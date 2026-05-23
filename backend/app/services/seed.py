@@ -4,6 +4,7 @@ Seed data for demo / staging environments.
 Extracted from main.py to keep the app entry point thin.
 Functions:
   - seed_default_data()          — full demo data (org, schools, users, sessions, etc.)
+  - repair_pii_accounts(db)      — one-time repair: deactivate real gmail PII accounts (#1920)
   - _patch_seed_assignments(db)  — idempotent patch for assignment seed data (#528)
   - _sync_yaml_lessons_to_texts(db) — sync YAML lessons → texts table
 """
@@ -23,6 +24,38 @@ from ..models.assignment import Assignment, AssignmentSubmission
 from ..auth.password import hash_password
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# PII repair (#1920)
+# ---------------------------------------------------------------------------
+
+# Real gmail addresses that were manually inserted into the staging DB during
+# early dogfood sessions.  These must never appear in code or seed data; this
+# function deactivates them idempotently so they disappear from the admin UI.
+_PII_GMAIL_ACCOUNTS = [
+    "jay.tzeng@gmail.com",
+    "kuanweilu@gmail.com",
+]
+
+
+def repair_pii_accounts(db) -> None:
+    """Idempotent: deactivate real gmail PII accounts from the staging DB.
+
+    Safe to call on every startup — does nothing if accounts don't exist or
+    are already inactive.  Introduced in #1920 to remove PII that was
+    accidentally inserted during early dogfood sessions.
+    """
+    affected = 0
+    for email in _PII_GMAIL_ACCOUNTS:
+        user = db.query(User).filter(User.email == email).first()
+        if user and user.is_active:
+            user.is_active = False
+            affected += 1
+            logger.info("repair_pii_accounts: deactivated PII account %s (#1920)", email)
+    if affected:
+        db.commit()
+    else:
+        logger.debug("repair_pii_accounts: no active PII accounts found")
 
 
 def _patch_seed_assignments(db) -> None:
@@ -257,8 +290,6 @@ def seed_default_data():
             if role_org_admin:
                 role_assignments.append(UserRole(user_id=admin.id, role_id=role_org_admin.id, scope_type="organization", scope_id=str(org.id)))
             if role_teacher:
-                # admin also manages classrooms in school1
-                role_assignments.append(UserRole(user_id=admin.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
                 role_assignments.append(UserRole(user_id=teacher1.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
                 role_assignments.append(UserRole(user_id=teacher2.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school2.id)))
             if role_student:
@@ -280,7 +311,6 @@ def seed_default_data():
                 ClassroomStudent(classroom_id=class_3a.id, student_id=student1.id),
                 ClassroomStudent(classroom_id=class_3a.id, student_id=student2.id),
                 ClassroomStudent(classroom_id=class_5b.id, student_id=student3.id),
-                ClassroomStudent(classroom_id=class_7a.id, student_id=student1.id),
             ])
 
             # -- 7. Learning sessions for students (relative dates so dashboard always shows data) --
