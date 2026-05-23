@@ -15,6 +15,36 @@ import { describe, it, expect } from 'vitest'
  *
  * So the meta tag version is both redundant and causes a console warning.
  */
+
+/**
+ * TDD test for #1932: img-src must include blob: in frontend CSP meta tag
+ *
+ * /omo upload creates blob: URLs for image preview. The backend CSP header
+ * was fixed in PR #1924 but the frontend <meta> tag still had img-src without
+ * blob:, causing browser CSP violations (browser enforces strictest policy).
+ *
+ * Fix: img-src 'self' data: blob: https:
+ */
+describe('CSP meta tag — img-src blob: for OMO image upload (#1932)', () => {
+  const indexHtmlPath = resolve(__dirname, '../../index.html')
+  const indexHtml = readFileSync(indexHtmlPath, 'utf-8')
+
+  it('should include blob: in img-src directive', () => {
+    const cspMetaMatch = indexHtml.match(
+      /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/
+    )
+    expect(cspMetaMatch).not.toBeNull()
+
+    const cspContent = cspMetaMatch![1]
+    // Extract img-src directive value
+    const imgSrcMatch = cspContent.match(/img-src\s+([^;]+)/)
+    expect(imgSrcMatch).not.toBeNull()
+
+    const imgSrcValue = imgSrcMatch![1]
+    expect(imgSrcValue).toContain('blob:')
+  })
+})
+
 describe('CSP meta tag — frame-ancestors directive', () => {
   const indexHtml = readFileSync(
     resolve(__dirname, '../../index.html'),
