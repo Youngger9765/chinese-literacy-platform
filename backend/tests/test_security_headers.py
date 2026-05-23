@@ -143,3 +143,24 @@ class TestCspDirectives:
         response = client.get("/")
         csp = response.headers.get("content-security-policy", "")
         assert "default-src 'self'" in csp
+
+    def test_csp_img_src_includes_blob(self):
+        """Regression test for #1917 — OMO cropped image previews use blob: URLs.
+
+        Without blob: in img-src, the browser silently blocks the preview image,
+        giving no feedback to the teacher uploading the OMO worksheet.
+        """
+        response = client.get("/")
+        csp = response.headers.get("content-security-policy", "")
+        # Extract the img-src directive value
+        img_src_directive = ""
+        for part in csp.split(";"):
+            stripped = part.strip()
+            if stripped.startswith("img-src"):
+                img_src_directive = stripped
+                break
+        assert img_src_directive, "CSP is missing img-src directive entirely"
+        assert "blob:" in img_src_directive, (
+            f"CSP img-src must include 'blob:' for OMO cropped image previews (#1917). "
+            f"Got: {img_src_directive!r}"
+        )
