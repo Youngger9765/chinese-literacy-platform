@@ -37,7 +37,7 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter
-from .services.seed import seed_default_data
+from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
 setup_logging()
@@ -309,6 +309,17 @@ async def lifespan(app: FastAPI):
     # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
     # (YAML → texts sync, migration patches) without creating demo accounts.
     seed_default_data()
+    # Idempotent: deactivate PII gmail accounts that leaked into staging DB (#1920).
+    # Safe on prod — does nothing if accounts don't exist.
+    try:
+        from .database import SessionLocal as _SessionLocal
+        _db = _SessionLocal()
+        try:
+            repair_pii_accounts(_db)
+        finally:
+            _db.close()
+    except Exception as _e:
+        logger.warning("repair_pii_accounts failed (non-fatal): %s", _e)
     yield
 
 
