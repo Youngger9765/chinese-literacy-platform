@@ -303,6 +303,7 @@ export interface TeacherSessionReport {
   story_slug: string | null;
   story_title: string | null;
   status: string;
+  is_complete: boolean;  // #1911: True when status == 'completed' — matches progress table criterion
   accuracy: number | null;
   overall_score: number | null;
   reading_result: Record<string, unknown> | null;
