@@ -190,7 +190,7 @@ class TestUploadInputValidation:
     @pytest.fixture(autouse=True)
     def _patch_gcs(self):
         """Patch GCS upload so we can assert it was never called on rejection."""
-        with patch("app.routes.omo._upload_to_gcs") as mock_gcs:
+        with patch("app.routes.omo.upload._upload_to_gcs") as mock_gcs:
             self._gcs_mock = mock_gcs
             yield
 
@@ -268,8 +268,8 @@ class TestUploadDedup:
 
     @pytest.fixture(autouse=True)
     def _patch_gcs_and_bg(self):
-        with patch("app.routes.omo._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
-             patch("app.routes.omo._run_identification"):
+        with patch("app.routes.omo.upload._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
+             patch("app.routes.omo.upload._run_identification"):
             yield
 
     def test_duplicate_upload_same_student_returns_from_cache(self, client):
@@ -378,9 +378,9 @@ class TestConfirmLessonIdMapping:
 
     @pytest.fixture(autouse=True)
     def _patch_gcs_and_jobs(self):
-        with patch("app.routes.omo._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
-             patch("app.routes.omo._run_identification"), \
-             patch("app.routes.omo._run_grading"):
+        with patch("app.routes.omo.upload._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
+             patch("app.routes.omo.upload._run_identification"), \
+             patch("app.routes.omo.grade._run_grading"):
             yield
 
     def _make_upload_with_identification(self, client, suffix: str, candidates: list) -> tuple[str, int]:
@@ -479,9 +479,9 @@ class TestRegradeStateMachine:
 
     @pytest.fixture(autouse=True)
     def _patch_gcs_and_jobs(self):
-        with patch("app.routes.omo._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
-             patch("app.routes.omo._run_identification"), \
-             patch("app.routes.omo._run_grading"):
+        with patch("app.routes.omo.upload._upload_to_gcs", return_value="gs://bucket/path.jpg"), \
+             patch("app.routes.omo.upload._run_identification"), \
+             patch("app.routes.omo.grade._run_grading"):
             yield
 
     def _make_upload(self, client, suffix: str) -> tuple[str, int]:
