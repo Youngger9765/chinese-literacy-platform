@@ -100,18 +100,25 @@ def list_my_classrooms(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List classrooms where the current teacher is owner or co-teacher."""
-    co_teacher_classroom_ids = (
-        db.query(ClassroomTeacher.classroom_id)
-        .filter(ClassroomTeacher.teacher_id == current_user.id)
-        .scalar_subquery()
-    )
-    query = db.query(Classroom).filter(
-        or_(
-            Classroom.teacher_id == current_user.id,
-            Classroom.id.in_(co_teacher_classroom_ids),
+    """List classrooms.
+
+    - system_admin / org_admin: returns ALL platform classrooms (platform-wide view).
+    - Regular teacher: returns only classrooms they own or co-teach.
+    """
+    if is_admin(current_user.id, db):
+        query = db.query(Classroom)
+    else:
+        co_teacher_classroom_ids = (
+            db.query(ClassroomTeacher.classroom_id)
+            .filter(ClassroomTeacher.teacher_id == current_user.id)
+            .scalar_subquery()
         )
-    )
+        query = db.query(Classroom).filter(
+            or_(
+                Classroom.teacher_id == current_user.id,
+                Classroom.id.in_(co_teacher_classroom_ids),
+            )
+        )
     total = query.count()
     items = query.order_by(Classroom.created_at.desc()).offset(offset).limit(limit).all()
 

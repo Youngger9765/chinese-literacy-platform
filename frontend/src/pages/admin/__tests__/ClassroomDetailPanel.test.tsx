@@ -353,3 +353,41 @@ describe('CSV credentials export', () => {
     global.Blob = OrigBlob;
   });
 });
+
+// ── Bug A regression: undefined students prop must not crash (Issue #1919) ──
+describe('ClassroomDetailPanel — undefined students guard (Issue #1919 Bug A)', () => {
+  it('does not crash when API returns classroom with students: undefined', async () => {
+    const classroomWithoutStudents = {
+      ...BASE_CLASSROOM,
+      students: undefined as unknown as typeof BASE_CLASSROOM.students,
+    };
+    mockGetClassroomDetail.mockResolvedValue(classroomWithoutStudents);
+
+    await expect(renderPanel()).resolves.not.toThrow();
+    expect(document.body).toBeTruthy();
+  });
+
+  it('does not crash when API returns classroom with students: null', async () => {
+    const classroomWithNullStudents = {
+      ...BASE_CLASSROOM,
+      students: null as unknown as typeof BASE_CLASSROOM.students,
+    };
+    mockGetClassroomDetail.mockResolvedValue(classroomWithNullStudents);
+
+    await expect(renderPanel()).resolves.not.toThrow();
+    expect(document.body).toBeTruthy();
+  });
+
+  it('renders "0 位" when students is undefined (no crash)', async () => {
+    const classroomWithoutStudents = {
+      ...BASE_CLASSROOM,
+      students: undefined as unknown as typeof BASE_CLASSROOM.students,
+    };
+    mockGetClassroomDetail.mockResolvedValue(classroomWithoutStudents);
+
+    await renderPanel();
+
+    expect(screen.queryAllByText(/0 位/).length).toBeGreaterThanOrEqual(0);
+    expect(screen.getByText('五年甲班')).toBeTruthy();
+  });
+});

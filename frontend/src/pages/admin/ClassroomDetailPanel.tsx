@@ -402,7 +402,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-bold text-gray-900">學生名單</h3>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">{classroom.students.length} 位</span>
+              <span className="text-sm text-gray-500">{(classroom.students?.length ?? 0)} 位</span>
               {!showStudentSearch && !showBatchCreate && (
                 <>
                   <button
@@ -465,13 +465,13 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
           )}
 
           {/* Student list rows */}
-          {classroom.students.length === 0 ? (
+          {(classroom.students?.length ?? 0) === 0 ? (
             <div className="p-8 text-center">
               <p className="text-sm text-gray-400">尚無學生</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {classroom.students.map((student) => (
+              {(classroom.students ?? []).map((student) => (
                 <div key={student.id} className="px-5 py-3 flex items-center justify-between group">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{student.name}</p>
