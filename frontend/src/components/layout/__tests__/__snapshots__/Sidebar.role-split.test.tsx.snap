@@ -1,0 +1,505 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AdminSidebar — role=admin nav items > snapshot — collapsed=false 1`] = `
+<nav
+  aria-label="管理員導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="班級管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      班級管理
+    </span>
+  </button>
+  <button
+    aria-label="作業管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📋
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      作業管理
+    </span>
+  </button>
+  <div
+    aria-hidden="true"
+    class="my-1 border-t border-gray-100"
+  />
+  <button
+    aria-label="系統管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      ⚙️
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      系統管理
+    </span>
+  </button>
+</nav>
+`;
+
+exports[`AdminSidebar — role=admin nav items > snapshot — collapsed=true 1`] = `
+<nav
+  aria-label="管理員導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="班級管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="班級管理"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+  </button>
+  <button
+    aria-label="作業管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="作業管理"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📋
+    </span>
+  </button>
+  <div
+    aria-hidden="true"
+    class="my-1 border-t border-gray-100"
+  />
+  <button
+    aria-label="系統管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="系統管理"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      ⚙️
+    </span>
+  </button>
+</nav>
+`;
+
+exports[`StudentSidebar — role=student nav items > snapshot — collapsed=false 1`] = `
+<nav
+  aria-label="學生導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="主頁"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏠
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      主頁
+    </span>
+  </button>
+  <button
+    aria-label="圖書館"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📚
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      圖書館
+    </span>
+  </button>
+  <button
+    aria-label="班級作業"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      班級作業
+    </span>
+  </button>
+  <button
+    aria-label="加入班級"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      ➕
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      加入班級
+    </span>
+  </button>
+  <button
+    aria-label="學習紀錄"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📖
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      學習紀錄
+    </span>
+  </button>
+  <div
+    aria-hidden="true"
+    class="my-1 border-t border-gray-100"
+  />
+  <button
+    aria-label="練習工具箱"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🧰
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      練習工具箱
+    </span>
+  </button>
+</nav>
+`;
+
+exports[`StudentSidebar — role=student nav items > snapshot — collapsed=true 1`] = `
+<nav
+  aria-label="學生導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="主頁"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="主頁"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏠
+    </span>
+  </button>
+  <button
+    aria-label="圖書館"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="圖書館"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📚
+    </span>
+  </button>
+  <button
+    aria-label="班級作業"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="班級作業"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+  </button>
+  <button
+    aria-label="加入班級"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="加入班級"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      ➕
+    </span>
+  </button>
+  <button
+    aria-label="學習紀錄"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="學習紀錄"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📖
+    </span>
+  </button>
+  <div
+    aria-hidden="true"
+    class="my-1 border-t border-gray-100"
+  />
+  <button
+    aria-label="練習工具箱"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="練習工具箱"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🧰
+    </span>
+  </button>
+</nav>
+`;
+
+exports[`TeacherSidebar — role=teacher nav items > snapshot — collapsed=false 1`] = `
+<nav
+  aria-label="教師導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="班級管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      班級管理
+    </span>
+  </button>
+  <button
+    aria-label="作業管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        px-3 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📋
+    </span>
+    <span
+      class="text-sm truncate"
+    >
+      作業管理
+    </span>
+  </button>
+</nav>
+`;
+
+exports[`TeacherSidebar — role=teacher nav items > snapshot — collapsed=true 1`] = `
+<nav
+  aria-label="教師導覽"
+  class="flex flex-col gap-1.5"
+>
+  <button
+    aria-label="班級管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="班級管理"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      🏫
+    </span>
+  </button>
+  <button
+    aria-label="作業管理"
+    class="
+        relative w-full flex items-center gap-3 rounded-lg transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        justify-center px-2 py-2.5
+        text-gray-600 hover:bg-gray-50 hover:text-gray-900
+      "
+    title="作業管理"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="text-lg shrink-0"
+    >
+      📋
+    </span>
+  </button>
+</nav>
+`;

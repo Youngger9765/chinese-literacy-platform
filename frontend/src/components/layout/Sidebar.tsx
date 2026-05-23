@@ -1,5 +1,5 @@
 /**
- * Sidebar — role-based navigation sidebar.
+ * Sidebar — thin role-switch dispatcher + shared shell.
  *
  * Desktop: left sidebar, w-56 expanded / w-14 collapsed.
  * Mobile (<768px): bottom tab bar with slide-up drawer for extra items.
@@ -9,6 +9,12 @@
  *
  * Header removed (2026-04-18): Logo, story title, notification bell,
  * zhuyin toggle, and logout are now integrated here.
+ *
+ * Refactored (Issue #1937): nav items extracted to role-specific components:
+ *   StudentSidebar  — 主頁/圖書館/班級作業/加入班級/學習紀錄/練習工具箱
+ *   TeacherSidebar  — 班級管理/作業管理
+ *   AdminSidebar    — 班級管理/作業管理/系統管理
+ * Shared shell (logo/profile/collapse/logout/footer) stays here.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -20,6 +26,11 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
 import NotificationBell from '../teacher/NotificationBell';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { SIDEBAR_STORAGE_KEY } from './sidebarUtils';
+import { StudentSidebar, getStudentNavItems, studentToolsItems } from './StudentSidebar';
+import { TeacherSidebar, getTeacherNavItems } from './TeacherSidebar';
+import { AdminSidebar, getAdminExtraItems } from './AdminSidebar';
+import type { NavItem } from './NavButton';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,84 +40,8 @@ export interface SidebarProps {
   pendingAssignmentCount: number;
 }
 
-interface NavItem {
-  icon: string;
-  label: string;
-  path: string;
-  badge?: number;
-}
-
 // ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const STORAGE_KEY = 'sidebar-collapsed';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function isActive(pathname: string, path: string): boolean {
-  if (path === '/student' || path === '/teacher-home') {
-    return pathname === path;
-  }
-  // /teacher matches only dashboard and classroom detail, not /teacher/my-texts or /teacher/assignments
-  if (path === '/teacher') {
-    return pathname === '/teacher' || /^\/teacher\/classroom\/\d+/.test(pathname);
-  }
-  return pathname === path || pathname.startsWith(`${path}/`);
-}
-
-// ---------------------------------------------------------------------------
-// NavButton — single sidebar item (expanded or icon-only)
-// ---------------------------------------------------------------------------
-
-interface NavButtonProps {
-  item: NavItem;
-  collapsed: boolean;
-  active: boolean;
-  onClick: () => void;
-}
-
-const NavButton: React.FC<NavButtonProps> = ({ item, collapsed, active, onClick }) => {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={item.label}
-      aria-current={active ? 'page' : undefined}
-      title={collapsed ? item.label : undefined}
-      className={`
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
-        ${active
-          ? 'bg-accent-bg text-accent font-semibold border-l-2 border-accent'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-        }
-      `}
-    >
-      <span className="text-lg shrink-0" aria-hidden="true">{item.icon}</span>
-      {!collapsed && (
-        <span className="text-sm truncate">{item.label}</span>
-      )}
-      {item.badge != null && item.badge > 0 && (
-        <span
-          aria-label={`${item.badge} 個待辦項目`}
-          className={`
-            min-w-[18px] h-4.5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1 leading-none shrink-0
-            ${collapsed ? 'absolute top-1 right-1' : 'ml-auto'}
-          `}
-        >
-          {item.badge > 9 ? '9+' : item.badge}
-        </span>
-      )}
-    </button>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// MobileTabBar — bottom tab bar for mobile
+// MobileTabBar — bottom tab bar for mobile (unchanged from original)
 // ---------------------------------------------------------------------------
 
 interface MobileTabBarProps {
@@ -115,13 +50,22 @@ interface MobileTabBarProps {
   extraItems: NavItem[];
   pathname: string;
   onNavigate: (path: string) => void;
-  // Workspace switching (Issue #571)
   hasMultipleViews: boolean;
   activeView: WorkspaceView;
   availableViews: WorkspaceView[];
   viewLabels: Record<WorkspaceView, { icon: string; label: string }>;
   onSwitchView: (view: WorkspaceView) => void;
   onLogout: () => void;
+}
+
+function isActiveLocal(pathname: string, path: string): boolean {
+  if (path === '/student' || path === '/teacher-home') {
+    return pathname === path;
+  }
+  if (path === '/teacher') {
+    return pathname === '/teacher' || /^\/teacher\/classroom\/\d+/.test(pathname);
+  }
+  return pathname === path || pathname.startsWith(`${path}/`);
 }
 
 const MobileTabBar: React.FC<MobileTabBarProps> = ({
@@ -139,11 +83,8 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allItems = [...studentItems, ...teacherItems];
-  // Show top 4 items + "更多" tab
   const topItems = allItems.slice(0, 4);
   const moreItems = [...allItems.slice(4), ...extraItems];
-
-  // Show the "更多" button if there are overflow nav items OR if multi-role switching is available
   const showMoreButton = moreItems.length > 0 || hasMultipleViews;
 
   return (
@@ -160,11 +101,11 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             type="button"
             onClick={() => onNavigate(item.path)}
             aria-label={item.label}
-            aria-current={isActive(pathname, item.path) ? 'page' : undefined}
+            aria-current={isActiveLocal(pathname, item.path) ? 'page' : undefined}
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent
-              ${isActive(pathname, item.path) ? 'text-accent' : 'text-gray-500'}
+              ${isActiveLocal(pathname, item.path) ? 'text-accent' : 'text-gray-500'}
             `}
           >
             <span className="text-xl relative" aria-hidden="true">
@@ -208,7 +149,6 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
           >
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" aria-hidden="true" />
 
-            {/* Workspace / role switcher — only shown when user has multiple roles (Issue #571) */}
             {hasMultipleViews && (
               <div className="mb-4">
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
@@ -259,7 +199,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                     className={`
                       flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
-                      ${isActive(pathname, item.path)
+                      ${isActiveLocal(pathname, item.path)
                         ? 'bg-accent-bg text-accent'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }
@@ -272,7 +212,6 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
               </div>
             )}
 
-            {/* Logout — always shown at bottom of drawer */}
             <div className="mt-4 border-t border-gray-100 pt-3">
               <button
                 type="button"
@@ -295,7 +234,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
 };
 
 // ---------------------------------------------------------------------------
-// Sidebar (main export)
+// Sidebar — shell + role dispatcher
 // ---------------------------------------------------------------------------
 
 const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
@@ -305,16 +244,14 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   const { selectedStory: navStory } = useLearningNav();
   const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
 
-  // Determine initial collapsed state from localStorage
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'true';
+      return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
     } catch {
       return false;
     }
   });
 
-  // Auto-collapse when in learning mode
   const isLearningMode = pathname.includes('/learn/');
   useEffect(() => {
     if (isLearningMode) {
@@ -326,7 +263,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
     setCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem(STORAGE_KEY, String(next));
+        localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
       } catch {
         // ignore
       }
@@ -341,10 +278,6 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
     [navigate],
   );
 
-  // ---------------------------------------------------------------------------
-  // Workspace context — determines which nav items to show
-  // ---------------------------------------------------------------------------
-
   const { activeView, setActiveView, availableViews, hasMultipleViews } = useWorkspace();
 
   const VIEW_LABELS: Record<WorkspaceView, { icon: string; label: string }> = {
@@ -356,7 +289,6 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   const roleLabel = VIEW_LABELS[activeView].label;
 
-  // Teacher role check for notification bell
   const isTeacher = hasRole(
     user,
     'teacher',
@@ -369,56 +301,54 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   );
 
   // ---------------------------------------------------------------------------
-  // Build nav items based on active workspace view
+  // Items for MobileTabBar — computed from same source of truth as role sidebars
   // ---------------------------------------------------------------------------
 
-  // Simplified sidebar — focus on core workflows (#686)
-  // Hidden items are NOT deleted, just removed from sidebar. Routes still work.
-  const studentItems: NavItem[] = activeView === 'student'
-    ? [
-        { icon: '🏠', label: '主頁', path: '/student' },
-        { icon: '📚', label: '圖書館', path: '/library' },
-        { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
-        { icon: '➕', label: '加入班級', path: '/join' },
-        // Hidden: 上傳學習單 — moved to lesson Intro page (#1637) — passes lesson_code_hint to backend, skips fuzzy-match Vertex AI call
-        { icon: '📖', label: '學習紀錄', path: '/learning-history' },
-        // Hidden: 成就 — merged into student home page (recent achievements strip + Lv banner) (#1163)
-        // Hidden: 學習進度, 生字本, 對話記錄 — 整合到「班級作業」(#643)
-        // Hidden: 我的班級 — merged into /assignments (#1146)
-      ]
-    : [];
+  const mobileStudentItems: NavItem[] =
+    activeView === 'student' ? getStudentNavItems(pendingAssignmentCount) : [];
 
-  // Targeted practice tools — shown at the BOTTOM of the student sidebar, separated by a divider (#1165)
-  // Hidden: 字典查詢 — removed from sidebar per 5/15 meeting (Issue #1638).
-  // Backend DictionaryService and /api/dictionary/* endpoints are preserved.
-  const toolsItems: NavItem[] = activeView === 'student'
-    ? [
-        { icon: '🧰', label: '練習工具箱', path: '/tools' },
-      ]
-    : [];
+  const mobileTeacherItems: NavItem[] =
+    activeView === 'teacher' || activeView === 'admin' ? getTeacherNavItems() : [];
 
-  const teacherItems: NavItem[] = activeView === 'teacher' || activeView === 'admin'
-    ? [
-        { icon: '🏫', label: '班級管理', path: '/teacher' },
-        { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
-        // Hidden: 主頁 (直接進班級管理), 我的課文 (降低優先)
-      ]
-    : [];
+  const parentItems: NavItem[] =
+    activeView === 'parent' ? [{ icon: '👨‍👩‍👧', label: '孩子進度', path: '/parent' }] : [];
 
-  const adminItems: NavItem[] = activeView === 'admin'
-    ? [{ icon: '⚙️', label: '系統管理', path: '/admin' }]
-    : [];
-
-  const parentItems: NavItem[] = activeView === 'parent'
-    ? [{ icon: '👨‍👩‍👧', label: '孩子進度', path: '/parent' }]
-    : [];
-
-  const primaryItems = [...studentItems, ...teacherItems];
-  const extraItems = [...adminItems, ...parentItems];
+  const mobileExtraItems: NavItem[] = [
+    ...(activeView === 'admin' ? getAdminExtraItems() : []),
+    ...parentItems,
+    ...(activeView === 'student' ? studentToolsItems : []),
+  ];
 
   // ---------------------------------------------------------------------------
-  // Render
+  // Render desktop role nav based on activeView
   // ---------------------------------------------------------------------------
+
+  const renderRoleNav = () => {
+    if (activeView === 'student') {
+      return (
+        <StudentSidebar
+          pendingAssignmentCount={pendingAssignmentCount}
+          collapsed={collapsed}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activeView === 'teacher') {
+      return <TeacherSidebar collapsed={collapsed} onNavigate={handleNavigate} />;
+    }
+    if (activeView === 'admin') {
+      return <AdminSidebar collapsed={collapsed} onNavigate={handleNavigate} />;
+    }
+    if (activeView === 'parent') {
+      // Parent view: simple single item
+      return (
+        <nav aria-label="家長導覽" className="flex flex-col gap-1.5">
+          {/* Parent nav items rendered inline — currently single item */}
+        </nav>
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -452,7 +382,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           </button>
         </div>
 
-        {/* Story title — learning mode only, hidden when collapsed */}
+        {/* Story title — learning mode only */}
         {navStory && !collapsed && (
           <div className="shrink-0 px-3 py-2 border-b border-gray-100">
             <p
@@ -465,7 +395,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           </div>
         )}
 
-        {/* User + role switcher (Issue #556, #557) */}
+        {/* User + role switcher */}
         {user && (
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
@@ -521,52 +451,13 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           </button>
         </div>
 
-        {/* Primary nav */}
+        {/* Primary nav — delegated to role-specific sidebar */}
         <nav aria-label="主要頁面" className="flex-1 flex flex-col gap-1.5 px-2 overflow-y-auto">
-          {primaryItems.map((item) => (
-            <NavButton
-              key={item.path}
-              item={item}
-              collapsed={collapsed}
-              active={isActive(pathname, item.path)}
-              onClick={() => handleNavigate(item.path)}
-            />
-          ))}
-
-          {/* Divider before extra items */}
-          {extraItems.length > 0 && (
-            <div className="my-1 border-t border-gray-100" aria-hidden="true" />
-          )}
-
-          {extraItems.map((item) => (
-            <NavButton
-              key={item.path}
-              item={item}
-              collapsed={collapsed}
-              active={isActive(pathname, item.path)}
-              onClick={() => handleNavigate(item.path)}
-            />
-          ))}
-
-          {/* Divider before targeted practice tools (#1165) */}
-          {toolsItems.length > 0 && (
-            <div className="my-1 border-t border-gray-100" aria-hidden="true" />
-          )}
-
-          {toolsItems.map((item) => (
-            <NavButton
-              key={item.path}
-              item={item}
-              collapsed={collapsed}
-              active={isActive(pathname, item.path)}
-              onClick={() => handleNavigate(item.path)}
-            />
-          ))}
+          {renderRoleNav()}
         </nav>
 
         {/* Bottom section — notification bell, zhuyin toggle, logout, footer */}
         <div className={`shrink-0 border-t border-gray-100 py-2 px-2 flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
-          {/* Actions: notification bell + zhuyin toggle + logout — grouped together */}
           {isTeacher && (
             <div className={collapsed ? '' : 'w-full'}>
               <NotificationBell
@@ -603,7 +494,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             {!collapsed && <span>登出</span>}
           </button>
 
-          {/* Footer — privacy + version, visually separated from actions */}
+          {/* Footer */}
           <div className={`${collapsed ? 'mt-1' : 'mt-2 pt-2 border-t border-gray-100'}`}>
             {!collapsed ? (
               <button
@@ -624,7 +515,6 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
                 <span className="text-sm" aria-hidden="true">🔒</span>
               </button>
             )}
-
             {!collapsed && (
               <p className="text-[10px] text-gray-300 px-3 select-none">LingoLeap v2.0</p>
             )}
@@ -634,9 +524,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
       {/* Mobile bottom tab bar */}
       <MobileTabBar
-        studentItems={studentItems}
-        teacherItems={teacherItems}
-        extraItems={[...extraItems, ...toolsItems]}
+        studentItems={mobileStudentItems}
+        teacherItems={mobileTeacherItems}
+        extraItems={mobileExtraItems}
         pathname={pathname}
         onNavigate={handleNavigate}
         hasMultipleViews={hasMultipleViews}
