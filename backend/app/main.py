@@ -201,12 +201,26 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     "traceback": traceback.format_exc(),
                 },
             )
+            # Manually inject CORS headers on the 500 fallback response.
+            # BaseHTTPMiddleware short-circuits the ASGI send chain, so
+            # CORSMiddleware's send-wrapper is bypassed when we return a
+            # raw JSONResponse here. We replicate the same logic as
+            # Starlette's CORSMiddleware.simple_response() so that browsers
+            # can read the error body instead of seeing a CORS-blocked response.
+            # (#1910 Sub-bug B)
+            origin = request.headers.get("origin", "")
+            cors_headers: dict[str, str] = {}
+            if origin and origin in settings.origins_list:
+                cors_headers["Access-Control-Allow-Origin"] = origin
+                cors_headers["Access-Control-Allow-Credentials"] = "true"
+                cors_headers["Vary"] = "Origin"
             return JSONResponse(
                 status_code=500,
                 content={
                     "detail": "Internal server error",
                     "request_id": request_id,
                 },
+                headers=cors_headers if cors_headers else None,
             )
 
 
