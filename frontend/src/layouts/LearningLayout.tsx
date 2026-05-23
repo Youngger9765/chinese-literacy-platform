@@ -25,6 +25,17 @@ import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 import { scopedStepStorageKey, isToolboxMode } from '../services/learningStorageScope';
+import {
+  ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+  LEGACY_DB_SESSION_KEY_PREFIX,
+  ASSIGNMENT_DB_SESSION_KEY_PREFIX,
+  SELF_DB_SESSION_KEY_PREFIX,
+  SELF_PRACTICE_COMPLETED_KEY_PREFIX,
+  buildActiveDbSessionKey,
+  readDbSessionId,
+  writeDbSessionId,
+  clearAllSessionKeys,
+} from './learningSessionStorage';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -132,11 +143,6 @@ const STEP_NUMBER_TO_PATH: Record<number, string> = Object.fromEntries(
  * Children access this state via useOutletContext<LearningContext>().
  */
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
-const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
-const LEGACY_DB_SESSION_KEY_PREFIX = 'db-session-';
-const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
-const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
-const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
 
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -162,14 +168,7 @@ const LearningLayout: React.FC = () => {
 
   const activeDbSessionStorageKey = useMemo(() => {
     if (!storyId) return null;
-    if (isAssignmentFlow) {
-      const assignmentId = sessionStorage.getItem('activeAssignmentId');
-      if (assignmentId) {
-        return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${storyId}`;
-      }
-      return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${storyId}`;
-    }
-    return `${SELF_DB_SESSION_KEY_PREFIX}${storyId}`;
+    return buildActiveDbSessionKey(storyId, isAssignmentFlow);
   }, [isAssignmentFlow, storyId]);
 
   const tutorCompletedStorageKey = useMemo(() => {
@@ -308,28 +307,15 @@ const LearningLayout: React.FC = () => {
       return;
     }
 
-    try {
+    const parsed = readDbSessionId(activeDbSessionStorageKey, legacyDbSessionStorageKey);
+    setDbSessionId(parsed);
+
+    // Migrate legacy key value to the split key for future reads.
+    if (parsed !== null) {
       const directRaw = sessionStorage.getItem(activeDbSessionStorageKey);
-      const legacyRaw = legacyDbSessionStorageKey
-        ? sessionStorage.getItem(legacyDbSessionStorageKey)
-        : null;
-      const chosenRaw = directRaw ?? legacyRaw;
-      if (!chosenRaw) {
-        setDbSessionId(null);
-        return;
+      if (!directRaw && legacyDbSessionStorageKey) {
+        try { sessionStorage.setItem(activeDbSessionStorageKey, String(parsed)); } catch { /* non-fatal */ }
       }
-      const parsed = parseInt(chosenRaw, 10);
-      if (Number.isNaN(parsed)) {
-        setDbSessionId(null);
-        return;
-      }
-      setDbSessionId(parsed);
-      // Migrate legacy key value to split key for future reads.
-      if (!directRaw && legacyRaw) {
-        sessionStorage.setItem(activeDbSessionStorageKey, String(parsed));
-      }
-    } catch {
-      setDbSessionId(null);
     }
   }, [storyId, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
 
@@ -493,21 +479,14 @@ const LearningLayout: React.FC = () => {
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
-    if (activeDbSessionStorageKey) {
-      try { sessionStorage.removeItem(activeDbSessionStorageKey); } catch { /* non-fatal */ }
-    }
-    if (legacyDbSessionStorageKey) {
-      try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
-    }
-    if (tutorCompletedStorageKey) {
-      try { localStorage.removeItem(tutorCompletedStorageKey); } catch { /* non-fatal */ }
-    }
-    if (liveTutorProgressStorageKey) {
-      try { localStorage.removeItem(liveTutorProgressStorageKey); } catch { /* non-fatal */ }
-    }
+    clearAllSessionKeys({
+      activeKey: activeDbSessionStorageKey,
+      legacyKey: legacyDbSessionStorageKey,
+      tutorLocalKey: tutorCompletedStorageKey,
+      liveTutorLocalKey: liveTutorProgressStorageKey,
+    });
   }, [
     user,
-    storyId,
     activeDbSessionStorageKey,
     legacyDbSessionStorageKey,
     tutorCompletedStorageKey,
@@ -641,10 +620,7 @@ const LearningLayout: React.FC = () => {
     const storeSessionId = (id: number) => {
       setDbSessionId(id);
       if (activeDbSessionStorageKey) {
-        try { sessionStorage.setItem(activeDbSessionStorageKey, String(id)); } catch { /* non-fatal */ }
-      }
-      if (legacyDbSessionStorageKey) {
-        try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+        writeDbSessionId(activeDbSessionStorageKey, legacyDbSessionStorageKey, id);
       }
     };
 
@@ -724,10 +700,7 @@ const LearningLayout: React.FC = () => {
           if (data?.id) {
             setDbSessionId(data.id);
             if (activeDbSessionStorageKey) {
-              try { sessionStorage.setItem(activeDbSessionStorageKey, String(data.id)); } catch { /* non-fatal */ }
-            }
-            if (legacyDbSessionStorageKey) {
-              try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+              writeDbSessionId(activeDbSessionStorageKey, legacyDbSessionStorageKey, data.id);
             }
           }
         })
