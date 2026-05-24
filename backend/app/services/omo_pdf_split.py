@@ -13,7 +13,7 @@ Design:
 - Output JPEG quality 85 — same target the existing client-side resize uses.
 - Caller is responsible for enforcing per-page count caps (we just expose
   the helper); we surface `len(result)` so the route can compare against
-  `_MAX_FILES_PER_UPLOAD`.
+  `MAX_FILES_PER_UPLOAD`.
 
 Backend uses `pypdfium2` (PDFium binding, Apache-2.0 + BSD3) — pure-Python
 wheel, no native libpoppler dependency, Cloud Run friendly.
@@ -21,6 +21,13 @@ wheel, no native libpoppler dependency, Cloud Run friendly.
 
 import io
 import logging
+
+# Fail-fast at import time rather than per-request. Both deps are listed in
+# requirements.txt; a missing import here means the Cloud Run image is broken
+# and should surface immediately on startup. Pillow itself is imported only
+# to assert it's installed — pypdfium2's ``.to_pil()`` uses it internally.
+import pypdfium2 as pdfium
+import PIL  # noqa: F401 — presence check; .to_pil() needs it at runtime
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +54,7 @@ def pdf_to_jpeg_pages(pdf_bytes: bytes, max_pages: int = 20) -> list[bytes]:
     max_pages:
         Refuse to render past this many pages — caller is responsible for
         deciding what page count is reasonable for a worksheet (default 20
-        matches the upload route's ``_MAX_FILES_PER_UPLOAD`` ceiling).
+        matches the upload route's ``MAX_FILES_PER_UPLOAD`` ceiling).
 
     Returns
     -------
@@ -62,16 +69,6 @@ def pdf_to_jpeg_pages(pdf_bytes: bytes, max_pages: int = 20) -> list[bytes]:
     """
     if not pdf_bytes:
         raise PdfSplitError("PDF is empty")
-
-    try:
-        import pypdfium2 as pdfium
-    except ImportError:  # pragma: no cover - dep should be installed
-        raise PdfSplitError("pypdfium2 not installed — cannot parse PDF")
-
-    try:
-        from PIL import Image
-    except ImportError:  # pragma: no cover - dep should be installed
-        raise PdfSplitError("Pillow not installed — cannot encode JPEG")
 
     try:
         pdf = pdfium.PdfDocument(pdf_bytes)

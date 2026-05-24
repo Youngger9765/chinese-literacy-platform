@@ -12,6 +12,7 @@ llm-endpoint-hardening checklist (inherited from omo.py):
 - Fail-closed: status=error on AI failure ✅
 """
 
+import asyncio
 import hashlib
 import logging
 from typing import Optional
@@ -40,7 +41,7 @@ from ...services.omo_upload_service import (
     supersede_existing_uploads,
 )
 from ...services.omo_upload_validator import (
-    _MAX_FILES_PER_UPLOAD,
+    MAX_FILES_PER_UPLOAD,
     validate_attempt_files,
     validate_upload_files,
 )
@@ -126,9 +127,10 @@ async def upload_worksheet(
     Returns immediately with status=identifying. Poll GET /api/omo/{id} for result.
 
     Constraints:
-    - Max 5 files per call
-    - Max 10MB per file
-    - JPEG / PNG / WebP only
+    - Max ``MAX_FILES_PER_UPLOAD`` files per call (PDFs count as 1 here, expanded
+      per-page after validation)
+    - Images ≤ 10MB each, PDFs ≤ 20MB
+    - JPEG / PNG / WebP / PDF (#1976)
 
     Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
     completes synchronously in the background task without any AI call
@@ -166,10 +168,13 @@ async def upload_worksheet(
     # ── #1976: expand any PDFs into per-page JPEGs ───────────────────────────
     # After this step every entry is an image and the rest of the pipeline
     # (GCS upload, identification, grading) does not need to know PDF existed.
+    # CPU-bound (pypdfium2 render) — push to a thread so we don't block the
+    # FastAPI event loop while a 20-page PDF renders (~1-3 s).
     try:
-        files_data = expand_pdf_files(
+        files_data = await asyncio.to_thread(
+            expand_pdf_files,
             files_data,
-            max_total_images=_MAX_FILES_PER_UPLOAD,
+            MAX_FILES_PER_UPLOAD,
         )
     except PdfSplitError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -264,11 +269,12 @@ async def add_attempt(
     # ── Validate (attempt count + file constraints) ───────────────────────────
     validate_attempt_files(files_data, existing_attempts)
 
-    # ── #1976: expand any PDFs into per-page JPEGs ───────────────────────────
+    # ── #1976: expand any PDFs into per-page JPEGs (off the event loop) ──────
     try:
-        files_data = expand_pdf_files(
+        files_data = await asyncio.to_thread(
+            expand_pdf_files,
             files_data,
-            max_total_images=_MAX_FILES_PER_UPLOAD,
+            MAX_FILES_PER_UPLOAD,
         )
     except PdfSplitError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

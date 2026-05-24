@@ -144,6 +144,9 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  // #1976: PDFs have no image preview (canvas can't render them) — track
+  // filename separately so the UI can show a 📄 stub with the name.
+  const [pdfPreview, setPdfPreview] = useState<{ name: string; sizeMb: string } | null>(null);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +161,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
 
     // ── Client-side validation ──────────────────────────────────────────────
     if (fileArray.length > MAX_FILES) {
-      setError(`最多只能上傳 ${MAX_FILES} 張圖片，你選了 ${fileArray.length} 張`);
+      setError(`最多只能上傳 ${MAX_FILES} 個檔案，你選了 ${fileArray.length} 個`);
       return;
     }
     for (const f of fileArray) {
@@ -181,7 +184,12 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
     const first = fileArray[0];
     if (first.type === PDF_MIME) {
       setPreview(null);
+      setPdfPreview({
+        name: first.name,
+        sizeMb: (first.size / (1024 * 1024)).toFixed(1),
+      });
     } else {
+      setPdfPreview(null);
       const firstReader = new FileReader();
       firstReader.onload = (e) => setPreview(e.target?.result as string);
       firstReader.readAsDataURL(first);
@@ -231,7 +239,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
         </p>
       </div>
 
-      {/* Preview */}
+      {/* Preview — image */}
       {preview && !uploading && (
         <div className="w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm">
           <img
@@ -239,6 +247,17 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
             alt="學習單預覽"
             className="w-full object-contain max-h-48"
           />
+        </div>
+      )}
+
+      {/* Preview — PDF stub (no thumbnail since <img> can't render PDF) */}
+      {pdfPreview && !preview && !uploading && (
+        <div className="w-full flex items-center gap-3 rounded-xl border border-gray-200 shadow-sm px-4 py-3 bg-gray-50">
+          <div className="text-3xl shrink-0" aria-hidden="true">📄</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-800 truncate">{pdfPreview.name}</p>
+            <p className="text-xs text-gray-500 mt-0.5">PDF · {pdfPreview.sizeMb} MB · 上傳後將自動拆頁批改</p>
+          </div>
         </div>
       )}
 

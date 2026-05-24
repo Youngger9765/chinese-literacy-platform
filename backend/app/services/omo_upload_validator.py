@@ -16,7 +16,7 @@ _MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024   # 10 MB per image
 # #1976: PDFs are commonly larger because they bundle multiple pages —
 # allow a bigger cap before we expand them into per-page JPEGs.
 _MAX_PDF_SIZE_BYTES: int = 20 * 1024 * 1024    # 20 MB per PDF
-_MAX_FILES_PER_UPLOAD: int = 20                  # max files per single upload call
+MAX_FILES_PER_UPLOAD: int = 20                  # max files per single upload call
 _MAX_TOTAL_ATTEMPTS: int = 5                     # max attempts per upload session
 _IMAGE_MIME_TYPES: frozenset[str] = frozenset({
     "image/jpeg",
@@ -61,7 +61,7 @@ def validate_upload_files(files_data: list[tuple[bytes, str]]) -> None:
 
     Raises HTTPException (400 or 413) for any of:
     - Empty file list
-    - Too many files (> _MAX_FILES_PER_UPLOAD)
+    - Too many files (> MAX_FILES_PER_UPLOAD)
     - Unsupported MIME type
     - Oversized file (image > 10MB, PDF > 20MB)
     - Zero-byte file content
@@ -76,14 +76,14 @@ def validate_upload_files(files_data: list[tuple[bytes, str]]) -> None:
     ----
     PDFs count as 1 file here regardless of page count.  Per-page expansion
     happens after validation in the route layer (#1976), where the expanded
-    image count is re-checked against ``_MAX_FILES_PER_UPLOAD``.
+    image count is re-checked against ``MAX_FILES_PER_UPLOAD``.
     """
     if not files_data:
         raise HTTPException(status_code=400, detail="最少需要上傳 1 個檔案")
-    if len(files_data) > _MAX_FILES_PER_UPLOAD:
+    if len(files_data) > MAX_FILES_PER_UPLOAD:
         raise HTTPException(
             status_code=400,
-            detail=f"最多只能上傳 {_MAX_FILES_PER_UPLOAD} 個檔案",
+            detail=f"最多只能上傳 {MAX_FILES_PER_UPLOAD} 個檔案",
         )
     for data, content_type in files_data:
         _check_single_file(data, content_type)
@@ -107,10 +107,10 @@ def validate_attempt_files(
         )
     if not files_data:
         raise HTTPException(status_code=400, detail="最少需要上傳 1 個檔案")
-    if len(files_data) > _MAX_FILES_PER_UPLOAD:
+    if len(files_data) > MAX_FILES_PER_UPLOAD:
         raise HTTPException(
             status_code=400,
-            detail=f"每次最多上傳 {_MAX_FILES_PER_UPLOAD} 個檔案",
+            detail=f"每次最多上傳 {MAX_FILES_PER_UPLOAD} 個檔案",
         )
     for data, content_type in files_data:
         _check_single_file(data, content_type)
