@@ -12,25 +12,25 @@ Contains:
 from fastapi import HTTPException
 
 # ── Upload constraints (single source of truth) ────────────────────────────────
-_MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024   # 10 MB per image
+MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024    # 10 MB per image
 # #1976: PDFs are commonly larger because they bundle multiple pages —
 # allow a bigger cap before we expand them into per-page JPEGs.
-_MAX_PDF_SIZE_BYTES: int = 20 * 1024 * 1024    # 20 MB per PDF
-MAX_FILES_PER_UPLOAD: int = 20                  # max files per single upload call
-_MAX_TOTAL_ATTEMPTS: int = 5                     # max attempts per upload session
+MAX_PDF_SIZE_BYTES: int = 20 * 1024 * 1024     # 20 MB per PDF
+MAX_FILES_PER_UPLOAD: int = 20                 # max files per single upload call
+_MAX_TOTAL_ATTEMPTS: int = 5                   # max attempts per upload session
 _IMAGE_MIME_TYPES: frozenset[str] = frozenset({
     "image/jpeg",
     "image/jpg",
     "image/png",
     "image/webp",
 })
-_PDF_MIME_TYPE: str = "application/pdf"
-_ALLOWED_MIME_TYPES: frozenset[str] = _IMAGE_MIME_TYPES | {_PDF_MIME_TYPE}
+PDF_MIME_TYPE: str = "application/pdf"
+_ALLOWED_MIME_TYPES: frozenset[str] = _IMAGE_MIME_TYPES | {PDF_MIME_TYPE}
 
 
 def _cap_for_mime(content_type: str) -> int:
     """Return the per-file size cap that applies to ``content_type``."""
-    return _MAX_PDF_SIZE_BYTES if content_type == _PDF_MIME_TYPE else _MAX_FILE_SIZE_BYTES
+    return MAX_PDF_SIZE_BYTES if content_type == PDF_MIME_TYPE else MAX_FILE_SIZE_BYTES
 
 
 def _check_single_file(data: bytes, content_type: str) -> None:
@@ -47,7 +47,7 @@ def _check_single_file(data: bytes, content_type: str) -> None:
     cap = _cap_for_mime(content_type)
     if len(data) > cap:
         cap_mb = cap // (1024 * 1024)
-        kind = "PDF" if content_type == _PDF_MIME_TYPE else "圖片"
+        kind = "PDF" if content_type == PDF_MIME_TYPE else "圖片"
         raise HTTPException(
             status_code=413,
             detail=f"{kind}太大（{len(data) // (1024 * 1024)}MB），最大允許 {cap_mb}MB",

@@ -29,6 +29,11 @@ import logging
 import pypdfium2 as pdfium
 import PIL  # noqa: F401 — presence check; .to_pil() needs it at runtime
 
+# Single source of truth for the PDF MIME constant lives in
+# omo_upload_validator. Safe to import here — validator doesn't depend back
+# on this module, so no circular risk.
+from .omo_upload_validator import PDF_MIME_TYPE
+
 logger = logging.getLogger(__name__)
 
 # 150 DPI rendering scale (PDFium's render_scale uses 72 DPI baseline).
@@ -119,12 +124,6 @@ def pdf_to_jpeg_pages(pdf_bytes: bytes, max_pages: int = 20) -> list[bytes]:
             pass
 
 
-# MIME constant duplicated from omo_upload_validator to avoid a circular import
-# (validator → pdf_split via expand_pdf_files). Kept private; the
-# canonical source is omo_upload_validator._PDF_MIME_TYPE.
-_PDF_MIME_TYPE = "application/pdf"
-
-
 def expand_pdf_files(
     files_data: list[tuple[bytes, str]],
     max_total_images: int,
@@ -162,7 +161,7 @@ def expand_pdf_files(
     """
     expanded: list[tuple[bytes, str]] = []
     for data, mime in files_data:
-        if mime == _PDF_MIME_TYPE:
+        if mime == PDF_MIME_TYPE:
             page_jpegs = pdf_to_jpeg_pages(data, max_pages=per_pdf_max_pages)
             expanded.extend((page, "image/jpeg") for page in page_jpegs)
         else:

@@ -21,7 +21,7 @@ from app.services.omo_pdf_split import (
     pdf_to_jpeg_pages,
 )
 from app.services.omo_upload_validator import (
-    _MAX_PDF_SIZE_BYTES,
+    MAX_PDF_SIZE_BYTES,
     validate_upload_files,
 )
 
@@ -152,7 +152,7 @@ class TestValidatorPdfSupport:
         validate_upload_files([(small_pdf, "application/pdf")])
 
     def test_rejects_pdf_over_20mb(self):
-        oversized = b"%PDF-1.4 " + b"x" * (_MAX_PDF_SIZE_BYTES + 1)
+        oversized = b"%PDF-1.4 " + b"x" * (MAX_PDF_SIZE_BYTES + 1)
         with pytest.raises(HTTPException) as exc:
             validate_upload_files([(oversized, "application/pdf")])
         assert exc.value.status_code == 413

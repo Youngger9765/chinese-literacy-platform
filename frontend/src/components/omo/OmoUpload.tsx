@@ -155,6 +155,11 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
 
   const handleFiles = async (files: FileList | null) => {
     setError(null);
+    // #1976 review-2: clear any prior preview before validation so a fresh
+    // pick that fails (e.g. >MAX_FILES) doesn't leave the old PDF/image stub
+    // showing alongside the error toast.
+    setPreview(null);
+    setPdfPreview(null);
     if (!files || files.length === 0) return;
 
     const fileArray = Array.from(files);
