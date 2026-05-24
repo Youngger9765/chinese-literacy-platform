@@ -53,7 +53,8 @@ def _make_mock_response(items: list[dict]) -> MagicMock:
 
 
 def _run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    # Python 3.10+: get_event_loop() is deprecated when no running loop exists.
+    return asyncio.run(coro)
 
 
 def _patch_and_grade(mock_items: list[dict]) -> list:
@@ -167,4 +168,110 @@ def test_results_with_missing_questions_keep_yaml_order_for_present():
     expected_order = ["fb_1", "fb_2", "mc_1", "mc_3"]
     assert actual_order == expected_order, (
         f"Expected YAML order {expected_order} for present questions, got {actual_order}"
+    )
+
+
+# Lesson with all three question types — fb_*, mc_*, se_* — to verify the
+# sort handles the full schema produced by _build_question_schema (#1879).
+LESSON_WITH_SE = {
+    "title": "L24-含策略練習",
+    "vocabulary": [
+        {"word": "觀察"},
+        {"word": "記錄"},
+    ],
+    "fill_in_blank": [
+        {"answer": "觀察", "sentence": "仔細觀察"},   # fb_1 (free_form)
+        {"answer": "記錄", "sentence": "詳細記錄"},   # fb_2 (free_form)
+    ],
+    "multiple_choice": [
+        {"answer": "A", "question": "q1"},   # mc_1
+        {"answer": "B", "question": "q2"},   # mc_2
+    ],
+    "strategy_exercise": {
+        "items": [
+            {"id": "se_1", "stem": "第一題策略", "answer": "策略A"},
+            {"id": "se_2", "stem": "第二題策略", "answer": "策略B"},
+        ],
+    },
+}
+
+
+def _patch_and_grade_lesson(mock_items: list[dict], lesson: dict) -> list:
+    """Same as _patch_and_grade but with a custom lesson fixture."""
+    import app.services.omo_grader as grader_mod
+
+    grader_mod._consecutive_errors = 0
+    mock_response = _make_mock_response(mock_items)
+
+    fake_genai = types.ModuleType("google.genai")
+    fake_types = types.ModuleType("google.genai.types")
+
+    class FakeContent:
+        def __init__(self, **kwargs): pass
+
+    class FakePart:
+        @staticmethod
+        def from_bytes(**kwargs): return FakePart()
+
+    class FakeThinkingConfig:
+        def __init__(self, **kwargs): pass
+
+    class FakeAutoFuncCallingConfig:
+        def __init__(self, **kwargs): pass
+
+    class FakeGenerateContentConfig:
+        def __init__(self, **kwargs): pass
+
+    class FakeClient:
+        def __init__(self, **kwargs): pass
+        class models:
+            @staticmethod
+            def generate_content(**kwargs):
+                return mock_response
+
+    fake_types.Content = FakeContent
+    fake_types.Part = FakePart
+    fake_types.ThinkingConfig = FakeThinkingConfig
+    fake_types.AutomaticFunctionCallingConfig = FakeAutoFuncCallingConfig
+    fake_types.GenerateContentConfig = FakeGenerateContentConfig
+    fake_genai.Client = FakeClient
+
+    fake_google = types.ModuleType("google")
+    fake_google.genai = fake_genai
+
+    with patch.dict(sys.modules, {
+        "google": fake_google,
+        "google.genai": fake_genai,
+        "google.genai.types": fake_types,
+    }):
+        return _run(grader_mod.grade_worksheet_images(
+            image_bytes_list=[b"fake_image_bytes"],
+            mime_types=["image/jpeg"],
+            lesson=lesson,
+            attempt_id=None,
+        ))
+
+
+def test_results_sorted_across_fb_mc_se_question_types():
+    """Sort must handle the full schema (fb_* → mc_* → se_*) — strategy_exercise
+    is appended after MC in _build_question_schema, so sort key must respect
+    that even though the IDs aren't lexicographically ordered.
+
+    Note: se_* answers use empty student_answer to avoid the anti-fabrication
+    coercion (se_* doesn't expose allowed_values), but the result is still
+    appended to `results` so the ordering is still observable.
+    """
+    scrambled = [
+        {"question_id": "se_2", "student_answer": "", "ai_confidence": 0.9, "reasoning": ""},
+        {"question_id": "mc_1", "student_answer": "A", "ai_confidence": 0.9, "reasoning": ""},
+        {"question_id": "fb_2", "student_answer": "記錄", "ai_confidence": 0.9, "reasoning": ""},
+        {"question_id": "se_1", "student_answer": "", "ai_confidence": 0.9, "reasoning": ""},
+        {"question_id": "fb_1", "student_answer": "觀察", "ai_confidence": 0.9, "reasoning": ""},
+        {"question_id": "mc_2", "student_answer": "B", "ai_confidence": 0.9, "reasoning": ""},
+    ]
+    results = _patch_and_grade_lesson(scrambled, LESSON_WITH_SE)
+    actual_order = [r.question_id for r in results]
+    expected_order = ["fb_1", "fb_2", "mc_1", "mc_2", "se_1", "se_2"]
+    assert actual_order == expected_order, (
+        f"Expected YAML order across fb/mc/se {expected_order}, got {actual_order}"
     )
