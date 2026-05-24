@@ -185,16 +185,16 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
       }
     }
 
-    // ── Preview first file (PDFs use an icon stub since <img> can't render them)
+    // ── Preview first file (PDFs use an icon stub since <img> can't render them).
+    // Preview state already cleared at the top of handleFiles, so each branch
+    // only sets the one it owns.
     const first = fileArray[0];
     if (first.type === PDF_MIME) {
-      setPreview(null);
       setPdfPreview({
         name: first.name,
         sizeMb: (first.size / (1024 * 1024)).toFixed(1),
       });
     } else {
-      setPdfPreview(null);
       const firstReader = new FileReader();
       firstReader.onload = (e) => setPreview(e.target?.result as string);
       firstReader.readAsDataURL(first);
