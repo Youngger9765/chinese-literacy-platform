@@ -57,9 +57,16 @@ def _run(coro):
     return asyncio.run(coro)
 
 
-def _patch_and_grade(mock_items: list[dict]) -> list:
-    """Patch the google.genai module and run grade_worksheet_images."""
+def _patch_and_grade(mock_items: list[dict], lesson: dict | None = None) -> list:
+    """Patch the google.genai module and run grade_worksheet_images.
+
+    Default lesson is the 5-fb + 3-mc fixture; pass ``lesson=`` to use a
+    different one (e.g. LESSON_WITH_SE for the strategy_exercise case).
+    """
     import app.services.omo_grader as grader_mod
+
+    if lesson is None:
+        lesson = LESSON
 
     grader_mod._consecutive_errors = 0
     mock_response = _make_mock_response(mock_items)
@@ -108,7 +115,7 @@ def _patch_and_grade(mock_items: list[dict]) -> list:
         return _run(grader_mod.grade_worksheet_images(
             image_bytes_list=[b"fake_image_bytes"],
             mime_types=["image/jpeg"],
-            lesson=LESSON,
+            lesson=lesson,
             attempt_id=None,
         ))
 
@@ -196,62 +203,6 @@ LESSON_WITH_SE = {
 }
 
 
-def _patch_and_grade_lesson(mock_items: list[dict], lesson: dict) -> list:
-    """Same as _patch_and_grade but with a custom lesson fixture."""
-    import app.services.omo_grader as grader_mod
-
-    grader_mod._consecutive_errors = 0
-    mock_response = _make_mock_response(mock_items)
-
-    fake_genai = types.ModuleType("google.genai")
-    fake_types = types.ModuleType("google.genai.types")
-
-    class FakeContent:
-        def __init__(self, **kwargs): pass
-
-    class FakePart:
-        @staticmethod
-        def from_bytes(**kwargs): return FakePart()
-
-    class FakeThinkingConfig:
-        def __init__(self, **kwargs): pass
-
-    class FakeAutoFuncCallingConfig:
-        def __init__(self, **kwargs): pass
-
-    class FakeGenerateContentConfig:
-        def __init__(self, **kwargs): pass
-
-    class FakeClient:
-        def __init__(self, **kwargs): pass
-        class models:
-            @staticmethod
-            def generate_content(**kwargs):
-                return mock_response
-
-    fake_types.Content = FakeContent
-    fake_types.Part = FakePart
-    fake_types.ThinkingConfig = FakeThinkingConfig
-    fake_types.AutomaticFunctionCallingConfig = FakeAutoFuncCallingConfig
-    fake_types.GenerateContentConfig = FakeGenerateContentConfig
-    fake_genai.Client = FakeClient
-
-    fake_google = types.ModuleType("google")
-    fake_google.genai = fake_genai
-
-    with patch.dict(sys.modules, {
-        "google": fake_google,
-        "google.genai": fake_genai,
-        "google.genai.types": fake_types,
-    }):
-        return _run(grader_mod.grade_worksheet_images(
-            image_bytes_list=[b"fake_image_bytes"],
-            mime_types=["image/jpeg"],
-            lesson=lesson,
-            attempt_id=None,
-        ))
-
-
 def test_results_sorted_across_fb_mc_se_question_types():
     """Sort must handle the full schema (fb_* → mc_* → se_*) — strategy_exercise
     is appended after MC in _build_question_schema, so sort key must respect
@@ -269,7 +220,7 @@ def test_results_sorted_across_fb_mc_se_question_types():
         {"question_id": "fb_1", "student_answer": "觀察", "ai_confidence": 0.9, "reasoning": ""},
         {"question_id": "mc_2", "student_answer": "B", "ai_confidence": 0.9, "reasoning": ""},
     ]
-    results = _patch_and_grade_lesson(scrambled, LESSON_WITH_SE)
+    results = _patch_and_grade(scrambled, lesson=LESSON_WITH_SE)
     actual_order = [r.question_id for r in results]
     expected_order = ["fb_1", "fb_2", "mc_1", "mc_2", "se_1", "se_2"]
     assert actual_order == expected_order, (
