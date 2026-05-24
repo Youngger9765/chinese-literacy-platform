@@ -104,6 +104,7 @@ const OmoPage: React.FC = () => {
             token={token}
             onUploaded={handleUploaded}
             lessonCodeHint={lessonCodeHint}
+            onShowHistory={() => navigate('/omo/history')}
           />
         )}
 

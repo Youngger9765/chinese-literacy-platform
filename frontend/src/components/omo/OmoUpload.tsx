@@ -44,6 +44,13 @@ interface OmoUploadProps {
    * backend so it can skip Gemini fuzzy-match (faster + cheaper).
    */
   lessonCodeHint?: string;
+  /**
+   * Issue #1975: optional callback to view OMO batch grading history. When
+   * provided, an extra「📋 查看批改記錄」button is rendered alongside the
+   * camera + gallery CTAs. Parent owns the navigation target so this
+   * component stays framework-agnostic.
+   */
+  onShowHistory?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +139,12 @@ function useLoadingMessage(active: boolean): string {
 // OmoUpload component
 // ---------------------------------------------------------------------------
 
-const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint }) => {
+const OmoUpload: React.FC<OmoUploadProps> = ({
+  token,
+  onUploaded,
+  lessonCodeHint,
+  onShowHistory,
+}) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -286,6 +298,22 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
             className="hidden"
             onChange={(e) => handleFiles(e.target.files)}
           />
+
+          {/* #1975 — entry point to view previous OMO grading results */}
+          {onShowHistory && (
+            <button
+              type="button"
+              onClick={onShowHistory}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-6
+                text-gray-600 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200
+                text-sm font-medium rounded-xl
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                transition-colors"
+            >
+              <span aria-hidden="true">📋</span>
+              查看批改記錄
+            </button>
+          )}
         </div>
       )}
 
