@@ -12,6 +12,7 @@ Note: /omo/by-lesson/{lesson_id} and /omo/history are static-prefix paths
 registered first in __init__.py to prevent shadowing by /omo/{upload_id}.
 """
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -238,7 +239,10 @@ def get_upload_by_lesson(
 _HISTORY_STATUSES = ("identified", "grading", "graded")
 
 
-def _resolve_lesson_meta(upload: OmoUpload, lesson_map: dict[int, dict]) -> tuple[Optional[int], Optional[str], Optional[str]]:
+def _resolve_lesson_meta(
+    upload: OmoUpload,
+    lesson_map: dict[int, dict],
+) -> tuple[Optional[int], Optional[str], Optional[str]]:
     """Pick (lesson_id, lesson_title, grade_code) for one upload.
 
     Prefers the user-confirmed ``lesson_id`` when set; otherwise falls back to
@@ -276,7 +280,7 @@ def _pick_thumbnail_path(upload: OmoUpload) -> Optional[str]:
 
 
 @router.get("/omo/history", response_model=OmoHistoryResponse)
-def list_omo_history(
+async def list_omo_history(
     limit: int = Query(20, ge=1, le=50, description="Max items returned per page"),
     offset: int = Query(0, ge=0, description="0-based offset for pagination"),
     current_user: User = Depends(get_current_user),
@@ -292,6 +296,11 @@ def list_omo_history(
 
     Filtering: only ``identified`` / ``grading`` / ``graded`` rows that
     have not been superseded by a newer upload for the same lesson.
+
+    Signed-URL strategy (#1975 review-1): IAM signing is one HTTP call per
+    URL, so N items would otherwise wall-clock as N × ~100ms. We fan the
+    signing out to a thread pool via ``asyncio.gather`` so a page of 20 only
+    takes the cost of the slowest single signing call.
     """
     # Lazy import to keep the module import-time light (lesson_loader reads YAML).
     from ...services.lesson_loader import get_all_lessons
@@ -315,20 +324,39 @@ def list_omo_history(
     # Build lesson_id → meta dict once (avoid N+1 yaml loads).
     lesson_map: dict[int, dict] = {}
     for lesson in get_all_lessons():
-        lid = lesson.get("id") or lesson.get("lesson_number")
-        if lid is None:
+        # Explicit `is not None` (not `or`) so a legitimate `id == 0` would
+        # not silently fall through to `lesson_number` — defensive even
+        # though current YAML IDs start at 1.
+        raw_lid = lesson.get("id")
+        if raw_lid is None:
+            raw_lid = lesson.get("lesson_number")
+        if raw_lid is None:
             continue
-        lesson_map[int(lid)] = {
+        lesson_map[int(raw_lid)] = {
             "title": lesson.get("title"),
             "grade_code": lesson.get("lesson_code") or lesson.get("grade_code"),
         }
 
-    items: list[OmoHistoryItem] = []
+    # Resolve lesson meta + thumbnail path (sync, in-memory) first.
+    resolved: list[tuple[OmoUpload, Optional[int], Optional[str], Optional[str], Optional[str]]] = []
     for upload in rows:
         lid, title, grade_code = _resolve_lesson_meta(upload, lesson_map)
         thumb_path = _pick_thumbnail_path(upload)
-        thumb_url = _get_signed_url(thumb_path) if thumb_path else None
+        resolved.append((upload, lid, title, grade_code, thumb_path))
 
+    # Sign all thumbnail URLs in parallel via a worker pool. Each signing
+    # call is a sync HTTP request (IAM SignBlob); we wrap with
+    # asyncio.to_thread so they overlap instead of running serially.
+    thumb_paths = [r[4] for r in resolved]
+    signed_results: list[Optional[str]] = await asyncio.gather(
+        *[
+            asyncio.to_thread(_get_signed_url, path) if path else asyncio.sleep(0, result=None)
+            for path in thumb_paths
+        ]
+    )
+
+    items: list[OmoHistoryItem] = []
+    for (upload, lid, title, grade_code, _thumb_path), thumb_url in zip(resolved, signed_results):
         items.append(OmoHistoryItem(
             upload_id=upload.id,
             lesson_id=lid,

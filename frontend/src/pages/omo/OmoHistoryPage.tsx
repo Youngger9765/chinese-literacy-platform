@@ -5,7 +5,7 @@
  * to individual upload results. Renders OmoHistoryList for the actual UI.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import OmoHistoryList from '../../components/omo/OmoHistoryList';
 import { useAuth } from '../../contexts/AuthContext';
 import { getOmoHistory } from '../../services/omoApi';
@@ -15,6 +15,8 @@ const PAGE_SIZE = 20;
 
 type LoadState = 'loading' | 'ready' | 'error';
 
+// Route is wrapped in <ProtectedRoute> in AppRoutes, so the token guard is
+// not needed here — context will always have a token by the time we render.
 const OmoHistoryPage: React.FC = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -24,11 +26,16 @@ const OmoHistoryPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  // #1975 review-1: separate inline error for failed "load more" so the
+  // existing list stays visible — wiping it on a partial-page failure is
+  // worse UX than telling the user the next page didn't load.
+  const [loadMoreError, setLoadMoreError] = useState(false);
 
   // Fetch the first page (also re-used by retry).
   const fetchFirstPage = useCallback(async () => {
     if (!token) return;
     setLoadState('loading');
+    setLoadMoreError(false);
     try {
       const data = await getOmoHistory(token, PAGE_SIZE, 0);
       setItems(data.items);
@@ -47,21 +54,17 @@ const OmoHistoryPage: React.FC = () => {
   const handleLoadMore = useCallback(async () => {
     if (!token || loadingMore || items.length >= total) return;
     setLoadingMore(true);
+    setLoadMoreError(false);
     try {
       const data = await getOmoHistory(token, PAGE_SIZE, offset);
       setItems((prev) => [...prev, ...data.items]);
       setOffset(offset + data.items.length);
     } catch {
-      // Surface a small error inline rather than wiping the existing list.
-      setLoadState('error');
+      setLoadMoreError(true);
     } finally {
       setLoadingMore(false);
     }
   }, [token, loadingMore, items.length, total, offset]);
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
 
   const hasMore = items.length < total;
 
@@ -129,7 +132,7 @@ const OmoHistoryPage: React.FC = () => {
         )}
 
         {hasMore && (
-          <div className="mt-5 flex justify-center">
+          <div className="mt-5 flex flex-col items-center gap-2">
             <button
               type="button"
               onClick={handleLoadMore}
@@ -138,8 +141,13 @@ const OmoHistoryPage: React.FC = () => {
                 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed
                 transition-colors"
             >
-              {loadingMore ? '載入中…' : '載入更多'}
+              {loadingMore ? '載入中…' : loadMoreError ? '再試一次' : '載入更多'}
             </button>
+            {loadMoreError && (
+              <p className="text-xs text-red-500" role="alert">
+                載入下一頁失敗，請再試一次
+              </p>
+            )}
           </div>
         )}
       </div>
