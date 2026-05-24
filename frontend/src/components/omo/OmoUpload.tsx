@@ -19,8 +19,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { uploadOmoImages } from '../../services/omoApi';
 
 const MAX_FILES = 5;
-const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB (pre-resize)
-const ACCEPTED_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_FILE_BYTES = 10 * 1024 * 1024;     // 10 MB per image (pre-resize)
+const MAX_PDF_BYTES = 20 * 1024 * 1024;      // 20 MB per PDF (backend splits server-side)
+const PDF_MIME = 'application/pdf';
+const IMAGE_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_MIME = [...IMAGE_MIME, PDF_MIME];
 
 // Client-side resize target: 1280px on the longest side, 85% JPEG quality
 const RESIZE_MAX_PX = 1280;
@@ -51,6 +54,11 @@ interface OmoUploadProps {
 // ---------------------------------------------------------------------------
 
 async function resizeImage(file: File): Promise<File> {
+  // #1976: canvas / <img> can't render PDF — pass it through untouched and
+  // let the backend's pypdfium2 render at server resolution.
+  if (file.type === PDF_MIME) {
+    return file;
+  }
   return new Promise((resolve) => {
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
@@ -155,20 +163,29 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
     }
     for (const f of fileArray) {
       if (!ACCEPTED_MIME.includes(f.type)) {
-        setError(`不支援「${f.name.split('.').pop()?.toUpperCase() ?? '?'}」格式，請選 JPG、PNG 或 WebP`);
+        setError(`不支援「${f.name.split('.').pop()?.toUpperCase() ?? '?'}」格式，請選 JPG、PNG、WebP 或 PDF`);
         return;
       }
-      if (f.size > MAX_FILE_BYTES) {
+      const isPdf = f.type === PDF_MIME;
+      const cap = isPdf ? MAX_PDF_BYTES : MAX_FILE_BYTES;
+      if (f.size > cap) {
         const mb = (f.size / (1024 * 1024)).toFixed(1);
-        setError(`「${f.name}」太大（${mb} MB），每張最多 10 MB`);
+        const capMb = cap / (1024 * 1024);
+        const kind = isPdf ? 'PDF' : '圖片';
+        setError(`「${f.name}」太大（${mb} MB），每個${kind}最多 ${capMb} MB`);
         return;
       }
     }
 
-    // ── Preview first file ──────────────────────────────────────────────────
-    const firstReader = new FileReader();
-    firstReader.onload = (e) => setPreview(e.target?.result as string);
-    firstReader.readAsDataURL(fileArray[0]);
+    // ── Preview first file (PDFs use an icon stub since <img> can't render them)
+    const first = fileArray[0];
+    if (first.type === PDF_MIME) {
+      setPreview(null);
+    } else {
+      const firstReader = new FileReader();
+      firstReader.onload = (e) => setPreview(e.target?.result as string);
+      firstReader.readAsDataURL(first);
+    }
 
     setUploading(true);
     try {
@@ -210,7 +227,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
         <div className="text-5xl mb-3" aria-hidden="true">📸</div>
         <h1 className="text-xl font-bold text-gray-900">上傳學習單</h1>
         <p className="mt-1 text-sm text-gray-500">
-          拍下你的紙本學習單，AI 會自動辨識是哪一課
+          拍下紙本、選相簿照片，或直接上傳 PDF 掃描檔
         </p>
       </div>
 
@@ -264,7 +281,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
             onChange={(e) => handleFiles(e.target.files)}
           />
 
-          {/* Gallery / file picker */}
+          {/* Gallery / file picker — accepts images + PDF */}
           <button
             type="button"
             onClick={() => galleryInputRef.current?.click()}
@@ -276,12 +293,12 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
               transition-colors"
           >
             <span aria-hidden="true">🖼️</span>
-            從相簿選擇
+            選擇照片或 PDF
           </button>
           <input
             ref={galleryInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf,.pdf"
             multiple
             className="hidden"
             onChange={(e) => handleFiles(e.target.files)}
@@ -310,7 +327,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
       )}
 
       <p className="text-xs text-gray-400 text-center">
-        支援 JPG、PNG、WebP，每張最多 10 MB，最多 {MAX_FILES} 張
+        支援 JPG、PNG、WebP（每張 ≤ 10 MB）或 PDF（≤ 20 MB，多頁自動拆開）
         <br />
         <span className="text-gray-300">上傳前自動壓縮以節省時間</span>
       </p>

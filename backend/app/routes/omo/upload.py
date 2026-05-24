@@ -25,6 +25,7 @@ from ...database import get_db
 from ...models.omo_upload import OmoUpload, OmoUploadAttempt
 from ...models.user import User
 from ...services.omo_jobs import _run_identification
+from ...services.omo_pdf_split import PdfSplitError, expand_pdf_files
 from ...services.omo_responses import (
     LessonSummaryResponse,
     OmoAttemptResponse,
@@ -38,7 +39,11 @@ from ...services.omo_upload_service import (
     create_upload_record,
     supersede_existing_uploads,
 )
-from ...services.omo_upload_validator import validate_attempt_files, validate_upload_files
+from ...services.omo_upload_validator import (
+    _MAX_FILES_PER_UPLOAD,
+    validate_attempt_files,
+    validate_upload_files,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -139,12 +144,12 @@ async def upload_worksheet(
     # ── Validate (raises 400/413 before any GCS work) ────────────────────────
     validate_upload_files(files_data)
 
-    image_bytes_list = [d for d, _ in files_data]
-    mime_types = [m for _, m in files_data]
-
-    # ── Phase 1b: SHA-256 dedup check ────────────────────────────────────────
-    # Hash the primary (first) image to detect duplicate uploads.
-    primary_hash = hashlib.sha256(image_bytes_list[0]).hexdigest()
+    # ── #1976: SHA-256 dedup BEFORE PDF expansion ────────────────────────────
+    # Hash the primary file as uploaded (PDF or image) so re-uploading the
+    # same PDF still hits the cache — expansion is deterministic but
+    # hashing the rendered JPEGs would invalidate when the renderer
+    # changes versions.
+    primary_hash = hashlib.sha256(files_data[0][0]).hexdigest()
 
     existing_upload = check_dedup(db, current_user.id, primary_hash)
     if existing_upload:
@@ -157,6 +162,20 @@ async def upload_worksheet(
         response.from_cache = True
         response.already_graded = already_graded
         return response
+
+    # ── #1976: expand any PDFs into per-page JPEGs ───────────────────────────
+    # After this step every entry is an image and the rest of the pipeline
+    # (GCS upload, identification, grading) does not need to know PDF existed.
+    try:
+        files_data = expand_pdf_files(
+            files_data,
+            max_total_images=_MAX_FILES_PER_UPLOAD,
+        )
+    except PdfSplitError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    image_bytes_list = [d for d, _ in files_data]
+    mime_types = [m for _, m in files_data]
 
     # ── Create new upload record (status=identifying) ─────────────────────────
     upload = create_upload_record(db, current_user.id)
@@ -244,6 +263,15 @@ async def add_attempt(
 
     # ── Validate (attempt count + file constraints) ───────────────────────────
     validate_attempt_files(files_data, existing_attempts)
+
+    # ── #1976: expand any PDFs into per-page JPEGs ───────────────────────────
+    try:
+        files_data = expand_pdf_files(
+            files_data,
+            max_total_images=_MAX_FILES_PER_UPLOAD,
+        )
+    except PdfSplitError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     image_bytes_list = [d for d, _ in files_data]
     mime_types = [m for _, m in files_data]
