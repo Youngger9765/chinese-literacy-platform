@@ -123,6 +123,27 @@ class OmoByLessonResponse(BaseModel):
     images: list[OmoSignedImageInfo] = Field(default_factory=list)
 
 
+class OmoHistoryItem(BaseModel):
+    """Compact representation of one OMO upload for the history list (#1975)."""
+    upload_id: int
+    lesson_id: Optional[int] = None
+    lesson_title: Optional[str] = None
+    grade_code: Optional[str] = None
+    status: str
+    overall_score: Optional[float] = None
+    answers_count: int = 0
+    created_at: str   # ISO-8601
+    thumbnail_url: Optional[str] = None
+
+
+class OmoHistoryResponse(BaseModel):
+    """Paginated list of the current user's OMO uploads, newest first."""
+    total: int
+    limit: int
+    offset: int
+    items: list[OmoHistoryItem] = Field(default_factory=list)
+
+
 # ── Response builder helpers ───────────────────────────────────────────────────
 
 def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:

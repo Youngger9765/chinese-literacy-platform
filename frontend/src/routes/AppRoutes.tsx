@@ -72,6 +72,7 @@ const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 // OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
 const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
 const OmoResultStandalonePage = lazy(() => import('../pages/omo/OmoResultStandalonePage'));
+const OmoHistoryPage = lazy(() => import('../pages/omo/OmoHistoryPage'));
 
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
@@ -402,6 +403,15 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <OmoResultStandalonePage />
+          </ProtectedRoute>
+        }
+      />
+      {/* #1975 — history of past OMO uploads for the current student */}
+      <Route
+        path="/omo/history"
+        element={
+          <ProtectedRoute>
+            <OmoHistoryPage />
           </ProtectedRoute>
         }
       />
