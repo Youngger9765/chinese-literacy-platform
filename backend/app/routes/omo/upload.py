@@ -12,6 +12,7 @@ llm-endpoint-hardening checklist (inherited from omo.py):
 - Fail-closed: status=error on AI failure ✅
 """
 
+import asyncio
 import hashlib
 import logging
 from typing import Optional
@@ -25,6 +26,7 @@ from ...database import get_db
 from ...models.omo_upload import OmoUpload, OmoUploadAttempt
 from ...models.user import User
 from ...services.omo_jobs import _run_identification
+from ...services.omo_pdf_split import PdfSplitError, expand_pdf_files
 from ...services.omo_responses import (
     LessonSummaryResponse,
     OmoAttemptResponse,
@@ -38,7 +40,11 @@ from ...services.omo_upload_service import (
     create_upload_record,
     supersede_existing_uploads,
 )
-from ...services.omo_upload_validator import validate_attempt_files, validate_upload_files
+from ...services.omo_upload_validator import (
+    MAX_FILES_PER_UPLOAD,
+    validate_attempt_files,
+    validate_upload_files,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +127,10 @@ async def upload_worksheet(
     Returns immediately with status=identifying. Poll GET /api/omo/{id} for result.
 
     Constraints:
-    - Max 5 files per call
-    - Max 10MB per file
-    - JPEG / PNG / WebP only
+    - Max ``MAX_FILES_PER_UPLOAD`` files per call (PDFs count as 1 here, expanded
+      per-page after validation)
+    - Images ≤ 10MB each, PDFs ≤ 20MB
+    - JPEG / PNG / WebP / PDF (#1976)
 
     Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
     completes synchronously in the background task without any AI call
@@ -139,12 +146,12 @@ async def upload_worksheet(
     # ── Validate (raises 400/413 before any GCS work) ────────────────────────
     validate_upload_files(files_data)
 
-    image_bytes_list = [d for d, _ in files_data]
-    mime_types = [m for _, m in files_data]
-
-    # ── Phase 1b: SHA-256 dedup check ────────────────────────────────────────
-    # Hash the primary (first) image to detect duplicate uploads.
-    primary_hash = hashlib.sha256(image_bytes_list[0]).hexdigest()
+    # ── #1976: SHA-256 dedup BEFORE PDF expansion ────────────────────────────
+    # Hash the primary file as uploaded (PDF or image) so re-uploading the
+    # same PDF still hits the cache — expansion is deterministic but
+    # hashing the rendered JPEGs would invalidate when the renderer
+    # changes versions.
+    primary_hash = hashlib.sha256(files_data[0][0]).hexdigest()
 
     existing_upload = check_dedup(db, current_user.id, primary_hash)
     if existing_upload:
@@ -157,6 +164,23 @@ async def upload_worksheet(
         response.from_cache = True
         response.already_graded = already_graded
         return response
+
+    # ── #1976: expand any PDFs into per-page JPEGs ───────────────────────────
+    # After this step every entry is an image and the rest of the pipeline
+    # (GCS upload, identification, grading) does not need to know PDF existed.
+    # CPU-bound (pypdfium2 render) — push to a thread so we don't block the
+    # FastAPI event loop while a 20-page PDF renders (~1-3 s).
+    try:
+        files_data = await asyncio.to_thread(
+            expand_pdf_files,
+            files_data,
+            MAX_FILES_PER_UPLOAD,
+        )
+    except PdfSplitError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    image_bytes_list = [d for d, _ in files_data]
+    mime_types = [m for _, m in files_data]
 
     # ── Create new upload record (status=identifying) ─────────────────────────
     upload = create_upload_record(db, current_user.id)
@@ -244,6 +268,16 @@ async def add_attempt(
 
     # ── Validate (attempt count + file constraints) ───────────────────────────
     validate_attempt_files(files_data, existing_attempts)
+
+    # ── #1976: expand any PDFs into per-page JPEGs (off the event loop) ──────
+    try:
+        files_data = await asyncio.to_thread(
+            expand_pdf_files,
+            files_data,
+            MAX_FILES_PER_UPLOAD,
+        )
+    except PdfSplitError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     image_bytes_list = [d for d, _ in files_data]
     mime_types = [m for _, m in files_data]

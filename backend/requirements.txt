@@ -24,3 +24,5 @@ python-json-logger>=2.0.0
 slowapi>=0.1.9
 sentry-sdk[fastapi]>=2.0
 google-cloud-texttospeech>=2.14
+pypdfium2>=4.30
+Pillow>=10.0
