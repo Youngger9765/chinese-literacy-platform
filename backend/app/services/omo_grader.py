@@ -286,6 +286,12 @@ async def grade_worksheet_images(
             )
             result.crop_image_url = gs_uri
 
+    # #1973: sort by YAML question order (fb_1, fb_2, …, mc_1, mc_2, …) so the
+    # client renders in a stable, student-readable order rather than Gemini's
+    # visual-scan order (which can jump around — esp. after _split_spread).
+    qid_order = {q["id"]: idx for idx, q in enumerate(questions)}
+    results.sort(key=lambda g: qid_order.get(g.question_id, len(qid_order)))
+
     logger.info(
         "OMO grader: graded %d/%d questions for lesson '%s'",
         len(results),
