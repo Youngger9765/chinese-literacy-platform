@@ -7,6 +7,11 @@
  *
  * Regression guard: 管理班級 and 建立作業 must navigate to /teacher
  * WITHOUT the reports intent flag.
+ *
+ * Issue #1984 — greeting must not duplicate role suffix
+ * When user.name ends with 老師 (e.g. '李老師'), the greeting
+ * must NOT append another 老師 → should show "歡迎回來，李老師！"
+ * not "歡迎回來，李老師 老師！"
  */
 
 import React from 'react';
@@ -117,6 +122,46 @@ describe('TeacherHome — 查看報告 routing (issue #1545)', () => {
     fireEvent.click(screen.getByRole('button', { name: /前往 三年甲班/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/teacher/classroom/1');
+  });
+});
+
+describe('TeacherHome — greeting name+role deduplication (issue #1984)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('does not duplicate role suffix when user.name already ends with 老師', async () => {
+    // user.name = '李老師' (ends with 老師); greeting must NOT show '李老師 老師'
+    renderTeacherHome();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    });
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading.textContent).not.toMatch(/老師\s*老師/);
+    expect(heading.textContent).toContain('李老師');
+  });
+
+  it('still appends 老師 when user.name does not end with 老師', async () => {
+    // Override mock for this test only — name = '王小明' (no 老師 suffix)
+    vi.doMock('../../../contexts/AuthContext', () => ({
+      useAuth: () => ({
+        user: { id: 2, name: '王小明' },
+        token: 'test-token',
+      }),
+    }));
+    // Re-import to pick up new mock
+    const { default: TeacherHomeFresh } = await import('../TeacherHome?name=fresh');
+    render(
+      <MemoryRouter initialEntries={['/teacher-home']}>
+        <TeacherHomeFresh />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    });
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading.textContent).toContain('王小明');
+    expect(heading.textContent).toContain('老師');
   });
 });
 
