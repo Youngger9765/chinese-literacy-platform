@@ -1,5 +1,6 @@
 import React, { FormEvent } from 'react';
 import ReadingGoalsForm, { GoalsFormState } from '../../../components/teacher/ReadingGoalsForm';
+import { ZhTWDatePicker } from '../../../components/ui/ZhTWDatePicker';
 import { Story } from '../../../types';
 
 export interface AssignmentCreateFormProps {
@@ -149,13 +150,10 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
             <label htmlFor="assign-due" className="block text-sm font-medium text-gray-700 mb-1">
               截止日期（選填）
             </label>
-            <input
+            <ZhTWDatePicker
               id="assign-due"
-              type="date"
-              lang="zh-TW"
               value={formDueDate}
-              onChange={(event) => setFormDueDate(event.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              onChange={setFormDueDate}
             />
           </div>
 
