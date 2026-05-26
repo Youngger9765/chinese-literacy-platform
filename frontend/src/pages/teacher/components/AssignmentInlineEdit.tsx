@@ -1,4 +1,5 @@
 import React from 'react';
+import { ZhTWDatePicker } from '../../../components/ui/ZhTWDatePicker';
 
 export interface AssignmentInlineEditProps {
   editTitle: string;
@@ -51,12 +52,9 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">截止日期</label>
-        <input
-          type="date"
-          lang="zh-TW"
+        <ZhTWDatePicker
           value={editDueDate}
-          onChange={(event) => setEditDueDate(event.target.value)}
-          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+          onChange={setEditDueDate}
         />
       </div>
     </div>
