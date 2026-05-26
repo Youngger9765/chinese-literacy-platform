@@ -1,5 +1,6 @@
 """Teacher dashboard endpoints: classrooms list, progress, stats."""
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
@@ -25,6 +26,25 @@ from .teacher_schemas import (
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Dev/test classroom name filter (approach b — no DB migration required)
+# Matches names that look like QA / PM dogfood / bulk-verify sessions.
+# Pattern breakdown:
+#   PM\s*R\d   — "PM R3", "PM R1 班" etc. (PM dogfood rounds)
+#   Bulk驗證   — "Bulk驗證 2026-05-16" (bulk verification runs)
+#   dogfood    — "PM Dogfood R2 班", "dogfood test" (internal dogfood sessions)
+# NOTE: "staging" and bare "test" intentionally excluded to avoid false positives
+#       on legitimate classroom names. Add only specific known PM/QA patterns.
+# ---------------------------------------------------------------------------
+_DEV_CLASSROOM_PATTERN = re.compile(
+    r"(?i)(PM\s*R\d|Bulk驗證|dogfood)",
+)
+
+
+def _is_dev_classroom(name: str) -> bool:
+    """Return True if the classroom name matches a dev/test pattern."""
+    return bool(_DEV_CLASSROOM_PATTERN.search(name))
+
 
 @router.get(
     "/teacher/classrooms",
@@ -41,6 +61,9 @@ def list_teacher_classrooms(
         .order_by(Classroom.created_at.desc())
         .all()
     )
+
+    # Filter out dev/test classrooms from the teacher-facing list
+    classrooms = [c for c in classrooms if not _is_dev_classroom(c.name)]
 
     if not classrooms:
         return []
