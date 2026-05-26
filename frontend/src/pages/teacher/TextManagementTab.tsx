@@ -39,8 +39,6 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
   // Assign flow
   const [showAssignSelector, setShowAssignSelector] = useState(false);
   const [assigningTextId, setAssigningTextId] = useState<string | null>(null);
-  const [copyrightConfirmed, setCopyrightConfirmed] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
 
   // Unassign flow
   const [confirmUnassignId, setConfirmUnassignId] = useState<string | null>(null);
@@ -115,19 +113,20 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
 
   const handleOpenAssignSelector = () => {
     setShowAssignSelector(true);
-    setCopyrightConfirmed(false);
     loadStories();
   };
 
   const handleCloseAssignSelector = () => {
     setShowAssignSelector(false);
-    setCopyrightConfirmed(false);
   };
 
   const handleAssign = async (textId: string) => {
-    if (!token || !copyrightConfirmed) return;
+    if (!token) return;
     setAssigningTextId(textId);
     try {
+      // All stories in this list are platform YAML content — copyright_confirmed is
+      // always true for internal content. User confirmation is only needed for
+      // teacher-uploaded texts (managed via MyTextsTab). See issue #1983.
       const newItem = await assignText(token, classroomId, textId, true);
       setAssignedTexts((prev) => [...prev, newItem]);
     } catch (err) {
@@ -247,42 +246,6 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
             </button>
           </div>
 
-          {/* Copyright confirmation */}
-          <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={copyrightConfirmed}
-                onChange={(e) => setCopyrightConfirmed(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-accent cursor-pointer shrink-0"
-              />
-              <span className="text-xs text-amber-900 leading-relaxed">
-                我確認本教材的使用符合著作權規範
-              </span>
-            </label>
-            <div className="mt-1.5 ml-6 flex items-center gap-1 relative">
-              <button
-                type="button"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-                onFocus={() => setShowTooltip(true)}
-                onBlur={() => setShowTooltip(false)}
-                className="text-xs text-amber-700 underline cursor-pointer hover:text-amber-900 flex items-center gap-0.5"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                著作權說明
-              </button>
-              {showTooltip && (
-                <div className="absolute bottom-full left-0 mb-1 w-64 p-2.5 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10 leading-relaxed">
-                  依據著作權法第46條，學校教師在教學目的下得合理使用已公開發表之著作。請確認您使用的教材符合合理使用原則，或已取得著作權人授權。
-                  <div className="absolute top-full left-3 border-4 border-transparent border-t-gray-800" />
-                </div>
-              )}
-            </div>
-          </div>
-
           {isLoadingStories ? (
             <div className="flex items-center gap-2 py-4">
               <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
@@ -307,16 +270,21 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                 <div key={story.id} className="px-4 py-2.5 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{story.title}</p>
-                    <p className="text-xs text-gray-500">
-                      {story.grade ? `${story.grade} 年級` : ''}
-                      {story.genre ? ` / ${story.genre}` : ''}
-                      {story.charCount ? ` / ${story.charCount} 字` : ''}
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <p className="text-xs text-gray-500">
+                        {story.grade ? `${story.grade} 年級` : ''}
+                        {story.genre ? ` / ${story.genre}` : ''}
+                        {story.charCount ? ` / ${story.charCount} 字` : ''}
+                      </p>
+                      {/* Platform badge — all stories here are internal YAML content (#1983) */}
+                      <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded shrink-0">
+                        平台教材
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleAssign(story.id)}
-                    disabled={assigningTextId === story.id || !copyrightConfirmed}
-                    title={!copyrightConfirmed ? '請先確認著作權聲明' : undefined}
+                    disabled={assigningTextId === story.id}
                     className="px-3 py-1 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                   >
                     {assigningTextId === story.id ? '指派中...' : '指派'}
