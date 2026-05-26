@@ -55,7 +55,8 @@ const MOCK_CLASSROOM = {
   grade: 3,
   is_active: true,
   created_at: '2026-01-01T00:00:00Z',
-  student_count: 5,
+  // student_count: 0 → accordion starts expanded so join code panel is visible for these tests
+  student_count: 0,
   students: [],
   join_code: 'ABC123',
   school_name: '測試國小',

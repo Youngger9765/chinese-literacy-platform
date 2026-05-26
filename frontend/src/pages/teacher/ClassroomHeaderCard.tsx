@@ -1,12 +1,12 @@
 /**
- * ClassroomHeaderCard — Issue #1943
+ * ClassroomHeaderCard — Issue #1943 / #1987
  *
  * Renders:
  *  - Classroom name, grade badge, student count, active status (view + edit form)
  *  - Action buttons: 編輯 / 停用啟用 / 匯出CSV
- *  - Join code panel with 複製 and 重生代碼 + confirm dialog
+ *  - Join code panel — accordion (collapsed when ≥1 student, expanded for new class)
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { ClassroomDetailResponse } from '../../services/classroomApi';
 
 interface ClassroomHeaderCardProps {
@@ -69,8 +69,12 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onHideRegenConfirm,
   onRegenerateCode,
   formatDate,
-}) => (
-  <>
+}) => {
+  // Default: collapsed for established classrooms (≥1 student), expanded for new (0 student)
+  const [joinCodeOpen, setJoinCodeOpen] = useState(classroom.student_count === 0);
+
+  return (
+    <>
     {/* Classroom info card */}
     <div className="bg-white rounded-2xl shadow-card p-6">
       {isEditing ? (
@@ -187,60 +191,93 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
       )}
     </div>
 
-    {/* Join Code card */}
-    <div className="bg-white rounded-2xl shadow-card p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold text-gray-700 mb-1">加入代碼</h3>
-          {classroom.join_code ? (
-            <p className="font-mono text-2xl font-bold tracking-widest text-accent select-all">
+    {/* Join Code card — accordion */}
+    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      {/* Accordion header / toggle */}
+      <button
+        type="button"
+        onClick={() => setJoinCodeOpen((prev) => !prev)}
+        aria-expanded={joinCodeOpen}
+        aria-controls="join-code-panel"
+        className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-gray-50 transition-colors"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          加入代碼
+          {classroom.join_code && !joinCodeOpen && (
+            <span className="font-mono text-xs font-medium text-accent bg-accent-bg px-2 py-0.5 rounded tracking-wider">
               {classroom.join_code}
-            </p>
-          ) : (
-            <p className="font-mono text-2xl font-bold tracking-widest text-gray-300">—</p>
+            </span>
           )}
-          <p className="text-xs text-gray-400 mt-1.5">
-            把此代碼給學生，他們從首頁「加入班級」輸入即可加入
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <button
-            onClick={onCopyJoinCode}
-            disabled={!classroom.join_code}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isCopied ? (
-              <>
-                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-emerald-600">已複製</span>
-              </>
+        </span>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${joinCodeOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Accordion body */}
+      <div
+        id="join-code-panel"
+        aria-hidden={!joinCodeOpen}
+        className={`transition-all duration-200 ${joinCodeOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="px-6 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            {classroom.join_code ? (
+              <p className="font-mono text-2xl font-bold tracking-widest text-accent select-all">
+                {classroom.join_code}
+              </p>
             ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                複製代碼
-              </>
+              <p className="font-mono text-2xl font-bold tracking-widest text-gray-300">—</p>
             )}
-          </button>
-          <button
-            onClick={onShowRegenConfirm}
-            disabled={isRegenerating}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 text-amber-700 text-sm hover:bg-amber-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isRegenerating ? (
-              '產生中...'
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                重生代碼
-              </>
-            )}
-          </button>
+            <p className="text-xs text-gray-400 mt-1.5">
+              把此代碼給學生，他們從首頁「加入班級」輸入即可加入
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={onCopyJoinCode}
+              disabled={!classroom.join_code}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isCopied ? (
+                <>
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-emerald-600">已複製</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  複製代碼
+                </>
+              )}
+            </button>
+            <button
+              onClick={onShowRegenConfirm}
+              disabled={isRegenerating}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 text-amber-700 text-sm hover:bg-amber-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isRegenerating ? (
+                '產生中...'
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  重生代碼
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -276,6 +313,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
       </div>
     )}
   </>
-);
+  );
+};
 
 export default ClassroomHeaderCard;
