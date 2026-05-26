@@ -202,15 +202,24 @@ def start_assignment_session(
     # Reuse existing in_progress session for same student + story to avoid
     # duplicates when switching devices (#1074).  Attach assignment metadata
     # so the session is associated with this assignment.
-    # Issue #1762 P0-1: filter by session_mode="assignment" — NEVER reuse a
-    # self-study session as an assignment session; they are separate contexts.
+    #
+    # Issue #1982: query for ANY in_progress session (not just assignment-mode)
+    # to prevent a conflict with the unique index before attempting INSERT.
+    # Previously the query filtered by session_mode="assignment", which meant
+    # a pre-existing self-study session was not found here and the subsequent
+    # INSERT hit the unique partial index on PostgreSQL → IntegrityError →
+    # PendingRollbackError → HTTP 500.
+    #
+    # Fixing the conflict pre-emptively (find → reuse → _sync_metadata) is
+    # safer than recovering after IntegrityError because SQLAlchemy's session
+    # state management after a flush exception differs between SQLite and
+    # PostgreSQL, making post-IntegrityError recovery fragile.
     learning_session = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id == submission.student_id,
             LearningSession.story_slug == story_slug,
             LearningSession.status == "in_progress",
-            LearningSession.session_mode == "assignment",  # P0-1: never reuse self-study sessions
         )
         .order_by(LearningSession.started_at.desc())
         .first()
@@ -218,8 +227,10 @@ def start_assignment_session(
     if learning_session:
         _sync_metadata(learning_session, assignment, skipped_steps)
         logger.info(
-            "Reusing existing session %d for assignment %d (student %d, story=%s) #1074",
-            learning_session.id, assignment.id, submission.student_id, story_slug,
+            "Reusing existing session %d (mode=%s) for assignment %d "
+            "(student %d, story=%s) #1074 #1982",
+            learning_session.id, learning_session.session_mode,
+            assignment.id, submission.student_id, story_slug,
         )
     else:
         initial_step_progress: dict = {
@@ -251,9 +262,10 @@ def start_assignment_session(
             with db.begin_nested():
                 db.flush()  # get learning_session.id; savepoint released on success
         except IntegrityError:
-            # Partial unique index (#1179) caught concurrent insert; reuse existing
-            # and sync assignment metadata onto it so it shows up under this assignment.
-            # The savepoint was rolled back; the outer transaction (submission) is intact.
+            # True concurrent race: another request inserted a session between
+            # our pre-flight query above and this flush.  This path is now rare
+            # because the pre-flight query (#1982) already handles the common
+            # case (pre-existing self-study session).
             learning_session = (
                 db.query(LearningSession)
                 .filter(
@@ -268,7 +280,8 @@ def start_assignment_session(
                 raise
             _sync_metadata(learning_session, assignment, skipped_steps)
             logger.info(
-                "Race resolved in start_assignment: reusing session %d for assignment %d (#1179 #1185)",
+                "Race resolved in start_assignment: reusing session %d for assignment %d "
+                "(#1179 #1185)",
                 learning_session.id, assignment.id,
             )
 
