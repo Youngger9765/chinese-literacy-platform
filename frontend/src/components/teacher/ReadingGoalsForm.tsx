@@ -71,25 +71,30 @@ const ReadingGoalsForm: React.FC<ReadingGoalsFormProps> = ({ value, onChange, gr
       <div>
         <label className="block text-xs text-gray-500 mb-1">難度標籤</label>
         <div className="flex gap-2">
-          {DIFFICULTY_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() =>
-                onChange({
-                  ...value,
-                  difficulty_label: value.difficulty_label === opt ? null : opt,
-                })
-              }
-              className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-                value.difficulty_label === opt
-                  ? 'border-blue-500 bg-blue-100 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
+          {DIFFICULTY_OPTIONS.map((opt) => {
+            const isSelected = value.difficulty_label === opt;
+            return (
+              <button
+                key={opt}
+                type="button"
+                aria-pressed={isSelected}
+                data-selected={isSelected ? 'true' : 'false'}
+                onClick={() =>
+                  onChange({
+                    ...value,
+                    difficulty_label: isSelected ? null : opt,
+                  })
+                }
+                className={`px-3 py-1 rounded-full text-sm border transition-all ${
+                  isSelected
+                    ? 'border-blue-700 bg-blue-700 text-white font-bold shadow-sm scale-105'
+                    : 'border-gray-300 bg-white text-gray-600 font-medium hover:border-blue-400 hover:scale-102'
+                }`}
+              >
+                {opt}
+              </button>
+            );
+          })}
           {value.difficulty_label && (
             <button
               type="button"
