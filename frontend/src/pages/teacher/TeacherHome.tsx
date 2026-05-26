@@ -194,7 +194,10 @@ const TeacherHome: React.FC = () => {
     };
   }, [token]);
 
-  const firstName = user?.name ?? '老師';
+  const rawName = user?.name ?? '老師';
+  // Issue #1984: avoid duplicating role suffix when name already ends with 老師
+  // e.g. '李老師' → '李老師！' (not '李老師 老師！')
+  const displayName = rawName.endsWith('老師') ? rawName : `${rawName} 老師`;
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -207,12 +210,12 @@ const TeacherHome: React.FC = () => {
               aria-hidden="true"
             >
               <span className="text-white text-2xl font-bold">
-                {firstName.charAt(0)}
+                {rawName.charAt(0)}
               </span>
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                歡迎回來，{firstName} 老師！
+                歡迎回來，{displayName}！
               </h1>
               <p className="text-sm text-gray-500 mt-0.5">
                 今天也來關心一下學生的學習進度吧
