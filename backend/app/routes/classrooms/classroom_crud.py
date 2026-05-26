@@ -19,6 +19,7 @@ from ...schemas.classroom import (
     StudentEnrolledClassroom,
     StudentEnrolledClassroomsResponse,
 )
+from ...services.classroom_dev_filter import is_dev_classroom
 from ...services.input_sanitizer import sanitize_ai_input
 from .helpers import (
     classroom_to_detail_response,
@@ -104,8 +105,13 @@ def list_my_classrooms(
 
     - system_admin / org_admin: returns ALL platform classrooms (platform-wide view).
     - Regular teacher: returns only classrooms they own or co-teach.
+
+    #1999: regular teachers also get dev/test classrooms (PM dogfood / Bulk驗證)
+    filtered out — same regex as /api/teacher/classrooms (#1985). Admins still
+    see every classroom, including dev ones, for full platform visibility.
     """
-    if is_admin(current_user.id, db):
+    caller_is_admin = is_admin(current_user.id, db)
+    if caller_is_admin:
         query = db.query(Classroom)
     else:
         co_teacher_classroom_ids = (
@@ -119,8 +125,13 @@ def list_my_classrooms(
                 Classroom.id.in_(co_teacher_classroom_ids),
             )
         )
-    total = query.count()
-    items = query.order_by(Classroom.created_at.desc()).offset(offset).limit(limit).all()
+    items = query.order_by(Classroom.created_at.desc()).all()
+
+    if not caller_is_admin:
+        items = [c for c in items if not is_dev_classroom(c.name)]
+
+    total = len(items)
+    items = items[offset : offset + limit]
 
     if not items:
         return ClassroomListResponse(items=[], total=total)
