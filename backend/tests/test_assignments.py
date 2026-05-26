@@ -1508,6 +1508,179 @@ class TestSubmitAssignment:
             db.close()
 
 
+# ====================================================================
+# Issue #2003: Assignment MUST stay active after first student submits
+# ====================================================================
+
+class TestIssue2003AssignmentStaysActiveAfterSubmit:
+    """Regression tests for #2003.
+
+    Bug: assignment.is_active flips to False after the first student submits,
+    locking out the remaining enrolled students and blocking /restart.
+
+    Expected: assignment stays active until the teacher manually deactivates it.
+    Teacher controls the lifecycle, not student submission events.
+    """
+
+    def _setup_assignment_two_students(
+        self, client, teacher, school_id
+    ) -> tuple[int, dict, dict, int]:
+        """Create a fresh classroom, enroll 2 students, create an assignment.
+
+        Returns (assignment_id, student_a, student_b, classroom_id).
+        """
+        # Fresh unique students so module-scoped shared state doesn't interfere
+        student_a = _register_user(client, "s2003a")
+        student_b = _register_user(client, "s2003b")
+        _make_student_role(student_a["user_id"], school_id)
+        _make_student_role(student_b["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 2003 Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        # Enroll both students
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student_a["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student_b["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 2003 Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+        assert create_resp.json()["is_active"] is True
+        assert create_resp.json()["submission_count"] == 2
+
+        return assignment_id, student_a, student_b, classroom_id
+
+    def test_assignment_stays_active_after_first_student_submits(
+        self, client, teacher, school_id
+    ):
+        """Core regression: assignment.is_active must remain True after one of two
+        enrolled students submits. Only the teacher can deactivate an assignment.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Student A starts and submits
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+        assert submit_resp.status_code == 200
+        assert submit_resp.json()["status"] == "submitted"
+
+        # --- Core assertion: assignment must still be active ---
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        assert detail_resp.json()["is_active"] is True, (
+            "Bug #2003: assignment.is_active flipped to False after student A "
+            "submitted — it should stay True until teacher deactivates."
+        )
+
+    def test_second_student_can_still_see_assignment_after_first_submits(
+        self, client, teacher, school_id
+    ):
+        """Student B (unenrolled/not yet started) must still see the assignment
+        in GET /api/assignments/my after student A submits.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Student A submits
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+
+        # Student B must still be able to see and start the assignment
+        my_resp = client.get(
+            "/api/assignments/my",
+            headers=auth_header(student_b["token"]),
+        )
+        assert my_resp.status_code == 200
+        my_ids = [a["assignment_id"] for a in my_resp.json()]
+        assert assignment_id in my_ids, (
+            "Bug #2003: student B lost access to assignment after student A submitted."
+        )
+
+    def test_assignment_stays_active_after_all_students_submit(
+        self, client, teacher, school_id
+    ):
+        """After ALL students submit, the assignment must still be is_active=True.
+
+        Core regression for #2003: no auto-deactivation when last student submits.
+        Note: /restart creates a new LearningSession; on SQLite the partial unique
+        index (postgresql_where=...) is ignored so a UNIQUE constraint fires.
+        That SQLite limitation is tested separately; here we focus on is_active.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Both students submit
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_b["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_b["token"]),
+        )
+
+        # Even after ALL students submit, assignment must stay active
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        assert detail_resp.json()["is_active"] is True, (
+            "Bug #2003: assignment.is_active flipped to False after all students submitted. "
+            "Teacher never deactivated it."
+        )
+
+
 # ====================================================================# Notification service — unit tests (no HTTP needed)
 # ====================================================================
 
