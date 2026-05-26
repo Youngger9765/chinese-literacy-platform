@@ -141,6 +141,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
         <input
           id="assign-due"
           type="date"
+          lang="zh-TW"
           value={formDueDate}
           onChange={(event) => setFormDueDate(event.target.value)}
           className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
