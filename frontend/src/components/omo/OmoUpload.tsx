@@ -492,7 +492,9 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4
                   bg-white hover:bg-gray-50 active:bg-gray-100
                   text-gray-700 text-sm font-medium rounded-xl
-                  border border-gray-300 transition-colors"
+                  border border-gray-300
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                  transition-colors"
               >
                 <span aria-hidden="true">📷</span>
                 再拍一張
@@ -503,7 +505,9 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4
                   bg-white hover:bg-gray-50 active:bg-gray-100
                   text-gray-700 text-sm font-medium rounded-xl
-                  border border-gray-300 transition-colors"
+                  border border-gray-300
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                  transition-colors"
               >
                 <span aria-hidden="true">🖼️</span>
                 再加照片/PDF

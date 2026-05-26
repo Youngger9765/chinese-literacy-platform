@@ -74,7 +74,7 @@ const OmoUploadPagePreview: React.FC<OmoUploadPagePreviewProps> = ({
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-700 truncate">{fileName}</p>
         <p className="text-xs text-gray-400 mt-0.5">
-          {isFirst && isLast ? '已選 1 頁' : `共 ${totalPages} 頁，點 ↑↓ 調整順序`}
+          {isFirst && isLast ? '已選 1 個' : `共 ${totalPages} 個，點 ↑↓ 調整順序`}
         </p>
       </div>
 
@@ -84,7 +84,7 @@ const OmoUploadPagePreview: React.FC<OmoUploadPagePreviewProps> = ({
           type="button"
           onClick={onMoveUp}
           disabled={isFirst}
-          aria-label={`將第 ${pageIndex + 1} 頁往上移`}
+          aria-label={`將第 ${pageIndex + 1} 個往上移`}
           className="w-7 h-6 flex items-center justify-center text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           ↑
@@ -93,7 +93,7 @@ const OmoUploadPagePreview: React.FC<OmoUploadPagePreviewProps> = ({
           type="button"
           onClick={onMoveDown}
           disabled={isLast}
-          aria-label={`將第 ${pageIndex + 1} 頁往下移`}
+          aria-label={`將第 ${pageIndex + 1} 個往下移`}
           className="w-7 h-6 flex items-center justify-center text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           ↓
@@ -104,7 +104,7 @@ const OmoUploadPagePreview: React.FC<OmoUploadPagePreviewProps> = ({
       <button
         type="button"
         onClick={onRemove}
-        aria-label={`移除第 ${pageIndex + 1} 頁`}
+        aria-label={`移除第 ${pageIndex + 1} 個`}
         className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-red-500 hover:bg-red-50 text-base font-semibold"
       >
         ✕
