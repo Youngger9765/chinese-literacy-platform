@@ -8,6 +8,24 @@
 
 ---
 
+## 5/22 ~ 5/29
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 靖杭 | ✅ | PR #1977（#1973）| OMO grader 結果依 YAML 題號排序（先 fb_* → mc_* → se_*），fix 雙頁 _split_spread 後題號跳序問題，在 service 層做不是 frontend hack |
+| 靖杭 | ✅ | PR #1979（#1976）| OMO 收 PDF！後端用 pypdfium2 拆每頁為 JPEG，下游 pipeline 完全不改。lib 選型有 rationale（Cloud Run 友善 + Apache-2.0），+503/-59 6 檔，首次引入 backend 新 dep |
+| 靖杭 | ✅ | PR #1980（#1975）| OMO 批改記錄頁：backend list endpoint（精簡 8 欄位 + thumbnail）+ frontend 歷史頁 + 上傳頁加入口，list vs detail endpoint 有意識拆分，+906/-5 9 檔 |
+| 靖杭 | 🔧 | PR #1978 open（#1974）| OMO 多頁上傳 UX — 縮圖 / 排序 / 確認再送，5/26 push 待 review |
+| 啟翔 | 🔧 | PR #1601 open（#1549，stale）| step_progress 統一儲存，自 5/22 起 0 update，目前 CONFLICTING — ⚠️ 已 stale 兩週 |
+| 啟翔 | ⏳ | 本週 0 PR | 連續第二週停滯（上次 merge 是 5/8 #1480）— 會議直接對話了解卡點 |
+| Young | ✅ | OMO refactor + ops（5/22-5/23）| 60+ PR refactor split monoliths：admin / teacher / student / learning-session / ai_base / pinyin / stt / omo / strategy-exercise / mcq_rescue / ClassroomDetail / SemesterPanel / AdminTreeSidebar 等。配合 6/1 教授 review 之前做 deep clean |
+| Young | ✅ | UX polish batch（5/23）| #1914 vocab 錯誤回饋、#1915 teacher-report empty state、#1923 閱讀聚光燈 empty copy、#1922 teacher/student onboarding toast、#1921 OMO three UX gaps（all-blank guard / candidate chips / reasoning expansion） |
+| Young | ✅ | Admin / security 修補（5/23）| #1919 admin dashboard crash + classroom scope、#1918 admin terms role badge、#1920 移除 seed PII gmail + 修 admin roles、#1934 修 staging PII rows、#1924/#1933 CSP blob: 允許 OMO crop preview |
+| Young | ✅ | Teacher/Student 資料隔離（5/26）| #1985 教師 dashboard 隱藏 dev/test classrooms、#1986 ClassroomDetail 8 tabs 排 2 行、#1987 join code 改 accordion、#1982 assignment start 500 修、#1983 移除 copyright checkbox、#1984 教師問候不重複「老師」後綴 |
+| Young | ✅ | Assignment + 日期 i18n（5/26）| #1988/#2005 native date input 改為 zh-TW custom picker、#1989 assignment form 分 3 section、#1990 difficulty pill solid fill + aria-pressed、#1999 dev/test filter + fastapi pin、#2003 assignment.is_active regression contract |
+
+---
+
 ## 5/12 ~ 5/15
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
