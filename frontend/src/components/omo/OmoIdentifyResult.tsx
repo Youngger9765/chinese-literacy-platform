@@ -125,11 +125,23 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   // stuck on a spinner forever.  Refs above already make polling robust;
   // this is defence-in-depth so a single missed poll can't trap the UI.
   const [showStuckHint, setShowStuckHint] = useState(false);
+  // Track the stuck-hint timer in a ref so we can cancel it on unmount and
+  // reset it without leaking timers when the user spams "立即查看結果".
+  const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const armStuckTimer = () => {
+    if (stuckTimerRef.current) clearTimeout(stuckTimerRef.current);
+    stuckTimerRef.current = setTimeout(() => setShowStuckHint(true), 25000);
+  };
   useEffect(() => {
     if (!confirmed) return;
     setShowStuckHint(false);
-    const t = setTimeout(() => setShowStuckHint(true), 25000);
-    return () => clearTimeout(t);
+    armStuckTimer();
+    return () => {
+      if (stuckTimerRef.current) {
+        clearTimeout(stuckTimerRef.current);
+        stuckTimerRef.current = null;
+      }
+    };
   }, [confirmed]);
 
   const checkResultNow = async () => {
@@ -143,8 +155,10 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
         );
       } else {
         // Reset timer so the hint comes back if user keeps waiting.
+        // Goes through armStuckTimer to clear any pending one first — prevents
+        // multiple stacked timers from rapid button taps.
         setShowStuckHint(false);
-        setTimeout(() => setShowStuckHint(true), 25000);
+        armStuckTimer();
       }
     } catch {
       /* keep UI as-is on transient error */
