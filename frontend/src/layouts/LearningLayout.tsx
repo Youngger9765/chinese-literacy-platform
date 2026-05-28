@@ -98,10 +98,15 @@ export interface LearningContext {
   /**
    * Merge a per-step progress payload into step_progress and persist it.
    * Use this for in-step process/history persistence (e.g. dialogue turns).
+   *
+   * `stepData` is typed as `object` (not `Record<string, unknown>`) so the
+   * strict per-step shapes from `types/stepProgress.ts` are assignable
+   * without a cast at every call site. Runtime behaviour is unchanged — the
+   * payload is spread into `step_data[stepId]` JSONB regardless of shape.
    */
   saveStepProgressPatch: (opts: {
     stepId: string;
-    stepData: Record<string, unknown>;
+    stepData: object;
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
@@ -291,45 +296,86 @@ const LearningLayout: React.FC = () => {
     );
   }
 
-  // ── Context assembly ─────────────────────────────────────────────────────
-
-  const ctx: LearningContext = {
-    selectedStory,
-    session,
-    lastAttempt,
-    rightPanelWidth,
-    setRightPanelWidth,
-    handleStartReading,
-    handleFinishReading,
-    handleFinishComprehension,
-    handleFinishStoryStructure,
-    handleFinishReadingStrategy,
-    handleFinishVocab,
-    handleFinishDictation,
-    handleFinishFullReading,
-    handleFinishListening,
-    handleFinishReadingAnnotation,
-    handleFinishVocabDefinitionMatch,
-    handleFinishVocabApplication,
-    handleFinishSentencePractice,
-    handleFinishVocabWordSearch,
-    handleFinishKnowledgeStation,
-    handleRetry,
-    handleSessionComplete,
-    emptyAttempt: EMPTY_ATTEMPT,
-    dbSessionId,
-    completedParagraphsSet,
-    handleParagraphComplete,
-    assignmentReadingGoals,
-    syncProgress,
-    flushProgress,
-    stepProgressData: stepProgressState,
-    saveStepProgressPatch,
-    isAssignmentReadyForSubmit,
-    missingAssignmentSteps,
-    firstIncompleteStepPath,
-    hasActiveAssignment,
-  };
+  // Memoise the outlet-context object so the Outlet (and any child component
+  // destructuring via useLearningContext) sees a stable reference when no
+  // dependency actually changed. Without useMemo, each LearningLayout render
+  // minted a fresh object; child useEffect hooks that depend on context
+  // identity (rather than individual fields) would needlessly re-run.
+  const ctx: LearningContext = useMemo(
+    () => ({
+      selectedStory,
+      session,
+      lastAttempt,
+      rightPanelWidth,
+      setRightPanelWidth,
+      handleStartReading,
+      handleFinishReading,
+      handleFinishComprehension,
+      handleFinishStoryStructure,
+      handleFinishReadingStrategy,
+      handleFinishVocab,
+      handleFinishDictation,
+      handleFinishFullReading,
+      handleFinishListening,
+      handleFinishReadingAnnotation,
+      handleFinishVocabDefinitionMatch,
+      handleFinishVocabApplication,
+      handleFinishSentencePractice,
+      handleFinishVocabWordSearch,
+      handleFinishKnowledgeStation,
+      handleRetry,
+      handleSessionComplete,
+      emptyAttempt: EMPTY_ATTEMPT,
+      dbSessionId,
+      completedParagraphsSet,
+      handleParagraphComplete,
+      assignmentReadingGoals,
+      syncProgress,
+      flushProgress,
+      stepProgressData: stepProgressState,
+      saveStepProgressPatch,
+      isAssignmentReadyForSubmit,
+      missingAssignmentSteps,
+      firstIncompleteStepPath,
+      hasActiveAssignment,
+    }),
+    [
+      selectedStory,
+      session,
+      lastAttempt,
+      rightPanelWidth,
+      setRightPanelWidth,
+      handleStartReading,
+      handleFinishReading,
+      handleFinishComprehension,
+      handleFinishStoryStructure,
+      handleFinishReadingStrategy,
+      handleFinishVocab,
+      handleFinishDictation,
+      handleFinishFullReading,
+      handleFinishListening,
+      handleFinishReadingAnnotation,
+      handleFinishVocabDefinitionMatch,
+      handleFinishVocabApplication,
+      handleFinishSentencePractice,
+      handleFinishVocabWordSearch,
+      handleFinishKnowledgeStation,
+      handleRetry,
+      handleSessionComplete,
+      dbSessionId,
+      completedParagraphsSet,
+      handleParagraphComplete,
+      assignmentReadingGoals,
+      syncProgress,
+      flushProgress,
+      stepProgressState,
+      saveStepProgressPatch,
+      isAssignmentReadyForSubmit,
+      missingAssignmentSteps,
+      firstIncompleteStepPath,
+      hasActiveAssignment,
+    ],
+  );
 
   // Issue #1549 — when a DB session exists but step_progress is still loading,
   // delay child render so pages don't initialise local state from an empty
