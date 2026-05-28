@@ -73,7 +73,7 @@ def _all_raw_yamls() -> list[tuple[str, dict]]:
 
 
 # ---------------------------------------------------------------------------
-# G6-L25 specific — pinned semantic answers (issue #2015 fix)
+# G6-L24 and G6-L25 specific — pinned semantic answers (issue #2015 fix)
 # ---------------------------------------------------------------------------
 
 # Maps each fill_in_blank sentence-fragment to the vocabulary word that fits
