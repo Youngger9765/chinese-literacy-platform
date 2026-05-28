@@ -328,19 +328,44 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1">
-            題目 {answer.question_id}
-            {lowConfidence && (
-              <span
-                title={`AI 信心度 ${confPct}% 偏低，建議老師確認。理由：${answer.reasoning}`}
-                aria-label={`AI 信心度偏低 (${confPct}%) — 需老師確認`}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium cursor-help"
-              >
-                <span aria-hidden="true">⚠️</span>
-                需老師確認
-              </span>
-            )}
-          </p>
+          {/* #2011 follow-up: show the question prompt as the primary heading
+             (from lesson YAML's `context`). Older uploads without context
+             fall back to「題目 fb_1」.  question_id 仍以小字保留供 QA / flag
+             / crop endpoint 對照之用. */}
+          {answer.context ? (
+            <>
+              <p className="text-sm font-semibold text-gray-800 leading-snug mb-1">
+                {answer.context}
+              </p>
+              <p className="text-[10px] text-gray-400 mb-0.5 flex items-center gap-1">
+                {answer.question_id}
+                {lowConfidence && (
+                  <span
+                    title={`AI 信心度 ${confPct}% 偏低，建議老師確認。理由：${answer.reasoning}`}
+                    aria-label={`AI 信心度偏低 (${confPct}%) — 需老師確認`}
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium cursor-help"
+                  >
+                    <span aria-hidden="true">⚠️</span>
+                    需老師確認
+                  </span>
+                )}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1">
+              題目 {answer.question_id}
+              {lowConfidence && (
+                <span
+                  title={`AI 信心度 ${confPct}% 偏低，建議老師確認。理由：${answer.reasoning}`}
+                  aria-label={`AI 信心度偏低 (${confPct}%) — 需老師確認`}
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium cursor-help"
+                >
+                  <span aria-hidden="true">⚠️</span>
+                  需老師確認
+                </span>
+              )}
+            </p>
+          )}
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
             {answer.reasoning}
           </p>
