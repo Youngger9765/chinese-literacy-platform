@@ -50,6 +50,10 @@ class GradedAnswer:
     score: float          # 0.0 – 1.0
     ai_confidence: float  # 0.0 – 1.0
     reasoning: str
+    # The question prompt text from the lesson YAML (e.g. the definition for a
+    # fill-in-blank, or the MCQ stem).  Surfaced in the result-page header so
+    # students see the actual question instead of an opaque id like "fb_1".
+    context: str = ""
     position: Optional[dict] = None   # {"x": float, "y": float} relative coords
     crop_image_url: Optional[str] = None
     source_attempt_id: Optional[int] = None
@@ -245,6 +249,7 @@ async def grade_worksheet_images(
                 score=score,
                 ai_confidence=ai_conf,
                 reasoning=reasoning,
+                context=str(question.get("context") or ""),
                 position={
                     "x": float(item.get("position_x", 0.0)),
                     "y": float(item.get("position_y", 0.0)),
@@ -311,6 +316,7 @@ def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[Grade
             score=1.0,
             ai_confidence=0.9,
             reasoning="本地開發模式：模擬批改結果",
+            context=str(q.get("context") or ""),
             crop_image_url=None,
             source_attempt_id=attempt_id,
         )

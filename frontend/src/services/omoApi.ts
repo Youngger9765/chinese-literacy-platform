@@ -54,6 +54,10 @@ export interface OmoAnswerItem {
   score: number;
   ai_confidence: number;
   reasoning: string;
+  /** Issue #2011 follow-up: prompt text from lesson YAML.
+   *  Optional / nullable — uploads graded before this field was added will
+   *  not have it; frontend falls back to「題目 {question_id}」 in that case. */
+  context?: string | null;
   source_attempt_id?: number | null;
   position?: { x: number; y: number } | null;
   crop_image_url?: string | null;

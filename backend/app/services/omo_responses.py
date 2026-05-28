@@ -51,6 +51,10 @@ class AnswerItem(BaseModel):
     score: float
     ai_confidence: float
     reasoning: str
+    # #2011 follow-up: the question prompt from lesson YAML, surfaced in the
+    # result page header. Optional — uploads graded before this field was
+    # added will have it as None; frontend falls back to "題目 {question_id}".
+    context: Optional[str] = None
     source_attempt_id: Optional[int] = None
     position: Optional[dict] = None
     crop_image_url: Optional[str] = None
@@ -181,6 +185,7 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
                 score=a.get("score", 0.0),
                 ai_confidence=a.get("ai_confidence", 0.0),
                 reasoning=a.get("reasoning", ""),
+                context=a.get("context"),  # #2011 follow-up; None for pre-existing uploads
                 source_attempt_id=a.get("source_attempt_id"),
                 position=a.get("position"),
                 crop_image_url=a.get("crop_image_url"),
