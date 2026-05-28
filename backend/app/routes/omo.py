@@ -246,11 +246,21 @@ async def upload_worksheet(
     if normalized_hint:
         from ..services.lesson_loader import get_lesson_by_code
         hinted_story = get_lesson_by_code(normalized_hint)
+    hinted_lesson_id: Optional[int] = None
+    hinted_story_id = hinted_story.get("id") if hinted_story else None
+    try:
+        if hinted_story_id is not None:
+            hinted_lesson_id = int(hinted_story_id)
+    except (TypeError, ValueError):
+        hinted_lesson_id = None
+    hinted_grade_code_raw = hinted_story.get("lesson_code") if hinted_story else None
+    hinted_grade_code = str(
+        hinted_grade_code_raw if hinted_grade_code_raw is not None else normalized_hint
+    )
 
     # Upload-replace UX: supersede any existing active upload for this lesson+student
     # (only when we know the canonical Story.id upfront via lesson hint)
-    if hinted_story and hinted_story.get("id"):
-        hinted_lesson_id = int(hinted_story["id"])
+    if hinted_story and hinted_lesson_id is not None:
         now_ts = datetime.now(timezone.utc)
         db.query(OmoUpload).filter(
             OmoUpload.student_id == current_user.id,
@@ -265,7 +275,7 @@ async def upload_worksheet(
         upload.progress = {"stage": "queued", "total": 0, "graded": 0}
         upload.identification = [{
             "lesson_id": hinted_lesson_id,
-            "grade_code": str(hinted_story.get("lesson_code") or normalized_hint),
+            "grade_code": hinted_grade_code,
             "title": str(hinted_story.get("title") or ""),
             "confidence": 1.0,
             "reasoning": "user-provided lesson hint (課文頁面內上傳)",
@@ -285,7 +295,7 @@ async def upload_worksheet(
             candidates=[
                 LessonCandidateResponse(
                     lesson_id=hinted_lesson_id,
-                    grade_code=str(hinted_story.get("lesson_code") or normalized_hint),
+                    grade_code=hinted_grade_code,
                     title=str(hinted_story.get("title") or ""),
                     confidence=1.0,
                     reasoning="user-provided lesson hint (課文頁面內上傳)",

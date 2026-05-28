@@ -20,7 +20,7 @@ describe('OmoIdentifyResult initialStatus', () => {
       />,
     );
 
-    expect(screen.getByRole('status', { name: 'AI 批改中' })).toBeTruthy();
-    expect(screen.getByText('AI 正在批改你的學習單')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'AI 批改中' })).toBeInTheDocument();
+    expect(screen.getByText('AI 正在批改你的學習單')).toBeInTheDocument();
   });
 });
