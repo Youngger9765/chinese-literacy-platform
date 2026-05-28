@@ -22,6 +22,8 @@ const MAX_POLLS = 30; // 60 seconds max
 interface OmoIdentifyResultProps {
   uploadId: number;
   token: string;
+  /** Initial upload status returned by POST /api/omo/upload */
+  initialStatus?: OmoStatus;
   /** Set to true if backend returned from_cache=true AND already_graded=true */
   alreadyGraded?: boolean;
   /** The already-graded overall_score (if alreadyGraded=true) */
@@ -37,13 +39,14 @@ interface OmoIdentifyResultProps {
 const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   uploadId,
   token,
+  initialStatus = 'identifying',
   alreadyGraded = false,
   cachedScore = null,
   onConfirmed,
   onRetry,
   onGraded,
 }) => {
-  const [status, setStatus] = useState<OmoStatus>('identifying');
+  const [status, setStatus] = useState<OmoStatus>(initialStatus);
   const [candidates, setCandidates] = useState<OmoCandidate[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);

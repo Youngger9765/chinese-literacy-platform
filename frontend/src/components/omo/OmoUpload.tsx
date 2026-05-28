@@ -16,7 +16,7 @@
  *  - Max 5 images, 10MB each (client-side guard + server re-validates)
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { uploadOmoImages } from '../../services/omoApi';
+import { uploadOmoImages, type OmoStatus } from '../../services/omoApi';
 
 const MAX_FILES = 5;
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB (pre-resize)
@@ -36,8 +36,8 @@ const LOADING_MESSAGES = [
 
 interface OmoUploadProps {
   token: string;
-  /** Called once upload succeeds, with the new upload_id */
-  onUploaded: (uploadId: number) => void;
+  /** Called once upload succeeds, with upload_id + initial backend status */
+  onUploaded: (uploadId: number, status: OmoStatus) => void;
   /**
    * Issue #1637: optional lesson code hint (e.g. "G5-L25") passed when the
    * student uploads from within a lesson reading page.  Forwarded to the
@@ -177,7 +177,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint
 
       // ── Upload (pass lesson hint if available — Issue #1637) ─────────────
       const result = await uploadOmoImages(resized, token, lessonCodeHint);
-      onUploaded(result.upload_id);
+      onUploaded(result.upload_id, result.status);
     } catch (err) {
       const raw = err instanceof Error ? err.message : '';
 

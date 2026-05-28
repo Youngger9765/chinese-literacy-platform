@@ -17,7 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import OmoUpload from '../../components/omo/OmoUpload';
 import OmoIdentifyResult from '../../components/omo/OmoIdentifyResult';
 import OmoResultPage from '../../components/omo/OmoResultPage';
-import type { OmoAnswerItem } from '../../services/omoApi';
+import type { OmoAnswerItem, OmoStatus } from '../../services/omoApi';
 
 type PageState = 'upload' | 'result' | 'graded';
 
@@ -29,6 +29,7 @@ const OmoPage: React.FC = () => {
   const lessonCodeHint = searchParams.get('lesson_code') ?? undefined;
   const [pageState, setPageState] = useState<PageState>('upload');
   const [uploadId, setUploadId] = useState<number | null>(null);
+  const [resultInitialStatus, setResultInitialStatus] = useState<OmoStatus>('identifying');
   const [lessonTitle, setLessonTitle] = useState<string | undefined>(undefined);
   const [answers, setAnswers] = useState<OmoAnswerItem[]>([]);
   const [overallScore, setOverallScore] = useState<number | null>(null);
@@ -38,13 +39,15 @@ const OmoPage: React.FC = () => {
     return null;
   }
 
-  const handleUploaded = (id: number) => {
+  const handleUploaded = (id: number, initialStatus: OmoStatus) => {
     setUploadId(id);
+    setResultInitialStatus(initialStatus);
     setPageState('result');
   };
 
   const handleRetry = () => {
     setUploadId(null);
+    setResultInitialStatus('identifying');
     setLessonTitle(undefined);
     setAnswers([]);
     setOverallScore(null);
@@ -111,6 +114,7 @@ const OmoPage: React.FC = () => {
           <OmoIdentifyResult
             uploadId={uploadId}
             token={token}
+            initialStatus={resultInitialStatus}
             onRetry={handleRetry}
             onGraded={handleGraded}
           />

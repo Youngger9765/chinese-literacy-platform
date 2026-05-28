@@ -2,7 +2,7 @@
 
 Endpoints:
     GET    /api/omo/lessons                         — list of OMO-eligible lessons (for manual picker)
-    POST   /api/omo/upload                          — upload images, trigger AI identification
+    POST   /api/omo/upload                          — upload images; identify or direct-grade from hint
                                                        (Phase 1b: SHA-256 dedup → skip Gemini if cached)
     POST   /api/omo/{upload_id}/attempt             — add another image to existing upload
     POST   /api/omo/{upload_id}/confirm             — confirm lesson + kick off grading
@@ -146,16 +146,16 @@ async def upload_worksheet(
 ):
     """Upload worksheet photos and kick off lesson identification.
 
-    Returns immediately with status=identifying. Poll GET /api/omo/{id} for result.
+    Returns immediately with status=identifying or status=grading. Poll GET /api/omo/{id} for result.
 
     Constraints:
     - Max 5 files per call
     - Max 10MB per file
     - JPEG / PNG / WebP only
 
-    Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
-    completes synchronously in the background task without any AI call
-    (confidence=1.0, ~0 latency vs 6-24 s for Gemini).
+    Hint path (#1637/#1343): if ``lesson_code_hint`` resolves to a known Story,
+    skip identification + confirmation and queue grading directly.
+    If hint lookup fails, falls back to normal Gemini identification flow.
     """
     if not files:
         raise HTTPException(status_code=400, detail="最少需要上傳 1 張照片")
@@ -241,30 +241,69 @@ async def upload_worksheet(
     db.add(attempt)
     db.commit()
 
+    normalized_hint = (lesson_code_hint or "").strip()
+    hinted_story: Optional[dict] = None
+    if normalized_hint:
+        from ..services.lesson_loader import get_lesson_by_code
+        hinted_story = get_lesson_by_code(normalized_hint)
+
     # Upload-replace UX: supersede any existing active upload for this lesson+student
-    # (only when we know the lesson upfront via hint — avoids superseding during identification)
-    if lesson_code_hint:
-        from ..services.omo_identifier import identify_lesson_from_hint
-        hint_candidates = identify_lesson_from_hint(lesson_code_hint)
-        if hint_candidates:
-            hinted_lesson_id = hint_candidates[0].lesson_id
-            now_ts = datetime.now(timezone.utc)
-            db.query(OmoUpload).filter(
-                OmoUpload.student_id == current_user.id,
-                OmoUpload.lesson_id == hinted_lesson_id,
-                OmoUpload.superseded_at.is_(None),
-                OmoUpload.id != upload_id,
-            ).update({'superseded_at': now_ts})
-            db.commit()
+    # (only when we know the canonical Story.id upfront via lesson hint)
+    if hinted_story and hinted_story.get("id"):
+        hinted_lesson_id = int(hinted_story["id"])
+        now_ts = datetime.now(timezone.utc)
+        db.query(OmoUpload).filter(
+            OmoUpload.student_id == current_user.id,
+            OmoUpload.lesson_id == hinted_lesson_id,
+            OmoUpload.superseded_at.is_(None),
+            OmoUpload.id != upload_id,
+        ).update({'superseded_at': now_ts})
+
+        # Known lesson context path: skip identification/confirmation, grade directly.
+        upload.lesson_id = hinted_lesson_id
+        upload.status = "grading"
+        upload.progress = {"stage": "queued", "total": 0, "graded": 0}
+        upload.identification = [{
+            "lesson_id": hinted_lesson_id,
+            "grade_code": str(hinted_story.get("lesson_code") or normalized_hint),
+            "title": str(hinted_story.get("title") or ""),
+            "confidence": 1.0,
+            "reasoning": "user-provided lesson hint (課文頁面內上傳)",
+        }]
+        db.commit()
+
+        background_tasks.add_task(_run_grading, upload_id, hinted_lesson_id)
+
+        logger.info(
+            "OMO upload created + direct grading: id=%d student=%d files=%d hash=%s hint=%s lesson_id=%d",
+            upload_id, current_user.id, len(files), primary_hash[:16], normalized_hint, hinted_lesson_id,
+        )
+
+        return OmoUploadResponse(
+            upload_id=upload_id,
+            status="grading",
+            candidates=[
+                LessonCandidateResponse(
+                    lesson_id=hinted_lesson_id,
+                    grade_code=str(hinted_story.get("lesson_code") or normalized_hint),
+                    title=str(hinted_story.get("title") or ""),
+                    confidence=1.0,
+                    reasoning="user-provided lesson hint (課文頁面內上傳)",
+                )
+            ],
+            answers=[],
+            from_cache=False,
+            already_graded=False,
+        )
 
     background_tasks.add_task(
-        _run_identification, upload_id, image_bytes_list, mime_types, lesson_code_hint
+        _run_identification, upload_id, image_bytes_list, mime_types, normalized_hint or None
     )
 
     logger.info(
         "OMO upload created: id=%d student=%d files=%d hash=%s hint=%s",
         upload_id, current_user.id, len(files), primary_hash[:16],
-        lesson_code_hint or "none",
+        normalized_hint or "none",
     )
 
     return OmoUploadResponse(

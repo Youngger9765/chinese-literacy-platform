@@ -17,6 +17,7 @@ Run:
 import io
 import sys
 import os
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -208,6 +209,29 @@ class TestOmoUploadHappyPath:
         data = get_resp.json()
         assert data["upload_id"] == upload_id
         assert data["status"] in ("pending", "identifying", "identified", "grading", "graded", "error")
+
+    def test_upload_with_lesson_hint_starts_grading_immediately(self, client):
+        """Known lesson hint should skip identify/confirm and queue grading directly."""
+        token = register_and_login(client, "omo_hint_direct_grade")
+        headers = {"Authorization": "Bearer " + token}
+
+        with patch("app.routes.omo._run_identification") as mock_identify, patch(
+            "app.routes.omo._run_grading"
+        ) as mock_grading:
+            response = client.post(
+                "/api/omo/upload",
+                files=[("files", ("worksheet.jpg", io.BytesIO(_TINY_JPEG), "image/jpeg"))],
+                data={"lesson_code_hint": "G7-L28"},
+                headers=headers,
+            )
+
+        assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.text}"
+        data = response.json()
+        assert data["status"] == "grading"
+        assert len(data["candidates"]) == 1
+        assert data["candidates"][0]["grade_code"] == "G7-L28"
+        mock_identify.assert_not_called()
+        mock_grading.assert_called_once()
 
     def test_full_happy_path_mocked_grading(self, client):
         """Upload → force identified → confirm → verify status=grading → force graded → poll result."""
