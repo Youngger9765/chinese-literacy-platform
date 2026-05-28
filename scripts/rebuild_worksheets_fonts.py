@@ -6,6 +6,7 @@ Issue #2018: https://github.com/Youngger9765/chinese-literacy-platform/issues/20
 """
 
 import os
+import re
 import subprocess
 import json
 import time
@@ -101,7 +102,11 @@ def find_docx(gcs_name):
             if not fname.endswith(".docx"):
                 continue
             for pat in search_patterns:
-                if pat in fname:
+                # Digit-boundary match: "G7-L1" must NOT match "G7-L10"/"G7-L11".
+                # Plain substring matching corrupted single-digit codes by pulling
+                # the wrong source docx (e.g. G7-L1 → G7-L10塑膠), so the rebuilt
+                # PDF carried a different lesson's content (#2018 follow-up).
+                if re.search(re.escape(pat) + r'(?![0-9])', fname):
                     full_path = os.path.join(root, fname)
                     is_student = ("學生版" in root or "-SL" in fname)
                     if is_student:
