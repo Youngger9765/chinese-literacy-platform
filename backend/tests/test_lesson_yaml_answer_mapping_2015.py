@@ -13,13 +13,63 @@ Run:
 
 import sys
 import os
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
+import yaml
 
 from app.services.lesson_loader import get_all_lessons, get_lesson_by_code
 from app.services.omo_question_schema import _build_question_schema
+
+
+# ---------------------------------------------------------------------------
+# Raw YAML access (for count integrity checks that lesson_loader strips out)
+# ---------------------------------------------------------------------------
+
+# Resolves to backend/data/lessons regardless of where pytest is invoked from.
+_LESSONS_ROOT = Path(__file__).resolve().parent.parent / "data" / "lessons"
+
+
+def _raw_yaml_for(lesson_code: str) -> dict:
+    """Load a single lesson's raw YAML file by lesson_code (e.g. "G6-L25").
+
+    Needed for checking ``fill_in_blank_count`` (and other ``*_count`` fields)
+    that ``lesson_loader`` does not propagate into the runtime dict — going
+    through ``get_lesson_by_code`` would always return None for these fields,
+    so the test would silently pass without exercising anything (Round 1 🔴).
+    """
+    # Prefer the most recent parsed layer; fall back to glob if structure changes.
+    candidate = _LESSONS_ROOT / "_parsed_2026-05-01" / f"{lesson_code}.yml"
+    if not candidate.exists():
+        matches = list(_LESSONS_ROOT.rglob(f"{lesson_code}.yml"))
+        assert matches, f"No raw YAML found for lesson {lesson_code}"
+        candidate = matches[0]
+    with candidate.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def _all_raw_yamls() -> list[tuple[str, dict]]:
+    """Yield (lesson_code, raw_dict) for every lesson YAML in the catalog.
+
+    Used by catalog-wide structural checks that need to see fields stripped
+    by ``lesson_loader`` (e.g. ``fill_in_blank_count``).
+    """
+    out: list[tuple[str, dict]] = []
+    for path in sorted(_LESSONS_ROOT.rglob("*.yml")):
+        # Skip non-lesson YAML (e.g. config / index files); a lesson YAML
+        # always has at least ``title``.
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+        except Exception:
+            continue
+        if not isinstance(data, dict) or "title" not in data:
+            continue
+        code = data.get("lesson_code") or path.stem
+        out.append((code, data))
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -29,6 +79,17 @@ from app.services.omo_question_schema import _build_question_schema
 # Maps each fill_in_blank sentence-fragment to the vocabulary word that fits
 # semantically. If the YAML's answer letter resolves to anything else, the
 # whole grading flow scores legitimate student work as 0 (#2015 reproducer).
+G6_L24_EXPECTED_ANSWERS: list[tuple[str, str]] = [
+    ("教師職缺", "僧多粥少"),
+    ("岸邊巨浪", "翻騰"),
+    ("北風", "凜冽"),
+    ("這項改革", "徒勞無功"),
+    ("不知道該怎麼辦", "束手無策"),
+    ("忙完畢業展", "筋疲力竭"),
+    ("災後援助若拖延", "緩不濟急"),
+    ("雙重壓力", "窒息"),
+]
+
 G6_L25_EXPECTED_ANSWERS: list[tuple[str, str]] = [
     ("公司今年", "獲利"),
     ("大學畢業後", "揚帆啟航"),
@@ -41,15 +102,57 @@ G6_L25_EXPECTED_ANSWERS: list[tuple[str, str]] = [
 ]
 
 
-def _find_lesson_g6_l25() -> dict:
-    lesson = get_lesson_by_code("G6-L25")
-    assert lesson is not None, "G6-L25 lesson YAML missing from catalog"
+def _find_lesson(code: str) -> dict:
+    lesson = get_lesson_by_code(code)
+    assert lesson is not None, f"{code} lesson YAML missing from catalog"
     return lesson
+
+
+class TestG6L24AnswerMapping:
+    """G6-L24 had the same parser bug as G6-L25 (#2015) — 5/8 fb answers and
+    fill_in_blank_count both wrong.  Pinned here so a future re-parse cannot
+    silently regress it."""
+    def setup_method(self) -> None:
+        self.lesson = _find_lesson("G6-L24")
+        self.questions = _build_question_schema(self.lesson)
+        self.fb_questions = [q for q in self.questions if q["id"].startswith("fb_")]
+
+    def test_fill_in_blank_has_8_questions(self) -> None:
+        assert len(self.fb_questions) == 8, (
+            f"G6-L24 should produce 8 fb questions, got {len(self.fb_questions)}"
+        )
+
+    def test_fill_in_blank_count_matches_array_length(self) -> None:
+        raw = _raw_yaml_for("G6-L24")
+        count_field = raw.get("fill_in_blank_count")
+        actual_len = len(raw.get("fill_in_blank") or [])
+        assert count_field == actual_len, (
+            f"G6-L24 raw YAML fill_in_blank_count={count_field} "
+            f"but fill_in_blank array has {actual_len} entries"
+        )
+
+    @pytest.mark.parametrize("idx,fragment_word", list(enumerate(G6_L24_EXPECTED_ANSWERS)))
+    def test_each_fb_answer_matches_sentence_semantically(
+        self,
+        idx: int,
+        fragment_word: tuple[str, str],
+    ) -> None:
+        sentence_fragment, expected_word = fragment_word
+        q = self.fb_questions[idx]
+        assert sentence_fragment in q["context"], (
+            f"fb_{idx + 1} context does not contain expected fragment "
+            f"{sentence_fragment!r}; got {q['context']!r}"
+        )
+        actual_word = q.get("correct_word") or q["correct_answer"]
+        assert actual_word == expected_word, (
+            f"fb_{idx + 1} {sentence_fragment!r} resolves to {actual_word!r}, "
+            f"expected {expected_word!r}"
+        )
 
 
 class TestG6L25AnswerMapping:
     def setup_method(self) -> None:
-        self.lesson = _find_lesson_g6_l25()
+        self.lesson = _find_lesson("G6-L25")
         self.questions = _build_question_schema(self.lesson)
         # fb_* only — exclude mc_* / se_*
         self.fb_questions = [q for q in self.questions if q["id"].startswith("fb_")]
@@ -60,20 +163,19 @@ class TestG6L25AnswerMapping:
         )
 
     def test_fill_in_blank_count_matches_array_length(self) -> None:
-        """`fill_in_blank_count` field, when present, must equal the array length.
+        """`fill_in_blank_count` field in the raw YAML must equal array length.
 
-        Note: ``lesson_loader`` does not currently propagate this field into
-        the loaded dict — it lives only in the raw YAML. We keep the YAML
-        value accurate (fixed 5→8 in this PR) but the runtime check is
-        skipped when the field is absent, since downstream code never reads it.
+        ``lesson_loader`` does not propagate this field into the runtime dict,
+        so we check it directly against the raw YAML file. This catches the
+        kind of typo introduced in #2015 (`fill_in_blank_count: 5` when
+        actually 8 entries exist) even though no production code reads it.
         """
-        count_field = self.lesson.get("fill_in_blank_count")
-        actual_len = len(self.lesson.get("fill_in_blank") or [])
-        if count_field is None:
-            pytest.skip("fill_in_blank_count not propagated by lesson_loader; "
-                        "raw YAML was still corrected in this PR")
+        raw = _raw_yaml_for("G6-L25")
+        count_field = raw.get("fill_in_blank_count")
+        actual_len = len(raw.get("fill_in_blank") or [])
         assert count_field == actual_len, (
-            f"G6-L25 fill_in_blank_count={count_field} but actual array has {actual_len} entries"
+            f"G6-L25 raw YAML fill_in_blank_count={count_field} "
+            f"but fill_in_blank array has {actual_len} entries"
         )
 
     @pytest.mark.parametrize("idx,fragment_word", list(enumerate(G6_L25_EXPECTED_ANSWERS)))
@@ -123,18 +225,21 @@ class TestLessonCatalogStructuralSanity:
         assert cls.lessons, "Catalog should contain at least one lesson"
 
     def test_fill_in_blank_count_matches_array_length_for_all_lessons(self) -> None:
-        """Every lesson with both fields should have them in sync (#2015)."""
+        """Every lesson with both fields should have them in sync (#2015).
+
+        Reads raw YAML (not lesson_loader) because the loader strips
+        ``fill_in_blank_count`` — going through the runtime dict would
+        always skip and silently pass nothing.
+        """
         mismatches = []
-        for lesson in self.lessons:
-            fb = lesson.get("fill_in_blank")
-            count = lesson.get("fill_in_blank_count")
+        for code, raw in _all_raw_yamls():
+            fb = raw.get("fill_in_blank")
+            count = raw.get("fill_in_blank_count")
             if fb is None or count is None:
                 continue
             actual = len(fb) if isinstance(fb, list) else 0
             if count != actual:
-                mismatches.append(
-                    (lesson.get("lesson_code") or lesson.get("title"), count, actual),
-                )
+                mismatches.append((code, count, actual))
         assert not mismatches, (
             "Lessons with fill_in_blank_count != len(fill_in_blank): "
             + ", ".join(f"{code}:count={c},actual={a}" for code, c, a in mismatches)
