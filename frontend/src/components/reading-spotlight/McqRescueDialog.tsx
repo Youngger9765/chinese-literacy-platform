@@ -21,6 +21,7 @@ import {
   McqRescueRespondResponse,
   SessionExpiredError,
 } from '../../services/learningApi';
+import VoiceInputButton from '../ui/VoiceInputButton';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,6 +113,7 @@ const McqRescueDialog: React.FC<Props> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const voiceStopRef = useRef<(() => void) | null>(null);
 
   useFocusTrap(dialogRef, isOpen);
 
@@ -250,6 +252,7 @@ const McqRescueDialog: React.FC<Props> = ({
   );
 
   const handleSend = useCallback(() => {
+    voiceStopRef.current?.();
     const text = inputText;
     setInputText('');
     sendMessage(text);
@@ -459,6 +462,13 @@ const McqRescueDialog: React.FC<Props> = ({
                     className="flex-1 text-sm rounded-xl border border-gray-200 px-4 py-2.5 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 disabled:bg-gray-50 disabled:text-gray-400 transition-colors"
                     maxLength={500}
                     aria-label="回答輸入框"
+                  />
+                  <VoiceInputButton
+                    onTranscript={(text) => setInputText(text.slice(0, 500))}
+                    lang="zh-TW"
+                    disabled={isLoading || !sessionId}
+                    size="sm"
+                    stopRef={voiceStopRef}
                   />
                   <button
                     onClick={handleSend}
