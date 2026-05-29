@@ -2208,3 +2208,171 @@ class TestIssue1910AssignmentStartAndCORS:
             f"Sub-bug B: 403 response missing Access-Control-Allow-Origin header. "
             f"Headers: {dict(resp_403.headers)}"
         )
+
+
+# Issue #1982 — POST /api/assignments/{id}/start returns 500 on pending (no-session) assignments
+# ====================================================================
+
+class TestIssue1982AssignmentStart500OnPendingNoSession:
+    """
+    Regression tests for #1982.
+
+    A freshly-created assignment gives each enrolled student a submission row
+    with status='pending' and session_id=NULL.  When that student calls
+    POST /api/assignments/{id}/start, the backend must create a new
+    LearningSession and return 200, not raise an unhandled exception (500).
+
+    Sub-bug A: pure pending → start path with no prior session for that story.
+    Sub-bug B: pending → start when the student already has an in-progress
+               self-study session for the SAME story slug.  The partial unique
+               index on (student_id, story_slug) WHERE status='in_progress'
+               fires, the IntegrityError savepoint handler must gracefully
+               recover and re-use the existing session, not re-raise and 500.
+    """
+
+    def test_start_pending_assignment_returns_200_no_prior_session(
+        self, client, teacher, school_id
+    ):
+        """
+        Sub-bug A (TDD Red): A student with a pending submission and NO prior
+        LearningSession for that story MUST get HTTP 200 when calling /start.
+
+        Expected to FAIL before fix if start_assignment_session() has an
+        unhandled exception on the new-session creation path.
+        """
+        # Dedicated classroom + student to avoid state leakage
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 1982 Sub-A Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        classroom_id = cls_resp.json()["id"]
+
+        student = _register_user(client, "issue1982a_stu")
+        _make_student_role(student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Create assignment (bulk-creates pending submission for student)
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1982 Sub-A Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201, asn_resp.text
+        assignment_id = asn_resp.json()["id"]
+
+        # Verify submission exists with status=pending and no session
+        db = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission as AS_1982
+            sub = (
+                db.query(AS_1982)
+                .filter(
+                    AS_1982.assignment_id == assignment_id,
+                    AS_1982.student_id == student["user_id"],
+                )
+                .first()
+            )
+            assert sub is not None, "Submission row missing after assignment creation"
+            assert sub.status == "pending", f"Expected pending, got {sub.status}"
+            assert sub.session_id is None, f"Expected no session, got {sub.session_id}"
+        finally:
+            db.close()
+
+        # Student starts the pending assignment — MUST return 200
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Expected 200, got {start_resp.status_code}: {start_resp.text}. "
+            "#1982 Sub-bug A: pending submission with no prior session → 500."
+        )
+        data = start_resp.json()
+        assert "session_id" in data, f"Missing session_id in response: {data}"
+        assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"
+        assert data["session_id"] > 0, f"session_id must be a positive int: {data}"
+
+    def test_start_pending_assignment_returns_200_with_existing_self_study_session(
+        self, client, teacher, school_id
+    ):
+        """
+        Sub-bug B (TDD Red): A student who ALREADY has an in-progress self-study
+        LearningSession for story '1' triggers the partial unique index
+        uq_session_student_story_inprogress when start_assignment_session tries
+        to INSERT a new session.  The IntegrityError savepoint handler MUST
+        recover gracefully and return 200 — not re-raise and produce a 500.
+        """
+        # Dedicated classroom + student
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 1982 Sub-B Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        classroom_id = cls_resp.json()["id"]
+
+        student = _register_user(client, "issue1982b_stu")
+        _make_student_role(student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Simulate: student already has an in-progress SELF-STUDY session for story "1"
+        db = TestingSessionLocal()
+        try:
+            from app.models.session import LearningSession as LS_1982
+            self_study_session = LS_1982(
+                student_id=student["user_id"],
+                story_slug=VALID_STORY_ID,
+                status="in_progress",
+                session_mode="self_study",
+                current_step=1,
+                full_reading_attempts=[],
+            )
+            db.add(self_study_session)
+            db.commit()
+            db.refresh(self_study_session)
+            self_study_session_id = self_study_session.id
+        finally:
+            db.close()
+
+        # Create assignment (bulk-creates pending submission for student)
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1982 Sub-B Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201, asn_resp.text
+        assignment_id = asn_resp.json()["id"]
+
+        # Student starts the pending assignment — MUST return 200 even though
+        # an in-progress self-study session for the same story already exists
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Expected 200, got {start_resp.status_code}: {start_resp.text}. "
+            "#1982 Sub-bug B: IntegrityError from unique index not recovered → 500."
+        )
+        data = start_resp.json()
+        assert "session_id" in data, f"Missing session_id in response: {data}"
+        assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"

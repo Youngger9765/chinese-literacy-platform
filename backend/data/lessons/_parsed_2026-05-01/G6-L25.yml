@@ -58,23 +58,27 @@ paragraphs:
 paragraph_count: 11
 char_count: 1145
 fill_in_blank:
+# #2015: answer letters were misaligned with sentences in the 2026-05-01 parse
+# (8/8 wrong, every student answer was scored 0). The vocabulary list maps
+# A=股票, B=利潤, C=股東, D=積蓄, E=獲利, F=集資, G=大手一揮, H=揚帆啟航,
+# I=節衣縮食, J=派遣, K=滿手老繭 — see vocabulary section below.
 - sentence: 公司今年（　　　）大增，大家都有獎金。
-  answer: F
+  answer: E  # 獲利
 - sentence: 大學畢業後，他準備（　　　），踏上人生新旅程。
-  answer: A
+  answer: H  # 揚帆啟航
 - sentence: 農夫長年在田裡工作，粗重的農事讓他（　　　）。
-  answer: D
+  answer: K  # 滿手老繭
 - sentence: 我們想（　　　）開一家新的飲料店，股東們都各投資一點吧。
-  answer: E
+  answer: F  # 集資
 - sentence: 公司（　　　）他到海外受訓。
-  answer: I
+  answer: J  # 派遣
 - sentence: 雖然家裡經濟不寬裕，爸媽仍靠著（　　　），努力供我念書。
-  answer: C
+  answer: I  # 節衣縮食
 - sentence: 富有的企業家（　　　），當場答應贊助全校一年的午餐費用。
-  answer: H
+  answer: G  # 大手一揮
 - sentence: 他每天關注（　　　）市場的變化，希望找到投資機會。
-  answer: B
-fill_in_blank_count: 5
+  answer: A  # 股票
+fill_in_blank_count: 8
 vocabulary:
 - word: 股票
   definition: 一種公司發給投資者的憑證，擁有股票即成為該公司的股東，可能賺錢也可能虧損。
