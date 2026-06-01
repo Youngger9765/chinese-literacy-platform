@@ -12,10 +12,11 @@
 # Run this before pushing changes that touch specs/ or backend/app/services/.
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
 
 # Prefer the backend venv (has google.genai etc.); fall back to python3.
-PYBIN="backend/.venv/bin/python"
+PYBIN="$REPO_ROOT/backend/.venv/bin/python"
 [ -x "$PYBIN" ] || PYBIN="$(command -v python3)"
 
 echo "== Local Spec CI =="
