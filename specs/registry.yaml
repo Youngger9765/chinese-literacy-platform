@@ -17,6 +17,25 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/ai-reading/INTENT.md
+- spec_id: ai.service.retry_and_safety
+  module: ai-service-circuit-breaker
+  title: Gemini 共用客戶端 — 重試常數、GeminiContentFilterError 不重試、安全回傳行為
+  stability: active
+  canonical_source: backend/app/services/ai/base.py
+  owns_code:
+  - backend/app/services/ai/base.py
+  - backend/app/services/ai/gemini_client.py
+  - backend/app/services/ai_service.py
+  - backend/app/services/ai_base.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_ai_service_circuit_breaker_spec.py
+  related_issues: []
+  source_meetings:
+  - docs/meetings/2026-05-01-experts-review.md
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/ai-service-circuit-breaker/INTENT.md
 - spec_id: assignment.lifecycle.status
   module: assignment-lifecycle
   title: 作業生命週期 — submission status 值域 + 輸入淨化契約
@@ -430,3 +449,23 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/step-sequence/INTENT.md
+- spec_id: tts.synthesis.provider_chain
+  module: tts
+  title: TTS 合成服務 — 提供者鏈（Chirp3-HD → Azure fallback）+ synthesize_speech 入口
+  stability: active
+  canonical_source: backend/app/services/tts/__init__.py
+  owns_code:
+  - backend/app/services/tts/__init__.py
+  - backend/app/services/tts/providers/azure.py
+  - backend/app/services/tts/providers/gemini.py
+  - backend/app/services/tts/providers/google.py
+  - backend/app/services/tts_service.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_tts_spec.py
+  related_issues: []
+  source_meetings:
+  - docs/meetings/2026-05-01-experts-review.md
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/tts/INTENT.md
