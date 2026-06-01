@@ -68,6 +68,18 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/content-schema/INTENT.md
+- spec_id: dictionary.lookup
+  module: dictionary
+  title: MOE 字典查詢 — 查無字優雅降級 + 結構驗證
+  stability: active
+  canonical_source: backend/app/services/dictionary_service.py
+  owns_code:
+  - backend/app/services/dictionary_service.py
+  spec_tests:
+  - backend/specs/test_dictionary_spec.py
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/dictionary/INTENT.md
 - spec_id: gamification.xp.level_progression
   module: gamification-xp
   title: 遊戲化 XP — XP 獎勵、等級計算、streak 加成
@@ -99,6 +111,35 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/input-sanitizer/INTENT.md
+- spec_id: learning.path.recommendation
+  module: learning-path
+  title: 個別化學習路徑推薦 — 推薦課文必須在課程目錄中存在
+  stability: active
+  canonical_source: backend/app/services/learning_path_service.py
+  owns_code:
+  - backend/app/services/learning_path_service.py
+  spec_tests:
+  - backend/specs/test_learning_path_spec.py
+  related_issues:
+  - 252
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/learning-path/INTENT.md
+- spec_id: lesson.code.normalization
+  module: lesson-code-normalization
+  title: 課文代碼正規化 — 零填充剝除 + WW→文 轉換 + 全形→半形
+  stability: active
+  canonical_source: backend/app/services/lesson_code_normalization.py
+  owns_code:
+  - backend/app/services/lesson_code_normalization.py
+  spec_tests:
+  - backend/specs/test_lesson_code_normalization_spec.py
+  related_issues:
+  - 1889
+  - 1669
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/lesson-code-normalization/INTENT.md
 - spec_id: content.lesson_loader
   module: lesson-loader
   title: 課文載入器 — 雙層合併 + strategy_exercise 鍵名容錯契約
@@ -117,6 +158,20 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/lesson-loader/INTENT.md
+- spec_id: listening.eval.guards
+  module: listening
+  title: 聽力評估安全門 — 垃圾輸入拒評 + 逐字貼上短路 + 分數 Clamp
+  stability: active
+  canonical_source: backend/app/services/listening_service.py
+  owns_code:
+  - backend/app/services/listening_service.py
+  spec_tests:
+  - backend/specs/test_listening_spec.py
+  related_issues:
+  - 1098
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/listening/INTENT.md
 - spec_id: omo.grader.letter_mapping
   module: omo-assessment
   title: OMO 語詞應用 — 字母作答的對應來源 (vocab_bank as SOT)
@@ -209,6 +264,20 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-upload/INTENT.md
+- spec_id: prediction.difficulty
+  module: prediction
+  title: 學習困難預測 — 規則引擎不變量（無 ML）
+  stability: active
+  canonical_source: backend/app/services/prediction_service.py
+  owns_code:
+  - backend/app/services/prediction_service.py
+  spec_tests:
+  - backend/specs/test_prediction_spec.py
+  related_issues:
+  - 254
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/prediction/INTENT.md
 - spec_id: reading.eval.fallback_never_autopass
   module: reading-eval-safety
   title: 朗讀評估 — AI 失敗時 fallback 絕不自動通過學生
