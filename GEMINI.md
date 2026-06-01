@@ -8,7 +8,7 @@ AI 閱讀教學平台。前端 React 19 + Vite + Tailwind，後端 FastAPI + Pos
 
 1. 讀 `specs/registry.yaml` — 索引，列出每個 module 的 `owns_code` / `owns_data`
 2. 要動的檔案落在某 module → 讀該 `specs/modules/<feature>/INTENT.md`（人讀規格，寫明什麼能改/不能改）+ 需要時 `backend/specs/test_<feature>_spec.py`（機器契約）
-3. 改完跑 `cd backend && python -m pytest specs/` — 契約 fail = code/data 偏離意圖（修 code 或更新規格，二擇一）
+3. 改完跑 `bash specs/run-ci.sh`（local CI = registry 新鮮度 + 27 模組全部契約）— 契約 fail = code/data 偏離意圖（修 code 或更新規格，二擇一）。GH Actions 自動跑卡 token（issue 2041），push 前一律本機跑這個
 4. 新功能沒對應 module → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code
 
 目的：只載入當下功能需要的規格，不吞整份 PRD / 全會議記錄，避免吃太多無關 context 而誤判。完整說明 `specs/README.md`。
