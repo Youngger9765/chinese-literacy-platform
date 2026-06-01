@@ -76,3 +76,13 @@ Spec 真正的失效不是 code 改壞，是**會議講了沒人寫回 INTENT.md
 - INTENT.md ↔ spec.py 的 HTML-comment anchor 連結（critic 標：會在更小尺度重現 stale-SOT）
 - 全 stack 鋪開（先 OMO pilot 驗證價值）
 - LLM-judge probe 接 per-PR gate（先定 latency/budget 政策，見 `modules/omo-assessment/probes/README.md`）
+
+## CI workflow 安裝（需 workflow-scoped token）
+
+`specs/ci/spec-check.yml` 是 CI workflow 模板。本機 PAT 沒有 GitHub `workflow`
+scope，無法自動寫入 `.github/workflows/`。請用有 `workflow` scope 的 token / 從
+GitHub 網頁，把它複製到 `.github/workflows/spec-check.yml` 啟用：
+
+```
+cp specs/ci/spec-check.yml .github/workflows/spec-check.yml
+```

@@ -1,0 +1,44 @@
+name: Spec Check
+
+# Modular spec system (issue #2029): verify the registry is fresh and run the
+# executable spec contracts. Scoped to spec files + the code/data they own.
+on:
+  pull_request:
+    paths:
+      - 'specs/**'
+      - 'backend/specs/**'
+      - 'backend/app/services/omo_question_schema.py'
+      - 'backend/data/lessons/**'
+
+jobs:
+  spec-check:
+    name: Spec registry + contracts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Registry freshness (build_registry.py --check)
+        run: python specs/build_registry.py --check
+
+      - name: Run spec contracts
+        run: |
+          cd backend
+          python -m pytest specs/ -v --tb=short
+        env:
+          DATABASE_URL: sqlite://
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+          TTS_PROVIDER: google
