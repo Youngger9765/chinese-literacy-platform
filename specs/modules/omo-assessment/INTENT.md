@@ -10,6 +10,9 @@ owns_data:
   - backend/data/lessons/_parsed_2026-05-01/**/*.yml
 spec_tests:
   - backend/specs/test_omo_assessment_spec.py
+  - backend/specs/test_omo_grading_corpus.py
+fixtures:
+  - specs/modules/omo-assessment/fixtures/grading-corpus.yaml
 probes:
   - specs/modules/omo-assessment/probes
 related_issues: [2015, 2027, 2028]

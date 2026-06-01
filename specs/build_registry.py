@@ -34,6 +34,7 @@ _FIELDS = [
     "owns_code",
     "owns_data",
     "spec_tests",
+    "fixtures",
     "probes",
     "related_issues",
     "source_meetings",
