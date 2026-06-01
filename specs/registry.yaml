@@ -46,6 +46,22 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-assessment/INTENT.md
+- spec_id: omo.grading.determinism
+  module: omo-determinism
+  title: OMO 批改確定性保證 — 「不是樂透」的架構規則
+  stability: active
+  owns_code:
+  - backend/app/services/omo_scoring.py
+  - backend/app/services/omo_question_schema.py
+  - backend/app/services/omo_grader.py
+  spec_tests:
+  - backend/specs/test_omo_determinism_spec.py
+  related_issues:
+  - 2029
+  - 1712
+  last_reviewed: 2026-06-01
+  owner: young
+  intent: specs/modules/omo-determinism/INTENT.md
 - spec_id: omo.upload.flow
   module: omo-upload
   title: OMO 紙本上傳 — 拍照識課 + AI 批改端到端流程
