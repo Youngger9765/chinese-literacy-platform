@@ -79,3 +79,18 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-upload/INTENT.md
+- spec_id: reading.eval.fallback_never_autopass
+  module: reading-eval-safety
+  title: 朗讀評估 — AI 失敗時 fallback 絕不自動通過學生
+  stability: active
+  canonical_source: backend/app/services/reading_evaluation_service.py (module docstring
+    lines 14-15)
+  owns_code:
+  - backend/app/services/reading_evaluation_service.py
+  spec_tests:
+  - backend/specs/test_reading_eval_safety_spec.py
+  related_issues:
+  - 2029
+  last_reviewed: 2026-06-01
+  owner: young
+  intent: specs/modules/reading-eval-safety/INTENT.md
