@@ -530,6 +530,22 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/step-sequence/INTENT.md
+- spec_id: learning.stuck_detection
+  module: stuck-detection
+  title: 卡點偵測 — 掙扎學生偵測閾值 + 規則式建議
+  stability: active
+  canonical_source: backend/app/services/stuck_detection_service.py
+  owns_code:
+  - backend/app/services/stuck_detection_service.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_stuck_detection_spec.py
+  related_issues:
+  - 91
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/stuck-detection/INTENT.md
 - spec_id: tts.synthesis.provider_chain
   module: tts
   title: TTS 合成服務 — 提供者鏈（Chirp3-HD → Azure fallback）+ synthesize_speech 入口
