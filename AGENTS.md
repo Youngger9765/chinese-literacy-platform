@@ -110,13 +110,21 @@ owned by a spec module:
 2. If the file you are editing appears under a module → read
    `specs/modules/<feature>/INTENT.md` (human-readable SOT) and the
    corresponding `backend/specs/test_<feature>_spec.py` (machine contracts).
-3. After changes: `cd backend && python -m pytest specs/` — a failing contract
-   means code or data drifted from the documented intent; fix the code OR
-   update the spec (but document why).
+3. After changes: run **`bash specs/run-ci.sh`** (local CI = registry-freshness
+   gate + all spec contracts). A failing contract means code or data drifted
+   from the documented intent; fix the code OR update the spec (but document
+   why). Fast registry-only check: `bash specs/run-ci.sh --quick`.
 4. No matching module for a genuinely new feature → create
-   `specs/modules/<feature>/INTENT.md` before writing code.
+   `specs/modules/<feature>/INTENT.md` before writing code, then rebuild the
+   index with `python specs/build_registry.py`.
 
-Full guide: `specs/README.md`.
+There are currently **27 modules**. Full index: `specs/registry.yaml`. Full
+guide: `specs/README.md`.
+
+**Local CI**: the GitHub Actions auto-run is blocked on a `workflow`-scoped
+token (issue 2041). Until that lands, run `bash specs/run-ci.sh` before pushing
+any change under `specs/` or `backend/app/services/`. (Last local run: 457
+passed / 31 xfailed.)
 
 ---
 

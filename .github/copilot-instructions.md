@@ -146,8 +146,10 @@ Before editing backend code or lesson YAML data, check ownership:
    `specs/modules/<feature>/INTENT.md` (the human-readable contract) and the
    corresponding `backend/specs/test_<feature>_spec.py` (machine-checkable
    invariants).
-3. After your change: `cd backend && python -m pytest specs/` — failures signal
-   a drift between code/data and the documented intent.
+3. After your change: `bash specs/run-ci.sh` (local CI = registry freshness +
+   all 27 module contracts) — failures signal a drift between code/data and the
+   documented intent. GitHub Actions auto-run is blocked on token scope (issue
+   2041), so run this locally before pushing.
 4. Adding a new feature with no existing module → create
    `specs/modules/<feature>/INTENT.md` first.
 
