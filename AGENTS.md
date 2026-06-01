@@ -100,6 +100,26 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 ---
 
+## Modular Spec System (`specs/`)
+
+Before editing backend code or lesson data, check whether the target file is
+owned by a spec module:
+
+1. Read `specs/registry.yaml` (index of all modules, their `owns_code` /
+   `owns_data` paths).
+2. If the file you are editing appears under a module → read
+   `specs/modules/<feature>/INTENT.md` (human-readable SOT) and the
+   corresponding `backend/specs/test_<feature>_spec.py` (machine contracts).
+3. After changes: `cd backend && python -m pytest specs/` — a failing contract
+   means code or data drifted from the documented intent; fix the code OR
+   update the spec (but document why).
+4. No matching module for a genuinely new feature → create
+   `specs/modules/<feature>/INTENT.md` before writing code.
+
+Full guide: `specs/README.md`.
+
+---
+
 ## 禁止事項
 
 - **不要** hardcode API key、密碼、token
