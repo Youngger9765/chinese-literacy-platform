@@ -129,6 +129,22 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/dictionary/INTENT.md
+- spec_id: example_sentence.cache.ttl
+  module: example-sentence-cache
+  title: 例句快取 — TTL 與 pre-generated 永不過期契約
+  stability: active
+  canonical_source: backend/app/services/example_sentence_cache.py
+  owns_code:
+  - backend/app/services/example_sentence_cache.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_example_sentence_cache_spec.py
+  related_issues:
+  - 780
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/example-sentence-cache/INTENT.md
 - spec_id: exit.ticket.schema_and_scoring
   module: exit-ticket
   title: 學習出場券 — 題目轉換 + 答案計分契約
@@ -332,6 +348,38 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/omo-identifier/INTENT.md
+- spec_id: omo.image_preprocess.spread_split
+  module: omo-image-preprocess
+  title: OMO 圖片預處理 — 橫向雙頁切半 fail-open 契約
+  stability: active
+  canonical_source: backend/app/services/omo_image_preprocess.py
+  owns_code:
+  - backend/app/services/omo_image_preprocess.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_omo_image_preprocess_spec.py
+  related_issues:
+  - 1717
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/omo-image-preprocess/INTENT.md
+- spec_id: omo.pdf_split.rendering
+  module: omo-pdf-split
+  title: OMO PDF 拆頁 — PDF 轉 per-page JPEG 契約
+  stability: active
+  canonical_source: backend/app/services/omo_pdf_split.py
+  owns_code:
+  - backend/app/services/omo_pdf_split.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_omo_pdf_split_spec.py
+  related_issues:
+  - 1976
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/omo-pdf-split/INTENT.md
 - spec_id: omo.upload.flow
   module: omo-upload
   title: OMO 紙本上傳 — 拍照識課 + AI 批改端到端流程
@@ -365,6 +413,21 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-upload/INTENT.md
+- spec_id: omo.upload.validation
+  module: omo-upload-validation
+  title: OMO 上傳驗證 — 檔案大小、數量、重拍次數契約
+  stability: active
+  canonical_source: backend/app/services/omo_upload_validator.py
+  owns_code:
+  - backend/app/services/omo_upload_validator.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_omo_upload_validation_spec.py
+  related_issues: []
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/omo-upload-validation/INTENT.md
 - spec_id: prediction.difficulty
   module: prediction
   title: 學習困難預測 — 規則引擎不變量（無 ML）
