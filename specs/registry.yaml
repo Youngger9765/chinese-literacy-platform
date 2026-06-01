@@ -36,6 +36,24 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/ai-service-circuit-breaker/INTENT.md
+- spec_id: ai.usage.cost
+  module: ai-usage-cost
+  title: LLM 用量成本估算 — estimate_cost 公式 + PRICING 費率鎖定
+  stability: active
+  canonical_source: backend/app/services/ai_usage_tracker.py
+  owns_code:
+  - backend/app/services/ai_usage_tracker.py
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_ai_usage_cost_spec.py
+  related_issues:
+  - 1730
+  - 1744
+  - 1729
+  source_meetings: []
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/ai-usage-cost/INTENT.md
 - spec_id: assignment.lifecycle.status
   module: assignment-lifecycle
   title: 作業生命週期 — submission status 值域 + 輸入淨化契約
