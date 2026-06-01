@@ -147,6 +147,17 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 > 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
 
+## Modular Spec System (`specs/`) — #2029
+
+改 backend code / lesson 資料前，**先查該段是否被某個 spec module 擁有**：
+
+1. 讀 `specs/registry.yaml`（小，所有 module 的 `owns_code` / `owns_data` 索引）
+2. 要動的檔案落在某 module → 讀該 `specs/modules/<feature>/INTENT.md`（人讀 SOT）+ 需要時 `backend/specs/test_<feature>_spec.py`（機器契約）
+3. 改完跑 `cd backend && python -m pytest specs/` — 契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一）
+4. 沒對應 module 又是新 feature → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code
+
+目前 module：`omo.grader.letter_mapping`（OMO 語詞應用字母作答 = `vocab_bank` 為 SOT）。完整說明 `specs/README.md`。Phase A 純檔案約定，無 MCP。
+
 ## LLM Model 比較與更換流程
 
 **換 model（新 Gemini 版本 / Claude / GPT 等）前，必跑系統性 A/B**。SOT: `docs/ai/llm-model-ab-2026-05.md`。
