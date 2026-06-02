@@ -5,9 +5,12 @@ convert_docx_to_pdf.py — Convert 158 lesson docx worksheets to PDF.
 Usage:
     python3 scripts/convert_docx_to_pdf.py [--dry-run] [--force]
 
-Source directories (教師版 L1~122 + 第三階段 L123~157 學生版):
-    private/curriculum-source/2026-05-01/1.L1-158新版完成學習單1150415/1-1教師版(L1~122)/
-    private/curriculum-source/2026-05-01/1.L1-158新版完成學習單1150415/第三階段(L123開始~L157)差學生版/
+Source directories — STUDENT versions preferred (#2043: student-facing PDFs must
+never embed teacher answers); teacher dir is a last-resort fallback only:
+    .../2-1學生版(L1~122)/
+    .../2-1學生版補L123-L157/
+    .../第三階段(L123開始~L157)差學生版/
+    .../1-1教師版(L1~122)/   (fallback — only for codes with no student source)
 
 Output: /tmp/lingoleap-worksheets/{lesson_code}.pdf
     e.g. G6-L22.pdf
@@ -46,9 +49,14 @@ def _find_private_dir() -> Path:
 
 PRIVATE_DIR = _find_private_dir()
 
+# Student versions FIRST so student-facing PDFs never embed teacher answers
+# (#2043). The teacher dir is a last-resort fallback for lesson codes that have
+# no student source. Mirrors rebuild_worksheets_fonts.py's student-preferred order.
 SOURCE_DIRS = [
-    PRIVATE_DIR / "1-1教師版(L1~122)",
+    PRIVATE_DIR / "2-1學生版(L1~122)",
+    PRIVATE_DIR / "2-1學生版補L123-L157",
     PRIVATE_DIR / "第三階段(L123開始~L157)差學生版",
+    PRIVATE_DIR / "1-1教師版(L1~122)",
 ]
 
 OUTPUT_DIR = Path("/tmp/lingoleap-worksheets")
@@ -86,13 +94,23 @@ def extract_lesson_code(filename: str) -> str | None:
 
     Examples:
         'G6-L22小兵立大功.docx' → 'G6-L22'
+        'G6-SL25...docx'        → 'G6-L25'   (student 'SL' → canonical 'L', #2043)
         'G4-L20-22物以稀為貴.docx' → 'G4-L20-22'
-        'G9-L15-16.docx' → 'G9-L15-16'
+        'G9-SL15~16.docx'       → 'G9-L15-16'
         '文-L1假新聞.docx' → '文-L1'
+
+    Student-version files are named with an 'SL' marker (學生版); normalize it to
+    the canonical 'L' so the student and teacher versions of a lesson resolve to
+    the SAME code (#2043). Without this, 'G6-SL25' failed to parse, every student
+    file was skipped, and the teacher version (with answers) won by default.
     """
+    # Normalize: fullwidth Ｇ → G, range tildes → '-', and the student 'SL' marker
+    # ('G6-SL25' / '文-SL1') → canonical 'L' before matching.
+    name = filename.replace("Ｇ", "G").replace("～", "-").replace("~", "-")
+    name = re.sub(r"-S(L\d)", r"-\1", name)
     # Match G{grade}-L{num} optionally followed by -L{num} or -{num} for ranges,
     # or 文-L{num} for 文言文 lessons.
-    m = re.match(r"^(G\d+-L\d+(?:-L?\d+)?|文-L\d+)", filename)
+    m = re.match(r"^(G\d+-L\d+(?:-L?\d+)?|文-L\d+)", name)
     if m:
         return m.group(1)
     return None
@@ -101,7 +119,8 @@ def extract_lesson_code(filename: str) -> str | None:
 def find_all_docx_files() -> list[tuple[str, Path]]:
     """
     Return list of (lesson_code, docx_path) tuples.
-    When both source dirs have the same lesson code, prefer 教師版 (first dir).
+    When multiple source dirs have the same lesson code, the FIRST dir wins, and
+    student dirs are ordered first — so the student version is preferred (#2043).
     """
     seen: dict[str, Path] = {}
 
@@ -117,7 +136,7 @@ def find_all_docx_files() -> list[tuple[str, Path]]:
                 continue
             if code not in seen:
                 seen[code] = docx
-            # else: already have this code from 教師版, skip duplicate
+            # else: already have this code from an earlier (student-preferred) dir
 
     return sorted(seen.items())
 
