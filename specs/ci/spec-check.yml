@@ -1,90 +1,10 @@
-name: Spec Check
-
-# Modular spec system (issue #2029 + #2058): verify the registry is fresh and
-# run the executable spec contracts + legacy_tests union.
+# ───────────────────────────────────────────────────────────────────────────
+# DEPLOYED — the live Spec Check workflow now runs from:
+#       .github/workflows/spec-check.yml   (wired 2026-06, issue #2041)
 #
-# ⚠️  DEPLOYMENT BLOCKED: copying this file to .github/workflows/ requires a
-#     token with `workflow` scope.  Tracked in issue #2041.
-#     Until then, run locally: bash specs/run-ci.sh
+# Do NOT edit gate logic here. The live workflow path-filters relevant PRs and
+# delegates to `bash specs/run-ci.sh` (same runner used locally → no drift).
 #
-# Path filter covers:
-#   - specs/**                              — module INTENT.md + registry + scripts
-#   - backend/specs/**                      — executable spec contracts
-#   - backend/app/services/**               — service code owned by spec modules
-#   - backend/app/routes/auth.py            — auth-flows module owned code
-#   - backend/app/routes/semesters.py       — semester module owned code
-#   - backend/data/lessons/**               — lesson YAML owned by content-schema
-#   - backend/tests/test_semesters.py       — legacy_tests pointer targets
-#   - backend/tests/test_points_system.py
-#   - backend/tests/test_reading_attempt_history.py
-#   - backend/tests/test_full_reading_attempts.py
-#   - backend/tests/test_auth_api.py
-#   - backend/tests/test_auth_route_split_1844.py
-on:
-  pull_request:
-    paths:
-      - 'specs/**'
-      - 'backend/specs/**'
-      - 'backend/app/services/**'
-      - 'backend/app/routes/auth.py'
-      - 'backend/app/routes/semesters.py'
-      - 'backend/data/lessons/**'
-      - 'backend/tests/test_semesters.py'
-      - 'backend/tests/test_points_system.py'
-      - 'backend/tests/test_reading_attempt_history.py'
-      - 'backend/tests/test_full_reading_attempts.py'
-      - 'backend/tests/test_auth_api.py'
-      - 'backend/tests/test_auth_route_split_1844.py'
-
-jobs:
-  spec-check:
-    name: Spec registry + contracts + legacy_tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
-
-      - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
-
-      - name: Gate 1 — Registry freshness + pointer-rot check (build_registry.py --check)
-        run: python specs/build_registry.py --check
-
-      - name: Gate 2 — Run spec contracts (pytest specs/)
-        run: |
-          cd backend
-          python -m pytest specs/ -v --tb=short
-        env:
-          DATABASE_URL: sqlite://
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-          TTS_PROVIDER: google
-
-      - name: Gate 3 — Run legacy_tests union
-        # Note: legacy_tests require a real DB.  In GHA, use SQLite where possible;
-        # tests that need PostgreSQL will be skipped via conftest skip markers.
-        # The primary value of this gate is catching import errors and pure-logic
-        # regressions; full DB-coupled tests run in the main test matrix.
-        run: |
-          cd backend
-          python -m pytest \
-            tests/test_semesters.py \
-            tests/test_points_system.py \
-            tests/test_reading_attempt_history.py \
-            tests/test_full_reading_attempts.py \
-            tests/test_auth_api.py \
-            tests/test_auth_route_split_1844.py \
-            -v --tb=short -q
-        env:
-          DATABASE_URL: sqlite://
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-          TTS_PROVIDER: google
+# This file is kept only as a doc anchor for references in specs/README.md and
+# specs/run-ci.sh. Source of truth: .github/workflows/spec-check.yml + run-ci.sh.
+# ───────────────────────────────────────────────────────────────────────────
