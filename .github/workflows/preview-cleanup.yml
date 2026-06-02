@@ -107,15 +107,19 @@ jobs:
                 }
                 console.log(`DELETE-IMAGE: ${sub}:${tag} (issue #${match[1]} closed)`);
                 try {
-                  // The CI service account has artifactregistry.versions.delete
-                  // (images delete) but NOT artifactregistry.tags.delete (#2064:
-                  // `tags delete` failed PERMISSION_DENIED on all 376). Delete the
-                  // image VERSION the tag points to with --delete-tags — works with
-                  // the existing perm AND frees storage immediately instead of
-                  // waiting for the L1 untagged policy. No 2>/dev/null so a real
-                  // failure (NOT_FOUND for an already-gone digest, etc.) surfaces.
+                  // Delete by @DIGEST, not :tag (#2064). The CI SA has
+                  // artifactregistry.versions.delete but NOT tags.delete; deleting a
+                  // :tag reference takes the tags.delete path (PERMISSION_DENIED),
+                  // whereas `images delete <pkg>@<digest> --delete-tags` uses
+                  // versions.delete — exactly what cleanup.yml does (600+/wk OK).
+                  // So resolve the tag → its digest first, then delete the version.
+                  const digest = execSync(
+                    `gcloud artifacts docker images list "${registry}/${sub}" --include-tags --filter="tags:${tag}" --format="value(version)" --limit=1`,
+                    { stdio: 'pipe' }
+                  ).toString().trim();
+                  if (!digest) { console.log('  (no digest for tag — already gone, skip)'); continue; }
                   execSync(
-                    `gcloud artifacts docker images delete "${registry}/${sub}:${tag}" --delete-tags --quiet`,
+                    `gcloud artifacts docker images delete "${registry}/${sub}@${digest}" --delete-tags --quiet`,
                     { stdio: 'pipe' }
                   );
                   tagDeleted++;
