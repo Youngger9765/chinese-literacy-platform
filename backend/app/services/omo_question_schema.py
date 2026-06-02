@@ -15,21 +15,46 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
-    """Resolve A/B/C/... letter to vocabulary word.
+def _vocab_bank_lookup(vocab_bank, key: str) -> str | None:
+    """Return the word a worksheet letter maps to in vocab_bank, else None.
 
-    L22-L30 YAML uses ordered letter (A=0, B=1, ...) as placeholder for the
-    vocabulary list index. So `answer: A` for fill_in_blank means the student
-    should fill in vocabulary[0].word (e.g. '奠定').
-
-    Returns the actual word if letter matches a vocab index, else returns
-    the letter as-is (for backward compatibility with non-vocab grading).
+    vocab_bank is the paper worksheet's printed legend (letter→word). Keys are
+    halfwidth single letters; match case-insensitively.
     """
-    if not isinstance(letter, str) or len(letter) != 1 or not letter.isalpha():
+    if not isinstance(vocab_bank, dict) or not vocab_bank:
+        return None
+    for k, v in vocab_bank.items():
+        if str(k).strip().upper() == key:
+            if isinstance(v, dict):
+                return str(v.get("word") or v.get("term") or "") or None
+            return str(v)
+    return None
+
+
+def _resolve_letter_answer(letter: str, vocabulary: list, vocab_bank=None) -> str:
+    """Resolve A/B/C/... letter to the vocabulary word it stands for.
+
+    Source of truth is the paper worksheet's printed legend (``vocab_bank``: a
+    letter→word dict). Its keys can be NON-CONTIGUOUS (e.g. {A, D, E, G, H}) and
+    need not match the lesson ``vocabulary`` list order, so resolve from
+    vocab_bank first when it contains the letter (#2015 — index mapping marked
+    correct answers wrong because it assumed A=vocabulary[0], B=vocabulary[1]…).
+
+    Fallback (no vocab_bank, or the letter is absent from it): legacy index
+    mapping where A=vocabulary[0], B=vocabulary[1], … (L22-L30 style).
+
+    Returns the actual word, else the letter as-is.
+    """
+    if not isinstance(letter, str) or len(letter.strip()) != 1 or not letter.strip().isalpha():
         return str(letter)
+    key = letter.strip().upper()
+    # Worksheet legend wins when present (#2015).
+    bank_word = _vocab_bank_lookup(vocab_bank, key)
+    if bank_word is not None:
+        return bank_word
     if not isinstance(vocabulary, list) or not vocabulary:
         return letter
-    idx = ord(letter.upper()) - ord("A")
+    idx = ord(key) - ord("A")
     if not (0 <= idx < len(vocabulary)):
         return letter
     v = vocabulary[idx]
@@ -48,25 +73,46 @@ def _build_question_schema(lesson: dict) -> list[dict]:
     questions = []
     vocabulary = lesson.get("vocabulary") or []
     vocab_words = [v.get("word", "") for v in vocabulary if v.get("word")]
+    # Paper worksheet legend (letter→word). When present it is the source of
+    # truth for lettered answers (#2015); its keys may be non-contiguous.
+    vocab_bank = lesson.get("vocab_bank") if isinstance(lesson.get("vocab_bank"), dict) else None
 
-    # Detect fill_in_blank mode: 'lettered' (student circles A-G) vs 'free_form'
-    # (student handwrites a word). Mode is determined by whether ALL fb answers
-    # in the lesson are single A-G letters — that pattern is used by L22-L30
-    # 「四 語詞應用」style where vocabulary letters are the choice set.
+    # Detect fill_in_blank mode: 'lettered' (student circles a letter) vs
+    # 'free_form' (student handwrites a word). Mode is determined by whether ALL
+    # fb answers are single letters within the worksheet's choice set.
     fb = lesson.get("fill_in_blank") or []
     fb_raw_items = list(fb.items()) if isinstance(fb, dict) else list(enumerate(fb))
     fb_answers = []
     for _, item in fb_raw_items:
         ans = item.get("answer", "") if isinstance(item, dict) else str(item)
         fb_answers.append(ans)
+
+    # The worksheet's legal letter set. When a vocab_bank legend is present, its
+    # keys define the letters — and they can run PAST G (H, I, J, K …) when the
+    # worksheet offers 8+ choices. Hardcoding A-G degraded those lessons to
+    # free_form and scored a perfect student 0 (#2015). Fall back to A-G only for
+    # legacy lessons (L22-L30 style) that have no vocab_bank.
+    if vocab_bank:
+        bank_letters = sorted(
+            str(k).strip().upper()
+            for k in vocab_bank.keys()
+            if len(str(k).strip()) == 1 and str(k).strip().isalpha()
+        )
+    else:
+        bank_letters = list("ABCDEFG")
+    bank_letter_set = set(bank_letters)
+
     fb_lettered = bool(fb_answers) and all(
-        isinstance(a, str) and len(a.strip()) == 1 and a.strip().upper() in "ABCDEFG"
+        isinstance(a, str) and len(a.strip()) == 1 and a.strip().upper() in bank_letter_set
         for a in fb_answers if a
     )
-    # Lettered choices use the vocabulary as the A-G mapping; allowed letters
-    # equal min(len(vocab), 7) so we don't claim more letters than choices.
-    n_letters = min(len(vocab_words), 7) if fb_lettered else 0
-    fb_allowed_letters = [chr(ord("A") + i) for i in range(n_letters)]
+    if not fb_lettered:
+        fb_allowed_letters = []
+    elif vocab_bank:
+        fb_allowed_letters = bank_letters
+    else:
+        n_letters = min(len(vocab_words), 7)
+        fb_allowed_letters = [chr(ord("A") + i) for i in range(n_letters)]
 
     for key, item in fb_raw_items:
         qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
@@ -76,7 +122,7 @@ def _build_question_schema(lesson: dict) -> list[dict]:
         else:
             raw_answer = str(item)
             context = ""
-        correct_word = _resolve_letter_answer(raw_answer, vocabulary)
+        correct_word = _resolve_letter_answer(raw_answer, vocabulary, vocab_bank)
         # #1712: lettered fb compares letter-vs-letter (student circles a letter).
         # `correct_answer` is what we score against in _score_answer.
         # `correct_word` is kept for display ("正解：規律").

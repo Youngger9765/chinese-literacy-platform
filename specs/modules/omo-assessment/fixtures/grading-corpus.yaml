@@ -81,12 +81,13 @@ cases:
     student: {fb_1: "b"}
     expect: {fb_1: 1.0}
 
-  # --- the issue-2015 bug, pinned as xfail ----------------------------------
+  # --- issue-2015 regression (FIXED): letters past G must score -------------
   - id: letter_beyond_AG_should_score    # 越界字母 H-K
     desc: >
-      學生圈正解 I → 應滿分。但只要有一題答案超過 A-G，fb_lettered 偵測就整課判 False，
-      模式退成 free_form：correct_answer 變成詞、allowed_values 變成 vocab words，
-      學生圈的 'I' 不在 vocab words 裡 → 被 validator coerce 成空 → 判 0。
+      學生圈正解 I → 應滿分。修正前：只要有一題答案超過 A-G，fb_lettered 偵測整課判 False，
+      模式退成 free_form，學生圈的 'I' 被 validator coerce 成空 → 判 0。
+      修正後（#2015）：合法字母集改由 vocab_bank keys 決定（可超過 G），課程留在 lettered
+      模式，圈 'I' 正常滿分。
     lesson:
       vocab_bank: {A: 揚帆啟航, B: 股票, C: 節衣縮食, D: 滿手老繭, E: 集資, F: 獲利, G: 股東, H: 大手一揮, I: 派遣}
       vocabulary:
@@ -102,4 +103,3 @@ cases:
       fill_in_blank: [{sentence: "畢業後他準備（），踏上新旅程", answer: I}]
     student: {fb_1: I}
     expect: {fb_1: 1.0}
-    xfail: "issue 2015 — one H-K answer flips the lesson to free_form; circled 'I' is coerced empty and scored 0"
