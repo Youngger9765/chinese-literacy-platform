@@ -105,12 +105,17 @@ jobs:
                   console.log(`KEEP: ${sub}:${tag} (issue #${match[1]} open)`);
                   continue;
                 }
-                console.log(`UNTAG: ${sub}:${tag} (issue #${match[1]} closed)`);
+                console.log(`DELETE-IMAGE: ${sub}:${tag} (issue #${match[1]} closed)`);
                 try {
-                  // No 2>/dev/null: capture the real gcloud stderr so a failing
-                  // delete surfaces PERMISSION_DENIED / NOT_FOUND / syntax (#2064).
+                  // The CI service account has artifactregistry.versions.delete
+                  // (images delete) but NOT artifactregistry.tags.delete (#2064:
+                  // `tags delete` failed PERMISSION_DENIED on all 376). Delete the
+                  // image VERSION the tag points to with --delete-tags — works with
+                  // the existing perm AND frees storage immediately instead of
+                  // waiting for the L1 untagged policy. No 2>/dev/null so a real
+                  // failure (NOT_FOUND for an already-gone digest, etc.) surfaces.
                   execSync(
-                    `gcloud artifacts docker tags delete "${registry}/${sub}:${tag}" --quiet`,
+                    `gcloud artifacts docker images delete "${registry}/${sub}:${tag}" --delete-tags --quiet`,
                     { stdio: 'pipe' }
                   );
                   tagDeleted++;
