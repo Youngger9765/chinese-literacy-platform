@@ -95,25 +95,42 @@ def _perfect_student(lesson: dict) -> dict:
     return student
 
 
-def _has_answer_beyond_AG(lesson: dict) -> bool:
-    """True if any fill_in_blank answer letter falls outside A-G.
+def _answers_reference_unknown_letters(lesson: dict) -> bool:
+    """True if any single-letter fill_in_blank answer is NOT a key in vocab_bank.
 
-    These lessons currently break: a single H-K answer flips the whole lesson
-    out of 'lettered' mode into 'free_form', so the student's circled letter is
-    validated against vocab words, coerced to empty, and scored 0 (issue 2015).
+    This is a LESSON-DATA inconsistency (the answer key cites a letter the
+    worksheet legend never defines, e.g. G6-L25 answers J/K but vocab_bank only
+    runs A-I), distinct from the grader-code bug fixed in #2015. The grader is
+    correct; the data needs fixing. Tracked as xfail(strict) so a data fix
+    XPASSes and forces this marker's removal.
     """
+    vb = lesson.get("vocab_bank")
+    if not isinstance(vb, dict):
+        return False
+    keys = {str(k).strip().upper() for k in vb.keys()
+            if len(str(k).strip()) == 1 and str(k).strip().isalpha()}
+    if not keys:
+        return False
     fb = lesson.get("fill_in_blank") or []
     pairs = fb.items() if isinstance(fb, dict) else enumerate(fb)
     for _, item in pairs:
         ans = item.get("answer") if isinstance(item, dict) else str(item)
-        if isinstance(ans, str) and len(ans.strip()) == 1 and ans.strip().upper() not in "ABCDEFG":
-            return True
+        if isinstance(ans, str) and len(ans.strip()) == 1 and ans.strip().isalpha():
+            if ans.strip().upper() not in keys:
+                return True
     return False
 
 
 def _lesson_sweep_params():
-    """One param per vocab_bank lesson. A-G-only lessons must hard-pass (catches
-    new regressions); lessons with H-K answers are xfail(strict) until 2015 lands."""
+    """One param per vocab_bank lesson. EVERY well-formed lesson must hard-pass:
+    a perfect student (circles exactly the answer key) scores 100%. Includes
+    lessons whose worksheet uses letters past G (H, I, J, K …) — fixed in #2015
+    by deriving the legal letter set from vocab_bank keys instead of hardcoding
+    A-G, so an 8+-choice worksheet no longer degrades to free_form.
+
+    Lessons whose answer key cites letters absent from their own vocab_bank are
+    a separate LESSON-DATA bug (not a grader bug) and are xfail(strict) until the
+    data is corrected."""
     params = []
     for f in _vocab_bank_lessons():
         try:
@@ -121,9 +138,10 @@ def _lesson_sweep_params():
         except Exception:
             continue
         marks = []
-        if _has_answer_beyond_AG(d):
+        if _answers_reference_unknown_letters(d):
             marks.append(pytest.mark.xfail(
-                reason="issue 2015 — H-K answer degrades lesson to free_form, perfect student scored 0",
+                reason="lesson-data: answer key cites a letter absent from this "
+                "lesson's vocab_bank legend (data fix, not grader — #2015 follow-up)",
                 strict=True,
             ))
         params.append(pytest.param(f, id=f.stem, marks=marks))
