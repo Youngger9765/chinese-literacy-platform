@@ -1,0 +1,50 @@
+name: Spec Check
+
+# Modular spec system (issues #2029 + #2058 + #2041): verify the registry is
+# fresh (+ legacy_tests pointer-rot), run the executable spec contracts, and run
+# the legacy_tests union. Path-filtered so unrelated PRs (frontend/docs) skip it.
+#
+# This delegates to `bash specs/run-ci.sh` — the SAME runner used locally — so
+# the CI gates and the local gates can never drift. run-ci.sh computes the
+# legacy_tests union dynamically from specs/registry.yaml.
+on:
+  pull_request:
+    paths:
+      - 'specs/**'
+      - 'backend/specs/**'
+      - 'backend/app/services/**'
+      - 'backend/app/routes/auth.py'
+      - 'backend/app/routes/semesters.py'
+      - 'backend/data/lessons/**'
+      - 'backend/tests/test_semesters.py'
+      - 'backend/tests/test_points_system.py'
+      - 'backend/tests/test_full_reading_attempts.py'
+      - 'backend/tests/test_auth_api.py'
+      - 'backend/tests/test_auth_route_split_1844.py'
+
+jobs:
+  spec-check:
+    name: Spec registry + contracts + legacy_tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: sqlite://
+      JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+      TTS_PROVIDER: google
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Spec CI (registry + pointer-rot + contracts + legacy_tests union)
+        run: bash specs/run-ci.sh

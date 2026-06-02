@@ -77,12 +77,11 @@ Spec 真正的失效不是 code 改壞，是**會議講了沒人寫回 INTENT.md
 - 全 stack 鋪開（先 OMO pilot 驗證價值）
 - LLM-judge probe 接 per-PR gate（先定 latency/budget 政策，見 `modules/omo-assessment/probes/README.md`）
 
-## CI workflow 安裝（需 workflow-scoped token）
+## CI workflow（已部署 — #2041）
 
-`specs/ci/spec-check.yml` 是 CI workflow 模板。本機 PAT 沒有 GitHub `workflow`
-scope，無法自動寫入 `.github/workflows/`。請用有 `workflow` scope 的 token / 從
-GitHub 網頁，把它複製到 `.github/workflows/spec-check.yml` 啟用：
+Live workflow：**`.github/workflows/spec-check.yml`**（2026-06 接上，workflow-scoped
+token）。它 **path-filtered**（只在 `specs/**`、`backend/specs/**`、
+`backend/app/services/**`、lesson 資料、legacy_tests 目標檔變動時跑），且直接
+`bash specs/run-ci.sh` —— 跟本機完全同一個 runner，CI 與本機 gate 永不 drift。
 
-```
-cp specs/ci/spec-check.yml .github/workflows/spec-check.yml
-```
+`specs/ci/spec-check.yml` 留作 doc anchor，內容指回 live 版（不要在那邊改邏輯）。
