@@ -12,15 +12,23 @@ if the committed registry has drifted from the modules on disk.
 Usage:
     python specs/build_registry.py            # regenerate specs/registry.yaml
     python specs/build_registry.py --check     # exit 1 if registry is stale
+
+Lock 2 (pointer-rot guard):
+    --check also verifies that every path listed under `legacy_tests:` in any
+    module's INTENT.md actually exists on disk.  A dangling pointer causes an
+    immediate, loud failure so pointer-rot is caught at CI time, not silently
+    after weeks of drift.
 """
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
 import yaml
 
 SPECS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SPECS_DIR.parent
 MODULES_DIR = SPECS_DIR / "modules"
 REGISTRY = SPECS_DIR / "registry.yaml"
 
@@ -34,6 +42,7 @@ _FIELDS = [
     "owns_code",
     "owns_data",
     "spec_tests",
+    "legacy_tests",
     "fixtures",
     "probes",
     "related_issues",
@@ -71,6 +80,56 @@ def build() -> str:
     return _HEADER + body
 
 
+def _collect_legacy_test_paths() -> list[tuple[str, str]]:
+    """Return [(module_spec_id, path_str), ...] for all legacy_tests entries."""
+    paths = []
+    for intent in sorted(MODULES_DIR.glob("*/INTENT.md")):
+        fm = _read_frontmatter(intent)
+        legacy = fm.get("legacy_tests") or []
+        spec_id = fm.get("spec_id", str(intent))
+        for p in legacy:
+            paths.append((spec_id, p))
+    return paths
+
+
+def _check_legacy_test_paths(errors: list[str]) -> None:
+    """Lock 2: assert every legacy_tests path EXISTS and is pytest-collectable.
+
+    Appends human-readable error strings to `errors` for any violation.
+    A missing file is always an error.  A non-collectable file (e.g. import
+    error) is reported as a warning printed to stderr but does NOT block the
+    check — this avoids false positives in CI environments where the full
+    backend deps aren't installed.
+    """
+    for spec_id, rel_path in _collect_legacy_test_paths():
+        abs_path = REPO_ROOT / rel_path
+        if not abs_path.exists():
+            errors.append(
+                f"[pointer-rot] {spec_id}: legacy_tests path does not exist: {rel_path}"
+            )
+            continue
+        # Optionally verify pytest can collect it (best-effort; skip if pytest unavailable)
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", "pytest", "--collect-only", "-q", str(abs_path)],
+                capture_output=True,
+                text=True,
+                cwd=str(REPO_ROOT / "backend"),
+                timeout=30,
+            )
+            # pytest --collect-only exits 0 (tests found), 5 (no tests collected), or 1+ (error)
+            # We accept 0 and 5; reject 1-4 (collection errors, import errors, etc.)
+            if result.returncode not in (0, 5):
+                print(
+                    f"  WARNING: {spec_id}: legacy_tests {rel_path} may have collection issues "
+                    f"(pytest exit {result.returncode}) — check manually if in a full env",
+                    file=sys.stderr,
+                )
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # pytest not available or timed out — skip collectability check silently
+            pass
+
+
 def main(argv: list[str]) -> int:
     rendered = build()
     if "--check" in argv:
@@ -85,6 +144,21 @@ def main(argv: list[str]) -> int:
                 file=sys.stderr,
             )
             return 1
+
+        # Lock 2: pointer-rot guard — dangling legacy_tests paths fail loudly
+        errors: list[str] = []
+        _check_legacy_test_paths(errors)
+        if errors:
+            print("LEGACY_TESTS POINTER-ROT DETECTED:", file=sys.stderr)
+            for err in errors:
+                print(f"  {err}", file=sys.stderr)
+            print(
+                "Fix: update the legacy_tests: path in the relevant INTENT.md, "
+                "then re-run: python specs/build_registry.py",
+                file=sys.stderr,
+            )
+            return 1
+
         print("registry.yaml is up to date.")
         return 0
     REGISTRY.write_text(rendered, encoding="utf-8")

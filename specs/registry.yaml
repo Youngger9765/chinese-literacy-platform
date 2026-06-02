@@ -85,6 +85,22 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/auth/INTENT.md
+- spec_id: auth_flows.registration_login_invariants
+  module: auth-flows
+  title: 註冊/登入 API 流程不變式（pointer module）
+  stability: active
+  canonical_source: backend/app/routes/auth.py
+  owns_code:
+  - backend/app/routes/auth.py
+  legacy_tests:
+  - backend/tests/test_auth_api.py
+  - backend/tests/test_auth_route_split_1844.py
+  related_issues:
+  - 1844
+  - 2058
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/auth-flows/INTENT.md
 - spec_id: comprehension.grading.schema_and_fail_closed
   module: comprehension-grading
   title: 課文理解評分 — COMPREHENSION_SCORE_SCHEMA + fail-closed 保證
@@ -446,6 +462,20 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/omo-upload-validation/INTENT.md
+- spec_id: points.ledger_invariants
+  module: points
+  title: 點數帳本不變式（pointer module）
+  stability: active
+  canonical_source: backend/app/services/points_service.py + backend/app/routes/organizations.py
+  owns_code:
+  - backend/app/services/points_service.py
+  legacy_tests:
+  - backend/tests/test_points_system.py
+  related_issues:
+  - 2058
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/points/INTENT.md
 - spec_id: prediction.difficulty
   module: prediction
   title: 學習困難預測 — 規則引擎不變量（無 ML）
@@ -460,6 +490,20 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/prediction/INTENT.md
+- spec_id: reading_attempt.history_invariants
+  module: reading-attempt
+  title: 朗讀嘗試歷史不變式（pointer module）
+  stability: active
+  canonical_source: backend/app/services/reading_attempt_service.py + backend/app/models/learning_session.py
+  owns_code:
+  - backend/app/services/reading_attempt_service.py
+  legacy_tests:
+  - backend/tests/test_full_reading_attempts.py
+  related_issues:
+  - 2058
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/reading-attempt/INTENT.md
 - spec_id: reading.eval.fallback_never_autopass
   module: reading-eval-safety
   title: 朗讀評估 — AI 失敗時 fallback 絕不自動通過學生
@@ -475,6 +519,21 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/reading-eval-safety/INTENT.md
+- spec_id: semester.one_active_invariant
+  module: semester
+  title: 學期唯一啟用不變式（pointer module）
+  stability: active
+  canonical_source: backend/app/routes/semesters.py + backend/app/models/semester.py
+  owns_code:
+  - backend/app/routes/semesters.py
+  - backend/app/models/semester.py
+  legacy_tests:
+  - backend/tests/test_semesters.py
+  related_issues:
+  - 2058
+  last_reviewed: 2026-06-02
+  owner: young
+  intent: specs/modules/semester/INTENT.md
 - spec_id: session.scoring.overall_score
   module: session-scoring
   title: 學習 session overall_score 加權計算
