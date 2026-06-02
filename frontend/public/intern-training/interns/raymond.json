@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-05-08",
+  "lastReview": "2026-05-29",
   "skills": {
     "1": {
       "level": 3,
@@ -342,17 +342,27 @@
           "date": "2026-04-23",
           "level": 4,
           "reason": "PR #1144（跨裝置 session 復用）和 PR #1145（current_step 同步）是 P1 beta blocker issue #1073/#1074 的完整實作。兩個 PR 在 4/22 deadline 前 2 天提前 merge，後端新增 GET-first + dedup 邏輯，DB 加 partial unique index，前端守衛同步，形成完整的前後端 + DB 三層解決方案。這是靖杭首次獨立完成涉及 DB migration 的端對端功能"
+        },
+        {
+          "date": "2026-05-29",
+          "level": 4,
+          "reason": "OMO PDF 拆頁（#1979）+ 批改記錄頁（#1980）是兩個前後端串通的完整 feature：#1979 把 PDF 視為 server-side 多檔來源、前端只加 MIME + size cap、後端用 pypdfium2 拆頁；#1980 backend list endpoint（精簡 8 欄位 + thumbnail URL） + frontend 歷史頁 + OmoUpload 加入口。一週連 3 PR merge（含 #1977 grader 排序 fix）顯示獨立完成複雜功能的速度穩定。Level 維持 4：尚未見到 P1 等級的 deadline-critical issue ownership（如 #1073/#1074 那種規模），但快速產出 quality 穩定。"
         }
       ]
     },
     "17": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-05-08",
           "level": 1,
           "reason": "PR #1497 fix(csp)：閱讀 SecurityHeadersMiddleware 的 CSP header 建構邏輯，定位 `frame-src` directive 缺少 `https://storage.googleapis.com` 的根因（PDF iframe popup 被 CSP 封鎖），在正確位置加入白名單並附說明 CSP path-restriction limitation（GCS bucket 無法做到 path 級限制）。這是靖杭首次讀懂並修改 Python middleware 層的安全設定，Level 1：能在引導下讀懂既有 middleware 邏輯並做定點修改"
+        },
+        {
+          "date": "2026-05-29",
+          "level": 2,
+          "reason": "PR #1979（feat: PDF 拆頁，+503/-59 6 檔）引入 `pypdfium2` 新 backend dep 並寫進 omo upload pipeline：lib 選型有 rationale（純 Python wheel / Cloud Run 部署友善 / Apache-2.0 license），把 PDF 拆頁邏輯封裝在 server-side，GCS upload / identification / grading 下游 pipeline 完全不需改。PR #1980（feat: 批改記錄頁，+906/-5 9 檔）跨多個既有 backend module（omo_uploads model / routes / service）讀懂後加新 list endpoint。已超出 #1497 的單檔定點修改，能在多個 Python module 之間追蹤資料流並做定向加工"
         }
       ]
     },
@@ -379,18 +389,23 @@
           "date": "2026-05-08",
           "level": 4,
           "reason": "PR #1461 用 Alembic 建立 10 張獨立 toolbox session tables，每張對應一個練習工具，schema 設計包含 FK 關聯與索引。PR #1465 獨立設計後端 toolbox.py routes（POST 建立 session、GET 查詢、PATCH 更新完成狀態）+ 前端 toolboxApi.ts 對應呼叫 + 學習紀錄頁 UI 分區整合。這是靖杭首次從零開始設計一個完整 feature 的後端 API，包含 DB schema → route → service → frontend API layer 的完整鏈路，並自主決定 HTTP method 語意（POST/GET/PATCH 各自職責），達到全端架構理解的 level 4"
+        },
+        {
+          "date": "2026-05-29",
+          "level": 4,
+          "reason": "PR #1980（feat: OMO 批改記錄頁）的 backend list endpoint 有意識做 schema 設計決策：list endpoint 只回 8 個顯示用欄位 + thumbnail URL，不回整包 answers JSONB；想看詳情走 GET /omo/{upload_id}（既有 detail endpoint）。是「list vs detail endpoint 該各自負責什麼」的明確設計判斷，PR body 主動寫出 rationale。Level 維持 4：仍是 single endpoint 規模，沒涉及全新子系統的 API 群設計（這是 level 5 的標準）"
         }
       ]
     }
   },
   "recommendations": [
-    "架構理解（#18）升到 level 4，首次獨立設計完整 feature 後端 API（toolbox POST/GET/PATCH）。下一步：嘗試為 toolbox API 補寫 contract test（pytest）驗證各 endpoint 的 status code + response schema，這是 level 5 的準備——不只能設計 API，也能用測試鎖定合約",
-    "React 進階（#11）升到 level 4（PR #1499 multi-mode prop 設計 + 命名衝突解決）。下一步：在 #1190 或 #1186 中嘗試用 useMemo 快取計算結果，或抽取 custom hook，完成後 #11 有機會升到 level 5",
-    "元件設計（#13）已穩在 level 4。#1464 的 ToolboxCompletionActions 共用元件 + 9 個 reading-step 接入是好的證據。下一步挑戰：把 toolbox session 寫入邏輯抽成 useToolboxSession custom hook，這是 level 5 的證明",
-    "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能",
-    "後端 Python 閱讀（#17）新增 level 1。下一步：在 #1494 silent-failure 修復中繼續讀懂 mcq_rescue_agent 的錯誤處理邏輯，這是 level 2 的機會（能獨立追蹤 middleware → route → service 的控制流）"
+    "後端 Python 閱讀（#17）升到 level 2。下一步：在下個 backend issue 嘗試從 schema design 階段就主動先讀 sqlalchemy-model-safety skill checklist（FK index / cascade / timestamps / alembic heads），完成後 #17 有機會升 level 3。或者嘗試 grader pipeline 內部的 prompt + response parser，是 level 3 的好戰場",
+    "後端 API 設計（#18）穩在 level 4，#1980 list vs detail endpoint 拆分有 rationale 是好證據。下一步：嘗試為 OMO 系列補 contract test（pytest）驗證 status code + response schema + permission boundary，這是 level 5 的準備",
+    "獨立開發（#16）穩在 level 4，本週連 3 PR 速度穩定。下一個 P1 candidate：教授 6/1 review 後若 OMO Phase 2 開始，建議接 GCS resource lifecycle / quota guard / cleanup 這類 ops 議題，是 level 5 的好機會",
+    "新技能 candidate：DevOps 意識（Cloud Run / GCS / Vertex AI quota）。PR #1979 選 pypdfium2 over PyMuPDF 是因為 Cloud Run 部署友善 — 已開始有 ops 視角。可考慮 #19 開新 skill。",
+    "未來 level 5 證明清單：(a) 一個 PR 從 issue → schema → migration → service → route → frontend → contract test 一條龍且不需要 review 大改 (b) 從 staging 上線後抓到 prod 問題並提出 root cause + 修復方案"
   ],
-  "summary": "5/4~5/8 共 7 個 PR merge（5/4~5/7: 4 個 toolbox PR；5/8 新增: #1497/#1498/#1499）。5/8 亮點：PR #1499 VocabPractice multi-mode（practiceMode + radicalColorMode 雙 prop，4 輪 review）展現跨 mode 元件架構設計；PR #1498 G7-L29/L30 文章重點表結構化重構（22 行平文字 → 5 行填空）；PR #1497 CSP middleware fix（首次讀懂並修改 Python security middleware）。技能升級：#11 React 進階（3→4，multi-mode prop 設計 + 命名邊界清晰）；#17 後端 Python 閱讀（新增 level 1）。技能 #14 質量提升（無升級，1498 證據待後續積累）。累計本週 7 PR，是歷週最高產之一",
+  "summary": "5/22~5/29 共 3 個 OMO PR merge（5/25 同一天 #1977 / #1979 / #1980），總 +1643/-64 9 個檔案，是靖杭最高產的週之一。亮點：#1979 引入 pypdfium2 拆 PDF（lib 選型 rationale 明確：純 Python wheel / Cloud Run 友善 / license）+ #1980 backend list endpoint 有意識做 schema 設計決策（list 回精簡 8 欄位、detail 走既有 endpoint）。Open PR #1978 多頁上傳 UX 待 review。技能升級：#17 後端 Python 閱讀（1→2，pypdfium2 整合 + cross-module 修改）。技能 #16/#18 穩在 level 4 加新證據。Recommendation：開始醞釀 DevOps 新技能維度（Cloud Run / GCS / quota 意識）",
   "issues": [
     {
       "id": "環境建置",
@@ -926,6 +941,61 @@
         "162+/32- 規模適中，設計乾淨"
       ],
       "linesChanged": "+162/-32"
+    },
+    {
+      "id": "#1973",
+      "title": "fix(omo): grader 結果依 YAML 題號排序（PR #1977）",
+      "date": "2026-05-25",
+      "type": "bugfix",
+      "contribution": "OMO 紙本批改結果原本依 Gemini 視覺掃描順序回傳（特別是 _split_spread 雙頁拆解後，Gemini 從右半開始 scan 順序很亂），學生對著紙本核對時題號跳來跳去。修法：在 grader service 層的 grade_worksheet_images 回傳前，依 _build_question_schema(lesson) 產出的 questions 順序（YAML：fb_* → mc_* → se_*）排序 results",
+      "skillsLearned": [
+        17,
+        18
+      ],
+      "highlights": [
+        "在正確的 service 層做排序（不是 frontend hack）",
+        "選擇用既有的 _build_question_schema 作為 source of truth，避免重覆定義順序",
+        "+234/-0 2 檔，純加邏輯不刪既有行為"
+      ],
+      "linesChanged": "+234/-0"
+    },
+    {
+      "id": "#1976",
+      "title": "feat(omo): PDF 多頁上傳 + pypdfium2 後端拆頁（PR #1979）",
+      "date": "2026-05-25",
+      "type": "feature",
+      "contribution": "紙本作業最常見輸出是掃描器 / 影印機 / 手機 app 的多頁 PDF，原本 OMO 只收 JPEG/PNG/WebP。靖杭把 PDF 視為「server-side 多檔來源」：前端只放行 PDF MIME + 拉高 size cap，後端用 pypdfium2 拆每頁為 JPEG，下游 GCS upload / identification / grading pipeline 完全不需要知道 PDF 存在。lib 選型 rationale 明確：純 Python wheel（Cloud Run 部署友善）+ Apache-2.0/BSD3 license + 比 PyMuPDF 部署門檻低",
+      "skillsLearned": [
+        9,
+        17,
+        18
+      ],
+      "highlights": [
+        "首次引入 backend 新 dependency 並寫進 upload pipeline",
+        "lib 選型有書面 rationale（純 Python / deployment / license）",
+        "正確的抽象邊界：把 PDF 拆頁封在 server-side，下游 pipeline 不變",
+        "+503/-59 6 檔（前端 MIME + 後端 pypdfium2 + upload service）"
+      ],
+      "linesChanged": "+503/-59"
+    },
+    {
+      "id": "#1975",
+      "title": "feat(omo): 批改記錄頁 + OmoUpload 加入口（PR #1980）",
+      "date": "2026-05-25",
+      "type": "feature",
+      "contribution": "OMO 批改完離開頁面後就再也找不到批改記錄（資料其實在 omo_uploads DB table），每次想看舊批改只能重新上傳同張學習單浪費 Gemini quota。新增 backend list endpoint + frontend 歷史頁 + 上傳頁加入口三段拼起來。設計重點：list endpoint 只回 8 個顯示用欄位 + thumbnail URL，不回整包 answers JSONB；想看詳情仍走 GET /omo/{upload_id}（既有 detail endpoint）。是有意識的 list vs detail endpoint 分工",
+      "skillsLearned": [
+        13,
+        16,
+        18
+      ],
+      "highlights": [
+        "list vs detail endpoint 拆分有 rationale（避免 list response 載入整包 JSONB）",
+        "復用既有 GET /omo/{upload_id}，不重覆造輪",
+        "前後端 + 入口 UI 三段完整",
+        "+906/-5 9 檔，新增多於修改 = 加 feature 不破壞既有行為"
+      ],
+      "linesChanged": "+906/-5"
     }
   ]
 }

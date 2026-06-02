@@ -11,7 +11,7 @@
  *
  * Route: /omo
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import OmoUpload from '../../components/omo/OmoUpload';
@@ -33,25 +33,27 @@ const OmoPage: React.FC = () => {
   const [answers, setAnswers] = useState<OmoAnswerItem[]>([]);
   const [overallScore, setOverallScore] = useState<number | null>(null);
 
-  if (!token) {
-    navigate('/login');
-    return null;
-  }
-
-  const handleUploaded = (id: number) => {
+  // #2011: every handler is useCallback-wrapped so the child OmoIdentifyResult
+  // doesn't see new function references on every parent re-render.  Previously
+  // `onGraded` (and friends) changed reference on each render, and any useEffect
+  // depending on them would clear + restart its interval — which created a
+  // race window where polling could stop silently.
+  // NOTE: useCallback MUST appear before the `if (!token)` early return so
+  // hook call order stays stable across renders (Rules of Hooks).
+  const handleUploaded = useCallback((id: number) => {
     setUploadId(id);
     setPageState('result');
-  };
+  }, []);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setUploadId(null);
     setLessonTitle(undefined);
     setAnswers([]);
     setOverallScore(null);
     setPageState('upload');
-  };
+  }, []);
 
-  const handleGraded = (
+  const handleGraded = useCallback((
     gradedAnswers: OmoAnswerItem[],
     score: number | null,
     title?: string,
@@ -60,7 +62,12 @@ const OmoPage: React.FC = () => {
     setOverallScore(score);
     if (title) setLessonTitle(title);
     setPageState('graded');
-  };
+  }, []);
+
+  if (!token) {
+    navigate('/login');
+    return null;
+  }
 
   const pageTitle =
     pageState === 'upload'
@@ -104,6 +111,7 @@ const OmoPage: React.FC = () => {
             token={token}
             onUploaded={handleUploaded}
             lessonCodeHint={lessonCodeHint}
+            onShowHistory={() => navigate('/omo/history')}
           />
         )}
 

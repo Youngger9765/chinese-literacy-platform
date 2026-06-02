@@ -238,8 +238,11 @@ const TeacherSessionReportPage: React.FC = () => {
         />
       )}
 
-      {/* Reuse student AssessmentReport (read-only) or show empty message */}
-      {report && !report.reading_result && !report.full_reading_result && !report.comprehension_result ? (
+      {/* Reuse student AssessmentReport (read-only) or show empty message.
+          Use is_complete from backend (#1911) — same criterion as the progress table
+          (status == 'completed'). Avoids false "尚未完成" when result JSONB fields
+          are null but the session is actually complete. */}
+      {report && !report.is_complete ? (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
           <p className="text-sm text-gray-500">學生尚未完成此課文的學習，暫無報告資料</p>
         </div>

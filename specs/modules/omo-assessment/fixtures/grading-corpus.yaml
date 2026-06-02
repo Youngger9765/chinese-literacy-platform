@@ -1,0 +1,105 @@
+# AI-era grading regression corpus — OMO 語詞應用 (lettered fill-in-blank).
+#
+# Each case is a self-contained mini-lesson + a simulated student answer + the
+# grade we EXPECT. The harness in backend/specs/test_omo_grading_corpus.py drives
+# every case through the REAL deterministic pipeline, no LLM, no grader edits:
+#   _build_question_schema(lesson)   ->  per-question correct_answer + schema
+#   _validate_student_answer(raw, q) ->  anti-fabrication coercion
+#   _score_answer(student, correct, qtype) -> 0.0 / 1.0
+#
+# What actually drives SCORING here: in lettered mode the grader compares the
+# student's circled letter against the fill_in_blank `answer` letter. So a case's
+# pass/fail depends on `answer` + the validator, NOT on vocab_bank. vocab_bank is
+# included because it's the worksheet teacher-key context (and it's what triggers
+# the free_form degradation when answers go beyond A-G). The separate contract
+# "vocab_bank IS the letter->word source of truth for the displayed 正解" lives in
+# backend/specs/test_omo_assessment_spec.py, not here.
+#
+# `xfail` marks a case that SHOULD pass but currently fails because of the
+# grader letter-mapping bug (issue 2015): letters resolve via vocabulary[index]
+# and lettered mode is capped at A-G. When 2015 is fixed these flip to XPASS,
+# which is the signal to delete the xfail and make it a hard expectation.
+#
+# This file is meant to GROW. Every real-world edge case the team hits on a
+# paper worksheet (the 5/29 landing review listed many) becomes one more entry
+# here, so a future change that re-breaks it goes red in CI.
+
+cases:
+  # --- happy path -----------------------------------------------------------
+  - id: correct_letter_scores_full
+    desc: 學生圈對的字母 → 滿分
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "公司今年（）大增，大家都有獎金", answer: C}]
+    student: {fb_1: C}
+    expect: {fb_1: 1.0}
+
+  - id: wrong_letter_scores_zero
+    desc: 學生圈錯字母 → 0 分
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "...", answer: C}]
+    student: {fb_1: A}
+    expect: {fb_1: 0.0}
+
+  # --- edge cases from the 2026-05-29 landing review ------------------------
+  - id: blank_answer_no_crash    # 漏題
+    desc: 學生漏題（空白）→ 0 分且不可 crash
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "...", answer: B}]
+    student: {fb_1: ""}
+    expect: {fb_1: 0.0}
+
+  - id: zhuyin_instead_of_letter    # 手寫注音
+    desc: 學生不會寫就寫注音 → 非法作答，coerce 空、不可當正解
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "...", answer: B}]
+    student: {fb_1: "ㄍㄨˇ"}
+    expect: {fb_1: 0.0}
+
+  - id: digit_wrong_type    # 填錯型別 ABCD vs 1234
+    desc: 該圈 A-G 卻寫數字 → 非法 → 0 分
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "...", answer: B}]
+    student: {fb_1: "2"}
+    expect: {fb_1: 0.0}
+
+  - id: lowercase_letter_accepted
+    desc: 學生寫小寫 b → 應視同 B（大小寫不敏感）
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 集資}
+      vocabulary: [{word: 揚帆啟航}, {word: 股票}, {word: 集資}]
+      fill_in_blank: [{sentence: "...", answer: B}]
+    student: {fb_1: "b"}
+    expect: {fb_1: 1.0}
+
+  # --- issue-2015 regression (FIXED): letters past G must score -------------
+  - id: letter_beyond_AG_should_score    # 越界字母 H-K
+    desc: >
+      學生圈正解 I → 應滿分。修正前：只要有一題答案超過 A-G，fb_lettered 偵測整課判 False，
+      模式退成 free_form，學生圈的 'I' 被 validator coerce 成空 → 判 0。
+      修正後（#2015）：合法字母集改由 vocab_bank keys 決定（可超過 G），課程留在 lettered
+      模式，圈 'I' 正常滿分。
+    lesson:
+      vocab_bank: {A: 揚帆啟航, B: 股票, C: 節衣縮食, D: 滿手老繭, E: 集資, F: 獲利, G: 股東, H: 大手一揮, I: 派遣}
+      vocabulary:
+        - {word: 揚帆啟航}
+        - {word: 股票}
+        - {word: 節衣縮食}
+        - {word: 滿手老繭}
+        - {word: 集資}
+        - {word: 獲利}
+        - {word: 股東}
+        - {word: 大手一揮}
+        - {word: 派遣}
+      fill_in_blank: [{sentence: "畢業後他準備（），踏上新旅程", answer: I}]
+    student: {fb_1: I}
+    expect: {fb_1: 1.0}

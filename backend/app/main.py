@@ -37,7 +37,7 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter
-from .services.seed import seed_default_data
+from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
 setup_logging()
@@ -86,7 +86,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "script-src 'self' 'unsafe-inline' https://apis.google.com; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; "
-        "img-src 'self' data: https:; "
+        "img-src 'self' data: blob: https:; "  # blob: needed for OMO cropped image previews (#1917)
         "media-src 'self' blob:; "
         "connect-src 'self' "
         "https://*.run.app "
@@ -201,12 +201,26 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     "traceback": traceback.format_exc(),
                 },
             )
+            # Manually inject CORS headers on the 500 fallback response.
+            # BaseHTTPMiddleware short-circuits the ASGI send chain, so
+            # CORSMiddleware's send-wrapper is bypassed when we return a
+            # raw JSONResponse here. We replicate the same logic as
+            # Starlette's CORSMiddleware.simple_response() so that browsers
+            # can read the error body instead of seeing a CORS-blocked response.
+            # (#1910 Sub-bug B)
+            origin = request.headers.get("origin", "")
+            cors_headers: dict[str, str] = {}
+            if origin and origin in settings.origins_list:
+                cors_headers["Access-Control-Allow-Origin"] = origin
+                cors_headers["Access-Control-Allow-Credentials"] = "true"
+                cors_headers["Vary"] = "Origin"
             return JSONResponse(
                 status_code=500,
                 content={
                     "detail": "Internal server error",
                     "request_id": request_id,
                 },
+                headers=cors_headers if cors_headers else None,
             )
 
 
@@ -295,6 +309,17 @@ async def lifespan(app: FastAPI):
     # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
     # (YAML → texts sync, migration patches) without creating demo accounts.
     seed_default_data()
+    # Idempotent: deactivate PII gmail accounts that leaked into staging DB (#1920).
+    # Safe on prod — does nothing if accounts don't exist.
+    try:
+        from .database import SessionLocal as _SessionLocal
+        _db = _SessionLocal()
+        try:
+            repair_pii_accounts(_db)
+        finally:
+            _db.close()
+    except Exception as _e:
+        logger.warning("repair_pii_accounts failed (non-fatal): %s", _e)
     yield
 
 

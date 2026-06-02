@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
-import {
+import type {
   Story,
   ReadingAttempt,
   LearningSession,
@@ -13,18 +13,17 @@ import type { ListeningResult } from '../components/reading-steps/ListeningPract
 import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
-import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
-import { completeSelfPracticeSession, SessionExpiredError } from '../services/learningApi';
-import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
-import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER, resolveActiveSteps } from '../config/stepConfig';
-import { ACTIVE_STEPS } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
-import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
-import { scopedStepStorageKey, isToolboxMode } from '../services/learningStorageScope';
+import { isToolboxMode } from '../services/learningStorageScope';
+
+// Extracted hooks (Issue #1906 — deep split of the god component)
+import { useLearningSessionBootstrap } from '../hooks/useLearningSessionBootstrap';
+import { useStepProgressPersistence } from '../hooks/useStepProgressPersistence';
+import { useLearningStepNavigation } from '../hooks/useLearningStepNavigation';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -118,440 +117,137 @@ export interface LearningContext {
 }
 
 /**
- * Map from step name in URL path to numeric step index (1-based, matching DB).
- * Sourced from stepConfig.ts — the single source of truth for step definitions.
- */
-const STEP_PATH_TO_NUMBER = STEP_CONFIG_PATH_TO_NUMBER;
-const STEP_NUMBER_TO_PATH: Record<number, string> = Object.fromEntries(
-  Object.entries(STEP_PATH_TO_NUMBER).map(([path, n]) => [n, path]),
-);
-
-/**
  * Wraps the learning flow routes (/learn/:storyId/*).
- * Manages shared state: selectedStory, session, lastAttempt, rightPanelWidth.
+ * Manages shared state via three extracted hooks (Issue #1906):
+ *   - useLearningSessionBootstrap  — story load, DB session create/restore
+ *   - useStepProgressPersistence   — step progress state + localStorage sync
+ *   - useLearningStepNavigation    — all handleFinish* callbacks + handleSessionComplete
+ *
  * Children access this state via useOutletContext<LearningContext>().
  */
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
-const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
-const LEGACY_DB_SESSION_KEY_PREFIX = 'db-session-';
-const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
-const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
-const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
-
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
   const { user, token } = useAuth();
 
-  const isAssignmentFlow = useMemo(() => {
-    if (!storyId) return false;
-    try {
-      const assignmentId = sessionStorage.getItem('activeAssignmentId');
-      if (!assignmentId) return false;
-      const contextRaw = sessionStorage.getItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
-      if (!contextRaw) return true;
-      const context = JSON.parse(contextRaw) as { storyKey?: string | null; userId?: string | null };
-      const storyMatch = String(context.storyKey ?? '') === String(storyId);
-      const userMatch = !context.userId || !user || String(context.userId) === String(user.id);
-      return storyMatch && userMatch;
-    } catch {
-      return false;
-    }
-  }, [storyId, user]);
+  // ── Right panel width (UI-only, no business logic) ───────────────────────
+  const [rightPanelWidth, setRightPanelWidthState] = React.useState(320);
+  const setRightPanelWidth = React.useCallback((w: number) => setRightPanelWidthState(w), []);
 
-  const activeDbSessionStorageKey = useMemo(() => {
-    if (!storyId) return null;
-    if (isAssignmentFlow) {
-      const assignmentId = sessionStorage.getItem('activeAssignmentId');
-      if (assignmentId) {
-        return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${storyId}`;
-      }
-      return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${storyId}`;
-    }
-    return `${SELF_DB_SESSION_KEY_PREFIX}${storyId}`;
-  }, [isAssignmentFlow, storyId]);
+  // ── Last attempt (carried across steps for report) ───────────────────────
+  const [lastAttempt, setLastAttempt] = React.useState<ReadingAttempt | null>(null);
 
-  const tutorCompletedStorageKey = useMemo(() => {
-    if (!storyId) return null;
-    return scopedStepStorageKey('tutor_completed_', storyId);
-  }, [storyId, isAssignmentFlow]);
-
-  const liveTutorProgressStorageKey = useMemo(() => {
-    if (!storyId) return null;
-    return scopedStepStorageKey('liveTutor_progress_', storyId);
-  }, [storyId, isAssignmentFlow]);
-
-  const legacyDbSessionStorageKey = useMemo(() => {
-    if (!storyId) return null;
-    return `${LEGACY_DB_SESSION_KEY_PREFIX}${storyId}`;
-  }, [storyId]);
-
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-  const [session, setSession] = useState<LearningSession | null>(null);
-  const [lastAttempt, setLastAttempt] = useState<ReadingAttempt | null>(null);
-  const [rightPanelWidth, setRightPanelWidth] = useState(320);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242).
-   * Persisted to sessionStorage so refresh within the same browser tab restores the session. */
-  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
-  /** Progressive paragraph unlock tracking (Issue #85).
-   * Restored from localStorage on mount so progress survives page refresh (Issue #689).
-   *
-   * Fix #806: also fall back to LiveTutor's own localStorage key (`liveTutor_progress_*`)
-   * so that when `tutor_completed_*` was cleared at session end but the user returns to
-   * the same story before LiveTutor clears its own cache, FullReading still sees all
-   * paragraphs as done. */
-  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
-    const scopedTutorKey = storyId ? scopedStepStorageKey('tutor_completed_', storyId) : null;
-    const scopedLiveTutorKey = storyId ? scopedStepStorageKey('liveTutor_progress_', storyId) : null;
-    try {
-      const raw = scopedTutorKey ? localStorage.getItem(scopedTutorKey) : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && (parsed as number[]).length > 0) {
-          return new Set<number>(parsed as number[]);
-        }
-      }
-    } catch {
-      // Non-fatal — continue to fallback
-    }
-    // Fallback: LiveTutor persists its own progress under a different key.
-    // If the user refreshed the page or started a new session for the same story
-    // before LiveTutor cleared its own cache, read completed paragraphs from there.
-    try {
-      const liveTutorRaw = scopedLiveTutorKey ? localStorage.getItem(scopedLiveTutorKey) : null;
-      if (liveTutorRaw) {
-        const liveTutorParsed = JSON.parse(liveTutorRaw) as {
-          completedParagraphs?: unknown;
-        };
-        if (
-          Array.isArray(liveTutorParsed.completedParagraphs) &&
-          (liveTutorParsed.completedParagraphs as number[]).length > 0
-        ) {
-          return new Set<number>(liveTutorParsed.completedParagraphs as number[]);
-        }
-      }
-    } catch {
-      // Non-fatal — start fresh
-    }
-    return new Set<number>();
-  });
-  /** Reading goals from the active assignment, loaded from sessionStorage (Issue #414). */
-  const [assignmentReadingGoals, setAssignmentReadingGoals] = useState<AssignmentReadingGoals | null>(() => {
-    try {
-      const raw = sessionStorage.getItem('activeAssignmentGoals');
-      return raw ? (JSON.parse(raw) as AssignmentReadingGoals) : null;
-    } catch {
-      return null;
-    }
-  });
-  /** Whether the session idle-timeout warning modal is visible (Issue #408). */
-  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
-  /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
+  // ── Idle timeout warning ─────────────────────────────────────────────────
+  const [showTimeoutWarning, setShowTimeoutWarning] = React.useState(false);
   const idleResetRef = useRef<(() => void) | null>(null);
-  /** Guard ref that prevents concurrent POST /api/learning/sessions calls (Issue #984). */
-  const isCreatingSession = useRef(false);
-  /** Guard ref that prevents handleSessionComplete from executing more than once per session. */
-  const sessionCompletedRef = useRef(false);
-  /** Tracks whether the completeSelfPracticeSession API call has fired (Issue #1070).
-   *  Separate from sessionCompletedRef so a late-arriving dbSessionId can still trigger it. */
-  const completionApiCalledRef = useRef(false);
-  const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
-    current_step: null,
-    steps_completed: [],
-    step_data: {},
-  });
 
-  // Resolve active steps for the current lesson (#1374).
-  // Uses lesson.stepSequence if present, otherwise falls back to DEFAULT_STEP_SEQUENCE.
-  // Note: selectedStory may be null while loading — resolveActiveSteps(null) returns the default.
-  const lessonActiveSteps = useMemo(
-    () => resolveActiveSteps(selectedStory?.stepSequence),
-    [selectedStory?.stepSequence],
-  );
-
-  const requiredAssignmentSteps = useMemo(
-    () => lessonActiveSteps.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
-    [lessonActiveSteps],
-  );
-  const completedStepsSet = useMemo(
-    () => new Set(stepProgressState.steps_completed ?? []),
-    [stepProgressState.steps_completed],
-  );
-  const missingAssignmentSteps = useMemo(
-    () => requiredAssignmentSteps.filter((s) => !completedStepsSet.has(s.id)),
-    [requiredAssignmentSteps, completedStepsSet],
-  );
-  const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
-  const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'reading-annotation';
-  const hasActiveAssignment = useMemo(() => {
-    try {
-      return isAssignmentFlow;
-    } catch {
-      return false;
-    }
-  }, [isAssignmentFlow]);
-
-  useEffect(() => {
-    // #1460: Toolbox mode never reads or creates a learning_sessions row.
-    // Skip the dbSessionId restore so useProgressSync below never loads
-    // step_progress / past attempts from a self-practice or assignment session.
-    if (isToolboxMode()) {
-      setDbSessionId(null);
-      return;
-    }
-
-    if (!storyId || !activeDbSessionStorageKey) {
-      setDbSessionId(null);
-      return;
-    }
-
-    try {
-      const directRaw = sessionStorage.getItem(activeDbSessionStorageKey);
-      const legacyRaw = legacyDbSessionStorageKey
-        ? sessionStorage.getItem(legacyDbSessionStorageKey)
-        : null;
-      const chosenRaw = directRaw ?? legacyRaw;
-      if (!chosenRaw) {
-        setDbSessionId(null);
-        return;
-      }
-      const parsed = parseInt(chosenRaw, 10);
-      if (Number.isNaN(parsed)) {
-        setDbSessionId(null);
-        return;
-      }
-      setDbSessionId(parsed);
-      // Migrate legacy key value to split key for future reads.
-      if (!directRaw && legacyRaw) {
-        sessionStorage.setItem(activeDbSessionStorageKey, String(parsed));
-      }
-    } catch {
-      setDbSessionId(null);
-    }
-  }, [storyId, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
-
-  // ── Step progress DB sync (Issue #660) ──────────────────────────────────
-  const { syncProgress, flushProgress } = useProgressSync({
-    token: token ?? null,
+  // ── Hook 1: session bootstrap (story load + DB session) ──────────────────
+  const bootstrap = useLearningSessionBootstrap({ storyId, user, token, navigate });
+  const {
+    isAssignmentFlow,
+    assignmentReadingGoals,
     dbSessionId,
-    onProgressLoaded: (data) => {
-      const loadedCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
-      const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
+    isLoading,
+    error,
+    selectedStory,
+    session,
+    setSession,
+    setSelectedStory,
+    ensureDbSession,
+  } = bootstrap;
 
-      setStepProgressState({
-        current_step: data.current_step ?? null,
-        steps_completed: loadedCompleted,
-        step_data: loadedStepData,
-      });
-
-      // When DB returns saved progress, update the in-memory session with
-      // completed paragraphs from step_data so LiveTutor can restore unlock state.
-      // This is best-effort — localStorage is the primary L1 store.
-      if (loadedStepData.tutor) {
-        const tutorData = loadedStepData.tutor as Record<string, unknown>;
-        const completedIdxs = tutorData.completedParagraphs;
-        if (Array.isArray(completedIdxs)) {
-          setCompletedParagraphsSet(new Set(completedIdxs as number[]));
-        }
-      }
-
-      // Rehydrate step results for report generation when resuming an assignment.
-      setSession((prev) => {
-        if (!prev) return prev;
-        const tutorData = (loadedStepData.tutor ?? {}) as Record<string, unknown>;
-        const fullReadingData = (loadedStepData['full-reading'] ?? {}) as Record<string, unknown>;
-        const vocabData = (loadedStepData.vocab ?? {}) as Record<string, unknown>;
-        const comprehensionData = (loadedStepData.comprehension ?? {}) as Record<string, unknown>;
-        const readingAnnotationData = (loadedStepData['reading-annotation'] ?? {}) as Record<string, unknown>;
-        const vocabDefinitionData = (loadedStepData['vocab-definition'] ?? {}) as Record<string, unknown>;
-        const vocabApplicationData = (loadedStepData['vocab-application'] ?? {}) as Record<string, unknown>;
-        const vocabWordSearchData = (loadedStepData['vocab-word-search'] ?? {}) as Record<string, unknown>;
-        const knowledgeStationData = (loadedStepData['knowledge-station'] ?? {}) as Record<string, unknown>;
-
-        return {
-          ...prev,
-          completedSteps: loadedCompleted,
-          readingAttempt: (tutorData.readingAttempt as ReadingAttempt | undefined) ?? prev.readingAttempt,
-          fullReadingResult: (fullReadingData.result as FullReadingResult | undefined) ?? prev.fullReadingResult,
-          vocabResult: (vocabData.result as VocabResult | undefined) ?? prev.vocabResult,
-          comprehensionResult: (comprehensionData.result as ComprehensionResult | undefined) ?? prev.comprehensionResult,
-          readingAnnotationCompleted:
-            (readingAnnotationData.completed as boolean | undefined) ?? loadedCompleted.includes('reading-annotation') ?? prev.readingAnnotationCompleted,
-          vocabDefinitionMatchCompleted:
-            (vocabDefinitionData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-definition') ?? prev.vocabDefinitionMatchCompleted,
-          vocabApplicationCompleted:
-            (vocabApplicationData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-application') ?? prev.vocabApplicationCompleted,
-          vocabWordSearchCompleted:
-            (vocabWordSearchData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-word-search') ?? prev.vocabWordSearchCompleted,
-          knowledgeStationCompleted:
-            (knowledgeStationData.completed as boolean | undefined) ?? loadedCompleted.includes('knowledge-station') ?? prev.knowledgeStationCompleted,
-        };
-      });
-    },
-  });
-
-  const persistStepProgressState = useCallback(
-    (
-      opts: {
-        currentStep?: string | null;
-        completeStep?: string;
-        stepDataPatch?: Record<string, unknown>;
-      },
-      immediate: boolean,
-    ) => {
-      setStepProgressState((prev) => {
-        const completed = new Set<string>(prev.steps_completed);
-        if (opts.completeStep) completed.add(opts.completeStep);
-
-        const next: StepProgressData = {
-          current_step: opts.currentStep ?? prev.current_step,
-          steps_completed: Array.from(completed),
-          step_data: {
-            ...prev.step_data,
-            ...(opts.stepDataPatch ?? {}),
-          },
-        };
-
-        // Prevent no-op writes that can trigger parent-child update loops.
-        const prevSig = JSON.stringify(prev);
-        const nextSig = JSON.stringify(next);
-        if (prevSig === nextSig) {
-          return prev;
-        }
-
-        if (immediate) {
-          flushProgress(next);
-        } else {
-          syncProgress(next);
-        }
-
-        setSession((prevSession) => {
-          if (!prevSession) return prevSession;
-          return {
-            ...prevSession,
-            completedSteps: Array.from(completed),
-          };
-        });
-        return next;
-      });
-    },
-    [flushProgress, syncProgress],
-  );
-
-  const saveStepProgressPatch = useCallback(
-    (opts: {
-      stepId: string;
-      stepData: Record<string, unknown>;
-      currentStep?: string | null;
-      markCompleted?: boolean;
-      immediate?: boolean;
-    }) => {
-      persistStepProgressState(
-        {
-          currentStep: opts.currentStep,
-          completeStep: opts.markCompleted ? opts.stepId : undefined,
-          stepDataPatch: {
-            [opts.stepId]: {
-              ...opts.stepData,
-            },
-          },
-        },
-        opts.immediate ?? false,
-      );
-    },
-    [persistStepProgressState],
-  );
-
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /** Persist current step to localStorage for session resume. */
-  const persistStep = useCallback(
-    (step: number) => {
-      if (!user || !storyId) return;
-      saveActiveSession(String(user.id), {
-        sessionId: 0, // no DB session ID in the current flow
-        storyId,
-        currentStep: step,
-        timestamp: Date.now(),
-      });
-      persistStepProgressState(
-        { currentStep: STEP_NUMBER_TO_PATH[step] ?? null },
-        false,
-      );
-    },
-    [user, storyId, persistStepProgressState],
-  );
-
-  /** Clear active session from localStorage and sessionStorage (called on completion).
-   * Removing the sessionStorage key means the next visit creates a fresh DB session.
-   * Also clears the tutor paragraph progress so a fresh session starts at zero (Issue #689).
-   * Fix #806: also clear LiveTutor's own cache key so stale paragraph data from a
-   * completed session never bleeds into a new session for the same story. */
-  const clearPersistedSession = useCallback(() => {
-    if (!user) return;
-    clearActiveSession(String(user.id));
-    if (activeDbSessionStorageKey) {
-      try { sessionStorage.removeItem(activeDbSessionStorageKey); } catch { /* non-fatal */ }
-    }
-    if (legacyDbSessionStorageKey) {
-      try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
-    }
-    if (tutorCompletedStorageKey) {
-      try { localStorage.removeItem(tutorCompletedStorageKey); } catch { /* non-fatal */ }
-    }
-    if (liveTutorProgressStorageKey) {
-      try { localStorage.removeItem(liveTutorProgressStorageKey); } catch { /* non-fatal */ }
-    }
-  }, [
-    user,
+  // ── Hook 2: step progress persistence ────────────────────────────────────
+  const stepPersistence = useStepProgressPersistence({
     storyId,
-    activeDbSessionStorageKey,
-    legacyDbSessionStorageKey,
-    tutorCompletedStorageKey,
-    liveTutorProgressStorageKey,
-  ]);
+    user,
+    token,
+    dbSessionId,
+    selectedStory,
+    isAssignmentFlow,
+    setSession,
+  });
+  const {
+    stepProgressState,
+    persistStepProgressState,
+    persistStep,
+    saveStepProgressPatch,
+    clearPersistedSession,
+    completedParagraphsSet,
+    handleParagraphComplete,
+    missingAssignmentSteps,
+    isAssignmentReadyForSubmit,
+    firstIncompleteStepPath,
+    hasActiveAssignment,
+    syncProgress,
+    flushProgress,
+  } = stepPersistence;
+
+  // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────
+  const stepNav = useLearningStepNavigation({
+    storyId,
+    selectedStory,
+    token,
+    user,
+    dbSessionId,
+    hasActiveAssignment,
+    isAssignmentReadyForSubmit,
+    navigate,
+    setSession,
+    setLastAttempt,
+    setSelectedStory,
+    persistStepProgressState,
+    persistStep,
+    clearPersistedSession,
+    ensureDbSession,
+  });
+  const {
+    handleStartReading,
+    handleFinishReading,
+    handleFinishComprehension,
+    handleFinishStoryStructure,
+    handleFinishReadingStrategy,
+    handleFinishVocab,
+    handleFinishDictation,
+    handleFinishFullReading,
+    handleFinishListening,
+    handleFinishReadingAnnotation,
+    handleFinishVocabDefinitionMatch,
+    handleFinishVocabApplication,
+    handleFinishSentencePractice,
+    handleFinishVocabWordSearch,
+    handleFinishKnowledgeStation,
+    handleRetry,
+    handleSessionComplete,
+  } = stepNav;
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
 
-  /** Show the warning modal when the user has been idle for IDLE_WARNING_TIMEOUT_MS. */
-  const handleIdleTimeout = useCallback(() => {
-    // Progress is already saved by persistStep on every step transition.
-    // Just show the warning so the student knows what's happening.
+  const handleIdleTimeout = React.useCallback(() => {
     setShowTimeoutWarning(true);
   }, []);
 
   const { reset: resetIdleTimer } = useIdleTimer({
     timeout: IDLE_WARNING_TIMEOUT_MS,
     onIdle: handleIdleTimeout,
-    // Only active when the user is inside the learning flow with a loaded story
     enabled: selectedStory !== null && !isLoading,
   });
 
-  // Expose reset to the ref so the continue handler below can call it
   useEffect(() => {
     idleResetRef.current = resetIdleTimer;
   }, [resetIdleTimer]);
 
-  /** User clicked "繼續學習" — hide warning and restart the idle timer. */
-  const handleContinueLearning = useCallback(() => {
+  const handleContinueLearning = React.useCallback(() => {
     setShowTimeoutWarning(false);
     idleResetRef.current?.();
   }, []);
 
-  /** User clicked "離開並儲存" or the countdown expired — navigate to library
-   * (or to /tools when in toolbox mode, #1460). */
-  const handleSessionExpired = useCallback(() => {
+  const handleSessionExpired = React.useCallback(() => {
     setShowTimeoutWarning(false);
-    // Progress was saved by persistStep; just navigate away.
     navigate(isToolboxMode() ? '/tools' : '/library');
   }, [navigate]);
 
-  // ─────────────────────────────────────────────────────────────────────────
-
-  // Sync session/story to the nav context so the header StepperNav can read them
+  // ── Sync nav context so StepperNav can read session/story ────────────────
   useEffect(() => {
     learningNav.setSession(session);
     learningNav.setSelectedStory(selectedStory);
@@ -562,591 +258,7 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
-  // Reset completion guards when the story changes so a new session can complete normally.
-  useEffect(() => {
-    sessionCompletedRef.current = false;
-    completionApiCalledRef.current = false;
-  }, [storyId]);
-
-  // Load story data when storyId changes
-  useEffect(() => {
-    if (!storyId) {
-      navigate('/library', { replace: true });
-      return;
-    }
-
-    // If we already have the right story loaded, skip
-    if (selectedStory?.id === storyId) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    fetchStory(storyId)
-      .then((story) => {
-        setSelectedStory(story);
-        // Only create a new session if we don't have one for this story
-        setSession((prev) => {
-          if (prev && prev.storyId === storyId) return prev;
-          return {
-            storyId: story.id,
-            startedAt: Date.now(),
-            introCompleted: false,
-            readingAttempt: null,
-            comprehensionResult: null,
-            vocabResult: null,
-            dictationResult: null,
-            fullReadingResult: null,
-          };
-        });
-        // Persist step 1 (reading-annotation) as the starting point
-        if (user) {
-          saveActiveSession(String(user.id), {
-            sessionId: 0,
-            storyId,
-            currentStep: STEP_PATH_TO_NUMBER['reading-annotation'],
-            timestamp: Date.now(),
-          });
-        }
-      })
-      .catch((err) => {
-        setError(err.message || 'Failed to load story');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [storyId, selectedStory?.id, navigate]);
-
-  // Ensure a DB session exists for step_progress persistence even when the flow
-  // starts from assignment entry points that skip the legacy intro action.
-  // Guard with isCreatingSession ref to prevent concurrent requests (Issue #984).
-  //
-  // Cross-device fix (#1074): when sessionStorage is empty (new device/browser),
-  // first try GET to find an existing in_progress session before creating a new
-  // one.  The backend POST already has get-or-create semantics, but an explicit
-  // GET avoids creating sessions when one already exists with a different source
-  // (assignment vs self-practice).
-  useEffect(() => {
-    // #1460: Toolbox mode skips session GET/POST entirely so no learning_sessions
-    // data leaks into the practice toolbox UI. Phase 2 will hook up the dedicated
-    // toolbox_*_sessions tables instead.
-    if (isToolboxMode()) return;
-    if (!token || !storyId || dbSessionId !== null || isLoading) return;
-    if (isCreatingSession.current) return;
-
-    isCreatingSession.current = true;
-
-    const storeSessionId = (id: number) => {
-      setDbSessionId(id);
-      if (activeDbSessionStorageKey) {
-        try { sessionStorage.setItem(activeDbSessionStorageKey, String(id)); } catch { /* non-fatal */ }
-      }
-      if (legacyDbSessionStorageKey) {
-        try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
-      }
-    };
-
-    // Step 1: Try to find an existing in_progress session for this story (#1074)
-    fetch(`${API_BASE}/api/learning/sessions?story_slug=${encodeURIComponent(storyId)}&status=in_progress&limit=1`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const existing = data?.items?.[0];
-        if (existing?.id) {
-          // Recovered existing session from server — no need to create
-          storeSessionId(existing.id);
-          return null; // signal: skip POST
-        }
-        // Step 2: No existing session found — create via POST (get-or-create)
-        return fetch(`${API_BASE}/api/learning/sessions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ story_slug: storyId }),
-        });
-      })
-      .then((res) => {
-        if (!res) return null; // skipped POST (existing session found)
-        return res.ok ? res.json() : null;
-      })
-      .then((data) => {
-        if (data?.id) {
-          storeSessionId(data.id);
-        }
-      })
-      .catch(() => {
-        // Non-fatal: local progress still works without DB.
-      })
-      .finally(() => {
-        isCreatingSession.current = false;
-      });
-  }, [token, storyId, dbSessionId, isLoading, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
-
-  const handleStartReading = useCallback(() => {
-    setSession((prev) => {
-      if (prev) return { ...prev, introCompleted: true };
-      if (selectedStory) {
-        return {
-          storyId: selectedStory.id,
-          startedAt: Date.now(),
-          introCompleted: true,
-          readingAttempt: null,
-          comprehensionResult: null,
-          vocabResult: null,
-          dictationResult: null,
-          fullReadingResult: null,
-        };
-      }
-      return null;
-    });
-    persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
-
-    // Create a DB learning session so dialogue can be persisted (Issue #242).
-    // Skip if a session already exists or another creation is in flight (Issue #984).
-    // #1460: Skip in toolbox mode — those rows belong in toolbox_*_sessions (Phase 2).
-    if (token && storyId && dbSessionId === null && !isCreatingSession.current && !isToolboxMode()) {
-      isCreatingSession.current = true;
-      fetch(`${API_BASE}/api/learning/sessions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ story_slug: storyId }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.id) {
-            setDbSessionId(data.id);
-            if (activeDbSessionStorageKey) {
-              try { sessionStorage.setItem(activeDbSessionStorageKey, String(data.id)); } catch { /* non-fatal */ }
-            }
-            if (legacyDbSessionStorageKey) {
-              try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
-            }
-          }
-        })
-        .catch(() => {
-          // Non-fatal — dialogue won't be persisted but learning still works
-        })
-        .finally(() => {
-          isCreatingSession.current = false;
-        });
-    }
-
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
-  }, [
-    storyId,
-    selectedStory,
-    navigate,
-    persistStep,
-    token,
-    dbSessionId,
-    activeDbSessionStorageKey,
-    legacyDbSessionStorageKey,
-  ]);
-
-  // #1460: when finishing any step in toolbox mode, return to /tools instead
-  // of advancing to the next step in the lesson sequence. Single-shot UX.
-  const navigateAfterFinish = useCallback(
-    (nextStep: string) => {
-      if (isToolboxMode()) {
-        navigate('/tools');
-        return;
-      }
-      navigate(`/learn/${storyId}/${nextStep}`);
-    },
-    [navigate, storyId],
-  );
-
-  // #1463: toolbox completions are persisted by ToolboxCompletionActions on
-  // mount (single source of truth). LearningLayout no longer wires recording
-  // into handleFinish*, since #1462's tool patterns short-circuit onFinish in
-  // toolbox mode and the handlers never run there.
-
-  const handleFinishReading = useCallback(
-    (attempt: ReadingAttempt) => {
-      setLastAttempt(attempt);
-      setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'tutor',
-          currentStep: 'full-reading',
-          stepDataPatch: {
-            tutor: { readingAttempt: attempt },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigateAfterFinish('full-reading');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishComprehension = useCallback(
-    (result: ComprehensionResult) => {
-      setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'comprehension',
-          currentStep: 'vocab-word-search',
-          stepDataPatch: {
-            comprehension: { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigateAfterFinish('vocab-word-search');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishVocab = useCallback(
-    (result: VocabResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab',
-          currentStep: 'vocab-definition',
-          stepDataPatch: {
-            vocab: { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
-      navigateAfterFinish('vocab-definition');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishDictation = useCallback(
-    (result: DictationResult) => {
-      setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigateAfterFinish('vocab-word-search');
-    },
-    [navigateAfterFinish, persistStep],
-  );
-
-  const handleFinishFullReading = useCallback(
-    (result: FullReadingResult) => {
-      setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'full-reading',
-          // currentStep advances to listening — the next enabled step after full-reading
-          stepDataPatch: {
-            'full-reading': { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['listening']);
-      navigateAfterFinish('listening');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  // Issue #1098 — listening step persistence (was missing, intern forgot to bring
-  // it over when extracting listening from full-reading as its own step).
-  const handleFinishListening = useCallback(
-    (result: ListeningResult) => {
-      persistStepProgressState(
-        {
-          completeStep: 'listening',
-          currentStep: 'vocab',
-          stepDataPatch: {
-            listening: { completed: true, score: result.score, feedback: result.feedback },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigateAfterFinish('vocab');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishReadingAnnotation = useCallback(
-    (_summary: AnnotationSummary) => {
-      setSession((prev) => (prev ? { ...prev, readingAnnotationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'reading-annotation',
-          currentStep: 'tutor',
-          stepDataPatch: {
-            'reading-annotation': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['tutor']);
-      navigateAfterFinish('tutor');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishVocabDefinitionMatch = useCallback(
-    (result: VocabDefinitionMatchResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-definition',
-          currentStep: 'vocab-application',
-          stepDataPatch: {
-            'vocab-definition': { completed: true, result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
-      navigateAfterFinish('vocab-application');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishVocabApplication = useCallback(
-    (result: VocabApplicationResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-application',
-          currentStep: 'story-structure',
-          stepDataPatch: {
-            'vocab-application': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['story-structure']);
-      navigateAfterFinish('story-structure');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  // Issue #1335 — advance from 文章重點表 to 閱讀聚光燈
-  const handleFinishStoryStructure = useCallback(
-    () => {
-      persistStepProgressState(
-        {
-          completeStep: 'story-structure',
-          currentStep: 'reading-strategy',
-          stepDataPatch: {
-            'story-structure': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
-      navigateAfterFinish('reading-strategy');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  // Issue #1335 — advance from 閱讀聚光燈 to 閱讀理解
-  const handleFinishReadingStrategy = useCallback(
-    () => {
-      persistStepProgressState(
-        {
-          completeStep: 'reading-strategy',
-          currentStep: 'comprehension',
-          stepDataPatch: {
-            'reading-strategy': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigateAfterFinish('comprehension');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishSentencePractice = useCallback(
-    () => {
-      persistStepProgressState(
-        {
-          completeStep: 'sentence-practice',
-          currentStep: 'vocab-definition',
-          stepDataPatch: {
-            'sentence-practice': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['sentence-practice']);
-      navigateAfterFinish('vocab-definition');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishVocabWordSearch = useCallback(
-    (elapsedSeconds: number) => {
-      setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-word-search',
-          currentStep: 'knowledge-station',
-          stepDataPatch: {
-            'vocab-word-search': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
-      navigateAfterFinish('knowledge-station');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleFinishKnowledgeStation = useCallback(
-    () => {
-      setSession((prev) => (prev ? { ...prev, knowledgeStationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'knowledge-station',
-          currentStep: 'report',
-          stepDataPatch: {
-            'knowledge-station': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigateAfterFinish('report');
-    },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
-  );
-
-  const handleRetry = useCallback(() => {
-    clearPersistedSession();
-    setSession(null);
-    setLastAttempt(null);
-    setSelectedStory(null);
-    // #1460: in toolbox mode, retry returns to the tool picker, not the library.
-    navigate(isToolboxMode() ? '/tools' : '/library');
-  }, [navigate, clearPersistedSession]);
-
-  /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
-  const handleSessionComplete = useCallback(() => {
-    // Auto-submit assignment if this session was started from an assignment.
-    const assignmentIdStr = sessionStorage.getItem('activeAssignmentId');
-    const contextRaw = sessionStorage.getItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
-
-    let shouldSubmit = false;
-    let assignmentId: number | null = null;
-    if (assignmentIdStr) {
-      const parsed = parseInt(assignmentIdStr, 10);
-      if (!isNaN(parsed)) assignmentId = parsed;
-    }
-
-    if (assignmentId != null && contextRaw && token && user && storyId) {
-      try {
-        const context = JSON.parse(contextRaw) as {
-          assignmentId?: number;
-          userId?: string | null;
-          storyKey?: string | null;
-        };
-        shouldSubmit = (
-          context.assignmentId === assignmentId
-          && String(context.userId ?? '') === String(user.id)
-          && String(context.storyKey ?? '') === String(storyId)
-          && isAssignmentReadyForSubmit
-        );
-      } catch {
-        shouldSubmit = false;
-      }
-    }
-
-    // Assignment not complete yet: keep progress/context; do not auto-submit.
-    // Guard does NOT fire here — the function may be called again once ready.
-    if (assignmentId != null && !shouldSubmit) {
-      return;
-    }
-
-    // Self-practice DB completion (Issue #1070).
-    // Placed before the one-time guard so a late-arriving dbSessionId can still trigger it
-    // on a subsequent useEffect re-fire without being blocked by sessionCompletedRef.
-    if (!hasActiveAssignment && storyId && dbSessionId !== null && token && !completionApiCalledRef.current) {
-      completionApiCalledRef.current = true;
-      completeSelfPracticeSession(dbSessionId, token).catch((err) => {
-        if (err instanceof SessionExpiredError) {
-          console.warn('[LearningLayout] completeSelfPracticeSession: token expired, session not marked complete in DB');
-        } else {
-          console.warn('[LearningLayout] completeSelfPracticeSession failed:', err);
-        }
-      });
-    }
-
-    // Guard: prevent double-execution for the actual completion path.
-    // Placed after the early-return above so a later "ready" call is not blocked.
-    if (sessionCompletedRef.current) return;
-    sessionCompletedRef.current = true;
-
-    if (!hasActiveAssignment && storyId) {
-      // Keep localStorage as a local fallback for the "already completed" UI check.
-      try {
-        localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`, '1');
-      } catch {
-        // non-fatal
-      }
-    }
-
-    clearPersistedSession();
-
-    sessionStorage.removeItem('activeAssignmentId');
-    sessionStorage.removeItem('activeAssignmentGoals');
-    sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
-
-    if (shouldSubmit && token && assignmentId != null) {
-      // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
-      submitAssignment(token, assignmentId).catch((err) => {
-        console.warn('[LearningLayout] Auto-submit assignment failed:', err);
-      });
-    }
-  }, [
-    clearPersistedSession,
-    token,
-    user,
-    storyId,
-    isAssignmentReadyForSubmit,
-    hasActiveAssignment,
-    dbSessionId,
-  ]);
-
-  /** Mark a paragraph as completed in both local state and session (Issue #85).
-   * Also persists to localStorage so progress survives page refresh (Issue #689). */
-  const handleParagraphComplete = useCallback((paragraphIndex: number) => {
-    setCompletedParagraphsSet((prev) => {
-      if (prev.has(paragraphIndex)) return prev;
-      const updated = new Set(prev);
-      updated.add(paragraphIndex);
-      // Persist to localStorage (L1 cache) — key per story so different stories don't collide
-      if (tutorCompletedStorageKey) {
-        try {
-          localStorage.setItem(tutorCompletedStorageKey, JSON.stringify(Array.from(updated)));
-        } catch {
-          // Non-fatal — in-memory state still updated
-        }
-      }
-      return updated;
-    });
-    setSession((prev) => {
-      if (!prev) return prev;
-      const existing = new Set(prev.completedParagraphs ?? []);
-      if (existing.has(paragraphIndex)) return prev;
-      existing.add(paragraphIndex);
-      return { ...prev, completedParagraphs: Array.from(existing) };
-    });
-  }, [storyId, tutorCompletedStorageKey]);
+  // ── Loading / error states ────────────────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -1160,7 +272,6 @@ const LearningLayout: React.FC = () => {
   }
 
   if (error || !selectedStory) {
-    // #1460: error fallback button label + destination follow toolbox mode.
     const inToolbox = isToolboxMode();
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -1176,6 +287,8 @@ const LearningLayout: React.FC = () => {
       </div>
     );
   }
+
+  // ── Context assembly ─────────────────────────────────────────────────────
 
   const ctx: LearningContext = {
     selectedStory,

@@ -54,6 +54,10 @@ export interface OmoAnswerItem {
   score: number;
   ai_confidence: number;
   reasoning: string;
+  /** Issue #2011 follow-up: prompt text from lesson YAML.
+   *  Optional / nullable — uploads graded before this field was added will
+   *  not have it; frontend falls back to「題目 {question_id}」 in that case. */
+  context?: string | null;
   source_attempt_id?: number | null;
   position?: { x: number; y: number } | null;
   crop_image_url?: string | null;
@@ -114,6 +118,26 @@ export interface OmoPriorUploadResponse {
 export interface OmoSignedUrlResponse {
   url?: string | null;
   expires_in_seconds: number;
+}
+
+/** Issue #1975 — compact item shown in the OMO history list page. */
+export interface OmoHistoryItem {
+  upload_id: number;
+  lesson_id?: number | null;
+  lesson_title?: string | null;
+  grade_code?: string | null;
+  status: OmoStatus;
+  overall_score?: number | null;
+  answers_count: number;
+  created_at: string;          // ISO-8601
+  thumbnail_url?: string | null;
+}
+
+export interface OmoHistoryResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  items: OmoHistoryItem[];
 }
 
 // ---------------------------------------------------------------------------
@@ -254,6 +278,26 @@ export async function getOmoLessons(token: string): Promise<OmoLessonSummary[]> 
     throw new Error(`Lessons fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<OmoLessonSummary[]>;
+}
+
+/**
+ * Issue #1975 — paginated list of the current user's OMO uploads, newest first.
+ * Excludes superseded uploads and in-flight statuses (pending/identifying/error).
+ */
+export async function getOmoHistory(
+  token: string,
+  limit = 20,
+  offset = 0,
+): Promise<OmoHistoryResponse> {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  const res = await fetch(`${API_BASE}/api/omo/history?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`History fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoHistoryResponse>;
 }
 
 export async function getPriorOmoUploadByLesson(

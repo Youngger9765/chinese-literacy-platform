@@ -11,6 +11,7 @@ import {
 import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
+import { useToast } from '../../components/ui/Toast';
 
 interface TeacherDashboardProps {
   onSelectClassroom: (classroomId: number) => void;
@@ -29,6 +30,9 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   // Search & sort state
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'grade' | 'students'>('name');
+
+  // Create form state
+  const { toast, showToast } = useToast();
 
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -89,11 +93,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         return;
       }
       const grade = newGrade ? parseInt(newGrade, 10) : undefined;
-      await createClassroom(token, {
+      const created = await createClassroom(token, {
         name: newName.trim(),
         school_id: teacherSchoolId,
         grade,
       });
+      showToast(`班級「${created.name}」建立成功！`, 'success');
       setNewName('');
       setNewGrade('');
       setShowCreateForm(false);
@@ -128,6 +133,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
 
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+      {toast}
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

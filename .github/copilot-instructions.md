@@ -136,6 +136,25 @@ Every Issue follows a 4-phase Plan-Do-Check-Act cycle:
 5. **FullReading** - Complete reading assessment
 6. **AssessmentReport** - 6-section diagnostic report
 
+## Modular Spec System (`specs/`)
+
+Before editing backend code or lesson YAML data, check ownership:
+
+1. Read `specs/registry.yaml` — lists every spec module with its `owns_code`
+   and `owns_data` paths.
+2. If the file you are touching falls under a module → read
+   `specs/modules/<feature>/INTENT.md` (the human-readable contract) and the
+   corresponding `backend/specs/test_<feature>_spec.py` (machine-checkable
+   invariants).
+3. After your change: `bash specs/run-ci.sh` (local CI = registry freshness +
+   all 27 module contracts) — failures signal a drift between code/data and the
+   documented intent. GitHub Actions auto-run is blocked on token scope (issue
+   2041), so run this locally before pushing.
+4. Adding a new feature with no existing module → create
+   `specs/modules/<feature>/INTENT.md` first.
+
+Full guide: `specs/README.md`.
+
 ## Testing
 
 - Frontend: `cd frontend && npm test` (Vitest)

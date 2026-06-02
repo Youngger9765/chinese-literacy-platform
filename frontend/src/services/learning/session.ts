@@ -1,0 +1,411 @@
+import type { ReadingEvaluateResponse } from '../../types';
+import { SessionExpiredError } from '../api';
+import { API_BASE } from '../apiConfig';
+
+// ---------------------------------------------------------------------------
+// Learning session creation + reading evaluation
+// ---------------------------------------------------------------------------
+
+export async function createLearningSession(payload: {
+  studentId: string;
+  storyId: string;
+}) {
+  const res = await fetch(`${API_BASE}/api/learning-sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`createLearningSession failed: ${res.status}`);
+  return res.json();
+}
+
+export async function evaluateReading(
+  spokenText: string,
+  targetText: string,
+  durationMs?: number,
+  token?: string,
+  signal?: AbortSignal,
+): Promise<ReadingEvaluateResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
+    method: 'POST',
+    headers,
+    signal,
+    body: JSON.stringify({
+      spoken_text: spokenText,
+      target_text: targetText,
+      duration_ms: durationMs,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
+  }
+
+  return await res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Session status (used by SessionResumePrompt)
+// ---------------------------------------------------------------------------
+
+export interface SessionStatusResponse {
+  id: number;
+  story_slug: string | null;
+  current_step: number;
+  status: string;
+  is_resumable: boolean;
+  is_completed: boolean;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export async function getSessionStatus(
+  sessionId: number,
+  token: string,
+): Promise<SessionStatusResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) throw new Error('Session not found');
+  if (res.status === 403) throw new Error('Not your session');
+  if (!res.ok) throw new Error(`getSessionStatus failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Self-practice session completion (Issue #1070)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mark a self-practice session as completed in the DB.
+ *
+ * Calls PATCH /api/learning/sessions/{sessionId} with status="completed".
+ * completed_at is intentionally omitted — the backend sets it via server time
+ * to avoid client clock skew.  Fire-and-forget — errors are non-fatal and
+ * logged to console only.
+ *
+ * Throws SessionExpiredError on 401 so callers can distinguish token expiry
+ * from other failures.
+ */
+export async function completeSelfPracticeSession(
+  sessionId: number,
+  token: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      status: 'completed',
+    }),
+  });
+  if (res.status === 401) {
+    throw new SessionExpiredError('completeSelfPracticeSession: token expired');
+  }
+  if (!res.ok) {
+    throw new Error(`completeSelfPracticeSession failed: ${res.status}`);
+  }
+}
+
+/**
+ * Check whether the current user has any completed self-practice session for a
+ * given story by querying the DB via GET /api/learning/sessions.
+ *
+ * Returns `true` when at least one completed self-practice session exists,
+ * `false` otherwise (including on network/auth errors — the caller falls back
+ * to localStorage in that case).
+ */
+export async function checkSelfPracticeCompleted(
+  storySlug: string,
+  token: string,
+): Promise<boolean> {
+  try {
+    const params = new URLSearchParams({
+      story_slug: storySlug,
+      status: 'completed',
+      learning_source: 'self',
+      // Note: limit only caps the returned `items` array; `total` still reflects
+      // the full count because learning_source filtering happens in Python after
+      // the SQL query.  We keep limit=1 to minimise payload size.
+      limit: '1',
+    });
+    const res = await fetch(`${API_BASE}/api/learning/sessions?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) {
+      throw new SessionExpiredError('checkSelfPracticeCompleted: token expired');
+    }
+    if (!res.ok) return false;
+    const data = (await res.json()) as { total: number };
+    return data.total > 0;
+  } catch (err) {
+    if (err instanceof SessionExpiredError) throw err;
+    console.error('[checkSelfPracticeCompleted] failed, falling back to localStorage:', err);
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Learning session list + report (Issue #580)
+// ---------------------------------------------------------------------------
+
+export interface LearningSummary {
+  id: number;
+  story_slug: string | null;
+  story_title: string | null;
+  learning_source?: 'self' | 'assignment' | null;
+  status: string;
+  current_step: number;
+  accuracy: number | null;
+  overall_score: number | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export async function fetchLearningSessions(
+  token: string,
+  params?: {
+    limit?: number;
+    offset?: number;
+    status?: string;
+    story_slug?: string;
+    learning_source?: 'self' | 'assignment';
+  },
+): Promise<{ items: LearningSummary[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params?.limit != null) qs.set('limit', String(params.limit));
+  if (params?.offset != null) qs.set('offset', String(params.offset));
+  if (params?.status) qs.set('status', params.status);
+  if (params?.story_slug) qs.set('story_slug', params.story_slug);
+  if (params?.learning_source) qs.set('learning_source', params.learning_source);
+  const url = `${API_BASE}/api/learning/sessions${qs.toString() ? `?${qs}` : ''}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`fetchLearningSessions failed: ${res.status}`);
+  return res.json();
+}
+
+export interface SessionDetailResponse {
+  id: number;
+  story_slug: string | null;
+  status: string;
+  current_step: number;
+  accuracy: number | null;
+  overall_score: number | null;
+  started_at: string;
+  completed_at: string | null;
+  reading_result: Record<string, unknown> | null;
+  comprehension_result: Record<string, unknown> | null;
+  vocab_result: Record<string, unknown> | null;
+  full_reading_result: Record<string, unknown> | null;
+  comprehension_score: number | null;
+  literal_score: number | null;
+  inferential_score: number | null;
+  evaluative_score: number | null;
+  comprehension_feedback: string | null;
+  teacher_reviewed_at: string | null;
+  teacher_comment: string | null;
+}
+
+export async function fetchSessionReport(
+  token: string,
+  sessionId: number,
+): Promise<SessionDetailResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`fetchSessionReport failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Student progress dashboard (Issue #25)
+// ---------------------------------------------------------------------------
+
+export interface DailyActivity {
+  date: string; // YYYY-MM-DD
+  sessions_completed: number;
+  avg_score: number | null;
+}
+
+export interface StudentDashboardData {
+  total_sessions: number;
+  completed_sessions: number;
+  avg_score: number | null;
+  today_sessions: number;
+  week_sessions: number;
+  streak_days: number;
+  longest_streak: number;
+  daily_activity: DailyActivity[];
+  completed_story_slugs: string[];
+}
+
+export async function fetchStudentDashboard(
+  token: string,
+  studentId: number,
+): Promise<StudentDashboardData> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/students/${studentId}/dashboard`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`fetchStudentDashboard failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Student enrolled classrooms (Issue #462)
+// ---------------------------------------------------------------------------
+
+export interface StudentEnrolledClassroom {
+  id: number;
+  name: string;
+  grade: number | null;
+  teacher_id: number;
+  teacher_name: string;
+  is_active: boolean;
+  enrolled_at: string;
+}
+
+export interface StudentEnrolledClassroomsResponse {
+  classrooms: StudentEnrolledClassroom[];
+  total: number;
+}
+
+export async function fetchMyEnrolledClassrooms(
+  token: string,
+): Promise<StudentEnrolledClassroomsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/my-enrollments`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`fetchMyEnrolledClassrooms failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Step Progress persistence (Issue #660)
+// ---------------------------------------------------------------------------
+
+export interface StepProgressData {
+  current_step: string | null;
+  steps_completed: string[];
+  step_data: Record<string, unknown>;
+  /** Optimistic concurrency version (#1187). Increments with each successful save. */
+  version?: number;
+}
+
+export interface StepProgressResponse {
+  session_id: number;
+  step_progress: StepProgressData | null;
+}
+
+/**
+ * Raised when DB rejects a save because the incoming version is older than stored.
+ * Caller should refresh state from the server and discard the stale client snapshot.
+ */
+export class StaleVersionError extends Error {
+  storedVersion: number;
+  incomingVersion: number;
+  constructor(storedVersion: number, incomingVersion: number) {
+    super(`Stale step_progress version: stored=${storedVersion} incoming=${incomingVersion}`);
+    this.name = 'StaleVersionError';
+    this.storedVersion = storedVersion;
+    this.incomingVersion = incomingVersion;
+  }
+}
+
+/**
+ * Persist step progress to DB for a given learning session.
+ * Non-blocking — caller should catch errors and not surface them to the user.
+ * Throws StaleVersionError (409) when the incoming version is older than stored.
+ */
+export async function saveStepProgress(
+  token: string,
+  sessionId: number,
+  progress: StepProgressData,
+): Promise<StepProgressResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/progress`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(progress),
+  });
+  if (res.status === 409) {
+    const body = await res.json().catch(() => ({}));
+    const d = body?.detail ?? {};
+    if (d?.error === 'stale_version') {
+      throw new StaleVersionError(d.stored_version ?? 0, d.incoming_version ?? 0);
+    }
+  }
+  if (!res.ok) throw new Error(`saveStepProgress failed: ${res.status}`);
+  return res.json();
+}
+
+/**
+ * Fire-and-forget step progress save using fetch + keepalive.
+ * Designed for beforeunload / page teardown where normal fetch may be cancelled.
+ */
+export function saveStepProgressBeacon(
+  token: string,
+  sessionId: number,
+  progress: StepProgressData,
+): void {
+  const url = `${API_BASE}/api/learning/sessions/${sessionId}/progress`;
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(progress),
+    keepalive: true,
+  }).catch(() => { /* non-fatal */ });
+}
+
+/**
+ * Load step progress from DB for a given learning session.
+ * Returns null step_progress when nothing has been saved yet.
+ */
+export async function loadStepProgress(
+  token: string,
+  sessionId: number,
+): Promise<StepProgressResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/progress`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`loadStepProgress failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Reading history (for progress curve)
+// ---------------------------------------------------------------------------
+
+export interface ReadingHistoryPoint {
+  session_id: number;
+  started_at: string;
+  cpm: number | null;
+  accuracy: number | null;
+  match_rate: number | null;
+  overall_score: number | null;
+}
+
+export async function getReadingHistory(
+  token: string,
+  storySlug: string,
+): Promise<ReadingHistoryPoint[]> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/reading-history?story_slug=${encodeURIComponent(storySlug)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getReadingHistory failed: ${res.status}`);
+  return res.json();
+}

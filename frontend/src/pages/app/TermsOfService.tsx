@@ -1,8 +1,11 @@
 /**
  * TermsOfService — ToS + copyright consent page (issue #1013).
  *
- * Teachers must check all 4 commitments before proceeding.
- * Students see a simplified single-checkbox version.
+ * Role-based rendering (issue #1918):
+ *   - Admins (school_admin / org_admin / system_admin) see admin-specific commitments
+ *   - Teachers see teacher commitments
+ *   - Students see a simplified single-checkbox version
+ *
  * On acceptance calls POST /api/auth/accept-terms, then redirects to dashboard.
  */
 import React, { useState } from 'react';
@@ -34,6 +37,18 @@ const TEACHER_COMMITMENTS: Commitment[] = [
   },
 ];
 
+// issue #1918: admin-specific commitments (distinct from teacher)
+const ADMIN_COMMITMENTS: Commitment[] = [
+  {
+    id: 'admin-compliance',
+    label: '我確認以管理員身分合規使用本平台',
+  },
+  {
+    id: 'admin-data',
+    label: '我確認平台上的學生及教師資料受到妥善保護',
+  },
+];
+
 const STUDENT_COMMITMENTS: Commitment[] = [
   {
     id: 'learn-earnestly',
@@ -45,8 +60,10 @@ const TermsOfService: React.FC = () => {
   const { user, acceptTerms } = useAuth();
   const navigate = useNavigate();
 
-  const isTeacher = hasRole(user, 'teacher', 'school_admin', 'org_admin', 'system_admin');
-  const commitments = isTeacher ? TEACHER_COMMITMENTS : STUDENT_COMMITMENTS;
+  // issue #1918: school_admin / org_admin / system_admin are NOT teachers
+  const isAdmin = hasRole(user, 'school_admin', 'org_admin', 'system_admin');
+  const isTeacher = !isAdmin && hasRole(user, 'teacher');
+  const commitments = isAdmin ? ADMIN_COMMITMENTS : isTeacher ? TEACHER_COMMITMENTS : STUDENT_COMMITMENTS;
 
   const [checked, setChecked] = useState<Record<string, boolean>>(
     () => Object.fromEntries(commitments.map((c) => [c.id, false])),
@@ -86,9 +103,11 @@ const TermsOfService: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-[#1A1A2E]">使用條款</h1>
           <p className="text-[#6B7280] text-sm mt-2">
-            {isTeacher
-              ? '在使用 LingoLeap 平台前，請詳閱並同意以下教師承諾'
-              : '在使用 LingoLeap 平台前，請詳閱並同意以下事項'}
+            {isAdmin
+              ? '在使用 LingoLeap 平台前，請詳閱並同意以下管理員使用條款'
+              : isTeacher
+                ? '在使用 LingoLeap 平台前，請詳閱並同意以下教師承諾'
+                : '在使用 LingoLeap 平台前，請詳閱並同意以下事項'}
           </p>
         </div>
 
@@ -100,7 +119,7 @@ const TermsOfService: React.FC = () => {
           {/* Role badge */}
           <div className="flex items-center gap-2">
             <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#5B4FC4]/10 text-[#5B4FC4]">
-              {isTeacher ? '教師帳號' : '學生帳號'}
+              {isAdmin ? '管理員帳號' : isTeacher ? '教師帳號' : '學生帳號'}
             </span>
             {user?.name && (
               <span className="text-sm text-[#6B7280]">{user.name}</span>
@@ -109,7 +128,7 @@ const TermsOfService: React.FC = () => {
 
           {/* Commitments */}
           <div className="space-y-4">
-            {isTeacher && (
+            {(isTeacher || isAdmin) && (
               <p className="text-sm font-medium text-[#1A1A2E]">我承諾以下事項：</p>
             )}
             {commitments.map((c) => (

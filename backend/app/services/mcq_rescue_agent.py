@@ -12,22 +12,40 @@ Architecture mirrors socratic_agent.py:
   - Error fallback: should_advance=False (NEVER True on error — auto-passing students on error is catastrophic)
 
 Session key: mcq_rescue_{user_id}_{question_id}
+
+Refactored (Issue #1887): session store, state machine, and prompt builder
+are extracted into focused modules:
+  - rescue_session_store.py   — RescueSessionState + RescueSessionStore
+  - rescue_state_machine.py   — give-up / step-advance / termination logic
+  - rescue_prompt_builder.py  — Gemini system prompt construction
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
 from .input_sanitizer import sanitize_ai_input
-from .persona import TUTOR_PERSONA
+from .rescue_prompt_builder import build_system_prompt
+from .rescue_session_store import RescueSessionState, RescueSessionStore
+from .rescue_state_machine import _fallback_prompt, apply_state_transitions
 from .strategy_prompts import StrategyPromptError, load_strategy_prompt
+
+# Re-export for backward compatibility — existing tests and routes import these names.
+__all__ = [
+    "McqRescueAgent",
+    "RescueResponse",
+    "RescueSessionState",
+    "RescueSessionStore",
+    "_store",
+    "mcq_rescue_agent",
+    "RESCUE_RESPONSE_SCHEMA",
+]
 
 # AI-layer exceptions we expect and handle gracefully.
 # Any other exception (KeyError, TypeError, AttributeError, JSONDecodeError, …)
@@ -40,87 +58,7 @@ _AI_ERRORS = (
 
 logger = logging.getLogger(__name__)
 
-
-# ---------------------------------------------------------------------------
-# Session State
-# ---------------------------------------------------------------------------
-
-@dataclass
-class RescueSessionState:
-    session_id: str
-    user_id: int
-    question_id: str
-    lesson_id: str
-    wrong_choice: str
-    question_text: str
-    correct_answer: str
-    strategy_type: str | None
-    # SOP state
-    current_step: int = 1          # 1-5
-    conversation: list[dict] = field(default_factory=list)   # {role, text}
-    consecutive_errors: int = 0
-    give_up_count: int = 0         # consecutive "不知道" / "我不會"
-    created_at: float = field(default_factory=time.time)
-    is_terminated: bool = False
-
-
-# ---------------------------------------------------------------------------
-# Session Store
-# ---------------------------------------------------------------------------
-
-class RescueSessionStore:
-    """In-memory session store for MCQ rescue dialogues.
-
-    Mirrors SessionStore from socratic_agent.py.
-    Key: mcq_rescue_{user_id}_{question_id}
-    TTL: 30 minutes (same as Socratic agent)
-    Rate limit: 30 requests / 60 seconds per session
-    """
-
-    TTL_SECONDS = 30 * 60
-    RATE_LIMIT = 30
-    RATE_WINDOW = 60
-
-    def __init__(self) -> None:
-        self._sessions: dict[str, RescueSessionState] = {}
-        self._rate_counts: dict[str, list[float]] = {}
-
-    @staticmethod
-    def make_key(user_id: int, question_id: str) -> str:
-        return f"mcq_rescue_{user_id}_{question_id}"
-
-    def get(self, session_id: str) -> RescueSessionState | None:
-        self._cleanup()
-        return self._sessions.get(session_id)
-
-    def save(self, state: RescueSessionState) -> None:
-        self._sessions[state.session_id] = state
-
-    def delete(self, session_id: str) -> None:
-        self._sessions.pop(session_id, None)
-
-    def check_rate_limit(self, session_id: str) -> bool:
-        """Return True if rate limit exceeded."""
-        now = time.time()
-        timestamps = self._rate_counts.get(session_id, [])
-        timestamps = [t for t in timestamps if now - t < self.RATE_WINDOW]
-        if len(timestamps) >= self.RATE_LIMIT:
-            return True
-        timestamps.append(now)
-        self._rate_counts[session_id] = timestamps
-        return False
-
-    def _cleanup(self) -> None:
-        now = time.time()
-        expired = [
-            sid for sid, s in self._sessions.items()
-            if now - s.created_at > self.TTL_SECONDS
-        ]
-        for sid in expired:
-            del self._sessions[sid]
-
-
-# Module-level singleton
+# Module-level singleton store (backward-compat — tests import `_store` directly)
 _store = RescueSessionStore()
 
 
@@ -196,72 +134,6 @@ class McqRescueAgent:
     MAX_HISTORY_TURNS = 10
     MAX_CONSECUTIVE_ERRORS = 3
     GIVE_UP_THRESHOLD = 3       # 3 consecutive give-up responses → skip to step 5
-
-    def _build_system_prompt(
-        self,
-        state: RescueSessionState,
-        prompt_data: dict,
-    ) -> str:
-        step_index = state.current_step - 1
-        steps = prompt_data.get("steps", [])
-        current_step_data = steps[step_index] if 0 <= step_index < len(steps) else {}
-
-        step_descriptions = "\n".join(
-            f"  步驟 {s['step']} [{s.get('name','')}] — {s.get('label','')}：{s.get('intent','')}"
-            for s in steps
-        )
-
-        tone_lines = "\n".join(f"  - {t}" for t in prompt_data.get("tone", []))
-
-        terminate_conds = prompt_data.get("terminate_conditions", [])
-        if isinstance(terminate_conds, list):
-            terminate_str = "\n".join(f"  - {c}" for c in terminate_conds)
-        else:
-            terminate_str = str(terminate_conds)
-
-        return f"""{TUTOR_PERSONA}
-
-你是「MCQ 解題助教」。學生在閱讀理解選擇題答錯了，你的任務是用 5 步驟 SOP 引導他找到正確答案。
-
-【策略類型】{prompt_data.get("display_name", "通用")}
-{prompt_data.get("description", "")}
-
-【學生答錯的題目】
-題目：{state.question_text}
-學生選了：{state.wrong_choice}
-
-【5 步驟 SOP 總覽】
-{step_descriptions}
-
-【目前步驟】步驟 {state.current_step} — {current_step_data.get("label", "")}
-目標：{current_step_data.get("intent", "")}
-advance 條件：{current_step_data.get("advance_when", "")}
-fail 條件：{current_step_data.get("fail_when", "")}
-
-引導原則（此步驟）：
-{current_step_data.get("sample_prompt", "")}
-
-【結束條件】
-{terminate_str}
-
-【語氣規範】
-{tone_lines}
-
-評分規則：
-- should_advance = true：學生回答達到此步驟的 advance_when 條件
-- should_advance = false：學生還沒達到，繼續同一步驟引導
-- should_terminate = true：
-  (a) 步驟 4 學生選對了（rescue 成功），或
-  (b) 步驟 5 完成（已直接教學），或
-  (c) 連續 {self.GIVE_UP_THRESHOLD} 次 give_up_detected=true
-- give_up_detected = true：學生說「不知道」「隨便」「我不會」「放棄」等敷衍或放棄詞
-- reasoning 欄位：必填。說明為什麼你設定了 should_advance / should_terminate 這樣的值
-
-絕對禁止：
-- 不可直接給答案，除非到了步驟 5
-- 不可說「答案是 X」直到 step 5
-- 不可讓學生答錯也 should_advance=true（即使他很接近）
-- 不可在 AI 出錯時讓 should_advance=true（錯誤降級必須 should_advance=false）"""
 
     async def start_session(
         self,
@@ -398,7 +270,7 @@ fail 條件：{current_step_data.get("fail_when", "")}
             )
 
         prompt_data = load_strategy_prompt(state.strategy_type)
-        system_prompt = self._build_system_prompt(state, prompt_data)
+        system_prompt = build_system_prompt(state, prompt_data, self.GIVE_UP_THRESHOLD)
 
         # Build Gemini contents
         contents: list[genai_types.Content] = [
@@ -501,30 +373,16 @@ fail 條件：{current_step_data.get("fail_when", "")}
             returned_step = state.current_step
             reasoning = f"AI error fallback (attempt {state.consecutive_errors})"
 
-        # Update give_up_count
-        if give_up_detected:
-            state.give_up_count += 1
-        else:
-            state.give_up_count = 0  # Reset on real answer
-
-        # Auto-skip to step 5 if too many give-ups
-        if state.give_up_count >= self.GIVE_UP_THRESHOLD:
-            returned_step = 5
-            should_advance = False
-            should_terminate = False  # Let step 5 run first, then terminate
-            reasoning += " [Give-up threshold reached — advancing to step 5 direct teach]"
-
-        # Advance step if criteria met
-        if should_advance and returned_step == state.current_step and state.current_step < 5:
-            state.current_step += 1
-            returned_step = state.current_step
-
-        # If step 5 is active and should_advance, terminate
-        if state.current_step == 5 and should_advance:
-            should_terminate = True
-
-        # Clamp step
-        state.current_step = max(1, min(5, returned_step))
+        # Apply state machine transitions (give-up, step advance, termination)
+        should_advance, should_terminate, final_step, reasoning = apply_state_transitions(
+            state=state,
+            give_up_detected=give_up_detected,
+            should_advance=should_advance,
+            should_terminate=should_terminate,
+            returned_step=returned_step,
+            reasoning=reasoning,
+            give_up_threshold=self.GIVE_UP_THRESHOLD,
+        )
 
         # Persist AI response
         full_ai_text = ai_feedback
@@ -538,7 +396,7 @@ fail 條件：{current_step_data.get("fail_when", "")}
         _store.save(state)
 
         return RescueResponse(
-            current_step=state.current_step,
+            current_step=final_step,
             should_advance=should_advance,
             should_terminate=should_terminate,
             give_up_detected=give_up_detected,
@@ -546,17 +404,6 @@ fail 條件：{current_step_data.get("fail_when", "")}
             next_question=next_question,
             reasoning=reasoning,
         )
-
-
-def _fallback_prompt(step: int) -> str:
-    fallbacks = {
-        1: "你能說說看，這題在問什麼嗎？",
-        2: "課文裡哪一段和這個問題有關？",
-        3: "你能用自己的話說說那段在講什麼嗎？",
-        4: "那 A/B/C/D 哪個選項符合你剛才說的？",
-        5: "我們一起來看一下答案好了。",
-    }
-    return fallbacks.get(step, fallbacks[1])
 
 
 # Module-level agent singleton

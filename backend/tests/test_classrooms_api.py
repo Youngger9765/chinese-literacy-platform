@@ -980,3 +980,114 @@ class TestMyEnrollments:
         data = resp.json()
         assert data["total"] == 1
         assert data["classrooms"][0]["is_active"] is False
+
+
+# ===========================================================================
+# GET /api/classrooms — Admin sees ALL platform classrooms (Issue #1919 Bug B)
+# ===========================================================================
+
+
+def _register_and_grant_admin(client, suffix: str) -> dict:
+    """Register a user, grant system_admin role, return {token, user_id}."""
+    import uuid
+    unique = uuid.uuid4().hex[:8]
+    email = f"{suffix}_{unique}@example.com"
+    password = "SecurePass123!"
+    name = f"{suffix.title()} {unique}"
+    resp = client.post("/api/auth/register", json={
+        "email": email,
+        "password": password,
+        "name": name,
+    })
+    assert resp.status_code == 201, resp.text
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    token = login_resp.json()["access_token"]
+    me_resp = client.get("/api/users/me", headers=auth_header(token))
+    user_id = me_resp.json()["id"]
+
+    # Grant system_admin role directly in the test DB
+    db = TestingSessionLocal()
+    try:
+        from app.models.user import UserRole
+        role = db.query(Role).filter(Role.name == "system_admin").first()
+        assert role is not None, "system_admin role not seeded"
+        db.add(UserRole(user_id=user_id, role_id=role.id, scope_type="platform"))
+        db.commit()
+    finally:
+        db.close()
+
+    return {"token": token, "user_id": user_id}
+
+
+class TestAdminListAllClassrooms:
+    """Bug B regression: admin GET /api/classrooms must return ALL platform classrooms.
+
+    Before the fix, the endpoint was teacher-scoped and always returned 0 for admin users
+    who had no teacher-owned classrooms.
+    """
+
+    def test_admin_sees_classrooms_owned_by_other_teachers(
+        self, client, teacher, other_teacher, school_id
+    ):
+        """Admin user with system_admin role sees classrooms owned by regular teachers."""
+        # Ensure at least one classroom exists (created by teacher fixture)
+        client.post(
+            "/api/classrooms",
+            json={"name": "Admin Visibility Test Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+
+        admin = _register_and_grant_admin(client, "admin_bug_b")
+        resp = client.get("/api/classrooms", headers=auth_header(admin["token"]))
+        assert resp.status_code == 200
+        data = resp.json()
+        # Admin must see classrooms owned by other teachers (not just their own)
+        assert data["total"] >= 1, (
+            f"Admin should see >= 1 classroom but got total={data['total']}. "
+            "Bug B: list_my_classrooms is teacher-scoped, ignores admin role."
+        )
+
+    def test_admin_total_exceeds_own_classrooms(
+        self, client, teacher, other_teacher, school_id
+    ):
+        """Admin sees more classrooms than they personally own (which is 0)."""
+        # Create classrooms under two different teachers to ensure multiple classrooms exist
+        client.post(
+            "/api/classrooms",
+            json={"name": "Teacher A Class for Admin", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            "/api/classrooms",
+            json={"name": "Other Teacher Class for Admin", "school_id": school_id},
+            headers=auth_header(other_teacher["token"]),
+        )
+
+        admin = _register_and_grant_admin(client, "admin_total_check")
+        # Admin owns 0 classrooms as a teacher; platform total should be > 0
+        resp = client.get("/api/classrooms", headers=auth_header(admin["token"]))
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] >= 2, (
+            f"Admin should see >= 2 platform classrooms but got {data['total']}."
+        )
+
+    def test_regular_teacher_still_sees_only_own_classrooms(
+        self, client, teacher, other_teacher, school_id
+    ):
+        """Non-admin teacher must NOT see other teachers classrooms (no regression)."""
+        client.post(
+            "/api/classrooms",
+            json={"name": "Isolated Teacher Class", "school_id": school_id},
+            headers=auth_header(other_teacher["token"]),
+        )
+        resp = client.get("/api/classrooms", headers=auth_header(other_teacher["token"]))
+        assert resp.status_code == 200
+        data = resp.json()
+        for item in data["items"]:
+            assert item["teacher_id"] == other_teacher["user_id"], (
+                "Non-admin teacher should only see their own classrooms"
+            )

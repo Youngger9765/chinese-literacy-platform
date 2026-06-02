@@ -1508,6 +1508,179 @@ class TestSubmitAssignment:
             db.close()
 
 
+# ====================================================================
+# Issue #2003: Assignment MUST stay active after first student submits
+# ====================================================================
+
+class TestIssue2003AssignmentStaysActiveAfterSubmit:
+    """Regression tests for #2003.
+
+    Bug: assignment.is_active flips to False after the first student submits,
+    locking out the remaining enrolled students and blocking /restart.
+
+    Expected: assignment stays active until the teacher manually deactivates it.
+    Teacher controls the lifecycle, not student submission events.
+    """
+
+    def _setup_assignment_two_students(
+        self, client, teacher, school_id
+    ) -> tuple[int, dict, dict, int]:
+        """Create a fresh classroom, enroll 2 students, create an assignment.
+
+        Returns (assignment_id, student_a, student_b, classroom_id).
+        """
+        # Fresh unique students so module-scoped shared state doesn't interfere
+        student_a = _register_user(client, "s2003a")
+        student_b = _register_user(client, "s2003b")
+        _make_student_role(student_a["user_id"], school_id)
+        _make_student_role(student_b["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 2003 Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        # Enroll both students
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student_a["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student_b["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 2003 Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+        assert create_resp.json()["is_active"] is True
+        assert create_resp.json()["submission_count"] == 2
+
+        return assignment_id, student_a, student_b, classroom_id
+
+    def test_assignment_stays_active_after_first_student_submits(
+        self, client, teacher, school_id
+    ):
+        """Core regression: assignment.is_active must remain True after one of two
+        enrolled students submits. Only the teacher can deactivate an assignment.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Student A starts and submits
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+        assert submit_resp.status_code == 200
+        assert submit_resp.json()["status"] == "submitted"
+
+        # --- Core assertion: assignment must still be active ---
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        assert detail_resp.json()["is_active"] is True, (
+            "Bug #2003: assignment.is_active flipped to False after student A "
+            "submitted — it should stay True until teacher deactivates."
+        )
+
+    def test_second_student_can_still_see_assignment_after_first_submits(
+        self, client, teacher, school_id
+    ):
+        """Student B (unenrolled/not yet started) must still see the assignment
+        in GET /api/assignments/my after student A submits.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Student A submits
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+
+        # Student B must still be able to see and start the assignment
+        my_resp = client.get(
+            "/api/assignments/my",
+            headers=auth_header(student_b["token"]),
+        )
+        assert my_resp.status_code == 200
+        my_ids = [a["assignment_id"] for a in my_resp.json()]
+        assert assignment_id in my_ids, (
+            "Bug #2003: student B lost access to assignment after student A submitted."
+        )
+
+    def test_assignment_stays_active_after_all_students_submit(
+        self, client, teacher, school_id
+    ):
+        """After ALL students submit, the assignment must still be is_active=True.
+
+        Core regression for #2003: no auto-deactivation when last student submits.
+        Note: /restart creates a new LearningSession; on SQLite the partial unique
+        index (postgresql_where=...) is ignored so a UNIQUE constraint fires.
+        That SQLite limitation is tested separately; here we focus on is_active.
+        """
+        assignment_id, student_a, student_b, _ = self._setup_assignment_two_students(
+            client, teacher, school_id
+        )
+
+        # Both students submit
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_a["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student_b["token"]),
+        )
+        client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student_b["token"]),
+        )
+
+        # Even after ALL students submit, assignment must stay active
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        assert detail_resp.json()["is_active"] is True, (
+            "Bug #2003: assignment.is_active flipped to False after all students submitted. "
+            "Teacher never deactivated it."
+        )
+
+
 # ====================================================================# Notification service — unit tests (no HTTP needed)
 # ====================================================================
 
@@ -2017,3 +2190,382 @@ class TestReadingGoalsInStartResponse:
         data = resp.json()
         assert "effective_cpm" in data
         assert data["effective_cpm"] == 160
+
+
+# ====================================================================
+# Issue #1910 — P0 regression: freshly-created assignment 403 + CORS
+# ====================================================================
+
+class TestIssue1910AssignmentStartAndCORS:
+    """
+    Three characterization tests for #1910.
+
+    Sub-bug A: enrolled student gets 403 on freshly-created assignment
+    because no AssignmentSubmission row was created at assignment creation time.
+
+    Sub-bug B: 4xx error responses are missing Access-Control-Allow-Origin
+    header because RequestLoggingMiddleware (BaseHTTPMiddleware) returns a raw
+    JSONResponse that bypasses CORSMiddleware's send wrapper.
+    """
+
+    def test_create_assignment_creates_submission_for_each_enrolled_student(
+        self, client, teacher, student1, student2, classroom_with_students
+    ):
+        """
+        TDD Red (Sub-bug A): When a teacher creates a new assignment,
+        AssignmentSubmission rows MUST be created for every enrolled student.
+
+        Expected to FAIL before fix: if create_assignment_with_submissions()
+        is broken, submission_count will be 0.
+        """
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1910 — submission row test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assignment_id = data["id"]
+
+        # The classroom has 2 enrolled students (student1 + student2).
+        # submission_count must equal 2 immediately after creation.
+        assert data["submission_count"] == 2, (
+            f"Expected 2 submission rows for 2 enrolled students, got {data['submission_count']}. "
+            "Sub-bug A: create_assignment_with_submissions() didn't create submission rows."
+        )
+
+        # Verify via direct DB query that both rows exist
+        db = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission as AS_1910
+            rows = (
+                db.query(AS_1910)
+                .filter(AS_1910.assignment_id == assignment_id)
+                .all()
+            )
+            student_ids_in_db = {r.student_id for r in rows}
+            assert student1["user_id"] in student_ids_in_db, (
+                f"No submission for student1 (id={student1['user_id']}). "
+                f"Found student_ids: {student_ids_in_db}"
+            )
+            assert student2["user_id"] in student_ids_in_db, (
+                f"No submission for student2 (id={student2['user_id']}). "
+                f"Found student_ids: {student_ids_in_db}"
+            )
+        finally:
+            db.close()
+
+    def test_enrolled_student_can_start_freshly_created_assignment_with_200(
+        self, client, teacher, school_id
+    ):
+        """
+        TDD Red (Sub-bug A): An enrolled student MUST be able to start
+        a freshly-created assignment and receive HTTP 200.
+
+        Uses a dedicated classroom + student to avoid unique-constraint
+        collisions with other tests that use the shared classroom/story.
+        """
+        # Create a dedicated classroom for this test
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 1910 Start Test Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        dedicated_classroom_id = cls_resp.json()["id"]
+
+        # Register a fresh student enrolled in this classroom only
+        fresh_student = _register_user(client, "issue1910_stu")
+        _make_student_role(fresh_student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{dedicated_classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Teacher creates a brand-new assignment — submissions created at this point
+        create_resp = client.post(
+            f"/api/classrooms/{dedicated_classroom_id}/assignments",
+            json={
+                "classroom_id": dedicated_classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1910 — fresh assignment start test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201, create_resp.text
+        assignment_id = create_resp.json()["id"]
+
+        # Enrolled student tries to start — MUST return 200, not 403
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Expected 200, got {start_resp.status_code}: {start_resp.text}. "
+            "Sub-bug A: student is enrolled but server returned 403."
+        )
+        data = start_resp.json()
+        assert "session_id" in data, f"Missing session_id in response: {data}"
+        assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"
+
+    def test_malformed_start_request_returns_4xx_WITH_cors_headers(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """
+        TDD Red (Sub-bug B): Any 4xx error response from the backend MUST
+        include the Access-Control-Allow-Origin header so browsers can
+        display the error message.
+
+        We trigger a deliberate 403/404/400 by trying to start a non-existent
+        assignment as an authenticated user, then check the ACAO header.
+
+        Expected to FAIL before fix: CORS middleware's send wrapper is bypassed
+        by RequestLoggingMiddleware's exception handler, so ACAO header is absent.
+        """
+        # Use an allowed origin so CORSMiddleware has a chance to inject ACAO.
+        # In test/dev the default allowed_origins = "http://localhost:3000,..."
+        # In production this would be the frontend Cloud Run domain.
+        ALLOWED_ORIGIN = "http://localhost:3000"
+
+        # Trigger a 404: assignment does not exist
+        resp = client.post(
+            "/api/assignments/999999/start",
+            headers={
+                **auth_header(student1["token"]),
+                "Origin": ALLOWED_ORIGIN,
+            },
+        )
+        assert resp.status_code == 404, f"Expected 404 for non-existent assignment, got {resp.status_code}"
+
+        acao = resp.headers.get("access-control-allow-origin")
+        assert acao is not None, (
+            f"Sub-bug B: 4xx response missing Access-Control-Allow-Origin header. "
+            f"Headers present: {dict(resp.headers)}"
+        )
+
+        # Also verify a 403 path (unenrolled user trying to start assignment
+        # they have no submission for)
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "CORS test classroom", "school_id": _test_school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        empty_classroom_id = create_resp.json()["id"]
+
+        asn_resp = client.post(
+            f"/api/classrooms/{empty_classroom_id}/assignments",
+            json={"story_id": VALID_STORY_ID, "title": "CORS 403 test"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201
+        asn_id = asn_resp.json()["id"]
+
+        # student1 is NOT enrolled in this classroom → start returns 403
+        resp_403 = client.post(
+            f"/api/assignments/{asn_id}/start",
+            headers={
+                **auth_header(student1["token"]),
+                "Origin": ALLOWED_ORIGIN,
+            },
+        )
+        assert resp_403.status_code == 403, f"Expected 403, got {resp_403.status_code}: {resp_403.text}"
+        acao_403 = resp_403.headers.get("access-control-allow-origin")
+        assert acao_403 is not None, (
+            f"Sub-bug B: 403 response missing Access-Control-Allow-Origin header. "
+            f"Headers: {dict(resp_403.headers)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Issue #1982: POST /api/assignments/{id}/start returns 500 on pending
+# (no-session) assignments on PostgreSQL
+# ---------------------------------------------------------------------------
+class TestIssue1982PendingAssignmentStart500:
+    """
+    Regression tests for issue #1982.
+
+    Root cause: on PostgreSQL the unique partial index
+    ``uq_session_student_story_inprogress`` (student_id, story_slug WHERE
+    status='in_progress' AND story_slug IS NOT NULL) fires when a student
+    already has an in-progress self-study session for the same story.  The
+    ``begin_nested()`` savepoint in ``start_assignment_session()`` catches the
+    IntegrityError, but after rollback the failed LearningSession object
+    remains attached to the SQLAlchemy session, causing ``db.commit()`` to
+    raise an unhandled error → 500.
+
+    SQLite does not enforce the ``postgresql_where`` clause so integration
+    tests on SQLite never expose this.  We test the service function directly
+    with a mock DB that simulates the IntegrityError, then verify the fix.
+    """
+
+    # ------------------------------------------------------------------
+    # Unit tests: service function directly (mock DB → IntegrityError)
+    # ------------------------------------------------------------------
+
+    def test_start_assignment_with_existing_in_progress_session_via_http(
+        self, client, teacher, school_id
+    ):
+        """
+        TDD RED → GREEN: POST /api/assignments/{id}/start returns 200 when
+        the student already has an in_progress self-study LearningSession for
+        the same story.
+
+        Root cause (#1982): the `with db.begin_nested(): db.flush()` pattern
+        leaves the outer SQLAlchemy session in DEACTIVE state after the
+        savepoint rollback when a unique-index violation occurs.  The fallback
+        query and db.commit() then raise PendingRollbackError → HTTP 500.
+
+        Fix: use explicit sp = db.begin_nested() / sp.commit() / sp.rollback()
+        so only the savepoint is rolled back while the outer transaction stays
+        valid.
+
+        On PostgreSQL: unique partial index fires when an in_progress self-study
+        session exists for same student+story_slug.
+        On SQLite (test env): the regular UNIQUE index on (student_id, story_slug)
+        fires — same code path is exercised via the HTTP client.
+        """
+        # Dedicated classroom + fresh student to avoid cross-test collisions
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "1982 IntegrityError simulation classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        classroom_id = cls_resp.json()["id"]
+
+        fresh_student = _register_user(client, "issue1982_ie_stu")
+        _make_student_role(fresh_student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Create assignment (triggers pending submission for the student)
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={"story_id": "1", "title": "1982 IntegrityError test assignment"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201, asn_resp.text
+        assignment_id = asn_resp.json()["id"]
+
+        # Manually insert a pre-existing self-study in_progress session for
+        # the same student + story_slug.  On PostgreSQL this triggers the
+        # partial unique index when start_assignment_session tries to INSERT
+        # the new assignment-mode session.
+        db = TestingSessionLocal()
+        try:
+            from app.models.session import LearningSession
+            self_study_session = LearningSession(
+                student_id=fresh_student["user_id"],
+                story_slug="1",
+                classroom_id=None,
+                status="in_progress",
+                current_step=1,
+                session_mode="self_study",
+                step_progress={},
+                full_reading_attempts=[],
+            )
+            db.add(self_study_session)
+            db.commit()
+        finally:
+            db.close()
+
+        # POST /start → must return 200 (not 500 from PendingRollbackError)
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Issue #1982 regression: expected 200 when pre-existing in_progress "
+            f"session exists for same story, got {start_resp.status_code}: "
+            f"{start_resp.text}"
+        )
+        data = start_resp.json()
+        assert "session_id" in data and data["session_id"] is not None
+        assert data["status"] == "in_progress"
+
+    # ------------------------------------------------------------------
+    # Integration test: full HTTP round-trip (SQLite path — idempotent safe)
+    # ------------------------------------------------------------------
+
+    def test_pending_assignment_start_returns_200_not_500(
+        self, client, teacher, school_id
+    ):
+        """
+        Integration regression: a student with a *pending* submission (status=
+        "pending", session_id=None) must receive HTTP 200 from POST
+        /api/assignments/{id}/start.
+
+        On SQLite the unique-index IntegrityError path is never hit because
+        SQLite ignores the postgresql_where clause — but the normal happy-path
+        must still return 200 (not a 5xx from any other bug).
+        """
+        # Dedicated classroom to avoid cross-test unique-index collisions
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 1982 regression classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        classroom_id = cls_resp.json()["id"]
+
+        # Fresh student enrolled in only this classroom
+        fresh_student = _register_user(client, "issue1982_stu")
+        _make_student_role(fresh_student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Create assignment (student gets a pending submission automatically)
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={"story_id": "1", "title": "Issue 1982 test assignment"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201, asn_resp.text
+        assignment_id = asn_resp.json()["id"]
+
+        # Verify the submission is pending before start
+        db = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission
+            sub = (
+                db.query(AssignmentSubmission)
+                .filter(
+                    AssignmentSubmission.assignment_id == assignment_id,
+                    AssignmentSubmission.student_id == fresh_student["user_id"],
+                )
+                .first()
+            )
+            assert sub is not None, "Submission should exist (created on enrollment)"
+            assert sub.status == "pending", f"Expected pending, got {sub.status}"
+            assert sub.session_id is None, f"Expected no session yet, got {sub.session_id}"
+        finally:
+            db.close()
+
+        # POST /start on a pending submission → must return 200
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Issue #1982 regression: expected 200, got {start_resp.status_code}: "
+            f"{start_resp.text}"
+        )
+        data = start_resp.json()
+        assert "session_id" in data, f"Missing session_id in response: {data}"
+        assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"
+        assert data["session_id"] is not None, "session_id must be set after start"

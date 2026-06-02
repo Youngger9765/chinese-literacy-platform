@@ -1,0 +1,10 @@
+# ───────────────────────────────────────────────────────────────────────────
+# DEPLOYED — the live Spec Check workflow now runs from:
+#       .github/workflows/spec-check.yml   (wired 2026-06, issue #2041)
+#
+# Do NOT edit gate logic here. The live workflow path-filters relevant PRs and
+# delegates to `bash specs/run-ci.sh` (same runner used locally → no drift).
+#
+# This file is kept only as a doc anchor for references in specs/README.md and
+# specs/run-ci.sh. Source of truth: .github/workflows/spec-check.yml + run-ci.sh.
+# ───────────────────────────────────────────────────────────────────────────

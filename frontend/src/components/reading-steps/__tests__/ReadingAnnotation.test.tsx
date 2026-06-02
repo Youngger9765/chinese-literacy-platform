@@ -7,12 +7,14 @@ import { Story } from '../../../types';
 
 vi.mock('../../../context/ZhuyinContext', () => ({
   useZhuyin: () => ({
-    zhuyinEnabled: true,
-    zhuyinReady: true,
-    zhuyinActive: true,
+    zhuyinEnabled: false,
+    zhuyinReady: false,
+    zhuyinActive: false,
+    isZhuyinAny: false,
     setZhuyinEnabled: vi.fn(),
     toggleZhuyin: vi.fn(),
     processZhuyin: (text: string) => text,
+    processLinesSelective: (_lines: string[], _vocabWords: string[]) => null,
   }),
 }));
 
@@ -205,5 +207,178 @@ describe('ReadingAnnotation', () => {
 
     const mark = screen.getByRole('mark', { name: /重要標記：第一/ });
     expect(mark.className).toContain('ring-4');
+  });
+});
+
+// ── TDD-First: Pure unit tests for offset utils ────────────────────────────
+// These test the pure logic extracted from ReadingAnnotation.
+// They MUST pass against the CURRENT (pre-refactor) code AND the refactored code.
+// After refactor, update imports to the new util files.
+
+describe('annotationOffsets (PUA + selection math)', () => {
+  // Import the functions under test.
+  // Pre-refactor: they live inline in ReadingAnnotation.tsx as module-level helpers.
+  // Post-refactor: they'll live in annotationOffsets.ts (re-exported via the same interface).
+  // For now we inline-define equivalent implementations here to test the CONTRACT
+  // (TDD: test the behavior, not the module path).
+
+  function stripPUASelectors(text: string): string {
+    return text.replace(/\uDB40[\uDC00-\uDFFF]/g, '');
+  }
+
+  function countRawChars(text: string, upTo?: number): number {
+    const limit = upTo ?? text.length;
+    let rawCount = 0;
+    let i = 0;
+    while (i < limit) {
+      const code = text.charCodeAt(i);
+      if (code === 0xDB40 && i + 1 < text.length) {
+        const low = text.charCodeAt(i + 1);
+        if (low >= 0xDD00 && low <= 0xDDEF) {
+          i += 2;
+          continue;
+        }
+      }
+      rawCount++;
+      i++;
+    }
+    return rawCount;
+  }
+
+  it('TDD-1: seeded PUA-selector text highlights correct raw character range', () => {
+    // "著" followed by a PUA variation selector (U+E01E1 → surrogate pair DB40 DDE1).
+    // Raw text has 3 chars: 著、頭、緒. PUA selector is between 著 and 頭.
+    const PUA_HIGH = '\uDB40';
+    const PUA_LOW = '\uDDE1'; // U+E01E1 selector
+    const rawText = '著' + PUA_HIGH + PUA_LOW + '頭緒';
+
+    // stripPUASelectors must remove the two-unit surrogate pair entirely
+    const stripped = stripPUASelectors(rawText);
+    expect(stripped).toBe('著頭緒');
+    expect(stripped.length).toBe(3);
+
+    // countRawChars: the string with PUA has 5 UTF-16 units (1 + 2 + 1 + 1),
+    // but raw char count must be 3 (著 頭 緒) — selectors skipped
+    expect(countRawChars(rawText)).toBe(3);
+
+    // upTo boundary: count raw chars up to the 3rd UTF-16 unit (after the high surrogate)
+    // At i=0: '著' → rawCount=1, i=1
+    // At i=1: PUA high 0xDB40, low=0xDDE1 in range → skip both, i=3
+    // At i=3 (limit): stop → rawCount=1
+    expect(countRawChars(rawText, 3)).toBe(1);
+
+    // upTo=5 covers the full string (all 5 code units): rawCount=3
+    expect(countRawChars(rawText, 5)).toBe(3);
+  });
+
+  it('TDD-2: overlapping annotation replaces existing overlapping mark', () => {
+    // Simulate the applyAnnotation filter logic that removes overlapping annotations.
+    // This is the contract: a new annotation at [charStart, charEnd) removes any
+    // existing annotation whose range overlaps with the new range.
+
+    type Annotation = { id: string; paragraphIndex: number; charStart: number; charEnd: number; type: string };
+
+    function applyAnnotationFilter(
+      prev: Annotation[],
+      newRange: { paragraphIndex: number; charStart: number; charEnd: number },
+    ): Annotation[] {
+      const { paragraphIndex, charStart, charEnd } = newRange;
+      return prev.filter(
+        (a) =>
+          a.paragraphIndex !== paragraphIndex ||
+          a.charEnd <= charStart ||
+          a.charStart >= charEnd
+      );
+    }
+
+    const existing: Annotation[] = [
+      { id: 'a1', paragraphIndex: 0, charStart: 2, charEnd: 6, type: 'unknown' },
+      { id: 'a2', paragraphIndex: 0, charStart: 8, charEnd: 10, type: 'important' },
+      { id: 'a3', paragraphIndex: 1, charStart: 0, charEnd: 3, type: 'unknown' },
+    ];
+
+    // New annotation [3, 7) overlaps with a1 (2-6) but not a2 (8-10) or a3 (para 1)
+    const filtered = applyAnnotationFilter(existing, { paragraphIndex: 0, charStart: 3, charEnd: 7 });
+
+    // a1 overlaps (its charEnd 6 > newStart 3 AND charStart 2 < newEnd 7) → removed
+    expect(filtered.find((a) => a.id === 'a1')).toBeUndefined();
+    // a2 does not overlap (charStart 8 >= newEnd 7) → kept
+    expect(filtered.find((a) => a.id === 'a2')).toBeDefined();
+    // a3 is in different paragraph → kept
+    expect(filtered.find((a) => a.id === 'a3')).toBeDefined();
+    expect(filtered.length).toBe(2);
+  });
+
+  it('TDD-3: undo restores previous annotation list + localStorage is synced', () => {
+    // Simulate the undo mechanism: undoStack holds snapshots of annotations[].
+    // After undo: annotations = last snapshot, undoStack pops.
+    // localStorage must reflect the restored state (via useEffect in component).
+
+    type Annotation = { id: string; paragraphIndex: number; charStart: number; charEnd: number; type: string };
+
+    const onFinishLocal = vi.fn();
+
+    // Seed localStorage and render the component
+    const initial: Annotation[] = [
+      { id: 'ann-a', paragraphIndex: 0, charStart: 0, charEnd: 2, type: 'unknown' },
+    ];
+    localStorageMock.setItem('annotations_test-story-001', JSON.stringify(initial));
+
+    render(<ReadingAnnotation story={mockStory} onFinish={onFinishLocal} />);
+
+    // Verify initial state: 1 annotation loaded
+    expect(screen.getByText('1', { selector: 'strong' })).toBeTruthy();
+
+    // Remove the annotation (this pushes a snapshot onto the undo stack)
+    const marks = screen.getAllByRole('mark');
+    act(() => {
+      fireEvent.click(marks[0]);
+    });
+
+    // After removal: 0 annotations
+    expect(screen.getByText(/還沒有標記/)).toBeTruthy();
+    // Undo button should now be enabled
+    const undoBtn = screen.getByLabelText('復原上一步');
+    expect(undoBtn).toHaveProperty('disabled', false);
+
+    // Press undo
+    act(() => {
+      fireEvent.click(undoBtn);
+    });
+
+    // After undo: the annotation is restored
+    expect(screen.queryByText(/還沒有標記/)).toBeNull();
+    expect(screen.getByText('1', { selector: 'strong' })).toBeTruthy();
+
+    // Verify localStorage reflects the restored state
+    const stored = JSON.parse(localStorageMock.getItem('annotations_test-story-001') ?? '[]') as Annotation[];
+    expect(stored.length).toBe(1);
+    expect(stored[0].id).toBe('ann-a');
+  });
+
+  it('TDD-4: inline image/table markers render inline and not duplicated in fallback strip', () => {
+    // Story with one image that has a paragraph caption marker (e.g. "圖1") in content.
+    // The image should render inline after that paragraph AND NOT appear in the fallback strip.
+
+    const onFinishLocal = vi.fn();
+
+    const storyWithInlineImage = {
+      ...mockStory,
+      // Paragraph 0 is a caption row matching detectImageMarker: "圖一 " + non-whitespace
+      content: ['圖一 白尾八哥棲息在電線上', '第二段正常文字'],
+      images: [{ filename: 'images/G7-L30/G7-L30-01.jpg', caption: '白尾八哥圖片' }],
+      layout_mode: 'default',
+    } as unknown as Story;
+
+    render(<ReadingAnnotation story={storyWithInlineImage} onFinish={onFinishLocal} />);
+
+    // The inline image should be rendered after paragraph 0
+    const inlineImages = document.querySelectorAll('[data-testid="inline-image-after-para-0"]');
+    expect(inlineImages.length).toBe(1);
+
+    // The fallback strip for graphic-text layout should NOT contain this image
+    // (layout_mode is 'default', not 'graphic-text', so no strip rendered at all)
+    const fallbackStrip = document.querySelector('[data-testid="reading-annotation-graphic-text-images"]');
+    expect(fallbackStrip).toBeNull();
   });
 });

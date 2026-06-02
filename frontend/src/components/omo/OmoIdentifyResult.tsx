@@ -60,6 +60,18 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   const pollCount = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // #2011: Mirror callback + label state into refs so the polling effect
+  // does NOT depend on them.  Previously `onGraded` and `confirmedTitle`
+  // were useEffect deps — when the parent re-rendered or the user picked a
+  // title, the effect would clear + re-arm the interval, opening a race
+  // window where polling could stop silently while an in-flight fetch was
+  // resolving.  With refs, the effect runs ONCE per upload, and the live
+  // values are read at poll-time without retriggering cleanup.
+  const onGradedRef = useRef(onGraded);
+  onGradedRef.current = onGraded;
+  const confirmedTitleRef = useRef(confirmedTitle);
+  confirmedTitleRef.current = confirmedTitle;
+
   // ---------------------------------------------------------------------------
   // Polling
   // ---------------------------------------------------------------------------
@@ -81,7 +93,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
         if (data.error_message) setErrorMessage(data.error_message);
         if (data.status === 'graded') {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          onGraded?.(data.answers ?? [], data.overall_score ?? null, confirmedTitle);
+          onGradedRef.current?.(data.answers ?? [], data.overall_score ?? null, confirmedTitleRef.current);
         } else if (
           data.status !== 'pending' &&
           data.status !== 'identifying' &&
@@ -97,7 +109,8 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     void poll();
     intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [uploadId, token, alreadyGraded, onGraded, confirmedTitle]);
+    // Deliberately stable deps — see ref pattern above.
+  }, [uploadId, token, alreadyGraded]);
 
   // #1779: unmount safety net — main effect early-returns for alreadyGraded
   // path so its cleanup isn't registered, but handleRegrade may then start
@@ -107,15 +120,64 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
 
+  // #2011: UX fallback — if grading takes longer than expected (or polling
+  // silently dies), show a "查看結果" button after 25s so the user is never
+  // stuck on a spinner forever.  Refs above already make polling robust;
+  // this is defence-in-depth so a single missed poll can't trap the UI.
+  const [showStuckHint, setShowStuckHint] = useState(false);
+  // Track the stuck-hint timer in a ref so we can cancel it on unmount and
+  // reset it without leaking timers when the user spams "立即查看結果".
+  const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const armStuckTimer = () => {
+    if (stuckTimerRef.current) clearTimeout(stuckTimerRef.current);
+    stuckTimerRef.current = setTimeout(() => setShowStuckHint(true), 25000);
+  };
+  useEffect(() => {
+    if (!confirmed) return;
+    setShowStuckHint(false);
+    armStuckTimer();
+    return () => {
+      if (stuckTimerRef.current) {
+        clearTimeout(stuckTimerRef.current);
+        stuckTimerRef.current = null;
+      }
+    };
+  }, [confirmed]);
+
+  const checkResultNow = async () => {
+    try {
+      const data = await getOmoStatus(uploadId, token);
+      if (data.status === 'graded') {
+        onGradedRef.current?.(
+          data.answers ?? [],
+          data.overall_score ?? null,
+          confirmedTitleRef.current,
+        );
+      } else {
+        // Reset timer so the hint comes back if user keeps waiting.
+        // Goes through armStuckTimer to clear any pending one first — prevents
+        // multiple stacked timers from rapid button taps.
+        setShowStuckHint(false);
+        armStuckTimer();
+      }
+    } catch {
+      /* keep UI as-is on transient error */
+    }
+  };
+
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
   const handleConfirm = async (lessonId: number, lessonTitle?: string) => {
     setConfirming(true);
     setShowManualPicker(false);
-    if (lessonTitle) setConfirmedTitle(lessonTitle);
     try {
       await confirmOmoLesson(uploadId, lessonId, token);
+      // #2011: setConfirmedTitle moved AFTER the await.  Setting it before
+      // the await would trigger a render mid-network-request, racing with
+      // the in-flight fetch state.  With the ref-based polling effect this
+      // is also safe, but ordering setState calls together keeps things tidy.
+      if (lessonTitle) setConfirmedTitle(lessonTitle);
       setConfirmed(true);
       onConfirmed?.(lessonId);
       setStatus('grading');
@@ -133,6 +195,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     try {
       await regradeOmo(uploadId, token);
       setStatus('grading');
+      setConfirmed(true);  // #2011: surface the timeout-hint UX during regrade too
       pollCount.current = 0;
       intervalRef.current = setInterval(async () => {
         pollCount.current += 1;
@@ -146,7 +209,13 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
           setStatus(data.status);
           if (data.status === 'graded') {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            onGraded?.(data.answers ?? [], data.overall_score ?? null, confirmedTitle);
+            // #2011: read live values via refs so a closure capture of
+            // confirmedTitle / onGraded at handler-arm time can't go stale.
+            onGradedRef.current?.(
+              data.answers ?? [],
+              data.overall_score ?? null,
+              confirmedTitleRef.current,
+            );
           }
         } catch { /* ignore transient */ }
       }, POLL_INTERVAL_MS);
@@ -292,6 +361,28 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
           <p className="font-semibold text-gray-800">AI 正在批改中</p>
           <p className="mt-1 text-sm text-gray-500">通常需要 15～20 秒…</p>
         </div>
+        {/* #2011: defence-in-depth — if polling silently dies between
+            "grading" and "graded" (e.g. background tab throttling, transient
+            network blip mid-fetch, browser extension), the user is never
+            stuck. After 25 s, surface a button that re-queries the status
+            directly and transitions if it's actually done. */}
+        {showStuckHint && (
+          <div className="w-full flex flex-col items-center gap-2">
+            <p className="text-xs text-gray-400 text-center">
+              批改通常 15-20 秒，超過時間可手動檢查結果
+            </p>
+            <button
+              type="button"
+              onClick={checkResultNow}
+              className="px-5 py-2 text-sm font-medium rounded-xl border border-gray-300 bg-white
+                hover:bg-gray-50 active:bg-gray-100
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                transition-colors"
+            >
+              立即查看批改結果
+            </button>
+          </div>
+        )}
       </div>
     );
   }

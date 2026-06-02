@@ -1,0 +1,19 @@
+---
+description: Modular spec system — check specs/registry before editing owned backend code or lesson data
+globs:
+  - "backend/**"
+  - "specs/**"
+  - "frontend/src/config/**"
+alwaysApply: true
+---
+
+# Modular Spec System (`specs/`)
+
+Before editing backend code or lesson data, check whether it is owned by a spec module:
+
+1. Read `specs/registry.yaml` — the index listing each module's `owns_code` / `owns_data`.
+2. If the file you're changing belongs to a module → read that module's `specs/modules/<feature>/INTENT.md` (human-readable spec: what may/may not change) and, when relevant, `backend/specs/test_<feature>_spec.py` (the machine contract).
+3. After changes run `bash specs/run-ci.sh` (local CI = registry freshness + all 27 module contracts) — a failing contract means code/data drifted from intent (fix the code, or update the spec — pick one). GitHub Actions auto-run is blocked on token scope (issue 2041); run this locally before pushing.
+4. For a new feature with no module → write `specs/modules/<feature>/INTENT.md` first, then the code.
+
+Purpose: load only the spec the current feature needs, instead of the whole PRD / all meeting notes — so the AI doesn't get confused by irrelevant context. Full overview: `specs/README.md`.

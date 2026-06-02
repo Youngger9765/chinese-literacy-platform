@@ -51,6 +51,10 @@ class AnswerItem(BaseModel):
     score: float
     ai_confidence: float
     reasoning: str
+    # #2011 follow-up: the question prompt from lesson YAML, surfaced in the
+    # result page header. Optional — uploads graded before this field was
+    # added will have it as None; frontend falls back to "題目 {question_id}".
+    context: Optional[str] = None
     source_attempt_id: Optional[int] = None
     position: Optional[dict] = None
     crop_image_url: Optional[str] = None
@@ -123,6 +127,27 @@ class OmoByLessonResponse(BaseModel):
     images: list[OmoSignedImageInfo] = Field(default_factory=list)
 
 
+class OmoHistoryItem(BaseModel):
+    """Compact representation of one OMO upload for the history list (#1975)."""
+    upload_id: int
+    lesson_id: Optional[int] = None
+    lesson_title: Optional[str] = None
+    grade_code: Optional[str] = None
+    status: str
+    overall_score: Optional[float] = None
+    answers_count: int = 0
+    created_at: str   # ISO-8601
+    thumbnail_url: Optional[str] = None
+
+
+class OmoHistoryResponse(BaseModel):
+    """Paginated list of the current user's OMO uploads, newest first."""
+    total: int
+    limit: int
+    offset: int
+    items: list[OmoHistoryItem] = Field(default_factory=list)
+
+
 # ── Response builder helpers ───────────────────────────────────────────────────
 
 def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
@@ -160,6 +185,7 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
                 score=a.get("score", 0.0),
                 ai_confidence=a.get("ai_confidence", 0.0),
                 reasoning=a.get("reasoning", ""),
+                context=a.get("context"),  # #2011 follow-up; None for pre-existing uploads
                 source_attempt_id=a.get("source_attempt_id"),
                 position=a.get("position"),
                 crop_image_url=a.get("crop_image_url"),

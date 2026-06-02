@@ -100,6 +100,34 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 ---
 
+## Modular Spec System (`specs/`)
+
+Before editing backend code or lesson data, check whether the target file is
+owned by a spec module:
+
+1. Read `specs/registry.yaml` (index of all modules, their `owns_code` /
+   `owns_data` paths).
+2. If the file you are editing appears under a module → read
+   `specs/modules/<feature>/INTENT.md` (human-readable SOT) and the
+   corresponding `backend/specs/test_<feature>_spec.py` (machine contracts).
+3. After changes: run **`bash specs/run-ci.sh`** (local CI = registry-freshness
+   gate + all spec contracts). A failing contract means code or data drifted
+   from the documented intent; fix the code OR update the spec (but document
+   why). Fast registry-only check: `bash specs/run-ci.sh --quick`.
+4. No matching module for a genuinely new feature → create
+   `specs/modules/<feature>/INTENT.md` before writing code, then rebuild the
+   index with `python specs/build_registry.py`.
+
+There are currently **27 modules**. Full index: `specs/registry.yaml`. Full
+guide: `specs/README.md`.
+
+**Local CI**: the GitHub Actions auto-run is blocked on a `workflow`-scoped
+token (issue 2041). Until that lands, run `bash specs/run-ci.sh` before pushing
+any change under `specs/` or `backend/app/services/`. (Last local run: 457
+passed / 31 xfailed.)
+
+---
+
 ## 禁止事項
 
 - **不要** hardcode API key、密碼、token

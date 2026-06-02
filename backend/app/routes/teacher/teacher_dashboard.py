@@ -14,6 +14,7 @@ from ...models.school import Classroom, ClassroomStudent, ClassroomText
 from ...models.session import LearningSession
 from ...models.student_tag import StudentTag
 from ...models.user import User
+from ...services.classroom_dev_filter import is_dev_classroom
 from ...services.lesson_loader import get_lesson_by_id
 from .teacher_schemas import (
     ClassroomStatsResponse,
@@ -41,6 +42,9 @@ def list_teacher_classrooms(
         .order_by(Classroom.created_at.desc())
         .all()
     )
+
+    # Filter out dev/test classrooms from the teacher-facing list
+    classrooms = [c for c in classrooms if not is_dev_classroom(c.name)]
 
     if not classrooms:
         return []

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { joinClassroomByCode, ClassroomApiError } from '../services/classroomApi';
+import { useToast } from '../components/ui/Toast';
 
 const JoinClassroomPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuth();
+  const { toast, showToast } = useToast();
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -42,6 +44,7 @@ const JoinClassroomPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const result = await joinClassroomByCode(token, joinCode);
+      showToast(`成功加入「${result.name}」！`, 'success');
       setSuccessMessage(`成功加入「${result.name}」！`);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
@@ -64,6 +67,7 @@ const JoinClassroomPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
+      {toast}
       <div className="w-full max-w-sm">
         {/* Logo / Brand */}
         <div className="text-center mb-8">

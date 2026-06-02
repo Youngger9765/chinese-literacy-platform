@@ -1,10 +1,23 @@
 /**
  * Teacher Dashboard API service -- student progress & text management.
- * Follows the same pattern as classroomApi.ts.
+ * Migrated to httpClient in Issue #1842.
+ *
+ * IMPORTANT behavioral notes preserved from old implementation:
+ * - getClassroomTexts/assignText/unassignText use /api/classrooms/ (not /api/teacher/)
+ * - exportClassroomReport: uses request() with responseType blob workaround
+ * - deleteStoryTag: silently swallows 404 (non-404 errors throw)
+ * - deleteInstruction: soft-delete, returns TeacherInstruction JSON (not void)
+ * - getStudentLearningCurve: optional story_slug query param
+ * - onApiUnauthorized is called via SessionExpiredApiError thrown by httpClient
  */
 
-import { onApiUnauthorized } from './sessionGuard';
-import { API_BASE } from './apiConfig';
+import { request, get, post, put, patch, del } from './httpClient';
+import { SessionExpiredApiError, ApiError } from './apiConfig';
+import { notifySessionUnauthorized } from './sessionGuard';
+
+// TeacherApiError backward-compat alias: httpClient throws ApiError (status-carrying).
+// Re-export ApiError as TeacherApiError so `instanceof TeacherApiError` still works.
+export { ApiError as TeacherApiError } from './apiConfig';
 
 
 // --- Response types ---
@@ -34,41 +47,6 @@ export interface ClassroomTextItem {
   assigned_at: string;
 }
 
-// --- Error class ---
-
-export class TeacherApiError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'TeacherApiError';
-    this.status = status;
-  }
-}
-
-// --- Helpers ---
-
-function authHeaders(token: string): Record<string, string> {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-async function handleResponse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    onApiUnauthorized(res);
-    let message = `Request failed: ${res.status}`;
-    try {
-      const body = await res.json();
-      message = body.detail ?? body.message ?? message;
-    } catch {
-      // ignore JSON parse errors
-    }
-    throw new TeacherApiError(message, res.status);
-  }
-  return res.json() as Promise<T>;
-}
-
 export interface ClassroomStats {
   total_students: number;
   total_sessions: number;
@@ -94,50 +72,6 @@ export interface TimeStats {
   sessions_last_week: number;
 }
 
-// --- API functions ---
-
-/** Get student progress for a classroom. */
-export async function getClassroomProgress(
-  token: string,
-  classroomId: number,
-): Promise<StudentProgress[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/progress`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentProgress[]>(res);
-}
-
-/** Get assigned texts for a classroom. */
-export async function getClassroomTexts(
-  token: string,
-  classroomId: number,
-): Promise<ClassroomTextItem[]> {
-  const res = await fetch(
-    `${API_BASE}/api/classrooms/${classroomId}/texts`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ClassroomTextItem[]>(res);
-}
-
-/** Assign a text (story) to a classroom. */
-export async function assignText(
-  token: string,
-  classroomId: number,
-  textId: string,
-  copyrightConfirmed: boolean = false,
-): Promise<ClassroomTextItem> {
-  const res = await fetch(
-    `${API_BASE}/api/classrooms/${classroomId}/texts`,
-    {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify({ text_id: textId, copyright_confirmed: copyrightConfirmed }),
-    },
-  );
-  return handleResponse<ClassroomTextItem>(res);
-}
-
 export interface StudentSession {
   id: number;
   story_title: string | null;
@@ -145,18 +79,6 @@ export interface StudentSession {
   completed_at: string | null;
   overall_score: number | null;
   status: string;
-}
-
-/** Get learning session history for a specific student. */
-export async function getStudentSessions(
-  token: string,
-  studentId: number,
-): Promise<StudentSession[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/sessions`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentSession[]>(res);
 }
 
 // ── Dialogue history (Issue #418) ──────────────────────────────────────────
@@ -177,151 +99,6 @@ export interface TeacherDialogueHistoryResponse {
   story_slug: string | null;
   turns: TeacherDialogueTurn[];
   total: number;
-}
-
-/** Fetch Socratic dialogue history for a student session (teacher view). */
-export async function getTeacherStudentDialogue(
-  token: string,
-  studentId: number,
-  sessionId: number,
-): Promise<TeacherDialogueHistoryResponse> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/dialogue`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<TeacherDialogueHistoryResponse>(res);
-}
-
-/** Unassign a text from a classroom. */
-export async function unassignText(
-  token: string,
-  classroomId: number,
-  textId: string,
-): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/api/classrooms/${classroomId}/texts/${textId}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  if (!res.ok) {
-    onApiUnauthorized(res);
-    let message = `Request failed: ${res.status}`;
-    try {
-      const body = await res.json();
-      message = body.detail ?? body.message ?? message;
-    } catch {
-      // ignore
-    }
-    throw new TeacherApiError(message, res.status);
-  }
-}
-
-/** Export classroom report as a CSV Blob. */
-export async function exportClassroomReport(token: string, classroomId: number): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/api/teacher/classrooms/${classroomId}/export`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    onApiUnauthorized(res);
-    throw new TeacherApiError('Export failed', res.status);
-  }
-  return res.blob();
-}
-
-/** Get classroom aggregate statistics. */
-export async function getClassroomStats(
-  token: string,
-  classroomId: number,
-): Promise<ClassroomStats> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/stats`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ClassroomStats>(res);
-}
-
-/** Get top error vocabulary for a classroom. */
-export async function getErrorVocab(
-  token: string,
-  classroomId: number,
-): Promise<ErrorVocabItem[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/error-vocab`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ErrorVocabItem[]>(res);
-}
-
-/** Get learning time statistics for a classroom. */
-export async function getTimeStats(
-  token: string,
-  classroomId: number,
-): Promise<TimeStats> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/time-stats`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<TimeStats>(res);
-}
-
-// --- Student Tag API ---
-
-/** List all tags for a student. */
-export async function getStudentTags(
-  token: string,
-  studentId: number,
-): Promise<StudentTag[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/tags`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentTag[]>(res);
-}
-
-/** Add a tag to a student. */
-export async function addStudentTag(
-  token: string,
-  studentId: number,
-  tagName: string,
-  color: string = 'gray',
-): Promise<StudentTag> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/tags`,
-    {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify({ tag_name: tagName, color }),
-    },
-  );
-  return handleResponse<StudentTag>(res);
-}
-
-/** Remove a tag from a student. */
-export async function removeStudentTag(
-  token: string,
-  studentId: number,
-  tagName: string,
-): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/tags/${encodeURIComponent(tagName)}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  if (!res.ok) {
-    onApiUnauthorized(res);
-    let message = `Request failed: ${res.status}`;
-    try {
-      const body = await res.json();
-      message = body.detail ?? body.message ?? message;
-    } catch {
-      // ignore
-    }
-    throw new TeacherApiError(message, res.status);
-  }
 }
 
 // --- Heatmap types ---
@@ -349,18 +126,6 @@ export interface ClassroomHeatmap {
   scores: HeatmapScore[];
 }
 
-/** Get student × story score heatmap for a classroom. */
-export async function getClassroomHeatmap(
-  token: string,
-  classroomId: number,
-): Promise<ClassroomHeatmap> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/heatmap`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ClassroomHeatmap>(res);
-}
-
 // --- Alert & Learning Curve types ---
 
 export interface StudentAlert {
@@ -383,30 +148,6 @@ export interface LearningCurvePoint {
 
 export interface LearningCurveData {
   data: LearningCurvePoint[];
-}
-
-/** Get at-risk student alerts for a classroom. */
-export async function getClassroomAlerts(
-  token: string,
-  classroomId: number,
-): Promise<StudentAlert[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/alerts`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentAlert[]>(res);
-}
-
-/** Get time-series learning curve data for a student. */
-export async function getStudentLearningCurve(
-  token: string,
-  studentId: number,
-  storySlug?: string,
-): Promise<LearningCurveData> {
-  let url = `${API_BASE}/api/teacher/students/${studentId}/learning-curve`;
-  if (storySlug) url += `?story_slug=${encodeURIComponent(storySlug)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  return handleResponse<LearningCurveData>(res);
 }
 
 // --- Teacher Instructions (Individualized) ---
@@ -434,79 +175,6 @@ export interface InstructionUpdateData {
   is_active?: boolean;
 }
 
-/** Create a special instruction for a student. */
-export async function createStudentInstruction(
-  token: string,
-  studentId: number,
-  data: InstructionCreateData,
-): Promise<TeacherInstruction> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
-    {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify(data),
-    },
-  );
-  return handleResponse<TeacherInstruction>(res);
-}
-
-/** Get active instructions for a student. */
-export async function getStudentInstructions(
-  token: string,
-  studentId: number,
-): Promise<TeacherInstruction[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<TeacherInstruction[]>(res);
-}
-
-/** Get active instruction counts for all students in a classroom (bulk, avoids N+1). */
-export async function getClassroomInstructionCounts(
-  token: string,
-  classroomId: number,
-): Promise<Record<number, number>> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/instruction-counts`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<Record<number, number>>(res);
-}
-
-/** Update an instruction. */
-export async function updateInstruction(
-  token: string,
-  instructionId: number,
-  data: InstructionUpdateData,
-): Promise<TeacherInstruction> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/instructions/${instructionId}`,
-    {
-      method: 'PATCH',
-      headers: authHeaders(token),
-      body: JSON.stringify(data),
-    },
-  );
-  return handleResponse<TeacherInstruction>(res);
-}
-
-/** Soft-delete an instruction. */
-export async function deleteInstruction(
-  token: string,
-  instructionId: number,
-): Promise<TeacherInstruction> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/instructions/${instructionId}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  return handleResponse<TeacherInstruction>(res);
-}
-
 // --- Notification Center ---
 
 export interface NotificationItem {
@@ -526,41 +194,6 @@ export interface NotificationSummary {
   total: number;
   unread: number;
   items: NotificationItem[];
-}
-
-/** Fetch all aggregated alerts across all teacher classrooms with read state. */
-export async function getTeacherNotifications(
-  token: string,
-): Promise<NotificationSummary> {
-  const res = await fetch(`${API_BASE}/api/teacher/notifications`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return handleResponse<NotificationSummary>(res);
-}
-
-/** Mark specific alert keys as read. */
-export async function markNotificationsRead(
-  token: string,
-  alertKeys: string[],
-): Promise<{ marked: number }> {
-  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-read`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify({ alert_keys: alertKeys }),
-  });
-  return handleResponse<{ marked: number }>(res);
-}
-
-/** Mark all current alerts as read. */
-export async function markAllNotificationsRead(
-  token: string,
-): Promise<{ marked: number }> {
-  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-all-read`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify({}),
-  });
-  return handleResponse<{ marked: number }>(res);
 }
 
 // ── Cross-Text Analysis (Issue #253) ─────────────────────────────────────────
@@ -617,18 +250,6 @@ export interface ClassroomCrossTextPattern {
   student_patterns: StudentCrossTextPattern[];
 }
 
-/** Fetch cross-text learning pattern analysis for a classroom. */
-export async function getCrossTextAnalysis(
-  token: string,
-  classroomId: number,
-): Promise<ClassroomCrossTextPattern> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/cross-text-analysis`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ClassroomCrossTextPattern>(res);
-}
-
 // ── At-Risk Students / Predictive Detection (Issue #254) ──────────────────────
 
 export interface AtRiskStudent {
@@ -641,19 +262,6 @@ export interface AtRiskStudent {
   supporting_data: Record<string, unknown>;
 }
 
-/** Fetch predictive at-risk student list for a classroom. */
-export async function getAtRiskStudents(
-  token: string,
-  classroomId: number,
-): Promise<AtRiskStudent[]> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/at-risk-students`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<AtRiskStudent[]>(res);
-}
-
-
 // ── Story Tags: difficulty + custom labels (Issue #422) ───────────────────────
 
 export interface StoryTagData {
@@ -665,58 +273,6 @@ export interface StoryTagData {
 export interface StoryTagUpsertRequest {
   difficulty_level?: 'easy' | 'medium' | 'hard' | null;
   custom_tags?: string[];
-}
-
-/** Get teacher's difficulty and custom tags for a story. */
-export async function getStoryTag(
-  token: string,
-  storyRef: string,
-): Promise<StoryTagData> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StoryTagData>(res);
-}
-
-/** Set or update difficulty and custom tags for a story. */
-export async function upsertStoryTag(
-  token: string,
-  storyRef: string,
-  data: StoryTagUpsertRequest,
-): Promise<StoryTagData> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
-    {
-      method: 'PUT',
-      headers: authHeaders(token),
-      body: JSON.stringify(data),
-    },
-  );
-  return handleResponse<StoryTagData>(res);
-}
-
-/** Remove all custom tags and difficulty override for a story. */
-export async function deleteStoryTag(
-  token: string,
-  storyRef: string,
-): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
-    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
-  );
-  if (!res.ok && res.status !== 404) {
-    const data = await res.json().catch(() => ({}));
-    throw new TeacherApiError(data.detail ?? 'Failed to delete story tag', res.status);
-  }
-}
-
-/** List all story tags created by the authenticated teacher. */
-export async function listStoryTags(token: string): Promise<StoryTagData[]> {
-  const res = await fetch(`${API_BASE}/api/teacher/story-tags`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return handleResponse<StoryTagData[]>(res);
 }
 
 // --- Error Heatmap types ---
@@ -738,18 +294,6 @@ export interface ClassroomErrorHeatmap {
   errors: ErrorHeatmapError[];
 }
 
-/** Get student × character error heatmap for a classroom. */
-export async function getClassroomErrorHeatmap(
-  token: string,
-  classroomId: number,
-): Promise<ClassroomErrorHeatmap> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/classrooms/${classroomId}/error-heatmap`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<ClassroomErrorHeatmap>(res);
-}
-
 // --- Teacher Session Report + Comment (Issue #993) ---
 
 export interface TeacherSessionReport {
@@ -759,6 +303,7 @@ export interface TeacherSessionReport {
   story_slug: string | null;
   story_title: string | null;
   status: string;
+  is_complete: boolean;  // #1911: True when status == 'completed' — matches progress table criterion
   accuracy: number | null;
   overall_score: number | null;
   reading_result: Record<string, unknown> | null;
@@ -777,46 +322,322 @@ export interface TeacherSessionReport {
   completed_at: string | null;
 }
 
-export async function fetchTeacherSessionReport(
-  token: string,
+// ════════════════════════════════════════════════════════════════════════════════
+// API functions
+// ════════════════════════════════════════════════════════════════════════════════
+
+/** Get student progress for a classroom. */
+export function getClassroomProgress(
+  _token: string,
+  classroomId: number,
+): Promise<StudentProgress[]> {
+  return get(`/api/teacher/classrooms/${classroomId}/progress`);
+}
+
+/** Get assigned texts for a classroom. */
+export function getClassroomTexts(
+  _token: string,
+  classroomId: number,
+): Promise<ClassroomTextItem[]> {
+  return get(`/api/classrooms/${classroomId}/texts`);
+}
+
+/** Assign a text (story) to a classroom. */
+export function assignText(
+  _token: string,
+  classroomId: number,
+  textId: string,
+  copyrightConfirmed: boolean = false,
+): Promise<ClassroomTextItem> {
+  return post(`/api/classrooms/${classroomId}/texts`, {
+    text_id: textId,
+    copyright_confirmed: copyrightConfirmed,
+  });
+}
+
+/** Get learning session history for a specific student. */
+export function getStudentSessions(
+  _token: string,
+  studentId: number,
+): Promise<StudentSession[]> {
+  return get(`/api/teacher/students/${studentId}/sessions`);
+}
+
+/** Fetch Socratic dialogue history for a student session (teacher view). */
+export function getTeacherStudentDialogue(
+  _token: string,
+  studentId: number,
+  sessionId: number,
+): Promise<TeacherDialogueHistoryResponse> {
+  return get(`/api/teacher/students/${studentId}/sessions/${sessionId}/dialogue`);
+}
+
+/** Unassign a text from a classroom. */
+export function unassignText(
+  _token: string,
+  classroomId: number,
+  textId: string,
+): Promise<void> {
+  return del(`/api/classrooms/${classroomId}/texts/${textId}`);
+}
+
+/** Export classroom report as a CSV Blob. */
+export async function exportClassroomReport(_token: string, classroomId: number): Promise<Blob> {
+  // httpClient.request() returns parsed JSON by default.
+  // For blob responses we must bypass it and call fetch + res.blob() directly.
+  // We still use the auth token via httpClient internals by calling request with
+  // a custom responseType workaround: fetch raw, handle blob.
+  const { API_BASE } = await import('./apiConfig');
+  const { authToken } = await import('../utils/storage');
+  const token = authToken.get();
+  const res = await fetch(`${API_BASE}/api/teacher/classrooms/${classroomId}/export`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    notifySessionUnauthorized();
+    if (res.status === 401) throw new SessionExpiredApiError();
+    throw new ApiError('Export failed', res.status);
+  }
+  return res.blob();
+}
+
+/** Get classroom aggregate statistics. */
+export function getClassroomStats(
+  _token: string,
+  classroomId: number,
+): Promise<ClassroomStats> {
+  return get(`/api/teacher/classrooms/${classroomId}/stats`);
+}
+
+/** Get top error vocabulary for a classroom. */
+export function getErrorVocab(
+  _token: string,
+  classroomId: number,
+): Promise<ErrorVocabItem[]> {
+  return get(`/api/teacher/classrooms/${classroomId}/error-vocab`);
+}
+
+/** Get learning time statistics for a classroom. */
+export function getTimeStats(
+  _token: string,
+  classroomId: number,
+): Promise<TimeStats> {
+  return get(`/api/teacher/classrooms/${classroomId}/time-stats`);
+}
+
+// --- Student Tag API ---
+
+/** List all tags for a student. */
+export function getStudentTags(
+  _token: string,
+  studentId: number,
+): Promise<StudentTag[]> {
+  return get(`/api/teacher/students/${studentId}/tags`);
+}
+
+/** Add a tag to a student. */
+export function addStudentTag(
+  _token: string,
+  studentId: number,
+  tagName: string,
+  color: string = 'gray',
+): Promise<StudentTag> {
+  return post(`/api/teacher/students/${studentId}/tags`, { tag_name: tagName, color });
+}
+
+/** Remove a tag from a student. */
+export function removeStudentTag(
+  _token: string,
+  studentId: number,
+  tagName: string,
+): Promise<void> {
+  return del(`/api/teacher/students/${studentId}/tags/${encodeURIComponent(tagName)}`);
+}
+
+/** Get student × story score heatmap for a classroom. */
+export function getClassroomHeatmap(
+  _token: string,
+  classroomId: number,
+): Promise<ClassroomHeatmap> {
+  return get(`/api/teacher/classrooms/${classroomId}/heatmap`);
+}
+
+/** Get at-risk student alerts for a classroom. */
+export function getClassroomAlerts(
+  _token: string,
+  classroomId: number,
+): Promise<StudentAlert[]> {
+  return get(`/api/teacher/classrooms/${classroomId}/alerts`);
+}
+
+/** Get time-series learning curve data for a student. */
+export function getStudentLearningCurve(
+  _token: string,
+  studentId: number,
+  storySlug?: string,
+): Promise<LearningCurveData> {
+  let path = `/api/teacher/students/${studentId}/learning-curve`;
+  if (storySlug) path += `?story_slug=${encodeURIComponent(storySlug)}`;
+  return get(path);
+}
+
+// --- Teacher Instructions ---
+
+/** Create a special instruction for a student. */
+export function createStudentInstruction(
+  _token: string,
+  studentId: number,
+  data: InstructionCreateData,
+): Promise<TeacherInstruction> {
+  return post(`/api/teacher/students/${studentId}/instructions`, data);
+}
+
+/** Get active instructions for a student. */
+export function getStudentInstructions(
+  _token: string,
+  studentId: number,
+): Promise<TeacherInstruction[]> {
+  return get(`/api/teacher/students/${studentId}/instructions`);
+}
+
+/** Get active instruction counts for all students in a classroom (bulk, avoids N+1). */
+export function getClassroomInstructionCounts(
+  _token: string,
+  classroomId: number,
+): Promise<Record<number, number>> {
+  return get(`/api/teacher/classrooms/${classroomId}/instruction-counts`);
+}
+
+/** Update an instruction. */
+export function updateInstruction(
+  _token: string,
+  instructionId: number,
+  data: InstructionUpdateData,
+): Promise<TeacherInstruction> {
+  return patch(`/api/teacher/instructions/${instructionId}`, data);
+}
+
+/** Soft-delete an instruction. */
+export function deleteInstruction(
+  _token: string,
+  instructionId: number,
+): Promise<TeacherInstruction> {
+  // Returns JSON body (soft-delete returns updated record), NOT void
+  return del<TeacherInstruction>(`/api/teacher/instructions/${instructionId}`);
+}
+
+// --- Notification Center ---
+
+/** Fetch all aggregated alerts across all teacher classrooms with read state. */
+export function getTeacherNotifications(
+  _token: string,
+): Promise<NotificationSummary> {
+  return get('/api/teacher/notifications');
+}
+
+/** Mark specific alert keys as read. */
+export function markNotificationsRead(
+  _token: string,
+  alertKeys: string[],
+): Promise<{ marked: number }> {
+  return post('/api/teacher/notifications/mark-read', { alert_keys: alertKeys });
+}
+
+/** Mark all current alerts as read. */
+export function markAllNotificationsRead(
+  _token: string,
+): Promise<{ marked: number }> {
+  return post('/api/teacher/notifications/mark-all-read', {});
+}
+
+/** Fetch cross-text learning pattern analysis for a classroom. */
+export function getCrossTextAnalysis(
+  _token: string,
+  classroomId: number,
+): Promise<ClassroomCrossTextPattern> {
+  return get(`/api/teacher/classrooms/${classroomId}/cross-text-analysis`);
+}
+
+/** Fetch predictive at-risk student list for a classroom. */
+export function getAtRiskStudents(
+  _token: string,
+  classroomId: number,
+): Promise<AtRiskStudent[]> {
+  return get(`/api/teacher/classrooms/${classroomId}/at-risk-students`);
+}
+
+// ── Story Tags ────────────────────────────────────────────────────────────────
+
+/** Get teacher's difficulty and custom tags for a story. */
+export function getStoryTag(
+  _token: string,
+  storyRef: string,
+): Promise<StoryTagData> {
+  return get(`/api/teacher/story-tags/${encodeURIComponent(storyRef)}`);
+}
+
+/** Set or update difficulty and custom tags for a story. */
+export function upsertStoryTag(
+  _token: string,
+  storyRef: string,
+  data: StoryTagUpsertRequest,
+): Promise<StoryTagData> {
+  return put(`/api/teacher/story-tags/${encodeURIComponent(storyRef)}`, data);
+}
+
+/** Remove all custom tags and difficulty override for a story.
+ *  Silently swallows 404 (already deleted). Non-404 errors throw.
+ */
+export async function deleteStoryTag(
+  _token: string,
+  storyRef: string,
+): Promise<void> {
+  try {
+    await del(`/api/teacher/story-tags/${encodeURIComponent(storyRef)}`);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return; // swallow
+    throw e;
+  }
+}
+
+/** List all story tags created by the authenticated teacher. */
+export function listStoryTags(_token: string): Promise<StoryTagData[]> {
+  return get('/api/teacher/story-tags');
+}
+
+// --- Error Heatmap ---
+
+/** Get student × character error heatmap for a classroom. */
+export function getClassroomErrorHeatmap(
+  _token: string,
+  classroomId: number,
+): Promise<ClassroomErrorHeatmap> {
+  return get(`/api/teacher/classrooms/${classroomId}/error-heatmap`);
+}
+
+// --- Teacher Session Report + Comment (Issue #993) ---
+
+export function fetchTeacherSessionReport(
+  _token: string,
   studentId: number,
   sessionId: number,
 ): Promise<TeacherSessionReport> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/report`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<TeacherSessionReport>(res);
+  return get(`/api/teacher/students/${studentId}/sessions/${sessionId}/report`);
 }
 
-export async function saveTeacherComment(
-  token: string,
+export function saveTeacherComment(
+  _token: string,
   studentId: number,
   sessionId: number,
   comment: string,
 ): Promise<{ teacher_comment: string; teacher_reviewed_at: string }> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/comment`,
-    {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify({ comment }),
-    },
-  );
-  return handleResponse(res);
+  return post(`/api/teacher/students/${studentId}/sessions/${sessionId}/comment`, { comment });
 }
 
-export async function generateAIComment(
-  token: string,
+export function generateAIComment(
+  _token: string,
   studentId: number,
   sessionId: number,
 ): Promise<{ ai_comment: string }> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/generate-ai-comment`,
-    {
-      method: 'POST',
-      headers: authHeaders(token),
-    },
-  );
-  return handleResponse(res);
+  return post(`/api/teacher/students/${studentId}/sessions/${sessionId}/generate-ai-comment`, {});
 }

@@ -1,8 +1,22 @@
-import logging
-import secrets
-from datetime import datetime, timedelta, timezone
+"""
+routes/auth.py — Thin HTTP boundary for auth endpoints (#1844).
 
-import httpx
+Business logic extracted to focused service modules:
+- auth_registration_service: register + school auto-assignment
+- password_reset_service: forgot/reset password
+- email_verification_service: verify email GET/POST + resend
+- sso_login_service: Google + Junyi SSO
+
+This file handles only:
+- FastAPI router wiring
+- Rate limiting (per-IP, HTTP concern)
+- Request → service call → response shaping
+- JWT token creation (auth concern, lives near the router)
+"""
+
+import logging
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -16,7 +30,6 @@ from ..auth.rate_limiter import InMemoryRateLimiter
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..models.school import School
 from ..schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -35,18 +48,34 @@ from ..schemas.auth import (
     VerifyEmailRequest,
     VerifyEmailResponse,
 )
-from ..services.input_sanitizer import sanitize_ai_input
-from ..utils.password_validator import validate_password_strength
 from ..schemas.user import UserResponse
+from ..services.auth_registration_service import (
+    assign_teacher_to_school,
+    block_student_self_registration,
+    create_teacher_user,
+    enforce_password_strength,
+)
+from ..services.email_verification_service import (
+    resend_verification_token,
+    verify_email_by_token,
+)
+from ..services.password_reset_service import (
+    apply_password_reset,
+    generate_password_reset_token,
+    lookup_user_by_identifier,
+    validate_reset_token,
+)
+from ..services.sso_login_service import (
+    exchange_junyi_code,
+    resolve_google_user,
+    resolve_junyi_user,
+    verify_google_id_token,
+)
 
 CURRENT_TERMS_VERSION = "1.0"
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 rate_limiter = InMemoryRateLimiter()
-
-PASSWORD_RESET_TOKEN_BYTES = 32
-PASSWORD_RESET_EXPIRY_HOURS = 1
-EMAIL_VERIFICATION_TOKEN_BYTES = 32
 
 
 def _has_active_role(db: Session, user_id: int, role_name: str) -> bool:
@@ -76,14 +105,9 @@ def _ensure_parent_login_allowed(user: User, db: Session) -> None:
         )
 
 
-def _enforce_password_strength(password: str) -> None:
-    """Raise HTTP 422 with a Chinese error message if password is too weak."""
-    result = validate_password_strength(password)
-    if not result.is_valid:
-        raise HTTPException(
-            status_code=422,
-            detail={"errors": result.errors},
-        )
+# ---------------------------------------------------------------------------
+# Registration
+# ---------------------------------------------------------------------------
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -103,18 +127,8 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    # Sanitize user-provided name to prevent injection in downstream AI contexts
-    safe_name, _ = sanitize_ai_input(req.name, user_id=req.email) if req.name else (req.name, False)
-
-    # Block student self-registration. Students are created by teachers only.
-    if req.role is not None and req.role.lower() == "student":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="學生帳號由老師建立，請聯繫你的老師取得帳號。",
-        )
-
-    # Validate password strength before checking for duplicates
-    _enforce_password_strength(req.password)
+    block_student_self_registration(req.role)
+    enforce_password_strength(req.password)
 
     existing = db.query(User).filter(User.email == req.email).first()
     if existing:
@@ -123,41 +137,21 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
             detail="Email already registered",
         )
 
-    # Issue #460: honour REQUIRE_EMAIL_VERIFICATION flag.
-    # When the flag is off (default), auto-verify so existing flows are unaffected.
-    # When the flag is on, generate a token and leave email_verified=False.
-    require_verification = settings.require_email_verification
-
-    if require_verification:
-        verification_token: str | None = secrets.token_hex(EMAIL_VERIFICATION_TOKEN_BYTES)
-        auto_verified = False
-    else:
-        verification_token = None
-        auto_verified = True
-
-    user = User(
+    user, verification_token = create_teacher_user(
+        db=db,
         email=req.email,
-        password_hash=hash_password(req.password),
-        name=safe_name,
-        email_verified=auto_verified,
-        email_verification_token=verification_token,
+        password=req.password,
+        name=req.name,
     )
-    db.add(user)
-    db.flush()  # get user.id without committing yet
 
-    # Auto-create or join school based on email domain (issue #459)
-    _assign_teacher_to_school(db, user)
-
+    assign_teacher_to_school(db, user)
     db.commit()
     db.refresh(user)
 
     # TODO(production): when require_verification=True, send verification email here.
-    # Example: send_email(to=user.email, subject="驗證您的 Email",
-    #                     body=f"請點擊連結驗證：/auth/verify-email?token={verification_token}")
-    if require_verification:
+    if settings.require_email_verification:
         return RegisterResponse(
             message="註冊成功！請檢查 Email 並點擊驗證連結完成驗證。（測試模式下 token 直接回傳）",
-            # Gate token in response: dev/preview only. Production always returns null.
             verification_token=verification_token if settings.is_dev else None,
         )
     return RegisterResponse(
@@ -167,89 +161,9 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     )
 
 
-def _validate_teacher_email_domain(school: "School", email_domain: str) -> None:
-    """Raise HTTP 403 if the school has domain restrictions and the teacher's domain
-    is not in the allowed list.
-
-    Issue #407: schools may configure `allowed_email_domains` to restrict which
-    email domains teachers can use to join.  Schools with no configured domains
-    (None or empty list) accept any email domain.
-
-    Args:
-        school: The existing School record the teacher is trying to join.
-        email_domain: Lowercase domain extracted from the teacher's email.
-
-    Raises:
-        HTTPException 403: if the domain is not in the allowed list.
-    """
-    allowed: list[str] | None = school.allowed_email_domains
-    if not allowed:
-        # No restriction configured — any domain is welcome.
-        return
-
-    # Normalise list entries to lowercase for comparison.
-    allowed_lower = [d.lower() for d in allowed]
-    if email_domain not in allowed_lower:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"您的 Email 網域（@{email_domain}）不在此學校的允許清單中。"
-                "請聯繫學校管理員確認您的 Email 網域是否正確，或改用學校核准的 Email 地址註冊。"
-            ),
-        )
-
-
-def _assign_teacher_to_school(db: Session, user: User) -> None:
-    """Auto-create a school for the teacher's email domain, or join an existing one.
-
-    Per 方大哥's spec: if this is the first teacher from a school domain,
-    the system auto-creates the school and makes the teacher the admin.
-    Subsequent teachers with the same domain are added to the existing school.
-
-    Issue #407: if the existing school has `allowed_email_domains` configured,
-    the teacher's email domain must match; otherwise registration is rejected.
-    """
-    # Extract domain from email (e.g. "teacher@school.edu.tw" -> "school.edu.tw")
-    domain = user.email.split("@")[-1].lower()
-
-    # Check if a school with this domain already exists
-    school = db.query(School).filter(School.domain == domain).first()
-
-    if school is None:
-        # First teacher from this domain: create the school (no domain restriction applies)
-        school = School(
-            name=f"{domain} 學校",
-            domain=domain,
-            admin_user_id=user.id,
-        )
-        db.add(school)
-        db.flush()  # get school.id
-    else:
-        # Existing school found — validate domain restriction before joining (issue #407)
-        _validate_teacher_email_domain(school, domain)
-
-    # Assign teacher role scoped to this school
-    teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-    if teacher_role is not None:
-        # Avoid duplicate role assignment
-        existing_role = (
-            db.query(UserRole)
-            .filter(
-                UserRole.user_id == user.id,
-                UserRole.role_id == teacher_role.id,
-                UserRole.scope_type == "school",
-                UserRole.scope_id == str(school.id),
-            )
-            .first()
-        )
-        if existing_role is None:
-            user_role = UserRole(
-                user_id=user.id,
-                role_id=teacher_role.id,
-                scope_type="school",
-                scope_id=str(school.id),
-            )
-            db.add(user_role)
+# ---------------------------------------------------------------------------
+# Login
+# ---------------------------------------------------------------------------
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -276,9 +190,6 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
 
     _ensure_parent_login_allowed(user, db)
 
-    # Require email verification before allowing login (issue #460).
-    # Only enforced when REQUIRE_EMAIL_VERIFICATION=True.
-    # Batch-created student accounts always have email_verified=True (no real email).
     if settings.require_email_verification and not user.email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -288,13 +199,10 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
 
-    # Check if student needs to change their default password
     must_change = False
     if user.student_profile and not user.student_profile.password_changed:
         must_change = True
 
-    # Issue #457: determine whether this user has at least one classroom.
-    # Only applies to students — teachers and admins always get True.
     has_classroom = compute_has_classroom(db, user.id)
 
     token = create_access_token(user.id)
@@ -303,6 +211,11 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
         must_change_password=must_change,
         has_classroom=has_classroom,
     )
+
+
+# ---------------------------------------------------------------------------
+# Onboarding + Password change
+# ---------------------------------------------------------------------------
 
 
 @router.post("/complete-onboarding")
@@ -330,12 +243,10 @@ def change_password(
             detail="Current password is incorrect",
         )
 
-    # Validate new password strength
-    _enforce_password_strength(req.new_password)
+    enforce_password_strength(req.new_password)
 
     current_user.password_hash = hash_password(req.new_password)
 
-    # Mark student password as changed if they have a student profile
     if current_user.student_profile:
         current_user.student_profile.password_changed = True
 
@@ -343,44 +254,35 @@ def change_password(
     return {"message": "Password updated successfully"}
 
 
+# ---------------------------------------------------------------------------
+# Password Reset
+# ---------------------------------------------------------------------------
+
+
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)):
     """Initiate a password reset.
 
     Accepts email or username as `identifier`.
-    Generates a reset token (expires in 1 hour) and stores it on the user record.
-
-    P0 behaviour: token is returned in the response body.
-    In production the token would be sent via email only and this field removed.
+    Always returns HTTP 200 to prevent user enumeration.
+    Dev mode: token returned in body. Production: send via email only.
     """
     client_ip = request.client.host if request.client else "unknown"
     if not rate_limiter.check(f"forgot-password:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    # Lookup by email or username
-    if "@" in req.identifier:
-        user = db.query(User).filter(User.email == req.identifier, User.is_active == True).first()
-    else:
-        user = db.query(User).filter(User.username == req.identifier, User.is_active == True).first()
+    user = lookup_user_by_identifier(db, req.identifier)
 
-    # Always return a success message to avoid user enumeration attacks.
-    # We still generate and return the token so the flow can be tested without email.
     if user is None:
-        # Return a plausible-looking token but do nothing in DB.
-        # Gate token in response: dev/preview only. Production always returns null.
         return ForgotPasswordResponse(
             message="若帳號存在，重設連結已產生（測試模式下直接回傳 token）。",
             reset_token="account-not-found" if settings.is_dev else None,
         )
 
-    reset_token = secrets.token_hex(PASSWORD_RESET_TOKEN_BYTES)
-    user.password_reset_token = reset_token
-    user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=PASSWORD_RESET_EXPIRY_HOURS)
-    db.commit()
+    reset_token = generate_password_reset_token(db, user)
 
     return ForgotPasswordResponse(
         message="密碼重設 token 已產生，請在 1 小時內使用。（正式環境將寄送至您的 Email）",
-        # Gate token in response: dev/preview only. Production always returns null.
         reset_token=reset_token if settings.is_dev else None,
     )
 
@@ -388,134 +290,55 @@ def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = 
 @router.post("/reset-password", response_model=ResetPasswordResponse)
 def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     """Reset password using a valid reset token."""
-    user = (
-        db.query(User)
-        .filter(User.password_reset_token == req.token, User.is_active == True)
-        .first()
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="無效的重設 token，請重新申請密碼重設。",
-        )
-
-    now = datetime.now(timezone.utc)
-    expires = user.password_reset_expires
-    # Normalise to UTC-aware for comparison
-    if expires is not None and expires.tzinfo is None:
-        expires = expires.replace(tzinfo=timezone.utc)
-
-    if expires is None or now > expires:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="重設 token 已過期，請重新申請密碼重設。",
-        )
-
-    # Validate new password strength
-    _enforce_password_strength(req.new_password)
-
-    user.password_hash = hash_password(req.new_password)
-    # Invalidate the token after use
-    user.password_reset_token = None
-    user.password_reset_expires = None
-    db.commit()
-
+    user = validate_reset_token(db, req.token)
+    enforce_password_strength(req.new_password)
+    apply_password_reset(db, user, req.new_password)
     return ResetPasswordResponse(message="密碼已成功重設，請使用新密碼登入。")
+
+
+# ---------------------------------------------------------------------------
+# Email Verification
+# ---------------------------------------------------------------------------
 
 
 @router.get("/verify-email", response_model=VerifyEmailResponse)
 def verify_email_get(token: str, db: Session = Depends(get_db)):
     """Verify email address using a token from the verification link.
 
-    This GET endpoint supports clicking a link from an email:
-      GET /auth/verify-email?token=xxx
-
-    Issue #460: token is generated at registration and (in production) emailed to the user.
+    GET /auth/verify-email?token=xxx
+    Issue #460.
     """
-    user = (
-        db.query(User)
-        .filter(User.email_verification_token == token, User.is_active == True)
-        .first()
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="無效的驗證 token。",
-        )
-
-    if user.email_verified:
-        return VerifyEmailResponse(message="電子郵件已驗證。")
-
-    user.email_verified = True
-    user.email_verification_token = None
-    db.commit()
-
-    return VerifyEmailResponse(message="電子郵件驗證成功！現在可以登入了。")
+    message = verify_email_by_token(db, token)
+    return VerifyEmailResponse(message=message)
 
 
 @router.post("/verify-email", response_model=VerifyEmailResponse)
 def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
     """Verify email address using a verification token (POST variant for API clients).
 
-    Issue #460: Also supports POST body for programmatic verification.
+    Issue #460.
     """
-    user = (
-        db.query(User)
-        .filter(User.email_verification_token == req.token, User.is_active == True)
-        .first()
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="無效的驗證 token。",
-        )
-
-    if user.email_verified:
-        return VerifyEmailResponse(message="電子郵件已驗證。")
-
-    user.email_verified = True
-    user.email_verification_token = None
-    db.commit()
-
-    return VerifyEmailResponse(message="電子郵件驗證成功！現在可以登入了。")
+    message = verify_email_by_token(db, req.token)
+    return VerifyEmailResponse(message=message)
 
 
 @router.post("/resend-verification")
 def resend_verification(req: ResendVerificationRequest, request: Request, db: Session = Depends(get_db)):
     """Resend the email verification token.
 
-    Issue #460: allows a user who hasn't verified yet to request a new token.
-    Rate-limited to 5 requests per minute per IP.
-
-    Dev/staging mode: returns the token directly. In production, this would send an email.
+    Issue #460. Rate-limited. Dev/staging mode: returns token directly.
     """
     client_ip = request.client.host if request.client else "unknown"
     if not rate_limiter.check(f"resend-verification:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    user = db.query(User).filter(User.email == req.email, User.is_active == True).first()
+    message, token = resend_verification_token(db, req.email)
+    return {"message": message, "verification_token": token}
 
-    # Always return a success message to prevent email enumeration.
-    if user is None or user.email_verified:
-        return {
-            "message": "若帳號存在且尚未驗證，驗證信已重新發送。",
-            "verification_token": None,
-        }
 
-    new_token = secrets.token_hex(EMAIL_VERIFICATION_TOKEN_BYTES)
-    user.email_verification_token = new_token
-    db.commit()
-
-    # TODO(production): send verification email here instead of returning token.
-    return {
-        "message": "驗證信已重新發送。（測試模式下 token 直接回傳）",
-        # Gate token in response: dev/preview only. Production always returns null.
-        "verification_token": new_token if settings.is_dev else None,
-    }
-
+# ---------------------------------------------------------------------------
+# SSO — Google + Junyi
+# ---------------------------------------------------------------------------
 
 
 @router.post("/google", response_model=GoogleLoginResponse)
@@ -532,67 +355,10 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
     if not rate_limiter.check(f"google-login:{client_ip}", max_requests=20, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    if not settings.google_client_id:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Google OAuth is not configured on this server.",
-        )
+    id_info = verify_google_id_token(req.credential)
+    user, is_new_user = resolve_google_user(db, id_info)
 
-    # Verify the Google id_token
-    try:
-        from google.oauth2 import id_token as google_id_token
-        from google.auth.transport import requests as google_requests
-
-        id_info = google_id_token.verify_oauth2_token(
-            req.credential,
-            google_requests.Request(),
-            settings.google_client_id,
-        )
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid Google credential: {exc}",
-        )
-
-    google_sub = id_info["sub"]          # stable unique Google user ID
-    email: str = id_info.get("email", "")
-    name: str = id_info.get("name", "") or email.split("@")[0]
-    picture: str | None = id_info.get("picture")
-
-    if not email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Google account does not expose an email address.",
-        )
-
-    is_new_user = False
-
-    # 1. Look up by google_id (returning user)
-    user = db.query(User).filter(User.google_id == google_sub, User.is_active == True).first()
-
-    if user is None:
-        # 2. Look up by email (link existing account)
-        user = db.query(User).filter(User.email == email, User.is_active == True).first()
-        if user is not None:
-            _ensure_parent_login_allowed(user, db)
-            user.google_id = google_sub
-            if picture and not user.avatar_url:
-                user.avatar_url = picture
-        else:
-            # 3. Create new account — no password (use a random unusable hash)
-            unusable_hash = hash_password(secrets.token_hex(32))
-            user = User(
-                email=email,
-                password_hash=unusable_hash,
-                name=name,
-                avatar_url=picture,
-                google_id=google_sub,
-                email_verified=True,  # Google already verified the email
-            )
-            db.add(user)
-            is_new_user = True
-    else:
-        _ensure_parent_login_allowed(user, db)
+    _ensure_parent_login_allowed(user, db)
 
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
@@ -600,6 +366,7 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
 
     token = create_access_token(user.id)
     return GoogleLoginResponse(access_token=token, is_new_user=is_new_user)
+
 
 @router.post("/accept-terms", response_model=UserResponse)
 def accept_terms(
@@ -612,7 +379,6 @@ def accept_terms(
     db.commit()
     db.refresh(current_user)
 
-    # Build roles for response
     from ..models.user import UserRole, Role as RoleModel
     from ..schemas.user import UserRoleResponse
 
@@ -659,102 +425,15 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
     4. Else -> create a new user account (student role, email_verified=True).
 
     The code is single-use with a 600s TTL (enforced by Junyi's backend).
-    Junyi returns: {"data": {"userId": "...", "userEmail": "...", "userDisplayName": "..."}}
     """
     client_ip = request.client.host if request.client else "unknown"
     if not rate_limiter.check(f"junyi-login:{client_ip}", max_requests=20, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    # Exchange auth code with Junyi backend
-    junyi_base = settings.junyi_sso_base_url.rstrip("/")
-    exchange_url = f"{junyi_base}/api/v2/auth/code"
-    try:
-        # client_id="lingoleap" required after Junyi multi-RP migration (junyi#4083 / #4085).
-        # Without it, Junyi falls back to probe mode and matches the first
-        # client_secret_hash=None entry (jutor) using jutor_auth_ cache prefix,
-        # which can't find lingoleap-issued codes -> AUTH_CODE_NOT_FOUND.
-        # client_secret omitted: LINGOLEAP_CLIENT.client_secret_hash is None
-        # (Phase 1 — see junyi doc/THIRD_PARTY_SSO.md "相容模式").
-        resp = httpx.post(
-            exchange_url,
-            json={"code": req.code, "client_id": "lingoleap"},
-            timeout=10.0,
-        )
-    except httpx.RequestError as exc:
-        logger.error("junyi_login: network error contacting Junyi SSO: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="無法連線到均一登入服務，請稍後再試。",
-        )
+    junyi_data = exchange_junyi_code(req.code)
+    user, is_new_user = resolve_junyi_user(db, junyi_data)
 
-    if resp.status_code == 404:
-        # Code expired, already used, or forged — guide user to retry
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="均一登入連結已過期或已使用，請重新點擊「使用均一帳號登入」。",
-        )
-    if resp.status_code != 200:
-        logger.error(
-            "junyi_login: unexpected status %s from Junyi SSO (url=%s)",
-            resp.status_code,
-            exchange_url,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="均一登入服務回應異常，請稍後再試。",
-        )
-
-    try:
-        payload = resp.json()
-        data = payload["data"]
-        junyi_user_id: str = data["userId"]
-        junyi_email: str = data.get("userEmail", "")
-        junyi_display_name: str = data.get("userDisplayName", "") or junyi_email.split("@")[0]
-    except (KeyError, ValueError) as exc:
-        logger.error("junyi_login: malformed Junyi payload: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="均一登入回傳資料格式異常。",
-        )
-
-    is_new_user = False
-
-    # 1. Look up by junyi_identity_id (returning user)
-    user = db.query(User).filter(
-        User.junyi_identity_id == junyi_user_id,
-        User.is_active == True,
-    ).first()
-
-    if user is None and junyi_email:
-        # 2. Look up by email (link existing account)
-        user = db.query(User).filter(
-            User.email == junyi_email,
-            User.is_active == True,
-        ).first()
-        if user is not None:
-            _ensure_parent_login_allowed(user, db)
-            user.junyi_identity_id = junyi_user_id
-
-    if user is None:
-        # 3. Create new account — unusable password hash (SSO-only account)
-        if not junyi_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="均一帳號未提供 Email，無法建立 LingoLeap 帳號。",
-            )
-        unusable_hash = hash_password(secrets.token_hex(32))
-        user = User(
-            email=junyi_email,
-            password_hash=unusable_hash,
-            name=junyi_display_name,
-            junyi_identity_id=junyi_user_id,
-            email_verified=True,  # Junyi already verified
-        )
-        db.add(user)
-        is_new_user = True
-    elif user.junyi_identity_id is None:
-        # Covers the email-match path above (already set) and any edge case
-        user.junyi_identity_id = junyi_user_id
+    _ensure_parent_login_allowed(user, db)
 
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
@@ -764,7 +443,7 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
     logger.info(
         "junyi_login: user_id=%s junyi_identity_id=%s is_new=%s",
         user.id,
-        junyi_user_id,
+        junyi_data["userId"],
         is_new_user,
     )
     return JunyiLoginResponse(access_token=token, is_new_user=is_new_user)

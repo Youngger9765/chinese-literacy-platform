@@ -15,8 +15,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids
+from ..auth.policies import is_admin
 from ..database import get_db
-from ..dependencies.tenant import is_system_admin
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.user import User, UserRole
 from ..services.gamification_service import (
@@ -72,25 +72,6 @@ def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
     return {r.scope_id for r in rows}
 
 
-def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
-    """Return the set of org scope_ids for a given user (loaded from DB).
-
-    Used to resolve the org(s) a student belongs to without relying on
-    eagerly-loaded relationships.
-    """
-    rows = (
-        db.query(UserRole.scope_id)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            UserRole.scope_type == "organization",
-            UserRole.scope_id.isnot(None),
-        )
-        .all()
-    )
-    return {r.scope_id for r in rows}
-
-
 def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     """Raise 403 if the current user cannot view the given student's gamification data.
 
@@ -120,7 +101,7 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
         return
 
     # system_admin bypasses all scope checks
-    if is_system_admin(current_user):
+    if is_admin(current_user.id, db):
         return
 
     # org_admin / org_owner: must share at least one org with the student
@@ -223,7 +204,7 @@ def get_leaderboard(
     )
     if not is_teacher and not is_student:
         # system_admin bypasses all scope checks
-        if is_system_admin(current_user):
+        if is_admin(current_user.id, db):
             pass  # allowed
         else:
             # org_admin / org_owner: classroom's school must belong to caller's org

@@ -4,6 +4,7 @@ Seed data for demo / staging environments.
 Extracted from main.py to keep the app entry point thin.
 Functions:
   - seed_default_data()          — full demo data (org, schools, users, sessions, etc.)
+  - repair_pii_accounts(db)      — idempotent repair: anonymize gmail PII + fix admin roles (#1920 #1931)
   - _patch_seed_assignments(db)  — idempotent patch for assignment seed data (#528)
   - _sync_yaml_lessons_to_texts(db) — sync YAML lessons → texts table
 """
@@ -23,6 +24,55 @@ from ..models.assignment import Assignment, AssignmentSubmission
 from ..auth.password import hash_password
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# PII repair (#1920)
+# ---------------------------------------------------------------------------
+
+# Real gmail addresses that were manually inserted into the staging DB during
+# early dogfood sessions.  These must never appear in code or seed data; this
+# function deactivates them idempotently so they disappear from the admin UI.
+_PII_GMAIL_ACCOUNTS = [
+    "jay.tzeng@gmail.com",
+    "kuanweilu@gmail.com",
+]
+
+
+def repair_pii_accounts(db) -> None:
+    """Idempotent: anonymize real gmail PII accounts from the staging DB.
+
+    Safe to call on every startup.  Belt-and-suspenders companion to the
+    Alembic migration pii01rep02air03 (#1931):
+
+    - Deactivates any remaining gmail accounts (original #1920 behaviour).
+    - Anonymizes their email to inactive_{id}@test.com so PII is not
+      returned by /api/users or visible in admin UI (#1931 fix).
+
+    The Alembic migration handles the one-time SQL UPDATE; this function
+    guards against any edge cases where the migration was not yet applied.
+    """
+    affected = 0
+    for email in _PII_GMAIL_ACCOUNTS:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            changed = False
+            if user.is_active:
+                user.is_active = False
+                changed = True
+            # Anonymize email if still holding PII (migration may not have run yet)
+            if "@gmail.com" in user.email:
+                user.email = f"inactive_{user.id}@test.com"
+                changed = True
+            if changed:
+                affected += 1
+                logger.info(
+                    "repair_pii_accounts: anonymized PII account id=%s (#1920/#1931)",
+                    user.id,
+                )
+    if affected:
+        db.commit()
+    else:
+        logger.debug("repair_pii_accounts: no PII accounts to repair")
 
 
 def _patch_seed_assignments(db) -> None:
@@ -257,8 +307,6 @@ def seed_default_data():
             if role_org_admin:
                 role_assignments.append(UserRole(user_id=admin.id, role_id=role_org_admin.id, scope_type="organization", scope_id=str(org.id)))
             if role_teacher:
-                # admin also manages classrooms in school1
-                role_assignments.append(UserRole(user_id=admin.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
                 role_assignments.append(UserRole(user_id=teacher1.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
                 role_assignments.append(UserRole(user_id=teacher2.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school2.id)))
             if role_student:
@@ -280,7 +328,6 @@ def seed_default_data():
                 ClassroomStudent(classroom_id=class_3a.id, student_id=student1.id),
                 ClassroomStudent(classroom_id=class_3a.id, student_id=student2.id),
                 ClassroomStudent(classroom_id=class_5b.id, student_id=student3.id),
-                ClassroomStudent(classroom_id=class_7a.id, student_id=student1.id),
             ])
 
             # -- 7. Learning sessions for students (relative dates so dashboard always shows data) --

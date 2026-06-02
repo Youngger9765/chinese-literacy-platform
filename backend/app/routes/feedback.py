@@ -12,8 +12,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..auth.policies import is_admin
 from ..database import get_db
-from ..dependencies.tenant import is_system_admin
 from ..models.feedback import Feedback
 from ..models.user import User, UserRole
 from ..schemas.feedback import (
@@ -79,7 +79,7 @@ def _get_feedback_org_scope_filter(current_user: User, db: Session):
 
     Feedback has no direct org FK, so we join via the submitter's UserRole.
     """
-    if is_system_admin(current_user):
+    if is_admin(current_user.id, db):
         return None  # no restriction
 
     caller_org_ids = get_user_org_ids(current_user) or []
@@ -176,7 +176,7 @@ def update_feedback_status(
         )
 
     # Scope check: org_admin may only modify feedback from their org's users
-    if not is_system_admin(current_user):
+    if not is_admin(current_user.id, db):
         caller_org_ids = set(get_user_org_ids(current_user) or [])
         if caller_org_ids:
             # Check if the feedback submitter belongs to any of caller's orgs
