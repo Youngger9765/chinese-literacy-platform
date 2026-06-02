@@ -105,26 +105,22 @@ jobs:
                   console.log(`KEEP: ${sub}:${tag} (issue #${match[1]} open)`);
                   continue;
                 }
-                console.log(`DELETE-IMAGE: ${sub}:${tag} (issue #${match[1]} closed)`);
+                console.log(`UNTAG: ${sub}:${tag} (issue #${match[1]} closed)`);
                 try {
-                  // Delete by @DIGEST, not :tag (#2064). The CI SA has
-                  // artifactregistry.versions.delete but NOT tags.delete; deleting a
-                  // :tag reference takes the tags.delete path (PERMISSION_DENIED),
-                  // whereas `images delete <pkg>@<digest> --delete-tags` uses
-                  // versions.delete — exactly what cleanup.yml does (600+/wk OK).
-                  // So resolve the tag → its digest first, then delete the version.
-                  const digest = execSync(
-                    `gcloud artifacts docker images list "${registry}/${sub}" --include-tags --filter="tags:${tag}" --format="value(version)" --limit=1`,
-                    { stdio: 'pipe' }
-                  ).toString().trim();
-                  if (!digest) { console.log('  (no digest for tag — already gone, skip)'); continue; }
+                  // Removing a tagged preview image ALWAYS needs
+                  // artifactregistry.tags.delete — whether via `tags delete` or
+                  // `images delete --delete-tags` (verified both fail identically).
+                  // The CI SA currently LACKS that perm (#2064: PERMISSION_DENIED).
+                  // There is no code workaround; the fix is the IAM grant in #2064.
+                  // No 2>/dev/null here (unlike cleanup.yml) so it fails LOUD, not
+                  // silent — and tagFailed + the ::warning:: below make it visible.
                   execSync(
-                    `gcloud artifacts docker images delete "${registry}/${sub}@${digest}" --delete-tags --quiet`,
+                    `gcloud artifacts docker tags delete "${registry}/${sub}:${tag}" --quiet`,
                     { stdio: 'pipe' }
                   );
                   tagDeleted++;
                 } catch(e) {
-                  const detail = ((e.stderr || e.message || '') + '').trim().slice(0, 300);
+                  const detail = ((e.stderr || e.message || '') + '').trim().slice(0, 200);
                   console.log(`  Failed: ${detail}`);
                   tagFailed++;
                 }
