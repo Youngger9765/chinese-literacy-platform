@@ -88,6 +88,7 @@ jobs:
             // === Part 2: AR Preview Tags + Images ===
             console.log('\n=== AR Preview Tags ===');
             let tagDeleted = 0;
+            let tagFailed = 0;
 
             for (const sub of ['backend', 'frontend']) {
               let tags;
@@ -106,17 +107,25 @@ jobs:
                 }
                 console.log(`UNTAG: ${sub}:${tag} (issue #${match[1]} closed)`);
                 try {
+                  // No 2>/dev/null: capture the real gcloud stderr so a failing
+                  // delete surfaces PERMISSION_DENIED / NOT_FOUND / syntax (#2064).
                   execSync(
-                    `gcloud artifacts docker tags delete "${registry}/${sub}:${tag}" --quiet 2>/dev/null`
+                    `gcloud artifacts docker tags delete "${registry}/${sub}:${tag}" --quiet`,
+                    { stdio: 'pipe' }
                   );
                   tagDeleted++;
                 } catch(e) {
-                  console.log(`  Failed: ${e.message}`);
+                  const detail = ((e.stderr || e.message || '') + '').trim().slice(0, 300);
+                  console.log(`  Failed: ${detail}`);
+                  tagFailed++;
                 }
               }
             }
 
             console.log(`\n=== Summary ===`);
             console.log(`Services: ${svcDeleted} deleted`);
-            console.log(`AR Tags: ${tagDeleted} untagged`);
+            console.log(`AR Tags: ${tagDeleted} untagged, ${tagFailed} failed`);
             console.log('L1 AR Policy will auto-clean untagged images within 7 days');
+            if (tagFailed > 0) {
+              console.log(`::warning::${tagFailed} AR tag deletes failed — see 'Failed:' lines above for the real gcloud error (#2064)`);
+            }
