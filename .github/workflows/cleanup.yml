@@ -44,17 +44,23 @@ jobs:
               TOTAL=$(echo "$DIGESTS" | wc -l | tr -d ' ')
               echo "Found $TOTAL images, keeping latest $KEEP"
 
-              DELETED=0
-              echo "$DIGESTS" | tail -n +$((KEEP + 1)) | while read -r DIGEST; do
+              # Real counting (no 2>/dev/null swallow, no subshell via <<<) so the
+              # report is the actual delete count, not TOTAL-KEEP arithmetic (#2064).
+              DELETED=0; FAILED=0
+              while read -r DIGEST; do
                 [ -z "$DIGEST" ] && continue
                 echo "DELETE: ${PACKAGE}@${DIGEST:0:20}..."
-                gcloud artifacts docker images delete \
-                  "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
-                  --delete-tags --quiet 2>/dev/null || true
-                DELETED=$((DELETED + 1))
-              done
+                if gcloud artifacts docker images delete \
+                    "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                    --delete-tags --quiet; then
+                  DELETED=$((DELETED + 1))
+                else
+                  FAILED=$((FAILED + 1))
+                  echo "::warning::failed to delete ${PACKAGE}@${DIGEST:0:25} (#2064)"
+                fi
+              done <<< "$(echo "$DIGESTS" | tail -n +$((KEEP + 1)))"
 
-              echo "Done: ${PACKAGE}/${PREFIX} — deleted $((TOTAL - KEEP > 0 ? TOTAL - KEEP : 0)) of $TOTAL"
+              echo "Done: ${PACKAGE}/${PREFIX} — deleted ${DELETED}, failed ${FAILED} (of $TOTAL total)"
               echo ""
             done
           done
@@ -78,13 +84,20 @@ jobs:
             TOTAL=$(echo "$DIGESTS" | wc -l | tr -d ' ')
             echo "Found $TOTAL untagged images"
 
-            echo "$DIGESTS" | while read -r DIGEST; do
+            DELETED=0; FAILED=0
+            while read -r DIGEST; do
               [ -z "$DIGEST" ] && continue
               echo "DELETE: ${PACKAGE}@${DIGEST:0:20}..."
-              gcloud artifacts docker images delete \
-                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
-                --delete-tags --quiet 2>/dev/null || true
-            done
+              if gcloud artifacts docker images delete \
+                  "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                  --delete-tags --quiet; then
+                DELETED=$((DELETED + 1))
+              else
+                FAILED=$((FAILED + 1))
+                echo "::warning::failed to delete untagged ${PACKAGE}@${DIGEST:0:25} (#2064)"
+              fi
+            done <<< "$DIGESTS"
+            echo "Done: ${PACKAGE} untagged — deleted ${DELETED}, failed ${FAILED} (of $TOTAL)"
           done
 
   cleanup-revisions:
@@ -125,18 +138,23 @@ jobs:
             TOTAL=$(echo "$REVISIONS" | wc -l | tr -d ' ')
             echo "Found $TOTAL revisions, keeping latest $KEEP"
 
-            DELETED=0
-            echo "$REVISIONS" | tail -n +$((KEEP + 1)) | while read -r REV; do
+            DELETED=0; FAILED=0
+            while read -r REV; do
               [ -z "$REV" ] && continue
               echo "DELETE: ${REV}"
-              gcloud run revisions delete "${REV}" \
-                --region="${{ env.REGION }}" \
-                --project="${{ env.PROJECT_ID }}" \
-                --quiet 2>/dev/null || true
-              DELETED=$((DELETED + 1))
-            done
+              if gcloud run revisions delete "${REV}" \
+                  --region="${{ env.REGION }}" \
+                  --project="${{ env.PROJECT_ID }}" \
+                  --quiet; then
+                DELETED=$((DELETED + 1))
+              else
+                # An active/serving revision can't be deleted — expected, not alarming.
+                FAILED=$((FAILED + 1))
+                echo "  (skip: ${REV} not deletable — likely still serving traffic)"
+              fi
+            done <<< "$(echo "$REVISIONS" | tail -n +$((KEEP + 1)))"
 
-            echo "Done: ${SERVICE} — cleaned $((TOTAL - KEEP > 0 ? TOTAL - KEEP : 0)) of $TOTAL revisions"
+            echo "Done: ${SERVICE} — deleted ${DELETED}, skipped ${FAILED} (of $TOTAL revisions)"
             echo ""
           done
 
