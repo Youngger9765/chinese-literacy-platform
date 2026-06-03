@@ -44,8 +44,9 @@ jobs:
       # where N is extracted from branch name fix/issue-N-* or feat/issue-N-*.
       - name: Resolve preview base URL
         id: resolve-url
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}   # via env — never inline in run (injection-safe)
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
           ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
           if [ -n "$ISSUE_NUM" ]; then
             PREVIEW_URL="https://lingoleap-frontend-issue-${ISSUE_NUM}-958347263320.asia-east1.run.app"
@@ -81,15 +82,10 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ steps.resolve-url.outputs.base_url }}
           CI: 'true'
         run: |
-          npx playwright test \
-            e2e/auth-flow.spec.ts \
-            e2e/story-selection.spec.ts \
-            e2e/learning-flow.spec.ts \
-            e2e/student-flow.spec.ts \
-            e2e/teacher-flow.spec.ts \
-            e2e/teacher-dashboard.spec.ts \
-            --reporter=github \
-            --timeout=60000
+          # Run all specs in testDir (tests/e2e). The old hardcoded list named 6
+          # spec files that were consolidated into demo-path + full-qa (#2062 — that
+          # stale list is why the workflow was disabled). Bare invocation auto-discovers.
+          npx playwright test --reporter=github --timeout=60000
 
       - name: Upload test report
         if: always()

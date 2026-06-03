@@ -136,32 +136,38 @@ test.describe('A. Student path — 13 step walkthrough', () => {
     expect(evalRes.status()).toBeLessThan(500);
   });
 
-  test('A7. Listening reload persists step (#1098 persistence)', async ({ page, request }) => {
+  test('A7. Reload persists step (#1098 persistence)', async ({ page, request }) => {
     const storyId = await fetchFirstStoryId(request);
     test.skip(!storyId, 'No stories available');
     const token = await loginAs(page, request, 'student');
     test.skip(!token, 'Cannot login as student');
 
-    await page.goto(`/learn/${storyId}/listening`);
+    // Was 'listening', but listening is enabled:false since 2026-05-01 (ToolPicker
+    // only) so its URL redirects. Test the reload-persistence invariant on an
+    // ENABLED step instead (#2062 revival).
+    await page.goto(`/learn/${storyId}/comprehension`);
     await page.waitForLoadState('networkidle');
     const beforeUrl = page.url();
     await page.reload();
     await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/listening');
+    expect(page.url()).toContain('/comprehension');
     expect(page.url()).toBe(beforeUrl);
   });
 
-  test('A8. Steps 5-12 (vocab/sentence/comprehension/etc) — structural URL check', async ({ page, request }) => {
+  test('A8. Enabled step routes — structural URL check', async ({ page, request }) => {
     const storyId = await fetchFirstStoryId(request);
     test.skip(!storyId, 'No stories available');
     const token = await loginAs(page, request, 'student');
     test.skip(!token, 'Cannot login as student');
 
+    // Only ENABLED steps (STEP_REGISTRY enabled:true). Dropped 'vocab' and
+    // 'sentence-practice' — both enabled:false since 2026-05-01 (their URLs
+    // redirect, breaking a structural check). See src/config/stepConfig.ts (#2062).
     const stepsToProbe = [
-      'vocab',
-      'sentence-practice',
       'vocab-definition',
       'vocab-application',
+      'story-structure',
+      'reading-strategy',
       'comprehension',
       'vocab-word-search',
       'knowledge-station',
