@@ -7,7 +7,9 @@ test.describe('5/1 Demo path on staging', () => {
     // Quick login via test button (label split across child divs, so match by desc text)
     await page.goto('/login');
     await page.click('button:has-text("王管理員")');
-    await page.waitForURL(/\/admin/, { timeout: 15000 });
+    // 45s: backend cold start (10-15s) + login processing can exceed the old 15s
+    // on a cold staging instance — this was the only flaky failure on revival (#2062).
+    await page.waitForURL(/\/admin/, { timeout: 45000 });
     // Verify admin home loads
     await expect(page).toHaveURL(/admin/);
   });

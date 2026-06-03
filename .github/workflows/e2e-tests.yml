@@ -1,0 +1,93 @@
+name: E2E Tests (Playwright)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/e2e-tests.yml'
+
+# Only run one E2E job per PR branch — cancel in-progress runs on new push
+concurrency:
+  group: e2e-${{ github.event.pull_request.head.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install chromium --with-deps
+
+      # These specs are STAGING integration smoke tests, not per-PR-isolated tests:
+      # full-qa.spec.ts + demo-path.spec.ts hardcode STAGING_BACKEND for every API
+      # call and drive UI quick-login through the seeded demo accounts (王管理員 /
+      # 小明 / *@test.com). A per-PR preview has a FRESH, unseeded DB, so those
+      # quick-login accounts don't exist there → UI waitForURL times out → cascade
+      # failures (this was the #2062 revival blocker). The preview is still built by
+      # preview-deploy.yml for manual human review; this automated regression gate
+      # targets staging, the stable seeded env the specs are written against.
+      - name: Wait for staging to be healthy
+        id: wait
+        run: |
+          STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
+          echo "Waiting for staging frontend $STAGING_URL to respond with HTTP 200..."
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Staging is up (attempt $i) — running E2E against staging"
+              echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Attempt $i/30 — got HTTP $STATUS, retrying in 10s..."
+            sleep 10
+          done
+          echo "::error::Staging frontend not healthy in 5 min — cannot run E2E (#2062)."
+          echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Run E2E tests (core flows only)
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.wait.outputs.effective_url }}
+          CI: 'true'
+        run: |
+          # Run all specs in testDir (tests/e2e). The old hardcoded list named 6
+          # spec files that were consolidated into demo-path + full-qa (#2062 — that
+          # stale list is why the workflow was disabled). Bare invocation auto-discovers.
+          npx playwright test --reporter=github --timeout=60000
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-pr-${{ github.event.pull_request.number }}
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-pr-${{ github.event.pull_request.number }}
+          path: frontend/test-results/
+          retention-days: 3
