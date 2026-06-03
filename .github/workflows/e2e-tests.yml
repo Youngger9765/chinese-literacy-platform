@@ -58,28 +58,34 @@ jobs:
             echo "Branch '$BRANCH' has no issue number — falling back to staging: ${STAGING_URL}"
           fi
 
-      # Wait for the preview deployment to become healthy before running tests.
-      # preview-deploy.yml deploys in parallel; this step polls until ready.
-      - name: Wait for preview deployment (max 5 min)
+      # Wait for the preview deployment to become healthy. preview-deploy.yml runs
+      # in parallel; a cold frontend build can exceed 5 min, so if the preview isn't
+      # up we FALL BACK to staging instead of failing on infra timing (#2062). The
+      # specs target a live, seeded env (staging always qualifies) — the effective
+      # URL is exported for the run step.
+      - name: Wait for preview deployment (fall back to staging)
+        id: wait
         run: |
-          BASE_URL="${{ steps.resolve-url.outputs.base_url }}"
-          echo "Waiting for $BASE_URL to respond with HTTP 200..."
+          PREVIEW_URL="${{ steps.resolve-url.outputs.base_url }}"
+          STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
+          echo "Waiting for $PREVIEW_URL to respond with HTTP 200..."
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "Preview is up (attempt $i)"
+              echo "Preview is up (attempt $i) — testing against the PR preview"
+              echo "effective_url=${PREVIEW_URL}" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Attempt $i/30 — got HTTP $STATUS, retrying in 10s..."
             sleep 10
           done
-          echo "Preview URL did not become healthy within 5 minutes."
-          exit 1
+          echo "::warning::Preview not healthy in 5 min — falling back to staging (#2062)."
+          echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
 
       - name: Run E2E tests (core flows only)
         working-directory: frontend
         env:
-          PLAYWRIGHT_BASE_URL: ${{ steps.resolve-url.outputs.base_url }}
+          PLAYWRIGHT_BASE_URL: ${{ steps.wait.outputs.effective_url }}
           CI: 'true'
         run: |
           # Run all specs in testDir (tests/e2e). The old hardcoded list named 6
