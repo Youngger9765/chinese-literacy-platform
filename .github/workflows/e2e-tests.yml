@@ -38,49 +38,32 @@ jobs:
         working-directory: frontend
         run: npx playwright install chromium --with-deps
 
-      # Determine preview URL from PR branch name.
-      # The preview-deploy.yml workflow deploys to:
-      #   lingoleap-frontend-issue-{N}-958347263320.asia-east1.run.app
-      # where N is extracted from branch name fix/issue-N-* or feat/issue-N-*.
-      - name: Resolve preview base URL
-        id: resolve-url
-        env:
-          BRANCH: ${{ github.event.pull_request.head.ref }}   # via env — never inline in run (injection-safe)
-        run: |
-          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
-          if [ -n "$ISSUE_NUM" ]; then
-            PREVIEW_URL="https://lingoleap-frontend-issue-${ISSUE_NUM}-958347263320.asia-east1.run.app"
-            echo "base_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
-            echo "Using PR Preview URL: ${PREVIEW_URL}"
-          else
-            STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
-            echo "base_url=${STAGING_URL}" >> $GITHUB_OUTPUT
-            echo "Branch '$BRANCH' has no issue number — falling back to staging: ${STAGING_URL}"
-          fi
-
-      # Wait for the preview deployment to become healthy. preview-deploy.yml runs
-      # in parallel; a cold frontend build can exceed 5 min, so if the preview isn't
-      # up we FALL BACK to staging instead of failing on infra timing (#2062). The
-      # specs target a live, seeded env (staging always qualifies) — the effective
-      # URL is exported for the run step.
-      - name: Wait for preview deployment (fall back to staging)
+      # These specs are STAGING integration smoke tests, not per-PR-isolated tests:
+      # full-qa.spec.ts + demo-path.spec.ts hardcode STAGING_BACKEND for every API
+      # call and drive UI quick-login through the seeded demo accounts (王管理員 /
+      # 小明 / *@test.com). A per-PR preview has a FRESH, unseeded DB, so those
+      # quick-login accounts don't exist there → UI waitForURL times out → cascade
+      # failures (this was the #2062 revival blocker). The preview is still built by
+      # preview-deploy.yml for manual human review; this automated regression gate
+      # targets staging, the stable seeded env the specs are written against.
+      - name: Wait for staging to be healthy
         id: wait
         run: |
-          PREVIEW_URL="${{ steps.resolve-url.outputs.base_url }}"
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
-          echo "Waiting for $PREVIEW_URL to respond with HTTP 200..."
+          echo "Waiting for staging frontend $STAGING_URL to respond with HTTP 200..."
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "Preview is up (attempt $i) — testing against the PR preview"
-              echo "effective_url=${PREVIEW_URL}" >> "$GITHUB_OUTPUT"
+              echo "Staging is up (attempt $i) — running E2E against staging"
+              echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Attempt $i/30 — got HTTP $STATUS, retrying in 10s..."
             sleep 10
           done
-          echo "::warning::Preview not healthy in 5 min — falling back to staging (#2062)."
+          echo "::error::Staging frontend not healthy in 5 min — cannot run E2E (#2062)."
           echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
+          exit 1
 
       - name: Run E2E tests (core flows only)
         working-directory: frontend
