@@ -21,7 +21,8 @@
 
 import { test, expect, APIRequestContext, Page } from '@playwright/test';
 
-const STAGING_FRONTEND = 'https://lingoleap-staging.web.app';
+// Frontend navigation uses the test's baseURL (PLAYWRIGHT_BASE_URL); only API calls
+// pin to the staging backend so token issuance is deterministic regardless of origin.
 const STAGING_BACKEND = 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 const TOKEN_KEY = 'lingoleap_token';
 
@@ -53,8 +54,13 @@ async function getToken(request: APIRequestContext, role: keyof typeof CREDS): P
 async function loginAs(page: Page, request: APIRequestContext, role: keyof typeof CREDS): Promise<string | null> {
   const token = await getToken(request, role);
   if (!token) return null;
-  // Must navigate first so localStorage is on the right origin.
-  await page.goto(STAGING_FRONTEND + '/login');
+  // Navigate via baseURL (relative), NOT the hardcoded STAGING_FRONTEND. localStorage
+  // is per-origin: injecting on lingoleap-staging.web.app while the tests navigate on
+  // PLAYWRIGHT_BASE_URL (the Cloud Run staging origin in CI) left the token on the wrong
+  // origin → every UI test bounced back to /login. Local runs passed only because the
+  // default baseURL happened to equal STAGING_FRONTEND (#2062). demo-path stays green
+  // because it uses relative paths throughout — match that.
+  await page.goto('/login');
   await page.evaluate(([key, val]) => {
     window.localStorage.setItem(key, val);
   }, [TOKEN_KEY, token]);
@@ -80,7 +86,7 @@ test.describe('A. Student path — 13 step walkthrough', () => {
     const token = await loginAs(page, request, 'student');
     test.skip(!token, 'Cannot login as student@test.com');
     await page.goto('/');
-    await page.waitForURL(/\/student/, { timeout: 30000 });
+    await page.waitForURL(/\/student/, { timeout: 45000 });  // cold staging backend can be slow (#2062)
     await expect(page).not.toHaveURL(/\/login/);
   });
 
@@ -206,7 +212,7 @@ test.describe('B. Teacher path', () => {
     const token = await loginAs(page, request, 'teacher');
     test.skip(!token, 'Cannot login as teacher@test.com');
     await page.goto('/');
-    await page.waitForURL(/teacher-home|\/teacher\b/, { timeout: 30000 });
+    await page.waitForURL(/teacher-home|\/teacher\b/, { timeout: 45000 });  // cold staging backend can be slow (#2062)
     await expect(page).not.toHaveURL(/\/login/);
   });
 
