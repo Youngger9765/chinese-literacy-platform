@@ -77,6 +77,10 @@ class StoryDetail(StoryListItem):
     # Public PDF URL of the original 紙本學習單 docx (#1444)
     # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.pdf
     worksheet_pdf_url: Optional[str] = None
+    # Public docx URL for lessons where soffice PDF conversion produces broken output (#2073)
+    # When present, frontend shows a download link instead of the broken PDF iframe.
+    # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.docx
+    worksheet_docx_url: Optional[str] = None
     # Tables extracted from 紙本學習單 PDF (#1685).
     # Each item: {id, title, headers: list[str], rows: list[{cells: list[str], section?: str}],
     #             section_label_col?: str, notes?: list[str]}

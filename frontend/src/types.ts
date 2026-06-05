@@ -180,6 +180,11 @@ export interface Story {
    *  Optional — lessons without a matching PDF (e.g. G8-L3a, 文-L*) leave this null,
    *  which hides the "查看紙本學習單" button on the Intro page. */
   worksheetPdfUrl?: string;
+  /** Direct docx URL for lessons where soffice PDF conversion produces broken output (#2073).
+   *  When present, the "查看紙本學習單" button becomes a download link for the docx instead
+   *  of opening the broken PDF in an iframe.
+   *  Hosted on GCS at gs://lingoleap-assets/worksheets/{lesson_code}.docx. */
+  worksheetDocxUrl?: string;
   /** Tables extracted from 紙本學習單 PDF (#1685).
    *  Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
    *  table row data. Frontend renders via TableDisplay with click-to-zoom.
