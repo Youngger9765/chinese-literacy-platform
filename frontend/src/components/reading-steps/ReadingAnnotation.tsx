@@ -9,6 +9,8 @@ import React, {
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { loadAnnotations, saveAnnotations } from '../../services/learning/annotationApi';
+import type { AnnotationPayload } from '../../services/learning/annotationApi';
 import { fontForZhuyin } from '../../constants/fonts';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
@@ -55,6 +57,8 @@ interface ReadingAnnotationProps {
   story: Story;
   onFinish: (summary: ReturnType<typeof computeSummary>) => void;
   fontSizePx?: number;
+  /** DB session id — when provided, annotations are persisted to and loaded from DB. */
+  dbSessionId?: number | null;
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────
@@ -63,6 +67,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   story,
   onFinish,
   fontSizePx = 22,
+  dbSessionId = null,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -71,7 +76,9 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     [story.vocabulary]
   );
 
-  // Annotation state managed via reducer
+  // Annotation state managed via reducer.
+  // Initial state comes from localStorage (sync, immediate).
+  // A DB load runs after mount to replace/merge with the authoritative DB copy.
   const [{ annotations, undoStack }, dispatch] = useReducer(annotationReducer, {
     annotations: (() => {
       try {
@@ -83,6 +90,15 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     })(),
     undoStack: [],
   });
+
+  // DB-sync tracking: true once the initial DB load finishes.
+  // Using useState (not ref) so the save effect re-runs when hydration completes —
+  // this fixes the race where an annotation made before hydration would be silently
+  // skipped (the ref-only version's guard would have already returned early and
+  // no timer would be set, leaving the annotation in localStorage but not in DB).
+  const [dbHydrated, setDbHydrated] = useState(false);
+  // Debounce timer ref for DB saves
+  const dbSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Floating toolbar state
   const [toolbar, setToolbar] = useState<{
@@ -106,7 +122,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     [story.content, vocabWords, processLinesSelective]
   );
 
-  // ── Persist annotations ────────────────────────────────────────────────
+  // ── Persist annotations (localStorage — always, for offline cache) ────────
 
   useEffect(() => {
     try {
@@ -115,6 +131,76 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       // Storage full — ignore
     }
   }, [annotations, story.id]);
+
+  // ── Load annotations from DB on mount (#2070) ────────────────────────────
+  // DB is the source of truth; localStorage is the offline/pre-load cache.
+  // On first load: if DB has annotations, replace localStorage snapshot.
+  // If DB has none but localStorage does, we keep the localStorage version
+  // (student might be offline or using a fresh DB session).
+
+  useEffect(() => {
+    if (!dbSessionId) {
+      setDbHydrated(true); // no DB available — treat as hydrated immediately
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const dbAnnotations = await loadAnnotations(dbSessionId);
+        if (cancelled) return;
+        if (dbAnnotations.length > 0) {
+          // DB has annotations — hydrate reducer with DB copy
+          dispatch({ type: 'INIT', payload: { annotations: dbAnnotations.map((r) => ({
+            id: r.client_id ?? String(r.id),
+            paragraphIndex: r.paragraph_index,
+            charStart: r.char_start,
+            charEnd: r.char_end,
+            type: r.annotation_type as Annotation['type'],
+          })) } });
+        }
+        // else: keep localStorage snapshot as-is (DB is empty, likely fresh session)
+      } catch (err) {
+        // DB load failed — silently keep localStorage data; log for debugging
+        console.warn('[ReadingAnnotation] DB load failed, using localStorage fallback:', err);
+      } finally {
+        // setDbHydrated(true) triggers the save effect to re-evaluate — this ensures
+        // any annotation the student made during the DB load window is saved to DB.
+        if (!cancelled) setDbHydrated(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbSessionId]); // run once per session
+
+  // ── Debounced DB save on annotation change (#2070) ───────────────────────
+  // Only runs after DB hydration to avoid saving the localStorage snapshot back.
+
+  useEffect(() => {
+    if (!dbSessionId || !dbHydrated) return;
+
+    // Clear any pending save
+    if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
+
+    dbSaveTimerRef.current = setTimeout(async () => {
+      try {
+        const payload: AnnotationPayload[] = annotations.map((ann) => ({
+          paragraph_index: ann.paragraphIndex,
+          char_start: ann.charStart,
+          char_end: ann.charEnd,
+          annotation_type: ann.type as 'unknown' | 'important',
+          client_id: ann.id,
+        }));
+        await saveAnnotations(dbSessionId, payload);
+      } catch (err) {
+        // Save failed (offline, token expired, etc.) — localStorage copy survives
+        console.warn('[ReadingAnnotation] DB save failed:', err);
+      }
+    }, 800); // 800 ms debounce — balances responsiveness vs write frequency
+
+    return () => {
+      if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
+    };
+  }, [annotations, dbSessionId, dbHydrated]);
 
   // ── Summary ────────────────────────────────────────────────────────────
 

@@ -31,3 +31,4 @@ from .toolbox import (  # noqa: F401
     ToolboxVocabSession,
     ToolboxVocabWordSearchSession,
 )
+from .annotation import AnnotationEntry  # noqa: F401

@@ -490,6 +490,24 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/prediction/INTENT.md
+- spec_id: reading.annotation.persistence
+  module: reading-annotation
+  title: 做記號持久化 — AnnotationEntry DB 契約 + 端點規格
+  stability: active
+  canonical_source: backend/app/models/annotation.py
+  owns_code:
+  - backend/app/models/annotation.py
+  - backend/app/routes/learning/learning_annotations.py
+  - frontend/src/services/learning/annotationApi.ts
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_reading_annotation_spec.py
+  related_issues:
+  - 2070
+  source_meetings: []
+  last_reviewed: 2026-06-05
+  owner: young
+  intent: specs/modules/reading-annotation/INTENT.md
 - spec_id: reading_attempt.history_invariants
   module: reading-attempt
   title: 朗讀嘗試歷史不變式（pointer module）
