@@ -146,20 +146,24 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            * 圖文並陳 layout (B1, #2085) — for graphic-text lessons with images
            *
            * Desktop/landscape (>=1024px):
-           *   Left pane  (50%): image gallery, full pane width, independently scrollable
-           *   Right pane (50%): text card (scrollable) + exercise + tables
+           *   Left pane  (50%): text card (scrollable) + exercise + tables
+           *   Right pane (50%): image gallery, full pane width, independently scrollable
            *
            * Portrait/tablet (<1024px):
-           *   Top:    image strip (~40vh, capped so text stays visible)
-           *   Bottom: text card + exercise stack, scrollable
+           *   Top:    text card + exercise stack, scrollable
+           *   Bottom: image strip (~40vh, capped so text stays visible)
+           *
+           * Order controlled via order-1 (text) / order-2 (image) so reading starts at text.
            *
            * Both panes are independently scrollable. Images are never modal-covered.
            * ══════════════════════════════════════════════════════════════════ */
           <div className="w-full h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
 
-            {/* Image pane — full width on mobile (top), 50% on desktop (left) */}
+            {/* Image pane — #2085: text-left/image-right (desktop) + text-top/image-bottom
+                (mobile). order-2 puts this AFTER the text pane in both flex-col & flex-row. */}
             <div
               className="
+                order-2
                 w-full lg:w-1/2
                 h-[40vh] lg:h-full
                 min-h-0
@@ -184,8 +188,9 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               </div>
             </div>
 
-            {/* Text + exercise pane — full width on mobile (bottom), 50% on desktop (right) */}
-            <div className="w-full lg:w-1/2 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+            {/* Text + exercise pane — #2085: order-1 puts text FIRST → left on desktop,
+                top on mobile (reading flow starts at the text, image is the reference). */}
+            <div className="order-1 w-full lg:w-1/2 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
               {/* Text card */}
               <StoryTextCard
                 story={story}
