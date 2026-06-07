@@ -25,6 +25,7 @@ import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import DevSkipButton from '../ui/DevSkipButton';
+import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 
@@ -373,6 +374,9 @@ export const LearningAppShell: React.FC = () => {
       >
         <LearningLayout />
       </main>
+
+      {/* Persistent bottom nav bar — in-place next/prev step without scroll-to-top (Issue #2082) */}
+      <StepFooterNav />
 
       {/* Dev-only: skip to next step button — fixed bottom-right on ALL learning steps */}
       <DevSkipButton />
