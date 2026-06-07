@@ -43,9 +43,9 @@ function extractOmoRecord(
 }
 
 function formatGradedAt(iso: string): string {
-  const t = new Date(iso).getTime();
-  if (!Number.isFinite(t)) return '';
-  return new Date(iso).toLocaleString('zh-TW', {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return '';
+  return d.toLocaleString('zh-TW', {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',

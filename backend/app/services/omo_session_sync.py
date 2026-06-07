@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 # Fallback step inference from question_id prefix, used only when a GradedAnswer
-# carries no `step` (older grader output). Mirrors QUESTION_TYPE_TO_STEP.
+# carries no `step` (older grader output). Keys are qid prefixes (fb_/mc_/se_),
+# not section names — values match QUESTION_TYPE_TO_STEP in omo_question_schema.
 _QID_PREFIX_TO_STEP = {
     "fb_": "vocab-application",
     "mc_": "comprehension",
@@ -47,25 +48,53 @@ def _step_for(graded) -> str:
     return ""
 
 
-def _get_or_create_session(db, student_id: int, story_slug: str) -> LearningSession:
-    """Find the student's in_progress self-study session for this lesson, or
-    create one. Mirrors the get-or-create in sessions_bootstrap.py (same unique
-    index uq_session_student_story_inprogress guards against races)."""
-    def _find():
+def _get_or_create_session(
+    db, student_id: int, story_slug: str
+) -> Optional[LearningSession]:
+    """Find the student's in_progress SELF-STUDY session for this lesson, or
+    create one. Returns None (skip sync) when the single in_progress slot for
+    this (student, story) is held by a non-self_study (assignment) session.
+
+    Why self_study only: the unique index uq_session_student_story_inprogress
+    allows just one in_progress session per (student, story), regardless of
+    session_mode. Writing paper-grading into an active assignment session would
+    silently pollute that assignment's progress / submission, so we never do —
+    paper uploads are self-study. Mirrors sessions_bootstrap.py's get-or-create.
+    """
+    def _find_self_study():
         return (
             db.query(LearningSession)
             .filter(
                 LearningSession.student_id == student_id,
                 LearningSession.story_slug == story_slug,
                 LearningSession.status == "in_progress",
+                LearningSession.session_mode == "self_study",
             )
             .order_by(LearningSession.started_at.desc())
             .first()
         )
 
-    existing = _find()
+    existing = _find_self_study()
     if existing:
         return existing
+
+    # Slot occupied by an assignment session → skip rather than pollute it.
+    occupant = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "in_progress",
+        )
+        .first()
+    )
+    if occupant is not None:
+        logger.info(
+            "OMO→session sync skipped: student %d lesson %s has an in_progress "
+            "%s session — not writing paper data into it.",
+            student_id, story_slug, occupant.session_mode,
+        )
+        return None
 
     text_id = None
     try:
@@ -89,12 +118,10 @@ def _get_or_create_session(db, student_id: int, story_slug: str) -> LearningSess
         db.refresh(session)
         return session
     except IntegrityError:
-        # Concurrent create (unique index) — fall back to the row that won.
+        # Lost a create race for the single in_progress slot. If a self_study
+        # session won, use it; if an assignment session took the slot, skip.
         db.rollback()
-        won = _find()
-        if won is None:
-            raise
-        return won
+        return _find_self_study()
 
 
 def build_step_progress_update(existing: Optional[dict], graded: list) -> Optional[dict]:
@@ -167,6 +194,8 @@ def sync_omo_grading_to_session(
     db = SessionLocal()
     try:
         session = _get_or_create_session(db, student_id, story_slug)
+        if session is None:
+            return None  # slot held by an assignment session — skip (see helper)
         new_sp = build_step_progress_update(session.step_progress, graded)
         if new_sp is None:
             return None
