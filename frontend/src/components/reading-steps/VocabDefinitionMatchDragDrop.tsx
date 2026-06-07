@@ -6,10 +6,17 @@
  *
  * Fix #1101 (炮灰選項): confirmed words shown as locked/dimmed in word bank so the
  * last drag-drop question always has multiple options — no forced-correct final question.
+ *
+ * Fix #2082 (A6/A7/A8): verbal feedback, larger definition text, device-aware instruction.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { AnswerRecord } from './vocabDefinitionMatchLogic';
+
+// A8: Detect touch (coarse pointer) vs mouse at mount time.
+// Using a module-level constant so it is evaluated once and shared across renders.
+const IS_TOUCH_DEVICE =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
 export interface DragDropProps {
   vocab: VocabItem[];
@@ -28,6 +35,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   // vocabIdx values currently playing the fly-away exit animation
   const [flyingAway, setFlyingAway] = useState<Set<number>>(new Set());
 
+  // A6: verbal feedback state — show praise on correct, "再試試看！" on wrong
+  const [wrongFeedbackSlot, setWrongFeedbackSlot] = useState<number | null>(null);
+  const [correctFeedbackSlot, setCorrectFeedbackSlot] = useState<number | null>(null);
+
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
     activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
@@ -44,6 +55,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     setHoverTarget(null);
     setTouchSelected(null);
     setFlyingAway(new Set());
+    setWrongFeedbackSlot(null);
+    setCorrectFeedbackSlot(null);
     answersRef.current = activeDefIndices.map((defIdx) => ({
       defIndex: defIdx,
       answeredWordIdx: null,
@@ -80,6 +93,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         );
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
 
+        // A6: Show explicit praise briefly
+        setCorrectFeedbackSlot(defIdx);
+        setTimeout(() => setCorrectFeedbackSlot(null), 1200);
+
         // Start fly-away animation on the chip
         setFlyingAway((prev) => new Set([...prev, vocabIdx]));
         // After animation completes, mark the slot as confirmed (chip is now hidden)
@@ -111,6 +128,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           } : a,
         );
         setWrongFlash((prev) => new Set([...prev, defIdx]));
+        // A6: Show "再試試看！" verbal feedback (amber, not silent bounce)
+        setWrongFeedbackSlot(defIdx);
         setTimeout(() => {
           setPlacements((prev) => {
             const next = new Map(prev);
@@ -122,6 +141,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             next.delete(defIdx);
             return next;
           });
+          setWrongFeedbackSlot(null);
         }, 650);
       }
     },
@@ -169,7 +189,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     <>
       <div className="flex items-center gap-2 mb-3">
         <span className="material-symbols-outlined text-on-surface-variant text-lg">dictionary</span>
-        <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">語詞庫</span>
+        {/* A7: Renamed from 語詞庫 to 本課語詞 */}
+        <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">本課語詞</span>
       </div>
       <div className="flex flex-wrap gap-2 min-h-[56px]">
         {activeShuffledWords.map((vocabIdx) => {
@@ -247,12 +268,17 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     [activeDefIndices, confirmed.size],
   );
 
+  // A8: Device-appropriate drop-zone hint text
+  const dropHintText = IS_TOUCH_DEVICE ? '點選空格放入' : '拖拉語詞到這裡';
+
   const definitionSlots = sortedDefIndices.map((defIdx) => {
     const item = vocab[defIdx];
     const placedVocabIdx = placements.get(defIdx) ?? null;
     const isCorrect = confirmed.has(defIdx);
     const isWrong = wrongFlash.has(defIdx);
     const isOver = hoverTarget === defIdx && !isCorrect;
+    const showWrongVerbal = wrongFeedbackSlot === defIdx;
+    const showCorrectVerbal = correctFeedbackSlot === defIdx;
 
     let cls =
       'rounded-3xl border-2 px-5 py-5 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
@@ -283,7 +309,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         }}
         onClick={() => handleSlotTap(defIdx)}
       >
-        <p className="text-base text-on-surface leading-relaxed">{item?.definition}</p>
+        {/* A7: text-base → text-lg md:text-xl leading-relaxed */}
+        <p className="text-lg md:text-xl leading-relaxed text-on-surface">{item?.definition}</p>
         <div className="flex items-center justify-center h-8">
           {isCorrect ? (
             <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
@@ -291,6 +318,17 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
                 ✓
               </span>
               {placedVocabIdx !== null ? vocab[placedVocabIdx]?.word : ''}
+              {/* A6: explicit correct praise */}
+              {showCorrectVerbal && (
+                <span className="ml-2 text-sm font-bold text-emerald-600 animate-pulse">
+                  答對了！
+                </span>
+              )}
+            </span>
+          ) : showWrongVerbal ? (
+            /* A6: wrong verbal feedback — amber text, not silent bounce */
+            <span className="font-bold text-sm text-amber-600 animate-pulse">
+              再試試看！
             </span>
           ) : placedVocabIdx !== null ? (
             <span className="font-bold text-base text-amber-800">
@@ -298,7 +336,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             </span>
           ) : (
             <span className="text-xs text-on-surface-variant/40 select-none">
-              拖拉語詞到這裡
+              {dropHintText}
             </span>
           )}
         </div>
@@ -306,8 +344,21 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     );
   });
 
+  // A8: Device-appropriate top-level instruction
+  const instructionText = IS_TOUCH_DEVICE
+    ? '點選語詞，再點空格放入'
+    : '把語詞拖到正確的解釋上';
+
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
+      {/* A8: Device-aware instruction banner */}
+      <p className="text-sm text-center text-on-surface-variant mb-4">
+        <span className="material-symbols-outlined align-middle text-base mr-1">
+          {IS_TOUCH_DEVICE ? 'touch_app' : 'drag_indicator'}
+        </span>
+        {instructionText}
+      </p>
+
       {/* Progress bar */}
       <div className="flex items-center gap-3 mb-6">
         <div className="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
@@ -328,8 +379,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       <div className="md:flex md:gap-6 md:items-start md:max-h-[calc(100vh-16rem)]">
         {/* Left column — definition slots, independently scrollable on desktop */}
         <div className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]">
+          {/* A7: Renamed from 定義欄位 to 語詞解釋 */}
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
-            定義欄位
+            語詞解釋
           </p>
           <div className="flex flex-col gap-3">
             {definitionSlots}
