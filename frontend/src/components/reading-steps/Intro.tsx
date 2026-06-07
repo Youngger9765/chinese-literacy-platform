@@ -359,35 +359,41 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               explanation (lessonIntro.text).
               #2082 A2: strategy name shown in prominent amber highlight box;
               instruction items removed (belong to read-text phase, not intro). */}
-          {(story.worksheetIntro?.target_strategy ||
-            (story.lessonIntro?.text && story.lessonIntro.source !== 'excel')) && (
+          {(() => {
+            // #2082 A2: the strategy name source. worksheetIntro.target_strategy is empty
+            // for the real lesson data (verified: all G6/G7 demo lessons), so fall back to
+            // the strategy portion of story.intro.author, which holds e.g.
+            // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
+            // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
+            const rawStrategy =
+              story.worksheetIntro?.target_strategy ||
+              (story.intro?.author?.includes(' · ')
+                ? story.intro.author.split(' · ').slice(1).join(' · ')
+                : '') ||
+              '';
+            // For structure-type strategies, wrap the three stage words in corner quotes and
+            // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
+            // and CJK separators (the demo data uses ASCII '.').
+            const strategyName = rawStrategy.includes('「問題')
+              ? rawStrategy
+              : rawStrategy.replace(
+                  /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
+                  '「$1、$2、$3」$4'
+                );
+            const hasBody = story.lessonIntro?.text && story.lessonIntro.source !== 'excel';
+            if (!strategyName && !hasBody) return null;
+            return (
             <div className="bg-amber-100/60 border-2 border-amber-300 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-lg" aria-hidden="true">💡</span>
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
               </div>
 
-              {story.worksheetIntro?.target_strategy && (
+              {strategyName && (
                 // #2082 A2: prominent highlight box for strategy name
                 <div className="bg-amber-200/70 border-2 border-amber-400 rounded-xl px-4 py-3">
                   <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
-                    {processZhuyin(
-                      // #2082 A2: for structure-type strategies, wrap the three stage words in
-                      // corner quotes and keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉.
-                      // Only apply if the strategy name contains 問題 and 解決 and 結果 together
-                      // without already having corner/double quotes around the trio.
-                      (() => {
-                        const s = story.worksheetIntro!.target_strategy as string;
-                        // If it already contains 「問題 (already quoted), leave as-is
-                        if (s.includes('「問題')) return s;
-                        // Match patterns like "問題-解決-結果結構", "問題·解決·結果結構",
-                        // "問題.解決.結果結構" (ASCII period — the actual demo-data separator), "問題解決結果結構"
-                        return s.replace(
-                          /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
-                          '「$1、$2、$3」$4'
-                        );
-                      })()
-                    )}
+                    {processZhuyin(strategyName)}
                   </p>
                 </div>
               )}
@@ -400,7 +406,8 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
                   they belong to the read-text phase (LiveTutor / annotations), not intro. */}
             </div>
-          )}
+            );
+          })()}
 
           {/* 數位學習步驟 — #2082 A4: replaced the static non-clickable ol with a
               single-line step count. StepperNav dots already provide real navigation.
