@@ -23,7 +23,7 @@
 import React, { useState } from 'react';
 
 interface GraphicTextImageStripProps {
-  images: { filename: string; caption?: string }[];
+  images: { filename: string; caption?: string; figure_label?: string }[];
   /**
    * Lesson code (e.g. 'G7-L28') used to build GCS image URL.
    * Optional — falls back to the first path segment of `images[0].filename`
@@ -38,8 +38,17 @@ const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-
 
 /** Chinese numeral labels (1-based) for figure badges */
 const CHINESE_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-function chineseNumeral(n: number): string {
+export function chineseNumeral(n: number): string {
   return n <= CHINESE_NUMERALS.length ? CHINESE_NUMERALS[n - 1] : String(n);
+}
+
+export const GCS_IMAGE_BASE_URL = GCS_IMAGE_BASE;
+export { deriveLessonCodeFromFilename };
+
+/** Build the GCS URL for an image filename under a lesson directory. */
+export function buildImageSrc(filename: string, lessonCode: string): string {
+  const basename = filename.split('/').pop() ?? filename;
+  return `${GCS_IMAGE_BASE}/${lessonCode}/${basename}`;
 }
 
 /** Derive lesson code from an image filename like `images/G7-L28/G7-L28-08.jpg`. */
@@ -60,10 +69,16 @@ interface FigureCardProps {
   src: string;
   alt: string;
   caption?: string;
-  index: number; // 0-based
+  index: number; // 0-based — fallback only when figureLabel absent
+  /**
+   * The REAL figure label from `image.figure_label` (e.g. '圖一'), #2085.
+   * Array index is NOT figure order, so prefer this. Falls back to the
+   * index-derived numeral only when no label is supplied.
+   */
+  figureLabel?: string;
 }
 
-const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index }) => {
+export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index, figureLabel: figureLabelProp }) => {
   const [scale, setScale] = useState(1);
   const [imgError, setImgError] = useState(false);
 
@@ -71,7 +86,7 @@ const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index }) => 
   const zoomOut = () => setScale((s) => Math.max(s - ZOOM_STEP, ZOOM_MIN));
   const resetZoom = () => setScale(1);
 
-  const figureLabel = `圖${chineseNumeral(index + 1)}`;
+  const figureLabel = figureLabelProp || `圖${chineseNumeral(index + 1)}`;
 
   return (
     <figure className="flex flex-col w-full mb-5 last:mb-0">
@@ -193,9 +208,10 @@ const GraphicTextImageStrip: React.FC<GraphicTextImageStripProps> = ({ images, l
               <FigureCard
                 key={idx}
                 src={src}
-                alt={img.caption ?? `圖 ${idx + 1}`}
+                alt={img.caption ?? img.figure_label ?? `圖 ${idx + 1}`}
                 caption={img.caption}
                 index={idx}
+                figureLabel={img.figure_label}
               />
             );
           })}

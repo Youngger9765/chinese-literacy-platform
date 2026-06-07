@@ -158,21 +158,25 @@ images:
   image_hash: 2152d5b2402d
   content_type: image/png
   caption: ''
+  figure_label: 圖四
 - filename: images/G7-L29/G7-L29-05.png
   size_bytes: 170755
   image_hash: 8edce43534b6
   content_type: image/png
   caption: ''
+  figure_label: 圖三
 - filename: images/G7-L29/G7-L29-07.png
   size_bytes: 716939
   image_hash: 7859cf640fb0
   content_type: image/png
   caption: ''
+  figure_label: 圖二
 - filename: images/G7-L29/G7-L29-09.png
   size_bytes: 272963
   image_hash: 3e6214e130c6
   content_type: image/png
   caption: ''
+  figure_label: 圖一
 image_count: 4
 spotlight_raw_text: "閱讀聚光燈\n圖文整合閱讀策略\n前一課我們已經學過圖文整合閱讀策略，知道圖片能幫助我們理解文章重點。讀有插圖的文章時，不能只看文字，也不能只看圖片，而要把文字和圖片對照起來讀。至於先看文字還是先看圖片，並沒有固定的順序。這一課，我們要練習另一種常用的方法：先讀文字，再看圖片。我們用下面4個步驟來進行圖文整合閱讀：\n\
   \    ❶先讀文字——抓到重點，想一想：要我從圖中看什麼 \n❷再看圖——讀懂這張圖告訴我們什麼訊息\n❸回到文字——從圖中找對應的訊息\n❹整合文圖——把文和圖合起來想，文圖要表達什麼\n\
