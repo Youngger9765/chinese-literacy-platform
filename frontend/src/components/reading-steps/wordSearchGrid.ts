@@ -121,12 +121,27 @@ export function generateGrid(words: string[]): GeneratedGrid {
   const placedWords: PlacedWord[] = [];
   const dirs: Direction[] = ['horizontal', 'vertical'];
 
+  // Direction balance counters: bias each word toward the under-represented
+  // direction so that |horizontal_count - vertical_count| stays ≤ 1.
+  let hCount = 0;
+  let vCount = 0;
+
   for (const word of shuffleArray(words)) {
     const wordLen = [...word].length;
     let placed = false;
 
+    // Preferred direction: whichever has fewer placements so far.
+    // If equal, pick randomly (standard 50/50).
+    const preferred: Direction =
+      hCount < vCount ? 'horizontal'
+      : vCount < hCount ? 'vertical'
+      : dirs[Math.floor(Math.random() * 2)];
+    const fallback: Direction = preferred === 'horizontal' ? 'vertical' : 'horizontal';
+
+    // First half of the attempt budget uses the preferred direction;
+    // second half falls back to the other direction so we never fail to place.
     for (let attempt = 0; attempt < 200 && !placed; attempt++) {
-      const dir = dirs[Math.floor(Math.random() * 2)];
+      const dir: Direction = attempt < 100 ? preferred : fallback;
       const maxRow = dir === 'vertical' ? size - wordLen : size - 1;
       const maxCol = dir === 'horizontal' ? size - wordLen : size - 1;
       if (maxRow < 0 || maxCol < 0) continue;
@@ -135,6 +150,7 @@ export function generateGrid(words: string[]): GeneratedGrid {
 
       if (tryPlaceWord(grid, word, size, dir, row, col)) {
         placedWords.push({ word, row, col, direction: dir });
+        if (dir === 'horizontal') hCount++; else vCount++;
         placed = true;
       }
     }
