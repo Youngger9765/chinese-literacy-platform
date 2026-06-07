@@ -135,6 +135,21 @@ cd frontend && npm install && npm run dev    # localhost:3000
 cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # localhost:8000
 ```
 
+## QA / 測試登入（重要 — 不要再說「卡登入牆/要帳號」）
+
+**`/login` 頁面直接有一鍵登入按鈕（懶人登入），QA 完全不需要真帳號或密碼。**
+所有環境（staging / preview / prod）的 `/login` 都有三顆 demo 登入鈕：
+
+| 按鈕 | 角色 | 用途 |
+|------|------|------|
+| 管理員 王管理員 | admin | 後台 / 稽核頁 QA |
+| 教師 李老師 | teacher | 班級 / 派作業 / 老師端 QA |
+| **學生 小明** | student | **學習流程（7 步驟）QA — 預設用這顆** |
+
+**QA 學習步驟 SOP（headless browse）**：先 `goto {base}/login` → `snapshot -i` 拿最新 ref → click 對應角色鈕 → 等 redirect 完成（驗 `js "location.href"` 不再是 /login）→ 再 `goto {base}/learn/{id}/{step}`。
+⚠️ browse 的 `@eN` ref 是當下 snapshot 的，導頁/重抓後會失效 → **click 前一定重新 snapshot**。
+⚠️ `/learn/*` 未登入會 redirect `/login` — 看到 redirect = 還沒登入成功，不是「需要帳號」。
+
 ## 覆寫規則（防止反覆 bug）
 
 14 天內同類 bug 反覆出現，以下規則強制執行：
