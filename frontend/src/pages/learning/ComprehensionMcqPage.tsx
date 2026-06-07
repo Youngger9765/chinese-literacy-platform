@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import MultipleChoiceExercise from '../../components/reading-steps/MultipleChoiceExercise';
+import OmoPaperResultBanner from '../../components/reading-steps/OmoPaperResultBanner';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { ComprehensionResult } from '../../types';
 
@@ -83,6 +84,7 @@ const ComprehensionMcqPage: React.FC = () => {
       exerciseIcon="quiz"
       exerciseLabel="閱讀理解"
     >
+      <OmoPaperResultBanner stepId="comprehension" />
       {hasMcq ? (
         mcqDone ? (
           /* Done state */

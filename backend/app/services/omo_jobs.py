@@ -256,10 +256,12 @@ async def _run_grading(upload_id: int, lesson_id: int):
         db = SessionLocal()
         active_attempt = None
         image_paths = []
+        student_id = None  # #2027: needed to sync grading into the LearningSession
         try:
             upload = db.query(OmoUpload).filter(OmoUpload.id == upload_id).first()
             if not upload:
                 return
+            student_id = upload.student_id
 
             # Find the latest active attempt
             for attempt in reversed(upload.attempts or []):
@@ -368,6 +370,20 @@ async def _run_grading(upload_id: int, lesson_id: int):
             len(graded),
             overall_score or 0.0,
         )
+
+        # #2027 / #2089 item 3: sync the paper grading into the student's
+        # LearningSession step_progress — lights up the 關卡 dots and stores the
+        # paper作答對錯 where the learning UI reads it. Best-effort: the grade is
+        # already saved above, so a sync failure never loses the result.
+        if student_id is not None and graded:
+            try:
+                from ..services.omo_session_sync import sync_omo_grading_to_session
+                sync_omo_grading_to_session(student_id, lesson_id, graded)
+            except Exception as exc:
+                logger.error(
+                    "OMO upload %d: session sync failed (non-fatal): %s",
+                    upload_id, exc, exc_info=True,
+                )
 
     # ── Task-level timeout wrapper ────────────────────────────────────────────
     try:
