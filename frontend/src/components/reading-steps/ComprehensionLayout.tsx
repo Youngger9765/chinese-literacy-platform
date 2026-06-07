@@ -40,7 +40,25 @@ import React, { useMemo } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
-import GraphicTextImageStrip from './GraphicTextImageStrip';
+import GraphicTextImageStrip, { FigureCard, buildImageSrc } from './GraphicTextImageStrip';
+
+/** #2085 B2: map a paragraph to the figures it references inline ("（請看圖一）", "如圖二").
+ *  Figures are 1-based in text (圖一/圖二/…) and 0-based in the images array (圖一 = images[0]),
+ *  matching GraphicTextImageStrip's badge numbering. Returns 0-based indices, ascending. */
+const _CN_NUM: Record<string, number> = {
+  一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
+};
+function figureIndicesInParagraph(text: string): number[] {
+  const idxs = new Set<number>();
+  const re = /圖\s*([一二三四五六七八九十]|\d+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const tok = m[1];
+    const n = _CN_NUM[tok] ?? parseInt(tok, 10);
+    if (Number.isFinite(n) && n >= 1) idxs.add(n - 1);
+  }
+  return [...idxs].sort((a, b) => a - b);
+}
 import TableDisplay from './TableDisplay';
 import CollapsibleRefPanel from './CollapsibleRefPanel';
 
@@ -157,70 +175,127 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            *
            * Both panes are independently scrollable. Images are never modal-covered.
            * ══════════════════════════════════════════════════════════════════ */
-          <div className="w-full h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <div className="w-full h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
 
-            {/* Image pane — #2085: text-left/image-right (desktop) + text-top/image-bottom
-                (mobile). order-2 puts this AFTER the text pane in both flex-col & flex-row. */}
-            <div
-              className="
-                order-2
-                w-full lg:w-1/2
-                h-[40vh] lg:h-full
-                min-h-0
-                flex-shrink-0 lg:flex-shrink
-                bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5
-                flex flex-col
-              "
-            >
-              <div className="flex items-center gap-2 mb-3 shrink-0">
-                <span className="material-symbols-outlined text-accent text-xl">photo_library</span>
+            {/* #2085 B2 — per-paragraph 段↔圖 pairing: each paragraph shows the figure
+                it references INLINE to its RIGHT (左右對照), like the paper worksheet.
+                NOT a gallery. 圖N (text) → images[N-1] (filename order). */}
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  課文圖表
+                  參考課文
                 </span>
-                <span className="text-xs text-on-surface-variant ml-1">{images.length} 張</span>
               </div>
-              {/* GraphicTextImageStrip fills the remaining height of this pane */}
-              <div className="flex-1 min-h-0">
-                <GraphicTextImageStrip
-                  images={images}
-                  lessonCode={story.lesson_code}
-                />
+
+              <div className="space-y-8">
+                {(() => {
+                  const referenced = new Set<number>();
+                  const rows = story.content.map((line, idx) => {
+                    const plain = typeof line === 'string' ? line : String(line ?? '');
+                    const figIdxs = figureIndicesInParagraph(plain).filter((i) => i < images.length);
+                    figIdxs.forEach((i) => referenced.add(i));
+                    return (
+                      <div key={idx} className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+                        {/* paragraph text — left */}
+                        <div className="flex gap-3 items-start w-full lg:w-1/2 lg:flex-shrink-0">
+                          <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <p
+                            className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                              zhuyinActive ? 'tracking-[0.15em]' : ''
+                            }`}
+                          >
+                            {zhuyinLines ? zhuyinLines[idx] : line}
+                          </p>
+                        </div>
+                        {/* its figure(s) — right, aligned for 左右對照 */}
+                        {figIdxs.length > 0 && (
+                          <div className="w-full lg:w-1/2 lg:flex-shrink-0 space-y-4">
+                            {figIdxs.map((gi) => (
+                              <FigureCard
+                                key={gi}
+                                src={buildImageSrc(images[gi].filename, story.lesson_code)}
+                                alt={images[gi].caption ?? `圖 ${gi + 1}`}
+                                caption={images[gi].caption}
+                                index={gi}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                  const orphans = images
+                    .map((img, gi) => ({ img, gi }))
+                    .filter(({ gi }) => !referenced.has(gi));
+                  return (
+                    <>
+                      {rows}
+                      {orphans.length > 0 && (
+                        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+                          <div className="w-full lg:w-1/2 lg:flex-shrink-0 text-sm text-on-surface-variant pt-1">
+                            其他圖表
+                          </div>
+                          <div className="w-full lg:w-1/2 lg:flex-shrink-0 space-y-4">
+                            {orphans.map(({ img, gi }) => (
+                              <FigureCard
+                                key={gi}
+                                src={buildImageSrc(img.filename, story.lesson_code)}
+                                alt={img.caption ?? `圖 ${gi + 1}`}
+                                caption={img.caption}
+                                index={gi}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
+
+              {progressPercent >= 0 && (
+                <div className="mt-6 pt-4 border-t border-surface-container-high">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-headline font-bold text-on-surface-variant">
+                      {progressLabel || '完成進度'}
+                    </span>
+                    <span className="text-xs font-headline font-bold text-accent">
+                      {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Text + exercise pane — #2085: order-1 puts text FIRST → left on desktop,
-                top on mobile (reading flow starts at the text, image is the reference). */}
-            <div className="order-1 w-full lg:w-1/2 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
-              {/* Text card */}
-              <StoryTextCard
-                story={story}
-                zhuyinLines={zhuyinLines}
-                zhuyinActive={zhuyinActive}
-                progressPercent={progressPercent}
-                progressLabel={progressLabel}
-              />
-
-              {/* Tables (if any) */}
-              {hasTables && (
-                <CollapsibleRefPanel
-                  icon="table_chart"
-                  label="紙本表格"
-                  count={`${tables.length} 張`}
-                  defaultOpen={false}
-                >
-                  <TableDisplay tables={tables} layout="stacked" />
-                </CollapsibleRefPanel>
-              )}
-
-              {/* Exercise */}
+            {/* Tables (if any) */}
+            {hasTables && (
               <CollapsibleRefPanel
-                icon={exerciseIcon}
-                label={exerciseLabel}
+                icon="table_chart"
+                label="紙本表格"
+                count={`${tables.length} 張`}
                 defaultOpen={false}
               >
-                {children}
+                <TableDisplay tables={tables} layout="stacked" />
               </CollapsibleRefPanel>
-            </div>
+            )}
+
+            {/* Exercise — below the paired reading */}
+            <CollapsibleRefPanel
+              icon={exerciseIcon}
+              label={exerciseLabel}
+              defaultOpen={true}
+            >
+              {children}
+            </CollapsibleRefPanel>
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════════════════

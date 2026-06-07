@@ -43,12 +43,20 @@ function chineseNumeral(n: number): string {
 }
 
 /** Derive lesson code from an image filename like `images/G7-L28/G7-L28-08.jpg`. */
-function deriveLessonCodeFromFilename(filename: string): string {
+export function deriveLessonCodeFromFilename(filename: string): string {
   const parts = filename.split('/').filter(Boolean);
   // Skip leading 'images/' prefix when present.
   if (parts.length >= 2 && parts[0] === 'images') return parts[1];
   if (parts.length >= 2) return parts[parts.length - 2];
   return '';
+}
+
+/** Build the public GCS URL for a lesson image. Shared with ComprehensionLayout
+ *  so per-paragraph figure pairing (#2085 B2) renders identical image sources. */
+export function buildImageSrc(filename: string, lessonCode?: string): string {
+  const code = lessonCode || deriveLessonCodeFromFilename(filename);
+  const basename = filename.split('/').pop() ?? filename;
+  return `${GCS_IMAGE_BASE}/${code}/${basename}`;
 }
 
 /** Per-figure in-pane zoom controls (no fullscreen modal). */
@@ -63,7 +71,7 @@ interface FigureCardProps {
   index: number; // 0-based
 }
 
-const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index }) => {
+export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index }) => {
   const [scale, setScale] = useState(1);
   const [imgError, setImgError] = useState(false);
 
