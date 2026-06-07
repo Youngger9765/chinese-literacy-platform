@@ -50,6 +50,10 @@ class GradedAnswer:
     score: float          # 0.0 – 1.0
     ai_confidence: float  # 0.0 – 1.0
     reasoning: str
+    # The UI step (step_sequence id) this question belongs to, e.g.
+    # "vocab-application" / "comprehension" / "reading-strategy". Used to order
+    # results by the lesson's on-screen 關卡 sequence (#2038 / #2089 item 2).
+    step: str = ""
     # The question prompt text from the lesson YAML (e.g. the definition for a
     # fill-in-blank, or the MCQ stem).  Surfaced in the result-page header so
     # students see the actual question instead of an opaque id like "fb_1".
@@ -249,6 +253,7 @@ async def grade_worksheet_images(
                 score=score,
                 ai_confidence=ai_conf,
                 reasoning=reasoning,
+                step=str(question.get("step") or ""),
                 context=str(question.get("context") or ""),
                 position={
                     "x": float(item.get("position_x", 0.0)),
@@ -291,11 +296,8 @@ async def grade_worksheet_images(
             )
             result.crop_image_url = gs_uri
 
-    # #1973: sort by YAML question order (fb_1, fb_2, …, mc_1, mc_2, …) so the
-    # client renders in a stable, student-readable order rather than Gemini's
-    # visual-scan order (which can jump around — esp. after _split_spread).
-    qid_order = {q["id"]: idx for idx, q in enumerate(questions)}
-    results.sort(key=lambda g: qid_order.get(g.question_id, len(qid_order)))
+    # #2038 / #2089 item 2: order results by the lesson's on-screen 關卡 sequence.
+    results = _order_by_step_sequence(results, lesson, questions)
 
     logger.info(
         "OMO grader: graded %d/%d questions for lesson '%s'",
@@ -304,6 +306,35 @@ async def grade_worksheet_images(
         lesson.get("title", "unknown"),
     )
     return results
+
+
+def _order_by_step_sequence(
+    results: list[GradedAnswer],
+    lesson: dict,
+    questions: list[dict],
+) -> list[GradedAnswer]:
+    """Order graded results by the lesson's on-screen 關卡 (step_sequence) order.
+
+    #2038 / #2089 item 2: the student sees the worksheet steps in the lesson's
+    step_sequence order (e.g. vocab-application → reading-strategy →
+    comprehension). Grading results must follow that same order rather than
+    question type (fb→mc→se) — under the old type sort, comprehension (mc) came
+    before reading-strategy (se), the reverse of the on-screen order.
+
+    Tie-break within a step keeps the stable YAML question order (#1973:
+    fb_1, fb_2, …). A question whose step is absent from this lesson's
+    step_sequence sorts last, still stably. Pure + deterministic (no LLM) so it
+    stays within the omo-determinism contract.
+    """
+    step_sequence = lesson.get("step_sequence") or []
+    step_order = {sid: idx for idx, sid in enumerate(step_sequence)}
+    qid_order = {q["id"]: idx for idx, q in enumerate(questions)}
+
+    def _sort_key(g: GradedAnswer) -> tuple:
+        step_idx = step_order.get(g.step, len(step_order))  # unknown/missing → last
+        return (step_idx, qid_order.get(g.question_id, len(qid_order)))
+
+    return sorted(results, key=_sort_key)
 
 
 def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[GradedAnswer]:
@@ -316,6 +347,7 @@ def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[Grade
             score=1.0,
             ai_confidence=0.9,
             reasoning="本地開發模式：模擬批改結果",
+            step=str(q.get("step") or ""),
             context=str(q.get("context") or ""),
             crop_image_url=None,
             source_attempt_id=attempt_id,

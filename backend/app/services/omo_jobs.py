@@ -345,6 +345,7 @@ async def _run_grading(upload_id: int, lesson_id: int):
                 "ai_confidence": g.ai_confidence,
                 "reasoning": g.reasoning,
                 "context": g.context,  # #2011 follow-up: prompt text for the result page
+                "step": g.step,        # #2038: UI 關卡 id — drives 依關卡順序 + (item 3) 綠點同步
                 "source_attempt_id": g.source_attempt_id,
                 "position": g.position,
                 "crop_image_url": g.crop_image_url,
