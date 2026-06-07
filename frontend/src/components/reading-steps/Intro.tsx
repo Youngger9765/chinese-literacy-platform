@@ -221,7 +221,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   className={`text-base ${zhuyinActive ? 'leading-[2] tracking-[0.15em]' : 'leading-[1.5]'} text-gray-600`}
                   aria-label={`作者：${story.intro.author}`}
                 >
-                  {processZhuyin(story.intro.author)}
+                  {/* #2082 A2: apply the same 「問題、解決、結果」結構 quoting as the strategy box
+                      so the subtitle and the highlight box stay consistent. */}
+                  {processZhuyin(
+                    story.intro.author.replace(
+                      /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
+                      '「$1、$2、$3」$4'
+                    )
+                  )}
                 </p>
               )}
             </div>
