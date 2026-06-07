@@ -69,8 +69,11 @@ const OmoCameraScanner: React.FC<OmoCameraScannerProps> = ({
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: 'environment' }, // rear camera for documents
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            // Match the upload resize target (1280px longest side) so the
+            // captured frame usually needs no second compression pass in
+            // resizeImage — avoids stacking JPEG artifacts (#2094 review).
+            width: { ideal: 1280 },
+            height: { ideal: 1280 },
           },
           audio: false,
         });
@@ -126,13 +129,14 @@ const OmoCameraScanner: React.FC<OmoCameraScannerProps> = ({
     canvas.toBlob(
       (blob) => {
         if (!blob) return;
-        const file = new File([blob], `scan-${Date.now()}.jpg`, {
+        const now = Date.now();
+        const file = new File([blob], `scan-${now}.jpg`, {
           type: 'image/jpeg',
-          lastModified: Date.now(),
+          lastModified: now,
         });
         onCapture(file);
         setFlash(true);
-        window.setTimeout(() => setFlash(false), 150);
+        setTimeout(() => setFlash(false), 150);
       },
       'image/jpeg',
       CAPTURE_QUALITY,
@@ -171,7 +175,7 @@ const OmoCameraScanner: React.FC<OmoCameraScannerProps> = ({
           muted
           className={`max-h-full max-w-full ${state === 'live' ? 'block' : 'hidden'}`}
         />
-        {flash && <div className="absolute inset-0 bg-white animate-pulse" aria-hidden="true" />}
+        {flash && <div className="absolute inset-0 bg-white opacity-80" aria-hidden="true" />}
 
         {state === 'starting' && (
           <div className="flex flex-col items-center gap-3 text-white/80">

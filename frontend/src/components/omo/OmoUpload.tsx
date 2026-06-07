@@ -258,7 +258,22 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
         isPdf,
       };
     });
-    setStaged((prev) => [...prev, ...newPages]);
+    // Cap guard inside the functional update (#2094 review): scanner captures
+    // go through canvas.toBlob (async), so two rapid shutter taps can both read
+    // the same `staged` snapshot and each append — overflowing MAX_FILES. Re-cap
+    // against the freshest `prev` here and revoke any dropped page's object URL.
+    setStaged((prev) => {
+      const room = MAX_FILES - prev.length;
+      if (room <= 0) {
+        newPages.forEach(revokePageUrl);
+        return prev;
+      }
+      if (newPages.length > room) {
+        newPages.slice(room).forEach(revokePageUrl);
+        return [...prev, ...newPages.slice(0, room)];
+      }
+      return [...prev, ...newPages];
+    });
 
     if (truncated) {
       setError(
