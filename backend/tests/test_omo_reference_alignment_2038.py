@@ -81,6 +81,29 @@ class TestMediaArtifactFilter:
         assert "fb_2" in fb_ids and "fb_15" in fb_ids
         assert len(fb_ids) == 14
 
+    def test_artifact_does_not_corrupt_lettered_mode_detection(self):
+        # #2038 review: a lettered lesson whose first fb entry is a video
+        # artifact with a NON-letter answer ('外來種') must still be detected as
+        # lettered — the artifact must be skipped before fb_lettered is computed,
+        # otherwise every real fb gets scored as free_form.
+        lesson = {
+            "fill_in_blank": {
+                "1": {"answer": "外來種", "context_before": "",
+                      "context_after": "・片長：(3:00) 建議觀看"},
+                "2": {"answer": "A", "sentence": "學生需填入【   】"},
+                "3": {"answer": "B", "sentence": "另一格【   】"},
+            },
+            "vocabulary": [{"word": "規律"}, {"word": "秩序"}],
+        }
+        questions = _build_question_schema(lesson)
+        real = [q for q in questions if q["id"] == "2"]
+        assert real, "the real lettered blank must survive"
+        assert real[0]["mode"] == "lettered", (
+            "artifact's non-letter answer must not flip the lesson to free_form"
+        )
+        # The artifact itself must not appear as a question.
+        assert not any(q["id"] == "1" for q in questions)
+
     def test_filter_does_not_drop_real_blanks_across_all_lessons(self):
         # Guardrail: only the two known artifacts may be filtered. Compare the
         # raw fill_in_blank count to the schema fill_blank count per lesson.

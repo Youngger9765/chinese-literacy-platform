@@ -15,9 +15,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# Which UI step (step_sequence id, see frontend stepConfig.ts) each grader
-# question type belongs to. Used to order graded results by the lesson's
-# on-screen 關卡 sequence (#2038 / #2089 item 2) instead of by question type.
+# Which UI step (step_sequence id, see frontend stepConfig.ts) each worksheet
+# section maps to. Used to order graded results by the lesson's on-screen 關卡
+# sequence (#2038 / #2089 item 2) instead of by question type.
+#
+# NOTE: keys are YAML SECTION names (fill_in_blank / multiple_choice /
+# strategy_exercise), NOT the schema's question `type` field — strategy_exercise
+# questions are emitted with type "fill_blank" but belong to "reading-strategy".
+# Do not look this up via q["type"]; assign step at the section it is built in.
 QUESTION_TYPE_TO_STEP = {
     "fill_blank": "vocab-application",       # 語詞應用
     "multiple_choice": "comprehension",      # 閱讀理解
@@ -118,8 +123,13 @@ def _build_question_schema(lesson: dict) -> list[dict]:
     # fb answers are single letters within the worksheet's choice set.
     fb = lesson.get("fill_in_blank") or []
     fb_raw_items = list(fb.items()) if isinstance(fb, dict) else list(enumerate(fb))
+    # Skip media artifacts here too (#2038 review): an artifact's non-letter
+    # answer (e.g. '外來種') would otherwise drag fb_lettered to False and turn
+    # a genuinely lettered lesson into free_form mode — scoring every fb wrong.
     fb_answers = []
     for _, item in fb_raw_items:
+        if _is_media_artifact(item):
+            continue
         ans = item.get("answer", "") if isinstance(item, dict) else str(item)
         fb_answers.append(ans)
 
