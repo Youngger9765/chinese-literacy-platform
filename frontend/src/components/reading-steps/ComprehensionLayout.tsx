@@ -16,7 +16,7 @@
  *   - Outer wrapper: flex flex-col flex-1 min-h-0 — NO scrollIntoView, NO min-h-full on children
  *   - Body: flex-1 min-h-0 overflow-hidden — establishes height boundary
  *   - Grid: grid-rows-[1fr] — CRITICAL: locks row height to 1fr so children cannot push it out
- *   - Right col: min-h-0 overflow-y-auto, children shrink-0 → natural flow stack
+ *   - Right col: min-h-0 overflow-y-auto, children shrink-0 -> natural flow stack
  *
  * History:
  *   - #1341 introduced a 3-pane layout (text / image strip / exercise)
@@ -28,9 +28,13 @@
  *     (defaultOpen=true) so all 3 right-col panels share the same accordion style,
  *     and removes the inner flex-1/min-h-0 nesting that caused the panels to
  *     visually overlap the exercise questions on scroll.
- *   - #1701 reorders right-col panels: 圖文對照 → 紙本表格 → 練習 (exercise last),
+ *   - #1701 reorders right-col panels: 圖文對照 -> 紙本表格 -> 練習 (exercise last),
  *     and sets all 3 panels to defaultOpen=true so students see reference material
  *     immediately without manually expanding.
+ *   - #2085 (B1 圖文並陳) graphic-text lessons get a dedicated split layout:
+ *     Desktop (>=1024px): left image pane (50%) | right text+exercise pane (50%).
+ *     Portrait/tablet (<1024px): top image pane (~40vh) / bottom text+exercise stack.
+ *     ZoomableImage modal removed — GraphicTextImageStrip now uses in-pane +/- zoom.
  */
 import React, { useMemo } from 'react';
 import { Story } from '../../types';
@@ -45,7 +49,7 @@ interface ComprehensionLayoutProps {
   dbSessionId?: number;
   /** The exercise component rendered in the right panel */
   children: React.ReactNode;
-  /** Progress 0–100 to show in the bottom bar of the left card. -1 = hide bar. */
+  /** Progress 0-100 to show in the bottom bar of the left card. -1 = hide bar. */
   progressPercent?: number;
   /** Label shown next to the progress percent. Defaults to empty. */
   progressLabel?: string;
@@ -54,6 +58,60 @@ interface ComprehensionLayoutProps {
   /** Header label for the exercise collapsible. */
   exerciseLabel?: string;
 }
+
+/** Scrollable lesson text card — shared between standard and graphic-text layouts. */
+const StoryTextCard: React.FC<{
+  story: Story;
+  zhuyinLines: React.ReactNode[] | null;
+  zhuyinActive: boolean;
+  progressPercent: number;
+  progressLabel: string;
+  className?: string;
+}> = ({ story, zhuyinLines, zhuyinActive, progressPercent, progressLabel, className = '' }) => (
+  <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0 ${className}`}>
+    <div className="flex items-center gap-2 mb-4 shrink-0">
+      <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
+      <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+        參考課文
+      </span>
+    </div>
+    <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar space-y-6">
+      {story.content.map((line, idx) => (
+        <div key={idx} className="flex gap-3 items-start">
+          <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
+            {String(idx + 1).padStart(2, '0')}
+          </span>
+          <p
+            className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+              zhuyinActive ? 'tracking-[0.15em]' : ''
+            }`}
+          >
+            {zhuyinLines ? zhuyinLines[idx] : line}
+          </p>
+        </div>
+      ))}
+    </div>
+
+    {progressPercent >= 0 && (
+      <div className="mt-4 pt-4 border-t border-surface-container-high shrink-0">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-headline font-bold text-on-surface-variant">
+            {progressLabel || '完成進度'}
+          </span>
+          <span className="text-xs font-headline font-bold text-accent">
+            {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
+          </span>
+        </div>
+        <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+          <div
+            className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+    )}
+  </div>
+);
 
 const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   story,
@@ -78,126 +136,128 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   const tables = story.tables ?? [];
   const hasImages = isGraphicText && images.length > 0;
   const hasTables = tables.length > 0;
-  // Lessons without any reference material (e.g. G6 摘要策略 課文) still render
-  // the exercise inside its own CollapsibleRefPanel for consistent visual
-  // styling — there's just nothing below it.
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
-      {/* ── Main content area ─────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8 overflow-hidden">
-        {/*
-          CRITICAL: grid-rows-[1fr] pins row height so child content changes
-          (checkbox toggle, MCQ answer reveal) cannot re-expand the row.
-          This is the fix for the height-collapse bug in #1332.
-        */}
-        <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-          {/* ── Left: Text-only card ───────────────────────────────────────────
-              #1697: images + tables moved to right column. Left always col-span-7
-              now (wider when there are no images/tables; previously col-span-8 for
-              graphic-text so the bottom image strip had room). */}
-          <div className="md:col-span-7 min-h-0 flex flex-col">
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0">
-              <div className="flex items-center gap-2 mb-4 shrink-0">
-                <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
+        {hasImages ? (
+          /* ══════════════════════════════════════════════════════════════════
+           * 圖文並陳 layout (B1, #2085) — for graphic-text lessons with images
+           *
+           * Desktop/landscape (>=1024px):
+           *   Left pane  (50%): image gallery, full pane width, independently scrollable
+           *   Right pane (50%): text card (scrollable) + exercise + tables
+           *
+           * Portrait/tablet (<1024px):
+           *   Top:    image strip (~40vh, capped so text stays visible)
+           *   Bottom: text card + exercise stack, scrollable
+           *
+           * Both panes are independently scrollable. Images are never modal-covered.
+           * ══════════════════════════════════════════════════════════════════ */
+          <div className="w-full h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+
+            {/* Image pane — full width on mobile (top), 50% on desktop (left) */}
+            <div
+              className="
+                w-full lg:w-1/2
+                h-[40vh] lg:h-full
+                min-h-0
+                flex-shrink-0 lg:flex-shrink
+                bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5
+                flex flex-col
+              "
+            >
+              <div className="flex items-center gap-2 mb-3 shrink-0">
+                <span className="material-symbols-outlined text-accent text-xl">photo_library</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  參考課文
+                  課文圖表
                 </span>
+                <span className="text-xs text-on-surface-variant ml-1">{images.length} 張</span>
               </div>
-              {/* Scrollable story content — overflow-y-auto on the inner div only.
-                  #1697 removes inline image/table placement (was #1692) — students
-                  now consult them from the right column collapsibles instead. */}
-              <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar space-y-6">
-                {story.content.map((line, idx) => (
-                  <div key={idx} className="flex gap-3 items-start">
-                    <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <p
-                      className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
-                        zhuyinActive ? 'tracking-[0.15em]' : ''
-                      }`}
-                    >
-                      {zhuyinLines ? zhuyinLines[idx] : line}
-                    </p>
-                  </div>
-                ))}
+              {/* GraphicTextImageStrip fills the remaining height of this pane */}
+              <div className="flex-1 min-h-0">
+                <GraphicTextImageStrip
+                  images={images}
+                  lessonCode={story.lesson_code}
+                />
               </div>
+            </div>
 
-              {/* Progress bar — only shown when progressPercent >= 0 */}
-              {progressPercent >= 0 && (
-                <div className="mt-4 pt-4 border-t border-surface-container-high shrink-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-headline font-bold text-on-surface-variant">
-                      {progressLabel || '完成進度'}
-                    </span>
-                    <span className="text-xs font-headline font-bold text-accent">
-                      {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                </div>
+            {/* Text + exercise pane — full width on mobile (bottom), 50% on desktop (right) */}
+            <div className="w-full lg:w-1/2 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+              {/* Text card */}
+              <StoryTextCard
+                story={story}
+                zhuyinLines={zhuyinLines}
+                zhuyinActive={zhuyinActive}
+                progressPercent={progressPercent}
+                progressLabel={progressLabel}
+              />
+
+              {/* Tables (if any) */}
+              {hasTables && (
+                <CollapsibleRefPanel
+                  icon="table_chart"
+                  label="紙本表格"
+                  count={`${tables.length} 張`}
+                  defaultOpen={false}
+                >
+                  <TableDisplay tables={tables} layout="stacked" />
+                </CollapsibleRefPanel>
               )}
+
+              {/* Exercise */}
+              <CollapsibleRefPanel
+                icon={exerciseIcon}
+                label={exerciseLabel}
+                defaultOpen={false}
+              >
+                {children}
+              </CollapsibleRefPanel>
             </div>
           </div>
+        ) : (
+          /* ══════════════════════════════════════════════════════════════════
+           * Standard 2-column layout — lessons without graphic-text images.
+           * Unchanged from #1701 / #1703.
+           * ══════════════════════════════════════════════════════════════════ */
+          <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-          {/* ── Right: 3 sibling accordion panels (ref material + exercise) ──
-              #1701: reorder so reference panels (圖文/紙本) come first, then
-              exercise. All 3 default to open so students see everything
-              immediately without needing to manually expand panels.
-              #1699: all 3 panels are CollapsibleRefPanel siblings in a vertical
-              flow stack. Outer div is the single scroll container; each panel
-              is shrink-0 so they take only the height they need. No flex-1,
-              no nested overflow, no z-index — purely natural document flow. */}
-          <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
-            {/* Reference panels first — students consult images/tables before filling exercise. */}
-            {hasImages && (
+            {/* Left: text card (col-span-7) */}
+            <div className="md:col-span-7 min-h-0 flex flex-col">
+              <StoryTextCard
+                story={story}
+                zhuyinLines={zhuyinLines}
+                zhuyinActive={zhuyinActive}
+                progressPercent={progressPercent}
+                progressLabel={progressLabel}
+              />
+            </div>
+
+            {/* Right: reference panels + exercise (col-span-5) */}
+            <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+              {hasTables && (
+                <CollapsibleRefPanel
+                  icon="table_chart"
+                  label="紙本表格"
+                  count={`${tables.length} 張`}
+                  defaultOpen={false}
+                >
+                  <TableDisplay tables={tables} layout="stacked" />
+                </CollapsibleRefPanel>
+              )}
+
               <CollapsibleRefPanel
-                icon="photo_library"
-                label="圖文對照"
-                count={`${images.length} 張`}
+                icon={exerciseIcon}
+                label={exerciseLabel}
                 defaultOpen={false}
               >
-                {/* Constrain image strip height when expanded so it doesn't push
-                    the exercise off-screen. ZoomableImage modal still works for
-                    full-screen viewing. */}
-                <div className="h-64 flex">
-                  <GraphicTextImageStrip
-                    images={images}
-                    lessonCode={story.lesson_code}
-                  />
-                </div>
+                {children}
               </CollapsibleRefPanel>
-            )}
-
-            {hasTables && (
-              <CollapsibleRefPanel
-                icon="table_chart"
-                label="紙本表格"
-                count={`${tables.length} 張`}
-                defaultOpen={false}
-              >
-                <TableDisplay tables={tables} layout="stacked" />
-              </CollapsibleRefPanel>
-            )}
-
-            {/* Exercise — after reference material. #1703: default collapsed
-                so right column starts compact; students expand panels they need. */}
-            <CollapsibleRefPanel
-              icon={exerciseIcon}
-              label={exerciseLabel}
-              defaultOpen={false}
-            >
-              {children}
-            </CollapsibleRefPanel>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Floating AI helper */}
