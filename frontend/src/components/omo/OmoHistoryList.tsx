@@ -95,7 +95,11 @@ function groupByLesson(items: OmoHistoryItem[]): LessonGroup[] {
       order.push(key);
     }
     // Backfill a missing title/grade_code from a later item in the same group.
-    if (group.title === '（尚未辨識課程名稱）' && item.lesson_title) {
+    // Never rename the unidentified group, even if a null-lesson_id item
+    // happens to carry a lesson_title (backend data inconsistency) — that
+    // item belongs in the unidentified bucket by lesson_id, so its title
+    // must not leak into the section header.
+    if (key !== UNIDENTIFIED_KEY && group.title === '（尚未辨識課程名稱）' && item.lesson_title) {
       group.title = item.lesson_title;
     }
     if (!group.gradeCode && item.grade_code) {
@@ -172,8 +176,12 @@ const OmoHistoryList: React.FC<OmoHistoryListProps> = ({ items, onSelect }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      {groups.map((group) => (
-        <section key={group.key} aria-label={group.title} className="flex flex-col gap-2">
+      {groups.map((group) => {
+        // Label the region via the heading's id (not aria-label with the same
+        // text) so screen readers don't announce the lesson name twice.
+        const headingId = `omo-history-lesson-${group.key}`;
+        return (
+        <section key={group.key} aria-labelledby={headingId} className="flex flex-col gap-2">
           {/* Per-lesson section header (#2089) */}
           <div className="flex items-center gap-2 px-1">
             {group.gradeCode && (
@@ -181,7 +189,7 @@ const OmoHistoryList: React.FC<OmoHistoryListProps> = ({ items, onSelect }) => {
                 {group.gradeCode}
               </span>
             )}
-            <h3 className="text-sm font-bold text-gray-900 truncate">{group.title}</h3>
+            <h3 id={headingId} className="text-sm font-bold text-gray-900 truncate">{group.title}</h3>
             <span className="ml-auto shrink-0 text-xs text-gray-400">{group.items.length} 筆</span>
           </div>
           <div className="flex flex-col gap-3">
@@ -194,7 +202,8 @@ const OmoHistoryList: React.FC<OmoHistoryListProps> = ({ items, onSelect }) => {
             ))}
           </div>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 };
