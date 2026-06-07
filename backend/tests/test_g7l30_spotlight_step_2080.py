@@ -49,6 +49,8 @@ class TestSpotlightHasQuestions:
     def test_steps_contain_real_questions_not_just_descriptions(self, g7l30):
         steps = g7l30["strategy_exercise"].get("steps") or []
         assert steps, "strategy_exercise.steps must not be empty"
+        # Pin the count so a future re-parse that merges/drops steps is caught.
+        assert len(steps) == 23, f"expected 23 spotlight steps, got {len(steps)}"
         # Every step must be a real question (select / free_text), NOT the old
         # skeleton shape ({exercise, description, steps}).
         typed = [s for s in steps if s.get("type") in ("select", "free_text")]
@@ -56,6 +58,18 @@ class TestSpotlightHasQuestions:
             "every spotlight step must be a select/free_text question; "
             f"got {len(typed)}/{len(steps)} typed"
         )
+
+    def test_no_multi_answer_stored_as_single_select(self, g7l30):
+        """#2088 review 🔴: multi-answer questions must NOT be select+answer:0
+        (frontend single-select would mis-grade students picking another valid
+        option). They were converted to free_text (open-ended, no mis-grade)."""
+        for s in g7l30["strategy_exercise"]["steps"]:
+            reasoning = s.get("reasoning") or ""
+            if "複選" in reasoning:
+                assert s.get("type") == "free_text", (
+                    f"multi-answer step must be free_text, got {s.get('type')}: "
+                    f"{s.get('prompt')!r}"
+                )
 
     def test_has_both_select_and_free_text(self, g7l30):
         steps = g7l30["strategy_exercise"]["steps"]
