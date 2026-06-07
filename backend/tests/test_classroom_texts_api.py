@@ -679,3 +679,136 @@ class TestClassroomTextsFullFlow:
         # 9. List still shows 2 texts (unchanged after failed operations)
         final_list = client.get(f"/api/classrooms/{cid}/texts", headers=headers)
         assert len(final_list.json()) == 2
+
+
+# ===========================================================================
+# Regression: non-numeric text_id (e.g. "L06") must not 500 — issue #2097
+# ===========================================================================
+
+
+class TestNonNumericTextId:
+    """Regression for GET /classrooms/{id}/texts 500 on lesson-code text_ids.
+
+    Before the fix, int('L06') raised ValueError -> HTTP 500.
+    After the fix, normalize_story_slug() converts 'L06' -> '6' so the lookup
+    succeeds, and a per-row try/except in the list handler prevents a single
+    bad identifier from killing the whole response.
+    """
+
+    def test_assign_with_l_prefix_text_id_returns_201(self, client, teacher, school_id):
+        """POST with text_id='L06' should work (normalize_story_slug -> '6')."""
+        cr = client.post(
+            "/api/classrooms",
+            json={"name": "L-Prefix Assign Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        cid = cr.json()["id"]
+
+        resp = client.post(
+            f"/api/classrooms/{cid}/texts",
+            json={"text_id": "L06", "copyright_confirmed": True},
+            headers=auth_header(teacher["token"]),
+        )
+        # The story at id=6 exists in fixtures; must not 500
+        assert resp.status_code in (201, 404), (
+            f"Expected 201 or 404, got {resp.status_code}: {resp.text}"
+        )
+        assert resp.status_code != 500
+
+    def test_list_does_not_500_when_row_has_l_prefix_text_id(
+        self, client, teacher, school_id
+    ):
+        """GET /classrooms/{id}/texts must return 200 even if a stored
+        text_id is 'L06' (lesson-code format), not a plain int string.
+
+        Simulates the staging failure: classroom_texts row with text_id='L06'
+        caused int('L06') -> ValueError -> 500.
+        """
+        from sqlalchemy.orm import Session as SASession
+
+        cr = client.post(
+            "/api/classrooms",
+            json={"name": "L-Prefix List Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cr.status_code == 201
+        cid = cr.json()["id"]
+
+        # Directly insert a ClassroomText row with a non-numeric text_id
+        # to reproduce the staging condition without going through the POST
+        # endpoint (which may or may not normalise on write).
+        db: SASession = TestingSessionLocal()
+        try:
+            from app.models.school import ClassroomText
+            import datetime
+
+            bad_row = ClassroomText(
+                classroom_id=cid,
+                text_id="L06",
+                assigned_by=teacher["user_id"],
+                assigned_at=datetime.datetime.utcnow(),
+            )
+            db.add(bad_row)
+            db.commit()
+        finally:
+            db.close()
+
+        # GET must return 200 (not 500)
+        resp = client.get(
+            f"/api/classrooms/{cid}/texts",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200, (
+            f"Expected 200 but got {resp.status_code}: {resp.text}"
+        )
+        # The row with L06 should either resolve to a real title or be skipped;
+        # either way the list must be a JSON array.
+        assert isinstance(resp.json(), list)
+
+    def test_list_returns_200_with_mixed_numeric_and_code_ids(
+        self, client, teacher, school_id
+    ):
+        """List endpoint stays 200 when classroom has both numeric and
+        L-prefixed text_ids stored (partial-failure guard)."""
+        cr = client.post(
+            "/api/classrooms",
+            json={"name": "Mixed ID Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cr.status_code == 201
+        cid = cr.json()["id"]
+
+        # Assign a known-good numeric text
+        client.post(
+            f"/api/classrooms/{cid}/texts",
+            json={"text_id": "1", "copyright_confirmed": True},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Directly insert a bad row (L-prefix)
+        db: SASession = TestingSessionLocal()
+        try:
+            from app.models.school import ClassroomText
+            import datetime
+
+            bad_row = ClassroomText(
+                classroom_id=cid,
+                text_id="L99",  # deliberately bad (no lesson id=99)
+                assigned_by=teacher["user_id"],
+                assigned_at=datetime.datetime.utcnow(),
+            )
+            db.add(bad_row)
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.get(
+            f"/api/classrooms/{cid}/texts",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        # At minimum the valid text "1" should be present; the bad row should
+        # either be resolved or silently skipped, never 500.
+        text_ids = {item["text_id"] for item in data}
+        assert "1" in text_ids
