@@ -40,9 +40,66 @@ import React, { useMemo } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
-import GraphicTextImageStrip from './GraphicTextImageStrip';
+import { FigureCard, buildImageSrc, deriveLessonCodeFromFilename } from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
 import CollapsibleRefPanel from './CollapsibleRefPanel';
+
+/** Image entry shape used by the graphic-text pairing layout (#2085). */
+type GraphicTextImage = NonNullable<Story['images']>[number];
+
+/**
+ * Map Chinese numeral characters → integer (圖一 → 1 … 圖十 → 10), #2085.
+ * Handles single-digit Arabic numerals too (圖3 → 3).
+ */
+const CN_NUM_MAP: Record<string, number> = {
+  一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
+};
+function figureTokenToNumber(token: string): number | null {
+  if (CN_NUM_MAP[token] != null) return CN_NUM_MAP[token];
+  const n = parseInt(token, 10);
+  return Number.isNaN(n) ? null : n;
+}
+
+/**
+ * Parse all inline 圖N references from a paragraph, return the set of figure
+ * numbers it references (deduped, in first-appearance order). #2085.
+ * Regex matches both 中文 numerals (圖一) and Arabic (圖3), tolerating a space.
+ */
+function parseFigureRefs(paragraph: string): number[] {
+  const re = /圖\s*([一二三四五六七八九十]|\d+)/g;
+  const seen = new Set<number>();
+  const out: number[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(paragraph)) !== null) {
+    const n = figureTokenToNumber(m[1]);
+    if (n != null && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
+}
+
+/**
+ * Build a lookup from figure number → image, keyed on the REAL `figure_label`
+ * baked into the YAML (NOT array order — the array is often reversed). #2085.
+ * Falls back to (index + 1) only for images that lack a figure_label, so
+ * single-image lessons without an explicit label still resolve.
+ */
+function buildFigureIndex(images: GraphicTextImage[]): Map<number, GraphicTextImage> {
+  const map = new Map<number, GraphicTextImage>();
+  images.forEach((img, idx) => {
+    const label = img.figure_label;
+    let num: number | null = null;
+    if (label) {
+      const mt = label.match(/圖\s*([一二三四五六七八九十]|\d+)/);
+      if (mt) num = figureTokenToNumber(mt[1]);
+    }
+    if (num == null) num = idx + 1; // fallback when no label present
+    if (!map.has(num)) map.set(num, img);
+  });
+  return map;
+}
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -113,6 +170,114 @@ const StoryTextCard: React.FC<{
   </div>
 );
 
+/**
+ * PairedReading — per-paragraph 圖文對照 (#2085).
+ *
+ * Renders the lesson as a vertical list of rows. Each row pairs ONE paragraph
+ * (left half) with the figure(s) that paragraph references (right half),
+ * matched by `figure_label` — NOT array order. The professor's intent:
+ * "一段課文就是一張圖在右邊，左右直接對照" (paper-worksheet style).
+ *
+ * - Desktop (lg): text left, image right (flex-row).
+ * - Mobile: text top, image bottom (flex-col).
+ * - A paragraph may reference 0, 1, or many figures.
+ * - Figures referenced by NO paragraph are appended under "其他圖表".
+ */
+const PairedReading: React.FC<{
+  paragraphs: string[];
+  images: GraphicTextImage[];
+  lessonCode: string;
+  zhuyinLines: React.ReactNode[] | null;
+  zhuyinActive: boolean;
+}> = ({ paragraphs, images, lessonCode, zhuyinLines, zhuyinActive }) => {
+  const figureIndex = useMemo(() => buildFigureIndex(images), [images]);
+
+  // Track which images got paired so we can list the leftovers at the end.
+  const usedFilenames = new Set<string>();
+
+  const rows = paragraphs.map((para, idx) => {
+    const refNums = parseFigureRefs(para);
+    const matched: { num: number; img: GraphicTextImage }[] = [];
+    refNums.forEach((num) => {
+      const img = figureIndex.get(num);
+      if (img) {
+        matched.push({ num, img });
+        usedFilenames.add(img.filename);
+      }
+    });
+    return { idx, para, matched };
+  });
+
+  const leftovers = images.filter((img) => !usedFilenames.has(img.filename));
+
+  return (
+    <div className="space-y-5">
+      {rows.map(({ idx, para, matched }) => (
+        <div
+          key={idx}
+          className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch border-b border-surface-container-high pb-5 last:border-b-0"
+        >
+          {/* Paragraph — left half (top on mobile) */}
+          <div className="w-full lg:w-1/2 flex gap-3 items-start">
+            <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-6 text-right">
+              {String(idx + 1).padStart(2, '0')}
+            </span>
+            <p
+              className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                zhuyinActive ? 'tracking-[0.15em]' : ''
+              }`}
+            >
+              {zhuyinLines ? zhuyinLines[idx] : para}
+            </p>
+          </div>
+
+          {/* Figure(s) — right half (bottom on mobile). Empty when no ref. */}
+          <div className="w-full lg:w-1/2 flex flex-col gap-4">
+            {matched.length > 0 ? (
+              matched.map(({ num, img }) => (
+                <FigureCard
+                  key={img.filename}
+                  src={buildImageSrc(img.filename, lessonCode)}
+                  alt={img.figure_label ?? img.caption ?? `圖 ${num}`}
+                  caption={img.caption}
+                  index={num - 1}
+                  figureLabel={img.figure_label ?? `圖${num}`}
+                />
+              ))
+            ) : (
+              <div className="hidden lg:block" aria-hidden="true" />
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Figures referenced by no paragraph → append under 其他圖表. */}
+      {leftovers.length > 0 && (
+        <div className="pt-2">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="material-symbols-outlined text-accent text-lg">image</span>
+            <span className="font-headline font-bold text-on-surface text-sm tracking-wide">
+              其他圖表
+            </span>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {leftovers.map((img, i) => (
+              <FigureCard
+                key={img.filename}
+                src={buildImageSrc(img.filename, lessonCode)}
+                alt={img.figure_label ?? img.caption ?? `圖 ${i + 1}`}
+                caption={img.caption}
+                index={i}
+                figureLabel={img.figure_label}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   story,
   dbSessionId,
@@ -137,71 +302,78 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   const hasImages = isGraphicText && images.length > 0;
   const hasTables = tables.length > 0;
 
+  // Resolve the lesson directory for GCS image URLs. story.lesson_code maps from
+  // grade_code (e.g. 'G7') which is NOT the full lesson code, so derive from the
+  // image filename (e.g. 'images/G7-L29/G7-L29-09.png' -> 'G7-L29'), #2085 / #1681.
+  const resolvedLessonCode =
+    (images[0] ? deriveLessonCodeFromFilename(images[0].filename) : '') ||
+    story.lesson_code ||
+    '';
+
+  // Paragraphs drive the per-paragraph pairing. story.content === paragraphs
+  // (api.ts maps detail.paragraphs -> content), so use content as the source.
+  const paragraphs = story.content ?? [];
+
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8 overflow-hidden">
 
         {hasImages ? (
           /* ══════════════════════════════════════════════════════════════════
-           * 圖文並陳 layout (B1, #2085) — for graphic-text lessons with images
+           * 圖文對照 per-paragraph pairing (B2, #2085) — graphic-text lessons.
            *
-           * Desktop/landscape (>=1024px):
-           *   Left pane  (50%): text card (scrollable) + exercise + tables
-           *   Right pane (50%): image gallery, full pane width, independently scrollable
+           * The professor's intent (6/4 demo): "一段課文就是一張圖在右邊，左右
+           * 直接對照." Each paragraph sits next to the SPECIFIC figure it
+           * references (matched by figure_label, NOT array order, since the
+           * YAML image array is often reversed vs. figure order).
            *
-           * Portrait/tablet (<1024px):
-           *   Top:    text card + exercise stack, scrollable
-           *   Bottom: image strip (~40vh, capped so text stays visible)
-           *
-           * Order controlled via order-1 (text) / order-2 (image) so reading starts at text.
-           *
-           * Both panes are independently scrollable. Images are never modal-covered.
+           * - Single scroll container holds the whole paired list.
+           * - Desktop (lg): each row is text-left | figure-right.
+           * - Mobile: text-top / figure-bottom.
+           * - Exercise renders BELOW the paired reading, full width (not a side
+           *   gallery), so practice no longer scrolls back to find the figure.
            * ══════════════════════════════════════════════════════════════════ */
-          <div className="w-full h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
-
-            {/* Image pane — #2085: text-left/image-right (desktop) + text-top/image-bottom
-                (mobile). order-2 puts this AFTER the text pane in both flex-col & flex-row. */}
-            <div
-              className="
-                order-2
-                w-full lg:w-1/2
-                h-[40vh] lg:h-full
-                min-h-0
-                flex-shrink-0 lg:flex-shrink
-                bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5
-                flex flex-col
-              "
-            >
-              <div className="flex items-center gap-2 mb-3 shrink-0">
-                <span className="material-symbols-outlined text-accent text-xl">photo_library</span>
+          <div className="w-full h-full overflow-y-auto custom-scrollbar pr-1">
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  課文圖表
+                  圖文對照閱讀
                 </span>
-                <span className="text-xs text-on-surface-variant ml-1">{images.length} 張</span>
+                <span className="text-xs text-on-surface-variant ml-1">{images.length} 張圖</span>
               </div>
-              {/* GraphicTextImageStrip fills the remaining height of this pane */}
-              <div className="flex-1 min-h-0">
-                <GraphicTextImageStrip
-                  images={images}
-                  lessonCode={story.lesson_code}
-                />
-              </div>
-            </div>
 
-            {/* Text + exercise pane — #2085: order-1 puts text FIRST → left on desktop,
-                top on mobile (reading flow starts at the text, image is the reference). */}
-            <div className="order-1 w-full lg:w-1/2 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
-              {/* Text card */}
-              <StoryTextCard
-                story={story}
+              <PairedReading
+                paragraphs={paragraphs}
+                images={images}
+                lessonCode={resolvedLessonCode}
                 zhuyinLines={zhuyinLines}
                 zhuyinActive={zhuyinActive}
-                progressPercent={progressPercent}
-                progressLabel={progressLabel}
               />
 
-              {/* Tables (if any) */}
-              {hasTables && (
+              {progressPercent >= 0 && (
+                <div className="mt-6 pt-4 border-t border-surface-container-high">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-headline font-bold text-on-surface-variant">
+                      {progressLabel || '完成進度'}
+                    </span>
+                    <span className="text-xs font-headline font-bold text-accent">
+                      {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Tables (if any) — full width below the paired reading */}
+            {hasTables && (
+              <div className="mt-4">
                 <CollapsibleRefPanel
                   icon="table_chart"
                   label="紙本表格"
@@ -210,9 +382,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 >
                   <TableDisplay tables={tables} layout="stacked" />
                 </CollapsibleRefPanel>
-              )}
+              </div>
+            )}
 
-              {/* Exercise */}
+            {/* Exercise — full width, BELOW the paired reading */}
+            <div className="mt-4">
               <CollapsibleRefPanel
                 icon={exerciseIcon}
                 label={exerciseLabel}

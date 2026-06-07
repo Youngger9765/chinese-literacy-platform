@@ -71,7 +71,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Plugin-pattern dispatch fields (#1404 / #1341)
   layout_mode?: 'standard' | 'graphic-text' | 'graphic-chart';
   reading_strategy_type?: string;
-  images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string }>;
+  images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string; figure_label?: string }>;
   // 學習單 section order + intro metadata (#1434)
   worksheet_section_order?: Array<{ number: string; name: string; type: string }> | null;
   worksheet_intro?: {
