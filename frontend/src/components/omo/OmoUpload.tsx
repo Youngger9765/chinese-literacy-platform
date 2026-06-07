@@ -27,6 +27,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { uploadOmoImages } from '../../services/omoApi';
 import OmoUploadPagePreview from './OmoUploadPagePreview';
+import OmoCameraScanner from './OmoCameraScanner';
 
 const MAX_FILES = 5;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;     // 10 MB per image (pre-resize)
@@ -184,8 +185,9 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
   const [staged, setStaged] = useState<StagedPage[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // #2089 item 4: in-browser scanner overlay (live camera inside the page).
+  const [scannerOpen, setScannerOpen] = useState(false);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // #1974 review-3: mirror `staged` into a ref so the unmount cleanup effect
@@ -209,12 +211,13 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
     }
   };
 
-  // ── Add files to the queue (called by both camera + gallery inputs) ──────
-  const handleAddFiles = (files: FileList | null) => {
+  // ── Add files to the queue ───────────────────────────────────────────────
+  // Core accepts a File[] so both the file inputs (gallery/PDF) and the
+  // in-browser scanner (#2089 item 4) feed the same validation + queue path.
+  const addFiles = (incoming: File[]) => {
     setError(null);
-    if (!files || files.length === 0) return;
+    if (incoming.length === 0) return;
 
-    const incoming = Array.from(files);
     const remaining = MAX_FILES - staged.length;
 
     if (remaining <= 0) {
@@ -262,6 +265,11 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
         `一次只能再加 ${remaining} 個，已取前 ${remaining} 個檔案，其餘 ${incoming.length - remaining} 個未加入`,
       );
     }
+  };
+
+  const handleAddFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    addFiles(Array.from(files));
   };
 
   // ── Manipulate the staged queue ─────────────────────────────────────────
@@ -343,11 +351,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
     }
   };
 
-  // ── Reset hidden file inputs so re-selecting the same file fires onChange ──
-  const onCameraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleAddFiles(e.target.files);
-    e.target.value = '';
-  };
+  // ── Reset hidden file input so re-selecting the same file fires onChange ──
   const onGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleAddFiles(e.target.files);
     e.target.value = '';
@@ -361,20 +365,22 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
         <div className="text-5xl mb-3" aria-hidden="true">📸</div>
         <h1 className="text-xl font-bold text-gray-900">上傳學習單（所有頁面）</h1>
         <p className="mt-1 text-sm text-gray-500">
-          拍下或選擇紙本的<span className="font-semibold text-gray-700">每一頁</span>，
-          也可直接上傳 PDF 掃描檔（AI 會合併批改，最多 {MAX_FILES} 個檔案）
+          用<span className="font-semibold text-gray-700">掃描</span>連續拍下紙本的每一頁，
+          或選擇照片 / PDF 上傳（AI 會合併批改，最多 {MAX_FILES} 個檔案）
         </p>
       </div>
 
-      {/* Hidden inputs (always mounted so refs are stable) */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={onCameraChange}
-      />
+      {/* In-browser scanner overlay (live camera inside the page, #2089 item 4) */}
+      {scannerOpen && (
+        <OmoCameraScanner
+          pageCount={staged.length}
+          canCapture={canAddMore}
+          onCapture={(file) => addFiles([file])}
+          onClose={() => setScannerOpen(false)}
+        />
+      )}
+
+      {/* Hidden file input (always mounted so the ref is stable) */}
       <input
         ref={galleryInputRef}
         type="file"
@@ -439,7 +445,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
         <div className="flex flex-col gap-3 w-full">
           <button
             type="button"
-            onClick={() => cameraInputRef.current?.click()}
+            onClick={() => setScannerOpen(true)}
             className="w-full flex items-center justify-center gap-2 py-3.5 px-6
               bg-blue-600 hover:bg-blue-700 active:bg-blue-800
               text-white font-semibold rounded-xl
@@ -447,7 +453,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
               transition-colors"
           >
             <span aria-hidden="true">📷</span>
-            拍照上傳
+            掃描上傳（連續拍多頁）
           </button>
           <button
             type="button"
@@ -488,7 +494,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={() => setScannerOpen(true)}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4
                   bg-white hover:bg-gray-50 active:bg-gray-100
                   text-gray-700 text-sm font-medium rounded-xl
@@ -497,7 +503,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
                   transition-colors"
               >
                 <span aria-hidden="true">📷</span>
-                再拍一張
+                繼續掃描
               </button>
               <button
                 type="button"
