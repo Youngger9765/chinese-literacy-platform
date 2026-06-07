@@ -40,7 +40,8 @@ def _synthesize_chunk(text: str) -> bytes:
             ),
             audio_config=texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
-                speaking_rate=0.9,
+                # #2082 A1: brisker pace ~260-270 字/分 (product-tunable; was 0.9)
+                speaking_rate=1.05,
                 pitch=0.0,
             ),
         )

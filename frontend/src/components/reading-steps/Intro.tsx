@@ -124,14 +124,15 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
     // #1598: 課文簡介 only — never fall back to strategy/target text (which would
     // read aloud "圖文題就是..." instead of the actual lesson topic).
+    // #2082 A1: start at story content directly — do NOT prepend title or metadata header.
     const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
     if (!introText) return;
 
-    const authorPart = story.intro ? `作者：${story.intro.author}。` : '';
-    const text = `${story.title}。${authorPart}${introText}`;
+    const text = introText;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW';
-    utterance.rate = 0.95;
+    // #2082 A1: brisker pace ~260-270 字/分 (product-tunable)
+    utterance.rate = 1.05;
 
     const doSpeak = () => {
       const voices = window.speechSynthesis.getVoices();
@@ -206,7 +207,11 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
                   {CATEGORY_LABEL[story.category] ?? story.category}
                 </span>
-                <span className="text-[10px] text-gray-400">難度 {story.level}</span>
+                {/* #2082 A13: neutral level format — avoids "四年級" which feels
+                    discouraging for older students. Mapping: story.level is
+                    already a numeric level (e.g. 4), shown as 「第 N 級」.
+                    Product-tunable: owner may prefer pure number or different label. */}
+                <span className="text-[10px] text-gray-400">第 {story.level} 級</span>
               </div>
               <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
@@ -341,7 +346,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
                       </svg>
-                      朗讀簡介
+                      朗讀
                     </button>
                   )}
                 </div>
@@ -350,9 +355,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           })()}
 
           {/* 💡 本課學習策略 — #1598: hint-style banner combining the strategy
-              name (worksheetIntro.target_strategy), instructions checklist,
-              and the longer strategy explanation (lessonIntro.text, which
-              used to leak into 課文簡介). */}
+              name (worksheetIntro.target_strategy) and the longer strategy
+              explanation (lessonIntro.text).
+              #2082 A2: strategy name shown in prominent amber highlight box;
+              instruction items removed (belong to read-text phase, not intro). */}
           {(story.worksheetIntro?.target_strategy ||
             (story.lessonIntro?.text && story.lessonIntro.source !== 'excel')) && (
             <div className="bg-amber-100/60 border-2 border-amber-300 rounded-2xl p-6 space-y-3">
@@ -362,9 +368,28 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
 
               {story.worksheetIntro?.target_strategy && (
-                <p className={`text-amber-900 text-lg font-semibold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.5]'}`}>
-                  {processZhuyin(story.worksheetIntro.target_strategy)}
-                </p>
+                // #2082 A2: prominent highlight box for strategy name
+                <div className="bg-amber-200/70 border-2 border-amber-400 rounded-xl px-4 py-3">
+                  <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
+                    {processZhuyin(
+                      // #2082 A2: for structure-type strategies, wrap the three stage words in
+                      // corner quotes and keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉.
+                      // Only apply if the strategy name contains 問題 and 解決 and 結果 together
+                      // without already having corner/double quotes around the trio.
+                      (() => {
+                        const s = story.worksheetIntro!.target_strategy as string;
+                        // If it already contains 「問題 (already quoted), leave as-is
+                        if (s.includes('「問題')) return s;
+                        // Match patterns like "問題-解決-結果結構", "問題·解決·結果結構",
+                        // "問題.解決.結果結構" (ASCII period — the actual demo-data separator), "問題解決結果結構"
+                        return s.replace(
+                          /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
+                          '「$1、$2、$3」$4'
+                        );
+                      })()
+                    )}
+                  </p>
+                </div>
               )}
 
               {story.lessonIntro?.text && story.lessonIntro.source !== 'excel' && (
@@ -372,76 +397,51 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   {processZhuyin(story.lessonIntro.text)}
                 </p>
               )}
-
-              {story.worksheetIntro?.instructions && story.worksheetIntro.instructions.length > 0 && (
-                <ul className="space-y-1.5 pt-1" aria-label="學習提示">
-                  {story.worksheetIntro.instructions.map((item, idx) => (
-                    <li key={idx} className={`flex items-start gap-2 text-amber-800 ${zhuyinActive ? 'text-base leading-[2.8rem] tracking-[0.2em]' : 'text-sm leading-[1.6]'}`}>
-                      <span className="mt-1 flex-shrink-0 text-amber-500" aria-hidden="true">&#9655;</span>
-                      <span>{processZhuyin(item)}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
+                  they belong to the read-text phase (LiveTutor / annotations), not intro. */}
             </div>
           )}
 
-          {/* 數位學習步驟 — derived from step_sequence (same source as StepperNav dots, #1508) */}
+          {/* 數位學習步驟 — #2082 A4: replaced the static non-clickable ol with a
+              single-line step count. StepperNav dots already provide real navigation.
+              Do NOT restore the full ol — it was confusing & non-interactive. */}
           {(() => {
-            // Resolve from lesson's step_sequence (or DEFAULT_STEP_SEQUENCE),
-            // then exclude the 'intro' step itself (this page IS the intro).
             const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
             if (digitalSteps.length === 0) return null;
             return (
-              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
-                    本課 {digitalSteps.length} 個學習步驟
-                  </span>
-                </div>
-                <ol className="space-y-2" aria-label="數位學習步驟">
-                  {digitalSteps.map((step, idx) => (
-                    <li key={step.id} className="flex items-center gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-accent-bg-subtle text-accent-hover text-sm font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <span className={`text-on-surface ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base'}`}>
-                        {processZhuyin(step.label)}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+              <p className="text-sm text-gray-500 text-center pb-2">
+                本課共 {digitalSteps.length} 個學習步驟
+              </p>
             );
           })()}
 
         </div>
       </div>
 
-      {/* Bottom action */}
-      <div className="flex-shrink-0 bg-surface-container-lowest border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2.5 rounded-full text-sm text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-        >
-          返回圖書館
-        </button>
+      {/* Bottom action — #2082 A3: 開始學習 promoted to large primary CTA,
+          返回圖書館 demoted to a secondary text link */}
+      <div className="flex-shrink-0 bg-surface-container-lowest border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center gap-3">
+        {/* Primary CTA — full-width on mobile, min-height ~56px */}
         <button
           type="button"
           onClick={() => {
             stopSpeaking();
             onStartReading();
           }}
-          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始學習
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
           </svg>
+        </button>
+        {/* Secondary — clearly less prominent */}
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-sm text-gray-400 hover:text-gray-700 transition-colors underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
+        >
+          返回圖書館
         </button>
       </div>
 
