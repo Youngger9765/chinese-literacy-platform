@@ -1,5 +1,6 @@
 import React from 'react';
 import VocabApplication from '../../components/reading-steps/VocabApplication';
+import OmoPaperResultBanner from '../../components/reading-steps/OmoPaperResultBanner';
 import { useLearningContext } from '../../layouts/LearningLayout';
 
 const VocabApplicationPage: React.FC = () => {
@@ -8,11 +9,14 @@ const VocabApplicationPage: React.FC = () => {
   if (!selectedStory) return null;
 
   return (
-    <VocabApplication
-      story={selectedStory}
-      onFinish={handleFinishVocabApplication}
-      saveStepProgressPatch={saveStepProgressPatch}
-    />
+    <>
+      <OmoPaperResultBanner stepId="vocab-application" />
+      <VocabApplication
+        story={selectedStory}
+        onFinish={handleFinishVocabApplication}
+        saveStepProgressPatch={saveStepProgressPatch}
+      />
+    </>
   );
 };
 

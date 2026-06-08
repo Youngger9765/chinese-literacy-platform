@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import StrategyExercise from '../../components/reading-steps/StrategyExercise';
 import GraphicTextIntegrationExercise from '../../components/reading-steps/GraphicTextIntegrationExercise';
+import OmoPaperResultBanner from '../../components/reading-steps/OmoPaperResultBanner';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { StrategyExercise as StrategyExerciseType, StrategyExerciseItem } from '../../types';
 
@@ -80,6 +81,7 @@ const StrategyExercisePage: React.FC = () => {
       exerciseIcon="lightbulb"
       exerciseLabel="閱讀聚光燈"
     >
+      <OmoPaperResultBanner stepId="reading-strategy" />
       {hasStrategy ? (
         <>
           {isGraphicTextList ? (
