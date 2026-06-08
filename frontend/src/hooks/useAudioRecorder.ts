@@ -228,6 +228,14 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     const recorder = mediaRecorderRef.current;
 
     // Not currently recording — return whatever blob we already have (may be null).
+    // P2 Round 4: note that `audioBlob` is React state, so it reflects the value
+    // committed during the *previous* render cycle.  In practice this is fine because:
+    //  (a) if recording never started, the value is correctly null
+    //  (b) if recording completed earlier (onstop already fired), state was set
+    //      synchronously inside the onstop handler and will already be up-to-date
+    //      by the time any subsequent render-cycle call arrives.
+    // The only scenario where stale state could bite is a double-call within the
+    // same synchronous frame — which the duplicate-call guard below prevents.
     if (!recorder || recorder.state === 'inactive') {
       return Promise.resolve(audioBlob);
     }

@@ -14,11 +14,19 @@ export interface TranscribeReadingResult {
   /** Gemini's internal audit notes (empty string when method=fallback). */
   reasoning?: string;
   /**
-   * Fallback reason from backend (Issue #2156 — I4 fallback alert).
-   * Values: 'timeout' | 'safety' | 'decode' | 'empty' | 'error'
-   * Present only when method='fallback'. Used by frontend to show alert banner.
+   * Fallback reason (Issue #2156 — I4 fallback alert).
+   *
+   * Backend reasons (method='fallback'):
+   *   'timeout' | 'safety' | 'decode' | 'empty' | 'error'
+   *
+   * Frontend reasons (set by caller before network call):
+   *   'no_audio'  — no recorded blob was available
+   *   'no_token'  — auth token missing; request not attempted
+   *
+   * Present only when method='fallback'. Used by both FullReading and LiveTutor
+   * to display the I4-compliant amber fallback alert banner.
    */
-  reason?: string;
+  reason?: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'no_audio' | 'no_token' | string;
 }
 
 /**

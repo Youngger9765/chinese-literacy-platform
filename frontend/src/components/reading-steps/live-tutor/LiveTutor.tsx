@@ -88,6 +88,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [paragraphFallbackReason, setParagraphFallbackReason] = useState<string | null>(null);
   const clearParagraphFallback = useCallback(() => setParagraphFallbackReason(null), []);
 
+  // ── P1: double-submit race guard (Issue #2156 Round 4) ───────────────────
+  // submitSentence is async (awaits stopAndGetBlob + Gemini API). Without a
+  // lock, tapping "Submit" twice fires two parallel evaluations for the same
+  // paragraph, causing duplicate scoring and two concurrent mic stops.
+  const isSubmittingSentenceRef = useRef(false);
+  const [isSubmittingSentence, setIsSubmittingSentence] = useState(false);
+
   // ── Evaluation state machine ─────────────────────────────────────────────
   const [evalState, dispatch] = useReducer(evalReducer, initialEvalState);
 
@@ -248,52 +255,65 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   handleSentenceRetryEvalRef.current = sentenceRetry.handleSentenceRetryEval;
 
   const submitSentence = useCallback(async () => {
-    const { transcript, rawStt, durationMs } = stt.submitSentence();
+    // P1 Round 4: double-submit race guard.
+    // submitSentence is async — a second tap before the first resolves would fire
+    // duplicate scoring and two concurrent mic-stop calls.  Use a ref (not state)
+    // for the guard to avoid stale-closure issues inside the callback.
+    if (isSubmittingSentenceRef.current) return;
+    isSubmittingSentenceRef.current = true;
+    setIsSubmittingSentence(true);
 
-    // ── Gemini audio transcription for paragraph (I1 — audio primary) ────────
-    // P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
-    // The old pattern (stopRecording() → synchronous audioBlob read) always returned
-    // null because onstop fires asynchronously after .stop() is called.
-    const audioBlob = await paragraphRecorder.stopAndGetBlob();
+    try {
+      const { transcript, rawStt, durationMs } = stt.submitSentence();
 
-    if (sentenceRetry.retrySentenceInfoRef.current) {
-      // Sentence retry path: paragraph recorder is already stopped (from prior submitSentence).
-      // No fresh blob is available for this sentence fragment.
-      // I4 compliance: show fallback banner so it's not silent about using Web Speech.
-      setParagraphFallbackReason('no_audio');
-      await handleSentenceRetryEvalRef.current(transcript, durationMs);
-    } else if (audioBlob || transcript) {
-      // P2#1: audioBlob takes priority — try Gemini even if Web Speech returned empty string
-      // (student may have spoken but STT returned nothing; Gemini can still transcribe).
-      // P1#4: track whether we got a Gemini transcript to pass correct `source` to evaluateAndRespond.
-      let finalTranscript = transcript;
-      let transcriptSource: 'gemini' | 'webspeech' = 'webspeech';
+      // ── Gemini audio transcription for paragraph (I1 — audio primary) ────────
+      // P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
+      // The old pattern (stopRecording() → synchronous audioBlob read) always returned
+      // null because onstop fires asynchronously after .stop() is called.
+      const audioBlob = await paragraphRecorder.stopAndGetBlob();
 
-      if (audioBlob && token) {
-        const targetText = story.content[currentLineIndex] || '';
-        try {
-          const result = await transcribeReading(audioBlob, targetText, durationMs, token);
-          if (result.method === 'gemini' && result.transcript) {
-            clearParagraphFallback();
-            finalTranscript = result.transcript;
-            transcriptSource = 'gemini';
-          } else {
-            // I4: Gemini returned fallback.
-            setParagraphFallbackReason(result.reason ?? 'error');
-            // finalTranscript stays as Web Speech; transcriptSource stays 'webspeech'
+      if (sentenceRetry.retrySentenceInfoRef.current) {
+        // Sentence retry path: paragraph recorder is already stopped (from prior submitSentence).
+        // No fresh blob is available for this sentence fragment.
+        // I4 compliance: show fallback banner so it's not silent about using Web Speech.
+        setParagraphFallbackReason('no_audio');
+        await handleSentenceRetryEvalRef.current(transcript, durationMs);
+      } else if (audioBlob || transcript) {
+        // P2#1: audioBlob takes priority — try Gemini even if Web Speech returned empty string
+        // (student may have spoken but STT returned nothing; Gemini can still transcribe).
+        // P1#4: track whether we got a Gemini transcript to pass correct `source` to evaluateAndRespond.
+        let finalTranscript = transcript;
+        let transcriptSource: 'gemini' | 'webspeech' = 'webspeech';
+
+        if (audioBlob && token) {
+          const targetText = story.content[currentLineIndex] || '';
+          try {
+            const result = await transcribeReading(audioBlob, targetText, durationMs, token);
+            if (result.method === 'gemini' && result.transcript) {
+              clearParagraphFallback();
+              finalTranscript = result.transcript;
+              transcriptSource = 'gemini';
+            } else {
+              // I4: Gemini returned fallback.
+              setParagraphFallbackReason(result.reason ?? 'error');
+              // finalTranscript stays as Web Speech; transcriptSource stays 'webspeech'
+            }
+          } catch {
+            setParagraphFallbackReason('error');
           }
-        } catch {
-          setParagraphFallbackReason('error');
+        } else {
+          // P1#3: no blob or no token — I4 alert.
+          setParagraphFallbackReason(audioBlob ? 'no_token' : 'no_audio');
         }
-      } else {
-        // P1#3: no blob or no token — I4 alert.
-        setParagraphFallbackReason(audioBlob ? 'no_token' : 'no_audio');
-      }
 
-      // Only score if we have something to score.
-      if (finalTranscript.trim()) {
-        await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex, transcriptSource);
+        // Only score if we have something to score.
+        if (finalTranscript.trim()) {
+          await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex, transcriptSource);
+        }
       }
+    } finally {
+      isSubmittingSentenceRef.current = false;
+      setIsSubmittingSentence(false);
     }
   }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex,
       paragraphRecorder.stopAndGetBlob,
@@ -565,7 +585,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
       {/* No-audio-detected banner */}
       {noAudioDetected && stt.isSessionActive && (
-        <NoAudioBanner onRestart={() => { stopSession(); startSession(); }} />
+        <NoAudioBanner onRestart={() => {
+          // P1 Round 4: stop the old paragraph recorder BEFORE starting a new session.
+          // The previous onRestart only called stopSession() (STT) + startSession(), which
+          // would call paragraphRecorder.startRecording() on top of a still-active recorder,
+          // leaking the old MediaStream and causing a permission / resource conflict.
+          // clearRecording() stops the recorder, cancels any pending stopAndGetBlob promise,
+          // and releases the mic track so startRecording() can acquire a fresh stream.
+          paragraphRecorder.clearRecording();
+          stopSession();
+          startSession();
+        }} />
       )}
 
       {/* I4 (Issue #2156): Per-paragraph Gemini fallback alert — must not be silent.
@@ -601,6 +631,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         isTtsPaused={isTtsPaused}
         isAdvancing={isAdvancing}
         isAwaitingGemini={evalState.isAwaitingGemini}
+        isSubmittingSentence={isSubmittingSentence}
         streamingUserInput={evalState.streamingUserInput}
         lastDiffTokens={evalState.lastDiffTokens}
         retryCount={evalState.retryCount}

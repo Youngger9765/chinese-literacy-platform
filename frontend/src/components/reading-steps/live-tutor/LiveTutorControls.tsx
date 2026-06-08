@@ -10,6 +10,8 @@ interface LiveTutorControlsProps {
   isTtsPaused: boolean;
   isAdvancing: boolean;
   isAwaitingGemini: boolean;
+  /** P1 Round 4: true while submitSentence async flow is in progress (double-submit guard). */
+  isSubmittingSentence?: boolean;
   // Content state
   streamingUserInput: string;
   lastDiffTokens: DiffToken[] | null;
@@ -41,6 +43,7 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   isTtsPaused,
   isAdvancing,
   isAwaitingGemini,
+  isSubmittingSentence = false,
   streamingUserInput,
   lastDiffTokens,
   retryCount,
@@ -81,20 +84,20 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
           /* Recording active — submit */
           <button
             onClick={onSubmitSentence}
-            disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+            disabled={isSubmittingSentence || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
             className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
-              isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+              isSubmittingSentence || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
                 ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
                 : 'text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]'
             }`}
             style={
-              !isAwaitingGemini && (streamingUserInput || lastDiffTokens)
+              !isSubmittingSentence && !isAwaitingGemini && (streamingUserInput || lastDiffTokens)
                 ? { background: 'linear-gradient(135deg, #006947, #34d399)' }
                 : undefined
             }
           >
             <span className="material-symbols-outlined text-xl">check</span>
-            完成
+            {isSubmittingSentence ? '評分中…' : '完成'}
           </button>
 
         ) : isPreparing ? (
