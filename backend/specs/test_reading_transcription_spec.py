@@ -67,47 +67,83 @@ class TestC1WebmNotDirectToGemini:
         assert _needs_transcode("audio/mpeg") is False
 
     def test_transcribe_audio_with_webm_transcodes_not_direct_gemini(self):
-        """When webm is submitted, _transcode_to_ogg must be called (not skipped)."""
+        """C1 integration: calling transcribe_reading_audio with webm MUST invoke
+        _transcode_to_ogg, and the transcoded ogg bytes (not original webm) must be
+        what eventually reaches the Gemini call path.
+
+        P2#2 fix: original test only asserted _needs_transcode static helpers and
+        never actually called transcribe_reading_audio — a webm-direct-to-Gemini
+        regression would have passed silently.  This version calls the real function.
+        """
+        import sys
         from app.services import reading_transcription_service as svc
 
-        transcoded_bytes = b"fake-ogg-data"
+        webm_bytes = b"fake-webm-input"
+        transcoded_ogg_bytes = b"fake-ogg-transcoded"
 
-        with patch.object(svc, "_transcode_to_ogg", return_value=transcoded_bytes) as mock_transcode, \
-             patch("app.services.reading_transcription_service._check_safety_filter"), \
-             patch("app.services.reading_transcription_service.asyncio.to_thread") as mock_thread, \
-             patch("app.services.reading_transcription_service.asyncio.wait_for") as mock_wait:
+        # Capture the bytes that arrive at the Gemini Part.from_bytes() call.
+        gemini_received_mime: list[str] = []
 
-            # Set up mock Gemini response
-            mock_response = MagicMock()
-            mock_response.text = '{"transcript": "學生朗讀文字", "reasoning": "清晰"}'
-            mock_wait.return_value = mock_response
+        fake_part = MagicMock()
+        fake_part_cls = MagicMock()
 
-            # Patch imports inside the function
-            import sys
-            fake_genai = MagicMock()
-            fake_genai_types = MagicMock()
-            fake_genai.Client.return_value = MagicMock()
-            fake_gemini_client = MagicMock()
-            fake_gemini_client.GEMINI_TIMEOUT = 30
-            fake_llm_models = MagicMock()
-            fake_llm_models.get_model_for_task.return_value = ("gemini-2.5-flash", "us-central1")
+        def capture_from_bytes(*args, **kwargs):  # noqa: ANN001
+            # Called as Part.from_bytes(data=..., mime_type=...) — capture mime_type
+            mime = kwargs.get("mime_type") or (args[1] if len(args) > 1 else "unknown")
+            gemini_received_mime.append(mime)
+            return fake_part
 
-            with patch.dict(sys.modules, {
-                "google": MagicMock(),
-                "google.genai": fake_genai,
-                "google.genai.types": fake_genai_types,
-            }):
-                with patch("app.services.reading_transcription_service.asyncio.to_thread") as mock_to_thread:
-                    mock_to_thread.return_value = mock_response
+        fake_part_cls.from_bytes = capture_from_bytes
 
-                    # Reimport inside patch context to trigger the lazy imports
-                    # We test _needs_transcode and _transcode_to_ogg integration directly
-                    assert svc._needs_transcode("audio/webm") is True
-                    assert svc._needs_transcode("audio/ogg") is False
+        fake_genai_types = MagicMock()
+        fake_genai_types.Part = fake_part_cls
 
-            # Confirm transcode mock was used
-            # (full async integration tested via mock in C2 tests)
-            mock_transcode.return_value = transcoded_bytes
+        mock_response = MagicMock()
+        mock_response.text = '{"transcript": "學生朗讀文字", "reasoning": "清晰"}'
+
+        fake_gemini_client = MagicMock()
+        fake_gemini_client.GEMINI_TIMEOUT = 30
+        fake_llm_models = MagicMock()
+        fake_llm_models.get_model_for_task.return_value = ("gemini-2.5-flash", "us-central1")
+
+        # The service does `from google.genai import types as genai_types` which resolves
+        # via sys.modules["google.genai"].types (not sys.modules["google.genai.types"]).
+        # We must set .types on the fake genai module so capture_from_bytes is reached.
+        fake_genai_module = MagicMock()
+        fake_genai_module.types = fake_genai_types
+
+        with patch.object(svc, "_transcode_to_ogg", return_value=transcoded_ogg_bytes) as mock_transcode, \
+             patch.object(svc, "_check_safety_filter"), \
+             patch("app.services.reading_transcription_service.asyncio.wait_for",
+                   new=AsyncMock(return_value=mock_response)), \
+             patch.dict(sys.modules, {
+                 "google": MagicMock(),
+                 "google.genai": fake_genai_module,
+                 "google.genai.types": fake_genai_types,
+                 "app.services.ai.gemini_client": fake_gemini_client,
+                 "app.services.llm_models": fake_llm_models,
+             }):
+
+            result = _run(svc.transcribe_reading_audio(
+                audio_bytes=webm_bytes,
+                mime_type="audio/webm",
+                target_text="課文文字",
+                duration_ms=3000,
+            ))
+
+        # C1 assertion 1: _transcode_to_ogg was called (not skipped) with the webm bytes.
+        mock_transcode.assert_called_once_with(webm_bytes, "audio/webm")
+
+        # C1 assertion 2: The MIME type reaching Gemini Part.from_bytes must be ogg,
+        # NOT webm — confirming transcoded bytes were used.
+        assert gemini_received_mime, "Part.from_bytes was never called — Gemini path not reached"
+        assert all(
+            m.startswith("audio/ogg") for m in gemini_received_mime
+        ), f"Expected audio/ogg MIME sent to Gemini, got: {gemini_received_mime}"
+
+        # C1 assertion 3: result comes from Gemini (not fallback).
+        assert result["method"] == "gemini"
+        assert result["transcript"] == "學生朗讀文字"
 
 
 # ---------------------------------------------------------------------------

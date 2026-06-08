@@ -15,6 +15,15 @@ export interface AudioRecorderState {
 export interface AudioRecorderActions {
   startRecording: () => Promise<void>;
   stopRecording: () => void;
+  /**
+   * Stop recording and wait for the MediaRecorder onstop event to fire,
+   * then return the final Blob.  Resolves to null if not recording or on error.
+   *
+   * This is the CORRECT way to obtain the blob in async callers (P1#1 fix):
+   * `stopRecording()` triggers onstop *asynchronously*; reading `audioBlob`
+   * synchronously after the call always returns null / the previous value.
+   */
+  stopAndGetBlob: () => Promise<Blob | null>;
   clearRecording: () => void;
 }
 
@@ -50,6 +59,8 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number | null>(null);
+  /** P1#1 fix: resolver for stopAndGetBlob() — resolved by onstop handler. */
+  const stopResolverRef = useRef<((blob: Blob | null) => void) | null>(null);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -146,6 +157,11 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
       setAudioBlob(blob);
       setAudioUrl(url);
       setStatus('stopped');
+      // P1#1: resolve any pending stopAndGetBlob() promise with the final blob.
+      if (stopResolverRef.current) {
+        stopResolverRef.current(blob);
+        stopResolverRef.current = null;
+      }
     };
 
     recorder.onerror = () => {
@@ -153,6 +169,11 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
       releaseStream();
       setErrorMessage('錄音過程中發生錯誤，請重試。');
       setStatus('error');
+      // P1#1: also resolve on error so callers don't hang.
+      if (stopResolverRef.current) {
+        stopResolverRef.current(null);
+        stopResolverRef.current = null;
+      }
     };
 
     recorder.start(250); // collect data every 250ms
@@ -193,7 +214,29 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     }, 500);
   }, [audioUrl, maxDurationSeconds, stopRecording, stopTimer, releaseStream]);
 
+  /**
+   * P1#1: Stop recording and await the onstop event, returning the final Blob.
+   * Safe to call even if not currently recording (returns null immediately).
+   */
+  const stopAndGetBlob = useCallback((): Promise<Blob | null> => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state === 'inactive') {
+      // Not recording — resolve immediately with whatever we already have.
+      return Promise.resolve(null);
+    }
+    return new Promise<Blob | null>((resolve) => {
+      stopResolverRef.current = resolve;
+      // stopRecording() calls recorder.stop() → triggers onstop → onstop calls resolve.
+      stopRecording();
+    });
+  }, [stopRecording]);
+
   const clearRecording = useCallback(() => {
+    // Cancel any pending stopAndGetBlob promise so it doesn't hang.
+    if (stopResolverRef.current) {
+      stopResolverRef.current(null);
+      stopResolverRef.current = null;
+    }
     stopRecording();
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
@@ -230,6 +273,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     volumeLevel,
     startRecording,
     stopRecording,
+    stopAndGetBlob,
     clearRecording,
   };
 }

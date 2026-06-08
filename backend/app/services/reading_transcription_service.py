@@ -113,6 +113,11 @@ def _transcode_to_ogg(audio_bytes: bytes, source_mime: str) -> bytes | None:
     }
     in_ext = ext_map.get(base, ".audio")
 
+    # Pre-initialise to None so `finally` can safely reference them even if
+    # temp-file creation fails before in_path / out_path are assigned (P1#4).
+    in_path: str | None = None
+    out_path: str | None = None
+
     try:
         with tempfile.NamedTemporaryFile(suffix=in_ext, delete=False) as in_f:
             in_f.write(audio_bytes)
@@ -156,7 +161,10 @@ def _transcode_to_ogg(audio_bytes: bytes, source_mime: str) -> bytes | None:
         logger.warning("ffmpeg transcode error: %s", exc)
         return None
     finally:
+        # in_path / out_path may still be None if temp creation raised before assignment.
         for path in [in_path, out_path]:
+            if path is None:
+                continue
             try:
                 if os.path.exists(path):
                     os.unlink(path)

@@ -20,8 +20,8 @@ export interface FullReadingControlsProps {
   onSpeak: () => void;
   /** Called when user clicks 開始朗讀 */
   onStartSession: () => void;
-  /** Called when user clicks 完成朗讀 */
-  onSubmit: () => void;
+  /** Called when user clicks 完成朗讀 (P1#1: async — awaits audio blob) */
+  onSubmit: () => void | Promise<void>;
   /** Called when user clicks 停止 (TTS) */
   onStopTts: () => void;
   /** Called when user clicks 暫停 (TTS playing, not paused) */

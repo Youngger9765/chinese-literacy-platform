@@ -56,7 +56,8 @@ interface UseFullReadingSessionReturn {
   clearFallbackReason: () => void;
   startSession: () => void;
   stopSession: () => void;
-  submitReading: () => void;
+  /** P1#1: async — awaits stopAndGetBlob() before Gemini transcription. */
+  submitReading: () => Promise<void>;
   audioRecorder: ReturnType<typeof useAudioRecorder>;
 }
 
@@ -166,28 +167,30 @@ export function useFullReadingSession({
     currentTranscriptRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingTranscript('');
-    audioRecorder.stopRecording();
-  }, [audioRecorder]);
+    // NOTE: audioRecorder.stopRecording() is intentionally NOT called here.
+    // submitReading() calls stopAndGetBlob() which triggers stop + awaits onstop,
+    // so it gets the final blob.  stopSession() is also called from handleRetry
+    // (no submit) — in that case clearRecording() handles cleanup.
+  }, []);
 
   /* ---- Submit & evaluate ---- */
-  const submitReading = useCallback(() => {
-    /* #1632 double-click guard: stopSession() flips this to false synchronously,
-     * so a second click during the same tick exits before re-saving. */
+  const submitReading = useCallback(async () => {
+    /* #1632 double-click guard: isSessionActiveRef is flipped synchronously below,
+     * so a second click during the same async tick exits before re-saving. */
     if (!isSessionActiveRef.current) return;
     const webSpeechTranscript = currentTranscriptRef.current;
     const durationMs = Date.now() - startTimeRef.current;
     stopSession();
     if (!webSpeechTranscript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
 
-    /* --- Gemini audio transcription (Issue #2131) ---
-     * 1. Try to get a higher-quality Gemini transcription from the audio blob.
-     * 2. If Gemini fails (no blob, no token, network error, fallback), use the
-     *    Web Speech transcript with punctuation re-inserted from the lesson text.
-     * 3. Scoring (analyzeFluency) runs on whichever transcript we end up with.
+    /* --- Gemini audio transcription (Issue #2131 / #2156) ---
+     * P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
+     * The old pattern (stopRecording() → sync audioBlob read) returned null because
+     * MediaRecorder.onstop fires asynchronously after .stop() is called.
      *
      * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
      *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
-    const audioBlob = audioRecorder.audioBlob;
+    const audioBlob = await audioRecorder.stopAndGetBlob();
 
     const _evaluate = (finalTranscript: string) => {
       const fluency = analyzeFluency({
@@ -243,10 +246,12 @@ export function useFullReadingSession({
           _evaluate(webSpeechTranscript);
         });
     } else {
-      // No audio blob or no token → direct Web Speech path (no Gemini call)
+      // P1#3 (I4): No audio blob or no token — cannot call Gemini.
+      // Must show fallback alert (never silent) so user knows score is Web Speech only.
+      setFallbackReason('no_audio');
       _evaluate(webSpeechTranscript);
     }
-  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.audioBlob, clearFallbackReason]);
+  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.stopAndGetBlob, clearFallbackReason]);
 
   return {
     isSessionActive,

@@ -251,9 +251,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const { transcript, rawStt, durationMs } = stt.submitSentence();
 
     // ── Gemini audio transcription for paragraph (I1 — audio primary) ────────
-    // Stop the paragraph recorder now so we have a complete blob for this paragraph.
-    paragraphRecorder.stopRecording();
-    const audioBlob = paragraphRecorder.audioBlob;
+    // P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
+    // The old pattern (stopRecording() → synchronous audioBlob read) always returned
+    // null because onstop fires asynchronously after .stop() is called.
+    const audioBlob = await paragraphRecorder.stopAndGetBlob();
 
     // Helper: resolve the transcript to use for scoring.
     // Returns Gemini transcript on success (I1), Web Speech on fallback (I4 alert).
@@ -277,14 +278,23 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     if (sentenceRetry.retrySentenceInfoRef.current) {
-      // Sentence retry path: use Web Speech (short fragment, Gemini overkill)
+      // Sentence retry path: paragraph recorder is already stopped (from prior submitSentence).
+      // No fresh blob is available for this sentence fragment.
+      // I4 compliance: show fallback banner so it's not silent about using Web Speech.
+      setParagraphFallbackReason('no_audio');
       await handleSentenceRetryEvalRef.current(transcript, durationMs);
-    } else if (transcript) {
+    } else if (audioBlob || transcript) {
+      // P2#1: audioBlob takes priority — try Gemini even if Web Speech returned empty string
+      // (student may have spoken but STT returned nothing; Gemini can still transcribe).
       const finalTranscript = await resolveTranscript();
-      await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex);
+      // Only score if we have something to score (Gemini result or non-empty Web Speech).
+      if (finalTranscript.trim()) {
+        await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex);
+      }
     }
-  }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex, paragraphRecorder,
-      token, story.content, clearParagraphFallback]);
+  }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex,
+      paragraphRecorder.stopAndGetBlob,
+      token, story.content, clearParagraphFallback, setParagraphFallbackReason]);
 
   // ── handleRetryParagraph ─────────────────────────────────────────────────
   const handleRetryParagraph = useCallback(
