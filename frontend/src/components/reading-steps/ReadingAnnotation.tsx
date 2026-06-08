@@ -65,35 +65,149 @@ interface ReadingAnnotationProps {
 // A5: Detect touch vs mouse for device-appropriate wording
 const IS_TOUCH = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
+// ── Demo overlay: animated drag illustration ───────────────────────────────
+
+function DemoOverlay({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <style>{`
+        @keyframes ra-demo-highlight {
+          0%   { width: 0px;   opacity: 0; }
+          15%  { opacity: 1; }
+          60%  { width: 210px; opacity: 0.75; }
+          85%  { width: 210px; opacity: 0.75; }
+          100% { width: 0px;   opacity: 0; }
+        }
+        @keyframes ra-demo-cursor {
+          0%   { left: 12px; }
+          60%  { left: 222px; }
+          85%  { left: 222px; }
+          100% { left: 12px; }
+        }
+      `}</style>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(3px)' }}
+        onClick={onClose}
+      >
+        <div
+          className="relative bg-white rounded-2xl shadow-2xl px-8 py-7 max-w-md w-full mx-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-lg font-bold text-on-surface mb-4 text-center">示範：如何拖曳標記</p>
+
+          {/* Animated demo area */}
+          <div className="relative rounded-xl bg-surface-container-low px-4 py-5 mb-5 overflow-hidden select-none" style={{ minHeight: '72px' }}>
+            <p className="text-base leading-relaxed text-on-surface">
+              孟嘗君是有錢的貴族，最讓人津津樂道。
+            </p>
+            {/* Animated yellow highlight */}
+            <span
+              className="absolute rounded pointer-events-none bg-yellow-300/70"
+              style={{
+                animation: 'ra-demo-highlight 2.4s ease-in-out infinite',
+                top: '50%',
+                height: '28px',
+                left: '12px',
+                transform: 'translateY(-50%)',
+                width: 0,
+              }}
+            />
+            {/* Animated cursor emoji */}
+            <span
+              className="absolute pointer-events-none"
+              style={{
+                animation: 'ra-demo-cursor 2.4s ease-in-out infinite',
+                top: '50%',
+                transform: 'translateY(-60%)',
+                fontSize: '20px',
+                lineHeight: 1,
+              }}
+            >
+              🖱️
+            </span>
+          </div>
+
+          <p className="text-base text-on-surface-variant text-center mb-5">
+            {IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取'}，即可標記詞語
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-3 rounded-full text-base font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+          >
+            我知道了，開始標記！
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Unified onboarding coach (merged instructions + demo) ─────────────────
+
 interface OnboardingCoachProps {
   onDismiss: () => void;
 }
 
 function OnboardingCoach({ onDismiss }: OnboardingCoachProps) {
+  const [showDemo, setShowDemo] = useState(false);
   const gestureWord = IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取';
+
+  const handleDemoClose = () => {
+    setShowDemo(false);
+    onDismiss();
+  };
+
   return (
-    <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
-      <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-5 py-4 flex flex-col gap-3">
-        <div className="flex items-start gap-3">
-          <span className="material-symbols-outlined text-accent text-2xl flex-shrink-0 mt-0.5">
-            {IS_TOUCH ? 'swipe' : 'select_all'}
-          </span>
-          <div className="flex-1">
-            <p className="font-bold text-on-surface text-base mb-1">如何標記詞語？</p>
-            <p className="text-sm text-on-surface-variant leading-relaxed">
-              {gestureWord}，就能標記不懂的詞語。
+    <>
+      {showDemo && <DemoOverlay onClose={handleDemoClose} />}
+      <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
+        <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-6 py-5 flex flex-col gap-4">
+
+          {/* How-to header */}
+          <div className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-accent text-3xl flex-shrink-0 mt-0.5">
+              {IS_TOUCH ? 'swipe' : 'select_all'}
+            </span>
+            <div className="flex-1">
+              <p className="font-bold text-on-surface text-lg mb-1">如何標記詞語？</p>
+              <p className="text-base text-on-surface-variant leading-relaxed">
+                {gestureWord}，就能標記不懂的詞語。
+              </p>
+            </div>
+          </div>
+
+          {/* Reading round instructions (merged from grey banner) */}
+          <div className="border-t border-accent/20 pt-3 space-y-2">
+            <p className="text-base text-on-surface-variant">
+              <span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記
+            </p>
+            <p className="text-base text-on-surface-variant">
+              <span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記
             </p>
           </div>
+
+          {/* Action row */}
+          <div className="flex items-center gap-3 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowDemo(true)}
+              className="px-5 py-2 rounded-full text-base font-bold text-accent border-2 border-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+            >
+              示範
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="px-5 py-2 rounded-full text-base font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+            >
+              我知道了
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="self-end px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -404,25 +518,15 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             <HintBar />
           )}
 
-          {/* Instruction banner */}
-          <div className="mx-auto max-w-4xl px-6 md:px-16 pt-2 pb-4">
-            <div className="rounded-2xl bg-surface-container-low px-5 py-4 text-sm text-on-surface-variant space-y-1">
-              <p><span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記</p>
-              <p><span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記</p>
-            </div>
-          </div>
-
           {/* Legend pills + counts + undo/clear — floating centered */}
           <div className="flex flex-wrap justify-center items-center gap-3 pt-4 pb-10 px-4">
             <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="w-3 h-3 rounded-full bg-red-400" />
               <span className="text-sm font-medium">❓ 不懂</span>
               {summary.unknownCount > 0 && (
                 <span className="text-sm font-bold text-tertiary">{summary.unknownCount}</span>
               )}
             </div>
             <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="w-3 h-3 rounded-full bg-tertiary-container" />
               <span className="text-sm font-medium">💛 重要</span>
               {summary.importantCount > 0 && (
                 <span className="text-sm font-bold text-yellow-800">{summary.importantCount}</span>
