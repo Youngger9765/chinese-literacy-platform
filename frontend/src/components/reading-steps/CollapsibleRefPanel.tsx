@@ -43,12 +43,13 @@ const CollapsibleRefPanel: React.FC<CollapsibleRefPanelProps> = ({
         aria-expanded={open}
         className="w-full flex items-center gap-2 px-4 py-3 hover:bg-surface-container-low transition-colors text-left"
       >
-        <span className="material-symbols-outlined text-accent text-lg">{icon}</span>
-        <span className="font-headline font-bold text-on-surface text-xs uppercase tracking-wider">
+        <span className="material-symbols-outlined text-accent text-xl">{icon}</span>
+        {/* #2133: 教授回饋「右上字體太小」— text-xs→text-base，移除對中文無意義的 uppercase */}
+        <span className="font-headline font-bold text-on-surface text-base tracking-wide">
           {label}
         </span>
         {count !== undefined && (
-          <span className="text-xs text-on-surface-variant ml-1">{count}</span>
+          <span className="text-sm text-on-surface-variant ml-1">{count}</span>
         )}
         <span
           className={`material-symbols-outlined text-on-surface-variant text-lg ml-auto transition-transform ${
