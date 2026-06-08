@@ -387,10 +387,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
 
             {/* Exercise — full width, BELOW the paired reading */}
             <div className="mt-4">
+              {/* #2133: 閱讀理解 quiz 預設展開（教授「應一開始就直接呈現、不必點上方小字」）*/}
               <CollapsibleRefPanel
                 icon={exerciseIcon}
                 label={exerciseLabel}
-                defaultOpen={false}
+                defaultOpen={true}
               >
                 {children}
               </CollapsibleRefPanel>
@@ -427,10 +428,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 </CollapsibleRefPanel>
               )}
 
+              {/* #2133: 閱讀理解 quiz 預設展開（教授「應一開始就直接呈現」）*/}
               <CollapsibleRefPanel
                 icon={exerciseIcon}
                 label={exerciseLabel}
-                defaultOpen={false}
+                defaultOpen={true}
               >
                 {children}
               </CollapsibleRefPanel>
