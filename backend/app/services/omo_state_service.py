@@ -5,6 +5,7 @@ AnalysisBy: issue #1857 — routes/omo.py second-pass refactor.
 
 Contains:
 - resolve_lesson_id(): #1740 fix — maps synthetic lesson_id → canonical Story.id
+- _resolve_or_create_learning_session(): #2087 — find/create LearningSession for OMO link
 - apply_confirm(): set upload to grading state after student confirmation
 - apply_regrade(): reset upload to grading for a student-initiated retry
 - apply_flag(): mark a specific answer as flagged by student
@@ -88,13 +89,108 @@ def resolve_lesson_id(
     return confirmed_lesson_id
 
 
+def _resolve_or_create_learning_session(
+    student_id: int,
+    lesson_id: int,
+) -> Optional[int]:
+    """Find or create a LearningSession for this student + lesson. (#2087)
+
+    Uses its OWN short-lived DB session so that any failure (table missing,
+    JSONB incompatibility in tests, constraint errors) is fully isolated from
+    the caller's transaction.  The OmoUpload commit always succeeds regardless.
+
+    Strategy:
+    1. lesson_id is a canonical Story.id (YAML lesson_number).
+       Convert to story_slug string (the canonical key in LearningSession).
+    2. Look for an existing in_progress session for student + story_slug.
+    3. If none exists, create one (same pattern as sessions_bootstrap).
+    4. Return the LearningSession.id, or None on any error (fail-open).
+
+    Nullable-safe: returns None if the lesson cannot be resolved (old lessons,
+    bad IDs, tests). The OMO record remains valid; learning_session_id stays NULL.
+
+    Parameters
+    ----------
+    student_id:
+        The student User.id.
+    lesson_id:
+        Canonical Story.id / lesson_number.
+
+    Returns
+    -------
+    int | None
+        LearningSession.id if found or created, else None.
+    """
+    try:
+        from ..database import SessionLocal
+        from ..models.session import LearningSession
+        from ..models.text import Text
+
+        story_slug = str(lesson_id)
+
+        inner_db = SessionLocal()
+        try:
+            # Look for an existing in_progress session (most recent)
+            existing = (
+                inner_db.query(LearningSession)
+                .filter(
+                    LearningSession.student_id == student_id,
+                    LearningSession.story_slug == story_slug,
+                    LearningSession.status == "in_progress",
+                )
+                .order_by(LearningSession.started_at.desc())
+                .first()
+            )
+            if existing:
+                logger.info(
+                    "OMO #2087: linked upload to existing LearningSession %d (student=%d lesson=%d)",
+                    existing.id, student_id, lesson_id,
+                )
+                return existing.id
+
+            # No existing session — create one so OMO result is anchored.
+            # Resolve text_id from lesson_number (same pattern as sessions_bootstrap).
+            text_record = inner_db.query(Text).filter(Text.lesson_number == lesson_id).first()
+            text_id = text_record.id if text_record else None
+
+            new_session = LearningSession(
+                student_id=student_id,
+                story_slug=story_slug,
+                text_id=text_id,
+                status="in_progress",
+            )
+            inner_db.add(new_session)
+            inner_db.commit()
+            inner_db.refresh(new_session)
+            logger.info(
+                "OMO #2087: created LearningSession %d for student=%d lesson=%d",
+                new_session.id, student_id, lesson_id,
+            )
+            return new_session.id
+
+        except Exception as inner_exc:
+            inner_db.rollback()
+            raise inner_exc
+        finally:
+            inner_db.close()
+
+    except Exception as exc:
+        # Fail-open: OMO record stays valid; learning_session_id stays NULL.
+        logger.warning(
+            "OMO #2087: could not resolve/create LearningSession for student=%d lesson=%d: %s",
+            student_id, lesson_id, exc,
+        )
+        return None
+
+
 def apply_confirm(db: Session, upload: OmoUpload, real_lesson_id: int) -> None:
     """Transition upload to grading state after student lesson confirmation.
 
     Sets:
-    - ``upload.lesson_id`` = real_lesson_id (canonical Story.id)
-    - ``upload.status``    = "grading"
-    - ``upload.progress``  = {"stage": "queued", "total": 0, "graded": 0}
+    - ``upload.lesson_id``         = real_lesson_id (canonical Story.id)
+    - ``upload.learning_session_id`` = resolved/created LearningSession.id (#2087)
+    - ``upload.status``            = "grading"
+    - ``upload.progress``          = {"stage": "queued", "total": 0, "graded": 0}
 
     Commits the session.
 
@@ -110,6 +206,15 @@ def apply_confirm(db: Session, upload: OmoUpload, real_lesson_id: int) -> None:
     upload.lesson_id = real_lesson_id
     upload.status = "grading"
     upload.progress = {"stage": "queued", "total": 0, "graded": 0}
+
+    # #2087: link to LearningSession (fail-open — stays NULL if unresolvable)
+    if upload.learning_session_id is None:
+        session_id = _resolve_or_create_learning_session(
+            upload.student_id, real_lesson_id
+        )
+        if session_id is not None:
+            upload.learning_session_id = session_id
+
     db.commit()
 
 

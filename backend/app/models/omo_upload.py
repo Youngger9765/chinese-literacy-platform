@@ -2,6 +2,7 @@
 
 Phase 1a: upload + AI lesson identification + multi-attempt + grading.
 Phase 1b: image_hash dedup on OmoUploadAttempt.
+Phase 2 (#2087): learning_session_id FK links OMO results to LearningSession.
 
 sqlalchemy-model-safety checklist:
 - FK with index=True (Rule 1) ✅
@@ -10,6 +11,7 @@ sqlalchemy-model-safety checklist:
 - JSONB columns with server_default (Rule 4) ✅
 - status enum as String(32) with server_default (Rule 5) ✅
 - image_hash index=True (Rule 1) ✅
+- learning_session_id FK index=True, ondelete=SET NULL (Rule 1) ✅
 """
 
 from datetime import datetime
@@ -44,7 +46,7 @@ class OmoUpload(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    # Student who uploaded — NOT linked to a LearningSession in Phase 1
+    # Student who uploaded
     student_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
@@ -54,6 +56,17 @@ class OmoUpload(Base):
     # Confirmed lesson_id (integer lesson_number from lesson_loader).
     # NULL until student confirms the AI's identification candidate.
     lesson_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+
+    # Phase 2 (#2087): link to the student's LearningSession for this lesson.
+    # Resolved/created when student confirms the lesson (confirm endpoint).
+    # Nullable: old rows before migration and uploads that never reach confirm stay NULL.
+    # ondelete=SET NULL: if the session is deleted, the OMO record stays (grading is valuable).
+    # index=True: Rule 1 — FK must be indexed (used in teacher dashboard JOIN).
+    learning_session_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("learning_sessions.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
 
     # AI identification result: top-3 candidates with confidence
     # Shape: [{"lesson_id": int, "grade_code": str, "title": str, "confidence": float, "reasoning": str}]
@@ -116,6 +129,11 @@ class OmoUpload(Base):
     student: Mapped["User"] = relationship(  # type: ignore[name-defined]
         "User",
         lazy="select",
+    )
+    learning_session: Mapped[Optional["LearningSession"]] = relationship(  # type: ignore[name-defined]
+        "LearningSession",
+        lazy="select",
+        foreign_keys="[OmoUpload.learning_session_id]",
     )
     attempts: Mapped[list["OmoUploadAttempt"]] = relationship(
         "OmoUploadAttempt",
