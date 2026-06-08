@@ -175,22 +175,27 @@ export function useFullReadingSession({
 
   /* ---- Submit & evaluate ---- */
   const submitReading = useCallback(async () => {
-    /* #1632 double-click guard: isSessionActiveRef is flipped synchronously below,
-     * so a second click during the same async tick exits before re-saving. */
+    /* #1632 double-click guard: isSessionActiveRef is flipped synchronously. */
     if (!isSessionActiveRef.current) return;
     const webSpeechTranscript = currentTranscriptRef.current;
     const durationMs = Date.now() - startTimeRef.current;
     stopSession();
-    if (!webSpeechTranscript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
+
+    /* P1#2: stop recorder FIRST (before any early-return) so the mic is always
+     * released and the final audio chunk is captured.  Even if Web Speech is empty,
+     * Gemini may succeed (I1 — audio primary).
+     * stopAndGetBlob() awaits onstop asynchronously (P1#1 fix). */
+    const audioBlob = await audioRecorder.stopAndGetBlob();
+
+    /* Early return ONLY when both sources are silent — otherwise Gemini gets a chance. */
+    if (!webSpeechTranscript.trim() && !audioBlob) {
+      setMicError('未偵測到語音，請再試一次。');
+      return;
+    }
 
     /* --- Gemini audio transcription (Issue #2131 / #2156) ---
-     * P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
-     * The old pattern (stopRecording() → sync audioBlob read) returned null because
-     * MediaRecorder.onstop fires asynchronously after .stop() is called.
-     *
      * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
      *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
-    const audioBlob = await audioRecorder.stopAndGetBlob();
 
     const _evaluate = (finalTranscript: string) => {
       const fluency = analyzeFluency({
@@ -223,32 +228,39 @@ export function useFullReadingSession({
     };
 
     if (audioBlob && token) {
+      // I1: audio blob available → try Gemini regardless of Web Speech content.
       setIsTranscribing(true);
       transcribeReading(audioBlob, fullText, durationMs, token)
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {
-            // Gemini success (I1): use high-quality Gemini transcript for scoring.
-            // Do NOT re-insert punctuation — Gemini already added it.
+            // Gemini success (I1): Gemini transcript is the sole scoring source.
             clearFallbackReason();
             _evaluate(result.transcript);
           } else {
-            // Gemini fallback (I4): show alert with reason, score with raw Web Speech.
-            // Do NOT use reinsertPunctuation to fake precision — it violates I1.
+            // I4: Gemini fallback — must alert, score with Web Speech (non-empty) or bail.
             setFallbackReason(result.reason ?? 'error');
-            _evaluate(webSpeechTranscript);
+            if (webSpeechTranscript.trim()) {
+              _evaluate(webSpeechTranscript);
+            } else {
+              // Both sources empty — show mic error instead of scoring 0%.
+              setMicError('未偵測到語音，請再試一次。');
+            }
           }
         })
         .catch(() => {
           setIsTranscribing(false);
-          // Network failure → fallback alert
           setFallbackReason('error');
-          _evaluate(webSpeechTranscript);
+          if (webSpeechTranscript.trim()) {
+            _evaluate(webSpeechTranscript);
+          } else {
+            setMicError('未偵測到語音，請再試一次。');
+          }
         });
     } else {
-      // P1#3 (I4): No audio blob or no token — cannot call Gemini.
-      // Must show fallback alert (never silent) so user knows score is Web Speech only.
+      // I4: No audio blob or no token — cannot reach Gemini.  Alert + Web Speech fallback.
       setFallbackReason('no_audio');
+      // webSpeechTranscript is non-empty here (ensured by early-return above).
       _evaluate(webSpeechTranscript);
     }
   }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.stopAndGetBlob, clearFallbackReason]);

@@ -215,21 +215,48 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
   }, [audioUrl, maxDurationSeconds, stopRecording, stopTimer, releaseStream]);
 
   /**
-   * P1#1: Stop recording and await the onstop event, returning the final Blob.
-   * Safe to call even if not currently recording (returns null immediately).
+   * Stop recording and await the MediaRecorder onstop event, returning the final Blob.
+   *
+   * Safety guarantees (P1#1 fixes):
+   *  1. Timeout (3 s): if onstop never fires (browser bug / already-stopped race),
+   *     resolves with the current audioBlob state (may be null) rather than hanging.
+   *  2. Duplicate-call guard: if a promise is already pending, the existing resolver
+   *     is settled with null and replaced — callers get independent responses.
+   *  3. Already-inactive recorder: resolves immediately with current blob (no wait).
    */
   const stopAndGetBlob = useCallback((): Promise<Blob | null> => {
     const recorder = mediaRecorderRef.current;
+
+    // Not currently recording — return whatever blob we already have (may be null).
     if (!recorder || recorder.state === 'inactive') {
-      // Not recording — resolve immediately with whatever we already have.
-      return Promise.resolve(null);
+      return Promise.resolve(audioBlob);
     }
+
+    // Duplicate-call guard: settle the previous promise before starting a new one.
+    if (stopResolverRef.current) {
+      stopResolverRef.current(null);
+      stopResolverRef.current = null;
+    }
+
     return new Promise<Blob | null>((resolve) => {
-      stopResolverRef.current = resolve;
-      // stopRecording() calls recorder.stop() → triggers onstop → onstop calls resolve.
+      // 3 s safety timeout — onstop should fire within milliseconds; 3 s is generous.
+      const timer = setTimeout(() => {
+        if (stopResolverRef.current === resolve) {
+          stopResolverRef.current = null;
+        }
+        // Resolve with whatever React state has at this point (may be null on first call).
+        resolve(audioBlob);
+      }, 3000);
+
+      stopResolverRef.current = (blob) => {
+        clearTimeout(timer);
+        resolve(blob);
+      };
+
+      // Calling recorder.stop() triggers ondataavailable (final chunk) then onstop.
       stopRecording();
     });
-  }, [stopRecording]);
+  }, [stopRecording, audioBlob]);
 
   const clearRecording = useCallback(() => {
     // Cancel any pending stopAndGetBlob promise so it doesn't hang.

@@ -142,6 +142,10 @@ export function useParagraphEvaluation({
       _rawStt: string,
       durationMs: number,
       lineIdx: number,
+      /** I1 (P1#4): caller must declare transcript source.
+       *  'gemini' → skip sentenceResults aggregation; evaluate whole paragraph directly.
+       *  'webspeech' → may use sentenceResults aggregation (existing behavior). */
+      source: 'gemini' | 'webspeech' = 'webspeech',
     ) => {
       const targetText = story.content[lineIdx] || '';
       const cleaned = cleanChineseText(rawTranscript);
@@ -173,40 +177,18 @@ export function useParagraphEvaluation({
       }
 
       // ── Phase 1: local eval ─────────────────────────────────────────────
-      const sentResults = sentenceResultsRef.current.filter(
-        Boolean,
-      ) as LocalEvalResult[];
-
+      // I1 (P1#4): When transcript comes from Gemini, skip sentenceResults
+      // aggregation entirely — it contains per-sentence Web Speech results which
+      // would pollute the Gemini-sourced transcript.  Evaluate the full paragraph
+      // against the Gemini transcript directly.
       let localTier: 1 | 2 | 3;
       let localDiffTokens: DiffToken[];
       let localFeedback: string;
       let localMatchRate: number;
       let localCpm: number;
 
-      const totalSentences = sentenceTargetsRef.current.length;
-      if (
-        sentResults.length > 0 &&
-        sentResults.length >= Math.ceil(totalSentences / 2)
-      ) {
-        const allDiff = sentResults.flatMap((r) => r.diffTokens);
-        const correctAndForgiven = allDiff.filter(
-          (t) => t.type === 'correct' || t.type === 'forgiven',
-        ).length;
-        const totalTarget = normalizeForComparison(targetText).length || 1;
-        localMatchRate = correctAndForgiven / totalTarget;
-        const threshold = getReadingPassThreshold(totalTarget);
-        localTier =
-          localMatchRate >= READING_EXCELLENT
-            ? 1
-            : localMatchRate >= threshold
-            ? 2
-            : 3;
-        localDiffTokens = allDiff;
-        localFeedback = sentResults[sentResults.length - 1].feedback;
-        localCpm = Math.round(
-          sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length,
-        );
-      } else {
+      if (source === 'gemini') {
+        // Gemini path: whole-paragraph evaluation — no sentenceResults mixing.
         const localResult = localEvaluateParagraph(
           cleaned,
           targetText,
@@ -224,6 +206,54 @@ export function useParagraphEvaluation({
         localFeedback = localResult.feedback;
         localMatchRate = localResult.matchRate;
         localCpm = localResult.cpm;
+      } else {
+        // Web Speech path: may aggregate sentenceResults if enough were collected.
+        const sentResults = sentenceResultsRef.current.filter(
+          Boolean,
+        ) as LocalEvalResult[];
+
+        const totalSentences = sentenceTargetsRef.current.length;
+        if (
+          sentResults.length > 0 &&
+          sentResults.length >= Math.ceil(totalSentences / 2)
+        ) {
+          const allDiff = sentResults.flatMap((r) => r.diffTokens);
+          const correctAndForgiven = allDiff.filter(
+            (t) => t.type === 'correct' || t.type === 'forgiven',
+          ).length;
+          const totalTarget = normalizeForComparison(targetText).length || 1;
+          localMatchRate = correctAndForgiven / totalTarget;
+          const threshold = getReadingPassThreshold(totalTarget);
+          localTier =
+            localMatchRate >= READING_EXCELLENT
+              ? 1
+              : localMatchRate >= threshold
+              ? 2
+              : 3;
+          localDiffTokens = allDiff;
+          localFeedback = sentResults[sentResults.length - 1].feedback;
+          localCpm = Math.round(
+            sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length,
+          );
+        } else {
+          const localResult = localEvaluateParagraph(
+            cleaned,
+            targetText,
+            durationMs,
+            {
+              tier1: TIER1_POOL,
+              tier2: TIER2_POOL,
+              tier3: TIER3_POOL,
+              streakMsgs: STREAK_MESSAGES,
+            },
+            evalState.streak,
+          );
+          localTier = localResult.tier;
+          localDiffTokens = localResult.diffTokens;
+          localFeedback = localResult.feedback;
+          localMatchRate = localResult.matchRate;
+          localCpm = localResult.cpm;
+        }
       }
 
       dispatch({ type: 'START_LOCAL', diffTokens: localDiffTokens });

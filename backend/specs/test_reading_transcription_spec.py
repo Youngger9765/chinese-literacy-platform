@@ -81,16 +81,19 @@ class TestC1WebmNotDirectToGemini:
         webm_bytes = b"fake-webm-input"
         transcoded_ogg_bytes = b"fake-ogg-transcoded"
 
-        # Capture the bytes that arrive at the Gemini Part.from_bytes() call.
+        # Capture both `data` and `mime_type` that arrive at Gemini Part.from_bytes().
         gemini_received_mime: list[str] = []
+        gemini_received_data: list[bytes] = []
 
         fake_part = MagicMock()
         fake_part_cls = MagicMock()
 
         def capture_from_bytes(*args, **kwargs):  # noqa: ANN001
-            # Called as Part.from_bytes(data=..., mime_type=...) — capture mime_type
+            # Called as Part.from_bytes(data=..., mime_type=...) — capture both.
             mime = kwargs.get("mime_type") or (args[1] if len(args) > 1 else "unknown")
+            data = kwargs.get("data") or (args[0] if args else b"")
             gemini_received_mime.append(mime)
+            gemini_received_data.append(data)
             return fake_part
 
         fake_part_cls.from_bytes = capture_from_bytes
@@ -140,6 +143,19 @@ class TestC1WebmNotDirectToGemini:
         assert all(
             m.startswith("audio/ogg") for m in gemini_received_mime
         ), f"Expected audio/ogg MIME sent to Gemini, got: {gemini_received_mime}"
+
+        # P2#2: also assert the `data` bytes are the TRANSCODED bytes, not the original webm.
+        # This catches a regression where data=original_webm_bytes + mime_type='audio/ogg' slips through.
+        assert gemini_received_data, "Part.from_bytes data was not captured"
+        assert all(
+            d == transcoded_ogg_bytes for d in gemini_received_data
+        ), (
+            f"Expected transcoded OGG bytes ({transcoded_ogg_bytes!r}) sent to Gemini, "
+            f"got: {gemini_received_data}"
+        )
+        assert all(
+            d != webm_bytes for d in gemini_received_data
+        ), "Original webm bytes must NOT reach Gemini directly (I2 violation)"
 
         # C1 assertion 3: result comes from Gemini (not fallback).
         assert result["method"] == "gemini"

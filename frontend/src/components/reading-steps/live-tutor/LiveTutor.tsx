@@ -256,27 +256,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // null because onstop fires asynchronously after .stop() is called.
     const audioBlob = await paragraphRecorder.stopAndGetBlob();
 
-    // Helper: resolve the transcript to use for scoring.
-    // Returns Gemini transcript on success (I1), Web Speech on fallback (I4 alert).
-    const resolveTranscript = async (): Promise<string> => {
-      if (audioBlob && token) {
-        const targetText = story.content[currentLineIndex] || '';
-        try {
-          const result = await transcribeReading(audioBlob, targetText, durationMs, token);
-          if (result.method === 'gemini' && result.transcript) {
-            clearParagraphFallback();
-            return result.transcript;
-          }
-          // I4: Gemini failed — show alert, fall back to Web Speech
-          setParagraphFallbackReason(result.reason ?? 'error');
-        } catch {
-          setParagraphFallbackReason('error');
-        }
-      }
-      // No audio blob or Gemini failed → Web Speech transcript
-      return transcript;
-    };
-
     if (sentenceRetry.retrySentenceInfoRef.current) {
       // Sentence retry path: paragraph recorder is already stopped (from prior submitSentence).
       // No fresh blob is available for this sentence fragment.
@@ -286,10 +265,34 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     } else if (audioBlob || transcript) {
       // P2#1: audioBlob takes priority — try Gemini even if Web Speech returned empty string
       // (student may have spoken but STT returned nothing; Gemini can still transcribe).
-      const finalTranscript = await resolveTranscript();
-      // Only score if we have something to score (Gemini result or non-empty Web Speech).
+      // P1#4: track whether we got a Gemini transcript to pass correct `source` to evaluateAndRespond.
+      let finalTranscript = transcript;
+      let transcriptSource: 'gemini' | 'webspeech' = 'webspeech';
+
+      if (audioBlob && token) {
+        const targetText = story.content[currentLineIndex] || '';
+        try {
+          const result = await transcribeReading(audioBlob, targetText, durationMs, token);
+          if (result.method === 'gemini' && result.transcript) {
+            clearParagraphFallback();
+            finalTranscript = result.transcript;
+            transcriptSource = 'gemini';
+          } else {
+            // I4: Gemini returned fallback.
+            setParagraphFallbackReason(result.reason ?? 'error');
+            // finalTranscript stays as Web Speech; transcriptSource stays 'webspeech'
+          }
+        } catch {
+          setParagraphFallbackReason('error');
+        }
+      } else {
+        // P1#3: no blob or no token — I4 alert.
+        setParagraphFallbackReason(audioBlob ? 'no_token' : 'no_audio');
+      }
+
+      // Only score if we have something to score.
       if (finalTranscript.trim()) {
-        await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex);
+        await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex, transcriptSource);
       }
     }
   }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex,
@@ -575,7 +578,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             <div className="flex-1">
               <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
               <p className="text-xs text-amber-700 mt-0.5">
-                AI 音訊分析未能完成，評分依瀏覽器語音辨識，準確度較低。建議重試此段。
+                AI 音訊分析未能完成（{paragraphFallbackReason}），評分依瀏覽器語音辨識，準確度較低。建議重試此段。
               </p>
             </div>
             <button
