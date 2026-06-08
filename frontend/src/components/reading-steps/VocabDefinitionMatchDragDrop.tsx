@@ -8,6 +8,7 @@
  * last drag-drop question always has multiple options — no forced-correct final question.
  *
  * Fix #2082 (A6/A7/A8): verbal feedback, larger definition text, device-aware instruction.
+ * Issue #2163: OnboardingCoach — first-use amber說明框 + demo animation on real UI.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
@@ -17,6 +18,52 @@ import { AnswerRecord } from './vocabDefinitionMatchLogic';
 // Using a module-level constant so it is evaluated once and shared across renders.
 const IS_TOUCH_DEVICE =
   typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+// ── localStorage key for first-use onboarding gate ────────────────────────
+const VOCAB_DRAGDROP_ONBOARDED_KEY = 'vocab_dragdrop_onboarded';
+
+// ── Onboarding coach — amber box, matches VocabDefinitionMatchMCQ pattern ──
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+  const instruction = IS_TOUCH_DEVICE
+    ? '點選語詞，再點右邊的解釋框放入'
+    : '把左邊的語詞拖到右邊正確的解釋上';
+  return (
+    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          lightbulb
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">詞語配對怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            {instruction}。配對正確後語詞會消失。
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export interface DragDropProps {
   vocab: VocabItem[];
@@ -38,6 +85,29 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   // A6: verbal feedback state — show praise on correct, "再試試看！" on wrong
   const [wrongFeedbackSlot, setWrongFeedbackSlot] = useState<number | null>(null);
   const [correctFeedbackSlot, setCorrectFeedbackSlot] = useState<number | null>(null);
+
+  // Onboarding state — gated by localStorage
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(VOCAB_DRAGDROP_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  // Demo animation: highlight a word chip + its matching slot pair
+  // demoWordIdx = vocabIdx being highlighted in the word bank
+  // demoSlotIdx = defIdx being highlighted in the definition slots
+  const [demoWordIdx, setDemoWordIdx] = useState<number | null>(null);
+  const [demoSlotIdx, setDemoSlotIdx] = useState<number | null>(null);
+  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up demo timer on unmount
+  useEffect(() => {
+    return () => {
+      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    };
+  }, []);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
@@ -66,6 +136,48 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     confirmedRef.current = new Set();
     wrongAttemptCountRef.current = new Map();
   }, [activeDefIndices, shuffledWords]);
+
+  const handleDismissCoach = () => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(VOCAB_DRAGDROP_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  };
+
+  /**
+   * Demo animation: highlight the first unconfirmed word chip and its matching slot.
+   * Two amber pulses on both elements to show how drag-and-drop works.
+   * Purely visual — does NOT submit a placement or affect scoring.
+   */
+  const handleDemo = () => {
+    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    // Pick the first unconfirmed vocab word to demo
+    const activeShuffled = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
+    const firstUnconfirmed = activeShuffled.find((wi) => !confirmed.has(wi));
+    if (firstUnconfirmed == null) {
+      handleDismissCoach();
+      return;
+    }
+    // The matching slot for this word is defIdx === firstUnconfirmed
+    const matchingSlot = firstUnconfirmed;
+    setDemoWordIdx(firstUnconfirmed);
+    setDemoSlotIdx(matchingSlot);
+    demoTimerRef.current = setTimeout(() => {
+      setDemoWordIdx(null);
+      setDemoSlotIdx(null);
+      demoTimerRef.current = setTimeout(() => {
+        setDemoWordIdx(firstUnconfirmed);
+        setDemoSlotIdx(matchingSlot);
+        demoTimerRef.current = setTimeout(() => {
+          setDemoWordIdx(null);
+          setDemoSlotIdx(null);
+        }, 900);
+      }, 200);
+    }, 900);
+    handleDismissCoach();
+  };
 
   const attemptPlace = useCallback(
     (defIdx: number, vocabIdx: number) => {
@@ -203,6 +315,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
           const isDragging = draggingVocabIdx === vocabIdx;
           const isTouchSelected = touchSelected === vocabIdx;
+          const isDemoWord = demoWordIdx === vocabIdx;
 
           // Confirmed words (fly-away animation already finished): show as locked/dimmed
           if (isConfirmedWord && !isFlying) {
@@ -226,6 +339,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none transition-all duration-200 ';
           if (isFlying) {
             cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
+          } else if (isDemoWord) {
+            cls += 'border-amber-400 bg-amber-50 text-amber-800 animate-pulse pointer-events-none';
           } else if (isDragging) {
             cls += 'border-accent bg-accent/10 text-accent shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
@@ -280,11 +395,14 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     const isOver = hoverTarget === defIdx && !isCorrect;
     const showWrongVerbal = wrongFeedbackSlot === defIdx;
     const showCorrectVerbal = correctFeedbackSlot === defIdx;
+    const isDemoSlot = demoSlotIdx === defIdx && !isCorrect;
 
     let cls =
       'rounded-3xl border-2 px-5 py-5 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
     if (isCorrect) {
       cls += 'bg-emerald-50 border-emerald-400 cursor-default';
+    } else if (isDemoSlot) {
+      cls += 'bg-amber-50 border-amber-400 animate-pulse';
     } else if (isWrong) {
       cls += 'bg-tertiary-container/10 border-tertiary animate-shake';
     } else if (isOver) {
@@ -353,13 +471,28 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
-      {/* A8: Device-aware instruction banner */}
-      <p className="text-sm text-center text-on-surface-variant mb-4">
-        <span className="material-symbols-outlined align-middle text-base mr-1">
-          {IS_TOUCH_DEVICE ? 'touch_app' : 'drag_indicator'}
-        </span>
-        {instructionText}
-      </p>
+      {/* Onboarding coach — shown first time or when student clicks help */}
+      {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+
+      {/* A8: Device-aware instruction banner — only shown after coach is dismissed */}
+      {!showCoach && (
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-center text-on-surface-variant">
+            <span className="material-symbols-outlined align-middle text-base mr-1">
+              {IS_TOUCH_DEVICE ? 'touch_app' : 'drag_indicator'}
+            </span>
+            {instructionText}
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCoach(true)}
+            className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1 shrink-0"
+          >
+            <span className="material-symbols-outlined text-sm">help_outline</span>
+            怎麼玩？
+          </button>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="flex items-center gap-3 mb-6">
