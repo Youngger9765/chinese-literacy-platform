@@ -209,7 +209,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             return (
               <div
                 key={vocabIdx}
-                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
+                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
                 aria-label={`${vocab[vocabIdx]?.word} 已配對`}
               >
                 {vocab[vocabIdx]?.word}
@@ -222,7 +222,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           if (isPlaced && !isFlying) return null;
 
           let cls =
-            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none transition-all duration-200 ';
+            // #2144: 教授「拖拉字體小」— text-base→text-lg
+            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none transition-all duration-200 ';
           if (isFlying) {
             cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
           } else if (isDragging) {
@@ -309,8 +310,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         }}
         onClick={() => handleSlotTap(defIdx)}
       >
-        {/* A7: text-base → text-lg md:text-xl leading-relaxed */}
-        <p className="text-lg md:text-xl leading-relaxed text-on-surface">{item?.definition}</p>
+        {/* A7: text-base → text-lg md:text-xl leading-relaxed
+            #2144: 教授「定義字換色」— 答對後定義文字轉綠，強化配對成功訊號 */}
+        <p className={`text-lg md:text-xl leading-relaxed ${isCorrect ? 'text-emerald-700 font-semibold' : 'text-on-surface'}`}>{item?.definition}</p>
         <div className="flex items-center justify-center h-8">
           {isCorrect ? (
             <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
