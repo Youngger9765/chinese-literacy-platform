@@ -60,13 +60,21 @@ export interface BenchmarkLevelSec {
 
 export type ParsedBenchmark = BenchmarkLevel | BenchmarkLevelSec;
 
-function generateFeedback(speedPassed: boolean, accuracyPassed: boolean): string {
-  if (speedPassed && accuracyPassed)
-    return '太棒了！速度和準確度都過關了！';
-  if (accuracyPassed && !speedPassed)
-    return '讀得很準確！速度再練快一點就完美了。';
-  if (speedPassed && !accuracyPassed)
-    return '速度很好！不過有些字要再練一練，讀慢一點沒關係。';
+/**
+ * Encouragement-first feedback (Issue #2131).
+ * Speed (CPM) is no longer a pass/fail criterion and never appears in feedback —
+ * it stays display-only on the score card. Feedback tiers are accuracy-based only:
+ *   - accuracy >= 0.75: top tier, very fluent
+ *   - accuracy >= 0.55: mid tier, decent
+ *   - else: encourage to keep practising
+ */
+function generateFeedback(accuracy: number): string {
+  if (accuracy >= 0.75) {
+    return '讀得很流暢！繼續保持，越來越棒！';
+  }
+  if (accuracy >= 0.55) {
+    return '讀得不錯！多練幾次，準確度會越來越高。';
+  }
   return '沒關係，多練幾次就會進步！先把每一段練熟，再挑戰全文。';
 }
 
@@ -87,7 +95,8 @@ export function analyzeFluency(input: {
 
   const accuracyPassed = diffResult.matchRate >= thresholds.accuracyPass;
   const speedPassed = cpm >= thresholds.cpmPass;
-  const passed = accuracyPassed && speedPassed;
+  // Issue #2131: passed is accuracy-only; speedPassed is kept for display reference only.
+  const passed = accuracyPassed;
 
   const errorBreakdown: ErrorBreakdown = {
     correct: diffResult.correctCount,
@@ -107,7 +116,7 @@ export function analyzeFluency(input: {
     errorBreakdown,
     diffTokens: diffResult.tokens,
     thresholds,
-    feedback: generateFeedback(speedPassed, accuracyPassed),
+    feedback: generateFeedback(diffResult.matchRate),
   };
 }
 
