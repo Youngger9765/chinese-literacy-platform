@@ -124,6 +124,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
 
   const fullText = useMemo(() => story.content.join(''), [story.content]);
 
+  /** Issue #2147: memoised live transcript segments — recomputes only when
+   *  the raw streaming text or the full lesson text changes, not on every render. */
+  const liveTranscriptSegments = useMemo(() => {
+    if (!sessionTranscript) return null;
+    return enhanceLiveTranscript(sessionTranscript, fullText).segments;
+  }, [sessionTranscript, fullText]);
+
   /* ---- TTS queue hook (owns tts instance + paragraph queue) ---- */
   const {
     tts,
@@ -310,14 +317,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
               <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">即時辨識</p>
               <p className="text-lg text-on-surface leading-relaxed">
-                {(() => {
-                  const { segments } = enhanceLiveTranscript(sessionTranscript, fullText);
-                  return segments.map((seg: TranscriptSegment, i: number) => (
-                    <span key={i} className={seg.kind === 'inserted' ? 'text-gray-400' : undefined}>
-                      {seg.text}
-                    </span>
-                  ));
-                })()}
+                {liveTranscriptSegments && liveTranscriptSegments.map((seg: TranscriptSegment, i: number) => (
+                  <span key={i} className={seg.kind === 'inserted' ? 'text-gray-400' : undefined}>
+                    {seg.text}
+                  </span>
+                ))}
               </p>
             </div>
           )}

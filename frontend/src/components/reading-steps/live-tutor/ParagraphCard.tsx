@@ -304,9 +304,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* CPM + accuracy scores (Issue #2147) */}
           {(() => {
-            const cpmVal = lineResults.find(r => r.lineIndex === idx)?.cpm ?? null;
-            const rate = paragraphSummary.matchRate;
-            if (cpmVal === null) return null;
+            // Use per-line result for both CPM and matchRate — LineResult tracks both fields.
+            // paragraphSummary.matchRate is paragraph-level and would show the same number
+            // on every line of a multi-line paragraph, which is semantically misleading.
+            const lineResult = lineResults.find(r => r.lineIndex === idx) ?? null;
+            if (lineResult === null) return null;
+            const { cpm: cpmVal, matchRate: rate } = lineResult;
             const rateColor = rate >= 0.9 ? 'text-emerald-600' : rate >= 0.65 ? 'text-green-600' : 'text-amber-600';
             return (
               <div className="flex gap-4 text-sm">
