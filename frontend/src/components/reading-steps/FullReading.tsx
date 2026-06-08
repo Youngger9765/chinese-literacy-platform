@@ -124,13 +124,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
 
   const fullText = useMemo(() => story.content.join(''), [story.content]);
 
-  /** Issue #2147: memoised live transcript segments — recomputes only when
-   *  the raw streaming text or the full lesson text changes, not on every render. */
-  const liveTranscriptSegments = useMemo(() => {
-    if (!sessionTranscript) return null;
-    return enhanceLiveTranscript(sessionTranscript, fullText).segments;
-  }, [sessionTranscript, fullText]);
-
   /* ---- TTS queue hook (owns tts instance + paragraph queue) ---- */
   const {
     tts,
@@ -162,6 +155,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       setHistoryRefreshKey(k => k + 1);
     }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
   });
+
+  /** Issue #2147: memoised live transcript segments — recomputes only when
+   *  the raw streaming text or the full lesson text changes, not on every render.
+   *  MUST be declared after useFullReadingSession so sessionTranscript exists
+   *  (was placed before it → "Cannot access before initialization" TDZ crash). */
+  const liveTranscriptSegments = useMemo(() => {
+    if (!sessionTranscript) return null;
+    return enhanceLiveTranscript(sessionTranscript, fullText).segments;
+  }, [sessionTranscript, fullText]);
 
   const zhuyinLines = useMemo(
     () => processLinesSelective(story.content, vocabWords),
