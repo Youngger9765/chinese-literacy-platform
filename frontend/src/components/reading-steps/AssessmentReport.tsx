@@ -198,16 +198,33 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
 
       {/* Progress indicator — shown when not all sections are complete */}
       {hasNoData ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
-          <p className="text-2xl mb-2">📖</p>
-          <h2 className="text-lg font-bold text-amber-900 mb-1">還沒有完成朗讀練習喔！</h2>
-          <p className="text-sm text-amber-700 mb-3">完成「逐段朗讀」或「全文朗讀」後，這裡會顯示你的完整學習報告。</p>
-          <button
-            onClick={onRetry}
-            className="bg-accent hover:bg-accent-hover text-white px-6 py-2 rounded-full text-sm font-bold transition-all"
-          >
-            回到課文
-          </button>
+        /* #2146: 空狀態文案 — 教授 demo 誤判「報告功能尚未完成」。
+           其實報告已就緒，只是 demo 時沒先做朗讀 → 無資料。改成明確標
+           「完成練習後自動解鎖」+ 預覽報告會包含的環節，讓它讀起來是
+           完整功能在等資料，而非未完成的 stub。 */
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+          <p className="text-3xl mb-2">📊</p>
+          <h2 className="text-lg font-bold text-amber-900 mb-1">學習報告已就緒，完成練習後解鎖</h2>
+          <p className="text-sm text-amber-700 mb-4">
+            先完成「逐段朗讀」或「全文朗讀」，系統會自動為你生成<strong>朗朗上口六環節診斷報告</strong>。
+          </p>
+          <div className="bg-white/70 border border-amber-100 rounded-xl px-4 py-3 mb-4 text-left inline-block">
+            <p className="text-xs font-bold text-amber-800 mb-1.5">報告將包含</p>
+            <ul className="text-xs text-amber-700 space-y-1">
+              <li>📖 朗讀流暢度與正確率</li>
+              <li>🎯 課文理解診斷</li>
+              <li>🔍 易錯字詞分析</li>
+              <li>💡 個別化練習建議</li>
+            </ul>
+          </div>
+          <div>
+            <button
+              onClick={onRetry}
+              className="bg-accent hover:bg-accent-hover text-white px-6 py-2 rounded-full text-sm font-bold transition-all"
+            >
+              開始練習解鎖報告
+            </button>
+          </div>
         </div>
       ) : completedSections < 6 ? (
         <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
@@ -233,10 +250,10 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
           </div>
         )}
         <h2 className="text-4xl font-bold mb-2">
-          {hasNoData ? '學習報告預覽' : '好棒！你今天又進步了。'}
+          {hasNoData ? '朗朗上口診斷報告' : '好棒！你今天又進步了。'}
         </h2>
         <p className="text-gray-500">
-          {hasNoData ? '完成各環節後，這裡會顯示你的詳細成果。' : '讓我們看看這次學習的完整成果吧。'}
+          {hasNoData ? '完成練習後，這裡會顯示你的六環節完整成果。' : '讓我們看看這次學習的完整成果吧。'}
         </p>
         {story && (
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>
