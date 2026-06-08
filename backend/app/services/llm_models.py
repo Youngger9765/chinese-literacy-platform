@@ -51,6 +51,13 @@ TASK_MODELS: dict[str, tuple[str, str]] = {
     "omo_identifier": ("gemini-flash-lite-latest", "global"),
     # LOCKED per #1730: lettered circle accuracy 5/5 vs 1/5, non-negotiable
     "omo_grader": ("gemini-2.5-flash", "us-central1"),
+
+    # ── Audio / STT tasks ────────────────────────────────────────────────────
+    # Issue #2131: FullReading Gemini audio transcription.
+    # gemini-2.5-flash chosen for audio understanding capability.
+    # us-central1: audio models require regional endpoint (not global).
+    # thinking_budget=0 (2.5 series) applied at call site.
+    "reading_transcribe": ("gemini-2.5-flash", "us-central1"),
 }
 
 
