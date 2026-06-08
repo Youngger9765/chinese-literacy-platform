@@ -219,7 +219,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
       </div>
 
       {/* ── Fixed bottom CTA ──────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
         <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
 
