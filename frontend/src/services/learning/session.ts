@@ -13,6 +13,12 @@ export interface TranscribeReadingResult {
   method: 'gemini' | 'fallback';
   /** Gemini's internal audit notes (empty string when method=fallback). */
   reasoning?: string;
+  /**
+   * Fallback reason from backend (Issue #2156 — I4 fallback alert).
+   * Values: 'timeout' | 'safety' | 'decode' | 'empty' | 'error'
+   * Present only when method='fallback'. Used by frontend to show alert banner.
+   */
+  reason?: string;
 }
 
 /**
@@ -31,7 +37,7 @@ export async function transcribeReading(
   durationMs: number,
   token: string,
 ): Promise<TranscribeReadingResult> {
-  const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '' };
+  const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '', reason: 'error' };
 
   try {
     const form = new FormData();
@@ -58,6 +64,7 @@ export async function transcribeReading(
         transcript: data.transcript ?? null,
         method: data.method === 'gemini' ? 'gemini' : 'fallback',
         reasoning: data.reasoning ?? '',
+        reason: data.reason ?? undefined,
       };
     }
     return FALLBACK;

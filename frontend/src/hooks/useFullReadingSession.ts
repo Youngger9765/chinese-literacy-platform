@@ -15,7 +15,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { cleanChineseText } from '../utils/textDiff';
 import { analyzeFluency } from '../utils/fluencyAnalyzer';
-import { reinsertPunctuation } from '../utils/punctuationReinsert';
 import { DiffToken } from '../types';
 import { useAudioRecorder } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
@@ -47,6 +46,14 @@ interface UseFullReadingSessionReturn {
   streamingTranscript: string;
   setStreamingTranscript: (v: string) => void;
   micError: string;
+  /**
+   * Fallback alert state (I4 — must alert, never silent).
+   * Set when Gemini transcription fails so FullReading can show a banner.
+   * Values: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | null
+   */
+  fallbackReason: string | null;
+  /** Clear fallback alert (e.g. on retry). */
+  clearFallbackReason: () => void;
   startSession: () => void;
   stopSession: () => void;
   submitReading: () => void;
@@ -65,6 +72,9 @@ export function useFullReadingSession({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState('');
   const [micError, setMicError] = useState('');
+  /** I4: fallback alert reason — non-null when Gemini failed and UI must warn user */
+  const [fallbackReason, setFallbackReason] = useState<string | null>(null);
+  const clearFallbackReason = useCallback(() => setFallbackReason(null), []);
 
   const isSessionActiveRef       = useRef(false);
   const recognitionRef           = useRef<any>(null);
@@ -215,23 +225,28 @@ export function useFullReadingSession({
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {
-            // Gemini success: use high-quality transcript
+            // Gemini success (I1): use high-quality Gemini transcript for scoring.
+            // Do NOT re-insert punctuation — Gemini already added it.
+            clearFallbackReason();
             _evaluate(result.transcript);
           } else {
-            // Gemini fallback: use Web Speech + punctuation re-insertion (Block 2)
-            const enhanced = reinsertPunctuation(webSpeechTranscript, fullText);
-            _evaluate(enhanced);
+            // Gemini fallback (I4): show alert with reason, score with raw Web Speech.
+            // Do NOT use reinsertPunctuation to fake precision — it violates I1.
+            setFallbackReason(result.reason ?? 'error');
+            _evaluate(webSpeechTranscript);
           }
         })
         .catch(() => {
           setIsTranscribing(false);
+          // Network failure → fallback alert
+          setFallbackReason('error');
           _evaluate(webSpeechTranscript);
         });
     } else {
       // No audio blob or no token → direct Web Speech path (no Gemini call)
       _evaluate(webSpeechTranscript);
     }
-  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.audioBlob]);
+  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.audioBlob, clearFallbackReason]);
 
   return {
     isSessionActive,
@@ -240,6 +255,8 @@ export function useFullReadingSession({
     streamingTranscript,
     setStreamingTranscript,
     micError,
+    fallbackReason,
+    clearFallbackReason,
     startSession,
     stopSession,
     submitReading,

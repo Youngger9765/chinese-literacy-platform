@@ -6,6 +6,9 @@ import { cancelTts } from '../../../services/ttsApi';
 import { scopedStepStorageKey, isToolboxMode } from '../../../services/learningStorageScope';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
+import { useAudioRecorder } from '../../../hooks/useAudioRecorder';
+import { transcribeReading } from '../../../services/learning/session';
+import { useAuth } from '../../../contexts/AuthContext';
 import { splitIntoSentences } from '../../../utils/localEval';
 import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 import ReadingMetricsCard from '../full-reading/ReadingMetricsCard';
@@ -74,7 +77,16 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 }) => {
   const { px: fontSizePx } = useFontSize();
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { token } = useAuth();
   const storageKey = scopedStepStorageKey('liveTutor_progress_', story.id);
+
+  // ── Per-paragraph Gemini audio recorder (Issue #2156 — I1 / I4) ──────────
+  // Records while the student reads each paragraph; stops on paragraph submit
+  // so we can send the blob to /reading/transcribe for high-quality Gemini STT.
+  const paragraphRecorder = useAudioRecorder(120);
+  /** I4: fallback alert per paragraph — set when Gemini audio transcription fails */
+  const [paragraphFallbackReason, setParagraphFallbackReason] = useState<string | null>(null);
+  const clearParagraphFallback = useCallback(() => setParagraphFallbackReason(null), []);
 
   // ── Evaluation state machine ─────────────────────────────────────────────
   const [evalState, dispatch] = useReducer(evalReducer, initialEvalState);
@@ -184,8 +196,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const startSession = useCallback(() => {
     setNoAudioDetected(false);
+    clearParagraphFallback();
+    // Start paragraph audio recorder alongside STT (I1 — Gemini primary source)
+    paragraphRecorder.startRecording().catch(() => {
+      // recorder failure is non-critical — Web Speech fallback still works
+    });
     stt.startSession();
-  }, [stt]);
+  }, [stt, paragraphRecorder, clearParagraphFallback]);
   const stopSession = stt.stopSession;
 
   // ── Paragraph evaluation hook ────────────────────────────────────────────
@@ -232,12 +249,42 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const submitSentence = useCallback(async () => {
     const { transcript, rawStt, durationMs } = stt.submitSentence();
+
+    // ── Gemini audio transcription for paragraph (I1 — audio primary) ────────
+    // Stop the paragraph recorder now so we have a complete blob for this paragraph.
+    paragraphRecorder.stopRecording();
+    const audioBlob = paragraphRecorder.audioBlob;
+
+    // Helper: resolve the transcript to use for scoring.
+    // Returns Gemini transcript on success (I1), Web Speech on fallback (I4 alert).
+    const resolveTranscript = async (): Promise<string> => {
+      if (audioBlob && token) {
+        const targetText = story.content[currentLineIndex] || '';
+        try {
+          const result = await transcribeReading(audioBlob, targetText, durationMs, token);
+          if (result.method === 'gemini' && result.transcript) {
+            clearParagraphFallback();
+            return result.transcript;
+          }
+          // I4: Gemini failed — show alert, fall back to Web Speech
+          setParagraphFallbackReason(result.reason ?? 'error');
+        } catch {
+          setParagraphFallbackReason('error');
+        }
+      }
+      // No audio blob or Gemini failed → Web Speech transcript
+      return transcript;
+    };
+
     if (sentenceRetry.retrySentenceInfoRef.current) {
+      // Sentence retry path: use Web Speech (short fragment, Gemini overkill)
       await handleSentenceRetryEvalRef.current(transcript, durationMs);
     } else if (transcript) {
-      await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
+      const finalTranscript = await resolveTranscript();
+      await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex);
     }
-  }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex]);
+  }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex, paragraphRecorder,
+      token, story.content, clearParagraphFallback]);
 
   // ── handleRetryParagraph ─────────────────────────────────────────────────
   const handleRetryParagraph = useCallback(
@@ -246,6 +293,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         stopSession();
         setCurrentLineIndex(idx);
       }
+      // Reset paragraph recorder and fallback state on retry
+      paragraphRecorder.clearRecording();
+      clearParagraphFallback();
       setParagraphSummaries((prev) => {
         const next = { ...prev };
         delete next[idx];
@@ -272,6 +322,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setParagraphSummaries,
       sentenceRetry,
       dispatch,
+      paragraphRecorder,
+      clearParagraphFallback,
     ],
   );
 
@@ -321,7 +373,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     nextSentenceIdxRef.current = 0;
     lastFinalResultIdxRef.current = -1;
     dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    // Reset paragraph recorder + fallback when paragraph changes (I4: stale alerts must not persist)
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLineIndex, story.content]);
+  // Note: paragraphRecorder and clearParagraphFallback intentionally excluded
+  // from deps — they are stable (refs + stable callbacks) and including them
+  // would re-run this effect unnecessarily.
 
   // ── Persist progress to localStorage ────────────────────────────────────
   useEffect(() => {
@@ -494,6 +553,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* No-audio-detected banner */}
       {noAudioDetected && stt.isSessionActive && (
         <NoAudioBanner onRestart={() => { stopSession(); startSession(); }} />
+      )}
+
+      {/* I4 (Issue #2156): Per-paragraph Gemini fallback alert — must not be silent.
+          Shown when audio transcription fails so student knows the score is from
+          Web Speech only (lower quality) and can retry for a better result. */}
+      {paragraphFallbackReason && (
+        <div className="absolute bottom-44 left-1/2 -translate-x-1/2 z-20 w-[min(92%,520px)]">
+          <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-md">
+            <span className="material-symbols-outlined text-amber-600 shrink-0">warning</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                AI 音訊分析未能完成，評分依瀏覽器語音辨識，準確度較低。建議重試此段。
+              </p>
+            </div>
+            <button
+              onClick={clearParagraphFallback}
+              className="text-amber-600 hover:text-amber-800 transition-colors shrink-0"
+              aria-label="關閉提示"
+            >
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ── Fixed bottom controls ─────────────────────────────────────── */}

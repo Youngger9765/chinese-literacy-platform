@@ -18,8 +18,10 @@ import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssess
 import FullReadingControls, { type ControlState } from './full-reading/FullReadingControls';
 import FullReadingScoreCard from './full-reading/FullReadingScoreCard';
 import FullReadingFeedbackPanel from './full-reading/FullReadingFeedbackPanel';
-import { enhanceLiveTranscript } from '../../utils/liveTranscriptEnhance';
-import type { TranscriptSegment } from '../../utils/liveTranscriptEnhance';
+// Note: liveTranscriptEnhance / enhanceLiveTranscript intentionally NOT imported here.
+// I3 (Issue #2156): live preview must show raw Web Speech gray text only.
+// Instant punctuation re-insertion causes visible flicker on every STT partial result.
+// Gemini adds accurate punctuation post-submission — no need to fake it live.
 
 /* ------------------------------------------------------------------ */
 
@@ -141,6 +143,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     isTranscribing,
     streamingTranscript: sessionTranscript,
     micError,
+    fallbackReason,
+    clearFallbackReason,
     startSession,
     submitReading,
     audioRecorder,
@@ -156,14 +160,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
   });
 
-  /** Issue #2147: memoised live transcript segments — recomputes only when
-   *  the raw streaming text or the full lesson text changes, not on every render.
-   *  MUST be declared after useFullReadingSession so sessionTranscript exists
-   *  (was placed before it → "Cannot access before initialization" TDZ crash). */
-  const liveTranscriptSegments = useMemo(() => {
-    if (!sessionTranscript) return null;
-    return enhanceLiveTranscript(sessionTranscript, fullText).segments;
-  }, [sessionTranscript, fullText]);
+  // I3 (Issue #2156): liveTranscriptSegments / enhanceLiveTranscript removed.
+  // Raw Web Speech gray-text preview replaces the punctuation-insertion path.
+  // Reason: enhanceLiveTranscript ran on every STT partial → visible flicker.
+  // Gemini provides accurate punctuation post-submission (no live re-insertion needed).
 
   const zhuyinLines = useMemo(
     () => processLinesSelective(story.content, vocabWords),
@@ -210,7 +210,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     audioRecorder.clearRecording();
     setSelfRating(undefined);
     setShowComparison(false);
-  }, [storageKey, setResult, setStreamingTranscript, audioRecorder]);
+    clearFallbackReason();
+  }, [storageKey, setResult, setStreamingTranscript, audioRecorder, clearFallbackReason]);
 
   const handleFinish = useCallback(() => {
     if (!result) return;
@@ -314,16 +315,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Live transcript card — Issue #2147: enhanced with punctuation + homophone correction */}
+          {/* Live transcript card — I3 (Issue #2156): raw Web Speech gray preview only.
+              No punctuation re-insertion here — Gemini adds it post-submission. */}
           {isSessionActive && sessionTranscript && (
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
-              <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">即時辨識</p>
-              <p className="text-lg text-on-surface leading-relaxed">
-                {liveTranscriptSegments && liveTranscriptSegments.map((seg: TranscriptSegment, i: number) => (
-                  <span key={i} className={seg.kind === 'inserted' ? 'text-gray-400' : undefined}>
-                    {seg.text}
-                  </span>
-                ))}
+              <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
+                即時預覽（唸完精準校正）
+              </p>
+              <p className="text-lg text-gray-400 leading-relaxed">
+                {sessionTranscript}
               </p>
             </div>
           )}
@@ -331,6 +331,28 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
           {isSessionActive && !sessionTranscript && (
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
               <p className="text-base text-on-surface-variant leading-relaxed">請開始朗讀上方課文…</p>
+            </div>
+          )}
+
+          {/* I4 (Issue #2156): Gemini fallback alert banner — must be visible, never silent.
+              Shown when backend returns method='fallback' so user knows the result is
+              based on Web Speech only (lower quality) and can retry for a better score. */}
+          {fallbackReason && result && (
+            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
+              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  AI 音訊分析未能完成（{fallbackReason}），評分僅依瀏覽器語音辨識，準確度較低。建議重試以獲得精準評分。
+                </p>
+              </div>
+              <button
+                onClick={clearFallbackReason}
+                className="text-amber-600 hover:text-amber-800 transition-colors shrink-0 mt-0.5"
+                aria-label="關閉提示"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
             </div>
           )}
 
