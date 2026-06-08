@@ -189,3 +189,119 @@ describe('getThresholdsFromBenchmark — lesson-aware (Bug B)', () => {
     expect(thresholds!.accuracyPass).toBe(0.80);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Block 1 (Issue #2131): passed = accuracyPassed only; encouragement-first feedback
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { analyzeFluency } from './fluencyAnalyzer';
+
+describe('analyzeFluency — passed uses accuracy only (Issue #2131)', () => {
+  // Scenario: high accuracy but slow speed → should PASS after fix
+  it('passes when accuracy is high even if speed is below threshold', () => {
+    // target text of 20 chars; read in 30s → CPM = 20/30*60 = 40 (well below any threshold)
+    // accuracy: read all 20 chars correctly → matchRate ≥ 0.80
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: target, // perfect reading
+      target,
+      durationMs: 30_000, // 30s → CPM ≈ 36 (very slow)
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.accuracyPassed).toBe(true);
+    expect(result.speedPassed).toBe(false); // slow
+    expect(result.passed).toBe(true); // <-- FAILS before fix (was: accuracyPassed && speedPassed)
+  });
+
+  // Scenario: low accuracy + low speed → should NOT pass
+  it('does not pass when accuracy is below threshold', () => {
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: '123456', // garbage
+      target,
+      durationMs: 5_000,
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.accuracyPassed).toBe(false);
+    expect(result.passed).toBe(false);
+  });
+
+  // Scenario: high accuracy + high speed → should still pass
+  it('passes when both accuracy and speed are high', () => {
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: target,
+      target,
+      durationMs: 2_000, // 2s → CPM ≈ 540 (very fast)
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.accuracyPassed).toBe(true);
+    expect(result.speedPassed).toBe(true);
+    expect(result.passed).toBe(true);
+  });
+
+  // Scenario: speedPassed is still computed (for display purposes)
+  it('still computes speedPassed for display even when it does not affect passed', () => {
+    const target = '春風吹過田野花兒開了';
+    const result = analyzeFluency({
+      spoken: target,
+      target,
+      durationMs: 30_000, // slow
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.speedPassed).toBe(false); // computed
+    expect(typeof result.cpm).toBe('number');
+    expect(result.cpm).toBeGreaterThan(0);
+  });
+});
+
+describe('generateFeedback — encouragement-first, no negative speed language (Issue #2131)', () => {
+  // The feedback is embedded in FluencyResult.feedback from analyzeFluency()
+  // We verify the new message strings via result.feedback
+
+  it('accurate reader gets positive feedback without negative speed mention', () => {
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: target,
+      target,
+      durationMs: 30_000, // slow
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.accuracyPassed).toBe(true);
+    // Old feedback: "讀得很準確！速度再練快一點就完美了。" (negative speed message)
+    // New feedback: should NOT contain "速度不過" pattern and should be encouraging
+    expect(result.feedback).not.toContain('速度再練快一點就完美了');
+    expect(result.feedback).not.toContain('速度不過');
+    // Should be positive/encouraging
+    expect(result.feedback.length).toBeGreaterThan(0);
+  });
+
+  it('highly accurate reader (≥0.75) gets very positive feedback', () => {
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: target,
+      target,
+      durationMs: 30_000,
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    // accuracy should be near 1.0 for perfect reading
+    expect(result.accuracy).toBeGreaterThanOrEqual(0.75);
+    // Should get the top-tier positive feedback
+    expect(result.feedback).toMatch(/流暢|棒|很好|不錯/);
+  });
+
+  it('low accuracy reader gets encouragement to keep practicing', () => {
+    const target = '春風吹過田野花兒開了我愛讀書學習進步';
+    const result = analyzeFluency({
+      spoken: '一二三四五', // very wrong
+      target,
+      durationMs: 5_000,
+      thresholds: { cpmPass: 120, accuracyPass: 0.80 },
+    });
+    expect(result.accuracyPassed).toBe(false);
+    // Should be encouraging, not punishing
+    expect(result.feedback).toMatch(/練|進步|多/);
+    // Should NOT say "速度不過" or blame speed
+    expect(result.feedback).not.toContain('速度不過');
+  });
+});
