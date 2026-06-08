@@ -22,7 +22,7 @@ import {
 } from '../../utils/paragraphMarkers';
 
 // Sub-components and utilities extracted as part of #1855 refactor
-import { getSelectionInfo } from './annotationOffsets';
+import { getSelectionInfo, stripPUASelectors } from './annotationOffsets';
 import {
   annotationReducer,
   computeSummary,
@@ -361,7 +361,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         return a.charStart - b.charStart;
       })
       .map((annotation) => {
-        const paragraph = story.content[annotation.paragraphIndex] ?? '';
+        // charStart/charEnd are RAW char offsets (PUA Variation Selectors stripped
+        // by getSelectionInfo). Lesson YAML embeds PUA selectors in the paragraph
+        // text, so slice the PUA-stripped paragraph — otherwise the panel word
+        // drifts left (e.g. 孟嘗君 → 投奔孟). AnnotatedParagraph already strips; this
+        // is the side-panel consumer that #2155 missed. (#2165)
+        const paragraph = stripPUASelectors(story.content[annotation.paragraphIndex] ?? '');
         return {
           annotation,
           text: paragraph.slice(annotation.charStart, annotation.charEnd),
