@@ -15,10 +15,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { cleanChineseText } from '../utils/textDiff';
 import { analyzeFluency } from '../utils/fluencyAnalyzer';
+import { reinsertPunctuation } from '../utils/punctuationReinsert';
 import { DiffToken } from '../types';
 import { useAudioRecorder } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
 import { saveReadingHistory } from '../services/readingHistoryApi';
+import { transcribeReading } from '../services/learning/session';
 
 export interface SavedResult {
   matchRate: number;
@@ -40,6 +42,8 @@ interface UseFullReadingSessionProps {
 interface UseFullReadingSessionReturn {
   isSessionActive: boolean;
   isPreparing: boolean;
+  /** True while Gemini audio transcription is in progress (after stop, before result). */
+  isTranscribing: boolean;
   streamingTranscript: string;
   setStreamingTranscript: (v: string) => void;
   micError: string;
@@ -58,6 +62,7 @@ export function useFullReadingSession({
 }: UseFullReadingSessionProps): UseFullReadingSessionReturn {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState('');
   const [micError, setMicError] = useState('');
 
@@ -158,48 +163,79 @@ export function useFullReadingSession({
     /* #1632 double-click guard: stopSession() flips this to false synchronously,
      * so a second click during the same tick exits before re-saving. */
     if (!isSessionActiveRef.current) return;
-    const transcript = currentTranscriptRef.current;
+    const webSpeechTranscript = currentTranscriptRef.current;
     const durationMs = Date.now() - startTimeRef.current;
     stopSession();
-    if (!transcript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
+    if (!webSpeechTranscript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
 
-    const fluency = analyzeFluency({
-      spoken: cleanChineseText(transcript),
-      target: fullText,
-      durationMs,
-    });
+    /* --- Gemini audio transcription (Issue #2131) ---
+     * 1. Try to get a higher-quality Gemini transcription from the audio blob.
+     * 2. If Gemini fails (no blob, no token, network error, fallback), use the
+     *    Web Speech transcript with punctuation re-inserted from the lesson text.
+     * 3. Scoring (analyzeFluency) runs on whichever transcript we end up with.
+     *
+     * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
+     *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
+    const audioBlob = audioRecorder.audioBlob;
 
-    const newResult: SavedResult = {
-      matchRate: fluency.accuracy,
-      feedback: fluency.feedback,
-      diffTokens: fluency.diffTokens,
-      cpm: fluency.cpm,
-      durationMs: fluency.durationMs,
-      errorBreakdown: fluency.errorBreakdown,
+    const _evaluate = (finalTranscript: string) => {
+      const fluency = analyzeFluency({
+        spoken: cleanChineseText(finalTranscript),
+        target: fullText,
+        durationMs,
+      });
+      const newResult: SavedResult = {
+        matchRate: fluency.accuracy,
+        feedback: fluency.feedback,
+        diffTokens: fluency.diffTokens,
+        cpm: fluency.cpm,
+        durationMs: fluency.durationMs,
+        errorBreakdown: fluency.errorBreakdown,
+      };
+      onResultReady(newResult, cleanChineseText(finalTranscript));
+      const durationSec = fluency.durationMs / 1000;
+      if (token && durationSec > 0) {
+        saveReadingHistory(
+          {
+            lesson_id: String(storyId),
+            reading_type: 'full',
+            cpm: fluency.cpm || 0,
+            accuracy: Math.round((fluency.accuracy || 0) * 100),
+            duration_seconds: durationSec,
+          },
+          token,
+        ).catch((err) => console.error('Failed to save reading history:', err));
+      }
     };
 
-    onResultReady(newResult, cleanChineseText(transcript));
-
-    /* #1632: persist this attempt to reading_history HERE — fired by the actual
-     * completion event, so re-mounts (page revisit) won't add fake rows. */
-    const durationSec = fluency.durationMs / 1000;
-    if (token && durationSec > 0) {
-      saveReadingHistory(
-        {
-          lesson_id: String(storyId),
-          reading_type: 'full',
-          cpm: fluency.cpm || 0,
-          accuracy: Math.round((fluency.accuracy || 0) * 100),
-          duration_seconds: durationSec,
-        },
-        token,
-      ).catch((err) => console.error('Failed to save reading history:', err));
+    if (audioBlob && token) {
+      setIsTranscribing(true);
+      transcribeReading(audioBlob, fullText, durationMs, token)
+        .then((result) => {
+          setIsTranscribing(false);
+          if (result.method === 'gemini' && result.transcript) {
+            // Gemini success: use high-quality transcript
+            _evaluate(result.transcript);
+          } else {
+            // Gemini fallback: use Web Speech + punctuation re-insertion (Block 2)
+            const enhanced = reinsertPunctuation(webSpeechTranscript, fullText);
+            _evaluate(enhanced);
+          }
+        })
+        .catch(() => {
+          setIsTranscribing(false);
+          _evaluate(webSpeechTranscript);
+        });
+    } else {
+      // No audio blob or no token → direct Web Speech path (no Gemini call)
+      _evaluate(webSpeechTranscript);
     }
-  }, [fullText, stopSession, token, storyId, onResultReady]);
+  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.audioBlob]);
 
   return {
     isSessionActive,
     isPreparing,
+    isTranscribing,
     streamingTranscript,
     setStreamingTranscript,
     micError,

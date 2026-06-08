@@ -136,6 +136,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   const {
     isSessionActive,
     isPreparing,
+    isTranscribing,
     streamingTranscript: sessionTranscript,
     micError,
     startSession,
@@ -225,6 +226,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     ? 'ttsPlaying'
     : 'idle';
 
+  // isTranscribing: Gemini audio analysis is in progress after user stops recording
+  // Show a "分析中..." overlay so user knows something is happening (Issue #2131)
+
   /* ================================================================ */
   /*  JSX                                                             */
   /* ================================================================ */
@@ -236,6 +240,17 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
+      {/* ── Gemini transcription loading overlay (Issue #2131) ─────────── */}
+      {isTranscribing && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface rounded-2xl px-8 py-6 flex flex-col items-center gap-3 shadow-xl">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-on-surface font-medium text-base">分析中…</p>
+            <p className="text-on-surface-variant text-sm">AI 正在分析您的朗讀，請稍候</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Single-column centered layout ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
         <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
