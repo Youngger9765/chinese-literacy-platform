@@ -216,23 +216,63 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
               </h1>
-              {story.intro && (
-                <p
-                  className={`text-base ${zhuyinActive ? 'leading-[2] tracking-[0.15em]' : 'leading-[1.5]'} text-gray-600`}
-                  aria-label={`作者：${story.intro.author}`}
-                >
-                  {/* #2082 A2: apply the same 「問題、解決、結果」結構 quoting as the strategy box
-                      so the subtitle and the highlight box stay consistent. */}
-                  {processZhuyin(
-                    story.intro.author.replace(
-                      /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
-                      '「$1、$2、$3」$4'
-                    )
-                  )}
-                </p>
-              )}
+              {/* #2139: genre/strategy subtitle removed here — replaced by the
+                  prominent 本課學習策略 yellow box moved directly below the title. */}
             </div>
           </div>
+
+          {/* 💡 本課學習策略 — #2139: moved here (directly below the title,
+              replacing the old grey subtitle) so the strategy is prominent,
+              not buried as a subtitle. Origins: #1598 + #2082 A2. */}
+          {(() => {
+            // #2082 A2: the strategy name source. worksheetIntro.target_strategy is empty
+            // for the real lesson data (verified: all G6/G7 demo lessons), so fall back to
+            // the strategy portion of story.intro.author, which holds e.g.
+            // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
+            // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
+            const rawStrategy =
+              story.worksheetIntro?.target_strategy ||
+              (story.intro?.author?.includes(' · ')
+                ? story.intro.author.split(' · ').slice(1).join(' · ')
+                : '') ||
+              '';
+            // For structure-type strategies, wrap the three stage words in corner quotes and
+            // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
+            // and CJK separators (the demo data uses ASCII '.').
+            const strategyName = rawStrategy.includes('「問題')
+              ? rawStrategy
+              : rawStrategy.replace(
+                  /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
+                  '「$1、$2、$3」$4'
+                );
+            const hasBody = story.lessonIntro?.text && story.lessonIntro.source !== 'excel';
+            if (!strategyName && !hasBody) return null;
+            return (
+            <div className="bg-amber-100/60 border-2 border-amber-300 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden="true">💡</span>
+                <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
+              </div>
+
+              {strategyName && (
+                // #2082 A2: prominent highlight box for strategy name
+                <div className="bg-amber-200/70 border-2 border-amber-400 rounded-xl px-4 py-3">
+                  <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
+                    {processZhuyin(strategyName)}
+                  </p>
+                </div>
+              )}
+
+              {story.lessonIntro?.text && story.lessonIntro.source !== 'excel' && (
+                <p className={`text-amber-800 ${zhuyinActive ? 'text-base leading-[2.4rem] tracking-[0.2em]' : 'text-sm leading-[1.7]'}`}>
+                  {processZhuyin(story.lessonIntro.text)}
+                </p>
+              )}
+              {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
+                  they belong to the read-text phase (LiveTutor / annotations), not intro. */}
+            </div>
+            );
+          })()}
 
           {/* 知識補給站 YouTube embed was removed — intro page shows course intro only */}
 
@@ -361,60 +401,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             );
           })()}
 
-          {/* 💡 本課學習策略 — #1598: hint-style banner combining the strategy
-              name (worksheetIntro.target_strategy) and the longer strategy
-              explanation (lessonIntro.text).
-              #2082 A2: strategy name shown in prominent amber highlight box;
-              instruction items removed (belong to read-text phase, not intro). */}
-          {(() => {
-            // #2082 A2: the strategy name source. worksheetIntro.target_strategy is empty
-            // for the real lesson data (verified: all G6/G7 demo lessons), so fall back to
-            // the strategy portion of story.intro.author, which holds e.g.
-            // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
-            // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
-            const rawStrategy =
-              story.worksheetIntro?.target_strategy ||
-              (story.intro?.author?.includes(' · ')
-                ? story.intro.author.split(' · ').slice(1).join(' · ')
-                : '') ||
-              '';
-            // For structure-type strategies, wrap the three stage words in corner quotes and
-            // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
-            // and CJK separators (the demo data uses ASCII '.').
-            const strategyName = rawStrategy.includes('「問題')
-              ? rawStrategy
-              : rawStrategy.replace(
-                  /(問題)[.·\-．。,，、]?(解決)[.·\-．。,，、]?(結果)(結構)/,
-                  '「$1、$2、$3」$4'
-                );
-            const hasBody = story.lessonIntro?.text && story.lessonIntro.source !== 'excel';
-            if (!strategyName && !hasBody) return null;
-            return (
-            <div className="bg-amber-100/60 border-2 border-amber-300 rounded-2xl p-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" aria-hidden="true">💡</span>
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
-              </div>
-
-              {strategyName && (
-                // #2082 A2: prominent highlight box for strategy name
-                <div className="bg-amber-200/70 border-2 border-amber-400 rounded-xl px-4 py-3">
-                  <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
-                    {processZhuyin(strategyName)}
-                  </p>
-                </div>
-              )}
-
-              {story.lessonIntro?.text && story.lessonIntro.source !== 'excel' && (
-                <p className={`text-amber-800 ${zhuyinActive ? 'text-base leading-[2.4rem] tracking-[0.2em]' : 'text-sm leading-[1.7]'}`}>
-                  {processZhuyin(story.lessonIntro.text)}
-                </p>
-              )}
-              {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
-                  they belong to the read-text phase (LiveTutor / annotations), not intro. */}
-            </div>
-            );
-          })()}
+          {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
           {/* 數位學習步驟 — #2082 A4: replaced the static non-clickable ol with a
               single-line step count. StepperNav dots already provide real navigation.
