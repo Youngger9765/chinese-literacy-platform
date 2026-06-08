@@ -21,15 +21,7 @@ import { useAuth } from '../../contexts/AuthContext';
 // ── Grade display helper ─────────────────────────────────────────────────────
 
 function gradeLabel(grade: number): string {
-  const labels: Record<number, string> = {
-    4: '四年級',
-    5: '五年級',
-    6: '六年級',
-    7: '七年級',
-    8: '八年級',
-    9: '九年級',
-  };
-  return labels[grade] ?? `${grade} 年級`;
+  return `第 ${grade} 級`;
 }
 
 // ── Tooltip component ────────────────────────────────────────────────────────
