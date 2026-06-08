@@ -93,6 +93,10 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const [currentIdx, setCurrentIdx] = useState(savedProgress?.currentIdx ?? 0);
   const [usedCodes, setUsedCodes] = useState<Set<string>>(() => new Set(savedProgress?.usedCodes ?? []));
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  // The word the student just picked — rendered INSIDE the sentence bracket
+  // (correct → green, wrong → amber) so they always see the full sentence and
+  // understand why an answer fits or doesn't, then continue / advance.
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [firstTryUsed, setFirstTryUsed] = useState(false);
   const [score, setScore] = useState(savedProgress?.score ?? 0);
   const [firstTryResults, setFirstTryResults] = useState<QuestionResult[]>(savedProgress?.firstTryResults ?? []);
@@ -128,6 +132,10 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     if (feedback === 'correct') return; // already correct, guard early return (preserve A10 note)
     if (!currentSentence) return;
 
+    // Drop the chosen word into the bracket — both correct AND wrong — so the
+    // student reads the whole sentence with their pick in place.
+    setSelectedCode(code);
+
     if (code === currentSentence.answer) {
       const newUsed = new Set(usedCodes);
       newUsed.add(code);
@@ -149,13 +157,15 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
       setCurrentPraise(nextPraise());
       setFeedback('correct');
 
-      // A10: auto-advance ~800ms after correct
+      // A10: auto-advance after correct — hold ~1.2s so the student sees their
+      // correct word sitting in the sentence bracket before moving on.
       setTimeout(() => {
         setCurrentIdx((i) => i + 1);
         setFeedback('idle');
+        setSelectedCode(null);
         setFirstTryUsed(false);
         setHintText('');
-      }, 800);
+      }, 1200);
     } else {
       // A12: wrong → do NOT reveal correct answer; keep retryable
       if (!firstTryUsed) {
@@ -184,6 +194,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setCurrentIdx(0);
     setUsedCodes(new Set());
     setFeedback('idle');
+    setSelectedCode(null);
     setFirstTryUsed(false);
     setHintText('');
     setPhase('exercise');
@@ -197,6 +208,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setScore(0);
     setFirstTryResults([]);
     setFeedback('idle');
+    setSelectedCode(null);
     setFirstTryUsed(false);
     setHintText('');
     setPhase('exercise');
@@ -210,7 +222,11 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   // ── Render sentence with inline blank ─────────────────────────────
   // A11: blank box shrunk to ~3.5em with dashed underline style
   function renderSentence(sentence: string, selectedCode: string | null) {
-    const parts = sentence.split(/[（(]　　[）)]/);
+    // Bug fix: blank placeholder may contain a VARIABLE number of full-width
+    // spaces (e.g. G6-L22 uses 「（　　　）」= 3, L10 uses 「（　　）」= 2).
+    // Match one-or-more spaces so the answer fills the in-sentence bracket
+    // instead of falling through to the end when the count differs.
+    const parts = sentence.split(/[（(][　\s]+[）)]/);
     const blankContent = selectedCode
       ? (
         <span className={`inline-flex items-center rounded-lg px-2 py-0.5 mx-1 font-bold text-lg border-2 transition-all ${
@@ -360,7 +376,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           }`}>
             {/* A11: text-left (not text-center) */}
             <p className="text-xl md:text-2xl text-on-surface leading-[2.6rem] md:leading-[3.2rem] text-left">
-              {renderSentence(currentSentence.sentence, null)}
+              {renderSentence(currentSentence.sentence, selectedCode)}
             </p>
           </div>
         )}
