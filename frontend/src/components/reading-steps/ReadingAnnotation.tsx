@@ -154,9 +154,11 @@ function OnboardingCoach({ onDismiss }: OnboardingCoachProps) {
   const [showDemo, setShowDemo] = useState(false);
   const gestureWord = IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取';
 
+  // Bug fix (#2154): closing the demo overlay must NOT dismiss the coach box.
+  // onDismiss() writes to localStorage and hides the coach permanently — that
+  // should only happen when the user explicitly clicks "我知道了" in the coach.
   const handleDemoClose = () => {
     setShowDemo(false);
-    onDismiss();
   };
 
   return (
