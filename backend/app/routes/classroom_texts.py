@@ -14,6 +14,7 @@ from ..models.assignment import Assignment
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
+from ..utils.slug import normalize_story_slug
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["classroom-texts"])
@@ -63,9 +64,12 @@ def assign_text_to_classroom(
     if not payload.copyright_confirmed:
         raise HTTPException(status_code=422, detail="copyright_confirmed must be true")
 
-    # Validate that the story exists
+    # Validate that the story exists.
+    # normalize_story_slug converts lesson-code formats (e.g. "L06", "G4-L21")
+    # to a plain numeric string before int() — same pattern used in
+    # assignment_queries.py and assignment_lifecycle_service.py.
     try:
-        story = get_lesson_by_id(int(payload.text_id))
+        story = get_lesson_by_id(int(normalize_story_slug(payload.text_id)))
     except (ValueError, TypeError):
         raise HTTPException(status_code=422, detail="Invalid text_id format")
     if not story:
@@ -146,12 +150,21 @@ def list_classroom_texts(
         .all()
     )
 
-    # Collect text_ids already present from classroom_texts
+    # Collect text_ids already present from classroom_texts.
+    # Guard each row individually: a single unparseable text_id must not
+    # 500 the entire list response (issue #2097).
     seen_text_ids: set[str] = set()
     results = []
     for ct in text_rows:
         seen_text_ids.add(ct.text_id)
-        story = get_lesson_by_id(int(ct.text_id))
+        try:
+            story = get_lesson_by_id(int(normalize_story_slug(ct.text_id)))
+        except (ValueError, TypeError):
+            logger.warning(
+                "classroom_texts row id=%d has unparseable text_id=%r — skipping",
+                ct.id, ct.text_id,
+            )
+            story = None
         title = story["title"] if story else f"Unknown ({ct.text_id})"
         results.append(
             ClassroomTextResponse(
@@ -179,7 +192,14 @@ def list_classroom_texts(
         if asn.story_id in seen_text_ids:
             continue
         seen_text_ids.add(asn.story_id)
-        story = get_lesson_by_id(int(asn.story_id))
+        try:
+            story = get_lesson_by_id(int(normalize_story_slug(asn.story_id)))
+        except (ValueError, TypeError):
+            logger.warning(
+                "assignment id=%d has unparseable story_id=%r — skipping",
+                asn.id, asn.story_id,
+            )
+            story = None
         title = story["title"] if story else f"Unknown ({asn.story_id})"
         results.append(
             ClassroomTextResponse(

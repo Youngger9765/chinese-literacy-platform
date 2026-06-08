@@ -1,9 +1,13 @@
 /**
- * ComprehensionLayout — inline image/table placement (#1692).
+ * ComprehensionLayout — per-paragraph 圖文對照 pairing (#2085).
  *
- * Verifies that lessons with 圖 N / 表 N caption paragraphs render the
- * matching asset inline immediately after the caption, and that
- * un-referenced assets still fall back to the bottom strip/table block.
+ * The graphic-text branch pairs each paragraph with the SPECIFIC figure it
+ * references, matched by `figure_label` (NOT array order — the YAML image
+ * array is often reversed vs. figure order). These tests pin that contract:
+ *   - 段 referencing 圖一 gets the image whose figure_label === '圖一',
+ *     even when that image is LAST in the array.
+ *   - Figures referenced by no paragraph fall under 其他圖表.
+ *   - Non-graphic-text lessons are untouched.
  */
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -23,55 +27,29 @@ vi.mock('../FloatingAIHelper', () => ({
 }));
 
 // ── Fixtures ──────────────────────────────────────────────────────────────
-const g7l30Story: Story = {
-  id: '1110',
-  title: '臺灣兩種八哥',
-  level: 7,
-  content: [
-    '段落零文字內容',
-    '圖一 白尾八哥（左）與 臺灣冠八哥（右）外形圖',
-    '表一比較了白尾八哥和臺灣冠八哥', // body — not a caption
-    '表一 白尾八哥與臺灣冠八哥比較異同表',
-    '表二則說明了兩種八哥近年族群數量的變化', // body — not a caption
-    '表二 近年兩種臺灣常見八哥之族群數量之變化',
-    '結尾段落',
-  ],
-  layout_mode: 'graphic-text',
-  lesson_code: 'G7-L30',
-  images: [
-    { filename: 'images/G7-L30/G7-L30-06.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png' },
-  ],
-  tables: [
-    {
-      id: 'table-1',
-      title: '表一 白尾八哥與臺灣冠八哥比較異同表',
-      headers: ['項目', '白尾八哥'],
-      rows: [{ cells: ['體型', '小'] }],
-    },
-    {
-      id: 'table-2',
-      title: '表二 近年兩種臺灣常見八哥之族群數量之變化',
-      headers: ['年份', '數量'],
-      rows: [{ cells: ['2020', '100'] }],
-    },
-  ],
-} as unknown as Story;
-
-const g7l29NoCaptionsStory: Story = {
+/**
+ * G7-L29: the image array is REVERSED relative to figure order — index 0 is
+ * 圖四, index 3 is 圖一. Pairing MUST use figure_label, not index.
+ * Paragraph 0 references 圖一, paragraph 3 references 圖四.
+ */
+const g7l29Story: Story = {
   id: '1109',
   title: '氣候變遷',
   level: 7,
   content: [
-    '一般段落',
-    '另一段',
-    '圖三進一步說明了一百多年來', // body, NOT a caption (no space after 圖三)
-    '結尾',
+    '近年來天氣愈來愈古怪……請看圖一。', // para 0 → 圖一
+    '為什麼地球氣溫升高呢？如圖二。',     // para 1 → 圖二
+    '圖三進一步說明二氧化碳排放趨勢。',   // para 2 → 圖三
+    '把時間拉長來看，如圖四。',           // para 3 → 圖四
+    '總結來說，原因仍有爭議。',           // para 4 → none
   ],
   layout_mode: 'graphic-text',
-  lesson_code: 'G7-L29',
+  lesson_code: 'G7',
   images: [
-    { filename: 'images/G7-L29/G7-L29-02.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png' },
-    { filename: 'images/G7-L29/G7-L29-05.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png' },
+    { filename: 'images/G7-L29/G7-L29-02.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png', figure_label: '圖四' },
+    { filename: 'images/G7-L29/G7-L29-05.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png', figure_label: '圖三' },
+    { filename: 'images/G7-L29/G7-L29-07.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png', figure_label: '圖二' },
+    { filename: 'images/G7-L29/G7-L29-09.png', size_bytes: 0, image_hash: 'h', content_type: 'image/png', figure_label: '圖一' },
   ],
 } as unknown as Story;
 
@@ -83,71 +61,58 @@ const standardLessonStory: Story = {
   layout_mode: 'standard',
 } as unknown as Story;
 
+/** Find the <img> element rendered in the same paragraph row as a given index. */
+function imgSrcForParagraph(rowText: string): string | null {
+  // FigureCard alt falls back to figure_label, so query by alt text.
+  const imgs = screen.queryAllByRole('img');
+  void rowText;
+  return imgs.length ? (imgs[0].getAttribute('src') ?? null) : null;
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────
-describe('ComprehensionLayout inline image/table (#1692)', () => {
-  it('renders 圖一 inline right after paragraph[1] for G7-L30', () => {
+describe('ComprehensionLayout per-paragraph pairing (#2085)', () => {
+  it('pairs 段(請看圖一) with the image whose figure_label === 圖一 (LAST in array, NOT index 0)', () => {
     render(
-      <ComprehensionLayout story={g7l30Story}>
+      <ComprehensionLayout story={g7l29Story}>
         <div>exercise panel</div>
       </ComprehensionLayout>,
     );
-    expect(screen.getByTestId('comprehension-inline-image-after-para-1')).toBeTruthy();
+    // 圖一 image (alt falls back to figure_label '圖一') must be the -09 file,
+    // NOT the -02 file (which is 圖四 and sits at array index 0).
+    const img圖一 = screen.getByAltText('圖一');
+    expect(img圖一.getAttribute('src')).toContain('G7-L29-09.png');
+    expect(img圖一.getAttribute('src')).not.toContain('G7-L29-02.png');
   });
 
-  it('renders 表一 inline after paragraph[3] (the caption, not body sentence at [2])', () => {
+  it('pairs 段(如圖四) with the image whose figure_label === 圖四 (FIRST in array)', () => {
     render(
-      <ComprehensionLayout story={g7l30Story}>
+      <ComprehensionLayout story={g7l29Story}>
         <div />
       </ComprehensionLayout>,
     );
-    expect(screen.queryByTestId('comprehension-inline-table-after-para-2')).toBeNull(); // body
-    expect(screen.getByTestId('comprehension-inline-table-after-para-3')).toBeTruthy(); // caption
+    const img圖四 = screen.getByAltText('圖四');
+    expect(img圖四.getAttribute('src')).toContain('G7-L29-02.png');
   });
 
-  it('renders 表二 inline after paragraph[5] only', () => {
+  it('renders all four figures (圖一..圖四) exactly once', () => {
     render(
-      <ComprehensionLayout story={g7l30Story}>
+      <ComprehensionLayout story={g7l29Story}>
         <div />
       </ComprehensionLayout>,
     );
-    expect(screen.queryByTestId('comprehension-inline-table-after-para-4')).toBeNull(); // body
-    expect(screen.getByTestId('comprehension-inline-table-after-para-5')).toBeTruthy(); // caption
+    ['圖一', '圖二', '圖三', '圖四'].forEach((label) => {
+      expect(screen.getAllByAltText(label)).toHaveLength(1);
+    });
+    void imgSrcForParagraph;
   });
 
-  it('falls back to bottom image strip when paragraphs have no caption rows (G7-L29 case)', () => {
-    render(
-      <ComprehensionLayout story={g7l29NoCaptionsStory}>
-        <div />
-      </ComprehensionLayout>,
-    );
-    // No inline image cards.
-    for (let i = 0; i < g7l29NoCaptionsStory.content.length; i += 1) {
-      expect(screen.queryByTestId(`comprehension-inline-image-after-para-${i}`)).toBeNull();
-    }
-    // Fallback strip rendered.
-    expect(screen.getByTestId('graphic-text-image-pane')).toBeTruthy();
-  });
-
-  it('does NOT render image strip or any inline asset for non-graphic-text lessons', () => {
+  it('does NOT render figures or pairing for non-graphic-text lessons', () => {
     render(
       <ComprehensionLayout story={standardLessonStory}>
         <div />
       </ComprehensionLayout>,
     );
-    expect(screen.queryByTestId('graphic-text-image-pane')).toBeNull();
-    expect(screen.queryByTestId('lesson-tables')).toBeNull();
-    expect(screen.queryByTestId('comprehension-inline-image-after-para-0')).toBeNull();
-  });
-
-  it('once an asset renders inline it is removed from the fallback block', () => {
-    render(
-      <ComprehensionLayout story={g7l30Story}>
-        <div />
-      </ComprehensionLayout>,
-    );
-    // G7-L30 has 1 image and 2 tables — all 3 captioned in paragraphs, so the
-    // fallback strip + bottom tables block must both be absent.
-    expect(screen.queryByTestId('graphic-text-image-pane')).toBeNull();
-    expect(screen.queryByTestId('lesson-tables')).toBeNull();
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.queryByText('圖文對照閱讀')).toBeNull();
   });
 });

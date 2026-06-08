@@ -206,11 +206,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       <div className="text-center">
         <h2 className="text-lg font-bold text-on-surface">語詞複習</h2>
         <p className="text-sm text-on-surface-variant mt-0.5">
-          拖曳選取字元，水平或垂直圈出語詞 · 找出
-          <span className="font-black text-accent mx-1">{foundWords.size}</span>
-          /
-          <span className="mx-1">{placedWords.length}</span>
-          個語詞
+          水平或垂直拖曳圈出語詞
         </p>
       </div>
 

@@ -42,6 +42,9 @@ export type { AnnotationSummary } from './annotationReducer';
 
 const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
 
+// A5: localStorage key for first-use onboarding gate
+const ANNOTATION_ONBOARDED_KEY = 'annotation_onboarded';
+
 // ── ID generator ───────────────────────────────────────────────────────────
 
 let _idCounter = 0;
@@ -55,6 +58,57 @@ interface ReadingAnnotationProps {
   story: Story;
   onFinish: (summary: ReturnType<typeof computeSummary>) => void;
   fontSizePx?: number;
+}
+
+// ── A5: First-use onboarding coach component ───────────────────────────────
+
+// A5: Detect touch vs mouse for device-appropriate wording
+const IS_TOUCH = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+}
+
+function OnboardingCoach({ onDismiss }: OnboardingCoachProps) {
+  const gestureWord = IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取';
+  return (
+    <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
+      <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-5 py-4 flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <span className="material-symbols-outlined text-accent text-2xl flex-shrink-0 mt-0.5">
+            {IS_TOUCH ? 'swipe' : 'select_all'}
+          </span>
+          <div className="flex-1">
+            <p className="font-bold text-on-surface text-base mb-1">如何標記詞語？</p>
+            <p className="text-sm text-on-surface-variant leading-relaxed">
+              {gestureWord}，就能標記不懂的詞語。
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="self-end px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── A5: Persistent mini hint bar (shown after onboarding is dismissed) ──────
+
+function HintBar() {
+  const hint = IS_TOUCH ? '滑過文字即可標記' : '選取文字即可標記';
+  return (
+    <div className="flex items-center justify-center gap-1.5 py-1 px-3 text-xs text-on-surface-variant/60">
+      <span className="material-symbols-outlined text-xs align-middle">
+        {IS_TOUCH ? 'touch_app' : 'select_all'}
+      </span>
+      <span>{hint}</span>
+    </div>
+  );
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────
@@ -98,6 +152,24 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const toolbarRef = useRef<HTMLDivElement>(null);
   const annotationElementRefs = useRef(new Map<string, HTMLSpanElement>());
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<string | null>(null);
+
+  // A5: First-use onboarding — gated by localStorage flag
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(ANNOTATION_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  const handleDismissCoach = useCallback(() => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(ANNOTATION_ONBOARDED_KEY, '1');
+    } catch {
+      // Storage unavailable — silently ignore
+    }
+  }, []);
 
   // ── Zhuyin ─────────────────────────────────────────────────────────────
 
@@ -324,8 +396,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           onTouchEnd={handleTouchEnd}
           style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
         >
+          {/* A5: First-use onboarding coach (dismissable, gated by localStorage) */}
+          {showCoach ? (
+            <OnboardingCoach onDismiss={handleDismissCoach} />
+          ) : (
+            /* A5: Persistent mini hint bar shown after onboarding is dismissed */
+            <HintBar />
+          )}
+
           {/* Instruction banner */}
-          <div className="mx-auto max-w-4xl px-6 md:px-16 pt-6 pb-4">
+          <div className="mx-auto max-w-4xl px-6 md:px-16 pt-2 pb-4">
             <div className="rounded-2xl bg-surface-container-low px-5 py-4 text-sm text-on-surface-variant space-y-1">
               <p><span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記</p>
               <p><span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記</p>

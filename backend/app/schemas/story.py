@@ -63,7 +63,10 @@ class StoryDetail(StoryListItem):
     # frontend ComprehensionChat layout variant: 'standard' | 'graphic-text' | 'graphic-chart'
     layout_mode: str = "standard"
     # Image gallery for graphic-text layout (#1341)
-    # Each image: {filename, size_bytes, image_hash, content_type, caption?}
+    # Each image: {filename, size_bytes, image_hash, content_type, caption?, figure_label?}
+    # figure_label (#2085): the REAL 圖N title baked into the image pixels
+    # (e.g. '圖一'). Array order is NOT figure order — pairing must use this label.
+    # Untyped dict passes the field straight through from YAML.
     images: list[dict] = []
     # 學習單 section ordering + intro metadata (#1434)
     # worksheet_section_order: [{number: '二', name: '念順順', type: 'reading_timer'}, ...]

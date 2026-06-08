@@ -147,6 +147,12 @@ export interface Story {
     image_hash: string;
     content_type: string;
     caption?: string;
+    /**
+     * The REAL 圖N title baked into the image pixels (e.g. '圖一'), #2085.
+     * Array order is NOT figure order — per-paragraph pairing matches on this
+     * label, NOT on array index.
+     */
+    figure_label?: string;
   }[];
   /** Paragraphs array (Layer-2 lessons use this instead of content). */
   paragraphs?: string[];

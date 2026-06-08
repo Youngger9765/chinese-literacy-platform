@@ -3,12 +3,12 @@
  *
  * Issue #698: one-at-a-time + disappearing word bank
  * Issue #732: first-try correctness tracking + summary screen with retry
- *
- * Redesigned to match Stitch immersive design:
- *   - Centered sentence card with inline blank
- *   - 2-column answer grid with letter badges
- *   - Hint card on wrong answer
- *   - Fixed bottom CTA
+ * Issue #2082 (A6/A10/A11/A12):
+ *   A10 — selecting an option immediately evaluates; confirm button removed
+ *   A6  — correct → rotating praise; wrong → amber "再試試看！" (not red)
+ *   A12 — wrong answer never reveals the correct answer; retryable
+ *   A11 — text-left, smaller dashed blank, "第 N 題 / 共 M 題" heading,
+ *          ABCD badges behind FILLBLANK_SHOW_ABCD feature flag (default false)
  */
 import React, { useEffect, useState } from 'react';
 import { FillInBlankItem } from '../../types';
@@ -16,6 +16,7 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
+import { FILLBLANK_SHOW_ABCD } from '../../config/featureFlags';
 
 interface Props {
   sentences: FillInBlankItem[];
@@ -72,6 +73,15 @@ function clearAnswers(storyId: string | number | undefined): void {
 
 type Phase = 'exercise' | 'summary';
 
+// A6: rotating correct praise messages
+const CORRECT_PRAISES = ['答對了！', '太棒了！', '很厲害！', '完全正確！', '你答對了！'];
+let praiseIdx = 0;
+function nextPraise(): string {
+  const msg = CORRECT_PRAISES[praiseIdx % CORRECT_PRAISES.length];
+  praiseIdx++;
+  return msg;
+}
+
 const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete, storyId }) => {
   const bankEntries = Object.entries(vocabBank).sort(([a], [b]) => a.localeCompare(b));
   const { zhuyinActive, processZhuyin } = useZhuyin();
@@ -82,12 +92,13 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const [retryIndices, setRetryIndices] = useState<number[]>(savedProgress?.pendingRetryIndices ?? []);
   const [currentIdx, setCurrentIdx] = useState(savedProgress?.currentIdx ?? 0);
   const [usedCodes, setUsedCodes] = useState<Set<string>>(() => new Set(savedProgress?.usedCodes ?? []));
-  const [selected, setSelected] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [firstTryUsed, setFirstTryUsed] = useState(false);
   const [score, setScore] = useState(savedProgress?.score ?? 0);
   const [firstTryResults, setFirstTryResults] = useState<QuestionResult[]>(savedProgress?.firstTryResults ?? []);
   const [hintText, setHintText] = useState('');
+  // A6: hold current praise so it doesn't re-roll mid-display
+  const [currentPraise, setCurrentPraise] = useState('答對了！');
 
   const activeSentences: FillInBlankItem[] = retryMode
     ? retryIndices.map((i) => sentences[i])
@@ -108,24 +119,18 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   }, [done, phase]);
 
   // Show all bank entries; used ones stay visible as decoys (greyed-out, non-selectable).
-  // This gives subsequent questions strategic distractor options (issue #1102 fix 3).
   const availableEntries = bankEntries;
   const currentSentence = !done ? activeSentences[currentIdx] : null;
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
 
+  // A10: selecting immediately evaluates — no separate confirm button
   function handleSelect(code: string) {
-    if (feedback === 'correct') return;
-    setSelected(code);
-    setFeedback('idle');
-    setHintText('');
-  }
+    if (feedback === 'correct') return; // already correct, guard early return (preserve A10 note)
+    if (!currentSentence) return;
 
-  function handleConfirm() {
-    if (!selected || !currentSentence) return;
-
-    if (selected === currentSentence.answer) {
+    if (code === currentSentence.answer) {
       const newUsed = new Set(usedCodes);
-      newUsed.add(selected);
+      newUsed.add(code);
       setUsedCodes(newUsed);
 
       const alreadyRecorded = firstTryResults.some((r) => r.sentenceIdx === currentOriginalIdx);
@@ -133,33 +138,42 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
         const isFirstTryCorrect = !firstTryUsed;
         if (isFirstTryCorrect) setScore((s) => s + 1);
         setFirstTryResults((prev) => [...prev, {
-          sentenceIdx: currentOriginalIdx, firstTryCorrect: isFirstTryCorrect,
-          studentFirstAnswer: null, correctAnswer: currentSentence.answer,
+          sentenceIdx: currentOriginalIdx,
+          firstTryCorrect: isFirstTryCorrect,
+          studentFirstAnswer: null,
+          correctAnswer: currentSentence.answer,
         }]);
       }
 
+      // A6: pick praise before setting feedback
+      setCurrentPraise(nextPraise());
       setFeedback('correct');
+
+      // A10: auto-advance ~800ms after correct
       setTimeout(() => {
         setCurrentIdx((i) => i + 1);
-        setSelected(null);
         setFeedback('idle');
         setFirstTryUsed(false);
         setHintText('');
-      }, 900);
+      }, 800);
     } else {
+      // A12: wrong → do NOT reveal correct answer; keep retryable
       if (!firstTryUsed) {
         setFirstTryResults((prev) => {
           const alreadyRecorded = prev.some((r) => r.sentenceIdx === currentOriginalIdx);
           if (alreadyRecorded) return prev;
           return [...prev, {
-            sentenceIdx: currentOriginalIdx, firstTryCorrect: false,
-            studentFirstAnswer: selected, correctAnswer: currentSentence!.answer,
+            sentenceIdx: currentOriginalIdx,
+            firstTryCorrect: false,
+            studentFirstAnswer: code,
+            correctAnswer: currentSentence!.answer,
           }];
         });
         setFirstTryUsed(true);
       }
+      // A6: amber wrong feedback (not red)
       setFeedback('wrong');
-      setHintText(currentSentence.hint || '再想想看，正確答案是哪個詞語？');
+      setHintText('再試試看！');
     }
   }
 
@@ -169,7 +183,6 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setRetryMode(true);
     setCurrentIdx(0);
     setUsedCodes(new Set());
-    setSelected(null);
     setFeedback('idle');
     setFirstTryUsed(false);
     setHintText('');
@@ -183,7 +196,6 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setUsedCodes(new Set());
     setScore(0);
     setFirstTryResults([]);
-    setSelected(null);
     setFeedback('idle');
     setFirstTryUsed(false);
     setHintText('');
@@ -196,23 +208,25 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
   // ── Render sentence with inline blank ─────────────────────────────
-  function renderSentence(sentence: string) {
+  // A11: blank box shrunk to ~3.5em with dashed underline style
+  function renderSentence(sentence: string, selectedCode: string | null) {
     const parts = sentence.split(/[（(]　　[）)]/);
-    const blankContent = selected
+    const blankContent = selectedCode
       ? (
-        <span className={`inline-flex items-center rounded-xl px-3 py-1 mx-1 font-bold text-lg border-2 transition-all ${
+        <span className={`inline-flex items-center rounded-lg px-2 py-0.5 mx-1 font-bold text-lg border-2 transition-all ${
           feedback === 'correct'
             ? 'bg-emerald-100 border-emerald-400 text-emerald-800'
             : feedback === 'wrong'
-            ? 'bg-tertiary-container/20 border-tertiary text-tertiary'
+            ? 'bg-amber-50 border-amber-400 text-amber-800'
             : 'bg-accent/10 border-accent/40 text-accent'
         }`}>
-          {zh(vocabBank[selected])}
+          {zh(vocabBank[selectedCode])}
         </span>
       )
       : (
-        <span className="inline-block border-2 border-dashed border-on-surface-variant/30 rounded-xl px-5 py-1 mx-1 text-on-surface-variant/40 text-center min-w-[5em]">
-          ＿＿＿
+        // A11: smaller dashed underline blank, not big pill
+        <span className="inline-block border-b-2 border-dashed border-on-surface-variant/40 mx-1 text-on-surface-variant/40 text-center min-w-[3.5em] pb-0.5">
+          ＿＿
         </span>
       );
 
@@ -244,7 +258,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
             </p>
           </div>
 
-          {/* Per-question breakdown */}
+          {/* Per-question breakdown — summary is the ONLY place correct answers are shown (A12) */}
           <div className="space-y-3">
             {sentences.map((s, idx) => {
               const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
@@ -253,9 +267,9 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
               const wrongCode = qResult?.studentFirstAnswer ?? null;
 
               return (
-                <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-tertiary-container/10'}`}>
+                <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
                   <div className="flex items-start gap-3">
-                    <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-tertiary'}`}>
+                    <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {correct ? 'check_circle' : 'cancel'}
                     </span>
                     <div className="flex-1 min-w-0">
@@ -263,7 +277,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
                         {zh(s.sentence.replace(/[（(]　　[）)]/, `【${vocabBank[correctCode] ?? correctCode}】`))}
                       </p>
                       {!correct && wrongCode && (
-                        <p className="text-sm text-tertiary">
+                        <p className="text-sm text-amber-700">
                           你選了 <span className="font-bold">{zh(vocabBank[wrongCode] ?? wrongCode)}</span>
                           <span className="text-on-surface-variant mx-1">→</span>
                           正確：<span className="font-bold text-emerald-700">{zh(vocabBank[correctCode] ?? correctCode)}</span>
@@ -311,10 +325,12 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
 
   // ── Exercise screen ───────────────────────────────────────────────
   const progressPercent = total > 0 ? ((currentIdx) / total) * 100 : 0;
+  // A11: "第 N 題 / 共 M 題" display numbers (1-indexed)
+  const questionNumber = currentIdx + 1;
 
   return (
-    <div className="flex-1 flex flex-col bg-surface overflow-y-auto pb-48" style={{ fontFamily: zhuyinFont }}>
-      <div className="max-w-2xl mx-auto px-6 pt-6 w-full space-y-6">
+    <div className="flex-1 flex flex-col bg-surface overflow-y-auto pb-32" style={{ fontFamily: zhuyinFont }}>
+      <div className="max-w-2xl mx-auto px-6 pt-6 w-full space-y-5">
 
         {/* Progress bar */}
         <div className="flex items-center gap-3">
@@ -326,52 +342,68 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           </span>
         </div>
 
-        {/* Sentence card */}
+        {/* A11: per-question heading "第 N 題 / 共 M 題" */}
         {currentSentence && (
-          <div className={`rounded-3xl p-8 md:p-10 text-center transition-all duration-300 ${
+          <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wide">
+            第 {questionNumber} 題 / 共 {total} 題
+          </p>
+        )}
+
+        {/* Sentence card — A11: text-left + comfortable leading */}
+        {currentSentence && (
+          <div className={`rounded-3xl p-6 md:p-8 transition-all duration-300 ${
             feedback === 'correct'
               ? 'bg-emerald-50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
               : feedback === 'wrong'
-              ? 'bg-surface-container-lowest shadow-editorial'
+              ? 'bg-amber-50 shadow-[0_4px_16px_rgba(217,119,6,0.1)]'
               : 'bg-surface-container-lowest shadow-editorial'
           }`}>
-            <p className="text-xl md:text-2xl text-on-surface leading-[2.5rem] md:leading-[3rem]">
-              {renderSentence(currentSentence.sentence)}
+            {/* A11: text-left (not text-center) */}
+            <p className="text-xl md:text-2xl text-on-surface leading-[2.6rem] md:leading-[3.2rem] text-left">
+              {renderSentence(currentSentence.sentence, null)}
             </p>
           </div>
         )}
 
-        {/* Hint card (on wrong answer) */}
-        {feedback === 'wrong' && hintText && (
-          <div className="rounded-2xl bg-tertiary-container/15 border border-tertiary/20 px-6 py-4 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-tertiary text-xl mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
+        {/* A6: wrong feedback — amber, "再試試看！", no correct answer shown (A12) */}
+        {feedback === 'wrong' && (
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 px-5 py-3 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-amber-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                refresh
+              </span>
               <div>
-                <p className="text-sm font-headline font-bold text-tertiary mb-1">再試一次！</p>
-                <p className="text-sm text-on-surface leading-relaxed">{hintText}</p>
+                <p className="text-sm font-headline font-bold text-amber-700">再試試看！</p>
+                {hintText && hintText !== '再試試看！' && (
+                  <p className="text-sm text-on-surface leading-relaxed mt-0.5">{hintText}</p>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Correct feedback */}
+        {/* A6: correct feedback — praise */}
         {feedback === 'correct' && (
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-6 py-4 text-center animate-fade-in">
+          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-3 text-center animate-fade-in">
             <span className="material-symbols-outlined text-emerald-600 text-2xl">check_circle</span>
             <p className="text-sm font-headline font-bold text-emerald-700 mt-1">
-              {firstTryUsed ? '答對了！' : '一次答對！'}
+              {currentPraise}
             </p>
           </div>
         )}
 
-        {/* Answer options — 2-column grid */}
+        {/* Answer options — A11: ABCD badges behind feature flag; A10: click = immediate evaluate */}
         {currentSentence && feedback !== 'correct' && (
           <div className="grid grid-cols-2 gap-3">
             {availableEntries.map(([code, word]) => {
-              const isSelected = selected === code;
-              // Words already used for previous questions stay as decoys:
-              // greyed-out, non-interactive, but visible to add strategic difficulty.
               const isUsedDecoy = usedCodes.has(code);
+              // A6/A12: when wrong, show which was just selected as amber highlight (no reveal of correct)
+              const isWrongSelected =
+                feedback === 'wrong' &&
+                firstTryResults.length > 0 &&
+                firstTryResults[firstTryResults.length - 1]?.studentFirstAnswer === code &&
+                firstTryResults[firstTryResults.length - 1]?.sentenceIdx === currentOriginalIdx;
+
               return (
                 <button
                   key={code}
@@ -381,25 +413,28 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
                   className={`rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all min-h-[56px] ${
                     isUsedDecoy
                       ? 'border-surface-container-high bg-surface-container-high/40 opacity-40 cursor-not-allowed'
-                      : isSelected
-                      ? 'border-accent bg-accent/5 shadow-sm active:scale-[0.97]'
-                      : 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30 active:scale-[0.97]'
+                      : isWrongSelected
+                      ? 'border-amber-400 bg-amber-50 active:scale-[0.97]'
+                      : 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30 hover:bg-surface-container-low active:scale-[0.97]'
                   }`}
                 >
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
-                    isUsedDecoy
-                      ? 'bg-surface-container-high text-on-surface-variant/40'
-                      : isSelected
-                      ? 'bg-accent text-white'
-                      : 'bg-surface-container-high text-on-surface-variant'
-                  }`}>
-                    {code}
-                  </span>
+                  {/* A11: ABCD badge behind feature flag */}
+                  {FILLBLANK_SHOW_ABCD && (
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
+                      isUsedDecoy
+                        ? 'bg-surface-container-high text-on-surface-variant/40'
+                        : isWrongSelected
+                        ? 'bg-amber-400 text-white'
+                        : 'bg-surface-container-high text-on-surface-variant'
+                    }`}>
+                      {code}
+                    </span>
+                  )}
                   <span className={`font-bold text-base ${
                     isUsedDecoy
                       ? 'text-on-surface-variant/40 line-through'
-                      : isSelected
-                      ? 'text-accent'
+                      : isWrongSelected
+                      ? 'text-amber-700'
                       : 'text-on-surface'
                   }`}>
                     {zh(word)}
@@ -409,39 +444,16 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
             })}
           </div>
         )}
-      </div>
 
-      {/* Fixed bottom CTA */}
-      {feedback !== 'correct' && (
-        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto">
-            <button
-              onClick={feedback === 'wrong' ? () => { setSelected(null); setFeedback('idle'); setHintText(''); } : handleConfirm}
-              disabled={feedback === 'idle' && !selected}
-              className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
-                feedback === 'wrong'
-                  ? 'text-white shadow-[0_12px_48px_rgba(153,65,0,0.2)]'
-                  : !selected
-                  ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
-                  : 'text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)]'
-              }`}
-              style={
-                feedback === 'wrong'
-                  ? { background: 'linear-gradient(135deg, #994100, #e8945a)' }
-                  : selected && feedback === 'idle'
-                  ? { background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }
-                  : undefined
-              }
-            >
-              <span className="material-symbols-outlined text-xl">
-                {feedback === 'wrong' ? 'refresh' : 'check_circle'}
-              </span>
-              {feedback === 'wrong' ? '再試一次' : selected ? '確認答案' : '請先選擇詞語'}
-            </button>
-          </div>
-        </div>
-      )}
+        {/* A10: no confirm button — selecting triggers immediate evaluation.
+            Show a gentle "try again" nudge only when in wrong state so user knows to tap another option. */}
+        {feedback === 'wrong' && currentSentence && (
+          <p className="text-xs text-center text-on-surface-variant">
+            點選其他選項繼續作答
+          </p>
+        )}
+
+      </div>
     </div>
   );
 };

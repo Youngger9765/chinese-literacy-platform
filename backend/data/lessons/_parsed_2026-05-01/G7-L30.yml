@@ -162,6 +162,9 @@ images:
   image_hash: 615dc2a3b452
   content_type: image/png
   caption: ''
+  # No 圖N title baked into image pixels (it shows "嘴巴-黃色" bird comparison);
+  # assigned 圖一 by sequence since this lesson has a single image (#2085).
+  figure_label: 圖一
 image_count: 1
 spotlight_raw_text: "閱讀聚光燈\n圖文表整合閱讀策略\n這篇文章裡，文字、圖片和表格都提供了重要訊息。閱讀時，不能只看文字，也不能只看圖片或表格，而要先注意文字怎麼提醒你看圖表、怎麼告訴你圖表的功能，再把文字、圖片、表格連起來想。\n\
   這一課我們用下面4個步驟，練習圖文表整合閱讀：\n❶先讀文字——抓出這段的重點\n❷找出相關圖表——判斷各自提供什麼訊息\n❸文圖表對照——從圖表中找到和文字對應的資訊\n\
