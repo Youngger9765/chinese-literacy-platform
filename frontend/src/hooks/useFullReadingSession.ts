@@ -15,7 +15,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { cleanChineseText } from '../utils/textDiff';
 import { analyzeFluency } from '../utils/fluencyAnalyzer';
-import { reinsertPunctuation } from '../utils/punctuationReinsert';
 import { DiffToken } from '../types';
 import { useAudioRecorder } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
@@ -47,9 +46,18 @@ interface UseFullReadingSessionReturn {
   streamingTranscript: string;
   setStreamingTranscript: (v: string) => void;
   micError: string;
+  /**
+   * Fallback alert state (I4 — must alert, never silent).
+   * Set when Gemini transcription fails so FullReading can show a banner.
+   * Values: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | null
+   */
+  fallbackReason: string | null;
+  /** Clear fallback alert (e.g. on retry). */
+  clearFallbackReason: () => void;
   startSession: () => void;
   stopSession: () => void;
-  submitReading: () => void;
+  /** P1#1: async — awaits stopAndGetBlob() before Gemini transcription. */
+  submitReading: () => Promise<void>;
   audioRecorder: ReturnType<typeof useAudioRecorder>;
 }
 
@@ -65,6 +73,9 @@ export function useFullReadingSession({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState('');
   const [micError, setMicError] = useState('');
+  /** I4: fallback alert reason — non-null when Gemini failed and UI must warn user */
+  const [fallbackReason, setFallbackReason] = useState<string | null>(null);
+  const clearFallbackReason = useCallback(() => setFallbackReason(null), []);
 
   const isSessionActiveRef       = useRef(false);
   const recognitionRef           = useRef<any>(null);
@@ -156,28 +167,35 @@ export function useFullReadingSession({
     currentTranscriptRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingTranscript('');
-    audioRecorder.stopRecording();
-  }, [audioRecorder]);
+    // NOTE: audioRecorder.stopRecording() is intentionally NOT called here.
+    // submitReading() calls stopAndGetBlob() which triggers stop + awaits onstop,
+    // so it gets the final blob.  stopSession() is also called from handleRetry
+    // (no submit) — in that case clearRecording() handles cleanup.
+  }, []);
 
   /* ---- Submit & evaluate ---- */
-  const submitReading = useCallback(() => {
-    /* #1632 double-click guard: stopSession() flips this to false synchronously,
-     * so a second click during the same tick exits before re-saving. */
+  const submitReading = useCallback(async () => {
+    /* #1632 double-click guard: isSessionActiveRef is flipped synchronously. */
     if (!isSessionActiveRef.current) return;
     const webSpeechTranscript = currentTranscriptRef.current;
     const durationMs = Date.now() - startTimeRef.current;
     stopSession();
-    if (!webSpeechTranscript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
 
-    /* --- Gemini audio transcription (Issue #2131) ---
-     * 1. Try to get a higher-quality Gemini transcription from the audio blob.
-     * 2. If Gemini fails (no blob, no token, network error, fallback), use the
-     *    Web Speech transcript with punctuation re-inserted from the lesson text.
-     * 3. Scoring (analyzeFluency) runs on whichever transcript we end up with.
-     *
+    /* P1#2: stop recorder FIRST (before any early-return) so the mic is always
+     * released and the final audio chunk is captured.  Even if Web Speech is empty,
+     * Gemini may succeed (I1 — audio primary).
+     * stopAndGetBlob() awaits onstop asynchronously (P1#1 fix). */
+    const audioBlob = await audioRecorder.stopAndGetBlob();
+
+    /* Early return ONLY when both sources are silent — otherwise Gemini gets a chance. */
+    if (!webSpeechTranscript.trim() && !audioBlob) {
+      setMicError('未偵測到語音，請再試一次。');
+      return;
+    }
+
+    /* --- Gemini audio transcription (Issue #2131 / #2156) ---
      * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
      *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
-    const audioBlob = audioRecorder.audioBlob;
 
     const _evaluate = (finalTranscript: string) => {
       const fluency = analyzeFluency({
@@ -210,28 +228,42 @@ export function useFullReadingSession({
     };
 
     if (audioBlob && token) {
+      // I1: audio blob available → try Gemini regardless of Web Speech content.
       setIsTranscribing(true);
       transcribeReading(audioBlob, fullText, durationMs, token)
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {
-            // Gemini success: use high-quality transcript
+            // Gemini success (I1): Gemini transcript is the sole scoring source.
+            clearFallbackReason();
             _evaluate(result.transcript);
           } else {
-            // Gemini fallback: use Web Speech + punctuation re-insertion (Block 2)
-            const enhanced = reinsertPunctuation(webSpeechTranscript, fullText);
-            _evaluate(enhanced);
+            // I4: Gemini fallback — must alert, score with Web Speech (non-empty) or bail.
+            setFallbackReason(result.reason ?? 'error');
+            if (webSpeechTranscript.trim()) {
+              _evaluate(webSpeechTranscript);
+            } else {
+              // Both sources empty — show mic error instead of scoring 0%.
+              setMicError('未偵測到語音，請再試一次。');
+            }
           }
         })
         .catch(() => {
           setIsTranscribing(false);
-          _evaluate(webSpeechTranscript);
+          setFallbackReason('error');
+          if (webSpeechTranscript.trim()) {
+            _evaluate(webSpeechTranscript);
+          } else {
+            setMicError('未偵測到語音，請再試一次。');
+          }
         });
     } else {
-      // No audio blob or no token → direct Web Speech path (no Gemini call)
+      // I4: No audio blob or no token — cannot reach Gemini.  Alert + Web Speech fallback.
+      setFallbackReason('no_audio');
+      // webSpeechTranscript is non-empty here (ensured by early-return above).
       _evaluate(webSpeechTranscript);
     }
-  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.audioBlob]);
+  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.stopAndGetBlob, clearFallbackReason]);
 
   return {
     isSessionActive,
@@ -240,6 +272,8 @@ export function useFullReadingSession({
     streamingTranscript,
     setStreamingTranscript,
     micError,
+    fallbackReason,
+    clearFallbackReason,
     startSession,
     stopSession,
     submitReading,

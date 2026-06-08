@@ -13,6 +13,20 @@ export interface TranscribeReadingResult {
   method: 'gemini' | 'fallback';
   /** Gemini's internal audit notes (empty string when method=fallback). */
   reasoning?: string;
+  /**
+   * Fallback reason (Issue #2156 — I4 fallback alert).
+   *
+   * Backend reasons (method='fallback'):
+   *   'timeout' | 'safety' | 'decode' | 'empty' | 'error'
+   *
+   * Frontend reasons (set by caller before network call):
+   *   'no_audio'  — no recorded blob was available
+   *   'no_token'  — auth token missing; request not attempted
+   *
+   * Present only when method='fallback'. Used by both FullReading and LiveTutor
+   * to display the I4-compliant amber fallback alert banner.
+   */
+  reason?: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'no_audio' | 'no_token' | string;
 }
 
 /**
@@ -31,7 +45,7 @@ export async function transcribeReading(
   durationMs: number,
   token: string,
 ): Promise<TranscribeReadingResult> {
-  const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '' };
+  const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '', reason: 'error' };
 
   try {
     const form = new FormData();
@@ -58,6 +72,7 @@ export async function transcribeReading(
         transcript: data.transcript ?? null,
         method: data.method === 'gemini' ? 'gemini' : 'fallback',
         reasoning: data.reasoning ?? '',
+        reason: data.reason ?? undefined,
       };
     }
     return FALLBACK;

@@ -5,12 +5,19 @@ transcription with punctuation using Gemini audio understanding.
 
 Design principles:
 - Backend is transcription-only; scoring stays in frontend analyzeFluency().
-- Fail-closed: any exception → return {transcript: null, method: "fallback"}
-  so the caller can fall back to the Web Speech transcript.
+- Fail-closed: any exception → return {transcript: null, method: "fallback", reason: <str>}
+  so the caller can show a fallback alert and use the Web Speech transcript.
 - No new DB schema: result is returned synchronously, not persisted here.
   The caller (route) may log AI usage; this service is stateless.
 
-Supported audio MIME types (Web browser MediaRecorder output):
+Audio format handling (Issue #2156 — Phase 0 root cause fix):
+  Chrome MediaRecorder defaults to audio/webm;codecs=opus.
+  Vertex AI Gemini audio only supports: wav / mp3 / aiff / aac / ogg / flac.
+  webm is NOT supported → sends error → silent fallback.
+  Fix: transcode webm (and any other unsupported format) → ogg via ffmpeg
+  before calling Gemini. ffmpeg is already in backend/Dockerfile.
+
+Supported input MIME types (browser MediaRecorder output — route allowlist):
     audio/webm, audio/webm;codecs=opus, audio/ogg, audio/ogg;codecs=opus,
     audio/mp4, audio/mpeg, audio/wav
 
@@ -23,7 +30,11 @@ Limits enforced by route (not repeated here):
 from __future__ import annotations
 
 import asyncio
+import io
 import logging
+import subprocess
+import tempfile
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +49,7 @@ def _check_safety_filter(response):  # noqa: ANN001
 # Maximum audio duration we'll send to Gemini (cost + latency guard).
 MAX_AUDIO_DURATION_SEC = 120
 
-# Allowed audio MIME types (browser MediaRecorder output).
+# Allowed audio MIME types (browser MediaRecorder output — used by route for 415 gate).
 ALLOWED_AUDIO_MIMES: frozenset[str] = frozenset(
     {
         "audio/webm",
@@ -53,10 +64,112 @@ ALLOWED_AUDIO_MIMES: frozenset[str] = frozenset(
     }
 )
 
-# Normalise MIME type for Gemini (strip codec suffix — Gemini accepts base MIME).
+# MIME types that Vertex AI Gemini natively accepts (no transcoding needed).
+# Ref: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding
+_GEMINI_NATIVE_AUDIO_MIMES: frozenset[str] = frozenset(
+    {
+        "audio/wav",
+        "audio/mp3",
+        "audio/mpeg",
+        "audio/aiff",
+        "audio/aac",
+        "audio/ogg",
+        "audio/flac",
+    }
+)
+
+# Fallback reason literals (used for WARN log + frontend alert).
+_REASON_TRANSCODE = "decode"   # ffmpeg transcode failed
+_REASON_TIMEOUT   = "timeout"
+_REASON_SAFETY    = "safety"
+_REASON_EMPTY     = "empty"
+_REASON_ERROR     = "error"
+
+
 def _normalise_mime(raw: str) -> str:
     """Strip codec parameter: 'audio/webm;codecs=opus' → 'audio/webm'."""
     return raw.split(";")[0].strip()
+
+
+def _needs_transcode(mime_type: str) -> bool:
+    """Return True if the MIME type is NOT natively accepted by Gemini."""
+    base = _normalise_mime(mime_type)
+    return base not in _GEMINI_NATIVE_AUDIO_MIMES
+
+
+def _transcode_to_ogg(audio_bytes: bytes, source_mime: str) -> bytes | None:
+    """Transcode audio_bytes to ogg/opus using ffmpeg.
+
+    Returns the transcoded bytes on success, or None on ffmpeg failure.
+    Uses a temp file to avoid piping large blobs (ffmpeg stdin/stdout can be
+    unreliable for webm demuxers that need seekable input).
+    """
+    # Determine input file extension from mime
+    base = _normalise_mime(source_mime)
+    ext_map = {
+        "audio/webm": ".webm",
+        "audio/mp4":  ".mp4",
+        "audio/mpeg": ".mp3",
+    }
+    in_ext = ext_map.get(base, ".audio")
+
+    # Pre-initialise to None so `finally` can safely reference them even if
+    # temp-file creation fails before in_path / out_path are assigned (P1#4).
+    in_path: str | None = None
+    out_path: str | None = None
+
+    try:
+        with tempfile.NamedTemporaryFile(suffix=in_ext, delete=False) as in_f:
+            in_f.write(audio_bytes)
+            in_path = in_f.name
+
+        out_path = in_path + ".ogg"
+
+        cmd = [
+            "ffmpeg",
+            "-y",                  # overwrite output
+            "-i", in_path,         # input
+            "-vn",                 # no video
+            "-acodec", "libopus",  # opus codec inside ogg
+            "-b:a", "48k",         # 48 kbps — sufficient for speech
+            "-ar", "16000",        # 16 kHz — matches STT optimal rate
+            "-ac", "1",            # mono
+            out_path,
+        ]
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            timeout=30,            # hard timeout for transcode
+        )
+
+        if result.returncode != 0:
+            logger.warning(
+                "ffmpeg transcode failed (rc=%d): %s",
+                result.returncode,
+                result.stderr[-500:].decode("utf-8", errors="replace"),
+            )
+            return None
+
+        with open(out_path, "rb") as out_f:
+            return out_f.read()
+
+    except subprocess.TimeoutExpired:
+        logger.warning("ffmpeg transcode timed out for mime=%s", source_mime)
+        return None
+    except Exception as exc:
+        logger.warning("ffmpeg transcode error: %s", exc)
+        return None
+    finally:
+        # in_path / out_path may still be None if temp creation raised before assignment.
+        for path in [in_path, out_path]:
+            if path is None:
+                continue
+            try:
+                if os.path.exists(path):
+                    os.unlink(path)
+            except OSError:
+                pass
 
 
 async def transcribe_reading_audio(
@@ -69,7 +182,7 @@ async def transcribe_reading_audio(
 
     Args:
         audio_bytes: Raw audio bytes from browser MediaRecorder.
-        mime_type:   MIME type of the audio (e.g. "audio/webm").
+        mime_type:   MIME type of the audio (e.g. "audio/webm;codecs=opus").
         target_text: The original lesson text used as a transcription hint
                      (Gemini uses it to resolve homophones and specialised names).
         duration_ms: Recorded duration in milliseconds (informational only).
@@ -77,9 +190,9 @@ async def transcribe_reading_audio(
     Returns:
         On success:
             {"transcript": "<text with punctuation>", "method": "gemini", "reasoning": "..."}
-        On any failure (Gemini error, timeout, content filter):
-            {"transcript": None, "method": "fallback"}
-            Caller must use Web Speech transcript as fallback — never auto-pass.
+        On any failure (transcode failure, Gemini error, timeout, content filter):
+            {"transcript": None, "method": "fallback", "reason": "<timeout|safety|decode|empty|error>"}
+            Caller must show fallback alert and use Web Speech transcript — never auto-pass.
     """
     from google import genai  # noqa: PLC0415 — lazy import; not available in test envs
     from google.genai import types as genai_types  # noqa: PLC0415
@@ -87,7 +200,31 @@ async def transcribe_reading_audio(
     from .ai.gemini_client import GEMINI_TIMEOUT
     from .llm_models import get_model_for_task
 
-    normalised_mime = _normalise_mime(mime_type)
+    # ── 1. Transcode if Gemini doesn't natively support the input MIME ─────────
+    gemini_audio_bytes = audio_bytes
+    gemini_mime = "audio/ogg"  # default after transcode
+
+    if _needs_transcode(mime_type):
+        transcoded = await asyncio.to_thread(_transcode_to_ogg, audio_bytes, mime_type)
+        if transcoded is None:
+            logger.warning(
+                "Reading transcription fallback — transcode failed: mime=%s duration_ms=%s",
+                mime_type,
+                duration_ms,
+                extra={
+                    "event": "reading_transcribe_fallback",
+                    "reason": _REASON_TRANSCODE,
+                    "mime_type": mime_type,
+                    "duration_ms": duration_ms,
+                },
+            )
+            return {"transcript": None, "method": "fallback", "reason": _REASON_TRANSCODE}
+        gemini_audio_bytes = transcoded
+        gemini_mime = "audio/ogg"
+    else:
+        gemini_mime = _normalise_mime(mime_type)
+
+    # ── 2. Call Gemini ──────────────────────────────────────────────────────────
     model, location = get_model_for_task("reading_transcribe")
     client = genai.Client(vertexai=True, project="lingoleap-dev", location=location)
 
@@ -106,8 +243,8 @@ async def transcribe_reading_audio(
     user_prompt = f"課文原文（供校正參考）：\n{target_text}"
 
     audio_part = genai_types.Part.from_bytes(
-        data=audio_bytes,
-        mime_type=normalised_mime,
+        data=gemini_audio_bytes,
+        mime_type=gemini_mime,
     )
     text_part = genai_types.Part(text=user_prompt)
 
@@ -157,6 +294,20 @@ async def transcribe_reading_audio(
         transcript = parsed.get("transcript", "")
         reasoning = parsed.get("reasoning", "")
 
+        # Empty transcript from Gemini → treat as fallback (I5: never auto-pass)
+        if not transcript:
+            logger.warning(
+                "Reading transcription fallback — Gemini returned empty transcript: "
+                "duration_ms=%s",
+                duration_ms,
+                extra={
+                    "event": "reading_transcribe_fallback",
+                    "reason": _REASON_EMPTY,
+                    "duration_ms": duration_ms,
+                },
+            )
+            return {"transcript": None, "method": "fallback", "reason": _REASON_EMPTY}
+
         logger.info(
             "Reading transcription success: duration_ms=%s transcript_len=%d",
             duration_ms,
@@ -168,14 +319,34 @@ async def transcribe_reading_audio(
 
     except TimeoutError:
         logger.warning(
-            "Reading transcription timeout: duration_ms=%s", duration_ms,
-            extra={"event": "reading_transcribe_timeout"},
+            "Reading transcription fallback — timeout: duration_ms=%s",
+            duration_ms,
+            extra={
+                "event": "reading_transcribe_fallback",
+                "reason": _REASON_TIMEOUT,
+                "duration_ms": duration_ms,
+            },
         )
-        return {"transcript": None, "method": "fallback"}
+        return {"transcript": None, "method": "fallback", "reason": _REASON_TIMEOUT}
 
     except Exception as exc:
-        logger.error(
-            "Reading transcription failed: %s", exc,
-            extra={"event": "reading_transcribe_error", "error": str(exc)},
+        # Classify the reason for monitoring / alerting
+        exc_str = str(exc).lower()
+        if "safety" in exc_str or "filter" in exc_str or "block" in exc_str:
+            reason = _REASON_SAFETY
+        else:
+            reason = _REASON_ERROR
+
+        logger.warning(
+            "Reading transcription fallback — %s: %s (duration_ms=%s)",
+            reason,
+            exc,
+            duration_ms,
+            extra={
+                "event": "reading_transcribe_fallback",
+                "reason": reason,
+                "error": str(exc),
+                "duration_ms": duration_ms,
+            },
         )
-        return {"transcript": None, "method": "fallback"}
+        return {"transcript": None, "method": "fallback", "reason": reason}

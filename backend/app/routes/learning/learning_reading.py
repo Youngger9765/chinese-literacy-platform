@@ -460,6 +460,10 @@ class TranscribeReadingResponse(BaseModel):
     reasoning: str | None = None
     """Gemini's 1-2 sentence explanation (for teacher audit). None on fallback."""
 
+    reason: str | None = None
+    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error'.
+    Only present when method='fallback'. Used by frontend to show appropriate alert."""
+
 
 @router.post(
     "/reading/transcribe",
@@ -469,8 +473,10 @@ class TranscribeReadingResponse(BaseModel):
     description=(
         "Accepts a student reading audio blob and the lesson target text.\n"
         "Returns a high-quality transcript with punctuation via Gemini audio.\n"
-        "On Gemini failure/timeout the route returns {transcript: null, method: 'fallback'} "
-        "(HTTP 200) so the caller can silently fall back to Web Speech transcript.\n"
+        "webm input is transcoded to ogg via ffmpeg before calling Gemini (Issue #2156).\n"
+        "On Gemini failure/timeout the route returns {transcript: null, method: 'fallback', "
+        "reason: <timeout|safety|decode|empty|error>} (HTTP 200) so the frontend can show "
+        "a fallback alert and use the Web Speech transcript.\n"
         "Rate-limited: 10 requests per minute per user.\n"
         "Audio: ≤10 MB, ≤120 s; MIME: audio/webm, audio/mp4, audio/ogg, audio/wav."
     ),
@@ -495,8 +501,10 @@ async def transcribe_reading_endpoint(
 
     Rate-limited to 10 requests per minute per user (shared with /reading/evaluate).
     Input caps are enforced before any AI call.
-    On any Gemini failure the route returns HTTP 200 with method='fallback' so
-    the frontend can silently fall back to the Web Speech transcript.
+    webm audio is transcoded to ogg/opus via ffmpeg before calling Gemini — this is the
+    root cause fix for Issue #2156 (Chrome records webm; Gemini only accepts ogg/wav/etc).
+    On any Gemini failure the route returns HTTP 200 with method='fallback' and a reason
+    field so the frontend can display the fallback alert banner (I4).
     """
     # ── 1. Validate MIME type (cheap, before reading bytes) ──────────────────
     raw_mime = audio.content_type or "audio/webm"
@@ -576,4 +584,5 @@ async def transcribe_reading_endpoint(
         transcript=result.get("transcript"),
         method=result["method"],
         reasoning=result.get("reasoning"),
+        reason=result.get("reason"),
     )

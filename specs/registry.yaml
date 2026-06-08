@@ -519,6 +519,29 @@ modules:
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/reading-eval-safety/INTENT.md
+- spec_id: reading.transcription.gemini_primary_fallback_alert
+  module: reading-transcription
+  title: 全文朗讀 + 逐段朗讀 Gemini 音訊轉錄 — webm 轉碼 + fallback alert + 殺即時補強閃爍
+  stability: active
+  canonical_source: backend/app/services/reading_transcription_service.py
+  owns_code:
+  - backend/app/services/reading_transcription_service.py
+  - backend/app/routes/learning/learning_reading.py
+  - frontend/src/hooks/useAudioRecorder.ts
+  - frontend/src/hooks/useFullReadingSession.ts
+  - frontend/src/components/reading-steps/FullReading.tsx
+  - frontend/src/components/reading-steps/live-tutor/LiveTutor.tsx
+  - frontend/src/services/learning/session.ts
+  owns_data: []
+  spec_tests:
+  - backend/specs/test_reading_transcription_spec.py
+  related_issues:
+  - 2131
+  - 2156
+  source_meetings: []
+  last_reviewed: 2026-06-09
+  owner: young
+  intent: specs/modules/reading-transcription/INTENT.md
 - spec_id: semester.one_active_invariant
   module: semester
   title: 學期唯一啟用不變式（pointer module）
