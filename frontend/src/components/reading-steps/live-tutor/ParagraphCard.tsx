@@ -302,6 +302,29 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
+          {/* CPM + accuracy scores (Issue #2147) */}
+          {(() => {
+            const cpmVal = lineResults.find(r => r.lineIndex === idx)?.cpm ?? null;
+            const rate = paragraphSummary.matchRate;
+            if (cpmVal === null) return null;
+            const rateColor = rate >= 0.9 ? 'text-emerald-600' : rate >= 0.65 ? 'text-green-600' : 'text-amber-600';
+            return (
+              <div className="flex gap-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-on-surface-variant">speed</span>
+                  <span className="text-on-surface-variant">語速</span>
+                  <span className="font-bold text-on-surface">{cpmVal}</span>
+                  <span className="text-on-surface-variant text-xs">字/分</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-on-surface-variant">check_circle</span>
+                  <span className="text-on-surface-variant">正確率</span>
+                  <span className={`font-bold ${rateColor}`}>{Math.round(rate * 100)}%</span>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Sentence-level retry — show whenever there are failed sentences */}
           {isCurrentIdx && (() => {
             const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');

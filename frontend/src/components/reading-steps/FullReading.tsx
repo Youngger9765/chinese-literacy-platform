@@ -18,6 +18,8 @@ import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssess
 import FullReadingControls, { type ControlState } from './full-reading/FullReadingControls';
 import FullReadingScoreCard from './full-reading/FullReadingScoreCard';
 import FullReadingFeedbackPanel from './full-reading/FullReadingFeedbackPanel';
+import { enhanceLiveTranscript } from '../../utils/liveTranscriptEnhance';
+import type { TranscriptSegment } from '../../utils/liveTranscriptEnhance';
 
 /* ------------------------------------------------------------------ */
 
@@ -303,11 +305,20 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Live transcript card */}
+          {/* Live transcript card — Issue #2147: enhanced with punctuation + homophone correction */}
           {isSessionActive && sessionTranscript && (
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
               <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">即時辨識</p>
-              <p className="text-lg text-on-surface leading-relaxed">{sessionTranscript}</p>
+              <p className="text-lg text-on-surface leading-relaxed">
+                {(() => {
+                  const { segments } = enhanceLiveTranscript(sessionTranscript, fullText);
+                  return segments.map((seg: TranscriptSegment, i: number) => (
+                    <span key={i} className={seg.kind === 'inserted' ? 'text-gray-400' : undefined}>
+                      {seg.text}
+                    </span>
+                  ));
+                })()}
+              </p>
             </div>
           )}
 
