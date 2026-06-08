@@ -205,7 +205,7 @@ const StudentProfile: React.FC = () => {
                     <p className="text-xs text-gray-500 mt-0.5">老師：{c.teacher_name}</p>
                   </div>
                   {c.grade != null && (
-                    <span className="shrink-0 text-xs text-gray-400">{c.grade} 年級</span>
+                    <span className="shrink-0 text-xs text-gray-400">第 {c.grade} 級</span>
                   )}
                 </li>
               ))}

@@ -267,7 +267,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
             selectedGrade === null ? 'bg-accent text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
           }`}
         >
-          全部年級
+          全部級別
         </button>
         {availableGrades.map((grade) => (
           <button
@@ -277,7 +277,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
               selectedGrade === grade ? 'bg-accent text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
             }`}
           >
-            {grade}年級
+            第 {grade} 級
           </button>
         ))}
 

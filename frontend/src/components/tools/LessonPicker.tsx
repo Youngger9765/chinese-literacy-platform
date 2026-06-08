@@ -14,13 +14,9 @@ interface LessonPickerProps {
   onChange: (story: Story | null) => void;
 }
 
-const GRADE_LABELS: Record<number, string> = {
-  3: '三年級',
-  4: '四年級',
-  5: '五年級',
-  6: '六年級',
-  7: '七年級',
-};
+function gradeToLevelLabel(grade: number): string {
+  return `第 ${grade} 級`;
+}
 
 const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => {
   const { token } = useAuth();
@@ -89,7 +85,7 @@ const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => 
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
             }`}
           >
-            {GRADE_LABELS[g] ?? `${g}年級`}
+            {gradeToLevelLabel(g)}
           </button>
         ))}
       </div>
@@ -181,7 +177,7 @@ const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => 
                   <span className="block text-sm font-medium truncate">{story.title}</span>
                   {story.grade && (
                     <span className="text-xs text-gray-400">
-                      {GRADE_LABELS[story.grade] ?? `${story.grade}年級`}
+                      {gradeToLevelLabel(story.grade)}
                       {story.genre ? ` · ${story.genre}` : ''}
                     </span>
                   )}
