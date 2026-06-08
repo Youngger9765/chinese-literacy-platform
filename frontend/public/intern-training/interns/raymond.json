@@ -3,10 +3,10 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-05-29",
+  "lastReview": "2026-06-09",
   "skills": {
     "1": {
-      "level": 3,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-02",
@@ -22,6 +22,11 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "多次 commit，熟悉 Git 操作"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 4,
+          "reason": "6/2~6/8 共 6 個 PR（#2024/#2088/#2090/#2091/#2093/#2094），commit message 全部符合 conventional commits（fix:/feat: 分類正確、scope 清楚），PR body 每次都有清楚的背景說明、變更列表、測試確認。連續多週穩定保持高品質 commit 習慣，不需提醒"
         }
       ],
       "maxLevel": 5
@@ -236,7 +241,7 @@
       "maxLevel": 5
     },
     "11": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -253,6 +258,11 @@
           "date": "2026-05-08",
           "level": 4,
           "reason": "PR #1499 VocabPractice multi-mode：新增 `practiceMode` prop（3 variants: standard/toolbox/quiz）+ `radicalColorMode` prop，Round 1 顯示筆順輪廓 + 部首顏色，Round 2 隱藏所有輔助。命名時刻意避免與元件內部 `mode` state 衝突，顯示對 prop vs internal state 邊界的清晰判斷。4 輪 @claude review 全部解決，含最後 brush color 一致性問題（commit 9bad640a）。已超出單純 useEffect/useRef，展現 prop 設計 + multi-mode 元件架構整合能力"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 5,
+          "reason": "PR #2094 相機掃描器：useRef 固定 video element reference（不觸發 re-render），useEffect cleanup 在 unmount 時呼叫所有 track.stop()（防相機燈殘留 / MediaStream 洩漏），這是瀏覽器資源 lifecycle 的正確 React 管理方式。PR #2093 OmoPaperResultBanner：條件式渲染「無紀錄則不渲染」設計可安全放任何 step 頁，展現元件 isolation 意識。兩個 PR 合計呈現 useRef（DOM reference）+ useEffect（side effect cleanup）在不同真實場景的純熟應用，並附完整 vitest 覆蓋"
         }
       ]
     },
@@ -283,7 +293,7 @@
       ]
     },
     "13": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -300,11 +310,16 @@
           "date": "2026-04-23",
           "level": 4,
           "reason": "PR #1148 整合鼓勵語系統 + tier3 擋關邏輯 + 逐句重練 UI 為單一視覺流，展現多行為在同一元件中的設計整合能力。PR #1204 造句練習完整持久化，設計 beforeunload → session 寫入 → 頁面恢復的完整 state lifecycle。PR #1207 IME composition 問題同時修正 Enter 鍵在造句和聽寫兩個獨立元件的行為，顯示對跨元件共同問題的識別和同步修復能力。目前尚未見到 custom hook 的獨立抽取"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 5,
+          "reason": "PR #2090 批改記錄按課文分組：新增 group-by-lesson 元件，接收扁平批改記錄清單後依 course_id 分組、排序、渲染，資料轉換邏輯與渲染邏輯清楚分離，附 vitest 覆蓋。PR #2093 OmoPaperResultBanner：設計為「無紀錄時不渲染」的自包含元件，可安全放進任何 learning step 頁（3 個頁面共用同一元件），每個使用點只傳 course_id，banner 自行查 session 資料、判斷是否顯示，完全不影響外部狀態。這是「元件接受最小 prop、內部自決渲染」的 isolation pattern，是真正的元件設計模式能力體現：不只是把 UI 拆開，而是讓元件對使用它的頁面零侵入"
         }
       ]
     },
     "14": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
@@ -321,11 +336,16 @@
           "date": "2026-05-08",
           "level": 2,
           "reason": "PR #1498 G7-L29/L30 文章重點表重構：把 22 行純文字平鋪輸出拆解為 5 個結構化行（主題/觀察/推論/趨勢/反論/結論）+ fill-blank 格式，對應方大哥 #1388 的教學設計目標。2 輪 review 迭代（第一輪靖杭寫了「證據→趨勢」，Claude 指出語義不精準，第二輪改為「是否怕人」句式）。這是主動理解教學規格→轉換資料結構的問題拆解，而非機械式修改。level 維持 2，原因：目前是 1 個 YAML 的資料結構轉換，尚未見到跨多個複雜問題類型的拆解"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 3,
+          "reason": "本輪 4 個 PR 全部附測試，且涵蓋三種不同類型：(1) PR #2094 OmoCameraScanner.test.tsx 5 vitest cases（getUserMedia mock、track cleanup、佇列上限、permission denial 中文訊息）— 測試瀏覽器 API side effect 的進階場景；(2) PR #2088 test_g7l30_spotlight_step_2080.py 8 pytest cases（assert build_all_lessons 載入結果，防止 YAML 改壞）— 資料層回歸測試；(3) PR #2091 在 PR body 說明了以 935 個 fill_in_blank 全量驗證過濾規則（0 誤傷）— 資料驗證作為測試策略。不是「改完補一個 test」，而是根據被測物選對測試類型，level 升 3"
         }
       ]
     },
     "16": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -347,11 +367,16 @@
           "date": "2026-05-29",
           "level": 4,
           "reason": "OMO PDF 拆頁（#1979）+ 批改記錄頁（#1980）是兩個前後端串通的完整 feature：#1979 把 PDF 視為 server-side 多檔來源、前端只加 MIME + size cap、後端用 pypdfium2 拆頁；#1980 backend list endpoint（精簡 8 欄位 + thumbnail URL） + frontend 歷史頁 + OmoUpload 加入口。一週連 3 PR merge（含 #1977 grader 排序 fix）顯示獨立完成複雜功能的速度穩定。Level 維持 4：尚未見到 P1 等級的 deadline-critical issue ownership（如 #1073/#1074 那種規模），但快速產出 quality 穩定。"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 5,
+          "reason": "PR #2093 紙本批改同步 LearningSession（+871/-10，3 個 learning step 頁 + banner + backend）是迄今最能體現「端對端設計判斷」的 PR。關鍵在設計決策的品質，而非規模：(1) 刻意不建 migration——只利用既有 paper_result JSONB 欄位，best-effort 寫入不失敗整個 session；(2) 限縮為 self-study-only——識別 assignment session 有不同的 ownership 語意，不冒然同步；(3) 純 merge fn——後端寫入邏輯是純函數（read current → merge → write），可獨立測試，附完整 pytest 覆蓋。這三個決策都需要同時理解 DB schema 邊界（哪裡能安全寫）、業務語意（self-study vs assignment）、和測試設計（pure fn 更好測），缺一不可。這是 level 5 的標準：從 issue 到 merge 全程自主，且設計決策有明確 rationale，不需要大幅 review 後改方向"
         }
       ]
     },
     "17": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
@@ -363,6 +388,11 @@
           "date": "2026-05-29",
           "level": 2,
           "reason": "PR #1979（feat: PDF 拆頁，+503/-59 6 檔）引入 `pypdfium2` 新 backend dep 並寫進 omo upload pipeline：lib 選型有 rationale（純 Python wheel / Cloud Run 部署友善 / Apache-2.0 license），把 PDF 拆頁邏輯封裝在 server-side，GCS upload / identification / grading 下游 pipeline 完全不需改。PR #1980（feat: 批改記錄頁，+906/-5 9 檔）跨多個既有 backend module（omo_uploads model / routes / service）讀懂後加新 list endpoint。已超出 #1497 的單檔定點修改，能在多個 Python module 之間追蹤資料流並做定向加工"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 3,
+          "reason": "PR #2091 reference 對齊 + 過濾影片雜訊 + 依 UI 關卡順序批改（+300/-5，pure Python backend）：(1) 媒體雜訊過濾——識別 fill_in_blank 中夾雜的影片連結為雜訊 topic，設計過濾規則並以 935 個題目全量驗證 0 誤傷（這是以資料規模作為測試策略，而非寫 mock test）；(2) 確定性排序——以 _build_question_schema(lesson) 產出的 UI 關卡順序作為 source of truth，而非用 Gemini 回傳的隨機掃描順序，選擇「哪個順序是正確的 ground truth」是業務判斷不只是排序技巧；(3) PR #2088 fix(lesson-data) G7-L30 聚光燈補題目 + 移除 story-structure + 清 fb 雜訊，附 8 個 pytest cases 回歸測試 YAML 載入。後端 Python 已超出「讀懂並加工」的 level 2，開始能自主設計業務邏輯與對應的驗證策略"
         }
       ]
     },
@@ -394,18 +424,23 @@
           "date": "2026-05-29",
           "level": 4,
           "reason": "PR #1980（feat: OMO 批改記錄頁）的 backend list endpoint 有意識做 schema 設計決策：list endpoint 只回 8 個顯示用欄位 + thumbnail URL，不回整包 answers JSONB；想看詳情走 GET /omo/{upload_id}（既有 detail endpoint）。是「list vs detail endpoint 該各自負責什麼」的明確設計判斷，PR body 主動寫出 rationale。Level 維持 4：仍是 single endpoint 規模，沒涉及全新子系統的 API 群設計（這是 level 5 的標準）"
+        },
+        {
+          "date": "2026-06-09",
+          "level": 4,
+          "reason": "PR #2093 紙本批改同步 LearningSession：backend pure merge fn 設計（read current steps_completed → merge paper results → write back，不建新 migration）顯示對既有 schema 邊界的清晰認識——哪個欄位可以安全寫、哪個 session type 可以修改（self-study only，不碰 assignment session）。這是「在不破壞現有資料模型的前提下擴充功能」的架構判斷，需要同時理解 DB schema 語意和業務所有權邊界。Level 維持 4：backend merge fn 設計精良，但全新子系統的 API 群設計（level 5 標準）尚未見到"
         }
       ]
     }
   },
   "recommendations": [
-    "後端 Python 閱讀（#17）升到 level 2。下一步：在下個 backend issue 嘗試從 schema design 階段就主動先讀 sqlalchemy-model-safety skill checklist（FK index / cascade / timestamps / alembic heads），完成後 #17 有機會升 level 3。或者嘗試 grader pipeline 內部的 prompt + response parser，是 level 3 的好戰場",
-    "後端 API 設計（#18）穩在 level 4，#1980 list vs detail endpoint 拆分有 rationale 是好證據。下一步：嘗試為 OMO 系列補 contract test（pytest）驗證 status code + response schema + permission boundary，這是 level 5 的準備",
-    "獨立開發（#16）穩在 level 4，本週連 3 PR 速度穩定。下一個 P1 candidate：教授 6/1 review 後若 OMO Phase 2 開始，建議接 GCS resource lifecycle / quota guard / cleanup 這類 ops 議題，是 level 5 的好機會",
-    "新技能 candidate：DevOps 意識（Cloud Run / GCS / Vertex AI quota）。PR #1979 選 pypdfium2 over PyMuPDF 是因為 Cloud Run 部署友善 — 已開始有 ops 視角。可考慮 #19 開新 skill。",
-    "未來 level 5 證明清單：(a) 一個 PR 從 issue → schema → migration → service → route → frontend → contract test 一條龍且不需要 review 大改 (b) 從 staging 上線後抓到 prod 問題並提出 root cause + 修復方案"
+    "後端 Python 設計（#17）升到 level 3，下一步：嘗試一個完整的 backend-only feature（從 schema 設計到 route 到 pytest contract test），目標是展示「sqlalchemy-model-safety checklist 在 PR 之前就跑過」的習慣，這樣 #17 才能往 level 4 走",
+    "架構理解（#18）穩在 level 4，#2093 best-effort / no-migration / self-study-only 三個設計決策都有明確 rationale 是強證據。下一步：主動設計一個全新子系統的 API 群（不只是加 endpoint，而是從零規劃資源模型 + HTTP 語意 + error handling），這是 level 5 的準備",
+    "獨立開發（#16）已升到 level 5，#2093 的設計判斷品質達標。下一個挑戰：嘗試從 issue 開立開始就寫 INTENT.md spec（用 specs/modules/ 系統），讓設計在寫 code 之前就有文件，這是更資深工程師的開發習慣",
+    "元件設計模式（#13）已升到 level 5，OmoPaperResultBanner 的 zero-prop-pollution isolation pattern 是教科書級示範。可考慮在下個 PR 嘗試 custom hook 抽取（把相機掃描器的 getUserMedia lifecycle 封裝成 useCameraScanner hook），這樣 #11 React 進階也有機會進一步鞏固",
+    "測試能力（#14）在 level 3，本輪三種測試類型（browser API mock / 資料層回歸 / 全量資料驗證）展現測試策略思維。下一步：嘗試為現有 backend route 補 contract test（status code + response schema + auth boundary），這是 level 4 的條件"
   ],
-  "summary": "5/22~5/29 共 3 個 OMO PR merge（5/25 同一天 #1977 / #1979 / #1980），總 +1643/-64 9 個檔案，是靖杭最高產的週之一。亮點：#1979 引入 pypdfium2 拆 PDF（lib 選型 rationale 明確：純 Python wheel / Cloud Run 友善 / license）+ #1980 backend list endpoint 有意識做 schema 設計決策（list 回精簡 8 欄位、detail 走既有 endpoint）。Open PR #1978 多頁上傳 UX 待 review。技能升級：#17 後端 Python 閱讀（1→2，pypdfium2 整合 + cross-module 修改）。技能 #16/#18 穩在 level 4 加新證據。Recommendation：開始醞釀 DevOps 新技能維度（Cloud Run / GCS / quota 意識）",
+  "summary": "6/2~6/8 共 6 個 PR merge（#2024 / #2088 / #2090 / #2091 / #2093 / #2094），總 +2043/-101，是靖杭技能跳躍最多的一週。最重要的里程碑：#2093 紙本批改同步 LearningSession 的三個設計決策（best-effort / no-migration / self-study-only）同時展現架構判斷、業務語意理解、和可測試設計，是 level 5 獨立開發（#16）的解鎖依據。#2094 相機掃描器（getUserMedia + canvas + track cleanup + vitest mock）解鎖 React 進階（#11）level 5。#2090 group-by-lesson component + #2093 OmoPaperResultBanner isolation pattern 解鎖元件設計模式（#13）level 5。#2091 後端確定性排序 + 全量資料驗證策略解鎖後端 Python（#17）level 3。本輪技能升級：#13 4→5 / #16 4→5 / #17 2→3。#14 測試（2→3，之前已記錄）/ #11 React 進階（4→5，之前已記錄）/ #1 Git（→4，之前已記錄）",
   "issues": [
     {
       "id": "環境建置",
@@ -996,6 +1031,121 @@
         "+906/-5 9 檔，新增多於修改 = 加 feature 不破壞既有行為"
       ],
       "linesChanged": "+906/-5"
+    },
+    {
+      "id": "#2011",
+      "title": "fix(omo): 批改完成後前端 polling 卡死 + 題目標題顯示（PR #2024）",
+      "date": "2026-06-02",
+      "type": "bugfix",
+      "contribution": "診斷 OMO 批改完成後前端 polling 永遠卡死的 race condition：批改結果 SSE 事件到達時前端 state 更新與 interval 清除之間的順序問題，修正後 polling 在批改完成後正確停止。同步修正批改結果卡片顯示題目原文（不只顯示 fb_1），改善學生核對體驗",
+      "skillsLearned": [
+        3,
+        10,
+        11
+      ],
+      "highlights": [
+        "Rules of Hooks 違規修正（hook 在條件式裡）",
+        "setTimeout leak 修正（unmount 時清除）",
+        "async polling race condition 完整診斷與修復",
+        "4 輪 review 迭代確認修復正確"
+      ],
+      "linesChanged": "+74500/-26880"
+    },
+    {
+      "id": "#2080",
+      "title": "fix(lesson-data): G7-L30 聚光燈補題目 + 移除 story-structure + 清 fb 雜訊（PR #2088）",
+      "date": "2026-06-08",
+      "type": "bugfix",
+      "contribution": "G7-L30 聚光燈步驟缺少題目，補齊 spotlight 題目結構；移除 story-structure step（G7 課文不需要）；清理 fill_in_blank 中混入的影片雜訊題。附 8 個 pytest cases（test_g7l30_spotlight_step_2080.py）回歸測試 build_all_lessons 載入結果，防止 YAML 修改後靜默破壞",
+      "skillsLearned": [
+        14,
+        17
+      ],
+      "highlights": [
+        "資料層回歸測試：8 pytest cases 覆蓋 YAML 載入結果",
+        "識別並清理 fb 雜訊題，保持資料乾淨",
+        "test 策略：assert 載入後的業務結果，不是 mock YAML 格式"
+      ],
+      "linesChanged": "+324/-40"
+    },
+    {
+      "id": "#2089-item1",
+      "title": "feat(omo): 批改記錄按課文分組檢視（PR #2090）",
+      "date": "2026-06-08",
+      "type": "feature",
+      "contribution": "OMO 批改歷史記錄原本是扁平清單，不同課文的批改記錄混在一起難以比較。新增 group-by-lesson 元件，將扁平記錄依 course_id 分組、以最新批改時間排序、每組獨立渲染。資料轉換邏輯（groupBy + sortBy）與渲染邏輯清楚分離，附 vitest 覆蓋",
+      "skillsLearned": [
+        6,
+        13,
+        14
+      ],
+      "highlights": [
+        "group-by-lesson 元件資料轉換與渲染職責分離",
+        "vitest 覆蓋分組排序邏輯",
+        "新元件設計乾淨，沒有外部 side effect"
+      ],
+      "linesChanged": "+190/-20"
+    },
+    {
+      "id": "#2089-item2",
+      "title": "feat(omo): reference 對齊 + 過濾影片雜訊 + 依 UI 關卡順序批改（PR #2091）",
+      "date": "2026-06-08",
+      "type": "feature",
+      "contribution": "OMO 批改結果原本依 Gemini 視覺掃描順序（特別是拆頁後順序混亂），且 fill_in_blank 中夾雜影片連結雜訊題導致 reference 比對失準。以 _build_question_schema(lesson) 的 UI 關卡順序作為 source of truth 排序批改結果；設計媒體雜訊過濾規則，以 935 個題目全量驗證 0 誤傷（資料驗證作為測試策略）",
+      "skillsLearned": [
+        14,
+        17,
+        18
+      ],
+      "highlights": [
+        "選擇 _build_question_schema 作為 source of truth（業務判斷，不只是排序）",
+        "935 個 fill_in_blank 全量驗證過濾規則，0 誤傷",
+        "純 Python 確定性邏輯設計，不依賴 Gemini 回傳順序"
+      ],
+      "linesChanged": "+300/-5"
+    },
+    {
+      "id": "#2089-item3",
+      "title": "feat(omo): 紙本批改同步 LearningSession — 關卡綠點 + 作答對錯（PR #2093）",
+      "date": "2026-06-08",
+      "type": "feature",
+      "contribution": "紙本批改完成後學習進度頁的關卡綠點不更新，學生無法知道哪些關卡已完成。靖杭設計 backend pure merge fn：讀取 current steps_completed → merge paper results → write back，不建 migration（利用既有 paper_result JSONB 欄位），限縮為 self-study-only（不碰 assignment session 所有權），best-effort 寫入（失敗不影響批改主流程）。3 個 learning step 頁 + OmoPaperResultBanner 共用同一元件，附完整 pytest 覆蓋",
+      "skillsLearned": [
+        11,
+        13,
+        14,
+        16,
+        17,
+        18
+      ],
+      "highlights": [
+        "刻意不建 migration——best-effort 利用既有 JSONB 欄位，安全第一",
+        "self-study-only 限縮——識別 assignment session 有不同所有權語意",
+        "pure merge fn——可獨立測試的純函數設計",
+        "OmoPaperResultBanner zero-prop-pollution：3 個頁面共用，每點只傳 course_id",
+        "端對端設計決策全部有書面 rationale"
+      ],
+      "linesChanged": "+871/-10"
+    },
+    {
+      "id": "#2089-item4",
+      "title": "feat(omo): 網頁內相機掃描器 — 連續拍多頁直接上傳（PR #2094）",
+      "date": "2026-06-08",
+      "type": "feature",
+      "contribution": "OMO 上傳流程需要使用者先用手機拍照再傳到電腦再上傳，步驟繁瑣。靖杭實作瀏覽器原生相機掃描器：getUserMedia live preview、canvas→JPEG 擷取、佇列上限保護、track cleanup（unmount 時 stop 所有 track 防相機燈殘留）、permission denial 明確錯誤訊息。5 個 vitest cases 覆蓋 browser API side effect（getUserMedia mock、track cleanup、permission denial）",
+      "skillsLearned": [
+        6,
+        11,
+        14,
+        16
+      ],
+      "highlights": [
+        "useRef 固定 video element reference（不觸發 re-render）",
+        "useEffect cleanup 在 unmount 時 stop 所有 track（防 MediaStream 洩漏）",
+        "vitest mock getUserMedia + track.stop — 瀏覽器 API side effect 測試",
+        "permission denial 中文錯誤訊息，使用者體驗細節"
+      ],
+      "linesChanged": "+358/-26"
     }
   ]
 }
