@@ -91,7 +91,6 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   speakingProgress,
   utteranceRef,
   ttsRafRef,
-  streamingUserInput,
   lastDiffTokens,
   isAwaitingGemini,
   retryCount,
@@ -233,18 +232,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         )}
       </p>
 
-      {/* ── Recording state: realtime transcript display ─────── */}
+      {/* ── Recording state: simple indicator (no Web Speech live transcript) ─────── */}
       {isCurrentIdx && isSessionActive && (
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <div className="w-full bg-surface-container-low rounded-2xl p-4">
-            <p className="text-xs font-bold text-accent uppercase tracking-widest mb-2 animate-pulse">即時辨識</p>
-            <p className="text-lg text-on-surface leading-relaxed min-h-[2em]">
-              {streamingUserInput || <span className="text-on-surface-variant/40">請開始朗讀…</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-emerald-600 font-medium">聆聽中...</span>
+        <div className="mt-8 flex justify-center">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-sm text-emerald-700 font-medium">錄音中，請大聲朗讀</span>
           </div>
         </div>
       )}
