@@ -11,13 +11,13 @@
  *          ABCD badges behind FILLBLANK_SHOW_ABCD feature flag (default false)
  * Issue #2163: OnboardingCoach — first-use amber説明框 + demo animation on real UI
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
-import { FILLBLANK_SHOW_ABCD } from '../../config/featureFlags';
+import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
 
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const FILLBLANK_ONBOARDED_KEY = 'fillblank_onboarded';
@@ -195,10 +195,32 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     if (done && phase === 'exercise') setPhase('summary');
   }, [done, phase]);
 
-  // Show all bank entries; used ones stay visible as decoys (greyed-out, non-selectable).
-  const availableEntries = bankEntries;
   const currentSentence = !done ? activeSentences[currentIdx] : null;
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
+
+  // #7 教授「選項呈現兩案」(featureFlag FILLBLANK_OPTION_MODE):
+  //   'all'      → 全部選項，用過 grey out (default, 現狀)
+  //   'disappear'→ 全部選項，用過直接移除 = 案 (b)
+  //   'random4'  → 每題只 4 個（正解 + 3 確定性 decoy）= 案 (a) 降難度
+  // random4 用 currentOriginalIdx 當 seed → 同題重選不會洗牌。
+  const availableEntries = useMemo(() => {
+    if (FILLBLANK_OPTION_MODE === 'disappear') {
+      return bankEntries.filter(([code]) => !usedCodes.has(code));
+    }
+    if (FILLBLANK_OPTION_MODE === 'random4' && currentSentence) {
+      const correct = currentSentence.answer;
+      const correctEntry = bankEntries.find(([c]) => c === correct);
+      const decoys = bankEntries.filter(([c]) => c !== correct);
+      if (!correctEntry || decoys.length < 3) return bankEntries;
+      const seed = (currentOriginalIdx + 1) * 7;
+      // deterministic rotation → first 3 distinct decoys
+      const rotated = decoys.map((_, i) => decoys[(i + seed) % decoys.length]);
+      const out = rotated.slice(0, 3);
+      out.splice(seed % (out.length + 1), 0, correctEntry); // stable, non-fixed slot
+      return out;
+    }
+    return bankEntries; // 'all'
+  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx]);
 
   /**
    * Demo animation: pulse the correct option for the current question.
