@@ -35,6 +35,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('AI 朗讀')).toBeInTheDocument();
@@ -57,6 +58,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     fireEvent.click(screen.getByText('開始朗讀'));
@@ -78,6 +80,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={true}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('完成朗讀')).toBeInTheDocument();
@@ -98,6 +101,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('準備中...')).toBeInTheDocument();
@@ -118,6 +122,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('暫停')).toBeInTheDocument();
@@ -139,6 +144,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={true}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('繼續')).toBeInTheDocument();
@@ -159,6 +165,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     expect(screen.getByText('再讀一次')).toBeInTheDocument();
@@ -181,6 +188,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     fireEvent.click(screen.getByText('再讀一次'));
@@ -203,6 +211,7 @@ describe('FullReadingControls', () => {
         isTtsPaused={false}
         sessionTranscriptReady={false}
         inToolbox={false}
+        recordingSecs={0}
       />
     );
     fireEvent.click(screen.getByText('下一關'));

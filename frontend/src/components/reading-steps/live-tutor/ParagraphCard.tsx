@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { formatTime } from '../../../utils/formatTime';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
@@ -114,6 +115,16 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 }) => {
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
+
+  /* ── Recording timer — counts up while isCurrentIdx && isSessionActive ── */
+  const isActiveRecording = isCurrentIdx && isSessionActive;
+  const [recordingSecs, setRecordingSecs] = useState(0);
+  useEffect(() => {
+    if (!isActiveRecording) { setRecordingSecs(0); return; }
+    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isActiveRecording]);
+
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
 
@@ -232,12 +243,16 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         )}
       </p>
 
-      {/* ── Recording state: simple indicator (no Web Speech live transcript) ─────── */}
+      {/* ── Recording state: pulsing mic + timer indicator ─────── */}
       {isCurrentIdx && isSessionActive && (
         <div className="mt-8 flex justify-center">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm text-emerald-700 font-medium">錄音中，請大聲朗讀</span>
+          <div className="flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
+            <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+              <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+            </span>
+            <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
+            <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
           </div>
         </div>
       )}

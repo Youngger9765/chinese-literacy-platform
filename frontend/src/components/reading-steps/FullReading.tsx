@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { formatTime } from '../../utils/formatTime';
 import { Story, FullReadingResult } from '../../types';
 import { parseReadingBenchmark, getBenchmarkFeedback, getSecBenchmarkFeedback, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -227,6 +228,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     });
   }, [result, storageKey, streamingTranscript, onFinish]);
 
+  /* ── Recording timer (Issue #2175) ──────────────────────────────────── */
+  const [recordingSecs, setRecordingSecs] = useState(0);
+  useEffect(() => {
+    if (!isSessionActive) { setRecordingSecs(0); return; }
+    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isSessionActive]);
+
   /* ── Derive control state for FullReadingControls ─────────────────── */
   const controlState: ControlState = result
     ? 'result'
@@ -283,12 +292,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
 
             {/* Recording indicator */}
             {isSessionActive && (
-              <div className="mb-6 flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              <div className="mb-6 flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
+                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+                  <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
                 </span>
-                <span className="text-sm font-headline font-bold text-emerald-700 uppercase tracking-wider">聆聽中</span>
+                <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
+                <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
               </div>
             )}
 
@@ -315,15 +325,17 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Recording indicator — Web Speech live transcript removed.
-              Show a simple mic pill during recording; Gemini result shown post-submission. */}
+          {/* Recording live card — shows animated mic + timer while session is active */}
           {isSessionActive && (
-            <div className="mt-6 flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 border border-emerald-200">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm text-emerald-700 font-medium">🎙 聆聽中，請大聲朗讀</span>
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-4 mt-6 flex flex-col items-center gap-2">
+              <div className="flex items-center justify-center gap-3 py-1">
+                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+                  <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+                </span>
+                <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
               </div>
-              <p className="text-xs text-on-surface-variant/60">隨時可以按「完成」停止</p>
+              <p className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</p>
             </div>
           )}
 
@@ -418,6 +430,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         isTtsPaused={tts.isTtsPaused}
         sessionTranscriptReady={!!sessionTranscript}
         inToolbox={inToolbox}
+        recordingSecs={recordingSecs}
       />
 
       {/* Background decoration */}
