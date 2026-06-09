@@ -4,7 +4,7 @@
  * Extracted from FullReading.tsx to own the state-machine button rendering:
  *   idle       → AI 朗讀 + 開始朗讀
  *   preparing  → 準備中... (disabled)
- *   recording  → pulsing mic + timer + 完成朗讀 (always enabled)
+ *   recording  → 完成朗讀 (always enabled; onSubmit handles no-transcript case)
  *   ttsPlaying → 暫停/繼續 + 停止
  *   result     → 再讀一次 + 下一關  (or ToolboxCompletionActions)
  */
@@ -35,7 +35,7 @@ export interface FullReadingControlsProps {
   onFinish: () => void;
   /** Whether TTS is currently paused (toggle text 暫停 ↔ 繼續) */
   isTtsPaused: boolean;
-  /** Whether any STT transcript exists — kept for future use; button is always enabled in recording state */
+  /** Whether any STT transcript exists — kept for backward compat; button is always enabled */
   sessionTranscriptReady: boolean;
   /** When true, shows ToolboxCompletionActions instead of 再讀一次 / 下一關 */
   inToolbox: boolean;
@@ -55,6 +55,7 @@ const FullReadingControls: React.FC<FullReadingControlsProps> = ({
   onRetry,
   onFinish,
   isTtsPaused,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sessionTranscriptReady: _sessionTranscriptReady,
   inToolbox,
   recordingSecs,
@@ -96,29 +97,14 @@ const FullReadingControls: React.FC<FullReadingControlsProps> = ({
             準備中...
           </button>
         ) : state === 'recording' ? (
-          /* ── Recording state: pulsing mic + timer + green 完成朗讀 button ── */
-          <div className="w-full flex flex-col items-center gap-2">
-            {/* Animate-ping mic indicator + timer */}
-            <div className="flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100 mb-1">
-              <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-                <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-              </span>
-              <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-              <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
-            </div>
-            {/* Submit button — always green; opacity-50 when no transcript yet */}
-            <button
-              onClick={onSubmit}
-              disabled={!_sessionTranscriptReady}
-              className={`w-full h-14 rounded-full font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white
-                ${_sessionTranscriptReady ? 'shadow-[0_12px_48px_rgba(0,105,71,0.3)]' : 'opacity-50 cursor-not-allowed'}`}
-              style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
-            >
-              <span className="material-symbols-outlined text-xl">check_circle</span>
-              完成朗讀
-            </button>
-          </div>
+          <button
+            onClick={onSubmit}
+            className="w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]"
+            style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+          >
+            <span className="material-symbols-outlined text-xl">check_circle</span>
+            完成朗讀
+          </button>
         ) : state === 'ttsPlaying' ? (
           <div className="w-full flex gap-3">
             <button

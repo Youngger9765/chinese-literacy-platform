@@ -290,18 +290,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
               </div>
             )}
 
-            {/* Recording indicator */}
-            {isSessionActive && (
-              <div className="mb-6 flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
-                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-                  <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-                </span>
-                <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-                <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
-              </div>
-            )}
-
             {/* TTS playing indicator */}
             {isTtsPlaying && !isSessionActive && (
               <div className="mb-6 flex items-center gap-2">
