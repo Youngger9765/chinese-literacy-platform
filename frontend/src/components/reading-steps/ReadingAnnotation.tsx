@@ -657,7 +657,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               Images/tables whose captions appear inside paragraphs render inline
               right after the caption row (#1692). Un-referenced assets fall back
               to the strip/table block below the article. */}
-          <article className="max-w-4xl mx-auto px-6 md:px-16 space-y-10">
+          <div className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex flex-col lg:flex-row items-start' : undefined}>
+            <article className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}>
             {story.content.map((rawPara, paraIdx) => {
               const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
               const inlineImgIdx = inlineImageIdxByPara.get(paraIdx);
@@ -704,23 +705,25 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 </React.Fragment>
               );
             })}
-          </article>
+            </article>
 
-          {/* Fallback image strip — only un-referenced images (no caption match).
-              Preserves G7-L29 behavior where paragraphs reference 圖 N inside body
-              sentences but never as standalone caption rows. */}
-          {story.layout_mode === 'graphic-text' && fallbackImages.length > 0 && (
-            <div
-              className="max-w-4xl mx-auto px-6 md:px-16 mt-10 h-72 md:h-80 flex"
-              data-testid="reading-annotation-graphic-text-images"
-              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
-            >
-              <GraphicTextImageStrip
-                images={fallbackImages}
-                lessonCode={story.lesson_code}
-              />
-            </div>
-          )}
+            {/* Fallback image strip — only un-referenced images (no caption match).
+                Graphic-text: renders as sticky right column alongside article.
+                Preserves G7-L29 behavior where paragraphs reference 圖 N inside body
+                sentences but never as standalone caption rows. */}
+            {story.layout_mode === 'graphic-text' && fallbackImages.length > 0 && (
+              <aside
+                className="w-full mt-8 lg:mt-0 lg:w-80 lg:shrink-0 lg:border-l border-outline-variant/20 lg:pl-4 lg:sticky lg:top-0 lg:h-[calc(100vh-5rem)] overflow-hidden"
+                data-testid="reading-annotation-graphic-text-images"
+                style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+              >
+                <GraphicTextImageStrip
+                  images={fallbackImages}
+                  lessonCode={story.lesson_code}
+                />
+              </aside>
+            )}
+          </div>
 
           {/* Fallback tables — only un-referenced tables. */}
           {fallbackTables.length > 0 && (
