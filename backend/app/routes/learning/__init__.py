@@ -40,6 +40,7 @@ from .learning_reading_history import router as reading_history_router
 from .mcq_rescue import router as mcq_rescue_router
 from .mcq_attempt import router as mcq_attempt_router
 from .toolbox import router as toolbox_router
+from .learning_annotations import router as annotations_router
 
 router = APIRouter(tags=["learning"])
 
@@ -58,5 +59,6 @@ router.include_router(reading_history_router)
 router.include_router(mcq_rescue_router)
 router.include_router(mcq_attempt_router)
 router.include_router(toolbox_router)
+router.include_router(annotations_router)
 
 __all__ = ["router"]
