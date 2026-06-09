@@ -315,22 +315,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Live transcript card — I3 (Issue #2156): raw Web Speech gray preview only.
-              No punctuation re-insertion here — Gemini adds it post-submission. */}
-          {isSessionActive && sessionTranscript && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
-              <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-                即時預覽（唸完精準校正）
-              </p>
-              <p className="text-lg text-gray-400 leading-relaxed">
-                {sessionTranscript}
-              </p>
-            </div>
-          )}
-
-          {isSessionActive && !sessionTranscript && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
-              <p className="text-base text-on-surface-variant leading-relaxed">請開始朗讀上方課文…</p>
+          {/* Recording indicator — Web Speech live transcript removed.
+              Show a simple mic pill during recording; Gemini result shown post-submission. */}
+          {isSessionActive && (
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 border border-emerald-200">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm text-emerald-700 font-medium">🎙 聆聽中，請大聲朗讀</span>
+              </div>
+              <p className="text-xs text-on-surface-variant/60">隨時可以按「完成」停止</p>
             </div>
           )}
 
