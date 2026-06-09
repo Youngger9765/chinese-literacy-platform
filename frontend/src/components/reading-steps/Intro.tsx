@@ -294,6 +294,23 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </button>
               )}
 
+              {/* #2087: direct PDF download link — lets students/teachers save the worksheet locally */}
+              {story.worksheetPdfUrl && (
+                <a
+                  href={story.worksheetPdfUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                  aria-label="下載學習單 PDF"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  下載學習單 PDF
+                </a>
+              )}
+
               {/* Upload button — #1637: available for any lesson with a lesson_code */}
               {story.lesson_code && (
                 priorUpload?.has_prior_upload ? (
@@ -465,16 +482,32 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-sm font-bold text-gray-700 flex-shrink-0">紙本學習單</span>
                 <span className="text-xs text-gray-400 hidden sm:inline truncate">— {story.title}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowWorksheetModal(false)}
-                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
-                aria-label="關閉學習單"
-              >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {/* #2087: download button inside modal header */}
+                <a
+                  href={story.worksheetPdfUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                  aria-label="下載學習單 PDF"
+                  title="下載 PDF"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowWorksheetModal(false)}
+                  className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                  aria-label="關閉學習單"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <iframe
               src={story.worksheetPdfUrl}
