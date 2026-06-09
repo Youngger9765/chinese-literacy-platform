@@ -189,6 +189,12 @@ const GraphicTextImageStrip: React.FC<GraphicTextImageStripProps> = ({ images, l
   const resolvedLessonCode =
     lessonCode || (images[0] ? deriveLessonCodeFromFilename(images[0].filename) : '');
 
+  const sortedImages = [...images].sort((a, b) => {
+    const aIdx = CHINESE_NUMERALS.findIndex(n => (a.figure_label ?? '').includes(n));
+    const bIdx = CHINESE_NUMERALS.findIndex(n => (b.figure_label ?? '').includes(n));
+    return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+  });
+
   return (
     <div
       data-testid="graphic-text-image-pane"
@@ -201,7 +207,7 @@ const GraphicTextImageStrip: React.FC<GraphicTextImageStripProps> = ({ images, l
       ) : (
         /* Scrollable vertical gallery — parent controls the height boundary */
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-          {images.map((img, idx) => {
+          {sortedImages.map((img, idx) => {
             const basename = img.filename.split('/').pop() ?? img.filename;
             const src = `${GCS_IMAGE_BASE}/${resolvedLessonCode}/${basename}`;
             return (
