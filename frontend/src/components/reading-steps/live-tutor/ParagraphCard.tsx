@@ -365,42 +365,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               return (
                 <div className="pt-3 border-t border-on-surface/10">
                   <p className="text-sm text-on-surface-variant text-center">
-                    這段有比較多地方需要加強，我們重新唸一次吧！
+                    繼續加油！再唸一次一定會更好！
                   </p>
-                  <div className="flex gap-3 justify-center pt-3">
-                    <button
-                      onClick={() => onRetryParagraph(idx)}
-                      className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
-                    >
-                      重練這段
-                    </button>
-                    {idx < storyLength - 1 && canAdvanceRule2 && (
-                      <button
-                        onClick={() => {
-                          if (!completedParagraphs.has(idx)) {
-                            onAdvanceParagraph(idx, lineResults);
-                          } else {
-                            onSelectParagraph(idx + 1);
-                          }
-                        }}
-                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                      >
-                        下一段
-                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                      </button>
-                    )}
-                    {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvanceRule2 && (
-                      <button
-                        onClick={() => onAdvanceParagraph(idx, lineResults)}
-                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                      >
-                        完成朗讀
-                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                      </button>
-                    )}
-                  </div>
                 </div>
               );
             }
@@ -466,8 +432,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               >
                 重練這段
               </button>
-              {/* Always show 下一段 when paragraph-level passed (matchRate >= 0.5) */}
-              {idx < storyLength - 1 && canAdvance && (
+              {/* Always show 下一段 — never block paragraph progress (#2172) */}
+              {idx < storyLength - 1 && (
                 <button
                   onClick={() => {
                     if (!completedParagraphs.has(idx)) {
