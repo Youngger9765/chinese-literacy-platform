@@ -1,9 +1,11 @@
 /**
- * StoryStructureTable — 互動式文章重點表 (#615, #845, #1082)
+ * StoryStructureTable — 互動式文章重點表 (#615, #845, #1082, #2084)
  *
  * Fetches AI-generated story structure from /api/stories/{id}/structure.
  * Supports interactive fill-in-the-blank and checkbox questions with AI grading.
  * Genre-aware: 記敘文 shows 主角/主題/事例, 說明文 shows concept structure, etc.
+ *
+ * #2084: Visual hierarchy (color-coded left-border badges) + copyable template button.
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -59,6 +61,52 @@ interface Props {
 
 function answerKey(rowIdx: number, subIdx?: number): string {
   return subIdx !== undefined ? `${rowIdx}-${subIdx}` : `${rowIdx}`;
+}
+
+/**
+ * Maps a row/sub-row label to a Tailwind border + bg colour token for the
+ * left-border visual-hierarchy accent (#2084).
+ *
+ * Returns an object with:
+ *   - borderClass  — e.g. "border-l-4 border-amber-400"
+ *   - bgClass      — e.g. "bg-amber-50"
+ *   - textClass    — e.g. "text-amber-800"
+ */
+function getLabelAccent(label: string): {
+  borderClass: string;
+  bgClass: string;
+  textClass: string;
+} {
+  const PROBLEM_RE = /問題|困境|衝突|挑戰|難題|障礙/;
+  const SOLUTION_RE = /解決|方法|策略|行動|回應|措施|處理|應對/;
+  const RESULT_RE = /結果|影響|成效|成果|結局|後果|變化/;
+
+  if (PROBLEM_RE.test(label)) {
+    return {
+      borderClass: 'border-l-4 border-amber-400',
+      bgClass: 'bg-amber-50',
+      textClass: 'text-amber-800',
+    };
+  }
+  if (SOLUTION_RE.test(label)) {
+    return {
+      borderClass: 'border-l-4 border-sky-400',
+      bgClass: 'bg-sky-50',
+      textClass: 'text-sky-800',
+    };
+  }
+  if (RESULT_RE.test(label)) {
+    return {
+      borderClass: 'border-l-4 border-emerald-400',
+      bgClass: 'bg-emerald-50',
+      textClass: 'text-emerald-800',
+    };
+  }
+  return {
+    borderClass: 'border-l-4 border-gray-300',
+    bgClass: 'bg-gray-50',
+    textClass: 'text-gray-700',
+  };
 }
 
 function findGradeItem(
@@ -222,6 +270,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
+  const [copyDone, setCopyDone] = useState(false);
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -292,6 +341,45 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     return payload;
   }, [structure, answers]);
 
+  // Build a plain-text template for clipboard copy (#2084 — 可複製模板)
+  // Format:  上位概念: <row.label>\n重點: ________________\n
+  // Only includes display rows (answers, not blanks).
+  const handleCopyTemplate = useCallback(() => {
+    if (!structure) return;
+    const lines: string[] = ['【文章重點表模板】', ''];
+
+    structure.rows.forEach((row) => {
+      if (row.sub_rows && row.sub_rows.length > 0) {
+        lines.push(`【${row.label}】`);
+        row.sub_rows.forEach((sub) => {
+          lines.push(`  上位概念：${sub.label}`);
+          if (sub.interactive_type === 'display' && sub.value?.trim()) {
+            lines.push(`  重點：${sub.value}`);
+          } else {
+            lines.push(`  重點：________________`);
+          }
+          lines.push('');
+        });
+      } else {
+        lines.push(`上位概念：${row.label}`);
+        if (row.interactive_type === 'display' && row.value?.trim()) {
+          lines.push(`重點：${row.value}`);
+        } else {
+          lines.push(`重點：________________`);
+        }
+        lines.push('');
+      }
+    });
+
+    const text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyDone(true);
+      setTimeout(() => setCopyDone(false), 1500);
+    }).catch(() => {
+      // Clipboard unavailable (non-HTTPS or permission denied) — silent no-op
+    });
+  }, [structure]);
+
   const handleSubmit = useCallback(async () => {
     if (!structure || submitting || gradeResult !== null) return;
     setSubmitting(true);
@@ -351,7 +439,11 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       subIdx?: number,
     ) => {
       if (cell.interactive_type === 'display') {
-        return <span className="text-gray-800 leading-relaxed">{cell.value}</span>;
+        return (
+          <span className="text-base italic text-gray-800 leading-relaxed font-medium">
+            {cell.value}
+          </span>
+        );
       }
       const key = answerKey(rowIdx, subIdx);
       const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
@@ -403,48 +495,71 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   return (
     <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
       {/* Header */}
-      <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between">
+      <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
-        {submitted && score >= 0 && (
-          <span
-            className={`text-sm font-bold px-3 py-1 rounded-full ${
-              score >= 80
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-amber-100 text-amber-700'
-            }`}
+        <div className="flex items-center gap-2">
+          {/* Copy template button (#2084) */}
+          <button
+            onClick={handleCopyTemplate}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-300 bg-white text-amber-700 text-xs font-semibold hover:bg-amber-100 active:scale-95 transition-all select-none"
+            title="複製模板到剪貼板"
           >
-            {score >= 80 ? '🎉 表現超棒！' : '💪 繼續加油'}
-          </span>
-        )}
+            <span className="material-symbols-outlined text-sm" style={{ fontSize: '14px' }}>
+              {copyDone ? 'check_circle' : 'content_copy'}
+            </span>
+            {copyDone ? '已複製 ✓' : '複製模板'}
+          </button>
+          {submitted && score >= 0 && (
+            <span
+              className={`text-sm font-bold px-3 py-1 rounded-full ${
+                score >= 80
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {score >= 80 ? '🎉 表現超棒！' : '💪 繼續加油'}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* #1534: card layout — yellow row banner + per-sub_row body; bare banner when display with empty value (avoids huge blank cell). */}
+      {/* #1534: card layout — coloured row banner + per-sub_row body */}
+      {/* #2084: left-border colour accent for visual hierarchy (problem/solution/result) */}
       <div className="divide-y-2 divide-gray-200 text-base">
         {rows.map((row, rowIdx) => {
           const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
           const topLevelEmptyDisplay =
             !hasSubRows && row.interactive_type === 'display' && !row.value?.trim();
+          const accent = getLabelAccent(row.label);
 
           return (
             <section key={`${rowIdx}-${row.label}`}>
-              {/* Yellow header — row.label as horizontal banner */}
-              <div className="bg-amber-50 px-4 py-2.5 font-bold text-gray-800 leading-snug">
+              {/* Row header — colour-accented left border (#2084) */}
+              <div
+                className={`${accent.borderClass} ${accent.bgClass} px-4 py-2.5 font-bold ${accent.textClass} leading-snug`}
+              >
                 {row.label}
               </div>
 
               {hasSubRows ? (
-                <div className="divide-y divide-gray-200">
-                  {(row.sub_rows ?? []).map((sub, subIdx) => (
-                    <div key={`${subIdx}-${sub.label}`}>
-                      {/* Gray sub-label — horizontal banner */}
-                      <div className="bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600 leading-snug">
-                        {sub.label}
+                /* Sub-rows: indented with left border for mind-map feel (#2084) */
+                <div className="divide-y divide-gray-100 ml-6 border-l-2 border-gray-200">
+                  {(row.sub_rows ?? []).map((sub, subIdx) => {
+                    const subAccent = getLabelAccent(sub.label);
+                    return (
+                      <div key={`${subIdx}-${sub.label}`}>
+                        {/* Sub-label banner with own accent */}
+                        <div
+                          className={`${subAccent.borderClass} ${subAccent.bgClass} px-4 py-2 text-sm font-semibold ${subAccent.textClass} leading-snug`}
+                        >
+                          {sub.label}
+                        </div>
+                        <div className="px-4 py-3">
+                          {renderCellContent(sub, rowIdx, subIdx)}
+                        </div>
                       </div>
-                      <div className="px-4 py-3">
-                        {renderCellContent(sub, rowIdx, subIdx)}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : topLevelEmptyDisplay ? null : (
                 <div className="px-4 py-3">
