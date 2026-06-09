@@ -42,32 +42,13 @@ export type { AnnotationSummary } from './annotationReducer';
 
 const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
 
-// Fallback loader: when sessionStorage is cleared (new tab / bookmark reopen),
-// getLearningStorageScope() returns the plain storyId key instead of the
-// assignment-scoped key (annotations_{id}__a_{assignmentId}). This helper
-// tries the primary key first, then scans localStorage for assignment-scoped
-// keys so annotations are not lost after a new-tab reopen.
 function loadAnnotationsWithFallback(storyId: string): Annotation[] {
-  const primary = STORAGE_KEY(storyId);
   try {
-    const raw = localStorage.getItem(primary);
-    if (raw) return JSON.parse(raw) as Annotation[];
-  } catch { /* ignore */ }
-
-  // Fallback: scan for assignment-scoped keys when sessionStorage was cleared
-  const prefix = `annotations_${storyId}__a_`;
-  let best: Annotation[] = [];
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith(prefix)) continue;
-      const val = localStorage.getItem(key);
-      if (!val) continue;
-      const parsed = JSON.parse(val) as Annotation[];
-      if (Array.isArray(parsed) && parsed.length > best.length) best = parsed;
-    }
-  } catch { /* ignore */ }
-  return best;
+    const raw = localStorage.getItem(STORAGE_KEY(storyId));
+    return raw ? (JSON.parse(raw) as Annotation[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 // A5: localStorage key for first-use onboarding gate
