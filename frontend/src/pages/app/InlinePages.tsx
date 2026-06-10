@@ -15,14 +15,12 @@ import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
-import { checkSelfPracticeCompleted, SessionExpiredError } from '../../services/learningApi';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
-import { Story } from '../../types';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
@@ -83,7 +81,6 @@ export const LibraryPage: React.FC = () => {
   const classroomId = searchParams.get('classroom');
   const classroomIdNum = classroomId ? parseInt(classroomId, 10) : null;
   const [showResumePrompt, setShowResumePrompt] = useState(true);
-  const [restartConfirmStory, setRestartConfirmStory] = useState<Story | null>(null);
 
   const clearAssignmentContext = (storyId: string) => {
     try {
@@ -145,51 +142,14 @@ export const LibraryPage: React.FC = () => {
     });
   };
 
-  const handleSelectStory = async (story: Story) => {
+  const handleSelectStory = (story: { id: string }) => {
     clearAssignmentContext(story.id);
     cleanupAssignmentScopedProgressKeys(story.id);
-
-    // Check completion: DB first (cross-device), localStorage as fallback.
-    let isCompletedBefore = false;
-    if (token) {
-      try {
-        isCompletedBefore = await checkSelfPracticeCompleted(story.id, token);
-      } catch (err) {
-        if (err instanceof SessionExpiredError) {
-          console.warn('[LibraryPage] checkSelfPracticeCompleted: token expired, falling back to localStorage');
-        }
-        // Fall through to localStorage check below.
-      }
-      // Sync DB truth back to localStorage so subsequent checks are instant.
-      if (isCompletedBefore) {
-        try { localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`, '1'); } catch { /* non-fatal */ }
-      }
-    }
-    if (!isCompletedBefore) {
-      try {
-        isCompletedBefore = localStorage.getItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`) === '1';
-      } catch {
-        isCompletedBefore = false;
-      }
-    }
-
-    if (isCompletedBefore) {
-      setRestartConfirmStory(story);
-      return;
-    }
-
     navigate(`/learn/${story.id}/intro`);
   };
 
-  const handleConfirmRestart = () => {
-    if (!restartConfirmStory) return;
-    clearSelfPracticeProgress(restartConfirmStory.id);
-    navigate(`/learn/${restartConfirmStory.id}/intro`);
-    setRestartConfirmStory(null);
-  };
-
-  const handleCancelRestart = () => {
-    setRestartConfirmStory(null);
+  const handleClearProgress = (storyId: string) => {
+    clearSelfPracticeProgress(storyId);
   };
 
   return (
@@ -197,56 +157,16 @@ export const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
-      {restartConfirmStory && (
-        <RestartPracticeConfirmModal
-          storyTitle={restartConfirmStory.title}
-          onConfirm={handleConfirmRestart}
-          onCancel={handleCancelRestart}
-        />
-      )}
       <div className="mt-4">
-        <StoryLibrary onStartReading={handleSelectStory} classroomId={classroomIdNum} />
+        <StoryLibrary
+          onStartReading={handleSelectStory}
+          classroomId={classroomIdNum}
+          onClearProgress={handleClearProgress}
+        />
       </div>
     </div>
   );
 };
-
-interface RestartPracticeConfirmModalProps {
-  storyTitle: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const RestartPracticeConfirmModal: React.FC<RestartPracticeConfirmModalProps> = ({
-  storyTitle,
-  onConfirm,
-  onCancel,
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-label="確認重新練習">
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
-      <h3 className="text-lg font-bold text-gray-900">重新練習確認</h3>
-      <p className="text-sm text-gray-600">
-        你已完成過「<strong>{storyTitle}</strong>」，要清除目前自學進度並重新開始嗎？
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
-        >
-          取消
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-hover rounded-lg"
-        >
-          重新練習
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 /** Write character page. */
 export const WritePage: React.FC = () => {

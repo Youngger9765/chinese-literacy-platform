@@ -44,9 +44,11 @@ interface StoryCardProps {
   estimatedXP?: number;
   /** When true, shows a "level up soon" hint instead of the XP estimate. */
   closeToLevelUp?: boolean;
+  /** When provided, shows a small "clear progress" button on the card (Issue #2188). */
+  onClearProgress?: () => void;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, userStatus, estimatedXP, closeToLevelUp }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, userStatus, estimatedXP, closeToLevelUp, onClearProgress }) => {
   const diff = getDifficulty(story);
   const diffConfig = DIFFICULTY_CONFIG[diff];
   const statusBadge = userStatus ? STATUS_BADGE[userStatus] : null;
@@ -130,6 +132,18 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
               </span>
             )}
           </div>
+        )}
+        {/* Clear progress button — only for completed stories (Issue #2188) */}
+        {isCompleted && onClearProgress && (
+          <button
+            type="button"
+            className="mt-2 flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => { e.stopPropagation(); onClearProgress(); }}
+            title="清除練習進度"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>restart_alt</span>
+            清除進度
+          </button>
         )}
       </div>
     </div>
