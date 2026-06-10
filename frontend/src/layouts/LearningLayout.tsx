@@ -186,6 +186,7 @@ const LearningLayout: React.FC = () => {
     hasActiveAssignment,
     syncProgress,
     flushProgress,
+    isProgressLoading,
   } = stepPersistence;
 
   // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────

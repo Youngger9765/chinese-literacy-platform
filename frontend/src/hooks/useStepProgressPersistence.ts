@@ -168,7 +168,7 @@ export function useStepProgressPersistence({
     }
   }, [isAssignmentFlow]);
 
-  const { syncProgress, flushProgress } = useProgressSync({
+  const { syncProgress, flushProgress, isProgressLoading } = useProgressSync({
     token: token ?? null,
     dbSessionId,
     onProgressLoaded: (data) => {
@@ -361,5 +361,6 @@ export function useStepProgressPersistence({
     hasActiveAssignment,
     syncProgress,
     flushProgress,
+    isProgressLoading,
   };
 }
