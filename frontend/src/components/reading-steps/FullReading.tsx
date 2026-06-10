@@ -147,6 +147,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     fallbackReason,
     clearFallbackReason,
     startSession,
+    stopSession,
     submitReading,
     audioRecorder,
   } = useFullReadingSession({
@@ -203,6 +204,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
 
     return <>{zhuyinLine ?? line}</>;
   };
+
+  const handleCancel = useCallback(() => {
+    stopSession();
+    audioRecorder.clearRecording();
+  }, [stopSession, audioRecorder]);
 
   const handleRetry = useCallback(() => {
     try { localStorage.removeItem(storageKey); } catch {}
@@ -313,19 +319,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Recording live card — shows animated mic + timer while session is active */}
-          {isSessionActive && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-4 mt-6 flex flex-col items-center gap-2">
-              <div className="flex items-center justify-center gap-3 py-1">
-                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-                  <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-                </span>
-                <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-              </div>
-              <p className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</p>
-            </div>
-          )}
 
           {/* I4 (Issue #2156): Gemini fallback alert banner — must be visible, never silent.
               Shown when backend returns method='fallback' so user knows the result is
@@ -410,6 +403,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         onSpeak={speakFullStory}
         onStartSession={startSession}
         onSubmit={submitReading}
+        onCancel={handleCancel}
         onStopTts={stopTtsAll}
         onPauseTts={tts.pauseTts}
         onResumeTts={tts.resumeTts}

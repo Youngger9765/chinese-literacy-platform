@@ -65,13 +65,14 @@ describe('FullReadingControls', () => {
     expect(onStartSession).toHaveBeenCalledTimes(1);
   });
 
-  it('renders 完成朗讀 button when recording is active', () => {
+  it('renders 完成 and 取消 buttons when recording is active', () => {
     render(
       <FullReadingControls
         state="recording"
         onSpeak={noop}
         onStartSession={noop}
         onSubmit={noop}
+        onCancel={noop}
         onStopTts={noop}
         onPauseTts={noop}
         onResumeTts={noop}
@@ -83,7 +84,8 @@ describe('FullReadingControls', () => {
         recordingSecs={0}
       />
     );
-    expect(screen.getByText('完成朗讀')).toBeInTheDocument();
+    expect(screen.getByText('完成')).toBeInTheDocument();
+    expect(screen.getByText('取消')).toBeInTheDocument();
   });
 
   it('renders 準備中... button when preparing', () => {
