@@ -9,10 +9,17 @@
  *
  * Fix #2082 (A6/A7/A8): verbal feedback, larger definition text, device-aware instruction.
  * Issue #2163: OnboardingCoach — first-use amber說明框 + demo animation on real UI.
+ * Issue #2135: TTS play button + zhuyin display on word bank chips.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { AnswerRecord } from './vocabDefinitionMatchLogic';
+import { speakText as azureSpeakText } from '../../services/ttsApi';
+import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
+
+/** Speak a vocab word using Azure TTS (fire-and-forget, errors silenced). */
+const speakWord = (text: string) => { azureSpeakText(text).catch(() => {}); };
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 // Using a module-level constant so it is evaluated once and shared across renders.
@@ -73,6 +80,10 @@ export interface DragDropProps {
 }
 
 export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: DragDropProps) {
+  // #2135: zhuyin support — read context directly (same pattern as VocabDefinitionMatch.tsx)
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
+
   const [draggingVocabIdx, setDraggingVocabIdx] = useState<number | null>(null);
   const [placements, setPlacements] = useState<Map<number, number>>(new Map());
   const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
@@ -324,8 +335,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
                 key={vocabIdx}
                 className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
                 aria-label={`${vocab[vocabIdx]?.word} 已配對`}
+                style={{ fontFamily: zhuyinFont }}
               >
-                {vocab[vocabIdx]?.word}
+                {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
               </div>
             );
           }
@@ -352,14 +364,34 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           return (
             <div
               key={vocabIdx}
-              draggable={!isFlying}
-              onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
-              onDragEnd={handleDragEnd}
-              onTouchStart={() => !isFlying && handleTouchStart(vocabIdx)}
-              onClick={() => !isFlying && handleTouchStart(vocabIdx)}
-              className={cls}
+              className="flex items-center gap-1"
             >
-              {vocab[vocabIdx]?.word}
+              <div
+                draggable={!isFlying}
+                onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
+                onDragEnd={handleDragEnd}
+                onTouchStart={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+                onClick={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+                className={cls}
+                style={{ fontFamily: zhuyinFont }}
+              >
+                {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
+              </div>
+              {/* #2135: TTS play button — only shown when chip is interactive (not flying) */}
+              {!isFlying && (
+                <button
+                  type="button"
+                  aria-label={`聽「${vocab[vocabIdx]?.word}」發音`}
+                  title="聽發音"
+                  onClick={(e) => { e.stopPropagation(); speakWord(vocab[vocabIdx]?.word ?? ''); }}
+                  onTouchStart={(e) => { e.stopPropagation(); }}
+                  className="flex-shrink-0 w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center hover:bg-accent/20 active:scale-95 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                  </svg>
+                </button>
+              )}
             </div>
           );
         })}
