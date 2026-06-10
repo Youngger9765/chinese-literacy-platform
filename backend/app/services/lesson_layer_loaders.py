@@ -62,6 +62,8 @@ ENRICHMENT_FIELDS = (
     "worksheet_intro",
     "lesson_intro",
     "worksheet_pdf_url",
+    # Direct docx URL when soffice PDF conversion is broken (#2073)
+    "worksheet_docx_url",
     "layout_mode",
     "reading_strategy_type",
     "images",
@@ -233,6 +235,8 @@ def load_layer1_lessons() -> list[dict]:
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Direct docx URL when soffice PDF conversion is broken (#2073)
+            "worksheet_docx_url": data.get("worksheet_docx_url"),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
             "_layer": 1,
@@ -388,6 +392,8 @@ def load_layer2_lessons(
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Direct docx URL when soffice PDF conversion is broken (#2073)
+            "worksheet_docx_url": data.get("worksheet_docx_url"),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
             "_layer": 2,

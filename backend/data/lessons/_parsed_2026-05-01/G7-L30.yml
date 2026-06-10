@@ -379,6 +379,7 @@ lesson_intro:
   course_intro: 這篇文章將帶你認識兩種在臺灣常見的八哥鳥——白尾八哥和臺灣冠八哥。雖然牠們外形相似，但其實有著不同的身世和習性。文章會介紹如何分辨這兩種八哥，並透過數據和圖表，探討為什麼外來種白尾八哥的數量，近年來會大幅超越臺灣原生種的臺灣冠八哥。讀完這篇文章，你將對這兩種鳥類有更深入的了解，並思考牠們在臺灣生態環境中的處境。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L30.pdf
+worksheet_docx_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L30.docx
 # Tables extracted from 紙本學習單 PDF (#1685) — yml `paragraphs` only kept
 # table titles, full row data was lost during docx → yml parse.
 # Source: /tmp/worksheets-7priority/G7-L30.pdf pages 2-3 (manual extract from 紙本).
