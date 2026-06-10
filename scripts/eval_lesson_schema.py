@@ -76,22 +76,49 @@ DEFAULT_SCHEMA_DIR = Path(
 def overfit_lint(script_path: Path) -> dict:
     """
     Detect hardcoded lesson IDs or course-specific strings in DETECTOR logic.
-    Only flags lines that contain detection/classification logic
-    (re.compile / re.search / re.match / if ... in ...) with lesson-specific strings.
-    Comments, docstrings, LESSON_META, DOCX_DIR, argparse help strings are excluded.
+    Two checks:
+    1. Lines with detection logic (re.compile/search/if...in) containing lesson-specific strings.
+    2. regex compile lines (LABEL_FAMILIES / SUPPLEMENTARY_MARKERS) containing proper-noun
+       overfit words — story character names, place names that appear in < 3 courses.
+
+    Anti-patterns caught:
+    - Lesson IDs: G6-L22, G7-SL17 etc.
+    - Story-specific proper nouns used in detection regexes: 孟嘗君, 白鯨, 八哥, 曹沖 etc.
+    - Crime-specific structural labels in LABEL_FAMILIES: 案件, 案發, 辦案 (use 歷程/真相 instead)
+
+    Exclusions:
+    - Comment lines (#)
+    - Docstrings (between triple-quotes)
+    - Lookup tables / path dicts: LESSON_META, DOCX_DIR, LESSON_DOCX, .docx
+    - argparse help strings
+    - extract_nested_tables function body (handles specific table shapes, not detection)
+    - get_lesson_story_text (reads lesson yaml, not detection)
     """
-    # Pattern: lesson IDs or highly specific course names that only appear in 1-2 lessons
+    # Pattern: lesson IDs or story-specific proper nouns that only appear in 1-2 courses
     specific_course_re = re.compile(
-        r"G[0-9]-L[0-9]|孟嘗君|白鯨|八哥|雞鳴狗盜|曹沖"
+        # Lesson IDs
+        r"G[0-9][-_][SL]*[0-9]"
+        # Story-specific character / place names — add here if found in future
+        r"|孟嘗君|雞鳴狗盜|白鯨救援|曹沖|吐瓦魯"
+        r"|白狐裘|八哥命運"
+        # Crime-specific labels that overfit detective courses
+        r"|案發|辦案"
+        # Chinese character names of supplementary-passage stories (single-story markers)
+        r"|荀巨伯|孝子"
     )
-    # Lines that count as detection logic
+    # Lines that count as detection / classification logic
     detection_logic_re = re.compile(
         r"\bre\.(compile|search|match|findall)\b|"
         r"\bif\b.+(in\b|==\b)|"
         r"\breturn\b.+[{\"']type"
     )
+    # Also flag bare regex continuation strings (r"...") inside re.compile blocks
+    # that contain banned words — these are multi-line compile constructs.
+    regex_continuation_re = re.compile(r"""^\s*r["']""")
+
     hits = []
     in_multiline_string = False
+    in_compile_block = False   # True when we're inside a multi-line re.compile(...)
 
     with open(script_path, encoding="utf-8") as f:
         for i, line in enumerate(f, 1):
@@ -110,17 +137,29 @@ def overfit_lint(script_path: Path) -> dict:
             if in_multiline_string:
                 continue
 
-            # Skip LESSON_META, DOCX_DIR, argparse, extract functions, SUPPLEMENTARY_MARKERS
+            # Skip pure lookup tables / path dicts / argparse
             if any(kw in stripped for kw in [
                 "LESSON_META", "DOCX_DIR", "LESSON_DOCX", "help=",
-                "extract_nested_tables", "SUPPLEMENTARY_MARKERS",
-                "get_lesson_story_text", "argparse", ".docx"
+                "extract_nested_tables", "get_lesson_story_text", "argparse", ".docx"
             ]):
                 continue
 
-            # Only flag if line has BOTH: specific course string AND detection logic
-            if specific_course_re.search(stripped) and detection_logic_re.search(stripped):
-                hits.append(f"  line {i}: {stripped[:100]}")
+            # Detect start/end of re.compile blocks (for multi-line regex strings)
+            if re.search(r"\bre\.compile\s*\(", stripped):
+                in_compile_block = True
+            if in_compile_block and ")" in stripped and not re.search(r"\bre\.compile\s*\(", stripped):
+                in_compile_block = False
+
+            # Check: line has specific course string AND (detection logic OR compile continuation)
+            has_banned = specific_course_re.search(stripped)
+            if has_banned:
+                is_detection_line = detection_logic_re.search(stripped)
+                is_compile_continuation = (
+                    in_compile_block and
+                    regex_continuation_re.match(line)
+                )
+                if is_detection_line or is_compile_continuation:
+                    hits.append(f"  line {i}: {stripped[:100]}")
 
     return {"pass": len(hits) == 0, "hits": hits}
 
@@ -168,12 +207,35 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
 
     row_recall = schema_row_count / docx_rows if docx_rows > 0 else 0.0
 
-    # Blank recall
-    flat_docx = " ".join(
-        c["text"] for row in kp_table_raw["rows"]
-        for c in row["cells"] if not c.get("dup")
-    )
-    docx_blanks = len(bls.BLANK_RE.findall(flat_docx))
+    # Blank recall — count DOCX fill-in blanks, excluding:
+    #   (a) blanks in the first row of the value column that look like instructions
+    #       e.g. "【 】處填入原文，找不到原文時，再用自己的話寫。"
+    #   (b) blanks in label-column cells (col0) that are the label itself
+    #       e.g. "【 經過   】" — these become schema label strings, not fill-in blanks
+    INSTRUCTION_BLANK_RE = re.compile(r"【\s*】\s*[處填找寫]")  # 【 】處... pattern
+
+    docx_blanks = 0
+    rows_raw_for_blank = kp_table_raw["rows"]
+    n_cols_raw = kp_table_raw["n_cols"]
+    for r_idx, row in enumerate(rows_raw_for_blank):
+        cells = [c for c in row["cells"] if not c.get("dup")]
+        for c_idx, cell in enumerate(cells):
+            txt = cell.get("text", "")
+            if not txt:
+                continue
+            # Skip label-column cells (col0) whose blank IS the label, not a fill-in slot
+            # Heuristic: cell is in col0 AND the entire text is just a blank (± whitespace)
+            if c_idx == 0 and re.fullmatch(r"【[^】]*】", txt.strip()):
+                continue
+            # Skip instruction-style blanks: "【 】處填入原文 ..."
+            if INSTRUCTION_BLANK_RE.search(txt):
+                # Subtract 1 for the instruction blank itself, count any additional real blanks
+                all_blanks = bls.BLANK_RE.findall(txt)
+                # An instruction cell typically has exactly 1 blank which is the instruction
+                docx_blanks += max(0, len(all_blanks) - 1)
+                continue
+            docx_blanks += len(bls.BLANK_RE.findall(txt))
+
     schema_blanks = sum(
         len(sr.get("blanks", []))
         for r in rows_out
@@ -182,10 +244,23 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     blank_recall = schema_blanks / docx_blanks if docx_blanks > 0 else 1.0
 
     # Nesting preserved
-    has_nested_in_docx = kp_table_raw["n_cols"] >= 3
+    # A 3+ col table can be either hint_value (flat with hint field) or nested (sub_rows).
+    # Both are valid encodings of a 3-col table — check that the schema uses EITHER.
+    has_multi_col_docx = kp_table_raw["n_cols"] >= 3
     nesting_preserved = True
-    if has_nested_in_docx:
-        nesting_preserved = any("sub_rows" in r for r in rows_out)
+    if has_multi_col_docx:
+        # Schema structure field tells us which encoding was used
+        schema_structure = kp_schema.get("keypoints", {}).get("structure", "flat")
+        schema_cols = kp_schema.get("keypoints", {}).get("columns", [])
+        has_sub_rows = any("sub_rows" in r for r in rows_out)
+        has_hint_field = any("hint" in r for r in rows_out)
+        # Accept: nested (sub_rows present) OR hint_value (hint field present) OR
+        # flat with 3-col encoding (columns includes "paragraph" / "hint" / "sub_label")
+        nesting_preserved = (
+            has_sub_rows or
+            has_hint_field or
+            any(c in schema_cols for c in ("hint", "sub_label", "paragraph"))
+        )
 
     # Label family
     sname, stype = bls.detect_strategy_from_filename(str(docx_path))

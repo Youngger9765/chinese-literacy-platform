@@ -314,7 +314,15 @@ def extract_nested_tables_g7l30(docx_path, asset_dir):
 # ── Helper: parse blanks from cell text ────────────────────────────────────
 
 def parse_blanks(text):
-    """Return list of {answer, hint} dicts from 【...】 patterns in text."""
+    """Return list of {answer, hint} dicts from 【...】 patterns in text.
+    Excludes instruction blanks of the form 【 】處填入原文 / 【 】填入... which are
+    meta-annotations, not student fill-in slots.
+    """
+    # Instruction blank: empty/whitespace 【】 followed by action word
+    INSTRUCTION_BLANK_RE = re.compile(r"【\s*】\s*[處填找寫]")
+    if INSTRUCTION_BLANK_RE.search(text):
+        # This cell is an instruction cell — skip all blanks in it
+        return []
     blanks = []
     for m in BLANK_RE.finditer(text):
         raw = m.group(1).strip()
@@ -345,21 +353,26 @@ def find_keypoints_table(blocks, lesson_id):
        - 摘要/PSE family: 問題, 解決, 結果, 迴響
        - 敘事人物 family: 主角, 主題, 特質, 事例, 家庭, 背景, 翻身, 體會, 心得,
                           起因, 經過, 結果, 結論
-       - 研究/科探 family: 研究問題, 假說, 實驗, 驗證, 結論, 案件, 前言, 案發
-       - 比較/觀點 family: 比較, 對象, 吐瓦魯, 危機, 因應, 挑戰, 作者反思, 4F
+       - 研究/科探 family: 研究問題, 假說, 實驗, 驗證, 結論, 歷程, 真相
+       - 比較/觀點 family: 危機, 因應, 挑戰, 作者反思, 4F, 總結
        - 大主題/小主題 family: 大主題, 小主題, 段落, 第N段
        - Hint_value family: 元素, 提示, 重點, 段落定位
 
     Bias AWAY from: vocab-application tables (2-3 rows × 4+ cols with vocab code slots)
     """
     # First-column label families (for scoring — not required)
+    # Rules: use structural/semantic labels that generalise across many courses.
+    # Do NOT add story-specific proper nouns (character names, case titles, etc.)
+    # — those overfit to a single course and hurt generalization.
     LABEL_FAMILIES = re.compile(
         # PSE / summary
         r"問題|解決|迴響|研究問題|新說法|假說"
         # Narrative / character
         r"|主角|主題|特質|事例|家庭|背景|翻身|體會|心得|起因|經過"
-        # Scientific inquiry
-        r"|實驗|驗證|研究影響|案件|前言|案發|辦案|歷程|真相"
+        # Scientific inquiry / causal sequence
+        # NOTE: 案件/案發/辦案 removed — crime-specific proper labels, not structural.
+        # Tables containing these labels are selected via blank-density scoring instead.
+        r"|實驗|驗證|研究影響|歷程|真相"
         # Comparison / opinion
         r"|危機|因應|挑戰|作者反思|總結|目的|原因|影響|方法"
         # Topic-based
@@ -526,9 +539,11 @@ def extract_keypoints(table, lesson_id):
 
         elif not is_hint_value and n_cols >= 3 and len(cells) >= 3:
             # Nested 3-col: label | sub_label | value
+            # For tables with 4+ columns, join all cells[2:] to avoid dropping extra cols
             label_text = clean_label(cells[0]["text"])
             sub_label_text = cells[1]["text"].strip()
-            value_text = cells[2]["text"].strip()
+            # Join all value columns (cells[2:]) — handles 4/5/6-col tables
+            value_text = " ".join(c["text"].strip() for c in cells[2:] if c["text"].strip())
 
             # Detect label change by TEXT IDENTITY (not vmerge — unreliable in python-docx)
             if label_text and label_text != current_label:
@@ -536,11 +551,16 @@ def extract_keypoints(table, lesson_id):
                 current_sub_rows = []
                 current_label = label_text
 
+            # Extract blanks from sub_label column too (e.g. "【第一】\n困難" label cells)
+            sub_label_blanks = parse_blanks(sub_label_text)
+            # Strip blanks from sub_label to get clean display label
+            sub_label_clean = remove_blanks(sub_label_text) if sub_label_blanks else sub_label_text
+
             if sub_label_text:
-                blanks = parse_blanks(value_text)
-                template = remove_blanks(value_text) if blanks else value_text
+                blanks = sub_label_blanks + parse_blanks(value_text)
+                template = remove_blanks(value_text)
                 current_sub_rows.append({
-                    "sub_label": sub_label_text,
+                    "sub_label": sub_label_clean,
                     "template": template,
                     "blanks": blanks,
                 })
@@ -907,8 +927,12 @@ def merge_passage_lines(blocks, lesson_id=None):
     Handles both List Paragraph style AND Normal-style narrative passages
     (the latter identified by is_substantive_narrative() in classify_block).
     """
+    # Structural markers that signal a supplementary passage section.
+    # Use generic heading phrases only — do NOT add story-specific proper nouns
+    # (character names like 孟嘗君/曹沖 etc.) — they overfit to individual courses.
+    # The is_lesson_text() check below handles the primary lesson_text/supplementary split.
     SUPPLEMENTARY_MARKERS = re.compile(
-        r"孟嘗君|白狐裘|曹沖|大象|讓我們來看|課文另一個|進階挑戰|以下是一篇"
+        r"讓我們來看|課文另一個|進階挑戰|以下是一篇|延伸閱讀|另一則故事"
     )
 
     # Load lesson story text for source=lesson_text detection
@@ -1382,7 +1406,8 @@ def process_lesson(lesson_id, docx_path, output_dir):
     if figure_blocks:
         print(f"  Figure blocks:")
         for fb in figure_blocks:
-            print(f"    referent={fb.get('referent')} asset={fb.get('asset')} bind='{fb.get('bind_paragraph','')[:40]}'")
+            bind_val = fb.get('bind_paragraph') or ''
+            print(f"    referent={fb.get('referent')} asset={fb.get('asset')} bind='{bind_val[:40]}'")
 
     null_answers = sp_schema["spotlight"].get("_null_answers", [])
     if null_answers:
