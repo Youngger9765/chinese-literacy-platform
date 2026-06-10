@@ -23,6 +23,8 @@ export interface FullReadingControlsProps {
   onStartSession: () => void;
   /** Called when user clicks 完成朗讀 (P1#1: async — awaits audio blob) */
   onSubmit: () => void | Promise<void>;
+  /** Called when user clicks 取消 during recording — stops session without submitting */
+  onCancel: () => void;
   /** Called when user clicks 停止 (TTS) */
   onStopTts: () => void;
   /** Called when user clicks 暫停 (TTS playing, not paused) */
@@ -49,6 +51,7 @@ const FullReadingControls: React.FC<FullReadingControlsProps> = ({
   onSpeak,
   onStartSession,
   onSubmit,
+  onCancel,
   onStopTts,
   onPauseTts,
   onResumeTts,
@@ -97,14 +100,35 @@ const FullReadingControls: React.FC<FullReadingControlsProps> = ({
             準備中...
           </button>
         ) : state === 'recording' ? (
-          <button
-            onClick={onSubmit}
-            className="w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]"
-            style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
-          >
-            <span className="material-symbols-outlined text-xl">check_circle</span>
-            完成朗讀
-          </button>
+          <div className="w-full flex flex-col items-center gap-3">
+            {/* Timer row */}
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-5 w-5 items-center justify-center">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+                <span className="relative material-symbols-outlined text-base text-red-500" style={{fontVariationSettings:"'FILL' 1"}}>mic</span>
+              </span>
+              <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
+            </div>
+            {/* Cancel + Submit buttons */}
+            <div className="w-full flex gap-3">
+              <button
+                onClick={onCancel}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+                取消
+              </button>
+              <button
+                onClick={onSubmit}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]"
+                style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+              >
+                <span className="material-symbols-outlined text-xl">check_circle</span>
+                完成
+              </button>
+            </div>
+            <p className="text-xs text-on-surface-variant">隨時可以停止，按「完成」即送出評分</p>
+          </div>
         ) : state === 'ttsPlaying' ? (
           <div className="w-full flex gap-3">
             <button
