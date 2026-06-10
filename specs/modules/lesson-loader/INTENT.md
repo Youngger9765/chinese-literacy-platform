@@ -84,7 +84,22 @@ Layer-2 lesson `id = display_order + LAYER2_ID_OFFSET`，最小值 >= 1000。
   singular 優先（`data.get("strategy_exercise") or data.get("strategy_exercises")`）。
   若兩者都有值，plural 被忽略。這是預期行為，但未有測試覆蓋。
 
-## 4. 反模式（不要做）
+## 4. worksheet_docx_url 自動 derive 機制（#2207）
+
+`lesson_layer_loaders.py` 在 module 載入時讀取 `backend/data/worksheet_docx_codes.txt`（checked-in manifest，225 個 grade_code），建成 `_DOCX_CODES` frozenset（一次性讀取，不每課 re-read）。
+
+**Priority 順序**（Layer-1 與 Layer-2 都適用）：
+1. YAML 顯式 `worksheet_docx_url` 欄位 → 優先（7 個 demo 課不受影響）
+2. grade_code 在 `_DOCX_CODES` 中 → derive `https://storage.googleapis.com/lingoleap-assets/worksheets/{grade_code}.docx`
+3. 不在 manifest → `None`
+
+**manifest 更新**：當 GCS 新上傳 docx 後，重新跑：
+```bash
+gsutil ls "gs://lingoleap-assets/worksheets/*.docx" | sed 's|.*/||; s|\.docx$||' | sort > backend/data/worksheet_docx_codes.txt
+```
+然後 commit `worksheet_docx_codes.txt`（不需改 loader）。
+
+## 5. 反模式（不要做）
 
 - ❌ 直接讀 `_LESSON_CACHE` 全域變數 — 用 `get_lesson_by_id()` API
 - ❌ 修改 Layer-1 YAML 的 `lesson_number` 欄位 — 會打破 DB Text FK 映射
