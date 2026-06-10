@@ -401,6 +401,10 @@ class TeacherSessionReportResponse(BaseModel):
     teacher_reviewed_at: datetime | None
     started_at: datetime
     completed_at: datetime | None
+    # Issue #1549 — unified per-step progress. Contains current_step,
+    # steps_completed, and step_data (one entry per stepId: intro / tutor /
+    # comprehension / vocab / dictation / full-reading / report).
+    step_progress: dict | None = None
 
     model_config = {"from_attributes": True}
 

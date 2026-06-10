@@ -34,9 +34,21 @@ interface FullReadingProps {
   initialResult?: FullReadingResult | null;
   /** All reading attempts for this session from DB (Issue #1386 — 4-attempt progress chart). */
   fullReadingAttempts?: FullReadingAttempt[];
+  /** Full step_data['full-reading'] snapshot from DB (Issue #1549) — provides selfRating + transcript. */
+  initialProgress?: FullReadingStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: FullReadingStepData, immediate?: boolean) => void;
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
+const FullReading: React.FC<FullReadingProps> = ({
+  story,
+  onFinish,
+  onBack,
+  initialResult,
+  fullReadingAttempts = [],
+  initialProgress,
+  onProgressChange,
+}) => {
   const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
@@ -57,7 +69,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   });
 
   /* ---- Self-assessment for current attempt (Issue #1386) ---- */
-  const [selfRating, setSelfRating] = useState<AssessmentRating | undefined>(undefined);
+  // Issue #1549 — rehydrate selfRating from DB-loaded step_data when available.
+  const [selfRating, setSelfRating] = useState<AssessmentRating | undefined>(
+    () => (initialProgress?.self_rating as AssessmentRating | undefined) ?? undefined
+  );
   const [showComparison, setShowComparison] = useState(false);
 
   /* ---- Parsed benchmark for progress chart (Issue #1386) ---- */
@@ -166,6 +181,29 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   // Raw Web Speech gray-text preview replaces the punctuation-insertion path.
   // Reason: enhanceLiveTranscript ran on every STT partial → visible flicker.
   // Gemini provides accurate punctuation post-submission (no live re-insertion needed).
+
+  /* ---- Issue #1549 — persist to step_progress (DB).
+   *      We only push to DB after a result is committed; transcript and
+   *      selfRating updates ride along so teachers see them too. The handler
+   *      is debounced upstream (5 s) so rapid selfRating clicks don't spam. */
+  useEffect(() => {
+    if (!result || !onProgressChange) return;
+    onProgressChange(
+      {
+        result: {
+          matchRate: result.matchRate,
+          feedback: result.feedback,
+          diffTokens: result.diffTokens,
+          cpm: result.cpm,
+          durationMs: result.durationMs,
+          errorBreakdown: result.errorBreakdown,
+        },
+        self_rating: selfRating,
+        transcript: streamingTranscript,
+      },
+      false,
+    );
+  }, [result, selfRating, streamingTranscript, onProgressChange]);
 
   const zhuyinLines = useMemo(
     () => processLinesSelective(story.content, vocabWords),

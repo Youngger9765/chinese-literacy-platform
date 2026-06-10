@@ -320,6 +320,13 @@ export interface TeacherSessionReport {
   teacher_reviewed_at: string | null;
   started_at: string;
   completed_at: string | null;
+  /** Issue #1549 — unified per-step progress (current_step, steps_completed, step_data). */
+  step_progress: {
+    current_step: string | null;
+    steps_completed: string[];
+    step_data: Record<string, unknown>;
+    version?: number;
+  } | null;
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
