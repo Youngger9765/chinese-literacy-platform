@@ -151,6 +151,11 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   // (merges with other steps' data instead of overwriting the snapshot).
   useEffect(() => {
     if (phase === 'done' && result && saveStepProgressPatch) {
+      // Issue #2070: include firstTryResults so teachers can see per-question
+      // first-attempt accuracy, not just the aggregate score.
+      // firstTryResults shape: { sentenceIdx: number; firstTryCorrect: boolean }[]
+      // Stored in step_progress.step_data['vocab-application'].firstTryResults
+      // (no new table needed — step_data JSONB already exists).
       saveStepProgressPatch({
         stepId: 'vocab-application',
         currentStep: 'vocab-application',
@@ -161,19 +166,22 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
           total: result.total,
           completionRate: result.total > 0 ? result.score / result.total : 1,
           completedAt: new Date().toISOString(),
+          firstTryResults: savedFirstTryResults,
         },
       });
     }
-  }, [phase, result, saveStepProgressPatch]);
+  }, [phase, result, savedFirstTryResults, saveStepProgressPatch]);
 
   // ── DB persistence on page unload (beforeunload) ─────────────────────────
   // Uses patch semantics so we never overwrite other steps' progress.
   const patchRef = useRef(saveStepProgressPatch);
   const phaseRef = useRef(phase);
   const resultRef = useRef(result);
+  const firstTryResultsRef = useRef(savedFirstTryResults);
   useEffect(() => { patchRef.current = saveStepProgressPatch; }, [saveStepProgressPatch]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { resultRef.current = result; }, [result]);
+  useEffect(() => { firstTryResultsRef.current = savedFirstTryResults; }, [savedFirstTryResults]);
 
   useEffect(() => {
     function handleBeforeUnload() {
@@ -193,6 +201,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
         });
       } else if (currentPhase === 'done' && currentResult) {
         // Completed but user is leaving — make sure it's flushed
+        // Include firstTryResults so per-question data survives page-close (#2070).
         patch({
           stepId: 'vocab-application',
           currentStep: 'vocab-application',
@@ -202,6 +211,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
             score: currentResult.score,
             total: currentResult.total,
             completionRate: currentResult.total > 0 ? currentResult.score / currentResult.total : 1,
+            firstTryResults: firstTryResultsRef.current,
           },
         });
       }
