@@ -9,7 +9,8 @@
  * - 中文序號 badges (圖一/圖二/…) positioned top-left of each figure.
  * - Enlarged captions (text-sm, no line-clamp).
  * - In-pane zoom: +/– controls scale the image within its container.
- *   NO fullscreen modal — text pane is never occluded.
+ * - Click-to-zoom fullscreen modal (#2179): click image (at scale=1) or the
+ *   fullscreen button to open a modal overlay — same pattern as ZoomableImage.
  *
  * Layout context (ComprehensionLayout):
  *   Desktop (>=1024px): rendered in the left split pane (50% width) — image
@@ -20,7 +21,7 @@
  * The component is scroll-container-agnostic: its parent sets the height/
  * overflow-y; this component fills 100% of that space.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface GraphicTextImageStripProps {
   images: { filename: string; caption?: string; figure_label?: string }[];
@@ -81,6 +82,8 @@ interface FigureCardProps {
 export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index, figureLabel: figureLabelProp }) => {
   const [scale, setScale] = useState(1);
   const [imgError, setImgError] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const zoomIn = () => setScale((s) => Math.min(s + ZOOM_STEP, ZOOM_MAX));
   const zoomOut = () => setScale((s) => Math.max(s - ZOOM_STEP, ZOOM_MIN));
@@ -88,100 +91,170 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
 
   const figureLabel = figureLabelProp || `圖${chineseNumeral(index + 1)}`;
 
-  return (
-    <figure className="flex flex-col w-full mb-5 last:mb-0">
-      {/* Image container — overflow:auto so zoomed content is scrollable within pane */}
-      <div className="relative w-full overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low">
-        {/* 圖一/圖二/… badge — top-left, always visible */}
-        <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-on-surface/70 text-white text-xs font-bold tracking-wide select-none pointer-events-none">
-          {figureLabel}
-        </span>
+  // Fullscreen modal — Esc closes, body scroll locked while open (#2179)
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setModalOpen(false); };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    // Move focus into dialog
+    dialogRef.current?.focus();
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [modalOpen]);
 
-        {/* In-pane zoom controls — top-right; hidden when image failed */}
-        {!imgError && (
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={zoomOut}
-              disabled={scale <= ZOOM_MIN}
-              aria-label="縮小"
-              className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <span className="material-symbols-outlined text-base leading-none">remove</span>
-            </button>
-            {scale !== 1 && (
+  return (
+    <>
+      <figure className="flex flex-col w-full mb-5 last:mb-0">
+        {/* Image container — overflow:auto so zoomed content is scrollable within pane */}
+        <div className="relative w-full overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low">
+          {/* 圖一/圖二/… badge — top-left, always visible */}
+          <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-on-surface/70 text-white text-xs font-bold tracking-wide select-none pointer-events-none">
+            {figureLabel}
+          </span>
+
+          {/* In-pane zoom controls + fullscreen button — top-right; hidden when image failed */}
+          {!imgError && (
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
               <button
                 type="button"
-                onClick={resetZoom}
-                aria-label="還原縮放"
-                className="px-1.5 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white text-[11px] font-bold flex items-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                onClick={zoomOut}
+                disabled={scale <= ZOOM_MIN}
+                aria-label="縮小"
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                {Math.round(scale * 100)}%
+                <span className="material-symbols-outlined text-base leading-none">remove</span>
               </button>
-            )}
-            <button
-              type="button"
-              onClick={zoomIn}
-              disabled={scale >= ZOOM_MAX}
-              aria-label="放大"
-              className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <span className="material-symbols-outlined text-base leading-none">add</span>
-            </button>
-          </div>
-        )}
+              {scale !== 1 && (
+                <button
+                  type="button"
+                  onClick={resetZoom}
+                  aria-label="還原縮放"
+                  className="px-1.5 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white text-[11px] font-bold flex items-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  {Math.round(scale * 100)}%
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={zoomIn}
+                disabled={scale >= ZOOM_MAX}
+                aria-label="放大"
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <span className="material-symbols-outlined text-base leading-none">add</span>
+              </button>
+              {/* Fullscreen modal button (#2179) */}
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                aria-label={`全螢幕查看 ${figureLabel}`}
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <span className="material-symbols-outlined text-base leading-none">fullscreen</span>
+              </button>
+            </div>
+          )}
 
-        {imgError ? (
-          <div className="w-full h-40 flex flex-col items-center justify-center gap-1 text-on-surface-variant/50">
-            <span className="material-symbols-outlined text-3xl">broken_image</span>
-            <span className="text-xs">圖片載入失敗</span>
-          </div>
+          {imgError ? (
+            <div className="w-full h-40 flex flex-col items-center justify-center gap-1 text-on-surface-variant/50">
+              <span className="material-symbols-outlined text-3xl">broken_image</span>
+              <span className="text-xs">圖片載入失敗</span>
+            </div>
+          ) : (
+            /**
+             * Scrollable inner div: when scale > 1 the image overflows the container
+             * and this div allows the user to pan by scrolling/touch-drag.
+             * transform-origin: top left ensures the badge stays anchored.
+             * Click on image at scale=1 opens the fullscreen modal (#2179).
+             */
+            <div
+              className="w-full overflow-auto"
+              style={{ cursor: scale > 1 ? 'grab' : 'pointer' }}
+              onClick={() => { if (scale === 1) setModalOpen(true); }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && scale === 1) setModalOpen(true); }}
+              aria-label={`全螢幕查看 ${figureLabel}`}
+            >
+              <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                onError={() => setImgError(true)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                  /**
+                   * When scaled, we shrink the CSS width so the scaled
+                   * rendered size equals the container width at scale 1.
+                   * This avoids the image overflowing to the right before
+                   * the overflow-auto div can scroll.
+                   */
+                  ...(scale > 1 ? { width: `${(100 / scale).toFixed(1)}%` } : {}),
+                  transition: 'transform 0.15s ease',
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Caption — enlarged to text-sm, no line-clamp */}
+        {caption ? (
+          <figcaption className="mt-2 text-sm text-on-surface-variant leading-relaxed px-1">
+            <span className="font-semibold text-on-surface">{figureLabel}：</span>
+            {caption}
+          </figcaption>
         ) : (
-          /**
-           * Scrollable inner div: when scale > 1 the image overflows the container
-           * and this div allows the user to pan by scrolling/touch-drag.
-           * transform-origin: top left ensures the badge stays anchored.
-           */
-          <div
-            className="w-full overflow-auto"
-            style={{ cursor: scale > 1 ? 'grab' : 'default' }}
+          <figcaption className="mt-1.5 text-sm text-on-surface-variant/60 px-1">
+            {figureLabel}
+          </figcaption>
+        )}
+      </figure>
+
+      {/* Fullscreen modal (#2179) — same pattern as ZoomableImage */}
+      {modalOpen && (
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${figureLabel} 全螢幕`}
+          tabIndex={-1}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
+          onClick={() => setModalOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setModalOpen(false); }}
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label="關閉"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+          <figure
+            className="max-w-6xl w-full max-h-full flex flex-col items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
           >
             <img
               src={src}
               alt={alt}
-              loading="lazy"
-              onError={() => setImgError(true)}
-              style={{
-                display: 'block',
-                width: '100%',
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                /**
-                 * When scaled, we shrink the CSS width so the scaled
-                 * rendered size equals the container width at scale 1.
-                 * This avoids the image overflowing to the right before
-                 * the overflow-auto div can scroll.
-                 */
-                ...(scale > 1 ? { width: `${(100 / scale).toFixed(1)}%` } : {}),
-                transition: 'transform 0.15s ease',
-              }}
+              className="max-h-[80vh] w-auto max-w-full object-contain rounded-lg shadow-2xl"
             />
-          </div>
-        )}
-      </div>
-
-      {/* Caption — enlarged to text-sm, no line-clamp */}
-      {caption ? (
-        <figcaption className="mt-2 text-sm text-on-surface-variant leading-relaxed px-1">
-          <span className="font-semibold text-on-surface">{figureLabel}：</span>
-          {caption}
-        </figcaption>
-      ) : (
-        <figcaption className="mt-1.5 text-sm text-on-surface-variant/60 px-1">
-          {figureLabel}
-        </figcaption>
+            {(caption || figureLabel) && (
+              <figcaption className="text-sm text-white/90 text-center max-w-3xl">
+                <span className="font-semibold">{figureLabel}</span>
+                {caption ? `：${caption}` : ''}
+              </figcaption>
+            )}
+          </figure>
+        </div>
       )}
-    </figure>
+    </>
   );
 };
 
