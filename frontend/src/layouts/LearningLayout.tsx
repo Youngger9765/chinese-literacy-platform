@@ -264,44 +264,12 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
-  // ── Loading / error states ────────────────────────────────────────────────
-
-
-
-
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-400">載入課文中...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !selectedStory) {
-    const inToolbox = isToolboxMode();
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <p className="text-red-600">{error || '找不到此課文'}</p>
-          <button
-            onClick={() => navigate(inToolbox ? '/tools' : '/library')}
-            className="text-accent hover:text-accent-hover font-medium text-sm"
-          >
-            {inToolbox ? '回到練習工具箱' : '返回圖書館'}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Memoise the outlet-context object so the Outlet (and any child component
   // destructuring via useLearningContext) sees a stable reference when no
   // dependency actually changed. Without useMemo, each LearningLayout render
   // minted a fresh object; child useEffect hooks that depend on context
   // identity (rather than individual fields) would needlessly re-run.
+  // NOTE: must be before early returns to satisfy Rules of Hooks.
   const ctx: LearningContext = useMemo(
     () => ({
       selectedStory,
@@ -377,6 +345,36 @@ const LearningLayout: React.FC = () => {
       hasActiveAssignment,
     ],
   );
+
+  // ── Loading / error states (after all hooks) ─────────────────────────────
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-400">載入課文中...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !selectedStory) {
+    const inToolbox = isToolboxMode();
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-red-600">{error || '找不到此課文'}</p>
+          <button
+            onClick={() => navigate(inToolbox ? '/tools' : '/library')}
+            className="text-accent hover:text-accent-hover font-medium text-sm"
+          >
+            {inToolbox ? '回到練習工具箱' : '返回圖書館'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Issue #1549 — when a DB session exists but step_progress is still loading,
   // delay child render so pages don't initialise local state from an empty
