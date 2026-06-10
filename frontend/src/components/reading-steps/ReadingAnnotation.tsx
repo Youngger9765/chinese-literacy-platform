@@ -44,6 +44,15 @@ export type { AnnotationSummary } from './annotationReducer';
 
 const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
 
+function loadAnnotationsWithFallback(storyId: string): Annotation[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY(storyId));
+    return raw ? (JSON.parse(raw) as Annotation[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 // A5: localStorage key for first-use onboarding gate
 const ANNOTATION_ONBOARDED_KEY = 'annotation_onboarded';
 
@@ -250,14 +259,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // Initial state comes from localStorage (sync, immediate).
   // A DB load runs after mount to replace/merge with the authoritative DB copy.
   const [{ annotations, undoStack }, dispatch] = useReducer(annotationReducer, {
-    annotations: (() => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY(story.id));
-        return raw ? (JSON.parse(raw) as Annotation[]) : [];
-      } catch {
-        return [];
-      }
-    })(),
+    annotations: loadAnnotationsWithFallback(String(story.id)),
     undoStack: [],
   });
 
