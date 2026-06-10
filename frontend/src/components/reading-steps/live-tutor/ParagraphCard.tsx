@@ -358,12 +358,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
             const totalRetryable = targets.filter(t => t.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1).length;
 
-            // Rule 2: if > half the sentences failed → suggest redo, but still show next-segment
-            // if paragraph-level evaluation passed (matchRate >= 0.5 or already completed).
-            // Sentence retry is advisory — never block paragraph-level progress. (#1318)
+            // Rule 2: if > half the sentences failed → suggest redo, but advancement is never blocked.
+            // Retry suggestion is advisory UI only — score never gates paragraph progress. (#1318, #2185)
             if (failedSentences.length > totalRetryable / 2) {
-              const canAdvanceRule2 = paragraphSummary.matchRate >= 0.5
-                || completedParagraphs.has(idx);
+              const canAdvanceRule2 = true; // advancement is never blocked by score
               return (
                 <div className="pt-3 border-t border-on-surface/10">
                   <p className="text-sm text-on-surface-variant text-center">
@@ -457,10 +455,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* Action buttons — hidden during sentence retry */}
           {retrySentenceIdx === undefined && (() => {
-            // canAdvance is based on paragraph-level matchRate only.
-            // Sentence retry suggestions are advisory and must not block paragraph progress. (#1318)
-            const canAdvance = paragraphSummary.matchRate >= 0.5
-              || completedParagraphs.has(idx);
+            // Advancement is never blocked by score — retry suggestions are advisory UI only. (#1318, #2185)
+            const canAdvance = true; // advancement is never blocked by score
 
             return (
             <div className="flex gap-3 justify-center pt-2">
