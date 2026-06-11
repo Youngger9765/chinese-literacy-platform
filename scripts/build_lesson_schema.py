@@ -1148,6 +1148,109 @@ def bind_assets_to_figures(blocks, assets):
     return blocks
 
 
+# Chinese number → int mapping for 圖一/圖二/圖三/圖四 etc.
+_CHINESE_NUM = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8}
+
+
+def inject_per_practice_figures(blocks, assets, strategy_type):
+    """
+    For image_text / table_text lessons (G7-L28 through G7-L30):
+    inject per-practice figure blocks immediately BEFORE each
+    「練習N：第N段 vs 圖N/表N」guide block.
+
+    Rules:
+    - Only injects if there are multiple image assets (≥2) OR table assets
+    - Reads the Chinese figure/table number from the guide text
+      e.g. "練習一：第一段 vs 圖一" → 圖一 → fig1.png
+           "練習二：第二段 vs 圖二" → 圖二 → fig2.png
+           "練習三：課文 vs 表一"   → 表一 → table1.json
+    - The existing opening figure block (full-page overview) is KEPT
+    - Does NOT inject if guide already has a figure sibling nearby
+    - Section-marker images (fig with context='二'/'三'...) are excluded;
+      only substantive images (fig1..figN up to len(image_assets)-len(section imgs))
+      are available for per-practice injection
+
+    Returns modified blocks list (new list, no in-place mutation).
+    """
+    if strategy_type not in ("image_text", "table_text"):
+        return blocks
+
+    image_assets = [a for a in assets if not a.get("type") == "data_table"]
+    table_assets = [a for a in assets if a.get("type") == "data_table"]
+
+    # Heuristic: section-marker images are small (< 20KB based on real data).
+    # Substantive figures are larger. But we don't have size info here — instead,
+    # rely on context: section markers have single-char context ('二', '三', '四').
+    section_marker_re = re.compile(r"^[二三四五六]$")
+    substantive_imgs = [
+        a for a in image_assets
+        if not section_marker_re.match(a.get("context", ""))
+    ]
+
+    # If only 1 substantive image, the opening figure block covers it; nothing to inject
+    if len(substantive_imgs) < 2 and not table_assets:
+        return blocks
+
+    # Build lookup: figure number → asset filename
+    # substantive_imgs[0] = 圖一, [1] = 圖二, etc.
+    fig_by_num = {}  # int → filename
+    for i, a in enumerate(substantive_imgs):
+        fig_by_num[i + 1] = a["filename"]
+
+    tbl_by_num = {}  # int → filename
+    for i, a in enumerate(table_assets):
+        tbl_by_num[i + 1] = a["filename"]
+
+    # Pattern: "練習N：... vs 圖N" or "練習N：... vs 表N"
+    PRACTICE_FIGURE_RE = re.compile(
+        r"練習[一二三四五六].*(?:vs|VS|和|對照|配)\s*圖([一二三四五六])"
+    )
+    PRACTICE_TABLE_RE = re.compile(
+        r"練習[一二三四五六].*(?:vs|VS|和|對照|配)\s*表([一二三四五六])"
+    )
+
+    new_blocks = []
+    for b in blocks:
+        if b.get("type") == "guide":
+            text = b.get("text", "")
+            injected = False
+
+            # Check for 圖N binding
+            m = PRACTICE_FIGURE_RE.search(text)
+            if m:
+                fig_num = _CHINESE_NUM.get(m.group(1), 0)
+                filename = fig_by_num.get(fig_num)
+                if filename:
+                    # Avoid double-inject: check previous block isn't already a figure
+                    if not (new_blocks and new_blocks[-1].get("type") == "figure"):
+                        new_blocks.append({
+                            "type": "figure",
+                            "referent": "image",
+                            "asset": filename,
+                            "bind_paragraph": text,
+                        })
+                        injected = True
+
+            # Check for 表N binding
+            if not injected:
+                m2 = PRACTICE_TABLE_RE.search(text)
+                if m2:
+                    tbl_num = _CHINESE_NUM.get(m2.group(1), 0)
+                    filename = tbl_by_num.get(tbl_num)
+                    if filename:
+                        if not (new_blocks and new_blocks[-1].get("type") == "figure"):
+                            new_blocks.append({
+                                "type": "figure",
+                                "referent": "table",
+                                "asset": filename,
+                                "bind_paragraph": text,
+                            })
+
+        new_blocks.append(b)
+
+    return new_blocks
+
+
 def extract_self_check(raw_blocks, spotlight_start, spotlight_end):
     """Extract self-check items from the spotlight range."""
     items = []
@@ -1192,6 +1295,11 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
     # Bind assets to figure blocks
     if assets:
         classified = bind_assets_to_figures(classified, assets)
+
+    # Inject per-practice figure blocks for image_text / table_text lessons
+    # (inserts figure blocks before 「練習N vs 圖N/表N」guide blocks)
+    if assets:
+        classified = inject_per_practice_figures(classified, assets, strategy_type)
 
     # Extract self-check items
     self_check_items = extract_self_check(raw_blocks, spotlight_start, spotlight_end)
