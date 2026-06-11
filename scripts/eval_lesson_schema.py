@@ -216,6 +216,14 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     # (e.g. G5-L11 with 発展歷程 parent + 2 sub-rows). These must use 1+len(sub_rows).
     # Detection: columns == ['label','value'] AND structure == 'nested'
     # Flat ['label','value'] tables still use len(rows_out).
+    #
+    # P3 fix (issue #2212): for 3-column nested tables (columns include 'sub_label'),
+    # a parent row whose label merges vertically in the DOCX (i.e. has sub_rows but
+    # no own value) does NOT occupy an extra physical row — the sub_rows themselves
+    # account for all rows under that label.
+    # Correct formula: if row has sub_rows → count len(sub_rows) only (not 1+sub_rows).
+    # If row has no sub_rows → count 1.
+    # This fixes G6-L22 summary_pse nested table: 解決(6 sub_rows)=6, not 7.
     rows_out = kp_schema.get("keypoints", {}).get("rows", [])
     schema_columns = kp_schema.get("keypoints", {}).get("columns", [])
     schema_structure = kp_schema.get("keypoints", {}).get("structure", "flat")
@@ -225,7 +233,7 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
         schema_row_count = len(rows_out)
     else:
         schema_row_count = sum(
-            1 + len(r.get("sub_rows", []))
+            len(r["sub_rows"]) if r.get("sub_rows") else 1
             for r in rows_out
         )
 
