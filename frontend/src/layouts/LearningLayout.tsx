@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import type {
   Story,
@@ -98,10 +98,15 @@ export interface LearningContext {
   /**
    * Merge a per-step progress payload into step_progress and persist it.
    * Use this for in-step process/history persistence (e.g. dialogue turns).
+   *
+   * `stepData` is typed as `object` (not `Record<string, unknown>`) so the
+   * strict per-step shapes from `types/stepProgress.ts` are assignable
+   * without a cast at every call site. Runtime behaviour is unchanged — the
+   * payload is spread into `step_data[stepId]` JSONB regardless of shape.
    */
   saveStepProgressPatch: (opts: {
     stepId: string;
-    stepData: Record<string, unknown>;
+    stepData: object;
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
@@ -181,6 +186,7 @@ const LearningLayout: React.FC = () => {
     hasActiveAssignment,
     syncProgress,
     flushProgress,
+    isProgressLoading,
   } = stepPersistence;
 
   // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────
@@ -258,7 +264,89 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
-  // ── Loading / error states ────────────────────────────────────────────────
+  // Memoise the outlet-context object so the Outlet (and any child component
+  // destructuring via useLearningContext) sees a stable reference when no
+  // dependency actually changed. Without useMemo, each LearningLayout render
+  // minted a fresh object; child useEffect hooks that depend on context
+  // identity (rather than individual fields) would needlessly re-run.
+  // NOTE: must be before early returns to satisfy Rules of Hooks.
+  const ctx: LearningContext = useMemo(
+    () => ({
+      selectedStory,
+      session,
+      lastAttempt,
+      rightPanelWidth,
+      setRightPanelWidth,
+      handleStartReading,
+      handleFinishReading,
+      handleFinishComprehension,
+      handleFinishStoryStructure,
+      handleFinishReadingStrategy,
+      handleFinishVocab,
+      handleFinishDictation,
+      handleFinishFullReading,
+      handleFinishListening,
+      handleFinishReadingAnnotation,
+      handleFinishVocabDefinitionMatch,
+      handleFinishVocabApplication,
+      handleFinishSentencePractice,
+      handleFinishVocabWordSearch,
+      handleFinishKnowledgeStation,
+      handleRetry,
+      handleSessionComplete,
+      emptyAttempt: EMPTY_ATTEMPT,
+      dbSessionId,
+      completedParagraphsSet,
+      handleParagraphComplete,
+      assignmentReadingGoals,
+      syncProgress,
+      flushProgress,
+      stepProgressData: stepProgressState,
+      saveStepProgressPatch,
+      isAssignmentReadyForSubmit,
+      missingAssignmentSteps,
+      firstIncompleteStepPath,
+      hasActiveAssignment,
+    }),
+    [
+      selectedStory,
+      session,
+      lastAttempt,
+      rightPanelWidth,
+      setRightPanelWidth,
+      handleStartReading,
+      handleFinishReading,
+      handleFinishComprehension,
+      handleFinishStoryStructure,
+      handleFinishReadingStrategy,
+      handleFinishVocab,
+      handleFinishDictation,
+      handleFinishFullReading,
+      handleFinishListening,
+      handleFinishReadingAnnotation,
+      handleFinishVocabDefinitionMatch,
+      handleFinishVocabApplication,
+      handleFinishSentencePractice,
+      handleFinishVocabWordSearch,
+      handleFinishKnowledgeStation,
+      handleRetry,
+      handleSessionComplete,
+      dbSessionId,
+      completedParagraphsSet,
+      handleParagraphComplete,
+      assignmentReadingGoals,
+      syncProgress,
+      flushProgress,
+      stepProgressState,
+      saveStepProgressPatch,
+      isAssignmentReadyForSubmit,
+      missingAssignmentSteps,
+      firstIncompleteStepPath,
+      hasActiveAssignment,
+    ],
+  );
+
+  // ── Loading / error states (after all hooks) ─────────────────────────────
 
   if (isLoading) {
     return (
@@ -288,49 +376,25 @@ const LearningLayout: React.FC = () => {
     );
   }
 
-  // ── Context assembly ─────────────────────────────────────────────────────
-
-  const ctx: LearningContext = {
-    selectedStory,
-    session,
-    lastAttempt,
-    rightPanelWidth,
-    setRightPanelWidth,
-    handleStartReading,
-    handleFinishReading,
-    handleFinishComprehension,
-    handleFinishStoryStructure,
-    handleFinishReadingStrategy,
-    handleFinishVocab,
-    handleFinishDictation,
-    handleFinishFullReading,
-    handleFinishListening,
-    handleFinishReadingAnnotation,
-    handleFinishVocabDefinitionMatch,
-    handleFinishVocabApplication,
-    handleFinishSentencePractice,
-    handleFinishVocabWordSearch,
-    handleFinishKnowledgeStation,
-    handleRetry,
-    handleSessionComplete,
-    emptyAttempt: EMPTY_ATTEMPT,
-    dbSessionId,
-    completedParagraphsSet,
-    handleParagraphComplete,
-    assignmentReadingGoals,
-    syncProgress,
-    flushProgress,
-    stepProgressData: stepProgressState,
-    saveStepProgressPatch,
-    isAssignmentReadyForSubmit,
-    missingAssignmentSteps,
-    firstIncompleteStepPath,
-    hasActiveAssignment,
-  };
+  // Issue #1549 — when a DB session exists but step_progress is still loading,
+  // delay child render so pages don't initialise local state from an empty
+  // snapshot. Without this gate the async DB load lands after the child has
+  // already useState-initialised with undefined, and the rehydrated answers
+  // never appear in the UI even though they're stored correctly.
+  const waitingForProgress = dbSessionId !== null && isProgressLoading;
 
   return (
     <>
-      <Outlet context={ctx} />
+      {waitingForProgress ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-gray-400">載入學習進度中...</span>
+          </div>
+        </div>
+      ) : (
+        <Outlet context={ctx} />
+      )}
       <SessionTimeoutWarning
         visible={showTimeoutWarning}
         countdownSeconds={WARNING_COUNTDOWN_SECONDS}

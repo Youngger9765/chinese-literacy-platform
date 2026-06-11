@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { formatTime } from '../../utils/formatTime';
 import { Story, FullReadingResult } from '../../types';
 import { parseReadingBenchmark, getBenchmarkFeedback, getSecBenchmarkFeedback, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -18,6 +19,10 @@ import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssess
 import FullReadingControls, { type ControlState } from './full-reading/FullReadingControls';
 import FullReadingScoreCard from './full-reading/FullReadingScoreCard';
 import FullReadingFeedbackPanel from './full-reading/FullReadingFeedbackPanel';
+// Note: liveTranscriptEnhance / enhanceLiveTranscript intentionally NOT imported here.
+// I3 (Issue #2156): live preview must show raw Web Speech gray text only.
+// Instant punctuation re-insertion causes visible flicker on every STT partial result.
+// Gemini adds accurate punctuation post-submission — no need to fake it live.
 
 /* ------------------------------------------------------------------ */
 
@@ -29,9 +34,21 @@ interface FullReadingProps {
   initialResult?: FullReadingResult | null;
   /** All reading attempts for this session from DB (Issue #1386 — 4-attempt progress chart). */
   fullReadingAttempts?: FullReadingAttempt[];
+  /** Full step_data['full-reading'] snapshot from DB (Issue #1549) — provides selfRating + transcript. */
+  initialProgress?: FullReadingStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: FullReadingStepData, immediate?: boolean) => void;
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
+const FullReading: React.FC<FullReadingProps> = ({
+  story,
+  onFinish,
+  onBack,
+  initialResult,
+  fullReadingAttempts = [],
+  initialProgress,
+  onProgressChange,
+}) => {
   const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
@@ -52,7 +69,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   });
 
   /* ---- Self-assessment for current attempt (Issue #1386) ---- */
-  const [selfRating, setSelfRating] = useState<AssessmentRating | undefined>(undefined);
+  // Issue #1549 — rehydrate selfRating from DB-loaded step_data when available.
+  const [selfRating, setSelfRating] = useState<AssessmentRating | undefined>(
+    () => (initialProgress?.self_rating as AssessmentRating | undefined) ?? undefined
+  );
   const [showComparison, setShowComparison] = useState(false);
 
   /* ---- Parsed benchmark for progress chart (Issue #1386) ---- */
@@ -136,9 +156,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   const {
     isSessionActive,
     isPreparing,
+    isTranscribing,
     streamingTranscript: sessionTranscript,
     micError,
+    fallbackReason,
+    clearFallbackReason,
     startSession,
+    stopSession,
     submitReading,
     audioRecorder,
   } = useFullReadingSession({
@@ -152,6 +176,34 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       setHistoryRefreshKey(k => k + 1);
     }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
   });
+
+  // I3 (Issue #2156): liveTranscriptSegments / enhanceLiveTranscript removed.
+  // Raw Web Speech gray-text preview replaces the punctuation-insertion path.
+  // Reason: enhanceLiveTranscript ran on every STT partial → visible flicker.
+  // Gemini provides accurate punctuation post-submission (no live re-insertion needed).
+
+  /* ---- Issue #1549 — persist to step_progress (DB).
+   *      We only push to DB after a result is committed; transcript and
+   *      selfRating updates ride along so teachers see them too. The handler
+   *      is debounced upstream (5 s) so rapid selfRating clicks don't spam. */
+  useEffect(() => {
+    if (!result || !onProgressChange) return;
+    onProgressChange(
+      {
+        result: {
+          matchRate: result.matchRate,
+          feedback: result.feedback,
+          diffTokens: result.diffTokens,
+          cpm: result.cpm,
+          durationMs: result.durationMs,
+          errorBreakdown: result.errorBreakdown,
+        },
+        self_rating: selfRating,
+        transcript: streamingTranscript,
+      },
+      false,
+    );
+  }, [result, selfRating, streamingTranscript, onProgressChange]);
 
   const zhuyinLines = useMemo(
     () => processLinesSelective(story.content, vocabWords),
@@ -191,6 +243,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     return <>{zhuyinLine ?? line}</>;
   };
 
+  const handleCancel = useCallback(() => {
+    stopSession();
+    audioRecorder.clearRecording();
+  }, [stopSession, audioRecorder]);
+
   const handleRetry = useCallback(() => {
     try { localStorage.removeItem(storageKey); } catch {}
     setResult(null);
@@ -198,7 +255,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     audioRecorder.clearRecording();
     setSelfRating(undefined);
     setShowComparison(false);
-  }, [storageKey, setResult, setStreamingTranscript, audioRecorder]);
+    clearFallbackReason();
+  }, [storageKey, setResult, setStreamingTranscript, audioRecorder, clearFallbackReason]);
 
   const handleFinish = useCallback(() => {
     if (!result) return;
@@ -214,6 +272,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     });
   }, [result, storageKey, streamingTranscript, onFinish]);
 
+  /* ── Recording timer (Issue #2175) ──────────────────────────────────── */
+  const [recordingSecs, setRecordingSecs] = useState(0);
+  useEffect(() => {
+    if (!isSessionActive) { setRecordingSecs(0); return; }
+    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isSessionActive]);
+
   /* ── Derive control state for FullReadingControls ─────────────────── */
   const controlState: ControlState = result
     ? 'result'
@@ -224,6 +290,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     : isTtsPlaying
     ? 'ttsPlaying'
     : 'idle';
+
+  // isTranscribing: Gemini audio analysis is in progress after user stops recording
+  // Show a "分析中..." overlay so user knows something is happening (Issue #2131)
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -236,6 +305,17 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
+      {/* ── Gemini transcription loading overlay (Issue #2131) ─────────── */}
+      {isTranscribing && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface rounded-2xl px-8 py-6 flex flex-col items-center gap-3 shadow-xl">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-on-surface font-medium text-base">分析中…</p>
+            <p className="text-on-surface-variant text-sm">AI 正在分析您的朗讀，請稍候</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Single-column centered layout ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
         <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
@@ -251,17 +331,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 <p className="text-sm text-on-surface-variant mt-1">
                   標準比逐段朗讀寬鬆，放輕鬆自然地讀吧
                 </p>
-              </div>
-            )}
-
-            {/* Recording indicator */}
-            {isSessionActive && (
-              <div className="mb-6 flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-                <span className="text-sm font-headline font-bold text-emerald-700 uppercase tracking-wider">聆聽中</span>
               </div>
             )}
 
@@ -288,17 +357,26 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
             </div>
           </div>
 
-          {/* Live transcript card */}
-          {isSessionActive && sessionTranscript && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
-              <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">即時辨識</p>
-              <p className="text-lg text-on-surface leading-relaxed">{sessionTranscript}</p>
-            </div>
-          )}
 
-          {isSessionActive && !sessionTranscript && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
-              <p className="text-base text-on-surface-variant leading-relaxed">請開始朗讀上方課文…</p>
+          {/* I4 (Issue #2156): Gemini fallback alert banner — must be visible, never silent.
+              Shown when backend returns method='fallback' so user knows the result is
+              based on Web Speech only (lower quality) and can retry for a better score. */}
+          {fallbackReason && result && (
+            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
+              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  AI 音訊分析未能完成（{fallbackReason}），評分僅依瀏覽器語音辨識，準確度較低。建議重試以獲得精準評分。
+                </p>
+              </div>
+              <button
+                onClick={clearFallbackReason}
+                className="text-amber-600 hover:text-amber-800 transition-colors shrink-0 mt-0.5"
+                aria-label="關閉提示"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
             </div>
           )}
 
@@ -363,6 +441,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         onSpeak={speakFullStory}
         onStartSession={startSession}
         onSubmit={submitReading}
+        onCancel={handleCancel}
         onStopTts={stopTtsAll}
         onPauseTts={tts.pauseTts}
         onResumeTts={tts.resumeTts}
@@ -371,6 +450,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         isTtsPaused={tts.isTtsPaused}
         sessionTranscriptReady={!!sessionTranscript}
         inToolbox={inToolbox}
+        recordingSecs={recordingSecs}
       />
 
       {/* Background decoration */}

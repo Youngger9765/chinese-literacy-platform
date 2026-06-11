@@ -257,6 +257,24 @@ const TeacherSessionReportPage: React.FC = () => {
           readOnly
         />
       )}
+
+      {/* Issue #1549 — raw step_progress placeholder. A proper per-step
+          breakdown UI (vocab chars practiced, dictation answers, etc.) is
+          tracked in a follow-up issue; for now we expose the JSON so the
+          data wiring is verifiable end-to-end. */}
+      {report?.step_progress && (
+        <details className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            學習步驟細節（原始資料）
+            <span className="ml-2 text-xs text-gray-400">
+              {(report.step_progress.steps_completed?.length ?? 0)} 步已完成
+            </span>
+          </summary>
+          <pre className="px-4 py-3 text-xs text-gray-800 bg-gray-50 overflow-x-auto whitespace-pre-wrap break-words border-t border-gray-200">
+            {JSON.stringify(report.step_progress, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 };

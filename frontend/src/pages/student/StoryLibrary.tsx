@@ -15,6 +15,8 @@ interface StoryLibraryProps {
   completedSlugs?: string[];
   /** When set, show only texts assigned to this classroom (from 我的班級→課文庫). */
   classroomId?: number | null;
+  /** When provided, shows a clear-progress button on completed story cards (Issue #2188). */
+  onClearProgress?: (storyId: string) => void;
 }
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
@@ -36,6 +38,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   limit,
   completedSlugs = [],
   classroomId = null,
+  onClearProgress,
 }) => {
   const { token, user } = useAuth();
   const [xpToNext, setXpToNext] = useState<number | null>(null);
@@ -95,7 +98,16 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   // Issue #1249: per-story student status map
   const [libraryStatus, setLibraryStatus] = useState<Record<string, LibraryStoryStatus>>({});
 
-  const completedSet = new Set(completedSlugs);
+  // Bug fix #2188: completedSet merges external completedSlugs prop AND
+  // stories with status='completed' from the API (libraryStatus).  This
+  // means the clear-progress button is visible even when the caller does not
+  // explicitly supply completedSlugs (the common case for LibraryPage).
+  const completedSet = new Set([
+    ...completedSlugs,
+    ...Object.entries(libraryStatus)
+      .filter(([, s]) => s === 'completed')
+      .map(([id]) => id),
+  ]);
 
   // Fetch XP info for callout badges (lightweight, non-blocking)
   useEffect(() => {
@@ -350,6 +362,17 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
                 userStatus={libraryStatus[story.id]}
                 estimatedXP={ESTIMATED_XP}
                 closeToLevelUp={isCloseToLevelUp}
+                onClearProgress={completedSet.has(story.id) && onClearProgress ? () => {
+                  // Bug fix #2188: update libraryStatus state immediately so the
+                  // card drops its "completed" appearance without needing a full
+                  // page refresh (the DB record is reset by the caller).
+                  setLibraryStatus((prev) => {
+                    const next = { ...prev };
+                    delete next[story.id];
+                    return next;
+                  });
+                  onClearProgress(story.id);
+                } : undefined}
               />
             );
           })}

@@ -3,6 +3,7 @@ import { Story } from '../../types';
 import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import type { DictationStepData } from '../../types/stepProgress';
 
 export interface DictationResult {
   totalWords: number;
@@ -17,12 +18,17 @@ interface WordResult {
   studentAnswer: string;
   isCorrect: boolean;
   skipped: boolean;
+  durationMs?: number;
 }
 
 interface DictationPracticeProps {
   story: Story;
   onFinish: (result: DictationResult) => void;
   onBack: () => void;
+  /** Rehydrate from previously saved step_progress.step_data['dictation']. */
+  initialProgress?: DictationStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: DictationStepData, immediate?: boolean) => void;
 }
 
 type Phase = 'intro' | 'practice' | 'results';
@@ -103,21 +109,61 @@ const SpeakerIcon: React.FC<{ animate: boolean }> = ({ animate }) => (
 
 // ---- Main component ----
 
-const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, onBack }) => {
+const DictationPractice: React.FC<DictationPracticeProps> = ({
+  story,
+  onFinish,
+  onBack,
+  initialProgress,
+  onProgressChange,
+}) => {
   const { zhuyinActive } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
   const words = React.useMemo(() => extractDictationWords(story), [story]);
 
-  const [phase, setPhase] = useState<Phase>('intro');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Rehydrate from DB-loaded step_data['dictation'] when available.
+  // Three cases:
+  //   - phase === 'results' + matching word_results → show the prior summary so
+  //     the student can review or redo (Issue #1549 P1 fix from PR review)
+  //   - phase === 'practice' with partial word_results → resume mid-flight
+  //   - otherwise → fresh start at intro
+  // We guard against course-content drift: if the stored word_results length
+  // doesn't match the current `words.length`, fall back to fresh start to
+  // avoid showing a stale summary that no longer corresponds to the lesson.
+  const hasPriorResults = !!initialProgress
+    && Array.isArray(initialProgress.word_results)
+    && initialProgress.word_results.length > 0;
+  const priorMatchesWords = hasPriorResults
+    && initialProgress!.word_results!.length === words.length
+    && initialProgress!.word_results!.every((r, i) => r.word === words[i]);
+  const canShowResults = priorMatchesWords && initialProgress!.phase === 'results';
+  const canResume = hasPriorResults && priorMatchesWords && initialProgress!.phase !== 'results';
+
+  const initialResults: WordResult[] = (canResume || canShowResults)
+    ? (initialProgress!.word_results as DictationStepData['word_results']).map((r) => ({
+        word: r.word,
+        studentAnswer: r.user_answer,
+        isCorrect: r.correct,
+        skipped: r.user_answer === '' && !r.correct,
+        durationMs: r.duration_ms,
+      }))
+    : [];
+
+  const [phase, setPhase] = useState<Phase>(
+    canShowResults ? 'results' : canResume ? 'practice' : 'intro',
+  );
+  const [currentIndex, setCurrentIndex] = useState(
+    canResume ? Math.min(initialProgress!.current_index ?? 0, words.length - 1) : 0,
+  );
   const [answer, setAnswer] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [wordResults, setWordResults] = useState<WordResult[]>([]);
+  const [wordResults, setWordResults] = useState<WordResult[]>(initialResults);
   const [ttsSupported, setTtsSupported] = useState(true);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   // IME composition guard (#1206): Enter during 注音選字 should not submit.
   const isComposingRef = useRef(false);
+  // Track when the current word was first shown so we can record duration.
+  const wordStartTsRef = useRef<number>(Date.now());
 
   // Cloud TTS is always ready immediately; mark voicesLoaded true on mount.
   // Web Speech API voice loading is handled inside ttsApi fallback.
@@ -154,6 +200,13 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentIndex, voicesLoaded]);
 
+  // Reset per-word timer when phase enters practice or the word advances.
+  useEffect(() => {
+    if (phase === 'practice') {
+      wordStartTsRef.current = Date.now();
+    }
+  }, [phase, currentIndex]);
+
   const handleStartPractice = () => {
     setPhase('practice');
     setCurrentIndex(0);
@@ -161,28 +214,57 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     setWordResults([]);
   };
 
+  const buildStepData = useCallback(
+    (results: WordResult[], nextIndex: number, nextPhase: Phase): DictationStepData => ({
+      word_results: results.map((r) => ({
+        word: r.word,
+        user_answer: r.studentAnswer,
+        correct: r.isCorrect,
+        attempts: 1,
+        duration_ms: r.durationMs,
+      })),
+      current_index: nextIndex,
+      phase: nextPhase,
+    }),
+    [],
+  );
+
   const submitAnswer = useCallback(
     (skipped = false) => {
       const word = words[currentIndex];
       const trimmed = answer.trim();
       const isCorrect = !skipped && trimmed === word;
+      const durationMs = Math.max(0, Date.now() - wordStartTsRef.current);
 
       const result: WordResult = {
         word,
         studentAnswer: skipped ? '' : trimmed,
         isCorrect,
         skipped,
+        durationMs,
       };
 
       const updatedResults = [...wordResults, result];
       setWordResults(updatedResults);
 
-      if (currentIndex + 1 >= words.length) {
-        // Done — show results
+      const isLast = currentIndex + 1 >= words.length;
+      if (isLast) {
         cancelTts();
         const correct = updatedResults.filter((r) => r.isCorrect).length;
         const skippedCount = updatedResults.filter((r) => r.skipped).length;
         const incorrect = updatedResults.length - correct - skippedCount;
+        // Final flush to DB (immediate) — include summary so the report view
+        // and teacher dashboard can read it directly from step_data.
+        const finalStepData: DictationStepData = {
+          ...buildStepData(updatedResults, currentIndex, 'results'),
+          result: {
+            total_words: words.length,
+            correct_count: correct,
+            incorrect_count: incorrect,
+            skipped_count: skippedCount,
+          },
+        };
+        onProgressChange?.(finalStepData, true);
         onFinish({
           totalWords: words.length,
           correctCount: correct,
@@ -192,11 +274,13 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
         });
         setPhase('results');
       } else {
+        // Mid-flight: debounced DB write.
+        onProgressChange?.(buildStepData(updatedResults, currentIndex + 1, 'practice'), false);
         setCurrentIndex((i) => i + 1);
         setAnswer('');
       }
     },
-    [words, currentIndex, answer, wordResults, onFinish],
+    [words, currentIndex, answer, wordResults, onFinish, onProgressChange, buildStepData],
   );
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -370,12 +454,91 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     );
   }
 
-  // ---- Phase: results (summary shown internally, then onFinish is called) ----
-  // This phase is reached only momentarily; the parent navigates away via onFinish.
-  // We show a brief "loading" state while onFinish fires.
+  // ---- Phase: results ----
+  // Two entry paths:
+  //   1. submitAnswer finished the last word → onFinish has already fired and
+  //      the parent typically navigates away; this view is transient.
+  //   2. Re-mount after the student returned to this step from elsewhere
+  //      (rehydrated via canShowResults). They see the saved summary plus a
+  //      "重做" button to start over and a "繼續下一關" button to advance.
+  const correctCount = wordResults.filter((r) => r.isCorrect).length;
+  const skippedCount = wordResults.filter((r) => r.skipped).length;
+  const incorrectCount = wordResults.length - correctCount - skippedCount;
+  const handleRedo = () => {
+    setPhase('intro');
+    setCurrentIndex(0);
+    setAnswer('');
+    setWordResults([]);
+  };
+  const handleContinue = () => {
+    onFinish({
+      totalWords: words.length,
+      correctCount,
+      incorrectCount,
+      skippedCount,
+      results: wordResults,
+    });
+  };
   return (
-    <div className="flex-1 flex items-center justify-center bg-amber-50">
-      <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+    <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-start px-6 py-8 gap-6 max-w-lg mx-auto w-full overflow-y-auto">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold text-gray-900">聽寫成績</h2>
+          <p className="text-sm text-gray-500">共 {words.length} 字</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 w-full">
+          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+            <div className="text-2xl font-bold text-emerald-700">{correctCount}</div>
+            <div className="text-xs text-emerald-700/70 mt-1">答對</div>
+          </div>
+          <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-center">
+            <div className="text-2xl font-bold text-red-700">{incorrectCount}</div>
+            <div className="text-xs text-red-700/70 mt-1">答錯</div>
+          </div>
+          <div className="rounded-2xl bg-gray-100 border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-gray-700">{skippedCount}</div>
+            <div className="text-xs text-gray-700/70 mt-1">跳過</div>
+          </div>
+        </div>
+
+        <div className="w-full space-y-2">
+          {wordResults.map((r, i) => (
+            <div
+              key={i}
+              className={`flex items-center justify-between rounded-xl px-4 py-3 border ${
+                r.skipped
+                  ? 'bg-gray-50 border-gray-200'
+                  : r.isCorrect
+                    ? 'bg-emerald-50 border-emerald-200'
+                    : 'bg-red-50 border-red-200'
+              }`}
+            >
+              <span className={`text-xl font-bold ${zhuyinFont}`}>{r.word}</span>
+              <span className={`text-sm ${
+                r.skipped ? 'text-gray-500' : r.isCorrect ? 'text-emerald-700' : 'text-red-700'
+              }`}>
+                {r.skipped ? '跳過' : r.isCorrect ? '✓ 正確' : `你寫：${r.studentAnswer || '(空白)'}`}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="w-full flex flex-col gap-2 mt-2">
+          <button
+            onClick={handleContinue}
+            className="w-full py-3 rounded-2xl bg-accent text-white font-semibold hover:bg-accent-hover transition-colors"
+          >
+            繼續下一關
+          </button>
+          <button
+            onClick={handleRedo}
+            className="w-full py-3 rounded-2xl bg-white text-gray-700 border border-gray-300 font-semibold hover:bg-gray-50 transition-colors"
+          >
+            重做聽寫
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

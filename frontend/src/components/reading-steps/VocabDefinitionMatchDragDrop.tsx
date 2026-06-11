@@ -8,15 +8,69 @@
  * last drag-drop question always has multiple options — no forced-correct final question.
  *
  * Fix #2082 (A6/A7/A8): verbal feedback, larger definition text, device-aware instruction.
+ * Issue #2163: OnboardingCoach — first-use amber說明框 + demo animation on real UI.
+ * Issue #2135: TTS play button + zhuyin display on word bank chips.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { AnswerRecord } from './vocabDefinitionMatchLogic';
+import { speakText as azureSpeakText } from '../../services/ttsApi';
+import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
+
+/** Speak a vocab word using Azure TTS (fire-and-forget, errors silenced). */
+const speakWord = (text: string) => { azureSpeakText(text).catch(() => {}); };
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 // Using a module-level constant so it is evaluated once and shared across renders.
 const IS_TOUCH_DEVICE =
   typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+// ── localStorage key for first-use onboarding gate ────────────────────────
+const VOCAB_DRAGDROP_ONBOARDED_KEY = 'vocab_dragdrop_onboarded';
+
+// ── Onboarding coach — amber box, matches VocabDefinitionMatchMCQ pattern ──
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+  const instruction = IS_TOUCH_DEVICE
+    ? '點選語詞，再點右邊的解釋框放入'
+    : '把左邊的語詞拖到右邊正確的解釋上';
+  return (
+    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          lightbulb
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">詞語配對怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            {instruction}。配對正確後語詞會消失。
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export interface DragDropProps {
   vocab: VocabItem[];
@@ -26,6 +80,10 @@ export interface DragDropProps {
 }
 
 export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: DragDropProps) {
+  // #2135: zhuyin support — read context directly (same pattern as VocabDefinitionMatch.tsx)
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
+
   const [draggingVocabIdx, setDraggingVocabIdx] = useState<number | null>(null);
   const [placements, setPlacements] = useState<Map<number, number>>(new Map());
   const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
@@ -38,6 +96,29 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   // A6: verbal feedback state — show praise on correct, "再試試看！" on wrong
   const [wrongFeedbackSlot, setWrongFeedbackSlot] = useState<number | null>(null);
   const [correctFeedbackSlot, setCorrectFeedbackSlot] = useState<number | null>(null);
+
+  // Onboarding state — gated by localStorage
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(VOCAB_DRAGDROP_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  // Demo animation: highlight a word chip + its matching slot pair
+  // demoWordIdx = vocabIdx being highlighted in the word bank
+  // demoSlotIdx = defIdx being highlighted in the definition slots
+  const [demoWordIdx, setDemoWordIdx] = useState<number | null>(null);
+  const [demoSlotIdx, setDemoSlotIdx] = useState<number | null>(null);
+  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up demo timer on unmount
+  useEffect(() => {
+    return () => {
+      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    };
+  }, []);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
@@ -66,6 +147,48 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     confirmedRef.current = new Set();
     wrongAttemptCountRef.current = new Map();
   }, [activeDefIndices, shuffledWords]);
+
+  const handleDismissCoach = () => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(VOCAB_DRAGDROP_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  };
+
+  /**
+   * Demo animation: highlight the first unconfirmed word chip and its matching slot.
+   * Two amber pulses on both elements to show how drag-and-drop works.
+   * Purely visual — does NOT submit a placement or affect scoring.
+   */
+  const handleDemo = () => {
+    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    // Pick the first unconfirmed vocab word to demo
+    const activeShuffled = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
+    const firstUnconfirmed = activeShuffled.find((wi) => !confirmed.has(wi));
+    if (firstUnconfirmed == null) {
+      handleDismissCoach();
+      return;
+    }
+    // The matching slot for this word is defIdx === firstUnconfirmed
+    const matchingSlot = firstUnconfirmed;
+    setDemoWordIdx(firstUnconfirmed);
+    setDemoSlotIdx(matchingSlot);
+    demoTimerRef.current = setTimeout(() => {
+      setDemoWordIdx(null);
+      setDemoSlotIdx(null);
+      demoTimerRef.current = setTimeout(() => {
+        setDemoWordIdx(firstUnconfirmed);
+        setDemoSlotIdx(matchingSlot);
+        demoTimerRef.current = setTimeout(() => {
+          setDemoWordIdx(null);
+          setDemoSlotIdx(null);
+        }, 900);
+      }, 200);
+    }, 900);
+    handleDismissCoach();
+  };
 
   const attemptPlace = useCallback(
     (defIdx: number, vocabIdx: number) => {
@@ -203,16 +326,18 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
           const isDragging = draggingVocabIdx === vocabIdx;
           const isTouchSelected = touchSelected === vocabIdx;
+          const isDemoWord = demoWordIdx === vocabIdx;
 
           // Confirmed words (fly-away animation already finished): show as locked/dimmed
           if (isConfirmedWord && !isFlying) {
             return (
               <div
                 key={vocabIdx}
-                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
+                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
                 aria-label={`${vocab[vocabIdx]?.word} 已配對`}
+                style={{ fontFamily: zhuyinFont }}
               >
-                {vocab[vocabIdx]?.word}
+                {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
               </div>
             );
           }
@@ -222,9 +347,12 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           if (isPlaced && !isFlying) return null;
 
           let cls =
-            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none transition-all duration-200 ';
+            // #2144: 教授「拖拉字體小」— text-base→text-lg
+            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none transition-all duration-200 ';
           if (isFlying) {
             cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
+          } else if (isDemoWord) {
+            cls += 'border-amber-400 bg-amber-50 text-amber-800 animate-pulse pointer-events-none';
           } else if (isDragging) {
             cls += 'border-accent bg-accent/10 text-accent shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
@@ -236,14 +364,34 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           return (
             <div
               key={vocabIdx}
-              draggable={!isFlying}
-              onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
-              onDragEnd={handleDragEnd}
-              onTouchStart={() => !isFlying && handleTouchStart(vocabIdx)}
-              onClick={() => !isFlying && handleTouchStart(vocabIdx)}
-              className={cls}
+              className="flex items-center gap-1"
             >
-              {vocab[vocabIdx]?.word}
+              <div
+                draggable={!isFlying}
+                onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
+                onDragEnd={handleDragEnd}
+                onTouchStart={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+                onClick={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+                className={cls}
+                style={{ fontFamily: zhuyinFont }}
+              >
+                {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
+              </div>
+              {/* #2135: TTS play button — only shown when chip is interactive (not flying) */}
+              {!isFlying && (
+                <button
+                  type="button"
+                  aria-label={`聽「${vocab[vocabIdx]?.word}」發音`}
+                  title="聽發音"
+                  onClick={(e) => { e.stopPropagation(); speakWord(vocab[vocabIdx]?.word ?? ''); }}
+                  onTouchStart={(e) => { e.stopPropagation(); }}
+                  className="flex-shrink-0 w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center hover:bg-accent/20 active:scale-95 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                  </svg>
+                </button>
+              )}
             </div>
           );
         })}
@@ -279,11 +427,14 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     const isOver = hoverTarget === defIdx && !isCorrect;
     const showWrongVerbal = wrongFeedbackSlot === defIdx;
     const showCorrectVerbal = correctFeedbackSlot === defIdx;
+    const isDemoSlot = demoSlotIdx === defIdx && !isCorrect;
 
     let cls =
       'rounded-3xl border-2 px-5 py-5 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
     if (isCorrect) {
       cls += 'bg-emerald-50 border-emerald-400 cursor-default';
+    } else if (isDemoSlot) {
+      cls += 'bg-amber-50 border-amber-400 animate-pulse';
     } else if (isWrong) {
       cls += 'bg-tertiary-container/10 border-tertiary animate-shake';
     } else if (isOver) {
@@ -309,8 +460,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         }}
         onClick={() => handleSlotTap(defIdx)}
       >
-        {/* A7: text-base → text-lg md:text-xl leading-relaxed */}
-        <p className="text-lg md:text-xl leading-relaxed text-on-surface">{item?.definition}</p>
+        {/* A7: text-base → text-lg md:text-xl leading-relaxed
+            #2144: 教授「定義字換色」— 答對後定義文字轉綠，強化配對成功訊號 */}
+        <p className={`text-lg md:text-xl leading-relaxed ${isCorrect ? 'text-emerald-700 font-semibold' : 'text-on-surface'}`}>{item?.definition}</p>
         <div className="flex items-center justify-center h-8">
           {isCorrect ? (
             <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
@@ -351,13 +503,28 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
-      {/* A8: Device-aware instruction banner */}
-      <p className="text-sm text-center text-on-surface-variant mb-4">
-        <span className="material-symbols-outlined align-middle text-base mr-1">
-          {IS_TOUCH_DEVICE ? 'touch_app' : 'drag_indicator'}
-        </span>
-        {instructionText}
-      </p>
+      {/* Onboarding coach — shown first time or when student clicks help */}
+      {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+
+      {/* A8: Device-aware instruction banner — only shown after coach is dismissed */}
+      {!showCoach && (
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-center text-on-surface-variant">
+            <span className="material-symbols-outlined align-middle text-base mr-1">
+              {IS_TOUCH_DEVICE ? 'touch_app' : 'drag_indicator'}
+            </span>
+            {instructionText}
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCoach(true)}
+            className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1 shrink-0"
+          >
+            <span className="material-symbols-outlined text-sm">help_outline</span>
+            怎麼玩？
+          </button>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="flex items-center gap-3 mb-6">

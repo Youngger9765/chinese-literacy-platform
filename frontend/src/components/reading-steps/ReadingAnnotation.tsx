@@ -9,6 +9,8 @@ import React, {
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { loadAnnotations, saveAnnotations } from '../../services/learning/annotationApi';
+import type { AnnotationPayload } from '../../services/learning/annotationApi';
 import { fontForZhuyin } from '../../constants/fonts';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
@@ -22,7 +24,7 @@ import {
 } from '../../utils/paragraphMarkers';
 
 // Sub-components and utilities extracted as part of #1855 refactor
-import { getSelectionInfo } from './annotationOffsets';
+import { getSelectionInfo, stripPUASelectors } from './annotationOffsets';
 import {
   annotationReducer,
   computeSummary,
@@ -42,6 +44,15 @@ export type { AnnotationSummary } from './annotationReducer';
 
 const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
 
+function loadAnnotationsWithFallback(storyId: string): Annotation[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY(storyId));
+    return raw ? (JSON.parse(raw) as Annotation[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 // A5: localStorage key for first-use onboarding gate
 const ANNOTATION_ONBOARDED_KEY = 'annotation_onboarded';
 
@@ -58,6 +69,8 @@ interface ReadingAnnotationProps {
   story: Story;
   onFinish: (summary: ReturnType<typeof computeSummary>) => void;
   fontSizePx?: number;
+  /** DB session id — when provided, annotations are persisted to and loaded from DB. */
+  dbSessionId?: number | null;
 }
 
 // ── A5: First-use onboarding coach component ───────────────────────────────
@@ -65,35 +78,151 @@ interface ReadingAnnotationProps {
 // A5: Detect touch vs mouse for device-appropriate wording
 const IS_TOUCH = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
+// ── Demo overlay: animated drag illustration ───────────────────────────────
+
+function DemoOverlay({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <style>{`
+        @keyframes ra-demo-highlight {
+          0%   { width: 0px;   opacity: 0; }
+          15%  { opacity: 1; }
+          60%  { width: 210px; opacity: 0.75; }
+          85%  { width: 210px; opacity: 0.75; }
+          100% { width: 0px;   opacity: 0; }
+        }
+        @keyframes ra-demo-cursor {
+          0%   { left: 12px; }
+          60%  { left: 222px; }
+          85%  { left: 222px; }
+          100% { left: 12px; }
+        }
+      `}</style>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(3px)' }}
+        onClick={onClose}
+      >
+        <div
+          className="relative bg-white rounded-2xl shadow-2xl px-8 py-7 max-w-md w-full mx-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-lg font-bold text-on-surface mb-4 text-center">示範：如何拖曳標記</p>
+
+          {/* Animated demo area */}
+          <div className="relative rounded-xl bg-surface-container-low px-4 py-5 mb-5 overflow-hidden select-none" style={{ minHeight: '72px' }}>
+            <p className="text-base leading-relaxed text-on-surface">
+              孟嘗君是有錢的貴族，最讓人津津樂道。
+            </p>
+            {/* Animated yellow highlight */}
+            <span
+              className="absolute rounded pointer-events-none bg-yellow-300/70"
+              style={{
+                animation: 'ra-demo-highlight 2.4s ease-in-out infinite',
+                top: '50%',
+                height: '28px',
+                left: '12px',
+                transform: 'translateY(-50%)',
+                width: 0,
+              }}
+            />
+            {/* Animated cursor emoji */}
+            <span
+              className="absolute pointer-events-none"
+              style={{
+                animation: 'ra-demo-cursor 2.4s ease-in-out infinite',
+                top: '50%',
+                transform: 'translateY(-60%)',
+                fontSize: '20px',
+                lineHeight: 1,
+              }}
+            >
+              🖱️
+            </span>
+          </div>
+
+          <p className="text-base text-on-surface-variant text-center mb-5">
+            {IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取'}，即可標記詞語
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-3 rounded-full text-base font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+          >
+            我知道了，開始標記！
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Unified onboarding coach (merged instructions + demo) ─────────────────
+
 interface OnboardingCoachProps {
   onDismiss: () => void;
 }
 
 function OnboardingCoach({ onDismiss }: OnboardingCoachProps) {
+  const [showDemo, setShowDemo] = useState(false);
   const gestureWord = IS_TOUCH ? '用手指在文字上滑過' : '用滑鼠在文字上拖曳選取';
+
+  // Bug fix (#2154): closing the demo overlay must NOT dismiss the coach box.
+  // onDismiss() writes to localStorage and hides the coach permanently — that
+  // should only happen when the user explicitly clicks "我知道了" in the coach.
+  const handleDemoClose = () => {
+    setShowDemo(false);
+  };
+
   return (
-    <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
-      <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-5 py-4 flex flex-col gap-3">
-        <div className="flex items-start gap-3">
-          <span className="material-symbols-outlined text-accent text-2xl flex-shrink-0 mt-0.5">
-            {IS_TOUCH ? 'swipe' : 'select_all'}
-          </span>
-          <div className="flex-1">
-            <p className="font-bold text-on-surface text-base mb-1">如何標記詞語？</p>
-            <p className="text-sm text-on-surface-variant leading-relaxed">
-              {gestureWord}，就能標記不懂的詞語。
+    <>
+      {showDemo && <DemoOverlay onClose={handleDemoClose} />}
+      <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
+        <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-6 py-5 flex flex-col gap-4">
+
+          {/* How-to header */}
+          <div className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-accent text-3xl flex-shrink-0 mt-0.5">
+              {IS_TOUCH ? 'swipe' : 'select_all'}
+            </span>
+            <div className="flex-1">
+              <p className="font-bold text-on-surface text-lg mb-1">如何標記詞語？</p>
+              <p className="text-base text-on-surface-variant leading-relaxed">
+                {gestureWord}，就能標記不懂的詞語。
+              </p>
+            </div>
+          </div>
+
+          {/* Reading round instructions (merged from grey banner) */}
+          <div className="border-t border-accent/20 pt-3 space-y-2">
+            <p className="text-base text-on-surface-variant">
+              <span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記
+            </p>
+            <p className="text-base text-on-surface-variant">
+              <span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記
             </p>
           </div>
+
+          {/* Action row */}
+          <div className="flex items-center gap-3 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowDemo(true)}
+              className="px-5 py-2 rounded-full text-base font-bold text-accent border-2 border-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+            >
+              示範
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="px-5 py-2 rounded-full text-base font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+            >
+              我知道了
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="self-end px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -117,6 +246,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   story,
   onFinish,
   fontSizePx = 22,
+  dbSessionId = null,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -125,18 +255,22 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     [story.vocabulary]
   );
 
-  // Annotation state managed via reducer
+  // Annotation state managed via reducer.
+  // Initial state comes from localStorage (sync, immediate).
+  // A DB load runs after mount to replace/merge with the authoritative DB copy.
   const [{ annotations, undoStack }, dispatch] = useReducer(annotationReducer, {
-    annotations: (() => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY(story.id));
-        return raw ? (JSON.parse(raw) as Annotation[]) : [];
-      } catch {
-        return [];
-      }
-    })(),
+    annotations: loadAnnotationsWithFallback(String(story.id)),
     undoStack: [],
   });
+
+  // DB-sync tracking: true once the initial DB load finishes.
+  // Using useState (not ref) so the save effect re-runs when hydration completes —
+  // this fixes the race where an annotation made before hydration would be silently
+  // skipped (the ref-only version's guard would have already returned early and
+  // no timer would be set, leaving the annotation in localStorage but not in DB).
+  const [dbHydrated, setDbHydrated] = useState(false);
+  // Debounce timer ref for DB saves
+  const dbSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Floating toolbar state
   const [toolbar, setToolbar] = useState<{
@@ -178,7 +312,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     [story.content, vocabWords, processLinesSelective]
   );
 
-  // ── Persist annotations ────────────────────────────────────────────────
+  // ── Persist annotations (localStorage — always, for offline cache) ────────
 
   useEffect(() => {
     try {
@@ -187,6 +321,76 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       // Storage full — ignore
     }
   }, [annotations, story.id]);
+
+  // ── Load annotations from DB on mount (#2070) ────────────────────────────
+  // DB is the source of truth; localStorage is the offline/pre-load cache.
+  // On first load: if DB has annotations, replace localStorage snapshot.
+  // If DB has none but localStorage does, we keep the localStorage version
+  // (student might be offline or using a fresh DB session).
+
+  useEffect(() => {
+    if (!dbSessionId) {
+      setDbHydrated(true); // no DB available — treat as hydrated immediately
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const dbAnnotations = await loadAnnotations(dbSessionId);
+        if (cancelled) return;
+        if (dbAnnotations.length > 0) {
+          // DB has annotations — hydrate reducer with DB copy
+          dispatch({ type: 'INIT', payload: { annotations: dbAnnotations.map((r) => ({
+            id: r.client_id ?? String(r.id),
+            paragraphIndex: r.paragraph_index,
+            charStart: r.char_start,
+            charEnd: r.char_end,
+            type: r.annotation_type as Annotation['type'],
+          })) } });
+        }
+        // else: keep localStorage snapshot as-is (DB is empty, likely fresh session)
+      } catch (err) {
+        // DB load failed — silently keep localStorage data; log for debugging
+        console.warn('[ReadingAnnotation] DB load failed, using localStorage fallback:', err);
+      } finally {
+        // setDbHydrated(true) triggers the save effect to re-evaluate — this ensures
+        // any annotation the student made during the DB load window is saved to DB.
+        if (!cancelled) setDbHydrated(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbSessionId]); // run once per session
+
+  // ── Debounced DB save on annotation change (#2070) ───────────────────────
+  // Only runs after DB hydration to avoid saving the localStorage snapshot back.
+
+  useEffect(() => {
+    if (!dbSessionId || !dbHydrated) return;
+
+    // Clear any pending save
+    if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
+
+    dbSaveTimerRef.current = setTimeout(async () => {
+      try {
+        const payload: AnnotationPayload[] = annotations.map((ann) => ({
+          paragraph_index: ann.paragraphIndex,
+          char_start: ann.charStart,
+          char_end: ann.charEnd,
+          annotation_type: ann.type as 'unknown' | 'important',
+          client_id: ann.id,
+        }));
+        await saveAnnotations(dbSessionId, payload);
+      } catch (err) {
+        // Save failed (offline, token expired, etc.) — localStorage copy survives
+        console.warn('[ReadingAnnotation] DB save failed:', err);
+      }
+    }, 800); // 800 ms debounce — balances responsiveness vs write frequency
+
+    return () => {
+      if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
+    };
+  }, [annotations, dbSessionId, dbHydrated]);
 
   // ── Summary ────────────────────────────────────────────────────────────
 
@@ -245,7 +449,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         return a.charStart - b.charStart;
       })
       .map((annotation) => {
-        const paragraph = story.content[annotation.paragraphIndex] ?? '';
+        // charStart/charEnd are RAW char offsets (PUA Variation Selectors stripped
+        // by getSelectionInfo). Lesson YAML embeds PUA selectors in the paragraph
+        // text, so slice the PUA-stripped paragraph — otherwise the panel word
+        // drifts left (e.g. 孟嘗君 → 投奔孟). AnnotatedParagraph already strips; this
+        // is the side-panel consumer that #2155 missed. (#2165)
+        const paragraph = stripPUASelectors(story.content[annotation.paragraphIndex] ?? '');
         return {
           annotation,
           text: paragraph.slice(annotation.charStart, annotation.charEnd),
@@ -404,25 +613,15 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             <HintBar />
           )}
 
-          {/* Instruction banner */}
-          <div className="mx-auto max-w-4xl px-6 md:px-16 pt-2 pb-4">
-            <div className="rounded-2xl bg-surface-container-low px-5 py-4 text-sm text-on-surface-variant space-y-1">
-              <p><span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記</p>
-              <p><span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記</p>
-            </div>
-          </div>
-
           {/* Legend pills + counts + undo/clear — floating centered */}
           <div className="flex flex-wrap justify-center items-center gap-3 pt-4 pb-10 px-4">
             <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="w-3 h-3 rounded-full bg-red-400" />
               <span className="text-sm font-medium">❓ 不懂</span>
               {summary.unknownCount > 0 && (
                 <span className="text-sm font-bold text-tertiary">{summary.unknownCount}</span>
               )}
             </div>
             <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="w-3 h-3 rounded-full bg-tertiary-container" />
               <span className="text-sm font-medium">💛 重要</span>
               {summary.importantCount > 0 && (
                 <span className="text-sm font-bold text-yellow-800">{summary.importantCount}</span>
@@ -460,7 +659,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               Images/tables whose captions appear inside paragraphs render inline
               right after the caption row (#1692). Un-referenced assets fall back
               to the strip/table block below the article. */}
-          <article className="max-w-4xl mx-auto px-6 md:px-16 space-y-10">
+          <div className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex flex-col lg:flex-row items-start' : undefined}>
+            <article className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}>
             {story.content.map((rawPara, paraIdx) => {
               const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
               const inlineImgIdx = inlineImageIdxByPara.get(paraIdx);
@@ -507,23 +707,25 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 </React.Fragment>
               );
             })}
-          </article>
+            </article>
 
-          {/* Fallback image strip — only un-referenced images (no caption match).
-              Preserves G7-L29 behavior where paragraphs reference 圖 N inside body
-              sentences but never as standalone caption rows. */}
-          {story.layout_mode === 'graphic-text' && fallbackImages.length > 0 && (
-            <div
-              className="max-w-4xl mx-auto px-6 md:px-16 mt-10 h-72 md:h-80 flex"
-              data-testid="reading-annotation-graphic-text-images"
-              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
-            >
-              <GraphicTextImageStrip
-                images={fallbackImages}
-                lessonCode={story.lesson_code}
-              />
-            </div>
-          )}
+            {/* Fallback image strip — only un-referenced images (no caption match).
+                Graphic-text: renders as sticky right column alongside article.
+                Preserves G7-L29 behavior where paragraphs reference 圖 N inside body
+                sentences but never as standalone caption rows. */}
+            {story.layout_mode === 'graphic-text' && fallbackImages.length > 0 && (
+              <aside
+                className="w-full mt-8 lg:mt-0 lg:w-80 lg:shrink-0 lg:border-l border-outline-variant/20 lg:pl-4 lg:sticky lg:top-0 lg:h-[calc(100vh-5rem)] overflow-hidden"
+                data-testid="reading-annotation-graphic-text-images"
+                style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+              >
+                <GraphicTextImageStrip
+                  images={fallbackImages}
+                  lessonCode={story.lesson_code}
+                />
+              </aside>
+            )}
+          </div>
 
           {/* Fallback tables — only un-referenced tables. */}
           {fallbackTables.length > 0 && (
@@ -557,7 +759,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       </div>
 
       {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
         <div className="max-w-md mx-auto pointer-events-auto">
           <button

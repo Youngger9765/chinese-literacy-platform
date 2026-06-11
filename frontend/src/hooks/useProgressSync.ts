@@ -18,7 +18,7 @@
  *
  * API failures are fully non-blocking — localStorage still functions.
  */
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   saveStepProgress,
   saveStepProgressBeacon,
@@ -49,6 +49,13 @@ export interface UseProgressSyncReturn {
   syncProgress: (data: StepProgressData) => void;
   /** Force an immediate DB save (e.g. on step completion). */
   flushProgress: (data: StepProgressData) => void;
+  /**
+   * True while the initial load from DB is in flight (Issue #1549).
+   * Caller should gate child renders that depend on step_progress so they
+   * don't initialise local state from an empty stepProgressData and then
+   * fail to re-init once the async load completes.
+   */
+  isProgressLoading: boolean;
 }
 
 export function useProgressSync({
@@ -60,6 +67,24 @@ export function useProgressSync({
   const latestDataRef = useRef<StepProgressData | null>(null);
   // Monotonic version tracking (#1187): last-known server version + in-flight client bump
   const lastServerVersionRef = useRef<number>(0);
+  // Issue #1549 — derive "loading" synchronously from a one-shot
+  // `hasLoadedOnce` flag plus the input props. We do NOT use a separate
+  // setIsLoading state, because doing so would lag one render behind the
+  // dbSessionId transition and let children mount with an empty snapshot.
+  //
+  // isProgressLoading is true whenever we *would* be loading from DB
+  // (both token and dbSessionId present) but the first load hasn't yet
+  // resolved. The flag flips on first .finally() of the load effect.
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const isProgressLoading = !!token && dbSessionId !== null && !hasLoadedOnce;
+
+  // Stash onProgressLoaded behind a ref so the doSave / syncProgress / flushProgress
+  // identities don't change every render when the caller passes an inline arrow.
+  // Without this, every LearningLayout re-render minted new callback references,
+  // which propagated through useOutletContext → child useEffect deps → fired the
+  // step-data sync on every render, bursting the rate-limited PUT endpoint.
+  const onProgressLoadedRef = useRef(onProgressLoaded);
+  useEffect(() => { onProgressLoadedRef.current = onProgressLoaded; }, [onProgressLoaded]);
 
   const readStoredVersion = (data: StepProgressData | null | undefined): number => {
     const v = data?.version;
@@ -70,17 +95,22 @@ export function useProgressSync({
   useEffect(() => {
     if (!token || dbSessionId === null) return;
 
+    // If we're loading for a fresh session (e.g. dbSessionId just transitioned
+    // from null → id), reset the loaded flag so isProgressLoading flips back
+    // to true synchronously on the next render.
+    setHasLoadedOnce(false);
     loadStepProgress(token, dbSessionId)
       .then((res) => {
         const stepProgress = res.step_progress;
         if (stepProgress) {
           lastServerVersionRef.current = readStoredVersion(stepProgress);
-          if (onProgressLoaded) onProgressLoaded(stepProgress);
+          onProgressLoadedRef.current?.(stepProgress);
         }
       })
       .catch(() => {
         // Non-fatal: fallback to localStorage handled by caller
-      });
+      })
+      .finally(() => setHasLoadedOnce(true));
     // Only run once when dbSessionId first becomes available
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbSessionId, token]);
@@ -106,14 +136,14 @@ export function useProgressSync({
             lastServerVersionRef.current = err.storedVersion;
             loadStepProgress(token, dbSessionId)
               .then((res) => {
-                if (res.step_progress && onProgressLoaded) onProgressLoaded(res.step_progress);
+                if (res.step_progress) onProgressLoadedRef.current?.(res.step_progress);
               })
               .catch(() => {});
           }
           // Other errors: non-fatal — localStorage already has the data
         });
     },
-    [token, dbSessionId, onProgressLoaded],
+    [token, dbSessionId],
   );
 
   // Keep a ref to the latest doSave so unmount cleanup always uses the current version
@@ -151,9 +181,15 @@ export function useProgressSync({
     [doSave],
   );
 
-  // Flush pending data on page unload (refresh / close / navigate away)
+  // Flush pending data on page unload (refresh / close / navigate away / tab hide).
+  //
+  // We listen to three events because no single one is reliable across browsers:
+  //   - beforeunload : desktop refresh / close (ignored on iOS Safari)
+  //   - pagehide     : reliable replacement for beforeunload on mobile + bfcache
+  //   - visibilitychange→hidden : fires when user switches apps on mobile
+  //     (the only signal an iOS Safari → home-screen transition produces)
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const flushBeacon = () => {
       if (!latestDataRef.current || !debounceTimerRef.current) return;
 
       clearTimeout(debounceTimerRef.current);
@@ -167,9 +203,17 @@ export function useProgressSync({
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushBeacon();
+    };
+
+    window.addEventListener('beforeunload', flushBeacon);
+    window.addEventListener('pagehide', flushBeacon);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('beforeunload', flushBeacon);
+      window.removeEventListener('pagehide', flushBeacon);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [token, dbSessionId]);
 
@@ -187,5 +231,5 @@ export function useProgressSync({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { syncProgress, flushProgress };
+  return { syncProgress, flushProgress, isProgressLoading };
 }

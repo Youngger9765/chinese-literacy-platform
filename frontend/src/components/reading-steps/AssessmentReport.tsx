@@ -86,7 +86,6 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
   // ── Metrics (pure computation, no side effects) ──────────────────────────
   const {
     hideScores,
-    hasNoData,
     completedSections,
     overallScore,
     segmentStats,
@@ -184,11 +183,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
         />
       )}
 
-      {!readOnly && !hasNoData && <CelebrationOverlay score={overallScore} />}
+      {!readOnly && overallScore !== null && <CelebrationOverlay score={overallScore} />}
 
       {/* ============ 星星評級 Star Rating (Issue #222) —
           學生端隱藏（Issue #1094：改鼓勵式，不呈現星星/分數） ============ */}
-      {!hasNoData && !hideScores && (
+      {overallScore !== null && !hideScores && (
         <StarCelebration
           stars={starCount}
           readingAccuracy={bestReadingAccuracy}
@@ -196,20 +195,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
         />
       )}
 
-      {/* Progress indicator — shown when not all sections are complete */}
-      {hasNoData ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
-          <p className="text-2xl mb-2">📖</p>
-          <h2 className="text-lg font-bold text-amber-900 mb-1">還沒有完成朗讀練習喔！</h2>
-          <p className="text-sm text-amber-700 mb-3">完成「逐段朗讀」或「全文朗讀」後，這裡會顯示你的完整學習報告。</p>
-          <button
-            onClick={onRetry}
-            className="bg-accent hover:bg-accent-hover text-white px-6 py-2 rounded-full text-sm font-bold transition-all"
-          >
-            回到課文
-          </button>
-        </div>
-      ) : completedSections < 6 ? (
+      {/* Progress indicator — shown while sections are still being completed (#2201: no lock gate) */}
+      {completedSections < 6 && (
         <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
           <div className="flex gap-1">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -223,20 +210,20 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
             已完成 <span className="font-black">{completedSections}</span> / 6 環節
           </p>
         </div>
-      ) : null}
+      )}
 
       {/* Header */}
       <div className="text-center">
-        {hasNoData ? null : (
+        {completedSections >= 6 && (
           <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
             恭喜完成練習！
           </div>
         )}
         <h2 className="text-4xl font-bold mb-2">
-          {hasNoData ? '學習報告預覽' : '好棒！你今天又進步了。'}
+          {completedSections >= 6 ? '好棒！你今天又進步了。' : '朗朗上口診斷報告'}
         </h2>
         <p className="text-gray-500">
-          {hasNoData ? '完成各環節後，這裡會顯示你的詳細成果。' : '讓我們看看這次學習的完整成果吧。'}
+          {completedSections >= 6 ? '讓我們看看這次學習的完整成果吧。' : '完成各練習環節，這裡會顯示你的六環節完整成果。'}
         </p>
         {story && (
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>

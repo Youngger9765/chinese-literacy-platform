@@ -21,7 +21,12 @@ export const READING_PASS = 0.60; // ≥60%: 很好，過關
 // Grade-based defaults (from lesson YAML research, Issue #1378):
 //   G4: 190 | G5: 200 | G6: 210 | G7-G9: 220
 // The floor of 120 is from 臺師大 Brain & Learning Lab (G2+ minimum).
-export const FULLREADING_CPM_PASS = 120; // global fallback — prefer lesson YAML
+// Issue #2131: CPM (speed) no longer contributes to pass/fail.
+// analyzeFluency() now uses passed = accuracyPassed only.
+// FULLREADING_CPM_PASS is retained so getThresholdsFromBenchmark() can still
+// compute speedPassed for display purposes (SelfAssessment aiRating) and
+// for the learning-unit benchmark reference shown in ReadingMetricsCard.
+export const FULLREADING_CPM_PASS = 120; // display reference — NOT a pass/fail gate (Issue #2131)
 export const FULLREADING_ACCURACY_PASS = 0.80;
 
 // Grade-based CPM pass defaults (fallback when no lesson YAML present)

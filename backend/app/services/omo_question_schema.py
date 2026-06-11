@@ -15,6 +15,47 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Which UI step (step_sequence id, see frontend stepConfig.ts) each worksheet
+# section maps to. Used to order graded results by the lesson's on-screen 關卡
+# sequence (#2038 / #2089 item 2) instead of by question type.
+#
+# NOTE: keys are YAML SECTION names (fill_in_blank / multiple_choice /
+# strategy_exercise), NOT the schema's question `type` field — strategy_exercise
+# questions are emitted with type "fill_blank" but belong to "reading-strategy".
+# Do not look this up via q["type"]; assign step at the section it is built in.
+QUESTION_TYPE_TO_STEP = {
+    "fill_blank": "vocab-application",       # 語詞應用
+    "multiple_choice": "comprehension",      # 閱讀理解
+    "strategy_exercise": "reading-strategy", # 閱讀聚光燈
+}
+
+# Video-link metadata markers. These are extremely specific to the YouTube-link
+# region of a worksheet (片長 = clip length, 建議觀看 = recommended viewing). A
+# real cloze sentence essentially never contains them — validated across all 57
+# lessons (#2038): only G7-L28 id=1 and G7-L30 id=1 match, both genuine parse
+# artifacts where the video caption region was mis-parsed as a fill-in blank.
+_VIDEO_METADATA_MARKERS = ("片長", "建議觀看")
+
+
+def _is_media_artifact(item) -> bool:
+    """True when a fill_in_blank entry is a video-caption parse artifact, not a
+    real question (#2038 — meeting §2「占位空格 / 示意 sample 被誤判為題目」).
+
+    Signal: the blank's surrounding context carries video-link metadata
+    (片長 / 建議觀看) AND it has no real cloze sentence. Such entries come from
+    the worksheet's video-links region, not a gradeable blank — including them
+    makes the grader hunt for handwriting that does not exist and can derange
+    alignment of the real questions.
+    """
+    if not isinstance(item, dict):
+        return False
+    sentence = (item.get("sentence") or item.get("context") or "").strip()
+    if sentence:
+        return False  # a real cloze sentence is present → it is a question
+    context_blob = (item.get("context_before") or "") + (item.get("context_after") or "")
+    return any(marker in context_blob for marker in _VIDEO_METADATA_MARKERS)
+
+
 def _vocab_bank_lookup(vocab_bank, key: str) -> str | None:
     """Return the word a worksheet letter maps to in vocab_bank, else None.
 
@@ -82,8 +123,13 @@ def _build_question_schema(lesson: dict) -> list[dict]:
     # fb answers are single letters within the worksheet's choice set.
     fb = lesson.get("fill_in_blank") or []
     fb_raw_items = list(fb.items()) if isinstance(fb, dict) else list(enumerate(fb))
+    # Skip media artifacts here too (#2038 review): an artifact's non-letter
+    # answer (e.g. '外來種') would otherwise drag fb_lettered to False and turn
+    # a genuinely lettered lesson into free_form mode — scoring every fb wrong.
     fb_answers = []
     for _, item in fb_raw_items:
+        if _is_media_artifact(item):
+            continue
         ans = item.get("answer", "") if isinstance(item, dict) else str(item)
         fb_answers.append(ans)
 
@@ -116,6 +162,14 @@ def _build_question_schema(lesson: dict) -> list[dict]:
 
     for key, item in fb_raw_items:
         qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
+        # #2038 Task A: skip video-caption parse artifacts so they never enter
+        # the reference schema (root cause of meeting §2「占位空格誤判為填空題」).
+        if _is_media_artifact(item):
+            logger.info(
+                "omo_question_schema: skipping media-artifact fill_in_blank %s "
+                "(video-caption region, not a real question)", qid,
+            )
+            continue
         if isinstance(item, dict):
             raw_answer = item.get("answer", "")
             context = item.get("context", item.get("sentence", ""))
@@ -133,6 +187,7 @@ def _build_question_schema(lesson: dict) -> list[dict]:
         questions.append({
             "id": qid,
             "type": "fill_blank",
+            "step": QUESTION_TYPE_TO_STEP["fill_blank"],
             "context": context,
             "correct_answer": correct_for_scoring,
             "correct_word": correct_word,
@@ -154,6 +209,7 @@ def _build_question_schema(lesson: dict) -> list[dict]:
         questions.append({
             "id": qid,
             "type": "multiple_choice",
+            "step": QUESTION_TYPE_TO_STEP["multiple_choice"],
             "context": context,
             "correct_answer": correct,
             "mode": "lettered",
@@ -171,6 +227,7 @@ def _build_question_schema(lesson: dict) -> list[dict]:
                     questions.append({
                         "id": qid,
                         "type": "fill_blank",
+                        "step": QUESTION_TYPE_TO_STEP["strategy_exercise"],
                         "context": item.get("stem", item.get("question", "")),
                         "correct_answer": item.get("answer", ""),
                     })

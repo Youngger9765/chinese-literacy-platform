@@ -5,7 +5,7 @@ Handles AI-powered reading diagnosis and improvement suggestions.
 import json
 import logging
 import time
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,10 @@ from ...services.ai_service import generate_reading_analysis, GeminiContentFilte
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
+from ...services.reading_transcription_service import (
+    ALLOWED_AUDIO_MIMES,
+    transcribe_reading_audio,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -434,4 +438,151 @@ async def evaluate_reading_endpoint(
         stats=ReadingEvalStats(**result["stats"]),
         thresholds=ReadingEvalThresholds(**result["thresholds"]),
         evaluation_method=result["evaluation_method"],
+    )
+
+
+# ─── FullReading STT: Gemini audio transcription (Issue #2131) ───────────────
+
+# Hard limits (enforced before hitting Gemini)
+_MAX_AUDIO_BYTES = 10 * 1024 * 1024   # 10 MB
+_MAX_TARGET_CHARS = 3000               # ≈ longest G9 lesson
+
+
+class TranscribeReadingResponse(BaseModel):
+    """Response schema for POST /api/reading/transcribe."""
+
+    transcript: str | None = None
+    """High-quality transcript with punctuation, or None on Gemini failure."""
+
+    method: str
+    """'gemini' on success, 'fallback' when Gemini is unavailable."""
+
+    reasoning: str | None = None
+    """Gemini's 1-2 sentence explanation (for teacher audit). None on fallback."""
+
+    reason: str | None = None
+    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error'.
+    Only present when method='fallback'. Used by frontend to show appropriate alert."""
+
+
+@router.post(
+    "/reading/transcribe",
+    response_model=TranscribeReadingResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+    summary="Gemini audio transcription for FullReading STT upgrade (Issue #2131)",
+    description=(
+        "Accepts a student reading audio blob and the lesson target text.\n"
+        "Returns a high-quality transcript with punctuation via Gemini audio.\n"
+        "webm input is transcoded to ogg via ffmpeg before calling Gemini (Issue #2156).\n"
+        "On Gemini failure/timeout the route returns {transcript: null, method: 'fallback', "
+        "reason: <timeout|safety|decode|empty|error>} (HTTP 200) so the frontend can show "
+        "a fallback alert and use the Web Speech transcript.\n"
+        "Rate-limited: 10 requests per minute per user.\n"
+        "Audio: ≤10 MB, ≤120 s; MIME: audio/webm, audio/mp4, audio/ogg, audio/wav."
+    ),
+)
+async def transcribe_reading_endpoint(
+    audio: UploadFile = File(
+        ...,
+        description="Audio blob from browser MediaRecorder (WebM/MP4/OGG/WAV, max 10 MB)",
+    ),
+    target_text: str = Form(
+        ...,
+        description="Original lesson text (used by Gemini to resolve homophones)",
+    ),
+    duration_ms: int | None = Form(
+        default=None,
+        description="Recording duration in milliseconds (informational, optional)",
+    ),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Transcribe student reading audio via Gemini.
+
+    Rate-limited to 10 requests per minute per user (shared with /reading/evaluate).
+    Input caps are enforced before any AI call.
+    webm audio is transcoded to ogg/opus via ffmpeg before calling Gemini — this is the
+    root cause fix for Issue #2156 (Chrome records webm; Gemini only accepts ogg/wav/etc).
+    On any Gemini failure the route returns HTTP 200 with method='fallback' and a reason
+    field so the frontend can display the fallback alert banner (I4).
+    """
+    # ── 1. Validate MIME type (cheap, before reading bytes) ──────────────────
+    raw_mime = audio.content_type or "audio/webm"
+    base_mime = raw_mime.split(";")[0].strip()
+    if base_mime not in {m.split(";")[0].strip() for m in ALLOWED_AUDIO_MIMES}:
+        raise HTTPException(
+            status_code=415,
+            detail=(
+                f"Unsupported audio type: {raw_mime!r}. "
+                "Accepted: audio/webm, audio/mp4, audio/ogg, audio/wav, audio/mpeg"
+            ),
+        )
+
+    # ── 2. Read and size-cap audio bytes ─────────────────────────────────────
+    audio_bytes = await audio.read()
+    if len(audio_bytes) > _MAX_AUDIO_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Audio file too large ({len(audio_bytes)} bytes). Max 10 MB.",
+        )
+    if len(audio_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Audio file is empty.")
+
+    # ── 3. Cap target_text ───────────────────────────────────────────────────
+    if len(target_text) > _MAX_TARGET_CHARS:
+        raise HTTPException(
+            status_code=413,
+            detail=f"target_text too long ({len(target_text)} chars). Max {_MAX_TARGET_CHARS}.",
+        )
+    if not target_text.strip():
+        raise HTTPException(status_code=400, detail="target_text must not be empty.")
+
+    logger.info(
+        "Reading transcribe request: user=%d audio_bytes=%d duration_ms=%s",
+        current_user.id,
+        len(audio_bytes),
+        duration_ms,
+        extra={
+            "event": "reading_transcribe_request",
+            "user_id": current_user.id,
+            "audio_bytes": len(audio_bytes),
+            "duration_ms": duration_ms,
+        },
+    )
+
+    # ── 4. Call Gemini (fail-closed — never 500 on AI failure) ───────────────
+    start_time = time.monotonic()
+    result = await transcribe_reading_audio(
+        audio_bytes=audio_bytes,
+        mime_type=raw_mime,
+        target_text=target_text,
+        duration_ms=duration_ms,
+    )
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # ── 5. Log usage when Gemini succeeded ───────────────────────────────────
+    if result.get("method") == "gemini":
+        usage = last_usage.get()
+        log_ai_usage(
+            db,
+            endpoint="/reading/transcribe",
+            step="full-reading",
+            student_id=current_user.id,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            model=usage.model if usage else "gemini-2.5-flash",
+            latency_ms=latency_ms,
+            success=True,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
+            prompt_template_id="reading_transcribe",
+        )
+
+    return TranscribeReadingResponse(
+        transcript=result.get("transcript"),
+        method=result["method"],
+        reasoning=result.get("reasoning"),
+        reason=result.get("reason"),
     )

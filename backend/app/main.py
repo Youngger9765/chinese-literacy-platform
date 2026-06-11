@@ -235,9 +235,11 @@ class GlobalRateLimitMiddleware:
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
     # Read operations are much burstier during UI navigation (route mounts,
     # parallel data loaders, prefetch). Keep write operations stricter.
-    READ_LIMIT = 300
-    WRITE_LIMIT = 90
-    WINDOW = 60  # seconds
+    # Allow env overrides so local dev (React StrictMode double-invocations,
+    # HMR replays) doesn't trip the global limiter while debugging.
+    READ_LIMIT = int(os.getenv("RATE_LIMIT_READ", "300"))
+    WRITE_LIMIT = int(os.getenv("RATE_LIMIT_WRITE", "90"))
+    WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
 
     def __init__(self, app):
         self.app = app

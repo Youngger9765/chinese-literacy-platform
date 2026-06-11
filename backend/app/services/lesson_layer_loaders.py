@@ -36,10 +36,40 @@ from app.services.lesson_code_normalization import (
 _LESSONS_DIR = Path(__file__).parent.parent.parent / "data" / "lessons"
 _PARSED_DIR = _LESSONS_DIR / "_parsed_2026-05-01"
 _CURRICULUM_MANIFEST = Path(__file__).parent.parent.parent / "data" / "curriculum" / "manifest.yml"
+# Checked-in manifest listing grade_codes that have a .docx in GCS worksheets/ (#2207)
+_DOCX_MANIFEST = Path(__file__).parent.parent.parent / "data" / "worksheet_docx_codes.txt"
 
 # Offset added to curriculum display_order to generate synthetic integer IDs
 # for Layer-2 lessons (avoids collision with Layer-1 ids 1–57).
 LAYER2_ID_OFFSET = 1000
+
+
+# ---------------------------------------------------------------------------
+# Module-level docx code set — loaded once at import, never re-read per lesson
+# ---------------------------------------------------------------------------
+
+def _load_docx_codes() -> frozenset[str]:
+    """Load grade_codes that have a GCS worksheet docx from the checked-in manifest."""
+    if not _DOCX_MANIFEST.exists():
+        return frozenset()
+    with open(_DOCX_MANIFEST, "r", encoding="utf-8") as f:
+        return frozenset(line.strip() for line in f if line.strip())
+
+
+_DOCX_CODES: frozenset[str] = _load_docx_codes()
+
+_GCS_DOCX_BASE = "https://storage.googleapis.com/lingoleap-assets/worksheets"
+
+
+def _derive_docx_url(grade_code: str | None) -> str | None:
+    """Return the GCS docx URL if grade_code is in the checked-in manifest, else None.
+
+    YAML-explicit worksheet_docx_url always takes priority over this derived value
+    (callers use ``data.get("worksheet_docx_url") or _derive_docx_url(grade_code)``).
+    """
+    if not grade_code or grade_code not in _DOCX_CODES:
+        return None
+    return f"{_GCS_DOCX_BASE}/{grade_code}.docx"
 
 
 # ---------------------------------------------------------------------------
@@ -62,6 +92,8 @@ ENRICHMENT_FIELDS = (
     "worksheet_intro",
     "lesson_intro",
     "worksheet_pdf_url",
+    # Direct docx URL when soffice PDF conversion is broken (#2073)
+    "worksheet_docx_url",
     "layout_mode",
     "reading_strategy_type",
     "images",
@@ -233,6 +265,12 @@ def load_layer1_lessons() -> list[dict]:
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Direct docx URL — YAML field takes priority; derive from GCS manifest
+            # for all other lessons that have a .docx in worksheets/ (#2073, #2207)
+            "worksheet_docx_url": (
+                data.get("worksheet_docx_url")
+                or _derive_docx_url(data.get("grade_code", ""))
+            ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
             "_layer": 1,
@@ -388,6 +426,12 @@ def load_layer2_lessons(
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Direct docx URL — YAML field takes priority; derive from GCS manifest
+            # for all other lessons that have a .docx in worksheets/ (#2073, #2207)
+            "worksheet_docx_url": (
+                data.get("worksheet_docx_url")
+                or _derive_docx_url(norm_code)
+            ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
             "_layer": 2,

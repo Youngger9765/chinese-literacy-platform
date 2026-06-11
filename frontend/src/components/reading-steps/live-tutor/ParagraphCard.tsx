@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { formatTime } from '../../../utils/formatTime';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
@@ -91,7 +92,6 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   speakingProgress,
   utteranceRef,
   ttsRafRef,
-  streamingUserInput,
   lastDiffTokens,
   isAwaitingGemini,
   retryCount,
@@ -115,6 +115,16 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 }) => {
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
+
+  /* ── Recording timer — counts up while isCurrentIdx && isSessionActive ── */
+  const isActiveRecording = isCurrentIdx && isSessionActive;
+  const [recordingSecs, setRecordingSecs] = useState(0);
+  useEffect(() => {
+    if (!isActiveRecording) { setRecordingSecs(0); return; }
+    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isActiveRecording]);
+
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
 
@@ -233,18 +243,16 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         )}
       </p>
 
-      {/* ── Recording state: realtime transcript display ─────── */}
+      {/* ── Recording state: pulsing mic + timer indicator ─────── */}
       {isCurrentIdx && isSessionActive && (
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <div className="w-full bg-surface-container-low rounded-2xl p-4">
-            <p className="text-xs font-bold text-accent uppercase tracking-widest mb-2 animate-pulse">即時辨識</p>
-            <p className="text-lg text-on-surface leading-relaxed min-h-[2em]">
-              {streamingUserInput || <span className="text-on-surface-variant/40">請開始朗讀…</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-emerald-600 font-medium">聆聽中...</span>
+        <div className="mt-8 flex justify-center">
+          <div className="flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
+            <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+              <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+            </span>
+            <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
+            <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
           </div>
         </div>
       )}
@@ -302,6 +310,29 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
+          {/* CPM + accuracy scores (Issue #2147) */}
+          {(() => {
+            const cpmVal = lineResults.find(r => r.lineIndex === idx)?.cpm ?? null;
+            const rate = paragraphSummary.matchRate;
+            if (cpmVal === null) return null;
+            const rateColor = rate >= 0.9 ? 'text-emerald-600' : rate >= 0.65 ? 'text-green-600' : 'text-amber-600';
+            return (
+              <div className="flex gap-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-on-surface-variant">speed</span>
+                  <span className="text-on-surface-variant">語速</span>
+                  <span className="font-bold text-on-surface">{cpmVal}</span>
+                  <span className="text-on-surface-variant text-xs">字/分</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-on-surface-variant">check_circle</span>
+                  <span className="text-on-surface-variant">正確率</span>
+                  <span className={`font-bold ${rateColor}`}>{Math.round(rate * 100)}%</span>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Sentence-level retry — show whenever there are failed sentences */}
           {isCurrentIdx && (() => {
             const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');
@@ -327,51 +358,15 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
             const totalRetryable = targets.filter(t => t.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1).length;
 
-            // Rule 2: if > half the sentences failed → suggest redo, but still show next-segment
-            // if paragraph-level evaluation passed (matchRate >= 0.5 or already completed).
-            // Sentence retry is advisory — never block paragraph-level progress. (#1318)
+            // Rule 2: if > half the sentences failed → suggest redo, but advancement is never blocked.
+            // Retry suggestion is advisory UI only — score never gates paragraph progress. (#1318, #2185)
             if (failedSentences.length > totalRetryable / 2) {
-              const canAdvanceRule2 = paragraphSummary.matchRate >= 0.5
-                || completedParagraphs.has(idx);
+              const canAdvanceRule2 = true; // advancement is never blocked by score
               return (
                 <div className="pt-3 border-t border-on-surface/10">
                   <p className="text-sm text-on-surface-variant text-center">
-                    這段有比較多地方需要加強，我們重新唸一次吧！
+                    繼續加油！再唸一次一定會更好！
                   </p>
-                  <div className="flex gap-3 justify-center pt-3">
-                    <button
-                      onClick={() => onRetryParagraph(idx)}
-                      className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
-                    >
-                      重練這段
-                    </button>
-                    {idx < storyLength - 1 && canAdvanceRule2 && (
-                      <button
-                        onClick={() => {
-                          if (!completedParagraphs.has(idx)) {
-                            onAdvanceParagraph(idx, lineResults);
-                          } else {
-                            onSelectParagraph(idx + 1);
-                          }
-                        }}
-                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                      >
-                        下一段
-                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                      </button>
-                    )}
-                    {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvanceRule2 && (
-                      <button
-                        onClick={() => onAdvanceParagraph(idx, lineResults)}
-                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                      >
-                        完成朗讀
-                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                      </button>
-                    )}
-                  </div>
                 </div>
               );
             }
@@ -426,10 +421,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* Action buttons — hidden during sentence retry */}
           {retrySentenceIdx === undefined && (() => {
-            // canAdvance is based on paragraph-level matchRate only.
-            // Sentence retry suggestions are advisory and must not block paragraph progress. (#1318)
-            const canAdvance = paragraphSummary.matchRate >= 0.5
-              || completedParagraphs.has(idx);
+            // Advancement is never blocked by score — retry suggestions are advisory UI only. (#1318, #2185)
+            const canAdvance = true; // advancement is never blocked by score
 
             return (
             <div className="flex gap-3 justify-center pt-2">
@@ -439,8 +432,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               >
                 重練這段
               </button>
-              {/* Always show 下一段 when paragraph-level passed (matchRate >= 0.5) */}
-              {idx < storyLength - 1 && canAdvance && (
+              {/* Always show 下一段 — never block paragraph progress (#2172) */}
+              {idx < storyLength - 1 && (
                 <button
                   onClick={() => {
                     if (!completedParagraphs.has(idx)) {

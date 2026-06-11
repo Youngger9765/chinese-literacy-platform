@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
+from ._helpers import get_owned_session
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
@@ -22,16 +23,6 @@ from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, pa
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-
-
-def _get_owned_session(session_id: int, current_user: User, db: Session) -> LearningSession:
-    """Fetch a LearningSession that belongs to the authenticated user."""
-    session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
-    if session is None:
-        raise HTTPException(status_code=404, detail="Session not found")
-    if session.student_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your session")
-    return session
 
 
 @router.put(
@@ -55,7 +46,7 @@ def save_step_progress(
     Overwrites any previously stored step_progress for this session.
     Non-completed sessions only — completed sessions are read-only.
     """
-    session = _get_owned_session(session_id, current_user, db)
+    session = get_owned_session(session_id, current_user, db)
 
     # parse_step_progress logs a WARNING when the stored value is malformed
     # instead of silently discarding it (Issue #1180).
@@ -206,5 +197,5 @@ def get_step_progress(
     Returns step_progress: null when no progress has been saved yet
     (frontend should fall back to localStorage in that case).
     """
-    session = _get_owned_session(session_id, current_user, db)
+    session = get_owned_session(session_id, current_user, db)
     return StepProgressResponse(session_id=session.id, step_progress=session.step_progress)

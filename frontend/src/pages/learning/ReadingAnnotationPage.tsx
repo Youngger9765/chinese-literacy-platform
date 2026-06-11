@@ -3,7 +3,7 @@ import ReadingAnnotation from '../../components/reading-steps/ReadingAnnotation'
 import { useLearningContext } from '../../layouts/LearningLayout';
 
 const ReadingAnnotationPage: React.FC = () => {
-  const { selectedStory, handleFinishReadingAnnotation } = useLearningContext();
+  const { selectedStory, handleFinishReadingAnnotation, dbSessionId } = useLearningContext();
 
   if (!selectedStory) return null;
 
@@ -11,6 +11,7 @@ const ReadingAnnotationPage: React.FC = () => {
     <ReadingAnnotation
       story={selectedStory}
       onFinish={handleFinishReadingAnnotation}
+      dbSessionId={dbSessionId}
     />
   );
 };

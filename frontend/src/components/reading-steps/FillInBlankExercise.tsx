@@ -9,14 +9,58 @@
  *   A12 — wrong answer never reveals the correct answer; retryable
  *   A11 — text-left, smaller dashed blank, "第 N 題 / 共 M 題" heading,
  *          ABCD badges behind FILLBLANK_SHOW_ABCD feature flag (default false)
+ * Issue #2163: OnboardingCoach — first-use amber説明框 + demo animation on real UI
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
-import { FILLBLANK_SHOW_ABCD } from '../../config/featureFlags';
+import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
+
+// ── localStorage key for first-use onboarding gate ────────────────────────
+const FILLBLANK_ONBOARDED_KEY = 'fillblank_onboarded';
+
+// ── Onboarding coach — amber box, same style as VocabDefinitionMatchMCQ ──
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+  return (
+    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          lightbulb
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">語詞應用怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            讀句子，從下面選出最適合填進空格的語詞。
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   sentences: FillInBlankItem[];
@@ -87,12 +131,45 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const savedProgress = loadProgress(storyId);
 
+  // Onboarding state — gated by localStorage
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(FILLBLANK_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  // Demo animation state: null = not running, code = the option being highlighted
+  const [demoHighlightCode, setDemoHighlightCode] = useState<string | null>(null);
+  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up demo timer on unmount
+  useEffect(() => {
+    return () => {
+      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    };
+  }, []);
+
+  const handleDismissCoach = () => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(FILLBLANK_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  };
+
   const [phase, setPhase] = useState<Phase>('exercise');
   const [retryMode, setRetryMode] = useState(savedProgress?.retryMode ?? false);
   const [retryIndices, setRetryIndices] = useState<number[]>(savedProgress?.pendingRetryIndices ?? []);
   const [currentIdx, setCurrentIdx] = useState(savedProgress?.currentIdx ?? 0);
   const [usedCodes, setUsedCodes] = useState<Set<string>>(() => new Set(savedProgress?.usedCodes ?? []));
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  // The word the student just picked — rendered INSIDE the sentence bracket
+  // (correct → green, wrong → amber) so they always see the full sentence and
+  // understand why an answer fits or doesn't, then continue / advance.
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [firstTryUsed, setFirstTryUsed] = useState(false);
   const [score, setScore] = useState(savedProgress?.score ?? 0);
   const [firstTryResults, setFirstTryResults] = useState<QuestionResult[]>(savedProgress?.firstTryResults ?? []);
@@ -118,15 +195,66 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     if (done && phase === 'exercise') setPhase('summary');
   }, [done, phase]);
 
-  // Show all bank entries; used ones stay visible as decoys (greyed-out, non-selectable).
-  const availableEntries = bankEntries;
   const currentSentence = !done ? activeSentences[currentIdx] : null;
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
+
+  // #7 教授「選項呈現兩案」(featureFlag FILLBLANK_OPTION_MODE):
+  //   'all'      → 全部選項，用過 grey out (default, 現狀)
+  //   'disappear'→ 全部選項，用過直接移除 = 案 (b)
+  //   'random4'  → 每題只 4 個（正解 + 3 確定性 decoy）= 案 (a) 降難度
+  // random4 用 currentOriginalIdx 當 seed → 同題重選不會洗牌。
+  const availableEntries = useMemo(() => {
+    if (FILLBLANK_OPTION_MODE === 'disappear') {
+      return bankEntries.filter(([code]) => !usedCodes.has(code));
+    }
+    if (FILLBLANK_OPTION_MODE === 'random4' && currentSentence) {
+      const correct = currentSentence.answer;
+      const correctEntry = bankEntries.find(([c]) => c === correct);
+      const decoys = bankEntries.filter(([c]) => c !== correct);
+      if (!correctEntry || decoys.length < 3) return bankEntries;
+      const seed = (currentOriginalIdx + 1) * 7;
+      // deterministic rotation → first 3 distinct decoys
+      const rotated = decoys.map((_, i) => decoys[(i + seed) % decoys.length]);
+      const out = rotated.slice(0, 3);
+      out.splice(seed % (out.length + 1), 0, correctEntry); // stable, non-fixed slot
+      return out;
+    }
+    return bankEntries; // 'all'
+  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx]);
+
+  /**
+   * Demo animation: pulse the correct option for the current question.
+   * Purely visual — does NOT submit an answer or affect scoring.
+   * Two amber pulses on the correct option, then done.
+   */
+  const handleDemo = () => {
+    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    if (!currentSentence) {
+      handleDismissCoach();
+      return;
+    }
+    const correctCode = currentSentence.answer;
+    setDemoHighlightCode(correctCode);
+    demoTimerRef.current = setTimeout(() => {
+      setDemoHighlightCode(null);
+      demoTimerRef.current = setTimeout(() => {
+        setDemoHighlightCode(correctCode);
+        demoTimerRef.current = setTimeout(() => {
+          setDemoHighlightCode(null);
+        }, 900);
+      }, 200);
+    }, 900);
+    handleDismissCoach();
+  };
 
   // A10: selecting immediately evaluates — no separate confirm button
   function handleSelect(code: string) {
     if (feedback === 'correct') return; // already correct, guard early return (preserve A10 note)
     if (!currentSentence) return;
+
+    // Drop the chosen word into the bracket — both correct AND wrong — so the
+    // student reads the whole sentence with their pick in place.
+    setSelectedCode(code);
 
     if (code === currentSentence.answer) {
       const newUsed = new Set(usedCodes);
@@ -149,13 +277,15 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
       setCurrentPraise(nextPraise());
       setFeedback('correct');
 
-      // A10: auto-advance ~800ms after correct
+      // A10: auto-advance after correct — hold ~1.2s so the student sees their
+      // correct word sitting in the sentence bracket before moving on.
       setTimeout(() => {
         setCurrentIdx((i) => i + 1);
         setFeedback('idle');
+        setSelectedCode(null);
         setFirstTryUsed(false);
         setHintText('');
-      }, 800);
+      }, 1200);
     } else {
       // A12: wrong → do NOT reveal correct answer; keep retryable
       if (!firstTryUsed) {
@@ -184,6 +314,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setCurrentIdx(0);
     setUsedCodes(new Set());
     setFeedback('idle');
+    setSelectedCode(null);
     setFirstTryUsed(false);
     setHintText('');
     setPhase('exercise');
@@ -197,6 +328,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setScore(0);
     setFirstTryResults([]);
     setFeedback('idle');
+    setSelectedCode(null);
     setFirstTryUsed(false);
     setHintText('');
     setPhase('exercise');
@@ -210,7 +342,11 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   // ── Render sentence with inline blank ─────────────────────────────
   // A11: blank box shrunk to ~3.5em with dashed underline style
   function renderSentence(sentence: string, selectedCode: string | null) {
-    const parts = sentence.split(/[（(]　　[）)]/);
+    // Bug fix: blank placeholder may contain a VARIABLE number of full-width
+    // spaces (e.g. G6-L22 uses 「（　　　）」= 3, L10 uses 「（　　）」= 2).
+    // Match one-or-more spaces so the answer fills the in-sentence bracket
+    // instead of falling through to the end when the count differs.
+    const parts = sentence.split(/[（(][　\s]+[）)]/);
     const blankContent = selectedCode
       ? (
         <span className={`inline-flex items-center rounded-lg px-2 py-0.5 mx-1 font-bold text-lg border-2 transition-all ${
@@ -292,7 +428,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
         </div>
 
         {/* Fixed bottom CTA */}
-        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
              style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
           <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
             {isToolboxMode() ? (
@@ -342,6 +478,9 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           </span>
         </div>
 
+        {/* Onboarding coach — shown first time or when student clicks help */}
+        {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+
         {/* A11: per-question heading "第 N 題 / 共 M 題" */}
         {currentSentence && (
           <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wide">
@@ -360,7 +499,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           }`}>
             {/* A11: text-left (not text-center) */}
             <p className="text-xl md:text-2xl text-on-surface leading-[2.6rem] md:leading-[3.2rem] text-left">
-              {renderSentence(currentSentence.sentence, null)}
+              {renderSentence(currentSentence.sentence, selectedCode)}
             </p>
           </div>
         )}
@@ -397,6 +536,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           <div className="grid grid-cols-2 gap-3">
             {availableEntries.map(([code, word]) => {
               const isUsedDecoy = usedCodes.has(code);
+              const isDemoHighlight = demoHighlightCode === code;
               // A6/A12: when wrong, show which was just selected as amber highlight (no reveal of correct)
               const isWrongSelected =
                 feedback === 'wrong' &&
@@ -407,11 +547,13 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
               return (
                 <button
                   key={code}
-                  onClick={() => !isUsedDecoy && handleSelect(code)}
-                  disabled={isUsedDecoy}
+                  onClick={() => !isUsedDecoy && !demoHighlightCode && handleSelect(code)}
+                  disabled={isUsedDecoy || !!demoHighlightCode}
                   aria-disabled={isUsedDecoy}
                   className={`rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all min-h-[56px] ${
-                    isUsedDecoy
+                    isDemoHighlight
+                      ? 'border-amber-400 bg-amber-50 animate-pulse'
+                      : isUsedDecoy
                       ? 'border-surface-container-high bg-surface-container-high/40 opacity-40 cursor-not-allowed'
                       : isWrongSelected
                       ? 'border-amber-400 bg-amber-50 active:scale-[0.97]'
@@ -423,7 +565,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
                     <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
                       isUsedDecoy
                         ? 'bg-surface-container-high text-on-surface-variant/40'
-                        : isWrongSelected
+                        : isWrongSelected || isDemoHighlight
                         ? 'bg-amber-400 text-white'
                         : 'bg-surface-container-high text-on-surface-variant'
                     }`}>
@@ -433,7 +575,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
                   <span className={`font-bold text-base ${
                     isUsedDecoy
                       ? 'text-on-surface-variant/40 line-through'
-                      : isWrongSelected
+                      : isWrongSelected || isDemoHighlight
                       ? 'text-amber-700'
                       : 'text-on-surface'
                   }`}>
@@ -451,6 +593,20 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           <p className="text-xs text-center text-on-surface-variant">
             點選其他選項繼續作答
           </p>
+        )}
+
+        {/* Show help button after onboarding is dismissed */}
+        {!showCoach && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowCoach(true)}
+              className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-sm">help_outline</span>
+              怎麼玩？
+            </button>
+          </div>
         )}
 
       </div>

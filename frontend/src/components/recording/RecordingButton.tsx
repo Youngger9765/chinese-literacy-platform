@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { formatTime } from '../../utils/formatTime';
 
 interface RecordingButtonProps {
   /** Maximum recording time in seconds. Default: 120 */
@@ -9,12 +10,6 @@ interface RecordingButtonProps {
   /** Optional label shown above the controls */
   label?: string;
   disabled?: boolean;
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
 }
 
 const RecordingButton: React.FC<RecordingButtonProps> = ({

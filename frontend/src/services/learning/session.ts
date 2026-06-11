@@ -3,6 +3,87 @@ import { SessionExpiredError } from '../api';
 import { API_BASE } from '../apiConfig';
 
 // ---------------------------------------------------------------------------
+// Gemini audio transcription (Issue #2131 — Block 3)
+// ---------------------------------------------------------------------------
+
+export interface TranscribeReadingResult {
+  /** Transcribed text, or null if Gemini failed (use Web Speech fallback). */
+  transcript: string | null;
+  /** "gemini" on success, "fallback" when Gemini errored. */
+  method: 'gemini' | 'fallback';
+  /** Gemini's internal audit notes (empty string when method=fallback). */
+  reasoning?: string;
+  /**
+   * Fallback reason (Issue #2156 — I4 fallback alert).
+   *
+   * Backend reasons (method='fallback'):
+   *   'timeout' | 'safety' | 'decode' | 'empty' | 'error'
+   *
+   * Frontend reasons (set by caller before network call):
+   *   'no_audio'  — no recorded blob was available
+   *   'no_token'  — auth token missing; request not attempted
+   *
+   * Present only when method='fallback'. Used by both FullReading and LiveTutor
+   * to display the I4-compliant amber fallback alert banner.
+   */
+  reason?: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'no_audio' | 'no_token' | string;
+}
+
+/**
+ * Send a recorded audio blob to the backend Gemini transcription endpoint.
+ *
+ * Returns a fail-closed result: on any network/auth/server error, `method`
+ * will be "fallback" and `transcript` will be null — caller must use the
+ * Web Speech transcript as fallback.  Never throws.
+ *
+ * NOTE: Requires real microphone audio to test end-to-end.
+ * Unit-tested via mocks (vitest).  E2E requires manual mic verification.
+ */
+export async function transcribeReading(
+  audioBlob: Blob,
+  targetText: string,
+  durationMs: number,
+  token: string,
+): Promise<TranscribeReadingResult> {
+  const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '', reason: 'error' };
+
+  try {
+    const form = new FormData();
+    form.append('audio', audioBlob, 'recording.webm');
+    form.append('target_text', targetText);
+    form.append('duration_ms', String(durationMs));
+
+    const res = await fetch(`${API_BASE}/api/reading/transcribe`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+
+    if (!res.ok) {
+      // Non-2xx (rate limit, auth, size cap, etc.) → fallback, no throw
+      console.warn('[transcribeReading] non-OK response:', res.status);
+      return FALLBACK;
+    }
+
+    const data = await res.json();
+    // Validate: backend always returns {transcript, method} even on Gemini error
+    if (data && typeof data.method === 'string') {
+      return {
+        transcript: data.transcript ?? null,
+        method: data.method === 'gemini' ? 'gemini' : 'fallback',
+        reasoning: data.reasoning ?? '',
+        reason: data.reason ?? undefined,
+      };
+    }
+    return FALLBACK;
+  } catch (err) {
+    // Network error or JSON parse failure → fallback
+    console.warn('[transcribeReading] error:', err);
+    return FALLBACK;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Learning session creation + reading evaluation
 // ---------------------------------------------------------------------------
 

@@ -8,6 +8,7 @@ import {
 import { cancelTts } from '../services/ttsApi';
 import { TIER1_POOL, TIER2_POOL, TIER3_POOL, STREAK_MESSAGES } from '../utils/liveTutorPools';
 import { buildRealtimeOverlay } from '../utils/liveTutorHelpers';
+import { enhanceLiveTranscript } from '../utils/liveTranscriptEnhance';
 
 /**
  * Manages the Web Speech API continuous-recognition session used by LiveTutor.
@@ -183,7 +184,12 @@ export function useLiveTutorSpeech({
       const fullTranscript = accumulatedTranscriptRef.current + sessionTranscript;
       rawSttRef.current = fullTranscript;
       currentTranscriptRef.current = fullTranscript;
-      onStreamingTranscript(cleanChineseText(fullTranscript));
+      // Issue #2147: enhance live display — correct homophones + reinsert punctuation
+      const { plain: enhancedDisplay } = enhanceLiveTranscript(
+        cleanChineseText(fullTranscript),
+        targetTextRef.current,
+      );
+      onStreamingTranscript(enhancedDisplay);
 
       // Real-time LCS diff overlay: compare full transcript against target
       // Throttle: only recompute on isFinal events OR if 400ms has elapsed since last diff.
