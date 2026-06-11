@@ -593,6 +593,16 @@ def extract_keypoints(table, lesson_id):
                     para_loc = m.group(1).strip()
                     label_clean = re.sub(r"\n?[/／]\s*[（(][\d\.\s,，、\-]+[）)]", "", label_raw).strip()
 
+            # Extract blanks embedded in the label column (col0) when the cell has both text
+            # and fill-in slots (e.g. "睡眠的\n【 好處  】" or "仍待解決的問題：\n1.女性運動員的【努力/成就】").
+            # Pure-label blanks (fullmatch 【...】) are already used as the label text; skip those.
+            label_blanks = []
+            if not re.fullmatch(r"【[^】]*】", label_clean.strip()):
+                raw_label_blanks = parse_blanks(label_clean)
+                if raw_label_blanks:
+                    label_blanks = raw_label_blanks
+                    label_clean = remove_blanks(label_clean)
+
             label_clean = clean_label(label_clean)
 
             if label_clean:
@@ -602,6 +612,8 @@ def extract_keypoints(table, lesson_id):
                     "value": remove_blanks(value_text) if blanks else value_text,
                     "blanks": blanks,
                 }
+                if label_blanks:
+                    row_entry["label_blanks"] = label_blanks
                 if para_loc:
                     row_entry["paragraph"] = para_loc
                 rows_out.append(row_entry)

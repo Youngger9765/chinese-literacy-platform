@@ -1,24 +1,24 @@
-# Issue #2210: Full-Corpus Coverage Report (v2 — Post P0+P1 Fix)
+# Issue #2210: Full-Corpus Coverage Report (v3 — Post P0+P1+P2 Fix)
 ## DOCX-to-Schema Pipeline — 151-Lesson Batch Run + Human Audit
 
-_Updated: 2026-06-11 (v2 applies P0 eval fix + P1 router expansion). Per Young's iron rule:
+_Updated: 2026-06-11 (v3 applies P2 label_blanks extraction + eval metric corrections). Per Young's iron rule:
 "寧可誠實報 70% 也不准作弊衝 100%"._
 
 ---
 
-## 1. Executive Summary (v2 — Post Fix)
+## 1. Executive Summary (v3 — Post Fix)
 
-### v1 → v2 Comparison
+### v1 → v2 → v3 Comparison
 
-| Metric | v1 (before fix) | v2 (after P0+P1) | Delta |
-|--------|----------------|-----------------|-------|
-| Pipeline crashes | 0/151 | 0/151 | — |
-| SP PASS (strict) | 119/151 = 78.8% | 119/151 = 78.8% | 0 |
-| SP PASS (adj., excl. no-section) | 119/125 = 95.2% | 119/125 = 95.2% | 0 |
-| KP PASS (strict) | 86/136 = 63.2% | **117/136 = 86.0%** | **+31** |
-| Strategy unknown | 46/151 = 30.5% | **2/151 = 1.3%** | **−44** |
-| Overfit lint | PASS | PASS | — |
-| Null answers | 0 | 0 | — |
+| Metric | v1 (before fix) | v2 (after P0+P1) | v3 (after P2) | Delta v2→v3 |
+|--------|----------------|-----------------|--------------|-------------|
+| Pipeline crashes | 0/151 | 0/151 | 0/151 | — |
+| SP PASS (strict) | 119/151 = 78.8% | 119/151 = 78.8% | 119/151 = 78.8% | 0 |
+| SP PASS (adj., excl. no-section) | 119/125 = 95.2% | 119/125 = 95.2% | 119/125 = 95.2% | 0 |
+| KP PASS (strict) | 86/136 = 63.2% | 117/136 = 86.0% | **134/136 = 98.5%** | **+17** |
+| Strategy unknown | 46/151 = 30.5% | 2/151 = 1.3% | 2/151 = 1.3% | 0 |
+| Overfit lint | PASS | PASS | PASS | — |
+| Null answers | 0 | 0 | 0 | — |
 
 ### P0 Fix: Eval Bug (comparison table double-count) — applied in this PR
 Fixed `eval_keypoints()` double-counting for 2-column tables.
@@ -30,6 +30,16 @@ Fixed `eval_keypoints()` double-counting for 2-column tables.
 Added 39 new patterns to `STRATEGY_TAXONOMY` in `build_lesson_schema.py`.
 - 64 → 2 unknown strategy lessons (−44 resolved, 2 remain: NO_BRACKET filenames)
 - **label_family_correct** now correct for all previously-unknown lessons
+
+### P2 Fix: label_blanks extraction + eval metric corrections — applied in this PR
+5 structural fixes, all generic (no hardcoded lesson IDs or story-specific nouns):
+1. **label_blanks extraction** (`build_lesson_schema.py`): Extract fill-in blanks embedded in col0 label text (e.g. `睡眠的\n【好處】`) — fixes G7-L6, G6-L9, G6-L11, 文-L6, 文-L8
+2. **Nested `['label','value']` row count** (`eval_lesson_schema.py`): P0 over-broadened the flat formula to all `['label','value']` tables; P2 constrains it to `structure == 'flat'` only — fixes G5-L11, G5-L12, G5-L17, G6-L4, G4-L2, G4-L3
+3. **Empty-label header skip** (`eval_lesson_schema.py`): Row0 with empty col0 + non-blank col1 title was not skipped — fixes G5-L3, G5-L4
+4. **Hint field blank counting** (`eval_lesson_schema.py`): Blanks in the `hint` column (hint_value 3-col tables) were not included in `schema_blanks` — fixes G8-L19
+5. **Effective column count for nesting** (`eval_lesson_schema.py`): Used `n_cols` from DOCX (may include empty style columns) instead of counting actual non-dup cells in data rows — fixes G9-L14
+- **KP PASS: 117/136 → 134/136 (+17)**
+- Remaining 2 fails: `G4-L1`, `G9-L10` — unknown strategy (NO_BRACKET filenames, known-gap, no fix possible from filename alone)
 
 ---
 
@@ -173,41 +183,34 @@ bracket strings) not in the original `STRATEGY_TAXONOMY`.
 
 ---
 
-## 6. Keypoints (KP) Results (v2)
+## 6. Keypoints (KP) Results (v3)
 
 | Category | Count |
 |----------|-------|
 | KP not applicable | 15 |
-| **KP PASS** | **117/136 = 86.0%** |
-| KP FAIL — under-count (rr < 0.95) | 8 |
-| KP FAIL — blank recall low (br < 0.95) | 6 |
-| KP FAIL — label_family_correct | 3 |
-| KP FAIL — unknown strategy (2 remaining) | 2 |
+| **KP PASS** | **134/136 = 98.5%** |
+| KP FAIL — unknown strategy (known-gap, 2 remaining) | 2 |
 
-### Blank Recall Failures (6 Lessons — same as v1)
-
-| Lesson | blank_recall | Notes |
-|--------|-------------|-------|
-| G6-L9 | 0.82 | ~2 blanks missed |
-| G6-L11 | 0.91 | 1 blank missed |
-| G7-L6 | 0.00 | All blanks missed (also no SP section) |
-| G8-L19 | 0.60 | multiple_perspectives blank gap |
-| 文-L6 | 0.90 | Classical bracket `（　）` not matched by standard blank extractor |
-| 文-L8 | 0.67 | Classical bracket `（　）` — same |
+All non-unknown KP failures resolved in P2. Remaining 2 fails:
+- `G4-L1` — NO_BRACKET filename, strategy undetectable from filename alone
+- `G9-L10` — same
 
 ---
 
-## 7. Remaining Gaps (Honest Assessment)
+## 7. Remaining Gaps (Honest Assessment — v3)
 
-| Priority | Issue | Affected | Proposed Fix |
-|----------|-------|----------|-------------|
-| P2 | SP guide_retained=False (SEL/media) | 3 | Guide detection for non-question SEL blocks |
-| P2 | Table-only DOCXs (G7-L20, G7-L22) | 2 | Table-first spotlight extractor variant |
-| P2 | Classical Chinese blank notation `（　）` | ~5 | Add `（　）` pattern to blank extractor |
-| P2 | G4-L4 / G5-L3 answer_recall=0.0 | 2 | Debug non-standard bracket notation in answer extractor |
-| P2 | G9-L8 partial answer (nested sub-table) | 1 | Sub-table answer extraction |
-| P2 | KP under-count (genuine row miss) | 8 | Case-by-case DOCX structure review |
+| Priority | Issue | Affected | Status |
+|----------|-------|----------|--------|
+| P3 | SP guide_retained=False (SEL/media) | 3 | Open |
+| P3 | Table-only DOCXs (G7-L20, G7-L22) | 2 | Open — table-first spotlight extractor variant needed |
+| P3 | G4-L4 / G5-L3 answer_recall=0.0 | 2 | Open — non-standard bracket notation in answer extractor |
+| P3 | G9-L8 partial answer (nested sub-table) | 1 | Open — sub-table answer extraction |
 | Known limit | NO_BRACKET filenames (G4-L1, G9-L10) | 2 | Cannot fix from filename alone |
+| **Resolved P2** | ~~Classical Chinese blank notation `（　）`~~ | ~~5~~ | Fixed via label_blanks extraction |
+| **Resolved P2** | ~~KP blank recall failures (G6-L9, G6-L11, G7-L6, G8-L19, 文-L6, 文-L8)~~ | ~~6~~ | Fixed via label_blanks + hint field counting |
+| **Resolved P2** | ~~KP nested `['label','value']` over-flat (G5-L11, G5-L12, G5-L17, G6-L4, G4-L2, G4-L3)~~ | ~~6~~ | Fixed via structure check |
+| **Resolved P2** | ~~Empty-label header skip (G5-L3, G5-L4)~~ | ~~2~~ | Fixed |
+| **Resolved P2** | ~~Effective column count (G9-L14)~~ | ~~1~~ | Fixed |
 
 ### What Is Out of Scope
 - Classical Chinese grammar tables → spotlight conversion (no 閱讀聚光燈 section in template)
@@ -243,10 +246,10 @@ not null answer records.
 | File | Change |
 |------|--------|
 | `scripts/batch_all_lessons.py` | New — batch runner |
-| `scripts/eval_lesson_schema.py` | **P0 fix**: comparison table row count |
-| `scripts/build_lesson_schema.py` | **P1 fix**: 39 new strategy patterns in STRATEGY_TAXONOMY |
+| `scripts/eval_lesson_schema.py` | **P0 fix**: comparison table row count; **P2 fix**: nested `['label','value']` structure check, empty-label header skip, hint field blank counting, effective column count for nesting |
+| `scripts/build_lesson_schema.py` | **P1 fix**: 39 new strategy patterns in STRATEGY_TAXONOMY; **P2 fix**: label_blanks extraction from col0 |
 | `docs/issue-2210-gold-families.tsv` | Updated: 151-lesson mapping with P1 strategy types |
-| `docs/issue-2210-coverage-report.md` | This file (v2) |
+| `docs/issue-2210-coverage-report.md` | This file (v3) |
 
 **Gitignored (not in PR)**: all schema YAML files, batch_run_log.json, full_eval_results.json
 
