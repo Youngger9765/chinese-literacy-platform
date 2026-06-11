@@ -466,7 +466,24 @@ def render_figure_block(block: dict, lesson_id: str) -> str:
     bind = block.get("bind_paragraph", "")
     caption = bind if bind else asset_name
 
-    asset_path = ASSETS_BASE / lesson_id / asset_name
+    # Path-traversal guard: asset_name comes from the generated schema, but never
+    # trust it — reject separators/NUL/absolute paths and require the resolved
+    # path to stay inside ASSETS_BASE/<lesson_id>.
+    base = (ASSETS_BASE / lesson_id).resolve()
+    bad = (
+        not asset_name
+        or "\x00" in asset_name
+        or "/" in asset_name
+        or "\\" in asset_name
+        or os.path.isabs(asset_name)
+    )
+    candidate = (base / asset_name).resolve() if not bad else None
+    if bad or not str(candidate).startswith(str(base) + os.sep):
+        return (
+            '<div class="block-figure"><div class="figure-caption">'
+            f'[invalid asset: {escape_html(asset_name)}]</div></div>'
+        )
+    asset_path = candidate
 
     if referent == "table" or (asset_name and asset_name.endswith(".json")):
         return render_figure_table(asset_path, caption)
@@ -495,7 +512,7 @@ def render_keypoints_section(kp: dict, inline: bool = False) -> str:
         "hint": "提示", "paragraph": "段落位置"
     }
     header_cells = "".join(
-        f'<th>{col_labels.get(c, c)}</th>' for c in columns
+        f'<th>{col_labels.get(c, escape_html(str(c)))}</th>' for c in columns
     )
 
     tbody = ""
