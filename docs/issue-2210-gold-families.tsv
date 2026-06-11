@@ -1,87 +1,104 @@
 lesson_id	grade	strategy_type	family	notes
+G4-L1	4	unknown	unknown	no_spotlight_section;kp_fail:label_only;router_gap
 G4-L10	4	emotion_inference	guided_steps	
 G4-L11	4	emotion_inference	guided_steps	
 G4-L12	4	emotion_inference	guided_steps	no_spotlight_section
 G4-L13	4	perspective_taking	guided_steps	
 G4-L14	4	emotion_management	guided_steps	no_spotlight_section
-G4-L15	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L16	4	unknown	unknown	kp_fail:eval_overcount;router_gap
+G4-L15	4	sel_character	guided_steps	
+G4-L16	4	sel_character	guided_steps	
+G4-L17	4	sel_character	guided_steps	
+G4-L18	4	sel_character	guided_steps	
 G4-L19	4	info_organization	comparison_table	
-G4-L1	4	unknown	unknown	no_spotlight_section;kp_fail:eval_overcount;router_gap
-G4-L20	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L2	4	writing_technique	guided_steps	
-G4-L3	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L4	4	unknown	unknown	sp_fail:ar=0.0,guide=True;kp_fail:eval_overcount;router_gap
+G4-L2	4	writing_technique	guided_steps	kp_fail:undercount_rr=0.80
+G4-L20	4	multiple_perspectives	comparison_table	
+G4-L23	4	sel_character	guided_steps	
+G4-L24	4	sel_character	guided_steps	
+G4-L25	4	sel_character	guided_steps	
+G4-L26	4	sel_character	guided_steps	
+G4-L27	4	sel_character	guided_steps	
+G4-L3	4	writing_technique	guided_steps	kp_fail:undercount_rr=0.50
+G4-L4	4	writing_technique	guided_steps	sp_fail:ar=0.0,guide=True
 G4-L5	4	inference	guided_steps	
 G4-L6	4	inference	guided_steps	
 G4-L7	4	inference	guided_steps	
 G4-L8	4	main_idea_inference	guided_steps	
 G4-L9	4	summary	guided_steps	
+G5-L1	5	inference	guided_steps	no_spotlight_section
 G5-L10	5	trait_inference	guided_steps	
-G5-L11	5	trait_inference	guided_steps	
-G5-L12	5	summary	guided_steps	
+G5-L11	5	trait_inference	guided_steps	kp_fail:undercount_rr=0.80
+G5-L12	5	summary	guided_steps	kp_fail:undercount_rr=0.50
 G5-L13	5	summary	guided_steps	
 G5-L14	5	summary	guided_steps	
-G5-L15	5	unknown	unknown	kp_fail:eval_overcount;router_gap
-G5-L16	5	unknown	unknown	kp_fail:eval_overcount;router_gap
-G5-L17	5	info_organization	comparison_table	
+G5-L15	5	main_idea_inference	guided_steps	
+G5-L16	5	main_idea_inference	guided_steps	
+G5-L17	5	info_organization	comparison_table	kp_fail:undercount_rr=0.80
 G5-L18	5	summary_pse	keypoints	
-G5-L19	5	unknown	unknown	no_spotlight_section;kp_fail:eval_overcount;router_gap
-G5-L1	5	unknown	unknown	no_spotlight_section;kp_fail:eval_overcount;router_gap
-G5-L20	5	unknown	unknown	kp_fail:eval_overcount;router_gap
-G5-L21	5	unknown	unknown	kp_fail:label_only;router_gap
-G5-L22	5	unknown	unknown	kp_fail:label_only;router_gap
-G5-L23	5	unknown	unknown	kp_fail:label_only;router_gap
-G5-L24	5	unknown	unknown	kp_fail:label_only;router_gap
+G5-L19	5	sel_character	guided_steps	no_spotlight_section
+G5-L2	5	inference	guided_steps	
+G5-L20	5	sel_character	guided_steps	
+G5-L21	5	sel_character	guided_steps	
+G5-L22	5	sel_character	guided_steps	
+G5-L23	5	sel_character	guided_steps	
+G5-L24	5	sel_character	guided_steps	
 G5-L26	5	comparison	comparison_table	
 G5-L27	5	writing_technique	guided_steps	
-G5-L2	5	unknown	unknown	kp_fail:eval_overcount;router_gap
-G5-L3	5	unknown	unknown	sp_fail:ar=0.0,guide=True;kp_fail:undercount_rr=0.83;router_gap
-G5-L4	5	unknown	unknown	kp_fail:undercount_rr=0.80;router_gap
+G5-L3	5	inference	guided_steps	sp_fail:ar=0.0,guide=True;kp_fail:undercount_rr=0.83
+G5-L4	5	inference	guided_steps	kp_fail:undercount_rr=0.80
 G5-L5	5	main_idea_inference	guided_steps	
 G5-L6	5	main_idea_inference	guided_steps	
 G5-L7	5	main_idea_inference	guided_steps	
 G5-L8	5	trait_inference	guided_steps	
 G5-L9	5	trait_inference	guided_steps	
+G6-L1	6	writing_technique	guided_steps	no_spotlight_section
 G6-L10	6	summary_keysentence	guided_steps	
 G6-L11	6	summary_keysentence	guided_steps	kp_fail:blank_br=0.91
 G6-L12	6	summary	guided_steps	
 G6-L13	6	self_questioning	guided_steps	
 G6-L14	6	self_questioning	guided_steps	
 G6-L15	6	express_opinion	guided_steps	
-G6-L16	6	unknown	unknown	no_spotlight_section;kp_fail:eval_overcount;router_gap
-G6-L17	6	unknown	unknown	kp_fail:label_only;router_gap
+G6-L16	6	sel_character	guided_steps	no_spotlight_section
+G6-L17	6	sel_character	guided_steps	
 G6-L18	6	sel_character	guided_steps	sp_fail:ar=1.0,guide=False
 G6-L19	6	sel_character	guided_steps	no_spotlight_section
-G6-L1	6	writing_technique	guided_steps	no_spotlight_section
-G6-L20	6	unknown	unknown	kp_fail:eval_overcount;router_gap
+G6-L2	6	emotion_inference	guided_steps	
+G6-L20	6	sel_character	guided_steps	
 G6-L21	6	emotion_management	guided_steps	no_spotlight_section
 G6-L22	6	summary_pse	keypoints	
 G6-L23	6	summary_pse	keypoints	
 G6-L24	6	summary_pse	keypoints	
 G6-L25	6	summary_pse	keypoints	
-G6-L2	6	emotion_inference	guided_steps	
 G6-L3	6	scientific_inquiry	guided_steps	
-G6-L4	6	main_idea_inference	guided_steps	
+G6-L4	6	main_idea_inference	guided_steps	kp_fail:undercount_rr=0.83
 G6-L5	6	main_idea_inference	guided_steps	
 G6-L6	6	inference	guided_steps	
 G6-L7	6	summary	guided_steps	
 G6-L8	6	summary_structure	guided_steps	
 G6-L9	6	summary_keysentence	guided_steps	kp_fail:blank_br=0.82
+G7-L1	7	writing_technique	guided_steps	
+G7-L10	7	main_idea_inference	guided_steps	
+G7-L11	7	main_idea_inference	guided_steps	
 G7-L12	7	main_idea_inference	guided_steps	
-G7-L13	7	unknown	unknown	kp_fail:label_only;router_gap
-G7-L14	7	unknown	unknown	kp_fail:label_only;router_gap
+G7-L13	7	sel_character	guided_steps	
+G7-L14	7	sel_character	guided_steps	
 G7-L15	7	problem_solving	guided_steps	no_spotlight_section
 G7-L16	7	problem_solving	guided_steps	
 G7-L17	7	scientific_inquiry	guided_steps	
-G7-L18	7	unknown	unknown	kp_fail:eval_overcount;router_gap
+G7-L18	7	main_idea_inference	guided_steps	
 G7-L19	7	self_questioning	guided_steps	
-G7-L1	7	writing_technique	guided_steps	
-G7-L20	7	unknown	unknown	sp_fail:ar=1.0,guide=False;kp_fail:eval_overcount;router_gap
-G7-L21	7	unknown	unknown	kp_fail:label_only;router_gap
-G7-L22	7	unknown	unknown	sp_fail:ar=1.0,guide=False;kp_fail:eval_overcount;router_gap
 G7-L2	7	info_organization	comparison_table	
+G7-L20	7	sel_character	guided_steps	sp_fail:ar=1.0,guide=False
+G7-L21	7	sel_character	guided_steps	
+G7-L22	7	sel_character	guided_steps	sp_fail:ar=1.0,guide=False
+G7-L23	7	inference	guided_steps	
+G7-L24	7	inference	guided_steps	
+G7-L25	7	summary_pse	keypoints	
+G7-L26	7	main_idea_inference	guided_steps	
+G7-L27	7	self_questioning	guided_steps	no_spotlight_section
+G7-L28	7	image_text	image_table	
+G7-L29	7	image_text	image_table	
 G7-L3	7	info_organization	comparison_table	
+G7-L30	7	table_text	image_table	
 G7-L4	7	comparison	comparison_table	
 G7-L5	7	info_organization	comparison_table	
 G7-L6	7	info_organization	comparison_table	no_spotlight_section;kp_fail:blank_br=0.00
@@ -89,64 +106,47 @@ G7-L7	7	image_text	image_table
 G7-L8	7	express_opinion	guided_steps	
 G7-L9	7	express_opinion	guided_steps	
 G8-L1	8	writing_technique	guided_steps	
-G8-L4	8	main_idea_inference	guided_steps	
-G8-L5	8	motivation_inference	guided_steps	
-G8-L6	8	emotion_inference	guided_steps	
-G8-L7	8	causal_inference	guided_steps	
-G8-L8	8	causal_inference	guided_steps	
-G9-L10	9	unknown	unknown	no_spotlight_section;kp_fail:eval_overcount;router_gap
-G9-L15	9	scientific_inquiry	guided_steps	no_spotlight_section
-G9-L17	9	multiple_perspectives	comparison_table	no_spotlight_section
-G9-L1	9	unknown	unknown	kp_fail:eval_overcount;router_gap
-G9-L2	9	unknown	unknown	kp_fail:eval_overcount;router_gap
-G9-L3	9	unknown	unknown	kp_fail:eval_overcount;router_gap
-G9-L4	9	express_opinion	guided_steps	
-G9-L5	9	unknown	unknown	kp_fail:label_only;router_gap
-G9-L6	9	scientific_inquiry	guided_steps	
-G9-L7	9	image_text	image_table	no_spotlight_section
-G9-L8	9	image_text	image_table	sp_fail:ar=0.667,guide=True
-G9-L9	9	image_text	image_table	
-文-L1	wen	unknown	unknown	kp_fail:eval_overcount;router_gap
-文-L2	wen	unknown	unknown	router_gap
-文-L3	wen	classical_grammar	classical_grammar	no_spotlight_section
-文-L4	wen	classical_grammar	classical_grammar	no_spotlight_section
-文-L5	wen	classical_grammar	classical_grammar	no_spotlight_section
-文-L6	wen	classical_grammar	classical_grammar	no_spotlight_section;kp_fail:blank_br=0.90
-文-L7	wen	unknown	unknown	no_spotlight_section;kp_fail:label_only;router_gap
-文-L8	wen	classical_grammar	classical_grammar	no_spotlight_section;kp_fail:blank_br=0.67
-文-L9	wen	classical_grammar	classical_grammar	no_spotlight_section
-G4-L17	4	unknown	unknown	kp_fail:label_only;router_gap
-G4-L18	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L23	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L24	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L25	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L26	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G4-L27	4	unknown	unknown	kp_fail:eval_overcount;router_gap
-G7-L10	7	main_idea_inference	guided_steps	
-G7-L11	7	main_idea_inference	guided_steps	
-G7-L23	7	unknown	unknown	router_gap
-G7-L24	7	unknown	unknown	kp_fail:label_only;router_gap
-G7-L25	7	summary_pse	keypoints	
-G7-L26	7	main_idea_inference	guided_steps	
-G7-L27	7	unknown	unknown	no_spotlight_section;router_gap
-G7-L28	7	image_text	image_table	
-G7-L29	7	image_text	image_table	
-G7-L30	7	table_text	image_table	
-G8-L10	8	inference	guided_steps	no_spotlight_section
+G8-L10	8	main_idea_inference	guided_steps	no_spotlight_section
+G8-L11	8	main_idea_inference	guided_steps	
 G8-L12	8	main_idea_inference	guided_steps	
 G8-L13	8	scientific_inquiry	guided_steps	
 G8-L14	8	scientific_inquiry	guided_steps	
-G8-L15	8	inference	guided_steps	
+G8-L15	8	main_idea_inference	guided_steps	
 G8-L16	8	main_idea_inference	guided_steps	
 G8-L17	8	multiple_perspectives	comparison_table	
 G8-L18	8	multiple_perspectives	comparison_table	
 G8-L19	8	multiple_perspectives	comparison_table	kp_fail:blank_br=0.60
 G8-L2	8	writing_technique	guided_steps	no_spotlight_section
 G8-L3	8	writing_technique	guided_steps	
+G8-L4	8	main_idea_inference	guided_steps	
+G8-L5	8	motivation_inference	guided_steps	
+G8-L6	8	emotion_inference	guided_steps	
+G8-L7	8	causal_inference	guided_steps	
+G8-L8	8	causal_inference	guided_steps	
 G8-L9	8	main_idea_inference	guided_steps	
+G9-L1	9	sel_character	guided_steps	
+G9-L10	9	unknown	unknown	no_spotlight_section;kp_fail:label_only;router_gap
 G9-L11	9	summary	guided_steps	
 G9-L12	9	summary	guided_steps	
 G9-L13	9	sel_character	guided_steps	
-G9-L14	9	sel_character	guided_steps	
-文-L10	wen	unknown	unknown	no_spotlight_section;kp_fail:label_only;router_gap
-G8-L11	8	main_idea_inference	guided_steps	
+G9-L14	9	sel_character	guided_steps	kp_fail:label_only
+G9-L15	9	scientific_inquiry	guided_steps	no_spotlight_section
+G9-L17	9	multiple_perspectives	comparison_table	no_spotlight_section
+G9-L2	9	express_opinion	guided_steps	
+G9-L3	9	express_opinion	guided_steps	
+G9-L4	9	express_opinion	guided_steps	
+G9-L5	9	sel_character	guided_steps	
+G9-L6	9	scientific_inquiry	guided_steps	
+G9-L7	9	image_text	image_table	no_spotlight_section
+G9-L8	9	image_text	image_table	sp_fail:ar=0.667,guide=True;kp_fail:undercount_rr=0.67
+G9-L9	9	image_text	image_table	
+文-L1	wen	sel_character	guided_steps	kp_fail:blank_br=0.43
+文-L10	wen	writing_technique	guided_steps	no_spotlight_section
+文-L2	wen	classical_grammar	classical_grammar	
+文-L3	wen	classical_grammar	classical_grammar	no_spotlight_section
+文-L4	wen	classical_grammar	classical_grammar	no_spotlight_section
+文-L5	wen	classical_grammar	classical_grammar	no_spotlight_section
+文-L6	wen	classical_grammar	classical_grammar	no_spotlight_section;kp_fail:blank_br=0.90
+文-L7	wen	classical_grammar	classical_grammar	no_spotlight_section
+文-L8	wen	classical_grammar	classical_grammar	no_spotlight_section;kp_fail:blank_br=0.67
+文-L9	wen	classical_grammar	classical_grammar	no_spotlight_section
