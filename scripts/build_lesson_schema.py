@@ -593,6 +593,16 @@ def extract_keypoints(table, lesson_id):
                     para_loc = m.group(1).strip()
                     label_clean = re.sub(r"\n?[/／]\s*[（(][\d\.\s,，、\-]+[）)]", "", label_raw).strip()
 
+            # Extract blanks embedded in the label column (col0) when the cell has both text
+            # and fill-in slots (e.g. "睡眠的\n【 好處  】" or "仍待解決的問題：\n1.女性運動員的【努力/成就】").
+            # Pure-label blanks (fullmatch 【...】) are already used as the label text; skip those.
+            label_blanks = []
+            if not re.fullmatch(r"【[^】]*】", label_clean.strip()):
+                raw_label_blanks = parse_blanks(label_clean)
+                if raw_label_blanks:
+                    label_blanks = raw_label_blanks
+                    label_clean = remove_blanks(label_clean)
+
             label_clean = clean_label(label_clean)
 
             if label_clean:
@@ -602,6 +612,8 @@ def extract_keypoints(table, lesson_id):
                     "value": remove_blanks(value_text) if blanks else value_text,
                     "blanks": blanks,
                 }
+                if label_blanks:
+                    row_entry["label_blanks"] = label_blanks
                 if para_loc:
                     row_entry["paragraph"] = para_loc
                 rows_out.append(row_entry)
@@ -1387,26 +1399,30 @@ STRATEGY_TAXONOMY = [
     (re.compile(r"摘要策略.*從結構找.*主題|從結構找"), "summary_structure"),
     (re.compile(r"摘要策略.*從關鍵句|從關鍵句"), "summary_keysentence"),
     (re.compile(r"摘要策略"), "summary"),
-    # Inference / trait
+    # Inference / trait / reading comprehension
     (re.compile(r"推論.*人物特質|從言行推論"), "trait_inference"),
     (re.compile(r"推論.*情緒|推論.*感受"), "emotion_inference"),
     (re.compile(r"推論.*動機|推論.*想法"), "motivation_inference"),
-    (re.compile(r"推論.*主旨|推論.*觀點"), "main_idea_inference"),
+    (re.compile(r"推論.*主旨|推論.*觀點|推論.*論點|找作者主要論點"), "main_idea_inference"),
     (re.compile(r"推論.*因果|找出一連串因果"), "causal_inference"),
     (re.compile(r"推論策略"), "inference"),
+    # Main idea / concept extraction (P1: added patterns)
+    (re.compile(r"提取上位概念|從具體.*提取|從事實歸納概念|從具體事實歸納"), "main_idea_inference"),
+    # Vocabulary / word analysis (P1: added patterns)
+    (re.compile(r"拆詞釋義|從上下文推測詞義|推測詞義"), "inference"),
     # Scientific inquiry / problem solving
-    (re.compile(r"科學探究|解決問題.*科學|以實驗"), "scientific_inquiry"),
-    (re.compile(r"解決問題"), "problem_solving"),
+    (re.compile(r"科學探究|解決問題.*科學|以實驗|比較異同.*解決問題|科學探究法"), "scientific_inquiry"),
+    (re.compile(r"解決問題|簡單推理"), "problem_solving"),
     # Comparison / perspective
-    (re.compile(r"比較多元觀點|多元觀點"), "multiple_perspectives"),
+    (re.compile(r"比較多元觀點|多元觀點|以不同角度.*說明"), "multiple_perspectives"),
     (re.compile(r"比較.*異同|表格整理.*比較"), "comparison"),
-    (re.compile(r"表達看法|4F思考|以科學證據說服"), "express_opinion"),
-    # Self-questioning
-    (re.compile(r"自我提問|詰問作者"), "self_questioning"),
-    # Writing techniques
-    (re.compile(r"寫作手法"), "writing_technique"),
-    # Classical Chinese
-    (re.compile(r"判讀主語|人稱代詞|指示.*代詞|疑問代詞|一字多義"), "classical_grammar"),
+    (re.compile(r"表達看法|4F思考|以科學證據說服|分辨事實與判斷|議論文結構"), "express_opinion"),
+    # Self-questioning / reading strategy
+    (re.compile(r"自我提問|詰問作者|解題策略"), "self_questioning"),
+    # Writing techniques (P1: expanded to cover sentence patterns)
+    (re.compile(r"寫作手法|認識句型|固定句式"), "writing_technique"),
+    # Classical Chinese (P1: expanded)
+    (re.compile(r"判讀主語|斷句.*判讀|人稱代詞|指示.*代詞|疑問代詞|指示與疑問|一字多義|判斷句|文言文閱讀策略"), "classical_grammar"),
     # Ordering / sequencing
     (re.compile(r"順序|排序|時間序"), "ordering"),
     # Information organization / comparison
@@ -1416,10 +1432,18 @@ STRATEGY_TAXONOMY = [
     (re.compile(r"換位思考|同理心|感同身受|想法感受"), "perspective_taking"),
     # Finding supporting evidence / perspective with reasons
     (re.compile(r"觀點找支持理由|找支持理由|支持理由|換位思考並找"), "evidence_finding"),
-    # Emotion management
+    # Emotion management (P1: expanded to cover ABC / stage variants)
     (re.compile(r"情緒管理"), "emotion_management"),
-    # Vocabulary / enrichment SEL
-    (re.compile(r"品格|SEL|正向思考|感恩|善意|同情"), "sel_character"),
+    # SEL / character development (P1: vastly expanded)
+    # Note: broad patterns only — no story-specific proper nouns
+    (re.compile(r"品格|SEL|感恩|善意|同情"), "sel_character"),
+    (re.compile(r"自我覺察|念頭覺察|身體覺察"), "sel_character"),
+    (re.compile(r"人際溝通|跨文化接納|性別平等|向.*歧視說不"), "sel_character"),
+    (re.compile(r"正向思考|負責任的決定|落實環保|媒體素養"), "sel_character"),
+    (re.compile(r"自我管理|時間管理|認識自我|生涯探索|建立.*習慣"), "sel_character"),
+    (re.compile(r"生活素養"), "sel_character"),
+    # General reading strategy (P1: catchall for unclassified reading skills)
+    (re.compile(r"閱讀策略"), "inference"),
 ]
 
 

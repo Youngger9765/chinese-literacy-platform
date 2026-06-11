@@ -181,15 +181,21 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     if kp_table_raw is None:
         return {"available": False, "note": "find_keypoints_table returned None"}
 
-    # Count actual DOCX data rows (exclude title row + header row)
+    # Count actual DOCX data rows (exclude title row + header row + empty-label rows)
     # Title row = first row with single merged cell, no blanks
     # Header row = row with 提示/元素/重點 keywords
+    # Empty-label row = row where col0 is empty and col1 has no blanks (right-aligned title variant)
     rows_raw = kp_table_raw["rows"]
     skip = 0
     if rows_raw:
         first_non_dup = [c for c in rows_raw[0]["cells"] if not c.get("dup")]
         if len(first_non_dup) == 1 and not bls.BLANK_RE.search(first_non_dup[0]["text"]):
             skip += 1  # title row
+        elif (len(first_non_dup) >= 2 and
+              not first_non_dup[0]["text"].strip() and
+              not first_non_dup[0].get("has_blank") and
+              not bls.BLANK_RE.search(first_non_dup[1]["text"])):
+            skip += 1  # empty-label header variant: col0 empty, col1 is a right-aligned title
     if skip < len(rows_raw):
         next_row = rows_raw[skip]
         next_cells = [c for c in next_row["cells"] if not c.get("dup")]
@@ -199,19 +205,47 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     docx_rows = max(0, kp_table_raw["n_rows"] - skip)
 
     # Count schema rows (top-level + sub_rows)
+    # P0 fix (issue #2210): for 2-column tables (columns=['label','value']), sub_rows
+    # represent the SECOND COLUMN's content per row, not additional rows.
+    # Counting 1+len(sub_rows) double-counts → row_recall > 1.0 for these tables.
+    # Detection: columns == ['label', 'value'] (no 'sub_label' column).
+    # For 3-column tables (columns include 'sub_label'), sub_rows are genuine nested
+    # questions — keep the original 1+len(sub_rows) formula for those.
+    #
+    # P2 fix: nested ['label','value'] tables DO use sub_rows for genuine nested questions
+    # (e.g. G5-L11 with 発展歷程 parent + 2 sub-rows). These must use 1+len(sub_rows).
+    # Detection: columns == ['label','value'] AND structure == 'nested'
+    # Flat ['label','value'] tables still use len(rows_out).
+    #
+    # P3 fix (issue #2212): for 3-column nested tables (columns include 'sub_label'),
+    # a parent row whose label merges vertically in the DOCX (i.e. has sub_rows but
+    # no own value) does NOT occupy an extra physical row — the sub_rows themselves
+    # account for all rows under that label.
+    # Correct formula: if row has sub_rows → count len(sub_rows) only (not 1+sub_rows).
+    # If row has no sub_rows → count 1.
+    # This fixes G6-L22 summary_pse nested table: 解決(6 sub_rows)=6, not 7.
     rows_out = kp_schema.get("keypoints", {}).get("rows", [])
-    schema_row_count = sum(
-        1 + len(r.get("sub_rows", []))
-        for r in rows_out
-    )
+    schema_columns = kp_schema.get("keypoints", {}).get("columns", [])
+    schema_structure = kp_schema.get("keypoints", {}).get("structure", "flat")
+    is_two_col_flat = schema_columns == ["label", "value"] and schema_structure == "flat"
+    if is_two_col_flat:
+        # sub_rows = second-column content only (P0 fix), not additional rows
+        schema_row_count = len(rows_out)
+    else:
+        schema_row_count = sum(
+            len(r["sub_rows"]) if r.get("sub_rows") else 1
+            for r in rows_out
+        )
 
     row_recall = schema_row_count / docx_rows if docx_rows > 0 else 0.0
 
     # Blank recall — count DOCX fill-in blanks, excluding:
     #   (a) blanks in the first row of the value column that look like instructions
     #       e.g. "【 】處填入原文，找不到原文時，再用自己的話寫。"
-    #   (b) blanks in label-column cells (col0) that are the label itself
+    #   (b) blanks in col0 that ARE the label itself (pure-label form: fullmatch 【...】)
     #       e.g. "【 經過   】" — these become schema label strings, not fill-in blanks
+    #   Mixed col0 blanks (text + blank) are extracted as label_blanks by the build script
+    #   and counted here like any other schema blank.
     INSTRUCTION_BLANK_RE = re.compile(r"【\s*】\s*[處填找寫]")  # 【 】處... pattern
 
     docx_blanks = 0
@@ -223,7 +257,7 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
             txt = cell.get("text", "")
             if not txt:
                 continue
-            # Skip label-column cells (col0) whose blank IS the label, not a fill-in slot
+            # Skip label-column cells (col0) whose blank IS the label (pure-label form)
             # Heuristic: cell is in col0 AND the entire text is just a blank (± whitespace)
             if c_idx == 0 and re.fullmatch(r"【[^】]*】", txt.strip()):
                 continue
@@ -236,8 +270,19 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
                 continue
             docx_blanks += len(bls.BLANK_RE.findall(txt))
 
+    # Count schema blanks including hint-field blanks (hint_value tables like G8-L19)
+    # and label_blanks (col0 embedded blanks extracted by the build script)
+    def count_row_blanks(r):
+        n = len(r.get("blanks", []))
+        n += len(r.get("label_blanks", []))  # blanks extracted from col0 label with text
+        # hint_value tables: col1 (hint) may contain fill-in blanks (e.g. paragraph numbers)
+        hint = r.get("hint", "")
+        if hint:
+            n += len(bls.BLANK_RE.findall(hint))
+        return n
+
     schema_blanks = sum(
-        len(sr.get("blanks", []))
+        count_row_blanks(sr)
         for r in rows_out
         for sr in ([r] + r.get("sub_rows", []))
     )
@@ -246,11 +291,20 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     # Nesting preserved
     # A 3+ col table can be either hint_value (flat with hint field) or nested (sub_rows).
     # Both are valid encodings of a 3-col table — check that the schema uses EITHER.
-    has_multi_col_docx = kp_table_raw["n_cols"] >= 3
+    # Use EFFECTIVE column count (max non-dup cells across data rows) not n_cols from DOCX,
+    # because n_cols may include empty/style-only columns (e.g. G9-L14 has n_cols=3 but
+    # all data rows only have 2 effective cells — true 2-col table with paragraph locators
+    # embedded in col0).
+    data_rows = kp_table_raw["rows"][1:]  # skip title row if any
+    effective_cols = max(
+        (len([c for c in row["cells"] if not c.get("dup")])
+         for row in data_rows),
+        default=1
+    )
+    has_multi_col_docx = effective_cols >= 3
     nesting_preserved = True
     if has_multi_col_docx:
         # Schema structure field tells us which encoding was used
-        schema_structure = kp_schema.get("keypoints", {}).get("structure", "flat")
         schema_cols = kp_schema.get("keypoints", {}).get("columns", [])
         has_sub_rows = any("sub_rows" in r for r in rows_out)
         has_hint_field = any("hint" in r for r in rows_out)
