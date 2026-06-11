@@ -199,11 +199,23 @@ def eval_keypoints(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> di
     docx_rows = max(0, kp_table_raw["n_rows"] - skip)
 
     # Count schema rows (top-level + sub_rows)
+    # P0 fix (issue #2210): for 2-column tables (columns=['label','value']), sub_rows
+    # represent the SECOND COLUMN's content per row, not additional rows.
+    # Counting 1+len(sub_rows) double-counts → row_recall > 1.0 for these tables.
+    # Detection: columns == ['label', 'value'] (no 'sub_label' column).
+    # For 3-column tables (columns include 'sub_label'), sub_rows are genuine nested
+    # questions — keep the original 1+len(sub_rows) formula for those.
     rows_out = kp_schema.get("keypoints", {}).get("rows", [])
-    schema_row_count = sum(
-        1 + len(r.get("sub_rows", []))
-        for r in rows_out
-    )
+    schema_columns = kp_schema.get("keypoints", {}).get("columns", [])
+    is_two_col_table = schema_columns == ["label", "value"]
+    if is_two_col_table:
+        # sub_rows = second-column content, not additional rows
+        schema_row_count = len(rows_out)
+    else:
+        schema_row_count = sum(
+            1 + len(r.get("sub_rows", []))
+            for r in rows_out
+        )
 
     row_recall = schema_row_count / docx_rows if docx_rows > 0 else 0.0
 
