@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build_lesson_registry.py — issue #2212
+build_lesson_registry.py — issue #2212 / #2214
 Generate docs/lesson-schema-registry.yaml from batch_run_log.json + eval results.
 
 The registry is the single source of truth for:
@@ -36,6 +36,17 @@ REGISTRY_OUT = REPO_ROOT / "docs/lesson-schema-registry.yaml"
 # Known-gap lessons: strategy detection impossible from filename alone (no brackets)
 KNOWN_GAPS = {"G4-L1", "G9-L10"}
 
+# Production parsed YAML directory (for YAML fallback — B-bucket recovery #2214)
+PARSED_YAML_DIR = REPO_ROOT / "backend/data/lessons/_parsed_2026-05-01"
+
+# Multi-lesson YAML key remapping (same as lesson_code_normalization.py)
+# The keys below are structural compound IDs, not lesson-specific overfit patterns.
+# Each entry maps a primary curriculum slot to its compound YAML filename.
+_MULTI_LESSON_PRIMARY = {
+    "G9-L15": "G9-L15-16",   # noqa: overfit-lint-ok — compound YAML key, not hardcode
+    "G9-L17": "G9-L17-19",   # noqa: overfit-lint-ok — compound YAML key, not hardcode
+}
+
 # Strategy type → family mapping (source: docs/issue-2205-eval-standard.md §5)
 # Note: trait_match is a sub-case of trait_inference detected by table structure.
 # For registry purposes we map all trait_inference to guided_steps (conservative).
@@ -70,6 +81,11 @@ _STRATEGY_TO_FAMILY = {
     "multiple_perspectives": "comparison_table",
     # ordering
     "ordering": "ordering",
+    # comparison / contrast (production YAML uses compare_contrast)
+    "compare_contrast": "comparison_table",
+    # classical Chinese (no spotlight by design)
+    "classical_grammar": "guided_steps",
+    "classical": "classical",
 }
 
 
@@ -104,14 +120,21 @@ def _resolve_family(lesson_id: str, log_entry: dict, schema_dir: Path) -> str:
     Derive family from the generated spotlight.yml strategy_type field.
     The batch_run_log 'family' key is always 'unknown' (never populated by the
     pipeline). The spotlight.yml carries the correct strategy_type from the P1
-    router expansion (46→2 unknown), so we read it from there.
+    router expansion.
 
-    Priority:
+    Priority (#2214 extended):
+      0. Classical Chinese lessons (grade == '文') → 'classical' (no spotlight by design)
       1. spotlight.yml strategy_type (P1 router result)
       2. keypoints.yml strategy_type (if spotlight missing)
       3. batch_run_log strategy_type (fallback — same router, but older run)
-      4. 'unknown'
+      4. Production YAML fallback via reading_strategy_type / reading_strategy name
+         (B-bucket recovery: only when production YAML has a usable strategy source)
+      5. 'unknown'
     """
+    # 0. Classical Chinese: grade prefix '文' → always 'classical', no spotlight expected
+    if lesson_id.startswith("文-"):
+        return "classical"
+
     # 1. Try spotlight.yml
     sp_path = schema_dir / f"{lesson_id}.spotlight.yml"
     if sp_path.exists():
@@ -135,6 +158,73 @@ def _resolve_family(lesson_id: str, log_entry: dict, schema_dir: Path) -> str:
     if st and st != "unknown":
         return _strategy_to_family(st)
 
+    # 4. Production YAML fallback (B-bucket recovery — #2214)
+    #    Use production reading_strategy_type or run strategy_name through the
+    #    DOCX taxonomy router. Only applied when a clear, non-'general' signal exists.
+    family = _resolve_family_from_production_yaml(lesson_id)
+    if family != "unknown":
+        return family
+
+    return "unknown"
+
+
+def _resolve_family_from_production_yaml(lesson_id: str) -> str:
+    """
+    Fallback: resolve family by reading production YAML reading_strategy_type /
+    reading_strategy fields via normalize_manifest_code key mapping.
+
+    Returns 'unknown' when:
+    - File not found
+    - reading_strategy_type is 'general' or empty AND reading_strategy is empty
+    - Resolved family is still 'unknown' after taxonomy lookup
+
+    Does NOT accept 'general' as a valid rst — 'general' means the production
+    YAML author could not determine a specific strategy type either.
+    Classical lessons are already handled upstream (priority 0).
+    """
+    if not PARSED_YAML_DIR.exists():
+        return "unknown"
+
+    # Handle multi-lesson YAML keys (e.g. G9-L15 → G9-L15-16)
+    yaml_key = _MULTI_LESSON_PRIMARY.get(lesson_id, lesson_id)
+    path = PARSED_YAML_DIR / f"{yaml_key}.yml"
+    if not path.exists():
+        return "unknown"
+
+    data = _load_yaml_safe(path)
+    if not data:
+        return "unknown"
+
+    # Try explicit reading_strategy_type first (non-general only)
+    rst = (data.get("reading_strategy_type") or "").strip()
+    if rst and rst not in ("general", ""):
+        family = _strategy_to_family(rst)
+        if family != "unknown":
+            return family
+
+    # Fallback: run reading_strategy name through DOCX filename taxonomy router
+    # This recovers lessons where rst='general' but reading_strategy has a specific name
+    rs_name = (data.get("reading_strategy") or "").strip()
+    if not rs_name:
+        return "unknown"
+
+    # Lazy-load build_lesson_schema to avoid circular import at module level
+    try:
+        import importlib.util as _ilu
+        _bls_path = Path(__file__).parent / "build_lesson_schema.py"
+        _spec = _ilu.spec_from_file_location("_bls_fallback", _bls_path)
+        _bls = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_bls)
+        # detect_strategy_from_filename reads bracket from filename, but we can
+        # pass a synthetic path: "dummy({rs_name}).docx"
+        _, st_code = _bls.detect_strategy_from_filename(f"dummy({rs_name}).docx")
+        if st_code and st_code != "unknown":
+            family = _strategy_to_family(st_code)
+            if family != "unknown":
+                return family
+    except Exception:
+        pass
+
     return "unknown"
 
 
@@ -152,13 +242,18 @@ def build_entry(lesson_id: str, log_entry: dict, ev, bls, schema_dir: Path,
     # Null answers from batch run
     null_answers = log_entry.get("null_answers") or []
 
-    # Family: derive from spotlight.yml strategy_type (fix #2212)
+    # Family: derive from spotlight.yml strategy_type (fix #2212 / #2214)
     family = _resolve_family(lesson_id, log_entry, schema_dir)
 
     # Known gap
     known_gaps = []
     if lesson_id in KNOWN_GAPS:
         known_gaps.append("strategy_unknown_no_bracket_filename")
+    if family == "classical":
+        known_gaps.append("classical_no_spotlight_by_design")
+    elif family == "unknown":
+        # C-bucket: both DOCX pipeline and production YAML could not determine strategy
+        known_gaps.append("strategy_source_both_empty")
 
     if status != "success":
         return {
@@ -173,6 +268,22 @@ def build_entry(lesson_id: str, log_entry: dict, ev, bls, schema_dir: Path,
             "n_figures": n_figures,
             "n_tables": None,
             "known_gaps": known_gaps + [f"pipeline_error: {log_entry.get('error', '')[:80]}"],
+        }
+
+    # Classical lessons have no spotlight by design — force status to 'none'
+    if family == "classical":
+        return {
+            "lesson_id": lesson_id,
+            "grade": _grade(lesson_id),
+            "title": _title_from_log(log_entry),
+            "family": "classical",
+            "spotlight_status": "none",
+            "spotlight_score": None,
+            "keypoints_status": "none",
+            "keypoints_blank_recall": None,
+            "n_figures": n_figures,
+            "n_tables": 0,
+            "known_gaps": known_gaps,
         }
 
     # Eval from log (fast path) or live re-eval
