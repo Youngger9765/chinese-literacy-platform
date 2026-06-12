@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build_lesson_registry.py — issue #2212 / #2214
+build_lesson_registry.py — issue #2212 / #2214 / #2146
 Generate docs/lesson-schema-registry.yaml from batch_run_log.json + eval results.
 
 The registry is the single source of truth for:
@@ -122,14 +122,16 @@ def _resolve_family(lesson_id: str, log_entry: dict, schema_dir: Path) -> str:
     pipeline). The spotlight.yml carries the correct strategy_type from the P1
     router expansion.
 
-    Priority (#2214 extended):
+    Priority (#2214 / #2146 extended):
       0. Classical Chinese lessons (grade == '文') → 'classical' (no spotlight by design)
       1. spotlight.yml strategy_type (P1 router result)
       2. keypoints.yml strategy_type (if spotlight missing)
       3. batch_run_log strategy_type (fallback — same router, but older run)
       4. Production YAML fallback via reading_strategy_type / reading_strategy name
          (B-bucket recovery: only when production YAML has a usable strategy source)
-      5. 'unknown'
+      5. keypoints.yml row-label structure inference (#2146)
+         (D-bucket: no spotlight section at all; infer from table shape, not lesson id)
+      6. 'unknown'
     """
     # 0. Classical Chinese: grade prefix '文' → always 'classical', no spotlight expected
     if lesson_id.startswith("文-"):
@@ -164,6 +166,20 @@ def _resolve_family(lesson_id: str, log_entry: dict, schema_dir: Path) -> str:
     family = _resolve_family_from_production_yaml(lesson_id)
     if family != "unknown":
         return family
+
+    # 5. Keypoints row-label structure inference (D-bucket — #2146)
+    #    Applied only when spotlight.yml confirms "spotlight range not found" — i.e.
+    #    this lesson has NO spotlight section in the source document (not a pipeline
+    #    failure, but a structural absence). Returns 'keypoints_only' when a
+    #    keypoints table exists; 'unknown' otherwise. No lesson ids are hardcoded.
+    sp_data = _load_yaml_safe(sp_path) if sp_path.exists() else None
+    sp_error = ((sp_data.get("spotlight") if sp_data else None) or {}).get("error", "")
+    if "spotlight range not found" in sp_error:
+        kp_path = schema_dir / f"{lesson_id}.keypoints.yml"
+        if kp_path.exists():
+            inferred = _infer_family_from_keypoints_labels(kp_path)
+            if inferred != "unknown":
+                return inferred
 
     return "unknown"
 
@@ -228,6 +244,35 @@ def _resolve_family_from_production_yaml(lesson_id: str) -> str:
     return "unknown"
 
 
+
+def _infer_family_from_keypoints_labels(kp_path: Path) -> str:
+    """
+    D-bucket inference (#2146): when a lesson has NO spotlight section at all
+    (spotlight.yml contains 'spotlight range not found'), confirm that a
+    keypoints table is present and return 'keypoints_only'.
+
+    This function does NOT return 'guided_steps' — lessons without a spotlight
+    section do not belong to the guided_steps family even if their keypoints
+    table resembles a narrative or scientific-inquiry structure.  The caller
+    (_resolve_family priority-5) uses 'keypoints_only' to signal:
+      "this lesson has assessable keypoints but no spotlight; classify honestly."
+
+    Returns 'keypoints_only' when a non-empty keypoints table is found.
+    Returns 'unknown' when the file is missing, empty, or has no rows.
+    """
+    data = _load_yaml_safe(kp_path)
+    if not data:
+        return "unknown"
+
+    kp_inner = data.get("keypoints", {})
+    rows = kp_inner.get("rows", [])
+    if not rows:
+        return "unknown"
+
+    # keypoints table present → honest label: has keypoints, no spotlight
+    return "keypoints_only"
+
+
 # ── Per-lesson entry builder ─────────────────────────────────────────────────
 
 def build_entry(lesson_id: str, log_entry: dict, ev, bls, schema_dir: Path,
@@ -247,10 +292,12 @@ def build_entry(lesson_id: str, log_entry: dict, ev, bls, schema_dir: Path,
 
     # Known gap
     known_gaps = []
-    if lesson_id in KNOWN_GAPS:
-        known_gaps.append("strategy_unknown_no_bracket_filename")
     if family == "classical":
         known_gaps.append("classical_no_spotlight_by_design")
+    elif family == "keypoints_only":
+        # D-bucket (#2146): lesson has a keypoints table but NO spotlight section in the
+        # source document. Honest label: classified by table presence, not strategy type.
+        known_gaps.append("no_spotlight_section")
     elif family == "unknown":
         # C-bucket: both DOCX pipeline and production YAML could not determine strategy
         known_gaps.append("strategy_source_both_empty")
