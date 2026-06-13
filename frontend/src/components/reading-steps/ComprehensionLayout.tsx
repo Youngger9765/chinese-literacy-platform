@@ -35,6 +35,11 @@
  *     Desktop (>=1024px): left image pane (50%) | right text+exercise pane (50%).
  *     Portrait/tablet (<1024px): top image pane (~40vh) / bottom text+exercise stack.
  *     ZoomableImage modal removed — GraphicTextImageStrip now uses in-pane +/- zoom.
+ *   - #2194 (table 對照) PairedReading now pairs tables alongside figures — a paragraph
+ *     that references 表N shows TableDisplay inline (right side), same as 圖N shows FigureCard.
+ *     Tables that no paragraph references fall back to the 其他圖表 section.
+ *     The standalone collapsible 紙本表格 panel is removed for graphic-text lessons since
+ *     tables are now always visible in-line with the paragraph that references them.
  */
 import React, { useMemo } from 'react';
 import { Story } from '../../types';
@@ -64,9 +69,14 @@ function figureTokenToNumber(token: string): number | null {
  * Parse all inline 圖N references from a paragraph, return the set of figure
  * numbers it references (deduped, in first-appearance order). #2085.
  * Regex matches both 中文 numerals (圖一) and Arabic (圖3), tolerating a space.
+ *
+ * Bug fix #2194: negative lookbehind for common compound-word prefixes that
+ * attach to 圖 (e.g. 製圖、地圖、示圖). Prevents 製圖一覽 → 圖一 false positive.
  */
 function parseFigureRefs(paragraph: string): number[] {
-  const re = /圖\s*([一二三四五六七八九十]|\d+)/g;
+  // (?<!製|地|示|插|底|簡|描|附|草) — single-char negative lookbehind (fixed-length,
+  // JS-supported). Each is a CJK char that forms a compound word ending in 圖.
+  const re = /(?<!製|地|示|插|底|簡|描|附|草)圖\s*([一二三四五六七八九十]|\d+)/g;
   const seen = new Set<number>();
   const out: number[] = [];
   let m: RegExpExecArray | null;
@@ -78,6 +88,50 @@ function parseFigureRefs(paragraph: string): number[] {
     }
   }
   return out;
+}
+
+/**
+ * Parse all inline 表N references from a paragraph, return the set of table
+ * numbers it references (deduped, in first-appearance order). #2194.
+ * Regex matches both 中文 numerals (表一) and Arabic (表1), tolerating a space.
+ *
+ * Bug fix #2194: negative lookbehind for compound-word prefixes that attach to 表
+ * (e.g. 外表、代表). Prevents "外表一眼分辨" → 表一 false positive (G7-L30 para 0).
+ */
+function parseTableRefs(paragraph: string): number[] {
+  // (?<!外|代|列|報|示|綜|述|發|圖) — single-char negative lookbehind (fixed-length,
+  // JS-supported). Each is a CJK char that forms a compound word ending in 表.
+  const re = /(?<!外|代|列|報|示|綜|述|發|圖)表\s*([一二三四五六七八九十]|\d+)/g;
+  const seen = new Set<number>();
+  const out: number[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(paragraph)) !== null) {
+    const n = figureTokenToNumber(m[1]);
+    if (n != null && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
+}
+
+/**
+ * Build a lookup from table number → LessonTable, keyed on the numeric index
+ * embedded in the table title (e.g. "表一 …" → 1, "表二 …" → 2). #2194.
+ *
+ * Bug fix #2194: tables without a 表N prefix in their title are NOT assigned
+ * a fallback key. This prevents untitled tables (e.g. G7-L28 "文章重點表")
+ * from accidentally matching any 表一 reference in paragraph text.
+ */
+function buildTableIndex(tables: import('../../types').LessonTable[]): Map<number, import('../../types').LessonTable> {
+  const map = new Map<number, import('../../types').LessonTable>();
+  tables.forEach((tbl) => {
+    const mt = tbl.title.match(/表\s*([一二三四五六七八九十]|\d+)/);
+    if (!mt) return; // no 表N prefix → skip (do NOT assign fallback index)
+    const num = figureTokenToNumber(mt[1]);
+    if (num != null && !map.has(num)) map.set(num, tbl);
+  });
+  return map;
 }
 
 /**
@@ -171,88 +225,128 @@ const StoryTextCard: React.FC<{
 );
 
 /**
- * PairedReading — per-paragraph 圖文對照 (#2085).
+ * PairedReading — per-paragraph 圖文表對照 (#2085, extended by #2194).
  *
  * Renders the lesson as a vertical list of rows. Each row pairs ONE paragraph
- * (left half) with the figure(s) that paragraph references (right half),
- * matched by `figure_label` — NOT array order. The professor's intent:
- * "一段課文就是一張圖在右邊，左右直接對照" (paper-worksheet style).
+ * (left half) with the figure(s) AND/OR table(s) that paragraph references
+ * (right half), matched by `figure_label` / table title prefix — NOT array order.
+ * The professor's intent: "一段課文就是一張圖（或表）在右邊，左右直接對照."
  *
- * - Desktop (lg): text left, image right (flex-row).
- * - Mobile: text top, image bottom (flex-col).
- * - A paragraph may reference 0, 1, or many figures.
- * - Figures referenced by NO paragraph are appended under "其他圖表".
+ * - Desktop (lg): text left, figure/table right (flex-row).
+ * - Mobile: text top, figure/table bottom (flex-col).
+ * - A paragraph may reference 0, 1, or many figures / tables.
+ * - Figures / tables referenced by NO paragraph are appended under "其他圖表".
  */
 const PairedReading: React.FC<{
   paragraphs: string[];
   images: GraphicTextImage[];
+  tables: import('../../types').LessonTable[];
   lessonCode: string;
   zhuyinLines: React.ReactNode[] | null;
   zhuyinActive: boolean;
-}> = ({ paragraphs, images, lessonCode, zhuyinLines, zhuyinActive }) => {
+}> = ({ paragraphs, images, tables, lessonCode, zhuyinLines, zhuyinActive }) => {
   const figureIndex = useMemo(() => buildFigureIndex(images), [images]);
+  const tableIndex = useMemo(() => buildTableIndex(tables), [tables]);
 
-  // Track which images got paired so we can list the leftovers at the end.
-  const usedFilenames = new Set<string>();
+  /**
+   * Derive rows + leftover lists inside a single useMemo so there are no
+   * render-path mutations (bug fix #2194 — StrictMode double-invoke safety).
+   *
+   * Each figure / table is shown at most ONCE — next to the FIRST paragraph
+   * that references it. Subsequent paragraphs that mention the same 圖N / 表N
+   * are intentionally left without a paired card to avoid duplicating the
+   * same large table/image 4× down the page (bug fix #2194).
+   */
+  const { rows, leftoverImages, leftoverTables } = useMemo(() => {
+    const usedFilenames = new Set<string>();
+    const usedTableIds = new Set<string>();
 
-  const rows = paragraphs.map((para, idx) => {
-    const refNums = parseFigureRefs(para);
-    const matched: { num: number; img: GraphicTextImage }[] = [];
-    refNums.forEach((num) => {
-      const img = figureIndex.get(num);
-      if (img) {
-        matched.push({ num, img });
-        usedFilenames.add(img.filename);
-      }
+    const computedRows = paragraphs.map((para, idx) => {
+      const figureRefs = parseFigureRefs(para);
+      const tableRefs = parseTableRefs(para);
+
+      // Only include a figure/table if it hasn't been shown in an earlier paragraph.
+      const matchedFigures: { num: number; img: GraphicTextImage }[] = [];
+      figureRefs.forEach((num) => {
+        const img = figureIndex.get(num);
+        if (img && !usedFilenames.has(img.filename)) {
+          matchedFigures.push({ num, img });
+          usedFilenames.add(img.filename);
+        }
+      });
+
+      const matchedTables: { num: number; tbl: import('../../types').LessonTable }[] = [];
+      tableRefs.forEach((num) => {
+        const tbl = tableIndex.get(num);
+        if (tbl && !usedTableIds.has(tbl.id)) {
+          matchedTables.push({ num, tbl });
+          usedTableIds.add(tbl.id);
+        }
+      });
+
+      return { idx, para, matchedFigures, matchedTables };
     });
-    return { idx, para, matched };
-  });
 
-  const leftovers = images.filter((img) => !usedFilenames.has(img.filename));
+    return {
+      rows: computedRows,
+      leftoverImages: images.filter((img) => !usedFilenames.has(img.filename)),
+      leftoverTables: tables.filter((tbl) => !usedTableIds.has(tbl.id)),
+    };
+  }, [paragraphs, images, tables, figureIndex, tableIndex]);
+
+  const hasLeftovers = leftoverImages.length > 0 || leftoverTables.length > 0;
 
   return (
     <div className="space-y-5">
-      {rows.map(({ idx, para, matched }) => (
-        <div
-          key={idx}
-          className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch border-b border-surface-container-high pb-5 last:border-b-0"
-        >
-          {/* Paragraph — left half (top on mobile) */}
-          <div className="w-full lg:w-1/2 flex gap-3 items-start">
-            <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-6 text-right">
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-            <p
-              className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
-                zhuyinActive ? 'tracking-[0.15em]' : ''
-              }`}
-            >
-              {zhuyinLines ? zhuyinLines[idx] : para}
-            </p>
-          </div>
+      {rows.map(({ idx, para, matchedFigures, matchedTables }) => {
+        const hasRef = matchedFigures.length > 0 || matchedTables.length > 0;
+        return (
+          <div
+            key={idx}
+            className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch border-b border-surface-container-high pb-5 last:border-b-0"
+          >
+            {/* Paragraph — left half (top on mobile) */}
+            <div className="w-full lg:w-1/2 flex gap-3 items-start">
+              <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-6 text-right">
+                {String(idx + 1).padStart(2, '0')}
+              </span>
+              <p
+                className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                  zhuyinActive ? 'tracking-[0.15em]' : ''
+                }`}
+              >
+                {zhuyinLines ? zhuyinLines[idx] : para}
+              </p>
+            </div>
 
-          {/* Figure(s) — right half (bottom on mobile). Empty when no ref. */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-4">
-            {matched.length > 0 ? (
-              matched.map(({ num, img }) => (
-                <FigureCard
-                  key={img.filename}
-                  src={buildImageSrc(img.filename, lessonCode)}
-                  alt={img.figure_label ?? img.caption ?? `圖 ${num}`}
-                  caption={img.caption}
-                  index={num - 1}
-                  figureLabel={img.figure_label ?? `圖${num}`}
-                />
-              ))
-            ) : (
-              <div className="hidden lg:block" aria-hidden="true" />
-            )}
+            {/* Figure(s) + Table(s) — right half (bottom on mobile). Empty when no ref. */}
+            <div className="w-full lg:w-1/2 flex flex-col gap-4">
+              {hasRef ? (
+                <>
+                  {matchedFigures.map(({ num, img }) => (
+                    <FigureCard
+                      key={img.filename}
+                      src={buildImageSrc(img.filename, lessonCode)}
+                      alt={img.figure_label ?? img.caption ?? `圖 ${num}`}
+                      caption={img.caption}
+                      index={num - 1}
+                      figureLabel={img.figure_label ?? `圖${num}`}
+                    />
+                  ))}
+                  {matchedTables.map(({ tbl }) => (
+                    <TableDisplay key={tbl.id} tables={[tbl]} layout="stacked" />
+                  ))}
+                </>
+              ) : (
+                <div className="hidden lg:block" aria-hidden="true" />
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
-      {/* Figures referenced by no paragraph → append under 其他圖表. */}
-      {leftovers.length > 0 && (
+      {/* Figures / tables referenced by no paragraph → append under 其他圖表. */}
+      {hasLeftovers && (
         <div className="pt-2">
           <div className="flex items-center gap-2 mb-3">
             <span className="material-symbols-outlined text-accent text-lg">image</span>
@@ -260,17 +354,24 @@ const PairedReading: React.FC<{
               其他圖表
             </span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {leftovers.map((img, i) => (
-              <FigureCard
-                key={img.filename}
-                src={buildImageSrc(img.filename, lessonCode)}
-                alt={img.figure_label ?? img.caption ?? `圖 ${i + 1}`}
-                caption={img.caption}
-                index={i}
-                figureLabel={img.figure_label}
-              />
-            ))}
+          <div className="space-y-4">
+            {leftoverImages.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {leftoverImages.map((img, i) => (
+                  <FigureCard
+                    key={img.filename}
+                    src={buildImageSrc(img.filename, lessonCode)}
+                    alt={img.figure_label ?? img.caption ?? `圖 ${i + 1}`}
+                    caption={img.caption}
+                    index={i}
+                    figureLabel={img.figure_label}
+                  />
+                ))}
+              </div>
+            )}
+            {leftoverTables.length > 0 && (
+              <TableDisplay tables={leftoverTables} layout="stacked" />
+            )}
           </div>
         </div>
       )}
@@ -338,14 +439,21 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               <div className="flex items-center gap-2 mb-5">
                 <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  圖文對照閱讀
+                  圖文表對照閱讀
                 </span>
-                <span className="text-xs text-on-surface-variant ml-1">{images.length} 張圖</span>
+                <span className="text-xs text-on-surface-variant ml-1">
+                  {images.length} 張圖{tables.length > 0 ? ` · ${tables.length} 張表` : ''}
+                </span>
               </div>
 
+              {/* #2194: pass tables so PairedReading can inline 表N alongside 圖N.
+                  The standalone collapsible 紙本表格 panel is removed for graphic-text
+                  lessons — tables are now visible directly next to the paragraphs
+                  that reference them, matching the professor's 對照 intent. */}
               <PairedReading
                 paragraphs={paragraphs}
                 images={images}
+                tables={tables}
                 lessonCode={resolvedLessonCode}
                 zhuyinLines={zhuyinLines}
                 zhuyinActive={zhuyinActive}
@@ -371,19 +479,8 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               )}
             </div>
 
-            {/* Tables (if any) — full width below the paired reading */}
-            {hasTables && (
-              <div className="mt-4">
-                <CollapsibleRefPanel
-                  icon="table_chart"
-                  label="紙本表格"
-                  count={`${tables.length} 張`}
-                  defaultOpen={false}
-                >
-                  <TableDisplay tables={tables} layout="stacked" />
-                </CollapsibleRefPanel>
-              </div>
-            )}
+            {/* Note: tables for graphic-text lessons are now inlined per-paragraph
+                inside PairedReading (above). No standalone 紙本表格 collapsible here. */}
 
             {/* Exercise — full width, BELOW the paired reading */}
             <div className="mt-4">
