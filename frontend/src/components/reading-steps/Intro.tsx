@@ -433,16 +433,34 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
-          {/* 數位學習步驟 — #2082 A4: replaced the static non-clickable ol with a
-              single-line step count. StepperNav dots already provide real navigation.
-              Do NOT restore the full ol — it was confusing & non-interactive. */}
+          {/* 數位學習步驟 — #2196: clickable step chips (quick-jump shortcut).
+              #2082 A4 removed the non-clickable ol — do NOT restore a static ol.
+              This uses chip badges so each step is directly accessible. */}
           {(() => {
             const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
             if (digitalSteps.length === 0) return null;
             return (
-              <p className="text-sm text-gray-500 text-center pb-2">
-                本課共 {digitalSteps.length} 個學習步驟
-              </p>
+              <div className="space-y-2 pb-2">
+                <p className="text-xs text-gray-400 text-center">
+                  本課共 {digitalSteps.length} 個步驟，點擊可快速跳轉
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {digitalSteps.map((step, idx) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      onClick={() => navigate(`/learn/${story.id}/${step.id}`)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                      aria-label={`跳轉到第 ${idx + 1} 步：${step.label}`}
+                    >
+                      <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      {step.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             );
           })()}
 
