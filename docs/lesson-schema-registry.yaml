@@ -12,20 +12,11 @@
 # Source: private/curriculum-source/_online-schema/batch_run_log.json
 # Coverage: 151 lessons
 #
-# --- Coverage Report vs Registry:口徑說明 (#2214) ---
-# family=unknown (registry) vs strategy-unknown (coverage report) are DIFFERENT:
-#   registry family=unknown   : 2 lessons (G4-L1, G9-L10) — no usable strategy signal
-#                               from DOCX pipeline AND production YAML (both sources empty).
-#   coverage strategy-unknown : lessons where spotlight_status != 'pass' or 'none'
-#                               (includes fail + error) — different dimension.
-#   family=classical          : 10 文言文 lessons — no spotlight by design (not a defect).
-#   family=unknown remaining  : 2 lessons need manual annotation (see docs/unknown-family-c-bucket.tsv)
-#
 lessons:
 - lesson_id: G4-L1
   grade: G4
   title: 贏得喝采的輸家
-  family: unknown
+  family: keypoints_only
   spotlight_status: none
   spotlight_score: null
   keypoints_status: pass
@@ -33,8 +24,7 @@ lessons:
   n_figures: 10
   n_tables: 0
   known_gaps:
-  - strategy_unknown_no_bracket_filename
-  - strategy_source_both_empty
+  - no_spotlight_section
 - lesson_id: G4-L2
   grade: G4
   title: 十秒的背後
@@ -1501,7 +1491,7 @@ lessons:
 - lesson_id: G9-L10
   grade: G9
   title: 高地訓練有助於運動表現嗎？
-  family: unknown
+  family: keypoints_only
   spotlight_status: none
   spotlight_score: null
   keypoints_status: pass
@@ -1509,8 +1499,7 @@ lessons:
   n_figures: 11
   n_tables: 0
   known_gaps:
-  - strategy_unknown_no_bracket_filename
-  - strategy_source_both_empty
+  - no_spotlight_section
 - lesson_id: G9-L11
   grade: G9
   title: 長喙天蛾見前人所未見
