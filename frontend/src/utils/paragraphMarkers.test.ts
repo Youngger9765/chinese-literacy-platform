@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   detectImageMarker,
   detectTableMarker,
+  detectTableBodyMarker,
   resolveImageIndex,
   resolveTableIndex,
 } from './paragraphMarkers';
@@ -52,6 +53,32 @@ describe('detectTableMarker', () => {
   it('returns null for non-marker text', () => {
     expect(detectTableMarker('白尾八哥是一種外來種')).toBeNull();
     expect(detectTableMarker('圖一 something')).toBeNull(); // image marker
+  });
+});
+
+describe('detectTableBodyMarker', () => {
+  // After #2218 stripped the `表N …` caption rows from G7-L30 paragraphs, the
+  // inline anchor falls back to the body sentence that introduces each table.
+  it('matches G7-L30 table intro sentences "表一比較了…" / "表二則說明了…"', () => {
+    expect(detectTableBodyMarker('表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。')).toBe(1);
+    expect(detectTableBodyMarker('表二則說明了兩種八哥近年族群數量的變化。')).toBe(2);
+  });
+
+  it('does NOT match a standalone caption row (whitespace after 表N)', () => {
+    // Caption rows are handled by detectTableMarker, not the body-intro matcher.
+    expect(detectTableBodyMarker('表一 白尾八哥與臺灣冠八哥比較異同表')).toBeNull();
+    expect(detectTableBodyMarker('表二　近年兩種臺灣常見八哥之族群數量之變化')).toBeNull();
+  });
+
+  it('does NOT match a mid-sentence reference like "從表二可知"', () => {
+    expect(detectTableBodyMarker('從表二可知，外來種白尾八哥明顯多過原生種。')).toBeNull();
+    expect(detectTableBodyMarker('請回到表一看一看，哪一種八哥比較不怕人？')).toBeNull();
+  });
+
+  it('returns null for non-marker / image text', () => {
+    expect(detectTableBodyMarker('白尾八哥是一種外來種')).toBeNull();
+    expect(detectTableBodyMarker('圖三進一步說明了一百多年來')).toBeNull();
+    expect(detectTableBodyMarker('')).toBeNull();
   });
 });
 

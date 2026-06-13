@@ -19,6 +19,7 @@ import InlineTableCard from './InlineTableCard';
 import {
   detectImageMarker,
   detectTableMarker,
+  detectTableBodyMarker,
   resolveImageIndex,
   resolveTableIndex,
 } from '../../utils/paragraphMarkers';
@@ -405,6 +406,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     const tblMap = new Map<number, number>();
     const usedImg = new Set<number>();
     const usedTbl = new Set<number>();
+    // Pass 1 — dedicated caption rows (`圖N …` / `表N …`) are the strongest anchor.
     story.content.forEach((para, paraIdx) => {
       const imgN = detectImageMarker(para);
       if (imgN !== null) {
@@ -421,6 +423,22 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           tblMap.set(paraIdx, tblIdx);
           usedTbl.add(tblIdx);
         }
+      }
+    });
+    // Pass 2 — for any table not anchored by a caption row, fall back to the
+    // body paragraph that introduces it (`表N比較了…`). Keeps tables inline at
+    // their reference point after #2218 stripped the `表N …` caption rows from
+    // paragraphs (regression: tables dropped to the bottom-of-article fallback).
+    // Only the FIRST intro sentence per table anchors it; a paragraph already
+    // carrying an inline table (caption row) is skipped to avoid stacking.
+    story.content.forEach((para, paraIdx) => {
+      if (tblMap.has(paraIdx)) return;
+      const tblN = detectTableBodyMarker(para);
+      if (tblN === null) return;
+      const tblIdx = resolveTableIndex(story.tables, tblN);
+      if (tblIdx !== null && !usedTbl.has(tblIdx)) {
+        tblMap.set(paraIdx, tblIdx);
+        usedTbl.add(tblIdx);
       }
     });
     return {
