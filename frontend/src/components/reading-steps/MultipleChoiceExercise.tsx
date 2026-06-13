@@ -42,6 +42,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  // #2199: show "再選一次" feedback after a wrong answer without revealing correct
+  const [wrongFeedback, setWrongFeedback] = useState(false);
 
   // MCQ Rescue dialog state (Issue #1387 / #1507)
   const [rescueOpen, setRescueOpen] = useState(false);
@@ -54,12 +56,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
 
   function handleSelect(label: string) {
     if (revealed) return;
-    setSelected(label);
-    setRevealed(true);
     const correct = label === q.answer;
-    if (correct) {
-      setScore((s) => s + 1);
-    }
 
     // Telemetry — every click, including wrong answers where the student
     // never opens the rescue dialog (Issue #1507 / Young 5/8 meeting).
@@ -70,6 +67,23 @@ const MultipleChoiceExercise: React.FC<Props> = ({
         choice: label,
         is_correct: correct,
       });
+    }
+
+    if (correct) {
+      // #2199: only reveal on correct answer
+      setSelected(label);
+      setRevealed(true);
+      setWrongFeedback(false);
+      setScore((s) => s + 1);
+    } else {
+      // #2199: wrong — show "再選一次" without locking or revealing the answer
+      setSelected(label);
+      setWrongFeedback(true);
+      // Clear selection after brief flash so student can pick again
+      setTimeout(() => {
+        setSelected(null);
+        setWrongFeedback(false);
+      }, 900);
     }
   }
 
@@ -100,6 +114,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
     setCurrent((c) => c + 1);
     setSelected(null);
     setRevealed(false);
+    setWrongFeedback(false);
   }
 
   return (
@@ -137,11 +152,17 @@ const MultipleChoiceExercise: React.FC<Props> = ({
             const label = OPTION_LABELS[idx];
             const isChosen = selected === label;
             const isAnswerLabel = q.answer === label;
+            // #2199: wrong-flash state — briefly highlight the wrong pick before clearing
+            const isWrongFlash = wrongFeedback && isChosen;
 
             let btnClass =
               'flex items-start gap-3 rounded-lg border p-3 text-sm text-left transition-all ';
             if (!revealed) {
-              btnClass += 'border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer';
+              if (isWrongFlash) {
+                btnClass += 'border-amber-400 bg-amber-50 text-amber-800';
+              } else {
+                btnClass += 'border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer';
+              }
             } else if (isAnswerLabel) {
               btnClass += 'border-green-500 bg-green-50 font-semibold text-green-800';
             } else if (isChosen && !isAnswerLabel) {
@@ -172,14 +193,22 @@ const MultipleChoiceExercise: React.FC<Props> = ({
           })}
         </div>
 
-        {/* Explanation */}
+        {/* #2199: Wrong-answer feedback — "再選一次" without revealing correct answer */}
+        {wrongFeedback && (
+          <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm text-amber-800 flex items-center gap-2 animate-pulse">
+            <span aria-hidden="true">🔄</span>
+            <span className="font-medium">再選一次！</span>
+          </div>
+        )}
+
+        {/* Explanation — shown only on correct answer reveal */}
         {revealed && q.explanation && (
           <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-800">
             💡 {zh(q.explanation)}
           </div>
         )}
 
-        {/* 問 AI 助教 — only on wrong answers, opt-in (Issue #1507) */}
+        {/* 問 AI 助教 — only on wrong answers after reveal, opt-in (Issue #1507) */}
         {revealed && !isCorrect && !rescueOpen && (
           <button
             onClick={openRescue}
