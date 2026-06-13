@@ -648,19 +648,28 @@ def parse_video_links(section: str) -> list[dict]:
     return videos
 
 
-def parse_image_captions(text: str) -> list[dict]:
-    """Extract 圖一/圖二/圖三/圖四 captions for 圖文整合 lessons."""
+def parse_image_captions(paragraphs: list[str]) -> list[dict]:
+    """Extract 圖一/圖二… captions for 圖文整合 lessons (#2218).
+
+    Previously this regex-scraped the WHOLE docx text, which swept up
+    spotlight/strategy fragments as fake captions (residue, e.g.
+    「，並在三種情況下進行實驗」「最相關的文字」). The real caption is the
+    *standalone* paragraph line `圖N␠<descriptor>` — same rule the frontend
+    uses (utils/paragraphMarkers.ts). So we now only read those caption ROWS
+    out of the already-extracted story paragraphs.
+    """
+    NUM_TO_INT = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
+                  "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+    # Standalone image-caption row: 行首「圖N␠」+ 非空白內容。
+    row_re = re.compile(r"^圖([一二三四五六七八九十])[\s　]+(\S.*)$")
     captions: list[dict] = []
-    NUM_TO_INT = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5}
     seen: set[str] = set()
-    # Pattern: "圖一  巴斯德鵝頸瓶實驗的設計與程序" (label + descriptor)
-    # OR "圖一的標題是：巴斯德的..."
-    for m in re.finditer(r"圖([一二三四五])(?:的標題是?)?\s*[:：]?\s*([^。\n（(]{5,80})", text):
+    for para in paragraphs:
+        m = row_re.match((para or "").strip())
+        if not m:
+            continue
         num = m.group(1)
         caption = m.group(2).strip()
-        # Reject captions that are clearly questions or instructions
-        if any(kw in caption for kw in ["哪一", "什麼", "如何", "為什麼", "請", "你猜", "（單選"]):
-            continue
         key = f"{num}:{caption[:30]}"
         if key in seen:
             continue
@@ -710,7 +719,7 @@ def parse_lesson(docx: Path) -> dict:
     vocab_definitions = parse_vocab_definitions(sections.get("vocab_definitions", ""))
     vocab_application = parse_vocab_application(sections.get("vocab_application", ""))
     videos = parse_video_links(sections.get("knowledge_station", ""))
-    image_captions = parse_image_captions(text)
+    image_captions = parse_image_captions(paragraphs)
 
     # Determine layout_mode + reading_strategy_type from filename
     fname = docx.name
