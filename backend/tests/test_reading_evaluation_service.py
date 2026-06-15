@@ -40,6 +40,11 @@ def test_normalize_strips_whitespace():
     assert result == "他們去"
 
 
+def test_normalize_strips_bopomofo():
+    result = _normalize_text("你好ㄋㄧˇㄏㄠˇ")
+    assert result == "你好"
+
+
 # ---------------------------------------------------------------------------
 # _apply_short_text_compensation
 # ---------------------------------------------------------------------------

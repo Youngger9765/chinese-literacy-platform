@@ -68,6 +68,10 @@ def test_normalize_for_comparison_strips_punctuation():
     assert "農夫" in result
 
 
+def test_normalize_for_comparison_strips_bopomofo():
+    assert normalize_for_comparison("人ㄖㄣˊ") == "人"
+
+
 def test_normalize_for_comparison_converts_numbers():
     result = normalize_for_comparison("12個")
     assert "12" not in result

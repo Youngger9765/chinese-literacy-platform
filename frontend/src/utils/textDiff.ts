@@ -144,33 +144,53 @@ export function normalizePunctuationToChinese(text: string): string {
     .replace(/\s+/g, '');
 }
 
-const TOKEN_PUNCT_RE = /[「」『』，。！？：；、,\-;:.!?'"()[\]{}]/;
+/** Bopomofo + tone marks — excluded from accuracy scoring (not spoken aloud). */
+const BOPOMOFO_RE = /[\u3100-\u312F\u31A0-\u31BF\u02CA\u02C7\u02CB\u02D9]/g;
+
+/**
+ * Punctuation excluded from accuracy denominator.
+ * Display may still show these via interleavePunctuation; they never affect matchRate.
+ */
+const SCORING_PUNCT_RE =
+  /[「」『』，。！？：；、．…—－\-（）()\[\]《》""''\s,.!?;:'"]/g;
+
+const TOKEN_PUNCT_RE = /[「」『』，。！？：；、．…—－\-（）()\[\]《》""''\s,.!?;:'"]/;
 
 function isTokenPunctuationChar(ch: string): boolean {
   return TOKEN_PUNCT_RE.test(ch);
 }
 
+/** Strip bopomofo and punctuation for scoring-only comparison. */
+function stripNonScorableChars(text: string): string {
+  return text.replace(BOPOMOFO_RE, '').replace(SCORING_PUNCT_RE, '');
+}
+
 export const normalizeForComparison = (text: string) =>
-  normalizeChineseNumberVariants(
-    normalizeNumbers(
-      cleanChineseText(stripDecorativeSymbols(normalizePunctuationToChinese(text))),
+  stripNonScorableChars(
+    normalizeChineseNumberVariants(
+      normalizeNumbers(
+        cleanChineseText(stripDecorativeSymbols(normalizePunctuationToChinese(text))),
+      ),
     ),
-  ).replace(/[「」『』，。！？：；、\s]/g, '');
+  );
+
+/** Count characters that contribute to accuracy (excludes punctuation and zhuyin). */
+export function countScorableCharacters(text: string): number {
+  return normalizeForComparison(text).length;
+}
 
 /**
- * LCS-based diff: compare spoken text against target text, producing
- * a token array showing correct/wrong/missing/extra characters.
+ * Prefix-aligned diff: compare spoken text against target left-to-right.
+ * Each spoken character is consumed at most once; alignment never "jumps back"
+ * to match duplicate target chars (fixes LCS ghost-green on later 人/才).
  *
  * Algorithm:
- * 1. Build LCS DP table between spoken and target characters
- * 2. Backtrack to produce alignment
- * 3. Classify each position:
- *    - Both match (or homophone match) → correct
- *    - Both present but different → wrong (substitution)
- *    - Target char skipped → missing (deletion from target)
- *    - Spoken char extra → extra (insertion not in target)
+ * 1. Walk target index j from 0; spoken index i only advances forward
+ * 2. Match → correct/forgiven; advance both
+ * 3. Mismatch → try STT extra (s[i] spurious), target skip (s[i]≈t[j+1]), else wrong
+ * 4. Spoken exhausted → remaining target chars are missing
  *
- * matchRate = correctCount / target.length
+ * matchRate = (correct + forgiven) / scorable target length (no punctuation or zhuyin)
  */
 export function diffCharacters(
   spoken: string,
@@ -183,33 +203,7 @@ export function diffCharacters(
   const sLen = s.length;
   const tLen = t.length;
 
-  if (tLen === 0) {
-    return {
-      tokens: s.map(ch => ({ char: ch, type: 'extra' as DiffType })),
-      matchRate: 0,
-      correctCount: 0,
-      wrongCount: 0,
-      missingCount: 0,
-      extraCount: sLen,
-    };
-  }
-
-  if (sLen === 0) {
-    return {
-      tokens: t.map(ch => ({ char: ch, type: 'missing' as DiffType })),
-      matchRate: 0,
-      correctCount: 0,
-      wrongCount: 0,
-      missingCount: tLen,
-      extraCount: 0,
-    };
-  }
-
-  // Step 1: Build LCS DP table
-  // dp[i][j] = length of LCS of s[0..i-1] and t[0..j-1]
-  const dp: number[][] = Array.from({ length: sLen + 1 }, () => Array(tLen + 1).fill(0));
-
-  /** Check if two chars match for LCS purposes (exact, STT-equivalent, homophone, or near-sound). */
+  /** Check if two chars match (exact, STT-equivalent, homophone, or near-sound). */
   const isMatch = (a: string, b: string): boolean => {
     if (a === b) return true;
     if (useHomophone) {
@@ -223,51 +217,90 @@ export function diffCharacters(
   /** Classify the match type between two matched characters. */
   const classifyMatch = (a: string, b: string): 'correct' | 'forgiven' => {
     if (a === b) return 'correct';
-    if (isSttEquivalent(a, b)) return 'correct'; // 的/得/地 = correct, not student error
-    // Homophone or near-sound = forgiven (STT chose wrong char, student pronounced correctly)
+    if (isSttEquivalent(a, b)) return 'correct';
     return 'forgiven';
   };
 
-  for (let i = 1; i <= sLen; i++) {
-    for (let j = 1; j <= tLen; j++) {
-      if (isMatch(s[i - 1], t[j - 1])) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
+  if (tLen === 0) {
+    const extras = s.filter((ch) => !FILLER_CHARS.has(ch));
+    return {
+      tokens: extras.map((ch) => ({ char: ch, type: 'extra' as DiffType })),
+      matchRate: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      missingCount: 0,
+      extraCount: extras.length,
+    };
   }
 
-  // Step 2: Backtrack to produce diff tokens
+  if (sLen === 0) {
+    return {
+      tokens: t.map((ch) => ({ char: ch, type: 'missing' as DiffType })),
+      matchRate: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      missingCount: tLen,
+      extraCount: 0,
+    };
+  }
+
+  // Step 1: Left-to-right prefix alignment
   const tokens: DiffToken[] = [];
-  let i = sLen;
-  let j = tLen;
+  let i = 0;
+  let j = 0;
 
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && isMatch(s[i - 1], t[j - 1])) {
-      // Match — correct or forgiven (use the target char for display consistency)
-      tokens.push({ char: t[j - 1], type: classifyMatch(s[i - 1], t[j - 1]) });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      // Target char not in spoken — missing
-      tokens.push({ char: t[j - 1], type: 'missing' });
-      j--;
-    } else {
-      // Spoken char not in target — extra
-      tokens.push({ char: s[i - 1], type: 'extra' });
-      i--;
+  while (j < tLen) {
+    if (i >= sLen) {
+      tokens.push({ char: t[j], type: 'missing' });
+      j++;
+      continue;
     }
+
+    const sCh = s[i];
+    const tCh = t[j];
+
+    if (FILLER_CHARS.has(sCh)) {
+      i++;
+      continue;
+    }
+
+    if (isMatch(sCh, tCh)) {
+      tokens.push({ char: tCh, type: classifyMatch(sCh, tCh) });
+      i++;
+      j++;
+      continue;
+    }
+
+    // STT inserted an extra char before the expected target char
+    if (i + 1 < sLen && isMatch(s[i + 1], tCh)) {
+      tokens.push({ char: sCh, type: 'extra' });
+      i++;
+      continue;
+    }
+
+    // Student skipped the current target char (lookahead one position)
+    if (j + 1 < tLen && isMatch(sCh, t[j + 1])) {
+      tokens.push({ char: tCh, type: 'missing' });
+      j++;
+      continue;
+    }
+
+    tokens.push({ char: sCh, type: 'wrong', expected: tCh });
+    i++;
+    j++;
   }
 
-  tokens.reverse();
+  while (i < sLen) {
+    if (!FILLER_CHARS.has(s[i])) {
+      tokens.push({ char: s[i], type: 'extra' });
+    }
+    i++;
+  }
 
-  // Step 3: Post-process — merge adjacent missing+extra into wrong/forgiven (substitution)
-  // Also filter out filler characters from 'extra' tokens
+  // Step 2: Post-process — merge adjacent missing+extra into wrong/forgiven (substitution)
   const merged: DiffToken[] = [];
   let idx = 0;
   while (idx < tokens.length) {
-    // Filter filler chars (嗯啊呃喔欸) — these are STT noise, not student errors
     if (tokens[idx].type === 'extra' && FILLER_CHARS.has(tokens[idx].char)) {
       idx++;
       continue;
@@ -279,7 +312,6 @@ export function diffCharacters(
     ) {
       const spokenChar = tokens[idx].char;
       const targetChar = tokens[idx + 1].char;
-      // Check if substitution is forgivable (homophone/near-sound/STT-equivalent)
       if (useHomophone && isMatch(spokenChar, targetChar)) {
         merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
       } else {
@@ -305,7 +337,7 @@ export function diffCharacters(
     }
   }
 
-  // Step 4: Compute stats (forgiven counts as correct for matchRate)
+  // Step 3: Compute stats (forgiven counts as correct for matchRate)
   let correctCount = 0;
   let forgivenCount = 0;
   let wrongCount = 0;
@@ -322,7 +354,6 @@ export function diffCharacters(
     }
   }
 
-  // Forgiven chars count toward match rate (student pronounced correctly, STT picked wrong char)
   const matchRate = tLen > 0 ? (correctCount + forgivenCount) / tLen : 0;
 
   return {
@@ -337,7 +368,7 @@ export function diffCharacters(
 
 /**
  * Backward-compatible replacement for the old bag-of-words computeMatchRate.
- * Now uses LCS-based ordering for more accurate results.
+ * Uses prefix-aligned diffCharacters for ordering-aware results.
  */
 export function computeMatchRate(spoken: string, target: string): number {
   const result = diffCharacters(spoken, target, { useHomophone: true });
@@ -345,7 +376,7 @@ export function computeMatchRate(spoken: string, target: string): number {
 }
 
 /** Punctuation stripped from diff comparison — re-inserted at display time only. */
-const DISPLAY_PUNCT_RE = /[「」『』，。！？：；、\s]/;
+const DISPLAY_PUNCT_RE = TOKEN_PUNCT_RE;
 
 /**
  * Re-insert punctuation from the lesson line into diff tokens for display.

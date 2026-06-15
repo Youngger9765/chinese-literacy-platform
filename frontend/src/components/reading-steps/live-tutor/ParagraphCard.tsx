@@ -311,6 +311,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                   <span className="material-symbols-outlined text-base text-on-surface-variant">check_circle</span>
                   <span className="text-on-surface-variant">正確率</span>
                   <span className={`font-bold ${rateColor}`}>{Math.round(rate * 100)}%</span>
+                  <span className="text-on-surface-variant text-xs">（不含標點、注音）</span>
                 </div>
               </div>
             );

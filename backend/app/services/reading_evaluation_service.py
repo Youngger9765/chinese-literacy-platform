@@ -24,6 +24,7 @@ from google.genai import types as genai_types
 from .ai_service import generate_structured_response
 from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA, Thresholds
+from .stt.normalization import normalize_for_comparison
 from .stt_service import (
     correct_homophones,
     compute_match_rate,
@@ -36,8 +37,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-
-_PUNCTUATION_RE = re.compile(r"[「」『』，。！？：；、\s]")
 
 # Filler words to strip from spoken text before evaluation
 _FILLER_WORDS = {"嗯", "啊", "那", "個", "就", "是", "然", "後", "呢", "哦", "喔"}
@@ -107,8 +106,8 @@ _SYSTEM_PROMPT = (
 # ---------------------------------------------------------------------------
 
 def _normalize_text(text: str) -> str:
-    """Remove punctuation and whitespace for comparison."""
-    return _PUNCTUATION_RE.sub("", text)
+    """Remove punctuation, bopomofo, and whitespace for scoring (matches frontend)."""
+    return normalize_for_comparison(text)
 
 
 def _apply_short_text_compensation(base_threshold: float, target_length: int) -> float:

@@ -25,8 +25,6 @@ interface LiveTutorControlsProps {
   ttsError: string | null;
   completedCount: number;
   totalLines: number;
-  hasParagraphSummary: boolean;
-  showFeedback: boolean;
   // Callbacks
   onStartSession: () => void;
   /** Pause recording and show 評估 / 重錄 choice. */
@@ -39,7 +37,6 @@ interface LiveTutorControlsProps {
   onPauseResumeTts: () => void;
   onStopTts: () => void;
   onFinish: () => void;
-  onToggleFeedback: () => void;
 }
 
 /**
@@ -66,8 +63,6 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   ttsError,
   completedCount,
   totalLines,
-  hasParagraphSummary,
-  showFeedback,
   onStartSession,
   onFinishRecording,
   onConfirmEvaluate,
@@ -76,7 +71,6 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   onPauseResumeTts,
   onStopTts,
   onFinish,
-  onToggleFeedback,
 }) => {
   const isAllDone = completedCount === totalLines;
 
@@ -259,16 +253,6 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
               停止
             </button>
           </div>
-
-        ) : hasParagraphSummary && !isAdvancing ? (
-          /* After evaluation — feedback toggle */
-          <button
-            type="button"
-            onClick={onToggleFeedback}
-            className="px-4 py-2 rounded-full bg-surface-container-lowest shadow-sm text-sm font-medium text-on-surface-variant hover:bg-surface-container-low transition-all"
-          >
-            {showFeedback ? '隱藏回饋' : '查看朗讀回饋'}
-          </button>
 
         ) : !isAdvancing ? (
           /* Idle — AI朗讀 + 開始朗讀 */

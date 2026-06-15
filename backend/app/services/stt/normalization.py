@@ -6,7 +6,11 @@ Shared by algorithm.py and reading_evaluation_service.py.
 
 import re
 
-_PUNCTUATION_RE = re.compile(r"[「」『』，。！？：；、\s]")
+_BOPOMOFO_RE = re.compile(r"[\u3100-\u312F\u31A0-\u31BF\u02CA\u02C7\u02CB\u02D9]")
+_PUNCTUATION_RE = re.compile(
+    r"[「」『』，。！？：；、．…—－\-（）()\[\]《》""'']"
+    + r"[\s,.!?;:'\"]"
+)
 _NUMERAL_MAP = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
 
 
@@ -52,5 +56,6 @@ def normalize_numbers(text: str) -> str:
 
 
 def normalize_for_comparison(text: str) -> str:
-    """Strip punctuation/whitespace and convert numerals for alignment."""
-    return _PUNCTUATION_RE.sub("", normalize_numbers(text))
+    """Strip punctuation, bopomofo, whitespace; convert numerals for alignment."""
+    stripped = _PUNCTUATION_RE.sub("", normalize_numbers(text))
+    return _BOPOMOFO_RE.sub("", stripped)

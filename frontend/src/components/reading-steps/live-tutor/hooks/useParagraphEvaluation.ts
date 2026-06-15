@@ -219,7 +219,9 @@ export function useParagraphEvaluation({
         ) {
           const allDiff = sentResults.flatMap((r) => r.diffTokens);
           const correctAndForgiven = allDiff.filter(
-            (t) => t.type === 'correct' || t.type === 'forgiven',
+            (t) =>
+              (t.type === 'correct' || t.type === 'forgiven') &&
+              normalizeForComparison(t.char).length > 0,
           ).length;
           const totalTarget = normalizeForComparison(targetText).length || 1;
           localMatchRate = correctAndForgiven / totalTarget;

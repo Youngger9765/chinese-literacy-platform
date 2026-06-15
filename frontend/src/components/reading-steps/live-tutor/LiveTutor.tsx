@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useReducer } from 'react';
-import { Story, ReadingAttempt, DiffToken } from '../../../types';
+import { Story, ReadingAttempt } from '../../../types';
 import { useZhuyin } from '../../../context/ZhuyinContext';
 import { useFontSize } from '../../ui/FontSizeControl';
 import { cancelTts } from '../../../services/ttsApi';
@@ -23,7 +23,6 @@ import {
 } from './hooks/useParagraphEvaluation';
 import { useSentenceRetry } from './hooks/useSentenceRetry';
 import LiveTutorControls from './LiveTutorControls';
-import LiveTutorFeedbackDrawer from './LiveTutorFeedbackDrawer';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
 
@@ -185,7 +184,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [noAudioDetected, setNoAudioDetected] = useState(false);
   const [hasDetectedAudio, setHasDetectedAudio] = useState(false);
   const [micError, setMicError] = useState('');
-  const [showFeedback, setShowFeedback] = useState(false);
 
   // ── STT hook ─────────────────────────────────────────────────────────────
   const stt = useLiveTutorSpeech({
@@ -566,13 +564,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, []);
 
   // ── Scroll helpers ───────────────────────────────────────────────────────
-  const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const didInitialScrollRef = useRef(false);
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [evalState.streamingUserInput]);
 
   useEffect(() => {
     if (!didInitialScrollRef.current) {
@@ -605,21 +598,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       geminiGenRef.current++;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Derived: right panel diff tokens ─────────────────────────────────────
-  const rightPanelDiffTokens: DiffToken[] | null = (() => {
-    const { lastDiffTokens } = evalState;
-    if (lastDiffTokens && lastDiffTokens.length > 0) return lastDiffTokens;
-    for (let i = lineResults.length - 1; i >= 0; i--) {
-      if (
-        lineResults[i].lineIndex === currentLineIndex &&
-        lineResults[i].diffTokens?.length > 0
-      ) {
-        return lineResults[i].diffTokens;
-      }
-    }
-    return null;
-  })();
 
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
 
@@ -761,8 +739,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         ttsError={ttsError}
         completedCount={completedParagraphs.size}
         totalLines={story.content.length}
-        hasParagraphSummary={!!paragraphSummary}
-        showFeedback={showFeedback}
         onStartSession={startSession}
         onFinishRecording={finishRecording}
         onConfirmEvaluate={confirmEvaluate}
@@ -771,25 +747,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
-        onToggleFeedback={() => setShowFeedback((v) => !v)}
-      />
-
-      {/* ── Feedback drawer ──────────────────────────────────────────── */}
-      <LiveTutorFeedbackDrawer
-        show={showFeedback}
-        onClose={() => setShowFeedback(false)}
-        scrollRef={scrollRef as React.RefObject<HTMLDivElement>}
-        isSessionActive={stt.isSessionActive}
-        isPreparing={stt.isPreparing}
-        streamingUserInput={evalState.streamingUserInput}
-        rightPanelDiffTokens={rightPanelDiffTokens}
-        targetText={story.content[currentLineIndex] ?? ''}
-        paragraphSummary={paragraphSummary}
-        currentLineIndex={currentLineIndex}
-        totalLines={story.content.length}
-        completedCount={completedParagraphs.size}
-        retryCount={evalState.retryCount}
-        micError={micError}
       />
 
       {/* Background decoration */}

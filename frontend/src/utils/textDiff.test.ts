@@ -42,6 +42,28 @@ describe('normalizeForComparison — Arabic number conversion', () => {
   it('strips punctuation and spaces', () => {
     expect(normalizeForComparison('「100次」')).toBe('一百次');
   });
+
+  it('strips bopomofo (注音) from scoring length', () => {
+    expect(normalizeForComparison('你好ㄋㄧˇㄏㄠˇ')).toBe('你好');
+    expect(normalizeForComparison('媽ㄇㄚ˙')).toBe('媽');
+  });
+});
+
+describe('diffCharacters — accuracy excludes punctuation and zhuyin', () => {
+  it('full match on Chinese chars ignores punctuation in target', () => {
+    const target = '媽媽說，你好。';
+    const spoken = '媽媽說你好';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+    expect(result.matchRate).toBe(1);
+    expect(result.correctCount + result.wrongCount + result.missingCount).toBe(5);
+  });
+
+  it('zhuyin in target does not inflate denominator', () => {
+    const target = '人ㄖㄣˊ';
+    const spoken = '人';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+    expect(result.matchRate).toBe(1);
+  });
 });
 
 describe('normalizeForComparison — 兩/二 variant normalization', () => {
@@ -106,6 +128,36 @@ describe('diffCharacters — STT matching with number normalization', () => {
     const result = diffCharacters('累計兩百一十四周', '累計214周', { useHomophone: true });
     expect(result.matchRate).toBe(1);
     expect(result.wrongCount).toBe(0);
+  });
+});
+
+describe('diffCharacters — prefix alignment (no ghost greens)', () => {
+  it('does not mark later duplicate 人/才 as correct when only early 人才 was spoken', () => {
+    const target = '管理人才有本事的人才有才能';
+    const spoken = '管理人才';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    const matched = (ch: string) =>
+      result.tokens.filter(
+        (t) => t.char === ch && (t.type === 'correct' || t.type === 'forgiven'),
+      ).length;
+
+    expect(matched('人')).toBe(1);
+    expect(matched('才')).toBe(1);
+    expect(result.correctCount).toBe(4);
+    expect(result.missingCount).toBeGreaterThan(0);
+  });
+
+  it('marks only the read prefix as correct for partial paragraph', () => {
+    const target = '中國的戰國時期有七個國家';
+    const spoken = '中國的戰國';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    expect(result.correctCount).toBe(5);
+    expect(result.tokens.slice(0, 5).every((t) => t.type === 'correct' || t.type === 'forgiven')).toBe(
+      true,
+    );
+    expect(result.tokens.slice(5).every((t) => t.type === 'missing')).toBe(true);
   });
 });
 
