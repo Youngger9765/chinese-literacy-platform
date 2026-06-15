@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
-import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
+import { ParagraphSummaryData, LineResult, getLineResultForParagraph } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
 import { splitIntoSentences } from '../../../utils/localEval';
 import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
@@ -119,7 +119,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
 
-  const savedLineResult = lineResults.find((r) => r.lineIndex === idx);
+  const savedLineResult = getLineResultForParagraph(lineResults, idx);
   const displayDiffTokens =
     lastDiffTokens
     ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
@@ -303,7 +303,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* CPM + accuracy scores (Issue #2147) */}
           {(() => {
-            const cpmVal = lineResults.find(r => r.lineIndex === idx)?.cpm ?? null;
+            const cpmVal = getLineResultForParagraph(lineResults, idx)?.cpm ?? null;
             const rate = paragraphSummary.matchRate;
             if (cpmVal === null) return null;
             const rateColor = rate >= 0.9 ? 'text-emerald-600' : rate >= 0.65 ? 'text-green-600' : 'text-amber-600';

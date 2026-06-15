@@ -14,6 +14,17 @@ export interface LineResult {
   diffTokens: DiffToken[];
 }
 
+/** Latest result wins when the same paragraph was evaluated more than once. */
+export function getLineResultForParagraph(
+  lineResults: LineResult[],
+  lineIndex: number,
+): LineResult | undefined {
+  for (let i = lineResults.length - 1; i >= 0; i--) {
+    if (lineResults[i].lineIndex === lineIndex) return lineResults[i];
+  }
+  return undefined;
+}
+
 export type ParagraphSummaryData = {
   feedback: string;
   matchRate: number;

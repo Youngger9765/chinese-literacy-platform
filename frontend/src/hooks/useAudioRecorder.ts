@@ -25,6 +25,8 @@ export interface AudioRecorderActions {
    * synchronously after the call always returns null / the previous value.
    */
   stopAndGetBlob: () => Promise<Blob | null>;
+  /** Elapsed ms since startRecording() — 0 if not started. */
+  getRecordingDurationMs: () => number;
   clearRecording: () => void;
 }
 
@@ -272,6 +274,11 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     });
   }, [stopRecording, audioBlob]);
 
+  const getRecordingDurationMs = useCallback((): number => {
+    if (!startTimeRef.current) return 0;
+    return Date.now() - startTimeRef.current;
+  }, []);
+
   const clearRecording = useCallback(() => {
     // Cancel any pending stopAndGetBlob promise so it doesn't hang.
     if (stopResolverRef.current) {
@@ -286,6 +293,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     setAudioBlob(null);
     setErrorMessage('');
     setElapsedSeconds(0);
+    startTimeRef.current = 0;
     setStatus('idle');
   }, [audioUrl, stopRecording]);
 
@@ -315,6 +323,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     startRecording,
     stopRecording,
     stopAndGetBlob,
+    getRecordingDurationMs,
     clearRecording,
   };
 }

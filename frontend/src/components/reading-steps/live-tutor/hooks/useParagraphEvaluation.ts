@@ -234,9 +234,20 @@ export function useParagraphEvaluation({
               : 3;
           localDiffTokens = allDiff;
           localFeedback = sentResults[sentResults.length - 1].feedback;
-          localCpm = Math.round(
-            sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length,
-          );
+          // CPM must reflect whole-paragraph pace, not averaged per-sentence chunks
+          // (per-sentence timers can drift from actual recording length).
+          localCpm = localEvaluateParagraph(
+            cleaned,
+            targetText,
+            durationMs,
+            {
+              tier1: TIER1_POOL,
+              tier2: TIER2_POOL,
+              tier3: TIER3_POOL,
+              streakMsgs: STREAK_MESSAGES,
+            },
+            evalState.streak,
+          ).cpm;
         } else {
           const localResult = localEvaluateParagraph(
             cleaned,
@@ -288,7 +299,10 @@ export function useParagraphEvaluation({
           transcript: cleaned,
           diffTokens: localDiffTokens,
         };
-        const allResults = [...lineResults, capResult];
+        const allResults = [
+          ...lineResults.filter((r) => r.lineIndex !== lineIdx),
+          capResult,
+        ];
         setLineResults(allResults);
         dispatch({ type: 'GEMINI_ERROR' });
         advanceParagraph(lineIdx, allResults, stopSession);
@@ -304,7 +318,10 @@ export function useParagraphEvaluation({
         transcript: cleaned,
         diffTokens: localDiffTokens,
       };
-      const allResults = [...lineResults, localResult];
+      const allResults = [
+        ...lineResults.filter((r) => r.lineIndex !== lineIdx),
+        localResult,
+      ];
       setLineResults(allResults);
       dispatch({ type: 'SET_STREAMING', value: '' });
 
@@ -409,7 +426,10 @@ export function useParagraphEvaluation({
               transcript: cleaned,
               diffTokens: gemini.diff_tokens,
             };
-            setLineResults((prev) => [...prev.slice(0, -1), geminiResult]);
+            setLineResults((prev) => [
+              ...prev.filter((r) => r.lineIndex !== lineIdx),
+              geminiResult,
+            ]);
           }
         } catch (err: unknown) {
           if (localTimeout !== null) clearTimeout(localTimeout);

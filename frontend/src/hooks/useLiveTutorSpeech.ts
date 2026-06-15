@@ -237,6 +237,7 @@ export function useLiveTutorSpeech({
         );
         sentenceResultsRef.current[sentIdx] = localResult;
         nextSentenceIdxRef.current = sentIdx + 1;
+        sentenceStartTimeRef.current = Date.now();
         onLastDiffTokens(prev =>
           prev ? [...prev, ...localResult.diffTokens] : localResult.diffTokens
         );

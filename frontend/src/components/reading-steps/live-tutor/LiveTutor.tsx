@@ -25,6 +25,7 @@ import { useSentenceRetry } from './hooks/useSentenceRetry';
 import LiveTutorControls from './LiveTutorControls';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
+import { getLineResultForParagraph } from './liveTutorTypes';
 
 /* ------------------------------------------------------------------ */
 /*  Small sub-components                                               */
@@ -345,7 +346,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     isFinishingRecordingRef.current = true;
     try {
-      const { transcript, rawStt, durationMs } = stt.submitSentence();
+      const { transcript, rawStt, durationMs: sttDurationMs } = stt.submitSentence();
+      const recorderDurationMs = paragraphRecorder.getRecordingDurationMs();
+      const durationMs = Math.max(recorderDurationMs, sttDurationMs, 500);
       stopSessionRaw();
       clearNoAudioTimer();
       setNoAudioDetected(false);
@@ -524,7 +527,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const targets = splitIntoSentences(story.content[currentLineIndex] || '');
     sentenceTargetsRef.current = targets;
 
-    const existingResult = lineResults.find((r) => r.lineIndex === currentLineIndex);
+    const existingResult = getLineResultForParagraph(lineResults, currentLineIndex);
     const existingSummary = paragraphSummaries[currentLineIndex];
 
     if (existingResult && existingSummary) {
@@ -617,7 +620,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
-  const savedLineResult = lineResults.find((r) => r.lineIndex === currentLineIndex);
+  const savedLineResult = getLineResultForParagraph(lineResults, currentLineIndex);
   const displayLastDiffTokens =
     evalState.lastDiffTokens
     ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
