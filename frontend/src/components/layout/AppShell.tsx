@@ -91,7 +91,6 @@ interface StepDotsProps {
   steps: ReturnType<typeof useStepSequence>;
   currentStepIndex: number;
   completedSet: Set<string>;
-  allNonReportDone: boolean;
   onStepClick: (step: ReturnType<typeof useStepSequence>[number]) => void;
 }
 
@@ -99,7 +98,6 @@ const StepDots: React.FC<StepDotsProps> = ({
   steps,
   currentStepIndex,
   completedSet,
-  allNonReportDone,
   onStepClick,
 }) => {
   return (
@@ -107,8 +105,6 @@ const StepDots: React.FC<StepDotsProps> = ({
       {steps.map((step, i) => {
         const isCompleted = completedSet.has(step.id);
         const isActive = i === currentStepIndex;
-        const isReport = step.id === 'report';
-        const isLocked = isReport && !allNonReportDone;
 
         let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';
         if (isCompleted) dotClass = 'bg-emerald-500 text-white';
@@ -119,15 +115,11 @@ const StepDots: React.FC<StepDotsProps> = ({
           <span key={step.id} className="group relative flex items-center justify-center">
             <button
               type="button"
-              onClick={() => {
-                if (isLocked) return;
-                onStepClick(step);
-              }}
-              disabled={isLocked}
-              className={`w-8 h-8 md:w-9 md:h-9 rounded-full text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-110 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
-              aria-label={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
+              onClick={() => onStepClick(step)}
+              className={`w-8 h-8 md:w-9 md:h-9 rounded-full text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              aria-label={`${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
-              title={isLocked ? `${step.label}（完成所有階段後解鎖）` : step.label}
+              title={step.label}
             >
               {isCompleted ? (
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
@@ -183,7 +175,6 @@ const ImmersiveTopBar: React.FC = () => {
 
   // Determine completed steps
   const completedSet = new Set(session?.completedSteps ?? []);
-  const allNonReportDone = activeSteps.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
 
   const handleBack = () => {
     if (inToolbox) {
@@ -200,27 +191,21 @@ const ImmersiveTopBar: React.FC = () => {
 
   const handleStepClick = (step: ReturnType<typeof useStepSequence>[number]) => {
     if (!selectedStory) return;
-    // Report only accessible when all other steps done
-    if (step.id === 'report' && !allNonReportDone) return;
     navigate(`/learn/${selectedStory.id}/${step.id}`);
   };
 
-  // Issue #1094: prev/next step arrows skip the locked report step
-  const prevStep = useMemo(() => {
-    for (let i = currentStepIndex - 1; i >= 0; i--) {
-      const s = activeSteps[i];
-      if (!(s.id === 'report' && !allNonReportDone)) return s;
-    }
-    return null;
-  }, [activeSteps, currentStepIndex, allNonReportDone]);
+  const prevStep = useMemo(
+    () => (currentStepIndex > 0 ? activeSteps[currentStepIndex - 1] : null),
+    [activeSteps, currentStepIndex],
+  );
 
-  const nextStep = useMemo(() => {
-    for (let i = currentStepIndex + 1; i < activeSteps.length; i++) {
-      const s = activeSteps[i];
-      if (!(s.id === 'report' && !allNonReportDone)) return s;
-    }
-    return null;
-  }, [activeSteps, currentStepIndex, allNonReportDone]);
+  const nextStep = useMemo(
+    () =>
+      currentStepIndex >= 0 && currentStepIndex < activeSteps.length - 1
+        ? activeSteps[currentStepIndex + 1]
+        : null,
+    [activeSteps, currentStepIndex],
+  );
 
   return (
     <header
@@ -286,7 +271,6 @@ const ImmersiveTopBar: React.FC = () => {
               steps={activeSteps}
               currentStepIndex={currentStepIndex}
               completedSet={completedSet}
-              allNonReportDone={allNonReportDone}
               onStepClick={handleStepClick}
             />
 
