@@ -452,6 +452,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         delete next[idx];
         return next;
       });
+      setLineResults((prev) => prev.filter((r) => r.lineIndex !== idx));
       dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
       const targets = splitIntoSentences(story.content[idx] || '');
       sentenceTargetsRef.current = targets;
@@ -471,6 +472,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       stopSession,
       startSession,
       setParagraphSummaries,
+      setLineResults,
       sentenceRetry,
       dispatch,
       paragraphRecorder,
@@ -517,22 +519,37 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     streakRef.current = evalState.streak;
   }, [evalState.streak]);
 
-  // ── Init sentence targets when paragraph changes ─────────────────────────
+  // ── Init / restore sentence state when paragraph changes ────────────────
   useEffect(() => {
     const targets = splitIntoSentences(story.content[currentLineIndex] || '');
     sentenceTargetsRef.current = targets;
-    sentenceResultsRef.current = new Array(targets.length).fill(null);
-    nextSentenceIdxRef.current = 0;
-    lastFinalResultIdxRef.current = -1;
-    dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
-    // Reset paragraph recorder + fallback when paragraph changes (I4: stale alerts must not persist)
+
+    const existingResult = lineResults.find((r) => r.lineIndex === currentLineIndex);
+    const existingSummary = paragraphSummaries[currentLineIndex];
+
+    if (existingResult && existingSummary) {
+      // Revisiting a scored paragraph — restore diff + per-sentence results
+      sentenceResultsRef.current = existingSummary.sentenceResults
+        ? [...existingSummary.sentenceResults]
+        : new Array(targets.length).fill(null);
+      nextSentenceIdxRef.current = targets.length;
+      lastFinalResultIdxRef.current = targets.length - 1;
+      if (existingSummary.geminiPending) {
+        dispatch({ type: 'START_LOCAL', diffTokens: existingResult.diffTokens });
+      } else {
+        dispatch({ type: 'GEMINI_DONE', diffTokens: existingResult.diffTokens });
+      }
+    } else {
+      sentenceResultsRef.current = new Array(targets.length).fill(null);
+      nextSentenceIdxRef.current = 0;
+      lastFinalResultIdxRef.current = -1;
+      dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    }
+
     paragraphRecorder.clearRecording();
     clearParagraphFallback();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLineIndex, story.content]);
-  // Note: paragraphRecorder and clearParagraphFallback intentionally excluded
-  // from deps — they are stable (refs + stable callbacks) and including them
-  // would re-run this effect unnecessarily.
 
   // ── Persist progress to localStorage ────────────────────────────────────
   useEffect(() => {
@@ -600,6 +617,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
+  const savedLineResult = lineResults.find((r) => r.lineIndex === currentLineIndex);
+  const displayLastDiffTokens =
+    evalState.lastDiffTokens
+    ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -632,7 +653,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               utteranceRef={utteranceRef}
               ttsRafRef={ttsRafRef}
               streamingUserInput={evalState.streamingUserInput}
-              lastDiffTokens={evalState.lastDiffTokens}
+              lastDiffTokens={displayLastDiffTokens}
               isAwaitingGemini={evalState.isAwaitingGemini}
               retryCount={evalState.retryCount}
               paragraphSummary={paragraphSummary}
@@ -734,7 +755,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         recordingPendingReview={recordingPendingReview}
         hasDetectedAudio={hasDetectedAudio}
         volumeLevel={paragraphRecorder.volumeLevel}
-        lastDiffTokens={evalState.lastDiffTokens}
+        lastDiffTokens={displayLastDiffTokens}
         retryCount={evalState.retryCount}
         ttsError={ttsError}
         completedCount={completedParagraphs.size}

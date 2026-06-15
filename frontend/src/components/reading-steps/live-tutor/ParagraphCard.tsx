@@ -10,6 +10,9 @@ import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 import { useKaraoke } from '../../../context/KaraokeContext';
 import { interleavePunctuation } from '../../../utils/textDiff';
 
+/** Per-sentence retry (record + eval). Off until short-sentence practice ships. */
+const SENTENCE_RETRY_UI_ENABLED = false;
+
 /* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
 
 const ENCOURAGE_TIERS: Array<{ min: number; color: string; msgs: string[] }> = [
@@ -116,9 +119,14 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
 
+  const savedLineResult = lineResults.find((r) => r.lineIndex === idx);
+  const displayDiffTokens =
+    lastDiffTokens
+    ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
+
   const readingResultTokens = useMemo(
-    () => (lastDiffTokens ? interleavePunctuation(line, lastDiffTokens) : null),
-    [line, lastDiffTokens],
+    () => (displayDiffTokens ? interleavePunctuation(line, displayDiffTokens) : null),
+    [line, displayDiffTokens],
   );
 
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
@@ -362,7 +370,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               <div className="pt-3 border-t border-on-surface/10 space-y-2">
                 <p className="text-xs font-bold text-on-surface-variant mb-1">加強練習這幾句</p>
                 {failedSentences.map(({ text, si }) => {
-                  const isRetrying = retrySentenceIdx === si;
+                  const isRetrying = SENTENCE_RETRY_UI_ENABLED && retrySentenceIdx === si;
                   return (
                     <div
                       key={si}
@@ -371,7 +379,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                       }`}
                     >
                       <span className="flex-1 text-on-surface/80 leading-relaxed">{text}</span>
-                      {!isRetrying && (
+                      {SENTENCE_RETRY_UI_ENABLED && !isRetrying && (
                         <button
                           onClick={() => onRetrySentence(idx, si)}
                           className="px-3 py-1 rounded-full text-xs font-bold bg-accent/10 text-accent hover:bg-accent/20 transition-all shrink-0"
@@ -379,7 +387,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                           重練這句
                         </button>
                       )}
-                      {isRetrying && isSessionActive && (
+                      {SENTENCE_RETRY_UI_ENABLED && isRetrying && isSessionActive && (
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="flex items-center gap-1 text-xs text-amber-600">
                             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
@@ -393,7 +401,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                           </button>
                         </div>
                       )}
-                      {isRetrying && isPreparing && (
+                      {SENTENCE_RETRY_UI_ENABLED && isRetrying && isPreparing && (
                         <span className="text-xs text-on-surface-variant shrink-0">準備中...</span>
                       )}
                     </div>
@@ -403,8 +411,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             );
           })()}
 
-          {/* Action buttons — hidden during sentence retry */}
-          {retrySentenceIdx === undefined && (() => {
+          {/* Action buttons — hidden during sentence retry (when enabled) */}
+          {(!SENTENCE_RETRY_UI_ENABLED || retrySentenceIdx === undefined) && (() => {
             // Advancement is never blocked by score — retry suggestions are advisory UI only. (#1318, #2185)
             const canAdvance = true; // advancement is never blocked by score
 
