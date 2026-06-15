@@ -131,7 +131,7 @@ describe('diffCharacters — STT matching with number normalization', () => {
   });
 });
 
-describe('diffCharacters — prefix alignment (no ghost greens)', () => {
+describe('diffCharacters — Levenshtein alignment', () => {
   it('does not mark later duplicate 人/才 as correct when only early 人才 was spoken', () => {
     const target = '管理人才有本事的人才有才能';
     const spoken = '管理人才';
@@ -158,6 +158,30 @@ describe('diffCharacters — prefix alignment (no ghost greens)', () => {
       true,
     );
     expect(result.tokens.slice(5).every((t) => t.type === 'missing')).toBe(true);
+  });
+
+  it('resyncs after skipped target chars instead of cascading wrong', () => {
+    const target = '互比苗頭在競爭中勝出各國都搶傑出的管理人才';
+    const spoken = '互比苗頭競爭中勝出各國都搶傑出的管理人才';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    const types = result.tokens.map((t) => t.type);
+    expect(types).toContain('missing');
+    expect(types.filter((t) => t === 'correct').length).toBeGreaterThan(10);
+    expect(result.tokens.find((t) => t.char === '在' && t.type === 'missing')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '才' && t.type === 'correct')).toBeDefined();
+    expect(result.tokens.filter((t) => t.type === 'wrong').length).toBeLessThan(3);
+  });
+
+  it('allows multiple missed chars then continues marking correct', () => {
+    const target = '其中最有名的人才是齊國的孟嘗君';
+    const spoken = '其中有名的人才是齊國的孟嘗君';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    expect(result.tokens.filter((t) => t.type === 'missing').length).toBe(1);
+    expect(result.tokens.find((t) => t.char === '最' && t.type === 'missing')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '孟' && t.type === 'correct')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '嘗' && t.type === 'correct')).toBeDefined();
   });
 });
 

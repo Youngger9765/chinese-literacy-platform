@@ -1,5 +1,5 @@
 /**
- * LCS-based character diff for comparing spoken text against target text.
+ * Levenshtein-aligned character diff for comparing spoken text against target text.
  * Used by LiveTutor and FullReading to show exactly which characters
  * the student read correctly, incorrectly, missed, or added.
  */
@@ -179,17 +179,83 @@ export function countScorableCharacters(text: string): number {
   return normalizeForComparison(text).length;
 }
 
+type AlignmentPair = { target: string | null; spoken: string | null };
+
 /**
- * Prefix-aligned diff: compare spoken text against target left-to-right.
- * Each spoken character is consumed at most once; alignment never "jumps back"
- * to match duplicate target chars (fixes LCS ghost-green on later 人/才).
- *
- * Algorithm:
- * 1. Walk target index j from 0; spoken index i only advances forward
- * 2. Match → correct/forgiven; advance both
- * 3. Mismatch → try STT extra (s[i] spurious), target skip (s[i]≈t[j+1]), else wrong
- * 4. Spoken exhausted → remaining target chars are missing
- *
+ * Levenshtein alignment with backtracking (same family as backend fallback).
+ * Allows multiple skipped target chars (漏字) while each spoken char is used
+ * at most once in order — no ghost-green on later duplicate target chars.
+ */
+function alignSpokenToTarget(
+  spokenChars: string[],
+  targetChars: string[],
+  isMatch: (a: string, b: string) => boolean,
+): AlignmentPair[] {
+  const sLen = spokenChars.length;
+  const tLen = targetChars.length;
+
+  const dp: number[][] = Array.from({ length: tLen + 1 }, () =>
+    Array<number>(sLen + 1).fill(0),
+  );
+  for (let i = 0; i <= tLen; i++) dp[i][0] = i;
+  for (let j = 0; j <= sLen; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= tLen; i++) {
+    for (let j = 1; j <= sLen; j++) {
+      const cost = isMatch(spokenChars[j - 1], targetChars[i - 1]) ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+    }
+  }
+
+  const alignment: AlignmentPair[] = [];
+  let i = tLen;
+  let j = sLen;
+
+  while (i > 0 || j > 0) {
+    // Prefer target gaps (漏字) over late duplicate-char matches when costs tie.
+    if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] + 1)) {
+      alignment.push({ target: targetChars[i - 1], spoken: null });
+      i--;
+      continue;
+    }
+    if (j > 0 && (i === 0 || dp[i][j] === dp[i][j - 1] + 1)) {
+      alignment.push({ target: null, spoken: spokenChars[j - 1] });
+      j--;
+      continue;
+    }
+    if (i > 0 && j > 0) {
+      const cost = isMatch(spokenChars[j - 1], targetChars[i - 1]) ? 0 : 1;
+      if (dp[i][j] === dp[i - 1][j - 1] + cost) {
+        alignment.push({
+          target: targetChars[i - 1],
+          spoken: spokenChars[j - 1],
+        });
+        i--;
+        j--;
+        continue;
+      }
+    }
+    // Fallback (should not happen with consistent DP)
+    if (i > 0) {
+      alignment.push({ target: targetChars[i - 1], spoken: null });
+      i--;
+    } else {
+      alignment.push({ target: null, spoken: spokenChars[j - 1] });
+      j--;
+    }
+  }
+
+  alignment.reverse();
+  return alignment;
+}
+
+/**
+ * Compare spoken text against target via Levenshtein alignment.
+ * Skipped target chars → missing; later speech can resync (no cascade wrong).
  * matchRate = (correct + forgiven) / scorable target length (no punctuation or zhuyin)
  */
 export function diffCharacters(
@@ -198,7 +264,7 @@ export function diffCharacters(
   options?: { useHomophone?: boolean }
 ): DiffResult {
   const useHomophone = options?.useHomophone ?? false;
-  const s = Array.from(normalizeForComparison(spoken));
+  const s = Array.from(normalizeForComparison(spoken)).filter((ch) => !FILLER_CHARS.has(ch));
   const t = Array.from(normalizeForComparison(target));
   const sLen = s.length;
   const tLen = t.length;
@@ -222,14 +288,13 @@ export function diffCharacters(
   };
 
   if (tLen === 0) {
-    const extras = s.filter((ch) => !FILLER_CHARS.has(ch));
     return {
-      tokens: extras.map((ch) => ({ char: ch, type: 'extra' as DiffType })),
+      tokens: s.map((ch) => ({ char: ch, type: 'extra' as DiffType })),
       matchRate: 0,
       correctCount: 0,
       wrongCount: 0,
       missingCount: 0,
-      extraCount: extras.length,
+      extraCount: sLen,
     };
   }
 
@@ -244,100 +309,28 @@ export function diffCharacters(
     };
   }
 
-  // Step 1: Left-to-right prefix alignment
+  const alignment = alignSpokenToTarget(s, t, isMatch);
   const tokens: DiffToken[] = [];
-  let i = 0;
-  let j = 0;
 
-  while (j < tLen) {
-    if (i >= sLen) {
-      tokens.push({ char: t[j], type: 'missing' });
-      j++;
+  for (const { target: tCh, spoken: sCh } of alignment) {
+    if (tCh === null) {
+      tokens.push({ char: sCh!, type: 'extra' });
       continue;
     }
-
-    const sCh = s[i];
-    const tCh = t[j];
-
-    if (FILLER_CHARS.has(sCh)) {
-      i++;
+    if (sCh === null) {
+      tokens.push({ char: tCh, type: 'missing' });
       continue;
     }
-
     if (isMatch(sCh, tCh)) {
       tokens.push({ char: tCh, type: classifyMatch(sCh, tCh) });
-      i++;
-      j++;
-      continue;
-    }
-
-    // STT inserted an extra char before the expected target char
-    if (i + 1 < sLen && isMatch(s[i + 1], tCh)) {
-      tokens.push({ char: sCh, type: 'extra' });
-      i++;
-      continue;
-    }
-
-    // Student skipped the current target char (lookahead one position)
-    if (j + 1 < tLen && isMatch(sCh, t[j + 1])) {
-      tokens.push({ char: tCh, type: 'missing' });
-      j++;
-      continue;
-    }
-
-    tokens.push({ char: sCh, type: 'wrong', expected: tCh });
-    i++;
-    j++;
-  }
-
-  while (i < sLen) {
-    if (!FILLER_CHARS.has(s[i])) {
-      tokens.push({ char: s[i], type: 'extra' });
-    }
-    i++;
-  }
-
-  // Step 2: Post-process — merge adjacent missing+extra into wrong/forgiven (substitution)
-  const merged: DiffToken[] = [];
-  let idx = 0;
-  while (idx < tokens.length) {
-    if (tokens[idx].type === 'extra' && FILLER_CHARS.has(tokens[idx].char)) {
-      idx++;
-      continue;
-    }
-    if (
-      idx + 1 < tokens.length &&
-      tokens[idx].type === 'extra' &&
-      tokens[idx + 1].type === 'missing'
-    ) {
-      const spokenChar = tokens[idx].char;
-      const targetChar = tokens[idx + 1].char;
-      if (useHomophone && isMatch(spokenChar, targetChar)) {
-        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
-      } else {
-        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
-      }
-      idx += 2;
-    } else if (
-      idx + 1 < tokens.length &&
-      tokens[idx].type === 'missing' &&
-      tokens[idx + 1].type === 'extra'
-    ) {
-      const targetChar = tokens[idx].char;
-      const spokenChar = tokens[idx + 1].char;
-      if (useHomophone && isMatch(spokenChar, targetChar)) {
-        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
-      } else {
-        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
-      }
-      idx += 2;
     } else {
-      merged.push(tokens[idx]);
-      idx++;
+      tokens.push({ char: sCh, type: 'wrong', expected: tCh });
     }
   }
 
-  // Step 3: Compute stats (forgiven counts as correct for matchRate)
+  const merged = tokens;
+
+  // Compute stats (forgiven counts as correct for matchRate)
   let correctCount = 0;
   let forgivenCount = 0;
   let wrongCount = 0;
@@ -368,7 +361,7 @@ export function diffCharacters(
 
 /**
  * Backward-compatible replacement for the old bag-of-words computeMatchRate.
- * Uses prefix-aligned diffCharacters for ordering-aware results.
+ * Uses Levenshtein-aligned diffCharacters for ordering-aware results.
  */
 export function computeMatchRate(spoken: string, target: string): number {
   const result = diffCharacters(spoken, target, { useHomophone: true });
