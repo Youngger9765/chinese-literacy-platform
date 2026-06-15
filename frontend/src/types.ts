@@ -236,6 +236,7 @@ export interface DiffToken {
   expected?: string;
   spoken?: string;
   reason?: string;
+  zhuyin?: string;
 }
 
 export interface ReadingEvalStats {
