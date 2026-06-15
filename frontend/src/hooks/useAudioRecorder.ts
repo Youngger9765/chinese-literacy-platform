@@ -13,7 +13,8 @@ export interface AudioRecorderState {
 }
 
 export interface AudioRecorderActions {
-  startRecording: () => Promise<void>;
+  /** Resolves null when recording started; otherwise a user-facing error message. */
+  startRecording: () => Promise<string | null>;
   stopRecording: () => void;
   /**
    * Stop recording and wait for the MediaRecorder onstop event to fire,
@@ -115,15 +116,17 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err: unknown) {
       const domErr = err as DOMException;
+      let msg: string;
       if (domErr?.name === 'NotAllowedError' || domErr?.name === 'PermissionDeniedError') {
-        setErrorMessage('麥克風權限被拒絕，請在瀏覽器設定中允許麥克風存取。');
+        msg = '麥克風權限被拒絕，請在瀏覽器設定中允許麥克風存取。';
       } else if (domErr?.name === 'NotFoundError') {
-        setErrorMessage('找不到麥克風裝置，請確認麥克風已連接。');
+        msg = '找不到麥克風裝置，請確認麥克風已連接。';
       } else {
-        setErrorMessage('無法存取麥克風，請確認裝置設定。');
+        msg = '無法存取麥克風，請確認裝置設定。';
       }
+      setErrorMessage(msg);
       setStatus('error');
-      return;
+      return msg;
     }
 
     streamRef.current = stream;
@@ -133,10 +136,11 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     try {
       recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
     } catch {
-      setErrorMessage('您的瀏覽器不支援錄音功能，請使用 Chrome 或 Safari。');
+      const msg = '您的瀏覽器不支援錄音功能，請使用 Chrome 或 Safari。';
+      setErrorMessage(msg);
       setStatus('error');
       releaseStream();
-      return;
+      return msg;
     }
 
     mediaRecorderRef.current = recorder;
@@ -212,6 +216,8 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
         stopRecording();
       }
     }, 500);
+
+    return null;
   }, [audioUrl, maxDurationSeconds, stopRecording, stopTimer, releaseStream]);
 
   /**

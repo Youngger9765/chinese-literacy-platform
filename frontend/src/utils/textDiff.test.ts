@@ -10,7 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { normalizeForComparison, diffCharacters } from './textDiff';
+import { normalizeForComparison, diffCharacters, interleavePunctuation, normalizePunctuationToChinese } from './textDiff';
+import type { DiffToken } from '../types';
 
 // ---------------------------------------------------------------------------
 // normalizeForComparison
@@ -105,5 +106,62 @@ describe('diffCharacters — STT matching with number normalization', () => {
     const result = diffCharacters('累計兩百一十四周', '累計214周', { useHomophone: true });
     expect(result.matchRate).toBe(1);
     expect(result.wrongCount).toBe(0);
+  });
+});
+
+describe('interleavePunctuation', () => {
+  it('inserts punctuation from target text between diff tokens', () => {
+    const target = '你好，世界';
+    const { tokens } = diffCharacters('你好世界', target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '你:correct',
+      '好:correct',
+      '，:punctuation',
+      '世:correct',
+      '界:correct',
+    ]);
+  });
+
+  it('inserts all target punctuation when diff tokens only cover partial reading', () => {
+    const target = '你好，世界！再見。';
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'correct' },
+    ];
+    const display = interleavePunctuation(target, tokens);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '你:correct',
+      '好:correct',
+      '，:punctuation',
+      '世:unread',
+      '界:unread',
+      '！:punctuation',
+      '再:unread',
+      '見:unread',
+      '。:punctuation',
+    ]);
+  });
+
+  it('uses target Chinese punctuation when spoken transcript has ASCII commas', () => {
+    const target = '中國的戰國時期，有七個國家總是爭強鬥勝、互比苗頭，';
+    const spoken = '中國的戰國時期, 有七個國家總是爭強鬥勝, 互比苗頭;';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.some((t) => t.char === ',')).toBe(false);
+    expect(display.some((t) => t.char === ';')).toBe(false);
+    expect(display.some((t) => t.char === '，')).toBe(true);
+    expect(display.some((t) => t.char === '、')).toBe(true);
+  });
+});
+
+describe('normalizePunctuationToChinese', () => {
+  it('maps half-width punctuation to full-width Chinese', () => {
+    expect(normalizePunctuationToChinese('你好, 世界; 再見.')).toBe('你好，世界；再見。');
   });
 });

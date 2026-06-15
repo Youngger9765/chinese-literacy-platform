@@ -1,5 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { formatTime } from '../../../utils/formatTime';
+import React, { useMemo } from 'react';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
@@ -9,6 +8,7 @@ import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 import { useKaraoke } from '../../../context/KaraokeContext';
+import { interleavePunctuation } from '../../../utils/textDiff';
 
 /* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
 
@@ -116,14 +116,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
 
-  /* ── Recording timer — counts up while isCurrentIdx && isSessionActive ── */
-  const isActiveRecording = isCurrentIdx && isSessionActive;
-  const [recordingSecs, setRecordingSecs] = useState(0);
-  useEffect(() => {
-    if (!isActiveRecording) { setRecordingSecs(0); return; }
-    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
-    return () => clearInterval(id);
-  }, [isActiveRecording]);
+  const readingResultTokens = useMemo(
+    () => (lastDiffTokens ? interleavePunctuation(line, lastDiffTokens) : null),
+    [line, lastDiffTokens],
+  );
 
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
@@ -243,21 +239,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         )}
       </p>
 
-      {/* ── Recording state: pulsing mic + timer indicator ─────── */}
-      {isCurrentIdx && isSessionActive && (
-        <div className="mt-8 flex justify-center">
-          <div className="flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
-            <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-              <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-            </span>
-            <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-            <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
-          </div>
-        </div>
-      )}
-
-      {/* Action buttons moved to LiveTutor fixed bottom CTA */}
+      {/* Recording indicator + CTA live in LiveTutorControls (fixed bottom bar) */}
 
       {/* ── Not current paragraph: small "go to" button ────────────── */}
       {!isCurrentIdx && status !== 'locked' && !isAdvancing && (
@@ -273,18 +255,19 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       )}
 
       {/* ── Diff token display (color-coded reading result) ────────── */}
-      {lastDiffTokens && !isSessionActive && (
+      {readingResultTokens && !isSessionActive && (
         <div className="mt-6 p-4 bg-surface-container-low rounded-2xl">
           <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">朗讀結果</p>
           <p className="text-lg leading-relaxed">
-            {lastDiffTokens.map((t, i) => (
+            {readingResultTokens.map((t, i) => (
               <span
                 key={i}
                 className={
+                  t.type === 'punctuation' ? 'text-on-surface' :
                   t.type === 'correct' ? 'text-emerald-600 font-medium' :
                   t.type === 'forgiven' ? 'text-blue-500' :
                   t.type === 'wrong' ? 'text-tertiary line-through' :
-                  t.type === 'missing' ? 'text-on-surface-variant/30' :
+                  t.type === 'missing' || t.type === 'unread' ? 'text-on-surface-variant/30' :
                   'text-on-surface'
                 }
               >

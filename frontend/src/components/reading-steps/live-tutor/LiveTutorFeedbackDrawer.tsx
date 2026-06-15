@@ -11,6 +11,7 @@ interface LiveTutorFeedbackDrawerProps {
   isPreparing: boolean;
   streamingUserInput: string;
   rightPanelDiffTokens: DiffToken[] | null;
+  targetText: string;
   paragraphSummary: ParagraphSummaryData | null;
   currentLineIndex: number;
   totalLines: number;
@@ -31,6 +32,7 @@ const LiveTutorFeedbackDrawer: React.FC<LiveTutorFeedbackDrawerProps> = ({
   isPreparing,
   streamingUserInput,
   rightPanelDiffTokens,
+  targetText,
   paragraphSummary,
   currentLineIndex,
   totalLines,
@@ -62,6 +64,7 @@ const LiveTutorFeedbackDrawer: React.FC<LiveTutorFeedbackDrawerProps> = ({
             isPreparing={isPreparing}
             streamingUserInput={streamingUserInput}
             rightPanelDiffTokens={rightPanelDiffTokens}
+            targetText={targetText}
             paragraphSummary={paragraphSummary}
             currentLineIndex={currentLineIndex}
             totalLines={totalLines}

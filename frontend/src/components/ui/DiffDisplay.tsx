@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DiffToken } from '../../types';
+import { interleavePunctuation } from '../../utils/textDiff';
 
 interface DiffDisplayProps {
   tokens: DiffToken[];
+  /** When set, punctuation from the lesson line is inserted between diff tokens. */
+  targetText?: string;
   showLegend?: boolean;
   className?: string;
 }
@@ -46,8 +49,18 @@ function CharWithZhuyin({
   );
 }
 
-const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, className = '' }) => {
-  if (!tokens || tokens.length === 0) return null;
+const DiffDisplay: React.FC<DiffDisplayProps> = ({
+  tokens,
+  targetText,
+  showLegend = false,
+  className = '',
+}) => {
+  const displayTokens = useMemo(
+    () => (targetText ? interleavePunctuation(targetText, tokens) : tokens),
+    [targetText, tokens],
+  );
+
+  if (!displayTokens || displayTokens.length === 0) return null;
 
   return (
     <div className={className}>
@@ -56,8 +69,14 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
         role="group"
         aria-label="朗讀差異對比結果"
       >
-        {tokens.map((token, idx) => {
+        {displayTokens.map((token, idx) => {
           switch (token.type) {
+            case 'punctuation':
+              return (
+                <span key={idx} className="text-gray-900">
+                  {token.char}
+                </span>
+              );
             case 'correct':
             case 'forgiven':
               return (

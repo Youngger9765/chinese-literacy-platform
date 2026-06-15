@@ -3,9 +3,17 @@
  * Used by LiveTutor and FullReading to show exactly which characters
  * the student read correctly, incorrectly, missed, or added.
  */
+import type { DiffToken } from '../types';
 import { isHomophone, isNearSound, isSttEquivalent } from './pinyin';
 
-export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
+export type DiffType =
+  | 'correct'
+  | 'forgiven'
+  | 'wrong'
+  | 'missing'
+  | 'extra'
+  | 'unread'
+  | 'punctuation';
 
 /** Filler words commonly inserted by STT — not student errors. */
 const FILLER_CHARS = new Set(['嗯', '啊', '呃', '喔', '欸']);
@@ -122,9 +130,31 @@ const stripDecorativeSymbols = (text: string) =>
     .replace(/（[^）]*）/g, '')                // parenthetical notes
     .replace(/\([^)]*\)/g, '');                // English parenthetical notes
 
+/** Half-width punctuation from STT/Gemini → full-width Chinese (display + compare). */
+export function normalizePunctuationToChinese(text: string): string {
+  return text
+    .replace(/,/g, '，')
+    .replace(/;/g, '；')
+    .replace(/\./g, '。')
+    .replace(/\?/g, '？')
+    .replace(/!/g, '！')
+    .replace(/:/g, '：')
+    .replace(/\(/g, '（')
+    .replace(/\)/g, '）')
+    .replace(/\s+/g, '');
+}
+
+const TOKEN_PUNCT_RE = /[「」『』，。！？：；、,\-;:.!?'"()[\]{}]/;
+
+function isTokenPunctuationChar(ch: string): boolean {
+  return TOKEN_PUNCT_RE.test(ch);
+}
+
 export const normalizeForComparison = (text: string) =>
   normalizeChineseNumberVariants(
-    normalizeNumbers(cleanChineseText(stripDecorativeSymbols(text)))
+    normalizeNumbers(
+      cleanChineseText(stripDecorativeSymbols(normalizePunctuationToChinese(text))),
+    ),
   ).replace(/[「」『』，。！？：；、\s]/g, '');
 
 /**
@@ -312,4 +342,61 @@ export function diffCharacters(
 export function computeMatchRate(spoken: string, target: string): number {
   const result = diffCharacters(spoken, target, { useHomophone: true });
   return result.matchRate;
+}
+
+/** Punctuation stripped from diff comparison — re-inserted at display time only. */
+const DISPLAY_PUNCT_RE = /[「」『』，。！？：；、\s]/;
+
+/**
+ * Re-insert punctuation from the lesson line into diff tokens for display.
+ * Always walks the full target text — punctuation is never gated on how much
+ * the student has read. Scoring still uses punctuation-stripped tokens.
+ */
+export function interleavePunctuation(
+  targetText: string,
+  diffTokens: DiffToken[],
+): DiffToken[] {
+  const displayTokens = diffTokens.filter((t) => t.type !== 'extra');
+  if (!targetText) return displayTokens;
+
+  if (displayTokens.length === 0) {
+    return Array.from(targetText).map((ch) =>
+      DISPLAY_PUNCT_RE.test(ch)
+        ? { char: ch, type: 'punctuation' as const }
+        : { char: ch, type: 'unread' as const },
+    );
+  }
+
+  const normChars = Array.from(normalizeForComparison(targetText));
+  const result: DiffToken[] = [];
+  let tokenIdx = 0;
+  let normIdx = 0;
+
+  for (const ch of Array.from(targetText)) {
+    if (DISPLAY_PUNCT_RE.test(ch)) {
+      result.push({ char: ch, type: 'punctuation' });
+      continue;
+    }
+    if (normIdx < normChars.length && ch === normChars[normIdx]) {
+      // Skip punctuation chars embedded in diff tokens — display uses target punctuation only.
+      while (
+        tokenIdx < displayTokens.length &&
+        isTokenPunctuationChar(displayTokens[tokenIdx].char)
+      ) {
+        tokenIdx += 1;
+      }
+      if (tokenIdx < displayTokens.length) {
+        result.push(displayTokens[tokenIdx]);
+      } else {
+        result.push({ char: ch, type: 'unread' });
+      }
+      tokenIdx += 1;
+      normIdx += 1;
+      continue;
+    }
+    // Decorative / stripped chars in the original line — show without diff styling.
+    result.push({ char: ch, type: 'punctuation' });
+  }
+
+  return result;
 }

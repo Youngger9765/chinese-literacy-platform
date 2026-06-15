@@ -11,10 +11,15 @@ interface LiveTutorControlsProps {
   isTtsPaused: boolean;
   isAdvancing: boolean;
   isAwaitingGemini: boolean;
-  /** P1 Round 4: true while submitSentence async flow is in progress (double-submit guard). */
+  /** P1 Round 4: true while confirmEvaluate async flow is in progress (double-submit guard). */
   isSubmittingSentence?: boolean;
+  /** True after 完成: recording paused, awaiting 評估 or 重錄. */
+  recordingPendingReview?: boolean;
+  /** AnalyserNode: true once mic volume crossed threshold this session. */
+  hasDetectedAudio?: boolean;
+  /** 0–1 mic volume for recording indicator bars. */
+  volumeLevel?: number;
   // Content state
-  streamingUserInput: string;
   lastDiffTokens: DiffToken[] | null;
   retryCount: number;
   ttsError: string | null;
@@ -24,7 +29,12 @@ interface LiveTutorControlsProps {
   showFeedback: boolean;
   // Callbacks
   onStartSession: () => void;
-  onSubmitSentence: () => void;
+  /** Pause recording and show 評估 / 重錄 choice. */
+  onFinishRecording: () => void;
+  /** Submit pending recording for scoring. */
+  onConfirmEvaluate: () => void;
+  /** Discard pending recording and record again. */
+  onConfirmRerecord: () => void;
   onSpeakCurrentParagraph: () => void;
   onPauseResumeTts: () => void;
   onStopTts: () => void;
@@ -37,7 +47,7 @@ interface LiveTutorControlsProps {
  * Renders the correct button state based on session phase.
  *
  * Recording state (isSessionActive): pulsing red mic + elapsed timer + green 完成 button.
- * Button is always green (gradient); opacity-50 when no speech yet, full when speech detected.
+ * After 完成: 評估 / 重錄 — only 評估 triggers API scoring.
  */
 const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   isSessionActive,
@@ -48,7 +58,9 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   isAdvancing,
   isAwaitingGemini,
   isSubmittingSentence = false,
-  streamingUserInput,
+  recordingPendingReview = false,
+  hasDetectedAudio = false,
+  volumeLevel = 0,
   lastDiffTokens,
   retryCount,
   ttsError,
@@ -57,7 +69,9 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   hasParagraphSummary,
   showFeedback,
   onStartSession,
-  onSubmitSentence,
+  onFinishRecording,
+  onConfirmEvaluate,
+  onConfirmRerecord,
   onSpeakCurrentParagraph,
   onPauseResumeTts,
   onStopTts,
@@ -66,16 +80,25 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
 }) => {
   const isAllDone = completedCount === totalLines;
 
-  /* ── Recording timer: counts up while isSessionActive ── */
+  const isRecordingOrSubmitting =
+    isSessionActive || isSubmittingSentence || recordingPendingReview;
+
+  /* ── Recording timer: counts up while recording (hidden once 完成 is tapped) ── */
   const [recordingSecs, setRecordingSecs] = useState(0);
   useEffect(() => {
-    if (!isSessionActive) { setRecordingSecs(0); return; }
+    if (!isSessionActive || isSubmittingSentence || recordingPendingReview) {
+      setRecordingSecs(0);
+      return;
+    }
     const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
     return () => clearInterval(id);
-  }, [isSessionActive]);
+  }, [isSessionActive, isSubmittingSentence, recordingPendingReview]);
 
-  // canSubmit: has speech OR has a previous diff (retry scenario). isAwaitingGemini blocks double-submit.
-  const canSubmit = !isSubmittingSentence && !isAwaitingGemini && (!!streamingUserInput || !!lastDiffTokens);
+  // canSubmit: mic picked up audio, or min recording time, or retry with prior diff.
+  const canSubmit =
+    !isSubmittingSentence &&
+    !isAwaitingGemini &&
+    (hasDetectedAudio || recordingSecs >= 2 || !!lastDiffTokens);
 
   return (
     <div
@@ -95,29 +118,82 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
 
-        ) : isSessionActive ? (
-          /* ── Recording state: pulsing mic + timer + green 完成 button ── */
+        ) : isRecordingOrSubmitting ? (
           <div className="w-full flex flex-col items-center gap-2">
-            {/* Pulsing mic indicator + timer */}
-            <div className="flex items-center gap-3">
-              <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-                <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-              </span>
-              <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-            </div>
-            {/* Submit button — always green; opacity-50 until speech detected */}
-            <button
-              onClick={onSubmitSentence}
-              disabled={isSubmittingSentence || isAwaitingGemini}
-              className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white
-                ${canSubmit ? 'shadow-[0_12px_48px_rgba(0,105,71,0.3)]' : 'opacity-50 cursor-not-allowed'}`}
-              style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
-            >
-              <span className="material-symbols-outlined text-xl">check_circle</span>
-              {isSubmittingSentence ? '評分中…' : '完成'}
-            </button>
-            <p className="text-xs text-on-surface-variant">隨時可以停止，按「完成」即送出評分</p>
+            {isSessionActive && !isSubmittingSentence && !recordingPendingReview && (
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+                  <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+                </span>
+                <div
+                  className="flex items-end gap-0.5 h-4"
+                  aria-label={`音量 ${Math.round(volumeLevel * 100)}%`}
+                >
+                  {[0.15, 0.35, 0.55, 0.75].map((threshold) => (
+                    <div
+                      key={threshold}
+                      className={`w-1 rounded-sm transition-colors ${
+                        volumeLevel >= threshold ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                      style={{ height: `${8 + threshold * 16}px` }}
+                    />
+                  ))}
+                </div>
+                <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
+              </div>
+            )}
+            {recordingPendingReview && !isSubmittingSentence ? (
+              <>
+                <p className="text-sm text-on-surface-variant text-center">
+                  錄音已暫停。滿意再送評估，不滿意可重錄。
+                </p>
+                <div className="w-full flex gap-3">
+                  <button
+                    type="button"
+                    onClick={onConfirmRerecord}
+                    className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-xl">replay</span>
+                    重錄
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onConfirmEvaluate}
+                    className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+                  >
+                    <span className="material-symbols-outlined text-xl">check_circle</span>
+                    評估
+                  </button>
+                </div>
+              </>
+            ) : isSubmittingSentence ? (
+              <button
+                type="button"
+                disabled
+                className="w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 text-white opacity-80 cursor-wait shadow-[0_12px_48px_rgba(0,105,71,0.3)]"
+                style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+              >
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                評分中…
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onFinishRecording}
+                disabled={!canSubmit}
+                className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] text-white disabled:opacity-50 disabled:cursor-not-allowed
+                  ${canSubmit ? 'shadow-[0_12px_48px_rgba(0,105,71,0.3)]' : ''}`}
+                style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+              >
+                <span className="material-symbols-outlined text-xl">check_circle</span>
+                完成
+              </button>
+            )}
+            {isSessionActive && !isSubmittingSentence && !recordingPendingReview && (
+              <p className="text-xs text-on-surface-variant">按「完成」暫停錄音，確認後再送評估</p>
+            )}
           </div>
 
         ) : isPreparing ? (

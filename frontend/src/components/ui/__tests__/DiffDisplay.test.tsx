@@ -124,4 +124,15 @@ describe('DiffDisplay', () => {
     const { container } = render(<DiffDisplay tokens={tokens} />);
     expect(container.querySelector('ruby')).not.toBeInTheDocument();
   });
+
+  it('inserts punctuation from targetText between diff tokens', () => {
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'missing' },
+      { char: '世', type: 'missing' },
+      { char: '界', type: 'missing' },
+    ];
+    render(<DiffDisplay tokens={tokens} targetText="你好，世界" />);
+    expect(screen.getByText('，')).toBeInTheDocument();
+  });
 });
