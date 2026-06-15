@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { DiffToken } from '../../../types';
 
 const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
   { min: 0.90, stars: 5, text: '太厲害了！',         color: 'text-emerald-600' },
@@ -28,7 +29,7 @@ export interface FullReadingScoreCardProps {
   result: {
     matchRate: number;
     feedback: string;
-    diffTokens?: Array<{ type: string; text: string }>;
+    diffTokens?: DiffToken[];
     cpm: number;
     durationMs: number;
     errorBreakdown: { correct: number; wrong: number; missing: number; extra: number };

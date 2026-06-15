@@ -223,12 +223,13 @@ describe('FullReadingControls', () => {
 
 // ── 2. FullReadingScoreCard ───────────────────────────────────────────────────
 import FullReadingScoreCard from '../FullReadingScoreCard';
+import type { DiffToken } from '../../../../types';
 
 describe('FullReadingScoreCard', () => {
   const baseResult = {
     matchRate: 0.92,
     feedback: '很好',
-    diffTokens: [{ type: 'correct', text: '你好' }],
+    diffTokens: [{ char: '你', type: 'correct' }, { char: '好', type: 'correct' }] as DiffToken[],
     cpm: 120,
     durationMs: 5000,
     errorBreakdown: { correct: 10, wrong: 0, missing: 0, extra: 0 },
@@ -321,12 +322,13 @@ describe('FullReadingScoreCard', () => {
 
 // ── 3. FullReadingFeedbackPanel ───────────────────────────────────────────────
 import FullReadingFeedbackPanel from '../FullReadingFeedbackPanel';
+import type { DiffToken as DT2 } from '../../../../types';
 
 describe('FullReadingFeedbackPanel', () => {
   it('renders diff section when diffTokens are present', () => {
-    const diffTokens = [
-      { type: 'correct', text: '你好' },
-      { type: 'wrong', text: '世界' },
+    const diffTokens: DT2[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'wrong', expected: '世' },
     ];
     render(
       <FullReadingFeedbackPanel diffTokens={diffTokens} />

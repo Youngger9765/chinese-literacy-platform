@@ -4,6 +4,7 @@ Handles AI-powered reading diagnosis and improvement suggestions.
 """
 import json
 import logging
+import re
 import time
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
@@ -18,6 +19,7 @@ from ...services.ai_service import generate_reading_analysis, GeminiContentFilte
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
+from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
     transcribe_reading_audio,
@@ -336,11 +338,32 @@ class ReadingEvaluateRequest(BaseModel):
     duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
 
 
+_CHINESE_CHAR_RE = re.compile(r"[一-鿿㐀-䶿]")
+
+
+def _build_zhuyin_map(target_text: str) -> dict[int, str]:
+    """Return a position→bopomofo map for all CJK characters in target_text.
+
+    Passing the full string (rather than individual chars) lets pypinyin use
+    surrounding context to disambiguate polyphonic characters (破音字), e.g.
+    「的」(ㄉㄜ˙ vs ㄉㄧˋ), 「樂」(ㄌㄜˋ vs ㄩㄝˋ), 「長」(ㄓㄤˇ vs ㄔㄤˊ).
+    """
+    # lazy_pinyin returns one bopomofo element per character (including punctuation).
+    # Non-CJK characters produce their raw form; we only keep CJK positions.
+    bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
+    zhuyin_map: dict[int, str] = {}
+    for idx, (char, bpmf) in enumerate(zip(target_text, bopomofo_list)):
+        if _CHINESE_CHAR_RE.match(char) and bpmf and bpmf != char:
+            zhuyin_map[idx] = bpmf
+    return zhuyin_map
+
+
 class DiffToken(BaseModel):
     char: str
     type: str  # "correct" | "forgiven" | "wrong" | "missing" | "extra"
     spoken: str | None = None
     reason: str | None = None
+    zhuyin: str | None = None
 
 
 class ReadingEvalStats(BaseModel):
@@ -428,13 +451,27 @@ async def evaluate_reading_endpoint(
             prompt_template_id="reading_evaluate",
         )
 
+    # Build a position→bopomofo map from target_text so pypinyin can use full-context
+    # polyphone disambiguation (破音字).  extra tokens have no position in target_text
+    # and are not displayed; skip zhuyin for them to avoid wasted lookups.
+    zhuyin_map = _build_zhuyin_map(payload.target_text)
+    target_pos = 0  # track position through non-extra tokens
+    diff_tokens: list[DiffToken] = []
+    for t in result["diff_tokens"]:
+        token_type = t.get("type", "")
+        if token_type == "extra":
+            diff_tokens.append(DiffToken(**t))
+        else:
+            zhuyin = zhuyin_map.get(target_pos) if target_pos < len(payload.target_text) else None
+            diff_tokens.append(DiffToken(**t, zhuyin=zhuyin))
+            target_pos += 1
     return ReadingEvaluateResponse(
         match_rate=result["match_rate"],
         adjusted_match_rate=result["adjusted_match_rate"],
         tier=result["tier"],
         feedback=result["feedback"],
         cpm=result.get("cpm"),
-        diff_tokens=[DiffToken(**t) for t in result["diff_tokens"]],
+        diff_tokens=diff_tokens,
         stats=ReadingEvalStats(**result["stats"]),
         thresholds=ReadingEvalThresholds(**result["thresholds"]),
         evaluation_method=result["evaluation_method"],

@@ -9,14 +9,10 @@
 
 import React from 'react';
 import DiffDisplay from '../../ui/DiffDisplay';
-
-export interface DiffToken {
-  type: string;
-  text: string;
-}
+import { DiffToken } from '../../../types';
 
 export interface FullReadingFeedbackPanelProps {
-  /** Token array from analyzeFluency. undefined or empty → renders nothing. */
+  /** Token array from reading evaluation. undefined or empty → renders nothing. */
   diffTokens: DiffToken[] | undefined;
 }
 
