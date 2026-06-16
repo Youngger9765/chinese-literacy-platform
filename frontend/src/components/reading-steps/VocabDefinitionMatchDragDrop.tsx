@@ -70,8 +70,8 @@ interface DragDemoGhost {
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   const instruction = IS_TOUCH_DEVICE
-    ? '點選語詞，再點右邊的解釋框放入'
-    : '把左邊的語詞拖到右邊正確的解釋上';
+    ? '點選上方語詞，再點下方解釋框放入'
+    : '把右邊的語詞拖到左邊正確的解釋上';
   return (
     <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
@@ -589,19 +589,19 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   // A8: Device-appropriate top-level instruction
   const instructionText = IS_TOUCH_DEVICE
-    ? '點選語詞，再點空格放入'
-    : '把語詞拖到正確的解釋上';
+    ? '點選語詞，再點下方空格放入'
+    : '把右邊的語詞拖到左邊正確的解釋上';
 
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
       {demo?.step === 'pick-word' && (
         <DemoBubble>
-          {IS_TOUCH_DEVICE ? '① 先點選一個語詞' : '① 按住左邊的語詞'}
+          {IS_TOUCH_DEVICE ? '① 先點選上方語詞' : '① 按住右邊的語詞'}
         </DemoBubble>
       )}
       {demo?.step === 'dragging' && (
         <DemoBubble>
-          {IS_TOUCH_DEVICE ? '② 再點到對應的解釋框' : '② 拖到對應的解釋框'}
+          {IS_TOUCH_DEVICE ? '② 再點到下方對應的解釋框' : '② 拖到左邊對應的解釋框'}
         </DemoBubble>
       )}
       {(demo?.step === 'dropped' || demo?.step === 'success') && (
@@ -681,14 +681,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         {wordBankContent}
       </div>
 
-      {/* Desktop: two-column layout — word bank left (sticky), definitions right (scrollable) */}
+      {/* Desktop: two-column layout — definitions left (scrollable), word bank right (sticky) */}
       <div className="md:flex md:gap-6 md:items-start md:max-h-[calc(100vh-16rem)]">
-        {/* Left column — word bank panel, independently scrollable on desktop */}
-        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
-          {wordBankContent}
-        </div>
-
-        {/* Right column — definition slots, independently scrollable on desktop */}
+        {/* Left column — definition slots, independently scrollable on desktop */}
         <div className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]">
           {/* A7: Renamed from 定義欄位 to 語詞解釋 */}
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
@@ -697,6 +692,11 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           <div className="flex flex-col gap-3">
             {definitionSlots}
           </div>
+        </div>
+
+        {/* Right column — word bank panel, independently scrollable on desktop */}
+        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
+          {wordBankContent}
         </div>
       </div>
     </div>
