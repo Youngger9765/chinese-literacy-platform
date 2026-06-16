@@ -41,13 +41,31 @@ export function calcSpeakingProgress(interim: string, target: string): number {
 /**
  * Map a count of normalized (punctuation-stripped) matched chars back to
  * the corresponding index in the original target string.
+ * Arabic digit runs (299 → 二百九十九) count as multiple normalized chars.
  */
 export function normalizedToOrigIdx(target: string, normalizedProgress: number): number {
+  const chars = Array.from(target);
   let norm = 0;
-  for (let i = 0; i < target.length; i++) {
+
+  for (let i = 0; i < chars.length; i++) {
     if (norm >= normalizedProgress) return i;
-    if (!/[「」『』，。！？：；、\s]/.test(target[i])) norm++;
+
+    const ch = chars[i];
+    if (/[「」『』，。！？：；、\s]/.test(ch)) continue;
+
+    if (/\d/.test(ch)) {
+      if (i > 0 && /\d/.test(chars[i - 1])) continue;
+      let digitEnd = i;
+      while (digitEnd < chars.length && /\d/.test(chars[digitEnd])) digitEnd++;
+      const digitRun = chars.slice(i, digitEnd).join('');
+      norm += normalizeForComparison(digitRun).length;
+      i = digitEnd - 1;
+      continue;
+    }
+
+    norm += 1;
   }
+
   return target.length;
 }
 

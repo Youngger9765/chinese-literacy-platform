@@ -371,10 +371,62 @@ export function computeMatchRate(spoken: string, target: string): number {
 /** Punctuation stripped from diff comparison — re-inserted at display time only. */
 const DISPLAY_PUNCT_RE = TOKEN_PUNCT_RE;
 
+const DIGIT_RE = /\d/;
+
+function chineseNormLenForDigitRun(digitStr: string): number {
+  if (!digitStr) return 0;
+  return Array.from(intToChinese(parseInt(digitStr, 10))).length;
+}
+
+function consumeNextDisplayToken(
+  displayTokens: DiffToken[],
+  tokenIdx: number,
+): { token: DiffToken | null; nextIdx: number } {
+  let idx = tokenIdx;
+  while (idx < displayTokens.length && isTokenPunctuationChar(displayTokens[idx].char)) {
+    idx += 1;
+  }
+  if (idx >= displayTokens.length) {
+    return { token: null, nextIdx: idx };
+  }
+  return { token: displayTokens[idx], nextIdx: idx + 1 };
+}
+
+function aggregateDigitRunForDisplay(
+  displayChar: string,
+  runTokens: DiffToken[],
+): DiffToken {
+  if (runTokens.length === 0) {
+    return { char: displayChar, type: 'unread' };
+  }
+  const types = runTokens.map((t) => t.type);
+  if (types.every((t) => t === 'correct')) {
+    return { char: displayChar, type: 'correct' };
+  }
+  if (types.every((t) => t === 'correct' || t === 'forgiven')) {
+    return { char: displayChar, type: 'forgiven' };
+  }
+  if (types.some((t) => t === 'wrong')) {
+    const wrong = runTokens.find((t) => t.type === 'wrong')!;
+    return { char: displayChar, type: 'wrong', expected: wrong.expected };
+  }
+  if (types.every((t) => t === 'missing' || t === 'unread')) {
+    return { char: displayChar, type: types[0] === 'unread' ? 'unread' : 'missing' };
+  }
+  if (types.some((t) => t === 'missing' || t === 'unread')) {
+    return { char: displayChar, type: 'missing' };
+  }
+  // Mis-aligned token run — do not default to correct (would show unread text as green).
+  return { char: displayChar, type: 'missing' };
+}
+
 /**
  * Re-insert punctuation from the lesson line into diff tokens for display.
  * Always walks the full target text — punctuation is never gated on how much
  * the student has read. Scoring still uses punctuation-stripped tokens.
+ *
+ * Arabic digit runs (e.g. 299 → 二百九十九) expand to multiple normalized
+ * diff tokens; each digit in the original line inherits the aggregate status.
  */
 export function interleavePunctuation(
   targetText: string,
@@ -391,33 +443,57 @@ export function interleavePunctuation(
     );
   }
 
+  const targetChars = Array.from(targetText);
   const normChars = Array.from(normalizeForComparison(targetText));
   const result: DiffToken[] = [];
   let tokenIdx = 0;
   let normIdx = 0;
 
-  for (const ch of Array.from(targetText)) {
+  for (let i = 0; i < targetChars.length; i++) {
+    const ch = targetChars[i];
+
     if (DISPLAY_PUNCT_RE.test(ch)) {
       result.push({ char: ch, type: 'punctuation' });
       continue;
     }
-    if (normIdx < normChars.length && ch === normChars[normIdx]) {
-      // Skip punctuation chars embedded in diff tokens — display uses target punctuation only.
-      while (
-        tokenIdx < displayTokens.length &&
-        isTokenPunctuationChar(displayTokens[tokenIdx].char)
-      ) {
-        tokenIdx += 1;
+
+    if (DIGIT_RE.test(ch)) {
+      if (i > 0 && DIGIT_RE.test(targetChars[i - 1])) continue;
+
+      let digitEnd = i;
+      while (digitEnd < targetChars.length && DIGIT_RE.test(targetChars[digitEnd])) {
+        digitEnd += 1;
       }
-      if (tokenIdx < displayTokens.length) {
-        result.push(displayTokens[tokenIdx]);
+      const digitRun = targetChars.slice(i, digitEnd).join('');
+      const normRunLen = chineseNormLenForDigitRun(digitRun);
+      const runTokens: DiffToken[] = [];
+
+      for (let k = 0; k < normRunLen; k++) {
+        const { token, nextIdx } = consumeNextDisplayToken(displayTokens, tokenIdx);
+        tokenIdx = nextIdx;
+        if (token) runTokens.push(token);
+      }
+      normIdx += normRunLen;
+
+      for (let d = i; d < digitEnd; d++) {
+        result.push(aggregateDigitRunForDisplay(targetChars[d], runTokens));
+      }
+      i = digitEnd - 1;
+      continue;
+    }
+
+    if (normIdx < normChars.length && ch === normChars[normIdx]) {
+      const { token, nextIdx } = consumeNextDisplayToken(displayTokens, tokenIdx);
+      tokenIdx = nextIdx;
+      if (token) {
+        result.push({ ...token, char: ch });
       } else {
         result.push({ char: ch, type: 'unread' });
       }
-      tokenIdx += 1;
       normIdx += 1;
       continue;
     }
+
     // Decorative / stripped chars in the original line — show without diff styling.
     result.push({ char: ch, type: 'punctuation' });
   }
