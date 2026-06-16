@@ -391,7 +391,11 @@ const FullReading: React.FC<FullReadingProps> = ({
               />
 
               {/* 朗讀結果 (Issue #1960 — same style as LiveTutor ParagraphCard) */}
-              <FullReadingFeedbackPanel diffTokens={result.diffTokens} targetText={fullText} />
+              <FullReadingFeedbackPanel
+                diffTokens={result.diffTokens}
+                targetText={fullText}
+                paragraphs={story.content}
+              />
 
               {/* 正確率 + 語速 metrics card (Issue #1505) */}
               <ReadingMetricsCard
