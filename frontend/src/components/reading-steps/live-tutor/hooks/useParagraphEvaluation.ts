@@ -92,6 +92,7 @@ export function evalReducer(state: EvalState, action: EvalAction): EvalState {
         realtimeDiffTokens: null,
         streamingUserInput: '',
         isAwaitingGemini: false,
+        retryCount: 0,
       };
     default:
       return state;

@@ -53,4 +53,19 @@ describe('evalReducer — display diff must stay on local Phase-1 result', () =>
     expect(next.lastDiffTokens).toEqual(localDiff);
     expect(next.phase).toBe('gemini_error');
   });
+
+  it('CLEAR_FOR_PARAGRAPH resets retryCount so next paragraph shows 開始朗讀', () => {
+    const afterRetries: EvalState = {
+      ...initialEvalState,
+      retryCount: 2,
+      lastDiffTokens: localDiff,
+      streamingUserInput: '測試',
+      phase: 'gemini_done',
+    };
+    const next = evalReducer(afterRetries, { type: 'CLEAR_FOR_PARAGRAPH' });
+    expect(next.retryCount).toBe(0);
+    expect(next.lastDiffTokens).toBeNull();
+    expect(next.streamingUserInput).toBe('');
+    expect(next.phase).toBe('idle');
+  });
 });
