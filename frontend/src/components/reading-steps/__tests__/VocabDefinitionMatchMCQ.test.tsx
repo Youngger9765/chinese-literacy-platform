@@ -155,9 +155,9 @@ describe('MultipleChoiceMode — correct answer behavior (must stay green)', () 
     const correctButton = screen.getByRole('button', { name: '勤奮' });
     fireEvent.click(correctButton);
 
-    // Wait for the advance delay (400ms used by correct path)
+    // Wait for the advance delay (1200ms hold after correct)
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 1400));
     });
 
     expect(onAllDone).toHaveBeenCalledOnce();
@@ -182,7 +182,7 @@ describe('MultipleChoiceMode — correct answer behavior (must stay green)', () 
     fireEvent.click(correctButton);
 
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 1400));
     });
 
     // Now on Q2: definition for defIndex 1 should be visible
@@ -203,7 +203,7 @@ describe('MultipleChoiceMode — correct answer behavior (must stay green)', () 
 
     fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 1400));
     });
 
     expect(screen.getByText('2 / 3')).toBeTruthy();
