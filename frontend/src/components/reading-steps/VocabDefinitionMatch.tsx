@@ -75,6 +75,34 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
   );
 }
 
+function StageCompletedPlaceholder({
+  title,
+  otherModeLabel,
+  otherDone,
+  onGoOther,
+}: {
+  title: string;
+  otherModeLabel: string;
+  otherDone: boolean;
+  onGoOther: () => void;
+}) {
+  return (
+    <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+      <span className="material-symbols-outlined text-5xl text-emerald-500">check_circle</span>
+      <p className="text-lg font-headline font-bold text-on-surface">{title} 已完成</p>
+      {!otherDone && (
+        <button type="button" onClick={onGoOther} className="btn-immersive">
+          前往{otherModeLabel}
+          <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
+        </button>
+      )}
+      {otherDone && (
+        <p className="text-sm text-on-surface-variant">兩關都完成了，正在準備成績…</p>
+      )}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Main Component (thin orchestrator)                                  */
 /* ------------------------------------------------------------------ */
@@ -195,15 +223,42 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     shuffledWords.current = shuffle(indices);
   }, []);
 
+  const mcDone = mcAnswers.length > 0;
+  const dragDropDone = dragDropAnswers.length > 0;
+
+  const goToSummaryIfBothDone = useCallback(
+    (nextMcAnswers: AnswerRecord[], nextDragDropAnswers: AnswerRecord[]) => {
+      if (nextMcAnswers.length > 0 && nextDragDropAnswers.length > 0) {
+        setPhase('summary');
+      }
+    },
+    [],
+  );
+
+  const handleSelectMode = useCallback(
+    (nextMode: InteractionMode) => {
+      if (nextMode === mode) return;
+      setMode(nextMode);
+      if (nextMode === 'multiple-choice' && !mcDone) {
+        setActiveDefIndices(allIndices);
+      }
+      if (nextMode === 'drag-drop' && !dragDropDone) {
+        setActiveDefIndices(allIndices);
+        shuffledWords.current = shuffle(allIndices);
+      }
+    },
+    [mode, mcDone, dragDropDone, allIndices],
+  );
+
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
     if (mode === 'multiple-choice') {
       setMcAnswers(answers);
-      startStage('drag-drop', allIndices);
+      goToSummaryIfBothDone(answers, dragDropAnswers);
       return;
     }
     setDragDropAnswers(answers);
-    setPhase('summary');
-  }, [mode, startStage, allIndices]);
+    goToSummaryIfBothDone(mcAnswers, answers);
+  }, [mode, mcAnswers, dragDropAnswers, goToSummaryIfBothDone]);
 
   const handleRetryModeWrong = useCallback((targetMode: InteractionMode) => {
     const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
@@ -253,24 +308,43 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
           <>
             <StageStatus
               current={mode}
-              mcDone={mcAnswers.length > 0}
-              dragDropDone={dragDropAnswers.length > 0}
+              mcDone={mcDone}
+              dragDropDone={dragDropDone}
+              onSelectMode={handleSelectMode}
             />
 
             {mode === 'multiple-choice' && (
-              <MultipleChoiceMode
-                vocab={vocab}
-                activeDefIndices={activeDefIndices}
-                onAllDone={handleAllDone}
-              />
+              mcDone ? (
+                <StageCompletedPlaceholder
+                  title="選擇題"
+                  otherModeLabel="拖拉配對"
+                  otherDone={dragDropDone}
+                  onGoOther={() => handleSelectMode('drag-drop')}
+                />
+              ) : (
+                <MultipleChoiceMode
+                  vocab={vocab}
+                  activeDefIndices={activeDefIndices}
+                  onAllDone={handleAllDone}
+                />
+              )
             )}
             {mode === 'drag-drop' && (
-              <DragDropMode
-                vocab={vocab}
-                activeDefIndices={activeDefIndices}
-                shuffledWords={shuffledWords.current}
-                onAllDone={handleAllDone}
-              />
+              dragDropDone ? (
+                <StageCompletedPlaceholder
+                  title="拖拉配對"
+                  otherModeLabel="選擇題"
+                  otherDone={mcDone}
+                  onGoOther={() => handleSelectMode('multiple-choice')}
+                />
+              ) : (
+                <DragDropMode
+                  vocab={vocab}
+                  activeDefIndices={activeDefIndices}
+                  shuffledWords={shuffledWords.current}
+                  onAllDone={handleAllDone}
+                />
+              )
             )}
           </>
         )}
