@@ -59,6 +59,19 @@ def _load_docx_codes() -> frozenset[str]:
 _DOCX_CODES: frozenset[str] = _load_docx_codes()
 
 _GCS_DOCX_BASE = "https://storage.googleapis.com/lingoleap-assets/worksheets"
+# Bump when GCS worksheet objects are replaced (student rollout #2043).
+# Public GCS URLs are edge-cached; a query param forces a fresh object fetch.
+WORKSHEET_GCS_CACHE_VERSION = "20260616-student"
+
+
+def public_worksheet_url(url: str | None) -> str | None:
+    """Append cache-bust query for lingoleap-assets worksheet URLs."""
+    if not url or "lingoleap-assets/worksheets/" not in url:
+        return url
+    if "v=" in url:
+        return url
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}v={WORKSHEET_GCS_CACHE_VERSION}"
 
 
 def _derive_docx_url(grade_code: str | None) -> str | None:

@@ -16,6 +16,17 @@ import { API_BASE } from './apiConfig';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
 
+/** Bump when GCS worksheet objects are replaced (student rollout #2043). */
+const WORKSHEET_GCS_CACHE_VERSION = '20260616-student';
+
+function publicWorksheetUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (!url.includes('lingoleap-assets/worksheets/')) return url;
+  if (url.includes('v=')) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}v=${WORKSHEET_GCS_CACHE_VERSION}`;
+}
+
 export class SessionExpiredError extends Error {
   constructor(message: string) {
     super(message);
@@ -173,8 +184,8 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
-    worksheetPdfUrl: detail.worksheet_pdf_url ?? undefined,
-    worksheetDocxUrl: detail.worksheet_docx_url ?? undefined,
+    worksheetPdfUrl: publicWorksheetUrl(detail.worksheet_pdf_url),
+    worksheetDocxUrl: publicWorksheetUrl(detail.worksheet_docx_url),
     tables: detail.tables ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',

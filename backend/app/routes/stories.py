@@ -14,6 +14,7 @@ from ..models.user import User
 from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
+from ..services.lesson_layer_loaders import public_worksheet_url
 from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
@@ -260,9 +261,9 @@ def get_story(story_id: str):
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
         lesson_intro=story.get("lesson_intro"),
         # 紙本學習單 PDF (#1444) — public GCS URL or None
-        worksheet_pdf_url=story.get("worksheet_pdf_url"),
+        worksheet_pdf_url=public_worksheet_url(story.get("worksheet_pdf_url")),
         # Direct docx URL when soffice PDF conversion is broken (#2073)
-        worksheet_docx_url=story.get("worksheet_docx_url"),
+        worksheet_docx_url=public_worksheet_url(story.get("worksheet_docx_url")),
         # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
         tables=story.get("tables"),
         # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
