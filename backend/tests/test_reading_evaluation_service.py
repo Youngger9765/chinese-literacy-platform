@@ -23,6 +23,14 @@ from app.services.reading_evaluation_service import (
 )
 from app.services.persona import Thresholds
 
+MENGCHANGJUN_LINE = (
+    "中國的戰國時期，有七個國家總是爭強鬥勝、互比苗頭，為了要在競爭中勝出，各國都在搶傑出的管理人才，"
+    "其中最有名的人才，就是齊國的孟嘗君。孟嘗君是有錢的貴族，最讓人津津樂道的是他在家裡養了三千名食客，"
+    "食客就是在家裡吃飯的客人，三千人開飯的場面一眼望不完，真是非常壯觀。"
+    "只要自認為有本事的人來投奔孟嘗君，他二話不說，總是張開雙手歡迎。"
+    "這些食客具備各式各樣的才能，可以隨時幫他解決各種問題。"
+)
+
 
 # ---------------------------------------------------------------------------
 # _normalize_text
@@ -262,6 +270,48 @@ async def test_ai_path_cpm_calculated_with_duration():
         )
     assert result["cpm"] is not None
     assert result["cpm"] > 0
+
+
+@pytest.mark.asyncio
+async def test_ai_path_cpm_uses_correct_count_not_full_target():
+    """Partial read: CPM denominator = chars actually read, not full target length."""
+    long_target = MENGCHANGJUN_LINE
+    spoken = "中國的戰國時期"
+    duration_ms = 60_000
+    preview = _build_fallback_result(spoken, long_target)
+    expected_cpm = round(preview["stats"]["correct_count"] / 60 * 60, 1)
+
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
+    ):
+        result = await evaluate_reading_with_ai(
+            spoken_text=spoken,
+            target_text=long_target,
+            duration_ms=duration_ms,
+        )
+    assert result["cpm"] == expected_cpm
+    assert result["cpm"] < len(_normalize_text(long_target)) * 0.5
+
+
+@pytest.mark.asyncio
+async def test_fallback_cpm_uses_correct_count():
+    """Fallback path CPM also uses alignment correct_count."""
+    spoken = "中國的戰國時期"
+    target = MENGCHANGJUN_LINE
+    duration_ms = 60_000
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(side_effect=RuntimeError("down")),
+    ):
+        result = await evaluate_reading_with_ai(
+            spoken_text=spoken,
+            target_text=target,
+            duration_ms=duration_ms,
+        )
+    assert result["evaluation_method"] == "fallback"
+    preview = _build_fallback_result(spoken, target)
+    assert result["cpm"] == round(preview["stats"]["correct_count"] / 60 * 60, 1)
 
 
 @pytest.mark.asyncio
