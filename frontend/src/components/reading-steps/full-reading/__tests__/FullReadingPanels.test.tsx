@@ -350,4 +350,24 @@ describe('FullReadingFeedbackPanel', () => {
     );
     expect(screen.queryByText('朗讀結果')).not.toBeInTheDocument();
   });
+
+  it('renders one indented paragraph block per lesson paragraph', () => {
+    const diffTokens: DT2[] = [
+      { char: '甲', type: 'correct' },
+      { char: '乙', type: 'correct' },
+      { char: '丙', type: 'wrong', expected: '丁' },
+      { char: '戊', type: 'correct' },
+    ];
+    const { container } = render(
+      <FullReadingFeedbackPanel
+        diffTokens={diffTokens}
+        targetText="甲乙丙戊"
+        paragraphs={['甲乙', '丙戊']}
+      />,
+    );
+    const bodyParas = container.querySelectorAll('p.indent-\\[2em\\]');
+    expect(bodyParas).toHaveLength(2);
+    expect(bodyParas[0].textContent).toBe('甲乙');
+    expect(bodyParas[1].textContent).toBe('丙戊');
+  });
 });
