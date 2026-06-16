@@ -33,6 +33,8 @@ interface LiveTutorControlsProps {
   onConfirmEvaluate: () => void;
   /** Discard pending recording and record again. */
   onConfirmRerecord: () => void;
+  /** Discard pending recording and return to idle (restore prior eval if any). */
+  onConfirmCancel: () => void;
   onSpeakCurrentParagraph: () => void;
   onPauseResumeTts: () => void;
   onStopTts: () => void;
@@ -44,7 +46,7 @@ interface LiveTutorControlsProps {
  * Renders the correct button state based on session phase.
  *
  * Recording state (isSessionActive): pulsing red mic + elapsed timer + green 完成 button.
- * After 完成: 評估 / 重錄 — only 評估 triggers API scoring.
+ * After 完成: 評估 / 重錄 / 取消 — only 評估 triggers API scoring.
  */
 const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   isSessionActive,
@@ -67,6 +69,7 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   onFinishRecording,
   onConfirmEvaluate,
   onConfirmRerecord,
+  onConfirmCancel,
   onSpeakCurrentParagraph,
   onPauseResumeTts,
   onStopTts,
@@ -140,24 +143,32 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
             {recordingPendingReview && !isSubmittingSentence ? (
               <>
                 <p className="text-sm text-on-surface-variant text-center">
-                  錄音已暫停。滿意再送評估，不滿意可重錄。
+                  錄音已暫停。滿意請按評估；想再錄按重錄；不要這次錄音請按取消。
                 </p>
-                <div className="w-full flex gap-3">
+                <div className="w-full flex gap-2">
+                  <button
+                    type="button"
+                    onClick={onConfirmCancel}
+                    className="flex-1 h-14 rounded-full font-headline font-bold text-base bg-surface-container-lowest shadow-editorial text-on-surface-variant hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span>
+                    取消
+                  </button>
                   <button
                     type="button"
                     onClick={onConfirmRerecord}
-                    className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    className="flex-1 h-14 rounded-full font-headline font-bold text-base bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
                   >
-                    <span className="material-symbols-outlined text-xl">replay</span>
+                    <span className="material-symbols-outlined text-lg">replay</span>
                     重錄
                   </button>
                   <button
                     type="button"
                     onClick={onConfirmEvaluate}
-                    className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    className="flex-1 h-14 rounded-full font-headline font-bold text-lg text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
                     style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
                   >
-                    <span className="material-symbols-outlined text-xl">check_circle</span>
+                    <span className="material-symbols-outlined text-lg">check_circle</span>
                     評估
                   </button>
                 </div>
