@@ -81,7 +81,7 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
         <div className="flex-1">
           <p className="font-bold text-on-surface text-base mb-1">詞語配對怎麼玩？</p>
           <p className="text-sm text-on-surface-variant leading-relaxed">
-            {instruction}。配對正確後語詞會消失。
+            {instruction}。左右兩欄都可以上下捲動查看更多語詞與解釋。配對正確後，該組會移到下方，尚未配對的會留在上方
           </p>
         </div>
       </div>
@@ -145,6 +145,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const wordChipRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const slotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const defScrollRef = useRef<HTMLDivElement>(null);
+  const wordBankScrollRef = useRef<HTMLDivElement>(null);
 
   const clearDemoTimers = useCallback(() => {
     demoTimersRef.current.forEach((id) => clearTimeout(id));
@@ -158,6 +160,13 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   }, []);
 
   useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
+
+  // Demo: scroll both columns to top so the pinned demo pair is visible first
+  useEffect(() => {
+    if (demo?.step !== 'pick-word') return;
+    defScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    wordBankScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [demo?.step, demo?.wordIdx, demo?.slotIdx]);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
@@ -391,6 +400,30 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     [activeShuffledWords, confirmed.size],
   );
 
+  // Sort: unmatched slots first so remaining options stay near the top as pairs are confirmed
+  const sortedDefIndices = useMemo(
+    () => [...activeDefIndices].sort((a, b) => {
+      const aConfirmed = confirmed.has(a) ? 1 : 0;
+      const bConfirmed = confirmed.has(b) ? 1 : 0;
+      return aConfirmed - bConfirmed;
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeDefIndices, confirmed.size],
+  );
+
+  // During guided demo, temporarily float the demo pair to the top of both columns
+  const displayShuffledWords = useMemo(() => {
+    if (demo == null) return sortedShuffledWords;
+    const { wordIdx } = demo;
+    return [wordIdx, ...sortedShuffledWords.filter((wi) => wi !== wordIdx)];
+  }, [sortedShuffledWords, demo]);
+
+  const displayDefIndices = useMemo(() => {
+    if (demo == null) return sortedDefIndices;
+    const { slotIdx } = demo;
+    return [slotIdx, ...sortedDefIndices.filter((di) => di !== slotIdx)];
+  }, [sortedDefIndices, demo]);
+
   /* ---- Word bank chips (shared between mobile top strip and desktop left panel) ---- */
   const wordBankContent = (
     <>
@@ -400,7 +433,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">本課語詞</span>
       </div>
       <div className="grid grid-cols-2 gap-2 min-h-[56px]">
-        {sortedShuffledWords.map((vocabIdx) => {
+        {displayShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
           const isFlying = flyingAway.has(vocabIdx);
           // Fix #1101 (炮灰選項): Keep correctly-confirmed words visible as locked
@@ -477,21 +510,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   );
 
   /* ---- Definition slots ---- */
-  // Sort: unmatched slots first so remaining options stay near the top as pairs are confirmed
-  const sortedDefIndices = useMemo(
-    () => [...activeDefIndices].sort((a, b) => {
-      const aConfirmed = confirmed.has(a) ? 1 : 0;
-      const bConfirmed = confirmed.has(b) ? 1 : 0;
-      return aConfirmed - bConfirmed;
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeDefIndices, confirmed.size],
-  );
-
   // A8: Device-appropriate drop-zone hint text
   const dropHintText = IS_TOUCH_DEVICE ? '點選空格放入' : '拖拉語詞到這裡';
 
-  const definitionSlots = sortedDefIndices.map((defIdx) => {
+  const definitionSlots = displayDefIndices.map((defIdx) => {
     const item = vocab[defIdx];
     const placedVocabIdx = placements.get(defIdx) ?? null;
     const isCorrect = confirmed.has(defIdx);
@@ -596,7 +618,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
       {demo?.step === 'pick-word' && (
         <DemoBubble>
-          {IS_TOUCH_DEVICE ? '① 先點選上方語詞' : '① 按住右邊的語詞'}
+          {IS_TOUCH_DEVICE
+            ? '① 先點選上方語詞（語詞與解釋欄都可上下捲動）'
+            : '① 按住右邊第一個語詞（左右兩欄都可上下捲動）'}
         </DemoBubble>
       )}
       {demo?.step === 'dragging' && (
@@ -606,7 +630,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       )}
       {(demo?.step === 'dropped' || demo?.step === 'success') && (
         <DemoBubble>
-          {demo.step === 'success' ? '✓ 配對成功！就是這樣玩' : '③ 放開就完成配對'}
+          {demo.step === 'success'
+            ? '✓ 配對成功！完成的會移到下方，繼續配對上方的'
+            : '③ 放開就完成配對'}
         </DemoBubble>
       )}
 
@@ -684,7 +710,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       {/* Desktop: two-column layout — definitions left (scrollable), word bank right (sticky) */}
       <div className="md:flex md:gap-6 md:items-start md:max-h-[calc(100vh-16rem)]">
         {/* Left column — definition slots, independently scrollable on desktop */}
-        <div className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]">
+        <div
+          ref={defScrollRef}
+          className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]"
+        >
           {/* A7: Renamed from 定義欄位 to 語詞解釋 */}
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
             語詞解釋
@@ -695,7 +724,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         </div>
 
         {/* Right column — word bank panel, independently scrollable on desktop */}
-        <div className="hidden md:flex md:flex-col w-72 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
+        <div
+          ref={wordBankScrollRef}
+          className="hidden md:flex md:flex-col w-72 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]"
+        >
           {wordBankContent}
         </div>
       </div>
