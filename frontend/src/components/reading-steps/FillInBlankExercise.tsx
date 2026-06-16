@@ -19,6 +19,10 @@ import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStor
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
 
+// A8: Detect touch (coarse pointer) vs mouse at mount time.
+const IS_TOUCH_DEVICE =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const FILLBLANK_ONBOARDED_KEY = 'fillblank_onboarded';
 
@@ -360,9 +364,12 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
         </span>
       )
       : (
-        // A11: smaller dashed underline blank, not big pill
-        <span className="inline-block border-b-2 border-dashed border-on-surface-variant/40 mx-1 text-on-surface-variant/40 text-center min-w-[3.5em] pb-0.5">
-          ＿＿
+        // A11: single dashed underline blank (no ＿＿ glyphs — they doubled the line)
+        <span
+          className="inline-block border-b-2 border-dashed border-on-surface-variant/40 mx-1 min-w-[3.5em] pb-0.5"
+          aria-label="填空"
+        >
+          {'\u3000'}
         </span>
       );
 
