@@ -26,6 +26,32 @@ const IS_TOUCH_DEVICE =
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const FILLBLANK_ONBOARDED_KEY = 'fillblank_onboarded';
 
+// ── Demo step tooltip bubble ───────────────────────────────────────────────
+function DemoBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-xs">
+        {children}
+        <span
+          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+type DemoStep = 'read-sentence' | 'pick' | 'click' | 'success';
+
+interface DemoRuntime {
+  step: DemoStep;
+  targetCode: string;
+}
+
 // ── Onboarding coach — amber box, same style as VocabDefinitionMatchMCQ ──
 interface OnboardingCoachProps {
   onDismiss: () => void;
@@ -144,16 +170,23 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     }
   });
 
-  // Demo animation state: null = not running, code = the option being highlighted
-  const [demoHighlightCode, setDemoHighlightCode] = useState<string | null>(null);
-  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guided demo: step-by-step tooltips + animated tap on the correct option (visual only)
+  const [demo, setDemo] = useState<DemoRuntime | null>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Clean up demo timer on unmount
-  useEffect(() => {
-    return () => {
-      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    };
-  }, []);
+  const clearDemoTimers = () => {
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
+  };
+
+  const scheduleDemoStep = (fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+    return id;
+  };
+
+  // Clean up demo timers on unmount
+  useEffect(() => () => clearDemoTimers(), []);
 
   const handleDismissCoach = () => {
     setShowCoach(false);
@@ -227,28 +260,24 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx]);
 
   /**
-   * Demo animation: pulse the correct option for the current question.
+   * Guided demo on the real UI — tooltips + animated tap on the correct option.
    * Purely visual — does NOT submit an answer or affect scoring.
-   * Two amber pulses on the correct option, then done.
    */
   const handleDemo = () => {
-    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    clearDemoTimers();
     if (!currentSentence) {
       handleDismissCoach();
       return;
     }
-    const correctCode = currentSentence.answer;
-    setDemoHighlightCode(correctCode);
-    demoTimerRef.current = setTimeout(() => {
-      setDemoHighlightCode(null);
-      demoTimerRef.current = setTimeout(() => {
-        setDemoHighlightCode(correctCode);
-        demoTimerRef.current = setTimeout(() => {
-          setDemoHighlightCode(null);
-        }, 900);
-      }, 200);
-    }, 900);
     handleDismissCoach();
+
+    const targetCode = currentSentence.answer;
+    setDemo({ step: 'read-sentence', targetCode });
+
+    scheduleDemoStep(() => setDemo({ step: 'pick', targetCode }), 1400);
+    scheduleDemoStep(() => setDemo({ step: 'click', targetCode }), 2800);
+    scheduleDemoStep(() => setDemo({ step: 'success', targetCode }), 4200);
+    scheduleDemoStep(() => setDemo(null), 5600);
   };
 
   // A10: selecting immediately evaluates — no separate confirm button
@@ -497,18 +526,23 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
 
         {/* Sentence card — A11: text-left + comfortable leading */}
         {currentSentence && (
-          <div className={`rounded-3xl p-6 md:p-8 transition-all duration-300 ${
-            feedback === 'correct'
-              ? 'bg-emerald-50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
-              : feedback === 'wrong'
-              ? 'bg-amber-50 shadow-[0_4px_16px_rgba(217,119,6,0.1)]'
-              : 'bg-surface-container-lowest shadow-editorial'
-          }`}>
-            {/* A11: text-left (not text-center) */}
-            <p className="text-xl md:text-2xl text-on-surface leading-[2.6rem] md:leading-[3.2rem] text-left">
-              {renderSentence(currentSentence.sentence, selectedCode)}
-            </p>
-          </div>
+          <>
+            {demo?.step === 'read-sentence' && (
+              <DemoBubble>① 先讀句子，想想空格要填什麼語詞</DemoBubble>
+            )}
+            <div className={`rounded-3xl p-6 md:p-8 transition-all duration-300 ${
+              feedback === 'correct'
+                ? 'bg-emerald-50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
+                : feedback === 'wrong'
+                ? 'bg-amber-50 shadow-[0_4px_16px_rgba(217,119,6,0.1)]'
+                : 'bg-surface-container-lowest shadow-editorial'
+            } ${demo?.step === 'read-sentence' ? 'ring-4 ring-amber-300/50' : ''}`}>
+              {/* A11: text-left (not text-center) */}
+              <p className="text-xl md:text-2xl text-on-surface leading-[2.6rem] md:leading-[3.2rem] text-left">
+                {renderSentence(currentSentence.sentence, selectedCode)}
+              </p>
+            </div>
+          </>
         )}
 
         {/* A6: wrong feedback — amber, "再試試看！", no correct answer shown (A12) */}
@@ -540,58 +574,86 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
 
         {/* Answer options — A11: ABCD badges behind feature flag; A10: click = immediate evaluate */}
         {currentSentence && feedback !== 'correct' && (
-          <div className="grid grid-cols-2 gap-3">
-            {availableEntries.map(([code, word]) => {
-              const isUsedDecoy = usedCodes.has(code);
-              const isDemoHighlight = demoHighlightCode === code;
-              // A6/A12: when wrong, show which was just selected as amber highlight (no reveal of correct)
-              const isWrongSelected =
-                feedback === 'wrong' &&
-                firstTryResults.length > 0 &&
-                firstTryResults[firstTryResults.length - 1]?.studentFirstAnswer === code &&
-                firstTryResults[firstTryResults.length - 1]?.sentenceIdx === currentOriginalIdx;
+          <>
+            {demo?.step === 'pick' && (
+              <DemoBubble>② 從下面選出最適合填進空格的語詞</DemoBubble>
+            )}
+            {(demo?.step === 'click' || demo?.step === 'success') && (
+              <DemoBubble>
+                {demo.step === 'click' ? '③ 點一下選擇答案' : '✓ 答對了！就是這樣玩'}
+              </DemoBubble>
+            )}
+            <div className={`grid grid-cols-2 gap-3 transition-all duration-300 ${
+              demo?.step === 'pick' ? 'ring-4 ring-amber-300/40 rounded-2xl p-1' : ''
+            }`}>
+              {availableEntries.map(([code, word]) => {
+                const isUsedDecoy = usedCodes.has(code);
+                const isDemoTarget = demo?.targetCode === code;
+                const isWrongSelected =
+                  feedback === 'wrong' &&
+                  firstTryResults.length > 0 &&
+                  firstTryResults[firstTryResults.length - 1]?.studentFirstAnswer === code &&
+                  firstTryResults[firstTryResults.length - 1]?.sentenceIdx === currentOriginalIdx;
 
-              return (
-                <button
-                  key={code}
-                  onClick={() => !isUsedDecoy && !demoHighlightCode && handleSelect(code)}
-                  disabled={isUsedDecoy || !!demoHighlightCode}
-                  aria-disabled={isUsedDecoy}
-                  className={`rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all min-h-[56px] ${
-                    isDemoHighlight
-                      ? 'border-amber-400 bg-amber-50 animate-pulse'
-                      : isUsedDecoy
-                      ? 'border-surface-container-high bg-surface-container-high/40 opacity-40 cursor-not-allowed'
-                      : isWrongSelected
-                      ? 'border-amber-400 bg-amber-50 active:scale-[0.97]'
-                      : 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30 hover:bg-surface-container-low active:scale-[0.97]'
-                  }`}
-                >
-                  {/* A11: ABCD badge behind feature flag */}
-                  {FILLBLANK_SHOW_ABCD && (
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
+                let optionClass = 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30 hover:bg-surface-container-low active:scale-[0.97]';
+                if (isDemoTarget && demo) {
+                  if (demo.step === 'success') {
+                    optionClass = 'border-emerald-400 bg-emerald-50 text-emerald-800 scale-[0.97]';
+                  } else if (demo.step === 'click') {
+                    optionClass = 'border-amber-400 bg-amber-50 text-amber-800 ring-4 ring-amber-300/60 scale-[0.97]';
+                  }
+                } else if (isUsedDecoy) {
+                  optionClass = 'border-surface-container-high bg-surface-container-high/40 opacity-40 cursor-not-allowed';
+                } else if (isWrongSelected) {
+                  optionClass = 'border-amber-400 bg-amber-50 active:scale-[0.97]';
+                }
+
+                return (
+                  <button
+                    key={code}
+                    onClick={() => !isUsedDecoy && !demo && handleSelect(code)}
+                    disabled={isUsedDecoy || demo !== null}
+                    aria-disabled={isUsedDecoy}
+                    className={`relative rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all min-h-[56px] ${optionClass}`}
+                  >
+                    {demo?.step === 'click' && isDemoTarget && (
+                      <span
+                        className="absolute -top-9 left-1/2 -translate-x-1/2 text-2xl animate-bounce pointer-events-none"
+                        aria-hidden
+                      >
+                        {IS_TOUCH_DEVICE ? '👆' : '🖱️'}
+                      </span>
+                    )}
+                    {demo?.step === 'success' && isDemoTarget && (
+                      <span className="mr-1 text-emerald-600" aria-hidden="true">
+                        ✓
+                      </span>
+                    )}
+                    {FILLBLANK_SHOW_ABCD && (
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
+                        isUsedDecoy
+                          ? 'bg-surface-container-high text-on-surface-variant/40'
+                          : isWrongSelected || (isDemoTarget && demo)
+                          ? 'bg-amber-400 text-white'
+                          : 'bg-surface-container-high text-on-surface-variant'
+                      }`}>
+                        {code}
+                      </span>
+                    )}
+                    <span className={`font-bold text-base ${
                       isUsedDecoy
-                        ? 'bg-surface-container-high text-on-surface-variant/40'
-                        : isWrongSelected || isDemoHighlight
-                        ? 'bg-amber-400 text-white'
-                        : 'bg-surface-container-high text-on-surface-variant'
+                        ? 'text-on-surface-variant/40 line-through'
+                        : isWrongSelected || (isDemoTarget && demo)
+                        ? 'text-amber-700'
+                        : 'text-on-surface'
                     }`}>
-                      {code}
+                      {zh(word)}
                     </span>
-                  )}
-                  <span className={`font-bold text-base ${
-                    isUsedDecoy
-                      ? 'text-on-surface-variant/40 line-through'
-                      : isWrongSelected || isDemoHighlight
-                      ? 'text-amber-700'
-                      : 'text-on-surface'
-                  }`}>
-                    {zh(word)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* A10: no confirm button — selecting triggers immediate evaluation.
