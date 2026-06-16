@@ -325,28 +325,29 @@ import FullReadingFeedbackPanel from '../FullReadingFeedbackPanel';
 import type { DiffToken as DT2 } from '../../../../types';
 
 describe('FullReadingFeedbackPanel', () => {
-  it('renders diff section when diffTokens are present', () => {
+  it('renders 朗讀結果 when diffTokens are present', () => {
     const diffTokens: DT2[] = [
       { char: '你', type: 'correct' },
       { char: '好', type: 'wrong', expected: '世' },
     ];
     render(
-      <FullReadingFeedbackPanel diffTokens={diffTokens} />
+      <FullReadingFeedbackPanel diffTokens={diffTokens} targetText="你好" />
     );
-    expect(screen.getByText('逐字比對')).toBeInTheDocument();
-  });
-
-  it('does not render diff section when diffTokens is empty', () => {
-    render(
-      <FullReadingFeedbackPanel diffTokens={[]} />
-    );
+    expect(screen.getByText('朗讀結果')).toBeInTheDocument();
     expect(screen.queryByText('逐字比對')).not.toBeInTheDocument();
   });
 
-  it('does not render diff section when diffTokens is undefined', () => {
+  it('does not render result section when diffTokens is empty', () => {
     render(
-      <FullReadingFeedbackPanel diffTokens={undefined} />
+      <FullReadingFeedbackPanel diffTokens={[]} targetText="你好" />
     );
-    expect(screen.queryByText('逐字比對')).not.toBeInTheDocument();
+    expect(screen.queryByText('朗讀結果')).not.toBeInTheDocument();
+  });
+
+  it('does not render result section when diffTokens is undefined', () => {
+    render(
+      <FullReadingFeedbackPanel diffTokens={undefined} targetText="你好" />
+    );
+    expect(screen.queryByText('朗讀結果')).not.toBeInTheDocument();
   });
 });

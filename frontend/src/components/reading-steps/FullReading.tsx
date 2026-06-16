@@ -390,8 +390,8 @@ const FullReading: React.FC<FullReadingProps> = ({
                 audioUrl={audioRecorder.audioUrl ?? null}
               />
 
-              {/* 逐字比對 diff (Issue #1960 — FullReadingFeedbackPanel) */}
-              <FullReadingFeedbackPanel diffTokens={result.diffTokens} />
+              {/* 朗讀結果 (Issue #1960 — same style as LiveTutor ParagraphCard) */}
+              <FullReadingFeedbackPanel diffTokens={result.diffTokens} targetText={fullText} />
 
               {/* 正確率 + 語速 metrics card (Issue #1505) */}
               <ReadingMetricsCard
