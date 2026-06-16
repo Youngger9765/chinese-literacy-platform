@@ -540,6 +540,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       nextSentenceIdxRef.current = restorePlan.nextSentenceIdx;
       lastFinalResultIdxRef.current = restorePlan.lastFinalResultIdx;
       dispatch(restorePlan.dispatchAction);
+      dispatch({ type: 'RESET_RETRY' });
     } else {
       sentenceResultsRef.current = new Array(targets.length).fill(null);
       nextSentenceIdxRef.current = 0;
