@@ -24,10 +24,17 @@ describe('pickConservativeTranscript', () => {
     expect(pickConservativeTranscript(gemini, web, TARGET)).toBe(web);
   });
 
-  it('falls back when Gemini is much longer than Web Speech', () => {
+  it('falls back when Gemini is much longer than Web Speech and Web Speech is a clean anchor', () => {
     const web = '公元前';
     const gemini = '公元前299年秦昭王聽說孟嘗君';
     expect(pickConservativeTranscript(gemini, web, TARGET)).toBe(web);
+  });
+
+  it('keeps Gemini when Web Speech is long but garbled (staging 孟嘗君 line 1)', () => {
+    const gemini = TARGET;
+    const garbledWeb =
+      '公元前299年秦昭王金說孟產君孟嚐君是有錢的貴族最讓人津津樂道是在家裡養了三千長開眼的作客才考慮清楚';
+    expect(pickConservativeTranscript(gemini, garbledWeb, TARGET, 41_317)).toBe(gemini);
   });
 
   it('uses short Gemini when Web Speech is empty', () => {

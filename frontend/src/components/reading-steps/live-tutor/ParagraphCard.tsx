@@ -9,25 +9,10 @@ import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 import { useKaraoke } from '../../../context/KaraokeContext';
 import { interleavePunctuation } from '../../../utils/textDiff';
+import { getEncouragement } from '../../../utils/readingEncouragement';
 
 /** Per-sentence retry (record + eval). Off until short-sentence practice ships. */
 const SENTENCE_RETRY_UI_ENABLED = false;
-
-/* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
-
-const ENCOURAGE_TIERS: Array<{ min: number; color: string; msgs: string[] }> = [
-  { min: 0.95, color: 'text-emerald-600', msgs: ['完美！太流暢了！', '讀得超棒！', '太厲害了！', '好厲害，一字不差！'] },
-  { min: 0.80, color: 'text-green-600', msgs: ['讀得很好！', '棒棒！繼續加油！', '很不錯喔！', '表現很棒！'] },
-  { min: 0.65, color: 'text-green-600', msgs: ['讀得不錯！', '很好喔，再練一下更好！', '進步很多了！'] },
-  { min: 0.50, color: 'text-amber-600', msgs: ['有進步喔！再試一次會更好！', '很努力！繼續加油！', '你做得到的！'] },
-  { min: 0, color: 'text-amber-600', msgs: ['沒關係，我們再試一次！', '慢慢來，不著急！', '多練幾次就會了！'] },
-];
-
-function getEncouragement(matchRate: number): { text: string; color: string } {
-  const tier = ENCOURAGE_TIERS.find(t => matchRate >= t.min) ?? ENCOURAGE_TIERS[ENCOURAGE_TIERS.length - 1];
-  const idx = Math.floor(matchRate * 1000) % tier.msgs.length;
-  return { text: tier.msgs[idx], color: tier.color };
-}
 
 /* ── Component ──────────────────────────────────────────────────────────── */
 
