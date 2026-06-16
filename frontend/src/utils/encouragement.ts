@@ -8,11 +8,28 @@
 export const ENCOURAGEMENT_MESSAGES = [
   '加油！再想想看',
   '沒關係，我們一起來理解',
-  '很好的嘗試！讓我給你一些提示',
+  '再想想看，你可以的',
   '慢慢來，你做得很好',
   '思考一下，你一定能想到的',
   '繼續努力，你越來越進步了',
 ] as const;
+
+/** 生字定義配對答錯時 — 正面鼓勵、不說「答錯」、不承諾會給提示 (#2159) */
+export const VOCAB_DEFINITION_ENCOURAGEMENT_MESSAGES = [
+  '加油！再想想看',
+  '沒關係，慢慢來',
+  '思考一下，你一定能想到的',
+  '繼續努力，你越來越進步了',
+  '再想想看哪個字比較符合',
+  '棒棒的嘗試，再選一次看看',
+  '你很認真，再想想看',
+  '再試試看，你可以的',
+] as const;
+
+export function getVocabDefinitionEncouragementMessage(): string {
+  const idx = Math.floor(Math.random() * VOCAB_DEFINITION_ENCOURAGEMENT_MESSAGES.length);
+  return VOCAB_DEFINITION_ENCOURAGEMENT_MESSAGES[idx];
+}
 
 /**
  * Returns a random encouraging phrase for incorrect answers.
