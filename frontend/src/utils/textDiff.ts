@@ -101,6 +101,11 @@ const intToChinese = (num: number): string => {
   return result;
 };
 
+const normalizeFullwidthDigits = (text: string) =>
+  text.replace(/[\uFF10-\uFF19]/g, (ch) =>
+    String.fromCharCode(ch.charCodeAt(0) - 0xff10 + 0x30),
+  );
+
 const normalizeNumbers = (text: string) => text.replace(/\d+/g, m => intToChinese(parseInt(m, 10)));
 
 /**
@@ -169,7 +174,11 @@ export const normalizeForComparison = (text: string) =>
   stripNonScorableChars(
     normalizeChineseNumberVariants(
       normalizeNumbers(
-        cleanChineseText(stripDecorativeSymbols(normalizePunctuationToChinese(text))),
+        cleanChineseText(
+          stripDecorativeSymbols(
+            normalizeFullwidthDigits(normalizePunctuationToChinese(text)),
+          ),
+        ),
       ),
     ),
   );
@@ -371,11 +380,12 @@ export function computeMatchRate(spoken: string, target: string): number {
 /** Punctuation stripped from diff comparison — re-inserted at display time only. */
 const DISPLAY_PUNCT_RE = TOKEN_PUNCT_RE;
 
-const DIGIT_RE = /\d/;
+const DIGIT_RE = /[\d\uFF10-\uFF19]/;
 
 function chineseNormLenForDigitRun(digitStr: string): number {
   if (!digitStr) return 0;
-  return Array.from(intToChinese(parseInt(digitStr, 10))).length;
+  const ascii = normalizeFullwidthDigits(digitStr);
+  return Array.from(intToChinese(parseInt(ascii, 10))).length;
 }
 
 function consumeNextDisplayToken(

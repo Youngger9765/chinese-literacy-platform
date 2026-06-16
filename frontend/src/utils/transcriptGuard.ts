@@ -14,6 +14,67 @@ const EXTRA_CHARS_TOLERANCE = 2;
  */
 const EXTRA_LENGTH_RATIO = 1.5;
 
+/** Generous upper-bound CPM for elementary oral reading (norm chars / min). */
+const MAX_PLAUSIBLE_CPM = 420;
+const CPM_SLACK = 1.25;
+
+/** Minimum normalized chars to keep after duration cap (avoid empty false negatives). */
+const MIN_TRUNCATED_NORM = 3;
+
+export function maxPlausibleNormChars(durationMs: number | undefined): number {
+  if (!durationMs || durationMs <= 0) return 0;
+  const minutes = durationMs / 60000;
+  return Math.max(1, Math.ceil(minutes * MAX_PLAUSIBLE_CPM * CPM_SLACK));
+}
+
+/** Trim raw transcript so its normalized length does not exceed maxNormLen. */
+export function truncateTranscriptToNormLength(text: string, maxNormLen: number): string {
+  if (maxNormLen <= 0) return '';
+  const chars = Array.from(text);
+  let best = '';
+  for (let i = 0; i < chars.length; i++) {
+    const prefix = chars.slice(0, i + 1).join('');
+    const normLen = normalizeForComparison(cleanChineseText(prefix)).length;
+    if (normLen > maxNormLen) break;
+    best = prefix;
+  }
+  return best;
+}
+
+function capGeminiWithoutWebspeechCorroboration(
+  preferred: string,
+  webspeechFallback: string,
+  targetNorm: string,
+  preferredNorm: string,
+  durationMs: number | undefined,
+): string {
+  if (!preferredNorm) return webspeechFallback;
+
+  const maxNorm = maxPlausibleNormChars(durationMs);
+  const looksLikeFullPaste =
+    targetNorm.length >= 8 && preferredNorm.length >= targetNorm.length * 0.9;
+
+  const exceedsDuration = maxNorm > 0 && preferredNorm.length > maxNorm;
+
+  if (!looksLikeFullPaste && !exceedsDuration) {
+    return preferred;
+  }
+
+  // No Web Speech anchor: cap by recording length, or reject full paste when duration unknown.
+  if (maxNorm > 0) {
+    const truncated = truncateTranscriptToNormLength(preferred, maxNorm);
+    const truncatedNorm = normalizeForComparison(cleanChineseText(truncated));
+    if (truncatedNorm.length >= MIN_TRUNCATED_NORM) return truncated;
+    return webspeechFallback;
+  }
+
+  if (looksLikeFullPaste) {
+    return webspeechFallback;
+  }
+
+  return preferred;
+}
+
 /**
  * Pick the transcript to feed scoring / diff display.
  * `preferred` is usually Gemini; `webspeechFallback` is browser STT at stop time.
@@ -22,12 +83,21 @@ export function pickConservativeTranscript(
   preferred: string,
   webspeechFallback: string,
   targetText: string,
+  durationMs?: number,
 ): string {
   const preferredNorm = normalizeForComparison(cleanChineseText(preferred));
   const fallbackNorm = normalizeForComparison(cleanChineseText(webspeechFallback));
   const targetNorm = normalizeForComparison(targetText);
 
-  if (!fallbackNorm) return preferred;
+  if (!fallbackNorm) {
+    return capGeminiWithoutWebspeechCorroboration(
+      preferred,
+      webspeechFallback,
+      targetNorm,
+      preferredNorm,
+      durationMs,
+    );
+  }
   if (!preferredNorm) return webspeechFallback;
 
   const extraChars = preferredNorm.length - fallbackNorm.length;

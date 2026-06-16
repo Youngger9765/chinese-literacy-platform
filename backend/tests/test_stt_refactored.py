@@ -78,6 +78,12 @@ def test_normalize_for_comparison_converts_numbers():
     assert "十二" in result
 
 
+def test_normalize_for_comparison_converts_fullwidth_digits():
+    result = normalize_for_comparison("公元前２９９年")
+    assert "２" not in result
+    assert "二百九十九" in result
+
+
 # ---------------------------------------------------------------------------
 # algorithm module
 # ---------------------------------------------------------------------------

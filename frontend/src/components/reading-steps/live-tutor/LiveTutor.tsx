@@ -26,6 +26,10 @@ import LiveTutorControls from './LiveTutorControls';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
 import { getLineResultForParagraph } from './liveTutorTypes';
+import {
+  planParagraphEvalRestore,
+  resolveDisplayLastDiffTokens,
+} from './paragraphEvalRestore';
 
 /* ------------------------------------------------------------------ */
 /*  Small sub-components                                               */
@@ -529,19 +533,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     const existingResult = getLineResultForParagraph(lineResults, currentLineIndex);
     const existingSummary = paragraphSummaries[currentLineIndex];
+    const restorePlan = planParagraphEvalRestore(existingResult, existingSummary, targets.length);
 
-    if (existingResult && existingSummary) {
-      // Revisiting a scored paragraph — restore diff + per-sentence results
-      sentenceResultsRef.current = existingSummary.sentenceResults
-        ? [...existingSummary.sentenceResults]
-        : new Array(targets.length).fill(null);
-      nextSentenceIdxRef.current = targets.length;
-      lastFinalResultIdxRef.current = targets.length - 1;
-      if (existingSummary.geminiPending) {
-        dispatch({ type: 'START_LOCAL', diffTokens: existingResult.diffTokens });
-      } else {
-        dispatch({ type: 'GEMINI_DONE', diffTokens: existingResult.diffTokens });
-      }
+    if (restorePlan.kind === 'restore') {
+      sentenceResultsRef.current = restorePlan.sentenceResults;
+      nextSentenceIdxRef.current = restorePlan.nextSentenceIdx;
+      lastFinalResultIdxRef.current = restorePlan.lastFinalResultIdx;
+      dispatch(restorePlan.dispatchAction);
     } else {
       sentenceResultsRef.current = new Array(targets.length).fill(null);
       nextSentenceIdxRef.current = 0;
@@ -621,9 +619,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
   const savedLineResult = getLineResultForParagraph(lineResults, currentLineIndex);
-  const displayLastDiffTokens =
-    evalState.lastDiffTokens
-    ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
+  const displayLastDiffTokens = resolveDisplayLastDiffTokens(
+    evalState.lastDiffTokens,
+    paragraphSummary,
+    savedLineResult,
+  );
 
   /* ================================================================ */
   /*  JSX                                                             */

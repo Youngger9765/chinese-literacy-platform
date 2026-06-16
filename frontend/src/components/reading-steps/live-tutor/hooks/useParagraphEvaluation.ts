@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { DiffToken, Story } from '../../../../types';
 import { normalizeForComparison, cleanChineseText } from '../../../../utils/textDiff';
-import { pickConservativeTranscript } from '../../../../utils/transcriptGuard';
+import { buildTranscriptForEvaluation } from '../../../../utils/liveTutorTranscriptPipeline';
 import { evaluateReading } from '../../../../services/learningApi';
 import { useAuth } from '../../../../contexts/AuthContext';
 import {
@@ -155,11 +155,13 @@ export function useParagraphEvaluation({
       source: 'gemini' | 'webspeech' = 'webspeech',
     ) => {
       const targetText = story.content[lineIdx] || '';
-      const transcriptForEval =
-        source === 'gemini' && rawStt.trim()
-          ? pickConservativeTranscript(rawTranscript, rawStt, targetText)
-          : rawTranscript;
-      const cleaned = cleanChineseText(transcriptForEval);
+      const { transcriptForEval, cleaned, conservativeClampApplied } = buildTranscriptForEvaluation({
+        source,
+        rawTranscript,
+        rawStt,
+        targetText,
+        durationMs,
+      });
 
       if (isEvalConsoleEnabled() && transcriptForEval !== rawTranscript) {
         console.warn(
@@ -256,7 +258,8 @@ export function useParagraphEvaluation({
           geminiAudioTranscript: source === 'gemini' ? rawTranscript : null,
           usedForEvaluation: cleaned,
           transcriptSource: source,
-          conservativeClampApplied: transcriptForEval !== rawTranscript,
+          conservativeClampApplied,
+          durationMs,
         });
       }
 
