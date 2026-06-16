@@ -64,17 +64,50 @@ describe('SelfAssessment', () => {
     expect(screen.getByText(/你的判斷跟 AI 一樣/)).toBeTruthy();
   });
 
-  it('shows mismatch message with AI rating label when ratings differ', () => {
+  it('shows mismatch message with objective fluency data when ratings differ', () => {
     render(
       <SelfAssessment
         onSelect={vi.fn()}
-        selectedRating="low"
-        aiRating="mid"
+        selectedRating="high"
+        aiRating="low"
+        aiInsight={{
+          rating: 'low',
+          benchmarkFeedback: '還要多加練習。',
+          metricValue: 150,
+          metricUnit: 'cpm',
+          rangeLabel: '190 字/分以下',
+          gapToMidTier: 41,
+          midTierLabel: '191~220 字/分鐘',
+        }}
         showComparison={true}
       />
     );
-    expect(screen.getByText(/AI 覺得你這次讀得/)).toBeTruthy();
-    expect(screen.getByText('中')).toBeTruthy();
+    expect(screen.getByText(/這次朗讀語速 150 字\/分鐘/)).toBeTruthy();
+    expect(screen.getByText(/191~220 字\/分鐘/)).toBeTruthy();
+    expect(screen.getByText(/還要多加練習。/)).toBeTruthy();
+    expect(screen.queryByText(/AI 覺得你這次讀得/)).toBeNull();
+    expect(screen.queryByText('低')).toBeNull();
+  });
+
+  it('shows benchmark feedback on match when aiInsight is provided', () => {
+    render(
+      <SelfAssessment
+        onSelect={vi.fn()}
+        selectedRating="mid"
+        aiRating="mid"
+        aiInsight={{
+          rating: 'mid',
+          benchmarkFeedback: '嗯，還不錯喲！',
+          metricValue: 225,
+          metricUnit: 'cpm',
+          rangeLabel: '211~240 字/分鐘',
+          gapToMidTier: null,
+          midTierLabel: '211~240 字/分鐘',
+        }}
+        showComparison={true}
+      />
+    );
+    expect(screen.getByText(/嗯，還不錯喲！/)).toBeTruthy();
   });
 
   it('marks selected button as aria-pressed', () => {
