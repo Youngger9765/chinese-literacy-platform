@@ -9,11 +9,10 @@
  *  - CTA 改「繼續下一步」由 stepper nav 帶到下一個 step，不再硬寫「前往報告」
  *    （知識補給站不一定是最後一關，例如 G7-L30 step_sequence 把它排在第 3 step）
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { Story } from '../../types';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
-import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
 
 interface KnowledgeStationProps {
   story: Story;
@@ -34,17 +33,6 @@ function getYouTubeEmbedUrl(url: string): string | null {
 
 const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
   const storageKey = scopedStepStorageKey('knowledge_viewed_', story.id);
-
-  const handleDownloadWorksheetPdf = useCallback(async () => {
-    if (!story.worksheetPdfUrl) return;
-    const filename = story.lesson_code ? `${story.lesson_code}.pdf` : undefined;
-    try {
-      await downloadRemoteFile(story.worksheetPdfUrl, filename);
-    } catch {
-      window.open(story.worksheetPdfUrl, '_blank', 'noopener,noreferrer');
-    }
-  }, [story.lesson_code, story.worksheetPdfUrl]);
-
 
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify({ viewed: true })); } catch {}
@@ -74,20 +62,6 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
             <p className="text-sm text-on-surface-variant">
               看看和這篇課文相關的影片，幫助你更深入了解主題
             </p>
-            {/* #2087: worksheet PDF download link — visible in every step for easy access */}
-            {story.worksheetPdfUrl && (
-              <button
-                type="button"
-                onClick={() => { void handleDownloadWorksheetPdf(); }}
-                className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full border border-outline-variant text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors"
-                aria-label="下載學習單 PDF"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                下載學習單 PDF
-              </button>
-            )}
           </div>
 
           {videos.length > 0 ? (
