@@ -8,18 +8,14 @@
  * last drag-drop question always has multiple options — no forced-correct final question.
  *
  * Fix #2082 (A6/A7/A8): verbal feedback, larger definition text, device-aware instruction.
- * Issue #2163: OnboardingCoach — first-use amber說明框 + demo animation on real UI.
- * Issue #2135: TTS play button + zhuyin display on word bank chips.
+ * Issue #2163: OnboardingCoach — first-use amber說明框 + guided drag demo on real UI.
+ * Issue #2135: zhuyin display on word bank chips.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { AnswerRecord } from './vocabDefinitionMatchLogic';
-import { speakText as azureSpeakText } from '../../services/ttsApi';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
-
-/** Speak a vocab word using Azure TTS (fire-and-forget, errors silenced). */
-const speakWord = (text: string) => { azureSpeakText(text).catch(() => {}); };
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 // Using a module-level constant so it is evaluated once and shared across renders.
@@ -33,6 +29,43 @@ const VOCAB_DRAGDROP_ONBOARDED_KEY = 'vocab_dragdrop_onboarded';
 interface OnboardingCoachProps {
   onDismiss: () => void;
   onDemo: () => void;
+}
+
+function DemoBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative flex justify-center mb-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-xs">
+        {children}
+        <span
+          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+type DragDemoStep = 'pick-word' | 'dragging' | 'dropped' | 'success';
+
+interface DragDemoRuntime {
+  step: DragDemoStep;
+  wordIdx: number;
+  slotIdx: number;
+}
+
+interface DragDemoGhost {
+  word: string;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  width: number;
+  height: number;
+  moving: boolean;
 }
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
@@ -106,19 +139,25 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     }
   });
 
-  // Demo animation: highlight a word chip + its matching slot pair
-  // demoWordIdx = vocabIdx being highlighted in the word bank
-  // demoSlotIdx = defIdx being highlighted in the definition slots
-  const [demoWordIdx, setDemoWordIdx] = useState<number | null>(null);
-  const [demoSlotIdx, setDemoSlotIdx] = useState<number | null>(null);
-  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guided demo — ghost chip flies from word bank to matching slot
+  const [demo, setDemo] = useState<DragDemoRuntime | null>(null);
+  const [demoGhost, setDemoGhost] = useState<DragDemoGhost | null>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const wordChipRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const slotRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  // Clean up demo timer on unmount
-  useEffect(() => {
-    return () => {
-      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    };
+  const clearDemoTimers = useCallback(() => {
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
   }, []);
+
+  const scheduleDemoStep = useCallback((fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+    return id;
+  }, []);
+
+  useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
@@ -157,37 +196,67 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     }
   };
 
+  const startDragGhost = useCallback((wordIdx: number, slotIdx: number) => {
+    const chipEl = wordChipRefs.current.get(wordIdx);
+    const slotEl = slotRefs.current.get(slotIdx);
+    if (!chipEl || !slotEl) {
+      setDemo(null);
+      setDemoGhost(null);
+      return;
+    }
+
+    const chipRect = chipEl.getBoundingClientRect();
+    const slotRect = slotEl.getBoundingClientRect();
+    const dropY = slotRect.top + slotRect.height - Math.min(chipRect.height + 8, slotRect.height * 0.45);
+    const dropX = slotRect.left + slotRect.width / 2 - chipRect.width / 2;
+
+    setDemoGhost({
+      word: vocab[wordIdx]?.word ?? '',
+      fromX: chipRect.left,
+      fromY: chipRect.top,
+      toX: dropX,
+      toY: dropY,
+      width: chipRect.width,
+      height: chipRect.height,
+      moving: false,
+    });
+    setDemo({ step: 'dragging', wordIdx, slotIdx });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setDemoGhost((prev) => (prev ? { ...prev, moving: true } : null));
+      });
+    });
+  }, [vocab]);
+
   /**
-   * Demo animation: highlight the first unconfirmed word chip and its matching slot.
-   * Two amber pulses on both elements to show how drag-and-drop works.
+   * Guided demo on the real UI — ghost chip animates from word bank to matching slot.
    * Purely visual — does NOT submit a placement or affect scoring.
    */
   const handleDemo = () => {
-    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    // Pick the first unconfirmed vocab word to demo
+    clearDemoTimers();
+    handleDismissCoach();
+
     const activeShuffled = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
     const firstUnconfirmed = activeShuffled.find((wi) => !confirmed.has(wi));
-    if (firstUnconfirmed == null) {
-      handleDismissCoach();
-      return;
-    }
-    // The matching slot for this word is defIdx === firstUnconfirmed
+    if (firstUnconfirmed == null) return;
+
     const matchingSlot = firstUnconfirmed;
-    setDemoWordIdx(firstUnconfirmed);
-    setDemoSlotIdx(matchingSlot);
-    demoTimerRef.current = setTimeout(() => {
-      setDemoWordIdx(null);
-      setDemoSlotIdx(null);
-      demoTimerRef.current = setTimeout(() => {
-        setDemoWordIdx(firstUnconfirmed);
-        setDemoSlotIdx(matchingSlot);
-        demoTimerRef.current = setTimeout(() => {
-          setDemoWordIdx(null);
-          setDemoSlotIdx(null);
-        }, 900);
-      }, 200);
-    }, 900);
-    handleDismissCoach();
+    setDemo({ step: 'pick-word', wordIdx: firstUnconfirmed, slotIdx: matchingSlot });
+    setDemoGhost(null);
+
+    scheduleDemoStep(() => startDragGhost(firstUnconfirmed, matchingSlot), 700);
+    scheduleDemoStep(() => {
+      setDemoGhost(null);
+      setDemo({ step: 'dropped', wordIdx: firstUnconfirmed, slotIdx: matchingSlot });
+    }, 1700);
+    scheduleDemoStep(() => {
+      setDemo({ step: 'success', wordIdx: firstUnconfirmed, slotIdx: matchingSlot });
+    }, 2400);
+    scheduleDemoStep(() => {
+      setDemo(null);
+      setDemoGhost(null);
+    }, 3600);
   };
 
   const attemptPlace = useCallback(
@@ -272,6 +341,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   );
 
   const handleDragStart = (vocabIdx: number) => {
+    if (demo !== null) return;
     setDraggingVocabIdx(vocabIdx);
     setTouchSelected(null);
   };
@@ -280,6 +350,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     setHoverTarget(null);
   };
   const handleDrop = (defIdx: number) => {
+    if (demo !== null) return;
     if (draggingVocabIdx === null) return;
     setHoverTarget(null);
     attemptPlace(defIdx, draggingVocabIdx);
@@ -287,10 +358,12 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   };
 
   const handleTouchStart = (vocabIdx: number) => {
+    if (demo !== null) return;
     if (confirmed.has(vocabIdx)) return;
     setTouchSelected((prev) => (prev === vocabIdx ? null : vocabIdx));
   };
   const handleSlotTap = (defIdx: number) => {
+    if (demo !== null) return;
     if (touchSelected !== null) {
       attemptPlace(defIdx, touchSelected);
       setTouchSelected(null);
@@ -307,7 +380,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   const activeShuffledWords = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
 
-  /* ---- Word bank chips (shared between mobile top strip and desktop right panel) ---- */
+  /* ---- Word bank chips (shared between mobile top strip and desktop left panel) ---- */
   const wordBankContent = (
     <>
       <div className="flex items-center gap-2 mb-3">
@@ -326,7 +399,8 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
           const isDragging = draggingVocabIdx === vocabIdx;
           const isTouchSelected = touchSelected === vocabIdx;
-          const isDemoWord = demoWordIdx === vocabIdx;
+          const isDemoWord = demo?.wordIdx === vocabIdx;
+          const isDemoDraggingWord = demo?.step === 'dragging' && demo.wordIdx === vocabIdx;
 
           // Confirmed words (fly-away animation already finished): show as locked/dimmed
           if (isConfirmedWord && !isFlying) {
@@ -351,8 +425,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none transition-all duration-200 ';
           if (isFlying) {
             cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
+          } else if (isDemoDraggingWord) {
+            cls += 'border-dashed border-amber-300 bg-amber-50/40 text-amber-700/50 opacity-40 pointer-events-none';
           } else if (isDemoWord) {
-            cls += 'border-amber-400 bg-amber-50 text-amber-800 animate-pulse pointer-events-none';
+            cls += 'border-amber-400 bg-amber-50 text-amber-800 ring-4 ring-amber-300/60 pointer-events-none';
           } else if (isDragging) {
             cls += 'border-accent bg-accent/10 text-accent shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
@@ -364,34 +440,19 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           return (
             <div
               key={vocabIdx}
-              className="flex items-center gap-1"
+              ref={(el) => {
+                if (el) wordChipRefs.current.set(vocabIdx, el);
+                else wordChipRefs.current.delete(vocabIdx);
+              }}
+              draggable={!isFlying && demo === null}
+              onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
+              onDragEnd={handleDragEnd}
+              onTouchStart={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+              onClick={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+              className={cls}
+              style={{ fontFamily: zhuyinFont }}
             >
-              <div
-                draggable={!isFlying}
-                onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
-                onDragEnd={handleDragEnd}
-                onTouchStart={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
-                onClick={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
-                className={cls}
-                style={{ fontFamily: zhuyinFont }}
-              >
-                {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
-              </div>
-              {/* #2135: TTS play button — only shown when chip is interactive (not flying) */}
-              {!isFlying && (
-                <button
-                  type="button"
-                  aria-label={`聽「${vocab[vocabIdx]?.word}」發音`}
-                  title="聽發音"
-                  onClick={(e) => { e.stopPropagation(); speakWord(vocab[vocabIdx]?.word ?? ''); }}
-                  onTouchStart={(e) => { e.stopPropagation(); }}
-                  className="flex-shrink-0 w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center hover:bg-accent/20 active:scale-95 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-                  </svg>
-                </button>
-              )}
+              {zhuyinActive ? processZhuyin(vocab[vocabIdx]?.word ?? '') : vocab[vocabIdx]?.word}
             </div>
           );
         })}
@@ -427,14 +488,19 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     const isOver = hoverTarget === defIdx && !isCorrect;
     const showWrongVerbal = wrongFeedbackSlot === defIdx;
     const showCorrectVerbal = correctFeedbackSlot === defIdx;
-    const isDemoSlot = demoSlotIdx === defIdx && !isCorrect;
+    const isDemoSlot = demo?.slotIdx === defIdx && !isCorrect;
+    const isDemoDropped = (demo?.step === 'dropped' || demo?.step === 'success') && demo.slotIdx === defIdx;
 
     let cls =
       'rounded-3xl border-2 px-5 py-5 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
     if (isCorrect) {
       cls += 'bg-emerald-50 border-emerald-400 cursor-default';
-    } else if (isDemoSlot) {
-      cls += 'bg-amber-50 border-amber-400 animate-pulse';
+    } else if (isDemoDropped) {
+      cls += 'bg-emerald-50 border-emerald-400';
+    } else if (isDemoSlot && demo?.step === 'dragging') {
+      cls += 'bg-accent/5 border-accent ring-4 ring-accent/30 scale-[1.01] shadow-md';
+    } else if (isDemoSlot && demo?.step === 'pick-word') {
+      cls += 'bg-amber-50 border-amber-300';
     } else if (isWrong) {
       cls += 'bg-tertiary-container/10 border-tertiary animate-shake';
     } else if (isOver) {
@@ -448,10 +514,15 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     return (
       <div
         key={defIdx}
+        ref={(el) => {
+          if (el) slotRefs.current.set(defIdx, el);
+          else slotRefs.current.delete(defIdx);
+        }}
         className={cls}
         onDragOver={(e) => {
           e.preventDefault();
-          if (!isCorrect) setHoverTarget(defIdx);
+          if (demo !== null || isCorrect) return;
+          setHoverTarget(defIdx);
         }}
         onDragLeave={() => setHoverTarget(null)}
         onDrop={(e) => {
@@ -482,6 +553,15 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             <span className="font-bold text-sm text-amber-600 animate-pulse">
               再試試看！
             </span>
+          ) : isDemoDropped ? (
+            <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
+              {demo?.step === 'success' && (
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold">
+                  ✓
+                </span>
+              )}
+              {vocab[demo?.wordIdx ?? defIdx]?.word}
+            </span>
           ) : placedVocabIdx !== null ? (
             <span className="font-bold text-base text-amber-800">
               {vocab[placedVocabIdx]?.word}
@@ -503,6 +583,54 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
+      {demo?.step === 'pick-word' && (
+        <DemoBubble>
+          {IS_TOUCH_DEVICE ? '① 先點選一個語詞' : '① 按住左邊的語詞'}
+        </DemoBubble>
+      )}
+      {demo?.step === 'dragging' && (
+        <DemoBubble>
+          {IS_TOUCH_DEVICE ? '② 再點到對應的解釋框' : '② 拖到對應的解釋框'}
+        </DemoBubble>
+      )}
+      {(demo?.step === 'dropped' || demo?.step === 'success') && (
+        <DemoBubble>
+          {demo.step === 'success' ? '✓ 配對成功！就是這樣玩' : '③ 放開就完成配對'}
+        </DemoBubble>
+      )}
+
+      {demoGhost && (
+        <>
+          <div
+            className="fixed z-50 pointer-events-none rounded-2xl border-2 border-accent bg-accent/10 text-accent font-bold text-lg shadow-xl flex items-center justify-center select-none"
+            style={{
+              left: demoGhost.moving ? demoGhost.toX : demoGhost.fromX,
+              top: demoGhost.moving ? demoGhost.toY : demoGhost.fromY,
+              width: demoGhost.width,
+              height: demoGhost.height,
+              transition: demoGhost.moving ? 'left 0.9s ease-in-out, top 0.9s ease-in-out' : 'none',
+              fontFamily: zhuyinFont,
+            }}
+            aria-hidden
+          >
+            {zhuyinActive
+              ? processZhuyin(demoGhost.word)
+              : demoGhost.word}
+          </div>
+          <span
+            className="fixed z-50 pointer-events-none text-xl"
+            style={{
+              left: (demoGhost.moving ? demoGhost.toX : demoGhost.fromX) + demoGhost.width * 0.65,
+              top: (demoGhost.moving ? demoGhost.toY : demoGhost.fromY) + demoGhost.height * 0.35,
+              transition: demoGhost.moving ? 'left 0.9s ease-in-out, top 0.9s ease-in-out' : 'none',
+            }}
+            aria-hidden
+          >
+            {IS_TOUCH_DEVICE ? '👆' : '🖱️'}
+          </span>
+        </>
+      )}
+
       {/* Onboarding coach — shown first time or when student clicks help */}
       {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
 
@@ -542,9 +670,14 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         {wordBankContent}
       </div>
 
-      {/* Desktop: two-column layout — definitions left (scrollable), word bank right (sticky) */}
+      {/* Desktop: two-column layout — word bank left (sticky), definitions right (scrollable) */}
       <div className="md:flex md:gap-6 md:items-start md:max-h-[calc(100vh-16rem)]">
-        {/* Left column — definition slots, independently scrollable on desktop */}
+        {/* Left column — word bank panel, independently scrollable on desktop */}
+        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
+          {wordBankContent}
+        </div>
+
+        {/* Right column — definition slots, independently scrollable on desktop */}
         <div className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]">
           {/* A7: Renamed from 定義欄位 to 語詞解釋 */}
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
@@ -553,11 +686,6 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           <div className="flex flex-col gap-3">
             {definitionSlots}
           </div>
-        </div>
-
-        {/* Right column — word bank panel, independently scrollable on desktop */}
-        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
-          {wordBankContent}
         </div>
       </div>
     </div>
