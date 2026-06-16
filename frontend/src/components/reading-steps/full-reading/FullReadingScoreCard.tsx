@@ -6,7 +6,7 @@
  *   - 你說的 streaming transcript (optional)
  *   - 重聽錄音 audio playback (optional)
  *
- * Note: DiffDisplay (逐字比對) is intentionally kept in FullReadingFeedbackPanel
+ * Note: 朗讀結果 color display is in FullReadingFeedbackPanel
  * to keep this component focused on the summary score + playback.
  */
 
