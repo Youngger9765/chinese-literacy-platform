@@ -19,6 +19,7 @@ import {
 } from './liveTutorPools';
 import { diffCharacters, interleavePunctuation } from './textDiff';
 import type { DiffToken } from '../types';
+import { GCP_STAGING_TRANSCRIPT_GUARD_20260616 as GCP_LINE1 } from './fixtures/gcpStagingTranscriptGuard20260616';
 
 const POOLS = {
   tier1: TIER1_POOL,
@@ -98,7 +99,7 @@ describe('Live Tutor regression — staging 孟嘗君 line 0 (empty Web Speech +
 });
 
 describe('Live Tutor regression — staging 秦昭王 line (Web Speech anchor)', () => {
-  it('prefers partial Web Speech when Gemini returns full target', () => {
+  it('prefers partial Web Speech when Gemini returns full target and Web Speech is clean', () => {
     const web = '公元前299年';
     const { cleaned, conservativeClampApplied, matchRate } = evaluateGeminiPath(
       QIN_LINE,
@@ -122,6 +123,18 @@ describe('Live Tutor regression — staging 秦昭王 line (Web Speech anchor)',
     );
     expect(conservativeClampApplied).toBe(false);
     expect(cleaned).toBe(gemini);
+  });
+
+  it('keeps full Gemini audio when Web Speech is garbled mid-paragraph (GCP staging line 1)', () => {
+    const { cleaned, conservativeClampApplied, matchRate } = evaluateGeminiPath(
+      GCP_LINE1.geminiAudioTranscript,
+      GCP_LINE1.garbledWebSpeech,
+      GCP_LINE1.targetText,
+      GCP_LINE1.durationMs,
+    );
+    expect(conservativeClampApplied).toBe(false);
+    expect(cleaned).toBe(GCP_LINE1.geminiAudioTranscript);
+    expect(matchRate).toBeGreaterThan(0.85);
   });
 });
 

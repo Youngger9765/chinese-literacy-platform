@@ -361,7 +361,7 @@ export function useParagraphEvaluation({
           const gemini = await Promise.race([
             evaluateReading(cleaned, targetText, durationMs, token ?? undefined),
             new Promise<never>((_, reject) => {
-              localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 8000);
+              localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 28_000);
               geminiTimeoutRef.current = localTimeout;
             }),
           ]);

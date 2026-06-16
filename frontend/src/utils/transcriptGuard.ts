@@ -21,6 +21,31 @@ const CPM_SLACK = 1.25;
 /** Minimum normalized chars to keep after duration cap (avoid empty false negatives). */
 const MIN_TRUNCATED_NORM = 3;
 
+/**
+ * Web Speech must align with the target opening before we let it override Gemini.
+ * Garbled / lagging browser STT often ends mid-paragraph with a low prefix match —
+ * that is not evidence the student stopped reading.
+ */
+const RELIABLE_ANCHOR_PREFIX_MATCH = 0.75;
+
+function prefixMatchRate(spokenNorm: string, targetNorm: string): number {
+  if (!spokenNorm) return 0;
+  const targetPrefix = targetNorm.slice(0, spokenNorm.length);
+  const spoken = Array.from(spokenNorm);
+  const target = Array.from(targetPrefix);
+  if (target.length < spoken.length * 0.5) return 0;
+  let matches = 0;
+  for (let i = 0; i < spoken.length; i++) {
+    if (spoken[i] === target[i]) matches++;
+  }
+  return matches / spoken.length;
+}
+
+function isReliableWebspeechAnchor(fallbackNorm: string, targetNorm: string): boolean {
+  if (fallbackNorm.length < 2) return false;
+  return prefixMatchRate(fallbackNorm, targetNorm) >= RELIABLE_ANCHOR_PREFIX_MATCH;
+}
+
 export function maxPlausibleNormChars(durationMs: number | undefined): number {
   if (!durationMs || durationMs <= 0) return 0;
   const minutes = durationMs / 60000;
@@ -115,7 +140,23 @@ export function pickConservativeTranscript(
     (ratio >= EXTRA_LENGTH_RATIO || extraChars >= Math.max(5, Math.floor(targetNorm.length * 0.25)));
 
   if (suspiciousFullParagraph || suspiciousLength) {
-    return webspeechFallback;
+    // Only trust Web Speech when it cleanly tracks the lesson opening (partial read).
+    if (isReliableWebspeechAnchor(fallbackNorm, targetNorm)) {
+      return webspeechFallback;
+    }
+
+    const maxNorm = maxPlausibleNormChars(durationMs);
+    if (maxNorm > 0 && preferredNorm.length <= maxNorm) {
+      return preferred;
+    }
+
+    if (maxNorm > 0) {
+      const truncated = truncateTranscriptToNormLength(preferred, maxNorm);
+      const truncatedNorm = normalizeForComparison(cleanChineseText(truncated));
+      if (truncatedNorm.length >= MIN_TRUNCATED_NORM) return truncated;
+    }
+
+    return preferred;
   }
 
   return preferred;
