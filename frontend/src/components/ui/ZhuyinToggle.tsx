@@ -37,7 +37,7 @@ export default function ZhuyinToggle({ mode, ready, onModeChange }: ZhuyinToggle
             aria-pressed={isActive}
             aria-label={seg.title}
             title={seg.title}
-            className={`h-9 px-3 rounded-full font-headline font-bold text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
+            className={`h-8 sm:h-9 px-2 sm:px-3 rounded-full font-headline font-bold text-xs sm:text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
               isActive
                 ? 'bg-accent text-white shadow-[0_2px_10px_rgba(86,74,191,0.35)]'
                 : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'

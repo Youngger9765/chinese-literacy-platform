@@ -12,8 +12,7 @@ Why thinking_budget=0 matters:
 Files guarded by this test:
   - ai_comprehension.py  (comprehension scoring, socratic questions)
   - omo_identifier.py    (worksheet image identification)
-  - tts_service.py       (TTS generation config)
-  - ai_base.py           (base LLM call utility)
+  - ai/gemini_client.py  (shared Gemini structured-response utility; Issue #1953)
   - omo_grader.py        (OMO answer grading)
 
 Run:
@@ -35,8 +34,7 @@ _SERVICES_DIR = Path(__file__).parent.parent / "app" / "services"
 _GUARDED_FILES = [
     ("ai_comprehension.py", "comprehension scoring / socratic question generation"),
     ("omo_identifier.py", "OMO worksheet image identification"),
-    ("tts_service.py", "TTS content generation config"),
-    ("ai_base.py", "base LLM call utility used by most services"),
+    ("ai/gemini_client.py", "shared Gemini structured-response utility (was ai_base.py)"),
     ("omo_grader.py", "OMO answer grading — Issue #1717"),
 ]
 
@@ -78,23 +76,25 @@ class TestThinkingBudgetEnforcement:
             "Extended thinking on identifier calls wastes tokens with no accuracy gain."
         )
 
-    def test_tts_service_has_thinking_budget_zero(self):
-        """tts_service.py must set thinking_budget=0 in GenerateContentConfig."""
-        content = self._read_service_file("tts_service.py")
-        assert _THINKING_BUDGET_PATTERN.search(content), (
-            "tts_service.py does NOT contain thinking_budget=0. "
-            "This was fixed in Issue #1738. "
-            "TTS generation is deterministic and never benefits from thinking."
+    def test_gemini_tts_does_not_use_thinking_config(self):
+        """Gemini TTS (AUDIO modality) must not pass thinking_config — API returns 400."""
+        path = _SERVICES_DIR / "tts" / "providers" / "gemini.py"
+        assert path.exists(), f"Gemini TTS provider not found at {path}"
+        content = path.read_text(encoding="utf-8")
+        assert "thinking_config" not in content, (
+            "tts/providers/gemini.py must NOT set thinking_config on GenerateContentConfig. "
+            "gemini-3.1-flash-tts-preview rejects it with 400 INVALID_ARGUMENT, "
+            "breaking live synthesis (503) on GCS cache miss."
         )
 
-    def test_ai_base_has_thinking_budget_zero(self):
-        """ai_base.py must set thinking_budget=0 in its GenerateContentConfig."""
-        content = self._read_service_file("ai_base.py")
+    def test_gemini_client_has_thinking_budget_zero(self):
+        """ai/gemini_client.py must set thinking_budget=0 in its GenerateContentConfig."""
+        content = self._read_service_file("ai/gemini_client.py")
         assert _THINKING_BUDGET_PATTERN.search(content), (
-            "ai_base.py does NOT contain thinking_budget=0. "
-            "This was fixed in Issue #1738. "
-            "ai_base.py is the shared LLM call utility — missing this setting "
-            "would enable thinking for all tasks that use the base utility."
+            "ai/gemini_client.py does NOT contain thinking_budget=0. "
+            "This was fixed in Issue #1738 and moved here in Issue #1953. "
+            "gemini_client.py is the shared LLM call utility — missing this setting "
+            "would enable thinking for all tasks that use generate_structured_response."
         )
 
     def test_omo_grader_has_thinking_budget_zero(self):
@@ -134,6 +134,14 @@ class TestThinkingBudgetContext:
         content = self._read_service_file("omo_grader.py")
         assert _GENERATE_CONTENT_CONFIG_PATTERN.search(content), (
             "omo_grader.py does not use GenerateContentConfig."
+        )
+
+    def test_gemini_client_uses_generate_content_config(self):
+        """ai/gemini_client.py uses GenerateContentConfig."""
+        content = self._read_service_file("ai/gemini_client.py")
+        assert _GENERATE_CONTENT_CONFIG_PATTERN.search(content), (
+            "ai/gemini_client.py does not use GenerateContentConfig. "
+            "If the LLM call pattern changed, update this test."
         )
 
     def test_all_guarded_files_exist(self):

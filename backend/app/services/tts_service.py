@@ -1,6 +1,6 @@
 """Compatibility shim for existing TTS imports."""
 
-# Gemini TTS GenerateContentConfig now lives in tts/providers/gemini.py and still sets thinking_budget=0.
+# Gemini TTS GenerateContentConfig lives in tts/providers/gemini.py (AUDIO-only; no thinking_config).
 import sys
 
 from . import tts as _tts
