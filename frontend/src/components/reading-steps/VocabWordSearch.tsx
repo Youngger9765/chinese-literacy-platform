@@ -420,23 +420,6 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 md:px-8 py-6 select-none" style={{ fontFamily: zhuyinFont }}>
-      {demo?.step === 'find-word' && (
-        <DemoBubble>① 先看右邊要找哪些語詞</DemoBubble>
-      )}
-      {demo?.step === 'start-drag' && (
-        <DemoBubble>
-          {IS_TOUCH_DEVICE ? '② 按住方格上的第一個字' : '② 按住方格上的第一個字'}
-        </DemoBubble>
-      )}
-      {demo?.step === 'dragging' && (
-        <DemoBubble>
-          {IS_TOUCH_DEVICE ? '③ 手指滑過，水平或垂直圈出語詞' : '③ 拖曳圈出整個語詞'}
-        </DemoBubble>
-      )}
-      {demo?.step === 'success' && (
-        <DemoBubble>✓ 找到了！就是這樣玩</DemoBubble>
-      )}
-
       {demoCursor && (
         <span
           className="fixed z-50 pointer-events-none text-xl"
@@ -451,8 +434,6 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
           {IS_TOUCH_DEVICE ? '👆' : '🖱️'}
         </span>
       )}
-
-      {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
 
       {/* Header */}
       <div className="text-center">
@@ -504,6 +485,27 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
           />
         </div>
       </div>
+
+      {/* Coach + game — shared width (grid + word list column) */}
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+        {demo?.step === 'find-word' && (
+          <DemoBubble>① 先看右邊要找哪些語詞</DemoBubble>
+        )}
+        {demo?.step === 'start-drag' && (
+          <DemoBubble>
+            {IS_TOUCH_DEVICE ? '② 按住方格上的第一個字' : '② 按住方格上的第一個字'}
+          </DemoBubble>
+        )}
+        {demo?.step === 'dragging' && (
+          <DemoBubble>
+            {IS_TOUCH_DEVICE ? '③ 手指滑過，水平或垂直圈出語詞' : '③ 拖曳圈出整個語詞'}
+          </DemoBubble>
+        )}
+        {demo?.step === 'success' && (
+          <DemoBubble>✓ 找到了！就是這樣玩</DemoBubble>
+        )}
+
+        {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
 
       <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
         {/* Grid with red border overlays for found words */}
@@ -612,6 +614,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
             </p>
           )}
         </div>
+      </div>
       </div>
 
       {/* Completion — fixed bottom CTA */}
