@@ -9,7 +9,7 @@
  * Header removed (2026-04-18): all header functionality (logo, story title,
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -100,23 +100,39 @@ const StepDots: React.FC<StepDotsProps> = ({
   completedSet,
   onStepClick,
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const activeEl = container.querySelector('[aria-current="step"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [currentStepIndex, steps.length]);
+
   return (
-    <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center min-w-0">
+    <div
+      ref={scrollRef}
+      className="flex-1 min-w-0 overflow-x-auto scrollbar-hide overscroll-x-contain"
+      aria-label="學習步驟進度"
+    >
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
       {steps.map((step, i) => {
         const isCompleted = completedSet.has(step.id);
         const isActive = i === currentStepIndex;
 
         let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';
         if (isCompleted) dotClass = 'bg-emerald-500 text-white';
-        if (isActive) dotClass = 'bg-accent text-white scale-110';
+        if (isActive) dotClass = 'bg-accent text-white ring-2 ring-accent/30';
         const displayChar = step.displayChar ?? String(i + 1);
 
         return (
-          <span key={step.id} className="group relative flex items-center justify-center">
+          <span key={step.id} className="group relative flex items-center justify-center shrink-0">
             <button
               type="button"
               onClick={() => onStepClick(step)}
-              className={`w-8 h-8 md:w-9 md:h-9 rounded-full text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={`${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
               title={step.label}
@@ -144,6 +160,7 @@ const StepDots: React.FC<StepDotsProps> = ({
           </span>
         );
       })}
+      </div>
     </div>
   );
 };
@@ -255,16 +272,16 @@ const ImmersiveTopBar: React.FC = () => {
             Toolbox mode (#1460): hide entirely — single-shot practice has no
             cross-step navigation. Other steps remain unreachable from here. */}
         {!inToolbox && (
-          <div className="flex items-center gap-1 max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
+          <div className="flex items-center gap-0.5 sm:gap-1 w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
             <button
               type="button"
               onClick={() => prevStep && handleStepClick(prevStep)}
               disabled={!prevStep || !selectedStory}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
               title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
             >
-              <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_left</span>
+              <span className="material-symbols-outlined leading-none text-2xl sm:text-[28px]">chevron_left</span>
             </button>
 
             <StepDots
@@ -278,11 +295,11 @@ const ImmersiveTopBar: React.FC = () => {
               type="button"
               onClick={() => nextStep && handleStepClick(nextStep)}
               disabled={!nextStep || !selectedStory}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
               title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
             >
-              <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_right</span>
+              <span className="material-symbols-outlined leading-none text-2xl sm:text-[28px]">chevron_right</span>
             </button>
           </div>
         )}
