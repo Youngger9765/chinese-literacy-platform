@@ -234,6 +234,40 @@ describe('interleavePunctuation', () => {
     expect(display.some((t) => t.char === '，')).toBe(true);
     expect(display.some((t) => t.char === '、')).toBe(true);
   });
+
+  it('maps Arabic digit runs to normalized diff tokens (公元前299年)', () => {
+    const target = '公元前299年，秦昭王聽說孟嘗君的賢達，便邀請他到秦國當宰相。';
+    const spoken = '公元前二百九十九年，秦昭王聽說孟嘗君的賢達，便邀請他到秦國當宰相。';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.filter((t) => t.type === 'correct').length).toBeGreaterThan(20);
+    expect(display.find((t) => t.char === '2')?.type).toBe('correct');
+    expect(display.find((t) => t.char === '年')?.type).toBe('correct');
+    expect(display.find((t) => t.char === '秦')?.type).toBe('correct');
+  });
+
+  it('shows partial read through Arabic digits correctly', () => {
+    const target = '公元前299年，秦昭王';
+    const spoken = '公元前二百九十九年';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '公:correct',
+      '元:correct',
+      '前:correct',
+      '2:correct',
+      '9:correct',
+      '9:correct',
+      '年:correct',
+      '，:punctuation',
+      '秦:missing',
+      '昭:missing',
+      '王:missing',
+    ]);
+  });
 });
 
 describe('normalizePunctuationToChinese', () => {
