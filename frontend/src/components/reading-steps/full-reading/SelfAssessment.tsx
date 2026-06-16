@@ -6,6 +6,7 @@
  * Issue #1386
  */
 import React from 'react';
+import type { AiFluencyInsight } from '../../../utils/fluencyAnalyzer';
 
 export type AssessmentRating = 'low' | 'mid' | 'high';
 
@@ -14,6 +15,8 @@ interface SelfAssessmentProps {
   selectedRating?: AssessmentRating;
   /** AI-computed rating based on CPM vs threshold */
   aiRating?: AssessmentRating;
+  /** Objective fluency data for mismatch comparison copy */
+  aiInsight?: AiFluencyInsight;
   /** Whether to show comparison (true after student has selected) */
   showComparison?: boolean;
   /** Which practice attempt this self-assessment is for (1-indexed).
@@ -46,15 +49,52 @@ const RATING_CONFIG: Record<AssessmentRating, { label: string; icon: string; bg:
   },
 };
 
-const RATING_LABELS: Record<AssessmentRating, string> = {
-  low: '低',
-  mid: '中',
-  high: '高',
+const RATING_RANK: Record<AssessmentRating, number> = {
+  low: 0,
+  mid: 1,
+  high: 2,
 };
 
-function ComparisonMessage({ selected, ai }: { selected: AssessmentRating; ai: AssessmentRating }) {
+function formatMetric(insight: AiFluencyInsight): string {
+  return insight.metricUnit === 'cpm'
+    ? `${insight.metricValue} 字/分鐘`
+    : `${insight.metricValue} 秒`;
+}
+
+function buildMismatchMessage(selected: AssessmentRating, insight: AiFluencyInsight): string {
+  const metricStr = formatMetric(insight);
+  let message = `這次朗讀語速 ${metricStr}，落在「${insight.rangeLabel}」`;
+
+  if (insight.gapToMidTier != null && insight.gapToMidTier > 0 && insight.midTierLabel) {
+    const gapUnit = insight.metricUnit === 'cpm' ? '字/分鐘' : '秒';
+    message += `，距離這篇建議區間（${insight.midTierLabel}）還差約 ${insight.gapToMidTier} ${gapUnit}`;
+  }
+
+  message += `。${insight.benchmarkFeedback}`;
+
+  if (RATING_RANK[selected] > RATING_RANK[insight.rating]) {
+    message += ' 你給自己的評價偏高，多練幾次會更熟悉自己的程度！';
+  } else if (RATING_RANK[selected] < RATING_RANK[insight.rating]) {
+    message += ' 其實表現比你想像好，繼續練自我判斷會更準！';
+  }
+
+  return message;
+}
+
+function ComparisonMessage({
+  selected,
+  ai,
+  insight,
+}: {
+  selected: AssessmentRating;
+  ai: AssessmentRating;
+  insight?: AiFluencyInsight;
+}) {
   const match = selected === ai;
   if (match) {
+    const matchBody = insight?.benchmarkFeedback
+      ? `你的判斷跟 AI 一樣 — 很有自我認識！${insight.benchmarkFeedback}`
+      : '你的判斷跟 AI 一樣 — 很有自我認識！';
     return (
       <div className="mt-4 flex items-center gap-2 p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
         <span
@@ -64,11 +104,16 @@ function ComparisonMessage({ selected, ai }: { selected: AssessmentRating; ai: A
           check_circle
         </span>
         <p className="text-sm text-emerald-700 font-headline">
-          你的判斷跟 AI 一樣 — 很有自我認識！
+          {matchBody}
         </p>
       </div>
     );
   }
+
+  const body = insight
+    ? buildMismatchMessage(selected, insight)
+    : '你和 AI 的判斷不太一樣，多練幾次會更熟悉自己的程度！';
+
   return (
     <div className="mt-4 flex items-start gap-2 p-3 rounded-2xl bg-surface-container-low border border-surface-container-high">
       <span
@@ -78,11 +123,7 @@ function ComparisonMessage({ selected, ai }: { selected: AssessmentRating; ai: A
         info
       </span>
       <p className="text-sm text-on-surface-variant font-headline">
-        AI 覺得你這次讀得「
-        <span className={`font-bold ${RATING_CONFIG[ai].text}`}>
-          {RATING_LABELS[ai]}
-        </span>
-        」。每個人感受不一樣，繼續練習你會越來越準！
+        {body}
       </p>
     </div>
   );
@@ -92,6 +133,7 @@ const SelfAssessment: React.FC<SelfAssessmentProps> = ({
   onSelect,
   selectedRating,
   aiRating,
+  aiInsight,
   showComparison = false,
   attemptNumber,
 }) => {
@@ -149,7 +191,7 @@ const SelfAssessment: React.FC<SelfAssessmentProps> = ({
       </div>
 
       {showComparison && selectedRating && aiRating && (
-        <ComparisonMessage selected={selectedRating} ai={aiRating} />
+        <ComparisonMessage selected={selectedRating} ai={aiRating} insight={aiInsight} />
       )}
     </div>
   );
