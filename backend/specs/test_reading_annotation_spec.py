@@ -142,11 +142,26 @@ def test_annotation_save_request_max_500():
 # Contract: Router is registered
 # ---------------------------------------------------------------------------
 
+def _collect_route_paths(router) -> list[str]:
+    """Collect route paths from a router, including nested include_router() trees."""
+    paths: list[str] = []
+    for route in router.routes:
+        path = getattr(route, "path", None)
+        if path:
+            paths.append(path)
+        nested = getattr(route, "original_router", None)
+        if nested is not None:
+            paths.extend(_collect_route_paths(nested))
+    return paths
+
+
 def test_annotations_router_registered():
     """Contract: annotations router is registered in the learning package."""
     from app.routes.learning import router
-    routes = [r.path for r in router.routes if hasattr(r, "path")]
-    annotation_routes = [r for r in routes if "annotations" in r]
+
+    annotation_routes = [
+        p for p in _collect_route_paths(router) if "annotations" in p
+    ]
     assert len(annotation_routes) >= 2, (
         f"Expected at least 2 annotation routes (GET + PUT), found: {annotation_routes}"
     )
