@@ -399,7 +399,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         {/* A7: Renamed from 語詞庫 to 本課語詞 */}
         <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">本課語詞</span>
       </div>
-      <div className="flex flex-wrap gap-2 min-h-[56px]">
+      <div className="grid grid-cols-2 gap-2 min-h-[56px]">
         {sortedShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
           const isFlying = flyingAway.has(vocabIdx);
@@ -418,7 +418,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             return (
               <div
                 key={vocabIdx}
-                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
+                className="w-full rounded-2xl border-2 px-3 py-2.5 flex items-center justify-center text-center font-bold text-lg select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
                 aria-label={`${vocab[vocabIdx]?.word} 已配對`}
                 style={{ fontFamily: zhuyinFont }}
               >
@@ -433,7 +433,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
           let cls =
             // #2144: 教授「拖拉字體小」— text-base→text-lg
-            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-lg select-none transition-all duration-200 ';
+            'w-full rounded-2xl border-2 px-3 py-2.5 flex items-center justify-center text-center font-bold text-lg select-none transition-all duration-200 ';
           if (isFlying) {
             cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
           } else if (isDemoDraggingWord) {
@@ -695,7 +695,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         </div>
 
         {/* Right column — word bank panel, independently scrollable on desktop */}
-        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
+        <div className="hidden md:flex md:flex-col w-72 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
           {wordBankContent}
         </div>
       </div>
