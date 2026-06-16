@@ -29,6 +29,7 @@ import { getLineResultForParagraph } from './liveTutorTypes';
 import {
   planParagraphEvalRestore,
   resolveDisplayLastDiffTokens,
+  resolveDisplayParagraphSummary,
 } from './paragraphEvalRestore';
 
 /* ------------------------------------------------------------------ */
@@ -377,8 +378,21 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setHasDetectedAudio(false);
     hasHeardAudioRef.current = false;
     volumeAboveSinceRef.current = null;
+    dispatch({ type: 'SET_STREAMING', value: '' });
+    dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
     startSession();
-  }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, startSession]);
+  }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, startSession, dispatch]);
+
+  const confirmCancel = useCallback(() => {
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    dispatch({ type: 'SET_STREAMING', value: '' });
+    dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
+  }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
 
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;
@@ -620,10 +634,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
   const savedLineResult = getLineResultForParagraph(lineResults, currentLineIndex);
+  const hideStaleEval =
+    stt.isSessionActive || recordingPendingReview || isSubmittingSentence;
   const displayLastDiffTokens = resolveDisplayLastDiffTokens(
     evalState.lastDiffTokens,
     paragraphSummary,
     savedLineResult,
+    hideStaleEval,
+  );
+  const displayParagraphSummary = resolveDisplayParagraphSummary(
+    paragraphSummary,
+    hideStaleEval,
   );
 
   /* ================================================================ */
@@ -660,7 +681,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               lastDiffTokens={displayLastDiffTokens}
               isAwaitingGemini={evalState.isAwaitingGemini}
               retryCount={evalState.retryCount}
-              paragraphSummary={paragraphSummary}
+              paragraphSummary={displayParagraphSummary}
               completedParagraphs={completedParagraphs}
               storyLength={story.content.length}
               lineResults={lineResults}
@@ -768,6 +789,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onFinishRecording={finishRecording}
         onConfirmEvaluate={confirmEvaluate}
         onConfirmRerecord={confirmRerecord}
+        onConfirmCancel={confirmCancel}
         onSpeakCurrentParagraph={speakCurrentParagraph}
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}

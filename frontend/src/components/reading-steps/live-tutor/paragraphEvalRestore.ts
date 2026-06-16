@@ -36,11 +36,27 @@ export function planParagraphEvalRestore(
   return { kind: 'clear' };
 }
 
-/** When eval state was cleared on revisit, fall back to persisted line result diff. */
+/**
+ * When eval state was cleared on revisit, fall back to persisted line result diff.
+ * While recording or awaiting 評估/重錄/取消, hide stale results so 完成 does not
+ * flash the previous score before the student commits.
+ */
 export function resolveDisplayLastDiffTokens(
   lastDiffTokens: DiffToken[] | null,
   paragraphSummary: ParagraphSummaryData | null,
   savedLineResult: LineResult | undefined,
+  hideStaleEval = false,
 ): DiffToken[] | null {
+  if (hideStaleEval) {
+    return null;
+  }
   return lastDiffTokens ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
+}
+
+/** Hide persisted summary while a new take is in progress or pending review. */
+export function resolveDisplayParagraphSummary(
+  paragraphSummary: ParagraphSummaryData | null,
+  hideStaleEval: boolean,
+): ParagraphSummaryData | null {
+  return hideStaleEval ? null : paragraphSummary;
 }

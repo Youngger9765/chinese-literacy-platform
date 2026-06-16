@@ -3,6 +3,7 @@ import type { DiffToken } from '../../../types';
 import {
   planParagraphEvalRestore,
   resolveDisplayLastDiffTokens,
+  resolveDisplayParagraphSummary,
 } from './paragraphEvalRestore';
 import type { LineResult, ParagraphSummaryData } from './liveTutorTypes';
 
@@ -76,5 +77,21 @@ describe('resolveDisplayLastDiffTokens — revisit diff fallback', () => {
 
   it('returns null when no summary and no live tokens', () => {
     expect(resolveDisplayLastDiffTokens(null, null, lineResult)).toBeNull();
+  });
+
+  it('hides stale saved diff while recording or pending review', () => {
+    expect(resolveDisplayLastDiffTokens(null, summary, lineResult, true)).toBeNull();
+    const live: DiffToken[] = [{ char: '好', type: 'correct' }];
+    expect(resolveDisplayLastDiffTokens(live, summary, lineResult, true)).toBeNull();
+  });
+});
+
+describe('resolveDisplayParagraphSummary — pending take UX', () => {
+  it('returns summary when not hiding stale eval', () => {
+    expect(resolveDisplayParagraphSummary(summary, false)).toBe(summary);
+  });
+
+  it('returns null while hiding stale eval', () => {
+    expect(resolveDisplayParagraphSummary(summary, true)).toBeNull();
   });
 });

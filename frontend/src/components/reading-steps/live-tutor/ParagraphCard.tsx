@@ -104,10 +104,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
 
-  const savedLineResult = getLineResultForParagraph(lineResults, idx);
-  const displayDiffTokens =
-    lastDiffTokens
-    ?? (paragraphSummary ? savedLineResult?.diffTokens ?? null : null);
+  const displayDiffTokens = lastDiffTokens;
 
   const readingResultTokens = useMemo(
     () => (displayDiffTokens ? interleavePunctuation(line, displayDiffTokens) : null),
