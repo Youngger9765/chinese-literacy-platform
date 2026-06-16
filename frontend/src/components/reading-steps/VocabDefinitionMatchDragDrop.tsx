@@ -380,6 +380,17 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   const activeShuffledWords = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
 
+  // Sort: confirmed words to the back so remaining options stay near the top
+  const sortedShuffledWords = useMemo(
+    () => [...activeShuffledWords].sort((a, b) => {
+      const aConfirmed = confirmed.has(a) ? 1 : 0;
+      const bConfirmed = confirmed.has(b) ? 1 : 0;
+      return aConfirmed - bConfirmed;
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeShuffledWords, confirmed.size],
+  );
+
   /* ---- Word bank chips (shared between mobile top strip and desktop left panel) ---- */
   const wordBankContent = (
     <>
@@ -389,7 +400,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">本課語詞</span>
       </div>
       <div className="flex flex-wrap gap-2 min-h-[56px]">
-        {activeShuffledWords.map((vocabIdx) => {
+        {sortedShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
           const isFlying = flyingAway.has(vocabIdx);
           // Fix #1101 (炮灰選項): Keep correctly-confirmed words visible as locked

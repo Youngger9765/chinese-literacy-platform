@@ -77,28 +77,98 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
 
 function StageCompletedPlaceholder({
   title,
+  vocab,
+  answers,
   otherModeLabel,
   otherDone,
   onGoOther,
+  onRetry,
 }: {
   title: string;
+  vocab: VocabItem[];
+  answers: AnswerRecord[];
   otherModeLabel: string;
   otherDone: boolean;
   onGoOther: () => void;
+  onRetry: () => void;
 }) {
+  const correctCount = answers.filter((a) => a.correct).length;
+
   return (
-    <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-      <span className="material-symbols-outlined text-5xl text-emerald-500">check_circle</span>
-      <p className="text-lg font-headline font-bold text-on-surface">{title} 已完成</p>
-      {!otherDone && (
-        <button type="button" onClick={onGoOther} className="btn-immersive">
-          前往{otherModeLabel}
-          <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-        </button>
-      )}
-      {otherDone && (
-        <p className="text-sm text-on-surface-variant">兩關都完成了，正在準備成績…</p>
-      )}
+    <div className="max-w-2xl mx-auto px-4 py-8 pb-48 animate-fade-in">
+      <div className="text-center mb-8">
+        <span className="material-symbols-outlined text-5xl text-emerald-500">check_circle</span>
+        <p className="text-lg font-headline font-bold text-on-surface mt-3">{title} 已完成</p>
+        <p className="text-sm text-on-surface-variant mt-1">
+          答對 {correctCount} / {answers.length} 題
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3 mb-6">
+        {answers.map((ans, idx) => {
+          const item = vocab[ans.defIndex];
+          const isCorrect = ans.correct;
+          const studentWord =
+            ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word : '—';
+
+          return (
+            <div
+              key={`${title}-result-${idx}`}
+              className={`rounded-xl border-2 px-4 py-3 flex items-start gap-3 ${
+                isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
+              }`}
+            >
+              <span
+                className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
+                  isCorrect ? 'bg-emerald-500' : 'bg-red-500'
+                }`}
+              >
+                {isCorrect ? '✓' : '✗'}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-500 leading-snug mb-1">{item?.definition}</p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                  <span className="text-gray-500">正確答案：</span>
+                  <span className="font-bold text-gray-800">{item?.word}</span>
+                  {!isCorrect && (
+                    <>
+                      <span className="text-gray-400">|</span>
+                      <span className="text-gray-500">你的答案：</span>
+                      <span className="font-bold text-red-600">{studentWord}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+        style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
+      >
+        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+          {!otherDone && (
+            <button
+              type="button"
+              onClick={onGoOther}
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+            >
+              前往{otherModeLabel}
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onRetry}
+            className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all"
+          >
+            重新做題
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -273,6 +343,16 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
+  const handleRetryMc = useCallback(() => {
+    setMcAnswers([]);
+    startStage('multiple-choice', allIndices);
+  }, [startStage, allIndices]);
+
+  const handleRetryDragDrop = useCallback(() => {
+    setDragDropAnswers([]);
+    startStage('drag-drop', allIndices);
+  }, [startStage, allIndices]);
+
   const handleFinish = useCallback(() => {
     const correctCount =
       mcAnswers.filter((a) => a.correct).length +
@@ -317,9 +397,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
               mcDone ? (
                 <StageCompletedPlaceholder
                   title="選擇題"
+                  vocab={vocab}
+                  answers={mcAnswers}
                   otherModeLabel="拖拉配對"
                   otherDone={dragDropDone}
                   onGoOther={() => handleSelectMode('drag-drop')}
+                  onRetry={handleRetryMc}
                 />
               ) : (
                 <MultipleChoiceMode
@@ -333,9 +416,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
               dragDropDone ? (
                 <StageCompletedPlaceholder
                   title="拖拉配對"
+                  vocab={vocab}
+                  answers={dragDropAnswers}
                   otherModeLabel="選擇題"
                   otherDone={mcDone}
                   onGoOther={() => handleSelectMode('multiple-choice')}
+                  onRetry={handleRetryDragDrop}
                 />
               ) : (
                 <DragDropMode
