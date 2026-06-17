@@ -16,6 +16,7 @@ LLM hardening rules applied (llm-endpoint-hardening skill):
 """
 
 import logging
+import time
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -26,6 +27,7 @@ from ...auth.rate_limiter import ai_limit_10_per_min
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import validate_strategy_answer
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -36,7 +38,9 @@ class ValidateStrategyRequest(BaseModel):
     student_answer: str = Field(..., min_length=1, max_length=500)
     strategy_name: str | None = Field(None, max_length=128)
     story_title: str | None = Field(None, max_length=200)
-    passage: str | None = Field(None, max_length=8000)
+    # Capped at 4000 to match the prompt truncation in validate_strategy_answer
+    # (safe_passage[:4000]) — sending more is silently ignored by the grader.
+    passage: str | None = Field(None, max_length=4000)
 
 
 class ValidateStrategyResponse(BaseModel):
@@ -61,6 +65,7 @@ async def validate_strategy(
     gentle hint when off-track. Rate limited: 10 requests per minute per user.
     Fail-closed: never blocks the student on an AI outage.
     """
+    start_time = time.monotonic()
     try:
         result = await validate_strategy_answer(
             question=payload.question,
@@ -77,6 +82,27 @@ async def validate_strategy(
             feedback="已記錄你的答案，做得好！",
             suggestion="",
         )
+
+    # Track AI usage (Issue #874) — consistent with sentence-practice/validate.
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint="/learning/strategy-practice/validate",
+        step="strategy_validate",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash-lite",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="strategy_validate_answer",
+    )
 
     return ValidateStrategyResponse(
         is_correct=bool(result.get("is_correct", True)),
