@@ -30,6 +30,9 @@ TASK_MODELS: dict[str, tuple[str, str]] = {
     "comprehension_score": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete JSON, -35% latency, correct is_correct logic
     "sentence_validate": ("gemini-2.5-flash-lite", "global"),
+    # Issue #2192 item 5: lenient free-text grading for 閱讀聚光燈 guided steps.
+    # Same category as sentence_validate (short JSON eval) — flash-lite parity.
+    "strategy_validate": ("gemini-2.5-flash-lite", "global"),
 
     # ── Generation tasks ──────────────────────────────────────────────────────
     # Tested: 3/3 complete (≥3 MCQ with correct_index), -31% latency

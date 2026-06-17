@@ -6,7 +6,8 @@
 import React, { useEffect, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { recordMcqAttempt } from '../../services/learningApi';
+import { recordMcqAttempt, validateStrategyAnswer } from '../../services/learningApi';
+import type { StrategyGradeResult } from '../../services/learning/sentence';
 import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
 import StrategyHeader from './StrategyHeader';
 import {
@@ -21,6 +22,10 @@ interface Props {
   onComplete?: () => void;
   lessonId?: string;
   readingStrategy?: string | null;
+  /** Story title — passed to the AI grader for free_text steps (#2192 item 5). */
+  storyTitle?: string;
+  /** Full lesson passage — gives the AI grader context to judge free_text answers. */
+  passage?: string;
   onChange?: (exerciseState: Record<string, unknown>) => void;
   initialState?: Record<string, unknown>;
 }
@@ -30,6 +35,8 @@ const GuidedStepsExercise: React.FC<Props> = ({
   onComplete,
   lessonId,
   readingStrategy,
+  storyTitle,
+  passage,
   onChange,
   initialState,
 }) => {
@@ -44,13 +51,21 @@ const GuidedStepsExercise: React.FC<Props> = ({
   );
   const [allDone, setAllDone] = useState(() => !!(initialState?.allDone as boolean));
 
+  // AI grading results for free_text steps (#2192 item 5). Persisted so teachers
+  // can see the student's answer + AI verdict via step_progress.
+  const [textGrades, setTextGrades] = useState<(StrategyGradeResult | null)[]>(
+    () => (initialState?.textGrades as (StrategyGradeResult | null)[]) ?? steps.map(() => null),
+  );
+  // Which free_text step is currently being graded (null = none).
+  const [gradingIdx, setGradingIdx] = useState<number | null>(null);
+
   // Track which step's rescue is open (null = none).
   const [rescueStepIdx, setRescueStepIdx] = useState<number | null>(null);
   const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   useEffect(() => {
-    onChange?.({ answers, stepFeedback, allDone, exerciseType: 'guided_steps' });
-  }, [answers, stepFeedback, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
+    onChange?.({ answers, stepFeedback, allDone, textGrades, exerciseType: 'guided_steps' });
+  }, [answers, stepFeedback, allDone, textGrades]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openRescueForStep = (stepIdx: number) => {
     const step = steps[stepIdx];
@@ -79,13 +94,55 @@ const GuidedStepsExercise: React.FC<Props> = ({
     setAnswers((prev) => prev.map((a, i) => (i === stepIdx ? optionIdx : a)));
   };
 
-  const handleStepSubmit = (stepIdx: number) => {
+  const markStepDone = (stepIdx: number) => {
+    const nextFeedback = computeNextFeedback(exercise, stepFeedback, answers, stepIdx);
+    setStepFeedback(nextFeedback);
+    if (isAllStepsDone(nextFeedback)) {
+      setAllDone(true);
+      onComplete?.();
+    }
+  };
+
+  const handleStepSubmit = async (stepIdx: number) => {
     const step = steps[stepIdx];
     const answer = answers[stepIdx];
 
     if (step.type === 'free_text') {
-      if (!answer || String(answer).trim() === '') return;
-    } else if (step.type === 'select') {
+      const text = String(answer ?? '').trim();
+      if (text === '') return;
+
+      // AI grade the answer (#2192 item 5). Lenient + encouraging; the backend
+      // fails closed so the student is never blocked on an AI outage.
+      setGradingIdx(stepIdx);
+      try {
+        if (token) {
+          const grade = await validateStrategyAnswer(token, {
+            question: step.prompt ?? '',
+            studentAnswer: text,
+            strategyName: exercise.strategy_name,
+            storyTitle,
+            passage,
+          });
+          setTextGrades((prev) => prev.map((g, i) => (i === stepIdx ? grade : g)));
+        }
+      } catch {
+        // Network/parse failure → record without feedback rather than blocking.
+        setTextGrades((prev) =>
+          prev.map((g, i) =>
+            i === stepIdx
+              ? { is_correct: true, feedback: '已記錄你的答案，做得好！', suggestion: '' }
+              : g,
+          ),
+        );
+      } finally {
+        setGradingIdx(null);
+      }
+
+      markStepDone(stepIdx);
+      return;
+    }
+
+    if (step.type === 'select') {
       if (answer === null) return;
       const isCorrect = answer === (step.answer ?? 0);
 
@@ -114,6 +171,7 @@ const GuidedStepsExercise: React.FC<Props> = ({
   const handleReset = () => {
     setAnswers(steps.map(() => null));
     setStepFeedback(steps.map(() => null));
+    setTextGrades(steps.map(() => null));
     setAllDone(false);
   };
 
@@ -142,7 +200,7 @@ const GuidedStepsExercise: React.FC<Props> = ({
                   <textarea
                     value={String(answers[stepIdx] ?? '')}
                     onChange={(e) => handleTextChange(stepIdx, e.target.value)}
-                    disabled={isDone}
+                    disabled={isDone || gradingIdx === stepIdx}
                     rows={3}
                     placeholder="請在此寫下你的答案..."
                     className={[
@@ -152,7 +210,39 @@ const GuidedStepsExercise: React.FC<Props> = ({
                         : 'bg-white border-gray-300 focus:border-violet-400 focus:ring-2 focus:ring-violet-100',
                     ].join(' ')}
                   />
-                  {isDone && (
+                  {gradingIdx === stepIdx && (
+                    <p className="mt-2 text-xs text-violet-600 font-semibold flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                      AI 批改中…
+                    </p>
+                  )}
+                  {/* AI feedback (#2192 item 5) — replaces the old bare「已記錄你的答案」. */}
+                  {gradingIdx !== stepIdx && textGrades[stepIdx] && (
+                    <div
+                      className={`mt-2 rounded-lg border p-3 ${
+                        textGrades[stepIdx]!.is_correct
+                          ? 'bg-emerald-50 border-emerald-200'
+                          : 'bg-amber-50 border-amber-200'
+                      }`}
+                    >
+                      <p
+                        className={`text-xs font-semibold flex items-start gap-1.5 ${
+                          textGrades[stepIdx]!.is_correct ? 'text-emerald-700' : 'text-amber-700'
+                        }`}
+                      >
+                        <span aria-hidden="true">{textGrades[stepIdx]!.is_correct ? '✓' : '💡'}</span>
+                        <span>{textGrades[stepIdx]!.feedback}</span>
+                      </p>
+                      {textGrades[stepIdx]!.suggestion && (
+                        <p className="mt-1.5 text-xs text-amber-700/90 pl-5">
+                          {textGrades[stepIdx]!.suggestion}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {/* Fallback when graded with no AI feedback available (e.g. restored
+                      from an older session before grading existed). */}
+                  {gradingIdx !== stepIdx && isDone && !textGrades[stepIdx] && (
                     <p className="mt-2 text-xs text-emerald-600 font-semibold">
                       &#10003; 已記錄你的答案
                     </p>
@@ -223,13 +313,14 @@ const GuidedStepsExercise: React.FC<Props> = ({
                   <button
                     onClick={() => handleStepSubmit(stepIdx)}
                     disabled={
-                      step.type === 'free_text'
+                      gradingIdx === stepIdx ||
+                      (step.type === 'free_text'
                         ? !String(answers[stepIdx] ?? '').trim()
-                        : answers[stepIdx] === null
+                        : answers[stepIdx] === null)
                     }
                     className="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold transition-colors"
                   >
-                    確認
+                    {gradingIdx === stepIdx ? '批改中…' : '確認'}
                   </button>
                 </div>
               )}

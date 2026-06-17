@@ -133,6 +133,8 @@ const StrategyExercisePage: React.FC = () => {
               onComplete={handleStrategyComplete}
               lessonId={selectedStory.id}
               readingStrategy={selectedStory.readingStrategy}
+              storyTitle={selectedStory.title}
+              passage={selectedStory.content?.join('\n')}
               onChange={handleAnswerChange}
               initialState={savedStrategyData}
             />
