@@ -8,6 +8,15 @@
 import React, { useEffect, useLayoutEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  STORY_STRUCTURE_INTERACTIVE_ATTR,
+  DEMO_STEP_DURATION_MS,
+  buildDemoSequence,
+  deriveStructureProfile,
+  getCoachIntroText,
+  resolveDemoTargetElement,
+  type StructureInteractionProfile,
+} from './storyStructureProfile';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +62,7 @@ interface StructureData {
   title?: string;
   worksheet_rows?: WorksheetRow[];
   rows: StructureRow[];
+  interaction_profile?: Partial<StructureInteractionProfile>;
 }
 
 interface GradeResultItem {
@@ -79,10 +89,8 @@ const INLINE_BLANK_RE = /【([^】]*)】/g;
 const SECTION_CHUNK_SIZE = 3;
 const STORY_STRUCTURE_ONBOARDED_KEY = 'story_structure_onboarded';
 
-type StoryStructureDemoStep = 'overview' | 'read' | 'type' | 'submit' | 'success';
-
 interface StoryStructureDemoRuntime {
-  step: StoryStructureDemoStep;
+  step: import('./storyStructureProfile').DemoStepId;
 }
 
 interface DemoSpotlightRect {
@@ -165,11 +173,12 @@ function DemoSpotlightOverlay({
 }
 
 interface OnboardingCoachProps {
+  introText: string;
   onDismiss: () => void;
   onDemo: () => void;
 }
 
-function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+function OnboardingCoach({ introText, onDismiss, onDemo }: OnboardingCoachProps) {
   return (
     <div className="mb-4 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
@@ -178,10 +187,7 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
         </span>
         <div className="flex-1">
           <p className="font-bold text-on-surface text-base mb-1">文章重點表怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            用表格整理課文的<strong className="text-amber-800">問題、解決、結果</strong>。
-            讀左邊課文，把關鍵詞填進【　】空格，填完按「提交答案」，AI 會幫你檢查。
-          </p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">{introText}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 self-end">
@@ -342,6 +348,7 @@ const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="　"
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
       className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-none focus:border-amber-600 mx-0.5`}
       disabled={submitted}
     />
@@ -449,6 +456,7 @@ const FillBlankCell: React.FC<FillBlankCellProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="　"
+        {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
         className="w-36 bg-amber-50 border-b-2 border-amber-400 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-amber-600 px-1 py-0.5 text-center"
         disabled={submitted}
       />
@@ -486,7 +494,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}>
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -728,17 +736,27 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
   useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
 
-  const resolveDemoTarget = useCallback((step: StoryStructureDemoStep): HTMLElement | null => {
-    if (step === 'read') {
-      return document.querySelector('[data-comprehension-lesson-text]');
-    }
-    if (step === 'type') {
-      return tableContainerRef.current?.querySelector('input[type="text"]') ?? null;
-    }
-    if (step === 'submit' || step === 'success') {
-      return submitBtnRef.current;
-    }
-    return tableContainerRef.current;
+  const interactionProfile = useMemo(
+    () => (structure ? deriveStructureProfile(structure) : null),
+    [structure],
+  );
+
+  const demoSteps = useMemo(
+    () => (interactionProfile ? buildDemoSequence(interactionProfile) : []),
+    [interactionProfile],
+  );
+
+  const activeDemoStep = useMemo(
+    () => (demo ? demoSteps.find((s) => s.id === demo.step) ?? null : null),
+    [demo, demoSteps],
+  );
+
+  const resolveDemoTarget = useCallback((step: import('./storyStructureProfile').DemoStepId): HTMLElement | null => {
+    return resolveDemoTargetElement(
+      step,
+      tableContainerRef.current,
+      submitBtnRef.current,
+    );
   }, []);
 
   useLayoutEffect(() => {
@@ -773,15 +791,20 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   }, []);
 
   const handleDemo = useCallback(() => {
+    if (!interactionProfile || demoSteps.length === 0) return;
     clearDemoTimers();
     handleDismissCoach();
-    setDemo({ step: 'overview' });
-    scheduleDemoStep(() => setDemo({ step: 'read' }), 2800);
-    scheduleDemoStep(() => setDemo({ step: 'type' }), 5600);
-    scheduleDemoStep(() => setDemo({ step: 'submit' }), 8400);
-    scheduleDemoStep(() => setDemo({ step: 'success' }), 11200);
-    scheduleDemoStep(() => setDemo(null), 14000);
-  }, [clearDemoTimers, handleDismissCoach, scheduleDemoStep]);
+    demoSteps.forEach((stepConfig, index) => {
+      scheduleDemoStep(() => setDemo({ step: stepConfig.id }), index * DEMO_STEP_DURATION_MS);
+    });
+    scheduleDemoStep(() => setDemo(null), demoSteps.length * DEMO_STEP_DURATION_MS);
+  }, [
+    clearDemoTimers,
+    handleDismissCoach,
+    scheduleDemoStep,
+    interactionProfile,
+    demoSteps,
+  ]);
 
 
   const setAnswer = useCallback((key: string, value: string | number[]) => {
@@ -1045,17 +1068,19 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     structure.layout === 'worksheet_table' &&
     !!(structure.worksheet_rows && structure.worksheet_rows.length > 0);
 
-  const demoBubbleText: Partial<Record<StoryStructureDemoStep, string>> = {
-    overview: '① 這張表幫你整理課文的問題、解決、結果',
-    read: '② 讀左邊課文，想想空格要填什麼關鍵詞',
-    type: '③ 點【　】空格，輸入你的答案',
-    submit: '④ 全部填完後，按「提交答案」',
-    success: '⑤ AI 會幫你檢查，答錯可以看參考提示',
-  };
+  const coachIntroText = interactionProfile
+    ? getCoachIntroText(interactionProfile)
+    : '讀課文，完成表格練習';
 
   return (
     <div className={useWorksheet ? 'max-w-3xl mx-auto' : 'max-w-2xl mx-auto'}>
-      {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+      {showCoach && (
+        <OnboardingCoach
+          introText={coachIntroText}
+          onDismiss={handleDismissCoach}
+          onDemo={handleDemo}
+        />
+      )}
       {!showCoach && (
         <div className="flex justify-end mb-2">
           <button
@@ -1068,18 +1093,12 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
           </button>
         </div>
       )}
-      {demo && demoTargetRect && demoBubbleText[demo.step] && (
+      {demo && demoTargetRect && activeDemoStep && (
         <DemoSpotlightOverlay
           rect={demoTargetRect}
-          label={demoBubbleText[demo.step]!}
-          placement={
-            demo.step === 'type' || demo.step === 'submit' || demo.step === 'success'
-              ? 'above'
-              : 'below'
-          }
-          bubbleAnchor={
-            demo.step === 'overview' || demo.step === 'read' ? 'top' : 'center'
-          }
+          label={activeDemoStep.bubbleText}
+          placement={activeDemoStep.placement}
+          bubbleAnchor={activeDemoStep.bubbleAnchor}
         />
       )}
     <div
@@ -1178,6 +1197,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
             </p>
             <button
               ref={submitBtnRef}
+              data-story-structure-submit
               onClick={handleSubmit}
               disabled={!allAnswered || submitting}
               className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${

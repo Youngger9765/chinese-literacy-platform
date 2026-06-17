@@ -91,6 +91,76 @@ def _sanitize_row_for_client(row: dict) -> dict:
     return out
 
 
+def _infer_structure_template_kind(title: str | None, labels: list[str]) -> str:
+    """Infer coach/demo template from table title + row labels."""
+    blob = " ".join([title or "", *labels])
+    if re.search(r"假說|驗證|步驟|探究", blob):
+        return "scientific"
+    if re.search(r"問題", blob) and re.search(r"解決|結果|影響|成效", blob):
+        return "psr"
+    if re.search(r"主題|事實|主角|事例|論點", blob):
+        return "theme_facts"
+    return "generic"
+
+
+def _derive_interaction_profile(structure: dict) -> dict:
+    """Summarize how students interact with this structure table.
+
+    Attached to GET /structure so the frontend demo/coach can branch without
+    re-deriving from rows. New table formats only need to populate rows with
+    interactive_type — profile fields stay stable.
+    """
+    fill_blank_count = 0
+    checkbox_count = 0
+    primary_labels: list[str] = []
+    section_labels: list[str] = []
+
+    def tally_row(row: dict) -> None:
+        nonlocal fill_blank_count, checkbox_count
+        itype = row.get("interactive_type")
+        label = str(row.get("label") or "").strip()
+        if itype == "fill_blank":
+            fill_blank_count += 1
+            if label:
+                primary_labels.append(label)
+        elif itype == "checkbox":
+            checkbox_count += 1
+            if label:
+                primary_labels.append(label)
+
+    for row in structure.get("rows") or []:
+        parent_label = str(row.get("label") or "").strip()
+        if parent_label:
+            section_labels.append(parent_label)
+        sub_rows = row.get("sub_rows") or []
+        if sub_rows:
+            for sub in sub_rows:
+                tally_row(sub)
+        else:
+            tally_row(row)
+
+    if fill_blank_count and checkbox_count:
+        mode = "mixed"
+    elif fill_blank_count:
+        mode = "fill_blank"
+    elif checkbox_count:
+        mode = "checkbox"
+    else:
+        mode = "display_only"
+
+    return {
+        "mode": mode,
+        "template_kind": _infer_structure_template_kind(
+            structure.get("title"),
+            primary_labels + section_labels,
+        ),
+        "fill_blank_count": fill_blank_count,
+        "checkbox_count": checkbox_count,
+        "primary_labels": primary_labels[:4],
+        "layout": structure.get("layout") or "cards",
+    }
+
+
 def _sanitize_structure_for_client(structure: dict) -> dict:
     """Return a deep copy of structure with answers stripped for student UI."""
     result = copy.deepcopy(structure)
@@ -101,6 +171,7 @@ def _sanitize_structure_for_client(structure: dict) -> dict:
         elif ws.get("kind") == "section_block":
             for item in ws.get("items") or []:
                 item["value"] = _strip_blank_answers(item["value"])
+    result["interaction_profile"] = _derive_interaction_profile(result)
     return result
 
 
