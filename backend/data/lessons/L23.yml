@@ -147,57 +147,7 @@ strategy_exercise:
     answer: 1
   - prompt: 【行動】讀完這篇文章後，你覺得我們可以採取什麼行動來保護海洋？請寫出你的想法
     type: free_text
-story_structure:
-- label: 主題
-  value: 小藍鯨擱淺死亡事件
-- label: 重要事實 1
-  value: 小藍鯨因漁具纏繞，無法進食而餓死。
-- label: 重要事實 2
-  value: 小藍鯨骨骼標本在海生館展出，提醒世人。
-- label: 重要事實 3
-  value: 藍鯨是瀕危物種，曾因捕獵數量銳減。
-- label: 結論
-  value: 人類應反省並行動，共同保育海洋環境。
-story_structure_rows:
-- label: 主題
-  value: 小藍鯨之死
-  interactive_type: fill_blank
-  hint: 課文主要在說什麼？
-- label: 重要事實 1
-  value: 小藍鯨因漁具纏繞餓死
-  interactive_type: checkbox
-  hint: 小藍鯨怎麼死的？
-  options:
-  - 小藍鯨被漁船撞死
-  - 小藍鯨因漁具纏繞餓死
-  - 小藍鯨被其他海洋生物攻擊
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 藍鯨是瀕危物種
-  interactive_type: checkbox
-  hint: 藍鯨的保育狀況？
-  options:
-  - 藍鯨數量穩定成長
-  - 藍鯨是瀕危物種
-  - 藍鯨已滅絕
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 小藍鯨標本在海生館展出
-  interactive_type: checkbox
-  hint: 小藍鯨的去處？
-  options:
-  - 小藍鯨被放回大海
-  - 小藍鯨標本在海生館展出
-  - 小藍鯨被製成藝術品
-  correct_options:
-  - 1
-- label: 結論
-  value: 人類應反省並保育海洋
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -233,3 +183,29 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L15.pdf
+story_structure_table:
+- - 小藍鯨之死
+- - 時間
+  - 【 2020年1月25日 】。
+- - 地點
+  - 【 臺東縣長濱鄉 】。
+- - 事件
+  - 巨大鯨魚【 擱淺死亡 】。
+- - 死者
+  - 未滿兩歲，還在生長期的幼年藍鯨。
+- - 死因
+  - 因頭骨兩側被繩索纏繞，長期無法進食，最終【 餓死 】。
+- - 後續行動
+  - '1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的
+
+    【 骨骼重建 】與研究典藏。
+
+    2.屏東海生館以巨鯨之路為名，向國人展現其【 標本 】。
+
+    3.展廳也展示造成小藍鯨死亡的凶器，藉此提醒大家
+
+    【 漁具纏繞 】是大型鯨類和海洋生物的威脅。'
+- - 省思
+  - '小藍鯨的死亡也提醒人們要有反省及行動，
+
+    為【 保育海洋 】盡一份心力。'

@@ -5,7 +5,8 @@
  * When API returns layout=worksheet_table, renders 紙本學習單 HTML table;
  * otherwise falls back to card layout (#2084).
  */
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -84,21 +85,82 @@ interface StoryStructureDemoRuntime {
   step: StoryStructureDemoStep;
 }
 
-function DemoBubble({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="relative flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300 mb-3"
-      role="status"
-      aria-live="polite"
-    >
-      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-sm">
-        {children}
-        <span
-          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
-          aria-hidden
-        />
+interface DemoSpotlightRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+function padDemoRect(rect: DOMRect, padding = 10): DemoSpotlightRect {
+  return {
+    top: Math.max(8, rect.top - padding),
+    left: Math.max(8, rect.left - padding),
+    width: rect.width + padding * 2,
+    height: rect.height + padding * 2,
+  };
+}
+
+interface DemoSpotlightOverlayProps {
+  rect: DemoSpotlightRect;
+  label: string;
+  placement?: 'above' | 'below';
+  bubbleAnchor?: 'top' | 'center' | 'bottom';
+}
+
+function DemoSpotlightOverlay({
+  rect,
+  label,
+  placement = 'above',
+  bubbleAnchor = 'center',
+}: DemoSpotlightOverlayProps) {
+  const { top, left, width, height } = rect;
+  const bottom = top + height;
+  const right = left + width;
+  const anchorY =
+    bubbleAnchor === 'top' ? top : bubbleAnchor === 'bottom' ? bottom : top + height / 2;
+
+  const bubbleStyle: React.CSSProperties =
+    placement === 'below'
+      ? {
+          top: anchorY + 14,
+          left: left + width / 2,
+          transform: 'translate(-50%, 0)',
+        }
+      : {
+          top: anchorY - 14,
+          left: left + width / 2,
+          transform: 'translate(-50%, -100%)',
+        };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[220] pointer-events-none" role="presentation" aria-hidden>
+      <div className="fixed left-0 right-0 top-0 bg-black/58 transition-opacity duration-700" style={{ height: top }} />
+      <div className="fixed left-0 right-0 bg-black/58 transition-opacity duration-700" style={{ top: bottom, bottom: 0 }} />
+      <div className="fixed bg-black/58 transition-opacity duration-700" style={{ top, left: 0, width: left, height }} />
+      <div className="fixed bg-black/58 transition-opacity duration-700" style={{ top, left: right, right: 0, height }} />
+      <div
+        className="fixed rounded-xl ring-4 ring-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.25)] bg-white/5 transition-all duration-700 ease-in-out"
+        style={{ top, left, width, height }}
+      />
+      <div
+        className="fixed z-[221] transition-all duration-700 ease-in-out"
+        style={bubbleStyle}
+        role="status"
+        aria-live="polite"
+      >
+        <div className="relative rounded-xl bg-accent text-white px-4 py-2.5 text-sm font-bold shadow-xl text-center max-w-xs animate-in fade-in zoom-in-95 duration-500">
+          {label}
+          <span
+            className={`absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent ${
+              placement === 'below' ? '-top-1.5' : '-bottom-1.5'
+            }`}
+            aria-hidden
+          />
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -631,6 +693,8 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const [demo, setDemo] = useState<StoryStructureDemoRuntime | null>(null);
   const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const submitBtnRef = useRef<HTMLButtonElement>(null);
+  const [demoTargetRect, setDemoTargetRect] = useState<DemoSpotlightRect | null>(null);
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -664,18 +728,40 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
   useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
 
-  useEffect(() => {
-    const root = tableContainerRef.current;
-    if (!root) return;
-    const inputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
-    inputs.forEach((el, idx) => {
-      const highlight = demo?.step === 'type' && idx === 0;
-      el.classList.toggle('ring-2', highlight);
-      el.classList.toggle('ring-amber-400', highlight);
-      el.classList.toggle('animate-pulse', highlight);
-      el.classList.toggle('bg-amber-50', highlight);
-    });
-  }, [demo, structure, loading]);
+  const resolveDemoTarget = useCallback((step: StoryStructureDemoStep): HTMLElement | null => {
+    if (step === 'read') {
+      return document.querySelector('[data-comprehension-lesson-text]');
+    }
+    if (step === 'type') {
+      return tableContainerRef.current?.querySelector('input[type="text"]') ?? null;
+    }
+    if (step === 'submit' || step === 'success') {
+      return submitBtnRef.current;
+    }
+    return tableContainerRef.current;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!demo) {
+      setDemoTargetRect(null);
+      return;
+    }
+
+    const measure = () => {
+      const el = resolveDemoTarget(demo.step);
+      setDemoTargetRect(el ? padDemoRect(el.getBoundingClientRect()) : null);
+    };
+
+    measure();
+    const raf = requestAnimationFrame(measure);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [demo, resolveDemoTarget, structure, loading]);
 
   const handleDismissCoach = useCallback(() => {
     setShowCoach(false);
@@ -690,11 +776,11 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     clearDemoTimers();
     handleDismissCoach();
     setDemo({ step: 'overview' });
-    scheduleDemoStep(() => setDemo({ step: 'read' }), 1400);
-    scheduleDemoStep(() => setDemo({ step: 'type' }), 2800);
-    scheduleDemoStep(() => setDemo({ step: 'submit' }), 4200);
-    scheduleDemoStep(() => setDemo({ step: 'success' }), 5600);
-    scheduleDemoStep(() => setDemo(null), 7000);
+    scheduleDemoStep(() => setDemo({ step: 'read' }), 2800);
+    scheduleDemoStep(() => setDemo({ step: 'type' }), 5600);
+    scheduleDemoStep(() => setDemo({ step: 'submit' }), 8400);
+    scheduleDemoStep(() => setDemo({ step: 'success' }), 11200);
+    scheduleDemoStep(() => setDemo(null), 14000);
   }, [clearDemoTimers, handleDismissCoach, scheduleDemoStep]);
 
 
@@ -982,14 +1068,24 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
           </button>
         </div>
       )}
-      {demo && demoBubbleText[demo.step] && (
-        <DemoBubble>{demoBubbleText[demo.step]}</DemoBubble>
+      {demo && demoTargetRect && demoBubbleText[demo.step] && (
+        <DemoSpotlightOverlay
+          rect={demoTargetRect}
+          label={demoBubbleText[demo.step]!}
+          placement={
+            demo.step === 'type' || demo.step === 'submit' || demo.step === 'success'
+              ? 'above'
+              : 'below'
+          }
+          bubbleAnchor={
+            demo.step === 'overview' || demo.step === 'read' ? 'top' : 'center'
+          }
+        />
       )}
     <div
       ref={tableContainerRef}
-      className={`overflow-hidden rounded-xl border-2 shadow-sm transition-all duration-300 ${
-        demo?.step === 'read' ? 'border-amber-400 ring-4 ring-amber-200/60' : 'border-gray-300'
-      }`}
+      data-story-structure-table
+      className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm"
     >
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
@@ -1081,12 +1177,11 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
               已填 {totalAnswered} / {totalInteractive} 題
             </p>
             <button
+              ref={submitBtnRef}
               onClick={handleSubmit}
               disabled={!allAnswered || submitting}
               className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${
-                demo?.step === 'submit'
-                  ? 'bg-amber-500 text-white ring-4 ring-amber-300 animate-pulse scale-105'
-                  : allAnswered && !submitting
+                allAnswered && !submitting
                   ? 'bg-amber-500 text-white hover:bg-amber-600 active:scale-95'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}

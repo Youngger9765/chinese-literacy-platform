@@ -150,49 +150,7 @@ strategy_exercise:
     answer: 1
   - prompt: 如果你在網路上看到一則很吸引人的健康資訊，你可以用什麼方法來查證它的真假？請寫出至少兩種方法
     type: free_text
-story_structure:
-- label: 結論
-  value: 電子煙對人體【     無害
-story_structure_rows:
-- label: 主題
-  value: 芬蘭廢除學科教育
-  interactive_type: fill_blank
-  hint: 文章主要在說什麼？
-- label: 重要事實 1
-  value: 芬蘭赫爾辛基市教育局發布通知
-  interactive_type: checkbox
-  hint: 什麼單位發布？
-  options:
-  - 芬蘭教育部發布通知
-  - 芬蘭赫爾辛基市教育局發布通知
-  - 芬蘭國家教育委員會發布通知
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 從2020年前廢除中小學課程教育
-  interactive_type: checkbox
-  hint: 何時廢除？
-  options:
-  - 從2016年開始廢除
-  - 從2020年前廢除中小學課程教育
-  - 從2020年後開始廢除
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 改採實際場景主題教學
-  interactive_type: checkbox
-  hint: 改用什麼方式？
-  options:
-  - 改採遠距線上教學
-  - 改採實際場景主題教學
-  - 改採分組討論教學
-  correct_options:
-  - 1
-- label: 結論
-  value: 全球拭目以待芬蘭教育改革的成效
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -228,3 +186,29 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L20.pdf
+story_structure_table:
+- - 網紅的電子煙實驗：偽科學的陷阱
+- - 好奇的問題
+  - 電子煙好不好？
+- - 方法
+  - 看朋友寄來的【 電子煙實驗影片 】。
+- - 網紅的實驗
+  - '(1)__實驗：
+
+    用紙菸和電子煙的煙霧試驗棉花有沒有變色。'
+  - '(2)【 棉花肺 】實驗：
+
+    把煙油當成食物調味料，看看吃下去的後果。【 煙油食材 】'
+- - 實驗結論
+  - 電子煙對人體【 無害 】。
+- - 對網紅實驗的批判
+  - "(1)棉花肺實驗的問題\n→光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【 看不見 】。 \n(2)煙油食材實驗的問題(單選)　\n\
+    →電子煙是【 吸⃞吃 】到肺裡的，\n網紅把煙油【 ⃞吸吃 】下肚，完全沒有說明吸電子煙對人體的影響。"
+- - 總結
+  - '理性判斷、聰明識讀的方法：
+
+    (1)認清廠商的行銷手法，學會質疑傳播者的
+
+    【 動機 】。
+
+    (2)多方【 查證 】網路上訊息的正確性。'

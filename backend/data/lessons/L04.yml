@@ -149,51 +149,7 @@ strategy_exercise:
     type: free_text
   - prompt: 請用「如果……就……」寫一個和運動訓練有關的條件複句
     type: free_text
-story_structure:
-- label: 事例
-  sub_rows:
-  - label: 結果
-    value: 321 成效斐然，林逸達的球速在很短的時間內恢復過來，他受訪時表 347 示：「本來手會不舒服，改變機制後，現在速度比較穩定……這樣投 371 會比較輕鬆，對手的負擔不會太大。」這就是運動科學的應用實例。 397 六 最後，運動科學並不專屬
-story_structure_rows:
-- label: 主題
-  value: 運動科學
-  interactive_type: fill_blank
-  hint: 課文主要在說明什麼？
-- label: 重要事實 1
-  value: 一拳超人訓練菜單不妥當
-  interactive_type: checkbox
-  hint: 關於一拳超人訓練
-  options:
-  - 一拳超人訓練菜單非常有效
-  - 一拳超人訓練菜單不妥當
-  - 一拳超人訓練菜單適合所有人
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 運動科學是分析體育活動的學科
-  interactive_type: checkbox
-  hint: 運動科學是什麼？
-  options:
-  - 運動科學是研究漫畫的學科
-  - 運動科學是分析體育活動的學科
-  - 運動科學是競技運動的名稱
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 運動科學能幫助選手提升表現
-  interactive_type: checkbox
-  hint: 運動科學的應用
-  options:
-  - 運動科學只適用於漫畫人物
-  - 運動科學能幫助選手提升表現
-  - 運動科學與現代科技無關
-  correct_options:
-  - 1
-- label: 結論
-  value: 運動科學讓每個人都能有效、健康地享受運動
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -229,3 +185,22 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L04.pdf
+story_structure_table:
+- - 運動科學
+- - 文章主題：運動科學
+  - "是什麼  \n  (定義)"
+  - 運動科學是對【 體育 】活動進行【 科學 】分析的一個綜合性學科。
+- - 文章主題：運動科學
+  - '方法
+
+    與應用'
+  - '1.透過【 科學證據 】，了解運動方式是否有效。
+
+    例如：運動者應該要把肌肉鍛鍊跟【 有氧運動 】的時間分開，才會達到較好的訓練效果。
+
+    2.透過【 精準 】的測量、明白問題、加強訓練等程序，幫助運動者改善自己的運動表現。
+
+    例如：味全龍職棒隊的投手林逸達，就是透過運動科學的應用，重新設計投球動作，成功恢復球速。'
+- - 文章主題：運動科學
+  - 適用對象
+  - 普及推廣，讓【 每個人 】都有機會參與󠇡，知道如何運動能更有效、更健康。

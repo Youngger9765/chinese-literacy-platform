@@ -178,58 +178,8 @@ strategy_exercise:
     answer: 2
   - prompt: 比較巨石陣和摩艾石像，寫出一個相同點和一個不同點
     type: free_text
-story_structure:
-- label: 主題
-  value: 巨石陣與摩艾石像的未解之謎
-- label: 重要事實 1
-  value: 巨石陣是英國史前遺跡，巨石重且遠，搬運方式成謎。
-- label: 重要事實 2
-  value: 巨石陣建造目的眾說紛紜，天文觀測說法最可能。
-- label: 重要事實 3
-  value: 摩艾石像位於復活節島，巨大沉重，移動方式仍是謎。
-- label: 結論
-  value: 人類祖先的智慧與技術，至今仍有許多未解之謎。
 knowledge_video_url: https://www.youtube.com/watch?v=EKJqvSPOXzg
-story_structure_rows:
-- label: 主題
-  value: 巨石陣與摩艾石像
-  interactive_type: fill_blank
-  hint: 課文主要在介紹什麼？
-- label: 重要事實 1
-  value: 巨石陣位於英國倫敦西南方
-  interactive_type: checkbox
-  hint: 巨石陣在哪裡？
-  options:
-  - 巨石陣位於英國倫敦西南方
-  - 巨石陣位於太平洋小島上
-  - 巨石陣位於智利海岸
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: 摩艾石像背向海洋面向島內
-  interactive_type: checkbox
-  hint: 摩艾石像的特色？
-  options:
-  - 摩艾石像面向海洋背向島內
-  - 摩艾石像背向海洋面向島內
-  - 摩艾石像面向天空
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 巨石陣與摩艾石像的建造目的與方式至今仍是謎
-  interactive_type: checkbox
-  hint: 關於兩者，課文提到什麼？
-  options:
-  - 巨石陣與摩艾石像的建造目的與方式已完全解開
-  - 巨石陣與摩艾石像的建造目的與方式至今仍是謎
-  - 巨石陣與摩艾石像都是外星人建造的
-  correct_options:
-  - 1
-- label: 結論
-  value: 人類的智慧與能力超乎想像
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -264,3 +214,16 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 未解之謎：石頭的祕密（二）──摩艾石像
+- - 發現人
+  - 船長
+  - 發現地點 【 復活節 】島
+- - 假設一
+  - 是【 超自然 】的力量，讓摩艾走路。
+- - 假設二
+  - 古代人用【 滾輪 】把石像移到海邊。
+- - 假設三
+  - 古代人把石像立起來，用【 繩索拉扯 】移動。
+- - 石像用途：人們至今不清楚設立的目的。
+  - ''

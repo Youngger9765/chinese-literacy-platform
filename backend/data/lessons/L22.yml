@@ -199,60 +199,7 @@ strategy_exercise:
     - 阿介從植物獵人的工作中得到了什麼？
     - 阿介爬過幾座山？
     answer: 1
-story_structure:
-- label: 主角
-  value: 學 習
-story_structure_rows:
-- label: 主角
-  value: 洪信介
-  interactive_type: fill_blank
-  hint: 課文中的靈魂人物
-- label: 主題
-  value: 熱愛能克服困難，找到人生價值
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 熱愛植物、不服輸、有毅力
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發生的原因
-    options:
-    - 阿介從小過動，不擅長與人相處，成績不佳。
-    - 地球氣候變遷，物種消失，科學家需保存植物。
-    - 阿介因學歷被保種中心拒絕，但他不放棄。
-    correct_options:
-    - 0
-    - 1
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 事情的發展過程
-    options:
-    - 阿介自學植物知識，成為許多學術論文作者。
-    - 阿介中年重回校園，考上園藝科，進入保種中心。
-    - 阿介冒險採集稀有植物，曾遇生命危險。
-    correct_options:
-    - 1
-    - 2
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 事情的最終結果
-    options:
-    - 阿介找到人生意義，受世界矚目，推廣植物保育。
-    - 阿介成為植物獵人，但收入不高，生活艱辛。
-    - 阿介成功復育多種瀕臨絕種植物。
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -288,3 +235,33 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L14.pdf
+story_structure_table:
+- - 植物獵人
+- - 主角
+  - 洪信介，是台灣頂尖的植物獵人。
+- - 奮鬥歷程
+  - '__
+
+    困難'
+  - 從小過動、成績差，不擅與人相處。只有國中學歷，44歲前靠打零工維生，被認為是失敗者。【 學習 】
+- - 奮鬥歷程
+  - 興趣
+  - 但他熱愛植物，以【 自學方式 】學習植物知識。
+- - 奮鬥歷程
+  - 專長
+  - '具備植物獵人的條件：能爬山、爬樹、
+
+    【 野外求生 】能力、具備專業的植物知識。'
+- - 奮鬥歷程
+  - '__
+
+    困難'
+  - '1.問題：因阿介的學歷太低，無法加入植物保種中心。
+
+    2.解決：阿介中年重回校園，很認真學習
+
+    3.結果：阿介克服【 求職 】限制，成功進入保種中心，成為採集稀有植物的專業植物獵人。【 學歷 】'
+- - 成就
+  - '1.阿介總共採集了兩萬種植物。
+
+    2.為【 瀕臨絕種 】植物的保護做出巨大貢獻，完成連植物學家都做不到的事。'

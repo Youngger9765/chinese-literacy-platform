@@ -191,40 +191,7 @@ strategy_exercise:
     answer: 1
   - prompt: 請用PERT方法表達你的看法：科學的發展應不應該有倫理道德的界線？寫出你的主張和原因
     type: free_text
-story_structure:
-- label: 主角
-  value: "希臘神話-眾\n      負責！《科學怪人》                         神篇 第八期"
-story_structure_rows:
-- label: 主題
-  value: 科學怪人
-  interactive_type: fill_blank
-  hint: 這篇文章主要在介紹哪一本小說？
-- label: 重要內容 1
-  value: 弗蘭肯斯坦創造怪物的原因
-  interactive_type: checkbox
-  hint: 弗蘭肯斯坦為什麼要創造怪物？
-  options:
-  - 想證明自己是神
-  - 對生命起源感到好奇
-  - 想得到永生
-  - 想成為世界霸主
-  correct_options:
-  - 1
-- label: 重要內容 2
-  value: 書名「弗蘭肯斯坦」的意義
-  interactive_type: checkbox
-  hint: 小說書名「弗蘭肯斯坦」指的是誰？
-  options:
-  - 怪物
-  - 科學家
-  - 怪物和科學家
-  correct_options:
-  - 1
-- label: 結論
-  value: 科學發展應有倫理界線
-  interactive_type: fill_blank
-  hint: 這篇故事引發了我們對科學發展的什麼思考？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -259,3 +226,32 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 科學怪人
+- - 書本簡介
+  - '1.作者是英國作家【 瑪麗•雪萊 】。
+
+    2.書名叫做叫做《Frankenstein》（弗蘭肯斯坦），中文翻譯：【 科學怪人 】。'
+- - 故事大意
+  - 起因
+  - 弗蘭肯斯坦是一位【 科學家 】，對探究生命起源很有興趣，並且從【 電流/閃電 】得到靈感，決定進行【 造人實驗 】。
+- - 故事大意
+  - 經過
+  - 他將【 屍塊 】縫補成人的形狀，某夜，他製造的「人」居然【 動起來/活過來 】，他害怕的奪門而出，留【 怪物 】自己探索世界。
+- - 故事大意
+  - 結果
+  - 怪物被迫進入人類世界，卻因為【 醜陋的外表 】，一再經歷誤解與傷害，最後導致一連串悲劇。
+- - 書名意義
+  - '主標題是【 弗蘭肯斯坦 】。
+
+    1.名字背後帶著取名之人的【 寄望、祝福 】。小說的怪物其實【 □有沒有 】名字，代表從未得到他人的認同與祝福。(單選)
+
+    2.小說中文譯名是科學怪人，有人認為科學怪人是【 怪物 】，也有人是【 瘋狂科學家 】。'
+- - 書名意義
+  - '副標題是【 現代普羅米修斯 】。
+
+    普羅米修斯是希臘神話的神，他【 偷火種 】觸犯禁忌，不得善終。作者把弗蘭肯斯坦比喻為「現代普羅米修斯」，可能意味弗蘭肯斯坦同樣【 觸犯禁忌 】。
+
+    人類是否能【 創造生命 】？引發後世讀者熱烈討論。'
+- - 結語
+  - 科學的發展是不是該有【 道德倫理 】的界線？

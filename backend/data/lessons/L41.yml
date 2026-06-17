@@ -181,49 +181,7 @@ strategy_exercise:
     type: free_text
   - prompt: 在日常生活中，你有沒有遇過類似的情況——有人說了不合理的話，但很多人卻相信？請舉一個例子，並說明你會怎麼判斷真假
     type: free_text
-story_structure:
-- label: 結論
-  value: □可能會不看證據，做出匪夷所思的判斷
-story_structure_rows:
-- label: 主題
-  value: 信眾與教主
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 教主預言世界末日，信徒辭職、散盡家財追隨。
-  interactive_type: checkbox
-  hint: 關於教主預言
-  options:
-  - 教主預言世界末日，信徒辭職、散盡家財追隨。
-  - 教主預言世界末日，信徒半信半疑。
-  - 教主預言世界末日，信徒嘲笑教主。
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: 末日未發生，教主稱信徒虔誠感動外星人。
-  interactive_type: checkbox
-  hint: 末日預言結果
-  options:
-  - 末日未發生，教主承認預言錯誤。
-  - 末日未發生，教主稱信徒虔誠感動外星人。
-  - 末日未發生，信徒立刻離開教主。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 付出代價者更崇拜教主，質疑者則離開。
-  interactive_type: checkbox
-  hint: 信眾態度轉變
-  options:
-  - 所有信眾都對教主失望。
-  - 付出代價者更崇拜教主，質疑者則離開。
-  - 所有信眾對教主的忠誠度都提高。
-  correct_options:
-  - 1
-- label: 結論
-  value: 人們可能不顧事實，盲目相信信仰。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -259,3 +217,31 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L22.pdf
+story_structure_table:
+- - 信眾與教主
+- - 預言/事件
+  - '一位【 家庭主婦／宗教教主 】聲稱
+
+    【 世界末日 】即將來臨，洪水會淹沒全世界，只有【 信徒 】會被外星人用飛碟救走。'
+- - 研究問題
+  - 信眾對教主的態度是否因預言結果有所改變？
+- - 研究方法
+  - 三位心理學家潛入組織，匿名進行蒐集資料。
+- - 觀察結果
+  - 末日前
+  - 許多人心生恐懼，為了得到【 救贖 】而加入這個宗教。
+- - 觀察結果
+  - 末日當日
+  - 什麼都沒有發生　　□外星人出現。(單選)
+- - 觀察結果
+  - 末日後
+  - (1)原來就不太投入的人怎麼做？→【 離開 】
+- - 觀察結果
+  - 末日後
+  - (2)對教主付出很多的人怎麼做？→【 更加投入 】
+- - 研究結論
+  - '有特定信仰的人：(單選)
+
+    可能會不看證據，做出匪夷所思的判斷
+
+    □比較能根據證據做判斷。'

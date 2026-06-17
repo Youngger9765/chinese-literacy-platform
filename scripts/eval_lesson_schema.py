@@ -499,6 +499,7 @@ def main():
     parser.add_argument("--dev", action="store_true", help="Eval DEV set (7 professor lessons)")
     parser.add_argument("--test", action="store_true", help="Eval TEST set (15 held-out lessons)")
     parser.add_argument("--report", action="store_true", help="Full report (DEV + TEST + gap)")
+    parser.add_argument("--all", action="store_true", help="Eval all discovered DOCX lessons")
     args = parser.parse_args()
 
     bls = load_bls()
@@ -511,6 +512,35 @@ def main():
     if not lint_result["pass"]:
         for hit in lint_result["hits"]:
             print(hit)
+
+    if args.all:
+        import importlib.util
+        batch_spec = importlib.util.spec_from_file_location(
+            "batch", Path(__file__).parent / "batch_all_lessons.py"
+        )
+        batch = importlib.util.module_from_spec(batch_spec)
+        batch_spec.loader.exec_module(batch)
+        all_results = [
+            eval_lesson(lid, path, schema_dir, bls)
+            for lid, path in batch.discover_lessons()
+        ]
+        kp_eligible = [r for r in all_results if r.get("keypoints", {}).get("available")]
+        kp_pass = sum(1 for r in kp_eligible if r["keypoints"].get("pass"))
+        kp_fail = [
+            (r["lesson_id"], r["keypoints"])
+            for r in all_results
+            if r.get("keypoints", {}).get("available") and not r["keypoints"].get("pass")
+        ]
+        print(f"\n{'='*80}")
+        print(f"ALL LESSONS ({len(all_results)})")
+        print(f"{'='*80}")
+        print(f"Keypoints PASS: {kp_pass}/{len(kp_eligible)}")
+        print(f"Keypoints N/A:  {len(all_results) - len(kp_eligible)}")
+        if kp_fail:
+            print("FAILURES:")
+            for lid, kp in kp_fail:
+                print(f"  {lid}: row_recall={kp.get('row_recall')} blank_recall={kp.get('blank_recall')} label_family={kp.get('label_family_correct')}")
+        return
 
     if args.lesson_id and args.docx_path:
         # Single lesson eval

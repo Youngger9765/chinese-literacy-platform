@@ -188,57 +188,7 @@ strategy_exercise:
     answer: 1
   - prompt: 比較完這兩個計畫後，你覺得從阿波羅到阿提米絲，人類的太空探索有什麼重要的改變？請寫下你的想法
     type: free_text
-story_structure:
-- label: 主題
-  value: 女性太空人登月
-- label: 重要事實 1
-  value: NASA重啟登月計畫「阿提米絲」，將有女性太空人登月。
-- label: 重要事實 2
-  value: 女性在太空任務中，可能比男性更具優勢。
-- label: 重要事實 3
-  value: 阿提米絲計畫強調性別與族群平等，目標是探索火星。
-- label: 結論
-  value: 女性太空人參與，有助人類探索更遠的宇宙。
-story_structure_rows:
-- label: 主題
-  value: 女性太空人登月
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 阿波羅計畫的太空人都是男性
-  interactive_type: checkbox
-  hint: 阿波羅計畫的特色
-  options:
-  - 阿波羅計畫送了十二位女性登月
-  - 阿波羅計畫的太空人都是男性
-  - 阿波羅計畫在2022年重啟
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 阿提米絲計畫以女神命名，強調女性登月
-  interactive_type: checkbox
-  hint: 阿提米絲計畫的意義
-  options:
-  - 阿提米絲計畫只送女性登月
-  - 阿提米絲計畫以女神命名，強調女性登月
-  - 阿提米絲計畫只送男性登月
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 女性太空人可能更適合長途太空任務
-  interactive_type: checkbox
-  hint: 女性太空人的優勢
-  options:
-  - 女性消耗飲食和氧氣比男性少
-  - 女性情緒與精神表現較不穩定
-  - 女性體型高大強壯適合太空任務
-  correct_options:
-  - 0
-- label: 結論
-  value: 女性太空人的參與有助人類探索宇宙
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -273,3 +223,21 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 項目對象
+  - __
+  - 阿提米絲【 阿波羅 】
+- - 古希臘神話代表
+  - 太陽神
+  - 【 月亮女神 】
+- - 【年代】
+  - 1969年~1972年
+  - 【 2022年~2025年 】
+- - 【代表性別】
+  - 男性
+  - 【 女性 】
+- - 【太空人的優勢】
+  - 高大強壯
+  - '1.消耗的飲食與氧氣【 較少 】
+
+    2.【 幽閉 】環境中情緒與精神表現也比較【 穩定 】。'
