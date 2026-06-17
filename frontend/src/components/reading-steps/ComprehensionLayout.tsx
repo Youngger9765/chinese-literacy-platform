@@ -179,7 +179,7 @@ const StoryTextCard: React.FC<{
   progressLabel: string;
   className?: string;
 }> = ({ story, zhuyinLines, zhuyinActive, progressPercent, progressLabel, className = '' }) => (
-  <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0 ${className}`}>
+  <div data-comprehension-lesson-text className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0 ${className}`}>
     <div className="flex items-center gap-2 mb-4 shrink-0">
       <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
       <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
