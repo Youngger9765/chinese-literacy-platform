@@ -113,27 +113,34 @@ const GuidedStepsExercise: React.FC<Props> = ({
 
       // AI grade the answer (#2192 item 5). Lenient + encouraging; the backend
       // fails closed so the student is never blocked on an AI outage.
+      const fallbackGrade: StrategyGradeResult = {
+        is_correct: true,
+        feedback: '已記錄你的答案，做得好！',
+        suggestion: '',
+      };
+      const setGrade = (grade: StrategyGradeResult) =>
+        setTextGrades((prev) => prev.map((g, i) => (i === stepIdx ? grade : g)));
+
+      if (!token) {
+        // No auth token (e.g. test/preview without login) → record, don't block.
+        setGrade(fallbackGrade);
+        markStepDone(stepIdx);
+        return;
+      }
+
       setGradingIdx(stepIdx);
       try {
-        if (token) {
-          const grade = await validateStrategyAnswer(token, {
-            question: step.prompt ?? '',
-            studentAnswer: text,
-            strategyName: exercise.strategy_name,
-            storyTitle,
-            passage,
-          });
-          setTextGrades((prev) => prev.map((g, i) => (i === stepIdx ? grade : g)));
-        }
+        const grade = await validateStrategyAnswer(token, {
+          question: step.prompt ?? '',
+          studentAnswer: text,
+          strategyName: exercise.strategy_name,
+          storyTitle,
+          passage,
+        });
+        setGrade(grade);
       } catch {
         // Network/parse failure → record without feedback rather than blocking.
-        setTextGrades((prev) =>
-          prev.map((g, i) =>
-            i === stepIdx
-              ? { is_correct: true, feedback: '已記錄你的答案，做得好！', suggestion: '' }
-              : g,
-          ),
-        );
+        setGrade(fallbackGrade);
       } finally {
         setGradingIdx(null);
       }

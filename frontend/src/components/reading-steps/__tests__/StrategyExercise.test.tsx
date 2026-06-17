@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import StrategyExercise from '../StrategyExercise';
 import { StrategyExercise as StrategyExerciseType } from '../../../types';
-import { recordMcqAttempt } from '../../../services/learningApi';
+import { recordMcqAttempt, validateStrategyAnswer } from '../../../services/learningApi';
 
 // Stub auth + network so tests don't need providers or real API calls.
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -10,6 +10,7 @@ vi.mock('../../../contexts/AuthContext', () => ({
 }));
 vi.mock('../../../services/learningApi', () => ({
   recordMcqAttempt: vi.fn(),
+  validateStrategyAnswer: vi.fn(),
   mcqRescueStart: vi.fn(),
   mcqRescueRespond: vi.fn(),
   SessionExpiredError: class SessionExpiredError extends Error {},
@@ -51,6 +52,13 @@ const guidedTwoSelect: StrategyExerciseType = {
       answer: 1,
     },
   ],
+};
+
+const guidedFreeText: StrategyExerciseType = {
+  type: 'guided_steps',
+  strategy_name: '問題.解決.結果',
+  instruction: '用自己的話回答。',
+  steps: [{ prompt: '主角遇到什麼問題？', type: 'free_text' }],
 };
 
 const traitExercise: StrategyExerciseType = {
@@ -170,6 +178,65 @@ describe('trait_wrong_answer_records_attempt_and_opens_rescue_context', () => {
     pickOption('慷慨'); // correct
     fireEvent.click(screen.getByRole('button', { name: /送出答案/ }));
     expect(screen.queryByText(/問 AI 助教/)).toBeNull();
+  });
+});
+
+// ── free_text AI grading (#2192 item 5) ─────────────────────────────────────
+
+describe('guided_steps free_text AI grading', () => {
+  beforeEach(() => {
+    vi.mocked(validateStrategyAnswer).mockReset();
+  });
+
+  it('shows AI feedback after a free_text answer is graded', async () => {
+    vi.mocked(validateStrategyAnswer).mockResolvedValue({
+      is_correct: true,
+      feedback: '你抓到重點了！',
+      suggestion: '',
+    });
+    render(<StrategyExercise exercise={guidedFreeText} onComplete={vi.fn()} />);
+
+    fireEvent.change(screen.getByPlaceholderText(/寫下你的答案/), {
+      target: { value: '城門打不開' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /確認/ }));
+
+    expect(await screen.findByText('你抓到重點了！')).toBeTruthy();
+    expect(validateStrategyAnswer).toHaveBeenCalledWith(
+      'test-token',
+      expect.objectContaining({ studentAnswer: '城門打不開', question: '主角遇到什麼問題？' }),
+    );
+  });
+
+  it('shows suggestion hint when answer is off-track', async () => {
+    vi.mocked(validateStrategyAnswer).mockResolvedValue({
+      is_correct: false,
+      feedback: '方向對了，再想想看～',
+      suggestion: '試著找出主角卡關的地方',
+    });
+    render(<StrategyExercise exercise={guidedFreeText} onComplete={vi.fn()} />);
+
+    fireEvent.change(screen.getByPlaceholderText(/寫下你的答案/), {
+      target: { value: '不知道' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /確認/ }));
+
+    expect(await screen.findByText('方向對了，再想想看～')).toBeTruthy();
+    expect(screen.getByText('試著找出主角卡關的地方')).toBeTruthy();
+  });
+
+  it('falls back to 已記錄 and still completes when grading throws', async () => {
+    vi.mocked(validateStrategyAnswer).mockRejectedValue(new Error('network'));
+    const onComplete = vi.fn();
+    render(<StrategyExercise exercise={guidedFreeText} onComplete={onComplete} />);
+
+    fireEvent.change(screen.getByPlaceholderText(/寫下你的答案/), {
+      target: { value: '隨便寫' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /確認/ }));
+
+    expect(await screen.findByText(/已記錄你的答案/)).toBeTruthy();
+    expect(onComplete).toHaveBeenCalledTimes(1);
   });
 });
 
