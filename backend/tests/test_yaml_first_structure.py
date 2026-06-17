@@ -75,6 +75,40 @@ def test_sanitize_structure_strips_answers_from_client():
 
     ws_item = client["worksheet_rows"][1]["items"][0]
     assert "【 狗 】" not in ws_item["value"]
+    profile = client["interaction_profile"]
+    assert profile["mode"] == "fill_blank"
+    assert profile["template_kind"] == "psr"
+    assert profile["fill_blank_count"] >= 1
+
+
+def test_interaction_profile_mixed_rows():
+    """story_structure_rows-style mixed fill_blank + checkbox."""
+    from app.routes.stories import _derive_interaction_profile
+
+    structure = {
+        "layout": "cards",
+        "rows": [
+            {"label": "主題", "value": "x", "interactive_type": "fill_blank"},
+            {"label": "事實", "value": "y", "interactive_type": "checkbox", "options": ["a", "b"]},
+        ],
+    }
+    profile = _derive_interaction_profile(structure)
+    assert profile["mode"] == "mixed"
+    assert profile["fill_blank_count"] == 1
+    assert profile["checkbox_count"] == 1
+    assert profile["template_kind"] == "theme_facts"
+
+
+def test_interaction_profile_display_only():
+    from app.routes.stories import _derive_interaction_profile
+
+    structure = {
+        "rows": [
+            {"label": "步驟", "value": "閱讀對照", "interactive_type": "display"},
+        ],
+    }
+    profile = _derive_interaction_profile(structure)
+    assert profile["mode"] == "display_only"
 
 
 def test_three_cell_sub_row():

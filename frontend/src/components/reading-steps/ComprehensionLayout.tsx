@@ -435,7 +435,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            *   gallery), so practice no longer scrolls back to find the figure.
            * ══════════════════════════════════════════════════════════════════ */
           <div className="w-full h-full overflow-y-auto custom-scrollbar pr-1">
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8" data-comprehension-lesson-text>
               <div className="flex items-center gap-2 mb-5">
                 <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
