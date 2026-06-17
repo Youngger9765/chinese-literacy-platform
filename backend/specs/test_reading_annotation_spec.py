@@ -142,10 +142,31 @@ def test_annotation_save_request_max_500():
 # Contract: Router is registered
 # ---------------------------------------------------------------------------
 
+def _collect_router_paths(router) -> list[str]:
+    """Collect paths from a composed APIRouter across FastAPI versions.
+
+    FastAPI 0.137+ stores included routers as _IncludedRouter without a
+    top-level .path; traverse via .original_router when present.
+    """
+    paths: list[str] = []
+    for route in router.routes:
+        path = getattr(route, "path", None)
+        if path:
+            paths.append(path)
+            continue
+        nested = getattr(route, "original_router", None)
+        if nested is not None:
+            paths.extend(_collect_router_paths(nested))
+            continue
+        if hasattr(route, "routes"):
+            paths.extend(_collect_router_paths(route))
+    return paths
+
+
 def test_annotations_router_registered():
     """Contract: annotations router is registered in the learning package."""
     from app.routes.learning import router
-    routes = [r.path for r in router.routes if hasattr(r, "path")]
+    routes = _collect_router_paths(router)
     annotation_routes = [r for r in routes if "annotations" in r]
     assert len(annotation_routes) >= 2, (
         f"Expected at least 2 annotation routes (GET + PUT), found: {annotation_routes}"

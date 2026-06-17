@@ -1,7 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { formatTime } from '../../../utils/formatTime';
+import React, { useMemo } from 'react';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
-import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
+import { ParagraphSummaryData, LineResult, getLineResultForParagraph } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
 import { splitIntoSentences } from '../../../utils/localEval';
 import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
@@ -9,22 +8,11 @@ import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 import { useKaraoke } from '../../../context/KaraokeContext';
+import { interleavePunctuation } from '../../../utils/textDiff';
+import { getEncouragement } from '../../../utils/readingEncouragement';
 
-/* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
-
-const ENCOURAGE_TIERS: Array<{ min: number; color: string; msgs: string[] }> = [
-  { min: 0.95, color: 'text-emerald-600', msgs: ['完美！太流暢了！', '讀得超棒！', '太厲害了！', '好厲害，一字不差！'] },
-  { min: 0.80, color: 'text-green-600', msgs: ['讀得很好！', '棒棒！繼續加油！', '很不錯喔！', '表現很棒！'] },
-  { min: 0.65, color: 'text-green-600', msgs: ['讀得不錯！', '很好喔，再練一下更好！', '進步很多了！'] },
-  { min: 0.50, color: 'text-amber-600', msgs: ['有進步喔！再試一次會更好！', '很努力！繼續加油！', '你做得到的！'] },
-  { min: 0, color: 'text-amber-600', msgs: ['沒關係，我們再試一次！', '慢慢來，不著急！', '多練幾次就會了！'] },
-];
-
-function getEncouragement(matchRate: number): { text: string; color: string } {
-  const tier = ENCOURAGE_TIERS.find(t => matchRate >= t.min) ?? ENCOURAGE_TIERS[ENCOURAGE_TIERS.length - 1];
-  const idx = Math.floor(matchRate * 1000) % tier.msgs.length;
-  return { text: tier.msgs[idx], color: tier.color };
-}
+/** Per-sentence retry (record + eval). Off until short-sentence practice ships. */
+const SENTENCE_RETRY_UI_ENABLED = false;
 
 /* ── Component ──────────────────────────────────────────────────────────── */
 
@@ -116,14 +104,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   const isCurrentIdx = idx === currentLineIndex;
   const { karaokeEnabled } = useKaraoke();
 
-  /* ── Recording timer — counts up while isCurrentIdx && isSessionActive ── */
-  const isActiveRecording = isCurrentIdx && isSessionActive;
-  const [recordingSecs, setRecordingSecs] = useState(0);
-  useEffect(() => {
-    if (!isActiveRecording) { setRecordingSecs(0); return; }
-    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
-    return () => clearInterval(id);
-  }, [isActiveRecording]);
+  const displayDiffTokens = lastDiffTokens;
+
+  const readingResultTokens = useMemo(
+    () => (displayDiffTokens ? interleavePunctuation(line, displayDiffTokens) : null),
+    [line, displayDiffTokens],
+  );
 
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
@@ -243,21 +229,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         )}
       </p>
 
-      {/* ── Recording state: pulsing mic + timer indicator ─────── */}
-      {isCurrentIdx && isSessionActive && (
-        <div className="mt-8 flex justify-center">
-          <div className="flex items-center justify-center gap-3 py-2 px-4 rounded-2xl bg-red-50 border border-red-100">
-            <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
-              <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-            </span>
-            <span className="font-mono tabular-nums text-lg font-bold text-red-600">{formatTime(recordingSecs)}</span>
-            <span className="text-xs text-on-surface-variant">朗讀中・隨時可以停止</span>
-          </div>
-        </div>
-      )}
-
-      {/* Action buttons moved to LiveTutor fixed bottom CTA */}
+      {/* Recording indicator + CTA live in LiveTutorControls (fixed bottom bar) */}
 
       {/* ── Not current paragraph: small "go to" button ────────────── */}
       {!isCurrentIdx && status !== 'locked' && !isAdvancing && (
@@ -273,18 +245,19 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       )}
 
       {/* ── Diff token display (color-coded reading result) ────────── */}
-      {lastDiffTokens && !isSessionActive && (
+      {readingResultTokens && !isSessionActive && (
         <div className="mt-6 p-4 bg-surface-container-low rounded-2xl">
           <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">朗讀結果</p>
           <p className="text-lg leading-relaxed">
-            {lastDiffTokens.map((t, i) => (
+            {readingResultTokens.map((t, i) => (
               <span
                 key={i}
                 className={
+                  t.type === 'punctuation' ? 'text-on-surface' :
                   t.type === 'correct' ? 'text-emerald-600 font-medium' :
                   t.type === 'forgiven' ? 'text-blue-500' :
                   t.type === 'wrong' ? 'text-tertiary line-through' :
-                  t.type === 'missing' ? 'text-on-surface-variant/30' :
+                  t.type === 'missing' || t.type === 'unread' ? 'text-on-surface-variant/30' :
                   'text-on-surface'
                 }
               >
@@ -312,7 +285,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* CPM + accuracy scores (Issue #2147) */}
           {(() => {
-            const cpmVal = lineResults.find(r => r.lineIndex === idx)?.cpm ?? null;
+            const cpmVal = getLineResultForParagraph(lineResults, idx)?.cpm ?? null;
             const rate = paragraphSummary.matchRate;
             if (cpmVal === null) return null;
             const rateColor = rate >= 0.9 ? 'text-emerald-600' : rate >= 0.65 ? 'text-green-600' : 'text-amber-600';
@@ -328,6 +301,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                   <span className="material-symbols-outlined text-base text-on-surface-variant">check_circle</span>
                   <span className="text-on-surface-variant">正確率</span>
                   <span className={`font-bold ${rateColor}`}>{Math.round(rate * 100)}%</span>
+                  <span className="text-on-surface-variant text-xs">（不含標點、注音）</span>
                 </div>
               </div>
             );
@@ -378,7 +352,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               <div className="pt-3 border-t border-on-surface/10 space-y-2">
                 <p className="text-xs font-bold text-on-surface-variant mb-1">加強練習這幾句</p>
                 {failedSentences.map(({ text, si }) => {
-                  const isRetrying = retrySentenceIdx === si;
+                  const isRetrying = SENTENCE_RETRY_UI_ENABLED && retrySentenceIdx === si;
                   return (
                     <div
                       key={si}
@@ -387,7 +361,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                       }`}
                     >
                       <span className="flex-1 text-on-surface/80 leading-relaxed">{text}</span>
-                      {!isRetrying && (
+                      {SENTENCE_RETRY_UI_ENABLED && !isRetrying && (
                         <button
                           onClick={() => onRetrySentence(idx, si)}
                           className="px-3 py-1 rounded-full text-xs font-bold bg-accent/10 text-accent hover:bg-accent/20 transition-all shrink-0"
@@ -395,7 +369,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                           重練這句
                         </button>
                       )}
-                      {isRetrying && isSessionActive && (
+                      {SENTENCE_RETRY_UI_ENABLED && isRetrying && isSessionActive && (
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="flex items-center gap-1 text-xs text-amber-600">
                             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
@@ -409,7 +383,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                           </button>
                         </div>
                       )}
-                      {isRetrying && isPreparing && (
+                      {SENTENCE_RETRY_UI_ENABLED && isRetrying && isPreparing && (
                         <span className="text-xs text-on-surface-variant shrink-0">準備中...</span>
                       )}
                     </div>
@@ -419,8 +393,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             );
           })()}
 
-          {/* Action buttons — hidden during sentence retry */}
-          {retrySentenceIdx === undefined && (() => {
+          {/* Action buttons — hidden during sentence retry (when enabled) */}
+          {(!SENTENCE_RETRY_UI_ENABLED || retrySentenceIdx === undefined) && (() => {
             // Advancement is never blocked by score — retry suggestions are advisory UI only. (#1318, #2185)
             const canAdvance = true; // advancement is never blocked by score
 

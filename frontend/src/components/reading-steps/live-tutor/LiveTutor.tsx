@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useReducer } from 'react';
-import { Story, ReadingAttempt, DiffToken } from '../../../types';
+import { Story, ReadingAttempt } from '../../../types';
 import { useZhuyin } from '../../../context/ZhuyinContext';
 import { useFontSize } from '../../ui/FontSizeControl';
 import { cancelTts } from '../../../services/ttsApi';
@@ -10,6 +10,7 @@ import { useAudioRecorder } from '../../../hooks/useAudioRecorder';
 import { transcribeReading } from '../../../services/learning/session';
 import { useAuth } from '../../../contexts/AuthContext';
 import { splitIntoSentences } from '../../../utils/localEval';
+import { normalizePunctuationToChinese } from '../../../utils/textDiff';
 import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 import ReadingMetricsCard from '../full-reading/ReadingMetricsCard';
 import { fontForZhuyin } from '../../../constants/fonts';
@@ -22,9 +23,14 @@ import {
 } from './hooks/useParagraphEvaluation';
 import { useSentenceRetry } from './hooks/useSentenceRetry';
 import LiveTutorControls from './LiveTutorControls';
-import LiveTutorFeedbackDrawer from './LiveTutorFeedbackDrawer';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
+import { getLineResultForParagraph } from './liveTutorTypes';
+import {
+  planParagraphEvalRestore,
+  resolveDisplayLastDiffTokens,
+  resolveDisplayParagraphSummary,
+} from './paragraphEvalRestore';
 
 /* ------------------------------------------------------------------ */
 /*  Small sub-components                                               */
@@ -95,11 +101,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const clearParagraphFallback = useCallback(() => setParagraphFallbackReason(null), []);
 
   // ── P1: double-submit race guard (Issue #2156 Round 4) ───────────────────
-  // submitSentence is async (awaits stopAndGetBlob + Gemini API). Without a
-  // lock, tapping "Submit" twice fires two parallel evaluations for the same
-  // paragraph, causing duplicate scoring and two concurrent mic stops.
+  // confirmEvaluate is async (Gemini API). Lock prevents duplicate scoring.
   const isSubmittingSentenceRef = useRef(false);
   const [isSubmittingSentence, setIsSubmittingSentence] = useState(false);
+
+  /** After 完成: paused recording awaiting 評估 or 重錄. */
+  const [recordingPendingReview, setRecordingPendingReview] = useState(false);
+  const pendingRecordingRef = useRef<{
+    transcript: string;
+    rawStt: string;
+    durationMs: number;
+    audioBlob: Blob | null;
+  } | null>(null);
+  const isFinishingRecordingRef = useRef(false);
 
   // ── Evaluation state machine ─────────────────────────────────────────────
   const [evalState, dispatch] = useReducer(evalReducer, initialEvalState);
@@ -174,8 +188,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   // ── UI state ─────────────────────────────────────────────────────────────
   const [noAudioDetected, setNoAudioDetected] = useState(false);
+  const [hasDetectedAudio, setHasDetectedAudio] = useState(false);
   const [micError, setMicError] = useState('');
-  const [showFeedback, setShowFeedback] = useState(false);
 
   // ── STT hook ─────────────────────────────────────────────────────────────
   const stt = useLiveTutorSpeech({
@@ -204,19 +218,87 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setIsTtsPaused(false);
     },
     onSessionReady: () => {},
-    onNoAudioDetected: () => setNoAudioDetected(true),
+    // No-audio banner uses AnalyserNode volume (paragraphRecorder), not Web Speech.
   });
+
+  // AnalyserNode volume: clear "no audio" banner as soon as the mic picks up sound.
+  const VOLUME_THRESHOLD = 0.06;
+  const VOLUME_SUSTAIN_MS = 150;
+  const NO_AUDIO_TIMEOUT_MS = 4000;
+  const hasHeardAudioRef = useRef(false);
+  const volumeAboveSinceRef = useRef<number | null>(null);
+  const noAudioTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearNoAudioTimer = useCallback(() => {
+    if (noAudioTimerRef.current !== null) {
+      clearTimeout(noAudioTimerRef.current);
+      noAudioTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (paragraphRecorder.status !== 'recording') {
+      clearNoAudioTimer();
+      return;
+    }
+    clearNoAudioTimer();
+    noAudioTimerRef.current = setTimeout(() => {
+      if (!hasHeardAudioRef.current) {
+        setNoAudioDetected(true);
+      }
+      noAudioTimerRef.current = null;
+    }, NO_AUDIO_TIMEOUT_MS);
+    return clearNoAudioTimer;
+  }, [paragraphRecorder.status, clearNoAudioTimer]);
+
+  useEffect(() => {
+    if (paragraphRecorder.status !== 'recording') {
+      volumeAboveSinceRef.current = null;
+      return;
+    }
+    if (paragraphRecorder.volumeLevel < VOLUME_THRESHOLD) {
+      volumeAboveSinceRef.current = null;
+      return;
+    }
+    const now = Date.now();
+    if (volumeAboveSinceRef.current === null) {
+      volumeAboveSinceRef.current = now;
+      return;
+    }
+    if (now - volumeAboveSinceRef.current < VOLUME_SUSTAIN_MS) return;
+    hasHeardAudioRef.current = true;
+    setHasDetectedAudio(true);
+    setNoAudioDetected(false);
+    clearNoAudioTimer();
+  }, [paragraphRecorder.volumeLevel, paragraphRecorder.status, clearNoAudioTimer]);
 
   const startSession = useCallback(() => {
     setNoAudioDetected(false);
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    clearNoAudioTimer();
     clearParagraphFallback();
-    // Start paragraph audio recorder alongside STT (I1 — Gemini primary source)
-    paragraphRecorder.startRecording().catch(() => {
-      // recorder failure is non-critical — Web Speech fallback still works
-    });
-    stt.startSession();
-  }, [stt, paragraphRecorder, clearParagraphFallback]);
-  const stopSession = stt.stopSession;
+    void (async () => {
+      const recorderError = await paragraphRecorder.startRecording();
+      if (recorderError) {
+        setMicError(recorderError);
+      }
+      stt.startSession();
+    })();
+  }, [stt, paragraphRecorder, clearParagraphFallback, clearNoAudioTimer]);
+
+  const stopSessionRaw = stt.stopSession;
+
+  const clearPendingRecording = useCallback(() => {
+    pendingRecordingRef.current = null;
+    setRecordingPendingReview(false);
+  }, []);
+
+  const stopSession = useCallback(() => {
+    clearPendingRecording();
+    stopSessionRaw();
+  }, [clearPendingRecording, stopSessionRaw]);
 
   // ── Paragraph evaluation hook ────────────────────────────────────────────
   const { evaluateAndRespond, geminiGenRef, geminiTimeoutRef } = useParagraphEvaluation({
@@ -253,41 +335,83 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   // Sync retry ref for STT hook
   retrySentenceInfoRef.current = sentenceRetry.retrySentenceInfoRef.current;
 
-  // ── submitSentence ───────────────────────────────────────────────────────
-  // Use refs to avoid stale closures in async callbacks
+  // ── Recording finish → 評估 / 重錄 ─────────────────────────────────────
   const evaluateAndRespondRef = useRef(evaluateAndRespond);
   evaluateAndRespondRef.current = evaluateAndRespond;
   const handleSentenceRetryEvalRef = useRef(sentenceRetry.handleSentenceRetryEval);
   handleSentenceRetryEvalRef.current = sentenceRetry.handleSentenceRetryEval;
 
-  const submitSentence = useCallback(async () => {
-    // P1 Round 4: double-submit race guard.
-    // submitSentence is async — a second tap before the first resolves would fire
-    // duplicate scoring and two concurrent mic-stop calls.  Use a ref (not state)
-    // for the guard to avoid stale-closure issues inside the callback.
-    if (isSubmittingSentenceRef.current) return;
+  const finishRecording = useCallback(async () => {
+    if (isFinishingRecordingRef.current || recordingPendingReview || isSubmittingSentenceRef.current) {
+      return;
+    }
+    if (!stt.isSessionActive && paragraphRecorder.status !== 'recording') {
+      return;
+    }
+
+    isFinishingRecordingRef.current = true;
+    try {
+      const { transcript, rawStt, durationMs: sttDurationMs } = stt.submitSentence();
+      const recorderDurationMs = paragraphRecorder.getRecordingDurationMs();
+      const durationMs = Math.max(recorderDurationMs, sttDurationMs, 500);
+      stopSessionRaw();
+      clearNoAudioTimer();
+      setNoAudioDetected(false);
+      const audioBlob = await paragraphRecorder.stopAndGetBlob();
+      pendingRecordingRef.current = { transcript, rawStt, durationMs, audioBlob };
+      setRecordingPendingReview(true);
+    } finally {
+      isFinishingRecordingRef.current = false;
+    }
+  }, [
+    stt,
+    paragraphRecorder,
+    recordingPendingReview,
+    stopSessionRaw,
+    clearNoAudioTimer,
+  ]);
+
+  const confirmRerecord = useCallback(() => {
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    dispatch({ type: 'SET_STREAMING', value: '' });
+    dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
+    startSession();
+  }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, startSession, dispatch]);
+
+  const confirmCancel = useCallback(() => {
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    dispatch({ type: 'SET_STREAMING', value: '' });
+    dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
+  }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
+
+  const confirmEvaluate = useCallback(async () => {
+    const pending = pendingRecordingRef.current;
+    if (!pending || isSubmittingSentenceRef.current) return;
+
     isSubmittingSentenceRef.current = true;
     setIsSubmittingSentence(true);
+    setRecordingPendingReview(false);
 
     try {
-      const { transcript, rawStt, durationMs } = stt.submitSentence();
-
-      // ── Gemini audio transcription for paragraph (I1 — audio primary) ────────
-      // P1#1 fix: use stopAndGetBlob() which awaits the MediaRecorder onstop event.
-      // The old pattern (stopRecording() → synchronous audioBlob read) always returned
-      // null because onstop fires asynchronously after .stop() is called.
-      const audioBlob = await paragraphRecorder.stopAndGetBlob();
+      const { transcript, rawStt, durationMs, audioBlob } = pending;
+      pendingRecordingRef.current = null;
 
       if (sentenceRetry.retrySentenceInfoRef.current) {
-        // Sentence retry path: paragraph recorder is already stopped (from prior submitSentence).
-        // No fresh blob is available for this sentence fragment.
-        // I4 compliance: show fallback banner so it's not silent about using Web Speech.
-        setParagraphFallbackReason('no_audio');
+        if (!audioBlob) {
+          setParagraphFallbackReason('no_audio');
+        }
         await handleSentenceRetryEvalRef.current(transcript, durationMs);
       } else if (audioBlob || transcript) {
-        // P2#1: audioBlob takes priority — try Gemini even if Web Speech returned empty string
-        // (student may have spoken but STT returned nothing; Gemini can still transcribe).
-        // P1#4: track whether we got a Gemini transcript to pass correct `source` to evaluateAndRespond.
         let finalTranscript = transcript;
         let transcriptSource: 'gemini' | 'webspeech' = 'webspeech';
 
@@ -300,34 +424,43 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               finalTranscript = result.transcript;
               transcriptSource = 'gemini';
             } else {
-              // I4: Gemini returned fallback.
               setParagraphFallbackReason(result.reason ?? 'error');
-              // finalTranscript stays as Web Speech; transcriptSource stays 'webspeech'
             }
           } catch {
             setParagraphFallbackReason('error');
           }
         } else {
-          // P1#3: no blob or no token — I4 alert.
           setParagraphFallbackReason(audioBlob ? 'no_token' : 'no_audio');
         }
 
-        // Only score if we have something to score.
         if (finalTranscript.trim()) {
-          await evaluateAndRespondRef.current(finalTranscript, rawStt, durationMs, currentLineIndex, transcriptSource);
+          const normalizedTranscript = normalizePunctuationToChinese(finalTranscript);
+          await evaluateAndRespondRef.current(
+            normalizedTranscript,
+            rawStt,
+            durationMs,
+            currentLineIndex,
+            transcriptSource,
+          );
         }
       }
     } finally {
       isSubmittingSentenceRef.current = false;
       setIsSubmittingSentence(false);
     }
-  }, [stt, sentenceRetry.retrySentenceInfoRef, currentLineIndex,
-      paragraphRecorder.stopAndGetBlob,
-      token, story.content, clearParagraphFallback, setParagraphFallbackReason]);
+  }, [
+    sentenceRetry.retrySentenceInfoRef,
+    currentLineIndex,
+    token,
+    story.content,
+    clearParagraphFallback,
+    setParagraphFallbackReason,
+  ]);
 
   // ── handleRetryParagraph ─────────────────────────────────────────────────
   const handleRetryParagraph = useCallback(
     (idx: number) => {
+      clearPendingRecording();
       if (idx !== currentLineIndex) {
         stopSession();
         setCurrentLineIndex(idx);
@@ -340,6 +473,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         delete next[idx];
         return next;
       });
+      setLineResults((prev) => prev.filter((r) => r.lineIndex !== idx));
       dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
       const targets = splitIntoSentences(story.content[idx] || '');
       sentenceTargetsRef.current = targets;
@@ -359,10 +493,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       stopSession,
       startSession,
       setParagraphSummaries,
+      setLineResults,
       sentenceRetry,
       dispatch,
       paragraphRecorder,
       clearParagraphFallback,
+      clearPendingRecording,
     ],
   );
 
@@ -404,22 +540,32 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     streakRef.current = evalState.streak;
   }, [evalState.streak]);
 
-  // ── Init sentence targets when paragraph changes ─────────────────────────
+  // ── Init / restore sentence state when paragraph changes ────────────────
   useEffect(() => {
     const targets = splitIntoSentences(story.content[currentLineIndex] || '');
     sentenceTargetsRef.current = targets;
-    sentenceResultsRef.current = new Array(targets.length).fill(null);
-    nextSentenceIdxRef.current = 0;
-    lastFinalResultIdxRef.current = -1;
-    dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
-    // Reset paragraph recorder + fallback when paragraph changes (I4: stale alerts must not persist)
+
+    const existingResult = getLineResultForParagraph(lineResults, currentLineIndex);
+    const existingSummary = paragraphSummaries[currentLineIndex];
+    const restorePlan = planParagraphEvalRestore(existingResult, existingSummary, targets.length);
+
+    if (restorePlan.kind === 'restore') {
+      sentenceResultsRef.current = restorePlan.sentenceResults;
+      nextSentenceIdxRef.current = restorePlan.nextSentenceIdx;
+      lastFinalResultIdxRef.current = restorePlan.lastFinalResultIdx;
+      dispatch(restorePlan.dispatchAction);
+      dispatch({ type: 'RESET_RETRY' });
+    } else {
+      sentenceResultsRef.current = new Array(targets.length).fill(null);
+      nextSentenceIdxRef.current = 0;
+      lastFinalResultIdxRef.current = -1;
+      dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    }
+
     paragraphRecorder.clearRecording();
     clearParagraphFallback();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLineIndex, story.content]);
-  // Note: paragraphRecorder and clearParagraphFallback intentionally excluded
-  // from deps — they are stable (refs + stable callbacks) and including them
-  // would re-run this effect unnecessarily.
 
   // ── Persist progress to localStorage ────────────────────────────────────
   useEffect(() => {
@@ -451,13 +597,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, []);
 
   // ── Scroll helpers ───────────────────────────────────────────────────────
-  const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const didInitialScrollRef = useRef(false);
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [evalState.streamingUserInput]);
 
   useEffect(() => {
     if (!didInitialScrollRef.current) {
@@ -491,22 +632,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Derived: right panel diff tokens ─────────────────────────────────────
-  const rightPanelDiffTokens: DiffToken[] | null = (() => {
-    const { lastDiffTokens } = evalState;
-    if (lastDiffTokens && lastDiffTokens.length > 0) return lastDiffTokens;
-    for (let i = lineResults.length - 1; i >= 0; i--) {
-      if (
-        lineResults[i].lineIndex === currentLineIndex &&
-        lineResults[i].diffTokens?.length > 0
-      ) {
-        return lineResults[i].diffTokens;
-      }
-    }
-    return null;
-  })();
-
   const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
+  const savedLineResult = getLineResultForParagraph(lineResults, currentLineIndex);
+  const hideStaleEval =
+    stt.isSessionActive || recordingPendingReview || isSubmittingSentence;
+  const displayLastDiffTokens = resolveDisplayLastDiffTokens(
+    evalState.lastDiffTokens,
+    paragraphSummary,
+    savedLineResult,
+    hideStaleEval,
+  );
+  const displayParagraphSummary = resolveDisplayParagraphSummary(
+    paragraphSummary,
+    hideStaleEval,
+  );
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -539,10 +678,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               utteranceRef={utteranceRef}
               ttsRafRef={ttsRafRef}
               streamingUserInput={evalState.streamingUserInput}
-              lastDiffTokens={evalState.lastDiffTokens}
+              lastDiffTokens={displayLastDiffTokens}
               isAwaitingGemini={evalState.isAwaitingGemini}
               retryCount={evalState.retryCount}
-              paragraphSummary={paragraphSummary}
+              paragraphSummary={displayParagraphSummary}
               completedParagraphs={completedParagraphs}
               storyLength={story.content.length}
               lineResults={lineResults}
@@ -551,7 +690,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               onTtsToggle={handleTtsToggle}
               onStartSession={startSession}
               onStopSession={stopSession}
-              onSubmitSentence={submitSentence}
+              onSubmitSentence={finishRecording}
               onRetryParagraph={handleRetryParagraph}
               onRetrySentence={sentenceRetry.handleRetrySentence}
               retrySentenceIdx={
@@ -590,7 +729,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       )}
 
       {/* No-audio-detected banner */}
-      {noAudioDetected && stt.isSessionActive && (
+      {noAudioDetected && paragraphRecorder.status === 'recording' && (
         <NoAudioBanner onRestart={() => {
           // P1 Round 4: stop the old paragraph recorder BEFORE starting a new session.
           // The previous onRestart only called stopSession() (STT) + startSession(), which
@@ -638,38 +777,23 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         isAdvancing={isAdvancing}
         isAwaitingGemini={evalState.isAwaitingGemini}
         isSubmittingSentence={isSubmittingSentence}
-        streamingUserInput={evalState.streamingUserInput}
-        lastDiffTokens={evalState.lastDiffTokens}
+        recordingPendingReview={recordingPendingReview}
+        hasDetectedAudio={hasDetectedAudio}
+        volumeLevel={paragraphRecorder.volumeLevel}
+        lastDiffTokens={displayLastDiffTokens}
         retryCount={evalState.retryCount}
         ttsError={ttsError}
         completedCount={completedParagraphs.size}
         totalLines={story.content.length}
-        hasParagraphSummary={!!paragraphSummary}
-        showFeedback={showFeedback}
         onStartSession={startSession}
-        onSubmitSentence={submitSentence}
+        onFinishRecording={finishRecording}
+        onConfirmEvaluate={confirmEvaluate}
+        onConfirmRerecord={confirmRerecord}
+        onConfirmCancel={confirmCancel}
         onSpeakCurrentParagraph={speakCurrentParagraph}
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
-        onToggleFeedback={() => setShowFeedback((v) => !v)}
-      />
-
-      {/* ── Feedback drawer ──────────────────────────────────────────── */}
-      <LiveTutorFeedbackDrawer
-        show={showFeedback}
-        onClose={() => setShowFeedback(false)}
-        scrollRef={scrollRef as React.RefObject<HTMLDivElement>}
-        isSessionActive={stt.isSessionActive}
-        isPreparing={stt.isPreparing}
-        streamingUserInput={evalState.streamingUserInput}
-        rightPanelDiffTokens={rightPanelDiffTokens}
-        paragraphSummary={paragraphSummary}
-        currentLineIndex={currentLineIndex}
-        totalLines={story.content.length}
-        completedCount={completedParagraphs.size}
-        retryCount={evalState.retryCount}
-        micError={micError}
       />
 
       {/* Background decoration */}

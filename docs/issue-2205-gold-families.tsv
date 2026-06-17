@@ -1,0 +1,23 @@
+lesson_id	grade	strategy_type	family	notes
+G6-L22	6	summary_pse	keypoints	DEV
+G6-L23	6	summary_pse	keypoints	DEV
+G6-L24	6	summary_pse	keypoints	DEV
+G6-L25	6	summary_pse	keypoints	DEV
+G7-L28	7	image_text	image_table	DEV
+G7-L29	7	image_text	image_table	DEV
+G7-L30	7	table_text	image_table	DEV
+G4-SL10	4	emotion_inference	guided_steps	TEST
+G4-SL13	4	perspective_taking	guided_steps	TEST
+G5-SL7	5	main_idea_inference	guided_steps	TEST (double-bracket filename)
+G5-SL10	5	trait_inference	guided_steps	TEST (no match table in this course)
+G5-SL26	5	comparison	comparison_table	TEST (double-bracket filename)
+G6-SL3	6	scientific_inquiry	guided_steps	TEST
+G6-SL8	6	summary_structure	guided_steps	TEST (paragraph-level blanks, no fill-table)
+G6-SL14	6	self_questioning	guided_steps	TEST
+G7-SL9	7	express_opinion	guided_steps	TEST
+G7-SL17	7	scientific_inquiry	guided_steps	TEST
+G7-SL19	7	self_questioning	guided_steps	TEST
+G8-SL4	8	main_idea_inference	guided_steps	TEST
+G8-SL8	8	causal_inference	guided_steps	TEST
+G9-SL9	9	image_text	image_table	TEST
+文-SL5	wen	classical_grammar	guided_steps	TEST (no spotlight section in classical texts)

@@ -63,6 +63,91 @@ def clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.replace("　", " ")).strip()
 
 
+# ---------- caption (圖N / 表N 圖說) helpers (#2218) ----------
+#
+# 圖文整合課文的「圖N …／表N …」圖說/表說行，在 docx 課文表格 cell 內是獨立一行。
+# 舊版 split_story_paragraphs 會把整行當成課文段落留在 paragraphs[]，導致圖說在閱讀頁
+# 被當成課文內文 render（#2218），而 images[].caption 反而是空的。
+#
+# 判別規則必須與前端 utils/paragraphMarkers.ts 一致：
+#   圖說行 = ^(圖|表)[一二三…十]<空白>非空白...
+#   行首標記後「緊接空白」才是圖說；緊接 CJK（例「表一比較了…」「圖三進一步說明…」）
+#   是正常課文句子，**不可**剝離。
+
+CN_NUMERALS: dict[str, int] = {
+    "一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
+    "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
+}
+# 行首「圖N␠」/「表N␠」(N 為中文數字)；標記後必須是空白 + 非空白內容才算圖說行。
+CAPTION_ROW_RE = re.compile(r"^(圖|表)([一二三四五六七八九十])[\s　]+(\S.*)$")
+
+
+def detect_caption_row(text: str) -> Optional[dict]:
+    """偵測單行是否為「圖N …／表N …」圖說/表說行。
+
+    Returns {kind: '圖'|'表', number: int, label: '圖一', caption: str} or None.
+    與前端 detectImageMarker/detectTableMarker 同規則（標記後需緊接空白）。
+    """
+    if not text:
+        return None
+    m = CAPTION_ROW_RE.match(text.strip())
+    if not m:
+        return None
+    kind, cn, rest = m.group(1), m.group(2), m.group(3).strip()
+    num = CN_NUMERALS.get(cn)
+    if num is None or not rest:
+        return None
+    return {"kind": kind, "number": num, "label": f"{kind}{cn}", "caption": rest}
+
+
+def split_caption_rows(paragraphs: list[str]) -> tuple[list[str], list[dict]]:
+    """從段落清單分離「圖N／表N」圖說行 (#2218)。
+
+    Returns (body_paragraphs, caption_rows)，caption_rows 為 detect_caption_row 的 dict。
+    body 段落仍保留句中以 inline 方式提及的「如圖一」「從表二可知」等（不是行首圖說）。
+    """
+    body: list[str] = []
+    captions: list[dict] = []
+    for p in paragraphs:
+        cap = detect_caption_row(p)
+        if cap is not None:
+            captions.append(cap)
+        else:
+            body.append(p)
+    return body, captions
+
+
+def assign_captions_to_images(images: list[dict], caption_rows: list[dict]) -> None:
+    """把「圖N」圖說寫進對應 image 的 caption / figure_label (#2218)。
+
+    對應策略（與前端 ComprehensionLayout.buildFigureIndex 一致）：
+      1. 若 image 已有 figure_label（如「圖一」），以該標記的數字配對。
+      2. 否則用陣列序位 (idx+1) 當 fallback figure number。
+    只填空的 caption，不覆寫既有值。表說（表N）不寫進 images（表格另有 tables[].title）。
+    """
+    if not images:
+        return
+    image_caps = {c["number"]: c["caption"] for c in caption_rows if c["kind"] == "圖"}
+    if not image_caps:
+        return
+    for idx, img in enumerate(images):
+        label = img.get("figure_label") or ""
+        num = None
+        m = re.search(r"圖\s*([一二三四五六七八九十]|\d+)", label)
+        if m:
+            tok = m.group(1)
+            num = CN_NUMERALS.get(tok) or (int(tok) if tok.isdigit() else None)
+        if num is None:
+            num = idx + 1  # positional fallback
+        cap = image_caps.get(num)
+        if cap and not img.get("caption"):
+            img["caption"] = cap
+            if not img.get("figure_label"):
+                cn = next((k for k, v in CN_NUMERALS.items() if v == num), None)
+                if cn:
+                    img["figure_label"] = f"圖{cn}"
+
+
 def extract_lesson_code_from_filename(filename: str) -> Optional[str]:
     """
     從檔名抽出 lesson code，如:
@@ -711,9 +796,19 @@ def parse_lesson(doc_path: Path, lesson_code: str, images_base: Path) -> tuple[d
             result["flags"].append("title_empty")
 
         paras_list = split_story_paragraphs(story_text)
+        # #2218: 剝離「圖N …／表N …」圖說行，避免被當成課文段落 render。
+        # caption_rows 稍後 (--- 圖片 extract ---) 寫進 images[].caption。
+        paras_list, caption_rows = split_caption_rows(paras_list)
+        result["_caption_rows"] = caption_rows  # internal; popped before save
         result["paragraphs"] = paras_list
         result["paragraph_count"] = len(paras_list)
-        result["char_count"] = len(story_text.replace(" ", ""))
+        if caption_rows:
+            # 有圖說行被剝離時，story_text / char_count 須與 paragraphs 同步，
+            # 否則 story_text 仍含被移除的圖說。無圖說行時維持原行為（不動）。
+            result["story_text"] = "\n".join(paras_list)
+            result["char_count"] = sum(len(p) for p in paras_list)
+        else:
+            result["char_count"] = len(story_text.replace(" ", ""))
     else:
         result["title"] = ""
         result["authors"] = ""
@@ -795,6 +890,9 @@ def parse_lesson(doc_path: Path, lesson_code: str, images_base: Path) -> tuple[d
     # --- 圖片 extract (with metadata) ---
     img_output_dir = images_base / lesson_code
     images = extract_images_with_metadata(doc, img_output_dir, lesson_code)
+    # #2218: 把先前剝離的「圖N」圖說寫進對應 image 的 caption。
+    caption_rows = result.pop("_caption_rows", [])
+    assign_captions_to_images(images, caption_rows)
     result["images"] = images
     result["image_count"] = len(images)
 

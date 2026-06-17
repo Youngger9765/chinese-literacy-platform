@@ -283,3 +283,121 @@ export function getSecBenchmarkFeedback(
   }
   return null;
 }
+
+/** Three-tier fluency rating derived from lesson reading_benchmark. */
+export type FluencyTierRating = 'low' | 'mid' | 'high';
+
+export interface AiFluencyInsight {
+  rating: FluencyTierRating;
+  benchmarkFeedback: string;
+  metricValue: number;
+  metricUnit: 'cpm' | 'sec';
+  rangeLabel: string;
+  /** Distance to the lesson's recommended mid tier; null when already there or better. */
+  gapToMidTier: number | null;
+  midTierLabel: string | null;
+}
+
+function mapBenchmarkIndexToRating(
+  idx: number,
+  total: number,
+  useSec: boolean
+): FluencyTierRating {
+  if (total === 1) return 'mid';
+  if (idx === 0) return useSec ? 'high' : 'low';
+  if (idx === total - 1) return useSec ? 'low' : 'high';
+  return 'mid';
+}
+
+export function formatCpmRangeLabel(level: BenchmarkLevel): string {
+  if (level.maxCpm === Infinity) return `${level.minCpm} 字/分以上`;
+  if (level.minCpm === 0) return `${level.maxCpm + 1} 字/分以下`;
+  return `${level.minCpm}~${level.maxCpm} 字/分鐘`;
+}
+
+export function formatSecRangeLabel(level: BenchmarkLevelSec): string {
+  if (level.maxSec === Infinity) return `${level.minSec} 秒以上`;
+  if (level.minSec === 0) return `${level.maxSec} 秒以下`;
+  return `${level.minSec}~${level.maxSec} 秒`;
+}
+
+function getMidTierIndex(levels: ParsedBenchmark[]): number {
+  if (levels.length <= 1) return 0;
+  return 1;
+}
+
+/**
+ * Build objective AI fluency insight for self-assessment comparison (Issue #1386).
+ * Uses lesson reading_benchmark tiers — no pejorative low/mid/high labels in UI copy.
+ */
+export function getAiFluencyInsight(
+  cpm: number,
+  durationMs: number,
+  levels: ParsedBenchmark[]
+): AiFluencyInsight | null {
+  if (levels.length === 0) return null;
+
+  const useSec = 'unit' in levels[0];
+  const midIdx = getMidTierIndex(levels);
+
+  if (useSec) {
+    const durationSec = Math.round((durationMs / 1000) * 10) / 10;
+    let matchedIdx = -1;
+    let matched: BenchmarkLevelSec | null = null;
+    for (let i = 0; i < levels.length; i++) {
+      const level = levels[i] as BenchmarkLevelSec;
+      if (durationSec >= level.minSec && durationSec <= level.maxSec) {
+        matchedIdx = i;
+        matched = level;
+        break;
+      }
+    }
+    if (matchedIdx === -1 || !matched) return null;
+
+    const midLevel = levels[midIdx] as BenchmarkLevelSec;
+    let gapToMidTier: number | null = null;
+    if (matchedIdx > midIdx) {
+      // Slower than recommended — need to shave seconds off
+      gapToMidTier = Math.max(0, Math.round((durationSec - midLevel.maxSec) * 10) / 10);
+    }
+
+    return {
+      rating: mapBenchmarkIndexToRating(matchedIdx, levels.length, true),
+      benchmarkFeedback: matched.feedback,
+      metricValue: durationSec,
+      metricUnit: 'sec',
+      rangeLabel: formatSecRangeLabel(matched),
+      gapToMidTier,
+      midTierLabel: formatSecRangeLabel(midLevel),
+    };
+  }
+
+  const roundedCpm = Math.round(cpm);
+  let matchedIdx = -1;
+  let matched: BenchmarkLevel | null = null;
+  for (let i = 0; i < levels.length; i++) {
+    const level = levels[i] as BenchmarkLevel;
+    if (roundedCpm >= level.minCpm && roundedCpm <= level.maxCpm) {
+      matchedIdx = i;
+      matched = level;
+      break;
+    }
+  }
+  if (matchedIdx === -1 || !matched) return null;
+
+  const midLevel = levels[midIdx] as BenchmarkLevel;
+  let gapToMidTier: number | null = null;
+  if (matchedIdx < midIdx && roundedCpm < midLevel.minCpm) {
+    gapToMidTier = midLevel.minCpm - roundedCpm;
+  }
+
+  return {
+    rating: mapBenchmarkIndexToRating(matchedIdx, levels.length, false),
+    benchmarkFeedback: matched.feedback,
+    metricValue: roundedCpm,
+    metricUnit: 'cpm',
+    rangeLabel: formatCpmRangeLabel(matched),
+    gapToMidTier,
+    midTierLabel: formatCpmRangeLabel(midLevel),
+  };
+}

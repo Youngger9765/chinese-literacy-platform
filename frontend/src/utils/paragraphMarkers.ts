@@ -31,6 +31,15 @@ const CN_NUMERALS: Record<string, number> = {
 const IMAGE_CAPTION_RE = /^圖([一二三四五六七八九十])[\s　]+\S/;
 const TABLE_CAPTION_RE = /^表([一二三四五六七八九十])[\s　]+\S/;
 
+// Body-sentence intro for a table, e.g. `表一比較了...`, `表二則說明了...`.
+// Distinguished from a caption row by the ABSENCE of whitespace after 表N
+// (a CJK char follows immediately). Used as the inline anchor when a lesson
+// has no standalone `表N …` caption row (e.g. after #2218 stripped them from
+// G7-L30 paragraphs). Anchoring to the intro sentence keeps the table inline at
+// its natural reference point — the table renders right after the paragraph that
+// first explains it, rather than vanishing to the bottom-of-article fallback.
+const TABLE_BODY_INTRO_RE = /^表([一二三四五六七八九十])(?![\s　])\S/;
+
 /**
  * Detect whether a paragraph is an image caption row.
  * Returns the 1-based marker number (e.g. 1 for 圖一) or null.
@@ -49,6 +58,23 @@ export function detectImageMarker(text: string): number | null {
 export function detectTableMarker(text: string): number | null {
   if (!text) return null;
   const m = text.match(TABLE_CAPTION_RE);
+  if (!m) return null;
+  return CN_NUMERALS[m[1]] ?? null;
+}
+
+/**
+ * Detect a body paragraph that introduces a table (e.g. `表一比較了...`).
+ * Returns the 1-based marker number or null.
+ *
+ * This is the fallback anchor for tables when the printed `表N …` caption row
+ * has been moved out of `paragraphs` (the figure caption now lives in the
+ * asset's own `title`/`caption`, see #2218). Without this, a graphic-text lesson
+ * whose tables are only named in prose would drop the table to the
+ * bottom-of-article fallback block instead of rendering it inline.
+ */
+export function detectTableBodyMarker(text: string): number | null {
+  if (!text) return null;
+  const m = text.match(TABLE_BODY_INTRO_RE);
   if (!m) return null;
   return CN_NUMERALS[m[1]] ?? null;
 }

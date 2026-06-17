@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import json
 import pytest
+from contextlib import contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
@@ -59,6 +60,22 @@ def _make_mock_gemini_call(response):
     return _fake_wait_for
 
 
+@contextmanager
+def _patch_webm_transcode_success(mock_resp):
+    """webm inputs transcode before Gemini; skip real ffmpeg in unit tests."""
+    with (
+        patch(
+            "app.services.reading_transcription_service.asyncio.to_thread",
+            new=AsyncMock(return_value=b"fake-ogg-transcoded"),
+        ),
+        patch(
+            "app.services.reading_transcription_service.asyncio.wait_for",
+            new=AsyncMock(return_value=mock_resp),
+        ),
+    ):
+        yield
+
+
 class TestTranscriptionServiceSuccess:
     """Gemini returns a valid JSON response."""
 
@@ -71,10 +88,7 @@ class TestTranscriptionServiceSuccess:
             reasoning="原文專有名詞「孟嘗君」辨識正確。",
         )
 
-        with patch(
-            "app.services.reading_transcription_service.asyncio.wait_for",
-            new=AsyncMock(return_value=mock_resp),
-        ):
+        with _patch_webm_transcode_success(mock_resp):
             result = await transcribe_reading_audio(
                 audio_bytes=b"fake_audio_bytes",
                 mime_type="audio/webm",
@@ -93,10 +107,7 @@ class TestTranscriptionServiceSuccess:
 
         mock_resp = _make_gemini_response("春風吹過田野。", "轉錄正確。")
 
-        with patch(
-            "app.services.reading_transcription_service.asyncio.wait_for",
-            new=AsyncMock(return_value=mock_resp),
-        ):
+        with _patch_webm_transcode_success(mock_resp):
             result = await transcribe_reading_audio(
                 audio_bytes=b"audio",
                 mime_type="audio/webm",
@@ -185,10 +196,7 @@ class TestTranscriptionServiceFailClosed:
         mock_resp.prompt_feedback = MagicMock()
         mock_resp.prompt_feedback.block_reason = None
 
-        with patch(
-            "app.services.reading_transcription_service.asyncio.wait_for",
-            new=AsyncMock(return_value=mock_resp),
-        ):
+        with _patch_webm_transcode_success(mock_resp):
             result = await transcribe_reading_audio(
                 audio_bytes=b"audio",
                 mime_type="audio/webm",

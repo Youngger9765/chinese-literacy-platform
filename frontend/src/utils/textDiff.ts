@@ -1,11 +1,19 @@
 /**
- * LCS-based character diff for comparing spoken text against target text.
+ * Levenshtein-aligned character diff for comparing spoken text against target text.
  * Used by LiveTutor and FullReading to show exactly which characters
  * the student read correctly, incorrectly, missed, or added.
  */
+import type { DiffToken } from '../types';
 import { isHomophone, isNearSound, isSttEquivalent } from './pinyin';
 
-export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
+export type DiffType =
+  | 'correct'
+  | 'forgiven'
+  | 'wrong'
+  | 'missing'
+  | 'extra'
+  | 'unread'
+  | 'punctuation';
 
 /** Filler words commonly inserted by STT — not student errors. */
 const FILLER_CHARS = new Set(['嗯', '啊', '呃', '喔', '欸']);
@@ -93,6 +101,11 @@ const intToChinese = (num: number): string => {
   return result;
 };
 
+const normalizeFullwidthDigits = (text: string) =>
+  text.replace(/[\uFF10-\uFF19]/g, (ch) =>
+    String.fromCharCode(ch.charCodeAt(0) - 0xff10 + 0x30),
+  );
+
 const normalizeNumbers = (text: string) => text.replace(/\d+/g, m => intToChinese(parseInt(m, 10)));
 
 /**
@@ -122,25 +135,137 @@ const stripDecorativeSymbols = (text: string) =>
     .replace(/（[^）]*）/g, '')                // parenthetical notes
     .replace(/\([^)]*\)/g, '');                // English parenthetical notes
 
-export const normalizeForComparison = (text: string) =>
-  normalizeChineseNumberVariants(
-    normalizeNumbers(cleanChineseText(stripDecorativeSymbols(text)))
-  ).replace(/[「」『』，。！？：；、\s]/g, '');
+/** Half-width punctuation from STT/Gemini → full-width Chinese (display + compare). */
+export function normalizePunctuationToChinese(text: string): string {
+  return text
+    .replace(/,/g, '，')
+    .replace(/;/g, '；')
+    .replace(/\./g, '。')
+    .replace(/\?/g, '？')
+    .replace(/!/g, '！')
+    .replace(/:/g, '：')
+    .replace(/\(/g, '（')
+    .replace(/\)/g, '）')
+    .replace(/\s+/g, '');
+}
+
+/** Bopomofo + tone marks — excluded from accuracy scoring (not spoken aloud). */
+const BOPOMOFO_RE = /[\u3100-\u312F\u31A0-\u31BF\u02CA\u02C7\u02CB\u02D9]/g;
 
 /**
- * LCS-based diff: compare spoken text against target text, producing
- * a token array showing correct/wrong/missing/extra characters.
- *
- * Algorithm:
- * 1. Build LCS DP table between spoken and target characters
- * 2. Backtrack to produce alignment
- * 3. Classify each position:
- *    - Both match (or homophone match) → correct
- *    - Both present but different → wrong (substitution)
- *    - Target char skipped → missing (deletion from target)
- *    - Spoken char extra → extra (insertion not in target)
- *
- * matchRate = correctCount / target.length
+ * Punctuation excluded from accuracy denominator.
+ * Display may still show these via interleavePunctuation; they never affect matchRate.
+ */
+const SCORING_PUNCT_RE =
+  /[「」『』，。！？：；、．…—－\-（）()\[\]《》""''\s,.!?;:'"]/g;
+
+const TOKEN_PUNCT_RE = /[「」『』，。！？：；、．…—－\-（）()\[\]《》""''\s,.!?;:'"]/;
+
+function isTokenPunctuationChar(ch: string): boolean {
+  return TOKEN_PUNCT_RE.test(ch);
+}
+
+/** Strip bopomofo and punctuation for scoring-only comparison. */
+function stripNonScorableChars(text: string): string {
+  return text.replace(BOPOMOFO_RE, '').replace(SCORING_PUNCT_RE, '');
+}
+
+export const normalizeForComparison = (text: string) =>
+  stripNonScorableChars(
+    normalizeChineseNumberVariants(
+      normalizeNumbers(
+        cleanChineseText(
+          stripDecorativeSymbols(
+            normalizeFullwidthDigits(normalizePunctuationToChinese(text)),
+          ),
+        ),
+      ),
+    ),
+  );
+
+/** Count characters that contribute to accuracy (excludes punctuation and zhuyin). */
+export function countScorableCharacters(text: string): number {
+  return normalizeForComparison(text).length;
+}
+
+type AlignmentPair = { target: string | null; spoken: string | null };
+
+/**
+ * Levenshtein alignment with backtracking (same family as backend fallback).
+ * Allows multiple skipped target chars (漏字) while each spoken char is used
+ * at most once in order — no ghost-green on later duplicate target chars.
+ */
+function alignSpokenToTarget(
+  spokenChars: string[],
+  targetChars: string[],
+  isMatch: (a: string, b: string) => boolean,
+): AlignmentPair[] {
+  const sLen = spokenChars.length;
+  const tLen = targetChars.length;
+
+  const dp: number[][] = Array.from({ length: tLen + 1 }, () =>
+    Array<number>(sLen + 1).fill(0),
+  );
+  for (let i = 0; i <= tLen; i++) dp[i][0] = i;
+  for (let j = 0; j <= sLen; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= tLen; i++) {
+    for (let j = 1; j <= sLen; j++) {
+      const cost = isMatch(spokenChars[j - 1], targetChars[i - 1]) ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+    }
+  }
+
+  const alignment: AlignmentPair[] = [];
+  let i = tLen;
+  let j = sLen;
+
+  while (i > 0 || j > 0) {
+    // Prefer target gaps (漏字) over late duplicate-char matches when costs tie.
+    if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] + 1)) {
+      alignment.push({ target: targetChars[i - 1], spoken: null });
+      i--;
+      continue;
+    }
+    if (j > 0 && (i === 0 || dp[i][j] === dp[i][j - 1] + 1)) {
+      alignment.push({ target: null, spoken: spokenChars[j - 1] });
+      j--;
+      continue;
+    }
+    if (i > 0 && j > 0) {
+      const cost = isMatch(spokenChars[j - 1], targetChars[i - 1]) ? 0 : 1;
+      if (dp[i][j] === dp[i - 1][j - 1] + cost) {
+        alignment.push({
+          target: targetChars[i - 1],
+          spoken: spokenChars[j - 1],
+        });
+        i--;
+        j--;
+        continue;
+      }
+    }
+    // Fallback (should not happen with consistent DP)
+    if (i > 0) {
+      alignment.push({ target: targetChars[i - 1], spoken: null });
+      i--;
+    } else {
+      alignment.push({ target: null, spoken: spokenChars[j - 1] });
+      j--;
+    }
+  }
+
+  alignment.reverse();
+  return alignment;
+}
+
+/**
+ * Compare spoken text against target via Levenshtein alignment.
+ * Skipped target chars → missing; later speech can resync (no cascade wrong).
+ * matchRate = (correct + forgiven) / scorable target length (no punctuation or zhuyin)
  */
 export function diffCharacters(
   spoken: string,
@@ -148,38 +273,12 @@ export function diffCharacters(
   options?: { useHomophone?: boolean }
 ): DiffResult {
   const useHomophone = options?.useHomophone ?? false;
-  const s = Array.from(normalizeForComparison(spoken));
+  const s = Array.from(normalizeForComparison(spoken)).filter((ch) => !FILLER_CHARS.has(ch));
   const t = Array.from(normalizeForComparison(target));
   const sLen = s.length;
   const tLen = t.length;
 
-  if (tLen === 0) {
-    return {
-      tokens: s.map(ch => ({ char: ch, type: 'extra' as DiffType })),
-      matchRate: 0,
-      correctCount: 0,
-      wrongCount: 0,
-      missingCount: 0,
-      extraCount: sLen,
-    };
-  }
-
-  if (sLen === 0) {
-    return {
-      tokens: t.map(ch => ({ char: ch, type: 'missing' as DiffType })),
-      matchRate: 0,
-      correctCount: 0,
-      wrongCount: 0,
-      missingCount: tLen,
-      extraCount: 0,
-    };
-  }
-
-  // Step 1: Build LCS DP table
-  // dp[i][j] = length of LCS of s[0..i-1] and t[0..j-1]
-  const dp: number[][] = Array.from({ length: sLen + 1 }, () => Array(tLen + 1).fill(0));
-
-  /** Check if two chars match for LCS purposes (exact, STT-equivalent, homophone, or near-sound). */
+  /** Check if two chars match (exact, STT-equivalent, homophone, or near-sound). */
   const isMatch = (a: string, b: string): boolean => {
     if (a === b) return true;
     if (useHomophone) {
@@ -193,89 +292,54 @@ export function diffCharacters(
   /** Classify the match type between two matched characters. */
   const classifyMatch = (a: string, b: string): 'correct' | 'forgiven' => {
     if (a === b) return 'correct';
-    if (isSttEquivalent(a, b)) return 'correct'; // 的/得/地 = correct, not student error
-    // Homophone or near-sound = forgiven (STT chose wrong char, student pronounced correctly)
+    if (isSttEquivalent(a, b)) return 'correct';
     return 'forgiven';
   };
 
-  for (let i = 1; i <= sLen; i++) {
-    for (let j = 1; j <= tLen; j++) {
-      if (isMatch(s[i - 1], t[j - 1])) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
+  if (tLen === 0) {
+    return {
+      tokens: s.map((ch) => ({ char: ch, type: 'extra' as DiffType })),
+      matchRate: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      missingCount: 0,
+      extraCount: sLen,
+    };
   }
 
-  // Step 2: Backtrack to produce diff tokens
+  if (sLen === 0) {
+    return {
+      tokens: t.map((ch) => ({ char: ch, type: 'missing' as DiffType })),
+      matchRate: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      missingCount: tLen,
+      extraCount: 0,
+    };
+  }
+
+  const alignment = alignSpokenToTarget(s, t, isMatch);
   const tokens: DiffToken[] = [];
-  let i = sLen;
-  let j = tLen;
 
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && isMatch(s[i - 1], t[j - 1])) {
-      // Match — correct or forgiven (use the target char for display consistency)
-      tokens.push({ char: t[j - 1], type: classifyMatch(s[i - 1], t[j - 1]) });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      // Target char not in spoken — missing
-      tokens.push({ char: t[j - 1], type: 'missing' });
-      j--;
-    } else {
-      // Spoken char not in target — extra
-      tokens.push({ char: s[i - 1], type: 'extra' });
-      i--;
-    }
-  }
-
-  tokens.reverse();
-
-  // Step 3: Post-process — merge adjacent missing+extra into wrong/forgiven (substitution)
-  // Also filter out filler characters from 'extra' tokens
-  const merged: DiffToken[] = [];
-  let idx = 0;
-  while (idx < tokens.length) {
-    // Filter filler chars (嗯啊呃喔欸) — these are STT noise, not student errors
-    if (tokens[idx].type === 'extra' && FILLER_CHARS.has(tokens[idx].char)) {
-      idx++;
+  for (const { target: tCh, spoken: sCh } of alignment) {
+    if (tCh === null) {
+      tokens.push({ char: sCh!, type: 'extra' });
       continue;
     }
-    if (
-      idx + 1 < tokens.length &&
-      tokens[idx].type === 'extra' &&
-      tokens[idx + 1].type === 'missing'
-    ) {
-      const spokenChar = tokens[idx].char;
-      const targetChar = tokens[idx + 1].char;
-      // Check if substitution is forgivable (homophone/near-sound/STT-equivalent)
-      if (useHomophone && isMatch(spokenChar, targetChar)) {
-        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
-      } else {
-        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
-      }
-      idx += 2;
-    } else if (
-      idx + 1 < tokens.length &&
-      tokens[idx].type === 'missing' &&
-      tokens[idx + 1].type === 'extra'
-    ) {
-      const targetChar = tokens[idx].char;
-      const spokenChar = tokens[idx + 1].char;
-      if (useHomophone && isMatch(spokenChar, targetChar)) {
-        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
-      } else {
-        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
-      }
-      idx += 2;
+    if (sCh === null) {
+      tokens.push({ char: tCh, type: 'missing' });
+      continue;
+    }
+    if (isMatch(sCh, tCh)) {
+      tokens.push({ char: tCh, type: classifyMatch(sCh, tCh) });
     } else {
-      merged.push(tokens[idx]);
-      idx++;
+      tokens.push({ char: sCh, type: 'wrong', expected: tCh });
     }
   }
 
-  // Step 4: Compute stats (forgiven counts as correct for matchRate)
+  const merged = tokens;
+
+  // Compute stats (forgiven counts as correct for matchRate)
   let correctCount = 0;
   let forgivenCount = 0;
   let wrongCount = 0;
@@ -292,7 +356,6 @@ export function diffCharacters(
     }
   }
 
-  // Forgiven chars count toward match rate (student pronounced correctly, STT picked wrong char)
   const matchRate = tLen > 0 ? (correctCount + forgivenCount) / tLen : 0;
 
   return {
@@ -307,9 +370,143 @@ export function diffCharacters(
 
 /**
  * Backward-compatible replacement for the old bag-of-words computeMatchRate.
- * Now uses LCS-based ordering for more accurate results.
+ * Uses Levenshtein-aligned diffCharacters for ordering-aware results.
  */
 export function computeMatchRate(spoken: string, target: string): number {
   const result = diffCharacters(spoken, target, { useHomophone: true });
   return result.matchRate;
+}
+
+/** Punctuation stripped from diff comparison — re-inserted at display time only. */
+const DISPLAY_PUNCT_RE = TOKEN_PUNCT_RE;
+
+const DIGIT_RE = /[\d\uFF10-\uFF19]/;
+
+function chineseNormLenForDigitRun(digitStr: string): number {
+  if (!digitStr) return 0;
+  const ascii = normalizeFullwidthDigits(digitStr);
+  return Array.from(intToChinese(parseInt(ascii, 10))).length;
+}
+
+function consumeNextDisplayToken(
+  displayTokens: DiffToken[],
+  tokenIdx: number,
+): { token: DiffToken | null; nextIdx: number } {
+  let idx = tokenIdx;
+  while (idx < displayTokens.length && isTokenPunctuationChar(displayTokens[idx].char)) {
+    idx += 1;
+  }
+  if (idx >= displayTokens.length) {
+    return { token: null, nextIdx: idx };
+  }
+  return { token: displayTokens[idx], nextIdx: idx + 1 };
+}
+
+function aggregateDigitRunForDisplay(
+  displayChar: string,
+  runTokens: DiffToken[],
+): DiffToken {
+  if (runTokens.length === 0) {
+    return { char: displayChar, type: 'unread' };
+  }
+  const types = runTokens.map((t) => t.type);
+  if (types.every((t) => t === 'correct')) {
+    return { char: displayChar, type: 'correct' };
+  }
+  if (types.every((t) => t === 'correct' || t === 'forgiven')) {
+    return { char: displayChar, type: 'forgiven' };
+  }
+  if (types.some((t) => t === 'wrong')) {
+    const wrong = runTokens.find((t) => t.type === 'wrong')!;
+    return { char: displayChar, type: 'wrong', expected: wrong.expected };
+  }
+  if (types.every((t) => t === 'missing' || t === 'unread')) {
+    return { char: displayChar, type: types[0] === 'unread' ? 'unread' : 'missing' };
+  }
+  if (types.some((t) => t === 'missing' || t === 'unread')) {
+    return { char: displayChar, type: 'missing' };
+  }
+  // Mis-aligned token run — do not default to correct (would show unread text as green).
+  return { char: displayChar, type: 'missing' };
+}
+
+/**
+ * Re-insert punctuation from the lesson line into diff tokens for display.
+ * Always walks the full target text — punctuation is never gated on how much
+ * the student has read. Scoring still uses punctuation-stripped tokens.
+ *
+ * Arabic digit runs (e.g. 299 → 二百九十九) expand to multiple normalized
+ * diff tokens; each digit in the original line inherits the aggregate status.
+ */
+export function interleavePunctuation(
+  targetText: string,
+  diffTokens: DiffToken[],
+): DiffToken[] {
+  const displayTokens = diffTokens.filter((t) => t.type !== 'extra');
+  if (!targetText) return displayTokens;
+
+  if (displayTokens.length === 0) {
+    return Array.from(targetText).map((ch) =>
+      DISPLAY_PUNCT_RE.test(ch)
+        ? { char: ch, type: 'punctuation' as const }
+        : { char: ch, type: 'unread' as const },
+    );
+  }
+
+  const targetChars = Array.from(targetText);
+  const normChars = Array.from(normalizeForComparison(targetText));
+  const result: DiffToken[] = [];
+  let tokenIdx = 0;
+  let normIdx = 0;
+
+  for (let i = 0; i < targetChars.length; i++) {
+    const ch = targetChars[i];
+
+    if (DISPLAY_PUNCT_RE.test(ch)) {
+      result.push({ char: ch, type: 'punctuation' });
+      continue;
+    }
+
+    if (DIGIT_RE.test(ch)) {
+      if (i > 0 && DIGIT_RE.test(targetChars[i - 1])) continue;
+
+      let digitEnd = i;
+      while (digitEnd < targetChars.length && DIGIT_RE.test(targetChars[digitEnd])) {
+        digitEnd += 1;
+      }
+      const digitRun = targetChars.slice(i, digitEnd).join('');
+      const normRunLen = chineseNormLenForDigitRun(digitRun);
+      const runTokens: DiffToken[] = [];
+
+      for (let k = 0; k < normRunLen; k++) {
+        const { token, nextIdx } = consumeNextDisplayToken(displayTokens, tokenIdx);
+        tokenIdx = nextIdx;
+        if (token) runTokens.push(token);
+      }
+      normIdx += normRunLen;
+
+      for (let d = i; d < digitEnd; d++) {
+        result.push(aggregateDigitRunForDisplay(targetChars[d], runTokens));
+      }
+      i = digitEnd - 1;
+      continue;
+    }
+
+    if (normIdx < normChars.length && ch === normChars[normIdx]) {
+      const { token, nextIdx } = consumeNextDisplayToken(displayTokens, tokenIdx);
+      tokenIdx = nextIdx;
+      if (token) {
+        result.push({ ...token, char: ch });
+      } else {
+        result.push({ char: ch, type: 'unread' });
+      }
+      normIdx += 1;
+      continue;
+    }
+
+    // Decorative / stripped chars in the original line — show without diff styling.
+    result.push({ char: ch, type: 'punctuation' });
+  }
+
+  return result;
 }

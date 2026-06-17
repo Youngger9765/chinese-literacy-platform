@@ -223,12 +223,13 @@ describe('FullReadingControls', () => {
 
 // ── 2. FullReadingScoreCard ───────────────────────────────────────────────────
 import FullReadingScoreCard from '../FullReadingScoreCard';
+import type { DiffToken } from '../../../../types';
 
 describe('FullReadingScoreCard', () => {
   const baseResult = {
     matchRate: 0.92,
     feedback: '很好',
-    diffTokens: [{ type: 'correct', text: '你好' }],
+    diffTokens: [{ char: '你', type: 'correct' }, { char: '好', type: 'correct' }] as DiffToken[],
     cpm: 120,
     durationMs: 5000,
     errorBreakdown: { correct: 10, wrong: 0, missing: 0, extra: 0 },
@@ -321,30 +322,52 @@ describe('FullReadingScoreCard', () => {
 
 // ── 3. FullReadingFeedbackPanel ───────────────────────────────────────────────
 import FullReadingFeedbackPanel from '../FullReadingFeedbackPanel';
+import type { DiffToken as DT2 } from '../../../../types';
 
 describe('FullReadingFeedbackPanel', () => {
-  it('renders diff section when diffTokens are present', () => {
-    const diffTokens = [
-      { type: 'correct', text: '你好' },
-      { type: 'wrong', text: '世界' },
+  it('renders 朗讀結果 when diffTokens are present', () => {
+    const diffTokens: DT2[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'wrong', expected: '世' },
     ];
     render(
-      <FullReadingFeedbackPanel diffTokens={diffTokens} />
+      <FullReadingFeedbackPanel diffTokens={diffTokens} targetText="你好" />
     );
-    expect(screen.getByText('逐字比對')).toBeInTheDocument();
-  });
-
-  it('does not render diff section when diffTokens is empty', () => {
-    render(
-      <FullReadingFeedbackPanel diffTokens={[]} />
-    );
+    expect(screen.getByText('朗讀結果')).toBeInTheDocument();
     expect(screen.queryByText('逐字比對')).not.toBeInTheDocument();
   });
 
-  it('does not render diff section when diffTokens is undefined', () => {
+  it('does not render result section when diffTokens is empty', () => {
     render(
-      <FullReadingFeedbackPanel diffTokens={undefined} />
+      <FullReadingFeedbackPanel diffTokens={[]} targetText="你好" />
     );
-    expect(screen.queryByText('逐字比對')).not.toBeInTheDocument();
+    expect(screen.queryByText('朗讀結果')).not.toBeInTheDocument();
+  });
+
+  it('does not render result section when diffTokens is undefined', () => {
+    render(
+      <FullReadingFeedbackPanel diffTokens={undefined} targetText="你好" />
+    );
+    expect(screen.queryByText('朗讀結果')).not.toBeInTheDocument();
+  });
+
+  it('renders one indented paragraph block per lesson paragraph', () => {
+    const diffTokens: DT2[] = [
+      { char: '甲', type: 'correct' },
+      { char: '乙', type: 'correct' },
+      { char: '丙', type: 'wrong', expected: '丁' },
+      { char: '戊', type: 'correct' },
+    ];
+    const { container } = render(
+      <FullReadingFeedbackPanel
+        diffTokens={diffTokens}
+        targetText="甲乙丙戊"
+        paragraphs={['甲乙', '丙戊']}
+      />,
+    );
+    const bodyParas = container.querySelectorAll('p.indent-\\[2em\\]');
+    expect(bodyParas).toHaveLength(2);
+    expect(bodyParas[0].textContent).toBe('甲乙');
+    expect(bodyParas[1].textContent).toBe('丙戊');
   });
 });

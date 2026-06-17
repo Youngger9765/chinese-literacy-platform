@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { formatTime } from '../../utils/formatTime';
 import { Story, FullReadingResult } from '../../types';
-import { parseReadingBenchmark, getBenchmarkFeedback, getSecBenchmarkFeedback, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
+import { parseReadingBenchmark, getAiFluencyInsight, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useKaraoke } from '../../context/KaraokeContext';
 import { useFullReadingSession, type SavedResult } from '../../hooks/useFullReadingSession';
@@ -91,37 +91,13 @@ const FullReading: React.FC<FullReadingProps> = ({
     return 'unit' in parsedBenchmark[0] && (parsedBenchmark[0] as any).unit === 'sec';
   }, [parsedBenchmark]);
 
-  /** AI-computed rating for the latest result */
-  const aiRating = useMemo<AssessmentRating | undefined>(() => {
+  /** AI-computed fluency insight for self-assessment comparison */
+  const aiFluencyInsight = useMemo(() => {
     if (!result || !parsedBenchmark || parsedBenchmark.length === 0) return undefined;
-    let feedbackText: string | null = null;
-    if (useSecUnit) {
-      const durationSec = (result.durationMs || 0) / 1000;
-      feedbackText = getSecBenchmarkFeedback(durationSec, parsedBenchmark);
-    } else {
-      feedbackText = getBenchmarkFeedback(result.cpm || 0, parsedBenchmark);
-    }
-    if (!feedbackText) return undefined;
-    // Map benchmark feedback position to rating
-    // parsedBenchmark[0] = lowest tier (slow/low), last = highest tier (fast/high)
-    const idx = parsedBenchmark.findIndex(b => {
-      if (useSecUnit && 'unit' in b) {
-        const bs = b as any;
-        const durationSec = (result.durationMs || 0) / 1000;
-        return durationSec >= bs.minSec && durationSec <= bs.maxSec;
-      } else if (!useSecUnit && !('unit' in b)) {
-        const bc = b as any;
-        return result.cpm >= bc.minCpm && result.cpm <= bc.maxCpm;
-      }
-      return false;
-    });
-    if (idx === -1) return undefined;
-    const total = parsedBenchmark.length;
-    if (total === 1) return 'mid';
-    if (idx === 0) return useSecUnit ? 'high' : 'low'; // sec: fastest = high; cpm: slowest = low
-    if (idx === total - 1) return useSecUnit ? 'low' : 'high'; // sec: slowest = low; cpm: fastest = high
-    return 'mid';
-  }, [result, parsedBenchmark, useSecUnit]);
+    return getAiFluencyInsight(result.cpm || 0, result.durationMs || 0, parsedBenchmark) ?? undefined;
+  }, [result, parsedBenchmark]);
+
+  const aiRating = aiFluencyInsight?.rating;
 
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
@@ -390,8 +366,12 @@ const FullReading: React.FC<FullReadingProps> = ({
                 audioUrl={audioRecorder.audioUrl ?? null}
               />
 
-              {/* 逐字比對 diff (Issue #1960 — FullReadingFeedbackPanel) */}
-              <FullReadingFeedbackPanel diffTokens={result.diffTokens} />
+              {/* 朗讀結果 (Issue #1960 — same style as LiveTutor ParagraphCard) */}
+              <FullReadingFeedbackPanel
+                diffTokens={result.diffTokens}
+                targetText={fullText}
+                paragraphs={story.content}
+              />
 
               {/* 正確率 + 語速 metrics card (Issue #1505) */}
               <ReadingMetricsCard
@@ -412,6 +392,7 @@ const FullReading: React.FC<FullReadingProps> = ({
                 }}
                 selectedRating={selfRating}
                 aiRating={aiRating}
+                aiInsight={aiFluencyInsight}
                 showComparison={showComparison}
                 attemptNumber={Math.max(dedicatedHistory.length, 1)}
               />

@@ -16,10 +16,23 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { buildMCQOptions, AnswerRecord } from './vocabDefinitionMatchLogic';
-import { getEncouragementMessage } from '../../utils/encouragement';
+import { getVocabDefinitionEncouragementMessage } from '../../utils/encouragement';
 
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const VOCAB_MCQ_ONBOARDED_KEY = 'vocab_mcq_onboarded';
+
+// Hold ~1.2s after correct so students see feedback before the next question
+// (matches FillInBlankExercise A10 — prevents rapid spam-clicking through).
+const CORRECT_ADVANCE_DELAY_MS = 1200;
+
+const CORRECT_PRAISES = ['答對了！', '太棒了！', '很厲害！', '完全正確！', '你答對了！'] as const;
+let praiseIdx = 0;
+
+function nextCorrectPraise(): string {
+  const msg = CORRECT_PRAISES[praiseIdx % CORRECT_PRAISES.length];
+  praiseIdx += 1;
+  return msg;
+}
 
 export interface MultipleChoiceProps {
   vocab: VocabItem[];
@@ -33,6 +46,32 @@ type AnswerState =
   | { status: 'idle' }
   | { status: 'correct'; chosenIdx: number }
   | { status: 'wrong'; wrongIndices: Set<number> };
+
+// ── Demo step tooltip bubble ───────────────────────────────────────────────
+function DemoBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-xs">
+        {children}
+        <span
+          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+type DemoStep = 'read-def' | 'pick' | 'click' | 'success';
+
+interface DemoRuntime {
+  step: DemoStep;
+  targetIdx: number;
+}
 
 // ── Onboarding coach (amber box, matches ReadingAnnotation pattern) ────────
 interface OnboardingCoachProps {
@@ -80,6 +119,9 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
   );
   const [answerState, setAnswerState] = useState<AnswerState>({ status: 'idle' });
+  const [correctPraise, setCorrectPraise] = useState('答對了！');
+  const [wrongEncouragement, setWrongEncouragement] = useState('加油！再想想看');
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Onboarding state — gated by localStorage
   const [showCoach, setShowCoach] = useState<boolean>(() => {
@@ -90,17 +132,16 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     }
   });
 
-  // Demo animation state: null = not running, number = vocabIdx being highlighted
-  const [demoHighlight, setDemoHighlight] = useState<number | null>(null);
+  // Guided demo: step-by-step tooltips + animated tap on the correct option (visual only)
+  const [demo, setDemo] = useState<DemoRuntime | null>(null);
   const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Encouragement message picked once per wrong answer
-  const [encouragementMsg, setEncouragementMsg] = useState<string>('');
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     setQueueIdx(0);
     setAnswerState({ status: 'idle' });
-    setEncouragementMsg('');
+    setCorrectPraise('答對了！');
+    setWrongEncouragement('加油！再想想看');
     answersRef.current = activeDefIndices.map((defIdx) => ({
       defIndex: defIdx,
       answeredWordIdx: null,
@@ -108,10 +149,18 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     }));
   }, [activeDefIndices]);
 
-  // Clean up demo timer on unmount
+  const clearDemoTimers = () => {
+    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
+    demoTimerRef.current = null;
+  };
+
+  // Clean up demo + advance timers on unmount
   useEffect(() => {
     return () => {
-      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+      clearDemoTimers();
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     };
   }, []);
 
@@ -132,29 +181,32 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     }
   };
 
+  const scheduleDemoStep = (fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+    return id;
+  };
+
   /**
-   * Demo animation: animate a cursor-like highlight onto the correct option.
+   * Guided demo on the real UI — tooltips + animated tap on the correct option.
    * Purely visual — does NOT submit an answer or affect scoring.
-   * Steps:
-   *   0ms   → start highlight on correct option
-   *   900ms → pulse off (clear highlight)
-   *   1100ms → second pulse
-   *   2000ms → done
+   *   0ms    → tooltip: read definition
+   *   1400ms → tooltip: pick from options
+   *   2800ms → animated finger + highlight on correct option
+   *   4200ms → show success state
+   *   5600ms → done
    */
   const handleDemo = () => {
-    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    setDemoHighlight(currentDefIdx);
-    demoTimerRef.current = setTimeout(() => {
-      setDemoHighlight(null);
-      demoTimerRef.current = setTimeout(() => {
-        setDemoHighlight(currentDefIdx);
-        demoTimerRef.current = setTimeout(() => {
-          setDemoHighlight(null);
-        }, 900);
-      }, 200);
-    }, 900);
-    // Also dismiss the coach so student can act
+    clearDemoTimers();
     handleDismissCoach();
+
+    const targetIdx = currentDefIdx;
+    setDemo({ step: 'read-def', targetIdx });
+
+    scheduleDemoStep(() => setDemo({ step: 'pick', targetIdx }), 1400);
+    scheduleDemoStep(() => setDemo({ step: 'click', targetIdx }), 2800);
+    scheduleDemoStep(() => setDemo({ step: 'success', targetIdx }), 4200);
+    scheduleDemoStep(() => setDemo(null), 5600);
   };
 
   const handleChoice = (vocabIdx: number) => {
@@ -173,27 +225,30 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     );
 
     if (isCorrect) {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      setCorrectPraise(nextCorrectPraise());
       setAnswerState({ status: 'correct', chosenIdx: vocabIdx });
-      setEncouragementMsg('');
-      // Auto-advance after short delay on correct answer (step 9 pattern)
-      setTimeout(() => {
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
         setAnswerState({ status: 'idle' });
-        setEncouragementMsg('');
         const nextIdx = queueIdx + 1;
         if (nextIdx >= activeDefIndices.length) {
           onAllDone(answersRef.current);
         } else {
           setQueueIdx(nextIdx);
         }
-      }, 400);
+      }, CORRECT_ADVANCE_DELAY_MS);
     } else {
       // Wrong answer: mark only the chosen option red; do NOT reveal correct answer.
       // Student can keep clicking other options.
       const prevWrong =
         answerState.status === 'wrong' ? new Set(answerState.wrongIndices) : new Set<number>();
       prevWrong.add(vocabIdx);
+      const isFirstWrongOnQuestion = answerState.status !== 'wrong';
       setAnswerState({ status: 'wrong', wrongIndices: prevWrong });
-      setEncouragementMsg(getEncouragementMessage());
+      if (isFirstWrongOnQuestion) {
+        setWrongEncouragement(getVocabDefinitionEncouragementMessage());
+      }
     }
   };
 
@@ -203,9 +258,14 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     const base =
       'rounded-2xl border-2 p-4 flex items-center justify-center font-bold text-xl transition-all duration-200 select-none active:scale-[0.97] min-h-[56px]';
 
-    // Demo highlight overrides everything — amber pulsing style
-    if (demoHighlight === vocabIdx) {
-      return `${base} border-amber-400 bg-amber-50 text-amber-800 animate-pulse`;
+    // Guided demo — highlight correct option during click / success steps
+    if (demo && vocabIdx === demo.targetIdx) {
+      if (demo.step === 'success') {
+        return `${base} border-emerald-400 bg-emerald-50 text-emerald-800 scale-[0.97]`;
+      }
+      if (demo.step === 'click') {
+        return `${base} border-amber-400 bg-amber-50 text-amber-800 ring-4 ring-amber-300/60 scale-[0.97]`;
+      }
     }
 
     // Correct answer confirmed — show green
@@ -243,7 +303,16 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
       {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
 
       {/* Definition card */}
-      <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 mb-6">
+      <div className="mb-3">
+        {demo?.step === 'read-def' && (
+          <DemoBubble>① 先讀上方的解釋，想想是哪個語詞</DemoBubble>
+        )}
+      </div>
+      <div
+        className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-8 mb-6 transition-all duration-300 ${
+          demo?.step === 'read-def' ? 'ring-4 ring-amber-300/50' : ''
+        }`}
+      >
         <p className="text-xl md:text-2xl text-on-surface leading-[2.5rem] md:leading-[3rem]">
           {item?.definition}
         </p>
@@ -252,16 +321,42 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
       {/* Options — 2-column grid */}
       {/* Fix #1101 (字置中): flex items-center justify-center ensures the Chinese
           character is vertically and horizontally centered within the min-h button */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="mb-3">
+        {demo?.step === 'pick' && (
+          <DemoBubble>② 從下面選出對應的語詞</DemoBubble>
+        )}
+        {(demo?.step === 'click' || demo?.step === 'success') && (
+          <DemoBubble>
+            {demo.step === 'click' ? '③ 點一下選擇答案' : '✓ 答對了！就是這樣玩'}
+          </DemoBubble>
+        )}
+      </div>
+      <div
+        className={`grid grid-cols-2 gap-3 transition-all duration-300 ${
+          demo?.step === 'pick' ? 'ring-4 ring-amber-300/40 rounded-2xl p-1' : ''
+        }`}
+      >
         {options.map((vocabIdx) => (
           <button
             key={vocabIdx}
-            className={getButtonClass(vocabIdx)}
+            className={`relative ${getButtonClass(vocabIdx)}`}
             onClick={() => handleChoice(vocabIdx)}
-            // Only disable when correct answer is being processed (auto-advance delay)
-            // or during demo highlight — wrong answers keep buttons interactive
-            disabled={answerState.status === 'correct' || demoHighlight !== null}
+            // Disable during guided demo or while correct answer auto-advances
+            disabled={answerState.status === 'correct' || demo !== null}
           >
+            {demo?.step === 'click' && vocabIdx === demo.targetIdx && (
+              <span
+                className="absolute -top-9 left-1/2 -translate-x-1/2 text-2xl animate-bounce pointer-events-none"
+                aria-hidden
+              >
+                👆
+              </span>
+            )}
+            {demo?.step === 'success' && vocabIdx === demo.targetIdx && (
+              <span className="mr-1 text-emerald-600" aria-hidden="true">
+                ✓
+              </span>
+            )}
             {/* Confirmed correct answer ✓ marker */}
             {answerState.status === 'correct' && vocabIdx === answerState.chosenIdx && (
               <span className="mr-1 text-emerald-600" aria-hidden="true">
@@ -283,6 +378,14 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
         ))}
       </div>
 
+      {/* Correct-answer praise — visible during hold before auto-advance */}
+      {answerState.status === 'correct' && (
+        <div className="mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-3 text-center">
+          <span className="material-symbols-outlined text-emerald-600 text-2xl">check_circle</span>
+          <p className="text-sm font-headline font-bold text-emerald-700 mt-1">{correctPraise}</p>
+        </div>
+      )}
+
       {/* Wrong-answer encouragement panel — no answer reveal (#2159) */}
       {answerState.status === 'wrong' && (
         <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -290,7 +393,7 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
             <span aria-hidden="true" className="text-lg">
               💪
             </span>
-            <span>{encouragementMsg || '答錯了，再試試看！'}</span>
+            <span>{wrongEncouragement}</span>
           </div>
         </div>
       )}

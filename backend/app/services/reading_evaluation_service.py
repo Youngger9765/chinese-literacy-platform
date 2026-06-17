@@ -24,6 +24,7 @@ from google.genai import types as genai_types
 from .ai_service import generate_structured_response
 from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA, Thresholds
+from .stt.normalization import normalize_for_comparison
 from .stt_service import (
     correct_homophones,
     compute_match_rate,
@@ -36,8 +37,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-
-_PUNCTUATION_RE = re.compile(r"[「」『』，。！？：；、\s]")
 
 # Filler words to strip from spoken text before evaluation
 _FILLER_WORDS = {"嗯", "啊", "那", "個", "就", "是", "然", "後", "呢", "哦", "喔"}
@@ -107,8 +106,8 @@ _SYSTEM_PROMPT = (
 # ---------------------------------------------------------------------------
 
 def _normalize_text(text: str) -> str:
-    """Remove punctuation and whitespace for comparison."""
-    return _PUNCTUATION_RE.sub("", text)
+    """Remove punctuation, bopomofo, and whitespace for scoring (matches frontend)."""
+    return normalize_for_comparison(text)
 
 
 def _apply_short_text_compensation(base_threshold: float, target_length: int) -> float:
@@ -136,6 +135,14 @@ def _calculate_tier(
     if adjusted_rate >= reading_pass:
         return 2
     return 3
+
+
+def _cpm_from_correct_count(correct_count: int, duration_ms: int | None) -> float | None:
+    """CPM from correctly-read chars only (matches frontend fluencyAnalyzer)."""
+    if duration_ms is None or duration_ms <= 0:
+        return None
+    duration_sec = max(duration_ms / 1000, 0.5)
+    return round(correct_count / duration_sec * 60, 1)
 
 
 def _is_near_sound(a: str, b: str) -> bool:
@@ -213,23 +220,25 @@ def _build_fallback_result(spoken_text: str, target_text: str) -> dict:
                 dp[i - 1][j - 1] + cost,
             )
 
-    # Backtrack
+    # Backtrack — prefer target gaps (漏字) over matching distant duplicates (frontend parity)
     alignment: list[tuple[str | None, str | None]] = []  # (target_char, spoken_char)
     i, j = t_len, s_len
     while i > 0 or j > 0:
-        if i > 0 and j > 0:
-            cost = 0 if target_chars[i - 1] == spoken_chars[j - 1] else 1
-            if dp[i][j] == dp[i - 1][j - 1] + cost:
-                alignment.append((target_chars[i - 1], spoken_chars[j - 1]))
-                i -= 1
-                j -= 1
-                continue
         if i > 0 and (j == 0 or dp[i][j] == dp[i - 1][j] + 1):
             alignment.append((target_chars[i - 1], None))
             i -= 1
-        else:
+            continue
+        if j > 0 and (i == 0 or dp[i][j] == dp[i][j - 1] + 1):
             alignment.append((None, spoken_chars[j - 1]))
             j -= 1
+            continue
+        if i > 0 and j > 0:
+            cost = 0 if target_chars[i - 1] == spoken_chars[j - 1] else 1
+            alignment.append((target_chars[i - 1], spoken_chars[j - 1]))
+            i -= 1
+            j -= 1
+            continue
+        break
     alignment.reverse()
 
     # Count totals for adjusted_match_rate calculation
@@ -319,10 +328,9 @@ async def evaluate_reading_with_ai(
     # Calculate effective pass threshold (short paragraph compensation)
     reading_pass = _apply_short_text_compensation(Thresholds.READING_PASS, t_len)
 
-    # Calculate CPM
-    cpm: float | None = None
-    if duration_ms and duration_ms > 0 and t_len > 0:
-        cpm = round(t_len / (duration_ms / 1000) * 60, 1)
+    # Alignment preview for CPM (chars actually read, not full target length)
+    alignment_preview = _build_fallback_result(spoken_text, target_text)
+    cpm = _cpm_from_correct_count(alignment_preview["stats"]["correct_count"], duration_ms)
 
     # Sanitise inputs before sending to AI
     safe_spoken = sanitize_ai_input(spoken_text)
@@ -432,7 +440,6 @@ async def evaluate_reading_with_ai(
             exc,
             extra={"event": "reading_eval_fallback", "error": str(exc)},
         )
-        result = _build_fallback_result(spoken_text, target_text)
-        if cpm is not None:
-            result["cpm"] = cpm
+        result = alignment_preview
+        result["cpm"] = cpm
         return result

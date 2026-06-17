@@ -22,13 +22,14 @@
  *   - useWordSearchProgress.ts  (timer, localStorage, completion, redo)
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story } from '../../types';
 import { isToolboxMode } from '../../services/learningStorageScope';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useWordSearchProgress } from './useWordSearchProgress';
+import { PlacedWord } from './wordSearchGrid';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +39,103 @@ interface VocabWordSearchProps {
   story: Story;
   onFinish: (elapsedSeconds: number) => void;
   zhuyinActive?: boolean;
+}
+
+// A8: Detect touch (coarse pointer) vs mouse at mount time.
+const IS_TOUCH_DEVICE =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+const VOCAB_WORDSEARCH_ONBOARDED_KEY = 'vocab_wordsearch_onboarded';
+
+type WordSearchDemoStep = 'find-word' | 'start-drag' | 'dragging' | 'success';
+
+interface WordSearchDemoRuntime {
+  step: WordSearchDemoStep;
+  targetWord: string;
+  highlightCells: Set<string>;
+}
+
+interface DemoCursor {
+  x: number;
+  y: number;
+}
+
+function DemoBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative flex justify-center mb-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-xs">
+        {children}
+        <span
+          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+  const instruction = IS_TOUCH_DEVICE
+    ? '用手指在方格上滑過，水平或垂直圈出語詞'
+    : '用滑鼠在方格上拖曳，水平或垂直圈出語詞';
+  return (
+    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          lightbulb
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">語詞複習怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            {instruction}。右邊列出要找的語詞，全部找到就完成
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function cellsAlongWord(placed: PlacedWord, upToIndex: number): Set<string> {
+  const keys = new Set<string>();
+  const chars = [...placed.word];
+  for (let i = 0; i <= upToIndex && i < chars.length; i++) {
+    const r = placed.direction === 'vertical' ? placed.row + i : placed.row;
+    const c = placed.direction === 'horizontal' ? placed.col + i : placed.col;
+    keys.add(`${r},${c}`);
+  }
+  return keys;
+}
+
+function cursorAtCell(row: number, col: number): DemoCursor | null {
+  const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  return { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.35 };
 }
 
 // ---------------------------------------------------------------------------
@@ -77,6 +175,104 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     handleRedo,
   } = useWordSearchProgress(vocabWords, story.id);
 
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(VOCAB_WORDSEARCH_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+  const [demo, setDemo] = useState<WordSearchDemoRuntime | null>(null);
+  const [demoCursor, setDemoCursor] = useState<DemoCursor | null>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearDemoTimers = useCallback(() => {
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
+  }, []);
+
+  const scheduleDemoStep = useCallback((fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+    return id;
+  }, []);
+
+  useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
+
+  const handleDismissCoach = useCallback(() => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(VOCAB_WORDSEARCH_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const demoTargetPlaced = useMemo(() => {
+    if (placedWords.length === 0) return null;
+    const horizontal = placedWords.find((pw) => pw.direction === 'horizontal');
+    return horizontal ?? placedWords[0];
+  }, [placedWords]);
+
+  const handleDemo = useCallback(() => {
+    clearDemoTimers();
+    handleDismissCoach();
+    const target = demoTargetPlaced;
+    if (!target) return;
+
+    const wordLen = [...target.word].length;
+    const midIndex = Math.max(0, Math.floor(wordLen / 2));
+    const endIndex = wordLen - 1;
+
+    setDemo({ step: 'find-word', targetWord: target.word, highlightCells: new Set() });
+    setDemoCursor(null);
+
+    scheduleDemoStep(() => {
+      setDemo({
+        step: 'start-drag',
+        targetWord: target.word,
+        highlightCells: cellsAlongWord(target, 0),
+      });
+      setDemoCursor(cursorAtCell(target.row, target.col));
+    }, 900);
+
+    scheduleDemoStep(() => {
+      setDemo({
+        step: 'dragging',
+        targetWord: target.word,
+        highlightCells: cellsAlongWord(target, midIndex),
+      });
+      const r = target.direction === 'vertical' ? target.row + midIndex : target.row;
+      const c = target.direction === 'horizontal' ? target.col + midIndex : target.col;
+      setDemoCursor(cursorAtCell(r, c));
+    }, 1800);
+
+    scheduleDemoStep(() => {
+      setDemo({
+        step: 'dragging',
+        targetWord: target.word,
+        highlightCells: cellsAlongWord(target, endIndex),
+      });
+      const r = target.direction === 'vertical' ? target.row + endIndex : target.row;
+      const c = target.direction === 'horizontal' ? target.col + endIndex : target.col;
+      setDemoCursor(cursorAtCell(r, c));
+    }, 2700);
+
+    scheduleDemoStep(() => {
+      setDemo({
+        step: 'success',
+        targetWord: target.word,
+        highlightCells: cellsAlongWord(target, endIndex),
+      });
+      setDemoCursor(null);
+    }, 3600);
+
+    scheduleDemoStep(() => {
+      setDemo(null);
+      setDemoCursor(null);
+    }, 5200);
+  }, [clearDemoTimers, demoTargetPlaced, handleDismissCoach, scheduleDemoStep]);
+
   // Resolve a touch/mouse event to a grid cell position
   const resolveCell = useCallback((e: React.MouseEvent | React.TouchEvent): { row: number; col: number } | null => {
     let clientX: number;
@@ -100,60 +296,69 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   // Mouse handlers
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      if (demo !== null) return;
       e.preventDefault();
       const pos = resolveCell(e);
       if (pos) handleDragStart(pos);
     },
-    [resolveCell, handleDragStart]
+    [demo, resolveCell, handleDragStart]
   );
 
   const onMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!dragStart) return;
+      if (demo !== null || !dragStart) return;
       const pos = resolveCell(e);
       if (pos) handleDragMove(pos);
     },
-    [dragStart, resolveCell, handleDragMove]
+    [demo, dragStart, resolveCell, handleDragMove]
   );
 
   const onMouseUp = useCallback(
     (e: React.MouseEvent) => {
+      if (demo !== null) return;
       const pos = resolveCell(e);
       if (pos) handleDragMove(pos);
       handleDragEnd();
     },
-    [resolveCell, handleDragMove, handleDragEnd]
+    [demo, resolveCell, handleDragMove, handleDragEnd]
   );
 
   // Touch handlers
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      if (demo !== null) return;
       e.preventDefault();
       const pos = resolveCell(e);
       if (pos) handleDragStart(pos);
     },
-    [resolveCell, handleDragStart]
+    [demo, resolveCell, handleDragStart]
   );
 
   const onTouchMove = useCallback(
     (e: React.TouchEvent) => {
+      if (demo !== null) return;
       e.preventDefault();
       const pos = resolveCell(e);
       if (pos) handleDragMove(pos);
     },
-    [resolveCell, handleDragMove]
+    [demo, resolveCell, handleDragMove]
   );
 
   const onTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      if (demo !== null) return;
       e.preventDefault();
       handleDragEnd();
     },
-    [handleDragEnd]
+    [demo, handleDragEnd]
   );
 
   function getCellClass(row: number, col: number): string {
     const key = row + ',' + col;
+    if (demo?.highlightCells.has(key)) {
+      if (demo.step === 'success') return 'bg-emerald-100 text-emerald-800 font-black';
+      return 'bg-indigo-300 text-white font-bold';
+    }
     if (highlightedCells.has(key)) return 'bg-indigo-50 text-indigo-700 font-black';
     if (dragCells.has(key)) return 'bg-indigo-300 text-white font-bold';
     if (flashCells.has(key)) return 'bg-red-300 text-white';
@@ -189,25 +394,69 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   // Red border overlays for found words — use inset outline to avoid offset issues
   const OVERLAY_BORDER = 4;
-  const foundWordOverlays = placedWords
-    .filter((pw) => foundWords.has(pw.word))
-    .map((pw) => {
-      const wordLen = [...pw.word].length;
-      const x = pw.col * cellSizePx;
-      const y = pw.row * cellSizePx;
-      const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
-      const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
-      return { word: pw.word, x, y, w, h };
-    });
+  const foundWordOverlays = [
+    ...placedWords
+      .filter((pw) => foundWords.has(pw.word))
+      .map((pw) => {
+        const wordLen = [...pw.word].length;
+        const x = pw.col * cellSizePx;
+        const y = pw.row * cellSizePx;
+        const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
+        const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
+        return { word: pw.word, x, y, w, h };
+      }),
+    ...(demo?.step === 'success' && demoTargetPlaced
+      ? (() => {
+          const pw = demoTargetPlaced;
+          const wordLen = [...pw.word].length;
+          const x = pw.col * cellSizePx;
+          const y = pw.row * cellSizePx;
+          const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
+          const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
+          return [{ word: `demo-${pw.word}`, x, y, w, h }];
+        })()
+      : []),
+  ];
 
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 md:px-8 py-6 select-none" style={{ fontFamily: zhuyinFont }}>
+      {demoCursor && (
+        <span
+          className="fixed z-50 pointer-events-none text-xl"
+          style={{
+            left: demoCursor.x,
+            top: demoCursor.y,
+            transform: 'translate(-50%, -50%)',
+            transition: 'left 0.7s ease-in-out, top 0.7s ease-in-out',
+          }}
+          aria-hidden
+        >
+          {IS_TOUCH_DEVICE ? '👆' : '🖱️'}
+        </span>
+      )}
+
       {/* Header */}
       <div className="text-center">
         <h2 className="text-lg font-bold text-on-surface">語詞複習</h2>
-        <p className="text-sm text-on-surface-variant mt-0.5">
-          水平或垂直拖曳圈出語詞
-        </p>
+        {!showCoach ? (
+          <div className="flex items-center justify-center gap-3 mt-0.5">
+            <p className="text-sm text-on-surface-variant">
+              {IS_TOUCH_DEVICE ? '水平或垂直滑過圈出語詞' : '水平或垂直拖曳圈出語詞'}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowCoach(true)}
+              className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1 shrink-0"
+            >
+              <span className="material-symbols-outlined text-sm">help_outline</span>
+              怎麼玩？
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-on-surface-variant mt-0.5">
+            水平或垂直拖曳圈出語詞
+          </p>
+        )}
       </div>
 
       {/* Found toast */}
@@ -237,17 +486,42 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         </div>
       </div>
 
+      {/* Coach + game — shared width (grid + word list column) */}
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+        {demo?.step === 'find-word' && (
+          <DemoBubble>① 先看右邊要找哪些語詞</DemoBubble>
+        )}
+        {demo?.step === 'start-drag' && (
+          <DemoBubble>
+            {IS_TOUCH_DEVICE ? '② 按住方格上的第一個字' : '② 按住方格上的第一個字'}
+          </DemoBubble>
+        )}
+        {demo?.step === 'dragging' && (
+          <DemoBubble>
+            {IS_TOUCH_DEVICE ? '③ 手指滑過，水平或垂直圈出語詞' : '③ 拖曳圈出整個語詞'}
+          </DemoBubble>
+        )}
+        {demo?.step === 'success' && (
+          <DemoBubble>✓ 找到了！就是這樣玩</DemoBubble>
+        )}
+
+        {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+
       <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
         {/* Grid with red border overlays for found words */}
         <div
-          className="flex-shrink-0 touch-none cursor-crosshair border-2 border-gray-200 shadow-sm"
+          className={`flex-shrink-0 touch-none cursor-crosshair border-2 shadow-sm transition-all duration-300 ${
+            demo?.step === 'find-word'
+              ? 'border-amber-300 ring-4 ring-amber-200/50'
+              : 'border-gray-200'
+          }`}
           style={{ position: 'relative' }}
           role="grid"
           aria-label="語詞方格，拖選字元以找出語詞"
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
-          onMouseLeave={handleDragEnd}
+          onMouseLeave={() => { if (demo === null) handleDragEnd(); }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -312,16 +586,20 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
           <div className="flex flex-wrap gap-2">
             {sortedPlacedWords.map((pw) => {
               const found = foundWords.has(pw.word);
+              const isDemoTarget = demo?.targetWord === pw.word;
+              const isDemoFound = demo?.step === 'success' && isDemoTarget;
               return (
                 <span
                   key={pw.word}
                   className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                    found
+                    found || isDemoFound
                       ? 'bg-accent/10 text-accent line-through'
+                      : isDemoTarget && demo?.step === 'find-word'
+                      ? 'bg-amber-50 border-2 border-amber-400 text-amber-800 ring-4 ring-amber-300/40 shadow-md'
                       : 'bg-surface-container-lowest border border-surface-container-high text-on-surface shadow-sm'
                   }`}
                 >
-                  {found && (
+                  {(found || isDemoFound) && (
                     <span className="material-symbols-outlined text-sm">check_circle</span>
                   )}
                   {zh(pw.word)}
@@ -336,6 +614,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
             </p>
           )}
         </div>
+      </div>
       </div>
 
       {/* Completion — fixed bottom CTA */}

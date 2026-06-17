@@ -26,7 +26,7 @@ from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, Story
 
 _structure_cache: dict[str, tuple[float, object]] = {}
 _CACHE_TTL = 86400  # 24 hours
-_CACHE_VERSION = "v2"  # bump when schema changes to auto-invalidate
+_CACHE_VERSION = "v3"  # bump when schema changes to auto-invalidate
 
 
 def _cache_key(story_id: str) -> str:
@@ -65,85 +65,207 @@ def _cell_to_row_dict(label: str, value: str) -> dict:
         "interactive_type": itype,
     }
     if itype == "fill_blank":
-        # Extract first blank content as the reference answer hint
-        m = _BLANK_RE.search(value)
-        if m:
-            row["hint"] = m.group(1).strip()
+        hints = [m.group(1).strip() for m in _BLANK_RE.finditer(value)]
+        if hints:
+            row["hint"] = hints[0]
+        if len(hints) > 1:
+            row["blank_hints"] = hints
     return row
 
 
+def _parse_yaml_table_row(raw_row: list) -> dict | None:
+    """Parse one YAML story_structure_table row into a normalized item."""
+    if not isinstance(raw_row, list) or not raw_row:
+        return None
+
+    n = len(raw_row)
+    if n == 1:
+        return {"kind": "title", "text": str(raw_row[0]).strip()}
+
+    if n == 2:
+        return {
+            "kind": "pair",
+            "label": str(raw_row[0]).strip(),
+            "value": str(raw_row[1]).strip(),
+        }
+
+    if n == 3:
+        return {
+            "kind": "nested_triple",
+            "section": str(raw_row[0]).strip(),
+            "sub_label": str(raw_row[1]).strip(),
+            "value": str(raw_row[2]).strip(),
+        }
+
+    label = str(raw_row[0]).strip()
+    remainder = [str(c) for c in raw_row[1:]]
+    if len(remainder) % 2 == 0:
+        return {
+            "kind": "paired_block",
+            "label": label,
+            "pairs": [
+                {"sub_label": remainder[i], "value": remainder[i + 1]}
+                for i in range(0, len(remainder), 2)
+            ],
+        }
+
+    return {
+        "kind": "pair",
+        "label": label,
+        "value": " ".join(remainder),
+    }
+
+
+def _merge_parsed_to_structure_rows(parsed: list[dict]) -> list[dict]:
+    """Convert parsed items into grading-friendly rows (group nested triples)."""
+    rows: list[dict] = []
+    i = 0
+    while i < len(parsed):
+        item = parsed[i]
+        kind = item["kind"]
+
+        if kind == "title":
+            rows.append({
+                "label": item["text"],
+                "value": "",
+                "interactive_type": "display",
+            })
+            i += 1
+            continue
+
+        if kind == "pair":
+            rows.append(_cell_to_row_dict(item["label"], item["value"]))
+            i += 1
+            continue
+
+        if kind == "nested_triple":
+            section = item["section"]
+            sub_rows: list[dict] = []
+            while (
+                i < len(parsed)
+                and parsed[i]["kind"] == "nested_triple"
+                and parsed[i]["section"] == section
+            ):
+                cur = parsed[i]
+                sub_rows.append(_cell_to_row_dict(cur["sub_label"], cur["value"]))
+                i += 1
+            rows.append({
+                "label": section,
+                "value": "",
+                "interactive_type": "display",
+                "sub_rows": sub_rows,
+            })
+            continue
+
+        if kind == "paired_block":
+            sub_rows = [
+                _cell_to_row_dict(p["sub_label"], p["value"])
+                for p in item["pairs"]
+            ]
+            rows.append({
+                "label": item["label"],
+                "value": "",
+                "interactive_type": "display",
+                "sub_rows": sub_rows,
+            })
+            i += 1
+            continue
+
+        i += 1
+
+    return rows
+
+
+def _build_worksheet_rows(parsed: list[dict]) -> tuple[str | None, list[dict]]:
+    """Build 紙本學習單 HTML table rows (title / pair / section_block)."""
+    title: str | None = None
+    worksheet_rows: list[dict] = []
+    i = 0
+
+    while i < len(parsed):
+        item = parsed[i]
+        kind = item["kind"]
+
+        if kind == "title":
+            title = item["text"]
+            i += 1
+            continue
+
+        if kind == "pair":
+            worksheet_rows.append({
+                "kind": "pair",
+                "label": item["label"],
+                "value": item["value"],
+            })
+            i += 1
+            continue
+
+        if kind == "nested_triple":
+            section = item["section"]
+            items: list[dict] = []
+            while (
+                i < len(parsed)
+                and parsed[i]["kind"] == "nested_triple"
+                and parsed[i]["section"] == section
+            ):
+                cur = parsed[i]
+                items.append({
+                    "label": cur["sub_label"],
+                    "value": cur["value"],
+                })
+                i += 1
+            worksheet_rows.append({
+                "kind": "section_block",
+                "section": section,
+                "items": items,
+            })
+            continue
+
+        if kind == "paired_block":
+            worksheet_rows.append({
+                "kind": "section_block",
+                "section": item["label"],
+                "items": [
+                    {"label": p["sub_label"], "value": p["value"]}
+                    for p in item["pairs"]
+                ],
+            })
+            i += 1
+            continue
+
+        i += 1
+
+    return title, worksheet_rows
+
+
 def _format_yaml_structure_table(table: list) -> dict:
-    """Convert story_structure_table YAML list → {'rows': [...]} API shape.
+    """Convert story_structure_table YAML list → API shape.
 
     YAML row formats:
       [title]                   → 1-cell display row (title of the whole table)
       [label, value]            → simple row (fill_blank if has 【…】, else display)
-      [label, sub_label, sub_value, ...]  → row with sub_rows (pairs after label)
-      [label, col1, col2, col3] → header row or row with 3 sub-cells (display)
+      [label, sub_label, sub_value]  → nested PSR row (merged by shared section label)
+      [label, sub1, val1, sub2, val2, ...] → paired sub_rows under one section
 
-    All interactive_type values are 'fill_blank' or 'display'.
-    Checkbox interactivity is NOT reproduced from YAML (requires AI options arrays);
-    cells with □ checkbox markers are treated as 'display'.
+    Returns rows for grading plus worksheet_rows for 紙本 table rendering when
+    the source table has a title row or nested PSR blocks.
     """
-    rows: list[dict] = []
+    parsed = [
+        item for raw in table
+        if (item := _parse_yaml_table_row(raw)) is not None
+    ]
+    rows = _merge_parsed_to_structure_rows(parsed)
+    title, worksheet_rows = _build_worksheet_rows(parsed)
 
-    for raw_row in table:
-        if not isinstance(raw_row, list) or not raw_row:
-            continue
-
-        n = len(raw_row)
-
-        if n == 1:
-            # Title row — display spanning label
-            rows.append({
-                "label": str(raw_row[0]).strip(),
-                "value": "",
-                "interactive_type": "display",
-            })
-
-        elif n == 2:
-            # [label, value]
-            rows.append(_cell_to_row_dict(str(raw_row[0]), str(raw_row[1])))
-
-        elif n == 3:
-            # [label, sub_label, sub_value] — row with one sub_row
-            row = {
-                "label": str(raw_row[0]).strip(),
-                "value": "",
-                "interactive_type": "display",
-                "sub_rows": [
-                    _cell_to_row_dict(str(raw_row[1]), str(raw_row[2])),
-                ],
-            }
-            rows.append(row)
-
-        else:
-            # n >= 4: treat as row with (n-1)/2 paired sub_rows if n is odd,
-            # or as a display row with all remaining cells joined if even
-            label = str(raw_row[0]).strip()
-            remainder = [str(c) for c in raw_row[1:]]
-
-            # Try to pair as (sub_label, sub_value) only when length is even
-            if len(remainder) % 2 == 0:
-                sub_rows = []
-                for i in range(0, len(remainder), 2):
-                    sub_rows.append(_cell_to_row_dict(remainder[i], remainder[i + 1]))
-                rows.append({
-                    "label": label,
-                    "value": "",
-                    "interactive_type": "display",
-                    "sub_rows": sub_rows,
-                })
-            else:
-                # Odd remainder — join all as a single display row
-                combined = " ".join(remainder)
-                rows.append({
-                    "label": label,
-                    "value": combined,
-                    "interactive_type": "display",
-                })
-
-    return {"rows": rows}
+    result: dict = {"rows": rows}
+    has_nested = any(p["kind"] in ("nested_triple", "paired_block") for p in parsed)
+    if title or has_nested or any(p["kind"] == "pair" for p in parsed):
+        result["layout"] = "worksheet_table"
+        if title:
+            result["title"] = title
+        if worksheet_rows:
+            result["worksheet_rows"] = worksheet_rows
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +275,7 @@ def _format_yaml_structure_table(table: list) -> dict:
 class StructureAnswerItem(BaseModel):
     row_index: int
     sub_row_index: int | None = None
+    blank_index: int | None = None
     value: str | None = None          # for fill_blank
     selected_options: list[int] | None = None  # for checkbox
 

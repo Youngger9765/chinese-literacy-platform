@@ -191,7 +191,7 @@ export function useLiveTutorSpeech({
       );
       onStreamingTranscript(enhancedDisplay);
 
-      // Real-time LCS diff overlay: compare full transcript against target
+      // Real-time diff overlay: compare full transcript against target
       // Throttle: only recompute on isFinal events OR if 400ms has elapsed since last diff.
       const isFinalEvent =
         event.results.length > 0 && event.results[event.results.length - 1].isFinal;
@@ -237,6 +237,7 @@ export function useLiveTutorSpeech({
         );
         sentenceResultsRef.current[sentIdx] = localResult;
         nextSentenceIdxRef.current = sentIdx + 1;
+        sentenceStartTimeRef.current = Date.now();
         onLastDiffTokens(prev =>
           prev ? [...prev, ...localResult.diffTokens] : localResult.diffTokens
         );

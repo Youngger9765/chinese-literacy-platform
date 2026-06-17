@@ -11,6 +11,7 @@ interface TutorFeedbackPanelProps {
   isPreparing: boolean;
   streamingUserInput: string;
   rightPanelDiffTokens: DiffToken[] | null;
+  targetText: string;
   paragraphSummary: ParagraphSummaryData | null;
   currentLineIndex: number;
   totalLines: number;
@@ -27,6 +28,7 @@ const TutorFeedbackPanel: React.FC<TutorFeedbackPanelProps> = ({
   isPreparing,
   streamingUserInput,
   rightPanelDiffTokens,
+  targetText,
   paragraphSummary,
   currentLineIndex,
   totalLines,
@@ -83,7 +85,12 @@ const TutorFeedbackPanel: React.FC<TutorFeedbackPanelProps> = ({
               )}
             </div>
             <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">
-              <DiffDisplay tokens={rightPanelDiffTokens} showLegend className="text-base" />
+              <DiffDisplay
+                tokens={rightPanelDiffTokens}
+                targetText={targetText}
+                showLegend
+                className="text-base"
+              />
             </div>
           </div>
         )}

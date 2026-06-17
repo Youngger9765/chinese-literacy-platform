@@ -41,14 +41,13 @@ describe('DiffDisplay', () => {
     expect(span).toHaveAttribute('title', '漏讀');
   });
 
-  it('renders extra characters with line-through', () => {
+  it('does not render extra characters (hidden for future coaching hints)', () => {
     const tokens: DiffToken[] = [
       { char: '啊', type: 'extra' },
     ];
     render(<DiffDisplay tokens={tokens} />);
-    const span = screen.getByText('啊');
-    expect(span).toHaveClass('line-through');
-    expect(span).toHaveAttribute('title', '多讀');
+    // extra tokens are intentionally not rendered in the diff view
+    expect(screen.queryByText('啊')).not.toBeInTheDocument();
   });
 
   it('renders mixed token types correctly', () => {
@@ -63,7 +62,8 @@ describe('DiffDisplay', () => {
     expect(screen.getByText('你')).toHaveClass('text-gray-900');
     expect(screen.getByText('好')).toHaveClass('bg-error');
     expect(screen.getByText('嗎')).toHaveClass('bg-gray-200');
-    expect(screen.getByText('的')).toHaveClass('line-through');
+    // extra token '的' is not rendered
+    expect(screen.queryByText('的')).not.toBeInTheDocument();
   });
 
   it('renders legend when showLegend is true', () => {
@@ -72,7 +72,8 @@ describe('DiffDisplay', () => {
     expect(screen.getByText('正確')).toBeInTheDocument();
     expect(screen.getByText('讀錯')).toBeInTheDocument();
     expect(screen.getByText('漏讀')).toBeInTheDocument();
-    expect(screen.getByText('多讀')).toBeInTheDocument();
+    // extra tokens are not shown in the diff display, so 多讀 is not in the legend
+    expect(screen.queryByText('多讀')).not.toBeInTheDocument();
   });
 
   it('does not render legend by default', () => {
@@ -85,5 +86,53 @@ describe('DiffDisplay', () => {
     const tokens: DiffToken[] = [{ char: '字', type: 'correct' }];
     const { container } = render(<DiffDisplay tokens={tokens} className="my-custom" />);
     expect(container.firstChild).toHaveClass('my-custom');
+  });
+
+  it('renders bopomofo annotation above character when zhuyin is provided', () => {
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'correct', zhuyin: 'ㄋㄧˇ' },
+    ];
+    const { container } = render(<DiffDisplay tokens={tokens} />);
+    const ruby = container.querySelector('ruby');
+    expect(ruby).toBeInTheDocument();
+    const rt = container.querySelector('rt');
+    expect(rt).toHaveTextContent('ㄋㄧˇ');
+  });
+
+  it('renders wrong token with zhuyin annotation', () => {
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'wrong', expected: '他', zhuyin: 'ㄋㄧˇ' },
+    ];
+    const { container } = render(<DiffDisplay tokens={tokens} />);
+    const rt = container.querySelector('rt');
+    expect(rt).toHaveTextContent('ㄋㄧˇ');
+  });
+
+  it('renders missing token with zhuyin annotation', () => {
+    const tokens: DiffToken[] = [
+      { char: '世', type: 'missing', zhuyin: 'ㄕˋ' },
+    ];
+    const { container } = render(<DiffDisplay tokens={tokens} />);
+    const rt = container.querySelector('rt');
+    expect(rt).toHaveTextContent('ㄕˋ');
+  });
+
+  it('does not render ruby element when zhuyin is absent', () => {
+    const tokens: DiffToken[] = [
+      { char: '字', type: 'correct' },
+    ];
+    const { container } = render(<DiffDisplay tokens={tokens} />);
+    expect(container.querySelector('ruby')).not.toBeInTheDocument();
+  });
+
+  it('inserts punctuation from targetText between diff tokens', () => {
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'missing' },
+      { char: '世', type: 'missing' },
+      { char: '界', type: 'missing' },
+    ];
+    render(<DiffDisplay tokens={tokens} targetText="你好，世界" />);
+    expect(screen.getByText('，')).toBeInTheDocument();
   });
 });

@@ -10,7 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { normalizeForComparison, diffCharacters } from './textDiff';
+import { normalizeForComparison, diffCharacters, interleavePunctuation, normalizePunctuationToChinese } from './textDiff';
+import type { DiffToken } from '../types';
 
 // ---------------------------------------------------------------------------
 // normalizeForComparison
@@ -40,6 +41,28 @@ describe('normalizeForComparison — Arabic number conversion', () => {
 
   it('strips punctuation and spaces', () => {
     expect(normalizeForComparison('「100次」')).toBe('一百次');
+  });
+
+  it('strips bopomofo (注音) from scoring length', () => {
+    expect(normalizeForComparison('你好ㄋㄧˇㄏㄠˇ')).toBe('你好');
+    expect(normalizeForComparison('媽ㄇㄚ˙')).toBe('媽');
+  });
+});
+
+describe('diffCharacters — accuracy excludes punctuation and zhuyin', () => {
+  it('full match on Chinese chars ignores punctuation in target', () => {
+    const target = '媽媽說，你好。';
+    const spoken = '媽媽說你好';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+    expect(result.matchRate).toBe(1);
+    expect(result.correctCount + result.wrongCount + result.missingCount).toBe(5);
+  });
+
+  it('zhuyin in target does not inflate denominator', () => {
+    const target = '人ㄖㄣˊ';
+    const spoken = '人';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+    expect(result.matchRate).toBe(1);
   });
 });
 
@@ -105,5 +128,150 @@ describe('diffCharacters — STT matching with number normalization', () => {
     const result = diffCharacters('累計兩百一十四周', '累計214周', { useHomophone: true });
     expect(result.matchRate).toBe(1);
     expect(result.wrongCount).toBe(0);
+  });
+});
+
+describe('diffCharacters — Levenshtein alignment', () => {
+  it('does not mark later duplicate 人/才 as correct when only early 人才 was spoken', () => {
+    const target = '管理人才有本事的人才有才能';
+    const spoken = '管理人才';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    const matched = (ch: string) =>
+      result.tokens.filter(
+        (t) => t.char === ch && (t.type === 'correct' || t.type === 'forgiven'),
+      ).length;
+
+    expect(matched('人')).toBe(1);
+    expect(matched('才')).toBe(1);
+    expect(result.correctCount).toBe(4);
+    expect(result.missingCount).toBeGreaterThan(0);
+  });
+
+  it('marks only the read prefix as correct for partial paragraph', () => {
+    const target = '中國的戰國時期有七個國家';
+    const spoken = '中國的戰國';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    expect(result.correctCount).toBe(5);
+    expect(result.tokens.slice(0, 5).every((t) => t.type === 'correct' || t.type === 'forgiven')).toBe(
+      true,
+    );
+    expect(result.tokens.slice(5).every((t) => t.type === 'missing')).toBe(true);
+  });
+
+  it('resyncs after skipped target chars instead of cascading wrong', () => {
+    const target = '互比苗頭在競爭中勝出各國都搶傑出的管理人才';
+    const spoken = '互比苗頭競爭中勝出各國都搶傑出的管理人才';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    const types = result.tokens.map((t) => t.type);
+    expect(types).toContain('missing');
+    expect(types.filter((t) => t === 'correct').length).toBeGreaterThan(10);
+    expect(result.tokens.find((t) => t.char === '在' && t.type === 'missing')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '才' && t.type === 'correct')).toBeDefined();
+    expect(result.tokens.filter((t) => t.type === 'wrong').length).toBeLessThan(3);
+  });
+
+  it('allows multiple missed chars then continues marking correct', () => {
+    const target = '其中最有名的人才是齊國的孟嘗君';
+    const spoken = '其中有名的人才是齊國的孟嘗君';
+    const result = diffCharacters(spoken, target, { useHomophone: true });
+
+    expect(result.tokens.filter((t) => t.type === 'missing').length).toBe(1);
+    expect(result.tokens.find((t) => t.char === '最' && t.type === 'missing')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '孟' && t.type === 'correct')).toBeDefined();
+    expect(result.tokens.find((t) => t.char === '嘗' && t.type === 'correct')).toBeDefined();
+  });
+});
+
+describe('interleavePunctuation', () => {
+  it('inserts punctuation from target text between diff tokens', () => {
+    const target = '你好，世界';
+    const { tokens } = diffCharacters('你好世界', target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '你:correct',
+      '好:correct',
+      '，:punctuation',
+      '世:correct',
+      '界:correct',
+    ]);
+  });
+
+  it('inserts all target punctuation when diff tokens only cover partial reading', () => {
+    const target = '你好，世界！再見。';
+    const tokens: DiffToken[] = [
+      { char: '你', type: 'correct' },
+      { char: '好', type: 'correct' },
+    ];
+    const display = interleavePunctuation(target, tokens);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '你:correct',
+      '好:correct',
+      '，:punctuation',
+      '世:unread',
+      '界:unread',
+      '！:punctuation',
+      '再:unread',
+      '見:unread',
+      '。:punctuation',
+    ]);
+  });
+
+  it('uses target Chinese punctuation when spoken transcript has ASCII commas', () => {
+    const target = '中國的戰國時期，有七個國家總是爭強鬥勝、互比苗頭，';
+    const spoken = '中國的戰國時期, 有七個國家總是爭強鬥勝, 互比苗頭;';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.some((t) => t.char === ',')).toBe(false);
+    expect(display.some((t) => t.char === ';')).toBe(false);
+    expect(display.some((t) => t.char === '，')).toBe(true);
+    expect(display.some((t) => t.char === '、')).toBe(true);
+  });
+
+  it('maps Arabic digit runs to normalized diff tokens (公元前299年)', () => {
+    const target = '公元前299年，秦昭王聽說孟嘗君的賢達，便邀請他到秦國當宰相。';
+    const spoken = '公元前二百九十九年，秦昭王聽說孟嘗君的賢達，便邀請他到秦國當宰相。';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => t.char).join('')).toBe(target);
+    expect(display.filter((t) => t.type === 'correct').length).toBeGreaterThan(20);
+    expect(display.find((t) => t.char === '2')?.type).toBe('correct');
+    expect(display.find((t) => t.char === '年')?.type).toBe('correct');
+    expect(display.find((t) => t.char === '秦')?.type).toBe('correct');
+  });
+
+  it('shows partial read through Arabic digits correctly', () => {
+    const target = '公元前299年，秦昭王';
+    const spoken = '公元前二百九十九年';
+    const { tokens } = diffCharacters(spoken, target, { useHomophone: true });
+    const display = interleavePunctuation(target, tokens as DiffToken[]);
+
+    expect(display.map((t) => `${t.char}:${t.type}`)).toEqual([
+      '公:correct',
+      '元:correct',
+      '前:correct',
+      '2:correct',
+      '9:correct',
+      '9:correct',
+      '年:correct',
+      '，:punctuation',
+      '秦:missing',
+      '昭:missing',
+      '王:missing',
+    ]);
+  });
+});
+
+describe('normalizePunctuationToChinese', () => {
+  it('maps half-width punctuation to full-width Chinese', () => {
+    expect(normalizePunctuationToChinese('你好, 世界; 再見.')).toBe('你好，世界；再見。');
   });
 });

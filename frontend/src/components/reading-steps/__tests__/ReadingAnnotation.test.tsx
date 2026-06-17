@@ -381,4 +381,41 @@ describe('annotationOffsets (PUA + selection math)', () => {
     const fallbackStrip = document.querySelector('[data-testid="reading-annotation-graphic-text-images"]');
     expect(fallbackStrip).toBeNull();
   });
+
+  it('TDD-5 (#2218): table anchors inline to its body-intro paragraph when no 表N caption row exists', () => {
+    // Regression #2218: the printed `表N …` caption rows were stripped from
+    // G7-L30 paragraphs into the table title/notes. Without a caption-row anchor
+    // the table must still render inline — anchored to the intro sentence
+    // (`表一比較了…`) — rather than dropping to the bottom-of-article fallback.
+    const onFinishLocal = vi.fn();
+
+    const storyWithTable = {
+      ...mockStory,
+      content: [
+        '前言段落，介紹兩種八哥。',
+        '表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。',
+        '結語段落。',
+      ],
+      tables: [
+        {
+          id: 'table-1',
+          title: '表一 白尾八哥與臺灣冠八哥比較異同表',
+          headers: ['比較項目', '白尾八哥', '臺灣冠八哥'],
+          rows: [{ cells: ['嘴喙顏色', '黃色', '象牙白色'] }],
+          notes: ['註1. 資料來源：我們的島（2022）'],
+        },
+      ],
+      layout_mode: 'graphic-text',
+    } as unknown as Story;
+
+    render(<ReadingAnnotation story={storyWithTable} onFinish={onFinishLocal} />);
+
+    // Table renders inline right after the intro paragraph (index 1).
+    const inlineTable = document.querySelectorAll('[data-testid="inline-table-after-para-1"]');
+    expect(inlineTable.length).toBe(1);
+
+    // And it must NOT also appear in the bottom-of-article fallback block.
+    const fallbackTables = document.querySelector('[data-testid="reading-annotation-tables"]');
+    expect(fallbackTables).toBeNull();
+  });
 });

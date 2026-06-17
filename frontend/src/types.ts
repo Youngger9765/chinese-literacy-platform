@@ -228,7 +228,14 @@ export interface ReadingAttempt {
   lineBreakdown?: LineBreakdown[];
 }
 
-export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
+export type DiffType =
+  | 'correct'
+  | 'forgiven'
+  | 'wrong'
+  | 'missing'
+  | 'extra'
+  | 'unread'
+  | 'punctuation';
 
 export interface DiffToken {
   char: string;
@@ -236,6 +243,7 @@ export interface DiffToken {
   expected?: string;
   spoken?: string;
   reason?: string;
+  zhuyin?: string;
 }
 
 export interface ReadingEvalStats {

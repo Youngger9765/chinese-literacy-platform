@@ -1,13 +1,12 @@
 import { useCallback, useRef } from 'react';
 import { DiffToken, Story } from '../../../../types';
 import { normalizeForComparison, cleanChineseText } from '../../../../utils/textDiff';
-import { READING_EXCELLENT } from '../../../../utils/personaConfig';
+import { buildTranscriptForEvaluation } from '../../../../utils/liveTutorTranscriptPipeline';
 import { evaluateReading } from '../../../../services/learningApi';
 import { useAuth } from '../../../../contexts/AuthContext';
 import {
   localEvaluateParagraph,
   splitIntoSentences,
-  getReadingPassThreshold,
   type LocalEvalResult,
 } from '../../../../utils/localEval';
 import {
@@ -17,6 +16,13 @@ import {
   STREAK_MESSAGES,
 } from '../../../../utils/liveTutorPools';
 import { LineResult, ParagraphSummaryData } from '../liveTutorTypes';
+
+/** Dev + staging/preview hosts — production 不印 STT/LLM debug。 */
+function isEvalConsoleEnabled(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === 'undefined') return false;
+  return /staging|preview|localhost/i.test(window.location.hostname);
+}
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Evaluation state machine using useReducer
@@ -59,11 +65,12 @@ export function evalReducer(state: EvalState, action: EvalAction): EvalState {
         lastDiffTokens: action.diffTokens,
       };
     case 'GEMINI_DONE':
+      // Keep Phase-1 local diff for 朗讀結果 — Gemini diff_tokens can mark unread chars
+      // correct when STT/transcription over-filled the spoken text.
       return {
         ...state,
         phase: 'gemini_done',
         isAwaitingGemini: false,
-        lastDiffTokens: action.diffTokens,
       };
     case 'GEMINI_ERROR':
       return { ...state, phase: 'gemini_error', isAwaitingGemini: false };
@@ -85,6 +92,7 @@ export function evalReducer(state: EvalState, action: EvalAction): EvalState {
         realtimeDiffTokens: null,
         streamingUserInput: '',
         isAwaitingGemini: false,
+        retryCount: 0,
       };
     default:
       return state;
@@ -139,7 +147,7 @@ export function useParagraphEvaluation({
   const evaluateAndRespond = useCallback(
     async (
       rawTranscript: string,
-      _rawStt: string,
+      rawStt: string,
       durationMs: number,
       lineIdx: number,
       /** I1 (P1#4): caller must declare transcript source.
@@ -148,7 +156,20 @@ export function useParagraphEvaluation({
       source: 'gemini' | 'webspeech' = 'webspeech',
     ) => {
       const targetText = story.content[lineIdx] || '';
-      const cleaned = cleanChineseText(rawTranscript);
+      const { transcriptForEval, cleaned, conservativeClampApplied } = buildTranscriptForEvaluation({
+        source,
+        rawTranscript,
+        rawStt,
+        targetText,
+        durationMs,
+      });
+
+      if (isEvalConsoleEnabled() && transcriptForEval !== rawTranscript) {
+        console.warn(
+          '[Evaluation] Gemini transcript longer than Web Speech — using Web Speech for diff',
+          { geminiLen: cleanChineseText(rawTranscript).length, usedLen: cleaned.length },
+        );
+      }
 
       // No speech detected
       if (!cleaned) {
@@ -207,70 +228,40 @@ export function useParagraphEvaluation({
         localMatchRate = localResult.matchRate;
         localCpm = localResult.cpm;
       } else {
-        // Web Speech path: may aggregate sentenceResults if enough were collected.
-        const sentResults = sentenceResultsRef.current.filter(
-          Boolean,
-        ) as LocalEvalResult[];
-
-        const totalSentences = sentenceTargetsRef.current.length;
-        if (
-          sentResults.length > 0 &&
-          sentResults.length >= Math.ceil(totalSentences / 2)
-        ) {
-          const allDiff = sentResults.flatMap((r) => r.diffTokens);
-          const correctAndForgiven = allDiff.filter(
-            (t) => t.type === 'correct' || t.type === 'forgiven',
-          ).length;
-          const totalTarget = normalizeForComparison(targetText).length || 1;
-          localMatchRate = correctAndForgiven / totalTarget;
-          const threshold = getReadingPassThreshold(totalTarget);
-          localTier =
-            localMatchRate >= READING_EXCELLENT
-              ? 1
-              : localMatchRate >= threshold
-              ? 2
-              : 3;
-          localDiffTokens = allDiff;
-          localFeedback = sentResults[sentResults.length - 1].feedback;
-          localCpm = Math.round(
-            sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length,
-          );
-        } else {
-          const localResult = localEvaluateParagraph(
-            cleaned,
-            targetText,
-            durationMs,
-            {
-              tier1: TIER1_POOL,
-              tier2: TIER2_POOL,
-              tier3: TIER3_POOL,
-              streakMsgs: STREAK_MESSAGES,
-            },
-            evalState.streak,
-          );
-          localTier = localResult.tier;
-          localDiffTokens = localResult.diffTokens;
-          localFeedback = localResult.feedback;
-          localMatchRate = localResult.matchRate;
-          localCpm = localResult.cpm;
-        }
+        // Always score the full paragraph transcript — do not stitch per-sentence diff
+        // tokens (length mismatch makes interleavePunctuation mark unread chars green).
+        const localResult = localEvaluateParagraph(
+          cleaned,
+          targetText,
+          durationMs,
+          {
+            tier1: TIER1_POOL,
+            tier2: TIER2_POOL,
+            tier3: TIER3_POOL,
+            streakMsgs: STREAK_MESSAGES,
+          },
+          evalState.streak,
+        );
+        localTier = localResult.tier;
+        localDiffTokens = localResult.diffTokens;
+        localFeedback = localResult.feedback;
+        localMatchRate = localResult.matchRate;
+        localCpm = localResult.cpm;
       }
 
       dispatch({ type: 'START_LOCAL', diffTokens: localDiffTokens });
 
-      if (import.meta.env.DEV) {
-        console.group('%c[Evaluation] Hybrid', 'color: cyan; font-weight: bold');
-        console.log('Line:', lineIdx, '/', story.content.length - 1);
-        console.log('Target:', targetText, '| cleaned:', cleaned);
-        console.log(
-          'Local tier:',
-          localTier,
-          '| match:',
-          (localMatchRate * 100).toFixed(1) + '%',
-          '| cpm:',
-          localCpm,
-        );
-        console.groupEnd();
+      if (isEvalConsoleEnabled()) {
+        console.log('[LiveTutor] STT', {
+          lineIndex: lineIdx,
+          targetText,
+          webSpeech: rawStt,
+          geminiAudioTranscript: source === 'gemini' ? rawTranscript : null,
+          usedForEvaluation: cleaned,
+          transcriptSource: source,
+          conservativeClampApplied,
+          durationMs,
+        });
       }
 
       // ── Retry cap ──────────────────────────────────────────────────────
@@ -286,7 +277,10 @@ export function useParagraphEvaluation({
           transcript: cleaned,
           diffTokens: localDiffTokens,
         };
-        const allResults = [...lineResults, capResult];
+        const allResults = [
+          ...lineResults.filter((r) => r.lineIndex !== lineIdx),
+          capResult,
+        ];
         setLineResults(allResults);
         dispatch({ type: 'GEMINI_ERROR' });
         advanceParagraph(lineIdx, allResults, stopSession);
@@ -302,7 +296,10 @@ export function useParagraphEvaluation({
         transcript: cleaned,
         diffTokens: localDiffTokens,
       };
-      const allResults = [...lineResults, localResult];
+      const allResults = [
+        ...lineResults.filter((r) => r.lineIndex !== lineIdx),
+        localResult,
+      ];
       setLineResults(allResults);
       dispatch({ type: 'SET_STREAMING', value: '' });
 
@@ -365,7 +362,7 @@ export function useParagraphEvaluation({
           const gemini = await Promise.race([
             evaluateReading(cleaned, targetText, durationMs, token ?? undefined),
             new Promise<never>((_, reject) => {
-              localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 8000);
+              localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 28_000);
               geminiTimeoutRef.current = localTimeout;
             }),
           ]);
@@ -396,6 +393,27 @@ export function useParagraphEvaluation({
           }));
           dispatch({ type: 'GEMINI_DONE', diffTokens: gemini.diff_tokens });
 
+          if (isEvalConsoleEnabled()) {
+            console.log('[LiveTutor] LLM 評估', {
+              localBaseline: {
+                tier: localTier,
+                matchRate: localMatchRate,
+                cpm: localCpm,
+              },
+              evaluation_method: gemini.evaluation_method,
+              tier: gemini.tier,
+              match_rate: gemini.match_rate,
+              adjusted_match_rate: gemini.adjusted_match_rate,
+              cpm: gemini.cpm,
+              feedback: gemini.feedback,
+              wrongCount: geminiWrong,
+              missingCount: geminiMissing,
+              stats: gemini.stats,
+              thresholds: gemini.thresholds,
+              diff_tokens: gemini.diff_tokens,
+            });
+          }
+
           if (gemini.tier <= 2 && localTier > 2) {
             dispatch({ type: 'INCREMENT_STREAK' });
             dispatch({ type: 'RESET_RETRY' });
@@ -405,9 +423,13 @@ export function useParagraphEvaluation({
               cpm: Math.round(gemini.cpm ?? localCpm),
               durationMs,
               transcript: cleaned,
-              diffTokens: gemini.diff_tokens,
+              // Display stays on local diff; Gemini only upgrades tier / summary.
+              diffTokens: localDiffTokens,
             };
-            setLineResults((prev) => [...prev.slice(0, -1), geminiResult]);
+            setLineResults((prev) => [
+              ...prev.filter((r) => r.lineIndex !== lineIdx),
+              geminiResult,
+            ]);
           }
         } catch (err: unknown) {
           if (localTimeout !== null) clearTimeout(localTimeout);
@@ -421,6 +443,12 @@ export function useParagraphEvaluation({
           });
           dispatch({ type: 'GEMINI_ERROR' });
           const msg = err instanceof Error ? err.message : '';
+          if (isEvalConsoleEnabled()) {
+            console.log('[LiveTutor] LLM 評估', {
+              status: msg === 'gemini_timeout' ? 'timeout' : 'error',
+              message: msg || String(err),
+            });
+          }
           if (msg !== 'gemini_timeout') {
             console.warn('[LiveTutor] Gemini eval failed, local result stands:', err);
           }

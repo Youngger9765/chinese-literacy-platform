@@ -9,6 +9,7 @@ import { resolveActiveSteps } from '../../config/stepConfig';
 import { useAuth } from '../../contexts/AuthContext';
 import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
 import type { OmoPriorUploadResponse } from '../../services/omoApi';
+import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -41,6 +42,16 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
    * Issue #1637: navigate to /omo with lesson_code query param so OmoPage
    * can pass it as a hint to the backend (skip Gemini fuzzy-match).
    */
+
+  const handleDownloadWorksheet = useCallback(async (url: string, ext: 'pdf' | 'docx') => {
+    const filename = story.lesson_code ? `${story.lesson_code}.${ext}` : undefined;
+    try {
+      await downloadRemoteFile(url, filename);
+    } catch {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }, [story.lesson_code]);
+
   const handleUploadWorksheet = useCallback(() => {
     const lessonCode = story.lesson_code ?? '';
     const params = lessonCode ? `?lesson_code=${encodeURIComponent(lessonCode)}` : '';
@@ -279,11 +290,36 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           {/* 紙本學習單 PDF button (#1444) + 上傳學習單 button (#1637) */}
           {(story.worksheetPdfUrl || story.worksheetDocxUrl || story.lesson_code) && (
             <div className="flex flex-wrap items-center gap-2">
-              {/* Docx download link (#2073) — preferred when docx is available (avoids broken soffice PDF) */}
-              {story.worksheetDocxUrl ? (
-                <a
-                  href={story.worksheetDocxUrl}
-                  download
+              {/* PDF first — mobile Quick Look cannot render complex docx text boxes */}
+              {story.worksheetPdfUrl ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowWorksheetModal(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                    aria-label="查看紙本學習單 PDF"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    查看紙本學習單
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { void handleDownloadWorksheet(story.worksheetPdfUrl!, 'pdf'); }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                    aria-label="下載紙本學習單"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    下載紙本學習單
+                  </button>
+                </>
+              ) : story.worksheetDocxUrl ? (
+                <button
+                  type="button"
+                  onClick={() => { void handleDownloadWorksheet(story.worksheetDocxUrl!, 'docx'); }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                   aria-label="下載紙本學習單"
                 >
@@ -291,38 +327,8 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   下載紙本學習單
-                </a>
-              ) : story.worksheetPdfUrl ? (
-                /* PDF view button — fallback when no docx available */
-                <button
-                  type="button"
-                  onClick={() => setShowWorksheetModal(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                  aria-label="查看紙本學習單 PDF"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  查看紙本學習單
                 </button>
               ) : null}
-
-              {/* #2087: direct PDF download link — lets students/teachers save the worksheet locally */}
-              {story.worksheetPdfUrl && (
-                <a
-                  href={story.worksheetPdfUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
-                  aria-label="下載學習單 PDF"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  下載學習單 PDF
-                </a>
-              )}
 
               {/* Upload button — #1637: available for any lesson with a lesson_code */}
               {story.lesson_code && (
@@ -433,16 +439,34 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
-          {/* 數位學習步驟 — #2082 A4: replaced the static non-clickable ol with a
-              single-line step count. StepperNav dots already provide real navigation.
-              Do NOT restore the full ol — it was confusing & non-interactive. */}
+          {/* 數位學習步驟 — #2196: clickable step chips (quick-jump shortcut).
+              #2082 A4 removed the non-clickable ol — do NOT restore a static ol.
+              This uses chip badges so each step is directly accessible. */}
           {(() => {
             const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
             if (digitalSteps.length === 0) return null;
             return (
-              <p className="text-sm text-gray-500 text-center pb-2">
-                本課共 {digitalSteps.length} 個學習步驟
-              </p>
+              <div className="space-y-2 pb-2">
+                <p className="text-xs text-gray-400 text-center">
+                  本課共 {digitalSteps.length} 個步驟，點擊可快速跳轉
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {digitalSteps.map((step, idx) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      onClick={() => navigate(`/learn/${story.id}/${step.id}`)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                      aria-label={`跳轉到第 ${idx + 1} 步：${step.label}`}
+                    >
+                      <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      {step.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             );
           })()}
 
@@ -497,11 +521,9 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 {/* #2087: download button inside modal header */}
-                <a
-                  href={story.worksheetPdfUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => { void handleDownloadWorksheet(story.worksheetPdfUrl!, 'pdf'); }}
                   className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
                   aria-label="下載學習單 PDF"
                   title="下載 PDF"
@@ -509,7 +531,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                </a>
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowWorksheetModal(false)}

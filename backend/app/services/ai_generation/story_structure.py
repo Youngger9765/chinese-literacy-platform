@@ -331,11 +331,19 @@ async def grade_story_structure(
                 correct_texts = [options[i] for i in sorted(expected) if i < len(options)]
                 result_entry["feedback"] = f"正確答案是：{'、'.join(correct_texts)}"
         else:
-            # fill_blank: fuzzy text match
+            # fill_blank: fuzzy text match (per blank when blank_hints present)
             student_value = str(answer.get("value") or "").strip()
+            blank_hints = target.get("blank_hints") or []
+            blank_idx = answer.get("blank_index")
+            if blank_hints and blank_idx is not None and 0 <= blank_idx < len(blank_hints):
+                correct_answer = blank_hints[blank_idx]
+            else:
+                correct_answer = target.get("hint") or correct_answer
             is_correct = _fuzzy_match_chinese(student_value, correct_answer, story_text)
             result_entry["correct"] = is_correct
             result_entry["correct_answer"] = correct_answer
+            if blank_idx is not None:
+                result_entry["blank_index"] = blank_idx
             if is_correct:
                 result_entry["feedback"] = "答對了！"
             else:

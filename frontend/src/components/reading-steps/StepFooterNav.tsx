@@ -30,26 +30,19 @@ const StepFooterNav: React.FC = () => {
   const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
 
   const completedSet = new Set(session?.completedSteps ?? []);
-  const allNonReportDone = activeSteps
-    .filter((s) => s.id !== 'report')
-    .every((s) => completedSet.has(s.id));
 
-  // Mirror the same locking logic as ImmersiveTopBar (#1094)
-  const prevStep = useMemo(() => {
-    for (let i = currentStepIndex - 1; i >= 0; i--) {
-      const s = activeSteps[i];
-      if (!(s.id === 'report' && !allNonReportDone)) return s;
-    }
-    return null;
-  }, [activeSteps, currentStepIndex, allNonReportDone]);
+  const prevStep = useMemo(
+    () => (currentStepIndex > 0 ? activeSteps[currentStepIndex - 1] : null),
+    [activeSteps, currentStepIndex],
+  );
 
-  const nextStep = useMemo(() => {
-    for (let i = currentStepIndex + 1; i < activeSteps.length; i++) {
-      const s = activeSteps[i];
-      if (!(s.id === 'report' && !allNonReportDone)) return s;
-    }
-    return null;
-  }, [activeSteps, currentStepIndex, allNonReportDone]);
+  const nextStep = useMemo(
+    () =>
+      currentStepIndex >= 0 && currentStepIndex < activeSteps.length - 1
+        ? activeSteps[currentStepIndex + 1]
+        : null,
+    [activeSteps, currentStepIndex],
+  );
 
   const handleNav = (step: (typeof activeSteps)[number] | null) => {
     if (!step || !selectedStory) return;

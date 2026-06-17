@@ -9,6 +9,9 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   plugins: [react()],
+  build: {
+    target: 'esnext',
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -10,6 +10,7 @@ import {
   parseReadingBenchmark,
   getBenchmarkFeedback,
   getSecBenchmarkFeedback,
+  getAiFluencyInsight,
   type BenchmarkLevel,
   type BenchmarkLevelSec,
 } from './fluencyAnalyzer';
@@ -128,6 +129,16 @@ describe('parseReadingBenchmark — CPM format (regression)', () => {
     expect(getBenchmarkFeedback(200, levels)).toBe('很好');
     expect(getBenchmarkFeedback(250, levels)).toBe('超棒！');
     expect(getBenchmarkFeedback(220, levels)).toBe('很好');
+  });
+
+  it('getAiFluencyInsight returns gap to mid tier for slow CPM', () => {
+    const levels = parseReadingBenchmark(g4Levels);
+    const insight = getAiFluencyInsight(150, 60000, levels);
+    expect(insight?.rating).toBe('low');
+    expect(insight?.metricValue).toBe(150);
+    expect(insight?.rangeLabel).toBe('190 字/分以下');
+    expect(insight?.gapToMidTier).toBe(41);
+    expect(insight?.midTierLabel).toBe('191~220 字/分鐘');
   });
 
   it('empty levels returns empty array', () => {
