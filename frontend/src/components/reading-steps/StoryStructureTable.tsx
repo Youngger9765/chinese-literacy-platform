@@ -1,13 +1,11 @@
 /**
  * StoryStructureTable — 互動式文章重點表 (#615, #845, #1082, #2084)
  *
- * Fetches AI-generated story structure from /api/stories/{id}/structure.
- * Supports interactive fill-in-the-blank and checkbox questions with AI grading.
- * Genre-aware: 記敘文 shows 主角/主題/事例, 說明文 shows concept structure, etc.
- *
- * #2084: Visual hierarchy (color-coded left-border badges) + copyable template button.
+ * Fetches story structure from /api/stories/{id}/structure.
+ * When API returns layout=worksheet_table, renders 紙本學習單 HTML table;
+ * otherwise falls back to card layout (#2084).
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -19,6 +17,7 @@ interface StructureSubRow {
   value: string;
   interactive_type: InteractiveType;
   hint?: string;
+  blank_hints?: string[];
   options?: string[];
   correct_options?: number[];
 }
@@ -28,18 +27,37 @@ interface StructureRow {
   value: string;
   interactive_type: InteractiveType;
   hint?: string;
+  blank_hints?: string[];
   options?: string[];
   correct_options?: number[];
   sub_rows?: StructureSubRow[];
 }
 
+interface WorksheetPairRow {
+  kind: 'pair';
+  label: string;
+  value: string;
+}
+
+interface WorksheetSectionBlockRow {
+  kind: 'section_block';
+  section: string;
+  items: { label: string; value: string }[];
+}
+
+type WorksheetRow = WorksheetPairRow | WorksheetSectionBlockRow;
+
 interface StructureData {
+  layout?: 'worksheet_table' | 'cards';
+  title?: string;
+  worksheet_rows?: WorksheetRow[];
   rows: StructureRow[];
 }
 
 interface GradeResultItem {
   row_index: number;
   sub_row_index?: number;
+  blank_index?: number;
   correct: boolean;
   feedback: string;
   correct_answer: string;
@@ -50,28 +68,52 @@ interface GradeResult {
   score: number;
 }
 
-// Answer state key: "rowIdx" for top-level, "rowIdx-subIdx" for sub-rows
 type AnswerMap = Record<string, string | number[]>;
 
 interface Props {
   storyId: string;
 }
 
+const INLINE_BLANK_RE = /【([^】]*)】/g;
+const SECTION_CHUNK_SIZE = 3;
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function answerKey(rowIdx: number, subIdx?: number): string {
-  return subIdx !== undefined ? `${rowIdx}-${subIdx}` : `${rowIdx}`;
+function answerKey(rowIdx: number, subIdx?: number, blankIdx?: number): string {
+  if (subIdx !== undefined && blankIdx !== undefined) {
+    return `${rowIdx}-${subIdx}-b${blankIdx}`;
+  }
+  if (subIdx !== undefined) return `${rowIdx}-${subIdx}`;
+  if (blankIdx !== undefined) return `${rowIdx}-b${blankIdx}`;
+  return `${rowIdx}`;
 }
 
-/**
- * Maps a row/sub-row label to a Tailwind border + bg colour token for the
- * left-border visual-hierarchy accent (#2084).
- *
- * Returns an object with:
- *   - borderClass  — e.g. "border-l-4 border-amber-400"
- *   - bgClass      — e.g. "bg-amber-50"
- *   - textClass    — e.g. "text-amber-800"
- */
+function countBlanks(text: string): number {
+  return [...text.matchAll(INLINE_BLANK_RE)].length;
+}
+
+function classifyInteractive(value: string): InteractiveType {
+  if (INLINE_BLANK_RE.test(value)) return 'fill_blank';
+  return 'display';
+}
+
+function resolveGradeIndex(
+  rows: StructureRow[],
+  wsRow: WorksheetRow,
+  itemIdx?: number,
+): { rowIdx: number; subIdx?: number } {
+  if (wsRow.kind === 'pair') {
+    const rowIdx = rows.findIndex(
+      (r) => r.label === wsRow.label && !(r.sub_rows && r.sub_rows.length > 0),
+    );
+    return { rowIdx };
+  }
+  const rowIdx = rows.findIndex(
+    (r) => r.label === wsRow.section && !!(r.sub_rows && r.sub_rows.length > 0),
+  );
+  return { rowIdx, subIdx: itemIdx };
+}
+
 function getLabelAccent(label: string): {
   borderClass: string;
   bgClass: string;
@@ -113,13 +155,134 @@ function findGradeItem(
   results: GradeResultItem[],
   rowIdx: number,
   subIdx?: number,
+  blankIdx?: number,
 ): GradeResultItem | undefined {
-  return results.find(
-    (r) => r.row_index === rowIdx && r.sub_row_index === subIdx,
-  );
+  return results.find((r) => {
+    if (r.row_index !== rowIdx || r.sub_row_index !== subIdx) return false;
+    if (blankIdx !== undefined) return r.blank_index === blankIdx;
+    return r.blank_index === undefined || r.blank_index === null;
+  });
 }
 
-// ── FillBlankCell ─────────────────────────────────────────────────────────────
+function chunkItems<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function sectionVerticalLabel(section: string): string {
+  return section.replace(/\s+/g, '');
+}
+
+// ── Inline blank inputs (worksheet table cells) ─────────────────────────────
+
+interface InlineBlankInputProps {
+  hint?: string;
+  value: string;
+  onChange: (v: string) => void;
+  submitted: boolean;
+  gradeItem?: GradeResultItem;
+  compact?: boolean;
+}
+
+const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
+  hint,
+  value,
+  onChange,
+  submitted,
+  gradeItem,
+  compact,
+}) => {
+  const width = compact ? 'w-16' : 'w-24';
+  if (submitted && gradeItem) {
+    const isCorrect = gradeItem.correct;
+    return (
+      <span
+        className={`inline-block border-b-2 px-0.5 mx-0.5 text-sm ${
+          isCorrect ? 'border-emerald-500 text-emerald-800' : 'border-red-500 text-red-800'
+        }`}
+        title={!isCorrect ? gradeItem.feedback : undefined}
+      >
+        {value || '　'}
+      </span>
+    );
+  }
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={hint?.trim() || '　'}
+      className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-none focus:border-amber-600 mx-0.5`}
+      disabled={submitted}
+    />
+  );
+};
+
+interface InlineWorksheetContentProps {
+  text: string;
+  rowIdx: number;
+  subIdx?: number;
+  hints?: string[];
+  answers: AnswerMap;
+  setAnswer: (key: string, value: string | number[]) => void;
+  submitted: boolean;
+  gradeResults: GradeResultItem[];
+}
+
+const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
+  text,
+  rowIdx,
+  subIdx,
+  hints,
+  answers,
+  setAnswer,
+  submitted,
+  gradeResults,
+}) => {
+  const parts = useMemo(() => {
+    const nodes: React.ReactNode[] = [];
+    let last = 0;
+    let blankIdx = 0;
+    const re = new RegExp(INLINE_BLANK_RE.source, 'g');
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > last) {
+        nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
+      }
+      const key = answerKey(rowIdx, subIdx, blankIdx);
+      const hint = hints?.[blankIdx] ?? match[1]?.trim();
+      nodes.push(
+        <span key={`b-${blankIdx}`} className="inline-flex items-baseline">
+          <span>【</span>
+          <InlineBlankInput
+            hint={hint}
+            value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
+            onChange={(v) => setAnswer(key, v)}
+            submitted={submitted}
+            gradeItem={
+              submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined
+            }
+            compact
+          />
+          <span>】</span>
+        </span>,
+      );
+      blankIdx += 1;
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) {
+      nodes.push(<span key={`t-${last}`}>{text.slice(last)}</span>);
+    }
+    return nodes;
+  }, [text, rowIdx, subIdx, hints, answers, setAnswer, submitted, gradeResults]);
+
+  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+};
+
+// ── FillBlankCell (card layout) ─────────────────────────────────────────────
 
 interface FillBlankCellProps {
   hint?: string;
@@ -259,6 +422,137 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   );
 };
 
+// ── Worksheet HTML table ─────────────────────────────────────────────────────
+
+interface WorksheetTableProps {
+  structure: StructureData;
+  answers: AnswerMap;
+  setAnswer: (key: string, value: string | number[]) => void;
+  submitted: boolean;
+  gradeResults: GradeResultItem[];
+  renderCellContent: (
+    cell: StructureRow | StructureSubRow,
+    rowIdx: number,
+    subIdx?: number,
+  ) => React.ReactNode;
+}
+
+const WorksheetTable: React.FC<WorksheetTableProps> = ({
+  structure,
+  answers,
+  setAnswer,
+  submitted,
+  gradeResults,
+  renderCellContent,
+}) => {
+  const { title, worksheet_rows = [], rows } = structure;
+  const cellBorder = 'border border-black px-2 py-2 align-top';
+
+  const renderValueCell = (
+    value: string,
+    rowIdx: number,
+    subIdx?: number,
+    hints?: string[],
+  ) => {
+    const itype = classifyInteractive(value);
+    if (itype === 'fill_blank' && countBlanks(value) > 0) {
+      return (
+        <InlineWorksheetContent
+          text={value}
+          rowIdx={rowIdx}
+          subIdx={subIdx}
+          hints={hints}
+          answers={answers}
+          setAnswer={setAnswer}
+          submitted={submitted}
+          gradeResults={gradeResults}
+        />
+      );
+    }
+    if (rowIdx >= 0) {
+      const cell = subIdx !== undefined ? rows[rowIdx]?.sub_rows?.[subIdx] : rows[rowIdx];
+      if (cell) return renderCellContent(cell, rowIdx, subIdx);
+    }
+    return <span className="text-sm leading-relaxed whitespace-pre-line">{value}</span>;
+  };
+
+  return (
+    <table className="w-full border-collapse border border-black text-sm bg-white">
+      <tbody>
+        {title && (
+          <tr>
+            <td
+              colSpan={3}
+              className={`${cellBorder} text-center font-bold text-base py-3`}
+            >
+              {title}
+            </td>
+          </tr>
+        )}
+        {worksheet_rows.map((wsRow, wsIdx) => {
+          if (wsRow.kind === 'pair') {
+            const { rowIdx } = resolveGradeIndex(rows, wsRow);
+            const row = rows[rowIdx];
+            return (
+              <tr key={`pair-${wsIdx}`}>
+                <td className={`${cellBorder} text-center font-medium w-16 whitespace-nowrap`}>
+                  {wsRow.label}
+                </td>
+                <td colSpan={2} className={cellBorder}>
+                  {renderValueCell(wsRow.value, rowIdx, undefined, row?.blank_hints)}
+                </td>
+              </tr>
+            );
+          }
+
+          const chunks = chunkItems(wsRow.items, SECTION_CHUNK_SIZE);
+          return chunks.flatMap((chunk, chunkIdx) =>
+            chunk.map((item, itemIdx) => {
+              const globalItemIdx = chunkIdx * SECTION_CHUNK_SIZE + itemIdx;
+              const { rowIdx, subIdx } = resolveGradeIndex(rows, wsRow, globalItemIdx);
+              const subRow = rowIdx >= 0 ? rows[rowIdx]?.sub_rows?.[subIdx ?? 0] : undefined;
+              const showSection = itemIdx === 0;
+              const sectionLabel =
+                chunkIdx === 0 ? sectionVerticalLabel(wsRow.section) : '';
+
+              return (
+                <tr key={`sec-${wsIdx}-${chunkIdx}-${itemIdx}`}>
+                  {showSection && (
+                    <td
+                      rowSpan={chunk.length}
+                      className={`${cellBorder} text-center font-medium w-10 align-middle ${
+                        sectionLabel ? 'bg-white' : ''
+                      }`}
+                      style={
+                        sectionLabel
+                          ? { writingMode: 'vertical-rl', textOrientation: 'upright' }
+                          : undefined
+                      }
+                    >
+                      {sectionLabel}
+                    </td>
+                  )}
+                  <td className={`${cellBorder} text-center font-medium w-20 whitespace-nowrap`}>
+                    {item.label}
+                  </td>
+                  <td className={cellBorder}>
+                    {renderValueCell(
+                      item.value,
+                      rowIdx,
+                      subIdx,
+                      subRow?.blank_hints,
+                    )}
+                  </td>
+                </tr>
+              );
+            }),
+          );
+        })}
+      </tbody>
+    </table>
+  );
+};
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
@@ -295,7 +589,38 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  // Build the answer payload for POST /structure/grade
+  const pushFillBlankAnswers = useCallback(
+    (
+      payload: object[],
+      rowIdx: number,
+      subIdx: number | undefined,
+      cell: StructureRow | StructureSubRow,
+    ) => {
+      const blankCount =
+        cell.blank_hints?.length ||
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 0);
+      if (blankCount <= 1) {
+        const key = answerKey(rowIdx, subIdx);
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          value: typeof answers[key] === 'string' ? answers[key] : '',
+        });
+        return;
+      }
+      for (let b = 0; b < blankCount; b += 1) {
+        const key = answerKey(rowIdx, subIdx, b);
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          blank_index: b,
+          value: typeof answers[key] === 'string' ? answers[key] : '',
+        });
+      }
+    },
+    [answers],
+  );
+
   const buildAnswerPayload = useCallback((): object[] => {
     if (!structure) return [];
     const payload: object[] = [];
@@ -304,80 +629,82 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       if (row.sub_rows && row.sub_rows.length > 0) {
         row.sub_rows.forEach((sub, subIdx) => {
           if (sub.interactive_type === 'display') return;
-          const key = answerKey(rowIdx, subIdx);
-          const val = answers[key];
           if (sub.interactive_type === 'checkbox') {
+            const key = answerKey(rowIdx, subIdx);
             payload.push({
               row_index: rowIdx,
               sub_row_index: subIdx,
-              selected_options: Array.isArray(val) ? val : [],
+              selected_options: Array.isArray(answers[key]) ? answers[key] : [],
             });
           } else {
-            payload.push({
-              row_index: rowIdx,
-              sub_row_index: subIdx,
-              value: typeof val === 'string' ? val : '',
-            });
+            pushFillBlankAnswers(payload, rowIdx, subIdx, sub);
           }
         });
       } else {
         if (row.interactive_type === 'display') return;
-        const key = answerKey(rowIdx);
-        const val = answers[key];
         if (row.interactive_type === 'checkbox') {
+          const key = answerKey(rowIdx);
           payload.push({
             row_index: rowIdx,
-            selected_options: Array.isArray(val) ? val : [],
+            selected_options: Array.isArray(answers[key]) ? answers[key] : [],
           });
         } else {
-          payload.push({
-            row_index: rowIdx,
-            value: typeof val === 'string' ? val : '',
-          });
+          pushFillBlankAnswers(payload, rowIdx, undefined, row);
         }
       }
     });
 
     return payload;
-  }, [structure, answers]);
+  }, [structure, answers, pushFillBlankAnswers]);
 
-  // Build a plain-text template for clipboard copy (#2084 — 可複製模板)
-  // Format:  上位概念: <row.label>\n重點: ________________\n
-  // Only includes display rows (answers, not blanks).
   const handleCopyTemplate = useCallback(() => {
     if (!structure) return;
     const lines: string[] = ['【文章重點表模板】', ''];
+    if (structure.title) lines.push(structure.title, '');
 
-    structure.rows.forEach((row) => {
-      if (row.sub_rows && row.sub_rows.length > 0) {
-        lines.push(`【${row.label}】`);
-        row.sub_rows.forEach((sub) => {
-          lines.push(`  上位概念：${sub.label}`);
-          if (sub.interactive_type === 'display' && sub.value?.trim()) {
-            lines.push(`  重點：${sub.value}`);
-          } else {
-            lines.push(`  重點：________________`);
-          }
-          lines.push('');
-        });
-      } else {
-        lines.push(`上位概念：${row.label}`);
-        if (row.interactive_type === 'display' && row.value?.trim()) {
-          lines.push(`重點：${row.value}`);
+    if (structure.layout === 'worksheet_table' && structure.worksheet_rows) {
+      structure.worksheet_rows.forEach((wsRow) => {
+        if (wsRow.kind === 'pair') {
+          lines.push(`${wsRow.label}：${wsRow.value.replace(INLINE_BLANK_RE, '【　　　】')}`);
         } else {
-          lines.push(`重點：________________`);
+          lines.push(`【${wsRow.section}】`);
+          wsRow.items.forEach((item) => {
+            lines.push(
+              `  ${item.label}：${item.value.replace(INLINE_BLANK_RE, '【　　　】')}`,
+            );
+          });
         }
         lines.push('');
-      }
-    });
+      });
+    } else {
+      structure.rows.forEach((row) => {
+        if (row.sub_rows && row.sub_rows.length > 0) {
+          lines.push(`【${row.label}】`);
+          row.sub_rows.forEach((sub) => {
+            lines.push(`  上位概念：${sub.label}`);
+            lines.push(
+              sub.interactive_type === 'display' && sub.value?.trim()
+                ? `  重點：${sub.value}`
+                : '  重點：________________',
+            );
+            lines.push('');
+          });
+        } else {
+          lines.push(`上位概念：${row.label}`);
+          lines.push(
+            row.interactive_type === 'display' && row.value?.trim()
+              ? `重點：${row.value}`
+              : '重點：________________',
+          );
+          lines.push('');
+        }
+      });
+    }
 
-    const text = lines.join('\n');
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
       setCopyDone(true);
       setTimeout(() => setCopyDone(false), 1500);
-    }).catch(() => {
-      // Clipboard unavailable (non-HTTPS or permission denied) — silent no-op
-    });
+    }).catch(() => {});
   }, [structure]);
 
   const handleSubmit = useCallback(async () => {
@@ -401,37 +728,64 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     }
   }, [structure, submitting, gradeResult, token, storyId, API_BASE, buildAnswerPayload]);
 
-  // Count total interactive fields and how many are answered
-  const { totalInteractive, totalAnswered } = (() => {
+  const countInteractiveFields = useCallback(
+    (cell: StructureRow | StructureSubRow): number => {
+      if (cell.interactive_type === 'display') return 0;
+      if (cell.interactive_type === 'checkbox') return 1;
+      const blanks = cell.blank_hints?.length || countBlanks(cell.value);
+      return blanks > 0 ? blanks : 1;
+    },
+    [],
+  );
+
+  const { totalInteractive, totalAnswered } = useMemo(() => {
     if (!structure) return { totalInteractive: 0, totalAnswered: 0 };
     let total = 0;
     let answered = 0;
-    structure.rows.forEach((row, rowIdx) => {
-      const targets = row.sub_rows?.length
-        ? row.sub_rows.map((s, si) => ({ ...s, _key: answerKey(rowIdx, si) }))
-        : [{ ...row, _key: answerKey(rowIdx) }];
 
-      targets.forEach(({ interactive_type, _key }) => {
-        if (interactive_type === 'display') return;
-        total++;
-        const val = answers[_key];
-        if (interactive_type === 'checkbox') {
-          if (Array.isArray(val) && val.length > 0) answered++;
-        } else {
-          if (typeof val === 'string' && val.trim().length > 0) answered++;
-        }
-      });
+    const tallyCell = (
+      cell: StructureRow | StructureSubRow,
+      rowIdx: number,
+      subIdx?: number,
+    ) => {
+      const fieldCount = countInteractiveFields(cell);
+      if (fieldCount === 0) return;
+
+      if (cell.interactive_type === 'checkbox') {
+        total += 1;
+        const key = answerKey(rowIdx, subIdx);
+        const val = answers[key];
+        if (Array.isArray(val) && val.length > 0) answered += 1;
+        return;
+      }
+
+      const blankCount =
+        cell.blank_hints?.length ||
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 1);
+      total += blankCount;
+      for (let b = 0; b < blankCount; b += 1) {
+        const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);
+        const val = answers[key];
+        if (typeof val === 'string' && val.trim().length > 0) answered += 1;
+      }
+    };
+
+    structure.rows.forEach((row, rowIdx) => {
+      if (row.sub_rows?.length) {
+        row.sub_rows.forEach((sub, subIdx) => tallyCell(sub, rowIdx, subIdx));
+      } else {
+        tallyCell(row, rowIdx);
+      }
     });
+
     return { totalInteractive: total, totalAnswered: answered };
-  })();
+  }, [structure, answers, countInteractiveFields]);
 
   const allAnswered = totalAnswered >= totalInteractive && totalInteractive > 0;
   const submitted = gradeResult !== null;
   const gradeResults = gradeResult?.results ?? [];
   const score = gradeResult?.score ?? 0;
 
-  // renderCellContent must be declared BEFORE any early returns to satisfy Rules of Hooks.
-  // When loading=true or structure=null, this hook still runs but is never called.
   const renderCellContent = useCallback(
     (
       cell: StructureRow | StructureSubRow,
@@ -472,8 +826,6 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     [answers, submitted, gradeResults, setAnswer],
   );
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8 text-gray-400 text-sm">
@@ -491,14 +843,19 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   }
 
   const { rows } = structure;
+  const useWorksheet =
+    structure.layout === 'worksheet_table' &&
+    !!(structure.worksheet_rows && structure.worksheet_rows.length > 0);
 
   return (
-    <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
-      {/* Header */}
+    <div
+      className={`overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm mx-auto ${
+        useWorksheet ? 'max-w-3xl' : 'max-w-2xl'
+      }`}
+    >
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
         <div className="flex items-center gap-2">
-          {/* Copy template button (#2084) */}
           <button
             onClick={handleCopyTemplate}
             className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-300 bg-white text-amber-700 text-xs font-semibold hover:bg-amber-100 active:scale-95 transition-all select-none"
@@ -523,55 +880,62 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
         </div>
       </div>
 
-      {/* #1534: card layout — coloured row banner + per-sub_row body */}
-      {/* #2084: left-border colour accent for visual hierarchy (problem/solution/result) */}
-      <div className="divide-y-2 divide-gray-200 text-base">
-        {rows.map((row, rowIdx) => {
-          const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
-          const topLevelEmptyDisplay =
-            !hasSubRows && row.interactive_type === 'display' && !row.value?.trim();
-          const accent = getLabelAccent(row.label);
+      {useWorksheet ? (
+        <div className="p-3 bg-white overflow-x-auto">
+          <WorksheetTable
+            structure={structure}
+            answers={answers}
+            setAnswer={setAnswer}
+            submitted={submitted}
+            gradeResults={gradeResults}
+            renderCellContent={renderCellContent}
+          />
+        </div>
+      ) : (
+        <div className="divide-y-2 divide-gray-200 text-base">
+          {rows.map((row, rowIdx) => {
+            const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
+            const topLevelEmptyDisplay =
+              !hasSubRows && row.interactive_type === 'display' && !row.value?.trim();
+            const accent = getLabelAccent(row.label);
 
-          return (
-            <section key={`${rowIdx}-${row.label}`}>
-              {/* Row header — colour-accented left border (#2084) */}
-              <div
-                className={`${accent.borderClass} ${accent.bgClass} px-4 py-2.5 font-bold ${accent.textClass} leading-snug`}
-              >
-                {row.label}
-              </div>
-
-              {hasSubRows ? (
-                /* Sub-rows: indented with left border for mind-map feel (#2084) */
-                <div className="divide-y divide-gray-100 ml-6 border-l-2 border-gray-200">
-                  {(row.sub_rows ?? []).map((sub, subIdx) => {
-                    const subAccent = getLabelAccent(sub.label);
-                    return (
-                      <div key={`${subIdx}-${sub.label}`}>
-                        {/* Sub-label banner with own accent */}
-                        <div
-                          className={`${subAccent.borderClass} ${subAccent.bgClass} px-4 py-2 text-sm font-semibold ${subAccent.textClass} leading-snug`}
-                        >
-                          {sub.label}
-                        </div>
-                        <div className="px-4 py-3">
-                          {renderCellContent(sub, rowIdx, subIdx)}
-                        </div>
-                      </div>
-                    );
-                  })}
+            return (
+              <section key={`${rowIdx}-${row.label}`}>
+                <div
+                  className={`${accent.borderClass} ${accent.bgClass} px-4 py-2.5 font-bold ${accent.textClass} leading-snug`}
+                >
+                  {row.label}
                 </div>
-              ) : topLevelEmptyDisplay ? null : (
-                <div className="px-4 py-3">
-                  {renderCellContent(row, rowIdx)}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
 
-      {/* Submit / Result bar */}
+                {hasSubRows ? (
+                  <div className="divide-y divide-gray-100 ml-6 border-l-2 border-gray-200">
+                    {(row.sub_rows ?? []).map((sub, subIdx) => {
+                      const subAccent = getLabelAccent(sub.label);
+                      return (
+                        <div key={`${subIdx}-${sub.label}`}>
+                          <div
+                            className={`${subAccent.borderClass} ${subAccent.bgClass} px-4 py-2 text-sm font-semibold ${subAccent.textClass} leading-snug`}
+                          >
+                            {sub.label}
+                          </div>
+                          <div className="px-4 py-3">
+                            {renderCellContent(sub, rowIdx, subIdx)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : topLevelEmptyDisplay ? null : (
+                  <div className="px-4 py-3">
+                    {renderCellContent(row, rowIdx)}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
+
       <div className="px-5 py-4 border-t-2 border-gray-200 bg-gray-50">
         {!submitted ? (
           <div className="flex items-center justify-between gap-4">
