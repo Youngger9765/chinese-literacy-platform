@@ -66,6 +66,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   source_file: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   strategy_exercise: Record<string, any> | any[] | null;  // list for multi-exercise lessons (G7 圖文整合, #1390)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  spotlight_v2?: Record<string, any> | null;
   // Schema-driven step composition (#1374)
   step_sequence: string[] | null;
   // Plugin-pattern dispatch fields (#1404 / #1341)
@@ -169,6 +171,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     videoLinks: detail.video_links ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
+    spotlightV2: detail.spotlight_v2 ?? undefined,
     stepSequence: detail.step_sequence ?? undefined,
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,

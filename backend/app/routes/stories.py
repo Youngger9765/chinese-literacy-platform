@@ -473,6 +473,7 @@ def get_story(story_id: str):
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
+        spotlight_v2=story.get("spotlight_v2"),
         step_sequence=story.get("step_sequence"),
         # Plugin-pattern dispatch fields (#1404):
         reading_strategy_type=story.get("reading_strategy_type") or "general",
