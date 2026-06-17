@@ -155,49 +155,7 @@ strategy_exercise:
     answer: 1
   - prompt: 課文結尾說除了努力練習之外，基因決定的身體素質也會影響運動表現。你覺得「因材施教」這個概念可以怎麼應用？請用自己的話回答
     type: free_text
-story_structure:
-- label: 結論
-  value: (1)除了努力練習，
-story_structure_rows:
-- label: 主題
-  value: 米田堡血型對運動表現的影響
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 阿美族人在運動表現上特別傑出，且在東京奧運國手中占比過高。
-  interactive_type: checkbox
-  hint: 阿美族有什麼特色？
-  options:
-  - 阿美族人特別喜歡參加奧運。
-  - 阿美族人在運動表現上特別傑出，且在東京奧運國手中占比過高。
-  - 阿美族人是臺灣人口最多的族群。
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 米田堡血型在阿美族人中比例極高，可能與呼吸生理優勢有關。
-  interactive_type: checkbox
-  hint: 米田堡血型有什麼特別？
-  options:
-  - 米田堡血型是臺灣特有的血型。
-  - 米田堡血型在阿美族人中比例極高，可能與呼吸生理優勢有關。
-  - 米田堡血型的人不能捐血。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 有米田堡血型的人，運動後排出二氧化碳的速度較快，體能恢復也較快。
-  interactive_type: checkbox
-  hint: 米田堡血型有什麼好處？
-  options:
-  - 有米田堡血型的人，運動後排出二氧化碳的速度較快，體能恢復也較快。
-  - 有米田堡血型的人，比較不容易生病。
-  - 有米田堡血型的人，記憶力比較好。
-  correct_options:
-  - 0
-- label: 結論
-  value: 基因決定的身體素質可能影響運動表現，因材施教可事半功倍。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -232,3 +190,22 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 從基因來的特別禮物
+- - 問題與假設
+  - "問題：阿美族人運動與勞動能力特別強，是什麼因素造成的？\n假設：88%的阿美族人有米田堡血型，可能具有\n    【 得天獨厚 】的呼吸生理優勢。"
+- - 檢驗假設
+  - 研究問題
+  - '「米田堡血型」和「非米田堡血型」的人們，運動後
+
+    【 代謝 】二氧化碳的效率是否有差異？'
+- - 檢驗假設
+  - 實驗
+  - 對300位成人進行血液、血型的檢測，並要求參與者做3分鐘的踏階運動測驗，比較運動前後的呼吸生理數值差異。
+- - 檢驗假設
+  - 研究結論
+  - 在運動之後，有米田堡血型的人體能恢復得較【 快 】。
+- - 啟示
+  - '(1)除了努力練習，【 身體素質 】也可能影響運動表現。
+
+    (2)如果可以【 因材施教 】，將可以發揮個人最大的優勢。'

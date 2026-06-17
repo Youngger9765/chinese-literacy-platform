@@ -151,33 +151,37 @@ worksheet_section_order:
   name: 閱讀理解
   type: mcq
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/文-L10.pdf
-story_structure_rows:
-- label: 主題
-  value: 鮑子都的義舉
-  interactive_type: fill_blank
-  hint: 這篇文章主要在講什麼？
-- label: 重要內容 1
-  value: 鮑子都安葬書生
-  interactive_type: checkbox
-  hint: 鮑子都對書生做了什麼？
-  options:
-  - 鮑子都把書生丟在荒野
-  - 鮑子都把書生帶回家
-  - 鮑子都賣金餅安葬書生
-  correct_options:
-  - 2
-- label: 重要內容 2
-  value: 書生家人感謝鮑子都
-  interactive_type: checkbox
-  hint: 書生家人知道真相後有什麼反應？
-  options:
-  - 書生家人責罵鮑子都
-  - 書生家人感謝鮑子都
-  - 書生家人不理鮑子都
-  correct_options:
-  - 1
-- label: 結論
-  value: 鮑子都因此聲名遠播
-  interactive_type: fill_blank
-  hint: 鮑子都的義舉帶來了什麼結果？
-story_structure_table_source: ai-generated-2026-05-08
+story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table:
+- - 劇本設定
+  - '內容摘要
+
+    【 】處填入原文，找不到原文時，再用自己的話寫。'
+- - 故事舞台
+  - '場景：魏國的(  野/荒野  )
+
+    時間：(  暮/傍晚  )時分。'
+- - 第一幕
+  - '問題：鮑子都偶遇書生( 卒心痛/突發心絞痛 )
+
+    解決：鮑子都立刻下馬施救。
+
+    結果：書生不治身亡。'
+- - 第二幕
+  - '問題：書生不治身亡。
+
+    解決：(1)發現書生有一本( 素書/兵書 )與( 十塊金餅  )。
+
+    (2)變賣(一金/一個金餅)安葬書生，剩下(九金/九個金餅)墊在遺體的頭下，兵書也放在書生的身邊。
+
+    結果：書生得到安葬。'
+- - 第三幕
+  - '問題：書生家人誤認鮑子都是( 盜/強盜  )，厲聲質問兒子的下落。
+
+    解決：鮑子都坦然說明往事，並帶路至墓地。
+
+    結果：開墓後，九金與兵書完好無缺，證實鮑子都並未私吞財物。'
+- - 結局
+  - '1.真相大白後，書生的家人從質疑轉為( 感激  )。
+
+    2.鮑子都的義舉在眾人的口耳相傳下，不久就成了很有名的人了。'

@@ -163,49 +163,7 @@ strategy_exercise:
     answer: 1
   - prompt: 課文說睡覺時動彈不得其實是身體的「保護機制」，為什麼？請用自己的話回答
     type: free_text
-story_structure:
-- label: 結論
-  value: 理性的科學方法，讓我們不再害怕，對現象有更客觀的認識。
-story_structure_rows:
-- label: 主題
-  value: 靈異現象的科學解釋
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 鬼火是冷焰現象
-  interactive_type: checkbox
-  hint: 鬼火的科學解釋是什麼？
-  options:
-  - 鬼火是鬼魂的火焰
-  - 鬼火是冷焰現象
-  - 鬼火是磷化氫燃燒
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 鬼壓床是睡眠癱瘓症
-  interactive_type: checkbox
-  hint: 鬼壓床的科學解釋是什麼？
-  options:
-  - 鬼壓床是鬼魂壓制
-  - 鬼壓床是睡眠癱瘓症
-  - 鬼壓床是作惡夢
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 快速眼動期肌肉癱軟
-  interactive_type: checkbox
-  hint: 睡眠癱瘓症發生在哪個時期？
-  options:
-  - 淺睡期肌肉放鬆
-  - 快速眼動期肌肉癱軟
-  - 深睡期大腦活躍
-  correct_options:
-  - 1
-- label: 結論
-  value: 科學能解釋靈異現象
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -240,3 +198,25 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 靈異與科學
+- - 超自然事件
+  - __
+  - 鬼 壓 床【 鬼火 】
+- - 現象
+  - 黑暗中閃爍飄動的藍綠色火焰。
+  - 入睡或剛醒來時，感覺自己被一股力量壓著，動彈不得。
+- - 靈異的解釋
+  - 鬼火代表死者的鬼魂。
+  - 鬼魂壓制了睡眠者，企圖傷害睡眠者，或想要傳達【 警告 】的訊息。
+- - 科學界的解釋
+  - '(1)人類及動物的遺骸腐化後，產生磷化氫氣體，在常溫下__。
+
+    (2)磷化氫和沼氣、空氣混合，形成燃點很低的可燃氣體，30度便可自燃，要在非常暗的地方才可以看得到，顏色為藍色或淡紫色，稱為__。'
+  - '(1)人類每晚有四到六次的睡眠週期，每次約90分鐘。
+
+    (2)大腦在【 自燃 】最為活躍，正在作夢的睡眠者此時無法控制自己的肌肉，癱軟無力。
+
+    (3)鬼壓床又稱【 冷焰 】，是因為身體有自我保護機制，避免作夢時讓身體受傷。【 快速眼動期 】【 睡眠癱瘓症 】'
+- - 結論
+  - 理性的科學方法，讓我們不再害怕，對現象有更客觀的認識。

@@ -195,64 +195,7 @@ strategy_exercise:
     type: free_text
   - prompt: 李昌鈺為什麼堅持當晚就要派200名刑警去搜垃圾箱？他說了什麼理由？
     type: free_text
-story_structure:
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: 2. 當天晚上十二點，李昌鈺博士趕到現場。 1. 警方已在現場調查【 十 】小時。 案發 2. 老太太死因：【 被刺十八刀/失血過多 】 。 現場 3. 凶器：【 廚房的刀 】。 問題 假設 假設驗證 解答 被刺了十 一、血跡【已 噴【化學
-story_structure_rows:
-- label: 主角
-  value: 李昌鈺博士
-  interactive_type: fill_blank
-  hint: 課文主要人物是誰？
-- label: 主題
-  value: 科學方法能幫助破案
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 善用科學方法、觀察力敏銳
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 命案發生的情境
-    options:
-    - 感恩節下大雪
-    - 老太太獨居家中
-    - 鄰居小孩發現命案
-    correct_options:
-    - 0
-    - 1
-    - 2
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 李博士如何辦案
-    options:
-    - 發現血跡被清理過
-    - 推斷凶手是熟人
-    - 找到凶手球鞋與信用卡資料
-    correct_options:
-    - 0
-    - 1
-    - 2
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 案件的結局
-    options:
-    - 凶手是老太太遠親，因錢財起爭執殺人
-    - 凶手是陌生人，隨機犯案
-    - 凶手是鄰居，因不滿老太太而殺人
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -288,3 +231,39 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L17.pdf
+story_structure_table:
+- - 用科學方法伸張正義的神探
+- - 前言
+  - '1.科學是一種【 系統性 】解決問題的方法。
+
+    2.警察也會依循【 問題 】、【 假設 】、
+
+    【 檢驗假設 】、【 解答 】的程序來辦案。'
+- - 案件背景
+  - '1.鄰居孩子發現老太太倒在自家廚房，老太太已死去。
+
+    2.當天晚上十二點，李昌鈺博士趕到現場。'
+- - 案發現場
+  - '1.警方已在現場調查【 十 】小時。
+
+    2.老太太死因：【 被刺十八刀/失血過多 】。
+
+    3.凶器：【 廚房的刀 】。'
+- - 辦案歷程
+  - 問題
+  - 假設 假設驗證 解答
+- - 辦案歷程
+  - 被刺了十八刀，血呢？
+  - '一、血跡【 已被清理 】？
+
+    二、廚房不是【 第一現場 】？ 噴【 化學藥劑 】驗證，地上是否有血跡反應。 有血跡反應，假設一成立'
+- - 辦案歷程
+  - 鞋子在哪裡？
+  - 沾血的鞋，凶手不會再穿，會被丟到垃圾箱嗎？ 派200名刑警到附近垃圾箱找鞋子。 找到鞋子，假設成立。
+- - 辦案歷程
+  - 去哪裡找鞋子的主人？
+  - ？ ？ 找到前天下午買鞋的人
+- - 案件真相
+  - 凶手是老太太的【 遠親 】，有【 吸毒 】惡習。感恩節當天想找老太太要錢，老太太不給，情緒失控殺了老太太。
+- - 總結
+  - 李博士和他的團隊用【 鑑識科學 】，替無聲的死者說話，讓正義得到伸張。

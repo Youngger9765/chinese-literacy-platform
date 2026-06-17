@@ -168,57 +168,7 @@ strategy_exercise:
     type: free_text
   - prompt: 文章提到人口負成長也可能有「樂觀」的一面，請舉出一個課文中提到的例子
     type: free_text
-story_structure:
-- label: 主題
-  value: 人口負成長這個「灰犀牛」現象
-- label: 重要事實 1
-  value: 臺灣總生育率逐年下降，是全球少子化最嚴重的國家。
-- label: 重要事實 2
-  value: 臺灣出生人數已少於死亡人數，人口開始負成長。
-- label: 重要事實 3
-  value: 人口負成長會加重年輕人的扶養負擔，但也可能帶來經濟變革。
-- label: 結論
-  value: 認識人口負成長的影響，才能更清楚規劃未來。
-story_structure_rows:
-- label: 主題
-  value: 人口負成長
-  interactive_type: fill_blank
-  hint: 課文主要在說明什麼？
-- label: 重要事實 1
-  value: 臺灣是全世界少子化最嚴重的國家
-  interactive_type: checkbox
-  hint: 關於臺灣人口現況
-  options:
-  - 臺灣人口正成長
-  - 臺灣少子化不嚴重
-  - 臺灣是全世界少子化最嚴重的國家
-  correct_options:
-  - 2
-- label: 重要事實 2
-  value: 2020年後臺灣人口開始負成長
-  interactive_type: checkbox
-  hint: 臺灣人口成長趨勢
-  options:
-  - 2019年出生人數大於死亡人數
-  - 2020年後臺灣人口開始負成長
-  - 臺灣出生人數逐年上升
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 人口負成長會加重生產者負擔
-  interactive_type: checkbox
-  hint: 人口負成長的影響
-  options:
-  - 人口負成長對經濟沒有影響
-  - 人口負成長會加重生產者負擔
-  - 老年人不會帶動經濟
-  correct_options:
-  - 1
-- label: 結論
-  value: 認識人口負成長，想像未來
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -253,3 +203,25 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 看見時代的灰犀牛了嗎？談人口負成長
+- - 灰犀牛的定義
+  - 灰犀牛是指明明可見，但被忽視的【 負面 】事件，例如不健康飲食對國中生健康的影響。
+- - 人口負成長的定義及現狀
+  - '1.當每年的「【 出生 】人口數」少於「【 死亡 】人口數」時，出現人口負成長。
+
+    2.人口負成長主要原因是【 少子化 】。'
+- - 臺灣人口負成長
+  - '1.臺灣自1951年以來婦女總生育率【 逐年下滑 】。
+
+    2.2011年至2022年，臺灣出生人數逐年【 下滑 】，死亡人數逐年【 上升 】。
+
+    3.2019年開始出生人數【 少於 】死亡人數，出現人口負成長。'
+- - 人口負成長的影響
+  - '1.缺點：生產者負擔加重，每人要負擔的扶養人數　【 提高or變多 】。
+
+    2.優點：(1)老年人多，會帶動消費經濟。
+
+    　　　　(2)因減少資源消耗和污染，對環境更【 友善 】。'
+- - 臺灣人口負成長的趨勢
+  - 臺灣人口負成長呈現【 不可逆 】的趨勢，帶來【 人口結構 】改變、【 勞動力 】人口比率下降、【 生產者 】扶養負擔加重，但也可能帶動經濟變革。

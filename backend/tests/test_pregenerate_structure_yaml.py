@@ -190,7 +190,7 @@ class TestWriteYamlSafely:
 
 
 # ---------------------------------------------------------------------------
-# Route priority: story_structure_rows > story_structure_table
+# Route priority: story_structure_table > story_structure_rows
 # (Unit tests for the route logic without FastAPI test client)
 # ---------------------------------------------------------------------------
 
@@ -199,24 +199,24 @@ class TestRoutePriorityLogic:
 
     def _simulate_route_priority(self, story: dict) -> dict | None:
         """Simulate what the route does for YAML-first selection."""
-        yaml_rows = story.get("story_structure_rows")
-        if yaml_rows and isinstance(yaml_rows, list):
-            return {"rows": yaml_rows, "source": "rows"}
-
         yaml_table = story.get("story_structure_table")
         if yaml_table:
             return {"rows": [], "source": "table"}  # simplified
 
+        yaml_rows = story.get("story_structure_rows")
+        if yaml_rows and isinstance(yaml_rows, list):
+            return {"rows": yaml_rows, "source": "rows"}
+
         return None
 
-    def test_rows_takes_priority_over_table(self):
+    def test_table_takes_priority_over_rows(self):
         story = {
             "story_structure_rows": [{"label": "A", "value": "B", "interactive_type": "fill_blank"}],
             "story_structure_table": [["label", "value"]],
         }
         result = self._simulate_route_priority(story)
         assert result is not None
-        assert result["source"] == "rows"
+        assert result["source"] == "table"
 
     def test_table_used_when_no_rows(self):
         story = {

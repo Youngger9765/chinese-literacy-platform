@@ -118,46 +118,7 @@ images:
   content_type: image/png
   caption: ''
 image_count: 2
-story_structure_rows:
-- label: 主題
-  value: 成為身體的最佳夥伴
-  interactive_type: fill_blank
-  hint: 課文主要在說什麼？
-- label: 重要事實 1
-  value: 課文沒有提供足夠資訊
-  interactive_type: checkbox
-  hint: 課文提到什麼？
-  options:
-  - 課文內容是數字
-  - 課文內容是文字
-  - 課文內容是圖片
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: 課文沒有提供足夠資訊
-  interactive_type: checkbox
-  hint: 課文提到什麼？
-  options:
-  - 課文有十六個字
-  - 課文有十個字
-  - 課文有二十個字
-  correct_options:
-  - 0
-- label: 重要事實 3
-  value: 課文沒有提供足夠資訊
-  interactive_type: checkbox
-  hint: 課文提到什麼？
-  options:
-  - 課文內容是中文數字
-  - 課文內容是英文字母
-  - 課文內容是標點符號
-  correct_options:
-  - 0
-- label: 結論
-  value: 課文內容僅為數字，無法得出結論
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 vocab_bank:
   A: 家常便飯
   B: 微不足道
@@ -168,21 +129,21 @@ vocab_bank:
   G: 耳邊風
   H: 使喚
 fill_in_blank:
-- sentence: '這場比賽球員們頻頻失誤，（　　）的表現讓許多球迷大失所望。'
+- sentence: 這場比賽球員們頻頻失誤，（　　）的表現讓許多球迷大失所望。
   answer: E
-- sentence: '他總喜歡（　　）學弟妹幫他跑腿，讓人覺得不太尊重。'
+- sentence: 他總喜歡（　　）學弟妹幫他跑腿，讓人覺得不太尊重。
   answer: H
-- sentence: '雖然第一局不幸失分，但隊長鼓勵大家不要（　　），繼續努力。'
+- sentence: 雖然第一局不幸失分，但隊長鼓勵大家不要（　　），繼續努力。
   answer: F
-- sentence: '因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分（　　）。'
+- sentence: 因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分（　　）。
   answer: D
-- sentence: '營養師一再警告青少年少喝含糖飲料，但許多人仍當成（　　）。'
+- sentence: 營養師一再警告青少年少喝含糖飲料，但許多人仍當成（　　）。
   answer: G
-- sentence: '在段考前熬夜唸書，對他來說已是（　　），週末也幾乎沒有休息。'
+- sentence: 在段考前熬夜唸書，對他來說已是（　　），週末也幾乎沒有休息。
   answer: A
-- sentence: '這份募款儘管 （　　），但也代表我們對流浪動物的一點心意。'
+- sentence: 這份募款儘管 （　　），但也代表我們對流浪動物的一點心意。
   answer: B
-- sentence: '議員在院會上（　　）的詢問市長有關預算的問題，引起媒體關注。'
+- sentence: 議員在院會上（　　）的詢問市長有關預算的問題，引起媒體關注。
   answer: C
 fill_in_blank_count: 8
 本課語詞:
@@ -219,3 +180,33 @@ worksheet_intro:
   level_label: Level 4・記敘文
   lesson_label: 第24課  成為身體的最佳夥伴
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L24.pdf
+story_structure_table:
+- - 成為身體的最佳夥伴
+- - 起因
+  - 一
+  - 阿哲因為狀況表現（□得心應手　乏善可陳），而被教練從場上【 換下來 】。
+- - 經過
+  - '二
+
+
+    ~
+
+
+    十'
+  - '阿哲收到學長的打氣，並關心學長【 沒上場 】的原因：學長（舊傷復發　□受了新傷）。
+
+    學長說，教練認為求表現之前，要先【 顧好身體 】，成為【 榜樣 】。
+
+    阿哲說出自己腦中的【 疑惑 】，學長邀請他一起去找教練。
+
+    阿哲內心反省自己時常（□看重　忽略）教練的叮嚀，也許無形中影響身體。'
+- - 結果
+  - '十一
+
+    ~
+
+    十五'
+  - 教練提醒他們【 放鬆 】和【 休息 】也是訓練的一環，此外，【 身體 】也是運動員重要的夥伴，要懂得照顧他。
+- - 省思
+  - 十六
+  - "阿哲認為自己要學習（□如何讓身體更有力量　 \n                    傾聽身體的聲音       ）"

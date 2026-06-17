@@ -141,61 +141,7 @@ strategy_exercise:
   - 隨性
   - 驕傲
   correct_trait: 自律
-story_structure:
-- label: 主角
-  value: 周天成
-story_structure_rows:
-- label: 主角
-  value: 周天成
-  interactive_type: fill_blank
-  hint: 課文主要寫誰？
-- label: 主題
-  value: 自律是頂尖選手的成功關鍵
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 極度自律、追求進步
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: 周天成是台灣羽球一哥
-    interactive_type: checkbox
-    hint: 主角的身份是什麼？
-    options:
-    - 他是台灣第一位在世界羽聯超級系列賽奪冠的男單選手
-    - 他曾是世界排名第一的羽球選手
-    - 他多年穩居世界排名前十
-    correct_options:
-    - 0
-    - 2
-  - label: 經過
-    value: 透過多方面自律訓練
-    interactive_type: checkbox
-    hint: 他如何維持頂尖？
-    options:
-    - 每天進行羽球基本訓練和重量訓練
-    - 飲食嚴格控制，只吃原型食物
-    - 為了避免受傷，不騎車也不開車
-    correct_options:
-    - 0
-    - 1
-    - 2
-  - label: 結果
-    value: 成為世界級頂尖選手
-    interactive_type: checkbox
-    hint: 這些努力帶來了什麼？
-    options:
-    - 成為台灣羽球一哥，並能回饋社會
-    - 獲得許多企業贊助，生活無虞
-    - 贏得所有比賽，從未輸過
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -230,3 +176,25 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 周天成的一天──頂尖選手的養成
+- - 主角
+  - 【 周天成 】
+- - 周天成的一天──自律事例
+  - 早上
+  - "1.基本訓練：\n(1)要站上世界級羽球舞台，訓練要循序漸進，以下四個步驟，請按文章的訓練順序排列。(填代號)\n  A.放鬆腳底筋膜      B.旋轉身體拉筋\n\
+    \  C.對打比賽          D.網前接發球練習\n▶首先要先做【 B 】，接著是【 A 】，再來是【 D 】，最後是【 C 】。\n(2)開發身體潛能，強健肌肉訓練，周天成做了那些訓練？(多選)\n\
+    核心肌群訓練  下肢肌群訓練  上肢肌群訓練"
+- - 周天成的一天──自律事例
+  - 中午
+  - '2.飲食控制：為了減少熱量的攝取，保持輕盈的身軀，他的飲食特性？(多選)
+
+    吃原型食物餐 依照順序吃各類食物 □儘速吃完'
+- - 周天成的一天──自律事例
+  - 晚上
+  - '3.安全意識：為了預防受傷，晚上外出時，周天成會搭乘下列哪一種交通工具？(單選)　　
+
+    □騎腳踏車    □開電動車    搭公車'
+- - 周天成的一天──自律事例
+  - 深夜
+  - "4.自我反省與調整：周天成持續尋找進步的方法，是為了什麼？(單選)\n□提高成績領比賽獎金。\n提高成績成為有影響力的人。      \n□提高成績爭取更多企業贊助。"

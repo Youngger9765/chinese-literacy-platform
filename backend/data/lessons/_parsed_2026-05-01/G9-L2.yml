@@ -177,19 +177,19 @@ vocab_bank:
   G: 贍養
   H: 搏命
 fill_in_blank:
-- sentence: '這位演員常在電影中（　　）演出，從不使用替身。'
+- sentence: 這位演員常在電影中（　　）演出，從不使用替身。
   answer: H
-- sentence: '戰爭開始了，許多士兵（　　），就為了保衛自己的國家。'
+- sentence: 戰爭開始了，許多士兵（　　），就為了保衛自己的國家。
   answer: F
-- sentence: '近日腸病毒疫情（　　），感染人數高達2.5萬人。'
+- sentence: 近日腸病毒疫情（　　），感染人數高達2.5萬人。
   answer: A
-- sentence: '他獨自去登山後失聯十天了，（　　），讓家人很擔心。'
+- sentence: 他獨自去登山後失聯十天了，（　　），讓家人很擔心。
   answer: D
-- sentence: '不肖商人將自己的營業稅（　　）給消費者，加重消費者的負擔。'
+- sentence: 不肖商人將自己的營業稅（　　）給消費者，加重消費者的負擔。
   answer: E
-- sentence: '國慶大典上，（　　）的三軍儀隊邁著整齊的步伐，朝司令臺敬禮。'
+- sentence: 國慶大典上，（　　）的三軍儀隊邁著整齊的步伐，朝司令臺敬禮。
   answer: B
-- sentence: '她的前夫在離婚後，承諾繼續 （　　）她們母女二人。'
+- sentence: 她的前夫在離婚後，承諾繼續 （　　）她們母女二人。
   answer: G
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n分辨事實與判斷\n    本篇文章是作者讀完兩封來自秦朝時期的家書後，做了一些推論，最後一段再加上自己的感想後寫成的。\n\
@@ -379,43 +379,46 @@ worksheet_intro:
   lesson_label: 第2課  帝國家書：一個普通家庭的生與死
   authors: 課文：二大爺  學習單：唐儀庭
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G9-L2.pdf
-story_structure_rows:
-- label: 主題
-  value: 秦代普通家庭的生與死
-  interactive_type: fill_blank
-  hint: 課文主要在講述什麼？
-- label: 重要事實 1
-  value: 秦國士兵需自備衣物，無兵餉
-  interactive_type: checkbox
-  hint: 秦國當兵的狀況
-  options:
-  - 秦國士兵有豐厚兵餉
-  - 秦國士兵衣物由國家提供
-  - 秦國士兵需自備衣物，無兵餉
-  correct_options:
-  - 2
-- label: 重要事實 2
-  value: 黑夫與驚的家書是寫在竹簡上
-  interactive_type: checkbox
-  hint: 家書的載體是什麼？
-  options:
-  - 黑夫與驚的家書是寫在紙上
-  - 黑夫與驚的家書是寫在竹簡上
-  - 黑夫與驚的家書是寫在布帛上
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 黑夫與驚最終戰死沙場
-  interactive_type: checkbox
-  hint: 兩兄弟的結局為何？
-  options:
-  - 黑夫與驚安然返鄉
-  - 黑夫與驚最終戰死沙場
-  - 黑夫與驚被俘虜
-  correct_options:
-  - 1
-- label: 結論
-  value: 秦國統一大業建立在底層民眾的犧牲上
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-08
+story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table:
+- - 帝國家書：一個普通家庭的生與死
+- - 背景
+  - 兩封西元前225年秦國滅楚大戰時的【 家書 】揭露了一個家庭的悲劇。這個家庭有兄弟3人，大哥衷在家贍養母親，20歲的二弟驚和17歲的三弟黑夫都在前線征戰。
+- - 家書一
+  - 信件內容
+  - 作者判斷
+- - 家書一
+  - '1.是__寫給大哥的。
+
+    2.現被困在淮陽，生死__。
+
+    3.缺乏__，要母親寄衣服或__。
+
+    4.詢問官府有沒有落實__。'
+  - '1.秦國服役早而重。
+
+    2.服役是【 三弟/黑夫 】，沒有兵餉，連衣物都要自己準備。
+
+    3.秦王統一大業，卻將戰爭成本【 難料 】到底層民眾身上。【 夏衣 】【 錢 】【 獎勵 】【 義務 】【 轉嫁 】'
+- - 家書二
+  - 信件內容
+  - 作者判斷
+- - 家書二
+  - '1.是__寫給大哥的。
+
+    2.因沒收到錢物，明確要__和__。
+
+    3.兄弟倆現在__過活，再不還錢就要死了。
+
+    4.擔心自己的妻子，要她不要到太遠的地方撿柴火。'
+  - '1.兄弟跟家人要的錢並不多，一般家庭應該都能承受。
+
+    2.如果有錢，一定不會吝嗇給在前線家人，沒給錢的原因只可能是【 二弟/驚 】。
+
+    3.他們並非底層人家，卻拿不出十件夏衣的救命錢。
+
+    4.由此可知秦國年年征戰，對底層民眾層層【 錢 】。【 布料 】【 借錢 】【 沒錢 】【 剝削 】'
+- - 結果
+  - 兩兄弟最終【 戰死/死了 】，只有如此大哥才會把兩個弟弟的家書作為陪葬品。從這裡可以看出哥哥心裡的悲傷和【 歉疚 】。
+- - 作者詰問
+  - 讀完家書，知道這個家庭的命運後，你還想成偉大秦帝國的子民嗎？

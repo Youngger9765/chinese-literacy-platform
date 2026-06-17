@@ -189,57 +189,7 @@ strategy_exercise:
     type: free_text
   - prompt: 請你自己舉一個在生活中看過的誘餌式標題例子，並說明它用了哪種手法（引發好奇、誇張句子、誇大情緒字眼、或利用熱門話題）
     type: free_text
-story_structure:
-- label: 主題
-  value: 誘餌式標題
-- label: 重要事實 1
-  value: 誘餌式標題指誇大、聳動的標題，吸引點擊。
-- label: 重要事實 2
-  value: 媒體用誘餌式標題，為增加點擊率和廣告收益。
-- label: 重要事實 3
-  value: 誘餌式標題會誤導大眾，傳播劣質新聞。
-- label: 結論
-  value: 對誇張標題保持警戒，培養獨立思考能力。
-story_structure_rows:
-- label: 主題
-  value: 誘餌式標題
-  interactive_type: fill_blank
-  hint: 課文主要在說什麼？
-- label: 重要事實 1
-  value: 誘餌式標題的目的是吸引點擊，增加廣告收益或帶風向。
-  interactive_type: checkbox
-  hint: 為什麼要用誘餌式標題？
-  options:
-  - 誘餌式標題是為了讓文章內容更豐富。
-  - 誘餌式標題的目的是吸引點擊，增加廣告收益或帶風向。
-  - 誘餌式標題能幫助讀者快速理解文章重點。
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 誘餌式標題不只出現在新聞報導，也出現在節目、廣告、書籍雜誌。
-  interactive_type: checkbox
-  hint: 誘餌式標題在哪裡出現？
-  options:
-  - 誘餌式標題只出現在新聞報導。
-  - 誘餌式標題不只出現在新聞報導，也出現在節目、廣告、書籍雜誌。
-  - 誘餌式標題只出現在社群媒體貼文。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 面對誘餌式標題，應保持警戒、核對內容、比較報導。
-  interactive_type: checkbox
-  hint: 我們該如何應對？
-  options:
-  - 面對誘餌式標題，應直接轉發分享。
-  - 面對誘餌式標題，應保持警戒、核對內容、比較報導。
-  - 面對誘餌式標題，應完全不予理會。
-  correct_options:
-  - 1
-- label: 結論
-  value: 不上誘餌式標題的鉤，不讓劣質新聞騙取點擊率。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -275,3 +225,21 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L21.pdf
+story_structure_table:
+- - 別上「誘餌式標題」的鉤
+- - 主題
+  - 為吸引閱聽大眾點擊收看，新聞標題經常變得【 辛辣 】、【 浮誇 】，這就是【 誘餌式標題 】。
+- - 目的
+  - '1.下標者想讓文章在眾多訊息中【 被看見 】。
+
+    2.讓報導增加【 點擊/點閱率 】，獲得較多的廣告收益。
+
+    3.為了能【 帶風向 】，影響大眾的認知。'
+- - 面對方法
+  - '1.對【 誇張 】的標題，保持【 警戒 】。
+
+    2.【 核對 】標題與內容的一致性。
+
+    3.【 比較 】不同報導，培養【 獨立 】思考能力。'
+- - 結論
+  - 上網時要隨時提醒自己：不上【 誘餌式標題 】的鉤，不再讓劣質新聞騙取【 點擊率 】。

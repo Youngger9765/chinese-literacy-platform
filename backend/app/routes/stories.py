@@ -452,34 +452,8 @@ async def get_story_structure(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # ── YAML-first: use pre-stored structure data if available (#1377, #1398) ──
-    # Priority 1: story_structure_rows — AI-generated dict rows (full checkbox support)
-    yaml_rows = story.get("story_structure_rows")
-    if yaml_rows and isinstance(yaml_rows, list):
-        result = {"rows": yaml_rows}
-        _set_cached_structure(story_id, result)
-        log_ai_usage(
-            db,
-            endpoint=f"/stories/{story_id}/structure",
-            step="structure",
-            student_id=current_user.id,
-            story_id=story_id,
-            story_title=story["title"],
-            input_tokens=0,
-            output_tokens=0,
-            model="yaml",
-            latency_ms=0,
-            success=True,
-            model_version=None,
-            prompt_char_count=None,
-            response_char_count=None,
-            content_filtered=False,
-            cache_hit=True,
-            prompt_template_id="story_structure_rows_yaml",
-        )
-        return _sanitize_structure_for_client(result)
-
-    # Priority 2: story_structure_table — docx-parsed list-of-lists (ground truth)
+    # ── YAML-first: use pre-stored structure data if available (#1377, #1398, #2205) ──
+    # Priority 1: story_structure_table — DOCX/keypoints ground truth (preserves layout)
     yaml_table = story.get("story_structure_table")
     if yaml_table:
         result = _format_yaml_structure_table(yaml_table)
@@ -503,6 +477,32 @@ async def get_story_structure(
             content_filtered=False,
             cache_hit=True,
             prompt_template_id="story_structure_yaml",
+        )
+        return _sanitize_structure_for_client(result)
+
+    # Priority 2: story_structure_rows — AI-generated dict rows (checkbox fallback)
+    yaml_rows = story.get("story_structure_rows")
+    if yaml_rows and isinstance(yaml_rows, list):
+        result = {"rows": yaml_rows}
+        _set_cached_structure(story_id, result)
+        log_ai_usage(
+            db,
+            endpoint=f"/stories/{story_id}/structure",
+            step="structure",
+            student_id=current_user.id,
+            story_id=story_id,
+            story_title=story["title"],
+            input_tokens=0,
+            output_tokens=0,
+            model="yaml",
+            latency_ms=0,
+            success=True,
+            model_version=None,
+            prompt_char_count=None,
+            response_char_count=None,
+            content_filtered=False,
+            cache_hit=True,
+            prompt_template_id="story_structure_rows_yaml",
         )
         return _sanitize_structure_for_client(result)
 

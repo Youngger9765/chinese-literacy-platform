@@ -154,70 +154,7 @@ strategy_exercise:
   - 膽小退縮
   - 隨波逐流
   correct_trait: 堅韌不拔
-story_structure:
-- label: 主角
-  value: 陳念琴
-- label: 主題
-  value: 拿到奧運拳擊項目資格的女拳手。
-story_structure_rows:
-- label: 主角
-  value: 陳念琴
-  interactive_type: fill_blank
-  hint: 課文主要人物是誰？
-  options: null
-  correct_options: null
-- label: 主題
-  value: 將挫折轉化為動力
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-  options: null
-  correct_options: null
-- label: 特色
-  value: 不服輸、堅韌、感恩
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-  options: null
-  correct_options: null
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  options: null
-  correct_options: null
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 陳念琴的成長背景
-    options:
-    - 小時候因膚色和原住民身分被排擠
-    - 在馬祖生活時，家人鼓勵她加入角力隊
-    - 國中時隻身到台灣改練拳擊
-    correct_options:
-    - 0
-    - 2
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 陳念琴的奮鬥過程
-    options:
-    - 面對男生的不友善態度，她靠不服輸撐下來
-    - 因先天性貧血和淋巴癌，仍堅持訓練與治療
-    - 在奧運前因媒體質疑而放棄訓練
-    correct_options:
-    - 0
-    - 1
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 陳念琴的成就與體悟
-    options:
-    - 成為第一個拿到奧運拳擊資格的女選手
-    - 因病痛影響，最終未能參加奧運
-    - 在東京奧運獲得金牌
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -252,3 +189,31 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 「拳」力出擊──陳念琴
+- - 主角
+  - 【 陳念琴 】
+- - 主題
+  - 陳念琴靠著堅韌的心志，擊破種種挑戰和困難，成為臺灣第一個拿到奧運拳擊項目資格的女拳手。
+- - 發展歷程
+  - 國中時期
+  - '1.陳念琴剛加入拳擊隊時受到排擠和遇到打不贏男生的困境，她做了什麼來改變現況？(多選)
+
+    用一顆不服輸的心撐下來   思考打到對方的策略
+
+    接受高強度的訓練    　　 □增重到67公斤
+
+    2.陳念琴的正向思考：(單選)
+
+    「既然無路可退，就  正面迎擊  □沮喪逃避，用成績證明自己。」
+
+    3.越級打怪成功，贏得勝利。'
+- - 發展歷程
+  - 國中以後
+  - "1.高中：\n(1)健康情況：(單選)\n罹患先天缺血性貧血\n□罹患淋巴癌。\n(2)過程：一邊訓練、一邊監測身體狀況，讓她心力交瘁。 2.東京奧運：\n\
+    (1)健康情況：(單選)\n□罹患先天缺血性貧血 \n罹患淋巴癌。\n(2)過程：忍受痛苦的【 化療 】和承受媒體的質疑。\n(3)抱持信念：\n為了【 夢想\
+    \ 】我願意忍耐，再苦再累我都要咬牙撐過。"
+- - 成就
+  - '1.她成為第一個拿到奧運【 拳擊 】項目資格的女拳手，並進入前八強。
+
+    2.她的抗癌經歷，也鼓舞了許多癌症病友。'
