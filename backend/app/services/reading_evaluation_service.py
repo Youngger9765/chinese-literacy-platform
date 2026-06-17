@@ -392,9 +392,18 @@ async def evaluate_reading_with_ai(
             elif token_type == "extra":
                 stats["extra_count"] += 1
 
-        # Use the target tokens (correct + forgiven + wrong + missing) as denominator
-        # This mirrors: adjusted = (correct + forgiven) / target_length
-        denominator = t_len if t_len > 0 else 1
+        # Denominator = target-position tokens only (correct + forgiven + wrong + missing),
+        # excluding `extra` (贅字). This keeps numerator and denominator on the SAME basis:
+        # both count target positions, so (correct + forgiven) <= denominator is guaranteed
+        # → adjusted_match_rate <= 1.0 by construction, not by a min(1.0, ...) clamp.
+        #
+        # Issue #2253: previously the denominator was t_len (原文字數) while the numerator
+        # came from Gemini token counts. When STT produced 贅字/重複字 and Gemini tagged them
+        # correct/forgiven, the numerator could exceed t_len → rate > 100% (seen 150%–300%).
+        target_tokens = (
+            correct + forgiven + stats["wrong_count"] + stats["missing_count"]
+        )
+        denominator = target_tokens if target_tokens > 0 else 1
 
         # Raw match rate (correct only)
         match_rate = correct / denominator

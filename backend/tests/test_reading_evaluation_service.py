@@ -413,3 +413,88 @@ async def test_short_text_lowers_pass_threshold():
         )
     effective_pass = result["thresholds"]["reading_pass"]
     assert effective_pass < Thresholds.READING_PASS
+
+
+# ---------------------------------------------------------------------------
+# evaluate_reading_with_ai — rate never exceeds 100% (Issue #2253)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_ai_path_rate_never_exceeds_one():
+    """贅字/重複字導致 Gemini 回傳 token 數 > 原文字數時，正確率仍 ≤ 100%。
+
+    Issue #2253: STT 把單字唸成多次（贅字/重複字），Gemini 為每個都產生
+    correct/forgiven token，導致分子 > 原文字數分母 → adjusted_match_rate > 1.0。
+    """
+    fake = {
+        "diff_tokens": [
+            {"char": "天", "type": "correct"},
+            {"char": "天", "type": "correct"},
+            {"char": "天", "type": "correct"},
+        ],
+        "feedback": "很棒",
+    }
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value=fake),
+    ):
+        result = await evaluate_reading_with_ai(spoken_text="天天天", target_text="天")
+    assert result["adjusted_match_rate"] <= 1.0   # 修復前 FAIL（算出 3.0）
+    assert result["match_rate"] <= 1.0
+
+
+@pytest.mark.asyncio
+async def test_ai_path_empty_diff_tokens_no_crash():
+    """空的 diff_tokens（target_tokens == 0）不爆，回傳 0.0 而非除零錯誤。"""
+    fake = {"diff_tokens": [], "feedback": "加油"}
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value=fake),
+    ):
+        result = await evaluate_reading_with_ai(spoken_text="天", target_text="天")
+    assert result["match_rate"] == 0.0
+    assert result["adjusted_match_rate"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_ai_path_all_extra_does_not_inflate():
+    """全 extra（贅字，不對應任何原文位置）→ target_tokens == 0 → 不爆、不灌水。"""
+    fake = {
+        "diff_tokens": [
+            {"char": "啊", "type": "extra"},
+            {"char": "嗯", "type": "extra"},
+        ],
+        "feedback": "再試一次",
+    }
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value=fake),
+    ):
+        result = await evaluate_reading_with_ai(spoken_text="啊嗯", target_text="天空")
+    # extra 被排除在分母外，分子也沒有 correct/forgiven → 0.0，且 <= 1.0
+    assert result["match_rate"] == 0.0
+    assert result["adjusted_match_rate"] == 0.0
+    assert result["stats"]["extra_count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_ai_path_wrong_and_missing_count_toward_denominator():
+    """wrong / missing 計入分母（目標位置），rate 仍 <= 1.0 且反映實際命中率。"""
+    fake = {
+        "diff_tokens": [
+            {"char": "天", "type": "correct"},
+            {"char": "空", "type": "wrong", "spoken": "海"},
+            {"char": "藍", "type": "missing"},
+        ],
+        "feedback": "繼續加油",
+    }
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value=fake),
+    ):
+        result = await evaluate_reading_with_ai(spoken_text="天海", target_text="天空藍")
+    # 分母 = correct(1) + forgiven(0) + wrong(1) + missing(1) = 3
+    # match_rate = 1/3, adjusted = 1/3（結果經 round(_, 4)）
+    assert result["match_rate"] == pytest.approx(1 / 3, abs=1e-4)
+    assert result["adjusted_match_rate"] == pytest.approx(1 / 3, abs=1e-4)
+    assert result["adjusted_match_rate"] <= 1.0
