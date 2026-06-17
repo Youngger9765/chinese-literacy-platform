@@ -3,6 +3,7 @@ Stories API — serves platform lessons from in-memory YAML data.
 No database dependency for platform content.
 """
 
+import copy
 import re
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
@@ -65,12 +66,42 @@ def _cell_to_row_dict(label: str, value: str) -> dict:
         "interactive_type": itype,
     }
     if itype == "fill_blank":
-        hints = [m.group(1).strip() for m in _BLANK_RE.finditer(value)]
-        if hints:
-            row["hint"] = hints[0]
-        if len(hints) > 1:
-            row["blank_hints"] = hints
+        # Answers inside 【】 are stored server-side for grading only — never sent to client.
+        answers = [m.group(1).strip() for m in _BLANK_RE.finditer(value)]
+        if answers:
+            row["hint"] = answers[0]
+        if len(answers) > 1:
+            row["blank_hints"] = answers
     return row
+
+
+def _strip_blank_answers(text: str) -> str:
+    """Replace 【answer】 with empty blanks for student-facing display."""
+    return _BLANK_RE.sub("【　　　】", text)
+
+
+def _sanitize_row_for_client(row: dict) -> dict:
+    """Remove grading answers from a structure row before API response."""
+    out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
+    if out.get("interactive_type") == "fill_blank" and out.get("value"):
+        out["value"] = _strip_blank_answers(out["value"])
+    sub_rows = out.get("sub_rows")
+    if sub_rows:
+        out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
+    return out
+
+
+def _sanitize_structure_for_client(structure: dict) -> dict:
+    """Return a deep copy of structure with answers stripped for student UI."""
+    result = copy.deepcopy(structure)
+    result["rows"] = [_sanitize_row_for_client(r) for r in result.get("rows", [])]
+    for ws in result.get("worksheet_rows") or []:
+        if ws.get("kind") == "pair":
+            ws["value"] = _strip_blank_answers(ws["value"])
+        elif ws.get("kind") == "section_block":
+            for item in ws.get("items") or []:
+                item["value"] = _strip_blank_answers(item["value"])
+    return result
 
 
 def _parse_yaml_table_row(raw_row: list) -> dict | None:
@@ -446,13 +477,13 @@ async def get_story_structure(
             cache_hit=True,
             prompt_template_id="story_structure_rows_yaml",
         )
-        return result
+        return _sanitize_structure_for_client(result)
 
     # Priority 2: story_structure_table — docx-parsed list-of-lists (ground truth)
     yaml_table = story.get("story_structure_table")
     if yaml_table:
         result = _format_yaml_structure_table(yaml_table)
-        # Store in cache so grade endpoint can use it; log as zero-cost hit
+        # Store full structure (with answers) in cache for grading
         _set_cached_structure(story_id, result)
         log_ai_usage(
             db,
@@ -473,12 +504,12 @@ async def get_story_structure(
             cache_hit=True,
             prompt_template_id="story_structure_yaml",
         )
-        return result
+        return _sanitize_structure_for_client(result)
 
     # ── In-memory cache hit — return immediately without rate-limit quota ───
     cached = _get_cached_structure(story_id)
     if cached is not None:
-        return cached
+        return _sanitize_structure_for_client(cached)
 
     # ── Cache miss — enforce rate limit before calling AI ───────────────────
     rl_key = f"ai:{get_client_key(request)}"
@@ -516,7 +547,7 @@ async def get_story_structure(
         cache_hit=False,
         prompt_template_id="story_structure",
     )
-    return result
+    return _sanitize_structure_for_client(result)
 
 
 # ── ⑤ 文章重點表 批改 endpoint (#1082) ────────────────────────────────────────
