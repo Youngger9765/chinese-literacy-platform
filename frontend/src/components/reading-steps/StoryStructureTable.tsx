@@ -5,7 +5,7 @@
  * When API returns layout=worksheet_table, renders 紙本學習單 HTML table;
  * otherwise falls back to card layout (#2084).
  */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -76,6 +76,73 @@ interface Props {
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
 const SECTION_CHUNK_SIZE = 3;
+const STORY_STRUCTURE_ONBOARDED_KEY = 'story_structure_onboarded';
+
+type StoryStructureDemoStep = 'overview' | 'read' | 'type' | 'submit' | 'success';
+
+interface StoryStructureDemoRuntime {
+  step: StoryStructureDemoStep;
+}
+
+function DemoBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300 mb-3"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="rounded-xl bg-accent text-white px-4 py-2 text-sm font-bold shadow-lg text-center max-w-sm">
+        {children}
+        <span
+          className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+interface OnboardingCoachProps {
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
+  return (
+    <div className="mb-4 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          account_tree
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">文章重點表怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            用表格整理課文的<strong className="text-amber-800">問題、解決、結果</strong>。
+            讀左邊課文，把關鍵詞填進【　】空格，填完按「提交答案」，AI 會幫你檢查。
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -554,6 +621,16 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
   const [copyDone, setCopyDone] = useState(false);
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(STORY_STRUCTURE_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+  const [demo, setDemo] = useState<StoryStructureDemoRuntime | null>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -573,6 +650,53 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, [storyId, token, API_BASE]);
+
+
+  const clearDemoTimers = useCallback(() => {
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
+  }, []);
+
+  const scheduleDemoStep = useCallback((fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+  }, []);
+
+  useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
+
+  useEffect(() => {
+    const root = tableContainerRef.current;
+    if (!root) return;
+    const inputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    inputs.forEach((el, idx) => {
+      const highlight = demo?.step === 'type' && idx === 0;
+      el.classList.toggle('ring-2', highlight);
+      el.classList.toggle('ring-amber-400', highlight);
+      el.classList.toggle('animate-pulse', highlight);
+      el.classList.toggle('bg-amber-50', highlight);
+    });
+  }, [demo, structure, loading]);
+
+  const handleDismissCoach = useCallback(() => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(STORY_STRUCTURE_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleDemo = useCallback(() => {
+    clearDemoTimers();
+    handleDismissCoach();
+    setDemo({ step: 'overview' });
+    scheduleDemoStep(() => setDemo({ step: 'read' }), 1400);
+    scheduleDemoStep(() => setDemo({ step: 'type' }), 2800);
+    scheduleDemoStep(() => setDemo({ step: 'submit' }), 4200);
+    scheduleDemoStep(() => setDemo({ step: 'success' }), 5600);
+    scheduleDemoStep(() => setDemo(null), 7000);
+  }, [clearDemoTimers, handleDismissCoach, scheduleDemoStep]);
+
 
   const setAnswer = useCallback((key: string, value: string | number[]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -835,10 +959,36 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     structure.layout === 'worksheet_table' &&
     !!(structure.worksheet_rows && structure.worksheet_rows.length > 0);
 
+  const demoBubbleText: Partial<Record<StoryStructureDemoStep, string>> = {
+    overview: '① 這張表幫你整理課文的問題、解決、結果',
+    read: '② 讀左邊課文，想想空格要填什麼關鍵詞',
+    type: '③ 點【　】空格，輸入你的答案',
+    submit: '④ 全部填完後，按「提交答案」',
+    success: '⑤ AI 會幫你檢查，答錯可以看參考提示',
+  };
+
   return (
+    <div className={useWorksheet ? 'max-w-3xl mx-auto' : 'max-w-2xl mx-auto'}>
+      {showCoach && <OnboardingCoach onDismiss={handleDismissCoach} onDemo={handleDemo} />}
+      {!showCoach && (
+        <div className="flex justify-end mb-2">
+          <button
+            type="button"
+            onClick={() => setShowCoach(true)}
+            className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">help_outline</span>
+            怎麼玩？
+          </button>
+        </div>
+      )}
+      {demo && demoBubbleText[demo.step] && (
+        <DemoBubble>{demoBubbleText[demo.step]}</DemoBubble>
+      )}
     <div
-      className={`overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm mx-auto ${
-        useWorksheet ? 'max-w-3xl' : 'max-w-2xl'
+      ref={tableContainerRef}
+      className={`overflow-hidden rounded-xl border-2 shadow-sm transition-all duration-300 ${
+        demo?.step === 'read' ? 'border-amber-400 ring-4 ring-amber-200/60' : 'border-gray-300'
       }`}
     >
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
@@ -934,7 +1084,9 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
               onClick={handleSubmit}
               disabled={!allAnswered || submitting}
               className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${
-                allAnswered && !submitting
+                demo?.step === 'submit'
+                  ? 'bg-amber-500 text-white ring-4 ring-amber-300 animate-pulse scale-105'
+                  : allAnswered && !submitting
                   ? 'bg-amber-500 text-white hover:bg-amber-600 active:scale-95'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
@@ -965,6 +1117,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
