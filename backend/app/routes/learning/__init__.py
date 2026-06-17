@@ -35,6 +35,7 @@ from .learning_dashboard import router as dashboard_router
 # Re-export symbols that parents.py imports by name
 from .learning_dashboard import DashboardResponse, get_student_dashboard  # noqa: F401
 from .learning_vocab import router as vocab_router
+from .learning_strategy import router as strategy_router
 from .learning_exit_ticket import router as exit_ticket_router
 from .learning_reading_history import router as reading_history_router
 from .mcq_rescue import router as mcq_rescue_router
@@ -54,6 +55,7 @@ router.include_router(step_progress_router)
 router.include_router(recommendations_router)
 router.include_router(dashboard_router)
 router.include_router(vocab_router)
+router.include_router(strategy_router)
 router.include_router(exit_ticket_router)
 router.include_router(reading_history_router)
 router.include_router(mcq_rescue_router)
