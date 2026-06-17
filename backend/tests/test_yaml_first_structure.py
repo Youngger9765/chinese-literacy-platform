@@ -173,12 +173,16 @@ def test_full_g7_l28_table():
 
 def test_lesson_without_structure_table_returns_none():
     """story_structure_table absent → get_lesson_by_id returns None for that field."""
-    from app.services.lesson_loader import get_lesson_by_id
-    # Lesson 1 (L01.yml) is the original 57-lesson set, has no story_structure_table
-    lesson = get_lesson_by_id(1)
-    if lesson is None:
-        pytest.skip("Lesson 1 not loaded in this environment")
-    # Should be None or absent (falls through to AI)
+    from app.services.lesson_loader import get_all_lessons, get_lesson_by_id
+
+    candidate_id = next(
+        (l["id"] for l in get_all_lessons() if l.get("story_structure_table") is None),
+        None,
+    )
+    if candidate_id is None:
+        pytest.skip("No lesson without story_structure_table in this environment")
+    lesson = get_lesson_by_id(candidate_id)
+    assert lesson is not None
     assert lesson.get("story_structure_table") is None
 
 

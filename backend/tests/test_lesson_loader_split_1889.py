@@ -120,6 +120,22 @@ class TestCatalogToParsedOverridesG8:
             )
 
 
+class TestCatalogParsedResolveHelpers:
+    """Public helpers for QA / tooling — mirror load_layer2_lessons resolution."""
+
+    def test_catalog_to_parsed_code_g8_offset(self):
+        from app.services.lesson_code_normalization import catalog_to_parsed_code
+
+        assert catalog_to_parsed_code("G8-L08") == "G8-L10"
+        assert catalog_to_parsed_code("G8-L10") == "G8-L13"
+
+    def test_parsed_to_catalog_codes_reverse_lookup(self):
+        from app.services.lesson_code_normalization import parsed_to_catalog_codes
+
+        assert "G8-L8" in parsed_to_catalog_codes("G8-L10")
+        assert "G8-L10" in parsed_to_catalog_codes("G8-L13")
+
+
 # ---------------------------------------------------------------------------
 # Test 2 — layer2_enrichment_merges_truthy_fields_into_layer1_by_title
 # ---------------------------------------------------------------------------
