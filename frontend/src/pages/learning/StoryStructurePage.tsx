@@ -47,16 +47,6 @@ const StoryStructurePage: React.FC = () => {
       exerciseIcon="summarize"
       exerciseLabel="文章重點表"
     >
-      {/* Entry visibility banner (#2084 — 讓入口更明顯，說明功能用途) */}
-      <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        <span className="material-symbols-outlined text-amber-500 shrink-0" style={{ fontSize: '18px' }}>
-          account_tree
-        </span>
-        <span>
-          <strong>文章重點表：</strong>用思維導圖整理這篇文章的核心架構，看清問題、解決方法與結果之間的關係。
-        </span>
-      </div>
-
       <StoryStructureTable storyId={selectedStory.id} />
 
       {/* Bottom CTA — always available (student may advance after inspecting the table) */}
