@@ -179,7 +179,6 @@ function sectionVerticalLabel(section: string): string {
 // ── Inline blank inputs (worksheet table cells) ─────────────────────────────
 
 interface InlineBlankInputProps {
-  hint?: string;
   value: string;
   onChange: (v: string) => void;
   submitted: boolean;
@@ -188,7 +187,6 @@ interface InlineBlankInputProps {
 }
 
 const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
-  hint,
   value,
   onChange,
   submitted,
@@ -214,7 +212,7 @@ const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={hint?.trim() || '　'}
+      placeholder="　"
       className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-none focus:border-amber-600 mx-0.5`}
       disabled={submitted}
     />
@@ -225,7 +223,6 @@ interface InlineWorksheetContentProps {
   text: string;
   rowIdx: number;
   subIdx?: number;
-  hints?: string[];
   answers: AnswerMap;
   setAnswer: (key: string, value: string | number[]) => void;
   submitted: boolean;
@@ -236,7 +233,6 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
   text,
   rowIdx,
   subIdx,
-  hints,
   answers,
   setAnswer,
   submitted,
@@ -253,12 +249,10 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
         nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
       }
       const key = answerKey(rowIdx, subIdx, blankIdx);
-      const hint = hints?.[blankIdx] ?? match[1]?.trim();
       nodes.push(
         <span key={`b-${blankIdx}`} className="inline-flex items-baseline">
           <span>【</span>
           <InlineBlankInput
-            hint={hint}
             value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
             onChange={(v) => setAnswer(key, v)}
             submitted={submitted}
@@ -277,7 +271,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
       nodes.push(<span key={`t-${last}`}>{text.slice(last)}</span>);
     }
     return nodes;
-  }, [text, rowIdx, subIdx, hints, answers, setAnswer, submitted, gradeResults]);
+  }, [text, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
   return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
 };
@@ -285,7 +279,6 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
 // ── FillBlankCell (card layout) ─────────────────────────────────────────────
 
 interface FillBlankCellProps {
-  hint?: string;
   value: string;
   onChange: (v: string) => void;
   submitted: boolean;
@@ -293,7 +286,6 @@ interface FillBlankCellProps {
 }
 
 const FillBlankCell: React.FC<FillBlankCellProps> = ({
-  hint,
   value,
   onChange,
   submitted,
@@ -327,7 +319,7 @@ const FillBlankCell: React.FC<FillBlankCellProps> = ({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={hint ?? '請填入答案'}
+        placeholder="　"
         className="w-36 bg-amber-50 border-b-2 border-amber-400 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-amber-600 px-1 py-0.5 text-center"
         disabled={submitted}
       />
@@ -452,7 +444,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
     value: string,
     rowIdx: number,
     subIdx?: number,
-    hints?: string[],
   ) => {
     const itype = classifyInteractive(value);
     if (itype === 'fill_blank' && countBlanks(value) > 0) {
@@ -461,7 +452,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
           text={value}
           rowIdx={rowIdx}
           subIdx={subIdx}
-          hints={hints}
           answers={answers}
           setAnswer={setAnswer}
           submitted={submitted}
@@ -499,7 +489,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
                   {wsRow.label}
                 </td>
                 <td colSpan={2} className={cellBorder}>
-                  {renderValueCell(wsRow.value, rowIdx, undefined, row?.blank_hints)}
+                  {renderValueCell(wsRow.value, rowIdx, undefined)}
                 </td>
               </tr>
             );
@@ -540,7 +530,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
                       item.value,
                       rowIdx,
                       subIdx,
-                      subRow?.blank_hints,
                     )}
                   </td>
                 </tr>
@@ -815,7 +804,6 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       }
       return (
         <FillBlankCell
-          hint={cell.hint}
           value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
           onChange={(v) => setAnswer(key, v)}
           submitted={submitted}

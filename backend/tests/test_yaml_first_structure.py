@@ -46,14 +46,35 @@ def test_two_cell_display_row():
 
 
 def test_two_cell_fill_blank_row():
-    """[label, value] with 【answer】 → fill_blank, hint extracted."""
+    """[label, value] with 【answer】 → fill_blank, answers stored for grading only."""
     table = [["結論", "生物不能【 自然產生 】，腐敗與【 微生物污染 】有關。"]]
     result = _format_yaml_structure_table(table)
     row = result["rows"][0]
     assert row["label"] == "結論"
     assert row["interactive_type"] == "fill_blank"
-    assert "hint" in row
-    assert row["hint"] == "自然產生"  # first blank extracted
+    assert row["hint"] == "自然產生"  # first blank extracted for server-side grading
+
+
+def test_sanitize_structure_strips_answers_from_client():
+    """GET response must not leak answers in value, hint, or blank_hints."""
+    from app.routes.stories import _sanitize_structure_for_client
+
+    table = [
+        ["小兵立大功：雞鳴狗盜的故事"],
+        ["問題", "秦昭王軟禁了孟嘗君。"],
+        ["解決", "問題1", "食客會模仿【 狗 】偷東西。"],
+    ]
+    full = _format_yaml_structure_table(table)
+    client = _sanitize_structure_for_client(full)
+
+    sub = client["rows"][2]["sub_rows"][0]
+    assert "hint" not in sub
+    assert "blank_hints" not in sub
+    assert "【 狗 】" not in sub["value"]
+    assert "【　　　】" in sub["value"]
+
+    ws_item = client["worksheet_rows"][1]["items"][0]
+    assert "【 狗 】" not in ws_item["value"]
 
 
 def test_three_cell_sub_row():
