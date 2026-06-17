@@ -31,8 +31,239 @@ R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 SCAFFOLD_RE = re.compile(r"計時|裁判|還要多加練習|哇嗚|超級厲害|影片連結|我的表現|秒以下|秒以上")
 MCQ_RE = re.compile(r"^[（(]\s*[A-Za-zＡ-Ｚ]\s*[）)]\s*\d+[\.\、]")
 BLANK_RE = re.compile(r"【(.*?)】")
+MCQ_PROMPT_RE = re.compile(r"（單選）|\(單選\)|（複選）|\(複選\)|（多選）|\(多選\)|三選二|二選一")
+OPTION_LINE_RE = re.compile(r"^[①②③④⑤⑥⑦⑧⑨⑩]|^□\s*[①②③④⑤⑥⑦⑧⑨⑩]|^□[^步驟小祕訣練習※]")
+GUIDE_HEADER_RE = re.compile(
+    r"^步驟[❶❷❸❹①②③④]|^小祕訣|^小提醒|^練習[一二三四五六七八九十]|^說明：|^前一課|^※|^[◎※]\s*自我檢核"
+)
 
-# Lesson-to-DOCX path mapping
+
+def is_option_line(text: str) -> bool:
+    """True when a paragraph is an MCQ option line (①… or □②…), not teaching guide."""
+    t = (text or "").strip()
+    if not t or GUIDE_HEADER_RE.match(t):
+        return False
+    if MCQ_PROMPT_RE.search(t) and not t.startswith("□") and not OPTION_LINE_RE.match(t):
+        # Question stem ending with （單選）— handled as prompt, not option
+        return False
+    if t.startswith("□"):
+        return True
+    if re.match(r"^[①②③④⑤⑥⑦⑧⑨⑩]", t):
+        return True
+    return False
+
+
+def parse_option_line(text: str) -> tuple[str, bool]:
+    """Return (clean_option_text, is_distractor). Distractor lines start with □."""
+    t = (text or "").strip()
+    is_dist = t.startswith("□")
+    t = re.sub(r"^□\s*", "", t)
+    t = re.sub(r"^[①②③④⑤⑥⑦⑧⑨⑩]\s*", "", t)
+    return t.strip(), is_dist
+
+
+def split_inline_box_options(text: str) -> list[tuple[str, bool]] | None:
+    """
+    Parse a single guide line with multiple □-separated options.
+    Returns list of (text, is_distractor) or None if not an option line.
+    """
+    t = (text or "").strip()
+    if GUIDE_HEADER_RE.match(t):
+        return None
+
+    # □①distractor  ②answer — line starts with box, second circled option is answer
+    if t.startswith("□") and len(re.findall(r"[①②③④⑤]", t)) >= 2:
+        rest = re.sub(r"^□\s*", "", t)
+        chunks = re.findall(r"([①②③④⑤])\s*([^①②③④⑤]+)", rest)
+        if len(chunks) >= 2:
+            parsed: list[tuple[str, bool]] = []
+            for idx, (_, body) in enumerate(chunks):
+                body = body.strip()
+                if body:
+                    parsed.append((body, idx == 0))
+            if len(parsed) >= 2:
+                return parsed
+
+    if "□" not in t:
+        return None
+    parts = re.split(r"\s*□\s*", t)
+    out: list[tuple[str, bool]] = []
+    for i, part in enumerate(parts):
+        part = part.strip()
+        if not part:
+            continue
+        clean = re.sub(r"^[①②③④⑤]\s*", "", part).strip()
+        if not clean:
+            continue
+        out.append((clean, i > 0 or (i == 0 and t.startswith("□"))))
+    if len(out) < 2:
+        return None
+    if t.startswith("□"):
+        return [(p, True) for p, _ in out]
+    return [(out[0][0], False)] + [(p, True) for p, _ in out[1:]]
+
+
+def _is_mcq_prompt_block(block: dict) -> bool:
+    if block.get("type") == "free_text":
+        return bool(MCQ_PROMPT_RE.search(block.get("prompt", "")))
+    if block.get("type") == "single":
+        return bool(block.get("_needs_answer_extraction")) or bool(
+            MCQ_PROMPT_RE.search(block.get("prompt", ""))
+        )
+    if block.get("type") == "guide":
+        return bool(MCQ_PROMPT_RE.search(block.get("text", "")))
+    return False
+
+
+def _prompt_text(block: dict) -> str:
+    if block.get("type") == "guide":
+        return block.get("text", "")
+    return block.get("prompt", "")
+
+
+def _append_options_from_block(
+    block: dict,
+    options: list[str],
+    answer: str | None,
+) -> str | None:
+    """Extract MCQ options from guide / _option_line block into running lists."""
+    if block.get("type") not in ("guide", "_option_line"):
+        return answer
+    gtext = block.get("text", "")
+    inline = split_inline_box_options(gtext)
+    if inline:
+        for opt_text, is_dist in inline:
+            if opt_text:
+                options.append(opt_text)
+                if not is_dist and answer is None:
+                    answer = opt_text
+        return answer
+    if is_option_line(gtext):
+        opt_text, is_dist = parse_option_line(gtext)
+        if opt_text:
+            options.append(opt_text)
+            if not is_dist and answer is None:
+                answer = opt_text
+    return answer
+
+
+def _collect_option_run(blocks: list, start: int) -> tuple[list[str], str | None, int]:
+    options: list[str] = []
+    answer: str | None = None
+    j = start
+    while j < len(blocks):
+        nxt = blocks[j]
+        ntype = nxt.get("type")
+        if ntype in ("guide", "_option_line"):
+            gtext = nxt.get("text", "").strip()
+            if ntype == "guide" and GUIDE_HEADER_RE.match(gtext):
+                break
+            if not is_option_line(gtext) and not split_inline_box_options(gtext):
+                break
+        else:
+            break
+        answer = _append_options_from_block(nxt, options, answer)
+        j += 1
+    return options, answer, j
+
+
+def coalesce_mcq_option_blocks(blocks: list) -> list:
+    """
+    Merge free_text/guide question prompts + following option lines into single blocks.
+    Fixes G7-L29-style misclassification where ①/□② lines became guide blocks.
+    """
+    out: list = []
+    i = 0
+    while i < len(blocks):
+        b = blocks[i]
+
+        if _is_mcq_prompt_block(b):
+            prompt = _prompt_text(b)
+            options: list[str] = []
+            answer = None
+            j = i + 1
+
+            run_opts, run_ans, j = _collect_option_run(blocks, j)
+            options.extend(run_opts)
+            if answer is None:
+                answer = run_ans
+
+            if len(options) >= 2:
+                out.append({
+                    "type": "single",
+                    "prompt": prompt,
+                    "options": options,
+                    "answer": answer or options[0],
+                })
+                i = j
+                continue
+
+        # Question (free_text or short guide) + following ①/□ option lines
+        if (
+            b.get("type") in ("guide", "_option_line")
+            and out
+            and is_option_line(b.get("text", ""))
+        ):
+            prev = out[-1]
+            prev_prompt = ""
+            if prev.get("type") == "free_text":
+                prev_prompt = prev.get("prompt", "")
+            elif prev.get("type") == "guide":
+                prev_text = prev.get("text", "").strip()
+                if (
+                    ("？" in prev_text or "?" in prev_text)
+                    and not GUIDE_HEADER_RE.match(prev_text)
+                    and not MCQ_PROMPT_RE.search(prev_text)
+                ):
+                    prev_prompt = prev_text
+            if prev_prompt and ("？" in prev_prompt or "?" in prev_prompt):
+                options, answer, j = _collect_option_run(blocks, i)
+                if len(options) >= 2:
+                    out.pop()
+                    out.append({
+                        "type": "single",
+                        "prompt": prev_prompt,
+                        "options": options,
+                        "answer": answer or options[0],
+                    })
+                    i = j
+                    continue
+
+        # Standalone inline multi-option guide (G6-L22 ❷/❸ style) after free_text without （單選）
+        if (
+            b.get("type") == "guide"
+            and i > 0
+            and out
+            and out[-1].get("type") == "free_text"
+            and not MCQ_PROMPT_RE.search(out[-1].get("prompt", ""))
+        ):
+            inline = split_inline_box_options(b.get("text", ""))
+            if inline and len(inline) >= 2:
+                prev = out.pop()
+                options = []
+                answer = None
+                for opt_text, is_dist in inline:
+                    options.append(opt_text)
+                    if not is_dist and answer is None:
+                        answer = opt_text
+                out.append({
+                    "type": "single",
+                    "prompt": prev.get("prompt", ""),
+                    "options": options,
+                    "answer": answer or options[0],
+                })
+                i += 1
+                continue
+
+        if b.get("type") == "_option_line":
+            # Orphan option line — keep as guide fallback
+            out.append({"type": "guide", "text": b.get("text", "")})
+        else:
+            out.append(b)
+        i += 1
+
+    return out
+
 DOCX_DIR = "/Users/young/project/chinese-literacy-platform/private/curriculum-source/2026-05-01/自學教材兩個單元"
 LESSON_DOCX = {
     "G6-L22": f"{DOCX_DIR}/G6-L22小兵立大功：雞鳴狗盜的故事（摘要策略-問題.解決.結果結構）.docx",
@@ -772,7 +1003,9 @@ def classify_block(b, idx, all_blocks, strategy_type):
         if b.get("style") == "Normal" and is_substantive_narrative(txt):
             return {"type": "passage_line", "_text": txt}
 
-        # Default: guide text
+        # Default: guide text — but MCQ option lines are not guides
+        if is_option_line(txt):
+            return {"type": "_option_line", "text": txt}
         return {"type": "guide", "text": txt}
 
     elif b["kind"] == "table" and not b.get("scaffold"):
@@ -1303,6 +1536,9 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
 
     # Post-process answer extraction (improved multi-pattern detection)
     classified = extract_single_options(classified, raw_blocks, spotlight_start, spotlight_end)
+
+    # Coalesce （單選）prompts + ①/□ option lines misclassified as guide/free_text
+    classified = coalesce_mcq_option_blocks(classified)
 
     # Bind assets to figure blocks
     if assets:

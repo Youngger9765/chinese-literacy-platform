@@ -22,11 +22,13 @@ import yaml
 from app.services.lesson_code_normalization import (
     halfwidth,
     normalize_manifest_code,
+    catalog_to_parsed_code,
     MULTI_LESSON_PRIMARY,
     MULTI_LESSON_MAP,
     CATALOG_TO_PARSED_OVERRIDE,
     AB_SECONDARY_MAP,
 )
+from app.services.spotlight_v2_loader import load_spotlight_v2
 
 
 # ---------------------------------------------------------------------------
@@ -316,15 +318,7 @@ def load_layer2_lessons(
             continue
 
         # Resolve which parsed YAML handles this curriculum slot
-        parsed_code = norm_code
-
-        # Multi-lesson primary: curriculum code → compound parsed YAML code
-        if norm_code in MULTI_LESSON_PRIMARY:
-            parsed_code = MULTI_LESSON_PRIMARY[norm_code]
-
-        # Catalog→parsed override (#1669): G8 offset + G8 a/b + G7-L31
-        if norm_code in CATALOG_TO_PARSED_OVERRIDE:
-            parsed_code = CATALOG_TO_PARSED_OVERRIDE[norm_code]
+        parsed_code = catalog_to_parsed_code(norm_code)
 
         if parsed_code not in parsed_index:
             # For a/b primary slots (e.g. G8-L3a), the parsed file is G8-L3 (no suffix)
@@ -434,6 +428,8 @@ def load_layer2_lessons(
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
+            # Block-sequence spotlight v2 (#2205 dev7 professor lessons)
+            "spotlight_v2": load_spotlight_v2(norm_code),
             "_layer": 2,
         }
         lessons.append(lesson)
