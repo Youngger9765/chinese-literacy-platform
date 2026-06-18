@@ -1,0 +1,116 @@
+{
+  "rows": [
+    {
+      "label": "澳洲奧運金牌的秘密",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "澳洲全民重視體育",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "人民",
+          "value": "經常自發運動。",
+          "interactive_type": "display"
+        },
+        {
+          "label": "政府",
+          "value": "設立了【　　　】的體育系統。\n1.【　　　】設置體育場設施、體育場館、學校。\n2.成立【　　　】，提供專業的科學訓練及獎金。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "學校",
+          "value": "1.學生有 充足  □少量  的課後時間進行體育活動。\n2.經常舉辦校內、校際的體育競賽。",
+          "interactive_type": "display"
+        },
+        {
+          "label": "家長",
+          "value": "熱衷讓孩子運動，以鍛錬孩子身心，培養重要【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "運動選手生涯",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "培育階段",
+          "value": "(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n(2)表現【　　　】者，可持續晉級，有機會成會兼職或全職的運動員，或進入國家代表隊。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "退役後",
+          "value": "(1)可從事其他或原本的職業\n(2)回到社區俱樂部當教練。",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "臺灣體育的問題",
+      "value": "1.運動績優生選材不易。\n2.運動選手主要是由政府與學校培育，較少俱樂部。\n3.長時嚴格的體育訓練，犧牲了選手的課業與職業發展，造成退役選手的就業【　　　】。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "澳洲奧運金牌的秘密",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "澳洲全民重視體育",
+      "items": [
+        {
+          "label": "人民",
+          "value": "經常自發運動。"
+        },
+        {
+          "label": "政府",
+          "value": "設立了【　　　】的體育系統。\n1.【　　　】設置體育場設施、體育場館、學校。\n2.成立【　　　】，提供專業的科學訓練及獎金。"
+        },
+        {
+          "label": "學校",
+          "value": "1.學生有 充足  □少量  的課後時間進行體育活動。\n2.經常舉辦校內、校際的體育競賽。"
+        },
+        {
+          "label": "家長",
+          "value": "熱衷讓孩子運動，以鍛錬孩子身心，培養重要【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "運動選手生涯",
+      "items": [
+        {
+          "label": "培育階段",
+          "value": "(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n(2)表現【　　　】者，可持續晉級，有機會成會兼職或全職的運動員，或進入國家代表隊。"
+        },
+        {
+          "label": "退役後",
+          "value": "(1)可從事其他或原本的職業\n(2)回到社區俱樂部當教練。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "臺灣體育的問題",
+      "value": "1.運動績優生選材不易。\n2.運動選手主要是由政府與學校培育，較少俱樂部。\n3.長時嚴格的體育訓練，犧牲了選手的課業與職業發展，造成退役選手的就業【　　　】。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "政府",
+      "家長",
+      "培育階段",
+      "臺灣體育的問題"
+    ],
+    "layout": "worksheet_table"
+  }
+}

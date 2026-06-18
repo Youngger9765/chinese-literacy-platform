@@ -1,0 +1,65 @@
+{
+  "rows": [
+    {
+      "label": "給神明發會診單",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "起因",
+      "value": "病人的狀況不好，家屬想請乩童來看看病人。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "陳醫師想法",
+      "value": "1.請乩童來看病人，這是家屬的【　　　】。\n2.病人預後不樂觀，現在更重要的是【　　　】。\n3.一般醫師拒絕乩童、符水的原因是？（請打勾，複選）\n認為這些東西很迷信無知  認為自己專業受到挑戰\n感覺自己不被信任 \n4.陳醫師不拒絕民間信仰進入醫院的原因？\n(1)把這件事用【　　　】看待，家屬只是想盡一分心力。\n(2)乩童、符水其實就是家屬的【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "請神明會診",
+      "value": "1.陳醫師自我介紹及說明病情，並感謝乩童的協助。\n2.乩童比手畫腳，代替病人跟家屬說了一番話，並給了他們大大的【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結果",
+      "value": "陳醫師由衷感謝乩童對家屬的【　　　】、【　　　】，療癒了家屬的心靈。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "給神明發會診單",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "起因",
+      "value": "病人的狀況不好，家屬想請乩童來看看病人。"
+    },
+    {
+      "kind": "pair",
+      "label": "陳醫師想法",
+      "value": "1.請乩童來看病人，這是家屬的【　　　】。\n2.病人預後不樂觀，現在更重要的是【　　　】。\n3.一般醫師拒絕乩童、符水的原因是？（請打勾，複選）\n認為這些東西很迷信無知  認為自己專業受到挑戰\n感覺自己不被信任 \n4.陳醫師不拒絕民間信仰進入醫院的原因？\n(1)把這件事用【　　　】看待，家屬只是想盡一分心力。\n(2)乩童、符水其實就是家屬的【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "請神明會診",
+      "value": "1.陳醫師自我介紹及說明病情，並感謝乩童的協助。\n2.乩童比手畫腳，代替病人跟家屬說了一番話，並給了他們大大的【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "陳醫師由衷感謝乩童對家屬的【　　　】、【　　　】，療癒了家屬的心靈。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "陳醫師想法",
+      "請神明會診",
+      "結果"
+    ],
+    "layout": "worksheet_table"
+  }
+}

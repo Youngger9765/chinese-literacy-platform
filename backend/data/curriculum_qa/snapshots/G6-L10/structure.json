@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "label": "大主題：末日種子庫",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "小主題",
+      "value": "重要細節",
+      "interactive_type": "display"
+    },
+    {
+      "label": "種子銀行的建置",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "目的",
+          "value": "萬一大規模災害發生時，預防某些種子的基因因此消失，以保護農業多樣性。",
+          "interactive_type": "display"
+        },
+        {
+          "label": "__",
+          "value": "如聚光燈－小試身手❶（第四段）所寫。【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "建築安全",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "參與種子銀行的例子",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "__",
+          "value": "如聚光燈－小試身手❷（第六段）所寫。【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "敘利亞取出保存種子",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "感想",
+      "value": "科學家未雨綢繆建設種子庫，我們應該保護【　　　】，希望永遠不會用到種子庫。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "大主題：末日種子庫",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "小主題",
+      "value": "重要細節"
+    },
+    {
+      "kind": "section_block",
+      "section": "種子銀行的建置",
+      "items": [
+        {
+          "label": "目的",
+          "value": "萬一大規模災害發生時，預防某些種子的基因因此消失，以保護農業多樣性。"
+        },
+        {
+          "label": "__",
+          "value": "如聚光燈－小試身手❶（第四段）所寫。【　　　】"
+        },
+        {
+          "label": "建築安全",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "參與種子銀行的例子",
+      "items": [
+        {
+          "label": "__",
+          "value": "如聚光燈－小試身手❷（第六段）所寫。【　　　】"
+        },
+        {
+          "label": "敘利亞取出保存種子",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "感想",
+      "value": "科學家未雨綢繆建設種子庫，我們應該保護【　　　】，希望永遠不會用到種子庫。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "__",
+      "建築安全",
+      "__",
+      "敘利亞取出保存種子"
+    ],
+    "layout": "worksheet_table"
+  }
+}

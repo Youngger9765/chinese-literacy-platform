@@ -1,0 +1,74 @@
+{
+  "keypoints": {
+    "lesson": "G5-L13",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "起源",
+        "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。",
+        "blanks": []
+      },
+      {
+        "label": "主要服務對象",
+        "value": "面臨__、手術或治療的孩子。",
+        "blanks": [
+          {
+            "answer": "長期住院",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "主要工作內容",
+        "sub_rows": [
+          {
+            "sub_label": "緩解醫院緊張的氛圍",
+            "template": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "所需專業",
+        "sub_rows": [
+          {
+            "sub_label": "表演",
+            "template": "以多元的表演方式，讓孩子們感受到放鬆。",
+            "blanks": []
+          },
+          {
+            "sub_label": "專業知識",
+            "template": "了解醫院的規範和病人的需求。",
+            "blanks": []
+          },
+          {
+            "sub_label": "__學",
+            "template": "應對病人和家屬的負面情緒。",
+            "blanks": [
+              {
+                "answer": "心理",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "貢獻",
+        "value": "讓病房多了笑聲，幫助病童降低__，也舒緩了壓力鍋下家長緊繃的心情。",
+        "blanks": [
+          {
+            "answer": "治療的焦慮",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "title": "小丑醫生"
+  }
+}

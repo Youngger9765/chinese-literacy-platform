@@ -1,0 +1,173 @@
+{
+  "keypoints": {
+    "lesson": "G8-L1",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "作者與台東的一段情",
+        "value": "",
+        "blanks": []
+      },
+      {
+        "label": "邂逅",
+        "value": "1.作者到訪台東的原因是__。\n2.作者停留時間為 不到一天  □一天  □兩天一夜。\n3.令作者眷戀的是__。",
+        "blanks": [
+          {
+            "answer": "考試",
+            "hint": ""
+          },
+          {
+            "answer": "遠方的藍",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "再相遇",
+        "sub_rows": [
+          {
+            "sub_label": "移動方式",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "搭火車",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "沿途景色\n（多選）",
+            "template": "寬廣田野 □遼闊天空 □點點星光 層層山巒",
+            "blanks": []
+          },
+          {
+            "sub_label": "台北景色（多選）",
+            "template": "□耀眼星空 狹小天空 閃爍霓虹 □棋盤街道",
+            "blanks": []
+          },
+          {
+            "sub_label": "車站景色（多選）",
+            "template": "青草茶店生意興隆  麻糬店掛上完售的牌子\n□站前廣場冷冷清清  □車站因沙塵一片灰濛濛",
+            "blanks": []
+          },
+          {
+            "sub_label": "作者感受",
+            "template": "較喜歡 □台北  台東 的景色。",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "相處",
+        "sub_rows": [
+          {
+            "sub_label": "早晨",
+            "template": "遠眺藍色的__，拍下__的樣貌。",
+            "blanks": [
+              {
+                "answer": "天空",
+                "hint": ""
+              },
+              {
+                "answer": "雲",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "黃昏",
+            "template": "期待__帶來的驚喜。",
+            "blanks": [
+              {
+                "answer": "彩霞",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "夜晚",
+            "template": "只要__，就能看見__。",
+            "blanks": [
+              {
+                "answer": "避開光害",
+                "hint": ""
+              },
+              {
+                "answer": "大片星空",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "例外之景",
+            "template": "漫天__，但若__就會平息。",
+            "blanks": [
+              {
+                "answer": "風沙",
+                "hint": ""
+              },
+              {
+                "answer": "下雨",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "最愛之景",
+            "template": "有各種__色的__景。",
+            "blanks": [
+              {
+                "answer": "藍",
+                "hint": ""
+              },
+              {
+                "answer": "海",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "帶來影響",
+            "template": "生活有更多__，心變得更__。",
+            "blanks": [
+              {
+                "answer": "餘裕",
+                "hint": ""
+              },
+              {
+                "answer": "柔軟",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "別離",
+        "sub_rows": [
+          {
+            "sub_label": "分別原因",
+            "template": "作者只是__，不是當地居民，必須離開。",
+            "blanks": [
+              {
+                "answer": "過客",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "分別之景\n（多選）",
+            "template": "湛藍天空 燦爛陽光 蔚藍海洋 遼闊天空",
+            "blanks": []
+          }
+        ]
+      }
+    ],
+    "title": "致台東：一封過客的情書"
+  }
+}

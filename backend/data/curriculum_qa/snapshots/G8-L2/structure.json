@@ -1,0 +1,90 @@
+{
+  "rows": [
+    {
+      "label": "對比句型",
+      "value": "【　　　】＋【　　　】＋【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "句型關鍵詞",
+      "value": "但是",
+      "interactive_type": "display"
+    },
+    {
+      "label": "文句內容",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "洗過澡又問要不要洗\n每次出門前問要去哪裡\n③忘了媽媽過世一年多",
+          "value": "仍記得八十年前舊事，且記得的都是「恩人」",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "落差焦點(複選)",
+      "value": "1.時間落差：近事 vs 舊事\n2.內容落差：日常小事 vs 恩人恩情\n□3.人物落差：家人的提醒vs 爸爸的反應",
+      "interactive_type": "display"
+    },
+    {
+      "label": "凸顯重點(依序將重點填入句中)",
+      "value": "作者用「記不得最近發生的事    」對比「仍記得八十年前的恩人   」，想要強調的是的【　　　】對爸爸的重要性。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "回到理解",
+      "value": "作者已經用對比的手法，把「恩人」這個主題顯出來了，再來，我們就可以預期，後面一定跟著許多恩人的故事。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "對比句型",
+      "value": "【　　　】＋【　　　】＋【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "句型關鍵詞",
+      "value": "但是"
+    },
+    {
+      "kind": "section_block",
+      "section": "文句內容",
+      "items": [
+        {
+          "label": "洗過澡又問要不要洗\n每次出門前問要去哪裡\n③忘了媽媽過世一年多",
+          "value": "仍記得八十年前舊事，且記得的都是「恩人」"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "落差焦點(複選)",
+      "value": "1.時間落差：近事 vs 舊事\n2.內容落差：日常小事 vs 恩人恩情\n□3.人物落差：家人的提醒vs 爸爸的反應"
+    },
+    {
+      "kind": "pair",
+      "label": "凸顯重點(依序將重點填入句中)",
+      "value": "作者用「記不得最近發生的事    」對比「仍記得八十年前的恩人   」，想要強調的是的【　　　】對爸爸的重要性。"
+    },
+    {
+      "kind": "pair",
+      "label": "回到理解",
+      "value": "作者已經用對比的手法，把「恩人」這個主題顯出來了，再來，我們就可以預期，後面一定跟著許多恩人的故事。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "對比句型",
+      "凸顯重點(依序將重點填入句中)"
+    ],
+    "layout": "worksheet_table"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "rows": [
+    {
+      "label": "十秒的背後",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主角",
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "挫折事件",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "雅加達亞運",
+          "value": "（單選）\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌",
+          "interactive_type": "display"
+        },
+        {
+          "label": "拿坡里世大運",
+          "value": "比賽時受傷了，他選擇（單選）\n積極的面對與復健   □放棄跑步、不願治療",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "結果",
+      "value": "他成為再度登上奧運（單選）\n一百公尺  □四百公尺   的短跑項目的臺灣選手。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "他學到了什麼?",
+      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "十秒的背後",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "kind": "section_block",
+      "section": "挫折事件",
+      "items": [
+        {
+          "label": "雅加達亞運",
+          "value": "（單選）\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌"
+        },
+        {
+          "label": "拿坡里世大運",
+          "value": "比賽時受傷了，他選擇（單選）\n積極的面對與復健   □放棄跑步、不願治療"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "他成為再度登上奧運（單選）\n一百公尺  □四百公尺   的短跑項目的臺灣選手。"
+    },
+    {
+      "kind": "pair",
+      "label": "他學到了什麼?",
+      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "主角",
+      "他學到了什麼?"
+    ],
+    "layout": "worksheet_table"
+  }
+}

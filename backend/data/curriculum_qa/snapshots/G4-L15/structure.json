@@ -1,0 +1,124 @@
+{
+  "rows": [
+    {
+      "label": "感情小日記1──是友情還是愛情？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "二",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "他主動詢問要幫我交__",
+          "value": "(勾選，可複選)\n茫然 害羞 緊張【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "三",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "__課被分在同一組",
+          "value": "【　　　】漏了一拍【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "四",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "習慣看向他、__突然對上、偷偷觀察他",
+          "value": "在乎、緊張、期待【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "五",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
+          "value": "(勾選，可複選)\n溫暖 害羞 興奮【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "統整",
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發（ 不知所措  □深情思念 ）的心情。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "感情小日記1──是友情還是愛情？",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "二",
+      "items": [
+        {
+          "label": "他主動詢問要幫我交__",
+          "value": "(勾選，可複選)\n茫然 害羞 緊張【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "三",
+      "items": [
+        {
+          "label": "__課被分在同一組",
+          "value": "【　　　】漏了一拍【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "四",
+      "items": [
+        {
+          "label": "習慣看向他、__突然對上、偷偷觀察他",
+          "value": "在乎、緊張、期待【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "五",
+      "items": [
+        {
+          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
+          "value": "(勾選，可複選)\n溫暖 害羞 興奮【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "統整",
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發（ 不知所措  □深情思念 ）的心情。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "他主動詢問要幫我交__",
+      "__課被分在同一組",
+      "習慣看向他、__突然對上、偷偷觀察他",
+      "幫我撿掉在地上的筆、小組討論時叫我的__"
+    ],
+    "layout": "worksheet_table"
+  }
+}

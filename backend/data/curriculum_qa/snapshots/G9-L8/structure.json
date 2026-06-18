@@ -1,0 +1,62 @@
+{
+  "rows": [
+    {
+      "label": "收入最高20%家庭",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "成長率小幅__",
+          "value": "成長率【　　　】【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "收入最低20%家庭",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "成長率大幅__",
+          "value": "成長率【　　　】【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "收入最高20%家庭",
+      "items": [
+        {
+          "label": "成長率小幅__",
+          "value": "成長率【　　　】【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "收入最低20%家庭",
+      "items": [
+        {
+          "label": "成長率大幅__",
+          "value": "成長率【　　　】【　　　】"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "成長率小幅__",
+      "成長率大幅__"
+    ],
+    "layout": "worksheet_table"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "keypoints": {
+    "lesson": "G6-L19",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "開頭",
+        "value": "作者繫著__參加媽媽的__。",
+        "blanks": [
+          {
+            "answer": "紅領帶",
+            "hint": ""
+          },
+          {
+            "answer": "告別式",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "起因",
+        "value": "作者媽媽得了惡性__。",
+        "blanks": [
+          {
+            "answer": "胃癌",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "母親信念",
+        "value": "落在__中，都要引以為大__。",
+        "blanks": [
+          {
+            "answer": "百般試煉",
+            "hint": ""
+          },
+          {
+            "answer": "喜樂",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "母親抗癌經過",
+        "sub_rows": [
+          {
+            "sub_label": "母親遇到的試煉",
+            "template": "轉換觀點",
+            "blanks": []
+          },
+          {
+            "sub_label": "沒有胃，無法躺著睡。",
+            "template": "沒有胃，就不會__。",
+            "blanks": [
+              {
+                "answer": "胃痛",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "身體很__，只能坐在沙發上看電視。",
+            "template": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。",
+            "blanks": [
+              {
+                "answer": "虛弱",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "完全不能進食，只能喝一點點水。",
+            "template": "__。",
+            "blanks": [
+              {
+                "answer": "水好甜，好好喝",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "醫生建議放棄治療，接受安寧治療（面對死亡）。",
+            "template": "有天會在天父那__。",
+            "blanks": [
+              {
+                "answer": "再見",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "作者實踐母親信念",
+        "sub_rows": [
+          {
+            "sub_label": "面對母親死亡的悲傷",
+            "template": "轉換觀點",
+            "blanks": []
+          },
+          {
+            "sub_label": "媽媽臨終了",
+            "template": "打定主意__陪媽媽最後一段。",
+            "blanks": [
+              {
+                "answer": "開開心心",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "媽媽__，作者很傷心。",
+            "template": "感謝上帝結束媽媽在世界上的__。",
+            "blanks": [
+              {
+                "answer": "過世/死亡",
+                "hint": ""
+              },
+              {
+                "answer": "勞苦",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "媽媽的葬禮",
+            "template": "決定用開心的心情參加葬禮",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "影響",
+        "value": "紅領帶提醒作者，即使困難已__，我們還可以轉換自己的__。",
+        "blanks": [
+          {
+            "answer": "不可逆轉",
+            "hint": ""
+          },
+          {
+            "answer": "觀點",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "title": "紅領帶"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "rows": [
+    {
+      "label": "網紅的電子煙實驗：偽科學的陷阱",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "好奇的問題",
+      "value": "電子煙好不好？",
+      "interactive_type": "display"
+    },
+    {
+      "label": "方法",
+      "value": "看朋友寄來的【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "網紅的實驗",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "(1)__實驗：\n用紙菸和電子煙的煙霧試驗棉花有沒有變色。",
+          "value": "(2)【　　　】實驗：\n把煙油當成食物調味料，看看吃下去的後果。【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "實驗結論",
+      "value": "電子煙對人體【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "對網紅實驗的批判",
+      "value": "(1)棉花肺實驗的問題\n→光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【　　　】。 \n(2)煙油食材實驗的問題(單選)　\n→電子煙是【　　　】到肺裡的，\n網紅把煙油【　　　】下肚，完全沒有說明吸電子煙對人體的影響。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "總結",
+      "value": "理性判斷、聰明識讀的方法：\n(1)認清廠商的行銷手法，學會質疑傳播者的\n【　　　】。\n(2)多方【　　　】網路上訊息的正確性。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "網紅的電子煙實驗：偽科學的陷阱",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "好奇的問題",
+      "value": "電子煙好不好？"
+    },
+    {
+      "kind": "pair",
+      "label": "方法",
+      "value": "看朋友寄來的【　　　】。"
+    },
+    {
+      "kind": "section_block",
+      "section": "網紅的實驗",
+      "items": [
+        {
+          "label": "(1)__實驗：\n用紙菸和電子煙的煙霧試驗棉花有沒有變色。",
+          "value": "(2)【　　　】實驗：\n把煙油當成食物調味料，看看吃下去的後果。【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "實驗結論",
+      "value": "電子煙對人體【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "對網紅實驗的批判",
+      "value": "(1)棉花肺實驗的問題\n→光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【　　　】。 \n(2)煙油食材實驗的問題(單選)　\n→電子煙是【　　　】到肺裡的，\n網紅把煙油【　　　】下肚，完全沒有說明吸電子煙對人體的影響。"
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "理性判斷、聰明識讀的方法：\n(1)認清廠商的行銷手法，學會質疑傳播者的\n【　　　】。\n(2)多方【　　　】網路上訊息的正確性。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "方法",
+      "(1)__實驗：\n用紙菸和電子煙的煙霧試驗棉花有沒有變色。",
+      "實驗結論",
+      "對網紅實驗的批判"
+    ],
+    "layout": "worksheet_table"
+  }
+}

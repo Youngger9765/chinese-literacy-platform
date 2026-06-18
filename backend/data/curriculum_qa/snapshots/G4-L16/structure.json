@@ -1,0 +1,140 @@
+{
+  "rows": [
+    {
+      "label": "感情小日記2──喜歡是什麼？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "二",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "上課時因為太在意他而分心，導致無法回答老師的問題",
+          "value": "(勾選，可複選)\n尷尬 □生氣 感到丟臉",
+          "interactive_type": "display"
+        },
+        {
+          "label": "常常和他做（相同 □不同）的選擇",
+          "value": "期待有更多相處的機會",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "三",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "看見他與別人談笑",
+          "value": "(勾選，可複選)\n不是滋味 難過 □害羞",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "四",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "下課時沒有和他互動",
+          "value": "感到【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "下課時有說到話或對到眼",
+          "value": "內心【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "五",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "因為喜歡而有各種心情起伏",
+          "value": "(勾選，可複選)\n□平靜　疲累 困惑",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "統整",
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情（ 大起大落   □平靜如水）的感受。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "感情小日記2──喜歡是什麼？",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "二",
+      "items": [
+        {
+          "label": "上課時因為太在意他而分心，導致無法回答老師的問題",
+          "value": "(勾選，可複選)\n尷尬 □生氣 感到丟臉"
+        },
+        {
+          "label": "常常和他做（相同 □不同）的選擇",
+          "value": "期待有更多相處的機會"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "三",
+      "items": [
+        {
+          "label": "看見他與別人談笑",
+          "value": "(勾選，可複選)\n不是滋味 難過 □害羞"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "四",
+      "items": [
+        {
+          "label": "下課時沒有和他互動",
+          "value": "感到【　　　】"
+        },
+        {
+          "label": "下課時有說到話或對到眼",
+          "value": "內心【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "五",
+      "items": [
+        {
+          "label": "因為喜歡而有各種心情起伏",
+          "value": "(勾選，可複選)\n□平靜　疲累 困惑"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "統整",
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情（ 大起大落   □平靜如水）的感受。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "下課時沒有和他互動",
+      "下課時有說到話或對到眼"
+    ],
+    "layout": "worksheet_table"
+  }
+}

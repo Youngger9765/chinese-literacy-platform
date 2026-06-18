@@ -1,0 +1,169 @@
+{
+  "rows": [
+    {
+      "label": "一封向醫師求助的信",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "寫作目的",
+      "value": "信件內容",
+      "interactive_type": "display"
+    },
+    {
+      "label": "說明來信目的",
+      "value": "1.說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。\n2.說明阿嬤症狀帶來的困難，希望醫師提供幫助。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "說明困難與具體事例",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "困難",
+          "value": "具體事例",
+          "interactive_type": "display"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "發生時間 【　　　】年前 一年多前 今年年初",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "對象 【　　　】 阿公 阿公、\n 【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "發生頻率 2─3天\n一次 【　　　】天\n一次 每天2－3次",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "持續時間 1鐘頭 2─3個鐘頭 【　　　】個鐘頭",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "方式 怪罪、責罵 大鬧、揮菜刀、丟尖銳物",
+          "interactive_type": "display"
+        },
+        {
+          "label": "2.遺失重要物品",
+          "value": "物品 (1)遺失自己的【　　　】\n(2)遺失鄰居的【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "2.遺失重要物品",
+          "value": "金錢 數萬元現金不知去向",
+          "interactive_type": "display"
+        },
+        {
+          "label": "3.缺乏__",
+          "value": "阿嬤不知道自己生病，需要哄騙才願意就醫【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "4.經濟與照顧的沉重負荷",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n\n(2)阿公無固定收入。\n(3((3)擔心阿嬤的行為造成經濟損失。\n((4)擔心若阿嬤無法康復的照顧問題。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "說明具體請求",
+      "value": "1.請求醫師開立【　　　】，為日後向法院申請監護宣告。\n2.請求醫師提供【　　　】，諮詢相關問題。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "表達感謝與祝福",
+      "value": "1.感謝讓阿嬤【　　　】。\n2.敬祝秋祺。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "一封向醫師求助的信",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "寫作目的",
+      "value": "信件內容"
+    },
+    {
+      "kind": "pair",
+      "label": "說明來信目的",
+      "value": "1.說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。\n2.說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+    },
+    {
+      "kind": "section_block",
+      "section": "說明困難與具體事例",
+      "items": [
+        {
+          "label": "困難",
+          "value": "具體事例"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "發生時間 【　　　】年前 一年多前 今年年初"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "對象 【　　　】 阿公 阿公、\n 【　　　】"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "發生頻率 2─3天\n一次 【　　　】天\n一次 每天2－3次"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "持續時間 1鐘頭 2─3個鐘頭 【　　　】個鐘頭"
+        },
+        {
+          "label": "1.亂發脾氣",
+          "value": "方式 怪罪、責罵 大鬧、揮菜刀、丟尖銳物"
+        },
+        {
+          "label": "2.遺失重要物品",
+          "value": "物品 (1)遺失自己的【　　　】\n(2)遺失鄰居的【　　　】"
+        },
+        {
+          "label": "2.遺失重要物品",
+          "value": "金錢 數萬元現金不知去向"
+        },
+        {
+          "label": "3.缺乏__",
+          "value": "阿嬤不知道自己生病，需要哄騙才願意就醫【　　　】"
+        },
+        {
+          "label": "4.經濟與照顧的沉重負荷",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n\n(2)阿公無固定收入。\n(3((3)擔心阿嬤的行為造成經濟損失。\n((4)擔心若阿嬤無法康復的照顧問題。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "說明具體請求",
+      "value": "1.請求醫師開立【　　　】，為日後向法院申請監護宣告。\n2.請求醫師提供【　　　】，諮詢相關問題。"
+    },
+    {
+      "kind": "pair",
+      "label": "表達感謝與祝福",
+      "value": "1.感謝讓阿嬤【　　　】。\n2.敬祝秋祺。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 10,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "說明來信目的",
+      "1.亂發脾氣",
+      "1.亂發脾氣",
+      "1.亂發脾氣"
+    ],
+    "layout": "worksheet_table"
+  }
+}

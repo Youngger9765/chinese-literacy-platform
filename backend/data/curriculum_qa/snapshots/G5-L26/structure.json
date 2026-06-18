@@ -1,0 +1,138 @@
+{
+  "rows": [
+    {
+      "label": "大主題：數字記憶的奧秘",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "小主題",
+      "value": "重要細節",
+      "interactive_type": "display"
+    },
+    {
+      "label": "數字記憶廣度測驗的介紹",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "測驗目的",
+          "value": "測試受試者記憶數字的能力",
+          "interactive_type": "display"
+        },
+        {
+          "label": "測驗方法",
+          "value": "施測者依序唸出數字，等唸完了，受試者需要\n【　　　】數字。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "得分標準",
+          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "實驗一：老中與老美的數字記憶廣度比較",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "參與者",
+          "value": "說【　　　】語與【　　　】語\n的兩組大學生。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "結果",
+          "value": "老中的記憶廣度得分比老美高，原因可能是\n【　　　】，\n大腦比較容易記住。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "實驗二：小老中與小老美的數字記憶廣度比較",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "參與者",
+          "value": "【　　　】至【　　　】歲的 小老中和小老美。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "結果",
+          "value": "小老中的數字記憶廣度依然高於小老美。\n而且，小老中的數字發音比小老美快。\n這個結果支持了【　　　】會影響【　　　】的說法。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "大主題：數字記憶的奧秘",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "小主題",
+      "value": "重要細節"
+    },
+    {
+      "kind": "section_block",
+      "section": "數字記憶廣度測驗的介紹",
+      "items": [
+        {
+          "label": "測驗目的",
+          "value": "測試受試者記憶數字的能力"
+        },
+        {
+          "label": "測驗方法",
+          "value": "施測者依序唸出數字，等唸完了，受試者需要\n【　　　】數字。"
+        },
+        {
+          "label": "得分標準",
+          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "實驗一：老中與老美的數字記憶廣度比較",
+      "items": [
+        {
+          "label": "參與者",
+          "value": "說【　　　】語與【　　　】語\n的兩組大學生。"
+        },
+        {
+          "label": "結果",
+          "value": "老中的記憶廣度得分比老美高，原因可能是\n【　　　】，\n大腦比較容易記住。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "實驗二：小老中與小老美的數字記憶廣度比較",
+      "items": [
+        {
+          "label": "參與者",
+          "value": "【　　　】至【　　　】歲的 小老中和小老美。"
+        },
+        {
+          "label": "結果",
+          "value": "小老中的數字記憶廣度依然高於小老美。\n而且，小老中的數字發音比小老美快。\n這個結果支持了【　　　】會影響【　　　】的說法。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 6,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "測驗方法",
+      "得分標準",
+      "參與者",
+      "結果"
+    ],
+    "layout": "worksheet_table"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "label": "見前人所未見——達爾文與長喙天蛾的故事",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "觀察",
+      "value": "一株名叫「大彗星風蘭」的蘭花格外引人矚目，它的花距長度竟【　　　】！",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "提問",
+      "value": "昆蟲若要取得這朵花的花蜜，牠應該要有長達30公分的口器，【　　　】？",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "推測",
+      "value": "達爾文推測：在馬達加斯加島上，應該【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "驗證",
+      "value": "1. 1903年，科學家在馬達加斯加找到了口器長達30公分的天蛾，證實了達爾文的預測。\n2. 1992年，研究團隊拍到了【　　　】，這個跨世紀的謎題終於得到完整的解答。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "啟示",
+      "value": "1.科學不只是描述所觀察到的現象，更要【　　　】現象背後隱藏的機制。\n2.科學不只是「眼見為憑」，未親眼所見之事，也能從【　　　】推論其答案。\n3.科學就是從觀察裡提出好問題之後，【　　　】的歷程。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "見前人所未見——達爾文與長喙天蛾的故事",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "觀察",
+      "value": "一株名叫「大彗星風蘭」的蘭花格外引人矚目，它的花距長度竟【　　　】！"
+    },
+    {
+      "kind": "pair",
+      "label": "提問",
+      "value": "昆蟲若要取得這朵花的花蜜，牠應該要有長達30公分的口器，【　　　】？"
+    },
+    {
+      "kind": "pair",
+      "label": "推測",
+      "value": "達爾文推測：在馬達加斯加島上，應該【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "驗證",
+      "value": "1. 1903年，科學家在馬達加斯加找到了口器長達30公分的天蛾，證實了達爾文的預測。\n2. 1992年，研究團隊拍到了【　　　】，這個跨世紀的謎題終於得到完整的解答。"
+    },
+    {
+      "kind": "pair",
+      "label": "啟示",
+      "value": "1.科學不只是描述所觀察到的現象，更要【　　　】現象背後隱藏的機制。\n2.科學不只是「眼見為憑」，未親眼所見之事，也能從【　　　】推論其答案。\n3.科學就是從觀察裡提出好問題之後，【　　　】的歷程。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "scientific",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "觀察",
+      "提問",
+      "推測",
+      "驗證"
+    ],
+    "layout": "worksheet_table"
+  }
+}

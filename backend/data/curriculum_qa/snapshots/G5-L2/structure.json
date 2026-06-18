@@ -1,0 +1,102 @@
+{
+  "rows": [
+    {
+      "label": "大主題",
+      "value": "以植物為師的科學",
+      "interactive_type": "display"
+    },
+    {
+      "label": "小主題",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "會飛的小種子",
+          "value": "跟著太陽轉的花 滾來滾去的草",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "細節",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "植物的現象",
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵的花朵整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "科學家的設計",
+          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "功能",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "總結",
+      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "大主題",
+      "value": "以植物為師的科學"
+    },
+    {
+      "kind": "section_block",
+      "section": "小主題",
+      "items": [
+        {
+          "label": "會飛的小種子",
+          "value": "跟著太陽轉的花 滾來滾去的草"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "細節",
+      "items": [
+        {
+          "label": "植物的現象",
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵的花朵整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
+        },
+        {
+          "label": "科學家的設計",
+          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】"
+        },
+        {
+          "label": "功能",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "植物的現象",
+      "科學家的設計",
+      "功能",
+      "總結"
+    ],
+    "layout": "worksheet_table"
+  }
+}

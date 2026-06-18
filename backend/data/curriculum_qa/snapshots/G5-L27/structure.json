@@ -1,0 +1,65 @@
+{
+  "rows": [
+    {
+      "label": "重複朗讀的重要性",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "工作記憶的功能",
+      "value": "工作記憶就像大腦裡的籃子，可以【　　　】的保存訊息，並且進行初步的【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "工作記憶與閱讀速度的關係",
+      "value": "※請勾選出正確答案(單選) \n1.東西越大(文旦)，工作記憶記得越 □多  少；\n  東西越小(柳丁)，工作記憶記得越 多  □少。\n2.讀得快的人，會讓自己記得更多。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得 \n好  □不好。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "重複朗讀的優點",
+      "value": "1.重複朗讀，朗讀速度會【　　　】，也有提升閱讀理解力的效果。\n2.重複朗讀課文的效果，可以【　　　】到新的課文上。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結論",
+      "value": "重複朗讀可以提升閱讀速度，使【　　　】容納更多內容，最終提升閱讀理解力。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "重複朗讀的重要性",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "工作記憶的功能",
+      "value": "工作記憶就像大腦裡的籃子，可以【　　　】的保存訊息，並且進行初步的【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "工作記憶與閱讀速度的關係",
+      "value": "※請勾選出正確答案(單選) \n1.東西越大(文旦)，工作記憶記得越 □多  少；\n  東西越小(柳丁)，工作記憶記得越 多  □少。\n2.讀得快的人，會讓自己記得更多。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得 \n好  □不好。"
+    },
+    {
+      "kind": "pair",
+      "label": "重複朗讀的優點",
+      "value": "1.重複朗讀，朗讀速度會【　　　】，也有提升閱讀理解力的效果。\n2.重複朗讀課文的效果，可以【　　　】到新的課文上。"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "重複朗讀可以提升閱讀速度，使【　　　】容納更多內容，最終提升閱讀理解力。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "工作記憶的功能",
+      "重複朗讀的優點",
+      "結論"
+    ],
+    "layout": "worksheet_table"
+  }
+}

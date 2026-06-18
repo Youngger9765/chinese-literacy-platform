@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "label": "語言的足跡：從臺北 萬華到南太平洋的航海之路",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "萬華地名典故",
+      "value": "「萬華」這個地名，來自原住民語 manga，原本是指【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "擴大觀察",
+      "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga（或vanga）指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "更多例子",
+      "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）\n語言在傳遞過程中會產生【　　　】，這是一種自然現象。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "疑問與解釋",
+      "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？\n2.科學界的解釋：他們曾有【　　　】，並透過航海逐步 【　　　】、拓展至各島嶼。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結尾",
+      "value": "語言是一條【　　　】，語言能保存族群【　　　】與【　　　】 的歷史。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "語言的足跡：從臺北 萬華到南太平洋的航海之路",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "萬華地名典故",
+      "value": "「萬華」這個地名，來自原住民語 manga，原本是指【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "擴大觀察",
+      "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga（或vanga）指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "更多例子",
+      "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）\n語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
+    },
+    {
+      "kind": "pair",
+      "label": "疑問與解釋",
+      "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？\n2.科學界的解釋：他們曾有【　　　】，並透過航海逐步 【　　　】、拓展至各島嶼。"
+    },
+    {
+      "kind": "pair",
+      "label": "結尾",
+      "value": "語言是一條【　　　】，語言能保存族群【　　　】與【　　　】 的歷史。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "萬華地名典故",
+      "擴大觀察",
+      "更多例子",
+      "疑問與解釋"
+    ],
+    "layout": "worksheet_table"
+  }
+}
