@@ -13,6 +13,7 @@ from app.routes.stories import _format_yaml_structure_table, _sanitize_structure
 from story_structure_qa_lib import (
     LessonTier,
     classify_lesson,
+    count_checkbox_cells_in_table,
     gate_l1_pass,
     gate_l3_mode_expectation,
     verify_interaction_profile_contract,
@@ -41,6 +42,31 @@ def test_profile_contract_g6_l22_yaml():
     assert verify_interaction_profile_contract(client) == []
     assert client["interaction_profile"]["mode"] == "fill_blank"
     assert client["interaction_profile"]["template_kind"] == "psr"
+
+
+def test_profile_contract_g7_l6_label_blanks():
+    yml = pathlib.Path(__file__).parent.parent / "data/lessons/L31.yml"
+    if not yml.exists():
+        pytest.skip("L31.yml missing")
+    data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+    client = _sanitize_structure_for_client(_format_yaml_structure_table(data["story_structure_table"]))
+    assert verify_interaction_profile_contract(client) == []
+    profile = client["interaction_profile"]
+    assert profile["mode"] == "fill_blank"
+    assert profile["fill_blank_count"] >= 1
+    assert any(r.get("blank_in_label") for r in client["rows"])
+
+
+def test_profile_contract_g8_l13_checkbox():
+    yml = pathlib.Path(__file__).parent.parent / "data/lessons/_parsed_2026-05-01/G8-L13.yml"
+    if not yml.exists():
+        pytest.skip("G8-L13.yml missing")
+    data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+    table = data["story_structure_table"]
+    client = _sanitize_structure_for_client(_format_yaml_structure_table(table))
+    assert verify_interaction_profile_contract(client) == []
+    assert client["interaction_profile"]["checkbox_count"] >= 1
+    assert count_checkbox_cells_in_table(table) >= 1
 
 
 def test_gate_l1_label_family_warn_only():
@@ -81,10 +107,23 @@ def test_g7_l6_yaml_fill_blank_mode():
     assert issues == []
 
 
-def test_gate_l3_parser_gap_display_only_still_supported():
+def test_gate_l3_checkbox_markers_fail_when_profile_missing():
+    table = [["步驟", "提示", "①正確 □②干擾"]]
     issues = gate_l3_mode_expectation(
-        LessonTier.PARSER_GAP,
-        "G7-L6",
-        {"mode": "display_only"},
+        LessonTier.DOCX_KEYPOINTS,
+        "G8-L13",
+        {"mode": "display_only", "checkbox_count": 0},
+        yaml_checkbox_cells=count_checkbox_cells_in_table(table),
+    )
+    assert "docx has checkbox markers but checkbox_count is 0" in issues
+
+
+def test_gate_l3_checkbox_markers_pass_when_profile_matches():
+    table = [["步驟", "提示", "①正確 □②干擾"]]
+    issues = gate_l3_mode_expectation(
+        LessonTier.DOCX_KEYPOINTS,
+        "G8-L13",
+        {"mode": "checkbox", "checkbox_count": 1},
+        yaml_checkbox_cells=count_checkbox_cells_in_table(table),
     )
     assert issues == []

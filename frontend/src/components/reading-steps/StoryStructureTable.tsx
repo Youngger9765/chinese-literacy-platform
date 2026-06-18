@@ -28,6 +28,7 @@ interface StructureSubRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
 }
@@ -38,6 +39,7 @@ interface StructureRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
   sub_rows?: StructureSubRow[];
@@ -633,7 +635,9 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
             return (
               <tr key={`pair-${wsIdx}`}>
                 <td className={`${cellBorder} font-medium w-16 whitespace-pre-line`}>
-                  {classifyInteractive(wsRow.label) === 'fill_blank' && countBlanks(wsRow.label) > 0 ? (
+                  {(row?.blank_in_label ||
+                    classifyInteractive(wsRow.label) === 'fill_blank') &&
+                  countBlanks(wsRow.label) > 0 ? (
                     <InlineWorksheetContent
                       text={wsRow.label}
                       rowIdx={rowIdx}
