@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Any
 
 # Known parser gaps — resolved lessons removed as fixes land
-PARSER_GAP_LESSONS = frozenset()
+PARSER_GAP_LESSONS = frozenset({"G7-L6"})
 
 # Parsed ids where □ in plain text was not yet interactive_type checkbox (fixed in stories.py)
 CHECKBOX_GAP_LESSONS = frozenset()

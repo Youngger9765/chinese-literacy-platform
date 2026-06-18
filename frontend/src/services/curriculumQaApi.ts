@@ -15,6 +15,7 @@ export interface KeypointsLessonSummary {
   title: string;
   story_id: number | null;
   tier: string;
+  known_data_gap?: boolean;
   overall_pass: boolean;
   overall_status: string;
   gates: Record<string, GateResult>;
@@ -42,6 +43,7 @@ export interface KeypointsManifest {
     total: number;
     pass: number;
     fail: number;
+    known_gap_count?: number;
     failure_count?: number;
   };
   lessons: KeypointsLessonSummary[];

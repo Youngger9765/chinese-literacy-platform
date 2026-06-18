@@ -269,6 +269,7 @@ const KeypointsTab: React.FC<{ token: string }> = ({ token }) => {
       {summary && (
         <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 text-sm">
           共 {summary.total} 課 · 通過 {summary.pass} · 失敗 {summary.fail}
+          {(summary.known_gap_count ?? 0) > 0 ? ` · 已知 gap ${summary.known_gap_count}` : ''}
           {manifest?.smoke_only ? ' （smoke）' : ''}
           <div className="flex gap-2 mt-2">
             {(['all', 'pass', 'fail'] as const).map((f) => (
@@ -304,7 +305,12 @@ const KeypointsTab: React.FC<{ token: string }> = ({ token }) => {
                     <td className="px-4 py-3"><OverallDot pass={lesson.overall_pass} /></td>
                     <td className="px-4 py-3 font-mono text-xs">{lesson.lesson_id}</td>
                     <td className="px-4 py-3 max-w-[200px] truncate">{lesson.title}</td>
-                    <td className="px-4 py-3 text-xs">{lesson.tier}</td>
+                    <td className="px-4 py-3 text-xs">
+                      {lesson.tier}
+                      {lesson.known_data_gap ? (
+                        <span className="ml-1 text-amber-600">(known)</span>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3"><GateBadge gate="L1" result={lesson.gates.L1} /></td>
                     <td className="px-4 py-3"><GateBadge gate="L2" result={lesson.gates.L2} /></td>
                     <td className="px-4 py-3"><GateBadge gate="L3" result={lesson.gates.L3} /></td>
