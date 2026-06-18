@@ -123,11 +123,14 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
 
         profile = rec.get("profile") or (structure or {}).get("interaction_profile") or {}
 
+        tier = rec.get("tier")
+        known_gap = tier == "parser_gap"
         lessons_out.append({
             "lesson_id": lesson_id,
             "title": (loader or {}).get("title") or lesson_id,
             "story_id": rec.get("story_id") or (loader or {}).get("id"),
-            "tier": rec.get("tier"),
+            "tier": tier,
+            "known_data_gap": known_gap,
             "overall_pass": overall,
             "overall_status": _gate_status(gates),
             "gates": gates,
@@ -148,6 +151,7 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
 
     lessons_out.sort(key=lambda x: x["lesson_id"])
 
+    known_gap_count = sum(1 for l in lessons_out if l.get("known_data_gap"))
     return {
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -157,6 +161,7 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
             "total": len(lessons_out),
             "pass": pass_count,
             "fail": len(lessons_out) - pass_count,
+            "known_gap_count": known_gap_count,
             "failure_count": qa.get("summary", {}).get("failure_count", 0),
         },
         "lessons": lessons_out,
