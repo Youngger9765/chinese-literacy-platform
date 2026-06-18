@@ -26,6 +26,8 @@ export type TreeNodeSelection =
   | { type: 'users'; id: 'users' }
   | { type: 'stories'; id: 'stories' }
   | { type: 'tts_audit'; id: 'tts_audit' }
+  | { type: 'story_structure_lab'; id: 'story_structure_lab' }
+  | { type: 'keypoints_qa'; id: 'keypoints_qa' }
   | { type: 'create_org'; id: 'create_org' };
 
 type TreeNodeType = TreeNodeSelection['type'];

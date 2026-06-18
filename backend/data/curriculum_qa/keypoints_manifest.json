@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-18T13:18:23.423372+00:00",
+  "smoke_only": true,
+  "gates_included": [
+    "L1",
+    "L2",
+    "L3"
+  ],
+  "summary": {
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "failure_count": 0
+  },
+  "lessons": [
+    {
+      "lesson_id": "G4-L1",
+      "title": "贏得喝󠇡采的輸家",
+      "story_id": 1001,
+      "tier": "docx_keypoints",
+      "overall_pass": true,
+      "overall_status": "pass",
+      "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": [
+            "WARN label_family_correct=false"
+          ]
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 2,
+        "checkbox_count": 0,
+        "row_count": 5
+      },
+      "artifacts": {
+        "has_keypoints_yml": true,
+        "has_original_preview": true,
+        "has_structure_snapshot": true
+      },
+      "yaml_path": "backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
+    },
+    {
+      "lesson_id": "G4-L6",
+      "title": "這是什麼「意思」？",
+      "story_id": 1006,
+      "tier": "ai_fallback",
+      "overall_pass": true,
+      "overall_status": "pass",
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "layout": {
+        "mode": "mixed",
+        "layout": "cards",
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
+        "row_count": 5
+      },
+      "artifacts": {
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
+        "has_structure_snapshot": true
+      },
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L6.yml"
+    },
+    {
+      "lesson_id": "G6-L22",
+      "title": "小兵立大功：雞鳴狗盜的故事",
+      "story_id": 1076,
+      "tier": "docx_keypoints",
+      "overall_pass": true,
+      "overall_status": "pass",
+      "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": []
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 6,
+        "checkbox_count": 0,
+        "row_count": 4
+      },
+      "artifacts": {
+        "has_keypoints_yml": true,
+        "has_original_preview": true,
+        "has_structure_snapshot": true
+      },
+      "yaml_path": "backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
+    },
+    {
+      "lesson_id": "G7-L28",
+      "title": "看不見的兇手:以實驗破解肉湯腐敗之謎",
+      "story_id": 1108,
+      "tier": "docx_keypoints",
+      "overall_pass": true,
+      "overall_status": "pass",
+      "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": []
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 6
+      },
+      "artifacts": {
+        "has_keypoints_yml": true,
+        "has_original_preview": true,
+        "has_structure_snapshot": true
+      },
+      "yaml_path": "backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
+    },
+    {
+      "lesson_id": "G8-L13",
+      "title": "構樹：南島祖先「出台灣說」的植物證據",
+      "story_id": 1123,
+      "tier": "docx_keypoints",
+      "overall_pass": true,
+      "overall_status": "pass",
+      "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "layout": {
+        "mode": "display_only",
+        "layout": "worksheet_table",
+        "fill_blank_count": 0,
+        "checkbox_count": 0,
+        "row_count": 5
+      },
+      "artifacts": {
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
+        "has_structure_snapshot": true
+      },
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L13.yml"
+    }
+  ],
+  "raw_failures": []
+}

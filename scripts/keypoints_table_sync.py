@@ -46,6 +46,15 @@ def fill_template(template: str, blanks: list[dict]) -> str:
     return text
 
 
+def format_row_label(row: dict) -> str:
+    """Apply label_blanks then optional paragraph suffix."""
+    label = row.get("label", "")
+    label_blanks = row.get("label_blanks") or []
+    if label_blanks:
+        label = fill_template(label, label_blanks)
+    return format_label(label, row.get("paragraph"))
+
+
 def format_label(label: str, paragraph: str | None = None) -> str:
     if not paragraph:
         return label
@@ -63,13 +72,15 @@ def keypoints_to_table(kp_schema: dict) -> list[list[str]]:
         rows_out.append([title])
 
     for row in data.get("rows") or []:
-        label = row.get("label", "")
-        paragraph = row.get("paragraph")
+        label = format_row_label(row)
 
         if row.get("sub_rows"):
             section = label
             for sub_row in row["sub_rows"]:
                 sub_label = sub_row.get("sub_label", "")
+                sub_label_blanks = sub_row.get("label_blanks") or []
+                if sub_label_blanks:
+                    sub_label = fill_template(sub_label, sub_label_blanks)
                 value = fill_template(
                     sub_row.get("template") or sub_row.get("value", ""),
                     sub_row.get("blanks") or [],
@@ -90,9 +101,9 @@ def keypoints_to_table(kp_schema: dict) -> list[list[str]]:
             "hint" in columns and "sub_label" not in columns
         ):
             hint = row.get("hint", "")
-            rows_out.append([format_label(label, paragraph), hint, value])
+            rows_out.append([label, hint, value])
         else:
-            rows_out.append([format_label(label, paragraph), value])
+            rows_out.append([label, value])
 
     return rows_out
 
