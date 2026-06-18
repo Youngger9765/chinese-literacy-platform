@@ -41,6 +41,7 @@ interface StructureRow {
   options?: string[];
   correct_options?: number[];
   sub_rows?: StructureSubRow[];
+  blank_in_label?: boolean;
 }
 
 interface WorksheetPairRow {
@@ -83,6 +84,9 @@ type AnswerMap = Record<string, string | number[]>;
 
 interface Props {
   storyId: string;
+  structure?: StructureData | null;
+  previewMode?: boolean;
+  showCoach?: boolean;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
@@ -221,6 +225,12 @@ function answerKey(rowIdx: number, subIdx?: number, blankIdx?: number): string {
   if (subIdx !== undefined) return `${rowIdx}-${subIdx}`;
   if (blankIdx !== undefined) return `${rowIdx}-b${blankIdx}`;
   return `${rowIdx}`;
+}
+
+
+function cellInteractiveText(cell: StructureRow | StructureSubRow): string {
+  if ('blank_in_label' in cell && cell.blank_in_label) return cell.label;
+  return cell.value;
 }
 
 function countBlanks(text: string): number {
@@ -622,8 +632,19 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
             const row = rows[rowIdx];
             return (
               <tr key={`pair-${wsIdx}`}>
-                <td className={`${cellBorder} text-center font-medium w-16 whitespace-nowrap`}>
-                  {wsRow.label}
+                <td className={`${cellBorder} font-medium w-16 whitespace-pre-line`}>
+                  {classifyInteractive(wsRow.label) === 'fill_blank' && countBlanks(wsRow.label) > 0 ? (
+                    <InlineWorksheetContent
+                      text={wsRow.label}
+                      rowIdx={rowIdx}
+                      answers={answers}
+                      setAnswer={setAnswer}
+                      submitted={submitted}
+                      gradeResults={gradeResults}
+                    />
+                  ) : (
+                    wsRow.label
+                  )}
                 </td>
                 <td colSpan={2} className={cellBorder}>
                   {renderValueCell(wsRow.value, rowIdx, undefined)}
@@ -681,10 +702,15 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
+const StoryStructureTable: React.FC<Props> = ({
+  storyId,
+  structure: structureProp,
+  previewMode = false,
+  showCoach: showCoachProp,
+}) => {
   const { token } = useAuth();
-  const [structure, setStructure] = useState<StructureData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
+  const [loading, setLoading] = useState(structureProp === undefined);
   const [fetchError, setFetchError] = useState(false);
 
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -692,6 +718,8 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
   const [copyDone, setCopyDone] = useState(false);
   const [showCoach, setShowCoach] = useState<boolean>(() => {
+    if (showCoachProp !== undefined) return showCoachProp;
+    if (previewMode) return false;
     try {
       return !localStorage.getItem(STORY_STRUCTURE_ONBOARDED_KEY);
     } catch {
@@ -707,6 +735,14 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
   useEffect(() => {
+    if (structureProp !== undefined) {
+      setStructure(structureProp);
+      setLoading(false);
+      setFetchError(false);
+      setAnswers({});
+      setGradeResult(null);
+      return;
+    }
     setLoading(true);
     setFetchError(false);
     setAnswers({});
@@ -721,7 +757,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       .then((data: StructureData) => setStructure(data))
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
-  }, [storyId, token, API_BASE]);
+  }, [storyId, token, API_BASE, structureProp]);
 
 
   const clearDemoTimers = useCallback(() => {
@@ -820,7 +856,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     ) => {
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 0);
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 0);
       if (blankCount <= 1) {
         const key = answerKey(rowIdx, subIdx);
         payload.push({
@@ -954,7 +990,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     (cell: StructureRow | StructureSubRow): number => {
       if (cell.interactive_type === 'display') return 0;
       if (cell.interactive_type === 'checkbox') return 1;
-      const blanks = cell.blank_hints?.length || countBlanks(cell.value);
+      const blanks = cell.blank_hints?.length || countBlanks(cellInteractiveText(cell));
       return blanks > 0 ? blanks : 1;
     },
     [],
@@ -983,7 +1019,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 1);
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       total += blankCount;
       for (let b = 0; b < blankCount; b += 1) {
         const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);
@@ -1190,7 +1226,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       )}
 
       <div className="px-5 py-4 border-t-2 border-gray-200 bg-gray-50">
-        {!submitted ? (
+        {!previewMode && !submitted ? (
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs text-gray-400">
               已填 {totalAnswered} / {totalInteractive} 題
@@ -1209,11 +1245,11 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
               {submitting ? '批改中…' : '提交答案'}
             </button>
           </div>
-        ) : score < 0 ? (
+        ) : !previewMode && score < 0 ? (
           <p className="text-sm text-red-500 text-center">
             批改失敗，請重新整理後再試
           </p>
-        ) : (
+        ) : !previewMode ? (
           <div
             className={`rounded-xl p-4 text-center ${
               score >= 80
@@ -1230,7 +1266,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
                 : '可以再讀一遍課文，試著找出關鍵句子'}
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
     </div>

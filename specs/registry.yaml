@@ -653,6 +653,29 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/step-sequence/INTENT.md
+- spec_id: content.story_structure
+  module: story-structure
+  title: 文章重點表 — YAML-first structure + interaction_profile 契約
+  stability: active
+  canonical_source: backend/app/routes/stories.py
+  owns_code:
+  - backend/app/routes/stories.py
+  - backend/app/services/story_structure_cell_parser.py
+  - backend/app/services/story_structure_lab_service.py
+  - scripts/keypoints_table_sync.py
+  - scripts/story_structure_qa_lib.py
+  owns_data:
+  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  spec_tests:
+  - backend/specs/test_story_structure_spec.py
+  - backend/tests/test_yaml_first_structure.py
+  - backend/tests/test_story_structure_qa_contract.py
+  related_issues:
+  - 2205
+  - 2261
+  last_reviewed: 2026-06-17
+  owner: young
+  intent: specs/modules/story-structure/INTENT.md
 - spec_id: learning.stuck_detection
   module: stuck-detection
   title: 卡點偵測 — 掙扎學生偵測閾值 + 規則式建議
