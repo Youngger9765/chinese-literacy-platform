@@ -28,6 +28,7 @@ interface StructureSubRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
 }
@@ -38,6 +39,7 @@ interface StructureRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
   sub_rows?: StructureSubRow[];
@@ -88,6 +90,13 @@ interface Props {
 const INLINE_BLANK_RE = /【([^】]*)】/g;
 const SECTION_CHUNK_SIZE = 3;
 const STORY_STRUCTURE_ONBOARDED_KEY = 'story_structure_onboarded';
+
+function countFillBlankFields(cell: StructureRow | StructureSubRow): number {
+  if (cell.blank_hints?.length) return cell.blank_hints.length;
+  const inValue = countBlanks(cell.value);
+  const inLabel = cell.blank_in_label ? countBlanks(cell.label) : 0;
+  return Math.max(inValue, inLabel, 1);
+}
 
 interface StoryStructureDemoRuntime {
   step: import('./storyStructureProfile').DemoStepId;
@@ -623,7 +632,20 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
             return (
               <tr key={`pair-${wsIdx}`}>
                 <td className={`${cellBorder} text-center font-medium w-16 whitespace-nowrap`}>
-                  {wsRow.label}
+                  {row &&
+                  (row.blank_in_label ||
+                    (row.interactive_type === 'fill_blank' && countBlanks(wsRow.label) > 0)) ? (
+                    <InlineWorksheetContent
+                      text={wsRow.label}
+                      rowIdx={rowIdx}
+                      answers={answers}
+                      setAnswer={setAnswer}
+                      submitted={submitted}
+                      gradeResults={gradeResults}
+                    />
+                  ) : (
+                    wsRow.label
+                  )}
                 </td>
                 <td colSpan={2} className={cellBorder}>
                   {renderValueCell(wsRow.value, rowIdx, undefined)}
@@ -818,9 +840,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       subIdx: number | undefined,
       cell: StructureRow | StructureSubRow,
     ) => {
-      const blankCount =
-        cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 0);
+      const blankCount = countFillBlankFields(cell);
       if (blankCount <= 1) {
         const key = answerKey(rowIdx, subIdx);
         payload.push({
@@ -954,7 +974,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     (cell: StructureRow | StructureSubRow): number => {
       if (cell.interactive_type === 'display') return 0;
       if (cell.interactive_type === 'checkbox') return 1;
-      const blanks = cell.blank_hints?.length || countBlanks(cell.value);
+      const blanks = countFillBlankFields(cell);
       return blanks > 0 ? blanks : 1;
     },
     [],
@@ -981,9 +1001,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
         return;
       }
 
-      const blankCount =
-        cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 1);
+      const blankCount = countFillBlankFields(cell);
       total += blankCount;
       for (let b = 0; b < blankCount; b += 1) {
         const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);

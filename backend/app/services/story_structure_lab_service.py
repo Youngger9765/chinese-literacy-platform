@@ -20,6 +20,7 @@ from app.services.story_structure_qa_lib import (
     REPRESENTATIVE_LESSONS,
     LessonTier,
     classify_lesson,
+    count_checkbox_cells_in_table,
     gate_l3_mode_expectation,
     verify_interaction_profile_contract,
 )
@@ -149,12 +150,24 @@ def _is_known_data_gap(tier: LessonTier, parsed_code: str | None, profile: dict[
     return False
 
 
-def _live_l3_qa(client_structure: dict[str, Any] | None, tier: LessonTier, parsed_code: str | None) -> dict[str, Any]:
+def _live_l3_qa(
+    client_structure: dict[str, Any] | None,
+    tier: LessonTier,
+    parsed_code: str | None,
+    story_structure_table: list | None = None,
+) -> dict[str, Any]:
     if not client_structure:
         return {"gate": "L3_live", "pass": False, "issues": ["no structure"]}
     issues = verify_interaction_profile_contract(client_structure)
     profile = client_structure.get("interaction_profile") or {}
-    issues.extend(gate_l3_mode_expectation(tier, parsed_code or "", profile))
+    issues.extend(
+        gate_l3_mode_expectation(
+            tier,
+            parsed_code or "",
+            profile,
+            yaml_checkbox_cells=count_checkbox_cells_in_table(story_structure_table),
+        )
+    )
     return {"gate": "L3_live", "pass": len(issues) == 0, "issues": issues}
 
 
@@ -173,7 +186,7 @@ def build_lab_index() -> dict[str, Any]:
         _, client = _build_structure_views(lesson)
         profile = (client or {}).get("interaction_profile") or {}
         qa_gates = _qa_gates_for_story(story_id, report)
-        live_l3 = _live_l3_qa(client, tier, parsed_code)
+        live_l3 = _live_l3_qa(client, tier, parsed_code, lesson.get("story_structure_table"))
         known_gap = _is_known_data_gap(tier, parsed_code, profile)
         overall_pass = (
             not known_gap
@@ -223,7 +236,7 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
     keypoints = _read_keypoints(parsed_code)
     report = _load_qa_report()
     qa_gates = _qa_gates_for_story(story_id, report)
-    live_l3 = _live_l3_qa(client, tier, parsed_code)
+    live_l3 = _live_l3_qa(client, tier, parsed_code, lesson.get("story_structure_table"))
     profile = (client or {}).get("interaction_profile") or {}
     known_gap = _is_known_data_gap(tier, parsed_code, profile)
     yaml_table = lesson.get("story_structure_table")

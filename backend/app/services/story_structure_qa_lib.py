@@ -6,10 +6,12 @@ import re
 from enum import Enum
 from typing import Any
 
-# Known parser gaps — resolved lessons removed as fixes land
+from app.services.story_structure_cell_parser import parse_checkbox_options
+
+# Known parser gaps — empty after cell_to_structure_fields wired (#P0)
 PARSER_GAP_LESSONS = frozenset()
 
-# Parsed ids where □ in plain text was not yet interactive_type checkbox (fixed in stories.py)
+# Legacy: checkbox lessons that were display_only before parser fix
 CHECKBOX_GAP_LESSONS = frozenset()
 
 # Parsed YAML / DOCX lesson ids (not catalog grade_code — see REPRESENTATIVE_LESSONS)
@@ -33,19 +35,19 @@ REPRESENTATIVE_LESSONS: tuple[dict[str, Any], ...] = (
         "parsed_code": "G7-L6",
         "catalog_code": "G7-L06",
         "story_id": 31,
-        "note": "parser_gap — label_blanks not synced → display_only",
+        "note": "label_blanks + worksheet_table fill_blank",
     },
     {
         "parsed_code": "G8-L13",
         "catalog_code": "G8-L10",
         "story_id": 1123,
-        "note": "checkbox gap — □ in plain text, not interactive_type",
+        "note": "nested scientific + checkbox in value cells",
     },
     {
         "parsed_code": "G8-L14",
         "catalog_code": "G8-L11",
         "story_id": 1124,
-        "note": "checkbox gap (same class as G8-L10)",
+        "note": "checkbox worksheet_table (same class as G8-L13)",
     },
     {
         "parsed_code": "G4-L6",
@@ -164,11 +166,31 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
             errors.append(f"answer leak in {ctx}")
 
     for i, row in enumerate(rows):
-        check_value(str(row.get("value") or ""), f"rows[{i}].value")
+        if row.get("interactive_type") == "fill_blank":
+            check_value(str(row.get("value") or ""), f"rows[{i}].value")
+            if row.get("blank_in_label"):
+                check_value(str(row.get("label") or ""), f"rows[{i}].label")
         for j, sub in enumerate(row.get("sub_rows") or []):
-            check_value(str(sub.get("value") or ""), f"rows[{i}].sub_rows[{j}].value")
+            if sub.get("interactive_type") == "fill_blank":
+                check_value(str(sub.get("value") or ""), f"rows[{i}].sub_rows[{j}].value")
+                if sub.get("blank_in_label"):
+                    check_value(str(sub.get("label") or ""), f"rows[{i}].sub_rows[{j}].label")
 
     return errors
+
+
+def count_checkbox_cells_in_table(table: list | None) -> int:
+    """Count YAML cells that parse as checkbox (□ + circled option numbers)."""
+    if not table:
+        return 0
+    count = 0
+    for row in table:
+        if not isinstance(row, list):
+            continue
+        for cell in row:
+            if isinstance(cell, str) and parse_checkbox_options(cell):
+                count += 1
+    return count
 
 
 def gate_l1_pass(keypoints_eval: dict) -> tuple[bool, list[str]]:
@@ -192,10 +214,12 @@ def gate_l3_mode_expectation(
     grade_code: str,
     profile: dict,
     docx_blanks: int | None = None,
+    yaml_checkbox_cells: int | None = None,
 ) -> list[str]:
     """Extra L3 rules per tier."""
     errors: list[str] = []
     mode = profile.get("mode")
+    checkbox_count = profile.get("checkbox_count") or 0
     if tier == LessonTier.PARSER_GAP:
         if mode != "display_only":
             errors.append(f"parser_gap expected display_only, got {mode}")
@@ -209,6 +233,8 @@ def gate_l3_mode_expectation(
             return errors
         if docx_blanks and docx_blanks > 0 and mode == "display_only":
             errors.append("docx has blanks but mode is display_only")
+        if yaml_checkbox_cells and yaml_checkbox_cells > 0 and checkbox_count == 0:
+            errors.append("docx has checkbox markers but checkbox_count is 0")
     return errors
 
 
