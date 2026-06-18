@@ -84,3 +84,45 @@ export async function fetchKeypointsLessonDetail(
 export function originalPreviewUrl(lessonId: string): string {
   return `${API_BASE}/api/curriculum-qa/keypoints/${encodeURIComponent(lessonId)}/preview/original`;
 }
+
+export interface SpotlightLessonSummary {
+  lesson_id: string;
+  strategy_type?: string;
+  block_count?: number;
+  overall_pass: boolean;
+  eval?: {
+    pass?: boolean;
+    guide_retained?: boolean;
+    answer_recall?: number;
+    mcq_leakage?: number;
+    struct_errors?: string[];
+    semantic?: { semantic_pass?: boolean; semantic_errors?: string[] };
+    acceptance?: { pass?: boolean; issues?: string[] };
+  };
+  gold?: { match?: boolean; diffs?: Record<string, unknown> };
+  type_histogram?: Record<string, number>;
+  error?: string;
+}
+
+export interface SpotlightManifest {
+  schema_version: number;
+  summary: { total: number; pass: number; fail: number };
+  lessons: SpotlightLessonSummary[];
+}
+
+export interface SpotlightLessonDetail extends SpotlightLessonSummary {
+  spotlight?: Record<string, unknown>;
+}
+
+export async function fetchSpotlightManifest(token: string): Promise<SpotlightManifest> {
+  const res = await authFetch('/api/curriculum-qa/spotlight', token);
+  return res.json();
+}
+
+export async function fetchSpotlightLessonDetail(
+  token: string,
+  lessonId: string,
+): Promise<SpotlightLessonDetail> {
+  const res = await authFetch(`/api/curriculum-qa/spotlight/${encodeURIComponent(lessonId)}`, token);
+  return res.json();
+}

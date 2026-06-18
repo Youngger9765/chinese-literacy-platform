@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-18T14:09:59.226623+00:00",
+  "generated_at": "2026-06-18T14:28:09.592712+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -9,9 +9,9 @@
   ],
   "summary": {
     "total": 151,
-    "pass": 19,
-    "fail": 132,
-    "failure_count": 137
+    "pass": 150,
+    "fail": 1,
+    "failure_count": 1
   },
   "lessons": [
     {
@@ -19,8 +19,8 @@
       "title": "贏得喝󠇡采的輸家",
       "story_id": 1001,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -31,10 +31,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -59,15 +57,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
     },
     {
       "lesson_id": "G4-L10",
       "title": "美好的一天",
       "story_id": 1010,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -76,10 +74,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -104,15 +100,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L10.yml"
     },
     {
       "lesson_id": "G4-L11",
       "title": "誤會",
       "story_id": 1011,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -121,10 +117,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -149,15 +143,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L11.yml"
     },
     {
       "lesson_id": "G4-L12",
       "title": "黃絲帶",
       "story_id": 1012,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -166,10 +160,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -194,15 +186,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L12.yml"
     },
     {
       "lesson_id": "G4-L13",
       "title": "第一百碗麵",
       "story_id": 6,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -211,10 +203,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -239,15 +229,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L13.yml"
     },
     {
       "lesson_id": "G4-L14",
       "title": "白牙的最後一戰",
       "story_id": 1014,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -256,10 +246,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -284,15 +272,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L14.yml"
     },
     {
       "lesson_id": "G4-L15",
       "title": "感情小日記1──是友情還是愛情？",
       "story_id": 1015,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -301,10 +289,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -329,15 +315,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L15.yml"
     },
     {
       "lesson_id": "G4-L16",
       "title": "感情小日記2──喜歡是什麼？",
       "story_id": 1016,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -346,10 +332,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -374,15 +358,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L16.yml"
     },
     {
       "lesson_id": "G4-L17",
       "title": "把球打好，就夠了嗎？ ──阿耀與健豪學長的通信（一）",
       "story_id": 1017,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -391,10 +375,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -419,15 +401,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L17.yml"
     },
     {
       "lesson_id": "G4-L18",
       "title": "想讀書，該從哪裡著手？ ──阿耀與健豪學長的通信（二）",
       "story_id": 1018,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -436,10 +418,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -453,10 +433,10 @@
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 1,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "artifacts": {
@@ -464,15 +444,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L18.yml"
     },
     {
       "lesson_id": "G4-L19",
       "title": "救援大隊的好幫手",
       "story_id": 1019,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -481,10 +461,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -509,15 +487,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L19.yml"
     },
     {
       "lesson_id": "G4-L2",
       "title": "十秒的背後",
       "story_id": 2,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -526,10 +504,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -554,7 +530,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L2.yml"
     },
     {
       "lesson_id": "G4-L20",
@@ -589,8 +565,8 @@
       "title": "心，也要一起練",
       "story_id": 1023,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -599,10 +575,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -627,15 +601,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L23.yml"
     },
     {
       "lesson_id": "G4-L24",
       "title": "成為身體的最佳夥伴",
       "story_id": 1024,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -644,10 +618,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -672,15 +644,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L24.yml"
     },
     {
       "lesson_id": "G4-L25",
       "title": "身體，謝謝你",
       "story_id": 1025,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -689,10 +661,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -701,17 +671,15 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": false,
-          "issues": [
-            "answer leak in rows[3].sub_rows[0].value"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 1,
+        "fill_blank_count": 4,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "artifacts": {
@@ -719,15 +687,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L25.yml"
     },
     {
       "lesson_id": "G4-L26",
       "title": "專注當下：關掉內心的批評噪音",
       "story_id": 1026,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -736,10 +704,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -748,17 +714,15 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": false,
-          "issues": [
-            "answer leak in rows[5].value"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 4,
+        "fill_blank_count": 6,
+        "checkbox_count": 0,
         "row_count": 7
       },
       "artifacts": {
@@ -766,15 +730,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L26.yml"
     },
     {
       "lesson_id": "G4-L27",
       "title": "從白熊到藍海豚：學習與念頭和平相處",
       "story_id": 1027,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -783,10 +747,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -795,18 +757,15 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": false,
-          "issues": [
-            "answer leak in rows[3].value",
-            "answer leak in rows[5].value"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 3,
+        "fill_blank_count": 7,
+        "checkbox_count": 0,
         "row_count": 6
       },
       "artifacts": {
@@ -814,15 +773,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L27.yml"
     },
     {
       "lesson_id": "G4-L3",
       "title": "長高的祕密",
       "story_id": 3,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -831,10 +790,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -859,15 +816,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L3.yml"
     },
     {
       "lesson_id": "G4-L4",
       "title": "運動科學",
       "story_id": 4,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -876,10 +833,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -904,15 +859,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L4.yml"
     },
     {
       "lesson_id": "G4-L5",
       "title": "穿越極限的跑者",
       "story_id": 5,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -921,10 +876,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -949,7 +902,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L5.yml"
     },
     {
       "lesson_id": "G4-L6",
@@ -984,8 +937,8 @@
       "title": "正太與小豬：武僧的養成之路",
       "story_id": 1007,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -994,10 +947,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1022,15 +973,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L7.yml"
     },
     {
       "lesson_id": "G4-L8",
       "title": "最美的畫面",
       "story_id": 1008,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1039,10 +990,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1067,7 +1016,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L8.yml"
     },
     {
       "lesson_id": "G4-L9",
@@ -1102,8 +1051,8 @@
       "title": "兵來將擋，水來土掩",
       "story_id": 1028,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1112,10 +1061,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1140,15 +1087,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L1.yml"
     },
     {
       "lesson_id": "G5-L10",
       "title": "從童工到大學教授之路",
       "story_id": 10,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1157,10 +1104,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1185,15 +1130,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L10.yml"
     },
     {
       "lesson_id": "G5-L11",
       "title": "「拳」力出擊──陳念琴",
       "story_id": 1038,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1202,10 +1147,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1230,15 +1173,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L11.yml"
     },
     {
       "lesson_id": "G5-L12",
       "title": "六塊肌、六塊雞",
       "story_id": 1039,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1247,10 +1190,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1275,15 +1216,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L12.yml"
     },
     {
       "lesson_id": "G5-L13",
       "title": "小丑醫生",
       "story_id": 1040,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1292,10 +1233,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1320,15 +1259,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L13.yml"
     },
     {
       "lesson_id": "G5-L14",
       "title": "垃圾食物的誘惑與代價",
       "story_id": 1041,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1337,10 +1276,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1365,15 +1302,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L14.yml"
     },
     {
       "lesson_id": "G5-L15",
       "title": "信件的力量──寫信馬拉松",
       "story_id": 1042,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1382,10 +1319,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1410,15 +1345,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L15.yml"
     },
     {
       "lesson_id": "G5-L16",
       "title": "臺灣棒球先驅──來自花蓮的能高團",
       "story_id": 1043,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1427,10 +1362,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1455,15 +1388,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L16.yml"
     },
     {
       "lesson_id": "G5-L17",
       "title": "掃雷英雄馬嘎瓦",
       "story_id": 1044,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1472,10 +1405,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1500,15 +1431,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L17.yml"
     },
     {
       "lesson_id": "G5-L18",
       "title": "魚來了，叮咚叮咚請開門",
       "story_id": 1045,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1517,10 +1448,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1545,15 +1474,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L18.yml"
     },
     {
       "lesson_id": "G5-L19",
       "title": "感情小日記3──吃醋的滋味",
       "story_id": 1046,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1562,10 +1491,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1590,15 +1517,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L19.yml"
     },
     {
       "lesson_id": "G5-L2",
       "title": "以植物為師的科學",
       "story_id": 1029,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1607,10 +1534,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1635,15 +1560,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L2.yml"
     },
     {
       "lesson_id": "G5-L20",
       "title": "感情小日記4──我被告白了",
       "story_id": 1047,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1652,10 +1577,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1680,15 +1603,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L20.yml"
     },
     {
       "lesson_id": "G5-L21",
       "title": "抗拒指尖上的誘惑",
       "story_id": 1048,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1697,10 +1620,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1725,15 +1646,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L21.yml"
     },
     {
       "lesson_id": "G5-L22",
       "title": "我有一個棒球夢",
       "story_id": 12,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1742,10 +1663,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1770,15 +1689,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L22.yml"
     },
     {
       "lesson_id": "G5-L23",
       "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
       "story_id": 1050,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1787,10 +1706,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1799,17 +1716,15 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": false,
-          "issues": [
-            "answer leak in rows[3].value"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
-        "mode": "checkbox",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 0,
-        "checkbox_count": 2,
+        "fill_blank_count": 1,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "artifacts": {
@@ -1817,7 +1732,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
     },
     {
       "lesson_id": "G5-L24",
@@ -1852,8 +1767,8 @@
       "title": "數字記憶的奧秘",
       "story_id": 1053,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1862,10 +1777,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1890,15 +1803,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L26.yml"
     },
     {
       "lesson_id": "G5-L27",
       "title": "重複朗讀的重要性：柳丁和文旦的比喻",
       "story_id": 1054,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1907,10 +1820,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1935,15 +1846,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L27.yml"
     },
     {
       "lesson_id": "G5-L3",
       "title": "工地大嫂",
       "story_id": 1030,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1952,10 +1863,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1980,15 +1889,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L3.yml"
     },
     {
       "lesson_id": "G5-L4",
       "title": "災難預言準不準？",
       "story_id": 1031,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -1997,10 +1906,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2025,15 +1932,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L4.yml"
     },
     {
       "lesson_id": "G5-L5",
       "title": "比運氣更重要的事：《長腿叔叔》的啟發",
       "story_id": 1032,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2042,10 +1949,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2070,15 +1975,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L5.yml"
     },
     {
       "lesson_id": "G5-L6",
       "title": "堅持到底的棒球人生──周思齊(前篇)",
       "story_id": 1033,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2087,10 +1992,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2115,15 +2018,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L6.yml"
     },
     {
       "lesson_id": "G5-L7",
       "title": "堅持到底的棒球人生──周思齊(後篇)",
       "story_id": 1034,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2132,10 +2035,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2160,15 +2061,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L7.yml"
     },
     {
       "lesson_id": "G5-L8",
       "title": "奧運銀牌的自我鍛鍊",
       "story_id": 8,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2177,10 +2078,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2205,15 +2104,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L8.yml"
     },
     {
       "lesson_id": "G5-L9",
       "title": "周天成的一天──頂尖選手的養成",
       "story_id": 9,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2222,10 +2121,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2250,15 +2147,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L9.yml"
     },
     {
       "lesson_id": "G6-L1",
       "title": "運動傷害，怎麼辦？",
       "story_id": 1055,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2267,10 +2164,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2295,15 +2190,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L1.yml"
     },
     {
       "lesson_id": "G6-L10",
       "title": "末日種子庫",
       "story_id": 20,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2312,10 +2207,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2340,15 +2233,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L10.yml"
     },
     {
       "lesson_id": "G6-L11",
       "title": "古代畫家心中的仙境",
       "story_id": 1065,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2357,10 +2250,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2385,15 +2276,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L11.yml"
     },
     {
       "lesson_id": "G6-L12",
       "title": "愛冒險逞強的雄性動物",
       "story_id": 1066,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2402,10 +2293,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2430,15 +2319,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L12.yml"
     },
     {
       "lesson_id": "G6-L13",
       "title": "森林大軍的守護者",
       "story_id": 21,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2447,10 +2336,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2475,15 +2362,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L13.yml"
     },
     {
       "lesson_id": "G6-L14",
       "title": "植物獵人",
       "story_id": 22,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2492,10 +2379,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2520,15 +2405,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L14.yml"
     },
     {
       "lesson_id": "G6-L15",
       "title": "小藍鯨之死",
       "story_id": 23,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2537,10 +2422,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2565,15 +2448,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L15.yml"
     },
     {
       "lesson_id": "G6-L16",
       "title": "奇蹟行動",
       "story_id": 26,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2582,10 +2465,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2610,15 +2491,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L16.yml"
     },
     {
       "lesson_id": "G6-L17",
       "title": "給神明發會診單",
       "story_id": 25,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2627,10 +2508,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2655,15 +2534,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L17.yml"
     },
     {
       "lesson_id": "G6-L18",
       "title": "把手上的餅吃香一點！",
       "story_id": 1072,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2672,10 +2551,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2700,15 +2577,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L18.yml"
     },
     {
       "lesson_id": "G6-L19",
       "title": "紅領帶",
       "story_id": 28,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2717,10 +2594,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2745,15 +2620,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L19.yml"
     },
     {
       "lesson_id": "G6-L2",
       "title": "與小學說再見",
       "story_id": 1056,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2762,10 +2637,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2790,15 +2663,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L2.yml"
     },
     {
       "lesson_id": "G6-L20",
       "title": "感情小日記5──我該告白嗎？",
       "story_id": 1074,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2807,10 +2680,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2835,15 +2706,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L20.yml"
     },
     {
       "lesson_id": "G6-L21",
       "title": "感情小日記6──我失戀了",
       "story_id": 1075,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2852,10 +2723,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2880,15 +2749,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L21.yml"
     },
     {
       "lesson_id": "G6-L22",
       "title": "小兵立大功：雞鳴狗盜的故事",
       "story_id": 1076,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2897,10 +2766,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2925,15 +2792,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
     },
     {
       "lesson_id": "G6-L23",
       "title": "老鷹紅豆的故事",
       "story_id": 1077,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2942,10 +2809,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2970,15 +2835,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L23.yml"
     },
     {
       "lesson_id": "G6-L24",
       "title": "白鯨救援：一場人與自然的協奏曲",
       "story_id": 1078,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2987,10 +2852,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3015,15 +2878,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L24.yml"
     },
     {
       "lesson_id": "G6-L25",
       "title": "荷蘭東印度公司：全世界第一張股票的誕生",
       "story_id": 1079,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3032,10 +2895,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3060,15 +2921,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L25.yml"
     },
     {
       "lesson_id": "G6-L3",
       "title": "昆蟲會思考嗎?",
       "story_id": 1057,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3077,10 +2938,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3105,15 +2964,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L3.yml"
     },
     {
       "lesson_id": "G6-L4",
       "title": "兩千五百歲的酷老師",
       "story_id": 15,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3122,10 +2981,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3150,7 +3007,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L4.yml"
     },
     {
       "lesson_id": "G6-L5",
@@ -3185,8 +3042,8 @@
       "title": "心理出狀況，是壞事導致的嗎？",
       "story_id": 17,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3195,10 +3052,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3223,15 +3078,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L6.yml"
     },
     {
       "lesson_id": "G6-L7",
       "title": "黑猩猩的守護者",
       "story_id": 7,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3240,10 +3095,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3268,7 +3121,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L7.yml"
     },
     {
       "lesson_id": "G6-L8",
@@ -3303,8 +3156,8 @@
       "title": "祝你好眠",
       "story_id": 19,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3313,10 +3166,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3341,15 +3192,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L9.yml"
     },
     {
       "lesson_id": "G7-L1",
       "title": "長大後，我才讀懂〈夏夜〉",
       "story_id": 1080,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3358,10 +3209,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3386,7 +3235,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L1.yml"
     },
     {
       "lesson_id": "G7-L10",
@@ -3449,8 +3298,8 @@
       "title": "你以為的浪漫可能是跟騷",
       "story_id": 1091,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3459,10 +3308,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3487,15 +3334,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L12.yml"
     },
     {
       "lesson_id": "G7-L13",
       "title": "綠色賽事",
       "story_id": 34,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3504,10 +3351,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3532,15 +3377,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L13.yml"
     },
     {
       "lesson_id": "G7-L14",
       "title": "隱藏在日常對話中的微歧視",
       "story_id": 1093,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3549,10 +3394,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3577,15 +3420,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L14.yml"
     },
     {
       "lesson_id": "G7-L15",
       "title": "看到了嗎？然後呢？",
       "story_id": 1094,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3594,10 +3437,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3622,15 +3463,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L15.yml"
     },
     {
       "lesson_id": "G7-L16",
       "title": "果醬男孩",
       "story_id": 36,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3639,10 +3480,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3667,15 +3506,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L16.yml"
     },
     {
       "lesson_id": "G7-L17",
       "title": "用科學方法伸張正義的神探",
       "story_id": 37,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3684,10 +3523,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3712,15 +3549,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L17.yml"
     },
     {
       "lesson_id": "G7-L18",
       "title": "一封向醫師求助的信",
       "story_id": 1097,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3729,10 +3566,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3757,15 +3592,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L18.yml"
     },
     {
       "lesson_id": "G7-L19",
       "title": "「背影」讀書會",
       "story_id": 1098,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3774,10 +3609,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3802,15 +3635,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L19.yml"
     },
     {
       "lesson_id": "G7-L2",
       "title": "澳洲奧運金牌的X機密",
       "story_id": 29,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3819,10 +3652,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3847,15 +3678,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L2.yml"
     },
     {
       "lesson_id": "G7-L20",
       "title": "網紅的電子煙實驗：偽科學的陷阱",
       "story_id": 39,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3864,10 +3695,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3892,15 +3721,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L20.yml"
     },
     {
       "lesson_id": "G7-L21",
       "title": "別上「誘餌式標題」的鉤",
       "story_id": 40,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3909,10 +3738,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3937,15 +3764,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L21.yml"
     },
     {
       "lesson_id": "G7-L22",
       "title": "信眾與教主",
       "story_id": 41,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3954,10 +3781,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3982,7 +3807,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L22.yml"
     },
     {
       "lesson_id": "G7-L23",
@@ -4017,8 +3842,8 @@
       "title": "未來的農夫",
       "story_id": 1104,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4027,10 +3852,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4055,7 +3878,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L24.yml"
     },
     {
       "lesson_id": "G7-L25",
@@ -4146,8 +3969,8 @@
       "title": "看不見的兇手:以實驗破解肉湯腐敗之謎",
       "story_id": 1108,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4156,10 +3979,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4184,7 +4005,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
     },
     {
       "lesson_id": "G7-L29",
@@ -4231,8 +4052,8 @@
       "title": "女性太空人登月",
       "story_id": 30,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4241,10 +4062,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4269,7 +4088,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L3.yml"
     },
     {
       "lesson_id": "G7-L30",
@@ -4316,8 +4135,8 @@
       "title": "從〈螞蟻與蟋蟀〉看生命的多樣性",
       "story_id": 1083,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4326,10 +4145,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4354,15 +4171,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L4.yml"
     },
     {
       "lesson_id": "G7-L5",
       "title": "爺爺奶奶來了以後",
       "story_id": 1084,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4371,10 +4188,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4399,7 +4214,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L5.yml"
     },
     {
       "lesson_id": "G7-L6",
@@ -4416,10 +4231,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4428,14 +4241,16 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "docx has blanks but mode is display_only"
+          ]
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "display_only",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
+        "fill_blank_count": 0,
         "checkbox_count": 0,
         "row_count": 8
       },
@@ -4444,15 +4259,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L6.yml"
     },
     {
       "lesson_id": "G7-L7",
       "title": "你看見時代的灰犀牛了嗎？談人口負成長",
       "story_id": 1086,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4461,10 +4276,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4489,15 +4302,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L7.yml"
     },
     {
       "lesson_id": "G7-L8",
       "title": "科學怪人",
       "story_id": 32,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4506,10 +4319,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4534,15 +4345,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L8.yml"
     },
     {
       "lesson_id": "G7-L9",
       "title": "吐瓦魯：逐漸被淹沒的島國",
       "story_id": 33,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4551,10 +4362,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4579,15 +4388,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L9.yml"
     },
     {
       "lesson_id": "G8-L1",
       "title": "致台東：一封過客的情書",
       "story_id": 1111,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4596,10 +4405,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4624,15 +4431,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L1.yml"
     },
     {
       "lesson_id": "G8-L10",
       "title": "「按讚」背後的真相",
       "story_id": 1120,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4641,10 +4448,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4669,15 +4474,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L10.yml"
     },
     {
       "lesson_id": "G8-L11",
       "title": "虎襲事件的真相：誰才是受害者？",
       "story_id": 1121,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4686,10 +4491,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4714,15 +4517,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L11.yml"
     },
     {
       "lesson_id": "G8-L12",
       "title": "語言的足跡：從臺北萬華到南太平洋的航海之路",
       "story_id": 1122,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4731,10 +4534,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4759,7 +4560,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L12.yml"
     },
     {
       "lesson_id": "G8-L13",
@@ -4788,10 +4589,10 @@
         }
       },
       "layout": {
-        "mode": "checkbox",
+        "mode": "display_only",
         "layout": "worksheet_table",
         "fill_blank_count": 0,
-        "checkbox_count": 4,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "artifacts": {
@@ -4846,8 +4647,8 @@
       "title": "球場上的另類指揮家",
       "story_id": 1125,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4856,10 +4657,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4884,15 +4683,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L15.yml"
     },
     {
       "lesson_id": "G8-L16",
       "title": "我的阿嬤",
       "story_id": 1126,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4901,10 +4700,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4929,15 +4726,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L16.yml"
     },
     {
       "lesson_id": "G8-L17",
       "title": "我能不能選擇告別方式?",
       "story_id": 1127,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4946,10 +4743,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4974,15 +4769,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L17.yml"
     },
     {
       "lesson_id": "G8-L18",
       "title": "石虎保育：遷移與否的兩難",
       "story_id": 1128,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -4991,10 +4786,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5019,15 +4812,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L18.yml"
     },
     {
       "lesson_id": "G8-L19",
       "title": "核能的兩難抉擇",
       "story_id": 1129,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5036,10 +4829,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5064,15 +4855,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L19.yml"
     },
     {
       "lesson_id": "G8-L2",
       "title": "爸爸的恩人們",
       "story_id": 1112,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5081,10 +4872,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5109,15 +4898,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L2.yml"
     },
     {
       "lesson_id": "G8-L3",
       "title": "當壞事已不可逆轉：集中營裡的一門課",
       "story_id": 1113,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5126,10 +4915,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5154,15 +4941,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L3.yml"
     },
     {
       "lesson_id": "G8-L4",
       "title": "新奇!「植物肉」你聽過嗎?",
       "story_id": 1114,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5171,10 +4958,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5199,15 +4984,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L4.yml"
     },
     {
       "lesson_id": "G8-L5",
       "title": "好心沒好報玻璃娃娃爭議事件",
       "story_id": 1115,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5216,10 +5001,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5244,15 +5027,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L5.yml"
     },
     {
       "lesson_id": "G8-L6",
       "title": "戲院、賭場、檳榔攤：在時代夾縫中成長的我",
       "story_id": 1116,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5261,10 +5044,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5289,15 +5070,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L6.yml"
     },
     {
       "lesson_id": "G8-L7",
       "title": "讓你口中的甜蜜成為遠方農民的希望",
       "story_id": 1117,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5306,10 +5087,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5334,15 +5113,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L7.yml"
     },
     {
       "lesson_id": "G8-L8",
       "title": "隱形的征服者",
       "story_id": 1118,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5351,10 +5130,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5379,15 +5156,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L8.yml"
     },
     {
       "lesson_id": "G8-L9",
       "title": "讓黑猩猩被看見的人",
       "story_id": 1119,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5396,10 +5173,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5424,15 +5199,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L9.yml"
     },
     {
       "lesson_id": "G9-L1",
       "title": "盡信書不如無書：從一件殺人案談起",
       "story_id": 48,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5441,10 +5216,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5469,15 +5242,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L1.yml"
     },
     {
       "lesson_id": "G9-L10",
       "title": "高地訓練有助於運動表現嗎?",
       "story_id": 1139,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5488,10 +5261,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5516,15 +5287,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L10.yml"
     },
     {
       "lesson_id": "G9-L11",
       "title": "見前人所未見—達爾文與長喙天蛾的故事",
       "story_id": 1140,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5533,10 +5304,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5561,15 +5330,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L11.yml"
     },
     {
       "lesson_id": "G9-L12",
       "title": "臺灣的太空之眼",
       "story_id": 1141,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5578,10 +5347,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5606,15 +5373,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L12.yml"
     },
     {
       "lesson_id": "G9-L13",
       "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
       "story_id": 1142,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5623,10 +5390,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5640,10 +5405,10 @@
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 1,
+        "checkbox_count": 0,
         "row_count": 6
       },
       "artifacts": {
@@ -5651,15 +5416,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L13.yml"
     },
     {
       "lesson_id": "G9-L14",
       "title": "焚而不毀的倫敦",
       "story_id": 1143,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5668,10 +5433,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5680,17 +5443,15 @@
         },
         "L3": {
           "gate": "L3",
-          "pass": false,
-          "issues": [
-            "answer leak in rows[3].value"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 1,
+        "fill_blank_count": 4,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "artifacts": {
@@ -5698,13 +5459,13 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
     },
     {
       "lesson_id": "G9-L15",
       "title": "未解之謎──石頭的祕密（一）：巨石陣",
       "story_id": 1144,
-      "tier": "ai_fallback",
+      "tier": "no_structure",
       "overall_pass": true,
       "overall_status": "pass",
       "gates": {
@@ -5715,11 +5476,11 @@
         }
       },
       "layout": {
-        "mode": "mixed",
-        "layout": "cards",
-        "fill_blank_count": 2,
-        "checkbox_count": 3,
-        "row_count": 5
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 4,
+        "checkbox_count": 0,
+        "row_count": 6
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -5732,7 +5493,7 @@
       "lesson_id": "G9-L17",
       "title": "馬拉松王者──基普喬吉 (記敘文)",
       "story_id": 1146,
-      "tier": "ai_fallback",
+      "tier": "no_structure",
       "overall_pass": true,
       "overall_status": "pass",
       "gates": {
@@ -5743,11 +5504,11 @@
         }
       },
       "layout": {
-        "mode": "mixed",
-        "layout": "cards",
-        "fill_blank_count": 2,
-        "checkbox_count": 3,
-        "row_count": 5
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 3,
+        "checkbox_count": 0,
+        "row_count": 7
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -5761,8 +5522,8 @@
       "title": "帝國家書：一個普通家庭的生與死",
       "story_id": 1131,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5771,10 +5532,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5799,15 +5558,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L2.yml"
     },
     {
       "lesson_id": "G9-L3",
       "title": "國高中數學課當然可以使用計算機！",
       "story_id": 1132,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5816,10 +5575,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5844,15 +5601,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L3.yml"
     },
     {
       "lesson_id": "G9-L4",
       "title": "預防近視？多點戶外活動就對了！",
       "story_id": 49,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5861,10 +5618,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5889,15 +5644,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L4.yml"
     },
     {
       "lesson_id": "G9-L5",
       "title": "#MeToo運動與我們的權利",
       "story_id": 50,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5906,10 +5661,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5934,15 +5687,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L5.yml"
     },
     {
       "lesson_id": "G9-L6",
       "title": "靈異與科學",
       "story_id": 51,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5951,10 +5704,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5979,15 +5730,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L6.yml"
     },
     {
       "lesson_id": "G9-L7",
       "title": "從基因來的特別禮物",
       "story_id": 52,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -5996,10 +5747,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6024,15 +5773,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L7.yml"
     },
     {
       "lesson_id": "G9-L8",
       "title": "臺灣學生的閱讀力：美麗與哀愁",
       "story_id": 53,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6041,10 +5790,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6069,15 +5816,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L8.yml"
     },
     {
       "lesson_id": "G9-L9",
       "title": "力與美表現的競技體操",
       "story_id": 54,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6086,10 +5833,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6114,15 +5859,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L9.yml"
     },
     {
       "lesson_id": "文-L1",
       "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
       "story_id": 1149,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6131,10 +5876,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6159,15 +5902,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L1.yml"
     },
     {
       "lesson_id": "文-L10",
       "title": "荒野救亡記",
       "story_id": 1158,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6176,10 +5919,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6204,7 +5945,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L10.yml"
     },
     {
       "lesson_id": "文-L2",
@@ -6239,8 +5980,8 @@
       "title": "文-L3",
       "story_id": null,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6249,10 +5990,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
@@ -6267,15 +6006,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": false
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
     },
     {
       "lesson_id": "文-L4",
       "title": "文-L4",
       "story_id": null,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6284,10 +6023,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
@@ -6302,15 +6039,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": false
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
     },
     {
       "lesson_id": "文-L5",
       "title": "重義的荀巨伯",
       "story_id": 1153,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6319,10 +6056,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6347,15 +6082,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L5.yml"
     },
     {
       "lesson_id": "文-L6",
       "title": "江乙媽媽告御狀",
       "story_id": 1154,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6364,10 +6099,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6392,15 +6125,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L6.yml"
     },
     {
       "lesson_id": "文-L7",
       "title": "相隔千里的約定",
       "story_id": 1155,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6409,10 +6142,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6437,15 +6168,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L7.yml"
     },
     {
       "lesson_id": "文-L8",
       "title": "文-L8",
       "story_id": null,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6454,10 +6185,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
@@ -6472,15 +6201,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": false
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
     },
     {
       "lesson_id": "文-L9",
       "title": "文-L9",
       "story_id": null,
       "tier": "docx_keypoints",
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6489,10 +6218,8 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "no yaml story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         }
       },
       "layout": {
@@ -6507,968 +6234,15 @@
         "has_original_preview": true,
         "has_structure_snapshot": false
       },
-      "yaml_path": null
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
   ],
   "raw_failures": [
     {
-      "lesson_id": "G4-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L11",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L13",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L14",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L15",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L16",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L19",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L11",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L13",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L14",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L15",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L16",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L17",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L18",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L19",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L20",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L21",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L22",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L23",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L23",
-      "gate": "L3",
-      "issues": [
-        "answer leak in rows[3].value"
-      ]
-    },
-    {
-      "lesson_id": "G5-L26",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L27",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G5-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L11",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L13",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L14",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L15",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L16",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L17",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L18",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L19",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L20",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L21",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L22",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L23",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L24",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L25",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G6-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L13",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L14",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L15",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L16",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L17",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L18",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L19",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L20",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L21",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L22",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
       "lesson_id": "G7-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L1",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L4",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L5",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L6",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L7",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L8",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "文-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L17",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L18",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L23",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L24",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L25",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L25",
       "gate": "L3",
       "issues": [
-        "answer leak in rows[3].sub_rows[0].value"
-      ]
-    },
-    {
-      "lesson_id": "G4-L26",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L26",
-      "gate": "L3",
-      "issues": [
-        "answer leak in rows[5].value"
-      ]
-    },
-    {
-      "lesson_id": "G4-L27",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L27",
-      "gate": "L3",
-      "issues": [
-        "answer leak in rows[3].value",
-        "answer leak in rows[5].value"
-      ]
-    },
-    {
-      "lesson_id": "G7-L24",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G7-L28",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L15",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L16",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L17",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L18",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L19",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L2",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L3",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L9",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L11",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L12",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L13",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L14",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G9-L14",
-      "gate": "L3",
-      "issues": [
-        "answer leak in rows[3].value"
-      ]
-    },
-    {
-      "lesson_id": "文-L10",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G8-L11",
-      "gate": "L2",
-      "issues": [
-        "no yaml story_structure_table"
+        "docx has blanks but mode is display_only"
       ]
     }
   ]

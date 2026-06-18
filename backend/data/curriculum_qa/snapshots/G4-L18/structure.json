@@ -8,14 +8,7 @@
     {
       "label": "阿耀的問題",
       "value": "下列哪個是阿耀遇到的問題？(單選)\n□①阿耀的疑問：一定要讀書嗎？\n②阿耀覺得自己跟不上課程，想請教學長。",
-      "interactive_type": "checkbox",
-      "options": [
-        "阿耀的疑問：一定要讀書嗎？",
-        "阿耀覺得自己跟不上課程，想請教學長。"
-      ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "display"
     },
     {
       "label": "學長的觀點",
@@ -88,15 +81,15 @@
     }
   ],
   "interaction_profile": {
-    "mode": "mixed",
+    "mode": "fill_blank",
     "template_kind": "generic",
     "fill_blank_count": 5,
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "primary_labels": [
-      "阿耀的問題",
       "學長的觀點",
       "例子1",
-      "例子2"
+      "例子2",
+      "例子3"
     ],
     "layout": "worksheet_table"
   }

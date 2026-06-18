@@ -13,6 +13,7 @@ from ..services.curriculum_qa_service import (
     read_preview_html,
     read_snapshot_json,
 )
+from ..services.curriculum_qa_spotlight import get_spotlight_lesson, load_spotlight_manifest
 
 router = APIRouter(
     prefix="/curriculum-qa",
@@ -54,3 +55,22 @@ async def get_keypoints_original_preview(
     if html is None:
         raise HTTPException(status_code=404, detail="Original preview not found")
     return HTMLResponse(content=html)
+
+
+@router.get("/spotlight")
+async def get_spotlight_manifest(
+    current_user: User = Depends(get_current_user),
+):
+    """Dev7 spotlight QA manifest (eval + gold fingerprint)."""
+    return load_spotlight_manifest()
+
+
+@router.get("/spotlight/{lesson_id}")
+async def get_spotlight_lesson_detail(
+    lesson_id: str,
+    current_user: User = Depends(get_current_user),
+):
+    entry = get_spotlight_lesson(lesson_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Lesson not in spotlight QA manifest")
+    return entry

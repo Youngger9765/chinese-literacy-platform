@@ -28,10 +28,11 @@ from app.services.lesson_code_normalization import (
     normalize_manifest_code,
 )
 
+_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_TAG = f"docx-keypoints-{date.today().isoformat()}"
-LESSONS_DIR = Path("backend/data/lessons")
+LESSONS_DIR = _ROOT / "backend/data/lessons"
 PARSED_DIR = LESSONS_DIR / "_parsed_2026-05-01"
-DEFAULT_SCHEMA_DIR = Path("private/curriculum-source/_online-schema")
+DEFAULT_SCHEMA_DIR = _ROOT / "private/curriculum-source/_online-schema"
 
 
 def fill_template(template: str, blanks: list[dict]) -> str:
