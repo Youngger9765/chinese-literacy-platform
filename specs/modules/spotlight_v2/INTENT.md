@@ -1,3 +1,26 @@
+---
+spec_id: learning.spotlight_v2
+module: spotlight-v2
+title: 聚光燈 v2 — block 序列契約 + G6-L22 驗收
+stability: active
+canonical_source: backend/app/services/spotlight_block_model.py
+owns_code:
+  - backend/app/services/spotlight_block_model.py
+  - backend/app/services/spotlight_contract.py
+  - backend/app/services/spotlight_v2_loader.py
+  - scripts/build_lesson_schema.py
+  - frontend/src/components/reading-spotlight/
+spec_tests:
+  - backend/specs/test_spotlight_block_model_spec.py
+  - backend/specs/test_spotlight_v2_spec.py
+  - backend/specs/test_pse_mcq_parser_spec.py
+related_issues: [2205]
+source_meetings:
+  - docs/professor-7-lessons-block-decomposition.md
+last_reviewed: 2026-06-18
+owner: young
+---
+
 # spotlight_v2 — 聚光燈 block 序列契約
 
 ## 目的
