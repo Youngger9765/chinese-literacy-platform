@@ -92,28 +92,56 @@
 - STT 有非確定性 → STT 層看區間，**評分層必須 =0（確定性）**
 - 「不確定就寬鬆」是教學取捨：寧可少扣不可錯扣
 
-## 7. 技術選型 A/B — 4 個比較軸（**現在就能測，與階段 A 並行，不擋 v1**）
+## 7. 技術選型 — 用「決策價值」篩，不平鋪 4 軸
 
-技術選型不必等階段 B。以下每軸標：✅ 現在跑得動 / ⚠️ 需小瀏覽器 PoC / 📐 設計決策（非單純量測）。固定其他軸、一次只變一軸才比得乾淨。
+實驗只在「結果會改變我們上線的選擇」時才值得跑。用這尺度，原本列的 4 軸（①STT 引擎 ②評分 ③演算法 ④前後端送件）**價值不對等**，收斂成 3 件：
 
-### 軸 1：STT 引擎/品牌 — Azure vs Gemini（vs Web Speech）
-- **引擎準度/成本（✅ 現在）**：Azure STT(REST/本機 key) vs Gemini batch(staging) 餵同一 TTS 音檔 → R2 字準 / R4 成本 / R1 延遲。背景實驗進行中。
-- **前端即時延遲（⚠️ 需小 PoC）**：Azure 瀏覽器 SDK / Gemini Live 的「邊讀邊轉 ~0 等待」要一個瀏覽器 PoC 驗（headless 跑不了）。先用引擎準度數據 + 單價，延遲用一支 PoC 補。
-- 候選：Gemini batch（現用）/ Azure 即時 / Gemini Live / Web Speech。
+| 原軸 | 我的判斷 | 動作 |
+|------|---------|------|
+| ②評分（確定性 vs LLM）| **已決**：98.1% vs 39~58%，確定性勝、無懸念 | **鎖定**，寫 unit 守住（非實驗）|
+| ③演算法差異 | LCS 已成熟+前後端 parity，只剩 2 個窄誤判 | **小 unit 測**：字序對調過罰?、同音遮真錯? |
+| ①+④（STT 引擎 + 前/後端送件）| **其實同一決策**：「前端送」≈瀏覽器即時 STT、「後端送」≈上傳 batch | **唯一值得量的實驗 = STT 延遲 PoC** |
 
-### 軸 2：評分引擎 — 確定性 LCS+同音 vs LLM 逐字 diff（✅ 現在）
-- 已有：確定性 = 98.1%（穩定）；LLM 逐字 diff = 39~58%（截斷+浮動）。**這軸結論最明確：確定性勝**。補 R5 確定性(variance=0 vs LLM 浮動)、R6 robustness(長段不截斷)。
+**引擎準度 Azure vs Gemini**：在乾淨 TTS 音檔上**比不出有意義贏家**（真差異在童音/雜訊，要人聲集）→ 引擎現階段用**延遲/成本/整合**選，不用 TTS 準度當依據。背景跑的 TTS 準度比較**只當「pipeline 跑得通」佐證**，不當選型定案。
 
-### 軸 3：其他演算法差異（✅ 現在，unit）
-- 同音寬鬆度（嚴格同音 vs 含異調 vs 近音）、normalize 選擇（數字/標點/注音）、LCS tie-break、字序對調處理 → 用已知案例 unit 測，看 R3 準度 + R7 誤判（過罰/遮真錯）。
+### 真正要跑的 3 件
+1. **鎖 scorer（決定+unit）**：確定性後端，unit 覆蓋誤判模式（字序/同音/重複字/漏字 resync/>100% guard/長段不截斷/方大哥案例 98%）→ 同時是 ②鎖定 + ③測試
+2. **自錄 5-10 段真音 sanity（信心）**：人判對照，pre-test-set 信心橋樑
+3. **STT 延遲 PoC（唯一決策量測）**：Node+Azure SDK+WAV 量「即時串流延遲」vs 後端 batch 切短(~3-4s)；引擎準度排序留人聲集
 
-### 軸 4：前端送件 vs 後端送件（📐 設計 + ⚠️ 延遲量測）
-- 不是單一量測，是架構取捨：**前端送**（瀏覽器即時 STT/評分，~0 延遲、但分數客戶端算可能漂移/被改）vs **後端送**（上傳 audio→後端 STT+評分，單一真相可稽核、+round-trip~200ms+STT）。
-- 可量：後端 round-trip 延遲（✅）；前端即時延遲（⚠️ PoC）。可決：單一真相要不要（📐，#2266 已傾向後端評分）。
+matrix 仍記錄：C1 Gemini batch 全文(基準) / C2 Gemini batch 逐段 / C3 Azure STT / C4 Gemini Live(N/A headless) / C5 Web Speech(N/A headless)，結果進 §5.5 HTML。
 
-### 呈現
-4 軸結果 → §5.5 HTML 儀表板：每軸一個比較區塊（選項 × R1-R8），標「現在數據 / PoC 待補 / 設計決策」，並給「這段該選哪個 + 為什麼」。
-matrix 落地：C1 Gemini batch 全文(基準) / C2 Gemini batch 逐段 / C3 Azure STT / C4 Gemini Live(N/A headless) / C5 Web Speech(N/A headless)。
+### Key / 臨時 token（前端 STT 安全）
+前端 STT **絕不放 key**；後端發短期 token：Azure `issueToken`(10 分) / Gemini ephemeral token(30 分)。本機 PoC 用 `backend/.env` key 直連（本機、不外曝、不 commit）；production 走 ephemeral token。
 
 ## 8. 誤判背景（LCS 修補史，2026-06-18 查證）
 前端 `textDiff.ts` 已修+回歸測試：重複字 ghost-green、漏字 cascade(resync)、口吃 collapse、STT 重複片段、數字 214↔二百一十四、注音/標點 strip。後端 `_build_fallback_result` 有 frontend parity（L223 + `stt/normalization.py`）。殘留風險（R7）：字序對調過罰、同音過度校正遮真錯。
+
+## 9. 成果記錄位置（哪些東西記在哪）
+| 內容 | 位置 |
+|------|------|
+| 設計/計畫（本檔）| `docs/ai/reading-stt-scorer-ab-2026-06.md` |
+| 決策 log + 進度 + 結果摘要 | issue **#2266** comments |
+| 實驗結果原始數據 | 本檔 §10 + #2266 |
+| **HTML 檢視儀表板** | `frontend/public/presentation/reading-stt-experiment.html`（staging 可看）|
+| 評分器 unit 測試（鎖定）| repo 測試檔（vitest/pytest）|
+| 跨 session 摘要 | memory `project_reading_eval_58pct_root_cause.md` |
+
+## 10. 實驗結果（2026-06-18，staging + 本機）
+輸入：L10 小花（360/320 字）。F1=Azure TTS 唸原文(GT 100%)、F2=TTS 唸 6 受控錯誤版(GT 88.4%)、Fang=方大哥 STT 文字(GT 98.1%)。
+
+| Combo | STT | Scorer | R1 延遲 | R2 CER | R3 誤差 | R4 成本/次 | R5 確定性 | R6 截斷 |
+|-------|-----|--------|---------|--------|---------|-----------|-----------|---------|
+| **C1 ✅贏家** | Gemini batch | 確定性 fallback | 7–14s | 0–1.8% | **<0.5%** | **$0.003** | **0 variance** | 無 |
+| C2 現用 ❌ | Gemini batch | LLM 逐字 diff | 15–16s | 0–1.8% | **0–100%** | $0.007 | 高 variance | **100% 觸發** |
+| C3 | Azure STT(REST) | 確定性 fallback | 20–24s | 3.8–4.2% | <0.3% | $0.022(7x) | 低 | 無 |
+| C4b | Fang 文字 | LLM diff | 9.5–15s | — | 46–58% | $0.004 | 高 | 100% |
+| C5/6 | Web Speech | — | N/A | — | — | — | — | — |
+
+**結論：C1（Gemini batch STT + 確定性 fallback scorer）綜合最佳**——延遲最短、誤差 <0.5% 且零 variance、成本最低、無截斷、**工程量最小（只把 scorer 從 LLM diff 換成 fallback，不動 STT 層）**。
+
+**現用 C2 三 bug 齊發（皆非邊緣 case）**：①MAX_TOKENS 截斷 100% 觸發；②**target==spoken→Gemini 吐空陣列→0 分（完美朗讀得 0，最慘）**；③root A 分母不一致（修 B 後會 >100%）。修 C2 要 A+B 同時修且仍有 LLM variance → 不如直接走 C1。
+
+**引擎**：Azure STT(REST batch) 7x 貴、CER 更高（Gemini 有 target 上下文自校）→ batch 場景 Gemini 勝。Azure 即時串流延遲優勢需瀏覽器 PoC 才驗（但 Gemini 逐段 6.5s + 確定性 scorer ~0 已可接受，未必需要換）。
+
+**限制**：實驗用乾淨成人 TTS 音，CER 樂觀；真實童音 CER 兩家都會升、Gemini 優勢縮小但不消失 → 真實排名待人聲集（階段 B）。
