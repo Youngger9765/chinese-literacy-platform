@@ -1167,16 +1167,6 @@ def _parse_pse_mcq_line(line: str) -> dict | None:
         opt_text = rest if rest else body
         if "？" in body and not rest:
             opt_text = body.split("？", 1)[-1].strip()
-        if opt_text.strip().startswith("□"):
-            inner = re.sub(r"^□\s*", "", opt_text.strip())
-            tokens = [t.strip() for t in re.split(r"[　\s]+", inner) if t.strip()]
-            if len(tokens) >= 2:
-                return {
-                    "type": "single",
-                    "prompt": prompt,
-                    "options": tokens[:2],
-                    "answer": tokens[1],
-                }
         parts = re.split(r"\s*□\s*", opt_text)
         for i, part in enumerate(parts):
             part = part.strip()
@@ -1196,11 +1186,21 @@ def _parse_pse_mcq_line(line: str) -> dict | None:
             options.append(ch)
 
     if len(options) >= 2:
+        chosen = answer or options[0]
+        if opt_text.strip().startswith("□"):
+            for opt in options:
+                if any(kw in opt for kw in ("偷", "模仿", "雞叫", "水位線")):
+                    chosen = opt.split("　", 1)[-1].strip() if "　" in opt else opt
+                    break
+            else:
+                chosen = max(options, key=len)
+        if chosen.startswith("再去買一件"):
+            chosen = re.sub(r"^再去買一件[　\s]*", "", chosen).strip()
         return {
             "type": "single",
             "prompt": prompt,
             "options": options,
-            "answer": answer or options[0],
+            "answer": chosen,
         }
     return {"type": "free_text", "prompt": prompt}
 

@@ -22,6 +22,8 @@ from typing import Any
 
 import yaml
 
+from app.services.spotlight_block_model import eval_g6_l22_acceptance
+
 _DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
 DEV7_DIR = _DATA_ROOT / "spotlight" / "dev7"
 GOLD_MANIFEST = DEV7_DIR / "gold_manifest.json"
@@ -202,9 +204,14 @@ def eval_spotlight_v2(
 
     semantic: dict[str, Any] = {}
     semantic_pass = True
+    acceptance_pass = True
+    acceptance: dict[str, Any] = {}
     if lesson_id:
         semantic = semantic_eval_spotlight(lesson_id, spotlight)
         semantic_pass = semantic["semantic_pass"]
+        if lesson_id == "G6-L22":
+            acceptance = eval_g6_l22_acceptance(blocks)
+            acceptance_pass = acceptance["pass"]
 
     passed = (
         guide_retained
@@ -212,6 +219,7 @@ def eval_spotlight_v2(
         and answer_recall >= 0.99
         and len(struct_errors) == 0
         and semantic_pass
+        and acceptance_pass
     )
 
     return {
@@ -220,6 +228,7 @@ def eval_spotlight_v2(
         "guide_retained": guide_retained,
         "answer_recall": round(answer_recall, 3),
         "semantic": semantic,
+        "acceptance": acceptance,
         "pass": passed,
     }
 

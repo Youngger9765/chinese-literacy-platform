@@ -12,6 +12,7 @@ import {
   isInteractiveBlock,
   isSectionHeaderPrompt,
   resolveFreeTextCorrect,
+  resolveLessonCode,
   resolveSingleCorrect,
   segmentBlocks,
 } from './spotlightBlockLogic';
@@ -23,14 +24,17 @@ interface Props {
   onComplete?: () => void;
   onChange?: (state: Record<string, unknown>) => void;
   initialState?: Record<string, unknown>;
+  onOpenKeypoints?: () => void;
 }
 
 const BlockSequenceRenderer: React.FC<Props> = ({
   spotlight,
   story,
+  lessonId,
   onComplete,
   onChange,
   initialState,
+  onOpenKeypoints,
 }) => {
   const segments = useMemo(() => segmentBlocks(spotlight.blocks), [spotlight.blocks]);
 
@@ -105,13 +109,17 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   const renderFigure = (block: SpotlightBlock) => {
     if (block.type !== 'figure') return null;
     const label = figureLabelFromBlock(block);
-    const img = story?.images?.find((i) => i.figure_label === label);
-    if (img) {
+    const imgIdx = story?.images?.findIndex((i) => i.figure_label === label) ?? -1;
+    const img = imgIdx >= 0 ? story?.images?.[imgIdx] : undefined;
+    const lessonCode = resolveLessonCode(spotlight, story, lessonId, img?.filename);
+    if (img && lessonCode) {
       return (
         <FigureCard
-          src={buildImageSrc(img.filename)}
+          src={buildImageSrc(img.filename, lessonCode)}
           alt={label ?? '圖'}
           caption={block.bind_paragraph ? String(block.bind_paragraph) : label ?? undefined}
+          index={imgIdx}
+          figureLabel={label ?? undefined}
         />
       );
     }
@@ -257,7 +265,16 @@ const BlockSequenceRenderer: React.FC<Props> = ({
             key={key}
             className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-base text-blue-900"
           >
-            文章重點表請在下一步「文章重點表」練習中填寫
+            文章重點表請在「文章重點表」步驟填寫
+            {onOpenKeypoints ? (
+              <button
+                type="button"
+                onClick={onOpenKeypoints}
+                className="ml-3 underline text-blue-700"
+              >
+                前往重點表
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => {
