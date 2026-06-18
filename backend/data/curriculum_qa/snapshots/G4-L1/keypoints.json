@@ -1,0 +1,63 @@
+{
+  "keypoints": {
+    "lesson": "G4-L1",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "主角",
+        "value": "__",
+        "blanks": [
+          {
+            "answer": "戴資穎",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "主題",
+        "value": "小戴即使在強大的壓力下，仍然堅持維持自己的風格。",
+        "blanks": []
+      },
+      {
+        "label": "球風",
+        "value": "主動出擊，追求完美的__和__的穿越角度。",
+        "blanks": [
+          {
+            "answer": "邊角球",
+            "hint": ""
+          },
+          {
+            "answer": "難以預測",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "事例",
+        "sub_rows": [
+          {
+            "sub_label": "背景",
+            "template": "這個故事發生的情境？(多選，請打勾)\n奧運金牌賽  □世界大學運動會  \n全國關注的比賽",
+            "blanks": []
+          },
+          {
+            "sub_label": "經過",
+            "template": "在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)\n忠於自己的球風\n□保守地打安全球",
+            "blanks": []
+          },
+          {
+            "sub_label": "結果",
+            "template": "(單選，請打勾)\n結果，小戴（  □贏了 、輸了  ）球賽，\n卻（  贏得了 、 □失去了  ）全國人民的尊敬。",
+            "blanks": []
+          }
+        ]
+      }
+    ],
+    "title": "贏得喝采的輸家"
+  }
+}

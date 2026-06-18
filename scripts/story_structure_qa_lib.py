@@ -6,10 +6,61 @@ import re
 from enum import Enum
 from typing import Any
 
-# Known parser gaps — display_only despite DOCX blanks (data layer, not demo)
-PARSER_GAP_LESSONS = frozenset({"G7-L6"})
+# Known parser gaps — resolved lessons removed as fixes land
+PARSER_GAP_LESSONS = frozenset()
 
-SMOKE_LESSONS = ("G6-L22", "G7-L28", "G4-L1", "G4-L6", "G8-L13")
+# Parsed ids where □ in plain text was not yet interactive_type checkbox (fixed in stories.py)
+CHECKBOX_GAP_LESSONS = frozenset()
+
+# Parsed YAML / DOCX lesson ids (not catalog grade_code — see REPRESENTATIVE_LESSONS)
+SMOKE_LESSONS = ("G6-L22", "G7-L28", "G4-L1", "G4-L6", "G7-L6")
+
+# Pinned lessons for Story Structure Lab + manual regression (parsed ↔ catalog ↔ story_id)
+REPRESENTATIVE_LESSONS: tuple[dict[str, Any], ...] = (
+    {
+        "parsed_code": "G6-L22",
+        "catalog_code": "G6-L22",
+        "story_id": 1076,
+        "note": "nested PSR + worksheet_table + fill_blank",
+    },
+    {
+        "parsed_code": "G4-L1",
+        "catalog_code": "G4-L1",
+        "story_id": 1001,
+        "note": "theme_facts + multi-row worksheet",
+    },
+    {
+        "parsed_code": "G7-L6",
+        "catalog_code": "G7-L06",
+        "story_id": 31,
+        "note": "parser_gap — label_blanks not synced → display_only",
+    },
+    {
+        "parsed_code": "G8-L13",
+        "catalog_code": "G8-L10",
+        "story_id": 1123,
+        "note": "checkbox gap — □ in plain text, not interactive_type",
+    },
+    {
+        "parsed_code": "G8-L14",
+        "catalog_code": "G8-L11",
+        "story_id": 1124,
+        "note": "checkbox gap (same class as G8-L10)",
+    },
+    {
+        "parsed_code": "G4-L6",
+        "catalog_code": "G4-L6",
+        "story_id": 1006,
+        "note": "ai_fallback + mixed fill_blank/checkbox",
+    },
+    {
+        "parsed_code": "G7-L28",
+        "catalog_code": "G7-L28",
+        "story_id": 1108,
+        "note": "scientific inquiry + image_text DOM",
+    },
+)
+
 IMAGE_TEXT_LESSONS = frozenset({"G7-L28", "G7-L29", "G7-L30"})
 
 

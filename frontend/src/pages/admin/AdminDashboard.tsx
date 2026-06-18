@@ -8,6 +8,8 @@ import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
 import StoryManagementPanel from './StoryManagementPanel';
 import TtsSentenceTable from './tts-audit/TtsSentenceTable';
+import StoryStructureLabPage from './story-structure-lab/StoryStructureLabPage';
+import KeypointsQADashboard from './KeypointsQADashboard';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
 import {
   listRoles,
@@ -121,6 +123,8 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'users' && <UsersPanel />}
         {selectedNode?.type === 'stories' && <StoryManagementPanel />}
         {selectedNode?.type === 'tts_audit' && <TtsSentenceTable />}
+        {selectedNode?.type === 'story_structure_lab' && <StoryStructureLabPage />}
+        {selectedNode?.type === 'keypoints_qa' && <KeypointsQADashboard />}
       </div>
     </div>
   );
