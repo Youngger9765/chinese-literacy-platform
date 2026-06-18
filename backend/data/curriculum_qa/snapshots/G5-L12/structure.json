@@ -1,0 +1,55 @@
+{
+  "rows": [
+    {
+      "label": "六塊肌、六塊雞",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主題：】肌肉【的鍛鍊",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "關鍵",
+          "value": "想要有結實的肌肉，要先【　　　】再【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "訓練要點",
+          "value": "要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：\nA.均衡的飲食控制：要減少【　　　】類和甜食的攝取。\nB.保持良好的【　　　】：可以幫助分泌生長激素促進生長。\nC.專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　　　】區，練習的分量要比自己承受的最大量再高一些才行。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "六塊肌、六塊雞",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "主題：】肌肉【的鍛鍊",
+      "items": [
+        {
+          "label": "關鍵",
+          "value": "想要有結實的肌肉，要先【　　　】再【　　　】。"
+        },
+        {
+          "label": "訓練要點",
+          "value": "要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：\nA.均衡的飲食控制：要減少【　　　】類和甜食的攝取。\nB.保持良好的【　　　】：可以幫助分泌生長激素促進生長。\nC.專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　　　】區，練習的分量要比自己承受的最大量再高一些才行。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "關鍵",
+      "訓練要點"
+    ],
+    "layout": "worksheet_table"
+  }
+}

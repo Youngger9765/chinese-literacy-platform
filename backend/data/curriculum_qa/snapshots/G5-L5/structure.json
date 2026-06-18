@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "label": "比運氣更重要的事：《長腿叔叔》的啟發",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "故事介紹",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "書名",
+          "value": "長腿叔叔",
+          "interactive_type": "display"
+        },
+        {
+          "label": "作者",
+          "value": "珍‧韋伯斯特",
+          "interactive_type": "display"
+        },
+        {
+          "label": "故事大綱",
+          "value": "描述孤兒朱蒂在「長腿叔叔」的【　　　】下進入大學，克服因【　　　】而導致的種種【　　　】困難，成為【　　　】的女性。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "讀者自問自答",
+      "value": "自問：朱蒂成功，只是得到貴人相助的好運嗎？\n自答：貴人相助外，朱蒂【　　　】、自立自強的特質，也是帶來【　　　】的關鍵",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "從故事內容找支持「自答」的證據",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "勤奮不懈",
+          "value": "1.在學業上，朱蒂有什麼困難？（請打勾，多選）\n在孤兒院沒有受到完整教育\n基本常識薄弱，不認識名人\n大一時，數學及拉丁文成績不及格\n2.朱蒂如何克服困難：\n制定有條不紊的【　　　】，持續閱讀與學習。\n3.結果：朱蒂學業短時間內脫穎而出，成績名列前茅。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "自立自強",
+          "value": "1.生活儉樸，不【　　　】資助的學費與生活費。\n2.靠自己能力賺錢、得獎學金時，想償還資助。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "讀者結論",
+      "value": "除了能抓住好運，朱蒂越挫越勇，不斷付出【　　　】，最後才能成為獨立自主新女性。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "比運氣更重要的事：《長腿叔叔》的啟發",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "故事介紹",
+      "items": [
+        {
+          "label": "書名",
+          "value": "長腿叔叔"
+        },
+        {
+          "label": "作者",
+          "value": "珍‧韋伯斯特"
+        },
+        {
+          "label": "故事大綱",
+          "value": "描述孤兒朱蒂在「長腿叔叔」的【　　　】下進入大學，克服因【　　　】而導致的種種【　　　】困難，成為【　　　】的女性。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "讀者自問自答",
+      "value": "自問：朱蒂成功，只是得到貴人相助的好運嗎？\n自答：貴人相助外，朱蒂【　　　】、自立自強的特質，也是帶來【　　　】的關鍵"
+    },
+    {
+      "kind": "section_block",
+      "section": "從故事內容找支持「自答」的證據",
+      "items": [
+        {
+          "label": "勤奮不懈",
+          "value": "1.在學業上，朱蒂有什麼困難？（請打勾，多選）\n在孤兒院沒有受到完整教育\n基本常識薄弱，不認識名人\n大一時，數學及拉丁文成績不及格\n2.朱蒂如何克服困難：\n制定有條不紊的【　　　】，持續閱讀與學習。\n3.結果：朱蒂學業短時間內脫穎而出，成績名列前茅。"
+        },
+        {
+          "label": "自立自強",
+          "value": "1.生活儉樸，不【　　　】資助的學費與生活費。\n2.靠自己能力賺錢、得獎學金時，想償還資助。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "讀者結論",
+      "value": "除了能抓住好運，朱蒂越挫越勇，不斷付出【　　　】，最後才能成為獨立自主新女性。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "故事大綱",
+      "讀者自問自答",
+      "勤奮不懈",
+      "自立自強"
+    ],
+    "layout": "worksheet_table"
+  }
+}

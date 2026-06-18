@@ -1,0 +1,88 @@
+{
+  "rows": [
+    {
+      "label": "感情小日記5──我該告白嗎？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "兩難問題",
+      "value": "該不該告白",
+      "interactive_type": "display"
+    },
+    {
+      "label": "立場",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "告白──確認關係",
+          "value": "不告白──維持現狀",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "風險",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "萬一告白失敗──\n1.（段三）被對方刻意__\n2.（段三）相處尷尬，無法毫無__\n3.（段四）被大家指指點點，被當成__流傳 \n4.被人亂開玩笑，影響心情，或變成__",
+          "value": "1.（段五）對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方【　　　】【　　　】【　　　】【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "兩難心情",
+      "value": "像是被困在【　　　】中，找不到出口，期許自己有足夠的勇氣和【　　　】做出選擇。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "感情小日記5──我該告白嗎？",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "兩難問題",
+      "value": "該不該告白"
+    },
+    {
+      "kind": "section_block",
+      "section": "立場",
+      "items": [
+        {
+          "label": "告白──確認關係",
+          "value": "不告白──維持現狀"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "風險",
+      "items": [
+        {
+          "label": "萬一告白失敗──\n1.（段三）被對方刻意__\n2.（段三）相處尷尬，無法毫無__\n3.（段四）被大家指指點點，被當成__流傳 \n4.被人亂開玩笑，影響心情，或變成__",
+          "value": "1.（段五）對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方【　　　】【　　　】【　　　】【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "兩難心情",
+      "value": "像是被困在【　　　】中，找不到出口，期許自己有足夠的勇氣和【　　　】做出選擇。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "psr",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "萬一告白失敗──\n1.（段三）被對方刻意__\n2.（段三）相處尷尬，無法毫無__\n3.（段四）被大家指指點點，被當成__流傳 \n4.被人亂開玩笑，影響心情，或變成__",
+      "兩難心情"
+    ],
+    "layout": "worksheet_table"
+  }
+}

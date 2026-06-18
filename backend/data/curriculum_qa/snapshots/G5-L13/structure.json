@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "label": "小丑醫生",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "起源",
+      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主要服務對象",
+      "value": "面臨【　　　】、手術或治療的孩子。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "主要工作內容",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "緩解醫院緊張的氛圍",
+          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "所需專業",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "表演",
+          "value": "以多元的表演方式，讓孩子們感受到放鬆。",
+          "interactive_type": "display"
+        },
+        {
+          "label": "專業知識",
+          "value": "了解醫院的規範和病人的需求。",
+          "interactive_type": "display"
+        },
+        {
+          "label": "__學",
+          "value": "應對病人和家屬的負面情緒。【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "貢獻",
+      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "小丑醫生",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "起源",
+      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。"
+    },
+    {
+      "kind": "pair",
+      "label": "主要服務對象",
+      "value": "面臨【　　　】、手術或治療的孩子。"
+    },
+    {
+      "kind": "section_block",
+      "section": "主要工作內容",
+      "items": [
+        {
+          "label": "緩解醫院緊張的氛圍",
+          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "所需專業",
+      "items": [
+        {
+          "label": "表演",
+          "value": "以多元的表演方式，讓孩子們感受到放鬆。"
+        },
+        {
+          "label": "專業知識",
+          "value": "了解醫院的規範和病人的需求。"
+        },
+        {
+          "label": "__學",
+          "value": "應對病人和家屬的負面情緒。【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "貢獻",
+      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "主要服務對象",
+      "__學",
+      "貢獻"
+    ],
+    "layout": "worksheet_table"
+  }
+}

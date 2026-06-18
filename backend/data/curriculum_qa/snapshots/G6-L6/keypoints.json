@@ -1,0 +1,176 @@
+{
+  "keypoints": {
+    "lesson": "G6-L6",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "問題",
+        "value": "許多人認為一個人__出狀況，是因不能控制的__導致的，這個說法是真的嗎？",
+        "blanks": [
+          {
+            "answer": "心理",
+            "hint": ""
+          },
+          {
+            "answer": "壞事",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "故事一",
+        "sub_rows": [
+          {
+            "sub_label": "人物",
+            "template": "阿堅 小芸",
+            "blanks": []
+          },
+          {
+            "sub_label": "家庭背景",
+            "template": "爸爸__，媽媽__。",
+            "blanks": [
+              {
+                "answer": "酗酒",
+                "hint": ""
+              },
+              {
+                "answer": "跑掉了",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "狀況",
+            "template": "因__、__被送進少年觀護所。 國立大學的__，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。",
+            "blanks": [
+              {
+                "answer": "偷竊",
+                "hint": ""
+              },
+              {
+                "answer": "打架",
+                "hint": ""
+              },
+              {
+                "answer": "高材生",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "想法",
+            "template": "我有這樣的家庭，你期待__？ 我家都已經這樣了，我__行嗎？",
+            "blanks": [
+              {
+                "answer": "我能怎樣",
+                "hint": ""
+              },
+              {
+                "answer": "不努力一點",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "故事二",
+        "value": "一開始 後來",
+        "blanks": []
+      },
+      {
+        "label": "故事二",
+        "sub_rows": [
+          {
+            "sub_label": "問題",
+            "template": "35歲的鄧小姐，發現自己有__，必須一輩子吃藥。",
+            "blanks": [
+              {
+                "answer": "先天性高血壓",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "想法",
+            "template": "為什麼這麼__？ 我__，及早發現。",
+            "blanks": [
+              {
+                "answer": "倒楣",
+                "hint": ""
+              },
+              {
+                "answer": "運氣真不錯",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "結果",
+            "template": "心裡__，吃不好也睡不好。 快樂起來，__。",
+            "blanks": [
+              {
+                "answer": "憂鬱",
+                "hint": ""
+              },
+              {
+                "answer": "能吃能睡",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "故事三",
+        "sub_rows": [
+          {
+            "sub_label": "事實",
+            "template": "黃美廉患有__，手腳扭曲變形，不但走路東倒西歪，還無法說話。",
+            "blanks": [
+              {
+                "answer": "腦性麻痺",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "想法",
+            "template": "學生 黃美廉",
+            "blanks": []
+          },
+          {
+            "sub_label": "想法",
+            "template": "你長這樣，怎麼\n__得起來？ ＯＯＯＯＯＯＯ",
+            "blanks": [
+              {
+                "answer": "快樂",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "結論",
+        "value": "一個人只要__對__的看法，就不致於讓情緒落入萬丈深淵。",
+        "blanks": [
+          {
+            "answer": "改變",
+            "hint": ""
+          },
+          {
+            "answer": "壞事",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "title": "心理出狀況，是壞事導致的嗎？"
+  }
+}

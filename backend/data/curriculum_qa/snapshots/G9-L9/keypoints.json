@@ -1,0 +1,146 @@
+{
+  "keypoints": {
+    "lesson": "G9-L9",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "動作順序",
+        "sub_rows": [
+          {
+            "sub_label": "動作名稱",
+            "template": "動作組群 動作難度/\n難度分值",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "1",
+        "sub_rows": [
+          {
+            "sub_label": "分腿交叉成倒立支撐",
+            "template": "I D/0.4",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "2",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋倒立轉體270度三部位",
+            "template": "II E/0.5",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "3",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋隔兩環俯轉向",
+            "template": "II D/0.4",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "4",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋大隔鞍反轉體180度",
+            "template": "II C/0.3",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "5",
+        "sub_rows": [
+          {
+            "sub_label": "分腿交叉成倒立支撐",
+            "template": "II E/0.5",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "6",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋倒立轉體270度三部位",
+            "template": "II D/0.4",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "7",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋隔兩環俯轉向",
+            "template": "III C/0.3",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "8",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋大隔鞍反轉體180度",
+            "template": "III E/0.5",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "9",
+        "sub_rows": [
+          {
+            "sub_label": "分腿迴旋隔鞍三部位反轉體360度",
+            "template": "III E/0.5",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "10",
+        "sub_rows": [
+          {
+            "sub_label": "（下法動作─結束）\n分腿迴旋隔鞍反轉體360度",
+            "template": "IV D/0.4",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "小計",
+        "value": "__ __",
+        "blanks": [
+          {
+            "answer": "2.0",
+            "hint": ""
+          },
+          {
+            "answer": "4.2",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "總分",
+        "value": "__　　D分＝2＋4.2＝6.2",
+        "blanks": [
+          {
+            "answer": "6.2",
+            "hint": ""
+          }
+        ]
+      }
+    ]
+  }
+}

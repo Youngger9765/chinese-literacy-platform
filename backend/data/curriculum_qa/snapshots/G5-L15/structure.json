@@ -1,0 +1,148 @@
+{
+  "rows": [
+    {
+      "label": "寫信馬拉松",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "起源與目的",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "行動起源",
+          "value": "由【　　　】組織發起，目的是為【　　　】的人發聲。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "行動時間",
+          "value": "每年【　　　】，是【　　　】日。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "行動目的",
+          "value": "透過【　　　】支持遭受【　　　】的人，並向【　　　】或相關單位施壓。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "援助對象",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "兩位受迫害\n的青少年",
+          "value": "琪哈姆 嘗試逃離【　　　】失敗，被捕至今【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "兩位受迫害\n的青少年",
+          "value": "米基塔 因捲入抗議，被判【　　　】，不但未獲【　　　】，且疑似遭受酷刑。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "具體影響與成果",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "成功案例",
+          "value": "泰國的蓉因批評王室特權，而面臨【　　　】，後因「寫信馬拉松」行動而被釋放。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "行動成果\n(第五段)",
+          "value": "已成功改變【　　　】的命運，使其擺脫【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "臺灣參與",
+      "value": "每年12月於【　　　】舉行活動，寫明信片傳遞【　　　】與【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "行動意義",
+      "value": "1.一封封充滿關懷與支持的信，位身陷困境的人們帶來【　　　】與【　　　】。\n2.讓大家看見，【　　　】都能成為改變的推手。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "寫信馬拉松",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "起源與目的",
+      "items": [
+        {
+          "label": "行動起源",
+          "value": "由【　　　】組織發起，目的是為【　　　】的人發聲。"
+        },
+        {
+          "label": "行動時間",
+          "value": "每年【　　　】，是【　　　】日。"
+        },
+        {
+          "label": "行動目的",
+          "value": "透過【　　　】支持遭受【　　　】的人，並向【　　　】或相關單位施壓。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "援助對象",
+      "items": [
+        {
+          "label": "兩位受迫害\n的青少年",
+          "value": "琪哈姆 嘗試逃離【　　　】失敗，被捕至今【　　　】。"
+        },
+        {
+          "label": "兩位受迫害\n的青少年",
+          "value": "米基塔 因捲入抗議，被判【　　　】，不但未獲【　　　】，且疑似遭受酷刑。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "具體影響與成果",
+      "items": [
+        {
+          "label": "成功案例",
+          "value": "泰國的蓉因批評王室特權，而面臨【　　　】，後因「寫信馬拉松」行動而被釋放。"
+        },
+        {
+          "label": "行動成果\n(第五段)",
+          "value": "已成功改變【　　　】的命運，使其擺脫【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "臺灣參與",
+      "value": "每年12月於【　　　】舉行活動，寫明信片傳遞【　　　】與【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "行動意義",
+      "value": "1.一封封充滿關懷與支持的信，位身陷困境的人們帶來【　　　】與【　　　】。\n2.讓大家看見，【　　　】都能成為改變的推手。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 9,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "行動起源",
+      "行動時間",
+      "行動目的",
+      "兩位受迫害\n的青少年"
+    ],
+    "layout": "worksheet_table"
+  }
+}

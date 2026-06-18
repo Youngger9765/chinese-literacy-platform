@@ -1,0 +1,280 @@
+{
+  "rows": [
+    {
+      "label": "動作順序",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "動作名稱",
+          "value": "動作組群 動作難度/\n難度分值",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "1",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿交叉成倒立支撐",
+          "value": "I D/0.4",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "2",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋倒立轉體270度三部位",
+          "value": "II E/0.5",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "3",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋隔兩環俯轉向",
+          "value": "II D/0.4",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "4",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋大隔鞍反轉體180度",
+          "value": "II C/0.3",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "5",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿交叉成倒立支撐",
+          "value": "II E/0.5",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "6",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋倒立轉體270度三部位",
+          "value": "II D/0.4",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "7",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋隔兩環俯轉向",
+          "value": "III C/0.3",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "8",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋大隔鞍反轉體180度",
+          "value": "III E/0.5",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "9",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分腿迴旋隔鞍三部位反轉體360度",
+          "value": "III E/0.5",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "10",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "（下法動作─結束）\n分腿迴旋隔鞍反轉體360度",
+          "value": "IV D/0.4",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "小計",
+      "value": "【　　　】 【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "總分",
+      "value": "【　　　】　　D分＝2＋4.2＝6.2",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "動作順序",
+      "items": [
+        {
+          "label": "動作名稱",
+          "value": "動作組群 動作難度/\n難度分值"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "1",
+      "items": [
+        {
+          "label": "分腿交叉成倒立支撐",
+          "value": "I D/0.4"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "2",
+      "items": [
+        {
+          "label": "分腿迴旋倒立轉體270度三部位",
+          "value": "II E/0.5"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "3",
+      "items": [
+        {
+          "label": "分腿迴旋隔兩環俯轉向",
+          "value": "II D/0.4"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "4",
+      "items": [
+        {
+          "label": "分腿迴旋大隔鞍反轉體180度",
+          "value": "II C/0.3"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "5",
+      "items": [
+        {
+          "label": "分腿交叉成倒立支撐",
+          "value": "II E/0.5"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "6",
+      "items": [
+        {
+          "label": "分腿迴旋倒立轉體270度三部位",
+          "value": "II D/0.4"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "7",
+      "items": [
+        {
+          "label": "分腿迴旋隔兩環俯轉向",
+          "value": "III C/0.3"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "8",
+      "items": [
+        {
+          "label": "分腿迴旋大隔鞍反轉體180度",
+          "value": "III E/0.5"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "9",
+      "items": [
+        {
+          "label": "分腿迴旋隔鞍三部位反轉體360度",
+          "value": "III E/0.5"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "10",
+      "items": [
+        {
+          "label": "（下法動作─結束）\n分腿迴旋隔鞍反轉體360度",
+          "value": "IV D/0.4"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "小計",
+      "value": "【　　　】 【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "總分",
+      "value": "【　　　】　　D分＝2＋4.2＝6.2"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "小計",
+      "總分"
+    ],
+    "layout": "worksheet_table"
+  }
+}

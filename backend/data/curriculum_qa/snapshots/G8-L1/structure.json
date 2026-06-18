@@ -1,0 +1,202 @@
+{
+  "rows": [
+    {
+      "label": "致台東：一封過客的情書",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "作者與台東的一段情",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "邂逅",
+      "value": "1.作者到訪台東的原因是【　　　】。\n2.作者停留時間為 不到一天  □一天  □兩天一夜。\n3.令作者眷戀的是【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "再相遇",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "移動方式",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "沿途景色\n（多選）",
+          "value": "寬廣田野 □遼闊天空 □點點星光 層層山巒",
+          "interactive_type": "display"
+        },
+        {
+          "label": "台北景色（多選）",
+          "value": "□耀眼星空 狹小天空 閃爍霓虹 □棋盤街道",
+          "interactive_type": "display"
+        },
+        {
+          "label": "車站景色（多選）",
+          "value": "青草茶店生意興隆  麻糬店掛上完售的牌子\n□站前廣場冷冷清清  □車站因沙塵一片灰濛濛",
+          "interactive_type": "display"
+        },
+        {
+          "label": "作者感受",
+          "value": "較喜歡 □台北  台東 的景色。",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "相處",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "早晨",
+          "value": "遠眺藍色的【　　　】，拍下【　　　】的樣貌。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "黃昏",
+          "value": "期待【　　　】帶來的驚喜。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "夜晚",
+          "value": "只要【　　　】，就能看見【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "例外之景",
+          "value": "漫天【　　　】，但若【　　　】就會平息。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "最愛之景",
+          "value": "有各種【　　　】色的【　　　】景。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "帶來影響",
+          "value": "生活有更多【　　　】，心變得更【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "別離",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "分別原因",
+          "value": "作者只是【　　　】，不是當地居民，必須離開。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "分別之景\n（多選）",
+          "value": "湛藍天空 燦爛陽光 蔚藍海洋 遼闊天空",
+          "interactive_type": "display"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "致台東：一封過客的情書",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "作者與台東的一段情",
+      "value": ""
+    },
+    {
+      "kind": "pair",
+      "label": "邂逅",
+      "value": "1.作者到訪台東的原因是【　　　】。\n2.作者停留時間為 不到一天  □一天  □兩天一夜。\n3.令作者眷戀的是【　　　】。"
+    },
+    {
+      "kind": "section_block",
+      "section": "再相遇",
+      "items": [
+        {
+          "label": "移動方式",
+          "value": "【　　　】"
+        },
+        {
+          "label": "沿途景色\n（多選）",
+          "value": "寬廣田野 □遼闊天空 □點點星光 層層山巒"
+        },
+        {
+          "label": "台北景色（多選）",
+          "value": "□耀眼星空 狹小天空 閃爍霓虹 □棋盤街道"
+        },
+        {
+          "label": "車站景色（多選）",
+          "value": "青草茶店生意興隆  麻糬店掛上完售的牌子\n□站前廣場冷冷清清  □車站因沙塵一片灰濛濛"
+        },
+        {
+          "label": "作者感受",
+          "value": "較喜歡 □台北  台東 的景色。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "相處",
+      "items": [
+        {
+          "label": "早晨",
+          "value": "遠眺藍色的【　　　】，拍下【　　　】的樣貌。"
+        },
+        {
+          "label": "黃昏",
+          "value": "期待【　　　】帶來的驚喜。"
+        },
+        {
+          "label": "夜晚",
+          "value": "只要【　　　】，就能看見【　　　】。"
+        },
+        {
+          "label": "例外之景",
+          "value": "漫天【　　　】，但若【　　　】就會平息。"
+        },
+        {
+          "label": "最愛之景",
+          "value": "有各種【　　　】色的【　　　】景。"
+        },
+        {
+          "label": "帶來影響",
+          "value": "生活有更多【　　　】，心變得更【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "別離",
+      "items": [
+        {
+          "label": "分別原因",
+          "value": "作者只是【　　　】，不是當地居民，必須離開。"
+        },
+        {
+          "label": "分別之景\n（多選）",
+          "value": "湛藍天空 燦爛陽光 蔚藍海洋 遼闊天空"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 9,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "邂逅",
+      "移動方式",
+      "早晨",
+      "黃昏"
+    ],
+    "layout": "worksheet_table"
+  }
+}

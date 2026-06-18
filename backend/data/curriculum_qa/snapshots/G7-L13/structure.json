@@ -1,0 +1,55 @@
+{
+  "rows": [
+    {
+      "label": "綠色賽事",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "覺察問題",
+      "value": "(1)阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n(2)賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "具體做法",
+      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結論",
+      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "綠色賽事",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "覺察問題",
+      "value": "(1)阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n(2)賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。"
+    },
+    {
+      "kind": "pair",
+      "label": "具體做法",
+      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "覺察問題",
+      "具體做法",
+      "結論"
+    ],
+    "layout": "worksheet_table"
+  }
+}

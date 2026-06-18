@@ -1,0 +1,50 @@
+{
+  "keypoints": {
+    "lesson": "G9-L8",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "收入最高20%家庭",
+        "sub_rows": [
+          {
+            "sub_label": "成長率小幅__",
+            "template": "成長率__",
+            "blanks": [
+              {
+                "answer": "上升",
+                "hint": ""
+              },
+              {
+                "answer": "下降",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "收入最低20%家庭",
+        "sub_rows": [
+          {
+            "sub_label": "成長率大幅__",
+            "template": "成長率__",
+            "blanks": [
+              {
+                "answer": "下降",
+                "hint": ""
+              },
+              {
+                "answer": "下降",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

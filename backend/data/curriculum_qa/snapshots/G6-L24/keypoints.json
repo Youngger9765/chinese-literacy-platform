@@ -1,0 +1,57 @@
+{
+  "keypoints": {
+    "lesson": "G6-L24",
+    "structure": "flat",
+    "columns": [
+      "label",
+      "hint",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "問題",
+        "hint": "描述一個「不好的事或困難」",
+        "value": "白鯨怎麼了?\n白鯨群__",
+        "blanks": [
+          {
+            "answer": "困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了",
+            "hint": ""
+          }
+        ],
+        "paragraph": "2"
+      },
+      {
+        "label": "解決~6",
+        "hint": "有人想出辦法或行動 (誰＋做什麼)",
+        "value": "1.村民__\n2.政府__\n3.船員__",
+        "blanks": [
+          {
+            "answer": "用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類",
+            "hint": ""
+          },
+          {
+            "answer": "派破冰船救援，開出一條20公里的水道",
+            "hint": ""
+          },
+          {
+            "answer": "播放古典音樂引導白鯨前進",
+            "hint": ""
+          }
+        ],
+        "paragraph": "3"
+      },
+      {
+        "label": "結果",
+        "hint": "行動後，造成了什麼改變？",
+        "value": "__",
+        "blanks": [
+          {
+            "answer": "數千頭白鯨游出冰原，回到大海",
+            "hint": ""
+          }
+        ],
+        "paragraph": "6"
+      }
+    ]
+  }
+}

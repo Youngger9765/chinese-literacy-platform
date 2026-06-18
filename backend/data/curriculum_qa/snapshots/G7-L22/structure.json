@@ -1,0 +1,115 @@
+{
+  "rows": [
+    {
+      "label": "信眾與教主",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "預言/事件",
+      "value": "一位【　　　】聲稱\n【　　　】即將來臨，洪水會淹沒全世界，只有【　　　】會被外星人用飛碟救走。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "研究問題",
+      "value": "信眾對教主的態度是否因預言結果有所改變？",
+      "interactive_type": "display"
+    },
+    {
+      "label": "研究方法",
+      "value": "三位心理學家潛入組織，匿名進行蒐集資料。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "觀察結果",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "末日前",
+          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "末日當日",
+          "value": "什麼都沒有發生　　□外星人出現。(單選)",
+          "interactive_type": "display"
+        },
+        {
+          "label": "末日後",
+          "value": "(1)原來就不太投入的人怎麼做？→【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "末日後",
+          "value": "(2)對教主付出很多的人怎麼做？→【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "研究結論",
+      "value": "有特定信仰的人：(單選)\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "信眾與教主",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "預言/事件",
+      "value": "一位【　　　】聲稱\n【　　　】即將來臨，洪水會淹沒全世界，只有【　　　】會被外星人用飛碟救走。"
+    },
+    {
+      "kind": "pair",
+      "label": "研究問題",
+      "value": "信眾對教主的態度是否因預言結果有所改變？"
+    },
+    {
+      "kind": "pair",
+      "label": "研究方法",
+      "value": "三位心理學家潛入組織，匿名進行蒐集資料。"
+    },
+    {
+      "kind": "section_block",
+      "section": "觀察結果",
+      "items": [
+        {
+          "label": "末日前",
+          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
+        },
+        {
+          "label": "末日當日",
+          "value": "什麼都沒有發生　　□外星人出現。(單選)"
+        },
+        {
+          "label": "末日後",
+          "value": "(1)原來就不太投入的人怎麼做？→【　　　】"
+        },
+        {
+          "label": "末日後",
+          "value": "(2)對教主付出很多的人怎麼做？→【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "研究結論",
+      "value": "有特定信仰的人：(單選)\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "psr",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "預言/事件",
+      "末日前",
+      "末日後",
+      "末日後"
+    ],
+    "layout": "worksheet_table"
+  }
+}

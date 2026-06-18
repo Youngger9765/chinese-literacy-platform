@@ -1,0 +1,57 @@
+{
+  "keypoints": {
+    "lesson": "G4-L2",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "主角",
+        "value": "__",
+        "blanks": [
+          {
+            "answer": "楊俊瀚",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "label": "挫折事件",
+        "sub_rows": [
+          {
+            "sub_label": "雅加達亞運",
+            "template": "（單選）\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌",
+            "blanks": []
+          },
+          {
+            "sub_label": "拿坡里世大運",
+            "template": "比賽時受傷了，他選擇（單選）\n積極的面對與復健   □放棄跑步、不願治療",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "結果",
+        "value": "他成為再度登上奧運（單選）\n一百公尺  □四百公尺   的短跑項目的臺灣選手。",
+        "blanks": []
+      },
+      {
+        "label": "他學到了什麼?",
+        "value": "他學會了先了解害怕的事物，__，再戰勝它。\n2.學習和自己__，找尋答案。",
+        "blanks": [
+          {
+            "answer": "擁抱恐懼",
+            "hint": ""
+          },
+          {
+            "answer": "對話",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "title": "十秒的背後"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "rows": [
+    {
+      "label": "掃雷英雄馬嘎瓦",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "巨鼠外型與優點",
+      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "地雷危害",
+      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "兩種掃雷方式的比較",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "傳統掃雷",
+          "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "巨鼠掃雷",
+          "value": "1.靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【　　　】，訓練成本【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "巨鼠貢獻",
+      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "掃雷英雄馬嘎瓦",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "巨鼠外型與優點",
+      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "地雷危害",
+      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。"
+    },
+    {
+      "kind": "section_block",
+      "section": "兩種掃雷方式的比較",
+      "items": [
+        {
+          "label": "傳統掃雷",
+          "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。"
+        },
+        {
+          "label": "巨鼠掃雷",
+          "value": "1.靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【　　　】，訓練成本【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "巨鼠貢獻",
+      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "巨鼠外型與優點",
+      "地雷危害",
+      "傳統掃雷",
+      "巨鼠掃雷"
+    ],
+    "layout": "worksheet_table"
+  }
+}

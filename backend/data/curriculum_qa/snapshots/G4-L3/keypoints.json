@@ -1,0 +1,54 @@
+{
+  "keypoints": {
+    "lesson": "G4-L3",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "主題：】長高【的關鍵",
+        "sub_rows": [
+          {
+            "sub_label": "迷思",
+            "template": "多喝__就可以長高。──這是錯誤的迷思唷！",
+            "blanks": [
+              {
+                "answer": "牛奶",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "研究支持的\n方法",
+            "template": "根據研究，長高的方法有哪三項？\n1.充足的__。\n2.適當的__。\n(1)有氧運動─提升核心體溫，促進生長激素分泌。\n(2)跳躍的動作─刺激__。\n(3)肌力訓練（弓箭步、深蹲）和__運動（瑜珈）。\n3.均衡的__。",
+            "blanks": [
+              {
+                "answer": "睡眠",
+                "hint": ""
+              },
+              {
+                "answer": "運動",
+                "hint": ""
+              },
+              {
+                "answer": "生長板",
+                "hint": ""
+              },
+              {
+                "answer": "伸展",
+                "hint": ""
+              },
+              {
+                "answer": "飲食",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "title": "長高的秘密"
+  }
+}

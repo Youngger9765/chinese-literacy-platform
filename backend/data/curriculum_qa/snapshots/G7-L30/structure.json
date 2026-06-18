@@ -1,0 +1,136 @@
+{
+  "rows": [
+    {
+      "label": "都是八哥，為什麼命運不一樣？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主題",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "文章探討的核心問題是什麼？",
+          "value": "為什麼外來種【　　　】愈來愈多，原生種【　　　】卻愈來愈少？",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "觀察 段1．圖一",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "圖一告訴我們什麼？",
+          "value": "白尾八哥與臺灣冠八哥外形【　　　】，不容易單靠外表一眼分辨。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "觀察 段2．表一",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "表一比較了哪些項目？",
+          "value": "兩種八哥的外形（【　　　】、【　　　】）與習性（是否【　　　】、築巢地點、適應都市環境）。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "觀察 段3．表二",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "表二呈現了什麼數據？",
+          "value": "近年【　　　】族群數量明顯多過臺灣冠八哥，部分地區甚至已經看不到【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "推論 段4",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "兩種族群命運差異的可能原因？",
+          "value": "【　　　】較不怕人、常利用人造設施築巢；臺灣【　　　】提供了外來種的生存優勢。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "都是八哥，為什麼命運不一樣？",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "主題",
+      "items": [
+        {
+          "label": "文章探討的核心問題是什麼？",
+          "value": "為什麼外來種【　　　】愈來愈多，原生種【　　　】卻愈來愈少？"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "觀察 段1．圖一",
+      "items": [
+        {
+          "label": "圖一告訴我們什麼？",
+          "value": "白尾八哥與臺灣冠八哥外形【　　　】，不容易單靠外表一眼分辨。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "觀察 段2．表一",
+      "items": [
+        {
+          "label": "表一比較了哪些項目？",
+          "value": "兩種八哥的外形（【　　　】、【　　　】）與習性（是否【　　　】、築巢地點、適應都市環境）。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "觀察 段3．表二",
+      "items": [
+        {
+          "label": "表二呈現了什麼數據？",
+          "value": "近年【　　　】族群數量明顯多過臺灣冠八哥，部分地區甚至已經看不到【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "推論 段4",
+      "items": [
+        {
+          "label": "兩種族群命運差異的可能原因？",
+          "value": "【　　　】較不怕人、常利用人造設施築巢；臺灣【　　　】提供了外來種的生存優勢。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "文章探討的核心問題是什麼？",
+      "圖一告訴我們什麼？",
+      "表一比較了哪些項目？",
+      "表二呈現了什麼數據？"
+    ],
+    "layout": "worksheet_table"
+  }
+}

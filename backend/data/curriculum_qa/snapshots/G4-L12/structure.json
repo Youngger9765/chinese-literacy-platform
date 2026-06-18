@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "label": "黃絲帶",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "火車上的相遇",
+      "value": "學生們在火車上玩牌、嘻笑、調侃，男人在一旁微笑著。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "學生唱歌",
+      "value": "學生唱〈故鄉〉時，男人【　　　】了、視線模糊、低頭，將臉埋在大手裡，肩膀輕輕抽動。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "男人說自己的過去",
+      "value": "1.男人說他年輕時就認識了美麗的妻子，要結婚時岳父反對。他想要賺很多錢，讓岳父【　　　】。\n2.為了【　　　】加入詐騙團體，被抓，判了18個月。\n3.他寫信給老婆認錯，想回家，如果老婆願意讓他回家，就在【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "接近大榕樹",
+      "value": "火車快到大榕樹時，年輕人們心中【　　　】，都湊到窗邊，睜大眼睛。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "黃絲帶出現",
+      "value": "1.大榕樹上，掛著滿樹的【　　　】，像太陽一樣閃耀。\n2.男人一邊笑一邊哭：「【　　　】。」\n  學生們掌聲齊聲大喊：「【　　　】！」",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "黃絲帶",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "火車上的相遇",
+      "value": "學生們在火車上玩牌、嘻笑、調侃，男人在一旁微笑著。"
+    },
+    {
+      "kind": "pair",
+      "label": "學生唱歌",
+      "value": "學生唱〈故鄉〉時，男人【　　　】了、視線模糊、低頭，將臉埋在大手裡，肩膀輕輕抽動。"
+    },
+    {
+      "kind": "pair",
+      "label": "男人說自己的過去",
+      "value": "1.男人說他年輕時就認識了美麗的妻子，要結婚時岳父反對。他想要賺很多錢，讓岳父【　　　】。\n2.為了【　　　】加入詐騙團體，被抓，判了18個月。\n3.他寫信給老婆認錯，想回家，如果老婆願意讓他回家，就在【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "接近大榕樹",
+      "value": "火車快到大榕樹時，年輕人們心中【　　　】，都湊到窗邊，睜大眼睛。"
+    },
+    {
+      "kind": "pair",
+      "label": "黃絲帶出現",
+      "value": "1.大榕樹上，掛著滿樹的【　　　】，像太陽一樣閃耀。\n2.男人一邊笑一邊哭：「【　　　】。」\n  學生們掌聲齊聲大喊：「【　　　】！」"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "學生唱歌",
+      "男人說自己的過去",
+      "接近大榕樹",
+      "黃絲帶出現"
+    ],
+    "layout": "worksheet_table"
+  }
+}

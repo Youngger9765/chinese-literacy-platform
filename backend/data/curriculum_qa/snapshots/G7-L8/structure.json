@@ -1,0 +1,106 @@
+{
+  "rows": [
+    {
+      "label": "科學怪人",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "書本簡介",
+      "value": "1.作者是英國作家【　　　】。\n2.書名叫做叫做《Frankenstein》（弗蘭肯斯坦），中文翻譯：【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "故事大意",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "起因",
+          "value": "弗蘭肯斯坦是一位【　　　】，對探究生命起源很有興趣，並且從【　　　】得到靈感，決定進行【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "經過",
+          "value": "他將【　　　】縫補成人的形狀，某夜，他製造的「人」居然【　　　】，他害怕的奪門而出，留【　　　】自己探索世界。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "結果",
+          "value": "怪物被迫進入人類世界，卻因為【　　　】，一再經歷誤解與傷害，最後導致一連串悲劇。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "書名意義",
+      "value": "主標題是【　　　】。\n1.名字背後帶著取名之人的【　　　】。小說的怪物其實【　　　】名字，代表從未得到他人的認同與祝福。(單選)\n2.小說中文譯名是科學怪人，有人認為科學怪人是【　　　】，也有人是【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "書名意義",
+      "value": "副標題是【　　　】。\n普羅米修斯是希臘神話的神，他【　　　】觸犯禁忌，不得善終。作者把弗蘭肯斯坦比喻為「現代普羅米修斯」，可能意味弗蘭肯斯坦同樣【　　　】。\n人類是否能【　　　】？引發後世讀者熱烈討論。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結語",
+      "value": "科學的發展是不是該有【　　　】的界線？",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "科學怪人",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "書本簡介",
+      "value": "1.作者是英國作家【　　　】。\n2.書名叫做叫做《Frankenstein》（弗蘭肯斯坦），中文翻譯：【　　　】。"
+    },
+    {
+      "kind": "section_block",
+      "section": "故事大意",
+      "items": [
+        {
+          "label": "起因",
+          "value": "弗蘭肯斯坦是一位【　　　】，對探究生命起源很有興趣，並且從【　　　】得到靈感，決定進行【　　　】。"
+        },
+        {
+          "label": "經過",
+          "value": "他將【　　　】縫補成人的形狀，某夜，他製造的「人」居然【　　　】，他害怕的奪門而出，留【　　　】自己探索世界。"
+        },
+        {
+          "label": "結果",
+          "value": "怪物被迫進入人類世界，卻因為【　　　】，一再經歷誤解與傷害，最後導致一連串悲劇。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "書名意義",
+      "value": "主標題是【　　　】。\n1.名字背後帶著取名之人的【　　　】。小說的怪物其實【　　　】名字，代表從未得到他人的認同與祝福。(單選)\n2.小說中文譯名是科學怪人，有人認為科學怪人是【　　　】，也有人是【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "書名意義",
+      "value": "副標題是【　　　】。\n普羅米修斯是希臘神話的神，他【　　　】觸犯禁忌，不得善終。作者把弗蘭肯斯坦比喻為「現代普羅米修斯」，可能意味弗蘭肯斯坦同樣【　　　】。\n人類是否能【　　　】？引發後世讀者熱烈討論。"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "科學的發展是不是該有【　　　】的界線？"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 7,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "書本簡介",
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "layout": "worksheet_table"
+  }
+}

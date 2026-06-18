@@ -1,0 +1,108 @@
+{
+  "rows": [
+    {
+      "label": "引出議題",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "【   1   】",
+          "value": "本文從生活與產業都需要【　　　】切入，提出台灣【　　　】的爭議。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "反方論述",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "【2～4   】",
+          "value": "反對方強調萬一出事【　　　】，並指出台灣疏散困難與核廢選址的困境。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "正方論述",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "【 5～7  】",
+          "value": "支持方強調「不用核能也有風險」，包括能源【　　　】、減碳壓力與【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "結尾",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "【  8    】",
+          "value": "作者提醒要用【　　　】來做出民主決策。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "引出議題",
+      "items": [
+        {
+          "label": "【   1   】",
+          "value": "本文從生活與產業都需要【　　　】切入，提出台灣【　　　】的爭議。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "反方論述",
+      "items": [
+        {
+          "label": "【2～4   】",
+          "value": "反對方強調萬一出事【　　　】，並指出台灣疏散困難與核廢選址的困境。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "正方論述",
+      "items": [
+        {
+          "label": "【 5～7  】",
+          "value": "支持方強調「不用核能也有風險」，包括能源【　　　】、減碳壓力與【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "結尾",
+      "items": [
+        {
+          "label": "【  8    】",
+          "value": "作者提醒要用【　　　】來做出民主決策。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "【   1   】",
+      "【2～4   】",
+      "【 5～7  】",
+      "【  8    】"
+    ],
+    "layout": "worksheet_table"
+  }
+}

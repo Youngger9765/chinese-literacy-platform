@@ -1,0 +1,84 @@
+{
+  "keypoints": {
+    "lesson": "G6-L10",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "小主題",
+        "value": "重要細節",
+        "blanks": []
+      },
+      {
+        "label": "種子銀行的建置",
+        "sub_rows": [
+          {
+            "sub_label": "目的",
+            "template": "萬一大規模災害發生時，預防某些種子的基因因此消失，以保護農業多樣性。",
+            "blanks": []
+          },
+          {
+            "sub_label": "__",
+            "template": "如聚光燈－小試身手❶（第四段）所寫。",
+            "blanks": [
+              {
+                "answer": "低溫環境",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "建築安全",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "建築設計具備高度的安全性，能抵擋地震、核武與洪水。（合理即可）",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "參與種子銀行的例子",
+        "sub_rows": [
+          {
+            "sub_label": "__",
+            "template": "如聚光燈－小試身手❷（第六段）所寫。",
+            "blanks": [
+              {
+                "answer": "臺灣參與種子保存計畫",
+                "hint": ""
+              }
+            ]
+          },
+          {
+            "sub_label": "敘利亞取出保存種子",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "2015年，敘利亞內戰導致當地種子庫受損，中東研究人員從斯瓦爾巴種子庫提取130箱種子。（合理即可）",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "感想",
+        "value": "科學家未雨綢繆建設種子庫，我們應該保護__，希望永遠不會用到種子庫。",
+        "blanks": [
+          {
+            "answer": "生態環境",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "title": "大主題：末日種子庫"
+  }
+}

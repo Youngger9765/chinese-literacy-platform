@@ -1,0 +1,85 @@
+{
+  "rows": [
+    {
+      "label": "問題\n/（1.2）",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "描述一個「不好的事或困難」",
+          "value": "歐洲人遇到什麼困難?\n歐洲人【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "解決\n/（3）",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "有人想出辦法或行動 (誰＋做什麼)",
+          "value": "1. 荷蘭人提出一個構想：【　　　】（可省略）\n2.荷蘭人成立【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "結果\n/（5. 10）",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "行動後，造成了什麼改變？",
+          "value": "1.許多人【　　　】\n2.最後【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "問題\n/（1.2）",
+      "items": [
+        {
+          "label": "描述一個「不好的事或困難」",
+          "value": "歐洲人遇到什麼困難?\n歐洲人【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "解決\n/（3）",
+      "items": [
+        {
+          "label": "有人想出辦法或行動 (誰＋做什麼)",
+          "value": "1. 荷蘭人提出一個構想：【　　　】（可省略）\n2.荷蘭人成立【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "結果\n/（5. 10）",
+      "items": [
+        {
+          "label": "行動後，造成了什麼改變？",
+          "value": "1.許多人【　　　】\n2.最後【　　　】"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "psr",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "描述一個「不好的事或困難」",
+      "有人想出辦法或行動 (誰＋做什麼)",
+      "行動後，造成了什麼改變？"
+    ],
+    "layout": "worksheet_table"
+  }
+}

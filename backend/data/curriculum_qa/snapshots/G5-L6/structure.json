@@ -1,0 +1,114 @@
+{
+  "rows": [
+    {
+      "label": "堅持到底的棒球人生──周思齊",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "背景",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "二",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "挑戰",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "三\n、\n四",
+          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說（天賦　□努力）不夠。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "努力",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "四\n、\n五",
+          "value": "1.調適心態：先【　　　】，再以【　　　】的精神努力\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "成就",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "五",
+          "value": "於高二暑假，升上【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "堅持到底的棒球人生──周思齊",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "背景",
+      "items": [
+        {
+          "label": "二",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "挑戰",
+      "items": [
+        {
+          "label": "三\n、\n四",
+          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說（天賦　□努力）不夠。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "努力",
+      "items": [
+        {
+          "label": "四\n、\n五",
+          "value": "1.調適心態：先【　　　】，再以【　　　】的精神努力\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "成就",
+      "items": [
+        {
+          "label": "五",
+          "value": "於高二暑假，升上【　　　】"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "二",
+      "三\n、\n四",
+      "四\n、\n五",
+      "五"
+    ],
+    "layout": "worksheet_table"
+  }
+}

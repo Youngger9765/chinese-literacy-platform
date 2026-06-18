@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "label": "主題",
+      "value": "大自然的氣象小幫手",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "重要事實 1",
+      "value": "蜘蛛結網代表天氣穩定",
+      "interactive_type": "checkbox",
+      "options": [
+        "蜘蛛結網代表快下雨",
+        "蜘蛛結網代表天氣穩定",
+        "蜘蛛結網代表風很大"
+      ],
+      "correct_options": [
+        1
+      ]
+    },
+    {
+      "label": "重要事實 2",
+      "value": "蟋蟀叫聲頻率與氣溫有關",
+      "interactive_type": "checkbox",
+      "options": [
+        "蟋蟀叫聲頻率與濕度有關",
+        "蟋蟀叫聲頻率與氣溫有關",
+        "蟋蟀叫聲頻率與風速有關"
+      ],
+      "correct_options": [
+        1
+      ]
+    },
+    {
+      "label": "重要事實 3",
+      "value": "日暈月暈是天氣變化的前兆",
+      "interactive_type": "checkbox",
+      "options": [
+        "日暈月暈是好運的象徵",
+        "日暈月暈是天氣變化的前兆",
+        "日暈月暈是外星人的信號"
+      ],
+      "correct_options": [
+        1
+      ]
+    },
+    {
+      "label": "結論",
+      "value": "大自然的線索能幫助我們預測天氣",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "mixed",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 2,
+    "checkbox_count": 3,
+    "primary_labels": [
+      "主題",
+      "重要事實 1",
+      "重要事實 2",
+      "重要事實 3"
+    ],
+    "layout": "cards"
+  }
+}

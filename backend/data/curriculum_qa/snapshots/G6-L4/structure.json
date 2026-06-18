@@ -1,0 +1,97 @@
+{
+  "rows": [
+    {
+      "label": "兩千五百歲的酷老師",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主角",
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "背景",
+      "value": "孔子喜歡唱歌、吟詩、射箭，後人尊稱為至聖先師。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "教育理念",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "（單選）\n有教無類\n□因材施教",
+          "value": "1.孔子開辦【　　　】，不分老小、貧富、貴賤或家世，將教育普及到一般平民百姓。\n2.下列哪些人可以成為孔子的學生？(多選)\n   乞丐    農夫    大官",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "（單選）\n□有教無類\n因材施教",
+          "value": "孔子了解每位學生，並依據他們的特質給予不同的教導。",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "成就",
+      "value": "1.開創教育新格局。\n2.教過的學生人數，約【　　　】人。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "影響",
+      "value": "學生敬念孔子，將他與學生的對話記錄、集結成【　　　】。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "兩千五百歲的酷老師",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "背景",
+      "value": "孔子喜歡唱歌、吟詩、射箭，後人尊稱為至聖先師。"
+    },
+    {
+      "kind": "section_block",
+      "section": "教育理念",
+      "items": [
+        {
+          "label": "（單選）\n有教無類\n□因材施教",
+          "value": "1.孔子開辦【　　　】，不分老小、貧富、貴賤或家世，將教育普及到一般平民百姓。\n2.下列哪些人可以成為孔子的學生？(多選)\n   乞丐    農夫    大官"
+        },
+        {
+          "label": "（單選）\n□有教無類\n因材施教",
+          "value": "孔子了解每位學生，並依據他們的特質給予不同的教導。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "成就",
+      "value": "1.開創教育新格局。\n2.教過的學生人數，約【　　　】人。"
+    },
+    {
+      "kind": "pair",
+      "label": "影響",
+      "value": "學生敬念孔子，將他與學生的對話記錄、集結成【　　　】。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "主角",
+      "（單選）\n有教無類\n□因材施教",
+      "成就",
+      "影響"
+    ],
+    "layout": "worksheet_table"
+  }
+}

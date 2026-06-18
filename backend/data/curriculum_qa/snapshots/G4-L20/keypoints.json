@@ -1,0 +1,94 @@
+{
+  "keypoints": {
+    "lesson": "G4-L20",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "職業",
+        "sub_rows": [
+          {
+            "sub_label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
+            "template": "引水人",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "薪水",
+        "sub_rows": [
+          {
+            "sub_label": "□高　　低",
+            "template": "高　　□低",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "技術門檻",
+        "sub_rows": [
+          {
+            "sub_label": "□高　　低",
+            "template": "高　　□低",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "條件",
+        "sub_rows": [
+          {
+            "sub_label": "__",
+            "template": "❶證照難易度難  □簡單\n❷經驗需要  多  □少\n❸年資需要  □短  長\n❹體能需要  強  □普通",
+            "blanks": [
+              {
+                "answer": "身體健康",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "市場稀有性",
+        "sub_rows": [
+          {
+            "sub_label": "常見　　□稀有",
+            "template": "□常見　　稀有",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "市場供需情況（填多或少）",
+        "sub_rows": [
+          {
+            "sub_label": "供給__\n需求__",
+            "template": "供給__\n需求__",
+            "blanks": [
+              {
+                "answer": "多",
+                "hint": ""
+              },
+              {
+                "answer": "少",
+                "hint": ""
+              },
+              {
+                "answer": "少",
+                "hint": ""
+              },
+              {
+                "answer": "多",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

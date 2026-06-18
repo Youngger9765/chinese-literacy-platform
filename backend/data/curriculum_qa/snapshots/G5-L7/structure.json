@@ -1,0 +1,114 @@
+{
+  "rows": [
+    {
+      "label": "堅持到底的棒球人生──周思齊",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "背景",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "二",
+          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "挑戰",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "三\n、\n四",
+          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "努力",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "四",
+          "value": "1.設法逃脫：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.堅持信念：不願違背【　　　】，也不願辜負支持他的【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "成就",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "五\n、\n六",
+          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "堅持到底的棒球人生──周思齊",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "背景",
+      "items": [
+        {
+          "label": "二",
+          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "挑戰",
+      "items": [
+        {
+          "label": "三\n、\n四",
+          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "努力",
+      "items": [
+        {
+          "label": "四",
+          "value": "1.設法逃脫：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.堅持信念：不願違背【　　　】，也不願辜負支持他的【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "成就",
+      "items": [
+        {
+          "label": "五\n、\n六",
+          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "二",
+      "三\n、\n四",
+      "四",
+      "五\n、\n六"
+    ],
+    "layout": "worksheet_table"
+  }
+}

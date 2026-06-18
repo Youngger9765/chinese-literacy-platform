@@ -1,0 +1,53 @@
+{
+  "rows": [
+    {
+      "label": "主題",
+      "value": "文言文怎麼讀？",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "重要內容 1",
+      "value": "文言文用字精簡的原因",
+      "interactive_type": "checkbox",
+      "options": [
+        "古人覺得白話文太難懂",
+        "書寫、記錄和印刷不方便",
+        "文言文比較有學問"
+      ],
+      "correct_options": [
+        1
+      ]
+    },
+    {
+      "label": "重要內容 2",
+      "value": "文言文節省用字的方式",
+      "interactive_type": "checkbox",
+      "options": [
+        "用詞精簡、省略主詞或受詞、省略連接詞",
+        "使用許多生難字詞",
+        "加入現代用語"
+      ],
+      "correct_options": [
+        0
+      ]
+    },
+    {
+      "label": "結論",
+      "value": "讀文言文要「腦補」",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "mixed",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 2,
+    "checkbox_count": 2,
+    "primary_labels": [
+      "主題",
+      "重要內容 1",
+      "重要內容 2",
+      "結論"
+    ],
+    "layout": "cards"
+  }
+}
