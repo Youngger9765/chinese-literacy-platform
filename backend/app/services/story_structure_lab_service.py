@@ -3,37 +3,72 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from app.routes.stories import _format_yaml_structure_table, _sanitize_structure_for_client
+from app.services.keypoints_table_convert import keypoints_to_table
 from app.services.lesson_code_normalization import (
     catalog_to_parsed_code,
     normalize_manifest_code,
 )
 from app.services.lesson_loader import get_all_lessons, get_lesson_by_id
-
-_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-_SCRIPTS = _REPO_ROOT / "scripts"
-if str(_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS))
-
-from story_structure_qa_lib import (  # noqa: E402
+from app.services.story_structure_qa_lib import (
     CHECKBOX_GAP_LESSONS,
     REPRESENTATIVE_LESSONS,
     LessonTier,
-    PARSER_GAP_LESSONS,
     classify_lesson,
     gate_l3_mode_expectation,
     verify_interaction_profile_contract,
 )
+from app.services.story_structure_table_utils import table_fingerprint
 
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
+_REPO_ROOT = _BACKEND_ROOT.parent
 _SCHEMA_DIR = _REPO_ROOT / "private" / "curriculum-source" / "_online-schema"
+_DOCX_SNAPSHOT_DIR = _BACKEND_ROOT / "data" / "qa" / "docx_table_snapshots"
 _QA_REPORT_PATH = _SCHEMA_DIR / "story_structure_qa_report.json"
 _PINNED_STORY_IDS = {item["story_id"] for item in REPRESENTATIVE_LESSONS}
+
+
+def _read_docx_snapshot(parsed_code: str | None) -> dict[str, Any] | None:
+    if not parsed_code:
+        return None
+    path = _DOCX_SNAPSHOT_DIR / f"{parsed_code}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _dual_source_eval(
+    parsed_code: str | None,
+    keypoints: dict[str, Any] | None,
+    yaml_table: list | None,
+) -> dict[str, Any]:
+    if not keypoints and not parsed_code:
+        return {"available": False}
+    expected = keypoints_to_table({"keypoints": keypoints}) if keypoints else None
+    snapshot = _read_docx_snapshot(parsed_code)
+    if expected is None and snapshot:
+        expected = snapshot.get("expected_table")
+    on_disk = yaml_table
+    match = (
+        expected is not None
+        and on_disk is not None
+        and table_fingerprint(expected) == table_fingerprint(on_disk)
+    )
+    return {
+        "available": expected is not None and on_disk is not None,
+        "yaml_match": match,
+        "has_docx_snapshot": snapshot is not None,
+        "expected_rows": len(expected or []),
+        "on_disk_rows": len(on_disk or []),
+    }
 
 
 def _load_qa_report() -> dict[str, Any] | None:
@@ -191,6 +226,9 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
     live_l3 = _live_l3_qa(client, tier, parsed_code)
     profile = (client or {}).get("interaction_profile") or {}
     known_gap = _is_known_data_gap(tier, parsed_code, profile)
+    yaml_table = lesson.get("story_structure_table")
+    docx_snapshot = _read_docx_snapshot(parsed_code)
+    dual_source = _dual_source_eval(parsed_code, keypoints, yaml_table)
 
     return {
         "story_id": story_id,
@@ -201,9 +239,11 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
         "tier": tier.value,
         "pinned": story_id in _PINNED_STORY_IDS,
         "known_data_gap": known_gap,
-        "yaml_table": lesson.get("story_structure_table"),
+        "yaml_table": yaml_table,
         "yaml_rows": lesson.get("story_structure_rows"),
         "keypoints": keypoints,
+        "docx_snapshot": docx_snapshot,
+        "dual_source_eval": dual_source,
         "structure_grading": grading,
         "structure": client,
         "interaction_profile": (client or {}).get("interaction_profile"),
@@ -211,6 +251,7 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
         "artifacts": {
             "has_keypoints_yml": bool(keypoints),
             "keypoints_path": str(_keypoints_path(parsed_code)) if parsed_code else None,
+            "has_docx_snapshot": docx_snapshot is not None,
             "qa_report_available": report is not None,
         },
     }
