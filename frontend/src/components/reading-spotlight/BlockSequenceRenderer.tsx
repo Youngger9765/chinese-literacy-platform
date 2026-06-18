@@ -10,6 +10,8 @@ import {
   figureLabelFromBlock,
   isBlockAnswered,
   isInteractiveBlock,
+  isSectionHeaderPrompt,
+  resolveFreeTextCorrect,
   resolveSingleCorrect,
   segmentBlocks,
 } from './spotlightBlockLogic';
@@ -79,13 +81,26 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     checkCompletion(blockState);
   };
 
-  const handleFreeTextSubmit = (segIdx: number, blockIdx: number) => {
+  const handleFreeTextSubmit = (segIdx: number, blockIdx: number, block: SpotlightBlock) => {
     const key = blockStateKey(segIdx, blockIdx);
     const text = String(blockState[key] ?? '').trim();
     if (!text) return;
-    setFeedback((prev) => ({ ...prev, [key]: true }));
+    const correct =
+      block.type === 'free_text'
+        ? resolveFreeTextCorrect(text, block.answer)
+        : true;
+    setFeedback((prev) => ({ ...prev, [key]: correct }));
     checkCompletion(blockState);
   };
+
+  const renderGuide = (key: string, text: string) => (
+    <div
+      key={key}
+      className="rounded-lg border-l-4 border-amber-400 bg-amber-50 px-5 py-4 text-base text-on-surface whitespace-pre-wrap leading-relaxed"
+    >
+      {text}
+    </div>
+  );
 
   const renderFigure = (block: SpotlightBlock) => {
     if (block.type !== 'figure') return null;
@@ -101,7 +116,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       );
     }
     return (
-      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-on-surface-variant text-center">
+      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-base text-on-surface-variant text-center">
         {label ? `${label}（圖片）` : '圖表參考'}
         {block.asset ? <span className="block text-xs mt-1 opacity-60">{block.asset}</span> : null}
       </div>
@@ -114,21 +129,14 @@ const BlockSequenceRenderer: React.FC<Props> = ({
 
     switch (block.type) {
       case 'guide':
-        return (
-          <div
-            key={key}
-            className="rounded-lg border-l-4 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-on-surface whitespace-pre-wrap leading-relaxed"
-          >
-            {block.text}
-          </div>
-        );
+        return renderGuide(key, block.text ?? '');
 
       case 'passage':
         return (
-          <div key={key} className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-            <div className="text-xs font-semibold text-on-surface-variant mb-2">閱讀文本</div>
+          <div key={key} className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4">
+            <div className="text-sm font-semibold text-on-surface-variant mb-2">閱讀文本</div>
             {block.paragraphs.map((p, i) => (
-              <p key={i} className="text-sm text-on-surface mb-2 last:mb-0 leading-relaxed">
+              <p key={i} className="text-base text-on-surface mb-2 last:mb-0 leading-relaxed">
                 {p}
               </p>
             ))}
@@ -139,8 +147,8 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         const options = block.options ?? [];
         const selected = blockState[key];
         return (
-          <div key={key} className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-sm font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
+          <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
+            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
             <div className="space-y-2">
               {options.map((opt, oi) => (
                 <button
@@ -149,7 +157,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                   disabled={fb !== undefined && fb !== null}
                   onClick={() => setBlockValue(key, oi)}
                   className={[
-                    'w-full text-left rounded-lg border px-3 py-2 text-sm transition-colors',
+                    'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors',
                     selected === oi
                       ? 'border-violet-500 bg-violet-50 text-violet-900'
                       : 'border-gray-200 hover:border-violet-300',
@@ -164,12 +172,12 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 type="button"
                 onClick={() => handleSingleSubmit(segIdx, blockIdx, block)}
                 disabled={typeof selected !== 'number'}
-                className="mt-3 px-4 py-1.5 rounded-full text-sm font-medium text-white bg-violet-600 disabled:opacity-40"
+                className="mt-3 px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
               >
                 確認
               </button>
             ) : (
-              <p className={`mt-3 text-sm font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+              <p className={`mt-3 text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
                 {fb ? '✓ 答對了' : '再想想看'}
               </p>
             )}
@@ -178,40 +186,45 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       }
 
       case 'free_text':
+        if (isSectionHeaderPrompt(block.prompt)) {
+          return renderGuide(key, block.prompt);
+        }
         return (
-          <div key={key} className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-sm font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
+          <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
+            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
             <textarea
               value={String(blockState[key] ?? '')}
               disabled={fb !== undefined && fb !== null}
               onChange={(e) => setBlockValue(key, e.target.value)}
               rows={3}
               placeholder="請在此寫下你的答案…"
-              className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm"
+              className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-base"
             />
             {fb === null || fb === undefined ? (
               <button
                 type="button"
-                onClick={() => handleFreeTextSubmit(segIdx, blockIdx)}
-                className="mt-3 px-4 py-1.5 rounded-full text-sm font-medium text-white bg-violet-600"
+                onClick={() => handleFreeTextSubmit(segIdx, blockIdx, block)}
+                className="mt-3 px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600"
               >
                 送出
               </button>
             ) : (
-              <p className="mt-3 text-sm text-green-700 font-medium">✓ 已記錄你的答案</p>
+              <p className={`mt-3 text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+                {fb ? '✓ 答對了' : '再想想看'}
+              </p>
             )}
           </div>
         );
 
       case 'self_check':
         return (
-          <div key={key} className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-sm font-semibold text-on-surface mb-3">自我檢核</p>
+          <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
+            <p className="text-base font-semibold text-on-surface mb-3">自我檢核</p>
             <div className="space-y-2">
               {block.items.map((item, ii) => {
                 const checks = (blockState[key] as boolean[]) ?? [];
                 return (
-                  <label key={ii} className="flex items-start gap-2 text-sm cursor-pointer">
+                  <label key={ii} className="flex items-start gap-2 text-base cursor-pointer">
                     <input
                       type="checkbox"
                       checked={!!checks[ii]}
@@ -242,7 +255,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         return (
           <div
             key={key}
-            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-base text-blue-900"
           >
             文章重點表請在下一步「文章重點表」練習中填寫
             <button
@@ -260,7 +273,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
 
       default:
         return (
-          <div key={key} className="rounded-lg border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-on-surface-variant">
+          <div key={key} className="rounded-lg border border-gray-300 bg-gray-100 px-4 py-3 text-base text-on-surface-variant">
             {(block as { text?: string; prompt?: string }).text ??
               (block as { prompt?: string }).prompt ??
               `[${block.type}]`}
@@ -272,14 +285,14 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   return (
     <div className="space-y-6 max-w-3xl mx-auto w-full">
       <header className="border-b border-gray-200 pb-4">
-        <div className="text-xs font-semibold text-violet-600 tracking-wide">閱讀聚光燈</div>
-        <h2 className="text-lg font-bold text-on-surface mt-1">{spotlight.strategy_name}</h2>
+        <div className="text-sm font-semibold text-violet-600 tracking-wide">閱讀聚光燈</div>
+        <h2 className="text-xl font-bold text-on-surface mt-1">{spotlight.strategy_name}</h2>
       </header>
 
       {segments.slice(0, visibleSegmentCount).map((segment, segIdx) => (
         <section key={segIdx} className="space-y-4">
           {segIdx > 0 ? (
-            <div className="text-xs font-semibold text-on-surface-variant pt-2 border-t border-gray-100">
+            <div className="text-sm font-semibold text-on-surface-variant pt-2 border-t border-gray-100">
               第 {segIdx + 1} 部分
             </div>
           ) : null}
@@ -288,11 +301,11 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       ))}
 
       {allDone ? (
-        <p className="text-center text-sm font-medium text-green-700 py-4">✓ 閱讀聚光燈練習完成</p>
+        <p className="text-center text-base font-medium text-green-700 py-4">✓ 閱讀聚光燈練習完成</p>
       ) : null}
 
       {story && story.content.length > 0 ? (
-        <details className="rounded-lg border border-gray-200 bg-surface-container-low p-3 text-sm">
+        <details className="rounded-lg border border-gray-200 bg-surface-container-low p-3 text-base">
           <summary className="cursor-pointer font-medium text-on-surface-variant">
             需要時查看本課課文全文
           </summary>

@@ -4,6 +4,7 @@ import {
   countVisibleSegments,
   fingerprintBlocks,
   isInteractiveBlock,
+  isSectionHeaderPrompt,
   isSegmentStartBlock,
   resolveSingleCorrect,
   segmentBlocks,
@@ -57,6 +58,11 @@ describe('spotlightBlockLogic', () => {
     expect(fp.guide_count).toBe(1);
     expect(fp.passage_count).toBe(1);
     expect(fp.block_count).toBe(3);
+  });
+
+  it('detects section header prompts', () => {
+    expect(isSectionHeaderPrompt('1.讓我們來看課文另一個故事')).toBe(true);
+    expect(isSectionHeaderPrompt('❷主角遇到了什麼問題？')).toBe(false);
   });
 
   it('knows interactive block types', () => {

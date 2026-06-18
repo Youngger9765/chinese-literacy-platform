@@ -1,28 +1,42 @@
 {
   "schema_version": 2,
-  "description": "Regression fingerprints for professor dev7 spotlight schemas (post MCQ coalesce fix).",
+  "description": "Regression fingerprints (PSE guide split + MCQ coalesce).",
   "lessons": {
     "G6-L22": {
       "strategy_type": "summary_pse",
-      "block_count": 18,
+      "block_count": 32,
       "type_histogram": {
         "fill_table": 1,
         "free_text": 3,
-        "guide": 5,
-        "passage": 2,
-        "single": 7
+        "guide": 11,
+        "passage": 4,
+        "single": 13
       },
       "type_sequence": [
         "guide",
         "guide",
+        "guide",
+        "guide",
+        "passage",
         "free_text",
+        "single",
+        "single",
+        "single",
+        "guide",
+        "passage",
+        "single",
+        "single",
+        "free_text",
+        "single",
+        "guide",
+        "guide",
         "passage",
         "single",
         "single",
         "single",
         "single",
         "guide",
-        "free_text",
+        "guide",
         "passage",
         "guide",
         "single",
@@ -32,14 +46,14 @@
         "single",
         "fill_table"
       ],
-      "guide_count": 5,
-      "passage_count": 2,
-      "qa_total": 7,
+      "guide_count": 11,
+      "passage_count": 4,
+      "qa_total": 13,
       "null_answers": 0,
       "first_guide_prefix": "好故事，大家都愛看。為什麼？因為主角不是一帆風順，而是會遇到困難，然後想辦法解決，最後扭轉局面，迎向結局。這樣的故事最精",
       "mcq_leakage": 0,
       "mcq_option_guides": 0,
-      "single_count": 7
+      "single_count": 13
     },
     "G6-L23": {
       "strategy_type": "summary_pse",

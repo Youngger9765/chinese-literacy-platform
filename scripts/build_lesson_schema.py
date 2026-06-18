@@ -1119,7 +1119,181 @@ def _classify_question_para(txt, strategy_type):
                 "_needs_answer_extraction": True}
 
     else:
+        if (
+            re.match(r"^\d+\.", txt)
+            and "【" not in txt
+            and len(txt) < 80
+            and re.search(r"(讓我們來看|進階挑戰|請你|小試身手)", txt)
+        ):
+            return {"type": "guide", "text": txt}
         return {"type": "free_text", "prompt": txt}
+
+
+PSE_CIRCLED_RE = re.compile(r"^[❶❷❸❹]")
+EXAMPLE_HEADER_RE = re.compile(r"^例[一二三四五六七八九十\d]+[：:]")
+STORY_PIVOT_RE = re.compile(r"^接下來，我們來看課文的故事")
+
+
+def _parse_pse_mcq_line(line: str) -> dict | None:
+    """Parse ❶❷❸❹ summary-PSE line into single or free_text block."""
+    line = line.strip()
+    m = re.match(r"^([❶❷❸❹])\s*(.+)$", line)
+    if not m:
+        return None
+    circled, body = m.group(1), m.group(2).strip()
+
+    if "【" in body and "】" in body:
+        bm = re.search(r"【\s*([^】]+?)\s*】", body)
+        answer_hint = bm.group(1).strip() if bm else None
+        prompt_body = re.sub(r"【[^】]+】", "【　　　】", body)
+        block: dict = {"type": "free_text", "prompt": f"{circled}{prompt_body}"}
+        if answer_hint and re.sub(r"\s+", "", answer_hint):
+            block["answer"] = answer_hint
+        return block
+
+    prompt = f"{circled}{body}"
+    options: list[str] = []
+    answer: str | None = None
+    rest = ""
+
+    if re.search(r"[？?]", body):
+        q_text, rest = re.split(r"[？?]", body, maxsplit=1)
+        prompt = f"{circled}{q_text.strip()}？"
+        rest = rest.strip()
+    else:
+        rest = body
+
+    if "□" in rest or "□" in body:
+        opt_text = rest if rest else body
+        if "？" in body and not rest:
+            opt_text = body.split("？", 1)[-1].strip()
+        if opt_text.strip().startswith("□"):
+            inner = re.sub(r"^□\s*", "", opt_text.strip())
+            tokens = [t.strip() for t in re.split(r"[　\s]+", inner) if t.strip()]
+            if len(tokens) >= 2:
+                return {
+                    "type": "single",
+                    "prompt": prompt,
+                    "options": tokens[:2],
+                    "answer": tokens[1],
+                }
+        parts = re.split(r"\s*□\s*", opt_text)
+        for i, part in enumerate(parts):
+            part = part.strip()
+            if not part:
+                continue
+            clean = re.sub(r"^[①②③④⑤]\s*", "", part).strip()
+            if not clean:
+                continue
+            if i == 0 and not opt_text.strip().startswith("□"):
+                answer = clean
+            options.append(clean)
+    elif rest:
+        chunks = [c.strip() for c in re.split(r"[　\s]{2,}", rest) if c.strip()]
+        for i, ch in enumerate(chunks):
+            if i == 0:
+                answer = ch
+            options.append(ch)
+
+    if len(options) >= 2:
+        return {
+            "type": "single",
+            "prompt": prompt,
+            "options": options,
+            "answer": answer or options[0],
+        }
+    return {"type": "free_text", "prompt": prompt}
+
+
+def _pse_line_is_interactive(line: str) -> bool:
+    """True when a ❶ line is an exercise (not the intro's four-question template)."""
+    s = line.strip()
+    if not PSE_CIRCLED_RE.match(s):
+        return False
+    if len(re.findall(r"[❶❷❸❹]", s)) > 1:
+        return False
+    if "□" in s or "【" in s:
+        return True
+    if re.search(r"[？?]", s):
+        after = re.split(r"[？?]", s, maxsplit=1)
+        if len(after) > 1:
+            tail = after[1].strip()
+            if tail and not PSE_CIRCLED_RE.match(tail):
+                return True
+    return False
+
+
+def split_pse_guide_text(text: str) -> list:
+    """Split mega guide cells into guide + passage + interactive PSE blocks (G6-L22)."""
+    lines = [ln for ln in text.replace("\r\n", "\n").split("\n") if ln.strip()]
+    out: list = []
+    guide_buf: list[str] = []
+    passage_buf: list[str] = []
+    mode = "guide"
+
+    def flush_guide() -> None:
+        nonlocal guide_buf
+        joined = "\n".join(guide_buf).strip()
+        if joined:
+            out.append({"type": "guide", "text": joined})
+        guide_buf = []
+
+    def flush_passage() -> None:
+        nonlocal passage_buf
+        paras = [" ".join(p.split()) for p in passage_buf if p.strip()]
+        if paras:
+            out.append({"type": "passage", "source": "supplementary", "paragraphs": paras})
+        passage_buf = []
+
+    for line in lines:
+        stripped = line.strip()
+        if PSE_CIRCLED_RE.match(stripped):
+            flush_guide()
+            flush_passage()
+            if _pse_line_is_interactive(stripped):
+                parsed = _parse_pse_mcq_line(stripped)
+                if parsed:
+                    out.append(parsed)
+            else:
+                guide_buf.append(stripped)
+            mode = "guide"
+            continue
+
+        if STORY_PIVOT_RE.match(stripped) or EXAMPLE_HEADER_RE.match(stripped):
+            flush_passage()
+            flush_guide()
+            guide_buf.append(stripped)
+            mode = "passage"
+            continue
+
+        if mode == "passage" or line.startswith("    "):
+            if guide_buf:
+                flush_guide()
+            passage_buf.append(stripped)
+            mode = "passage"
+            continue
+
+        flush_passage()
+        guide_buf.append(stripped)
+        mode = "guide"
+
+    flush_guide()
+    flush_passage()
+    return out
+
+
+def expand_embedded_pse_guides(blocks: list) -> list:
+    out: list = []
+    for b in blocks:
+        if b.get("type") != "guide":
+            out.append(b)
+            continue
+        text = b.get("text", "")
+        if text.count("❶") >= 2 or (STORY_PIVOT_RE.search(text) and "❶" in text):
+            out.extend(split_pse_guide_text(text))
+        else:
+            out.append(b)
+    return out
 
 
 def get_lesson_story_text(lesson_id):
@@ -1539,6 +1713,9 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
 
     # Coalesce （單選）prompts + ①/□ option lines misclassified as guide/free_text
     classified = coalesce_mcq_option_blocks(classified)
+
+    # Split summary-PSE mega guide cells → passage + ❶❷❸❹ singles (G6-L22)
+    classified = expand_embedded_pse_guides(classified)
 
     # Bind assets to figure blocks
     if assets:

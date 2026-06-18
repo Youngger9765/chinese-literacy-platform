@@ -30,6 +30,23 @@ export function isSegmentStartBlock(block: SpotlightBlock): boolean {
   return false;
 }
 
+/** Section intro lines misclassified as free_text — render as guide, not textarea. */
+export function isSectionHeaderPrompt(prompt: string): boolean {
+  const t = (prompt ?? '').trim();
+  return /^\d+\.\s*(讓我們來看|進階挑戰)/.test(t);
+}
+
+export function resolveFreeTextCorrect(
+  studentText: string,
+  expected: string | null | undefined,
+): boolean {
+  if (!expected) return true;
+  const norm = (s: string) => s.replace(/\s+/g, '').trim();
+  const a = norm(studentText);
+  const b = norm(expected);
+  return a === b || a.includes(b) || b.includes(a);
+}
+
 /** Split blocks into teaching segments for progressive reveal. */
 export function segmentBlocks(blocks: SpotlightBlock[]): SpotlightBlock[][] {
   if (blocks.length === 0) return [];

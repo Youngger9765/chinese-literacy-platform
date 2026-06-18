@@ -122,6 +122,7 @@ export interface SpotlightMultiBlock {
 export interface SpotlightFreeTextBlock {
   type: 'free_text';
   prompt: string;
+  answer?: string | null;
 }
 
 export interface SpotlightFigureBlock {

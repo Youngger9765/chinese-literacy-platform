@@ -76,6 +76,24 @@ def test_g7_l29_mcq_options_not_guides():
     assert count_mcq_option_guides(sp["blocks"]) == 0
 
 
+def test_g6_l22_mengchang_story_has_interactive_singles():
+    """孟嘗君 passage must be followed by ❶❷❸❹ singles, not static guide text."""
+    sp = load_dev7_spotlight("G6-L22")
+    blocks = sp["blocks"]
+    pivot = next(
+        i for i, b in enumerate(blocks)
+        if b.get("type") == "guide" and "接下來，我們來看課文的故事" in b.get("text", "")
+    )
+    following = blocks[pivot + 1 : pivot + 8]
+    assert following[0]["type"] == "passage"
+    singles = [b for b in following if b["type"] == "single"]
+    assert len(singles) >= 3
+    assert any(
+        any("孟嘗君" in opt for opt in (b.get("options") or []))
+        for b in singles
+    )
+
+
 @pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
 def test_loader_exposes_spotlight_v2(lesson_id: str):
     assert is_spotlight_v2_lesson(lesson_id)
