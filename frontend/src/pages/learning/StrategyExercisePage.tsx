@@ -103,6 +103,7 @@ const StrategyExercisePage: React.FC = () => {
           onComplete={handleStrategyComplete}
           onChange={handleAnswerChange}
           initialState={savedStrategyData}
+          onOpenKeypoints={() => navigate(`/learn/${selectedStory.id}/story-structure`)}
         />
         {nextButton}
       </div>

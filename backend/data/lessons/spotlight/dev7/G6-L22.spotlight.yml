@@ -19,8 +19,12 @@ spotlight:
     source: supplementary
     paragraphs:
     - 天氣炎熱，烏鴉又渴又累。牠找到一個有水的瓶子，但瓶子太深，水太少，烏鴉喝不到。烏鴉叼來小石頭丟進瓶子，讓水面升高，最後順利喝到水。
-  - type: free_text
+  - type: single
     prompt: ❶主角是誰？
+    options:
+    - 烏鴉
+    - 麻雀
+    answer: 烏鴉
   - type: single
     prompt: ❷主角遇到了什麼「問題」？
     options:
@@ -31,7 +35,7 @@ spotlight:
     prompt: ❸問題如何「解決」？
     options:
     - 丟小石頭進瓶子裡，讓水面升高
-    - 。
+    - 等待下雨，讓瓶子裝滿水
     answer: 丟小石頭進瓶子裡，讓水面升高
   - type: single
     prompt: ❹最後得到什麼「結果」？
@@ -96,8 +100,8 @@ spotlight:
     prompt: ❸問題如何「解決」？
     options:
     - 拜託秦王讓給幸姬
-    - 再去買一件　食客潛入寶庫偷回白狐裘
-    answer: 拜託秦王讓給幸姬
+    - 食客潛入寶庫偷回白狐裘
+    answer: 食客潛入寶庫偷回白狐裘
   - type: single
     prompt: ❹最後得到什麼「結果」？
     options:
@@ -105,32 +109,32 @@ spotlight:
     - 幸姬拒絕幫忙，孟嘗君被關
     answer: 幸姬幫忙說話，秦王放了孟嘗君
   - type: guide
-    text: □秦王說話不算話，不肯放人
-  - type: guide
     text: 2.進階挑戰：大象有多重？
   - type: passage
     source: supplementary
     paragraphs:
     - 有一天，吳國送了一頭大象給曹操。大家都很好奇這頭大象到底有多重，可是大象那麼大，放不上秤，沒辦法知道大象的重量。
     - 這時，年紀還小的曹沖說：「我有辦法！」他請人把大象牽到一艘大船上，等船下沉穩定後，在船身畫一條水位線。然後把大象牽下來，再往船上裝石頭，一邊裝一邊觀察水位，直到水位線回到原來的位置。
-  - type: guide
-    text: 最後，把船上的石頭搬下來一個一個秤重量，就知道大象的重量了。
+    - 最後，把船上的石頭搬下來一個一個秤重量，就知道大象的重量了。
   - type: single
-    prompt: ❶主角是誰？□曹操　曹沖
+    prompt: ❶主角是誰？
     options:
     - 曹操
     - 曹沖
     answer: 曹沖
-  - type: free_text
-    prompt: ❷主角遇到了什麼「問題」？     大象太重，沒辦法秤              。
+  - type: single
+    prompt: ❷主角遇到了什麼「問題」？
+    options:
+    - 大象太重，沒辦法秤
+    - 大家只是好奇，沒有實際困難
+    answer: 大象太重，沒辦法秤
   - type: single
     prompt: ❸問題如何「解決」？
     options:
     - 請工人抬大象放到大磅秤上秤重
     - 讓大家猜一個大概的重量
-    answer: 請工人抬大象放到大磅秤上秤重
-  - type: guide
-    text: 用船的下沉水位線比對石頭重量，間接秤量體重
+    - 用船的下沉水位線比對石頭重量，間接秤量體重
+    answer: 用船的下沉水位線比對石頭重量，間接秤量體重
   - type: single
     prompt: ❹最後得到什麼「結果」？
     options:

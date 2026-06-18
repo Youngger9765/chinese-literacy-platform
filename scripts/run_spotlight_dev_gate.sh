@@ -31,11 +31,17 @@ if not r['pass']:
 echo "=== [2/4] Gold contract (dev7 checked-in fixtures) ==="
 python3 scripts/spotlight_contract.py --dev7
 
-echo "=== [3/4] Backend pytest (spotlight v2 spec) ==="
-cd backend && python -m pytest specs/test_spotlight_v2_spec.py -q --tb=short
+echo "=== [3/6] Backend pytest (spotlight block model TDD) ==="
+cd backend && python -m pytest specs/test_spotlight_block_model_spec.py -q --tb=short
+
+echo "=== [4/6] Backend pytest (PSE MCQ parser TDD) ==="
+python -m pytest specs/test_pse_mcq_parser_spec.py -q --tb=short
+
+echo "=== [5/6] Backend pytest (spotlight v2 spec) ==="
+python -m pytest specs/test_spotlight_v2_spec.py -q --tb=short
 cd "$REPO_ROOT"
 
-echo "=== [4/4] Frontend vitest (spotlight v2) ==="
+echo "=== [6/6] Frontend vitest (spotlight v2) ==="
 cd frontend && npm run test -- --run src/components/reading-spotlight/__tests__/
 
 echo "=== Gate PASS: dev7 spotlight v2 all checks green ==="

@@ -4,6 +4,10 @@
  */
 import type { SpotlightBlock } from '../../types';
 
+// Re-export for tests — GraphicTextImageStrip owns GCS path logic
+import { deriveLessonCodeFromFilename } from '../reading-steps/GraphicTextImageStrip';
+export { deriveLessonCodeFromFilename };
+
 const SEGMENT_START_RE =
   /練習[一二三四五六七八九十\d]|例[一二三四五六七八九十\d]|小試身手|步驟[❶①1-9]/;
 
@@ -149,7 +153,21 @@ export function fingerprintBlocks(blocks: SpotlightBlock[]): {
   };
 }
 
-/** Map fig1.png / bind_paragraph hint → story image index by 圖N label */
+/** Resolve GCS lesson directory (e.g. G7-L29) for figure images. */
+export function resolveLessonCode(
+  spotlight: { lesson?: string },
+  story: { lesson_code?: string; images?: { filename: string }[] } | null | undefined,
+  lessonId?: string | number,
+  imageFilename?: string,
+): string {
+  if (story?.lesson_code) return story.lesson_code;
+  if (spotlight.lesson) return spotlight.lesson;
+  if (typeof lessonId === 'string' && lessonId.includes('-')) return lessonId;
+  if (imageFilename) return deriveLessonCodeFromFilename(imageFilename);
+  const first = story?.images?.[0]?.filename;
+  if (first) return deriveLessonCodeFromFilename(first);
+  return '';
+}
 export function figureLabelFromBlock(block: {
   asset?: string | null;
   bind_paragraph?: string | number | null;

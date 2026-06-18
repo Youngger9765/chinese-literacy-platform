@@ -8,6 +8,8 @@ import {
   isSegmentStartBlock,
   resolveSingleCorrect,
   segmentBlocks,
+  resolveLessonCode,
+  figureLabelFromBlock,
 } from '../spotlightBlockLogic';
 
 const G6_L22_SNIPPET: SpotlightBlock[] = [
@@ -68,5 +70,26 @@ describe('spotlightBlockLogic', () => {
   it('knows interactive block types', () => {
     expect(isInteractiveBlock('single')).toBe(true);
     expect(isInteractiveBlock('guide')).toBe(false);
+  });
+
+  it('resolveLessonCode prefers story.lesson_code then spotlight.lesson', () => {
+    expect(
+      resolveLessonCode(
+        { lesson: 'G7-L29' },
+        { lesson_code: 'G7-L29', images: [{ filename: 'images/G7-L29/G7-L29-09.png' }] },
+        1109,
+      ),
+    ).toBe('G7-L29');
+    expect(
+      resolveLessonCode(
+        { lesson: 'G7-L29' },
+        { images: [{ filename: 'images/G7-L29/G7-L29-09.png' }] },
+        1109,
+      ),
+    ).toBe('G7-L29');
+  });
+
+  it('figureLabelFromBlock maps fig1.png to 圖一', () => {
+    expect(figureLabelFromBlock({ asset: 'fig1.png' })).toBe('圖一');
   });
 });
