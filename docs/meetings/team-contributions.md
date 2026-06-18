@@ -8,6 +8,21 @@
 
 ---
 
+## 6/15 ~ 6/18
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | 朗讀/live-tutor 批次（#2230~2236, #2239, #2245, #2249）| STT/LLM console debug、eval rules + CPM/全形對齊鎖測試、擋 Web Speech 蓋掉 Gemini transcript、pending 錄音三按鈕 + 隱藏舊評估、全文朗讀結果分段縮排、self-assessment 改用 lesson benchmark feedback |
+| Young | ✅ | 教授 demo story structure / 聚光燈 / 重點表（#2256~2261）| 聚光燈 block-sequence v2、profile-driven demo、keypoints 136 課同步 DOCX 版面表格、how-to-play coach + fill-blank demo、隱藏 placeholder 空答案、L1-L5 story structure QA 驗證 gate |
+| Young | ✅ | vocab UX 批次（#2237~2248）| 拖拉詞庫雙欄 + 釘選示範對、coach 寬度對齊、word search 引導 demo onboarding、fill-in-blank 引導 tooltip、MCQ↔拖拉自由切換、移除拖拉 TTS、學習單 PDF 改下載 |
+| Young | ✅ | infra（#2229, #2251, #2252）| GEMINI.md 從 CLAUDE.md auto-sync、staging→main release、stepper 解鎖報告步驟（每步可自由導航）、diff 注音 ruby |
+| 靖杭 | 🔧 | PR 2255 open（#2192 item 5）| 閱讀聚光燈 申論/填空 AI 即時批改（+468/-12, 10 檔），6/17 push，CI 綠待 review |
+| 啟翔 | 🔧 | PR 2254 open | 朗讀正確率不再超過 100%（分母改用 token 統計，+97/-3），6/17 push，CI 綠待 review |
+
+> 本週兩位實習生 0 merged，各 1 open PR 待 Young review。方大哥 6/17 測試簡化版朗讀回報評分過低（58%）+ 流程 UX 問題，列為 6/18 會議核心。
+
+---
+
 ## 5/22 ~ 5/29
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
