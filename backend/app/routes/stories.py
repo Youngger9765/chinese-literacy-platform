@@ -19,6 +19,7 @@ from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
+from ..services.story_structure_cell_parser import cell_to_structure_fields
 
 # ---------------------------------------------------------------------------
 # Simple TTL cache for story structure results (avoids redundant Gemini calls)
@@ -27,7 +28,14 @@ from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, Story
 
 _structure_cache: dict[str, tuple[float, object]] = {}
 _CACHE_TTL = 86400  # 24 hours
-_CACHE_VERSION = "v3"  # bump when schema changes to auto-invalidate
+_CACHE_VERSION = "v4"  # bump when schema changes to auto-invalidate
+
+_BLANK_RE = re.compile(r"【([^】]*)】")
+
+
+def _cell_to_row_dict(label: str, value: str) -> dict:
+    """Build a StructureRow dict from a label + value string."""
+    return cell_to_structure_fields(label, value)
 
 
 def _cache_key(story_id: str) -> str:
@@ -49,32 +57,6 @@ def _set_cached_structure(story_id: str, result):
 # YAML-first: convert story_structure_table → API response (no AI call)
 # ---------------------------------------------------------------------------
 
-_BLANK_RE = re.compile(r"【([^】]*)】")
-
-
-def _classify_cell(text: str) -> str:
-    """Return 'fill_blank' if the cell has 【…】 blanks, else 'display'."""
-    return "fill_blank" if _BLANK_RE.search(text) else "display"
-
-
-def _cell_to_row_dict(label: str, value: str) -> dict:
-    """Build a StructureRow dict from a label + value string."""
-    itype = _classify_cell(value)
-    row: dict = {
-        "label": label.strip(),
-        "value": value.strip(),
-        "interactive_type": itype,
-    }
-    if itype == "fill_blank":
-        # Answers inside 【】 are stored server-side for grading only — never sent to client.
-        answers = [m.group(1).strip() for m in _BLANK_RE.finditer(value)]
-        if answers:
-            row["hint"] = answers[0]
-        if len(answers) > 1:
-            row["blank_hints"] = answers
-    return row
-
-
 def _strip_blank_answers(text: str) -> str:
     """Replace 【answer】 with empty blanks for student-facing display."""
     return _BLANK_RE.sub("【　　　】", text)
@@ -83,8 +65,11 @@ def _strip_blank_answers(text: str) -> str:
 def _sanitize_row_for_client(row: dict) -> dict:
     """Remove grading answers from a structure row before API response."""
     out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
-    if out.get("interactive_type") == "fill_blank" and out.get("value"):
-        out["value"] = _strip_blank_answers(out["value"])
+    if out.get("interactive_type") == "fill_blank":
+        if out.get("value"):
+            out["value"] = _strip_blank_answers(out["value"])
+        if out.get("blank_in_label") and out.get("label"):
+            out["label"] = _strip_blank_answers(out["label"])
     sub_rows = out.get("sub_rows")
     if sub_rows:
         out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]

@@ -11,7 +11,6 @@ import pytest
 
 from app.routes.stories import _format_yaml_structure_table, _sanitize_structure_for_client
 from story_structure_qa_lib import (
-    PARSER_GAP_LESSONS,
     LessonTier,
     classify_lesson,
     gate_l1_pass,
@@ -56,25 +55,36 @@ def test_gate_l1_label_family_warn_only():
     assert any("WARN" in i for i in issues)
 
 
-def test_parser_gap_tier():
+def test_g7_l6_classified_docx_keypoints():
     tier = classify_lesson(
         grade_code="G7-L6",
         has_keypoints_yml=True,
         has_structure_table=True,
         has_ai_rows=False,
     )
-    assert tier == LessonTier.PARSER_GAP
+    assert tier == LessonTier.DOCX_KEYPOINTS
 
 
-def test_gate_l3_parser_gap_display_only():
+def test_g7_l6_yaml_fill_blank_mode():
+    yml = pathlib.Path(__file__).parent.parent / "data/lessons/_parsed_2026-05-01/G7-L6.yml"
+    if not yml.exists():
+        pytest.skip("G7-L6.yml missing")
+    data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+    client = _sanitize_structure_for_client(_format_yaml_structure_table(data["story_structure_table"]))
+    assert client["interaction_profile"]["mode"] == "fill_blank"
+    issues = gate_l3_mode_expectation(
+        LessonTier.DOCX_KEYPOINTS,
+        "G7-L6",
+        client["interaction_profile"],
+        docx_blanks=5,
+    )
+    assert issues == []
+
+
+def test_gate_l3_parser_gap_display_only_still_supported():
     issues = gate_l3_mode_expectation(
         LessonTier.PARSER_GAP,
         "G7-L6",
         {"mode": "display_only"},
     )
     assert issues == []
-
-
-def test_known_parser_gap_set():
-    assert "G7-L6" in PARSER_GAP_LESSONS
-    assert "G8-L13" not in PARSER_GAP_LESSONS
