@@ -1,14 +1,15 @@
 """
-TDD tests for reading_evaluation_service.py (Issue #454)
+TDD tests for reading_evaluation_service.py
+
+History:
+  Issue #454 (original): AI path tests using Gemini mock.
+  Issue #2266 (2026-06-18): AI path removed. Tests updated to test the
+  deterministic DP path directly (no mock needed — no Gemini in the path).
 
 Run with:  cd backend && pytest tests/test_reading_evaluation_service.py -v
-
-Red phase: all tests should FAIL before the service is implemented.
-Green phase: all tests should PASS after implementation.
 """
 import sys
 import os
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -178,221 +179,165 @@ def test_fallback_stats_keys():
 # evaluate_reading_with_ai — AI path (mocked)
 # ---------------------------------------------------------------------------
 
-MOCK_AI_RESPONSE = {
-    "diff_tokens": [
-        {"char": "他", "type": "correct"},
-        {"char": "們", "type": "forgiven", "spoken": "門", "reason": "同音字"},
-        {"char": "去", "type": "correct"},
-        {"char": "公", "type": "forgiven", "spoken": "工", "reason": "同音字"},
-        {"char": "園", "type": "correct"},
-        {"char": "玩", "type": "forgiven", "spoken": "完", "reason": "同音字"},
-        {"char": "耍", "type": "forgiven", "spoken": "刷", "reason": "近音字"},
-    ],
-    "feedback": "唸得很棒！下一段。",
-}
+# ---------------------------------------------------------------------------
+# evaluate_reading_with_ai — deterministic path (Issue #2266)
+#
+# All tests below replaced from AI-path (Gemini mock) tests to deterministic
+# path tests. The homophone case "他門去工園完刷" → "他們去公園玩耍" is
+# preserved: 們/門(同音), 公/工(同音), 玩/完(同音), 耍/刷(近音) → all forgiven.
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_deterministic_path_returns_adjusted_match_rate():
+    """Deterministic path: evaluation_method is 'deterministic' and result is usable."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
+    assert result["evaluation_method"] == "deterministic"
+    # homophones are forgiven → adjusted_match_rate is high
+    assert result["adjusted_match_rate"] >= 0.8
 
 
 @pytest.mark.asyncio
-async def test_ai_path_returns_adjusted_match_rate():
-    """AI path: forgiven chars boost adjusted_match_rate vs match_rate."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
-    assert result["evaluation_method"] == "ai"
-    assert result["adjusted_match_rate"] > result["match_rate"]
-
-
-@pytest.mark.asyncio
-async def test_ai_path_response_structure():
-    """AI path result has all required keys."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
+async def test_deterministic_path_response_structure():
+    """Deterministic path result has all required keys."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
     for key in ("match_rate", "adjusted_match_rate", "tier", "feedback",
                 "diff_tokens", "stats", "thresholds", "evaluation_method"):
         assert key in result, f"Missing key: {key}"
 
 
 @pytest.mark.asyncio
-async def test_ai_path_tier_calculated_from_adjusted():
-    """Tier is based on adjusted_match_rate, not raw match_rate."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
+async def test_deterministic_path_tier_calculated_from_adjusted():
+    """Tier is based on adjusted_match_rate (forgiven chars count)."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
     # 3 correct + 4 forgiven = 7/7 → adjusted 1.0 → tier 1
     assert result["tier"] == 1
     assert result["adjusted_match_rate"] == pytest.approx(1.0)
 
 
 @pytest.mark.asyncio
-async def test_ai_path_stats_counts():
-    """Stats counts match diff_tokens content."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
+async def test_deterministic_path_stats_counts():
+    """Stats counts reflect actual char alignment."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
     stats = result["stats"]
-    assert stats["correct_count"] == 3
-    assert stats["forgiven_count"] == 4
+    assert stats["correct_count"] == 3   # 他, 去, 園
+    assert stats["forgiven_count"] == 4  # 們/門, 公/工, 玩/完, 耍/刷
     assert stats["wrong_count"] == 0
 
 
 @pytest.mark.asyncio
-async def test_ai_path_cpm_calculated_with_duration():
+async def test_deterministic_path_cpm_calculated_with_duration():
     """CPM is calculated when duration_ms is provided."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-            duration_ms=5000,  # 5 seconds → 7 chars * 60/5 = 84 cpm
-        )
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+        duration_ms=5000,
+    )
     assert result["cpm"] is not None
     assert result["cpm"] > 0
 
 
 @pytest.mark.asyncio
-async def test_ai_path_cpm_uses_correct_count_not_full_target():
-    """Partial read: CPM denominator = chars actually read, not full target length."""
+async def test_deterministic_path_cpm_uses_correct_count_not_full_target():
+    """Partial read: CPM uses chars actually matched, not full target length."""
     long_target = MENGCHANGJUN_LINE
     spoken = "中國的戰國時期"
     duration_ms = 60_000
-    preview = _build_fallback_result(spoken, long_target)
-    expected_cpm = round(preview["stats"]["correct_count"] / 60 * 60, 1)
+    expected_cpm = round(_build_fallback_result(spoken, long_target)["stats"]["correct_count"] / 60 * 60, 1)
 
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text=spoken,
-            target_text=long_target,
-            duration_ms=duration_ms,
-        )
+    result = await evaluate_reading_with_ai(
+        spoken_text=spoken,
+        target_text=long_target,
+        duration_ms=duration_ms,
+    )
     assert result["cpm"] == expected_cpm
     assert result["cpm"] < len(_normalize_text(long_target)) * 0.5
 
 
 @pytest.mark.asyncio
-async def test_fallback_cpm_uses_correct_count():
-    """Fallback path CPM also uses alignment correct_count."""
+async def test_deterministic_path_cpm_matches_fallback_helper():
+    """CPM via evaluate_reading_with_ai equals CPM from _build_fallback_result directly."""
     spoken = "中國的戰國時期"
     target = MENGCHANGJUN_LINE
     duration_ms = 60_000
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(side_effect=RuntimeError("down")),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text=spoken,
-            target_text=target,
-            duration_ms=duration_ms,
-        )
-    assert result["evaluation_method"] == "fallback"
+
+    result = await evaluate_reading_with_ai(
+        spoken_text=spoken,
+        target_text=target,
+        duration_ms=duration_ms,
+    )
+    assert result["evaluation_method"] == "deterministic"
     preview = _build_fallback_result(spoken, target)
-    assert result["cpm"] == round(preview["stats"]["correct_count"] / 60 * 60, 1)
+    expected_cpm = round(preview["stats"]["correct_count"] / 60 * 60, 1)
+    assert result["cpm"] == expected_cpm
 
 
 @pytest.mark.asyncio
-async def test_ai_path_no_cpm_without_duration():
+async def test_deterministic_path_no_cpm_without_duration():
     """CPM is None when duration_ms is not provided."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
     assert result["cpm"] is None
 
 
 @pytest.mark.asyncio
-async def test_ai_path_thresholds_in_response():
+async def test_deterministic_path_thresholds_in_response():
     """Thresholds are returned for frontend use."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
     assert "reading_pass" in result["thresholds"]
     assert "reading_excellent" in result["thresholds"]
 
 
 @pytest.mark.asyncio
-async def test_ai_path_uses_dynamic_max_tokens_for_long_text():
-    """Long targets should request a larger token budget than 1024."""
+async def test_deterministic_path_long_text_complete():
+    """Long texts (120+ chars) return complete results — no truncation risk."""
     long_target = "天" * 120
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value={"diff_tokens": [], "feedback": "加油"}),
-    ) as mocked_generate:
-        await evaluate_reading_with_ai(
-            spoken_text=long_target,
-            target_text=long_target,
-        )
-
-    kwargs = mocked_generate.await_args.kwargs
-    assert "max_tokens" in kwargs
-    assert kwargs["max_tokens"] > 1024
-    assert kwargs["max_tokens"] <= 4096
+    result = await evaluate_reading_with_ai(
+        spoken_text=long_target,
+        target_text=long_target,
+    )
+    assert result["evaluation_method"] == "deterministic"
+    assert result["adjusted_match_rate"] >= 0.99
 
 
 # ---------------------------------------------------------------------------
-# evaluate_reading_with_ai — fallback on AI error
+# evaluate_reading_with_ai — correctness properties (replaces fallback tests)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_fallback_on_ai_exception():
-    """AI failure triggers fallback; evaluation_method = 'fallback'."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(side_effect=RuntimeError("Gemini unavailable")),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去工園完刷",
-            target_text="他們去公園玩耍",
-        )
-    assert result["evaluation_method"] == "fallback"
+async def test_deterministic_path_always_produces_result():
+    """Deterministic path never raises — always returns a valid result dict."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去工園完刷",
+        target_text="他們去公園玩耍",
+    )
+    assert result["evaluation_method"] == "deterministic"
     assert "tier" in result
 
 
 @pytest.mark.asyncio
-async def test_fallback_does_not_auto_pass():
-    """Fallback for zero-match input must NOT produce tier 1."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(side_effect=RuntimeError("Gemini unavailable")),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="aaaaa",
-            target_text="他們去公園玩耍",
-        )
-    # Completely wrong input should not produce tier 1
+async def test_deterministic_path_does_not_auto_pass_wrong_input():
+    """Completely wrong input must NOT produce tier 1."""
+    result = await evaluate_reading_with_ai(
+        spoken_text="aaaaa",
+        target_text="他們去公園玩耍",
+    )
     assert result["tier"] != 1
 
 
@@ -403,13 +348,9 @@ async def test_fallback_does_not_auto_pass():
 @pytest.mark.asyncio
 async def test_short_text_lowers_pass_threshold():
     """Short target (≤10 chars) lowers the effective pass threshold in thresholds."""
-    with patch(
-        "app.services.reading_evaluation_service.generate_structured_response",
-        new=AsyncMock(return_value=MOCK_AI_RESPONSE),
-    ):
-        result = await evaluate_reading_with_ai(
-            spoken_text="他門去",
-            target_text="他們去",  # 3 chars → very short
-        )
+    result = await evaluate_reading_with_ai(
+        spoken_text="他門去",
+        target_text="他們去",  # 3 chars → very short
+    )
     effective_pass = result["thresholds"]["reading_pass"]
     assert effective_pass < Thresholds.READING_PASS

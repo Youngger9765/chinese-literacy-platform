@@ -342,7 +342,7 @@ export interface ReadingEvaluateResponse {
   diff_tokens: DiffToken[];
   stats: ReadingEvalStats;
   thresholds: ReadingEvalThresholds;
-  evaluation_method: 'ai' | 'fallback';
+  evaluation_method: 'deterministic' | 'fallback' | 'ai'; // 'deterministic' since #2266; 'ai' kept for backward compat
 }
 
 export interface LineBreakdown {
