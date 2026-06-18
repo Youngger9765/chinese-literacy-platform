@@ -3,6 +3,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
+import StoryStructureTable from '../../../components/reading-steps/StoryStructureTable';
 import {
   fetchStoryStructureLabDetail,
   fetchStoryStructureLabIndex,
@@ -240,20 +241,42 @@ const StoryStructureLabPage: React.FC = () => {
               </div>
             </header>
 
+            <JsonPanel title="A · DOCX snapshot (committed)" data={detail.docx_snapshot} />
+
+            {detail.dual_source_eval && (
+              <section className="rounded-xl border border-gray-200 bg-white p-4 text-sm">
+                <p className="font-semibold text-gray-800">Dual-source eval</p>
+                <p className="text-gray-600 mt-1">
+                  keypoints → YAML match:{' '}
+                  <strong className={detail.dual_source_eval.yaml_match ? 'text-emerald-700' : 'text-red-700'}>
+                    {detail.dual_source_eval.available ? String(detail.dual_source_eval.yaml_match) : 'N/A'}
+                  </strong>
+                  {detail.dual_source_eval.available ? (
+                    <span className="text-gray-500">
+                      {' '}({detail.dual_source_eval.on_disk_rows} rows on disk)
+                    </span>
+                  ) : null}
+                </p>
+              </section>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <JsonPanel title="B · YAML story_structure_table" data={detail.yaml_table} />
               <JsonPanel title="C · keypoints.yml" data={detail.keypoints} />
             </div>
 
-            <section className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-              <header className="px-4 py-2 border-b border-gray-100 bg-gray-50 text-sm font-semibold text-gray-700">
-                D · 學生端即時渲染
-              </header>
-              <iframe
-                title="story-structure-preview"
-                src={`/learn/${detail.story_id}/story-structure`}
-                className="w-full h-[520px] border-0 bg-white"
-              />
+            <section className="rounded-xl border border-gray-200 bg-white overflow-hidden p-4">
+              <header className="text-sm font-semibold text-gray-700 mb-3">D · 學生端即時渲染（previewMode）</header>
+              {detail.structure ? (
+                <StoryStructureTable
+                  storyId={String(detail.story_id)}
+                  structure={detail.structure as never}
+                  previewMode
+                  showCoach={false}
+                />
+              ) : (
+                <p className="text-sm text-gray-400">無 structure 資料</p>
+              )}
             </section>
 
             <section className="rounded-xl border border-gray-200 bg-white overflow-hidden">

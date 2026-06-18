@@ -128,7 +128,7 @@ backend/.venv/bin/python scripts/story_structure_qa.py --all
 | G7-L28 | 科學探究 + 圖文 `data-comprehension-lesson-text` |
 | G4-L1 | theme_facts + 多列紙本表 |
 | G4-L6 | `ai_fallback` / `mixed` |
-| G7-L6（catalog `G7-L06`） | `parser_gap` / `display_only`（`label_blanks` 未進 YAML） |
+| G7-L6（catalog `G7-L06`） | `docx_keypoints` / `fill_blank`（`label_blanks` 已 sync） |
 
 > **命名注意**：冒煙集用 **parsed** 課碼（DOCX batch id）。例如 parsed `G8-L13` = catalog `G8-L10`（構樹），不是 catalog `G8-L13`（告別方式）
 

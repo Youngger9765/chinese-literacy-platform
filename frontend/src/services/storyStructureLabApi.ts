@@ -60,6 +60,14 @@ export interface LabDetail {
   yaml_table?: unknown;
   yaml_rows?: unknown;
   keypoints?: Record<string, unknown>;
+  docx_snapshot?: Record<string, unknown>;
+  dual_source_eval?: {
+    available: boolean;
+    yaml_match?: boolean;
+    has_docx_snapshot?: boolean;
+    expected_rows?: number;
+    on_disk_rows?: number;
+  };
   structure_grading?: Record<string, unknown>;
   structure?: Record<string, unknown>;
   interaction_profile?: InteractionProfileSummary;
