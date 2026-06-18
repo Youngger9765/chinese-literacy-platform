@@ -92,9 +92,28 @@
 - STT 有非確定性 → STT 層看區間，**評分層必須 =0（確定性）**
 - 「不確定就寬鬆」是教學取捨：寧可少扣不可錯扣
 
-## 7. 附錄：STT 引擎 A/B（階段 B 優化，非 v1 必要）
+## 7. 技術選型 A/B — 4 個比較軸（**現在就能測，與階段 A 並行，不擋 v1**）
 
-固定評分=確定性後端，唯一變因=STT。matrix：C1 Gemini batch 全文（基準/慢）、C2 Gemini batch 逐段（切短）、C3 Azure STT、C4 Gemini Live(N/A headless)、C5 Web Speech(N/A headless)。用 TTS fixture(F1 全對/F2 部分對) + 人聲集量 R1/R2/R4。**此為「更快更省」優化，不是「分數可信」驗證**。
+技術選型不必等階段 B。以下每軸標：✅ 現在跑得動 / ⚠️ 需小瀏覽器 PoC / 📐 設計決策（非單純量測）。固定其他軸、一次只變一軸才比得乾淨。
+
+### 軸 1：STT 引擎/品牌 — Azure vs Gemini（vs Web Speech）
+- **引擎準度/成本（✅ 現在）**：Azure STT(REST/本機 key) vs Gemini batch(staging) 餵同一 TTS 音檔 → R2 字準 / R4 成本 / R1 延遲。背景實驗進行中。
+- **前端即時延遲（⚠️ 需小 PoC）**：Azure 瀏覽器 SDK / Gemini Live 的「邊讀邊轉 ~0 等待」要一個瀏覽器 PoC 驗（headless 跑不了）。先用引擎準度數據 + 單價，延遲用一支 PoC 補。
+- 候選：Gemini batch（現用）/ Azure 即時 / Gemini Live / Web Speech。
+
+### 軸 2：評分引擎 — 確定性 LCS+同音 vs LLM 逐字 diff（✅ 現在）
+- 已有：確定性 = 98.1%（穩定）；LLM 逐字 diff = 39~58%（截斷+浮動）。**這軸結論最明確：確定性勝**。補 R5 確定性(variance=0 vs LLM 浮動)、R6 robustness(長段不截斷)。
+
+### 軸 3：其他演算法差異（✅ 現在，unit）
+- 同音寬鬆度（嚴格同音 vs 含異調 vs 近音）、normalize 選擇（數字/標點/注音）、LCS tie-break、字序對調處理 → 用已知案例 unit 測，看 R3 準度 + R7 誤判（過罰/遮真錯）。
+
+### 軸 4：前端送件 vs 後端送件（📐 設計 + ⚠️ 延遲量測）
+- 不是單一量測，是架構取捨：**前端送**（瀏覽器即時 STT/評分，~0 延遲、但分數客戶端算可能漂移/被改）vs **後端送**（上傳 audio→後端 STT+評分，單一真相可稽核、+round-trip~200ms+STT）。
+- 可量：後端 round-trip 延遲（✅）；前端即時延遲（⚠️ PoC）。可決：單一真相要不要（📐，#2266 已傾向後端評分）。
+
+### 呈現
+4 軸結果 → §5.5 HTML 儀表板：每軸一個比較區塊（選項 × R1-R8），標「現在數據 / PoC 待補 / 設計決策」，並給「這段該選哪個 + 為什麼」。
+matrix 落地：C1 Gemini batch 全文(基準) / C2 Gemini batch 逐段 / C3 Azure STT / C4 Gemini Live(N/A headless) / C5 Web Speech(N/A headless)。
 
 ## 8. 誤判背景（LCS 修補史，2026-06-18 查證）
 前端 `textDiff.ts` 已修+回歸測試：重複字 ghost-green、漏字 cascade(resync)、口吃 collapse、STT 重複片段、數字 214↔二百一十四、注音/標點 strip。後端 `_build_fallback_result` 有 frontend parity（L223 + `stt/normalization.py`）。殘留風險（R7）：字序對調過罰、同音過度校正遮真錯。
