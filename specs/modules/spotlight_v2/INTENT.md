@@ -8,6 +8,7 @@ owns_code:
   - backend/app/services/spotlight_block_model.py
   - backend/app/services/spotlight_contract.py
   - backend/app/services/spotlight_v2_loader.py
+  - backend/app/services/spotlight_pse_parser.py
   - scripts/build_lesson_schema.py
   - frontend/src/components/reading-spotlight/
 spec_tests:

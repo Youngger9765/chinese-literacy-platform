@@ -1,16 +1,10 @@
-"""TDD for PSE MCQ line parser (scripts/build_lesson_schema.py)."""
+"""TDD for PSE MCQ line parser (spotlight_pse_parser.py)."""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts"))
-
-from build_lesson_schema import _parse_pse_mcq_line  # noqa: E402
+from app.services.spotlight_pse_parser import parse_pse_mcq_line
 
 
 @pytest.mark.parametrize(
@@ -27,7 +21,7 @@ from build_lesson_schema import _parse_pse_mcq_line  # noqa: E402
     ],
 )
 def test_parse_pse_mcq_line_answer_not_first_distractor(line: str, expected_answer_substr: str):
-    block = _parse_pse_mcq_line(line)
+    block = parse_pse_mcq_line(line)
     assert block is not None
     assert block["type"] == "single"
     assert expected_answer_substr in (block.get("answer") or "")
