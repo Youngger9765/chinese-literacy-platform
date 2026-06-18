@@ -39,6 +39,7 @@ from story_structure_qa_lib import (  # noqa: E402
     LessonTier,
     SMOKE_LESSONS,
     classify_lesson,
+    count_checkbox_cells_in_table,
     gate_l1_pass,
     gate_l3_mode_expectation,
     summarize_gate,
@@ -374,6 +375,9 @@ def run_qa(
                             lesson_id,
                             struct.get("interaction_profile") or {},
                             docx_blanks=kp_eval.get("docx_blanks"),
+                            yaml_checkbox_cells=count_checkbox_cells_in_table(
+                                file_table or loader_table
+                            ),
                         )
                     )
                     profile = struct.get("interaction_profile") or {}
@@ -404,7 +408,16 @@ def run_qa(
                 has_ai_rows=bool(lesson.get("story_structure_rows")),
             )
             issues = verify_interaction_profile_contract(struct)
-            issues.extend(gate_l3_mode_expectation(tier, code, struct.get("interaction_profile") or {}))
+            issues.extend(
+                gate_l3_mode_expectation(
+                    tier,
+                    code,
+                    struct.get("interaction_profile") or {},
+                    yaml_checkbox_cells=count_checkbox_cells_in_table(
+                        lesson.get("story_structure_table")
+                    ),
+                )
+            )
             if issues:
                 failures.append({"lesson_id": code, "story_id": lesson["id"], "gate": "L3", "issues": issues})
 
@@ -472,7 +485,14 @@ def run_qa(
                             issues.append("layout mismatch vs local")
 
             issues.extend(
-                gate_l3_mode_expectation(tier, code, remote.get("interaction_profile") or {})
+                gate_l3_mode_expectation(
+                    tier,
+                    code,
+                    remote.get("interaction_profile") or {},
+                    yaml_checkbox_cells=count_checkbox_cells_in_table(
+                        local.get("story_structure_table") if local else None
+                    ),
+                )
             )
             ok = len(issues) == 0
             rec = {
