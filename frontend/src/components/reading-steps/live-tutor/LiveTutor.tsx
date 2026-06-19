@@ -721,12 +721,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
       </div>
 
-      {/* Mic error */}
-      {micError && (
-        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 px-5 py-2 bg-tertiary-container/20 rounded-full z-20">
-          <span className="text-sm text-tertiary">{micError}</span>
-        </div>
-      )}
+      {/* Mic error is now shown as a prominent card inside LiveTutorControls (Painpoint 2).
+          The old floating pill is removed. micError is passed via props below. */}
 
       {/* No-audio-detected banner */}
       {noAudioDetected && paragraphRecorder.status === 'recording' && (
@@ -780,6 +776,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         recordingPendingReview={recordingPendingReview}
         hasDetectedAudio={hasDetectedAudio}
         volumeLevel={paragraphRecorder.volumeLevel}
+        micError={micError || undefined}
+        recordingAudioUrl={recordingPendingReview ? paragraphRecorder.audioUrl : null}
         lastDiffTokens={displayLastDiffTokens}
         retryCount={evalState.retryCount}
         ttsError={ttsError}
@@ -794,6 +792,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
+        onRequestMicPermission={startSession}
       />
 
       {/* Background decoration */}
