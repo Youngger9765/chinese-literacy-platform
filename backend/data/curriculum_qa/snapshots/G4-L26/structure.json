@@ -18,7 +18,14 @@
         {
           "label": "事件",
           "value": "（①漏接  □②接殺）對手的高飛球，讓對手得分",
-          "interactive_type": "display"
+          "interactive_type": "checkbox",
+          "options": [
+            "漏接  □",
+            "接殺）對手的高飛球，讓對手得分"
+          ],
+          "correct_options": [
+            0
+          ]
         },
         {
           "label": "念頭",
@@ -28,7 +35,14 @@
         {
           "label": "反應",
           "value": "內心充滿（①自責  □②鬥志）",
-          "interactive_type": "display"
+          "interactive_type": "checkbox",
+          "options": [
+            "自責  □",
+            "鬥志）"
+          ],
+          "correct_options": [
+            0
+          ]
         }
       ]
     },
@@ -62,7 +76,14 @@
         {
           "label": "事件",
           "value": "站上打擊區，被三球（①三振  □②保送）",
-          "interactive_type": "display"
+          "interactive_type": "checkbox",
+          "options": [
+            "三振  □",
+            "保送）"
+          ],
+          "correct_options": [
+            0
+          ]
         },
         {
           "label": "念頭",
@@ -78,8 +99,15 @@
     },
     {
       "label": "解決方法",
-      "value": "1.收到隊友、朋友的【　　　】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【　　　】，但還是感到有些【　　　】\n2.收到教練的提醒：「懊悔不如【　　　】」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）",
-      "interactive_type": "fill_blank"
+      "value": "1.收到隊友、朋友的【 鼓勵 】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【 暖 】，但還是感到有些【 自責 】\n2.收到教練的提醒：「懊悔不如【 行動 】」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）",
+      "interactive_type": "checkbox",
+      "options": [
+        "變小聲  □",
+        "變大聲）"
+      ],
+      "correct_options": [
+        0
+      ]
     },
     {
       "label": "收穫",
@@ -165,15 +193,15 @@
     }
   ],
   "interaction_profile": {
-    "mode": "fill_blank",
+    "mode": "mixed",
     "template_kind": "psr",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "checkbox_count": 4,
     "primary_labels": [
       "主要問題",
       "事件",
       "反應",
-      "反應"
+      "事件"
     ],
     "layout": "worksheet_table"
   }

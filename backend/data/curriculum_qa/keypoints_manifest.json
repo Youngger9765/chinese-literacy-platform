@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-18T14:56:04.878722+00:00",
+  "generated_at": "2026-06-19T14:42:13.896161+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -9,10 +9,10 @@
   ],
   "summary": {
     "total": 151,
-    "pass": 151,
-    "fail": 0,
-    "known_gap_count": 1,
-    "failure_count": 0
+    "pass": 146,
+    "fail": 5,
+    "known_gap_count": 0,
+    "failure_count": 5
   },
   "lessons": [
     {
@@ -444,10 +444,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -693,10 +693,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -737,10 +737,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 4,
         "row_count": 7
       },
       "artifacts": {
@@ -781,10 +781,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 7,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 3,
         "row_count": 6
       },
       "artifacts": {
@@ -1763,10 +1763,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "checkbox",
         "layout": "worksheet_table",
-        "fill_blank_count": 1,
-        "checkbox_count": 0,
+        "fill_blank_count": 0,
+        "checkbox_count": 2,
         "row_count": 5
       },
       "artifacts": {
@@ -2295,8 +2295,8 @@
       "story_id": 1065,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
+      "overall_pass": false,
+      "overall_status": "fail",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -2305,8 +2305,10 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "fingerprint mismatch"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3233,8 +3235,8 @@
       "story_id": 19,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
+      "overall_pass": false,
+      "overall_status": "fail",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -3243,8 +3245,10 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "fingerprint mismatch"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4323,11 +4327,26 @@
       "lesson_id": "G7-L6",
       "title": "奧運性別平等這條路",
       "story_id": 31,
-      "tier": "parser_gap",
-      "known_data_gap": true,
+      "tier": "docx_keypoints",
+      "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
       "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": []
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
         "L3": {
           "gate": "L3",
           "pass": true,
@@ -4335,9 +4354,9 @@
         }
       },
       "layout": {
-        "mode": "display_only",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 0,
+        "fill_blank_count": 5,
         "checkbox_count": 0,
         "row_count": 8
       },
@@ -4684,10 +4703,10 @@
         }
       },
       "layout": {
-        "mode": "display_only",
+        "mode": "checkbox",
         "layout": "worksheet_table",
         "fill_blank_count": 0,
-        "checkbox_count": 0,
+        "checkbox_count": 4,
         "row_count": 5
       },
       "artifacts": {
@@ -5519,10 +5538,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "checkbox_count": 1,
         "row_count": 6
       },
       "artifacts": {
@@ -5563,10 +5582,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -5580,7 +5599,7 @@
       "lesson_id": "G9-L15",
       "title": "未解之謎──石頭的祕密（一）：巨石陣",
       "story_id": 1144,
-      "tier": "no_structure",
+      "tier": "ai_fallback",
       "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
@@ -5592,11 +5611,11 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
-        "row_count": 6
+        "mode": "mixed",
+        "layout": "cards",
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -5609,7 +5628,7 @@
       "lesson_id": "G9-L17",
       "title": "馬拉松王者──基普喬吉 (記敘文)",
       "story_id": 1146,
-      "tier": "no_structure",
+      "tier": "ai_fallback",
       "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
@@ -5621,11 +5640,11 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 0,
-        "row_count": 7
+        "mode": "mixed",
+        "layout": "cards",
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -5992,8 +6011,8 @@
       "story_id": 1149,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
+      "overall_pass": false,
+      "overall_status": "fail",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6002,8 +6021,10 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "fingerprint mismatch"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6221,8 +6242,8 @@
       "story_id": 1154,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
+      "overall_pass": false,
+      "overall_status": "fail",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6231,8 +6252,10 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "fingerprint mismatch"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6309,8 +6332,8 @@
       "story_id": null,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
+      "overall_pass": false,
+      "overall_status": "fail",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -6319,8 +6342,10 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": true,
-          "issues": []
+          "pass": false,
+          "issues": [
+            "fingerprint mismatch"
+          ]
         }
       },
       "layout": {
@@ -6372,5 +6397,41 @@
       "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
   ],
-  "raw_failures": []
+  "raw_failures": [
+    {
+      "lesson_id": "G6-L11",
+      "gate": "L2",
+      "issues": [
+        "fingerprint mismatch"
+      ]
+    },
+    {
+      "lesson_id": "G6-L9",
+      "gate": "L2",
+      "issues": [
+        "fingerprint mismatch"
+      ]
+    },
+    {
+      "lesson_id": "文-L1",
+      "gate": "L2",
+      "issues": [
+        "fingerprint mismatch"
+      ]
+    },
+    {
+      "lesson_id": "文-L6",
+      "gate": "L2",
+      "issues": [
+        "fingerprint mismatch"
+      ]
+    },
+    {
+      "lesson_id": "文-L8",
+      "gate": "L2",
+      "issues": [
+        "fingerprint mismatch"
+      ]
+    }
+  ]
 }

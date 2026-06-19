@@ -6,7 +6,7 @@
       "interactive_type": "fill_blank"
     },
     {
-      "label": "【 起因 】/案由",
+      "label": "__/案由",
       "value": "【　　　】媽媽的布被偷了，於是她到王宮向王上告發【　　　】盜竊。",
       "interactive_type": "fill_blank"
     },
@@ -30,7 +30,7 @@
     },
     {
       "kind": "pair",
-      "label": "【 起因 】/案由",
+      "label": "__/案由",
       "value": "【　　　】媽媽的布被偷了，於是她到王宮向王上告發【　　　】盜竊。"
     },
     {
@@ -51,7 +51,7 @@
     "checkbox_count": 0,
     "primary_labels": [
       "故事結構",
-      "【 起因 】/案由",
+      "__/案由",
       "經過/告訴人主張"
     ],
     "layout": "worksheet_table"

@@ -1,5 +1,29 @@
 # 文章重點表 QA 標準（三層契約）
 
+## 0. Merge Gate（必做 — 防假綠）
+
+動到 **cell parser / stories structure / lesson YAML `story_structure_table` / QA lib** 時，merge 前必跑：
+
+```bash
+# 有 private schema 時（完整重建 + 驗證）
+bash scripts/story_structure_ship_gate.sh --rebuild
+
+# CI / 無 private schema（驗證 committed manifest 是否跟 runtime 一致）
+bash scripts/story_structure_ship_gate.sh
+```
+
+| 步驟 | 做什麼 | 失敗代表 |
+|------|--------|----------|
+| 1 | `build_keypoints_qa_manifest.py --all` | manifest / snapshot 過期 |
+| 2 | `keypoints_manifest_verify.py` | 儀表板會跟學生端不一致（假綠） |
+| 3 | pytest manifest + story-structure contracts | 契約回歸 |
+
+**CI**：`.github/workflows/keypoints-manifest-gate.yml` — PR 觸及相關路徑時自動跑，**不需要** private schema
+
+**禁止**：只 merge parser fix、不重跑 manifest（#2273 教訓：G7-L6 儀表板仍 `display_only` 假綠）
+
+---
+
 對齊架構：
 
 ```
@@ -23,11 +47,11 @@ StoryStructureTable + ComprehensionLayout
 | `docx_keypoints` | 有 `*.keypoints.yml` + YAML `story_structure_table` | 136 |
 | `ai_fallback` | 僅 `story_structure_rows`（AI/checkbox 卡版） | 16 |
 | `no_keypoints_docx` | DOCX 無填空式重點表（圖文/純表等） | 15 |
-| `parser_gap` | 有 DOCX 表但 parser 未產 `interactive_type`（已知） | 1 |
+| `parser_gap` | 有 DOCX 表但 parser 未產 `interactive_type`（`PARSER_GAP_LESSONS`） | 0 |
 
-已知 `parser_gap`：`G7-L6`（底線 `__`，仍 `display_only`）
+`parser_gap` 課碼清單：`scripts/story_structure_qa_lib.py` → `PARSER_GAP_LESSONS`（#2273 後 G7-L6 已移出）
 
-`G8-L13` / `G8-L14` 若 YAML 內 `□` 在純文字、未進 `interactive_type: checkbox` → L3 會標 `display_only` 且 **WARN**（資料層待修）
+`G8-L13` / `G8-L14` 若 YAML 內 `□` 未進 `interactive_type: checkbox` → L3 **FAIL**（見 `count_checkbox_cells_in_table` gate）
 
 ---
 
@@ -112,7 +136,7 @@ StoryStructureTable + ComprehensionLayout
 
 ```bash
 export QA_STUDENT_EMAIL='...'   # staging /login 學生懶人登入帳號
-export QA_STUDENT_PASSWORD='...'
+export QA_STUDENT_CRED='...'    # 舊名 QA_STUDENT_PASSWORD 仍相容
 backend/.venv/bin/python scripts/story_structure_qa.py --all
 ```
 
@@ -128,7 +152,7 @@ backend/.venv/bin/python scripts/story_structure_qa.py --all
 | G7-L28 | 科學探究 + 圖文 `data-comprehension-lesson-text` |
 | G4-L1 | theme_facts + 多列紙本表 |
 | G4-L6 | `ai_fallback` / `mixed` |
-| G7-L6（catalog `G7-L06`） | `parser_gap` / `display_only`（`label_blanks` 未進 YAML） |
+| G7-L6（catalog `G7-L06`） | `label_blanks` + `fill_blank`×5（#2273 cell parser） |
 
 > **命名注意**：冒煙集用 **parsed** 課碼（DOCX batch id）。例如 parsed `G8-L13` = catalog `G8-L10`（構樹），不是 catalog `G8-L13`（告別方式）
 
