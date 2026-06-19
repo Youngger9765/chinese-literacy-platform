@@ -379,3 +379,58 @@ class TestTranscribeWithSessionIdPersistsPath:
         # The attempt row in DB should now have the path written
         db.refresh(attempt)
         assert attempt.audio_gcs_path == expected_path
+
+    def test_transcribe_idor_rejected_when_session_belongs_to_other_user(self, db):
+        """SECURITY: supplying another student's session_id must NOT write to their attempts.
+
+        This test covers the IDOR fix: the transcribe endpoint must verify
+        LearningSession.student_id == current_user.id before writing audio_gcs_path.
+        """
+        from unittest.mock import AsyncMock
+
+        # Create a session owned by _OTHER_STUDENT_ID
+        other_sess = _create_session(db, student_id=_OTHER_STUDENT_ID)
+        other_attempt = _create_attempt(db, session_id=other_sess.id, audio_gcs_path=None)
+
+        # Log in as _STUDENT_ID but pass the other student's session_id
+        app = _build_transcribe_app(db, current_user_id=_STUDENT_ID)
+        client = TestClient(app)
+
+        with (
+            patch(
+                "app.routes.learning.learning_reading.transcribe_reading_audio",
+                new=AsyncMock(return_value={
+                    "transcript": "攻擊者",
+                    "method": "gemini",
+                    "reasoning": "ok",
+                }),
+            ),
+            patch(
+                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs_sync",
+                return_value="reading-audio/attempts/EVIL.webm",
+            ) as mock_sync,
+            patch("app.routes.learning.learning_reading.upload_reading_audio_to_gcs"),
+            patch("app.routes.learning.learning_reading.log_ai_usage"),
+        ):
+            resp = client.post(
+                "/api/reading/transcribe",
+                files={"audio": ("rec.webm", b"attacker_audio", "audio/webm")},
+                data={
+                    "target_text": "攻擊者",
+                    "session_id": str(other_sess.id),  # Attacker passes victim's session_id
+                },
+            )
+
+        # Scoring must succeed — IDOR block must NOT break the response
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["transcript"] == "攻擊者"
+
+        # The sync upload must NOT have been called — ownership check blocked it
+        mock_sync.assert_not_called()
+
+        # The other student's attempt row must still have audio_gcs_path=None
+        db.refresh(other_attempt)
+        assert other_attempt.audio_gcs_path is None, (
+            "IDOR exploit succeeded: attacker wrote to another student's attempt row"
+        )

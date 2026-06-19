@@ -632,48 +632,69 @@ async def transcribe_reading_endpoint(
     # Upload failures are logged as WARNING; never affect the student score.
     # Security: bucket is private, no public ACL, path NOT returned to client here.
     if session_id is not None:
-        # Verify session belongs to the current user before touching DB
-        attempt = (
-            db.query(ReadingAttemptHistory)
-            .filter(ReadingAttemptHistory.session_id == session_id)
-            .order_by(ReadingAttemptHistory.attempt_no.desc())
+        # ── SECURITY: verify session ownership BEFORE touching DB (IDOR fix) ──
+        # Without this check any authenticated user could write to another
+        # student's attempt row by supplying a different session_id.
+        owned_session = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.id == session_id,
+                LearningSession.student_id == current_user.id,
+            )
             .first()
         )
-        if attempt is not None:
-            base_mime = _normalise_mime_for_path(raw_mime)
-            ext = _MIME_TO_EXT_SYNC.get(base_mime, ".audio")
-            blob_path = f"reading-audio/attempts/{attempt.id}{ext}"
-            stored_path = upload_reading_audio_to_gcs_sync(
-                audio_bytes=audio_bytes,
-                mime_type=raw_mime,
-                blob_path=blob_path,
-            )
-            if stored_path is not None:
-                attempt.audio_gcs_path = stored_path
-                try:
-                    db.commit()
-                except Exception as commit_exc:
-                    logger.warning(
-                        "Failed to persist audio_gcs_path for attempt %d: %s",
-                        attempt.id,
-                        commit_exc,
-                    )
-                    db.rollback()
-        else:
-            # No attempt row yet — fall back to fire-and-forget for debug
-            logger.info(
-                "transcribe: session_id=%d has no ReadingAttemptHistory yet; "
-                "falling back to fire-and-forget upload",
+        if owned_session is None:
+            # Log but do NOT raise — audio upload failure must never block scoring.
+            logger.warning(
+                "transcribe: session_id=%d does not belong to user=%d; "
+                "skipping GCS audio upload",
                 session_id,
+                current_user.id,
             )
-            background_tasks.add_task(
-                upload_reading_audio_to_gcs,
-                audio_bytes=audio_bytes,
-                mime_type=raw_mime,
-                user_id=current_user.id,
-                lesson_id=None,
-                duration_ms=duration_ms,
+            # Fall through to return without uploading.
+        else:
+            attempt = (
+                db.query(ReadingAttemptHistory)
+                .filter(ReadingAttemptHistory.session_id == session_id)
+                .order_by(ReadingAttemptHistory.attempt_no.desc())
+                .first()
             )
+        if owned_session is not None:
+            if attempt is not None:
+                base_mime = _normalise_mime_for_path(raw_mime)
+                ext = _MIME_TO_EXT_SYNC.get(base_mime, ".audio")
+                blob_path = f"reading-audio/attempts/{attempt.id}{ext}"
+                stored_path = upload_reading_audio_to_gcs_sync(
+                    audio_bytes=audio_bytes,
+                    mime_type=raw_mime,
+                    blob_path=blob_path,
+                )
+                if stored_path is not None:
+                    attempt.audio_gcs_path = stored_path
+                    try:
+                        db.commit()
+                    except Exception as commit_exc:
+                        logger.warning(
+                            "Failed to persist audio_gcs_path for attempt %d: %s",
+                            attempt.id,
+                            commit_exc,
+                        )
+                        db.rollback()
+            else:
+                # Owned session but no attempt row yet — fire-and-forget for debug
+                logger.info(
+                    "transcribe: session_id=%d has no ReadingAttemptHistory yet; "
+                    "falling back to fire-and-forget upload",
+                    session_id,
+                )
+                background_tasks.add_task(
+                    upload_reading_audio_to_gcs,
+                    audio_bytes=audio_bytes,
+                    mime_type=raw_mime,
+                    user_id=current_user.id,
+                    lesson_id=None,
+                    duration_ms=duration_ms,
+                )
     else:
         # Stateless call — fire-and-forget for debug purposes only.
         background_tasks.add_task(
