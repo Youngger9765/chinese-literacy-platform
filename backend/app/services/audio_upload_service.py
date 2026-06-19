@@ -231,6 +231,85 @@ def upload_reading_audio_to_gcs_sync(
         return None
 
 
+def delete_gcs_blob(blob_path: str) -> bool:
+    """Delete a single GCS blob by path.  Returns True on success, False on failure.
+
+    Failure is logged as WARNING; callers MUST NOT raise — GCS delete failures
+    are non-fatal and should not block DB operations.  The orphan reconciliation
+    script (scripts/reconcile_reading_audio_orphans.py) handles any residual
+    blobs on manual run.
+
+    Args:
+        blob_path: GCS object path stored in audio_gcs_path columns.
+
+    Returns:
+        True  — blob deleted (or did not exist: idempotent).
+        False — GCS unavailable or unexpected error.
+    """
+    if not blob_path:
+        return False
+
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        logger.warning(
+            "GCS unavailable — cannot delete blob %s; will appear as orphan", blob_path
+        )
+        return False
+
+    try:
+        blob = bucket.blob(blob_path)
+        blob.delete(if_generation_match=None)  # idempotent: 404 is OK
+        logger.info("reading-audio GCS blob deleted: %s", blob_path)
+        return True
+    except Exception as exc:
+        # google-cloud-storage raises NotFound if already gone — that is success.
+        exc_name = type(exc).__name__
+        if "NotFound" in exc_name or "404" in str(exc):
+            logger.debug(
+                "reading-audio GCS blob already gone (404): %s", blob_path
+            )
+            return True
+        logger.warning(
+            "reading-audio GCS blob delete failed: path=%s error=%s — will appear as orphan",
+            blob_path,
+            exc,
+        )
+        return False
+
+
+def delete_gcs_blobs_for_paths(blob_paths: list[str]) -> tuple[int, int]:
+    """Delete a batch of GCS blobs.  Best-effort; never raises.
+
+    Used by cascade-delete hooks so GCS audio is cleaned up in sync with DB row
+    removal.  Each blob is attempted independently — one failure does not stop
+    the others.  Callers MUST NOT let failures block DB operations.
+
+    Args:
+        blob_paths: List of GCS object paths (None / empty strings are skipped).
+
+    Returns:
+        (deleted_count, failed_count) — for logging.
+    """
+    deleted = 0
+    failed = 0
+    for path in blob_paths:
+        if not path:
+            continue
+        ok = delete_gcs_blob(path)
+        if ok:
+            deleted += 1
+        else:
+            failed += 1
+    if any(blob_paths):
+        logger.info(
+            "reading-audio cascade delete: deleted=%d failed=%d total=%d",
+            deleted,
+            failed,
+            sum(1 for p in blob_paths if p),
+        )
+    return deleted, failed
+
+
 def generate_audio_signed_url(
     blob_path: str,
     expiration_seconds: int = 600,
