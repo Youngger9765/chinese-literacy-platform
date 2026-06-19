@@ -371,22 +371,40 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto w-full">
+    <div className="space-y-6 max-w-6xl mx-auto w-full">
       <header className="border-b border-gray-200 pb-4">
         <div className="text-sm font-semibold text-violet-600 tracking-wide">閱讀聚光燈</div>
         <h2 className="text-xl font-bold text-on-surface mt-1">{spotlight.strategy_name}</h2>
       </header>
 
-      {segments.slice(0, visibleSegmentCount).map((segment, segIdx) => (
-        <section key={segIdx} className="space-y-4">
-          {segIdx > 0 ? (
-            <div className="text-sm font-semibold text-on-surface-variant pt-2 border-t border-gray-100">
-              第 {segIdx + 1} 部分
-            </div>
-          ) : null}
-          {segment.map((block, blockIdx) => renderBlock(block, segIdx, blockIdx))}
-        </section>
-      ))}
+      {segments.slice(0, visibleSegmentCount).map((segment, segIdx) => {
+        const indexed = segment.map((block, blockIdx) => ({ block, blockIdx }));
+        const hasPassage = segment.some((b) => b.type === 'passage');
+        const contextBlocks = indexed.filter(({ block }) => !isInteractiveBlock(block.type));
+        const exerciseBlocks = indexed.filter(({ block }) => isInteractiveBlock(block.type));
+
+        return (
+          <section key={segIdx} className="space-y-4">
+            {segIdx > 0 ? (
+              <div className="text-sm font-semibold text-on-surface-variant pt-2 border-t border-gray-100">
+                第 {segIdx + 1} 部分
+              </div>
+            ) : null}
+            {hasPassage && exerciseBlocks.length > 0 ? (
+              <div className="flex flex-col gap-4 lg:grid lg:grid-cols-5 lg:gap-6 lg:items-start">
+                <div className="lg:col-span-3 space-y-4 lg:sticky lg:top-4">
+                  {contextBlocks.map(({ block, blockIdx }) => renderBlock(block, segIdx, blockIdx))}
+                </div>
+                <div className="lg:col-span-2 space-y-4">
+                  {exerciseBlocks.map(({ block, blockIdx }) => renderBlock(block, segIdx, blockIdx))}
+                </div>
+              </div>
+            ) : (
+              segment.map((block, blockIdx) => renderBlock(block, segIdx, blockIdx))
+            )}
+          </section>
+        );
+      })}
 
       {allDone ? (
         <p className="text-center text-base font-medium text-green-700 py-4">✓ 閱讀聚光燈練習完成</p>
