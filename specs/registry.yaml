@@ -667,16 +667,23 @@ modules:
   - backend/app/services/story_structure_lab_service.py
   - scripts/keypoints_table_sync.py
   - scripts/story_structure_qa_lib.py
+  - scripts/story_structure_qa.py
+  - scripts/build_keypoints_qa_manifest.py
+  - scripts/keypoints_manifest_verify.py
   owns_data:
   - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  - backend/data/curriculum_qa/keypoints_manifest.json
+  - backend/data/curriculum_qa/snapshots/**/*
   spec_tests:
   - backend/specs/test_story_structure_spec.py
+  - backend/specs/test_keypoints_manifest_spec.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
   related_issues:
   - 2205
   - 2261
-  last_reviewed: 2026-06-17
+  - 2273
+  last_reviewed: 2026-06-19
   owner: young
   intent: specs/modules/story-structure/INTENT.md
 - spec_id: learning.stuck_detection

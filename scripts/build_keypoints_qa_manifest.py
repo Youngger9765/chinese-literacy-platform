@@ -33,6 +33,7 @@ from story_structure_qa_lib import SMOKE_LESSONS  # noqa: E402
 
 DEFAULT_SCHEMA_DIR = ROOT / "private/curriculum-source/_online-schema"
 OUT_DIR = ROOT / "backend/data/curriculum_qa"
+PARSED_DIR = ROOT / "backend/data/lessons/_parsed_2026-05-01"
 GATES = {"L1", "L2", "L3"}
 
 
@@ -115,6 +116,14 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
             structure = build_structure_from_lesson(
                 loader, _format_yaml_structure_table, _sanitize_structure_for_client
             )
+        if structure is None:
+            parsed_path = PARSED_DIR / f"{lesson_id}.yml"
+            if parsed_path.is_file():
+                with open(parsed_path, encoding="utf-8") as f:
+                    parsed_data = yaml.safe_load(f) or {}
+                structure = build_structure_from_lesson(
+                    parsed_data, _format_yaml_structure_table, _sanitize_structure_for_client
+                )
         if structure:
             (lesson_snap / "structure.json").write_text(
                 json.dumps(structure, ensure_ascii=False, indent=2),

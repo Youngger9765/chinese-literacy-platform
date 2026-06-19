@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-19T11:41:32.732704+00:00",
+  "generated_at": "2026-06-19T14:45:35.762366+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -6139,16 +6139,16 @@
         }
       },
       "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
         "has_original_preview": true,
-        "has_structure_snapshot": false
+        "has_structure_snapshot": true
       },
       "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
     },
@@ -6173,16 +6173,16 @@
         }
       },
       "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 3,
+        "checkbox_count": 0,
+        "row_count": 4
       },
       "artifacts": {
         "has_keypoints_yml": true,
         "has_original_preview": true,
-        "has_structure_snapshot": false
+        "has_structure_snapshot": true
       },
       "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
     },
@@ -6339,16 +6339,16 @@
         }
       },
       "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 6,
+        "checkbox_count": 0,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
         "has_original_preview": true,
-        "has_structure_snapshot": false
+        "has_structure_snapshot": true
       },
       "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
     },
@@ -6373,16 +6373,16 @@
         }
       },
       "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 3
       },
       "artifacts": {
         "has_keypoints_yml": true,
         "has_original_preview": true,
-        "has_structure_snapshot": false
+        "has_structure_snapshot": true
       },
       "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
