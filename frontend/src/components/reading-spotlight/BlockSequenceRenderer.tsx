@@ -3,6 +3,9 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SpotlightBlock, SpotlightV2, Story } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { validateStrategyAnswer } from '../../services/learningApi';
+import type { StrategyGradeResult } from '../../services/learning/sentence';
 import { FigureCard, buildImageSrc } from '../reading-steps/GraphicTextImageStrip';
 import {
   blockStateKey,
@@ -27,6 +30,12 @@ interface Props {
   onOpenKeypoints?: () => void;
 }
 
+const FALLBACK_GRADE: StrategyGradeResult = {
+  is_correct: true,
+  feedback: '已記錄你的答案，做得好！',
+  suggestion: '',
+};
+
 const BlockSequenceRenderer: React.FC<Props> = ({
   spotlight,
   story,
@@ -36,6 +45,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   initialState,
   onOpenKeypoints,
 }) => {
+  const { token } = useAuth();
+  const storyTitle = story?.title;
+  const passage = story?.content?.join('\n');
   const segments = useMemo(() => segmentBlocks(spotlight.blocks), [spotlight.blocks]);
 
   const [blockState, setBlockState] = useState<Record<string, unknown>>(
@@ -44,13 +56,17 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   const [feedback, setFeedback] = useState<Record<string, boolean | null>>(
     () => (initialState?.feedback as Record<string, boolean | null>) ?? {},
   );
+  const [textGrades, setTextGrades] = useState<Record<string, StrategyGradeResult>>(
+    () => (initialState?.textGrades as Record<string, StrategyGradeResult>) ?? {},
+  );
+  const [gradingKey, setGradingKey] = useState<string | null>(null);
   const [allDone, setAllDone] = useState(() => !!(initialState?.allDone as boolean));
 
   const visibleSegmentCount = countVisibleSegments(segments, blockState);
 
   useEffect(() => {
-    onChange?.({ blockState, feedback, allDone, renderer: 'spotlight_v2' });
-  }, [blockState, feedback, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
+    onChange?.({ blockState, feedback, textGrades, allDone, renderer: 'spotlight_v2' });
+  }, [blockState, feedback, textGrades, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setBlockValue = useCallback((key: string, value: unknown) => {
     setBlockState((prev) => ({ ...prev, [key]: value }));
@@ -85,16 +101,47 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     checkCompletion(blockState);
   };
 
-  const handleFreeTextSubmit = (segIdx: number, blockIdx: number, block: SpotlightBlock) => {
+  const finishFreeText = (key: string, grade: StrategyGradeResult) => {
+    setTextGrades((prev) => ({ ...prev, [key]: grade }));
+    setFeedback((prev) => ({ ...prev, [key]: true }));
+    checkCompletion(blockState);
+  };
+
+  const handleFreeTextSubmit = async (
+    segIdx: number,
+    blockIdx: number,
+    block: SpotlightBlock,
+  ) => {
+    if (block.type !== 'free_text') return;
     const key = blockStateKey(segIdx, blockIdx);
     const text = String(blockState[key] ?? '').trim();
     if (!text) return;
-    const correct =
-      block.type === 'free_text'
-        ? resolveFreeTextCorrect(text, block.answer)
-        : true;
-    setFeedback((prev) => ({ ...prev, [key]: correct }));
-    checkCompletion(blockState);
+
+    if (!token) {
+      const localCorrect = resolveFreeTextCorrect(text, block.answer);
+      finishFreeText(key, {
+        ...FALLBACK_GRADE,
+        is_correct: localCorrect,
+        feedback: localCorrect ? '✓ 答對了' : '再想想看',
+      });
+      return;
+    }
+
+    setGradingKey(key);
+    try {
+      const grade = await validateStrategyAnswer(token, {
+        question: block.prompt ?? '',
+        studentAnswer: text,
+        strategyName: spotlight.strategy_name,
+        storyTitle,
+        passage,
+      });
+      finishFreeText(key, grade);
+    } catch {
+      finishFreeText(key, FALLBACK_GRADE);
+    } finally {
+      setGradingKey(null);
+    }
   };
 
   const renderGuide = (key: string, text: string) => (
@@ -193,36 +240,60 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         );
       }
 
-      case 'free_text':
+      case 'free_text': {
         if (isSectionHeaderPrompt(block.prompt)) {
           return renderGuide(key, block.prompt);
         }
+        const grade = textGrades[key];
+        const isGrading = gradingKey === key;
+        const isSubmitted = fb !== undefined && fb !== null;
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
             <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
             <textarea
               value={String(blockState[key] ?? '')}
-              disabled={fb !== undefined && fb !== null}
+              disabled={isSubmitted || isGrading}
               onChange={(e) => setBlockValue(key, e.target.value)}
               rows={3}
               placeholder="請在此寫下你的答案…"
               className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-base"
             />
-            {fb === null || fb === undefined ? (
+            {!isSubmitted && !isGrading ? (
               <button
                 type="button"
-                onClick={() => handleFreeTextSubmit(segIdx, blockIdx, block)}
+                onClick={() => void handleFreeTextSubmit(segIdx, blockIdx, block)}
                 className="mt-3 px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600"
               >
                 送出
               </button>
-            ) : (
-              <p className={`mt-3 text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                {fb ? '✓ 答對了' : '再想想看'}
-              </p>
-            )}
+            ) : null}
+            {isGrading ? (
+              <p className="mt-3 text-sm text-violet-600 font-semibold">AI 批改中…</p>
+            ) : null}
+            {!isGrading && grade ? (
+              <div
+                className={`mt-3 rounded-lg border p-3 ${
+                  grade.is_correct
+                    ? 'bg-emerald-50 border-emerald-200'
+                    : 'bg-amber-50 border-amber-200'
+                }`}
+              >
+                <p
+                  className={`text-sm font-semibold ${
+                    grade.is_correct ? 'text-emerald-700' : 'text-amber-700'
+                  }`}
+                >
+                  {grade.is_correct ? '✓ ' : '💡 '}
+                  {grade.feedback}
+                </p>
+                {grade.suggestion ? (
+                  <p className="mt-1.5 text-sm text-amber-700/90">{grade.suggestion}</p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         );
+      }
 
       case 'self_check':
         return (
