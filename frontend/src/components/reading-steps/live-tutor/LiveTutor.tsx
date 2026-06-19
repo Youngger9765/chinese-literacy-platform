@@ -218,7 +218,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setIsTtsPaused(false);
     },
     onSessionReady: () => {},
-    // No-audio banner uses AnalyserNode volume (paragraphRecorder), not Web Speech.
+    // No-audio banner uses AnalyserNode volume (paragraphRecorder). Web Speech removed (Issue #2266).
   });
 
   // AnalyserNode volume: clear "no audio" banner as soon as the mic picks up sound.

@@ -19,10 +19,8 @@ import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssess
 import FullReadingControls, { type ControlState } from './full-reading/FullReadingControls';
 import FullReadingScoreCard from './full-reading/FullReadingScoreCard';
 import FullReadingFeedbackPanel from './full-reading/FullReadingFeedbackPanel';
-// Note: liveTranscriptEnhance / enhanceLiveTranscript intentionally NOT imported here.
-// I3 (Issue #2156): live preview must show raw Web Speech gray text only.
-// Instant punctuation re-insertion causes visible flicker on every STT partial result.
-// Gemini adds accurate punctuation post-submission — no need to fake it live.
+// Note: Web Speech removed (Issue #2266) — streaming transcript not available during recording.
+// Live preview area will be empty until Gemini STT returns post-submission.
 
 /* ------------------------------------------------------------------ */
 
