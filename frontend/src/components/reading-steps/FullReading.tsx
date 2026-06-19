@@ -100,52 +100,6 @@ const FullReading: React.FC<FullReadingProps> = ({
 
   const aiRating = aiFluencyInsight?.rating;
 
-  /* ---- Issue #2266: In-memory audio replay (same-session) ---- */
-  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
-  const replayAudioRef = useRef<HTMLAudioElement | null>(null);
-  const replayObjectUrlRef = useRef<string | null>(null);
-
-  const handleReplayAudio = useCallback(() => {
-    const blob = audioRecorder.audioBlob;
-    if (!blob) return;
-
-    // Clean up any existing replay
-    if (replayAudioRef.current) {
-      replayAudioRef.current.pause();
-      replayAudioRef.current = null;
-    }
-    if (replayObjectUrlRef.current) {
-      URL.revokeObjectURL(replayObjectUrlRef.current);
-      replayObjectUrlRef.current = null;
-    }
-
-    const url = URL.createObjectURL(blob);
-    replayObjectUrlRef.current = url;
-    const audio = new Audio(url);
-    replayAudioRef.current = audio;
-
-    audio.onended = () => {
-      setIsPlayingReplay(false);
-      URL.revokeObjectURL(url);
-      replayObjectUrlRef.current = null;
-      replayAudioRef.current = null;
-    };
-    audio.onerror = () => setIsPlayingReplay(false);
-
-    setIsPlayingReplay(true);
-    audio.play().catch(() => setIsPlayingReplay(false));
-  }, [audioRecorder.audioBlob]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      replayAudioRef.current?.pause();
-      if (replayObjectUrlRef.current) {
-        URL.revokeObjectURL(replayObjectUrlRef.current);
-      }
-    };
-  }, []);
-
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
   const vocabWords = useMemo(
@@ -200,6 +154,55 @@ const FullReading: React.FC<FullReadingProps> = ({
       setHistoryRefreshKey(k => k + 1);
     }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
   });
+
+  /* ---- Issue #2266: In-memory audio replay (same-session).
+   *      Declared AFTER useFullReadingSession so `audioRecorder` exists when
+   *      handleReplayAudio / its deps reference it — moving this above the hook
+   *      caused a mount-time TDZ ReferenceError (#2289). */
+  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
+  const replayAudioRef = useRef<HTMLAudioElement | null>(null);
+  const replayObjectUrlRef = useRef<string | null>(null);
+
+  const handleReplayAudio = useCallback(() => {
+    const blob = audioRecorder.audioBlob;
+    if (!blob) return;
+
+    // Clean up any existing replay
+    if (replayAudioRef.current) {
+      replayAudioRef.current.pause();
+      replayAudioRef.current = null;
+    }
+    if (replayObjectUrlRef.current) {
+      URL.revokeObjectURL(replayObjectUrlRef.current);
+      replayObjectUrlRef.current = null;
+    }
+
+    const url = URL.createObjectURL(blob);
+    replayObjectUrlRef.current = url;
+    const audio = new Audio(url);
+    replayAudioRef.current = audio;
+
+    audio.onended = () => {
+      setIsPlayingReplay(false);
+      URL.revokeObjectURL(url);
+      replayObjectUrlRef.current = null;
+      replayAudioRef.current = null;
+    };
+    audio.onerror = () => setIsPlayingReplay(false);
+
+    setIsPlayingReplay(true);
+    audio.play().catch(() => setIsPlayingReplay(false));
+  }, [audioRecorder.audioBlob]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      replayAudioRef.current?.pause();
+      if (replayObjectUrlRef.current) {
+        URL.revokeObjectURL(replayObjectUrlRef.current);
+      }
+    };
+  }, []);
 
   // I3 (Issue #2156): liveTranscriptSegments / enhanceLiveTranscript removed.
   // Raw Web Speech gray-text preview replaces the punctuation-insertion path.

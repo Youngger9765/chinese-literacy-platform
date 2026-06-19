@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * UI utility helpers for AssignmentDetailPanel and sub-components (Issue #1936).
  * Extracted from AssignmentDetailPanel.tsx to be shared across the split pieces.

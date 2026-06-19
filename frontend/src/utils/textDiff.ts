@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * Levenshtein-aligned character diff for comparing spoken text against target text.
  * Used by LiveTutor and FullReading to show exactly which characters

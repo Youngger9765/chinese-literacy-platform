@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * OnboardingGuide — Step-by-step welcome overlay for first-time student users.
  *
