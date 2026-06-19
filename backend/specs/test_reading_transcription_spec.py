@@ -30,8 +30,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 # ---------------------------------------------------------------------------
 
 def _run(coro):
-    """Run an async coroutine synchronously (compatible with pytest without anyio)."""
-    return asyncio.get_event_loop().run_until_complete(coro)
+    """Run an async coroutine synchronously (pytest sync tests, Py3.11+ safe)."""
+    return asyncio.run(coro)
 
 
 # ---------------------------------------------------------------------------
