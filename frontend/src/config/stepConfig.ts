@@ -64,6 +64,10 @@ export interface StepConfig {
   enabled: boolean;
   /** Step category for color-coding */
   category: StepCategory;
+  /** Issue #2192: larger stepper pill + icon so students can find 閱讀聚光燈 */
+  navEmphasis?: boolean;
+  /** Compact label on mobile when navEmphasis is true */
+  navShortLabel?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -190,6 +194,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     needsStory: true,
     enabled: true,
     category: 'comprehension',
+    navEmphasis: true,
+    navShortLabel: '聚光燈',
   },
   'sentence-practice': {
     id: 'sentence-practice',

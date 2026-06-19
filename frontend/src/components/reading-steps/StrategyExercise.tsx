@@ -24,6 +24,10 @@ interface Props {
   lessonId?: string;
   /** Reading strategy type — selects strategy-specific rescue prompt. */
   readingStrategy?: string | null;
+  /** Story title — passed to the AI grader for free_text steps (#2192 item 5). */
+  storyTitle?: string;
+  /** Full lesson passage — gives the AI grader context for free_text answers. */
+  passage?: string;
   /** Persist answer state to parent (Issue #1505 — survive page refresh). */
   onChange?: (exerciseState: Record<string, unknown>) => void;
   initialState?: Record<string, unknown>;
@@ -34,6 +38,8 @@ const StrategyExercise: React.FC<Props> = ({
   onComplete,
   lessonId,
   readingStrategy,
+  storyTitle,
+  passage,
   onChange,
   initialState,
 }) => {
@@ -63,6 +69,8 @@ const StrategyExercise: React.FC<Props> = ({
           onComplete={handleComplete}
           lessonId={lessonId}
           readingStrategy={readingStrategy}
+          storyTitle={storyTitle}
+          passage={passage}
           onChange={onChange}
           initialState={initialState}
         />
