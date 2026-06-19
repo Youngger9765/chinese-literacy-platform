@@ -39,6 +39,7 @@ from story_structure_qa_lib import (  # noqa: E402
     LessonTier,
     SMOKE_LESSONS,
     classify_lesson,
+    count_checkbox_cells_in_table,
     gate_l1_pass,
     gate_l3_mode_expectation,
     summarize_gate,
@@ -368,12 +369,16 @@ def run_qa(
                         )
                 if struct:
                     issues = verify_interaction_profile_contract(struct)
+                    yaml_checkbox_cells = (
+                        count_checkbox_cells_in_table(on_disk_table) if on_disk_table else 0
+                    )
                     issues.extend(
                         gate_l3_mode_expectation(
                             tier,
                             lesson_id,
                             struct.get("interaction_profile") or {},
                             docx_blanks=kp_eval.get("docx_blanks"),
+                            yaml_checkbox_cells=yaml_checkbox_cells,
                         )
                     )
                     profile = struct.get("interaction_profile") or {}

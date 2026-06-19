@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-18T14:56:04.878722+00:00",
+  "generated_at": "2026-06-19T11:41:32.732704+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -11,7 +11,7 @@
     "total": 151,
     "pass": 151,
     "fail": 0,
-    "known_gap_count": 1,
+    "known_gap_count": 0,
     "failure_count": 0
   },
   "lessons": [
@@ -444,10 +444,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -693,10 +693,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -737,10 +737,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 4,
         "row_count": 7
       },
       "artifacts": {
@@ -781,10 +781,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 7,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 3,
         "row_count": 6
       },
       "artifacts": {
@@ -1763,10 +1763,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "checkbox",
         "layout": "worksheet_table",
-        "fill_blank_count": 1,
-        "checkbox_count": 0,
+        "fill_blank_count": 0,
+        "checkbox_count": 2,
         "row_count": 5
       },
       "artifacts": {
@@ -2322,7 +2322,7 @@
       "layout": {
         "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
+        "fill_blank_count": 5,
         "checkbox_count": 0,
         "row_count": 6
       },
@@ -4323,11 +4323,26 @@
       "lesson_id": "G7-L6",
       "title": "奧運性別平等這條路",
       "story_id": 31,
-      "tier": "parser_gap",
-      "known_data_gap": true,
+      "tier": "docx_keypoints",
+      "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
       "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": []
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
         "L3": {
           "gate": "L3",
           "pass": true,
@@ -4335,9 +4350,9 @@
         }
       },
       "layout": {
-        "mode": "display_only",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 0,
+        "fill_blank_count": 5,
         "checkbox_count": 0,
         "row_count": 8
       },
@@ -4684,10 +4699,10 @@
         }
       },
       "layout": {
-        "mode": "display_only",
+        "mode": "checkbox",
         "layout": "worksheet_table",
         "fill_blank_count": 0,
-        "checkbox_count": 0,
+        "checkbox_count": 4,
         "row_count": 5
       },
       "artifacts": {
@@ -5519,10 +5534,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "checkbox_count": 1,
         "row_count": 6
       },
       "artifacts": {
@@ -5563,10 +5578,10 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "artifacts": {
@@ -5580,7 +5595,7 @@
       "lesson_id": "G9-L15",
       "title": "未解之謎──石頭的祕密（一）：巨石陣",
       "story_id": 1144,
-      "tier": "no_structure",
+      "tier": "ai_fallback",
       "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
@@ -5592,11 +5607,11 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
-        "row_count": 6
+        "mode": "mixed",
+        "layout": "cards",
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -5609,7 +5624,7 @@
       "lesson_id": "G9-L17",
       "title": "馬拉松王者──基普喬吉 (記敘文)",
       "story_id": 1146,
-      "tier": "no_structure",
+      "tier": "ai_fallback",
       "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
@@ -5621,11 +5636,11 @@
         }
       },
       "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 0,
-        "row_count": 7
+        "mode": "mixed",
+        "layout": "cards",
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
+        "row_count": 5
       },
       "artifacts": {
         "has_keypoints_yml": true,
@@ -6019,7 +6034,7 @@
       "layout": {
         "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
+        "fill_blank_count": 7,
         "checkbox_count": 0,
         "row_count": 7
       },

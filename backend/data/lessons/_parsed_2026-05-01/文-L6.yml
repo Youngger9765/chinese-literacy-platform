@@ -107,7 +107,7 @@ story_structure_table:
   - '內容摘要
 
     【 】處填入原文，找不到原文時，再用自己的話寫。'
-- - __/案由
+- - 【 起因 】/案由
   - 【 江乙 】媽媽的布被偷了，於是她到王宮向王上告發【 令尹 】盜竊。
 - - 經過/告訴人主張
   - '主張一 令尹指使人偷她的布。
@@ -198,4 +198,4 @@ lesson_intro:
   source: docx_guide
   text: 這故事發生在二千多年前的楚國。江乙是當時的小官，他管轄的郢都󠇡王宮發生竊案，江乙的長官（叫做「令尹」）不高興，就報請楚王把江乙免職了。
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/文-L6.pdf
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-19

@@ -152,7 +152,7 @@ images:
   content_type: image/png
   caption: ''
 image_count: 2
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-19
 vocab_bank:
   A: 倖存
   B: 杳無人煙
@@ -259,9 +259,10 @@ worksheet_intro:
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/文-L1.pdf
 story_structure_table:
 - - 這是假新聞嗎？--以「鞭虎救弟記」為例
-- - __故事概要
+- - 【 鞭虎救弟記 】故事概要
   - ''
-- - 1.時間：1675年秋天2.地點：地勢險峻、__的山嶺3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟__了，含光拿鞭子奮力追虎，經歷搏鬥，從虎口救出弟弟。弟弟一息尚存，但__過多，含光灌湯藥、吸毒血，弟弟終於得救。
+- - 1.時間：1675年秋天2.地點：地勢險峻、【 杳無人煙 】的山嶺3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟【 攫走 】了，含光拿鞭子奮力追虎，經歷搏鬥，從虎口救出弟弟。弟弟一息尚存，但【
+    失血 】過多，含光灌湯藥、吸毒血，弟弟終於得救。
   - ''
 - - 作者質疑故事不合理之處
   - Q1
