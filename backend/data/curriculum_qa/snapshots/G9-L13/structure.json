@@ -33,7 +33,17 @@
         {
           "label": "2.之後表現 \n(單選)",
           "value": "①越打越好\n□②連敗不止 □①越打越好\n②連敗不止",
-          "interactive_type": "display"
+          "interactive_type": "checkbox",
+          "options": [
+            "越打越好\n□",
+            "連敗不止 □",
+            "越打越好",
+            "連敗不止"
+          ],
+          "correct_options": [
+            0,
+            3
+          ]
         }
       ]
     },
@@ -91,15 +101,15 @@
     }
   ],
   "interaction_profile": {
-    "mode": "fill_blank",
+    "mode": "mixed",
     "template_kind": "generic",
     "fill_blank_count": 5,
-    "checkbox_count": 0,
+    "checkbox_count": 1,
     "primary_labels": [
       "研究目的",
       "研究方法",
       "1.對失敗的看法",
-      "研究結論"
+      "2.之後表現 \n(單選)"
     ],
     "layout": "worksheet_table"
   }
