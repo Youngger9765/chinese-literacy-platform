@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * StepErrorBoundary — lightweight error boundary for individual learning steps.
  *

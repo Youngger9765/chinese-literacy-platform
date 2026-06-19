@@ -3,6 +3,10 @@
     {
       "type": "SessionStart",
       "command": "bash .claude/scripts/intern-progress.sh"
+    },
+    {
+      "type": "Stop",
+      "command": "bash .claude/scripts/stop-tsx-unverified-guard.sh"
     }
   ]
 }

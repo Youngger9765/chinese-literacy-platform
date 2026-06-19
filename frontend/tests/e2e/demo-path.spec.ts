@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/pageerror-fixture';
 
 const STAGING_BACKEND = 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 

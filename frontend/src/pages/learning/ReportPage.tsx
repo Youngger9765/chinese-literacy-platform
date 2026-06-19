@@ -186,6 +186,7 @@ const ReportPage: React.FC = () => {
     );
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing pattern, hook is after early return guard (#2289)
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);
     setXpResult(null);

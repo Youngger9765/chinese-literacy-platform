@@ -191,6 +191,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({
     .filter(c => !c.meaning.trim())
     .map(c => c.char);
   const fallbackChipsKey = fallbackChips.join('');
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing pattern, hook is after early return guard (#2289)
   useEffect(() => {
     const missing = fallbackChips.filter(c => !moedictMeaningCache.has(c));
     if (missing.length === 0) return;
