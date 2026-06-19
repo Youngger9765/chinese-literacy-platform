@@ -74,15 +74,15 @@ def http_json(url: str, *, token: str | None = None, method: str = "GET", body: 
 
 def login_staging(base: str) -> str:
     email = os.environ.get("QA_STUDENT_EMAIL")
-    password = os.environ.get("QA_STUDENT_PASSWORD")
-    if not email or not password:
+    cred = os.environ.get("QA_STUDENT_CRED") or os.environ.get("QA_STUDENT_PASSWORD")
+    if not email or not cred:
         raise RuntimeError(
-            "Set QA_STUDENT_EMAIL and QA_STUDENT_PASSWORD before running staging QA"
+            "Set QA_STUDENT_EMAIL and QA_STUDENT_CRED before running staging QA"
         )
     return http_json(
         f"{base}/api/auth/login",
         method="POST",
-        body={"email": email, "password": password},
+        body={"email": email, "password": cred},
     )["access_token"]
 
 
