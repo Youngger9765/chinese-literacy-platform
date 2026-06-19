@@ -544,6 +544,7 @@ modules:
   canonical_source: backend/app/services/reading_transcription_service.py
   owns_code:
   - backend/app/services/reading_transcription_service.py
+  - backend/app/services/audio_upload_service.py
   - backend/app/routes/learning/learning_reading.py
   - frontend/src/hooks/useAudioRecorder.ts
   - frontend/src/hooks/useFullReadingSession.ts
@@ -553,9 +554,11 @@ modules:
   owns_data: []
   spec_tests:
   - backend/specs/test_reading_transcription_spec.py
+  - backend/tests/test_reading_audio_upload.py
   related_issues:
   - 2131
   - 2156
+  - 2266
   source_meetings: []
   last_reviewed: 2026-06-09
   owner: young

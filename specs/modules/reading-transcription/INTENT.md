@@ -6,6 +6,7 @@ stability: active
 canonical_source: backend/app/services/reading_transcription_service.py
 owns_code:
   - backend/app/services/reading_transcription_service.py
+  - backend/app/services/audio_upload_service.py
   - backend/app/routes/learning/learning_reading.py
   - frontend/src/hooks/useAudioRecorder.ts
   - frontend/src/hooks/useFullReadingSession.ts
@@ -15,9 +16,11 @@ owns_code:
 owns_data: []
 spec_tests:
   - backend/specs/test_reading_transcription_spec.py
+  - backend/tests/test_reading_audio_upload.py
 related_issues:
   - 2131
   - 2156
+  - 2266
 source_meetings: []
 last_reviewed: 2026-06-09
 owner: young
@@ -134,6 +137,7 @@ Frontend scoring:
 | C3 | Gemini success → `{method: "gemini", transcript: str (non-empty), reasoning: str}` |
 | C4 | Unsupported MIME → HTTP 415 (route gate); empty audio → HTTP 400; never HTTP 500 on AI error |
 | C5 | Route has auth (`get_current_user`), rate-limit (`ai_limit`), and size caps (`_MAX_AUDIO_BYTES`, `_MAX_TARGET_CHARS`) |
+| C6 | After transcription completes (success or graceful fallback — not on unhandled exception), audio bytes are uploaded to GCS via BackgroundTasks (fire-and-forget). Upload never blocks the response, never sets public ACL, and silently skips if READING_AUDIO_GCS_BUCKET env is unset. |
 
 ---
 
