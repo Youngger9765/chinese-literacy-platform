@@ -141,7 +141,7 @@
     {
       "lesson_id": "G6-L24",
       "strategy_type": "summary_pse",
-      "block_count": 7,
+      "block_count": 10,
       "overall_pass": true,
       "eval": {
         "pass": true,
@@ -150,7 +150,7 @@
         "mcq_leakage": 0,
         "struct_errors": [],
         "semantic": {
-          "single_count": 0,
+          "single_count": 3,
           "mcq_option_guides": 0,
           "semantic_pass": true,
           "semantic_errors": []
@@ -164,13 +164,14 @@
       "type_histogram": {
         "fill_table": 1,
         "guide": 5,
-        "self_check": 1
+        "self_check": 1,
+        "single": 3
       }
     },
     {
       "lesson_id": "G6-L25",
       "strategy_type": "summary_pse",
-      "block_count": 4,
+      "block_count": 7,
       "overall_pass": true,
       "eval": {
         "pass": true,
@@ -179,7 +180,7 @@
         "mcq_leakage": 0,
         "struct_errors": [],
         "semantic": {
-          "single_count": 0,
+          "single_count": 3,
           "mcq_option_guides": 0,
           "semantic_pass": true,
           "semantic_errors": []
@@ -193,7 +194,8 @@
       "type_histogram": {
         "fill_table": 1,
         "guide": 2,
-        "self_check": 1
+        "self_check": 1,
+        "single": 3
       }
     },
     {

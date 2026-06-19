@@ -117,14 +117,18 @@
     },
     "G6-L24": {
       "strategy_type": "summary_pse",
-      "block_count": 7,
+      "block_count": 10,
       "type_histogram": {
         "fill_table": 1,
         "guide": 5,
-        "self_check": 1
+        "self_check": 1,
+        "single": 3
       },
       "type_sequence": [
         "guide",
+        "single",
+        "single",
+        "single",
         "guide",
         "fill_table",
         "guide",
@@ -134,35 +138,35 @@
       ],
       "guide_count": 5,
       "passage_count": 0,
-      "qa_total": 0,
+      "qa_total": 3,
       "null_answers": 0,
       "first_guide_prefix": "這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找",
-      "mcq_leakage": 0,
-      "mcq_option_guides": 0,
-      "single_count": 0
+      "mcq_leakage": 0
     },
     "G6-L25": {
       "strategy_type": "summary_pse",
-      "block_count": 4,
+      "block_count": 7,
       "type_histogram": {
         "fill_table": 1,
         "guide": 2,
-        "self_check": 1
+        "self_check": 1,
+        "single": 3
       },
       "type_sequence": [
         "guide",
+        "single",
+        "single",
+        "single",
         "guide",
         "fill_table",
         "self_check"
       ],
       "guide_count": 2,
       "passage_count": 0,
-      "qa_total": 0,
+      "qa_total": 3,
       "null_answers": 0,
       "first_guide_prefix": "這篇故事也是一篇說明文，講「全世界第一張股票」是怎麼誕生的。故事結構裡有明顯的問題、解決、結果。前面兩課我們已經學過怎麼",
-      "mcq_leakage": 0,
-      "mcq_option_guides": 0,
-      "single_count": 0
+      "mcq_leakage": 0
     },
     "G7-L28": {
       "strategy_type": "image_text",
