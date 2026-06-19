@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from app.services.keypoints_preview import render_keypoints_html  # noqa: E402
 from app.services.lesson_code_normalization import normalize_manifest_code  # noqa: E402
 from story_structure_qa import run_qa  # noqa: E402
-from story_structure_qa_lib import SMOKE_LESSONS  # noqa: E402
+from story_structure_qa_lib import PARSER_GAP_LESSONS, SMOKE_LESSONS  # noqa: E402
 
 DEFAULT_SCHEMA_DIR = ROOT / "private/curriculum-source/_online-schema"
 OUT_DIR = ROOT / "backend/data/curriculum_qa"
@@ -124,7 +124,7 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
         profile = rec.get("profile") or (structure or {}).get("interaction_profile") or {}
 
         tier = rec.get("tier")
-        known_gap = tier == "parser_gap"
+        known_gap = lesson_id in PARSER_GAP_LESSONS or tier == "parser_gap"
         lessons_out.append({
             "lesson_id": lesson_id,
             "title": (loader or {}).get("title") or lesson_id,

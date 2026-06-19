@@ -13,11 +13,14 @@ type StepStatus = 'disabled' | 'idle' | 'active' | 'completed';
 
 interface StepDef {
   step: number;
+  id: string;
   label: string;
   displayChar: string;
   view: AppView;
   needsStory: boolean;
   category: 'reading' | 'comprehension' | 'practice' | 'report';
+  navEmphasis?: boolean;
+  navShortLabel?: string;
 }
 
 function getStepStatus(
@@ -30,7 +33,6 @@ function getStepStatus(
   if (currentView === stepDef.view) return 'active';
   if (stepDef.needsStory && !selectedStory) return 'disabled';
 
-  // Check completion based on session data
   const isCompleted = (() => {
     if (!session) return false;
     const completedSet = new Set(session.completedSteps ?? []);
@@ -48,7 +50,7 @@ function getStepStatus(
       case AppView.VOCAB_APPLICATION:       return session.vocabApplicationCompleted === true;
       case AppView.VOCAB_WORD_SEARCH:       return session.vocabWordSearchCompleted === true;
       case AppView.KNOWLEDGE_STATION:       return session.knowledgeStationCompleted === true;
-      case AppView.REPORT:                  return false; // destination step, never "completed"
+      case AppView.REPORT:                  return false;
       default:                              return false;
     }
   })();
@@ -56,13 +58,13 @@ function getStepStatus(
   return isCompleted ? 'completed' : 'idle';
 }
 
-// -- Step badge sub-component --
 const StepBadge: React.FC<{
   step: number;
   displayChar: string;
   status: StepStatus;
   category?: 'reading' | 'comprehension' | 'practice' | 'report';
-}> = ({ displayChar, status, category }) => {
+  navEmphasis?: boolean;
+}> = ({ displayChar, status, category, navEmphasis }) => {
   const categoryColors = category ? STEP_CATEGORY_COLORS[category] : null;
 
   const styleMap: Record<StepStatus, string> = {
@@ -72,14 +74,22 @@ const StepBadge: React.FC<{
     completed: 'bg-emerald-500 text-white',
   };
 
+  const sizeClass = navEmphasis && status !== 'completed' ? 'w-12 h-12' : 'w-10 h-10';
+
   return (
     <span
-      className={`w-10 h-10 text-lg rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
+      className={`${sizeClass} text-lg rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]} ${
+        navEmphasis && status === 'idle' ? 'ring-2 ring-violet-400 ring-offset-1' : ''
+      }`}
     >
       {status === 'completed' ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
+      ) : navEmphasis ? (
+        <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden="true">
+          lightbulb
+        </span>
       ) : (
         displayChar
       )}
@@ -87,16 +97,6 @@ const StepBadge: React.FC<{
   );
 };
 
-// ── Horizontal top nav (shared for desktop & mobile) ─────────────────────
-
-/**
- * StepperNav — horizontal top navigation bar.
- *
- * Desktop (md+): horizontal row of step pills with labels.
- * Mobile (<md): horizontally scrollable compact step indicators.
- *
- * Auto-scrolls the active step into view on mount and when the step changes.
- */
 const StepperNav: React.FC<StepperNavProps> = ({
   currentView,
   session,
@@ -105,10 +105,6 @@ const StepperNav: React.FC<StepperNavProps> = ({
 }) => {
   const scrollRef = useRef<HTMLElement>(null);
 
-  /* #1634: derive steps from this lesson's step_sequence (yaml-driven), so
-   * lessons that omit reading / vocab / etc. don't expose dead steps in the
-   * top stepper. Falls back to DEFAULT_STEP_SEQUENCE when the lesson lacks
-   * a step_sequence field. */
   const activeSteps = useMemo(
     () => resolveActiveSteps(selectedStory?.stepSequence),
     [selectedStory?.stepSequence],
@@ -117,11 +113,14 @@ const StepperNav: React.FC<StepperNavProps> = ({
     () =>
       activeSteps.map((s, i) => ({
         step: i + 1,
+        id: s.id,
         label: s.label,
         displayChar: s.displayChar,
         view: s.view,
         needsStory: s.needsStory,
         category: s.category,
+        navEmphasis: s.navEmphasis,
+        navShortLabel: s.navShortLabel,
       })),
     [activeSteps],
   );
@@ -130,7 +129,6 @@ const StepperNav: React.FC<StepperNavProps> = ({
     [activeSteps],
   );
 
-  // Auto-scroll the active step into view
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -147,7 +145,6 @@ const StepperNav: React.FC<StepperNavProps> = ({
       className="font-ui bg-white border-b border-gray-200 shrink-0 overflow-x-auto scrollbar-hide"
     >
       <div className="flex items-center gap-1 px-3 py-2 min-w-max">
-        {/* Story title pill — desktop only */}
         {selectedStory && (
           <div className="hidden md:flex items-center mr-2 pr-3 border-r border-gray-200">
             <p className="text-xs font-semibold text-gray-500 truncate max-w-[120px]" title={selectedStory.title}>
@@ -156,7 +153,6 @@ const StepperNav: React.FC<StepperNavProps> = ({
           </div>
         )}
 
-        {/* Step pills */}
         {steps.map((stepDef) => {
           const status = getStepStatus(stepDef, currentView, session, selectedStory, viewToStepId);
           const isActive = status === 'active';
@@ -175,11 +171,23 @@ const StepperNav: React.FC<StepperNavProps> = ({
                   ? `${categoryColors.activeBg} ${categoryColors.text}`
                   : isDisabled
                   ? 'text-gray-300 cursor-not-allowed'
+                  : stepDef.navEmphasis && !isDisabled
+                  ? 'text-violet-700 hover:bg-violet-50 hover:scale-105'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:scale-105'
               }`}
             >
-              <StepBadge step={stepDef.step} displayChar={stepDef.displayChar} status={status} category={stepDef.category} />
-              {/* Show full label text on desktop alongside the circle */}
+              <StepBadge
+                step={stepDef.step}
+                displayChar={stepDef.displayChar}
+                status={status}
+                category={stepDef.category}
+                navEmphasis={stepDef.navEmphasis}
+              />
+              {stepDef.navEmphasis && stepDef.navShortLabel ? (
+                <span className={`md:hidden text-[11px] leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                  {stepDef.navShortLabel}
+                </span>
+              ) : null}
               <span className={`hidden md:inline text-xs leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {stepDef.label}
               </span>
