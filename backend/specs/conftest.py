@@ -1,6 +1,6 @@
 """Shared spec-test configuration.
 
-Two jobs:
+Three jobs:
 
 1. Make ``app`` importable regardless of pytest invocation cwd. CI runs
    ``cd backend && python -m pytest specs/`` (backend on sys.path), but this
@@ -11,6 +11,14 @@ Two jobs:
    ``backend/tests/conftest.py`` — JSONB → JSON, and strips ``::jsonb`` casts
    from server_default that SQLite cannot parse. Pure-function spec modules are
    unaffected; only the DB-tier modules rely on this.
+
+3. Pin asyncio fixture loop scope to "function" (Python 3.11+ / pytest-asyncio
+   0.24+). Without this, pytest-asyncio emits a DeprecationWarning that becomes
+   an error in future versions, and the implicit loop scope can cause
+   RuntimeError: There is no current event loop in thread 'MainThread' when
+   async helpers (e.g. _run / asyncio.run) are used inside sync test methods.
+   Setting this explicitly here makes all three environments consistent:
+   local Py3.10, CI Py3.11, and future upgrades.
 """
 import sys
 from pathlib import Path
@@ -59,3 +67,5 @@ def _patch_pg_server_defaults() -> None:
 # Run once at import time, before any spec test creates tables.
 _patch_jsonb_columns()
 _patch_pg_server_defaults()
+
+
