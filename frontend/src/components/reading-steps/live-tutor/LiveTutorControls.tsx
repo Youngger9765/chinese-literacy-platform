@@ -129,15 +129,11 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
 
-  // Reset playback state when pending review ends
-  useEffect(() => {
-    if (!recordingPendingReview) {
-      stopPlaybackSync();
-    }
-  }, [recordingPendingReview, stopPlaybackSync]);
-
   /** Stop playback synchronously — used both by the toggle button and before
-   *  delegating 取消/重錄 so that clearRecording() doesn't revoke a live URL. */
+   *  delegating 取消/重錄 so that clearRecording() doesn't revoke a live URL.
+   *  NOTE: declared BEFORE the reset useEffect below — that effect lists
+   *  stopPlaybackSync in its deps, so a TDZ ReferenceError crashes the whole
+   *  逐段朗讀 step if this const is declared after it (Issue #2279 regression). */
   const stopPlaybackSync = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.onended = null;
@@ -147,6 +143,13 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
     }
     setIsPlayingBack(false);
   }, []);
+
+  // Reset playback state when pending review ends
+  useEffect(() => {
+    if (!recordingPendingReview) {
+      stopPlaybackSync();
+    }
+  }, [recordingPendingReview, stopPlaybackSync]);
 
   const handlePlayback = useCallback(() => {
     if (!recordingAudioUrl) return;
