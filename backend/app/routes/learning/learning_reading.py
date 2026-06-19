@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import time
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -24,6 +24,7 @@ from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
     transcribe_reading_audio,
 )
+from ...services.audio_upload_service import upload_reading_audio_to_gcs
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -519,6 +520,7 @@ class TranscribeReadingResponse(BaseModel):
     ),
 )
 async def transcribe_reading_endpoint(
+    background_tasks: BackgroundTasks,
     audio: UploadFile = File(
         ...,
         description="Audio blob from browser MediaRecorder (WebM/MP4/OGG/WAV, max 10 MB)",
@@ -596,6 +598,22 @@ async def transcribe_reading_endpoint(
         duration_ms=duration_ms,
     )
     latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # ── 4.5. Background: async upload audio to GCS for debug / replay ────────
+    # Fire-and-forget — FastAPI sends the HTTP response first, then runs this task.
+    # Upload failures are logged as WARNING only; never affect the student score.
+    # Security: bucket is private, no public ACL, blob path is NOT returned to client.
+    # Bucket: controlled by READING_AUDIO_GCS_BUCKET env var.  If not set, skipped.
+    # TODO (Issue #2266): Set GCS lifecycle/retention policy once product decides
+    #   how long audio should be kept (e.g. 30 days debug / 90 days training set).
+    background_tasks.add_task(
+        upload_reading_audio_to_gcs,
+        audio_bytes=audio_bytes,
+        mime_type=raw_mime,
+        user_id=current_user.id,
+        lesson_id=None,  # transcribe endpoint is stateless — no lesson context
+        duration_ms=duration_ms,
+    )
 
     # ── 5. Log usage when Gemini succeeded ───────────────────────────────────
     if result.get("method") == "gemini":
