@@ -53,6 +53,10 @@ class ReadingAttemptHistory(Base):
     # 1-based attempt counter; composite index enables fast "latest attempt" lookup
     attempt_no: Mapped[int] = mapped_column(Integer, nullable=False)
     reading_result: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    # Issue #2266: GCS blob path for student audio replay (private bucket).
+    # Format: reading-audio/attempts/{id}.webm  — Never a public URL.
+    # None = audio not yet uploaded or upload failed (non-fatal).
+    audio_gcs_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

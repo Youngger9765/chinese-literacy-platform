@@ -24,7 +24,11 @@ from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
     transcribe_reading_audio,
 )
-from ...services.audio_upload_service import upload_reading_audio_to_gcs
+from ...models.session import ReadingAttemptHistory
+from ...services.audio_upload_service import (
+    upload_reading_audio_to_gcs,
+    upload_reading_audio_to_gcs_sync,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -485,6 +489,21 @@ async def evaluate_reading_endpoint(
 _MAX_AUDIO_BYTES = 10 * 1024 * 1024   # 10 MB
 _MAX_TARGET_CHARS = 3000               # ≈ longest G9 lesson
 
+# MIME → extension map used when constructing attempt-bound GCS paths
+_MIME_TO_EXT_SYNC: dict[str, str] = {
+    "audio/webm": ".webm",
+    "audio/mp4": ".mp4",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
+    "audio/wav": ".wav",
+    "audio/x-wav": ".wav",
+}
+
+
+def _normalise_mime_for_path(mime_type: str) -> str:
+    """Strip codec suffix for extension lookup: 'audio/webm;codecs=opus' → 'audio/webm'."""
+    return mime_type.split(";")[0].strip()
+
 
 class TranscribeReadingResponse(BaseModel):
     """Response schema for POST /api/reading/transcribe."""
@@ -532,6 +551,14 @@ async def transcribe_reading_endpoint(
     duration_ms: int | None = Form(
         default=None,
         description="Recording duration in milliseconds (informational, optional)",
+    ),
+    session_id: int | None = Form(
+        default=None,
+        description=(
+            "Optional LearningSession DB id.  When provided the audio is "
+            "uploaded synchronously and the GCS path is written to the latest "
+            "ReadingAttemptHistory row for this session (Issue #2266)."
+        ),
     ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -599,21 +626,64 @@ async def transcribe_reading_endpoint(
     )
     latency_ms = int((time.monotonic() - start_time) * 1000)
 
-    # ── 4.5. Background: async upload audio to GCS for debug / replay ────────
-    # Fire-and-forget — FastAPI sends the HTTP response first, then runs this task.
-    # Upload failures are logged as WARNING only; never affect the student score.
-    # Security: bucket is private, no public ACL, blob path is NOT returned to client.
-    # Bucket: controlled by READING_AUDIO_GCS_BUCKET env var.  If not set, skipped.
-    # TODO (Issue #2266): Set GCS lifecycle/retention policy once product decides
-    #   how long audio should be kept (e.g. 30 days debug / 90 days training set).
-    background_tasks.add_task(
-        upload_reading_audio_to_gcs,
-        audio_bytes=audio_bytes,
-        mime_type=raw_mime,
-        user_id=current_user.id,
-        lesson_id=None,  # transcribe endpoint is stateless — no lesson context
-        duration_ms=duration_ms,
-    )
+    # ── 4.5. Upload audio to GCS for student replay (Issue #2266) ───────────
+    # When session_id is provided: sync upload → write blob path to DB.
+    # When session_id is absent:  fire-and-forget background upload (debug only).
+    # Upload failures are logged as WARNING; never affect the student score.
+    # Security: bucket is private, no public ACL, path NOT returned to client here.
+    if session_id is not None:
+        # Verify session belongs to the current user before touching DB
+        attempt = (
+            db.query(ReadingAttemptHistory)
+            .filter(ReadingAttemptHistory.session_id == session_id)
+            .order_by(ReadingAttemptHistory.attempt_no.desc())
+            .first()
+        )
+        if attempt is not None:
+            base_mime = _normalise_mime_for_path(raw_mime)
+            ext = _MIME_TO_EXT_SYNC.get(base_mime, ".audio")
+            blob_path = f"reading-audio/attempts/{attempt.id}{ext}"
+            stored_path = upload_reading_audio_to_gcs_sync(
+                audio_bytes=audio_bytes,
+                mime_type=raw_mime,
+                blob_path=blob_path,
+            )
+            if stored_path is not None:
+                attempt.audio_gcs_path = stored_path
+                try:
+                    db.commit()
+                except Exception as commit_exc:
+                    logger.warning(
+                        "Failed to persist audio_gcs_path for attempt %d: %s",
+                        attempt.id,
+                        commit_exc,
+                    )
+                    db.rollback()
+        else:
+            # No attempt row yet — fall back to fire-and-forget for debug
+            logger.info(
+                "transcribe: session_id=%d has no ReadingAttemptHistory yet; "
+                "falling back to fire-and-forget upload",
+                session_id,
+            )
+            background_tasks.add_task(
+                upload_reading_audio_to_gcs,
+                audio_bytes=audio_bytes,
+                mime_type=raw_mime,
+                user_id=current_user.id,
+                lesson_id=None,
+                duration_ms=duration_ms,
+            )
+    else:
+        # Stateless call — fire-and-forget for debug purposes only.
+        background_tasks.add_task(
+            upload_reading_audio_to_gcs,
+            audio_bytes=audio_bytes,
+            mime_type=raw_mime,
+            user_id=current_user.id,
+            lesson_id=None,  # transcribe endpoint has no lesson context here
+            duration_ms=duration_ms,
+        )
 
     # ── 5. Log usage when Gemini succeeded ───────────────────────────────────
     if result.get("method") == "gemini":

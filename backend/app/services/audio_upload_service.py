@@ -1,11 +1,12 @@
-"""Async GCS upload service for reading audio files (Issue #2266).
+"""GCS upload / signed-URL service for reading audio files (Issue #2266).
 
 Responsibilities:
-- Fire-and-forget: upload audio bytes to GCS in background
-- NEVER block the transcription response
+- Fire-and-forget: upload audio bytes to GCS in background (legacy path)
+- Sync upload: upload and return blob path so callers can persist it to DB
+- Signed URL: generate short-lived (10 min) URL for student audio playback
 - NEVER set public ACL on blobs
 - NEVER log audio content or user PII beyond user_id + duration_ms
-- Fail silently: any upload error only logs WARNING
+- Fail silently: any upload/URL error only logs WARNING; returns None
 
 Bucket:
     Controlled by env var READING_AUDIO_GCS_BUCKET.
@@ -14,18 +15,20 @@ Bucket:
     (lingoleap-tts-cache) because mixing audio PII into the TTS bucket violates
     the principle of least privilege.
 
-    TODO (Issue #2266): Once the product team decides the retention policy
-    (e.g. 30 days for debug replay, 90 days for model training set), set a GCS
-    lifecycle rule on the bucket path reading-audio/** to auto-delete blobs.
-    Until then, blobs persist until manually deleted.
+Path convention (Issue #2266):
+    - Attempt-bound:    reading-audio/attempts/{attempt_id}{ext}
+    - Submission-bound: reading-audio/submissions/{submission_id}{ext}
+    - Legacy debug:     reading-audio/{lesson_id or unknown}/{user_id}/{ts}{ext}
 
 Privacy / security:
     - Bucket must be PRIVATE (no make_public / predefined_acl calls here).
-    - Blob path is NOT returned to the client or written to the DB.
-    - Path structure: reading-audio/{lesson_id or unknown}/{user_id}/{ts}{ext}
+    - Blob path is stored in DB; signed URLs are generated on demand and expire.
     - This service does NOT store user names, email, or any PII beyond user_id.
-    - The Cloud Run service account must have roles/storage.objectCreator on the
-      bucket; no broader permissions are required or granted here.
+    - The Cloud Run service account must have roles/storage.objectCreator +
+      roles/storage.objectViewer on the bucket.  For signed URL generation it
+      additionally needs iam.serviceAccounts.signBlob permission (available via
+      roles/iam.serviceAccountTokenCreator on the SA itself, or run on GCE/Cloud
+      Run where the SA can self-sign).
 
 Concurrency:
     Cloud Run instances default to concurrency=80.  The GCS Client() constructor
@@ -37,7 +40,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -135,9 +138,14 @@ def upload_reading_audio_to_gcs(
 
     GCS path: ``reading-audio/{lesson_id or 'unknown'}/{user_id}/{timestamp}{ext}``
 
-    TODO (Issue #2266): Retention policy — once product decides duration
-    (e.g. 30 days debug / 90 days training set), add a GCS lifecycle rule on
-    the bucket or path prefix so blobs auto-expire.
+    TODO (Issue #2266): Retention policy — audio linked from a DB record (any
+    ReadingAttemptHistory or AssignmentSubmission with a non-null audio_gcs_path)
+    is kept forever so students and teachers can always replay it.  Only three
+    "garbage" types are eligible for deletion: (1) discarded takes where no
+    evaluation was sent — skip the GCS upload entirely in the frontend; (2) GCS
+    orphans where the DB record no longer points to the blob — daily reconciliation
+    cron; (3) cascade-delete when the parent attempt/session/assignment is deleted.
+    Do NOT add time-based lifecycle rules (no 30-day / 90-day auto-expire).
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -172,3 +180,100 @@ def upload_reading_audio_to_gcs(
             duration_ms,
             exc,
         )
+
+
+def upload_reading_audio_to_gcs_sync(
+    audio_bytes: bytes,
+    mime_type: str,
+    blob_path: str,
+) -> str | None:
+    """Synchronous GCS upload that returns the blob path on success.
+
+    Unlike the fire-and-forget variant, this function is designed to be called
+    inline (not via BackgroundTasks) so the caller can write the returned path
+    to the DB in the same request.
+
+    Args:
+        audio_bytes: Raw audio bytes.
+        mime_type:   MIME type string (e.g. 'audio/webm').
+        blob_path:   Pre-computed GCS object path (e.g.
+                     'reading-audio/attempts/42.webm').  The caller constructs
+                     the path from the DB id so it is deterministic.
+
+    Returns:
+        blob_path on success, None on any failure (already logged as WARNING).
+
+    Safety:
+        - NEVER sets public ACL.
+        - On any exception returns None (fail-open for the DB write).
+    """
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        return None  # Already warned at init; skip silently.
+
+    try:
+        base_mime = _normalise_mime(mime_type)
+        blob = bucket.blob(blob_path)
+        blob.upload_from_string(audio_bytes, content_type=base_mime)
+        logger.info(
+            "reading-audio GCS sync upload OK: bytes=%d path=%s",
+            len(audio_bytes),
+            blob_path,
+        )
+        return blob_path
+    except Exception as exc:
+        logger.warning(
+            "reading-audio GCS sync upload failed (non-fatal): bytes=%d path=%s error=%s",
+            len(audio_bytes),
+            blob_path,
+            exc,
+        )
+        return None
+
+
+def generate_audio_signed_url(
+    blob_path: str,
+    expiration_seconds: int = 600,
+) -> str | None:
+    """Generate a signed URL for private GCS audio playback.
+
+    The signed URL is short-lived (default 10 minutes) and allows the holder
+    to GET the object without any authentication.  It is generated server-side
+    and returned to the authorised student only — never cached or stored.
+
+    Args:
+        blob_path:          GCS object path stored in ReadingAttemptHistory.audio_gcs_path.
+        expiration_seconds: URL lifetime in seconds (default 600 = 10 min).
+
+    Returns:
+        Signed URL string on success, None on any failure.
+
+    Requirements:
+        The Cloud Run service account must be able to call
+        blob.generate_signed_url().  On GCE / Cloud Run this works automatically
+        when the SA has roles/iam.serviceAccountTokenCreator on itself.
+    """
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        return None
+
+    try:
+        blob = bucket.blob(blob_path)
+        url = blob.generate_signed_url(
+            expiration=timedelta(seconds=expiration_seconds),
+            method="GET",
+            version="v4",
+        )
+        logger.debug(
+            "reading-audio signed URL generated: path=%s expiry=%ds",
+            blob_path,
+            expiration_seconds,
+        )
+        return url
+    except Exception as exc:
+        logger.warning(
+            "reading-audio signed URL generation failed: path=%s error=%s",
+            blob_path,
+            exc,
+        )
+        return None
