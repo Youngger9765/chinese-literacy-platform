@@ -12,6 +12,7 @@ const FullReadingPage: React.FC = () => {
     session,
     stepProgressData,
     saveStepProgressPatch,
+    dbSessionId,
   } = useLearningContext();
   const navigate = useNavigate();
 
@@ -37,6 +38,7 @@ const FullReadingPage: React.FC = () => {
       initialResult={session?.fullReadingResult ?? null}
       initialProgress={stepProgressData.step_data?.['full-reading'] as FullReadingStepData | undefined}
       onProgressChange={handleProgressChange}
+      dbSessionId={dbSessionId}
     />
   );
 };

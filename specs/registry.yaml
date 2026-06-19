@@ -546,6 +546,7 @@ modules:
   - backend/app/services/reading_transcription_service.py
   - backend/app/services/audio_upload_service.py
   - backend/app/routes/learning/learning_reading.py
+  - backend/app/routes/learning/learning_audio_replay.py
   - frontend/src/hooks/useAudioRecorder.ts
   - frontend/src/hooks/useFullReadingSession.ts
   - frontend/src/components/reading-steps/FullReading.tsx
@@ -555,10 +556,12 @@ modules:
   spec_tests:
   - backend/specs/test_reading_transcription_spec.py
   - backend/tests/test_reading_audio_upload.py
+  - backend/tests/test_reading_audio_replay_student.py
   related_issues:
   - 2131
   - 2156
   - 2266
+  - 2266-audio-replay
   source_meetings: []
   last_reviewed: 2026-06-09
   owner: young

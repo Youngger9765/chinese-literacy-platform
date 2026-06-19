@@ -34,6 +34,9 @@ interface UseFullReadingSessionProps {
   fullText: string;
   token: string | null;
   storyId: string | number;
+  /** DB LearningSession integer id — passed to /reading/transcribe so the backend can bind
+   *  the uploaded audio blob to the correct ReadingAttemptHistory row (Issue #2266). */
+  dbSessionId?: number | null;
   stopTtsAll: () => void;
   onResultReady: (result: SavedResult, transcript: string) => void;
 }
@@ -64,6 +67,7 @@ export function useFullReadingSession({
   fullText,
   token,
   storyId,
+  dbSessionId,
   stopTtsAll,
   onResultReady,
 }: UseFullReadingSessionProps): UseFullReadingSessionReturn {
@@ -175,7 +179,7 @@ export function useFullReadingSession({
     if (token) {
       // I1: audio blob available → try Gemini.
       setIsTranscribing(true);
-      transcribeReading(audioBlob, fullText, durationMs, token)
+      transcribeReading(audioBlob, fullText, durationMs, token, dbSessionId ?? undefined)
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {

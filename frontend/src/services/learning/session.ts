@@ -44,6 +44,10 @@ export async function transcribeReading(
   targetText: string,
   durationMs: number,
   token: string,
+  /** Optional DB LearningSession id — when provided the backend binds the uploaded
+   *  audio blob to the latest ReadingAttemptHistory row so the student can replay
+   *  their recording later (Issue #2266). */
+  dbSessionId?: number,
 ): Promise<TranscribeReadingResult> {
   const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '', reason: 'error' };
 
@@ -52,6 +56,10 @@ export async function transcribeReading(
     form.append('audio', audioBlob, 'recording.webm');
     form.append('target_text', targetText);
     form.append('duration_ms', String(durationMs));
+    // Issue #2266: pass session_id so backend can bind audio to DB attempt row.
+    if (dbSessionId != null) {
+      form.append('session_id', String(dbSessionId));
+    }
 
     const res = await fetch(`${API_BASE}/api/reading/transcribe`, {
       method: 'POST',
@@ -80,6 +88,38 @@ export async function transcribeReading(
     // Network error or JSON parse failure → fallback
     console.warn('[transcribeReading] error:', err);
     return FALLBACK;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Reading audio replay (Issue #2266)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch a 10-minute signed URL so the student can replay their reading recording.
+ *
+ * Returns the signed URL string on success, or null if no audio was recorded
+ * for this attempt or if GCS signed URL generation fails.
+ *
+ * @param sessionId  DB LearningSession id
+ * @param attemptId  DB ReadingAttemptHistory id
+ * @param token      JWT bearer token
+ */
+export async function getReadingAudioSignedUrl(
+  sessionId: number,
+  attemptId: number,
+  token: string,
+): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/learning/sessions/${sessionId}/reading-audio/${attemptId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data.signed_url === 'string' ? data.signed_url : null;
+  } catch {
+    return null;
   }
 }
 
