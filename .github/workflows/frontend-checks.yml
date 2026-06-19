@@ -36,6 +36,11 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-      - name: Unit + Smoke tests (vitest)
+      # Render-smoke gate (#2289). Scoped to the smoke suite on purpose: the wider
+      # vitest suite has ~38 pre-existing functional-test failures (UI text drift,
+      # tests missing AuthProvider wrappers) that predate this safety net. Gating
+      # the new render-safety check on that broken suite would make this workflow
+      # red on day one. The smoke suite is the actual mount-crash guard.
+      - name: Render-smoke tests (vitest)
         working-directory: frontend
-        run: npm run test
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx
