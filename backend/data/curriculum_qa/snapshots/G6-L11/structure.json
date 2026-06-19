@@ -11,9 +11,10 @@
       "interactive_type": "fill_blank"
     },
     {
-      "label": "著名仙境：【 張公洞 】",
+      "label": "著名仙境：【　　　】",
       "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
     },
     {
       "label": "仙境畫的元素與意義",
@@ -41,7 +42,7 @@
     },
     {
       "kind": "pair",
-      "label": "著名仙境：【 張公洞 】",
+      "label": "著名仙境：【　　　】",
       "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。"
     },
     {
@@ -63,13 +64,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "中國文化的神仙想像",
+      "著名仙境：【　　　】",
       "仙境畫的元素與意義",
-      "仙境畫的特點",
-      "古、今對仙境的嚮往"
+      "仙境畫的特點"
     ],
     "layout": "worksheet_table"
   }

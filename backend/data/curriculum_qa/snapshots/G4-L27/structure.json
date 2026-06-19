@@ -8,7 +8,17 @@
     {
       "label": "引言",
       "value": "日常生活中，我們腦袋中有眾多念頭，且多半是（□①正面  ②負面），使我們充滿（□①自信  ②懷疑）。",
-      "interactive_type": "display"
+      "interactive_type": "checkbox",
+      "options": [
+        "正面",
+        "負面），使我們充滿（□",
+        "自信",
+        "懷疑）。"
+      ],
+      "correct_options": [
+        1,
+        3
+      ]
     },
     {
       "label": "問題描述",
@@ -39,8 +49,15 @@
     },
     {
       "label": "問題描述",
-      "value": "如果抗拒這些念頭，它們就會（□①消失  ②放大）。越要自己不去想，念頭反而越清晰，這就是【　　　】效應。",
-      "interactive_type": "fill_blank"
+      "value": "如果抗拒這些念頭，它們就會（□①消失  ②放大）。越要自己不去想，念頭反而越清晰，這就是【 白熊 】效應。",
+      "interactive_type": "checkbox",
+      "options": [
+        "消失",
+        "放大）。越要自己不去想，念頭反而越清晰，這就是【 白熊 】效應。"
+      ],
+      "correct_options": [
+        1
+      ]
     },
     {
       "label": "解決方法",
@@ -61,8 +78,15 @@
     },
     {
       "label": "結語",
-      "value": "下次又浮現負面想法時，記得把【　　　】拉回當下，只要（①看見  □②相信）那些念頭，不必跟隨它。",
-      "interactive_type": "fill_blank"
+      "value": "下次又浮現負面想法時，記得把【 注意力 】拉回當下，只要（①看見  □②相信）那些念頭，不必跟隨它。",
+      "interactive_type": "checkbox",
+      "options": [
+        "看見  □",
+        "相信）那些念頭，不必跟隨它。"
+      ],
+      "correct_options": [
+        0
+      ]
     }
   ],
   "layout": "worksheet_table",
@@ -125,15 +149,15 @@
     }
   ],
   "interaction_profile": {
-    "mode": "fill_blank",
+    "mode": "mixed",
     "template_kind": "psr",
-    "fill_blank_count": 7,
-    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "checkbox_count": 3,
     "primary_labels": [
+      "引言",
       "1.「我很爛」",
       "2.「我只會添麻煩」",
-      "3.「都是我的錯」",
-      "問題描述"
+      "3.「都是我的錯」"
     ],
     "layout": "worksheet_table"
   }

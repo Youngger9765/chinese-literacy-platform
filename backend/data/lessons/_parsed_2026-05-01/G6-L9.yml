@@ -130,7 +130,7 @@ images:
   content_type: image/png
   caption: ''
 image_count: 1
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-19
 vocab_bank:
   A: 睡眼惺忪
   B: 小酌
@@ -237,7 +237,7 @@ story_structure_table:
 - - 祝你好眠
 - - 青少年睡眠的需求?
   - 青少年每天需要【 8-10 】小時的睡眠。
-- - 睡眠的__
+- - 睡眠的【 好處 】
   - '1.修復身體：大腦會在睡眠中修補【 肌肉 】，清除【 新陳代謝物 】。
 
     2.學得更好：大腦睡眠時會做【 記憶重組 】，將白天吸收的新知【 去蕪存菁 】。'
@@ -245,7 +245,7 @@ story_structure_table:
   - '1.剝奪了身體【 恢復與修復 】的時間，增加生病的風險。
 
     2.大腦反應變得【 遲鈍 】，出錯率高。'
-- - 大眾對睡眠的__(迷思)
+- - 大眾對睡眠的【 錯誤觀念 】(迷思)
   - '1.平日熬夜可利用假日補眠?
 
     生理時鐘不規律，會影響睡眠的品質。
