@@ -1,0 +1,73 @@
+---
+description: Staging / PR preview browser QA — login、直連 /learn/{id}、清 session 避免導頁
+alwaysApply: true
+---
+
+# Staging Browser QA
+
+## 登入（所有環境）
+
+`/login` 有一鍵登入，**不需要真帳號**：
+
+| 按鈕 | 用途 |
+|------|------|
+| 學生 小明 | 學習流程 QA（預設） |
+| 教師 李老師 | 老師端 |
+| 管理員 王管理員 | 後台 |
+
+SOP：`goto {base}/login` → snapshot → click 學生 → 等 redirect 離開 `/login` → 再 `goto` 目標頁
+
+## Staging 直連 `/learn/{storyId}/…` 前必清 session
+
+直開 `https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/learn/{id}/story-structure` 時，若不清舊 session，**會被 resume / assignment context 導到別篇課文**（URL 變成另一個 id）
+
+**登入成功後、goto 目標課之前**執行（保留 auth token）：
+
+```javascript
+(() => {
+  localStorage.removeItem('story_structure_onboarded'); // 可選：重看 coach
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('lingoleap-active-session-')) localStorage.removeItem(k);
+  }
+  sessionStorage.removeItem('activeAssignmentId');
+  sessionStorage.removeItem('activeAssignmentContext');
+  return 'session-cleared';
+})()
+```
+
+### 禁止
+
+- **不要** `localStorage.clear()` — 會刪掉 `lingoleap_token` 並登出
+- **不要** `sessionStorage.clear()` — 若未來 auth 改存 sessionStorage 會踩雷；只清上列 assignment keys
+
+### 驗證有到對的課
+
+goto 後等 3–5s，確認：
+
+- `location.href` 仍含目標 `{storyId}`
+- 頁面標題或內文含預期課名（勿只靠 URL）
+
+## Story ID ≠ YAML 檔名
+
+`lesson_code` / DOCX 檔名可能與 DB `id` 不一致。QA 指定課次時先查：
+
+```bash
+cd backend && .venv/bin/python -c "
+from app.services.lesson_loader import get_lesson_by_code, get_all_lessons
+# 或依標題搜尋 get_all_lessons()
+"
+```
+
+範例：`G8-L13.yml`（構樹）→ DB **G8-L10 / id 1123**；`G8-L14.yml`（蝴蝶蘭）→ **G8-L11 / id 1124**
+
+## 環境 URL
+
+| 環境 | Frontend |
+|------|----------|
+| Staging | `https://lingoleap-frontend-staging-958347263320.asia-east1.run.app` |
+| PR Preview | 見 PR comment Deploy 表格 |
+
+## browse ref 注意
+
+`@eN` 只在**當次 snapshot**有效；導頁或重抓 snapshot 後必須重新 snapshot 再 click

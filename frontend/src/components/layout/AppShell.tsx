@@ -125,14 +125,19 @@ const StepDots: React.FC<StepDotsProps> = ({
         let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';
         if (isCompleted) dotClass = 'bg-emerald-500 text-white';
         if (isActive) dotClass = 'bg-accent text-white ring-2 ring-accent/30';
+        const emphasis = step.navEmphasis && !isCompleted;
+        if (emphasis && !isActive) dotClass = 'bg-violet-100 text-violet-700 ring-2 ring-violet-400';
         const displayChar = step.displayChar ?? String(i + 1);
+        const sizeClass = emphasis
+          ? 'w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11'
+          : 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9';
 
         return (
-          <span key={step.id} className="group relative flex items-center justify-center shrink-0">
+          <span key={step.id} className="group relative flex flex-col items-center justify-center shrink-0">
             <button
               type="button"
               onClick={() => onStepClick(step)}
-              className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`${sizeClass} rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={`${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
               title={step.label}
@@ -141,10 +146,19 @@ const StepDots: React.FC<StepDotsProps> = ({
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
+              ) : emphasis ? (
+                <span className="material-symbols-outlined text-[18px] sm:text-[20px] md:text-[22px] leading-none" aria-hidden="true">
+                  lightbulb
+                </span>
               ) : (
                 displayChar
               )}
             </button>
+            {emphasis && step.navShortLabel ? (
+              <span className={`sm:hidden text-[9px] leading-none mt-0.5 font-semibold ${isActive ? 'text-accent' : 'text-violet-600'}`}>
+                {step.navShortLabel}
+              </span>
+            ) : null}
             <span
               role="tooltip"
               className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"

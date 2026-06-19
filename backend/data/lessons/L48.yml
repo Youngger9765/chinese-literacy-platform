@@ -173,49 +173,7 @@ strategy_exercise:
     answer: 1
   - prompt: 在生活中遇到一則聳動的新聞時，你可以用哪些方法來判斷真假？請寫出至少兩個方法
     type: free_text
-story_structure:
-- label: 結論
-  value: 不怕權威的去檢驗、質疑舊的理論，才能使我們一步步逼近
-story_structure_rows:
-- label: 主題
-  value: 盡信書不如無書
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 凱蒂案的報導與真相不符
-  interactive_type: checkbox
-  hint: 關於凱蒂案的真相
-  options:
-  - 凱蒂案是記者杜撰的
-  - 凱蒂案是真實事件，但細節有誤
-  - 凱蒂案完全是真實的報導
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 旁觀者效應的理論基礎有誤
-  interactive_type: checkbox
-  hint: 關於旁觀者效應
-  options:
-  - 旁觀者效應是錯誤的理論
-  - 旁觀者效應的案例有問題
-  - 旁觀者效應已被推翻
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 科學家也會犯錯
-  interactive_type: checkbox
-  hint: 關於科學研究
-  options:
-  - 科學研究總是正確的
-  - 科學家不會犯錯
-  - 科學研究可能會有錯誤
-  correct_options:
-  - 2
-- label: 結論
-  value: 要抱持懷疑精神，檢驗資訊
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -250,3 +208,23 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 盡信書不如無書：從一件殺人案談起
+- - 凱蒂謀殺案
+  - 紐約時報報導
+  - '標題：38人目擊謀殺卻未報警，凸顯社會的冷漠無情，震驚警界。
+
+    (1)被害者：凱蒂
+
+    (2)事發經過：一位女子在街上遭遇兇手多達三次的追殺，時間將近半小時，但38位旁觀者冷漠無情，直到女子被殺死後，才有一個人打電話報警。'
+- - 凱蒂謀殺案
+  - 心理學界反應
+  - '1.心理學家提出【 旁觀者效應 】理論來解釋這個現象。
+
+    2.心理學家對這個事件毫不質疑，長達43年。'
+- - 凱蒂謀殺案
+  - 重大轉折
+  - "1.三位研究者追查發現：「凱蒂謀殺案是記者【 杜撰 】的作品。」\n　(1)沒有38位目擊者   (2)只有【 2 】次的追殺。\n  (3)命案發生在【\
+    \ 黑暗 】且看不清楚的街角。\n  (4)有人報警，但警局不以為意的【 吃案 】了。"
+- - 結論
+  - 【 科學家 】也是會犯錯的，盡信書【 不如無書 】，不怕權威的去檢驗、質疑舊的理論，才能使我們一步步逼近真相。

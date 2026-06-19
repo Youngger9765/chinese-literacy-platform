@@ -1,0 +1,70 @@
+{
+  "rows": [
+    {
+      "label": "背景",
+      "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "起因",
+      "value": "神秘經歷 空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "問題",
+      "value": "產生疑惑 這個叫【　　　】的人，為何受上天保佑？",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "解決",
+      "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結果",
+      "value": "商人恍然大悟 \n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "背景",
+      "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。"
+    },
+    {
+      "kind": "pair",
+      "label": "起因",
+      "value": "神秘經歷 空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」"
+    },
+    {
+      "kind": "pair",
+      "label": "問題",
+      "value": "產生疑惑 這個叫【　　　】的人，為何受上天保佑？"
+    },
+    {
+      "kind": "pair",
+      "label": "解決",
+      "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "商人恍然大悟 \n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "psr",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "背景",
+      "起因",
+      "問題",
+      "解決"
+    ],
+    "layout": "worksheet_table"
+  }
+}

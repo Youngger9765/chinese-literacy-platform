@@ -176,49 +176,7 @@ strategy_exercise:
     - 睡前拖延症與3C產品
     - 工作壓力太大
     answer: 1
-story_structure:
-- label: 主題
-  value: (1)小主題可以直接從段落中找到：找出該段的核心概念，當小主題名
-story_structure_rows:
-- label: 主題
-  value: 睡眠的重要性
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 青少年每天需要8到10小時睡眠。
-  interactive_type: checkbox
-  hint: 關於睡眠時間
-  options:
-  - 青少年每天需要6到8小時睡眠。
-  - 青少年每天需要8到10小時睡眠。
-  - 青少年每天需要10到12小時睡眠。
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 睡眠時大腦會修復身體、重整記憶。
-  interactive_type: checkbox
-  hint: 睡眠對身體的影響
-  options:
-  - 睡眠時大腦會完全休息。
-  - 睡眠時大腦會修復身體、重整記憶。
-  - 睡眠時大腦會持續工作，不會休息。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 睡前喝酒會影響睡眠品質。
-  interactive_type: checkbox
-  hint: 關於睡前習慣
-  options:
-  - 平日熬夜沒關係，假日補眠就好。
-  - 睡前喝酒能幫助入眠。
-  - 睡前喝酒會影響睡眠品質。
-  correct_options:
-  - 2
-- label: 結論
-  value: 放下3C產品，關掉思緒，好好睡覺。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-19
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -253,3 +211,27 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 祝你好眠
+- - 青少年睡眠的需求?
+  - 青少年每天需要【 8-10 】小時的睡眠。
+- - 睡眠的【 好處 】
+  - '1.修復身體：大腦會在睡眠中修補【 肌肉 】，清除【 新陳代謝物 】。
+
+    2.學得更好：大腦睡眠時會做【 記憶重組 】，將白天吸收的新知【 去蕪存菁 】。'
+- - 睡眠不足產生的問題
+  - '1.剝奪了身體【 恢復與修復 】的時間，增加生病的風險。
+
+    2.大腦反應變得【 遲鈍 】，出錯率高。'
+- - 大眾對睡眠的【 錯誤觀念 】(迷思)
+  - '1.平日熬夜可利用假日補眠?
+
+    生理時鐘不規律，會影響睡眠的品質。
+
+    2.睡前喝酒能幫助入眠?
+
+    睡覺時血液若有【 酒精 】，容易頻繁的醒來，降低睡眠品質。'
+- - 造成現代人睡眠不足的原因
+  - 現代人因【 3C產品 】的普及，流連於社群網站中而延後就寢。
+- - 未來行動
+  - 放下手中的3C產品，關掉煩擾的思緒，好好睡一覺。

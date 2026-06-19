@@ -1,0 +1,102 @@
+{
+  "rows": [
+    {
+      "label": "主角",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "背景",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "",
+          "value": "居住地：【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "",
+          "value": "家  世：【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "發展或變化",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "天\n才\n時\n期",
+          "value": "【　　　】歲開始展現天才。\n1.不曾見過【　　　】，沒有人教，卻會寫詩，還能簽名。\n2.指定任何事物叫他作詩，都能立刻做出來。\n3.寫出來的詩有【　　　】也有【　　　】。\n4.他的父親帶他【　　　】鄉人作詩，沒有讓他學習。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "變成凡人過程",
+          "value": "1.【　　　】歲時，寫的詩已不如傳聞中的好。\n2.【　　　】歲，天資消失，變成普通人。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "主角",
+      "items": [
+        {
+          "label": "",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "背景",
+      "items": [
+        {
+          "label": "",
+          "value": "居住地：【　　　】"
+        },
+        {
+          "label": "",
+          "value": "家  世：【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "發展或變化",
+      "items": [
+        {
+          "label": "天\n才\n時\n期",
+          "value": "【　　　】歲開始展現天才。\n1.不曾見過【　　　】，沒有人教，卻會寫詩，還能簽名。\n2.指定任何事物叫他作詩，都能立刻做出來。\n3.寫出來的詩有【　　　】也有【　　　】。\n4.他的父親帶他【　　　】鄉人作詩，沒有讓他學習。"
+        },
+        {
+          "label": "變成凡人過程",
+          "value": "1.【　　　】歲時，寫的詩已不如傳聞中的好。\n2.【　　　】歲，天資消失，變成普通人。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "天\n才\n時\n期",
+      "變成凡人過程"
+    ],
+    "layout": "worksheet_table"
+  }
+}

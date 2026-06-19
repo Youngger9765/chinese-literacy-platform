@@ -1,0 +1,43 @@
+{
+  "rows": [
+    {
+      "label": "爺爺奶奶來了以後",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "家庭生活的改變",
+      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】（單選）\n2.下列哪些是作者家的生活改變？（多選）\n【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "作者的收穫",
+      "value": "1.作者理解不同世代有各自的  生活方式     和  價值觀     ，如：音樂喜好和冷氣使用習慣等。\n2.同住後，有助於青少年  情緒           智商的培養。\n3.作者學會了傾聽不同世代的聲音和  設身處地  為他人著想。\n4.作者學會轉換觀點，帶著   好奇心   聆聽爺爺奶奶的故事。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "爺爺奶奶來了以後",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "家庭生活的改變",
+      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】（單選）\n2.下列哪些是作者家的生活改變？（多選）\n【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "作者的收穫",
+      "value": "1.作者理解不同世代有各自的  生活方式     和  價值觀     ，如：音樂喜好和冷氣使用習慣等。\n2.同住後，有助於青少年  情緒           智商的培養。\n3.作者學會了傾聽不同世代的聲音和  設身處地  為他人著想。\n4.作者學會轉換觀點，帶著   好奇心   聆聽爺爺奶奶的故事。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 1,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "家庭生活的改變"
+    ],
+    "layout": "worksheet_table"
+  }
+}

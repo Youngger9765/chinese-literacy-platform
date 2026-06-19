@@ -5,8 +5,18 @@
  * When API returns layout=worksheet_table, renders 紙本學習單 HTML table;
  * otherwise falls back to card layout (#2084).
  */
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  STORY_STRUCTURE_INTERACTIVE_ATTR,
+  DEMO_STEP_DURATION_MS,
+  buildDemoSequence,
+  deriveStructureProfile,
+  getCoachIntroText,
+  resolveDemoTargetElement,
+  type StructureInteractionProfile,
+} from './storyStructureProfile';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,6 +28,7 @@ interface StructureSubRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
 }
@@ -28,9 +39,11 @@ interface StructureRow {
   interactive_type: InteractiveType;
   hint?: string;
   blank_hints?: string[];
+  blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
   sub_rows?: StructureSubRow[];
+  blank_in_label?: boolean;
 }
 
 interface WorksheetPairRow {
@@ -52,6 +65,7 @@ interface StructureData {
   title?: string;
   worksheet_rows?: WorksheetRow[];
   rows: StructureRow[];
+  interaction_profile?: Partial<StructureInteractionProfile>;
 }
 
 interface GradeResultItem {
@@ -72,10 +86,137 @@ type AnswerMap = Record<string, string | number[]>;
 
 interface Props {
   storyId: string;
+  structure?: StructureData | null;
+  previewMode?: boolean;
+  showCoach?: boolean;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
 const SECTION_CHUNK_SIZE = 3;
+const STORY_STRUCTURE_ONBOARDED_KEY = 'story_structure_onboarded';
+
+interface StoryStructureDemoRuntime {
+  step: import('./storyStructureProfile').DemoStepId;
+}
+
+interface DemoSpotlightRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+function padDemoRect(rect: DOMRect, padding = 10): DemoSpotlightRect {
+  return {
+    top: Math.max(8, rect.top - padding),
+    left: Math.max(8, rect.left - padding),
+    width: rect.width + padding * 2,
+    height: rect.height + padding * 2,
+  };
+}
+
+interface DemoSpotlightOverlayProps {
+  rect: DemoSpotlightRect;
+  label: string;
+  placement?: 'above' | 'below';
+  bubbleAnchor?: 'top' | 'center' | 'bottom';
+}
+
+function DemoSpotlightOverlay({
+  rect,
+  label,
+  placement = 'above',
+  bubbleAnchor = 'center',
+}: DemoSpotlightOverlayProps) {
+  const { top, left, width, height } = rect;
+  const bottom = top + height;
+  const right = left + width;
+  const anchorY =
+    bubbleAnchor === 'top' ? top : bubbleAnchor === 'bottom' ? bottom : top + height / 2;
+
+  const bubbleStyle: React.CSSProperties =
+    placement === 'below'
+      ? {
+          top: anchorY + 14,
+          left: left + width / 2,
+          transform: 'translate(-50%, 0)',
+        }
+      : {
+          top: anchorY - 14,
+          left: left + width / 2,
+          transform: 'translate(-50%, -100%)',
+        };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[220] pointer-events-none" role="presentation" aria-hidden>
+      <div className="fixed left-0 right-0 top-0 bg-black/58 transition-opacity duration-700" style={{ height: top }} />
+      <div className="fixed left-0 right-0 bg-black/58 transition-opacity duration-700" style={{ top: bottom, bottom: 0 }} />
+      <div className="fixed bg-black/58 transition-opacity duration-700" style={{ top, left: 0, width: left, height }} />
+      <div className="fixed bg-black/58 transition-opacity duration-700" style={{ top, left: right, right: 0, height }} />
+      <div
+        className="fixed rounded-xl ring-4 ring-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.25)] bg-white/5 transition-all duration-700 ease-in-out"
+        style={{ top, left, width, height }}
+      />
+      <div
+        className="fixed z-[221] transition-all duration-700 ease-in-out"
+        style={bubbleStyle}
+        role="status"
+        aria-live="polite"
+      >
+        <div className="relative rounded-xl bg-accent text-white px-4 py-2.5 text-sm font-bold shadow-xl text-center max-w-xs animate-in fade-in zoom-in-95 duration-500">
+          {label}
+          <span
+            className={`absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-accent ${
+              placement === 'below' ? '-top-1.5' : '-bottom-1.5'
+            }`}
+            aria-hidden
+          />
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+interface OnboardingCoachProps {
+  introText: string;
+  onDismiss: () => void;
+  onDemo: () => void;
+}
+
+function OnboardingCoach({ introText, onDismiss, onDemo }: OnboardingCoachProps) {
+  return (
+    <div className="mb-4 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+          account_tree
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-on-surface text-base mb-1">文章重點表怎麼玩？</p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">{introText}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 self-end">
+        <button
+          type="button"
+          onClick={onDemo}
+          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
+        >
+          示範
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          我知道了
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -86,6 +227,12 @@ function answerKey(rowIdx: number, subIdx?: number, blankIdx?: number): string {
   if (subIdx !== undefined) return `${rowIdx}-${subIdx}`;
   if (blankIdx !== undefined) return `${rowIdx}-b${blankIdx}`;
   return `${rowIdx}`;
+}
+
+
+function cellInteractiveText(cell: StructureRow | StructureSubRow): string {
+  if ('blank_in_label' in cell && cell.blank_in_label) return cell.label;
+  return cell.value;
 }
 
 function countBlanks(text: string): number {
@@ -179,7 +326,6 @@ function sectionVerticalLabel(section: string): string {
 // ── Inline blank inputs (worksheet table cells) ─────────────────────────────
 
 interface InlineBlankInputProps {
-  hint?: string;
   value: string;
   onChange: (v: string) => void;
   submitted: boolean;
@@ -188,7 +334,6 @@ interface InlineBlankInputProps {
 }
 
 const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
-  hint,
   value,
   onChange,
   submitted,
@@ -214,7 +359,8 @@ const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={hint?.trim() || '　'}
+      placeholder="　"
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
       className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-none focus:border-amber-600 mx-0.5`}
       disabled={submitted}
     />
@@ -225,7 +371,6 @@ interface InlineWorksheetContentProps {
   text: string;
   rowIdx: number;
   subIdx?: number;
-  hints?: string[];
   answers: AnswerMap;
   setAnswer: (key: string, value: string | number[]) => void;
   submitted: boolean;
@@ -236,7 +381,6 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
   text,
   rowIdx,
   subIdx,
-  hints,
   answers,
   setAnswer,
   submitted,
@@ -253,12 +397,10 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
         nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
       }
       const key = answerKey(rowIdx, subIdx, blankIdx);
-      const hint = hints?.[blankIdx] ?? match[1]?.trim();
       nodes.push(
         <span key={`b-${blankIdx}`} className="inline-flex items-baseline">
           <span>【</span>
           <InlineBlankInput
-            hint={hint}
             value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
             onChange={(v) => setAnswer(key, v)}
             submitted={submitted}
@@ -277,7 +419,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
       nodes.push(<span key={`t-${last}`}>{text.slice(last)}</span>);
     }
     return nodes;
-  }, [text, rowIdx, subIdx, hints, answers, setAnswer, submitted, gradeResults]);
+  }, [text, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
   return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
 };
@@ -285,7 +427,6 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
 // ── FillBlankCell (card layout) ─────────────────────────────────────────────
 
 interface FillBlankCellProps {
-  hint?: string;
   value: string;
   onChange: (v: string) => void;
   submitted: boolean;
@@ -293,7 +434,6 @@ interface FillBlankCellProps {
 }
 
 const FillBlankCell: React.FC<FillBlankCellProps> = ({
-  hint,
   value,
   onChange,
   submitted,
@@ -327,7 +467,8 @@ const FillBlankCell: React.FC<FillBlankCellProps> = ({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={hint ?? '請填入答案'}
+        placeholder="　"
+        {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
         className="w-36 bg-amber-50 border-b-2 border-amber-400 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-amber-600 px-1 py-0.5 text-center"
         disabled={submitted}
       />
@@ -365,7 +506,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}>
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -452,7 +593,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
     value: string,
     rowIdx: number,
     subIdx?: number,
-    hints?: string[],
   ) => {
     const itype = classifyInteractive(value);
     if (itype === 'fill_blank' && countBlanks(value) > 0) {
@@ -461,7 +601,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
           text={value}
           rowIdx={rowIdx}
           subIdx={subIdx}
-          hints={hints}
           answers={answers}
           setAnswer={setAnswer}
           submitted={submitted}
@@ -495,11 +634,24 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
             const row = rows[rowIdx];
             return (
               <tr key={`pair-${wsIdx}`}>
-                <td className={`${cellBorder} text-center font-medium w-16 whitespace-nowrap`}>
-                  {wsRow.label}
+                <td className={`${cellBorder} font-medium w-16 whitespace-pre-line`}>
+                  {(row?.blank_in_label ||
+                    classifyInteractive(wsRow.label) === 'fill_blank') &&
+                  countBlanks(wsRow.label) > 0 ? (
+                    <InlineWorksheetContent
+                      text={wsRow.label}
+                      rowIdx={rowIdx}
+                      answers={answers}
+                      setAnswer={setAnswer}
+                      submitted={submitted}
+                      gradeResults={gradeResults}
+                    />
+                  ) : (
+                    wsRow.label
+                  )}
                 </td>
                 <td colSpan={2} className={cellBorder}>
-                  {renderValueCell(wsRow.value, rowIdx, undefined, row?.blank_hints)}
+                  {renderValueCell(wsRow.value, rowIdx, undefined)}
                 </td>
               </tr>
             );
@@ -540,7 +692,6 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
                       item.value,
                       rowIdx,
                       subIdx,
-                      subRow?.blank_hints,
                     )}
                   </td>
                 </tr>
@@ -555,20 +706,47 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
+const StoryStructureTable: React.FC<Props> = ({
+  storyId,
+  structure: structureProp,
+  previewMode = false,
+  showCoach: showCoachProp,
+}) => {
   const { token } = useAuth();
-  const [structure, setStructure] = useState<StructureData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
+  const [loading, setLoading] = useState(structureProp === undefined);
   const [fetchError, setFetchError] = useState(false);
 
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
   const [copyDone, setCopyDone] = useState(false);
+  const [showCoach, setShowCoach] = useState<boolean>(() => {
+    if (showCoachProp !== undefined) return showCoachProp;
+    if (previewMode) return false;
+    try {
+      return !localStorage.getItem(STORY_STRUCTURE_ONBOARDED_KEY);
+    } catch {
+      return true;
+    }
+  });
+  const [demo, setDemo] = useState<StoryStructureDemoRuntime | null>(null);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const submitBtnRef = useRef<HTMLButtonElement>(null);
+  const [demoTargetRect, setDemoTargetRect] = useState<DemoSpotlightRect | null>(null);
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
   useEffect(() => {
+    if (structureProp !== undefined) {
+      setStructure(structureProp);
+      setLoading(false);
+      setFetchError(false);
+      setAnswers({});
+      setGradeResult(null);
+      return;
+    }
     setLoading(true);
     setFetchError(false);
     setAnswers({});
@@ -583,7 +761,91 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       .then((data: StructureData) => setStructure(data))
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
-  }, [storyId, token, API_BASE]);
+  }, [storyId, token, API_BASE, structureProp]);
+
+
+  const clearDemoTimers = useCallback(() => {
+    demoTimersRef.current.forEach((id) => clearTimeout(id));
+    demoTimersRef.current = [];
+  }, []);
+
+  const scheduleDemoStep = useCallback((fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    demoTimersRef.current.push(id);
+  }, []);
+
+  useEffect(() => () => clearDemoTimers(), [clearDemoTimers]);
+
+  const interactionProfile = useMemo(
+    () => (structure ? deriveStructureProfile(structure) : null),
+    [structure],
+  );
+
+  const demoSteps = useMemo(
+    () => (interactionProfile ? buildDemoSequence(interactionProfile) : []),
+    [interactionProfile],
+  );
+
+  const activeDemoStep = useMemo(
+    () => (demo ? demoSteps.find((s) => s.id === demo.step) ?? null : null),
+    [demo, demoSteps],
+  );
+
+  const resolveDemoTarget = useCallback((step: import('./storyStructureProfile').DemoStepId): HTMLElement | null => {
+    return resolveDemoTargetElement(
+      step,
+      tableContainerRef.current,
+      submitBtnRef.current,
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!demo) {
+      setDemoTargetRect(null);
+      return;
+    }
+
+    const measure = () => {
+      const el = resolveDemoTarget(demo.step);
+      setDemoTargetRect(el ? padDemoRect(el.getBoundingClientRect()) : null);
+    };
+
+    measure();
+    const raf = requestAnimationFrame(measure);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [demo, resolveDemoTarget, structure, loading]);
+
+  const handleDismissCoach = useCallback(() => {
+    setShowCoach(false);
+    try {
+      localStorage.setItem(STORY_STRUCTURE_ONBOARDED_KEY, '1');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleDemo = useCallback(() => {
+    if (!interactionProfile || demoSteps.length === 0) return;
+    clearDemoTimers();
+    handleDismissCoach();
+    demoSteps.forEach((stepConfig, index) => {
+      scheduleDemoStep(() => setDemo({ step: stepConfig.id }), index * DEMO_STEP_DURATION_MS);
+    });
+    scheduleDemoStep(() => setDemo(null), demoSteps.length * DEMO_STEP_DURATION_MS);
+  }, [
+    clearDemoTimers,
+    handleDismissCoach,
+    scheduleDemoStep,
+    interactionProfile,
+    demoSteps,
+  ]);
+
 
   const setAnswer = useCallback((key: string, value: string | number[]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -598,7 +860,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     ) => {
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 0);
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 0);
       if (blankCount <= 1) {
         const key = answerKey(rowIdx, subIdx);
         payload.push({
@@ -732,7 +994,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     (cell: StructureRow | StructureSubRow): number => {
       if (cell.interactive_type === 'display') return 0;
       if (cell.interactive_type === 'checkbox') return 1;
-      const blanks = cell.blank_hints?.length || countBlanks(cell.value);
+      const blanks = cell.blank_hints?.length || countBlanks(cellInteractiveText(cell));
       return blanks > 0 ? blanks : 1;
     },
     [],
@@ -761,7 +1023,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cell.value), 1) : 1);
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       total += blankCount;
       for (let b = 0; b < blankCount; b += 1) {
         const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);
@@ -815,7 +1077,6 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       }
       return (
         <FillBlankCell
-          hint={cell.hint}
           value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
           onChange={(v) => setAnswer(key, v)}
           submitted={submitted}
@@ -847,11 +1108,43 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     structure.layout === 'worksheet_table' &&
     !!(structure.worksheet_rows && structure.worksheet_rows.length > 0);
 
+  const coachIntroText = interactionProfile
+    ? getCoachIntroText(interactionProfile)
+    : '讀課文，完成表格練習';
+
   return (
+    <div className={useWorksheet ? 'max-w-3xl mx-auto' : 'max-w-2xl mx-auto'}>
+      {showCoach && (
+        <OnboardingCoach
+          introText={coachIntroText}
+          onDismiss={handleDismissCoach}
+          onDemo={handleDemo}
+        />
+      )}
+      {!showCoach && (
+        <div className="flex justify-end mb-2">
+          <button
+            type="button"
+            onClick={() => setShowCoach(true)}
+            className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">help_outline</span>
+            怎麼玩？
+          </button>
+        </div>
+      )}
+      {demo && demoTargetRect && activeDemoStep && (
+        <DemoSpotlightOverlay
+          rect={demoTargetRect}
+          label={activeDemoStep.bubbleText}
+          placement={activeDemoStep.placement}
+          bubbleAnchor={activeDemoStep.bubbleAnchor}
+        />
+      )}
     <div
-      className={`overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm mx-auto ${
-        useWorksheet ? 'max-w-3xl' : 'max-w-2xl'
-      }`}
+      ref={tableContainerRef}
+      data-story-structure-table
+      className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm"
     >
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
@@ -937,12 +1230,14 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       )}
 
       <div className="px-5 py-4 border-t-2 border-gray-200 bg-gray-50">
-        {!submitted ? (
+        {!previewMode && !submitted ? (
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs text-gray-400">
               已填 {totalAnswered} / {totalInteractive} 題
             </p>
             <button
+              ref={submitBtnRef}
+              data-story-structure-submit
               onClick={handleSubmit}
               disabled={!allAnswered || submitting}
               className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${
@@ -954,11 +1249,11 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
               {submitting ? '批改中…' : '提交答案'}
             </button>
           </div>
-        ) : score < 0 ? (
+        ) : !previewMode && score < 0 ? (
           <p className="text-sm text-red-500 text-center">
             批改失敗，請重新整理後再試
           </p>
-        ) : (
+        ) : !previewMode ? (
           <div
             className={`rounded-xl p-4 text-center ${
               score >= 80
@@ -975,8 +1270,9 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
                 : '可以再讀一遍課文，試著找出關鍵句子'}
             </p>
           </div>
-        )}
+        ) : null}
       </div>
+    </div>
     </div>
   );
 };

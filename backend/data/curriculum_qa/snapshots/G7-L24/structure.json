@@ -1,0 +1,86 @@
+{
+  "rows": [
+    {
+      "label": "未來農夫",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "志向與進入場域(段1-2)",
+      "value": "1.宇晴的志向是想要當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，有消毒味，農場像【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "農場外觀（段3）",
+      "value": "農場一層層栽培架，LED燈光，像【　　　】，每層水耕槽葉片【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "農場運作方式(段4)",
+      "value": "1.水耕蔬菜不是用土種出來的是，而是用【　　　】。\n2.透過【　　　】監測與控制條件，讓農場的環境維持在最適合蔬菜生長的範圍。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "工作內容(段5)",
+      "value": "1.宇晴的任務：每天【　　　】，找【　　　】並處理或回報校正。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "農場優勢(段6)",
+      "value": "1.水耕蔬菜成本【　　　】會不會賺錢？\n2.風險低、長得快、乾淨漂亮，能創造【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "傳統與未來(段7-8)",
+      "value": "1.宇晴回憶【　　　】（農具徒手、糞肥等），因此起雞皮疙瘩。\n2.未來農夫不再是斗笠鋤頭，而更像【　　　】",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "未來農夫",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "志向與進入場域(段1-2)",
+      "value": "1.宇晴的志向是想要當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，有消毒味，農場像【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "農場外觀（段3）",
+      "value": "農場一層層栽培架，LED燈光，像【　　　】，每層水耕槽葉片【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "農場運作方式(段4)",
+      "value": "1.水耕蔬菜不是用土種出來的是，而是用【　　　】。\n2.透過【　　　】監測與控制條件，讓農場的環境維持在最適合蔬菜生長的範圍。"
+    },
+    {
+      "kind": "pair",
+      "label": "工作內容(段5)",
+      "value": "1.宇晴的任務：每天【　　　】，找【　　　】並處理或回報校正。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "農場優勢(段6)",
+      "value": "1.水耕蔬菜成本【　　　】會不會賺錢？\n2.風險低、長得快、乾淨漂亮，能創造【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "傳統與未來(段7-8)",
+      "value": "1.宇晴回憶【　　　】（農具徒手、糞肥等），因此起雞皮疙瘩。\n2.未來農夫不再是斗笠鋤頭，而更像【　　　】"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 6,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "志向與進入場域(段1-2)",
+      "農場外觀（段3）",
+      "農場運作方式(段4)",
+      "工作內容(段5)"
+    ],
+    "layout": "worksheet_table"
+  }
+}

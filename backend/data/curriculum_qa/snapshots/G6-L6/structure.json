@@ -1,0 +1,185 @@
+{
+  "rows": [
+    {
+      "label": "心理出狀況，是壞事導致的嗎？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "問題",
+      "value": "許多人認為一個人【　　　】出狀況，是因不能控制的【　　　】導致的，這個說法是真的嗎？",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "故事一",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "人物",
+          "value": "阿堅 小芸",
+          "interactive_type": "display"
+        },
+        {
+          "label": "家庭背景",
+          "value": "爸爸【　　　】，媽媽【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "狀況",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。 國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "想法",
+          "value": "我有這樣的家庭，你期待【　　　】？ 我家都已經這樣了，我【　　　】行嗎？",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "故事二",
+      "value": "一開始 後來",
+      "interactive_type": "display"
+    },
+    {
+      "label": "故事二",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "問題",
+          "value": "35歲的鄧小姐，發現自己有【　　　】，必須一輩子吃藥。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "想法",
+          "value": "為什麼這麼【　　　】？ 我【　　　】，及早發現。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "結果",
+          "value": "心裡【　　　】，吃不好也睡不好。 快樂起來，【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "故事三",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "事實",
+          "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "想法",
+          "value": "學生 黃美廉",
+          "interactive_type": "display"
+        },
+        {
+          "label": "想法",
+          "value": "你長這樣，怎麼\n【　　　】得起來？ ＯＯＯＯＯＯＯ",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "結論",
+      "value": "一個人只要【　　　】對【　　　】的看法，就不致於讓情緒落入萬丈深淵。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "心理出狀況，是壞事導致的嗎？",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "問題",
+      "value": "許多人認為一個人【　　　】出狀況，是因不能控制的【　　　】導致的，這個說法是真的嗎？"
+    },
+    {
+      "kind": "section_block",
+      "section": "故事一",
+      "items": [
+        {
+          "label": "人物",
+          "value": "阿堅 小芸"
+        },
+        {
+          "label": "家庭背景",
+          "value": "爸爸【　　　】，媽媽【　　　】。"
+        },
+        {
+          "label": "狀況",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。 國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+        },
+        {
+          "label": "想法",
+          "value": "我有這樣的家庭，你期待【　　　】？ 我家都已經這樣了，我【　　　】行嗎？"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "故事二",
+      "value": "一開始 後來"
+    },
+    {
+      "kind": "section_block",
+      "section": "故事二",
+      "items": [
+        {
+          "label": "問題",
+          "value": "35歲的鄧小姐，發現自己有【　　　】，必須一輩子吃藥。"
+        },
+        {
+          "label": "想法",
+          "value": "為什麼這麼【　　　】？ 我【　　　】，及早發現。"
+        },
+        {
+          "label": "結果",
+          "value": "心裡【　　　】，吃不好也睡不好。 快樂起來，【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "故事三",
+      "items": [
+        {
+          "label": "事實",
+          "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。"
+        },
+        {
+          "label": "想法",
+          "value": "學生 黃美廉"
+        },
+        {
+          "label": "想法",
+          "value": "你長這樣，怎麼\n【　　　】得起來？ ＯＯＯＯＯＯＯ"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "一個人只要【　　　】對【　　　】的看法，就不致於讓情緒落入萬丈深淵。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "psr",
+    "fill_blank_count": 10,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "問題",
+      "家庭背景",
+      "狀況",
+      "想法"
+    ],
+    "layout": "worksheet_table"
+  }
+}

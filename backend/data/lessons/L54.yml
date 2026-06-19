@@ -180,57 +180,7 @@ strategy_exercise:
     answer: 1
   - prompt: 李智凱在東京奧運鞍馬拿下15.40分，請根據課文的計分規則，說明這個分數大概是怎麼來的（D分加E分）
     type: free_text
-story_structure:
-- label: 主題
-  value: 競技體操的計分方式
-- label: 重要事實 1
-  value: 競技體操是奧運項目，選手需展現力量、平衡與協調。
-- label: 重要事實 2
-  value: 總分由D分（難度分）和E分（實施分）組成。
-- label: 重要事實 3
-  value: D分看動作難度與組群，E分看動作執行品質扣分。
-- label: 結論
-  value: 了解體操計分規則，能欣賞選手的努力與技巧。
-story_structure_rows:
-- label: 主題
-  value: 競技體操計分方式
-  interactive_type: fill_blank
-  hint: 課文主要在說明什麼？
-- label: 重要事實 1
-  value: 奧運競技體操分數由D分和E分組成
-  interactive_type: checkbox
-  hint: 分數如何組成？
-  options:
-  - 奧運競技體操分數由D分和E分組成
-  - 奧運競技體操分數只看D分
-  - 奧運競技體操分數只看E分
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: D分由動作難度與動作組群組成
-  interactive_type: checkbox
-  hint: D分包含哪些？
-  options:
-  - D分由動作難度與動作組群組成
-  - D分只看動作難度
-  - D分只看動作組群
-  correct_options:
-  - 0
-- label: 重要事實 3
-  value: E分評估執行動作的品質，從10分開始扣分
-  interactive_type: checkbox
-  hint: E分如何評估？
-  options:
-  - E分評估執行動作的品質，從10分開始扣分
-  - E分評估動作難度，從0分開始加分
-  - E分評估動作組群，從0分開始加分
-  correct_options:
-  - 0
-- label: 結論
-  value: 競技體操的計分方式複雜且嚴謹，兼顧難度與執行品質。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -265,3 +215,45 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 動作順序
+  - 動作名稱
+  - '動作組群 動作難度/
+
+    難度分值'
+- - '1'
+  - 分腿交叉成倒立支撐
+  - I D/0.4
+- - '2'
+  - 分腿迴旋倒立轉體270度三部位
+  - II E/0.5
+- - '3'
+  - 分腿迴旋隔兩環俯轉向
+  - II D/0.4
+- - '4'
+  - 分腿迴旋大隔鞍反轉體180度
+  - II C/0.3
+- - '5'
+  - 分腿交叉成倒立支撐
+  - II E/0.5
+- - '6'
+  - 分腿迴旋倒立轉體270度三部位
+  - II D/0.4
+- - '7'
+  - 分腿迴旋隔兩環俯轉向
+  - III C/0.3
+- - '8'
+  - 分腿迴旋大隔鞍反轉體180度
+  - III E/0.5
+- - '9'
+  - 分腿迴旋隔鞍三部位反轉體360度
+  - III E/0.5
+- - '10'
+  - '（下法動作─結束）
+
+    分腿迴旋隔鞍反轉體360度'
+  - IV D/0.4
+- - 小計
+  - 【 2.0 】 【 4.2 】
+- - 總分
+  - 【 6.2 】　　D分＝2＋4.2＝6.2

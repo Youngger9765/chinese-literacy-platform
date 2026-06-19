@@ -1,0 +1,64 @@
+{
+  "rows": [
+    {
+      "label": "運動傷害，怎麼辦？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "如何預防",
+      "value": "1.不管是哪一種運動，都要先做好【　　　】運動。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "如何預防",
+      "value": "2.正確的暖身時間至少要佔整個運動時間的【　　　】，\n主要目的是什麼？（多選）\n增加關節的靈活性　　提升體溫　\n促進肌肉收放效能    提高心肺功能",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "受傷時的處理",
+      "value": "3.受傷後可以如何處理？（多選）\n避免　　壓迫　　保護　　教育　　抬高",
+      "interactive_type": "display"
+    },
+    {
+      "label": "受傷時的處理",
+      "value": "4.若不幸自己或他人意外受傷，可以怎麼做？(多選)\n找老師／防護員求助       態度冷靜  \n依ＰＥＡＣＥ五步驟處置",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "運動傷害，怎麼辦？",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "如何預防",
+      "value": "1.不管是哪一種運動，都要先做好【　　　】運動。"
+    },
+    {
+      "kind": "pair",
+      "label": "如何預防",
+      "value": "2.正確的暖身時間至少要佔整個運動時間的【　　　】，\n主要目的是什麼？（多選）\n增加關節的靈活性　　提升體溫　\n促進肌肉收放效能    提高心肺功能"
+    },
+    {
+      "kind": "pair",
+      "label": "受傷時的處理",
+      "value": "3.受傷後可以如何處理？（多選）\n避免　　壓迫　　保護　　教育　　抬高"
+    },
+    {
+      "kind": "pair",
+      "label": "受傷時的處理",
+      "value": "4.若不幸自己或他人意外受傷，可以怎麼做？(多選)\n找老師／防護員求助       態度冷靜  \n依ＰＥＡＣＥ五步驟處置"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 2,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "如何預防",
+      "如何預防"
+    ],
+    "layout": "worksheet_table"
+  }
+}

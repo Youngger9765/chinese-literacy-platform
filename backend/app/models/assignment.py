@@ -92,6 +92,10 @@ class AssignmentSubmission(Base):
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)  # from LearningSession accuracy
     teacher_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)  # per-student teacher comment (Issue #424)
+    # Issue #2266: GCS blob path for assignment reading audio (private bucket).
+    # Format: reading-audio/submissions/{id}.webm  — Never a public URL.
+    # None = audio not available (non-assignment session or upload not yet done).
+    audio_gcs_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

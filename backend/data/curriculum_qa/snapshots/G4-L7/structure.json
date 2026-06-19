@@ -1,0 +1,65 @@
+{
+  "rows": [
+    {
+      "label": "正太與小豬：武僧的養成之路",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "背景",
+      "value": "兩百年前日本奈良，市集。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "起因",
+      "value": "正太看到僧人制服惡霸，讓他想要去興福寺【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "經過",
+      "value": "師父給他【　　　】，每天讓正太抱著小豬走上走下，\n持續【　　　】年，每日不間斷。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結果",
+      "value": "三年後，正太變成了【　　　】，一般的匪徒強盜再也不是他的對手。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "正太與小豬：武僧的養成之路",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "背景",
+      "value": "兩百年前日本奈良，市集。"
+    },
+    {
+      "kind": "pair",
+      "label": "起因",
+      "value": "正太看到僧人制服惡霸，讓他想要去興福寺【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "經過",
+      "value": "師父給他【　　　】，每天讓正太抱著小豬走上走下，\n持續【　　　】年，每日不間斷。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "三年後，正太變成了【　　　】，一般的匪徒強盜再也不是他的對手。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "layout": "worksheet_table"
+  }
+}

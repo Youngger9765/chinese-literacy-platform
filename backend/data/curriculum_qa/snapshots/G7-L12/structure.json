@@ -1,0 +1,90 @@
+{
+  "rows": [
+    {
+      "label": "主題",
+      "value": "你以為的浪漫可能是跟騷",
+      "interactive_type": "display"
+    },
+    {
+      "label": "情境案例",
+      "value": "阿哲反覆追求小芳，小芳【　　　】很大，甚至失眠。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "迷思來源",
+      "value": "愛情電影常把糾纏行為美化為浪漫行為，誤導了觀眾，",
+      "interactive_type": "display"
+    },
+    {
+      "label": "法律標準",
+      "value": "《跟蹤騷擾防治法》：若違反他人意願，針對特定人反覆做出與【　　　】，造成對方【　　　】及【　　　】 就構成了「跟蹤騷擾」。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "判斷關鍵",
+      "value": "如何區別浪漫和跟騷，關鍵是【　　　】與【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "行動建議",
+      "value": "遭跟騷應【　　　】或【　　　】或【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "結語",
+      "value": "真正的喜歡要從尊重他人開始。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "你以為的浪漫可能是跟騷"
+    },
+    {
+      "kind": "pair",
+      "label": "情境案例",
+      "value": "阿哲反覆追求小芳，小芳【　　　】很大，甚至失眠。"
+    },
+    {
+      "kind": "pair",
+      "label": "迷思來源",
+      "value": "愛情電影常把糾纏行為美化為浪漫行為，誤導了觀眾，"
+    },
+    {
+      "kind": "pair",
+      "label": "法律標準",
+      "value": "《跟蹤騷擾防治法》：若違反他人意願，針對特定人反覆做出與【　　　】，造成對方【　　　】及【　　　】 就構成了「跟蹤騷擾」。"
+    },
+    {
+      "kind": "pair",
+      "label": "判斷關鍵",
+      "value": "如何區別浪漫和跟騷，關鍵是【　　　】與【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "行動建議",
+      "value": "遭跟騷應【　　　】或【　　　】或【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "真正的喜歡要從尊重他人開始。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "情境案例",
+      "法律標準",
+      "判斷關鍵",
+      "行動建議"
+    ],
+    "layout": "worksheet_table"
+  }
+}

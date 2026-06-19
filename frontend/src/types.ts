@@ -93,6 +93,79 @@ export interface StrategyExercise {
   steps?: StrategyExerciseStep[];
 }
 
+/** Spotlight v2 block-sequence schema (#2205) */
+export interface SpotlightGuideBlock {
+  type: 'guide';
+  text: string;
+}
+
+export interface SpotlightPassageBlock {
+  type: 'passage';
+  source?: string;
+  paragraphs: string[];
+}
+
+export interface SpotlightSingleBlock {
+  type: 'single';
+  prompt: string;
+  options?: string[];
+  answer?: string | number | null;
+}
+
+export interface SpotlightMultiBlock {
+  type: 'multi';
+  prompt: string;
+  options?: string[];
+  answer?: string | number | number[] | null;
+}
+
+export interface SpotlightFreeTextBlock {
+  type: 'free_text';
+  prompt: string;
+  answer?: string | null;
+}
+
+export interface SpotlightFigureBlock {
+  type: 'figure';
+  referent: string;
+  asset?: string | null;
+  bind_paragraph?: string | number | null;
+}
+
+export interface SpotlightSelfCheckBlock {
+  type: 'self_check';
+  items: string[];
+}
+
+export interface SpotlightFillTableBlock {
+  type: 'fill_table';
+}
+
+export interface SpotlightUnknownBlock {
+  type: 'unknown' | string;
+  text?: string;
+  prompt?: string;
+  [key: string]: unknown;
+}
+
+export type SpotlightBlock =
+  | SpotlightGuideBlock
+  | SpotlightPassageBlock
+  | SpotlightSingleBlock
+  | SpotlightMultiBlock
+  | SpotlightFreeTextBlock
+  | SpotlightFigureBlock
+  | SpotlightSelfCheckBlock
+  | SpotlightFillTableBlock
+  | SpotlightUnknownBlock;
+
+export interface SpotlightV2 {
+  lesson: string;
+  strategy_name: string;
+  strategy_type: string;
+  blocks: SpotlightBlock[];
+}
+
 /** G7 圖文整合格式：多練習清單，每項含步驟 (#1390) */
 export interface StrategyExerciseItem {
   exercise: string;
@@ -128,6 +201,7 @@ export interface Story {
    *  KnowledgeStation renders all of them. Each item: { title: '影片1', url: 'https://...' }. */
   videoLinks?: { title: string; url: string }[];
   strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
+  spotlightV2?: SpotlightV2;  // Block-sequence 聚光燈 (#2205 dev7)
   /**
    * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
    * When present, overrides DEFAULT_STEP_SEQUENCE for StepperNav and next/prev navigation.
@@ -268,7 +342,7 @@ export interface ReadingEvaluateResponse {
   diff_tokens: DiffToken[];
   stats: ReadingEvalStats;
   thresholds: ReadingEvalThresholds;
-  evaluation_method: 'ai' | 'fallback';
+  evaluation_method: 'deterministic' | 'fallback' | 'ai'; // 'deterministic' since #2266; 'ai' kept for backward compat
 }
 
 export interface LineBreakdown {

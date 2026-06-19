@@ -54,6 +54,8 @@ class StoryDetail(StoryListItem):
     text_type: str = "單"
     source_file: Optional[str] = None
     strategy_exercise: Optional[Union[dict, list]] = None  # 閱讀策略練習 (#943); list for multi-exercise lessons (G7 圖文整合)
+    # Block-sequence spotlight v2 (#2205): guide/passage/single blocks in order
+    spotlight_v2: Optional[dict] = None
     # Schema-driven step composition (#1374): per-lesson step order from YAML.
     # None means frontend uses DEFAULT_STEP_SEQUENCE fallback.
     step_sequence: Optional[list[str]] = None

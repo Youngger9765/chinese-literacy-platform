@@ -147,3 +147,35 @@ _MULTI_LESSON_PRIMARY = MULTI_LESSON_PRIMARY
 _MULTI_LESSON_MAP = MULTI_LESSON_MAP
 _CATALOG_TO_PARSED_OVERRIDE = CATALOG_TO_PARSED_OVERRIDE
 _AB_SECONDARY_MAP = AB_SECONDARY_MAP
+
+
+def catalog_to_parsed_code(catalog_code: str) -> str:
+    """Map curriculum catalog code → parsed YAML ``lesson_code`` / filename stem.
+
+    Mirrors ``load_layer2_lessons`` resolution (#1669).
+    """
+    norm = normalize_manifest_code(catalog_code)
+    if norm in MULTI_LESSON_PRIMARY:
+        return MULTI_LESSON_PRIMARY[norm]
+    if norm in CATALOG_TO_PARSED_OVERRIDE:
+        return CATALOG_TO_PARSED_OVERRIDE[norm]
+    return norm
+
+
+def parsed_to_catalog_codes(parsed_code: str) -> list[str]:
+    """Reverse lookup: catalog slot(s) that load this parsed YAML file.
+
+    DOCX batch / keypoints use parsed filenames (e.g. G8-L10 = 按讚 yaml).
+    Loader ``grade_code`` uses catalog slots (e.g. G8-L8 = 按讚 in UI).
+    """
+    codes: list[str] = []
+    for catalog, parsed in CATALOG_TO_PARSED_OVERRIDE.items():
+        if parsed == parsed_code:
+            codes.append(catalog)
+    for catalog, compound in MULTI_LESSON_PRIMARY.items():
+        if compound == parsed_code:
+            codes.append(catalog)
+    norm = normalize_manifest_code(parsed_code)
+    if norm not in codes:
+        codes.append(norm)
+    return codes

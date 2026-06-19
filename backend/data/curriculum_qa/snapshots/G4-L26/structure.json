@@ -1,0 +1,208 @@
+{
+  "rows": [
+    {
+      "label": "主題",
+      "value": "內容",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主要問題",
+      "value": "只要關鍵時刻或遭遇【　　　】，腦中就會出現【　　　】不斷廣播，內心充滿自我批評的聲音。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "情境一",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "事件",
+          "value": "（①漏接  □②接殺）對手的高飛球，讓對手得分",
+          "interactive_type": "checkbox",
+          "options": [
+            "漏接  □",
+            "接殺）對手的高飛球，讓對手得分"
+          ],
+          "correct_options": [
+            0
+          ]
+        },
+        {
+          "label": "念頭",
+          "value": "「你真是爛透了！」、「都是你害的！」",
+          "interactive_type": "display"
+        },
+        {
+          "label": "反應",
+          "value": "內心充滿（①自責  □②鬥志）",
+          "interactive_type": "checkbox",
+          "options": [
+            "自責  □",
+            "鬥志）"
+          ],
+          "correct_options": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "label": "情境二",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "事件",
+          "value": "輪到自己的【　　　】，希望能扳回一城",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "念頭",
+          "value": "「我真的打得到嗎？」、「不要又丟人現眼了啊！」",
+          "interactive_type": "display"
+        },
+        {
+          "label": "反應",
+          "value": "手心全是汗，無法【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "情境三",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "事件",
+          "value": "站上打擊區，被三球（①三振  □②保送）",
+          "interactive_type": "checkbox",
+          "options": [
+            "三振  □",
+            "保送）"
+          ],
+          "correct_options": [
+            0
+          ]
+        },
+        {
+          "label": "念頭",
+          "value": "「又來了……」、「真的很討厭現在的自己」",
+          "interactive_type": "display"
+        },
+        {
+          "label": "反應",
+          "value": "心裡滿是【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "解決方法",
+      "value": "1.收到隊友、朋友的【 鼓勵 】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【 暖 】，但還是感到有些【 自責 】\n2.收到教練的提醒：「懊悔不如【 行動 】」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）",
+      "interactive_type": "checkbox",
+      "options": [
+        "變小聲  □",
+        "變大聲）"
+      ],
+      "correct_options": [
+        0
+      ]
+    },
+    {
+      "label": "收穫",
+      "value": "只要專注在【　　　】，把【　　　】拉回正在做的事上，心裡好像也就沒有那麼糾結了。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "內容"
+    },
+    {
+      "kind": "pair",
+      "label": "主要問題",
+      "value": "只要關鍵時刻或遭遇【　　　】，腦中就會出現【　　　】不斷廣播，內心充滿自我批評的聲音。"
+    },
+    {
+      "kind": "section_block",
+      "section": "情境一",
+      "items": [
+        {
+          "label": "事件",
+          "value": "（①漏接  □②接殺）對手的高飛球，讓對手得分"
+        },
+        {
+          "label": "念頭",
+          "value": "「你真是爛透了！」、「都是你害的！」"
+        },
+        {
+          "label": "反應",
+          "value": "內心充滿（①自責  □②鬥志）"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "情境二",
+      "items": [
+        {
+          "label": "事件",
+          "value": "輪到自己的【　　　】，希望能扳回一城"
+        },
+        {
+          "label": "念頭",
+          "value": "「我真的打得到嗎？」、「不要又丟人現眼了啊！」"
+        },
+        {
+          "label": "反應",
+          "value": "手心全是汗，無法【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "情境三",
+      "items": [
+        {
+          "label": "事件",
+          "value": "站上打擊區，被三球（①三振  □②保送）"
+        },
+        {
+          "label": "念頭",
+          "value": "「又來了……」、「真的很討厭現在的自己」"
+        },
+        {
+          "label": "反應",
+          "value": "心裡滿是【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "解決方法",
+      "value": "1.收到隊友、朋友的【　　　】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【　　　】，但還是感到有些【　　　】\n2.收到教練的提醒：「懊悔不如【　　　】」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）"
+    },
+    {
+      "kind": "pair",
+      "label": "收穫",
+      "value": "只要專注在【　　　】，把【　　　】拉回正在做的事上，心裡好像也就沒有那麼糾結了。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "mixed",
+    "template_kind": "psr",
+    "fill_blank_count": 5,
+    "checkbox_count": 4,
+    "primary_labels": [
+      "主要問題",
+      "事件",
+      "反應",
+      "事件"
+    ],
+    "layout": "worksheet_table"
+  }
+}

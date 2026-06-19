@@ -17,6 +17,7 @@ Splits the original monolithic learning.py (1,881 lines) into focused sub-module
 - mcq_rescue.py                    — MCQ rescue AI tutor endpoints (Issue #1387)
 - mcq_attempt.py                   — MCQ attempt telemetry endpoint (Issue #1507)
 - toolbox.py                       — Practice toolbox session endpoints (Issue #1463 / #1460)
+- learning_audio_replay.py         — Student reading audio signed-URL replay (Issue #2266)
 
 The composed router is re-exported as `router` so that main.py's existing
 `app.include_router(learning.router, prefix="/api")` continues to work unchanged.
@@ -35,12 +36,14 @@ from .learning_dashboard import router as dashboard_router
 # Re-export symbols that parents.py imports by name
 from .learning_dashboard import DashboardResponse, get_student_dashboard  # noqa: F401
 from .learning_vocab import router as vocab_router
+from .learning_strategy import router as strategy_router
 from .learning_exit_ticket import router as exit_ticket_router
 from .learning_reading_history import router as reading_history_router
 from .mcq_rescue import router as mcq_rescue_router
 from .mcq_attempt import router as mcq_attempt_router
 from .toolbox import router as toolbox_router
 from .learning_annotations import router as annotations_router
+from .learning_audio_replay import router as audio_replay_router
 
 router = APIRouter(tags=["learning"])
 
@@ -54,11 +57,13 @@ router.include_router(step_progress_router)
 router.include_router(recommendations_router)
 router.include_router(dashboard_router)
 router.include_router(vocab_router)
+router.include_router(strategy_router)
 router.include_router(exit_ticket_router)
 router.include_router(reading_history_router)
 router.include_router(mcq_rescue_router)
 router.include_router(mcq_attempt_router)
 router.include_router(toolbox_router)
 router.include_router(annotations_router)
+router.include_router(audio_replay_router)
 
 __all__ = ["router"]

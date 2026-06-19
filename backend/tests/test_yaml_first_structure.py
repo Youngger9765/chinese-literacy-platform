@@ -46,14 +46,69 @@ def test_two_cell_display_row():
 
 
 def test_two_cell_fill_blank_row():
-    """[label, value] with 【answer】 → fill_blank, hint extracted."""
+    """[label, value] with 【answer】 → fill_blank, answers stored for grading only."""
     table = [["結論", "生物不能【 自然產生 】，腐敗與【 微生物污染 】有關。"]]
     result = _format_yaml_structure_table(table)
     row = result["rows"][0]
     assert row["label"] == "結論"
     assert row["interactive_type"] == "fill_blank"
-    assert "hint" in row
-    assert row["hint"] == "自然產生"  # first blank extracted
+    assert row["hint"] == "自然產生"  # first blank extracted for server-side grading
+
+
+def test_sanitize_structure_strips_answers_from_client():
+    """GET response must not leak answers in value, hint, or blank_hints."""
+    from app.routes.stories import _sanitize_structure_for_client
+
+    table = [
+        ["小兵立大功：雞鳴狗盜的故事"],
+        ["問題", "秦昭王軟禁了孟嘗君。"],
+        ["解決", "問題1", "食客會模仿【 狗 】偷東西。"],
+    ]
+    full = _format_yaml_structure_table(table)
+    client = _sanitize_structure_for_client(full)
+
+    sub = client["rows"][2]["sub_rows"][0]
+    assert "hint" not in sub
+    assert "blank_hints" not in sub
+    assert "【 狗 】" not in sub["value"]
+    assert "【　　　】" in sub["value"]
+
+    ws_item = client["worksheet_rows"][1]["items"][0]
+    assert "【 狗 】" not in ws_item["value"]
+    profile = client["interaction_profile"]
+    assert profile["mode"] == "fill_blank"
+    assert profile["template_kind"] == "psr"
+    assert profile["fill_blank_count"] >= 1
+
+
+def test_interaction_profile_mixed_rows():
+    """story_structure_rows-style mixed fill_blank + checkbox."""
+    from app.routes.stories import _derive_interaction_profile
+
+    structure = {
+        "layout": "cards",
+        "rows": [
+            {"label": "主題", "value": "x", "interactive_type": "fill_blank"},
+            {"label": "事實", "value": "y", "interactive_type": "checkbox", "options": ["a", "b"]},
+        ],
+    }
+    profile = _derive_interaction_profile(structure)
+    assert profile["mode"] == "mixed"
+    assert profile["fill_blank_count"] == 1
+    assert profile["checkbox_count"] == 1
+    assert profile["template_kind"] == "theme_facts"
+
+
+def test_interaction_profile_display_only():
+    from app.routes.stories import _derive_interaction_profile
+
+    structure = {
+        "rows": [
+            {"label": "步驟", "value": "閱讀對照", "interactive_type": "display"},
+        ],
+    }
+    profile = _derive_interaction_profile(structure)
+    assert profile["mode"] == "display_only"
 
 
 def test_three_cell_sub_row():
@@ -118,12 +173,16 @@ def test_full_g7_l28_table():
 
 def test_lesson_without_structure_table_returns_none():
     """story_structure_table absent → get_lesson_by_id returns None for that field."""
-    from app.services.lesson_loader import get_lesson_by_id
-    # Lesson 1 (L01.yml) is the original 57-lesson set, has no story_structure_table
-    lesson = get_lesson_by_id(1)
-    if lesson is None:
-        pytest.skip("Lesson 1 not loaded in this environment")
-    # Should be None or absent (falls through to AI)
+    from app.services.lesson_loader import get_all_lessons, get_lesson_by_id
+
+    candidate_id = next(
+        (l["id"] for l in get_all_lessons() if l.get("story_structure_table") is None),
+        None,
+    )
+    if candidate_id is None:
+        pytest.skip("No lesson without story_structure_table in this environment")
+    lesson = get_lesson_by_id(candidate_id)
+    assert lesson is not None
     assert lesson.get("story_structure_table") is None
 
 

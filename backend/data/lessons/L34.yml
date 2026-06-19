@@ -188,49 +188,7 @@ strategy_exercise:
     type: free_text
   - prompt: 如果你們學校要舉辦運動會，請想一個落實環保3R的做法，並說明它屬於哪一個R
     type: free_text
-story_structure:
-- label: 結論
-  value: 中。不要把【 快樂
-story_structure_rows:
-- label: 主題
-  value: 綠色賽事
-  interactive_type: fill_blank
-  hint: 課文主要說明什麼？
-- label: 重要事實 1
-  value: 綠色賽事是將永續理念融入體育賽事中。
-  interactive_type: checkbox
-  hint: 綠色賽事是什麼？
-  options:
-  - 綠色賽事是強調為愛而跑的比賽。
-  - 綠色賽事是將永續理念融入體育賽事中。
-  - 綠色賽事是只在綠色場地舉辦的比賽。
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 綠色賽事落實環保3R：減少使用、物盡其用、循環回收。
-  interactive_type: checkbox
-  hint: 綠色賽事怎麼做？
-  options:
-  - 綠色賽事只使用再生材料。
-  - 綠色賽事落實環保3R：減少使用、物盡其用、循環回收。
-  - 綠色賽事只減少碳排放。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 實踐綠色賽事能減少資源消耗、喚起環保意識。
-  interactive_type: checkbox
-  hint: 綠色賽事有什麼好處？
-  options:
-  - 實踐綠色賽事能讓比賽更刺激。
-  - 實踐綠色賽事能減少資源消耗、喚起環保意識。
-  - 實踐綠色賽事能吸引更多參賽者。
-  correct_options:
-  - 1
-- label: 結論
-  value: 運動賽事應是健康快樂的活動，也是環境教育的好機會。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -266,3 +224,13 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L13.pdf
+story_structure_table:
+- - 綠色賽事
+- - 覺察問題
+  - "(1)阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【 環境汙染 】的運動賽事。\n(2)賽事規模越大，造成環境負擔也越大，許多人\n  【\
+    \ 憂心 】忡忡。"
+- - 具體做法
+  - "1.Reduce【 減少使用 】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【 物盡其用 】：重複使用器材與裝備。\n  例如：【 布置時不使用一次性的器材或物品；重複使用的環保杯\
+    \ 】。\n3.Recycle【 循環回收 】：使用再生能源與材料。例如，【 以回收玻璃製作獎盃；寶特瓶回收製成的環保球衣 】。"
+- - 結論
+  - 阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【 快樂 】帶走，卻把悲傷留給【 地球 】！

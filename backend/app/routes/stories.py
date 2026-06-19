@@ -3,6 +3,7 @@ Stories API — serves platform lessons from in-memory YAML data.
 No database dependency for platform content.
 """
 
+import copy
 import re
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
@@ -17,6 +18,7 @@ from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_avail
 from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
+from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -26,7 +28,14 @@ from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, Story
 
 _structure_cache: dict[str, tuple[float, object]] = {}
 _CACHE_TTL = 86400  # 24 hours
-_CACHE_VERSION = "v3"  # bump when schema changes to auto-invalidate
+_CACHE_VERSION = "v4"  # label_blanks + checkbox via cell_to_structure_fields
+
+_BLANK_RE = re.compile(r"【([^】]*)】")
+
+
+def _cell_to_row_dict(label: str, value: str) -> dict:
+    """Build a StructureRow dict from a label + value string."""
+    return cell_to_structure_fields(label, value)
 
 
 def _cache_key(story_id: str) -> str:
@@ -48,29 +57,109 @@ def _set_cached_structure(story_id: str, result):
 # YAML-first: convert story_structure_table → API response (no AI call)
 # ---------------------------------------------------------------------------
 
-_BLANK_RE = re.compile(r"【([^】]*)】")
+def _strip_blank_answers(text: str) -> str:
+    """Replace 【answer】 with empty blanks for student-facing display."""
+    return _BLANK_RE.sub("【　　　】", text)
 
 
-def _classify_cell(text: str) -> str:
-    """Return 'fill_blank' if the cell has 【…】 blanks, else 'display'."""
-    return "fill_blank" if _BLANK_RE.search(text) else "display"
+def _sanitize_row_for_client(row: dict) -> dict:
+    """Remove grading answers from a structure row before API response."""
+    out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
+    if out.get("interactive_type") == "fill_blank":
+        if out.get("blank_in_label") and out.get("label"):
+            out["label"] = _strip_blank_answers(out["label"])
+        if out.get("value"):
+            out["value"] = _strip_blank_answers(out["value"])
+    sub_rows = out.get("sub_rows")
+    if sub_rows:
+        out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
+    return out
 
 
-def _cell_to_row_dict(label: str, value: str) -> dict:
-    """Build a StructureRow dict from a label + value string."""
-    itype = _classify_cell(value)
-    row: dict = {
-        "label": label.strip(),
-        "value": value.strip(),
-        "interactive_type": itype,
+def _infer_structure_template_kind(title: str | None, labels: list[str]) -> str:
+    """Infer coach/demo template from table title + row labels."""
+    blob = " ".join([title or "", *labels])
+    if re.search(r"假說|驗證|步驟|探究", blob):
+        return "scientific"
+    if re.search(r"問題", blob) and re.search(r"解決|結果|影響|成效", blob):
+        return "psr"
+    if re.search(r"主題|事實|主角|事例|論點", blob):
+        return "theme_facts"
+    return "generic"
+
+
+def _derive_interaction_profile(structure: dict) -> dict:
+    """Summarize how students interact with this structure table.
+
+    Attached to GET /structure so the frontend demo/coach can branch without
+    re-deriving from rows. New table formats only need to populate rows with
+    interactive_type — profile fields stay stable.
+    """
+    fill_blank_count = 0
+    checkbox_count = 0
+    primary_labels: list[str] = []
+    section_labels: list[str] = []
+
+    def tally_row(row: dict) -> None:
+        nonlocal fill_blank_count, checkbox_count
+        itype = row.get("interactive_type")
+        label = str(row.get("label") or "").strip()
+        if itype == "fill_blank":
+            fill_blank_count += 1
+            if label:
+                primary_labels.append(label)
+        elif itype == "checkbox":
+            checkbox_count += 1
+            if label:
+                primary_labels.append(label)
+
+    for row in structure.get("rows") or []:
+        parent_label = str(row.get("label") or "").strip()
+        if parent_label:
+            section_labels.append(parent_label)
+        sub_rows = row.get("sub_rows") or []
+        if sub_rows:
+            for sub in sub_rows:
+                tally_row(sub)
+        else:
+            tally_row(row)
+
+    if fill_blank_count and checkbox_count:
+        mode = "mixed"
+    elif fill_blank_count:
+        mode = "fill_blank"
+    elif checkbox_count:
+        mode = "checkbox"
+    else:
+        mode = "display_only"
+
+    return {
+        "mode": mode,
+        "template_kind": _infer_structure_template_kind(
+            structure.get("title"),
+            primary_labels + section_labels,
+        ),
+        "fill_blank_count": fill_blank_count,
+        "checkbox_count": checkbox_count,
+        "primary_labels": primary_labels[:4],
+        "layout": structure.get("layout") or "cards",
     }
-    if itype == "fill_blank":
-        hints = [m.group(1).strip() for m in _BLANK_RE.finditer(value)]
-        if hints:
-            row["hint"] = hints[0]
-        if len(hints) > 1:
-            row["blank_hints"] = hints
-    return row
+
+
+def _sanitize_structure_for_client(structure: dict) -> dict:
+    """Return a deep copy of structure with answers stripped for student UI."""
+    result = copy.deepcopy(structure)
+    result["rows"] = [_sanitize_row_for_client(r) for r in result.get("rows", [])]
+    for ws in result.get("worksheet_rows") or []:
+        if ws.get("kind") == "pair":
+            ws["label"] = _strip_blank_answers(ws.get("label") or "")
+            ws["value"] = _strip_blank_answers(ws.get("value") or "")
+        elif ws.get("kind") == "section_block":
+            for item in ws.get("items") or []:
+                item["label"] = _strip_blank_answers(item.get("label") or "")
+                item["value"] = _strip_blank_answers(item.get("value") or "")
+    result["interaction_profile"] = _derive_interaction_profile(result)
+    return result
 
 
 def _parse_yaml_table_row(raw_row: list) -> dict | None:
@@ -371,6 +460,7 @@ def get_story(story_id: str):
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
+        spotlight_v2=story.get("spotlight_v2"),
         step_sequence=story.get("step_sequence"),
         # Plugin-pattern dispatch fields (#1404):
         reading_strategy_type=story.get("reading_strategy_type") or "general",
@@ -421,8 +511,35 @@ async def get_story_structure(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # ── YAML-first: use pre-stored structure data if available (#1377, #1398) ──
-    # Priority 1: story_structure_rows — AI-generated dict rows (full checkbox support)
+    # ── YAML-first: use pre-stored structure data if available (#1377, #1398, #2205) ──
+    # Priority 1: story_structure_table — DOCX/keypoints ground truth (preserves layout)
+    yaml_table = story.get("story_structure_table")
+    if yaml_table:
+        result = _format_yaml_structure_table(yaml_table)
+        # Store full structure (with answers) in cache for grading
+        _set_cached_structure(story_id, result)
+        log_ai_usage(
+            db,
+            endpoint=f"/stories/{story_id}/structure",
+            step="structure",
+            student_id=current_user.id,
+            story_id=story_id,
+            story_title=story["title"],
+            input_tokens=0,
+            output_tokens=0,
+            model="yaml",
+            latency_ms=0,
+            success=True,
+            model_version=None,
+            prompt_char_count=None,
+            response_char_count=None,
+            content_filtered=False,
+            cache_hit=True,
+            prompt_template_id="story_structure_yaml",
+        )
+        return _sanitize_structure_for_client(result)
+
+    # Priority 2: story_structure_rows — AI-generated dict rows (checkbox fallback)
     yaml_rows = story.get("story_structure_rows")
     if yaml_rows and isinstance(yaml_rows, list):
         result = {"rows": yaml_rows}
@@ -446,39 +563,12 @@ async def get_story_structure(
             cache_hit=True,
             prompt_template_id="story_structure_rows_yaml",
         )
-        return result
-
-    # Priority 2: story_structure_table — docx-parsed list-of-lists (ground truth)
-    yaml_table = story.get("story_structure_table")
-    if yaml_table:
-        result = _format_yaml_structure_table(yaml_table)
-        # Store in cache so grade endpoint can use it; log as zero-cost hit
-        _set_cached_structure(story_id, result)
-        log_ai_usage(
-            db,
-            endpoint=f"/stories/{story_id}/structure",
-            step="structure",
-            student_id=current_user.id,
-            story_id=story_id,
-            story_title=story["title"],
-            input_tokens=0,
-            output_tokens=0,
-            model="yaml",
-            latency_ms=0,
-            success=True,
-            model_version=None,
-            prompt_char_count=None,
-            response_char_count=None,
-            content_filtered=False,
-            cache_hit=True,
-            prompt_template_id="story_structure_yaml",
-        )
-        return result
+        return _sanitize_structure_for_client(result)
 
     # ── In-memory cache hit — return immediately without rate-limit quota ───
     cached = _get_cached_structure(story_id)
     if cached is not None:
-        return cached
+        return _sanitize_structure_for_client(cached)
 
     # ── Cache miss — enforce rate limit before calling AI ───────────────────
     rl_key = f"ai:{get_client_key(request)}"
@@ -516,7 +606,7 @@ async def get_story_structure(
         cache_hit=False,
         prompt_template_id="story_structure",
     )
-    return result
+    return _sanitize_structure_for_client(result)
 
 
 # ── ⑤ 文章重點表 批改 endpoint (#1082) ────────────────────────────────────────

@@ -1,0 +1,86 @@
+{
+  "rows": [
+    {
+      "label": "祝你好眠",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "青少年睡眠的需求?",
+      "value": "青少年每天需要【　　　】小時的睡眠。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "睡眠的【 好處 】",
+      "value": "1.修復身體：大腦會在睡眠中修補【　　　】，清除【　　　】。\n2.學得更好：大腦睡眠時會做【　　　】，將白天吸收的新知【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "睡眠不足產生的問題",
+      "value": "1.剝奪了身體【　　　】的時間，增加生病的風險。\n2.大腦反應變得【　　　】，出錯率高。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "大眾對睡眠的【 錯誤觀念 】(迷思)",
+      "value": "1.平日熬夜可利用假日補眠?\n生理時鐘不規律，會影響睡眠的品質。\n2.睡前喝酒能幫助入眠?\n睡覺時血液若有【　　　】，容易頻繁的醒來，降低睡眠品質。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "造成現代人睡眠不足的原因",
+      "value": "現代人因【　　　】的普及，流連於社群網站中而延後就寢。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "未來行動",
+      "value": "放下手中的3C產品，關掉煩擾的思緒，好好睡一覺。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "祝你好眠",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "青少年睡眠的需求?",
+      "value": "青少年每天需要【　　　】小時的睡眠。"
+    },
+    {
+      "kind": "pair",
+      "label": "睡眠的【　　　】",
+      "value": "1.修復身體：大腦會在睡眠中修補【　　　】，清除【　　　】。\n2.學得更好：大腦睡眠時會做【　　　】，將白天吸收的新知【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "睡眠不足產生的問題",
+      "value": "1.剝奪了身體【　　　】的時間，增加生病的風險。\n2.大腦反應變得【　　　】，出錯率高。"
+    },
+    {
+      "kind": "pair",
+      "label": "大眾對睡眠的【　　　】(迷思)",
+      "value": "1.平日熬夜可利用假日補眠?\n生理時鐘不規律，會影響睡眠的品質。\n2.睡前喝酒能幫助入眠?\n睡覺時血液若有【　　　】，容易頻繁的醒來，降低睡眠品質。"
+    },
+    {
+      "kind": "pair",
+      "label": "造成現代人睡眠不足的原因",
+      "value": "現代人因【　　　】的普及，流連於社群網站中而延後就寢。"
+    },
+    {
+      "kind": "pair",
+      "label": "未來行動",
+      "value": "放下手中的3C產品，關掉煩擾的思緒，好好睡一覺。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "青少年睡眠的需求?",
+      "睡眠的【 好處 】",
+      "睡眠不足產生的問題",
+      "大眾對睡眠的【 錯誤觀念 】(迷思)"
+    ],
+    "layout": "worksheet_table"
+  }
+}

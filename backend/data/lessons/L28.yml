@@ -173,62 +173,7 @@ strategy_exercise:
     answer: 1
   - prompt: 請你想一件最近遇到的不開心的事，試著用「至少……」「還好……」或「很好啊……」的句型來轉念，寫下來
     type: free_text
-story_structure:
-- label: 事例
-  sub_rows:
-  - label: 經過
-    value: 主 完全不能進食，只能喝一點 【 水好甜，好好喝 】 。 題 點水。 ： 紅 領 醫生建議放棄治療，接受安 有天會在天父那【 再見 】 。 帶 寧治療（面對死亡） 。 面對母親死亡的悲傷 轉換觀點 作者 打定主意【 開開心心 】陪媽 媽媽臨
-story_structure_rows:
-- label: 主角
-  value: 媽媽
-  interactive_type: fill_blank
-  hint: 課文主要人物
-- label: 主題
-  value: 轉換觀點，積極面對困境
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 樂觀、堅強、幽默
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發生的原因
-    options:
-    - 媽媽罹患惡性胃癌
-    - 媽媽因病無法進食
-    - 媽媽接受全胃切除手術
-    correct_options:
-    - 0
-    - 2
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發展的過程
-    options:
-    - 媽媽用黑色幽默面對病痛
-    - 媽媽用聖經話語鼓勵自己
-    - 媽媽堅持不接受安寧照護
-    correct_options:
-    - 0
-    - 1
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 事情最後的發展
-    options:
-    - 家人決定用喜氣的方式送別媽媽
-    - 家人因媽媽的離世感到悲傷
-    - 家人決定放棄治療
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -264,3 +209,40 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L19.pdf
+story_structure_table:
+- - 紅領帶
+- - 開頭
+  - 作者繫著【 紅領帶 】參加媽媽的【 告別式 】。
+- - 起因
+  - 作者媽媽得了惡性【 胃癌 】。
+- - 母親信念
+  - 落在【 百般試煉 】中，都要引以為大【 喜樂 】。
+- - 母親抗癌經過
+  - 母親遇到的試煉
+  - 轉換觀點
+- - 母親抗癌經過
+  - 沒有胃，無法躺著睡。
+  - 沒有胃，就不會【 胃痛 】。
+- - 母親抗癌經過
+  - 身體很__，只能坐在沙發上看電視。
+  - 生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【 虛弱 】
+- - 母親抗癌經過
+  - 完全不能進食，只能喝一點點水。
+  - 【 水好甜，好好喝 】。
+- - 母親抗癌經過
+  - 醫生建議放棄治療，接受安寧治療（面對死亡）。
+  - 有天會在天父那【 再見 】。
+- - 作者實踐母親信念
+  - 面對母親死亡的悲傷
+  - 轉換觀點
+- - 作者實踐母親信念
+  - 媽媽臨終了
+  - 打定主意【 開開心心 】陪媽媽最後一段。
+- - 作者實踐母親信念
+  - 媽媽__，作者很傷心。
+  - 感謝上帝結束媽媽在世界上的【 過世/死亡 】。【 勞苦 】
+- - 作者實踐母親信念
+  - 媽媽的葬禮
+  - 決定用開心的心情參加葬禮
+- - 影響
+  - 紅領帶提醒作者，即使困難已【 不可逆轉 】，我們還可以轉換自己的【 觀點 】。

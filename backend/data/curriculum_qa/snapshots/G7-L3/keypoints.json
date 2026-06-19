@@ -1,0 +1,95 @@
+{
+  "keypoints": {
+    "lesson": "G7-L3",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "項目對象",
+        "sub_rows": [
+          {
+            "sub_label": "__",
+            "template": "阿提米絲",
+            "blanks": [
+              {
+                "answer": "阿波羅",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "古希臘神話代表",
+        "sub_rows": [
+          {
+            "sub_label": "太陽神",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "月亮女神",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "【年代】",
+        "sub_rows": [
+          {
+            "sub_label": "1969年~1972年",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "2022年~2025年",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "【代表性別】",
+        "sub_rows": [
+          {
+            "sub_label": "男性",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "女性",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "【太空人的優勢】",
+        "sub_rows": [
+          {
+            "sub_label": "高大強壯",
+            "template": "1.消耗的飲食與氧氣__\n2.__環境中情緒與精神表現也比較__。",
+            "blanks": [
+              {
+                "answer": "較少",
+                "hint": ""
+              },
+              {
+                "answer": "幽閉",
+                "hint": ""
+              },
+              {
+                "answer": "穩定",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

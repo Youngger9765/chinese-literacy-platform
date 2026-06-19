@@ -145,63 +145,7 @@ strategy_exercise:
     answer: 1
   - prompt: 第三段提到「遇到一段意外的插曲」，這個「插曲」指的是什麼事？請用自己的話說明
     type: free_text
-story_structure:
-- label: 主角
-  value: 陳彥博
-- label: 主題
-  value: 限。
-story_structure_rows:
-- label: 主角
-  value: 陳彥博
-  interactive_type: fill_blank
-  hint: 課文中的主要人物
-- label: 主題
-  value: 堅持夢想，超越極限
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 永不放棄、勇敢追夢
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: 陳彥博罹患咽喉癌，身體虛弱。
-    interactive_type: checkbox
-    hint: 事情發生的原因
-    options:
-    - 陳彥博在一次重感冒後，一直咳痰且痰裡有血絲。
-    - 醫生建議陳彥博開刀治療咽喉癌。
-    - 陳彥博因訓練過度導致身體不適。
-    correct_options:
-    - 0
-    - 1
-  - label: 經過
-    value: 陳彥博手術後努力復健，恢復跑步。
-    interactive_type: checkbox
-    hint: 事情的發展過程
-    options:
-    - 陳彥博害怕手術後不能跑步，但仍接受手術。
-    - 親友勸他放棄賽事，但他堅持跑步。
-    - 陳彥博術後體力大不如前，肌肉強度也消失了。
-    correct_options:
-    - 0
-    - 1
-    - 2
-  - label: 結果
-    value: 陳彥博完成超馬夢想，超越極限。
-    interactive_type: checkbox
-    hint: 事情的最終結果
-    options:
-    - 陳彥博在五年內完成了世界七大洲、八大站的超級馬拉松。
-    - 陳彥博放棄了跑步，選擇了平靜的生活。
-    - 陳彥博因身體狀況不佳，未能再參加任何比賽。
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -237,3 +181,20 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L05.pdf
+story_structure_table:
+- - 穿越極限的跑者
+- - 主角
+  - 【 陳彥博 】
+- - 主題
+  - 陳彥博雖然遇到了身體的病痛，仍然不放棄，超越自己的極限。
+- - 事例
+  - 起因
+  - 他【 2011 】年罹患了(　□骨癌   咽喉癌  )，必須動手術。
+- - 事例
+  - 經過
+  - '他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難?(多選)
+
+    體力不足  肌肉強度不見  身邊親友的反對'
+- - 事例
+  - 結果
+  - 他在【 2016 】年完成了當初的超馬夢想。

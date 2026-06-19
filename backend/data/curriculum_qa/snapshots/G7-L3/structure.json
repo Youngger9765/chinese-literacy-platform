@@ -1,0 +1,130 @@
+{
+  "rows": [
+    {
+      "label": "項目對象",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "__",
+          "value": "阿提米絲【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "古希臘神話代表",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "太陽神",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "【年代】",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "1969年~1972年",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "【代表性別】",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "男性",
+          "value": "【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "【太空人的優勢】",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "高大強壯",
+          "value": "1.消耗的飲食與氧氣【　　　】\n2.【　　　】環境中情緒與精神表現也比較【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "項目對象",
+      "items": [
+        {
+          "label": "__",
+          "value": "阿提米絲【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "古希臘神話代表",
+      "items": [
+        {
+          "label": "太陽神",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "【年代】",
+      "items": [
+        {
+          "label": "1969年~1972年",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "【代表性別】",
+      "items": [
+        {
+          "label": "男性",
+          "value": "【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "【太空人的優勢】",
+      "items": [
+        {
+          "label": "高大強壯",
+          "value": "1.消耗的飲食與氧氣【　　　】\n2.【　　　】環境中情緒與精神表現也比較【　　　】。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "__",
+      "太陽神",
+      "1969年~1972年",
+      "男性"
+    ],
+    "layout": "worksheet_table"
+  }
+}

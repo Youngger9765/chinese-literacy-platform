@@ -1,0 +1,147 @@
+{
+  "rows": [
+    {
+      "label": "好心沒好報的玻璃娃娃爭議事件",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "事故概要",
+      "value": "陳同學好心協助玻璃娃娃顏同學下樓，不幸發生意外摔倒，顏同學當晚因顱內出血死亡，隨後顏家對學校與陳同學提告、要求賠償，引起社會爭議。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主要爭議請在□打勾（單選）",
+      "value": "陳同學是否有過失責任？\n □顏旭男是否應該上體育課？\n □學校是否應該設立無障礙設施？",
+      "interactive_type": "display"
+    },
+    {
+      "label": "法院判決請在□打勾（單選）",
+      "value": "一審判決 二審判決 三審判決",
+      "interactive_type": "display"
+    },
+    {
+      "label": "法院判決請在□打勾（單選）",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "陳\n同學",
+          "value": "不用賠償\n□需要賠償 □不用賠償\n需要賠償 不用賠償\n□需要賠償",
+          "interactive_type": "display"
+        },
+        {
+          "label": "學校",
+          "value": "不用賠償\n□需要賠償 □不用賠償\n需要賠償 □不用賠償\n需要賠償",
+          "interactive_type": "display"
+        },
+        {
+          "label": "顏父",
+          "value": "應負20%過失。",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "法官理由",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "1.陳同學已發揮\n__他人的美德。\n2.家長延誤就醫可能導致顏同學離世原因。",
+          "value": "1.陳同學應先考量自身能力，因\n【　　　】導致意外，應負責任。\n2.學校未提供\n【　　　】及個別化體育教學。 1.陳同學已盡力保護顏同學。\n2.學校未提供無障礙設施及個別化體育教學。\n3.顏爸爸\n【　　　】。【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "學生對判決的回應",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "雅柔：感同身受顏家的悲痛，若此事「沒人需負責」，對家屬也不公平。",
+          "value": "承熹：助人卻被法院處罰，實在令人氣餒。 語菲：最高法院判決最合理，此判決也避免社會大眾不敢主動助人。",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "總結請在□打勾(多選)",
+      "value": "老師希望透過這次討論讓學生學到什麼？\n 助人時應先考量自己的能力。\n 理解社會中兩難問題的複雜性。\n □證明幫助別人一定會有好報。\n 讓學生了解助人過程中可能遇到的風險與挑戰。",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "好心沒好報的玻璃娃娃爭議事件",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "事故概要",
+      "value": "陳同學好心協助玻璃娃娃顏同學下樓，不幸發生意外摔倒，顏同學當晚因顱內出血死亡，隨後顏家對學校與陳同學提告、要求賠償，引起社會爭議。"
+    },
+    {
+      "kind": "pair",
+      "label": "主要爭議請在□打勾（單選）",
+      "value": "陳同學是否有過失責任？\n □顏旭男是否應該上體育課？\n □學校是否應該設立無障礙設施？"
+    },
+    {
+      "kind": "pair",
+      "label": "法院判決請在□打勾（單選）",
+      "value": "一審判決 二審判決 三審判決"
+    },
+    {
+      "kind": "section_block",
+      "section": "法院判決請在□打勾（單選）",
+      "items": [
+        {
+          "label": "陳\n同學",
+          "value": "不用賠償\n□需要賠償 □不用賠償\n需要賠償 不用賠償\n□需要賠償"
+        },
+        {
+          "label": "學校",
+          "value": "不用賠償\n□需要賠償 □不用賠償\n需要賠償 □不用賠償\n需要賠償"
+        },
+        {
+          "label": "顏父",
+          "value": "應負20%過失。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "法官理由",
+      "items": [
+        {
+          "label": "1.陳同學已發揮\n__他人的美德。\n2.家長延誤就醫可能導致顏同學離世原因。",
+          "value": "1.陳同學應先考量自身能力，因\n【　　　】導致意外，應負責任。\n2.學校未提供\n【　　　】及個別化體育教學。 1.陳同學已盡力保護顏同學。\n2.學校未提供無障礙設施及個別化體育教學。\n3.顏爸爸\n【　　　】。【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "學生對判決的回應",
+      "items": [
+        {
+          "label": "雅柔：感同身受顏家的悲痛，若此事「沒人需負責」，對家屬也不公平。",
+          "value": "承熹：助人卻被法院處罰，實在令人氣餒。 語菲：最高法院判決最合理，此判決也避免社會大眾不敢主動助人。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "總結請在□打勾(多選)",
+      "value": "老師希望透過這次討論讓學生學到什麼？\n 助人時應先考量自己的能力。\n 理解社會中兩難問題的複雜性。\n □證明幫助別人一定會有好報。\n 讓學生了解助人過程中可能遇到的風險與挑戰。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 1,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "1.陳同學已發揮\n__他人的美德。\n2.家長延誤就醫可能導致顏同學離世原因。"
+    ],
+    "layout": "worksheet_table"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "rows": [
+    {
+      "label": "穿越極限的跑者",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主角",
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "主題",
+      "value": "陳彥博雖然遇到了身體的病痛，仍然不放棄，超越自己的極限。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "事例",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "起因",
+          "value": "他【　　　】年罹患了(　□骨癌   咽喉癌  )，必須動手術。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "經過",
+          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難?(多選)\n體力不足  肌肉強度不見  身邊親友的反對",
+          "interactive_type": "display"
+        },
+        {
+          "label": "結果",
+          "value": "他在【　　　】年完成了當初的超馬夢想。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "穿越極限的跑者",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "陳彥博雖然遇到了身體的病痛，仍然不放棄，超越自己的極限。"
+    },
+    {
+      "kind": "section_block",
+      "section": "事例",
+      "items": [
+        {
+          "label": "起因",
+          "value": "他【　　　】年罹患了(　□骨癌   咽喉癌  )，必須動手術。"
+        },
+        {
+          "label": "經過",
+          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難?(多選)\n體力不足  肌肉強度不見  身邊親友的反對"
+        },
+        {
+          "label": "結果",
+          "value": "他在【　　　】年完成了當初的超馬夢想。"
+        }
+      ]
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 3,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "主角",
+      "起因",
+      "結果"
+    ],
+    "layout": "worksheet_table"
+  }
+}

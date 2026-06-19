@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { ShieldIcon, UsersIcon } from '../../../components/icons';
-import { StoriesIcon, TtsAuditIcon } from './AdminTreeIcons';
+import { StoriesIcon, TtsAuditIcon, StructureLabIcon } from './AdminTreeIcons';
 import type { TreeNodeSelection } from '../AdminTreeSidebar';
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -42,6 +42,22 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         </span>
       </button>
 
+
+      {/* Story Structure Lab */}
+      <button
+        onClick={() => onSelectNode({ type: 'story_structure_lab', id: 'story_structure_lab' })}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+          isSelected(selectedNode, 'story_structure_lab', 'story_structure_lab')
+            ? 'bg-sky-50 text-sky-700'
+            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        }`}
+      >
+        <StructureLabIcon className={isSelected(selectedNode, 'story_structure_lab', 'story_structure_lab') ? 'text-sky-500' : ''} />
+        <span className={`text-sm ${isSelected(selectedNode, 'story_structure_lab', 'story_structure_lab') ? 'font-semibold' : ''}`}>
+          文章重點表 Lab
+        </span>
+      </button>
+
       {/* TTS Audit */}
       <button
         onClick={() => onSelectNode({ type: 'tts_audit', id: 'tts_audit' })}
@@ -54,6 +70,21 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         <TtsAuditIcon className={`shrink-0 ${isSelected(selectedNode, 'tts_audit', 'tts_audit') ? 'text-violet-500' : ''}`} />
         <span className={`text-sm ${isSelected(selectedNode, 'tts_audit', 'tts_audit') ? 'font-semibold' : ''}`}>
           TTS 句子稽核
+        </span>
+      </button>
+
+      {/* Keypoints QA */}
+      <button
+        onClick={() => onSelectNode({ type: 'keypoints_qa', id: 'keypoints_qa' })}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+          isSelected(selectedNode, 'keypoints_qa', 'keypoints_qa')
+            ? 'bg-sky-50 text-sky-700'
+            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        }`}
+      >
+        <span className={`text-sm shrink-0 w-4 text-center ${isSelected(selectedNode, 'keypoints_qa', 'keypoints_qa') ? 'text-sky-500' : ''}`}>表</span>
+        <span className={`text-sm ${isSelected(selectedNode, 'keypoints_qa', 'keypoints_qa') ? 'font-semibold' : ''}`}>
+          重點表 QA
         </span>
       </button>
 

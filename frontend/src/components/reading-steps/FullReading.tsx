@@ -19,10 +19,8 @@ import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssess
 import FullReadingControls, { type ControlState } from './full-reading/FullReadingControls';
 import FullReadingScoreCard from './full-reading/FullReadingScoreCard';
 import FullReadingFeedbackPanel from './full-reading/FullReadingFeedbackPanel';
-// Note: liveTranscriptEnhance / enhanceLiveTranscript intentionally NOT imported here.
-// I3 (Issue #2156): live preview must show raw Web Speech gray text only.
-// Instant punctuation re-insertion causes visible flicker on every STT partial result.
-// Gemini adds accurate punctuation post-submission — no need to fake it live.
+// Note: Web Speech removed (Issue #2266) — streaming transcript not available during recording.
+// Live preview area will be empty until Gemini STT returns post-submission.
 
 /* ------------------------------------------------------------------ */
 
@@ -38,6 +36,8 @@ interface FullReadingProps {
   initialProgress?: FullReadingStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: FullReadingStepData, immediate?: boolean) => void;
+  /** DB LearningSession integer id — used to bind uploaded audio to the attempt row (Issue #2266). */
+  dbSessionId?: number | null;
 }
 
 const FullReading: React.FC<FullReadingProps> = ({
@@ -48,6 +48,7 @@ const FullReading: React.FC<FullReadingProps> = ({
   fullReadingAttempts = [],
   initialProgress,
   onProgressChange,
+  dbSessionId,
 }) => {
   const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
@@ -99,6 +100,52 @@ const FullReading: React.FC<FullReadingProps> = ({
 
   const aiRating = aiFluencyInsight?.rating;
 
+  /* ---- Issue #2266: In-memory audio replay (same-session) ---- */
+  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
+  const replayAudioRef = useRef<HTMLAudioElement | null>(null);
+  const replayObjectUrlRef = useRef<string | null>(null);
+
+  const handleReplayAudio = useCallback(() => {
+    const blob = audioRecorder.audioBlob;
+    if (!blob) return;
+
+    // Clean up any existing replay
+    if (replayAudioRef.current) {
+      replayAudioRef.current.pause();
+      replayAudioRef.current = null;
+    }
+    if (replayObjectUrlRef.current) {
+      URL.revokeObjectURL(replayObjectUrlRef.current);
+      replayObjectUrlRef.current = null;
+    }
+
+    const url = URL.createObjectURL(blob);
+    replayObjectUrlRef.current = url;
+    const audio = new Audio(url);
+    replayAudioRef.current = audio;
+
+    audio.onended = () => {
+      setIsPlayingReplay(false);
+      URL.revokeObjectURL(url);
+      replayObjectUrlRef.current = null;
+      replayAudioRef.current = null;
+    };
+    audio.onerror = () => setIsPlayingReplay(false);
+
+    setIsPlayingReplay(true);
+    audio.play().catch(() => setIsPlayingReplay(false));
+  }, [audioRecorder.audioBlob]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      replayAudioRef.current?.pause();
+      if (replayObjectUrlRef.current) {
+        URL.revokeObjectURL(replayObjectUrlRef.current);
+      }
+    };
+  }, []);
+
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
   const vocabWords = useMemo(
@@ -145,6 +192,7 @@ const FullReading: React.FC<FullReadingProps> = ({
     fullText,
     token,
     storyId: story.id,
+    dbSessionId: dbSessionId ?? null,
     stopTtsAll,
     onResultReady: useCallback((newResult: SavedResult, transcript: string) => {
       setResult(newResult);
@@ -372,6 +420,21 @@ const FullReading: React.FC<FullReadingProps> = ({
                 targetText={fullText}
                 paragraphs={story.content}
               />
+
+              {/* ── Issue #2266: In-memory audio replay button ──────────── */}
+              {audioRecorder.audioBlob && (
+                <div className="flex justify-center mt-2 mb-1">
+                  <button
+                    type="button"
+                    onClick={handleReplayAudio}
+                    disabled={isPlayingReplay}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 text-sm font-medium text-accent hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="聽我的朗讀錄音"
+                  >
+                    <span>{isPlayingReplay ? '▶ 播放中…' : '▶ 聽錄音'}</span>
+                  </button>
+                </div>
+              )}
 
               {/* 正確率 + 語速 metrics card (Issue #1505) */}
               <ReadingMetricsCard

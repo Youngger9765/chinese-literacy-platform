@@ -186,57 +186,7 @@ strategy_exercise:
     type: free_text
   - prompt: 除了「人數平等」，文章提到奧運在性別平等上還有哪些仍需努力的地方？請舉一個例子
     type: free_text
-story_structure:
-- label: 主題
-  value: 奧運性別平等的發展與現況
-- label: 重要事實 1
-  value: 女性參與奧運從被排除到逐漸增加，歷經百年。
-- label: 重要事實 2
-  value: 2024年巴黎奧運首次達成男女選手1:1的里程碑。
-- label: 重要事實 3
-  value: 巴黎奧運推出多項措施，提升女性在運動中的地位。
-- label: 結論
-  value: 奧運是檢視性別平等的舞臺，但仍有進步空間。
-story_structure_rows:
-- label: 主題
-  value: 奧運性別平等這條路
-  interactive_type: fill_blank
-  hint: 課文主要在說什麼？
-- label: 重要事實 1
-  value: 1900年巴黎奧運首度有女性參加
-  interactive_type: checkbox
-  hint: 女性參賽的開端
-  options:
-  - 古希臘奧運女性可觀賽
-  - 1900年巴黎奧運首度有女性參加
-  - 古柏坦支持女性參賽
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 2024年巴黎奧運達成男女選手1:1
-  interactive_type: checkbox
-  hint: 性別比例的里程碑
-  options:
-  - 1948年奧運女性參賽率達一成
-  - 2004年奧運女性參賽率達50%
-  - 2024年巴黎奧運達成男女選手1:1
-  correct_options:
-  - 2
-- label: 重要事實 3
-  value: 2024年巴黎奧運提供哺乳室
-  interactive_type: checkbox
-  hint: 性別平等的措施
-  options:
-  - 奧運選手村禁止女性運動員
-  - 奧運媒體村街道以男性命名
-  - 2024年巴黎奧運提供哺乳室
-  correct_options:
-  - 2
-- label: 結論
-  value: 奧運是實現與檢視全球性別平等的最大舞臺
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -271,3 +221,19 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 奧運性別平等這條路
+- - 2024年巴黎奧運和東京奧運相比：朝著【 性別平等 】的目標更邁進一步。
+  - ''
+- - 2024年巴黎奧運重要措施
+  - 目的
+- - 為哺乳期運動員設置【 哺乳室 】
+  - 讓「母親」也可以同時是「頂尖運動員」。
+- - 媒體村街道以傑出女性【 命名 】
+  - 提高女性在公共空間中的知名度，彰顯女性在社會的重要性。
+- - 提高女性【 時事評論員 】比例
+  - 讓運動相關產業不再侷限於男性，女性也能有一展長才的機會。
+- - 未來努力的方向：往性別文化平等邁進
+  - ''
+- - 仍待解決的問題：1.女性運動員的【 努力/成就 】被忽略：女性運動員的外表和身材常常比實力更受關注。2.女子運動員的地位仍然□高於低於男性運動，特別是在大型職業運動中，男性運動員仍佔主導地位。(單選)
+  - ''

@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "lesson_id": "G6-L22",
+      "strategy_type": "summary_pse",
+      "block_count": 29,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 15,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {
+          "pass": true,
+          "failures": [],
+          "fingerprint": {
+            "role_histogram": {
+              "bridge": 1,
+              "exercise": 16,
+              "guide": 4,
+              "meta": 1,
+              "passage": 4,
+              "section": 3
+            },
+            "role_sequence": [
+              "guide",
+              "guide",
+              "guide",
+              "guide",
+              "passage",
+              "exercise",
+              "exercise",
+              "exercise",
+              "exercise",
+              "bridge",
+              "passage",
+              "exercise",
+              "exercise",
+              "exercise",
+              "exercise",
+              "section",
+              "section",
+              "passage",
+              "exercise",
+              "exercise",
+              "exercise",
+              "exercise",
+              "section",
+              "passage",
+              "exercise",
+              "exercise",
+              "exercise",
+              "exercise",
+              "meta"
+            ],
+            "interaction_sequence": [
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "fill_blank",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one",
+              "select_one"
+            ],
+            "guide_count": 4,
+            "passage_count": 4,
+            "exercise_count": 16,
+            "section_count": 3
+          },
+          "answers": {
+            "pass": true,
+            "failures": []
+          },
+          "segments": {
+            "pass": true,
+            "failures": []
+          }
+        }
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "fill_table": 1,
+        "free_text": 1,
+        "guide": 8,
+        "passage": 4,
+        "single": 15
+      }
+    },
+    {
+      "lesson_id": "G6-L23",
+      "strategy_type": "summary_pse",
+      "block_count": 43,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 2,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "fill_table": 1,
+        "free_text": 13,
+        "guide": 20,
+        "passage": 6,
+        "self_check": 1,
+        "single": 2
+      }
+    },
+    {
+      "lesson_id": "G6-L24",
+      "strategy_type": "summary_pse",
+      "block_count": 10,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 3,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "fill_table": 1,
+        "guide": 5,
+        "self_check": 1,
+        "single": 3
+      }
+    },
+    {
+      "lesson_id": "G6-L25",
+      "strategy_type": "summary_pse",
+      "block_count": 7,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 3,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "fill_table": 1,
+        "guide": 2,
+        "self_check": 1,
+        "single": 3
+      }
+    },
+    {
+      "lesson_id": "G7-L28",
+      "strategy_type": "image_text",
+      "block_count": 40,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 5,
+          "mcq_option_guides": 4,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "figure": 1,
+        "fill_table": 1,
+        "free_text": 7,
+        "guide": 22,
+        "passage": 3,
+        "self_check": 1,
+        "single": 5
+      }
+    },
+    {
+      "lesson_id": "G7-L29",
+      "strategy_type": "image_text",
+      "block_count": 68,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 24,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "figure": 5,
+        "free_text": 6,
+        "guide": 32,
+        "self_check": 1,
+        "single": 24
+      }
+    },
+    {
+      "lesson_id": "G7-L30",
+      "strategy_type": "table_text",
+      "block_count": 52,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 19,
+          "mcq_option_guides": 2,
+          "semantic_pass": true,
+          "semantic_errors": []
+        },
+        "acceptance": {}
+      },
+      "gold": {
+        "match": true,
+        "diffs": {}
+      },
+      "type_histogram": {
+        "figure": 5,
+        "free_text": 4,
+        "guide": 21,
+        "passage": 2,
+        "self_check": 1,
+        "single": 19
+      }
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  }
+}

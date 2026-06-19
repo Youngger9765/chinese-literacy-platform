@@ -1,0 +1,96 @@
+{
+  "rows": [
+    {
+      "label": "救援大隊的好幫手",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "主角",
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "特徵",
+      "value": "1.體型如小貓。\n2.嗅覺與聽力【　　　】及天生的鑽洞能力。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "救援任務",
+      "value": "1.巨鼠要在地震廢墟中尋找【　　　】。\n2.巨鼠身上裝備有麥克風、攝影機、定位追蹤器。\n3.巨鼠發現倖存者後，拉扯警報器發出【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "優勢",
+      "value": "相較於狗，非洲巨鼠有哪些優勢？（多選）\n1.能與多位訓練員合作\n2.體型小，可以進入狗無法進入的地方\n□3.比狗的嗅覺更靈敏\n4.訓練與飼養成本較低\n□5.比狗更容易訓練",
+      "interactive_type": "display"
+    },
+    {
+      "label": "潛在問題",
+      "value": "巨鼠可能會嚇壞瓦礫中的倖存者。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "科學家的對策",
+      "value": "為了解決人們對巨鼠的恐懼，科學家採取了哪些方法？\n（多選）\n1.透過媒體宣傳巨鼠的救援能力。\n□2.平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。\n3.在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。\n□4.在巨鼠背上貼上「我是救援鼠」的標語提醒人類。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "結論",
+      "value": "巨鼠是【　　　】的重要夥伴。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "救援大隊的好幫手",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "特徵",
+      "value": "1.體型如小貓。\n2.嗅覺與聽力【　　　】及天生的鑽洞能力。"
+    },
+    {
+      "kind": "pair",
+      "label": "救援任務",
+      "value": "1.巨鼠要在地震廢墟中尋找【　　　】。\n2.巨鼠身上裝備有麥克風、攝影機、定位追蹤器。\n3.巨鼠發現倖存者後，拉扯警報器發出【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "優勢",
+      "value": "相較於狗，非洲巨鼠有哪些優勢？（多選）\n1.能與多位訓練員合作\n2.體型小，可以進入狗無法進入的地方\n□3.比狗的嗅覺更靈敏\n4.訓練與飼養成本較低\n□5.比狗更容易訓練"
+    },
+    {
+      "kind": "pair",
+      "label": "潛在問題",
+      "value": "巨鼠可能會嚇壞瓦礫中的倖存者。"
+    },
+    {
+      "kind": "pair",
+      "label": "科學家的對策",
+      "value": "為了解決人們對巨鼠的恐懼，科學家採取了哪些方法？\n（多選）\n1.透過媒體宣傳巨鼠的救援能力。\n□2.平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。\n3.在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。\n□4.在巨鼠背上貼上「我是救援鼠」的標語提醒人類。"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "巨鼠是【　　　】的重要夥伴。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "主角",
+      "特徵",
+      "救援任務",
+      "結論"
+    ],
+    "layout": "worksheet_table"
+  }
+}

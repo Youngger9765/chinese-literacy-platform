@@ -166,57 +166,7 @@ strategy_exercise:
     answer: 1
   - prompt: 請你也用倒反法寫一句話，描述一個同學在體育課跌倒的情境（要有趣但不傷人）
     type: free_text
-story_structure:
-- label: 主題
-  value: 運動傷害的處理與預防
-- label: 重要事實 1
-  value: 運動前暖身很重要，可降低受傷風險。
-- label: 重要事實 2
-  value: 運動傷害發生時，可記住PEACE五步驟。
-- label: 重要事實 3
-  value: 抽筋原因：流汗多電解質失衡、肌肉疲勞。
-- label: 結論
-  value: 了解運動傷害處理，保護自己與他人。
-story_structure_rows:
-- label: 主題
-  value: 運動傷害的處理與預防
-  interactive_type: fill_blank
-  hint: 課文主要在說什麼？
-- label: 重要事實 1
-  value: 運動前暖身很重要，至少要佔運動時間的十分之一。
-  interactive_type: checkbox
-  hint: 關於暖身
-  options:
-  - 暖身時間越長越好，沒有限制。
-  - 暖身可以增加關節靈活度、提高心肺功能。
-  - 暖身只對專業運動員有用。
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 運動時流汗過多會導致電解質不平衡，容易抽筋。
-  interactive_type: checkbox
-  hint: 關於抽筋
-  options:
-  - 抽筋是因為肌肉太用力。
-  - 抽筋是因為身體電解質不平衡和肌肉疲勞。
-  - 抽筋是因為沒有喝水。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 運動傷害發生時，PEACE原則是基本的處置方式。
-  interactive_type: checkbox
-  hint: 傷害處理原則
-  options:
-  - PEACE原則包含保護、抬高、避免、壓迫、教育。
-  - PEACE原則只適用於腳踝扭傷。
-  - PEACE原則的第一步是冰敷。
-  correct_options:
-  - 0
-- label: 結論
-  value: 運動前做好暖身，運動傷害發生時，可依PEACE原則處理。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -251,3 +201,21 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 運動傷害，怎麼辦？
+- - 如何預防
+  - 1.不管是哪一種運動，都要先做好【 暖身 】運動。
+- - 如何預防
+  - '2.正確的暖身時間至少要佔整個運動時間的【 十分之一 】，
+
+    主要目的是什麼？（多選）
+
+    增加關節的靈活性　　提升體溫　
+
+    促進肌肉收放效能    提高心肺功能'
+- - 受傷時的處理
+  - '3.受傷後可以如何處理？（多選）
+
+    避免　　壓迫　　保護　　教育　　抬高'
+- - 受傷時的處理
+  - "4.若不幸自己或他人意外受傷，可以怎麼做？(多選)\n找老師／防護員求助       態度冷靜  \n依ＰＥＡＣＥ五步驟處置"

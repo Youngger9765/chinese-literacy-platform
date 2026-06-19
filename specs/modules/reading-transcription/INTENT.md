@@ -6,7 +6,9 @@ stability: active
 canonical_source: backend/app/services/reading_transcription_service.py
 owns_code:
   - backend/app/services/reading_transcription_service.py
+  - backend/app/services/audio_upload_service.py
   - backend/app/routes/learning/learning_reading.py
+  - backend/app/routes/learning/learning_audio_replay.py
   - frontend/src/hooks/useAudioRecorder.ts
   - frontend/src/hooks/useFullReadingSession.ts
   - frontend/src/components/reading-steps/FullReading.tsx
@@ -15,9 +17,13 @@ owns_code:
 owns_data: []
 spec_tests:
   - backend/specs/test_reading_transcription_spec.py
+  - backend/tests/test_reading_audio_upload.py
+  - backend/tests/test_reading_audio_replay_student.py
 related_issues:
   - 2131
   - 2156
+  - 2266
+  - 2266-audio-replay
 source_meetings: []
 last_reviewed: 2026-06-09
 owner: young
@@ -134,6 +140,29 @@ Frontend scoring:
 | C3 | Gemini success → `{method: "gemini", transcript: str (non-empty), reasoning: str}` |
 | C4 | Unsupported MIME → HTTP 415 (route gate); empty audio → HTTP 400; never HTTP 500 on AI error |
 | C5 | Route has auth (`get_current_user`), rate-limit (`ai_limit`), and size caps (`_MAX_AUDIO_BYTES`, `_MAX_TARGET_CHARS`) |
+| C6 | After transcription completes (success or graceful fallback — not on unhandled exception), audio bytes are uploaded to GCS via BackgroundTasks (fire-and-forget). Upload never blocks the response, never sets public ACL, and silently skips if READING_AUDIO_GCS_BUCKET env is unset. |
+
+---
+
+---
+
+## Audio Replay (Issue #2266 PR1)
+
+After transcription, the audio file is uploaded to GCS and the blob path is stored in
+`ReadingAttemptHistory.audio_gcs_path`.  Students can request a signed URL via:
+
+```
+GET /api/learning/sessions/{session_id}/reading-audio/{attempt_id}
+```
+
+The endpoint (`learning_audio_replay.py`) validates session ownership, fetches the attempt,
+generates a 10-minute V4 signed URL via `generate_audio_signed_url()`, and returns
+`{signed_url, expires_in: 600}`.
+
+Security invariants:
+- Only the session owner (student) may call the endpoint.
+- The bucket stays private; no public ACL is ever set.
+- Signed URLs expire after 10 minutes and are never cached server-side.
 
 ---
 

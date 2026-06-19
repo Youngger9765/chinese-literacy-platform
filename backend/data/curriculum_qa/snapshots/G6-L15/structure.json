@@ -1,0 +1,96 @@
+{
+  "rows": [
+    {
+      "label": "小藍鯨之死",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "時間",
+      "value": "【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "地點",
+      "value": "【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "事件",
+      "value": "巨大鯨魚【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "死者",
+      "value": "未滿兩歲，還在生長期的幼年藍鯨。",
+      "interactive_type": "display"
+    },
+    {
+      "label": "死因",
+      "value": "因頭骨兩側被繩索纏繞，長期無法進食，最終【　　　】。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "後續行動",
+      "value": "1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的\n【　　　】與研究典藏。\n2.屏東海生館以巨鯨之路為名，向國人展現其【　　　】。\n3.展廳也展示造成小藍鯨死亡的凶器，藉此提醒大家\n【　　　】是大型鯨類和海洋生物的威脅。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "省思",
+      "value": "小藍鯨的死亡也提醒人們要有反省及行動，\n為【　　　】盡一份心力。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "小藍鯨之死",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "時間",
+      "value": "【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "地點",
+      "value": "【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "事件",
+      "value": "巨大鯨魚【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "死者",
+      "value": "未滿兩歲，還在生長期的幼年藍鯨。"
+    },
+    {
+      "kind": "pair",
+      "label": "死因",
+      "value": "因頭骨兩側被繩索纏繞，長期無法進食，最終【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "後續行動",
+      "value": "1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的\n【　　　】與研究典藏。\n2.屏東海生館以巨鯨之路為名，向國人展現其【　　　】。\n3.展廳也展示造成小藍鯨死亡的凶器，藉此提醒大家\n【　　　】是大型鯨類和海洋生物的威脅。"
+    },
+    {
+      "kind": "pair",
+      "label": "省思",
+      "value": "小藍鯨的死亡也提醒人們要有反省及行動，\n為【　　　】盡一份心力。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 6,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "時間",
+      "地點",
+      "事件",
+      "死因"
+    ],
+    "layout": "worksheet_table"
+  }
+}

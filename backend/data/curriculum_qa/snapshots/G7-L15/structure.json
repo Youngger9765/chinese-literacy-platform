@@ -1,0 +1,89 @@
+{
+  "rows": [
+    {
+      "label": "看到了嗎？然後呢？",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "人物一】福爾摩斯【",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "特質與 \n支持理由",
+          "value": "1.特質：有敏銳的【　　　】及能洞察一切的【　　　】。\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n❶由帽子是三年前的流行款，用料高級可知，帽主至少三年前【　　　】\n❷由帽子內襯中的灰白髮絲及髮膏味可知，帽主可能【　　　】\n❸由壞掉的鬆緊帶、補丁處有墨水染黑的痕跡可知，帽主如今家道中落，但仍力圖【　　　】。",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "成功推理要素",
+          "value": "1.對事物要【　　　】。\n2.要能掌握【　　　】。\n3.平時養成【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "人物二】王戎【",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "特質與 \n支持理由",
+          "value": "1.特質：厲害的觀察和推理能力\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n 答：他觀察到【　　　】的李子樹【　　　】卻不去採，因為他推論樹上的李子肯定【　　　】。",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "結論",
+      "value": "試著培養敏銳的【　　　】及【　　　】能力，會讓你有不同的視野。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "看到了嗎？然後呢？",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "人物一】福爾摩斯【",
+      "items": [
+        {
+          "label": "特質與 \n支持理由",
+          "value": "1.特質：有敏銳的【　　　】及能洞察一切的【　　　】。\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n❶由帽子是三年前的流行款，用料高級可知，帽主至少三年前【　　　】\n❷由帽子內襯中的灰白髮絲及髮膏味可知，帽主可能【　　　】\n❸由壞掉的鬆緊帶、補丁處有墨水染黑的痕跡可知，帽主如今家道中落，但仍力圖【　　　】。"
+        },
+        {
+          "label": "成功推理要素",
+          "value": "1.對事物要【　　　】。\n2.要能掌握【　　　】。\n3.平時養成【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "人物二】王戎【",
+      "items": [
+        {
+          "label": "特質與 \n支持理由",
+          "value": "1.特質：厲害的觀察和推理能力\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n 答：他觀察到【　　　】的李子樹【　　　】卻不去採，因為他推論樹上的李子肯定【　　　】。"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "試著培養敏銳的【　　　】及【　　　】能力，會讓你有不同的視野。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "特質與 \n支持理由",
+      "成功推理要素",
+      "特質與 \n支持理由",
+      "結論"
+    ],
+    "layout": "worksheet_table"
+  }
+}

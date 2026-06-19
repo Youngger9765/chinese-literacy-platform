@@ -1,0 +1,107 @@
+{
+  "rows": [
+    {
+      "label": "步驟",
+      "value": "根據課文內容，請勾選或填寫答案（答案合理即可）",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❶ 問題",
+      "value": "1.花期落差 蝴蝶蘭盛開在（ 3-4 ）月；市場需求卻在（1-2）月 2.文章要解決什麼問題？ 如何讓蝴蝶蘭提早開花，以配合市場需求？",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "❷假說",
+          "value": "❸驗證",
+          "interactive_type": "display"
+        }
+      ]
+    },
+    {
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "影響因素可能是 用什麼方法 結果/ 是否支持假說？",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "1.肥料 1.施肥 1.花更大更美，但沒提早開花 / □是 否 □部分支持",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "2白晝長度 2.用黑塑膠網遮光 2.遮光可催花但僅提早5–7天 / □是 □否 部分支持",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "3.低溫 3.實驗組放冷氣房、對照組留原來花房 3.實驗組一個多月後，抽出花梗 ；對照組則無 / 是 □否 □部分支持",
+      "interactive_type": "display"
+    },
+    {
+      "label": "❹ 結論",
+      "value": "低溫，溫度26度以下，持續30-40天，就能成功催花",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "步驟",
+      "value": "根據課文內容，請勾選或填寫答案（答案合理即可）"
+    },
+    {
+      "kind": "pair",
+      "label": "❶ 問題",
+      "value": "1.花期落差 蝴蝶蘭盛開在（ 3-4 ）月；市場需求卻在（1-2）月 2.文章要解決什麼問題？ 如何讓蝴蝶蘭提早開花，以配合市場需求？"
+    },
+    {
+      "kind": "section_block",
+      "section": "❷ 假說⭣ ❸ 驗證",
+      "items": [
+        {
+          "label": "❷假說",
+          "value": "❸驗證"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "影響因素可能是 用什麼方法 結果/ 是否支持假說？"
+    },
+    {
+      "kind": "pair",
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "1.肥料 1.施肥 1.花更大更美，但沒提早開花 / □是 否 □部分支持"
+    },
+    {
+      "kind": "pair",
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "2白晝長度 2.用黑塑膠網遮光 2.遮光可催花但僅提早5–7天 / □是 □否 部分支持"
+    },
+    {
+      "kind": "pair",
+      "label": "❷ 假說⭣ ❸ 驗證",
+      "value": "3.低溫 3.實驗組放冷氣房、對照組留原來花房 3.實驗組一個多月後，抽出花梗 ；對照組則無 / 是 □否 □部分支持"
+    },
+    {
+      "kind": "pair",
+      "label": "❹ 結論",
+      "value": "低溫，溫度26度以下，持續30-40天，就能成功催花"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "display_only",
+    "template_kind": "scientific",
+    "fill_blank_count": 0,
+    "checkbox_count": 0,
+    "primary_labels": [],
+    "layout": "worksheet_table"
+  }
+}

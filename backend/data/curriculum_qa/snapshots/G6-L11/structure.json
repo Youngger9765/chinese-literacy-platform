@@ -1,0 +1,77 @@
+{
+  "rows": [
+    {
+      "label": "古代畫家心中的仙境",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "中國文化的神仙想像",
+      "value": "中國古人相信神仙遠離【　　　】，住在【　　　】的深山中，並流傳許多仙境故事。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "著名仙境：【　　　】",
+      "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。",
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
+    },
+    {
+      "label": "仙境畫的元素與意義",
+      "value": "仙境畫常見【　　　】、【　　　】、【　　　】三個元素，分別象徵通往仙境的門戶、跨越世界的通道與交通工具，表達進入仙境的奇妙轉變。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "仙境畫的特點",
+      "value": "畫中人物【　　　】而風景【　　　】，表現人類在浩瀚大自然中的【　　　】，傳達敬畏自然的情感。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "古、今對仙境的嚮往",
+      "value": "1.元明時期庶民畫家喜用「山人」、「道人」等稱號，反映對自然和心靈提升的【　　　】。\n2.儘管現代人不再相信神仙，但在欣賞仙境畫時，仍能喚起遠離【　　　】、回歸自然的渴望。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "古代畫家心中的仙境",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "中國文化的神仙想像",
+      "value": "中國古人相信神仙遠離【　　　】，住在【　　　】的深山中，並流傳許多仙境故事。"
+    },
+    {
+      "kind": "pair",
+      "label": "著名仙境：【　　　】",
+      "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。"
+    },
+    {
+      "kind": "pair",
+      "label": "仙境畫的元素與意義",
+      "value": "仙境畫常見【　　　】、【　　　】、【　　　】三個元素，分別象徵通往仙境的門戶、跨越世界的通道與交通工具，表達進入仙境的奇妙轉變。"
+    },
+    {
+      "kind": "pair",
+      "label": "仙境畫的特點",
+      "value": "畫中人物【　　　】而風景【　　　】，表現人類在浩瀚大自然中的【　　　】，傳達敬畏自然的情感。"
+    },
+    {
+      "kind": "pair",
+      "label": "古、今對仙境的嚮往",
+      "value": "1.元明時期庶民畫家喜用「山人」、「道人」等稱號，反映對自然和心靈提升的【　　　】。\n2.儘管現代人不再相信神仙，但在欣賞仙境畫時，仍能喚起遠離【　　　】、回歸自然的渴望。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "中國文化的神仙想像",
+      "著名仙境：【　　　】",
+      "仙境畫的元素與意義",
+      "仙境畫的特點"
+    ],
+    "layout": "worksheet_table"
+  }
+}

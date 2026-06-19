@@ -140,57 +140,7 @@ strategy_exercise:
     type: free_text
   - prompt: 請用「不但……而且……」造一個和長高有關的遞進複句
     type: free_text
-story_structure:
-- label: 主題
-  value: 長高的祕密
-- label: 重要事實 1
-  value: 充足的睡眠能分泌生長激素，幫助身體發育。
-- label: 重要事實 2
-  value: 適當的運動能刺激成長，但過度激烈會受傷。
-- label: 重要事實 3
-  value: 均衡飲食，多攝取蛋白質和維生素，避免甜食。
-- label: 結論
-  value: 掌握睡眠、運動、飲食三關鍵，青春期才能長高。
-story_structure_rows:
-- label: 主題
-  value: 長高的祕密
-  interactive_type: fill_blank
-  hint: 課文主要在說明什麼？
-- label: 重要事實 1
-  value: 充足的睡眠有助於長高
-  interactive_type: checkbox
-  hint: 長高的關鍵之一
-  options:
-  - 熬夜玩手機有助於長高
-  - 充足的睡眠有助於長高
-  - 睡越久越好
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 適當的運動有助於長高
-  interactive_type: checkbox
-  hint: 長高的關鍵之二
-  options:
-  - 運動越激烈越好
-  - 只有跳繩能幫助長高
-  - 適當的運動有助於長高
-  correct_options:
-  - 2
-- label: 重要事實 3
-  value: 均衡的飲食有助於長高
-  interactive_type: checkbox
-  hint: 長高的關鍵之三
-  options:
-  - 多喝牛奶就能長高
-  - 均衡的飲食有助於長高
-  - 多吃甜食冰品能長高
-  correct_options:
-  - 1
-- label: 結論
-  value: 青春期把握長高關鍵，才有機會高人一等。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -226,3 +176,25 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L03.pdf
+story_structure_table:
+- - 長高的秘密
+- - 主題：】長高【的關鍵
+  - 迷思
+  - 多喝【 牛奶 】就可以長高。──這是錯誤的迷思唷！
+- - 主題：】長高【的關鍵
+  - '研究支持的
+
+    方法'
+  - '根據研究，長高的方法有哪三項？
+
+    1.充足的【 睡眠 】。
+
+    2.適當的【 運動 】。
+
+    (1)有氧運動─提升核心體溫，促進生長激素分泌。
+
+    (2)跳躍的動作─刺激【 生長板 】。
+
+    (3)肌力訓練（弓箭步、深蹲）和【 伸展 】運動（瑜珈）。
+
+    3.均衡的【 飲食 】。'

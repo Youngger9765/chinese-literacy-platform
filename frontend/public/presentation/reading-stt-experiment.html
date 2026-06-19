@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>朗讀評分技術選型實驗 — 檢視儀表板</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --green:#16a34a; --greenbg:#dcfce7; --amber:#d97706; --amberbg:#fef3c7;
+    --red:#dc2626; --redbg:#fee2e2; --blue:#2563eb; --bluebg:#dbeafe; --slatebg:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;
+    color:var(--ink);background:#f8fafc;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:48px 0 40px}
+  header h1{margin:0 0 8px;font-size:30px;font-weight:800;letter-spacing:-.5px}
+  header p{margin:0;color:#cbd5e1;font-size:16px}
+  .tag{display:inline-block;background:rgba(255,255,255,.12);color:#e2e8f0;font-size:12px;
+    padding:3px 10px;border-radius:999px;margin-top:14px}
+  section{padding:36px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+  h2 .n{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
+    box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .stat{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+  .stat.bad{color:var(--red)} .stat.good{color:var(--green)} .stat.warn{color:var(--amber)}
+  .card .lbl{color:var(--muted);font-size:13px;margin-top:6px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;overflow:hidden;
+    border-radius:12px;border:1px solid var(--line)}
+  th,td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--slatebg);font-weight:700;font-size:13px}
+  td.l,th.l{text-align:left}
+  tr:last-child td{border-bottom:none}
+  .win{background:var(--greenbg)} .win td:first-child{box-shadow:inset 3px 0 0 var(--green)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700}
+  .p-g{background:var(--greenbg);color:var(--green)}
+  .p-a{background:var(--amberbg);color:var(--amber)}
+  .p-r{background:var(--redbg);color:var(--red)}
+  .p-b{background:var(--bluebg);color:var(--blue)}
+  .bar{height:10px;border-radius:6px;background:var(--slatebg);overflow:hidden;margin-top:4px}
+  .bar > i{display:block;height:100%;border-radius:6px}
+  .ba{display:grid;grid-template-columns:120px 1fr 60px;gap:10px;align-items:center;margin:8px 0;font-size:13px}
+  .flow{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:13px;white-space:pre-wrap;overflow-x:auto}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.two{grid-template-columns:1fr}.ba{grid-template-columns:90px 1fr 52px}}
+  .ba .nm{color:var(--muted)} .ba .vv{text-align:right;font-weight:700}
+  .note{background:var(--amberbg);border:1px solid #fcd34d;border-radius:12px;padding:14px 16px;
+    font-size:13px;color:#92400e;margin-top:18px}
+  .legend{font-size:12px;color:var(--muted);margin-top:10px}
+  footer{padding:30px 0;color:var(--muted);font-size:13px}
+  .arch{font-size:13px}
+  .mod{display:inline-block;padding:2px 7px;border-radius:6px;font-size:12px;margin:2px;border:1px solid var(--line)}
+  .m-live{background:var(--greenbg);color:#14532d} .m-dead{background:var(--redbg);color:#7f1d1d;text-decoration:line-through}
+  .m-dup{background:var(--amberbg);color:#78350f}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>朗讀評分技術選型實驗</h1>
+  <p>為什麼「念對卻得低分」、慢、又亂——以及該怎麼收斂成一條可信的路</p>
+  <span class="tag">Issue #2266 · 2026-06-18 · staging + 本機實測 · 🤖 Claude 整理</span>
+</div></header>
+
+<!-- 問題 -->
+<section><div class="wrap">
+  <h2><span class="n">1</span>問題：分數不可信</h2>
+  <p class="sub">產品負責人實測：幾乎全對的朗讀，分數卻又低又跳。這是朗讀一直做不好的核心。</p>
+  <div class="cards">
+    <div class="card"><div class="stat bad">58%</div><div class="lbl">方大哥幾乎全對（人判 98%）卻顯示 58%，且不同次 39–58% 浮動</div></div>
+    <div class="card"><div class="stat bad">0 分</div><div class="lbl">更慘：念得「完全正確」時系統吐 0 分（target==spoken bug）</div></div>
+    <div class="card"><div class="stat warn">26–35s</div><div class="lbl">按評估到看到分數的等待</div></div>
+    <div class="card"><div class="stat warn">3 套</div><div class="lbl">同音演算重複實作、前後端各一套評分，互相蓋來蓋去</div></div>
+  </div>
+  <div class="note"><b>根因</b>：把「逐字比對」這種<b>確定性</b>工作丟給 LLM 逐字吐 token → 輸出超過 4096 被截斷（虛低）、target==spoken 吐空陣列（0 分）、且每次浮動。比對本該是確定性程式，不該用 LLM。</div>
+</div></section>
+
+<!-- 實驗結果 -->
+<section><div class="wrap">
+  <h2><span class="n">2</span>實驗結果：6 組排列組合對照</h2>
+  <p class="sub">固定評分維度、只變 STT × Scorer。輸入＝L10 小花（360 字）；F1 全對(真值100%)、F2 含6錯(真值88.4%)、Fang=方大哥STT(真值98.1%)。</p>
+  <table>
+    <tr><th class="l">組合</th><th>STT</th><th>Scorer</th><th>延遲</th><th>正確率誤差</th><th>成本/次</th><th>確定性</th><th>截斷</th></tr>
+    <tr class="win"><td class="l"><b>C1 ✅ 贏家</b></td><td>Gemini batch</td><td>確定性</td><td><span class="pill p-g">7–14s</span></td><td><span class="pill p-g">&lt;0.5%</span></td><td><span class="pill p-g">$0.003</span></td><td><span class="pill p-g">0 浮動</span></td><td><span class="pill p-g">無</span></td></tr>
+    <tr><td class="l">C2 現用 ❌</td><td>Gemini batch</td><td>LLM 逐字 diff</td><td><span class="pill p-a">15–16s</span></td><td><span class="pill p-r">0–100%</span></td><td><span class="pill p-a">$0.007</span></td><td><span class="pill p-r">高浮動</span></td><td><span class="pill p-r">100%</span></td></tr>
+    <tr><td class="l">C3</td><td>Azure STT</td><td>確定性</td><td><span class="pill p-r">20–24s</span></td><td><span class="pill p-g">&lt;0.3%</span></td><td><span class="pill p-r">$0.022</span></td><td><span class="pill p-a">低</span></td><td><span class="pill p-g">無</span></td></tr>
+    <tr><td class="l">C4b</td><td>Fang 文字</td><td>LLM diff</td><td><span class="pill p-a">9.5–15s</span></td><td><span class="pill p-r">46–58%</span></td><td><span class="pill p-a">$0.004</span></td><td><span class="pill p-r">高</span></td><td><span class="pill p-r">100%</span></td></tr>
+    <tr><td class="l">C5/C6</td><td>Web Speech / Gemini Live</td><td>—</td><td colspan="5" style="color:var(--muted)">N/A — 瀏覽器/WebSocket headless 跑不了，需 PoC（見 §5）</td></tr>
+  </table>
+  <p class="legend">證據：staging GCP log（10 筆 max_tokens 截斷）、curl ×3、TTS fixture、確定性 scorer 直呼。</p>
+</div></section>
+
+<!-- 成本效益 -->
+<section><div class="wrap">
+  <h2><span class="n">3</span>成本效益：C1 全面領先</h2>
+  <p class="sub">越短越好（延遲/誤差/成本）。C1 在四個維度同時最佳，且工程量最小。</p>
+  <div class="two">
+    <div class="card">
+      <b style="font-size:14px">正確率誤差（越低越好）</b>
+      <div class="ba"><span class="nm">C1 確定性</span><div class="bar"><i style="width:2%;background:var(--green)"></i></div><span class="vv">&lt;0.5%</span></div>
+      <div class="ba"><span class="nm">C2 現用 LLM</span><div class="bar"><i style="width:100%;background:var(--red)"></i></div><span class="vv">≤100%</span></div>
+      <div class="ba"><span class="nm">C3 Azure</span><div class="bar"><i style="width:2%;background:var(--green)"></i></div><span class="vv">&lt;0.3%</span></div>
+    </div>
+    <div class="card">
+      <b style="font-size:14px">成本/次（越低越好）</b>
+      <div class="ba"><span class="nm">C1</span><div class="bar"><i style="width:14%;background:var(--green)"></i></div><span class="vv">$0.003</span></div>
+      <div class="ba"><span class="nm">C2 現用</span><div class="bar"><i style="width:32%;background:var(--amber)"></i></div><span class="vv">$0.007</span></div>
+      <div class="ba"><span class="nm">C3 Azure</span><div class="bar"><i style="width:100%;background:var(--red)"></i></div><span class="vv">$0.022</span></div>
+    </div>
+    <div class="card">
+      <b style="font-size:14px">延遲（越短越好）</b>
+      <div class="ba"><span class="nm">C1</span><div class="bar"><i style="width:40%;background:var(--green)"></i></div><span class="vv">7–14s</span></div>
+      <div class="ba"><span class="nm">C2 現用</span><div class="bar"><i style="width:64%;background:var(--amber)"></i></div><span class="vv">15–16s</span></div>
+      <div class="ba"><span class="nm">C3 Azure</span><div class="bar"><i style="width:96%;background:var(--red)"></i></div><span class="vv">20–24s</span></div>
+    </div>
+    <div class="card">
+      <b style="font-size:14px">為何 C1 工程量最小</b>
+      <p style="font-size:13px;margin:8px 0 0;color:var(--muted)">不動 STT 層（沿用現有 <code>/reading/transcribe</code> Gemini）；<b>只把 scorer 從 LLM 逐字 diff 換成現成的確定性 fallback</b>。58%/0% 同時消失。</p>
+    </div>
+  </div>
+  <div class="note">引擎：Azure STT(REST batch) 7x 貴、字準反而更差（Gemini 有 target 上下文自校）→ batch 場景 Gemini 勝。Azure「即時串流」的延遲優勢要瀏覽器 PoC 才驗，但 C1 已夠用，未必需要換。</div>
+</div></section>
+
+<!-- 階段比較 -->
+<section><div class="wrap">
+  <h2><span class="n">4</span>Before / After ＋ 兩階段</h2>
+  <div class="two">
+    <div class="card">
+      <b>Before（現況 C2）</b>
+      <ul style="font-size:14px;margin:8px 0 0;padding-left:18px;color:#7f1d1d">
+        <li>正確率 0–100% 亂跳、念對得 0/58 分</li>
+        <li>等 26–35s</li>
+        <li>三 bug 齊發、前後端互蓋</li>
+      </ul>
+    </div>
+    <div class="card">
+      <b>After（目標 C1）</b>
+      <ul style="font-size:14px;margin:8px 0 0;padding-left:18px;color:#14532d">
+        <li>正確率誤差 &lt;0.5%、零浮動、念對=高分</li>
+        <li>延遲 7–14s（之後可再壓）</li>
+        <li>一條路：一個 LLM(STT) + 一個確定性評分</li>
+      </ul>
+    </div>
+  </div>
+  <table style="margin-top:16px">
+    <tr><th class="l">階段</th><th class="l">要驗證 / 拿到什麼</th><th>需要測試集？</th></tr>
+    <tr><td class="l"><b>A 求可信（現在）</b></td><td class="l">確定性 scorer 鎖 unit + 自錄少量真音 sanity → tune 一版敢上線</td><td><span class="pill p-g">不需要</span></td></tr>
+    <tr><td class="l"><b>B 求廣度+優化（之後）</b></td><td class="l">100–200 人聲樣本回歸 + STT 引擎真實排名 + 即時延遲優化</td><td><span class="pill p-a">需要</span></td></tr>
+  </table>
+</div></section>
+
+<!-- 架構分拆 -->
+<section><div class="wrap">
+  <h2><span class="n">5</span>架構分拆：糾纏 → 收斂</h2>
+  <p class="sub"><span class="mod m-live">LIVE</span> <span class="mod m-dup">重複</span> <span class="mod m-dead">死碼</span></p>
+  <div class="two">
+    <div class="flow arch"><b>現況（糾纏）</b>
+
+錄音 → <span class="mod m-live">Gemini STT</span> → 評分分裂：
+  <span class="mod m-live">前端 LCS</span>(算對的綠字)
+  <span class="mod m-dup">後端 fallback diff</span>(算了丟掉)
+  <span class="mod m-live">後端 Gemini 逐字 diff</span>(截斷→58%/0%)
+  ↑ 分數被後端壞值蓋掉前端對的
+同音演算 <span class="mod m-dup">×3 套</span>
+<span class="mod m-dead">stt/evaluate.py</span> 零 caller
+    </div>
+    <div class="flow arch"><b>目標（收斂一條）</b>
+
+錄音 → <span class="mod m-live">Gemini STT</span>（短段/可即時）
+   → <span class="mod m-live">一個確定性評分</span>
+      (LCS + 同音表 + CPM，後端單一真相)
+   → 純顯示（綠字 + 正確率 + 語速）
+
+砍：Gemini 逐字 diff、同音留 1 套、
+    stt/evaluate.py、休眠 fallback diff
+GCS 存音檔 = async，不擋分數
+    </div>
+  </div>
+</div></section>
+
+<!-- 分段選技術 -->
+<section><div class="wrap">
+  <h2><span class="n">6</span>分段選技術：每段選什麼 + 為什麼</h2>
+  <table>
+    <tr><th class="l">Phase</th><th class="l">選擇</th><th class="l">為什麼</th></tr>
+    <tr><td class="l">0 拍板</td><td class="l">評分=後端確定性；STT=Gemini batch(現)；GCS async</td><td class="l">實驗證明 C1 最佳；單一真相</td></tr>
+    <tr><td class="l">1 鎖評分</td><td class="l">確定性 scorer + unit 紅燈轉綠</td><td class="l">先測後做；誤差 &lt;0.5% 零浮動</td></tr>
+    <tr><td class="l">2 收斂</td><td class="l">兩功能接後端 scorer、移除覆蓋</td><td class="l">58%/0% 消失；前後端不再互蓋</td></tr>
+    <tr><td class="l">3 清理</td><td class="l">刪 Gemini 逐字 diff / 同音留 1 / 死碼</td><td class="l">沒人用了才刪、測試守著</td></tr>
+    <tr><td class="l">4 速度</td><td class="l">STT 切短段落（必要時瀏覽器即時 PoC）+ 「約 N 秒」提示</td><td class="l">延遲主因是 STT 不是評分；先切短最省</td></tr>
+  </table>
+  <div class="note"><b>限制聲明</b>：本實驗用乾淨成人 TTS 音，字準偏樂觀；真實國小童音兩家 STT 都會變差，最終引擎排名待階段 B 的人聲測試集。本頁是「pipeline + 邏輯」結論，不是「真實 robustness」結論。</div>
+</div></section>
+
+<footer><div class="wrap">
+  資料來源：staging GCP log / curl 實測 / TTS fixture / 確定性 scorer 直呼。詳見 issue #2266 與 <code>docs/ai/reading-stt-scorer-ab-2026-06.md</code>。本頁由 Claude AI 整理（非 Young 本人）。
+</div></footer>
+</body>
+</html>

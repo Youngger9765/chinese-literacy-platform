@@ -183,53 +183,7 @@ strategy_exercise:
     - 2
   - prompt: 課文提到2015年敘利亞內戰時，研究人員提取了130箱種子。這個例子說明了什麼？用自己的話寫下來
     type: free_text
-story_structure:
-- label: 主題
-  value: 重要細節
-- label: 事例
-  sub_rows:
-  - label: 經過
-    value: 真空 294 包裝 ，並 用三 層 鋁箔 密封 ，才 能 上架 。 308 五 這 裡 的 戒 備 十 分 森 嚴 ， 如 果 你 有 機 會 進 入 內 部 ， 會 先 經 過 大 約 333 120 公 尺的 隧道 ， 並 通過 5 扇
-story_structure_rows:
-- label: 主題
-  value: 斯瓦爾巴全球種子庫
-  interactive_type: fill_blank
-  hint: 課文主要在介紹什麼？
-- label: 重要事實 1
-  value: 興建目的是保護農業作物的多樣性
-  interactive_type: checkbox
-  hint: 種子庫為何而建？
-  options:
-  - 興建目的是為了讓各國交換種子
-  - 興建目的是保護農業作物的多樣性
-  - 興建目的是為了研究新品種作物
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 位於北極地區，氣候寒冷，有利於保存種子
-  interactive_type: checkbox
-  hint: 種子庫的地理位置？
-  options:
-  - 位於熱帶地區，氣候炎熱，有利於保存種子
-  - 位於溫帶地區，氣候溫和，有利於保存種子
-  - 位於北極地區，氣候寒冷，有利於保存種子
-  correct_options:
-  - 2
-- label: 重要事實 3
-  value: 臺灣曾將小米種子存入種子庫
-  interactive_type: checkbox
-  hint: 臺灣與種子庫的關係？
-  options:
-  - 臺灣曾將稻米種子存入種子庫
-  - 臺灣曾將小米種子存入種子庫
-  - 臺灣曾將玉米種子存入種子庫
-  correct_options:
-  - 1
-- label: 結論
-  value: 保護生態環境，避免使用種子庫的種子
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -265,3 +219,24 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L10.pdf
+story_structure_table:
+- - 大主題：末日種子庫
+- - 小主題
+  - 重要細節
+- - 種子銀行的建置
+  - 目的
+  - 萬一大規模災害發生時，預防某些種子的基因因此消失，以保護農業多樣性。
+- - 種子銀行的建置
+  - __
+  - 如聚光燈－小試身手❶（第四段）所寫。【 低溫環境 】
+- - 種子銀行的建置
+  - 建築安全
+  - 【 建築設計具備高度的安全性，能抵擋地震、核武與洪水。（合理即可） 】
+- - 參與種子銀行的例子
+  - __
+  - 如聚光燈－小試身手❷（第六段）所寫。【 臺灣參與種子保存計畫 】
+- - 參與種子銀行的例子
+  - 敘利亞取出保存種子
+  - 【 2015年，敘利亞內戰導致當地種子庫受損，中東研究人員從斯瓦爾巴種子庫提取130箱種子。（合理即可） 】
+- - 感想
+  - 科學家未雨綢繆建設種子庫，我們應該保護【 生態環境 】，希望永遠不會用到種子庫。

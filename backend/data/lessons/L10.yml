@@ -176,64 +176,7 @@ strategy_exercise:
   - 隨遇而安
   - 好高騖遠
   correct_trait: 堅毅不屈
-story_structure:
-- label: 主角
-  value: 世界充滿愛
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: (3)大姊二姊【犧牲/放棄 】學業，小學畢業就到工廠工作。 (4)孩子們放學後、寒暑假都要到工廠做【童工 】貼補家用。 (1)起因： 大學聯考落榜，向媽媽爭取【重考 】的機會，希望能靠 【教育 】翻身。 (2)問題： 必須靠自己的力量支付補
-story_structure_rows:
-- label: 主角
-  value: 小花
-  interactive_type: fill_blank
-  hint: 課文中的主要人物
-- label: 主題
-  value: 教育能改變人生
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 勤奮、不放棄、感恩
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 主角成長的環境
-    options:
-    - 家境貧困，從小打工
-    - 父母雙亡，由親戚撫養
-    - 姊姊們犧牲學業，貼補家用
-    correct_options:
-    - 0
-    - 2
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 主角如何努力
-    options:
-    - 大學聯考落榜後，堅持重考
-    - 補習期間，努力打工賺取學費
-    - 大學畢業後，直接考上公務員
-    correct_options:
-    - 0
-    - 1
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 主角的最終成就
-    options:
-    - 成為國立大學教授
-    - 開設自己的補習班
-    - 繼承家業，經營工廠
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -269,3 +212,37 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G5-L10.pdf
+story_structure_table:
+- - 從童工到大學教授之路
+- - 家庭背景
+  - '1.小花小時候家裡很窮困
+
+    (1)父親早逝，母親沒有【 一技之長 】，到處打零工。
+
+    (2)家裡沒有課外讀物，吃得不好。
+
+    (3)大姊二姊【 犧牲/放棄 】學業，小學畢業就到工廠工作。
+
+    (4)孩子們放學後、寒暑假都要到工廠做【 童工 】貼補家用。'
+- - 翻身之路
+  - '(1)起因：
+
+    大學聯考落榜，向媽媽爭取【 重考 】的機會，希望能靠【 教育 】翻身。
+
+    (2)問題：
+
+    必須靠自己的力量支付補習費和生活費。
+
+    (3)解決：
+
+    到補習班【 打工 】，短時間賺到補習費。
+
+    【 雙胞胎妹妹 】伸出援手，願意支付重考一年的生活費。
+
+    (4)結果：
+
+    小花考上【 公費 】的師範學院，並在大學期間繼續打工和接家教，堅持完成學業。
+
+    畢業後成為學校助教，並在職念碩士和博士，最終成為國立大學的【 教授 】。'
+- - 體會與心得
+  - 小花感激姊姊們為家庭所做的犧牲，並意識到【 教育 】對人生進路的影響。

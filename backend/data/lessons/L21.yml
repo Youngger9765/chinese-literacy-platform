@@ -171,69 +171,7 @@ strategy_exercise:
     - 兒子從不理解到支持，中間發生了什麼轉變？
     - 咖啡一杯賣多少錢？
     answer: 1
-story_structure:
-- label: 主角
-  value: 賴桑為什麼要買一座垃圾山？
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: 賴倍元從小熱愛【 大自然 】 。 起因 工作之餘到山上看神木，感受自然的永恆，下決心【 種樹 】 。 1.三千萬元買下的第一座山，滿是【 垃圾 】 。 問題 1 2.這座山過去種植果樹，使用除草劑， 【 土壤 】被破壞，不能涵 養水份，難以
-  - label: 結果
-    value: 2.【 生態 】恢復：大雪山林場生態豐富，多樣性增加。 迴響 越來越多的人認同賴桑的理念，一起【 加入種樹的行列 】 。 閱讀時，如果你能能夠持續的問自己問題，例如「他為什麼會這樣？」 「不可思議，這是真的嗎？」 「作者為什麼要寫這篇文章？
-story_structure_rows:
-- label: 主角
-  value: 賴倍元（賴桑）
-  interactive_type: fill_blank
-  hint: 課文主要人物
-- label: 主題
-  value: 種樹愛地球，為下一代留下寶藏
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 堅持、有遠見、愛護大自然
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發生的原因
-    options:
-    - 賴桑童年與大自然為伍，感受生命短暫與大自然永恆。
-    - 賴桑想經營一個不會被時間淘汰的事業。
-    - 賴桑的父親要求他種樹。
-    - 賴桑想賺大錢。
-    correct_options:
-    - 0
-    - 1
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發生的過程
-    options:
-    - 賴桑買下佈滿垃圾的山，花數月清運。
-    - 賴桑諮詢木材行老闆後，決定種植肖楠。
-    - 賴桑不使用化學肥料，人工除草並鋪設水管澆灌。
-    - 賴桑的家人一開始都支持他的決定。
-    correct_options:
-    - 0
-    - 1
-    - 2
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 事情的結果
-    options:
-    - 大雪山林場生態豐富，吸引眾人認同並加入種樹行列。
-    - 賴桑的家人因為種樹而破產。
-    - 賴桑放棄種樹，改做其他事業。
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -269,3 +207,27 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L13.pdf
+story_structure_table:
+- - 森林大軍的守護者-賴倍元
+- - 背景
+  - 賴倍元從小熱愛【 大自然 】。
+- - 起因
+  - 工作之餘到山上看神木，感受自然的永恆，下決心【 種樹 】。
+- - 問題1
+  - '1.三千萬元買下的第一座山，滿是【 垃圾 】。
+
+    2.這座山過去種植果樹，使用除草劑，【 土壤 】被破壞，不能涵養水份，難以種樹。'
+- - 解決1
+  - "1.清理垃圾：親自開卡車清運垃圾，耗時數月，來回兩千趟。\n2.友善環境：(1)不使用化學肥料和除草劑，改以人工【 除草 】\n            (2)鋪設四十多公里水管，澆灌剛種下的小樹苗。"
+- - 問題2
+  - 賴桑種樹的錢從哪裡來？
+- - 解決2
+  - '【 賴太太 】接下家庭及公司，並為種樹籌措資金。
+
+    兒子們也開始種咖啡、販售所得再投入種樹志業。'
+- - 結果
+  - '1.種樹成就：三十年來在大雪山種了三十多萬棵樹。
+
+    2.【 生態 】恢復：大雪山林場生態豐富，多樣性增加。'
+- - 迴響
+  - 越來越多的人認同賴桑的理念，一起【 加入種樹的行列 】。

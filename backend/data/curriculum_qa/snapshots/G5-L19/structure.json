@@ -1,0 +1,124 @@
+{
+  "rows": [
+    {
+      "label": "感情小日記3──吃醋的滋味",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "二、三",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "看見自己的__和喜歡的人聊得很開心",
+          "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "四",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "轉身離開現場，回到教室座位",
+          "value": "Ａ.不想再看下去\nB.【　　　】卻無法停止",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "五",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "朋友阿葉來關心",
+          "value": "Ａ.認為自己沒有回應他，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "六",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "獨自反思",
+          "value": "Ａ.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "統整",
+      "value": "因為看見【　　　】和喜歡的人聊天而感到不是滋味，卻又不想面對這份吃醋的心情，作者寫下這篇小日記，是想抒發心情（煩燥混亂  □寂寞無奈）的感受。",
+      "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "感情小日記3──吃醋的滋味",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "二、三",
+      "items": [
+        {
+          "label": "看見自己的__和喜歡的人聊得很開心",
+          "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "四",
+      "items": [
+        {
+          "label": "轉身離開現場，回到教室座位",
+          "value": "Ａ.不想再看下去\nB.【　　　】卻無法停止"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "五",
+      "items": [
+        {
+          "label": "朋友阿葉來關心",
+          "value": "Ａ.認為自己沒有回應他，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "六",
+      "items": [
+        {
+          "label": "獨自反思",
+          "value": "Ａ.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "統整",
+      "value": "因為看見【　　　】和喜歡的人聊天而感到不是滋味，卻又不想面對這份吃醋的心情，作者寫下這篇小日記，是想抒發心情（煩燥混亂  □寂寞無奈）的感受。"
+    }
+  ],
+  "interaction_profile": {
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "primary_labels": [
+      "看見自己的__和喜歡的人聊得很開心",
+      "轉身離開現場，回到教室座位",
+      "朋友阿葉來關心",
+      "獨自反思"
+    ],
+    "layout": "worksheet_table"
+  }
+}

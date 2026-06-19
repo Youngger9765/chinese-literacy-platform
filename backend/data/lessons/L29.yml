@@ -173,57 +173,7 @@ strategy_exercise:
     answer: 0
   - prompt: 根據表格的比較，你覺得臺灣可以學習澳洲的哪一點來改善體育環境？請寫下你的想法
     type: free_text
-story_structure:
-- label: 主題
-  value: 澳洲奧運金牌的祕密
-- label: 重要事實 1
-  value: 澳洲體育系統完善，政府全力支持
-- label: 重要事實 2
-  value: 學校重視體育，家長鼓勵孩子運動
-- label: 重要事實 3
-  value: 社區俱樂部健全，運動員生涯無憂
-- label: 結論
-  value: 臺灣應學習澳洲，發展全民體育
-story_structure_rows:
-- label: 主題
-  value: 澳洲奧運金牌的機密
-  interactive_type: fill_blank
-  hint: 這篇文章在說什麼？
-- label: 重要事實 1
-  value: 澳洲奧運得牌數高的原因
-  interactive_type: checkbox
-  hint: 澳洲為何得牌多？
-  options:
-  - 政府全力支持體育活動
-  - 澳洲人口比臺灣多很多
-  - 澳洲人天生運動細胞好
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: 澳洲體育系統的優點
-  interactive_type: checkbox
-  hint: 澳洲體育有何特色？
-  options:
-  - 學校不重視體育課程
-  - 運動員退役後有其他職業
-  - 國家隊選手都是全職運動員
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 臺灣體育發展的困境
-  interactive_type: checkbox
-  hint: 臺灣體育有何問題？
-  options:
-  - 學生運動時間充足
-  - 家長重視課業勝過體育
-  - 社區運動俱樂部很普及
-  correct_options:
-  - 1
-- label: 結論
-  value: 臺灣應學習澳洲發展體育
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -258,3 +208,39 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 澳洲奧運金牌的秘密
+- - 澳洲全民重視體育
+  - 人民
+  - 經常自發運動。
+- - 澳洲全民重視體育
+  - 政府
+  - '設立了【 完善 】的體育系統。
+
+    1.【 斥資 】設置體育場設施、體育場館、學校。
+
+    2.成立【 國家運動中心 】，提供專業的科學訓練及獎金。'
+- - 澳洲全民重視體育
+  - 學校
+  - '1.學生有 充足  □少量  的課後時間進行體育活動。
+
+    2.經常舉辦校內、校際的體育競賽。'
+- - 澳洲全民重視體育
+  - 家長
+  - 熱衷讓孩子運動，以鍛錬孩子身心，培養重要【 品格 】。
+- - 運動選手生涯
+  - 培育階段
+  - '(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。
+
+    (2)表現【 優異 】者，可持續晉級，有機會成會兼職或全職的運動員，或進入國家代表隊。'
+- - 運動選手生涯
+  - 退役後
+  - '(1)可從事其他或原本的職業
+
+    (2)回到社區俱樂部當教練。'
+- - 臺灣體育的問題
+  - '1.運動績優生選材不易。
+
+    2.運動選手主要是由政府與學校培育，較少俱樂部。
+
+    3.長時嚴格的體育訓練，犧牲了選手的課業與職業發展，造成退役選手的就業【 困難 】。'

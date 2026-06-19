@@ -182,62 +182,7 @@ strategy_exercise:
     type: free_text
   - prompt: 如果你遇到一個困難，請用「問題解決流程」的四個步驟來分析：認清問題是什麼、拆解成小問題、想出解決方案、選擇最好的方案
     type: free_text
-story_structure:
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: 法。 困境 多次失敗，錢花光了 【再去打工賺錢 】 。 主 【 浪費食物 】 失敗品拿去餵蜜蜂。 題 ： 分送給親友試吃，到市集擺攤，建立口 果 【 高成本、高單價】 碑。 醬 男 英國客人鼓勵他去參加英國的果醬比賽，他便【 籌措 】旅 孩
-story_structure_rows:
-- label: 主角
-  value: 林韡勳
-  interactive_type: fill_blank
-  hint: 課文主要人物
-- label: 主題
-  value: 堅持與創新，讓夢想開花結果
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-- label: 特色
-  value: 不放棄、有創意、重視細節
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  sub_rows:
-  - label: 背景
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發生的原因
-    options:
-    - 林韡勳對動物過敏，無法繼續相關工作
-    - 懷念阿嬤做的桑椹醬，想將醜水果製成果醬
-    - 想賺大錢，所以決定製作果醬
-    correct_options:
-    - 0
-    - 1
-  - label: 經過
-    value: ''
-    interactive_type: checkbox
-    hint: 事情發展的過程
-    options:
-    - 自學果醬製作，經歷兩年失敗才成功
-    - 將失敗的果醬餵蜜蜂，不浪費食材
-    - 直接販售果醬，一開始就大受歡迎
-    correct_options:
-    - 0
-    - 1
-  - label: 結果
-    value: ''
-    interactive_type: checkbox
-    hint: 事情最終的結果
-    options:
-    - 在英國果醬大賽獲得一金二銅的佳績
-    - 果醬成本太高，最後放棄製作
-    - 家人不贊成，所以沒有繼續參賽
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -273,3 +218,36 @@ worksheet_section_order:
   name: 報告
   type: report
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L16.pdf
+story_structure_table:
+- - 果醬男孩
+- - 成就
+  - 林韡勳在世界柑橘類【 果醬 】大賽，獲得【 一金二銅 】的成績。
+- - 起因
+  - '1.因為找不到工作，他想起阿嬤做的【 桑椹醬 】，靈機一動決定要做【 果醬 】。
+
+    2.他發現農場裡外觀不佳的水果往往被棄置，他覺得很【 可惜 】，加深要做果醬的念頭。'
+- - 困境
+  - 問題
+  - 解決辦法
+- - 困境
+  - 沒有專業背景
+  - 開始自學，研究食譜，不斷嘗試熬煮方法。
+- - 困境
+  - 多次失敗，錢花光了
+  - 【 再去打工賺錢 】。
+- - 困境
+  - __
+  - 失敗品拿去餵蜜蜂。【 浪費食物 】
+- - 困境
+  - __
+  - 分送給親友試吃，到市集擺攤，建立口碑。【 高成本、高價 】
+- - 轉機
+  - 英國客人鼓勵他去參加英國的果醬比賽，他便【 籌措 】旅費，連年參賽，終於在【 第四年 】獲得桂冠。
+- - 成功關鍵
+  - '1.【 看重細節 】：走遍全臺，只為找到香氣、味道深具個性的水果。
+
+    2.【 看重創意 】：想到把紅玉紅茶、威士忌和柑橘混在一起做出「茶金」果醬。
+
+    3.【 開發新技術 】：本來「茶金」果醬茶味不足，他想到將切碎的茶葉以威士忌冰釀一晚，逼出茶香。'
+- - 期許
+  - 把臺灣水果製成的果醬行銷到【 全世界 】。

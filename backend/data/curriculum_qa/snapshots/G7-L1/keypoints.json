@@ -1,0 +1,181 @@
+{
+  "keypoints": {
+    "lesson": "G7-L1",
+    "structure": "nested",
+    "columns": [
+      "label",
+      "sub_label",
+      "value"
+    ],
+    "rows": [
+      {
+        "label": "讀〈夏夜〉中的「來了！來了！」",
+        "value": "",
+        "blanks": []
+      },
+      {
+        "label": "時間點",
+        "sub_rows": [
+          {
+            "sub_label": "一開始讀",
+            "template": "聽完老師解釋(單選)",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "感受",
+        "sub_rows": [
+          {
+            "sub_label": "帶來__",
+            "template": "__",
+            "blanks": [
+              {
+                "answer": "歡樂",
+                "hint": ""
+              },
+              {
+                "answer": "□能夠領略無法領略",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "原因",
+        "sub_rows": [
+          {
+            "sub_label": "「來了！來了！」可以__在__派上用場",
+            "template": "對十三歲的我們來說，更深刻的是那份__",
+            "blanks": [
+              {
+                "answer": "千變萬化",
+                "hint": ""
+              },
+              {
+                "answer": "不同時機",
+                "hint": ""
+              },
+              {
+                "answer": "□嬉笑的快樂浪漫的詩意",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "讀〈夏夜〉中的「擬人」",
+        "value": "",
+        "blanks": []
+      },
+      {
+        "label": "時間點",
+        "sub_rows": [
+          {
+            "sub_label": "國中時",
+            "template": "長大後(單選)",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "感受",
+        "sub_rows": [
+          {
+            "sub_label": "對作者感到__",
+            "template": "對作者感到__",
+            "blanks": [
+              {
+                "answer": "困惑",
+                "hint": ""
+              },
+              {
+                "answer": "□不解讚嘆",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "原因",
+        "sub_rows": [
+          {
+            "sub_label": "認為作者寫羊隊會回家、小河會歌唱，是描述常見的景象，為什麼老師會說許多句子都有__修辭呢？",
+            "template": "長大後，了解作者成年後還能有貼近__的眼光，很不容易。",
+            "blanks": [
+              {
+                "answer": "擬人",
+                "hint": ""
+              },
+              {
+                "answer": "孩童",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "讀〈夏夜〉中的溫馨場景",
+        "value": "",
+        "blanks": []
+      },
+      {
+        "label": "時間點",
+        "sub_rows": [
+          {
+            "sub_label": "國中時",
+            "template": "長大後(單選)",
+            "blanks": []
+          }
+        ]
+      },
+      {
+        "label": "感受",
+        "sub_rows": [
+          {
+            "sub_label": "__",
+            "template": "對作者__",
+            "blanks": [
+              {
+                "answer": "羨慕",
+                "hint": ""
+              },
+              {
+                "answer": "感佩□失望",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "原因",
+        "sub_rows": [
+          {
+            "sub_label": "認為作者能寫下如此溫馨的夏夜畫面，一定是因為有著 __的童年。",
+            "template": "發現作者有著\n__的童年，投入__文學寫作是為了讓每個孩子都能在童年裡有快樂。",
+            "blanks": [
+              {
+                "answer": "幸福洋溢□悲慘不幸",
+                "hint": ""
+              },
+              {
+                "answer": "艱辛悲苦□無憂無慮",
+                "hint": ""
+              },
+              {
+                "answer": "兒童",
+                "hint": ""
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "title": "長大後，我才讀懂〈夏夜〉"
+  }
+}

@@ -198,57 +198,7 @@ strategy_exercise:
     answer: 2
   - prompt: 如果有人對你做了讓你不舒服的事，你可以怎麼做？請寫出至少兩個方法
     type: free_text
-story_structure:
-- label: 主題
-  value: '#MeToo運動的意義與影響'
-- label: 重要事實 1
-  value: '#MeToo運動鼓勵性騷擾受害者發聲'
-- label: 重要事實 2
-  value: 受害者常因權力不對等難以說出
-- label: 重要事實 3
-  value: 身體自主權是尊重個人身體界線
-- label: 結論
-  value: 共同創造安全、尊重的社會環境
-story_structure_rows:
-- label: 主題
-  value: '#MeToo運動與我們的權利'
-  interactive_type: fill_blank
-  hint: 這篇文章主要在說明什麼？
-- label: 重要事實 1
-  value: 2006年，伯克發起「Me Too」讓受害者知道她們並不孤單。
-  interactive_type: checkbox
-  hint: 關於#MeToo運動的起源
-  options:
-  - 2006年，伯克發起「Me Too」讓受害者知道她們並不孤單。
-  - 2017年，溫斯坦在推特上使用「#MeToo」揭發性侵事件。
-  - 2018年，臺灣的#MeToo運動才開始受到關注。
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: '#MeToo運動讓受害者知道「這不是你的錯」，並打造友善社會。'
-  interactive_type: checkbox
-  hint: '#MeToo運動的影響'
-  options:
-  - 受害者擔心被指責，所以不願說出受害經驗。
-  - '#MeToo運動讓受害者知道「這不是你的錯」，並打造友善社會。'
-  - 加害者和被害者常處於「權力不對等」的關係，導致受害者不敢發聲。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 身體自主權是每個人決定自己身體被碰觸限度的權利。
-  interactive_type: checkbox
-  hint: 關於身體自主權的定義
-  options:
-  - 身體界線是固定不變的，不會因對象而異。
-  - 身體自主權是每個人決定自己身體被碰觸限度的權利。
-  - 尊重身體自主權，代表可以開朋友黃腔。
-  correct_options:
-  - 1
-- label: 結論
-  value: '#MeToo運動促使受害者發聲，並喚起大眾對身體自主權的重視，共同創造安全尊重的環境。'
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: docx-keypoints-2026-06-18
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -283,3 +233,18 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - '#MeToo運動與我們的權利'
+- - ＃MeToo運動
+  - ''
+- - 起源與發展
+  - '1. 2006年，伯克在網路平台使用【 MeToo 】，透過同理心的話語幫助性侵受害者走出陰霾。
+
+    2. 2017年，米蘭諾在推特使用【 #MeToo 】分享自己受害經驗，以回應好萊塢製片人溫斯坦對演員長期事侵的事件。引發廣大回響，成為全球運動。
+
+    3.#MeToo運動在2018年傳到臺灣。2023年一連串的性騷擾事件被揭露，而電視劇的相關情節與台詞，更引發大量的關注與討論。受害人開始舉發所遭遇的性騷擾與性侵犯。'
+- - MeToo我該怎麼做?
+  - "1.不是你的錯，安心說出來\n許多受害者，不敢說出他們受害的經歷。其原因有(複勾選)\n難以舉證   怕自己成為別人的話題   怕被別人指責\n怕被權力高的人報復\
+    \  \n2.身體自主權，從尊重界線開始\n(1)強調每個人都有權利決定自己的身體【 界線 】不受侵犯。\n(2)學習尊重別人的身體【 自主權 】，避免越界、冒犯的行為。"
+- - 結語
+  - '#MeToo運動讓受害者打破沉默，也帶動大眾身體自主權的覺醒。'
