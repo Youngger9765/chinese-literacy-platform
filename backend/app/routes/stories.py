@@ -18,8 +18,8 @@ from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_avail
 from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
-from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 from ..services.story_structure_cell_parser import cell_to_structure_fields
+from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
 # Simple TTL cache for story structure results (avoids redundant Gemini calls)
@@ -28,7 +28,7 @@ from ..services.story_structure_cell_parser import cell_to_structure_fields
 
 _structure_cache: dict[str, tuple[float, object]] = {}
 _CACHE_TTL = 86400  # 24 hours
-_CACHE_VERSION = "v4"  # bump when schema changes to auto-invalidate
+_CACHE_VERSION = "v4"  # label_blanks + checkbox via cell_to_structure_fields
 
 _BLANK_RE = re.compile(r"【([^】]*)】")
 
@@ -66,10 +66,10 @@ def _sanitize_row_for_client(row: dict) -> dict:
     """Remove grading answers from a structure row before API response."""
     out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
     if out.get("interactive_type") == "fill_blank":
-        if out.get("value"):
-            out["value"] = _strip_blank_answers(out["value"])
         if out.get("blank_in_label") and out.get("label"):
             out["label"] = _strip_blank_answers(out["label"])
+        if out.get("value"):
+            out["value"] = _strip_blank_answers(out["value"])
     sub_rows = out.get("sub_rows")
     if sub_rows:
         out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
@@ -152,10 +152,12 @@ def _sanitize_structure_for_client(structure: dict) -> dict:
     result["rows"] = [_sanitize_row_for_client(r) for r in result.get("rows", [])]
     for ws in result.get("worksheet_rows") or []:
         if ws.get("kind") == "pair":
-            ws["value"] = _strip_blank_answers(ws["value"])
+            ws["label"] = _strip_blank_answers(ws.get("label") or "")
+            ws["value"] = _strip_blank_answers(ws.get("value") or "")
         elif ws.get("kind") == "section_block":
             for item in ws.get("items") or []:
-                item["value"] = _strip_blank_answers(item["value"])
+                item["label"] = _strip_blank_answers(item.get("label") or "")
+                item["value"] = _strip_blank_answers(item.get("value") or "")
     result["interaction_profile"] = _derive_interaction_profile(result)
     return result
 
