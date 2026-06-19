@@ -10,14 +10,20 @@ owns_code:
   - backend/app/services/story_structure_lab_service.py
   - scripts/keypoints_table_sync.py
   - scripts/story_structure_qa_lib.py
+  - scripts/story_structure_qa.py
+  - scripts/build_keypoints_qa_manifest.py
+  - scripts/keypoints_manifest_verify.py
 owns_data:
   - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  - backend/data/curriculum_qa/keypoints_manifest.json
+  - backend/data/curriculum_qa/snapshots/**/*
 spec_tests:
   - backend/specs/test_story_structure_spec.py
+  - backend/specs/test_keypoints_manifest_spec.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
-related_issues: [2205, 2261]
-last_reviewed: 2026-06-17
+related_issues: [2205, 2261, 2273]
+last_reviewed: 2026-06-19
 owner: young
 ---
 
@@ -47,6 +53,18 @@ keypoints.yml 的 `label_blanks` 經 `keypoints_table_sync.py` 轉成 `【 answe
 ### I-5: □ 選項轉 checkbox
 
 含 `□` + 圈號選項的 cell 必須產出 `interactive_type: checkbox` 與 `options` / `correct_options`
+
+### I-6: Admin 重點表 manifest 必須跟 runtime 同步（禁假綠）
+
+改 `owns_code` 或 lesson `story_structure_table` 時，**同一 PR** 必須：
+
+1. `python scripts/build_keypoints_qa_manifest.py --all`（需 private schema）
+2. `python scripts/keypoints_manifest_verify.py` 全綠
+3. CI `keypoints-manifest-gate.yml` 會擋 stale manifest
+
+`keypoints_manifest.json` 的 `layout` / `snapshots/*/structure.json` 必須與 live loader + parser 的 `interaction_profile` 一致；`PARSER_GAP_LESSONS` 為空時 `known_gap_count` 必須為 0
+
+一鍵本地：`bash scripts/story_structure_ship_gate.sh --rebuild`
 
 ## 代表課
 

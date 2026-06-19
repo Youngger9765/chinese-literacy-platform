@@ -1,0 +1,61 @@
+name: Keypoints Manifest Gate
+
+# Enforces I-6: committed manifest + snapshots must match live loader/parser output.
+# CI-safe — no private/curriculum-source required.
+#
+# See docs/qa/story-structure-verification-standard.md §0
+
+on:
+  pull_request:
+    paths:
+      - 'backend/app/routes/stories.py'
+      - 'backend/app/services/story_structure*.py'
+      - 'backend/app/services/keypoints_preview.py'
+      - 'backend/data/lessons/**'
+      - 'backend/data/curriculum_qa/**'
+      - 'backend/specs/test_keypoints_manifest_spec.py'
+      - 'backend/specs/test_story_structure_spec.py'
+      - 'backend/tests/test_story_structure_qa_contract.py'
+      - 'scripts/story_structure_qa*.py'
+      - 'scripts/keypoints_table_sync.py'
+      - 'scripts/build_keypoints_qa_manifest.py'
+      - 'scripts/keypoints_manifest_verify.py'
+      - 'scripts/story_structure_ship_gate.sh'
+      - 'specs/modules/story-structure/**'
+
+permissions:
+  contents: read
+
+jobs:
+  manifest-gate:
+    name: Manifest freshness + story-structure contracts
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: sqlite://
+      JWT_SECRET_KEY: ci-test-secret-key-not-for-production
+      TTS_PROVIDER: google
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Manifest matches runtime (no private schema)
+        run: python scripts/keypoints_manifest_verify.py
+
+      - name: Story-structure + manifest spec contracts
+        run: |
+          cd backend
+          python -m pytest \
+            specs/test_keypoints_manifest_spec.py \
+            specs/test_story_structure_spec.py \
+            tests/test_story_structure_qa_contract.py \
+            -q
