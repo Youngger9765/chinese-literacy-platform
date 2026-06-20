@@ -114,7 +114,14 @@ async def save_reading_audio(
         )
         return SaveAudioResponse(ok=False, reason="invalid_audio_size")
 
-    raw_mime = audio.content_type or "audio/webm"
+    # MIME: deny empty/unsupported (codex review — was fail-open to webm/.audio)
+    raw_mime = audio.content_type or ""
+    if _normalise_mime(raw_mime) not in _MIME_TO_EXT:
+        logger.warning(
+            "save-audio: unsupported MIME %r for user=%d session=%s",
+            raw_mime, current_user.id, session_id,
+        )
+        return SaveAudioResponse(ok=False, reason="unsupported_audio_type")
 
     # ── 2. IDOR: verify session ownership ────────────────────────────────────
     owned_session = (
