@@ -123,7 +123,7 @@ async def testset_upload(
 
 @router.get(
     "/testset/recordings",
-    dependencies=[Depends(require_role("system_admin", "teacher"))],
+    dependencies=[require_role("system_admin", "teacher")],
 )
 def testset_recordings(current_user: User = Depends(get_current_user)):
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
