@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>朗讀 Reading Pipeline — 架構 / 開發 / QA / 測試集 集成板</title>
+<style>
+  :root{
+    --bg:#FDF8F0; --ink:#1a1a2e; --purple:#5B4FC4; --muted:#6b6b8a;
+    --card:#fff; --line:#e7e2d8; --green:#16a34a; --red:#dc2626; --amber:#d97706;
+    --chip:#efe9ff;
+  }
+  *{box-sizing:border-box}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:32px 20px;line-height:1.6}
+  .container{max-width:1080px;margin:0 auto}
+  h1{color:var(--purple);font-size:1.6rem;margin:0 0 6px}
+  .subtitle{color:var(--muted);margin:0 0 6px}
+  .oneliner{background:var(--chip);border-left:4px solid var(--purple);padding:10px 14px;border-radius:8px;margin:14px 0 4px;font-size:.95rem}
+  .updated{color:var(--muted);font-size:.78rem;margin-bottom:18px}
+  /* tabs */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:22px}
+  .tab{padding:10px 16px;border:none;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+  .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+  .pane{display:none}
+  .pane.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  /* flow */
+  .flow{display:flex;flex-direction:column;gap:0;align-items:center}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;width:100%;max-width:560px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .node .t{font-weight:700}
+  .node .s{font-size:.82rem;color:var(--muted);margin-top:2px}
+  .node .side{font-size:.72rem;display:inline-block;background:var(--chip);color:var(--purple);border-radius:6px;padding:1px 7px;margin-left:6px}
+  .arrow{color:var(--purple);font-size:1.2rem;line-height:1.1;margin:4px 0}
+  .branch{border-style:dashed;border-color:var(--purple);max-width:560px}
+  .branch .t{color:var(--purple)}
+  /* table */
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:.86rem}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f3eee4;color:var(--ink);font-size:.8rem}
+  tr:last-child td{border-bottom:none}
+  code{background:#f3eee4;padding:1px 5px;border-radius:4px;font-size:.82em}
+  a{color:var(--purple);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .ok{color:var(--green);font-weight:700}
+  .badword{color:var(--red);font-weight:700}
+  .pill{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:20px;background:var(--chip);color:var(--purple);margin:2px 3px 2px 0}
+  .pill.fe{background:#e0f2fe;color:#0369a1}
+  .pill.be{background:#dcfce7;color:#15803d}
+  .pill.llm{background:#fef3c7;color:#b45309}
+  .unverified{background:#fee2e2;color:var(--red);font-weight:700;padding:1px 7px;border-radius:6px;font-size:.78rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .card h3{margin:0 0 8px;font-size:1.05rem;color:var(--purple)}
+  .big-link{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .big-link .lbl{font-weight:600}
+  .big-link .d{font-size:.82rem;color:var(--muted);margin-top:2px}
+  .debt{border-left:4px solid var(--red)}
+  .rule{border-left:4px solid var(--purple);background:var(--chip)}
+  ul{margin:6px 0;padding-left:20px}
+  li{margin:3px 0}
+  .legend{font-size:.78rem;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>朗讀 Reading Pipeline · 集成板</h1>
+  <p class="subtitle">架構 / 開發 / QA / 測試集 / 缺口&amp;債 — all in one</p>
+  <div class="oneliner"><b>一句話分工：</b>前端管「錄音 + 顯示」，後端管「辨識(STT) + 優化 + 評分 + 儲存」；<b>LLM 只用在辨識</b>，評分是 deterministic；<b>儲存後送</b>（評分→分數先回前端→才上傳，只存被接受的 take）。</div>
+  <p class="updated">最後更新 2026-06-20 · base staging <code>6d991323</code>（含 #2299 後送修正）· 規則：每格現況掛可點證明；無證明標 <span class="unverified">未驗證</span></p>
+
+  <div class="tabs">
+    <button class="tab active" data-pane="arch">① 架構</button>
+    <button class="tab" data-pane="dev">② 開發</button>
+    <button class="tab" data-pane="qa">③ QA result</button>
+    <button class="tab" data-pane="testset">④ 測試集</button>
+    <button class="tab" data-pane="debt">⑤ 缺口&amp;債</button>
+  </div>
+
+  <!-- ARCH -->
+  <div class="pane active" id="arch">
+    <div class="flow">
+      <div class="node"><div class="t">① 錄音 <span class="side">前端</span></div><div class="s">useAudioRecorder.ts · MediaRecorder → webm</div></div>
+      <div class="arrow">▼</div>
+      <div class="node"><div class="t">② 辨識 STT <span class="side">後端 · LLM</span></div><div class="s">POST /reading/transcribe → gemini-2.5-flash@us-central1（只做辨識，#2299 後已不在此上傳）</div></div>
+      <div class="arrow">▼</div>
+      <div class="node"><div class="t">③ 優化 + 評分 <span class="side">前端 local + 後端</span></div><div class="s">normalize(去標點/注音/全形)+同音校正 → DP/Levenshtein deterministic（local 先算；tier3 才 Gemini）→ match_rate + diff + CPM</div></div>
+      <div class="arrow">▼</div>
+      <div class="node"><div class="t">④ 分數回傳 UI <span class="side">前端</span></div><div class="s">ParagraphCard 顯示正確率（學生立刻看到，不等儲存）</div></div>
+      <div class="arrow">▼ （學生接受 take，未重錄）</div>
+      <div class="node branch"><div class="t">⑤ 儲存（後送·async） <span class="side">前端→後端+GCS</span></div><div class="s">saveReadingAudio → POST /reading/save-audio → IDOR(session.student_id==user) → GCS lingoleap-reading-audio → 寫 audio_gcs_path（fail-safe，不擋分數；未接受的 take 不存）</div></div>
+      <div class="arrow">▼</div>
+      <div class="node branch"><div class="t">回放 <span class="side">後端</span></div><div class="s">signed URL 10min：學生 learning_audio_replay · 老師 teacher_audio_replay（+IDOR 擁有權）</div></div>
+    </div>
+    <p class="legend">關鍵：LLM 只在②辨識；③④全確定性（分數穩定可稽核）。<b>儲存在④之後（後送）</b>——舊版把儲存放在 transcribe（評分前），#2299 已改正。</p>
+  </div>
+
+  <!-- DEV -->
+  <div class="pane" id="dev">
+    <table>
+      <thead><tr><th>階段</th><th>端</th><th>功能</th><th>檔案</th><th>PR</th><th>證明</th><th>狀態</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>①錄音</td><td><span class="pill fe">前端</span></td><td>MediaRecorder→webm</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/hooks/useAudioRecorder.ts">useAudioRecorder.ts</a></td>
+          <td>—</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">/qa render OK</a></td><td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td>②辨識STT</td><td><span class="pill llm">後端·LLM</span></td><td>gemini-2.5-flash @us-central1</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/services/reading_transcription_service.py">reading_transcription_service.py</a></td>
+          <td>—</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/docs/ai/reading-stt-scorer-ab-2026-06.md">A/B doc</a></td><td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td>③優化+評分</td><td><span class="pill fe">前</span><span class="pill be">後</span></td><td>normalize+同音校正 → deterministic DP 對齊</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/services/reading_evaluation_service.py">reading_evaluation_service.py</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2266">#2266</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2274">#2274</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2266">staging 98.1%</a></td><td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td>④顯示</td><td><span class="pill fe">前端</span></td><td>ParagraphCard 正確率+diff</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/components/reading-steps/live-tutor/hooks/useParagraphEvaluation.ts">useParagraphEvaluation.ts</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2279">#2279</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2284">#2284</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a></td>
+          <td>/qa console 乾淨</td><td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td>⑤儲存(後送)</td><td><span class="pill fe">前</span><span class="pill be">後+GCS</span></td><td>分數後 async 上傳+綁定（只存接受的 take）</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/routes/learning/learning_save_audio.py">learning_save_audio.py</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2278">#2278</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">#2299</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">Backend Tests 綠</a></td><td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td>回放</td><td><span class="pill be">後端</span></td><td>signed URL 10min + IDOR（學生/老師）</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/routes/teacher/teacher_audio_replay.py">teacher_audio_replay.py</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a></td>
+          <td><span class="unverified">未驗證</span> 老師端前端鈕(PR3)未建</td><td class="badword">部分</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend">前端 <span class="pill fe">前</span> · 後端 <span class="pill be">後</span> · 用 LLM <span class="pill llm">LLM</span>。「證明」欄連到 PR / CI / 文件；無證明 = <span class="unverified">未驗證</span>。</p>
+  </div>
+
+  <!-- QA -->
+  <div class="pane" id="qa">
+    <a class="big-link" href="./7-lessons-progress.html">
+      <div><div class="lbl">七課驗收進度頁 →</div><div class="d">教授七課 staging 人工驗收狀態</div></div><div>📄</div>
+    </a>
+    <div class="card">
+      <h3>QA 驗收 issue</h3>
+      <ul>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2197">#2197</a> 逐段朗讀（AI 辨識）七課驗收 <span class="pill">啟翔</span></li>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2187">#2187</a> 全文朗讀 七課驗收 <span class="pill">啟翔</span></li>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2194">#2194</a> 圖文並陳介面 七課驗收 <span class="pill">Young</span></li>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2153">#2153</a> 教授 demo 修正 — 七課人工驗收</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>教授痛點（未結）</h3>
+      <ul>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2083">#2083</a> 聚光燈版面與教學脈絡重設計 <span class="badword">open · 最痛</span></li>
+        <li><a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2079">#2079</a> · <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2080">#2080</a> 教授七課 學習單對應/內容/功能檢查</li>
+      </ul>
+    </div>
+    <p class="legend">⚠️ 驗收前先「真機 + 真人」dogfood，別只跑 happy-path（方大哥用真機才暴露的痛點不該等客戶踩）。</p>
+  </div>
+
+  <!-- TESTSET -->
+  <div class="pane" id="testset">
+    <div class="card debt">
+      <h3>測試集收集頁 <span class="unverified">未建</span></h3>
+      <p>人聲測試集 crowdsource 頁（<a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2287">issue #2287</a>）— 招募真人讀課文錄音建 100–200 樣本，驗證 STT/評分在真實童音。<b>目前零實作</b>（上次 agent 跑完零產出）。</p>
+    </div>
+    <div class="card">
+      <h3>收集 SOP（陌生人視角，每人 ~30 分）</h3>
+      <ol>
+        <li>落地頁：為什麼錄、要做什麼、多久</li>
+        <li>輸入名字（輕量、無登入；列為貢獻者留名）</li>
+        <li>看指派課文：依年級難度分級（國小只看國小）</li>
+        <li>點開一篇 → 課文全文顯示，照念</li>
+        <li>錄 2 版本：正確 + 刻意錯漏（每人 3 篇×2=6 段）</li>
+        <li>上傳 → 可回放確認</li>
+        <li>進度 grid：哪些課文×(正確/錯誤)已上傳打勾</li>
+        <li>全部完成 → 致謝 + 留名</li>
+      </ol>
+      <p class="legend">存放：GCS <code>lingoleap-reading-audio</code> prefix <code>test-dataset/{貢獻者}/{課文}/{correct|error}.webm</code>（不跟學生 attempt 混）。第一批靖杭/方大哥開箱。</p>
+    </div>
+  </div>
+
+  <!-- DEBT -->
+  <div class="pane" id="debt">
+    <div class="card debt">
+      <h3>🔴 已知缺口 / 技術債</h3>
+      <ul>
+        <li><b>testset #2287 未建</b> — 收集頁零實作 → <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2287">#2287</a></li>
+        <li><b>38 個 pre-existing vitest 失敗</b> — UI 文字 drift + 沒包 AuthProvider；CI <code>frontend-checks</code> 刻意只跑 <code>src/__smoke__/</code>，全套 <code>npm run test</code> 目前是紅的</li>
+        <li><b>CI 測 staging-not-PR-code</b> — <code>e2e-tests.yml</code> 跑 staging baseURL（測舊 code 非 PR 自己的），render-smoke 才跑 PR build</li>
+        <li><b>reconcile orphan 未排程</b> — <code>reconcile_reading_audio_orphans.py</code> 預設 dry-run、未排 cron（#2299 後送後新 orphan 應大減）</li>
+        <li><b>老師端「▶聽錄音」前端鈕(PR3) 未建</b> — 後端 #2286 已 ready</li>
+      </ul>
+    </div>
+    <div class="card rule">
+      <h3>設計鐵律</h3>
+      <p>每一格「現況」必須掛可點證明連結（PR / CI run / commit / 截圖）；沒證明的格子自動標 <span class="unverified">未驗證</span> —— 把「verified = 證據」變成看得見，擋掉「code-read 當完成」。</p>
+    </div>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.pane).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
