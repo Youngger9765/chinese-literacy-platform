@@ -643,7 +643,7 @@ modules:
   - 2205
   source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
-  last_reviewed: 2026-06-18
+  last_reviewed: 2026-06-20
   owner: young
   intent: specs/modules/spotlight_v2/INTENT.md
 - spec_id: step.sequence.registry

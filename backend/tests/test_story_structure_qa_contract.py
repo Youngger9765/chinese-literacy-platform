@@ -127,3 +127,12 @@ def test_gate_l3_checkbox_markers_pass_when_profile_matches():
         yaml_checkbox_cells=count_checkbox_cells_in_table(table),
     )
     assert issues == []
+
+
+def test_l5_issues_retriable_session_flake():
+    from story_structure_qa_lib import l5_issues_retriable
+
+    assert l5_issues_retriable(["missing data-story-structure-table", "worksheet_table but zero tr"])
+    assert l5_issues_retriable(["redirected to login"])
+    assert not l5_issues_retriable(["missing data-comprehension-lesson-text"])
+    assert not l5_issues_retriable([])
