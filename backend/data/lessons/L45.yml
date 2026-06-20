@@ -161,58 +161,8 @@ strategy_exercise:
     answer: 1
   - prompt: 讀文言文時遇到不認識的字詞，課文建議我們怎麼做？請用自己的話回答
     type: free_text
-story_structure:
-- label: 主題
-  value: 文言文的閱讀方法與特色
-- label: 重要事實 1
-  value: 文言文因書寫不便而生，可大幅精簡文字。
-- label: 重要事實 2
-  value: 文言文主要透過三種方式節省用字。
-- label: 重要事實 3
-  value: 文言文因時代差異，有許多生字古字。
-- label: 結論
-  value: 讀文言文要「腦補」被省略處，並查注釋。
 knowledge_video_url: https://www.youtube.com/watch?v=JRZOowz9V7c
-story_structure_rows:
-- label: 主題
-  value: 文言文的特色與閱讀方式
-  interactive_type: fill_blank
-  hint: 這篇文章在說什麼？
-- label: 重要事實 1
-  value: 文言文因書寫不便而生
-  interactive_type: checkbox
-  hint: 文言文為何出現？
-  options:
-  - 古人喜歡用文言文
-  - 文言文因書寫不便而生
-  - 文言文比較有深度
-  correct_options:
-  - 1
-- label: 重要事實 2
-  value: 文言文節省用字的方式
-  interactive_type: checkbox
-  hint: 文言文如何省字？
-  options:
-  - 用詞精簡、省略主詞或受詞、省略連接詞
-  - 多用成語、多用比喻、多用排比
-  - 字體較小、排版緊密、不加標點
-  correct_options:
-  - 0
-- label: 重要事實 3
-  value: 文言文難讀的原因
-  interactive_type: checkbox
-  hint: 文言文為何難懂？
-  options:
-  - 古人故意寫得很難
-  - 用字精簡和古今用詞差異
-  - 文言文的字數太多
-  correct_options:
-  - 1
-- label: 結論
-  value: 讀文言文要「腦補」並參考注釋
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: ai-rows-migrated-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -247,3 +197,14 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 主題
+  - 文言文的特色與閱讀方式 【 這篇文章在說什麼？ 】
+- - 重要事實 1
+  - □①古人喜歡用文言文 ②文言文因書寫不便而生 □③文言文比較有深度
+- - 重要事實 2
+  - ①用詞精簡、省略主詞或受詞、省略連接詞 □②多用成語、多用比喻、多用排比 □③字體較小、排版緊密、不加標點
+- - 重要事實 3
+  - □①古人故意寫得很難 ②用字精簡和古今用詞差異 □③文言文的字數太多
+- - 結論
+  - 讀文言文要「腦補」並參考注釋 【 課文最後想告訴我們什麼？ 】

@@ -179,49 +179,7 @@ strategy_exercise:
     answer: 1
   - prompt: 課文最後一段總結了什麼？用自己的話寫下來
     type: free_text
-story_structure:
-- label: 主題
-  value: 本段的小標題也是：用歌聲求偶。
-story_structure_rows:
-- label: 主題
-  value: 動物求偶方式
-  interactive_type: fill_blank
-  hint: 課文主要在講什麼？
-- label: 重要事實 1
-  value: 動物會用歌聲求偶，例如雄蛙和五色鳥。
-  interactive_type: checkbox
-  hint: 動物如何傳達愛意？
-  options:
-  - 動物會用歌聲求偶，例如雄蛙和五色鳥。
-  - 動物只會用舞蹈求偶。
-  - 動物不會發出聲音求偶。
-  correct_options:
-  - 0
-- label: 重要事實 2
-  value: 海馬和鴕鳥會用舞姿吸引仰慕者。
-  interactive_type: checkbox
-  hint: 動物如何吸引伴侶？
-  options:
-  - 只有海馬會用舞姿求偶。
-  - 海馬和鴕鳥會用舞姿吸引仰慕者。
-  - 動物不會跳舞求偶。
-  correct_options:
-  - 1
-- label: 重要事實 3
-  value: 飛蛾和蛇會利用氣味傳達真情意。
-  interactive_type: checkbox
-  hint: 動物如何傳遞訊息？
-  options:
-  - 動物只會用聲音傳遞訊息。
-  - 飛蛾和蛇會利用氣味傳達真情意。
-  - 動物不會利用氣味求偶。
-  correct_options:
-  - 1
-- label: 結論
-  value: 動物透過多采多姿的求偶方式，延續物種，豐富大自然。
-  interactive_type: fill_blank
-  hint: 課文最後想告訴我們什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: ai-rows-migrated-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -256,3 +214,14 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 主題
+  - 動物求偶方式 【 課文主要在講什麼？ 】
+- - 重要事實 1
+  - ①動物會用歌聲求偶，例如雄蛙和五色鳥。 □②動物只會用舞蹈求偶。 □③動物不會發出聲音求偶。
+- - 重要事實 2
+  - □①只有海馬會用舞姿求偶。 ②海馬和鴕鳥會用舞姿吸引仰慕者。 □③動物不會跳舞求偶。
+- - 重要事實 3
+  - □①動物只會用聲音傳遞訊息。 ②飛蛾和蛇會利用氣味傳達真情意。 □③動物不會利用氣味求偶。
+- - 結論
+  - 動物透過多采多姿的求偶方式，延續物種，豐富大自然。 【 課文最後想告訴我們什麼？ 】
