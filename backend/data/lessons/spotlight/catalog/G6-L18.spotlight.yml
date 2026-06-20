@@ -1,0 +1,15 @@
+spotlight:
+  lesson: G6-L18
+  strategy_name: 正向思考-辨識與轉念練習
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: 本課閱讀策略：正向思考-辨識與轉念練習
+  - type: free_text
+    prompt: 1.正向思考、負向思考辨識大考驗：請根據前面的情境，判斷後面兩個句子，屬於正向思考還請在（ ）內畫Ｏ，負向思考請在（ ）內畫Ｘ。
+  - type: free_text
+    prompt: ２.正負轉換試試看：請幫情境裡的負向想法，轉換成正向的想法。答案只要合理都可以哦！
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
