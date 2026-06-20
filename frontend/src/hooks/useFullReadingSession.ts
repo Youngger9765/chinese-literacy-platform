@@ -19,7 +19,7 @@ import { DiffToken } from '../types';
 import { useAudioRecorder } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
 import { saveReadingHistory } from '../services/readingHistoryApi';
-import { transcribeReading } from '../services/learning/session';
+import { transcribeReading, saveReadingAudio } from '../services/learning/session';
 
 export interface SavedResult {
   matchRate: number;
@@ -146,7 +146,7 @@ export function useFullReadingSession({
      * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
      *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
 
-    const _evaluate = (finalTranscript: string) => {
+    const _evaluate = (finalTranscript: string, capturedAudioBlob: Blob) => {
       const fluency = analyzeFluency({
         spoken: cleanChineseText(finalTranscript),
         target: fullText,
@@ -161,6 +161,14 @@ export function useFullReadingSession({
         errorBreakdown: fluency.errorBreakdown,
       };
       onResultReady(newResult, cleanChineseText(finalTranscript));
+
+      // Issue #2297: upload audio AFTER score is returned to UI (deferred upload).
+      // Fail-safe: .catch() ensures upload failure never affects score display.
+      if (token && dbSessionId != null) {
+        saveReadingAudio(capturedAudioBlob, dbSessionId, undefined, token)
+          .catch((err) => console.warn('[FullReading] saveReadingAudio error:', err));
+      }
+
       const durationSec = fluency.durationMs / 1000;
       if (token && durationSec > 0) {
         saveReadingHistory(
@@ -179,12 +187,14 @@ export function useFullReadingSession({
     if (token) {
       // I1: audio blob available → try Gemini.
       setIsTranscribing(true);
-      transcribeReading(audioBlob, fullText, durationMs, token, dbSessionId ?? undefined)
+      // Issue #2297: no longer pass session_id to transcribeReading — upload is
+      // deferred to saveReadingAudio called inside _evaluate after score is ready.
+      transcribeReading(audioBlob, fullText, durationMs, token)
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {
             // Gemini success (I1): Gemini transcript is the sole scoring source.
-            _evaluate(result.transcript);
+            _evaluate(result.transcript, audioBlob);
           } else {
             // Gemini failed — cannot fall back to Web Speech (removed, Issue #2266).
             setMicError('辨識失敗，請重錄一次');
@@ -198,7 +208,7 @@ export function useFullReadingSession({
       // No token — cannot reach Gemini.
       setMicError('未偵測到語音，請重試。');
     }
-  }, [fullText, stopSession, token, storyId, onResultReady, audioRecorder.stopAndGetBlob]);
+  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, audioRecorder.stopAndGetBlob]);
 
   return {
     isSessionActive,

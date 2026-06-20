@@ -18,6 +18,7 @@ Splits the original monolithic learning.py (1,881 lines) into focused sub-module
 - mcq_attempt.py                   — MCQ attempt telemetry endpoint (Issue #1507)
 - toolbox.py                       — Practice toolbox session endpoints (Issue #1463 / #1460)
 - learning_audio_replay.py         — Student reading audio signed-URL replay (Issue #2266)
+- learning_save_audio.py           — Deferred GCS upload for accepted reading takes (Issue #2297)
 
 The composed router is re-exported as `router` so that main.py's existing
 `app.include_router(learning.router, prefix="/api")` continues to work unchanged.
@@ -44,6 +45,7 @@ from .mcq_attempt import router as mcq_attempt_router
 from .toolbox import router as toolbox_router
 from .learning_annotations import router as annotations_router
 from .learning_audio_replay import router as audio_replay_router
+from .learning_save_audio import router as save_audio_router
 
 router = APIRouter(tags=["learning"])
 
@@ -65,5 +67,6 @@ router.include_router(mcq_attempt_router)
 router.include_router(toolbox_router)
 router.include_router(annotations_router)
 router.include_router(audio_replay_router)
+router.include_router(save_audio_router)
 
 __all__ = ["router"]
