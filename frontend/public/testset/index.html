@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>朗讀測試集收集 — LingoLeap</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+    .header { background: #1e40af; color: white; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .header h1 { font-size: 1.2rem; font-weight: 700; }
+    .container { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .card h2 { font-size: 1rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; }
+    .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .field { flex: 1; min-width: 140px; }
+    label { display: block; font-size: .8rem; font-weight: 600; color: #64748b; margin-bottom: .35rem; }
+    input, select { width: 100%; padding: .55rem .75rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: .95rem; outline: none; transition: border-color .15s; }
+    input:focus, select:focus { border-color: #3b82f6; }
+    .btn { display: inline-flex; align-items: center; gap: .45rem; padding: .6rem 1.2rem; border: none; border-radius: 8px; font-size: .9rem; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .btn-primary { background: #1e40af; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-outline { background: white; color: #475569; border: 1.5px solid #cbd5e1; }
+    .btn-outline:hover { background: #f1f5f9; }
+    .lesson-grid { display: grid; gap: .75rem; }
+    .lesson-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; cursor: pointer; transition: all .15s; }
+    .lesson-card:hover { border-color: #3b82f6; background: #eff6ff; }
+    .lesson-card.selected { border-color: #1e40af; background: #dbeafe; }
+    .lesson-title { font-weight: 700; font-size: 1rem; }
+    .lesson-meta { font-size: .78rem; color: #64748b; margin-top: .2rem; }
+    .lesson-preview { font-size: .83rem; color: #475569; margin-top: .6rem; line-height: 1.6; max-height: 3.2rem; overflow: hidden; }
+    .text-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 1rem; line-height: 1.9; color: #1e293b; max-height: 280px; overflow-y: auto; }
+    .version-row { display: flex; gap: .75rem; margin-bottom: 1rem; }
+    .version-btn { flex: 1; padding: .65rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: .88rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; background: white; color: #475569; }
+    .version-btn.selected { border-color: #1e40af; background: #dbeafe; color: #1e40af; }
+    .version-btn.selected.error { border-color: #dc2626; background: #fee2e2; color: #dc2626; }
+    .rec-controls { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    .timer { font-size: 1.5rem; font-weight: 700; color: #1e40af; min-width: 3rem; }
+    .timer.recording { color: #dc2626; }
+    audio { width: 100%; margin-top: .75rem; display: none; }
+    audio.visible { display: block; }
+    .status-msg { margin-top: .75rem; padding: .65rem .9rem; border-radius: 8px; font-size: .88rem; font-weight: 500; display: none; }
+    .status-msg.show { display: block; }
+    .status-msg.success { background: #dcfce7; color: #166534; }
+    .status-msg.error { background: #fee2e2; color: #991b1b; }
+    .status-msg.info { background: #dbeafe; color: #1e40af; }
+    .uploaded-list { margin-top: 1rem; }
+    .uploaded-item { display: flex; align-items: center; gap: .5rem; padding: .4rem 0; border-bottom: 1px solid #f1f5f9; font-size: .85rem; color: #374151; }
+    .badge { font-size: .7rem; padding: .15rem .5rem; border-radius: 99px; font-weight: 600; }
+    .badge.correct { background: #dcfce7; color: #166534; }
+    .badge.error { background: #fee2e2; color: #991b1b; }
+    .step-indicator { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+    .step { flex: 1; height: 4px; border-radius: 2px; background: #e2e8f0; }
+    .step.done { background: #1e40af; }
+    .step.active { background: #93c5fd; }
+    .hidden { display: none !important; }
+    .pulse { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+    .info-banner { background: #fefce8; border: 1.5px solid #fbbf24; border-radius: 10px; padding: 1rem; font-size: .88rem; color: #92400e; margin-bottom: 1.25rem; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>朗讀人聲測試集</h1>
+    <div style="font-size:.78rem;opacity:.8;margin-top:.15rem">LingoLeap AI 閱讀教學平台</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Step indicator -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step active" id="s1"></div>
+    <div class="step" id="s2"></div>
+    <div class="step" id="s3"></div>
+    <div class="step" id="s4"></div>
+  </div>
+
+  <div class="info-banner">
+    感謝你參與 LingoLeap 人聲測試集收集！你的錄音將幫助我們訓練更準確的朗讀 AI，讓更多孩子受益。
+  </div>
+
+  <!-- Step 1: Identity -->
+  <div class="card" id="stepIdentity">
+    <h2>第 1 步：請輸入你的資訊</h2>
+    <div class="form-row">
+      <div class="field">
+        <label>姓名（不會公開顯示）</label>
+        <input type="text" id="nameInput" placeholder="例：王小明" maxlength="30" />
+      </div>
+      <div class="field">
+        <label>年級 / 身分</label>
+        <select id="gradeInput">
+          <option value="">請選擇</option>
+          <option value="小一">國小一年級</option>
+          <option value="小二">國小二年級</option>
+          <option value="小三">國小三年級</option>
+          <option value="小四">國小四年級</option>
+          <option value="小五">國小五年級</option>
+          <option value="小六">國小六年級</option>
+          <option value="國中生">國中生</option>
+          <option value="高中生">高中生</option>
+          <option value="大學生">大學生</option>
+          <option value="老師">老師</option>
+          <option value="大人">大人</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="goStep2()">下一步 →</button>
+  </div>
+
+  <!-- Step 2: Select lesson -->
+  <div class="card hidden" id="stepLesson">
+    <h2>第 2 步：選一篇課文來朗讀</h2>
+    <div class="lesson-grid" id="lessonGrid"></div>
+    <div style="margin-top:1rem;display:flex;gap:.5rem">
+      <button class="btn btn-outline" onclick="goStep(1)">← 返回</button>
+      <button class="btn btn-primary" onclick="goStep3()" id="selectLessonBtn" disabled>選好了 →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Record -->
+  <div class="card hidden" id="stepRecord">
+    <h2>第 3 步：選版本並錄音</h2>
+    <div style="background:#f1f5f9;border-radius:8px;padding:.75rem;margin-bottom:1rem;font-size:.82rem;color:#475569">
+      <strong>課文：</strong><span id="selectedLessonTitle"></span>
+    </div>
+
+    <div style="margin-bottom:.75rem">
+      <label style="font-size:.85rem;font-weight:700;color:#374151;margin-bottom:.5rem;display:block">請選擇要錄哪個版本：</label>
+      <div class="version-row">
+        <button class="version-btn selected" id="vBtnCorrect" onclick="selectVersion('correct', this)">
+          正確版<br><span style="font-weight:400;font-size:.75rem">正常照課文念</span>
+        </button>
+        <button class="version-btn error" id="vBtnError" onclick="selectVersion('error', this)" style="border-color:#e2e8f0;background:white;color:#475569">
+          刻意錯誤版<br><span style="font-weight:400;font-size:.75rem">故意多錯/少讀幾個字</span>
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:.75rem">
+      <label style="font-size:.85rem;font-weight:700;color:#374151;margin-bottom:.5rem;display:block">課文全文（對著念）：</label>
+      <div class="text-box" id="lessonText"></div>
+    </div>
+
+    <div class="rec-controls">
+      <button class="btn btn-danger" id="recBtn" onclick="toggleRecord()">
+        <span id="recIcon">●</span> 開始錄音
+      </button>
+      <div class="timer" id="recTimer">0:00</div>
+      <button class="btn btn-outline hidden" id="clearBtn" onclick="clearRecording()">清除重錄</button>
+    </div>
+    <audio id="playbackAudio" controls></audio>
+    <div class="status-msg" id="recStatus"></div>
+
+    <div style="margin-top:1rem;display:flex;gap:.5rem">
+      <button class="btn btn-outline" onclick="goStep(2)">← 返回</button>
+      <button class="btn btn-success hidden" id="uploadBtn" onclick="uploadRecording()">上傳這個錄音 ✓</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Uploaded summary -->
+  <div class="card hidden" id="stepDone">
+    <h2>已上傳的錄音</h2>
+    <div class="uploaded-list" id="uploadedList"></div>
+    <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="addAnother()">+ 再錄一個版本</button>
+      <button class="btn btn-outline" onclick="goStep(2)">換一篇課文</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Lesson data (embedded — v1 uses 5 lessons from backend/data/lessons/) ──
+const LESSONS = [
+  {
+    id: "L01",
+    title: "贏得喝采的輸家",
+    grade: "四年級",
+    text: `「戴資穎戴資穎第一名，戴資穎戴資穎我愛妳~~~」這一句洗腦的廣告臺詞，是否也在你的周遭出現？她就是台灣第一人，累計214周排名世界第一的球后──戴資穎。
+
+小戴即使在強大的壓力下，仍然堅持維持自己的風格。小戴相信攻擊是最好的防禦，總是主動出擊，她追求完美的邊角球和難以預測的穿越角度，她的攻擊千變萬化，讓對手摸不著頭緒。雖然這樣的進攻方式會提高失誤率，但如果要她打穩定的安全球風，小戴就不是小戴了。這就是她獨特的地方，也是她迷人之處。
+
+2021年8月1日，小戴在東京奧運金牌賽的轉播收視率創下新高，這場小戴與陳雨菲的龍爭虎鬥，戰況勢均力敵，全臺觀眾守在電視前，目不轉睛。小戴一得分，大家歡天喜地、讚嘆不已；小戴失分，個個揪心、替她緊張。最後，小戴以2比1，21:12、16:21、16:21艱辛地輸給了陳雨菲，與金牌失之交臂。
+
+雖然輸了，但小戴贏得了全臺的心。賽後，小戴笑著說：「謝謝大家。我盡力了，就是這樣。」她的微笑給了我們一個回答──人生不只有輸和贏，重要的是你面對輸贏的態度。小戴是一個贏得喝采的輸家。`,
+  },
+  {
+    id: "L02",
+    title: "十秒的背後",
+    grade: "四年級",
+    text: `十秒鐘你能做什麼？裝一杯水、哼一段小曲、等待手機略過廣告？這十秒可能還不夠呢。這轉瞬即逝的十秒，對於百尺短跑的選手來說足已決定了一場令人血脈賁張、緊張刺激的勝負。
+
+在眾人期待的目光下，「臺灣最速男」——楊俊瀚，在2017年夏季世界大學運動會田徑男子一百公尺決賽，以10.22秒獲得第一名，替中華臺北拿下睽違二十六年的世大運田徑金牌。
+
+2018年雅加達亞運上，他以千分之二秒的差距與金牌擦身而過，些微秒數的差距帶來天壤之別的結果，讓好不容易站上的國際舞台的他心有不甘，他告訴自己：「那代表我還不夠努力，今天我輸千分位，那是上天給我的結果。」他更下定決心要超越現在的自己。
+
+看楊俊瀚的採訪影片，你會發現他說話很有力量，完全不是短跑選手刻板印象中的凶猛形象。一個人說話的態度，往往反映了他待人處事的方式：楊俊瀚的溫柔，如同他在賽場上的穩健；他的堅定，如同他奔跑時的決心。這就是屬於楊俊瀚的那十秒背後的祕密。`,
+  },
+  {
+    id: "L03",
+    title: "長高的祕密",
+    grade: "四年級",
+    text: `開學後不久，又是到健康中心量身高體重的時候。同學們嘰嘰喳喳講個不停，有人會開始炫耀自己的身高，有人則是會隱藏自己的體重。測量後老師大多會依照身高來安排班級的座位，「小承恩」只有一百三十公分，又要坐第一排。他一直都很羨慕最後一排的「大承恩」，明明都是男生，明明都叫承恩，身高卻差了近三十公分，他真的很不喜歡「小承恩」這個外號。
+
+可能很多同學都有「小承恩」這樣的煩惱。那麼要怎樣才能長高呢？是跳繩嗎？喝牛奶嗎？還是要喝轉骨湯呢？其實這些答案都不完全正確。根據研究：「充足的睡眠」、「適當的運動」及「均衡的飲食」才是長高的關鍵。
+
+我們會長高，主要是在睡眠時，身體會分泌「生長激素」，這種激素會刺激身體發育，不僅能讓骨骼和肌肉生長，對於身高增長也有很大的幫助。生長激素大量分泌的時間，大約是在晚上十一點到凌晨一點之間，因此最好能在十點前入睡。而且，如果睡眠時間不夠，分泌的生長激素就會相對減少，身高自然不容易增加，更可能導致精神不濟，影響學習效率。`,
+  },
+  {
+    id: "L04",
+    title: "運動科學",
+    grade: "四年級",
+    text: `漫畫《一拳超人》中的埼玉老師堅持了三年，每天做一百次的伏地挺身、一百次的仰臥起坐、一百次的深蹲、十公里的長跑，終於擁有一拳就能打倒所有敵人的實力。許多人看完漫畫後，紛紛效法實施「一拳超人訓練菜單」。
+
+蒼藍鴿醫師從運動科學的角度說明埼玉老師的訓練菜單並不是那麼妥當：研究證實，這四種運動方式是相互衝突的，有氧運動（訓練心肺功能，如長跑）與其他訓練肌肉的運動，擺在同一天進行，效果會相互抵消。
+
+科學告訴我們，想增肌時，最好進行無氧的重量訓練，每次訓練完，必須讓肌肉有足夠的休息時間，才能達到增肌的效果。而有氧運動和重量訓練最好不要在同一天進行，如果非得如此，最好以重量訓練為優先，有氧運動排在後面進行。此外，每次訓練後一定要有足夠的睡眠，才能讓肌肉充分恢復。`,
+  },
+  {
+    id: "L05",
+    title: "穿越極限的跑者",
+    grade: "四年級",
+    text: `「一個夢想如果可以被想像，那就有存在的價值。但重點是你要怎麼計劃並且執行。」臺灣極地超級馬拉松好手陳彥博說。他跑過沙漠、高山和冰原，是第一位勇奪四大極地超級馬拉松巡迴賽總冠軍的亞洲人。
+
+2008年，陳彥博與超馬好手林義傑、劉柏園組隊，挑戰磁北極六百五十公里極限馬拉松，獲得團體組第三名的殊榮，他是歷屆最年輕完賽的選手，這場比賽帶給他的感動無可言喻，也是他跨入極地賽的夢想起點。
+
+2011年，二十三歲的陳彥博下了一個決定：「我要在五年內挑戰世界七大洲、八大站的超級馬拉松。」在逐夢的過程中，他承受了常人難以想像的艱辛──凍傷、迷路、身體極限的挑戰。但他告訴自己，每一步都算數，每一次堅持都是在向夢想靠近一步。他的故事告訴我們：極限不是終點，而是新的起點。`,
+  },
+];
+
+// ── App state ──
+const state = {
+  name: '',
+  grade: '',
+  selectedLesson: null,
+  version: 'correct',
+  recordedBlob: null,
+  uploadedItems: [],
+  mediaRecorder: null,
+  isRecording: false,
+  timerInterval: null,
+  elapsedSec: 0,
+};
+
+// ── Determine API base URL ──
+// In dev (localhost), hit the backend directly.
+// In production/preview (Cloud Run frontend), proxy via /api (same origin).
+function apiBase() {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  return '';
+}
+
+// ── Step navigation ──
+function setStep(n) {
+  document.getElementById('stepIdentity').classList.toggle('hidden', n !== 1);
+  document.getElementById('stepLesson').classList.toggle('hidden', n !== 2);
+  document.getElementById('stepRecord').classList.toggle('hidden', n !== 3);
+  document.getElementById('stepDone').classList.toggle('hidden', n !== 4);
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById(`s${i}`);
+    el.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : '');
+  });
+}
+
+function goStep(n) { setStep(n); }
+
+function goStep2() {
+  const name = document.getElementById('nameInput').value.trim();
+  const grade = document.getElementById('gradeInput').value;
+  if (!name) { alert('請輸入姓名'); return; }
+  if (!grade) { alert('請選擇年級'); return; }
+  state.name = name;
+  state.grade = grade;
+  renderLessonGrid();
+  setStep(2);
+}
+
+function goStep3() {
+  if (!state.selectedLesson) { alert('請先選一篇課文'); return; }
+  document.getElementById('selectedLessonTitle').textContent = state.selectedLesson.title;
+  document.getElementById('lessonText').textContent = state.selectedLesson.text;
+  clearRecording();
+  setStep(3);
+}
+
+// ── Lesson grid ──
+function renderLessonGrid() {
+  const grid = document.getElementById('lessonGrid');
+  grid.innerHTML = '';
+  LESSONS.forEach(lesson => {
+    const div = document.createElement('div');
+    div.className = 'lesson-card' + (state.selectedLesson?.id === lesson.id ? ' selected' : '');
+    div.innerHTML = `
+      <div class="lesson-title">${lesson.title}</div>
+      <div class="lesson-meta">${lesson.grade}</div>
+      <div class="lesson-preview">${lesson.text.substring(0, 80)}…</div>
+    `;
+    div.onclick = () => {
+      state.selectedLesson = lesson;
+      document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('selected'));
+      div.classList.add('selected');
+      document.getElementById('selectLessonBtn').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+}
+
+// ── Version selection ──
+function selectVersion(v, btn) {
+  state.version = v;
+  document.getElementById('vBtnCorrect').className = 'version-btn' + (v === 'correct' ? ' selected' : '');
+  document.getElementById('vBtnError').className = 'version-btn error' + (v === 'error' ? ' selected error' : '');
+  clearRecording();
+}
+
+// ── Recording ──
+async function toggleRecord() {
+  if (state.isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chunks = [];
+    state.mediaRecorder = new MediaRecorder(stream);
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    state.mediaRecorder.onstop = () => {
+      state.recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(state.recordedBlob);
+      const audio = document.getElementById('playbackAudio');
+      audio.src = url;
+      audio.className = 'visible';
+      document.getElementById('clearBtn').classList.remove('hidden');
+      document.getElementById('uploadBtn').classList.remove('hidden');
+      showStatus('recStatus', '錄音完成！請先回放確認，再按「上傳」', 'info');
+      stream.getTracks().forEach(t => t.stop());
+    };
+    state.mediaRecorder.start();
+    state.isRecording = true;
+    state.elapsedSec = 0;
+    const btn = document.getElementById('recBtn');
+    btn.className = 'btn btn-danger pulse';
+    btn.innerHTML = '<span id="recIcon">■</span> 停止錄音';
+    const timerEl = document.getElementById('recTimer');
+    timerEl.className = 'timer recording';
+    state.timerInterval = setInterval(() => {
+      state.elapsedSec++;
+      const m = Math.floor(state.elapsedSec / 60);
+      const s = state.elapsedSec % 60;
+      timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+  } catch (err) {
+    showStatus('recStatus', `無法存取麥克風：${err.message}`, 'error');
+  }
+}
+
+function stopRecording() {
+  if (state.mediaRecorder && state.isRecording) {
+    state.mediaRecorder.stop();
+    state.isRecording = false;
+    clearInterval(state.timerInterval);
+    const btn = document.getElementById('recBtn');
+    btn.className = 'btn btn-danger';
+    btn.innerHTML = '<span>●</span> 重新錄音';
+    document.getElementById('recTimer').className = 'timer';
+  }
+}
+
+function clearRecording() {
+  if (state.mediaRecorder && state.isRecording) {
+    state.mediaRecorder.stop();
+    state.isRecording = false;
+    clearInterval(state.timerInterval);
+  }
+  state.recordedBlob = null;
+  const audio = document.getElementById('playbackAudio');
+  audio.src = '';
+  audio.className = '';
+  document.getElementById('clearBtn').classList.add('hidden');
+  document.getElementById('uploadBtn').classList.add('hidden');
+  document.getElementById('recTimer').textContent = '0:00';
+  document.getElementById('recTimer').className = 'timer';
+  const btn = document.getElementById('recBtn');
+  btn.className = 'btn btn-danger';
+  btn.innerHTML = '<span>●</span> 開始錄音';
+  hideStatus('recStatus');
+}
+
+// ── Upload ──
+async function uploadRecording() {
+  if (!state.recordedBlob) { alert('請先錄音'); return; }
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = '上傳中…';
+  showStatus('recStatus', '上傳中，請稍候…', 'info');
+
+  const fd = new FormData();
+  fd.append('contributor_name', state.name);
+  fd.append('grade', state.grade);
+  fd.append('lesson_id', state.selectedLesson.id);
+  fd.append('version', state.version);
+  fd.append('audio', state.recordedBlob, `${state.selectedLesson.id}_${state.version}.webm`);
+
+  try {
+    const res = await fetch(`${apiBase()}/api/testset/upload`, {
+      method: 'POST',
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || `HTTP ${res.status}`);
+    }
+    state.uploadedItems.push({
+      lesson: state.selectedLesson.title,
+      lessonId: state.selectedLesson.id,
+      version: state.version,
+      id: data.id,
+    });
+    showStep4();
+  } catch (err) {
+    showStatus('recStatus', `上傳失敗：${err.message}`, 'error');
+    btn.disabled = false;
+    btn.textContent = '重試上傳';
+  }
+}
+
+function showStep4() {
+  renderUploadedList();
+  setStep(4);
+}
+
+function renderUploadedList() {
+  const list = document.getElementById('uploadedList');
+  list.innerHTML = '';
+  if (state.uploadedItems.length === 0) {
+    list.innerHTML = '<div style="color:#64748b;font-size:.85rem">還沒有上傳的錄音</div>';
+    return;
+  }
+  state.uploadedItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'uploaded-item';
+    div.innerHTML = `
+      <span style="flex:1">${item.lesson}</span>
+      <span class="badge ${item.version}">${item.version === 'correct' ? '正確版' : '錯誤版'}</span>
+      <span style="color:#16a34a;font-size:.85rem">✓ #${item.id}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function addAnother() {
+  // Keep identity + lesson, go back to recording step
+  clearRecording();
+  setStep(3);
+}
+
+// ── Status helpers ──
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `status-msg show ${type}`;
+}
+
+function hideStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status-msg';
+}
+
+// ── Init ──
+setStep(1);
+</script>
+</body>
+</html>

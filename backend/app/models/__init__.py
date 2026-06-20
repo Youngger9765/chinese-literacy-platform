@@ -32,3 +32,4 @@ from .toolbox import (  # noqa: F401
     ToolboxVocabWordSearchSession,
 )
 from .annotation import AnnotationEntry  # noqa: F401
+from .testset_recording import TestsetRecording  # noqa: F401

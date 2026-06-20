@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>測試集錄音清單 (Owner) — LingoLeap</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; color: #1e293b; }
+    .header { background: #1e3a5f; color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .header-left h1 { font-size: 1.1rem; font-weight: 700; }
+    .header-left small { font-size: .75rem; opacity: .75; }
+    .share-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .share-btn:hover { background: #2563eb; }
+    .container { max-width: 1000px; margin: 1.5rem auto; padding: 0 1rem; }
+    .stats-row { display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 120px; background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: .9rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .stat-num { font-size: 1.8rem; font-weight: 800; color: #1e40af; }
+    .stat-label { font-size: .75rem; color: #64748b; margin-top: .2rem; }
+    .filter-row { display: flex; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .filter-row select, .filter-row input { padding: .45rem .7rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: .85rem; outline: none; }
+    .filter-row select:focus, .filter-row input:focus { border-color: #3b82f6; }
+    .refresh-btn { padding: .45rem .9rem; background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: .85rem; cursor: pointer; }
+    .refresh-btn:hover { background: #e2e8f0; }
+    .table-wrap { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8fafc; }
+    th { padding: .75rem 1rem; font-size: .75rem; font-weight: 700; color: #64748b; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    td { padding: .7rem 1rem; font-size: .85rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .badge { display: inline-block; font-size: .7rem; padding: .18rem .55rem; border-radius: 99px; font-weight: 600; }
+    .badge.correct { background: #dcfce7; color: #166534; }
+    .badge.error { background: #fee2e2; color: #991b1b; }
+    audio { max-width: 220px; height: 32px; }
+    .dl-btn { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .7rem; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: .75rem; color: #374151; cursor: pointer; text-decoration: none; }
+    .dl-btn:hover { background: #e2e8f0; }
+    .empty { text-align: center; padding: 3rem; color: #94a3b8; font-size: .95rem; }
+    .loading { text-align: center; padding: 2rem; color: #64748b; }
+    .error-msg { background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .88rem; }
+    .copy-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e293b; color: white; padding: .6rem 1.2rem; border-radius: 8px; font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+    .copy-toast.show { opacity: 1; }
+    .contributor-url-box { background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: .65rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .contributor-url-box span { font-size: .82rem; color: #475569; font-family: monospace; flex: 1; word-break: break-all; }
+    .contributor-url-box button { padding: .4rem .8rem; background: #1e40af; color: white; border: none; border-radius: 6px; font-size: .78rem; cursor: pointer; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <h1>測試集錄音清單 (Owner 頁)</h1>
+    <small>LingoLeap 人聲測試集 — 只有拿到這連結的人可以看</small>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center">
+    <a href="./index.html" class="share-btn" target="_blank">開貢獻者頁</a>
+    <button class="share-btn" onclick="copyContributorLink()">複製貢獻者連結</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Contributor URL box -->
+  <div class="contributor-url-box">
+    <span id="contributorUrl"></span>
+    <button onclick="copyContributorLink()">複製連結</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">—</div>
+      <div class="stat-label">總錄音數</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statContributors">—</div>
+      <div class="stat-label">貢獻者人數</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statCorrect">—</div>
+      <div class="stat-label">正確版</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statError">—</div>
+      <div class="stat-label">錯誤版</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statLessons">—</div>
+      <div class="stat-label">涵蓋課文數</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <select id="filterVersion" onchange="applyFilter()">
+      <option value="">所有版本</option>
+      <option value="correct">正確版</option>
+      <option value="error">錯誤版</option>
+    </select>
+    <select id="filterLesson" onchange="applyFilter()">
+      <option value="">所有課文</option>
+    </select>
+    <input type="text" id="filterName" placeholder="搜尋貢獻者名字…" oninput="applyFilter()" />
+    <button class="refresh-btn" onclick="loadData()">重新整理</button>
+    <span id="filterCount" style="font-size:.82rem;color:#64748b"></span>
+  </div>
+
+  <div id="errorMsg" class="error-msg" style="display:none"></div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="loading" id="loadingMsg">載入中…</div>
+    <table id="recTable" style="display:none">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>貢獻者</th>
+          <th>年級</th>
+          <th>課文</th>
+          <th>版本</th>
+          <th>上傳時間</th>
+          <th>播放</th>
+        </tr>
+      </thead>
+      <tbody id="recTbody"></tbody>
+    </table>
+    <div class="empty hidden" id="emptyMsg">目前還沒有錄音，分享貢獻者連結開始收集！</div>
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">連結已複製！</div>
+
+<script>
+let allData = [];
+
+function apiBase() {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  return '';
+}
+
+function contributorUrl() {
+  return location.origin + location.pathname.replace('list.html', 'index.html');
+}
+
+// Set contributor URL display
+document.getElementById('contributorUrl').textContent = contributorUrl();
+
+function copyContributorLink() {
+  const url = contributorUrl();
+  navigator.clipboard.writeText(url).then(() => {
+    const t = document.getElementById('copyToast');
+    t.className = 'copy-toast show';
+    setTimeout(() => { t.className = 'copy-toast'; }, 2000);
+  });
+}
+
+async function loadData() {
+  document.getElementById('loadingMsg').style.display = 'block';
+  document.getElementById('recTable').style.display = 'none';
+  document.getElementById('emptyMsg').classList.add('hidden');
+  document.getElementById('errorMsg').style.display = 'none';
+
+  try {
+    const res = await fetch(`${apiBase()}/api/testset/list?limit=500`);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.detail || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    allData = data.recordings || [];
+    populateLessonFilter();
+    updateStats();
+    applyFilter();
+  } catch (err) {
+    document.getElementById('loadingMsg').style.display = 'none';
+    const msg = document.getElementById('errorMsg');
+    msg.textContent = `載入失敗：${err.message}`;
+    msg.style.display = 'block';
+  }
+}
+
+function populateLessonFilter() {
+  const lessons = [...new Set(allData.map(r => r.lesson_id))].sort();
+  const sel = document.getElementById('filterLesson');
+  sel.innerHTML = '<option value="">所有課文</option>';
+  lessons.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l;
+    opt.textContent = l;
+    sel.appendChild(opt);
+  });
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = allData.length;
+  document.getElementById('statContributors').textContent = new Set(allData.map(r => r.contributor_name)).size;
+  document.getElementById('statCorrect').textContent = allData.filter(r => r.version === 'correct').length;
+  document.getElementById('statError').textContent = allData.filter(r => r.version === 'error').length;
+  document.getElementById('statLessons').textContent = new Set(allData.map(r => r.lesson_id)).size;
+}
+
+function applyFilter() {
+  const version = document.getElementById('filterVersion').value;
+  const lesson = document.getElementById('filterLesson').value;
+  const name = document.getElementById('filterName').value.toLowerCase().trim();
+
+  const filtered = allData.filter(r => {
+    if (version && r.version !== version) return false;
+    if (lesson && r.lesson_id !== lesson) return false;
+    if (name && !r.contributor_name.toLowerCase().includes(name)) return false;
+    return true;
+  });
+
+  renderTable(filtered);
+  document.getElementById('filterCount').textContent = filtered.length < allData.length
+    ? `顯示 ${filtered.length} / ${allData.length} 筆`
+    : '';
+}
+
+function renderTable(rows) {
+  document.getElementById('loadingMsg').style.display = 'none';
+
+  if (rows.length === 0) {
+    document.getElementById('recTable').style.display = 'none';
+    document.getElementById('emptyMsg').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('emptyMsg').classList.add('hidden');
+  document.getElementById('recTable').style.display = 'table';
+
+  const tbody = document.getElementById('recTbody');
+  tbody.innerHTML = '';
+
+  rows.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const uploadedAt = new Date(r.created_at).toLocaleString('zh-TW', {
+      month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+    });
+
+    // GCS path → can't play directly (private bucket).
+    // Show path for reference; download requires signed URL (v2 feature).
+    tr.innerHTML = `
+      <td style="color:#94a3b8;font-size:.75rem">${r.id}</td>
+      <td style="font-weight:600">${escHtml(r.contributor_name)}</td>
+      <td>${escHtml(r.grade)}</td>
+      <td style="font-family:monospace;font-size:.8rem">${escHtml(r.lesson_id)}</td>
+      <td><span class="badge ${r.version}">${r.version === 'correct' ? '正確版' : '錯誤版'}</span></td>
+      <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${uploadedAt}</td>
+      <td>
+        <span style="font-size:.72rem;color:#94a3b8;font-family:monospace" title="${escHtml(r.audio_gcs_path)}">
+          ${escHtml(r.audio_gcs_path.split('/').pop())}
+        </span>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Init
+loadData();
+</script>
+</body>
+</html>
