@@ -169,8 +169,9 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 1. 讀 `specs/registry.yaml`（小，所有 module 的 `owns_code` / `owns_data` 索引）
 2. 要動的檔案落在某 module → 讀該 `specs/modules/<feature>/INTENT.md`（人讀 SOT）+ 需要時 `backend/specs/test_<feature>_spec.py`（機器契約）
-3. 改完跑 **`bash specs/run-ci.sh`**（= local CI：registry 新鮮度 + 全部契約）。契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一）。快檢只跑 registry：`bash specs/run-ci.sh --quick`
-4. 沒對應 module 又是新 feature → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code，並跑 `python specs/build_registry.py` 重建索引
+3. **Content / learning module**（聚光燈、重點表、未來 DOCX 流程）→ 另讀 **`docs/qa/layer-verification-framework.md`** + INTENT 內 **L-layer 對照表**；merge 前跑 module ship gate（見框架 §5–§6）
+4. 改完跑 **`bash specs/run-ci.sh`**（= local CI：registry 新鮮度 + 全部契約）。契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一）。快檢只跑 registry：`bash specs/run-ci.sh --quick`
+5. 沒對應 module 又是新 feature → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code，並跑 `python specs/build_registry.py` 重建索引
 
 目前 **27 個 module**（OMO / 朗讀理解 / 計分 / 教材 / auth / 學習功能 / AI infra…）。完整索引 `specs/registry.yaml`，說明 `specs/README.md`。
 **Local CI**：GH Actions 自動跑卡在 workflow token（issue 2041），在那之前 push 前一律手動 `bash specs/run-ci.sh`（最近一次本機全綠：457 passed / 31 xfailed）。

@@ -1,9 +1,12 @@
 ---
 name: qa-keypoints
-description: 對一課已產出的重點表 schema 跑量化 eval + 人眼抽審。當需要「qa 重點表」「驗證重點表 schema」「keypoints qa」「確認重點表品質」「check keypoints」時使用。依賴 docs/issue-2205-eval-standard.md 的 PASS 門檻，不重發明指標。
+description: 對一課已產出的重點表 schema 跑量化 eval + 人眼抽審。當需要「qa 重點表」「驗證重點表 schema」「keypoints qa」「確認重點表品質」「check keypoints」時使用。依賴 docs/issue-2205-eval-standard.md 的 PASS 門檻，不重發明指標。L-layer 框架見 docs/qa/layer-verification-framework.md §5.1。
 ---
 
 # qa-keypoints — 重點表 schema 品質驗證
+
+> **L-layer 對照**：`docs/qa/layer-verification-framework.md` §5.1 + `docs/qa/story-structure-verification-standard.md`  
+> **Module SOT**：`specs/modules/story-structure/INTENT.md`
 
 對一課 `build-keypoints` 產出的 `.keypoints.yml` 做**量化 eval + 人眼抽審**。
 兩步缺一不可：auto-eval 抓數字，人眼抓語意錯誤。

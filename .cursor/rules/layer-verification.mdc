@@ -1,0 +1,50 @@
+---
+description: L1–L5 layer verification — read framework + module INTENT L-layer table before content/QA changes
+globs:
+  - backend/data/lessons/**
+  - backend/data/curriculum_qa/**
+  - backend/app/services/spotlight*
+  - backend/app/services/story_structure*
+  - backend/app/services/lesson_layer_loaders.py
+  - backend/app/routes/stories.py
+  - scripts/build_lesson_schema.py
+  - scripts/eval_lesson_schema.py
+  - scripts/run_lesson_pipeline.py
+  - scripts/story_structure*
+  - scripts/spotlight*
+  - scripts/keypoints*
+  - scripts/run_spotlight*
+  - frontend/src/components/reading-spotlight/**
+  - frontend/src/components/**/StoryStructure*
+  - docs/qa/**
+  - specs/modules/**
+alwaysApply: false
+---
+
+# Layer 驗證框架（L1–L5）
+
+改 **content pipeline、lesson 資料、聚光燈、重點表、新 learning module QA** 前必讀：
+
+1. **通用框架**：`docs/qa/layer-verification-framework.md`（五層定義、新 module 四問、gold manifest 說明）
+2. **registry**：`specs/registry.yaml` → 找到 module
+3. **module SOT**：`specs/modules/<module>/INTENT.md` 內 **L-layer 對照表** + 一鍵 ship gate 命令
+4. **機器契約**：`backend/specs/test_<module>_spec.py`
+
+## 設計原則（不要搞錯）
+
+- **L1–L5 名詞共用**；**每 module 各自 gate**（不要合成一個 unified_qa.py）
+- **L2 ≠ keypoints sync**：聚光燈 L2 是 `.spotlight.yml` ↔ `gold_manifest.json` fingerprint
+- **gold manifest** = 結構指紋 regression，不是全文標準答案
+- merge 宣稱完成：**L3 綠不夠**，有 UI 的 module 還要 L4/L5
+
+## 現有 module 一鍵 gate
+
+| Module | 命令 |
+|--------|------|
+| 重點表 | `bash scripts/story_structure_ship_gate.sh` |
+| 聚光燈 | `bash scripts/run_spotlight_dev_gate.sh` |
+| 全 spec 契約 | `bash specs/run-ci.sh` |
+
+## 新 module
+
+先讀框架 §3–§4 → 建 `specs/modules/<name>/INTENT.md`（含 L-layer 表）→ 再寫 code

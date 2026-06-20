@@ -18,11 +18,46 @@ spec_tests:
 related_issues: [2205]
 source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
-last_reviewed: 2026-06-18
+last_reviewed: 2026-06-20
 owner: young
 ---
 
 # spotlight_v2 — 聚光燈 block 序列契約
+
+> 通用 L-layer 框架：`docs/qa/layer-verification-framework.md`
+> 量化指標：`docs/issue-2205-eval-standard.md` §2
+> 機器契約：`backend/specs/test_spotlight_v2_spec.py`
+> 人眼抽審：`.claude/skills/qa-spotlight/SKILL.md`
+
+## L-layer 對照
+
+| Gate | 驗什麼 | 工具 / 命令 | Merge 阻擋 |
+|------|--------|-------------|-----------|
+| **L1** | DOCX → `.spotlight.yml`（answer_recall、mcq_leakage、guide_retained） | `python3 scripts/eval_lesson_schema.py --dev` / `--test` | 改 parser 時必跑；fixture PR 可靠 batch 紀錄 |
+| **L2** | checked-in YAML ↔ `gold_manifest.json` **結構指紋**（非全文 diff） | `python3 scripts/spotlight_contract.py --dev7` / `--test15` | **是** |
+| **L3** | block 結構 + loader 在 story dict 暴露 `spotlight_v2`（含 Layer-1 課） | `cd backend && pytest specs/test_spotlight_v2_spec.py -q` | **是** |
+| **L4** | staging/preview `GET /api/stories/{id}` 的 `spotlight_v2` = local loader | curl / preview API；catalog code 見 `TEST15_FIXTURE_TO_CATALOG` | merge 後必 spot-check |
+| **L5** | `/learn/{id}/reading-strategy` 渲染 `BlockSequenceRenderer`（非 legacy StrategyExercise） | browse + 代表課；見下表 | merge 後必 spot-check |
+
+**L2 gold 說明**：`backend/data/lessons/spotlight/{dev7,test15}/gold_manifest.json` 存 fingerprint（block 序列、計數、mcq_leakage 等），抓 parser 回歸；**不**保證 passage/answer 語意 — 靠 L1 + 人眼 checklist
+
+一鍵本地 gate：
+
+```bash
+bash scripts/run_spotlight_dev_gate.sh
+```
+
+## 代表課（L4/L5 冒煙）
+
+| 課 | catalog / fixture | story_id（staging 約） | 驗什麼 |
+|----|-------------------|------------------------|--------|
+| G6-L22 | dev7 | 1076 | guide 保留 + passage 後 MCQ；`eval_g6_l22_acceptance` |
+| G6-L23 | dev7 | 1077 | free_text AI 回饋 |
+| G6-L24/L25 | dev7 | 1078/1079 | fill_table + self_check；頁內可無 passage（設計） |
+| G7-L28~L30 | dev7 | 1108–1110 | figure + 圖文整合 |
+| G6-L03 | test15 / G6-SL3 | 24 | test15 loader + Layer-1 `spotlight_v2` 接線 |
+
+完整 dev7 staging QA 紀錄：`.qa-screenshots/spotlight-dev7-staging-qa-2026-06-19.md`
 
 ## 目的
 

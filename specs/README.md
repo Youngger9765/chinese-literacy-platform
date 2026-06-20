@@ -7,6 +7,15 @@
 > 5-round battle + critic verdict）。**這版是 Phase A：純檔案約定 + deterministic
 > 契約，0 MCP server、0 anchor scheme**（critic 警告那兩個會過早 / 會 rot）。
 
+## Layer 驗證（L1–L5）
+
+Content / learning module（重點表、聚光燈、未來模組）merge 前依 **同一套五層語言** 驗證，但 **各 module 自己實作 gate**：
+
+- **通用指南**：[`docs/qa/layer-verification-framework.md`](../docs/qa/layer-verification-framework.md)
+- **每 module**：`specs/modules/<feature>/INTENT.md` 內的 **L-layer 對照表** + `backend/specs/test_*_spec.py`
+
+新 module 先讀通用指南 §3–§4，再在 INTENT 填 L-layer 表，不要從零發明 gate 名詞
+
 ## 一個 module 長什麼樣
 
 ```
@@ -14,10 +23,13 @@ specs/
   registry.yaml                     ← AUTO-GEN 索引（AI 先讀這個，便宜）
   build_registry.py                 ← 掃 INTENT.md frontmatter → registry.yaml
   modules/<feature>/
-    INTENT.md                       ← 人讀 SOT（prose + frontmatter）方大哥/教授/intern
+    INTENT.md                       ← 人讀 SOT（prose + L-layer 表 + frontmatter）
     probes/                         ← LLM-as-judge 語意 drift（policy，暫不接 PR gate）
 backend/specs/
     test_<feature>_spec.py          ← 機器可驗契約（pytest，drift = test fail）
+docs/qa/
+    layer-verification-framework.md ← 全 platform L1–L5 通用框架
+    *-verification-standard.md      ← （可選）單 module 詳標
 ```
 
 - **`INTENT.md`** = 真相來源給人看：脈絡、ownership、允許/禁止改動、已知 drift、教學脈絡。
