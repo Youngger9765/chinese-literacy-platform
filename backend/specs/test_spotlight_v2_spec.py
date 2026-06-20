@@ -13,11 +13,15 @@ import pytest
 
 from app.services.spotlight_contract import (
     DEV7_LESSONS,
+    TEST15_CATALOG_CODES,
+    TEST15_LESSONS,
     compare_to_gold,
     count_mcq_option_guides,
     eval_spotlight_v2,
     load_dev7_spotlight,
     load_gold_manifest,
+    load_test15_gold_manifest,
+    load_test15_spotlight,
     semantic_eval_spotlight,
     validate_block_structure,
 )
@@ -27,6 +31,11 @@ from app.services.spotlight_v2_loader import is_spotlight_v2_lesson, load_spotli
 @pytest.fixture(scope="module")
 def gold_manifest() -> dict:
     return load_gold_manifest()
+
+
+@pytest.fixture(scope="module")
+def test15_gold_manifest() -> dict:
+    return load_test15_gold_manifest()
 
 
 @pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
@@ -107,6 +116,67 @@ def test_non_dev7_lesson_returns_none():
     assert load_spotlight_v2("G4-L1") is None
 
 
+@pytest.mark.parametrize("catalog_code", sorted(TEST15_CATALOG_CODES))
+def test_test15_loader_exposes_spotlight_v2(catalog_code: str):
+    assert is_spotlight_v2_lesson(catalog_code)
+    loaded = load_spotlight_v2(catalog_code)
+    assert loaded is not None
+    assert loaded.get("strategy_type")
+    assert loaded.get("blocks")
+
+
+@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
+def test_test15_fixture_exists(fixture_id: str):
+    sp = load_test15_spotlight(fixture_id)
+    assert sp is not None, f"missing fixture {fixture_id}.spotlight.yml"
+    assert sp.get("blocks"), f"{fixture_id}: empty blocks"
+
+
+@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
+def test_test15_gold_fingerprint(fixture_id: str, test15_gold_manifest: dict):
+    sp = load_test15_spotlight(fixture_id)
+    result = compare_to_gold(
+        fixture_id,
+        sp,
+        test15_gold_manifest["lessons"][fixture_id],
+    )
+    assert result["match"], f"{fixture_id} gold drift: {result.get('diffs')}"
+
+
+@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
+def test_test15_eval_passes(fixture_id: str):
+    sp = load_test15_spotlight(fixture_id)
+    ev = eval_spotlight_v2(sp, fixture_id)
+    assert ev["guide_retained"], f"{fixture_id}: no guide blocks"
+    assert ev["mcq_leakage"] == 0, f"{fixture_id}: MCQ leaked into spotlight"
+    assert ev["answer_recall"] >= 0.99, f"{fixture_id}: null answers in single/multi"
+    assert ev["pass"], (
+        f"{fixture_id}: struct/semantic errors "
+        f"{ev.get('struct_errors')} {ev.get('semantic')}"
+    )
+
+
+def test_g4_l10_catalog_code_loads_test15_fixture():
+    loaded = load_spotlight_v2("G4-L10")
+    assert loaded is not None
+    assert "美好的一天" in " ".join(
+        " ".join(b.get("paragraphs") or [])
+        for b in loaded.get("blocks") or []
+        if b.get("type") == "passage"
+    ) or any(
+        "情緒" in (b.get("text") or "")
+        for b in loaded.get("blocks") or []
+        if b.get("type") == "guide"
+    )
+
+
+def test_g8_l3b_maps_to_test15_plant_meat_fixture():
+    loaded = load_spotlight_v2("G8-L3b")
+    assert loaded is not None
+    guides = [b.get("text", "") for b in loaded["blocks"] if b["type"] == "guide"]
+    assert any("植物肉" in g for g in guides)
+
+
 def test_validate_rejects_empty_guide():
     errors = validate_block_structure([{"type": "guide", "text": "  "}])
     assert any("guide missing text" in e for e in errors)
@@ -114,3 +184,7 @@ def test_validate_rejects_empty_guide():
 
 def test_gold_manifest_covers_all_dev7(gold_manifest: dict):
     assert set(gold_manifest["lessons"].keys()) == set(DEV7_LESSONS)
+
+
+def test_test15_gold_manifest_covers_all_test15(test15_gold_manifest: dict):
+    assert set(test15_gold_manifest["lessons"].keys()) == set(TEST15_LESSONS)
