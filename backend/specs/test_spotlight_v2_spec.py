@@ -177,6 +177,16 @@ def test_g8_l3b_maps_to_test15_plant_meat_fixture():
     assert any("植物肉" in g for g in guides)
 
 
+def test_layer1_g6_l03_lesson_dict_has_spotlight_v2():
+    from app.services.lesson_loader import get_lesson_by_code
+
+    lesson = get_lesson_by_code("G6-L03")
+    assert lesson is not None
+    sp = lesson.get("spotlight_v2")
+    assert sp is not None
+    assert sp.get("strategy_type") == "scientific_inquiry"
+
+
 def test_validate_rejects_empty_guide():
     errors = validate_block_structure([{"type": "guide", "text": "  "}])
     assert any("guide missing text" in e for e in errors)
