@@ -126,7 +126,7 @@
   <h1>聚光燈 Spotlight Pipeline · 集成板</h1>
   <p class="subtitle">架構 / 開發 / QA / 資料 / 缺口&amp;債 — all in one</p>
   <div class="oneliner"><b>一句話分工：</b>前端管「區塊渲染 + 互動」，後端管「從 DOCX 解析 → YAML → API」；<b>LLM 只在最後 free_text 批改</b>，所有解析是 deterministic regex。</div>
-  <p class="updated">最後更新 2026-06-20 · base staging · issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2309">#2309</a></p>
+  <p class="updated">最後更新 2026-06-20 · base staging · issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">#2315</a></p>
 
   <div class="tabs">
     <button class="tab active" data-pane="arch">① 架構</button>
@@ -229,6 +229,27 @@
 
     </div>
     <p class="legend">關鍵：<b>LLM 只在⑤ free_text 批改</b>；①–④全無 LLM（deterministic regex + 序列渲染）。</p>
+
+    <div class="card" style="margin-top:20px">
+      <h3>教學意圖：~14 Block Palette（7 課共用、不同 sequence）</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin:0 0 8px">7 課版面天差地遠（摘要敘事 / 多步驟引導 / 圖文 / 文表），全部由同一套 ~14 block 不同順序組成（教授 decomposition 驗證）</p>
+      <table>
+        <thead><tr><th>Block</th><th>說明</th><th>出現課例</th></tr></thead>
+        <tbody>
+          <tr><td><code>B0</code> 插入小文本</td><td><b>補充小文本（自備、不用看課文）</b>——聚光燈自帶一段短文，題目掛在此，不看主課文</td><td>G6-L22 孟嘗君/大象；G6-L23/24/25</td></tr>
+          <tr><td><code>B-guide</code> 教學脈絡</td><td><b>教學脈絡敘述（小祕訣/步驟/「我們可以這樣思考」）</b>——7 課均有；現平台此層「不見了」</td><td>全部 7 課</td></tr>
+          <tr><td><code>B2</code> 單選</td><td>select_one；最常見互動</td><td>全部 7 課</td></tr>
+          <tr><td><code>B3</code> 複選</td><td>select_many；選擇段落/支持句</td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B4</code> 結構表格填空</td><td>flat 4x3 / 9x3 nested / 段落定位填 / 推論填</td><td>G6-L22~25</td></tr>
+          <tr><td><code>B6</code> 自由作答</td><td>free_write，LLM 批改</td><td>G7-L29/30</td></tr>
+          <tr><td><code>B7</code> 畫線 highlight</td><td>選取文中段落</td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B8</code> 自我檢核</td><td>self_check ✓✗</td><td>全部 7 課</td></tr>
+          <tr><td><code>B10</code> 圖/表 referent</td><td><b>綁定段落的圖（G7-L28/29）或資料表格（G7-L30 表一/表二+跨表交叉）</b></td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B11</code> MCQ×5</td><td>5 選 1 閱讀理解，每課結尾</td><td>全部 7 課</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:10px 0 0;font-size:.82rem"><b>5 軸</b>（canonical）：role / interaction / answer / eval / layout。Legacy <code>type</code> 經 <code>normalize_block()</code> 映射；非法 role×interaction 由 <code>validate_canonical_block()</code> 拒絕。</p>
+    </div>
   </div>
 
   <!-- ② DEV -->
@@ -292,6 +313,59 @@
 
   <!-- ③ QA -->
   <div class="pane" id="qa">
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--purple)">
+      <h3>L1–L5 驗證對照表</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">對照 <code>specs/modules/spotlight_v2/INTENT.md</code>；防假綠：L3 綠但 L4/L5 紅 ≠ 可上線</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Gate</th>
+            <th>驗什麼</th>
+            <th>工具 / 命令</th>
+            <th>Merge 阻擋</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>L1</b></td>
+            <td>DOCX → <code>.spotlight.yml</code>（answer_recall=1·mcq_leakage=0·guide_retained）</td>
+            <td><code>python3 scripts/eval_lesson_schema.py --dev</code> / <code>--test</code></td>
+            <td>改 parser 時必跑</td>
+          </tr>
+          <tr>
+            <td><b>L2</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td>checked-in YAML ↔ <code>gold_manifest.json</code> 結構指紋（dev7/test15）</td>
+            <td><code>python3 scripts/spotlight_contract.py --dev7</code> / <code>--test15</code></td>
+            <td><b>是</b>｜manifest stale = 假綠</td>
+          </tr>
+          <tr>
+            <td><b>L3</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td>loader 在 story dict 暴露 <code>spotlight_v2</code>（含 Layer-1 課）</td>
+            <td><code>cd backend &amp;&amp; pytest specs/test_spotlight_v2_spec.py -q</code></td>
+            <td><b>是</b></td>
+          </tr>
+          <tr>
+            <td><b>L4</b></td>
+            <td>staging <code>GET /api/stories/{id}</code> 的 <code>spotlight_v2</code> = local loader</td>
+            <td>curl preview API；<code>TEST15_FIXTURE_TO_CATALOG</code> 對照表</td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+          <tr>
+            <td><b>L5</b></td>
+            <td><code>/learn/{id}/reading-strategy</code> 渲染 <code>BlockSequenceRenderer</code>（非 legacy <code>StrategyExercise</code>）</td>
+            <td>browse + 代表課</td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:10px 0 0;font-size:.82rem">
+        <b>#2205 PASS 門檻</b>：answer_recall == 1.0 AND mcq_leakage == 0 AND guide_retained<br>
+        一鍵 gate：<code>bash scripts/run_spotlight_dev_gate.sh</code>
+      </p>
+    </div>
+
+    <h4 style="color:var(--purple);margin:18px 0 6px">L2 細節 — 逐課 QA 矩陣</h4>
     <div id="qa-summary">載入中...</div>
     <div class="matrix-wrap">
       <table id="sp-table">
@@ -299,7 +373,13 @@
         <tbody id="sp-body"></tbody>
       </table>
     </div>
-    <div class="card" style="margin-top:20px;border-left:4px solid var(--amber)">
+
+    <div class="card" style="margin-top:16px;border-left:4px solid var(--amber)">
+      <h3>🚧 Open Frontier — B10 圖/表 asset（尚未完成）</h3>
+      <p>G7-L29 / G7-L30 的 B10 圖/表 asset 抽取 + 跨兩表交叉 + 段落綁定 <b>尚未做完</b>。目前 figure referent 為另案（INTENT 明確標示）。矩陣中這兩課 figure_asset_recall 欄未計入，不代表全 PASS。</p>
+    </div>
+
+    <div class="card" style="margin-top:4px;border-left:4px solid var(--amber)">
       <h3>尚未結構化的驗收</h3>
       <p>逐段閱讀 flow 功能（能不能跑）的驗收結果<b>尚未做成結構化資料</b>，此矩陣沒有涵蓋。</p>
     </div>
@@ -354,7 +434,7 @@
 
     <div class="card rule">
       <h3>規則：出問題修 SKILL 通用規則，不 overfit</h3>
-      <p>修正解析錯誤時，只能改 <code>build_lesson_schema.py</code> 的<b>通用規則</b>，禁止針對個別課文寫特例。Overfit = 下一課又壞。見 issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2309">#2309</a>。</p>
+      <p>修正解析錯誤時，只能改 <code>build_lesson_schema.py</code> 的<b>通用規則</b>，禁止針對個別課文寫特例。Overfit = 下一課又壞。見 issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">#2315</a>。</p>
     </div>
   </div>
 
