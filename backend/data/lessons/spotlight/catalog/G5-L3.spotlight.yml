@@ -128,5 +128,5 @@ spotlight:
     prompt: (8)他喜歡把大家(  J  )的想法直接說出來，常常弄得現場很尷尬。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

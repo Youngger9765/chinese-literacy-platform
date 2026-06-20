@@ -14,7 +14,7 @@ spotlight:
     prompt: 3.給學生的資料庫（疑問詞）
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ◎小試身手：

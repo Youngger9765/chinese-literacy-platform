@@ -21,7 +21,7 @@ spotlight:
       雖然老師連假前派了一堆作業，但這對美美來說是小意思。'
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ◎推論小偵探：

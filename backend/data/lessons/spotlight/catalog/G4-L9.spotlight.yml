@@ -52,5 +52,5 @@ spotlight:
     - 恭喜你，你已經完成任務了，以後看到長篇文字時，先找出主題，再找出重要的細節，最後用一句話精簡內容，你就能很快抓住文章重點囉。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

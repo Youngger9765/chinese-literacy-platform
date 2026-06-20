@@ -105,5 +105,5 @@ spotlight:
     prompt: (6)站在山頂上，看著(  F  )的綠色草原，心情格外愉快。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

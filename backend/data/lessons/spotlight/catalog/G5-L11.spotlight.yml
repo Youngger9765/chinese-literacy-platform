@@ -9,7 +9,7 @@ spotlight:
     prompt: 1.將支持理由與相對應的人物特質連起來。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.請看文章，找出田鼠阿飛的人物特質，寫下你的理由。(答案合理即可)

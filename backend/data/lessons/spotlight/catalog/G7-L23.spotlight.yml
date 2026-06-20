@@ -11,7 +11,7 @@ spotlight:
       底下的課文，就有一些艱深的詞彙，請你先讀一次。記得吃魚的比喻，多刺的地方先不要深究哦。'
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 〈雨林裡的奇蹟藥物〉

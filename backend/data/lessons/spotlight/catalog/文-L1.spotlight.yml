@@ -10,7 +10,7 @@ spotlight:
     prompt: 1.底下說明作者的閱讀及解決問題的歷程。最後，請你填答最右欄的是非題，只是要讓你檢查自己的閱讀習慣，沒有正確答案哦。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 小提醒1：閱讀不能只是像海棉吸水──把白紙黑字所記載的知識讀懂、吸進腦袋而已。你可以學習這篇文章的作者，他示範了看完一篇文章，如何提出許多合理的質疑，不但質疑，還自行查閱網路資料解決問題。

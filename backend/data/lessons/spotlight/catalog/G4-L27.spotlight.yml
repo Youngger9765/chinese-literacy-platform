@@ -9,7 +9,7 @@ spotlight:
     text: 練習一：辨識藍海豚──判斷文章中，作者提出的「藍海豚」，分別屬於哪個層面。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ※前一課〈專注當下，關掉內心的批評噪音〉中，主角因為做了棒式訓練，感受到肌肉越來越痠，呼吸越來越急，這是（ ①身體  □②行動  □③問題解決
@@ -18,7 +18,7 @@ spotlight:
     text: 練習二：區辨白熊與藍海豚──比較下列相同情境的不同回應，哪個聚焦在白熊（抗拒的念頭），哪個聚焦在藍海豚（新的焦點）？
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: guide
     text: 練習三：找出自己的藍海豚──找到自己日常的「藍海豚」，幫助自己在負面念頭冒出來時，可以派上用場。

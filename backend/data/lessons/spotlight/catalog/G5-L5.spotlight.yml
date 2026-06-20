@@ -9,7 +9,7 @@ spotlight:
     text: 一、連連看：請判斷以下的描述，是「觀點」，還是「支持理由」
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 二、判斷觀點和支持理由的關係──請你找出能支持觀點的理由

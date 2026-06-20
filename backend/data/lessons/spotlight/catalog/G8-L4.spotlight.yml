@@ -12,7 +12,7 @@ spotlight:
     text: 一、下圖中，左邊列出三個課文的觀點，請在右邊找到這些觀點的支持理由，並畫線連起來。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 二、由課文觀點找出支持理由

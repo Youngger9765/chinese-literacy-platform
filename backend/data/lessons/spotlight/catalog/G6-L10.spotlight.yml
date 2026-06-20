@@ -47,5 +47,5 @@ spotlight:
     text: 複習完小主題及細節，接下來就請你完成文章重點表吧！
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

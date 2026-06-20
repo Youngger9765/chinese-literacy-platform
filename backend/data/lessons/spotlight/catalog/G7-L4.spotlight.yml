@@ -15,5 +15,5 @@ spotlight:
     text: （項目主題參考：行為模式、行為背後的共同目的、生存目標）
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

@@ -26,7 +26,7 @@ spotlight:
     prompt: 2.進階題：連連看，將「文章中的事實」與「作者判斷」配對。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 3.挑戰題：文中作者認為秦國將戰爭的成本轉嫁給底層民眾。下列哪些文中「事實」能支持這個判斷，請將能支持的句子畫O，不能的畫X。

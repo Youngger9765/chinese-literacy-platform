@@ -65,5 +65,5 @@ spotlight:
     text: ◎ 小試身手：練習完閱讀聚光燈的題目後，請你完成文章重點表。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

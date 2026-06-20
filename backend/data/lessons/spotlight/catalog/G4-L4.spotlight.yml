@@ -17,13 +17,13 @@ spotlight:
     answer: 辨別句子的意思，選出適當的分句，在
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.連連看，先圈出關聯詞，再將相關的句子連起來。
   - type: figure
     referent: table
-    asset: null
+    asset: fig2.png
     bind_paragraph: null
   - type: guide
     text: 3.句型大比拚：我們這幾課學過了許多關聯詞，現在我們將這些關聯詞整理在下方的方框內。請你將適當的關聯詞填入括號內，成為一個通順的句子。

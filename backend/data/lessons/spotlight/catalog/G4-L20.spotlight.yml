@@ -19,5 +19,5 @@ spotlight:
     text: 請依文章內容完成下方表格：
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

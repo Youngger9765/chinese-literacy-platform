@@ -7,13 +7,13 @@ spotlight:
     text: ◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ◎接著，請再試著思考，以下的互動，對你來說，更偏向友情還是愛情呢？一樣沒有正確答案哦！
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: guide
     text: ◎根據上面的回答，以及你自己的觀察，關於友情與愛情差異，哪些是你認同的？請打勾，也可以寫上自己的想法。

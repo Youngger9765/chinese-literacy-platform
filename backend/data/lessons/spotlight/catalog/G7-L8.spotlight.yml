@@ -17,7 +17,7 @@ spotlight:
     prompt: 1.有兩個人根據問題給出了答案，請你幫忙完成表格內容。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.小試身手：你認為書名的「科學怪人」是指怪物，還是那位瘋狂科學家呢？

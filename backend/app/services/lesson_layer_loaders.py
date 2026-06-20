@@ -28,6 +28,7 @@ from app.services.lesson_code_normalization import (
     CATALOG_TO_PARSED_OVERRIDE,
     AB_SECONDARY_MAP,
 )
+from app.services.spotlight_figure_images import merge_spotlight_images
 from app.services.spotlight_v2_loader import load_spotlight_v2
 
 
@@ -190,6 +191,13 @@ def load_curriculum_manifest() -> dict[str, dict]:
     return index
 
 
+def _spotlight_enrichment(data: dict, grade_code: str) -> dict:
+    """spotlight_v2 + images[] merged from figure block assets."""
+    spotlight_v2 = load_spotlight_v2(grade_code)
+    images = merge_spotlight_images(data.get("images") or [], spotlight_v2)
+    return {"spotlight_v2": spotlight_v2, "images": images}
+
+
 # ---------------------------------------------------------------------------
 # Layer-1 loader
 # ---------------------------------------------------------------------------
@@ -259,8 +267,7 @@ def load_layer1_lessons() -> list[dict]:
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
-            # Image gallery for graphic-text layout (#1341)
-            "images": data.get("images") or [],
+            **_spotlight_enrichment(data, data.get("grade_code", "")),
             "intro": build_intro(data),
             # 學習單 section order + intro metadata (#1434) — None for Layer-1
             "worksheet_section_order": data.get("worksheet_section_order"),
@@ -277,8 +284,6 @@ def load_layer1_lessons() -> list[dict]:
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
-            # Block-sequence spotlight v2 (#2205 dev7 + test15)
-            "spotlight_v2": load_spotlight_v2(data.get("grade_code", "")),
             "_layer": 1,
         }
         lessons.append(lesson)
@@ -414,8 +419,7 @@ def load_layer2_lessons(
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
-            # Image gallery for graphic-text layout (#1341)
-            "images": data.get("images") or [],
+            **_spotlight_enrichment(data, norm_code),
             "intro": build_intro({**data, "reading_strategy": strategy}),
             # 學習單 section order + intro metadata (#1434)
             "worksheet_section_order": data.get("worksheet_section_order"),
@@ -432,8 +436,6 @@ def load_layer2_lessons(
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
-            # Block-sequence spotlight v2 (#2205 dev7 professor lessons)
-            "spotlight_v2": load_spotlight_v2(norm_code),
             "_layer": 2,
         }
         lessons.append(lesson)

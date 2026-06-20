@@ -23,7 +23,7 @@ spotlight:
     - 近日，新竹市發生大樓火警，兩名消防員救災時不幸殉職，眾人同感心痛。為了感謝消防員的辛苦與付出，一位國小老師帶領學生在課程中繪製感謝卡片，一同寫上感謝與紀念的文字，並送到消防隊。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: passage
     source: unknown
@@ -37,5 +37,5 @@ spotlight:
     text: 請你參考「五、文章重點表」，寫出下表右欄文字的上位概念。
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null

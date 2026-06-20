@@ -19,7 +19,7 @@ spotlight:
     text: 請閱讀下列情境，勾選出你是否也曾出現這樣的想法。（沒有標準答案喔）
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 如果你的答案多是「有」，代表你常被大腦的悲觀小劇場帶著走。
@@ -37,13 +37,13 @@ spotlight:
     text: 提示：樂觀＝暫時、特定、可改變；悲觀＝永久、全面、無法改變。
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.換你試試看：現在我們用第一大題的情境來練習「樂觀詮釋」
   - type: figure
     referent: table
-    asset: null
+    asset: fig2.png
     bind_paragraph: null
   - type: free_text
     prompt: 3.進階練習：你的同學遇到了壞事，而且有了悲觀的詮釋，請你試著把他們的詮釋改成樂觀的詮釋。
