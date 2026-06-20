@@ -42,8 +42,11 @@ from story_structure_qa_lib import (  # noqa: E402
     count_checkbox_cells_in_table,
     gate_l1_pass,
     gate_l3_mode_expectation,
+    http_retry_wait_s,
     l5_issues_retriable,
     summarize_gate,
+    STRUCTURE_HTTP_BACKOFF_S,
+    STRUCTURE_HTTP_RETRY_CODES,
     ui_pass_from_dom,
     verify_interaction_profile_contract,
 )
@@ -54,6 +57,7 @@ DEFAULT_STAGING_FE = "https://lingoleap-frontend-staging-958347263320.asia-east1
 REPORT_PATH = DEFAULT_SCHEMA_DIR / "story_structure_qa_report.json"
 BROWSE = Path.home() / ".claude/skills/gstack/browse/dist/browse"
 L5_RELOGIN_EVERY = 15
+DEFAULT_STRUCTURE_PACING_S = 0.25
 
 
 def load_mod(name: str, path: Path):
@@ -73,6 +77,44 @@ def http_json(url: str, *, token: str | None = None, method: str = "GET", body: 
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     with urllib.request.urlopen(req, timeout=120) as resp:
         return json.loads(resp.read().decode())
+
+
+def http_json_retry(
+    url: str,
+    *,
+    token: str | None = None,
+    method: str = "GET",
+    body: dict | None = None,
+    retry_on: frozenset[int] = STRUCTURE_HTTP_RETRY_CODES,
+) -> dict:
+    """HTTP JSON with exponential backoff on rate-limit / transient errors."""
+    last_err: urllib.error.HTTPError | None = None
+    max_attempts = len(STRUCTURE_HTTP_BACKOFF_S) + 1
+    for attempt in range(max_attempts):
+        try:
+            return http_json(url, token=token, method=method, body=body)
+        except urllib.error.HTTPError as exc:
+            last_err = exc
+            if exc.code not in retry_on or attempt >= max_attempts - 1:
+                raise
+            retry_after = None
+            if exc.headers:
+                retry_after = exc.headers.get("Retry-After")
+            wait = http_retry_wait_s(attempt, retry_after=retry_after)
+            if wait is None:
+                raise
+            print(
+                f"HTTP {exc.code} retry {attempt + 1}/{max_attempts - 1} in {wait:.0f}s: {url}",
+                flush=True,
+            )
+            time.sleep(wait)
+    if last_err is not None:
+        raise last_err
+    raise RuntimeError(f"http_json_retry failed: {url}")
+
+
+def fetch_staging_structure(staging_be: str, story_id: int, token: str) -> dict:
+    return http_json_retry(f"{staging_be}/api/stories/{story_id}/structure", token=token)
 
 
 def login_staging(base: str) -> str:
@@ -293,6 +335,7 @@ def run_qa(
     smoke_only: bool,
     run_ui: bool,
     story_ids: set[int] | None = None,
+    structure_pacing_s: float = DEFAULT_STRUCTURE_PACING_S,
 ) -> dict:
     batch = load_mod("batch", ROOT / "scripts/batch_all_lessons.py")
     eval_mod = load_mod("eval", ROOT / "scripts/eval_lesson_schema.py")
@@ -477,13 +520,22 @@ def run_qa(
             stories = [s for s in stories if s["id"] in story_ids]
 
     staging_records: list[dict] = []
+    structure_calls = 0
+
+    def _pace_structure_fetch() -> None:
+        nonlocal structure_calls
+        if structure_pacing_s > 0 and structure_calls > 0:
+            time.sleep(structure_pacing_s)
+        structure_calls += 1
+
     if "L4" in gates:
         for s in stories:
             sid = s["id"]
             code = s.get("grade_code") or ""
             issues: list[str] = []
+            _pace_structure_fetch()
             try:
-                remote = http_json(f"{staging_be}/api/stories/{sid}/structure", token=staging_token)
+                remote = fetch_staging_structure(staging_be, sid, staging_token)
             except urllib.error.HTTPError as e:
                 issues.append(f"HTTP {e.code}")
                 failures.append({"story_id": sid, "grade_code": code, "gate": "L4", "issues": issues})
@@ -553,19 +605,20 @@ def run_qa(
             sid = s["id"]
             code = s.get("grade_code") or ""
             require_lt = normalize_manifest_code(code) in IMAGE_TEXT_LESSONS
-            remote = None
-            for api_try in range(2):
-                try:
-                    remote = http_json(
-                        f"{staging_be}/api/stories/{sid}/structure", token=staging_token
-                    )
-                    break
-                except urllib.error.HTTPError as e:
-                    if api_try == 0:
-                        time.sleep(1)
-                        continue
-                    print(f"L5 skip id={sid} {code} structure HTTP {e.code}", flush=True)
-            if remote is None:
+            _pace_structure_fetch()
+            try:
+                remote = fetch_staging_structure(staging_be, sid, staging_token)
+            except urllib.error.HTTPError as e:
+                issues = [f"structure HTTP {e.code}"]
+                rec = next(
+                    (r for r in staging_records if r["id"] == sid),
+                    {"id": sid, "grade_code": code, "gates": {}},
+                )
+                rec.setdefault("gates", {})["L5"] = summarize_gate("L5", False, issues)
+                if rec not in staging_records:
+                    staging_records.append(rec)
+                failures.append({"story_id": sid, "grade_code": code, "gate": "L5", "issues": issues})
+                print(f"L5 {idx + 1}/{total} id={sid} {code} FAIL", flush=True)
                 continue
             profile = remote.get("interaction_profile") or {}
             dom = check_ui_page(sid, staging_fe, require_lt, relogin=relogin)
@@ -612,6 +665,12 @@ def main() -> int:
     parser.add_argument("--token")
     parser.add_argument("--no-ui", action="store_true", help="Skip L5 browser even if requested")
     parser.add_argument("--story-ids", default="", help="Comma-separated story ids (L4/L5 subset)")
+    parser.add_argument(
+        "--structure-pacing-s",
+        type=float,
+        default=DEFAULT_STRUCTURE_PACING_S,
+        help="Sleep seconds between staging GET /structure calls (0=off)",
+    )
     parser.add_argument("--report", default=str(REPORT_PATH))
     args = parser.parse_args()
 
@@ -635,6 +694,7 @@ def main() -> int:
         smoke_only=args.smoke,
         run_ui="L5" in gates and not args.no_ui,
         story_ids=story_ids,
+        structure_pacing_s=args.structure_pacing_s,
     )
 
     report_path = Path(args.report)

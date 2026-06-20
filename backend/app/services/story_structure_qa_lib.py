@@ -293,5 +293,23 @@ def l5_issues_retriable(issues: list[str]) -> bool:
     return bool(issues) and any(i in L5_SESSION_FLAKE_ISSUES for i in issues)
 
 
+# Staging GET /structure returns 429 when AI cache-miss rate limit trips (5/min)
+STRUCTURE_HTTP_RETRY_CODES = frozenset({429, 503})
+STRUCTURE_HTTP_BACKOFF_S = (2, 5, 15, 30, 65)
+
+
+def http_retry_wait_s(attempt: int, *, retry_after: str | None = None) -> float | None:
+    """Seconds to wait before retry attempt index (0-based), or None if exhausted."""
+    if attempt >= len(STRUCTURE_HTTP_BACKOFF_S):
+        return None
+    wait = float(STRUCTURE_HTTP_BACKOFF_S[attempt])
+    if retry_after:
+        try:
+            wait = max(wait, float(retry_after))
+        except ValueError:
+            pass
+    return wait
+
+
 def summarize_gate(gate: str, passed: bool, issues: list[str]) -> dict[str, Any]:
     return {"gate": gate, "pass": passed, "issues": issues}
