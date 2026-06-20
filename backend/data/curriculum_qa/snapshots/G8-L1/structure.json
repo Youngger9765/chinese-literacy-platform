@@ -26,19 +26,22 @@
           "interactive_type": "fill_blank"
         },
         {
-          "label": "沿途景色\n（多選）",
+          "label": "沿途景色\n【　　　】",
           "value": "寬廣田野 □遼闊天空 □點點星光 層層山巒",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         },
         {
-          "label": "台北景色（多選）",
+          "label": "台北景色【　　　】",
           "value": "□耀眼星空 狹小天空 閃爍霓虹 □棋盤街道",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         },
         {
-          "label": "車站景色（多選）",
+          "label": "車站景色【　　　】",
           "value": "青草茶店生意興隆  麻糬店掛上完售的牌子\n□站前廣場冷冷清清  □車站因沙塵一片灰濛濛",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         },
         {
           "label": "作者感受",
@@ -95,9 +98,10 @@
           "interactive_type": "fill_blank"
         },
         {
-          "label": "分別之景\n（多選）",
+          "label": "分別之景\n【　　　】",
           "value": "湛藍天空 燦爛陽光 蔚藍海洋 遼闊天空",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         }
       ]
     }
@@ -189,13 +193,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 9,
+    "fill_blank_count": 13,
     "checkbox_count": 0,
     "primary_labels": [
       "邂逅",
       "移動方式",
-      "早晨",
-      "黃昏"
+      "沿途景色\n【　　　】",
+      "台北景色【　　　】"
     ],
     "layout": "worksheet_table"
   }

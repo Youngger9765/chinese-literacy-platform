@@ -189,68 +189,7 @@ strategy_exercise:
     - 只要我喜歡，有什麼不可以
     - 人可以犯錯，但是不可犯同一個錯
     answer: 1
-story_structure:
-- label: 主旨
-  value: 第一次閱讀課文時，請在不太了解的字、詞或句做記號，如： ？
-story_structure_rows:
-- label: 主角
-  value: 哆啦A夢、魯夫
-  interactive_type: fill_blank
-  hint: 課文主要介紹誰？
-  options: null
-  correct_options: null
-- label: 主題
-  value: 卡通人氣王票選政見發表會
-  interactive_type: fill_blank
-  hint: 一句話說明課文想告訴我們什麼
-  options: null
-  correct_options: null
-- label: 特色
-  value: 哆啦A夢：無私、樂於助人；魯夫：勇敢、重情義
-  interactive_type: fill_blank
-  hint: 主角有什麼特別的地方？
-  options: null
-  correct_options: null
-- label: 事例
-  value: ''
-  interactive_type: display
-  hint: ''
-  options: null
-  correct_options: null
-  sub_rows:
-  - label: 背景
-    value: 班上舉辦卡通人氣王票選活動，哆啦A夢和魯夫是候選人。
-    interactive_type: checkbox
-    hint: 事情發生的原因或情境
-    options:
-    - 班上同學想選出最喜歡的卡通人物。
-    - 哆啦A夢和魯夫是經過分組討論推選出的候選人。
-    - 老師要求大家為卡通人物製作宣傳海報。
-    correct_options:
-    - 0
-    - 1
-  - label: 經過
-    value: 各組代表上台發表政見，介紹哆啦A夢和魯夫的特色。
-    interactive_type: checkbox
-    hint: 事情發展的過程
-    options:
-    - 第一組代表介紹哆啦A夢的百寶袋和助人行為。
-    - 小妤在發表會中途打斷發言。
-    - 第二組代表夏恩介紹魯夫的勇敢和重視同伴。
-    correct_options:
-    - 0
-    - 2
-  - label: 結果
-    value: 主持人總結發表會，將由投票決定卡通人氣王。
-    interactive_type: checkbox
-    hint: 事情的最終結果
-    options:
-    - 同學們聽完發表後，對兩位候選人有更深入的了解。
-    - 育勤提出哆啦A夢和魯夫的缺點。
-    - 班長宣布哆啦A夢當選人氣王。
-    correct_options:
-    - 0
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: ai-rows-migrated-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -285,3 +224,12 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 主角
+  - 哆啦A夢、魯夫 【 課文主要介紹誰？ 】
+- - 主題
+  - 卡通人氣王票選政見發表會 【 一句話說明課文想告訴我們什麼 】
+- - 特色
+  - 哆啦A夢：無私、樂於助人；魯夫：勇敢、重情義 【 主角有什麼特別的地方？ 】
+- - 事例
+  - ''

@@ -260,7 +260,7 @@ strategy_exercise:
   - prompt: 綜合三篇文章，你認為基普喬吉破紀錄主要靠自己的實力，還是靠外在因素（跑鞋、團隊、科技）？請說明你的理由
     type: free_text
 knowledge_video_url: https://www.youtube.com/watch?v=OxlRK5rVRsU
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號

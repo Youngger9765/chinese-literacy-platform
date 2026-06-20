@@ -18,7 +18,7 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "有人想出辦法或行動 (誰＋做什麼)",
+          "label": "有人想出辦法或行動 【 誰＋做什麼 】",
           "value": "1.村民【　　　】\n2.政府【　　　】\n3.船員【　　　】",
           "interactive_type": "fill_blank"
         }
@@ -77,7 +77,7 @@
     "checkbox_count": 0,
     "primary_labels": [
       "描述一個「不好的事或困難」",
-      "有人想出辦法或行動 (誰＋做什麼)",
+      "有人想出辦法或行動 【 誰＋做什麼 】",
       "行動後，造成了什麼改變？"
     ],
     "layout": "worksheet_table"

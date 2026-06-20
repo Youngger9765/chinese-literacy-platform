@@ -179,7 +179,7 @@ strategy_exercise:
   - prompt: 比較巨石陣和摩艾石像，寫出一個相同點和一個不同點
     type: free_text
 knowledge_video_url: https://www.youtube.com/watch?v=EKJqvSPOXzg
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號

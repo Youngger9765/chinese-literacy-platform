@@ -27,18 +27,18 @@
       "sub_rows": [
         {
           "label": "背景",
-          "value": "這個故事發生的情境？(多選，請打勾)\n奧運金牌賽  □世界大學運動會  \n全國關注的比賽",
-          "interactive_type": "display"
+          "value": "這個故事發生的情境？【　　　】\n奧運金牌賽  □世界大學運動會  \n全國關注的比賽",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "經過",
-          "value": "在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)\n忠於自己的球風\n□保守地打安全球",
-          "interactive_type": "display"
+          "value": "在重要比賽，輸球的狀況下，仍然選擇：【　　　】\n忠於自己的球風\n□保守地打安全球",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "結果",
-          "value": "(單選，請打勾)\n結果，小戴（  □贏了 、輸了  ）球賽，\n卻（  贏得了 、 □失去了  ）全國人民的尊敬。",
-          "interactive_type": "display"
+          "value": "【　　　】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。",
+          "interactive_type": "fill_blank"
         }
       ]
     }
@@ -83,11 +83,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "theme_facts",
-    "fill_blank_count": 2,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "主角",
-      "球風"
+      "球風",
+      "背景",
+      "經過"
     ],
     "layout": "worksheet_table"
   }

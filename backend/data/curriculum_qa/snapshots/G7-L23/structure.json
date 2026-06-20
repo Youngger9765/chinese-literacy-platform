@@ -2,16 +2,16 @@
   "rows": [
     {
       "label": "主題",
-      "value": "雨林裡的奇蹟藥物",
+      "value": "雨林裡的奇蹟藥物 【　　　】",
       "interactive_type": "fill_blank"
     },
     {
       "label": "重要事實 1",
-      "value": "雨林植物能提供救命藥物",
+      "value": "□①雨林植物只能提煉毒藥 ②雨林植物能提供救命藥物 □③雨林植物對人類無用",
       "interactive_type": "checkbox",
       "options": [
         "雨林植物只能提煉毒藥",
-        "雨林植物能提供救命藥物",
+        "雨林植物能提供救命藥物 □",
         "雨林植物對人類無用"
       ],
       "correct_options": [
@@ -20,10 +20,10 @@
     },
     {
       "label": "重要事實 2",
-      "value": "雨林被破壞，藥物可能消失",
+      "value": "□①雨林消失對人類沒影響 □②雨林消失會讓藥物更稀有 ③雨林被破壞，藥物可能消失",
       "interactive_type": "checkbox",
       "options": [
-        "雨林消失對人類沒影響",
+        "雨林消失對人類沒影響 □",
         "雨林消失會讓藥物更稀有",
         "雨林被破壞，藥物可能消失"
       ],
@@ -33,11 +33,11 @@
     },
     {
       "label": "重要事實 3",
-      "value": "雨林破壞速度驚人",
+      "value": "□①雨林破壞速度很慢 ②雨林破壞速度驚人 □③雨林破壞已停止",
       "interactive_type": "checkbox",
       "options": [
         "雨林破壞速度很慢",
-        "雨林破壞速度驚人",
+        "雨林破壞速度驚人 □",
         "雨林破壞已停止"
       ],
       "correct_options": [
@@ -46,8 +46,36 @@
     },
     {
       "label": "結論",
-      "value": "保護雨林，才能保有珍貴藥物",
+      "value": "保護雨林，才能保有珍貴藥物 【　　　】",
       "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "雨林裡的奇蹟藥物 【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 1",
+      "value": "□①雨林植物只能提煉毒藥 ②雨林植物能提供救命藥物 □③雨林植物對人類無用"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 2",
+      "value": "□①雨林消失對人類沒影響 □②雨林消失會讓藥物更稀有 ③雨林被破壞，藥物可能消失"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 3",
+      "value": "□①雨林破壞速度很慢 ②雨林破壞速度驚人 □③雨林破壞已停止"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "保護雨林，才能保有珍貴藥物 【　　　】"
     }
   ],
   "interaction_profile": {
@@ -61,6 +89,6 @@
       "重要事實 2",
       "重要事實 3"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

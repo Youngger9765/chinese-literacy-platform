@@ -46,6 +46,17 @@ def test_value_fill_blank():
     assert row.get("hint") == "哺乳室"
 
 
+def test_paren_fill_blank_g8_l14_style():
+    row = cell_to_structure_fields(
+        "❶ 問題",
+        "蝴蝶蘭盛開在（ 3-4 ）月；市場需求卻在（1-2）月",
+    )
+    assert row["interactive_type"] == "fill_blank"
+    assert row.get("hint") == "3-4"
+    assert "blank_hints" in row
+    assert row["blank_hints"][1] == "1-2"
+
+
 def test_checkbox_circled_options():
     text = "□①錯誤選項 ②正確選項"
     parsed = parse_checkbox_options(text)

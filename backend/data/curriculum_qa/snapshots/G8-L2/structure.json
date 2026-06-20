@@ -23,12 +23,13 @@
       ]
     },
     {
-      "label": "落差焦點(複選)",
+      "label": "落差焦點【　　　】",
       "value": "1.時間落差：近事 vs 舊事\n2.內容落差：日常小事 vs 恩人恩情\n□3.人物落差：家人的提醒vs 爸爸的反應",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
     },
     {
-      "label": "凸顯重點(依序將重點填入句中)",
+      "label": "凸顯重點【 依序將重點填入句中 】",
       "value": "作者用「記不得最近發生的事    」對比「仍記得八十年前的恩人   」，想要強調的是的【　　　】對爸爸的重要性。",
       "interactive_type": "fill_blank"
     },
@@ -79,11 +80,12 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 2,
+    "fill_blank_count": 3,
     "checkbox_count": 0,
     "primary_labels": [
       "對比句型",
-      "凸顯重點(依序將重點填入句中)"
+      "落差焦點【　　　】",
+      "凸顯重點【 依序將重點填入句中 】"
     ],
     "layout": "worksheet_table"
   }

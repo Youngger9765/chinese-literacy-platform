@@ -133,44 +133,8 @@ strategy_exercise:
     answer: 1
   - prompt: 張氏被稱為「不量」而非「不良」，真正的原因是什麼？請用自己的話回答
     type: free_text
-story_structure:
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: 躲避大【 冰雹 】，便躲到田間。 神秘經歷 空中有聲音說：「這是【 張不量 】田，不要傷 起因 害他的莊稼。」 問題 產生疑惑 這個叫【 不良 】的人，為何受上天保佑？ 向村民尋求答案 1 這個叫【 張不量 】的人非常富有，積蓄的【 粟/穀
-  - label: 結果
-    value: 2 眾人趕到田中，發現只有張不量的田【 無恙/一點事也沒 有 】 。 四、文言文聚光燈 判讀主語 在古代，「寫字」是一件很花錢的事，以致古人寫字時惜字如金，能 省則省，但這往往造成我們閱讀文言文時產生困難，所以，如果我們能 了解文言文省略了
 knowledge_video_url: https://www.youtube.com/watch?v=I_oc5J43uzY
-story_structure_rows:
-- label: 主題
-  value: 善有善報
-  interactive_type: fill_blank
-  hint: 這篇文章主要想表達什麼？
-- label: 重要內容 1
-  value: 商人聽到空中有聲音，說不要傷害張不量的莊稼。
-  interactive_type: checkbox
-  hint: 冰雹來襲時，商人聽到了什麼？
-  options:
-  - 商人聽到空中有聲音，說要保護張不量的莊稼。
-  - 商人聽到空中有聲音，說不要傷害張不量的莊稼。
-  - 商人聽到空中有聲音，說冰雹會停止。
-  correct_options:
-  - 1
-- label: 重要內容 2
-  value: 張氏因為借糧給窮人不計較多寡，所以被稱為「不量」。
-  interactive_type: checkbox
-  hint: 張氏為何被稱為「不量」？
-  options:
-  - 張氏因為不喜歡測量，所以被稱為「不量」。
-  - 張氏因為借糧給窮人不計較多寡，所以被稱為「不量」。
-  - 張氏因為不曾拿工具測量，所以被稱為「不量」。
-  correct_options:
-  - 1
-- label: 結論
-  value: 張氏的善行感動上天，因此他的田地沒有受損。
-  interactive_type: fill_blank
-  hint: 這篇文章的結局是什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: ai-rows-migrated-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -205,3 +169,12 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 主題
+  - 善有善報 【 這篇文章主要想表達什麼？ 】
+- - 重要內容 1
+  - □①商人聽到空中有聲音，說要保護張不量的莊稼。 ②商人聽到空中有聲音，說不要傷害張不量的莊稼。 □③商人聽到空中有聲音，說冰雹會停止。
+- - 重要內容 2
+  - □①張氏因為不喜歡測量，所以被稱為「不量」。 ②張氏因為借糧給窮人不計較多寡，所以被稱為「不量」。 □③張氏因為不曾拿工具測量，所以被稱為「不量」。
+- - 結論
+  - 張氏的善行感動上天，因此他的田地沒有受損。 【 這篇文章的結局是什麼？ 】

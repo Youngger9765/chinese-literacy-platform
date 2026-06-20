@@ -12,8 +12,8 @@
     },
     {
       "label": "工作記憶與閱讀速度的關係",
-      "value": "※請勾選出正確答案(單選) \n1.東西越大(文旦)，工作記憶記得越 □多  少；\n  東西越小(柳丁)，工作記憶記得越 多  □少。\n2.讀得快的人，會讓自己記得更多。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得 \n好  □不好。",
-      "interactive_type": "display"
+      "value": "※請勾選出正確答案【　　　】 \n1.東西越大【　　　】，工作記憶記得越 □多  少；\n  東西越小【　　　】，工作記憶記得越 多  □少。\n2.讀得快的人，會讓自己記得更多。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得 \n好  □不好。",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "重複朗讀的優點",
@@ -53,10 +53,11 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 3,
+    "fill_blank_count": 4,
     "checkbox_count": 0,
     "primary_labels": [
       "工作記憶的功能",
+      "工作記憶與閱讀速度的關係",
       "重複朗讀的優點",
       "結論"
     ],

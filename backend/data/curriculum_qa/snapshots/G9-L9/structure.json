@@ -126,9 +126,10 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "（下法動作─結束）\n分腿迴旋隔鞍反轉體360度",
+          "label": "【　　　】\n分腿迴旋隔鞍反轉體360度",
           "value": "IV D/0.4",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         }
       ]
     },
@@ -269,9 +270,10 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 2,
+    "fill_blank_count": 3,
     "checkbox_count": 0,
     "primary_labels": [
+      "【　　　】\n分腿迴旋隔鞍反轉體360度",
       "小計",
       "總分"
     ],
