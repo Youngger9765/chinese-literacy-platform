@@ -29,6 +29,7 @@ import type { ComprehensionScoreResult } from '../../services/learningApi';
 import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import TeacherCommentSection from '../../components/teacher/TeacherCommentSection';
 import PageLoader from '../../components/ui/PageLoader';
+import { SpotlightStrategyRecord } from '../student/session-history/SpotlightStrategyRecord';
 
 // ---------------------------------------------------------------------------
 // Helpers — map raw backend dicts to frontend types
@@ -236,6 +237,22 @@ const TeacherSessionReportPage: React.FC = () => {
           teacherReviewedAt={report.teacher_reviewed_at}
           studentName={report.student_name}
         />
+      )}
+
+
+      {/* Issue #2083 — structured spotlight answers for teacher review */}
+      {report?.step_progress?.step_data?.['reading-strategy'] && (
+        <div className="mb-6">
+          <SpotlightStrategyRecord
+            stepData={report.step_progress.step_data['reading-strategy'] as Record<string, unknown>}
+            spotlight={story?.spotlightV2}
+            strategyExercise={
+              story?.strategyExercise && !Array.isArray(story.strategyExercise)
+                ? story.strategyExercise
+                : null
+            }
+          />
+        </div>
       )}
 
       {/* Reuse student AssessmentReport (read-only) or show empty message.
