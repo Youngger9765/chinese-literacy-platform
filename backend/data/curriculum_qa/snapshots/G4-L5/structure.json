@@ -22,13 +22,13 @@
       "sub_rows": [
         {
           "label": "起因",
-          "value": "他【　　　】年罹患了(　□骨癌   咽喉癌  )，必須動手術。",
+          "value": "他【　　　】年罹患了【　　　】，必須動手術。",
           "interactive_type": "fill_blank"
         },
         {
           "label": "經過",
-          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難?(多選)\n體力不足  肌肉強度不見  身邊親友的反對",
-          "interactive_type": "display"
+          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難?【　　　】\n體力不足  肌肉強度不見  身邊親友的反對",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "結果",
@@ -73,11 +73,12 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "theme_facts",
-    "fill_blank_count": 3,
+    "fill_blank_count": 4,
     "checkbox_count": 0,
     "primary_labels": [
       "主角",
       "起因",
+      "經過",
       "結果"
     ],
     "layout": "worksheet_table"

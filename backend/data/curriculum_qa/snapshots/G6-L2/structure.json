@@ -11,9 +11,9 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "時間(點)",
-          "value": "感受(多選) 原因",
-          "interactive_type": "display"
+          "label": "時間【 點 】",
+          "value": "感受【　　　】 原因",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "剛上國中",
@@ -103,13 +103,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
+      "時間【 點 】",
       "剛上國中",
       "新鮮感退去後",
-      "上國中前",
-      "上國中後"
+      "上國中前"
     ],
     "layout": "worksheet_table"
   }

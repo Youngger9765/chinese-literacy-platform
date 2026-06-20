@@ -12,8 +12,8 @@
     },
     {
       "label": "情緒反應",
-      "value": "作者（我）看了心裡不高興，猶豫著要不要開口提醒他。",
-      "interactive_type": "display"
+      "value": "作者【　　　】看了心裡不高興，猶豫著要不要開口提醒他。",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "事件引爆",
@@ -27,7 +27,7 @@
     },
     {
       "label": "結局反思",
-      "value": "1.作者（我）道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者（我）反芻那句「我習慣了」，發現自己是無數加害者之一。",
+      "value": "1.作者【　　　】道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者【　　　】反芻那句「我習慣了」，發現自己是無數加害者之一。",
       "interactive_type": "fill_blank"
     }
   ],
@@ -63,13 +63,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "事件起點",
+      "情緒反應",
       "事件引爆",
-      "轉折",
-      "結局反思"
+      "轉折"
     ],
     "layout": "worksheet_table"
   }

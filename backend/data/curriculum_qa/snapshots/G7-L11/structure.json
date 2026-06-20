@@ -2,16 +2,16 @@
   "rows": [
     {
       "label": "主題",
-      "value": "AI時代的學習",
+      "value": "AI時代的學習 【　　　】",
       "interactive_type": "fill_blank"
     },
     {
       "label": "重要事實 1",
-      "value": "AI時代，要更會發問",
+      "value": "□①AI能保證答案正確 ②AI懂回答卻不懂發問 □③AI能判斷觀點意義",
       "interactive_type": "checkbox",
       "options": [
         "AI能保證答案正確",
-        "AI懂回答卻不懂發問",
+        "AI懂回答卻不懂發問 □",
         "AI能判斷觀點意義"
       ],
       "correct_options": [
@@ -20,10 +20,10 @@
     },
     {
       "label": "重要事實 2",
-      "value": "AI時代，要更看重體驗",
+      "value": "□①AI能感受人生磨難 □②AI能代替你體驗成就感 ③體驗是人類探索的價值",
       "interactive_type": "checkbox",
       "options": [
-        "AI能感受人生磨難",
+        "AI能感受人生磨難 □",
         "AI能代替你體驗成就感",
         "體驗是人類探索的價值"
       ],
@@ -33,11 +33,11 @@
     },
     {
       "label": "重要事實 3",
-      "value": "AI時代，要更會判斷",
+      "value": "□①完全依賴AI最厲害 ②駕馭AI讓自己更聰明 □③AI會取代你的想法",
       "interactive_type": "checkbox",
       "options": [
         "完全依賴AI最厲害",
-        "駕馭AI讓自己更聰明",
+        "駕馭AI讓自己更聰明 □",
         "AI會取代你的想法"
       ],
       "correct_options": [
@@ -46,8 +46,36 @@
     },
     {
       "label": "結論",
-      "value": "學習是培養思考、情感與勇氣的起點",
+      "value": "學習是培養思考、情感與勇氣的起點 【　　　】",
       "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "AI時代的學習 【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 1",
+      "value": "□①AI能保證答案正確 ②AI懂回答卻不懂發問 □③AI能判斷觀點意義"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 2",
+      "value": "□①AI能感受人生磨難 □②AI能代替你體驗成就感 ③體驗是人類探索的價值"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 3",
+      "value": "□①完全依賴AI最厲害 ②駕馭AI讓自己更聰明 □③AI會取代你的想法"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "學習是培養思考、情感與勇氣的起點 【　　　】"
     }
   ],
   "interaction_profile": {
@@ -61,6 +89,6 @@
       "重要事實 2",
       "重要事實 3"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

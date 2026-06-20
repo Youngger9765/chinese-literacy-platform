@@ -17,8 +17,8 @@
       "sub_rows": [
         {
           "label": "一開始讀",
-          "value": "聽完老師解釋(單選)",
-          "interactive_type": "display"
+          "value": "聽完老師解釋【　　　】",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -58,8 +58,8 @@
       "sub_rows": [
         {
           "label": "國中時",
-          "value": "長大後(單選)",
-          "interactive_type": "display"
+          "value": "長大後【　　　】",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -99,8 +99,8 @@
       "sub_rows": [
         {
           "label": "國中時",
-          "value": "長大後(單選)",
-          "interactive_type": "display"
+          "value": "長大後【　　　】",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -241,13 +241,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 6,
+    "fill_blank_count": 9,
     "checkbox_count": 0,
     "primary_labels": [
+      "一開始讀",
       "帶來__",
       "「來了！來了！」可以__在__派上用場",
-      "對作者感到__",
-      "認為作者寫羊隊會回家、小河會歌唱，是描述常見的景象，為什麼老師會說許多句子都有__修辭呢？"
+      "國中時"
     ],
     "layout": "worksheet_table"
   }

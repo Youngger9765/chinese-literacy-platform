@@ -27,13 +27,13 @@
         },
         {
           "label": "經過",
-          "value": "楊勇緯雖然流下了眼淚，但最後他認為?(多選)\n失敗讓人成長        □休息才能走更長遠的路 \n調整心情重新開始",
-          "interactive_type": "display"
+          "value": "楊勇緯雖然流下了眼淚，但最後他認為?【　　　】\n失敗讓人成長        □休息才能走更長遠的路 \n調整心情重新開始",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "結果",
-          "value": "楊勇緯最後獲得了兩面柔道大滿貫金牌，他值得學習的地方是什麼?(多選)\n把挫折當養分    持續優化細節    內心強大",
-          "interactive_type": "display"
+          "value": "楊勇緯最後獲得了兩面柔道大滿貫金牌，他值得學習的地方是什麼?【　　　】\n把挫折當養分    持續優化細節    內心強大",
+          "interactive_type": "fill_blank"
         }
       ]
     }
@@ -73,10 +73,12 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "theme_facts",
-    "fill_blank_count": 1,
+    "fill_blank_count": 3,
     "checkbox_count": 0,
     "primary_labels": [
-      "主角"
+      "主角",
+      "經過",
+      "結果"
     ],
     "layout": "worksheet_table"
   }

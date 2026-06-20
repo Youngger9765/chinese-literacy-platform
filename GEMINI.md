@@ -42,6 +42,7 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | 新增或修改 `backend/app/models/*.py` | **先跑 `sqlalchemy-model-safety` checklist**（FK index / cascade / timestamps / alembic heads / idempotent DDL）；先讀對應 skill checklist | `~/.claude/skills/sqlalchemy-model-safety/` |
 | 新增或修改有 LLM import 的 `backend/app/routes/*.py` | **先跑 `llm-endpoint-hardening` checklist**（rate-limit-after-cache / auth / input cap / fail-closed / reasoning field）；先讀對應 skill checklist | `~/.claude/skills/llm-endpoint-hardening/` |
 | 新增 `backend/alembic/versions/*.py` migration | **先確認 `alembic heads` = 1**；先執行 `alembic heads` 並在 multi-head 時 WARN | `~/.claude/skills/postgres-best-practices/` |
+| 改 frontend render 檔（`*.tsx`）| **PR 前必跑 `/qa` 驗那頁**（console 乾淨 + 截圖），禁用 code-read 當 verified；`npm run lint + npm run test` render-smoke/eslint gate 自動擋 mount crash（#2279 TDZ postmortem）| `.claude/skills/ui-pr-verify/SKILL.md` |
 
 > 相關 見對應 skill（#1273）。
 

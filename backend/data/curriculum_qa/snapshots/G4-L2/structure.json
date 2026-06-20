@@ -17,20 +17,20 @@
       "sub_rows": [
         {
           "label": "雅加達亞運",
-          "value": "（單選）\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌",
-          "interactive_type": "display"
+          "value": "【　　　】\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "拿坡里世大運",
-          "value": "比賽時受傷了，他選擇（單選）\n積極的面對與復健   □放棄跑步、不願治療",
-          "interactive_type": "display"
+          "value": "比賽時受傷了，他選擇【　　　】\n積極的面對與復健   □放棄跑步、不願治療",
+          "interactive_type": "fill_blank"
         }
       ]
     },
     {
       "label": "結果",
-      "value": "他成為再度登上奧運（單選）\n一百公尺  □四百公尺   的短跑項目的臺灣選手。",
-      "interactive_type": "display"
+      "value": "他成為再度登上奧運【　　　】\n一百公尺  □四百公尺   的短跑項目的臺灣選手。",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "他學到了什麼?",
@@ -74,11 +74,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "theme_facts",
-    "fill_blank_count": 2,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "主角",
-      "他學到了什麼?"
+      "雅加達亞運",
+      "拿坡里世大運",
+      "結果"
     ],
     "layout": "worksheet_table"
   }

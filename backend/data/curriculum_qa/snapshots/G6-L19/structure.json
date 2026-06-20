@@ -46,7 +46,7 @@
           "interactive_type": "fill_blank"
         },
         {
-          "label": "醫生建議放棄治療，接受安寧治療（面對死亡）。",
+          "label": "醫生建議放棄治療，接受安寧治療【 面對死亡 】。",
           "value": "有天會在天父那【　　　】。",
           "interactive_type": "fill_blank"
         }
