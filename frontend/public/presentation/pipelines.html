@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline · 集成板 總入口 · LingoLeap</title>
+<style>
+  :root{--bg:#FDF8F0;--ink:#1a1a2e;--purple:#5B4FC4;--muted:#6b6b8a;--card:#fff;--line:#e7e2d8;--green:#16a34a;--amber:#d97706}
+  *{box-sizing:border-box}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:40px 20px;line-height:1.7}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{color:var(--purple);font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 28px}
+  .card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:box-shadow .2s,transform .1s}
+  .card:hover{box-shadow:0 6px 18px rgba(91,79,196,.15);transform:translateY(-1px)}
+  .card.dim{opacity:.7;cursor:default}
+  .card.dim:hover{box-shadow:0 1px 3px rgba(0,0,0,.06);transform:none}
+  .row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--chip,#efe9ff)}
+  .ic.r{background:#e0e7ff}.ic.s{background:#fef3c7}.ic.k{background:#dcfce7}.ic.t{background:#fee2e2}
+  .name{font-weight:700;font-size:1.15rem}
+  .badge{font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:auto}
+  .badge.live{background:#dcfce7;color:var(--green)}
+  .badge.wip{background:#fef3c7;color:var(--amber)}
+  .badge.new{background:#e0e7ff;color:var(--purple)}
+  .flow{font-size:.86rem;color:var(--muted);margin:4px 0 0 54px}
+  .meta{font-size:.78rem;color:var(--muted);margin:6px 0 0 54px}
+  .foot{color:var(--muted);font-size:.78rem;margin-top:24px;text-align:center}
+  code{background:#f3eee4;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pipeline · 集成板</h1>
+  <p class="sub">各模組的「架構 → 開發 → QA → 資料」全鏈集成板。點進去看每個模組的資訊流、模組功能表、與每篇課文的 QA 現況。</p>
+
+  <a class="card" href="reading-pipeline.html">
+    <div class="row"><span class="ic r">🎙️</span><span class="name">朗讀 Reading</span><span class="badge live">可用</span></div>
+    <div class="flow">錄音 → 辨識(STT) → 優化+評分 → 顯示 → 儲存(後送) → 回放</div>
+    <div class="meta">架構動畫 · 課文×gate QA 矩陣 · 模組功能表（檔案/PR/證明）</div>
+  </a>
+
+  <a class="card" href="spotlight-pipeline.html">
+    <div class="row"><span class="ic s">🔦</span><span class="name">閱讀聚光燈 Spotlight</span><span class="badge wip">建置中</span></div>
+    <div class="flow">DOCX → build_lesson_schema → spotlight.yml → spotlight_v2 loader → BlockSequenceRenderer</div>
+    <div class="meta">free_text 提交用 Gemini 批改 · dev7(7課) + test15(15課) 泛化 gate</div>
+  </a>
+
+  <a class="card" href="keypoints-pipeline.html">
+    <div class="row"><span class="ic k">📋</span><span class="name">文章重點表 Keypoints</span><span class="badge wip">建置中</span></div>
+    <div class="flow">DOCX → keypoints.yml → sync 進 lesson YAML → manifest(151課) → StoryStructure 渲染</div>
+    <div class="meta">L1–L3 gate（row/blank recall · checkbox/fill_blank · profile contract）· 151 課全綠</div>
+  </a>
+
+  <a class="card" href="../testset/list.html">
+    <div class="row"><span class="ic t">🎧</span><span class="name">人聲測試集收集</span><span class="badge new">新</span></div>
+    <div class="flow">招募真人讀課文 → 錄音上傳 → 覆蓋率矩陣（課文×正確/錯誤版）</div>
+    <div class="meta">貢獻者頁公開分享 · owner 現況表需登入 · 驗證 STT/評分在真實童音</div>
+  </a>
+
+  <p class="foot">LingoLeap 朗朗上口 · 集成板總入口</p>
+</div>
+</body>
+</html>
