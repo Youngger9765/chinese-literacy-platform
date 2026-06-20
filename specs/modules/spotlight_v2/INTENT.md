@@ -55,7 +55,9 @@ bash scripts/run_spotlight_dev_gate.sh
 | G6-L23 | dev7 | 1077 | free_text AI 回饋 |
 | G6-L24/L25 | dev7 | 1078/1079 | fill_table + self_check；頁內可無 passage（設計） |
 | G7-L28~L30 | dev7 | 1108–1110 | figure + 圖文整合 |
-| G6-L03 | test15 / G6-SL3 | 24 | test15 loader + Layer-1 `spotlight_v2` 接線 |
+| G6-L03 | test15 / G6-SL3 | 24 / 1057 | test15 loader + Layer-1 `spotlight_v2` 接線 |
+
+**test15 全量 staging L4+L5（14 課）**：`.qa-screenshots/staging-test15-l5-qa-2026-06-20.md` · 重跑 `cd frontend && node ../.qa-screenshots/run-test15-l5-staging.mjs`
 
 完整 dev7 staging QA 紀錄：`.qa-screenshots/spotlight-dev7-staging-qa-2026-06-19.md`
 
