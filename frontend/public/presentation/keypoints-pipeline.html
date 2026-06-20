@@ -117,7 +117,7 @@
   <h1>文章重點表 Keypoints Pipeline · 集成板</h1>
   <p class="subtitle">架構 / 開發 / QA / 資料 / 缺口&amp;債 — all in one</p>
   <div class="oneliner"><b>一句話分工：</b>前端管「重點表渲染 + 互動」，後端管「從 DOCX table parser → YAML sync → API」；<b>LLM 為 fallback</b>（無 story_structure_table 時才呼叫 Gemini）。</div>
-  <p class="updated">最後更新 2026-06-20 · base staging · commit <code>63de7bad</code>（151 課 manifest）· issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2309">#2309</a></p>
+  <p class="updated">最後更新 2026-06-20 · base staging · commit <code>63de7bad</code>（151 課 manifest）· issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">#2315</a></p>
 
   <div class="tabs">
     <button class="tab active" data-pane="arch">① 架構</button>
@@ -224,6 +224,32 @@
 
     </div>
     <p class="legend">LLM 僅 fallback（無 story_structure_table 時 generate_story_structure() → Gemini 2.5 Flash）；①-⑤ 全無 LLM</p>
+
+    <div class="card" style="margin-top:20px">
+      <h3>教學意圖：B4 重點表遞迴元件 + I-1~I-6 不變式</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin:0 0 8px">B4 在 7 課全都出現，但參數空間大：同一個遞迴表格元件吃不同參數</p>
+      <table>
+        <thead><tr><th>B4 變異</th><th>說明</th><th>課例</th></tr></thead>
+        <tbody>
+          <tr><td>4x3 flat fill</td><td>4 列 3 欄（問題/解決/結果）簡單填空</td><td>G6-L24 白鯨救援</td></tr>
+          <tr><td>9x3 nested</td><td>9 列含子列（解決下有 解決1/解決2/結果1…）+ 【】填空</td><td>G6-L22 雞鳴狗盜</td></tr>
+          <tr><td>段落定位填</td><td>先填「問題在第幾段」再填重點</td><td>G6-L25 第一張股票</td></tr>
+          <tr><td>推論填</td><td>結合段落+表格推論填空</td><td>G7-L30 都是八哥</td></tr>
+        </tbody>
+      </table>
+      <h4 style="margin:14px 0 4px;color:var(--purple)">不變式 I-1 ~ I-6</h4>
+      <table>
+        <thead><tr><th>不變式</th><th>規則</th></tr></thead>
+        <tbody>
+          <tr><td>I-1</td><td><code>story_structure_table</code> 優先於 AI rows；有 table 時不呼叫 Gemini</td></tr>
+          <tr><td>I-2</td><td><code>interaction_profile</code> 與 rows 一致（mode / fill_blank_count / checkbox_count）</td></tr>
+          <tr><td>I-3</td><td>答案不洩漏給 client（value 無 【答案】，只有 【　　　】）</td></tr>
+          <tr><td>I-4</td><td>keypoints.yml 的 label_blanks 經 sync 轉成 【 answer 】 進入 story_structure_table</td></tr>
+          <tr><td>I-5</td><td>含 □ + 圈號的 cell 必須產出 interactive_type: checkbox</td></tr>
+          <tr><td>I-6</td><td>Admin 重點表 manifest 必須跟 runtime 同步（同一 PR 必須 rebuild + verify，禁假綠 #2273）</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ② 開發 -->
@@ -306,6 +332,54 @@
 
   <!-- ③ QA result -->
   <div class="pane" id="qa">
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--purple)">
+      <h3>L1–L5 驗證對照表</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">對照 <code>specs/modules/story-structure/INTENT.md</code>；禁假綠：manifest stale = 儀表板與學生端不一致（#2273 教訓）</p>
+      <table>
+        <thead>
+          <tr><th>Gate</th><th>驗什麼</th><th>工具 / 命令</th><th>Merge 阻擋</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>L1</b></td>
+            <td>DOCX ↔ keypoints.yml（row_recall≥0.95·blank_recall≥0.95·nesting）</td>
+            <td><code>eval_lesson_schema.py</code>；<code>story_structure_qa.py --gates L1</code></td>
+            <td>改 parser 時必跑</td>
+          </tr>
+          <tr>
+            <td><b>L2</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td>keypoints.yml ↔ YAML <code>story_structure_table</code> + manifest sync</td>
+            <td><code>keypoints_table_sync</code>；<code>keypoints_manifest_verify.py</code></td>
+            <td><b>是</b>｜禁假綠 #2273</td>
+          </tr>
+          <tr>
+            <td><b>L3</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td><code>interaction_profile</code> 與 rows 一致；fill_blank / checkbox 計數</td>
+            <td><code>story_structure_qa.py --gates L3</code>；<code>test_yaml_first_structure.py</code></td>
+            <td><b>是</b></td>
+          </tr>
+          <tr>
+            <td><b>L4</b></td>
+            <td>staging <code>GET /structure</code> = local loader</td>
+            <td><code>story_structure_qa.py --gates L4</code></td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+          <tr>
+            <td><b>L5</b></td>
+            <td>StoryStructureTable DOM profile 驅動互動</td>
+            <td><code>story_structure_qa.py --gates L5</code></td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:10px 0 0;font-size:.82rem">
+        <b>Tier 分佈</b>：docx_keypoints 136 / ai_fallback 16 / no_keypoints_docx 15 / parser_gap 0<br>
+        一鍵 gate：<code>bash scripts/story_structure_ship_gate.sh</code>
+      </p>
+    </div>
+
+    <h4 style="color:var(--purple);margin:18px 0 6px">L2 細節 — 逐課 QA 矩陣</h4>
     <div id="qa-summary">載入中...</div>
     <div class="filter-bar">
       <label>年級篩選：</label>
@@ -329,7 +403,7 @@
     <div id="kp-generated"></div>
     <div class="card" style="margin-top:20px;border-left:4px solid var(--amber)">
       <h3>Flow 覆蓋範圍說明</h3>
-      <p>此矩陣驗證 YAML 資料結構完整性（L1-L4 gates）。<b>StoryStructureLabPage 實際渲染 QA</b>（UI 呈現、互動、學生流程整合）尚無結構化資料，追蹤在 <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2309">issue #2309</a>。</p>
+      <p>此矩陣驗證 YAML 資料結構完整性（L1-L4 gates）。<b>StoryStructureLabPage 實際渲染 QA</b>（UI 呈現、互動、學生流程整合）尚無結構化資料，追蹤在 <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">issue #2315</a>。</p>
     </div>
   </div>
 
@@ -371,6 +445,10 @@
 
   <!-- ⑤ 缺口&債 -->
   <div class="pane" id="debt">
+    <div class="card debt">
+      <h3>缺口 0：I-6 假綠歷史（#2273 postmortem）</h3>
+      <p>Admin 重點表 manifest 與 runtime story_structure_table 曾出現不同步（manifest 顯示通過但學生端看到舊資料）。根因：同 PR 沒有 rebuild manifest + verify。I-6 不變式現在明確列入 merge-blocking L2 — 同一 PR 改 keypoints.yml 必須同時執行 <code>keypoints_manifest_verify.py</code>，否則視為假綠。</p>
+    </div>
     <div class="card debt">
       <h3>缺口 1：llm_generated 課文需人工驗證</h3>
       <p>151 課全通 L1-L3 gates，但 <code>tier=llm_generated</code> 的課文由 Gemini 生成內容，尚無人工抽驗流程確保品質一致性。建議：逐課核對 keypoints 是否與紙本學習單吻合。</p>
