@@ -46,10 +46,18 @@ export function chineseNumeral(n: number): string {
 export const GCS_IMAGE_BASE_URL = GCS_IMAGE_BASE;
 export { deriveLessonCodeFromFilename };
 
+/** Catalog asset dirs use G4-L2; API grade_code may be G4-L02 — normalize for GCS. */
+export function normalizeGcsLessonCode(lessonCode: string): string {
+  const m = lessonCode.match(/^(G\d+)-L0*(\d+)([a-z])?$/i);
+  if (m) return `${m[1]}-L${parseInt(m[2], 10)}${m[3] ?? ''}`;
+  return lessonCode;
+}
+
 /** Build the GCS URL for an image filename under a lesson directory. */
 export function buildImageSrc(filename: string, lessonCode: string): string {
   const basename = filename.split('/').pop() ?? filename;
-  return `${GCS_IMAGE_BASE}/${lessonCode}/${basename}`;
+  const code = normalizeGcsLessonCode(lessonCode);
+  return `${GCS_IMAGE_BASE}/${code}/${basename}`;
 }
 
 /** Derive lesson code from an image filename like `images/G7-L28/G7-L28-08.jpg`. */
