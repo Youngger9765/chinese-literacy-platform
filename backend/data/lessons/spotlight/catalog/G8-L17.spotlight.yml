@@ -1,0 +1,52 @@
+spotlight:
+  lesson: G8-L17
+  strategy_name: 比較多元觀點
+  strategy_type: multiple_perspectives
+  blocks:
+  - type: guide
+    text: 一、確定議題
+  - type: free_text
+    prompt: 1.這篇文章在談「哪個議題／爭議」
+  - type: guide
+    text: 對安樂死或協助自殺的看法
+  - type: guide
+    text: 二、找觀點
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 議題文章是在「說服」讀者：每一方會先表明立場與主張，再用理由說服。接著請你整理這個議題有哪些立場？每個立場的主張和理由是什麼？
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、比較觀點差異（用「價值／風險」兩個角度）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 我們先用「主張＋理由」掌握每一方在說什麼；再追問理由在強調什麼──重視的價值與擔心的風險。用這兩個角度看，就能清楚比較觀點差異。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: ＊歸納觀點差異：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 贊成者重視    自主與尊嚴     ；反對者最擔心   弱勢受壓、被迫選擇   ；保留者強調先    把照護做到位     。
+  - type: guide
+    text: 四、推論主旨（從「觀點差異」推論整篇重點）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 根據你整理的觀點差異（自主尊嚴／弱勢被迫／先補照護），下列哪一項最能概括本文主旨？（單選）
+  - type: guide
+    text: □①說明末期病人的自主選擇，並提醒制度應降低風險、補足照護資源
+  - type: guide
+    text: ②透過多元觀點對照，凸顯此議題在權利、風險與照護之間的兩難
+  - type: guide
+    text: □①我能找出本文的多元立場，及各自的主張與理由。
+  - type: guide
+    text: □②我能用「多元觀點對照」推論主旨。
+  - type: fill_table

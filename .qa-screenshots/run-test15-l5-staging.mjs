@@ -23,10 +23,26 @@ const LESSONS = [
 ];
 
 async function loginStudent(page) {
-  await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
-  const btn = page.getByRole('button', { name: /學生.*小明|小明/ });
-  await btn.click();
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+  await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.getByRole('button', { name: /學生/ }).click();
+  await page.waitForFunction(() => !location.pathname.includes('/login'), null, { timeout: 45000 });
+  await page.waitForTimeout(500);
+}
+
+async function gotoLesson(page, lessonId) {
+  await page.goto(`${BASE}/learn/${lessonId}/reading-strategy`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
+  await page.waitForTimeout(800);
+  if (page.url().includes('/login')) {
+    await loginStudent(page);
+    await page.goto(`${BASE}/learn/${lessonId}/reading-strategy`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+    await page.waitForTimeout(1200);
+  }
 }
 
 async function main() {
@@ -49,8 +65,7 @@ async function main() {
     let note = '';
 
     try {
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-      await page.waitForTimeout(800);
+      await gotoLesson(page, lesson.id);
 
       const body = await page.locator('body').innerText();
       const hasV2Header = body.includes('閱讀聚光燈');

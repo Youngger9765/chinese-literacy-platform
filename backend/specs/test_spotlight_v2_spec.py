@@ -9,6 +9,8 @@ Run:
     cd backend && python -m pytest specs/test_spotlight_v2_spec.py -v
 """
 
+import json
+
 import pytest
 
 from app.services.spotlight_contract import (
@@ -198,3 +200,19 @@ def test_gold_manifest_covers_all_dev7(gold_manifest: dict):
 
 def test_test15_gold_manifest_covers_all_test15(test15_gold_manifest: dict):
     assert set(test15_gold_manifest["lessons"].keys()) == set(TEST15_LESSONS)
+
+
+def test_catalog_manifest_matches_files_if_present():
+    from pathlib import Path
+
+    from app.services.spotlight_contract import CATALOG_DIR, CATALOG_MANIFEST, load_catalog_spotlight
+
+    if not CATALOG_MANIFEST.exists():
+        pytest.skip("catalog not promoted yet")
+    manifest = json.loads(CATALOG_MANIFEST.read_text(encoding="utf-8"))
+    codes = manifest.get("lessons") or []
+    assert len(codes) >= 80, f"expected bulk catalog, got {len(codes)}"
+    sample = codes[0]
+    sp = load_catalog_spotlight(sample)
+    assert sp is not None and sp.get("blocks"), sample
+    assert (CATALOG_DIR / f"{sample}.spotlight.yml").exists()

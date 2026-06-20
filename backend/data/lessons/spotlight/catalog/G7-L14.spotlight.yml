@@ -1,0 +1,43 @@
+spotlight:
+  lesson: G7-L14
+  strategy_name: 向微歧視說不
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎ 小試身手
+  - type: free_text
+    prompt: 1.請判斷下列情況是否為微歧視，是微歧視的打Ｖ。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 小叮嚀：刻板印象或對某族群體偏見，很可能就是微歧視。
+  - type: free_text
+    prompt: 2.面對微歧視時，可以怎麼反應？可以的打Ｖ。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 小叮嚀：如果別人說的話讓你覺得有點怪怪、不舒服，都可以溫和的提出看法，調整成彼此最舒服的溝通方式。
+  - type: free_text
+    prompt: 3.想拉近與新朋友的距離，但又害怕自己說的話讓對方感受到不舒服，不妨試著用「安全的話題」以及「請對方分享的方式」開啟友善對話，下面就讓我們一起練習看看開啟新話題的問句吧！
+  - type: free_text
+    prompt: (1)由安全話題開啟對話，不踩雷。例如：食物、天氣、運動、最近的時事。
+  - type: guide
+    text: →麟洋配又得一次奧運金牌，超感動的！你有看轉播嗎？
+  - type: guide
+    text: →學校旁邊開了一家賣滷肉飯的店，聽說便宜又好吃，你有吃過嗎？
+  - type: free_text
+    prompt: (2)真心讚賞對方出色之處，聚焦在對方專長和興趣，讓對方願意分享。
+  - type: guide
+    text: →你讀好多書喔，最近讀的哪一本好看？有推薦的嗎？
+  - type: guide
+    text: →你同時可以做好多件事，有什麼時間管理的祕訣嗎？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 小叮嚀：當我們與人相處時，可以從不會踩雷的話題開始，避免刻板印象，才能建立平等信任的關係。

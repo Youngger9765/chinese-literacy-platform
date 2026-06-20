@@ -1,0 +1,32 @@
+spotlight:
+  lesson: 文-L1
+  strategy_name: 媒體素養與識讀-善用網路資源找證據
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: "我們在閱讀文章時，常會覺得內容有問題：「這不太可能吧！」、「這會不會太誇張了？」如果對文章有所質疑，我們可以善用網路工具去搜尋及解決我們的疑惑。\n\
+      \    以本課為例，作者看完文章後，先提出質疑，接下來上網搜尋證據，並將證據標示於註腳，表示自己所言均有所本，不只是自己個人的意見，以加強說服力。"
+  - type: free_text
+    prompt: 1.底下說明作者的閱讀及解決問題的歷程。最後，請你填答最右欄的是非題，只是要讓你檢查自己的閱讀習慣，沒有正確答案哦。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 小提醒1：閱讀不能只是像海棉吸水──把白紙黑字所記載的知識讀懂、吸進腦袋而已。你可以學習這篇文章的作者，他示範了看完一篇文章，如何提出許多合理的質疑，不但質疑，還自行查閱網路資料解決問題。
+  - type: guide
+    text: 小提醒2：因為網路資料真假不一，請讀者要記得交叉比對搜尋的資料，確認訊息的真實性，以免誤用。
+  - type: free_text
+    prompt: 2.小試身手：提出質疑，查網路資料找證據。
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：媒體素養與識讀
+  - type: free_text
+    prompt: 3.在這篇文章中，我們學到了對文章提出質疑以及上網找證據。含光的品格也是值得我們學習，請問看完了這篇文章，你覺得主角──含光有什麼人格特質？請說明理由。
+  - type: guide
+    text: 例：我覺得含光很勇敢，因為他不害怕死亡，敢徒手打老虎。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 換你試試看：我覺得含光很　　友愛兄弟　，因為他為了救弟弟，揹著弟弟下山，並找醫生醫治他                                    。

@@ -1,0 +1,54 @@
+spotlight:
+  lesson: G8-L4
+  strategy_name: 推論策略-由課文觀點找出支持理由
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: "這一課是說明文，作者先告訴讀者植物肉引發的風潮，再用具體的例子去支持作者種種的看法（觀點），讓文章更有說服力。所以，閱讀時，如果能找出作者觀點，並從文章中找出支持觀點的理由，你會更容易讀出文章的重點喔。\n\
+      \    ※什麼是觀點和理由？"
+  - type: guide
+    text: ◎ 小試身手
+  - type: guide
+    text: 一、下圖中，左邊列出三個課文的觀點，請在右邊找到這些觀點的支持理由，並畫線連起來。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、由課文觀點找出支持理由
+  - type: guide
+    text: 文章觀點：植物肉市場潛力非常巨大
+  - type: guide
+    text: 支持理由：（請從文章的五、六段找出至少兩個支持理由）
+  - type: free_text
+    prompt: (1)根據最新的統計，2021年到未來2028年，全球植物肉市場規模將大幅【成長　　】，反映出消費者對植物性蛋白的需求急劇【上升　】。
+  - type: free_text
+    prompt: (2)越來越多的連鎖超市設置專門的植物性食品區。／眾多知名快餐店和餐廳也紛紛將植物肉的料理納入菜單選項。／預計會有越來越多人開始嘗試「彈性素食主    義」，在日常飲食中增加植物性蛋白的比例。
+  - type: guide
+    text: 三、總結作者觀點（小提示：觀點是含有個人的意見看法）
+  - type: guide
+    text: →由文章觀點可知道，作者【　支持  □不支持】植物肉。
+  - type: guide
+    text: 四、挑戰題：找出全文主旨
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 現在我們已經找到文章的重要觀點和支持理由了，接著我們來練習推論文章主旨，這是更高層次的功夫喔！別擔心，之前我們已經在「兩千五百歲的酷老師」學過如何找出文章主旨，我們可以先猜測標題想要傳達的重點，再從第一段和最後一段找主旨線索，最後推論全文主旨。現在就讓我們來練習看看吧！
+  - type: guide
+    text: ＜新奇！「植物肉」你聽過嗎＞
+  - type: free_text
+    prompt: (1)先猜測標題想要傳達的重點：（單選）
+  - type: guide
+    text: →植物肉是 【 新發明　　□發明很久　】的食物。
+  - type: free_text
+    prompt: (2)可以從文章首段或末段找到全文主旨
+  - type: guide
+    text: 首段：近年來，一種由植物製成卻能模仿肉類口感和風味的食品悄然興起，卻引發了一場飲食革命。
+  - type: guide
+    text: 末段：植物肉代表了一種創新的飲食選擇，為我們餐桌帶來驚喜。
+  - type: guide
+    text: →由飲食革命、及創新的飲食選擇，可以知道全文主旨為：
+  - type: guide
+    text: 【　　  植物肉　  　】是人類的飲食新選擇。
+  - type: guide
+    text: 恭喜你，達成任務了，你好棒！

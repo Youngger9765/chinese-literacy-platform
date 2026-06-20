@@ -1,0 +1,144 @@
+spotlight:
+  lesson: G7-L12
+  strategy_name: 推論策略-推論作者觀點和寫作目的
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: "閱讀說明文或議論文時，讀出「作者的觀點」和「寫作目的」，才能完全理解文章。我們用底下❶～❹ 4個步驟來讀出「作者的觀點」和「寫作目的」。\n\
+      【❶選定焦點】→【❷推論立場】→【❸找支持證據】→【❹推論目的】\n(文章討論哪件事或議題)→(作者主張)→(用什麼說服我)→(想改變我什麼)\n  \
+      \  接下來，我們來學習這個超級重要的閱讀策略，來找出本文的作者觀點與目的。"
+  - type: guide
+    text: 一、推論本文作者觀點與目的
+  - type: guide
+    text: 步驟❶──先看焦點
+  - type: free_text
+    prompt: 1.問自己：這篇文章在談「哪件事」？
+  - type: free_text
+    prompt: 2.祕訣：看標題＋開頭兩段，判斷主題關鍵字。
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 〈你以為的浪漫，可能是跟騷〉，這篇文章在談哪件事？
+  - type: guide
+    text: 浪漫與跟騷的區別  □浪漫的行為   □《跟蹤騷擾防治法》
+  - type: guide
+    text: 步驟❷──推論作者立場（可和「步驟❸找支持證據」同時進行）
+  - type: free_text
+    prompt: 1.問自己：作者對文章事件的看法是什麼？支持、反對？
+  - type: free_text
+    prompt: 2.祕訣：(1)找出表達情緒語詞（開心/害怕…）或例子方向（好/壞）。
+  - type: free_text
+    prompt: (2)勾選立場。
+  - type: guide
+    text: ◎小試身手
+  - type: free_text
+    prompt: (1)閱讀課文後，選出表達被跟騷者情緒的語詞（請打勾，複選）
+  - type: guide
+    text: 轉身離開 　　壓力大　　輾轉難眠
+  - type: single
+    prompt: (2)判斷選出的語詞是正面或負面的    □正面   負面
+    options:
+    - 正面
+    - 負面
+    answer: 負面
+  - type: single
+    prompt: (3)判斷作者看待跟騷的立場    □作者支持死纏   作者反對死纏
+    options:
+    - 作者支持死纏
+    - 作者反對死纏
+    answer: 作者反對死纏
+  - type: guide
+    text: 步驟❸──找支持證據
+  - type: free_text
+    prompt: 1.問自己：作者用什麼說服我？
+  - type: free_text
+    prompt: 2.祕訣：通常作者會用「案例、數據、法律、名言」當支持證據。
+  - type: guide
+    text: ◎小試身手：找一找，本文用什麼證據說服讀者？（請打勾，複選）
+  - type: guide
+    text: 真實案例　□名人採訪　法律條文　□影視數據
+  - type: guide
+    text: 步驟❹──推論寫作目的
+  - type: free_text
+    prompt: 1.問自己：作者想要影響我什麼？
+  - type: free_text
+    prompt: 2.祕訣：呼籲句、結論段重點
+  - type: guide
+    text: ◎小試身手
+  - type: free_text
+    prompt: (1)結尾呼籲：「如果真心喜歡，就從尊重開始！」
+  - type: free_text
+    prompt: (2)作者想讓我知道：
+  - type: guide
+    text: □喜歡一個人要不顧一切、以浪漫方式追求
+  - type: guide
+    text: 追求異性時，要尊重別人意願，避免觸法
+  - type: guide
+    text: 二、挑戰題：
+  - type: guide
+    text: 再讀一個短文，看看你是否可以讀出作者的主要觀點和寫作目的。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 別讓紙吸管成為下一個塑膠袋
+    - 為響應減塑，許多飲料店改用紙吸管。但不少消費者已養成用完即丟的習慣，因此常一次拿幾支吸管，以備不時之需。環保團體調查發現，一些觀光區紙吸管一週的垃圾量竟高於過去使用塑膠吸管時期。此外，多數紙吸管難以有效回收處理，最終仍將送進焚化爐。減塑真正該做的是「少用一次性吸管」，而非僅將材質從塑膠換成紙。下次點飲料前，先問自己──我真的需要吸管嗎？
+  - type: guide
+    text: 步驟❶──先看焦點
+  - type: free_text
+    prompt: 1.問自己：這篇在談「哪件事」？
+  - type: free_text
+    prompt: 2.這篇文章主要關注哪件事情？（請打勾，單選）
+  - type: guide
+    text: □塑膠袋污染  一次性吸管帶來的環境問題
+  - type: guide
+    text: 步驟❷──推論作者立場
+  - type: free_text
+    prompt: 1.問自己：作者看法是什麼？支持、反對？
+  - type: free_text
+    prompt: 2.根據標題，作者態度是？（請打勾，單選）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - □紙吸管能解決塑膠污染問題
+  - type: guide
+    text: 應該減少使用一次性用品，而非僅更換材質
+  - type: guide
+    text: 步驟❸──找支持證據
+  - type: free_text
+    prompt: 1.問自己：作者用什麼說服我？
+  - type: free_text
+    prompt: 2.文中哪兩項資訊用來支持作者立場？（請打勾，複選）
+  - type: guide
+    text: 調查發現某些景點的紙吸管垃圾量甚至比塑膠吸管更多
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 多數紙吸管仍難以有效回收，只能送入焚化爐
+    - □飲料店為消費者提供紙吸管，增加了消費成本
+  - type: guide
+    text: 步驟❹──推論寫作目的
+  - type: free_text
+    prompt: 1.問自己：作者想要影響我什麼？
+  - type: free_text
+    prompt: 2.作者寫這篇短文想讓我知道：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - □提醒讀者減少飲料的購買頻率
+    - 鼓勵讀者盡量不要使用一次性吸管
+    - □鼓勵讀者多使用紙吸管而非塑膠吸管
+  - type: guide
+    text: ※如果你三項都打勾，恭喜你，表示你已經學會用 4 步驟「推論作者觀點與寫作目的」，你超厲害的！
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 這是一篇說明文，閱讀聚光燈你已經學會怎麼推論作者的觀點和目的，接著，我們就來完整的整理本課的重點嘍！
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: self_check
+    items:
+    - 我能判斷作者的觀點與立場。
+    - 我能找到支時該立場的證據。
+    - 我找到作者的寫作目的符合1、2的立場與證據。

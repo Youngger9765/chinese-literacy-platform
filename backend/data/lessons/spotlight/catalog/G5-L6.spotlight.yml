@@ -1,0 +1,69 @@
+spotlight:
+  lesson: G5-L6
+  strategy_name: 推論策略-觀點找支持理由
+  strategy_type: main_idea_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾。
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 一、確認觀點：本篇文章的主要觀點是下列何者？（單選）
+  - type: guide
+    text: □(1)進入高苑工商是周思齊第一次感覺到委屈與不甘心
+  - type: guide
+    text: □(2)周思齊曾經不被教練和學長看好，被直言沒有天賦
+  - type: free_text
+    prompt: (3)真正厲害的人是願意承認自己的不足，然後一步一步追上去
+  - type: guide
+    text: □(4)周思齊帶著熱愛棒球的心加入了職棒，卻面臨了前所未有的威脅和考驗
+  - type: guide
+    text: 二、分析觀點：根據上題答案，本文的觀點有兩個重點，為了支持這個觀點，支持理由應該提及哪些事情？（複選）
+  - type: guide
+    text: □他受到的肯定       □他的天賦       他一步步努力
+  - type: guide
+    text: □他的委屈和不甘心   他承認自己不足
+  - type: guide
+    text: □他熱愛棒球的心     □所面臨的威脅考驗
+  - type: guide
+    text: 三、觀點找支持理由：根據上題分析，下列哪些事件或細節可以支持文章觀點中的兩個重點？（可複選）
+  - type: free_text
+    prompt: 1.支持觀點重點1：「願意承認自己不足」：
+  - type: guide
+    text: □(1)周思齊和光復國小的隊友們打出好成績，拿下全國第二名
+  - type: guide
+    text: □(2)周思齊因好友被教練力邀，而一起加入了棒球強隊
+  - type: free_text
+    prompt: (3)周思齊說：「認輸，只是幫助自己先認清事實，接下來才是真正的開始，也才能用努力展現不服輸的精神。」
+  - type: free_text
+    prompt: 2.支持觀點重點2：「一步步追上去」：
+  - type: free_text
+    prompt: (1)為了彌補體能，周思齊開始不搭校車，改用跑步當體能訓練
+  - type: free_text
+    prompt: (2)為了增進技巧，周思齊回到宿舍後也繼續練習揮棒。
+  - type: free_text
+    prompt: (3)為了增進技巧，宿舍晚上熄燈後周思齊會繼續到頂樓練習。
+  - type: guide
+    text: 四、延伸練習：根據下列觀點，找出適當的支持理由。
+  - type: free_text
+    prompt: 1.觀點：逆境使人成長。
+  - type: guide
+    text: 支持理由：
+  - type: guide
+    text: □(1)只有在大風大浪裡，才能看出船長的航行技術。
+  - type: guide
+    text: □(2)他靠著助聽器，彌補天生的聽覺障礙。
+  - type: free_text
+    prompt: (3)因為家裡窮，他比同輩更早開始了解理財知識。
+  - type: free_text
+    prompt: 2.觀點：失去後才懂得珍惜。
+  - type: guide
+    text: 支持理由：
+  - type: guide
+    text: □(1)爺爺過世後，小明的家中再也沒有過年圍爐的笑聲。
+  - type: guide
+    text: □(2)阿芳珍惜畢業前能和同學相處的時光，規劃了許多活動。
+  - type: free_text
+    prompt: (3)附近的早餐店關門後，大華才發現這間店的口味無可替代。

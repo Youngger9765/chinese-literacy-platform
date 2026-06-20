@@ -1,0 +1,53 @@
+spotlight:
+  lesson: G6-L4
+  strategy_name: 推論策略-從標題及首尾段推論主旨
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: ◎ 小試身手：下列哪一位老師以「因材施教」的方式教學？(單選)
+  - type: guide
+    text: 小美喜歡畫畫，老師教她用圖像記憶學習注音符號。
+  - type: guide
+    text: □小明做事很急躁，老師請他操作精密的實驗儀器。
+  - type: guide
+    text: □大華專注力不足，老師請他一次背完一篇課文
+  - type: guide
+    text: '主旨：作者在寫文章時，想要告訴別人的主要想法或道理。
+
+      推論文章主旨的方法：
+
+      從標題及首末段找主旨（方法2在下一課-第5課）
+
+      有時，作者會在標題裡暗示文章的主旨。我們可以先從題目思考作者可能想要傳遞什麼樣的訊息，再從文章第一段跟最後一段找主旨線索。步驟有二：
+
+      1.先猜測標題想要傳達的重點；2.從第一段和最後一段找主旨線索。'
+  - type: guide
+    text: 先猜測標題想要傳達的重點。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 猜測：這篇可能是在講 　　　一位流傳已久的老師        的故事
+  - type: free_text
+    prompt: ２.從首尾段找主題句：主旨可能在文章中的第一段或最後一段。
+  - type: guide
+    text: 主題句在第一段：有些作者會使用「開門見山法」，直接一開始講出文章重點，讀第一段能輕易找出主旨。（範文擷取自梁實秋－我愛鳥）
+  - type: guide
+    text: →從首段推論主旨：這是一篇寫有關作者　　愛鳥　　　的文章。
+  - type: guide
+    text: 主題句在最後一段：有些作者會把重要的觀念放在最後一段，再次強調或總結重點，讓人印象深刻。（範文擷取自馮驥才－珍珠鳥）
+  - type: guide
+    text: →從末段推論主旨：這是一篇寫有關作者想傳遞人與鳥互相　信賴　的文章。
+  - type: free_text
+    prompt: 3.小試身手：
+  - type: guide
+    text: ※推論文章主旨：從課文第一段和最後一段找出本文的文章主旨。（單選）
+  - type: guide
+    text: □這位酷老師，如果還活著，年紀和阿里山神木一樣老。
+  - type: guide
+    text: □學生們把和孔子在生活中的對話，加上平常的作為記錄下來，集結成《論語》
+  - type: guide
+    text: □孔子當時教過的學生約有三千人，後人尊稱他為「至聖先師」。
+  - type: guide
+    text: 孔子是個博學有智慧，為理想奉獻一生的酷老師。

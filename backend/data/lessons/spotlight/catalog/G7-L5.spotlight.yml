@@ -1,0 +1,25 @@
+spotlight:
+  lesson: G7-L5
+  strategy_name: 用表格整理訊息-從細節歸納標題列名稱
+  strategy_type: info_organization
+  blocks:
+  - type: guide
+    text: "本篇文章描述了三代同堂後的種種改變和適應。每一段都有獨立、清楚的主題，並且舉例說明改變後的影響，使文章更具說服力。\n    但是你發現了嗎？本篇文章的細節訊息很多，大腦的容量有限，如果可以將這些訊息用表格整理下來，找出改變前後的差異，將能幫助我們對本課更有印象，也能更清楚本課的重點。\n\
+      \    我們已在「L2澳洲奧運金牌的Ｘ機密」、「L3女性太空人登月」學過了用表格整理訊息，可以參考下方兩個步驟\n    步驟1：在從段落重點句判斷每段重要主題。\n\
+      \    步驟2：從段落關鍵句找文章細節。\n現在就讓我們利用這兩個步驟將本課訊息整理成表格吧！"
+  - type: guide
+    text: ◎ 小試身手：
+  - type: free_text
+    prompt: 1.將課文第三、四、五段內容整理成表格。（單選）
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 2.將課文第六段內容整理成表格。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 3.總結：爺爺奶奶與作者一家生活習慣有著很大的　　差異　，最後作者琢磨的相處之道是　　傾聽　　不同世代的聲音，　設身處地　　為他人著想。

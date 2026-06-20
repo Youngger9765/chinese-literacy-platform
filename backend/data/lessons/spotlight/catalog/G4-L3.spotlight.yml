@@ -1,0 +1,38 @@
+spotlight:
+  lesson: G4-L3
+  strategy_name: 認識句型-遞進複句
+  strategy_type: writing_technique
+  blocks:
+  - type: guide
+    text: ◎ 小試身手：
+  - type: free_text
+    prompt: 1.請依照下圖提示作答。
+  - type: free_text
+    prompt: (1)請問小傑跟阿光的車相同的地方是什麼？都跑得【  很快　  】
+  - type: free_text
+    prompt: (2)請問小傑跟阿光的車哪裡不一樣？小傑的車【   還很省油　  　】
+  - type: single
+    prompt: (3)誰的車子比較好？【小傑 □阿光】，因為車子多了【會省油   】
+    options:
+    - 【小傑
+    - 阿光】，因為車子多了【會省油
+    - 】
+    answer: 【小傑
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 的優點。
+  - type: free_text
+    prompt: (4)小傑的車子「不但」跑得很快，「還」很省油。請問「」裡的詞
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 叫做【關聯詞　□形容詞】
+  - type: free_text
+    prompt: 2.請圈出遞進複句的關聯詞
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 3. 讀段落，寫句子

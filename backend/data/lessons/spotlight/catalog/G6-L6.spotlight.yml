@@ -1,0 +1,45 @@
+spotlight:
+  lesson: G6-L6
+  strategy_name: 推論策略-從大意及關鍵句推論段旨
+  strategy_type: inference
+  blocks:
+  - type: guide
+    text: "主旨是作者在寫文章時，想要告訴別人的主要想法或道理。\n    這篇文章屬於議論文，文章主題在討論：心理生病了，是「壞事」導致的嗎？作者用三個故事來說明他的想法，卻未在故事中直接說出他的答案。\n\
+      因此這課我們要來練習：推論段落主旨。\n推論文章主旨的方法有兩種：\n1.\t從標題找線索、從文章第一段或最後一段找主題句。\n2.\t摘取文章的大意和關鍵語句。\n\
+      （忘記方法可以翻到第4、5課閱讀聚光燈，裡面有詳細說明）"
+  - type: guide
+    text: 一、推論全文主旨
+  - type: free_text
+    prompt: 1.標題一探究竟：「心理出狀況，是壞事導致的嗎？」
+  - type: guide
+    text: →從標題可以看出作者想探討【  心理狀況 】和【  壞事 】的關聯。
+  - type: free_text
+    prompt: 2.主旨找一找：請從本文最末段勾選出主旨。(單選)
+  - type: guide
+    text: □你發現這三個故事的共同主題了嗎？
+  - type: guide
+    text: □是的，主角都遇到了自己不能控制的壞事。
+  - type: guide
+    text: 但即使惡劣的情況已不可能逆轉，一個人只要「改變自己對壞事的看法」，就不至於讓自己的情緒跌入萬丈深淵。
+  - type: guide
+    text: □最後再問一次：心理生病了，真的是「壞事」導致的嗎？
+  - type: guide
+    text: 二、推論段落主旨
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 接下來我們要找出三個故事的主旨，由於故事中並不能直接找到主旨主題句，因此我們要用第二個方法推論主旨。
+  - type: guide
+    text: 本文關鍵問題是：「心理出狀況，是壞事導致的嗎？」
+  - type: guide
+    text: 從標題與全文主旨可以得知，段落大意和關鍵語句與
+  - type: guide
+    text: 【  心理狀況 】、【  壞事 】以及對壞事的【  看法 】有關係。
+  - type: guide
+    text: 接下來要從三個故事中分別找出這些線索，推論出各段落的主旨，準備好了嗎？
+  - type: free_text
+    prompt: (1) 基礎題：
+  - type: free_text
+    prompt: (2) 進階題：
+  - type: free_text
+    prompt: (3) 挑戰題：

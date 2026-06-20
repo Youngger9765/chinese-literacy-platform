@@ -32,11 +32,18 @@ Backend: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
 
 ## L5 UI（14/14）
 
+### Smoke（快速）
 腳本：`.qa-screenshots/run-test15-l5-staging.mjs`  
 判定：`body` 含「閱讀聚光燈」+ 各課 strategy 關鍵字 · console error 0
 
-| id | fixture | L5 |
-|----|---------|-----|
+### Deep（dev7 同級，2026-06-20）
+腳本：`.qa-screenshots/run-test15-l5-deep-staging.mjs`  
+機器讀數：`.qa-screenshots/spotlight-test15-deep-qa.jsonl`
+
+每課 probe：`BlockSequenceRenderer` header · guide · passage 計數 · dualCol（lg:grid-cols-5）· MCQ/textarea · figure · stepper 聚光燈 · console 0 · session 過期自動 re-login
+
+| id | fixture | L5 deep |
+|----|---------|---------|
 | 1010 | G4-SL10 | PASS |
 | 6 | G4-L13 | PASS |
 | 1034 | G5-SL7 | PASS |
@@ -52,6 +59,8 @@ Backend: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
 | 1118 | G8-SL8 | PASS |
 | 54 | G9-SL9 | PASS |
 
+**14/14 PASS** · 設計備註：多數 test15 課無 inline `閱讀文本` passage（練習以 free_text 為主），dualCol 僅在 passage+interactive 同 segment 時出現（例 G9-SL9）
+
 ## 補充：G6-L03 id=24
 
 Layer-1 課 `L24.yml` 與 test15 `G6-SL3` 同策略，先前已手動 browse PASS（見 `staging-g6-l03-test15-l5-qa.md`）。staging API id=1057 為 Layer-2 同課另一入口，兩者皆載入 test15 fixture
@@ -59,5 +68,6 @@ Layer-1 課 `L24.yml` 與 test15 `G6-SL3` 同策略，先前已手動 browse PAS
 ## 重跑
 
 ```bash
-cd frontend && node ../.qa-screenshots/run-test15-l5-staging.mjs
+cd frontend && node ../.qa-screenshots/run-test15-l5-staging.mjs      # smoke
+cd frontend && node ../.qa-screenshots/run-test15-l5-deep-staging.mjs # deep (dev7 parity)
 ```

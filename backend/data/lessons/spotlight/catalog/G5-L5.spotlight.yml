@@ -1,0 +1,65 @@
+spotlight:
+  lesson: G5-L5
+  strategy_name: 推論策略-觀點找支持理由
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 一、連連看：請判斷以下的描述，是「觀點」，還是「支持理由」
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、判斷觀點和支持理由的關係──請你找出能支持觀點的理由
+  - type: free_text
+    prompt: 1.基礎題（請打勾，多選）
+  - type: free_text
+    prompt: (1)小美很細心
+  - type: guide
+    text: □她喜歡幫助同學，因此大家都很喜歡她
+  - type: guide
+    text: 她寫作業時，總是仔細檢查，確保沒有錯誤
+  - type: guide
+    text: □她做事情的時候，總是以很快的速度完成
+  - type: guide
+    text: □她上課時一邊聽講，一邊畫畫，還能回答老師的問題
+  - type: guide
+    text: 她摺紙時，會對齊每一條邊，讓作品看起來很整齊
+  - type: free_text
+    prompt: (2)小名很幽默
+  - type: guide
+    text: 他總是能用有趣的方式講故事，讓大家笑得合不攏嘴
+  - type: guide
+    text: □他看到有趣的故事會哈哈大笑
+  - type: guide
+    text: □他經常在課堂上講話，引起大家的注意
+  - type: guide
+    text: □他很受歡迎，很多同學都喜歡和他做朋友
+  - type: guide
+    text: 他常常用機智的回答讓同學們哈哈大笑
+  - type: free_text
+    prompt: 2.課內練習（請打勾，多選）
+  - type: free_text
+    prompt: (1)朱蒂是一個勤奮不懈，以努力克服不足的人
+  - type: guide
+    text: 她發現程度遠遠落後同學，積極訂定學習計畫來提升自己
+  - type: guide
+    text: □她為一個神祕又重要的人物取了個貼切的綽號──長腿叔叔
+  - type: guide
+    text: 她努力補強數學及拉丁文成績不及格的弱點
+  - type: guide
+    text: 她基本常識不足，卻不氣餒，每天晚上在房間苦讀
+  - type: guide
+    text: □她參加了婦女選舉權的辯論會
+  - type: free_text
+    prompt: (2)朱蒂的成功不只是靠運氣，還靠著自己的努力創造出來的
+  - type: guide
+    text: 她會針對自己的困難制定學習計畫，增進自己知識
+  - type: guide
+    text: 她持續不間斷的閱讀與學習，使她學業突飛猛進
+  - type: guide
+    text: 她以自己的能力賺進獎學金，甚至希望能自己負擔學費
+  - type: guide
+    text: □她因長腿叔叔的資助，得到進入大學就讀的機會

@@ -1,0 +1,65 @@
+spotlight:
+  lesson: G4-L17
+  strategy_name: 生涯探索-讀書，讓夢想多一條路
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 情境一：運動員的退路
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 智凱是學校羽球隊的王牌，他的夢想是打進國家代表隊。教練提醒他：「如果哪天受傷不能打球，你還有別的計畫嗎？」智凱開始想，如果不能當選手，也許他可以當體能教練或裁判、體育主播。這麼一想，他突然覺得自己該好好讀書了。
+  - type: free_text
+    prompt: 1.你覺得智凱為什麼開始想「讀書」？（單選）
+  - type: guide
+    text: 想讓自己有退路 □想比同學更厲害　　□想改變夢想
+  - type: free_text
+    prompt: 2.以下哪些能力對智凱的未來有幫助？（複選）
+  - type: guide
+    text: 英文：出國比賽、與外隊交流　溝通表達：接受訪問、與隊友合作
+  - type: guide
+    text: 醫學與運動防護：預防受傷　　分析能力：能分析不同戰術
+  - type: free_text
+    prompt: 3.承第2題，智凱如何學會上述的能力呢？請連連看。
+  - type: free_text
+    prompt: 4.從智凱的例子可以學到：
+  - type: guide
+    text: 讀書不是放棄打球，而是讓他擁有【多   □少】一條能走的路。
+  - type: guide
+    text: 情境二：讓作品更有內容
+  - type: guide
+    text: 宥蓁喜歡拍短影片，常常上傳搞笑的片段。但她發現，只靠搞笑，大家看幾次就不想看了。後來，她開始學著寫腳本、學著拍攝並剪輯更精緻的畫面、學著構思主題，她的影片變得更有故事性，也有越來越多人喜歡看。
+  - type: free_text
+    prompt: 1.宥蓁開始「學更多」後，有什麼好處?（複選）
+  - type: guide
+    text: ①讓作品更有內容         ②讓興趣變成能力
+  - type: guide
+    text: □③全心投入拍片，不管課業
+  - type: free_text
+    prompt: 2.根據情境描述，以下哪些能力對宥蓁的未來有幫助？（複選）
+  - type: guide
+    text: ①寫作能力：能想出好看的內容　□②唱跳能力：才能吸引粉絲
+  - type: guide
+    text: ③觀察能力：能找到有趣的主題  ④攝影能力：能拍出流暢的畫面
+  - type: free_text
+    prompt: 3.承第2題，宥蓁如何學會上述的能力呢？請連連看。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 4.從宥蓁的例子可以學到：
+  - type: guide
+    text: 讀書不是放棄興趣，而是讓她【用興趣做更多事／擁有更多能力】。
+  - type: guide
+    text: 情境三：學會為自己多準備
+  - type: guide
+    text: 庭萱很喜歡玩遊戲。有一天，她看到有人能自己設計地圖和角色，就很好奇：「如果我也會做這些，應該會更好玩吧！」於是，她上網查資料，學習簡單的指令，慢慢做出自己的遊戲關卡，還獲得許多網友的支持。
+  - type: free_text
+    prompt: 1.你覺得庭萱為什麼會想學新的東西？想要試試看自己是不是可以設計出遊戲/看見別人做得到，也想挑戰看看 (參考答案)
+  - type: free_text
+    prompt: 2.庭萱學會英文和電腦的基礎知識，這對她有什麼幫助？能看懂國外教學影片，學更多遊戲設計技巧/能自己設計地圖和角色(參考答案)
+  - type: guide
+    text: 結語：有時候我們不會馬上知道學的東西有什麼用，但當機會來臨時，那些你以為沒用的知識，可能正好幫你打開一扇新的門。
