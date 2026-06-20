@@ -1,0 +1,41 @@
+spotlight:
+  lesson: G8-L5
+  strategy_name: 推論策略-推論人物行為的背後動機
+  strategy_type: motivation_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：推論策略──推論人物行為的背後動機
+  - type: guide
+    text: ◎ 小試身手：
+  - type: guide
+    text: 一、人物動機「明示」在課文內文中
+  - type: free_text
+    prompt: 1.摔倒時，陳同學仍緊抱顏同學，將自己當成肉墊，保護著他。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →陳同學的動機是想要【　　保護顏同學   】。
+  - type: free_text
+    prompt: 2.顏同學還告訴校護及導師：「不是陳同學的錯，請不要處罰他。」
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →顏同學的動機是　□希望　　不希望　陳同學被學校處罰。
+  - type: guide
+    text: 二、人物動機「隱含」在課文內文中
+  - type: free_text
+    prompt: 1.顏家對陳同學、學校提起民事訴訟。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →顏家的動機是希望   有人為這件事情負責           。(課文第五段)
+  - type: free_text
+    prompt: 2.顏家決定將拿到的賠償金，成立顏旭男基金會。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →根據你的推測，顏家成立基金會的動機可能是：(多選)
+    - □希望可以繼續跟社會大眾募款。　　  希望幫助其他身心障礙者。
+    - 洗刷社會大眾對顏家要錢的偏見。  　□希望為顏同學討回公道。

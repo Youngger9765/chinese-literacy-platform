@@ -1,0 +1,11 @@
+spotlight:
+  lesson: G6-L17
+  strategy_name: 跨文化接納理解
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：現在我們也學學陳醫生，轉換自己的想法吧！
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

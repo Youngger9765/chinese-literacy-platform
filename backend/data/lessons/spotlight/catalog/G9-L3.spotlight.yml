@@ -1,0 +1,19 @@
+spotlight:
+  lesson: G9-L3
+  strategy_name: 議論文結構-支持論點的論據
+  strategy_type: express_opinion
+  blocks:
+  - type: guide
+    text: ◎ 小試身手：請依據論點及支持理由，透過提問來做論據檢核，並在□打勾。
+  - type: guide
+    text: 練習一
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 練習二
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

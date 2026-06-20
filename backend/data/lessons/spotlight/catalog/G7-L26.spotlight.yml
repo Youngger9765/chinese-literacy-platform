@@ -1,0 +1,43 @@
+spotlight:
+  lesson: G7-L26
+  strategy_name: 推論策略-整理重點.推論作者觀點
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: 這是一篇說明文，說明文作者通常會在第一段和最後一段，把文章重點講出來，如本文第一段強調的祝福和連結。但如果作者一開始沒有說出重點，或重點不夠完整，閱讀時，讀者就可以先找出各段重點，再把重點整理起來，最後推論作者想表達的觀點。本課第一段，並沒有把重點說完整，所以，這個聚光燈，我們要來學習整理各段的重點，再推論作者想強調的重點哦。
+  - type: guide
+    text: 一、找段落重點
+  - type: guide
+    text: 請先判斷這段主要在說什麼，再找出文中支持這個重點的內容。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、統整文化意義
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 把前面找到的段落重點放在一起想一想：每一段主要表現出小米酒的哪些文化意義？再看看整篇文章合起來，小米酒有哪些文化意義。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、推論作者觀點（單選）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 前面我們已經找出各段的重點和文化意義，現在把它們合起來想一想：作者真正想表達的是什麼？
+  - type: free_text
+    prompt: 1.根據前面整理出的段落重點和文化意義，最符合作者觀點的是哪一項
+  - type: passage
+    source: unknown
+    paragraphs:
+    - ①小米酒在原住民族文化中，不只是酒，更承載著祝福、敬意、連結，以及分享與接納的意義。
+    - □②小米酒因為常出現在重要場合，所以是原住民族生活中受重視的傳統飲品。
+  - type: self_check
+    items:
+    - 我能找出文章前幾段分別在說明什麼重點。
+    - 我能整理各段重點，找出小米酒有哪些文化意義。
+    - 我能綜合各段重點和文化意義，推論出作者想表達的觀點。

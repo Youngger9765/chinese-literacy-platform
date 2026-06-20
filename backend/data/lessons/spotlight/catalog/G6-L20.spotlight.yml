@@ -1,0 +1,40 @@
+spotlight:
+  lesson: G6-L20
+  strategy_name: 負責任的決定-區辨控制圈
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: 一、認識「控制圈」：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 在生活中，像是健康、人際、課業等我們所關心的各種事物，構成了我們的「關注圈」。而在這些關注的事情裡，真正能夠由我們主動改變或掌控的部分，就是「控制圈」。若你的「關注圈」裡有這幾件事，請判斷哪些事情會落在你的「控制圈」呢？請在你可以掌控、改變的項目打勾：
+  - type: guide
+    text: '□今天的天氣 早上的起床時間 □公車上人多不多 要不要找同學聊天
+
+      功課有沒有完成 □老師幾點下課 □回家作業多不多 手機要使用多久'
+  - type: guide
+    text: 二、區辨「控制圈」：
+  - type: guide
+    text: ◎從文章中，我們可以看出主角的兩難，現在就一起來看看主角在乎的事情是否落在他的「控制圈」：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: passage
+    source: unknown
+    paragraphs:
+    - ☆主角的心煩，也來自於他的焦點多在（□控制圈之內　控制圈之外），一起來幫主角想想，哪些是在控制圈內的事情吧！（請打勾）
+  - type: guide
+    text: 告白時機　告白方式　□對方的回應　告白內容　□得到回覆的時間
+  - type: guide
+    text: ◎在生活中，也有許多兩難情境，就讓我們透過情境，來練習區辨「控制圈」：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: passage
+    source: unknown
+    paragraphs:
+    - ☆在控制圈之外的事，仍有努力的價值，但重點是努力過後也需要明白，結果不是我們單方面可以控制。
+    - 在面對兩難抉擇時，我們容易被各種擔憂困住，感到焦慮或茫然。而當我們專注在控制圈裡，會能減少那些無力和不安，也會能逐漸找回自己的主動權和力量。練習把注意力放自己能影響的行動和選擇上，會更能勇敢、自在的面對每一次選擇❤︎

@@ -1,0 +1,19 @@
+spotlight:
+  lesson: G7-L4
+  strategy_name: 用表格整理訊息-比較異同
+  strategy_type: comparison
+  blocks:
+  - type: guide
+    text: "之前我們學過可以將文章內容整理成表格。表格的優點有(1)幫助讀者快速看到文章的重點。(2)藉由訊息分類，將文章化繁為簡。(3)讓讀者能發現訊息的共同點或差異處。\n\
+      　　在「L3女性太空人登月」，我們已經學過整理表格的步驟：\n(1)確認比較的對象：是什麼和什麼比較？寫在表格第一列。\n(2)找重點：先用鉛筆將每段可能的重點句（行為特徵）畫起來。\n\
+      (3)想主題1.2…的名稱：從重點句判斷「主題」。 \n(4)寫表格左欄：將「主題」寫在表格左欄項目中。\n(5)將文章細節填入表格內。\n　　現在就讓我們利用本課文章來練習看看吧！"
+  - type: guide
+    text: ◎ 小試身手：
+  - type: free_text
+    prompt: 1.請依照上面的步驟，完成以下的表格。
+  - type: guide
+    text: （項目主題參考：行為模式、行為背後的共同目的、生存目標）
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

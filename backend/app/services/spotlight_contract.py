@@ -28,6 +28,8 @@ from app.services.spotlight_block_model import eval_g6_l22_acceptance
 _DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
 DEV7_DIR = _DATA_ROOT / "spotlight" / "dev7"
 TEST15_DIR = _DATA_ROOT / "spotlight" / "test15"
+CATALOG_DIR = _DATA_ROOT / "spotlight" / "catalog"
+CATALOG_MANIFEST = CATALOG_DIR / "manifest.json"
 GOLD_MANIFEST = DEV7_DIR / "gold_manifest.json"
 TEST15_GOLD_MANIFEST = TEST15_DIR / "gold_manifest.json"
 
@@ -334,6 +336,25 @@ def load_dev7_spotlight(lesson_id: str) -> dict[str, Any] | None:
 
 def load_test15_spotlight(lesson_id: str) -> dict[str, Any] | None:
     path = TEST15_DIR / f"{lesson_id}.spotlight.yml"
+    if not path.exists():
+        return None
+    return load_spotlight_yaml(path)
+
+
+def _load_catalog_lesson_codes() -> frozenset[str]:
+    if not CATALOG_MANIFEST.exists():
+        return frozenset()
+    data = json.loads(CATALOG_MANIFEST.read_text(encoding="utf-8"))
+    codes = data.get("lessons") or []
+    return frozenset(normalize_manifest_code(c) for c in codes)
+
+
+CATALOG_LESSONS = _load_catalog_lesson_codes()
+
+
+def load_catalog_spotlight(lesson_code: str) -> dict[str, Any] | None:
+    norm = normalize_manifest_code(lesson_code)
+    path = CATALOG_DIR / f"{norm}.spotlight.yml"
     if not path.exists():
         return None
     return load_spotlight_yaml(path)

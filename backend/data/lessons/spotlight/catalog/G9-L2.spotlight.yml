@@ -1,0 +1,42 @@
+spotlight:
+  lesson: G9-L2
+  strategy_name: 分辨事實與判斷
+  strategy_type: express_opinion
+  blocks:
+  - type: guide
+    text: "本篇文章是作者讀完兩封來自秦朝時期的家書後，做了一些推論，最後一段再加上自己的感想後寫成的。\n　　也就是說，文章中的訊息主要有兩大類，第一類是「兩兄弟的處境（以下稱事實）」，第二類是「作者對兩兄弟處境的推論（以下稱判斷）」。閱讀這樣的文章，如果能分辨哪些是客觀的事實，哪些是作者的判斷，就能幫助自己有比較好的理解。\n\
+      \    那麼什麼是事實？什麼又是判斷呢？\n事實：可以被驗證真假的訊息。例如，第四段提到黑夫的家書寫著「請母親寄衣物或錢」，這是家書中直接呈現且可以從信中驗證的，因此是「事實」。\n\
+      判斷：作者基於文章中的事實，結合自己的知識和經驗後所做的推測。例如，從黑夫「請母親寄衣物或錢」這個事實，作者推論秦國服役沒有兵餉，國家只提供武器和口糧，因此屬於「作者判斷」。\n\
+      接下來讓我們來練習分辨「事實」與「判斷」吧。"
+  - type: free_text
+    prompt: 1.基礎題：根據這篇文章，以下的文句是事實的請寫上F，是作者判斷的請寫上J。
+  - type: guide
+    text: ★事實的英文為Fact，判斷的英文為Judgment。
+  - type: free_text
+    prompt: (1)【 F 】(第三段)文中的家庭有兄弟三人。
+  - type: free_text
+    prompt: (2)【 F 】(第四段)兄弟倆困在淮陽，缺乏夏衣。
+  - type: free_text
+    prompt: (3)【 J 】(第八段)黑夫和驚的母親沒有寄錢給他們。
+  - type: free_text
+    prompt: (4)【 J 】(第十三段)黑夫和驚最終都戰死沙場。
+  - type: free_text
+    prompt: (5)【 J 】(第十三段)大哥失去兩個弟弟後，深感悲傷和歉疚。
+  - type: free_text
+    prompt: 2.進階題：連連看，將「文章中的事實」與「作者判斷」配對。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 3.挑戰題：文中作者認為秦國將戰爭的成本轉嫁給底層民眾。下列哪些文中「事實」能支持這個判斷，請將能支持的句子畫O，不能的畫X。
+  - type: free_text
+    prompt: (1)【 O 】士兵的衣物等必需品需要自備。
+  - type: free_text
+    prompt: (2)【 O 】許多年輕的男子被徵召入伍。
+  - type: free_text
+    prompt: (3)【 X 】根據出土文物，秦國一件夏衣的價值是五十五錢。
+  - type: free_text
+    prompt: (4)【 O 】即使是有一定社會地位的家庭，也無法提供足夠的錢財給在前線的親人。
+  - type: free_text
+    prompt: (5)【 X 】家書寫在竹簡上，並隨大哥衷下葬。
