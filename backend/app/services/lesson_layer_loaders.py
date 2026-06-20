@@ -105,6 +105,8 @@ ENRICHMENT_FIELDS = (
     # 紙本表格 (#1685): some Layer-2 lessons (G7-L28, G7-L30) carry extracted
     # tables; copy onto matching Layer-1 entries to preserve back-compat.
     "tables",
+    # Block-sequence spotlight v2 (#2205) — Layer-2 fixture onto Layer-1 back-compat slots
+    "spotlight_v2",
 )
 
 
@@ -275,6 +277,8 @@ def load_layer1_lessons() -> list[dict]:
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
             "tables": data.get("tables"),
+            # Block-sequence spotlight v2 (#2205 dev7 + test15)
+            "spotlight_v2": load_spotlight_v2(data.get("grade_code", "")),
             "_layer": 1,
         }
         lessons.append(lesson)

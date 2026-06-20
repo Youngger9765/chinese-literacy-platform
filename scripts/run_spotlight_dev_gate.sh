@@ -28,8 +28,11 @@ if not r['pass']:
     sys.exit(1)
 "
 
-echo "=== [2/4] Gold contract (dev7 checked-in fixtures) ==="
+echo "=== [2/6] Gold contract (dev7 checked-in fixtures) ==="
 python3 scripts/spotlight_contract.py --dev7
+
+echo "=== [2b/6] Gold contract (test15 checked-in fixtures) ==="
+python3 scripts/spotlight_contract.py --test15
 
 echo "=== [3/6] Backend pytest (spotlight block model TDD) ==="
 cd backend && python -m pytest specs/test_spotlight_block_model_spec.py -q --tb=short
