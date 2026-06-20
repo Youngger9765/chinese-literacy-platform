@@ -21,11 +21,13 @@ from __future__ import annotations
 import json
 import logging
 import re
+import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from ..auth.rate_limiter import make_general_rate_limit_dependency
+from ..auth.dependencies import get_current_user
+from ..models.user import User
 from ..services.audio_upload_service import (
     _get_gcs_bucket,
     generate_audio_signed_url,
@@ -36,13 +38,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["testset"])
 
 _PREFIX = "test-dataset"
-_MAX_AUDIO_BYTES = 15 * 1024 * 1024  # 15 MB
+_MAX_AUDIO_BYTES = 8 * 1024 * 1024  # 8 MB (webm 朗讀用不到更多)
 _ALLOWED_MIME = {"audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav"}
 _ALLOWED_VERSION = {"correct", "error"}
+# lesson_id 進 GCS path → 必須白名單格式，否則可 ../ 跨 prefix 寫入學生錄音 (security #2304)
+_LESSON_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,20}$")
+_LIST_CAP = 500  # list_blobs hard cap，避免 unbounded read/signBlob
 
-# Public endpoints → per-IP limits (in-memory, per Cloud Run instance).
-_upload_limit = make_general_rate_limit_dependency(max_requests=30, window_seconds=60)
-_list_limit = make_general_rate_limit_dependency(max_requests=60, window_seconds=60)
+# Rate-limiting 靠全域 GlobalRateLimitMiddleware（讀 X-Forwarded-For，真 per-IP）。
+# 不在 endpoint 用 request.client.host limiter — Cloud Run LB 後面那只會讓所有人共用
+# 一個 bucket → self-DoS（security 複查 #2304）。
 
 
 def _slug(name: str) -> str:
@@ -51,7 +56,7 @@ def _slug(name: str) -> str:
     return (s.strip("_") or "anon")[:40]
 
 
-@router.post("/testset/upload", dependencies=[Depends(_upload_limit)])
+@router.post("/testset/upload")
 async def testset_upload(
     contributor_name: str = Form(...),
     grade: str = Form(...),
@@ -68,10 +73,13 @@ async def testset_upload(
         raise HTTPException(400, "version must be 'correct' or 'error'")
     if not contributor_name.strip() or not grade.strip() or not lesson_id.strip():
         raise HTTPException(400, "contributor_name, grade, lesson_id are required")
+    # HIGH: lesson_id 進 blob path → 白名單格式擋路徑注入 / 跨 prefix 寫入
+    if not _LESSON_ID_RE.match(lesson_id.strip()):
+        raise HTTPException(400, "invalid lesson_id")
 
     base_mime = (audio.content_type or "").split(";")[0].strip()
-    if base_mime and base_mime not in _ALLOWED_MIME:
-        raise HTTPException(415, f"unsupported audio type: {base_mime}")
+    if base_mime not in _ALLOWED_MIME:  # reject empty/missing too (deny-by-default)
+        raise HTTPException(415, f"unsupported audio type: {base_mime or '(none)'}")
 
     audio_bytes = await audio.read()
     if len(audio_bytes) == 0:
@@ -85,13 +93,14 @@ async def testset_upload(
         raise HTTPException(503, "storage temporarily unavailable")
 
     slug = _slug(contributor_name)
-    ext = "webm"
-    audio_path = f"{_PREFIX}/{slug}/{lesson_id}/{version}.{ext}"
-    meta_path = f"{_PREFIX}/{slug}/{lesson_id}/{version}.json"
+    lid = lesson_id.strip()
+    uid = uuid.uuid4().hex[:8]  # 防同名/重錄覆蓋：每次上傳唯一路徑（append-only）
+    audio_path = f"{_PREFIX}/{slug}/{lid}/{version}-{uid}.webm"
+    meta_path = f"{_PREFIX}/{slug}/{lid}/{version}-{uid}.json"
     meta = {
         "contributor_name": contributor_name.strip(),
         "grade": grade.strip(),
-        "lesson_id": lesson_id.strip(),
+        "lesson_id": lid,
         "version": version,
         "audio_path": audio_path,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -112,11 +121,13 @@ async def testset_upload(
     return {"ok": True, "path": audio_path}
 
 
-@router.get("/testset/recordings", dependencies=[Depends(_list_limit)])
-def testset_recordings():
+@router.get("/testset/recordings")
+def testset_recordings(current_user: User = Depends(get_current_user)):
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
 
-    v1 公開（低敏感 + 隱蔽 URL）；v2 加 auth。
+    需登入（get_current_user）→ 擋掉匿名公開抓取貢獻者 PII（security #2304）。
+    list.html 讀 localStorage `lingoleap_token` 帶 Bearer；未登入 → 401。
+    （v2：再收斂成 admin/teacher role only。）
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -124,7 +135,7 @@ def testset_recordings():
 
     out = []
     try:
-        for blob in bucket.list_blobs(prefix=f"{_PREFIX}/"):
+        for blob in bucket.list_blobs(prefix=f"{_PREFIX}/", max_results=_LIST_CAP):
             if not blob.name.endswith(".json"):
                 continue
             try:
