@@ -19,8 +19,10 @@ from ..schemas.assignment import (
     StudentAttemptGroup,
     SubmissionResponse,
 )
+from ..models.session import ReadingAttemptHistory
 from ..services.assignment_responses import extract_reading_metrics
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
+from ..services.audio_upload_service import delete_gcs_blobs_for_paths
 from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
 from ..utils.slug import normalize_story_slug
@@ -383,6 +385,39 @@ def delete_assignment_with_cleanup(
                 "__meta": meta,
             }
             linked_session.status = "abandoned"
+
+    # ── Issue #2266: cascade-delete GCS audio before removing DB rows ─────────
+    # Collect audio_gcs_path from:
+    #   (a) AssignmentSubmission.audio_gcs_path (submission-level recording)
+    #   (b) ReadingAttemptHistory.audio_gcs_path for each linked session
+    # This runs BEFORE db.delete(assignment) so the paths are still accessible.
+    # Failures are best-effort: one GCS failure never blocks the DB delete.
+    audio_paths_to_delete: list[str] = []
+
+    # (a) Submission-level paths
+    submissions = (
+        db.query(AssignmentSubmission)
+        .filter(AssignmentSubmission.assignment_id == assignment_id)
+        .all()
+    )
+    for sub in submissions:
+        if sub.audio_gcs_path:
+            audio_paths_to_delete.append(sub.audio_gcs_path)
+
+    # (b) Attempt-level paths from linked sessions
+    if linked_session_ids:
+        attempt_paths = (
+            db.query(ReadingAttemptHistory.audio_gcs_path)
+            .filter(
+                ReadingAttemptHistory.session_id.in_(linked_session_ids),
+                ReadingAttemptHistory.audio_gcs_path.is_not(None),
+            )
+            .all()
+        )
+        audio_paths_to_delete.extend(p for (p,) in attempt_paths if p)
+
+    if audio_paths_to_delete:
+        delete_gcs_blobs_for_paths(audio_paths_to_delete)
 
     db.delete(assignment)
     db.commit()

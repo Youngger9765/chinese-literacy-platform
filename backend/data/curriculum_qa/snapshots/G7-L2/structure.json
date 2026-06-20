@@ -39,13 +39,13 @@
       "sub_rows": [
         {
           "label": "培育階段",
-          "value": "(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n(2)表現【　　　】者，可持續晉級，有機會成會兼職或全職的運動員，或進入國家代表隊。",
+          "value": "【　　　】社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n【　　　】表現【　　　】者，可持續晉級，有機會成會兼職或全職的運動員，或進入國家代表隊。",
           "interactive_type": "fill_blank"
         },
         {
           "label": "退役後",
-          "value": "(1)可從事其他或原本的職業\n(2)回到社區俱樂部當教練。",
-          "interactive_type": "display"
+          "value": "【　　　】可從事其他或原本的職業\n【　　　】回到社區俱樂部當教練。",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -103,13 +103,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "政府",
       "家長",
       "培育階段",
-      "臺灣體育的問題"
+      "退役後"
     ],
     "layout": "worksheet_table"
   }

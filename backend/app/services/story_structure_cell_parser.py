@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 _BLANK_RE = re.compile(r"【([^】]*)】")
+_PAREN_BLANK_RE = re.compile(r"[（(]\s*([^）)]*?)\s*[）)]")
 _CIRCLED_NUM_RE = re.compile(r"[①②③④⑤⑥⑦⑧⑨⑩]")
 
 
@@ -54,10 +55,19 @@ def extract_blank_answers(text: str) -> list[str]:
     return [m.group(1).strip() for m in _BLANK_RE.finditer(text)]
 
 
+def normalize_paren_blanks_to_brackets(text: str) -> str:
+    """Convert （ answer ） / ( answer ) placeholders to 【 answer 】."""
+    return _PAREN_BLANK_RE.sub(lambda m: f"【 {m.group(1).strip()} 】", text or "")
+
+
+def _has_fill_blank_markers(text: str) -> bool:
+    return bool(_BLANK_RE.search(text) or _PAREN_BLANK_RE.search(text))
+
+
 def cell_to_structure_fields(label: str, value: str) -> dict:
     """Build a grading-friendly structure row from raw label + value strings."""
-    label_s = label.strip()
-    value_s = value.strip()
+    label_s = normalize_paren_blanks_to_brackets(label.strip())
+    value_s = normalize_paren_blanks_to_brackets(value.strip())
 
     for source in (value_s, label_s):
         checkbox = parse_checkbox_options(source)
@@ -70,8 +80,8 @@ def cell_to_structure_fields(label: str, value: str) -> dict:
                 "correct_options": checkbox["correct_options"],
             }
 
-    value_fb = bool(_BLANK_RE.search(value_s))
-    label_fb = bool(_BLANK_RE.search(label_s))
+    value_fb = _has_fill_blank_markers(value_s)
+    label_fb = _has_fill_blank_markers(label_s)
 
     if value_fb:
         answers = extract_blank_answers(value_s)

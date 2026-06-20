@@ -1,0 +1,85 @@
+spotlight:
+  lesson: G8-SL8
+  strategy_name: 推論策略-找出一連串因果
+  strategy_type: causal_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：推論策略──
+  - type: guide
+    text: 推論本文的因果關係
+  - type: guide
+    text: 步驟❶──找事件
+  - type: free_text
+    prompt: 1.問自己：這段文字提到的重要事件或現象？
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 找出可能造成印加帝國衰敗的每一個事件，不管這些事件發生的順序，我們通通先找出來！(請在□中打勾，複選，有四個答案）
+  - type: guide
+    text: □天花病菌傳入印加    □繼承人爭奪王位，引發內戰
+  - type: guide
+    text: □人民改說西班牙語    □多年戰亂，政治經濟崩潰
+  - type: guide
+    text: □印加皇帝染疫過世    □皮薩羅帶著168名士兵準備偷襲
+  - type: guide
+    text: 步驟❷──找因果線索
+  - type: free_text
+    prompt: 1.問自己：文章中哪些地方透露出「原因結果」的線索？有哪些語句在說明事情發生的原因或帶來的後果？
+  - type: free_text
+    prompt: 2.祕訣：
+  - type: guide
+    text: A.「有關鍵詞」的文句：
+  - type: guide
+    text: B.「沒有關鍵詞」的文句：
+  - type: guide
+    text: 判斷策略：加因果關鍵詞，判斷是否為因果句。
+  - type: guide
+    text: 例如：「皇帝死了，內戰爆發。」
+  - type: guide
+    text: 加入關鍵詞「因為皇帝死了，所以內戰爆發。」
+  - type: guide
+    text: ◎小試身手
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟❸──判斷因果，畫箭頭
+  - type: free_text
+    prompt: 1.問自己：在找到的因果語句中，「原因」是哪一部分？「結果」是哪一部分？兩者之間如何連接？
+  - type: free_text
+    prompt: 2.祕訣：畫一個箭頭「→」從原因指向結果，就一目了然了！
+  - type: guide
+    text: ◎小試身手
+  - type: guide
+    text: 根據上表，請判斷誰是因？誰是果？並畫正確箭頭方向
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟❹──連成一連串因果
+  - type: guide
+    text: ◎小試身手
+  - type: passage
+    source: unknown
+    paragraphs:
+    - A.以本文為例，隱含著一條重要的因果鏈。上表我們已經找到4個因果關係，接下來我們再看看它們之間的關係，請排序畫出一條因果鏈。
+  - type: guide
+    text: ①天花病菌傳入印加地區   ②帝國虛弱不堪，不堪一擊
+  - type: guide
+    text: ③皇帝染病死亡 　　　　　④帝國政治經濟瓦解
+  - type: guide
+    text: ⑤帝國持續內戰與分裂
+  - type: guide
+    text: B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
+  - type: guide
+    text: ①天花病菌傳入印加 ③皇帝染病死亡  　 ⑤帝國持續內戰與分裂  ④帝國政治經濟瓦解   ②帝國衰弱，不堪一擊
+  - type: passage
+    source: unknown
+    paragraphs:
+    - C.這條因果鏈告訴我們：印加帝國在還沒跟西班牙人真正交戰之前，早就因為天花的傳入、皇帝病死、內戰分裂等問題，變得非常虛弱、不堪一擊。如此一來，他們在戰爭中會失敗，也就不奇怪了。

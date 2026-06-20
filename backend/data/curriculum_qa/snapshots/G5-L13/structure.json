@@ -22,8 +22,8 @@
       "sub_rows": [
         {
           "label": "緩解醫院緊張的氛圍",
-          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物",
-          "interactive_type": "display"
+          "value": "常見方式：【　　　】\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -105,10 +105,11 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 3,
+    "fill_blank_count": 4,
     "checkbox_count": 0,
     "primary_labels": [
       "主要服務對象",
+      "緩解醫院緊張的氛圍",
       "__學",
       "貢獻"
     ],

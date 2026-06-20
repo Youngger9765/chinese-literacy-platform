@@ -1,66 +1,88 @@
 {
   "rows": [
     {
-      "label": "主題",
-      "value": "英國巨石陣",
+      "label": "未解之謎：石頭的祕密（二）──摩艾石像",
+      "value": "",
+      "interactive_type": "display"
+    },
+    {
+      "label": "發現人",
+      "value": "",
+      "interactive_type": "display",
+      "sub_rows": [
+        {
+          "label": "船長",
+          "value": "發現地點 【　　　】島",
+          "interactive_type": "fill_blank"
+        }
+      ]
+    },
+    {
+      "label": "假設一",
+      "value": "是【　　　】的力量，讓摩艾走路。",
       "interactive_type": "fill_blank"
     },
     {
-      "label": "重要事實 1",
-      "value": "巨石陣的建造方式至今仍是謎團。",
-      "interactive_type": "checkbox",
-      "options": [
-        "巨石陣是由外星人建造的。",
-        "巨石陣的建造方式至今仍是謎團。",
-        "巨石陣是由大型機械建造的。"
-      ],
-      "correct_options": [
-        1
-      ]
-    },
-    {
-      "label": "重要事實 2",
-      "value": "巨石陣的石頭來自25公里外的山丘。",
-      "interactive_type": "checkbox",
-      "options": [
-        "巨石陣的石頭來自附近河流。",
-        "巨石陣的石頭來自25公里外的山丘。",
-        "巨石陣的石頭是從國外運來的。"
-      ],
-      "correct_options": [
-        1
-      ]
-    },
-    {
-      "label": "重要事實 3",
-      "value": "巨石陣最可能是用來觀測天文。",
-      "interactive_type": "checkbox",
-      "options": [
-        "巨石陣是外星人的基地。",
-        "巨石陣是古代的醫院。",
-        "巨石陣最可能是用來觀測天文。"
-      ],
-      "correct_options": [
-        2
-      ]
-    },
-    {
-      "label": "結論",
-      "value": "巨石陣的起源和目的仍是未解之謎。",
+      "label": "假設二",
+      "value": "古代人用【　　　】把石像移到海邊。",
       "interactive_type": "fill_blank"
+    },
+    {
+      "label": "假設三",
+      "value": "古代人把石像立起來，用【　　　】移動。",
+      "interactive_type": "fill_blank"
+    },
+    {
+      "label": "石像用途：人們至今不清楚設立的目的。",
+      "value": "",
+      "interactive_type": "display"
+    }
+  ],
+  "layout": "worksheet_table",
+  "title": "未解之謎：石頭的祕密（二）──摩艾石像",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "發現人",
+      "items": [
+        {
+          "label": "船長",
+          "value": "發現地點 【　　　】島"
+        }
+      ]
+    },
+    {
+      "kind": "pair",
+      "label": "假設一",
+      "value": "是【　　　】的力量，讓摩艾走路。"
+    },
+    {
+      "kind": "pair",
+      "label": "假設二",
+      "value": "古代人用【　　　】把石像移到海邊。"
+    },
+    {
+      "kind": "pair",
+      "label": "假設三",
+      "value": "古代人把石像立起來，用【　　　】移動。"
+    },
+    {
+      "kind": "pair",
+      "label": "石像用途：人們至今不清楚設立的目的。",
+      "value": ""
     }
   ],
   "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
+    "mode": "fill_blank",
+    "template_kind": "generic",
+    "fill_blank_count": 4,
+    "checkbox_count": 0,
     "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
+      "船長",
+      "假設一",
+      "假設二",
+      "假設三"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

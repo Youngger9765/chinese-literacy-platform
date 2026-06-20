@@ -2,16 +2,16 @@
   "rows": [
     {
       "label": "主題",
-      "value": "帶著問題閱讀",
+      "value": "帶著問題閱讀 【　　　】",
       "interactive_type": "fill_blank"
     },
     {
       "label": "重要事實 1",
-      "value": "血拼的兩種方式是逛街和採買。",
+      "value": "□①逛街和網購 ②逛街和採買 □③採買和團購",
       "interactive_type": "checkbox",
       "options": [
         "逛街和網購",
-        "逛街和採買",
+        "逛街和採買 □",
         "採買和團購"
       ],
       "correct_options": [
@@ -20,11 +20,11 @@
     },
     {
       "label": "重要事實 2",
-      "value": "逛街是沒有特定目的的購物方式。",
+      "value": "□①有清楚的購物清單 ②沒有特定目的 □③為了買齊所有東西",
       "interactive_type": "checkbox",
       "options": [
         "有清楚的購物清單",
-        "沒有特定目的",
+        "沒有特定目的 □",
         "為了買齊所有東西"
       ],
       "correct_options": [
@@ -33,10 +33,10 @@
     },
     {
       "label": "重要事實 3",
-      "value": "閱讀的兩種方式是篇章瀏覽和帶著問題讀。",
+      "value": "□①精讀和略讀 □②快速閱讀和慢讀 ③篇章瀏覽和帶著問題讀",
       "interactive_type": "checkbox",
       "options": [
-        "精讀和略讀",
+        "精讀和略讀 □",
         "快速閱讀和慢讀",
         "篇章瀏覽和帶著問題讀"
       ],
@@ -46,8 +46,36 @@
     },
     {
       "label": "結論",
-      "value": "帶著問題讀能幫助學生快速找到重點、解決問題。",
+      "value": "帶著問題讀能幫助學生快速找到重點、解決問題。 【　　　】",
       "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "帶著問題閱讀 【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 1",
+      "value": "□①逛街和網購 ②逛街和採買 □③採買和團購"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 2",
+      "value": "□①有清楚的購物清單 ②沒有特定目的 □③為了買齊所有東西"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 3",
+      "value": "□①精讀和略讀 □②快速閱讀和慢讀 ③篇章瀏覽和帶著問題讀"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "帶著問題讀能幫助學生快速找到重點、解決問題。 【　　　】"
     }
   ],
   "interaction_profile": {
@@ -61,6 +89,6 @@
       "重要事實 2",
       "重要事實 3"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

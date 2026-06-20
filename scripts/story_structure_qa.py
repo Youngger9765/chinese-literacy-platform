@@ -42,6 +42,7 @@ from story_structure_qa_lib import (  # noqa: E402
     count_checkbox_cells_in_table,
     gate_l1_pass,
     gate_l3_mode_expectation,
+    l5_issues_retriable,
     summarize_gate,
     ui_pass_from_dom,
     verify_interaction_profile_contract,
@@ -52,6 +53,8 @@ DEFAULT_STAGING = "https://lingoleap-backend-staging-958347263320.asia-east1.run
 DEFAULT_STAGING_FE = "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
 REPORT_PATH = DEFAULT_SCHEMA_DIR / "story_structure_qa_report.json"
 BROWSE = Path.home() / ".claude/skills/gstack/browse/dist/browse"
+L5_RELOGIN_EVERY = 15
+
 
 def load_mod(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -107,7 +110,30 @@ def browse_js(expr: str) -> str:
     return ""
 
 
-def ensure_browser_login(fe_base: str) -> None:
+def ensure_browser_logout(fe_base: str) -> None:
+    """Click 登出 if a session is active (ignore if already logged out)."""
+    browse_cmd("goto", f"{fe_base}/student", timeout=60)
+    time.sleep(1.0)
+    clicked = browse_js(
+        """(() => {
+  const btn = Array.from(document.querySelectorAll('button'))
+    .find(b => (b.textContent || '').includes('登出'));
+  if (btn) { btn.click(); return 'logout'; }
+  return 'no-logout';
+})()"""
+    )
+    if clicked != "logout":
+        return
+    for _ in range(20):
+        time.sleep(0.5)
+        if "/login" in browse_js("location.href"):
+            return
+    time.sleep(1.0)
+
+
+def ensure_browser_login(fe_base: str, *, fresh: bool = False) -> None:
+    if fresh:
+        ensure_browser_logout(fe_base)
     for _attempt in range(3):
         browse_cmd("goto", f"{fe_base}/login")
         time.sleep(2)
@@ -132,6 +158,17 @@ def ensure_browser_login(fe_base: str) -> None:
                 time.sleep(1.5)
                 return
     raise RuntimeError("browser login timeout")
+
+
+def assert_browser_logged_in(fe_base: str) -> None:
+    href = browse_js("location.href")
+    if "/login" in href:
+        raise RuntimeError(f"browser session not logged in: {href}")
+    browse_cmd("goto", f"{fe_base}/student", timeout=60)
+    time.sleep(0.5)
+    href = browse_js("location.href")
+    if "/login" in href:
+        raise RuntimeError(f"browser session lost after student goto: {href}")
 
 
 def _read_ui_dom_state() -> dict:
@@ -495,19 +532,23 @@ def run_qa(
     if "L5" in gates and run_ui:
         if not BROWSE.exists():
             raise RuntimeError(f"browse not found: {BROWSE}")
+
         def relogin() -> None:
-            for _ in range(2):
+            last_err: RuntimeError | None = None
+            for _ in range(3):
                 try:
-                    ensure_browser_login(staging_fe)
+                    ensure_browser_login(staging_fe, fresh=True)
+                    assert_browser_logged_in(staging_fe)
                     return
-                except RuntimeError:
+                except RuntimeError as exc:
+                    last_err = exc
                     time.sleep(3)
-            print("WARN: browser relogin failed", flush=True)
+            raise RuntimeError(f"browser relogin failed after 3 attempts: {last_err}")
 
         relogin()
         total = len(stories)
         for idx, s in enumerate(stories):
-            if idx > 0 and idx % 15 == 0:
+            if idx > 0 and idx % L5_RELOGIN_EVERY == 0:
                 relogin()
             sid = s["id"]
             code = s.get("grade_code") or ""
@@ -529,6 +570,14 @@ def run_qa(
             profile = remote.get("interaction_profile") or {}
             dom = check_ui_page(sid, staging_fe, require_lt, relogin=relogin)
             ok, issues = ui_pass_from_dom(dom, profile, require_lesson_text=require_lt)
+            if not ok and l5_issues_retriable(issues):
+                try:
+                    relogin()
+                    dom = check_ui_page(sid, staging_fe, require_lt, relogin=relogin)
+                    ok, issues = ui_pass_from_dom(dom, profile, require_lesson_text=require_lt)
+                except RuntimeError as exc:
+                    issues = [*issues, f"flake retry relogin failed: {exc}"]
+                    ok = False
             rec = next((r for r in staging_records if r["id"] == sid), {"id": sid, "grade_code": code, "gates": {}})
             rec.setdefault("gates", {})["L5"] = summarize_gate("L5", ok, issues)
             rec["profile"] = profile

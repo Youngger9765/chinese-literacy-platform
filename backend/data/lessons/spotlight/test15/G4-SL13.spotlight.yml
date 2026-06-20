@@ -1,0 +1,49 @@
+spotlight:
+  lesson: G4-SL13
+  strategy_name: 想法感受的換位思考
+  strategy_type: perspective_taking
+  blocks:
+  - type: guide
+    text: '「換位思考」是指站在別人的角度看事情，了解對方的感受，進而聽懂別人的言外之意。故事中的阿公、小男孩或是麵攤老闆，他們都能夠換位思考，懂得替別人著想。
+
+      　　我們可以用三個步驟來學習「換位思考」喔：
+
+      (1)觀察言行：聽對方說的話或觀察對方的行為（表情、動作、反應）。
+
+      (2)推論動機：根據(1)的觀察，推論對方言行的動機。
+
+      (3)成功換位思考：綜合(2)的推論，判斷對方的真正想法。
+
+      　　接下來我們要用「換位思考三步驟」，來練習推論出本篇故事中人物說話或行為的動機，以及言外之意喔！'
+  - type: guide
+    text: ◎小試身手：
+  - type: free_text
+    prompt: 1.我們要利用換位思考三步驟來推論課文中阿公的想法，請根據阿公說的話或行為想一想、連連看，做出合理的推論。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟三：成功換位思考
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →阿公應該【  還沒 / 已經  】吃飽，用這麼誇張的方式說話是因為錢不夠，又想讓孫子【  安心/放心  】吃麵。
+  - type: free_text
+    prompt: 2.進階題：我們要再利用換位思考三步驟來推論課文中老闆的想法，請根據老闆說的話或行為想一想、連連看，做出合理的推論。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟三：成功換位思考
+  - type: passage
+    source: unknown
+    paragraphs:
+    - →老闆想要在不傷害老人及小男孩【   自尊心  /  自信心   】的情況下，【  幫助   】他們。
+  - type: free_text
+    prompt: 3.挑戰題：讀完下面故事後，運用換位思考三步驟寫出老闆可能的想法。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 老闆這麼做是因為：【   怕大學生一看到老闆幫他加料，會覺得被施捨，傷害他的自尊心，因此才放在白飯下方。        　　　　               】

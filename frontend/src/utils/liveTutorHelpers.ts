@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 import { DiffToken } from '../types';
 import { normalizeForComparison } from './textDiff';
 import { isHomophone } from './pinyin';

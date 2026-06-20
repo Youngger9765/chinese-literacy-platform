@@ -22,11 +22,50 @@ from typing import Any
 
 import yaml
 
+from app.services.lesson_code_normalization import normalize_manifest_code
 from app.services.spotlight_block_model import eval_g6_l22_acceptance
 
 _DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
 DEV7_DIR = _DATA_ROOT / "spotlight" / "dev7"
+TEST15_DIR = _DATA_ROOT / "spotlight" / "test15"
 GOLD_MANIFEST = DEV7_DIR / "gold_manifest.json"
+TEST15_GOLD_MANIFEST = TEST15_DIR / "gold_manifest.json"
+
+TEST15_LESSONS = (
+    "G4-SL10",
+    "G4-SL13",
+    "G5-SL7",
+    "G5-SL10",
+    "G5-SL26",
+    "G6-SL3",
+    "G6-SL8",
+    "G6-SL14",
+    "G7-SL9",
+    "G7-SL17",
+    "G7-SL19",
+    "G8-SL4",
+    "G8-SL8",
+    "G9-SL9",
+)
+
+# Eval fixture id (G*-SL*) → platform catalog lesson_code.
+# G8 sub-letter slots differ from naive SL→L numbering (#2205).
+TEST15_FIXTURE_TO_CATALOG: dict[str, str] = {
+    "G4-SL10": "G4-L10",
+    "G4-SL13": "G4-L13",
+    "G5-SL7": "G5-L7",
+    "G5-SL10": "G5-L10",
+    "G5-SL26": "G5-L26",
+    "G6-SL3": "G6-L3",
+    "G6-SL8": "G6-L8",
+    "G6-SL14": "G6-L14",
+    "G7-SL9": "G7-L9",
+    "G7-SL17": "G7-L17",
+    "G7-SL19": "G7-L19",
+    "G8-SL4": "G8-L3b",
+    "G8-SL8": "G8-L6b",
+    "G9-SL9": "G9-L9",
+}
 
 DEV7_LESSONS = (
     "G6-L22",
@@ -132,6 +171,23 @@ def load_spotlight_yaml(path: Path) -> dict[str, Any]:
 
 def load_gold_manifest() -> dict[str, Any]:
     return json.loads(GOLD_MANIFEST.read_text(encoding="utf-8"))
+
+
+def load_test15_gold_manifest() -> dict[str, Any]:
+    return json.loads(TEST15_GOLD_MANIFEST.read_text(encoding="utf-8"))
+
+
+_CATALOG_TO_TEST15_FIXTURE: dict[str, str] = {
+    normalize_manifest_code(catalog): fixture
+    for fixture, catalog in TEST15_FIXTURE_TO_CATALOG.items()
+}
+
+TEST15_CATALOG_CODES = frozenset(_CATALOG_TO_TEST15_FIXTURE.keys())
+
+
+def test15_fixture_for_catalog(catalog_code: str) -> str | None:
+    """Map platform lesson_code → test15 fixture id (G*-SL*), or None."""
+    return _CATALOG_TO_TEST15_FIXTURE.get(normalize_manifest_code(catalog_code))
 
 
 def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
@@ -271,6 +327,13 @@ def compare_to_gold(
 
 def load_dev7_spotlight(lesson_id: str) -> dict[str, Any] | None:
     path = DEV7_DIR / f"{lesson_id}.spotlight.yml"
+    if not path.exists():
+        return None
+    return load_spotlight_yaml(path)
+
+
+def load_test15_spotlight(lesson_id: str) -> dict[str, Any] | None:
+    path = TEST15_DIR / f"{lesson_id}.spotlight.yml"
     if not path.exists():
         return None
     return load_spotlight_yaml(path)

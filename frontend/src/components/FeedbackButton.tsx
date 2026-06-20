@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 import React, { useState, useRef, useEffect } from 'react';
 import { submitFeedback, type FeedbackCategory } from '../services/feedbackApi';
 import { useFocusTrap } from '../hooks/useFocusTrap';

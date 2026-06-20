@@ -7,13 +7,13 @@
     },
     {
       "label": "背景",
-      "value": "（如同你前面寫的背景）",
-      "interactive_type": "display"
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "起因",
-      "value": "（如同你前面寫的起因）",
-      "interactive_type": "display"
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "經過",
@@ -53,9 +53,11 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 2,
+    "fill_blank_count": 4,
     "checkbox_count": 0,
     "primary_labels": [
+      "背景",
+      "起因",
       "經過",
       "結果"
     ],

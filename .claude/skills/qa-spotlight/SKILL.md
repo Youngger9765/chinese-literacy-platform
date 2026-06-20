@@ -1,9 +1,12 @@
 ---
 name: qa-spotlight
-description: 對一課已產出的聚光燈 schema 跑量化 eval + 人眼抽審。當需要「qa 聚光燈」「驗證聚光燈 schema」「spotlight qa」「確認聚光燈品質」「check spotlight」時使用。依賴 docs/issue-2205-eval-standard.md 的 PASS 門檻，不重發明指標。
+description: 對一課已產出的聚光燈 schema 跑量化 eval + 人眼抽審。當需要「qa 聚光燈」「驗證聚光燈 schema」「spotlight qa」「確認聚光燈品質」「check spotlight」時使用。依賴 docs/issue-2205-eval-standard.md 的 PASS 門檻，不重發明指標。L-layer 框架見 docs/qa/layer-verification-framework.md §5.2。
 ---
 
 # qa-spotlight — 聚光燈 schema 品質驗證
+
+> **L-layer 對照**（L1–L5 全 platform 框架）：`docs/qa/layer-verification-framework.md` §5.2  
+> **Module SOT**：`specs/modules/spotlight_v2/INTENT.md`
 
 對一課 `build-spotlight` 產出的 `.spotlight.yml` 做**量化 eval + 人眼抽審**。
 兩步缺一不可：auto-eval 抓數字，人眼抓語意錯誤。

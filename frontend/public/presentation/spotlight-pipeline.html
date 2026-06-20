@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聚光燈 Spotlight Pipeline — 架構 / 開發 / QA / 資料 / 缺口&債 集成板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FDF8F0; --ink:#1a1a2e; --purple:#5B4FC4; --muted:#6b6b8a;
+    --card:#fff; --line:#e7e2d8; --green:#16a34a; --red:#dc2626; --amber:#d97706;
+    --chip:#efe9ff;
+  }
+  *{box-sizing:border-box}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:32px 20px;line-height:1.6}
+  .container{max-width:1080px;margin:0 auto}
+  h1{color:var(--purple);font-size:1.6rem;margin:0 0 6px}
+  .subtitle{color:var(--muted);margin:0 0 6px}
+  .oneliner{background:var(--chip);border-left:4px solid var(--purple);padding:10px 14px;border-radius:8px;margin:14px 0 4px;font-size:.95rem}
+  .updated{color:var(--muted);font-size:.78rem;margin-bottom:18px}
+  /* tabs */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:22px}
+  .tab{padding:10px 16px;border:none;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+  .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+  .pane{display:none}
+  .pane.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  /* flow — arch tab */
+  .flow{display:flex;flex-direction:column;gap:0;align-items:center}
+  .node-row{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;width:100%;max-width:760px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .node-row.branch{border-style:dashed;border-color:var(--purple)}
+  .node-text{flex:1;min-width:0}
+  .node-text .t{font-weight:700}
+  .node-text .s{font-size:.82rem;color:var(--muted);margin-top:2px}
+  .node-text .side{font-size:.72rem;display:inline-block;background:var(--chip);color:var(--purple);border-radius:6px;padding:1px 7px;margin-left:6px}
+  .node-demo{flex:0 0 160px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80px;gap:6px}
+  @media(max-width:640px){.node-row{flex-direction:column}.node-demo{flex:none;width:100%}}
+  .arrow{color:var(--purple);font-size:1.2rem;line-height:1.1;margin:4px 0}
+  /* table */
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:.86rem}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f3eee4;color:var(--ink);font-size:.8rem}
+  .nowrap{white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  code{background:#f3eee4;padding:1px 5px;border-radius:4px;font-size:.82em}
+  a{color:var(--purple);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .ok{color:var(--green);font-weight:700}
+  .badword{color:var(--red);font-weight:700}
+  .pill{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:20px;background:var(--chip);color:var(--purple);margin:2px 3px 2px 0}
+  .pill.fe{background:#e0f2fe;color:#0369a1}
+  .pill.be{background:#dcfce7;color:#15803d}
+  .pill.llm{background:#fef3c7;color:#b45309}
+  .pill.sc{background:#f3e8ff;color:#7c3aed}
+  .unverified{background:#fee2e2;color:var(--red);font-weight:700;padding:1px 7px;border-radius:6px;font-size:.78rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .card h3{margin:0 0 8px;font-size:1.05rem;color:var(--purple)}
+  .big-link{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .big-link .lbl{font-weight:600}
+  .big-link .d{font-size:.82rem;color:var(--muted);margin-top:2px}
+  .debt{border-left:4px solid var(--red)}
+  .rule{border-left:4px solid var(--purple);background:var(--chip)}
+  ul{margin:6px 0;padding-left:20px}
+  li{margin:3px 0}
+  .legend{font-size:.78rem;color:var(--muted);margin-top:10px}
+
+  /* === 架構動畫 CSS === */
+
+  /* ① DOCX 解析 — pulsing doc icon */
+  .doc-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .doc-icon{width:36px;height:44px;border:3px solid var(--purple);border-radius:4px;position:relative;animation:doc-pulse 2s ease-in-out infinite}
+  .doc-icon::before{content:'';position:absolute;top:0;right:0;width:10px;height:10px;background:var(--bg);border-left:3px solid var(--purple);border-bottom:3px solid var(--purple)}
+  .doc-lines{display:flex;flex-direction:column;gap:3px;margin-top:2px}
+  .doc-line{height:3px;border-radius:2px;background:var(--muted);animation:doc-line-pulse 2s ease-in-out infinite}
+  .doc-line:nth-child(1){width:44px;animation-delay:0s}
+  .doc-line:nth-child(2){width:36px;animation-delay:.3s}
+  .doc-line:nth-child(3){width:40px;animation-delay:.6s}
+  @keyframes doc-pulse{0%,100%{border-color:var(--purple);opacity:1}50%{border-color:var(--amber);opacity:.8}}
+  @keyframes doc-line-pulse{0%,100%{background:var(--muted)}50%{background:var(--purple)}}
+
+  /* ② YAML file icon */
+  .yaml-wrap{display:flex;flex-direction:column;gap:3px;align-items:center}
+  .yaml-label{font-size:.65rem;font-weight:700;color:var(--purple);letter-spacing:.05em}
+  .yaml-block{border-radius:3px;height:8px;animation:yaml-appear 1.6s ease-in-out infinite}
+  .yaml-block:nth-child(2){width:90px;background:#efe9ff;animation-delay:0s}
+  .yaml-block:nth-child(3){width:70px;background:#e0f2fe;animation-delay:.2s}
+  .yaml-block:nth-child(4){width:80px;background:#dcfce7;animation-delay:.4s}
+  .yaml-block:nth-child(5){width:60px;background:#fef3c7;animation-delay:.6s}
+  .yaml-block:nth-child(6){width:75px;background:#fee2e2;animation-delay:.8s}
+  @keyframes yaml-appear{0%{opacity:.3}50%{opacity:1}100%{opacity:.3}}
+
+  /* ③ Server box with blinking light */
+  .server-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .server-box{width:64px;height:36px;background:#f3eee4;border:2px solid var(--purple);border-radius:6px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px}
+  .server-light{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.2s ease-in-out infinite}
+  .server-label{font-size:.6rem;color:var(--muted);font-weight:600;letter-spacing:.04em}
+  .server-route{font-size:.6rem;color:var(--muted);text-align:center}
+  @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.3;box-shadow:none}}
+
+  /* ④ Stacking blocks */
+  #block-anim{min-height:80px;display:flex;flex-direction:column;justify-content:center}
+
+  /* ⑤ Typing text → AI badge */
+  .ai-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .typing-text{font-size:.72rem;color:var(--ink);background:#f9f6f0;border-radius:4px;padding:4px 6px;min-width:100px;text-align:left;min-height:1.4em}
+  .typing-cursor{display:inline-block;width:2px;height:12px;background:var(--purple);animation:cursor-blink .8s step-end infinite;vertical-align:middle}
+  .ai-badge{font-size:.68rem;font-weight:700;background:var(--chip);color:var(--purple);border-radius:6px;padding:2px 8px;border:1px solid var(--purple)}
+  .submit-arrow{color:var(--purple);font-size:.9rem}
+
+  /* === QA 矩陣 CSS === */
+  .matrix-wrap{overflow-x:auto;margin-bottom:12px}
+  .cell-ok{color:var(--green);font-weight:600;text-align:center}
+  .cell-fail{color:var(--red);font-weight:600;text-align:center;cursor:help}
+  .cell-warn{color:var(--amber);text-align:center}
+  .lesson-id{font-size:.78rem;color:var(--muted);white-space:nowrap}
+  .qa-stat-bar{background:var(--chip);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem}
+  .stat-ok{color:var(--green);font-weight:700}
+  .stat-fail{color:var(--red);font-weight:700}
+  .stat-gen{color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>聚光燈 Spotlight Pipeline · 集成板</h1>
+  <p class="subtitle">架構 / 開發 / QA / 資料 / 缺口&amp;債 — all in one</p>
+  <div class="oneliner"><b>一句話分工：</b>前端管「區塊渲染 + 互動」，後端管「從 DOCX 解析 → YAML → API」；<b>LLM 只在最後 free_text 批改</b>，所有解析是 deterministic regex。</div>
+  <p class="updated">最後更新 2026-06-20 · base staging · issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">#2315</a></p>
+
+  <div class="tabs">
+    <button class="tab active" data-pane="arch">① 架構</button>
+    <button class="tab" data-pane="dev">② 開發</button>
+    <button class="tab" data-pane="qa">③ QA result</button>
+    <button class="tab" data-pane="data">④ 資料</button>
+    <button class="tab" data-pane="debt">⑤ 缺口&amp;債</button>
+  </div>
+
+  <!-- ① ARCH -->
+  <div class="pane active" id="arch">
+    <div class="flow">
+
+      <!-- ① DOCX 解析 -->
+      <div class="node-row">
+        <div class="node-text">
+          <div class="t">① DOCX 解析 <span class="side">script</span></div>
+          <div class="s"><code>build_lesson_schema.py</code> regex 抽取，無 LLM — deterministic block 切割</div>
+        </div>
+        <div class="node-demo">
+          <div class="doc-wrap">
+            <div class="doc-icon"></div>
+            <div class="doc-lines">
+              <div class="doc-line"></div>
+              <div class="doc-line"></div>
+              <div class="doc-line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">▼</div>
+
+      <!-- ② spotlight.yml -->
+      <div class="node-row">
+        <div class="node-text">
+          <div class="t">② spotlight.yml 產出 <span class="side">script</span></div>
+          <div class="s">block schema：guide / passage / exercise / figure / fill_table / free_text / self_check</div>
+        </div>
+        <div class="node-demo">
+          <div class="yaml-wrap">
+            <div class="yaml-label">spotlight.yml</div>
+            <div class="yaml-block"></div>
+            <div class="yaml-block"></div>
+            <div class="yaml-block"></div>
+            <div class="yaml-block"></div>
+            <div class="yaml-block"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">▼</div>
+
+      <!-- ③ spotlight_v2_loader.py -->
+      <div class="node-row">
+        <div class="node-text">
+          <div class="t">③ spotlight_v2_loader.py <span class="side">後端</span></div>
+          <div class="s"><code>GET /api/stories/{id}/spotlight_v2</code> → BlockSequenceRenderer props（typed blocks 序列）</div>
+        </div>
+        <div class="node-demo">
+          <div class="server-wrap">
+            <div class="server-box">
+              <div class="server-light"></div>
+              <div class="server-label">API</div>
+            </div>
+            <div class="server-route">/spotlight_v2</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">▼</div>
+
+      <!-- ④ BlockSequenceRenderer -->
+      <div class="node-row">
+        <div class="node-text">
+          <div class="t">④ BlockSequenceRenderer.tsx <span class="side">前端</span></div>
+          <div class="s">渲染各 block type 區塊序列：guide / exercise / fill_table / figure / self_check</div>
+        </div>
+        <div class="node-demo">
+          <div id="block-anim"></div>
+        </div>
+      </div>
+
+      <div class="arrow">▼ （學生完成 free_text 書寫後提交）</div>
+
+      <!-- ⑤ free_text 批改 -->
+      <div class="node-row branch">
+        <div class="node-text">
+          <div class="t">⑤ free_text 提交 <span class="side">前端→後端 · LLM</span></div>
+          <div class="s"><code>POST /api/stories/{id}/blocks/{id}/grade</code> → <code>grade_story_structure()</code> → Gemini 2.5 Flash Lite</div>
+        </div>
+        <div class="node-demo">
+          <div class="ai-wrap">
+            <div class="typing-text" id="typing-demo">學生書寫中<span class="typing-cursor"></span></div>
+            <div class="submit-arrow">↓ 提交</div>
+            <div class="ai-badge">Gemini 2.5 Flash Lite</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="legend">關鍵：<b>LLM 只在⑤ free_text 批改</b>；①–④全無 LLM（deterministic regex + 序列渲染）。</p>
+
+    <div class="card" style="margin-top:20px">
+      <h3>教學意圖：~14 Block Palette（7 課共用、不同 sequence）</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin:0 0 8px">7 課版面天差地遠（摘要敘事 / 多步驟引導 / 圖文 / 文表），全部由同一套 ~14 block 不同順序組成（教授 decomposition 驗證）</p>
+      <table>
+        <thead><tr><th>Block</th><th>說明</th><th>出現課例</th></tr></thead>
+        <tbody>
+          <tr><td><code>B0</code> 插入小文本</td><td><b>補充小文本（自備、不用看課文）</b>——聚光燈自帶一段短文，題目掛在此，不看主課文</td><td>G6-L22 孟嘗君/大象；G6-L23/24/25</td></tr>
+          <tr><td><code>B-guide</code> 教學脈絡</td><td><b>教學脈絡敘述（小祕訣/步驟/「我們可以這樣思考」）</b>——7 課均有；現平台此層「不見了」</td><td>全部 7 課</td></tr>
+          <tr><td><code>B2</code> 單選</td><td>select_one；最常見互動</td><td>全部 7 課</td></tr>
+          <tr><td><code>B3</code> 複選</td><td>select_many；選擇段落/支持句</td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B4</code> 結構表格填空</td><td>flat 4x3 / 9x3 nested / 段落定位填 / 推論填</td><td>G6-L22~25</td></tr>
+          <tr><td><code>B6</code> 自由作答</td><td>free_write，LLM 批改</td><td>G7-L29/30</td></tr>
+          <tr><td><code>B7</code> 畫線 highlight</td><td>選取文中段落</td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B8</code> 自我檢核</td><td>self_check ✓✗</td><td>全部 7 課</td></tr>
+          <tr><td><code>B10</code> 圖/表 referent</td><td><b>綁定段落的圖（G7-L28/29）或資料表格（G7-L30 表一/表二+跨表交叉）</b></td><td>G7-L28/29/30</td></tr>
+          <tr><td><code>B11</code> MCQ×5</td><td>5 選 1 閱讀理解，每課結尾</td><td>全部 7 課</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:10px 0 0;font-size:.82rem"><b>5 軸</b>（canonical）：role / interaction / answer / eval / layout。Legacy <code>type</code> 經 <code>normalize_block()</code> 映射；非法 role×interaction 由 <code>validate_canonical_block()</code> 拒絕。</p>
+    </div>
+  </div>
+
+  <!-- ② DEV -->
+  <div class="pane" id="dev">
+    <table>
+      <thead>
+        <tr>
+          <th class="nowrap">階段</th>
+          <th>端</th>
+          <th>功能</th>
+          <th>檔案</th>
+          <th>PR / 證明</th>
+          <th>狀態</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="nowrap">① DOCX 解析</td>
+          <td><span class="pill sc">script</span></td>
+          <td>regex 無 LLM block 抽取</td>
+          <td><code>scripts/build_lesson_schema.py</code></td>
+          <td>commit <code>19e2a742</code></td>
+          <td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td class="nowrap">② spotlight.yml</td>
+          <td><span class="pill sc">script</span></td>
+          <td>block schema 序列化</td>
+          <td><code>backend/data/lessons/*.yml</code> (spotlight key)</td>
+          <td>commit <code>c4cee67b</code></td>
+          <td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td class="nowrap">③ API loader</td>
+          <td><span class="pill be">後端</span></td>
+          <td>spotlight_v2_loader → typed blocks</td>
+          <td><code>backend/app/services/spotlight_v2_loader.py</code></td>
+          <td>commit <code>4d8f71f7</code></td>
+          <td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td class="nowrap">④ BlockSequenceRenderer</td>
+          <td><span class="pill fe">前端</span></td>
+          <td>渲染 guide / exercise / fill_table / figure</td>
+          <td><code>frontend/src/components/reading-spotlight/BlockSequenceRenderer.tsx</code></td>
+          <td>commit <code>3d58059c</code></td>
+          <td class="ok">✅</td>
+        </tr>
+        <tr>
+          <td class="nowrap">⑤ free_text 批改</td>
+          <td><span class="pill be">後端</span> <span class="pill llm">LLM</span></td>
+          <td>grade_story_structure() → Gemini 2.5 Flash Lite</td>
+          <td><code>backend/app/routes/stories.py</code> · <code>backend/app/services/spotlight_contract.py</code></td>
+          <td>commit <code>c4cee67b</code></td>
+          <td class="ok">✅</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend">前端 <span class="pill fe">前</span> · 後端 <span class="pill be">後</span> · 用 LLM <span class="pill llm">LLM</span> · 工具腳本 <span class="pill sc">script</span></p>
+  </div>
+
+  <!-- ③ QA -->
+  <div class="pane" id="qa">
+
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--purple)">
+      <h3>L1–L5 驗證對照表</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">對照 <code>specs/modules/spotlight_v2/INTENT.md</code>；防假綠：L3 綠但 L4/L5 紅 ≠ 可上線</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Gate</th>
+            <th>驗什麼</th>
+            <th>工具 / 命令</th>
+            <th>Merge 阻擋</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>L1</b></td>
+            <td>DOCX → <code>.spotlight.yml</code>（answer_recall=1·mcq_leakage=0·guide_retained）</td>
+            <td><code>python3 scripts/eval_lesson_schema.py --dev</code> / <code>--test</code></td>
+            <td>改 parser 時必跑</td>
+          </tr>
+          <tr>
+            <td><b>L2</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td>checked-in YAML ↔ <code>gold_manifest.json</code> 結構指紋（dev7/test15）</td>
+            <td><code>python3 scripts/spotlight_contract.py --dev7</code> / <code>--test15</code></td>
+            <td><b>是</b>｜manifest stale = 假綠</td>
+          </tr>
+          <tr>
+            <td><b>L3</b> <span class="pill" style="background:#fee2e2;color:var(--red)">merge-block</span></td>
+            <td>loader 在 story dict 暴露 <code>spotlight_v2</code>（含 Layer-1 課）</td>
+            <td><code>cd backend &amp;&amp; pytest specs/test_spotlight_v2_spec.py -q</code></td>
+            <td><b>是</b></td>
+          </tr>
+          <tr>
+            <td><b>L4</b></td>
+            <td>staging <code>GET /api/stories/{id}</code> 的 <code>spotlight_v2</code> = local loader</td>
+            <td>curl preview API；<code>TEST15_FIXTURE_TO_CATALOG</code> 對照表</td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+          <tr>
+            <td><b>L5</b></td>
+            <td><code>/learn/{id}/reading-strategy</code> 渲染 <code>BlockSequenceRenderer</code>（非 legacy <code>StrategyExercise</code>）</td>
+            <td>browse + 代表課</td>
+            <td>merge 後必 spot-check</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:10px 0 0;font-size:.82rem">
+        <b>#2205 PASS 門檻</b>：answer_recall == 1.0 AND mcq_leakage == 0 AND guide_retained<br>
+        一鍵 gate：<code>bash scripts/run_spotlight_dev_gate.sh</code>
+      </p>
+    </div>
+
+    <h4 style="color:var(--purple);margin:18px 0 6px">L2 細節 — 逐課 QA 矩陣</h4>
+    <div id="qa-summary">載入中...</div>
+    <div class="matrix-wrap">
+      <table id="sp-table">
+        <thead id="sp-head"></thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px;border-left:4px solid var(--amber)">
+      <h3>🚧 Open Frontier — B10 圖/表 asset（尚未完成）</h3>
+      <p>G7-L29 / G7-L30 的 B10 圖/表 asset 抽取 + 跨兩表交叉 + 段落綁定 <b>尚未做完</b>。目前 figure referent 為另案（INTENT 明確標示）。矩陣中這兩課 figure_asset_recall 欄未計入，不代表全 PASS。</p>
+    </div>
+
+    <div class="card" style="margin-top:4px;border-left:4px solid var(--amber)">
+      <h3>尚未結構化的驗收</h3>
+      <p>逐段閱讀 flow 功能（能不能跑）的驗收結果<b>尚未做成結構化資料</b>，此矩陣沒有涵蓋。</p>
+    </div>
+  </div>
+
+  <!-- ④ DATA -->
+  <div class="pane" id="data">
+    <div class="card">
+      <h3>spotlight manifest 資料來源</h3>
+      <p><code>frontend/public/presentation/data/spotlight_manifest.json</code><br>
+      7 課 · schema_version 1 · 涵蓋 G6-L22~25（summary_pse × 4）、G7-L28~30（image_text × 2，table_text × 1）</p>
+    </div>
+
+    <div class="card">
+      <h3>block type 說明</h3>
+      <table>
+        <thead><tr><th>type</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>guide</code></td><td>學習引導說明文字</td></tr>
+          <tr><td><code>passage</code></td><td>課文段落</td></tr>
+          <tr><td><code>exercise</code></td><td>互動練習（select_one / fill_blank）</td></tr>
+          <tr><td><code>fill_table</code></td><td>表格填空</td></tr>
+          <tr><td><code>free_text</code></td><td>開放式書寫（LLM 批改）</td></tr>
+          <tr><td><code>figure</code></td><td>圖片</td></tr>
+          <tr><td><code>self_check</code></td><td>學生自我檢核</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>已驗證課文清單</h3>
+      <ul>
+        <li>G6-L22 · G6-L23 · G6-L24 · G6-L25 — <b>summary_pse</b> 策略 × 4 課</li>
+        <li>G7-L28 · G7-L29 — <b>image_text</b> 策略 × 2 課</li>
+        <li>G7-L30 — <b>table_text</b> 策略 × 1 課</li>
+      </ul>
+      <p style="margin:6px 0 0;color:var(--green);font-weight:700">7 課全通過 ✅</p>
+    </div>
+  </div>
+
+  <!-- ⑤ DEBT -->
+  <div class="pane" id="debt">
+    <div class="card debt">
+      <h3>缺口：其他 144 課 spotlight.yml 尚未建</h3>
+      <p>目前僅 7 課通過驗證。其餘 144 課（共 151 課）spotlight.yml 尚未建立，需批次跑 <code>build_lesson_schema.py</code> 補全，並逐一 QA。</p>
+    </div>
+
+    <div class="card debt">
+      <h3>缺口：偵測器仍需 generalize（5/8 非七課漏抓重點表）</h3>
+      <p>dev7 + test15 泛化測試已通過，但偵測器在非七課課文（5/8）仍漏抓重點表。需繼續調整通用規則，不針對七課 overfit。</p>
+    </div>
+
+    <div class="card rule">
+      <h3>規則：出問題修 SKILL 通用規則，不 overfit</h3>
+      <p>修正解析錯誤時，只能改 <code>build_lesson_schema.py</code> 的<b>通用規則</b>，禁止針對個別課文寫特例。Overfit = 下一課又壞。見 issue <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2315">#2315</a>。</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── Inline spotlight manifest data ── */
+var SP_DATA = {"schema_version":1,"lessons":[{"lesson_id":"G6-L22","strategy_type":"summary_pse","block_count":29,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":15,"mcq_option_guides":0,"semantic_pass":true,"semantic_errors":[]},"acceptance":{"pass":true,"failures":[]}},"gold":{"match":true,"diffs":{}},"type_histogram":{"fill_table":1,"free_text":1,"guide":8,"passage":4,"single":15}},{"lesson_id":"G6-L23","strategy_type":"summary_pse","block_count":43,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":2,"mcq_option_guides":0,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"fill_table":1,"free_text":13,"guide":20,"passage":6,"self_check":1,"single":2}},{"lesson_id":"G6-L24","strategy_type":"summary_pse","block_count":10,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":3,"mcq_option_guides":0,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"fill_table":1,"guide":5,"self_check":1,"single":3}},{"lesson_id":"G6-L25","strategy_type":"summary_pse","block_count":7,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":3,"mcq_option_guides":0,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"fill_table":1,"guide":2,"self_check":1,"single":3}},{"lesson_id":"G7-L28","strategy_type":"image_text","block_count":40,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":5,"mcq_option_guides":4,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"figure":1,"fill_table":1,"free_text":7,"guide":22,"passage":3,"self_check":1,"single":5}},{"lesson_id":"G7-L29","strategy_type":"image_text","block_count":68,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":24,"mcq_option_guides":0,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"figure":5,"free_text":6,"guide":32,"self_check":1,"single":24}},{"lesson_id":"G7-L30","strategy_type":"table_text","block_count":52,"overall_pass":true,"eval":{"pass":true,"guide_retained":true,"answer_recall":1.0,"mcq_leakage":0,"struct_errors":[],"semantic":{"single_count":19,"mcq_option_guides":2,"semantic_pass":true,"semantic_errors":[]},"acceptance":{}},"gold":{"match":true,"diffs":{}},"type_histogram":{"figure":5,"free_text":4,"guide":21,"passage":2,"self_check":1,"single":19}}],"summary":{"total":7,"pass":7,"fail":0}};
+
+/* ── QA rendering helpers ── */
+function cellBool(v) {
+  if (v === true) return '<td class="cell-ok">✅</td>';
+  if (v === false) return '<td class="cell-fail">❌</td>';
+  return '<td>—</td>';
+}
+function cellNum(v, invertGood) {
+  if (v === undefined || v === null) return '<td>—</td>';
+  var good = invertGood ? (v === 0) : (v >= 0.9);
+  return '<td class="' + (good ? 'cell-ok' : 'cell-warn') + '">' + (typeof v === 'number' ? v.toFixed(2) : v) + '</td>';
+}
+function renderSpotlight(sp) {
+  var lessons = sp.lessons || [];
+  var passed = lessons.filter(function(l){return l.overall_pass;}).length;
+  document.getElementById('qa-summary').innerHTML =
+    '<div class="qa-stat-bar"><span class="stat-ok">' + passed + ' / ' + lessons.length + ' 通過</span>' +
+    '<span class="stat-fail">' + (lessons.length - passed) + ' 失敗</span>' +
+    '<span class="stat-gen">資料更新：' + (sp.summary ? '7 課' : '?') + '</span></div>';
+
+  document.getElementById('sp-head').innerHTML = '<tr><th>課文</th><th>策略類型</th>' +
+    '<th>guide_retained</th><th>answer_recall</th><th>mcq_leakage</th><th>semantic_pass</th><th>acceptance</th><th>Overall</th></tr>';
+
+  document.getElementById('sp-body').innerHTML = lessons.map(function(l) {
+    var ev = l.eval || {};
+    return '<tr><td class="lesson-id">' + l.lesson_id + '</td><td>' + (l.strategy_type || '') + '</td>' +
+      cellBool(ev.guide_retained) +
+      cellNum(ev.answer_recall) +
+      cellNum(ev.mcq_leakage, true) +
+      cellBool(ev.semantic && ev.semantic.semantic_pass) +
+      cellBool(ev.acceptance && ev.acceptance.pass) +
+      '<td class="' + (l.overall_pass ? 'cell-ok' : 'cell-fail') + '">' + (l.overall_pass ? '✅' : '❌') + '</td></tr>';
+  }).join('');
+}
+renderSpotlight(SP_DATA);
+
+/* ── Tab switching ── */
+document.querySelectorAll('.tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+    btn.classList.add('active');
+    document.getElementById(btn.getAttribute('data-pane')).classList.add('active');
+  });
+});
+
+/* ── Spotlight block animation — stacking colored blocks ── */
+(function() {
+  var blockColors = ['#efe9ff','#dcfce7','#fef3c7','#e0f2fe','#fee2e2'];
+  var container = document.getElementById('block-anim');
+  if (!container) return;
+  var idx = 0;
+  function addBlock() {
+    if (container.children.length >= 5) {
+      container.innerHTML = '';
+      idx = 0;
+    }
+    var b = document.createElement('div');
+    b.style.cssText = 'width:120px;height:14px;border-radius:4px;background:' + blockColors[idx % blockColors.length] + ';margin:3px auto;transition:all .3s';
+    container.appendChild(b);
+    idx++;
+    setTimeout(addBlock, 500);
+  }
+  addBlock();
+})();
+
+/* ── Typing animation for free_text demo ── */
+(function() {
+  var el = document.getElementById('typing-demo');
+  if (!el) return;
+  var phrases = ['學生書寫中', '這段描述了...', '主角面對困難'];
+  var phraseIdx = 0;
+  var charIdx = 0;
+  var deleting = false;
+
+  function tick() {
+    var current = phrases[phraseIdx];
+    if (!deleting) {
+      charIdx++;
+      el.innerHTML = current.slice(0, charIdx) + '<span class="typing-cursor"></span>';
+      if (charIdx >= current.length) {
+        deleting = true;
+        setTimeout(tick, 1400);
+        return;
+      }
+    } else {
+      charIdx--;
+      el.innerHTML = current.slice(0, charIdx) + '<span class="typing-cursor"></span>';
+      if (charIdx === 0) {
+        deleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+      }
+    }
+    setTimeout(tick, deleting ? 60 : 110);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

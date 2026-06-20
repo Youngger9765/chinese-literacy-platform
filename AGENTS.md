@@ -110,6 +110,9 @@ owned by a spec module:
 2. If the file you are editing appears under a module → read
    `specs/modules/<feature>/INTENT.md` (human-readable SOT) and the
    corresponding `backend/specs/test_<feature>_spec.py` (machine contracts).
+   For **content/learning modules** (spotlight, story-structure, DOCX-backed
+   flows): also read `docs/qa/layer-verification-framework.md` and the module
+   L-layer table in INTENT.md; run the module ship gate before merge.
 3. After changes: run **`bash specs/run-ci.sh`** (local CI = registry-freshness
    gate + all spec contracts). A failing contract means code or data drifted
    from the documented intent; fix the code OR update the spec (but document

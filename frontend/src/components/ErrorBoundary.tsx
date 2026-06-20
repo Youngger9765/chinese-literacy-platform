@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 import React, { Component, ErrorInfo } from 'react';
 
 const RELOAD_COUNT_KEY = 'error_reload_count';

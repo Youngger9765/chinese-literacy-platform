@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * NotificationBell — bell icon with unread badge for teacher notification center.
  * Shown in the app header for users with teacher role.

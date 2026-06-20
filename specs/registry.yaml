@@ -547,6 +547,9 @@ modules:
   - backend/app/services/audio_upload_service.py
   - backend/app/routes/learning/learning_reading.py
   - backend/app/routes/learning/learning_audio_replay.py
+  - backend/app/routes/teacher/teacher_audio_replay.py
+  - backend/app/services/assignment_lifecycle_service.py
+  - scripts/reconcile_reading_audio_orphans.py
   - frontend/src/hooks/useAudioRecorder.ts
   - frontend/src/hooks/useFullReadingSession.ts
   - frontend/src/components/reading-steps/FullReading.tsx
@@ -557,11 +560,13 @@ modules:
   - backend/specs/test_reading_transcription_spec.py
   - backend/tests/test_reading_audio_upload.py
   - backend/tests/test_reading_audio_replay_student.py
+  - backend/tests/test_teacher_audio_replay.py
   related_issues:
   - 2131
   - 2156
   - 2266
   - 2266-audio-replay
+  - 2266-pr2
   source_meetings: []
   last_reviewed: 2026-06-09
   owner: young
@@ -638,7 +643,7 @@ modules:
   - 2205
   source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
-  last_reviewed: 2026-06-18
+  last_reviewed: 2026-06-20
   owner: young
   intent: specs/modules/spotlight_v2/INTENT.md
 - spec_id: step.sequence.registry

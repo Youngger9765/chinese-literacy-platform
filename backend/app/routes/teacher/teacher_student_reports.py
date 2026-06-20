@@ -81,6 +81,7 @@ def get_teacher_session_report(
         teacher_reviewed_at=session.teacher_reviewed_at,
         started_at=session.started_at,
         completed_at=session.completed_at,
+        step_progress=session.step_progress,
     )
 
 

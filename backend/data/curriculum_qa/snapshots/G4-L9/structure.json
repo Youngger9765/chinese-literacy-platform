@@ -2,16 +2,16 @@
   "rows": [
     {
       "label": "主題",
-      "value": "大自然的氣象小幫手",
+      "value": "大自然的氣象小幫手 【　　　】",
       "interactive_type": "fill_blank"
     },
     {
       "label": "重要事實 1",
-      "value": "蜘蛛結網代表天氣穩定",
+      "value": "□①蜘蛛結網代表快下雨 ②蜘蛛結網代表天氣穩定 □③蜘蛛結網代表風很大",
       "interactive_type": "checkbox",
       "options": [
         "蜘蛛結網代表快下雨",
-        "蜘蛛結網代表天氣穩定",
+        "蜘蛛結網代表天氣穩定 □",
         "蜘蛛結網代表風很大"
       ],
       "correct_options": [
@@ -20,11 +20,11 @@
     },
     {
       "label": "重要事實 2",
-      "value": "蟋蟀叫聲頻率與氣溫有關",
+      "value": "□①蟋蟀叫聲頻率與濕度有關 ②蟋蟀叫聲頻率與氣溫有關 □③蟋蟀叫聲頻率與風速有關",
       "interactive_type": "checkbox",
       "options": [
         "蟋蟀叫聲頻率與濕度有關",
-        "蟋蟀叫聲頻率與氣溫有關",
+        "蟋蟀叫聲頻率與氣溫有關 □",
         "蟋蟀叫聲頻率與風速有關"
       ],
       "correct_options": [
@@ -33,11 +33,11 @@
     },
     {
       "label": "重要事實 3",
-      "value": "日暈月暈是天氣變化的前兆",
+      "value": "□①日暈月暈是好運的象徵 ②日暈月暈是天氣變化的前兆 □③日暈月暈是外星人的信號",
       "interactive_type": "checkbox",
       "options": [
         "日暈月暈是好運的象徵",
-        "日暈月暈是天氣變化的前兆",
+        "日暈月暈是天氣變化的前兆 □",
         "日暈月暈是外星人的信號"
       ],
       "correct_options": [
@@ -46,8 +46,36 @@
     },
     {
       "label": "結論",
-      "value": "大自然的線索能幫助我們預測天氣",
+      "value": "大自然的線索能幫助我們預測天氣 【　　　】",
       "interactive_type": "fill_blank"
+    }
+  ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "大自然的氣象小幫手 【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 1",
+      "value": "□①蜘蛛結網代表快下雨 ②蜘蛛結網代表天氣穩定 □③蜘蛛結網代表風很大"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 2",
+      "value": "□①蟋蟀叫聲頻率與濕度有關 ②蟋蟀叫聲頻率與氣溫有關 □③蟋蟀叫聲頻率與風速有關"
+    },
+    {
+      "kind": "pair",
+      "label": "重要事實 3",
+      "value": "□①日暈月暈是好運的象徵 ②日暈月暈是天氣變化的前兆 □③日暈月暈是外星人的信號"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "大自然的線索能幫助我們預測天氣 【　　　】"
     }
   ],
   "interaction_profile": {
@@ -61,6 +89,6 @@
       "重要事實 2",
       "重要事實 3"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

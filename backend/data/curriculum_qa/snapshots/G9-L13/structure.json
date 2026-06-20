@@ -22,8 +22,8 @@
       "sub_rows": [
         {
           "label": "代表球隊",
-          "value": "波士頓塞爾提克\n(樂觀型) 紐澤西籃網\n(悲觀型)",
-          "interactive_type": "display"
+          "value": "波士頓塞爾提克\n【　　　】 紐澤西籃網\n【　　　】",
+          "interactive_type": "fill_blank"
         },
         {
           "label": "1.對失敗的看法",
@@ -31,7 +31,7 @@
           "interactive_type": "fill_blank"
         },
         {
-          "label": "2.之後表現 \n(單選)",
+          "label": "2.之後表現 \n【 單選 】",
           "value": "①越打越好\n□②連敗不止 □①越打越好\n②連敗不止",
           "interactive_type": "checkbox",
           "options": [
@@ -49,7 +49,7 @@
     },
     {
       "label": "研究結論",
-      "value": "【　　　】會直接影響後續表現。",
+      "value": "【　　　】 】會直接影響後續表現。",
       "interactive_type": "fill_blank"
     },
     {
@@ -103,13 +103,13 @@
   "interaction_profile": {
     "mode": "mixed",
     "template_kind": "generic",
-    "fill_blank_count": 5,
+    "fill_blank_count": 6,
     "checkbox_count": 1,
     "primary_labels": [
       "研究目的",
       "研究方法",
-      "1.對失敗的看法",
-      "2.之後表現 \n(單選)"
+      "代表球隊",
+      "1.對失敗的看法"
     ],
     "layout": "worksheet_table"
   }

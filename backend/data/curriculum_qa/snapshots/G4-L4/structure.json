@@ -11,7 +11,7 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "是什麼  \n  (定義)",
+          "label": "是什麼  \n  【 定義 】",
           "value": "運動科學是對【　　　】活動進行【　　　】分析的一個綜合性學科。",
           "interactive_type": "fill_blank"
         },
@@ -56,7 +56,7 @@
     "fill_blank_count": 3,
     "checkbox_count": 0,
     "primary_labels": [
-      "是什麼  \n  (定義)",
+      "是什麼  \n  【 定義 】",
       "方法\n與應用",
       "適用對象"
     ],

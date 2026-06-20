@@ -136,44 +136,8 @@ strategy_exercise:
     answer: 1
   - prompt: 請用「少」的三種不同意思，各造一個句子
     type: free_text
-story_structure:
-- label: 主角
-  value: 顧寧人
-- label: 事例
-  sub_rows:
-  - label: 背景
-    value: 家世
 knowledge_video_url: https://www.youtube.com/watch?v=p3SufRlafnA
-story_structure_rows:
-- label: 主題
-  value: 顧寧人勤奮讀書
-  interactive_type: fill_blank
-  hint: 這篇文章主要在講述誰的什麼事蹟？
-- label: 重要內容 1
-  value: 顧寧人從小就聰明過人，專心研究古學，能背誦儒家經典和史書。
-  interactive_type: checkbox
-  hint: 顧寧人年少時有什麼特點？
-  options:
-  - 喜歡玩樂，不愛讀書
-  - 聰明過人，能背誦經典
-  - 體弱多病，無法專心
-  correct_options:
-  - 1
-- label: 重要內容 2
-  value: 顧寧人精力旺盛，沒有其他嗜好，從小到老每天都讀書，出門也帶著書。
-  interactive_type: checkbox
-  hint: 顧寧人讀書的習慣如何？
-  options:
-  - 只在閒暇時讀書
-  - 每天都讀書，出門也帶書
-  - 只讀自己喜歡的書
-  correct_options:
-  - 1
-- label: 結論
-  value: 顧寧人是個愛讀書、勤奮好學的人。
-  interactive_type: fill_blank
-  hint: 從顧寧人的故事中，你可以學到什麼？
-story_structure_table_source: ai-generated-2026-05-02
+story_structure_table_source: ai-rows-migrated-2026-06-20
 worksheet_section_order:
 - number: 一
   name: 讀全文-做記號
@@ -208,3 +172,12 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+story_structure_table:
+- - 主題
+  - 顧寧人勤奮讀書 【 這篇文章主要在講述誰的什麼事蹟？ 】
+- - 重要內容 1
+  - □①喜歡玩樂，不愛讀書 ②聰明過人，能背誦經典 □③體弱多病，無法專心
+- - 重要內容 2
+  - □①只在閒暇時讀書 ②每天都讀書，出門也帶書 □③只讀自己喜歡的書
+- - 結論
+  - 顧寧人是個愛讀書、勤奮好學的人。 【 從顧寧人的故事中，你可以學到什麼？ 】

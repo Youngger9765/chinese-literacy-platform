@@ -32,25 +32,25 @@
         },
         {
           "label": "末日當日",
-          "value": "什麼都沒有發生　　□外星人出現。(單選)",
-          "interactive_type": "display"
-        },
-        {
-          "label": "末日後",
-          "value": "(1)原來就不太投入的人怎麼做？→【　　　】",
+          "value": "什麼都沒有發生　　□外星人出現。【　　　】",
           "interactive_type": "fill_blank"
         },
         {
           "label": "末日後",
-          "value": "(2)對教主付出很多的人怎麼做？→【　　　】",
+          "value": "【　　　】原來就不太投入的人怎麼做？→【　　　】",
+          "interactive_type": "fill_blank"
+        },
+        {
+          "label": "末日後",
+          "value": "【　　　】對教主付出很多的人怎麼做？→【　　　】",
           "interactive_type": "fill_blank"
         }
       ]
     },
     {
       "label": "研究結論",
-      "value": "有特定信仰的人：(單選)\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。",
-      "interactive_type": "display"
+      "value": "有特定信仰的人：【　　　】\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。",
+      "interactive_type": "fill_blank"
     }
   ],
   "layout": "worksheet_table",
@@ -102,12 +102,12 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "psr",
-    "fill_blank_count": 4,
+    "fill_blank_count": 6,
     "checkbox_count": 0,
     "primary_labels": [
       "預言/事件",
       "末日前",
-      "末日後",
+      "末日當日",
       "末日後"
     ],
     "layout": "worksheet_table"

@@ -29,8 +29,30 @@ owner: young
 
 # 文章重點表（Story Structure）
 
-> 人讀 SOT：`docs/qa/story-structure-verification-standard.md`
+> 通用 L-layer 框架：`docs/qa/layer-verification-framework.md`
+> 人讀 SOT（L1–L5 詳標）：`docs/qa/story-structure-verification-standard.md`
 > 機器契約：`backend/specs/test_story_structure_spec.py`
+
+## L-layer 對照
+
+| Gate | 驗什麼 | 工具 / 命令 | Merge 阻擋 |
+|------|--------|-------------|-----------|
+| **L1** | DOCX ↔ keypoints.yml（row_recall、blank_recall、nesting） | `eval_lesson_schema.py`；`story_structure_qa.py --gates L1` | 改 parser 時必跑 |
+| **L2** | keypoints.yml ↔ 上架 YAML `story_structure_table` + manifest sync | `keypoints_table_sync`；`keypoints_manifest_verify.py` | **是**（禁假綠 #2273） |
+| **L3** | `interaction_profile` 與 rows 一致；fill_blank / checkbox 計數 | `story_structure_qa.py --gates L3`；`test_yaml_first_structure.py` | **是** |
+| **L4** | staging `GET /structure` = local loader | `story_structure_qa.py --gates L4` | merge 後必 spot-check |
+| **L5** | StoryStructureTable DOM + profile 驅動互動 | `story_structure_qa.py --gates L5` | merge 後必 spot-check |
+
+**L2 gold 說明**：`backend/data/curriculum_qa/keypoints_manifest.json` + snapshots — 儀表板與 runtime 一致；非 DOCX 全文 gold
+
+一鍵本地：
+
+```bash
+bash scripts/story_structure_ship_gate.sh          # verify only（CI）
+bash scripts/story_structure_ship_gate.sh --rebuild  # 有 private schema 時
+```
+
+代表課：見 `scripts/story_structure_qa_lib.py` → `REPRESENTATIVE_LESSONS`
 
 ## 不變式
 
@@ -64,8 +86,3 @@ keypoints.yml 的 `label_blanks` 經 `keypoints_table_sync.py` 轉成 `【 answe
 
 `keypoints_manifest.json` 的 `layout` / `snapshots/*/structure.json` 必須與 live loader + parser 的 `interaction_profile` 一致；`PARSER_GAP_LESSONS` 為空時 `known_gap_count` 必須為 0
 
-一鍵本地：`bash scripts/story_structure_ship_gate.sh --rebuild`
-
-## 代表課
-
-見 `scripts/story_structure_qa_lib.py` → `REPRESENTATIVE_LESSONS`
