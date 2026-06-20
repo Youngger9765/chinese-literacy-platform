@@ -81,7 +81,7 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio"
 
       - name: Promote backend traffic to latest revision (Fixes #1449)
         run: |
