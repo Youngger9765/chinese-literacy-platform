@@ -1,0 +1,89 @@
+spotlight:
+  lesson: G7-L10
+  strategy_name: 推論策略-找作者觀點和支持理由
+  strategy_type: main_idea_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：推論策略──
+  - type: guide
+    text: 一、找作者觀點、支持理由與隱含意義
+  - type: guide
+    text: 步驟❶──找作者觀點
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 祕訣：觀點常是判斷句；先看標題與開頭段。
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 根據〈塑膠，好用不好甩〉的標題和第一段內容判斷，作者主要強調塑膠具備怎樣的特性？（請打勾，單選）
+  - type: single
+    prompt: 請選擇
+    options:
+    - 塑膠進入環境後很難消失
+    - 塑膠玩具可以隨海洋漂流到世界各地
+    answer: 塑膠進入環境後很難消失
+  - type: guide
+    text: 步驟❷──找支持理由
+  - type: guide
+    text: 祕訣：支持理由常會用「事實、數據、例子、說明…」，多在觀點後。
+  - type: single
+    prompt: ◎小試身手：找一找，針對「塑膠進入環境後很難消失」觀點，作者提出什麼支持理由？（請打勾，單選）
+    options:
+    - 1997年樂高玩具落海，20多年後仍被海浪沖上岸
+    - 臺灣回收率高於世界平均，制度較完善
+    answer: 1997年樂高玩具落海，20多年後仍被海浪沖上岸
+  - type: guide
+    text: 步驟❸──推論隱含意義
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 祕訣：問自己：這個觀點與證據告訴我們什麼？（這是讀者自己讀出來的結論，不一定是課文原句）
+  - type: guide
+    text: ◎小試身手：
+  - type: free_text
+    prompt: ❶觀點：「塑膠一旦進入環境，就很難消失。」
+  - type: free_text
+    prompt: ❷理由：「樂高玩具漂流二十多年後仍被海浪沖上岸。」
+  - type: single
+    prompt: ❸我讀到的結論
+    options:
+    - 只要國際談成公約，問題就能立刻解決
+    - 所以塑膠不是短期問題，而是長期存在自然中的垃圾。
+    answer: 只要國際談成公約，問題就能立刻解決
+  - type: guide
+    text: 二、小試身手（二）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 上面我們用「三步驟」練習了一個觀點，在這篇文章中，作者還提出其他重要觀點。接下來請你用同樣的三步驟（找觀點→找支持理由→推論隱含意義；從左欄到右欄），找出本文其他觀點。請在勾選□適合的答案。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、推論主旨與寫作目的
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 本文觀點的鋪陳，作者先說明塑膠污染的持久與無所不在，再指出回收不足與減塑困難的現實挑戰，最後提出個人行動仍有力量。這樣的安排讓我們理解──面對難題不能只等待國際協商，改變可以從自己開始。我們再回到全文，思考透過這樣的鋪陳，本文的主旨和的寫作目的是什麼？
+    - 本文主旨是什麼？
+    - '□①說明塑膠為生活帶來便利，應該繼續使用。
+
+      ②強調塑膠污染嚴重又持久，呼籲從生活實踐減塑以改善環境。'
+    - 作者寫作目的：
+    - 作者希望我們未來可以怎麼做?
+    - '①從日常小行動開始減塑，成為推動改變的人
+
+      □②等待政府或國際協議解決塑膠問題。'
+  - type: guide
+    text: ※如果你三項都打勾，恭喜你，表示你已經學會用 3 步驟「找到作者觀點與支持理由，並能推論出隱含意義」，你超厲害的！
+  - type: self_check
+    items:
+    - 我能找到作者的觀點。
+    - 我能找到支持該立場的證據。
+    - 我能根據觀點和支持理由，進一步歸納出結論（隱含意義）。

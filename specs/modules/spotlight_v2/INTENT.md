@@ -57,7 +57,9 @@ bash scripts/run_spotlight_dev_gate.sh
 | G7-L28~L30 | dev7 | 1108–1110 | figure + 圖文整合 |
 | G6-L03 | test15 / G6-SL3 | 24 / 1057 | test15 loader + Layer-1 `spotlight_v2` 接線 |
 
-**test15 全量 staging L4+L5（14 課）**：`.qa-screenshots/staging-test15-l5-qa-2026-06-20.md` · 重跑 `cd frontend && node ../.qa-screenshots/run-test15-l5-staging.mjs`
+**test15 全量 staging L4+L5（14 課）**：`.qa-screenshots/staging-test15-l5-qa-2026-06-20.md` · 重跑 `cd frontend && node ../.qa-screenshots/run-test15-l5-deep-staging.mjs`
+
+**catalog bulk（104 課）**：`backend/data/lessons/spotlight/catalog/` · promote `python3 scripts/promote_spotlight_catalog.py` · **125/151 v2**（28 課無聚光燈區 → legacy，見 `catalog/no_spotlight_legacy.json`）
 
 完整 dev7 staging QA 紀錄：`.qa-screenshots/spotlight-dev7-staging-qa-2026-06-19.md`
 

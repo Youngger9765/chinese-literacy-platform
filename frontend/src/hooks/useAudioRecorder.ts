@@ -27,6 +27,12 @@ export interface AudioRecorderActions {
   stopAndGetBlob: () => Promise<Blob | null>;
   /** Elapsed ms since startRecording() — 0 if not started. */
   getRecordingDurationMs: () => number;
+  /**
+   * Returns the peak volume (0-1) observed during the last recording session.
+   * Used by callers to detect silence before sending audio to STT (Issue #2321).
+   * Reset to 0 on startRecording().
+   */
+  getPeakVolume: () => number;
   clearRecording: () => void;
 }
 
@@ -62,6 +68,12 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number | null>(null);
+  /**
+   * Issue #2321 — Silence gate: tracks the maximum volume (0-1) seen during
+   * the current recording session.  Reset on startRecording(); read via getPeakVolume()
+   * after stopAndGetBlob() to decide whether to send the audio to STT.
+   */
+  const peakVolumeRef = useRef<number>(0);
   /** P1#1 fix: resolver for stopAndGetBlob() — resolved by onstop handler. */
   const stopResolverRef = useRef<((blob: Blob | null) => void) | null>(null);
 
@@ -110,6 +122,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     setErrorMessage('');
     setElapsedSeconds(0);
     chunksRef.current = [];
+    peakVolumeRef.current = 0; // Issue #2321: reset silence gate for new session
 
     setStatus('requesting');
 
@@ -200,7 +213,12 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
         const avg = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length;
-        setVolumeLevel(Math.min(1, avg / 128));
+        const level = Math.min(1, avg / 128);
+        setVolumeLevel(level);
+        // Issue #2321: track session peak for silence detection after recording ends.
+        if (level > peakVolumeRef.current) {
+          peakVolumeRef.current = level;
+        }
         if (rafRef.current !== null) {
           rafRef.current = requestAnimationFrame(updateVolume);
         }
@@ -279,6 +297,15 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     return Date.now() - startTimeRef.current;
   }, []);
 
+  /**
+   * Issue #2321 — Returns the peak volume level (0-1) observed during the
+   * last recording session.  Call AFTER stopAndGetBlob() resolves.
+   * A value below SILENT_PEAK_THRESHOLD indicates no audible speech was captured.
+   */
+  const getPeakVolume = useCallback((): number => {
+    return peakVolumeRef.current;
+  }, []);
+
   const clearRecording = useCallback(() => {
     // Cancel any pending stopAndGetBlob promise so it doesn't hang.
     if (stopResolverRef.current) {
@@ -324,6 +351,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     stopRecording,
     stopAndGetBlob,
     getRecordingDurationMs,
+    getPeakVolume,
     clearRecording,
   };
 }

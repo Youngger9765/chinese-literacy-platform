@@ -483,6 +483,12 @@ async def evaluate_reading_endpoint(
 # Hard limits (enforced before hitting Gemini)
 _MAX_AUDIO_BYTES = 10 * 1024 * 1024   # 10 MB
 _MAX_TARGET_CHARS = 3000               # ≈ longest G9 lesson
+# Issue #2321 — Gate 2: minimum duration below which we skip STT entirely.
+# Frontend Gate 1 (volume + 1 500 ms) is the primary filter; this is a backend
+# safety net for clients that bypass the frontend (or have no AnalyserNode).
+# 1 000 ms chosen conservatively: real speech takes ≥ 200 ms per syllable even
+# at fast pace; anything under 1 s almost certainly contains no useful audio.
+_MIN_AUDIO_DURATION_MS = 1000          # 1 second
 
 
 class TranscribeReadingResponse(BaseModel):
@@ -498,7 +504,7 @@ class TranscribeReadingResponse(BaseModel):
     """Gemini's 1-2 sentence explanation (for teacher audit). None on fallback."""
 
     reason: str | None = None
-    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error'.
+    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'too_short'.
     Only present when method='fallback'. Used by frontend to show appropriate alert."""
 
 
@@ -578,6 +584,29 @@ async def transcribe_reading_endpoint(
         )
     if len(audio_bytes) == 0:
         raise HTTPException(status_code=400, detail="Audio file is empty.")
+
+    # ── 2.5. Issue #2321 — Gate 2: duration too short → return fallback immediately ─
+    # Frontend Gate 1 (volume + 1 500 ms) is the primary filter.  This backend gate
+    # protects against clients that supply duration_ms but bypass the frontend check.
+    # Only applied when duration_ms is explicitly provided and below the threshold —
+    # absent duration_ms means the client did not send it, not that the audio is short.
+    if duration_ms is not None and duration_ms < _MIN_AUDIO_DURATION_MS:
+        logger.warning(
+            "Reading transcribe skipped — audio too short: user=%d duration_ms=%d",
+            current_user.id,
+            duration_ms,
+            extra={
+                "event": "reading_transcribe_fallback",
+                "reason": "too_short",
+                "user_id": current_user.id,
+                "duration_ms": duration_ms,
+            },
+        )
+        return TranscribeReadingResponse(
+            transcript=None,
+            method="fallback",
+            reason="too_short",
+        )
 
     # ── 3. Cap target_text ───────────────────────────────────────────────────
     if len(target_text) > _MAX_TARGET_CHARS:

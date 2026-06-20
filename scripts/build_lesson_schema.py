@@ -75,6 +75,21 @@ def split_inline_box_options(text: str) -> list[tuple[str, bool]] | None:
     if GUIDE_HEADER_RE.match(t):
         return None
 
+    # □①opt1 □②opt2 — multiple boxed circled options (multi-select lines)
+    if re.search(r"□\s*[①②③④⑤]", t):
+        chunks = re.findall(r"□\s*[①②③④⑤⑥⑦⑧⑨⑩]?\s*([^□]+)", t)
+        parsed = [c.strip() for c in chunks if c.strip()]
+        if len(parsed) >= 2:
+            return [(p, True) for p in parsed]
+
+    # □distractor   answer-without-box (G4-L4 style)
+    if t.startswith("□"):
+        m = re.match(r"^□(.+?)[\s　]{2,}(.+)$", t)
+        if m:
+            a, b = m.group(1).strip(), m.group(2).strip()
+            if a and b:
+                return [(a, True), (b, False)]
+
     # □①distractor  ②answer — line starts with box, second circled option is answer
     if t.startswith("□") and len(re.findall(r"[①②③④⑤]", t)) >= 2:
         rest = re.sub(r"^□\s*", "", t)
@@ -267,6 +282,177 @@ def coalesce_mcq_option_blocks(blocks: list) -> list:
         i += 1
 
     return out
+
+
+def split_question_inline_options(text: str) -> dict | None:
+    """Guide line with question + inline □ options → single block dict."""
+    t = (text or "").strip()
+    if "□" not in t or GUIDE_HEADER_RE.match(t):
+        return None
+    m = re.match(r"^(.+?[？?])\s*(.+)$", t)
+    if not m:
+        return None
+    prompt = m.group(1).strip()
+    opt_part = m.group(2).strip()
+    inline = split_inline_box_options("□" + opt_part if not opt_part.startswith("□") else opt_part)
+    if not inline and "□" in opt_part:
+        inline = split_inline_box_options(opt_part)
+    if not inline:
+        parts = re.findall(r"□\s*([^□　]+)", opt_part)
+        inline = [(p.strip(), True) for p in parts if p.strip()]
+    if not inline or len(inline) < 2:
+        return None
+    options = [o for o, _ in inline]
+    answer = next((o for o, d in inline if not d), None) or options[0]
+    return {
+        "type": "single",
+        "prompt": prompt,
+        "options": options,
+        "answer": answer,
+    }
+
+
+def _is_checkbox_guide_text(text: str) -> bool:
+    t = (text or "").strip()
+    if not t or GUIDE_HEADER_RE.match(t):
+        return False
+    if t.startswith("□") or re.match(r"^[①②③④⑤]", t):
+        return True
+    return bool(re.search(r"□\s*[①②③④⑤]", t))
+
+
+def _options_from_checkbox_guide(text: str) -> list[str]:
+    inline = split_inline_box_options(text)
+    if inline:
+        return [o for o, _ in inline if o]
+    if text.strip().startswith("□"):
+        m = re.match(r"^□(.+?)[\s　]{2,}(.+)$", text.strip())
+        if m:
+            return [m.group(1).strip(), m.group(2).strip()]
+    opt, _ = parse_option_line(text)
+    return [opt] if opt else []
+
+
+def convert_checkbox_guide_blocks(blocks: list) -> list:
+    """
+    Turn □①/□② guide lines into multi/single blocks (fixes mcq_option_guides drift).
+    """
+    out: list = []
+    i = 0
+    while i < len(blocks):
+        b = blocks[i]
+        if b.get("type") != "guide":
+            out.append(b)
+            i += 1
+            continue
+
+        text = b.get("text", "").strip()
+        expanded = split_question_inline_options(text)
+        if expanded:
+            out.append(expanded)
+            i += 1
+            continue
+
+        if _is_mcq_prompt_block(b):
+            prompt = _prompt_text(b)
+            options: list[str] = []
+            answer = None
+            j = i + 1
+            run_opts, run_ans, j = _collect_option_run(blocks, j)
+            options.extend(run_opts)
+            if answer is None:
+                answer = run_ans
+            if len(options) >= 2:
+                out.append({
+                    "type": "single",
+                    "prompt": prompt,
+                    "options": options,
+                    "answer": answer or options[0],
+                })
+                i = j
+                continue
+
+        if _is_checkbox_guide_text(text):
+            prompt = ""
+            is_multi = False
+            if out and out[-1].get("type") == "free_text":
+                prompt = out.pop().get("prompt", "")
+                is_multi = bool(re.search(r"複選|多選|可複選", prompt))
+            options: list[str] = []
+            j = i
+            while j < len(blocks) and blocks[j].get("type") == "guide":
+                gtext = blocks[j].get("text", "").strip()
+                if GUIDE_HEADER_RE.match(gtext):
+                    break
+                if not _is_checkbox_guide_text(gtext):
+                    break
+                options.extend(_options_from_checkbox_guide(gtext))
+                if re.search(r"複選|多選|可複選", gtext):
+                    is_multi = True
+                j += 1
+            options = list(dict.fromkeys(o for o in options if o))
+            if len(options) >= 2:
+                block_type = "multi" if is_multi or len(options) > 2 else "single"
+                block: dict = {
+                    "type": block_type,
+                    "prompt": prompt or "請選擇",
+                    "options": options,
+                }
+                if block_type == "single":
+                    block["answer"] = options[0]
+                else:
+                    block["answer"] = options
+                out.append(block)
+                i = j
+                continue
+
+        out.append(b)
+        i += 1
+    return out
+
+
+def ensure_strategy_guide(blocks: list, strategy_name: str) -> list:
+    """SEL / exercise-only lessons may have zero guides — prepend strategy context."""
+    if any(b.get("type") == "guide" for b in blocks):
+        return blocks
+    if not blocks:
+        return blocks
+    intro = f"本課閱讀策略：{strategy_name}" if strategy_name else "本課閱讀聚光燈練習"
+    return [{"type": "guide", "text": intro}, *blocks]
+
+
+def salvage_or_downgrade_singles(blocks: list) -> list:
+    """Fix sparse singles from table/chart exercises; else downgrade to free_text."""
+    out: list = []
+    for b in blocks:
+        if b.get("type") != "single":
+            out.append(b)
+            continue
+        prompt = (b.get("prompt") or "").strip()
+        opts = [o for o in (b.get("options") or []) if o]
+        if len(opts) < 2:
+            m = re.search(r"【\s*([^】]*?)\s*□\s*([^】]*?)\s*】", prompt)
+            if m:
+                opts = [m.group(1).strip(), m.group(2).strip()]
+            elif "□" in prompt:
+                before, after = prompt.rsplit("□", 1)
+                after = after.strip().rstrip("。.")
+                before_clean = re.sub(r"^[❶❷❸❹①②③④⑤\d\.\、\s—\-]+", "", before).strip()
+                m2 = re.search(r"代表\s*(.+)$", before_clean)
+                opt_a = (m2.group(1) if m2 else before_clean).strip()
+                if opt_a and after:
+                    opts = [opt_a, after]
+        if len(opts) >= 2:
+            out.append({
+                "type": "single",
+                "prompt": prompt,
+                "options": opts,
+                "answer": b.get("answer") or opts[0],
+            })
+        else:
+            out.append({"type": "free_text", "prompt": prompt})
+    return out
+
 
 DOCX_DIR = "/Users/young/project/chinese-literacy-platform/private/curriculum-source/2026-05-01/自學教材兩個單元"
 LESSON_DOCX = {
@@ -1647,8 +1833,13 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
     # Coalesce （單選）prompts + ①/□ option lines misclassified as guide/free_text
     classified = coalesce_mcq_option_blocks(classified)
 
+    # □①/□② guide lines → multi/single; inline question+options → single
+    classified = convert_checkbox_guide_blocks(classified)
+
     # Split summary-PSE mega guide cells → passage + ❶❷❸❹ singles (G6-L22)
     classified = expand_embedded_pse_guides(classified)
+
+    classified = salvage_or_downgrade_singles(classified)
 
     # Bind assets to figure blocks
     if assets:
@@ -1666,6 +1857,7 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
 
     # Clean up internal markers
     final_blocks = [b for b in classified if not b.get("_skip")]
+    final_blocks = ensure_strategy_guide(final_blocks, strategy_name)
     for b in final_blocks:
         b.pop("_ref", None)
 
