@@ -12,13 +12,14 @@
       "sub_rows": [
         {
           "label": "上課時因為太在意他而分心，導致無法回答老師的問題",
-          "value": "(勾選，可複選)\n尷尬 □生氣 感到丟臉",
-          "interactive_type": "display"
+          "value": "【　　　】\n尷尬 □生氣 感到丟臉",
+          "interactive_type": "fill_blank"
         },
         {
-          "label": "常常和他做（相同 □不同）的選擇",
+          "label": "常常和他做【　　　】的選擇",
           "value": "期待有更多相處的機會",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "blank_in_label": true
         }
       ]
     },
@@ -29,8 +30,8 @@
       "sub_rows": [
         {
           "label": "看見他與別人談笑",
-          "value": "(勾選，可複選)\n不是滋味 難過 □害羞",
-          "interactive_type": "display"
+          "value": "【　　　】\n不是滋味 難過 □害羞",
+          "interactive_type": "fill_blank"
         }
       ]
     },
@@ -58,15 +59,15 @@
       "sub_rows": [
         {
           "label": "因為喜歡而有各種心情起伏",
-          "value": "(勾選，可複選)\n□平靜　疲累 困惑",
-          "interactive_type": "display"
+          "value": "【　　　】\n□平靜　疲累 困惑",
+          "interactive_type": "fill_blank"
         }
       ]
     },
     {
       "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情（ 大起大落   □平靜如水）的感受。",
-      "interactive_type": "display"
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情【　　　】的感受。",
+      "interactive_type": "fill_blank"
     }
   ],
   "layout": "worksheet_table",
@@ -129,11 +130,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 2,
+    "fill_blank_count": 7,
     "checkbox_count": 0,
     "primary_labels": [
-      "下課時沒有和他互動",
-      "下課時有說到話或對到眼"
+      "上課時因為太在意他而分心，導致無法回答老師的問題",
+      "常常和他做【　　　】的選擇",
+      "看見他與別人談笑",
+      "下課時沒有和他互動"
     ],
     "layout": "worksheet_table"
   }

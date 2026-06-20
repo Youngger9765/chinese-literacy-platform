@@ -11,14 +11,16 @@
       "interactive_type": "display"
     },
     {
-      "label": "主要爭議請在□打勾（單選）",
+      "label": "主要爭議請在□打勾【　　　】",
       "value": "陳同學是否有過失責任？\n □顏旭男是否應該上體育課？\n □學校是否應該設立無障礙設施？",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
     },
     {
-      "label": "法院判決請在□打勾（單選）",
+      "label": "法院判決請在□打勾【　　　】",
       "value": "一審判決 二審判決 三審判決",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
     },
     {
       "label": "法院判決請在□打勾（單選）",
@@ -67,9 +69,10 @@
       ]
     },
     {
-      "label": "總結請在□打勾(多選)",
+      "label": "總結請在□打勾【　　　】",
       "value": "老師希望透過這次討論讓學生學到什麼？\n 助人時應先考量自己的能力。\n 理解社會中兩難問題的複雜性。\n □證明幫助別人一定會有好報。\n 讓學生了解助人過程中可能遇到的風險與挑戰。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "blank_in_label": true
     }
   ],
   "layout": "worksheet_table",
@@ -137,10 +140,13 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 1,
+    "fill_blank_count": 4,
     "checkbox_count": 0,
     "primary_labels": [
-      "1.陳同學已發揮\n__他人的美德。\n2.家長延誤就醫可能導致顏同學離世原因。"
+      "主要爭議請在□打勾【　　　】",
+      "法院判決請在□打勾【　　　】",
+      "1.陳同學已發揮\n__他人的美德。\n2.家長延誤就醫可能導致顏同學離世原因。",
+      "總結請在□打勾【　　　】"
     ],
     "layout": "worksheet_table"
   }

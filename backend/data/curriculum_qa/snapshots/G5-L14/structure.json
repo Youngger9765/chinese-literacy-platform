@@ -17,13 +17,13 @@
     },
     {
       "label": "讓人上癮的原因",
-      "value": "為什麼我們會忍不住想吃垃圾食物？（請打勾，多選）\n味道經過精心調配，口感令人難以抗拒\n促進大腦分泌多巴胺，給人快樂的感受\n□吃垃圾食物能讓人變得更聰明\n與快樂時光聯結，容易形成習慣",
-      "interactive_type": "display"
+      "value": "為什麼我們會忍不住想吃垃圾食物？【　　　】\n味道經過精心調配，口感令人難以抗拒\n促進大腦分泌多巴胺，給人快樂的感受\n□吃垃圾食物能讓人變得更聰明\n與快樂時光聯結，容易形成習慣",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "健康危害",
-      "value": "長期吃垃圾食物可能造成哪些影響？（請打勾，多選）\n增加體重，可能導致肥胖\n□增強免疫力，讓身體更健康\n影響血糖穩定，容易感到飢餓，導致過量飲食\n可能引發高血壓、糖尿病、心血管疾病等健康問題",
-      "interactive_type": "display"
+      "value": "長期吃垃圾食物可能造成哪些影響？【　　　】\n增加體重，可能導致肥胖\n□增強免疫力，讓身體更健康\n影響血糖穩定，容易感到飢餓，導致過量飲食\n可能引發高血壓、糖尿病、心血管疾病等健康問題",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "給青少年的建議",
@@ -63,10 +63,12 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "theme_facts",
-    "fill_blank_count": 1,
+    "fill_blank_count": 3,
     "checkbox_count": 0,
     "primary_labels": [
-      "定義"
+      "定義",
+      "讓人上癮的原因",
+      "健康危害"
     ],
     "layout": "worksheet_table"
   }

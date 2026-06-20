@@ -12,7 +12,7 @@
       "sub_rows": [
         {
           "label": "被傳訊息告白",
-          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】 (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁",
+          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】 【　　　】\n驚訝 □驚喜 \n惱怒 煩躁",
           "interactive_type": "fill_blank"
         }
       ]
@@ -24,7 +24,7 @@
       "sub_rows": [
         {
           "label": "猶豫是否該答應",
-          "value": "1.也許選擇（□自己喜歡的人　喜歡自己的人），比較不會受傷\n2.不想【　　　】接受沒有心動的關係 (勾選，可複選)\n混亂 □輕鬆 \n□悸動 矛盾",
+          "value": "1.也許選擇【　　　】，比較不會受傷\n2.不想【　　　】接受沒有心動的關係 【　　　】\n混亂 □輕鬆 \n□悸動 矛盾",
           "interactive_type": "fill_blank"
         }
       ]
@@ -36,7 +36,7 @@
       "sub_rows": [
         {
           "label": "猶豫如何拒絕",
-          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】 (勾選，可複選)\n苦惱 猶豫 \n□憤怒 □無奈",
+          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】 【　　　】\n苦惱 猶豫 \n□憤怒 □無奈",
           "interactive_type": "fill_blank"
         }
       ]
@@ -60,15 +60,15 @@
       "sub_rows": [
         {
           "label": "收到對方回覆",
-          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】 (勾選，可複選)\n如釋重負 \n坦然 □難過",
+          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】 【　　　】\n如釋重負 \n坦然 □難過",
           "interactive_type": "fill_blank"
         }
       ]
     },
     {
       "label": "統整",
-      "value": "作者寫下這篇小日記，是想抒發被告白後（ 混亂  □平靜）的感受，以及勇敢（ □答應   拒絕）後，內心的（ 踏實坦然  □沮喪難過）。",
-      "interactive_type": "display"
+      "value": "作者寫下這篇小日記，是想抒發被告白後【　　　】的感受，以及勇敢【　　　】後，內心的【　　　】。",
+      "interactive_type": "fill_blank"
     }
   ],
   "layout": "worksheet_table",
@@ -133,7 +133,7 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 5,
+    "fill_blank_count": 6,
     "checkbox_count": 0,
     "primary_labels": [
       "被傳訊息告白",

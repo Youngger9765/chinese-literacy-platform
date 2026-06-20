@@ -12,7 +12,7 @@
       "sub_rows": [
         {
           "label": "他主動詢問要幫我交__",
-          "value": "(勾選，可複選)\n茫然 害羞 緊張【　　　】",
+          "value": "【　　　】\n茫然 害羞 緊張【　　　】",
           "interactive_type": "fill_blank"
         }
       ]
@@ -48,15 +48,15 @@
       "sub_rows": [
         {
           "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
-          "value": "(勾選，可複選)\n溫暖 害羞 興奮【　　　】",
+          "value": "【　　　】\n溫暖 害羞 興奮【　　　】",
           "interactive_type": "fill_blank"
         }
       ]
     },
     {
       "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發（ 不知所措  □深情思念 ）的心情。",
-      "interactive_type": "display"
+      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發【　　　】的心情。",
+      "interactive_type": "fill_blank"
     }
   ],
   "layout": "worksheet_table",
@@ -111,7 +111,7 @@
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
     "checkbox_count": 0,
     "primary_labels": [
       "他主動詢問要幫我交__",

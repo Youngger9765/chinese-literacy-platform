@@ -11,7 +11,7 @@
       "interactive_type": "fill_blank"
     },
     {
-      "label": "解決（誰＋做什麼）",
+      "label": "解決【 誰＋做什麼 】",
       "value": "1.團隊實地調查、與農民溝通。\n2.農民改用【　　　】種植紅豆，播種時將紅豆埋入土中，減少播種期的鳥害，收成時放棄使用農藥。\n3.全聯與農民簽訂契作協議，【　　　】收購紅豆",
       "interactive_type": "fill_blank"
     },
@@ -21,7 +21,7 @@
       "interactive_type": "fill_blank"
     },
     {
-      "label": "迴響（結語）",
+      "label": "迴響【 結語 】",
       "value": "老鷹紅豆的成功，除了大學、農民和企業，還有許多【　　　】，支持購買老鷹紅豆，用行動守護臺灣生態。",
       "interactive_type": "fill_blank"
     }
@@ -57,9 +57,9 @@
     "checkbox_count": 0,
     "primary_labels": [
       "問題",
-      "解決（誰＋做什麼）",
+      "解決【 誰＋做什麼 】",
       "結果",
-      "迴響（結語）"
+      "迴響【 結語 】"
     ],
     "layout": "worksheet_table"
   }

@@ -2,13 +2,13 @@
   "rows": [
     {
       "label": "步驟",
-      "value": "根據課文內容，請勾選或填寫答案（答案合理即可）",
-      "interactive_type": "display"
+      "value": "根據課文內容，請勾選或填寫答案【　　　】",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "❶ 問題",
-      "value": "1.花期落差 蝴蝶蘭盛開在（ 3-4 ）月；市場需求卻在（1-2）月 2.文章要解決什麼問題？ 如何讓蝴蝶蘭提早開花，以配合市場需求？",
-      "interactive_type": "display"
+      "value": "1.花期落差 蝴蝶蘭盛開在【　　　】月；市場需求卻在【　　　】月 2.文章要解決什麼問題？ 如何讓蝴蝶蘭提早開花，以配合市場需求？",
+      "interactive_type": "fill_blank"
     },
     {
       "label": "❷ 假說⭣ ❸ 驗證",
@@ -97,11 +97,14 @@
     }
   ],
   "interaction_profile": {
-    "mode": "display_only",
+    "mode": "fill_blank",
     "template_kind": "scientific",
-    "fill_blank_count": 0,
+    "fill_blank_count": 2,
     "checkbox_count": 0,
-    "primary_labels": [],
+    "primary_labels": [
+      "步驟",
+      "❶ 問題"
+    ],
     "layout": "worksheet_table"
   }
 }

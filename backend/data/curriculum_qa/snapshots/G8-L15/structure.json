@@ -6,12 +6,12 @@
       "interactive_type": "display"
     },
     {
-      "label": "情境（段1）",
+      "label": "情境【 段1 】",
       "value": "球場氣氛沸騰，帶動氣勢的推手是【　　　】",
       "interactive_type": "fill_blank"
     },
     {
-      "label": "觀點/主張（段2）",
+      "label": "觀點/主張【 段2 】",
       "value": "1.啦啦隊已蛻變成一種有價值與需要高度【　　　】的職業",
       "interactive_type": "fill_blank"
     },
@@ -21,34 +21,34 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "有功能\n（段2）",
+          "label": "有功能\n【 段2 】",
           "value": "啦啦隊能把球迷零散聲音整合成整齊有力的音浪，讓球隊氣勢如虹，也為運動員注入【　　　】。",
           "interactive_type": "fill_blank"
         },
         {
-          "label": "有能力\n(段3)",
+          "label": "有能力\n【 段3 】",
           "value": "1.許多人以為啦啦隊只需【　　　】就能勝任。\n2.啦啦隊要付出很多的訓練。需要驚人的【　　　】與【　　　】。",
           "interactive_type": "fill_blank"
         },
         {
-          "label": "需體能\n(段4)",
+          "label": "需體能\n【 段4 】",
           "value": "工作消耗體力，長時間跳躍揮手、需要【　　　】；訓練含重訓、核心訓練、拉筋。",
           "interactive_type": "fill_blank"
         },
         {
-          "label": "心理韌性(段4)",
+          "label": "心理韌性【 段4 】",
           "value": "需【　　　】，落後仍保持活力，絕對不是【　　　】。",
           "interactive_type": "fill_blank"
         }
       ]
     },
     {
-      "label": "反思(段5)",
+      "label": "反思【 段5 】",
       "value": "1.啦啦隊的服裝常成為與論靶心。\n2.服裝爭議表面在「穿什麼/辣不辣」，但深層涉及觀看的立場是【　　　】或【　　　】。",
       "interactive_type": "fill_blank"
     },
     {
-      "label": "呼籲/結語(段5.6)",
+      "label": "呼籲/結語【 段5.6 】",
       "value": "呼籲讀者【　　　】看啦啦隊，把焦點放回【　　　】，看見笑容背後的訓練與心意。",
       "interactive_type": "fill_blank"
     }
@@ -105,10 +105,10 @@
     "fill_blank_count": 8,
     "checkbox_count": 0,
     "primary_labels": [
-      "情境（段1）",
-      "觀點/主張（段2）",
-      "有功能\n（段2）",
-      "有能力\n(段3)"
+      "情境【 段1 】",
+      "觀點/主張【 段2 】",
+      "有功能\n【 段2 】",
+      "有能力\n【 段3 】"
     ],
     "layout": "worksheet_table"
   }
