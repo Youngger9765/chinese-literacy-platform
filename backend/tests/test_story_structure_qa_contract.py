@@ -136,3 +136,11 @@ def test_l5_issues_retriable_session_flake():
     assert l5_issues_retriable(["redirected to login"])
     assert not l5_issues_retriable(["missing data-comprehension-lesson-text"])
     assert not l5_issues_retriable([])
+
+
+def test_http_retry_wait_s_respects_retry_after():
+    from story_structure_qa_lib import STRUCTURE_HTTP_BACKOFF_S, http_retry_wait_s
+
+    assert http_retry_wait_s(0) == STRUCTURE_HTTP_BACKOFF_S[0]
+    assert http_retry_wait_s(0, retry_after="90") == 90.0
+    assert http_retry_wait_s(len(STRUCTURE_HTTP_BACKOFF_S)) is None
