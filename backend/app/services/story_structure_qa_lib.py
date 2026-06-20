@@ -275,5 +275,23 @@ def ui_pass_from_dom(state: dict, profile: dict, *, require_lesson_text: bool = 
     return len(issues) == 0, issues
 
 
+# L5 browser session flakes: empty DOM after silent relogin failure (issue #2307)
+L5_SESSION_FLAKE_ISSUES = frozenset(
+    {
+        "redirected to login",
+        "load error banner",
+        "still loading",
+        "missing data-story-structure-table",
+        "missing interactive element",
+        "worksheet_table but zero tr",
+    }
+)
+
+
+def l5_issues_retriable(issues: list[str]) -> bool:
+    """True when L5 FAIL is likely stale browse session, not lesson data."""
+    return bool(issues) and any(i in L5_SESSION_FLAKE_ISSUES for i in issues)
+
+
 def summarize_gate(gate: str, passed: bool, issues: list[str]) -> dict[str, Any]:
     return {"gate": gate, "pass": passed, "issues": issues}
