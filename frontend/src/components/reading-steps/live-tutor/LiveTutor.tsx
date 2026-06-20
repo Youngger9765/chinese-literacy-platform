@@ -7,7 +7,7 @@ import { scopedStepStorageKey, isToolboxMode } from '../../../services/learningS
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { useAudioRecorder } from '../../../hooks/useAudioRecorder';
-import { transcribeReading } from '../../../services/learning/session';
+import { transcribeReading, saveReadingAudio } from '../../../services/learning/session';
 import { useAuth } from '../../../contexts/AuthContext';
 import { splitIntoSentences } from '../../../utils/localEval';
 import { normalizePunctuationToChinese } from '../../../utils/textDiff';
@@ -74,6 +74,9 @@ interface LiveTutorProps {
   initialProgress?: TutorStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
+  /** DB LearningSession integer id — used to bind accepted audio to the attempt row
+   *  via POST /reading/save-audio (Issue #2297). Optional: upload is skipped if absent. */
+  dbSessionId?: number | null;
 }
 
 const LiveTutor: React.FC<LiveTutorProps> = ({
@@ -86,6 +89,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   initialCompletedParagraphs,
   initialProgress,
   onProgressChange,
+  dbSessionId,
 }) => {
   const { px: fontSizePx } = useFontSize();
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -442,6 +446,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             currentLineIndex,
             transcriptSource,
           );
+          // Issue #2297: upload audio AFTER evaluation (score) is sent to the UI.
+          // Only upload when transcription succeeded (Gemini confirmed the take).
+          // Fail-safe: .catch() ensures upload failure never blocks the student.
+          if (audioBlob && token && dbSessionId != null && transcriptSource === 'gemini') {
+            saveReadingAudio(audioBlob, dbSessionId, undefined, token)
+              .catch((err) => console.warn('[LiveTutor] saveReadingAudio error:', err));
+          }
         }
       }
     } finally {
@@ -452,6 +463,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     sentenceRetry.retrySentenceInfoRef,
     currentLineIndex,
     token,
+    dbSessionId,
     story.content,
     clearParagraphFallback,
     setParagraphFallbackReason,

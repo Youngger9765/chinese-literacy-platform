@@ -14,6 +14,7 @@ const TutorPage: React.FC = () => {
     handleParagraphComplete,
     stepProgressData,
     saveStepProgressPatch,
+    dbSessionId,
   } = useLearningContext();
   const navigate = useNavigate();
 
@@ -42,6 +43,7 @@ const TutorPage: React.FC = () => {
       initialCompletedParagraphs={completedParagraphsSet}
       initialProgress={stepProgressData.step_data?.tutor as TutorStepData | undefined}
       onProgressChange={handleProgressChange}
+      dbSessionId={dbSessionId}
     />
   );
 };

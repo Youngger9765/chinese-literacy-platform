@@ -44,9 +44,8 @@ export async function transcribeReading(
   targetText: string,
   durationMs: number,
   token: string,
-  /** Optional DB LearningSession id — when provided the backend binds the uploaded
-   *  audio blob to the latest ReadingAttemptHistory row so the student can replay
-   *  their recording later (Issue #2266). */
+  /** @deprecated Issue #2297: GCS upload is deferred to saveReadingAudio().
+   *  Kept for API compat; backend ignores this parameter. */
   dbSessionId?: number,
 ): Promise<TranscribeReadingResult> {
   const FALLBACK: TranscribeReadingResult = { transcript: null, method: 'fallback', reasoning: '', reason: 'error' };
@@ -56,7 +55,7 @@ export async function transcribeReading(
     form.append('audio', audioBlob, 'recording.webm');
     form.append('target_text', targetText);
     form.append('duration_ms', String(durationMs));
-    // Issue #2266: pass session_id so backend can bind audio to DB attempt row.
+    // Issue #2297: session_id is kept for API compat but no longer triggers upload.
     if (dbSessionId != null) {
       form.append('session_id', String(dbSessionId));
     }
@@ -120,6 +119,63 @@ export async function getReadingAudioSignedUrl(
     return typeof data.signed_url === 'string' ? data.signed_url : null;
   } catch {
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Deferred GCS audio upload (Issue #2297)
+// ---------------------------------------------------------------------------
+
+/**
+ * Upload the accepted reading take audio to GCS via the backend.
+ *
+ * Called AFTER the student accepts the score (not at transcription time) so
+ * only accepted takes are persisted.  Discarded / re-recorded takes are never
+ * uploaded.
+ *
+ * Fail-safe: any network or server error is caught and returns {ok: false}.
+ * This must NEVER throw or block the score display in the UI.
+ *
+ * @param audioBlob  The audio blob captured by the MediaRecorder.
+ * @param sessionId  DB LearningSession id.
+ * @param attemptId  Optional DB ReadingAttemptHistory id.  When omitted the
+ *                   backend uses the latest attempt row for this session.
+ * @param token      JWT bearer token.
+ */
+export async function saveReadingAudio(
+  audioBlob: Blob,
+  sessionId: number,
+  attemptId?: number,
+  token?: string,
+): Promise<{ ok: boolean; audio_gcs_path?: string }> {
+  if (!token) {
+    console.warn('[saveReadingAudio] no token — skipping upload');
+    return { ok: false };
+  }
+  try {
+    const form = new FormData();
+    form.append('audio', audioBlob, 'recording.webm');
+    form.append('session_id', String(sessionId));
+    if (attemptId != null) {
+      form.append('attempt_id', String(attemptId));
+    }
+    const res = await fetch(`${API_BASE}/api/reading/save-audio`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+    if (!res.ok) {
+      console.warn('[saveReadingAudio] non-OK response:', res.status);
+      return { ok: false };
+    }
+    const data = await res.json();
+    return {
+      ok: data?.ok === true,
+      audio_gcs_path: typeof data?.audio_gcs_path === 'string' ? data.audio_gcs_path : undefined,
+    };
+  } catch (err) {
+    console.warn('[saveReadingAudio] error:', err);
+    return { ok: false };
   }
 }
 
