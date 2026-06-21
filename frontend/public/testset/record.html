@@ -8,16 +8,20 @@
   :root{--bg:#FDF8F0;--ink:#1a1a2e;--purple:#5B4FC4;--muted:#6b6b8a;--card:#fff;--line:#e7e2d8;--green:#16a34a;--red:#dc2626;--chip:#efe9ff}
   *{box-sizing:border-box}
   body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:24px 16px;line-height:1.7}
-  .wrap{max-width:700px;margin:0 auto}
+  .wrap{max-width:1120px;margin:0 auto}
   h1{color:var(--purple);font-size:1.4rem;margin:0 0 4px}
   .sub{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+  /* 兩欄佈局：左=課文、右=操作 */
+  .layout{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
+  .col-left{position:sticky;top:24px}
+  .col-right{min-width:0}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .step{font-weight:700;color:var(--purple);margin-bottom:10px}
   label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
   input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
   .lesson-title{font-size:1.15rem;font-weight:800;color:var(--ink);margin:0 0 4px}
   .lesson-id{font-size:.8rem;color:var(--muted);margin:0 0 14px}
-  .passage{background:#faf7f0;border-left:3px solid var(--purple);padding:14px 16px;border-radius:8px;margin:10px 0;font-size:1.08rem;line-height:2.1;max-height:380px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+  .passage{background:#faf7f0;border-left:3px solid var(--purple);padding:14px 16px;border-radius:8px;margin:10px 0;font-size:1.08rem;line-height:2.1;max-height:calc(100vh - 180px);overflow-y:auto;white-space:pre-wrap;word-break:break-word}
   .passage p{margin:0 0 .8em}
   .passage p:last-child{margin:0}
   .loading-text{color:var(--muted);font-size:.9rem;text-align:center;padding:24px 0}
@@ -42,6 +46,13 @@
   .back{display:inline-block;margin-bottom:16px;color:var(--purple);text-decoration:none;font-size:.88rem;font-weight:600}
   .back:hover{text-decoration:underline}
   .err-banner{background:#fee2e2;border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center;color:var(--red);font-weight:600}
+  /* ── 手機 RWD：收回單欄、課文在上、操作在下 ── */
+  @media (max-width:860px){
+    body{padding:16px 12px}
+    .layout{grid-template-columns:1fr;gap:0}
+    .col-left{position:static;top:auto}
+    .passage{max-height:300px}
+  }
 </style>
 </head>
 <body>
@@ -52,45 +63,52 @@
 
   <div id="errBanner" class="err-banner" style="display:none"></div>
 
-  <!-- 貢獻者資訊 -->
-  <div class="card">
-    <div class="step">① 你是誰</div>
-    <label>名字（暱稱即可）</label>
-    <input id="name" placeholder="例如：小明 / Amy">
-    <label>年級</label>
-    <select id="grade">
-      <option value="">請選擇</option>
-      <option>國小三年級</option><option>國小四年級</option><option>國小五年級</option><option>國小六年級</option>
-      <option>國中七年級</option><option>國中八年級</option><option>國中九年級</option>
-      <option>高中以上</option>
-    </select>
-  </div>
-
-  <!-- 課文全文 -->
-  <div class="card" id="lesson-card">
-    <div class="step">② 這一課：<span id="lesson-title-inline" style="font-weight:400;color:var(--muted)">載入中…</span></div>
-    <div class="passage" id="passage"><div class="loading-text">載入課文中…</div></div>
-  </div>
-
-  <!-- 錄音 -->
-  <div class="card" id="rec-card">
-    <div class="step">③ 照著念 + 錄音</div>
-    <div class="vtabs">
-      <div class="vtab sel" data-v="correct" onclick="selVersion('correct')">正確版<span class="hint">盡量念正確</span></div>
-      <div class="vtab" data-v="error" onclick="selVersion('error')">刻意錯誤版<span class="hint">故意念錯幾個字</span></div>
+  <div class="layout">
+    <!-- 左欄：課文全文 -->
+    <div class="col-left">
+      <div class="card" id="lesson-card">
+        <div class="step">📖 課文：<span id="lesson-title-inline" style="font-weight:400;color:var(--muted)">載入中…</span></div>
+        <div class="passage" id="passage"><div class="loading-text">載入課文中…</div></div>
+      </div>
     </div>
-    <button class="btn btn-rec" id="recBtn" onclick="toggleRec()">● 開始錄音</button>
-    <audio id="player" controls style="display:none"></audio>
-    <button class="btn btn-up" id="upBtn" onclick="upload()" disabled style="margin-top:10px">上傳這段</button>
-    <div class="status" id="status"></div>
-  </div>
 
-  <!-- 進度 -->
-  <div class="card">
-    <div class="step">④ 我的進度（此課）</div>
-    <div class="progress-grid" id="progress"></div>
-    <div class="done-banner" id="doneBanner">
-      本課正確版 + 錯誤版都錄完了，太謝謝你了！
+    <!-- 右欄：操作 -->
+    <div class="col-right">
+      <!-- 貢獻者資訊 -->
+      <div class="card">
+        <div class="step">① 你是誰</div>
+        <label>名字（暱稱即可）</label>
+        <input id="name" placeholder="例如：小明 / Amy">
+        <label>年級</label>
+        <select id="grade">
+          <option value="">請選擇</option>
+          <option>國小三年級</option><option>國小四年級</option><option>國小五年級</option><option>國小六年級</option>
+          <option>國中七年級</option><option>國中八年級</option><option>國中九年級</option>
+          <option>高中以上</option>
+        </select>
+      </div>
+
+      <!-- 錄音 -->
+      <div class="card" id="rec-card">
+        <div class="step">② 照著念 + 錄音</div>
+        <div class="vtabs">
+          <div class="vtab sel" data-v="correct" onclick="selVersion('correct')">正確版<span class="hint">盡量念正確</span></div>
+          <div class="vtab" data-v="error" onclick="selVersion('error')">刻意錯誤版<span class="hint">故意念錯幾個字</span></div>
+        </div>
+        <button class="btn btn-rec" id="recBtn" onclick="toggleRec()">● 開始錄音</button>
+        <audio id="player" controls style="display:none"></audio>
+        <button class="btn btn-up" id="upBtn" onclick="upload()" disabled style="margin-top:10px">上傳這段</button>
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- 進度 -->
+      <div class="card">
+        <div class="step">③ 我的進度（此課）</div>
+        <div class="progress-grid" id="progress"></div>
+        <div class="done-banner" id="doneBanner">
+          本課正確版 + 錯誤版都錄完了，太謝謝你了！
+        </div>
+      </div>
     </div>
   </div>
 </div>
