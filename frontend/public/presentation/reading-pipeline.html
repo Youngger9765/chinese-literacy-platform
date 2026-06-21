@@ -209,11 +209,11 @@
 
       <div class="arrow">▼</div>
 
-      <!-- ①.5 錄音驗證 (Issue #2362) -->
+      <!-- ①.5 人聲守門 VAD (Issue #2362) -->
       <div class="node-row">
         <div class="node-text">
-          <div class="t">①.5 錄音驗證 <span class="side">前端</span></div>
-          <div class="s">validateRecording() — 能量(peak &lt; 0.05) / 時長(&lt; 1500 ms) 驗證，沒語音不進 STT；逐段(LiveTutor) + 全文(FullReading) 共用同一函式（recordingValidation.ts）</div>
+          <div class="t">①.5 人聲守門（VAD）<span class="side">前端</span></div>
+          <div class="s">Voice Activity Detection：先判斷「有沒有真的在說話」——用音量能量(peak &lt; 0.05) + 錄音時長(&lt; 1500 ms) 攔截靜音/背景噪音，沒人聲就不送進 STT（從源頭防 Gemini 對空音幻覺 #2321）。逐段(LiveTutor) + 全文(FullReading) 共用同一道關卡（recordingValidation.ts）</div>
         </div>
       </div>
 
