@@ -59,7 +59,7 @@ def _slug(name: str) -> str:
 @router.post("/testset/upload")
 async def testset_upload(
     contributor_name: str = Form(...),
-    grade: str = Form(...),
+    grade: str = Form(""),  # 選填（Young 2026-06-21：錄音頁拿掉年級欄）
     lesson_id: str = Form(...),
     version: str = Form(...),
     audio: UploadFile = File(...),
@@ -71,8 +71,8 @@ async def testset_upload(
     # ── validate ──────────────────────────────────────────────────────────────
     if version not in _ALLOWED_VERSION:
         raise HTTPException(400, "version must be 'correct' or 'error'")
-    if not contributor_name.strip() or not grade.strip() or not lesson_id.strip():
-        raise HTTPException(400, "contributor_name, grade, lesson_id are required")
+    if not contributor_name.strip() or not lesson_id.strip():
+        raise HTTPException(400, "contributor_name, lesson_id are required")
     # HIGH: lesson_id 進 blob path → 白名單格式擋路徑注入 / 跨 prefix 寫入
     if not _LESSON_ID_RE.match(lesson_id.strip()):
         raise HTTPException(400, "invalid lesson_id")
@@ -119,6 +119,38 @@ async def testset_upload(
 
     logger.info("testset upload OK: %s (%d bytes)", audio_path, len(audio_bytes))
     return {"ok": True, "path": audio_path}
+
+
+@router.get("/testset/progress")
+def testset_progress(name: str = "", lesson: str = ""):
+    """錄音頁進度查詢（公開，server-truth）：某貢獻者某課是否已上傳 correct/error。
+
+    只回布林（不回名字/年級/play URL 等 PII），讓匿名 record.html 換裝置/清快取後
+    仍能讀回真實進度（取代純 localStorage 的 device-local 標記）。
+    """
+    empty = {"ok": False, "correct": False, "error": False}
+    if not name.strip() or not _LESSON_ID_RE.match(lesson.strip()):
+        return empty
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        return empty
+
+    slug = _slug(name)
+    lid = lesson.strip()
+    done = {"correct": False, "error": False}
+    try:
+        for blob in bucket.list_blobs(prefix=f"{_PREFIX}/{slug}/{lid}/", max_results=50):
+            fname = blob.name.rsplit("/", 1)[-1]
+            if not fname.endswith(".webm"):
+                continue
+            if fname.startswith("correct"):
+                done["correct"] = True
+            elif fname.startswith("error"):
+                done["error"] = True
+    except Exception as exc:
+        logger.warning("testset progress failed: %s", exc)
+        return empty
+    return {"ok": True, **done}
 
 
 @router.get("/testset/recordings")
