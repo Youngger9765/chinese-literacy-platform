@@ -20,23 +20,10 @@ import { useAudioRecorder } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
 import { saveReadingHistory } from '../services/readingHistoryApi';
 import { transcribeReading, saveReadingAudio } from '../services/learning/session';
+import { validateRecording } from '../utils/recordingValidation';
 
-/**
- * Issue #2321 — Silence gate constants.
- *
- * SILENT_PEAK_THRESHOLD: peak volume (0-1) below which we consider the recording
- * silent.  The AnalyserNode returns average byte frequency; 0.05 corresponds to
- * ~6.4/128 — well below conversational speech (~0.15-0.4) but above true silence.
- * Conservative: a very soft whisper may still exceed this threshold, which is
- * intentional — we prefer the occasional STT hallucination over blocking a
- * real-but-quiet reader.
- *
- * SILENT_MIN_DURATION_MS: minimum recording duration below which we skip STT.
- * 1 500 ms is comfortably longer than an accidental tap but shorter than even
- * a single Chinese syllable at slow reading speed (~300-400 ms).
- */
-const SILENT_PEAK_THRESHOLD = 0.05;   // gate: peak volume must exceed this
-const SILENT_MIN_DURATION_MS = 1500;  // gate: recording must be at least 1.5 s
+// Issue #2362: SILENT_PEAK_THRESHOLD and SILENT_MIN_DURATION_MS are now the
+// single source of truth in recordingValidation.ts — imported via validateRecording().
 
 /**
  * Issue #2321 — Hallucination sanity gate for FullReading scoring.
@@ -200,15 +187,17 @@ export function useFullReadingSession({
       return;
     }
 
-    /* Issue #2321 — Silence gate (Gate 1, frontend):
+    /* Issue #2321 / #2362 — Silence gate (Gate 1, frontend):
+     * Shared validateRecording() — same constants as LiveTutor.
      * If the recording was too short OR entirely silent, skip STT to prevent
      * Gemini from hallucinating the lesson text back when given a blank audio.
      * Uses peakVolume tracked by useAudioRecorder's AnalyserNode loop.
      * Reuses the existing micError path — no new UI component needed. */
-    const peakVolume = audioRecorder.getPeakVolume();
-    const isSilentByVolume = peakVolume < SILENT_PEAK_THRESHOLD;
-    const isTooShort = durationMs < SILENT_MIN_DURATION_MS;
-    if (isSilentByVolume || isTooShort) {
+    const silenceCheck = validateRecording({
+      peakVolume: audioRecorder.getPeakVolume(),
+      durationMs,
+    });
+    if (!silenceCheck.ok) {
       setMicError('未偵測到語音，請重試。');
       return;
     }
