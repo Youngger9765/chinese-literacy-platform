@@ -14,6 +14,12 @@
 安全:
 - 公開 endpoint → IP rate-limit + size cap + content-type 檢查 + fail-closed。
 - v1 list 也公開（owner 資料低敏感、URL 隱蔽）；v2 再加 auth。已向 owner 標註此 tradeoff。
+
+批次評估 (Issue #2340):
+- POST /api/testset/batch-eval — 登入後才可用（get_current_user）
+- 讀 GCS meta → transcribe → evaluate pipeline，每筆 fail-safe
+- 硬上限 _BATCH_EVAL_LIMIT 筆，超過截斷並回 truncated:true + log
+- 無 DB migration（GCS-only）
 """
 
 from __future__ import annotations
@@ -24,7 +30,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from ..auth.dependencies import get_current_user
 from ..models.user import User
@@ -45,6 +51,10 @@ _ALLOWED_VERSION = {"correct", "error"}
 _LESSON_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,20}$")
 _LIST_CAP = 500  # list_blobs hard cap，避免 unbounded read/signBlob
 
+# 批次評估單次硬上限：每次最多評 N 筆（cost guard，#2340）
+# Gemini transcribe 每筆約 2-5s，30 筆 = ~150s；超過截斷並回 truncated:true
+_BATCH_EVAL_LIMIT = 30
+
 # Rate-limiting 靠全域 GlobalRateLimitMiddleware（讀 X-Forwarded-For，真 per-IP）。
 # 不在 endpoint 用 request.client.host limiter — Cloud Run LB 後面那只會讓所有人共用
 # 一個 bucket → self-DoS（security 複查 #2304）。
@@ -54,6 +64,25 @@ def _slug(name: str) -> str:
     """Stable, path-safe slug from contributor name (keeps CJK, strips separators)."""
     s = re.sub(r"[^\w一-鿿]+", "_", (name or "").strip())
     return (s.strip("_") or "anon")[:40]
+
+
+def _resolve_target_text(lesson_id: str) -> str | None:
+    """Return full_text for lesson_id (numeric int or code string like 'G6-L22').
+
+    Priority: int lookup → code lookup. Returns None if not found.
+    """
+    from ..services.lesson_loader import get_lesson_by_code, get_lesson_by_id  # noqa: PLC0415
+
+    lesson = None
+    try:
+        lesson = get_lesson_by_id(int(lesson_id))
+    except (ValueError, TypeError):
+        pass
+    if lesson is None:
+        lesson = get_lesson_by_code(lesson_id)
+    if lesson is None:
+        return None
+    return lesson.get("full_text") or None
 
 
 @router.post("/testset/upload")
@@ -202,3 +231,217 @@ def testset_recordings(current_user: User = Depends(get_current_user)):
 
     out.sort(key=lambda m: m.get("created_at", ""), reverse=True)
     return {"ok": True, "count": len(out), "recordings": out}
+
+
+@router.post("/testset/batch-eval")
+async def testset_batch_eval(
+    current_user: User = Depends(get_current_user),
+    name: str | None = Query(default=None, description="過濾貢獻者名字（slug 比對）"),
+    lesson: str | None = Query(default=None, description="過濾課文 lesson_id（字串精確比對）"),
+) -> dict:
+    """批次跑 STT + 評分 pipeline，驗測試集準度（Issue #2340）。
+
+    Auth: 登入使用者才可呼叫（get_current_user），不需 teacher/admin role。
+
+    Query params:
+        name   — 過濾 contributor slug（局部比對，例如 '王小明' → slug '王小明'）
+        lesson — 過濾 lesson_id（例如 '1' 或 'G6-L22'）
+
+    Returns:
+        {
+          ok: bool,
+          n: int,
+          truncated: bool,
+          results: [{
+            name, lesson, version,
+            match_rate, adjusted_match_rate, cpm,
+            transcript_method,  // "gemini" | "fallback"
+            transcript_reason,  // fallback 原因，非 fallback 時 null
+            expected,           // "high" (correct) | "low" (error)
+            flag,               // true = 不符期望（異常）
+            error,              // 該筆例外訊息，正常時 null
+          }],
+          summary: {
+            correct_avg,    // correct 版的 adjusted_match_rate 平均（無資料時 null）
+            error_avg,      // error 版的 adjusted_match_rate 平均（無資料時 null）
+            anomaly_count,  // flag=true 的筆數
+          }
+        }
+
+    Cost guard: 單次最多評 _BATCH_EVAL_LIMIT（30）筆，超過截斷並標 truncated:true。
+    Fail-safe: 單筆 exception 不中斷整批，標 error 欄位並繼續。
+    """
+    from ..services.reading_evaluation_service import evaluate_reading_with_ai  # noqa: PLC0415
+    from ..services.reading_transcription_service import transcribe_reading_audio  # noqa: PLC0415
+
+    # ── 1. GCS availability check (fail-closed) ────────────────────────────
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        logger.warning("testset batch-eval: GCS unavailable")
+        return {
+            "ok": False,
+            "n": 0,
+            "truncated": False,
+            "results": [],
+            "summary": {"correct_avg": None, "error_avg": None, "anomaly_count": 0},
+        }
+
+    # ── 2. Collect meta entries from GCS ──────────────────────────────────
+    name_slug = _slug(name) if name else None
+    metas: list[dict] = []
+    try:
+        for blob in bucket.list_blobs(prefix=f"{_PREFIX}/", max_results=_LIST_CAP):
+            if not blob.name.endswith(".json"):
+                continue
+            # Apply contributor filter (slug-based path component match)
+            if name_slug and f"/{name_slug}/" not in blob.name:
+                continue
+            try:
+                meta = json.loads(blob.download_as_text())
+            except Exception:
+                continue
+            # Apply lesson filter
+            if lesson and meta.get("lesson_id", "") != lesson:
+                continue
+            metas.append(meta)
+    except Exception as exc:
+        logger.warning("testset batch-eval list failed: %s", exc)
+        return {
+            "ok": False,
+            "n": 0,
+            "truncated": False,
+            "results": [],
+            "summary": {"correct_avg": None, "error_avg": None, "anomaly_count": 0},
+        }
+
+    # ── 3. Hard limit — cost guard ─────────────────────────────────────────
+    truncated = len(metas) > _BATCH_EVAL_LIMIT
+    if truncated:
+        logger.info(
+            "testset batch-eval truncated: total=%d limit=%d name=%s lesson=%s",
+            len(metas), _BATCH_EVAL_LIMIT, name, lesson,
+        )
+        metas = metas[:_BATCH_EVAL_LIMIT]
+
+    # ── 4. Per-entry pipeline (fail-safe) ──────────────────────────────────
+    results: list[dict] = []
+    for meta in metas:
+        entry_name = meta.get("contributor_name", "")
+        entry_lesson = meta.get("lesson_id", "")
+        entry_version = meta.get("version", "")
+        audio_path = meta.get("audio_path", "")
+
+        base_result: dict = {
+            "name": entry_name,
+            "lesson": entry_lesson,
+            "version": entry_version,
+            "match_rate": None,
+            "adjusted_match_rate": None,
+            "cpm": None,
+            "transcript_method": None,
+            "transcript_reason": None,
+            "expected": "high" if entry_version == "correct" else "low",
+            "flag": False,
+            "error": None,
+        }
+
+        try:
+            # 4a. Resolve target_text for this lesson
+            target_text = _resolve_target_text(entry_lesson)
+            if not target_text:
+                base_result["error"] = f"lesson '{entry_lesson}' not found in catalog"
+                results.append(base_result)
+                logger.info("batch-eval skip: lesson not found path=%s", audio_path)
+                continue
+
+            # 4b. Download audio bytes
+            audio_blob = bucket.blob(audio_path)
+            audio_bytes = audio_blob.download_as_bytes()
+
+            # 4c. Transcribe
+            transcribe_result = await transcribe_reading_audio(
+                audio_bytes=audio_bytes,
+                mime_type="audio/webm",
+                target_text=target_text,
+                duration_ms=None,
+            )
+            transcript = transcribe_result.get("transcript")
+            transcript_method = transcribe_result.get("method", "fallback")
+            transcript_reason = transcribe_result.get("reason")
+
+            base_result["transcript_method"] = transcript_method
+            base_result["transcript_reason"] = transcript_reason
+
+            # 4d. Skip scoring if transcription failed (fallback with no transcript)
+            if not transcript:
+                base_result["error"] = f"transcription fallback: {transcript_reason or 'unknown'}"
+                results.append(base_result)
+                logger.info(
+                    "batch-eval transcribe fallback: path=%s reason=%s",
+                    audio_path, transcript_reason,
+                )
+                continue
+
+            # 4e. Evaluate
+            eval_result = await evaluate_reading_with_ai(
+                spoken_text=transcript,
+                target_text=target_text,
+                duration_ms=None,
+            )
+            match_rate = eval_result.get("match_rate")
+            adjusted = eval_result.get("adjusted_match_rate")
+            cpm = eval_result.get("cpm")
+
+            base_result["match_rate"] = match_rate
+            base_result["adjusted_match_rate"] = adjusted
+            base_result["cpm"] = cpm
+
+            # 4f. Flag anomalies vs expected score direction
+            # correct → expect adjusted >= 0.8; error → expect adjusted < 0.8
+            if adjusted is not None:
+                if entry_version == "correct" and adjusted < 0.8:
+                    base_result["flag"] = True
+                elif entry_version == "error" and adjusted >= 0.8:
+                    base_result["flag"] = True
+
+        except Exception as exc:
+            # Fail-safe: single entry exception must not abort the batch
+            base_result["error"] = type(exc).__name__
+            logger.warning(
+                "batch-eval entry error: path=%s err=%s", audio_path, exc, exc_info=True
+            )
+
+        results.append(base_result)
+
+    # ── 5. Summary statistics ───────────────────────────────────────────────
+    correct_scores = [
+        r["adjusted_match_rate"]
+        for r in results
+        if r["version"] == "correct" and r["adjusted_match_rate"] is not None
+    ]
+    error_scores = [
+        r["adjusted_match_rate"]
+        for r in results
+        if r["version"] == "error" and r["adjusted_match_rate"] is not None
+    ]
+    anomaly_count = sum(1 for r in results if r["flag"])
+
+    correct_avg = round(sum(correct_scores) / len(correct_scores), 4) if correct_scores else None
+    error_avg = round(sum(error_scores) / len(error_scores), 4) if error_scores else None
+
+    logger.info(
+        "testset batch-eval done: n=%d truncated=%s anomaly=%d correct_avg=%s error_avg=%s",
+        len(results), truncated, anomaly_count, correct_avg, error_avg,
+    )
+
+    return {
+        "ok": True,
+        "n": len(results),
+        "truncated": truncated,
+        "results": results,
+        "summary": {
+            "correct_avg": correct_avg,
+            "error_avg": error_avg,
+            "anomaly_count": anomaly_count,
+        },
+    }
