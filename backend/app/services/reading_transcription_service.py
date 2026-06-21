@@ -85,6 +85,18 @@ _REASON_SAFETY    = "safety"
 _REASON_EMPTY     = "empty"
 _REASON_ERROR     = "error"
 _REASON_HALLUCINATION = "hallucination"  # Issue #2321 — Gemini hallucinated hint text
+_REASON_SILENT = "silent"                # Issue #2368 — deterministic no-speech energy gate
+
+# Issue #2368 — server-side silence / energy gate.
+# Gemini parrots the FULL reference text on silent / no-speech audio (it is given
+# target_text as a homophone hint), and the length-based hallucination gate below
+# only catches SHORT prefixes — a full-text parrot slips through as a false ~100%.
+# Measured peak (ffmpeg volumedetect max_volume):
+#   digital silence ≈ -inf   ·  440 Hz tone ≈ -18 dB
+#   white noise     ≈ -3.5 dB·  child speech ≈ -10 … -30 dB
+# -45 dB is well below the softest real reading but above true / near silence,
+# so it rejects silence without blocking soft readers.
+_SILENT_MAX_VOLUME_DB = -45.0
 
 
 def _normalise_mime(raw: str) -> str:
@@ -139,6 +151,59 @@ def _needs_transcode(mime_type: str) -> bool:
     """Return True if the MIME type is NOT natively accepted by Gemini."""
     base = _normalise_mime(mime_type)
     return base not in _GEMINI_NATIVE_AUDIO_MIMES
+
+
+def _max_volume_db(audio_bytes: bytes, source_mime: str) -> float | None:
+    """Return peak (max) volume in dBFS via ffmpeg `volumedetect`.
+
+    Issue #2368 — deterministic silence gate run BEFORE STT.  ffmpeg can decode
+    every browser MediaRecorder container directly, so we measure the raw bytes
+    without transcoding first.
+
+    Returns:
+        - a negative float (e.g. -3.5) for audio with sound
+        - float('-inf') for true digital silence
+        - None if ffmpeg fails or the level cannot be parsed (caller fails open —
+          STT + the downstream hallucination gate still apply).
+    """
+    import re
+
+    base = _normalise_mime(source_mime)
+    ext = {
+        "audio/webm": ".webm",
+        "audio/ogg":  ".ogg",
+        "audio/mp4":  ".mp4",
+        "audio/mpeg": ".mp3",
+        "audio/wav":  ".wav",
+    }.get(base, ".audio")
+
+    in_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as in_f:
+            in_f.write(audio_bytes)
+            in_path = in_f.name
+
+        result = subprocess.run(
+            ["ffmpeg", "-i", in_path, "-af", "volumedetect", "-f", "null", "-"],
+            capture_output=True,
+            timeout=20,
+        )
+        stderr = result.stderr or b""
+        m = re.search(rb"max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB", stderr)
+        if m:
+            return float(m.group(1))
+        # ffmpeg emits no max_volume line for empty/-inf audio streams.
+        if b"-inf dB" in stderr or b"mean_volume" in stderr:
+            return float("-inf")
+        return None
+    except Exception:  # noqa: BLE001 — fail open; downstream gates still apply
+        return None
+    finally:
+        if in_path and os.path.exists(in_path):
+            try:
+                os.unlink(in_path)
+            except OSError:
+                pass
 
 
 def _transcode_to_ogg(audio_bytes: bytes, source_mime: str) -> bytes | None:
@@ -244,6 +309,28 @@ async def transcribe_reading_audio(
     from .ai.gemini_client import GEMINI_TIMEOUT
     from .llm_models import get_model_for_task
 
+    # ── 0. Deterministic silence gate (Issue #2368) ───────────────────────────
+    # Gemini parrots the FULL reference text on silent audio (it gets target_text
+    # as a hint); the length-based hallucination gate below only catches SHORT
+    # prefixes, so a full parrot would pass as a false ~100%.  Reject effectively
+    # silent audio here — before transcode + STT — independent of Gemini.
+    max_db = await asyncio.to_thread(_max_volume_db, audio_bytes, mime_type)
+    if max_db is not None and max_db < _SILENT_MAX_VOLUME_DB:
+        logger.warning(
+            "Reading transcription fallback — silent audio: max_volume=%.1f dB "
+            "(< %.1f) duration_ms=%s",
+            max_db,
+            _SILENT_MAX_VOLUME_DB,
+            duration_ms,
+            extra={
+                "event": "reading_transcribe_fallback",
+                "reason": _REASON_SILENT,
+                "max_volume_db": max_db,
+                "duration_ms": duration_ms,
+            },
+        )
+        return {"transcript": None, "method": "fallback", "reason": _REASON_SILENT}
+
     # ── 1. Transcode if Gemini doesn't natively support the input MIME ─────────
     gemini_audio_bytes = audio_bytes
     gemini_mime = "audio/ogg"  # default after transcode
@@ -276,11 +363,16 @@ async def transcribe_reading_audio(
         "你是一個繁體中文語音轉錄系統，專門轉錄台灣國小至國中學生的朗讀音檔。\n"
         "任務：將學生朗讀的音檔逐字轉錄成繁體中文文字，並加入正確標點符號。\n"
         "規則：\n"
-        "1. 以提供的課文原文（reference text）為基準，校正同音字、近音字。\n"
-        "2. 輸出必須忠實反映學生實際唸出的字（不要補字或修正未唸出的字）。\n"
-        "3. 在 transcript 中加入中文標點（。，！？……），以課文原文為準。\n"
+        "1. 課文原文（reference text）只用於校正同音字、近音字——"
+        "嚴禁直接把課文原文當成轉錄結果輸出。\n"
+        "2. 輸出必須忠實反映學生實際唸出的字（不要補字、不要修正未唸出的字、"
+        "不要把沒聽到的句子補進來）。\n"
+        "3. 在 transcript 中加入中文標點（。，！？……）。\n"
         "4. reasoning 欄位寫 1-2 句說明你如何處理難以辨認的部分（供教師稽核）。\n"
-        "5. 若完全無法辨認（靜音或雜音），transcript 回傳空字串 ''。\n"
+        "5. 若音檔中沒有清晰可辨的人聲朗讀（靜音、環境雜音、白噪音、音樂、"
+        "只有單一音調或喇叭聲），transcript 必須回傳空字串 ''，"
+        "且 reasoning 註明「未偵測到人聲朗讀」——此時絕對不可輸出任何課文原文內容。\n"
+        "6. 只在你真的聽到學生唸出對應字句時，才把那些字寫進 transcript。\n"
         "回傳格式：JSON {\"transcript\": \"...\", \"reasoning\": \"...\"}"
     )
 
