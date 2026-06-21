@@ -194,8 +194,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     needsStory: true,
     enabled: true,
     category: 'comprehension',
-    navEmphasis: true,
-    navShortLabel: '聚光燈',
+    // navEmphasis 移除（Young 2026-06-21）：原本 #2192 讓聚光燈用 💡+放大+紫框，
+    // 跟其他步單字灰圈不一致 → 統一成 displayChar '光' 灰圈。findability 若要再加用顏色非換 icon。
   },
   'sentence-practice': {
     id: 'sentence-practice',
