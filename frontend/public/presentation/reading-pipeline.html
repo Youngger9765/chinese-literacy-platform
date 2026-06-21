@@ -320,8 +320,8 @@
         </tr>
         <tr>
           <td class="nowrap">② 錄音驗證</td><td><span class="pill fe">前端</span></td>
-          <td>能量+時長 VAD 守門，沒語音不送 STT；逐段+全文共用<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/utils/recordingValidation.ts">recordingValidation.ts</a></td>
-          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a> · 🟡 行為待真機麥克風</td><td>🟡</td>
+          <td>前端能量+時長 VAD 守門 + 後端 ffmpeg 能量 gate(−45dB) 擋靜音 + 轉錄 prompt 硬化禁鸚鵡學舌<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/utils/recordingValidation.ts">recordingValidation.ts</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2368">#2368</a> · vitest 9/9 + 合成音檔 staging 真 Gemini 複驗</td><td class="ok">✅</td>
         </tr>
         <tr>
           <td class="nowrap">③ 辨識 STT</td><td><span class="pill llm">後端·LLM</span></td>
@@ -366,7 +366,7 @@
         <tr><td>同音/近音字寬容</td><td>④優化</td><td><b>原則</b>：發音對但字不同（同音/近音字）不該扣分。<br><b>方法</b>：spec 契約測試用固定案例驗，確保寬容規則不退化。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2266">#2266</a></td><td>—</td></tr>
         <tr><td>後送儲存（評估=存、取消/重錄不存）</td><td>⑥儲存</td><td><b>原則</b>：只存學生按了「評估」且接受的那段，分數先顯示才後送上傳。<br><b>方法</b>：spec + curl 打 /reading/save-audio 看行為與守門。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">#2299</a></td><td>—</td></tr>
         <tr><td>回放（學生/老師 signed URL + IDOR）</td><td>回放</td><td><b>原則</b>：只有本人/老師能聽，連結 10 分鐘過期。<br><b>方法</b>：curl 帶不同身分看 401/403/200 + 老師端鈕；簽名改走 IAM SignBlob 後 prod 實證 HTTP 200。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2327">#2327</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2344">#2344</a></td><td>—</td></tr>
-        <tr><td>靜音偽陽性 gate（不出聲不送評分）</td><td>②錄音驗證</td><td><b>原則</b>：沒出聲就不該送評分、更不該假性通過（最危險的沉默失敗）。<br><b>方法</b>：音量能量 + 錄音時長門檻先擋；轉錄端再擋幻覺前綴；完整行為需真機麥克風測。</td><td>🟡 待真機</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a></td><td>—</td></tr>
+        <tr><td>靜音/噪音偽陽性 gate（不出聲不送評分）</td><td>②錄音驗證</td><td><b>原則</b>：沒出聲就不該送評分、更不該假性通過（最危險的沉默失敗）。<br><b>方法</b>：前端能量+時長門檻擋靜音；後端 ffmpeg 能量 gate(−45dB)再擋一層；轉錄 prompt 硬化禁把課文當輸出、沒人聲回空；<b>合成音檔（靜音/白噪音/純音）+ 真人朗讀跑 staging 真 Gemini 複驗</b>。</td><td>✅ 合成音檔驗證<br>靜音/噪音 0 假passed · 真朗讀 pass</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2368">#2368</a></td><td>—</td></tr>
         <tr><td>STT 字準率（真實童音）</td><td>③辨識</td><td><b>原則</b>：機器聽寫要跟學生實際念的吻合，尤其真實童音（口齒不清/方言腔）。<br><b>方法</b>：收真人朗讀樣本，逐字跟課文比對算「字錯率 CER」。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
         <tr><td>評分準度（真實童音 across 課文）</td><td>④評分</td><td><b>原則</b>：好的高分、普通中等、<b>很差的接近 0</b>，分數要拉得開、跨課文都穩。<br><b>方法</b>：真人多版本（正確版 / 錯誤版 / <b>很差版</b>）跑批次評分，比對各自該落的分數帶。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
       </tbody>
@@ -392,7 +392,7 @@
         <li><b>CI 測 staging-not-PR-code</b> — <code>e2e-tests.yml</code> 跑 staging baseURL（測舊 code 非 PR 自己的），render-smoke 才跑 PR build</li>
         <li><b>reconcile orphan 未排程</b> — <code>reconcile_reading_audio_orphans.py</code> 預設 dry-run、未排 cron（#2299 後送後新 orphan 應大減）</li>
       </ul>
-      <p class="legend">近期已解：回放簽名 URL Cloud Run 修復（#2344，原本所有回放都播不出）· 老師端「▶聽錄音」鈕（#2327）· 測試集收集＋server-truth 進度＋聽取＋批次評分閉環 · 靜音偽陽性 3 層防線（#2338）· 聚光燈 icon 統一（#2349）</p>
+      <p class="legend">近期已解：靜音/噪音 STT 整段幻覺假passed 修復（#2368，合成音檔實測抓到→後端能量 gate＋prompt 硬化→staging 真 Gemini 複驗 0 假passed）· 回放簽名 URL Cloud Run 修復（#2344）· 老師端「▶聽錄音」鈕（#2327）· 測試集收集＋server-truth 進度＋聽取＋批次評分閉環 · 聚光燈 icon 統一（#2349）</p>
     </div>
     <div class="card rule">
       <h3>設計鐵律</h3>
