@@ -96,7 +96,7 @@ function pct(v){ return v==null?'—':(Math.round(v*1000)/10)+'%'; }
 
 function aiCell(id, hasRec){
   var r=aiResults[id];
-  if(r&&r.running) return '<span class="muted">跑分中…</span>';
+  if(r&&r.running) return '<span class="muted">跑分中…（約 30 秒）</span>';
   if(r&&(r.correct!=null||r.error!=null)){
     var parts=[];
     if(r.correct!=null) parts.push('<div class="'+(r.correctFlag?'anom':'ok')+'">正確版 '+pct(r.correct)+(r.correctFlag?' ⚠':' ✓')+'</div>');
@@ -269,17 +269,35 @@ function statCard(n,l){
   return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
 }
 
+/* ── 跑分 fetch：150s 逾時保護 + 失敗自動重試一次（冷啟動/Gemini 暫時性失敗自癒，#2379）── */
+async function evalFetch(url, headers){
+  var lastErr;
+  for(var attempt=1; attempt<=2; attempt++){
+    var ctrl=new AbortController();
+    var timer=setTimeout(function(){ ctrl.abort(); }, 150000);
+    try{
+      var r=await fetch(url,{method:'POST',headers:headers,signal:ctrl.signal});
+      clearTimeout(timer);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){
+      clearTimeout(timer);
+      lastErr=e;
+      if(attempt<2){ await new Promise(function(res){ setTimeout(res,2000); }); }  // 等 2s，冷啟動已暖
+    }
+  }
+  throw lastErr;
+}
+
 /* ── 跑 AI 評分：呼叫 batch-eval → 填 aiResults → 重繪 AI判斷欄 ── */
 async function runAiEval(){
   var btn=document.getElementById('aiRunBtn'), st=document.getElementById('aiStatus');
   var token=localStorage.getItem('lingoleap_token');
   if(!token){ st.textContent='需先登入'; return; }
   btn.disabled=true;
-  st.textContent='AI 評分中…（真人聲辨識較久，請稍候）';
+  st.textContent='AI 評分中…（真人聲辨識較久，約每筆 20-30 秒，請稍候）';
   try{
-    var r=await fetch(API+'/api/testset/batch-eval',{method:'POST',headers:{'Authorization':'Bearer '+token}});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    var d=await r.json();
+    var d=await evalFetch(API+'/api/testset/batch-eval',{'Authorization':'Bearer '+token});
     aiResults={};
     (d.results||[]).forEach(function(x){ applyAiResult(x); });
     var sm=d.summary||{};
@@ -306,9 +324,7 @@ async function runAiEvalForLesson(id){
   aiResults[id]={running:true}; rerenderAiCell(id);
   try{
     var headers=token?{'Authorization':'Bearer '+token}:{};
-    var r=await fetch(API+'/api/testset/batch-eval?lesson='+encodeURIComponent(id),{method:'POST',headers:headers});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    var d=await r.json();
+    var d=await evalFetch(API+'/api/testset/batch-eval?lesson='+encodeURIComponent(id), headers);
     aiResults[id]={correct:null,error:null,correctFlag:false,errorFlag:false};
     (d.results||[]).forEach(function(x){ if(String(x.lesson)===String(id)) applyAiResult(x); });
   }catch(e){ aiResults[id]={err:true}; }
