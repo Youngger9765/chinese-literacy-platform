@@ -22,6 +22,10 @@ import { fontForZhuyin } from '../../constants/fonts';
 const IS_TOUCH_DEVICE =
   typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
+// 教授七課 §6：答對 praise 要明顯 + 含「太棒」字樣（對齊 VocabDefinitionMatchMCQ/FillInBlankExercise）。
+// 依 slot index 取（deterministic，避免 re-render 閃動）；「太棒了！」放第一個確保常見。
+const CORRECT_PRAISES = ['太棒了！', '答對了！', '很厲害！', '完全正確！'] as const;
+
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const VOCAB_DRAGDROP_ONBOARDED_KEY = 'vocab_dragdrop_onboarded';
 
@@ -294,9 +298,9 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         );
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
 
-        // A6: Show explicit praise briefly
+        // A6 / 教授七課 §6: Show explicit praise（拉長到 1600ms，比 chip 飛走久，避免不明顯）
         setCorrectFeedbackSlot(defIdx);
-        setTimeout(() => setCorrectFeedbackSlot(null), 1200);
+        setTimeout(() => setCorrectFeedbackSlot(null), 1600);
 
         // Start fly-away animation on the chip
         setFlyingAway((prev) => new Set([...prev, vocabIdx]));
@@ -574,10 +578,10 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
                 ✓
               </span>
               {placedVocabIdx !== null ? vocab[placedVocabIdx]?.word : ''}
-              {/* A6: explicit correct praise */}
+              {/* A6 / 教授七課 §6: explicit correct praise — 明顯的綠色 pill + 「太棒了！」 */}
               {showCorrectVerbal && (
-                <span className="ml-2 text-sm font-bold text-emerald-600 animate-pulse">
-                  答對了！
+                <span className="ml-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-base md:text-lg font-bold animate-pulse">
+                  {CORRECT_PRAISES[defIdx % CORRECT_PRAISES.length]}
                 </span>
               )}
             </span>
