@@ -45,6 +45,14 @@
   .det-table th{background:#ede8de}
   audio{height:28px;vertical-align:middle}
   .muted{color:var(--muted)}
+  .ai-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .ai-run-btn{background:var(--purple,#5B4FC4);color:#fff;border:none;border-radius:8px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
+  .ai-run-btn:disabled{opacity:.5;cursor:not-allowed}
+  .ai-status{font-size:.85rem;font-weight:600}
+  .ai-score{display:inline-block;font-size:.78rem;line-height:1.5;white-space:nowrap}
+  .ai-score .ok{color:#15803d;font-weight:700}
+  .ai-score .lo{color:#b45309;font-weight:700}
+  .ai-score .anom{color:var(--red,#dc2626);font-weight:700}
 </style>
 </head>
 <body>
@@ -60,6 +68,11 @@
   <div class="stats" id="stats"><div class="loading">載入中…</div></div>
 
   <h2>所有課文</h2>
+  <div id="aiTools" class="ai-tools" style="display:none">
+    <button id="aiRunBtn" class="ai-run-btn" onclick="runAiEval()">🤖 跑 AI 評分（已收錄音）</button>
+    <span id="aiStatus" class="ai-status"></span>
+    <small class="muted">正確版應高分、錯誤版應低分；不符會標 ⚠ 異常。單次上限 30 筆。</small>
+  </div>
   <div id="tableWrap"><div class="loading">載入課文清單…</div></div>
 </div>
 
@@ -72,6 +85,19 @@ function apiBase(){
   return 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 }
 var API=apiBase();
+var aiResults={};  // lesson_id → {correct:adj|null, error:adj|null, anomaly:bool}
+
+function pct(v){ return v==null?'—':(Math.round(v*1000)/10)+'%'; }
+
+function aiCell(id){
+  var r=aiResults[id];
+  if(!r) return '<span class="ai-badge">待對應</span>';
+  var parts=[];
+  if(r.correct!=null) parts.push('<span class="'+(r.correct>=0.8?'ok':'anom')+'">正 '+pct(r.correct)+'</span>');
+  if(r.error!=null)   parts.push('<span class="'+(r.error<0.8?'lo':'anom')+'">誤 '+pct(r.error)+'</span>');
+  if(!parts.length) return '<span class="ai-badge">待對應</span>';
+  return '<span class="ai-score">'+parts.join('<br>')+(r.anomaly?' ⚠':'')+'</span>';
+}
 
 function recordUrl(lessonId){
   return location.origin+'/testset/record.html?lesson='+encodeURIComponent(lessonId);
@@ -197,7 +223,7 @@ async function load(){
     h+='<td><span class="pill '+(correctList.length?'some':'zero')+'">'+correctList.length+'</span></td>';
     h+='<td><span class="pill '+(errorList.length?'some':'zero')+'">'+errorList.length+'</span></td>';
     h+='<td>'+(authOk?(contribs.length?('<span title="'+esc(contribs.join('、'))+'">'+esc(contribs.length+' 人')+'</span>'):'<span class="muted">—</span>'):'<span class="muted">需登入</span>')+'</td>';
-    h+='<td><span class="ai-badge">待對應</span></td>';
+    h+='<td>'+aiCell(id)+'</td>';
     h+='<td><div class="action-cell">'+
       '<button class="copy-btn" onclick="copyLink(this,\''+esc(url)+'\')">複製連結</button>'+
       '<a class="open-btn" href="'+esc(url)+'" target="_blank">開啟</a>'+
@@ -228,10 +254,41 @@ async function load(){
 
   h+='</tbody></table>';
   document.getElementById('tableWrap').innerHTML=h;
+
+  // AI 評分工具列：登入後才可跑（batch-eval 需 auth + 會花 LLM 成本）
+  document.getElementById('aiTools').style.display=authOk?'flex':'none';
 }
 
 function statCard(n,l){
   return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
+}
+
+/* ── 跑 AI 評分：呼叫 batch-eval → 填 aiResults → 重繪 AI判斷欄 ── */
+async function runAiEval(){
+  var btn=document.getElementById('aiRunBtn'), st=document.getElementById('aiStatus');
+  var token=localStorage.getItem('lingoleap_token');
+  if(!token){ st.textContent='需先登入'; return; }
+  btn.disabled=true;
+  st.textContent='AI 評分中…（真人聲辨識較久，請稍候）';
+  try{
+    var r=await fetch(API+'/api/testset/batch-eval',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var d=await r.json();
+    aiResults={};
+    (d.results||[]).forEach(function(x){
+      var e=aiResults[x.lesson]=aiResults[x.lesson]||{correct:null,error:null,anomaly:false};
+      if(x.version==='correct') e.correct=x.adjusted_match_rate;
+      else if(x.version==='error') e.error=x.adjusted_match_rate;
+      if(x.flag) e.anomaly=true;
+    });
+    var sm=d.summary||{};
+    st.textContent='完成：'+(d.n||0)+' 筆 · 異常 '+(sm.anomaly_count||0)+(d.truncated?'（達單次上限 30，僅評前 30）':'');
+    await load();
+  }catch(e){
+    st.textContent='失敗：'+e.message;
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 load();
