@@ -1,0 +1,66 @@
+{
+  "key": "G5-L22+12",
+  "story_id": 12,
+  "lesson_code": "G5-L22",
+  "title": "我有一個棒球夢",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure"
+    ],
+    "question_count": 1,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig3.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "7c3b31987a9fe462e0f2e8b20e37c3f929312a0a70a9c77ab9ef0403bd0c38ce"
+  }
+}

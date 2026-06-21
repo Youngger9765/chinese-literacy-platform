@@ -1,0 +1,47 @@
+{
+  "key": "G7-L11+1090",
+  "story_id": 1090,
+  "lesson_code": "G7-L11",
+  "title": "AI什麼都會，我們還要學什麼？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "passage",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "guide",
+      "passage",
+      "multi",
+      "guide",
+      "passage",
+      "free_text",
+      "free_text",
+      "single",
+      "guide",
+      "passage",
+      "figure",
+      "guide",
+      "passage",
+      "guide",
+      "self_check"
+    ],
+    "question_count": 6,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "bda5e5f7196841e95e2327f45de293a573ca16d428f3254e048104dea863b196"
+  }
+}

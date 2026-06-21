@@ -1,0 +1,24 @@
+{
+  "key": "G7-L02+29",
+  "story_id": 29,
+  "lesson_code": "G7-L02",
+  "title": "澳洲奧運金牌的X機密",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "03c34efcfc67b0723a66c855176a01b5fd4c103e674c349798127fd3b90f31c1"
+  }
+}

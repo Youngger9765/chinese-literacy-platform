@@ -1,0 +1,88 @@
+{
+  "key": "G7-L30+1110",
+  "story_id": 1110,
+  "lesson_code": "G7-L30",
+  "title": "都是八哥，為什麼命運不一樣？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure",
+      "guide",
+      "figure",
+      "guide",
+      "single",
+      "single",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "passage",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "figure",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "free_text",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "free_text",
+      "passage",
+      "self_check"
+    ],
+    "question_count": 23,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "table1.json"
+      },
+      {
+        "referent": "table",
+        "asset": "table2.json"
+      },
+      {
+        "referent": "table",
+        "asset": "table1.json"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "66b5fff21645b57e4606a20ff896843d905269b1c3410553f4356c044f2f0c67"
+  }
+}

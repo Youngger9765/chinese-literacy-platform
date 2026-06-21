@@ -1,0 +1,30 @@
+{
+  "key": "G4-L02+2",
+  "story_id": 2,
+  "lesson_code": "G4-L02",
+  "title": "十秒的背後",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "figure",
+      "passage"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "1efd4b5a480a85edc5db0a8e1964f870537df230a2c35e4d075050a438e7ed5c"
+  }
+}

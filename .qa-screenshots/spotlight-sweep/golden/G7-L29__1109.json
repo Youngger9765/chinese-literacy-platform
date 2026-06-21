@@ -1,0 +1,104 @@
+{
+  "key": "G7-L29+1109",
+  "story_id": 1109,
+  "lesson_code": "G7-L29",
+  "title": "從四張圖，看地球暖化的現象",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "free_text",
+      "free_text",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "self_check"
+    ],
+    "question_count": 30,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig2.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig3.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig4.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "3d2496d73c6c675510f750c35b84d33221c394824e1e7c03c6fa6544ebc1c2c1"
+  }
+}

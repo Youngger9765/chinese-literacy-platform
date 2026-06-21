@@ -1,0 +1,19 @@
+{
+  "key": "G5-L20+1047",
+  "story_id": 1047,
+  "lesson_code": "G5-L20",
+  "title": "感情小日記4──我被告白了",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "single",
+      "guide",
+      "passage"
+    ],
+    "question_count": 1,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "3126a6022a4750137045fb19cfa9a5237b1ce8e2305b6fef7b6adad98c52ec37"
+  }
+}

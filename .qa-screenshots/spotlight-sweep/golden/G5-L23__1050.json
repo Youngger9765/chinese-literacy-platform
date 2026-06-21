@@ -1,0 +1,61 @@
+{
+  "key": "G5-L23+1050",
+  "story_id": 1050,
+  "lesson_code": "G5-L23",
+  "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "free_text",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "self_check"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "52ccb9c66fcb4ae2684ca2d3e24a596af08a6f172761d45e806bc806144031fb"
+  }
+}

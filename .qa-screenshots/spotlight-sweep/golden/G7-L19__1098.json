@@ -1,0 +1,18 @@
+{
+  "key": "G7-L19+1098",
+  "story_id": 1098,
+  "lesson_code": "G7-L19",
+  "title": "「背影」讀書會",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "passage"
+    ],
+    "question_count": 0,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "5b953d16310585c36cb713c6650ec6b45dcd3e6ec19aeb2e05f0faad1de03324"
+  }
+}

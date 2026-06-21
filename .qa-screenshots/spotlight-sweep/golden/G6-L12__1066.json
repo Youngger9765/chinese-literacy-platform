@@ -1,0 +1,25 @@
+{
+  "key": "G6-L12+1066",
+  "story_id": 1066,
+  "lesson_code": "G6-L12",
+  "title": "愛冒險逞強的雄性動物",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "passage",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "passage",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 4,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "f73a8ec05e8159fc4b39fb880799a29488b85aa9b2c3cce31c73db85bac2cb4e"
+  }
+}

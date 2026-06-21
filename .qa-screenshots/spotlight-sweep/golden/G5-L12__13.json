@@ -1,0 +1,24 @@
+{
+  "key": "G5-L12+13",
+  "story_id": 13,
+  "lesson_code": "G5-L12",
+  "title": "六塊肌六塊雞",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 1,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "bfea649f0ab7098227c2145695fd84150d76e4da48490d01b01d5f1e3462b24c"
+  }
+}

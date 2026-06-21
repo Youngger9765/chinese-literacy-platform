@@ -1,0 +1,37 @@
+{
+  "key": "G5-L4+1031",
+  "story_id": 1031,
+  "lesson_code": "G5-L4",
+  "title": "災難預言準不準？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "figure",
+      "self_check"
+    ],
+    "question_count": 8,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "345da41212145cdea0e4af46c17410c2e312d2a273dfcddb2384d6b467418ce4"
+  }
+}

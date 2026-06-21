@@ -1,0 +1,24 @@
+{
+  "key": "G5-L10+10",
+  "story_id": 10,
+  "lesson_code": "G5-L10",
+  "title": "從童工到大學教授之路",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "single",
+      "single",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "single"
+    ],
+    "question_count": 5,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "b99a947aace2446b69fa8014eed4523097f21b6024ba3dd3c97300aa9ba02aa1"
+  }
+}

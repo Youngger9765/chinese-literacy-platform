@@ -1,0 +1,31 @@
+{
+  "key": "G4-L03+3",
+  "story_id": 3,
+  "lesson_code": "G4-L03",
+  "title": "長高的祕密",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "single",
+      "passage",
+      "free_text",
+      "passage",
+      "free_text",
+      "figure",
+      "free_text"
+    ],
+    "question_count": 7,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "9e980a667e8bf1a1adcbc08e9533f7b7862f9a81f03e3db3da627df681770a7f"
+  }
+}

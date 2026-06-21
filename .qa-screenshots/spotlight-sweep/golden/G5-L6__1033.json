@@ -1,0 +1,51 @@
+{
+  "key": "G5-L6+1033",
+  "story_id": 1033,
+  "lesson_code": "G5-L6",
+  "title": "堅持到底的棒球人生──周思齊(前篇)",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text"
+    ],
+    "question_count": 11,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "880dfcf8de9cddb0a1f4ff5825e43de653f1ad3f0932e8bbce10a437ab56f226"
+  }
+}

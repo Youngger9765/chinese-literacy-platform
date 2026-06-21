@@ -1,0 +1,30 @@
+{
+  "key": "G7-L25+1105",
+  "story_id": 1105,
+  "lesson_code": "G7-L25",
+  "title": "當全世界都在笑你，你可以怎麼做？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "passage",
+      "single"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "e3816d8bddfc705083956c906dbec393af78c069e00365013d68f4c9784aa900"
+  }
+}

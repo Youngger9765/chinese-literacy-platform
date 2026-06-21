@@ -1,0 +1,29 @@
+{
+  "key": "G9-L06+51",
+  "story_id": 51,
+  "lesson_code": "G9-L06",
+  "title": "靈異與科學",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "free_text",
+      "guide",
+      "free_text",
+      "guide",
+      "free_text"
+    ],
+    "question_count": 5,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "f990564eff0b36b9061e7f2749705b621fbd53022321b857e8b4a4c0d5d868be"
+  }
+}

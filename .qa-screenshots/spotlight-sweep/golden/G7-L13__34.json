@@ -1,0 +1,25 @@
+{
+  "key": "G7-L13+34",
+  "story_id": 34,
+  "lesson_code": "G7-L13",
+  "title": "綠色賽事",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "guide"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "5848d70c94dec70e6aee21dd35c7b74d0aeb0ee1aa34a3f82c60ddb9cec437f3"
+  }
+}

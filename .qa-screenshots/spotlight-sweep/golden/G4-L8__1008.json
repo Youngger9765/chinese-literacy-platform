@@ -1,0 +1,28 @@
+{
+  "key": "G4-L8+1008",
+  "story_id": 1008,
+  "lesson_code": "G4-L8",
+  "title": "最美的畫面",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide"
+    ],
+    "question_count": 4,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "88d95214a0c87242e1b7b0f2287f52a572626fe5765ca90685bac19b346efbda"
+  }
+}

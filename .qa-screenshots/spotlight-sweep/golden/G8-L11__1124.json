@@ -1,0 +1,34 @@
+{
+  "key": "G8-L11+1124",
+  "story_id": 1124,
+  "lesson_code": "G8-L11",
+  "title": "科學辦案：破解蝴蝶蘭的花期密碼",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "passage",
+      "guide",
+      "fill_table",
+      "guide",
+      "passage",
+      "free_text",
+      "passage",
+      "free_text",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "fill_table",
+      "self_check"
+    ],
+    "question_count": 2,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "7cc68b8725f824ace880ed91237c56d32e62dfe3f8f02012b3640317387b9222"
+  }
+}

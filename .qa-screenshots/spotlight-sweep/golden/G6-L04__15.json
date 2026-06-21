@@ -1,0 +1,39 @@
+{
+  "key": "G6-L04+15",
+  "story_id": 15,
+  "lesson_code": "G6-L04",
+  "title": "兩千五百歲的酷老師",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "273593be1ba309b4d157c2e60a850576697b98c0242c0872a400786606f85266"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "key": "G7-L5+1084",
+  "story_id": 1084,
+  "lesson_code": "G7-L5",
+  "title": "爺爺奶奶來了以後",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "figure",
+      "free_text"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "0537594d7cbe17ed0eb998217651abc363ddbcf0f5083cd1c20d81e95a7c0ac5"
+  }
+}

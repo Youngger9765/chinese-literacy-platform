@@ -1,0 +1,64 @@
+{
+  "key": "G7-L23+1102",
+  "story_id": 1102,
+  "lesson_code": "G7-L23",
+  "title": "第一篇 雨林裡的奇蹟藥物",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure",
+      "guide",
+      "passage",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "free_text",
+      "passage",
+      "guide",
+      "passage",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide"
+    ],
+    "question_count": 22,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "f3b641a987da7e4440aa33ca025a0a32406f012282b5918f4d5a1024f76ed4d7"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "key": "G7-L17+37",
+  "story_id": 37,
+  "lesson_code": "G7-L17",
+  "title": "用科學方法伸張正義的神探",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "guide",
+      "free_text"
+    ],
+    "question_count": 2,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "0dbc00332b6ee81609fe773334ba40586c12a5f03f4f37b0a0f7fe9bacdc3fdc"
+  }
+}

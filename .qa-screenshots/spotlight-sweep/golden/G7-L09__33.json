@@ -1,0 +1,26 @@
+{
+  "key": "G7-L09+33",
+  "story_id": 33,
+  "lesson_code": "G7-L09",
+  "title": "吐瓦魯：逐漸被淹沒的島國",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text"
+    ],
+    "question_count": 2,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "1d4c29e4175f10cce5b1ef83c3cf56d1f7a256a004afb069be22b45284178800"
+  }
+}

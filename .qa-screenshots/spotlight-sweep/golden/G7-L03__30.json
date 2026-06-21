@@ -1,0 +1,24 @@
+{
+  "key": "G7-L03+30",
+  "story_id": 30,
+  "lesson_code": "G7-L03",
+  "title": "女性太空人登月",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "e1f187dec553ddddb793733a903360868217e7e9210c0f6737c89f0158096ed4"
+  }
+}

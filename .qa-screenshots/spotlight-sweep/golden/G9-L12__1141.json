@@ -1,0 +1,47 @@
+{
+  "key": "G9-L12+1141",
+  "story_id": 1141,
+  "lesson_code": "G9-L12",
+  "title": "臺灣的太空之眼",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "multi",
+      "guide",
+      "single",
+      "single",
+      "multi",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "self_check"
+    ],
+    "question_count": 10,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "e5dbd6fe61b6aa4e3b0abc989db403562d1a866a7a21fb725f1e64af0a8ed1b8"
+  }
+}

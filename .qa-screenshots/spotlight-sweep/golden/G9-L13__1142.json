@@ -1,0 +1,55 @@
+{
+  "key": "G9-L13+1142",
+  "story_id": 1142,
+  "lesson_code": "G9-L13",
+  "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "figure",
+      "free_text",
+      "figure",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "self_check"
+    ],
+    "question_count": 6,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "18d6c57cf557bcfc8c9928fdb28862f5f6aa25f340fb0997d3af73b6ae251eb1"
+  }
+}

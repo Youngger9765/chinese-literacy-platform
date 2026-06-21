@@ -1,0 +1,34 @@
+{
+  "key": "文-L1+1149",
+  "story_id": 1149,
+  "lesson_code": "文-L1",
+  "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "guide",
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "guide",
+      "passage"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "ab3ee760cb67b69d03ef885b6e35295d39d0d5dc32d68f77440512d06ac296b2"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "key": "G7-L18+1097",
+  "story_id": 1097,
+  "lesson_code": "G7-L18",
+  "title": "一封向醫師求助的信",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "figure",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "f39d05c5439fdc7689f40986bfc383b5b14a230f0f6806542394b31e741c63d0"
+  }
+}

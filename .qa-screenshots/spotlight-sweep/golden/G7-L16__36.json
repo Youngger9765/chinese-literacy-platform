@@ -1,0 +1,22 @@
+{
+  "key": "G7-L16+36",
+  "story_id": 36,
+  "lesson_code": "G7-L16",
+  "title": "果醬男孩",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 6,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "f0caaa7cabb9024e35cccf20f4ac81e753b19156755f22d05bd5bf349dc35168"
+  }
+}

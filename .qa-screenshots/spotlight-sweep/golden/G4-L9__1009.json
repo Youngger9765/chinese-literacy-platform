@@ -1,0 +1,40 @@
+{
+  "key": "G4-L9+1009",
+  "story_id": 1009,
+  "lesson_code": "G4-L9",
+  "title": "大自然的氣象小幫手",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "figure"
+    ],
+    "question_count": 8,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "94bc3397b0734123f8e191e0c5e9af3e310527c3e587a077d3f3747b8a969dd4"
+  }
+}

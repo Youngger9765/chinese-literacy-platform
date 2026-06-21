@@ -1,0 +1,62 @@
+{
+  "key": "G8-L6b+1118",
+  "story_id": 1118,
+  "lesson_code": "G8-L6b",
+  "title": "隱形的征服者",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "passage"
+    ],
+    "question_count": 5,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": null
+      },
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "7e7cb28f8771be7c5fcc826c245b9c1f2dd7656df6ef6978ac5e565bc4ec7f67"
+  }
+}

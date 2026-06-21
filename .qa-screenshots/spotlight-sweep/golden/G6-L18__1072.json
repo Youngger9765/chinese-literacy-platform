@@ -1,0 +1,24 @@
+{
+  "key": "G6-L18+1072",
+  "story_id": 1072,
+  "lesson_code": "G6-L18",
+  "title": "把手上的餅吃香一點！",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "figure"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "fb1331766cddb22b79b543578a94a69305d9da37043265e876a84675dfd12c13"
+  }
+}

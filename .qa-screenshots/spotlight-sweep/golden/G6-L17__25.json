@@ -1,0 +1,22 @@
+{
+  "key": "G6-L17+25",
+  "story_id": 25,
+  "lesson_code": "G6-L17",
+  "title": "給神明發會診單",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "3c68ac5eedb7dc771d817877571d00dd26af7ed5bbb71d084f34aea4ff0b3e34"
+  }
+}

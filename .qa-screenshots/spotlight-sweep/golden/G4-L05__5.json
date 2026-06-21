@@ -1,0 +1,22 @@
+{
+  "key": "G4-L05+5",
+  "story_id": 5,
+  "lesson_code": "G4-L05",
+  "title": "穿越極限的跑者",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "781fa0de3645c6ce1df7ac5e8bb9b34a8879804249295e8fa310e0705e61c0cb"
+  }
+}

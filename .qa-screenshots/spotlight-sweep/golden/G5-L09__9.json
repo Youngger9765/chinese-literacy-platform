@@ -1,0 +1,29 @@
+{
+  "key": "G5-L09+9",
+  "story_id": 9,
+  "lesson_code": "G5-L09",
+  "title": "周天成的一天──頂尖選手的養成",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "figure"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "c4d42b35a9253fc2607fd998bcb85444d5df46b7a12d1953633c3ce5ee686e2f"
+  }
+}

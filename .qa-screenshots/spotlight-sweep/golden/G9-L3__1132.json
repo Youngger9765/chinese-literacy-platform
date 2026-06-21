@@ -1,0 +1,29 @@
+{
+  "key": "G9-L3+1132",
+  "story_id": 1132,
+  "lesson_code": "G9-L3",
+  "title": "國高中數學課當然可以使用計算機！",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "1aaa386e31f669493ea0c58ba0bb3627dc81f00b104d45c70854c42134697270"
+  }
+}

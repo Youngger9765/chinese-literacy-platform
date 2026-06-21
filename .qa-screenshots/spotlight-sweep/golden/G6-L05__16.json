@@ -1,0 +1,36 @@
+{
+  "key": "G6-L05+16",
+  "story_id": 16,
+  "lesson_code": "G6-L05",
+  "title": "卡通人氣王票選政見發表會",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide"
+    ],
+    "question_count": 6,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "c057e2d2453902e58ed99165b79a20cd2a2281da1e8a7790bd4cb417e7c1de53"
+  }
+}

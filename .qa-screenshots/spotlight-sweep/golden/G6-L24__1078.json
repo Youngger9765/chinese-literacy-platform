@@ -1,0 +1,25 @@
+{
+  "key": "G6-L24+1078",
+  "story_id": 1078,
+  "lesson_code": "G6-L24",
+  "title": "白鯨救援：一場人與自然的協奏曲",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "fill_table",
+      "guide",
+      "guide",
+      "guide",
+      "self_check"
+    ],
+    "question_count": 3,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "d0888714293d15ff2291e77b0b4e75a5a8db9b779e262602008d84e2ed1a81bf"
+  }
+}

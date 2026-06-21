@@ -1,0 +1,35 @@
+{
+  "key": "G6-L13+21",
+  "story_id": 21,
+  "lesson_code": "G6-L13",
+  "title": "森林大軍的守護者",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 6,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "1dce37f148c58e4e7d192bac97a2aaa9913ea938ad1e8d4ae34f7ea1b16bfcd0"
+  }
+}

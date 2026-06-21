@@ -1,0 +1,28 @@
+{
+  "key": "G9-L04+49",
+  "story_id": 49,
+  "lesson_code": "G9-L04",
+  "title": "預防近視？多點戶外活動就對了！",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "36f6b8548a46e64929f6a6483f908fed924ef9a63cf1a8a219422935072f48e0"
+  }
+}
