@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from ..auth.dependencies import get_current_user, require_role
+from ..auth.dependencies import get_current_user
 from ..models.user import User
 from ..services.audio_upload_service import (
     _get_gcs_bucket,
@@ -121,16 +121,14 @@ async def testset_upload(
     return {"ok": True, "path": audio_path}
 
 
-@router.get(
-    "/testset/recordings",
-    dependencies=[require_role("system_admin", "teacher")],
-)
+@router.get("/testset/recordings")
 def testset_recordings(current_user: User = Depends(get_current_user)):
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
 
-    限 system_admin / teacher（codex review #2304-followup）→ 一般登入學生
-    不得抓取貢獻者 PII（名字/年級/可播放錄音）。list.html 讀 localStorage
-    `lingoleap_token` 帶 Bearer；未登入 → 401、權限不足 → 403。
+    任何登入者可看（Young 2026-06-21：先不限 admin/teacher）。仍需登入，
+    擋匿名公開抓取貢獻者 PII（名字/年級/可播放錄音）。list.html 讀 localStorage
+    `lingoleap_token` 帶 Bearer；未登入 → 401。
+    （v2 若要全公開或收回 admin-only 再調；codex #2304 的 role gate 暫移除。）
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
