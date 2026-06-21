@@ -289,21 +289,23 @@
 
   <!-- QA -->
   <div class="pane" id="qa">
-    <div class="card" style="border-left:4px solid var(--purple)">
-      <h3>朗讀模組 QA — 測試集對應</h3>
-      <p>朗讀正確率 / STT 辨識品質的量化驗證，依賴<b>人聲測試集</b>（真實童音樣本）。</p>
-      <p>測試集現況：</p>
-      <ul>
-        <li><a href="../testset/index.html">貢獻者收集頁</a> — 招募真人讀課文錄音</li>
-        <li><a href="../testset/list.html">owner 現況表</a> — 各課錄音上傳進度</li>
-      </ul>
-      <p style="color:var(--amber);font-weight:600">朗讀專屬 QA 表待測試集建立樣本後對應</p>
-      <p style="font-size:.82rem;color:var(--muted)">收集 SOP：每位貢獻者讀 3 篇×正確版+錯誤版，存至 GCS <code>lingoleap-reading-audio</code> prefix <code>test-dataset/</code></p>
-    </div>
-    <div class="card" style="margin-top:8px;border-left:4px solid var(--amber)">
-      <h3>尚未結構化的驗收</h3>
-      <p>逐段朗讀、全文朗讀實際 flow 功能（能不能跑）的驗收結果<b>尚未做成結構化資料</b>，此矩陣沒有涵蓋。相關驗收追蹤在 intern issues。</p>
-    </div>
+    <h3 style="margin:0 0 8px">朗讀專屬 QA 表</h3>
+    <p style="font-size:.85rem;color:var(--muted);margin:0 0 10px">朗讀 flow 每個 QA 細目的驗證方式與現況。✅ 已驗 · 🟡 已實作待真機/真人 · ⏳ 待測試集樣本。</p>
+    <table>
+      <thead><tr><th>QA 細目</th><th>flow 階段</th><th>驗證方式</th><th>現況</th><th>證據</th><th>需測試集?</th></tr></thead>
+      <tbody>
+        <tr><td>逐段朗讀頁 render（mount 不白屏）</td><td>①錄音/⑤顯示</td><td>vitest smoke + /qa console</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2284">#2284</a></td><td>—</td></tr>
+        <tr><td>全文朗讀頁 render</td><td>①錄音/⑤顯示</td><td>vitest smoke + /qa console</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a></td><td>—</td></tr>
+        <tr><td>評分正確率（deterministic 對齊）</td><td>③評分</td><td>方大哥真錄音 staging 重算</td><td>✅ 98.1%</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2274">#2274</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2266">#2266</a></td><td>—</td></tr>
+        <tr><td>同音/近音字寬容</td><td>④優化</td><td>spec 契約測試</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2266">#2266</a></td><td>—</td></tr>
+        <tr><td>後送儲存（評估=存、取消/重錄不存）</td><td>⑥儲存</td><td>spec + curl /reading/save-audio</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">#2299</a></td><td>—</td></tr>
+        <tr><td>回放（學生/老師 signed URL + IDOR）</td><td>回放</td><td>curl 401/403/200 + 老師端鈕</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2327">#2327</a></td><td>—</td></tr>
+        <tr><td>靜音偽陽性 gate（不出聲不送評分）</td><td>②辨識前</td><td>能量門檻 + duration gate；行為需真機</td><td>🟡 待真機</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2321">#2321</a></td><td>—</td></tr>
+        <tr><td>STT 字準率（真實童音）</td><td>②辨識</td><td>真人朗讀樣本 × 課文 diff CER</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
+        <tr><td>評分準度（真實童音 across 課文）</td><td>③評分</td><td>真人樣本 × 正確/錯誤版 對照</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.82rem;color:var(--muted);margin-top:10px">⏳ 兩列「真實童音」的量化驗證靠<b>人聲測試集</b>：<a href="../testset/index.html">貢獻者收集頁</a> · <a href="../testset/list.html">owner 現況表</a>。每位貢獻者讀 3 篇×(正確版+錯誤版)，存 GCS <code>test-dataset/</code>。樣本足夠後這兩列填入 per-課 CER/正確率。</p>
   </div>
 
   <!-- TESTSET -->
