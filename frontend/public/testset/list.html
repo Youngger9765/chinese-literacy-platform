@@ -83,7 +83,7 @@ async function load(){
     var token=localStorage.getItem('lingoleap_token');
     var r=await fetch(API+'/api/testset/recordings',{headers: token?{'Authorization':'Bearer '+token}:{}});
     if(r.status===401||r.status===403){
-      document.getElementById('matrixWrap').innerHTML='<div class="err">這是管理頁，請先到主站登入（管理員/老師）後再開此頁。<br><a href="/login">前往登入 →</a></div>';
+      document.getElementById('matrixWrap').innerHTML='<div class="err">請先到主站登入（任何帳號皆可）後再開此頁。<br><a href="/login">前往登入 →</a></div>';
       return;
     }
     var j=await r.json();
