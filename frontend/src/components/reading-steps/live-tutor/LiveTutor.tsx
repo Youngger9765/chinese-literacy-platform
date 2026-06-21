@@ -8,6 +8,7 @@ import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { useAudioRecorder } from '../../../hooks/useAudioRecorder';
 import { transcribeReading, saveReadingAudio } from '../../../services/learning/session';
+import { validateRecording } from '../../../utils/recordingValidation';
 import { useAuth } from '../../../contexts/AuthContext';
 import { splitIntoSentences } from '../../../utils/localEval';
 import { normalizePunctuationToChinese } from '../../../utils/textDiff';
@@ -420,6 +421,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         let transcriptSource: 'gemini' | 'webspeech' = 'webspeech';
 
         if (audioBlob && token) {
+          /* Issue #2362 — Silence gate (①.5, frontend): shared with FullReading.
+           * Validate peak volume + duration before sending to STT.
+           * ok:false → show banner via existing micError path, skip transcribeReading. */
+          const silenceCheck = validateRecording({
+            peakVolume: paragraphRecorder.getPeakVolume(),
+            durationMs,
+          });
+          if (!silenceCheck.ok) {
+            setMicError('未偵測到語音，請重試。');
+            return;   // finally{} resets isSubmittingSentenceRef + state
+          }
+
           const targetText = story.content[currentLineIndex] || '';
           try {
             const result = await transcribeReading(audioBlob, targetText, durationMs, token);
@@ -467,6 +480,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     story.content,
     clearParagraphFallback,
     setParagraphFallbackReason,
+    paragraphRecorder.getPeakVolume,
+    setMicError,
   ]);
 
   // ── handleRetryParagraph ─────────────────────────────────────────────────
