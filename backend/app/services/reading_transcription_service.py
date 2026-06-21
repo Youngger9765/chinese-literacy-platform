@@ -79,16 +79,60 @@ _GEMINI_NATIVE_AUDIO_MIMES: frozenset[str] = frozenset(
 )
 
 # Fallback reason literals (used for WARN log + frontend alert).
-_REASON_TRANSCODE = "decode"   # ffmpeg transcode failed
+_REASON_TRANSCODE = "decode"        # ffmpeg transcode failed
 _REASON_TIMEOUT   = "timeout"
 _REASON_SAFETY    = "safety"
 _REASON_EMPTY     = "empty"
 _REASON_ERROR     = "error"
+_REASON_HALLUCINATION = "hallucination"  # Issue #2321 — Gemini hallucinated hint text
 
 
 def _normalise_mime(raw: str) -> str:
     """Strip codec parameter: 'audio/webm;codecs=opus' → 'audio/webm'."""
     return raw.split(";")[0].strip()
+
+
+# Issue #2321 — Hallucination detection at the transcription layer.
+# Mirrors the constants in reading_evaluation_service._is_hallucination_prefix.
+# Kept here so the transcription service can act as an early gate before the
+# transcript even reaches the scoring service.
+_HALLUCINATION_LENGTH_RATIO = 0.35   # transcript < 35 % of target → suspect
+_HALLUCINATION_PREFIX_MATCH = 0.90   # ≥ 90 % of transcript chars match target prefix
+
+
+def _strip_cjk_punctuation(text: str) -> str:
+    """Strip CJK punctuation and whitespace for prefix comparison.
+
+    Intentionally minimal — mirrors the normalisation step in
+    reading_evaluation_service._normalize_text without importing that module
+    (to avoid circular dependency).  Only used for hallucination detection, not
+    for scoring, so exact parity with the scoring normaliser is not required.
+    """
+    import re
+    return re.sub(r'[\s　、-〿＀-￯‘-‟。，！？；：、─—…「」『』（）]', '', text)
+
+
+def _is_hallucination_transcript(transcript: str, target_text: str) -> bool:
+    """Return True when transcript looks like Gemini hallucinated the lesson hint.
+
+    Same logic as reading_evaluation_service._is_hallucination_prefix:
+      1. Normalised transcript length < 35 % of normalised target length
+      2. ≥ 90 % of transcript chars match the target's opening chars
+
+    This is a *transcription-layer* gate: if it fires, we return fallback
+    immediately so the empty-transcript path (→ no auto-pass) takes effect.
+    """
+    t_norm = _strip_cjk_punctuation(transcript)
+    tgt_norm = _strip_cjk_punctuation(target_text)
+    t_len = len(t_norm)
+    tgt_len = len(tgt_norm)
+    if tgt_len == 0 or t_len == 0:
+        return False
+    if t_len >= _HALLUCINATION_LENGTH_RATIO * tgt_len:
+        return False
+    prefix = tgt_norm[:t_len]
+    matches = sum(a == b for a, b in zip(t_norm, prefix))
+    return (matches / t_len) >= _HALLUCINATION_PREFIX_MATCH
 
 
 def _needs_transcode(mime_type: str) -> bool:
@@ -307,6 +351,33 @@ async def transcribe_reading_audio(
                 },
             )
             return {"transcript": None, "method": "fallback", "reason": _REASON_EMPTY}
+
+        # Issue #2321 — Hallucination post-check.
+        # Gemini was given the full lesson text as a homophone-correction hint.
+        # On silent/noisy audio it sometimes "hallucinates" the opening 2–3
+        # sentences of that hint text back as the transcript.  The result is a
+        # non-empty, near-perfect prefix of the target — bypassing the empty
+        # guard above and causing a false-positive pass when scored.
+        #
+        # Detection: transcript is suspiciously short AND is a near-exact
+        # prefix of the target.  Real partial reads rarely satisfy both
+        # (students make errors; hallucinations come out clean).
+        if _is_hallucination_transcript(transcript, target_text):
+            logger.warning(
+                "Reading transcription hallucination detected — treating as fallback: "
+                "duration_ms=%s transcript_len=%d target_len=%d (Issue #2321)",
+                duration_ms,
+                len(transcript),
+                len(target_text),
+                extra={
+                    "event": "reading_transcribe_fallback",
+                    "reason": _REASON_HALLUCINATION,
+                    "duration_ms": duration_ms,
+                    "transcript_len": len(transcript),
+                    "target_len": len(target_text),
+                },
+            )
+            return {"transcript": None, "method": "fallback", "reason": _REASON_HALLUCINATION}
 
         logger.info(
             "Reading transcription success: duration_ms=%s transcript_len=%d",

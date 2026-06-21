@@ -504,8 +504,9 @@ class TranscribeReadingResponse(BaseModel):
     """Gemini's 1-2 sentence explanation (for teacher audit). None on fallback."""
 
     reason: str | None = None
-    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'too_short'.
-    Only present when method='fallback'. Used by frontend to show appropriate alert."""
+    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'too_short' | 'hallucination'.
+    Only present when method='fallback'. Used by frontend to show appropriate alert.
+    'hallucination' (Issue #2321): Gemini echoed the lesson hint on silent/noisy audio."""
 
 
 @router.post(
