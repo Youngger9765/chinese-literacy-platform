@@ -201,13 +201,12 @@ def testset_progress(name: str = "", lesson: str = ""):
 
 
 @router.get("/testset/recordings")
-def testset_recordings(current_user: User = Depends(get_current_user)):
+def testset_recordings():
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
 
-    任何登入者可看（Young 2026-06-21：先不限 admin/teacher）。仍需登入，
-    擋匿名公開抓取貢獻者 PII（名字/年級/可播放錄音）。list.html 讀 localStorage
-    `lingoleap_token` 帶 Bearer；未登入 → 401。
-    （v2 若要全公開或收回 admin-only 再調；codex #2304 的 role gate 暫移除。）
+    公開（Young 2026-06-21：不需登入即顯示貢獻者暱稱/數量）。暱稱為自選暱稱、
+    朗讀公開課文，非敏感 PII；list.html 現況表不登入就能看到誰貢獻了哪幾課。
+    （此前曾 admin/teacher → 任何登入者 → 現全公開。）
     """
     bucket = _get_gcs_bucket()
     if bucket is None:

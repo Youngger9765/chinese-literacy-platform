@@ -160,7 +160,7 @@
   <h1>朗讀 Reading Pipeline · 集成板</h1>
   <p class="subtitle">架構 / 開發 / QA / 測試集 / 缺口&amp;債 — all in one</p>
   <div class="oneliner"><b>一句話分工：</b>前端管「錄音 + 顯示」，後端管「辨識(STT) + 優化 + 評分 + 儲存」；<b>LLM 只用在辨識</b>，評分是 deterministic；<b>儲存後送</b>（評分→分數先回前端→才上傳，只存被接受的 take）。</div>
-  <p class="updated">最後更新 2026-06-20 · base staging <code>6d991323</code>（含 #2299 後送修正）· 規則：每格現況掛可點證明；無證明標 <span class="unverified">未驗證</span></p>
+  <p class="updated">最後更新 2026-06-21 · 回放簽名 URL 修復(#2344, prod HTTP 200)＋老師端鈕(#2327)＋批次測試 API(#2342)＋dashboard AI判斷(#2346)＋聚光燈 icon 統一(#2349)· 規則：每格現況掛可點證明；無證明標 <span class="unverified">未驗證</span></p>
 
   <div class="tabs">
     <button class="tab active" data-pane="arch">① 架構</button>
@@ -331,7 +331,7 @@
         <tr>
           <td class="nowrap">回放</td><td><span class="pill be">後端</span></td>
           <td>signed URL 10min + IDOR（學生/老師）<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/routes/teacher/teacher_audio_replay.py">teacher_audio_replay.py</a></td>
-          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a> · <span class="unverified">未驗證</span> 老師端前端鈕(PR3)未建</td><td class="badword">部分</td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2327">#2327</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2344">#2344</a> · 老師端鈕已建 + 簽名 URL 修復(IAM SignBlob)，prod 實證 HTTP 200</td><td class="ok">✅</td>
         </tr>
       </tbody>
     </table>
@@ -364,20 +364,6 @@
     <div class="card" style="border-left:4px solid var(--green);padding:0;overflow:hidden">
       <iframe src="../testset/list.html" title="測試集現況表" style="width:100%;height:820px;border:0;display:block;background:#fff"></iframe>
     </div>
-    <div class="card">
-      <h3>收集 SOP（陌生人視角，每人 ~30 分）</h3>
-      <ol>
-        <li>落地頁：為什麼錄、要做什麼、多久</li>
-        <li>輸入名字（輕量、無登入；列為貢獻者留名）</li>
-        <li>看指派課文：依年級難度分級（國小只看國小）</li>
-        <li>點開一篇 → 課文全文顯示，照念</li>
-        <li>錄 2 版本：正確 + 刻意錯漏（每人 3 篇×2=6 段）</li>
-        <li>上傳 → 可回放確認</li>
-        <li>進度 grid：哪些課文×(正確/錯誤)已上傳打勾</li>
-        <li>全部完成 → 致謝 + 留名</li>
-      </ol>
-      <p class="legend">存放：GCS <code>lingoleap-reading-audio</code> prefix <code>test-dataset/{貢獻者}/{課文}/{correct|error}.webm</code>（不跟學生 attempt 混）。第一批靖杭/方大哥開箱。</p>
-    </div>
   </div>
 
   <!-- DEBT -->
@@ -385,12 +371,13 @@
     <div class="card debt">
       <h3>已知缺口 / 技術債</h3>
       <ul>
-        <li><b>朗讀專屬 QA 表</b> — 待測試集建立足夠樣本後才能對應正確率驗證</li>
+        <li><b>朗讀 QA / 測試集（持續累積樣本）</b> — QA 表已建（#2334）+ 批次測試 API（#2342）+ dashboard「AI 判斷」欄已串（#2346）；真人聲實證 正確版 96% / 錯誤版 35%。<b>剩</b>：累積多人多裝置樣本以量化童音 CER / 正確率</li>
+        <li><b>聚光燈內容（2026-06-21 查證）</b> — 忠實反映源檔 DOCX（<b>非</b>張冠李戴、<b>非</b>抽取垃圾；元宵詩是「十秒的背後」DOCX 的合法第二練習文）；個別標題殘留標記（如 G4-L2）逐課正規化（#2352）</li>
         <li><b>38 個 pre-existing vitest 失敗</b> — UI 文字 drift + 沒包 AuthProvider；CI <code>frontend-checks</code> 刻意只跑 <code>src/__smoke__/</code>，全套 <code>npm run test</code> 目前是紅的</li>
         <li><b>CI 測 staging-not-PR-code</b> — <code>e2e-tests.yml</code> 跑 staging baseURL（測舊 code 非 PR 自己的），render-smoke 才跑 PR build</li>
         <li><b>reconcile orphan 未排程</b> — <code>reconcile_reading_audio_orphans.py</code> 預設 dry-run、未排 cron（#2299 後送後新 orphan 應大減）</li>
-        <li><b>老師端「▶聽錄音」前端鈕(PR3) 未建</b> — 後端 #2286 已 ready</li>
       </ul>
+      <p class="legend">近期已解：回放簽名 URL Cloud Run 修復（#2344，原本所有回放都播不出）· 老師端「▶聽錄音」鈕（#2327）· 測試集收集＋server-truth 進度＋聽取＋批次評分閉環 · 靜音偽陽性 3 層防線（#2338）· 聚光燈 icon 統一（#2349）</p>
     </div>
     <div class="card rule">
       <h3>設計鐵律</h3>
