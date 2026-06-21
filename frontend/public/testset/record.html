@@ -34,7 +34,12 @@
   .btn-rec.recording{background:#7f1d1d}
   .btn-up{background:var(--purple);color:#fff;width:100%}
   .btn:disabled{opacity:.4;cursor:not-allowed}
-  audio{width:100%;margin-top:10px}
+  audio{width:100%}
+  /* 播放器 + 右側小重錄鈕同列（重錄縮小、不被誤觸）*/
+  .player-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .player-row audio{flex:1;min-width:0;margin:0}
+  .btn-rerec{flex:0 0 auto;background:#fff;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:8px 10px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;line-height:1.2}
+  .btn-rerec:hover{background:#fee2e2}
   .status{font-size:.85rem;margin-top:8px}
   .ok{color:var(--green);font-weight:700}
   .err{color:var(--red)}
@@ -43,6 +48,9 @@
   .prog-item{display:flex;align-items:center;gap:8px;font-size:.88rem}
   .dot{width:14px;height:14px;border-radius:50%;background:#ddd;flex-shrink:0}
   .dot.done{background:var(--green)}
+  .prog-play{margin-left:auto;background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:2px 9px;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .prog-play:hover{background:var(--chip)}
+  .prog-play.playing{background:var(--purple);color:#fff}
   .back{display:inline-block;margin-bottom:16px;color:var(--purple);text-decoration:none;font-size:.88rem;font-weight:600}
   .back:hover{text-decoration:underline}
   .err-banner{background:#fee2e2;border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center;color:var(--red);font-weight:600}
@@ -88,7 +96,10 @@
           <div class="vtab" data-v="error" onclick="selVersion('error')">刻意錯誤版<span class="hint">故意念錯幾個字</span></div>
         </div>
         <button class="btn btn-rec" id="recBtn" onclick="toggleRec()">● 開始錄音</button>
-        <audio id="player" controls style="display:none"></audio>
+        <div class="player-row" id="playerRow" style="display:none">
+          <audio id="player" controls></audio>
+          <button class="btn-rerec" id="reRecBtn" onclick="reRecord()" title="重新錄音">↻ 重錄</button>
+        </div>
         <button class="btn btn-up" id="upBtn" onclick="upload()" disabled style="margin-top:10px">上傳這段</button>
         <div class="status" id="status"></div>
       </div>
@@ -124,6 +135,7 @@ var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 var cur={version:'correct'};
 var NAME_KEY='testset_name';
 var done=JSON.parse(localStorage.getItem('testset_done_v2_'+lessonId)||'{}');
+var doneUrls={correct:null,error:null};  // server 簽名播放 URL（聽取用，10 分鐘有效）
 var mediaRec=null,chunks=[],blob=null;
 
 /* ── 進度：server-truth（換裝置/清快取仍讀得回，localStorage 只當快取） ── */
@@ -136,6 +148,7 @@ async function loadProgress(){
       var d=await r.json();
       if(d&&d.ok){
         done={correct:!!d.correct,error:!!d.error};
+        doneUrls={correct:d.correct_url||null,error:d.error_url||null};
         localStorage.setItem('testset_done_v2_'+lessonId,JSON.stringify(done));
       }
     }
@@ -204,10 +217,11 @@ function selVersion(v){
 
 function resetRec(){
   blob=null;
-  var p=document.getElementById('player'); p.style.display='none'; p.src='';
+  var p=document.getElementById('player'); p.src='';
+  document.getElementById('playerRow').style.display='none';
   document.getElementById('upBtn').disabled=true;
   document.getElementById('status').innerHTML='';
-  var b=document.getElementById('recBtn'); b.classList.remove('recording'); b.textContent='● 開始錄音';
+  var b=document.getElementById('recBtn'); b.style.display=''; b.classList.remove('recording'); b.textContent='● 開始錄音';
 }
 
 async function toggleRec(){
@@ -219,16 +233,29 @@ async function toggleRec(){
     mediaRec.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
     mediaRec.onstop=function(){
       blob=new Blob(chunks,{type:'audio/webm'});
-      var p=document.getElementById('player'); p.src=URL.createObjectURL(blob); p.style.display='block';
+      var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
+      // 完成：收起大錄音鈕，改顯示「播放器 + 右側小重錄鈕」（避免誤觸重錄）
+      document.getElementById('playerRow').style.display='flex';
+      b.style.display='none';
       document.getElementById('upBtn').disabled=false;
       stream.getTracks().forEach(function(t){t.stop()});
-      b.classList.remove('recording'); b.textContent='● 重新錄音';
+      b.classList.remove('recording');
+      document.getElementById('status').innerHTML='';
     };
+    // 進入錄音中：收起播放器列、顯示停止鈕
+    document.getElementById('playerRow').style.display='none';
+    b.style.display='';
     mediaRec.start(); b.classList.add('recording'); b.textContent='■ 停止錄音';
     document.getElementById('status').innerHTML='<span style="color:var(--muted)">錄音中…照著上面的課文念</span>';
   }catch(e){
     document.getElementById('status').innerHTML='<span class="err">無法存取麥克風，請允許瀏覽器麥克風權限後再試。</span>';
   }
+}
+
+// 重錄：先確認再捨棄目前這段（小鈕在播放器右邊，避免誤觸）
+function reRecord(){
+  if(!confirm('確定要重錄嗎？目前這段會被捨棄。')) return;
+  toggleRec();
 }
 
 async function upload(){
@@ -270,10 +297,28 @@ function renderProgress(){
     var ok=!!done[V.k];
     if(!ok) allDone=false;
     var div=document.createElement('div'); div.className='prog-item';
-    div.innerHTML='<span class="dot'+(ok?' done':'')+'"></span><span>'+(ok?'✓ ':'')+V.n+'</span>';
+    var html='<span class="dot'+(ok?' done':'')+'"></span><span>'+(ok?'✓ ':'')+V.n+'</span>';
+    if(ok && doneUrls[V.k]){
+      html+='<button class="prog-play" data-v="'+V.k+'" onclick="playVersion(\''+V.k+'\')">▶ 聽取</button>';
+    }
+    div.innerHTML=html;
     el.appendChild(div);
   });
   document.getElementById('doneBanner').style.display=allDone?'block':'none';
+}
+
+// 聽取已上傳的某版本錄音（server 簽名 URL）；再點一次停止
+var progAudio=null;
+function playVersion(v){
+  var url=doneUrls[v];
+  if(!url) return;
+  if(!progAudio) progAudio=new Audio();
+  var btn=document.querySelector('.prog-play[data-v="'+v+'"]');
+  if(progAudio.src===url && !progAudio.paused){ progAudio.pause(); if(btn) btn.classList.remove('playing'); return; }
+  document.querySelectorAll('.prog-play').forEach(function(b){b.classList.remove('playing')});
+  progAudio.src=url; progAudio.play();
+  if(btn) btn.classList.add('playing');
+  progAudio.onended=function(){ if(btn) btn.classList.remove('playing'); };
 }
 
 // 自動帶回上次名字 → 從 server 讀真實進度（下次進來/換裝置都看得到）

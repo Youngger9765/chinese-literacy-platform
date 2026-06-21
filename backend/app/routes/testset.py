@@ -125,10 +125,13 @@ async def testset_upload(
 def testset_progress(name: str = "", lesson: str = ""):
     """錄音頁進度查詢（公開，server-truth）：某貢獻者某課是否已上傳 correct/error。
 
-    只回布林（不回名字/年級/play URL 等 PII），讓匿名 record.html 換裝置/清快取後
-    仍能讀回真實進度（取代純 localStorage 的 device-local 標記）。
+    回布林 + 各版本最新一筆的 10 分鐘簽名播放 URL（correct_url/error_url），讓匿名
+    record.html 換裝置/清快取後仍能讀回真實進度（取代純 localStorage 的 device-local
+    標記），且可在「我的進度」直接聽取自己上傳的錄音。
+    隱私 tradeoff：URL 以「名字 + 課」查得，知道名字者可聽該人錄音；符合 #2287
+    「公開上傳、隱私只做標配」設計，且 URL 10 分鐘過期。
     """
-    empty = {"ok": False, "correct": False, "error": False}
+    empty = {"ok": False, "correct": False, "error": False, "correct_url": None, "error_url": None}
     if not name.strip() or not _LESSON_ID_RE.match(lesson.strip()):
         return empty
     bucket = _get_gcs_bucket()
@@ -137,20 +140,35 @@ def testset_progress(name: str = "", lesson: str = ""):
 
     slug = _slug(name)
     lid = lesson.strip()
-    done = {"correct": False, "error": False}
+    latest = {"correct": None, "error": None}  # 各版本最新（lexical 末筆）webm blob path
     try:
         for blob in bucket.list_blobs(prefix=f"{_PREFIX}/{slug}/{lid}/", max_results=50):
             fname = blob.name.rsplit("/", 1)[-1]
             if not fname.endswith(".webm"):
                 continue
             if fname.startswith("correct"):
-                done["correct"] = True
+                latest["correct"] = blob.name
             elif fname.startswith("error"):
-                done["error"] = True
+                latest["error"] = blob.name
     except Exception as exc:
         logger.warning("testset progress failed: %s", exc)
         return empty
-    return {"ok": True, **done}
+
+    def _url(path: str | None) -> str | None:
+        if not path:
+            return None
+        try:
+            return generate_audio_signed_url(path, expiration_seconds=600)
+        except Exception:
+            return None
+
+    return {
+        "ok": True,
+        "correct": latest["correct"] is not None,
+        "error": latest["error"] is not None,
+        "correct_url": _url(latest["correct"]),
+        "error_url": _url(latest["error"]),
+    }
 
 
 @router.get("/testset/recordings")
