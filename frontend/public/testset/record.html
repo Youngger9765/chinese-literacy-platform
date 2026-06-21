@@ -57,7 +57,6 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="javascript:history.back()">← 返回</a>
   <h1>朗讀錄音貢獻</h1>
   <p class="sub">幫 LingoLeap 蒐集真人朗讀，用於訓練與驗證 AI 朗讀評分。謝謝你！</p>
 
@@ -79,13 +78,6 @@
         <div class="step">① 你是誰</div>
         <label>名字（暱稱即可）</label>
         <input id="name" placeholder="例如：小明 / Amy">
-        <label>年級</label>
-        <select id="grade">
-          <option value="">請選擇</option>
-          <option>國小三年級</option><option>國小四年級</option><option>國小五年級</option><option>國小六年級</option>
-          <option>國中七年級</option><option>國中八年級</option><option>國中九年級</option>
-          <option>高中以上</option>
-        </select>
       </div>
 
       <!-- 錄音 -->
@@ -130,8 +122,26 @@ function qs(key){
 var lessonId=qs('lesson')||'';
 var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 var cur={version:'correct'};
+var NAME_KEY='testset_name';
 var done=JSON.parse(localStorage.getItem('testset_done_v2_'+lessonId)||'{}');
 var mediaRec=null,chunks=[],blob=null;
+
+/* ── 進度：server-truth（換裝置/清快取仍讀得回，localStorage 只當快取） ── */
+async function loadProgress(){
+  var name=document.getElementById('name').value.trim();
+  if(!name||!lessonId){ renderProgress(); return; }
+  try{
+    var r=await fetch(API+'/api/testset/progress?name='+encodeURIComponent(name)+'&lesson='+encodeURIComponent(lessonId));
+    if(r.ok){
+      var d=await r.json();
+      if(d&&d.ok){
+        done={correct:!!d.correct,error:!!d.error};
+        localStorage.setItem('testset_done_v2_'+lessonId,JSON.stringify(done));
+      }
+    }
+  }catch(e){ /* 離線/失敗 → 沿用 localStorage 快取 */ }
+  renderProgress();
+}
 
 /* ── load story ── */
 async function loadStory(){
@@ -223,30 +233,30 @@ async function toggleRec(){
 
 async function upload(){
   var name=document.getElementById('name').value.trim();
-  var grade=document.getElementById('grade').value;
-  if(!name||!grade){
-    document.getElementById('status').innerHTML='<span class="err">請先填①的名字和年級</span>';
+  if(!name){
+    document.getElementById('status').innerHTML='<span class="err">請先填①的名字</span>';
     window.scrollTo(0,0); return;
   }
   if(!blob) return;
   if(!lessonId){
     document.getElementById('status').innerHTML='<span class="err">缺少 lesson ID，無法上傳</span>'; return;
   }
+  localStorage.setItem(NAME_KEY,name);
   document.getElementById('upBtn').disabled=true;
   document.getElementById('status').innerHTML='<span style="color:var(--muted)">上傳中…</span>';
   var fd=new FormData();
   fd.append('contributor_name',name);
-  fd.append('grade',grade);
   fd.append('lesson_id',lessonId);
   fd.append('version',cur.version);
   fd.append('audio',blob,lessonId+'_'+cur.version+'.webm');
   try{
     var r=await fetch(API+'/api/testset/upload',{method:'POST',body:fd});
     if(!r.ok){ throw new Error('HTTP '+r.status); }
-    done[cur.version]=true;
+    done[cur.version]=true;  // 樂觀更新（即時回饋）
     localStorage.setItem('testset_done_v2_'+lessonId,JSON.stringify(done));
     document.getElementById('status').innerHTML='<span class="ok">✓ 已上傳！可以繼續錄另一個版本。</span>';
     renderProgress();
+    loadProgress();  // 再從 server 對齊真實進度
   }catch(e){
     document.getElementById('upBtn').disabled=false;
     document.getElementById('status').innerHTML='<span class="err">上傳失敗，請再試一次（'+e.message+'）</span>';
@@ -266,8 +276,19 @@ function renderProgress(){
   document.getElementById('doneBanner').style.display=allDone?'block':'none';
 }
 
+// 自動帶回上次名字 → 從 server 讀真實進度（下次進來/換裝置都看得到）
+(function initName(){
+  var saved=localStorage.getItem(NAME_KEY);
+  if(saved) document.getElementById('name').value=saved;
+})();
+document.getElementById('name').addEventListener('change',function(){
+  var n=document.getElementById('name').value.trim();
+  if(n) localStorage.setItem(NAME_KEY,n);
+  loadProgress();
+});
+
 loadStory();
-renderProgress();
+loadProgress();
 </script>
 </body>
 </html>
