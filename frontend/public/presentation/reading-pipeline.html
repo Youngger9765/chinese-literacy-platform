@@ -209,20 +209,20 @@
 
       <div class="arrow">▼</div>
 
-      <!-- ①.5 錄音驗證 (Issue #2362) -->
+      <!-- ② 錄音驗證 (Issue #2362) -->
       <div class="node-row">
         <div class="node-text">
-          <div class="t">①.5 錄音驗證 <span class="side">前端</span></div>
+          <div class="t">② 錄音驗證 <span class="side">前端</span></div>
           <div class="s">validateRecording() — 能量(peak &lt; 0.05) / 時長(&lt; 1500 ms) 驗證，沒語音不進 STT；逐段(LiveTutor) + 全文(FullReading) 共用同一函式（recordingValidation.ts）</div>
         </div>
       </div>
 
       <div class="arrow">▼</div>
 
-      <!-- ② 辨識STT -->
+      <!-- ③ 辨識STT -->
       <div class="node-row">
         <div class="node-text">
-          <div class="t">② 辨識 STT <span class="side">後端 · LLM</span></div>
+          <div class="t">③ 辨識 STT <span class="side">後端 · LLM</span></div>
           <div class="s">POST /reading/transcribe → gemini-2.5-flash@us-central1（只做辨識，#2299 後已不在此上傳）</div>
         </div>
         <div class="node-demo stt-demo">
@@ -237,10 +237,10 @@
 
       <div class="arrow">▼</div>
 
-      <!-- ③ 優化+評分 -->
+      <!-- ④ 優化+評分 -->
       <div class="node-row">
         <div class="node-text">
-          <div class="t">③ 優化 + 評分 <span class="side">前端 local + 後端</span></div>
+          <div class="t">④ 優化 + 評分 <span class="side">前端 local + 後端</span></div>
           <div class="s">normalize(去標點/注音/全形)+同音校正 → DP/Levenshtein deterministic（local 先算；tier3 才 Gemini）→ match_rate + diff + CPM</div>
         </div>
         <div class="node-demo">
@@ -254,10 +254,10 @@
 
       <div class="arrow">▼</div>
 
-      <!-- ④ 分數回傳UI -->
+      <!-- ⑤ 分數回傳UI -->
       <div class="node-row">
         <div class="node-text">
-          <div class="t">④ 分數回傳 UI <span class="side">前端</span></div>
+          <div class="t">⑤ 分數回傳 UI <span class="side">前端</span></div>
           <div class="s">ParagraphCard 顯示正確率（學生立刻看到，不等儲存）</div>
         </div>
         <div class="node-demo">
@@ -273,10 +273,10 @@
 
       <div class="arrow">▼ （學生按評估—一定存放；取消/重錄不存）</div>
 
-      <!-- ⑤ 儲存後送 -->
+      <!-- ⑥ 儲存後送 -->
       <div class="node-row branch">
         <div class="node-text">
-          <div class="t">⑤ 儲存（後送·async） <span class="side">前端→後端+GCS</span></div>
+          <div class="t">⑥ 儲存（後送·async） <span class="side">前端→後端+GCS</span></div>
           <div class="s">saveReadingAudio → POST /reading/save-audio → IDOR(session.student_id==user) → GCS lingoleap-reading-audio → 寫 audio_gcs_path（fail-safe，不擋分數；取消/重錄不存放；▶播放錄音可先回放（已實作））</div>
         </div>
         <div class="node-demo upload-demo">
@@ -305,7 +305,7 @@
       </div>
 
     </div>
-    <p class="legend">關鍵：LLM 只在②辨識；③④全確定性（分數穩定可稽核）。<b>儲存在④之後（後送）</b>——舊版把儲存放在 transcribe（評分前），#2299 已改正。</p>
+    <p class="legend">關鍵：LLM 只在③辨識；④⑤全確定性（分數穩定可稽核）。<b>儲存在⑤之後（後送）</b>——舊版把儲存放在 transcribe（評分前），#2299 已改正。</p>
   </div>
 
   <!-- DEV -->
@@ -319,22 +319,27 @@
           <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">/qa render OK</a></td><td class="ok">✅</td>
         </tr>
         <tr>
-          <td class="nowrap">② 辨識 STT</td><td><span class="pill llm">後端·LLM</span></td>
+          <td class="nowrap">② 錄音驗證</td><td><span class="pill fe">前端</span></td>
+          <td>能量+時長 VAD 守門，沒語音不送 STT；逐段+全文共用<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/utils/recordingValidation.ts">recordingValidation.ts</a></td>
+          <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a> · 🟡 行為待真機麥克風</td><td>🟡</td>
+        </tr>
+        <tr>
+          <td class="nowrap">③ 辨識 STT</td><td><span class="pill llm">後端·LLM</span></td>
           <td>gemini-2.5-flash @us-central1<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/services/reading_transcription_service.py">reading_transcription_service.py</a></td>
           <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/docs/ai/reading-stt-scorer-ab-2026-06.md">A/B doc</a></td><td class="ok">✅</td>
         </tr>
         <tr>
-          <td class="nowrap">③ 優化+評分</td><td><span class="pill fe">前</span><span class="pill be">後</span></td>
+          <td class="nowrap">④ 優化+評分</td><td><span class="pill fe">前</span><span class="pill be">後</span></td>
           <td>normalize+同音校正 → deterministic DP 對齊<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/services/reading_evaluation_service.py">reading_evaluation_service.py</a></td>
           <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2266">#2266</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2274">#2274</a> · <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2266">staging 98.1%</a></td><td class="ok">✅</td>
         </tr>
         <tr>
-          <td class="nowrap">④ 顯示</td><td><span class="pill fe">前端</span></td>
+          <td class="nowrap">⑤ 顯示</td><td><span class="pill fe">前端</span></td>
           <td>ParagraphCard 正確率+diff<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/frontend/src/components/reading-steps/live-tutor/hooks/useParagraphEvaluation.ts">useParagraphEvaluation.ts</a></td>
           <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2279">#2279</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2284">#2284</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a> · /qa console 乾淨</td><td class="ok">✅</td>
         </tr>
         <tr>
-          <td class="nowrap">⑤ 儲存(後送)</td><td><span class="pill fe">前</span><span class="pill be">後+GCS</span></td>
+          <td class="nowrap">⑥ 儲存(後送)</td><td><span class="pill fe">前</span><span class="pill be">後+GCS</span></td>
           <td>分數後 async 上傳+綁定（只存接受的 take）<br><a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/backend/app/routes/learning/learning_save_audio.py">learning_save_audio.py</a></td>
           <td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2278">#2278</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2286">#2286</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">#2299</a> · <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">Backend Tests 綠</a></td><td class="ok">✅</td>
         </tr>
@@ -357,13 +362,13 @@
       <tbody>
         <tr><td>逐段朗讀頁 render（mount 不白屏）</td><td>①錄音/⑤顯示</td><td><b>原則</b>：頁面一定要畫得出來、不白屏。<br><b>方法</b>：vitest 自動 mount 每個元件不報錯 + /qa 開實際頁看 console 乾淨。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2284">#2284</a></td><td>—</td></tr>
         <tr><td>全文朗讀頁 render</td><td>①錄音/⑤顯示</td><td><b>原則</b>：同上，全文朗讀頁也要正常 render。<br><b>方法</b>：vitest smoke + /qa console。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2292">#2292</a></td><td>—</td></tr>
-        <tr><td>評分正確率（deterministic 對齊）</td><td>③評分</td><td><b>原則</b>：機器算的分數要跟人工核對一致，<b>且涵蓋全範圍——念得好、普通、很差都要對齊</b>（好的接近高分、很差的接近 0）。<br><b>方法</b>：拿真人錄音（含刻意念很差的）在 staging 重算，比對「該得的比例」，太高太低都算 fail。</td><td>✅ 98.1%</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2274">#2274</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2266">#2266</a></td><td>—</td></tr>
+        <tr><td>評分正確率（deterministic 對齊）</td><td>④評分</td><td><b>原則</b>：機器算的分數要跟人工核對一致，<b>且涵蓋全範圍——念得好、普通、很差都要對齊</b>（好的接近高分、很差的接近 0）。<br><b>方法</b>：拿真人錄音（含刻意念很差的）在 staging 重算，比對「該得的比例」，太高太低都算 fail。</td><td>✅ 98.1%</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2274">#2274</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/issues/2266">#2266</a></td><td>—</td></tr>
         <tr><td>同音/近音字寬容</td><td>④優化</td><td><b>原則</b>：發音對但字不同（同音/近音字）不該扣分。<br><b>方法</b>：spec 契約測試用固定案例驗，確保寬容規則不退化。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2266">#2266</a></td><td>—</td></tr>
         <tr><td>後送儲存（評估=存、取消/重錄不存）</td><td>⑥儲存</td><td><b>原則</b>：只存學生按了「評估」且接受的那段，分數先顯示才後送上傳。<br><b>方法</b>：spec + curl 打 /reading/save-audio 看行為與守門。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2299">#2299</a></td><td>—</td></tr>
         <tr><td>回放（學生/老師 signed URL + IDOR）</td><td>回放</td><td><b>原則</b>：只有本人/老師能聽，連結 10 分鐘過期。<br><b>方法</b>：curl 帶不同身分看 401/403/200 + 老師端鈕；簽名改走 IAM SignBlob 後 prod 實證 HTTP 200。</td><td>✅</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2283">#2283</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2327">#2327</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2344">#2344</a></td><td>—</td></tr>
-        <tr><td>靜音偽陽性 gate（不出聲不送評分）</td><td>②辨識前</td><td><b>原則</b>：沒出聲就不該送評分、更不該假性通過（最危險的沉默失敗）。<br><b>方法</b>：音量能量 + 錄音時長門檻先擋；轉錄端再擋幻覺前綴；完整行為需真機麥克風測。</td><td>🟡 待真機</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a></td><td>—</td></tr>
-        <tr><td>STT 字準率（真實童音）</td><td>②辨識</td><td><b>原則</b>：機器聽寫要跟學生實際念的吻合，尤其真實童音（口齒不清/方言腔）。<br><b>方法</b>：收真人朗讀樣本，逐字跟課文比對算「字錯率 CER」。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
-        <tr><td>評分準度（真實童音 across 課文）</td><td>③評分</td><td><b>原則</b>：好的高分、普通中等、<b>很差的接近 0</b>，分數要拉得開、跨課文都穩。<br><b>方法</b>：真人多版本（正確版 / 錯誤版 / <b>很差版</b>）跑批次評分，比對各自該落的分數帶。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
+        <tr><td>靜音偽陽性 gate（不出聲不送評分）</td><td>②錄音驗證</td><td><b>原則</b>：沒出聲就不該送評分、更不該假性通過（最危險的沉默失敗）。<br><b>方法</b>：音量能量 + 錄音時長門檻先擋；轉錄端再擋幻覺前綴；完整行為需真機麥克風測。</td><td>🟡 待真機</td><td><a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2324">#2324</a> <a href="https://github.com/Youngger9765/chinese-literacy-platform/pull/2338">#2338</a></td><td>—</td></tr>
+        <tr><td>STT 字準率（真實童音）</td><td>③辨識</td><td><b>原則</b>：機器聽寫要跟學生實際念的吻合，尤其真實童音（口齒不清/方言腔）。<br><b>方法</b>：收真人朗讀樣本，逐字跟課文比對算「字錯率 CER」。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
+        <tr><td>評分準度（真實童音 across 課文）</td><td>④評分</td><td><b>原則</b>：好的高分、普通中等、<b>很差的接近 0</b>，分數要拉得開、跨課文都穩。<br><b>方法</b>：真人多版本（正確版 / 錯誤版 / <b>很差版</b>）跑批次評分，比對各自該落的分數帶。</td><td>⏳ 待樣本</td><td>—</td><td>✅ 需</td></tr>
       </tbody>
     </table>
     <p style="font-size:.82rem;color:var(--muted);margin-top:10px">⏳ 兩列「真實童音」量化驗證靠<b>人聲測試集</b>（見上方④測試集 tab，內嵌現況表）：每課收正確版 + 錯誤版（含念很差的），按貢獻者暱稱分組存 GCS <code>test-dataset/</code>；在現況表點各課「跑分」即跑批次評分對照期望。樣本足夠後這兩列填入 per-課 CER / 正確率。</p>
