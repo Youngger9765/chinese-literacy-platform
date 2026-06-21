@@ -8,58 +8,63 @@
   :root{--bg:#FDF8F0;--ink:#1a1a2e;--purple:#5B4FC4;--muted:#6b6b8a;--card:#fff;--line:#e7e2d8;--green:#16a34a;--amber:#d97706;--red:#dc2626;--chip:#efe9ff}
   *{box-sizing:border-box}
   body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:28px 18px;line-height:1.6}
-  .wrap{max-width:1000px;margin:0 auto}
+  .wrap{max-width:1100px;margin:0 auto}
   h1{color:var(--purple);font-size:1.5rem;margin:0 0 4px}
   .sub{color:var(--muted);margin:0 0 18px}
-  .share{display:flex;align-items:center;gap:12px;background:var(--chip);border:1px solid var(--purple);border-radius:12px;padding:14px 18px;margin-bottom:20px;flex-wrap:wrap}
-  .share .lbl{font-weight:700;color:var(--purple)}
-  .share a{color:var(--purple);font-weight:600;word-break:break-all}
-  .share button{padding:8px 14px;border:1px solid var(--purple);background:#fff;color:var(--purple);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+  .auth-banner{background:#fef9c3;border:1px solid var(--amber);border-radius:10px;padding:14px 18px;margin-bottom:18px;color:#92400e;font-size:.9rem}
+  .auth-banner a{color:var(--purple);font-weight:600}
   .stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .stat .n{font-size:1.6rem;font-weight:800;color:var(--purple)}
   .stat .l{font-size:.8rem;color:var(--muted)}
   h2{font-size:1.1rem;color:var(--ink);margin:22px 0 10px}
   table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:.9rem}
-  th,td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-  th{background:#f3eee4;font-size:.82rem}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  th{background:#f3eee4;font-size:.82rem;white-space:nowrap}
+  tr.data-row:hover td{background:#faf7f0}
   tr:last-child td{border-bottom:none}
-  .cell{display:flex;align-items:center;gap:8px}
   .pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:24px;padding:0 8px;border-radius:20px;font-size:.82rem;font-weight:700}
   .pill.zero{background:#f3f0e8;color:var(--muted)}
   .pill.some{background:#dcfce7;color:var(--green)}
-  .names{font-size:.78rem;color:var(--muted)}
-  .det{font-size:.86rem}
-  .det td{padding:9px 13px}
-  audio{height:30px;vertical-align:middle}
-  .muted{color:var(--muted)}
+  .lesson-title{font-weight:600}
+  .lesson-id{font-size:.78rem;color:var(--muted)}
+  .ai-badge{background:#f3f0e8;color:var(--muted);font-size:.75rem;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .copy-btn{padding:5px 11px;border:1px solid var(--purple);background:#fff;color:var(--purple);border-radius:8px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .copy-btn:hover{background:var(--chip)}
+  .copy-btn.copied{border-color:var(--green);color:var(--green)}
+  .open-btn{padding:5px 11px;border:none;background:var(--purple);color:#fff;border-radius:8px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+  .open-btn:hover{opacity:.85}
+  .expand-btn{background:none;border:none;color:var(--purple);cursor:pointer;font-size:.78rem;font-weight:600;padding:0;white-space:nowrap;text-decoration:underline}
+  .action-cell{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .loading{text-align:center;padding:40px;color:var(--muted)}
-  .err{color:var(--red);text-align:center;padding:20px}
-  code{background:#f3eee4;padding:1px 6px;border-radius:4px}
+  .detail-row{display:none;background:#faf7f0}
+  .detail-row>td{padding:10px 14px}
+  .detail-inner{max-height:220px;overflow-y:auto}
+  .det-table{width:100%;font-size:.82rem;border-collapse:collapse}
+  .det-table th,.det-table td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+  .det-table th{background:#ede8de}
+  audio{height:28px;vertical-align:middle}
+  .muted{color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>測試集收集現況</h1>
-  <p class="sub">真人朗讀錄音蒐集進度 — 每篇課文各需「正確版 + 刻意錯誤版」</p>
+  <p class="sub">每篇課文各需「正確版 + 刻意錯誤版」— 複製各課分享連結傳給貢獻者錄音</p>
 
-  <div class="share">
-    <span class="lbl">📣 分享給貢獻者：</span>
-    <a id="shareLink" href="./index.html">./index.html</a>
-    <button onclick="copyLink()">複製連結</button>
-    <a href="./index.html" target="_blank" style="margin-left:auto"><button>開啟錄音頁 →</button></a>
+  <div id="authBanner" class="auth-banner" style="display:none">
+    錄音明細需要教師/管理員登入才能查看。<a href="/login">前往登入 →</a>
+    <br><small>各課的「複製連結」功能無需登入，可直接分享給貢獻者。</small>
   </div>
 
-  <div class="stats" id="stats"></div>
+  <div class="stats" id="stats"><div class="loading">載入中…</div></div>
 
-  <h2>覆蓋率矩陣（課文 × 版本）</h2>
-  <div id="matrixWrap"><div class="loading">載入中…</div></div>
-
-  <h2>所有錄音明細</h2>
-  <div id="detailWrap"></div>
+  <h2>所有課文</h2>
+  <div id="tableWrap"><div class="loading">載入課文清單…</div></div>
 </div>
 
 <script>
+/* ── API base ── */
 function apiBase(){
   var h=location.origin;
   if(h.indexOf('-frontend-')>-1) return h.replace('-frontend-','-backend-');
@@ -67,75 +72,168 @@ function apiBase(){
   return 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 }
 var API=apiBase();
-var LESSON_TITLES={L01:'贏得喝采的輸家',L02:'十秒的背後',L03:'長高的祕密',L04:'運動科學',L05:'穿越極限的跑者',L06:'第一百碗麵',L07:'黑猩猩的守護者',L08:'奧運銀牌的自我鍛鍊'};
-var EXPECTED=['L01','L02','L03','L04','L05','L06','L07','L08'];
-var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 
-document.getElementById('shareLink').textContent=location.origin+location.pathname.replace('list.html','index.html');
-document.getElementById('shareLink').href=location.origin+location.pathname.replace('list.html','index.html');
-function copyLink(){ navigator.clipboard.writeText(location.origin+location.pathname.replace('list.html','index.html')); }
+function recordUrl(lessonId){
+  return location.origin+'/testset/record.html?lesson='+encodeURIComponent(lessonId);
+}
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
+/* ── copy button ── */
+function copyLink(btn,url){
+  navigator.clipboard.writeText(url).then(function(){
+    btn.textContent='已複製';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='複製連結'; btn.classList.remove('copied'); },2000);
+  }).catch(function(){
+    var t=document.createElement('textarea'); t.value=url;
+    t.style.position='fixed'; t.style.left='-9999px';
+    document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
+    btn.textContent='已複製'; btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='複製連結'; btn.classList.remove('copied'); },2000);
+  });
+}
+
+/* ── expand detail ── */
+function toggleDetail(id){
+  var row=document.getElementById('det-'+id);
+  if(!row) return;
+  var shown=row.style.display==='table-row';
+  row.style.display=shown?'none':'table-row';
+  var btn=document.querySelector('[data-expand="'+id+'"]');
+  if(btn) btn.textContent=shown?'展開 ▼':'收起 ▲';
+}
+
+/* ── load ── */
 async function load(){
-  var recs=[];
+  // 1. story list — public endpoint, no auth needed
+  var stories=[];
   try{
-    var token=localStorage.getItem('lingoleap_token');
-    var r=await fetch(API+'/api/testset/recordings',{headers: token?{'Authorization':'Bearer '+token}:{}});
-    if(r.status===401||r.status===403){
-      document.getElementById('matrixWrap').innerHTML='<div class="err">請先到主站登入（任何帳號皆可）後再開此頁。<br><a href="/login">前往登入 →</a></div>';
-      return;
-    }
+    var r=await fetch(API+'/api/stories?page_size=300');
+    if(!r.ok) throw new Error('HTTP '+r.status);
     var j=await r.json();
-    recs=j.recordings||[];
+    stories=j.stories||[];
   }catch(e){
-    document.getElementById('matrixWrap').innerHTML='<div class="err">讀取失敗：'+esc(e.message)+'</div>';
+    document.getElementById('tableWrap').innerHTML='<div class="loading" style="color:var(--red)">課文清單載入失敗：'+esc(e.message)+'</div>';
+    document.getElementById('stats').innerHTML='';
     return;
   }
-  // lessons = expected ∪ seen
-  var lessons={}; EXPECTED.forEach(function(id){lessons[id]=true});
-  recs.forEach(function(m){ if(m.lesson_id) lessons[m.lesson_id]=true; });
-  var lessonIds=Object.keys(lessons);
 
-  // index by lesson+version
-  var idx={}; var contributors={};
+  // 2. recordings — requires teacher/admin Bearer token
+  var recs=[];
+  var authOk=false;
+  try{
+    var token=localStorage.getItem('lingoleap_token');
+    if(token){
+      var r2=await fetch(API+'/api/testset/recordings',{headers:{'Authorization':'Bearer '+token}});
+      if(r2.status===401||r2.status===403){
+        document.getElementById('authBanner').style.display='block';
+      } else if(r2.ok){
+        var j2=await r2.json();
+        recs=j2.recordings||[];
+        authOk=true;
+      }
+    } else {
+      document.getElementById('authBanner').style.display='block';
+    }
+  }catch(e){
+    // recordings optional
+  }
+
+  // 3. index: lesson_id + version → list of recordings
+  var idx={};
+  var contribSet={};
   recs.forEach(function(m){
-    var k=m.lesson_id+'_'+m.version; (idx[k]=idx[k]||[]).push(m);
-    if(m.contributor_name) contributors[m.contributor_name+'｜'+(m.grade||'')]=true;
+    var k=m.lesson_id+'||'+m.version;
+    (idx[k]=idx[k]||[]).push(m);
+    if(m.contributor_name) contribSet[m.contributor_name]=true;
   });
 
-  // stats
-  var total=recs.length, cells=lessonIds.length*VERSIONS.length, filled=0;
-  lessonIds.forEach(function(id){VERSIONS.forEach(function(v){ if((idx[id+'_'+v.k]||[]).length) filled++; })});
+  // 4. stats
+  var totalRecs=recs.length;
+  var coveredCells=0;
+  stories.forEach(function(s){
+    if((idx[s.id+'||correct']||[]).length) coveredCells++;
+    if((idx[s.id+'||error']||[]).length) coveredCells++;
+  });
+  var totalCells=stories.length*2;
+
   document.getElementById('stats').innerHTML=
-    stat(total,'總錄音數')+stat(filled+' / '+cells,'已覆蓋格')+stat(Object.keys(contributors).length,'貢獻者')+stat(lessonIds.length,'課文數');
+    statCard(stories.length,'課文總數')+
+    statCard(authOk?totalRecs:'—','總錄音數')+
+    statCard(authOk?(coveredCells+' / '+totalCells):'— / '+totalCells,'已覆蓋格')+
+    statCard(authOk?Object.keys(contribSet).length:'—','貢獻者數');
 
-  // matrix
-  var h='<table><thead><tr><th>課文</th>'+VERSIONS.map(function(v){return '<th>'+v.n+'</th>'}).join('')+'</tr></thead><tbody>';
-  lessonIds.forEach(function(id){
-    h+='<tr><td><b>'+esc(LESSON_TITLES[id]||id)+'</b><div class="muted" style="font-size:.78rem">'+esc(id)+'</div></td>';
-    VERSIONS.forEach(function(v){
-      var list=idx[id+'_'+v.k]||[]; var n=list.length;
-      var names=list.map(function(m){return esc(m.contributor_name)}).filter(function(x,i,a){return a.indexOf(x)===i}).join('、');
-      h+='<td><div class="cell"><span class="pill '+(n?'some':'zero')+'">'+n+'</span>'+(names?'<span class="names">'+names+'</span>':'<span class="names">尚無</span>')+'</div></td>';
+  // 5. build table
+  var h='<table><thead><tr>'+
+    '<th>#</th>'+
+    '<th>課文</th>'+
+    '<th>正確版</th>'+
+    '<th>錯誤版</th>'+
+    '<th>貢獻者</th>'+
+    '<th>AI 判斷</th>'+
+    '<th>分享與操作</th>'+
+    '</tr></thead><tbody>';
+
+  stories.forEach(function(s,i){
+    var id=s.id;
+    var url=recordUrl(id);
+    var correctList=idx[id+'||correct']||[];
+    var errorList=idx[id+'||error']||[];
+    var allRecs=correctList.concat(errorList);
+    var contribs=[];
+    allRecs.forEach(function(m){
+      if(m.contributor_name&&contribs.indexOf(m.contributor_name)<0) contribs.push(m.contributor_name);
     });
-    h+='</tr>';
-  });
-  h+='</tbody></table>';
-  document.getElementById('matrixWrap').innerHTML=h;
+    var hasDetail=authOk&&allRecs.length>0;
 
-  // detail
-  if(!recs.length){ document.getElementById('detailWrap').innerHTML='<p class="muted">還沒有任何錄音。把上面的連結分享出去吧！</p>'; return; }
-  var d='<table class="det"><thead><tr><th>課文</th><th>版本</th><th>貢獻者</th><th>年級</th><th>時間</th><th>播放</th></tr></thead><tbody>';
-  recs.forEach(function(m){
-    var vn=(VERSIONS.filter(function(v){return v.k===m.version})[0]||{}).n||m.version;
-    var t=(m.created_at||'').replace('T',' ').slice(0,16);
-    d+='<tr><td>'+esc(LESSON_TITLES[m.lesson_id]||m.lesson_id)+'</td><td>'+vn+'</td><td>'+esc(m.contributor_name)+'</td><td>'+esc(m.grade)+'</td><td class="muted">'+esc(t)+'</td><td>'+(m.play_url?'<audio controls preload="none" src="'+esc(m.play_url)+'"></audio>':'<span class="muted">—</span>')+'</td></tr>';
+    h+='<tr class="data-row">';
+    h+='<td class="muted" style="font-size:.8rem">'+(i+1)+'</td>';
+    h+='<td><div class="lesson-title">'+esc(s.title)+'</div><div class="lesson-id">'+esc(id)+'</div></td>';
+    h+='<td><span class="pill '+(correctList.length?'some':'zero')+'">'+correctList.length+'</span></td>';
+    h+='<td><span class="pill '+(errorList.length?'some':'zero')+'">'+errorList.length+'</span></td>';
+    h+='<td>'+(authOk?(contribs.length?('<span title="'+esc(contribs.join('、'))+'">'+esc(contribs.length+' 人')+'</span>'):'<span class="muted">—</span>'):'<span class="muted">需登入</span>')+'</td>';
+    h+='<td><span class="ai-badge">待對應</span></td>';
+    h+='<td><div class="action-cell">'+
+      '<button class="copy-btn" onclick="copyLink(this,\''+esc(url)+'\')">複製連結</button>'+
+      '<a class="open-btn" href="'+esc(url)+'" target="_blank">開啟</a>'+
+      (hasDetail?'<button class="expand-btn" data-expand="'+esc(id)+'" onclick="toggleDetail(\''+esc(id)+'\')">展開 ▼</button>':'')+
+      '</div></td>';
+    h+='</tr>';
+
+    // inline detail row (only when authed + has recs)
+    if(hasDetail){
+      h+='<tr class="detail-row" id="det-'+esc(id)+'"><td colspan="7"><div class="detail-inner">'+
+        '<table class="det-table"><thead><tr>'+
+        '<th>版本</th><th>貢獻者</th><th>年級</th><th>時間</th><th>播放</th>'+
+        '</tr></thead><tbody>';
+      allRecs.forEach(function(m){
+        var vn=m.version==='correct'?'正確版':'錯誤版';
+        var t=(m.created_at||'').replace('T',' ').slice(0,16);
+        h+='<tr>'+
+          '<td>'+vn+'</td>'+
+          '<td>'+esc(m.contributor_name)+'</td>'+
+          '<td>'+esc(m.grade)+'</td>'+
+          '<td class="muted">'+esc(t)+'</td>'+
+          '<td>'+(m.play_url?'<audio controls preload="none" src="'+esc(m.play_url)+'"></audio>':'<span class="muted">—</span>')+'</td>'+
+          '</tr>';
+      });
+      h+='</tbody></table></div></td></tr>';
+    }
   });
-  d+='</tbody></table>';
-  document.getElementById('detailWrap').innerHTML=d;
+
+  h+='</tbody></table>';
+  document.getElementById('tableWrap').innerHTML=h;
 }
-function stat(n,l){return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
+
+function statCard(n,l){
+  return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
+}
+
 load();
 </script>
 </body>
