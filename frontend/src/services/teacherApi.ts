@@ -648,3 +648,23 @@ export function generateAIComment(
 ): Promise<{ ai_comment: string }> {
   return post(`/api/teacher/students/${studentId}/sessions/${sessionId}/generate-ai-comment`, {});
 }
+
+// ── Teacher Audio Replay (Issue #2326, Related to #2266 #2286) ────────────────
+
+/** Fetch a 10-minute signed URL so the teacher can replay a student's submission recording.
+ *  Returns null when no recording exists (404) — callers should show a disabled state.
+ */
+export async function getSubmissionReadingAudio(
+  _token: string,
+  assignmentId: number,
+  submissionId: number,
+): Promise<{ signed_url: string; expires_in: number } | null> {
+  try {
+    return await get<{ signed_url: string; expires_in: number }>(
+      `/api/teacher/assignments/${assignmentId}/submissions/${submissionId}/reading-audio`,
+    );
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null;
+    throw e;
+  }
+}
