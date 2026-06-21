@@ -77,6 +77,35 @@
   .wave-bar:nth-child(5){animation-delay:.6s}
   @keyframes wavebar{0%,100%{height:30%}50%{height:100%}}
 
+  /* ① 錄音 node：循環學生實際經歷的 3 個 UI 狀態 */
+  .rec-demo{flex:0 0 224px}
+  @media(max-width:640px){.rec-demo{flex:none;width:100%}}
+  .rec-mock{width:206px;min-height:108px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 10px;box-shadow:0 1px 5px rgba(0,0,0,.09);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .rec-state{display:none;flex-direction:column;align-items:center;gap:8px;width:100%;animation:fade .35s ease}
+  .rec-mock[data-s="1"] .rec-s1{display:flex}
+  .rec-mock[data-s="2"] .rec-s2{display:flex}
+  .rec-mock[data-s="3"] .rec-s3{display:flex}
+  .rec-hint{font-size:.74rem;color:var(--muted);text-align:center;line-height:1.5}
+  .rec-btn-start{background:var(--red);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:.84rem;font-weight:700;cursor:default}
+  .rec-live{display:flex;align-items:center;gap:7px}
+  .rec-mic-dot{width:12px;height:12px;border-radius:50%;background:var(--red);animation:recpulse 1s ease-in-out infinite}
+  @keyframes recpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+  .rec-timer{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:var(--red);font-size:1rem;letter-spacing:.03em}
+  .rec-wave{display:flex;align-items:flex-end;gap:2px;height:22px}
+  .rec-wave span{width:4px;background:var(--red);border-radius:2px;animation:wavebar .8s ease-in-out infinite}
+  .rec-wave span:nth-child(2){animation-delay:.1s}
+  .rec-wave span:nth-child(3){animation-delay:.2s}
+  .rec-wave span:nth-child(4){animation-delay:.3s}
+  .rec-wave span:nth-child(5){animation-delay:.4s}
+  .rec-wave span:nth-child(6){animation-delay:.5s}
+  .rec-wave span:nth-child(7){animation-delay:.6s}
+  .rec-btn-done{background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 24px;font-size:.84rem;font-weight:700;cursor:default}
+  .rec-hint-sm{font-size:.66rem;color:var(--muted);text-align:center;line-height:1.4}
+  .rec-btn-play{background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:8px;padding:4px 14px;font-size:.74rem;font-weight:600;cursor:default}
+  .rec-actions{display:flex;gap:5px}
+  .rec-act{border:1px solid var(--line);background:#f9f6f0;border-radius:7px;padding:4px 10px;font-size:.72rem;font-weight:600;color:var(--muted);cursor:default}
+  .rec-act.eval{background:#dcfce7;border-color:var(--green);color:#15803d}
+
   .stt-demo{text-align:center}
   .stt-wave{display:flex;gap:3px;justify-content:center;margin-bottom:4px}
   .stt-wave-bar{width:4px;height:14px;background:var(--muted);border-radius:2px;animation:wavebar .7s ease-in-out infinite}
@@ -149,10 +178,32 @@
       <div class="node-row">
         <div class="node-text">
           <div class="t">① 錄音 <span class="side">前端</span></div>
-          <div class="s">useAudioRecorder.ts · MediaRecorder → webm</div>
+          <div class="s">useAudioRecorder.ts · MediaRecorder → webm · 學生實際經歷：開始 → 錄音中 → 完成（重錄/取消/評估/播放）</div>
         </div>
-        <div class="node-demo">
-          <img src="component-shots/recording.png" alt="真實錄音卡截圖" style="max-width:200px;max-height:140px;border-radius:8px;border:1px solid var(--line);object-fit:contain">
+        <div class="node-demo rec-demo">
+          <div class="rec-mock" id="rec-mock" data-s="1">
+            <!-- 狀態① 準備開始 -->
+            <div class="rec-state rec-s1">
+              <div class="rec-hint">照著課文念<br>準備好按開始</div>
+              <button class="rec-btn-start" type="button">● 開始錄音</button>
+            </div>
+            <!-- 狀態② 錄音中 -->
+            <div class="rec-state rec-s2">
+              <div class="rec-live"><span class="rec-mic-dot"></span><span class="rec-timer" id="rec-timer">00:00</span></div>
+              <div class="rec-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              <button class="rec-btn-done" type="button">完成</button>
+            </div>
+            <!-- 狀態③ 完成待處理：重錄/取消/評估/▶播放 -->
+            <div class="rec-state rec-s3">
+              <div class="rec-hint-sm">滿意按評估 · 想再錄按重錄</div>
+              <button class="rec-btn-play" type="button">▶ 播放錄音</button>
+              <div class="rec-actions">
+                <button class="rec-act" type="button">取消</button>
+                <button class="rec-act" type="button">重錄</button>
+                <button class="rec-act eval" type="button">評估</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -391,8 +442,38 @@ function startScoreAnim() {
   requestAnimationFrame(step);
 }
 
+// ① 錄音 node：循環學生實際經歷的 3 個 UI 狀態（開始 → 錄音中 → 完成）
+function startRecMockAnim() {
+  var mock = document.getElementById('rec-mock');
+  var timerEl = document.getElementById('rec-timer');
+  if (!mock) return;
+  var seq = [
+    { s: 1, dur: 1700 },   // 準備開始
+    { s: 2, dur: 3400 },   // 錄音中（計時）
+    { s: 3, dur: 2900 }    // 完成：重錄/取消/評估/播放
+  ];
+  var idx = 0, recTimer = null;
+  function tick() {
+    var cur = seq[idx];
+    mock.setAttribute('data-s', String(cur.s));
+    if (recTimer) { clearInterval(recTimer); recTimer = null; }
+    if (cur.s === 2 && timerEl) {
+      var secs = 0;
+      timerEl.textContent = '00:00';
+      recTimer = setInterval(function() {
+        secs++;
+        timerEl.textContent = '00:' + (secs < 10 ? '0' + secs : secs);
+      }, 800);
+    }
+    idx = (idx + 1) % seq.length;
+    setTimeout(tick, cur.dur);
+  }
+  tick();
+}
+
 startTypingAnim();
 startScoreAnim();
+startRecMockAnim();
 </script>
 </body>
 </html>
