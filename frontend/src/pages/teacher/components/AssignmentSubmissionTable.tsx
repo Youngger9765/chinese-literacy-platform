@@ -9,7 +9,7 @@
  *   - Expand/collapse reading metrics per row
  *   - Expand/collapse attempt history for multi-attempt students
  */
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import type {
   SubmissionResponse,
   StudentAttemptGroup,
@@ -17,6 +17,89 @@ import type {
 import ReadingMetricsPanel from './ReadingMetricsPanel';
 import AttemptHistoryPanel from './AttemptHistoryPanel';
 import { statusBadge, formatDate } from '../assignmentDetailUtils.tsx';
+import { getSubmissionReadingAudio } from '../../../services/teacherApi';
+
+// ── PlayAudioButton — inline audio replay for a submission (Issue #2326) ──────
+/** Fetches a 10-min signed URL and plays the student's reading recording.
+ *  Gracefully shows "無錄音" when the backend returns 404 (no recording).
+ *  Declared BEFORE the table component to avoid TDZ (frontend-render-safety rule). */
+interface PlayAudioButtonProps {
+  assignmentId: number;
+  submissionId: number;
+}
+
+const PlayAudioButton: React.FC<PlayAudioButtonProps> = ({
+  assignmentId,
+  submissionId,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [noAudio, setNoAudio] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopPlayback = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  }, []);
+
+  const handleClick = useCallback(async () => {
+    // Toggle stop if already playing
+    if (isPlaying) {
+      stopPlayback();
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await getSubmissionReadingAudio('', assignmentId, submissionId);
+      if (!result) {
+        setNoAudio(true);
+        return;
+      }
+      const audio = new Audio(result.signed_url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setIsPlaying(false);
+        audioRef.current = null;
+      };
+      audio.onerror = () => {
+        setIsPlaying(false);
+        audioRef.current = null;
+      };
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        setIsPlaying(false);
+        audioRef.current = null;
+      });
+    } catch (_e) {
+      // Unexpected error — surface as no audio
+      setNoAudio(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [assignmentId, submissionId, isPlaying, stopPlayback]);
+
+  if (noAudio) {
+    return <span className="text-gray-300 text-xs">無錄音</span>;
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      title={isPlaying ? '停止播放' : '播放錄音'}
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-green-200 text-green-700 text-xs hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+    >
+      {loading ? '...' : isPlaying ? '■ 停止' : '▶ 聽錄音'}
+    </button>
+  );
+};
+
 
 export interface GradeFormProps {
   gradingId: number | null;
@@ -35,6 +118,8 @@ interface Props {
   groups: StudentAttemptGroup[];
   useGrouped: boolean;
   gradeForm: GradeFormProps;
+  /** Assignment ID passed down for audio replay (grouped rows lack it on AttemptResponse). */
+  assignmentId: number;
 }
 
 const AssignmentSubmissionTable: React.FC<Props> = ({
@@ -42,6 +127,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
   groups,
   useGrouped,
   gradeForm,
+  assignmentId,
 }) => {
   const {
     gradingId,
@@ -162,6 +248,15 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
           </p>
         </div>
       ) : null}
+
+      {(sub.status === 'submitted' || sub.status === 'graded') && (
+        <div>
+          <PlayAudioButton
+            assignmentId={sub.assignment_id}
+            submissionId={sub.id}
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -278,10 +373,20 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 <span className="text-gray-300">—</span>
               )}
             </td>
+            <td className="py-1.5 text-center">
+              {(latest.status === 'submitted' || latest.status === 'graded') ? (
+                <PlayAudioButton
+                  assignmentId={assignmentId}
+                  submissionId={latest.id}
+                />
+              ) : (
+                <span className="text-gray-300">—</span>
+              )}
+            </td>
           </tr>
           {expandedMetricsId === latest.id && (
             <tr>
-              <td colSpan={7} className="pb-2 pt-0">
+              <td colSpan={8} className="pb-2 pt-0">
                 <ReadingMetricsPanel
                   studentName={group.student_name}
                   readingAccuracy={latest.reading_accuracy}
@@ -394,10 +499,20 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <span className="text-gray-300">—</span>
             )}
           </td>
+          <td className="py-1.5 text-center">
+            {(sub.status === 'submitted' || sub.status === 'graded') ? (
+              <PlayAudioButton
+                assignmentId={sub.assignment_id}
+                submissionId={sub.id}
+              />
+            ) : (
+              <span className="text-gray-300">—</span>
+            )}
+          </td>
         </tr>
         {expandedMetricsId === sub.id && (
           <tr>
-            <td colSpan={7} className="pb-2 pt-0">
+            <td colSpan={8} className="pb-2 pt-0">
               <ReadingMetricsPanel
                 studentName={sub.student_name}
                 readingAccuracy={sub.reading_accuracy}
@@ -429,6 +544,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <th className="pb-1.5 font-medium text-center">朗讀數據</th>
               <th className="pb-1.5 font-medium">評語</th>
               <th className="pb-1.5 font-medium text-center">批改</th>
+              <th className="pb-1.5 font-medium text-center">錄音</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
