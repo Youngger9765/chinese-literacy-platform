@@ -13,7 +13,7 @@ spotlight:
     answer: 請在
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.換你試試看，填入適當的譬喻用詞代號。

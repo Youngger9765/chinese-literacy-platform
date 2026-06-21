@@ -45,7 +45,7 @@ spotlight:
     text: ◎小試身手
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 步驟❸──判斷因果，畫箭頭
@@ -59,7 +59,7 @@ spotlight:
     text: 根據上表，請判斷誰是因？誰是果？並畫正確箭頭方向
   - type: figure
     referent: table
-    asset: null
+    asset: fig2.png
     bind_paragraph: null
   - type: guide
     text: 步驟❹──連成一連串因果

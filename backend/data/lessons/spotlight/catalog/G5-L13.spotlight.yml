@@ -21,5 +21,5 @@ spotlight:
     text: 上面的閱讀聚光燈幫助我們了解文章的大主題、小主題和細節之間的關係。接下來，我們要完成「文章重點表」，把重點更清楚地整理出來。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

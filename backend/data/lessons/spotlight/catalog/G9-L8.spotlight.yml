@@ -120,13 +120,13 @@ spotlight:
     prompt: ❶請根據圖(九)，完成下表。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: ❷請根據圖(九)完成下面的表格。（空格內填上升或下降）
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: single
     prompt: ❸請根據圖(九)，勾選答案(單選)：

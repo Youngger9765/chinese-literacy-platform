@@ -231,6 +231,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
         submissions={detail.submissions}
         groups={groups}
         useGrouped={useGrouped}
+        assignmentId={assignmentId}
         gradeForm={{
           gradingId: gradeForm.gradingId,
           gradeInput: gradeForm.gradeInput,

@@ -9,11 +9,11 @@ spotlight:
     prompt: 1.將支持理由與所屬種類連起來，並找出課文提到的周天成的人物特質。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.除了上述特質，周天成還有其他的特質，請由文章中支持的理由推論人物特質。（單選）
   - type: figure
     referent: table
-    asset: null
+    asset: fig2.png
     bind_paragraph: null

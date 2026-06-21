@@ -9,7 +9,7 @@ spotlight:
     prompt: 1.生活中已經有許多落實「環保3R」例子，請依照你對環保3R的理解，判斷下列情境為「環保3R」中的哪一種R，請你用上列的ABC代號為選項作答。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 2.請問在生活中，我們可以做什麼行動落實環保?（自由發揮）

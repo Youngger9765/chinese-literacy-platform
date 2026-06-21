@@ -63,6 +63,56 @@ _NEAR_SOUND_PAIRS: list[tuple[str, str]] = [
 # Public helpers
 # ---------------------------------------------------------------------------
 
+# Issue #2321 — sanity gate constants for hallucination detection.
+# When Gemini receives a silent/noisy audio + the full lesson text as hint,
+# it tends to hallucinate the opening 2–3 sentences of the lesson text.
+# That hallucination lands in the scoring pipeline as a non-empty spoken_text
+# that is a *prefix* of the target — causing false positives (tier 1/2 pass).
+#
+# A real partial read:
+#   - Usually covers a contiguous range of the target (not always the first chars)
+#   - Often includes disfluencies / wrong chars that break the prefix match
+# A Gemini hallucination:
+#   - Is almost always a *clean prefix* of the target text (no errors)
+#   - Has length well below 35% of the target (hallucination stops without audio support)
+#
+# Threshold chosen conservatively: 35% keeps real short-paragraph reads safe
+# (a student who reads just the first 40% of a long paragraph passes through),
+# while blocking hallucination (2–3 sentences of a 76–140 char target ≈ 26–50%).
+# Only transcripts that are *also* a near-exact prefix are blocked — this keeps
+# the false-positive rate low for students who happen to start correctly.
+_HALLUCINATION_LENGTH_RATIO = 0.35   # transcript < 35 % of target → suspect
+_HALLUCINATION_PREFIX_MATCH = 0.90   # ≥ 90 % of transcript chars match target prefix
+
+
+def _is_hallucination_prefix(spoken_norm: str, target_norm: str) -> bool:
+    """Return True when spoken_text looks like a Gemini hallucination prefix.
+
+    Condition (both must hold):
+      1. spoken length < _HALLUCINATION_LENGTH_RATIO * target length
+      2. spoken chars match the target's opening chars at rate ≥ _HALLUCINATION_PREFIX_MATCH
+         (comparing the first len(spoken) chars of target against spoken)
+
+    A real partial read rarely satisfies *both* conditions simultaneously:
+    real students make errors (condition 2 fails) or read enough of the
+    paragraph that condition 1 no longer holds.
+
+    Only called when spoken_norm is non-empty; callers must guard for empty.
+    """
+    s_len = len(spoken_norm)
+    t_len = len(target_norm)
+    if t_len == 0 or s_len == 0:
+        return False
+    # Condition 1: too short to be a real read
+    if s_len >= _HALLUCINATION_LENGTH_RATIO * t_len:
+        return False
+    # Condition 2: near-exact match with target prefix
+    prefix = target_norm[:s_len]
+    matches = sum(a == b for a, b in zip(spoken_norm, prefix))
+    match_rate = matches / s_len
+    return match_rate >= _HALLUCINATION_PREFIX_MATCH
+
+
 def _normalize_text(text: str) -> str:
     """Remove punctuation, bopomofo, and whitespace for scoring (matches frontend)."""
     return normalize_for_comparison(text)
@@ -286,6 +336,33 @@ async def evaluate_reading_with_ai(
         cpm, diff_tokens, stats, thresholds, evaluation_method.
         evaluation_method is always 'deterministic'.
     """
+    # Issue #2321 — Hallucination sanity gate (scoring-layer defence).
+    # When Gemini STT receives silent/noisy audio it sometimes hallucinates the
+    # opening sentences of the lesson text (fed as hint).  The hallucinated
+    # transcript is non-empty, so the empty-string guard in the transcription
+    # layer does NOT fire, and the text reaches here looking like a clean
+    # prefix of the target → LCS gives a false-positive pass.
+    #
+    # Guard: if spoken is non-empty AND normalises to a near-exact prefix of
+    # the target AND is suspiciously short (< 35 % of target), treat it as
+    # no-speech and route to the fallback path (always returns 0).
+    # Only affects auto-pass decision — student can always retry.
+    spoken_norm = _normalize_text(spoken_text)
+    target_norm = _normalize_text(target_text)
+    if spoken_norm and _is_hallucination_prefix(spoken_norm, target_norm):
+        logger.warning(
+            "Reading eval sanity gate: hallucination prefix detected "
+            "(spoken_len=%d, target_len=%d) — routing to fallback (Issue #2321)",
+            len(spoken_norm),
+            len(target_norm),
+        )
+        result = _build_fallback_result("", target_text)
+        cpm = None
+        result["cpm"] = cpm
+        result["evaluation_method"] = "deterministic"
+        result["hallucination_blocked"] = True
+        return result
+
     # Deterministic DP aligner — single source of truth for scoring.
     # This is the same aligner that was previously used only for CPM.
     # See _build_fallback_result for the full implementation.

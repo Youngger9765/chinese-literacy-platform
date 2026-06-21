@@ -29,7 +29,7 @@ spotlight:
     prompt: (8)政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民(  I  )的措施。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: self_check
     items:

@@ -17,7 +17,7 @@ spotlight:
     text: 表：本課的結構：困擾→策略→改變
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 二、推論主旨與作者意圖

@@ -11,7 +11,7 @@ spotlight:
     text: ◎小試身手：讀完文章後，你是不是發現澳洲與臺灣有許多不同的地方？現在我們要來練習整理文章的訊息，幫助你更好抓住文章重點，若有文章未提到的訊息，可善用網路搜尋工具搜尋喔！
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 總結：由上表可知：澳洲的人口數與臺灣差不多，但是澳洲對體育非常重視，體育設施的建設也比臺灣多，家長也重視體育，            所以這可能是澳洲得獎牌多於臺灣的原因。（答案合理即可）。

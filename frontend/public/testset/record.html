@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>朗讀錄音貢獻 · LingoLeap</title>
+<style>
+  :root{--bg:#FDF8F0;--ink:#1a1a2e;--purple:#5B4FC4;--muted:#6b6b8a;--card:#fff;--line:#e7e2d8;--green:#16a34a;--red:#dc2626;--chip:#efe9ff}
+  *{box-sizing:border-box}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:24px 16px;line-height:1.7}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1{color:var(--purple);font-size:1.4rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+  /* 兩欄佈局：左=課文、右=操作 */
+  .layout{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
+  .col-left{position:sticky;top:24px}
+  .col-right{min-width:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .step{font-weight:700;color:var(--purple);margin-bottom:10px}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+  input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+  .lesson-title{font-size:1.15rem;font-weight:800;color:var(--ink);margin:0 0 4px}
+  .lesson-id{font-size:.8rem;color:var(--muted);margin:0 0 14px}
+  .passage{background:#faf7f0;border-left:3px solid var(--purple);padding:14px 16px;border-radius:8px;margin:10px 0;font-size:1.08rem;line-height:2.1;max-height:calc(100vh - 180px);overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+  .passage p{margin:0 0 .8em}
+  .passage p:last-child{margin:0}
+  .loading-text{color:var(--muted);font-size:.9rem;text-align:center;padding:24px 0}
+  .vtabs{display:flex;gap:8px;margin:10px 0}
+  .vtab{flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-weight:600}
+  .vtab.sel{border-color:var(--purple);background:var(--chip);color:var(--purple)}
+  .vtab .hint{display:block;font-size:.72rem;color:var(--muted);font-weight:400}
+  .btn{padding:12px 18px;border:none;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+  .btn-rec{background:var(--red);color:#fff;width:100%}
+  .btn-rec.recording{background:#7f1d1d}
+  .btn-up{background:var(--purple);color:#fff;width:100%}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  audio{width:100%}
+  /* 播放器 + 右側小重錄鈕同列（重錄縮小、不被誤觸）*/
+  .player-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .player-row audio{flex:1;min-width:0;margin:0}
+  .btn-rerec{flex:0 0 auto;background:#fff;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:8px 10px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;line-height:1.2}
+  .btn-rerec:hover{background:#fee2e2}
+  .status{font-size:.85rem;margin-top:8px}
+  .ok{color:var(--green);font-weight:700}
+  .err{color:var(--red)}
+  .done-banner{background:#dcfce7;border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center;color:var(--green);font-weight:700;font-size:1.05rem;display:none}
+  .progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .prog-item{display:flex;align-items:center;gap:8px;font-size:.88rem}
+  .dot{width:14px;height:14px;border-radius:50%;background:#ddd;flex-shrink:0}
+  .dot.done{background:var(--green)}
+  .prog-play{margin-left:auto;background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:6px;padding:2px 9px;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .prog-play:hover{background:var(--chip)}
+  .prog-play.playing{background:var(--purple);color:#fff}
+  .back{display:inline-block;margin-bottom:16px;color:var(--purple);text-decoration:none;font-size:.88rem;font-weight:600}
+  .back:hover{text-decoration:underline}
+  .err-banner{background:#fee2e2;border:1px solid var(--red);border-radius:10px;padding:16px;text-align:center;color:var(--red);font-weight:600}
+  /* ── 手機 RWD：收回單欄、課文在上、操作在下 ── */
+  @media (max-width:860px){
+    body{padding:16px 12px}
+    .layout{grid-template-columns:1fr;gap:0}
+    .col-left{position:static;top:auto}
+    .passage{max-height:300px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>朗讀錄音貢獻</h1>
+  <p class="sub">幫 LingoLeap 蒐集真人朗讀，用於訓練與驗證 AI 朗讀評分。謝謝你！</p>
+
+  <div id="errBanner" class="err-banner" style="display:none"></div>
+
+  <div class="layout">
+    <!-- 左欄：課文全文 -->
+    <div class="col-left">
+      <div class="card" id="lesson-card">
+        <div class="step">📖 課文：<span id="lesson-title-inline" style="font-weight:400;color:var(--muted)">載入中…</span></div>
+        <div class="passage" id="passage"><div class="loading-text">載入課文中…</div></div>
+      </div>
+    </div>
+
+    <!-- 右欄：操作 -->
+    <div class="col-right">
+      <!-- 貢獻者資訊 -->
+      <div class="card">
+        <div class="step">① 你是誰</div>
+        <label>名字（暱稱即可）</label>
+        <input id="name" placeholder="例如：小明 / Amy">
+      </div>
+
+      <!-- 錄音 -->
+      <div class="card" id="rec-card">
+        <div class="step">② 照著念 + 錄音</div>
+        <div class="vtabs">
+          <div class="vtab sel" data-v="correct" onclick="selVersion('correct')">正確版<span class="hint">盡量念正確</span></div>
+          <div class="vtab" data-v="error" onclick="selVersion('error')">刻意錯誤版<span class="hint">故意念錯幾個字</span></div>
+        </div>
+        <button class="btn btn-rec" id="recBtn" onclick="toggleRec()">● 開始錄音</button>
+        <div class="player-row" id="playerRow" style="display:none">
+          <audio id="player" controls></audio>
+          <button class="btn-rerec" id="reRecBtn" onclick="reRecord()" title="重新錄音">↻ 重錄</button>
+        </div>
+        <button class="btn btn-up" id="upBtn" onclick="upload()" disabled style="margin-top:10px">上傳這段</button>
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- 進度 -->
+      <div class="card">
+        <div class="step">③ 我的進度（此課）</div>
+        <div class="progress-grid" id="progress"></div>
+        <div class="done-banner" id="doneBanner">
+          本課正確版 + 錯誤版都錄完了，太謝謝你了！
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── helpers ── */
+function apiBase(){
+  var h=location.origin;
+  if(h.indexOf('-frontend-')>-1) return h.replace('-frontend-','-backend-');
+  if(h.indexOf('localhost')>-1||h.indexOf('127.0.0.1')>-1) return 'http://localhost:8000';
+  return 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
+}
+var API=apiBase();
+
+function qs(key){
+  return new URLSearchParams(location.search).get(key);
+}
+
+var lessonId=qs('lesson')||'';
+var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
+var cur={version:'correct'};
+var NAME_KEY='testset_name';
+var done=JSON.parse(localStorage.getItem('testset_done_v2_'+lessonId)||'{}');
+var doneUrls={correct:null,error:null};  // server 簽名播放 URL（聽取用，10 分鐘有效）
+var mediaRec=null,chunks=[],blob=null;
+
+/* ── 進度：server-truth（換裝置/清快取仍讀得回，localStorage 只當快取） ── */
+async function loadProgress(){
+  var name=document.getElementById('name').value.trim();
+  if(!name||!lessonId){ renderProgress(); return; }
+  try{
+    var r=await fetch(API+'/api/testset/progress?name='+encodeURIComponent(name)+'&lesson='+encodeURIComponent(lessonId));
+    if(r.ok){
+      var d=await r.json();
+      if(d&&d.ok){
+        done={correct:!!d.correct,error:!!d.error};
+        doneUrls={correct:d.correct_url||null,error:d.error_url||null};
+        localStorage.setItem('testset_done_v2_'+lessonId,JSON.stringify(done));
+      }
+    }
+  }catch(e){ /* 離線/失敗 → 沿用 localStorage 快取 */ }
+  renderProgress();
+}
+
+/* ── load story ── */
+async function loadStory(){
+  if(!lessonId){
+    document.getElementById('errBanner').textContent='缺少 ?lesson= 參數。請從 owner dashboard 複製連結開啟此頁。';
+    document.getElementById('errBanner').style.display='block';
+    document.getElementById('lesson-card').style.display='none';
+    document.getElementById('rec-card').style.display='none';
+    return;
+  }
+
+  // normalize: if "L06" strip L prefix for numeric lookup
+  var lookupId=lessonId;
+
+  try{
+    var r=await fetch(API+'/api/stories/'+encodeURIComponent(lookupId));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var data=await r.json();
+
+    var title=data.title||lessonId;
+    document.title=title+' · 朗讀錄音貢獻 · LingoLeap';
+    document.getElementById('lesson-title-inline').textContent=title;
+
+    // Build full text from paragraphs
+    var passage=document.getElementById('passage');
+    passage.innerHTML='';
+    var paragraphs=[];
+
+    if(data.paragraphs&&data.paragraphs.length){
+      paragraphs=data.paragraphs;
+    } else if(data.text){
+      paragraphs=[{content:data.text}];
+    }
+
+    if(paragraphs.length===0){
+      passage.innerHTML='<span style="color:var(--muted)">（課文資料暫時無法載入）</span>';
+    } else {
+      // paragraphs is a list of strings from the API
+      paragraphs.forEach(function(p){
+        var txt=typeof p==='string'?p.trim():'';
+        if(!txt) return;
+        var el=document.createElement('p');
+        el.textContent=txt;
+        passage.appendChild(el);
+      });
+    }
+  }catch(e){
+    document.getElementById('errBanner').textContent='課文載入失敗（'+lessonId+'）: '+e.message+'。請確認 lesson ID 正確。';
+    document.getElementById('errBanner').style.display='block';
+    document.getElementById('passage').innerHTML='<span style="color:var(--red)">載入失敗，請重新整理。</span>';
+  }
+}
+
+/* ── recording ── */
+function selVersion(v){
+  cur.version=v;
+  document.querySelectorAll('.vtab').forEach(function(t){t.classList.toggle('sel',t.dataset.v===v)});
+  resetRec();
+}
+
+function resetRec(){
+  blob=null;
+  var p=document.getElementById('player'); p.src='';
+  document.getElementById('playerRow').style.display='none';
+  document.getElementById('upBtn').disabled=true;
+  document.getElementById('status').innerHTML='';
+  var b=document.getElementById('recBtn'); b.style.display=''; b.classList.remove('recording'); b.textContent='● 開始錄音';
+}
+
+async function toggleRec(){
+  var b=document.getElementById('recBtn');
+  if(mediaRec&&mediaRec.state==='recording'){ mediaRec.stop(); return; }
+  try{
+    var stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[]; mediaRec=new MediaRecorder(stream);
+    mediaRec.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop=function(){
+      blob=new Blob(chunks,{type:'audio/webm'});
+      var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
+      // 完成：收起大錄音鈕，改顯示「播放器 + 右側小重錄鈕」（避免誤觸重錄）
+      document.getElementById('playerRow').style.display='flex';
+      b.style.display='none';
+      document.getElementById('upBtn').disabled=false;
+      stream.getTracks().forEach(function(t){t.stop()});
+      b.classList.remove('recording');
+      document.getElementById('status').innerHTML='';
+    };
+    // 進入錄音中：收起播放器列、顯示停止鈕
+    document.getElementById('playerRow').style.display='none';
+    b.style.display='';
+    mediaRec.start(); b.classList.add('recording'); b.textContent='■ 停止錄音';
+    document.getElementById('status').innerHTML='<span style="color:var(--muted)">錄音中…照著上面的課文念</span>';
+  }catch(e){
+    document.getElementById('status').innerHTML='<span class="err">無法存取麥克風，請允許瀏覽器麥克風權限後再試。</span>';
+  }
+}
+
+// 重錄：先確認再捨棄目前這段（小鈕在播放器右邊，避免誤觸）
+function reRecord(){
+  if(!confirm('確定要重錄嗎？目前這段會被捨棄。')) return;
+  toggleRec();
+}
+
+async function upload(){
+  var name=document.getElementById('name').value.trim();
+  if(!name){
+    document.getElementById('status').innerHTML='<span class="err">請先填①的名字</span>';
+    window.scrollTo(0,0); return;
+  }
+  if(!blob) return;
+  if(!lessonId){
+    document.getElementById('status').innerHTML='<span class="err">缺少 lesson ID，無法上傳</span>'; return;
+  }
+  localStorage.setItem(NAME_KEY,name);
+  document.getElementById('upBtn').disabled=true;
+  document.getElementById('status').innerHTML='<span style="color:var(--muted)">上傳中…</span>';
+  var fd=new FormData();
+  fd.append('contributor_name',name);
+  fd.append('lesson_id',lessonId);
+  fd.append('version',cur.version);
+  fd.append('audio',blob,lessonId+'_'+cur.version+'.webm');
+  try{
+    var r=await fetch(API+'/api/testset/upload',{method:'POST',body:fd});
+    if(!r.ok){ throw new Error('HTTP '+r.status); }
+    done[cur.version]=true;  // 樂觀更新（即時回饋）
+    localStorage.setItem('testset_done_v2_'+lessonId,JSON.stringify(done));
+    document.getElementById('status').innerHTML='<span class="ok">✓ 已上傳！可以繼續錄另一個版本。</span>';
+    renderProgress();
+    loadProgress();  // 再從 server 對齊真實進度
+  }catch(e){
+    document.getElementById('upBtn').disabled=false;
+    document.getElementById('status').innerHTML='<span class="err">上傳失敗，請再試一次（'+e.message+'）</span>';
+  }
+}
+
+function renderProgress(){
+  var el=document.getElementById('progress'); el.innerHTML='';
+  var allDone=true;
+  VERSIONS.forEach(function(V){
+    var ok=!!done[V.k];
+    if(!ok) allDone=false;
+    var div=document.createElement('div'); div.className='prog-item';
+    var html='<span class="dot'+(ok?' done':'')+'"></span><span>'+(ok?'✓ ':'')+V.n+'</span>';
+    if(ok && doneUrls[V.k]){
+      html+='<button class="prog-play" data-v="'+V.k+'" onclick="playVersion(\''+V.k+'\')">▶ 聽取</button>';
+    }
+    div.innerHTML=html;
+    el.appendChild(div);
+  });
+  document.getElementById('doneBanner').style.display=allDone?'block':'none';
+}
+
+// 聽取已上傳的某版本錄音（server 簽名 URL）；再點一次停止
+var progAudio=null;
+function playVersion(v){
+  var url=doneUrls[v];
+  if(!url) return;
+  if(!progAudio) progAudio=new Audio();
+  var btn=document.querySelector('.prog-play[data-v="'+v+'"]');
+  if(progAudio.src===url && !progAudio.paused){ progAudio.pause(); if(btn) btn.classList.remove('playing'); return; }
+  document.querySelectorAll('.prog-play').forEach(function(b){b.classList.remove('playing')});
+  progAudio.src=url; progAudio.play();
+  if(btn) btn.classList.add('playing');
+  progAudio.onended=function(){ if(btn) btn.classList.remove('playing'); };
+}
+
+// 自動帶回上次名字 → 從 server 讀真實進度（下次進來/換裝置都看得到）
+(function initName(){
+  var saved=localStorage.getItem(NAME_KEY);
+  if(saved) document.getElementById('name').value=saved;
+})();
+document.getElementById('name').addEventListener('change',function(){
+  var n=document.getElementById('name').value.trim();
+  if(n) localStorage.setItem(NAME_KEY,n);
+  loadProgress();
+});
+
+loadStory();
+loadProgress();
+</script>
+</body>
+</html>

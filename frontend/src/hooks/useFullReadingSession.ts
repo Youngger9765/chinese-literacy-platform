@@ -38,6 +38,47 @@ import { transcribeReading, saveReadingAudio } from '../services/learning/sessio
 const SILENT_PEAK_THRESHOLD = 0.05;   // gate: peak volume must exceed this
 const SILENT_MIN_DURATION_MS = 1500;  // gate: recording must be at least 1.5 s
 
+/**
+ * Issue #2321 — Hallucination sanity gate for FullReading scoring.
+ *
+ * The backend's transcription-layer and scoring-layer guards catch hallucinations
+ * server-side (and return method='fallback' or 0 score).  This client-side guard
+ * is an extra layer of defence: if somehow a hallucinated transcript escapes both
+ * backend gates, we detect it here before calling analyzeFluency.
+ *
+ * Same logic as backend _is_hallucination_prefix:
+ *   1. Normalised transcript length < 35 % of normalised target length
+ *   2. ≥ 90 % of transcript chars match target opening chars
+ *
+ * If both hold → treat the same as no-speech (show retry error, do not score).
+ */
+const HALLUCINATION_LENGTH_RATIO = 0.35;   // transcript < 35% of target → suspect
+const HALLUCINATION_PREFIX_MATCH = 0.90;   // ≥ 90% of chars match target prefix
+
+function normaliseForHallucinationCheck(text: string): string {
+  // Strip CJK punctuation and whitespace — mirrors backend _strip_cjk_punctuation.
+  // Intentionally not the same as normalizeForComparison (scoring) to keep the
+  // two functions independent and avoid accidental coupling.
+  return text.replace(/[\s　、-〿＀-￯‘-‟…。，！？；：、─—…「」『』（）]/gu, '');
+}
+
+function isHallucinationTranscript(transcript: string, target: string): boolean {
+  const tNorm = normaliseForHallucinationCheck(transcript);
+  const tgtNorm = normaliseForHallucinationCheck(target);
+  const tLen = tNorm.length;
+  const tgtLen = tgtNorm.length;
+  if (tgtLen === 0 || tLen === 0) return false;
+  // Condition 1: suspiciously short
+  if (tLen >= HALLUCINATION_LENGTH_RATIO * tgtLen) return false;
+  // Condition 2: near-exact prefix match
+  const prefix = tgtNorm.slice(0, tLen);
+  let matches = 0;
+  for (let i = 0; i < tLen; i++) {
+    if (tNorm[i] === prefix[i]) matches++;
+  }
+  return matches / tLen >= HALLUCINATION_PREFIX_MATCH;
+}
+
 export interface SavedResult {
   matchRate: number;
   feedback: string;
@@ -223,6 +264,15 @@ export function useFullReadingSession({
         .then((result) => {
           setIsTranscribing(false);
           if (result.method === 'gemini' && result.transcript) {
+            // Issue #2321 — Hallucination guard (client-side defence layer 3).
+            // Backend already has two guards (transcription + scoring layer).
+            // This client-side check catches any hallucinated transcripts that
+            // escaped both backend gates — treating them as no-speech.
+            if (isHallucinationTranscript(result.transcript, fullText)) {
+              setIsTranscribing(false);
+              setMicError('未偵測到語音，請重試。');
+              return;
+            }
             // Gemini success (I1): Gemini transcript is the sole scoring source.
             _evaluate(result.transcript, audioBlob);
           } else {

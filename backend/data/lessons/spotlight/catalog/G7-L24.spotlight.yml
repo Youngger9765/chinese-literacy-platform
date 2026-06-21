@@ -129,5 +129,5 @@ spotlight:
     prompt: (8)北風雖然(  B   )，發生山難時，消防勇士們仍冒著嚴寒上山搜救。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

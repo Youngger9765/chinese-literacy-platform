@@ -13,7 +13,7 @@ spotlight:
     text: 可是，最近有幾則留言說她的文筆「太幼稚」，讓她開始懷疑自己是不是沒有天分。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 情境二：社團與課業的衝突
@@ -25,7 +25,7 @@ spotlight:
     text: 她很矛盾，一方面想聽父母的話，一方面又捨不得放下練舞。
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: guide
     text: ◎換你試試看：

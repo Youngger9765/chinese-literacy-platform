@@ -25,7 +25,7 @@ spotlight:
     text: 表：本課的科學討論四步驟：問題→假說→驗證→結論
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ①考考你，請你以正確的順序寫出本課所提的科學研究四個步驟

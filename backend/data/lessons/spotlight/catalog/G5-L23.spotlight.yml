@@ -50,7 +50,7 @@ spotlight:
     text: 他透過規律作息，把時間分成三類：
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 任務：請勾選你覺得主角值得學習的做法。（複選）
@@ -64,7 +64,7 @@ spotlight:
     text: 現在，請你根據自己的生活節奏，設計「我的自律作息表」
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: guide
     text: ④反思（Step4）──預防拖延的方法【我的「拖延時間」改進計畫】

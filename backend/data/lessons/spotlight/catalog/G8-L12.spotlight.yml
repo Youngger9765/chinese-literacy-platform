@@ -17,7 +17,7 @@ spotlight:
       為下一步找出它們的共同點做準備。（複選）'
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: passage
     source: unknown
@@ -53,7 +53,7 @@ spotlight:
     - 表示你已經學會用 3 步驟「從例子推論作者觀點（歸納推論）」，不只看懂例子，還能看懂作者的想法，你超厲害的！
   - type: figure
     referent: table
-    asset: null
+    asset: fig2.png
     bind_paragraph: null
   - type: self_check
     items:

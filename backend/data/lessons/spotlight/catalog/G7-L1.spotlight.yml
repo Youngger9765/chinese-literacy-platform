@@ -19,7 +19,7 @@ spotlight:
     - (段一)當上課前大家玩鬧不休，而突然聽到老師逼近的腳步聲時，大家會面面相覷說道「來了！來了！」；當心儀對象迎面走來，即將和自己擦身而過時，會聽見身旁損友竊笑「來了！來了！」；當三五好友一起壯膽看恐怖片，在音樂驚悚而畫面黯淡時，會聽到有人低語著「來了！來了！」。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: passage
     source: unknown
@@ -27,7 +27,7 @@ spotlight:
     - (段二) 羊隊和牛群不是本來就會回家嗎？綠色的小河不是一直都在歌唱嗎？螢火蟲不是原本就提著燈嗎？
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: passage
     source: unknown
@@ -35,5 +35,5 @@ spotlight:
     - (段三) 當「火紅的太陽也滾著火輪子回家了」，我得匆忙趕回去幫忙家裡的生意；「當街燈亮起來向村莊道過晚安」，更常是我們店裡忙得不可開交之時；當「小雞和小鴨們關在欄裡睡了」，就是我和蚊子決鬥的時刻。
   - type: figure
     referent: table
-    asset: null
+    asset: fig11.png
     bind_paragraph: null

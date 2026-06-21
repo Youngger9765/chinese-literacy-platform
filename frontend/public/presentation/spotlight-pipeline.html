@@ -132,7 +132,7 @@
     <button class="tab active" data-pane="arch">① 架構</button>
     <button class="tab" data-pane="dev">② 開發</button>
     <button class="tab" data-pane="qa">③ QA result</button>
-    <button class="tab" data-pane="data">④ 資料</button>
+    <button class="tab" data-pane="data">④ 資料集</button>
     <button class="tab" data-pane="debt">⑤ 缺口&amp;債</button>
   </div>
 
@@ -387,6 +387,58 @@
 
   <!-- ④ DATA -->
   <div class="pane" id="data">
+
+    <div class="card" style="margin-bottom:16px">
+      <h3>課程資料集一覽 — 點課文 cell 查詳情</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 12px">每個 cell 可點擊，顯示：raw DOCX 來源說明 · extract schema 摘要 · 前端 UI 截圖</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+        <div class="course-cell" data-lesson="G6-L22" data-strategy="summary_pse" data-blocks='{"fill_table":1,"free_text":1,"guide":8,"passage":4,"single":15}' style="cursor:pointer;padding:12px;background:var(--chip);border:2px solid var(--purple);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background='#e0d9ff'" onmouseout="this.style.background='var(--chip)'">
+          <div style="font-weight:700;color:var(--purple)">G6-L22</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">summary_pse</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--green)">29 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G6-L23" data-strategy="summary_pse" data-blocks='{"fill_table":1,"free_text":13,"guide":20,"passage":6,"self_check":1,"single":2}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G6-L23</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">summary_pse</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">43 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G6-L24" data-strategy="summary_pse" data-blocks='{"fill_table":1,"guide":5,"self_check":1,"single":3}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G6-L24</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">summary_pse</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">10 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G6-L25" data-strategy="summary_pse" data-blocks='{"fill_table":1,"guide":2,"self_check":1,"single":3}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G6-L25</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">summary_pse</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">7 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G7-L28" data-strategy="image_text" data-blocks='{"figure":1,"fill_table":1,"free_text":7,"guide":22,"passage":3,"self_check":1,"single":5}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G7-L28</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">image_text</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">40 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G7-L29" data-strategy="image_text" data-blocks='{"figure":5,"free_text":6,"guide":32,"self_check":1,"single":24}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G7-L29</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">image_text</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">68 blocks</div>
+        </div>
+        <div class="course-cell" data-lesson="G7-L30" data-strategy="table_text" data-blocks='{"figure":5,"free_text":4,"guide":21,"passage":2,"self_check":1,"single":19}' style="cursor:pointer;padding:12px;background:#f9f6f0;border:1px solid var(--line);border-radius:10px;text-align:center;transition:background .15s" onmouseover="this.style.background=var(--chip)" onmouseout="this.style.background='#f9f6f0'">
+          <div style="font-weight:700;color:var(--ink)">G7-L30</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px">table_text</div>
+          <div style="font-size:.68rem;margin-top:4px;color:var(--muted)">52 blocks</div>
+        </div>
+      </div>
+      <p style="font-size:.72rem;color:var(--muted);margin-top:8px">G6-L22 = 完整 popup 範本；其餘課 popup 共用代表截圖</p>
+    </div>
+
+    <!-- Lesson popup modal -->
+    <div id="lesson-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#fff;border-radius:14px;max-width:680px;width:100%;max-height:88vh;overflow-y:auto;padding:24px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+        <button id="modal-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1">×</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+
     <div class="card">
       <h3>spotlight manifest 資料來源</h3>
       <p><code>frontend/public/presentation/data/spotlight_manifest.json</code><br>
@@ -540,6 +592,64 @@ document.querySelectorAll('.tab').forEach(function(btn) {
   }
   tick();
 })();
+
+/* ── Course cell popup ── */
+var LESSON_DATA = {
+  'G6-L22': {
+    rawDocx: 'private/curriculum-source/2026-05-01/G6-L22-摘要策略.docx（gitignored — 原始學習單 DOCX，含教師版排版與 B10 圖表素材）',
+    yamlPath: 'backend/data/lessons/G6-L22-孟嘗君.yml → spotlight key',
+    strategy: 'summary_pse',
+    blockCount: 29,
+    note: 'G6-L22 完整 popup 範本課（孟嘗君 / 大象故事）'
+  },
+  'G6-L23': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G6-L23*.yml → spotlight key', strategy: 'summary_pse', blockCount: 43, note: '代表截圖' },
+  'G6-L24': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G6-L24*.yml → spotlight key', strategy: 'summary_pse', blockCount: 10, note: '代表截圖' },
+  'G6-L25': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G6-L25*.yml → spotlight key', strategy: 'summary_pse', blockCount: 7, note: '代表截圖' },
+  'G7-L28': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G7-L28*.yml → spotlight key', strategy: 'image_text', blockCount: 40, note: '代表截圖' },
+  'G7-L29': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G7-L29*.yml → spotlight key', strategy: 'image_text', blockCount: 68, note: '代表截圖' },
+  'G7-L30': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G7-L30*.yml → spotlight key', strategy: 'table_text', blockCount: 52, note: '代表截圖' }
+};
+
+document.querySelectorAll('.course-cell').forEach(function(cell) {
+  cell.addEventListener('click', function() {
+    var lessonId = cell.getAttribute('data-lesson');
+    var d = LESSON_DATA[lessonId] || {};
+    var blocksRaw = cell.getAttribute('data-blocks');
+    var blocks = {};
+    try { blocks = JSON.parse(blocksRaw); } catch(e) {}
+    var blockRows = Object.entries(blocks).map(function(kv) {
+      return '<tr><td><code>' + kv[0] + '</code></td><td>' + kv[1] + '</td></tr>';
+    }).join('');
+    var isFullSample = lessonId === 'G6-L22';
+    document.getElementById('modal-content').innerHTML =
+      '<h2 style="color:var(--purple);margin:0 0 4px">' + lessonId + '</h2>' +
+      '<div style="font-size:.82rem;color:var(--muted);margin-bottom:14px">策略類型：' + (d.strategy||'') + ' · ' + (d.blockCount||'') + ' blocks' +
+        (isFullSample ? ' · <b>完整範本課</b>' : ' · 代表截圖') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">' +
+        '<div>' +
+          '<h4 style="color:var(--ink);margin:0 0 6px;font-size:.9rem">① raw DOCX 來源</h4>' +
+          '<div style="font-size:.8rem;background:#f9f6f0;border-radius:6px;padding:10px;color:var(--muted)">' + (d.rawDocx||'—') + '</div>' +
+          '<h4 style="color:var(--ink);margin:12px 0 6px;font-size:.9rem">② extract schema（block 結構摘要）</h4>' +
+          '<table style="width:100%;font-size:.78rem"><thead><tr><th>block type</th><th>數量</th></tr></thead><tbody>' + blockRows + '</tbody></table>' +
+          '<div style="font-size:.75rem;color:var(--muted);margin-top:4px">' + (d.yamlPath||'') + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<h4 style="color:var(--ink);margin:0 0 6px;font-size:.9rem">③ 真實前端 UI</h4>' +
+          '<img src="component-shots/spotlight-ui.png" alt="聚光燈 UI 截圖（G6-L22 代表）" style="width:100%;border-radius:8px;border:1px solid var(--line)">' +
+          '<p style="font-size:.72rem;color:var(--muted);margin:4px 0 0">' + (isFullSample ? 'G6-L22 孟嘗君 reading-strategy 頁' : '代表截圖（G6-L22）— 相同 BlockSequenceRenderer 渲染') + '</p>' +
+        '</div>' +
+      '</div>';
+    var modal = document.getElementById('lesson-modal');
+    modal.style.display = 'flex';
+  });
+});
+
+document.getElementById('modal-close').addEventListener('click', function() {
+  document.getElementById('lesson-modal').style.display = 'none';
+});
+document.getElementById('lesson-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
 </script>
 </body>
 </html>

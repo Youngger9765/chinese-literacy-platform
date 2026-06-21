@@ -11,5 +11,5 @@ spotlight:
     prompt: ２.正負轉換試試看：請幫情境裡的負向想法，轉換成正向的想法。答案只要合理都可以哦！
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null

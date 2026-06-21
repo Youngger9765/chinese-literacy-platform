@@ -11,19 +11,19 @@ spotlight:
     text: ＊營養：
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: ＊水分：
   - type: figure
     referent: table
-    asset: null
+    asset: fig10.png
     bind_paragraph: null
   - type: guide
     text: ＊休息：
   - type: figure
     referent: table
-    asset: null
+    asset: fig11.png
     bind_paragraph: null
   - type: guide
     text: ＊反思──我發現自己：

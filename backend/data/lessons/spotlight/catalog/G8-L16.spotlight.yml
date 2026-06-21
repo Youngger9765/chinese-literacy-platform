@@ -23,7 +23,7 @@ spotlight:
       接下來要做的就是抓住這些線索，推論作者和阿嬤的關係如何改變，並進一步理解作者真正想傳達的意思。'
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 二、把三個階段串連起來看歷程。(單選)

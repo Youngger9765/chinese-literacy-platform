@@ -25,7 +25,7 @@ spotlight:
     text: 先猜測標題想要傳達的重點。
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: guide
     text: 猜測：這篇可能是在講 　　　一位流傳已久的老師        的故事

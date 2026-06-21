@@ -32,7 +32,7 @@ spotlight:
     prompt: 2.請圈出遞進複句的關聯詞
   - type: figure
     referent: table
-    asset: null
+    asset: fig1.png
     bind_paragraph: null
   - type: free_text
     prompt: 3. 讀段落，寫句子
