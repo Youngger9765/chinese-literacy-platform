@@ -12,7 +12,7 @@ spotlight:
     asset: fig1.png
     bind_paragraph: null
   - type: free_text
-    prompt: ２.<𪹚1龍慶元宵>　彭仁星
+    prompt: ２.〈𪹚龍慶元宵〉　彭仁星
   - type: figure
     referent: table
     asset: fig10.png
