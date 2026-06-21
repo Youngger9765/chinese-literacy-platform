@@ -106,10 +106,11 @@ const TutorFeedbackPanel: React.FC<TutorFeedbackPanelProps> = ({
 
       </div>
 
-      {/* Mic error */}
+      {/* Mic error — Issue #2357: promote to opaque banner with icon */}
       {micError && (
-        <div className="flex-shrink-0 px-4 py-2 bg-rose-50 border-t border-rose-100">
-          <span className="text-xs text-rose-500">{micError}</span>
+        <div className="flex-shrink-0 mx-4 mb-3 flex items-center gap-3 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-300 shadow-sm">
+          <span className="material-symbols-outlined text-rose-600 shrink-0">mic_off</span>
+          <p className="text-base font-bold text-rose-800">{micError}</p>
         </div>
       )}
     </div>

@@ -392,8 +392,8 @@ const FullReading: React.FC<FullReadingProps> = ({
             <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
               <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
               <div className="flex-1">
-                <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
-                <p className="text-xs text-amber-700 mt-0.5">
+                <p className="text-base font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+                <p className="text-sm text-amber-700 mt-0.5">
                   AI 音訊分析未能完成（{fallbackReason}），評分僅依瀏覽器語音辨識，準確度較低。建議重試以獲得精準評分。
                 </p>
               </div>
@@ -475,10 +475,13 @@ const FullReading: React.FC<FullReadingProps> = ({
         </div>
       </div>
 
-      {/* Mic error */}
+      {/* Mic error — Issue #2357: opaque banner, not transparent pill overlapping passage */}
       {micError && (
-        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 px-5 py-2 bg-tertiary-container/20 rounded-full z-20">
-          <span className="text-sm text-tertiary">{micError}</span>
+        <div className="mt-4 flex items-start gap-3 px-5 py-4 rounded-2xl bg-rose-50 border border-rose-300 shadow-sm">
+          <span className="material-symbols-outlined text-rose-600 shrink-0 mt-0.5">mic_off</span>
+          <div className="flex-1">
+            <p className="text-base font-bold text-rose-800">{micError}</p>
+          </div>
         </div>
       )}
 

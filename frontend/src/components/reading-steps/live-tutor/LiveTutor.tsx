@@ -759,8 +759,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-md">
             <span className="material-symbols-outlined text-amber-600 shrink-0">warning</span>
             <div className="flex-1">
-              <p className="text-sm font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
-              <p className="text-xs text-amber-700 mt-0.5">
+              <p className="text-base font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+              <p className="text-sm text-amber-700 mt-0.5">
                 AI 音訊分析未能完成（{paragraphFallbackReason}），評分依瀏覽器語音辨識，準確度較低。建議重試此段。
               </p>
             </div>
