@@ -40,6 +40,37 @@ OPTION_LINE_RE = re.compile(r"^[①②③④⑤⑥⑦⑧⑨⑩]|^□\s*[①②�
 GUIDE_HEADER_RE = re.compile(
     r"^步驟[❶❷❸❹①②③④]|^小祕訣|^小提醒|^練習[一二三四五六七八九十]|^說明：|^前一課|^※|^[◎※]\s*自我檢核"
 )
+INSTRUCTIONAL_CHECKBOX_RE = re.compile(r"[（(]\s*□\s*[^□/／()（）]{1,6}\s*[/／]\s*□?\s*[^□/／()（）]{1,6}\s*[）)]")
+CHART_READING_CUES = (
+    "折線圖",
+    "長條圖",
+    "圖表判讀",
+    "圖文表整合",
+    "圖表繪製",
+    "判讀圖表",
+    "組織圖表",
+)
+WENYAN_GRAMMAR_CUES = (
+    "代詞所指",
+    "指示代詞",
+    "疑問代詞",
+    "指出主語",
+    "主語是",
+    "判斷句",
+    "句型",
+    "固定句式",
+    "一字多義",
+    "詞義",
+)
+WENYAN_GENERIC_STORY_CUES = (
+    "故事脈絡",
+    "主角",
+    "主要人物",
+    "問題",
+    "解決",
+    "結果",
+    "結局",
+)
 
 
 def is_option_line(text: str) -> bool:
@@ -73,6 +104,8 @@ def split_inline_box_options(text: str) -> list[tuple[str, bool]] | None:
     """
     t = (text or "").strip()
     if GUIDE_HEADER_RE.match(t):
+        return None
+    if INSTRUCTIONAL_CHECKBOX_RE.search(t):
         return None
 
     # □①opt1 □②opt2 — multiple boxed circled options (multi-select lines)
@@ -118,6 +151,22 @@ def split_inline_box_options(text: str) -> list[tuple[str, bool]] | None:
     if len(out) < 2:
         return None
     if t.startswith("□"):
+        parsed: list[tuple[str, bool]] = []
+        parts = re.split(r"\s*□\s*", t)
+        for idx, part in enumerate(parts):
+            part = part.strip()
+            if not part:
+                continue
+            subtokens = re.split(r"[　\s]+", part)
+            subtokens = [re.sub(r"^[①②③④⑤⑥⑦⑧⑨⑩]\s*", "", s).strip() for s in subtokens if s.strip()]
+            if not subtokens:
+                continue
+            parsed.append((subtokens[0], True))
+            # `□A　B` means A is distractor, B is the unboxed answer.
+            for tok in subtokens[1:]:
+                parsed.append((tok, False))
+        if len(parsed) >= 2:
+            return parsed
         return [(p, True) for p, _ in out]
     return [(out[0][0], False)] + [(p, True) for p, _ in out[1:]]
 
@@ -322,6 +371,8 @@ def _is_checkbox_guide_text(text: str) -> bool:
 
 
 def _options_from_checkbox_guide(text: str) -> list[str]:
+    if INSTRUCTIONAL_CHECKBOX_RE.search((text or "").strip()):
+        return []
     inline = split_inline_box_options(text)
     if inline:
         return [o for o, _ in inline if o]
@@ -1421,38 +1472,176 @@ def get_lesson_story_text(lesson_id):
     Used to detect source=lesson_text vs source=supplementary.
     Reads from backend/data/lessons/ YAML files.
     """
-    # Try to find and load the lesson YAML
-    lessons_dir = Path("/Users/young/project/chinese-literacy-platform-issue-2205/backend/data/lessons")
-    if not lessons_dir.exists():
+    resolved = extract_lesson_id(lesson_id=lesson_id)
+    if not resolved:
         return []
-
-    # Search for matching lesson YAML
-    lesson_num = re.search(r"L(\d+)", lesson_id)
-    if not lesson_num:
-        return []
-    l_num = lesson_num.group(1)
-
-    candidates = list(lessons_dir.glob(f"*L{l_num}*.yml")) + list(lessons_dir.glob(f"*L{l_num}*.yaml"))
-    if not candidates:
-        return []
-
-    import yaml as pyyaml
-    story_lines = []
     try:
-        with open(candidates[0], 'r', encoding='utf-8') as f:
-            data = pyyaml.safe_load(f)
-        # Extract story text from various possible keys
-        for key in ('story_text', 'content', 'text', 'paragraphs'):
-            if key in data:
-                val = data[key]
-                if isinstance(val, list):
-                    story_lines.extend(str(v) for v in val)
-                elif isinstance(val, str):
-                    story_lines.append(val)
+        from app.services.lesson_loader import get_lesson_by_code
     except Exception:
-        pass
+        return []
+    lesson = get_lesson_by_code(resolved)
+    if not lesson:
+        return []
+    story_lines = lesson.get("paragraphs") or []
+    if isinstance(story_lines, list):
+        return [str(v) for v in story_lines if str(v).strip()]
+    return []
 
-    return story_lines
+
+def extract_lesson_id(lesson_id: str | None = None, docx_path: str | None = None) -> str | None:
+    """
+    Resolve canonical lesson code and avoid cross-lesson contamination.
+
+    Priority:
+    1) Explicit lesson_id argument
+    2) DOCX filename prefix (e.g. G8-SL4..., 文-SL5...)
+    """
+    raw_candidates: list[str] = []
+    if lesson_id:
+        raw_candidates.append(lesson_id)
+    if docx_path:
+        stem = Path(docx_path).stem
+        m = re.search(r"([GＧ]\d+\s*[-－]\s*(?:SL|L)\s*\d+[abAB]?|[文WWｗＷ]+\s*[-－]\s*(?:SL|L)\s*\d+)", stem)
+        if m:
+            raw_candidates.append(m.group(1))
+    if not raw_candidates:
+        return None
+
+    def _normalize(code: str) -> str:
+        out = code.strip().upper()
+        out = out.replace("－", "-").replace(" ", "")
+        out = out.replace("Ｇ", "G").replace("Ｗ", "W")
+        out = out.replace("WW", "文")
+        out = out.replace("W-", "文-")
+        return out
+
+    raw = _normalize(raw_candidates[0])
+    if "-SL" in raw:
+        # G8 worksheets use SL numbering while platform stories include a/b splits.
+        # Keep this map explicit to avoid off-by-one cross-lesson contamination.
+        sl_map = {
+            "G8-SL4": "G8-L3b",
+            "G8-SL5": "G8-L4",
+            "G8-SL6": "G8-L5",
+            "G8-SL7": "G8-L6a",
+            "G8-SL8": "G8-L6b",
+        }
+        raw = sl_map.get(raw, raw.replace("-SL", "-L"))
+    if raw.startswith("文-SL"):
+        raw = raw.replace("文-SL", "文-L")
+    return raw
+
+
+def _is_chart_reading_strategy(strategy_name: str, strategy_type: str) -> bool:
+    merged = f"{strategy_name} {strategy_type}"
+    return any(cue in merged for cue in CHART_READING_CUES)
+
+
+def _is_wenyan_missing_material(blocks: list, strategy_type: str) -> bool:
+    if strategy_type != "classical_grammar":
+        return False
+    text = " ".join(
+        str(b.get("text") or b.get("prompt") or "")
+        for b in blocks
+        if b.get("type") in {"guide", "free_text", "single", "multi"}
+    )
+    if not text.strip():
+        return True
+    generic_hits = [cue for cue in WENYAN_GENERIC_STORY_CUES if cue in text]
+    grammar_hits = [cue for cue in WENYAN_GRAMMAR_CUES if cue in text]
+    return len(set(generic_hits)) >= 2 and len(grammar_hits) == 0
+
+
+def _wenyan_grammar_anchor(strategy_name: str) -> str:
+    label = strategy_name or ""
+    if "代詞" in label:
+        return "代詞所指"
+    if "判斷句" in label:
+        return "判斷句"
+    if "固定句式" in label:
+        return "固定句式"
+    if "一字多義" in label:
+        return "一字多義"
+    if "主語" in label:
+        return "指出主語"
+    return "句型"
+
+
+def _sanitize_choice_options(options: list[str]) -> list[str]:
+    artifact_opts = {"請在", "打勾，並將比喻的東西圈起來。", "打勾", "）。", "/", "／"}
+    cleaned: list[str] = []
+    for opt in options:
+        t = str(opt or "").strip()
+        t = re.sub(r"^[→\-]\s*", "", t)
+        if not t or t in artifact_opts:
+            continue
+        if re.search(r"請在|打勾", t) and len(re.sub(r"\s+", "", t)) <= 12:
+            continue
+        if re.fullmatch(r"[()/／\s。．，,]+", t):
+            continue
+        cleaned.append(t)
+    deduped: list[str] = []
+    seen = set()
+    for t in cleaned:
+        if t not in seen:
+            seen.add(t)
+            deduped.append(t)
+    return deduped
+
+
+def _infer_binary_options_from_prompt(prompt: str) -> tuple[list[str], str | None]:
+    m = re.search(r"[（(]\s*(□?)\s*([^/／）)]+?)\s*[/／]\s*(□?)\s*([^）)]+?)\s*[）)]", prompt or "")
+    if not m:
+        return [], None
+    left_mark, left_raw, right_mark, right_raw = m.groups()
+    left = re.sub(r"\s+", "", left_raw).strip("。．")
+    right = re.sub(r"\s+", "", right_raw).strip("。．")
+    if not left or not right:
+        return [], None
+    answer = None
+    if left_mark != "□":
+        answer = left
+    elif right_mark != "□":
+        answer = right
+    return [left, right], answer
+
+
+def repair_choice_blocks(blocks: list) -> list:
+    repaired: list = []
+    for b in blocks:
+        if b.get("type") not in {"single", "multi"}:
+            repaired.append(b)
+            continue
+        prompt = str(b.get("prompt") or "")
+        opts = _sanitize_choice_options([str(o) for o in (b.get("options") or []) if str(o).strip()])
+        inferred_opts, inferred_answer = _infer_binary_options_from_prompt(prompt)
+        if len(opts) < 2 and len(inferred_opts) >= 2:
+            opts = inferred_opts
+            if b.get("type") == "single":
+                b["answer"] = inferred_answer or inferred_opts[0]
+        # Prevent instructional guide sentences from turning into fake choices.
+        if b.get("type") == "single" and len(opts) < 2:
+            repaired.append({"type": "free_text", "prompt": prompt})
+            continue
+        b["options"] = opts
+        if b.get("type") == "single":
+            ans = str(b.get("answer") or "").strip()
+            if ans not in opts and inferred_answer in opts:
+                b["answer"] = inferred_answer
+            elif ans not in opts and opts:
+                b["answer"] = opts[0]
+            # Known bad pattern: conclusion question accidentally picks immediate-action distractor.
+            if re.search(r"結論|結果", prompt) and re.search(r"立刻|馬上", str(b.get("answer") or "")):
+                for opt in opts:
+                    if not re.search(r"立刻|馬上", opt):
+                        b["answer"] = opt
+                        break
+        else:
+            ans = b.get("answer")
+            if isinstance(ans, list):
+                b["answer"] = [a for a in ans if a in opts]
+        repaired.append(b)
+    return repaired
 
 
 def merge_passage_lines(blocks, lesson_id=None):
@@ -1651,7 +1840,7 @@ def extract_single_options(blocks, raw_blocks, spotlight_start, spotlight_end):
     return blocks
 
 
-def bind_assets_to_figures(blocks, assets):
+def bind_assets_to_figures(blocks, assets, strategy_name="", strategy_type=""):
     """
     Bind extracted asset filenames to figure blocks in the spotlight.
     Figure blocks are assigned assets in document order (sequential binding).
@@ -1667,19 +1856,32 @@ def bind_assets_to_figures(blocks, assets):
 
     img_idx = 0
     tbl_idx = 0
+    chart_mode = _is_chart_reading_strategy(strategy_name, strategy_type)
 
     for b in blocks:
         if not b.get("_needs_asset_bind"):
             continue
 
-        if b.get("referent") == "image" and img_idx < len(image_assets):
-            b["asset"] = image_assets[img_idx]["filename"]
-            b["bind_paragraph"] = image_assets[img_idx].get("context", "")
-            img_idx += 1
-        elif b.get("referent") == "table" and tbl_idx < len(table_assets):
-            b["asset"] = table_assets[tbl_idx]["filename"]
-            b["bind_paragraph"] = table_assets[tbl_idx].get("context", "")
-            tbl_idx += 1
+        if b.get("referent") == "image":
+            if img_idx < len(image_assets):
+                b["asset"] = image_assets[img_idx]["filename"]
+                b["bind_paragraph"] = image_assets[img_idx].get("context", "")
+                img_idx += 1
+            elif chart_mode and image_assets:
+                # Chart lessons often reuse the same chart figure in multiple prompts.
+                b["asset"] = image_assets[0]["filename"]
+                b["bind_paragraph"] = image_assets[0].get("context", "")
+        elif b.get("referent") == "table":
+            if tbl_idx < len(table_assets):
+                b["asset"] = table_assets[tbl_idx]["filename"]
+                b["bind_paragraph"] = table_assets[tbl_idx].get("context", "")
+                tbl_idx += 1
+            elif chart_mode and image_assets:
+                b["asset"] = image_assets[0]["filename"]
+                b["bind_paragraph"] = image_assets[0].get("context", "")
+            elif chart_mode:
+                b["asset"] = f"table-inline-{tbl_idx + 1}.json"
+                b["bind_paragraph"] = b.get("bind_paragraph") or "chart-inline-table"
 
         b.pop("_needs_asset_bind", None)
 
@@ -1813,6 +2015,30 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
     spotlight_start, spotlight_end = find_spotlight_range(blocks)
 
     if spotlight_start is None:
+        if strategy_type == "classical_grammar":
+            strategy_label = strategy_name or "文言聚光燈"
+            grammar_anchor = _wenyan_grammar_anchor(strategy_label)
+            return {
+                "spotlight": {
+                    "lesson": lesson_id,
+                    "strategy_name": strategy_name,
+                    "strategy_type": strategy_type,
+                    "blocks": [
+                        {
+                            "type": "guide",
+                            "text": (
+                                f"[MISSING_SPOTLIGHT_SOURCE] {strategy_label}（文言聚光燈）缺可抽取素材，需人工補件"
+                                f"（語法焦點：{grammar_anchor}）"
+                            ),
+                        },
+                        {
+                            "type": "free_text",
+                            "prompt": f"{strategy_label}（文言聚光燈）缺料（語法焦點：{grammar_anchor}，待補件）",
+                        },
+                    ],
+                    "_missing_source": True,
+                }
+            }
         return {"spotlight": {"lesson": lesson_id, "error": "spotlight range not found"}}
 
     spotlight_blocks_raw = blocks[spotlight_start:spotlight_end]
@@ -1840,10 +2066,16 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
     classified = expand_embedded_pse_guides(classified)
 
     classified = salvage_or_downgrade_singles(classified)
+    classified = repair_choice_blocks(classified)
 
     # Bind assets to figure blocks
     if assets:
-        classified = bind_assets_to_figures(classified, assets)
+        classified = bind_assets_to_figures(
+            classified,
+            assets,
+            strategy_name=strategy_name,
+            strategy_type=strategy_type,
+        )
 
     # Inject per-practice figure blocks for image_text / table_text lessons
     # (inserts figure blocks before 「練習N vs 圖N/表N」guide blocks)
@@ -1868,6 +2100,24 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
         if b.get("type") in ("single", "multi") and b.get("answer") is None
     ]
 
+    wenyan_missing = _is_wenyan_missing_material(final_blocks, strategy_type)
+    if wenyan_missing:
+        strategy_label = strategy_name or "文言聚光燈"
+        grammar_anchor = _wenyan_grammar_anchor(strategy_label)
+        final_blocks = [
+            {
+                "type": "guide",
+                "text": (
+                    f"[MISSING_SPOTLIGHT_SOURCE] {strategy_label}（文言聚光燈）缺可抽取素材，需人工補件"
+                    f"（語法焦點：{grammar_anchor}）"
+                ),
+            },
+            {
+                "type": "free_text",
+                "prompt": f"{strategy_label}（文言聚光燈）缺料（語法焦點：{grammar_anchor}，待補件）",
+            },
+        ]
+
     schema = {
         "spotlight": {
             "lesson": lesson_id,
@@ -1876,6 +2126,8 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
             "blocks": final_blocks,
         }
     }
+    if wenyan_missing:
+        schema["spotlight"]["_missing_source"] = True
 
     if null_answers:
         schema["spotlight"]["_null_answers"] = null_answers
@@ -2009,12 +2261,15 @@ def detect_strategy_from_filename(docx_path):
 
 
 def process_lesson(lesson_id, docx_path, output_dir):
+    resolved_lesson_id = extract_lesson_id(lesson_id=lesson_id, docx_path=docx_path) or lesson_id
     print(f"\n{'='*60}")
-    print(f"Processing {lesson_id} : {Path(docx_path).name}")
+    print(f"Processing {resolved_lesson_id} : {Path(docx_path).name}")
     print('='*60)
+    if resolved_lesson_id != lesson_id:
+        print(f"[lesson_id] normalized: {lesson_id} -> {resolved_lesson_id}")
 
     raw_blocks = extract_raw(docx_path)
-    meta = LESSON_META.get(lesson_id, {})
+    meta = LESSON_META.get(resolved_lesson_id, {})
 
     # Strategy: prefer LESSON_META (manually curated for 7 professor lessons)
     # then fall back to filename parsing (generalizes to all 151 lessons)
@@ -2026,18 +2281,18 @@ def process_lesson(lesson_id, docx_path, output_dir):
         print(f"[strategy] Detected from filename: {strategy_name} → {strategy_type}")
 
     # 0. Extract assets (images + data tables)
-    asset_dir = Path(output_dir) / "assets" / lesson_id
-    assets = extract_assets(docx_path, lesson_id, asset_dir, meta)
+    asset_dir = Path(output_dir) / "assets" / resolved_lesson_id
+    assets = extract_assets(docx_path, resolved_lesson_id, asset_dir, meta)
     print(f"[assets] Extracted {len(assets)} asset(s) to {asset_dir}")
     for a in assets:
         print(f"  {a.get('seq')}: {a['filename']} — context: {a.get('context', '')[:50]}")
 
     # 1. Build keypoints schema
-    kp_table = find_keypoints_table(raw_blocks, lesson_id)
+    kp_table = find_keypoints_table(raw_blocks, resolved_lesson_id)
     kp_schema = None
     if kp_table:
-        kp_schema = extract_keypoints(kp_table, lesson_id)
-        kp_path = Path(output_dir) / f"{lesson_id}.keypoints.yml"
+        kp_schema = extract_keypoints(kp_table, resolved_lesson_id)
+        kp_path = Path(output_dir) / f"{resolved_lesson_id}.keypoints.yml"
         with open(kp_path, "w", encoding="utf-8") as f:
             yaml.dump(kp_schema, f, allow_unicode=True, default_flow_style=False,
                      sort_keys=False)
@@ -2050,14 +2305,14 @@ def process_lesson(lesson_id, docx_path, output_dir):
         )
         print(f"  Blanks found: {blank_count}")
     else:
-        print(f"[keypoints] WARNING: No keypoints table found for {lesson_id}")
+        print(f"[keypoints] WARNING: No keypoints table found for {resolved_lesson_id}")
 
     # 2. Build spotlight schema (with assets for figure binding)
     sp_schema = build_spotlight_schema(
-        lesson_id, raw_blocks, raw_blocks, strategy_type, strategy_name,
+        resolved_lesson_id, raw_blocks, raw_blocks, strategy_type, strategy_name,
         assets=assets
     )
-    sp_path = Path(output_dir) / f"{lesson_id}.spotlight.yml"
+    sp_path = Path(output_dir) / f"{resolved_lesson_id}.spotlight.yml"
     with open(sp_path, "w", encoding="utf-8") as f:
         yaml.dump(sp_schema, f, allow_unicode=True, default_flow_style=False,
                  sort_keys=False)

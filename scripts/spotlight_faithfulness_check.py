@@ -9,6 +9,7 @@ It evaluates all stories that have non-empty reading_strategy (expected: 161).
 from __future__ import annotations
 
 import argparse
+import copy
 import difflib
 import hashlib
 import json
@@ -21,31 +22,35 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import yaml
 
 DEFAULT_BASE_URL = "https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
 DEFAULT_OUT = Path(".qa-screenshots/spotlight-sweep/faithfulness-report.json")
 
-# User-specified red list from the Stage-1 request
+# Known-FAIL baseline (post round-3). Real extractor bugs 54/1089/1103/1115/1116
+# are FIXED (content-verified) and dropped from this set so they freeze into golden.
+# Remaining are content gaps (文言 inv=7) + 空骨架 inv=2 + option inv=3 + reading_strategy
+# placeholder inv=4 — tracked here as the current regression baseline.
 EXPECTED_RED_IDS = {
-    1115,
-    1116,
-    1103,
-    1089,
+    23,
+    46,
+    47,
+    1010,
+    1011,
+    1014,
+    1023,
+    1044,
     1053,
     1054,
-    1144,
-    1146,
-    1014,
-    1044,
     1056,
     1057,
     1111,
-    23,
+    1121,
+    1144,
+    1146,
     1154,
     1155,
     1158,
-    54,
-    1010,
 }
 
 INTERACTIVE_TYPES = {"single", "multi", "fill", "fill_blank", "free_text"}
@@ -127,6 +132,13 @@ CHART_READING_STRATEGY_CUES = (
     "圖表繪製",
     "判讀圖表",
     "組織圖表",
+)
+# 缺源護欄：抽取器抽不到素材時的 placeholder 標記。
+# 這些課只能標「待人工補件」，不可冒充成有效題目 silent PASS（防 relabel-to-placeholder gaming）。
+MISSING_SOURCE_MARKERS = (
+    "[missing_spotlight_source]",
+    "缺可抽取素材",
+    "待補件",
 )
 
 
@@ -652,6 +664,19 @@ def check_invariant_6(
     )
 
 
+def check_invariant_8(story: dict[str, Any]) -> InvariantResult:
+    """缺源護欄：_missing_source placeholder 不可冒充成題目 silent PASS。
+    缺源課文只能誠實標記待人工補件 → FAIL（flag 給人補），不可 relabel 成 strategy_name 騙過 inv=7。"""
+    sv2 = story.get("spotlight_v2")
+    if isinstance(sv2, dict) and sv2.get("_missing_source") is True:
+        return InvariantResult(False, "missing_source placeholder — needs human content")
+    for b in spotlight_blocks(story):
+        text = normalize_text(str(b.get("text") or b.get("prompt") or ""))
+        if any(marker in text for marker in MISSING_SOURCE_MARKERS):
+            return InvariantResult(False, "placeholder marker in block text — needs human content")
+    return InvariantResult(True, "no missing-source placeholder")
+
+
 def evaluate_story(
     story: dict[str, Any],
     by_design_empty_ids: set[int],
@@ -667,6 +692,7 @@ def evaluate_story(
         "5": check_invariant_5(story, blocks),
         "6": check_invariant_6(story, all_story_tokens, all_rendered_tokens),
         "7": check_invariant_7(story),
+        "8": check_invariant_8(story),
     }
     failed = [inv for inv, result in checks.items() if not result.ok]
     return {
@@ -694,10 +720,61 @@ def load_story_ids(base_url: str) -> list[int]:
     ]
 
 
+def _load_local_override_spotlights(schema_dir: str) -> dict[str, dict[str, Any]]:
+    if not schema_dir:
+        return {}
+    root = Path(schema_dir)
+    if not root.exists():
+        return {}
+    mapping: dict[str, dict[str, Any]] = {}
+    for path in sorted(root.glob("*.spotlight.yml")):
+        try:
+            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        spotlight = payload.get("spotlight") if isinstance(payload, dict) else None
+        if not isinstance(spotlight, dict):
+            continue
+        lesson = str(spotlight.get("lesson") or path.stem.replace(".spotlight", ""))
+        if lesson:
+            mapping[lesson] = spotlight
+    return mapping
+
+
+def load_stories_local(schema_dir: str = "") -> list[dict[str, Any]]:
+    repo_root = Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(repo_root / "backend"))
+    from app.services.lesson_loader import get_all_lessons  # noqa: PLC0415
+
+    stories = [
+        copy.deepcopy(s)
+        for s in get_all_lessons()
+        if isinstance(s, dict) and normalize_text(str(s.get("reading_strategy") or ""))
+    ]
+    overrides = _load_local_override_spotlights(schema_dir)
+    if not overrides:
+        return stories
+    for story in stories:
+        code = str(story.get("grade_code") or "")
+        if code in overrides:
+            story["spotlight_v2"] = overrides[code]
+    return stories
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run spotlight content-faithfulness invariants")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument(
+        "--local",
+        action="store_true",
+        help="evaluate local lesson_loader data (no HTTP)",
+    )
+    parser.add_argument(
+        "--schema-dir",
+        default="",
+        help="optional override directory containing *.spotlight.yml (used with --local)",
+    )
     parser.add_argument(
         "--by-design-empty",
         default="",
@@ -711,15 +788,18 @@ def main() -> int:
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    story_ids = load_story_ids(args.base_url)
-    print(f"[info] stories with reading_strategy: {len(story_ids)}")
-
-    stories: list[dict[str, Any]] = []
-    for idx, sid in enumerate(story_ids, start=1):
-        story = http_json(f"{args.base_url}/api/stories/{sid}")
-        stories.append(story)
-        print(f"[fetch {idx:03d}/{len(story_ids)}] {sid} {story.get('grade_code')}")
-        time.sleep(0.04)
+    if args.local:
+        stories = load_stories_local(schema_dir=args.schema_dir)
+        print(f"[info] local stories with reading_strategy: {len(stories)}")
+    else:
+        story_ids = load_story_ids(args.base_url)
+        print(f"[info] stories with reading_strategy: {len(story_ids)}")
+        stories = []
+        for idx, sid in enumerate(story_ids, start=1):
+            story = http_json(f"{args.base_url}/api/stories/{sid}")
+            stories.append(story)
+            print(f"[fetch {idx:03d}/{len(story_ids)}] {sid} {story.get('grade_code')}")
+            time.sleep(0.04)
 
     all_story_tokens = {
         int(st["id"]): token_set(story_body_text(st))

@@ -1,0 +1,64 @@
+{
+  "key": "G7-L31+1103",
+  "story_id": 1103,
+  "lesson_code": "G7-L31",
+  "title": "最後一隻旅人鴿",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "figure",
+      "guide",
+      "passage",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "free_text",
+      "passage",
+      "guide",
+      "passage",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "free_text",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "single",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide"
+    ],
+    "question_count": 22,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-f3b641a987da7e44"
+  }
+}

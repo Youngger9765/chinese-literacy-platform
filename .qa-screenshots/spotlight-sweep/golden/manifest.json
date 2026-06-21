@@ -2,9 +2,9 @@
   "meta": {
     "report_path": ".qa-screenshots/spotlight-sweep/faithfulness-report.json",
     "total_stories": 161,
-    "frozen_count": 137,
+    "frozen_count": 142,
     "skipped_expected_red": 19,
-    "skipped_runtime_fail": 5
+    "skipped_runtime_fail": 0
   },
   "items": [
     {
@@ -624,6 +624,14 @@
       "question_count": 0
     },
     {
+      "key": "G7-L10+1089",
+      "story_id": 1089,
+      "lesson_code": "G7-L10",
+      "file": "G7-L10__1089.json",
+      "semantic_hash": "sha256-ed9e91e33b6c8191",
+      "question_count": 5
+    },
+    {
       "key": "G7-L11+1090",
       "story_id": 1090,
       "lesson_code": "G7-L11",
@@ -792,6 +800,14 @@
       "question_count": 23
     },
     {
+      "key": "G7-L31+1103",
+      "story_id": 1103,
+      "lesson_code": "G7-L31",
+      "file": "G7-L31__1103.json",
+      "semantic_hash": "sha256-f3b641a987da7e44",
+      "question_count": 22
+    },
+    {
       "key": "G7-L4+1083",
       "story_id": 1083,
       "lesson_code": "G7-L4",
@@ -896,6 +912,22 @@
       "question_count": 4
     },
     {
+      "key": "G8-L4+1115",
+      "story_id": 1115,
+      "lesson_code": "G8-L4",
+      "file": "G8-L4__1115.json",
+      "semantic_hash": "sha256-a984fe3cbba26e21",
+      "question_count": 4
+    },
+    {
+      "key": "G8-L5+1116",
+      "story_id": 1116,
+      "lesson_code": "G8-L5",
+      "file": "G8-L5__1116.json",
+      "semantic_hash": "sha256-e183969c2c582227",
+      "question_count": 9
+    },
+    {
       "key": "G8-L6a+1117",
       "story_id": 1117,
       "lesson_code": "G8-L6a",
@@ -982,6 +1014,14 @@
       "file": "G9-L08__53.json",
       "semantic_hash": "sha256-0422a6adc61e94ea",
       "question_count": 35
+    },
+    {
+      "key": "G9-L09+54",
+      "story_id": 54,
+      "lesson_code": "G9-L09",
+      "file": "G9-L09__54.json",
+      "semantic_hash": "sha256-092117666aae5e67",
+      "question_count": 8
     },
     {
       "key": "G9-L11+1140",
