@@ -310,6 +310,49 @@ def delete_gcs_blobs_for_paths(blob_paths: list[str]) -> tuple[int, int]:
     return deleted, failed
 
 
+_signing_creds = None
+_signing_creds_lock = threading.Lock()
+_signing_email: str | None = None
+
+
+def _signing_identity() -> tuple[str | None, str | None]:
+    """Return (service_account_email, access_token) for IAM-based v4 signing.
+
+    On Cloud Run/GCE the default credentials hold only an OAuth token, so v4
+    signing must go through the IAM SignBlob API — which needs the runtime SA's
+    email + a fresh access token. Returns (None, None) if unavailable (caller
+    then falls back to library default, e.g. a private key in local dev).
+    """
+    global _signing_creds, _signing_email
+    try:
+        from google.auth import default as _ga_default  # noqa: PLC0415
+        from google.auth.transport.requests import Request as _GaRequest  # noqa: PLC0415
+
+        with _signing_creds_lock:
+            if _signing_creds is None:
+                _signing_creds, _ = _ga_default()
+            creds = _signing_creds
+        if not getattr(creds, "valid", False):
+            creds.refresh(_GaRequest())
+
+        email = _signing_email or getattr(creds, "service_account_email", None)
+        if not email or email == "default":
+            # compute_engine creds may report "default" → resolve real email
+            import urllib.request  # noqa: PLC0415
+
+            req = urllib.request.Request(
+                "http://metadata.google.internal/computeMetadata/v1/instance/"
+                "service-accounts/default/email",
+                headers={"Metadata-Flavor": "Google"},
+            )
+            email = urllib.request.urlopen(req, timeout=2).read().decode().strip()  # noqa: S310
+        _signing_email = email
+        return email, getattr(creds, "token", None)
+    except Exception as exc:  # never block signing setup; fall back to default
+        logger.debug("signing identity unavailable, using library default: %s", exc)
+        return None, None
+
+
 def generate_audio_signed_url(
     blob_path: str,
     expiration_seconds: int = 600,
@@ -338,15 +381,27 @@ def generate_audio_signed_url(
 
     try:
         blob = bucket.blob(blob_path)
-        url = blob.generate_signed_url(
-            expiration=timedelta(seconds=expiration_seconds),
-            method="GET",
-            version="v4",
-        )
+        kwargs = {
+            "expiration": timedelta(seconds=expiration_seconds),
+            "method": "GET",
+            "version": "v4",
+        }
+        # Cloud Run / GCE default credentials only carry an OAuth token (no
+        # private key) → blob.generate_signed_url() would raise "you need a
+        # private key to sign credentials". Passing service_account_email +
+        # access_token makes the client sign via the IAM SignBlob API instead
+        # (requires the runtime SA to have roles/iam.serviceAccountTokenCreator
+        # on itself — already granted to the compute SA).
+        email, token = _signing_identity()
+        if email and token:
+            kwargs["service_account_email"] = email
+            kwargs["access_token"] = token
+        url = blob.generate_signed_url(**kwargs)
         logger.debug(
-            "reading-audio signed URL generated: path=%s expiry=%ds",
+            "reading-audio signed URL generated: path=%s expiry=%ds via_iam=%s",
             blob_path,
             expiration_seconds,
+            bool(email and token),
         )
         return url
     except Exception as exc:
