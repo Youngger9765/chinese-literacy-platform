@@ -12,7 +12,7 @@
       "story_id": 2,
       "lesson_code": "G4-L02",
       "file": "G4-L02__2.json",
-      "semantic_hash": "1efd4b5a480a85edc5db0a8e1964f870537df230a2c35e4d075050a438e7ed5c",
+      "semantic_hash": "sha256-1efd4b5a480a85ed",
       "question_count": 2
     },
     {
@@ -20,7 +20,7 @@
       "story_id": 3,
       "lesson_code": "G4-L03",
       "file": "G4-L03__3.json",
-      "semantic_hash": "9e980a667e8bf1a1adcbc08e9533f7b7862f9a81f03e3db3da627df681770a7f",
+      "semantic_hash": "sha256-9e980a667e8bf1a1",
       "question_count": 7
     },
     {
@@ -28,7 +28,7 @@
       "story_id": 4,
       "lesson_code": "G4-L04",
       "file": "G4-L04__4.json",
-      "semantic_hash": "aeccd35a272286e146caa1f896582b5704b1866773aced22fb67b5ba6e5ef348",
+      "semantic_hash": "sha256-aeccd35a272286e1",
       "question_count": 8
     },
     {
@@ -36,7 +36,7 @@
       "story_id": 5,
       "lesson_code": "G4-L05",
       "file": "G4-L05__5.json",
-      "semantic_hash": "781fa0de3645c6ce1df7ac5e8bb9b34a8879804249295e8fa310e0705e61c0cb",
+      "semantic_hash": "sha256-781fa0de3645c6ce",
       "question_count": 0
     },
     {
@@ -44,7 +44,7 @@
       "story_id": 1012,
       "lesson_code": "G4-L12",
       "file": "G4-L12__1012.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -52,7 +52,7 @@
       "story_id": 6,
       "lesson_code": "G4-L13",
       "file": "G4-L13__6.json",
-      "semantic_hash": "36a57865dcf863ba89eb9d15961d87965d77b65f7a403a814e9a19214f4bab46",
+      "semantic_hash": "sha256-36a57865dcf863ba",
       "question_count": 3
     },
     {
@@ -60,7 +60,7 @@
       "story_id": 1015,
       "lesson_code": "G4-L15",
       "file": "G4-L15__1015.json",
-      "semantic_hash": "52eeee786d6869988d31d8e33a19f6ece486e5de069046fd9191086777862e6a",
+      "semantic_hash": "sha256-52eeee786d686998",
       "question_count": 0
     },
     {
@@ -68,7 +68,7 @@
       "story_id": 1016,
       "lesson_code": "G4-L16",
       "file": "G4-L16__1016.json",
-      "semantic_hash": "93d774de2d910944581fd0ce4bb587c0a1a461c9815699b0ebeba096776af45e",
+      "semantic_hash": "sha256-93d774de2d910944",
       "question_count": 5
     },
     {
@@ -76,7 +76,7 @@
       "story_id": 1017,
       "lesson_code": "G4-L17",
       "file": "G4-L17__1017.json",
-      "semantic_hash": "edda07b7d352e8c8d892dddc8bf28a545541eee4b48a2b96081a0ffec3fc3a4b",
+      "semantic_hash": "sha256-edda07b7d352e8c8",
       "question_count": 10
     },
     {
@@ -84,7 +84,7 @@
       "story_id": 1018,
       "lesson_code": "G4-L18",
       "file": "G4-L18__1018.json",
-      "semantic_hash": "225e4db5623dee618b81cde7d21a35b40aa2f191a8e1c648cfb1d949e70999c6",
+      "semantic_hash": "sha256-225e4db5623dee61",
       "question_count": 0
     },
     {
@@ -92,7 +92,7 @@
       "story_id": 1019,
       "lesson_code": "G4-L19",
       "file": "G4-L19__1019.json",
-      "semantic_hash": "0d011a415cb74693320c0a1944a59d1859344dab1b8b2a945268798b796c180a",
+      "semantic_hash": "sha256-0d011a415cb74693",
       "question_count": 14
     },
     {
@@ -100,7 +100,7 @@
       "story_id": 1020,
       "lesson_code": "G4-L20",
       "file": "G4-L20__1020.json",
-      "semantic_hash": "df386f46b562ec963c931f748c9d97aff4bd3b6afee4af86d5b2ebe0f2bace5b",
+      "semantic_hash": "sha256-df386f46b562ec96",
       "question_count": 0
     },
     {
@@ -108,7 +108,7 @@
       "story_id": 1024,
       "lesson_code": "G4-L24",
       "file": "G4-L24__1024.json",
-      "semantic_hash": "b39fbca6d620a331ad1aef6770163a0adc6f8eeefb2a471a71525b491afa00bc",
+      "semantic_hash": "sha256-b39fbca6d620a331",
       "question_count": 13
     },
     {
@@ -116,7 +116,7 @@
       "story_id": 1025,
       "lesson_code": "G4-L25",
       "file": "G4-L25__1025.json",
-      "semantic_hash": "36a71455569574e7ec5b4f471238080c1346b0cd46a05a772eae60d0faa094bc",
+      "semantic_hash": "sha256-36a71455569574e7",
       "question_count": 3
     },
     {
@@ -124,7 +124,7 @@
       "story_id": 1026,
       "lesson_code": "G4-L26",
       "file": "G4-L26__1026.json",
-      "semantic_hash": "80a7a9ff9f55e2f1e5db89dc7ff7b5822da4693e854f2e2fb2dcb84840e2c396",
+      "semantic_hash": "sha256-80a7a9ff9f55e2f1",
       "question_count": 3
     },
     {
@@ -132,7 +132,7 @@
       "story_id": 1027,
       "lesson_code": "G4-L27",
       "file": "G4-L27__1027.json",
-      "semantic_hash": "4155299455dbb646c603a62bc58ad56f4e9e12b008b162fe13be7ab5566ad503",
+      "semantic_hash": "sha256-4155299455dbb646",
       "question_count": 4
     },
     {
@@ -140,7 +140,7 @@
       "story_id": 1006,
       "lesson_code": "G4-L6",
       "file": "G4-L6__1006.json",
-      "semantic_hash": "8ae12640156442bc291a4d3e568c549ea31d94e225762a9f5f628fbe256475c3",
+      "semantic_hash": "sha256-8ae12640156442bc",
       "question_count": 3
     },
     {
@@ -148,7 +148,7 @@
       "story_id": 1007,
       "lesson_code": "G4-L7",
       "file": "G4-L7__1007.json",
-      "semantic_hash": "9cee9435c93df20706cad87c33a7882dd082340d346f4d9a676bb9084e831ace",
+      "semantic_hash": "sha256-9cee9435c93df207",
       "question_count": 6
     },
     {
@@ -156,7 +156,7 @@
       "story_id": 1008,
       "lesson_code": "G4-L8",
       "file": "G4-L8__1008.json",
-      "semantic_hash": "88d95214a0c87242e1b7b0f2287f52a572626fe5765ca90685bac19b346efbda",
+      "semantic_hash": "sha256-88d95214a0c87242",
       "question_count": 4
     },
     {
@@ -164,7 +164,7 @@
       "story_id": 1009,
       "lesson_code": "G4-L9",
       "file": "G4-L9__1009.json",
-      "semantic_hash": "94bc3397b0734123f8e191e0c5e9af3e310527c3e587a077d3f3747b8a969dd4",
+      "semantic_hash": "sha256-94bc3397b0734123",
       "question_count": 8
     },
     {
@@ -172,7 +172,7 @@
       "story_id": 8,
       "lesson_code": "G5-L08",
       "file": "G5-L08__8.json",
-      "semantic_hash": "3c9bcb59fb709a4cdd7d400b8eae5c7ceadf79e1ec224707bb704d377668be90",
+      "semantic_hash": "sha256-3c9bcb59fb709a4c",
       "question_count": 3
     },
     {
@@ -180,7 +180,7 @@
       "story_id": 9,
       "lesson_code": "G5-L09",
       "file": "G5-L09__9.json",
-      "semantic_hash": "c4d42b35a9253fc2607fd998bcb85444d5df46b7a12d1953633c3ce5ee686e2f",
+      "semantic_hash": "sha256-c4d42b35a9253fc2",
       "question_count": 2
     },
     {
@@ -188,7 +188,7 @@
       "story_id": 1028,
       "lesson_code": "G5-L1",
       "file": "G5-L1__1028.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -196,7 +196,7 @@
       "story_id": 10,
       "lesson_code": "G5-L10",
       "file": "G5-L10__10.json",
-      "semantic_hash": "b99a947aace2446b69fa8014eed4523097f21b6024ba3dd3c97300aa9ba02aa1",
+      "semantic_hash": "sha256-b99a947aace2446b",
       "question_count": 5
     },
     {
@@ -204,7 +204,7 @@
       "story_id": 11,
       "lesson_code": "G5-L11",
       "file": "G5-L11__11.json",
-      "semantic_hash": "f79413712327b25f7d2bc61fb3a9a2cab326aa426d3ed2099f725c8355ed88fa",
+      "semantic_hash": "sha256-f79413712327b25f",
       "question_count": 2
     },
     {
@@ -212,7 +212,7 @@
       "story_id": 1038,
       "lesson_code": "G5-L11",
       "file": "G5-L11__1038.json",
-      "semantic_hash": "f79413712327b25f7d2bc61fb3a9a2cab326aa426d3ed2099f725c8355ed88fa",
+      "semantic_hash": "sha256-f79413712327b25f",
       "question_count": 2
     },
     {
@@ -220,7 +220,7 @@
       "story_id": 13,
       "lesson_code": "G5-L12",
       "file": "G5-L12__13.json",
-      "semantic_hash": "bfea649f0ab7098227c2145695fd84150d76e4da48490d01b01d5f1e3462b24c",
+      "semantic_hash": "sha256-bfea649f0ab70982",
       "question_count": 1
     },
     {
@@ -228,7 +228,7 @@
       "story_id": 1039,
       "lesson_code": "G5-L12",
       "file": "G5-L12__1039.json",
-      "semantic_hash": "bfea649f0ab7098227c2145695fd84150d76e4da48490d01b01d5f1e3462b24c",
+      "semantic_hash": "sha256-bfea649f0ab70982",
       "question_count": 1
     },
     {
@@ -236,7 +236,7 @@
       "story_id": 1040,
       "lesson_code": "G5-L13",
       "file": "G5-L13__1040.json",
-      "semantic_hash": "01860ad5542d91274e399f0a6dd57158ec5570065bd608086f89f3d3672752c2",
+      "semantic_hash": "sha256-01860ad5542d9127",
       "question_count": 2
     },
     {
@@ -244,7 +244,7 @@
       "story_id": 1041,
       "lesson_code": "G5-L14",
       "file": "G5-L14__1041.json",
-      "semantic_hash": "695e8ccb3ae47636b7ab0f6fc5f6f235750507854038cd0114fa255aa8236d94",
+      "semantic_hash": "sha256-695e8ccb3ae47636",
       "question_count": 16
     },
     {
@@ -252,7 +252,7 @@
       "story_id": 1042,
       "lesson_code": "G5-L15",
       "file": "G5-L15__1042.json",
-      "semantic_hash": "cc05281bf65c828e3697d43243b2c76da8bba2631cdca4360b12f3bc4586fd26",
+      "semantic_hash": "sha256-cc05281bf65c828e",
       "question_count": 0
     },
     {
@@ -260,7 +260,7 @@
       "story_id": 1043,
       "lesson_code": "G5-L16",
       "file": "G5-L16__1043.json",
-      "semantic_hash": "3aa801e0b624e49086d515cd79c71e2df48c75f4ca97d86d5a79b9d4a60bda58",
+      "semantic_hash": "sha256-3aa801e0b624e490",
       "question_count": 0
     },
     {
@@ -268,7 +268,7 @@
       "story_id": 1045,
       "lesson_code": "G5-L18",
       "file": "G5-L18__1045.json",
-      "semantic_hash": "92096976e39f1b4566f405ee7409b17301f9f142ad3557cd4db1f75596451db9",
+      "semantic_hash": "sha256-92096976e39f1b45",
       "question_count": 6
     },
     {
@@ -276,7 +276,7 @@
       "story_id": 1046,
       "lesson_code": "G5-L19",
       "file": "G5-L19__1046.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -284,7 +284,7 @@
       "story_id": 1029,
       "lesson_code": "G5-L2",
       "file": "G5-L2__1029.json",
-      "semantic_hash": "82bdbcfd315bf82a594cde0e7de5a7bc988989f5e674814fb0e1cfc3ce83fe1e",
+      "semantic_hash": "sha256-82bdbcfd315bf82a",
       "question_count": 30
     },
     {
@@ -292,7 +292,7 @@
       "story_id": 1047,
       "lesson_code": "G5-L20",
       "file": "G5-L20__1047.json",
-      "semantic_hash": "3126a6022a4750137045fb19cfa9a5237b1ce8e2305b6fef7b6adad98c52ec37",
+      "semantic_hash": "sha256-3126a6022a475013",
       "question_count": 1
     },
     {
@@ -300,7 +300,7 @@
       "story_id": 1048,
       "lesson_code": "G5-L21",
       "file": "G5-L21__1048.json",
-      "semantic_hash": "a2e19b4361c6e1074e3551e62d71f582743bd2a87ee59a82fcd1f9b5b70f5aa3",
+      "semantic_hash": "sha256-a2e19b4361c6e107",
       "question_count": 4
     },
     {
@@ -308,7 +308,7 @@
       "story_id": 12,
       "lesson_code": "G5-L22",
       "file": "G5-L22__12.json",
-      "semantic_hash": "7c3b31987a9fe462e0f2e8b20e37c3f929312a0a70a9c77ab9ef0403bd0c38ce",
+      "semantic_hash": "sha256-7c3b31987a9fe462",
       "question_count": 1
     },
     {
@@ -316,7 +316,7 @@
       "story_id": 1050,
       "lesson_code": "G5-L23",
       "file": "G5-L23__1050.json",
-      "semantic_hash": "52ccb9c66fcb4ae2684ca2d3e24a596af08a6f172761d45e806bc806144031fb",
+      "semantic_hash": "sha256-52ccb9c66fcb4ae2",
       "question_count": 3
     },
     {
@@ -324,7 +324,7 @@
       "story_id": 1051,
       "lesson_code": "G5-L24",
       "file": "G5-L24__1051.json",
-      "semantic_hash": "02a8529ef6400a1ec6f1ff25ab9a9175a7a25ecf3ffb92b99d1009f076ec3726",
+      "semantic_hash": "sha256-02a8529ef6400a1e",
       "question_count": 3
     },
     {
@@ -332,7 +332,7 @@
       "story_id": 1030,
       "lesson_code": "G5-L3",
       "file": "G5-L3__1030.json",
-      "semantic_hash": "c28dc2a69143cd8dca3fe98cf442a0e233e9a3afa0813d27b8ca715b2deeedaf",
+      "semantic_hash": "sha256-c28dc2a69143cd8d",
       "question_count": 35
     },
     {
@@ -340,7 +340,7 @@
       "story_id": 1031,
       "lesson_code": "G5-L4",
       "file": "G5-L4__1031.json",
-      "semantic_hash": "345da41212145cdea0e4af46c17410c2e312d2a273dfcddb2384d6b467418ce4",
+      "semantic_hash": "sha256-345da41212145cde",
       "question_count": 8
     },
     {
@@ -348,7 +348,7 @@
       "story_id": 1032,
       "lesson_code": "G5-L5",
       "file": "G5-L5__1032.json",
-      "semantic_hash": "c50012277d41afd80e54f9ebe3e6e9c41920316dc21b60403593748fc779789b",
+      "semantic_hash": "sha256-c50012277d41afd8",
       "question_count": 6
     },
     {
@@ -356,7 +356,7 @@
       "story_id": 1033,
       "lesson_code": "G5-L6",
       "file": "G5-L6__1033.json",
-      "semantic_hash": "880dfcf8de9cddb0a1f4ff5825e43de653f1ad3f0932e8bbce10a437ab56f226",
+      "semantic_hash": "sha256-880dfcf8de9cddb0",
       "question_count": 11
     },
     {
@@ -364,7 +364,7 @@
       "story_id": 1034,
       "lesson_code": "G5-L7",
       "file": "G5-L7__1034.json",
-      "semantic_hash": "35238a58df6f96f6ce448db95991eb2c465dfb9fa99008487ea78d082526079e",
+      "semantic_hash": "sha256-35238a58df6f96f6",
       "question_count": 5
     },
     {
@@ -372,7 +372,7 @@
       "story_id": 14,
       "lesson_code": "G6-L01",
       "file": "G6-L01__14.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -380,7 +380,7 @@
       "story_id": 24,
       "lesson_code": "G6-L03",
       "file": "G6-L03__24.json",
-      "semantic_hash": "3885fb52073f6f243b5a726b7cf638eb33716ca005626da0a210a38c8c2988c0",
+      "semantic_hash": "sha256-3885fb52073f6f24",
       "question_count": 0
     },
     {
@@ -388,7 +388,7 @@
       "story_id": 15,
       "lesson_code": "G6-L04",
       "file": "G6-L04__15.json",
-      "semantic_hash": "273593be1ba309b4d157c2e60a850576697b98c0242c0872a400786606f85266",
+      "semantic_hash": "sha256-273593be1ba309b4",
       "question_count": 2
     },
     {
@@ -396,7 +396,7 @@
       "story_id": 16,
       "lesson_code": "G6-L05",
       "file": "G6-L05__16.json",
-      "semantic_hash": "c057e2d2453902e58ed99165b79a20cd2a2281da1e8a7790bd4cb417e7c1de53",
+      "semantic_hash": "sha256-c057e2d2453902e5",
       "question_count": 6
     },
     {
@@ -404,7 +404,7 @@
       "story_id": 17,
       "lesson_code": "G6-L06",
       "file": "G6-L06__17.json",
-      "semantic_hash": "e11aef7800d706611cd2fc2f8f92096b172a9d549bb5f91ebdd5cc5f23ffe577",
+      "semantic_hash": "sha256-e11aef7800d70661",
       "question_count": 5
     },
     {
@@ -412,7 +412,7 @@
       "story_id": 7,
       "lesson_code": "G6-L07",
       "file": "G6-L07__7.json",
-      "semantic_hash": "818344c5fdabb7148a67c3a3720d932067ed31f49fb9bc14b2f889985ddd1bd6",
+      "semantic_hash": "sha256-818344c5fdabb714",
       "question_count": 8
     },
     {
@@ -420,7 +420,7 @@
       "story_id": 18,
       "lesson_code": "G6-L08",
       "file": "G6-L08__18.json",
-      "semantic_hash": "e96b260720e47e95a967b17c3433667d192413dfc1249f6881a251ef773cc08b",
+      "semantic_hash": "sha256-e96b260720e47e95",
       "question_count": 17
     },
     {
@@ -428,7 +428,7 @@
       "story_id": 19,
       "lesson_code": "G6-L09",
       "file": "G6-L09__19.json",
-      "semantic_hash": "79e06c05d8a3a64ebc844b6f6accf22c89e8588e9424e2f56679482988399504",
+      "semantic_hash": "sha256-79e06c05d8a3a64e",
       "question_count": 2
     },
     {
@@ -436,7 +436,7 @@
       "story_id": 1055,
       "lesson_code": "G6-L1",
       "file": "G6-L1__1055.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -444,7 +444,7 @@
       "story_id": 20,
       "lesson_code": "G6-L10",
       "file": "G6-L10__20.json",
-      "semantic_hash": "377d145a0bb278b731fb9452578f2ab7bfc8a522634828d91b0d24c9c6274d06",
+      "semantic_hash": "sha256-377d145a0bb278b7",
       "question_count": 6
     },
     {
@@ -452,7 +452,7 @@
       "story_id": 1065,
       "lesson_code": "G6-L11",
       "file": "G6-L11__1065.json",
-      "semantic_hash": "46d8c3c8251736410cf7cbac08f89c5eddc957b6b529043dd802da23b775abe1",
+      "semantic_hash": "sha256-46d8c3c825173641",
       "question_count": 18
     },
     {
@@ -460,7 +460,7 @@
       "story_id": 1066,
       "lesson_code": "G6-L12",
       "file": "G6-L12__1066.json",
-      "semantic_hash": "f73a8ec05e8159fc4b39fb880799a29488b85aa9b2c3cce31c73db85bac2cb4e",
+      "semantic_hash": "sha256-f73a8ec05e8159fc",
       "question_count": 4
     },
     {
@@ -468,7 +468,7 @@
       "story_id": 21,
       "lesson_code": "G6-L13",
       "file": "G6-L13__21.json",
-      "semantic_hash": "1dce37f148c58e4e7d192bac97a2aaa9913ea938ad1e8d4ae34f7ea1b16bfcd0",
+      "semantic_hash": "sha256-1dce37f148c58e4e",
       "question_count": 6
     },
     {
@@ -476,7 +476,7 @@
       "story_id": 22,
       "lesson_code": "G6-L14",
       "file": "G6-L14__22.json",
-      "semantic_hash": "30aa93a7a345eac3133146702a86e04ad038faeecf8c9f00a30f9a96bf65a3d4",
+      "semantic_hash": "sha256-30aa93a7a345eac3",
       "question_count": 2
     },
     {
@@ -484,7 +484,7 @@
       "story_id": 26,
       "lesson_code": "G6-L16",
       "file": "G6-L16__26.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -492,7 +492,7 @@
       "story_id": 25,
       "lesson_code": "G6-L17",
       "file": "G6-L17__25.json",
-      "semantic_hash": "3c68ac5eedb7dc771d817877571d00dd26af7ed5bbb71d084f34aea4ff0b3e34",
+      "semantic_hash": "sha256-3c68ac5eedb7dc77",
       "question_count": 0
     },
     {
@@ -500,7 +500,7 @@
       "story_id": 27,
       "lesson_code": "G6-L18",
       "file": "G6-L18__27.json",
-      "semantic_hash": "fb1331766cddb22b79b543578a94a69305d9da37043265e876a84675dfd12c13",
+      "semantic_hash": "sha256-fb1331766cddb22b",
       "question_count": 2
     },
     {
@@ -508,7 +508,7 @@
       "story_id": 1072,
       "lesson_code": "G6-L18",
       "file": "G6-L18__1072.json",
-      "semantic_hash": "fb1331766cddb22b79b543578a94a69305d9da37043265e876a84675dfd12c13",
+      "semantic_hash": "sha256-fb1331766cddb22b",
       "question_count": 2
     },
     {
@@ -516,7 +516,7 @@
       "story_id": 28,
       "lesson_code": "G6-L19",
       "file": "G6-L19__28.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -524,7 +524,7 @@
       "story_id": 1074,
       "lesson_code": "G6-L20",
       "file": "G6-L20__1074.json",
-      "semantic_hash": "45956aa06826ed1226d5f831e58203cec58597f9cb47bba44e9cc7e6efdd6fb1",
+      "semantic_hash": "sha256-45956aa06826ed12",
       "question_count": 0
     },
     {
@@ -532,7 +532,7 @@
       "story_id": 1075,
       "lesson_code": "G6-L21",
       "file": "G6-L21__1075.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -540,7 +540,7 @@
       "story_id": 1076,
       "lesson_code": "G6-L22",
       "file": "G6-L22__1076.json",
-      "semantic_hash": "f43b9de972169add431a0b99ede1508ff7f158e111f2337a7fee4ab74c240d27",
+      "semantic_hash": "sha256-f43b9de972169add",
       "question_count": 16
     },
     {
@@ -548,7 +548,7 @@
       "story_id": 1077,
       "lesson_code": "G6-L23",
       "file": "G6-L23__1077.json",
-      "semantic_hash": "d66e63cd45879c0425859c9789eb7e6cb38390c7452fc64b4691edd7771253bc",
+      "semantic_hash": "sha256-d66e63cd45879c04",
       "question_count": 15
     },
     {
@@ -556,7 +556,7 @@
       "story_id": 1078,
       "lesson_code": "G6-L24",
       "file": "G6-L24__1078.json",
-      "semantic_hash": "d0888714293d15ff2291e77b0b4e75a5a8db9b779e262602008d84e2ed1a81bf",
+      "semantic_hash": "sha256-d0888714293d15ff",
       "question_count": 3
     },
     {
@@ -564,7 +564,7 @@
       "story_id": 1079,
       "lesson_code": "G6-L25",
       "file": "G6-L25__1079.json",
-      "semantic_hash": "93377699066fc8fc52eb6a97a75816b7aa605087f6a060d0745ceb173c0a9027",
+      "semantic_hash": "sha256-93377699066fc8fc",
       "question_count": 3
     },
     {
@@ -572,7 +572,7 @@
       "story_id": 29,
       "lesson_code": "G7-L02",
       "file": "G7-L02__29.json",
-      "semantic_hash": "03c34efcfc67b0723a66c855176a01b5fd4c103e674c349798127fd3b90f31c1",
+      "semantic_hash": "sha256-03c34efcfc67b072",
       "question_count": 0
     },
     {
@@ -580,7 +580,7 @@
       "story_id": 30,
       "lesson_code": "G7-L03",
       "file": "G7-L03__30.json",
-      "semantic_hash": "e1f187dec553ddddb793733a903360868217e7e9210c0f6737c89f0158096ed4",
+      "semantic_hash": "sha256-e1f187dec553dddd",
       "question_count": 0
     },
     {
@@ -588,7 +588,7 @@
       "story_id": 31,
       "lesson_code": "G7-L06",
       "file": "G7-L06__31.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -596,7 +596,7 @@
       "story_id": 38,
       "lesson_code": "G7-L07",
       "file": "G7-L07__38.json",
-      "semantic_hash": "2ffca144246b25c02a28629c5ad0d1b6807785f99c87b4979ee48c5d53321313",
+      "semantic_hash": "sha256-2ffca144246b25c0",
       "question_count": 13
     },
     {
@@ -604,7 +604,7 @@
       "story_id": 32,
       "lesson_code": "G7-L08",
       "file": "G7-L08__32.json",
-      "semantic_hash": "4e9601d13790d4c022b8456223d8093adbfb95d2b21ae9dd1f360bb328f3dbe3",
+      "semantic_hash": "sha256-4e9601d13790d4c0",
       "question_count": 2
     },
     {
@@ -612,7 +612,7 @@
       "story_id": 33,
       "lesson_code": "G7-L09",
       "file": "G7-L09__33.json",
-      "semantic_hash": "1d4c29e4175f10cce5b1ef83c3cf56d1f7a256a004afb069be22b45284178800",
+      "semantic_hash": "sha256-1d4c29e4175f10cc",
       "question_count": 2
     },
     {
@@ -620,7 +620,7 @@
       "story_id": 1080,
       "lesson_code": "G7-L1",
       "file": "G7-L1__1080.json",
-      "semantic_hash": "718738a798fc3a4bbd333859da5f2c9c713460d1dd67a2b6195679016ad10480",
+      "semantic_hash": "sha256-718738a798fc3a4b",
       "question_count": 0
     },
     {
@@ -628,7 +628,7 @@
       "story_id": 1090,
       "lesson_code": "G7-L11",
       "file": "G7-L11__1090.json",
-      "semantic_hash": "bda5e5f7196841e95e2327f45de293a573ca16d428f3254e048104dea863b196",
+      "semantic_hash": "sha256-bda5e5f7196841e9",
       "question_count": 6
     },
     {
@@ -636,7 +636,7 @@
       "story_id": 1091,
       "lesson_code": "G7-L12",
       "file": "G7-L12__1091.json",
-      "semantic_hash": "dd984f2516f16ab57b2521fa7fb3a83f5de2eafcf2f0ccedfcdcb98003f76189",
+      "semantic_hash": "sha256-dd984f2516f16ab5",
       "question_count": 22
     },
     {
@@ -644,7 +644,7 @@
       "story_id": 34,
       "lesson_code": "G7-L13",
       "file": "G7-L13__34.json",
-      "semantic_hash": "5848d70c94dec70e6aee21dd35c7b74d0aeb0ee1aa34a3f82c60ddb9cec437f3",
+      "semantic_hash": "sha256-5848d70c94dec70e",
       "question_count": 2
     },
     {
@@ -652,7 +652,7 @@
       "story_id": 1093,
       "lesson_code": "G7-L14",
       "file": "G7-L14__1093.json",
-      "semantic_hash": "a3ceb46a59738dc8a20cbe9b2fb5b1f904d1dc80e62faceed0ff0074d25c4b82",
+      "semantic_hash": "sha256-a3ceb46a59738dc8",
       "question_count": 5
     },
     {
@@ -660,7 +660,7 @@
       "story_id": 35,
       "lesson_code": "G7-L15",
       "file": "G7-L15__35.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -668,7 +668,7 @@
       "story_id": 1094,
       "lesson_code": "G7-L15",
       "file": "G7-L15__1094.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -676,7 +676,7 @@
       "story_id": 36,
       "lesson_code": "G7-L16",
       "file": "G7-L16__36.json",
-      "semantic_hash": "f0caaa7cabb9024e35cccf20f4ac81e753b19156755f22d05bd5bf349dc35168",
+      "semantic_hash": "sha256-f0caaa7cabb9024e",
       "question_count": 6
     },
     {
@@ -684,7 +684,7 @@
       "story_id": 37,
       "lesson_code": "G7-L17",
       "file": "G7-L17__37.json",
-      "semantic_hash": "0dbc00332b6ee81609fe773334ba40586c12a5f03f4f37b0a0f7fe9bacdc3fdc",
+      "semantic_hash": "sha256-0dbc00332b6ee816",
       "question_count": 2
     },
     {
@@ -692,7 +692,7 @@
       "story_id": 1097,
       "lesson_code": "G7-L18",
       "file": "G7-L18__1097.json",
-      "semantic_hash": "f39d05c5439fdc7689f40986bfc383b5b14a230f0f6806542394b31e741c63d0",
+      "semantic_hash": "sha256-f39d05c5439fdc76",
       "question_count": 0
     },
     {
@@ -700,7 +700,7 @@
       "story_id": 1098,
       "lesson_code": "G7-L19",
       "file": "G7-L19__1098.json",
-      "semantic_hash": "5b953d16310585c36cb713c6650ec6b45dcd3e6ec19aeb2e05f0faad1de03324",
+      "semantic_hash": "sha256-5b953d16310585c3",
       "question_count": 0
     },
     {
@@ -708,7 +708,7 @@
       "story_id": 39,
       "lesson_code": "G7-L20",
       "file": "G7-L20__39.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -716,7 +716,7 @@
       "story_id": 40,
       "lesson_code": "G7-L21",
       "file": "G7-L21__40.json",
-      "semantic_hash": "8711b2a1db745e00d8f439ccb5c0fc7aedd5e505084dfa1117284371d4ab9bb1",
+      "semantic_hash": "sha256-8711b2a1db745e00",
       "question_count": 3
     },
     {
@@ -724,7 +724,7 @@
       "story_id": 41,
       "lesson_code": "G7-L22",
       "file": "G7-L22__41.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -732,7 +732,7 @@
       "story_id": 1102,
       "lesson_code": "G7-L23",
       "file": "G7-L23__1102.json",
-      "semantic_hash": "f3b641a987da7e4440aa33ca025a0a32406f012282b5918f4d5a1024f76ed4d7",
+      "semantic_hash": "sha256-f3b641a987da7e44",
       "question_count": 22
     },
     {
@@ -740,7 +740,7 @@
       "story_id": 1104,
       "lesson_code": "G7-L24",
       "file": "G7-L24__1104.json",
-      "semantic_hash": "d4b28b4b5959b18c3d8b65d1ea24d6709da32ea3c29b95e293ea3916ec0209ae",
+      "semantic_hash": "sha256-d4b28b4b5959b18c",
       "question_count": 30
     },
     {
@@ -748,7 +748,7 @@
       "story_id": 1105,
       "lesson_code": "G7-L25",
       "file": "G7-L25__1105.json",
-      "semantic_hash": "e3816d8bddfc705083956c906dbec393af78c069e00365013d68f4c9784aa900",
+      "semantic_hash": "sha256-e3816d8bddfc7050",
       "question_count": 3
     },
     {
@@ -756,7 +756,7 @@
       "story_id": 1106,
       "lesson_code": "G7-L26",
       "file": "G7-L26__1106.json",
-      "semantic_hash": "2562f4779f0a0b7b5b8602e095212cfce20e54fef8a648cd7613f3b6824ec34a",
+      "semantic_hash": "sha256-2562f4779f0a0b7b",
       "question_count": 1
     },
     {
@@ -764,7 +764,7 @@
       "story_id": 1107,
       "lesson_code": "G7-L27",
       "file": "G7-L27__1107.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -772,7 +772,7 @@
       "story_id": 1108,
       "lesson_code": "G7-L28",
       "file": "G7-L28__1108.json",
-      "semantic_hash": "fd970999d447de6dce934642890dae57570b078a00b0edb5db010cd07edb49ae",
+      "semantic_hash": "sha256-fd970999d447de6d",
       "question_count": 12
     },
     {
@@ -780,7 +780,7 @@
       "story_id": 1109,
       "lesson_code": "G7-L29",
       "file": "G7-L29__1109.json",
-      "semantic_hash": "3d2496d73c6c675510f750c35b84d33221c394824e1e7c03c6fa6544ebc1c2c1",
+      "semantic_hash": "sha256-3d2496d73c6c6755",
       "question_count": 30
     },
     {
@@ -788,7 +788,7 @@
       "story_id": 1110,
       "lesson_code": "G7-L30",
       "file": "G7-L30__1110.json",
-      "semantic_hash": "66b5fff21645b57e4606a20ff896843d905269b1c3410553f4356c044f2f0c67",
+      "semantic_hash": "sha256-66b5fff21645b57e",
       "question_count": 23
     },
     {
@@ -796,7 +796,7 @@
       "story_id": 1083,
       "lesson_code": "G7-L4",
       "file": "G7-L4__1083.json",
-      "semantic_hash": "645895185554fa5fa2eebbfea47624bd45eb28f6ff2543d624427fe3337556e2",
+      "semantic_hash": "sha256-645895185554fa5f",
       "question_count": 1
     },
     {
@@ -804,7 +804,7 @@
       "story_id": 1084,
       "lesson_code": "G7-L5",
       "file": "G7-L5__1084.json",
-      "semantic_hash": "0537594d7cbe17ed0eb998217651abc363ddbcf0f5083cd1c20d81e95a7c0ac5",
+      "semantic_hash": "sha256-0537594d7cbe17ed",
       "question_count": 3
     },
     {
@@ -812,7 +812,7 @@
       "story_id": 1086,
       "lesson_code": "G7-L7",
       "file": "G7-L7__1086.json",
-      "semantic_hash": "2ffca144246b25c02a28629c5ad0d1b6807785f99c87b4979ee48c5d53321313",
+      "semantic_hash": "sha256-2ffca144246b25c0",
       "question_count": 13
     },
     {
@@ -820,7 +820,7 @@
       "story_id": 1123,
       "lesson_code": "G8-L10",
       "file": "G8-L10__1123.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -828,7 +828,7 @@
       "story_id": 1124,
       "lesson_code": "G8-L11",
       "file": "G8-L11__1124.json",
-      "semantic_hash": "7cc68b8725f824ace880ed91237c56d32e62dfe3f8f02012b3640317387b9222",
+      "semantic_hash": "sha256-7cc68b8725f824ac",
       "question_count": 2
     },
     {
@@ -836,7 +836,7 @@
       "story_id": 1125,
       "lesson_code": "G8-L12a",
       "file": "G8-L12a__1125.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -844,7 +844,7 @@
       "story_id": 1126,
       "lesson_code": "G8-L12b",
       "file": "G8-L12b__1126.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -852,7 +852,7 @@
       "story_id": 1127,
       "lesson_code": "G8-L13",
       "file": "G8-L13__1127.json",
-      "semantic_hash": "3e1ad1128ae58a7f5fc2719c896ef4ae7c589f96dd1d5998edf5a484c7579c26",
+      "semantic_hash": "sha256-3e1ad1128ae58a7f",
       "question_count": 0
     },
     {
@@ -860,7 +860,7 @@
       "story_id": 1128,
       "lesson_code": "G8-L14",
       "file": "G8-L14__1128.json",
-      "semantic_hash": "6c76d4c8ecf62446fb496df729fca777d7ab26d55ec0ac3bccfb051a4c2c63ae",
+      "semantic_hash": "sha256-6c76d4c8ecf62446",
       "question_count": 3
     },
     {
@@ -868,7 +868,7 @@
       "story_id": 1129,
       "lesson_code": "G8-L15",
       "file": "G8-L15__1129.json",
-      "semantic_hash": "9744542602c6b7a2bb6b4e355b59daf64939a533112d93fa2048f814c68364e3",
+      "semantic_hash": "sha256-9744542602c6b7a2",
       "question_count": 0
     },
     {
@@ -876,7 +876,7 @@
       "story_id": 1112,
       "lesson_code": "G8-L2",
       "file": "G8-L2__1112.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -884,7 +884,7 @@
       "story_id": 1113,
       "lesson_code": "G8-L3a",
       "file": "G8-L3a__1113.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -892,7 +892,7 @@
       "story_id": 1114,
       "lesson_code": "G8-L3b",
       "file": "G8-L3b__1114.json",
-      "semantic_hash": "605ea0a7e348e5082ab21b2742372239630aeac5f3e023b78cb56dfb03d5a8f0",
+      "semantic_hash": "sha256-605ea0a7e348e508",
       "question_count": 4
     },
     {
@@ -900,7 +900,7 @@
       "story_id": 1117,
       "lesson_code": "G8-L6a",
       "file": "G8-L6a__1117.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -908,7 +908,7 @@
       "story_id": 1118,
       "lesson_code": "G8-L6b",
       "file": "G8-L6b__1118.json",
-      "semantic_hash": "7e7cb28f8771be7c5fcc826c245b9c1f2dd7656df6ef6978ac5e565bc4ec7f67",
+      "semantic_hash": "sha256-7e7cb28f8771be7c",
       "question_count": 5
     },
     {
@@ -916,7 +916,7 @@
       "story_id": 1119,
       "lesson_code": "G8-L7",
       "file": "G8-L7__1119.json",
-      "semantic_hash": "9dcd22b97106b02269e8f870cc374ce34eaa25f4d4551f0f729042f5a8b22473",
+      "semantic_hash": "sha256-9dcd22b97106b022",
       "question_count": 11
     },
     {
@@ -924,7 +924,7 @@
       "story_id": 1120,
       "lesson_code": "G8-L8",
       "file": "G8-L8__1120.json",
-      "semantic_hash": "37ad8f18ba16ec8c0ee8919856a0c0596ded53c95522c143db6ea7f692f749dd",
+      "semantic_hash": "sha256-37ad8f18ba16ec8c",
       "question_count": 5
     },
     {
@@ -932,7 +932,7 @@
       "story_id": 1122,
       "lesson_code": "G8-L9b",
       "file": "G8-L9b__1122.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -940,7 +940,7 @@
       "story_id": 48,
       "lesson_code": "G9-L01",
       "file": "G9-L01__48.json",
-      "semantic_hash": "f56dee856ea2023da154273169fcfebd595ea9b0cb2701a936242ef41e1ba96c",
+      "semantic_hash": "sha256-f56dee856ea2023d",
       "question_count": 2
     },
     {
@@ -948,7 +948,7 @@
       "story_id": 49,
       "lesson_code": "G9-L04",
       "file": "G9-L04__49.json",
-      "semantic_hash": "36f6b8548a46e64929f6a6483f908fed924ef9a63cf1a8a219422935072f48e0",
+      "semantic_hash": "sha256-36f6b8548a46e649",
       "question_count": 0
     },
     {
@@ -956,7 +956,7 @@
       "story_id": 50,
       "lesson_code": "G9-L05",
       "file": "G9-L05__50.json",
-      "semantic_hash": "a3c7214ff9f3709bdf1be14b0c1a00325628a9b6789220b6effd993ad013cedf",
+      "semantic_hash": "sha256-a3c7214ff9f3709b",
       "question_count": 0
     },
     {
@@ -964,7 +964,7 @@
       "story_id": 51,
       "lesson_code": "G9-L06",
       "file": "G9-L06__51.json",
-      "semantic_hash": "f990564eff0b36b9061e7f2749705b621fbd53022321b857e8b4a4c0d5d868be",
+      "semantic_hash": "sha256-f990564eff0b36b9",
       "question_count": 5
     },
     {
@@ -972,7 +972,7 @@
       "story_id": 52,
       "lesson_code": "G9-L07",
       "file": "G9-L07__52.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -980,7 +980,7 @@
       "story_id": 53,
       "lesson_code": "G9-L08",
       "file": "G9-L08__53.json",
-      "semantic_hash": "0422a6adc61e94eaab342ca3291558ab56923639aa01048bf8c98fa1d1e85dbc",
+      "semantic_hash": "sha256-0422a6adc61e94ea",
       "question_count": 35
     },
     {
@@ -988,7 +988,7 @@
       "story_id": 1140,
       "lesson_code": "G9-L11",
       "file": "G9-L11__1140.json",
-      "semantic_hash": "8025ff28e37adb8fc9a82b2a7cf341b769c1aa33885c1596ef2c38f12fcecf56",
+      "semantic_hash": "sha256-8025ff28e37adb8f",
       "question_count": 10
     },
     {
@@ -996,7 +996,7 @@
       "story_id": 1141,
       "lesson_code": "G9-L12",
       "file": "G9-L12__1141.json",
-      "semantic_hash": "e5dbd6fe61b6aa4e3b0abc989db403562d1a866a7a21fb725f1e64af0a8ed1b8",
+      "semantic_hash": "sha256-e5dbd6fe61b6aa4e",
       "question_count": 10
     },
     {
@@ -1004,7 +1004,7 @@
       "story_id": 1142,
       "lesson_code": "G9-L13",
       "file": "G9-L13__1142.json",
-      "semantic_hash": "18d6c57cf557bcfc8c9928fdb28862f5f6aa25f340fb0997d3af73b6ae251eb1",
+      "semantic_hash": "sha256-18d6c57cf557bcfc",
       "question_count": 6
     },
     {
@@ -1012,7 +1012,7 @@
       "story_id": 1143,
       "lesson_code": "G9-L14",
       "file": "G9-L14__1143.json",
-      "semantic_hash": "6f5eb7a5219ce76df6d53b61e9af05936dea4144ee2b0a3782d26b8ca42f239d",
+      "semantic_hash": "sha256-6f5eb7a5219ce76d",
       "question_count": 3
     },
     {
@@ -1020,7 +1020,7 @@
       "story_id": 56,
       "lesson_code": "G9-L15",
       "file": "G9-L15__56.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1028,7 +1028,7 @@
       "story_id": 58,
       "lesson_code": "G9-L17",
       "file": "G9-L17__58.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1036,7 +1036,7 @@
       "story_id": 1131,
       "lesson_code": "G9-L2",
       "file": "G9-L2__1131.json",
-      "semantic_hash": "0787c25ab9086be0d2444fad7259d94a12e3ef752730e3045ce7f927f6f5d11f",
+      "semantic_hash": "sha256-0787c25ab9086be0",
       "question_count": 13
     },
     {
@@ -1044,7 +1044,7 @@
       "story_id": 1132,
       "lesson_code": "G9-L3",
       "file": "G9-L3__1132.json",
-      "semantic_hash": "1aaa386e31f669493ea0c58ba0bb3627dc81f00b104d45c70854c42134697270",
+      "semantic_hash": "sha256-1aaa386e31f66949",
       "question_count": 0
     },
     {
@@ -1052,7 +1052,7 @@
       "story_id": 44,
       "lesson_code": "文-L01",
       "file": "文-L01__44.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1060,7 +1060,7 @@
       "story_id": 45,
       "lesson_code": "文-L02",
       "file": "文-L02__45.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1068,7 +1068,7 @@
       "story_id": 42,
       "lesson_code": "文-L08",
       "file": "文-L08__42.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1076,7 +1076,7 @@
       "story_id": 43,
       "lesson_code": "文-L09",
       "file": "文-L09__43.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     },
     {
@@ -1084,7 +1084,7 @@
       "story_id": 1149,
       "lesson_code": "文-L1",
       "file": "文-L1__1149.json",
-      "semantic_hash": "ab3ee760cb67b69d03ef885b6e35295d39d0d5dc32d68f77440512d06ac296b2",
+      "semantic_hash": "sha256-ab3ee760cb67b69d",
       "question_count": 3
     },
     {
@@ -1092,7 +1092,7 @@
       "story_id": 1150,
       "lesson_code": "文-L2",
       "file": "文-L2__1150.json",
-      "semantic_hash": "676c30bc98ef56c2ecd781096842da30fbd3e650355582f44d1f08f28e4c1467",
+      "semantic_hash": "sha256-676c30bc98ef56c2",
       "question_count": 7
     },
     {
@@ -1100,7 +1100,7 @@
       "story_id": 1153,
       "lesson_code": "文-L5",
       "file": "文-L5__1153.json",
-      "semantic_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
       "question_count": 0
     }
   ]
