@@ -542,6 +542,27 @@ def l1_reading_strategy(
             status = "unknown"
             failure_codes = ["SOURCE_MISSING"]
     else:
+        if has_no_docx_marker(spotlight_text(spotlight)):
+            unknown_flags["strategy_unknown"] = True
+            status = "unknown"
+            failure_codes = ["NO_SOURCE_DOCX"]
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "cell_id": f"{story['id']}:reading-strategy",
+                "story_id": story["id"],
+                "lesson_code": lesson_code,
+                "step": "reading-strategy",
+                "source_field": STEP_SOURCE_FIELD["reading-strategy"],
+                "gold_key": gold_key,
+                "invariants": invariants,
+                "unknown_flags": unknown_flags,
+                "status": status,
+                "failure_codes": failure_codes,
+                "evidence_refs": {
+                    "api_payload": f"artifacts/api-payloads/{story['id']}.json"
+                },
+                "checked_at": utcnow(),
+            }
         # Eval with lesson_id only when it maps to a known semantic baseline.
         ev = eval_spotlight_v2(spotlight, gold_key if gold_key else None)
         guide_retained = bool(ev["guide_retained"])
