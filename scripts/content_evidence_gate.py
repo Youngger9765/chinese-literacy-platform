@@ -123,6 +123,12 @@ KNOWN_GAP_REASONS = {
 }
 
 _KNOWN_GAPS: dict[str, dict[str, str]] | None = None
+TOKEN_RE = re.compile(r"[A-Za-z0-9]+|[\u4e00-\u9fff]")
+SKELETON_MARK_CHARS = set(
+    "ㄧ一二三四五六七八九十百千零壹貳參肆伍陸柒捌玖拾甲乙丙丁戊己庚辛壬癸0123456789"
+)
+PUNCT_SPACE_RE = re.compile(r"[\s、，,。．\.\-:：;；()（）\[\]【】]")
+NO_DOCX_RE = re.compile(r"\bn/?a\s*no\s*docx\b", re.IGNORECASE)
 
 
 def _known_gaps() -> dict[str, dict[str, str]]:
@@ -157,6 +163,114 @@ SMOKE_STORY_IDS = [1076, 1077, 1078, 1079, 2, 3, 4, 1, 1108, 1109]
 
 def utcnow() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def normalize_text(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "")).strip().lower()
+
+
+def token_set(text: str) -> set[str]:
+    tokens = [m.group(0) for m in TOKEN_RE.finditer(normalize_text(text))]
+    out: set[str] = set()
+    for idx, tok in enumerate(tokens):
+        out.add(tok)
+        if idx + 1 < len(tokens):
+            out.add(f"{tok}{tokens[idx + 1]}")
+    return {t for t in out if len(t.strip()) >= 2}
+
+
+def overlap_score(tokens_a: set[str], tokens_b: set[str]) -> float:
+    if not tokens_a or not tokens_b:
+        return 0.0
+    inter = tokens_a & tokens_b
+    return len(inter) / max(1, min(len(tokens_a), len(tokens_b)))
+
+
+def story_text(story: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            str(story.get("title") or ""),
+            "\n".join(str(p) for p in (story.get("paragraphs") or [])),
+        ]
+    )
+
+
+def spotlight_text(spotlight: dict[str, Any]) -> str:
+    chunks: list[str] = []
+    blocks = spotlight.get("blocks") or []
+    for block in blocks:
+        if not isinstance(block, dict):
+            continue
+        for key in ("text", "prompt"):
+            value = block.get(key)
+            if isinstance(value, str) and value.strip():
+                chunks.append(value)
+        options = block.get("options")
+        if isinstance(options, list):
+            chunks.extend(str(opt) for opt in options)
+        paras = block.get("paragraphs")
+        if isinstance(paras, list):
+            chunks.extend(str(p) for p in paras)
+    return "\n".join(chunks)
+
+
+def has_meaningful_base_text(story: dict[str, Any]) -> bool:
+    paragraphs = [str(p or "").strip() for p in (story.get("paragraphs") or [])]
+    non_empty = [p for p in paragraphs if p]
+    if not non_empty:
+        return False
+    normalized = [PUNCT_SPACE_RE.sub("", p) for p in non_empty]
+    if normalized and all(
+        text and all(ch in SKELETON_MARK_CHARS for ch in text) for text in normalized
+    ):
+        return False
+    return True
+
+
+def has_no_docx_marker(*texts: str) -> bool:
+    for text in texts:
+        if NO_DOCX_RE.search(text or ""):
+            return True
+    return False
+
+
+def anti_cross_lesson_invariant(
+    story: dict[str, Any],
+    spotlight: dict[str, Any],
+    all_story_tokens: dict[int, set[str]],
+) -> dict[str, Any]:
+    own_story_id = int(story["id"])
+    own_tokens = all_story_tokens.get(own_story_id, set())
+    spot_tokens = token_set(spotlight_text(spotlight))
+    if not spot_tokens:
+        return {
+            "name": "anti_cross_lesson",
+            "actual": "no_spotlight_tokens",
+            "expected": "own_overlap>0 and own>=best_other",
+            "pass": False,
+            "detail": "spotlight token set is empty",
+        }
+    own_overlap = overlap_score(spot_tokens, own_tokens)
+    best_other_id = None
+    best_other_overlap = 0.0
+    for sid, tokens in all_story_tokens.items():
+        if sid == own_story_id:
+            continue
+        score = overlap_score(spot_tokens, tokens)
+        if score > best_other_overlap:
+            best_other_overlap = score
+            best_other_id = sid
+    passes = own_overlap >= 0.05 and own_overlap + 1e-9 >= best_other_overlap
+    return {
+        "name": "anti_cross_lesson",
+        "actual": {
+            "own_overlap": round(own_overlap, 4),
+            "best_other_overlap": round(best_other_overlap, 4),
+            "best_other_story_id": best_other_id,
+        },
+        "expected": "own_overlap>=0.05 and own>=best_other",
+        "pass": passes,
+    }
 
 
 def sha256_file(path: Path) -> str:
@@ -402,7 +516,11 @@ def _gold_for(lesson_code: str) -> tuple[str | None, dict[str, Any] | None]:
     return None, None
 
 
-def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, Any]:
+def l1_reading_strategy(
+    story: dict[str, Any],
+    lesson_code: str,
+    all_story_tokens: dict[int, set[str]],
+) -> dict[str, Any]:
     spotlight = story.get("spotlight_v2") or {}
     blocks = spotlight.get("blocks") or []
     source_missing = not blocks
@@ -430,6 +548,7 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
         answer_recall = float(ev["answer_recall"])
         mcq_leakage = int(ev["mcq_leakage"])
         struct_ok = len(ev["struct_errors"]) == 0
+        base_text_ok = has_meaningful_base_text(story)
 
         invariants = [
             {
@@ -456,6 +575,13 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
                 "expected": True,
                 "pass": struct_ok,
             },
+            {
+                "name": "base_text_quality",
+                "actual": base_text_ok,
+                "expected": True,
+                "pass": base_text_ok,
+            },
+            anti_cross_lesson_invariant(story, spotlight, all_story_tokens),
         ]
         if gold is not None:
             gold_cmp = compare_to_gold(gold_key, spotlight, gold)
@@ -470,19 +596,18 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
             )
 
         all_pass = all(inv["pass"] for inv in invariants)
-        if gold is None:
+        if not all_pass:
+            status = "fail"
+            failure_codes = [
+                f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
+            ]
+        elif gold is None:
             unknown_flags["strategy_unknown"] = True
             status = "unknown"
             failure_codes = ["GOLDEN_MISSING"]
         else:
-            status = "pass" if all_pass else "fail"
-            failure_codes = [] if all_pass else [
-                f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
-            ]
-        if status == "fail":
-            failure_codes = [
-            f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
-            ]
+            status = "pass"
+            failure_codes = []
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -571,6 +696,7 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
             status = "unknown"
             failure_codes = ["KEYPOINTS_MANIFEST_MISSING"]
     else:
+        base_text_ok = has_meaningful_base_text(story)
         gates = entry.get("gates") or {}
         l1 = gates.get("L1") or {}
         l1_pass = bool(l1.get("pass"))
@@ -608,12 +734,18 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
                 "expected": True,
                 "pass": l1_pass,
             },
+            {
+                "name": "base_text_quality",
+                "actual": base_text_ok,
+                "expected": True,
+                "pass": base_text_ok,
+            },
         ]
         if known_gap:
             unknown_flags["strategy_unknown"] = True
             status = "unknown"
             failure_codes = ["KEYPOINTS_KNOWN_DATA_GAP"]
-        elif l1_pass and not source_missing:
+        elif l1_pass and not source_missing and base_text_ok:
             status = "pass"
             failure_codes = []
         elif source_missing:
@@ -948,12 +1080,19 @@ def main() -> int:
             return 2
         print("   demo login OK")
 
+    story_payloads: dict[int, dict[str, Any]] = {}
+    for sid in target_ids:
+        story_payloads[sid] = fetch_story(sid)
+    all_story_tokens = {
+        int(sid): token_set(story_text(story_payloads[sid])) for sid in target_ids
+    }
+
     l1_rows: list[dict[str, Any]] = []
     l3_rows: list[dict[str, Any]] = []
     fig_rows: list[dict[str, Any]] = []
 
     for idx, sid in enumerate(target_ids, 1):
-        story = fetch_story(sid)
+        story = story_payloads[sid]
         lesson_code = story.get("grade_code", "")
         (payloads_dir / f"{sid}.json").write_text(
             json.dumps(story, ensure_ascii=False), encoding="utf-8"
@@ -961,7 +1100,7 @@ def main() -> int:
         print(f"   [{idx}/{len(target_ids)}] {sid} {lesson_code}")
 
         # L1
-        l1_rows.append(l1_reading_strategy(story, lesson_code))
+        l1_rows.append(l1_reading_strategy(story, lesson_code, all_story_tokens))
         l1_rows.append(l1_story_structure(story, lesson_code))
 
         # figure (both steps -> 2 rows/lesson so figure_rows == total cells)
