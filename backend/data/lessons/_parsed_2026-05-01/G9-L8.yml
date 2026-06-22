@@ -118,7 +118,7 @@ images:
   content_type: image/jpeg
   caption: ''
 image_count: 10
-story_structure_table_source: manual-extract-2026-06-22-replaced-wrong-keypoints
+story_structure_table_source: docx-keypoints-2026-06-18
 spotlight_raw_text: "閱讀聚光燈\n折線圖429881142\n\n例如：圖一是臺灣新生兒及全國性別比變化圖，\n255905070485\n\n\
   新生兒性別比\n \n全國性別比 \n圖一00\n\n新生兒性別比\n \n全國性別比 \n圖一(1)先觀察圖表類型：折線圖\n(2)閱讀標題：\n2628900-29845\n\
   (%)00\n(%)臺灣新生兒及全國性別比變化圖\n(3)閱讀橫軸與縱軸名稱：\n橫軸－民國/年\n縱軸－性別比，性別比是指\n女生和男生的比率，例如110表示，女生100人，男生110人。\n\
@@ -374,13 +374,9 @@ worksheet_intro:
   authors: 課文：陳淑麗  學習單：陳允捷
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G9-L8.pdf
 story_structure_table:
-- - 主題
-  - 臺灣學生的閱讀力：美麗與哀愁 【 課文主要在說什麼？ 】
-- - 重要事實 1
-  - □①臺灣學生閱讀力全球最差 ②臺灣學生閱讀力持續進步，2022年排名全球第五 □③臺灣退出PISA評量
-- - 重要事實 2
-  - □①疫情期間臺灣學生閱讀力大幅下滑 ②疫情期間臺灣因停課時間短、有效遠距教學，閱讀力逆勢成長 □③108課綱讓學生閱讀力下滑
-- - 重要事實 3
-  - □①臺灣城鄉閱讀差距已消除 ②偏鄉地區學生閱讀力與識字能力，仍明顯落後都會區 □③花東地區學生識字量高於全國平均
-- - 結論
-  - 臺灣學生整體閱讀力表現亮眼，但偏鄉城鄉差距仍待加強 【 課文最後想告訴我們什麼？ 】
+- - 收入最高20%家庭
+  - 成長率小幅__
+  - 成長率【 上升 】【 下降 】
+- - 收入最低20%家庭
+  - 成長率大幅__
+  - 成長率【 下降 】【 下降 】
