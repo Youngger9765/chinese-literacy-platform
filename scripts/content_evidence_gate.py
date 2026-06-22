@@ -46,9 +46,12 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 # Import the worktree's backend services (spotlight_contract), not the venv's repo.
@@ -62,7 +65,10 @@ from app.services.spotlight_contract import (  # noqa: E402
     load_test15_gold_manifest,
     test15_fixture_for_catalog,
 )
-from app.services.lesson_code_normalization import normalize_manifest_code  # noqa: E402
+from app.services.lesson_code_normalization import (  # noqa: E402
+    catalog_to_parsed_code,
+    normalize_manifest_code,
+)
 
 # ---------------------------------------------------------------------------
 # Fixed platform facts (spec §0.1)
@@ -103,6 +109,46 @@ BROWSE_BIN = os.environ.get(
 KEYPOINTS_MANIFEST = (
     REPO_ROOT / "backend" / "data" / "curriculum_qa" / "keypoints_manifest.json"
 )
+KNOWN_GAPS_PATH = (
+    REPO_ROOT / "backend" / "data" / "curriculum_qa" / "content_known_gaps.yaml"
+)
+# Reasons that are honest content/source gaps (no deployable content exists).
+KNOWN_GAP_REASONS = {
+    "no_spotlight_source",        # DOCX has no extractable 聚光燈 section
+    "no_keypoints_source",        # DOCX has no extractable 重點表
+    "multi_text_secondary",       # multi-text 2nd/3rd slot (content in primary)
+    "classical_no_step",          # 文言文 lesson type lacks this step
+    "built_pending_deploy",       # schema built locally, not yet in DB
+    "figure_asset_not_uploaded",  # story references a figN that's not in GCS
+}
+
+_KNOWN_GAPS: dict[str, dict[str, str]] | None = None
+
+
+def _known_gaps() -> dict[str, dict[str, str]]:
+    """Registry of lessons with genuinely-missing content, keyed by step.
+
+    Returns {step: {normalized_lesson_code: reason}}. A listed cell is marked
+    `known_gap` (NOT pass), surfacing the gap honestly instead of as a silent
+    `unknown`. SOT: backend/data/curriculum_qa/content_known_gaps.yaml.
+    """
+    global _KNOWN_GAPS
+    if _KNOWN_GAPS is None:
+        sections = (*STEPS, "figure")  # figure audit is keyed separately
+        _KNOWN_GAPS = {section: {} for section in sections}
+        if KNOWN_GAPS_PATH.exists():
+            data = yaml.safe_load(KNOWN_GAPS_PATH.read_text(encoding="utf-8")) or {}
+            for section in sections:
+                for entry in data.get(section) or []:
+                    code = entry.get("lesson_code")
+                    reason = entry.get("reason")
+                    if code and reason in KNOWN_GAP_REASONS:
+                        _KNOWN_GAPS[section][normalize_manifest_code(code)] = reason
+    return _KNOWN_GAPS
+
+
+def _known_gap_reason(lesson_code: str, step: str) -> str | None:
+    return _known_gaps().get(step, {}).get(normalize_manifest_code(lesson_code))
 
 # Smoke lessons: mix dev7 (golden), test15 (golden), and a few plain catalog
 # lessons so the smoke run exercises golden compare + figure assets + plain path.
@@ -189,12 +235,21 @@ def fetch_story(story_id: int) -> dict[str, Any]:
 # figure md5 audit
 # ---------------------------------------------------------------------------
 def normalize_gcs_lesson_code(lesson_code: str) -> str:
-    """API grade_code G4-L02 -> catalog asset dir G4-L2 (matches frontend)."""
-    m = re.match(r"^(G\d+)-L0*(\d+)([a-z])?$", lesson_code, re.IGNORECASE)
+    """API grade_code -> GCS asset directory.
+
+    GCS figure dirs use the PARSED lesson code, not the catalog code. For
+    multi-text / override lessons the two differ (G4-L20 → G4-L20-22,
+    G8-L10 → G8-L13, G8-L3b → G8-L4), and the asset filenames embed the parsed
+    prefix (e.g. G8-L13-13.jpg). Routing through catalog_to_parsed_code fixes
+    the figure 404s for those lessons; it is identity for normal lessons
+    (G6-L8 → G6-L8), so the padding-strip behaviour is preserved (#2397).
+    """
+    parsed = catalog_to_parsed_code(lesson_code)
+    m = re.match(r"^(G\d+)-L0*(\d+)([a-z])?$", parsed, re.IGNORECASE)
     if m:
         suffix = m.group(3) or ""
         return f"{m.group(1)}-L{int(m.group(2))}{suffix}"
-    return lesson_code
+    return parsed
 
 
 def figure_assets_from_story(story: dict[str, Any]) -> list[str]:
@@ -227,7 +282,11 @@ def gcs_md5_hex(lesson_code: str, filename: str, timeout: int = 30) -> tuple[
 ]:
     """Return (md5_hex, error). HEAD the GCS object and decode x-goog-hash md5."""
     code = normalize_gcs_lesson_code(lesson_code)
-    url = f"{GCS_IMAGE_BASE}/{code}/{filename}"
+    # Percent-encode the path so non-ASCII codes (文-L*) don't crash urllib with
+    # 'ascii' codec can't encode — previously every 文 lesson reported a bogus
+    # fetch-error instead of the real 404/200 (#2397).
+    path = urllib.parse.quote(f"{code}/{filename}")
+    url = f"{GCS_IMAGE_BASE}/{path}"
     req = urllib.request.Request(url, method="HEAD")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -272,12 +331,22 @@ def audit_figures(
         # Asset referenced but cannot verify md5 => unknown (=> fail at gate).
         failure_codes.append("FIGURE_ASSET_UNRESOLVED")
 
-    if failure_codes:
-        status = "fail" if blacklist_hits else "unknown"
+    gap_reason = None
+    if blacklist_hits:
+        # A placeholder image actively served is a real defect — never gap-allow.
+        status = "fail"
+    elif errors:
+        gap_reason = _known_gap_reason(lesson_code, "figure")
+        if gap_reason:
+            # Honest figure gap (synthetic figN reference never uploaded).
+            status = "known_gap"
+            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+        else:
+            status = "unknown"
     else:
         status = "pass"
 
-    return {
+    row = {
         "schema_version": SCHEMA_VERSION,
         "cell_id": f"{story['id']}:{step}",
         "story_id": story["id"],
@@ -292,6 +361,9 @@ def audit_figures(
         "failure_codes": failure_codes,
         "checked_at": utcnow(),
     }
+    if gap_reason:
+        row["known_gap_reason"] = gap_reason
+    return row
 
 
 # ---------------------------------------------------------------------------
@@ -337,9 +409,17 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
     unknown_flags = {"strategy_unknown": False, "source_missing": source_missing}
 
     if source_missing:
-        unknown_flags["strategy_unknown"] = True
-        status = "unknown"
-        failure_codes = ["SOURCE_MISSING"]
+        gap_reason = _known_gap_reason(lesson_code, "reading-strategy")
+        if gap_reason:
+            # Genuine, owned content gap — surfaced honestly, not faked pass.
+            unknown_flags["strategy_unknown"] = True
+            unknown_flags["known_gap_reason"] = gap_reason
+            status = "known_gap"
+            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+        else:
+            unknown_flags["strategy_unknown"] = True
+            status = "unknown"
+            failure_codes = ["SOURCE_MISSING"]
     else:
         # Eval with lesson_id only when it maps to a known semantic baseline.
         ev = eval_spotlight_v2(spotlight, gold_key if gold_key else None)
@@ -463,10 +543,18 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
     invariants: list[dict[str, Any]] = []
 
     if entry is None:
-        # No L1 keypoints verdict for this lesson -> unknown -> fail at gate.
-        unknown_flags["strategy_unknown"] = True
-        status = "unknown"
-        failure_codes = ["KEYPOINTS_MANIFEST_MISSING"]
+        gap_reason = _known_gap_reason(lesson_code, "story-structure")
+        if gap_reason:
+            # Genuine, owned content gap (e.g. multi-text secondary slot).
+            unknown_flags["strategy_unknown"] = True
+            unknown_flags["known_gap_reason"] = gap_reason
+            status = "known_gap"
+            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+        else:
+            # No L1 keypoints verdict for this lesson -> unknown -> fail at gate.
+            unknown_flags["strategy_unknown"] = True
+            status = "unknown"
+            failure_codes = ["KEYPOINTS_MANIFEST_MISSING"]
     else:
         gates = entry.get("gates") or {}
         l1 = gates.get("L1") or {}
@@ -921,7 +1009,7 @@ def main() -> int:
     )
     all_cells = sorted(set(l1_idx) | set(l3_idx) | set(fig_idx))
 
-    pass_cells = fail_cells = unknown_cells = 0
+    pass_cells = fail_cells = unknown_cells = known_gap_cells = 0
     missing_screenshot_cells = console_error_cells = 0
     figure_blacklist_hits = 0
     for cid in all_cells:
@@ -930,10 +1018,14 @@ def main() -> int:
             l3_idx.get(cid, {}).get("status", "unknown"),
             fig_idx.get(cid, {}).get("status", "unknown"),
         ]
+        # Precedence: a real fail/unknown always dominates an honest known_gap,
+        # so a known_gap cell that ALSO renders broken still surfaces as fail.
         if "fail" in statuses:
             fail_cells += 1
         elif "unknown" in statuses:
             unknown_cells += 1
+        elif "known_gap" in statuses:
+            known_gap_cells += 1
         else:
             pass_cells += 1
         l3 = l3_idx.get(cid, {})
@@ -990,6 +1082,7 @@ def main() -> int:
             "pass_cells": pass_cells,
             "fail_cells": fail_cells,
             "unknown_cells": unknown_cells,
+            "known_gap_cells": known_gap_cells,
             "missing_screenshot_cells": missing_screenshot_cells,
             "console_error_cells": console_error_cells,
             "figure_blacklist_hits": figure_blacklist_hits,
@@ -1014,6 +1107,7 @@ def main() -> int:
     print(f"   run_id            : {run_id}")
     print(f"   cells             : {len(all_cells)} / {expected_cells}")
     print(f"   pass / fail / unk : {pass_cells} / {fail_cells} / {unknown_cells}")
+    print(f"   known_gap         : {known_gap_cells}")
     print(f"   figure blacklist  : {figure_blacklist_hits}")
     print(f"   console errors    : {console_error_cells}")
     print(f"   overall_status    : {overall_status}")

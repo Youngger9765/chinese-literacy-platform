@@ -137,6 +137,17 @@ if counts.get("figure_blacklist_hits", -1) != 0:
 if counts.get("fail_cells", -1) != 0:
     fails.append(f"FAIL_CELLS:{counts.get('fail_cells')}")
 
+# 7b. known_gap cells are NON-blocking (honest, owned content gaps) but MUST
+# be reason-annotated in every l1/figure row — a known_gap status with no
+# KNOWN_CONTENT_GAP_* failure_code would be a silent skip, which is a fail.
+known_gap_cells = counts.get("known_gap_cells", 0)
+for row in l1 + fig:
+    if row.get("status") == "known_gap":
+        codes = row.get("failure_codes") or []
+        if not any(c.startswith("KNOWN_CONTENT_GAP_") for c in codes):
+            fails.append(f"KNOWN_GAP_NO_REASON:{row.get('cell_id')}")
+print(f"INFO: known_gap_cells={known_gap_cells} (honest content gaps, non-blocking)")
+
 # 8. overall_status == pass
 if manifest.get("overall_status") != "pass":
     fails.append(f"OVERALL_STATUS:{manifest.get('overall_status')}")

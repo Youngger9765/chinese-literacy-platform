@@ -78,3 +78,62 @@ class TestKeypointsCanonicalFallback:
         assert entry is not None and entry["story_id"] == 7
         gate._KP_BY_STORY = None
         gate._KP_BY_CODE = None
+
+
+class TestKnownGaps:
+    """Honest content-gap registry: a listed (lesson, step) becomes known_gap
+    (NOT pass, NOT silent unknown). Reasons must be in the validated enum.
+    """
+
+    def test_registry_loads_with_reasons(self):
+        gate._KNOWN_GAPS = None
+        gaps = gate._known_gaps()
+        # Every reason value must be in the validated enum (no typos slip in).
+        for section, entries in gaps.items():
+            for code, reason in entries.items():
+                assert reason in gate.KNOWN_GAP_REASONS, (section, code, reason)
+        # G7-L31 multi-text secondary is a tracked story-structure gap.
+        assert "G7-L31" in gaps["story-structure"]
+        gate._KNOWN_GAPS = None
+
+    def test_reading_strategy_known_gap_marks_known_gap_not_unknown(self):
+        gate._KNOWN_GAPS = {
+            "reading-strategy": {"G4-L1": "no_spotlight_source"},
+            "story-structure": {},
+            "figure": {},
+        }
+        story = {"id": 1001, "grade_code": "G4-L1", "spotlight_v2": {"blocks": []}}
+        r = gate.l1_reading_strategy(story, "G4-L1")
+        assert r["status"] == "known_gap"
+        assert r["failure_codes"] == ["KNOWN_CONTENT_GAP_NO_SPOTLIGHT_SOURCE"]
+        gate._KNOWN_GAPS = None
+
+    def test_unlisted_missing_source_stays_unknown(self):
+        gate._KNOWN_GAPS = {"reading-strategy": {}, "story-structure": {}, "figure": {}}
+        story = {"id": 9999, "grade_code": "G4-L99", "spotlight_v2": {"blocks": []}}
+        r = gate.l1_reading_strategy(story, "G4-L99")
+        assert r["status"] == "unknown"
+        assert r["failure_codes"] == ["SOURCE_MISSING"]
+        gate._KNOWN_GAPS = None
+
+    def test_blacklist_hit_never_gap_allowed(self):
+        # A blacklisted placeholder md5 must stay fail even if lesson is listed.
+        gate._KNOWN_GAPS = {
+            "reading-strategy": {},
+            "story-structure": {},
+            "figure": {"G8-L6b": "no_spotlight_source"},
+        }
+        bl = next(iter(gate.BLACKLIST_MD5))
+        # Fake a story whose single asset hashes to the blacklist md5.
+        orig_md5 = gate.gcs_md5_hex
+        orig_assets = gate.figure_assets_from_story
+        gate.gcs_md5_hex = lambda code, fn, timeout=30: (bl, None)
+        gate.figure_assets_from_story = lambda s: ["fig1.png"]
+        try:
+            r = gate.audit_figures({"id": 1118, "grade_code": "G8-L6b"}, "G8-L6b", "reading-strategy")
+            assert r["status"] == "fail"
+            assert "FIGURE_BLACKLIST_HIT" in r["failure_codes"]
+        finally:
+            gate.gcs_md5_hex = orig_md5
+            gate.figure_assets_from_story = orig_assets
+        gate._KNOWN_GAPS = None
