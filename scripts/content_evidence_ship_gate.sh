@@ -6,7 +6,7 @@
 #
 #   bash scripts/content_evidence_ship_gate.sh --run-id <run_id>
 #   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --evidence-root qa/content-evidence
-#   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --smoke   # allow <330 cells (smoke set)
+#   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --smoke   # allow <304 cells (smoke set)
 #
 # Exit 0 + "CONTENT_EVIDENCE_GATE=PASS run_id=<run_id>" on success.
 # Exit 1 + specific fail codes otherwise.
@@ -106,10 +106,12 @@ scope = manifest.get("scope", {})
 observed = manifest.get("observed", {})
 counts = manifest.get("summary_counts", {})
 
-# 2. expected_total_cells == 330 (full) ; for smoke = expected_lessons * 2
+# 2. expected_total_cells == 304 (full = 152 deduped lessons x 2 steps) ;
+#    for smoke = expected_lessons * 2. 304 (not 330): the raw /api/stories
+#    list has 13 padded/unpadded duplicate rows the gate now collapses.
 expected_total = scope.get("expected_total_cells")
-if not smoke and expected_total != 330:
-    fails.append(f"EXPECTED_TOTAL_NOT_330:{expected_total}")
+if not smoke and expected_total != 304:
+    fails.append(f"EXPECTED_TOTAL_NOT_304:{expected_total}")
 
 # 3. observed three layers all == expected_total
 for layer in ("l1_rows", "l3_rows", "figure_rows"):

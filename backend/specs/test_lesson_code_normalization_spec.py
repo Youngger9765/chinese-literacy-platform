@@ -34,6 +34,13 @@ from app.services.lesson_code_normalization import (
     ("G8-L04",  "G8-L4"),
     ("G5-L20",  "G5-L20"),  # no leading zero — unchanged
     ("G9-L05",  "G9-L5"),
+    # Classical-Chinese 文 prefix must strip leading zeros too, else 文-L08
+    # stays padded and never matches the unpadded parsed YAML 文-L8.yml,
+    # splitting one lesson into a duplicate the content gate misses (#2397).
+    ("文-L08",  "文-L8"),
+    ("文-L01",  "文-L1"),
+    ("文-L10",  "文-L10"),  # two digits — unchanged
+    ("文-L1",   "文-L1"),   # already normalized
 ])
 def test_normalize_strips_leading_zero(raw: str, expected: str) -> None:
     assert normalize_manifest_code(raw) == expected
@@ -55,7 +62,7 @@ def test_normalize_converts_ww_prefix(raw: str, expected: str) -> None:
 
 @pytest.mark.parametrize("raw", [
     "G4-L01", "G4-L1", "G4-L03a", "WW-L01", "WW-L10",
-    "G8-L04", "G5-L20", "G9-L05",
+    "G8-L04", "G5-L20", "G9-L05", "文-L08", "文-L8", "文-L10",
 ])
 def test_normalize_is_idempotent(raw: str) -> None:
     once = normalize_manifest_code(raw)

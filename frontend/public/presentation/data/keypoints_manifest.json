@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T14:46:00.733957+00:00",
+  "generated_at": "2026-06-22T14:56:35.878731+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -6312,8 +6312,8 @@
     },
     {
       "lesson_id": "文-L3",
-      "title": "文-L3",
-      "story_id": null,
+      "title": "不量田",
+      "story_id": 46,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6326,6 +6326,16 @@
         },
         "L2": {
           "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6346,8 +6356,8 @@
     },
     {
       "lesson_id": "文-L4",
-      "title": "文-L4",
-      "story_id": null,
+      "title": "陸公買硯",
+      "story_id": 47,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6360,6 +6370,16 @@
         },
         "L2": {
           "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6512,8 +6532,8 @@
     },
     {
       "lesson_id": "文-L8",
-      "title": "文-L8",
-      "story_id": null,
+      "title": "愛讀書的顧寧人",
+      "story_id": 42,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6526,6 +6546,16 @@
         },
         "L2": {
           "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6546,8 +6576,8 @@
     },
     {
       "lesson_id": "文-L9",
-      "title": "文-L9",
-      "story_id": null,
+      "title": "從天才跌為凡人的神童",
+      "story_id": 43,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6560,6 +6590,16 @@
         },
         "L2": {
           "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }

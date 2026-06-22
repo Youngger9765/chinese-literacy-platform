@@ -3,7 +3,9 @@
 content_evidence_gate.py — Content Evidence Gate (MVP, #2397).
 
 Produces machine-verifiable evidence for every content cell:
-    165 lessons x {reading-strategy, story-structure} = 330 cells.
+    152 lessons x {reading-strategy, story-structure} = 304 cells.
+    (Raw /api/stories returns 165 rows = 152 lessons + 13 padded/unpadded
+    duplicate DB rows, collapsed by dedupe_stories_by_canonical_code().)
 
 Evidence-first, fail-closed. Spec: /tmp/cursor-gate-spec.txt (§1-7, MVP = §7.1).
 
@@ -25,7 +27,7 @@ Outputs to qa/content-evidence/<run_id>/:
 
 Run:
   python scripts/content_evidence_gate.py --smoke     # 10-lesson smoke
-  python scripts/content_evidence_gate.py             # full 330 cells
+  python scripts/content_evidence_gate.py             # full 304 cells
 
 Status values are pass / fail / unknown. unknown == fail at gate time.
 """
@@ -66,7 +68,10 @@ from app.services.lesson_code_normalization import normalize_manifest_code  # no
 # Fixed platform facts (spec §0.1)
 # ---------------------------------------------------------------------------
 SCHEMA_VERSION = "content-evidence.v1"
-EXPECTED_LESSONS = 165
+# 152 distinct lessons after collapsing 13 padded/unpadded duplicate DB rows
+# (the raw /api/stories list returns 165 rows = 152 lessons + 13 dup rows).
+# See dedupe_stories_by_canonical_code(). 152 x 2 steps = 304 cells.
+EXPECTED_LESSONS = 152
 STEPS = ("reading-strategy", "story-structure")
 STEP_SOURCE_FIELD = {
     "reading-strategy": "spotlight_v2.blocks",
@@ -145,6 +150,37 @@ def fetch_story_list() -> list[dict[str, Any]]:
     return data.get("stories") or []
 
 
+def dedupe_stories_by_canonical_code(
+    stories: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Collapse padded/unpadded duplicate DB rows of the SAME lesson.
+
+    The platform stores 13 lessons twice — once zero-padded (G4-L01, story 1)
+    and once unpadded (G4-L1, story 1001) — so the raw list of 165 rows is
+    really 152 distinct lessons + 13 duplicates. Counting both inflates the
+    matrix and surfaces the content-less duplicate row as a phantom
+    SOURCE_MISSING / KEYPOINTS_MANIFEST_MISSING. Keep one row per canonical
+    code: prefer the row whose grade_code is already canonical (unpadded =
+    the catalog entry that carries spotlight/keypoints), else the higher id.
+    """
+    by_canon: dict[str, dict[str, Any]] = {}
+    for s in stories:
+        code = s.get("grade_code", "") or ""
+        canon = normalize_manifest_code(code)
+        cur = by_canon.get(canon)
+        if cur is None:
+            by_canon[canon] = s
+            continue
+        # Tie-break: canonical (unpadded) grade_code wins; else higher id.
+        cur_is_canon = (cur.get("grade_code") == canon)
+        new_is_canon = (code == canon)
+        if new_is_canon and not cur_is_canon:
+            by_canon[canon] = s
+        elif new_is_canon == cur_is_canon and s.get("id", 0) > cur.get("id", 0):
+            by_canon[canon] = s
+    return list(by_canon.values())
+
+
 def fetch_story(story_id: int) -> dict[str, Any]:
     return api_get(f"/api/stories/{story_id}")
 
@@ -215,7 +251,7 @@ def audit_figures(
     story: dict[str, Any], lesson_code: str, step: str
 ) -> dict[str, Any]:
     """Per-cell figure audit. figure step = reading-strategy carries figures;
-    story-structure cells are evaluated identically for completeness (330 rows)."""
+    story-structure cells are evaluated identically for completeness (304 rows)."""
     assets = figure_assets_from_story(story)
     md5_list: list[str] = []
     blacklist_hits: list[str] = []
@@ -379,25 +415,49 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
 # L1 — story-structure (重點表) via keypoints_manifest L1 verdict
 # ---------------------------------------------------------------------------
 _KP_BY_STORY: dict[int, dict[str, Any]] | None = None
+_KP_BY_CODE: dict[str, dict[str, Any]] | None = None
+
+
+def _build_keypoints_indices() -> None:
+    global _KP_BY_STORY, _KP_BY_CODE
+    _KP_BY_STORY = {}
+    _KP_BY_CODE = {}
+    if KEYPOINTS_MANIFEST.exists():
+        data = json.loads(KEYPOINTS_MANIFEST.read_text(encoding="utf-8"))
+        for entry in data.get("lessons") or []:
+            sid = entry.get("story_id")
+            if sid is not None:
+                _KP_BY_STORY[int(sid)] = entry
+            # Second index keyed by normalized lesson code. The platform stores
+            # the same lesson under two padded/unpadded rows (G4-L01 / G4-L1 →
+            # story 1 / 1001); the manifest only carries one story_id per
+            # lesson, so the iterated duplicate's story_id misses. Falling back
+            # to the canonical code resolves both rows to the same verdict.
+            lid = entry.get("lesson_id")
+            if lid:
+                _KP_BY_CODE.setdefault(normalize_manifest_code(lid), entry)
 
 
 def _keypoints_index() -> dict[int, dict[str, Any]]:
-    global _KP_BY_STORY
     if _KP_BY_STORY is None:
-        _KP_BY_STORY = {}
-        if KEYPOINTS_MANIFEST.exists():
-            data = json.loads(KEYPOINTS_MANIFEST.read_text(encoding="utf-8"))
-            for entry in data.get("lessons") or []:
-                sid = entry.get("story_id")
-                if sid is not None:
-                    _KP_BY_STORY[int(sid)] = entry
-    return _KP_BY_STORY
+        _build_keypoints_indices()
+    return _KP_BY_STORY  # type: ignore[return-value]
+
+
+def _keypoints_entry(story: dict[str, Any], lesson_code: str) -> dict[str, Any] | None:
+    """Manifest entry for a lesson: by story_id first, then canonical code."""
+    if _KP_BY_STORY is None:
+        _build_keypoints_indices()
+    entry = _KP_BY_STORY.get(int(story["id"]))  # type: ignore[union-attr]
+    if entry is None and lesson_code:
+        entry = _KP_BY_CODE.get(normalize_manifest_code(lesson_code))  # type: ignore[union-attr]
+    return entry
 
 
 def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any]:
     sst = story.get("story_structure_table")
     source_missing = not sst
-    entry = _keypoints_index().get(int(story["id"]))
+    entry = _keypoints_entry(story, lesson_code)
 
     unknown_flags = {"strategy_unknown": False, "source_missing": source_missing}
     invariants: list[dict[str, Any]] = []
@@ -764,13 +824,14 @@ def main() -> int:
     print(f"   smoke={args.smoke}  no_l3={args.no_l3}")
 
     stories = fetch_story_list()
+    stories = dedupe_stories_by_canonical_code(stories)
     by_id = {s["id"]: s for s in stories}
     if args.smoke:
         target_ids = [sid for sid in SMOKE_STORY_IDS if sid in by_id]
         expected_lessons = len(target_ids)
     else:
         target_ids = [s["id"] for s in stories]
-        expected_lessons = EXPECTED_LESSONS
+        expected_lessons = len(target_ids)
     expected_cells = expected_lessons * len(STEPS)
     print(f"   lessons={len(target_ids)} expected_cells={expected_cells}")
 
