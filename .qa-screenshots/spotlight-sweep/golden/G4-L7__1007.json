@@ -1,0 +1,39 @@
+{
+  "key": "G4-L7+1007",
+  "story_id": 1007,
+  "lesson_code": "G4-L7",
+  "title": "正太與小豬：武僧的養成之路",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 6,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-9cee9435c93df207"
+  }
+}

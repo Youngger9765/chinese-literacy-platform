@@ -1,0 +1,27 @@
+{
+  "key": "G7-L21+40",
+  "story_id": 40,
+  "lesson_code": "G7-L21",
+  "title": "別上「誘餌式標題」的鉤",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-8711b2a1db745e00"
+  }
+}

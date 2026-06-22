@@ -1,0 +1,31 @@
+{
+  "key": "G5-L13+1040",
+  "story_id": 1040,
+  "lesson_code": "G5-L13",
+  "title": "小丑醫生",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "free_text",
+      "free_text",
+      "passage",
+      "guide",
+      "figure"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-01860ad5542d9127"
+  }
+}

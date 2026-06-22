@@ -1,0 +1,35 @@
+{
+  "key": "G5-L24+1051",
+  "story_id": 1051,
+  "lesson_code": "G5-L24",
+  "title": "牧羊少年的逆轉勝",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "figure",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-02a8529ef6400a1e"
+  }
+}

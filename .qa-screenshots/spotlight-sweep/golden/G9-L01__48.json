@@ -1,0 +1,22 @@
+{
+  "key": "G9-L01+48",
+  "story_id": 48,
+  "lesson_code": "G9-L01",
+  "title": "盡信書不如無書：從一件殺人案談起",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 2,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-f56dee856ea2023d"
+  }
+}

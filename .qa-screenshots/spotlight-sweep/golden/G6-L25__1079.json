@@ -1,0 +1,22 @@
+{
+  "key": "G6-L25+1079",
+  "story_id": 1079,
+  "lesson_code": "G6-L25",
+  "title": "荷蘭東印度公司：全世界第一張股票的誕生",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "fill_table",
+      "self_check"
+    ],
+    "question_count": 3,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-93377699066fc8fc"
+  }
+}

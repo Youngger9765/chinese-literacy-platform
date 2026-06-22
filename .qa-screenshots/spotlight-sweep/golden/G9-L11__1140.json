@@ -1,0 +1,45 @@
+{
+  "key": "G9-L11+1140",
+  "story_id": 1140,
+  "lesson_code": "G9-L11",
+  "title": "見前人所未見—達爾文與長喙天蛾的故事",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "free_text",
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "multi",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "passage",
+      "fill_table",
+      "self_check"
+    ],
+    "question_count": 10,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-8025ff28e37adb8f"
+  }
+}

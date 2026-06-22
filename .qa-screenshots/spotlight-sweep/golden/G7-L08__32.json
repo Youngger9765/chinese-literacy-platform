@@ -1,0 +1,28 @@
+{
+  "key": "G7-L08+32",
+  "story_id": 32,
+  "lesson_code": "G7-L08",
+  "title": "科學怪人",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-4e9601d13790d4c0"
+  }
+}

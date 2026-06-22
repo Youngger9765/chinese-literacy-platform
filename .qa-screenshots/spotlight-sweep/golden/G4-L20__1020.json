@@ -1,0 +1,28 @@
+{
+  "key": "G4-L20+1020",
+  "story_id": 1020,
+  "lesson_code": "G4-L20",
+  "title": "物以稀為貴： 從「供給」和「需求」談物價波動",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-df386f46b562ec96"
+  }
+}

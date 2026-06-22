@@ -1,0 +1,32 @@
+{
+  "key": "G4-L23+1023",
+  "story_id": 1023,
+  "lesson_code": "G4-L23",
+  "title": "心，也要一起練",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "self_check",
+      "self_check",
+      "self_check",
+      "self_check",
+      "guide",
+      "self_check",
+      "self_check",
+      "self_check",
+      "self_check",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 4,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-27e619a2944f9f02"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "key": "G8-L4+1115",
+  "story_id": 1115,
+  "lesson_code": "G8-L4",
+  "title": "好心沒好報玻璃娃娃爭議事件",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "passage",
+      "free_text",
+      "passage",
+      "guide",
+      "free_text",
+      "passage",
+      "free_text",
+      "passage"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-a984fe3cbba26e21"
+  }
+}

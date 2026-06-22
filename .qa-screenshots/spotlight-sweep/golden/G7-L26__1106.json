@@ -1,0 +1,36 @@
+{
+  "key": "G7-L26+1106",
+  "story_id": 1106,
+  "lesson_code": "G7-L26",
+  "title": "小米酒的祝福",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "passage",
+      "figure",
+      "guide",
+      "passage",
+      "free_text",
+      "passage",
+      "self_check"
+    ],
+    "question_count": 1,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-2562f4779f0a0b7b"
+  }
+}

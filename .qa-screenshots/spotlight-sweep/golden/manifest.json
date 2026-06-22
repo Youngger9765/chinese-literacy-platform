@@ -1,0 +1,1251 @@
+{
+  "meta": {
+    "report_path": ".qa-screenshots/spotlight-sweep/faithfulness-report.json",
+    "total_stories": 161,
+    "frozen_count": 155,
+    "skipped_expected_red": 6,
+    "skipped_runtime_fail": 0
+  },
+  "items": [
+    {
+      "key": "G4-L02+2",
+      "story_id": 2,
+      "lesson_code": "G4-L02",
+      "file": "G4-L02__2.json",
+      "semantic_hash": "sha256-1efd4b5a480a85ed",
+      "question_count": 2
+    },
+    {
+      "key": "G4-L03+3",
+      "story_id": 3,
+      "lesson_code": "G4-L03",
+      "file": "G4-L03__3.json",
+      "semantic_hash": "sha256-9e980a667e8bf1a1",
+      "question_count": 7
+    },
+    {
+      "key": "G4-L04+4",
+      "story_id": 4,
+      "lesson_code": "G4-L04",
+      "file": "G4-L04__4.json",
+      "semantic_hash": "sha256-aeccd35a272286e1",
+      "question_count": 8
+    },
+    {
+      "key": "G4-L05+5",
+      "story_id": 5,
+      "lesson_code": "G4-L05",
+      "file": "G4-L05__5.json",
+      "semantic_hash": "sha256-781fa0de3645c6ce",
+      "question_count": 0
+    },
+    {
+      "key": "G4-L10+1010",
+      "story_id": 1010,
+      "lesson_code": "G4-L10",
+      "file": "G4-L10__1010.json",
+      "semantic_hash": "sha256-85b9ad49acf61b07",
+      "question_count": 12
+    },
+    {
+      "key": "G4-L11+1011",
+      "story_id": 1011,
+      "lesson_code": "G4-L11",
+      "file": "G4-L11__1011.json",
+      "semantic_hash": "sha256-79b17ae6114420f3",
+      "question_count": 5
+    },
+    {
+      "key": "G4-L12+1012",
+      "story_id": 1012,
+      "lesson_code": "G4-L12",
+      "file": "G4-L12__1012.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G4-L13+6",
+      "story_id": 6,
+      "lesson_code": "G4-L13",
+      "file": "G4-L13__6.json",
+      "semantic_hash": "sha256-36a57865dcf863ba",
+      "question_count": 3
+    },
+    {
+      "key": "G4-L15+1015",
+      "story_id": 1015,
+      "lesson_code": "G4-L15",
+      "file": "G4-L15__1015.json",
+      "semantic_hash": "sha256-52eeee786d686998",
+      "question_count": 0
+    },
+    {
+      "key": "G4-L16+1016",
+      "story_id": 1016,
+      "lesson_code": "G4-L16",
+      "file": "G4-L16__1016.json",
+      "semantic_hash": "sha256-93d774de2d910944",
+      "question_count": 5
+    },
+    {
+      "key": "G4-L17+1017",
+      "story_id": 1017,
+      "lesson_code": "G4-L17",
+      "file": "G4-L17__1017.json",
+      "semantic_hash": "sha256-edda07b7d352e8c8",
+      "question_count": 10
+    },
+    {
+      "key": "G4-L18+1018",
+      "story_id": 1018,
+      "lesson_code": "G4-L18",
+      "file": "G4-L18__1018.json",
+      "semantic_hash": "sha256-225e4db5623dee61",
+      "question_count": 0
+    },
+    {
+      "key": "G4-L19+1019",
+      "story_id": 1019,
+      "lesson_code": "G4-L19",
+      "file": "G4-L19__1019.json",
+      "semantic_hash": "sha256-0d011a415cb74693",
+      "question_count": 14
+    },
+    {
+      "key": "G4-L20+1020",
+      "story_id": 1020,
+      "lesson_code": "G4-L20",
+      "file": "G4-L20__1020.json",
+      "semantic_hash": "sha256-df386f46b562ec96",
+      "question_count": 0
+    },
+    {
+      "key": "G4-L23+1023",
+      "story_id": 1023,
+      "lesson_code": "G4-L23",
+      "file": "G4-L23__1023.json",
+      "semantic_hash": "sha256-27e619a2944f9f02",
+      "question_count": 4
+    },
+    {
+      "key": "G4-L24+1024",
+      "story_id": 1024,
+      "lesson_code": "G4-L24",
+      "file": "G4-L24__1024.json",
+      "semantic_hash": "sha256-b39fbca6d620a331",
+      "question_count": 13
+    },
+    {
+      "key": "G4-L25+1025",
+      "story_id": 1025,
+      "lesson_code": "G4-L25",
+      "file": "G4-L25__1025.json",
+      "semantic_hash": "sha256-36a71455569574e7",
+      "question_count": 3
+    },
+    {
+      "key": "G4-L26+1026",
+      "story_id": 1026,
+      "lesson_code": "G4-L26",
+      "file": "G4-L26__1026.json",
+      "semantic_hash": "sha256-80a7a9ff9f55e2f1",
+      "question_count": 3
+    },
+    {
+      "key": "G4-L27+1027",
+      "story_id": 1027,
+      "lesson_code": "G4-L27",
+      "file": "G4-L27__1027.json",
+      "semantic_hash": "sha256-4155299455dbb646",
+      "question_count": 4
+    },
+    {
+      "key": "G4-L6+1006",
+      "story_id": 1006,
+      "lesson_code": "G4-L6",
+      "file": "G4-L6__1006.json",
+      "semantic_hash": "sha256-8ae12640156442bc",
+      "question_count": 3
+    },
+    {
+      "key": "G4-L7+1007",
+      "story_id": 1007,
+      "lesson_code": "G4-L7",
+      "file": "G4-L7__1007.json",
+      "semantic_hash": "sha256-9cee9435c93df207",
+      "question_count": 6
+    },
+    {
+      "key": "G4-L8+1008",
+      "story_id": 1008,
+      "lesson_code": "G4-L8",
+      "file": "G4-L8__1008.json",
+      "semantic_hash": "sha256-88d95214a0c87242",
+      "question_count": 4
+    },
+    {
+      "key": "G4-L9+1009",
+      "story_id": 1009,
+      "lesson_code": "G4-L9",
+      "file": "G4-L9__1009.json",
+      "semantic_hash": "sha256-94bc3397b0734123",
+      "question_count": 8
+    },
+    {
+      "key": "G5-L08+8",
+      "story_id": 8,
+      "lesson_code": "G5-L08",
+      "file": "G5-L08__8.json",
+      "semantic_hash": "sha256-3c9bcb59fb709a4c",
+      "question_count": 3
+    },
+    {
+      "key": "G5-L09+9",
+      "story_id": 9,
+      "lesson_code": "G5-L09",
+      "file": "G5-L09__9.json",
+      "semantic_hash": "sha256-c4d42b35a9253fc2",
+      "question_count": 2
+    },
+    {
+      "key": "G5-L1+1028",
+      "story_id": 1028,
+      "lesson_code": "G5-L1",
+      "file": "G5-L1__1028.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G5-L10+10",
+      "story_id": 10,
+      "lesson_code": "G5-L10",
+      "file": "G5-L10__10.json",
+      "semantic_hash": "sha256-b99a947aace2446b",
+      "question_count": 5
+    },
+    {
+      "key": "G5-L11+11",
+      "story_id": 11,
+      "lesson_code": "G5-L11",
+      "file": "G5-L11__11.json",
+      "semantic_hash": "sha256-f79413712327b25f",
+      "question_count": 2
+    },
+    {
+      "key": "G5-L11+1038",
+      "story_id": 1038,
+      "lesson_code": "G5-L11",
+      "file": "G5-L11__1038.json",
+      "semantic_hash": "sha256-f79413712327b25f",
+      "question_count": 2
+    },
+    {
+      "key": "G5-L12+13",
+      "story_id": 13,
+      "lesson_code": "G5-L12",
+      "file": "G5-L12__13.json",
+      "semantic_hash": "sha256-bfea649f0ab70982",
+      "question_count": 1
+    },
+    {
+      "key": "G5-L12+1039",
+      "story_id": 1039,
+      "lesson_code": "G5-L12",
+      "file": "G5-L12__1039.json",
+      "semantic_hash": "sha256-bfea649f0ab70982",
+      "question_count": 1
+    },
+    {
+      "key": "G5-L13+1040",
+      "story_id": 1040,
+      "lesson_code": "G5-L13",
+      "file": "G5-L13__1040.json",
+      "semantic_hash": "sha256-01860ad5542d9127",
+      "question_count": 2
+    },
+    {
+      "key": "G5-L14+1041",
+      "story_id": 1041,
+      "lesson_code": "G5-L14",
+      "file": "G5-L14__1041.json",
+      "semantic_hash": "sha256-695e8ccb3ae47636",
+      "question_count": 16
+    },
+    {
+      "key": "G5-L15+1042",
+      "story_id": 1042,
+      "lesson_code": "G5-L15",
+      "file": "G5-L15__1042.json",
+      "semantic_hash": "sha256-cc05281bf65c828e",
+      "question_count": 0
+    },
+    {
+      "key": "G5-L16+1043",
+      "story_id": 1043,
+      "lesson_code": "G5-L16",
+      "file": "G5-L16__1043.json",
+      "semantic_hash": "sha256-3aa801e0b624e490",
+      "question_count": 0
+    },
+    {
+      "key": "G5-L17+1044",
+      "story_id": 1044,
+      "lesson_code": "G5-L17",
+      "file": "G5-L17__1044.json",
+      "semantic_hash": "sha256-8ca20f6136aa39ec",
+      "question_count": 10
+    },
+    {
+      "key": "G5-L18+1045",
+      "story_id": 1045,
+      "lesson_code": "G5-L18",
+      "file": "G5-L18__1045.json",
+      "semantic_hash": "sha256-92096976e39f1b45",
+      "question_count": 6
+    },
+    {
+      "key": "G5-L19+1046",
+      "story_id": 1046,
+      "lesson_code": "G5-L19",
+      "file": "G5-L19__1046.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G5-L2+1029",
+      "story_id": 1029,
+      "lesson_code": "G5-L2",
+      "file": "G5-L2__1029.json",
+      "semantic_hash": "sha256-82bdbcfd315bf82a",
+      "question_count": 30
+    },
+    {
+      "key": "G5-L20+1047",
+      "story_id": 1047,
+      "lesson_code": "G5-L20",
+      "file": "G5-L20__1047.json",
+      "semantic_hash": "sha256-3126a6022a475013",
+      "question_count": 1
+    },
+    {
+      "key": "G5-L21+1048",
+      "story_id": 1048,
+      "lesson_code": "G5-L21",
+      "file": "G5-L21__1048.json",
+      "semantic_hash": "sha256-a2e19b4361c6e107",
+      "question_count": 4
+    },
+    {
+      "key": "G5-L22+12",
+      "story_id": 12,
+      "lesson_code": "G5-L22",
+      "file": "G5-L22__12.json",
+      "semantic_hash": "sha256-7c3b31987a9fe462",
+      "question_count": 1
+    },
+    {
+      "key": "G5-L23+1050",
+      "story_id": 1050,
+      "lesson_code": "G5-L23",
+      "file": "G5-L23__1050.json",
+      "semantic_hash": "sha256-52ccb9c66fcb4ae2",
+      "question_count": 3
+    },
+    {
+      "key": "G5-L24+1051",
+      "story_id": 1051,
+      "lesson_code": "G5-L24",
+      "file": "G5-L24__1051.json",
+      "semantic_hash": "sha256-02a8529ef6400a1e",
+      "question_count": 3
+    },
+    {
+      "key": "G5-L26+1053",
+      "story_id": 1053,
+      "lesson_code": "G5-L26",
+      "file": "G5-L26__1053.json",
+      "semantic_hash": "sha256-52e4221c206f0e51",
+      "question_count": 14
+    },
+    {
+      "key": "G5-L27+1054",
+      "story_id": 1054,
+      "lesson_code": "G5-L27",
+      "file": "G5-L27__1054.json",
+      "semantic_hash": "sha256-cb8fa46e2d90c841",
+      "question_count": 7
+    },
+    {
+      "key": "G5-L3+1030",
+      "story_id": 1030,
+      "lesson_code": "G5-L3",
+      "file": "G5-L3__1030.json",
+      "semantic_hash": "sha256-c28dc2a69143cd8d",
+      "question_count": 35
+    },
+    {
+      "key": "G5-L4+1031",
+      "story_id": 1031,
+      "lesson_code": "G5-L4",
+      "file": "G5-L4__1031.json",
+      "semantic_hash": "sha256-345da41212145cde",
+      "question_count": 8
+    },
+    {
+      "key": "G5-L5+1032",
+      "story_id": 1032,
+      "lesson_code": "G5-L5",
+      "file": "G5-L5__1032.json",
+      "semantic_hash": "sha256-c50012277d41afd8",
+      "question_count": 6
+    },
+    {
+      "key": "G5-L6+1033",
+      "story_id": 1033,
+      "lesson_code": "G5-L6",
+      "file": "G5-L6__1033.json",
+      "semantic_hash": "sha256-880dfcf8de9cddb0",
+      "question_count": 11
+    },
+    {
+      "key": "G5-L7+1034",
+      "story_id": 1034,
+      "lesson_code": "G5-L7",
+      "file": "G5-L7__1034.json",
+      "semantic_hash": "sha256-35238a58df6f96f6",
+      "question_count": 5
+    },
+    {
+      "key": "G6-L01+14",
+      "story_id": 14,
+      "lesson_code": "G6-L01",
+      "file": "G6-L01__14.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L03+24",
+      "story_id": 24,
+      "lesson_code": "G6-L03",
+      "file": "G6-L03__24.json",
+      "semantic_hash": "sha256-396570c567d2b24c",
+      "question_count": 4
+    },
+    {
+      "key": "G6-L04+15",
+      "story_id": 15,
+      "lesson_code": "G6-L04",
+      "file": "G6-L04__15.json",
+      "semantic_hash": "sha256-273593be1ba309b4",
+      "question_count": 2
+    },
+    {
+      "key": "G6-L05+16",
+      "story_id": 16,
+      "lesson_code": "G6-L05",
+      "file": "G6-L05__16.json",
+      "semantic_hash": "sha256-c057e2d2453902e5",
+      "question_count": 6
+    },
+    {
+      "key": "G6-L06+17",
+      "story_id": 17,
+      "lesson_code": "G6-L06",
+      "file": "G6-L06__17.json",
+      "semantic_hash": "sha256-e11aef7800d70661",
+      "question_count": 5
+    },
+    {
+      "key": "G6-L07+7",
+      "story_id": 7,
+      "lesson_code": "G6-L07",
+      "file": "G6-L07__7.json",
+      "semantic_hash": "sha256-818344c5fdabb714",
+      "question_count": 8
+    },
+    {
+      "key": "G6-L08+18",
+      "story_id": 18,
+      "lesson_code": "G6-L08",
+      "file": "G6-L08__18.json",
+      "semantic_hash": "sha256-e96b260720e47e95",
+      "question_count": 17
+    },
+    {
+      "key": "G6-L09+19",
+      "story_id": 19,
+      "lesson_code": "G6-L09",
+      "file": "G6-L09__19.json",
+      "semantic_hash": "sha256-79e06c05d8a3a64e",
+      "question_count": 2
+    },
+    {
+      "key": "G6-L1+1055",
+      "story_id": 1055,
+      "lesson_code": "G6-L1",
+      "file": "G6-L1__1055.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L10+20",
+      "story_id": 20,
+      "lesson_code": "G6-L10",
+      "file": "G6-L10__20.json",
+      "semantic_hash": "sha256-377d145a0bb278b7",
+      "question_count": 6
+    },
+    {
+      "key": "G6-L11+1065",
+      "story_id": 1065,
+      "lesson_code": "G6-L11",
+      "file": "G6-L11__1065.json",
+      "semantic_hash": "sha256-46d8c3c825173641",
+      "question_count": 18
+    },
+    {
+      "key": "G6-L12+1066",
+      "story_id": 1066,
+      "lesson_code": "G6-L12",
+      "file": "G6-L12__1066.json",
+      "semantic_hash": "sha256-f73a8ec05e8159fc",
+      "question_count": 4
+    },
+    {
+      "key": "G6-L13+21",
+      "story_id": 21,
+      "lesson_code": "G6-L13",
+      "file": "G6-L13__21.json",
+      "semantic_hash": "sha256-1dce37f148c58e4e",
+      "question_count": 6
+    },
+    {
+      "key": "G6-L14+22",
+      "story_id": 22,
+      "lesson_code": "G6-L14",
+      "file": "G6-L14__22.json",
+      "semantic_hash": "sha256-30aa93a7a345eac3",
+      "question_count": 2
+    },
+    {
+      "key": "G6-L15+23",
+      "story_id": 23,
+      "lesson_code": "G6-L15",
+      "file": "G6-L15__23.json",
+      "semantic_hash": "sha256-cccbbaf78fbfbf16",
+      "question_count": 12
+    },
+    {
+      "key": "G6-L16+26",
+      "story_id": 26,
+      "lesson_code": "G6-L16",
+      "file": "G6-L16__26.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L17+25",
+      "story_id": 25,
+      "lesson_code": "G6-L17",
+      "file": "G6-L17__25.json",
+      "semantic_hash": "sha256-3c68ac5eedb7dc77",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L18+27",
+      "story_id": 27,
+      "lesson_code": "G6-L18",
+      "file": "G6-L18__27.json",
+      "semantic_hash": "sha256-fb1331766cddb22b",
+      "question_count": 2
+    },
+    {
+      "key": "G6-L18+1072",
+      "story_id": 1072,
+      "lesson_code": "G6-L18",
+      "file": "G6-L18__1072.json",
+      "semantic_hash": "sha256-fb1331766cddb22b",
+      "question_count": 2
+    },
+    {
+      "key": "G6-L19+28",
+      "story_id": 28,
+      "lesson_code": "G6-L19",
+      "file": "G6-L19__28.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L2+1056",
+      "story_id": 1056,
+      "lesson_code": "G6-L2",
+      "file": "G6-L2__1056.json",
+      "semantic_hash": "sha256-10a5083b9cdec50d",
+      "question_count": 4
+    },
+    {
+      "key": "G6-L20+1074",
+      "story_id": 1074,
+      "lesson_code": "G6-L20",
+      "file": "G6-L20__1074.json",
+      "semantic_hash": "sha256-45956aa06826ed12",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L21+1075",
+      "story_id": 1075,
+      "lesson_code": "G6-L21",
+      "file": "G6-L21__1075.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G6-L22+1076",
+      "story_id": 1076,
+      "lesson_code": "G6-L22",
+      "file": "G6-L22__1076.json",
+      "semantic_hash": "sha256-f43b9de972169add",
+      "question_count": 16
+    },
+    {
+      "key": "G6-L23+1077",
+      "story_id": 1077,
+      "lesson_code": "G6-L23",
+      "file": "G6-L23__1077.json",
+      "semantic_hash": "sha256-d66e63cd45879c04",
+      "question_count": 15
+    },
+    {
+      "key": "G6-L24+1078",
+      "story_id": 1078,
+      "lesson_code": "G6-L24",
+      "file": "G6-L24__1078.json",
+      "semantic_hash": "sha256-d0888714293d15ff",
+      "question_count": 3
+    },
+    {
+      "key": "G6-L25+1079",
+      "story_id": 1079,
+      "lesson_code": "G6-L25",
+      "file": "G6-L25__1079.json",
+      "semantic_hash": "sha256-93377699066fc8fc",
+      "question_count": 3
+    },
+    {
+      "key": "G6-L3+1057",
+      "story_id": 1057,
+      "lesson_code": "G6-L3",
+      "file": "G6-L3__1057.json",
+      "semantic_hash": "sha256-396570c567d2b24c",
+      "question_count": 4
+    },
+    {
+      "key": "G7-L02+29",
+      "story_id": 29,
+      "lesson_code": "G7-L02",
+      "file": "G7-L02__29.json",
+      "semantic_hash": "sha256-03c34efcfc67b072",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L03+30",
+      "story_id": 30,
+      "lesson_code": "G7-L03",
+      "file": "G7-L03__30.json",
+      "semantic_hash": "sha256-e1f187dec553dddd",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L06+31",
+      "story_id": 31,
+      "lesson_code": "G7-L06",
+      "file": "G7-L06__31.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L07+38",
+      "story_id": 38,
+      "lesson_code": "G7-L07",
+      "file": "G7-L07__38.json",
+      "semantic_hash": "sha256-2ffca144246b25c0",
+      "question_count": 13
+    },
+    {
+      "key": "G7-L08+32",
+      "story_id": 32,
+      "lesson_code": "G7-L08",
+      "file": "G7-L08__32.json",
+      "semantic_hash": "sha256-4e9601d13790d4c0",
+      "question_count": 2
+    },
+    {
+      "key": "G7-L09+33",
+      "story_id": 33,
+      "lesson_code": "G7-L09",
+      "file": "G7-L09__33.json",
+      "semantic_hash": "sha256-1d4c29e4175f10cc",
+      "question_count": 2
+    },
+    {
+      "key": "G7-L1+1080",
+      "story_id": 1080,
+      "lesson_code": "G7-L1",
+      "file": "G7-L1__1080.json",
+      "semantic_hash": "sha256-718738a798fc3a4b",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L10+1089",
+      "story_id": 1089,
+      "lesson_code": "G7-L10",
+      "file": "G7-L10__1089.json",
+      "semantic_hash": "sha256-ed9e91e33b6c8191",
+      "question_count": 5
+    },
+    {
+      "key": "G7-L11+1090",
+      "story_id": 1090,
+      "lesson_code": "G7-L11",
+      "file": "G7-L11__1090.json",
+      "semantic_hash": "sha256-bda5e5f7196841e9",
+      "question_count": 6
+    },
+    {
+      "key": "G7-L12+1091",
+      "story_id": 1091,
+      "lesson_code": "G7-L12",
+      "file": "G7-L12__1091.json",
+      "semantic_hash": "sha256-dd984f2516f16ab5",
+      "question_count": 22
+    },
+    {
+      "key": "G7-L13+34",
+      "story_id": 34,
+      "lesson_code": "G7-L13",
+      "file": "G7-L13__34.json",
+      "semantic_hash": "sha256-5848d70c94dec70e",
+      "question_count": 2
+    },
+    {
+      "key": "G7-L14+1093",
+      "story_id": 1093,
+      "lesson_code": "G7-L14",
+      "file": "G7-L14__1093.json",
+      "semantic_hash": "sha256-a3ceb46a59738dc8",
+      "question_count": 5
+    },
+    {
+      "key": "G7-L15+35",
+      "story_id": 35,
+      "lesson_code": "G7-L15",
+      "file": "G7-L15__35.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L15+1094",
+      "story_id": 1094,
+      "lesson_code": "G7-L15",
+      "file": "G7-L15__1094.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L16+36",
+      "story_id": 36,
+      "lesson_code": "G7-L16",
+      "file": "G7-L16__36.json",
+      "semantic_hash": "sha256-f0caaa7cabb9024e",
+      "question_count": 6
+    },
+    {
+      "key": "G7-L17+37",
+      "story_id": 37,
+      "lesson_code": "G7-L17",
+      "file": "G7-L17__37.json",
+      "semantic_hash": "sha256-0dbc00332b6ee816",
+      "question_count": 2
+    },
+    {
+      "key": "G7-L18+1097",
+      "story_id": 1097,
+      "lesson_code": "G7-L18",
+      "file": "G7-L18__1097.json",
+      "semantic_hash": "sha256-f39d05c5439fdc76",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L19+1098",
+      "story_id": 1098,
+      "lesson_code": "G7-L19",
+      "file": "G7-L19__1098.json",
+      "semantic_hash": "sha256-5b953d16310585c3",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L20+39",
+      "story_id": 39,
+      "lesson_code": "G7-L20",
+      "file": "G7-L20__39.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L21+40",
+      "story_id": 40,
+      "lesson_code": "G7-L21",
+      "file": "G7-L21__40.json",
+      "semantic_hash": "sha256-8711b2a1db745e00",
+      "question_count": 3
+    },
+    {
+      "key": "G7-L22+41",
+      "story_id": 41,
+      "lesson_code": "G7-L22",
+      "file": "G7-L22__41.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L23+1102",
+      "story_id": 1102,
+      "lesson_code": "G7-L23",
+      "file": "G7-L23__1102.json",
+      "semantic_hash": "sha256-f3b641a987da7e44",
+      "question_count": 22
+    },
+    {
+      "key": "G7-L24+1104",
+      "story_id": 1104,
+      "lesson_code": "G7-L24",
+      "file": "G7-L24__1104.json",
+      "semantic_hash": "sha256-d4b28b4b5959b18c",
+      "question_count": 30
+    },
+    {
+      "key": "G7-L25+1105",
+      "story_id": 1105,
+      "lesson_code": "G7-L25",
+      "file": "G7-L25__1105.json",
+      "semantic_hash": "sha256-e3816d8bddfc7050",
+      "question_count": 3
+    },
+    {
+      "key": "G7-L26+1106",
+      "story_id": 1106,
+      "lesson_code": "G7-L26",
+      "file": "G7-L26__1106.json",
+      "semantic_hash": "sha256-2562f4779f0a0b7b",
+      "question_count": 1
+    },
+    {
+      "key": "G7-L27+1107",
+      "story_id": 1107,
+      "lesson_code": "G7-L27",
+      "file": "G7-L27__1107.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G7-L28+1108",
+      "story_id": 1108,
+      "lesson_code": "G7-L28",
+      "file": "G7-L28__1108.json",
+      "semantic_hash": "sha256-fd970999d447de6d",
+      "question_count": 12
+    },
+    {
+      "key": "G7-L29+1109",
+      "story_id": 1109,
+      "lesson_code": "G7-L29",
+      "file": "G7-L29__1109.json",
+      "semantic_hash": "sha256-3d2496d73c6c6755",
+      "question_count": 30
+    },
+    {
+      "key": "G7-L30+1110",
+      "story_id": 1110,
+      "lesson_code": "G7-L30",
+      "file": "G7-L30__1110.json",
+      "semantic_hash": "sha256-66b5fff21645b57e",
+      "question_count": 23
+    },
+    {
+      "key": "G7-L31+1103",
+      "story_id": 1103,
+      "lesson_code": "G7-L31",
+      "file": "G7-L31__1103.json",
+      "semantic_hash": "sha256-f3b641a987da7e44",
+      "question_count": 22
+    },
+    {
+      "key": "G7-L4+1083",
+      "story_id": 1083,
+      "lesson_code": "G7-L4",
+      "file": "G7-L4__1083.json",
+      "semantic_hash": "sha256-645895185554fa5f",
+      "question_count": 1
+    },
+    {
+      "key": "G7-L5+1084",
+      "story_id": 1084,
+      "lesson_code": "G7-L5",
+      "file": "G7-L5__1084.json",
+      "semantic_hash": "sha256-0537594d7cbe17ed",
+      "question_count": 3
+    },
+    {
+      "key": "G7-L7+1086",
+      "story_id": 1086,
+      "lesson_code": "G7-L7",
+      "file": "G7-L7__1086.json",
+      "semantic_hash": "sha256-2ffca144246b25c0",
+      "question_count": 13
+    },
+    {
+      "key": "G8-L1+1111",
+      "story_id": 1111,
+      "lesson_code": "G8-L1",
+      "file": "G8-L1__1111.json",
+      "semantic_hash": "sha256-eb150db9773caf9f",
+      "question_count": 3
+    },
+    {
+      "key": "G8-L10+1123",
+      "story_id": 1123,
+      "lesson_code": "G8-L10",
+      "file": "G8-L10__1123.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L11+1124",
+      "story_id": 1124,
+      "lesson_code": "G8-L11",
+      "file": "G8-L11__1124.json",
+      "semantic_hash": "sha256-7cc68b8725f824ac",
+      "question_count": 2
+    },
+    {
+      "key": "G8-L12a+1125",
+      "story_id": 1125,
+      "lesson_code": "G8-L12a",
+      "file": "G8-L12a__1125.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L12b+1126",
+      "story_id": 1126,
+      "lesson_code": "G8-L12b",
+      "file": "G8-L12b__1126.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L13+1127",
+      "story_id": 1127,
+      "lesson_code": "G8-L13",
+      "file": "G8-L13__1127.json",
+      "semantic_hash": "sha256-3e1ad1128ae58a7f",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L14+1128",
+      "story_id": 1128,
+      "lesson_code": "G8-L14",
+      "file": "G8-L14__1128.json",
+      "semantic_hash": "sha256-6c76d4c8ecf62446",
+      "question_count": 3
+    },
+    {
+      "key": "G8-L15+1129",
+      "story_id": 1129,
+      "lesson_code": "G8-L15",
+      "file": "G8-L15__1129.json",
+      "semantic_hash": "sha256-9744542602c6b7a2",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L2+1112",
+      "story_id": 1112,
+      "lesson_code": "G8-L2",
+      "file": "G8-L2__1112.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L3a+1113",
+      "story_id": 1113,
+      "lesson_code": "G8-L3a",
+      "file": "G8-L3a__1113.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L3b+1114",
+      "story_id": 1114,
+      "lesson_code": "G8-L3b",
+      "file": "G8-L3b__1114.json",
+      "semantic_hash": "sha256-605ea0a7e348e508",
+      "question_count": 4
+    },
+    {
+      "key": "G8-L4+1115",
+      "story_id": 1115,
+      "lesson_code": "G8-L4",
+      "file": "G8-L4__1115.json",
+      "semantic_hash": "sha256-a984fe3cbba26e21",
+      "question_count": 4
+    },
+    {
+      "key": "G8-L5+1116",
+      "story_id": 1116,
+      "lesson_code": "G8-L5",
+      "file": "G8-L5__1116.json",
+      "semantic_hash": "sha256-e183969c2c582227",
+      "question_count": 9
+    },
+    {
+      "key": "G8-L6a+1117",
+      "story_id": 1117,
+      "lesson_code": "G8-L6a",
+      "file": "G8-L6a__1117.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L6b+1118",
+      "story_id": 1118,
+      "lesson_code": "G8-L6b",
+      "file": "G8-L6b__1118.json",
+      "semantic_hash": "sha256-7e7cb28f8771be7c",
+      "question_count": 5
+    },
+    {
+      "key": "G8-L7+1119",
+      "story_id": 1119,
+      "lesson_code": "G8-L7",
+      "file": "G8-L7__1119.json",
+      "semantic_hash": "sha256-9dcd22b97106b022",
+      "question_count": 11
+    },
+    {
+      "key": "G8-L8+1120",
+      "story_id": 1120,
+      "lesson_code": "G8-L8",
+      "file": "G8-L8__1120.json",
+      "semantic_hash": "sha256-37ad8f18ba16ec8c",
+      "question_count": 5
+    },
+    {
+      "key": "G8-L9a+1121",
+      "story_id": 1121,
+      "lesson_code": "G8-L9a",
+      "file": "G8-L9a__1121.json",
+      "semantic_hash": "sha256-d159c3c1bfeeec85",
+      "question_count": 0
+    },
+    {
+      "key": "G8-L9b+1122",
+      "story_id": 1122,
+      "lesson_code": "G8-L9b",
+      "file": "G8-L9b__1122.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G9-L01+48",
+      "story_id": 48,
+      "lesson_code": "G9-L01",
+      "file": "G9-L01__48.json",
+      "semantic_hash": "sha256-f56dee856ea2023d",
+      "question_count": 2
+    },
+    {
+      "key": "G9-L04+49",
+      "story_id": 49,
+      "lesson_code": "G9-L04",
+      "file": "G9-L04__49.json",
+      "semantic_hash": "sha256-36f6b8548a46e649",
+      "question_count": 0
+    },
+    {
+      "key": "G9-L05+50",
+      "story_id": 50,
+      "lesson_code": "G9-L05",
+      "file": "G9-L05__50.json",
+      "semantic_hash": "sha256-a3c7214ff9f3709b",
+      "question_count": 0
+    },
+    {
+      "key": "G9-L06+51",
+      "story_id": 51,
+      "lesson_code": "G9-L06",
+      "file": "G9-L06__51.json",
+      "semantic_hash": "sha256-f990564eff0b36b9",
+      "question_count": 5
+    },
+    {
+      "key": "G9-L07+52",
+      "story_id": 52,
+      "lesson_code": "G9-L07",
+      "file": "G9-L07__52.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "G9-L08+53",
+      "story_id": 53,
+      "lesson_code": "G9-L08",
+      "file": "G9-L08__53.json",
+      "semantic_hash": "sha256-0422a6adc61e94ea",
+      "question_count": 35
+    },
+    {
+      "key": "G9-L09+54",
+      "story_id": 54,
+      "lesson_code": "G9-L09",
+      "file": "G9-L09__54.json",
+      "semantic_hash": "sha256-092117666aae5e67",
+      "question_count": 8
+    },
+    {
+      "key": "G9-L11+1140",
+      "story_id": 1140,
+      "lesson_code": "G9-L11",
+      "file": "G9-L11__1140.json",
+      "semantic_hash": "sha256-8025ff28e37adb8f",
+      "question_count": 10
+    },
+    {
+      "key": "G9-L12+1141",
+      "story_id": 1141,
+      "lesson_code": "G9-L12",
+      "file": "G9-L12__1141.json",
+      "semantic_hash": "sha256-e5dbd6fe61b6aa4e",
+      "question_count": 10
+    },
+    {
+      "key": "G9-L13+1142",
+      "story_id": 1142,
+      "lesson_code": "G9-L13",
+      "file": "G9-L13__1142.json",
+      "semantic_hash": "sha256-18d6c57cf557bcfc",
+      "question_count": 6
+    },
+    {
+      "key": "G9-L14+1143",
+      "story_id": 1143,
+      "lesson_code": "G9-L14",
+      "file": "G9-L14__1143.json",
+      "semantic_hash": "sha256-6f5eb7a5219ce76d",
+      "question_count": 3
+    },
+    {
+      "key": "G9-L15+56",
+      "story_id": 56,
+      "lesson_code": "G9-L15",
+      "file": "G9-L15__56.json",
+      "semantic_hash": "sha256-347bcd0dea6981c9",
+      "question_count": 4
+    },
+    {
+      "key": "G9-L15+1144",
+      "story_id": 1144,
+      "lesson_code": "G9-L15",
+      "file": "G9-L15__1144.json",
+      "semantic_hash": "sha256-347bcd0dea6981c9",
+      "question_count": 4
+    },
+    {
+      "key": "G9-L17+58",
+      "story_id": 58,
+      "lesson_code": "G9-L17",
+      "file": "G9-L17__58.json",
+      "semantic_hash": "sha256-af8e49668d6a105b",
+      "question_count": 4
+    },
+    {
+      "key": "G9-L17+1146",
+      "story_id": 1146,
+      "lesson_code": "G9-L17",
+      "file": "G9-L17__1146.json",
+      "semantic_hash": "sha256-af8e49668d6a105b",
+      "question_count": 4
+    },
+    {
+      "key": "G9-L2+1131",
+      "story_id": 1131,
+      "lesson_code": "G9-L2",
+      "file": "G9-L2__1131.json",
+      "semantic_hash": "sha256-0787c25ab9086be0",
+      "question_count": 13
+    },
+    {
+      "key": "G9-L3+1132",
+      "story_id": 1132,
+      "lesson_code": "G9-L3",
+      "file": "G9-L3__1132.json",
+      "semantic_hash": "sha256-1aaa386e31f66949",
+      "question_count": 0
+    },
+    {
+      "key": "文-L01+44",
+      "story_id": 44,
+      "lesson_code": "文-L01",
+      "file": "文-L01__44.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "文-L02+45",
+      "story_id": 45,
+      "lesson_code": "文-L02",
+      "file": "文-L02__45.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "文-L08+42",
+      "story_id": 42,
+      "lesson_code": "文-L08",
+      "file": "文-L08__42.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "文-L09+43",
+      "story_id": 43,
+      "lesson_code": "文-L09",
+      "file": "文-L09__43.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    },
+    {
+      "key": "文-L1+1149",
+      "story_id": 1149,
+      "lesson_code": "文-L1",
+      "file": "文-L1__1149.json",
+      "semantic_hash": "sha256-ab3ee760cb67b69d",
+      "question_count": 3
+    },
+    {
+      "key": "文-L2+1150",
+      "story_id": 1150,
+      "lesson_code": "文-L2",
+      "file": "文-L2__1150.json",
+      "semantic_hash": "sha256-676c30bc98ef56c2",
+      "question_count": 7
+    },
+    {
+      "key": "文-L5+1153",
+      "story_id": 1153,
+      "lesson_code": "文-L5",
+      "file": "文-L5__1153.json",
+      "semantic_hash": "sha256-4f53cda18c2baa0c",
+      "question_count": 0
+    }
+  ]
+}

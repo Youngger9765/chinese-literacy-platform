@@ -7,11 +7,11 @@
       "block_count": 37,
       "type_histogram": {
         "figure": 2,
-        "free_text": 8,
+        "free_text": 9,
         "guide": 20,
         "passage": 2,
         "self_check": 1,
-        "single": 4
+        "single": 3
       },
       "type_sequence": [
         "guide",
@@ -19,7 +19,7 @@
         "guide",
         "guide",
         "single",
-        "single",
+        "free_text",
         "guide",
         "guide",
         "guide",
@@ -54,7 +54,7 @@
       ],
       "guide_count": 20,
       "passage_count": 2,
-      "qa_total": 4,
+      "qa_total": 3,
       "null_answers": 0,
       "first_guide_prefix": "請試著讀底下的文字，再回答一個問題：\n　　「晚間新聞正播報明天的天氣預報，爺爺坐在電視前的沙發上，早就進入夢鄉。」\n問題",
       "mcq_leakage": 0
@@ -224,19 +224,25 @@
     },
     "G6-SL3": {
       "strategy_type": "scientific_inquiry",
-      "block_count": 3,
+      "block_count": 7,
       "type_histogram": {
         "figure": 1,
-        "guide": 2
+        "free_text": 2,
+        "guide": 2,
+        "single": 2
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure"
+        "figure",
+        "single",
+        "free_text",
+        "single",
+        "free_text"
       ],
       "guide_count": 2,
       "passage_count": 0,
-      "qa_total": 0,
+      "qa_total": 2,
       "null_answers": 0,
       "first_guide_prefix": "「昆蟲會思考嗎？」這是一個科學問題。回答科學問題時要根據客觀的事實來做合理的判斷，避免僅憑自己的感覺來回答，科學家常常是",
       "mcq_leakage": 0

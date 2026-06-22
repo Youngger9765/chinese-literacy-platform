@@ -26,6 +26,8 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 # SPA fallback: all routes → index.html
-RUN echo 'server { listen 8080; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
+# absolute_redirect off: dir 尾斜線 301（如 /presentation → /presentation/）改送相對 Location，
+# 否則 nginx 用內部 listen 8080 + http 拼絕對 URL → http://host:8080/... 對外連不到（Cloud Run 只開 443）
+RUN echo 'server { listen 8080; absolute_redirect off; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

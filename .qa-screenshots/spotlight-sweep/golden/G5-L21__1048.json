@@ -1,0 +1,29 @@
+{
+  "key": "G5-L21+1048",
+  "story_id": 1048,
+  "lesson_code": "G5-L21",
+  "title": "抗拒指尖上的誘惑",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "guide",
+      "free_text",
+      "figure",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-a2e19b4361c6e107"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "key": "G4-L04+4",
+  "story_id": 4,
+  "lesson_code": "G4-L04",
+  "title": "運動科學",
+  "structure_layer": {
+    "block_type_sequence": [
+      "single",
+      "single",
+      "figure",
+      "free_text",
+      "figure",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 8,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-aeccd35a272286e1"
+  }
+}

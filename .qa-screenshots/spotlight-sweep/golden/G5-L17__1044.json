@@ -1,0 +1,26 @@
+{
+  "key": "G5-L17+1044",
+  "story_id": 1044,
+  "lesson_code": "G5-L17",
+  "title": "掃雷英雄馬嘎瓦",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single"
+    ],
+    "question_count": 10,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-8ca20f6136aa39ec"
+  }
+}

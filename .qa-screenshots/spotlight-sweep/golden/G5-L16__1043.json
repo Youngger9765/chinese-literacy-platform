@@ -1,0 +1,41 @@
+{
+  "key": "G5-L16+1043",
+  "story_id": 1043,
+  "lesson_code": "G5-L16",
+  "title": "臺灣棒球先驅──來自花蓮的能高團",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "fill_table",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-3aa801e0b624e490"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "key": "G9-L17+1146",
+  "story_id": 1146,
+  "lesson_code": "G9-L17",
+  "title": "馬拉松王者──基普喬吉 (記敘文)",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "multi",
+      "single",
+      "single",
+      "free_text"
+    ],
+    "question_count": 4,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-af8e49668d6a105b"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "key": "G4-L24+1024",
+  "story_id": 1024,
+  "lesson_code": "G4-L24",
+  "title": "成為身體的最佳夥伴",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "multi",
+      "multi",
+      "multi",
+      "multi",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "single",
+      "multi",
+      "guide",
+      "guide",
+      "multi",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 13,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-b39fbca6d620a331"
+  }
+}
