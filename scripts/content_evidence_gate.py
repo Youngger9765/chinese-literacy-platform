@@ -338,9 +338,12 @@ def audit_figures(
     elif errors:
         gap_reason = _known_gap_reason(lesson_code, "figure")
         if gap_reason:
-            # Honest figure gap (synthetic figN reference never uploaded).
-            status = "known_gap"
-            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+            # Fail-closed: known gap is still missing evidence, never PASS-able.
+            status = "unknown"
+            failure_codes = [
+                "FIGURE_ASSET_UNRESOLVED",
+                f"KNOWN_CONTENT_GAP_{gap_reason.upper()}",
+            ]
         else:
             status = "unknown"
     else:
@@ -411,11 +414,11 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
     if source_missing:
         gap_reason = _known_gap_reason(lesson_code, "reading-strategy")
         if gap_reason:
-            # Genuine, owned content gap — surfaced honestly, not faked pass.
+            # Fail-closed: known source gap is still unknown evidence.
             unknown_flags["strategy_unknown"] = True
             unknown_flags["known_gap_reason"] = gap_reason
-            status = "known_gap"
-            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+            status = "unknown"
+            failure_codes = ["SOURCE_MISSING", f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
         else:
             unknown_flags["strategy_unknown"] = True
             status = "unknown"
@@ -467,10 +470,19 @@ def l1_reading_strategy(story: dict[str, Any], lesson_code: str) -> dict[str, An
             )
 
         all_pass = all(inv["pass"] for inv in invariants)
-        status = "pass" if all_pass else "fail"
-        failure_codes = [] if all_pass else [
+        if gold is None:
+            unknown_flags["strategy_unknown"] = True
+            status = "unknown"
+            failure_codes = ["GOLDEN_MISSING"]
+        else:
+            status = "pass" if all_pass else "fail"
+            failure_codes = [] if all_pass else [
+                f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
+            ]
+        if status == "fail":
+            failure_codes = [
             f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
-        ]
+            ]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -545,11 +557,14 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
     if entry is None:
         gap_reason = _known_gap_reason(lesson_code, "story-structure")
         if gap_reason:
-            # Genuine, owned content gap (e.g. multi-text secondary slot).
+            # Fail-closed: no source evidence for this cell.
             unknown_flags["strategy_unknown"] = True
             unknown_flags["known_gap_reason"] = gap_reason
-            status = "known_gap"
-            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+            status = "unknown"
+            failure_codes = [
+                "KEYPOINTS_MANIFEST_MISSING",
+                f"KNOWN_CONTENT_GAP_{gap_reason.upper()}",
+            ]
         else:
             # No L1 keypoints verdict for this lesson -> unknown -> fail at gate.
             unknown_flags["strategy_unknown"] = True
@@ -1049,6 +1064,8 @@ def main() -> int:
         )
     if unknown_cells:
         fail_reasons.append(f"unknown_cells={unknown_cells}")
+    if known_gap_cells:
+        fail_reasons.append(f"known_gap_cells={known_gap_cells}")
     if fail_cells:
         fail_reasons.append(f"fail_cells={fail_cells}")
     if missing_screenshot_cells:
