@@ -12,3 +12,19 @@ spotlight:
     referent: table
     asset: null
     bind_paragraph: null
+  - type: single
+    prompt: 空氣是否佔有空間？
+    options:
+    - 空氣佔有空間。
+    - 空氣不佔有空間。
+    answer: 空氣佔有空間。
+  - type: free_text
+    prompt: 請舉出其他你知道的例子，證明空氣佔有空間。
+  - type: single
+    prompt: 動物會不會分工合作呢？
+    options:
+    - 動物會分工合作。
+    - 動物不會分工合作。
+    answer: 動物會分工合作。
+  - type: free_text
+    prompt: 請舉出其他你知道的例子，證明動物會分工合作。

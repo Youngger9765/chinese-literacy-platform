@@ -32,25 +32,14 @@ DEFAULT_OUT = Path(".qa-screenshots/spotlight-sweep/faithfulness-report.json")
 # Remaining are content gaps (文言 inv=7) + 空骨架 inv=2 + option inv=3 + reading_strategy
 # placeholder inv=4 — tracked here as the current regression baseline.
 EXPECTED_RED_IDS = {
-    23,
-    46,
-    47,
-    1010,
-    1011,
-    1014,
-    1023,
-    1044,
-    1053,
-    1054,
-    1056,
-    1057,
-    1111,
-    1121,
-    1144,
-    1146,
-    1154,
-    1155,
-    1158,
+    # 文言課 — 需要人工補文言語法材料（#2388）
+    46,   # 文-L03 inv=6,7
+    47,   # 文-L04 inv=7
+    1154, # 文-L6 inv=7
+    1155, # 文-L7 inv=7
+    1158, # 文-L10 inv=7
+    # 內容缺口 — online-schema 無 spotlight range（#2388）
+    1014, # G4-L14 inv=2
 }
 
 INTERACTIVE_TYPES = {"single", "multi", "fill", "fill_blank", "free_text"}

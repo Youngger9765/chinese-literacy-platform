@@ -1,6 +1,6 @@
 {
   "description": "Auto-promoted from private/_online-schema (eval pass, excl dev7/test15)",
-  "count": 108,
+  "count": 107,
   "lessons": [
     "G4-L11",
     "G4-L15",
@@ -94,21 +94,21 @@
     "G8-L7",
     "G8-L8",
     "G8-L9",
+    "G8-L9a",
     "G9-L1",
     "G9-L11",
     "G9-L12",
     "G9-L13",
     "G9-L14",
+    "G9-L15",
+    "G9-L17",
     "G9-L2",
     "G9-L3",
     "G9-L4",
     "G9-L5",
     "G9-L6",
     "G9-L8",
-    "文-L03",
-    "文-L04",
     "文-L1",
-    "文-L2",
-    "文-L6"
+    "文-L2"
   ]
 }
