@@ -1,0 +1,34 @@
+{
+  "key": "G8-L14+1128",
+  "story_id": 1128,
+  "lesson_code": "G8-L14",
+  "title": "石虎保育：遷移與否的兩難",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "passage",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-6c76d4c8ecf62446"
+  }
+}

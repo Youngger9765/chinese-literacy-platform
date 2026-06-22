@@ -1,0 +1,21 @@
+{
+  "key": "G5-L08+8",
+  "story_id": 8,
+  "lesson_code": "G5-L08",
+  "title": "奧運銀牌的自我鍛鍊",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "match",
+      "free_text",
+      "match"
+    ],
+    "question_count": 3,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-3c9bcb59fb709a4c"
+  }
+}

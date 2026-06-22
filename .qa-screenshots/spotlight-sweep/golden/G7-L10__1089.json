@@ -1,0 +1,47 @@
+{
+  "key": "G7-L10+1089",
+  "story_id": 1089,
+  "lesson_code": "G7-L10",
+  "title": "塑膠，好用不好甩",
+  "structure_layer": {
+    "block_type_sequence": [
+      "figure",
+      "guide",
+      "guide",
+      "passage",
+      "guide",
+      "passage",
+      "single",
+      "guide",
+      "guide",
+      "single",
+      "guide",
+      "passage",
+      "guide",
+      "free_text",
+      "free_text",
+      "single",
+      "guide",
+      "passage",
+      "figure",
+      "guide",
+      "passage",
+      "guide",
+      "self_check"
+    ],
+    "question_count": 5,
+    "figure_summary": [
+      {
+        "referent": "image",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-ed9e91e33b6c8191"
+  }
+}

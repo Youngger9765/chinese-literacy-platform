@@ -1,0 +1,41 @@
+{
+  "key": "G8-L3b+1114",
+  "story_id": 1114,
+  "lesson_code": "G8-L3b",
+  "title": "新奇!「植物肉」你聽過嗎?",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "guide",
+      "single",
+      "free_text",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-605ea0a7e348e508"
+  }
+}

@@ -5,15 +5,11 @@ spotlight:
   blocks:
   - type: guide
     text: ◎ 小試身手
-  - type: single
+  - type: free_text
     prompt: 1. 以下哪些句子使用了譬喻法?請在□打勾，並將比喻的東西圈起來。
-    options:
-    - 請在
-    - 打勾，並將比喻的東西圈起來。
-    answer: 請在
   - type: figure
     referent: table
-    asset: fig1.png
+    asset: null
     bind_paragraph: null
   - type: free_text
     prompt: 2.換你試試看，填入適當的譬喻用詞代號。

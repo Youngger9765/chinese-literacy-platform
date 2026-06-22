@@ -1,0 +1,34 @@
+{
+  "key": "G6-L14+22",
+  "story_id": 22,
+  "lesson_code": "G6-L14",
+  "title": "植物獵人",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "guide",
+      "figure"
+    ],
+    "question_count": 2,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-30aa93a7a345eac3"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "G7-L14+1093",
+  "story_id": 1093,
+  "lesson_code": "G7-L14",
+  "title": "隱藏在日常對話中的微歧視",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "figure",
+      "guide",
+      "free_text",
+      "figure",
+      "passage",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "passage"
+    ],
+    "question_count": 5,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-a3ceb46a59738dc8"
+  }
+}

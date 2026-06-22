@@ -1,0 +1,38 @@
+{
+  "key": "G7-L1+1080",
+  "story_id": 1080,
+  "lesson_code": "G7-L1",
+  "title": "長大後，我才讀懂〈夏夜〉",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "figure",
+      "passage",
+      "figure",
+      "passage",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig11.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-718738a798fc3a4b"
+  }
+}

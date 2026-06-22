@@ -1,0 +1,27 @@
+{
+  "key": "G6-L2+1056",
+  "story_id": 1056,
+  "lesson_code": "G6-L2",
+  "title": "與小學說再見",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "single",
+      "single",
+      "single",
+      "single"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-10a5083b9cdec50d"
+  }
+}

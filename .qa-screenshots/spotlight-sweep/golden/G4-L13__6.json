@@ -1,0 +1,36 @@
+{
+  "key": "G4-L13+6",
+  "story_id": 6,
+  "lesson_code": "G4-L13",
+  "title": "第一百碗麵",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "free_text",
+      "figure",
+      "guide",
+      "passage",
+      "free_text",
+      "figure",
+      "guide",
+      "passage",
+      "free_text",
+      "passage"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      },
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-36a57865dcf863ba"
+  }
+}

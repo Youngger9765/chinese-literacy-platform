@@ -1,0 +1,28 @@
+{
+  "key": "G6-L15+23",
+  "story_id": 23,
+  "lesson_code": "G6-L15",
+  "title": "小藍鯨之死",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single",
+      "single"
+    ],
+    "question_count": 12,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-cccbbaf78fbfbf16"
+  }
+}

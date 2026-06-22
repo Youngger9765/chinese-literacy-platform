@@ -1,0 +1,44 @@
+{
+  "key": "G6-L22+1076",
+  "story_id": 1076,
+  "lesson_code": "G6-L22",
+  "title": "小兵立大功：雞鳴狗盜的故事",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "passage",
+      "single",
+      "single",
+      "free_text",
+      "single",
+      "guide",
+      "guide",
+      "passage",
+      "single",
+      "single",
+      "single",
+      "single",
+      "guide",
+      "passage",
+      "single",
+      "single",
+      "single",
+      "single",
+      "fill_table"
+    ],
+    "question_count": 16,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-f43b9de972169add"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "key": "G4-L6+1006",
+  "story_id": 1006,
+  "lesson_code": "G4-L6",
+  "title": "這是什麼「意思」？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "passage"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-8ae12640156442bc"
+  }
+}

@@ -39,8 +39,8 @@ spotlight:
     text: 表3. D組某位裁判給李智凱的分數
   - type: figure
     referent: table
-    asset: null
-    bind_paragraph: null
+    asset: fig1.png
+    bind_paragraph: 目標策略：圖表繪製與判讀——圖文表綜合判讀
   - type: guide
     text: 提示：
   - type: free_text

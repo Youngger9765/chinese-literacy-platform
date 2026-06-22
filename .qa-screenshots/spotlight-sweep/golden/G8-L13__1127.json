@@ -1,0 +1,27 @@
+{
+  "key": "G8-L13+1127",
+  "story_id": 1127,
+  "lesson_code": "G8-L13",
+  "title": "我能不能選擇告別方式?",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "passage",
+      "guide",
+      "guide"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-3e1ad1128ae58a7f"
+  }
+}

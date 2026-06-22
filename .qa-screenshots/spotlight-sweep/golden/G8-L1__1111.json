@@ -1,0 +1,27 @@
+{
+  "key": "G8-L1+1111",
+  "story_id": 1111,
+  "lesson_code": "G8-L1",
+  "title": "致台東：一封過客的情書",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "single",
+      "single",
+      "free_text"
+    ],
+    "question_count": 3,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-eb150db9773caf9f"
+  }
+}
