@@ -89,6 +89,16 @@ def classify_lesson(
         return LessonTier.DOCX_KEYPOINTS
     if has_structure_table:
         return LessonTier.DOCX_KEYPOINTS
+    # Multi-text lessons (one DOCX → several curriculum slots, e.g. G4-L20-22)
+    # parse to a compound YAML (G4-L20-22.yml), so the single-slot lookup
+    # (expected_parsed_yaml_path("G4-L20")) returns None and has_structure_table
+    # is False — even though the keypoints schema was extracted and the loader
+    # serves a structure table at runtime. Keypoints availability, not the
+    # presence of a single-slot parsed table on disk, decides whether the L1
+    # 重點表 gate must run. Treat any lesson with an extracted keypoints schema
+    # as DOCX_KEYPOINTS so its L1 verdict is recorded (no silent gate skip).
+    if docx_keypoints_available is True:
+        return LessonTier.DOCX_KEYPOINTS
     if has_ai_rows:
         return LessonTier.AI_FALLBACK
     if docx_keypoints_available is False:
