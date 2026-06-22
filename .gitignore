@@ -49,3 +49,7 @@ workspace/
 
 # /issue-fix skill outputs — work-progress notes, posted to PRs/issues, not committed
 issue*done.md
+
+# Content Evidence Gate (#2397) — re-shootable artifacts (screenshots / api payloads / logs)
+# stay local; the *.jsonl + coverage_manifest.json records ARE committed as evidence.
+qa/content-evidence/*/artifacts/
