@@ -30,9 +30,5 @@ spotlight:
     - 叫做【關聯詞　□形容詞】
   - type: free_text
     prompt: 2.請圈出遞進複句的關聯詞
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 3. 讀段落，寫句子

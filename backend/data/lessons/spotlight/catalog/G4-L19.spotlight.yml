@@ -44,10 +44,6 @@ spotlight:
     prompt: ❷這句話比較的重點是什麼？　　訓練成本
   - type: free_text
     prompt: 2.請將比較重點與比較的訊息填入表格內(請打勾，單選)
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 3.想一想這些重點可以告訴我們什麼？
   - type: single

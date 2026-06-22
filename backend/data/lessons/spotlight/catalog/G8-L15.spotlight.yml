@@ -9,10 +9,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 本文第二段，作者主張(明示):啦啦隊是有價值、需要高度專業能力的職業。請從第2–4段找出支持這個主張的「觀點(看法)和支持理由(證據)」。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ※作者用四個理由說服：啦啦隊是「具有專業能力與職業價值」的工作者。
   - type: guide

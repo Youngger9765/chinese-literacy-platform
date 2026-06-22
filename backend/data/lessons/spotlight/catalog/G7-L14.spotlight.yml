@@ -7,10 +7,6 @@ spotlight:
     text: ◎ 小試身手
   - type: free_text
     prompt: 1.請判斷下列情況是否為微歧視，是微歧視的打Ｖ。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 小叮嚀：刻板印象或對某族群體偏見，很可能就是微歧視。
   - type: free_text

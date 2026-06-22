@@ -103,7 +103,3 @@ spotlight:
     prompt: (5)他的新手機(  A  )了最新的相機功能，拍出來的照片非常清晰。
   - type: free_text
     prompt: (6)站在山頂上，看著(  F  )的綠色草原，心情格外愉快。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

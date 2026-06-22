@@ -9,10 +9,6 @@ spotlight:
     text: 練習一：身體照護檢核表──透過營養、水分、休息三個面向來看看自己的身體照護習慣吧！
   - type: guide
     text: ＊營養：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ＊水分：
   - type: figure

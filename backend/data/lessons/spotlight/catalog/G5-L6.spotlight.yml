@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 推論策略-觀點找支持理由
   strategy_type: main_idea_inference
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾。
   - type: guide
     text: ◎小試身手：
   - type: guide

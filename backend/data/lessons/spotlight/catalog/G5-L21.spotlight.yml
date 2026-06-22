@@ -11,10 +11,6 @@ spotlight:
     text: 解決：以下是解決寫作業分心的「策略」與「具體做法」，請連線配對。
   - type: free_text
     prompt: 2.進階挑戰：小芸常常上學遲到，想培養「準時起床」的好習慣。請幫她挑選合適的做法，用來改掉壞習慣。（勾選題，單選）
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: ３.自我省思：你是否有想改掉的壞習慣？試著運用本文介紹的三大策略──「改變環境」「設定規範」「自我提醒」。請先寫下你想改變的壞習慣，再從三種策略中勾選一項，並思考具體做法，填入下列表格。
   - type: free_text

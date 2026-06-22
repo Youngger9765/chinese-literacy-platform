@@ -45,10 +45,6 @@ spotlight:
     text: ③觀察能力：能找到有趣的主題  ④攝影能力：能拍出流暢的畫面
   - type: free_text
     prompt: 3.承第2題，宥蓁如何學會上述的能力呢？請連連看。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 4.從宥蓁的例子可以學到：
   - type: guide

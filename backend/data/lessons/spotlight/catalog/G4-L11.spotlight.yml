@@ -49,10 +49,6 @@ spotlight:
     text: ◎你發現了嗎，角色的情緒或感受，也有可能明白寫在文中喔！但角色的情緒或感受，如果沒有明白寫出來，你就需要進一步根據線索做推論喔。
   - type: guide
     text: 二、從故事發展，推論「作者」（我）的情緒或感受變化
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 三、推論主旨或目的
   - type: passage

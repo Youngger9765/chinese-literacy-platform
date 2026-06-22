@@ -13,7 +13,3 @@ spotlight:
     prompt: 1.請依照上面的步驟，完成以下的表格。
   - type: guide
     text: （項目主題參考：行為模式、行為背後的共同目的、生存目標）
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

@@ -17,10 +17,6 @@ spotlight:
     source: unknown
     paragraphs:
     - (段一)當上課前大家玩鬧不休，而突然聽到老師逼近的腳步聲時，大家會面面相覷說道「來了！來了！」；當心儀對象迎面走來，即將和自己擦身而過時，會聽見身旁損友竊笑「來了！來了！」；當三五好友一起壯膽看恐怖片，在音樂驚悚而畫面黯淡時，會聽到有人低語著「來了！來了！」。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: passage
     source: unknown
     paragraphs:

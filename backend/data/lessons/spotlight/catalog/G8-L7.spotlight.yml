@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 推論策略-找出一連串因果
   strategy_type: causal_inference
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：推論策略──
   - type: guide
     text: 推論本文的因果關係-以第四段為例
   - type: guide
@@ -47,10 +43,6 @@ spotlight:
     text: 再判斷這個關鍵詞是表達「因」還是「果」。
   - type: guide
     text: B.沒有關鍵詞：判斷是否為因果句。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 步驟❸──判斷因果，畫箭頭
   - type: free_text
