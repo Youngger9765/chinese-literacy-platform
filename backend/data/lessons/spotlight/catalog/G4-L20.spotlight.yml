@@ -17,7 +17,3 @@ spotlight:
     text: 總之，厲害的技能並不是天生的，而是在指導下，長期苦練後學來的。不管是運動、音樂，還是其他技能，❹只要我們願意努力，認真練習，就能成為很厲害的人。天才其實是練出來的！
   - type: guide
     text: 請依文章內容完成下方表格：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

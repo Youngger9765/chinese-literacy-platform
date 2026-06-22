@@ -5,10 +5,6 @@ spotlight:
   blocks:
   - type: guide
     text: ◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ◎接著，請再試著思考，以下的互動，對你來說，更偏向友情還是愛情呢？一樣沒有正確答案哦！
   - type: figure

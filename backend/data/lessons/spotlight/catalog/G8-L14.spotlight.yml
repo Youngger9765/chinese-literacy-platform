@@ -11,10 +11,6 @@ spotlight:
     text: 一、找問題→找假說→找驗證→下結論
   - type: guide
     text: 表：本課的科學解決四步驟：找問題→找假說→找驗證→下結論
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、應用（把結論帶回現場：問題→解決→結果）
   - type: passage

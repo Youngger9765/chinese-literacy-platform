@@ -15,10 +15,6 @@ spotlight:
     text: 二、找觀點（立場）
   - type: guide
     text: 請你整理這個議題有哪些立場/主張？主要用哪些理由？有沒有證據支持？
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 三、比較觀點差異（用「價值／風險」兩個角度）
   - type: passage

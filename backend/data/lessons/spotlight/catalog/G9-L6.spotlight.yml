@@ -7,10 +7,6 @@ spotlight:
     text: ◎　小試身手：
   - type: free_text
     prompt: 1.以「鬼火」為例
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 2.情境→小明上課都很想睡覺
   - type: free_text

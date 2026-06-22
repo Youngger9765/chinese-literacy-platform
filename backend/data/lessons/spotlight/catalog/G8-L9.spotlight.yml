@@ -9,10 +9,6 @@ spotlight:
       \   \n1.這組對比想讓我看見什麼？（重點）\n    2.作者透過這些重點想影響我什麼？（作者意圖）"
   - type: guide
     text: 一、找對比與歸納重點：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、歸納主要論點/主旨
   - type: figure

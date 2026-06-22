@@ -23,10 +23,6 @@ spotlight:
       1.先猜測標題想要傳達的重點；2.從第一段和最後一段找主旨線索。'
   - type: guide
     text: 先猜測標題想要傳達的重點。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 猜測：這篇可能是在講 　　　一位流傳已久的老師        的故事
   - type: free_text

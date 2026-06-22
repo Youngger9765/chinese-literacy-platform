@@ -21,10 +21,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 近日，新竹市發生大樓火警，兩名消防員救災時不幸殉職，眾人同感心痛。為了感謝消防員的辛苦與付出，一位國小老師帶領學生在課程中繪製感謝卡片，一同寫上感謝與紀念的文字，並送到消防隊。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: passage
     source: unknown
     paragraphs:

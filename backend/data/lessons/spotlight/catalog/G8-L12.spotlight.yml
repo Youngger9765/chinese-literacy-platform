@@ -15,10 +15,6 @@ spotlight:
     - 'A.作者在文中舉了不少語詞例子。請勾選這些語詞「出現在哪些地區」，
 
       為下一步找出它們的共同點做準備。（複選）'
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: passage
     source: unknown
     paragraphs:

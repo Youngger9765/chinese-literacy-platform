@@ -37,10 +37,6 @@ spotlight:
     prompt: (3)臺灣「鞍馬王子」李智凱參加2021年東京奧運鞍馬項目競賽，表3是D分組兩位裁判給各動作難度的平均給分，請問李智凱的D分是多少？在空格內填入答案（可以用計算器）。
   - type: guide
     text: 表3. D組某位裁判給李智凱的分數
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: 目標策略：圖表繪製與判讀——圖文表綜合判讀
   - type: guide
     text: 提示：
   - type: free_text

@@ -126,7 +126,3 @@ spotlight:
     prompt: (7)他(  C  )，交際手腕高明，一下子就能和各方談成合作。
   - type: free_text
     prompt: (8)他喜歡把大家(  J  )的想法直接說出來，常常弄得現場很尷尬。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

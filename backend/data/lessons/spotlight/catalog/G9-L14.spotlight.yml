@@ -11,10 +11,6 @@ spotlight:
     text: 一、面對突發變化保持彈性（適應力）：
   - type: guide
     text: 遇到不熟悉的情況時，可能會讓你很不舒服，哪一個想法最符合『面對變動時保持彈性』的能力？
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 當事情突然改變時，願意換個想法，就是在練習讓自己更能適應生活中的意外。
   - type: guide

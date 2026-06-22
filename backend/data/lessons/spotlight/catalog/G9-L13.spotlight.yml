@@ -17,10 +17,6 @@ spotlight:
     text: 一、自我覺察：你的大腦也在「編劇」嗎？
   - type: guide
     text: 請閱讀下列情境，勾選出你是否也曾出現這樣的想法。（沒有標準答案喔）
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 如果你的答案多是「有」，代表你常被大腦的悲觀小劇場帶著走。
   - type: guide

@@ -5,7 +5,3 @@ spotlight:
   blocks:
   - type: guide
     text: ◎ 小試身手：請勾選出指稱詞（框框內的語詞）所代表的事物。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

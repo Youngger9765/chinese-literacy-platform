@@ -7,10 +7,6 @@ spotlight:
     text: ◎小試身手：
   - type: guide
     text: 一、找出自己的優勢，選對戰場：如果你有下列優勢，請你選出適合你的優勢戰場。（請勾選，單選）
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、大衛不但善用自己的優勢（甩石），還把自己的劣勢也變成了優勢（矮小⭢靈活），上面的練習幫助我們覺察優勢能力，接下來，我們來練習怎麼樣換位思考，把「劣勢」轉為「優勢」。
   - type: figure

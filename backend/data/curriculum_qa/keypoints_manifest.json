@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-20T04:52:33.530540+00:00",
+  "generated_at": "2026-06-22T09:42:32.098674+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -59,7 +59,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
     },
     {
       "lesson_id": "G4-L10",
@@ -103,7 +103,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L10.yml"
     },
     {
       "lesson_id": "G4-L11",
@@ -147,7 +147,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L11.yml"
     },
     {
       "lesson_id": "G4-L12",
@@ -191,7 +191,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L12.yml"
     },
     {
       "lesson_id": "G4-L13",
@@ -235,7 +235,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L13.yml"
     },
     {
       "lesson_id": "G4-L14",
@@ -279,7 +279,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L14.yml"
     },
     {
       "lesson_id": "G4-L15",
@@ -323,7 +323,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L15.yml"
     },
     {
       "lesson_id": "G4-L16",
@@ -367,7 +367,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L16.yml"
     },
     {
       "lesson_id": "G4-L17",
@@ -411,7 +411,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L17.yml"
     },
     {
       "lesson_id": "G4-L18",
@@ -455,7 +455,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L18.yml"
     },
     {
       "lesson_id": "G4-L19",
@@ -499,7 +499,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L19.yml"
     },
     {
       "lesson_id": "G4-L2",
@@ -543,7 +543,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L2.yml"
     },
     {
       "lesson_id": "G4-L20",
@@ -572,7 +572,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L20-22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L20-22.yml"
     },
     {
       "lesson_id": "G4-L23",
@@ -616,7 +616,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L23.yml"
     },
     {
       "lesson_id": "G4-L24",
@@ -660,7 +660,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L24.yml"
     },
     {
       "lesson_id": "G4-L25",
@@ -704,7 +704,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L25.yml"
     },
     {
       "lesson_id": "G4-L26",
@@ -748,7 +748,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L26.yml"
     },
     {
       "lesson_id": "G4-L27",
@@ -792,7 +792,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L27.yml"
     },
     {
       "lesson_id": "G4-L3",
@@ -836,7 +836,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L3.yml"
     },
     {
       "lesson_id": "G4-L4",
@@ -880,7 +880,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L4.yml"
     },
     {
       "lesson_id": "G4-L5",
@@ -924,7 +924,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L5.yml"
     },
     {
       "lesson_id": "G4-L6",
@@ -965,7 +965,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L6.yml"
     },
     {
       "lesson_id": "G4-L7",
@@ -1009,7 +1009,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L7.yml"
     },
     {
       "lesson_id": "G4-L8",
@@ -1053,7 +1053,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L8.yml"
     },
     {
       "lesson_id": "G4-L9",
@@ -1094,7 +1094,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G4-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L9.yml"
     },
     {
       "lesson_id": "G5-L1",
@@ -1138,7 +1138,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L1.yml"
     },
     {
       "lesson_id": "G5-L10",
@@ -1182,7 +1182,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L10.yml"
     },
     {
       "lesson_id": "G5-L11",
@@ -1226,7 +1226,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L11.yml"
     },
     {
       "lesson_id": "G5-L12",
@@ -1270,7 +1270,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L12.yml"
     },
     {
       "lesson_id": "G5-L13",
@@ -1314,7 +1314,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L13.yml"
     },
     {
       "lesson_id": "G5-L14",
@@ -1358,7 +1358,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L14.yml"
     },
     {
       "lesson_id": "G5-L15",
@@ -1402,7 +1402,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L15.yml"
     },
     {
       "lesson_id": "G5-L16",
@@ -1446,7 +1446,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L16.yml"
     },
     {
       "lesson_id": "G5-L17",
@@ -1490,7 +1490,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L17.yml"
     },
     {
       "lesson_id": "G5-L18",
@@ -1534,7 +1534,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L18.yml"
     },
     {
       "lesson_id": "G5-L19",
@@ -1578,7 +1578,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L19.yml"
     },
     {
       "lesson_id": "G5-L2",
@@ -1622,7 +1622,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L2.yml"
     },
     {
       "lesson_id": "G5-L20",
@@ -1666,7 +1666,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L20.yml"
     },
     {
       "lesson_id": "G5-L21",
@@ -1710,7 +1710,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L21.yml"
     },
     {
       "lesson_id": "G5-L22",
@@ -1754,7 +1754,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L22.yml"
     },
     {
       "lesson_id": "G5-L23",
@@ -1798,7 +1798,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
     },
     {
       "lesson_id": "G5-L24",
@@ -1827,7 +1827,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L24-25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L24-25.yml"
     },
     {
       "lesson_id": "G5-L26",
@@ -1871,7 +1871,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L26.yml"
     },
     {
       "lesson_id": "G5-L27",
@@ -1915,7 +1915,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L27.yml"
     },
     {
       "lesson_id": "G5-L3",
@@ -1959,7 +1959,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L3.yml"
     },
     {
       "lesson_id": "G5-L4",
@@ -2003,7 +2003,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L4.yml"
     },
     {
       "lesson_id": "G5-L5",
@@ -2047,7 +2047,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L5.yml"
     },
     {
       "lesson_id": "G5-L6",
@@ -2091,7 +2091,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L6.yml"
     },
     {
       "lesson_id": "G5-L7",
@@ -2135,7 +2135,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L7.yml"
     },
     {
       "lesson_id": "G5-L8",
@@ -2179,7 +2179,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L8.yml"
     },
     {
       "lesson_id": "G5-L9",
@@ -2223,7 +2223,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G5-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L9.yml"
     },
     {
       "lesson_id": "G6-L1",
@@ -2267,7 +2267,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L1.yml"
     },
     {
       "lesson_id": "G6-L10",
@@ -2311,7 +2311,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L10.yml"
     },
     {
       "lesson_id": "G6-L11",
@@ -2355,7 +2355,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L11.yml"
     },
     {
       "lesson_id": "G6-L12",
@@ -2399,7 +2399,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L12.yml"
     },
     {
       "lesson_id": "G6-L13",
@@ -2443,7 +2443,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L13.yml"
     },
     {
       "lesson_id": "G6-L14",
@@ -2487,7 +2487,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L14.yml"
     },
     {
       "lesson_id": "G6-L15",
@@ -2531,7 +2531,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L15.yml"
     },
     {
       "lesson_id": "G6-L16",
@@ -2575,7 +2575,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L16.yml"
     },
     {
       "lesson_id": "G6-L17",
@@ -2619,7 +2619,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L17.yml"
     },
     {
       "lesson_id": "G6-L18",
@@ -2663,7 +2663,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L18.yml"
     },
     {
       "lesson_id": "G6-L19",
@@ -2707,7 +2707,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L19.yml"
     },
     {
       "lesson_id": "G6-L2",
@@ -2751,7 +2751,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L2.yml"
     },
     {
       "lesson_id": "G6-L20",
@@ -2795,7 +2795,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L20.yml"
     },
     {
       "lesson_id": "G6-L21",
@@ -2839,7 +2839,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L21.yml"
     },
     {
       "lesson_id": "G6-L22",
@@ -2883,7 +2883,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
     },
     {
       "lesson_id": "G6-L23",
@@ -2927,7 +2927,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L23.yml"
     },
     {
       "lesson_id": "G6-L24",
@@ -2971,7 +2971,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L24.yml"
     },
     {
       "lesson_id": "G6-L25",
@@ -3015,7 +3015,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L25.yml"
     },
     {
       "lesson_id": "G6-L3",
@@ -3059,7 +3059,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L3.yml"
     },
     {
       "lesson_id": "G6-L4",
@@ -3103,7 +3103,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L4.yml"
     },
     {
       "lesson_id": "G6-L5",
@@ -3144,7 +3144,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L5.yml"
     },
     {
       "lesson_id": "G6-L6",
@@ -3188,7 +3188,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L6.yml"
     },
     {
       "lesson_id": "G6-L7",
@@ -3232,7 +3232,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L7.yml"
     },
     {
       "lesson_id": "G6-L8",
@@ -3273,7 +3273,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L8.yml"
     },
     {
       "lesson_id": "G6-L9",
@@ -3317,7 +3317,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G6-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L9.yml"
     },
     {
       "lesson_id": "G7-L1",
@@ -3361,7 +3361,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L1.yml"
     },
     {
       "lesson_id": "G7-L10",
@@ -3402,7 +3402,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L10.yml"
     },
     {
       "lesson_id": "G7-L11",
@@ -3443,7 +3443,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L11.yml"
     },
     {
       "lesson_id": "G7-L12",
@@ -3487,7 +3487,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L12.yml"
     },
     {
       "lesson_id": "G7-L13",
@@ -3531,7 +3531,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L13.yml"
     },
     {
       "lesson_id": "G7-L14",
@@ -3575,7 +3575,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L14.yml"
     },
     {
       "lesson_id": "G7-L15",
@@ -3619,7 +3619,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L15.yml"
     },
     {
       "lesson_id": "G7-L16",
@@ -3663,7 +3663,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L16.yml"
     },
     {
       "lesson_id": "G7-L17",
@@ -3707,7 +3707,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L17.yml"
     },
     {
       "lesson_id": "G7-L18",
@@ -3751,7 +3751,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L18.yml"
     },
     {
       "lesson_id": "G7-L19",
@@ -3795,7 +3795,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L19.yml"
     },
     {
       "lesson_id": "G7-L2",
@@ -3839,7 +3839,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L2.yml"
     },
     {
       "lesson_id": "G7-L20",
@@ -3883,7 +3883,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L20.yml"
     },
     {
       "lesson_id": "G7-L21",
@@ -3927,7 +3927,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L21.yml"
     },
     {
       "lesson_id": "G7-L22",
@@ -3971,12 +3971,12 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L22.yml"
     },
     {
       "lesson_id": "G7-L23",
-      "title": "最後一隻旅人鴿",
-      "story_id": 1103,
+      "title": "第一篇 雨林裡的奇蹟藥物",
+      "story_id": 1102,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -4012,7 +4012,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L23.yml"
     },
     {
       "lesson_id": "G7-L24",
@@ -4056,7 +4056,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L24.yml"
     },
     {
       "lesson_id": "G7-L25",
@@ -4097,7 +4097,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L25.yml"
     },
     {
       "lesson_id": "G7-L26",
@@ -4138,7 +4138,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L26.yml"
     },
     {
       "lesson_id": "G7-L27",
@@ -4179,7 +4179,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L27.yml"
     },
     {
       "lesson_id": "G7-L28",
@@ -4223,7 +4223,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
     },
     {
       "lesson_id": "G7-L29",
@@ -4264,7 +4264,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L29.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L29.yml"
     },
     {
       "lesson_id": "G7-L3",
@@ -4308,7 +4308,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L3.yml"
     },
     {
       "lesson_id": "G7-L30",
@@ -4349,7 +4349,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L30.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L30.yml"
     },
     {
       "lesson_id": "G7-L4",
@@ -4393,7 +4393,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L4.yml"
     },
     {
       "lesson_id": "G7-L5",
@@ -4437,7 +4437,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L5.yml"
     },
     {
       "lesson_id": "G7-L6",
@@ -4481,7 +4481,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L6.yml"
     },
     {
       "lesson_id": "G7-L7",
@@ -4525,7 +4525,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L7.yml"
     },
     {
       "lesson_id": "G7-L8",
@@ -4569,7 +4569,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L8.yml"
     },
     {
       "lesson_id": "G7-L9",
@@ -4613,7 +4613,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G7-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L9.yml"
     },
     {
       "lesson_id": "G8-L1",
@@ -4657,7 +4657,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L1.yml"
     },
     {
       "lesson_id": "G8-L10",
@@ -4701,7 +4701,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L10.yml"
     },
     {
       "lesson_id": "G8-L11",
@@ -4745,7 +4745,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L11.yml"
     },
     {
       "lesson_id": "G8-L12",
@@ -4789,7 +4789,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L12.yml"
     },
     {
       "lesson_id": "G8-L13",
@@ -4830,7 +4830,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L13.yml"
     },
     {
       "lesson_id": "G8-L14",
@@ -4871,7 +4871,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L14.yml"
     },
     {
       "lesson_id": "G8-L15",
@@ -4915,7 +4915,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L15.yml"
     },
     {
       "lesson_id": "G8-L16",
@@ -4959,7 +4959,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L16.yml"
     },
     {
       "lesson_id": "G8-L17",
@@ -5003,7 +5003,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L17.yml"
     },
     {
       "lesson_id": "G8-L18",
@@ -5047,7 +5047,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L18.yml"
     },
     {
       "lesson_id": "G8-L19",
@@ -5091,7 +5091,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L19.yml"
     },
     {
       "lesson_id": "G8-L2",
@@ -5135,7 +5135,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L2.yml"
     },
     {
       "lesson_id": "G8-L3",
@@ -5179,7 +5179,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L3.yml"
     },
     {
       "lesson_id": "G8-L4",
@@ -5223,7 +5223,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L4.yml"
     },
     {
       "lesson_id": "G8-L5",
@@ -5267,7 +5267,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L5.yml"
     },
     {
       "lesson_id": "G8-L6",
@@ -5311,7 +5311,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L6.yml"
     },
     {
       "lesson_id": "G8-L7",
@@ -5355,7 +5355,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L7.yml"
     },
     {
       "lesson_id": "G8-L8",
@@ -5399,7 +5399,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L8.yml"
     },
     {
       "lesson_id": "G8-L9",
@@ -5443,7 +5443,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G8-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L9.yml"
     },
     {
       "lesson_id": "G9-L1",
@@ -5487,7 +5487,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L1.yml"
     },
     {
       "lesson_id": "G9-L10",
@@ -5533,7 +5533,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L10.yml"
     },
     {
       "lesson_id": "G9-L11",
@@ -5577,7 +5577,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L11.yml"
     },
     {
       "lesson_id": "G9-L12",
@@ -5621,7 +5621,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L12.yml"
     },
     {
       "lesson_id": "G9-L13",
@@ -5665,7 +5665,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L13.yml"
     },
     {
       "lesson_id": "G9-L14",
@@ -5709,7 +5709,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
     },
     {
       "lesson_id": "G9-L15",
@@ -5738,7 +5738,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L15-16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L15-16.yml"
     },
     {
       "lesson_id": "G9-L17",
@@ -5767,7 +5767,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L17-19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L17-19.yml"
     },
     {
       "lesson_id": "G9-L2",
@@ -5811,7 +5811,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L2.yml"
     },
     {
       "lesson_id": "G9-L3",
@@ -5855,7 +5855,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L3.yml"
     },
     {
       "lesson_id": "G9-L4",
@@ -5899,7 +5899,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L4.yml"
     },
     {
       "lesson_id": "G9-L5",
@@ -5943,7 +5943,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L5.yml"
     },
     {
       "lesson_id": "G9-L6",
@@ -5987,7 +5987,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L6.yml"
     },
     {
       "lesson_id": "G9-L7",
@@ -6031,7 +6031,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L7.yml"
     },
     {
       "lesson_id": "G9-L8",
@@ -6075,7 +6075,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L8.yml"
     },
     {
       "lesson_id": "G9-L9",
@@ -6119,7 +6119,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/G9-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L9.yml"
     },
     {
       "lesson_id": "文-L1",
@@ -6163,7 +6163,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L1.yml"
     },
     {
       "lesson_id": "文-L10",
@@ -6207,7 +6207,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L10.yml"
     },
     {
       "lesson_id": "文-L2",
@@ -6248,7 +6248,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L2.yml"
     },
     {
       "lesson_id": "文-L3",
@@ -6282,7 +6282,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
     },
     {
       "lesson_id": "文-L4",
@@ -6316,7 +6316,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
     },
     {
       "lesson_id": "文-L5",
@@ -6360,7 +6360,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L5.yml"
     },
     {
       "lesson_id": "文-L6",
@@ -6404,7 +6404,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L6.yml"
     },
     {
       "lesson_id": "文-L7",
@@ -6448,7 +6448,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L7.yml"
     },
     {
       "lesson_id": "文-L8",
@@ -6482,7 +6482,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
     },
     {
       "lesson_id": "文-L9",
@@ -6516,7 +6516,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
   ],
   "raw_failures": []

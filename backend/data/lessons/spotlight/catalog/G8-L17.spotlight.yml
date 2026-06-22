@@ -15,10 +15,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 議題文章是在「說服」讀者：每一方會先表明立場與主張，再用理由說服。接著請你整理這個議題有哪些立場？每個立場的主張和理由是什麼？
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 三、比較觀點差異（用「價值／風險」兩個角度）
   - type: passage

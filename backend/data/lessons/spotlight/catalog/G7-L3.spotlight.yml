@@ -21,7 +21,3 @@ spotlight:
     text: ◎小試身手
   - type: guide
     text: 請依照上面的步驟，完成以下的表格。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

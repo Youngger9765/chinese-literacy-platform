@@ -11,10 +11,6 @@ spotlight:
     text: ◎ 小試身手：
   - type: free_text
     prompt: 1.將課文第三、四、五段內容整理成表格。（單選）
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 2.將課文第六段內容整理成表格。
   - type: figure

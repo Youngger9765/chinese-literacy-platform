@@ -34,10 +34,6 @@ spotlight:
     answer: 拆解——分清輕重緩急，設定優先順序
   - type: guide
     text: 時間有限時，要先判斷什麼該先做。請從上面勾選的任務中，標註優先順序，並排出學習時間：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ※提示：
   - type: guide

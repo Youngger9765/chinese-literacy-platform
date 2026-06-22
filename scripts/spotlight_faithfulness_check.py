@@ -40,6 +40,11 @@ EXPECTED_RED_IDS = {
     1158, # 文-L10 inv=7
     # 內容缺口 — online-schema 無 spotlight range（#2388）
     1014, # G4-L14 inv=2
+    # gate should_use_v2 誤判（v2 互動=0 但 legacy 有 4-5 步驟）—— render 實測畫面正常顯示
+    # legacy 內容，非真缺陷；列此避免 baseline drift（gate 通則待調 should_use_v2 偏好 legacy）
+    29,   # G7-L02 inv=2（legacy 5 步，render OK）
+    30,   # G7-L03 inv=2（legacy 5 步，render OK）
+    49,   # G9-L04 inv=2（legacy 4 步，render OK）
 }
 
 INTERACTIVE_TYPES = {"single", "multi", "fill", "fill_blank", "free_text"}
@@ -666,6 +671,70 @@ def check_invariant_8(story: dict[str, Any]) -> InvariantResult:
     return InvariantResult(True, "no missing-source placeholder")
 
 
+# MD5 hash of the generic book+pencil grey placeholder image on GCS.
+# Any figure block whose resolved GCS URL returns this exact file is a fake illustration.
+_PLACEHOLDER_FIG_MD5 = "9f31079bf8dc822e61f0a65ba433c34e"
+_GCS_LESSONS_BASE = "https://storage.googleapis.com/lingoleap-assets/lessons-images"
+# Cache fetched md5 values within a check run to avoid duplicate HTTP requests.
+_figure_md5_cache: dict[str, str | None] = {}
+
+
+def _fetch_md5(url: str) -> str | None:
+    """Fetch URL and return its md5 hex digest, or None on error."""
+    if url in _figure_md5_cache:
+        return _figure_md5_cache[url]
+    try:
+        import urllib.parse
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            data = resp.read()
+        result = hashlib.md5(data).hexdigest()
+    except Exception:
+        result = None
+    _figure_md5_cache[url] = result
+    return result
+
+
+def check_invariant_9(story: dict[str, Any]) -> InvariantResult:
+    """Placeholder-figure gate: figure blocks must not point to the generic placeholder image.
+
+    The extractor used to emit figure blocks for every spotlight lesson and fall back to
+    GCS fig1.png, which is a generic book+pencil grey icon (md5 9f31079...).  Rendering
+    this image gives users a meaningless illustration.  This invariant detects the case
+    where a figure block has asset=fig1.png AND the GCS object is the placeholder.
+
+    Check is remote (HTTP): runs only when the asset name is fig1.png to limit requests.
+    Other assets (fig2.png, fig10.png, …) are assumed real — they were never bulk-uploaded
+    as placeholders.
+
+    Only fails when md5 matches the known placeholder (not on 404 / network error).
+    """
+    lesson_code = story.get("grade_code") or ""
+    if not lesson_code:
+        return InvariantResult(True, "no grade_code — skip")
+
+    placeholder_blocks: list[int] = []
+    for idx, b in enumerate(spotlight_blocks(story)):
+        if b.get("type") != "figure":
+            continue
+        asset = b.get("asset") or ""
+        if asset != "fig1.png":
+            # Only fig1.png was bulk-uploaded as placeholder; other assets are real.
+            continue
+        import urllib.parse
+        url = f"{_GCS_LESSONS_BASE}/{urllib.parse.quote(lesson_code)}/fig1.png"
+        md5 = _fetch_md5(url)
+        if md5 == _PLACEHOLDER_FIG_MD5:
+            placeholder_blocks.append(idx)
+
+    if placeholder_blocks:
+        return InvariantResult(
+            False,
+            f"figure block(s) at index {placeholder_blocks} point to placeholder image "
+            f"(md5={_PLACEHOLDER_FIG_MD5[:8]}…) — remove figure block or supply real image",
+        )
+    return InvariantResult(True, "no placeholder-backed figure blocks")
+
+
 def evaluate_story(
     story: dict[str, Any],
     by_design_empty_ids: set[int],
@@ -682,6 +751,7 @@ def evaluate_story(
         "6": check_invariant_6(story, all_story_tokens, all_rendered_tokens),
         "7": check_invariant_7(story),
         "8": check_invariant_8(story),
+        "9": check_invariant_9(story),
     }
     failed = [inv for inv, result in checks.items() if not result.ok]
     return {

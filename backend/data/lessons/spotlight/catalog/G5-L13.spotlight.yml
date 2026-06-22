@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 摘要策略-從主題描述結構找重點
   strategy_type: summary
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：摘要策略──
   - type: guide
     text: ◎小試身手：
   - type: free_text
@@ -19,7 +15,3 @@ spotlight:
     - 現在，請仔細閱讀每一個補充細節，判斷它們分別屬於下列哪個小主題，並在空格中填上正確的小主題。全部完成後，再檢查一次，確定每個細節都和小主題有清楚的連結喔！
   - type: guide
     text: 上面的閱讀聚光燈幫助我們了解文章的大主題、小主題和細節之間的關係。接下來，我們要完成「文章重點表」，把重點更清楚地整理出來。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
