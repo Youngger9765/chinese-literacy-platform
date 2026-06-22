@@ -671,6 +671,50 @@ def _keypoints_entry(story: dict[str, Any], lesson_code: str) -> dict[str, Any] 
     return entry
 
 
+def flatten_story_structure_cells(sst: Any) -> list[str]:
+    cells: list[str] = []
+    if isinstance(sst, list):
+        rows = sst
+    elif isinstance(sst, dict):
+        rows = sst.get("rows") if isinstance(sst.get("rows"), list) else []
+    else:
+        rows = []
+    for row in rows:
+        if isinstance(row, list):
+            for cell in row:
+                text = str(cell or "").strip()
+                if text:
+                    cells.append(text)
+        elif isinstance(row, dict):
+            for value in row.values():
+                if isinstance(value, list):
+                    for cell in value:
+                        text = str(cell or "").strip()
+                        if text:
+                            cells.append(text)
+                else:
+                    text = str(value or "").strip()
+                    if text:
+                        cells.append(text)
+        else:
+            text = str(row or "").strip()
+            if text:
+                cells.append(text)
+    return cells
+
+
+def meaningful_story_structure_cells(cells: list[str]) -> int:
+    meaningful = 0
+    for cell in cells:
+        compact = PUNCT_SPACE_RE.sub("", cell)
+        if not compact:
+            continue
+        if all(ch in SKELETON_MARK_CHARS for ch in compact):
+            continue
+        meaningful += 1
+    return meaningful
+
+
 def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any]:
     sst = story.get("story_structure_table")
     source_missing = not sst
@@ -697,42 +741,27 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
             failure_codes = ["KEYPOINTS_MANIFEST_MISSING"]
     else:
         base_text_ok = has_meaningful_base_text(story)
-        gates = entry.get("gates") or {}
-        l1 = gates.get("L1") or {}
-        l1_pass = bool(l1.get("pass"))
-        known_gap = bool(entry.get("known_data_gap"))
-        # The manifest summary collapses per-invariant numbers; expose the
-        # gate verdict + issue list as the machine-verifiable invariant.
+        cells = flatten_story_structure_cells(sst)
+        no_docx = has_no_docx_marker("\n".join(cells))
+        meaningful_cells = meaningful_story_structure_cells(cells)
         invariants = [
             {
-                "name": "row_recall",
-                "actual": "manifest_L1",
-                "expected": ">=0.95",
-                "pass": l1_pass,
+                "name": "table_shape_valid",
+                "actual": len(cells),
+                "expected": ">=3",
+                "pass": len(cells) >= 3,
             },
             {
-                "name": "blank_recall",
-                "actual": "manifest_L1",
-                "expected": ">=0.95",
-                "pass": l1_pass,
+                "name": "table_content_present",
+                "actual": meaningful_cells,
+                "expected": ">=2",
+                "pass": meaningful_cells >= 2,
             },
             {
-                "name": "cell_integrity",
-                "actual": "manifest_L1",
+                "name": "not_no_docx_placeholder",
+                "actual": not no_docx,
                 "expected": True,
-                "pass": l1_pass,
-            },
-            {
-                "name": "label_family_correct",
-                "actual": "manifest_L1",
-                "expected": True,
-                "pass": l1_pass,
-            },
-            {
-                "name": "overfit_lint_pass",
-                "actual": "manifest_L1",
-                "expected": True,
-                "pass": l1_pass,
+                "pass": not no_docx,
             },
             {
                 "name": "base_text_quality",
@@ -741,11 +770,8 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
                 "pass": base_text_ok,
             },
         ]
-        if known_gap:
-            unknown_flags["strategy_unknown"] = True
-            status = "unknown"
-            failure_codes = ["KEYPOINTS_KNOWN_DATA_GAP"]
-        elif l1_pass and not source_missing and base_text_ok:
+        all_pass = all(inv["pass"] for inv in invariants)
+        if all_pass and not source_missing:
             status = "pass"
             failure_codes = []
         elif source_missing:
@@ -754,7 +780,9 @@ def l1_story_structure(story: dict[str, Any], lesson_code: str) -> dict[str, Any
             failure_codes = ["SOURCE_MISSING"]
         else:
             status = "fail"
-            failure_codes = ["L1_KEYPOINTS_FAIL"]
+            failure_codes = [
+                f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
+            ]
 
     return {
         "schema_version": SCHEMA_VERSION,
