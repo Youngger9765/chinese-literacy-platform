@@ -1,27 +1,27 @@
 {
-  "key": "G6-L03+24",
-  "story_id": 24,
-  "lesson_code": "G6-L03",
-  "title": "昆蟲會思考嗎？",
+  "key": "G6-L2+1056",
+  "story_id": 1056,
+  "lesson_code": "G6-L2",
+  "title": "與小學說再見",
   "structure_layer": {
     "block_type_sequence": [
       "guide",
       "guide",
       "figure",
       "single",
-      "free_text",
       "single",
-      "free_text"
+      "single",
+      "single"
     ],
     "question_count": 4,
     "figure_summary": [
       {
         "referent": "table",
-        "asset": null
+        "asset": "fig1.png"
       }
     ]
   },
   "semantic_layer": {
-    "hash": "sha256-396570c567d2b24c"
+    "hash": "sha256-10a5083b9cdec50d"
   }
 }

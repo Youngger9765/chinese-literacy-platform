@@ -1,12 +1,12 @@
 {
-  "key": "G9-L15+56",
-  "story_id": 56,
-  "lesson_code": "G9-L15",
-  "title": "多文本-未解之謎-巨石陣+摩艾石像",
+  "key": "G9-L17+1146",
+  "story_id": 1146,
+  "lesson_code": "G9-L17",
+  "title": "馬拉松王者──基普喬吉 (記敘文)",
   "structure_layer": {
     "block_type_sequence": [
       "guide",
-      "single",
+      "multi",
       "single",
       "single",
       "free_text"
@@ -15,6 +15,6 @@
     "figure_summary": []
   },
   "semantic_layer": {
-    "hash": "sha256-347bcd0dea6981c9"
+    "hash": "sha256-af8e49668d6a105b"
   }
 }

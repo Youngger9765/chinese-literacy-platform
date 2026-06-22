@@ -4,11 +4,17 @@
   "lesson_code": "G9-L17",
   "title": "多文本-馬拉松王者+靠跑鞋破紀錄合理嗎+促成更高更快更遠的因素",
   "structure_layer": {
-    "block_type_sequence": [],
-    "question_count": 0,
+    "block_type_sequence": [
+      "guide",
+      "multi",
+      "single",
+      "single",
+      "free_text"
+    ],
+    "question_count": 4,
     "figure_summary": []
   },
   "semantic_layer": {
-    "hash": "sha256-4f53cda18c2baa0c"
+    "hash": "sha256-af8e49668d6a105b"
   }
 }
