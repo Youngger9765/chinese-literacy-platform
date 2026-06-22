@@ -85,6 +85,32 @@ def _resolve_target_text(lesson_id: str) -> str | None:
     return lesson.get("full_text") or None
 
 
+def _eval_blob_path(audio_path: str) -> str:
+    """跑分結果持久化的 sibling 路徑：
+    .../{version}-{uid}.webm → .../{version}-{uid}.eval.json（#2392）。"""
+    if not audio_path:
+        return ""
+    return audio_path.rsplit(".", 1)[0] + ".eval.json"
+
+
+def _stamp_persist_append(bucket, audio_path: str, result: dict, results: list) -> None:
+    """蓋 scored_at 時間戳 → 持久化 eval 結果到 GCS（fail-safe，寫失敗不中斷批次）→ append。
+
+    讓 dashboard reload 不丟分數 + 標跑分時間（#2392）。重跑會覆寫同一 eval.json。
+    """
+    result["scored_at"] = datetime.now(timezone.utc).isoformat()
+    eval_path = _eval_blob_path(audio_path)
+    if eval_path:
+        try:
+            bucket.blob(eval_path).upload_from_string(
+                json.dumps(result, ensure_ascii=False),
+                content_type="application/json",
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("batch-eval persist failed: path=%s err=%s", eval_path, exc)
+    results.append(result)
+
+
 @router.post("/testset/upload")
 async def testset_upload(
     contributor_name: str = Form(...),
@@ -214,15 +240,29 @@ def testset_recordings():
 
     out = []
     try:
+        # 單趟掃描同時收 meta + 持久化的 eval 結果（#2392），用 base path join，
+        # 避免每筆再打一次 GCS exists/download（N 次額外呼叫會拖慢清單）。
+        metas_by_base: dict[str, dict] = {}
+        evals_by_base: dict[str, dict] = {}
         for blob in bucket.list_blobs(prefix=f"{_PREFIX}/", max_results=_LIST_CAP):
-            if not blob.name.endswith(".json"):
-                continue
-            try:
-                meta = json.loads(blob.download_as_text())
-            except Exception:
-                continue
+            if blob.name.endswith(".eval.json"):
+                base = blob.name[: -len(".eval.json")]
+                try:
+                    evals_by_base[base] = json.loads(blob.download_as_text())
+                except Exception:
+                    continue
+            elif blob.name.endswith(".json"):
+                base = blob.name[: -len(".json")]
+                try:
+                    metas_by_base[base] = json.loads(blob.download_as_text())
+                except Exception:
+                    continue
+        for base, meta in metas_by_base.items():
             signed = generate_audio_signed_url(meta.get("audio_path", ""), expiration_seconds=600)
             meta["play_url"] = signed
+            ev = evals_by_base.get(base)
+            if ev is not None:
+                meta["eval"] = ev  # 含 adjusted_match_rate / flag / scored_at 等
             out.append(meta)
     except Exception as exc:
         logger.warning("testset list failed: %s", exc)
@@ -292,6 +332,9 @@ async def testset_batch_eval(
         for blob in bucket.list_blobs(prefix=f"{_PREFIX}/", max_results=_LIST_CAP):
             if not blob.name.endswith(".json"):
                 continue
+            # 跳過跑分結果檔（#2392）—— 它也以 .json 結尾，當 meta 解析會污染清單
+            if blob.name.endswith(".eval.json"):
+                continue
             # Apply contributor filter (slug-based path component match)
             if name_slug and f"/{name_slug}/" not in blob.name:
                 continue
@@ -349,7 +392,7 @@ async def testset_batch_eval(
             target_text = _resolve_target_text(entry_lesson)
             if not target_text:
                 base_result["error"] = f"lesson '{entry_lesson}' not found in catalog"
-                results.append(base_result)
+                _stamp_persist_append(bucket, audio_path, base_result, results)
                 logger.info("batch-eval skip: lesson not found path=%s", audio_path)
                 continue
 
@@ -374,7 +417,7 @@ async def testset_batch_eval(
             # 4d. Skip scoring if transcription failed (fallback with no transcript)
             if not transcript:
                 base_result["error"] = f"transcription fallback: {transcript_reason or 'unknown'}"
-                results.append(base_result)
+                _stamp_persist_append(bucket, audio_path, base_result, results)
                 logger.info(
                     "batch-eval transcribe fallback: path=%s reason=%s",
                     audio_path, transcript_reason,
@@ -410,7 +453,7 @@ async def testset_batch_eval(
                 "batch-eval entry error: path=%s err=%s", audio_path, exc, exc_info=True
             )
 
-        results.append(base_result)
+        _stamp_persist_append(bucket, audio_path, base_result, results)
 
     # ── 5. Summary statistics ───────────────────────────────────────────────
     correct_scores = [
