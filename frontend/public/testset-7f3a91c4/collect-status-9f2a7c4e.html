@@ -94,6 +94,14 @@ var aiResults={};  // lesson_id → {correct:adj|null, error:adj|null, anomaly:b
 
 function pct(v){ return v==null?'—':(Math.round(v*1000)/10)+'%'; }
 
+// 跑分時間戳格式化（#2392）：ISO → MM/DD HH:MM（本地時區）
+function fmtTs(iso){
+  try{ var d=new Date(iso); if(isNaN(d.getTime())) return '';
+    var p=function(n){return (n<10?'0':'')+n;};
+    return p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }catch(e){ return ''; }
+}
+
 function aiCell(id, hasRec){
   var r=aiResults[id];
   if(r&&r.running) return '<span class="muted">跑分中…（約 30 秒）</span>';
@@ -103,7 +111,8 @@ function aiCell(id, hasRec){
     if(r.error!=null)   parts.push('<div class="'+(r.errorFlag?'anom':'lo')+'">錯誤版 '+pct(r.error)+(r.errorFlag?' ⚠':' ✓')+'</div>');
     var both=(r.correct!=null&&!r.correctFlag)&&(r.error!=null&&!r.errorFlag);
     var verdict=(r.correct!=null&&r.error!=null)?('<div style="font-weight:700;margin-top:2px" class="'+(both?'ok':'anom')+'">'+(both?'✅ 兩版都 pass':'⚠ 有異常')+'</div>'):'';
-    return '<div class="ai-score">'+parts.join('')+verdict+'<button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">重跑</button></div>';
+    var ts=r.scoredAt?('<div class="muted" style="font-size:.72rem;margin-top:2px">跑分 '+fmtTs(r.scoredAt)+'</div>'):'';
+    return '<div class="ai-score">'+parts.join('')+verdict+ts+'<button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">重跑</button></div>';
   }
   if(r&&r.authErr) return '<span class="anom">登入已過期</span> <a class="ai-row-btn" href="/login" target="_blank" rel="noopener" style="text-decoration:none">重新登入</a>';
   if(r&&r.err) return '<span class="anom">失敗</span> <button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">重試</button>';
@@ -184,6 +193,7 @@ async function load(){
     var k=m.lesson_id+'||'+m.version;
     (idx[k]=idx[k]||[]).push(m);
     if(m.contributor_name) contribSet[m.contributor_name]=true;
+    if(m.eval) applyAiResult(m.eval);  // 持久化跑分結果 → reload 直接顯示分數+時間，免重跑（#2392）
   });
 
   // 4. stats
@@ -320,7 +330,8 @@ function applyAiResult(x){
   var e=aiResults[x.lesson]=aiResults[x.lesson]||{correct:null,error:null,correctFlag:false,errorFlag:false};
   if(x.version==='correct'){ e.correct=x.adjusted_match_rate; e.correctFlag=!!x.flag; }
   else if(x.version==='error'){ e.error=x.adjusted_match_rate; e.errorFlag=!!x.flag; }
-  delete e.running; delete e.err;
+  if(x.scored_at && (!e.scoredAt || x.scored_at>e.scoredAt)) e.scoredAt=x.scored_at;  // 取最新跑分時間（#2392）
+  delete e.running; delete e.err; delete e.authErr;
 }
 
 // 單課跑分（Image #8：點某課 → 跑該課正確/錯誤版 → 顯示分數 + 兩版是否都 pass）
