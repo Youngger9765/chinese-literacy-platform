@@ -10,10 +10,6 @@ spotlight:
     text: ◎ 小試身手
   - type: guide
     text: 試試看，從這篇文章的擬人句讀出原先的客觀事實，再找出其中的聯想，並推論作者背後想表達的意涵：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: single
     prompt: 根據原文說明，下列何者最符合「擬人」修辭的定義？
     options:

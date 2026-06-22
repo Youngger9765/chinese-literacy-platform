@@ -129,7 +129,9 @@ CATALOG_TO_PARSED_OVERRIDE: dict[str, str] = {
     "G8-L12a": "G8-L15", # 球場上的另類指揮家
     "G8-L12b": "G8-L16", # 我的阿嬤
     # Category C: G7-L31 (旅人鴿 = 第二篇 of G7-L23 multi-text docx)
-    "G7-L31": "G7-L23",
+    # Removed: G7-L31 now has its own parsed YAML (G7-L31.yml) built in #2392.
+    # normalize_manifest_code("G7-L31") already returns "G7-L31" directly,
+    # so no CATALOG_TO_PARSED_OVERRIDE entry is needed.
 }
 
 # Legacy: kept for backward compat; superseded by CATALOG_TO_PARSED_OVERRIDE.

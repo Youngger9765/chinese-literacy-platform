@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 推論策略-推論人物行為的背後動機
   strategy_type: motivation_inference
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：推論策略──推論人物行為的背後動機
   - type: guide
     text: ◎ 小試身手：
   - type: guide

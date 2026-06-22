@@ -7,10 +7,6 @@ spotlight:
     text: ◎小試身手：
   - type: free_text
     prompt: 1.誘餌式標題搜查：下列標題，是誘餌式標題的畫，不是的畫
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 2.誘餌式標題放大鏡：下列標題都是誘餌式標題，請將標題中的誘餌圈出來，每題至少圈出兩個
   - type: free_text

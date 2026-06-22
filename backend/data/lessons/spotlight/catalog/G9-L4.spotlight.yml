@@ -5,13 +5,5 @@ spotlight:
   blocks:
   - type: guide
     text: 我們在生活中，經常有說服別人的需要，從說服爸媽讓你養小狗，到說服班上同學依照你的想法辦園遊會。這篇文章也是在傳達一個主張，說服讀者要讓孩子多曬太陽，以預防近視。你有看到作者怎樣說服讀者接受他的論點嗎？他的論述步驟下表左欄：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ◎ 小試身手
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：表達看法——以科學證據說服人

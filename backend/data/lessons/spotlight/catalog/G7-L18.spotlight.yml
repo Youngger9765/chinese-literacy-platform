@@ -7,10 +7,6 @@ spotlight:
     text: 在寫作時，一個想法或概念，若能運用具體、有細節的事實、例子來說明，會讓讀者更能感受與想像；但在閱讀時，常相反的，需要從具體事實，歸納出作者想要表達的概念，才能促成最佳的理解。
   - type: guide
     text: 一、以下先讓我們用生活中常見的具體事實，來練習提取抽象概念：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、接著我們回到本篇文章，來練習看看作者想要藉由具體事實表達什麼概念：
   - type: figure

@@ -19,10 +19,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 議題文章像在辯論：每一方都有自己的立場或觀點，並提出有說服力的理由與作法。底下請你整理對這個議題的不同立場／觀點，每個觀點的核心想法與理由、作法是什麼？
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 三、比較觀點差異（用優先順序／介入焦點／判準原則」三個角度）
   - type: guide

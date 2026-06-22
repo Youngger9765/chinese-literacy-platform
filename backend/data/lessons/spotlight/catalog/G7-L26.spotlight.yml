@@ -9,10 +9,6 @@ spotlight:
     text: 一、找段落重點
   - type: guide
     text: 請先判斷這段主要在說什麼，再找出文中支持這個重點的內容。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、統整文化意義
   - type: passage

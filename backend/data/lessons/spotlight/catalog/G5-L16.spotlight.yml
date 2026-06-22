@@ -7,10 +7,6 @@ spotlight:
     text: ◎小試身手：以「高砂棒球隊／能高團」為中心，提取相關上位概念。
   - type: guide
     text: 一、找出上位概念：請判斷文章中粗楷體文字的上位概念，並從右欄中選出正確答案，填在【    】裡
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 二、練習提取上位概念：請閱讀以下段落，根據內容，填寫對應的上位概念。
   - type: guide

@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 推論策略-找作者觀點和支持理由
   strategy_type: main_idea_inference
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：推論策略──
   - type: guide
     text: 一、作者在第一段提出了什麼「問題」？
   - type: passage
@@ -68,10 +64,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 上面我們用「三步驟」練習了一個觀點，在這篇文章中，作者還提出其他重要觀點。接下來請你用同樣的三步驟（找觀點→找支持理由→推論隱含意義；從左欄到右欄），找出本文其他觀點。請在勾選□適合的答案。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 三、推論主旨與寫作目的
   - type: passage

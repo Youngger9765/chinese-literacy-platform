@@ -5,7 +5,3 @@ spotlight:
   blocks:
   - type: guide
     text: ◎小試身手：現在我們也學學陳醫生，轉換自己的想法吧！
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
