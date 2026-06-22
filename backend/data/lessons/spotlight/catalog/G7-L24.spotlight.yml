@@ -127,7 +127,3 @@ spotlight:
     prompt: (7)上台前，我先在家(  H   ) 報告一次，練習說話的速度和抑揚頓挫。
   - type: free_text
     prompt: (8)北風雖然(  B   )，發生山難時，消防勇士們仍冒著嚴寒上山搜救。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

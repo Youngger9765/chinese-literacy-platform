@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DiffToken } from '../../../types';
 import { formatTime } from '../../../utils/formatTime';
-
-/** Eval progress steps — defined outside component to avoid per-render allocation. */
-const EVAL_STEPS = [
-  { icon: '📖', label: '掃描課文中…',    minMs: 0     },
-  { icon: '🎙️', label: '辨識你的朗讀…', minMs: 2500  },
-  { icon: '🔍', label: '逐字比對對錯…', minMs: 10000 },
-  { icon: '📊', label: '計算正確率…',   minMs: 15000 },
-] as const;
+import { EvalProgress } from '../EvalProgress';
 
 interface LiveTutorControlsProps {
   // Session state
@@ -174,33 +167,8 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
     setIsPlayingBack(true);
   }, [recordingAudioUrl, isPlayingBack, stopPlaybackSync]);
 
-  /* ── Eval progress animation: step sequence + elapsed counter ── */
-  const [awaitingSecs, setAwaitingSecs] = useState(0);
-  const [evalStepIdx, setEvalStepIdx] = useState(0);
-
-  useEffect(() => {
-    if (!isSubmittingSentence) {
-      setAwaitingSecs(0);
-      setEvalStepIdx(0);
-      return;
-    }
-    const start = Date.now();
-    const id = setInterval(() => {
-      const elapsedMs = Date.now() - start;
-      const secs = Math.floor(elapsedMs / 1000);
-      setAwaitingSecs(secs);
-      // Advance to the highest step whose minMs has been reached;
-      // cap at last step (stays there until result arrives).
-      let nextIdx = 0;
-      for (let i = EVAL_STEPS.length - 1; i >= 0; i--) {
-        if (elapsedMs >= EVAL_STEPS[i].minMs) { nextIdx = i; break; }
-      }
-      setEvalStepIdx(nextIdx);
-    }, 300);
-    return () => clearInterval(id);
-  }, [isSubmittingSentence]);
-
-  const evalElapsedSecs = isSubmittingSentence ? awaitingSecs : 0;
+  /* 評估進度改用共用 <EvalProgress>（duration 動態 + 緩動漸近 + snap，#2396）—
+     舊版假掃描步驟（EVAL_STEPS 固定 minMs）已移除。 */
 
   return (
     <div
@@ -315,80 +283,8 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
                 </div>
               </>
             ) : isSubmittingSentence ? (
-              /* Eval progress animation — step-by-step with scanning line */
-              <div className="w-full flex flex-col items-center gap-3">
-                {/* Main card */}
-                <div className="w-full rounded-2xl overflow-hidden shadow-[0_12px_48px_rgba(0,105,71,0.2)] bg-gradient-to-br from-[#006947] to-[#34d399]">
-                  {/* Scanning progress bar */}
-                  <div className="relative h-1.5 bg-white/20">
-                    <div
-                      className="absolute inset-y-0 left-0 bg-white/80 rounded-full"
-                      style={{
-                        width: `${Math.min(95, (evalStepIdx / (EVAL_STEPS.length - 1)) * 100)}%`,
-                        transition: 'width 0.6s ease-in-out',
-                      }}
-                    />
-                    {/* Glowing scanner dot */}
-                    <div
-                      className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_4px_rgba(255,255,255,0.5)]"
-                      style={{
-                        left: `calc(${Math.min(95, (evalStepIdx / (EVAL_STEPS.length - 1)) * 100)}% - 4px)`,
-                        transition: 'left 0.6s ease-in-out',
-                      }}
-                    />
-                  </div>
-
-                  {/* Step messages */}
-                  <div className="px-5 py-4 flex flex-col gap-2.5">
-                    {EVAL_STEPS.map((step, idx) => {
-                      const isActive = idx === evalStepIdx;
-                      const isDone = idx < evalStepIdx;
-                      return (
-                        <div
-                          key={step.label}
-                          className="flex items-center gap-3 transition-opacity duration-500"
-                          style={{ opacity: isDone ? 0.45 : isActive ? 1 : 0.25 }}
-                        >
-                          <span
-                            className="text-lg leading-none select-none"
-                            style={{ filter: isActive ? 'none' : 'grayscale(0.5)' }}
-                          >
-                            {step.icon}
-                          </span>
-                          <span
-                            className={`text-sm font-bold transition-colors duration-300 ${
-                              isActive ? 'text-white' : isDone ? 'text-white/60 line-through decoration-white/40' : 'text-white/40'
-                            }`}
-                          >
-                            {step.label}
-                          </span>
-                          {isActive && (
-                            <div className="ml-auto flex items-end gap-1 h-4">
-                              {[0, 1, 2].map(i => (
-                                <div
-                                  key={i}
-                                  className="w-1.5 h-1.5 rounded-full bg-white animate-bounce"
-                                  style={{ animationDelay: `${i * 0.15}s` }}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          {isDone && (
-                            <span className="ml-auto text-sm text-white/60">✓</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Elapsed time hint */}
-                <p className="text-xs text-on-surface-variant tabular-nums">
-                  {evalElapsedSecs > 0
-                    ? `已等待 ${evalElapsedSecs} 秒，AI 正在分析中…`
-                    : 'AI 正在分析朗讀音訊，約需 10–20 秒'}
-                </p>
-              </div>
+              /* 評估進度：共用 EvalProgress（duration 動態 + 緩動漸近 + snap，#2396） */
+              <EvalProgress active={isSubmittingSentence} recordingMs={recordingSecs * 1000} />
             ) : (
               <button
                 type="button"

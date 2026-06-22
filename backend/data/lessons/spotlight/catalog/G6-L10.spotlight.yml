@@ -45,7 +45,3 @@ spotlight:
     text: ⃞由原住民代表，將小米種子存放在全球種子庫。
   - type: guide
     text: 複習完小主題及細節，接下來就請你完成文章重點表吧！
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null

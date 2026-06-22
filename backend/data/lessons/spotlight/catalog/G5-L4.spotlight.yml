@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 拆詞釋義、從上下文推測詞義
   strategy_type: inference
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：拆詞釋義、
   - type: guide
     text: 一、請你自己檢查以下3項，確定遇到難詞時，自己是否會推論語詞的意思。
   - type: guide
@@ -27,10 +23,6 @@ spotlight:
     prompt: (7)這支影片上線不到一天，(  G  )就突破十萬，太驚人了！
   - type: free_text
     prompt: (8)政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民(  I  )的措施。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: self_check
     items:
     - 我會用「拆詞釋義」的方法推測詞語的意思。

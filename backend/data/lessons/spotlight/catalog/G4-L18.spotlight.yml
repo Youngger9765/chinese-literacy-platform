@@ -11,10 +11,6 @@ spotlight:
     text: 品妤喜歡寫小說，常在網路上分享自己的故事。
   - type: guide
     text: 可是，最近有幾則留言說她的文筆「太幼稚」，讓她開始懷疑自己是不是沒有天分。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 情境二：社團與課業的衝突
   - type: guide

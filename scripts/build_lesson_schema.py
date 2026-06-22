@@ -2093,6 +2093,27 @@ def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strateg
     for b in final_blocks:
         b.pop("_ref", None)
 
+    # INVARIANT: Drop figure blocks that never got a real asset bound.
+    # A figure block with _needs_asset_bind=True still set means no real image was
+    # available during extraction. Emitting it would produce a placeholder-backed
+    # figure (e.g. the generic book+pencil grey icon at fig1.png on GCS) that renders
+    # as a fake illustration. Rule: figure blocks must have a real asset OR not exist.
+    unbound_figure_count = sum(
+        1 for b in final_blocks
+        if b.get("type") == "figure" and b.get("_needs_asset_bind")
+    )
+    if unbound_figure_count:
+        print(
+            f"  [INVARIANT] Dropping {unbound_figure_count} figure block(s) with no "
+            f"real asset — placeholder emission prevented"
+        )
+    final_blocks = [
+        b for b in final_blocks
+        if not (b.get("type") == "figure" and b.get("_needs_asset_bind"))
+    ]
+    for b in final_blocks:
+        b.pop("_needs_asset_bind", None)
+
     # Count nulls for answer tracking
     null_answers = [
         f"block[{i}].{b.get('type')}: {b.get('prompt', '')[:40]}"

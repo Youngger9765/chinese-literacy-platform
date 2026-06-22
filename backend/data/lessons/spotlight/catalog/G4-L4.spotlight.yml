@@ -15,10 +15,6 @@ spotlight:
     - 辨別句子的意思，選出適當的分句，在
     - 打勾。(單選)
     answer: 辨別句子的意思，選出適當的分句，在
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: 2.連連看，先圈出關聯詞，再將相關的句子連起來。
   - type: figure

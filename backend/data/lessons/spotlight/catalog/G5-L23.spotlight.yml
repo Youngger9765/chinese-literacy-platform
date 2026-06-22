@@ -48,10 +48,6 @@ spotlight:
     text: 主角在課文中說：「要成為頂尖選手，時間管理是關鍵。」
   - type: guide
     text: 他透過規律作息，把時間分成三類：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: 任務：請勾選你覺得主角值得學習的做法。（複選）
   - type: guide

@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 摘要策略-從主題描述結構找重點
   strategy_type: summary
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：摘要策略
   - type: free_text
     prompt: 1.以本課為例
   - type: guide

@@ -7,10 +7,6 @@ spotlight:
     text: ◎小試身手：
   - type: guide
     text: 練習一：辨識藍海豚──判斷文章中，作者提出的「藍海豚」，分別屬於哪個層面。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: guide
     text: ※前一課〈專注當下，關掉內心的批評噪音〉中，主角因為做了棒式訓練，感受到肌肉越來越痠，呼吸越來越急，這是（ ①身體  □②行動  □③問題解決
       ）類型的藍海豚。

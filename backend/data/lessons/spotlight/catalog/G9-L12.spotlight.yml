@@ -109,10 +109,6 @@ spotlight:
     text: 衛星為我們守望家園，你可以成為那個看見臺灣、珍惜臺灣的人。
   - type: guide
     text: ※如果你兩項都打勾，恭喜你，表示你已經學會用「主題—小主題—重要細節」來抓說明文重點，先抓大方向，再抓段落重點與關鍵細節。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: self_check
     items:
     - 我能確認這篇文章的「大主題」是什麼。

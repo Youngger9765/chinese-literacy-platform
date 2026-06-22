@@ -133,10 +133,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 這是一篇說明文，閱讀聚光燈你已經學會怎麼推論作者的觀點和目的，接著，我們就來完整的整理本課的重點嘍！
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: self_check
     items:
     - 我能判斷作者的觀點與立場。

@@ -17,10 +17,6 @@ spotlight:
     text: 二、區辨「控制圈」：
   - type: guide
     text: ◎從文章中，我們可以看出主角的兩難，現在就一起來看看主角在乎的事情是否落在他的「控制圈」：
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: passage
     source: unknown
     paragraphs:

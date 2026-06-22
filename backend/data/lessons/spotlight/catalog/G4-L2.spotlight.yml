@@ -7,10 +7,6 @@ spotlight:
     text: ◎ 小試身手：
   - type: free_text
     prompt: 1. 先圈出時間，再依發生的先後順序，在（ ）中填入1~4。
-  - type: figure
-    referent: table
-    asset: fig1.png
-    bind_paragraph: null
   - type: free_text
     prompt: ２.〈𪹚龍慶元宵〉　彭仁星
   - type: figure
