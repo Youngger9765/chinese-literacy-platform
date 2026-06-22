@@ -1,0 +1,44 @@
+{
+  "key": "G8-L15+1129",
+  "story_id": 1129,
+  "lesson_code": "G8-L15",
+  "title": "核能的兩難抉擇",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "passage",
+      "figure",
+      "guide",
+      "guide",
+      "passage",
+      "figure",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "self_check"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig2.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig3.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-9744542602c6b7a2"
+  }
+}

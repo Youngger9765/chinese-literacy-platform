@@ -16,21 +16,17 @@ spotlight:
   - type: free_text
     prompt: 2. 從表格歸納訊息：實驗一告訴我們什麼訊息(單選)
   - type: single
-    prompt: (1)中國大學生的數字記憶得分比美國大學生（ □高  /  □低  ）。
+    prompt: (1)中國大學生的數字記憶得分比美國大學生（ 高  /  □低  ）。
     options:
     - 高
-    - /
     - 低
-    - ）。
-    answer: /
+    answer: 高
   - type: single
-    prompt: (2)漢語的的數字發音長度比英語（ □長  /  □短  ）。
+    prompt: (2)漢語的的數字發音長度比英語（ □長  /  短  ）。
     options:
     - 長
-    - /
     - 短
-    - ）。
-    answer: /
+    answer: 短
   - type: free_text
     prompt: (3)大學生數字記憶廣度的長度和什麼有關係？   數字發音長度
   - type: guide
@@ -46,13 +42,11 @@ spotlight:
   - type: free_text
     prompt: 2. 從表格歸納訊息：實驗二告訴我們什麼訊息(單選)
   - type: single
-    prompt: (1)中國幼童的數字記憶得分比美國幼童（ □高  /  □低  ）。
+    prompt: (1)中國幼童的數字記憶得分比美國幼童（ 高  /  □低  ）。
     options:
     - 高
-    - /
     - 低
-    - ）。
-    answer: /
+    answer: 高
   - type: free_text
     prompt: (2)幼兒「數字記憶力廣度」和「數字發音長度」之間的關係是什麼？
   - type: guide
@@ -74,10 +68,8 @@ spotlight:
   - type: free_text
     prompt: (2)這兩個實驗都支持了數字記憶廣度與哪個因素有關？（發音長度　）
   - type: single
-    prompt: (3)數字發音越短，記憶數字的難度會（  □增加   /   □減少   ）。
+    prompt: (3)數字發音越短，記憶數字的難度會（  □增加   /   減少   ）。
     options:
     - 增加
-    - /
     - 減少
-    - ）。
-    answer: /
+    answer: 減少

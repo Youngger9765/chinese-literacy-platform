@@ -1,0 +1,36 @@
+{
+  "key": "G9-L2+1131",
+  "story_id": 1131,
+  "lesson_code": "G9-L2",
+  "title": "帝國家書：一個普通家庭的生與死",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "figure",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text"
+    ],
+    "question_count": 13,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-0787c25ab9086be0"
+  }
+}

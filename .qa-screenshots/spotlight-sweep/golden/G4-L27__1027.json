@@ -1,0 +1,39 @@
+{
+  "key": "G4-L27+1027",
+  "story_id": 1027,
+  "lesson_code": "G4-L27",
+  "title": "從白熊到藍海豚：學習與念頭和平相處",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "single",
+      "free_text",
+      "free_text",
+      "guide",
+      "multi",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-4155299455dbb646"
+  }
+}

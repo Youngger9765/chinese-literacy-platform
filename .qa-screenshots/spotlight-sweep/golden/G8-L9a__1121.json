@@ -1,0 +1,30 @@
+{
+  "key": "G8-L9a+1121",
+  "story_id": 1121,
+  "lesson_code": "G8-L9a",
+  "title": "虎襲事件的真相：誰才是受害者？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "guide",
+      "figure",
+      "self_check"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      },
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-d159c3c1bfeeec85"
+  }
+}

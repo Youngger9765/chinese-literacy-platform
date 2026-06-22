@@ -1,0 +1,23 @@
+{
+  "key": "G9-L05+50",
+  "story_id": 50,
+  "lesson_code": "G9-L05",
+  "title": "#MeToo運動與我們的權利",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide"
+    ],
+    "question_count": 0,
+    "figure_summary": []
+  },
+  "semantic_layer": {
+    "hash": "sha256-a3c7214ff9f3709b"
+  }
+}

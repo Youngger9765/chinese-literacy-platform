@@ -1,0 +1,27 @@
+{
+  "key": "G6-L3+1057",
+  "story_id": 1057,
+  "lesson_code": "G6-L3",
+  "title": "昆蟲會思考嗎?",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "figure",
+      "single",
+      "free_text",
+      "single",
+      "free_text"
+    ],
+    "question_count": 4,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": null
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-396570c567d2b24c"
+  }
+}

@@ -1,0 +1,34 @@
+spotlight:
+  lesson: G9-L17
+  strategy_name: 比較不同作者觀點
+  strategy_type: comparison
+  blocks:
+  - type: guide
+    text: ◎ 小試身手
+  - type: multi
+    prompt: 第一篇文章認為基普喬吉成功的原因有哪些？
+    options:
+    - 天生的身體優勢（高海拔、小腿細長）
+    - 團隊合作（陪跑員、教練團）
+    - 自律、內省與閱讀
+    - 只靠高科技跑鞋
+    answer:
+    - 天生的身體優勢（高海拔、小腿細長）
+    - 團隊合作（陪跑員、教練團）
+    - 自律、內省與閱讀
+  - type: single
+    prompt: 第二篇文章提出了什麼質疑？
+    options:
+    - 基普喬吉的訓練方式不科學
+    - 高科技跑鞋可能造成比賽不公平
+    - 馬拉松的距離應該縮短
+    answer: 高科技跑鞋可能造成比賽不公平
+  - type: single
+    prompt: 第三篇文章認為，運動成績進步的兩大因素是什麼？
+    options:
+    - 營養和休息
+    - 科技進步和專項選才
+    - 獎金和國家支持
+    answer: 科技進步和專項選才
+  - type: free_text
+    prompt: 綜合三篇文章，你認為基普喬吉破紀錄主要靠自己的實力，還是靠外在因素（跑鞋、團隊、科技）？請說明你的理由

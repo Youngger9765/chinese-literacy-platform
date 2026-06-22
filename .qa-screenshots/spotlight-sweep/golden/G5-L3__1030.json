@@ -1,0 +1,71 @@
+{
+  "key": "G5-L3+1030",
+  "story_id": 1030,
+  "lesson_code": "G5-L3",
+  "title": "工地大嫂",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "single",
+      "single",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "passage",
+      "single",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "figure"
+    ],
+    "question_count": 35,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-c28dc2a69143cd8d"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "key": "G5-L2+1029",
+  "story_id": 1029,
+  "lesson_code": "G5-L2",
+  "title": "以植物為師的科學",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "guide",
+      "guide",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "free_text",
+      "figure"
+    ],
+    "question_count": 30,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-82bdbcfd315bf82a"
+  }
+}

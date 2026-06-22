@@ -1,0 +1,38 @@
+{
+  "key": "G5-L15+1042",
+  "story_id": 1042,
+  "lesson_code": "G5-L15",
+  "title": "信件的力量──寫信馬拉松",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "guide",
+      "passage",
+      "figure",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "figure"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-cc05281bf65c828e"
+  }
+}

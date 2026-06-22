@@ -1,0 +1,35 @@
+{
+  "key": "G6-L20+1074",
+  "story_id": 1074,
+  "lesson_code": "G6-L20",
+  "title": "感情小日記5──我該告白嗎？",
+  "structure_layer": {
+    "block_type_sequence": [
+      "guide",
+      "passage",
+      "guide",
+      "guide",
+      "guide",
+      "figure",
+      "passage",
+      "guide",
+      "guide",
+      "figure",
+      "passage"
+    ],
+    "question_count": 0,
+    "figure_summary": [
+      {
+        "referent": "table",
+        "asset": "fig1.png"
+      },
+      {
+        "referent": "table",
+        "asset": "fig10.png"
+      }
+    ]
+  },
+  "semantic_layer": {
+    "hash": "sha256-45956aa06826ed12"
+  }
+}
