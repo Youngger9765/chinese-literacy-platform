@@ -8,6 +8,7 @@ import { useFullReadingSession, type SavedResult } from '../../hooks/useFullRead
 import { useFullReadingTtsQueue } from '../../hooks/useFullReadingTtsQueue';
 import { useFullReadingResultPersistence } from '../../hooks/useFullReadingResultPersistence';
 import ReadingMetricsCard from './full-reading/ReadingMetricsCard';
+import { EvalProgress } from './EvalProgress';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
@@ -301,9 +302,17 @@ const FullReading: React.FC<FullReadingProps> = ({
 
   /* ── Recording timer (Issue #2175) ──────────────────────────────────── */
   const [recordingSecs, setRecordingSecs] = useState(0);
+  // 錄音長度（ms）保留到 transcribe 後 — recordingSecs 在 stop 時歸 0，故用 ref 留住
+  // 給共用 <EvalProgress> 動態配評估進度節奏（#2396）。
+  const lastRecordingMsRef = useRef(0);
   useEffect(() => {
     if (!isSessionActive) { setRecordingSecs(0); return; }
-    const id = setInterval(() => setRecordingSecs(s => s + 1), 1000);
+    lastRecordingMsRef.current = 0;
+    const id = setInterval(() => setRecordingSecs(s => {
+      const next = s + 1;
+      lastRecordingMsRef.current = next * 1000;
+      return next;
+    }), 1000);
     return () => clearInterval(id);
   }, [isSessionActive]);
 
@@ -332,13 +341,12 @@ const FullReading: React.FC<FullReadingProps> = ({
         fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
-      {/* ── Gemini transcription loading overlay (Issue #2131) ─────────── */}
+      {/* ── 評估進度：共用 EvalProgress（與逐段朗讀同款 duration 動態+緩動+snap，#2396）
+            取代舊版乾轉圈 spinner（#2131）；置中 overlay 保留 ── */}
       {isTranscribing && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-surface rounded-2xl px-8 py-6 flex flex-col items-center gap-3 shadow-xl">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-on-surface font-medium text-base">分析中…</p>
-            <p className="text-on-surface-variant text-sm">AI 正在分析您的朗讀，請稍候</p>
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6">
+          <div className="w-full max-w-md">
+            <EvalProgress active={isTranscribing} recordingMs={lastRecordingMsRef.current} />
           </div>
         </div>
       )}
