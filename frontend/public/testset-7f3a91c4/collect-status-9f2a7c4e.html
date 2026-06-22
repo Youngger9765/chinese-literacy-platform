@@ -105,6 +105,7 @@ function aiCell(id, hasRec){
     var verdict=(r.correct!=null&&r.error!=null)?('<div style="font-weight:700;margin-top:2px" class="'+(both?'ok':'anom')+'">'+(both?'✅ 兩版都 pass':'⚠ 有異常')+'</div>'):'';
     return '<div class="ai-score">'+parts.join('')+verdict+'<button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">重跑</button></div>';
   }
+  if(r&&r.authErr) return '<span class="anom">登入已過期</span> <a class="ai-row-btn" href="/login" target="_blank" rel="noopener" style="text-decoration:none">重新登入</a>';
   if(r&&r.err) return '<span class="anom">失敗</span> <button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">重試</button>';
   if(hasRec) return '<button class="ai-row-btn" onclick="runAiEvalForLesson(\''+esc(id)+'\')">▶ 跑分</button>';
   return '<span class="ai-badge">待對應</span>';
@@ -278,10 +279,13 @@ async function evalFetch(url, headers){
     try{
       var r=await fetch(url,{method:'POST',headers:headers,signal:ctrl.signal});
       clearTimeout(timer);
+      // 401 = token 過期/失效（JWT 8h TTL）。重試同一個死 token 永遠還是 401 → 不重試，直接拋給 caller 導重新登入（#2379 只修冷啟動，沒處理這個）
+      if(r.status===401){ var ae=new Error('登入已過期'); ae.authExpired=true; throw ae; }
       if(!r.ok) throw new Error('HTTP '+r.status);
       return await r.json();
     }catch(e){
       clearTimeout(timer);
+      if(e&&e.authExpired) throw e;  // 過期不重試
       lastErr=e;
       if(attempt<2){ await new Promise(function(res){ setTimeout(res,2000); }); }  // 等 2s，冷啟動已暖
     }
@@ -293,7 +297,7 @@ async function evalFetch(url, headers){
 async function runAiEval(){
   var btn=document.getElementById('aiRunBtn'), st=document.getElementById('aiStatus');
   var token=localStorage.getItem('lingoleap_token');
-  if(!token){ st.textContent='需先登入'; return; }
+  if(!token){ st.innerHTML='請先<a href="/login" target="_blank" rel="noopener">登入</a>'; return; }
   btn.disabled=true;
   st.textContent='AI 評分中…（真人聲辨識較久，約每筆 20-30 秒，請稍候）';
   try{
@@ -304,7 +308,8 @@ async function runAiEval(){
     st.textContent='完成：'+(d.n||0)+' 筆 · 異常 '+(sm.anomaly_count||0)+(d.truncated?'（達單次上限 30，僅評前 30）':'');
     await load();
   }catch(e){
-    st.textContent='失敗：'+e.message;
+    if(e&&e.authExpired){ st.innerHTML='登入已過期，<a href="/login" target="_blank" rel="noopener">請重新登入</a>後重跑'; }
+    else { st.textContent='失敗：'+e.message; }
   }finally{
     btn.disabled=false;
   }
@@ -327,7 +332,7 @@ async function runAiEvalForLesson(id){
     var d=await evalFetch(API+'/api/testset/batch-eval?lesson='+encodeURIComponent(id), headers);
     aiResults[id]={correct:null,error:null,correctFlag:false,errorFlag:false};
     (d.results||[]).forEach(function(x){ if(String(x.lesson)===String(id)) applyAiResult(x); });
-  }catch(e){ aiResults[id]={err:true}; }
+  }catch(e){ aiResults[id]=(e&&e.authExpired)?{authErr:true}:{err:true}; }
   rerenderAiCell(id);
 }
 
