@@ -26,6 +26,7 @@
 #   classical_no_step     — 文言文課型本就無此步驟素材
 #   built_pending_deploy  — 線上版 schema 已建好(_online-schema)但尚未進 DB
 #                           → 真正解法是部署，不是補件；先誠實標記不擋
+#   figure_missing        — 源 DOCX/GCS 都沒有可用真圖資產（不可用 placeholder 補綠）
 #
 # 校驗來源 (2026-06-22, staging full sweep, post dedup+normalization fix):
 #   每筆都對照 private/curriculum-source/_online-schema/<code>.spotlight.yml /
@@ -86,18 +87,17 @@ story-structure:
 # Figure-asset gaps: story references a synthetic figN.png / tableN.json name
 # that was never uploaded to GCS (the real per-page assets G7-L28-NN.jpg DO
 # exist). honest gap = the figure reference points at missing content.
-# NOTE: FIGURE_BLACKLIST_HIT (a placeholder image actively served, e.g.
-# G8-L6b) is a real defect and is deliberately NOT listed here — it must be
-# fixed by uploading the real figure, not gap-allowed.
+# NOTE: FIGURE_BLACKLIST_HIT (placeholder served) 應優先補真圖；若確認源頭沒有
+# 真圖可供上傳，允許以 figure_missing 誠實標記缺口，不得用 placeholder 假裝通過。
 figure:
   # story 引用合成的 figN.png / tableN.json 名稱，GCS 沒上傳該檔（真實 per-page
   # 資產如 G5-L24-25-10.png 存在，但 story 指向不存在的 figN 名）。誠實標 gap，
   # 真解是修 story figure reference 指向真實檔名 / 上傳對應 figN。
-  - {lesson_code: G6-L8,    reason: figure_asset_not_uploaded}
+  - {lesson_code: G6-L8,    reason: figure_missing}
   - {lesson_code: G9-L9,    reason: figure_asset_not_uploaded}
   - {lesson_code: G7-L28,   reason: figure_asset_not_uploaded}
   - {lesson_code: G7-L29,   reason: figure_asset_not_uploaded}
   - {lesson_code: G7-L30,   reason: figure_asset_not_uploaded}
   - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # fig10.png 未上傳
   - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # G8-L9 dir, fig10.png
-  - {lesson_code: G8-L8,    reason: figure_asset_not_uploaded}  # G8-L10 dir, fig2.png
+  - {lesson_code: G8-L8,    reason: figure_missing}             # G8-L6b only has placeholder fig1.png in G8-L8 dir

@@ -120,6 +120,7 @@ KNOWN_GAP_REASONS = {
     "classical_no_step",          # 文言文 lesson type lacks this step
     "built_pending_deploy",       # schema built locally, not yet in DB
     "figure_asset_not_uploaded",  # story references a figN that's not in GCS
+    "figure_missing",             # no authentic figure asset exists in source
 }
 
 _KNOWN_GAPS: dict[str, dict[str, str]] | None = None

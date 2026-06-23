@@ -12,6 +12,7 @@
 - `qa/content-evidence/issue-2397-figure-broken/diag_raw.json`
 - `qa/content-evidence/issue-2397-figure-broken/diag_summary.json`
 - `qa/content-evidence/issue-2397-figure-broken/api/*.json`
+- `qa/content-evidence/issue-2397-figure-broken/post_fix_url_check.json`（修補後 URL 解析結果）
 
 ## 每課結論
 

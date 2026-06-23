@@ -48,6 +48,8 @@ export { deriveLessonCodeFromFilename };
 
 /** Catalog asset dirs use G4-L2; API grade_code may be G4-L02 — normalize for GCS. */
 export function normalizeGcsLessonCode(lessonCode: string): string {
+  const fixture = lessonCode.match(/^(G\d+)-SL0*(\d+)([a-z])?$/i);
+  if (fixture) return `${fixture[1]}-L${parseInt(fixture[2], 10)}${fixture[3] ?? ''}`;
   const m = lessonCode.match(/^(G\d+)-L0*(\d+)([a-z])?$/i);
   if (m) return `${m[1]}-L${parseInt(m[2], 10)}${m[3] ?? ''}`;
   return lessonCode;
