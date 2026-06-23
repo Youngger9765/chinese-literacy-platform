@@ -239,6 +239,12 @@ def anti_cross_lesson_invariant(
     spotlight: dict[str, Any],
     all_story_tokens: dict[int, set[str]],
 ) -> dict[str, Any]:
+    """DEPRECATED (#2397): token-overlap anti-cross heuristic (~85% misfire).
+
+    No longer wired into l1_reading_strategy — the cross-lesson axis is now
+    per-lesson golden-match (_per_lesson_golden + _spotlight_fingerprint_sha16).
+    Kept only for reference / ad-hoc debugging; do NOT re-enable as a gate.
+    """
     own_story_id = int(story["id"])
     own_tokens = all_story_tokens.get(own_story_id, set())
     spot_tokens = token_set(spotlight_text(spotlight))
@@ -489,9 +495,52 @@ def audit_figures(
 _GOLD_DEV7: dict[str, Any] | None = None
 _GOLD_TEST15: dict[str, Any] | None = None
 
+# Per-lesson spotlight goldens frozen by scripts/build_spotlight_goldens.py
+# (LLM-judged faithful, verified_by=llm-judge-pending-spotcheck). These replace
+# the broken token-overlap anti-cross heuristic: a faithful golden whose
+# content_fingerprint still matches the live payload satisfies the cross-lesson
+# concern; a mismatch is real drift (L1_GOLDEN_MISMATCH); no golden is fail-
+# closed unknown (GOLDEN_MISSING). SOT layout: golden/<norm>/reading-strategy.golden.json
+PER_LESSON_GOLDEN_ROOT = (
+    REPO_ROOT / "backend" / "data" / "curriculum_qa" / "golden"
+)
+_PER_LESSON_GOLDEN_CACHE: dict[str, dict[str, Any] | None] = {}
+
+
+def _spotlight_fingerprint_sha16(spotlight: dict[str, Any]) -> str:
+    """sha256[:16] of the spotlight content text.
+
+    MUST stay byte-compatible with build_spotlight_goldens.content_fingerprint
+    (both hash spotlight_text(spotlight)) so a frozen golden matches the live
+    payload it was frozen from.
+    """
+    text = spotlight_text(spotlight)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _per_lesson_golden(lesson_code: str) -> dict[str, Any] | None:
+    """Load the per-lesson reading-strategy golden for this lesson, or None."""
+    norm = normalize_manifest_code(lesson_code)
+    if norm in _PER_LESSON_GOLDEN_CACHE:
+        return _PER_LESSON_GOLDEN_CACHE[norm]
+    path = PER_LESSON_GOLDEN_ROOT / norm / "reading-strategy.golden.json"
+    golden: dict[str, Any] | None = None
+    if path.exists():
+        try:
+            golden = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            golden = None
+    _PER_LESSON_GOLDEN_CACHE[norm] = golden
+    return golden
+
 
 def _gold_for(lesson_code: str) -> tuple[str | None, dict[str, Any] | None]:
-    """Resolve a golden fingerprint for this catalog lesson_code, if any."""
+    """Resolve a (legacy dev7/test15) golden fingerprint for this code, if any.
+
+    Per-lesson goldens are resolved separately via _per_lesson_golden(); this
+    helper is kept for the legacy semantic-baseline eval_spotlight_v2 lesson_id
+    path only.
+    """
     global _GOLD_DEV7, _GOLD_TEST15
     norm = normalize_manifest_code(lesson_code)
     if _GOLD_DEV7 is None:
@@ -571,6 +620,9 @@ def l1_reading_strategy(
         struct_ok = len(ev["struct_errors"]) == 0
         base_text_ok = has_meaningful_base_text(story)
 
+        # Format / base-text invariants always apply (catch skeleton / malformed
+        # blocks). The cross-lesson axis is no longer the token-overlap heuristic
+        # (~85% misfire) — it is now golden-match (handled below).
         invariants = [
             {
                 "name": "guide_retained",
@@ -602,8 +654,32 @@ def l1_reading_strategy(
                 "expected": True,
                 "pass": base_text_ok,
             },
-            anti_cross_lesson_invariant(story, spotlight, all_story_tokens),
         ]
+
+        # Per-lesson golden-match (replaces anti_cross_lesson heuristic).
+        per_golden = _per_lesson_golden(lesson_code)
+        live_fp = _spotlight_fingerprint_sha16(spotlight)
+        if per_golden is not None:
+            gold_key = per_golden.get("lesson_code") or gold_key
+            golden_fp = (per_golden.get("content_fingerprint") or {}).get(
+                "sha256_16"
+            )
+            fp_match = bool(golden_fp) and golden_fp == live_fp
+            invariants.append(
+                {
+                    "name": "golden_match",
+                    "actual": {
+                        "live_sha16": live_fp,
+                        "golden_sha16": golden_fp,
+                        "verified_by": per_golden.get("verified_by"),
+                    },
+                    "expected": "live_sha16 == golden_sha16",
+                    "pass": fp_match,
+                }
+            )
+        unknown_flags["per_lesson_golden"] = per_golden is not None
+
+        # Optional legacy semantic gold (dev7/test15) — informational only now.
         if gold is not None:
             gold_cmp = compare_to_gold(gold_key, spotlight, gold)
             invariants.append(
@@ -622,7 +698,14 @@ def l1_reading_strategy(
             failure_codes = [
                 f"L1_{inv['name'].upper()}" for inv in invariants if not inv["pass"]
             ]
-        elif gold is None:
+            # Rename the golden-match failure to the spec'd drift code so a
+            # frozen-but-now-different lesson reads as real drift.
+            failure_codes = [
+                "L1_GOLDEN_MISMATCH" if c == "L1_GOLDEN_MATCH" else c
+                for c in failure_codes
+            ]
+        elif per_golden is None:
+            # Fail-closed: no per-lesson golden -> unknown (release-blocking).
             unknown_flags["strategy_unknown"] = True
             status = "unknown"
             failure_codes = ["GOLDEN_MISSING"]
