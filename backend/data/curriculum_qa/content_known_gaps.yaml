@@ -41,6 +41,12 @@ reading-strategy:
   - {lesson_code: G4-L3,  reason: no_spotlight_source}
   - {lesson_code: G4-L17, reason: no_spotlight_source}
   - {lesson_code: G4-L20, reason: no_spotlight_source}
+  # vision-judge confirmed served spotlight embeds another lesson's example/
+  # practice text; no verified correct source found → fail-closed (not 放錯課)
+  - {lesson_code: G5-L11, reason: no_spotlight_source}
+  - {lesson_code: G6-L12, reason: no_spotlight_source}
+  - {lesson_code: G7-L31, reason: no_spotlight_source}
+  - {lesson_code: G9-L8,  reason: no_spotlight_source}
   # 無可抽取聚光燈段落 (extractor: spotlight range not found / empty blocks)
   - {lesson_code: G4-L1,  reason: no_spotlight_source}
   - {lesson_code: G4-L12, reason: no_spotlight_source}

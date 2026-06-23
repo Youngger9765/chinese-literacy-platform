@@ -41,6 +41,12 @@ _UNVERIFIED_SPOTLIGHT_SLOT_DENYLIST = frozenset({
     "G4-L17",
     "G5-L15",
     "G7-L7",
+    # Vision-judge confirmed the strategy scaffold embeds ANOTHER lesson's
+    # example/practice text (verified full render content, not snippet):
+    "G5-L11",   # example uses 田鼠阿飛 (≠ 陳念琴)
+    "G6-L12",   # 找主題句 example uses 烏龍茶 (≠ 愛冒險逞強的雄性動物)
+    "G7-L31",   # 跳過卡關 practice text is 雨林裡的奇蹟藥物 (≠ 旅人鴿)
+    "G9-L8",    # 折線圖 example is 性別比/新生兒 population data (≠ 閱讀力)
 })
 
 
