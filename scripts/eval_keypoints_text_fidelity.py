@@ -31,13 +31,17 @@ def normalize_text(text: str) -> str:
     """
     Normalize text for comparison:
     1. NFKC (full-width ← ASCII, combines compatibility chars)
-    2. Strip surrounding whitespace
-    3. Collapse internal consecutive whitespace to single space
-    4. Normalize full-width/half-width punctuation via NFKC (covered by step 1)
+    2. Normalize empty blank markers 【 】/【　】/【】 → __ (semantically identical to __)
+       NOTE: only EMPTY brackets — 【answer】 (non-empty) is left intact so real
+       answer comparisons are not swallowed.
+    3. Strip surrounding whitespace
+    4. Collapse internal consecutive whitespace to single space
     """
     if not text:
         return ""
     text = unicodedata.normalize("NFKC", text)
+    # Replace empty blank markers with __ BEFORE stripping (NFKC already normalised spaces)
+    text = EMPTY_BLANK_MARKER_RE.sub("__", text)
     text = text.strip()
     text = re.sub(r"\s+", " ", text)
     return text
@@ -46,8 +50,14 @@ def normalize_text(text: str) -> str:
 BLANK_RE = re.compile(r"【(.*?)】")
 
 # Markers that indicate inline checkbox option lists in schema templates.
-# These make positional DOCX↔schema alignment unreliable — skip fidelity check.
-CHECKBOX_MARKER_RE = re.compile(r"□|勾選")
+# Cell-level: a cell is "checkbox-only" if its template/value contains □/勾選/單選/複選
+# AND has no real fill-in blanks (blanks list is empty).
+CHECKBOX_MARKER_RE = re.compile(r"□|勾選|單選|複選")
+
+# Empty blank markers: 【 】/【　】/【】 (only whitespace/ideographic-space inside brackets).
+# These are instruction markers meaning "fill in here" — semantically identical to __.
+# Normalize them to __ before text comparison.
+EMPTY_BLANK_MARKER_RE = re.compile(r"【[\s　]*】")
 
 
 def extract_blanks_from_docx_text(text: str) -> list:
@@ -94,28 +104,33 @@ def _skip_header_rows(rows_raw: list) -> int:
     return skip
 
 
-def _has_checkbox_structure(rows_out: list) -> bool:
+def _is_checkbox_only_cell(schema_cell: dict) -> bool:
     """
-    Return True if any schema row or sub_row template/value contains inline
-    checkbox markers (□ or 勾選).
+    Return True if this schema cell (a flat row or sub_row dict) is a checkbox-only
+    cell that should be SKIPPED in fidelity comparison.
 
-    These layouts interleave fill-in blanks with multiple-choice checkbox options
-    on extra lines inside the same DOCX cell. Positional DOCX↔schema alignment
-    breaks for these tables — classifying them as structure_unsupported avoids
-    false-positive mismatches.
+    A cell is checkbox-only when ALL of:
+    1. Its template/value text contains checkbox markers (□/勾選/單選/複選)
+    2. It has NO real fill-in blanks (blanks list is empty)
 
-    Real example: G5-L20 template =
-      "1.不知該__\n2.擔心相處會變得__ (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁"
+    Rationale: checkbox-only cells interleave option lists with the fill-in text
+    in a layout that doesn't align positionally to DOCX rows. Cells WITH blanks
+    (even if also containing checkbox text) are real fill-in rows — verify them.
+
+    Real example of checkbox-only: G4-L2 sub_row =
+      template = "（單選）\n□驕傲地奪得銀牌\n不甘心以微小的差距奪得銀牌"
+      blanks = []   ← no real fill-in → skip
+
+    Real example of real fill-in (must NOT skip): G5-L20 sub_row =
+      template = "1.不知該__\n2.擔心相處會變得__ (勾選，可複選)\n驚訝 □驚喜..."
+      blanks = [{"answer": "如何回應"}, {"answer": "尷尬"}]  ← has real blanks
+      (These are genuinely hard to align → caught by positional drift, reported)
     """
-    for row in rows_out:
-        for text_field in (row.get("value", ""), row.get("template", "")):
-            if CHECKBOX_MARKER_RE.search(text_field):
-                return True
-        for sr in row.get("sub_rows", []):
-            for text_field in (sr.get("value", ""), sr.get("template", "")):
-                if CHECKBOX_MARKER_RE.search(text_field):
-                    return True
-    return False
+    # schema_cell is a flat cell from _flatten_schema_rows() — text is in "schema_text"
+    text = schema_cell.get("schema_text") or ""
+    has_checkbox_text = bool(CHECKBOX_MARKER_RE.search(text))
+    has_real_blanks = bool(schema_cell.get("blanks"))
+    return has_checkbox_text and not has_real_blanks
 
 
 def _flatten_schema_rows(rows_out: list, structure: str) -> list:
@@ -224,22 +239,6 @@ def eval_keypoints_text_fidelity(
             "pass": True,
         }
 
-    # ── Structure guard: checkbox/勾選 inline layouts ─────────────────────────
-    # These tables mix fill-in blanks with checkbox option lists on extra lines
-    # inside the same cell. Positional alignment between schema rows and DOCX rows
-    # is unreliable → classify as structure_unsupported, skip (not FAIL).
-    if _has_checkbox_structure(rows_out):
-        return {
-            "available": True,
-            "structure_unsupported": True,
-            "note": "checkbox/勾選 inline layout — positional alignment unreliable, skipped",
-            "text_fidelity": 1.0,
-            "total_cells_checked": 0,
-            "matched_cells": 0,
-            "mismatches": [],
-            "pass": True,
-        }
-
     # ── Load DOCX rows ────────────────────────────────────────────────────────
     if _docx_rows_override is not None:
         docx_raw_rows = _docx_rows_override
@@ -265,6 +264,7 @@ def eval_keypoints_text_fidelity(
     mismatches = []
     total_cells = 0
     matched_cells = 0
+    skipped_cells = 0  # cells skipped due to checkbox-only structure
 
     n_pairs = min(len(schema_flat), len(docx_flat))
 
@@ -278,6 +278,14 @@ def eval_keypoints_text_fidelity(
         field = s["field"]
         row_idx = s["row_idx"]
         label = s["label"]
+
+        # ── Cell-level checkbox guard ─────────────────────────────────────────
+        # Skip cells where schema template/value has checkbox markers AND no real
+        # fill-in blanks. These cells are checkbox-only (option lists) and cannot
+        # be aligned positionally. Real fill-in cells (has blanks) are always checked.
+        if _is_checkbox_only_cell(s):
+            skipped_cells += 1
+            continue
 
         # ── Compare template/value text (blanks replaced with __) ────────────
         docx_as_template = normalize_text(docx_text_to_template(docx_value_text))
@@ -331,9 +339,25 @@ def eval_keypoints_text_fidelity(
                     "diff": "blank not found in DOCX",
                 })
 
+    # ── Whole-lesson checkbox guard ───────────────────────────────────────────
+    # If every paired cell was checkbox-only (nothing to check), mark as
+    # structure_unsupported to avoid a trivially "passing" 0/0 result.
+    if total_cells == 0 and skipped_cells > 0:
+        return {
+            "available": True,
+            "structure_unsupported": True,
+            "note": "all cells are checkbox-only — positional alignment unreliable, skipped",
+            "text_fidelity": 1.0,
+            "total_cells_checked": 0,
+            "matched_cells": 0,
+            "skipped_cells": skipped_cells,
+            "mismatches": [],
+            "pass": True,
+        }
+
     text_fidelity = matched_cells / total_cells if total_cells > 0 else 1.0
 
-    return {
+    result = {
         "available": True,
         "text_fidelity": round(text_fidelity, 4),
         "total_cells_checked": total_cells,
@@ -341,6 +365,9 @@ def eval_keypoints_text_fidelity(
         "mismatches": mismatches,
         "pass": len(mismatches) == 0,
     }
+    if skipped_cells > 0:
+        result["skipped_cells"] = skipped_cells
+    return result
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
