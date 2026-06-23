@@ -83,6 +83,22 @@ def main() -> int:
     if not lesson:
         print(f"lesson {code} not found", file=sys.stderr)
         return 2
+    # Rebinding guard (#2397): the content_mapping_registry can route a lesson to
+    # load a DIFFERENTLY-coded spotlight file (title-anchored). If this lesson's
+    # effective source != its own code, then writing <code>.spotlight.yml would
+    # (a) NOT affect this lesson and (b) corrupt whatever OTHER lesson consumes
+    # <code>.yml. e.g. G8-L14 loads G8-L18's file, while G8-L14.yml is consumed by
+    # G8-L11 (蝴蝶蘭) — converting G8-L14 here would put 石虎 questions on 蝴蝶蘭.
+    from app.services.content_mapping_registry import get_spotlight_source_code
+    from app.services.lesson_code_normalization import normalize_manifest_code
+    ncode = normalize_manifest_code(code)
+    src = get_spotlight_source_code(ncode, lesson.get("title"))
+    if src and normalize_manifest_code(src) != ncode:
+        print(f"{code}: loads spotlight from '{src}' (registry rebinding) — writing "
+              f"{code}.yml would not affect this lesson and may corrupt the lesson "
+              f"that consumes {code}.yml. SKIP.", file=sys.stderr)
+        return 2
+
     se = lesson.get("strategy_exercise")
     if not isinstance(se, dict) or se.get("type") != "guided_steps":
         print(f"{code}: legacy strategy_exercise is not guided_steps (type={se.get('type') if isinstance(se,dict) else type(se).__name__}) — skip", file=sys.stderr)
