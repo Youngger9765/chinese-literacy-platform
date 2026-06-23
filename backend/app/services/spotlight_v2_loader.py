@@ -50,6 +50,43 @@ _UNVERIFIED_SPOTLIGHT_SLOT_DENYLIST = frozenset({
 })
 
 
+# Render-confirmed cross_lesson via the LEGACY strategy_exercise fallback (#2397).
+# These slots have no verified spotlight source (already in known_gaps + the
+# unverified denylist above → spotlight_v2 None), but their legacy
+# strategy_exercise embeds a FOREIGN worked example that is NEVER applied to the
+# lesson's own passage (verified: the example text is absent from the lesson
+# paragraphs). The frontend StrategyExercisePage falls back to strategy_exercise
+# when spotlight_v2 is empty → student sees another topic's example. Nulling the
+# legacy field makes the honest "no spotlight yet" placeholder render instead.
+# gap >> 放錯課.
+#
+# Scope is deliberately NARROW: lessons whose legacy strategy_exercise is itself
+# faithful (e.g. G7-L31 旅人鴿 — its strategy quotes the lesson's own passage)
+# must keep rendering it, so they are NOT listed here even though their
+# spotlight_v2 is fail-closed above.
+_LEGACY_STRATEGY_EXERCISE_DENYLIST = frozenset({
+    "G5-L15",  # 上位概念 example = 大安森林公園裝置藝術 (≠ 信件的力量; absent from passage)
+    "G6-L12",  # 找主題句 example = 烏龍茶製程 (≠ 愛冒險逞強的雄性動物; absent from passage)
+    "G7-L7",   # 折線圖判讀 example = 臺北市平均氣溫 (≠ 人口負成長; absent from passage)
+    "G9-L8",   # 圖表判讀 example = 新生兒性別比 (≠ 臺灣學生閱讀力; absent from passage)
+})
+
+
+def should_suppress_legacy_strategy_exercise(lesson_code: str) -> bool:
+    """True when the lesson's legacy strategy_exercise must be nulled (#2397).
+
+    Verified by content evidence: the strategy's worked example does not appear
+    in the lesson's own passage, so rendering the legacy fallback shows another
+    topic's content. See _LEGACY_STRATEGY_EXERCISE_DENYLIST.
+    """
+    raw = (lesson_code or "").strip()
+    norm = normalize_manifest_code(raw)
+    return (
+        raw in _LEGACY_STRATEGY_EXERCISE_DENYLIST
+        or norm in _LEGACY_STRATEGY_EXERCISE_DENYLIST
+    )
+
+
 def _is_zero_padded_grade_code(code: str) -> bool:
     return bool(_ZERO_PADDED_GRADE_CODE_RE.match(code or ""))
 
