@@ -815,12 +815,13 @@
   },
   "G7-L2": {
     "tier": "catalog",
-    "n_blocks": 3,
-    "n_questions": 0,
+    "n_blocks": 6,
+    "n_questions": 5,
     "type_counts": {
-      "guide": 3
-    },
-    "fingerprint": "d3edb1799432c8a1"
+      "guide": 1,
+      "single": 4,
+      "free_text": 1
+    }
   },
   "G7-L21": {
     "tier": "catalog",
