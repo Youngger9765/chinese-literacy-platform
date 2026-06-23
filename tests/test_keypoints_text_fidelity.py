@@ -716,3 +716,72 @@ class TestEmptyDocxNonCheckbox:
             f"DOCX has 0 rows for non-checkbox schema — must FAIL, not silently pass. "
             f"Got: pass={result['pass']}, total_cells_checked={result.get('total_cells_checked')}"
         )
+
+
+# ─── BLOCKING 1b: docx > schema (reverse cardinality) → silent pass ────────
+#
+# When DOCX has more rows than schema, n_pairs=min(schema, docx)=len(schema),
+# so extra DOCX rows are silently ignored. A schema with 1 row / DOCX with 2 rows
+# → only the first pair is compared. If the first pair matches, pass=True even
+# though an entire DOCX row went unverified.
+#
+# Fix: unmatched DOCX rows (idx n_pairs..len(docx_flat)) should produce mismatches
+# just like unmatched schema rows do. Since _flatten_docx_rows already skips headers
+# (via _skip_header_rows), all remaining rows are content rows.
+
+SCHEMA_FEWER_ROWS = {
+    "keypoints": {
+        "lesson": "TEST-FEWER-ROWS",
+        "structure": "flat",
+        "columns": ["label", "value"],
+        "rows": [
+            {
+                # Schema has only 1 row; DOCX will have 2
+                "label": "起因",
+                "value": "主角想要逃跑。",
+                "blanks": [],
+            },
+            # ← schema is missing the 結果 row entirely
+        ],
+    }
+}
+
+# DOCX has 2 content rows: first matches schema, second has no schema counterpart
+DOCX_ROWS_EXTRA_ROW = [
+    {"cells": [{"text": "起因", "dup": False}, {"text": "主角想要逃跑。", "dup": False}]},
+    # Extra DOCX row — schema has no counterpart for this
+    {"cells": [{"text": "結果", "dup": False}, {"text": "主角成功逃走。", "dup": False}]},
+]
+
+
+class TestReverseCardinalityMismatch:
+    """
+    BLOCKING regression: DOCX has more rows than schema → must FAIL, not silently pass.
+
+    Before fix: n_pairs=min(1,2)=1, second DOCX row silently dropped,
+    first row matches → pass=True. The extra DOCX content is invisible to the checker.
+
+    After fix: unmatched DOCX rows produce a mismatch → pass=False.
+    """
+
+    def test_docx_has_more_rows_than_schema_must_fail(self):
+        """
+        Schema has 1 row, DOCX has 2 rows. The unmatched DOCX row must produce
+        a mismatch. Result must be pass=False.
+        """
+        result = eval_keypoints_text_fidelity(
+            lesson_id="TEST-FEWER-ROWS",
+            docx_path=None,
+            schema_dir=None,
+            bls=None,
+            _schema_override=SCHEMA_FEWER_ROWS,
+            _docx_rows_override=DOCX_ROWS_EXTRA_ROW,
+        )
+        assert result["available"] is True
+        assert result["pass"] is False, (
+            f"Schema has 1 row, DOCX has 2 — unmatched DOCX row must produce FAIL. "
+            f"Got: pass={result['pass']}, mismatches={result.get('mismatches')}"
+        )
+        assert len(result["mismatches"]) >= 1, (
+            f"Expected at least 1 mismatch for extra DOCX row, got: {result['mismatches']}"
+        )

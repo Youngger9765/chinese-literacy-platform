@@ -340,10 +340,23 @@ def eval_keypoints_text_fidelity(
                     "diff": "blank not found in DOCX",
                 })
 
-    # ── Row cardinality: unmatched schema rows → mismatch ────────────────────
-    # Schema rows beyond n_pairs had no DOCX counterpart. Silently dropping them
-    # would produce a false pass (BLOCKING 1). Each unmatched row produces a
-    # mismatch with docx_text="<row missing from DOCX>".
+    # ── Row cardinality: unmatched rows on both sides → mismatch ─────────────
+    # n_pairs = min(schema, docx) silently drops trailing rows on the longer side.
+    # Both directions must produce mismatches to prevent false-pass:
+    #
+    # (A) schema > docx: extra schema rows have no DOCX counterpart.
+    #     → mismatch per row (docx_text="<row missing from DOCX>")
+    #
+    # (B) docx > schema: extra DOCX rows have no schema counterpart.
+    #     _flatten_docx_rows already skips title/header via _skip_header_rows,
+    #     so every remaining row is a content row.
+    #     → mismatch per row (schema_text="<row missing from schema>")
+    #
+    # Checkbox cells in unmatched schema rows are skipped (counted as skipped_cells),
+    # since their positional alignment is already unreliable.
+    # No analogous filter for unmatched DOCX rows: they're content by definition.
+
+    # (A) Unmatched schema rows
     for idx in range(n_pairs, n_schema):
         s = schema_flat[idx]
         if _is_checkbox_only_cell(s):
@@ -378,6 +391,24 @@ def eval_keypoints_text_fidelity(
                 "diff": "blank not found in DOCX (row missing)",
             })
 
+    # (B) Unmatched DOCX rows (docx > schema)
+    # _flatten_docx_rows already strips title/header via _skip_header_rows,
+    # so every entry here is a real content row.
+    n_docx = len(docx_flat)
+    for idx in range(n_pairs, n_docx):
+        d = docx_flat[idx]
+        docx_value_text = normalize_text(docx_text_to_template(d["value_text"]))
+        total_cells += 1
+        mismatches.append({
+            "row": f"docx_{idx}",
+            "label": "<extra DOCX row>",
+            "field": "value",
+            "match": False,
+            "schema_text": "<row missing from schema>",
+            "docx_text": docx_value_text,
+            "diff": "DOCX row has no schema counterpart",
+        })
+
     # ── Whole-lesson checkbox guard ───────────────────────────────────────────
     # If every paired cell was checkbox-only (nothing to check), mark as
     # structure_unsupported to avoid a trivially "passing" 0/0 result.
@@ -395,10 +426,16 @@ def eval_keypoints_text_fidelity(
         }
 
     # ── Extraction empty guard (BLOCKING 2) ──────────────────────────────────
-    # Non-checkbox schema with zero comparable cells extracted: DOCX provided no
-    # data rows. This is not "all checkbox-only" (skipped_cells==0) — it means the
-    # DOCX extraction returned nothing for a non-empty schema.
-    # Zero comparison ≠ passing → flag as extraction_empty and fail.
+    # Originally added when DOCX returned 0 rows → total_cells=0 → silent pass.
+    # After adding the symmetric cardinality loops (A) and (B), this guard is now
+    # unreachable in practice:
+    #   - If DOCX is empty AND schema_flat is non-empty AND no checkbox cells:
+    #     loop (A) adds every schema row to total_cells (as "<row missing from DOCX>")
+    #     → total_cells > 0 before we reach this guard.
+    #   - If DOCX is empty AND all schema cells are checkbox-only:
+    #     skipped_cells > 0 → the checkbox guard above fires first.
+    # Kept as a defensive belt-and-suspenders against future code changes that might
+    # skip the cardinality loops (e.g., early returns added above them).
     if total_cells == 0 and skipped_cells == 0 and schema_flat:
         return {
             "available": True,
