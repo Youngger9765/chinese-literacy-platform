@@ -45,6 +45,10 @@ def normalize_text(text: str) -> str:
 
 BLANK_RE = re.compile(r"【(.*?)】")
 
+# Markers that indicate inline checkbox option lists in schema templates.
+# These make positional DOCX↔schema alignment unreliable — skip fidelity check.
+CHECKBOX_MARKER_RE = re.compile(r"□|勾選")
+
 
 def extract_blanks_from_docx_text(text: str) -> list:
     """Extract answer strings from 【...】 patterns in a DOCX cell."""
@@ -88,6 +92,30 @@ def _skip_header_rows(rows_raw: list) -> int:
         if _re.search(r"提示|元素|重點|段落", cell_texts):
             skip += 1
     return skip
+
+
+def _has_checkbox_structure(rows_out: list) -> bool:
+    """
+    Return True if any schema row or sub_row template/value contains inline
+    checkbox markers (□ or 勾選).
+
+    These layouts interleave fill-in blanks with multiple-choice checkbox options
+    on extra lines inside the same DOCX cell. Positional DOCX↔schema alignment
+    breaks for these tables — classifying them as structure_unsupported avoids
+    false-positive mismatches.
+
+    Real example: G5-L20 template =
+      "1.不知該__\n2.擔心相處會變得__ (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁"
+    """
+    for row in rows_out:
+        for text_field in (row.get("value", ""), row.get("template", "")):
+            if CHECKBOX_MARKER_RE.search(text_field):
+                return True
+        for sr in row.get("sub_rows", []):
+            for text_field in (sr.get("value", ""), sr.get("template", "")):
+                if CHECKBOX_MARKER_RE.search(text_field):
+                    return True
+    return False
 
 
 def _flatten_schema_rows(rows_out: list, structure: str) -> list:
@@ -192,6 +220,22 @@ def eval_keypoints_text_fidelity(
             "available": False,
             "note": "schema has no rows",
             "text_fidelity": 1.0,
+            "mismatches": [],
+            "pass": True,
+        }
+
+    # ── Structure guard: checkbox/勾選 inline layouts ─────────────────────────
+    # These tables mix fill-in blanks with checkbox option lists on extra lines
+    # inside the same cell. Positional alignment between schema rows and DOCX rows
+    # is unreliable → classify as structure_unsupported, skip (not FAIL).
+    if _has_checkbox_structure(rows_out):
+        return {
+            "available": True,
+            "structure_unsupported": True,
+            "note": "checkbox/勾選 inline layout — positional alignment unreliable, skipped",
+            "text_fidelity": 1.0,
+            "total_cells_checked": 0,
+            "matched_cells": 0,
             "mismatches": [],
             "pass": True,
         }

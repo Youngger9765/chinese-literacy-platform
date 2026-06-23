@@ -601,6 +601,65 @@ def main():
             print("FAILURES:")
             for lid, kp in kp_fail:
                 print(f"  {lid}: row_recall={kp.get('row_recall')} blank_recall={kp.get('blank_recall')} label_family={kp.get('label_family_correct')}")
+
+        # ── Text fidelity summary (Slice ②) ──────────────────────────────────
+        if args.text_fidelity:
+            fid_results = [
+                r for r in all_results
+                if r.get("keypoints_text_fidelity") is not None
+            ]
+            # available=False means no keypoints.yml — treat as NA, not FAIL
+            fid_available = [r for r in fid_results if r["keypoints_text_fidelity"].get("available")]
+            fid_not_available = [r for r in fid_results if not r["keypoints_text_fidelity"].get("available")]
+            fid_unsupported = [r for r in fid_available if r["keypoints_text_fidelity"].get("structure_unsupported")]
+            fid_pass = [r for r in fid_available if r["keypoints_text_fidelity"].get("pass") and not r["keypoints_text_fidelity"].get("structure_unsupported")]
+            fid_fail = [r for r in fid_available if not r["keypoints_text_fidelity"].get("pass") and not r["keypoints_text_fidelity"].get("structure_unsupported")]
+            fid_na = [r for r in all_results if r.get("keypoints_text_fidelity") is None] + fid_not_available
+
+            print(f"\n{'='*80}")
+            print("TEXT FIDELITY SUMMARY (Slice ②)")
+            print(f"{'='*80}")
+            print(f"PASS (text matches):          {len(fid_pass)}")
+            print(f"FAIL (text mismatch):         {len(fid_fail)}")
+            print(f"NA (structure_unsupported):   {len(fid_unsupported)}")
+            print(f"NA (no keypoints.yml/error):  {len(fid_na)}")
+
+            if fid_fail:
+                print(f"\nFAIL lessons (sorted by fidelity score, lowest first):")
+                fail_sorted = sorted(
+                    fid_fail,
+                    key=lambda r: r["keypoints_text_fidelity"].get("text_fidelity", 0.0)
+                )
+                for r in fail_sorted:
+                    fid = r["keypoints_text_fidelity"]
+                    score = fid.get("text_fidelity", 0.0)
+                    total = fid.get("total_cells_checked", 0)
+                    matched = fid.get("matched_cells", 0)
+                    n_mm = len(fid.get("mismatches", []))
+                    print(f"  {r['lesson_id']:<14} fid={score:.3f} ({matched}/{total} cells) mismatches={n_mm}")
+                    # Print first mismatch for quick human review
+                    mm_list = fid.get("mismatches", [])
+                    first_mm = mm_list[0] if mm_list else None
+                    if first_mm:
+                        print(f"    first mismatch: row={first_mm.get('row')} field={first_mm.get('field')}")
+                        print(f"      schema: {str(first_mm.get('schema_text',''))[:60]}")
+                        print(f"      docx:   {str(first_mm.get('docx_text',''))[:60]}")
+
+            # High-confidence true errors: fidelity >= 0.8 but still FAIL
+            # (most cells match, only 1-2 specific cells diverge → likely real content error)
+            high_conf_errors = [
+                r for r in fid_fail
+                if r["keypoints_text_fidelity"].get("text_fidelity", 0.0) >= 0.8
+            ]
+            if high_conf_errors:
+                print(f"\nHIGH-CONFIDENCE TRUE ERRORS (fid >= 0.8, {len(high_conf_errors)} lessons):")
+                print("  These are most likely real schema content errors (not alignment issues):")
+                for r in sorted(high_conf_errors, key=lambda x: -x["keypoints_text_fidelity"].get("text_fidelity", 0.0)):
+                    fid = r["keypoints_text_fidelity"]
+                    print(f"  {r['lesson_id']:<14} fid={fid.get('text_fidelity'):.3f}")
+                    for mm in fid.get("mismatches", []):
+                        print(f"    [{mm.get('field')}] schema='{str(mm.get('schema_text',''))[:50]}' docx='{str(mm.get('docx_text',''))[:50]}'")
+
         return
 
     if args.lesson_id and args.docx_path:

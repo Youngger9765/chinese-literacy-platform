@@ -240,3 +240,98 @@ class TestFidelityScorePresent:
         assert "text_fidelity" in result
         assert isinstance(result["text_fidelity"], float)
         assert 0.0 <= result["text_fidelity"] <= 1.0
+
+
+# ─── Checkbox/勾選 structure fixture (from real G5-L20 pattern) ───────────────
+#
+# G5-L20 has templates like:
+#   "1.不知該__\n2.擔心相處會變得__ (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁"
+#
+# The DOCX for this kind of lesson has a table where the "value" column cell
+# contains a mix of fill-in blanks AND checkbox option lists on separate lines.
+# Positional alignment of schema rows → DOCX rows breaks here because the DOCX
+# may group multiple checklist items under one physical row with a different
+# cell layout than what the schema's flat/nested rows expect.
+#
+# The checker must NOT report FAIL for this structure. It should report
+# structure_unsupported=True and skip (return pass=True, available=True,
+# structure_unsupported=True, mismatches=[]).
+
+SCHEMA_CHECKBOX = {
+    "keypoints": {
+        "lesson": "TEST-CHECKBOX",
+        "structure": "nested",
+        "columns": ["label", "value"],
+        "rows": [
+            {
+                "label": "一、二",
+                "sub_rows": [
+                    {
+                        "sub_label": "被傳訊息告白",
+                        # Template contains checkbox markers □ and inline option list
+                        "template": "1.不知該__\n2.擔心相處會變得__ (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁",
+                        "blanks": [
+                            {"answer": "如何回應", "hint": ""},
+                            {"answer": "尷尬", "hint": ""},
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+}
+
+# The DOCX for this structure has a cell that interleaves option checkboxes with blanks
+# in a way that doesn't align positionally with what schema rows expect.
+# The cell layout comes from a physically different table structure.
+DOCX_ROWS_CHECKBOX = [
+    # The value column cell contains the full checkbox+fill-in text, which does NOT
+    # map cleanly to what _flatten_schema_rows produces.
+    {"cells": [
+        {"text": "一、二", "dup": False},
+        {"text": "(勾選,可複選) 驚訝 □驚喜 □惱怒 煩躁", "dup": False},  # ← different cell layout
+    ]},
+]
+
+
+class TestCheckboxStructureNotFailed:
+    """
+    Regression lock: checkbox/勾選 table structures must NOT be reported as FAIL.
+    They should be classified as structure_unsupported and skipped (NA).
+
+    Root cause of false-positive: G5-L20 scored 1/15 (1 match out of 15 cells)
+    because the checker paired schema rows against wrong DOCX cells — the template
+    contains checkbox option text on extra lines that doesn't appear in the value
+    column of the corresponding DOCX row.
+
+    After the fix: checker detects checkbox inline structure → returns
+    structure_unsupported=True, pass=True (NA skip), mismatches=[].
+    """
+
+    def test_checkbox_template_not_reported_as_fail(self):
+        """
+        A schema whose templates contain □ or '勾選' must not produce FAIL.
+        Expected: structure_unsupported=True, pass=True (or available=False with note),
+        mismatches=[].
+        """
+        result = eval_keypoints_text_fidelity(
+            lesson_id="TEST-CHECKBOX",
+            docx_path=None,
+            schema_dir=None,
+            bls=None,
+            _schema_override=SCHEMA_CHECKBOX,
+            _docx_rows_override=DOCX_ROWS_CHECKBOX,
+        )
+        # Must NOT be a hard FAIL — the checker doesn't know if it's a true mismatch
+        # or just a structural alignment problem.
+        assert result["pass"] is True, (
+            f"Checkbox structure should not be hard FAIL, got mismatches: {result.get('mismatches')}"
+        )
+        # Must signal that this structure was skipped
+        assert result.get("structure_unsupported") is True, (
+            "Checkbox structure must be flagged as structure_unsupported"
+        )
+        # No mismatches reported for an unsupported structure
+        assert result["mismatches"] == [], (
+            f"No mismatches expected for unsupported structure, got: {result['mismatches']}"
+        )
