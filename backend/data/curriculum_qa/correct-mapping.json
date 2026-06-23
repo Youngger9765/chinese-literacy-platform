@@ -2,6 +2,16 @@
   "version": "2026-06-23.issue-2397.rebind.v1",
   "notes": "Title-anchored recovery mapping for rescued spotlight/story-structure content",
   "spotlight": {
+    "G7-L7": {
+      "source_code": "G9-L8",
+      "title_anchor": "你看見時代的灰犀牛了嗎？談人口負成長",
+      "required_keywords": [
+        "人口",
+        "負成長",
+        "性別比"
+      ],
+      "reason": "Rebind line-chart unit to verified population-negative-growth spotlight content"
+    },
     "G7-L31": {
       "source_code": "G7-L23",
       "title_anchor": "最後一隻旅人鴿",
@@ -9,6 +19,44 @@
         "旅人鴿"
       ],
       "reason": "Rescue second text content from verified mixed-source spotlight"
+    },
+    "G8-L11": {
+      "source_code": "G8-L14",
+      "title_anchor": "科學辦案：破解蝴蝶蘭的花期密碼",
+      "required_keywords": [
+        "蝴蝶蘭",
+        "花期",
+        "催花"
+      ],
+      "reason": "Rebind misrouted science inquiry content to orchid flowering source"
+    },
+    "G8-L13": {
+      "source_code": "G8-L17",
+      "title_anchor": "我能不能選擇告別方式?",
+      "required_keywords": [
+        "安樂死",
+        "協助自殺"
+      ],
+      "reason": "Rebind mixed science slot to euthanasia multi-perspective source"
+    },
+    "G8-L14": {
+      "source_code": "G8-L18",
+      "title_anchor": "石虎保育：遷移與否的兩難",
+      "required_keywords": [
+        "石虎",
+        "遷移",
+        "保育"
+      ],
+      "reason": "Rebind sibling text in multi-perspective sequence to leopard-cat source"
+    },
+    "G8-L15": {
+      "source_code": "G8-L19",
+      "title_anchor": "核能的兩難抉擇",
+      "required_keywords": [
+        "核能",
+        "核電"
+      ],
+      "reason": "Rebind sibling text in multi-perspective sequence to nuclear debate source"
     },
     "G4-L20": {
       "source_code": "G4-L20",
