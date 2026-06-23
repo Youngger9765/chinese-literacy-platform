@@ -67,9 +67,14 @@ def infer_cognitive_skill(
 
     Rules (in priority order):
     1. If template contains 推論/判斷/為什麼 keywords → inference
-    2. If label matches 結果/結論/總結 AND has sub_rows → synthesis
-    3. If answer is single char or short phrase (<=5 chars) AND label is 解決 → recall
+    2. If effective_label (sub_label or label) matches 結果/結論/總結 AND structure
+       is nested → synthesis  (section-level labels signal higher-order synthesis)
+    3. If answer is a short phrase (<= VERBATIM_RECALL_THRESHOLD chars) → recall
+       (short, exact-wording answers are verbatim recall regardless of label)
     4. Default → recall
+
+    Note: `strategy_type` is accepted but not used in v1. Reserved for future
+    extensions (e.g., distinguish story-map vs. compare-contrast strategy types).
     """
     effective_label = sub_label or label
 

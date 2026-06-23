@@ -267,6 +267,7 @@ def eval_keypoints_text_fidelity(
     skipped_cells = 0  # cells skipped due to checkbox-only structure
 
     n_pairs = min(len(schema_flat), len(docx_flat))
+    n_schema = len(schema_flat)
 
     for idx in range(n_pairs):
         s = schema_flat[idx]
@@ -339,6 +340,44 @@ def eval_keypoints_text_fidelity(
                     "diff": "blank not found in DOCX",
                 })
 
+    # ── Row cardinality: unmatched schema rows → mismatch ────────────────────
+    # Schema rows beyond n_pairs had no DOCX counterpart. Silently dropping them
+    # would produce a false pass (BLOCKING 1). Each unmatched row produces a
+    # mismatch with docx_text="<row missing from DOCX>".
+    for idx in range(n_pairs, n_schema):
+        s = schema_flat[idx]
+        if _is_checkbox_only_cell(s):
+            skipped_cells += 1
+            continue
+        row_idx = s["row_idx"]
+        label = s["label"]
+        field = s["field"]
+        schema_normalized = normalize_text(s["schema_text"])
+        total_cells += 1
+        mismatches.append({
+            "row": row_idx,
+            "label": label,
+            "field": field,
+            "match": False,
+            "schema_text": schema_normalized,
+            "docx_text": "<row missing from DOCX>",
+            "diff": "schema row has no DOCX counterpart",
+        })
+        # Also count each blank as missing
+        for b_idx, blank_spec in enumerate(s["blanks"]):
+            schema_answer = blank_spec.get("answer") or ""
+            schema_answer_norm = normalize_text(str(schema_answer))
+            total_cells += 1
+            mismatches.append({
+                "row": row_idx,
+                "label": label,
+                "field": f"answer[{b_idx}]",
+                "match": False,
+                "schema_text": schema_answer_norm,
+                "docx_text": "<missing>",
+                "diff": "blank not found in DOCX (row missing)",
+            })
+
     # ── Whole-lesson checkbox guard ───────────────────────────────────────────
     # If every paired cell was checkbox-only (nothing to check), mark as
     # structure_unsupported to avoid a trivially "passing" 0/0 result.
@@ -353,6 +392,23 @@ def eval_keypoints_text_fidelity(
             "skipped_cells": skipped_cells,
             "mismatches": [],
             "pass": True,
+        }
+
+    # ── Extraction empty guard (BLOCKING 2) ──────────────────────────────────
+    # Non-checkbox schema with zero comparable cells extracted: DOCX provided no
+    # data rows. This is not "all checkbox-only" (skipped_cells==0) — it means the
+    # DOCX extraction returned nothing for a non-empty schema.
+    # Zero comparison ≠ passing → flag as extraction_empty and fail.
+    if total_cells == 0 and skipped_cells == 0 and schema_flat:
+        return {
+            "available": True,
+            "extraction_empty": True,
+            "note": "DOCX returned no comparable rows for non-empty schema — possible extraction failure",
+            "text_fidelity": 0.0,
+            "total_cells_checked": 0,
+            "matched_cells": 0,
+            "mismatches": [],
+            "pass": False,
         }
 
     text_fidelity = matched_cells / total_cells if total_cells > 0 else 1.0

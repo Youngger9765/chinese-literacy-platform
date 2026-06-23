@@ -582,3 +582,137 @@ class TestBlankMarkerNormalization:
             "Real answer mismatch must not be swallowed by blank-marker normalization"
         )
         assert len(result["mismatches"]) >= 1
+
+
+# ─── BLOCKING 1: Row cardinality truncation → silent pass ──────────────────
+#
+# n_pairs = min(len(schema_flat), len(docx_flat)) silently drops unmatched rows.
+# When schema has more rows than DOCX, the extra schema rows never enter the
+# comparison loop → no mismatch produced → pass=True even though content is missing.
+#
+# Fix: unmatched schema rows (beyond n_pairs) must each produce a mismatch
+# (field="<row missing from DOCX>").
+
+SCHEMA_EXTRA_ROWS = {
+    "keypoints": {
+        "lesson": "TEST-EXTRA-ROWS",
+        "structure": "flat",
+        "columns": ["label", "value"],
+        "rows": [
+            {
+                "label": "起因",
+                # Template text matches DOCX exactly — first row is a clean PASS
+                "value": "主角想要逃跑。",
+                "blanks": [],
+            },
+            {
+                # This row exists in schema but has no DOCX counterpart
+                "label": "結果",
+                "value": "主角成功逃走。",
+                "blanks": [],
+            },
+        ],
+    }
+}
+
+# DOCX only has 1 row — schema has 2. The second schema row has no DOCX counterpart.
+# First row matches perfectly, so n_pairs logic is the only thing that can catch this.
+DOCX_ROWS_MISSING_ROW = [
+    {"cells": [{"text": "起因", "dup": False}, {"text": "主角想要逃跑。", "dup": False}]},
+    # ← second row absent: schema 結果 row has no DOCX counterpart
+]
+
+
+class TestRowCardinalityMismatch:
+    """
+    BLOCKING regression: schema has more rows than DOCX → must FAIL, not silently pass.
+
+    Before fix: n_pairs = min(2,1) = 1, only first row compared, second row silently
+    dropped → pass=True even though 結果 row is entirely missing from DOCX.
+
+    After fix: unmatched schema rows produce a mismatch → pass=False.
+    """
+
+    def test_schema_has_more_rows_than_docx_must_fail(self):
+        """
+        Schema has 2 rows, DOCX has 1 row. The unmatched schema row must produce
+        a mismatch. Result must be pass=False.
+        """
+        result = eval_keypoints_text_fidelity(
+            lesson_id="TEST-EXTRA-ROWS",
+            docx_path=None,
+            schema_dir=None,
+            bls=None,
+            _schema_override=SCHEMA_EXTRA_ROWS,
+            _docx_rows_override=DOCX_ROWS_MISSING_ROW,
+        )
+        assert result["available"] is True
+        assert result["pass"] is False, (
+            f"Schema has 2 rows, DOCX has 1 — unmatched schema row must produce FAIL. "
+            f"Got: pass={result['pass']}, mismatches={result.get('mismatches')}"
+        )
+        assert len(result["mismatches"]) >= 1, (
+            f"Expected at least 1 mismatch for missing DOCX row, got: {result['mismatches']}"
+        )
+
+
+# ─── BLOCKING 2: n_pairs==0 empty pass (non-checkbox context) ──────────────
+#
+# When schema has rows but DOCX has 0 rows (all skipped/missing), n_pairs=0,
+# the loop never runs, total_cells=0, mismatches=[], pass=True.
+# This is an "honest 0" — the checker compared nothing and silently declared pass.
+#
+# Fix: if total_cells==0 AND skipped_cells==0 (not a checkbox-only lesson),
+# that means DOCX had zero extractable rows for a non-empty schema → FAIL or
+# flag as extraction_empty.
+
+SCHEMA_FOR_EMPTY_DOCX = {
+    "keypoints": {
+        "lesson": "TEST-EMPTY-DOCX",
+        "structure": "flat",
+        "columns": ["label", "value"],
+        "rows": [
+            {
+                "label": "主角",
+                "value": "__",
+                "blanks": [{"answer": "楊俊瀚", "hint": ""}],
+            },
+        ],
+    }
+}
+
+# DOCX provides zero data rows (empty list after header skip)
+DOCX_ROWS_EMPTY = []
+
+
+class TestEmptyDocxNonCheckbox:
+    """
+    BLOCKING regression: non-checkbox schema with 0 extractable DOCX rows must NOT pass.
+
+    Before fix: n_pairs=min(1,0)=0, loop never runs, total_cells=0, mismatches=[],
+    pass=True. Zero comparison ≠ passing.
+
+    After fix: total_cells==0 and skipped_cells==0 → extraction_empty=True, pass=False.
+    """
+
+    def test_empty_docx_non_checkbox_must_not_pass(self):
+        """
+        Schema has 1 real fill-in row, DOCX has 0 data rows.
+        This is not a checkbox lesson (no cells skipped). Must NOT pass=True.
+        """
+        result = eval_keypoints_text_fidelity(
+            lesson_id="TEST-EMPTY-DOCX",
+            docx_path=None,
+            schema_dir=None,
+            bls=None,
+            _schema_override=SCHEMA_FOR_EMPTY_DOCX,
+            _docx_rows_override=DOCX_ROWS_EMPTY,
+        )
+        assert result["available"] is True
+        assert result.get("structure_unsupported") is not True, (
+            "Non-checkbox empty result must not be classified as structure_unsupported"
+        )
+        assert result["pass"] is False, (
+            f"DOCX has 0 rows for non-checkbox schema — must FAIL, not silently pass. "
+            f"Got: pass={result['pass']}, total_cells_checked={result.get('total_cells_checked')}"
+        )

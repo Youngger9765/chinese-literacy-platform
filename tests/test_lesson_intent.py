@@ -196,18 +196,33 @@ class TestDriftDetectionNoChange:
 
 
 class TestIntentRowsCoverage:
-    """Test 4: G6-L22 style schema (7 blanks) → at least 7 blank_idx entries."""
+    """Test 4: G6-L22 style schema (7 blanks) → exactly 7 blank_idx entries (one per blank)."""
 
     def test_blank_coverage_at_least_7(self):
-        """For schema with 7 blanks, intent_rows must have >= 7 entries with blank_idx."""
+        """
+        For schema with exactly 7 blanks, intent_rows must have exactly 7 entries
+        with blank_idx (one entry per blank, no duplicates, no omissions).
+
+        KP_SCHEMA_G6_L22_STYLE blanks: 解決.問題1(1) + 解決1(1) + 結果1(1) + 問題2(2) +
+        解決2(1) + 結果3(1) = 7 total.
+
+        Uniqueness check: each (row_idx, blank_idx) pair must appear exactly once.
+        """
         intent = gen_lesson_intent_for_schema(
             KP_SCHEMA_G6_L22_STYLE,
             lesson_id="TEST-INTENT-L1",
         )
         blank_rows = [r for r in intent["intent_rows"] if "blank_idx" in r]
-        assert len(blank_rows) >= 7, (
-            f"Expected >= 7 blank_idx entries for 7-blank schema, got {len(blank_rows)}: "
-            f"{[r.get('blank_idx') for r in blank_rows]}"
+        assert len(blank_rows) == 7, (
+            f"Expected exactly 7 blank_idx entries for 7-blank schema, got {len(blank_rows)}: "
+            f"{[(r.get('row_idx'), r.get('blank_idx')) for r in blank_rows]}"
+        )
+        # Uniqueness: no (row_idx, blank_idx) pair should appear more than once
+        pairs = [(r["row_idx"], r["blank_idx"]) for r in blank_rows]
+        unique_pairs = set(pairs)
+        assert len(pairs) == len(unique_pairs), (
+            f"Duplicate (row_idx, blank_idx) pairs found: "
+            f"{[p for p in pairs if pairs.count(p) > 1]}"
         )
 
     def test_answer_criterion_present(self):
