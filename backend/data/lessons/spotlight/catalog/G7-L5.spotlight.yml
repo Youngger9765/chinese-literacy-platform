@@ -13,9 +13,5 @@ spotlight:
     prompt: 1.將課文第三、四、五段內容整理成表格。（單選）
   - type: free_text
     prompt: 2.將課文第六段內容整理成表格。
-  - type: figure
-    referent: table
-    asset: fig10.png
-    bind_paragraph: null
   - type: free_text
     prompt: 3.總結：爺爺奶奶與作者一家生活習慣有著很大的　　差異　，最後作者琢磨的相處之道是　　傾聽　　不同世代的聲音，　設身處地　　為他人著想。

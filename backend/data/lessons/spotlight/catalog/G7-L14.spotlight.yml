@@ -11,10 +11,6 @@ spotlight:
     text: 小叮嚀：刻板印象或對某族群體偏見，很可能就是微歧視。
   - type: free_text
     prompt: 2.面對微歧視時，可以怎麼反應？可以的打Ｖ。
-  - type: figure
-    referent: table
-    asset: fig10.png
-    bind_paragraph: null
   - type: passage
     source: unknown
     paragraphs:
