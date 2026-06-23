@@ -105,12 +105,15 @@ def check() -> int:
             regressions.append((code, f"blocks {base['n_blocks']}→{cur['n_blocks']} (掉 {base['n_blocks']-cur['n_blocks']})"))
         if cur["n_questions"] < base["n_questions"]:
             regressions.append((code, f"題型塊 {base['n_questions']}→{cur['n_questions']} (掉題目)"))
-        # lost a question TYPE entirely
+        # Lost a question TYPE entirely — only a regression if total questions did
+        # NOT increase. Restructuring 1 free_text into 8 single questions is an
+        # UPGRADE, not a degrade; flag a lost type only when it isn't offset by
+        # more questions overall.
         lost_types = [t for t in base["type_counts"] if t in Q_TYPES
                       and base["type_counts"][t] > 0
                       and cur["type_counts"].get(t, 0) == 0]
-        if lost_types:
-            regressions.append((code, f"題型消失: {lost_types}"))
+        if lost_types and cur["n_questions"] <= base["n_questions"]:
+            regressions.append((code, f"題型消失且題數未增: {lost_types}"))
         if cur["n_blocks"] > base["n_blocks"] or cur["n_questions"] > base["n_questions"]:
             improvements.append((code, f"blocks {base['n_blocks']}→{cur['n_blocks']}, Q {base['n_questions']}→{cur['n_questions']}"))
     # lessons newly loading that weren't in baseline (new content) — informational
