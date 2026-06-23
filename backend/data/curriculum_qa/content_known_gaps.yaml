@@ -101,3 +101,4 @@ figure:
   - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # fig10.png 未上傳
   - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # G8-L9 dir, fig10.png
   - {lesson_code: G8-L8,    reason: figure_missing}             # G8-L6b only has placeholder fig1.png in G8-L8 dir
+  - {lesson_code: G8-L6b,   reason: figure_missing}             # source figure is placeholder-only (no authentic asset)

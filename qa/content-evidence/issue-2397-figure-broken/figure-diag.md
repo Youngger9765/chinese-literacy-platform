@@ -39,4 +39,4 @@
 1. 目前「確定可重現」的壞點集中在 2 課：`G6-L08`、`G8-L6b`  
 2. 6 課（`G7-L1/G7-L5/G7-L14/G7-L18/G7-L26/G9-L3`）以 API+URL+md5 檢查皆正常，需留待 UI 視角二次驗證是否為 vision 誤判  
 3. 修復方向應優先做「通則綁定修正」：不要優先取 `spotlight_v2.lesson=G*-SL*` 來組圖路徑，改以可上架課號來源（如 `grade_code` / worksheet code）為主  
-4. `G6-L08` 屬真缺圖，後續應誠實標記 `content_known_gaps.yaml`（`figure_missing`），不放 placeholder 充數
+4. `G6-L08`、`G8-L6b` 屬真缺圖，應誠實標記 `content_known_gaps.yaml`（`figure_missing`），不放 placeholder 充數
