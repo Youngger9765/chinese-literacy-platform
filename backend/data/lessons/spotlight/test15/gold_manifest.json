@@ -249,14 +249,12 @@
     },
     "G6-SL8": {
       "strategy_type": "summary_structure",
-      "block_count": 35,
+      "block_count": 34,
       "type_histogram": {
-        "figure": 1,
         "free_text": 17,
         "guide": 17
       },
       "type_sequence": [
-        "figure",
         "guide",
         "guide",
         "free_text",
@@ -407,15 +405,13 @@
     },
     "G8-SL8": {
       "strategy_type": "causal_inference",
-      "block_count": 34,
+      "block_count": 31,
       "type_histogram": {
-        "figure": 3,
         "free_text": 5,
         "guide": 23,
         "passage": 3
       },
       "type_sequence": [
-        "figure",
         "guide",
         "guide",
         "free_text",
@@ -433,13 +429,11 @@
         "guide",
         "guide",
         "guide",
-        "figure",
         "guide",
         "free_text",
         "free_text",
         "guide",
         "guide",
-        "figure",
         "guide",
         "guide",
         "passage",
