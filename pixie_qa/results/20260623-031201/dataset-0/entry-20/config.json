@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1008 G4-L8 reading-strategy: 最美的畫面",
+  "evalMetadata": {
+    "lesson_code": "G4-L8",
+    "batch": "g4-first"
+  }
+}

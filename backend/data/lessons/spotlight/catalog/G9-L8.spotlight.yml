@@ -3,6 +3,10 @@ spotlight:
   strategy_name: 圖表繪製與判讀-折線圖
   strategy_type: image_text
   blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：圖表繪製與判讀
   - type: guide
     text: 例如：圖一是臺灣新生兒及全國性別比變化圖，
   - type: free_text
@@ -114,12 +118,16 @@ spotlight:
     prompt: (5)讀出統計圖表達什麼：
   - type: free_text
     prompt: ❶請根據圖(九)，完成下表。
+  - type: figure
+    referent: table
+    asset: fig1.png
+    bind_paragraph: 目標策略：圖表繪製與判讀
   - type: free_text
     prompt: ❷請根據圖(九)完成下面的表格。（空格內填上升或下降）
   - type: figure
     referent: table
-    asset: fig10.png
-    bind_paragraph: null
+    asset: fig1.png
+    bind_paragraph: 目標策略：圖表繪製與判讀
   - type: single
     prompt: ❸請根據圖(九)，勾選答案(單選)：
     options:

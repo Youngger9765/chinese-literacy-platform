@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=0.9)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Quotes the example sentence (美美/小意思) and the '查看本課課文全文' affordance, and rules out broken-image/skeleton — concrete and complete, justifies faithful."}

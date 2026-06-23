@@ -160,6 +160,7 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | 新增或修改有 LLM import 的 `backend/app/routes/*.py` | **先跑 `llm-endpoint-hardening` checklist**（rate-limit-after-cache / auth / input cap / fail-closed / reasoning field）；PostToolUse hook 會自動提醒 | `~/.claude/skills/llm-endpoint-hardening/` |
 | 新增 `backend/alembic/versions/*.py` migration | **先確認 `alembic heads` = 1**；PostToolUse hook 會自動執行 `alembic heads` 並在 multi-head 時 WARN | `~/.claude/skills/postgres-best-practices/` |
 | 改 frontend render 檔（`*.tsx`）| **PR 前必跑 `/qa` 驗那頁**（console 乾淨 + 截圖），禁用 code-read 當 verified；`npm run lint + npm run test` render-smoke/eslint gate 自動擋 mount crash（#2279 TDZ postmortem）| `.claude/skills/ui-pr-verify/SKILL.md` |
+| 改**聚光燈 / 重點表內容或抽取器**（`catalog/*` / `_online-schema/*` / `_parsed*/*` / `build_lesson_schema.py` / `keypoints_manifest.json` / spotlight / story_structure）| **PR 前必跑 content evidence gate + ship-gate（fail-closed）**：`python scripts/content_evidence_gate.py --run-id <id>` → `bash scripts/content_evidence_ship_gate.sh --run-id <id>`，必須印 `CONTENT_EVIDENCE_GATE=PASS`。⛔ 禁用「API 回 200 / render 看一下 / 我覺得對了」當完成依據——口頭宣稱過不了 gate，只認 evidence 檔（fail_cells=0 + unknown_cells=0）。真內容缺口登錄 `backend/data/curriculum_qa/content_known_gaps.yaml`（known_gap，誠實標、非造假），**禁把缺口 fake 成 pass**。| `.claude/skills/build-keypoints/` `.claude/skills/build-spotlight/` + `docs/qa/layer-verification-framework.md` |
 
 > 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
 

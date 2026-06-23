@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1006  reading-strategy: 這是什麼意思",
+  "expectation": "verdict should be faithful — 聚光燈講指稱詞/推論三步驟 = 本課主題(被舊啟發式誤判)",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

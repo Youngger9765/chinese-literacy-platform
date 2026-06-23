@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 0.85, "reasoning": "Ties 換位思考 scaffold to 阿公 (this lesson's character) — concrete, justifies faithful; somewhat brief."}

@@ -45,13 +45,18 @@ def normalize_manifest_code(code: str) -> str:
         G4-L01  -> G4-L1
         G4-L03a -> G4-L3a
         WW-L01  -> 文-L1
+        文-L08  -> 文-L8   (classical-Chinese prefix, same leading-zero strip)
     """
     if code.startswith("WW-"):
         m = re.search(r"L(\d+)", code)
         if m:
             return f"文-L{int(m.group(1))}"
         return code
-    m = re.match(r"(G\d+)-L(\d+)(.*)", code)
+    # Grade prefix is either Gn (G4, G9…) or 文 (classical Chinese). Both share
+    # the same leading-zero strip; without 文 here, 文-L08 stayed padded and
+    # never matched the unpadded parsed YAML (文-L8.yml) — splitting one lesson
+    # into a "padded" duplicate the keypoints manifest / content gate missed.
+    m = re.match(r"(G\d+|文)-L(\d+)(.*)", code)
     if m:
         grade_part = m.group(1)
         num = int(m.group(2))

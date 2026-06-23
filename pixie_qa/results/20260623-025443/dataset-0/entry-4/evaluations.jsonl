@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Correctly distinguishes the main body (朱自清為何寫背影) from an incidental worked-example name (作者是林玫伶) — precisely handles the scaffold carve-out, justifies faithful."}

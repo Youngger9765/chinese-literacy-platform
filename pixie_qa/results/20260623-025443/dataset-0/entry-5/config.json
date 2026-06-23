@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1015  reading-strategy: 感情小日記──是友情還是愛情?",
+  "expectation": "verdict should be faithful — 聚光燈講友情與愛情差異/互動判斷 = 對應本課(被舊 anti-cross 啟發式誤判)",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

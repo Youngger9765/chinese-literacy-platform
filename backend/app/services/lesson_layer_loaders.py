@@ -19,6 +19,7 @@ from pathlib import Path
 
 import yaml
 
+from app.services.content_mapping_registry import get_story_structure_override
 from app.services.lesson_code_normalization import (
     halfwidth,
     normalize_manifest_code,
@@ -193,7 +194,7 @@ def load_curriculum_manifest() -> dict[str, dict]:
 
 def _spotlight_enrichment(data: dict, grade_code: str) -> dict:
     """spotlight_v2 + images[] merged from figure block assets."""
-    spotlight_v2 = load_spotlight_v2(grade_code)
+    spotlight_v2 = load_spotlight_v2(grade_code, data.get("title"))
     images = merge_spotlight_images(data.get("images") or [], spotlight_v2)
     return {"spotlight_v2": spotlight_v2, "images": images}
 
@@ -223,6 +224,9 @@ def load_layer1_lessons() -> list[dict]:
         strategy = data.get("reading_strategy")
         if strategy == "無":
             strategy = None
+
+        story_structure_table = data.get("story_structure_table")
+        story_structure_rows = data.get("story_structure_rows")
 
         lesson = {
             "id": data["lesson_number"],
@@ -262,8 +266,8 @@ def load_layer1_lessons() -> list[dict]:
             # Schema-driven step composition (#1374): pass through if present in YAML.
             # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
             "step_sequence": data.get("step_sequence") or None,
-            "story_structure_table": data.get("story_structure_table"),
-            "story_structure_rows": data.get("story_structure_rows"),
+            "story_structure_table": story_structure_table,
+            "story_structure_rows": story_structure_rows,
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
@@ -372,6 +376,19 @@ def load_layer2_lessons(
         # Video links: prefer manifest (has cleaned URLs), fall back to parsed
         video_links = meta.get("video_links") or data.get("video_links")
 
+        # Content mapping is a title-anchor guard for known catalog slots.
+        # It should never force table→rows degradation in runtime payload.
+        structure_override = get_story_structure_override(norm_code, title)
+        is_multi_text_primary_slot = norm_code in MULTI_LESSON_PRIMARY
+        allow_multi_text_table = bool(structure_override)
+        if is_multi_text_primary_slot and not allow_multi_text_table:
+            # Fail-closed for unverified multi-text primary slots.
+            story_structure_table = None
+            story_structure_rows = None
+        else:
+            story_structure_table = data.get("story_structure_table")
+            story_structure_rows = data.get("story_structure_rows")
+
         lesson = {
             "id": lesson_id,
             "lesson_number": lesson_id,  # kept for backward compat with schemas
@@ -410,8 +427,8 @@ def load_layer2_lessons(
             "strategy_exercise": (
                 data.get("strategy_exercise") or data.get("strategy_exercises")
             ),
-            "story_structure_table": data.get("story_structure_table"),
-            "story_structure_rows": data.get("story_structure_rows"),
+            "story_structure_table": story_structure_table,
+            "story_structure_rows": story_structure_rows,
             "display_order": display_order,
             # Schema-driven step composition (#1374): pass through if present in YAML.
             # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.

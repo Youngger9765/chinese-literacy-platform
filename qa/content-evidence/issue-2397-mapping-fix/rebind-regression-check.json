@@ -1,0 +1,340 @@
+{
+  "summary": {
+    "victim_total": 5,
+    "victim_fixed_count": 4,
+    "faithful_total": 18,
+    "faithful_ok_count": 18
+  },
+  "rows": [
+    {
+      "story_id": 2,
+      "grade_code": "G4-L02",
+      "title": "十秒的背後",
+      "target_step": "story-structure",
+      "keyword": "楊俊瀚",
+      "has_spotlight": false,
+      "has_story_structure": true,
+      "spotlight_keyword_match": false,
+      "story_structure_keyword_match": true,
+      "fixed": true
+    },
+    {
+      "story_id": 3,
+      "grade_code": "G4-L03",
+      "title": "長高的祕密",
+      "target_step": "story-structure",
+      "keyword": "長高",
+      "has_spotlight": false,
+      "has_story_structure": true,
+      "spotlight_keyword_match": false,
+      "story_structure_keyword_match": true,
+      "fixed": true
+    },
+    {
+      "story_id": 1017,
+      "grade_code": "G4-L17",
+      "title": "把球打好，就夠了嗎？ ──阿耀與健豪學長的通信（一）",
+      "target_step": "story-structure",
+      "keyword": "阿耀",
+      "has_spotlight": false,
+      "has_story_structure": true,
+      "spotlight_keyword_match": false,
+      "story_structure_keyword_match": true,
+      "fixed": true
+    },
+    {
+      "story_id": 1103,
+      "grade_code": "G7-L31",
+      "title": "最後一隻旅人鴿",
+      "target_step": "reading-strategy",
+      "keyword": "旅人鴿",
+      "has_spotlight": true,
+      "has_story_structure": true,
+      "spotlight_keyword_match": true,
+      "story_structure_keyword_match": true,
+      "fixed": true
+    },
+    {
+      "story_id": 1020,
+      "grade_code": "G4-L20",
+      "title": "物以稀為貴： 從「供給」和「需求」談物價波動",
+      "target_step": "story-structure",
+      "keyword": "供給",
+      "has_spotlight": false,
+      "has_story_structure": false,
+      "spotlight_keyword_match": false,
+      "story_structure_keyword_match": false,
+      "fixed": false
+    },
+    {
+      "story_id": 4,
+      "grade_code": "G4-L04",
+      "title": "運動科學",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 5,
+      "grade_code": "G4-L05",
+      "title": "穿越極限的跑者",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 6,
+      "grade_code": "G4-L13",
+      "title": "第一百碗麵",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1006,
+      "grade_code": "G4-L6",
+      "title": "這是什麼「意思」？",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1007,
+      "grade_code": "G4-L7",
+      "title": "正太與小豬：武僧的養成之路",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1008,
+      "grade_code": "G4-L8",
+      "title": "最美的畫面",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1009,
+      "grade_code": "G4-L9",
+      "title": "大自然的氣象小幫手",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1010,
+      "grade_code": "G4-L10",
+      "title": "美好的一天",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1011,
+      "grade_code": "G4-L11",
+      "title": "誤會",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1015,
+      "grade_code": "G4-L15",
+      "title": "感情小日記1──是友情還是愛情？",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1016,
+      "grade_code": "G4-L16",
+      "title": "感情小日記2──喜歡是什麼？",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1018,
+      "grade_code": "G4-L18",
+      "title": "想讀書，該從哪裡著手？ ──阿耀與健豪學長的通信（二）",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1019,
+      "grade_code": "G4-L19",
+      "title": "救援大隊的好幫手",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1023,
+      "grade_code": "G4-L23",
+      "title": "心，也要一起練",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1024,
+      "grade_code": "G4-L24",
+      "title": "成為身體的最佳夥伴",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1025,
+      "grade_code": "G4-L25",
+      "title": "身體，謝謝你",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1026,
+      "grade_code": "G4-L26",
+      "title": "專注當下：關掉內心的批評噪音",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    },
+    {
+      "story_id": 1027,
+      "grade_code": "G4-L27",
+      "title": "從白熊到藍海豚：學習與念頭和平相處",
+      "bucket": "faithful",
+      "current": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "expected": {
+        "has_spotlight": true,
+        "has_story_structure": true
+      },
+      "ok": true
+    }
+  ]
+}

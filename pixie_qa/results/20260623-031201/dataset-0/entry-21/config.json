@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1009 G4-L9 reading-strategy: 大自然的氣象小幫手",
+  "evalMetadata": {
+    "lesson_code": "G4-L9",
+    "batch": "g4-first"
+  }
+}

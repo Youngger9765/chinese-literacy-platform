@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1023 G4-L23 reading-strategy: 心，也要一起練",
+  "evalMetadata": {
+    "lesson_code": "G4-L23",
+    "batch": "g4-first"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1118 G8-L6b reading-strategy: 隱形的征服者",
+  "expectation": "verdict should be figure_broken — 聚光燈內文忠實(推論策略-找出因果),但頁面中央有明顯『圖片載入失敗』佔位框 = figure_broken;這是文字層看不到、只有 render 截圖才抓得到的缺陷。gate matrix figure_blacklist_hit 命中(placeholder md5)",
+  "evalMetadata": {
+    "expected_verdict": "figure_broken",
+    "lesson_code": "G8-L6b"
+  }
+}

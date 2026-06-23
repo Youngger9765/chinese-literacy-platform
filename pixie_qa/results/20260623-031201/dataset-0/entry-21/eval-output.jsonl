@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖內容是關於「大自然的氣象小幫手」這篇課文的閱讀策略練習。頁面上的文字內容、舉例（蜘蛛結網、蟋蟀叫聲、日暈月暈）都與提供的課文內容完全一致，且排版正常，沒有圖片載入失敗或空白骨架的情況。", "suspected_actual_lesson": ""}}

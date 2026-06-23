@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "cross_lesson"}
+{"name": "judge_detail", "value": {"verdict": "cross_lesson", "confidence": 1, "reasoning": "截圖中的題目內容，例如「小傑跟阿光的車」以及關於車子「跑得很快」、「很省油」等描述，明顯與本課《長高的祕密》中討論身高、睡眠、運動和飲食的主題完全無關。頁面主體內容是關於車子的比較，而非本課的學習內容。", "suspected_actual_lesson": "關於車子或交通工具的比較"}}

@@ -1,0 +1,14 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1024 G4-L24 reading-strategy: (骨架課)",
+  "expectation": "verdict should be faithful — paragraphs 是純『一 二 三』標號無實質內文",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": "G4-L24",
+    "original_label": "skeleton",
+    "disputed": "skeleton_is_l1_base_text_layer_not_vision"
+  }
+}

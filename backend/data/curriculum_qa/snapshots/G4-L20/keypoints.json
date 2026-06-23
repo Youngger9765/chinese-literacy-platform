@@ -21,8 +21,8 @@
         "label": "薪水",
         "sub_rows": [
           {
-            "sub_label": "□高　　低",
-            "template": "高　　□低",
+            "sub_label": "□高　　□低",
+            "template": "□高　　□低",
             "blanks": []
           }
         ]
@@ -31,8 +31,8 @@
         "label": "技術門檻",
         "sub_rows": [
           {
-            "sub_label": "□高　　低",
-            "template": "高　　□低",
+            "sub_label": "□高　　□低",
+            "template": "□高　　□低",
             "blanks": []
           }
         ]
@@ -42,7 +42,7 @@
         "sub_rows": [
           {
             "sub_label": "__",
-            "template": "❶證照難易度難  □簡單\n❷經驗需要  多  □少\n❸年資需要  □短  長\n❹體能需要  強  □普通",
+            "template": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通",
             "blanks": [
               {
                 "answer": "身體健康",
@@ -56,8 +56,8 @@
         "label": "市場稀有性",
         "sub_rows": [
           {
-            "sub_label": "常見　　□稀有",
-            "template": "□常見　　稀有",
+            "sub_label": "□常見　　□稀有",
+            "template": "□常見　　□稀有",
             "blanks": []
           }
         ]

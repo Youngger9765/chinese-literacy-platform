@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖內容是「閱讀聚光燈」步驟，旨在引導學生用表格整理訊息。頁面中的範例文本和練習題目都圍繞著本課課文《救援大隊的好幫手》中關於「巨鼠與狗」的比較，並引導學生找出兩者的差異，完全忠實於本課內容。", "suspected_actual_lesson": ""}}

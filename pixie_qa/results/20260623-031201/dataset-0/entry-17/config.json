@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1027 G4-L27 reading-strategy: 從白熊到藍海豚：學習與念頭和平相處",
+  "evalMetadata": {
+    "lesson_code": "G4-L27",
+    "batch": "g4-first"
+  }
+}

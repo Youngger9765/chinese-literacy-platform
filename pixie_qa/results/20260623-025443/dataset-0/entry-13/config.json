@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "6  story-structure: 第一百碗麵",
+  "expectation": "verdict should be faithful — 右側文章重點表要學生填本課情節(老人點最便宜的麵給孫子/寒流小男孩請阿公吃麵)= 忠實對應本課",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

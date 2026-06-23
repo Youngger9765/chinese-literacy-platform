@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1010 G4-L10 reading-strategy: 美好的一天",
+  "evalMetadata": {
+    "lesson_code": "G4-L10",
+    "batch": "g4-first"
+  }
+}

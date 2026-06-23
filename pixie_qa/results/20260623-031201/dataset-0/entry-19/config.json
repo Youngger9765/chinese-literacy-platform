@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1007 G4-L7 reading-strategy: 正太與小豬：武僧的養成之路",
+  "evalMetadata": {
+    "lesson_code": "G4-L7",
+    "batch": "g4-first"
+  }
+}

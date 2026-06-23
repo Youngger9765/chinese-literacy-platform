@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1016 G4-L16 reading-strategy: 感情小日記2──喜歡是什麼？",
+  "evalMetadata": {
+    "lesson_code": "G4-L16",
+    "batch": "g4-first"
+  }
+}

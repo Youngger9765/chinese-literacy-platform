@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=figure_broken got=figure_broken -> HIT (judge confidence=0.9)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Cites the exact '圖片載入失敗' placeholder text while acknowledging the body is on-topic — textbook concrete justification for figure_broken."}

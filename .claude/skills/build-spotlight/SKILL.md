@@ -142,6 +142,25 @@ spotlight:
 - [ ] match 表格有正確識別（不是 free_text）
 - [ ] 不夾帶閱讀理解 5 題 MCQ
 
+## Multi-text / figure-asset 路徑（#2397 踩過的雷）
+
+- 多文本課（`G4-L20-22…docx` 一檔多篇）的 **GCS 圖檔目錄用 parsed/compound code**（`G4-L20-22/`、`G8-L13/`），不是 catalog code（`G4-L20`、`G8-L10`）。圖檔名也帶 parsed 前綴（`G8-L13-13.jpg`）。算 figure 路徑要走 `catalog_to_parsed_code`，不能只 strip padding。
+- `文-L*`（文言文）路徑含中文字，URL 要 **percent-encode**（`urllib.parse.quote`），否則 `'ascii' codec` 直接 crash 報假 fetch-error。
+- story 引用合成 `figN.png` 但 GCS 只有真實 per-page 檔（`G7-L28-08.jpg`）→ figure 404。真解是修 story 的 figure reference 指真實檔名，**不要**自己造一張假圖蒙混。
+
+## Ship gate — 改完憑證據宣稱，不憑感覺（#2397）
+
+改聚光燈內容 / 抽取器 / 綁圖後，**PR 前必過 content evidence gate（fail-closed）**：
+
+```bash
+python scripts/content_evidence_gate.py --run-id <id>          # 全 304 cell（staging）
+bash   scripts/content_evidence_ship_gate.sh --run-id <id>     # 須印 CONTENT_EVIDENCE_GATE=PASS
+```
+
+- ⛔ 禁用「API 200 / 看一下 render / 我覺得對了」當完成依據——只認 evidence 檔（`fail_cells=0` + `unknown_cells=0`，`figure_blacklist_hits=0`）。
+- 真內容缺口（DOCX 無聚光燈段落、文言課型無此步驟、合成 figN 未上傳）→ 登錄 `backend/data/curriculum_qa/content_known_gaps.yaml`（`reading-strategy:` / `figure:` 段，reason 用 enum：`no_spotlight_source` / `classical_no_step` / `built_pending_deploy` / `figure_asset_not_uploaded`），標 `known_gap`（誠實，非 pass）。**禁把缺口 fake 成 pass。**
+- `FIGURE_BLACKLIST_HIT`（placeholder 假圖被當真圖上線）是**真缺陷，永遠不可 gap-allow**，必補真圖。
+
 ## 反模式
 - ❌ 從 `backend/data/lessons/*.yml` 反推（已被 parser 壓平，失真）
 - ❌ 把 guide 教學脈絡省略（教授最在意的就是這段）
@@ -150,3 +169,6 @@ spotlight:
 - ❌ 用 FIRST bracket in filename for strategy — always use the LAST bracket
 - ❌ 把 trait-inference match table 分類成 free_text（要用 match block）
 - ❌ 忘記抽取 image/table assets（figure blocks must have asset path, not null）
+- ❌ 多文本課用 catalog code 算圖檔目錄（要 parsed code）；文言課 URL 不 encode
+- ❌ 憑 API 200 / render 一瞥宣稱完成（要過 content evidence ship-gate）
+- ❌ 把真內容缺口 fake 成 pass（要登 content_known_gaps.yaml 標 known_gap）

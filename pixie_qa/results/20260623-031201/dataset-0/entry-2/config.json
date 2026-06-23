@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "4 G4-L04 reading-strategy: 運動科學",
+  "evalMetadata": {
+    "lesson_code": "G4-L04",
+    "batch": "g4-first"
+  }
+}

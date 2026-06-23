@@ -1,0 +1,50 @@
+{
+  "before": [
+    {
+      "code": "G7-L7",
+      "story_id": 1086,
+      "title": "你看見時代的灰犀牛了嗎？談人口負成長",
+      "local_hash": "5a5bff7c507357c0",
+      "local_hint": "例如：圖一是臺灣新生兒及全國性別比變化圖，",
+      "local_blocks": 64,
+      "staging_title": "你看見時代的灰犀牛了嗎？談人口負成長",
+      "staging_hash": "d800faa363d280e1",
+      "staging_hint": "◎小試身手：看圖回答問題：",
+      "staging_blocks": 18
+    },
+    {
+      "code": "G5-L15",
+      "story_id": 1042,
+      "title": "信件的力量──寫信馬拉松",
+      "local_hash": "07be9fc3cd5d5390",
+      "local_hint": "◎小試身手：",
+      "local_blocks": 14,
+      "staging_title": "信件的力量──寫信馬拉松",
+      "staging_hash": "dacf329254bd2e16",
+      "staging_hint": "◎小試身手：",
+      "staging_blocks": 13
+    },
+    {
+      "code": "G5-L14",
+      "story_id": 1041,
+      "title": "垃圾食物的誘惑與代價",
+      "local_hash": "70c6195b6d111318",
+      "local_hint": "◎ 小試身手",
+      "local_blocks": 42,
+      "staging_title": "垃圾食物的誘惑與代價",
+      "staging_hash": "0606820efcea0a73",
+      "staging_hint": "◎ 小試身手",
+      "staging_blocks": 39
+    },
+    {
+      "code": "G9-L8",
+      "story_id": null,
+      "title": null,
+      "local_hash": "5a5bff7c507357c0",
+      "local_hint": "例如：圖一是臺灣新生兒及全國性別比變化圖，",
+      "local_blocks": 64
+    }
+  ],
+  "g7l7_eq_g9l8_local": true,
+  "g7l7_eq_g9l8_staging": false
+}

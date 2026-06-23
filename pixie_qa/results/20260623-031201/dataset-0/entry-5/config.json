@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1011 G4-L11 reading-strategy: 誤會",
+  "evalMetadata": {
+    "lesson_code": "G4-L11",
+    "batch": "g4-first"
+  }
+}

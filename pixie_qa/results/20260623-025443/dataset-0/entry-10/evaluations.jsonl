@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Quotes lesson-specific practice questions (洪信介成為植物獵人的條件) — concrete, justifies faithful."}
