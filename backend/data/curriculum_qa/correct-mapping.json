@@ -9,26 +9,35 @@
         "旅人鴿"
       ],
       "reason": "Rescue second text content from verified mixed-source spotlight"
+    },
+    "G4-L20": {
+      "source_code": "G4-L20",
+      "title_anchor": "物以稀為貴",
+      "required_keywords": [
+        "供給",
+        "需求"
+      ],
+      "reason": "Bind multi-text slot to verified supply-demand spotlight content"
     }
   },
   "story_structure": {
     "G4-L2": {
       "title_anchor": "十秒的背後",
-      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L2/structure.json",
+      "structure_snapshot": "data/curriculum_qa/snapshots/G4-L2/structure.json",
       "required_keywords": [
         "楊俊瀚"
       ]
     },
     "G4-L3": {
       "title_anchor": "長高的祕密",
-      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L3/structure.json",
+      "structure_snapshot": "data/curriculum_qa/snapshots/G4-L3/structure.json",
       "required_keywords": [
         "長高"
       ]
     },
     "G4-L17": {
       "title_anchor": "把球打好，就夠了嗎",
-      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L17/structure.json",
+      "structure_snapshot": "data/curriculum_qa/snapshots/G4-L17/structure.json",
       "required_keywords": [
         "阿耀",
         "健豪"
@@ -36,7 +45,7 @@
     },
     "G4-L20": {
       "title_anchor": "物以稀為貴",
-      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L20/structure.json",
+      "structure_snapshot": "data/curriculum_qa/snapshots/G4-L20/structure.json",
       "required_keywords": [
         "供給",
         "需求"
