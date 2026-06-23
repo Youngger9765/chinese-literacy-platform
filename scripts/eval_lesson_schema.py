@@ -20,6 +20,28 @@ from pathlib import Path
 
 import yaml
 
+# ─── Load eval_keypoints_text_fidelity module ─────────────────────────────────
+
+def load_text_fidelity_module():
+    spec = importlib.util.spec_from_file_location(
+        "ektf", Path(__file__).parent / "eval_keypoints_text_fidelity.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+# ─── Load gen_lesson_intent module ────────────────────────────────────────────
+
+def load_intent_module():
+    spec = importlib.util.spec_from_file_location(
+        "gli", Path(__file__).parent / "gen_lesson_intent.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 # ─── Load build_lesson_schema module ──────────────────────────────────────────
 
 def load_bls():
@@ -414,7 +436,15 @@ def eval_strategy(lesson_id: str, docx_path: Path, bls) -> dict:
     }
 
 
-def eval_lesson(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> dict:
+def eval_lesson(
+    lesson_id: str,
+    docx_path: Path,
+    schema_dir: Path,
+    bls,
+    *,
+    include_text_fidelity: bool = False,
+    include_intent_drift: bool = False,
+) -> dict:
     """Full eval for one lesson."""
     if not Path(docx_path).exists():
         return {"lesson_id": lesson_id, "error": "DOCX not found"}
@@ -423,12 +453,29 @@ def eval_lesson(lesson_id: str, docx_path: Path, schema_dir: Path, bls) -> dict:
     sp = eval_spotlight(lesson_id, docx_path, schema_dir, bls)
     st = eval_strategy(lesson_id, docx_path, bls)
 
-    return {
+    result = {
         "lesson_id": lesson_id,
         "strategy": st,
         "keypoints": kp,
         "spotlight": sp,
     }
+
+    if include_text_fidelity:
+        ektf_mod = load_text_fidelity_module()
+        kp_tf = ektf_mod.eval_keypoints_text_fidelity(
+            lesson_id=lesson_id,
+            docx_path=docx_path,
+            schema_dir=schema_dir,
+            bls=bls,
+        )
+        result["keypoints_text_fidelity"] = kp_tf
+
+    if include_intent_drift:
+        gli_mod = load_intent_module()
+        drift = gli_mod.check_intent_stale_from_files(lesson_id, Path(schema_dir))
+        result["intent_drift"] = drift
+
+    return result
 
 
 # ─── Reporting ─────────────────────────────────────────────────────────────────
@@ -500,6 +547,16 @@ def main():
     parser.add_argument("--test", action="store_true", help="Eval TEST set (15 held-out lessons)")
     parser.add_argument("--report", action="store_true", help="Full report (DEV + TEST + gap)")
     parser.add_argument("--all", action="store_true", help="Eval all discovered DOCX lessons")
+    parser.add_argument(
+        "--text-fidelity",
+        action="store_true",
+        help="Also run keypoints text fidelity check (Slice ②)",
+    )
+    parser.add_argument(
+        "--check-intent-drift",
+        action="store_true",
+        help="Also check intent drift (Slice ③ drift-lock)",
+    )
     args = parser.parse_args()
 
     bls = load_bls()
@@ -521,7 +578,11 @@ def main():
         batch = importlib.util.module_from_spec(batch_spec)
         batch_spec.loader.exec_module(batch)
         all_results = [
-            eval_lesson(lid, path, schema_dir, bls)
+            eval_lesson(
+                lid, path, schema_dir, bls,
+                include_text_fidelity=args.text_fidelity,
+                include_intent_drift=args.check_intent_drift,
+            )
             for lid, path in batch.discover_lessons()
         ]
         kp_eligible = [r for r in all_results if r.get("keypoints", {}).get("available")]
@@ -544,7 +605,14 @@ def main():
 
     if args.lesson_id and args.docx_path:
         # Single lesson eval
-        result = eval_lesson(args.lesson_id, Path(args.docx_path), schema_dir, bls)
+        result = eval_lesson(
+            args.lesson_id,
+            Path(args.docx_path),
+            schema_dir,
+            bls,
+            include_text_fidelity=args.text_fidelity,
+            include_intent_drift=args.check_intent_drift,
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
 
