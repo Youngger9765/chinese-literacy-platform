@@ -1,0 +1,13 @@
+{
+  "grade": "G6",
+  "generated_at_utc": "2026-06-23T06:01:01Z",
+  "total": 21,
+  "verdict_counts": {
+    "faithful": 18,
+    "figure_broken": 1,
+    "cross_lesson": 2
+  },
+  "failure_total": 3,
+  "jsonl_path": "qa/content-evidence/vision-judge-grade-map/G6/G6_vision_results_20260623-055642.jsonl",
+  "screenshots_dir": "qa/content-evidence/vision-judge-grade-map/G6/screenshots-20260623-055642"
+}
