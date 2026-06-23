@@ -582,11 +582,13 @@ def l1_reading_strategy(
     if source_missing:
         gap_reason = _known_gap_reason(lesson_code, "reading-strategy")
         if gap_reason:
-            # Fail-closed: known source gap is still unknown evidence.
-            unknown_flags["strategy_unknown"] = True
+            # Documented gap: surface honestly as known_gap (NOT silent unknown,
+            # NOT pass). Distinct category so the matrix separates "documented
+            # no-source" from "unexpected unknown"; ship gate gates known_gap
+            # behind human sign-off.
             unknown_flags["known_gap_reason"] = gap_reason
-            status = "unknown"
-            failure_codes = ["SOURCE_MISSING", f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
+            status = "known_gap"
+            failure_codes = [f"KNOWN_CONTENT_GAP_{gap_reason.upper()}"]
         else:
             unknown_flags["strategy_unknown"] = True
             status = "unknown"

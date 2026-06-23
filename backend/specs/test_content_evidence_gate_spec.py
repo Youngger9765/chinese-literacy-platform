@@ -103,7 +103,7 @@ class TestKnownGaps:
             "figure": {},
         }
         story = {"id": 1001, "grade_code": "G4-L1", "spotlight_v2": {"blocks": []}}
-        r = gate.l1_reading_strategy(story, "G4-L1")
+        r = gate.l1_reading_strategy(story, "G4-L1", {})
         assert r["status"] == "known_gap"
         assert r["failure_codes"] == ["KNOWN_CONTENT_GAP_NO_SPOTLIGHT_SOURCE"]
         gate._KNOWN_GAPS = None
@@ -111,7 +111,7 @@ class TestKnownGaps:
     def test_unlisted_missing_source_stays_unknown(self):
         gate._KNOWN_GAPS = {"reading-strategy": {}, "story-structure": {}, "figure": {}}
         story = {"id": 9999, "grade_code": "G4-L99", "spotlight_v2": {"blocks": []}}
-        r = gate.l1_reading_strategy(story, "G4-L99")
+        r = gate.l1_reading_strategy(story, "G4-L99", {})
         assert r["status"] == "unknown"
         assert r["failure_codes"] == ["SOURCE_MISSING"]
         gate._KNOWN_GAPS = None
