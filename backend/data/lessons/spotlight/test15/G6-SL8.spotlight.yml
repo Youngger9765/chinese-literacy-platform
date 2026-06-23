@@ -3,10 +3,6 @@ spotlight:
   strategy_name: 摘要策略-從結構找小主題與細節
   strategy_type: summary_structure
   blocks:
-  - type: figure
-    referent: image
-    asset: fig1.png
-    bind_paragraph: 目標策略：摘要策略──
   - type: guide
     text: 如何找出「小主題」以及小主題下方的「舉例與重要細節」呢？
   - type: guide
