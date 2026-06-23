@@ -1,0 +1,93 @@
+# EDD ground-truth eval set — 聚光燈/重點表 多模態 vision judge 校準用
+# 用途:judge 必須先在這組標註 case 上達標(正確分類 expected_verdict)才准拿去跑全 152 課
+# 守則:這裡每個 label 都是 2026-06 session 人工(Young/cursor/Claude 抽查)對源/對 render 驗過的高信心真相
+# verdict 值:faithful(內容+排版忠實本課) / cross_lesson(張冠李戴,內容是別課) / skeleton(純骨架無實質) / figure_broken(假佔位圖或破圖)
+# 注意:judge 是多模態 —— 餵「render 截圖」不是 API 文字;通用教學鷹架語(小試身手/請打勾/論據檢核)算 faithful 不算 cross
+
+cases:
+  # ---- 確定 FAIL ----
+  - story_id: 1020
+    lesson_code: G4-L20
+    title: "物以稀為貴:從供給和需求談物價波動"
+    step: reading-strategy
+    expected_verdict: cross_lesson
+    why: "聚光燈整段是『天才是練出來的』(費德勒/海菲茲練習),與本課供給/需求物價完全無關 = 張冠李戴"
+    source: "claude+cursor 抽查 staging 2026-06-22/23"
+
+  - story_id: 1024
+    lesson_code: G4-L24
+    title: "(骨架課)"
+    step: reading-strategy
+    expected_verdict: skeleton
+    why: "paragraphs 是純『一 二 三』標號無實質內文"
+    source: "cursor 抽查 + gate L1_BASE_TEXT_QUALITY"
+
+  # ---- 確定 PASS(faithful) ----
+  - story_id: 1115
+    lesson_code: G8-L4
+    title: "玻璃娃娃"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "張冠李戴已修(玻璃娃娃內容對),假圖已清(prod figure block=0)"
+    source: "本 session 修復 + prod 驗證 2026-06-22"
+
+  - story_id: 1103
+    lesson_code: G7-L31
+    title: "旅人鴿"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "原雨林/箭毒已修成旅人鴿(staging 旅人鴿=True 箭毒=False)"
+    source: "本 session #2395 修復 staging 驗證"
+
+  - story_id: 1098
+    title: "背影讀書會"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈明寫『作者(朱自清)為什麼選擇寫背影』= 完全對應本課"
+    source: "claude 抽查 staging 2026-06-23"
+
+  - story_id: 1015
+    title: "感情小日記──是友情還是愛情?"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講友情與愛情差異/互動判斷 = 對應本課(被舊 anti-cross 啟發式誤判)"
+    source: "cursor+claude 抽查"
+
+  - story_id: 1132
+    title: "國高中數學課當然可以使用計算機"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈是『論據檢核』策略鷹架(通用引導語,合法),非張冠李戴(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 6
+    title: "第一百碗麵"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講換位思考並點名阿公/小男孩/麵攤老闆(本課角色)= 對應本課(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 1006
+    title: "這是什麼意思"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講指稱詞/推論三步驟 = 本課主題(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 1143
+    title: "焚而不毀的倫敦"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講倫敦人/心理韌性 = 本課(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 22
+    title: "植物獵人"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈『問出重要問題』策略鷹架(通用引導,合法)非張冠李戴(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  # ---- TODO 補:figure_broken 案例(多模態 judge 的關鍵測項)----
+  # 從 gate matrix figure_blacklist_hits(現 2 個)取當前仍是假佔位圖的課,標 expected_verdict: figure_broken
+  # 重點表(story-structure)case 待補:4 多文本 fail (G4-L20/G5-L24/G9-L15/G9-L17) 應為 cross_lesson/缺料
