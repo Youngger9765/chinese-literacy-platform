@@ -1,21 +1,73 @@
 spotlight:
   lesson: G7-L18
-  strategy_name: 從事實歸納概念-從具體事實歸納要表達的抽象概念
+  strategy_name: 閱讀聚光燈
   strategy_type: main_idea_inference
   blocks:
   - type: guide
-    text: 在寫作時，一個想法或概念，若能運用具體、有細節的事實、例子來說明，會讓讀者更能感受與想像；但在閱讀時，常相反的，需要從具體事實，歸納出作者想要表達的概念，才能促成最佳的理解。
-  - type: guide
-    text: 一、以下先讓我們用生活中常見的具體事實，來練習提取抽象概念：
-  - type: guide
-    text: 二、接著我們回到本篇文章，來練習看看作者想要藉由具體事實表達什麼概念：
-  - type: figure
-    referent: table
-    asset: fig10.png
-    bind_paragraph: null
-  - type: guide
-    text: 三、請你整理作者想表達的概念，但難度提升了，請你試著寫出來：
-  - type: figure
-    referent: table
-    asset: fig2.png
-    bind_paragraph: null
+    text: 從具體事實歸納概念，以達到最佳理解。
+  - type: single
+    prompt: 我今天的回家作業有國文習作、數學課本、英文造句、自然複習卷，還要準備明天的上台報告。我今天的回家作業
+    options:
+    - 很少
+    - 很多
+    answer: 很多
+  - type: single
+    prompt: 我們從幼稚園就認識，國小也一直都在同一個班，而到了國中還能一起在球隊奮鬥。我們對彼此很
+    options:
+    - 陌生
+    - 熟悉
+    answer: 熟悉
+  - type: single
+    prompt: 他每天都早睡早起，且有慢跑的習慣，更會留意自己一天水分的攝取是否足夠。他對健康很
+    options:
+    - 忽視
+    - 重視
+    answer: 重視
+  - type: single
+    prompt: '實際發生的具體事實: 過去 現在。想表達的抽象概念: 持續'
+    options:
+    - 停止
+    - 持續
+    answer: 持續
+  - type: single
+    prompt: '實際發生的具體事實: 1.阿嬤的症狀越來越。想表達的抽象概念:'
+    options:
+    - 輕微
+    - 嚴重
+    answer: 嚴重
+  - type: single
+    prompt: '實際發生的具體事實: 2.對大家的影響越來越。想表達的抽象概念:'
+    options:
+    - 小
+    - 大
+    answer: 大
+  - type: single
+    prompt: '實際發生的具體事實: 在家裡罵阿公 在銀行大鬧。想表達的抽象概念: 影響範圍：'
+    options:
+    - 變小
+    - 變大
+    answer: 變大
+  - type: single
+    prompt: '實際發生的具體事實: 2-3天一次 每天2-3次。想表達的抽象概念: 頻率：'
+    options:
+    - 變低
+    - 變高
+    answer: 變高
+  - type: single
+    prompt: '實際發生的具體事實: 1個鐘頭 2-4個鐘頭。想表達的抽象概念: 時間：'
+    options:
+    - 變短
+    - 變長
+    answer: 變長
+  - type: single
+    prompt: '實際發生的具體事實: 責罵 揮菜刀、丟尖銳物。想表達的抽象概念: 危險性：'
+    options:
+    - 變低
+    - 變高
+    answer: 變高
+  - type: free_text
+    prompt: '實際發生的具體事實: 我週末每天打工時數超過十二小時，……，有時甚至到晚上九點才下班。想表達的抽象概念: 我的工作負擔'
+  - type: free_text
+    prompt: '實際發生的具體事實: 擔心她是否遭人控制，……，更害怕她被人拐騙簽寫契約或購物，而造成我們無法承擔的交易損失。想表達的抽象概念: 我們對現況與未來感到'
+  - type: free_text
+    prompt: '實際發生的具體事實: 想到這些，我和妹妹常常哭泣，晚上難以入睡。想表達的抽象概念: 阿嬤狀況讓我們'
