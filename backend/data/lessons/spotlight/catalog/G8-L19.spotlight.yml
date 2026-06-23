@@ -21,10 +21,6 @@ spotlight:
     source: unknown
     paragraphs:
     - 我們先用「主張＋理由＋證據」掌握每一方在說什麼；再追問理由在強調什麼──最優先的價值與最害怕的風險。用這兩個角度看，就能清楚比較觀點差異。
-  - type: figure
-    referent: table
-    asset: fig2.png
-    bind_paragraph: null
   - type: guide
     text: ＊歸納觀點差異：
   - type: guide
@@ -65,7 +61,3 @@ spotlight:
     source: unknown
     paragraphs:
     - 辯論式的議題文章，常見的論述結構是：「引出議題→一方論述→另一方論述→結尾」，請在【  】填入對應的段落數，並根據課文內容完成摘要。
-  - type: figure
-    referent: table
-    asset: fig3.png
-    bind_paragraph: null

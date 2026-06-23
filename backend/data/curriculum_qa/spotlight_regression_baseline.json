@@ -1022,12 +1022,11 @@
   },
   "G8-L15": {
     "tier": "catalog",
-    "n_blocks": 20,
+    "n_blocks": 18,
     "n_questions": 2,
     "type_counts": {
       "guide": 11,
       "passage": 5,
-      "figure": 2,
       "multi": 2
     }
   },
