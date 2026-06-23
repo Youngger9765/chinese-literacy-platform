@@ -66,6 +66,70 @@
         "需求"
       ],
       "reason": "Bind multi-text slot to verified supply-demand spotlight content"
+    },
+    "G5-L11": {
+      "source_code": "G5-L11",
+      "title_anchor": "「拳」力出擊──陳念琴",
+      "required_keywords": [
+        "陳念琴",
+        "拳"
+      ],
+      "reason": "Restore per-lesson spotlight from source DOCX for boxing profile text"
+    },
+    "G5-L14": {
+      "source_code": "G5-L14",
+      "title_anchor": "垃圾食物的誘惑與代價",
+      "required_keywords": [
+        "垃圾食物",
+        "誘惑",
+        "代價"
+      ],
+      "reason": "Restore summary strategy spotlight from source DOCX for junk-food unit"
+    },
+    "G5-L15": {
+      "source_code": "G5-L15",
+      "title_anchor": "信件的力量──寫信馬拉松",
+      "required_keywords": [
+        "信件",
+        "寫信馬拉松"
+      ],
+      "reason": "Restore main-idea spotlight from source DOCX for letter-writing unit"
+    },
+    "G5-L16": {
+      "source_code": "G5-L16",
+      "title_anchor": "臺灣棒球先驅──來自花蓮的能高團",
+      "required_keywords": [
+        "棒球",
+        "能高團"
+      ],
+      "reason": "Restore baseball pioneer spotlight from source DOCX for Noko team lesson"
+    },
+    "G6-L2": {
+      "source_code": "G6-L2",
+      "title_anchor": "與小學說再見",
+      "required_keywords": [
+        "小學",
+        "再見"
+      ],
+      "reason": "Restore metaphor strategy spotlight from source DOCX for graduation-themed lesson"
+    },
+    "G6-L12": {
+      "source_code": "G6-L12",
+      "title_anchor": "愛冒險逞強的雄性動物",
+      "required_keywords": [
+        "雄性動物",
+        "冒險"
+      ],
+      "reason": "Restore summary spotlight from source DOCX for male-animal behavior lesson"
+    },
+    "G9-L8": {
+      "source_code": "G9-L8",
+      "title_anchor": "臺灣學生的閱讀力：美麗與哀愁",
+      "required_keywords": [
+        "閱讀力",
+        "臺灣學生"
+      ],
+      "reason": "Restore chart-reading spotlight from source DOCX for reading-literacy lesson"
     }
   },
   "story_structure": {

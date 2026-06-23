@@ -9,33 +9,7 @@ spotlight:
       \    使用譬喻的手法時，句子常會有「好像」、「像」、「彷彿」、「如（同）」、「一樣」、「A（像）是B」等關鍵字詞，而文章使用譬喻之處，也是作者投入想像和著重感情之處，因此閱讀時我們可以留意譬喻的句子，推論作者主要想傳達的心情或意涵。"
   - type: guide
     text: ◎ 小試身手：
-  - type: single
-    prompt: 例1「他的笑容像太陽」主要想傳達什麼感受？
-    options:
-    - 溫暖、耀眼
-    - 明亮
-    - 熱情
-    answer: 溫暖、耀眼
-  - type: single
-    prompt: 例2「他的笑容像盛放的花」主要想傳達什麼感受？
-    options:
-    - 美好、燦爛
-    - 芬芳
-    - 嬌豔
-    answer: 美好、燦爛
-  - type: single
-    prompt: 下列何者不是譬喻句中常見的關鍵字詞？
-    options:
-    - 好像
-    - 像
-    - 因為
-    - 彷彿
-    answer: 因為
-  - type: single
-    prompt: 作者在文章中使用譬喻手法，主要目的是什麼？
-    options:
-    - 讓讀者更容易理解複雜的概念
-    - 凸顯事物特質並傳達作者的情感或意涵
-    - 增加文章的字數
-    - 讓句子聽起來更優美
-    answer: 凸顯事物特質並傳達作者的情感或意涵
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

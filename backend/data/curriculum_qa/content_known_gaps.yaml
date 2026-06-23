@@ -52,6 +52,7 @@ reading-strategy:
   - {lesson_code: G6-L21, reason: no_spotlight_source}
   - {lesson_code: G7-L6,  reason: no_spotlight_source}
   - {lesson_code: G7-L15, reason: no_spotlight_source}
+  # verified no-source in source DOCX (G7-L20 extractor returned spotlight blocks: 0)
   - {lesson_code: G7-L20, reason: no_spotlight_source}
   - {lesson_code: G7-L22, reason: no_spotlight_source}
   - {lesson_code: G7-L27, reason: no_spotlight_source}
@@ -59,14 +60,6 @@ reading-strategy:
   - {lesson_code: G8-L10, reason: no_spotlight_source}
   - {lesson_code: G9-L7,  reason: no_spotlight_source}
   - {lesson_code: G9-L10, reason: no_spotlight_source}
-  # cross-lesson drift slots pending clean source extraction (#2397 follow-up)
-  - {lesson_code: G5-L11, reason: no_spotlight_source}
-  - {lesson_code: G5-L14, reason: no_spotlight_source}
-  - {lesson_code: G5-L15, reason: no_spotlight_source}
-  - {lesson_code: G5-L16, reason: no_spotlight_source}
-  - {lesson_code: G6-L2,  reason: no_spotlight_source}
-  - {lesson_code: G6-L12, reason: no_spotlight_source}
-  - {lesson_code: G9-L8,  reason: no_spotlight_source}
   # 文言文課型 — 無聚光燈素材 / 標記待補件
   - {lesson_code: 文-L3,  reason: classical_no_step}
   - {lesson_code: 文-L4,  reason: classical_no_step}
