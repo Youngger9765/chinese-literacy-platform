@@ -1070,15 +1070,13 @@
   },
   "G8-L19": {
     "tier": "catalog",
-    "n_blocks": 20,
+    "n_blocks": 18,
     "n_questions": 2,
     "type_counts": {
       "guide": 11,
       "passage": 5,
-      "figure": 2,
       "multi": 2
-    },
-    "fingerprint": "12a0bd2441bbc59d"
+    }
   },
   "G8-L3": {
     "tier": "catalog",
