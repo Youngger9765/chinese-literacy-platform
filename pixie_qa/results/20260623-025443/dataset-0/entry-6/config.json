@@ -1,0 +1,14 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1132  reading-strategy: 國高中數學課當然可以使用計算機",
+  "expectation": "verdict should be figure_broken — 聚光燈是『論據檢核』策略鷹架(通用引導語,合法),非張冠李戴(被舊啟發式誤判)",
+  "evalMetadata": {
+    "expected_verdict": "figure_broken",
+    "lesson_code": "",
+    "original_label": "faithful",
+    "disputed": "degraded_blurry_image_borderline_broken"
+  }
+}

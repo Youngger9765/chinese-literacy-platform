@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1020 G4-L20 reading-strategy: 物以稀為貴:從供給和需求談物價波動",
+  "expectation": "verdict should be cross_lesson — 聚光燈整段是『天才是練出來的』(費德勒/海菲茲練習),與本課供給/需求物價完全無關 = 張冠李戴",
+  "evalMetadata": {
+    "expected_verdict": "cross_lesson",
+    "lesson_code": "G4-L20"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1098  reading-strategy: 背影讀書會",
+  "expectation": "verdict should be faithful — 聚光燈明寫『作者(朱自清)為什麼選擇寫背影』= 完全對應本課",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

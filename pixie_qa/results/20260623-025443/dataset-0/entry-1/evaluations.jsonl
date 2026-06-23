@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1) [disputed: skeleton_is_l1_base_text_layer_not_vision]"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Cites specific page content (身體覺察選擇題：雙手交叉/翹腳坐姿) showing the rendered spotlight is substantive, justifying faithful; honestly reflects that the render is not a skeleton."}

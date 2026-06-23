@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=0.9)"}
+{"evaluator": "JudgeReasoningQuality", "score": 0.9, "reasoning": "Cites 倫敦人/倫敦大轟炸/心理韌性 keywords tying to the lesson and notes generic-but-loaded image — concrete, justifies faithful (recovered from prior false figure_broken)."}

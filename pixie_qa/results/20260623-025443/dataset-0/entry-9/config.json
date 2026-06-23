@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1143  reading-strategy: 焚而不毀的倫敦",
+  "expectation": "verdict should be faithful — 聚光燈講倫敦人/心理韌性 = 本課(被舊啟發式誤判)",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=cross_lesson got=cross_lesson -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Cites the exact off-topic body (天才/費德勒/海菲茲/莫札特) vs the lesson's 供需 topic — concrete, justifies cross_lesson."}

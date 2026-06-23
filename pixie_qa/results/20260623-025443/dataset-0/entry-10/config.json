@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "22  reading-strategy: 植物獵人",
+  "expectation": "verdict should be faithful — 聚光燈『問出重要問題』策略鷹架(通用引導,合法)非張冠李戴(被舊啟發式誤判)",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": ""
+  }
+}

@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Cites the 重點表 fields (事故概要/主要爭議/法院判決) matching the 玻璃娃娃 text on the left — concrete, justifies faithful for story-structure."}

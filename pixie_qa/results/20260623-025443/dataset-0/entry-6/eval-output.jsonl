@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "figure_broken"}
+{"name": "judge_detail", "value": {"verdict": "figure_broken", "confidence": 0.9, "reasoning": "截圖顯示頁面內容為「議論文結構-支持論點的論據」的教學鷹架，文字內容與本課主題「國高中數學課當然可以使用計算機！」相符，屬於通用教學策略。然而，頁面下方應顯示圖片的位置出現了明顯的模糊、像素化圖像，看起來像是載入失敗或佔位圖，因此判斷為破圖。", "suspected_actual_lesson": ""}}

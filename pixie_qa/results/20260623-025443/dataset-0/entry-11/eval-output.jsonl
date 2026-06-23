@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "figure_broken"}
+{"name": "judge_detail", "value": {"verdict": "figure_broken", "confidence": 0.9, "reasoning": "截圖顯示頁面頂部有一個圖片佔位符，明確標示著「圖片載入失敗」。雖然頁面內容（推論策略、找事件）與本課主題相關，但圖片載入失敗是一個明顯的缺陷。", "suspected_actual_lesson": ""}}
