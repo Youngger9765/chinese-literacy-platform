@@ -116,8 +116,17 @@ JUDGE_SYSTEM_PROMPT = """你是國語文閱讀學習平台的內容品管審查�
            例如本課是《背影》,主體在討論「朱自清為什麼寫背影」(=忠實本課),
            只是在教學生「怎麼提問」的步驟順手舉了一句格式示範(提到別的作者名)——
            這只是 scaffold 裡的 incidental 範例,主體仍是本課 → faithful,不是 cross_lesson。
-     只有「頁面主體/被分析的文本本身」是別課時才判 cross_lesson;
-     單一句範例、格式示範、scaffold 夾帶的他課人名,都不足以構成 cross_lesson。
+       (c) ⭐畫面是「漸進式揭露」,截圖常只顯示開頭第一段(往往是用一個外來例子「示範策略怎麼做」),
+           後面「套用本課內容」的段落還沒展開、不在截圖裡。所以判斷內容忠實度時,
+           **要看 user 提供的【聚光燈完整 block 文字】(全部 block),不要只憑截圖開頭。**
+           只要本課自己的主題/人事物在「完整 block 文字」裡有出現、有被套用,
+           開頭那個外來示範例就是 scaffold → faithful。例如開頭用「臺東鹿野高台」示範刪除法,
+           但完整文字裡後面用本課「垃圾食物/餅乾洋芋片」做練習 → faithful。
+       (d) 若本課主題本身就是「教人辨識/分析/批判某類文本」(如:假消息、偽科學、論證、廣告話術),
+           那麼頁面拿「一篇該類型的樣本」當素材(如假消息課放一則假新聞、論證課放一段論述)
+           = 本課合法素材 → faithful,不是 cross_lesson。
+     只有「頁面主體/被分析的文本本身(且完整 block 文字裡也找不到本課內容)」是別課時才判 cross_lesson;
+     單一句範例、格式示範、scaffold 夾帶的他課人名、漸進揭露只露開頭,都不足以構成 cross_lesson。
 
 3. skeleton(純骨架)
    - 頁面只有編號、標號、空白格(一、二、三 / 1.2.3. / 甲乙丙),沒有實質內文。
@@ -168,6 +177,33 @@ JUDGE_RESPONSE_SCHEMA = {
 }
 
 
+def _spotlight_block_text(story: dict[str, Any]) -> str:
+    """All readable text across EVERY spotlight_v2 block (not just the visible
+    segment). The render is progressive-reveal so the screenshot may only show
+    the opening segment — the judge needs the full block text to tell a scaffold
+    worked-example apart from a genuinely cross-lesson body (#2397)."""
+    sp = story.get("spotlight_v2")
+    if not isinstance(sp, dict):
+        return ""
+    out: list[str] = []
+    for b in sp.get("blocks", []) or []:
+        for k in ("text", "prompt", "instruction", "heading", "title", "body"):
+            v = b.get(k)
+            if isinstance(v, str) and v.strip():
+                out.append(v.strip())
+        for p in b.get("paragraphs", []) or []:
+            if isinstance(p, str) and p.strip():
+                out.append(p.strip())
+        for opt in b.get("options", []) or []:
+            t = opt if isinstance(opt, str) else str(opt.get("text", "") if isinstance(opt, dict) else "")
+            if t.strip():
+                out.append(f"  選項:{t.strip()}")
+    joined = "\n".join(out)
+    if len(joined) > 4000:
+        joined = joined[:4000] + "…(block 文字已截斷)"
+    return joined
+
+
 def build_user_text(story: dict[str, Any], step: str) -> str:
     title = str(story.get("title") or "").strip()
     grade_code = str(story.get("grade_code") or "").strip()
@@ -178,14 +214,23 @@ def build_user_text(story: dict[str, Any], step: str) -> str:
     if len(body) > 3000:
         body = body[:3000] + "…(課文已截斷)"
     step_label = STEP_LABEL.get(step, step)
+    block_text = _spotlight_block_text(story)
+    block_section = (
+        f"\n【聚光燈完整 block 文字（重要）】\n"
+        f"以下是這一課聚光燈「全部」block 的文字。畫面是漸進式揭露,截圖可能只顯示開頭第一段,"
+        f"後面套用本課內容的段落還沒展開 —— 所以判斷「內容是否忠實本課」要看這份完整文字,不要只憑截圖開頭。\n"
+        f"{block_text if block_text else '(此步驟非 spotlight_v2 / 無 block 文字)'}\n"
+    ) if block_text else ""
     return (
         f"【本課權威資料】\n"
         f"課程代碼:{grade_code}\n"
         f"課文標題:{title}\n"
-        f"課文段落:\n{body if body else '(無課文段落)'}\n\n"
+        f"課文段落:\n{body if body else '(無課文段落)'}\n"
+        f"{block_section}\n"
         f"【待判斷的截圖】\n"
         f"這是本課「{step_label}」步驟的網頁截圖。\n"
-        f"請判斷截圖上 render 出來的內容與排版,是否忠實服務上面這一課。\n"
+        f"請判斷:(1) 內容是否忠實服務本課 —— 依【聚光燈完整 block 文字】＋本課權威資料判斷;"
+        f"(2) 視覺問題(破圖/排版/載入失敗) —— 依截圖判斷。\n"
         f"依 system 指示輸出 verdict / confidence / reasoning / suspected_actual_lesson。"
     )
 
