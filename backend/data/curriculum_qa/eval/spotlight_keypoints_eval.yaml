@@ -88,6 +88,33 @@ cases:
     why: "聚光燈『問出重要問題』策略鷹架(通用引導,合法)非張冠李戴(被舊啟發式誤判)"
     source: "claude 抽查"
 
-  # ---- TODO 補:figure_broken 案例(多模態 judge 的關鍵測項)----
-  # 從 gate matrix figure_blacklist_hits(現 2 個)取當前仍是假佔位圖的課,標 expected_verdict: figure_broken
-  # 重點表(story-structure)case 待補:4 多文本 fail (G4-L20/G5-L24/G9-L15/G9-L17) 應為 cross_lesson/缺料
+  # ---- figure_broken(多模態 judge 的關鍵測項)----
+  - story_id: 1118
+    lesson_code: G8-L6b
+    title: "隱形的征服者"
+    step: reading-strategy
+    expected_verdict: figure_broken
+    why: "聚光燈內文忠實(推論策略-找出因果),但頁面中央有明顯『圖片載入失敗』佔位框 = figure_broken;這是文字層看不到、只有 render 截圖才抓得到的缺陷。gate matrix figure_blacklist_hit 命中(placeholder md5)"
+    source: "本 session render 截圖人工驗證 2026-06-23 + gate figure_blacklist_hits"
+
+  # ---- story-structure(重點表)case ----
+  - story_id: 1115
+    lesson_code: G8-L4
+    title: "玻璃娃娃"
+    step: story-structure
+    expected_verdict: faithful
+    why: "左側參考課文=玻璃娃娃,右側文章重點表呈現玻璃娃娃事故概要/主要爭議 = 內容對應本課,排版正常無破圖"
+    source: "本 session render 截圖人工驗證 2026-06-23"
+
+  - story_id: 6
+    title: "第一百碗麵"
+    step: story-structure
+    expected_verdict: faithful
+    why: "右側文章重點表要學生填本課情節(老人點最便宜的麵給孫子/寒流小男孩請阿公吃麵)= 忠實對應本課"
+    source: "本 session render 截圖人工驗證 2026-06-23"
+
+  # ---- 待補(未加入校準 — 標籤需更謹慎人工定真相,不在本輪硬塞)----
+  # - 1024 story-structure:左側參考課文是骨架(一二三…),右側重點表卻有實質內容,
+  #   judge 讀成 cross_lesson;此 cell 本身定義模糊(骨架課 + 疑似錯置重點表),
+  #   需人工定 ground truth 後再加,避免錯標污染校準。
+  # - 更多 cross_lesson 負樣本:多文本 fail (G5-L24/G9-L15/G9-L17) render 後人工驗再加。

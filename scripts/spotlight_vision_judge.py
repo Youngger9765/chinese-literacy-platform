@@ -103,12 +103,21 @@ JUDGE_SYSTEM_PROMPT = """你是國語文閱讀學習平台的內容品管審查�
    - 排版正常、有實質內文、圖片(若有)是真實圖示。
 
 2. cross_lesson(張冠李戴)
-   - 截圖上有一整段實質內容,明確在講「另一課的主題」,與本課課文完全無關。
-   - 關鍵判準:不是「用語不同」,而是「整段敘述/舉例/主題是別的課文」。
-     例如本課課文講「供給與需求/物價」,但聚光燈整段在講「費德勒/海菲茲靠練習成為天才」——
-     這是別課的內容被錯置進來 = cross_lesson。
+   - 頁面的「主體實質內容」(策略要練的那篇文本、那組舉例、那個被分析的主題)
+     明確在講「另一課的主題」,與本課課文完全無關。
+   - 關鍵判準:不是「用語不同」,而是「頁面主體被分析的文本/主要舉例/整段敘述,是別的課文」。
+     例如本課課文講「供給與需求/物價」,但聚光燈整個主體在講「費德勒/海菲茲靠練習成為天才」——
+     本課的供需主題完全不見、整段被別課內容取代 = cross_lesson。
    - 如果判定 cross_lesson,請在 suspected_actual_lesson 填你推測那段內容「其實是哪一課/什麼主題」。
-   - ⚠️ 不要因為頁面用了通用策略鷹架語(小試身手/論據檢核)就誤判成 cross_lesson。
+   - ⚠️ 重要的負面判準(避免誤判,以下情況「不是」cross_lesson,應判 faithful):
+       (a) 頁面用了通用策略鷹架語(小試身手/論據檢核/問出重要問題)。
+       (b) 頁面在「示範如何做」的步驟裡,夾帶一個跟本課無關的「教學示範例/造句範例/格式範例」,
+           但頁面的主體內容、被分析的文本、主要討論對象仍然是本課。
+           例如本課是《背影》,主體在討論「朱自清為什麼寫背影」(=忠實本課),
+           只是在教學生「怎麼提問」的步驟順手舉了一句格式示範(提到別的作者名)——
+           這只是 scaffold 裡的 incidental 範例,主體仍是本課 → faithful,不是 cross_lesson。
+     只有「頁面主體/被分析的文本本身」是別課時才判 cross_lesson;
+     單一句範例、格式示範、scaffold 夾帶的他課人名,都不足以構成 cross_lesson。
 
 3. skeleton(純骨架)
    - 頁面只有編號、標號、空白格(一、二、三 / 1.2.3. / 甲乙丙),沒有實質內文。
@@ -222,8 +231,27 @@ def judge_screenshot(
     return parsed
 
 
+# Tall viewport so the WHOLE page (incl. below-the-fold figures) is captured in
+# one shot. The gate's default screenshot is viewport-only (1280x720) — a broken
+# image lower on the page would never enter frame and figure_broken would be
+# missed. The browser caps output height, so the saved shot is downscaled but
+# the full page is in frame and text stays legible enough for topic ID.
+FULLPAGE_VIEWPORT = "1280x3200"
+
+
+def capture_fullpage(browse: Browse, shot_path: Path) -> int:
+    """Set a tall viewport and re-screenshot the current page. Returns bytes."""
+    browse._run(["viewport", FULLPAGE_VIEWPORT])
+    time.sleep(1)
+    # nudge lazy content into rendering, then settle back to top
+    browse._run(["scroll", "--load"])
+    time.sleep(1)
+    browse.screenshot(str(shot_path))
+    return shot_path.stat().st_size if shot_path.exists() else 0
+
+
 # ---------------------------------------------------------------------------
-# Render + judge a single cell (reuses gate l3_render_cell)
+# Render + judge a single cell (reuses gate l3_render_cell for login + nav)
 # ---------------------------------------------------------------------------
 def render_and_judge(
     browse: Browse,
@@ -232,10 +260,9 @@ def render_and_judge(
     shots_dir: Path,
 ) -> dict[str, Any]:
     story = fetch_story(story_id)
+    # l3_render_cell does login-redirect detection, console capture, nav + retry.
     render = l3_render_cell(browse, story, step, shots_dir)
-    # Mirror how l3_render_cell builds its path (shots_dir/<id>/<step>.png)
-    # instead of reverse-engineering it from the relative string, which is
-    # fragile if the gate's rel-path format changes.
+    # Mirror how l3_render_cell builds its path (shots_dir/<id>/<step>.png).
     shot_path = shots_dir / str(story_id) / f"{step}.png"
     result: dict[str, Any] = {
         "story_id": story_id,
@@ -244,12 +271,13 @@ def render_and_judge(
         "step": step,
         "render_loaded": render["render"]["loaded"],
         "render_on_login": render["render"]["on_login_page"],
-        "screenshot_bytes": render["screenshot"]["bytes"],
-        "screenshot_path": str(shot_path),
+        "console_error_count": render["render"]["console_error_count"],
         "checked_at": utcnow(),
     }
     if render["screenshot"]["bytes"] == 0 or render["render"]["on_login_page"]:
         result.update(
+            screenshot_path=str(shot_path),
+            screenshot_bytes=render["screenshot"]["bytes"],
             verdict="render_failed",
             confidence=0.0,
             reasoning=(
@@ -257,6 +285,19 @@ def render_and_judge(
                 f"(on_login={render['render']['on_login_page']}, "
                 f"loaded={render['render']['loaded']})."
             ),
+            suspected_actual_lesson="",
+        )
+        return result
+    # Re-capture full page (the gate's shot is viewport-only). Overwrites the
+    # viewport shot at the same path with the full-page version we judge on.
+    fp_bytes = capture_fullpage(browse, shot_path)
+    result["screenshot_path"] = str(shot_path)
+    result["screenshot_bytes"] = fp_bytes
+    if fp_bytes == 0:
+        result.update(
+            verdict="render_failed",
+            confidence=0.0,
+            reasoning="Full-page screenshot capture produced 0 bytes.",
             suspected_actual_lesson="",
         )
         return result
@@ -271,6 +312,120 @@ def render_and_judge(
 def load_eval_cases() -> list[dict[str, Any]]:
     data = yaml.safe_load(EVAL_PATH.read_text(encoding="utf-8")) or {}
     return data.get("cases") or []
+
+
+# --- EDD release gate thresholds ------------------------------------------
+# The judge is NOT cleared for the full 152-lesson run unless it clears these.
+# Overall accuracy must be high AND the defect classes (the whole point of a
+# vision judge) must each be fully recalled — a judge that misses cross_lesson /
+# skeleton / figure_broken is worthless even at high overall accuracy because
+# faithful cases dominate the set.
+MIN_OVERALL_ACCURACY = 0.85
+# Categories whose recall MUST be 1.0 (every eval case in them must be hit).
+CRITICAL_DEFECT_VERDICTS = ("cross_lesson", "skeleton", "figure_broken")
+
+
+def per_category_recall(rows: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """recall per expected verdict: {verdict: {hits, total}}."""
+    out: dict[str, dict[str, int]] = {}
+    for r in rows:
+        cat = r["expected"]
+        slot = out.setdefault(cat, {"hits": 0, "total": 0})
+        slot["total"] += 1
+        if r["hit"]:
+            slot["hits"] += 1
+    return out
+
+
+def evaluate_gate(
+    rows: list[dict[str, Any]],
+) -> tuple[bool, list[str], dict[str, dict[str, int]]]:
+    """Return (passed, fail_reasons, recall_by_cat)."""
+    total = len(rows)
+    hits = sum(1 for r in rows if r["hit"])
+    acc = hits / total if total else 0.0
+    recall = per_category_recall(rows)
+    reasons: list[str] = []
+    if acc < MIN_OVERALL_ACCURACY:
+        reasons.append(
+            f"overall accuracy {hits}/{total}={acc:.2f} < {MIN_OVERALL_ACCURACY}"
+        )
+    for cat in CRITICAL_DEFECT_VERDICTS:
+        slot = recall.get(cat)
+        if slot is None:
+            reasons.append(
+                f"defect class '{cat}' has NO eval case (cannot verify recall)"
+            )
+        elif slot["hits"] < slot["total"]:
+            reasons.append(
+                f"defect class '{cat}' recall {slot['hits']}/{slot['total']} < 1.0"
+            )
+    return (not reasons), reasons, recall
+
+
+def write_calibration_report(summary: dict[str, Any], path: Path) -> None:
+    rows = summary["rows"]
+    passed = summary["gate_passed"]
+    reasons = summary["gate_fail_reasons"]
+    recall = summary["recall_by_category"]
+    lines: list[str] = []
+    lines.append("# Vision Judge — EDD 校準報告")
+    lines.append("")
+    lines.append(f"- run_id: `{summary['run_id']}`")
+    lines.append(f"- judged_at: {summary['judged_at']}")
+    lines.append(f"- model: `{JUDGE_MODEL}` @ `{JUDGE_LOCATION}`(多模態 vision)")
+    lines.append(f"- eval set: `{EVAL_PATH.relative_to(REPO_ROOT)}`")
+    lines.append("")
+    lines.append("## 結論")
+    verdict_word = "PASS — 達標,可放行跑全量(待 Young/coordinator 看過)" if passed \
+        else "FAIL — 未達標,judge 還沒校準到位,不可放出去用"
+    lines.append(f"- **{verdict_word}**")
+    lines.append(f"- 整體準度:**{summary['accuracy']}** "
+                 f"(門檻 ≥ {MIN_OVERALL_ACCURACY:.0%})")
+    if reasons:
+        lines.append("- 未過門檻原因:")
+        for r in reasons:
+            lines.append(f"  - {r}")
+    lines.append("")
+    lines.append("## 各類別 recall(defect class 必須 1.0)")
+    lines.append("")
+    lines.append("| expected verdict | recall | 是否關鍵缺陷類 |")
+    lines.append("|---|---|---|")
+    for cat in sorted(recall):
+        slot = recall[cat]
+        crit = "✅ 關鍵" if cat in CRITICAL_DEFECT_VERDICTS else ""
+        lines.append(f"| {cat} | {slot['hits']}/{slot['total']} | {crit} |")
+    lines.append("")
+    lines.append("## 逐案 expected vs got")
+    lines.append("")
+    lines.append("| # | story | code | step | expected | got | hit | conf |")
+    lines.append("|---|---|---|---|---|---|---|---|")
+    for i, r in enumerate(rows, 1):
+        mark = "✅" if r["hit"] else "❌"
+        lines.append(
+            f"| {i} | {r['story_id']} | {r['lesson_code']} | {r['step']} "
+            f"| {r['expected']} | **{r['got']}** | {mark} | {r['confidence']} |"
+        )
+    lines.append("")
+    lines.append("## 逐案 reasoning(稽核用)")
+    lines.append("")
+    for i, r in enumerate(rows, 1):
+        mark = "HIT" if r["hit"] else "MISS"
+        lines.append(
+            f"### {i}. story {r['story_id']} {r['lesson_code']} "
+            f"{r['step']} — {mark}"
+        )
+        lines.append(f"- expected: `{r['expected']}` | got: `{r['got']}` "
+                     f"| confidence: {r['confidence']}")
+        lines.append(f"- 標註理由(why expected): {r['why_expected']}")
+        lines.append(f"- judge reasoning: {r['reasoning']}")
+        if r.get("suspected_actual_lesson"):
+            lines.append(
+                f"- suspected_actual_lesson: {r['suspected_actual_lesson']}"
+            )
+        lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def run_calibration(run_id: str | None = None) -> dict[str, Any]:
@@ -288,14 +443,15 @@ def run_calibration(run_id: str | None = None) -> dict[str, Any]:
     if not browse_login(browse):
         print("FATAL: demo login failed (still on /login)", file=sys.stderr)
         sys.exit(2)
-    print("   demo login OK")
+    print("   demo login OK", flush=True)
 
     rows: list[dict[str, Any]] = []
     for i, case in enumerate(cases, 1):
         sid = int(case["story_id"])
         step = case.get("step", "reading-strategy")
         expected = case["expected_verdict"]
-        print(f"   [{i}/{len(cases)}] story {sid} {step} (expect {expected})")
+        print(f"   [{i}/{len(cases)}] story {sid} {step} (expect {expected})",
+              flush=True)
         try:
             judged = render_and_judge(browse, sid, step, shots_dir)
         except Exception as exc:  # pragma: no cover
@@ -325,16 +481,23 @@ def run_calibration(run_id: str | None = None) -> dict[str, Any]:
                     "suspected_actual_lesson", ""
                 ),
                 "why_expected": case.get("why", ""),
+                "screenshot_path": judged.get("screenshot_path", ""),
             }
         )
-        print(f"        -> got {got} {'HIT' if hit else 'MISS'}")
+        print(f"        -> got {got} {'HIT' if hit else 'MISS'}", flush=True)
 
     hits = sum(1 for r in rows if r["hit"])
+    passed, reasons, recall = evaluate_gate(rows)
     summary = {
         "run_id": run_id,
         "total": len(rows),
         "hits": hits,
         "accuracy": f"{hits}/{len(rows)}",
+        "recall_by_category": recall,
+        "gate_passed": passed,
+        "gate_fail_reasons": reasons,
+        "min_overall_accuracy": MIN_OVERALL_ACCURACY,
+        "critical_defect_verdicts": list(CRITICAL_DEFECT_VERDICTS),
         "rows": rows,
         "judged_at": utcnow(),
     }
@@ -342,7 +505,17 @@ def run_calibration(run_id: str | None = None) -> dict[str, Any]:
     raw_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    print(f"\n   calibration: {hits}/{len(rows)}  raw -> {raw_path}")
+    write_calibration_report(summary, CALIBRATION_REPORT)
+    print(f"\n   calibration: {hits}/{len(rows)}", flush=True)
+    print(f"   recall: " + ", ".join(
+        f"{c}={recall[c]['hits']}/{recall[c]['total']}" for c in sorted(recall)
+    ), flush=True)
+    print(f"   gate: {'PASS' if passed else 'FAIL'}", flush=True)
+    for r in reasons:
+        print(f"     - {r}", flush=True)
+    print(f"   raw    -> {raw_path}", flush=True)
+    print(f"   report -> {CALIBRATION_REPORT.relative_to(REPO_ROOT)}",
+          flush=True)
     return summary
 
 
@@ -360,8 +533,10 @@ def main() -> int:
     args = p.parse_args()
 
     if args.calibrate:
-        run_calibration(args.run_id)
-        return 0
+        summary = run_calibration(args.run_id)
+        # Hard gate: fail-closed. A non-zero exit blocks any caller (CI / ship
+        # gate / a human) from treating an uncalibrated judge as usable.
+        return 0 if summary["gate_passed"] else 1
 
     if args.story_id is None:
         p.error("either --calibrate or --story-id is required")
