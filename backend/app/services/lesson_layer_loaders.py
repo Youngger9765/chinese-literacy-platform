@@ -224,6 +224,9 @@ def load_layer1_lessons() -> list[dict]:
         if strategy == "無":
             strategy = None
 
+        story_structure_table = data.get("story_structure_table")
+        story_structure_rows = data.get("story_structure_rows")
+
         lesson = {
             "id": data["lesson_number"],
             "lesson_number": data["lesson_number"],
@@ -262,8 +265,8 @@ def load_layer1_lessons() -> list[dict]:
             # Schema-driven step composition (#1374): pass through if present in YAML.
             # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
             "step_sequence": data.get("step_sequence") or None,
-            "story_structure_table": data.get("story_structure_table"),
-            "story_structure_rows": data.get("story_structure_rows"),
+            "story_structure_table": story_structure_table,
+            "story_structure_rows": story_structure_rows,
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
@@ -372,6 +375,13 @@ def load_layer2_lessons(
         # Video links: prefer manifest (has cleaned URLs), fall back to parsed
         video_links = meta.get("video_links") or data.get("video_links")
 
+        # Fail-closed for primary slots backed by one multi-text parsed file
+        # (e.g. G4-L20 -> G4-L20-22). The shared table content can mix multiple
+        # texts and bind to the wrong lesson slot.
+        is_multi_text_primary_slot = norm_code in MULTI_LESSON_PRIMARY
+        story_structure_table = None if is_multi_text_primary_slot else data.get("story_structure_table")
+        story_structure_rows = None if is_multi_text_primary_slot else data.get("story_structure_rows")
+
         lesson = {
             "id": lesson_id,
             "lesson_number": lesson_id,  # kept for backward compat with schemas
@@ -410,8 +420,8 @@ def load_layer2_lessons(
             "strategy_exercise": (
                 data.get("strategy_exercise") or data.get("strategy_exercises")
             ),
-            "story_structure_table": data.get("story_structure_table"),
-            "story_structure_rows": data.get("story_structure_rows"),
+            "story_structure_table": story_structure_table,
+            "story_structure_rows": story_structure_rows,
             "display_order": display_order,
             # Schema-driven step composition (#1374): pass through if present in YAML.
             # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
