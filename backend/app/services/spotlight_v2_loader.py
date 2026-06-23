@@ -39,6 +39,8 @@ _SECONDARY_MULTI_TEXT_SPOTLIGHT_DENYLIST = frozenset({
 # Do not bind to a spotlight file unless a verified per-lesson source exists.
 _UNVERIFIED_SPOTLIGHT_SLOT_DENYLIST = frozenset({
     "G4-L17",
+    "G5-L15",
+    "G7-L7",
 })
 
 
