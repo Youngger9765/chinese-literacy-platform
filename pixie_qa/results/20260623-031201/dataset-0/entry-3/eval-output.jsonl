@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖顯示「閱讀聚光燈」步驟，標題為「推論策略-推論代名詞」，並有「小試身手:請勾選出指稱詞(框框內的語詞)所代表的事物」的通用教學鷹架語句。這些內容是通用的閱讀策略引導，且頁面頂部明確標示為《穿越極限的跑者》的閱讀策略，因此判斷為忠實於本課。", "suspected_actual_lesson": ""}}

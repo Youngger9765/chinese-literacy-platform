@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "6 G4-L13 reading-strategy: 第一百碗麵",
+  "evalMetadata": {
+    "lesson_code": "G4-L13",
+    "batch": "g4-first"
+  }
+}

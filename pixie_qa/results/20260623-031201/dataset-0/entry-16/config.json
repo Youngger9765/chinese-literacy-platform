@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1026 G4-L26 reading-strategy: 專注當下：關掉內心的批評噪音",
+  "evalMetadata": {
+    "lesson_code": "G4-L26",
+    "batch": "g4-first"
+  }
+}

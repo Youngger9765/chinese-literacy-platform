@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 0.9, "reasoning": "截圖顯示的是「推論策略-推論代名詞」的教學內容，這是一個通用的閱讀策略鷹架。頁面提供了推論代名詞的三個步驟，並在「例如」部分舉了一個示範句：「雖然老師連假前派了一堆作業，但這對美美來說是小意思。」這個示範句與本課課文主題「意思」相關，且頁面下方有「需要時查看本課課文全文」的提示，表明這是針對本課的策略練習。內容和排版都正常，沒有破圖或空白骨架。", "suspected_actual_lesson": ""}}

@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "2 G4-L02 reading-strategy: 十秒的背後",
+  "evalMetadata": {
+    "lesson_code": "G4-L02",
+    "batch": "g4-first"
+  }
+}

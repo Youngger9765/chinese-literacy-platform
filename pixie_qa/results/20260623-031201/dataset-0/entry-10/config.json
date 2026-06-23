@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1018 G4-L18 reading-strategy: 想讀書，該從哪裡著手？ ──阿耀與健豪學長的通信（二）",
+  "evalMetadata": {
+    "lesson_code": "G4-L18",
+    "batch": "g4-first"
+  }
+}

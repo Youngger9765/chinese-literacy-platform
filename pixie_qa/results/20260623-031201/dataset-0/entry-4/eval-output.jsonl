@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖內容是關於「推論情緒和感受」的閱讀策略，並以課文《美好的一天》中「大媽」的角色為主要分析對象。頁面上的問題和範例都直接引用了課文中的情境和對話，例如「大媽上公車後看到什麼？」、「大媽眉毛一挑」等，忠實地服務了本課的教學目標。排版正常，內容完整。", "suspected_actual_lesson": ""}}

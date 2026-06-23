@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1006 G4-L6 reading-strategy: 這是什麼「意思」？",
+  "evalMetadata": {
+    "lesson_code": "G4-L6",
+    "batch": "g4-first"
+  }
+}

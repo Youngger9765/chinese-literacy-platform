@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1024 G4-L24 reading-strategy: 成為身體的最佳夥伴",
+  "evalMetadata": {
+    "lesson_code": "G4-L24",
+    "batch": "g4-first"
+  }
+}

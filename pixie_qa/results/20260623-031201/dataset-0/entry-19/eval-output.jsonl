@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 0.9, "reasoning": "截圖內容包含「推論策略-找出故事道理」的教學引導，並以本課課文《正太與小豬》中的「正太與小豬的第十一段」作為範例，解釋如何從故事中找出作者想傳達的道理。雖然頁面下半部分出現了「破掉的水桶」的故事作為練習題材，但這屬於教學鷹架中的「小試身手」環節，且其內容與本課主題「努力與成長」有共通之處，因此整體內容仍忠實服務本課。", "suspected_actual_lesson": ""}}

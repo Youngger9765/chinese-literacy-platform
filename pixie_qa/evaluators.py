@@ -46,6 +46,32 @@ def verdict_match(evaluable: Evaluable, *, trace=None) -> Evaluation:
     )
 
 
+def verdict_gate_pass(evaluable: Evaluable, *, trace=None) -> Evaluation:
+    """Exploration gate: faithful=pass, other defect verdicts=fail."""
+    got = str(_get_output(evaluable, "vision_verdict") or "")
+    detail = _get_output(evaluable, "judge_detail") or {}
+    conf = detail.get("confidence")
+    pass_verdicts = {"faithful"}
+    fail_verdicts = {"cross_lesson", "skeleton", "figure_broken"}
+    if got in pass_verdicts:
+        return Evaluation(
+            score=1.0,
+            reasoning=f"verdict={got} -> PASS (confidence={conf})",
+            details={"verdict": got, "confidence": conf, "mode": "exploration_gate"},
+        )
+    if got in fail_verdicts:
+        return Evaluation(
+            score=0.0,
+            reasoning=f"verdict={got} -> FAIL (confidence={conf})",
+            details={"verdict": got, "confidence": conf, "mode": "exploration_gate"},
+        )
+    return Evaluation(
+        score=0.0,
+        reasoning=f"verdict={got or 'missing'} -> FAIL (unmapped verdict)",
+        details={"verdict": got, "confidence": conf, "mode": "exploration_gate"},
+    )
+
+
 JudgeReasoningQuality = create_agent_evaluator(
     name="JudgeReasoningQuality",
     criteria=(
