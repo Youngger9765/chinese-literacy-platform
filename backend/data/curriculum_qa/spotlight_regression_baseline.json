@@ -251,13 +251,12 @@
   },
   "G5-L12": {
     "tier": "catalog",
-    "n_blocks": 3,
-    "n_questions": 1,
+    "n_blocks": 9,
+    "n_questions": 8,
     "type_counts": {
-      "free_text": 1,
-      "guide": 2
-    },
-    "fingerprint": "09484600c5225854"
+      "guide": 1,
+      "single": 8
+    }
   },
   "G5-L13": {
     "tier": "catalog",
@@ -870,16 +869,12 @@
   },
   "G7-L26": {
     "tier": "catalog",
-    "n_blocks": 11,
-    "n_questions": 1,
+    "n_blocks": 14,
+    "n_questions": 13,
     "type_counts": {
-      "guide": 5,
-      "passage": 3,
-      "figure": 1,
-      "free_text": 1,
-      "self_check": 1
-    },
-    "fingerprint": "481dcbf94bdeacb0"
+      "guide": 1,
+      "single": 13
+    }
   },
   "G7-L28": {
     "tier": "dev7",
