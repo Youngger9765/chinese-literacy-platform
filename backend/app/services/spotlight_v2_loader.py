@@ -6,6 +6,7 @@ Priority: dev7 (curated) → test15 (curated) → catalog (bulk-promoted).
 
 import re
 
+from app.services.content_mapping_registry import get_spotlight_source_code
 from app.services.lesson_code_normalization import (
     MULTI_LESSON_MAP,
     normalize_manifest_code,
@@ -32,7 +33,6 @@ _PADDED_ALIAS_DENYLIST = frozenset({
 # Secondary slot backed by a shared multi-text source docx.
 # Fail-closed: do not route to a blended spotlight file for this slot.
 _SECONDARY_MULTI_TEXT_SPOTLIGHT_DENYLIST = frozenset({
-    "G7-L31",
 })
 
 # Temporarily fail-closed for slots with unresolved source identity drift.
@@ -67,9 +67,12 @@ def is_spotlight_v2_lesson(lesson_code: str) -> bool:
     )
 
 
-def load_spotlight_v2(lesson_code: str) -> dict | None:
+def load_spotlight_v2(lesson_code: str, lesson_title: str | None = None) -> dict | None:
     raw = (lesson_code or "").strip()
     norm = normalize_manifest_code(raw)
+    rebound = get_spotlight_source_code(norm, lesson_title)
+    source_raw = rebound or raw
+    source_norm = normalize_manifest_code(source_raw)
 
     if raw in _PADDED_ALIAS_DENYLIST:
         return None
@@ -81,20 +84,20 @@ def load_spotlight_v2(lesson_code: str) -> dict | None:
         return None
 
     # First, try exact-code lookup to avoid accidental cross-binding.
-    if raw in DEV7_LESSONS:
-        return load_dev7_spotlight(raw)
-    fixture_id = test15_fixture_for_catalog(raw)
+    if source_raw in DEV7_LESSONS:
+        return load_dev7_spotlight(source_raw)
+    fixture_id = test15_fixture_for_catalog(source_raw)
     if fixture_id:
         return load_test15_spotlight(fixture_id)
-    if raw in CATALOG_LESSONS:
-        return load_catalog_spotlight(raw)
+    if source_raw in CATALOG_LESSONS:
+        return load_catalog_spotlight(source_raw)
 
     # Only then allow normalized fallback.
-    if norm in DEV7_LESSONS:
-        return load_dev7_spotlight(norm)
-    fixture_id = test15_fixture_for_catalog(norm)
+    if source_norm in DEV7_LESSONS:
+        return load_dev7_spotlight(source_norm)
+    fixture_id = test15_fixture_for_catalog(source_norm)
     if fixture_id:
         return load_test15_spotlight(fixture_id)
-    if norm in CATALOG_LESSONS:
-        return load_catalog_spotlight(norm)
+    if source_norm in CATALOG_LESSONS:
+        return load_catalog_spotlight(source_norm)
     return None

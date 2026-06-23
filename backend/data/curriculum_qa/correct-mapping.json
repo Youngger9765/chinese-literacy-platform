@@ -1,0 +1,46 @@
+{
+  "version": "2026-06-23.issue-2397.rebind.v1",
+  "notes": "Title-anchored recovery mapping for rescued spotlight/story-structure content",
+  "spotlight": {
+    "G7-L31": {
+      "source_code": "G7-L23",
+      "title_anchor": "最後一隻旅人鴿",
+      "required_keywords": [
+        "旅人鴿"
+      ],
+      "reason": "Rescue second text content from verified mixed-source spotlight"
+    }
+  },
+  "story_structure": {
+    "G4-L2": {
+      "title_anchor": "十秒的背後",
+      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L2/structure.json",
+      "required_keywords": [
+        "楊俊瀚"
+      ]
+    },
+    "G4-L3": {
+      "title_anchor": "長高的祕密",
+      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L3/structure.json",
+      "required_keywords": [
+        "長高"
+      ]
+    },
+    "G4-L17": {
+      "title_anchor": "把球打好，就夠了嗎",
+      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L17/structure.json",
+      "required_keywords": [
+        "阿耀",
+        "健豪"
+      ]
+    },
+    "G4-L20": {
+      "title_anchor": "物以稀為貴",
+      "structure_snapshot": "backend/data/curriculum_qa/snapshots/G4-L20/structure.json",
+      "required_keywords": [
+        "供給",
+        "需求"
+      ]
+    }
+  }
+}

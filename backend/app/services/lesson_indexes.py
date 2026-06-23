@@ -18,6 +18,7 @@ from app.services.lesson_layer_loaders import (
     load_layer2_lessons,
     build_layer2_enrichment_index,
 )
+from app.services.content_mapping_registry import get_story_structure_override
 from app.services.spotlight_figure_images import merge_spotlight_images
 from app.services.spotlight_v2_loader import load_spotlight_v2
 
@@ -25,7 +26,7 @@ from app.services.spotlight_v2_loader import load_spotlight_v2
 def _reapply_spotlight_images(lesson: dict) -> None:
     """Layer-2 enrichment overwrites images[] — re-merge spotlight figure assets."""
     code = lesson.get("lesson_code") or lesson.get("grade_code") or ""
-    spotlight_v2 = lesson.get("spotlight_v2") or load_spotlight_v2(code)
+    spotlight_v2 = lesson.get("spotlight_v2") or load_spotlight_v2(code, lesson.get("title"))
     if not spotlight_v2:
         return
     lesson["spotlight_v2"] = spotlight_v2
@@ -75,6 +76,15 @@ def build_all_lessons() -> list[dict]:
                 l2_value = l2_data.get("strategy_exercises")
             if l2_value:  # only override when Layer-2 has a truthy value
                 lesson[field] = l2_value
+
+        structure_override = get_story_structure_override(
+            lesson.get("lesson_code") or lesson.get("grade_code") or "",
+            lesson.get("title"),
+        )
+        if structure_override:
+            lesson["story_structure_table"] = None
+            lesson["story_structure_rows"] = structure_override.get("rows")
+
         _reapply_spotlight_images(lesson)
 
     all_lessons = layer1 + layer2

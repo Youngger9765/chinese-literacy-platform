@@ -40,7 +40,6 @@ reading-strategy:
   - {lesson_code: G4-L3,  reason: no_spotlight_source}
   - {lesson_code: G4-L17, reason: no_spotlight_source}
   - {lesson_code: G4-L20, reason: no_spotlight_source}
-  - {lesson_code: G7-L31, reason: multi_text_secondary}
   # 無可抽取聚光燈段落 (extractor: spotlight range not found / empty blocks)
   - {lesson_code: G4-L1,  reason: no_spotlight_source}
   - {lesson_code: G4-L12, reason: no_spotlight_source}
@@ -78,8 +77,6 @@ reading-strategy:
   - {lesson_code: G8-L12b, reason: built_pending_deploy}
 
 story-structure:
-  # fail-closed: multi-text primary slot has shared table content drift risk
-  - {lesson_code: G4-L20, reason: no_keypoints_source}
   # 多文本課的第二/三篇 slot — 重點表內容在 primary slot (G7-L23)
   - {lesson_code: G7-L31, reason: multi_text_secondary}
 
