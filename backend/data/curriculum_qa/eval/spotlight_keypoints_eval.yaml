@@ -21,6 +21,13 @@ cases:
     expected_verdict: skeleton
     why: "paragraphs 是純『一 二 三』標號無實質內文"
     source: "cursor 抽查 + gate L1_BASE_TEXT_QUALITY"
+    # DISPUTED(round2+3 一致 judge=faithful conf 1,待人工定真相):
+    #   skeleton 描述的是 base text(課文 paragraphs),不是聚光燈 render 頁。
+    #   render 實看:聚光燈頁《成為身體的最佳夥伴》有完整句子+多題身體覺察練習 = 非骨架。
+    #   架構結論:skeleton 是 base-text / 資料層缺陷,gate L1 BASE_TEXT_QUALITY 已抓
+    #   (全 matrix 只此 1 cell),render 的鷹架把它填成有內容 → 不該要 vision judge 從
+    #   render 認 skeleton。建議:此測項移到 L1 文字層,或換一個 render 真為骨架的 cell。
+    disputed: skeleton_is_l1_base_text_layer_not_vision
 
   # ---- 確定 PASS(faithful) ----
   - story_id: 1115
@@ -38,6 +45,13 @@ cases:
     expected_verdict: faithful
     why: "原雨林/箭毒已修成旅人鴿(staging 旅人鴿=True 箭毒=False)"
     source: "本 session #2395 修復 staging 驗證"
+    # DISPUTED(round2+3 一致 judge=cross_lesson conf 1,待人工定真相):
+    #   2026-06-23 重查 staging API + render:title=最後一隻旅人鴿,但 spotlight 主體
+    #   內嵌的練習課文是〈雨林裡的奇蹟藥物〉(箭毒),所有練習題問雨林/箭毒/科學家採探。
+    #   judge 看「被分析的主體文本是雨林不是旅人鴿」→ 判 cross,可辯護甚至可能正確。
+    #   本課策略=「跳過卡關詞先瀏覽」故意借另一篇當練習文本。需人工定:借他課文本當
+    #   策略練習算 faithful 還是 cross?(此 label 假設 #2395 已修,但 render 顯示沒修到)
+    disputed: borrowed_practice_text_OR_stale_fix
 
   - story_id: 1098
     title: "背影讀書會"
@@ -59,6 +73,13 @@ cases:
     expected_verdict: faithful
     why: "聚光燈是『論據檢核』策略鷹架(通用引導語,合法),非張冠李戴(被舊啟發式誤判)"
     source: "claude 抽查"
+    # DISPUTED(round2+3 一致 judge=figure_broken conf 0.9,待人工定真相):
+    #   文字內容 judge 認同忠實,但頁面下方有一張「模糊/像素化」的手指圖(圖二/圖三)。
+    #   judge 讀成「載入失敗/佔位圖」。此圖其實有載出來但畫質極差,介於「醜圖」與
+    #   「實質上壞掉」之間 = 邊界案例。收緊 figure_broken prompt(圖醜≠圖破)後仍 miss,
+    #   代表這張圖糊到 model 視為破圖 → 可能該課圖本身就該換/重壓。需人工定:
+    #   這張糊圖算 faithful 還是該標 figure_broken(= 該課圖品質本身是缺陷)?
+    disputed: degraded_blurry_image_borderline_broken
 
   - story_id: 6
     title: "第一百碗麵"
