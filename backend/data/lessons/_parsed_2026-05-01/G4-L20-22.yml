@@ -202,7 +202,7 @@ images:
   content_type: image/png
   caption: ''
 image_count: 6
-story_structure_table_source: docx-keypoints-2026-06-18
+story_structure_table_source: docx-keypoints-2026-06-23
 vocab_bank:
   B: 義憤填膺
   C: 望穿秋水
@@ -332,23 +332,23 @@ story_structure_table:
   - 商店店員、飯店房務人員、拔釘工人、送餐人員
   - 引水人
 - - 薪水
-  - □高　　低
-  - 高　　□低
+  - □高　　□低
+  - □高　　□低
 - - 技術門檻
-  - □高　　低
-  - 高　　□低
+  - □高　　□低
+  - □高　　□低
 - - 條件
   - __
-  - '❶證照難易度難  □簡單
+  - '❶證照難易度□難  □簡單
 
-    ❷經驗需要  多  □少
+    ❷經驗需要  □多  □少
 
-    ❸年資需要  □短  長
+    ❸年資需要  □短  □長
 
-    ❹體能需要  強  □普通【 身體健康 】'
+    ❹體能需要  □強  □普通【 身體健康 】'
 - - 市場稀有性
-  - 常見　　□稀有
-  - □常見　　稀有
+  - □常見　　□稀有
+  - □常見　　□稀有
 - - 市場供需情況（填多或少）
   - '供給__
 

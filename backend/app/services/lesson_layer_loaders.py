@@ -376,18 +376,18 @@ def load_layer2_lessons(
         # Video links: prefer manifest (has cleaned URLs), fall back to parsed
         video_links = meta.get("video_links") or data.get("video_links")
 
+        # Content mapping is a title-anchor guard for known catalog slots.
+        # It should never force table→rows degradation in runtime payload.
         structure_override = get_story_structure_override(norm_code, title)
-        if structure_override:
-            # Title-anchored recovery mapping: use verified per-lesson rows.
+        is_multi_text_primary_slot = norm_code in MULTI_LESSON_PRIMARY
+        allow_multi_text_table = bool(structure_override)
+        if is_multi_text_primary_slot and not allow_multi_text_table:
+            # Fail-closed for unverified multi-text primary slots.
             story_structure_table = None
-            story_structure_rows = structure_override.get("rows")
+            story_structure_rows = None
         else:
-            # Fail-closed for primary slots backed by one multi-text parsed file
-            # (e.g. G4-L20 -> G4-L20-22). The shared table content can mix multiple
-            # texts and bind to the wrong lesson slot.
-            is_multi_text_primary_slot = norm_code in MULTI_LESSON_PRIMARY
-            story_structure_table = None if is_multi_text_primary_slot else data.get("story_structure_table")
-            story_structure_rows = None if is_multi_text_primary_slot else data.get("story_structure_rows")
+            story_structure_table = data.get("story_structure_table")
+            story_structure_rows = data.get("story_structure_rows")
 
         lesson = {
             "id": lesson_id,

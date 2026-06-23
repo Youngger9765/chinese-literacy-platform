@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T08:41:04.272682+00:00",
+  "generated_at": "2026-06-23T08:55:28.601805+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -8,11 +8,11 @@
     "L3"
   ],
   "summary": {
-    "total": 151,
-    "pass": 145,
-    "fail": 6,
+    "total": 148,
+    "pass": 148,
+    "fail": 0,
     "known_gap_count": 0,
-    "failure_count": 4
+    "failure_count": 0
   },
   "lessons": [
     {
@@ -349,8 +349,8 @@
       "story_id": 1017,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -361,10 +361,8 @@
         },
         "L3_catalog": {
           "gate": "L3_catalog",
-          "pass": false,
-          "issues": [
-            "loader missing story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3": {
           "gate": "L3",
@@ -374,7 +372,7 @@
       },
       "layout": {
         "mode": "fill_blank",
-        "layout": "cards",
+        "layout": "worksheet_table",
         "fill_blank_count": 2,
         "checkbox_count": 0,
         "row_count": 3
@@ -515,8 +513,8 @@
       "story_id": 1020,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -525,17 +523,13 @@
         },
         "L2": {
           "gate": "L2",
-          "pass": false,
-          "issues": [
-            "fingerprint mismatch"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
-          "pass": false,
-          "issues": [
-            "loader missing story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3": {
           "gate": "L3",
@@ -545,7 +539,7 @@
       },
       "layout": {
         "mode": "fill_blank",
-        "layout": "cards",
+        "layout": "worksheet_table",
         "fill_blank_count": 2,
         "checkbox_count": 0,
         "row_count": 6
@@ -768,8 +762,8 @@
       "story_id": 3,
       "tier": "docx_keypoints",
       "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "fail",
+      "overall_pass": true,
+      "overall_status": "pass",
       "gates": {
         "L1": {
           "gate": "L1",
@@ -780,10 +774,8 @@
         },
         "L3_catalog": {
           "gate": "L3_catalog",
-          "pass": false,
-          "issues": [
-            "loader missing story_structure_table"
-          ]
+          "pass": true,
+          "issues": []
         },
         "L3": {
           "gate": "L3",
@@ -793,7 +785,7 @@
       },
       "layout": {
         "mode": "fill_blank",
-        "layout": "cards",
+        "layout": "worksheet_table",
         "fill_blank_count": 2,
         "checkbox_count": 0,
         "row_count": 2
@@ -1718,29 +1710,6 @@
         "has_structure_snapshot": true
       },
       "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
-    },
-    {
-      "lesson_id": "G5-L24",
-      "title": "牧羊少年的逆轉勝",
-      "story_id": 1051,
-      "tier": "no_keypoints_docx",
-      "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "skip",
-      "gates": {},
-      "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
-      },
-      "artifacts": {
-        "has_keypoints_yml": false,
-        "has_original_preview": false,
-        "has_structure_snapshot": false
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L24-25.yml"
     },
     {
       "lesson_id": "G5-L26",
@@ -5401,52 +5370,6 @@
       "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
     },
     {
-      "lesson_id": "G9-L15",
-      "title": "未解之謎──石頭的祕密（一）：巨石陣",
-      "story_id": 1144,
-      "tier": "no_keypoints_docx",
-      "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "skip",
-      "gates": {},
-      "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
-      },
-      "artifacts": {
-        "has_keypoints_yml": false,
-        "has_original_preview": false,
-        "has_structure_snapshot": false
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L15-16.yml"
-    },
-    {
-      "lesson_id": "G9-L17",
-      "title": "馬拉松王者──基普喬吉 (記敘文)",
-      "story_id": 1146,
-      "tier": "no_keypoints_docx",
-      "known_data_gap": false,
-      "overall_pass": false,
-      "overall_status": "skip",
-      "gates": {},
-      "layout": {
-        "mode": null,
-        "layout": null,
-        "fill_blank_count": null,
-        "checkbox_count": null,
-        "row_count": 0
-      },
-      "artifacts": {
-        "has_keypoints_yml": false,
-        "has_original_preview": false,
-        "has_structure_snapshot": false
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L17-19.yml"
-    },
-    {
       "lesson_id": "G9-L2",
       "title": "帝國家書：一個普通家庭的生與死",
       "story_id": 1131,
@@ -6188,34 +6111,5 @@
       "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
   ],
-  "raw_failures": [
-    {
-      "lesson_id": "G4-L20",
-      "gate": "L2",
-      "issues": [
-        "fingerprint mismatch"
-      ]
-    },
-    {
-      "lesson_id": "G4-L20",
-      "gate": "L3_catalog",
-      "issues": [
-        "loader missing story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L3",
-      "gate": "L3_catalog",
-      "issues": [
-        "loader missing story_structure_table"
-      ]
-    },
-    {
-      "lesson_id": "G4-L17",
-      "gate": "L3_catalog",
-      "issues": [
-        "loader missing story_structure_table"
-      ]
-    }
-  ]
+  "raw_failures": []
 }

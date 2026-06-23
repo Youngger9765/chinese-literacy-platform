@@ -18,8 +18,8 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "□高　　低",
-          "value": "高　　□低",
+          "label": "□高　　□低",
+          "value": "□高　　□低",
           "interactive_type": "display"
         }
       ]
@@ -30,8 +30,8 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "□高　　低",
-          "value": "高　　□低",
+          "label": "□高　　□低",
+          "value": "□高　　□低",
           "interactive_type": "display"
         }
       ]
@@ -43,7 +43,7 @@
       "sub_rows": [
         {
           "label": "__",
-          "value": "❶證照難易度難  □簡單\n❷經驗需要  多  □少\n❸年資需要  □短  長\n❹體能需要  強  □普通【　　　】",
+          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】",
           "interactive_type": "fill_blank"
         }
       ]
@@ -54,8 +54,8 @@
       "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "常見　　□稀有",
-          "value": "□常見　　稀有",
+          "label": "□常見　　□稀有",
+          "value": "□常見　　□稀有",
           "interactive_type": "display"
         }
       ]
@@ -73,6 +73,69 @@
       ]
     }
   ],
+  "layout": "worksheet_table",
+  "worksheet_rows": [
+    {
+      "kind": "section_block",
+      "section": "職業",
+      "items": [
+        {
+          "label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
+          "value": "引水人"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "薪水",
+      "items": [
+        {
+          "label": "□高　　□低",
+          "value": "□高　　□低"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "技術門檻",
+      "items": [
+        {
+          "label": "□高　　□低",
+          "value": "□高　　□低"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "條件",
+      "items": [
+        {
+          "label": "__",
+          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "市場稀有性",
+      "items": [
+        {
+          "label": "□常見　　□稀有",
+          "value": "□常見　　□稀有"
+        }
+      ]
+    },
+    {
+      "kind": "section_block",
+      "section": "市場供需情況（填多或少）",
+      "items": [
+        {
+          "label": "供給__\n需求__",
+          "value": "供給【　　　】\n需求【　　　】【　　　】【　　　】"
+        }
+      ]
+    }
+  ],
   "interaction_profile": {
     "mode": "fill_blank",
     "template_kind": "generic",
@@ -82,6 +145,6 @@
       "__",
       "供給__\n需求__"
     ],
-    "layout": "cards"
+    "layout": "worksheet_table"
   }
 }

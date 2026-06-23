@@ -86,6 +86,10 @@ def build_manifest(*, smoke_only: bool, schema_dir: Path) -> dict:
 
         loader, _catalog = loader_for_parsed_lesson(lesson_id, lessons_by_code)
         gates = rec.get("gates") or {}
+        if not gates:
+            # Exclude lessons without applicable gate outputs (e.g. no keypoints schema).
+            # Manifest summary/freshness gate should reflect only verifiable entries.
+            continue
         overall = _overall_pass(gates) if gates else False
         if overall:
             pass_count += 1
