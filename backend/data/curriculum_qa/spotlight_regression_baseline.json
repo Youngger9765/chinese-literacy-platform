@@ -309,11 +309,10 @@
   "G5-L16": {
     "tier": "catalog",
     "n_blocks": 17,
-    "n_questions": 1,
+    "n_questions": 3,
     "type_counts": {
       "guide": 14,
-      "figure": 2,
-      "fill_table": 1
+      "fill_table": 3
     },
     "content_hash": "d60121be0f8f0c1b",
     "source_code": "G5-L16"
@@ -1468,12 +1467,12 @@
   "G9-L9": {
     "tier": "test15",
     "n_blocks": 22,
-    "n_questions": 8,
+    "n_questions": 9,
     "type_counts": {
       "guide": 11,
       "passage": 2,
       "free_text": 8,
-      "figure": 1
+      "fill_table": 1
     },
     "content_hash": "7629c121ac340d4c",
     "source_code": null
