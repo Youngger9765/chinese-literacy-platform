@@ -1,0 +1,251 @@
+{
+  "name": "spotlight-g4-batch",
+  "runnable": "pixie_qa/run_app.py:VisionJudgeRunnable",
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "entries": [
+    {
+      "input_data": {
+        "story_id": 2,
+        "step": "reading-strategy"
+      },
+      "description": "2 G4-L02 reading-strategy: 十秒的背後",
+      "eval_metadata": {
+        "lesson_code": "G4-L02",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 3,
+        "step": "reading-strategy"
+      },
+      "description": "3 G4-L03 reading-strategy: 長高的祕密",
+      "eval_metadata": {
+        "lesson_code": "G4-L03",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 4,
+        "step": "reading-strategy"
+      },
+      "description": "4 G4-L04 reading-strategy: 運動科學",
+      "eval_metadata": {
+        "lesson_code": "G4-L04",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 5,
+        "step": "reading-strategy"
+      },
+      "description": "5 G4-L05 reading-strategy: 穿越極限的跑者",
+      "eval_metadata": {
+        "lesson_code": "G4-L05",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1010,
+        "step": "reading-strategy"
+      },
+      "description": "1010 G4-L10 reading-strategy: 美好的一天",
+      "eval_metadata": {
+        "lesson_code": "G4-L10",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1011,
+        "step": "reading-strategy"
+      },
+      "description": "1011 G4-L11 reading-strategy: 誤會",
+      "eval_metadata": {
+        "lesson_code": "G4-L11",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 6,
+        "step": "reading-strategy"
+      },
+      "description": "6 G4-L13 reading-strategy: 第一百碗麵",
+      "eval_metadata": {
+        "lesson_code": "G4-L13",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1015,
+        "step": "reading-strategy"
+      },
+      "description": "1015 G4-L15 reading-strategy: 感情小日記1──是友情還是愛情？",
+      "eval_metadata": {
+        "lesson_code": "G4-L15",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1016,
+        "step": "reading-strategy"
+      },
+      "description": "1016 G4-L16 reading-strategy: 感情小日記2──喜歡是什麼？",
+      "eval_metadata": {
+        "lesson_code": "G4-L16",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1017,
+        "step": "reading-strategy"
+      },
+      "description": "1017 G4-L17 reading-strategy: 把球打好，就夠了嗎？ ──阿耀與健豪學長的通信（一）",
+      "eval_metadata": {
+        "lesson_code": "G4-L17",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1018,
+        "step": "reading-strategy"
+      },
+      "description": "1018 G4-L18 reading-strategy: 想讀書，該從哪裡著手？ ──阿耀與健豪學長的通信（二）",
+      "eval_metadata": {
+        "lesson_code": "G4-L18",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1019,
+        "step": "reading-strategy"
+      },
+      "description": "1019 G4-L19 reading-strategy: 救援大隊的好幫手",
+      "eval_metadata": {
+        "lesson_code": "G4-L19",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1020,
+        "step": "reading-strategy"
+      },
+      "description": "1020 G4-L20 reading-strategy: 物以稀為貴： 從「供給」和「需求」談物價波動",
+      "eval_metadata": {
+        "lesson_code": "G4-L20",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1023,
+        "step": "reading-strategy"
+      },
+      "description": "1023 G4-L23 reading-strategy: 心，也要一起練",
+      "eval_metadata": {
+        "lesson_code": "G4-L23",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1024,
+        "step": "reading-strategy"
+      },
+      "description": "1024 G4-L24 reading-strategy: 成為身體的最佳夥伴",
+      "eval_metadata": {
+        "lesson_code": "G4-L24",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1025,
+        "step": "reading-strategy"
+      },
+      "description": "1025 G4-L25 reading-strategy: 身體，謝謝你",
+      "eval_metadata": {
+        "lesson_code": "G4-L25",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1026,
+        "step": "reading-strategy"
+      },
+      "description": "1026 G4-L26 reading-strategy: 專注當下：關掉內心的批評噪音",
+      "eval_metadata": {
+        "lesson_code": "G4-L26",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1027,
+        "step": "reading-strategy"
+      },
+      "description": "1027 G4-L27 reading-strategy: 從白熊到藍海豚：學習與念頭和平相處",
+      "eval_metadata": {
+        "lesson_code": "G4-L27",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1006,
+        "step": "reading-strategy"
+      },
+      "description": "1006 G4-L6 reading-strategy: 這是什麼「意思」？",
+      "eval_metadata": {
+        "lesson_code": "G4-L6",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1007,
+        "step": "reading-strategy"
+      },
+      "description": "1007 G4-L7 reading-strategy: 正太與小豬：武僧的養成之路",
+      "eval_metadata": {
+        "lesson_code": "G4-L7",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1008,
+        "step": "reading-strategy"
+      },
+      "description": "1008 G4-L8 reading-strategy: 最美的畫面",
+      "eval_metadata": {
+        "lesson_code": "G4-L8",
+        "batch": "g4-first"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1009,
+        "step": "reading-strategy"
+      },
+      "description": "1009 G4-L9 reading-strategy: 大自然的氣象小幫手",
+      "eval_metadata": {
+        "lesson_code": "G4-L9",
+        "batch": "g4-first"
+      }
+    }
+  ]
+}

@@ -156,11 +156,21 @@ export function fingerprintBlocks(blocks: SpotlightBlock[]): {
 /** Resolve GCS lesson directory (e.g. G7-L29) for figure images. */
 export function resolveLessonCode(
   spotlight: { lesson?: string },
-  story: { lesson_code?: string; images?: { filename: string }[] } | null | undefined,
+  story: {
+    lesson_code?: string;
+    grade_code?: string;
+    worksheet_pdf_url?: string;
+    images?: { filename: string }[];
+  } | null | undefined,
   lessonId?: string | number,
   imageFilename?: string,
 ): string {
   if (story?.lesson_code) return story.lesson_code;
+  if (story?.grade_code) return story.grade_code;
+  if (story?.worksheet_pdf_url) {
+    const m = /\/worksheets\/([^/]+)\.pdf$/i.exec(story.worksheet_pdf_url);
+    if (m?.[1]) return m[1];
+  }
   if (spotlight.lesson) return spotlight.lesson;
   if (typeof lessonId === 'string' && lessonId.includes('-')) return lessonId;
   if (imageFilename) return deriveLessonCodeFromFilename(imageFilename);

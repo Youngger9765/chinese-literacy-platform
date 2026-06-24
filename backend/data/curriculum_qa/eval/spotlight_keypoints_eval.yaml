@@ -1,0 +1,141 @@
+# EDD ground-truth eval set — 聚光燈/重點表 多模態 vision judge 校準用
+# 用途:judge 必須先在這組標註 case 上達標(正確分類 expected_verdict)才准拿去跑全 152 課
+# 守則:這裡每個 label 都是 2026-06 session 人工(Young/cursor/Claude 抽查)對源/對 render 驗過的高信心真相
+# verdict 值:faithful(內容+排版忠實本課) / cross_lesson(張冠李戴,內容是別課) / skeleton(純骨架無實質) / figure_broken(假佔位圖或破圖)
+# 注意:judge 是多模態 —— 餵「render 截圖」不是 API 文字;通用教學鷹架語(小試身手/請打勾/論據檢核)算 faithful 不算 cross
+
+cases:
+  # ---- 確定 FAIL ----
+  - story_id: 1020
+    lesson_code: G4-L20
+    title: "物以稀為貴:從供給和需求談物價波動"
+    step: reading-strategy
+    expected_verdict: cross_lesson
+    why: "聚光燈整段是『天才是練出來的』(費德勒/海菲茲練習),與本課供給/需求物價完全無關 = 張冠李戴"
+    source: "claude+cursor 抽查 staging 2026-06-22/23"
+
+  - story_id: 1024
+    lesson_code: G4-L24
+    title: "(骨架課)"
+    step: reading-strategy
+    expected_verdict: skeleton
+    why: "paragraphs 是純『一 二 三』標號無實質內文"
+    source: "cursor 抽查 + gate L1_BASE_TEXT_QUALITY"
+    # DISPUTED(round2+3 一致 judge=faithful conf 1,待人工定真相):
+    #   skeleton 描述的是 base text(課文 paragraphs),不是聚光燈 render 頁。
+    #   render 實看:聚光燈頁《成為身體的最佳夥伴》有完整句子+多題身體覺察練習 = 非骨架。
+    #   架構結論:skeleton 是 base-text / 資料層缺陷,gate L1 BASE_TEXT_QUALITY 已抓
+    #   (全 matrix 只此 1 cell),render 的鷹架把它填成有內容 → 不該要 vision judge 從
+    #   render 認 skeleton。建議:此測項移到 L1 文字層,或換一個 render 真為骨架的 cell。
+    disputed: skeleton_is_l1_base_text_layer_not_vision
+
+  # ---- 確定 PASS(faithful) ----
+  - story_id: 1115
+    lesson_code: G8-L4
+    title: "玻璃娃娃"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "張冠李戴已修(玻璃娃娃內容對),假圖已清(prod figure block=0)"
+    source: "本 session 修復 + prod 驗證 2026-06-22"
+
+  - story_id: 1103
+    lesson_code: G7-L31
+    title: "旅人鴿"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "原雨林/箭毒已修成旅人鴿(staging 旅人鴿=True 箭毒=False)"
+    source: "本 session #2395 修復 staging 驗證"
+    # DISPUTED(round2+3 一致 judge=cross_lesson conf 1,待人工定真相):
+    #   2026-06-23 重查 staging API + render:title=最後一隻旅人鴿,但 spotlight 主體
+    #   內嵌的練習課文是〈雨林裡的奇蹟藥物〉(箭毒),所有練習題問雨林/箭毒/科學家採探。
+    #   judge 看「被分析的主體文本是雨林不是旅人鴿」→ 判 cross,可辯護甚至可能正確。
+    #   本課策略=「跳過卡關詞先瀏覽」故意借另一篇當練習文本。需人工定:借他課文本當
+    #   策略練習算 faithful 還是 cross?(此 label 假設 #2395 已修,但 render 顯示沒修到)
+    disputed: borrowed_practice_text_OR_stale_fix
+
+  - story_id: 1098
+    title: "背影讀書會"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈明寫『作者(朱自清)為什麼選擇寫背影』= 完全對應本課"
+    source: "claude 抽查 staging 2026-06-23"
+
+  - story_id: 1015
+    title: "感情小日記──是友情還是愛情?"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講友情與愛情差異/互動判斷 = 對應本課(被舊 anti-cross 啟發式誤判)"
+    source: "cursor+claude 抽查"
+
+  - story_id: 1132
+    title: "國高中數學課當然可以使用計算機"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈是『論據檢核』策略鷹架(通用引導語,合法),非張冠李戴(被舊啟發式誤判)"
+    source: "claude 抽查"
+    # DISPUTED(round2+3 一致 judge=figure_broken conf 0.9,待人工定真相):
+    #   文字內容 judge 認同忠實,但頁面下方有一張「模糊/像素化」的手指圖(圖二/圖三)。
+    #   judge 讀成「載入失敗/佔位圖」。此圖其實有載出來但畫質極差,介於「醜圖」與
+    #   「實質上壞掉」之間 = 邊界案例。收緊 figure_broken prompt(圖醜≠圖破)後仍 miss,
+    #   代表這張圖糊到 model 視為破圖 → 可能該課圖本身就該換/重壓。需人工定:
+    #   這張糊圖算 faithful 還是該標 figure_broken(= 該課圖品質本身是缺陷)?
+    disputed: degraded_blurry_image_borderline_broken
+
+  - story_id: 6
+    title: "第一百碗麵"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講換位思考並點名阿公/小男孩/麵攤老闆(本課角色)= 對應本課(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 1006
+    title: "這是什麼意思"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講指稱詞/推論三步驟 = 本課主題(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 1143
+    title: "焚而不毀的倫敦"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈講倫敦人/心理韌性 = 本課(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  - story_id: 22
+    title: "植物獵人"
+    step: reading-strategy
+    expected_verdict: faithful
+    why: "聚光燈『問出重要問題』策略鷹架(通用引導,合法)非張冠李戴(被舊啟發式誤判)"
+    source: "claude 抽查"
+
+  # ---- figure_broken(多模態 judge 的關鍵測項)----
+  - story_id: 1118
+    lesson_code: G8-L6b
+    title: "隱形的征服者"
+    step: reading-strategy
+    expected_verdict: figure_broken
+    why: "聚光燈內文忠實(推論策略-找出因果),但頁面中央有明顯『圖片載入失敗』佔位框 = figure_broken;這是文字層看不到、只有 render 截圖才抓得到的缺陷。gate matrix figure_blacklist_hit 命中(placeholder md5)"
+    source: "本 session render 截圖人工驗證 2026-06-23 + gate figure_blacklist_hits"
+
+  # ---- story-structure(重點表)case ----
+  - story_id: 1115
+    lesson_code: G8-L4
+    title: "玻璃娃娃"
+    step: story-structure
+    expected_verdict: faithful
+    why: "左側參考課文=玻璃娃娃,右側文章重點表呈現玻璃娃娃事故概要/主要爭議 = 內容對應本課,排版正常無破圖"
+    source: "本 session render 截圖人工驗證 2026-06-23"
+
+  - story_id: 6
+    title: "第一百碗麵"
+    step: story-structure
+    expected_verdict: faithful
+    why: "右側文章重點表要學生填本課情節(老人點最便宜的麵給孫子/寒流小男孩請阿公吃麵)= 忠實對應本課"
+    source: "本 session render 截圖人工驗證 2026-06-23"
+
+  # ---- 待補(未加入校準 — 標籤需更謹慎人工定真相,不在本輪硬塞)----
+  # - 1024 story-structure:左側參考課文是骨架(一二三…),右側重點表卻有實質內容,
+  #   judge 讀成 cross_lesson;此 cell 本身定義模糊(骨架課 + 疑似錯置重點表),
+  #   需人工定 ground truth 後再加,避免錯標污染校準。
+  # - 更多 cross_lesson 負樣本:多文本 fail (G5-L24/G9-L15/G9-L17) render 後人工驗再加。

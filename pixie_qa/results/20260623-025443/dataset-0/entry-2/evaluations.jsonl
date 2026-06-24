@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Quotes the actual practice item (陳同學緊抱顏同學當肉墊) tying render to the 玻璃娃娃 text — concrete, justifies faithful."}

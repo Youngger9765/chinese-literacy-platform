@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1015 G4-L15 reading-strategy: 感情小日記1──是友情還是愛情？",
+  "evalMetadata": {
+    "lesson_code": "G4-L15",
+    "batch": "g4-first"
+  }
+}

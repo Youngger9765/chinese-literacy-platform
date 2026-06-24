@@ -100,6 +100,19 @@ python3 scripts/eval_lesson_schema.py --dev
 
 Known-gap 課次（不需修 — filename 無括號無法偵測 strategy）：`G4-L1`, `G9-L10`
 
+## Ship gate（PR / 宣稱 pass 前必過 — #2397）
+
+per-lesson eval + 人眼抽審是課級檢查。要宣稱「重點表這批 ship 得了」**還要過全平台 content evidence gate（fail-closed）**：
+
+```bash
+python scripts/content_evidence_gate.py --run-id <id>
+bash   scripts/content_evidence_ship_gate.sh --run-id <id>   # 須印 CONTENT_EVIDENCE_GATE=PASS
+```
+
+重建 manifest 後也跑 `pytest backend/specs/test_keypoints_manifest_spec.py`（`test_manifest_matches_runtime` 確保 manifest = live runtime，無假綠）。只認 evidence 檔（`fail_cells=0` + `unknown_cells=0`）。真缺口登 `content_known_gaps.yaml` 的 `story-structure:` 段標 known_gap（誠實，非 pass）。
+
+**多文本課**（一 DOCX 多篇，compound YAML）：判斷該不該跑 L1 gate 用 `docx_keypoints_available`，不是單槽 parsed table 在不在（見 build-keypoints SKILL「Multi-text lessons」）。
+
 ## 反模式
 
 - ❌ 只看 auto-eval 數字就算過——cell_integrity 是 bool，但語意錯亂不一定觸發它
@@ -107,3 +120,5 @@ Known-gap 課次（不需修 — filename 無括號無法偵測 strategy）：`G
 - ❌ overfit lint FAIL 但繼續跑——lint FAIL = 規則不通用，eval 數字不可信
 - ❌ 跳過人眼抽審——nested 還原錯誤只有人眼才能抓到
 - ❌ 把 eval 邏輯複製進 SKILL——引用 eval_lesson_schema.py，不重複
+- ❌ 憑單課 eval pass 就宣稱整批 ship——要過 content evidence ship-gate
+- ❌ 把真缺口 fake 成 pass——登 content_known_gaps.yaml 標 known_gap

@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖內容明確指出本課讀書會討論主題是「作者(朱自清)為什麼選擇寫背影?」，並以「讀書會」為例說明詰問作者的步驟。雖然在舉例時提到「作者是林玫伶喔」，但這只是教學示範中的一個小插曲，頁面主體內容仍圍繞著「背影」這課的閱讀策略，因此判斷為 faithful。", "suspected_actual_lesson": ""}}

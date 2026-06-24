@@ -33,6 +33,8 @@ Internal structure (Issue #1889 — split into focused modules):
   lesson_indexes.py             — build + expose singleton lesson collections
 """
 
+import re
+
 # ---------------------------------------------------------------------------
 # Backward-compatible re-exports from sub-modules
 # (all names that callers currently import directly from lesson_loader)
@@ -120,6 +122,14 @@ def get_lesson_by_code(lesson_code: str) -> dict | None:
     lesson = _LESSONS_BY_CODE.get(normalized)
     if lesson:
         return lesson
+    # Legacy zero-padded aliases in Layer-1 (e.g. G4-L03).
+    match = re.match(r"^([A-Za-z0-9一-鿿]+-L)(\d+)([A-Za-z]?)$", normalized)
+    if match:
+        prefix, num, suffix = match.groups()
+        padded = f"{prefix}{num.zfill(2)}{suffix}"
+        lesson = _LESSONS_BY_CODE.get(padded)
+        if lesson:
+            return lesson
     # Multi-text secondary slot fallback: look up the primary slot (#1669).
     # G4-L21 → G4-L20-22 → primary code G4-L20
     primary_compound = _MULTI_LESSON_MAP.get(normalized)

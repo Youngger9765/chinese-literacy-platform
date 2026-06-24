@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 0.9, "reasoning": "截圖內容明確提及「課文中的倫敦人」、「倫敦大轟炸」等關鍵字，並討論心理韌性、社會支持和樂觀詮釋，這些都與《焚而不毀的倫敦》這課的主題高度相關。圖片雖然是通用圖示，但內容文字忠實於本課。", "suspected_actual_lesson": ""}}

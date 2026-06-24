@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "cross_lesson"}
+{"name": "judge_detail", "value": {"verdict": "cross_lesson", "confidence": 0.9, "reasoning": "截圖的第二題明確提到「《龍慶元宵》彭仁星」，這與本課《十秒的背後》的主題「楊俊瀚的短跑生涯」完全無關。雖然第一題是通用策略，但第二題的主體內容明顯是另一課的文本。", "suspected_actual_lesson": "龍慶元宵"}}

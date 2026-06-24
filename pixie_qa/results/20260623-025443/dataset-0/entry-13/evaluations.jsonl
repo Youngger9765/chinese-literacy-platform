@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Cites the 重點表 fill-ins (背景/起因/經過/結果) all drawn from 第一百碗麵 — concrete, justifies faithful for story-structure."}

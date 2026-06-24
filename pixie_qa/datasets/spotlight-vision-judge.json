@@ -1,0 +1,184 @@
+{
+  "name": "spotlight-vision-judge",
+  "runnable": "pixie_qa/run_app.py:VisionJudgeRunnable",
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "entries": [
+    {
+      "input_data": {
+        "story_id": 1020,
+        "step": "reading-strategy"
+      },
+      "description": "1020 G4-L20 reading-strategy: 物以稀為貴:從供給和需求談物價波動",
+      "expectation": "verdict should be cross_lesson — 聚光燈整段是『天才是練出來的』(費德勒/海菲茲練習),與本課供給/需求物價完全無關 = 張冠李戴",
+      "eval_metadata": {
+        "expected_verdict": "cross_lesson",
+        "lesson_code": "G4-L20"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1024,
+        "step": "reading-strategy"
+      },
+      "description": "1024 G4-L24 reading-strategy: (骨架課)",
+      "expectation": "verdict should be faithful — paragraphs 是純『一 二 三』標號無實質內文",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": "G4-L24",
+        "original_label": "skeleton",
+        "disputed": "skeleton_is_l1_base_text_layer_not_vision"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1115,
+        "step": "reading-strategy"
+      },
+      "description": "1115 G8-L4 reading-strategy: 玻璃娃娃",
+      "expectation": "verdict should be faithful — 張冠李戴已修(玻璃娃娃內容對),假圖已清(prod figure block=0)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": "G8-L4"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1103,
+        "step": "reading-strategy"
+      },
+      "description": "1103 G7-L31 reading-strategy: 旅人鴿",
+      "expectation": "verdict should be cross_lesson — 原雨林/箭毒已修成旅人鴿(staging 旅人鴿=True 箭毒=False)",
+      "eval_metadata": {
+        "expected_verdict": "cross_lesson",
+        "lesson_code": "G7-L31",
+        "original_label": "faithful",
+        "disputed": "borrowed_practice_text_OR_stale_fix"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1098,
+        "step": "reading-strategy"
+      },
+      "description": "1098  reading-strategy: 背影讀書會",
+      "expectation": "verdict should be faithful — 聚光燈明寫『作者(朱自清)為什麼選擇寫背影』= 完全對應本課",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1015,
+        "step": "reading-strategy"
+      },
+      "description": "1015  reading-strategy: 感情小日記──是友情還是愛情?",
+      "expectation": "verdict should be faithful — 聚光燈講友情與愛情差異/互動判斷 = 對應本課(被舊 anti-cross 啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1132,
+        "step": "reading-strategy"
+      },
+      "description": "1132  reading-strategy: 國高中數學課當然可以使用計算機",
+      "expectation": "verdict should be figure_broken — 聚光燈是『論據檢核』策略鷹架(通用引導語,合法),非張冠李戴(被舊啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "figure_broken",
+        "lesson_code": "",
+        "original_label": "faithful",
+        "disputed": "degraded_blurry_image_borderline_broken"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 6,
+        "step": "reading-strategy"
+      },
+      "description": "6  reading-strategy: 第一百碗麵",
+      "expectation": "verdict should be faithful — 聚光燈講換位思考並點名阿公/小男孩/麵攤老闆(本課角色)= 對應本課(被舊啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1006,
+        "step": "reading-strategy"
+      },
+      "description": "1006  reading-strategy: 這是什麼意思",
+      "expectation": "verdict should be faithful — 聚光燈講指稱詞/推論三步驟 = 本課主題(被舊啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1143,
+        "step": "reading-strategy"
+      },
+      "description": "1143  reading-strategy: 焚而不毀的倫敦",
+      "expectation": "verdict should be faithful — 聚光燈講倫敦人/心理韌性 = 本課(被舊啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 22,
+        "step": "reading-strategy"
+      },
+      "description": "22  reading-strategy: 植物獵人",
+      "expectation": "verdict should be faithful — 聚光燈『問出重要問題』策略鷹架(通用引導,合法)非張冠李戴(被舊啟發式誤判)",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1118,
+        "step": "reading-strategy"
+      },
+      "description": "1118 G8-L6b reading-strategy: 隱形的征服者",
+      "expectation": "verdict should be figure_broken — 聚光燈內文忠實(推論策略-找出因果),但頁面中央有明顯『圖片載入失敗』佔位框 = figure_broken;這是文字層看不到、只有 render 截圖才抓得到的缺陷。gate matrix figure_blacklist_hit 命中(placeholder md5)",
+      "eval_metadata": {
+        "expected_verdict": "figure_broken",
+        "lesson_code": "G8-L6b"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 1115,
+        "step": "story-structure"
+      },
+      "description": "1115 G8-L4 story-structure: 玻璃娃娃",
+      "expectation": "verdict should be faithful — 左側參考課文=玻璃娃娃,右側文章重點表呈現玻璃娃娃事故概要/主要爭議 = 內容對應本課,排版正常無破圖",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": "G8-L4"
+      }
+    },
+    {
+      "input_data": {
+        "story_id": 6,
+        "step": "story-structure"
+      },
+      "description": "6  story-structure: 第一百碗麵",
+      "expectation": "verdict should be faithful — 右側文章重點表要學生填本課情節(老人點最便宜的麵給孫子/寒流小男孩請阿公吃麵)= 忠實對應本課",
+      "eval_metadata": {
+        "expected_verdict": "faithful",
+        "lesson_code": ""
+      }
+    }
+  ]
+}

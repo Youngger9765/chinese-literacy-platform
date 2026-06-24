@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1019 G4-L19 reading-strategy: 救援大隊的好幫手",
+  "evalMetadata": {
+    "lesson_code": "G4-L19",
+    "batch": "g4-first"
+  }
+}

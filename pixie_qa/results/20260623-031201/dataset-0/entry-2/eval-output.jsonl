@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 0.9, "reasoning": "截圖內容是「閱讀聚光燈」步驟，主要在練習句型和關聯詞。雖然第一題的「小試身手」舉例提到了「運動方式相互衝突」，這與本課《運動科學》的主題相關，但後續的題目都是通用的語文練習，例如辨別分句、連連看、句型大比拚等，這些都屬於合法的通用教學鷹架，並未偏離本課主題。", "suspected_actual_lesson": ""}}

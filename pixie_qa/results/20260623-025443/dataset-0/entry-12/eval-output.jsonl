@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 1, "reasoning": "截圖左側顯示了完整的課文內容，標題為《好心沒好報玻璃娃娃爭議事件》。右側的「文章重點表」區域，其標題、事故概要、主要爭議、法院判決等內容，都與左側課文的具體情節和討論主題完全吻合，沒有出現與其他課文相關的內容。排版正常，內容完整。", "suspected_actual_lesson": ""}}

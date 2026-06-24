@@ -8,6 +8,19 @@
 
 ---
 
+## 6/22 ~ 6/25
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | 聚光燈/重點表內容 QA 系統化（#2400, #2404~2408）| 「內容放錯課」系統性修復、證據 gate + golden TDD、4 課 fail-close placeholder、10 課 shadowed 還原題目、6 課破圖剝除、G8-L14 還原蝴蝶蘭 + rebinding 護欄 |
+| Young | ✅ | 雙 Pipeline QA Board + ratchet（#2409, #2412, #2414）| 聚光燈 + 重點表 每課×6 階段逐站證據 board、決定性 ratchet 4 指紋（結構/source/content/schema，drift 即 FAIL）|
+| Young | ✅ | testset 跑分閉環（#2390, #2393, #2395, #2398）| 跑分結果持久化 + 時間戳、修 401 re-login + /presentation 301、79 課假佔位圖清除 + 1103 旅人鴿課文 → prod |
+| Young | ✅ | 朗讀評估動畫（#2396）| 統一逐段 + 全文朗讀評估進度，duration 動態緩動、去假掃描 |
+| 靖杭 | 🔧 | PR #2411 open（#2410）| 快速登入加「登入朗讀測試頁面」按鈕，幫測試者一鍵直達朗讀測試頁，CI 待 review |
+| 啟翔 | ⏳ | #2200 / #2153 QA 七課驗收 | 本週無 PR，負責全平台 UX 七課人工驗收（needs-testing）|
+
+---
+
 ## 6/15 ~ 6/18
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |

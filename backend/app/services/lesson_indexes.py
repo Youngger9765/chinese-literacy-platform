@@ -19,13 +19,16 @@ from app.services.lesson_layer_loaders import (
     build_layer2_enrichment_index,
 )
 from app.services.spotlight_figure_images import merge_spotlight_images
-from app.services.spotlight_v2_loader import load_spotlight_v2
+from app.services.spotlight_v2_loader import (
+    load_spotlight_v2,
+    should_suppress_legacy_strategy_exercise,
+)
 
 
 def _reapply_spotlight_images(lesson: dict) -> None:
     """Layer-2 enrichment overwrites images[] — re-merge spotlight figure assets."""
     code = lesson.get("lesson_code") or lesson.get("grade_code") or ""
-    spotlight_v2 = lesson.get("spotlight_v2") or load_spotlight_v2(code)
+    spotlight_v2 = lesson.get("spotlight_v2") or load_spotlight_v2(code, lesson.get("title"))
     if not spotlight_v2:
         return
     lesson["spotlight_v2"] = spotlight_v2
@@ -75,9 +78,20 @@ def build_all_lessons() -> list[dict]:
                 l2_value = l2_data.get("strategy_exercises")
             if l2_value:  # only override when Layer-2 has a truthy value
                 lesson[field] = l2_value
+
         _reapply_spotlight_images(lesson)
 
     all_lessons = layer1 + layer2
+
+    # #2397: render-confirmed cross_lesson via the legacy strategy_exercise
+    # fallback. Applied AFTER the Layer-2 enrichment merge above (which would
+    # otherwise re-populate strategy_exercise with the foreign example), so the
+    # null sticks. The frontend StrategyExercisePage then shows the honest
+    # "no spotlight yet" placeholder instead of another topic's content.
+    for lesson in all_lessons:
+        code = lesson.get("lesson_code") or lesson.get("grade_code") or ""
+        if should_suppress_legacy_strategy_exercise(code):
+            lesson["strategy_exercise"] = None
 
     # Sort: Layer-1 by lesson_number, Layer-2 by display_order, then mix.
     # Use display_order from manifest for Layer-2; for Layer-1 use lesson_number as proxy.

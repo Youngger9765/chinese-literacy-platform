@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1020 G4-L20 reading-strategy: 物以稀為貴： 從「供給」和「需求」談物價波動",
+  "evalMetadata": {
+    "lesson_code": "G4-L20",
+    "batch": "g4-first"
+  }
+}

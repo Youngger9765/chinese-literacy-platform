@@ -1,0 +1,5 @@
+{
+  "dataset": "spotlight-vision-judge",
+  "datasetPath": "pixie_qa/datasets/spotlight-vision-judge.json",
+  "runnable": "pixie_qa/run_app.py:VisionJudgeRunnable"
+}

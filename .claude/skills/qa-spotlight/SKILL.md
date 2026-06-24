@@ -96,6 +96,17 @@ python3 scripts/eval_lesson_schema.py --dev
 - DEV spotlight：教授七課全 PASS（SP adjusted 95.2% across 151 courses）
 - generalization_gap ≤ 0.15（DEV - TEST pass rate）
 
+## Ship gate（PR / 宣稱 pass 前必過 — #2397）
+
+per-lesson auto-eval + 人眼抽審只是課級檢查。要宣稱「聚光燈這批 ship 得了」**還要過全平台 content evidence gate（fail-closed）**：
+
+```bash
+python scripts/content_evidence_gate.py --run-id <id>
+bash   scripts/content_evidence_ship_gate.sh --run-id <id>   # 須印 CONTENT_EVIDENCE_GATE=PASS
+```
+
+只認 evidence 檔（`fail_cells=0` + `unknown_cells=0` + `figure_blacklist_hits=0`），口頭/單課過關不算。真缺口登 `content_known_gaps.yaml` 標 known_gap（誠實，非 pass）。
+
 ## 反模式
 
 - ❌ 只看 auto-eval 數字就算過——語意錯誤（passage source 標錯、answer 抓錯選項）auto-eval 量不到
@@ -103,3 +114,5 @@ python3 scripts/eval_lesson_schema.py --dev
 - ❌ overfit lint FAIL 但繼續跑——lint FAIL = 規則不通用，eval 數字不可信
 - ❌ 跳過人眼抽審——上線後教授會看到語意錯誤
 - ❌ 把 eval 邏輯複製進 SKILL——引用 eval_lesson_schema.py，不重複
+- ❌ 憑單課 eval pass 就宣稱整批 ship——要過 content evidence ship-gate
+- ❌ 把真缺口（無聚光燈/合成 figN 未上傳）fake 成 pass——登 content_known_gaps.yaml

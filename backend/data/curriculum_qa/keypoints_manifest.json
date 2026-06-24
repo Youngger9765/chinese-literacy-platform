@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T09:42:32.098674+00:00",
+  "generated_at": "2026-06-23T08:55:28.601805+00:00",
   "smoke_only": false,
   "gates_included": [
     "L1",
@@ -8,8 +8,8 @@
     "L3"
   ],
   "summary": {
-    "total": 151,
-    "pass": 151,
+    "total": 148,
+    "pass": 148,
     "fail": 0,
     "known_gap_count": 0,
     "failure_count": 0
@@ -28,13 +28,8 @@
           "gate": "L1",
           "pass": true,
           "issues": [
-            "WARN label_family_correct=false"
+            "N/A no docx keypoints table"
           ]
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -55,11 +50,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L1.yml"
     },
     {
       "lesson_id": "G4-L10",
@@ -73,12 +68,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -99,11 +91,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L10.yml"
     },
     {
       "lesson_id": "G4-L11",
@@ -117,12 +109,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -143,11 +132,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L11.yml"
     },
     {
       "lesson_id": "G4-L12",
@@ -161,12 +150,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -187,11 +173,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L12.yml"
     },
     {
       "lesson_id": "G4-L13",
@@ -205,12 +191,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -231,11 +214,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L13.yml"
     },
     {
       "lesson_id": "G4-L14",
@@ -249,12 +232,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -275,11 +255,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L14.yml"
     },
     {
       "lesson_id": "G4-L15",
@@ -293,12 +273,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -319,11 +296,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L15.yml"
     },
     {
       "lesson_id": "G4-L16",
@@ -337,12 +314,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -363,11 +337,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L16.yml"
     },
     {
       "lesson_id": "G4-L17",
@@ -381,12 +355,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -407,11 +378,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L17.yml"
     },
     {
       "lesson_id": "G4-L18",
@@ -425,12 +396,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -451,11 +419,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L18.yml"
     },
     {
       "lesson_id": "G4-L19",
@@ -469,12 +437,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -495,11 +460,11 @@
         "row_count": 8
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L19.yml"
     },
     {
       "lesson_id": "G4-L2",
@@ -513,12 +478,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -539,21 +501,36 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L2.yml"
     },
     {
       "lesson_id": "G4-L20",
       "title": "物以稀為貴： 從「供給」和「需求」談物價波動",
       "story_id": 1020,
-      "tier": "no_structure",
+      "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
       "overall_status": "pass",
       "gates": {
+        "L1": {
+          "gate": "L1",
+          "pass": true,
+          "issues": []
+        },
+        "L2": {
+          "gate": "L2",
+          "pass": true,
+          "issues": []
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
+          "issues": []
+        },
         "L3": {
           "gate": "L3",
           "pass": true,
@@ -572,7 +549,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L20-22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L20-22.yml"
     },
     {
       "lesson_id": "G4-L23",
@@ -586,12 +563,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -612,11 +586,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L23.yml"
     },
     {
       "lesson_id": "G4-L24",
@@ -630,12 +604,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -656,11 +627,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L24.yml"
     },
     {
       "lesson_id": "G4-L25",
@@ -674,12 +645,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -700,11 +668,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L25.yml"
     },
     {
       "lesson_id": "G4-L26",
@@ -718,12 +686,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -744,11 +709,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L26.yml"
     },
     {
       "lesson_id": "G4-L27",
@@ -762,12 +727,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -788,11 +750,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L27.yml"
     },
     {
       "lesson_id": "G4-L3",
@@ -806,12 +768,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -832,11 +791,11 @@
         "row_count": 2
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L3.yml"
     },
     {
       "lesson_id": "G4-L4",
@@ -850,12 +809,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -876,11 +832,11 @@
         "row_count": 2
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L4.yml"
     },
     {
       "lesson_id": "G4-L5",
@@ -894,12 +850,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -920,11 +873,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L5.yml"
     },
     {
       "lesson_id": "G4-L6",
@@ -965,7 +918,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L6.yml"
     },
     {
       "lesson_id": "G4-L7",
@@ -979,12 +932,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1005,11 +955,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L7.yml"
     },
     {
       "lesson_id": "G4-L8",
@@ -1023,12 +973,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1049,11 +996,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L8.yml"
     },
     {
       "lesson_id": "G4-L9",
@@ -1094,7 +1041,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G4-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G4-L9.yml"
     },
     {
       "lesson_id": "G5-L1",
@@ -1108,12 +1055,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1134,11 +1078,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L1.yml"
     },
     {
       "lesson_id": "G5-L10",
@@ -1152,12 +1096,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1178,11 +1119,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L10.yml"
     },
     {
       "lesson_id": "G5-L11",
@@ -1226,7 +1167,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L11.yml"
     },
     {
       "lesson_id": "G5-L12",
@@ -1240,12 +1181,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1266,11 +1204,11 @@
         "row_count": 2
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L12.yml"
     },
     {
       "lesson_id": "G5-L13",
@@ -1284,12 +1222,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1310,11 +1245,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L13.yml"
     },
     {
       "lesson_id": "G5-L14",
@@ -1358,7 +1293,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L14.yml"
     },
     {
       "lesson_id": "G5-L15",
@@ -1402,7 +1337,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L15.yml"
     },
     {
       "lesson_id": "G5-L16",
@@ -1446,7 +1381,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L16.yml"
     },
     {
       "lesson_id": "G5-L17",
@@ -1460,12 +1395,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1486,11 +1418,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L17.yml"
     },
     {
       "lesson_id": "G5-L18",
@@ -1504,12 +1436,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1530,11 +1459,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L18.yml"
     },
     {
       "lesson_id": "G5-L19",
@@ -1548,12 +1477,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1574,11 +1500,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L19.yml"
     },
     {
       "lesson_id": "G5-L2",
@@ -1592,12 +1518,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1618,11 +1541,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L2.yml"
     },
     {
       "lesson_id": "G5-L20",
@@ -1636,12 +1559,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1662,11 +1582,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L20.yml"
     },
     {
       "lesson_id": "G5-L21",
@@ -1680,12 +1600,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1706,11 +1623,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L21.yml"
     },
     {
       "lesson_id": "G5-L22",
@@ -1724,12 +1641,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1750,11 +1664,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L22.yml"
     },
     {
       "lesson_id": "G5-L23",
@@ -1768,12 +1682,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1794,40 +1705,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
-    },
-    {
-      "lesson_id": "G5-L24",
-      "title": "牧羊少年的逆轉勝",
-      "story_id": 1051,
-      "tier": "no_structure",
-      "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
-      "gates": {
-        "L3": {
-          "gate": "L3",
-          "pass": true,
-          "issues": []
-        }
-      },
-      "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
-        "row_count": 6
-      },
-      "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
-        "has_structure_snapshot": true
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L24-25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L23.yml"
     },
     {
       "lesson_id": "G5-L26",
@@ -1841,12 +1723,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1867,11 +1746,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L26.yml"
     },
     {
       "lesson_id": "G5-L27",
@@ -1885,12 +1764,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1911,11 +1787,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L27.yml"
     },
     {
       "lesson_id": "G5-L3",
@@ -1929,12 +1805,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1955,11 +1828,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L3.yml"
     },
     {
       "lesson_id": "G5-L4",
@@ -1973,12 +1846,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -1999,11 +1869,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L4.yml"
     },
     {
       "lesson_id": "G5-L5",
@@ -2017,12 +1887,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2043,11 +1910,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L5.yml"
     },
     {
       "lesson_id": "G5-L6",
@@ -2061,12 +1928,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2087,11 +1951,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L6.yml"
     },
     {
       "lesson_id": "G5-L7",
@@ -2105,12 +1969,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2131,11 +1992,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L7.yml"
     },
     {
       "lesson_id": "G5-L8",
@@ -2149,12 +2010,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2175,11 +2033,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L8.yml"
     },
     {
       "lesson_id": "G5-L9",
@@ -2193,12 +2051,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2219,11 +2074,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G5-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G5-L9.yml"
     },
     {
       "lesson_id": "G6-L1",
@@ -2237,12 +2092,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2263,11 +2115,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L1.yml"
     },
     {
       "lesson_id": "G6-L10",
@@ -2281,12 +2133,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2307,11 +2156,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L10.yml"
     },
     {
       "lesson_id": "G6-L11",
@@ -2325,12 +2174,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2351,11 +2197,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L11.yml"
     },
     {
       "lesson_id": "G6-L12",
@@ -2399,7 +2245,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L12.yml"
     },
     {
       "lesson_id": "G6-L13",
@@ -2413,12 +2259,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2439,11 +2282,11 @@
         "row_count": 9
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L13.yml"
     },
     {
       "lesson_id": "G6-L14",
@@ -2457,12 +2300,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2483,11 +2323,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L14.yml"
     },
     {
       "lesson_id": "G6-L15",
@@ -2501,12 +2341,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2527,11 +2364,11 @@
         "row_count": 8
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L15.yml"
     },
     {
       "lesson_id": "G6-L16",
@@ -2545,12 +2382,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2571,11 +2405,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L16.yml"
     },
     {
       "lesson_id": "G6-L17",
@@ -2589,12 +2423,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2615,11 +2446,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L17.yml"
     },
     {
       "lesson_id": "G6-L18",
@@ -2633,12 +2464,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2659,11 +2487,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L18.yml"
     },
     {
       "lesson_id": "G6-L19",
@@ -2677,12 +2505,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2703,11 +2528,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L19.yml"
     },
     {
       "lesson_id": "G6-L2",
@@ -2751,7 +2576,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L2.yml"
     },
     {
       "lesson_id": "G6-L20",
@@ -2765,12 +2590,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2791,11 +2613,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L20.yml"
     },
     {
       "lesson_id": "G6-L21",
@@ -2809,12 +2631,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2835,11 +2654,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L21.yml"
     },
     {
       "lesson_id": "G6-L22",
@@ -2853,12 +2672,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2879,11 +2695,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L22.yml"
     },
     {
       "lesson_id": "G6-L23",
@@ -2897,12 +2713,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2923,11 +2736,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L23.yml"
     },
     {
       "lesson_id": "G6-L24",
@@ -2941,12 +2754,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -2967,11 +2777,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L24.yml"
     },
     {
       "lesson_id": "G6-L25",
@@ -2985,12 +2795,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3011,11 +2818,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L25.yml"
     },
     {
       "lesson_id": "G6-L3",
@@ -3029,12 +2836,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3055,11 +2859,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L3.yml"
     },
     {
       "lesson_id": "G6-L4",
@@ -3073,12 +2877,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3099,11 +2900,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L4.yml"
     },
     {
       "lesson_id": "G6-L5",
@@ -3144,7 +2945,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L5.yml"
     },
     {
       "lesson_id": "G6-L6",
@@ -3158,12 +2959,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3184,11 +2982,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L6.yml"
     },
     {
       "lesson_id": "G6-L7",
@@ -3202,12 +3000,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3228,11 +3023,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L7.yml"
     },
     {
       "lesson_id": "G6-L8",
@@ -3273,7 +3068,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L8.yml"
     },
     {
       "lesson_id": "G6-L9",
@@ -3287,12 +3082,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3313,11 +3105,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G6-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G6-L9.yml"
     },
     {
       "lesson_id": "G7-L1",
@@ -3331,12 +3123,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3357,11 +3146,11 @@
         "row_count": 13
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L1.yml"
     },
     {
       "lesson_id": "G7-L10",
@@ -3402,7 +3191,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L10.yml"
     },
     {
       "lesson_id": "G7-L11",
@@ -3443,7 +3232,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L11.yml"
     },
     {
       "lesson_id": "G7-L12",
@@ -3457,12 +3246,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3483,11 +3269,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L12.yml"
     },
     {
       "lesson_id": "G7-L13",
@@ -3501,12 +3287,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3527,11 +3310,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L13.yml"
     },
     {
       "lesson_id": "G7-L14",
@@ -3545,12 +3328,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3571,11 +3351,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L14.yml"
     },
     {
       "lesson_id": "G7-L15",
@@ -3589,12 +3369,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3615,11 +3392,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L15.yml"
     },
     {
       "lesson_id": "G7-L16",
@@ -3633,12 +3410,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3659,11 +3433,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L16.yml"
     },
     {
       "lesson_id": "G7-L17",
@@ -3677,12 +3451,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3703,11 +3474,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L17.yml"
     },
     {
       "lesson_id": "G7-L18",
@@ -3721,12 +3492,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3747,11 +3515,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L18.yml"
     },
     {
       "lesson_id": "G7-L19",
@@ -3765,12 +3533,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3791,11 +3556,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L19.yml"
     },
     {
       "lesson_id": "G7-L2",
@@ -3809,12 +3574,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3835,11 +3597,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L2.yml"
     },
     {
       "lesson_id": "G7-L20",
@@ -3883,7 +3645,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L20.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L20.yml"
     },
     {
       "lesson_id": "G7-L21",
@@ -3897,12 +3659,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3923,11 +3682,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L21.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L21.yml"
     },
     {
       "lesson_id": "G7-L22",
@@ -3941,12 +3700,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -3967,11 +3723,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L22.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L22.yml"
     },
     {
       "lesson_id": "G7-L23",
@@ -4012,7 +3768,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L23.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L23.yml"
     },
     {
       "lesson_id": "G7-L24",
@@ -4026,12 +3782,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4052,11 +3805,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L24.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L24.yml"
     },
     {
       "lesson_id": "G7-L25",
@@ -4097,7 +3850,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L25.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L25.yml"
     },
     {
       "lesson_id": "G7-L26",
@@ -4138,7 +3891,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L26.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L26.yml"
     },
     {
       "lesson_id": "G7-L27",
@@ -4179,7 +3932,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L27.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L27.yml"
     },
     {
       "lesson_id": "G7-L28",
@@ -4193,12 +3946,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4219,11 +3969,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L28.yml"
     },
     {
       "lesson_id": "G7-L29",
@@ -4264,7 +4014,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L29.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L29.yml"
     },
     {
       "lesson_id": "G7-L3",
@@ -4278,12 +4028,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4304,11 +4051,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L3.yml"
     },
     {
       "lesson_id": "G7-L30",
@@ -4349,7 +4096,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L30.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L30.yml"
     },
     {
       "lesson_id": "G7-L4",
@@ -4363,12 +4110,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4389,11 +4133,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L4.yml"
     },
     {
       "lesson_id": "G7-L5",
@@ -4407,12 +4151,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4433,11 +4174,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L5.yml"
     },
     {
       "lesson_id": "G7-L6",
@@ -4451,12 +4192,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4477,11 +4215,11 @@
         "row_count": 8
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L6.yml"
     },
     {
       "lesson_id": "G7-L7",
@@ -4495,12 +4233,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4521,11 +4256,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L7.yml"
     },
     {
       "lesson_id": "G7-L8",
@@ -4539,12 +4274,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4565,11 +4297,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L8.yml"
     },
     {
       "lesson_id": "G7-L9",
@@ -4583,12 +4315,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4609,11 +4338,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G7-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G7-L9.yml"
     },
     {
       "lesson_id": "G8-L1",
@@ -4627,12 +4356,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4653,11 +4379,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L1.yml"
     },
     {
       "lesson_id": "G8-L10",
@@ -4671,12 +4397,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4697,11 +4420,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L10.yml"
     },
     {
       "lesson_id": "G8-L11",
@@ -4715,12 +4438,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4741,11 +4461,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L11.yml"
     },
     {
       "lesson_id": "G8-L12",
@@ -4759,12 +4479,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4785,11 +4502,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L12.yml"
     },
     {
       "lesson_id": "G8-L13",
@@ -4830,7 +4547,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L13.yml"
     },
     {
       "lesson_id": "G8-L14",
@@ -4871,7 +4588,7 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L14.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L14.yml"
     },
     {
       "lesson_id": "G8-L15",
@@ -4885,12 +4602,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4911,11 +4625,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L15.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L15.yml"
     },
     {
       "lesson_id": "G8-L16",
@@ -4929,12 +4643,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4955,11 +4666,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L16.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L16.yml"
     },
     {
       "lesson_id": "G8-L17",
@@ -4973,12 +4684,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -4999,11 +4707,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L17.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L17.yml"
     },
     {
       "lesson_id": "G8-L18",
@@ -5017,12 +4725,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5043,11 +4748,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L18.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L18.yml"
     },
     {
       "lesson_id": "G8-L19",
@@ -5061,12 +4766,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5087,11 +4789,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L19.yml"
     },
     {
       "lesson_id": "G8-L2",
@@ -5105,12 +4807,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5131,11 +4830,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L2.yml"
     },
     {
       "lesson_id": "G8-L3",
@@ -5149,12 +4848,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5175,11 +4871,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L3.yml"
     },
     {
       "lesson_id": "G8-L4",
@@ -5193,12 +4889,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5219,11 +4912,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L4.yml"
     },
     {
       "lesson_id": "G8-L5",
@@ -5237,12 +4930,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5263,11 +4953,11 @@
         "row_count": 8
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L5.yml"
     },
     {
       "lesson_id": "G8-L6",
@@ -5281,12 +4971,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5307,11 +4994,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L6.yml"
     },
     {
       "lesson_id": "G8-L7",
@@ -5325,12 +5012,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5351,11 +5035,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L7.yml"
     },
     {
       "lesson_id": "G8-L8",
@@ -5369,12 +5053,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5395,11 +5076,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L8.yml"
     },
     {
       "lesson_id": "G8-L9",
@@ -5413,12 +5094,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5439,11 +5117,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G8-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G8-L9.yml"
     },
     {
       "lesson_id": "G9-L1",
@@ -5457,12 +5135,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5483,11 +5158,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L1.yml"
     },
     {
       "lesson_id": "G9-L10",
@@ -5502,13 +5177,8 @@
           "gate": "L1",
           "pass": true,
           "issues": [
-            "WARN label_family_correct=false"
+            "N/A no docx keypoints table"
           ]
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5529,11 +5199,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L10.yml"
     },
     {
       "lesson_id": "G9-L11",
@@ -5547,12 +5217,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5573,11 +5240,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L11.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L11.yml"
     },
     {
       "lesson_id": "G9-L12",
@@ -5591,12 +5258,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5617,11 +5281,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L12.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L12.yml"
     },
     {
       "lesson_id": "G9-L13",
@@ -5635,12 +5299,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5661,11 +5322,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L13.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L13.yml"
     },
     {
       "lesson_id": "G9-L14",
@@ -5679,12 +5340,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5705,69 +5363,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
-    },
-    {
-      "lesson_id": "G9-L15",
-      "title": "未解之謎──石頭的祕密（一）：巨石陣",
-      "story_id": 1144,
-      "tier": "no_structure",
-      "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
-      "gates": {
-        "L3": {
-          "gate": "L3",
-          "pass": true,
-          "issues": []
-        }
-      },
-      "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
-        "row_count": 6
-      },
-      "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
-        "has_structure_snapshot": true
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L15-16.yml"
-    },
-    {
-      "lesson_id": "G9-L17",
-      "title": "馬拉松王者──基普喬吉 (記敘文)",
-      "story_id": 1146,
-      "tier": "no_structure",
-      "known_data_gap": false,
-      "overall_pass": true,
-      "overall_status": "pass",
-      "gates": {
-        "L3": {
-          "gate": "L3",
-          "pass": true,
-          "issues": []
-        }
-      },
-      "layout": {
-        "mode": "fill_blank",
-        "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 0,
-        "row_count": 7
-      },
-      "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
-        "has_structure_snapshot": true
-      },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L17-19.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L14.yml"
     },
     {
       "lesson_id": "G9-L2",
@@ -5781,12 +5381,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5807,11 +5404,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L2.yml"
     },
     {
       "lesson_id": "G9-L3",
@@ -5825,12 +5422,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5851,11 +5445,11 @@
         "row_count": 12
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L3.yml"
     },
     {
       "lesson_id": "G9-L4",
@@ -5869,12 +5463,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5895,11 +5486,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L4.yml"
     },
     {
       "lesson_id": "G9-L5",
@@ -5913,12 +5504,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5939,11 +5527,11 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L5.yml"
     },
     {
       "lesson_id": "G9-L6",
@@ -5957,12 +5545,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -5983,11 +5568,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L6.yml"
     },
     {
       "lesson_id": "G9-L7",
@@ -6001,12 +5586,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6027,11 +5609,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L7.yml"
     },
     {
       "lesson_id": "G9-L8",
@@ -6075,7 +5657,7 @@
         "has_original_preview": true,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L8.yml"
     },
     {
       "lesson_id": "G9-L9",
@@ -6089,12 +5671,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6115,11 +5694,11 @@
         "row_count": 13
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/G9-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/G9-L9.yml"
     },
     {
       "lesson_id": "文-L1",
@@ -6133,12 +5712,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6159,11 +5735,11 @@
         "row_count": 7
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L1.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L1.yml"
     },
     {
       "lesson_id": "文-L10",
@@ -6177,12 +5753,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6203,11 +5776,11 @@
         "row_count": 6
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L10.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L10.yml"
     },
     {
       "lesson_id": "文-L2",
@@ -6248,12 +5821,12 @@
         "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L2.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L2.yml"
     },
     {
       "lesson_id": "文-L3",
-      "title": "文-L3",
-      "story_id": null,
+      "title": "不量田",
+      "story_id": 46,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6262,10 +5835,17 @@
         "L1": {
           "gate": "L1",
           "pass": true,
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
           "issues": []
         },
-        "L2": {
-          "gate": "L2",
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6278,16 +5858,16 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L3.yml"
     },
     {
       "lesson_id": "文-L4",
-      "title": "文-L4",
-      "story_id": null,
+      "title": "陸公買硯",
+      "story_id": 47,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6296,10 +5876,17 @@
         "L1": {
           "gate": "L1",
           "pass": true,
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
           "issues": []
         },
-        "L2": {
-          "gate": "L2",
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6312,11 +5899,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L4.yml"
     },
     {
       "lesson_id": "文-L5",
@@ -6330,12 +5917,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6356,11 +5940,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L5.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L5.yml"
     },
     {
       "lesson_id": "文-L6",
@@ -6374,12 +5958,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6400,11 +5981,11 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L6.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L6.yml"
     },
     {
       "lesson_id": "文-L7",
@@ -6418,12 +5999,9 @@
         "L1": {
           "gate": "L1",
           "pass": true,
-          "issues": []
-        },
-        "L2": {
-          "gate": "L2",
-          "pass": true,
-          "issues": []
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
         },
         "L3_catalog": {
           "gate": "L3_catalog",
@@ -6444,16 +6022,16 @@
         "row_count": 4
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L7.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L7.yml"
     },
     {
       "lesson_id": "文-L8",
-      "title": "文-L8",
-      "story_id": null,
+      "title": "愛讀書的顧寧人",
+      "story_id": 42,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6462,10 +6040,17 @@
         "L1": {
           "gate": "L1",
           "pass": true,
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
           "issues": []
         },
-        "L2": {
-          "gate": "L2",
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6478,16 +6063,16 @@
         "row_count": 5
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L8.yml"
     },
     {
       "lesson_id": "文-L9",
-      "title": "文-L9",
-      "story_id": null,
+      "title": "從天才跌為凡人的神童",
+      "story_id": 43,
       "tier": "docx_keypoints",
       "known_data_gap": false,
       "overall_pass": true,
@@ -6496,10 +6081,17 @@
         "L1": {
           "gate": "L1",
           "pass": true,
+          "issues": [
+            "N/A no docx keypoints table"
+          ]
+        },
+        "L3_catalog": {
+          "gate": "L3_catalog",
+          "pass": true,
           "issues": []
         },
-        "L2": {
-          "gate": "L2",
+        "L3": {
+          "gate": "L3",
           "pass": true,
           "issues": []
         }
@@ -6512,11 +6104,11 @@
         "row_count": 3
       },
       "artifacts": {
-        "has_keypoints_yml": true,
-        "has_original_preview": true,
+        "has_keypoints_yml": false,
+        "has_original_preview": false,
         "has_structure_snapshot": true
       },
-      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/fix-1103-53/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
+      "yaml_path": "/Users/young/project/chinese-literacy-platform/.worktrees/gate-p0/backend/data/lessons/_parsed_2026-05-01/文-L9.yml"
     }
   ],
   "raw_failures": []

@@ -1,0 +1,56 @@
+{
+  "schema_version": "content-evidence.v1",
+  "run_id": "p0-l1-matrix",
+  "generated_at": "2026-06-22T17:45:40Z",
+  "git": {
+    "branch": "fix/issue-2397-gate-p0-hardening",
+    "commit_sha": "4691f77006fd355858f5aeb027c21d124e80ecd8"
+  },
+  "smoke": false,
+  "scope": {
+    "expected_lessons": 152,
+    "expected_steps": [
+      "reading-strategy",
+      "story-structure"
+    ],
+    "expected_total_cells": 304
+  },
+  "observed": {
+    "l1_rows": 304,
+    "l3_rows": 304,
+    "figure_rows": 304,
+    "l2_rows": 0,
+    "cells": 304
+  },
+  "summary_counts": {
+    "pass_cells": 0,
+    "fail_cells": 57,
+    "unknown_cells": 247,
+    "known_gap_cells": 0,
+    "missing_screenshot_cells": 304,
+    "console_error_cells": 0,
+    "figure_blacklist_hits": 2
+  },
+  "files": {
+    "l1_results_jsonl": "l1_results.jsonl",
+    "l3_render_results_jsonl": "l3_render_results.jsonl",
+    "figure_asset_audit_jsonl": "figure_asset_audit.jsonl",
+    "review_queue_jsonl": "review_queue.jsonl",
+    "human_review_md": "human_review.md",
+    "l2_eval_jsonl": null
+  },
+  "checksums_sha256": {
+    "l1_results.jsonl": "5d8da6a63a8a44fdd0f84d45423c4dcec37794651752647a065aa73eb40407b6",
+    "l3_render_results.jsonl": "d2419895dd2e452bbcdd0433abb0cf93586d91a01dc806c5a1037b68a734b945",
+    "figure_asset_audit.jsonl": "6d43d4656cd04455777b56dcbc05034fee1955f3504b2dc3cb32e51fe2f60d21",
+    "review_queue.jsonl": "3924ef680a04759c4a14b1b44c26dd0f29f8d37ec15792017f977767018ae884",
+    "human_review.md": "aceb8b4e9849b236e095441e0edc0b8221f997576ca3980a4880086afd47dd56"
+  },
+  "overall_status": "fail",
+  "fail_reasons": [
+    "unknown_cells=247",
+    "fail_cells=57",
+    "missing_screenshot_cells=304",
+    "figure_blacklist_hits=2"
+  ]
+}

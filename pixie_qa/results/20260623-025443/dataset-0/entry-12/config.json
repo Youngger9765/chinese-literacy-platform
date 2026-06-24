@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1115 G8-L4 story-structure: 玻璃娃娃",
+  "expectation": "verdict should be faithful — 左側參考課文=玻璃娃娃,右側文章重點表呈現玻璃娃娃事故概要/主要爭議 = 內容對應本課,排版正常無破圖",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": "G8-L4"
+  }
+}

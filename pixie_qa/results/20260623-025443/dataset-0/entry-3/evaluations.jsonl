@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=cross_lesson got=cross_lesson -> HIT (judge confidence=1) [disputed: borrowed_practice_text_OR_stale_fix]"}
+{"evaluator": "JudgeReasoningQuality", "score": 1.0, "reasoning": "Quotes the on-screen practice text (亞馬遜雨林/箭毒製毒箭) which is a different lesson than 旅人鴿 — concrete, justifies cross_lesson honestly given what renders."}

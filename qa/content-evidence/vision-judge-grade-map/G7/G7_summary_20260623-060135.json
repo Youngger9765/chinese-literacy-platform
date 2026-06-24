@@ -1,0 +1,13 @@
+{
+  "grade": "G7",
+  "generated_at_utc": "2026-06-23T06:07:00Z",
+  "total": 26,
+  "verdict_counts": {
+    "faithful": 19,
+    "figure_broken": 5,
+    "cross_lesson": 2
+  },
+  "failure_total": 7,
+  "jsonl_path": "qa/content-evidence/vision-judge-grade-map/G7/G7_vision_results_20260623-060135.jsonl",
+  "screenshots_dir": "qa/content-evidence/vision-judge-grade-map/G7/screenshots-20260623-060135"
+}

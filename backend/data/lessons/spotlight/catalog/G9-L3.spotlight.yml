@@ -1,15 +1,31 @@
 spotlight:
   lesson: G9-L3
-  strategy_name: 議論文結構-支持論點的論據
+  strategy_name: 閱讀聚光燈 - 支持論點的論據
   strategy_type: express_opinion
   blocks:
   - type: guide
-    text: ◎ 小試身手：請依據論點及支持理由，透過提問來做論據檢核，並在□打勾。
-  - type: guide
-    text: 練習一
-  - type: guide
-    text: 練習二
-  - type: figure
-    referent: table
-    asset: fig2.png
-    bind_paragraph: null
+    text: 本練習將引導你判斷議論文中「論據」是否能有效支持「支持理由」，並進一步支持「論點」。
+  - type: single
+    prompt: 針對「利用紙筆記錄數字」這個論據，它是否能降低認知負荷？
+    options:
+    - 是
+    - 否
+    answer: 是
+  - type: single
+    prompt: 針對「利用紙筆記錄數字」這個論據，它是否適合作為支持「學數學可以用計算機」這個論點的論據？
+    options:
+    - 是
+    - 否
+    answer: 是
+  - type: single
+    prompt: 針對「計算機幫助計算」這個論據，它是否能降低認知負荷？
+    options:
+    - 是
+    - 否
+    answer: 是
+  - type: single
+    prompt: 針對「計算機幫助計算」這個論據，它是否適合作為支持「學數學可以用計算機」這個論點的論據？
+    options:
+    - 是
+    - 否
+    answer: 是

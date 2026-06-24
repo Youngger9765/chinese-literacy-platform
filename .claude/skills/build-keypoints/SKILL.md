@@ -93,10 +93,32 @@ keypoints:
 - [ ] 段落定位型有標 `locate_paragraph`
 - [ ] value 沒有像 L28 那樣多 cell 文字串在一起錯亂（逐 cell 對 raw 輸出檢查）
 
+## Multi-text lessons (one DOCX → several slots) — CRITICAL
+
+某些 DOCX 一檔含多篇（檔名如 `G4-L20-22…docx` / `G9-L15~16…docx`），parse 成 **compound YAML**（`G4-L20-22.yml`），UI 用 primary slot code（`G4-L20`）對外。踩過的雷（#2397）：
+
+- `discover_lessons()` 取**第一個課號**當 lesson_id（`G4-L20-22…docx` → `G4-L20`），keypoints schema 也建在 `G4-L20.keypoints.yml`。
+- 但單槽查找 `expected_parsed_yaml_path("G4-L20")` 回 **None**（檔案是 compound `G4-L20-22.yml`）→ `has_structure_table=False`。
+- **教訓**：判斷「該不該跑 L1 重點表 gate」用 **keypoints 是否抽得出來**（`docx_keypoints_available`），**不是**單槽 parsed table 在不在磁碟。`classify_lesson` 已修成 `docx_keypoints_available is True` → `DOCX_KEYPOINTS`（gate 不會 silent skip）。改抽取器/分類器時別退回「要有單槽 structure table 才算 DOCX_KEYPOINTS」。
+- GCS 圖檔目錄用 **parsed/compound code**（`G4-L20-22/`），非 catalog code。
+
 ## Courses Without Keypoints (expected — not bugs)
 
 - `image_text` / `table_text` courses (G7-L28/29/30): no fill-table, figures carry the meaning
 - Courses with paragraph-level fill-in exercises (e.g., G6-SL8 summary_structure): the blanks are in paragraphs, not a table. `keypoints.yml` not produced — correct behavior.
+
+## Ship gate — 改完憑證據宣稱，不憑感覺（#2397）
+
+改重點表內容 / 抽取器 / `keypoints_manifest.json` 後，**PR 前必過 content evidence gate（fail-closed）**：
+
+```bash
+python scripts/content_evidence_gate.py --run-id <id>          # 全 304 cell（staging）
+bash   scripts/content_evidence_ship_gate.sh --run-id <id>     # 須印 CONTENT_EVIDENCE_GATE=PASS
+```
+
+- ⛔ 禁用「manifest 重建完 / API 200 / 看一下 render」當完成依據——只認 evidence 檔（`fail_cells=0` + `unknown_cells=0`）。
+- 真內容缺口（某課 DOCX 沒重點表、多文本 secondary slot 無自身重點表）→ 登錄 `backend/data/curriculum_qa/content_known_gaps.yaml` 的 `story-structure:` 段（reason: `no_keypoints_source` / `multi_text_secondary`），標 `known_gap`（誠實，非 pass）。**禁把缺口 fake 成 pass。**
+- 重建 manifest 後跑 `pytest backend/specs/test_keypoints_manifest_spec.py`（`test_manifest_matches_runtime` 確保 manifest = live runtime，無假綠）。
 
 ## 反模式
 - ❌ 用現行 `story_structure`（已壞）

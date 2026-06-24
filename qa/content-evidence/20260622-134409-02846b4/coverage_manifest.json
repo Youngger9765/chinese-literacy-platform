@@ -1,0 +1,53 @@
+{
+  "schema_version": "content-evidence.v1",
+  "run_id": "20260622-134409-02846b4",
+  "generated_at": "2026-06-22T14:09:11Z",
+  "git": {
+    "branch": "fix/issue-2397-content-evidence-gate",
+    "commit_sha": "02846b4ec4e0aaf01a146180b68fc344840d6e1f"
+  },
+  "smoke": false,
+  "scope": {
+    "expected_lessons": 165,
+    "expected_steps": [
+      "reading-strategy",
+      "story-structure"
+    ],
+    "expected_total_cells": 330
+  },
+  "observed": {
+    "l1_rows": 330,
+    "l3_rows": 330,
+    "figure_rows": 330,
+    "l2_rows": 0,
+    "cells": 330
+  },
+  "summary_counts": {
+    "pass_cells": 247,
+    "fail_cells": 4,
+    "unknown_cells": 79,
+    "missing_screenshot_cells": 0,
+    "console_error_cells": 0,
+    "figure_blacklist_hits": 0
+  },
+  "files": {
+    "l1_results_jsonl": "l1_results.jsonl",
+    "l3_render_results_jsonl": "l3_render_results.jsonl",
+    "figure_asset_audit_jsonl": "figure_asset_audit.jsonl",
+    "review_queue_jsonl": "review_queue.jsonl",
+    "human_review_md": "human_review.md",
+    "l2_eval_jsonl": null
+  },
+  "checksums_sha256": {
+    "l1_results.jsonl": "979d4cfc4399d542270e5e503eeadb5605615565ea92150b353985784f7dc4e8",
+    "l3_render_results.jsonl": "8871a4455ebd275b74350e31d5ea3e1016f6e71408fd712310da2d4eee8569ec",
+    "figure_asset_audit.jsonl": "a7d8464689f8afd6f076c9519782722d558f9e61ed16272cf42412a70c077067",
+    "review_queue.jsonl": "8232a9b25f1cffe6f004ddf8d9a65412ada2fdcd47d56b164bc2b81708e19b6d",
+    "human_review.md": "4035e268eb89b123a6f68e48924d1cbe1940aca7e2f01ae88bff096085102096"
+  },
+  "overall_status": "fail",
+  "fail_reasons": [
+    "unknown_cells=79",
+    "fail_cells=4"
+  ]
+}

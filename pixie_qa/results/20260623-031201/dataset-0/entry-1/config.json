@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "3 G4-L03 reading-strategy: 長高的祕密",
+  "evalMetadata": {
+    "lesson_code": "G4-L03",
+    "batch": "g4-first"
+  }
+}

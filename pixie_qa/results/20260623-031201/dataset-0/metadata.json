@@ -1,0 +1,5 @@
+{
+  "dataset": "spotlight-g4-batch",
+  "datasetPath": "pixie_qa/datasets/spotlight-g4-batch.json",
+  "runnable": "pixie_qa/run_app.py:VisionJudgeRunnable"
+}

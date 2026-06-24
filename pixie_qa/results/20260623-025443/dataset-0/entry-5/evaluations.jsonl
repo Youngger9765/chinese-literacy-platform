@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=faithful got=faithful -> HIT (judge confidence=1)"}
+{"evaluator": "JudgeReasoningQuality", "score": 0.9, "reasoning": "Cites title + scaffold prompts (友情還是愛情) and notes the image is a generic-but-loaded icon (not broken) — concrete, justifies faithful; slightly less specific on body content."}

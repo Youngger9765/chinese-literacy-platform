@@ -1,0 +1,1627 @@
+{
+  "G4-L10": {
+    "tier": "test15",
+    "n_blocks": 37,
+    "n_questions": 12,
+    "type_counts": {
+      "guide": 20,
+      "single": 3,
+      "free_text": 9,
+      "passage": 2,
+      "figure": 2,
+      "self_check": 1
+    },
+    "content_hash": "6d1c5a87c254e647",
+    "schema_hash": "7b76824c540363f0",
+    "source_code": null
+  },
+  "G4-L11": {
+    "tier": "catalog",
+    "n_blocks": 31,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 21,
+      "single": 1,
+      "free_text": 4,
+      "passage": 3,
+      "figure": 2
+    },
+    "content_hash": "226452fb1bc9486d",
+    "schema_hash": "13cdaba252daf74e",
+    "source_code": null
+  },
+  "G4-L13": {
+    "tier": "test15",
+    "n_blocks": 12,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 4,
+      "free_text": 3,
+      "figure": 2,
+      "passage": 3
+    },
+    "content_hash": "cc0e361531ffdbe5",
+    "schema_hash": "2330d6a4e348c1fa",
+    "source_code": null
+  },
+  "G4-L15": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 3,
+      "figure": 1,
+      "passage": 1
+    },
+    "content_hash": "d213ee78c8b66e0e",
+    "schema_hash": "a809d66f0b9c7139",
+    "source_code": null
+  },
+  "G4-L16": {
+    "tier": "catalog",
+    "n_blocks": 11,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 4,
+      "figure": 1,
+      "free_text": 5,
+      "passage": 1
+    },
+    "content_hash": "8f9193e1ed5a7788",
+    "schema_hash": "a86d7353caf2c842",
+    "source_code": null
+  },
+  "G4-L18": {
+    "tier": "catalog",
+    "n_blocks": 20,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 20
+    },
+    "content_hash": "fc53c09d8f92cd03",
+    "schema_hash": "4794a6773f561da6",
+    "source_code": null
+  },
+  "G4-L19": {
+    "tier": "catalog",
+    "n_blocks": 24,
+    "n_questions": 15,
+    "type_counts": {
+      "guide": 9,
+      "fill_table": 1,
+      "free_text": 9,
+      "single": 5
+    },
+    "content_hash": "ecd218705342e64c",
+    "schema_hash": "2ff9244242c9599d",
+    "source_code": null
+  },
+  "G4-L2": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 2,
+      "figure": 1,
+      "passage": 1
+    },
+    "content_hash": "64083bb7bd82b880",
+    "schema_hash": "659c71a5766a8f55",
+    "source_code": null
+  },
+  "G4-L20": {
+    "tier": "catalog",
+    "n_blocks": 9,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 4,
+      "single": 5
+    },
+    "content_hash": "f809479cd99bc3a1",
+    "schema_hash": "6c712f42129da91e",
+    "source_code": "G4-L20"
+  },
+  "G4-L23": {
+    "tier": "catalog",
+    "n_blocks": 17,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 5,
+      "self_check": 8,
+      "free_text": 4
+    },
+    "content_hash": "240f659c1a892d59",
+    "schema_hash": "5ce6388f1ff0f700",
+    "source_code": null
+  },
+  "G4-L24": {
+    "tier": "catalog",
+    "n_blocks": 33,
+    "n_questions": 13,
+    "type_counts": {
+      "guide": 20,
+      "single": 7,
+      "multi": 6
+    },
+    "content_hash": "3f700f9452bb99f0",
+    "schema_hash": "d3487dd3fbee9096",
+    "source_code": null
+  },
+  "G4-L25": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 16,
+      "figure": 2,
+      "free_text": 3
+    },
+    "content_hash": "9233bfc5b60a67d5",
+    "schema_hash": "6ba89783b480a6d8",
+    "source_code": null
+  },
+  "G4-L26": {
+    "tier": "catalog",
+    "n_blocks": 36,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 31,
+      "figure": 2,
+      "free_text": 3
+    },
+    "content_hash": "b4ab82c8ace20ab7",
+    "schema_hash": "5f30f3661faa6fdc",
+    "source_code": null
+  },
+  "G4-L27": {
+    "tier": "catalog",
+    "n_blocks": 14,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 9,
+      "figure": 1,
+      "single": 1,
+      "free_text": 2,
+      "multi": 1
+    },
+    "content_hash": "e6cc69ed4c16a068",
+    "schema_hash": "d5113a9a56825611",
+    "source_code": null
+  },
+  "G4-L3": {
+    "tier": "catalog",
+    "n_blocks": 10,
+    "n_questions": 7,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 6,
+      "single": 1,
+      "passage": 2
+    },
+    "content_hash": "9a8396ab230b780c",
+    "schema_hash": "e397d32a4170ba38",
+    "source_code": null
+  },
+  "G4-L4": {
+    "tier": "catalog",
+    "n_blocks": 10,
+    "n_questions": 8,
+    "type_counts": {
+      "single": 2,
+      "free_text": 6,
+      "figure": 1,
+      "guide": 1
+    },
+    "content_hash": "3d9b2ada9561d98c",
+    "schema_hash": "d73c8f056bbb603d",
+    "source_code": null
+  },
+  "G4-L5": {
+    "tier": "catalog",
+    "n_blocks": 1,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 1
+    },
+    "content_hash": "ce344d1027a19d83",
+    "schema_hash": "b61af29e8792d1c8",
+    "source_code": null
+  },
+  "G4-L6": {
+    "tier": "catalog",
+    "n_blocks": 10,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 6,
+      "free_text": 3,
+      "passage": 1
+    },
+    "content_hash": "e8e4971b9e59e5c1",
+    "schema_hash": "f873cbb089662a71",
+    "source_code": null
+  },
+  "G4-L7": {
+    "tier": "catalog",
+    "n_blocks": 24,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 18,
+      "free_text": 5,
+      "single": 1
+    },
+    "content_hash": "8ff81fb11783256d",
+    "schema_hash": "b93dea39db69ebf4",
+    "source_code": null
+  },
+  "G4-L8": {
+    "tier": "catalog",
+    "n_blocks": 13,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 9,
+      "free_text": 4
+    },
+    "content_hash": "e280bff90a8eb0a4",
+    "schema_hash": "d70cae1def8ba4d6",
+    "source_code": null
+  },
+  "G4-L9": {
+    "tier": "catalog",
+    "n_blocks": 19,
+    "n_questions": 8,
+    "type_counts": {
+      "guide": 10,
+      "free_text": 8,
+      "passage": 1
+    },
+    "content_hash": "a6f5c0bcb99a6868",
+    "schema_hash": "9d504d547e1eacd8",
+    "source_code": null
+  },
+  "G5-L10": {
+    "tier": "test15",
+    "n_blocks": 9,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 4,
+      "free_text": 2,
+      "single": 3
+    },
+    "content_hash": "cd097710c03fb192",
+    "schema_hash": "1e558aab1f6e42e3",
+    "source_code": null
+  },
+  "G5-L12": {
+    "tier": "catalog",
+    "n_blocks": 9,
+    "n_questions": 8,
+    "type_counts": {
+      "guide": 1,
+      "single": 8
+    },
+    "content_hash": "02011ab61dd67a4c",
+    "schema_hash": "1386ce3bd139dcab",
+    "source_code": null
+  },
+  "G5-L13": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 2,
+      "passage": 1
+    },
+    "content_hash": "1e16a7ef6888ff2d",
+    "schema_hash": "5a54c3106ac6066e",
+    "source_code": null
+  },
+  "G5-L14": {
+    "tier": "catalog",
+    "n_blocks": 42,
+    "n_questions": 17,
+    "type_counts": {
+      "guide": 24,
+      "fill_table": 1,
+      "free_text": 16,
+      "passage": 1
+    },
+    "content_hash": "edf525bf1ab0b4fe",
+    "schema_hash": "0a8fe39a4e40651d",
+    "source_code": "G5-L14"
+  },
+  "G5-L16": {
+    "tier": "catalog",
+    "n_blocks": 17,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 14,
+      "fill_table": 3
+    },
+    "content_hash": "d60121be0f8f0c1b",
+    "schema_hash": "7b2fb458bd88a2d1",
+    "source_code": "G5-L16"
+  },
+  "G5-L17": {
+    "tier": "catalog",
+    "n_blocks": 11,
+    "n_questions": 10,
+    "type_counts": {
+      "guide": 1,
+      "single": 10
+    },
+    "content_hash": "ee61440336e8e5b0",
+    "schema_hash": "f2779c13588f3826",
+    "source_code": null
+  },
+  "G5-L18": {
+    "tier": "catalog",
+    "n_blocks": 36,
+    "n_questions": 7,
+    "type_counts": {
+      "guide": 17,
+      "free_text": 6,
+      "passage": 11,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "c93a88d8bcca1a0b",
+    "schema_hash": "60510e6ddb0113df",
+    "source_code": null
+  },
+  "G5-L2": {
+    "tier": "catalog",
+    "n_blocks": 35,
+    "n_questions": 30,
+    "type_counts": {
+      "guide": 5,
+      "free_text": 30
+    },
+    "content_hash": "76ee97e14a45733c",
+    "schema_hash": "bb7202e8b824147e",
+    "source_code": null
+  },
+  "G5-L20": {
+    "tier": "catalog",
+    "n_blocks": 4,
+    "n_questions": 1,
+    "type_counts": {
+      "guide": 2,
+      "single": 1,
+      "passage": 1
+    },
+    "content_hash": "990f1062131ab1b1",
+    "schema_hash": "1e146d26a5523a2a",
+    "source_code": null
+  },
+  "G5-L21": {
+    "tier": "catalog",
+    "n_blocks": 8,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 4,
+      "free_text": 4
+    },
+    "content_hash": "8a2d17dab6325d42",
+    "schema_hash": "0c9efc488c87839a",
+    "source_code": null
+  },
+  "G5-L22": {
+    "tier": "catalog",
+    "n_blocks": 37,
+    "n_questions": 1,
+    "type_counts": {
+      "guide": 34,
+      "single": 1,
+      "figure": 2
+    },
+    "content_hash": "127678f36541ff70",
+    "schema_hash": "2046688dd3d9104c",
+    "source_code": null
+  },
+  "G5-L23": {
+    "tier": "catalog",
+    "n_blocks": 36,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 31,
+      "free_text": 3,
+      "figure": 1,
+      "self_check": 1
+    },
+    "content_hash": "b06360558e7ca0bb",
+    "schema_hash": "5fb295305a2b3722",
+    "source_code": null
+  },
+  "G5-L24": {
+    "tier": "catalog",
+    "n_blocks": 10,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 6,
+      "figure": 1,
+      "free_text": 3
+    },
+    "content_hash": "8f54ccd52b7ae0a4",
+    "schema_hash": "d9ec0557ef0904bd",
+    "source_code": null
+  },
+  "G5-L26": {
+    "tier": "test15",
+    "n_blocks": 24,
+    "n_questions": 14,
+    "type_counts": {
+      "guide": 7,
+      "free_text": 10,
+      "figure": 3,
+      "single": 4
+    },
+    "content_hash": "191a4b3bb90254a0",
+    "schema_hash": "8e9ae0661c3ad52f",
+    "source_code": null
+  },
+  "G5-L27": {
+    "tier": "catalog",
+    "n_blocks": 9,
+    "n_questions": 7,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 7,
+      "figure": 1
+    },
+    "content_hash": "fa2ea46ef58d1d74",
+    "schema_hash": "11d22ce874cac3cc",
+    "source_code": null
+  },
+  "G5-L3": {
+    "tier": "catalog",
+    "n_blocks": 50,
+    "n_questions": 35,
+    "type_counts": {
+      "guide": 14,
+      "free_text": 32,
+      "single": 3,
+      "passage": 1
+    },
+    "content_hash": "175f25258267eb15",
+    "schema_hash": "8075bf3ed384a72d",
+    "source_code": null
+  },
+  "G5-L4": {
+    "tier": "catalog",
+    "n_blocks": 11,
+    "n_questions": 8,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 8,
+      "self_check": 1
+    },
+    "content_hash": "0d9fe2142fc472d2",
+    "schema_hash": "0e72cb7b7d30de59",
+    "source_code": null
+  },
+  "G5-L5": {
+    "tier": "catalog",
+    "n_blocks": 28,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 22,
+      "free_text": 6
+    },
+    "content_hash": "e82a11914afe9ece",
+    "schema_hash": "961646a210642eeb",
+    "source_code": null
+  },
+  "G5-L6": {
+    "tier": "catalog",
+    "n_blocks": 30,
+    "n_questions": 11,
+    "type_counts": {
+      "guide": 19,
+      "free_text": 11
+    },
+    "content_hash": "425359d51864e3e1",
+    "schema_hash": "84864e0b9c51af12",
+    "source_code": null
+  },
+  "G5-L7": {
+    "tier": "test15",
+    "n_blocks": 17,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 12,
+      "single": 3,
+      "free_text": 2
+    },
+    "content_hash": "7d037e4e40fec837",
+    "schema_hash": "56e8c23d199605ab",
+    "source_code": null
+  },
+  "G5-L8": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 3,
+      "match": 2
+    },
+    "content_hash": "3afa466d4b07a984",
+    "schema_hash": "4c6b77a7fe8ae3c6",
+    "source_code": null
+  },
+  "G5-L9": {
+    "tier": "catalog",
+    "n_blocks": 4,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 2,
+      "figure": 1
+    },
+    "content_hash": "96a934ce887799c8",
+    "schema_hash": "0017e94759cb60d0",
+    "source_code": null
+  },
+  "G6-L10": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 15,
+      "free_text": 6
+    },
+    "content_hash": "5b527b4582538651",
+    "schema_hash": "1131ed5bdd5af9c5",
+    "source_code": null
+  },
+  "G6-L11": {
+    "tier": "catalog",
+    "n_blocks": 30,
+    "n_questions": 18,
+    "type_counts": {
+      "guide": 12,
+      "free_text": 18
+    },
+    "content_hash": "42f3956efa95043b",
+    "schema_hash": "65502b4a820744d2",
+    "source_code": null
+  },
+  "G6-L13": {
+    "tier": "catalog",
+    "n_blocks": 14,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 8,
+      "free_text": 6
+    },
+    "content_hash": "22c05fb54a999176",
+    "schema_hash": "fe2cb5b41ec8af10",
+    "source_code": null
+  },
+  "G6-L14": {
+    "tier": "test15",
+    "n_blocks": 14,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 11,
+      "free_text": 2,
+      "figure": 1
+    },
+    "content_hash": "8bbba2e127b6fc75",
+    "schema_hash": "e2e93bef5e76be10",
+    "source_code": null
+  },
+  "G6-L15": {
+    "tier": "catalog",
+    "n_blocks": 13,
+    "n_questions": 12,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 4,
+      "single": 8
+    },
+    "content_hash": "d3ebaa59723e9dc6",
+    "schema_hash": "ac0f80773450d61d",
+    "source_code": null
+  },
+  "G6-L17": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "single": 3,
+      "free_text": 1
+    },
+    "content_hash": "65ee9a95121d029c",
+    "schema_hash": "7b57f7fcb8ecd00f",
+    "source_code": null
+  },
+  "G6-L18": {
+    "tier": "catalog",
+    "n_blocks": 3,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 2
+    },
+    "content_hash": "3b673055c9e84ef3",
+    "schema_hash": "398f2a859042cff8",
+    "source_code": null
+  },
+  "G6-L2": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "single": 4
+    },
+    "content_hash": "41ed27ae11e2d90e",
+    "schema_hash": "d95f46ab6d666649",
+    "source_code": "G6-L2"
+  },
+  "G6-L20": {
+    "tier": "catalog",
+    "n_blocks": 10,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 6,
+      "passage": 3,
+      "figure": 1
+    },
+    "content_hash": "9e0375973b768d2a",
+    "schema_hash": "8ad3d3e1d77650c2",
+    "source_code": null
+  },
+  "G6-L22": {
+    "tier": "dev7",
+    "n_blocks": 29,
+    "n_questions": 17,
+    "type_counts": {
+      "guide": 8,
+      "passage": 4,
+      "single": 15,
+      "free_text": 1,
+      "fill_table": 1
+    },
+    "content_hash": "ab991697e6b30f9e",
+    "schema_hash": "94c5172e97f9a35a",
+    "source_code": null
+  },
+  "G6-L23": {
+    "tier": "dev7",
+    "n_blocks": 43,
+    "n_questions": 16,
+    "type_counts": {
+      "guide": 20,
+      "free_text": 13,
+      "passage": 6,
+      "single": 2,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "63062e0ace581952",
+    "schema_hash": "a4d159f5d218287c",
+    "source_code": null
+  },
+  "G6-L24": {
+    "tier": "dev7",
+    "n_blocks": 10,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 5,
+      "single": 3,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "0dadb6ff3544d9a4",
+    "schema_hash": "7ca7a150889fdf68",
+    "source_code": null
+  },
+  "G6-L25": {
+    "tier": "dev7",
+    "n_blocks": 7,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 2,
+      "single": 3,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "4805058ed16b933e",
+    "schema_hash": "7a05f8d17ef8fc9a",
+    "source_code": null
+  },
+  "G6-L3": {
+    "tier": "test15",
+    "n_blocks": 7,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 2,
+      "figure": 1,
+      "single": 2,
+      "free_text": 2
+    },
+    "content_hash": "494347a15fe2aa45",
+    "schema_hash": "396b95361459957c",
+    "source_code": null
+  },
+  "G6-L4": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 16,
+      "free_text": 2
+    },
+    "content_hash": "3e98a7f48cdc1f2a",
+    "schema_hash": "8cd6e090bee26dfe",
+    "source_code": null
+  },
+  "G6-L5": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 15,
+      "free_text": 6
+    },
+    "content_hash": "701a16a5813a02ce",
+    "schema_hash": "bbc611d5f52a1407",
+    "source_code": null
+  },
+  "G6-L6": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 12,
+      "free_text": 5,
+      "passage": 1
+    },
+    "content_hash": "13ecff4f2d27fb4f",
+    "schema_hash": "83767bc9e4a0beb2",
+    "source_code": null
+  },
+  "G6-L7": {
+    "tier": "catalog",
+    "n_blocks": 25,
+    "n_questions": 10,
+    "type_counts": {
+      "guide": 9,
+      "fill_table": 2,
+      "free_text": 8,
+      "passage": 6
+    },
+    "content_hash": "4dcb6fa95eb720a7",
+    "schema_hash": "b93d607324ed0cf2",
+    "source_code": null
+  },
+  "G6-L8": {
+    "tier": "test15",
+    "n_blocks": 34,
+    "n_questions": 17,
+    "type_counts": {
+      "guide": 17,
+      "free_text": 17
+    },
+    "content_hash": "23ce3b52f4a4d7d5",
+    "schema_hash": "e4195361377b6a1f",
+    "source_code": null
+  },
+  "G6-L9": {
+    "tier": "catalog",
+    "n_blocks": 12,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 10,
+      "free_text": 2
+    },
+    "content_hash": "abe964599e475ca8",
+    "schema_hash": "e21d7829a5a659c6",
+    "source_code": null
+  },
+  "G7-L1": {
+    "tier": "catalog",
+    "n_blocks": 12,
+    "n_questions": 11,
+    "type_counts": {
+      "guide": 1,
+      "single": 8,
+      "free_text": 3
+    },
+    "content_hash": "352ae89e1ca50da3",
+    "schema_hash": "e4a4e58241fdfd57",
+    "source_code": null
+  },
+  "G7-L10": {
+    "tier": "catalog",
+    "n_blocks": 22,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 10,
+      "passage": 5,
+      "single": 3,
+      "free_text": 2,
+      "figure": 1,
+      "self_check": 1
+    },
+    "content_hash": "3427bab625d70a9f",
+    "schema_hash": "6f7c53b0a4cb843e",
+    "source_code": null
+  },
+  "G7-L11": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 9,
+      "passage": 5,
+      "single": 3,
+      "multi": 1,
+      "free_text": 2,
+      "self_check": 1
+    },
+    "content_hash": "5a18352d436b19c9",
+    "schema_hash": "d8be39fef08f2fb5",
+    "source_code": null
+  },
+  "G7-L12": {
+    "tier": "catalog",
+    "n_blocks": 54,
+    "n_questions": 22,
+    "type_counts": {
+      "guide": 26,
+      "free_text": 20,
+      "single": 2,
+      "passage": 5,
+      "self_check": 1
+    },
+    "content_hash": "2f1f5dcd488c3511",
+    "schema_hash": "2b2dd669cfc1d43c",
+    "source_code": null
+  },
+  "G7-L13": {
+    "tier": "catalog",
+    "n_blocks": 4,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 2
+    },
+    "content_hash": "5c61e38036816a30",
+    "schema_hash": "79633f4b1057c572",
+    "source_code": null
+  },
+  "G7-L14": {
+    "tier": "catalog",
+    "n_blocks": 13,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 6,
+      "free_text": 5,
+      "passage": 2
+    },
+    "content_hash": "3dc221b3d52067c3",
+    "schema_hash": "1c58b7d442d7e28e",
+    "source_code": null
+  },
+  "G7-L16": {
+    "tier": "catalog",
+    "n_blocks": 7,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 1,
+      "free_text": 6
+    },
+    "content_hash": "c36aed2ac01e7558",
+    "schema_hash": "9db316e5e16fc652",
+    "source_code": null
+  },
+  "G7-L17": {
+    "tier": "test15",
+    "n_blocks": 4,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 2
+    },
+    "content_hash": "101c351670364f2f",
+    "schema_hash": "355dfa43d8dacdd3",
+    "source_code": null
+  },
+  "G7-L18": {
+    "tier": "catalog",
+    "n_blocks": 14,
+    "n_questions": 13,
+    "type_counts": {
+      "guide": 1,
+      "single": 10,
+      "free_text": 3
+    },
+    "content_hash": "cee2e86ccb246847",
+    "schema_hash": "3d99d3fea551fd0a",
+    "source_code": null
+  },
+  "G7-L19": {
+    "tier": "test15",
+    "n_blocks": 3,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 2,
+      "passage": 1
+    },
+    "content_hash": "f63c773089541206",
+    "schema_hash": "51e1ebf255a25c64",
+    "source_code": null
+  },
+  "G7-L2": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 1,
+      "single": 4,
+      "free_text": 1
+    },
+    "content_hash": "9073c88e1bb38c47",
+    "schema_hash": "967406bb14d9f75b",
+    "source_code": null
+  },
+  "G7-L21": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 3,
+      "free_text": 3
+    },
+    "content_hash": "0c68202e7b97f2fc",
+    "schema_hash": "caef322482ae8613",
+    "source_code": null
+  },
+  "G7-L23": {
+    "tier": "catalog",
+    "n_blocks": 44,
+    "n_questions": 22,
+    "type_counts": {
+      "guide": 18,
+      "figure": 1,
+      "passage": 3,
+      "free_text": 6,
+      "single": 16
+    },
+    "content_hash": "a6c86ae87eaa7e56",
+    "schema_hash": "aa35ee95aeb7c252",
+    "source_code": null
+  },
+  "G7-L24": {
+    "tier": "catalog",
+    "n_blocks": 41,
+    "n_questions": 30,
+    "type_counts": {
+      "guide": 9,
+      "passage": 2,
+      "free_text": 22,
+      "single": 8
+    },
+    "content_hash": "d27ce1b31d7453b4",
+    "schema_hash": "e2f7363531f336a7",
+    "source_code": null
+  },
+  "G7-L25": {
+    "tier": "catalog",
+    "n_blocks": 9,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 5,
+      "single": 3,
+      "passage": 1
+    },
+    "content_hash": "04862c5b30a387ab",
+    "schema_hash": "179f3cf3bd49a218",
+    "source_code": null
+  },
+  "G7-L26": {
+    "tier": "catalog",
+    "n_blocks": 14,
+    "n_questions": 13,
+    "type_counts": {
+      "guide": 1,
+      "single": 13
+    },
+    "content_hash": "d7c74c4293f2ec2d",
+    "schema_hash": "f1590b58d53932cd",
+    "source_code": null
+  },
+  "G7-L28": {
+    "tier": "dev7",
+    "n_blocks": 40,
+    "n_questions": 13,
+    "type_counts": {
+      "guide": 22,
+      "figure": 1,
+      "free_text": 7,
+      "single": 5,
+      "passage": 3,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "294a8757ede0a2a6",
+    "schema_hash": "c9a609fb71aa5517",
+    "source_code": null
+  },
+  "G7-L29": {
+    "tier": "dev7",
+    "n_blocks": 68,
+    "n_questions": 30,
+    "type_counts": {
+      "guide": 32,
+      "figure": 5,
+      "free_text": 6,
+      "single": 24,
+      "self_check": 1
+    },
+    "content_hash": "0b07dff9291ec862",
+    "schema_hash": "9c899e667a2411c7",
+    "source_code": null
+  },
+  "G7-L3": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 1,
+      "single": 5
+    },
+    "content_hash": "47609b2b01e1d4ce",
+    "schema_hash": "44219ecce3769a3b",
+    "source_code": null
+  },
+  "G7-L30": {
+    "tier": "dev7",
+    "n_blocks": 52,
+    "n_questions": 23,
+    "type_counts": {
+      "guide": 21,
+      "figure": 5,
+      "single": 19,
+      "free_text": 4,
+      "passage": 2,
+      "self_check": 1
+    },
+    "content_hash": "da8ff59a794678f3",
+    "schema_hash": "77b649971fdf35d7",
+    "source_code": null
+  },
+  "G7-L4": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 1,
+      "single": 3,
+      "free_text": 2
+    },
+    "content_hash": "915e664f125c00f8",
+    "schema_hash": "a87be6af2fc19a56",
+    "source_code": null
+  },
+  "G7-L5": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 3
+    },
+    "content_hash": "e1f5938a3f47534b",
+    "schema_hash": "40543283a9b20bee",
+    "source_code": null
+  },
+  "G7-L8": {
+    "tier": "catalog",
+    "n_blocks": 7,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 5,
+      "free_text": 2
+    },
+    "content_hash": "be8da481d8682209",
+    "schema_hash": "1b797439c93e1be8",
+    "source_code": null
+  },
+  "G7-L9": {
+    "tier": "test15",
+    "n_blocks": 11,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 9,
+      "free_text": 2
+    },
+    "content_hash": "8c22f157d0fb2076",
+    "schema_hash": "1c34019c9e60da05",
+    "source_code": null
+  },
+  "G8-L1": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 3,
+      "single": 2,
+      "free_text": 1
+    },
+    "content_hash": "64085081f28022bd",
+    "schema_hash": "870715f21c8c3277",
+    "source_code": null
+  },
+  "G8-L11": {
+    "tier": "catalog",
+    "n_blocks": 13,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 9,
+      "passage": 1,
+      "free_text": 3
+    },
+    "content_hash": "4e36ecd7481cd153",
+    "schema_hash": "47a3b71d3f4f04da",
+    "source_code": "G8-L14"
+  },
+  "G8-L12": {
+    "tier": "catalog",
+    "n_blocks": 17,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 11,
+      "passage": 4,
+      "figure": 1,
+      "self_check": 1
+    },
+    "content_hash": "c218cc295b0dd1ea",
+    "schema_hash": "60e623e69599d7be",
+    "source_code": null
+  },
+  "G8-L13": {
+    "tier": "catalog",
+    "n_blocks": 17,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 10,
+      "free_text": 1,
+      "passage": 4,
+      "figure": 1,
+      "fill_table": 1
+    },
+    "content_hash": "01a2eba5f9db73a8",
+    "schema_hash": "785834c84fa3f8fc",
+    "source_code": "G8-L17"
+  },
+  "G8-L14": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 1,
+    "type_counts": {
+      "guide": 12,
+      "passage": 3,
+      "figure": 1,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "54a7e9d8801d9c21",
+    "schema_hash": "949552126a1f98c8",
+    "source_code": "G8-L18"
+  },
+  "G8-L15": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 11,
+      "passage": 5,
+      "multi": 2
+    },
+    "content_hash": "71f975a6a4fdad75",
+    "schema_hash": "775ae876f5d07232",
+    "source_code": "G8-L19"
+  },
+  "G8-L16": {
+    "tier": "catalog",
+    "n_blocks": 14,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 9,
+      "free_text": 2,
+      "passage": 2,
+      "self_check": 1
+    },
+    "content_hash": "c23df9a49c02d00c",
+    "schema_hash": "0e502892f98f81b8",
+    "source_code": null
+  },
+  "G8-L17": {
+    "tier": "catalog",
+    "n_blocks": 17,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 10,
+      "free_text": 1,
+      "passage": 4,
+      "figure": 1,
+      "fill_table": 1
+    },
+    "content_hash": "01a2eba5f9db73a8",
+    "schema_hash": "785834c84fa3f8fc",
+    "source_code": null
+  },
+  "G8-L18": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 1,
+    "type_counts": {
+      "guide": 12,
+      "passage": 3,
+      "figure": 1,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "54a7e9d8801d9c21",
+    "schema_hash": "949552126a1f98c8",
+    "source_code": null
+  },
+  "G8-L19": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 11,
+      "passage": 5,
+      "multi": 2
+    },
+    "content_hash": "71f975a6a4fdad75",
+    "schema_hash": "775ae876f5d07232",
+    "source_code": null
+  },
+  "G8-L3": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 11,
+      "passage": 3,
+      "fill_table": 1,
+      "single": 5,
+      "figure": 1
+    },
+    "content_hash": "137d8ae3080598a6",
+    "schema_hash": "93611a692e627ead",
+    "source_code": null
+  },
+  "G8-L3b": {
+    "tier": "test15",
+    "n_blocks": 21,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 15,
+      "figure": 1,
+      "free_text": 3,
+      "passage": 1,
+      "single": 1
+    },
+    "content_hash": "d3b6c6c1185dc546",
+    "schema_hash": "8bc499f916554e62",
+    "source_code": null
+  },
+  "G8-L4": {
+    "tier": "catalog",
+    "n_blocks": 12,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 4,
+      "free_text": 4,
+      "passage": 4
+    },
+    "content_hash": "5f854259dadc5068",
+    "schema_hash": "5d9fe9812ed7f706",
+    "source_code": null
+  },
+  "G8-L5": {
+    "tier": "catalog",
+    "n_blocks": 18,
+    "n_questions": 9,
+    "type_counts": {
+      "guide": 7,
+      "free_text": 6,
+      "passage": 2,
+      "single": 3
+    },
+    "content_hash": "2fe31c7ba849bdf8",
+    "schema_hash": "198125656fbf982e",
+    "source_code": null
+  },
+  "G8-L6": {
+    "tier": "catalog",
+    "n_blocks": 23,
+    "n_questions": 8,
+    "type_counts": {
+      "guide": 13,
+      "free_text": 8,
+      "passage": 2
+    },
+    "content_hash": "ea95a14e36b1d1eb",
+    "schema_hash": "dbaf7b691f692dfa",
+    "source_code": null
+  },
+  "G8-L6b": {
+    "tier": "test15",
+    "n_blocks": 31,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 23,
+      "free_text": 5,
+      "passage": 3
+    },
+    "content_hash": "832cc861dc5c7352",
+    "schema_hash": "23ad4e5ea55284c8",
+    "source_code": null
+  },
+  "G8-L7": {
+    "tier": "catalog",
+    "n_blocks": 49,
+    "n_questions": 12,
+    "type_counts": {
+      "guide": 30,
+      "free_text": 11,
+      "passage": 5,
+      "figure": 1,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "c9004dddce1e3192",
+    "schema_hash": "5bb59edaa93d3513",
+    "source_code": null
+  },
+  "G8-L8": {
+    "tier": "catalog",
+    "n_blocks": 32,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 23,
+      "free_text": 5,
+      "passage": 3,
+      "figure": 1
+    },
+    "content_hash": "d44cdc33f32f8250",
+    "schema_hash": "f61f0f07814d04c9",
+    "source_code": null
+  },
+  "G8-L9": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 3,
+      "figure": 1,
+      "self_check": 1
+    },
+    "content_hash": "6ee228e8abf732b1",
+    "schema_hash": "0d2e3088f936f52e",
+    "source_code": null
+  },
+  "G8-L9a": {
+    "tier": "catalog",
+    "n_blocks": 6,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 3,
+      "figure": 2,
+      "self_check": 1
+    },
+    "content_hash": "6ee228e8abf732b1",
+    "schema_hash": "752f0b870502c431",
+    "source_code": null
+  },
+  "G9-L1": {
+    "tier": "catalog",
+    "n_blocks": 7,
+    "n_questions": 2,
+    "type_counts": {
+      "guide": 5,
+      "free_text": 2
+    },
+    "content_hash": "ccb7343fd3ab6fdf",
+    "schema_hash": "d8d38ede30c49aff",
+    "source_code": null
+  },
+  "G9-L11": {
+    "tier": "catalog",
+    "n_blocks": 30,
+    "n_questions": 11,
+    "type_counts": {
+      "guide": 15,
+      "single": 8,
+      "free_text": 1,
+      "passage": 3,
+      "multi": 1,
+      "fill_table": 1,
+      "self_check": 1
+    },
+    "content_hash": "0b279eac9fdc06a8",
+    "schema_hash": "c4771df1931adb33",
+    "source_code": null
+  },
+  "G9-L12": {
+    "tier": "catalog",
+    "n_blocks": 26,
+    "n_questions": 10,
+    "type_counts": {
+      "guide": 15,
+      "single": 8,
+      "multi": 2,
+      "self_check": 1
+    },
+    "content_hash": "d386d7a117a98907",
+    "schema_hash": "2976ad87498594bf",
+    "source_code": null
+  },
+  "G9-L13": {
+    "tier": "catalog",
+    "n_blocks": 26,
+    "n_questions": 6,
+    "type_counts": {
+      "guide": 17,
+      "free_text": 6,
+      "figure": 2,
+      "self_check": 1
+    },
+    "content_hash": "291533a9bf13c002",
+    "schema_hash": "e45e078544d337d5",
+    "source_code": null
+  },
+  "G9-L14": {
+    "tier": "catalog",
+    "n_blocks": 21,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 13,
+      "figure": 1,
+      "passage": 3,
+      "free_text": 3,
+      "self_check": 1
+    },
+    "content_hash": "e9ab1bd4dcdacc65",
+    "schema_hash": "ca6c98acd604b6b6",
+    "source_code": null
+  },
+  "G9-L15": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "single": 3,
+      "free_text": 1
+    },
+    "content_hash": "c9b8848d710fd81b",
+    "schema_hash": "7b57f7fcb8ecd00f",
+    "source_code": null
+  },
+  "G9-L17": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "multi": 1,
+      "single": 2,
+      "free_text": 1
+    },
+    "content_hash": "13a5f9945d6d453f",
+    "schema_hash": "565c33748da951ad",
+    "source_code": null
+  },
+  "G9-L2": {
+    "tier": "catalog",
+    "n_blocks": 15,
+    "n_questions": 13,
+    "type_counts": {
+      "guide": 2,
+      "free_text": 13
+    },
+    "content_hash": "12f5f321a49ba135",
+    "schema_hash": "fb1481922eae8876",
+    "source_code": null
+  },
+  "G9-L3": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "single": 4
+    },
+    "content_hash": "7ba9f6551cdff00e",
+    "schema_hash": "844aee2f5a80852d",
+    "source_code": null
+  },
+  "G9-L4": {
+    "tier": "catalog",
+    "n_blocks": 5,
+    "n_questions": 4,
+    "type_counts": {
+      "guide": 1,
+      "single": 4
+    },
+    "content_hash": "54df76d447a5cb1b",
+    "schema_hash": "e6344ac0f7d51282",
+    "source_code": null
+  },
+  "G9-L5": {
+    "tier": "catalog",
+    "n_blocks": 8,
+    "n_questions": 0,
+    "type_counts": {
+      "guide": 8
+    },
+    "content_hash": "5957ea2d91c1a8b1",
+    "schema_hash": "91bca158b1e96f70",
+    "source_code": null
+  },
+  "G9-L6": {
+    "tier": "catalog",
+    "n_blocks": 8,
+    "n_questions": 5,
+    "type_counts": {
+      "guide": 3,
+      "free_text": 5
+    },
+    "content_hash": "0b913a933fc41bd5",
+    "schema_hash": "611b1a262124fd5c",
+    "source_code": null
+  },
+  "G9-L9": {
+    "tier": "test15",
+    "n_blocks": 22,
+    "n_questions": 9,
+    "type_counts": {
+      "guide": 11,
+      "passage": 2,
+      "free_text": 8,
+      "fill_table": 1
+    },
+    "content_hash": "7629c121ac340d4c",
+    "schema_hash": "7ab4ec343ccdddf6",
+    "source_code": null
+  },
+  "文-L1": {
+    "tier": "catalog",
+    "n_blocks": 8,
+    "n_questions": 3,
+    "type_counts": {
+      "guide": 4,
+      "free_text": 3,
+      "passage": 1
+    },
+    "content_hash": "8281026ce7492ee5",
+    "schema_hash": "a6d83dac698c33b9",
+    "source_code": null
+  },
+  "文-L2": {
+    "tier": "catalog",
+    "n_blocks": 22,
+    "n_questions": 7,
+    "type_counts": {
+      "guide": 12,
+      "free_text": 5,
+      "passage": 3,
+      "single": 2
+    },
+    "content_hash": "885971d22a42eb63",
+    "schema_hash": "ca568cb58f216060",
+    "source_code": null
+  }
+}

@@ -1,0 +1,110 @@
+# content_known_gaps.yaml — honest registry of content the platform genuinely
+# lacks for the聚光燈 (reading-strategy) / 重點表 (story-structure) steps (#2397).
+#
+# WHY THIS EXISTS (not a fake-pass list):
+#   The content evidence gate iterates every live lesson and marks a cell
+#   `unknown` when the source content is missing. `unknown` == fail at gate
+#   time. But some lessons have NO extractable聚光燈/重點表 in their source
+#   DOCX (classical Chinese 文-L*, lessons whose worksheet has no spotlight
+#   range, multi-text secondary slots). Those are真實內容缺口, not bugs — they
+#   must be surfaced honestly, not faked green and not blocked as un-triaged
+#   unknowns. Listing a lesson here flips its cell from `unknown` to
+#   `known_gap`: still NOT a pass, but an explicitly-owned, auditable gap.
+#
+# HOW IT IS USED:
+#   content_evidence_gate.py reads this file. For a (lesson_code, step) listed
+#   here it sets status=known_gap + failure_code KNOWN_CONTENT_GAP_<reason>.
+#   The ship gate counts known_gap cells separately (reported, non-blocking)
+#   but REQUIRES every entry to carry a reason — so adding one is a deliberate,
+#   reviewable act, never a silent skip.
+#
+# REASONS (machine-checked enum):
+#   no_spotlight_source   — DOCX 學習單沒有可抽取的閱讀聚光燈段落
+#                           (extractor: "spotlight range not found" / empty)
+#   no_keypoints_source   — DOCX 沒有可抽取的文章重點表
+#   multi_text_secondary  — 多文本課的第二/三篇 slot，內容在 primary slot
+#   classical_no_step     — 文言文課型本就無此步驟素材
+#   built_pending_deploy  — 線上版 schema 已建好(_online-schema)但尚未進 DB
+#                           → 真正解法是部署，不是補件；先誠實標記不擋
+#   figure_missing        — 源 DOCX/GCS 都沒有可用真圖資產（不可用 placeholder 補綠）
+#
+# 校驗來源 (2026-06-22, staging full sweep, post dedup+normalization fix):
+#   每筆都對照 private/curriculum-source/_online-schema/<code>.spotlight.yml /
+#   .keypoints.yml 的抽取結果，error/_missing_source/empty blocks 才列入。
+#   修內容後請從本檔移除對應 entry，讓 gate 重新驗 pass。
+
+schema_version: content-known-gaps.v1
+
+reading-strategy:
+  # fail-closed: padded alias/identity drift slots (避免鄰號錯綁內容)
+  - {lesson_code: G4-L2,  reason: no_spotlight_source}
+  - {lesson_code: G4-L3,  reason: no_spotlight_source}
+  - {lesson_code: G4-L17, reason: no_spotlight_source}
+  - {lesson_code: G4-L20, reason: no_spotlight_source}
+  # vision-judge confirmed served spotlight embeds another lesson's example/
+  # practice text; no verified correct source found → fail-closed (not 放錯課)
+  - {lesson_code: G5-L11, reason: no_spotlight_source}
+  - {lesson_code: G6-L12, reason: no_spotlight_source}
+  - {lesson_code: G7-L31, reason: no_spotlight_source}
+  - {lesson_code: G9-L8,  reason: no_spotlight_source}
+  # 無可抽取聚光燈段落 (extractor: spotlight range not found / empty blocks)
+  - {lesson_code: G4-L1,  reason: no_spotlight_source}
+  - {lesson_code: G4-L12, reason: no_spotlight_source}
+  - {lesson_code: G4-L14, reason: no_spotlight_source}
+  - {lesson_code: G5-L1,  reason: no_spotlight_source}
+  - {lesson_code: G5-L15, reason: no_spotlight_source}
+  - {lesson_code: G5-L19, reason: no_spotlight_source}
+  - {lesson_code: G6-L1,  reason: no_spotlight_source}
+  - {lesson_code: G6-L16, reason: no_spotlight_source}
+  - {lesson_code: G6-L19, reason: no_spotlight_source}
+  - {lesson_code: G6-L21, reason: no_spotlight_source}
+  - {lesson_code: G7-L6,  reason: no_spotlight_source}
+  - {lesson_code: G7-L7,  reason: no_spotlight_source}
+  - {lesson_code: G7-L15, reason: no_spotlight_source}
+  # verified no-source in source DOCX (G7-L20 extractor returned spotlight blocks: 0)
+  - {lesson_code: G7-L20, reason: no_spotlight_source}
+  - {lesson_code: G7-L22, reason: no_spotlight_source}
+  - {lesson_code: G7-L27, reason: no_spotlight_source}
+  - {lesson_code: G8-L2,  reason: no_spotlight_source}
+  - {lesson_code: G8-L10, reason: no_spotlight_source}
+  - {lesson_code: G9-L7,  reason: no_spotlight_source}
+  - {lesson_code: G9-L10, reason: no_spotlight_source}
+  # 文言文課型 — 無聚光燈素材 / 標記待補件
+  - {lesson_code: 文-L3,  reason: classical_no_step}
+  - {lesson_code: 文-L4,  reason: classical_no_step}
+  - {lesson_code: 文-L5,  reason: classical_no_step}
+  - {lesson_code: 文-L6,  reason: classical_no_step}
+  - {lesson_code: 文-L7,  reason: classical_no_step}
+  - {lesson_code: 文-L8,  reason: classical_no_step}
+  - {lesson_code: 文-L9,  reason: classical_no_step}
+  - {lesson_code: 文-L10, reason: classical_no_step}
+  # G8 a/b sub-letter — 聚光燈 schema 已建 (_online-schema/G8-L3.spotlight.yml
+  # 等，22~51 blocks)，但尚未進 staging DB → 部署後即 pass，先誠實標記
+  - {lesson_code: G8-L3a,  reason: built_pending_deploy}
+  - {lesson_code: G8-L6a,  reason: built_pending_deploy}
+  - {lesson_code: G8-L9b,  reason: built_pending_deploy}
+  - {lesson_code: G8-L12a, reason: built_pending_deploy}
+  - {lesson_code: G8-L12b, reason: built_pending_deploy}
+
+story-structure:
+  # 多文本課的第二/三篇 slot — 重點表內容在 primary slot (G7-L23)
+  - {lesson_code: G7-L31, reason: multi_text_secondary}
+
+# Figure-asset gaps: story references a synthetic figN.png / tableN.json name
+# that was never uploaded to GCS (the real per-page assets G7-L28-NN.jpg DO
+# exist). honest gap = the figure reference points at missing content.
+# NOTE: FIGURE_BLACKLIST_HIT (placeholder served) 應優先補真圖；若確認源頭沒有
+# 真圖可供上傳，允許以 figure_missing 誠實標記缺口，不得用 placeholder 假裝通過。
+figure:
+  # story 引用合成的 figN.png / tableN.json 名稱，GCS 沒上傳該檔（真實 per-page
+  # 資產如 G5-L24-25-10.png 存在，但 story 指向不存在的 figN 名）。誠實標 gap，
+  # 真解是修 story figure reference 指向真實檔名 / 上傳對應 figN。
+  - {lesson_code: G6-L8,    reason: figure_missing}
+  - {lesson_code: G9-L9,    reason: figure_asset_not_uploaded}
+  - {lesson_code: G7-L28,   reason: figure_asset_not_uploaded}
+  - {lesson_code: G7-L29,   reason: figure_asset_not_uploaded}
+  - {lesson_code: G7-L30,   reason: figure_asset_not_uploaded}
+  - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # fig10.png 未上傳
+  - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # G8-L9 dir, fig10.png
+  - {lesson_code: G8-L8,    reason: figure_missing}             # G8-L6b only has placeholder fig1.png in G8-L8 dir
+  - {lesson_code: G8-L6b,   reason: figure_missing}             # source figure is placeholder-only (no authentic asset)

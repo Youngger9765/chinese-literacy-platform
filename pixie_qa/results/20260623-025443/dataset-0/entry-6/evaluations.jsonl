@@ -1,0 +1,2 @@
+{"evaluator": "verdict_match", "score": 1.0, "reasoning": "expected=figure_broken got=figure_broken -> HIT (judge confidence=0.9) [disputed: degraded_blurry_image_borderline_broken]"}
+{"evaluator": "JudgeReasoningQuality", "score": 0.8, "reasoning": "Describes the blurry/pixelated image at the bottom as load-failure-like; honest about the borderline degraded figure though the verdict is the disputed call. Reasoning matches the page; the call is genuinely borderline."}

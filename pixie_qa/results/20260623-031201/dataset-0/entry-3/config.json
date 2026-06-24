@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "5 G4-L05 reading-strategy: 穿越極限的跑者",
+  "evalMetadata": {
+    "lesson_code": "G4-L05",
+    "batch": "g4-first"
+  }
+}

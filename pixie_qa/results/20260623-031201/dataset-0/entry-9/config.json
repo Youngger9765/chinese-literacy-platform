@@ -1,0 +1,10 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_gate_pass"
+  ],
+  "description": "1017 G4-L17 reading-strategy: 把球打好，就夠了嗎？ ──阿耀與健豪學長的通信（一）",
+  "evalMetadata": {
+    "lesson_code": "G4-L17",
+    "batch": "g4-first"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "evaluators": [
+    "pixie_qa/evaluators.py:verdict_match",
+    "pixie_qa/evaluators.py:JudgeReasoningQuality"
+  ],
+  "description": "1115 G8-L4 reading-strategy: 玻璃娃娃",
+  "expectation": "verdict should be faithful — 張冠李戴已修(玻璃娃娃內容對),假圖已清(prod figure block=0)",
+  "evalMetadata": {
+    "expected_verdict": "faithful",
+    "lesson_code": "G8-L4"
+  }
+}

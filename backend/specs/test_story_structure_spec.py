@@ -22,7 +22,11 @@ from app.services.story_structure_cell_parser import (
     fill_blanks_in_text,
     parse_checkbox_options,
 )
-from story_structure_qa_lib import verify_interaction_profile_contract
+from story_structure_qa_lib import (
+    LessonTier,
+    classify_lesson,
+    verify_interaction_profile_contract,
+)
 
 
 class TestCellParser:
@@ -73,3 +77,76 @@ class TestRepresentativeLessons:
         )
         assert client["interaction_profile"]["mode"] == "checkbox"
         assert client["interaction_profile"]["checkbox_count"] >= 3
+
+
+class TestClassifyLessonTier:
+    """L1 重點表 gate only runs for DOCX_KEYPOINTS lessons. Multi-text lessons
+    (one DOCX → many slots, compound YAML) must still be classified
+    DOCX_KEYPOINTS when their keypoints schema was extracted, otherwise the
+    gate is silently skipped and the content evidence gate reads it as a fail
+    (#2397 — the 4 L1_KEYPOINTS_FAIL cells: G4-L20 / G5-L24 / G9-L15 / G9-L17).
+    """
+
+    def test_keypoints_available_without_structure_table_is_docx_keypoints(self):
+        # Multi-text compound lesson: single-slot parsed YAML lookup misses,
+        # so has_structure_table is False, but the keypoints schema exists.
+        tier = classify_lesson(
+            grade_code="G4-L20",
+            has_keypoints_yml=True,
+            has_structure_table=False,
+            has_ai_rows=False,
+            docx_keypoints_available=True,
+        )
+        assert tier == LessonTier.DOCX_KEYPOINTS
+
+    def test_keypoints_unavailable_is_not_docx_keypoints(self):
+        # No extractable 重點表 → must NOT be promoted to DOCX_KEYPOINTS.
+        assert (
+            classify_lesson(
+                grade_code="X-L1",
+                has_keypoints_yml=False,
+                has_structure_table=False,
+                has_ai_rows=False,
+                docx_keypoints_available=False,
+            )
+            == LessonTier.NO_KEYPOINTS_DOCX
+        )
+
+    def test_keypoints_availability_none_stays_no_structure(self):
+        # None (key absent in eval) must not satisfy the `is True` promotion.
+        assert (
+            classify_lesson(
+                grade_code="X-L2",
+                has_keypoints_yml=False,
+                has_structure_table=False,
+                has_ai_rows=False,
+                docx_keypoints_available=None,
+            )
+            == LessonTier.NO_STRUCTURE
+        )
+
+    def test_ai_rows_still_ai_fallback_when_no_keypoints(self):
+        # AI fallback path is unaffected by the new keypoints branch.
+        assert (
+            classify_lesson(
+                grade_code="X-L3",
+                has_keypoints_yml=False,
+                has_structure_table=False,
+                has_ai_rows=True,
+                docx_keypoints_available=None,
+            )
+            == LessonTier.AI_FALLBACK
+        )
+
+    def test_structure_table_path_unchanged(self):
+        # Normal single-slot lesson with on-disk structure table.
+        assert (
+            classify_lesson(
+                grade_code="X-L4",
+                has_keypoints_yml=True,
+                has_structure_table=True,
+                has_ai_rows=False,
+                docx_keypoints_available=True,
+            )
+            == LessonTier.DOCX_KEYPOINTS
+        )

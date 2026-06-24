@@ -1,0 +1,2 @@
+{"name": "vision_verdict", "value": "faithful"}
+{"name": "judge_detail", "value": {"verdict": "faithful", "confidence": 0.9, "reasoning": "截圖內容是關於「推論策略-找出文章主旨」的教學，並以本課《最美的畫面》為例進行練習。頁面中舉例的「小孩與糖果」和「○○的重要」是通用教學範例，但「小試身手」部分明確指出以本課《最美的畫面》為例，且後續的練習題內容（如「作者覺得自己在別人眼中最美的畫面是：看書的樣子」）也與本課課文內容高度相關。整體內容忠實於本課教學目標。", "suspected_actual_lesson": ""}}

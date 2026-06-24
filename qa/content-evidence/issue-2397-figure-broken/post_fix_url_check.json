@@ -1,0 +1,108 @@
+[
+  {
+    "story_id": 1080,
+    "grade_code": "G7-L1",
+    "resolved_code": "G7-L1",
+    "checks": [
+      {
+        "asset": "fig10.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L1/fig10.png",
+        "status": 200
+      },
+      {
+        "asset": "fig11.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L1/fig11.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 1084,
+    "grade_code": "G7-L5",
+    "resolved_code": "G7-L5",
+    "checks": [
+      {
+        "asset": "fig10.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L5/fig10.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 1093,
+    "grade_code": "G7-L14",
+    "resolved_code": "G7-L14",
+    "checks": [
+      {
+        "asset": "fig10.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L14/fig10.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 1097,
+    "grade_code": "G7-L18",
+    "resolved_code": "G7-L18",
+    "checks": [
+      {
+        "asset": "fig10.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L18/fig10.png",
+        "status": 200
+      },
+      {
+        "asset": "fig2.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L18/fig2.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 1106,
+    "grade_code": "G7-L26",
+    "resolved_code": "G7-L26",
+    "checks": [
+      {
+        "asset": "fig2.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G7-L26/fig2.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 1118,
+    "grade_code": "G8-L6b",
+    "resolved_code": "G8-L6b",
+    "checks": [
+      {
+        "asset": "fig1.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G8-L6b/fig1.png",
+        "status": 404
+      }
+    ]
+  },
+  {
+    "story_id": 1132,
+    "grade_code": "G9-L3",
+    "resolved_code": "G9-L3",
+    "checks": [
+      {
+        "asset": "fig2.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G9-L3/fig2.png",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "story_id": 18,
+    "grade_code": "G6-L08",
+    "resolved_code": "G6-L8",
+    "checks": [
+      {
+        "asset": "fig1.png",
+        "url": "https://storage.googleapis.com/lingoleap-assets/lessons-images/G6-L8/fig1.png",
+        "status": 404
+      }
+    ]
+  }
+]
