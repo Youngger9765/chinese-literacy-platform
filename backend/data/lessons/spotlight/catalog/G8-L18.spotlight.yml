@@ -23,10 +23,7 @@ spotlight:
     text: 三、比較觀點差異（用優先順序／介入焦點／判準原則」三個角度）
   - type: guide
     text: 上表我們已經掌握每一方在說什麼；接著請做兩方觀點的比較。
-  - type: figure
-    referent: table
-    asset: fig10.png
-    bind_paragraph: null
+  - type: fill_table
   - type: guide
     text: ＊歸納觀點差異：
   - type: passage

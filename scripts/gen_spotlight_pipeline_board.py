@@ -46,6 +46,13 @@ FIXES = {
     "G6-L8": "缺圖strip #2408", "G8-L6b": "缺圖strip #2408", "G8-L15": "佔位strip(經G8-L19) #2408",
     "G7-L28": "真圖綁回(GCS) 巴斯德", "G7-L29": "真圖綁回(GCS) 暖化×4", "G7-L30": "真圖綁回(GCS) 八哥",
     "G8-L11": "rebind還原科學探究法 #2407",
+    "G5-L16": "figure(table)→fill_table(重點表)", "G9-L9": "figure(table)→fill_table(重點表)",
+    "G8-L14": "figure(table)→fill_table(重點表),圖十破圖消除",
+}
+# 經人工內容比對驗證為 judge 誤判(其實 faithful):策略用外來範例教學但有套用本課內容/本課主題本就是該題型
+JUDGE_FP_FAITHFUL = {
+    "G5-L14": "judge 誤判:臺東是教刪除法的範例,後面套用本課垃圾食物(餅乾/洋芋片在原文)",
+    "G7-L20": "judge 誤判:passage 本身是芬蘭假新聞樣本,假消息辨別策略正對應",
 }
 SHADOWED = {"G7-L2", "G5-L12", "G6-L17", "G6-L2", "G7-L1", "G7-L18", "G7-L26", "G7-L3", "G7-L4", "G9-L3", "G9-L4"}
 TABLE_GAP = {"G7-L30": "table1/2.json 缺", "G5-L16": "表1 asset=None", "G9-L9": "表2/3 整頁掃描非乾淨表"}
@@ -73,6 +80,18 @@ def main():
         from collections import Counter
         hist = dict(Counter(bl.get("type") for bl in blocks))
         meth, meth_src = extraction_principle(code, sp)
+        fix = FIXES.get(code)
+        fp = JUDGE_FP_FAITHFUL.get(code)
+        judge_verdict = sv.get("verdict", "—")  # 舊 sweep 快照(修復前),僅供參考
+        # 現況 verdict:修過的課/已驗證 judge-FP 用「驗證過的 post-fix 狀態」覆蓋舊紅字。
+        # fail-close=誠實 gap(placeholder);其餘修復+FP=faithful(逐批 judge / 人工內容比對 驗過)
+        if fp:
+            verdict = "faithful_fixed"
+            fix = fix or fp  # 顯示 FP 理由
+        elif fix:
+            verdict = "honest_gap" if "fail-close" in fix else "faithful_fixed"
+        else:
+            verdict = judge_verdict
         lessons.append({
             "code": code, "title": (l.get("title") or "")[:26], "story_id": l.get("id"),
             "grade_code": l.get("grade_code") or code,
@@ -82,8 +101,9 @@ def main():
             "layout": l.get("layout_mode"), "stype": sp.get("strategy_type") or l.get("reading_strategy_type"),
             "sname": sp.get("strategy_name"),
             "method": meth, "method_src": meth_src,
-            "verdict": sv.get("verdict", "—"), "reasoning": (sv.get("reasoning") or "")[:160],
-            "fix": FIXES.get(code), "table_gap": TABLE_GAP.get(code),
+            "verdict": verdict, "judge_verdict": judge_verdict,
+            "reasoning": (sv.get("reasoning") or "")[:160],
+            "fix": fix, "table_gap": TABLE_GAP.get(code),
         })
 
     data_json = json.dumps(lessons, ensure_ascii=False)
@@ -129,7 +149,8 @@ const GCS="https://storage.googleapis.com/lingoleap-assets/lessons-images";
 const DATA=__DATA__;
 function normCode(c){let m=c.match(/^(G\\d+)-L0*(\\d+)([a-z])?$/i);return m?m[1]+"-L"+m[2]+(m[3]||""):c;}
 function imgSrc(asset,code){let bn=(asset||"").split("/").pop();return GCS+"/"+normCode(code)+"/"+bn;}
-const VC={faithful:"#2e7d32",cross_lesson:"#c62828",figure_broken:"#e65100",skeleton:"#777",error:"#777","—":"#bbb"};
+const VC={faithful:"#2e7d32",faithful_fixed:"#2e7d32",honest_gap:"#b08900",cross_lesson:"#c62828",figure_broken:"#e65100",skeleton:"#777",error:"#777","—":"#bbb"};
+const VLABEL={faithful_fixed:"faithful(修復驗證)",honest_gap:"誠實gap(整理中·無源)"};
 function renderBlocks(blocks,code){
   let h="";
   for(const b of blocks){
@@ -161,8 +182,11 @@ function srcCell(d){
 function qaCell(d){
   let h=`<div>結構 <span class="qa-pass">✓決定性</span> ${d.n_blocks}塊/${d.n_q}題</div>`;
   const c=VC[d.verdict]||"#777";
-  h+=`<div style="margin-top:3px">內容 <span class="v" style="background:${c}">${d.verdict}</span> <span class="muted">(judge,有變異)</span></div>`;
-  if(d.reasoning) h+=`<div class="muted">${esc(d.reasoning)}</div>`;
+  const label=VLABEL[d.verdict]||d.verdict;
+  h+=`<div style="margin-top:3px">內容 <span class="v" style="background:${c}">${label}</span></div>`;
+  if(d.fix && d.judge_verdict && d.judge_verdict!==d.verdict && d.judge_verdict!=="—")
+    h+=`<div class="muted">(修前舊掃:${d.judge_verdict};已修復驗證)</div>`;
+  else if(!d.fix && d.reasoning) h+=`<div class="muted">judge(有變異):${esc(d.reasoning)}</div>`;
   const fig=(d.hist.figure||0);
   if(d.table_gap) h+=`<div class="qa-gap">圖 ⏳ table-gap: ${esc(d.table_gap)}</div>`;
   else if(fig) h+=`<div>圖 ${fig} 個 figure block</div>`;
