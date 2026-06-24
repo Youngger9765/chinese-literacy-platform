@@ -308,13 +308,27 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     type="button"
                     onClick={() => { void handleDownloadWorksheet(story.worksheetPdfUrl!, 'pdf'); }}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
-                    aria-label="下載紙本學習單"
+                    aria-label="下載紙本學習單 PDF"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    下載紙本學習單
+                    下載 PDF
                   </button>
+                  {/* #2422 教授 6/5 #15：Word + PDF 同時上架讓老師自選（docx 已上 GCS，先前被 PDF 分支吞掉拿不到）*/}
+                  {story.worksheetDocxUrl && (
+                    <button
+                      type="button"
+                      onClick={() => { void handleDownloadWorksheet(story.worksheetDocxUrl!, 'docx'); }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1"
+                      aria-label="下載紙本學習單 Word"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      下載 Word
+                    </button>
+                  )}
                 </>
               ) : story.worksheetDocxUrl ? (
                 <button
