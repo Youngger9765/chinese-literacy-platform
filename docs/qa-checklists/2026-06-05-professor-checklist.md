@@ -67,12 +67,13 @@
 - [ ] 重點表／聚光燈結構盤點結果與模板化做法（board 已盤點，模板化做法待教授確認）
 - [ ] 聚光燈與老師「有效率核對」流程
 
-## 7/1 launch 前重點（從本 checklist 收斂）
-1. **❓ 項目 staging /qa 逐項驗**（1/5/7/9/13/14/15）→ 補完狀態
-2. **朗讀辨識真人內測**（4b）→ 明天會議測試集收集計畫
-3. **聚光燈即時批改 + 老師端**（11c）→ 靖杭 #2255 CLOSED 釐清
-4. **圖文逐段配圖**（12）→ G7 七課驗
-5. **總結報告完成度**（14）+ **閱讀理解補題至 5**（13）
+## 7/1 launch 前重點（PM + Eng review 修正後 — 見下方 Review Gate）
+1. **方大哥 staging 複測朗讀並簽核**（朗讀 58% code 已修，只差他主觀確認 #1 抱怨已解）
+2. **拍板「上七課、不上 151」**（白紙黑字）——未經人眼審內容大規模上線 = 信任崩盤風險
+3. **老師 assign/核對 flow**（教授要的「有效率核對」，計畫原本整個漏掉 = P0）
+4. **launch-ops**：Word/PDF 雙上架決策 + 單課 rollback runbook + 成功指標 + 7/1 前重走 6/5 16 項驗收 gate
+5. 細節 polish（補題 5 #13 / 字搜直橫 #15 / 標記動畫 #5）僅限七課，不吃 dev-day
+6. **延後**：聚光燈即時批改+老師端（#2255 dead PR）、測試集真人錄音（R&D 非 launch 依賴）
 
 ---
 
@@ -97,3 +98,28 @@
 **QA 結論**：6/5 教授清單**核心項目（聚光燈最難 #11、重點表 #10、級別 #1、語詞應用 #7、報告 #14）已驗證完成**，全程 0 console error、無放錯課。剩 🔧 為視覺/數量細節（5/13/15）+ 跨課驗證（圖文 #12）+ 流程類（朗讀真人內測 #4b、老師核對 #11d），非 blocker。
 
 > 7/1 前剩餘聚焦見上方「7/1 launch 前重點」。
+
+---
+
+## Review Gate 結論（2026-06-25 · product-manager agent + eng-manager review · 全部 CLI 驗證）
+
+PM = **GO-WITH-CUTS**｜Eng = **GO-WITH-CONDITIONS**（兩 reviewer 收斂一致）。
+
+### 驗證更正（review 抓到原 brief/狀態的錯，我逐條 CLI 驗）
+| 項目 | 原以為 | 驗證後真相 | 證據 |
+|------|--------|-----------|------|
+| 朗讀 58% | 「已記未動手」待修 | ✅ **早已修好上線**（決定性 DP scorer，非 LLM，誤差 <0.5%）| `reading_evaluation_service.py` header（#2266/PR #2274），`evaluation_method='deterministic'` |
+| prod 落後 | eng agent 看到「25 commit 沒上 prod」 | ✅ **prod 已最新**（本 session #2418 已 merge）| `git rev-list main..staging = 0` |
+| G7-L28/29/30 圖資 | eng agent 報「figure LAUNCH BLOCKER」 | ✅ **圖全在 GCS、全 200**（fig1.jpeg / fig1-4.png / fig1.png）| curl GCS 每張 200 |
+| `content_known_gaps.yaml` | — | ❌ **過時自打臉**：仍登錄 G7-L28~30 `figure_asset_not_uploaded`，但圖已上傳 | staging yaml L104-106 vs GCS 200 |
+
+### 真正要做的（取代「圖文 blocker」假議題）
+- 🔧 **修 `content_known_gaps.yaml`**：移除 G7-L28/29/30（圖已驗證上傳）等已解 entry —— 屬內容 QA 改動，**必走 content evidence gate**（CLAUDE.md 硬規則），不裸改
+- 🔴 **拍板 151→七課 rollout**（兩 reviewer 最強共識）：ratchet 只保結構不保內容品質，大規模上未審內容 = 一課放錯課即信任崩盤。只上有完整 baseline 的課
+- 🟡 **計畫漏掉的 launch-ops**（PM 抓）：老師 assign/核對 flow（P0）、Word/PDF、rollback runbook、成功指標、6/5 16 項重走 gate
+- ⏸️ **延後**：#2255 即時批改（dead PR + 6 天做不完）、測試集真人錄音（誤判率 35.3% 本就不能對外，R&D 非 launch 依賴）
+
+### 6 天計畫（兩 reviewer 合併）
+D1 走查真實狀態+方大哥複測簽核+定七課 ｜ D2 七課 ratchet+端到端 smoke ｜ D3 老師核對 flow（漏的 P0）+runbook+指標 ｜ D4 Word/PDF+七課 polish ｜ D5 跟方大哥(+教授)dress rehearsal = GO/NO-GO+凍 scope ｜ D6 staging→prod 七課+curl prod smoke+簽核 → 7/1
+
+> review gate 證明有效：抓到「以為 58% 沒修、以為 G7 圖缺」兩個會誤導 6 天工的錯。
