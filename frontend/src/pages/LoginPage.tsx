@@ -96,8 +96,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
       if (err instanceof AuthError) {
         setError(err.message);
       } else {
-        setError('登入失敗');
+        setError('登入失敗，請稍後再試');
       }
+      // Only reset on failure: on success the component unmounts after redirect,
+      // so resetting in a finally block would be a no-op (and could warn on an
+      // unmounted component). The form's handleSubmit uses finally because it
+      // never redirects on the same path.
       setIsSubmitting(false);
     }
   };
