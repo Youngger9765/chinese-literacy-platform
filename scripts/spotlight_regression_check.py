@@ -51,7 +51,7 @@ def tier(code: str) -> str:
 
 
 def _block_text(blocks: list) -> str:
-    """All readable text across blocks (for the content fingerprint)."""
+    """All readable text across blocks (for the TEXT fingerprint)."""
     out = []
     for b in blocks:
         for k in ("text", "prompt", "instruction", "heading", "title"):
@@ -64,6 +64,24 @@ def _block_text(blocks: list) -> str:
         for opt in b.get("options", []) or []:
             out.append(opt if isinstance(opt, str) else str(opt.get("text", "") if isinstance(opt, dict) else ""))
     return "\n".join(out)
+
+
+def _block_schema(blocks: list) -> str:
+    """Canonical SHAPE of the block sequence (for the SCHEMA fingerprint, per
+    cursor review): catches type-only / asset / referent / answer / option-count
+    / order changes that text_hash misses (e.g. figure→fill_table, asset rebind,
+    answer flipped). Records per block: type, referent, asset, #options, has-answer."""
+    parts = []
+    for b in blocks:
+        parts.append("|".join([
+            str(b.get("type")),
+            str(b.get("referent") or ""),
+            str(b.get("asset") or ""),
+            str(len(b.get("options") or [])),
+            "A" if (b.get("answer") not in (None, "", [])) else "",
+            str(len(b.get("paragraphs") or [])),
+        ]))
+    return "\n".join(parts)
 
 
 def snapshot_one(code: str) -> dict | None:
@@ -84,6 +102,7 @@ def snapshot_one(code: str) -> dict | None:
         type_counts[t] = type_counts.get(t, 0) + 1
     n_q = sum(c for t, c in type_counts.items() if t in Q_TYPES)
     content_hash = hashlib.sha256(_block_text(blocks).encode("utf-8")).hexdigest()[:16]
+    schema_hash = hashlib.sha256(_block_schema(blocks).encode("utf-8")).hexdigest()[:16]
     n = normalize_manifest_code(code)
     try:
         src = get_spotlight_source_code(n, (get_lesson_by_code(code) or {}).get("title"))
@@ -95,6 +114,7 @@ def snapshot_one(code: str) -> dict | None:
         "n_questions": n_q,
         "type_counts": type_counts,
         "content_hash": content_hash,
+        "schema_hash": schema_hash,
         "source_code": normalize_manifest_code(src) if src else None,
     }
 
@@ -129,7 +149,7 @@ def check() -> int:
     baseline = load_baseline()
     regressions = []
     improvements = []
-    content_drifts = []  # 放錯課防線:內容指紋變了(改過要 rebaseline;沒改卻變=ripple/放錯課)
+    drifts = []  # 放錯課防線:內容/結構指紋變了(改過要 rebaseline 鎖;沒 rebaseline 卻變=ripple/放錯課→FAIL)
     for code, base in baseline.items():
         cur = snapshot_one(code)
         if cur is None:
@@ -151,9 +171,13 @@ def check() -> int:
         # 放錯課防線 (#2397, deterministic): 源綁定漂移 = rebinding 到別課的檔 = 幾乎必為 bug
         if base.get("source_code") != cur.get("source_code"):
             regressions.append((code, f"源綁定漂移 source {base.get('source_code')}→{cur.get('source_code')} (rebinding/放錯課風險)"))
-        # 內容指紋變:結構沒退步但內容換了。改過該 rebaseline;沒改卻變 = 別課 ripple(石虎覆蓋蝴蝶蘭那種)
-        elif base.get("content_hash") and cur.get("content_hash") != base.get("content_hash"):
-            content_drifts.append((code, f"內容指紋 {base.get('content_hash')}→{cur.get('content_hash')}"))
+        else:
+            # 指紋漂移(content=文字 / schema=type/asset/referent/options/answer/順序)。
+            # 改過該 rebaseline 鎖;沒 rebaseline 卻漂移 = 別課 ripple/放錯課(石虎覆蓋蝴蝶蘭那種)→ 不准吞,計 FAIL
+            if base.get("content_hash") and cur.get("content_hash") != base.get("content_hash"):
+                drifts.append((code, f"內容(文字)指紋 {base.get('content_hash')}→{cur['content_hash']}"))
+            if base.get("schema_hash") and cur.get("schema_hash") != base.get("schema_hash"):
+                drifts.append((code, f"結構(schema)指紋 {base.get('schema_hash')}→{cur['schema_hash']} (type/asset/referent/options/answer/順序)"))
         if cur["n_blocks"] > base["n_blocks"] or cur["n_questions"] > base["n_questions"]:
             improvements.append((code, f"blocks {base['n_blocks']}→{cur['n_blocks']}, Q {base['n_questions']}→{cur['n_questions']}"))
     # lessons newly loading that weren't in baseline (new content) — informational
@@ -166,18 +190,18 @@ def check() -> int:
             print(f"   {c}: {d}")
     if new_codes:
         print(f"\n🆕 新增 {len(new_codes)} 課（baseline 沒有,--rebaseline-all 納入）: {new_codes[:15]}")
-    if content_drifts:
-        print(f"\n⚠️  內容指紋漂移 {len(content_drifts)} 課（改過→--rebaseline 鎖住;沒改卻漂移=別課 ripple/放錯課,要查!）:")
-        for c, d in content_drifts:
+    if drifts:
+        print(f"\n❌ 指紋漂移 {len(drifts)} 課 —— 內容/結構變了卻沒 rebaseline（改過→`--rebaseline <code>` 鎖;沒改卻漂移=別課 ripple/放錯課,要查!）:")
+        for c, d in drifts:
             print(f"   {c}: {d}")
     if regressions:
-        print(f"\n❌ REGRESSION {len(regressions)} 課 —— 有東西被修壞了:")
+        print(f"\n❌ REGRESSION {len(regressions)} 課 —— 結構/源綁定退步:")
         for c, d in regressions:
             print(f"   {c}: {d}")
+    if regressions or drifts:
         print("\nSPOTLIGHT_REGRESSION=FAIL")
         return 1
-    drift_note = f"（⚠️ {len(content_drifts)} 課內容指紋漂移待 review/rebaseline）" if content_drifts else ""
-    print(f"\n✅ 0 結構/源綁定 regression — 前面的課都沒被修壞 {drift_note}")
+    print("\n✅ 0 regression/漂移 — 結構+源綁定+內容+schema 四重指紋全鎖住,沒被修壞也沒放錯課")
     print("SPOTLIGHT_REGRESSION=PASS")
     return 0
 
