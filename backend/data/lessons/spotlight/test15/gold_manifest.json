@@ -455,7 +455,7 @@
       "strategy_type": "image_text",
       "block_count": 22,
       "type_histogram": {
-        "figure": 1,
+        "fill_table": 1,
         "free_text": 8,
         "guide": 11,
         "passage": 2
@@ -476,7 +476,7 @@
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "fill_table",
         "guide",
         "free_text",
         "free_text",
