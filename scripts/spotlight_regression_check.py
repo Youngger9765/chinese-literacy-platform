@@ -20,6 +20,7 @@ Workflow:
 Exit code 0 = PASS (no regressions), 1 = FAIL (regressions found).
 """
 import json
+import hashlib
 import sys
 from pathlib import Path
 
@@ -33,6 +34,8 @@ from app.services.spotlight_contract import (  # noqa: E402
 )
 from app.services.spotlight_v2_loader import load_spotlight_v2  # noqa: E402
 from app.services.lesson_code_normalization import normalize_manifest_code  # noqa: E402
+from app.services.content_mapping_registry import get_spotlight_source_code  # noqa: E402
+from app.services.lesson_loader import get_lesson_by_code  # noqa: E402
 
 BASELINE_PATH = REPO_ROOT / "backend" / "data" / "curriculum_qa" / "spotlight_regression_baseline.json"
 Q_TYPES = {"single", "multi", "free_text", "fill_table", "fill_blank", "sort", "match"}
@@ -47,8 +50,48 @@ def tier(code: str) -> str:
     return "catalog"
 
 
+def _block_text(blocks: list) -> str:
+    """All readable text across blocks (for the TEXT fingerprint)."""
+    out = []
+    for b in blocks:
+        for k in ("text", "prompt", "instruction", "heading", "title"):
+            v = b.get(k)
+            if isinstance(v, str) and v.strip():
+                out.append(v.strip())
+        for p in b.get("paragraphs", []) or []:
+            if isinstance(p, str):
+                out.append(p.strip())
+        for opt in b.get("options", []) or []:
+            out.append(opt if isinstance(opt, str) else str(opt.get("text", "") if isinstance(opt, dict) else ""))
+    return "\n".join(out)
+
+
+def _block_schema(blocks: list) -> str:
+    """Canonical SHAPE of the block sequence (for the SCHEMA fingerprint, per
+    cursor review): catches type-only / asset / referent / answer / option-count
+    / order changes that text_hash misses (e.g. figure→fill_table, asset rebind,
+    answer flipped). Records per block: type, referent, asset, #options, has-answer."""
+    parts = []
+    for b in blocks:
+        parts.append("|".join([
+            str(b.get("type")),
+            str(b.get("referent") or ""),
+            str(b.get("asset") or ""),
+            str(len(b.get("options") or [])),
+            "A" if (b.get("answer") not in (None, "", [])) else "",
+            str(len(b.get("paragraphs") or [])),
+        ]))
+    return "\n".join(parts)
+
+
 def snapshot_one(code: str) -> dict | None:
-    """Current structural snapshot for a lesson, or None if no spotlight loads."""
+    """Structural + content + source-binding snapshot for a lesson (#2397).
+
+    content_hash + source_code make the ratchet catch the 放錯課/rebinding class
+    (deterministic): if a lesson's content silently changes topic (overwrite /
+    registry rebinding drift), the hash/source moves — even when block counts go
+    UP (the structural-only ratchet missed exactly this: 石虎 overwrote 蝴蝶蘭).
+    """
     sp = load_spotlight_v2(code)
     if not sp:
         return None
@@ -58,11 +101,21 @@ def snapshot_one(code: str) -> dict | None:
         t = b.get("type")
         type_counts[t] = type_counts.get(t, 0) + 1
     n_q = sum(c for t, c in type_counts.items() if t in Q_TYPES)
+    content_hash = hashlib.sha256(_block_text(blocks).encode("utf-8")).hexdigest()[:16]
+    schema_hash = hashlib.sha256(_block_schema(blocks).encode("utf-8")).hexdigest()[:16]
+    n = normalize_manifest_code(code)
+    try:
+        src = get_spotlight_source_code(n, (get_lesson_by_code(code) or {}).get("title"))
+    except Exception:
+        src = None
     return {
         "tier": tier(code),
         "n_blocks": len(blocks),
         "n_questions": n_q,
         "type_counts": type_counts,
+        "content_hash": content_hash,
+        "schema_hash": schema_hash,
+        "source_code": normalize_manifest_code(src) if src else None,
     }
 
 
@@ -96,6 +149,7 @@ def check() -> int:
     baseline = load_baseline()
     regressions = []
     improvements = []
+    drifts = []  # 放錯課防線:內容/結構指紋變了(改過要 rebaseline 鎖;沒 rebaseline 卻變=ripple/放錯課→FAIL)
     for code, base in baseline.items():
         cur = snapshot_one(code)
         if cur is None:
@@ -114,6 +168,16 @@ def check() -> int:
                       and cur["type_counts"].get(t, 0) == 0]
         if lost_types and cur["n_questions"] <= base["n_questions"]:
             regressions.append((code, f"題型消失且題數未增: {lost_types}"))
+        # 放錯課防線 (#2397, deterministic): 源綁定漂移 = rebinding 到別課的檔 = 幾乎必為 bug
+        if base.get("source_code") != cur.get("source_code"):
+            regressions.append((code, f"源綁定漂移 source {base.get('source_code')}→{cur.get('source_code')} (rebinding/放錯課風險)"))
+        else:
+            # 指紋漂移(content=文字 / schema=type/asset/referent/options/answer/順序)。
+            # 改過該 rebaseline 鎖;沒 rebaseline 卻漂移 = 別課 ripple/放錯課(石虎覆蓋蝴蝶蘭那種)→ 不准吞,計 FAIL
+            if base.get("content_hash") and cur.get("content_hash") != base.get("content_hash"):
+                drifts.append((code, f"內容(文字)指紋 {base.get('content_hash')}→{cur['content_hash']}"))
+            if base.get("schema_hash") and cur.get("schema_hash") != base.get("schema_hash"):
+                drifts.append((code, f"結構(schema)指紋 {base.get('schema_hash')}→{cur['schema_hash']} (type/asset/referent/options/answer/順序)"))
         if cur["n_blocks"] > base["n_blocks"] or cur["n_questions"] > base["n_questions"]:
             improvements.append((code, f"blocks {base['n_blocks']}→{cur['n_blocks']}, Q {base['n_questions']}→{cur['n_questions']}"))
     # lessons newly loading that weren't in baseline (new content) — informational
@@ -126,13 +190,18 @@ def check() -> int:
             print(f"   {c}: {d}")
     if new_codes:
         print(f"\n🆕 新增 {len(new_codes)} 課（baseline 沒有,--rebaseline-all 納入）: {new_codes[:15]}")
+    if drifts:
+        print(f"\n❌ 指紋漂移 {len(drifts)} 課 —— 內容/結構變了卻沒 rebaseline（改過→`--rebaseline <code>` 鎖;沒改卻漂移=別課 ripple/放錯課,要查!）:")
+        for c, d in drifts:
+            print(f"   {c}: {d}")
     if regressions:
-        print(f"\n❌ REGRESSION {len(regressions)} 課 —— 有東西被修壞了:")
+        print(f"\n❌ REGRESSION {len(regressions)} 課 —— 結構/源綁定退步:")
         for c, d in regressions:
             print(f"   {c}: {d}")
+    if regressions or drifts:
         print("\nSPOTLIGHT_REGRESSION=FAIL")
         return 1
-    print("\n✅ 0 regression — 前面的課都沒被修壞")
+    print("\n✅ 0 regression/漂移 — 結構+源綁定+內容+schema 四重指紋全鎖住,沒被修壞也沒放錯課")
     print("SPOTLIGHT_REGRESSION=PASS")
     return 0
 
