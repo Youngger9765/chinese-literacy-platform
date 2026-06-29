@@ -69,6 +69,43 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     }
   };
 
+  /**
+   * Shared quick-login (demo) handler. Logs in with the given demo credentials
+   * (real login — token + session, same as the form), then redirects.
+   * @param redirectTo  override target. When `external` is true the target is a
+   *   static page outside the SPA router (e.g. /presentation/*.html) and must be
+   *   reached via window.location, not react-router navigate().
+   */
+  const quickLogin = async (
+    demoEmail: string,
+    demoPw: string,
+    redirectTo?: { path: string; external?: boolean },
+  ) => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      const result = await login(demoEmail, demoPw);
+      if (result.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else if (redirectTo?.external) {
+        window.location.href = redirectTo.path;
+      } else {
+        navigate(redirectTo?.path ?? from, { replace: true });
+      }
+    } catch (err) {
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else {
+        setError('登入失敗，請稍後再試');
+      }
+      // Only reset on failure: on success the component unmounts after redirect,
+      // so resetting in a finally block would be a no-op (and could warn on an
+      // unmounted component). The form's handleSubmit uses finally because it
+      // never redirects on the same path.
+      setIsSubmitting(false);
+    }
+  };
+
   const handleGoogleCredential = async (credential: string) => {
     setError('');
     setIsSubmitting(true);
@@ -220,25 +257,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                   key={acc.email}
                   type="button"
                   disabled={isSubmitting}
-                  onClick={async () => {
-                    setError('');
-                    setIsSubmitting(true);
-                    try {
-                      const result = await login(acc.email, acc.pw);
-                      if (result.mustChangePassword) {
-                        navigate('/change-password', { replace: true });
-                      } else {
-                        navigate(from, { replace: true });
-                      }
-                    } catch (err) {
-                      if (err instanceof AuthError) {
-                        setError(err.message);
-                      } else {
-                        setError('登入失敗');
-                      }
-                      setIsSubmitting(false);
-                    }
-                  }}
+                  onClick={() => quickLogin(acc.email, acc.pw)}
                   className={`border rounded-lg px-2 py-2.5 text-center transition-colors cursor-pointer disabled:opacity-50 ${acc.color}`}
                 >
                   <div className="text-xs font-bold">{acc.label}</div>
@@ -246,6 +265,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                 </button>
               ))}
             </div>
+
+            {/* Reading-test shortcut: real student login, then jump straight to
+                the (hidden) reading-pipeline test page. #2410 */}
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() =>
+                quickLogin(
+                  import.meta.env.VITE_DEMO_STUDENT_EMAIL ?? '',
+                  import.meta.env.VITE_DEMO_STUDENT_PW ?? '',
+                  { path: '/presentation/reading-pipeline.html', external: true },
+                )
+              }
+              className="mt-2 w-full flex items-center justify-center gap-2 border rounded-lg px-2 py-2.5 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+            >
+              <span className="material-symbols-outlined text-sm">record_voice_over</span>
+              登入朗讀測試頁面
+            </button>
           </div>
         )}
       </div>
