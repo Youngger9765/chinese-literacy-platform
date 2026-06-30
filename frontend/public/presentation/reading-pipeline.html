@@ -417,7 +417,8 @@ document.querySelectorAll('.tab').forEach(function(btn){
 });
 // 支援用 URL hash 直接開到指定分頁（例：record.html 返回時帶 #testset 回到「④ 測試集」）
 function activatePaneFromHash(){
-  var id=(location.hash||'').replace('#','');
+  // 淨化 hash（只留英數/底線/連字號）再進 querySelector，避免惡意/畸形 hash 拋 DOMException
+  var id=(location.hash||'').replace('#','').replace(/[^a-z0-9_-]/gi,'');
   if(id) activatePane(id);
 }
 activatePaneFromHash();

@@ -245,6 +245,11 @@ var MAX_AUDIO_BYTES=8*1024*1024;  // 與後端 /api/testset/upload 上限一致
 function onFileSelected(ev){
   var f=ev.target.files&&ev.target.files[0];
   if(!f) return;
+  // 錄音進行中不接受選檔，避免 blob 被錄音 onstop 覆寫（競爭）
+  if(mediaRec&&mediaRec.state==='recording'){
+    document.getElementById('status').innerHTML='<span class="err">錄音進行中，請先停止錄音再上傳檔案</span>';
+    ev.target.value=''; return;
+  }
   var nm=(f.name||'').toLowerCase();
   var isWav=f.type.indexOf('wav')>-1||nm.slice(-4)==='.wav';
   var isMp3=f.type.indexOf('mpeg')>-1||f.type.indexOf('mp3')>-1||nm.slice(-4)==='.mp3';
