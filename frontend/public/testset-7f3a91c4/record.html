@@ -152,6 +152,7 @@ var NAME_KEY='testset_name';
 var done=JSON.parse(localStorage.getItem('testset_done_v2_'+lessonId)||'{}');
 var doneUrls={correct:null,error:null};  // server 簽名播放 URL（聽取用，10 分鐘有效）
 var mediaRec=null,chunks=[],blob=null;
+var blobSource=null;  // 'rec' = 錄音；'file' = 上傳檔 — 決定「重錄/重選」鈕行為與標籤
 
 /* ── 進度：server-truth（換裝置/清快取仍讀得回，localStorage 只當快取） ── */
 async function loadProgress(){
@@ -231,12 +232,13 @@ function selVersion(v){
 }
 
 function resetRec(){
-  blob=null;
+  blob=null; blobSource=null;
   var p=document.getElementById('player'); p.src='';
   document.getElementById('playerRow').style.display='none';
   document.getElementById('upBtn').disabled=true;
   document.getElementById('status').innerHTML='';
   var fi=document.getElementById('fileInput'); if(fi) fi.value='';  // 讓同一檔可重新選取
+  var rr=document.getElementById('reRecBtn'); if(rr){ rr.textContent='↻ 重錄'; rr.title='重新錄音'; }
   var b=document.getElementById('recBtn'); b.style.display=''; b.classList.remove('recording'); b.textContent='● 開始錄音';
 }
 
@@ -263,11 +265,13 @@ function onFileSelected(ev){
   }
   // 正規化 content-type 為後端白名單接受的 MIME（避免 audio/x-wav 之類被擋）
   var mime=isWav?'audio/wav':'audio/mpeg';
-  blob=new Blob([f],{type:mime});
+  blob=new Blob([f],{type:mime}); blobSource='file';
   // 收起大錄音鈕、顯示播放器預覽 + 開放上傳（與錄完一段後同樣的 UI 狀態）
   var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
   document.getElementById('playerRow').style.display='flex';
   document.getElementById('recBtn').style.display='none';
+  // 來源是檔案 → 小鈕改為「重選」語意（避免「重錄」誤導去開麥克風）
+  var rr=document.getElementById('reRecBtn'); if(rr){ rr.textContent='↻ 重選'; rr.title='重新選擇檔案'; }
   document.getElementById('upBtn').disabled=false;
   document.getElementById('status').innerHTML='<span style="color:var(--muted)">已選擇檔案：'+esc(f.name)+'，可上傳</span>';
 }
@@ -280,7 +284,7 @@ async function toggleRec(){
     chunks=[]; mediaRec=new MediaRecorder(stream);
     mediaRec.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
     mediaRec.onstop=function(){
-      blob=new Blob(chunks,{type:'audio/webm'});
+      blob=new Blob(chunks,{type:'audio/webm'}); blobSource='rec';
       var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
       // 完成：收起大錄音鈕，改顯示「播放器 + 右側小重錄鈕」（避免誤觸重錄）
       document.getElementById('playerRow').style.display='flex';
@@ -300,8 +304,13 @@ async function toggleRec(){
   }
 }
 
-// 重錄：先確認再捨棄目前這段（小鈕在播放器右邊，避免誤觸）
+// 「重錄/重選」：依目前來源決定行為，避免上傳檔時誤開麥克風
 function reRecord(){
+  if(blobSource==='file'){
+    // 來源是上傳檔 → 回到可錄音或重新選檔的狀態，不直接開麥克風
+    resetRec();
+    return;
+  }
   if(!confirm('確定要重錄嗎？目前這段會被捨棄。')) return;
   toggleRec();
 }
