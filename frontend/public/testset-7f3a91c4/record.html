@@ -34,6 +34,11 @@
   .btn-rec.recording{background:#7f1d1d}
   .btn-up{background:var(--purple);color:#fff;width:100%}
   .btn:disabled{opacity:.4;cursor:not-allowed}
+  /* 上傳音檔途徑（與錄音二選一）*/
+  .or-sep{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem;margin:12px 0}
+  .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line)}
+  .btn-file{display:block;width:100%;padding:12px;border:1px dashed var(--purple);border-radius:10px;background:var(--chip);color:var(--purple);font-weight:600;text-align:center;cursor:pointer}
+  .btn-file:hover{background:#e6dffb}
   audio{width:100%}
   /* 播放器 + 右側小重錄鈕同列（重錄縮小、不被誤觸）*/
   .player-row{display:flex;align-items:center;gap:8px;margin-top:10px}
@@ -65,6 +70,7 @@
 </head>
 <body>
 <div class="wrap">
+  <a class="back" id="backLink" href="../presentation/reading-pipeline.html#testset">← 返回測試集</a>
   <h1>朗讀錄音貢獻</h1>
   <p class="sub">幫 LingoLeap 蒐集真人朗讀，用於訓練與驗證 AI 朗讀評分。謝謝你！</p>
 
@@ -90,12 +96,17 @@
 
       <!-- 錄音 -->
       <div class="card" id="rec-card">
-        <div class="step">② 照著念 + 錄音</div>
+        <div class="step">② 照著念 + 錄音，或上傳音檔</div>
         <div class="vtabs">
           <div class="vtab sel" data-v="correct" onclick="selVersion('correct')">正確版<span class="hint">盡量念正確</span></div>
           <div class="vtab" data-v="error" onclick="selVersion('error')">刻意錯誤版<span class="hint">故意念錯幾個字</span></div>
         </div>
         <button class="btn btn-rec" id="recBtn" onclick="toggleRec()">● 開始錄音</button>
+        <!-- 上傳既有音檔（mp3/wav）— 與錄音二選一，後續流程一致 -->
+        <div class="or-sep">或</div>
+        <label class="btn-file">📁 選擇 mp3 / wav 檔
+          <input type="file" id="fileInput" accept="audio/mpeg,audio/wav,.mp3,.wav" hidden onchange="onFileSelected(event)">
+        </label>
         <div class="player-row" id="playerRow" style="display:none">
           <audio id="player" controls></audio>
           <button class="btn-rerec" id="reRecBtn" onclick="reRecord()" title="重新錄音">↻ 重錄</button>
@@ -129,14 +140,19 @@ var API=apiBase();
 function qs(key){
   return new URLSearchParams(location.search).get(key);
 }
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 var lessonId=qs('lesson')||'';
+
+// 「返回測試集」直接走 <a href> 到 reading-pipeline.html#testset（④ 測試集 分頁）。
+// record.html 是用 target="_blank" 從測試集頁開的新分頁，故用導頁而非 history.back()。
 var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 var cur={version:'correct'};
 var NAME_KEY='testset_name';
 var done=JSON.parse(localStorage.getItem('testset_done_v2_'+lessonId)||'{}');
 var doneUrls={correct:null,error:null};  // server 簽名播放 URL（聽取用，10 分鐘有效）
 var mediaRec=null,chunks=[],blob=null;
+var blobSource=null;  // 'rec' = 錄音；'file' = 上傳檔 — 決定「重錄/重選」鈕行為與標籤
 
 /* ── 進度：server-truth（換裝置/清快取仍讀得回，localStorage 只當快取） ── */
 async function loadProgress(){
@@ -216,12 +232,48 @@ function selVersion(v){
 }
 
 function resetRec(){
-  blob=null;
+  blob=null; blobSource=null;
   var p=document.getElementById('player'); p.src='';
   document.getElementById('playerRow').style.display='none';
   document.getElementById('upBtn').disabled=true;
   document.getElementById('status').innerHTML='';
+  var fi=document.getElementById('fileInput'); if(fi) fi.value='';  // 讓同一檔可重新選取
+  var rr=document.getElementById('reRecBtn'); if(rr){ rr.textContent='↻ 重錄'; rr.title='重新錄音'; }
   var b=document.getElementById('recBtn'); b.style.display=''; b.classList.remove('recording'); b.textContent='● 開始錄音';
+}
+
+/* ── 上傳既有音檔（mp3/wav）── 與錄音共用同一條 upload() 流程 ── */
+var MAX_AUDIO_BYTES=8*1024*1024;  // 與後端 /api/testset/upload 上限一致
+function onFileSelected(ev){
+  var f=ev.target.files&&ev.target.files[0];
+  if(!f) return;
+  // 錄音進行中不接受選檔，避免 blob 被錄音 onstop 覆寫（競爭）
+  if(mediaRec&&mediaRec.state==='recording'){
+    document.getElementById('status').innerHTML='<span class="err">錄音進行中，請先停止錄音再上傳檔案</span>';
+    ev.target.value=''; return;
+  }
+  var nm=(f.name||'').toLowerCase();
+  var isWav=f.type.indexOf('wav')>-1||nm.slice(-4)==='.wav';
+  var isMp3=f.type.indexOf('mpeg')>-1||f.type.indexOf('mp3')>-1||nm.slice(-4)==='.mp3';
+  if(!isWav&&!isMp3){
+    document.getElementById('status').innerHTML='<span class="err">只接受 mp3 或 wav 檔</span>';
+    ev.target.value=''; return;
+  }
+  if(f.size>MAX_AUDIO_BYTES){
+    document.getElementById('status').innerHTML='<span class="err">檔案超過 8MB，請改用較短的音檔</span>';
+    ev.target.value=''; return;
+  }
+  // 正規化 content-type 為後端白名單接受的 MIME（避免 audio/x-wav 之類被擋）
+  var mime=isWav?'audio/wav':'audio/mpeg';
+  blob=new Blob([f],{type:mime}); blobSource='file';
+  // 收起大錄音鈕、顯示播放器預覽 + 開放上傳（與錄完一段後同樣的 UI 狀態）
+  var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
+  document.getElementById('playerRow').style.display='flex';
+  document.getElementById('recBtn').style.display='none';
+  // 來源是檔案 → 小鈕改為「重選」語意（避免「重錄」誤導去開麥克風）
+  var rr=document.getElementById('reRecBtn'); if(rr){ rr.textContent='↻ 重選'; rr.title='重新選擇檔案'; }
+  document.getElementById('upBtn').disabled=false;
+  document.getElementById('status').innerHTML='<span style="color:var(--muted)">已選擇檔案：'+esc(f.name)+'，可上傳</span>';
 }
 
 async function toggleRec(){
@@ -232,7 +284,7 @@ async function toggleRec(){
     chunks=[]; mediaRec=new MediaRecorder(stream);
     mediaRec.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
     mediaRec.onstop=function(){
-      blob=new Blob(chunks,{type:'audio/webm'});
+      blob=new Blob(chunks,{type:'audio/webm'}); blobSource='rec';
       var p=document.getElementById('player'); p.src=URL.createObjectURL(blob);
       // 完成：收起大錄音鈕，改顯示「播放器 + 右側小重錄鈕」（避免誤觸重錄）
       document.getElementById('playerRow').style.display='flex';
@@ -252,8 +304,13 @@ async function toggleRec(){
   }
 }
 
-// 重錄：先確認再捨棄目前這段（小鈕在播放器右邊，避免誤觸）
+// 「重錄/重選」：依目前來源決定行為，避免上傳檔時誤開麥克風
 function reRecord(){
+  if(blobSource==='file'){
+    // 來源是上傳檔 → 回到可錄音或重新選檔的狀態，不直接開麥克風
+    resetRec();
+    return;
+  }
   if(!confirm('確定要重錄嗎？目前這段會被捨棄。')) return;
   toggleRec();
 }
@@ -271,11 +328,13 @@ async function upload(){
   localStorage.setItem(NAME_KEY,name);
   document.getElementById('upBtn').disabled=true;
   document.getElementById('status').innerHTML='<span style="color:var(--muted)">上傳中…</span>';
+  // 副檔名跟著實際內容走（錄音=webm；上傳檔=mp3/wav），content-type 由 blob.type 帶出
+  var ext=(blob.type.indexOf('wav')>-1)?'wav':((blob.type.indexOf('mpeg')>-1||blob.type.indexOf('mp3')>-1)?'mp3':'webm');
   var fd=new FormData();
   fd.append('contributor_name',name);
   fd.append('lesson_id',lessonId);
   fd.append('version',cur.version);
-  fd.append('audio',blob,lessonId+'_'+cur.version+'.webm');
+  fd.append('audio',blob,lessonId+'_'+cur.version+'.'+ext);
   try{
     var r=await fetch(API+'/api/testset/upload',{method:'POST',body:fd});
     if(!r.ok){ throw new Error('HTTP '+r.status); }

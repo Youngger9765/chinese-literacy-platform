@@ -402,14 +402,27 @@
 </div>
 <script>
 /* ===== Tab switching ===== */
+function activatePane(id){
+  var btn=document.querySelector('.tab[data-pane="'+id+'"]');
+  var pane=document.getElementById(id);
+  if(!btn||!pane) return false;
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+  btn.classList.add('active');
+  pane.classList.add('active');
+  return true;
+}
 document.querySelectorAll('.tab').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
-    document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.pane).classList.add('active');
-  });
+  btn.addEventListener('click',function(){ activatePane(btn.dataset.pane); });
 });
+// 支援用 URL hash 直接開到指定分頁（例：record.html 返回時帶 #testset 回到「④ 測試集」）
+function activatePaneFromHash(){
+  // 淨化 hash（只留英數/底線/連字號）再進 querySelector，避免惡意/畸形 hash 拋 DOMException
+  var id=(location.hash||'').replace('#','').replace(/[^a-z0-9_-]/gi,'');
+  if(id) activatePane(id);
+}
+activatePaneFromHash();
+window.addEventListener('hashchange',activatePaneFromHash);
 
 // ===== Arch animations =====
 function startTypingAnim() {
