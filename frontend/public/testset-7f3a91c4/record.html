@@ -70,7 +70,7 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" id="backLink" href="./index.html">← 返回測試集</a>
+  <a class="back" id="backLink" href="./index.html" onclick="return goBack()">← 返回測試集</a>
   <h1>朗讀錄音貢獻</h1>
   <p class="sub">幫 LingoLeap 蒐集真人朗讀，用於訓練與驗證 AI 朗讀評分。謝謝你！</p>
 
@@ -144,11 +144,12 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 
 var lessonId=qs('lesson')||'';
 
-// 「返回測試集」帶上 lesson，回到列表後可定位到剛剛這一課
-(function initBack(){
-  var b=document.getElementById('backLink');
-  if(b) b.href='./index.html'+(lessonId?('?focus='+encodeURIComponent(lessonId)):'');
-})();
+// 「返回測試集」= 回到一開始開啟此頁的來源頁（瀏覽器上一頁）。
+// 若是直接貼網址開啟（沒有上一頁），才退回課文列表 index.html（href fallback）。
+function goBack(){
+  if(history.length>1){ history.back(); return false; }
+  return true;  // 無上一頁 → 走 href fallback (./index.html)
+}
 var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 var cur={version:'correct'};
 var NAME_KEY='testset_name';

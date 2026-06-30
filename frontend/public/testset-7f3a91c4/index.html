@@ -18,9 +18,6 @@
   .btn-sec:hover{background:var(--chip)}
   .note{font-size:.82rem;color:var(--muted);margin-top:16px}
   .icon{font-size:2.5rem;margin-bottom:12px}
-  /* 從 record.html「返回測試集」帶 ?focus= 回來時，短暫高亮剛剛那一課 */
-  .focus-hl{box-shadow:0 0 0 3px var(--purple);animation:focusPulse 2.4s ease-out}
-  @keyframes focusPulse{0%{box-shadow:0 0 0 6px rgba(91,79,196,.55)}100%{box-shadow:0 0 0 3px rgba(91,79,196,0)}}
 </style>
 </head>
 <body>
@@ -59,24 +56,12 @@ async function loadLessons(){
     var h='';
     stories.forEach(function(s){
       var url='./record.html?lesson='+encodeURIComponent(s.id);
-      h+='<a id="lesson-'+esc(s.id)+'" class="btn-main" href="'+esc(url)+'">'+esc(s.title)+'<span style="display:block;font-size:.75rem;opacity:.7;font-weight:400">'+esc(s.id)+'</span></a>';
+      h+='<a class="btn-main" href="'+esc(url)+'">'+esc(s.title)+'<span style="display:block;font-size:.75rem;opacity:.7;font-weight:400">'+esc(s.id)+'</span></a>';
     });
     el.innerHTML=h;
-    focusLesson();  // 若帶 ?focus= 回來，捲動並高亮該課
   }catch(e){
     el.innerHTML='<p style="color:#dc2626;font-size:.9rem">課文清單載入失敗：'+esc(e.message)+'<br><button onclick="loadLessons()" style="margin-top:8px;padding:6px 14px;cursor:pointer;border:1px solid #dc2626;background:#fff;border-radius:6px;color:#dc2626">重試</button></p>';
   }
-}
-
-// 返回測試集時定位到剛剛錄製/上傳的課文（record.html 帶 ?focus=<lessonId>）
-function focusLesson(){
-  var focus=new URLSearchParams(location.search).get('focus');
-  if(!focus) return;
-  var target=document.getElementById('lesson-'+focus);
-  if(!target) return;
-  target.scrollIntoView({behavior:'smooth',block:'center'});
-  target.classList.add('focus-hl');
-  setTimeout(function(){ target.classList.remove('focus-hl'); },2400);
 }
 
 loadLessons();
