@@ -70,7 +70,7 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" id="backLink" href="./index.html" onclick="return goBack()">← 返回測試集</a>
+  <a class="back" id="backLink" href="../presentation/reading-pipeline.html#testset">← 返回測試集</a>
   <h1>朗讀錄音貢獻</h1>
   <p class="sub">幫 LingoLeap 蒐集真人朗讀，用於訓練與驗證 AI 朗讀評分。謝謝你！</p>
 
@@ -144,12 +144,8 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 
 var lessonId=qs('lesson')||'';
 
-// 「返回測試集」= 回到一開始開啟此頁的來源頁（瀏覽器上一頁）。
-// 若是直接貼網址開啟（沒有上一頁），才退回課文列表 index.html（href fallback）。
-function goBack(){
-  if(history.length>1){ history.back(); return false; }
-  return true;  // 無上一頁 → 走 href fallback (./index.html)
-}
+// 「返回測試集」直接走 <a href> 到 reading-pipeline.html#testset（④ 測試集 分頁）。
+// record.html 是用 target="_blank" 從測試集頁開的新分頁，故用導頁而非 history.back()。
 var VERSIONS=[{k:'correct',n:'正確版'},{k:'error',n:'錯誤版'}];
 var cur={version:'correct'};
 var NAME_KEY='testset_name';
