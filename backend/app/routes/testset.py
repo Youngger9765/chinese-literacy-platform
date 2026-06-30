@@ -179,6 +179,7 @@ async def testset_upload(
         "lesson_id": lid,
         "version": version,
         "audio_path": audio_path,
+        "content_type": base_mime,  # 真實 MIME → batch-eval 傳真 mime,原生格式免多餘 transcode (#2434)
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -398,6 +399,8 @@ async def testset_batch_eval(
         entry_lesson = meta.get("lesson_id", "")
         entry_version = meta.get("version", "")
         audio_path = meta.get("audio_path", "")
+        # 真實 MIME(#2434);舊紀錄無此欄 → fallback webm（與上線前行為一致，ffmpeg 仍 sniff）
+        entry_mime = meta.get("content_type") or "audio/webm"
 
         base_result: dict = {
             "name": entry_name,
@@ -429,7 +432,7 @@ async def testset_batch_eval(
             # 4c. Transcribe
             transcribe_result = await transcribe_reading_audio(
                 audio_bytes=audio_bytes,
-                mime_type="audio/webm",
+                mime_type=entry_mime,  # #2434: 真實 mime（原生 wav/mp3 免多餘 transcode）
                 target_text=target_text,
                 duration_ms=None,
             )
