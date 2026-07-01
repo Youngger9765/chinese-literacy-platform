@@ -1,0 +1,270 @@
+{
+  "blocks": [
+    {
+      "id": "p1",
+      "text": "你最常見到哪一種野鳥？近年，黑忽忽的八哥還分兩種：「白尾八哥」和「臺灣冠八哥」。從圖一可以看出，這兩種八哥外形十分相似，不容易單靠外表一眼分辨。",
+      "type": "paragraph"
+    },
+    {
+      "asset": "images/G7-L30/G7-L30-06.png",
+      "caption": "白尾八哥（左）與 臺灣冠八哥（右）外形圖",
+      "id": "fig-1",
+      "label": "圖一",
+      "type": "figure"
+    },
+    {
+      "id": "p2",
+      "text": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。只要觀察嘴喙和尾羽的顏色，就能分辨牠們：白尾八哥尾羽末段白色，嘴喙黃色；臺灣冠八哥嘴喙白色、鼻頭有明顯的冠羽，因為是臺灣原生種，也被稱為「臺灣八哥」。",
+      "type": "paragraph"
+    },
+    {
+      "headers": [
+        "比較項目",
+        "白尾八哥",
+        "臺灣冠八哥"
+      ],
+      "id": "table-1",
+      "label": "表一",
+      "notes": [],
+      "rows": [
+        [
+          "外形",
+          "全身大致為黑色",
+          "全身大致為黑色"
+        ],
+        [
+          "嘴喙顏色",
+          "黃色",
+          "象牙白色"
+        ],
+        [
+          "尾羽顏色",
+          "末段白色",
+          "只有部分白色"
+        ],
+        [
+          "來源",
+          "外來種",
+          "原生種"
+        ],
+        [
+          "習性",
+          "較不怕人",
+          "較怕人"
+        ],
+        [
+          "築巢地點",
+          "常利用人造設施築巢",
+          "較少利用人造設施築巢"
+        ],
+        [
+          "適應都市環境",
+          "較強",
+          "較弱"
+        ]
+      ],
+      "title": "表一 白尾八哥與臺灣冠八哥比較異同表",
+      "type": "table"
+    },
+    {
+      "id": "p3",
+      "text": "表二則說明了兩種八哥近年族群數量的變化。從表二可知，外來種白尾八哥都明顯多過原生種臺灣冠八哥；有些地方甚至已經看不到臺灣冠八哥的身影了。",
+      "type": "paragraph"
+    },
+    {
+      "headers": [
+        "指標",
+        "白尾八哥",
+        "臺灣冠八哥",
+        "解讀重點"
+      ],
+      "id": "table-2",
+      "label": "表二",
+      "notes": [
+        "註2. 「84 / 584」表示：一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
+      ],
+      "rows": [
+        [
+          "近年數量變化（2009-2020）",
+          "成長 250%",
+          "無明顯變化",
+          "原生種的數量沒有增加，外來種快速擴張"
+        ],
+        [
+          "2021 年看得到的地點數",
+          "225 個地點",
+          "23 個地點",
+          "2021 年外來種仍明顯多於原生種約 9.8 倍。"
+        ],
+        [
+          "2018 年花蓮調查結果",
+          "674 隻",
+          "0 隻",
+          "某些區域幾乎看不到原生種"
+        ]
+      ],
+      "title": "表二 近年兩種臺灣常見八哥之族群數量之變化",
+      "type": "table"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        0,
+        1,
+        null,
+        1,
+        0
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight",
+      "needs_review": false,
+      "question": {
+        "instruction": "閱讀時，先注意文字怎麼提醒你看圖表、怎麼告訴你圖表的功能，再把文字、圖片、表格連起來想。",
+        "kind": "graphic_text_integration",
+        "steps": [
+          {
+            "answer": 0,
+            "options": [
+              "兩種八哥外形相近的整體印象",
+              "兩種八哥近年的族群變化情形"
+            ],
+            "prompt": "練習一：第一段 vs 圖一\n1. 圖一最主要提供哪一類訊息？",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。",
+              "這兩種八哥外形十分相似，不容易單靠外表一眼分辨。"
+            ],
+            "prompt": "2. 讀完第一段後，請你找出和圖一最相關的文字。",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "練習二：第二段 vs 表一\n請把第二段文字中，要你看表的地方畫線或圈起來",
+            "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
+            "type": "free_text"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "白尾八哥和臺灣冠八哥近年的族群變化",
+              "白尾八哥和臺灣冠八哥的異同"
+            ],
+            "prompt": "表一主要提供的是哪一類訊息？",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "兩種八哥近年族群數量的變化",
+              "白尾八哥和臺灣冠八哥的異同"
+            ],
+            "prompt": "練習三：第三段 vs 表二\n表二主要提供的是哪一類訊息？",
+            "reference_answer": null,
+            "type": "select"
+          }
+        ],
+        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 1,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-1",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "白尾八哥是白色嘴喙、黑色尾羽；臺灣冠八哥是黃色嘴喙、白色尾羽",
+          "白尾八哥是黃色嘴喙、白色尾羽；臺灣冠八哥是白色嘴喙、黑色尾羽",
+          "白尾八哥是黑色嘴喙、白色尾羽；臺灣冠八哥是黃色嘴喙、黑色尾羽",
+          "白尾八哥是黃色嘴喙、黑色尾羽；臺灣冠八哥是白色嘴喙、白色尾羽"
+        ],
+        "question": "1.根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 1,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-5",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "兩種八哥外形十分相似，所以只看整體羽色仍不容易正確分辨",
+          "白尾八哥較能適應人類環境，因此近年數量與分布都明顯增加",
+          "臺灣冠八哥原本就是臺灣原生種，所以現在在各地仍應較常見到",
+          "八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧"
+        ],
+        "question": "５.下列哪一個結論，最需要同時整合前文敘述、表一和表二，才能完整判斷？"
+      },
+      "type": "exercise"
+    }
+  ],
+  "id": "G7-L30",
+  "lesson_code": "G7-L30",
+  "title": "都是八哥，為什麼命運不一樣？"
+}
