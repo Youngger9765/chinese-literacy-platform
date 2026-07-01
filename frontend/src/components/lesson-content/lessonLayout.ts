@@ -73,19 +73,54 @@ export type LayoutItem = PairedRow | FullWidthItem;
 /**
  * groupPairedBlocks — pre-pass that builds the render item list for a 'paired' lesson.
  *
- * Pairing rules (anchors first, adjacency second), each media block used AT MOST ONCE:
- *   1. For each paragraph, pull in media blocks that an exercise anchors to THIS
- *      paragraph AND whose block sits adjacent — no, simpler + robust: pull in media
- *      blocks that immediately FOLLOW this paragraph in block order (adjacency), which
- *      matches how the corpus is authored (p1 → fig-1, p2 → table-1, p3 → table-2).
- *   2. A media block already consumed by an earlier paragraph is not repeated
- *      (mirrors PairedReading #2194 "show each figure once").
- *   3. Exercises and any leftover blocks render full-width, in original order.
+ * Pairing is ANCHORS FIRST, ADJACENCY SECOND, each media block used AT MOST ONCE:
+ *   1. Anchors: when an exercise anchors EXACTLY ONE paragraph together with media
+ *      block(s), that is an unambiguous EXPLICIT 段-媒體 pairing (the author said "this
+ *      one paragraph goes with this figure/table"), so those media attach to that
+ *      paragraph's row wherever they sit in block order. A cross-passage exercise that
+ *      anchors MANY paragraphs (e.g. an integration 練習 spanning p1..p3) carries no
+ *      per-paragraph signal and is intentionally skipped here — it falls through to
+ *      rule 2 so the natural interleave order is preserved. Built once, up front.
+ *   2. Adjacency (fallback): any still-unpaired media block is attached to the
+ *      paragraph it immediately FOLLOWS in block order — matching how the corpus is
+ *      authored (p1 → fig-1, p2 → table-1, p3 → table-2), which is exactly the shape
+ *      the adapter now emits (interleaved).
+ *   3. A media block consumed by rule 1 or 2 is never repeated (mirrors PairedReading
+ *      #2194 "show each figure once"). Exercises and any leftover blocks render
+ *      full-width, in original order.
  *
- * Everything is derived in one pass with no external mutation so the caller can wrap
- * it in useMemo safely.
+ * Everything is derived in one pass (plus one cheap up-front anchor scan) with no
+ * external mutation so the caller can wrap it in useMemo safely.
  */
 export function groupPairedBlocks(blocks: Block[]): LayoutItem[] {
+  const paragraphIds = new Set(
+    blocks.filter((b) => b.type === 'paragraph').map((b) => b.id),
+  );
+  const mediaById = new Map(
+    blocks.filter((b) => MEDIA_TYPES.has(b.type)).map((b) => [b.id, b]),
+  );
+
+  // ── Rule 1: explicit anchor pairings — only from exercises that anchor a SINGLE
+  // paragraph + media (unambiguous local pairing). Multi-paragraph anchor lists carry no
+  // per-paragraph signal and are skipped (→ rule 2). First exercise to claim a media wins.
+  const anchoredMedia = new Map<string, string[]>();
+  const mediaClaimedByAnchor = new Set<string>();
+  for (const block of blocks) {
+    if (block.type !== 'exercise') continue;
+    const anchors = block.anchors ?? [];
+    const paras = [...new Set(anchors.map((a) => a.blockId).filter((id) => paragraphIds.has(id)))];
+    const media = anchors.map((a) => a.blockId).filter((id) => mediaById.has(id));
+    if (paras.length !== 1 || media.length === 0) continue;
+    const owner = paras[0];
+    const list = anchoredMedia.get(owner) ?? [];
+    for (const m of media) {
+      if (mediaClaimedByAnchor.has(m)) continue;
+      mediaClaimedByAnchor.add(m);
+      list.push(m);
+    }
+    if (list.length > 0) anchoredMedia.set(owner, list);
+  }
+
   const items: LayoutItem[] = [];
   const consumed = new Set<string>();
 
@@ -93,14 +128,20 @@ export function groupPairedBlocks(blocks: Block[]): LayoutItem[] {
     if (consumed.has(block.id)) return;
 
     if (block.type === 'paragraph') {
-      // Collect consecutive media blocks immediately following this paragraph.
       const media: Block[] = [];
+      const take = (b: Block | undefined) => {
+        if (b && !consumed.has(b.id)) {
+          media.push(b);
+          consumed.add(b.id);
+        }
+      };
+      // Rule 1: media explicitly anchored to this paragraph, in anchor order.
+      for (const mid of anchoredMedia.get(block.id) ?? []) take(mediaById.get(mid));
+      // Rule 2: media that adjacently follow this paragraph and weren't anchor-claimed
+      // elsewhere (an anchor pairing for this same paragraph already took them above).
       let j = idx + 1;
       while (j < blocks.length && MEDIA_TYPES.has(blocks[j].type)) {
-        if (!consumed.has(blocks[j].id)) {
-          media.push(blocks[j]);
-          consumed.add(blocks[j].id);
-        }
+        if (!mediaClaimedByAnchor.has(blocks[j].id)) take(blocks[j]);
         j += 1;
       }
       items.push({ kind: 'paired', text: block, media });
