@@ -13,6 +13,9 @@ import MultipleChoiceExercise from '../../components/reading-steps/MultipleChoic
 import OmoPaperResultBanner from '../../components/reading-steps/OmoPaperResultBanner';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { ComprehensionResult } from '../../types';
+import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
+import LessonRenderer from '../../components/lesson-content/LessonRenderer';
+import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 
 const ComprehensionMcqPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -75,6 +78,41 @@ const ComprehensionMcqPage: React.FC = () => {
   if (!selectedStory) return null;
 
   const hasMcq = !!(selectedStory.multipleChoice && selectedStory.multipleChoice.length > 0);
+
+  // Phase-2 unified renderer (flag-guarded, default OFF). Placed BEFORE the legacy layout;
+  // engages only when the adapter yields a valid zod Lesson, else falls through to the
+  // byte-identical legacy path (fail-safe, never white-screens).
+  if (LESSON_RENDERER_V1) {
+    const { lesson } = storyToLesson(selectedStory);
+    if (lesson) {
+      return (
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
+          <OmoPaperResultBanner stepId="comprehension" />
+          <LessonRenderer
+            lesson={lesson}
+            story={selectedStory}
+            lessonCode={selectedStory.lesson_code || selectedStory.id}
+            onComplete={() => {
+              const total = selectedStory.multipleChoice?.length ?? 0;
+              handleMcqComplete(total, total);
+            }}
+          />
+          {mcqDone ? (
+            <div className="mt-6 shrink-0 w-full max-w-3xl mx-auto">
+              <button
+                onClick={handleNext}
+                className="w-full h-12 rounded-full font-headline font-bold text-base text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                <span>下一關</span>
+                <span className="material-symbols-outlined text-base">arrow_forward</span>
+              </button>
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+  }
 
   return (
     <ComprehensionLayout

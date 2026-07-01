@@ -26,6 +26,22 @@ const _lsAbcd =
 export const FILLBLANK_SHOW_ABCD: boolean =
   _lsAbcd != null ? _lsAbcd === 'true' : _rawAbcd === 'true';
 
+// LESSON_RENDERER_V1: Phase-2 unified block-based lesson renderer (閱讀聚光燈 refactor).
+// Default false → existing layouts (ComprehensionLayout / BlockSequenceRenderer /
+// StrategyExercise) are 100% unchanged. When true, StrategyExercisePage /
+// ComprehensionMcqPage try the new LessonRenderer (via storyToLesson) and fall back to
+// the legacy path if the adapter can't produce a valid Lesson. Final default-flip is a
+// manual visual-QA decision, out of scope for this round.
+// Toggle: VITE_LESSON_RENDERER_V1=true at build time, or per-browser at runtime via
+// localStorage key "flag_LESSON_RENDERER_V1" = "true" | "false".
+const _rawLesson = import.meta.env.VITE_LESSON_RENDERER_V1 as string | undefined;
+const _lsLesson =
+  typeof window !== 'undefined'
+    ? window.localStorage?.getItem('flag_LESSON_RENDERER_V1')
+    : null;
+export const LESSON_RENDERER_V1: boolean =
+  _lsLesson != null ? _lsLesson === 'true' : _rawLesson === 'true'; // default false
+
 // FILLBLANK_OPTION_MODE: how answer options are presented (#7 教授「選項呈現兩案」).
 //   'all'      → show every bank word; used ones grey out (current default)
 //   'random4'  → show 4 options per question (correct + 3 random decoys) = 案 (a) 降難度
