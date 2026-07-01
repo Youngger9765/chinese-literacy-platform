@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, require_role
 from ..models.user import User
 from ..services.audio_upload_service import (
     _get_gcs_bucket,
@@ -248,18 +248,19 @@ def testset_progress(name: str = "", lesson: str = ""):
     }
 
 
-@router.get("/testset/recordings")
+@router.get(
+    "/testset/recordings",
+    dependencies=[require_role("system_admin", "org_admin")],
+)
 def testset_recordings():
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
 
-    公開（Young 2026-06-21：不需登入即顯示貢獻者暱稱/數量）。暱稱為自選暱稱、
-    朗讀公開課文，非敏感 PII；list.html 現況表不登入就能看到誰貢獻了哪幾課。
-    （此前曾 admin/teacher → 任何登入者 → 現全公開。）
-
-    DECISION NEEDED — auth: 此 endpoint 日後應改為 require_role(system_admin, org_admin)，
-    但 frontend/public/testset-7f3a91c4/dashboard.html 目前無登入/token 機制；
-    現階段加 require_role 會 403 並讓 admin 無法看錄音清單。須先讓 dashboard 接上
-    auth flow 再鎖 endpoint；在此之前維持公開、勿在此加 require_role。
+    Auth: **平台級 admin（system_admin / org_admin）才可看**（#2437, Young 選 C）。
+    錄音是跨校跨課的平台級訓練資料 + signed 播放 URL（可聽真人朗讀）＝ 隱私敏感，
+    收回公開。唯一 caller 是 owner dashboard `collect-status-9f2a7c4e.html`，已送
+    `Authorization: Bearer <lingoleap_token>`；未登入/非 admin → 401/403，該頁顯示登入 banner。
+    公開頁 index.html / record.html 不呼叫此端點，故 re-gate 不影響貢獻者流程。
+    （歷史：admin/teacher → 任何登入者 → 2026-06-21 全公開 → 2026-07-01 收回 system_admin/org_admin。）
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
