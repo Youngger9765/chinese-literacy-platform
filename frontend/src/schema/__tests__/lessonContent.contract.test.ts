@@ -210,6 +210,42 @@ describe('Gap 1 — multi_select guided step (zod)', () => {
     const d = guided([{ prompt: 'p', type: 'free_text', answer: 0 }]);
     expect(LessonSchema.safeParse(d).success).toBe(false);
   });
+
+  it('rejects a select step with a negative index (parity with pydantic)', () => {
+    // 0-based option index has no negative slot. The pydantic mirror rejects this in
+    // GuidedStep._check_shape; zod rejects it via the field-level `.min(0)`. Both must
+    // agree so a -1 sentinel / off-by-one lesson is not accepted by one and not the other.
+    const d = guided([
+      { prompt: 'p', type: 'select', options: ['a', 'b'], answer: -1 },
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a graphic_text_integration select step with a negative index', () => {
+    const d = {
+      id: 'g',
+      lessonCode: 'G-1',
+      blocks: [
+        { id: 'p1', type: 'paragraph', text: 'passage' },
+        {
+          id: 'ex1',
+          type: 'exercise',
+          question: {
+            kind: 'graphic_text_integration',
+            strategyName: 's',
+            instruction: 'i',
+            steps: [{ prompt: 'p', type: 'select', options: ['a', 'b'], answer: -1 }],
+          },
+          answerSpace: 'free_text',
+          answer: [-1],
+          grader: 'rubric_ai',
+          needsReview: true,
+          anchors: [{ blockId: 'p1' }],
+        },
+      ],
+    };
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
 });
 
 // ── Gap 2: merged-cell grid + keypoints_table ────────────────────────────────

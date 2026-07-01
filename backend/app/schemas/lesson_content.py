@@ -230,7 +230,12 @@ class GuidedStep(BaseModel):
             # bool is an int subclass — reject YAML `answer: true` / `false`.
             if isinstance(self.answer, bool):
                 raise ValueError("select step answer must be a single index, not a bool")
-            if isinstance(self.answer, int) and self.answer >= len(self.options):
+            if isinstance(self.answer, int) and (
+                self.answer < 0 or self.answer >= len(self.options)
+            ):
+                # 0-based option index; a negative index is out of range. The zod mirror
+                # rejects it via a field-level `.min(0)`, so this lower bound keeps the two
+                # contracts from drifting on the same lesson (e.g. an off-by-one / -1 sentinel).
                 raise ValueError("select step answer index out of range")
         if self.type == "multi_select":
             if self.answer is not None:
@@ -252,8 +257,10 @@ class GuidedStep(BaseModel):
 
 class GuidedStepsQuestion(BaseModel):
     """導引步驟 — mirrors StrategyExercise(type='guided_steps'). The answers live
-    per-step (``GuidedStep.answer``), so the block-level ``answer`` is the list of
-    per-step answers assembled by :meth:`ExerciseBlock.assembled_answer`."""
+    per-step (``GuidedStep.answer``), so the wrapping ``ExerciseBlock.answer`` is the
+    ordered list of per-step answers (``select`` → int, ``multi_select`` → list[int],
+    ``free_text`` → None). The eval harness re-grades each step and cross-checks that
+    list against the per-step answers (see ``eval_lesson_content.answer_round_trip``)."""
 
     model_config = ConfigDict(extra="forbid")
 

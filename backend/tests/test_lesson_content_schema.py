@@ -269,6 +269,45 @@ def test_reject_select_bool_answer() -> None:
         Lesson.model_validate(d)
 
 
+@pytest.mark.parametrize("bad", [-1, -2])
+def test_reject_select_negative_index(bad: int) -> None:
+    """A negative select index is out of range — 0-based option index has no negative
+    slot. The zod mirror rejects it via a field-level `.min(0)`; the pydantic select
+    branch must reject it too or the two contracts drift on the SAME lesson (e.g. a
+    parser off-by-one / -1 sentinel would pass backend but fail frontend)."""
+    d = _guided_lesson([
+        {"prompt": "p", "type": "select", "options": ["a", "b"], "answer": bad},
+    ], needs_review=True, answer=[bad])
+    with pytest.raises(ValidationError, match="out of range"):
+        Lesson.model_validate(d)
+
+
+def test_reject_graphic_text_integration_select_negative_index() -> None:
+    """graphic_text_integration reuses GuidedStep, so the same negative-index guard
+    must apply (this type is the one the drift report specifically flagged)."""
+    d = {
+        "id": "g", "lesson_code": "G-1",
+        "blocks": [
+            {"id": "p1", "type": "paragraph", "text": "passage"},
+            {
+                "id": "ex1", "type": "exercise",
+                "question": {
+                    "kind": "graphic_text_integration", "strategy_name": "s",
+                    "instruction": "i",
+                    "steps": [
+                        {"prompt": "p", "type": "select", "options": ["a", "b"],
+                         "answer": -1},
+                    ],
+                },
+                "answer_space": "free_text", "answer": [-1], "grader": "rubric_ai",
+                "needs_review": True, "anchors": [{"block_id": "p1"}],
+            },
+        ],
+    }
+    with pytest.raises(ValidationError, match="out of range"):
+        Lesson.model_validate(d)
+
+
 # ── (Gap 2) merged-cell grid + keypoints_table ───────────────────────────────
 def _lesson_with_table(grid) -> dict:
     return {
