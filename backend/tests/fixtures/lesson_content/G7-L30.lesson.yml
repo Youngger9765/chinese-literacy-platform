@@ -37,6 +37,16 @@ blocks:
       - [習性, 較不怕人, 較怕人]
       - [築巢地點, 常利用人造設施築巢, 較少利用人造設施築巢]
       - [適應都市環境, 較強, 較弱]
+    # Gap 2(a): merged-cell overlay demonstrating 跨列 section labels (相同處/相異處).
+    # `rows` above stays the fast-path; `grid` is the merged-cell representation.
+    # Each grid row's colspan sum must equal len(headers)=3 (enforced by _check_grid).
+    grid:
+      - [{ text: 相同處, colspan: 3, is_section_label: true }]
+      - [{ text: 外形 }, { text: 全身大致為黑色, colspan: 2 }]
+      - [{ text: 相異處, colspan: 3, is_section_label: true }]
+      - [{ text: 嘴喙顏色 }, { text: 黃色 }, { text: 象牙白色 }]
+      - [{ text: 尾羽顏色 }, { text: 末段白色 }, { text: 只有部分白色 }]
+      - [{ text: 來源 }, { text: 外來種 }, { text: 原生種 }]
   - id: p3
     type: paragraph
     text: >-
@@ -84,8 +94,14 @@ blocks:
           type: select
           options: [兩種八哥近年族群數量的變化, 白尾八哥和臺灣冠八哥的異同]
           answer: 0
+        # Gap 1: multi_select 步驟示範 (可複選). answer 是索引集合 (set 語意).
+        - prompt: "整合題:哪些線索能同時從『表一+表二』讀出?(可複選)"
+          type: multi_select
+          options: [外形都大致為黑色, 白尾八哥數量近年成長, 臺灣冠八哥是原生種, 兩種八哥叫聲相同]
+          answer: [1, 2]
     answer_space: free_text
-    answer: [0, 1, null, 1, 0]
+    # assembled per-step answers; last element is the multi_select step's index set.
+    answer: [0, 1, null, 1, 0, [1, 2]]
     grader: rubric_ai
     anchors:
       - { block_id: p1 }
@@ -127,3 +143,43 @@ blocks:
     anchors:
       - { block_id: table-1 }
       - { block_id: table-2 }
+
+  # ── Gap 2(b): 重點表 (keypoints_table, 答案承載型) — 第 8 型 + dict answer ──────
+  # 1:1 aligned with parser extract_keypoints (structure=nested: label + sub_label +
+  # blanks) + parse_blanks ({answer, hint}). The block answer is a dict{blank_id: fill}
+  # (machine-comparable), answer_space=text, grader=exact.
+  - id: ex-keypoints
+    type: exercise
+    question:
+      kind: keypoints_table
+      structure: nested
+      title: 兩種八哥辨識重點表
+      rows:
+        - label: 辨識依據
+          sub_label: 嘴喙顏色
+          blank_ids: [r1.b1, r1.b2]
+        - label: 辨識依據
+          sub_label: 尾羽顏色
+          blank_ids: [r2.b1, r2.b2]
+        - label: 生態身分
+          sub_label: 來源
+          hint: 外來 / 原生
+          blank_ids: [r3.b1, r3.b2]
+      blanks:
+        - { id: r1.b1, answer: 黃色, hint: 白尾八哥 }
+        - { id: r1.b2, answer: 象牙白色, hint: 臺灣冠八哥 }
+        - { id: r2.b1, answer: 末段白色 }
+        - { id: r2.b2, answer: 只有部分白色 }
+        - { id: r3.b1, answer: 外來種 }
+        - { id: r3.b2, answer: 原生種 }
+    answer_space: text
+    answer:
+      r1.b1: 黃色
+      r1.b2: 象牙白色
+      r2.b1: 末段白色
+      r2.b2: 只有部分白色
+      r3.b1: 外來種
+      r3.b2: 原生種
+    grader: exact
+    anchors:
+      - { block_id: table-1 }

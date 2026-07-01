@@ -11,6 +11,7 @@
       "type": "paragraph"
     },
     {
+      "grid": null,
       "headers": [
         "文中線索（言／行）",
         "推論的人物特質"
@@ -160,6 +161,55 @@
       "question": {
         "kind": "fill_in_blank",
         "sentence": "周天成靠著__與__，數年如一日地維持頂尖狀態。（填入兩個人物特質）",
+        "slots": null,
+        "vocab_bank": null
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": {
+        "b1": "羽球訓練菜單",
+        "b2": [
+          "規律",
+          "自律"
+        ]
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-fill-slots",
+      "needs_review": false,
+      "question": {
+        "kind": "fill_in_blank",
+        "sentence": "周天成每天清晨即起，完成__，並維持__的作息與飲食。",
+        "slots": [
+          {
+            "answer": "羽球訓練菜單",
+            "grader": "exact",
+            "hint": null,
+            "id": "b1"
+          },
+          {
+            "answer": [
+              "規律",
+              "自律"
+            ],
+            "grader": "set",
+            "hint": null,
+            "id": "b2"
+          }
+        ],
         "vocab_bank": null
       },
       "type": "exercise"

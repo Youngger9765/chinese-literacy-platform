@@ -19,25 +19,57 @@ blocks:
     text: >-
       Ｑ１：文言文在哪裡節省用字？作者主要用了三個方式：用詞精簡、省略主詞或受詞、省略連接詞。讀文言文時必須強調「腦補」，讀者要試著推敲出被省略的部分。
 
-  # ── custom escape hatch: 白話/文言 對照表 (parallel-passage widget) ──────────
-  # The registered `table` block is a flat headers+rows grid; it cannot capture the
-  # semantics of a side-by-side 白話↔文言 alignment where each row is a translation
-  # pair to be studied. Rather than fake it, we use `custom` — which is NOT exempt
-  # from the answer invariant, so it still declares answer + grader, and is routed
-  # to human review (needs_review: true). This is the honest escape hatch, not a
-  # widened contract. (See README "Open questions / schema gaps".)
-  - id: ex-parallel-table
+  # ── Gap 5: 白話/文言 對照表 promoted from `custom` to a first-class presentation
+  # block. `parallel_passage` carries NO answer — the 對照 is presentation. Judging
+  # regresses to a companion `fill_in_blank` exercise (ex-parallel-count) anchored here,
+  # which IS machine-verifiable so it drops needs_review. (plan §2.3: 白板的自由留給呈現，
+  # 不留給答案; §3.4 promote signal.)  [待 product 拍板 — 一行可退回 custom]
+  - id: pp-parallel
+    type: parallel_passage
+    title: 表１ 鞭虎救弟記的白話/文言文對照表
+    left_label: 白話
+    right_label: 文言
+    rows:
+      - left: 有一個名叫朱泰的人，和弟弟一起在山中砍柴。
+        right: 朱泰與弟採薪山中。
+      - left: 忽然有一隻老虎衝出來，咬住了弟弟就跑。
+        right: 忽虎出，噬其弟以去。
+      - left: 朱泰非常生氣，就拿起柴刀追上去，用力鞭打老虎。
+        right: 泰怒，持刀逐擊之。
+        note: 「肆」在此為「施展、放開」之意
+    notes:
+      - 白話 343 字 / 文言 195 字，對照後可數出差距。
+
+  # 判分回歸 fill_in_blank：數字填空，機器可驗證 → 移除 needs_review。
+  - id: ex-parallel-count
     type: exercise
     question:
-      kind: custom
-      prompt: 表１ 鞭虎救弟記的白話/文言文對照表 — 對照閱讀後，數一數文言文比白話文少了幾個字？
-      render_hint: two-column parallel passage (白話 343 字 / 文言 195 字); renderer should show side-by-side aligned rows
+      kind: fill_in_blank
+      sentence: 對照上表後，文言文比白話文少了幾個字？__
     answer_space: text
     answer: "148"
     grader: exact
+    needs_review: false
+    anchors:
+      - { block_id: pp-parallel }
+
+  # ── tiny `custom` escape hatch (真一次性範例) ────────────────────────────────
+  # parallel_passage graduated OUT of custom, but the contract still needs at least one
+  # `custom` example (test_all_question_types_covered). This is a genuinely one-off shape:
+  # a free-form annotation task the 7 registered types cannot model. custom is NOT exempt
+  # from the answer invariant, so it still carries answer + grader + needs_review.
+  - id: ex-custom-annotate
+    type: exercise
+    question:
+      kind: custom
+      prompt: 用你自己的話，在課文旁標註出「腦補」被省略的主詞或受詞。
+      render_hint: free-form margin-annotation widget over the passage; no fixed answer shape
+    answer_space: text
+    answer: 讀者需補出被省略的主詞／受詞
+    grader: manual
     needs_review: true
     anchors:
-      - { block_id: p1 }
+      - { block_id: p2 }
 
   # ── 詞義選擇 (fill_in_blank style: pick the correct gloss for a highlighted char) ──
   - id: ex-vocab-si

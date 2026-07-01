@@ -18,6 +18,98 @@
       "type": "paragraph"
     },
     {
+      "grid": [
+        [
+          {
+            "colspan": 3,
+            "is_section_label": true,
+            "rowspan": 1,
+            "text": "相同處"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "外形"
+          },
+          {
+            "colspan": 2,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "全身大致為黑色"
+          }
+        ],
+        [
+          {
+            "colspan": 3,
+            "is_section_label": true,
+            "rowspan": 1,
+            "text": "相異處"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "嘴喙顏色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "黃色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "象牙白色"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "尾羽顏色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "末段白色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "只有部分白色"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "來源"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "外來種"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "原生種"
+          }
+        ]
+      ],
       "headers": [
         "比較項目",
         "白尾八哥",
@@ -72,6 +164,7 @@
       "type": "paragraph"
     },
     {
+      "grid": null,
       "headers": [
         "指標",
         "白尾八哥",
@@ -144,7 +237,11 @@
         1,
         null,
         1,
-        0
+        0,
+        [
+          1,
+          2
+        ]
       ],
       "answer_space": "free_text",
       "grader": "rubric_ai",
@@ -200,6 +297,21 @@
             "prompt": "練習三：第三段 vs 表二\n表二主要提供的是哪一類訊息？",
             "reference_answer": null,
             "type": "select"
+          },
+          {
+            "answer": [
+              1,
+              2
+            ],
+            "options": [
+              "外形都大致為黑色",
+              "白尾八哥數量近年成長",
+              "臺灣冠八哥是原生種",
+              "兩種八哥叫聲相同"
+            ],
+            "prompt": "整合題:哪些線索能同時從『表一+表二』讀出?(可複選)",
+            "reference_answer": null,
+            "type": "multi_select"
           }
         ],
         "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
@@ -260,6 +372,100 @@
           "八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧"
         ],
         "question": "５.下列哪一個結論，最需要同時整合前文敘述、表一和表二，才能完整判斷？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": {
+        "r1.b1": "黃色",
+        "r1.b2": "象牙白色",
+        "r2.b1": "末段白色",
+        "r2.b2": "只有部分白色",
+        "r3.b1": "外來種",
+        "r3.b2": "原生種"
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-keypoints",
+      "needs_review": false,
+      "question": {
+        "blanks": [
+          {
+            "answer": "黃色",
+            "hint": "白尾八哥",
+            "id": "r1.b1"
+          },
+          {
+            "answer": "象牙白色",
+            "hint": "臺灣冠八哥",
+            "id": "r1.b2"
+          },
+          {
+            "answer": "末段白色",
+            "hint": null,
+            "id": "r2.b1"
+          },
+          {
+            "answer": "只有部分白色",
+            "hint": null,
+            "id": "r2.b2"
+          },
+          {
+            "answer": "外來種",
+            "hint": null,
+            "id": "r3.b1"
+          },
+          {
+            "answer": "原生種",
+            "hint": null,
+            "id": "r3.b2"
+          }
+        ],
+        "kind": "keypoints_table",
+        "rows": [
+          {
+            "blank_ids": [
+              "r1.b1",
+              "r1.b2"
+            ],
+            "hint": null,
+            "label": "辨識依據",
+            "paragraph": null,
+            "sub_label": "嘴喙顏色",
+            "template": null
+          },
+          {
+            "blank_ids": [
+              "r2.b1",
+              "r2.b2"
+            ],
+            "hint": null,
+            "label": "辨識依據",
+            "paragraph": null,
+            "sub_label": "尾羽顏色",
+            "template": null
+          },
+          {
+            "blank_ids": [
+              "r3.b1",
+              "r3.b2"
+            ],
+            "hint": "外來 / 原生",
+            "label": "生態身分",
+            "paragraph": null,
+            "sub_label": "來源",
+            "template": null
+          }
+        ],
+        "structure": "nested",
+        "title": "兩種八哥辨識重點表"
       },
       "type": "exercise"
     }
