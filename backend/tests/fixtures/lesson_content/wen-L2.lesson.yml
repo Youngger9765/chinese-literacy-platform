@@ -1,0 +1,87 @@
+# Fixture 3/4 — 文言文 (classical Chinese)
+# Hand-transcribed from backend/data/lessons/_parsed_2026-05-01/文-L2.yml
+# 文言文怎麼讀？-以「鞭虎救弟記」為例 — 文言文閱讀策略
+#
+# Layered "hard" case: exercises the `fill_in_blank` (詞義選擇) + `multiple_choice`
+# types, AND deliberately uses the `custom` escape hatch for the 白話/文言 對照表 —
+# a two-column parallel-passage widget the 6 registered types cannot faithfully model.
+# Per plan §2.3, custom is flagged needs_review and STILL carries a machine answer.
+id: wen-L2
+lesson_code: 文-L2
+title: 文言文怎麼讀？-以「鞭虎救弟記」為例
+blocks:
+  - id: p1
+    type: paragraph
+    text: >-
+      白話文比較容易懂，為什麼古人要用文言文寫文章？因為古時候書寫、記錄和印刷都太麻煩、花太多時間、太花錢，因此可以大幅精簡文字的文言文因應而生。
+  - id: p2
+    type: paragraph
+    text: >-
+      Ｑ１：文言文在哪裡節省用字？作者主要用了三個方式：用詞精簡、省略主詞或受詞、省略連接詞。讀文言文時必須強調「腦補」，讀者要試著推敲出被省略的部分。
+
+  # ── custom escape hatch: 白話/文言 對照表 (parallel-passage widget) ──────────
+  # The registered `table` block is a flat headers+rows grid; it cannot capture the
+  # semantics of a side-by-side 白話↔文言 alignment where each row is a translation
+  # pair to be studied. Rather than fake it, we use `custom` — which is NOT exempt
+  # from the answer invariant, so it still declares answer + grader, and is routed
+  # to human review (needs_review: true). This is the honest escape hatch, not a
+  # widened contract. (See README "Open questions / schema gaps".)
+  - id: ex-parallel-table
+    type: exercise
+    question:
+      kind: custom
+      prompt: 表１ 鞭虎救弟記的白話/文言文對照表 — 對照閱讀後，數一數文言文比白話文少了幾個字？
+      render_hint: two-column parallel passage (白話 343 字 / 文言 195 字); renderer should show side-by-side aligned rows
+    answer_space: text
+    answer: "148"
+    grader: exact
+    needs_review: true
+    anchors:
+      - { block_id: p1 }
+
+  # ── 詞義選擇 (fill_in_blank style: pick the correct gloss for a highlighted char) ──
+  - id: ex-vocab-si
+    type: exercise
+    question:
+      kind: fill_in_blank
+      sentence: 虎怒，力不得「肆」——「肆」的意思是？
+      vocab_bank:
+        A: 施展
+        B: 放肆
+    answer_space: choice
+    answer: A
+    grader: exact
+    anchors:
+      - { block_id: p2 }
+
+  # ── 閱讀理解選擇題 ─────────────────────────────────────────────────────────
+  - id: ex-mcq-2
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 2. 閱讀完本篇課文，請問有關「文言文」的敘述，何者為不正確？
+      options:
+        - 文言文的出現是為了要記錄古代的生難字，以供後人閱讀
+        - 因為古代書寫成本很高，文言文大幅精簡了需要紀錄的文字
+        - 文言文是書面用語，和古人平常說話的方式有所不同
+        - 精簡文字的方式有精簡用詞、省略主詞和受詞及省略連接詞
+    answer_space: choice
+    answer: 0 # option A (不正確者)
+    grader: exact
+    anchors:
+      - { block_id: p1 }
+  - id: ex-mcq-4
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 4. 下列何者是作者(曾世杰)想要學生學到的概念？
+      options:
+        - 宣揚文言文寫作之美，推廣文言文
+        - 說明文言文中生字、難字、古字的字義
+        - 告訴讀者文言文的由來以及閱讀的策略
+        - 說明文言文傳承古人智慧，現代人不可不學
+    answer_space: choice
+    answer: 2 # option C
+    grader: exact
+    anchors:
+      - { block_id: p2 }

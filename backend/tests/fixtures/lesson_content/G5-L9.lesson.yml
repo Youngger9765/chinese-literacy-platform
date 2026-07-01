@@ -1,0 +1,100 @@
+# Fixture 4/4 — MULTI-TYPE / TABLE showcase (推論人物特質 + 排序 + 複選)
+# Trait-inference + guided-steps content hand-transcribed from
+# backend/data/lessons/_parsed_2026-05-01/G5-L9.yml (周天成的一天──頂尖選手的養成).
+#
+# This fixture deliberately exercises the FOUR question types not covered by
+# fixtures 1-3, so the contract is proven against every registered type:
+#   - trait_inference  (from the real G5-L9 言行→特質 spotlight)
+#   - ordering         (排序: reconstruct the training-day sequence — real 順敘 shape)
+#   - multiple_choice with answer_space=multi_choice (複選: the 可複選 case the current
+#     frontend downgrades to free_text; here it is first-class + set-graded)
+#   - text fill-in-the-blank (grader=exact, per-blank list answer)
+# It also carries a `table` block (the 言行→特質 clue table) so a data table with real
+# rows round-trips.
+id: G5-L9
+lesson_code: G5-L9
+title: 周天成的一天──頂尖選手的養成
+blocks:
+  - id: p1
+    type: paragraph
+    text: >-
+      周天成極度自律，每天清晨即起，完成每日的羽球訓練菜單後，還會繼續進行重量訓練，對自己的要求從不鬆懈。他說：「強健的肌肉是每個運動員必備的條件之一。」
+  - id: p2
+    type: paragraph
+    text: >-
+      即使已是頂尖選手，周天成仍時刻提醒自己保持謙虛不驕傲，並嚴格限制自己的口腹之慾，數年如一日地維持著規律的作息與飲食。
+  - id: clue-table
+    type: table
+    title: 言行線索 → 人物特質
+    headers: [文中線索（言／行）, 推論的人物特質]
+    rows:
+      - [每天完成訓練菜單後還做重量訓練, 自律]
+      - ["「保持謙虛不驕傲」", 謙虛]
+      - [嚴格限制口腹之慾, 自律]
+
+  # ── trait_inference ─────────────────────────────────────────────────────────
+  - id: ex-trait
+    type: exercise
+    question:
+      kind: trait_inference
+      instruction: 周天成完成每日的羽球訓練菜單，還繼續重量訓練。這屬於「做的事」。請推論周天成的人物特質。
+      character: 周天成
+      clues:
+        - 每天清晨即起，完成每日的羽球訓練菜單
+        - 訓練後還會繼續進行重量訓練
+        - 嚴格限制自己的口腹之慾
+      trait_options: [自律, 謙虛, 熱情, 感恩]
+    answer_space: choice
+    answer: 0 # 自律
+    grader: exact
+    anchors:
+      - { block_id: p1 }
+      - { block_id: clue-table }
+
+  # ── ordering (排序: reconstruct the day's training sequence) ─────────────────
+  - id: ex-order
+    type: exercise
+    question:
+      kind: ordering
+      instruction: 請依照周天成一天訓練的時間順序，將下列事件排序。
+      items:
+        - 清晨即起
+        - 完成羽球訓練菜單
+        - 進行重量訓練
+        - 提醒自己保持謙虛
+    answer_space: order
+    answer: [0, 1, 2, 3]
+    grader: ordered
+    anchors:
+      - { block_id: p1 }
+      - { block_id: p2 }
+
+  # ── multiple_choice with multi-select (複選) ────────────────────────────────
+  - id: ex-multi
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 下列哪些線索可以支持周天成「自律」的特質？（可複選）
+      options:
+        - 每天完成訓練菜單後還做重量訓練
+        - 保持謙虛不驕傲
+        - 嚴格限制口腹之慾
+        - 維持規律的作息與飲食
+    answer_space: multi_choice
+    answer: [0, 2, 3] # A, C, D
+    grader: set
+    anchors:
+      - { block_id: p1 }
+      - { block_id: p2 }
+
+  # ── text fill-in-the-blank (per-blank list answer, exact grader) ────────────
+  - id: ex-fill
+    type: exercise
+    question:
+      kind: fill_in_blank
+      sentence: 周天成靠著__與__，數年如一日地維持頂尖狀態。（填入兩個人物特質）
+    answer_space: text
+    answer: [自律, 謙虛]
+    grader: set
+    anchors:
+      - { block_id: p2 }

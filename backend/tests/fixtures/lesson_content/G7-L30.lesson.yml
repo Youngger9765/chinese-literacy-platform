@@ -1,0 +1,129 @@
+# Fixture 2/4 — GRAPHIC-TEXT (圖文表整合)
+# Hand-transcribed from backend/data/lessons/_parsed_2026-05-01/G7-L30.yml
+# 都是八哥，為什麼命運不一樣？ — 圖文表整合閱讀策略
+#
+# The HARD case for a unified renderer: figure + two data tables interleaved with
+# paragraphs, and a graphic_text_integration spotlight whose steps reference 圖一/表一/表二.
+# Proves the "一般 vs 圖文" split degrades to block ORDERING + anchors, not a second layout.
+# Also proves table row data (lost by the docx→yml parser, later restored under `tables:`)
+# is first-class here as a `table` block.
+id: G7-L30
+lesson_code: G7-L30
+title: 都是八哥，為什麼命運不一樣？
+blocks:
+  - id: p1
+    type: paragraph
+    text: >-
+      你最常見到哪一種野鳥？近年，黑忽忽的八哥還分兩種：「白尾八哥」和「臺灣冠八哥」。從圖一可以看出，這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+  - id: fig-1
+    type: figure
+    label: 圖一
+    caption: 白尾八哥（左）與 臺灣冠八哥（右）外形圖
+    asset: images/G7-L30/G7-L30-06.png
+  - id: p2
+    type: paragraph
+    text: >-
+      表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。只要觀察嘴喙和尾羽的顏色，就能分辨牠們：白尾八哥尾羽末段白色，嘴喙黃色；臺灣冠八哥嘴喙白色、鼻頭有明顯的冠羽，因為是臺灣原生種，也被稱為「臺灣八哥」。
+  - id: table-1
+    type: table
+    label: 表一
+    title: 表一 白尾八哥與臺灣冠八哥比較異同表
+    headers: [比較項目, 白尾八哥, 臺灣冠八哥]
+    rows:
+      - [外形, 全身大致為黑色, 全身大致為黑色]
+      - [嘴喙顏色, 黃色, 象牙白色]
+      - [尾羽顏色, 末段白色, 只有部分白色]
+      - [來源, 外來種, 原生種]
+      - [習性, 較不怕人, 較怕人]
+      - [築巢地點, 常利用人造設施築巢, 較少利用人造設施築巢]
+      - [適應都市環境, 較強, 較弱]
+  - id: p3
+    type: paragraph
+    text: >-
+      表二則說明了兩種八哥近年族群數量的變化。從表二可知，外來種白尾八哥都明顯多過原生種臺灣冠八哥；有些地方甚至已經看不到臺灣冠八哥的身影了。
+  - id: table-2
+    type: table
+    label: 表二
+    title: 表二 近年兩種臺灣常見八哥之族群數量之變化
+    headers: [指標, 白尾八哥, 臺灣冠八哥, 解讀重點]
+    rows:
+      - ["近年數量變化（2009-2020）", 成長 250%, 無明顯變化, 原生種的數量沒有增加，外來種快速擴張]
+      - [2021 年看得到的地點數, 225 個地點, 23 個地點, 2021 年外來種仍明顯多於原生種約 9.8 倍。]
+      - [2018 年花蓮調查結果, 674 隻, 0 隻, 某些區域幾乎看不到原生種]
+    notes:
+      - 註2. 「84 / 584」表示：一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。
+
+  # ── 閱讀聚光燈 (graphic_text_integration) — subset of the real 4-練習 flow ──
+  - id: ex-spotlight
+    type: exercise
+    question:
+      kind: graphic_text_integration
+      strategy_name: 閱讀聚光燈 - 圖文表整合閱讀策略
+      instruction: 閱讀時，先注意文字怎麼提醒你看圖表、怎麼告訴你圖表的功能，再把文字、圖片、表格連起來想。
+      steps:
+        - prompt: "練習一：第一段 vs 圖一\n1. 圖一最主要提供哪一類訊息？"
+          type: select
+          options: [兩種八哥外形相近的整體印象, 兩種八哥近年的族群變化情形]
+          answer: 0
+        - prompt: "2. 讀完第一段後，請你找出和圖一最相關的文字。"
+          type: select
+          options:
+            - 白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。
+            - 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+          answer: 1
+        - prompt: "練習二：第二段 vs 表一\n請把第二段文字中，要你看表的地方畫線或圈起來"
+          type: free_text
+          reference_answer: 表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。
+        - prompt: "表一主要提供的是哪一類訊息？"
+          type: select
+          options:
+            - 白尾八哥和臺灣冠八哥近年的族群變化
+            - 白尾八哥和臺灣冠八哥的異同
+          answer: 1
+        - prompt: "練習三：第三段 vs 表二\n表二主要提供的是哪一類訊息？"
+          type: select
+          options: [兩種八哥近年族群數量的變化, 白尾八哥和臺灣冠八哥的異同]
+          answer: 0
+    answer_space: free_text
+    answer: [0, 1, null, 1, 0]
+    grader: rubric_ai
+    anchors:
+      - { block_id: p1 }
+      - { block_id: fig-1 }
+      - { block_id: p2 }
+      - { block_id: table-1 }
+      - { block_id: p3 }
+      - { block_id: table-2 }
+
+  # ── 閱讀理解選擇題 ─────────────────────────────────────────────────────────
+  - id: ex-mcq-1
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 1.根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？
+      options:
+        - 白尾八哥是白色嘴喙、黑色尾羽；臺灣冠八哥是黃色嘴喙、白色尾羽
+        - 白尾八哥是黃色嘴喙、白色尾羽；臺灣冠八哥是白色嘴喙、黑色尾羽
+        - 白尾八哥是黑色嘴喙、白色尾羽；臺灣冠八哥是黃色嘴喙、黑色尾羽
+        - 白尾八哥是黃色嘴喙、黑色尾羽；臺灣冠八哥是白色嘴喙、白色尾羽
+    answer_space: choice
+    answer: 1 # option B
+    grader: exact
+    anchors:
+      - { block_id: table-1 }
+  - id: ex-mcq-5
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: ５.下列哪一個結論，最需要同時整合前文敘述、表一和表二，才能完整判斷？
+      options:
+        - 兩種八哥外形十分相似，所以只看整體羽色仍不容易正確分辨
+        - 白尾八哥較能適應人類環境，因此近年數量與分布都明顯增加
+        - 臺灣冠八哥原本就是臺灣原生種，所以現在在各地仍應較常見到
+        - 八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧
+    answer_space: choice
+    answer: 1 # option B
+    grader: exact
+    anchors:
+      - { block_id: table-1 }
+      - { block_id: table-2 }
