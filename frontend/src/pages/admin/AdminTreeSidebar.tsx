@@ -153,6 +153,17 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         >
           <UsersIcon />
         </button>
+
+        {/* 朗讀測試集 — 外部集成板（新分頁），與完整側邊欄入口一致 (#2448) */}
+        <a
+          href="/presentation/reading-pipeline.html#testset"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1.5 mt-1 rounded-md transition-colors cursor-pointer text-gray-400 hover:bg-gray-100 hover:text-gray-600 flex items-center justify-center"
+          title="朗讀測試集（錄音 + AI 跑分現況）"
+        >
+          <span className="text-sm" aria-hidden="true">🎙</span>
+        </a>
       </div>
     );
   }

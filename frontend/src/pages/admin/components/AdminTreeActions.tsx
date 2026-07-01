@@ -88,6 +88,18 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         </span>
       </button>
 
+      {/* 朗讀測試集 — 外部集成板（新分頁）。同源開啟，admin 的 token 讓 recordings 直接載入 (#2448) */}
+      <a
+        href="/presentation/reading-pipeline.html#testset"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+        title="朗讀測試集 — 錄音收集 + AI 跑分現況（新分頁開啟）"
+      >
+        <span className="text-sm shrink-0 w-4 text-center" aria-hidden="true">🎙</span>
+        <span className="text-sm">朗讀測試集</span>
+      </a>
+
       {/* Roles */}
       <button
         onClick={() => onSelectNode({ type: 'roles', id: 'roles' })}
