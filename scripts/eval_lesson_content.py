@@ -79,6 +79,12 @@ def grade(ex: ExerciseBlock, response: Any) -> bool:
     stored answer back in MUST return True (for machine graders)."""
     ans = ex.answer
     g = ex.grader
+    # Gap 2/3: dict answers (keypoints_table {blank_id: fill} / slotted fill_in_blank).
+    # Coarse whole-dict compare; per-slot grader refinement is future work.
+    if isinstance(ans, dict):
+        if not isinstance(response, dict) or response.keys() != ans.keys():
+            return False
+        return all(response[k] == ans[k] for k in ans)
     if g is Grader.EXACT:
         return response == ans
     if g is Grader.SET:
@@ -98,12 +104,42 @@ def _as_list(v: Any) -> list:
     return [v]
 
 
+def _step_verdict(step: Any, needs_review: bool) -> str:
+    """Gap 4: per-step round-trip verdict for a guided_steps / graphic_text_integration
+    step. Per-step grader is DERIVED from step.type (no schema enum):
+    select→exact, multi_select→set, free_text→soft. Returns 'ok' | 'soft' | 'fail'."""
+    if step.type == "free_text":
+        return "soft"
+    # select / multi_select — a machine step
+    if step.answer is None:
+        # a missing machine answer is only tolerable if the block is flagged for review
+        return "soft" if needs_review else "fail"
+    if step.type == "select":
+        # in-range already guaranteed by GuidedStep validator; catch value/type loss
+        return "ok" if (isinstance(step.answer, int) and not isinstance(step.answer, bool)) else "fail"
+    # multi_select
+    return "ok" if (isinstance(step.answer, list) and len(step.answer) > 0) else "fail"
+
+
 def answer_round_trip(ex: ExerciseBlock) -> str:
-    """Return one of: 'ok' | 'soft' | 'fail'.
-    - ok:   machine grader re-grades the stored answer as correct
-    - soft: rubric/manual grader (answer present but not machine-verifiable)
-    - fail: machine grader could NOT re-grade its own answer (contract violation)
+    """Return one of: 'ok' | 'soft' | 'partial' | 'fail'.
+    - ok:      machine grader re-grades the stored answer as correct
+    - soft:    rubric/manual grader (answer present but not machine-verifiable)
+    - partial: guided flow with >=1 machine-verified step AND >=1 soft (free_text) step
+    - fail:    a machine grader / step could NOT re-grade its own answer (contract violation)
+
+    Gap 4: for guided_steps / graphic_text_integration we re-grade EACH step by its
+    derived per-step grader instead of hiding the whole block behind a blanket 'soft'.
+    A broken select index (missing / wrong type) now surfaces as 'fail'.
     """
+    q = ex.question
+    if q.kind in ("guided_steps", "graphic_text_integration"):
+        verdicts = [_step_verdict(s, ex.needs_review) for s in q.steps]
+        if "fail" in verdicts:
+            return "fail"
+        if all(v == "soft" for v in verdicts):
+            return "soft"
+        return "partial"  # >=1 machine step verified + at least one soft step
     if ex.grader in (Grader.RUBRIC_AI, Grader.MANUAL):
         return "soft"
     return "ok" if grade(ex, ex.answer) else "fail"
@@ -120,6 +156,7 @@ _ALL_KINDS = [
     "trait_inference",
     "guided_steps",
     "graphic_text_integration",
+    "keypoints_table",
     "custom",
 ]
 
@@ -137,6 +174,7 @@ def lesson_coverage(lesson: Lesson) -> dict[str, Any]:
         "n_needs_review": sum(1 for b in exercises if b.needs_review),
         "round_trip_ok": sum(1 for r in rt if r == "ok"),
         "round_trip_soft": sum(1 for r in rt if r == "soft"),
+        "round_trip_partial": sum(1 for r in rt if r == "partial"),
         "round_trip_fail": sum(1 for r in rt if r == "fail"),
     }
 
@@ -173,7 +211,8 @@ def markdown_report(covs: list[dict[str, Any]]) -> str:
         lines.append(
             f"| {c['lesson_code']} | {c['n_blocks']} | {c['n_exercises']} | "
             f"{_light(c['all_anchored'])} | {_light(c['round_trip_fail'] == 0)} "
-            f"({c['round_trip_ok']} exact / {c['round_trip_soft']} rubric) | "
+            f"({c['round_trip_ok']} exact / {c['round_trip_partial']} partial / "
+            f"{c['round_trip_soft']} rubric) | "
             f"{c['n_needs_review']} | {', '.join(sorted(c['kinds']))} |"
         )
     seen = set().union(*(c["kinds"] for c in covs)) if covs else set()
