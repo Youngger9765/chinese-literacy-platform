@@ -307,13 +307,35 @@ class CustomQuestion(BaseModel):
 
 
 class KeypointBlank(BaseModel):
-    """A single 【...】 fill in a keypoints table. Mirrors parse_blanks {answer, hint}."""
+    """A single 【...】 fill in a keypoints table. Mirrors parse_blanks {answer, hint}.
+
+    Two modes:
+      * FREE FILL (``options`` absent): the student writes the 【...】 fill; ``answer`` is
+        that fill (the current, dominant shape).
+      * □-CHOICE (``options`` present): the cell offered □-marked choices and the student
+        ticks one, e.g. G7-L2 story_structure "學生有 充足 □少量 的課後時間" where 充足 is
+        correct and 少量 is a distractor. Without this, keypoints_table silently drops the
+        distractor and the fact it is a pick (not a free fill), so the exercise could not
+        be faithfully reconstructed or re-graded as the original single-choice. ``options``
+        holds ALL offered choices (correct + distractors) and ``answer`` MUST be one of them."""
 
     model_config = ConfigDict(extra="forbid")
 
     id: str = Field(..., min_length=1)      # stable slot id, e.g. 'r2.b1'
-    answer: str = Field(..., min_length=1)  # the 【...】 fill
+    answer: str = Field(..., min_length=1)  # the 【...】 fill, or (choice mode) the correct option
     hint: Optional[str] = None
+    # □-choice mode: the choices offered in the cell (correct + distractors). When present
+    # this blank is a single-choice pick, not a free fill; `answer` must be one of them.
+    options: Optional[list[str]] = Field(default=None, min_length=2)
+
+    @model_validator(mode="after")
+    def _check_choice(self) -> "KeypointBlank":
+        if self.options is not None and self.answer not in self.options:
+            raise ValueError(
+                f"keypoints_table blank '{self.id}' is a □-choice but its answer "
+                f"'{self.answer}' is not among options {self.options}"
+            )
+        return self
 
 
 class KeypointRow(BaseModel):

@@ -498,6 +498,43 @@ def test_reject_keypoints_duplicate_blank_id() -> None:
         Lesson.model_validate(d)
 
 
+def test_keypoints_blank_choice_mode_accepts() -> None:
+    """G7-L2 story_structure has □-pick cells (e.g. "學生有 充足 □少量 的課後時間") where the
+    correct fill is offered alongside a distractor. A □-choice blank carries `options`
+    (correct + distractors) so the pick — and the distractor — are not lost."""
+    d = _lesson_with_keypoints(
+        rows=[{"label": "學校", "blank_ids": ["b1"]}],
+        blanks=[{"id": "b1", "answer": "充足", "options": ["充足", "少量"]}],
+        answer={"b1": "充足"},
+    )
+    ex = Lesson.model_validate(d).blocks[1]
+    assert isinstance(ex, ExerciseBlock)
+    q = ex.question
+    assert q.kind == "keypoints_table"
+    assert q.blanks[0].options == ["充足", "少量"]
+    assert answer_round_trip(ex) == "ok"  # dict branch of grade()
+
+
+def test_reject_keypoints_choice_answer_not_in_options() -> None:
+    d = _lesson_with_keypoints(
+        rows=[{"label": "學校", "blank_ids": ["b1"]}],
+        blanks=[{"id": "b1", "answer": "中等", "options": ["充足", "少量"]}],
+        answer={"b1": "中等"},
+    )
+    with pytest.raises(ValidationError, match="not among options"):
+        Lesson.model_validate(d)
+
+
+def test_reject_keypoints_choice_single_option() -> None:
+    d = _lesson_with_keypoints(
+        rows=[{"label": "學校", "blank_ids": ["b1"]}],
+        blanks=[{"id": "b1", "answer": "充足", "options": ["充足"]}],
+        answer={"b1": "充足"},
+    )
+    with pytest.raises(ValidationError, match="at least 2"):
+        Lesson.model_validate(d)
+
+
 # ── (Gap 3) fill_in_blank slots ──────────────────────────────────────────────
 def _lesson_with_fib(question: dict, answer, grader: str = "exact") -> dict:
     return {

@@ -202,8 +202,11 @@ blocks:
         - { id: r1.b2, answer: 象牙白色, hint: 臺灣冠八哥 }
         - { id: r2.b1, answer: 末段白色 }
         - { id: r2.b2, answer: 只有部分白色 }
-        - { id: r3.b1, answer: 外來種 }
-        - { id: r3.b2, answer: 原生種 }
+        # □-choice blanks (Gap 2b): 來源 is a binary □-pick, not a free fill. `options`
+        # carries the offered choices (correct + distractor) so the pick is faithfully
+        # reconstructable/regradable; `answer` is the correct choice among them.
+        - { id: r3.b1, answer: 外來種, options: [外來種, 原生種] }
+        - { id: r3.b2, answer: 原生種, options: [外來種, 原生種] }
     answer_space: text
     answer:
       r1.b1: 黃色

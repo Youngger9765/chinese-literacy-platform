@@ -656,32 +656,44 @@
           {
             "answer": "黃色",
             "hint": "白尾八哥",
-            "id": "r1.b1"
+            "id": "r1.b1",
+            "options": null
           },
           {
             "answer": "象牙白色",
             "hint": "臺灣冠八哥",
-            "id": "r1.b2"
+            "id": "r1.b2",
+            "options": null
           },
           {
             "answer": "末段白色",
             "hint": null,
-            "id": "r2.b1"
+            "id": "r2.b1",
+            "options": null
           },
           {
             "answer": "只有部分白色",
             "hint": null,
-            "id": "r2.b2"
+            "id": "r2.b2",
+            "options": null
           },
           {
             "answer": "外來種",
             "hint": null,
-            "id": "r3.b1"
+            "id": "r3.b1",
+            "options": [
+              "外來種",
+              "原生種"
+            ]
           },
           {
             "answer": "原生種",
             "hint": null,
-            "id": "r3.b2"
+            "id": "r3.b2",
+            "options": [
+              "外來種",
+              "原生種"
+            ]
           }
         ],
         "kind": "keypoints_table",

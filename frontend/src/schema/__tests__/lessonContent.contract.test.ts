@@ -396,6 +396,33 @@ describe('Gap 2 — table grid overlay + keypoints_table (zod)', () => {
     );
     expect(LessonSchema.safeParse(d).success).toBe(false);
   });
+
+  it('accepts a □-choice keypoints blank (options + correct answer)', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '充足', options: ['充足', '少量'] }],
+      { b1: '充足' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a □-choice blank whose answer is not among options', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '中等', options: ['充足', '少量'] }],
+      { b1: '中等' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a □-choice blank with fewer than 2 options', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '充足', options: ['充足'] }],
+      { b1: '充足' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
 });
 
 // ── Gap 3: fill_in_blank slots ────────────────────────────────────────────────

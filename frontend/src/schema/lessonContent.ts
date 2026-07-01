@@ -165,13 +165,21 @@ const CustomQuestion = z
 // Gap 2(b): answer-bearing 重點表 (8th question kind). Pure ZodObjects so the outer
 // KeypointsTableQuestion stays a valid discriminatedUnion member; the blank-id
 // uniqueness + row→blank reference checks are enforced in LessonSchema.superRefine.
+// KeypointBlank has two modes: free fill (options absent) or □-choice (options present,
+// e.g. G7-L2 "充足 □少量" where 充足 is correct and 少量 is a distractor). In choice mode
+// `answer` must be one of `options`. `.refine` here is fine — KeypointBlank is nested
+// inside KeypointsTableQuestion.blanks, not itself a discriminatedUnion member.
 const KeypointBlank = z
   .object({
     id: z.string().min(1),
     answer: z.string().min(1),
     hint: z.string().nullish(),
+    options: z.array(z.string()).min(2).nullish(),
   })
-  .strict();
+  .strict()
+  .refine((b) => b.options == null || b.options.includes(b.answer), {
+    message: 'keypoints_table □-choice blank answer must be one of options',
+  });
 
 const KeypointRow = z
   .object({
