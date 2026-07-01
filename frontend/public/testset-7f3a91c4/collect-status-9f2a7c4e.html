@@ -66,7 +66,7 @@
   <p class="sub">每篇課文各需「正確版 + 刻意錯誤版」— 複製各課分享連結傳給貢獻者錄音</p>
 
   <div id="authBanner" class="auth-banner" style="display:none">
-    錄音明細需要教師/管理員登入才能查看。<a href="/login">前往登入 →</a>
+    錄音明細需要管理員（system_admin / org_admin）登入才能查看。<a href="/login">前往登入 →</a>
     <br><small>各課的「複製連結」功能無需登入，可直接分享給貢獻者。</small>
   </div>
 
@@ -170,7 +170,7 @@ async function load(){
     return;
   }
 
-  // 2. recordings — 公開端點（Young 2026-06-21：不登入也顯示貢獻者暱稱/數量）
+  // 2. recordings — 需 system_admin/org_admin（#2437）；未登入/非 admin → 顯示登入 banner
   var recs=[];
   var authOk=false;
   try{
@@ -181,6 +181,8 @@ async function load(){
       var j2=await r2.json();
       recs=j2.recordings||[];
       authOk=true;
+    }else if(r2.status===401||r2.status===403){
+      document.getElementById('authBanner').style.display='block';
     }
   }catch(e){
     // recordings optional
