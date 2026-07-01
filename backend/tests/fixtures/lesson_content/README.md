@@ -22,11 +22,12 @@ spotlight/keypoints pipeline. Existing lessons and behaviour are untouched.
 ## The contract in one paragraph
 
 A `Lesson` is `{ id, lesson_code, title?, blocks[] }`. `blocks` is an ordered, typed
-sequence — a discriminated union of `paragraph | figure | table | exercise`, each with a
-stable `id`. The "一般 vs 圖文" split degrades into block **ordering + anchors**, not two
-layouts (plan §2.3). An `exercise` block carries a question-type discriminated union
-covering the 6 known types (`multiple_choice | fill_in_blank | ordering |
-trait_inference | guided_steps | graphic_text_integration`) plus a `custom` escape hatch.
+sequence — a discriminated union of
+`paragraph | figure | table | parallel_passage | exercise`, each with a stable `id`. The
+"一般 vs 圖文" split degrades into block **ordering + anchors**, not two layouts (plan §2.3).
+An `exercise` block carries a question-type discriminated union covering the 7 registered
+types (`multiple_choice | fill_in_blank | ordering | trait_inference | guided_steps |
+graphic_text_integration | keypoints_table`) plus a `custom` escape hatch.
 
 ### The answer-verifiability invariant (plan §2.2 — the whole point)
 
@@ -58,7 +59,7 @@ not just easy narrative courses. All are hand-transcribed from real lessons in
 |---|---|---|---|
 | `G6-L22.lesson.yml` | 小兵立大功：雞鳴狗盜的故事 | general **narrative** — the dominant `guided_steps` 問題.解決.結果 spotlight | `guided_steps`, `multiple_choice` |
 | `G7-L30.lesson.yml` | 都是八哥，為什麼命運不一樣？ | **graphic-text** — figure + 2 data tables interleaved, `graphic_text_integration` spotlight anchored to 圖一/表一/表二 | `graphic_text_integration`, `multiple_choice` |
-| `wen-L2.lesson.yml` | 文言文怎麼讀？以「鞭虎救弟記」為例 | **文言文** — uses the `custom` escape hatch for the 白話/文言 對照表 | `custom`, `fill_in_blank`, `multiple_choice` |
+| `wen-L2.lesson.yml` | 文言文怎麼讀？以「鞭虎救弟記」為例 | **文言文** — 白話/文言 對照表 as a first-class `parallel_passage` block; `custom` escape hatch still exercised elsewhere | `parallel_passage`, `custom`, `fill_in_blank`, `multiple_choice` |
 | `G5-L9.lesson.yml` | 周天成的一天──頂尖選手的養成 | **multi-type / table** showcase — proves the 4 remaining types | `trait_inference`, `ordering`, `multiple_choice` (multi-select), `fill_in_blank` (text) |
 
 Together they green-light all **7 registered question types** (enforced by
@@ -98,42 +99,53 @@ cd frontend && npx vitest run src/schema/__tests__/lessonContent.contract.test.t
 checkout doesn't have them). If your npm cache errors with `EEXIST`/`EACCES`, install
 with an isolated cache: `npm install --cache /tmp/npm-cache`.
 
-## Open questions / schema gaps (honest — NOT fudged)
+## Schema gaps — status (honest — NOT fudged)
 
-These are real design-level findings surfaced while transcribing the hard fixtures. Per
+These are the design-level findings surfaced while transcribing the hard fixtures. Per
 the plan (§3.4, "別讓 AI HTML 把變異性吸收掉") they are recorded here rather than papered
-over by quietly widening the contract.
+over by quietly widening the contract. Each is marked with its **current status** —
+CLOSED means the contract expresses it faithfully AND a fixture + test exercise it.
 
-1. **Multi-select inside `guided_steps` is lost today.** In the real corpus (e.g.
-   G7-L30), 複選 steps are downgraded to `free_text` because "前端 strategy step 目前僅支援
-   單選比對". The new contract *can* express multi-select (see `G5-L9` `multi_choice` +
-   `set` grader), but a `GuidedStep` is still single-`select` or `free_text`. **Gap:** a
-   step-level multi-select answer type. Deferred — needs a decision on whether to enrich
-   `GuidedStep` or split multi-select steps into standalone `multiple_choice` exercises.
+1. **Multi-select inside `guided_steps` — CLOSED.** In the real corpus (e.g. G7-L30),
+   複選 steps were downgraded to `free_text` because "前端 strategy step 目前僅支援單選比對".
+   `GuidedStep` now has a `multi_select` type carrying a `list[int]` index set (set
+   semantics: deduped, in-range, negatives rejected). Exercised by the G7-L30
+   spotlight's 整合題 step and by unit tests on both pydantic + zod.
 
-2. **Merged-cell / nested tables are flattened.** `TableBlock` is a flat
-   `headers` + `rows: string[][]`. Real 學習單 tables have merged cells, section labels
-   (G7-L30 表一 相同處/相異處 via `section_label_col`), and the 文章重點表 has deeply nested
-   `label / sub_label / value` structures (see `build_lesson_schema.py`
-   `extract_keypoints`). **Gap:** a table model with row-spanning sections + nested
-   sub-rows. Not needed for Phase 1's spotlight focus, but Phase 2's renderer will need it.
+2. **Merged-cell tables — CLOSED for row-spanning section columns; nested sub-rows
+   still via `keypoints_table`.** The defining real shape is a vmerged section-label
+   **COLUMN** (G7-L30 表一 `異同` = 相同處/相異處; G7-L2 story_structure = 澳洲全民重視體育 /
+   運動選手生涯), NOT a horizontal band. `TableBlock` now carries `section_label_col`
+   (the vmerged column's header) + `row_sections` (per-row membership), and the grid
+   width validator is **rowspan-aware**, so a faithful vmerge grid (origin row carries a
+   `rowspan=N` section cell; the N-1 spanned rows omit that cell) validates. G7-L30
+   table-1 is transcribed with all 14 rows in this form. In-cell □-choice picks that mix
+   with 【 】 fills (G7-L2 story_structure "充足 □少量") are preserved by `KeypointBlank.options`
+   (choice mode: `answer` must be one of the offered options). Deeply nested
+   `label / sub_label / value` 文章重點表 structures remain modeled by the answer-bearing
+   `keypoints_table` question kind (not `TableBlock`), which is the intended split
+   (presentation vs answer-bearing).
 
-3. **`fill_in_blank` answer shape is overloaded.** We store a single blank as `str`
-   (`wen-L2`) and multiple blanks as `list[str]` (`G5-L9`), graded by `exact` / `set`
-   respectively. This works but is implicit. **Gap:** per-blank slot ids + per-slot
-   answer/grader, for sentences with mixed blank types.
+3. **`fill_in_blank` mixed per-blank grading — CLOSED.** A single blank as `str` and
+   multiple blanks as `list[str]` (graded `exact` / `set`) still work implicitly; for
+   sentences with *mixed* per-blank types, `FillInBlankQuestion.slots` gives each blank an
+   `id` + `answer` + per-slot `grader`, and the block `answer` becomes a machine-comparable
+   `dict{slot_id: value}` (see `G5-L9`).
 
-4. **`guided_steps` block-level `answer` is a heterogeneous list.** It mixes option
-   indices (int) and `null` for rubric-graded free_text steps, and the block uses
-   `grader: rubric_ai`. This is honest (the list *is* the machine-readable per-step
-   answer set) but a stricter model would attach `answer` + `grader` per step. Deferred —
-   the round-trip check treats such blocks as "soft" (present but human-graded), which is
-   correct but coarse.
+4. **`guided_steps` block-level `answer` is a heterogeneous list — coarse but now
+   cross-checked.** The block `answer` mixes option indices (int), index sets (list[int]),
+   and `null` for rubric-graded free_text steps. The eval harness re-grades each step by
+   its derived per-step grader (select→exact / multi_select→set / free_text→soft), yielding
+   `partial` for mixed flows, and it now **cross-checks the assembled block `answer` against
+   the per-step answers** so a drifted block answer surfaces as `fail`. A fully per-step
+   `answer` + `grader` schema (rather than a heterogeneous list + block `grader: rubric_ai`)
+   is still the cleaner long-term model — deferred.
 
-5. **The 白話/文言 對照表 has no first-class type.** Handled via `custom` +
-   `needs_review: true` in `wen-L2`. This is the escape hatch working as designed — if
-   many 文言文 lessons need it, that's the signal (plan §3.4 "逃生口比率當指標") to promote a
-   registered `parallel_passage` block type rather than leave it as `custom`.
+5. **白話/文言 對照表 — CLOSED (promoted to `parallel_passage`).** Formerly handled via the
+   `custom` escape hatch; now a first-class `parallel_passage` presentation block (left/
+   right rows), with judging delegated to a companion `fill_in_blank` anchored at it
+   (presentation/judging separation, plan §2.3). `wen-L2` still exercises the `custom`
+   escape hatch elsewhere so that path stays covered.
 
 ## Not done in this phase (by design)
 
