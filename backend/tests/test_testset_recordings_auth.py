@@ -70,12 +70,14 @@ def setup_db():
             db.add(Role(**rd))
     db.commit()
     # persist user rows (FK target for UserRole)
-    db.add_all([_fresh_user(1, "admin_u"), _fresh_user(2, "pleb_u")])
+    db.add_all([_fresh_user(1, "admin_u"), _fresh_user(2, "pleb_u"), _fresh_user(3, "orgadmin_u")])
     db.commit()
     sa = db.query(Role).filter(Role.name == "system_admin").first()
     st = db.query(Role).filter(Role.name == "student").first()
+    oa = db.query(Role).filter(Role.name == "org_admin").first()
     db.add(UserRole(user_id=1, role_id=sa.id, scope_type="platform", scope_id=None))
     db.add(UserRole(user_id=2, role_id=st.id, scope_type="school", scope_id="1"))
+    db.add(UserRole(user_id=3, role_id=oa.id, scope_type="organization", scope_id="1"))
     db.commit()
     db.close()
     yield
@@ -116,6 +118,18 @@ def test_non_admin_returns_403():
 def test_system_admin_returns_200():
     """system_admin → 200 (GCS mocked)."""
     app.dependency_overrides[get_current_user] = lambda: _fresh_user(1, "admin_u")
+    try:
+        with patch("app.routes.testset._get_gcs_bucket", return_value=_bucket()):
+            with TestClient(app, raise_server_exceptions=False) as c:
+                r = c.get("/api/testset/recordings?lesson_id=1&version=correct")
+        assert r.status_code == 200, r.text
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_org_admin_returns_200():
+    """org_admin (the other allowed role) → 200 (GCS mocked)."""
+    app.dependency_overrides[get_current_user] = lambda: _fresh_user(3, "orgadmin_u")
     try:
         with patch("app.routes.testset._get_gcs_bucket", return_value=_bucket()):
             with TestClient(app, raise_server_exceptions=False) as c:
