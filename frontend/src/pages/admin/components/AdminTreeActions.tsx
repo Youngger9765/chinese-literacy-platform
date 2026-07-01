@@ -7,7 +7,7 @@
 import React from 'react';
 import { ShieldIcon, UsersIcon } from '../../../components/icons';
 import { StoriesIcon, TtsAuditIcon, StructureLabIcon } from './AdminTreeIcons';
-import type { TreeNodeSelection } from '../AdminTreeSidebar';
+import { READING_TESTSET_URL, type TreeNodeSelection } from '../AdminTreeSidebar';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
 
       {/* 朗讀測試集 — 外部集成板（新分頁）。同源開啟，admin 的 token 讓 recordings 直接載入 (#2448) */}
       <a
-        href="/presentation/reading-pipeline.html#testset"
+        href={READING_TESTSET_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer text-gray-500 hover:bg-gray-50 hover:text-gray-700"
