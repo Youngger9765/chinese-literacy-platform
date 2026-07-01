@@ -105,6 +105,8 @@ import ComprehensionChat from '../components/reading-steps/ComprehensionChat';
 import VocabWordSearch from '../components/reading-steps/VocabWordSearch';
 import KnowledgeStation from '../components/reading-steps/KnowledgeStation';
 import AssessmentReport from '../components/reading-steps/AssessmentReport';
+import LessonRenderer from '../components/lesson-content/LessonRenderer';
+import { LessonSchema } from '../schema/lessonContent';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -152,6 +154,27 @@ const MINIMAL_STRATEGY_EXERCISE: StrategyExerciseType = {
     { text: '第二步', correct_order: 2 },
   ],
 };
+
+// Minimal fixture-shaped Lesson for LessonRenderer (Phase-2 unified renderer, #2289 net).
+// Built + validated through the frozen zod contract so the smoke covers a real Lesson
+// (paragraph + one gradable choice exercise), not a hand-waved object.
+const MINIMAL_LESSON = LessonSchema.parse({
+  id: 'smoke-lesson',
+  lessonCode: 'G4-L1',
+  title: '煙霧測試課',
+  blocks: [
+    { id: 'p1', type: 'paragraph', text: '這是一段課文內容。' },
+    {
+      id: 'ex1',
+      type: 'exercise',
+      question: { kind: 'multiple_choice', question: '這段在說什麼？', options: ['A 選項', 'B 選項'] },
+      answerSpace: 'choice',
+      answer: 0,
+      grader: 'exact',
+      anchors: [{ blockId: 'p1' }],
+    },
+  ],
+});
 
 const LIVE_TUTOR_CONTROLS_PROPS = {
   isSessionActive: false,
@@ -352,5 +375,11 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
 describe('render-smoke: LiveTutorControls — TDZ guard for stopPlaybackSync (#2279)', () => {
   it('LiveTutorControls', () => {
     mountGuard('LiveTutorControls', <LiveTutorControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
+  });
+});
+
+describe('render-smoke: LessonRenderer — Phase-2 unified block renderer (#2289 net)', () => {
+  it('LessonRenderer', () => {
+    mountGuard('LessonRenderer', <LessonRenderer lesson={MINIMAL_LESSON} lessonCode="G4-L1" />);
   });
 });
