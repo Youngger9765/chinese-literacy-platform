@@ -1,0 +1,289 @@
+/**
+ * lessonContent.ts — Block-based Lesson content contract (zod mirror).
+ *
+ * Part of the 閱讀聚光燈 refactor (SPOTLIGHT_REFACTOR_PLAN.md), Phase 0 + Phase 1.
+ *
+ * This is the FRONTEND half of the shared content contract. The BACKEND half lives
+ * at `backend/app/schemas/lesson_content.py`. The two MUST stay semantically in sync —
+ * `src/schema/__tests__/lessonContent.contract.test.ts` validates the shared fixtures
+ * in `backend/tests/fixtures/lesson_content/` through THIS schema, so if the two drift,
+ * a fixture that the backend accepts will fail here (or vice-versa) and the test breaks.
+ *
+ * WHY (plan §2.2, the invariant): every exercise MUST carry `answerSpace` + `answer` +
+ * `grader`. The renderer is free to make it pretty; the ANSWER is always structured and
+ * machine-comparable. The `custom` escape hatch is not exempt — it must set
+ * `needsReview: true`.
+ *
+ * NON-INVASIVE: additive only. Does not touch existing `types.ts`, `ComprehensionLayout`,
+ * `StrategyExercise`, or any renderer. This is scaffolding for the Phase-2 unified renderer.
+ */
+import { z } from 'zod';
+
+// ─── Shared value objects ────────────────────────────────────────────────────
+
+export const AnswerSpace = z.enum([
+  'choice',
+  'multi_choice',
+  'text',
+  'order',
+  'free_text',
+]);
+export type AnswerSpace = z.infer<typeof AnswerSpace>;
+
+export const Grader = z.enum(['exact', 'set', 'ordered', 'rubric_ai', 'manual']);
+export type Grader = z.infer<typeof Grader>;
+
+export const AnchorSchema = z
+  .object({
+    blockId: z.string().min(1),
+    charStart: z.number().int().min(0).optional(),
+    charEnd: z.number().int().min(0).optional(),
+  })
+  .strict()
+  .refine(
+    (a) => a.charStart == null || a.charEnd == null || a.charEnd >= a.charStart,
+    { message: 'charEnd must be >= charStart' },
+  );
+export type Anchor = z.infer<typeof AnchorSchema>;
+
+// ─── Exercise question-type discriminated union ──────────────────────────────
+
+const MultipleChoiceQuestion = z
+  .object({
+    kind: z.literal('multiple_choice'),
+    question: z.string().min(1),
+    options: z.array(z.string()).min(2),
+    explanation: z.string().nullish(),
+  })
+  .strict();
+
+const FillInBlankQuestion = z
+  .object({
+    kind: z.literal('fill_in_blank'),
+    sentence: z.string().min(1),
+    vocabBank: z.record(z.string(), z.string()).nullish(),
+  })
+  .strict();
+
+const OrderingQuestion = z
+  .object({
+    kind: z.literal('ordering'),
+    instruction: z.string().min(1),
+    items: z.array(z.string()).min(2),
+  })
+  .strict();
+
+const TraitInferenceQuestion = z
+  .object({
+    kind: z.literal('trait_inference'),
+    instruction: z.string().min(1),
+    character: z.string().min(1),
+    clues: z.array(z.string()).default([]),
+    traitOptions: z.array(z.string()).min(2),
+  })
+  .strict();
+
+const GuidedStep = z
+  .object({
+    prompt: z.string().min(1),
+    type: z.enum(['select', 'free_text']),
+    options: z.array(z.string()).nullish(),
+    answer: z.number().int().min(0).nullish(),
+    referenceAnswer: z.string().nullish(),
+  })
+  .strict()
+  .refine(
+    (s) => s.type !== 'select' || (s.options != null && s.options.length >= 2),
+    { message: 'select step must have >= 2 options' },
+  )
+  .refine(
+    (s) =>
+      s.type !== 'select' ||
+      s.answer == null ||
+      (s.options != null && s.answer < s.options.length),
+    { message: 'select step answer index out of range' },
+  );
+
+const GuidedStepsQuestion = z
+  .object({
+    kind: z.literal('guided_steps'),
+    strategyName: z.string().min(1),
+    instruction: z.string().min(1),
+    steps: z.array(GuidedStep).min(1),
+  })
+  .strict();
+
+const GraphicTextIntegrationQuestion = z
+  .object({
+    kind: z.literal('graphic_text_integration'),
+    strategyName: z.string().min(1),
+    instruction: z.string().min(1),
+    steps: z.array(GuidedStep).min(1),
+  })
+  .strict();
+
+const CustomQuestion = z
+  .object({
+    kind: z.literal('custom'),
+    prompt: z.string().min(1),
+    renderHint: z.string().nullish(),
+  })
+  .strict();
+
+export const QuestionSchema = z.discriminatedUnion('kind', [
+  MultipleChoiceQuestion,
+  FillInBlankQuestion,
+  OrderingQuestion,
+  TraitInferenceQuestion,
+  GuidedStepsQuestion,
+  GraphicTextIntegrationQuestion,
+  CustomQuestion,
+]);
+export type Question = z.infer<typeof QuestionSchema>;
+
+// ─── Block discriminated union ────────────────────────────────────────────────
+
+const ParagraphBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('paragraph'),
+    text: z.string().min(1),
+  })
+  .strict();
+
+const FigureBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('figure'),
+    label: z.string().nullish(),
+    caption: z.string().nullish(),
+    asset: z.string().nullish(),
+  })
+  .strict();
+
+const TableBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('table'),
+    label: z.string().nullish(),
+    title: z.string().nullish(),
+    headers: z.array(z.string()).default([]),
+    rows: z.array(z.array(z.string())).default([]),
+    notes: z.array(z.string()).default([]),
+  })
+  .strict();
+
+/** Machine-comparable answer. Shape depends on answerSpace (see backend docstring). */
+const AnswerValue = z.union([
+  z.number(),
+  z.string(),
+  z.boolean(),
+  z.array(z.any()),
+  z.record(z.string(), z.any()),
+  z.null(),
+]);
+
+const SPACE_TO_GRADERS: Record<AnswerSpace, Grader[]> = {
+  choice: ['exact', 'manual'],
+  multi_choice: ['set', 'manual'],
+  text: ['exact', 'set', 'rubric_ai', 'manual'],
+  order: ['ordered', 'manual'],
+  free_text: ['rubric_ai', 'manual'],
+};
+
+function answerMissing(a: unknown): boolean {
+  if (a == null) return true;
+  if (typeof a === 'string' || Array.isArray(a)) return a.length === 0;
+  if (typeof a === 'object') return Object.keys(a as object).length === 0;
+  return false;
+}
+
+/**
+ * Base exercise object (a plain ZodObject so it can be a discriminated-union member —
+ * zod v3 requires union members expose the discriminator directly, which `.refine()`
+ * wrapping hides). The answer-invariant refinements are applied by
+ * {@link enforceExerciseInvariant} at the Lesson level (mirrors the pydantic
+ * ExerciseBlock model_validator, which also runs after the whole object is built).
+ */
+export const ExerciseBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('exercise'),
+    question: QuestionSchema,
+    answerSpace: AnswerSpace,
+    answer: AnswerValue,
+    grader: Grader,
+    anchors: z.array(AnchorSchema).default([]),
+    needsReview: z.boolean().default(false),
+  })
+  .strict();
+export type ExerciseBlockT = z.infer<typeof ExerciseBlock>;
+
+/** Returns an error message if the exercise violates the answer invariant, else null. */
+export function exerciseInvariantError(e: ExerciseBlockT): string | null {
+  if (e.question.kind === 'custom' && e.needsReview !== true) {
+    return 'custom exercise must set needsReview: true';
+  }
+  if (answerMissing(e.answer) && e.needsReview !== true) {
+    return 'exercise has no machine-comparable answer; provide `answer` or set needsReview: true';
+  }
+  if (!SPACE_TO_GRADERS[e.answerSpace].includes(e.grader)) {
+    return `grader '${e.grader}' is not valid for answerSpace '${e.answerSpace}'`;
+  }
+  return null;
+}
+
+export const BlockSchema = z.discriminatedUnion('type', [
+  ParagraphBlock,
+  FigureBlock,
+  TableBlock,
+  ExerciseBlock,
+]);
+export type Block = z.infer<typeof BlockSchema>;
+
+// ─── Lesson root ──────────────────────────────────────────────────────────────
+
+export const LessonSchema = z
+  .object({
+    id: z.string().min(1),
+    lessonCode: z.string().min(1),
+    title: z.string().nullish(),
+    blocks: z.array(BlockSchema).min(1),
+  })
+  .strict()
+  .superRefine((lesson, ctx) => {
+    const ids = lesson.blocks.map((b) => b.id);
+    const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+    if (dupes.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `duplicate block ids: ${[...new Set(dupes)].join(', ')}`,
+      });
+    }
+    const anchorable = new Set(
+      lesson.blocks
+        .filter((b) => b.type === 'paragraph' || b.type === 'figure' || b.type === 'table')
+        .map((b) => b.id),
+    );
+    for (const b of lesson.blocks) {
+      if (b.type !== 'exercise') continue;
+      // answer invariant (mirrors pydantic ExerciseBlock model_validator)
+      const invErr = exerciseInvariantError(b);
+      if (invErr) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `exercise '${b.id}': ${invErr}`,
+          path: ['blocks'],
+        });
+      }
+      for (const a of b.anchors ?? []) {
+        if (!anchorable.has(a.blockId)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `exercise '${b.id}' anchors unknown block '${a.blockId}'`,
+          });
+        }
+      }
+    }
+  });
+export type Lesson = z.infer<typeof LessonSchema>;
