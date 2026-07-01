@@ -57,11 +57,25 @@ const MultipleChoiceQuestion = z
   })
   .strict();
 
+// Gap 3: optional per-blank slot. `.refine`s here are ILLUSTRATIVE ONLY — because
+// FillInBlankQuestion is a discriminatedUnion member it must stay a pure ZodObject, so
+// the cross-field slot checks (set-slot-array, slot-id-uniqueness) are enforced in
+// LessonSchema.superRefine (see slotError / fillInBlankSlotError below).
+const BlankSlot = z
+  .object({
+    id: z.string().min(1),
+    answer: z.union([z.string(), z.array(z.string())]),
+    grader: z.enum(['exact', 'set']).default('exact'),
+    hint: z.string().nullish(),
+  })
+  .strict();
+
 const FillInBlankQuestion = z
   .object({
     kind: z.literal('fill_in_blank'),
     sentence: z.string().min(1),
     vocabBank: z.record(z.string(), z.string()).nullish(),
+    slots: z.array(BlankSlot).nullish(),
   })
   .strict();
 
@@ -86,23 +100,41 @@ const TraitInferenceQuestion = z
 const GuidedStep = z
   .object({
     prompt: z.string().min(1),
-    type: z.enum(['select', 'free_text']),
+    type: z.enum(['select', 'multi_select', 'free_text']),
     options: z.array(z.string()).nullish(),
-    answer: z.number().int().min(0).nullish(),
+    // select → single index; multi_select → list of indices; free_text → null
+    answer: z
+      .union([z.number().int().min(0), z.array(z.number().int().min(0)), z.null()])
+      .nullish(),
     referenceAnswer: z.string().nullish(),
   })
   .strict()
   .refine(
-    (s) => s.type !== 'select' || (s.options != null && s.options.length >= 2),
-    { message: 'select step must have >= 2 options' },
+    (s) =>
+      (s.type !== 'select' && s.type !== 'multi_select') ||
+      (s.options != null && s.options.length >= 2),
+    { message: 'select/multi_select step must have >= 2 options' },
   )
   .refine(
     (s) =>
       s.type !== 'select' ||
       s.answer == null ||
-      (s.options != null && s.answer < s.options.length),
-    { message: 'select step answer index out of range' },
-  );
+      (typeof s.answer === 'number' && s.options != null && s.answer < s.options.length),
+    { message: 'select step answer must be a single in-range index' },
+  )
+  .refine(
+    (s) =>
+      s.type !== 'multi_select' ||
+      s.answer == null ||
+      (Array.isArray(s.answer) &&
+        s.options != null &&
+        new Set(s.answer).size === s.answer.length &&
+        s.answer.every((i) => i < s.options!.length)),
+    { message: 'multi_select step answer must be distinct in-range indices' },
+  )
+  .refine((s) => s.type !== 'free_text' || s.answer == null, {
+    message: 'free_text step answer must be null',
+  });
 
 const GuidedStepsQuestion = z
   .object({
@@ -130,6 +162,38 @@ const CustomQuestion = z
   })
   .strict();
 
+// Gap 2(b): answer-bearing 重點表 (8th question kind). Pure ZodObjects so the outer
+// KeypointsTableQuestion stays a valid discriminatedUnion member; the blank-id
+// uniqueness + row→blank reference checks are enforced in LessonSchema.superRefine.
+const KeypointBlank = z
+  .object({
+    id: z.string().min(1),
+    answer: z.string().min(1),
+    hint: z.string().nullish(),
+  })
+  .strict();
+
+const KeypointRow = z
+  .object({
+    label: z.string().min(1),
+    subLabel: z.string().nullish(),
+    hint: z.string().nullish(),
+    paragraph: z.string().nullish(),
+    template: z.string().nullish(),
+    blankIds: z.array(z.string()).default([]),
+  })
+  .strict();
+
+const KeypointsTableQuestion = z
+  .object({
+    kind: z.literal('keypoints_table'),
+    structure: z.enum(['flat', 'nested', 'hint_value', 'locate_paragraph']),
+    title: z.string().nullish(),
+    rows: z.array(KeypointRow).min(1),
+    blanks: z.array(KeypointBlank).min(1),
+  })
+  .strict();
+
 export const QuestionSchema = z.discriminatedUnion('kind', [
   MultipleChoiceQuestion,
   FillInBlankQuestion,
@@ -137,6 +201,7 @@ export const QuestionSchema = z.discriminatedUnion('kind', [
   TraitInferenceQuestion,
   GuidedStepsQuestion,
   GraphicTextIntegrationQuestion,
+  KeypointsTableQuestion,
   CustomQuestion,
 ]);
 export type Question = z.infer<typeof QuestionSchema>;
@@ -161,6 +226,18 @@ const FigureBlock = z
   })
   .strict();
 
+// Gap 2(a): merged-cell overlay. Present only when there are merged cells; grid width
+// consistency is checked in LessonSchema.superRefine (TableBlock must stay a pure
+// ZodObject for the BlockSchema discriminatedUnion).
+const TableCell = z
+  .object({
+    text: z.string().default(''),
+    colspan: z.number().int().min(1).default(1),
+    rowspan: z.number().int().min(1).default(1),
+    isSectionLabel: z.boolean().default(false),
+  })
+  .strict();
+
 const TableBlock = z
   .object({
     id: z.string().min(1),
@@ -169,6 +246,28 @@ const TableBlock = z
     title: z.string().nullish(),
     headers: z.array(z.string()).default([]),
     rows: z.array(z.array(z.string())).default([]),
+    grid: z.array(z.array(TableCell)).nullish(),
+    notes: z.array(z.string()).default([]),
+  })
+  .strict();
+
+// Gap 5: 雙欄對照『呈現』block (NOT an exercise, no answer).
+const ParallelRow = z
+  .object({
+    left: z.string().min(1),
+    right: z.string().min(1),
+    note: z.string().nullish(),
+  })
+  .strict();
+
+const ParallelPassageBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('parallel_passage'),
+    leftLabel: z.string().min(1).default('白話'),
+    rightLabel: z.string().min(1).default('文言'),
+    title: z.string().nullish(),
+    rows: z.array(ParallelRow).min(1),
     notes: z.array(z.string()).default([]),
   })
   .strict();
@@ -237,6 +336,7 @@ export const BlockSchema = z.discriminatedUnion('type', [
   ParagraphBlock,
   FigureBlock,
   TableBlock,
+  ParallelPassageBlock,
   ExerciseBlock,
 ]);
 export type Block = z.infer<typeof BlockSchema>;
@@ -262,10 +362,25 @@ export const LessonSchema = z
     }
     const anchorable = new Set(
       lesson.blocks
-        .filter((b) => b.type === 'paragraph' || b.type === 'figure' || b.type === 'table')
+        .filter((b) =>
+          ['paragraph', 'figure', 'table', 'parallel_passage'].includes(b.type),
+        )
         .map((b) => b.id),
     );
     for (const b of lesson.blocks) {
+      // Gap 2(a): merged-cell grid width must match headers width (TableBlock is a pure
+      // ZodObject for the discriminatedUnion, so this cross-field check lives here).
+      if (b.type === 'table' && b.grid != null && b.headers.length > 0) {
+        for (const row of b.grid) {
+          const width = row.reduce((sum, c) => sum + c.colspan, 0);
+          if (width !== b.headers.length) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `table '${b.id}' grid row colspan sum ${width} != headers width ${b.headers.length}`,
+            });
+          }
+        }
+      }
       if (b.type !== 'exercise') continue;
       // answer invariant (mirrors pydantic ExerciseBlock model_validator)
       const invErr = exerciseInvariantError(b);
@@ -275,6 +390,46 @@ export const LessonSchema = z
           message: `exercise '${b.id}': ${invErr}`,
           path: ['blocks'],
         });
+      }
+      // Gap 3: fill_in_blank slot checks (moved off the pure-object member).
+      if (b.question.kind === 'fill_in_blank' && b.question.slots != null) {
+        const slots = b.question.slots;
+        const slotIds = slots.map((s) => s.id);
+        if (new Set(slotIds).size !== slotIds.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `exercise '${b.id}': fill_in_blank slot ids must be unique`,
+          });
+        }
+        for (const s of slots) {
+          if (s.grader === 'set' && !Array.isArray(s.answer)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `exercise '${b.id}': set slot answer must be an array`,
+            });
+          }
+        }
+      }
+      // Gap 2(b): keypoints_table blank-id uniqueness + row reference checks.
+      if (b.question.kind === 'keypoints_table') {
+        const blankIds = b.question.blanks.map((bl) => bl.id);
+        if (new Set(blankIds).size !== blankIds.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `exercise '${b.id}': keypoints_table blank ids must be unique`,
+          });
+        }
+        const known = new Set(blankIds);
+        for (const row of b.question.rows) {
+          for (const bid of row.blankIds ?? []) {
+            if (!known.has(bid)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `exercise '${b.id}': keypoints_table row references unknown blank id '${bid}'`,
+              });
+            }
+          }
+        }
       }
       for (const a of b.anchors ?? []) {
         if (!anchorable.has(a.blockId)) {

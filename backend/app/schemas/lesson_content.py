@@ -38,7 +38,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -108,15 +108,52 @@ class MultipleChoiceQuestion(BaseModel):
     explanation: Optional[str] = None
 
 
+class BlankSlot(BaseModel):
+    """Gap 3: one addressable blank inside a ``fill_in_blank`` sentence. Optional —
+    only used when a sentence has *mixed* per-blank grading (some exact, some set).
+    When ``slots`` is absent the block keeps the current implicit str/list answer.
+
+    NOTE: does NOT change the sentence markup — the sentence still uses ``__`` runs;
+    slots align to those runs by ORDER (a future renderer's responsibility). This is
+    the conservative shape (no ``{{s1}}`` placeholder convention)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)              # e.g. 'b1', order-stable
+    answer: Union[str, list[str]]                    # str=單一正解; list[str]=可接受同義集
+    grader: Literal["exact", "set"] = "exact"        # per-slot override
+    hint: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _slot_coherence(self) -> "BlankSlot":
+        if self.grader == "set" and not isinstance(self.answer, list):
+            raise ValueError("set slot answer must be a list")
+        return self
+
+
 class FillInBlankQuestion(BaseModel):
     """④ 語詞應用 — mirrors FillInBlankItem in frontend/src/types.ts.
-    ``vocab_bank`` is the optional letter→word map (e.g. {"A": "疑難雜症"})."""
+    ``vocab_bank`` is the optional letter→word map (e.g. {"A": "疑難雜症"}).
+
+    Gap 3: ``slots`` is optional. Absent → the block-level ``answer`` keeps the current
+    shape (``str`` = single exact blank, ``list[str]`` = multi-blank set). Present →
+    each slot carries its own ``id`` + ``answer`` + ``grader`` and the block ``answer``
+    becomes a ``dict{slot_id: value}`` (machine-comparable)."""
 
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal["fill_in_blank"] = "fill_in_blank"
-    sentence: str = Field(..., min_length=1)
+    sentence: str = Field(..., min_length=1)         # current: contains '__' runs (markup unchanged)
     vocab_bank: Optional[dict[str, str]] = None
+    slots: Optional[list[BlankSlot]] = None          # None => block-level str/list answer
+
+    @model_validator(mode="after")
+    def _check_slots(self) -> "FillInBlankQuestion":
+        if self.slots is not None:
+            ids = [s.id for s in self.slots]
+            if len(ids) != len(set(ids)):
+                raise ValueError("fill_in_blank slot ids must be unique")
+        return self
 
 
 class OrderingQuestion(BaseModel):
@@ -146,32 +183,70 @@ class TraitInferenceQuestion(BaseModel):
 
 class GuidedStep(BaseModel):
     """One step inside a guided_steps exercise. ``select`` steps carry options and
-    are machine-gradable; ``free_text`` steps are rubric/teacher graded.
+    are machine-gradable (single-index answer); ``multi_select`` steps carry options
+    and a *set* of indices (可複選); ``free_text`` steps are rubric/teacher graded.
 
     This mirrors the DOMINANT real shape in backend/data/lessons/_parsed_*: the
     閱讀聚光燈 is almost always a `guided_steps` container whose steps alternate
-    between `select` (□-marked answer) and `free_text` (open annotation)."""
+    between `select` (□-marked answer) and `free_text` (open annotation). Gap 1
+    adds `multi_select` for the 可複選 steps the current pipeline silently downgrades
+    to `free_text`."""
 
     model_config = ConfigDict(extra="forbid")
 
     prompt: str = Field(..., min_length=1)
-    type: Literal["select", "free_text"]
+    type: Literal["select", "multi_select", "free_text"]
     options: Optional[list[str]] = None
-    # Machine-comparable answer for `select` steps: 0-based option index.
-    # None for free_text steps (graded by rubric); may also be None for a select
-    # step whose answer could not be recovered — but then `needs_review` on the
-    # block MUST be True (enforced in ExerciseBlock validator).
-    answer: Optional[int] = Field(default=None, ge=0)
+    # Machine-comparable answer, shape depends on `type`:
+    #   select       → int (0-based option index)
+    #   multi_select → list[int] (set semantics: deduped, in-range)
+    #   free_text    → None (graded by rubric; reference_answer holds the model answer)
+    # A select/multi_select step answer may be None if it could not be recovered —
+    # but then `needs_review` on the block MUST be True (enforced in ExerciseBlock).
+    answer: Union[int, list[int], None] = Field(default=None)
     # Optional teacher-facing reference answer for free_text steps.
     reference_answer: Optional[str] = None
 
+    @field_validator("answer", mode="before")
+    @classmethod
+    def _reject_bool_answer(cls, v: object) -> object:
+        # bool is an int subclass; pydantic would coerce YAML `answer: true` → 1 in the
+        # Union[int, list[int], None] before _check_shape runs. Reject raw bools up-front
+        # (scalar and inside a list) so `answer: true` can never masquerade as an index.
+        if isinstance(v, bool):
+            raise ValueError("step answer must be an index / list of indices, not a bool")
+        if isinstance(v, list) and any(isinstance(i, bool) for i in v):
+            raise ValueError("step answer must be indices, not bools")
+        return v
+
     @model_validator(mode="after")
     def _check_shape(self) -> "GuidedStep":
-        if self.type == "select":
+        if self.type in ("select", "multi_select"):
             if not self.options or len(self.options) < 2:
-                raise ValueError("select step must have >= 2 options")
-            if self.answer is not None and self.answer >= len(self.options):
+                raise ValueError(f"{self.type} step must have >= 2 options")
+        if self.type == "select":
+            if isinstance(self.answer, list):
+                raise ValueError("select step answer must be a single index, not a list")
+            # bool is an int subclass — reject YAML `answer: true` / `false`.
+            if isinstance(self.answer, bool):
+                raise ValueError("select step answer must be a single index, not a bool")
+            if isinstance(self.answer, int) and self.answer >= len(self.options):
                 raise ValueError("select step answer index out of range")
+        if self.type == "multi_select":
+            if self.answer is not None:
+                if not isinstance(self.answer, list):
+                    raise ValueError("multi_select step answer must be a list of indices")
+                if len(set(self.answer)) != len(self.answer):
+                    raise ValueError("multi_select step answer has duplicate indices")
+                if any(
+                    (not isinstance(i, int)) or isinstance(i, bool) or i < 0 or i >= len(self.options)
+                    for i in self.answer
+                ):
+                    raise ValueError("multi_select step answer index out of range")
+        if self.type == "free_text" and self.answer is not None:
+            raise ValueError(
+                "free_text step answer must be None (reference_answer holds the model answer)"
+            )
         return self
 
 
@@ -217,6 +292,65 @@ class CustomQuestion(BaseModel):
     render_hint: Optional[str] = None
 
 
+# ── Gap 2(b): answer-bearing 重點表 (第 8 型) ─────────────────────────────────
+# 1:1 aligned with the parser's extract_keypoints() output:
+#   keypoints{structure, columns, rows[{label, sub_rows:[{sub_label,value,blanks}]}], title?}
+# + parse_blanks() {answer, hint}. Unlike a TableBlock (presentation), this CARRIES the
+# answer invariant, so it is a question kind wrapped by ExerciseBlock, not a block.
+
+
+class KeypointBlank(BaseModel):
+    """A single 【...】 fill in a keypoints table. Mirrors parse_blanks {answer, hint}."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)      # stable slot id, e.g. 'r2.b1'
+    answer: str = Field(..., min_length=1)  # the 【...】 fill
+    hint: Optional[str] = None
+
+
+class KeypointRow(BaseModel):
+    """One row of a keypoints table. ``blank_ids`` point into the block ``blanks`` list
+    (order-stable), so the answer stays a flat, machine-comparable dict."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str = Field(..., min_length=1)
+    sub_label: Optional[str] = None         # nested 3-col: col1
+    hint: Optional[str] = None              # hint_value mode
+    paragraph: Optional[str] = None         # locate_paragraph mode N.M
+    template: Optional[str] = None          # remove_blanks-ed template
+    blank_ids: list[str] = Field(default_factory=list)  # → blanks[].id, order-stable
+
+
+class KeypointsTableQuestion(BaseModel):
+    """⑧ 重點表 (答案承載型) — the 文章重點表 that a flat TableBlock cannot express.
+    The wrapping ExerciseBlock uses answer_space=text, answer={blank_id: fill} (dict,
+    machine-comparable), grader=exact."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["keypoints_table"] = "keypoints_table"
+    structure: Literal["flat", "nested", "hint_value", "locate_paragraph"]  # parser-aligned
+    title: Optional[str] = None
+    rows: list[KeypointRow] = Field(..., min_length=1)
+    blanks: list[KeypointBlank] = Field(..., min_length=1)
+
+    @model_validator(mode="after")
+    def _check_blank_refs(self) -> "KeypointsTableQuestion":
+        ids = [b.id for b in self.blanks]
+        if len(ids) != len(set(ids)):
+            raise ValueError("keypoints_table blank ids must be unique")
+        known = set(ids)
+        for r in self.rows:
+            for bid in r.blank_ids:
+                if bid not in known:
+                    raise ValueError(
+                        f"keypoints_table row references unknown blank id '{bid}'"
+                    )
+        return self
+
+
 Question = Annotated[
     Union[
         MultipleChoiceQuestion,
@@ -225,6 +359,7 @@ Question = Annotated[
         TraitInferenceQuestion,
         GuidedStepsQuestion,
         GraphicTextIntegrationQuestion,
+        KeypointsTableQuestion,
         CustomQuestion,
     ],
     Field(discriminator="kind"),
@@ -256,6 +391,18 @@ class FigureBlock(BaseModel):
     asset: Optional[str] = None
 
 
+class TableCell(BaseModel):
+    """Gap 2(a): one cell in a merged-cell ``grid`` overlay. Aligns with the parser's
+    cell_grid() (span, vmerge) output."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = ""
+    colspan: int = Field(default=1, ge=1)        # parser gridSpan
+    rowspan: int = Field(default=1, ge=1)        # parser vmerge (連續段)
+    is_section_label: bool = False               # e.g. G7-L30 相同處/相異處 跨列區段標籤
+
+
 class TableBlock(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -264,9 +411,48 @@ class TableBlock(BaseModel):
     label: Optional[str] = None
     title: Optional[str] = None
     headers: list[str] = Field(default_factory=list)
-    # Each row is a list of cell strings; kept deliberately simple (no merge model
-    # yet — see README "schema gaps").
+    # Simple/default shape (fast path).
     rows: list[list[str]] = Field(default_factory=list)
+    # Gap 2(a): optional merged-cell overlay — present ONLY when there are merged cells.
+    grid: Optional[list[list["TableCell"]]] = None
+    notes: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _check_grid(self) -> "TableBlock":
+        if self.grid is not None and self.headers:
+            for r in self.grid:
+                width = sum(c.colspan for c in r)
+                if width != len(self.headers):
+                    raise ValueError(
+                        f"table '{self.id}' grid row colspan sum {width} != headers "
+                        f"width {len(self.headers)}"
+                    )
+        return self
+
+
+class ParallelRow(BaseModel):
+    """Gap 5: one aligned pair in a 雙欄對照表 (白話↔文言 / 原文↔翻譯)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    left: str = Field(..., min_length=1)     # e.g. 文言
+    right: str = Field(..., min_length=1)    # e.g. 白話
+    note: Optional[str] = None
+
+
+class ParallelPassageBlock(BaseModel):
+    """Gap 5: 雙欄對照『呈現』block (NOT an exercise, no answer). 文言/白話、原文/翻譯
+    share it. Judging is delegated to a companion fill_in_blank exercise anchored here —
+    presentation/judging separation (plan §2.3: 白板的自由留給呈現，不留給答案)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    type: Literal["parallel_passage"] = "parallel_passage"
+    left_label: str = Field(default="白話", min_length=1)
+    right_label: str = Field(default="文言", min_length=1)
+    title: Optional[str] = None
+    rows: list[ParallelRow] = Field(..., min_length=1)
     notes: list[str] = Field(default_factory=list)
 
 
@@ -342,7 +528,7 @@ class ExerciseBlock(BaseModel):
 
 
 Block = Annotated[
-    Union[ParagraphBlock, FigureBlock, TableBlock, ExerciseBlock],
+    Union[ParagraphBlock, FigureBlock, TableBlock, ParallelPassageBlock, ExerciseBlock],
     Field(discriminator="type"),
 ]
 
@@ -373,7 +559,9 @@ class Lesson(BaseModel):
 
         # Every exercise anchor must point at an existing NON-exercise block.
         anchorable = {
-            b.id for b in self.blocks if b.type in ("paragraph", "figure", "table")
+            b.id
+            for b in self.blocks
+            if b.type in ("paragraph", "figure", "table", "parallel_passage")
         }
         for b in self.blocks:
             if b.type != "exercise":
@@ -391,17 +579,24 @@ __all__ = [
     "Grader",
     "Anchor",
     "MultipleChoiceQuestion",
+    "BlankSlot",
     "FillInBlankQuestion",
     "OrderingQuestion",
     "TraitInferenceQuestion",
     "GuidedStep",
     "GuidedStepsQuestion",
     "GraphicTextIntegrationQuestion",
+    "KeypointBlank",
+    "KeypointRow",
+    "KeypointsTableQuestion",
     "CustomQuestion",
     "Question",
     "ParagraphBlock",
     "FigureBlock",
+    "TableCell",
     "TableBlock",
+    "ParallelRow",
+    "ParallelPassageBlock",
     "ExerciseBlock",
     "Block",
     "Lesson",
