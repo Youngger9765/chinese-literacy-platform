@@ -105,6 +105,7 @@ import ComprehensionChat from '../components/reading-steps/ComprehensionChat';
 import VocabWordSearch from '../components/reading-steps/VocabWordSearch';
 import KnowledgeStation from '../components/reading-steps/KnowledgeStation';
 import AssessmentReport from '../components/reading-steps/AssessmentReport';
+import LoginPage from '../pages/LoginPage';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -352,5 +353,15 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
 describe('render-smoke: LiveTutorControls — TDZ guard for stopPlaybackSync (#2279)', () => {
   it('LiveTutorControls', () => {
     mountGuard('LiveTutorControls', <LiveTutorControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
+  });
+});
+
+// LoginPage is the only React (src/) component this session touched — #2410 added
+// the quick-login handler. The testset upload UI is static public/ HTML (verified
+// via real-browser e2e, not vitest-testable). This locks LoginPage against a
+// #2279-style mount/TDZ crash.
+describe('render-smoke: LoginPage — quick-login handler mounts without TDZ (#2410)', () => {
+  it('LoginPage', () => {
+    mountGuard('LoginPage', <LoginPage onSwitchToRegister={vi.fn()} />);
   });
 });
