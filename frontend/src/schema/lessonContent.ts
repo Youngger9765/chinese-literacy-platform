@@ -246,6 +246,13 @@ const TableBlock = z
     title: z.string().nullish(),
     headers: z.array(z.string()).default([]),
     rows: z.array(z.array(z.string())).default([]),
+    // Gap 2(a): vmerged section-label COLUMN (G7-L30 表一 `異同`, G7-L2 story_structure).
+    // `sectionLabelCol` is that column's header; `rowSections` gives each `rows` entry its
+    // section membership (order-aligned to `rows`; consecutive equals = one vmerge span).
+    // Coherence + rowspan-aware grid width are enforced in LessonSchema.superRefine (this
+    // must stay a pure ZodObject for the BlockSchema discriminatedUnion).
+    sectionLabelCol: z.string().nullish(),
+    rowSections: z.array(z.string()).nullish(),
     grid: z.array(z.array(TableCell)).nullish(),
     notes: z.array(z.string()).default([]),
   })
@@ -368,17 +375,53 @@ export const LessonSchema = z
         .map((b) => b.id),
     );
     for (const b of lesson.blocks) {
-      // Gap 2(a): merged-cell grid width must match headers width (TableBlock is a pure
-      // ZodObject for the discriminatedUnion, so this cross-field check lives here).
-      if (b.type === 'table' && b.grid != null && b.headers.length > 0) {
-        for (const row of b.grid) {
-          const width = row.reduce((sum, c) => sum + c.colspan, 0);
-          if (width !== b.headers.length) {
+      if (b.type === 'table') {
+        // Gap 2(a): vmerged section-label column coherence (mirrors pydantic _check_grid).
+        if (b.rowSections != null) {
+          if (b.sectionLabelCol == null) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: `table '${b.id}' grid row colspan sum ${width} != headers width ${b.headers.length}`,
+              message: `table '${b.id}' has rowSections but no sectionLabelCol`,
             });
           }
+          if (b.rows.length > 0 && b.rowSections.length !== b.rows.length) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `table '${b.id}' rowSections length ${b.rowSections.length} != rows length ${b.rows.length}`,
+            });
+          }
+        }
+        // Gap 2(a): merged-cell grid width, ROWSPAN-AWARE (mirrors pydantic _check_grid).
+        // A cell with rowspan=k occupies its column(s) for k rows, so spanned rows carry
+        // fewer physical cells — exactly how a vmerged section column emits. Track, per
+        // column, how many more rows a vmerge from above still occupies it.
+        if (b.grid != null && b.headers.length > 0) {
+          // The vmerged section-label column (when present) is an EXTRA leftmost grid
+          // column on top of the `headers` data columns, so the physical grid is one
+          // column wider than `headers`.
+          const ncols = b.headers.length + (b.sectionLabelCol ? 1 : 0);
+          let carried = new Array<number>(ncols).fill(0);
+          b.grid.forEach((row, ri) => {
+            const occupied = carried.filter((c) => c > 0).length;
+            const supplied = row.reduce((sum, c) => sum + c.colspan, 0);
+            if (supplied !== ncols - occupied) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `table '${b.id}' grid row ${ri} width ${supplied} != expected ${ncols - occupied} (headers ${ncols}, ${occupied} column(s) still spanned from above)`,
+              });
+            }
+            carried = carried.map((c) => Math.max(0, c - 1));
+            let col = 0;
+            for (const cell of row) {
+              while (col < ncols && carried[col] > 0) col += 1;
+              if (cell.rowspan > 1) {
+                for (let k = 0; k < cell.colspan; k += 1) {
+                  if (col + k < ncols) carried[col + k] = cell.rowspan - 1;
+                }
+              }
+              col += cell.colspan;
+            }
+          });
         }
       }
       if (b.type !== 'exercise') continue;

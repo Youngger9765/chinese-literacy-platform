@@ -418,22 +418,72 @@ class TableBlock(BaseModel):
     label: Optional[str] = None
     title: Optional[str] = None
     headers: list[str] = Field(default_factory=list)
-    # Simple/default shape (fast path).
+    # Simple/default shape (fast path). `rows` cells align to `headers`; the vmerged
+    # section-label COLUMN (below) is layered on top so `rows` stays pure cell data.
     rows: list[list[str]] = Field(default_factory=list)
+    # Gap 2(a): vmerged section-label COLUMN (the dominant real shape — G7-L30 表一 has a
+    # `異同` column that vmerges 相同處/相異處 across many rows; G7-L2 story_structure vmerges
+    # 澳洲全民重視體育 / 運動選手生涯). This is a *column* of section labels, NOT a horizontal
+    # band. `section_label_col` is that column's header (e.g. '異同'); `row_sections` gives
+    # each `rows` entry its section membership (order-aligned to `rows`). Repeats mark the
+    # vmerge span (consecutive equal labels = one merged cell). Kept off `rows` so the fast
+    # path (cells aligned to `headers`) is undisturbed. See `grid` for the physical overlay.
+    section_label_col: Optional[str] = None
+    row_sections: Optional[list[str]] = None
     # Gap 2(a): optional merged-cell overlay — present ONLY when there are merged cells.
     grid: Optional[list[list["TableCell"]]] = None
     notes: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _check_grid(self) -> "TableBlock":
+        # (1) vmerged section-label column coherence.
+        if self.row_sections is not None:
+            if self.section_label_col is None:
+                raise ValueError(
+                    f"table '{self.id}' has row_sections but no section_label_col "
+                    "(name the vmerged section column, e.g. '異同')"
+                )
+            if self.rows and len(self.row_sections) != len(self.rows):
+                raise ValueError(
+                    f"table '{self.id}' row_sections length {len(self.row_sections)} "
+                    f"!= rows length {len(self.rows)} (one section label per row)"
+                )
+
+        # (2) merged-cell grid width — ROWSPAN-AWARE. A cell with rowspan=k occupies its
+        # column(s) for k rows, so the rows it spans carry FEWER physical cells (this is
+        # exactly how a vmerged section-label column emits: the origin row carries the
+        # section cell, subsequent spanned rows omit it). We track, per column, how many
+        # more rows it is still occupied by a vmerge from above; each row must then supply
+        # exactly `headers_width - occupied` cells (measured in colspan). The old validator
+        # ignored rowspan and rejected faithful vmerge grids — see plan §2.3.
         if self.grid is not None and self.headers:
-            for r in self.grid:
-                width = sum(c.colspan for c in r)
-                if width != len(self.headers):
+            # The vmerged section-label column (when present) is an EXTRA leftmost column
+            # in the physical grid, on top of the `headers` data columns — so the grid is
+            # one column wider than `headers`. `rows` stay aligned to `headers`; only the
+            # `grid` overlay carries the section column.
+            ncols = len(self.headers) + (1 if self.section_label_col else 0)
+            carried = [0] * ncols  # rows each column is still occupied by a vmerge above
+            for ri, row in enumerate(self.grid):
+                occupied = sum(1 for c in carried if c > 0)
+                supplied = sum(c.colspan for c in row)
+                if supplied != ncols - occupied:
                     raise ValueError(
-                        f"table '{self.id}' grid row colspan sum {width} != headers "
-                        f"width {len(self.headers)}"
+                        f"table '{self.id}' grid row {ri} width {supplied} != expected "
+                        f"{ncols - occupied} (headers {ncols}, {occupied} column(s) still "
+                        "spanned by a rowspan from above)"
                     )
+                # advance one row: expire one step of every carried span
+                carried = [max(0, c - 1) for c in carried]
+                # lay this row's cells into the columns not currently spanned
+                col = 0
+                for cell in row:
+                    while col < ncols and carried[col] > 0:
+                        col += 1  # skip columns still occupied from above
+                    if cell.rowspan > 1:
+                        for k in range(cell.colspan):
+                            if col + k < ncols:
+                                carried[col + k] = cell.rowspan - 1
+                    col += cell.colspan
         return self
 
 

@@ -30,6 +30,7 @@ from app.schemas.lesson_content import (  # noqa: E402
     ExerciseBlock,
     Grader,
     Lesson,
+    TableBlock,
 )
 from eval_lesson_content import (  # noqa: E402
     FIXTURE_DIR,
@@ -334,7 +335,117 @@ def test_table_grid_overlay_accepts() -> None:
 
 def test_reject_grid_width_mismatch() -> None:
     d = _lesson_with_table([[{"text": "x", "colspan": 2}]])  # sum 2 != headers 3
-    with pytest.raises(ValidationError, match="colspan sum"):
+    with pytest.raises(ValidationError, match="width 2 != expected 3"):
+        Lesson.model_validate(d)
+
+
+# ── (Gap 2a) vmerged section-label COLUMN — the real-corpus topology ──────────
+def _lesson_with_full_table(table: dict) -> dict:
+    return {
+        "id": "t", "lesson_code": "T-1",
+        "blocks": [table, {"id": "p1", "type": "paragraph", "text": "x"}],
+    }
+
+
+def test_vmerged_section_label_column_grid_accepts() -> None:
+    """The DEFINING real-corpus shape (G7-L30 表一): a vmerged 異同 section-label COLUMN,
+    NOT a horizontal band. The origin row of each section carries the section cell with
+    rowspan=N; the N-1 rows it spans carry ONE FEWER physical cell. The old validator
+    summed only colspan and rejected this — the rowspan-aware validator must accept it."""
+    headers = ["異同", "比較項目", "白尾八哥", "臺灣冠八哥"]
+    grid = [
+        [{"text": "相同處", "rowspan": 5, "is_section_label": True},
+         {"text": "外形"}, {"text": "黑"}, {"text": "黑"}],
+        [{"text": "體型"}, {"text": "接近"}, {"text": "接近"}],
+        [{"text": "行動與食物"}, {"text": "覓食"}, {"text": "覓食"}],
+        [{"text": "棲息地"}, {"text": "平地"}, {"text": "平地"}],
+        [{"text": "生物分類"}, {"text": "留鳥"}, {"text": "留鳥"}],
+        [{"text": "相異處", "rowspan": 9, "is_section_label": True},
+         {"text": "嘴喙顏色"}, {"text": "黃"}, {"text": "象牙白"}],
+        [{"text": "尾羽顏色"}, {"text": "末白"}, {"text": "部分白"}],
+        [{"text": "冠羽"}, {"text": "不明顯"}, {"text": "明顯"}],
+        [{"text": "來源"}, {"text": "外來種"}, {"text": "原生種"}],
+        [{"text": "族群數量"}, {"text": "較多"}, {"text": "較少"}],
+        [{"text": "習性"}, {"text": "較不怕人"}, {"text": "較怕人"}],
+        [{"text": "築巢地點"}, {"text": "常利用人造"}, {"text": "較少利用"}],
+        [{"text": "適應都市環境"}, {"text": "較強"}, {"text": "較弱"}],
+        [{"text": "保育身分"}, {"text": "非保育類"}, {"text": "保育類"}],
+    ]
+    d = _lesson_with_full_table(
+        {"id": "table-1", "type": "table", "headers": headers, "grid": grid}
+    )
+    lesson = Lesson.model_validate(d)
+    tbl = lesson.blocks[0]
+    assert isinstance(tbl, TableBlock)
+    assert tbl.grid is not None and tbl.grid[0][0].rowspan == 5
+    assert len(tbl.grid) == 14
+
+
+def test_row_sections_column_fast_path_accepts() -> None:
+    """The non-grid representation: `rows` are the data cells aligned to `headers`, and
+    `row_sections` + `section_label_col` layer the vmerged section column on top so the
+    `異同` column and the 比較項目/白尾/臺灣冠 columns stay aligned across sections."""
+    d = _lesson_with_full_table({
+        "id": "table-1", "type": "table",
+        "headers": ["比較項目", "白尾八哥", "臺灣冠八哥"],
+        "section_label_col": "異同",
+        "row_sections": ["相同處", "相同處", "相異處"],
+        "rows": [["外形", "黑", "黑"], ["體型", "接近", "接近"], ["嘴喙", "黃", "白"]],
+    })
+    tbl = Lesson.model_validate(d).blocks[0]
+    assert isinstance(tbl, TableBlock)
+    assert tbl.section_label_col == "異同"
+    assert tbl.row_sections == ["相同處", "相同處", "相異處"]
+
+
+def test_reject_row_sections_without_section_label_col() -> None:
+    d = _lesson_with_full_table({
+        "id": "t1", "type": "table", "headers": ["a", "b"],
+        "row_sections": ["x"], "rows": [["1", "2"]],
+    })
+    with pytest.raises(ValidationError, match="no section_label_col"):
+        Lesson.model_validate(d)
+
+
+def test_reject_row_sections_length_mismatch() -> None:
+    d = _lesson_with_full_table({
+        "id": "t1", "type": "table", "headers": ["a", "b"],
+        "section_label_col": "s", "row_sections": ["x"],
+        "rows": [["1", "2"], ["3", "4"]],
+    })
+    with pytest.raises(ValidationError, match="row_sections length"):
+        Lesson.model_validate(d)
+
+
+def test_horizontal_band_grid_still_accepts() -> None:
+    """Backward compat: the earlier horizontal-band grid (full-width colspan section band,
+    no rowspan) must keep validating under the rowspan-aware check."""
+    d = _lesson_with_full_table({
+        "id": "t1", "type": "table",
+        "headers": ["比較項目", "白尾八哥", "臺灣冠八哥"],
+        "grid": [
+            [{"text": "相同處", "colspan": 3, "is_section_label": True}],
+            [{"text": "外形"}, {"text": "全身大致為黑色", "colspan": 2}],
+            [{"text": "相異處", "colspan": 3, "is_section_label": True}],
+            [{"text": "嘴喙顏色"}, {"text": "黃色"}, {"text": "象牙白色"}],
+        ],
+    })
+    tbl = Lesson.model_validate(d).blocks[0]
+    assert isinstance(tbl, TableBlock)
+
+
+def test_reject_grid_undersupply_after_span_expires() -> None:
+    """A row that supplies too few cells once a vmerge from above still occupies a column
+    must be rejected (the span accounting is not a free pass to drop arbitrary cells)."""
+    d = _lesson_with_full_table({
+        "id": "t1", "type": "table", "headers": ["a", "b", "c"],
+        "grid": [
+            [{"text": "S", "rowspan": 2, "is_section_label": True},
+             {"text": "x"}, {"text": "y"}],
+            [{"text": "z"}],  # col a still spanned → expects 2 cells, supplies 1
+        ],
+    })
+    with pytest.raises(ValidationError, match="width 1 != expected 2"):
         Lesson.model_validate(d)
 
 

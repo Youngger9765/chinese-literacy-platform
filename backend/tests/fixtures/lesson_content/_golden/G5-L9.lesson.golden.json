@@ -19,6 +19,7 @@
       "id": "clue-table",
       "label": null,
       "notes": [],
+      "row_sections": null,
       "rows": [
         [
           "每天完成訓練菜單後還做重量訓練",
@@ -33,6 +34,7 @@
           "自律"
         ]
       ],
+      "section_label_col": null,
       "title": "言行線索 → 人物特質",
       "type": "table"
     },

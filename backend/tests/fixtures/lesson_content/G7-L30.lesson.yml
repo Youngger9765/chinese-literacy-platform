@@ -28,25 +28,57 @@ blocks:
     type: table
     label: 表一
     title: 表一 白尾八哥與臺灣冠八哥比較異同表
+    # Gap 2(a) — the DEFINING real-corpus topology (see _parsed_2026-05-01/G7-L30.yml
+    # table-1): a vmerged 異同 section-label COLUMN, NOT a horizontal band. The section
+    # (相同處/相異處) lives in its OWN leftmost column while 比較項目/白尾/臺灣冠 stay aligned
+    # across sections. Faithfully transcribed with all 14 rows (5 相同處 + 9 相異處).
+    #   • `section_label_col` names that vmerged column's header (異同).
+    #   • `row_sections` gives each `rows` entry its section membership (order-aligned;
+    #     consecutive equal labels = one vmerge span). `rows` stays pure cell data
+    #     aligned to `headers` (fast path).
+    #   • `grid` is the physical merged-cell overlay: the section cell carries a rowspan
+    #     and the rows it spans omit that column's cell. The validator is rowspan-aware,
+    #     so this passes (the old colspan-only sum rejected it — plan §2.3).
     headers: [比較項目, 白尾八哥, 臺灣冠八哥]
+    section_label_col: 異同
+    row_sections:
+      [相同處, 相同處, 相同處, 相同處, 相同處,
+       相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處]
     rows:
       - [外形, 全身大致為黑色, 全身大致為黑色]
+      - [體型, 身形大小接近, 身形大小接近]
+      - [行動與食物, 常在地面走動覓食，吃昆蟲、果實, 常在地面走動覓食，吃昆蟲、果實]
+      - [棲息地, 低海拔平地, 低海拔平地]
+      - [生物分類, 八哥屬、留鳥, 八哥屬、留鳥]
       - [嘴喙顏色, 黃色, 象牙白色]
       - [尾羽顏色, 末段白色, 只有部分白色]
+      - [冠羽, 冠羽不明顯, 冠羽較明顯]
       - [來源, 外來種, 原生種]
+      - [族群數量, 較多, 較少]
       - [習性, 較不怕人, 較怕人]
       - [築巢地點, 常利用人造設施築巢, 較少利用人造設施築巢]
       - [適應都市環境, 較強, 較弱]
-    # Gap 2(a): merged-cell overlay demonstrating 跨列 section labels (相同處/相異處).
-    # `rows` above stays the fast-path; `grid` is the merged-cell representation.
-    # Each grid row's colspan sum must equal len(headers)=3 (enforced by _check_grid).
+      - [保育身分, 非保育類野生動物, 保育類野生動物]
     grid:
-      - [{ text: 相同處, colspan: 3, is_section_label: true }]
-      - [{ text: 外形 }, { text: 全身大致為黑色, colspan: 2 }]
-      - [{ text: 相異處, colspan: 3, is_section_label: true }]
-      - [{ text: 嘴喙顏色 }, { text: 黃色 }, { text: 象牙白色 }]
+      # 相同處 vmerges 5 rows: origin row carries the section cell (rowspan=5) + 3 data
+      # cells; the next 4 rows carry 3 cells (section column stays spanned from above).
+      - [{ text: 相同處, rowspan: 5, is_section_label: true },
+         { text: 外形 }, { text: 全身大致為黑色 }, { text: 全身大致為黑色 }]
+      - [{ text: 體型 }, { text: 身形大小接近 }, { text: 身形大小接近 }]
+      - [{ text: 行動與食物 }, { text: 常在地面走動覓食，吃昆蟲、果實 }, { text: 常在地面走動覓食，吃昆蟲、果實 }]
+      - [{ text: 棲息地 }, { text: 低海拔平地 }, { text: 低海拔平地 }]
+      - [{ text: 生物分類 }, { text: 八哥屬、留鳥 }, { text: 八哥屬、留鳥 }]
+      # 相異處 vmerges 9 rows.
+      - [{ text: 相異處, rowspan: 9, is_section_label: true },
+         { text: 嘴喙顏色 }, { text: 黃色 }, { text: 象牙白色 }]
       - [{ text: 尾羽顏色 }, { text: 末段白色 }, { text: 只有部分白色 }]
+      - [{ text: 冠羽 }, { text: 冠羽不明顯 }, { text: 冠羽較明顯 }]
       - [{ text: 來源 }, { text: 外來種 }, { text: 原生種 }]
+      - [{ text: 族群數量 }, { text: 較多 }, { text: 較少 }]
+      - [{ text: 習性 }, { text: 較不怕人 }, { text: 較怕人 }]
+      - [{ text: 築巢地點 }, { text: 常利用人造設施築巢 }, { text: 較少利用人造設施築巢 }]
+      - [{ text: 適應都市環境 }, { text: 較強 }, { text: 較弱 }]
+      - [{ text: 保育身分 }, { text: 非保育類野生動物 }, { text: 保育類野生動物 }]
   - id: p3
     type: paragraph
     text: >-

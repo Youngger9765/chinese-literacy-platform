@@ -21,13 +21,11 @@
       "grid": [
         [
           {
-            "colspan": 3,
+            "colspan": 1,
             "is_section_label": true,
-            "rowspan": 1,
+            "rowspan": 5,
             "text": "相同處"
-          }
-        ],
-        [
+          },
           {
             "colspan": 1,
             "is_section_label": false,
@@ -35,7 +33,13 @@
             "text": "外形"
           },
           {
-            "colspan": 2,
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "全身大致為黑色"
+          },
+          {
+            "colspan": 1,
             "is_section_label": false,
             "rowspan": 1,
             "text": "全身大致為黑色"
@@ -43,13 +47,91 @@
         ],
         [
           {
-            "colspan": 3,
-            "is_section_label": true,
+            "colspan": 1,
+            "is_section_label": false,
             "rowspan": 1,
-            "text": "相異處"
+            "text": "體型"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "身形大小接近"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "身形大小接近"
           }
         ],
         [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "行動與食物"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常在地面走動覓食，吃昆蟲、果實"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常在地面走動覓食，吃昆蟲、果實"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "棲息地"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "低海拔平地"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "低海拔平地"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "生物分類"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "八哥屬、留鳥"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "八哥屬、留鳥"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": true,
+            "rowspan": 9,
+            "text": "相異處"
+          },
           {
             "colspan": 1,
             "is_section_label": false,
@@ -94,6 +176,26 @@
             "colspan": 1,
             "is_section_label": false,
             "rowspan": 1,
+            "text": "冠羽"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "冠羽不明顯"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "冠羽較明顯"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
             "text": "來源"
           },
           {
@@ -108,6 +210,106 @@
             "rowspan": 1,
             "text": "原生種"
           }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "族群數量"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較多"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較少"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "習性"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較不怕人"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較怕人"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "築巢地點"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常利用人造設施築巢"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較少利用人造設施築巢"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "適應都市環境"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較強"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較弱"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "保育身分"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "非保育類野生動物"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "保育類野生動物"
+          }
         ]
       ],
       "headers": [
@@ -118,11 +320,47 @@
       "id": "table-1",
       "label": "表一",
       "notes": [],
+      "row_sections": [
+        "相同處",
+        "相同處",
+        "相同處",
+        "相同處",
+        "相同處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處"
+      ],
       "rows": [
         [
           "外形",
           "全身大致為黑色",
           "全身大致為黑色"
+        ],
+        [
+          "體型",
+          "身形大小接近",
+          "身形大小接近"
+        ],
+        [
+          "行動與食物",
+          "常在地面走動覓食，吃昆蟲、果實",
+          "常在地面走動覓食，吃昆蟲、果實"
+        ],
+        [
+          "棲息地",
+          "低海拔平地",
+          "低海拔平地"
+        ],
+        [
+          "生物分類",
+          "八哥屬、留鳥",
+          "八哥屬、留鳥"
         ],
         [
           "嘴喙顏色",
@@ -135,9 +373,19 @@
           "只有部分白色"
         ],
         [
+          "冠羽",
+          "冠羽不明顯",
+          "冠羽較明顯"
+        ],
+        [
           "來源",
           "外來種",
           "原生種"
+        ],
+        [
+          "族群數量",
+          "較多",
+          "較少"
         ],
         [
           "習性",
@@ -153,8 +401,14 @@
           "適應都市環境",
           "較強",
           "較弱"
+        ],
+        [
+          "保育身分",
+          "非保育類野生動物",
+          "保育類野生動物"
         ]
       ],
+      "section_label_col": "異同",
       "title": "表一 白尾八哥與臺灣冠八哥比較異同表",
       "type": "table"
     },
@@ -176,6 +430,7 @@
       "notes": [
         "註2. 「84 / 584」表示：一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
       ],
+      "row_sections": null,
       "rows": [
         [
           "近年數量變化（2009-2020）",
@@ -196,6 +451,7 @@
           "某些區域幾乎看不到原生種"
         ]
       ],
+      "section_label_col": null,
       "title": "表二 近年兩種臺灣常見八哥之族群數量之變化",
       "type": "table"
     },

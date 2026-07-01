@@ -272,6 +272,87 @@ describe('Gap 2 — table grid overlay + keypoints_table (zod)', () => {
     expect(LessonSchema.safeParse(d).success).toBe(false);
   });
 
+  // Gap 2(a): vmerged section-label COLUMN — the defining real-corpus topology.
+  const withFullTable = (table: unknown) => ({
+    id: 't',
+    lessonCode: 'T-1',
+    blocks: [table, { id: 'p1', type: 'paragraph', text: 'x' }],
+  });
+
+  it('accepts a vmerged section-label column grid (rowspan-aware)', () => {
+    const headers = ['異同', '比較項目', '白尾八哥', '臺灣冠八哥'];
+    const grid = [
+      [{ text: '相同處', rowspan: 5, isSectionLabel: true }, { text: '外形' }, { text: '黑' }, { text: '黑' }],
+      [{ text: '體型' }, { text: '接近' }, { text: '接近' }],
+      [{ text: '行動與食物' }, { text: '覓食' }, { text: '覓食' }],
+      [{ text: '棲息地' }, { text: '平地' }, { text: '平地' }],
+      [{ text: '生物分類' }, { text: '留鳥' }, { text: '留鳥' }],
+      [{ text: '相異處', rowspan: 9, isSectionLabel: true }, { text: '嘴喙顏色' }, { text: '黃' }, { text: '象牙白' }],
+      [{ text: '尾羽顏色' }, { text: '末白' }, { text: '部分白' }],
+      [{ text: '冠羽' }, { text: '不明顯' }, { text: '明顯' }],
+      [{ text: '來源' }, { text: '外來種' }, { text: '原生種' }],
+      [{ text: '族群數量' }, { text: '較多' }, { text: '較少' }],
+      [{ text: '習性' }, { text: '較不怕人' }, { text: '較怕人' }],
+      [{ text: '築巢地點' }, { text: '常利用人造' }, { text: '較少利用' }],
+      [{ text: '適應都市環境' }, { text: '較強' }, { text: '較弱' }],
+      [{ text: '保育身分' }, { text: '非保育類' }, { text: '保育類' }],
+    ];
+    const d = withFullTable({ id: 'table-1', type: 'table', headers, grid });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('accepts rowSections + sectionLabelCol fast path', () => {
+    const d = withFullTable({
+      id: 'table-1',
+      type: 'table',
+      headers: ['比較項目', '白尾八哥', '臺灣冠八哥'],
+      sectionLabelCol: '異同',
+      rowSections: ['相同處', '相同處', '相異處'],
+      rows: [['外形', '黑', '黑'], ['體型', '接近', '接近'], ['嘴喙', '黃', '白']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects rowSections without sectionLabelCol', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b'],
+      rowSections: ['x'], rows: [['1', '2']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects rowSections length mismatch', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b'],
+      sectionLabelCol: 's', rowSections: ['x'], rows: [['1', '2'], ['3', '4']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('still accepts the earlier horizontal-band grid (backward compat)', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['比較項目', '白尾八哥', '臺灣冠八哥'],
+      grid: [
+        [{ text: '相同處', colspan: 3, isSectionLabel: true }],
+        [{ text: '外形' }, { text: '全身大致為黑色', colspan: 2 }],
+        [{ text: '相異處', colspan: 3, isSectionLabel: true }],
+        [{ text: '嘴喙顏色' }, { text: '黃色' }, { text: '象牙白色' }],
+      ],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a grid that under-supplies after a rowspan expires', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b', 'c'],
+      grid: [
+        [{ text: 'S', rowspan: 2, isSectionLabel: true }, { text: 'x' }, { text: 'y' }],
+        [{ text: 'z' }],
+      ],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
   const withKeypoints = (rows: unknown[], blanks: unknown[], answer: unknown) => ({
     id: 'k',
     lessonCode: 'K-1',
