@@ -636,6 +636,50 @@ def test_guided_steps_broken_select_fails() -> None:
     assert answer_round_trip(ex) == "fail"
 
 
+def test_guided_steps_block_answer_drift_fails() -> None:
+    """Minor gap: re-grading each step's own answer does NOT catch the assembled
+    block-level `answer` list drifting from the per-step answers. A block claiming
+    step0=1 while the step's answer is 0 must FAIL (previously undetected)."""
+    d = _guided_lesson([
+        {"prompt": "p", "type": "select", "options": ["a", "b"], "answer": 0},
+        {"prompt": "q", "type": "free_text"},
+    ], answer=[1, None])  # block says step0=1, but step0.answer=0 → drift
+    ex = Lesson.model_validate(d).blocks[1]
+    assert isinstance(ex, ExerciseBlock)
+    assert answer_round_trip(ex) == "fail"
+
+
+def test_guided_steps_block_answer_aligned_is_partial() -> None:
+    """The correctly-assembled block answer (matching the per-step answers) stays 'partial'."""
+    d = _guided_lesson([
+        {"prompt": "p", "type": "select", "options": ["a", "b"], "answer": 0},
+        {"prompt": "q", "type": "free_text"},
+    ], answer=[0, None])
+    ex = Lesson.model_validate(d).blocks[1]
+    assert isinstance(ex, ExerciseBlock)
+    assert answer_round_trip(ex) == "partial"
+
+
+def test_guided_steps_multi_select_block_answer_set_insensitive() -> None:
+    """Cross-check is set-insensitive for multi_select: a reordered block index set still
+    matches the step, but a genuinely different set drifts and fails."""
+    steps = [
+        {"prompt": "p", "type": "multi_select", "options": ["a", "b", "c"], "answer": [1, 2]},
+        {"prompt": "q", "type": "free_text"},
+    ]
+    reordered = Lesson.model_validate(
+        _guided_lesson(steps, answer=[[2, 1], None])
+    ).blocks[1]
+    assert isinstance(reordered, ExerciseBlock)
+    assert answer_round_trip(reordered) == "partial"
+
+    drifted = Lesson.model_validate(
+        _guided_lesson(steps, answer=[[0, 2], None])
+    ).blocks[1]
+    assert isinstance(drifted, ExerciseBlock)
+    assert answer_round_trip(drifted) == "fail"
+
+
 def test_guided_steps_all_free_text_soft() -> None:
     d = _guided_lesson([
         {"prompt": "p", "type": "free_text"},

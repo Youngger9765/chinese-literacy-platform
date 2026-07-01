@@ -121,6 +121,37 @@ def _step_verdict(step: Any, needs_review: bool) -> str:
     return "ok" if (isinstance(step.answer, list) and len(step.answer) > 0) else "fail"
 
 
+def _block_answer_matches_steps(ex: ExerciseBlock) -> bool:
+    """The block-level ``answer`` of a guided flow is the ORDERED list of per-step answers
+    (select→int, multi_select→list[int], free_text→None). Re-grading each step's own answer
+    (``_step_verdict``) does NOT catch the assembled block ``answer`` drifting from that
+    list — a rendered/stored block answer of ``[0, 1, null, 1, 0, [1,2]]`` could silently
+    disagree with the steps it claims to summarize. Verify the two agree.
+
+    Only enforced when the block answer is a list aligned 1:1 to the steps (the documented
+    shape). Other/legacy shapes are left to the per-step verdicts (returns True = no drift
+    asserted), so this only ever turns a genuine mismatch into a 'fail', never a false one.
+    """
+    ans = ex.answer
+    steps = ex.question.steps
+    if not isinstance(ans, list) or len(ans) != len(steps):
+        return True  # not the aligned per-step list shape → nothing to cross-check
+    for stored, step in zip(ans, steps):
+        expected = step.answer  # select→int | multi_select→list[int] | free_text→None
+        if step.type == "multi_select":
+            # set semantics: order-insensitive
+            if stored is None and expected is None:
+                continue
+            if not isinstance(stored, list) or not isinstance(expected, list):
+                return False
+            if set(stored) != set(expected):
+                return False
+        else:
+            if stored != expected:
+                return False
+    return True
+
+
 def answer_round_trip(ex: ExerciseBlock) -> str:
     """Return one of: 'ok' | 'soft' | 'partial' | 'fail'.
     - ok:      machine grader re-grades the stored answer as correct
@@ -130,13 +161,17 @@ def answer_round_trip(ex: ExerciseBlock) -> str:
 
     Gap 4: for guided_steps / graphic_text_integration we re-grade EACH step by its
     derived per-step grader instead of hiding the whole block behind a blanket 'soft'.
-    A broken select index (missing / wrong type) now surfaces as 'fail'.
+    A broken select index (missing / wrong type) now surfaces as 'fail'. We ALSO cross-check
+    the assembled block-level ``answer`` against the per-step answers so an assembled answer
+    that drifts from the steps it summarizes is caught (previously undetected).
     """
     q = ex.question
     if q.kind in ("guided_steps", "graphic_text_integration"):
         verdicts = [_step_verdict(s, ex.needs_review) for s in q.steps]
         if "fail" in verdicts:
             return "fail"
+        if not _block_answer_matches_steps(ex):
+            return "fail"  # block `answer` drifted from its per-step answers
         if all(v == "soft" for v in verdicts):
             return "soft"
         return "partial"  # >=1 machine step verified + at least one soft step
