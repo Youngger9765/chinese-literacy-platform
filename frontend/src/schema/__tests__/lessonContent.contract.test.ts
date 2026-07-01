@@ -12,32 +12,12 @@
  * this test snake→camel-cases keys before parsing (the frontend contract is camelCase).
  * The KEY SET is intentionally identical between the two, only the casing differs.
  */
-import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vitest';
-import { parse as parseYaml } from 'yaml';
 
-import {
-  ExerciseBlock,
-  LessonSchema,
-  type Lesson,
-} from '../lessonContent';
-
-const HERE = dirname(fileURLToPath(import.meta.url));
-// frontend/src/schema/__tests__ → repo root → backend/tests/fixtures/lesson_content
-const FIXTURE_DIR = join(
-  HERE,
-  '..',
-  '..',
-  '..',
-  '..',
-  'backend',
-  'tests',
-  'fixtures',
-  'lesson_content',
-);
+import { ExerciseBlock, LessonSchema } from '../lessonContent';
+// Shared fixture loaders — single implementation, re-used by the Phase-2 renderer
+// tests so every spec stays lock-step with the frozen contract (see testHelpers.ts).
+import { listFixtureFiles, loadFixture } from '../testHelpers';
 
 const REGISTERED_KINDS = [
   'multiple_choice',
@@ -50,31 +30,7 @@ const REGISTERED_KINDS = [
   'custom',
 ] as const;
 
-function toCamel(s: string): string {
-  return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
-}
-
-/** Recursively camelCase object keys (arrays/scalars pass through). */
-function camelizeKeys(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(camelizeKeys);
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      out[toCamel(k)] = camelizeKeys(v);
-    }
-    return out;
-  }
-  return value;
-}
-
-function loadFixture(file: string): Lesson {
-  const raw = parseYaml(readFileSync(join(FIXTURE_DIR, file), 'utf-8'));
-  return LessonSchema.parse(camelizeKeys(raw));
-}
-
-const fixtureFiles = readdirSync(FIXTURE_DIR).filter((f) =>
-  f.endsWith('.lesson.yml'),
-);
+const fixtureFiles = listFixtureFiles();
 
 describe('lesson content contract (zod ↔ pydantic parity)', () => {
   it('has the 4 layered hard-case fixtures', () => {
