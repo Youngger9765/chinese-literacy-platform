@@ -535,3 +535,49 @@ class TestAuth:
             assert resp.status_code == 401
         finally:
             app.dependency_overrides.update(saved)
+
+
+# ---------------------------------------------------------------------------
+# (#2434) Real MIME passthrough — batch-eval passes the meta's content_type
+# (not a hardcoded "audio/webm") so native wav/mp3 skip an unnecessary
+# transcode; legacy records without content_type fall back to webm.
+# ---------------------------------------------------------------------------
+
+class TestRealMimePassthrough:
+    def _run_capture_transcribe(self, authed_client, meta):
+        bucket = _make_bucket_with_metas([meta])
+        transcribe_mock = AsyncMock(
+            return_value={"transcript": "課文內容", "method": "gemini", "reason": None}
+        )
+        eval_ret = {"match_rate": 0.9, "adjusted_match_rate": 0.9, "cpm": 100.0, "tier": 1}
+        with (
+            patch("app.routes.testset._get_gcs_bucket", return_value=bucket),
+            patch(
+                "app.services.reading_transcription_service.transcribe_reading_audio",
+                transcribe_mock,
+            ),
+            patch(
+                "app.services.reading_evaluation_service.evaluate_reading_with_ai",
+                new_callable=AsyncMock,
+                return_value=eval_ret,
+            ),
+        ):
+            resp = authed_client.post("/api/testset/batch-eval")
+        assert resp.status_code == 200, resp.text
+        return transcribe_mock
+
+    def test_real_mime_from_meta_content_type(self, authed_client):
+        """meta has content_type=audio/wav → transcribe called with that mime."""
+        meta = _sample_meta(version="correct", uid="mime0001")
+        meta["content_type"] = "audio/wav"
+        m = self._run_capture_transcribe(authed_client, meta)
+        assert m.call_count == 1
+        assert m.call_args.kwargs["mime_type"] == "audio/wav"
+
+    def test_legacy_meta_without_content_type_falls_back_to_webm(self, authed_client):
+        """Legacy record (no content_type) → transcribe called with audio/webm."""
+        meta = _sample_meta(version="correct", uid="mime0002")
+        meta.pop("content_type", None)
+        m = self._run_capture_transcribe(authed_client, meta)
+        assert m.call_count == 1
+        assert m.call_args.kwargs["mime_type"] == "audio/webm"

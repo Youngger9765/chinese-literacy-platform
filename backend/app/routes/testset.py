@@ -66,6 +66,25 @@ def _slug(name: str) -> str:
     return (s.strip("_") or "anon")[:40]
 
 
+def _audio_bytes_match_declared_mime(data: bytes, declared_mime: str) -> bool:
+    """Verify leading magic bytes match client-declared MIME (anti spoofing)."""
+    if not data:
+        return False
+    if declared_mime == "audio/wav":
+        return len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WAVE"
+    if declared_mime == "audio/mpeg":
+        if data[:3] == b"ID3":
+            return True
+        return len(data) >= 2 and data[0] == 0xFF and (data[1] & 0xE0) == 0xE0
+    if declared_mime == "audio/webm":
+        return data[:4] == b"\x1a\x45\xdf\xa3"
+    if declared_mime == "audio/ogg":
+        return data[:4] == b"OggS"
+    if declared_mime == "audio/mp4":
+        return len(data) >= 12 and data[4:8] == b"ftyp"
+    return False
+
+
 def _resolve_target_text(lesson_id: str) -> str | None:
     """Return full_text for lesson_id (numeric int or code string like 'G6-L22').
 
@@ -140,7 +159,9 @@ async def testset_upload(
     if len(audio_bytes) == 0:
         raise HTTPException(400, "empty audio")
     if len(audio_bytes) > _MAX_AUDIO_BYTES:
-        raise HTTPException(413, "audio too large (max 15MB)")
+        raise HTTPException(413, "audio too large (max 8MB)")
+    if not _audio_bytes_match_declared_mime(audio_bytes, base_mime):
+        raise HTTPException(400, "audio content does not match declared type")
 
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -158,6 +179,7 @@ async def testset_upload(
         "lesson_id": lid,
         "version": version,
         "audio_path": audio_path,
+        "content_type": base_mime,  # 真實 MIME → batch-eval 傳真 mime,原生格式免多餘 transcode (#2434)
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -233,6 +255,11 @@ def testset_recordings():
     公開（Young 2026-06-21：不需登入即顯示貢獻者暱稱/數量）。暱稱為自選暱稱、
     朗讀公開課文，非敏感 PII；list.html 現況表不登入就能看到誰貢獻了哪幾課。
     （此前曾 admin/teacher → 任何登入者 → 現全公開。）
+
+    DECISION NEEDED — auth: 此 endpoint 日後應改為 require_role(system_admin, org_admin)，
+    但 frontend/public/testset-7f3a91c4/dashboard.html 目前無登入/token 機制；
+    現階段加 require_role 會 403 並讓 admin 無法看錄音清單。須先讓 dashboard 接上
+    auth flow 再鎖 endpoint；在此之前維持公開、勿在此加 require_role。
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -372,6 +399,8 @@ async def testset_batch_eval(
         entry_lesson = meta.get("lesson_id", "")
         entry_version = meta.get("version", "")
         audio_path = meta.get("audio_path", "")
+        # 真實 MIME(#2434);舊紀錄無此欄 → fallback webm（與上線前行為一致，ffmpeg 仍 sniff）
+        entry_mime = meta.get("content_type") or "audio/webm"
 
         base_result: dict = {
             "name": entry_name,
@@ -403,7 +432,7 @@ async def testset_batch_eval(
             # 4c. Transcribe
             transcribe_result = await transcribe_reading_audio(
                 audio_bytes=audio_bytes,
-                mime_type="audio/webm",
+                mime_type=entry_mime,  # #2434: 真實 mime（原生 wav/mp3 免多餘 transcode）
                 target_text=target_text,
                 duration_ms=None,
             )
