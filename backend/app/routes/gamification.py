@@ -18,7 +18,7 @@ from ..auth.dependencies import get_current_user, get_user_org_ids
 from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
-from ..models.user import User, UserRole
+from ..models.user import User
 from ..services.gamification_service import (
     award_xp,
     get_classroom_leaderboard,
@@ -52,25 +52,6 @@ class SessionCompleteRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
-    """Return the set of org scope_ids for a given user (loaded from DB).
-
-    Used to resolve the org(s) a student belongs to without relying on
-    eagerly-loaded relationships.
-    """
-    rows = (
-        db.query(UserRole.scope_id)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            UserRole.scope_type == "organization",
-            UserRole.scope_id.isnot(None),
-        )
-        .all()
-    )
-    return {r.scope_id for r in rows}
-
 
 def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     """Raise 403 if the current user cannot view the given student's gamification data.
