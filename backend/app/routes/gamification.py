@@ -15,10 +15,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids
-from ..auth.policies import is_admin
+from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
-from ..models.user import User, UserRole
+from ..models.user import User
 from ..services.gamification_service import (
     award_xp,
     get_classroom_leaderboard,
@@ -53,25 +53,6 @@ class SessionCompleteRequest(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
-    """Return the set of org scope_ids for a given user (loaded from DB).
-
-    Used to resolve the org(s) a student belongs to without relying on
-    eagerly-loaded relationships.
-    """
-    rows = (
-        db.query(UserRole.scope_id)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            UserRole.scope_type == "organization",
-            UserRole.scope_id.isnot(None),
-        )
-        .all()
-    )
-    return {r.scope_id for r in rows}
-
-
 def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     """Raise 403 if the current user cannot view the given student's gamification data.
 
@@ -100,14 +81,16 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     if is_teacher:
         return
 
-    # system_admin bypasses all scope checks
-    if is_admin(current_user.id, db):
+    # system_admin bypasses all scope checks (org_admin must stay org-scoped below)
+    if is_system_admin(current_user.id, db):
         return
 
-    # org_admin / org_owner: must share at least one org with the student
-    caller_org_ids = set(get_user_org_ids(current_user) or [])
+    # org_admin / org_owner: must share at least one org with the student.
+    # Resolve via school->org so school-scoped students (the production model,
+    # where students carry scope_type="school") are matched to their org_admin.
+    caller_org_ids = resolve_user_org_ids(current_user.id, db)
     if caller_org_ids:
-        student_org_ids = _get_user_org_ids_from_db(student_id, db)
+        student_org_ids = resolve_user_org_ids(student_id, db)
         if caller_org_ids & student_org_ids:
             return
 
@@ -203,8 +186,8 @@ def get_leaderboard(
         is not None
     )
     if not is_teacher and not is_student:
-        # system_admin bypasses all scope checks
-        if is_admin(current_user.id, db):
+        # system_admin bypasses all scope checks (org_admin must stay org-scoped below)
+        if is_system_admin(current_user.id, db):
             pass  # allowed
         else:
             # org_admin / org_owner: classroom's school must belong to caller's org
