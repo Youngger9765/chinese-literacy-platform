@@ -273,17 +273,20 @@ def normalized_json(lesson: Lesson) -> str:
     )
 
 
-def golden_path(src: Path) -> Path:
-    return GOLDEN_DIR / (src.stem + ".golden.json")
+def golden_path(src: Path, golden_dir: Path | None = None) -> Path:
+    # Additive (adapter EDD): allow an explicit golden dir so adapter goldens live in
+    # their own dir and never collide with the hand-fixture goldens. Default unchanged.
+    return (golden_dir or GOLDEN_DIR) / (src.stem + ".golden.json")
 
 
-def freeze_golden(src: Path, lesson: Lesson) -> None:
-    GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
-    golden_path(src).write_text(normalized_json(lesson) + "\n", encoding="utf-8")
+def freeze_golden(src: Path, lesson: Lesson, golden_dir: Path | None = None) -> None:
+    gp = golden_path(src, golden_dir)
+    gp.parent.mkdir(parents=True, exist_ok=True)
+    gp.write_text(normalized_json(lesson) + "\n", encoding="utf-8")
 
 
-def check_golden(src: Path, lesson: Lesson) -> tuple[bool, str]:
-    gp = golden_path(src)
+def check_golden(src: Path, lesson: Lesson, golden_dir: Path | None = None) -> tuple[bool, str]:
+    gp = golden_path(src, golden_dir)
     if not gp.exists():
         return False, f"no golden snapshot for {src.name} (run --freeze-golden)"
     current = normalized_json(lesson) + "\n"
@@ -308,7 +311,16 @@ def main() -> int:
     ap.add_argument("--markdown", action="store_true", help="emit markdown coverage table")
     ap.add_argument("--freeze-golden", action="store_true", help="(re)write golden snapshots")
     ap.add_argument("--check-golden", action="store_true", help="diff vs golden snapshots")
+    # Additive (adapter EDD): override the golden dir so adapter goldens are isolated
+    # from the hand-fixture goldens. When omitted, behavior is unchanged (GOLDEN_DIR).
+    ap.add_argument(
+        "--golden-dir",
+        default=None,
+        help="dir for golden snapshots (default: fixtures/_golden)",
+    )
     args = ap.parse_args()
+
+    golden_dir = Path(args.golden_dir) if args.golden_dir else None
 
     targets = discover([Path(p) for p in args.paths], args.fixtures)
     if not targets:
@@ -332,10 +344,10 @@ def main() -> int:
                 print(f"🔴 ROUND-TRIP FAIL {src.name}: exercise '{b.id}' cannot re-grade its own answer")
 
         if args.freeze_golden:
-            freeze_golden(src, lesson)
-            print(f"froze golden: {golden_path(src).name}")
+            freeze_golden(src, lesson, golden_dir)
+            print(f"froze golden: {golden_path(src, golden_dir).name}")
         if args.check_golden:
-            ok, msg = check_golden(src, lesson)
+            ok, msg = check_golden(src, lesson, golden_dir)
             if not ok:
                 any_fail = True
                 print(f"🔴 {msg}")
