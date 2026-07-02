@@ -37,6 +37,8 @@ from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role, User, UserRole
+from app.models.school import School
+from app.models.organization import Organization
 
 
 # ---------------------------------------------------------------------------
@@ -170,6 +172,27 @@ def _assign_org_role(user_id: int, role_name: str, org_id: str) -> None:
     _assign_role(user_id, role_name, scope_type="organization", scope_id=org_id)
 
 
+def _create_org_and_school(org_id: str) -> int:
+    """Create an Organization(id=org_id) + a School in it. Returns the school id.
+
+    Mirrors the PRODUCTION scoping model (seed.py): students/teachers are
+    school-scoped, and their org is derived via School.organization_id — they do
+    NOT carry an org-scoped UserRole.
+    """
+    db = TestingSessionLocal()
+    try:
+        if not db.query(Organization).filter(Organization.id == org_id).first():
+            db.add(Organization(id=org_id, name=f"Org {org_id}"))
+            db.commit()
+        school = School(name=f"School {org_id}", organization_id=org_id)
+        db.add(school)
+        db.commit()
+        db.refresh(school)
+        return school.id
+    finally:
+        db.close()
+
+
 def _submit_feedback(client, token: str) -> int:
     """Submit a feedback entry and return its ID."""
     r = client.post("/api/feedback", json={
@@ -207,6 +230,11 @@ class TestOrgAdminScopeIsolation:
     @pytest.fixture(scope="class")
     def actors(self, client):
         """Create all actors once per class."""
+        # Production model: schools belong to orgs; students are SCHOOL-scoped
+        # (org derived via school->org), org_admins are org-scoped.
+        school_a_id = _create_org_and_school(self.ORG_A)
+        school_b_id = _create_org_and_school(self.ORG_B)
+
         admin_a_id, admin_a_tok = _register_login(client, "admin_a")
         _assign_org_role(admin_a_id, "org_admin", self.ORG_A)
 
@@ -214,10 +242,10 @@ class TestOrgAdminScopeIsolation:
         _assign_org_role(admin_b_id, "org_admin", self.ORG_B)
 
         student_a_id, student_a_tok = _register_login(client, "student_a")
-        _assign_org_role(student_a_id, "student", self.ORG_A)
+        _assign_role(student_a_id, "student", scope_type="school", scope_id=str(school_a_id))
 
         student_b_id, student_b_tok = _register_login(client, "student_b")
-        _assign_org_role(student_b_id, "student", self.ORG_B)
+        _assign_role(student_b_id, "student", scope_type="school", scope_id=str(school_b_id))
 
         sysadmin_id, sysadmin_tok = _register_login(client, "sysadmin")
         _assign_role(sysadmin_id, "system_admin", scope_type="platform")

@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids
-from ..auth.policies import is_system_admin
+from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.user import User, UserRole
@@ -104,10 +104,12 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     if is_system_admin(current_user.id, db):
         return
 
-    # org_admin / org_owner: must share at least one org with the student
-    caller_org_ids = set(get_user_org_ids(current_user) or [])
+    # org_admin / org_owner: must share at least one org with the student.
+    # Resolve via school->org so school-scoped students (the production model,
+    # where students carry scope_type="school") are matched to their org_admin.
+    caller_org_ids = resolve_user_org_ids(current_user.id, db)
     if caller_org_ids:
-        student_org_ids = _get_user_org_ids_from_db(student_id, db)
+        student_org_ids = resolve_user_org_ids(student_id, db)
         if caller_org_ids & student_org_ids:
             return
 

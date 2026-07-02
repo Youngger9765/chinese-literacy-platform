@@ -8,7 +8,7 @@ import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ..models.user import Role, User, UserRole
 
 logger = logging.getLogger(__name__)
@@ -51,6 +51,49 @@ def is_system_admin(user_id: int, db: Session) -> bool:
         )
         .first()
     ) is not None
+
+
+def resolve_user_org_ids(user_id: int, db: Session) -> set[str]:
+    """Resolve ALL organization ids a user belongs to (as a set of str org ids).
+
+    Handles the production scoping model: students/teachers carry a SCHOOL-scoped
+    UserRole (scope_type="school", scope_id=str(school.id)), NOT a direct org role,
+    so their org is derived via School.organization_id. org_admin/org_owner carry
+    org-scoped roles (scope_type="organization"), resolved directly. Returns the
+    union of both.
+
+    Using only org-scoped roles (the old approach) wrongly returned an empty set
+    for a real school-scoped student, which over-restricted org_admins out of
+    their OWN org's data. Always resolve through school→org for correctness.
+    """
+    org_ids: set[str] = set()
+    school_ids: set[int] = set()
+    rows = (
+        db.query(UserRole.scope_type, UserRole.scope_id)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            UserRole.scope_id.isnot(None),
+        )
+        .all()
+    )
+    for scope_type, scope_id in rows:
+        if scope_type == "organization":
+            org_ids.add(str(scope_id))
+        elif scope_type == "school":
+            try:
+                school_ids.add(int(scope_id))
+            except (TypeError, ValueError):
+                continue
+    if school_ids:
+        schools = (
+            db.query(School.organization_id)
+            .filter(School.id.in_(school_ids), School.organization_id.isnot(None))
+            .all()
+        )
+        for (org_id,) in schools:
+            org_ids.add(str(org_id))
+    return org_ids
 
 
 def require_classroom_owner(classroom: Classroom, user: User, db: Session) -> None:

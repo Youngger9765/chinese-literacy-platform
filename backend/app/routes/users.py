@@ -3,11 +3,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
-from ..auth.policies import is_system_admin
+from ..auth.policies import is_system_admin, resolve_user_org_ids
+from ..models.school import School
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
@@ -190,22 +192,39 @@ def list_users(
     query = db.query(User)
 
     # Scope restriction: org_admin may only see users within their org(s).
-    # system_admin (get_user_org_ids returns None) skips this filter.
-    # org_admin is NOT global — it must fall through and be org-scoped.
+    # system_admin bypasses; org_admin is NOT global — it must be org-scoped.
     if not is_system_admin(current_user.id, db):
-        caller_org_ids = get_user_org_ids(current_user)  # list[str], never None here
+        caller_org_ids = resolve_user_org_ids(current_user.id, db)
         if not caller_org_ids:
             # org_admin with no org scope → see nothing
             return UserListResponse(items=[], total=0)
-        # Keep only users who have at least one active org-scoped role
-        # matching one of the caller's orgs.
+        # Keep users who belong to one of the caller's orgs — via a direct
+        # org-scoped role OR a school-scoped role whose school is in the org
+        # (students/teachers are school-scoped in the production model).
+        caller_school_ids = [
+            str(sid)
+            for (sid,) in db.query(School.id)
+            .filter(School.organization_id.in_(caller_org_ids))
+            .all()
+        ]
+        scope_predicates = [
+            and_(
+                UserRole.scope_type == "organization",
+                UserRole.scope_id.in_(list(caller_org_ids)),
+            )
+        ]
+        if caller_school_ids:
+            scope_predicates.append(
+                and_(
+                    UserRole.scope_type == "school",
+                    UserRole.scope_id.in_(caller_school_ids),
+                )
+            )
         query = query.filter(
             User.id.in_(
-                db.query(UserRole.user_id)
-                .filter(
+                db.query(UserRole.user_id).filter(
                     UserRole.is_active == True,
-                    UserRole.scope_type == "organization",
-                    UserRole.scope_id.in_(caller_org_ids),
+                    or_(*scope_predicates),
                 )
             )
         )
@@ -267,13 +286,10 @@ def get_user_detail(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Scope check for org_admin: target user must share at least one org with caller.
+    # Resolve via school->org so school-scoped targets (production model) match.
     if not is_system_admin(current_user.id, db):
-        caller_org_ids = set(get_user_org_ids(current_user) or [])
-        target_org_ids = {
-            ur.scope_id
-            for ur in user.user_roles
-            if ur.is_active and ur.scope_type == "organization" and ur.scope_id
-        }
+        caller_org_ids = resolve_user_org_ids(current_user.id, db)
+        target_org_ids = resolve_user_org_ids(user.id, db)
         if not (caller_org_ids & target_org_ids):
             raise HTTPException(
                 status_code=403,
