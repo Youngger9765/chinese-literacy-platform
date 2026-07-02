@@ -137,3 +137,86 @@ class TestKnownGaps:
             gate.gcs_md5_hex = orig_md5
             gate.figure_assets_from_story = orig_assets
         gate._KNOWN_GAPS = None
+
+
+class TestFigureAssetsFromStory:
+    """#2459 — the gate must audit ONLY the figure filenames the FRONTEND
+    actually fetches (story.images[].filename via buildImageSrc), never the
+    synthetic spotlight_v2 blocks[].asset name (figN.png). block.asset is used
+    frontend-side only to derive the figure label; it is never uploaded to GCS
+    under that name, so auditing it produced false 404 gaps on lessons whose
+    real image is present and rendering (G7-L28/L29/L30/G9-L9)."""
+
+    def test_audits_img_filename_not_synthetic_block_asset(self):
+        story = {
+            "id": 1,
+            "spotlight_v2": {
+                "blocks": [{"type": "figure", "asset": "fig1.png", "bind_paragraph": "圖一"}]
+            },
+            "images": [
+                {"filename": "images/G7-L28/G7-L28-08.jpg", "figure_label": "圖一"}
+            ],
+        }
+        assets = gate.figure_assets_from_story(story)
+        # The real, fetched filename is audited...
+        assert "G7-L28-08.jpg" in assets
+        # ...and the synthetic block.asset name is NOT (it 404s in GCS → false gap).
+        assert "fig1.png" not in assets
+        assert assets == ["G7-L28-08.jpg"]
+
+    def test_synthetic_block_asset_alone_yields_no_audit_target(self):
+        # A figure block with a synthetic asset but no backing image must not
+        # inject figN.png into the audit set (frontend renders a placeholder,
+        # it never fetches figN.png).
+        story = {
+            "id": 2,
+            "spotlight_v2": {"blocks": [{"type": "figure", "asset": "fig10.png"}]},
+            "images": [],
+        }
+        assert gate.figure_assets_from_story(story) == []
+
+    def test_skips_non_image_table_json(self):
+        # G7-L30's API-served images[] carries table*.json entries (tables
+        # mis-modeled as figures). Those are not rendered as <img> and must not
+        # be audited as figures.
+        story = {
+            "id": 3,
+            "spotlight_v2": {"blocks": []},
+            "images": [
+                {"filename": "images/G7-L30/G7-L30-06.png"},
+                {"filename": "table1.json"},
+                {"filename": "table2.json"},
+            ],
+        }
+        assert gate.figure_assets_from_story(story) == ["G7-L30-06.png"]
+
+    def test_audits_unusual_real_image_extensions_fail_closed(self):
+        # Denylist (not allowlist): a real figure with a non-standard docx
+        # extraction extension (.x-emf / .svg) must STILL be audited against
+        # GCS, never silently skipped — otherwise a future broken figure in
+        # that format would pass invisibly (#2459 review). Only .json tables skip.
+        story = {
+            "id": 5,
+            "spotlight_v2": {"blocks": []},
+            "images": [
+                {"filename": "images/G9-L7/G9-L7-03.x-emf"},
+                {"filename": "images/G5-L5/G5-L5-02.svg"},
+                {"filename": "notes.json"},
+            ],
+        }
+        assert gate.figure_assets_from_story(story) == [
+            "G9-L7-03.x-emf",
+            "G5-L5-02.svg",
+        ]
+
+    def test_collects_all_real_image_filenames_deduped(self):
+        story = {
+            "id": 4,
+            "spotlight_v2": {"blocks": []},
+            "images": [
+                {"filename": "images/G9-L9/G9-L9-02.jpg"},
+                {"filename": "images/G9-L9/G9-L9-04.png"},
+                {"filename": "images/G9-L9/G9-L9-02.jpg"},  # dup basename
+            ],
+        }
+        assert gate.figure_assets_from_story(story) == ["G9-L9-02.jpg", "G9-L9-04.png"]

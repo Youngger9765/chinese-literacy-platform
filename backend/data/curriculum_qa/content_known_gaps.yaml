@@ -90,21 +90,20 @@ story-structure:
   # 多文本課的第二/三篇 slot — 重點表內容在 primary slot (G7-L23)
   - {lesson_code: G7-L31, reason: multi_text_secondary}
 
-# Figure-asset gaps: story references a synthetic figN.png / tableN.json name
-# that was never uploaded to GCS (the real per-page assets G7-L28-NN.jpg DO
-# exist). honest gap = the figure reference points at missing content.
+# Figure-asset gaps.
+# #2459: the gate previously ALSO audited the synthetic spotlight_v2
+# blocks[].asset name (figN.png) which the frontend never fetches — it renders
+# from story.images[].filename via buildImageSrc. That produced FALSE gaps on
+# lessons whose real per-page image (G7-L28-08.jpg …) is uploaded and rendering.
+# The gate now audits story.images[].filename only; G7-L28/L29/L30/G9-L9 were
+# verified pass (real images 200 in GCS) and removed from this list.
 # NOTE: FIGURE_BLACKLIST_HIT (placeholder served) 應優先補真圖；若確認源頭沒有
 # 真圖可供上傳，允許以 figure_missing 誠實標記缺口，不得用 placeholder 假裝通過。
 figure:
-  # story 引用合成的 figN.png / tableN.json 名稱，GCS 沒上傳該檔（真實 per-page
-  # 資產如 G5-L24-25-10.png 存在，但 story 指向不存在的 figN 名）。誠實標 gap，
-  # 真解是修 story figure reference 指向真實檔名 / 上傳對應 figN。
+  # Remaining = genuine gaps: story.images[].filename points at a name absent
+  # from GCS (real fix = correct the figure reference / upload the real asset).
   - {lesson_code: G6-L8,    reason: figure_missing}
-  - {lesson_code: G9-L9,    reason: figure_asset_not_uploaded}
-  - {lesson_code: G7-L28,   reason: figure_asset_not_uploaded}
-  - {lesson_code: G7-L29,   reason: figure_asset_not_uploaded}
-  - {lesson_code: G7-L30,   reason: figure_asset_not_uploaded}
-  - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # fig10.png 未上傳
-  - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # G8-L9 dir, fig10.png
+  - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # story → fig10.png (404); real source asset TBD by content owner (#2458)
+  - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # story → fig10.png (404); G8-L9 dir (#2458)
   - {lesson_code: G8-L8,    reason: figure_missing}             # G8-L6b only has placeholder fig1.png in G8-L8 dir
   - {lesson_code: G8-L6b,   reason: figure_missing}             # source figure is placeholder-only (no authentic asset)
