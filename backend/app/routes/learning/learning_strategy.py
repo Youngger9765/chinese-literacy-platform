@@ -11,8 +11,12 @@ LLM hardening rules applied (llm-endpoint-hardening skill):
   - Auth: Depends(get_current_user)
   - Input cap: question max 1000, student_answer max 500 (Pydantic Field constraints)
   - Output cap: max_output_tokens=1024 (set in validate_strategy_answer)
-  - Fail-closed: on AI error return is_correct=true + neutral 已記錄 feedback so the
-    student is never blocked by an AI outage (the step is non-gating)
+  - Fail-OPEN (intentional): on AI error return is_correct=true + neutral 已記錄
+    feedback so the student is never blocked by an AI outage. This is safe ONLY
+    because this spotlight step is non-gating and its is_correct is never persisted
+    as a score or used to unlock progress. If this step ever becomes gating/scored,
+    switch to fail-closed (is_correct=false) — auto-passing on error would then be
+    a real bug (platform invariant: never auto-pass a graded step on AI failure).
 """
 
 import logging
@@ -63,7 +67,8 @@ async def validate_strategy(
 
     Lenient grading (七八成對 = 正向回饋). Returns encouraging feedback plus a
     gentle hint when off-track. Rate limited: 10 requests per minute per user.
-    Fail-closed: never blocks the student on an AI outage.
+    Fail-OPEN (intentional, non-gating): never blocks the student on an AI outage
+    — safe only because is_correct is not persisted as a score here.
     """
     start_time = time.monotonic()
     try:
@@ -76,7 +81,9 @@ async def validate_strategy(
         )
     except Exception as e:
         logger.error("validate_strategy error: %s", e)
-        # Fail-closed toward the student: record the answer, don't block progress.
+        # Fail-OPEN (intentional, non-gating step): record the answer, don't block
+        # progress on an AI outage. Safe only because is_correct is not persisted
+        # as a score here — see module docstring.
         return ValidateStrategyResponse(
             is_correct=True,
             feedback="已記錄你的答案，做得好！",
