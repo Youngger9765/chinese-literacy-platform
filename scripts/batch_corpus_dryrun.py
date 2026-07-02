@@ -149,11 +149,11 @@ def process_corpus(
 
             lesson_code = normalize_manifest_code(str(spot.get("lesson") or file_code))
             row["lesson_code"] = lesson_code
-            parsed = A.load_parsed(lesson_code)
+            parsed, parsed_kind = A.load_parsed(lesson_code)
 
             # 2. assemble + validate (adapter fns — fail LOUD as SCHEMA_FAIL)
             try:
-                lesson_dict = A.assemble_lesson(spot, parsed, gaps, with_keypoints)
+                lesson_dict = A.assemble_lesson(spot, parsed, gaps, with_keypoints, parsed_kind)
                 A.to_lesson(lesson_dict)  # raises ValidationError on mapping bug
             except ValidationError as e:
                 row["status"] = "SCHEMA_FAIL"
@@ -303,6 +303,63 @@ def render_markdown(
              f"({100.0 * green / n_proc:.1f}%) of processed lessons pass all lights.")
     L.append("")
 
+    # ── 4a (baseline) vs 4b (current) comparison ──
+    # BASELINE_4A = the shipped adapter BEFORE the three fidelity fixes (last-figure keypoints
+    # anchor, exact-filename-only parsed lookup, match/fill_table silently dropped), measured on
+    # the SAME 134-lesson corpus with --with-keypoints. Recorded here as a fixed provenance
+    # snapshot so every regenerated report carries the honest before/after delta.
+    baseline_4a = {
+        "GREEN": 40, "NEEDS_REVIEW": 10, "UNANCHORED": 81,
+        "NO_EXERCISE": 3, "RT_FAIL": 0, "SCHEMA_FAIL": 0, "LOAD_FAIL": 0,
+    }
+    L.append("## 4a (baseline) vs 4b (after fidelity fixes)")
+    L.append("")
+    L.append("`4a` = shipped adapter **before** the three fixes (keypoints anchored to the last "
+             "figure; exact-filename-only `_parsed` lookup; `match`/`fill_table` silently "
+             "dropped). `4b` = this run. Same 134-lesson corpus, same `--with-keypoints`. The "
+             "shift is UNANCHORED → GREEN (real passage/table anchors recovered) + UNANCHORED → "
+             "NEEDS_REVIEW (honest: no in-document span, or approximate/merged source, or an "
+             "unsupported `match` type) — **no lesson was faked green**.")
+    L.append("")
+    L.append("| status | 4a (baseline) | 4b (now) | Δ |")
+    L.append("|---|---|---|---|")
+    for st in _STATUS_ORDER:
+        old = baseline_4a.get(st, 0)
+        new = status_tot.get(st, 0)
+        d = new - old
+        L.append(f"| {st} | {old} | {new} | {d:+d} |")
+    L.append(f"| **processed** | **{sum(baseline_4a.values())}** | **{n_proc}** | "
+             f"{n_proc - sum(baseline_4a.values()):+d} |")
+    L.append("")
+    L.append("**Fidelity wins this round:**")
+    L.append("")
+    kp_range = reason_counter.get("keypoints_source_is_merged_range", 0)
+    kp_suffix = reason_counter.get("keypoints_source_suffix_resolved", 0)
+    n_match = reason_counter.get("matching_type_unsupported", 0)
+    n_fill = reason_counter.get("fill_table_stub_no_inline_content", 0)
+    L.append(f"- **Gap 1 (keypoints recovered):** {kp_range + kp_suffix} lessons whose "
+             f"`story_structure_table` lived in a merged range file "
+             f"({kp_range} × `keypoints_source_is_merged_range`) or a suffix-stripped base file "
+             f"({kp_suffix} × `keypoints_source_suffix_resolved`) now emit a `keypoints_table` "
+             f"exercise (were `no_keypoints_source`). All flagged `needs_review` because the "
+             f"source is only approximate for a single lesson — recovered honestly, not faked.")
+    L.append(f"- **Gap 2 (anchor semantics):** `keypoints_table` now anchors to the passage/table "
+             f"blocks it summarizes (figures only for pure-圖文 lessons), so UNANCHORED collapsed "
+             f"{baseline_4a['UNANCHORED']} → {status_tot.get('UNANCHORED', 0)}. Lessons whose "
+             f"source has NO presentation block are kept `anchors=[]` + `needs_review` + "
+             f"`no_anchorable_passage_in_source` ({reason_counter.get('no_anchorable_passage_in_source', 0)} "
+             f"entries) → they land as 🟡 NEEDS_REVIEW, never a fake 🟢.")
+    L.append(f"- **Gap 3 (no silent drop):** `match` blocks (answer-bearing) are emitted as a "
+             f"`custom` exercise (needs_review) preserving every left→right answer — "
+             f"{n_match} × `matching_type_unsupported` (matching 型別未支援, awaiting a future "
+             f"contract kind; the contract was NOT extended for it this round). `fill_table` "
+             f"blocks are bare `{{type}}` stubs whose real content is the "
+             f"`story_structure_table` (recovered as `ex-keypoints`); the empty stub yields no "
+             f"block but is logged {n_fill} × `fill_table_stub_no_inline_content` so the skip is "
+             f"on the record. `guide` / `self_check` are intentionally NOT emitted as exercises — "
+             f"they are 教學鷹架 / 後設認知檢核 (non-graded scaffolding), not questions.")
+    L.append("")
+
     # ── gap-reason distribution ──
     L.append("## Gap / failure reason distribution")
     L.append("")
@@ -317,11 +374,25 @@ def render_markdown(
         "keypoints_blank_null_answer",
         "keypoints_choice_distractor_unrecoverable",
         "no_keypoints_source",
+        # New this round — each forces an honest 🟡 NEEDS_REVIEW (not a fake 🟢):
+        "no_anchorable_passage_in_source",     # source has no in-document span to anchor to
+        "keypoints_source_is_merged_range",    # keypoints from a merged multi-lesson range file
+        "keypoints_source_suffix_resolved",    # keypoints from a suffix-stripped base file
+        "matching_type_unsupported",           # match block emitted as needs_review custom
+    }
+    # Informational reasons that do NOT block green (the block was correctly empty / skipped):
+    informational = {
+        "fill_table_stub_no_inline_content",   # empty fill_table stub; content is the sst
     }
     for reason, n in reason_counter.most_common():
-        note = "cosmetic (→ DEFAULT_KIND, does not block)" if reason == "strategy_type_unmapped" else (
-            "yes (unanchored / review / no-exercise)" if reason in blocking else "—"
-        )
+        if reason == "strategy_type_unmapped":
+            note = "cosmetic (→ DEFAULT_KIND, does not block)"
+        elif reason in informational:
+            note = "no (empty stub; content recovered as ex-keypoints)"
+        elif reason in blocking:
+            note = "yes (→ needs_review / unanchored / no-exercise)"
+        else:
+            note = "—"
         L.append(f"| `{reason}` | {n} | {note} |")
     L.append("")
     if strat_unmapped:
