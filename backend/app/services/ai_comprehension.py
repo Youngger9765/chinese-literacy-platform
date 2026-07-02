@@ -192,6 +192,30 @@ COMPREHENSION_SCORE_SCHEMA = {
 }
 
 
+def _apply_clamping(result: dict) -> dict:
+    """Clamp comprehension scores to [0,100] and fill missing values sensibly.
+
+    - literal/inferential/evaluative: missing → 50 (neutral mid-point, NEVER 0 —
+      a missing sub-score means the layer wasn't assessed or the AI omitted it,
+      and 0 would unfairly penalise the student for an AI failure).
+    - comprehension_score (overall): if the model omitted it, DERIVE it from the
+      sub-scores using the documented weighting (字面 30% + 推論 40% + 評鑑 30%)
+      instead of a flat 50 — faithful to the sub-scores when they exist. In the
+      all-missing case the subs are 50, so this still yields the neutral 50.
+    """
+    for key in ("literal_score", "inferential_score", "evaluative_score"):
+        result[key] = max(0.0, min(100.0, float(result.get(key, 50))))
+    overall = result.get("comprehension_score")
+    if overall is None:
+        overall = (
+            0.3 * result["literal_score"]
+            + 0.4 * result["inferential_score"]
+            + 0.3 * result["evaluative_score"]
+        )
+    result["comprehension_score"] = round(max(0.0, min(100.0, float(overall))), 1)
+    return result
+
+
 async def evaluate_comprehension(
     dialogue_turns: list[dict],
     story_context: dict,
@@ -252,9 +276,4 @@ async def evaluate_comprehension(
         task="comprehension_score",
     )
 
-    # Clamp scores to 0-100 range
-    for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
-        val = result.get(key, 50)
-        result[key] = max(0, min(100, float(val)))
-
-    return result
+    return _apply_clamping(result)
