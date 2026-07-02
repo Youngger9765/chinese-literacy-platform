@@ -15,7 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 def is_admin(user_id: int, db: Session) -> bool:
-    """Return True if user has system_admin or org_admin role."""
+    """Return True if user has system_admin or org_admin role.
+
+    NOTE: this includes org_admin, so it must NOT be used as a *global* bypass in
+    contexts that require organization-scope isolation (cross-org reads). Using it
+    that way lets an org_admin skip org-scoping and read other orgs' data (個資法
+    §20 violation). For a global bypass, use ``is_system_admin`` and let org_admin
+    fall through to the org-scope check.
+    """
     return (
         db.query(UserRole)
         .join(Role)
@@ -23,6 +30,24 @@ def is_admin(user_id: int, db: Session) -> bool:
             UserRole.user_id == user_id,
             UserRole.is_active == True,
             Role.name.in_(["system_admin", "org_admin"]),
+        )
+        .first()
+    ) is not None
+
+
+def is_system_admin(user_id: int, db: Session) -> bool:
+    """Return True only if the user has an active system_admin role.
+
+    Use this (not ``is_admin``) for the global bypass in org-scope-sensitive
+    checks: system_admin sees everything, org_admin must stay within its org.
+    """
+    return (
+        db.query(UserRole)
+        .join(Role)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            Role.name == "system_admin",
         )
         .first()
     ) is not None

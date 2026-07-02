@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids
-from ..auth.policies import is_admin
+from ..auth.policies import is_system_admin
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.user import User, UserRole
@@ -100,8 +100,8 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     if is_teacher:
         return
 
-    # system_admin bypasses all scope checks
-    if is_admin(current_user.id, db):
+    # system_admin bypasses all scope checks (org_admin must stay org-scoped below)
+    if is_system_admin(current_user.id, db):
         return
 
     # org_admin / org_owner: must share at least one org with the student
@@ -203,8 +203,8 @@ def get_leaderboard(
         is not None
     )
     if not is_teacher and not is_student:
-        # system_admin bypasses all scope checks
-        if is_admin(current_user.id, db):
+        # system_admin bypasses all scope checks (org_admin must stay org-scoped below)
+        if is_system_admin(current_user.id, db):
             pass  # allowed
         else:
             # org_admin / org_owner: classroom's school must belong to caller's org
