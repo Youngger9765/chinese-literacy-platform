@@ -196,6 +196,20 @@ _ALL_KINDS = [
 ]
 
 
+def _exercise_anchoring_ok(ex: ExerciseBlock) -> bool:
+    """Gap 2: an exercise is 'anchoring-ok' if it has >=1 anchor, OR it has 0 anchors but is
+    honestly flagged ``needs_review`` (a source with NO in-document passage/figure/table span
+    is a source-shape FACT, not an anchoring bug — the adapter records it as needs_review +
+    a ``no_anchorable_passage_in_source`` known-gap). This is ADDITIVE and cannot manufacture a
+    green: a needs_review exercise still forces the lesson verdict to NEEDS_REVIEW (🟡) via the
+    dryrun ``_verdict`` precedence (needs_review beats unanchored) — it is reclassified 🟠→🟡
+    (honest known-gap), never 🟠→🟢. An exercise with 0 anchors AND needs_review=False is still
+    a real anchoring bug and returns False (stays 🟠/🔴)."""
+    if ex.anchors:
+        return True
+    return bool(ex.needs_review)
+
+
 def lesson_coverage(lesson: Lesson) -> dict[str, Any]:
     exercises = [b for b in lesson.blocks if isinstance(b, ExerciseBlock)]
     kinds = {b.question.kind for b in exercises}
@@ -205,7 +219,7 @@ def lesson_coverage(lesson: Lesson) -> dict[str, Any]:
         "n_blocks": len(lesson.blocks),
         "n_exercises": len(exercises),
         "kinds": kinds,
-        "all_anchored": all(b.anchors for b in exercises) if exercises else True,
+        "all_anchored": all(_exercise_anchoring_ok(b) for b in exercises) if exercises else True,
         "n_needs_review": sum(1 for b in exercises if b.needs_review),
         "round_trip_ok": sum(1 for r in rt if r == "ok"),
         "round_trip_soft": sum(1 for r in rt if r == "soft"),

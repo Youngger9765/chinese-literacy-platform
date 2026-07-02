@@ -39,6 +39,27 @@ content-ABSENCE enum in content_evidence_gate.py — written to a SIBLING file
   * strategy_type_unmapped                  — a strategy_type code with no kind mapping
   * no_anchorable_block                     — a spotlight with zero non-exercise blocks
   * no_keypoints_source                     — story_structure_table missing/empty
+  * keypoints_source_is_merged_range        — keypoints sourced from a MERGED multi-lesson range
+                                               file (a curriculum slot whose parsed YAML is a
+                                               <grade>-L<n>-<m> compound); the table spans several
+                                               lessons, so attaching the whole table to ONE lesson
+                                               is only approximate → needs_review
+  * keypoints_source_suffix_resolved        — keypoints sourced from the suffix-stripped base
+                                               parsed file (an a/b variant with no exact file
+                                               borrows the base lesson's table) → needs_review
+  * no_anchorable_passage_in_source         — an exercise whose source has ZERO presentation
+                                               (passage/figure/table) blocks: no in-document
+                                               text span to anchor to. A source-shape FACT, not
+                                               a defect — kept anchors=[] + needs_review (honest
+                                               NEEDS_REVIEW, never a fake green)
+  * fill_table_stub_no_inline_content       — a fill_table block that is a bare {type} stub (no
+                                               rows/answers); its real content is the _parsed
+                                               story_structure_table (recovered as ex-keypoints),
+                                               so the empty stub itself yields no block
+  * matching_type_unsupported               — a `match` block (answer-bearing) has no dedicated
+                                               contract kind this round; emitted as a `custom`
+                                               ExerciseBlock (needs_review) so its answers are
+                                               NEVER silently dropped, pending a future kind
 
 NO HARDCODED LESSON IDS / COURSE NAMES anywhere below (overfit lint self-passes).
 """
@@ -60,6 +81,7 @@ from pydantic import ValidationError  # noqa: E402
 
 from app.schemas.lesson_content import Lesson  # noqa: E402
 from app.services.lesson_code_normalization import (  # noqa: E402
+    MULTI_LESSON_PRIMARY,
     halfwidth,
     normalize_manifest_code,
 )
@@ -107,6 +129,10 @@ _INLINE_DISTRACTOR_RE = re.compile(r"[②③④⑤⑥⑦⑧⑨⑩]|□")
 _BLANK_RE = re.compile(r"【\s*(.*?)\s*】")
 # 圖N / 表N label derivation from a bind_paragraph hint (never hardcode a specific N).
 _FIGURE_LABEL_RE = re.compile(r"([圖表][一二三四五六七八九十\d]+)")
+# a/b (…) sub-letter suffix on an already-normalized code (a '<grade>-L<n><letter>' form maps
+# to its base '<grade>-L<n>'). Used ONLY as a last-resort fallback when the exact a/b parsed
+# file is absent (the a/b variant shares the base lesson's article/table).
+_SUFFIX_RE = re.compile(r"^((?:G\d+|文)-L\d+)([a-z])$")
 
 
 def _cn_to_int(token: str) -> int:
@@ -203,13 +229,64 @@ def load_spotlight(path: Path) -> dict[str, Any]:
     return spot
 
 
-def load_parsed(lesson_code: str) -> dict[str, Any]:
-    """Load the _parsed_*/<code>.yml (keypoints source). Returns {} if absent."""
-    path = PARSED_DIR / f"{lesson_code}.yml"
-    if not path.exists():
-        return {}
+def resolve_parsed_source(lesson_code: str) -> tuple[Optional[Path], str]:
+    """Range/補零-aware resolution of the _parsed keypoints source for a lesson code.
+
+    Resolution order (fail-closed, content-verified — NEVER guesses a neighbour by bare
+    number, which is exactly the 補零碰撞 / 缺檔鄰號錯綁 class content-mapping-integrity
+    warns about):
+
+      1. EXACT bare-normalized file ``<norm>.yml``. This is the authority for these
+         spotlight sources: the spotlight/catalog/*.spotlight.yml files are keyed to the
+         Layer-2 (parsed) numbering, so the bare-normalized name is the correct twin when the
+         file exists. Content-verified on the G8 block whose bare-normalized file and curriculum
+         override map DISAGREE — the spotlight's actual story matches the BARE file, so routing
+         through the curriculum override (catalog_to_parsed_code) would MIS-bind it to a
+         neighbour's story (張冠李戴). Bare-first is therefore the honest choice here.
+      2. MULTI_LESSON_PRIMARY range file (only when the exact file is absent). A curriculum
+         slot covered by a merged multi-lesson YAML (a <grade>-L<n>-<m> compound). The table
+         inside spans several lessons → kind='merged_range' so the caller flags it.
+      3. Suffix-stripped base file (only when exact + range both absent AND the code carries an
+         a/b sub-letter). Content-verified: the sole such catalog case's spotlight story matches
+         its suffix-stripped base parsed file (NOT the curriculum override target).
+         kind='suffix_base'.
+
+    Returns (path_or_None, source_kind) where source_kind ∈
+    {'exact', 'merged_range', 'suffix_base', 'none'}. NO self-padding (per resolve_identity).
+    """
+    norm = normalize_manifest_code(lesson_code)
+
+    exact = PARSED_DIR / f"{norm}.yml"
+    if exact.exists():
+        return exact, "exact"
+
+    rng = MULTI_LESSON_PRIMARY.get(norm)
+    if rng:
+        rng_path = PARSED_DIR / f"{rng}.yml"
+        if rng_path.exists():
+            return rng_path, "merged_range"
+
+    m = _SUFFIX_RE.match(norm)
+    if m:
+        base_path = PARSED_DIR / f"{m.group(1)}.yml"
+        if base_path.exists():
+            return base_path, "suffix_base"
+
+    return None, "none"
+
+
+def load_parsed(lesson_code: str) -> tuple[dict[str, Any], str]:
+    """Load the _parsed keypoints source for a lesson code (range/補零/suffix-aware).
+
+    Returns (parsed_dict, source_kind). parsed_dict is {} when no source resolves
+    (source_kind='none'); source_kind is one of 'exact' | 'merged_range' | 'suffix_base'
+    | 'none' so ``build_keypoints_exercise`` can honestly flag approximate sources.
+    """
+    path, kind = resolve_parsed_source(lesson_code)
+    if path is None:
+        return {}, kind
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return raw if isinstance(raw, dict) else {}
+    return (raw if isinstance(raw, dict) else {}), kind
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -440,7 +517,13 @@ def group_spotlight_exercise(
             block_answer.append(s["answer"])
 
     if not anchor_ids:
+        # Gap 2: a spotlight whose source has ZERO presentation (passage/figure/table) blocks
+        # has no in-document span to anchor to — a source-shape FACT, not a defect. Keep
+        # anchors=[] but flag it honestly (needs_review) so it lands as NEEDS_REVIEW (🟡),
+        # never a fake green and never a silent 🟠. (Kept the legacy no_anchorable_block reason
+        # too, so existing DEV7 ledger entries / tests stay stable.)
         gaps.add(lesson_code, "no_anchorable_block", "ex-spotlight")
+        gaps.add(lesson_code, "no_anchorable_passage_in_source", "ex-spotlight")
 
     return {
         "id": "ex-spotlight",
@@ -455,7 +538,7 @@ def group_spotlight_exercise(
         "answer": block_answer,
         "grader": "rubric_ai",
         "anchors": [{"block_id": bid} for bid in anchor_ids],
-        "needs_review": any_unresolved,
+        "needs_review": any_unresolved or not anchor_ids,
     }
 
 
@@ -465,8 +548,27 @@ def group_spotlight_exercise(
 
 
 def build_keypoints_exercise(
-    parsed: dict[str, Any], lesson_code: str, last_figure_id: Optional[str], gaps: GapLog
+    parsed: dict[str, Any],
+    lesson_code: str,
+    passage_table_anchor_ids: list[str],
+    gaps: GapLog,
+    source_kind: str = "exact",
 ) -> Optional[dict[str, Any]]:
+    """Build the ex-keypoints block from the _parsed story_structure_table.
+
+    Gap 2 (anchor semantics): keypoints_table is 『整篇文章重點』, so it anchors to the
+    PASSAGE/TABLE presentation blocks it summarizes (``passage_table_anchor_ids``) — NOT a
+    single arbitrary figure (the old ``last_figure_id`` was semantically wrong and left 80/113
+    figure-less lessons with anchors=[]). When the source has ZERO passage/table blocks there
+    is genuinely no in-document span to anchor to → we keep anchors=[] AND set
+    needs_review=True AND log ``no_anchorable_passage_in_source`` (honest NEEDS_REVIEW, never a
+    fake green).
+
+    Gap 1 (source honesty): ``source_kind`` records how the parsed file was resolved.
+    'merged_range' / 'suffix_base' sources are only APPROXIMATE for a single lesson, so the
+    block is flagged needs_review + a matching gap reason is logged. 'exact' is clean.
+    """
+    passage_table_anchor_ids = list(passage_table_anchor_ids or [])
     sst = parsed.get("story_structure_table")
     if not isinstance(sst, list) or not sst:
         gaps.add(lesson_code, "no_keypoints_source", "ex-keypoints")
@@ -515,7 +617,23 @@ def build_keypoints_exercise(
 
     structure = "nested" if any_nested else "flat"
     answer_dict = {b["id"]: b["answer"] for b in blanks_out}
-    anchors = [{"block_id": last_figure_id}] if last_figure_id else []
+
+    # Gap 2: anchor the whole-article 重點表 to the passage/table blocks it summarizes.
+    anchors = [{"block_id": bid} for bid in passage_table_anchor_ids]
+    needs_review = False
+    if not anchors:
+        # No passage/table block exists in the source → nothing in-document to anchor to.
+        # A source-shape FACT, not a bug: keep anchors=[] but flag it honestly.
+        gaps.add(lesson_code, "no_anchorable_passage_in_source", "ex-keypoints")
+        needs_review = True
+
+    # Gap 1: an approximate (merged-range / suffix-base) source is honestly flagged.
+    if source_kind == "merged_range":
+        gaps.add(lesson_code, "keypoints_source_is_merged_range", "ex-keypoints")
+        needs_review = True
+    elif source_kind == "suffix_base":
+        gaps.add(lesson_code, "keypoints_source_suffix_resolved", "ex-keypoints")
+        needs_review = True
 
     return {
         "id": "ex-keypoints",
@@ -531,7 +649,7 @@ def build_keypoints_exercise(
         "answer": answer_dict,
         "grader": "exact",
         "anchors": anchors,
-        "needs_review": False,
+        "needs_review": needs_review,
     }
 
 
@@ -540,8 +658,63 @@ def build_keypoints_exercise(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def build_match_exercise(
+    match_blocks: list[dict[str, Any]],
+    anchor_ids: list[str],
+    gaps: GapLog,
+    lesson_code: str,
+) -> Optional[dict[str, Any]]:
+    """Gap 3: a `match` block is answer-bearing (left clue → right answer) but the contract
+    has no dedicated matching kind, and we deliberately do NOT extend it for the 2 corpus
+    lessons that use it. To avoid SILENTLY DROPPING real answers we emit ONE `custom`
+    ExerciseBlock that preserves every left→right pair machine-comparably and routes to human
+    review (CustomQuestion REQUIRES needs_review=True). Also logs ``matching_type_unsupported``
+    and surfaces "matching 型別未支援" in the report.
+
+    Returns the ExerciseBlock dict, or None if there is nothing answer-bearing to preserve.
+    """
+    pairs: list[dict[str, str]] = []
+    render_lines: list[str] = []
+    for bi, b in enumerate(match_blocks):
+        col_left = str(b.get("col_left") or "左").strip()
+        col_right = str(b.get("col_right") or "右").strip()
+        for r in b.get("rows", []) or []:
+            if not isinstance(r, dict):
+                continue
+            left = str(r.get("left") or "").strip()
+            right = str(r.get("right") or "").strip()
+            if not left or not right:
+                continue
+            pairs.append({"left": left, "right": right})
+            render_lines.append(f"{left}  →  {right}")
+
+    if not pairs:
+        return None
+
+    gaps.add(lesson_code, "matching_type_unsupported", "ex-match", f"{len(pairs)} pair(s)")
+
+    # answer = the ordered list of correct right-hand values (machine-comparable, not prose).
+    answer = [p["right"] for p in pairs]
+    render_hint = "配對題 (matching, 契約未支援型別):\n" + "\n".join(render_lines)
+    return {
+        "id": "ex-match",
+        "type": "exercise",
+        "question": {
+            "kind": "custom",
+            "prompt": "配對題：將左欄線索對應到右欄答案。",
+            "render_hint": render_hint,
+        },
+        "answer_space": "text",
+        "answer": answer,
+        "grader": "manual",
+        "anchors": [{"block_id": bid} for bid in anchor_ids],
+        "needs_review": True,  # required for custom; also honest (unsupported type)
+    }
+
+
 def assemble_lesson(
-    spot: dict[str, Any], parsed: dict[str, Any], gaps: GapLog, with_keypoints: bool
+    spot: dict[str, Any], parsed: dict[str, Any], gaps: GapLog, with_keypoints: bool,
+    parsed_source_kind: str = "exact",
 ) -> dict[str, Any]:
     lesson_id, lesson_code = resolve_identity(spot)
     blocks_in = spot.get("blocks") or []
@@ -554,12 +727,43 @@ def assemble_lesson(
     if spotlight is not None:
         all_blocks.append(spotlight)
 
+    # Gap 3: `match` blocks are answer-bearing but have no contract kind this round.
+    # Emit them as a `custom` block (needs_review) so answers are NEVER silently dropped.
+    match_blocks = [b for b in blocks_in if b.get("type") == "match"]
+    if match_blocks:
+        match_ex = build_match_exercise(match_blocks, anchor_ids, gaps, lesson_code)
+        if match_ex is not None:
+            all_blocks.append(match_ex)
+
+    # Gap 3: `fill_table` blocks in this corpus are bare {type} stubs — the real content is
+    # the _parsed story_structure_table (recovered as ex-keypoints below). Emitting nothing
+    # from an empty stub is correct, but log it so the "we saw it, it was empty, we skipped it"
+    # decision is on the record (never a silent skip). guide/self_check are intentionally not
+    # emitted (教學鷹架 / 後設認知檢核, non-graded — see the audit note in the report).
+    for b in blocks_in:
+        if b.get("type") == "fill_table" and set(b.keys()) == {"type"}:
+            gaps.add(lesson_code, "fill_table_stub_no_inline_content", "fill_table")
+
     if with_keypoints:
-        # Anchor keypoints to the LAST emitted figure/table block if one exists.
-        last_fig = next(
-            (b["id"] for b in reversed(presentation) if b["type"] == "figure"), None
+        # Gap 2: keypoints_table is 『整篇文章重點』, so it anchors to the text spans it
+        # summarizes — the PASSAGE (p*) + TABLE (tbl*) presentation blocks — NOT a single
+        # arbitrary figure (the old last-figure anchor was semantically wrong). ONLY when the
+        # lesson has NO passage/table block at all (a pure 圖文 lesson whose content IS its
+        # figures) do we fall back to anchoring the figures, so a figure-only lesson stays
+        # legitimately anchored instead of being penalised. A lesson with zero presentation
+        # blocks of any kind is handled honestly inside build_keypoints_exercise (needs_review
+        # + no_anchorable_passage_in_source).
+        passage_table_ids = [
+            b["id"]
+            for b in presentation
+            if b["type"] == "paragraph" or b["id"].startswith("tbl")
+        ]
+        keypoint_anchor_ids = passage_table_ids or [
+            b["id"] for b in presentation if b["id"].startswith("fig")
+        ]
+        kp = build_keypoints_exercise(
+            parsed, lesson_code, keypoint_anchor_ids, gaps, parsed_source_kind
         )
-        kp = build_keypoints_exercise(parsed, lesson_code, last_fig, gaps)
         if kp is not None:
             all_blocks.append(kp)
 
@@ -634,8 +838,8 @@ def build_lesson_dict(
     """Load DEV7 sources for a code and return (lesson_dict, gaps)."""
     gaps = gaps or GapLog()
     spot = load_spotlight(SPOTLIGHT_DIR / f"{lesson_code}.spotlight.yml")
-    parsed = load_parsed(lesson_code)
-    lesson_dict = assemble_lesson(spot, parsed, gaps, with_keypoints)
+    parsed, parsed_kind = load_parsed(lesson_code)
+    lesson_dict = assemble_lesson(spot, parsed, gaps, with_keypoints, parsed_kind)
     return lesson_dict, gaps
 
 
