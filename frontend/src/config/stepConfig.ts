@@ -340,6 +340,36 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
     .filter((s): s is StepConfig => !!s && s.enabled);
 }
 
+/**
+ * Derive a per-lesson step sequence from the printed worksheet's section order.
+ *
+ * Each lesson YAML carries `worksheet_section_order`: the AUTHORITATIVE ordered
+ * list of the paper 學習單 sections, e.g.
+ *   [{number:'一', name:'讀全文-做記號', type:'reading_annotation'}, ...]
+ * The section `type` (underscored) maps 1:1 to a STEP_REGISTRY id (hyphenated),
+ * so this makes the online step flow follow each lesson's ACTUAL worksheet order
+ * — the 5/1 "學習步驟動態對應學習單" requirement — instead of the flat
+ * DEFAULT_STEP_SEQUENCE (which e.g. orders 文章重點表/閱讀聚光燈 opposite to the paper).
+ *
+ * 'intro' is prepended (the online flow always opens with it; the paper starts
+ * at 讀全文). Unknown types are skipped here; disabled steps are dropped later by
+ * resolveActiveSteps. Returns null when there is no worksheet order so callers
+ * fall back to DEFAULT_STEP_SEQUENCE.
+ */
+export function stepSequenceFromWorksheet(
+  worksheet?: Array<{ number?: string; name?: string; type?: string }> | null,
+): string[] | null {
+  if (!worksheet || worksheet.length === 0) return null;
+  const ids: string[] = ['intro'];
+  for (const section of worksheet) {
+    const type = section?.type;
+    if (!type) continue;
+    const id = type.replace(/_/g, '-'); // reading_annotation → reading-annotation
+    if (STEP_REGISTRY[id] && !ids.includes(id)) ids.push(id);
+  }
+  return ids.length > 1 ? ids : null;
+}
+
 // ---------------------------------------------------------------------------
 // Derived lookup maps — computed once from STEP_CONFIG so consumers don't
 // need to re-derive them.  Import these instead of building your own maps.
