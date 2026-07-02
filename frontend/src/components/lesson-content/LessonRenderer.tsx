@@ -121,7 +121,18 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   const [feedback, setFeedback] = useState<Record<string, boolean | null>>(
     () => (initialState?.feedback as Record<string, boolean | null>) ?? {},
   );
-  const [needsReview, setNeedsReview] = useState<Record<string, boolean>>({});
+  // Seed the manual-review set from BLOCK-LEVEL needs_review flags (honest from first
+  // render — no interaction needed). This is what surfaces the "有 N 題需老師人工檢核"
+  // status for a needs_review lesson so the renderer never pretends a flagged block is
+  // complete/verifiable. `custom` blocks additionally add themselves via onGraded.
+  const initialNeedsReview = useMemo(() => {
+    const seed: Record<string, boolean> = {};
+    for (const b of lesson.blocks) {
+      if (b.type === 'exercise' && b.needsReview === true) seed[b.id] = true;
+    }
+    return seed;
+  }, [lesson.blocks]);
+  const [needsReview, setNeedsReview] = useState<Record<string, boolean>>(initialNeedsReview);
 
   const allDone = useMemo(
     () =>

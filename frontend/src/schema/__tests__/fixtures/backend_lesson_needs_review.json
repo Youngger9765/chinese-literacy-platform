@@ -1,0 +1,70 @@
+{
+  "id": "G4-L5",
+  "lesson_code": "G4-L5",
+  "title": "穿越極限的跑者",
+  "blocks": [
+    {
+      "id": "ex-keypoints",
+      "type": "exercise",
+      "question": {
+        "kind": "keypoints_table",
+        "structure": "nested",
+        "title": "穿越極限的跑者",
+        "rows": [
+          {
+            "label": "主角",
+            "blank_ids": [
+              "r1.b1"
+            ]
+          },
+          {
+            "label": "主題",
+            "blank_ids": []
+          },
+          {
+            "label": "事例",
+            "sub_label": "起因",
+            "blank_ids": [
+              "r3.b1"
+            ]
+          },
+          {
+            "label": "事例",
+            "sub_label": "經過",
+            "blank_ids": []
+          },
+          {
+            "label": "事例",
+            "sub_label": "結果",
+            "blank_ids": [
+              "r5.b1"
+            ]
+          }
+        ],
+        "blanks": [
+          {
+            "id": "r1.b1",
+            "answer": "陳彥博"
+          },
+          {
+            "id": "r3.b1",
+            "answer": "2011"
+          },
+          {
+            "id": "r5.b1",
+            "answer": "2016"
+          }
+        ]
+      },
+      "answer_space": "text",
+      "answer": {
+        "r1.b1": "陳彥博",
+        "r3.b1": "2011",
+        "r5.b1": "2016"
+      },
+      "grader": "exact",
+      "anchors": [],
+      "needs_review": true
+    }
+  ]
+}

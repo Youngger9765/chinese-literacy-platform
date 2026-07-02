@@ -83,7 +83,10 @@ const ComprehensionMcqPage: React.FC = () => {
   // engages only when the adapter yields a valid zod Lesson, else falls through to the
   // byte-identical legacy path (fail-safe, never white-screens).
   if (LESSON_RENDERER_V1) {
-    const { lesson } = storyToLesson(selectedStory);
+    // Prefer the backend-supplied REAL lesson_content (typed contract from the story
+    // adapter); fall back to the front-end storyToLesson stopgap when the backend flag is
+    // OFF or the payload didn't parse (selectedStory.lessonContent is undefined).
+    const lesson = selectedStory.lessonContent ?? storyToLesson(selectedStory).lesson;
     if (lesson) {
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
