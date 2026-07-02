@@ -8,6 +8,23 @@
 
 ---
 
+## 6/29 ~ 7/3
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #2452 fail-closed + 跨組織 RBAC + STT + 理解 (#2450) | 造句不 auto-pass、OMO 斷路器不卡死、跨組織個資隔離、朗讀長文不截斷 |
+| Young | ✅ | PR #2453 學習步驟動態對應學習單 (#2451) | nav 跟每課學習單 section 順序排（5/1 主軸）|
+| Young | ✅ | PR #2431~2435 testset 上傳 magic-bytes + TDD/EDD | 擋偽造 MIME、real-mime、鎖轉寫前處理 |
+| Young | ✅ | PR #2438 testset recordings 限 admin (#2437) | 權限收斂 |
+| Young | ✅ | PR #2444 LoginPage render-smoke (#2443) | mount 安全網 |
+| Young | ✅ | PR #2454 清 dead code (#2450) | Cursor review 指出的無用函式；全批上 prod |
+| 靖杭 | ✅ | PR #2411 快速登入朗讀測試頁按鈕 (#2410) | LoginPage 便利入口 |
+| 靖杭 | ✅ | PR #2427 record.html mp3/wav 上傳途徑 (#2426) | 錄音頁擴充 + 返回鈕（4 輪 review）|
+| 靖杭 | ✅ | PR #2429 npm run dev esbuild 降級修復 (#2428) | vite.config 獨立診斷 build 問題 |
+| 啟翔 | ⏳ | QA 七課 (#2425 #2200 #2153) | 本週無 PR，做聚光燈/重點表/UX 導航七課 QA 驗收 |
+
+---
+
 ## 6/22 ~ 6/25
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
