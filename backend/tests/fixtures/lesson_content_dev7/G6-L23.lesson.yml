@@ -182,5 +182,15 @@ blocks:
     r3.b2: 經濟
     r4.b1: 消費者
   grader: exact
-  anchors: []
+  anchors:
+  - block_id: p1
+  - block_id: p2
+  - block_id: p3
+  - block_id: p4
+  - block_id: p5
+  - block_id: p6
+  - block_id: p7
+  - block_id: p8
+  - block_id: p9
+  - block_id: p10
   needs_review: false

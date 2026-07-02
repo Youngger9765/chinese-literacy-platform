@@ -394,6 +394,26 @@
     {
       "anchors": [
         {
+          "block_id": "fig1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig4",
+          "char_end": null,
+          "char_start": null
+        },
+        {
           "block_id": "fig5",
           "char_end": null,
           "char_start": null

@@ -37,7 +37,7 @@ blocks:
   - 0
   grader: rubric_ai
   anchors: []
-  needs_review: false
+  needs_review: true
 - id: ex-keypoints
   type: exercise
   question:
@@ -85,4 +85,4 @@ blocks:
     r3.b2: 荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行
   grader: exact
   anchors: []
-  needs_review: false
+  needs_review: true

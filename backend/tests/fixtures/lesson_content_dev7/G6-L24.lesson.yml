@@ -37,7 +37,7 @@ blocks:
   - 0
   grader: rubric_ai
   anchors: []
-  needs_review: false
+  needs_review: true
 - id: ex-keypoints
   type: exercise
   question:
@@ -85,4 +85,4 @@ blocks:
     r3.b1: 數千頭白鯨游出冰原，回到大海
   grader: exact
   anchors: []
-  needs_review: false
+  needs_review: true

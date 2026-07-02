@@ -293,5 +293,10 @@ blocks:
     r5.b2: 都市化
   grader: exact
   anchors:
+  - block_id: tbl1
+  - block_id: p1
+  - block_id: tbl2
   - block_id: tbl3
+  - block_id: p2
+  - block_id: p3
   needs_review: false

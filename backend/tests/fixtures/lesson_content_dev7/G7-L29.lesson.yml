@@ -324,5 +324,9 @@ blocks:
     r6.b1: 小心
   grader: exact
   anchors:
+  - block_id: fig1
+  - block_id: fig2
+  - block_id: fig3
+  - block_id: fig4
   - block_id: fig5
   needs_review: false

@@ -378,7 +378,32 @@
     {
       "anchors": [
         {
+          "block_id": "tbl1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "tbl2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
           "block_id": "tbl3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p3",
           "char_end": null,
           "char_start": null
         }

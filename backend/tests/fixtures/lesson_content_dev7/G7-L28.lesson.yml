@@ -188,5 +188,8 @@ blocks:
     r5.b1: 公共衛生
   grader: exact
   anchors:
-  - block_id: fig1
+  - block_id: p1
+  - block_id: p2
+  - block_id: p3
+  - block_id: p4
   needs_review: false

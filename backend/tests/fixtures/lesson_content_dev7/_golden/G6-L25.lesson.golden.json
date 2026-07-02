@@ -10,7 +10,7 @@
       "answer_space": "free_text",
       "grader": "rubric_ai",
       "id": "ex-spotlight",
-      "needs_review": false,
+      "needs_review": true,
       "question": {
         "instruction": "這篇故事也是一篇說明文，講「全世界第一張股票」是怎麼誕生的。故事結構裡有明顯的問題、解決、結果。前面兩課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，我們再來複習這個祕訣，請你連連看。",
         "kind": "guided_steps",
@@ -65,7 +65,7 @@
       "answer_space": "text",
       "grader": "exact",
       "id": "ex-keypoints",
-      "needs_review": false,
+      "needs_review": true,
       "question": {
         "blanks": [
           {
