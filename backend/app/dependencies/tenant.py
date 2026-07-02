@@ -129,6 +129,39 @@ def _check_org_admin(user: User, org_id: str, db: Session) -> None:
     )
 
 
+def get_owned_resource_or_403(
+    db: Session,
+    model: Any,
+    resource_id: Any,
+    user_id: int,
+    *,
+    not_found_detail: str = "Not found",
+    forbidden_detail: str = "Forbidden",
+    owner_attr: str = "teacher_id",
+) -> Any:
+    """Load a row by id and assert the caller owns it, else raise.
+
+    Consolidates the "fetch by id → 404 if missing → 403 if not mine" guard that
+    was duplicated inline across teacher-owned-resource handlers.
+
+    Behavior is kept byte-identical to the inline guards it replaces:
+      - 404 if no row with ``resource_id`` exists
+      - 403 if ``getattr(row, owner_attr)`` != ``user_id``
+      - returns the ORM row otherwise
+
+    NOTE: intentionally has NO system_admin bypass. The call sites this replaces
+    (teacher instruction update/delete) grant access strictly to the owning
+    teacher; adding an admin bypass here would silently widen access. If a caller
+    needs admin bypass, it must opt in explicitly at the call site.
+    """
+    obj = db.query(model).filter(model.id == resource_id).first()
+    if obj is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=not_found_detail)
+    if getattr(obj, owner_attr) != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=forbidden_detail)
+    return obj
+
+
 def _check_classroom_access(user: User, classroom_id: int, db: Session) -> Classroom:
     """Verify the user can access the given classroom.
 
