@@ -13,6 +13,7 @@
 
 import type { Story } from '../types';
 import { API_BASE } from './apiConfig';
+import { stepSequenceFromWorksheet } from '../config/stepConfig';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
 
@@ -172,7 +173,13 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     videoLinks: detail.video_links ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
     spotlightV2: detail.spotlight_v2 ?? undefined,
-    stepSequence: detail.step_sequence ?? undefined,
+    // Step order source of truth: an explicit YAML step_sequence wins; otherwise
+    // derive the sequence from the printed worksheet's section order so the online
+    // flow matches each lesson's actual 學習單 (5/1「學習步驟動態對應學習單」).
+    stepSequence:
+      detail.step_sequence
+      ?? stepSequenceFromWorksheet(detail.worksheet_section_order)
+      ?? undefined,
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
