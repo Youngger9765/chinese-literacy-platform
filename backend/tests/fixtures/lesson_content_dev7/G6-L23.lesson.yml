@@ -1,0 +1,186 @@
+id: G6-L23
+lesson_code: G6-L23
+title: 老鷹紅豆的故事
+blocks:
+- id: p1
+  type: paragraph
+  text: 本文第一段有三句，請你先判斷哪一個句子是描述「不好的事」，而且是「最嚴重」的。(請在□打勾，三選一。)
+- id: p2
+  type: paragraph
+  text: □句1：2012年10月，屏東科技大學的研究人員收到兩隻死亡的老鷹，檢驗後，確認老鷹體內含有劇毒農藥。
+- id: p3
+  type: paragraph
+  text: 句2：2013年，他們在屏東縣一塊紅豆田中，發現了超過3000隻野鳥屍體。
+- id: p4
+  type: paragraph
+  text: 第一段有三個句子，第一句和第二句都是描述「不好的事」，我覺得第二句「發現超過3000隻野鳥屍體」更嚴重，所以我留下第二句，並把第二句畫線。
+- id: p5
+  type: paragraph
+  text: 請你先判斷哪些句子是描述「有人想出辦法或行動的句子」。（在□打勾，三選二）
+- id: p6
+  type: paragraph
+  text: 解決1：屏東科技大學在縣政府的協助下，找上當初發現超過3000隻鳥屍的紅豆田，向地主林清源先生說明這個生態的悲劇。
+- id: p7
+  type: paragraph
+  text: 解決2：林先生坦承錯誤，自2014年起，開始使用機械播種將紅豆埋入土中，有效減少了播種期的鳥害；收成時也放棄使用落葉劑與除草劑。
+- id: p8
+  type: paragraph
+  text: 祕訣：「結果」通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變。「結果」常有明顯的關鍵詞，例如「結果」、「最後」等。
+- id: p9
+  type: paragraph
+  text: 請你先判斷哪些句子是描述「行動後帶來的改變」。（在□打勾，三選一）
+- id: p10
+  type: paragraph
+  text: 這是一篇問題解決結構的文章，閱讀聚光燈你已經學會怎麼用線索來找重點，接著，我們就來整理本課的重點嘍！
+- id: ex-spotlight
+  type: exercise
+  question:
+    kind: guided_steps
+    strategy_name: 摘要策略：問題．解決結構找重點
+    instruction: '這篇故事是一篇報導式說明文，講「毒鳥事件」解決的過程。故事結構裡有明顯的問題、解決、結果。但閱讀時，如何找到文章中的「問題、解決、結果」呢？我們可以用一些線索來做判斷喔！
+
+      我們來練習用兩步驟（❶找重點句；❷精簡重點句）找「問題、解決、結果」。'
+    steps:
+    - prompt: ❶找重點句：
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: ❷精簡重點句：
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 1.有大量的野鳥中毒死亡。
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: ❶找重點句：（第4段）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: ❷精簡重點句：
+      type: select
+      options:
+      - 想一想這句話的意思，用更簡短的方式表達重點。（在
+      - 打勾，二選一。）
+      answer: 0
+    - prompt: (1)請判斷「解決1」可以精簡成底下哪一個句子？
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 1.屏科大找林先生溝通。
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (2)請判斷「解決2」可以精簡成底下哪一個句子？
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 1.林先生坦承錯誤。
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 1.課文第五段：
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (1)請先尋找重點句，並畫線。
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (2)請判斷第5段的「解決」可以精簡成底下哪個句子？（在□打勾，二選一。）
+      type: select
+      options:
+      - （在
+      - 打勾，二選一。）
+      answer: 0
+    - prompt: 1.全聯與農民合作，並高價收購紅豆
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: ❶找重點句：（第6段）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: ❷精簡重點句：想一想這句話的意思，用更簡短的方式表達重點。
+      type: free_text
+      answer: null
+      reference_answer: null
+  answer_space: free_text
+  answer:
+  - null
+  - null
+  - null
+  - null
+  - 0
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - 0
+  - null
+  - null
+  - null
+  grader: rubric_ai
+  anchors:
+  - block_id: p1
+  - block_id: p2
+  - block_id: p3
+  - block_id: p4
+  - block_id: p5
+  - block_id: p6
+  - block_id: p7
+  - block_id: p8
+  - block_id: p9
+  - block_id: p10
+  needs_review: false
+- id: ex-keypoints
+  type: exercise
+  question:
+    kind: keypoints_table
+    structure: flat
+    title: 老鷹紅豆的故事
+    rows:
+    - label: 問題
+      sub_label: null
+      blank_ids:
+      - r1.b1
+    - label: 解決（誰＋做什麼）
+      sub_label: null
+      blank_ids:
+      - r2.b1
+      - r2.b2
+    - label: 結果
+      sub_label: null
+      blank_ids:
+      - r3.b1
+      - r3.b2
+    - label: 迴響（結語）
+      sub_label: null
+      blank_ids:
+      - r4.b1
+    blanks:
+    - id: r1.b1
+      answer: 中毒
+    - id: r2.b1
+      answer: 無毒農法
+    - id: r2.b2
+      answer: 高價
+    - id: r3.b1
+      answer: 生態
+    - id: r3.b2
+      answer: 經濟
+    - id: r4.b1
+      answer: 消費者
+  answer_space: text
+  answer:
+    r1.b1: 中毒
+    r2.b1: 無毒農法
+    r2.b2: 高價
+    r3.b1: 生態
+    r3.b2: 經濟
+    r4.b1: 消費者
+  grader: exact
+  anchors: []
+  needs_review: false

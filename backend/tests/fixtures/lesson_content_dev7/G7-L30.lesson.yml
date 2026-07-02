@@ -1,0 +1,297 @@
+id: G7-L30
+lesson_code: G7-L30
+title: 都是八哥，為什麼命運不一樣？
+blocks:
+- id: fig1
+  type: figure
+  asset: fig1.png
+  caption: null
+- id: fig2
+  type: figure
+  asset: fig1.png
+  caption: null
+  label: 圖一
+- id: tbl1
+  type: figure
+  asset: table1.json
+  caption: null
+  label: 表一
+- id: p1
+  type: paragraph
+  text: 在表一找到對應文字說明的訊息，必要時回頭看圖一，看看表格怎麼幫助你把文字讀得更清楚。
+- id: tbl2
+  type: figure
+  asset: table2.json
+  caption: null
+  label: 表二
+- id: tbl3
+  type: figure
+  asset: table1.json
+  caption: null
+  label: 表一
+- id: p2
+  type: paragraph
+  text: 白尾八哥  較不怕人  ，又   較會利用人造設施築巢  ，適應都市環境較強，所以在都市化的環境中比較容易生存，族群逐漸增加；
+- id: p3
+  type: paragraph
+  text: 臺灣冠八哥  較怕人，又  較少利用人造設施築巢   ，適應都市環境較弱，因此族群逐漸減少。
+- id: ex-spotlight
+  type: exercise
+  question:
+    kind: graphic_text_integration
+    strategy_name: 圖文表整合閱讀策略
+    instruction: 說明：閱讀有圖或有表的文章時，不能只看文字，而要來回比對圖、表與文章內容，理解彼此之間的關係。這樣不但能更快掌握重點，也能更正確地回答問題。這一課，我們將以〈都是八哥，為什麼命運不一樣？〉為例，學習有表格文章的閱讀方法。
+    steps:
+    - prompt: 1.圖一最主要提供哪一類訊息？（單選）
+      type: select
+      options:
+      - 兩種八哥外形相近的整體印象
+      - 兩種八哥近年的族群變化情形
+      answer: 0
+    - prompt: 2.讀完第一段後，請你找出和圖一最相關的文字。（單選）
+      type: select
+      options:
+      - 白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。
+      - 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+      answer: 1
+    - prompt: 1.請把第二段文字中，要你看表的地方畫線或圈起來
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 2.這段要你看表的什麼？（單選）
+      type: select
+      options:
+      - 八哥的外形與習性
+      - 八哥的數量變化
+      answer: 0
+    - prompt: 1.表一主要提供的是哪一類訊息？（單選）
+      type: select
+      options:
+      - 白尾八哥和臺灣冠八哥近年的族群變化
+      - 白尾八哥和臺灣冠八哥的異同
+      answer: 1
+    - prompt: 1.第二段說兩種八哥「外表相似」，表一中哪些資料可支持這句話？（複選）
+      type: multi_select
+      options:
+      - 全身大致為黑色
+      - 身形大小接近
+      - 常在地面走動覓食，吃昆蟲、果實
+      - 都屬八哥屬、留鳥
+      answer: &id001
+      - 0
+      - 1
+    - prompt: 2.第二段說「只要觀察嘴喙和尾羽的顏色，就能分辨牠們」，表一中的哪些資料正好對應這句話？（複選）
+      type: multi_select
+      options:
+      - 嘴喙顏色
+      - 尾羽顏色
+      - 築巢地點
+      - 適應都市環境
+      answer: &id002
+      - 0
+      - 1
+    - prompt: 3.第二段提到臺灣冠八哥又稱「臺灣八哥」，表一中的哪一項資料和這句話最有關？（單選）
+      type: select
+      options:
+      - 冠羽是否明顯
+      - 外來種／原生種
+      - 族群數量      □
+      - 保育身分
+      answer: 1
+    - prompt: 4.讀表一，對理解第二段有什麼幫助？（單選）
+      type: select
+      options:
+      - 表一只是把第二段重新整理一次，並沒有幫助我們更清楚理解這段意思。
+      - 表一幫助我們更清楚看出，兩種八哥雖然外形相近，但仍可從特徵和習性加以分辨。
+      answer: 1
+    - prompt: 1.下面哪一句最能把第二段和表一的意思一起說清楚？（單選）
+      type: select
+      options:
+      - 兩種八哥雖然外形相近，但只要知道牠們同屬八哥屬，就能解釋後來族群數量不同的原因
+      - 兩種八哥雖然外形相近，但仍可從嘴喙、尾羽等特徵區分，表一也進一步比較了牠們的習性差異
+      answer: 1
+    - prompt: 2.讀完第二段和表一後，你認為哪些差異最值得留意，因為它們可能和課文標題的「命運不一樣」有關？（單選）
+      type: select
+      options:
+      - 是否怕人、是否利用人造設施築巢、適應都市環境強弱
+      - 嘴喙顏色、尾羽顏色、冠羽是否明顯
+      answer: 0
+    - prompt: 1.請把第三段文字中，要你看表的地方畫線
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 2.這段要你看表的什麼？（單選）
+      type: select
+      options:
+      - 兩種八哥的外形與習性
+      - 兩種八哥的數量變化
+      answer: 1
+    - prompt: 1.表二主要提供的是哪一類訊息？（單選）
+      type: select
+      options:
+      - 兩種八哥近年族群數量的變化
+      - 白尾八哥和臺灣冠八哥的異同
+      answer: 0
+    - prompt: 1.第三段說「外來種白尾八哥都明顯多過原生種臺灣冠八哥」，表二中的哪些資料可以支持這句話？（複選）
+      type: select
+      options:
+      - 近年數量變化（2009-2020）
+      - 看得到的地點數／總調查地點數（2009-2021）
+      - 2021年看得到的地點數
+      - 2018年花蓮調查結果
+      answer: 0
+    - prompt: 2.讀表二時，看到「84／584」旁邊有「註2」，到表格下方看註解有什麼幫助？（單選）
+      type: select
+      options:
+      - 註2會說明這個寫法的意思，幫助我們理解表格內容。
+      - 註2會補充八哥的外形特徵，幫助我們分辨兩種八哥。
+      answer: 0
+    - prompt: 3.第三段說「有些地方甚至已經看不到臺灣冠八哥的身影了」，表二中哪一項最直接支持這句話？（單選）
+      type: select
+      options:
+      - 近年數量變化：無明顯變化
+      - 2021年看得到的地點數：23個地點
+      - 2018年花蓮調查結果：0隻
+      - 白尾八哥成長250%
+      answer: 2
+    - prompt: 4.作者呈現表格後，通常會在文字中說明這張表的重要訊息。請回到第三段，判斷哪一句最能統整表二最重要的訊息？（單選）
+      type: select
+      options:
+      - 表二則說明了兩種八哥近年族群數量的變化
+      - 從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥
+      - 可是，當初白尾八哥被引進臺灣時，牠們的數量很少，臺灣冠八哥才是隨處可見的常客。
+      - 那麼，為什麼幾十年過去，原生種臺灣冠八哥逐漸消聲匿跡，白尾八哥卻愈來愈常見，聲勢愈來愈大呢？
+      answer: 1
+    - prompt: 1.再回頭看表一，哪幾項差異最可能和第三段的數量變化有關？（複選）
+      type: select
+      options:
+      - 較不怕人／較怕人
+      - 常利用人造設施築巢／較少利用人造設施築巢
+      - 適應都市環境較強／較弱
+      - 嘴喙顏色不同
+      answer: 0
+    - prompt: 2.下面哪一句最能把第三段和表二的意思一起說清楚？（單選）
+      type: select
+      options:
+      - 表二說明兩種八哥近年的數量差不多，而表一只是補充牠們名稱上的不同。
+      - 表二告訴我們兩種八哥近年的族群差距很大，而表一提供了進一步思考原因的重要線索。
+      answer: 1
+    - prompt: 3.你發現了嗎，讀第三段不能只看表二，還要回頭看表一，是因為：
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 1.這段要你「回到表一」回答什麼問題？（單選）
+      type: select
+      options:
+      - 八哥的外形與習性
+      - 根據表一試著推論兩種八哥族群變化的原因
+      answer: 1
+    - prompt: 1.請根據表一，並結合第四段提到的都市化背景，試著推論兩種八哥族群變化的原因？
+      type: free_text
+      answer: null
+      reference_answer: null
+  answer_space: free_text
+  answer:
+  - 0
+  - 1
+  - null
+  - 0
+  - 1
+  - *id001
+  - *id002
+  - 1
+  - 1
+  - 1
+  - 0
+  - null
+  - 1
+  - 0
+  - 0
+  - 0
+  - 2
+  - 1
+  - 0
+  - 1
+  - null
+  - 1
+  - null
+  grader: rubric_ai
+  anchors:
+  - block_id: fig1
+  - block_id: fig2
+  - block_id: tbl1
+  - block_id: p1
+  - block_id: tbl2
+  - block_id: tbl3
+  - block_id: p2
+  - block_id: p3
+  needs_review: true
+- id: ex-keypoints
+  type: exercise
+  question:
+    kind: keypoints_table
+    structure: nested
+    title: 都是八哥，為什麼命運不一樣？
+    rows:
+    - label: 主題
+      sub_label: 文章探討的核心問題是什麼？
+      blank_ids:
+      - r1.b1
+      - r1.b2
+    - label: 觀察 段1．圖一
+      sub_label: 圖一告訴我們什麼？
+      blank_ids:
+      - r2.b1
+    - label: 觀察 段2．表一
+      sub_label: 表一比較了哪些項目？
+      blank_ids:
+      - r3.b1
+      - r3.b2
+      - r3.b3
+    - label: 觀察 段3．表二
+      sub_label: 表二呈現了什麼數據？
+      blank_ids:
+      - r4.b1
+      - r4.b2
+    - label: 推論 段4
+      sub_label: 兩種族群命運差異的可能原因？
+      blank_ids:
+      - r5.b1
+      - r5.b2
+    blanks:
+    - id: r1.b1
+      answer: 白尾八哥
+    - id: r1.b2
+      answer: 臺灣冠八哥
+    - id: r2.b1
+      answer: 十分相似
+    - id: r3.b1
+      answer: 嘴喙
+    - id: r3.b2
+      answer: 尾羽
+    - id: r3.b3
+      answer: 怕人
+    - id: r4.b1
+      answer: 白尾八哥
+    - id: r4.b2
+      answer: 臺灣冠八哥
+    - id: r5.b1
+      answer: 白尾八哥
+    - id: r5.b2
+      answer: 都市化
+  answer_space: text
+  answer:
+    r1.b1: 白尾八哥
+    r1.b2: 臺灣冠八哥
+    r2.b1: 十分相似
+    r3.b1: 嘴喙
+    r3.b2: 尾羽
+    r3.b3: 怕人
+    r4.b1: 白尾八哥
+    r4.b2: 臺灣冠八哥
+    r5.b1: 白尾八哥
+    r5.b2: 都市化
+  grader: exact
+  anchors:
+  - block_id: tbl3
+  needs_review: false

@@ -1,0 +1,354 @@
+{
+  "blocks": [
+    {
+      "id": "p1",
+      "text": "本文第一段有三句，請你先判斷哪一個句子是描述「不好的事」，而且是「最嚴重」的。(請在□打勾，三選一。)",
+      "type": "paragraph"
+    },
+    {
+      "id": "p2",
+      "text": "□句1：2012年10月，屏東科技大學的研究人員收到兩隻死亡的老鷹，檢驗後，確認老鷹體內含有劇毒農藥。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p3",
+      "text": "句2：2013年，他們在屏東縣一塊紅豆田中，發現了超過3000隻野鳥屍體。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p4",
+      "text": "第一段有三個句子，第一句和第二句都是描述「不好的事」，我覺得第二句「發現超過3000隻野鳥屍體」更嚴重，所以我留下第二句，並把第二句畫線。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p5",
+      "text": "請你先判斷哪些句子是描述「有人想出辦法或行動的句子」。（在□打勾，三選二）",
+      "type": "paragraph"
+    },
+    {
+      "id": "p6",
+      "text": "解決1：屏東科技大學在縣政府的協助下，找上當初發現超過3000隻鳥屍的紅豆田，向地主林清源先生說明這個生態的悲劇。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p7",
+      "text": "解決2：林先生坦承錯誤，自2014年起，開始使用機械播種將紅豆埋入土中，有效減少了播種期的鳥害；收成時也放棄使用落葉劑與除草劑。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p8",
+      "text": "祕訣：「結果」通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變。「結果」常有明顯的關鍵詞，例如「結果」、「最後」等。",
+      "type": "paragraph"
+    },
+    {
+      "id": "p9",
+      "text": "請你先判斷哪些句子是描述「行動後帶來的改變」。（在□打勾，三選一）",
+      "type": "paragraph"
+    },
+    {
+      "id": "p10",
+      "text": "這是一篇問題解決結構的文章，閱讀聚光燈你已經學會怎麼用線索來找重點，接著，我們就來整理本課的重點嘍！",
+      "type": "paragraph"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p5",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p6",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p7",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p8",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p9",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p10",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        null,
+        null,
+        null,
+        null,
+        0,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        0,
+        null,
+        null,
+        null
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight",
+      "needs_review": false,
+      "question": {
+        "instruction": "這篇故事是一篇報導式說明文，講「毒鳥事件」解決的過程。故事結構裡有明顯的問題、解決、結果。但閱讀時，如何找到文章中的「問題、解決、結果」呢？我們可以用一些線索來做判斷喔！\n我們來練習用兩步驟（❶找重點句；❷精簡重點句）找「問題、解決、結果」。",
+        "kind": "guided_steps",
+        "steps": [
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "❶找重點句：",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "❷精簡重點句：",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "1.有大量的野鳥中毒死亡。",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "❶找重點句：（第4段）",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "想一想這句話的意思，用更簡短的方式表達重點。（在",
+              "打勾，二選一。）"
+            ],
+            "prompt": "❷精簡重點句：",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "(1)請判斷「解決1」可以精簡成底下哪一個句子？",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "1.屏科大找林先生溝通。",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "(2)請判斷「解決2」可以精簡成底下哪一個句子？",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "1.林先生坦承錯誤。",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "1.課文第五段：",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "(1)請先尋找重點句，並畫線。",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "（在",
+              "打勾，二選一。）"
+            ],
+            "prompt": "(2)請判斷第5段的「解決」可以精簡成底下哪個句子？（在□打勾，二選一。）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "1.全聯與農民合作，並高價收購紅豆",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "❶找重點句：（第6段）",
+            "reference_answer": null,
+            "type": "free_text"
+          },
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "❷精簡重點句：想一想這句話的意思，用更簡短的方式表達重點。",
+            "reference_answer": null,
+            "type": "free_text"
+          }
+        ],
+        "strategy_name": "摘要策略：問題．解決結構找重點"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [],
+      "answer": {
+        "r1.b1": "中毒",
+        "r2.b1": "無毒農法",
+        "r2.b2": "高價",
+        "r3.b1": "生態",
+        "r3.b2": "經濟",
+        "r4.b1": "消費者"
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-keypoints",
+      "needs_review": false,
+      "question": {
+        "blanks": [
+          {
+            "answer": "中毒",
+            "hint": null,
+            "id": "r1.b1",
+            "options": null
+          },
+          {
+            "answer": "無毒農法",
+            "hint": null,
+            "id": "r2.b1",
+            "options": null
+          },
+          {
+            "answer": "高價",
+            "hint": null,
+            "id": "r2.b2",
+            "options": null
+          },
+          {
+            "answer": "生態",
+            "hint": null,
+            "id": "r3.b1",
+            "options": null
+          },
+          {
+            "answer": "經濟",
+            "hint": null,
+            "id": "r3.b2",
+            "options": null
+          },
+          {
+            "answer": "消費者",
+            "hint": null,
+            "id": "r4.b1",
+            "options": null
+          }
+        ],
+        "kind": "keypoints_table",
+        "rows": [
+          {
+            "blank_ids": [
+              "r1.b1"
+            ],
+            "hint": null,
+            "label": "問題",
+            "paragraph": null,
+            "sub_label": null,
+            "template": null
+          },
+          {
+            "blank_ids": [
+              "r2.b1",
+              "r2.b2"
+            ],
+            "hint": null,
+            "label": "解決（誰＋做什麼）",
+            "paragraph": null,
+            "sub_label": null,
+            "template": null
+          },
+          {
+            "blank_ids": [
+              "r3.b1",
+              "r3.b2"
+            ],
+            "hint": null,
+            "label": "結果",
+            "paragraph": null,
+            "sub_label": null,
+            "template": null
+          },
+          {
+            "blank_ids": [
+              "r4.b1"
+            ],
+            "hint": null,
+            "label": "迴響（結語）",
+            "paragraph": null,
+            "sub_label": null,
+            "template": null
+          }
+        ],
+        "structure": "flat",
+        "title": "老鷹紅豆的故事"
+      },
+      "type": "exercise"
+    }
+  ],
+  "id": "G6-L23",
+  "lesson_code": "G6-L23",
+  "title": "老鷹紅豆的故事"
+}

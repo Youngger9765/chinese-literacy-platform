@@ -1,0 +1,192 @@
+id: G7-L28
+lesson_code: G7-L28
+title: 看不見的兇手:以實驗破解肉湯腐敗之謎
+blocks:
+- id: fig1
+  type: figure
+  asset: fig1.jpeg
+  caption: null
+- id: p1
+  type: paragraph
+  text: ①研究問題  ②假設  □③驗證方法  □④結論
+- id: p2
+  type: paragraph
+  text: →段1~2有插圖嗎？ □①有 ②沒有
+- id: p3
+  type: paragraph
+  text: □①研究問題  □②假設  ③驗證方法  □④結論
+- id: p4
+  type: paragraph
+  text: □①研究問題  □②假設  □③驗證方法  ④結論
+- id: ex-spotlight
+  type: exercise
+  question:
+    kind: graphic_text_integration
+    strategy_name: 圖文整合閱讀策略（初階）
+    instruction: 說明：圖文題在近年會考國文科的比重大幅增加——114年會考圖文題有9題，但十年前（105年）的會考卻只有1題。圖文題就是「文字帶著插圖」的題目，你不能只看文字，也不能只看插圖，眼睛必須在文字和插圖中來回移動，把文圖之間的關係弄清楚，才能又快又正確地答題。這一課我們就用一個科學史上有名的實驗，來學習如何閱讀、解答圖文題。
+    steps:
+    - prompt: 1.圖一的標題是：   巴斯德的鵝頸瓶實驗的設計與程序
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 2.實驗共有幾個情境？    三    個。
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 3.圖一用什麼方式呈現實驗？（單選）
+      type: select
+      options:
+      - 用箭頭呈現三個實驗情境的進行方式與結果
+      - 用顏色呈現三種肉湯的不同味道
+      answer: 0
+    - prompt: 4.圖一整體來看，這張圖最像在比較什麼？（單選）
+      type: select
+      options:
+      - 肉湯在什麼情境下會產生改變？
+      - 肉湯加熱後，會產生什麼改變？
+      answer: 0
+    - prompt: 5.根據圖一，你猜這篇文章最可能想回答哪一個問題？（單選）
+      type: select
+      options:
+      - 肉湯顏色和加熱的時間長短有沒有關係
+      - 肉湯腐敗和瓶子的處理方式有沒有關係
+      answer: 1
+    - prompt: 1.這是一篇科學性文章，段1～2，主要在描述研究的什麼？（4選2）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 2.段3主要描述這個研究的什麼？（單選）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (1)「鵝頸瓶保持開口，外界空氣仍可進入，但空氣中的微生物會被彎曲的瓶頸攔住，沉積在頸部，因此無法進入瓶中的肉湯」這句，圖一的哪一部分在描述這段文字？結果如何？（單選）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (2)「將瓶頸折斷，空氣中若有微生物，就會掉進湯裡」這句，圖一的哪一部分在描述這段文字？結果如何？（單選）
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: (3)「把瓶身傾斜，讓肉湯流到瓶口」這句，圖一的哪一部分在描述這段文字？結果如何？（單選）
+      type: select
+      options:
+      - ⒈情境①-瓶頸彎曲，瓶口保持開放肉湯沒有腐敗
+      - ⒉情境②-瓶頸被打斷，瓶口直接外露肉湯臭了
+      answer: 0
+    - prompt: 3.段4主要描述這個研究的什麼？
+      type: free_text
+      answer: null
+      reference_answer: null
+    - prompt: 下面哪一句，最能把文字和插圖的意思一起說清楚？（單選）
+      type: select
+      options:
+      - 巴斯德比較三種情況後發現，肉湯腐敗和微生物污染有關
+      - 巴斯德比較三種情況後發現，只要肉湯接觸空氣就會腐敗
+      answer: 0
+  answer_space: free_text
+  answer:
+  - null
+  - null
+  - 0
+  - 0
+  - 1
+  - null
+  - null
+  - null
+  - null
+  - 0
+  - null
+  - 0
+  grader: rubric_ai
+  anchors:
+  - block_id: fig1
+  - block_id: p1
+  - block_id: p2
+  - block_id: p3
+  - block_id: p4
+  needs_review: false
+- id: ex-keypoints
+  type: exercise
+  question:
+    kind: keypoints_table
+    structure: flat
+    title: 以實驗破解肉湯腐敗之謎
+    rows:
+    - label: 研究問題/解釋（段1）
+      sub_label: null
+      blank_ids:
+      - r1.b1
+      - r1.b2
+    - label: 新說法/假說（段2）
+      sub_label: null
+      blank_ids:
+      - r2.b1
+      - r2.b2
+      - r2.b3
+    - label: 實驗/檢驗（段3)
+      sub_label: null
+      blank_ids:
+      - r3.b1
+      - r3.b2
+      - r3.b3
+      - r3.b4
+      - r3.b5
+      - r3.b6
+    - label: 結論(段4)
+      sub_label: null
+      blank_ids:
+      - r4.b1
+      - r4.b2
+    - label: 研究影響(段5)
+      sub_label: null
+      blank_ids:
+      - r5.b1
+    blanks:
+    - id: r1.b1
+      answer: 腐敗／變酸發臭
+    - id: r1.b2
+      answer: 自然發生說
+    - id: r2.b1
+      answer: 微生物
+    - id: r2.b2
+      answer: 煮沸
+    - id: r2.b3
+      answer: 接觸空氣
+    - id: r3.b1
+      answer: 保持完整
+    - id: r3.b2
+      answer: 沒有腐敗
+    - id: r3.b3
+      answer: 折斷
+    - id: r3.b4
+      answer: 腐敗了／臭掉了
+    - id: r3.b5
+      answer: 傾斜
+    - id: r3.b6
+      answer: 腐敗了／臭掉了
+    - id: r4.b1
+      answer: 自然產生
+    - id: r4.b2
+      answer: 微生物污染
+    - id: r5.b1
+      answer: 公共衛生
+  answer_space: text
+  answer:
+    r1.b1: 腐敗／變酸發臭
+    r1.b2: 自然發生說
+    r2.b1: 微生物
+    r2.b2: 煮沸
+    r2.b3: 接觸空氣
+    r3.b1: 保持完整
+    r3.b2: 沒有腐敗
+    r3.b3: 折斷
+    r3.b4: 腐敗了／臭掉了
+    r3.b5: 傾斜
+    r3.b6: 腐敗了／臭掉了
+    r4.b1: 自然產生
+    r4.b2: 微生物污染
+    r5.b1: 公共衛生
+  grader: exact
+  anchors:
+  - block_id: fig1
+  needs_review: false

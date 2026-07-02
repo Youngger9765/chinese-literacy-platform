@@ -1,0 +1,88 @@
+id: G6-L24
+lesson_code: G6-L24
+title: 白鯨救援：一場人與自然的協奏曲
+blocks:
+- id: ex-spotlight
+  type: exercise
+  question:
+    kind: guided_steps
+    strategy_name: 摘要策略：問題．解決結構找重點
+    instruction: 這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，你還記得祕訣嗎？請你連連看。
+    steps:
+    - prompt: 「問題」的祕訣是什麼？
+      type: select
+      options:
+      - 通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。
+      - 通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。
+      - 通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。
+      answer: 1
+    - prompt: 「解決」的祕訣是什麼？
+      type: select
+      options:
+      - 通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。
+      - 通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。
+      - 通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。
+      answer: 2
+    - prompt: 「結果」的祕訣是什麼？
+      type: select
+      options:
+      - 通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。
+      - 通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。
+      - 通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。
+      answer: 0
+  answer_space: free_text
+  answer:
+  - 1
+  - 2
+  - 0
+  grader: rubric_ai
+  anchors: []
+  needs_review: false
+- id: ex-keypoints
+  type: exercise
+  question:
+    kind: keypoints_table
+    structure: nested
+    title: null
+    rows:
+    - label: '問題
+
+        /（2）'
+      sub_label: 描述一個「不好的事或困難」
+      blank_ids:
+      - r1.b1
+    - label: '解決~6
+
+        /（3）'
+      sub_label: 有人想出辦法或行動 (誰＋做什麼)
+      blank_ids:
+      - r2.b1
+      - r2.b2
+      - r2.b3
+    - label: '結果
+
+        /（6）'
+      sub_label: 行動後，造成了什麼改變？
+      blank_ids:
+      - r3.b1
+    blanks:
+    - id: r1.b1
+      answer: 困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了
+    - id: r2.b1
+      answer: 用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類
+    - id: r2.b2
+      answer: 派破冰船救援，開出一條20公里的水道
+    - id: r2.b3
+      answer: 播放古典音樂引導白鯨前進
+    - id: r3.b1
+      answer: 數千頭白鯨游出冰原，回到大海
+  answer_space: text
+  answer:
+    r1.b1: 困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了
+    r2.b1: 用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類
+    r2.b2: 派破冰船救援，開出一條20公里的水道
+    r2.b3: 播放古典音樂引導白鯨前進
+    r3.b1: 數千頭白鯨游出冰原，回到大海
+  grader: exact
+  anchors: []
+  needs_review: false

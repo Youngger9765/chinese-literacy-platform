@@ -1,0 +1,233 @@
+id: G6-L22
+lesson_code: G6-L22
+title: 小兵立大功：雞鳴狗盜的故事
+blocks:
+- id: p1
+  type: paragraph
+  text: 天氣炎熱，烏鴉又渴又累。牠找到一個有水的瓶子，但瓶子太深，水太少，烏鴉喝不到。烏鴉叼來小石頭丟進瓶子，讓水面升高，最後順利喝到水。
+- id: p2
+  type: paragraph
+  text: 孟嘗君連夜逃到函谷關，但天沒亮，城門不能開。當時規定要聽到雞鳴，士兵才會開門。
+- id: p3
+  type: paragraph
+  text: 這時，一位食客雞鳴先生站出來說他會學雞叫。他學得唯妙唯肖，引來附近公雞一起叫，士兵以為天亮了，就開了城門。
+- id: p4
+  type: paragraph
+  text: 孟嘗君一行人順利出關，逃出秦國。
+- id: p5
+  type: paragraph
+  text: 孟嘗君被秦昭王軟禁，情勢危急。他請幸姬幫忙，幸姬願意救他，但提出條件，要一件白狐裘。可是那件大衣已經送給秦王，孟嘗君無法再拿出一件。
+- id: p6
+  type: paragraph
+  text: 這時，一位會狗盜的食客站出來。他潛入寶庫，把白狐裘偷了回來。幸姬收到大衣後很開心，幫孟嘗君在秦王面前說好話。秦王聽信她的話，便放了孟嘗君。
+- id: p7
+  type: paragraph
+  text: 有一天，吳國送了一頭大象給曹操。大家都很好奇這頭大象到底有多重，可是大象那麼大，放不上秤，沒辦法知道大象的重量。
+- id: p8
+  type: paragraph
+  text: 這時，年紀還小的曹沖說：「我有辦法！」他請人把大象牽到一艘大船上，等船下沉穩定後，在船身畫一條水位線。然後把大象牽下來，再往船上裝石頭，一邊裝一邊觀察水位，直到水位線回到原來的位置。
+- id: p9
+  type: paragraph
+  text: 最後，把船上的石頭搬下來一個一個秤重量，就知道大象的重量了。
+- id: ex-spotlight
+  type: exercise
+  question:
+    kind: guided_steps
+    strategy_name: 摘要策略：問題．解決．結果結構
+    instruction: '好故事，大家都愛看。為什麼？因為主角不是一帆風順，而是會遇到困難，然後想辦法解決，最後扭轉局面，迎向結局。這樣的故事最精彩、最吸引人！
+
+      所以，一個經典又精彩的故事，常常有四個重點：'
+    steps:
+    - prompt: ❶主角是誰？
+      type: select
+      options:
+      - 烏鴉
+      - 麻雀
+      answer: 0
+    - prompt: ❷主角遇到了什麼「問題」？
+      type: select
+      options:
+      - 喝不到水
+      - 天氣炎熱
+      answer: 0
+    - prompt: ❸問題如何「解決」？
+      type: select
+      options:
+      - 丟小石頭進瓶子裡，讓水面升高
+      - 等待下雨，讓瓶子裝滿水
+      answer: 0
+    - prompt: ❹最後得到什麼「結果」？
+      type: select
+      options:
+      - 主角順利喝到水
+      - 主角沒有喝到水
+      answer: 0
+    - prompt: ❶主角是誰？
+      type: select
+      options:
+      - 孟嘗君
+      - 秦昭王
+      - 雞鳴先生
+      answer: 0
+    - prompt: ❷主角遇到了什麼「問題」？
+      type: select
+      options:
+      - 被追兵追到
+      - 天沒亮，城門不能開
+      answer: 1
+    - prompt: ❸問題如何「解決」？孟嘗君的食客【　　　】，引來附近公雞也一起叫。
+      type: free_text
+      answer: null
+      reference_answer: 模仿雞叫
+    - prompt: ❹最後得到什麼「結果」？
+      type: select
+      options:
+      - 主角  成功出關
+      - 沒有出關。
+      answer: 0
+    - prompt: ❶主角是誰？ □秦昭王　孟嘗君　□幸姬 □狗盜先生
+      type: select
+      options:
+      - 秦昭王
+      - 孟嘗君
+      - 幸姬
+      - 狗盜先生
+      answer: 1
+    - prompt: ❷主角遇到了什麼「問題」？
+      type: select
+      options:
+      - 沒錢買白狐裘　幸姬要白狐裘但已送給秦王
+      - 找不到人幫忙
+      answer: 0
+    - prompt: ❸問題如何「解決」？
+      type: select
+      options:
+      - 拜託秦王讓給幸姬
+      - 食客潛入寶庫偷回白狐裘
+      answer: 1
+    - prompt: ❹最後得到什麼「結果」？
+      type: select
+      options:
+      - 幸姬幫忙說話，秦王放了孟嘗君
+      - 幸姬拒絕幫忙，孟嘗君被關
+      answer: 0
+    - prompt: ❶主角是誰？
+      type: select
+      options:
+      - 曹操
+      - 曹沖
+      answer: 1
+    - prompt: ❷主角遇到了什麼「問題」？
+      type: select
+      options:
+      - 大象太重，沒辦法秤
+      - 大家只是好奇，沒有實際困難
+      answer: 0
+    - prompt: ❸問題如何「解決」？
+      type: select
+      options:
+      - 請工人抬大象放到大磅秤上秤重
+      - 讓大家猜一個大概的重量
+      - 用船的下沉水位線比對石頭重量，間接秤量體重
+      answer: 2
+    - prompt: ❹最後得到什麼「結果」？
+      type: select
+      options:
+      - 知道大象的重量
+      - 不知道大象的重量
+      answer: 0
+  answer_space: free_text
+  answer:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 1
+  - null
+  - 0
+  - 1
+  - 0
+  - 1
+  - 0
+  - 1
+  - 0
+  - 2
+  - 0
+  grader: rubric_ai
+  anchors:
+  - block_id: p1
+  - block_id: p2
+  - block_id: p3
+  - block_id: p4
+  - block_id: p5
+  - block_id: p6
+  - block_id: p7
+  - block_id: p8
+  - block_id: p9
+  needs_review: false
+- id: ex-keypoints
+  type: exercise
+  question:
+    kind: keypoints_table
+    structure: nested
+    title: 小兵立大功：雞鳴狗盜的故事
+    rows:
+    - label: 問題
+      sub_label: null
+      blank_ids: []
+    - label: 解決
+      sub_label: 問題1
+      blank_ids:
+      - r2.b1
+    - label: 解決
+      sub_label: 解決1
+      blank_ids:
+      - r3.b1
+    - label: 解決
+      sub_label: 結果1
+      blank_ids:
+      - r4.b1
+    - label: 解決
+      sub_label: 問題2
+      blank_ids:
+      - r5.b1
+      - r5.b2
+    - label: 解決
+      sub_label: 解決2
+      blank_ids:
+      - r6.b1
+    - label: 解決
+      sub_label: 結果3
+      blank_ids:
+      - r7.b1
+    - label: 結果
+      sub_label: null
+      blank_ids: []
+    blanks:
+    - id: r2.b1
+      answer: 凶多吉少
+    - id: r3.b1
+      answer: 狗
+    - id: r4.b1
+      answer: 軟禁
+    - id: r5.b1
+      answer: 天亮
+    - id: r5.b2
+      answer: 出不了關
+    - id: r6.b1
+      answer: 公雞叫
+    - id: r7.b1
+      answer: 終於打開／提前開啟
+  answer_space: text
+  answer:
+    r2.b1: 凶多吉少
+    r3.b1: 狗
+    r4.b1: 軟禁
+    r5.b1: 天亮
+    r5.b2: 出不了關
+    r6.b1: 公雞叫
+    r7.b1: 終於打開／提前開啟
+  grader: exact
+  anchors: []
+  needs_review: false
