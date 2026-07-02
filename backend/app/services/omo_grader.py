@@ -25,6 +25,7 @@ Extracted helpers (issue #1879):
 
 import asyncio
 import logging
+import time
 from dataclasses import dataclass
 from typing import Optional
 
@@ -36,9 +37,38 @@ from .omo_crop_upload import _crop_and_upload, _crop_and_upload_answer_image  # 
 
 logger = logging.getLogger(__name__)
 
-# Circuit breaker state (module-level singleton, per-process)
+# Circuit breaker state (module-level singleton, per-process).
+# Time-based half-open: after THRESHOLD consecutive errors the breaker fast-fails,
+# but only until COOLDOWN_SECONDS elapse. After that a probe call is allowed
+# through so a recovered Vertex AI can reset the breaker — otherwise 3 transient
+# errors would wedge grading OFF until the Cloud Run instance restarts, because
+# the success-reset lives *after* the Gemini call the guard was blocking.
 _consecutive_errors = 0
+_circuit_open_until = 0.0  # monotonic deadline; breaker is open while now < this
 _CIRCUIT_BREAKER_THRESHOLD = 3
+_CIRCUIT_BREAKER_COOLDOWN_SECONDS = 30.0
+
+
+def _breaker_is_open() -> bool:
+    """True while the breaker is tripped AND still inside its cooldown window."""
+    return (
+        _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD
+        and time.monotonic() < _circuit_open_until
+    )
+
+
+def _record_grader_error() -> None:
+    """Count one failure and (re)arm the cooldown window."""
+    global _consecutive_errors, _circuit_open_until
+    _consecutive_errors += 1
+    _circuit_open_until = time.monotonic() + _CIRCUIT_BREAKER_COOLDOWN_SECONDS
+
+
+def _reset_grader_breaker() -> None:
+    """Clear breaker state after a successful (or mock) grade."""
+    global _consecutive_errors, _circuit_open_until
+    _consecutive_errors = 0
+    _circuit_open_until = 0.0
 
 
 @dataclass
@@ -86,11 +116,11 @@ async def grade_worksheet_images(
     Raises:
         RuntimeError: If circuit breaker threshold is reached (3 consecutive errors).
     """
-    global _consecutive_errors
-
-    if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
+    if _breaker_is_open():
+        retry_in = max(0.0, _circuit_open_until - time.monotonic())
         raise RuntimeError(
-            f"OMO grader circuit breaker open after {_CIRCUIT_BREAKER_THRESHOLD} consecutive errors"
+            f"OMO grader circuit breaker open after {_CIRCUIT_BREAKER_THRESHOLD} "
+            f"consecutive errors; retry in {retry_in:.0f}s"
         )
 
     questions = _build_question_schema(lesson)
@@ -106,7 +136,7 @@ async def grade_worksheet_images(
         from google.genai import types as genai_types
     except ImportError:
         logger.warning("google-genai not available — returning mock grades for local dev")
-        _consecutive_errors = 0
+        _reset_grader_breaker()
         return _mock_grades(questions, attempt_id)
 
     _grader_model, _grader_location = get_model_for_task("omo_grader")
@@ -171,13 +201,13 @@ async def grade_worksheet_images(
             timeout=120,  # #1717: thinking enabled — give it room (was 60)
         )
     except asyncio.TimeoutError:
-        _consecutive_errors += 1
-        logger.error("OMO grader timeout after 60s (consecutive_errors=%d)", _consecutive_errors)
+        _record_grader_error()
+        logger.error("OMO grader timeout after 120s (consecutive_errors=%d)", _consecutive_errors)
         if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
             raise RuntimeError("OMO grader circuit breaker opened")
         return []
     except Exception as exc:
-        _consecutive_errors += 1
+        _record_grader_error()
         logger.error("OMO grader Gemini call failed: %s (consecutive_errors=%d)", exc, _consecutive_errors)
         if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
             raise RuntimeError("OMO grader circuit breaker opened")
@@ -193,14 +223,14 @@ async def grade_worksheet_images(
         if not isinstance(items, list):
             raise ValueError(f"Expected list, got {type(items)}")
     except Exception as exc:
-        _consecutive_errors += 1
+        _record_grader_error()
         logger.error("OMO grader JSON parse failed: %s (consecutive_errors=%d)", exc, _consecutive_errors)
         if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
             raise RuntimeError("OMO grader circuit breaker opened")
         return []
 
     # Reset circuit breaker on success
-    _consecutive_errors = 0
+    _reset_grader_breaker()
 
     # Lookup table: question_id → full question dict (for validation + scoring)
     qmap = {q["id"]: q for q in questions}

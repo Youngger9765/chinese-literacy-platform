@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
-from ...dependencies.tenant import _check_classroom_access
+from ...dependencies.tenant import _check_classroom_access, get_owned_resource_or_403
 from ...models.school import Classroom, ClassroomStudent
 from ...models.teacher_instruction import TeacherInstruction
 from ...models.user import User
@@ -181,15 +181,11 @@ def update_instruction(
     db: Session = Depends(get_db),
 ):
     """Update an instruction. Only the teacher who created it can update."""
-    instruction = (
-        db.query(TeacherInstruction)
-        .filter(TeacherInstruction.id == instruction_id)
-        .first()
+    instruction = get_owned_resource_or_403(
+        db, TeacherInstruction, instruction_id, current_user.id,
+        not_found_detail="Instruction not found",
+        forbidden_detail="Not your instruction",
     )
-    if not instruction:
-        raise HTTPException(status_code=404, detail="Instruction not found")
-    if instruction.teacher_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your instruction")
 
     # Validate instruction_type if provided
     if payload.instruction_type is not None and payload.instruction_type not in VALID_INSTRUCTION_TYPES:
@@ -223,15 +219,11 @@ def delete_instruction(
     db: Session = Depends(get_db),
 ):
     """Soft-delete an instruction by setting is_active = False."""
-    instruction = (
-        db.query(TeacherInstruction)
-        .filter(TeacherInstruction.id == instruction_id)
-        .first()
+    instruction = get_owned_resource_or_403(
+        db, TeacherInstruction, instruction_id, current_user.id,
+        not_found_detail="Instruction not found",
+        forbidden_detail="Not your instruction",
     )
-    if not instruction:
-        raise HTTPException(status_code=404, detail="Instruction not found")
-    if instruction.teacher_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your instruction")
 
     instruction.is_active = False
     db.commit()

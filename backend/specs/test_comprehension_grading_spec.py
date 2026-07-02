@@ -32,15 +32,11 @@ def _import_schema():
 
 
 # ---------------------------------------------------------------------------
-# The clamping logic extracted verbatim from ai_comprehension.py L256-258.
+# Import the REAL clamping helper from production (was a hand-copy before) so
+# these contracts test the actual code path used by evaluate_comprehension().
 # ---------------------------------------------------------------------------
 
-def _apply_clamping(result: dict) -> dict:
-    """Mirror of the production score-clamping loop in evaluate_comprehension()."""
-    for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
-        val = result.get(key, 50)
-        result[key] = max(0, min(100, float(val)))
-    return result
+from app.services.ai_comprehension import _apply_clamping  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -169,6 +165,20 @@ def test_clamping_missing_key_default_is_not_zero():
     result = _apply_clamping({})
     for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
         assert result[key] != 0.0, f"{key} default must be 50, not 0"
+
+
+def test_missing_overall_is_derived_from_subscores_not_flat_50():
+    """When the model returns sub-scores but omits comprehension_score, the overall
+    is DERIVED from the documented weighting (字面30%+推論40%+評鑑30%), not a flat 50 —
+    faithful to the sub-scores that ARE present. All-missing still yields 50."""
+    result = _apply_clamping({
+        "literal_score": 80.0,
+        "inferential_score": 60.0,
+        "evaluative_score": 40.0,
+        # comprehension_score intentionally omitted
+    })
+    assert result["comprehension_score"] == 60.0  # 0.3*80 + 0.4*60 + 0.3*40
+    assert _apply_clamping({})["comprehension_score"] == 50.0  # neutral in all-missing case
 
 
 def test_clamping_missing_key_default_is_not_100():

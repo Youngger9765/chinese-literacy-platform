@@ -9,10 +9,12 @@ Endpoints:
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
-from ..auth.policies import is_admin
+from ..auth.policies import is_system_admin, resolve_user_org_ids
+from ..models.school import School
 from ..database import get_db
 from ..models.feedback import Feedback
 from ..models.user import User, UserRole
@@ -79,23 +81,40 @@ def _get_feedback_org_scope_filter(current_user: User, db: Session):
 
     Feedback has no direct org FK, so we join via the submitter's UserRole.
     """
-    if is_admin(current_user.id, db):
-        return None  # no restriction
+    if is_system_admin(current_user.id, db):
+        return None  # no restriction (org_admin falls through to org-scope filter)
 
-    caller_org_ids = get_user_org_ids(current_user) or []
+    caller_org_ids = resolve_user_org_ids(current_user.id, db)
     if not caller_org_ids:
         # org_admin with no org scope → sees nothing
         return Feedback.id.in_([])
 
-    # Subquery: user_ids whose org scope overlaps with caller's orgs.
-    # Use .scalar_subquery() to avoid SAWarning when used inside .in_().
+    # Submitters in the caller's org(s): via a direct org-scoped role OR a
+    # school-scoped role whose school is in the org (production model, where
+    # students/teachers are school-scoped). Use .scalar_subquery() to avoid a
+    # SAWarning when used inside .in_().
+    caller_school_ids = [
+        str(sid)
+        for (sid,) in db.query(School.id)
+        .filter(School.organization_id.in_(caller_org_ids))
+        .all()
+    ]
+    scope_predicates = [
+        and_(
+            UserRole.scope_type == "organization",
+            UserRole.scope_id.in_(list(caller_org_ids)),
+        )
+    ]
+    if caller_school_ids:
+        scope_predicates.append(
+            and_(
+                UserRole.scope_type == "school",
+                UserRole.scope_id.in_(caller_school_ids),
+            )
+        )
     submitter_ids_subq = (
         db.query(UserRole.user_id)
-        .filter(
-            UserRole.is_active == True,
-            UserRole.scope_type == "organization",
-            UserRole.scope_id.in_(caller_org_ids),
-        )
+        .filter(UserRole.is_active == True, or_(*scope_predicates))
         .scalar_subquery()
     )
     return Feedback.user_id.in_(submitter_ids_subq)
@@ -175,27 +194,13 @@ def update_feedback_status(
             detail=f"Feedback #{feedback_id} not found",
         )
 
-    # Scope check: org_admin may only modify feedback from their org's users
-    if not is_admin(current_user.id, db):
-        caller_org_ids = set(get_user_org_ids(current_user) or [])
-        if caller_org_ids:
-            # Check if the feedback submitter belongs to any of caller's orgs
-            submitter_in_org = (
-                db.query(UserRole)
-                .filter(
-                    UserRole.user_id == feedback.user_id,
-                    UserRole.is_active == True,
-                    UserRole.scope_type == "organization",
-                    UserRole.scope_id.in_(caller_org_ids),
-                )
-                .first()
-            )
-            if not submitter_in_org:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Not authorized to modify this feedback",
-                )
-        else:
+    # Scope check: org_admin may only modify feedback from their org's users.
+    # Resolve submitter org via school->org (production model). Fail closed if the
+    # caller has no org or the submitter is outside it.
+    if not is_system_admin(current_user.id, db):
+        caller_org_ids = resolve_user_org_ids(current_user.id, db)
+        submitter_org_ids = resolve_user_org_ids(feedback.user_id, db)
+        if not (caller_org_ids & submitter_org_ids):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to modify this feedback",

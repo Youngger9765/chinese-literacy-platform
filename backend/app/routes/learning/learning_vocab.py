@@ -251,7 +251,10 @@ async def validate_sentence(
     )
 
     return ValidateSentenceResponse(
-        is_correct=result.get("is_correct", True),
+        # Fail closed: if the grader omits the verdict, do NOT auto-pass the
+        # student. A missing is_correct means an ambiguous/malformed response,
+        # which must default to False (never mark a sentence correct by default).
+        is_correct=result.get("is_correct", False),
         feedback=result.get("feedback", "做得好！"),
         suggestion=result.get("suggestion", ""),
     )
