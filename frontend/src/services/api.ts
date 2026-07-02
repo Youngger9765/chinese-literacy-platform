@@ -12,6 +12,8 @@
  */
 
 import type { Story } from '../types';
+import { camelizeKeys } from '../schema/camelize';
+import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
@@ -106,6 +108,10 @@ interface ApiStoryDetail extends ApiStoryListItem {
     section_label_col?: string;
     notes?: string[];
   }> | null;
+  // Typed lesson_content contract (閱讀聚光燈 EDD, DARK — handoff §4-#2). snake_case dict
+  // straight from pydantic model_dump; null when the backend flag is OFF or no source.
+  // Parsed in apiDetailToStory via camelizeKeys + LessonSchema.safeParse (fail-safe).
+  lesson_content?: Record<string, unknown> | null;
 }
 
 interface ApiStoryListResponse {
@@ -185,6 +191,21 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     images: detail.images ?? [],
     lesson_code: detail.grade_code ?? '',
     paragraphs: detail.paragraphs,
+    // Typed lesson_content contract (閱讀聚光燈 EDD, DARK). Backend sends snake_case (or
+    // null when its flag is OFF); camelize + zod-parse into the typed Lesson the unified
+    // renderer wants. safeParse (never throws): on drift/half-shape → undefined, so the
+    // pages fall back to the storyToLesson stopgap instead of white-screening.
+    lessonContent: (() => {
+      if (!detail.lesson_content) return undefined;
+      const parsed = LessonSchema.safeParse(camelizeKeys(detail.lesson_content));
+      if (!parsed.success) {
+        if (import.meta.env.DEV) {
+          console.warn('lesson_content safeParse failed; falling back to storyToLesson', parsed.error);
+        }
+        return undefined;
+      }
+      return parsed.data;
+    })(),
   };
 }
 
