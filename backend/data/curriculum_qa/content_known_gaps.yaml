@@ -78,13 +78,10 @@ reading-strategy:
   - {lesson_code: 文-L8,  reason: classical_no_step}
   - {lesson_code: 文-L9,  reason: classical_no_step}
   - {lesson_code: 文-L10, reason: classical_no_step}
-  # G8 a/b sub-letter — 聚光燈 schema 已建 (_online-schema/G8-L3.spotlight.yml
-  # 等，22~51 blocks)，但尚未進 staging DB → 部署後即 pass，先誠實標記
-  - {lesson_code: G8-L3a,  reason: built_pending_deploy}
-  - {lesson_code: G8-L6a,  reason: built_pending_deploy}
-  - {lesson_code: G8-L9b,  reason: built_pending_deploy}
-  - {lesson_code: G8-L12a, reason: built_pending_deploy}
-  - {lesson_code: G8-L12b, reason: built_pending_deploy}
+  # G8 a/b multi-text siblings — spotlight now BOUND to their verified base/
+  # companion catalog source via correct-mapping.json (#2461, content-verified
+  # per-lesson): G8-L3a→G8-L3, G8-L6a→G8-L7, G8-L9b→G8-L12, G8-L12a→G8-L15,
+  # G8-L12b→G8-L16. Removed from known_gaps — no longer pending.
 
 story-structure:
   # 多文本課的第二/三篇 slot — 重點表內容在 primary slot (G7-L23)
