@@ -1,21 +1,21 @@
 /**
  * GuidedStepsInput — widget for `guided_steps` + `graphic_text_integration` kinds.
  *
+ * Steps are grouped into REGIONS by `step.section` (e.g. 例一 / 課文故事 / 小試身手).
+ * Each region renders ONCE as a bordered block: a section header + an optional
+ * worked-example `context` passage (shown a single time, not per step) + that
+ * region's step cards. This keeps a worked example self-contained and stops the
+ * per-step prompts from repeating the section lead-in ("例一：烏鴉喝水 …").
+ *
  * Per-step widgets:
  *   - select      → radios; verdict = selectedIndex === step.answer.
- *   - multi_select→ checkboxes; verdict = set-equality vs step.answer (Gap 7: the ONE
- *                   legacy lossy point — legacy GuidedStepsExercise only did select|
- *                   free_text; here multi_select is first-class).
+ *   - multi_select→ checkboxes; verdict = set-equality vs step.answer.
  *   - free_text   → textarea graded by `validateStrategyAnswer` (rubric_ai), FAIL-CLOSED
- *                   to is_correct:true (FALLBACK_GRADE) on AI error / no token — copying
- *                   BlockSequenceRenderer.tsx:110-145 (#2279: don't let AI outage block).
+ *                   to is_correct:true on AI error / no token (#2279: don't block student).
  *
- * The block-level list answer ([0,1,null,1,0,[1,2]]) is storage/regrade only, NOT a
- * second grading path — each step is graded by its own step.answer here. This widget
- * owns its per-step state and reports overall completion up via onAllStepsDone.
- *
- * Hooks are declared at the top level, before any effect that references them (#2279
- * TDZ gate). State setters used in effects are stable useState setters.
+ * The block-level list answer is storage/regrade only — each step is graded by its own
+ * step.answer here. Hooks are declared top-level before any effect that references them
+ * (#2279 TDZ gate).
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -58,7 +58,6 @@ const GuidedStepsInput: React.FC<Props> = ({
   const { token } = useAuth();
   const steps = question.steps;
 
-  // Per-step submitted feedback (verdict) + free-text grade + grading flag.
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
   const [grades, setGrades] = useState<Record<number, StrategyGradeResult>>({});
   const [gradingStep, setGradingStep] = useState<number | null>(null);
@@ -71,6 +70,23 @@ const GuidedStepsInput: React.FC<Props> = ({
   useEffect(() => {
     onAllStepsDone?.(allDone);
   }, [allDone, onAllStepsDone]);
+
+  // Group consecutive steps sharing a section into one region. The region carries the
+  // worked-example passage (context) once; a step's own context is lifted to its group.
+  const groups = useMemo(() => {
+    const gs: { section: string | null; context: string | null; items: number[] }[] = [];
+    steps.forEach((s, i) => {
+      const section = s.section ?? null;
+      const last = gs[gs.length - 1];
+      if (!last || last.section !== section) {
+        gs.push({ section, context: s.context ?? null, items: [i] });
+      } else {
+        if (!last.context && s.context) last.context = s.context;
+        last.items.push(i);
+      }
+    });
+    return gs;
+  }, [steps]);
 
   const setStepValue = useCallback(
     (i: number, v: unknown) => onChange({ ...value, [i]: v }),
@@ -118,7 +134,6 @@ const GuidedStepsInput: React.FC<Props> = ({
       setGrades((prev) => ({ ...prev, [i]: grade }));
       setFeedback((prev) => ({ ...prev, [i]: true }));
     } catch {
-      // FAIL-CLOSED: AI outage must not block the student (#2279).
       setGrades((prev) => ({ ...prev, [i]: FALLBACK_GRADE }));
       setFeedback((prev) => ({ ...prev, [i]: true }));
     } finally {
@@ -126,158 +141,166 @@ const GuidedStepsInput: React.FC<Props> = ({
     }
   };
 
+  const renderStep = (i: number) => {
+    const step = steps[i];
+    const fb = feedback[i];
+    const submitted = fb === true || fb === false;
+    const options = step.options ?? [];
+    return (
+      <div key={i} className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+        <p className="text-base font-medium text-on-surface whitespace-pre-wrap">{step.prompt}</p>
+
+        {step.type === 'select' && (
+          <>
+            <div className="space-y-2" role="radiogroup">
+              {options.map((opt, oi) => (
+                <button
+                  key={oi}
+                  type="button"
+                  role="radio"
+                  aria-checked={value[i] === oi}
+                  disabled={submitted}
+                  onClick={() => setStepValue(i, oi)}
+                  className={[
+                    'w-full text-left rounded-lg border px-4 py-2 text-base transition-colors',
+                    value[i] === oi ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-gray-200 hover:border-violet-300',
+                  ].join(' ')}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            {!submitted ? (
+              <button
+                type="button"
+                onClick={() => submitSelect(i)}
+                disabled={typeof value[i] !== 'number' || disabled}
+                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+              >
+                確認
+              </button>
+            ) : (
+              <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+                {fb ? '✓ 答對了' : '再想想看'}
+              </p>
+            )}
+          </>
+        )}
+
+        {step.type === 'multi_select' && (
+          <>
+            <div className="space-y-2">
+              {options.map((opt, oi) => {
+                const picked = Array.isArray(value[i]) ? (value[i] as number[]) : [];
+                const checked = picked.includes(oi);
+                return (
+                  <label key={oi} className="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-2 text-base cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={submitted}
+                      onChange={() => {
+                        const next = checked ? picked.filter((x) => x !== oi) : [...picked, oi].sort((a, b) => a - b);
+                        setStepValue(i, next);
+                      }}
+                      className="mt-1"
+                    />
+                    <span>{opt}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {!submitted ? (
+              <button
+                type="button"
+                onClick={() => submitMultiSelect(i)}
+                disabled={!Array.isArray(value[i]) || (value[i] as number[]).length === 0 || disabled}
+                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+              >
+                確認
+              </button>
+            ) : (
+              <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+                {fb ? '✓ 答對了' : '再想想看'}
+              </p>
+            )}
+          </>
+        )}
+
+        {step.type === 'free_text' && (
+          <>
+            <textarea
+              value={String(value[i] ?? '')}
+              disabled={submitted || gradingStep === i}
+              onChange={(e) => setStepValue(i, e.target.value)}
+              rows={3}
+              placeholder="請在此寫下你的答案…"
+              className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-base"
+              aria-label="自由作答"
+            />
+            {!submitted && gradingStep !== i ? (
+              <button
+                type="button"
+                onClick={() => void submitFreeText(i)}
+                disabled={disabled}
+                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600"
+              >
+                送出
+              </button>
+            ) : null}
+            {gradingStep === i ? (
+              <p className="text-sm text-violet-600 font-semibold">AI 批改中…</p>
+            ) : null}
+            {gradingStep !== i && grades[i] ? (
+              <div className={`rounded-lg border p-3 ${grades[i].is_correct ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'}`}>
+                <p className={`text-sm font-semibold ${grades[i].is_correct ? 'text-emerald-700' : 'text-amber-700'}`}>
+                  {grades[i].is_correct ? '✓ ' : '💡 '}
+                  {grades[i].feedback}
+                </p>
+                {grades[i].suggestion ? (
+                  <p className="mt-1.5 text-sm text-amber-700/90">{grades[i].suggestion}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="text-base text-on-surface whitespace-pre-wrap">{question.instruction}</p>
-      {steps.map((step, i) => {
-        const fb = feedback[i];
-        const submitted = fb === true || fb === false;
-        const options = step.options ?? [];
-        const prevSection = i > 0 ? steps[i - 1].section : undefined;
-        const showSection = step.section && step.section !== prevSection;
-        const isExample = step.section === '範例';
+      {groups.map((g, gi) => {
+        const isExample = !!g.context; // a region with a worked-example passage
         return (
-          <React.Fragment key={i}>
-            {showSection && (
-              <div className="flex items-center gap-2 pt-2">
+          <div
+            key={gi}
+            className={[
+              'rounded-xl border p-4 space-y-3',
+              isExample ? 'border-amber-300 bg-amber-50/40' : 'border-gray-200 bg-gray-50/60',
+            ].join(' ')}
+          >
+            {g.section && (
+              <div className="flex items-center gap-2">
                 <span
                   className={[
                     'inline-block rounded-full px-3 py-1 text-sm font-bold',
-                    isExample ? 'bg-amber-100 text-amber-800' : 'bg-violet-100 text-violet-800',
+                    isExample ? 'bg-amber-200 text-amber-900' : 'bg-violet-100 text-violet-800',
                   ].join(' ')}
                 >
-                  {step.section}
+                  {g.section}
                 </span>
                 <span className="h-px flex-1 bg-gray-200" />
               </div>
             )}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
-            {step.context && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-base text-amber-900 whitespace-pre-wrap">
-                <span className="mr-2 align-middle rounded bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-amber-900">
-                  範例短文
-                </span>
-                {step.context}
+            {g.context && (
+              <div className="rounded-lg border border-amber-200 bg-white p-3 text-base leading-relaxed text-gray-800 whitespace-pre-wrap">
+                {g.context}
               </div>
             )}
-            <p className="text-base font-medium text-on-surface whitespace-pre-wrap">{step.prompt}</p>
-
-            {step.type === 'select' && (
-              <>
-                <div className="space-y-2" role="radiogroup">
-                  {options.map((opt, oi) => (
-                    <button
-                      key={oi}
-                      type="button"
-                      role="radio"
-                      aria-checked={value[i] === oi}
-                      disabled={submitted}
-                      onClick={() => setStepValue(i, oi)}
-                      className={[
-                        'w-full text-left rounded-lg border px-4 py-2 text-base transition-colors',
-                        value[i] === oi ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-gray-200 hover:border-violet-300',
-                      ].join(' ')}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-                {!submitted ? (
-                  <button
-                    type="button"
-                    onClick={() => submitSelect(i)}
-                    disabled={typeof value[i] !== 'number' || disabled}
-                    className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
-                  >
-                    確認
-                  </button>
-                ) : (
-                  <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                    {fb ? '✓ 答對了' : '再想想看'}
-                  </p>
-                )}
-              </>
-            )}
-
-            {step.type === 'multi_select' && (
-              <>
-                <div className="space-y-2">
-                  {options.map((opt, oi) => {
-                    const picked = Array.isArray(value[i]) ? (value[i] as number[]) : [];
-                    const checked = picked.includes(oi);
-                    return (
-                      <label key={oi} className="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-2 text-base cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={submitted}
-                          onChange={() => {
-                            const next = checked ? picked.filter((x) => x !== oi) : [...picked, oi].sort((a, b) => a - b);
-                            setStepValue(i, next);
-                          }}
-                          className="mt-1"
-                        />
-                        <span>{opt}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {!submitted ? (
-                  <button
-                    type="button"
-                    onClick={() => submitMultiSelect(i)}
-                    disabled={!Array.isArray(value[i]) || (value[i] as number[]).length === 0 || disabled}
-                    className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
-                  >
-                    確認
-                  </button>
-                ) : (
-                  <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                    {fb ? '✓ 答對了' : '再想想看'}
-                  </p>
-                )}
-              </>
-            )}
-
-            {step.type === 'free_text' && (
-              <>
-                <textarea
-                  value={String(value[i] ?? '')}
-                  disabled={submitted || gradingStep === i}
-                  onChange={(e) => setStepValue(i, e.target.value)}
-                  rows={3}
-                  placeholder="請在此寫下你的答案…"
-                  className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-base"
-                  aria-label="自由作答"
-                />
-                {!submitted && gradingStep !== i ? (
-                  <button
-                    type="button"
-                    onClick={() => void submitFreeText(i)}
-                    disabled={disabled}
-                    className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600"
-                  >
-                    送出
-                  </button>
-                ) : null}
-                {gradingStep === i ? (
-                  <p className="text-sm text-violet-600 font-semibold">AI 批改中…</p>
-                ) : null}
-                {gradingStep !== i && grades[i] ? (
-                  <div className={`rounded-lg border p-3 ${grades[i].is_correct ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'}`}>
-                    <p className={`text-sm font-semibold ${grades[i].is_correct ? 'text-emerald-700' : 'text-amber-700'}`}>
-                      {grades[i].is_correct ? '✓ ' : '💡 '}
-                      {grades[i].feedback}
-                    </p>
-                    {grades[i].suggestion ? (
-                      <p className="mt-1.5 text-sm text-amber-700/90">{grades[i].suggestion}</p>
-                    ) : null}
-                  </div>
-                ) : null}
-              </>
-            )}
+            {g.items.map((i) => renderStep(i))}
           </div>
-          </React.Fragment>
         );
       })}
     </div>

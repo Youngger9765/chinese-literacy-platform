@@ -36,40 +36,30 @@ blocks:
     strategy_name: 摘要策略-問題.解決.結果結構
     instruction: 學習使用「問題、解決、結果」策略整理故事內容，幫助你輕鬆抓到重點。
     steps:
-    - prompt: '例一：烏鴉喝水
-
-        ❶主角是誰？'
+    - prompt: ❶主角是誰？
       type: free_text
       reference_answer: 烏鴉
-      section: 範例
+      section: 例一：烏鴉喝水
       context: 天氣炎熱，烏鴉又渴又累。牠找到一個有水的瓶子，但瓶子太深，水太少，烏鴉喝不到。烏鴉叼來小石頭丟進瓶子，讓水面升高，最後順利喝到水。
-    - prompt: '例一：烏鴉喝水
-
-        ❷主角遇到了什麼「問題」？'
+    - prompt: ❷主角遇到了什麼「問題」？
       type: select
       options:
       - 喝不到水
       - 天氣炎熱
       answer: 0
-      section: 範例
-    - prompt: '例一：烏鴉喝水
-
-        ❸問題如何「解決」？'
+      section: 例一：烏鴉喝水
+    - prompt: ❸問題如何「解決」？
       type: free_text
       reference_answer: 丟小石頭進瓶子裡，讓水面升高
-      section: 範例
-    - prompt: '例一：烏鴉喝水
-
-        ❹最後得到什麼「結果」？'
+      section: 例一：烏鴉喝水
+    - prompt: ❹最後得到什麼「結果」？
       type: select
       options:
       - 主角順利喝到水
       - 主角沒有喝到水
       answer: 0
-      section: 範例
-    - prompt: '接下來，我們來看課文的故事
-
-        ❶主角是誰？'
+      section: 例一：烏鴉喝水
+    - prompt: ❶主角是誰？
       type: select
       options:
       - 孟嘗君
@@ -77,33 +67,25 @@ blocks:
       - 雞鳴先生
       answer: 0
       section: 課文故事
-    - prompt: '接下來，我們來看課文的故事
-
-        ❷主角遇到了什麼「問題」？'
+    - prompt: ❷主角遇到了什麼「問題」？
       type: select
       options:
       - 被追兵追到
       - 天沒亮，城門不能開
       answer: 1
       section: 課文故事
-    - prompt: '接下來，我們來看課文的故事
-
-        ❸問題如何「解決」？孟嘗君的食客【 】，引來附近公雞也一起叫。'
+    - prompt: ❸問題如何「解決」？孟嘗君的食客【 】，引來附近公雞也一起叫。
       type: free_text
       reference_answer: 模仿雞叫
       section: 課文故事
-    - prompt: '接下來，我們來看課文的故事
-
-        ❹最後得到什麼「結果」？主角'
+    - prompt: ❹最後得到什麼「結果」？主角
       type: select
       options:
       - 成功出關
       - 沒有出關
       answer: 0
       section: 課文故事
-    - prompt: '小試身手1：課文另一個故事
-
-        ❶主角是誰？'
+    - prompt: ❶主角是誰？
       type: select
       options:
       - 秦昭王
@@ -111,71 +93,57 @@ blocks:
       - 幸姬
       - 狗盜先生
       answer: 1
-      section: 小試身手1
-    - prompt: '小試身手1：課文另一個故事
-
-        ❷主角遇到了什麼「問題」？'
+      section: 小試身手一
+    - prompt: ❷主角遇到了什麼「問題」？
       type: select
       options:
       - 沒錢買白狐裘
       - 幸姬要白狐裘但已送給秦王
       - 找不到人幫忙
       answer: 1
-      section: 小試身手1
-    - prompt: '小試身手1：課文另一個故事
-
-        ❸問題如何「解決」？'
+      section: 小試身手一
+    - prompt: ❸問題如何「解決」？
       type: select
       options:
       - 拜託秦王讓給幸姬
       - 再去買一件
       - 食客潛入寶庫偷回白狐裘
       answer: 2
-      section: 小試身手1
-    - prompt: '小試身手1：課文另一個故事
-
-        ❹最後得到什麼「結果」？'
+      section: 小試身手一
+    - prompt: ❹最後得到什麼「結果」？
       type: select
       options:
       - 幸姬幫忙說話，秦王放了孟嘗君
       - 幸姬拒絕幫忙，孟嘗君被關
       - 秦王說話不算話，不肯放人
       answer: 0
-      section: 小試身手1
-    - prompt: '小試身手2：進階挑戰 大象有多重？
-
-        ❶主角是誰？'
+      section: 小試身手一
+    - prompt: ❶主角是誰？
       type: select
       options:
       - 曹操
       - 曹沖
       answer: 1
-      section: 小試身手2
-    - prompt: '小試身手2：進階挑戰 大象有多重？
-
-        ❷主角遇到了什麼「問題」？'
+      section: 小試身手二：大象有多重？
+    - prompt: ❷主角遇到了什麼「問題」？
       type: free_text
       reference_answer: 大象太重，沒辦法秤
-      section: 小試身手2
-    - prompt: '小試身手2：進階挑戰 大象有多重？
-
-        ❸問題如何「解決」？'
+      section: 小試身手二：大象有多重？
+    - prompt: ❸問題如何「解決」？
       type: select
       options:
       - 請工人抬大象放到大磅秤上秤重
       - 讓大家猜一個大概的重量
       - 用船的下沉水位線比對石頭重量，間接秤量體重
       answer: 2
-      section: 小試身手2
-    - prompt: '小試身手2：進階挑戰 大象有多重？
-
-        ❹最後得到什麼「結果」？'
+      section: 小試身手二：大象有多重？
+    - prompt: ❹最後得到什麼「結果」？
       type: select
       options:
       - 知道大象的重量
       - 不知道大象的重量
       answer: 0
-      section: 小試身手2
+      section: 小試身手二：大象有多重？
   answer_space: free_text
   answer:
   - null

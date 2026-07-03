@@ -108,9 +108,9 @@
             "answer": null,
             "context": "天氣炎熱，烏鴉又渴又累。牠找到一個有水的瓶子，但瓶子太深，水太少，烏鴉喝不到。烏鴉叼來小石頭丟進瓶子，讓水面升高，最後順利喝到水。",
             "options": null,
-            "prompt": "例一：烏鴉喝水\n❶主角是誰？",
+            "prompt": "❶主角是誰？",
             "reference_answer": "烏鴉",
-            "section": "範例",
+            "section": "例一：烏鴉喝水",
             "type": "free_text"
           },
           {
@@ -120,18 +120,18 @@
               "喝不到水",
               "天氣炎熱"
             ],
-            "prompt": "例一：烏鴉喝水\n❷主角遇到了什麼「問題」？",
+            "prompt": "❷主角遇到了什麼「問題」？",
             "reference_answer": null,
-            "section": "範例",
+            "section": "例一：烏鴉喝水",
             "type": "select"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "例一：烏鴉喝水\n❸問題如何「解決」？",
+            "prompt": "❸問題如何「解決」？",
             "reference_answer": "丟小石頭進瓶子裡，讓水面升高",
-            "section": "範例",
+            "section": "例一：烏鴉喝水",
             "type": "free_text"
           },
           {
@@ -141,9 +141,9 @@
               "主角順利喝到水",
               "主角沒有喝到水"
             ],
-            "prompt": "例一：烏鴉喝水\n❹最後得到什麼「結果」？",
+            "prompt": "❹最後得到什麼「結果」？",
             "reference_answer": null,
-            "section": "範例",
+            "section": "例一：烏鴉喝水",
             "type": "select"
           },
           {
@@ -154,7 +154,7 @@
               "秦昭王",
               "雞鳴先生"
             ],
-            "prompt": "接下來，我們來看課文的故事\n❶主角是誰？",
+            "prompt": "❶主角是誰？",
             "reference_answer": null,
             "section": "課文故事",
             "type": "select"
@@ -166,7 +166,7 @@
               "被追兵追到",
               "天沒亮，城門不能開"
             ],
-            "prompt": "接下來，我們來看課文的故事\n❷主角遇到了什麼「問題」？",
+            "prompt": "❷主角遇到了什麼「問題」？",
             "reference_answer": null,
             "section": "課文故事",
             "type": "select"
@@ -175,7 +175,7 @@
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "接下來，我們來看課文的故事\n❸問題如何「解決」？孟嘗君的食客【 】，引來附近公雞也一起叫。",
+            "prompt": "❸問題如何「解決」？孟嘗君的食客【 】，引來附近公雞也一起叫。",
             "reference_answer": "模仿雞叫",
             "section": "課文故事",
             "type": "free_text"
@@ -187,7 +187,7 @@
               "成功出關",
               "沒有出關"
             ],
-            "prompt": "接下來，我們來看課文的故事\n❹最後得到什麼「結果」？主角",
+            "prompt": "❹最後得到什麼「結果」？主角",
             "reference_answer": null,
             "section": "課文故事",
             "type": "select"
@@ -201,9 +201,9 @@
               "幸姬",
               "狗盜先生"
             ],
-            "prompt": "小試身手1：課文另一個故事\n❶主角是誰？",
+            "prompt": "❶主角是誰？",
             "reference_answer": null,
-            "section": "小試身手1",
+            "section": "小試身手一",
             "type": "select"
           },
           {
@@ -214,9 +214,9 @@
               "幸姬要白狐裘但已送給秦王",
               "找不到人幫忙"
             ],
-            "prompt": "小試身手1：課文另一個故事\n❷主角遇到了什麼「問題」？",
+            "prompt": "❷主角遇到了什麼「問題」？",
             "reference_answer": null,
-            "section": "小試身手1",
+            "section": "小試身手一",
             "type": "select"
           },
           {
@@ -227,9 +227,9 @@
               "再去買一件",
               "食客潛入寶庫偷回白狐裘"
             ],
-            "prompt": "小試身手1：課文另一個故事\n❸問題如何「解決」？",
+            "prompt": "❸問題如何「解決」？",
             "reference_answer": null,
-            "section": "小試身手1",
+            "section": "小試身手一",
             "type": "select"
           },
           {
@@ -240,9 +240,9 @@
               "幸姬拒絕幫忙，孟嘗君被關",
               "秦王說話不算話，不肯放人"
             ],
-            "prompt": "小試身手1：課文另一個故事\n❹最後得到什麼「結果」？",
+            "prompt": "❹最後得到什麼「結果」？",
             "reference_answer": null,
-            "section": "小試身手1",
+            "section": "小試身手一",
             "type": "select"
           },
           {
@@ -252,18 +252,18 @@
               "曹操",
               "曹沖"
             ],
-            "prompt": "小試身手2：進階挑戰 大象有多重？\n❶主角是誰？",
+            "prompt": "❶主角是誰？",
             "reference_answer": null,
-            "section": "小試身手2",
+            "section": "小試身手二：大象有多重？",
             "type": "select"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "小試身手2：進階挑戰 大象有多重？\n❷主角遇到了什麼「問題」？",
+            "prompt": "❷主角遇到了什麼「問題」？",
             "reference_answer": "大象太重，沒辦法秤",
-            "section": "小試身手2",
+            "section": "小試身手二：大象有多重？",
             "type": "free_text"
           },
           {
@@ -274,9 +274,9 @@
               "讓大家猜一個大概的重量",
               "用船的下沉水位線比對石頭重量，間接秤量體重"
             ],
-            "prompt": "小試身手2：進階挑戰 大象有多重？\n❸問題如何「解決」？",
+            "prompt": "❸問題如何「解決」？",
             "reference_answer": null,
-            "section": "小試身手2",
+            "section": "小試身手二：大象有多重？",
             "type": "select"
           },
           {
@@ -286,9 +286,9 @@
               "知道大象的重量",
               "不知道大象的重量"
             ],
-            "prompt": "小試身手2：進階挑戰 大象有多重？\n❹最後得到什麼「結果」？",
+            "prompt": "❹最後得到什麼「結果」？",
             "reference_answer": null,
-            "section": "小試身手2",
+            "section": "小試身手二：大象有多重？",
             "type": "select"
           }
         ],
