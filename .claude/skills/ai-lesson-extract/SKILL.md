@@ -48,6 +48,7 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
   - `answer` = **可機器比對**的標準答案(索引 int、索引集 list[int]、字串、字串集、dict{blank_id: fill}…);**散文不算答案**
   - `grader` ∈ exact / set / ordered / rubric_ai / manual(且 space↔grader 要相容)
   - 判斷不出正解 → `answer` 可為 null **但**必須 `needs_review: true`(寧 🟡 不假 🟢)
+  - 註:這些答案不只用來判分,也用於**進度恢復**——學生重整頁面後,渲染器會用 `select`/`multi_select` 的機器索引**重算並還原**每步判分,`free_text` 步驟則用 `reference_answer` 做離線近似。因此機器可判分步驟的 `answer` 必須**正確**,且 `free_text` 步驟務必附 `reference_answer`(否則重整後無法還原、也無範答可對)。
 
 ## 輸入(可插拔來源,優先序)
 
