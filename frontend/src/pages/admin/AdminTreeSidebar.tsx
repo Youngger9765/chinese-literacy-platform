@@ -32,6 +32,9 @@ export type TreeNodeSelection =
 
 type TreeNodeType = TreeNodeSelection['type'];
 
+/** 朗讀測試集集成板（外部靜態頁）— 收合/展開兩處入口共用，避免路徑各硬編一次 (#2448) */
+export const READING_TESTSET_URL = '/presentation/reading-pipeline.html#testset';
+
 interface AdminTreeSidebarProps {
   selectedNode: TreeNodeSelection | null;
   onSelectNode: (node: TreeNodeSelection | null) => void;
@@ -153,6 +156,18 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         >
           <UsersIcon />
         </button>
+
+        {/* 朗讀測試集 — 外部集成板（新分頁），與完整側邊欄入口一致 (#2448) */}
+        <a
+          href={READING_TESTSET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="朗讀測試集"
+          className="p-1.5 mt-1 rounded-md transition-colors cursor-pointer text-gray-400 hover:bg-gray-100 hover:text-gray-600 flex items-center justify-center"
+          title="朗讀測試集（錄音 + AI 跑分現況）"
+        >
+          <span className="text-sm" aria-hidden="true">🎙</span>
+        </a>
       </div>
     );
   }
