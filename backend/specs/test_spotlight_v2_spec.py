@@ -216,3 +216,20 @@ def test_catalog_manifest_matches_files_if_present():
     sp = load_catalog_spotlight(sample)
     assert sp is not None and sp.get("blocks"), sample
     assert (CATALOG_DIR / f"{sample}.spotlight.yml").exists()
+
+
+@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
+def test_dev7_no_referent_table_figure_block(lesson_id: str):
+    """#2463 — a figure block with referent=table has no image and no inline
+    table data, so BlockSequenceRenderer.renderFigure can only draw an empty
+    「圖表參考」placeholder. Tables belong in the 重點表 (keypoints) step, never
+    as an inline spotlight figure. Lock that dev7 carries none."""
+    sp = load_dev7_spotlight(lesson_id)
+    offenders = [
+        b for b in (sp.get("blocks") or [])
+        if b.get("type") == "figure" and b.get("referent") == "table"
+    ]
+    assert not offenders, (
+        f"{lesson_id}: {len(offenders)} figure/referent=table block(s) render as "
+        f"empty 圖表參考 placeholders — model tables as the 重點表 step, not inline figures"
+    )
