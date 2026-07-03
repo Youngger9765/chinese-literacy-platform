@@ -1,0 +1,1252 @@
+{
+  "blocks": [
+    {
+      "id": "p1",
+      "text": "你最常見到哪一種野鳥？二十年前，臺灣民眾的回答會是嘰嘰喳喳的麻雀。但近年，在公園、校園、農地與河濱綠地裡，這個答案已經被聒噪喧囂的黑鳥——八哥——取代。但你知道嗎？一眼望去，黑忽忽的八哥還分兩種：「白尾八哥」和「臺灣冠八哥」。白尾八哥是外來種，因為很會模仿聲音，四、五十年前被引進臺灣作為寵物鳥。沒想到，近年鳥類族群的調查發現，白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。從圖一可以看出，這兩種八哥外形十分相似，不容易單靠外表一眼分辨。",
+      "type": "paragraph"
+    },
+    {
+      "asset": "images/G7-L30/G7-L30-06.png",
+      "caption": "白尾八哥（左）與 臺灣冠八哥（右）外形圖",
+      "id": "fig-1",
+      "label": "圖一",
+      "type": "figure"
+    },
+    {
+      "id": "p2",
+      "text": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。這兩種八哥外表相似，體型、羽色和動作都很接近，在生物分類上也同屬八哥屬。不過，只要觀察嘴喙和尾羽的顏色，就能分辨牠們：白尾八哥尾羽末段白色，嘴喙黃色，所以又稱「黃嘴八哥」；臺灣冠八哥嘴喙白色、鼻頭有明顯的冠羽，尾羽只有少許白色，因為是臺灣原生種，也被稱為「臺灣八哥」。",
+      "type": "paragraph"
+    },
+    {
+      "grid": [
+        [
+          {
+            "colspan": 1,
+            "is_section_label": true,
+            "rowspan": 5,
+            "text": "相同處"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "外形"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "全身大致為黑色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "全身大致為黑色"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "體型"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "身形大小接近"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "身形大小接近"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "行動與食物"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常在地面走動覓食，吃昆蟲、果實"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常在地面走動覓食，吃昆蟲、果實"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "棲息地"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "低海拔平地"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "低海拔平地"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "生物分類"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "八哥屬、留鳥"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "八哥屬、留鳥"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": true,
+            "rowspan": 9,
+            "text": "相異處"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "嘴喙顏色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "黃色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "象牙白色"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "尾羽顏色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "末段白色"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "只有部分白色"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "冠羽"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "冠羽不明顯"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "冠羽較明顯"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "來源"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "外來種"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "原生種"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "族群數量"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較多"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較少"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "習性"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較不怕人"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較怕人"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "築巢地點"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "常利用人造設施築巢"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較少利用人造設施築巢"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "適應都市環境"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較強"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "較弱"
+          }
+        ],
+        [
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "保育身分"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "非保育類野生動物"
+          },
+          {
+            "colspan": 1,
+            "is_section_label": false,
+            "rowspan": 1,
+            "text": "保育類野生動物"
+          }
+        ]
+      ],
+      "headers": [
+        "比較項目",
+        "白尾八哥",
+        "臺灣冠八哥"
+      ],
+      "id": "table-1",
+      "label": "表一",
+      "notes": [],
+      "row_sections": [
+        "相同處",
+        "相同處",
+        "相同處",
+        "相同處",
+        "相同處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處",
+        "相異處"
+      ],
+      "rows": [
+        [
+          "外形",
+          "全身大致為黑色",
+          "全身大致為黑色"
+        ],
+        [
+          "體型",
+          "身形大小接近",
+          "身形大小接近"
+        ],
+        [
+          "行動與食物",
+          "常在地面走動覓食，吃昆蟲、果實",
+          "常在地面走動覓食，吃昆蟲、果實"
+        ],
+        [
+          "棲息地",
+          "低海拔平地",
+          "低海拔平地"
+        ],
+        [
+          "生物分類",
+          "八哥屬、留鳥",
+          "八哥屬、留鳥"
+        ],
+        [
+          "嘴喙顏色",
+          "黃色",
+          "象牙白色"
+        ],
+        [
+          "尾羽顏色",
+          "末段白色",
+          "只有部分白色"
+        ],
+        [
+          "冠羽",
+          "冠羽不明顯",
+          "冠羽較明顯"
+        ],
+        [
+          "來源",
+          "外來種",
+          "原生種"
+        ],
+        [
+          "族群數量",
+          "較多",
+          "較少"
+        ],
+        [
+          "習性",
+          "較不怕人",
+          "較怕人"
+        ],
+        [
+          "築巢地點",
+          "常利用人造設施築巢",
+          "較少利用人造設施築巢"
+        ],
+        [
+          "適應都市環境",
+          "較強",
+          "較弱"
+        ],
+        [
+          "保育身分",
+          "非保育類野生動物",
+          "保育類野生動物"
+        ]
+      ],
+      "section_label_col": "異同",
+      "title": "表一 白尾八哥與臺灣冠八哥比較異同表",
+      "type": "table"
+    },
+    {
+      "id": "p3",
+      "text": "表二則說明了兩種八哥近年族群數量的變化。從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥；有些地方甚至已經看不到臺灣冠八哥的身影了。可是，當初白尾八哥被引進臺灣時，牠們的數量很少，臺灣冠八哥才是隨處可見的常客。那麼，為什麼幾十年過去，原生種臺灣冠八哥逐漸消聲匿跡，白尾八哥卻愈來愈常見，聲勢愈來愈大呢？",
+      "type": "paragraph"
+    },
+    {
+      "grid": null,
+      "headers": [
+        "指標",
+        "白尾八哥",
+        "臺灣冠八哥",
+        "解讀重點"
+      ],
+      "id": "table-2",
+      "label": "表二",
+      "notes": [
+        "註1. 資料來源：我們的島（2022）；環境資訊中心（2023）",
+        "註2. 「84 / 584」表示：研究人員一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
+      ],
+      "row_sections": null,
+      "rows": [
+        [
+          "近年數量變化（2009-2020）（註1）",
+          "成長 250%",
+          "無明顯變化",
+          "原生種的數量沒有增加，外來種快速擴張"
+        ],
+        [
+          "看得到的地點數／總調查地點數（2009-2021）",
+          "341/584",
+          "84/584（註2）",
+          "外來種分布更廣，可見度更高，比原生種更容易看見 4.1 倍。"
+        ],
+        [
+          "2021 年看得到的地點數",
+          "225 個地點",
+          "23 個地點",
+          "2021 年外來種仍明顯多於原生種約 9.8 倍。"
+        ],
+        [
+          "2018 年花蓮調查結果",
+          "674 隻",
+          "0 隻",
+          "某些區域幾乎看不到原生種"
+        ]
+      ],
+      "section_label_col": null,
+      "title": "表二 近年兩種臺灣常見八哥之族群數量之變化",
+      "type": "table"
+    },
+    {
+      "id": "p4",
+      "text": "這個問題的答案可能和兩種八哥的一項習性差異有關，也和臺灣這四、五十年來的都市化有關。請回到表一看一看，哪一種八哥比較不怕人？哪一種八哥比較常利用人造建築築巢？再想一想，當馬路、橋樑、房舍佔地面積愈來愈大時，鳥類的天性會怎麼樣影響牠們族群的發展呢？請根據表一試著推論兩種八哥族群變化的原因。",
+      "type": "paragraph"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        0,
+        1
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight-1",
+      "needs_review": false,
+      "question": {
+        "instruction": "練習一：第一段 vs 圖一。先讀文字抓重點，再判斷圖一提供什麼訊息，最後把文字和圖片連起來想。",
+        "kind": "graphic_text_integration",
+        "steps": [
+          {
+            "answer": 0,
+            "options": [
+              "兩種八哥外形相近的整體印象",
+              "兩種八哥近年的族群變化情形"
+            ],
+            "prompt": "1. 圖一最主要提供哪一類訊息？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。",
+              "這兩種八哥外形十分相似，不容易單靠外表一眼分辨。"
+            ],
+            "prompt": "2. 讀完第一段後，請你找出和圖一最相關的文字。（單選）",
+            "reference_answer": null,
+            "type": "select"
+          }
+        ],
+        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        null,
+        0,
+        1,
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        1,
+        1,
+        1,
+        0
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight-2",
+      "needs_review": false,
+      "question": {
+        "instruction": "練習二：第二段 vs 表一。先找出文字中要你看表的提示，再讀懂表一比較什麼，最後文圖表對照、整合。",
+        "kind": "graphic_text_integration",
+        "steps": [
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "步驟❶-1. 請把第二段文字中，要你看表的地方畫線或圈起來。",
+            "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
+            "type": "free_text"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "八哥的外形與習性",
+              "八哥的數量變化"
+            ],
+            "prompt": "步驟❶-2. 這段要你看表的什麼？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "白尾八哥和臺灣冠八哥近年的族群變化",
+              "白尾八哥和臺灣冠八哥的異同"
+            ],
+            "prompt": "步驟❷-1. 表一主要提供的是哪一類訊息？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": [
+              0,
+              1
+            ],
+            "options": [
+              "全身大致為黑色",
+              "身形大小接近",
+              "常在地面走動覓食，吃昆蟲、果實",
+              "都屬八哥屬、留鳥"
+            ],
+            "prompt": "步驟❸-1. 第二段說兩種八哥「外表相似」，表一中哪些資料可支持這句話？（複選）",
+            "reference_answer": null,
+            "type": "multi_select"
+          },
+          {
+            "answer": [
+              0,
+              1
+            ],
+            "options": [
+              "嘴喙顏色",
+              "尾羽顏色",
+              "築巢地點",
+              "適應都市環境"
+            ],
+            "prompt": "步驟❸-2. 第二段說「只要觀察嘴喙和尾羽的顏色，就能分辨牠們」，表一中哪些資料正好對應這句話？（複選）",
+            "reference_answer": null,
+            "type": "multi_select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "冠羽是否明顯",
+              "外來種／原生種",
+              "族群數量",
+              "保育身分"
+            ],
+            "prompt": "步驟❸-3. 第二段提到臺灣冠八哥又稱「臺灣八哥」，表一中的哪一項資料和這句話最有關？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "表一只是把第二段重新整理一次，並沒有幫助我們更清楚理解這段意思。",
+              "表一幫助我們更清楚看出，兩種八哥雖然外形相近，但仍可從特徵和習性加以分辨。"
+            ],
+            "prompt": "步驟❸-4. 讀表一，對理解第二段有什麼幫助？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "兩種八哥雖然外形相近，但只要知道牠們同屬八哥屬，就能解釋後來族群數量不同的原因",
+              "兩種八哥雖然外形相近，但仍可從嘴喙、尾羽等特徵區分，表一也進一步比較了牠們的習性差異"
+            ],
+            "prompt": "步驟❹-1. 下面哪一句最能把第二段和表一的意思一起說清楚？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "是否怕人、是否利用人造設施築巢、適應都市環境強弱",
+              "嘴喙顏色、尾羽顏色、冠羽是否明顯"
+            ],
+            "prompt": "步驟❹-2. 讀完第二段和表一後，你認為哪些差異最值得留意，因為它們可能和課文標題的「命運不一樣」有關？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          }
+        ],
+        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        null,
+        1,
+        0,
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        0,
+        2,
+        1,
+        [
+          0,
+          1,
+          2
+        ],
+        1,
+        0
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight-3",
+      "needs_review": false,
+      "question": {
+        "instruction": "練習三：第三段 vs 表二。讀懂表二的數量變化，並回頭看表一，思考數量差異的原因。",
+        "kind": "graphic_text_integration",
+        "steps": [
+          {
+            "answer": null,
+            "options": null,
+            "prompt": "步驟❶-1. 請把第三段文字中，要你看表的地方畫線。",
+            "reference_answer": "從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥。",
+            "type": "free_text"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "兩種八哥的外形與習性",
+              "兩種八哥的數量變化"
+            ],
+            "prompt": "步驟❶-2. 這段要你看表的什麼？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "兩種八哥近年族群數量的變化",
+              "白尾八哥和臺灣冠八哥的異同"
+            ],
+            "prompt": "步驟❷-1. 表二主要提供的是哪一類訊息？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "options": [
+              "近年數量變化（2009-2020）",
+              "看得到的地點數／總調查地點數（2009-2021）",
+              "2021 年看得到的地點數",
+              "2018 年花蓮調查結果"
+            ],
+            "prompt": "步驟❸-1. 第三段說「外來種白尾八哥都明顯多過原生種臺灣冠八哥」，表二中哪些資料可以支持這句話？（複選）",
+            "reference_answer": null,
+            "type": "multi_select"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "註2會說明這個寫法的意思，幫助我們理解表格內容。",
+              "註2會補充八哥的外形特徵，幫助我們分辨兩種八哥。"
+            ],
+            "prompt": "步驟❸-2. 讀表二時，看到「84／584」旁邊有「註2」，到表格下方看註解有什麼幫助？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 2,
+            "options": [
+              "近年數量變化：無明顯變化",
+              "2021 年看得到的地點數：23 個地點",
+              "2018 年花蓮調查結果：0 隻",
+              "白尾八哥成長250%"
+            ],
+            "prompt": "步驟❸-3. 第三段說「有些地方甚至已經看不到臺灣冠八哥的身影了」，表二中哪一項最直接支持這句話？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "表二則說明了兩種八哥近年族群數量的變化",
+              "從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥",
+              "可是，當初白尾八哥被引進臺灣時，牠們的數量很少，臺灣冠八哥才是隨處可見的常客。",
+              "那麼，為什麼幾十年過去，原生種臺灣冠八哥逐漸消聲匿跡，白尾八哥卻愈來愈常見，聲勢愈來愈大呢？"
+            ],
+            "prompt": "步驟❸-4. 請回到第三段，判斷哪一句最能統整表二最重要的訊息？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": [
+              0,
+              1,
+              2
+            ],
+            "options": [
+              "較不怕人／較怕人",
+              "常利用人造設施築巢／較少利用人造設施築巢",
+              "適應都市環境較強／較弱",
+              "嘴喙顏色不同"
+            ],
+            "prompt": "步驟❹-1. 再回頭看表一，哪幾項差異最可能和第三段的數量變化有關？（複選）",
+            "reference_answer": null,
+            "type": "multi_select"
+          },
+          {
+            "answer": 1,
+            "options": [
+              "表二說明兩種八哥近年的數量差不多，而表一只是補充牠們名稱上的不同。",
+              "表二告訴我們兩種八哥近年的族群差距很大，而表一提供了進一步思考原因的重要線索。"
+            ],
+            "prompt": "步驟❹-2. 下面哪一句最能把第三段和表二的意思一起說清楚？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          },
+          {
+            "answer": 0,
+            "options": [
+              "表二讓我們知道哪一種八哥變多、哪一種變少；表一幫助我們思考為什麼會這樣。",
+              "表二幫助我們思考為什麼會這樣；表一讓我們知道哪一種八哥變多、哪一種變少。"
+            ],
+            "prompt": "步驟❹-3. 讀第三段不能只看表二，還要回頭看表一，是因為：（單選）",
+            "reference_answer": null,
+            "type": "select"
+          }
+        ],
+        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight-4",
+      "needs_review": false,
+      "question": {
+        "instruction": "練習四：第四段 vs 表一、二。先抓出這段要你回到表一回答的問題。",
+        "kind": "graphic_text_integration",
+        "steps": [
+          {
+            "answer": 1,
+            "options": [
+              "八哥的外形與習性",
+              "根據表一試著推論兩種八哥族群變化的原因"
+            ],
+            "prompt": "步驟❶-1. 這段要你「回到表一」回答什麼問題？（單選）",
+            "reference_answer": null,
+            "type": "select"
+          }
+        ],
+        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": {
+        "b1": "較不怕人",
+        "b2": "較會利用人造設施築巢",
+        "b3": "較怕人",
+        "b4": "較少利用人造設施築巢"
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-spotlight-4-infer",
+      "needs_review": false,
+      "question": {
+        "kind": "fill_in_blank",
+        "sentence": "白尾八哥＿＿，又＿＿，適應都市環境較強，所以在都市化的環境中比較容易生存，族群逐漸增加；臺灣冠八哥＿＿，又＿＿，適應都市環境較弱，因此族群逐漸減少。",
+        "slots": [
+          {
+            "answer": "較不怕人",
+            "grader": "exact",
+            "hint": null,
+            "id": "b1"
+          },
+          {
+            "answer": "較會利用人造設施築巢",
+            "grader": "exact",
+            "hint": null,
+            "id": "b2"
+          },
+          {
+            "answer": "較怕人",
+            "grader": "exact",
+            "hint": null,
+            "id": "b3"
+          },
+          {
+            "answer": "較少利用人造設施築巢",
+            "grader": "exact",
+            "hint": null,
+            "id": "b4"
+          }
+        ],
+        "vocab_bank": null
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 1,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-1",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "白尾八哥是白色嘴喙、黑色尾羽；臺灣冠八哥是黃色嘴喙、白色尾羽",
+          "白尾八哥是黃色嘴喙、白色尾羽；臺灣冠八哥是白色嘴喙、黑色尾羽",
+          "白尾八哥是黑色嘴喙、白色尾羽；臺灣冠八哥是黃色嘴喙、黑色尾羽",
+          "白尾八哥是黃色嘴喙、黑色尾羽；臺灣冠八哥是白色嘴喙、白色尾羽"
+        ],
+        "question": "1. 根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 3,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-2",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "牠冠羽較為明顯、外形也較特殊，所以更需要受到法律保護",
+          "牠和白尾八哥同屬八哥屬，因此族群減少時較容易被列入保育",
+          "牠冠羽明顯，容易成為獵人或猛禽捕獵的目標",
+          "牠怕人又不易適應都市環境，競爭力不如白尾八哥"
+        ],
+        "question": "2. 從表一、表二和最後一段一起看，下列對臺灣冠八哥成為保育類的原因，哪一項最合理？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 1,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-3",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "用連續提問吸引讀者注意，讓文章讀起來更有變化與懸念",
+          "引導讀者回看文字及表格，促成讀者整合訊息、解決問題",
+          "用設問整理前文重點，強調兩種八哥外形其實非常接近",
+          "用提問保留討論空間，表示作者對研究結果仍無法確定"
+        ],
+        "question": "3. 文章末段沒有直接下結論，而是接連提出問題，作者這樣寫最可能的目的是什麼？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 0,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-4",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "保留較安靜的綠地環境，並增加接近自然的築巢空間",
+          "增設更多橋梁與水泥建物，讓牠們改用人工設施繁殖",
+          "在人口密集商圈投放食物，吸引牠們習慣接近人群活動",
+          "讓兩種八哥共享同類巢位，以提高都市區域利用效率"
+        ],
+        "question": "4. 如果地方政府想幫助白嘴八哥恢復族群，下列哪一項措施最可能有效？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 1,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-mcq-5",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "兩種八哥外形十分相似，所以只看整體羽色仍不容易正確分辨",
+          "白尾八哥較能適應人類環境，因此近年數量與分布都明顯增加",
+          "臺灣冠八哥原本就是臺灣原生種，所以現在在各地仍應較常見到",
+          "八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧"
+        ],
+        "question": "5. 下列哪一個結論，最需要同時整合前文敘述、表一和表二，才能完整判斷？"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "fig-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": {
+        "k1": "白尾八哥",
+        "k10": "都市化",
+        "k2": "臺灣冠八哥",
+        "k3": "十分相似",
+        "k4": "嘴喙",
+        "k5": "尾羽",
+        "k6": "怕人",
+        "k7": "白尾八哥",
+        "k8": "臺灣冠八哥",
+        "k9": "白尾八哥"
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-keypoints",
+      "needs_review": false,
+      "question": {
+        "blanks": [
+          {
+            "answer": "白尾八哥",
+            "hint": null,
+            "id": "k1",
+            "options": null
+          },
+          {
+            "answer": "臺灣冠八哥",
+            "hint": null,
+            "id": "k2",
+            "options": null
+          },
+          {
+            "answer": "十分相似",
+            "hint": null,
+            "id": "k3",
+            "options": null
+          },
+          {
+            "answer": "嘴喙",
+            "hint": null,
+            "id": "k4",
+            "options": null
+          },
+          {
+            "answer": "尾羽",
+            "hint": null,
+            "id": "k5",
+            "options": null
+          },
+          {
+            "answer": "怕人",
+            "hint": null,
+            "id": "k6",
+            "options": null
+          },
+          {
+            "answer": "白尾八哥",
+            "hint": null,
+            "id": "k7",
+            "options": null
+          },
+          {
+            "answer": "臺灣冠八哥",
+            "hint": null,
+            "id": "k8",
+            "options": null
+          },
+          {
+            "answer": "白尾八哥",
+            "hint": null,
+            "id": "k9",
+            "options": null
+          },
+          {
+            "answer": "都市化",
+            "hint": null,
+            "id": "k10",
+            "options": null
+          }
+        ],
+        "kind": "keypoints_table",
+        "rows": [
+          {
+            "blank_ids": [
+              "k1",
+              "k2"
+            ],
+            "hint": null,
+            "label": "主題",
+            "paragraph": null,
+            "sub_label": null,
+            "template": "為什麼外來種【】愈來愈多，原生種【】卻愈來愈少？"
+          },
+          {
+            "blank_ids": [
+              "k3"
+            ],
+            "hint": null,
+            "label": "觀察",
+            "paragraph": "1",
+            "sub_label": "圖一",
+            "template": "白尾八哥與臺灣冠八哥外形【】，不容易單靠外表一眼分辨。"
+          },
+          {
+            "blank_ids": [
+              "k4",
+              "k5",
+              "k6"
+            ],
+            "hint": null,
+            "label": "觀察",
+            "paragraph": "2",
+            "sub_label": "表一",
+            "template": "兩種八哥的外形（【】、【】）與習性（是否【】、築巢地點、適應都市環境）。"
+          },
+          {
+            "blank_ids": [
+              "k7",
+              "k8"
+            ],
+            "hint": null,
+            "label": "觀察",
+            "paragraph": "3",
+            "sub_label": "表二",
+            "template": "近年【】族群數量明顯多過臺灣冠八哥，部分地區甚至已經看不到【】。"
+          },
+          {
+            "blank_ids": [
+              "k9",
+              "k10"
+            ],
+            "hint": null,
+            "label": "推論",
+            "paragraph": "4",
+            "sub_label": null,
+            "template": "【】較不怕人、常利用人造設施築巢；臺灣【】提供了外來種的生存優勢。"
+          }
+        ],
+        "structure": "locate_paragraph",
+        "title": "都是八哥，為什麼命運不一樣？ 文章重點表"
+      },
+      "type": "exercise"
+    }
+  ],
+  "id": "G7-L30",
+  "lesson_code": "G7-L30",
+  "title": "都是八哥，為什麼命運不一樣？"
+}
