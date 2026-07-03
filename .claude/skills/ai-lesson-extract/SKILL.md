@@ -93,8 +93,18 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 3. **step 的 `prompt` 只寫問題本身**(如 `❶主角是誰？`),**不要**在每步重複區段名(「例一:烏鴉喝水…」「接下來,我們來看課文的故事…」)——那交給 `section`。
 4. `context` / `section` / `render_hint` 都是**純呈現**,永遠**不放答案**。
 
+### C. 版面模型:左=課文、右=作答區(擷取時的分類原則)
+
+渲染器把 reading-strategy 頁分成**兩欄**:
+- **左欄=閱讀材料**:所有非 exercise 的 block(`paragraph` / `figure` / `table` / `parallel_passage`),依原文順序。**本課課文自帶、供對照的圖/表放這裡**(學生邊看邊答)。
+- **右欄=聚光燈作答區**:所有 `exercise` block(引導步驟 + 選項/輸入)。
+
+擷取時據此分類:
+- 課文段落、以及**課文的對照圖/表**(如 G7-L30 的圖一/表一/表二)→ 做成**頂層 `figure`/`table` block**(自動歸左),由聚光燈 exercise 的 `anchors` 指向它們。
+- **若某聚光燈題目自帶、只服務該題的圖**(非課文對照材料)→ 應歸右欄、跟著題目。目前契約**沒有** per-question 圖片欄位,所以這種情況:在該 exercise 用 `custom` 的 `render_hint` 記錄該圖語意 + 標 `needs_review: true`(誠實標記待補),**不要**把它當成課文對照圖放頂層(否則會錯誤出現在左欄當閱讀材料)。這是已知限制,遇到就登缺口,別硬塞。
+
 ## 鐵律(違反 = 失敗)
-1. 只做聚光燈 + 其 anchor 的段落/圖/表;不擷取重點表/語詞/閱讀理解等其他模組。
+1. 只做聚光燈 + 其 anchor 的段落/圖/表;不擷取重點表/語詞/閱讀理解等其他模組。課文對照圖表 → 頂層 block(渲染在左欄);題目專屬圖 → 依 §C 處理(勿當課文圖放左欄)。
 2. 每個 exercise 必有 `answer_space` + 機器可比 `answer` + `grader`。散文不是答案。
 3. `anchors.block_id` 必須指向存在的 paragraph/figure/table/parallel_passage block。
 4. block `id` 唯一且穩定(如 p1/fig-1/table-1/ex-spotlight)。
