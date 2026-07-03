@@ -563,7 +563,7 @@
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "步驟❶-1. 請把第二段文字中，要你看表的地方畫線或圈起來。",
+            "prompt": "步驟❶-1. 請把第二段文字中，要你看表的那句話寫下來。",
             "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
             "section": null,
             "type": "free_text"
@@ -732,7 +732,7 @@
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "步驟❶-1. 請把第三段文字中，要你看表的地方畫線。",
+            "prompt": "步驟❶-1. 請把第三段文字中，要你看表的那句話寫下來。",
             "reference_answer": "從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥。",
             "section": null,
             "type": "free_text"

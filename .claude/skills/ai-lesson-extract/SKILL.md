@@ -14,7 +14,8 @@ description: 讓 AI 直接讀「原始學習單」(從 GCS 下載 DOCX → 轉 P
 
 **這輪只擷取「閱讀聚光燈」(reading strategy)這一個模組,以及它所依賴的課文段落/圖/表。**
 
-- ✅ **擷取**:閱讀聚光燈的引導練習(通常是 `guided_steps` / `graphic_text_integration`)+ 它 anchor 到的 `paragraph` / `figure` / `table` / `parallel_passage`。
+- ✅ **擷取**:閱讀聚光燈的引導練習(通常是 `guided_steps` / `graphic_text_integration`)+ **完整課文**(全部段落)+ 課文用到的 `figure` / `table` / `parallel_passage`。
+  - ⚠️ **課文要完整、且與朗讀同源**:`paragraph` block 要放**整篇課文的全部段落**,文字取自正規來源 `backend/data/lessons/_parsed_2026-05-01/{CODE}.yml` 的 `paragraphs`(list)或 `story_text`,依原文順序給 id `p1..pN`。**絕不可只放聚光燈 anchor 到的那幾段**——否則左欄課文缺段、且與朗讀模組(用同一 `paragraphs` 來源)不一致。聚光燈 exercise 再用 `anchors` 指向其中相關段落即可。
 - ❌ **不擷取**(它們是**各自獨立的模組**,不在本 skill 範疇):
   - **文章重點表**(story-structure / keypoints_table)——獨立模組。
   - 語詞我最棒 / 語詞應用、閱讀理解選擇題、生字、朗讀計時、知識補給站…等非聚光燈練習。
@@ -84,6 +85,8 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 | 真的沒有對應結構 | `custom` + `needs_review: true`(`render_hint` 寫呈現說明,**答案仍要填**)| — |
 
 **圖片位置與表格意義(使用者特別在意)**:讀 PDF 時明確記錄每張圖在**哪一段旁邊**、每個表的意義;用 block 順序 + `anchors` 忠實表達。
+
+**紙本動作指示要改寫成數位可作答(重要)**:紙本常有「畫線 / 圈起來 / 畫記」這類動作,但數位版學生**無法在課文上畫線**。遇到這類 step,**改寫 `prompt`** 成可作答的指示 —— 例如「請把第X段中要你看圖的地方**畫線**」→「請找出第X段中要你看圖的**那句話,寫下來**」、「找出重點句並**畫線**」→「找出重點句並**寫下來**」。型別維持 `free_text`,並附 `reference_answer`(該畫線/該圈的正確內容)。不要保留學生做不到的「畫線/圈起來」字眼。
 
 ### B. 呈現結構:用 `section` 分區、範例自成一體、prompt 不重複(重要)
 
