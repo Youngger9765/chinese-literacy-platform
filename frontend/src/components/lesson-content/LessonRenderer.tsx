@@ -23,7 +23,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Lesson, Block } from '../../schema/lessonContent';
-import { resolveLayout, groupPairedBlocks, type LayoutItem } from './lessonLayout';
+import { resolveLayout } from './lessonLayout';
 import BlockRenderer from './BlockRenderer';
 
 /**
@@ -183,15 +183,40 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
     [resolvedLessonCode, storyTitle, passage, meta, answers, feedback, handleAnswerChange, handleGraded],
   );
 
-  const pairedItems: LayoutItem[] = useMemo(
-    () => (layout === 'paired' ? groupPairedBlocks(lesson.blocks) : []),
-    [layout, lesson.blocks],
+  // Reading material (LEFT) vs exercise / answer area (RIGHT). 課文 paragraphs + the
+  // lesson's own figures/tables/parallel passages are reference material students read
+  // to answer, so they live on the LEFT (in document order). The 聚光燈 exercise — the
+  // digitized worksheet answer block — is on the RIGHT. When both exist we use the
+  // two-pane split (mirrors ComprehensionLayout's height-safe left-text/right-exercise
+  // recipe); otherwise fall back to a single-column flow.
+  const { readingBlocks, exerciseBlocks } = useMemo(() => {
+    const reading: Block[] = [];
+    const exercises: Block[] = [];
+    for (const b of lesson.blocks) {
+      if (b.type === 'exercise') exercises.push(b);
+      else reading.push(b);
+    }
+    return { readingBlocks: reading, exerciseBlocks: exercises };
+  }, [lesson.blocks]);
+  const useSplit = readingBlocks.length > 0 && exerciseBlocks.length > 0;
+
+  const notices = (
+    <>
+      {allDone ? (
+        <p className="text-center text-base font-medium text-green-700 py-4">✓ 本課練習完成</p>
+      ) : null}
+      {Object.keys(needsReview).length > 0 ? (
+        <p className="text-center text-sm text-amber-700 py-2">
+          有 {Object.keys(needsReview).length} 題需老師人工檢核
+        </p>
+      ) : null}
+    </>
   );
 
   return (
     <div
       data-testid="lesson-renderer"
-      data-layout={layout}
+      data-layout={useSplit ? 'reading-split' : layout}
       className="flex flex-col flex-1 min-h-0 overflow-hidden"
     >
       <header className="border-b border-gray-200 pb-4 mb-4 shrink-0">
@@ -201,30 +226,34 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
         )}
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-        {layout === 'paired' ? (
-          <div className="space-y-6">
-            {pairedItems.map((item, idx) => {
-              if (item.kind === 'paired') {
-                return (
-                  <div key={item.text.id} className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-start">
-                    <div className="lg:flex-1 min-w-0 space-y-4 shrink-0">{renderBlock(item.text)}</div>
-                    {item.media.length > 0 && (
-                      <div className="lg:flex-1 min-w-0 space-y-4 shrink-0">
-                        {item.media.map((m) => renderBlock(m))}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-              return (
-                <div key={`${item.block.id}-${idx}`} className="shrink-0">
-                  {renderBlock(item.block)}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
+      {useSplit ? (
+        // Two-pane: LEFT 課文(+其圖表)可捲動對照;RIGHT 聚光燈答題區可捲動。
+        // 手機(單欄)整頁捲動;lg 以上各欄獨立捲動(min-h-0 + overflow)。
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1fr] gap-4 lg:gap-6 overflow-y-auto lg:overflow-hidden">
+          <section
+            aria-label="課文"
+            className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-2 space-y-6"
+          >
+            {readingBlocks.map((block) => (
+              <div key={block.id} className="shrink-0">
+                {renderBlock(block)}
+              </div>
+            ))}
+          </section>
+          <section
+            aria-label="閱讀聚光燈作答區"
+            className="lg:col-span-5 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1 lg:border-l lg:border-gray-200 lg:pl-5 space-y-6"
+          >
+            {exerciseBlocks.map((block) => (
+              <div key={block.id} className="shrink-0">
+                {renderBlock(block)}
+              </div>
+            ))}
+            {notices}
+          </section>
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
           <div className="space-y-6">
             {lesson.blocks.map((block) => (
               <div key={block.id} className="shrink-0">
@@ -232,17 +261,9 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
               </div>
             ))}
           </div>
-        )}
-
-        {allDone ? (
-          <p className="text-center text-base font-medium text-green-700 py-4">✓ 本課練習完成</p>
-        ) : null}
-        {Object.keys(needsReview).length > 0 ? (
-          <p className="text-center text-sm text-amber-700 py-2">
-            有 {Object.keys(needsReview).length} 題需老師人工檢核
-          </p>
-        ) : null}
-      </div>
+          {notices}
+        </div>
+      )}
     </div>
   );
 };
