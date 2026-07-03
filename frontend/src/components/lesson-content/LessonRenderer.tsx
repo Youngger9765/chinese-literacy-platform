@@ -200,6 +200,13 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   }, [lesson.blocks]);
   const useSplit = readingBlocks.length > 0 && exerciseBlocks.length > 0;
 
+  // Single-column card header: 聚光燈作答 when the flow carries exercises, otherwise
+  // it is pure reference reading (mirrors the split view's two card titles).
+  const singleHeader =
+    exerciseBlocks.length > 0
+      ? { icon: 'highlight', label: '閱讀聚光燈' }
+      : { icon: 'menu_book', label: '參考課文' };
+
   const notices = (
     <>
       {allDone ? (
@@ -219,51 +226,85 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
       data-layout={useSplit ? 'reading-split' : layout}
       className="flex flex-col flex-1 min-h-0 overflow-hidden"
     >
-      <header className="border-b border-gray-200 pb-4 mb-4 shrink-0">
-        <div className="text-sm font-semibold text-violet-600 tracking-wide">閱讀學習</div>
+      <header className="border-b border-surface-container-high pb-4 mb-4 shrink-0">
+        <div className="font-headline font-bold text-accent text-sm uppercase tracking-wider">
+          閱讀學習
+        </div>
         {(lesson.title ?? null) && (
-          <h2 className="text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
         )}
       </header>
 
       {useSplit ? (
         // Two-pane: LEFT 課文(+其圖表)可捲動對照;RIGHT 聚光燈答題區可捲動。
         // 手機(單欄)整頁捲動;lg 以上各欄獨立捲動(min-h-0 + overflow)。
+        // 兩欄各自是一張「參考課文 / 閱讀聚光燈」卡片,與 ComprehensionLayout 一致。
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1fr] gap-4 lg:gap-6 overflow-y-auto lg:overflow-hidden">
           <section
             aria-label="課文"
-            className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-2 space-y-6"
+            className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-2"
           >
-            {readingBlocks.map((block) => (
-              <div key={block.id} className="shrink-0">
-                {renderBlock(block)}
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
+                <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                  參考課文
+                </span>
               </div>
-            ))}
+              <div className="space-y-6">
+                {readingBlocks.map((block) => (
+                  <div key={block.id}>{renderBlock(block)}</div>
+                ))}
+              </div>
+            </div>
           </section>
           <section
             aria-label="閱讀聚光燈作答區"
-            className="lg:col-span-5 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1 lg:border-l lg:border-gray-200 lg:pl-5 space-y-6"
+            className="lg:col-span-5 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1"
           >
-            {exerciseBlocks.map((block) => (
-              <div key={block.id} className="shrink-0">
-                {renderBlock(block)}
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-accent text-xl">highlight</span>
+                <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                  閱讀聚光燈
+                </span>
               </div>
-            ))}
-            {notices}
+              <div className="space-y-6">
+                {exerciseBlocks.map((block) => (
+                  <div key={block.id}>{renderBlock(block)}</div>
+                ))}
+                {notices}
+              </div>
+            </div>
           </section>
         </div>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-          <div className="space-y-6">
-            {lesson.blocks.map((block) => (
-              <div key={block.id} className="shrink-0">
-                {renderBlock(block)}
-              </div>
-            ))}
+          <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-accent text-xl">
+                {singleHeader.icon}
+              </span>
+              <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                {singleHeader.label}
+              </span>
+            </div>
+            <div className="space-y-6">
+              {lesson.blocks.map((block) => (
+                <div key={block.id}>{renderBlock(block)}</div>
+              ))}
+            </div>
+            {notices}
           </div>
-          {notices}
         </div>
       )}
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
+      `}</style>
     </div>
   );
 };

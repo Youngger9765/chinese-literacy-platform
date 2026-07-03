@@ -26,6 +26,9 @@ import { setEqualIndices, gradeRubricLocal } from '../lessonGrading';
 
 export type GuidedQuestion = Question & ({ kind: 'guided_steps' } | { kind: 'graphic_text_integration' });
 
+/** A/B/C/D 字母標籤 — 與 MultipleChoiceExercise / ChoiceInput 一致的選項樣式。 */
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
 const FALLBACK_GRADE: StrategyGradeResult = {
   is_correct: true,
   feedback: '已記錄你的答案，做得好！',
@@ -191,8 +194,8 @@ const GuidedStepsInput: React.FC<Props> = ({
     const submitted = fb === true || fb === false;
     const options = step.options ?? [];
     return (
-      <div key={i} className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
-        <p className="text-base font-medium text-on-surface whitespace-pre-wrap">{step.prompt}</p>
+      <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+        <p className="text-base font-medium text-on-surface leading-relaxed whitespace-pre-wrap">{step.prompt}</p>
 
         {step.type === 'select' && (
           <>
@@ -206,11 +209,15 @@ const GuidedStepsInput: React.FC<Props> = ({
                   disabled={submitted}
                   onClick={() => setStepValue(i, oi)}
                   className={[
-                    'w-full text-left rounded-lg border px-4 py-2 text-base transition-colors',
+                    'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors flex items-start gap-2',
                     value[i] === oi ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-gray-200 hover:border-violet-300',
+                    submitted ? 'cursor-default' : '',
                   ].join(' ')}
                 >
-                  {opt}
+                  <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full border border-current text-xs font-bold">
+                    {OPTION_LETTERS[oi] ?? oi + 1}
+                  </span>
+                  <span className="flex-1 whitespace-pre-wrap">{opt}</span>
                 </button>
               ))}
             </div>
@@ -219,23 +226,25 @@ const GuidedStepsInput: React.FC<Props> = ({
                 type="button"
                 onClick={() => submitSelect(i)}
                 disabled={typeof value[i] !== 'number' || disabled}
-                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+                className="px-5 py-2 rounded-full text-base font-medium text-white bg-violet-600 hover:bg-violet-700 active:scale-95 transition-all disabled:opacity-40 disabled:hover:bg-violet-600"
               >
                 確認
               </button>
             ) : fb === false ? (
-              <div className="flex items-center gap-3">
-                <p className="text-base font-medium text-amber-700">再想想看</p>
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 flex items-center gap-3">
+                <p className="text-base font-medium text-amber-800">再想想看</p>
                 <button
                   type="button"
                   onClick={() => retryStep(i)}
-                  className="text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                  className="text-sm font-medium text-violet-700 underline underline-offset-2 cursor-pointer"
                 >
                   再試一次
                 </button>
               </div>
             ) : (
-              <p className="text-base font-medium text-green-700">✓ 答對了</p>
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2.5">
+                <p className="text-base font-medium text-emerald-700">✓ 答對了</p>
+              </div>
             )}
           </>
         )}
@@ -247,7 +256,14 @@ const GuidedStepsInput: React.FC<Props> = ({
                 const picked = Array.isArray(value[i]) ? (value[i] as number[]) : [];
                 const checked = picked.includes(oi);
                 return (
-                  <label key={oi} className="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-2 text-base cursor-pointer">
+                  <label
+                    key={oi}
+                    className={[
+                      'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors flex items-start gap-3',
+                      checked ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-gray-200 hover:border-violet-300',
+                      submitted ? 'cursor-default' : 'cursor-pointer',
+                    ].join(' ')}
+                  >
                     <input
                       type="checkbox"
                       checked={checked}
@@ -256,9 +272,12 @@ const GuidedStepsInput: React.FC<Props> = ({
                         const next = checked ? picked.filter((x) => x !== oi) : [...picked, oi].sort((a, b) => a - b);
                         setStepValue(i, next);
                       }}
-                      className="mt-1"
+                      className="mt-1 shrink-0"
                     />
-                    <span>{opt}</span>
+                    <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full border border-current text-xs font-bold">
+                      {OPTION_LETTERS[oi] ?? oi + 1}
+                    </span>
+                    <span className="flex-1 whitespace-pre-wrap">{opt}</span>
                   </label>
                 );
               })}
@@ -268,23 +287,25 @@ const GuidedStepsInput: React.FC<Props> = ({
                 type="button"
                 onClick={() => submitMultiSelect(i)}
                 disabled={!Array.isArray(value[i]) || (value[i] as number[]).length === 0 || disabled}
-                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+                className="px-5 py-2 rounded-full text-base font-medium text-white bg-violet-600 hover:bg-violet-700 active:scale-95 transition-all disabled:opacity-40 disabled:hover:bg-violet-600"
               >
                 確認
               </button>
             ) : fb === false ? (
-              <div className="flex items-center gap-3">
-                <p className="text-base font-medium text-amber-700">再想想看</p>
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 flex items-center gap-3">
+                <p className="text-base font-medium text-amber-800">再想想看</p>
                 <button
                   type="button"
                   onClick={() => retryStep(i)}
-                  className="text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                  className="text-sm font-medium text-violet-700 underline underline-offset-2 cursor-pointer"
                 >
                   再試一次
                 </button>
               </div>
             ) : (
-              <p className="text-base font-medium text-green-700">✓ 答對了</p>
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2.5">
+                <p className="text-base font-medium text-emerald-700">✓ 答對了</p>
+              </div>
             )}
           </>
         )}
@@ -305,7 +326,7 @@ const GuidedStepsInput: React.FC<Props> = ({
                 type="button"
                 onClick={() => void submitFreeText(i)}
                 disabled={disabled}
-                className="px-4 py-2 rounded-full text-base font-medium text-white bg-violet-600"
+                className="px-5 py-2 rounded-full text-base font-medium text-white bg-violet-600 hover:bg-violet-700 active:scale-95 transition-all disabled:opacity-40 disabled:hover:bg-violet-600"
               >
                 送出
               </button>
@@ -326,7 +347,7 @@ const GuidedStepsInput: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => retryStep(i)}
-                    className="mt-2 block text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                    className="mt-2 block text-sm font-medium text-violet-700 underline underline-offset-2 cursor-pointer"
                   >
                     再試一次
                   </button>
@@ -339,9 +360,29 @@ const GuidedStepsInput: React.FC<Props> = ({
     );
   };
 
+  // Progress sense (display-only, derived from feedback) — mirrors MultipleChoiceExercise's
+  // 「第 X 題／共 N 題」+ thin bar. Counts steps with a correct verdict as done.
+  const doneCount = steps.filter((_, i) => feedback[i] === true).length;
+  const progressPct = steps.length > 0 ? (doneCount / steps.length) * 100 : 0;
+
   return (
     <div className="space-y-5">
       <p className="text-base text-on-surface whitespace-pre-wrap">{question.instruction}</p>
+
+      {steps.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-sm text-on-surface-variant">
+            <span>已完成 {doneCount}／共 {steps.length} 題</span>
+            <span>{allDone ? '完成！' : '繼續加油！'}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div
+              className="bg-violet-500 h-1.5 rounded-full transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        </div>
+      )}
       {groups.map((g, gi) => {
         const isExample = !!g.context; // a region with a worked-example passage
         return (
@@ -366,7 +407,7 @@ const GuidedStepsInput: React.FC<Props> = ({
               </div>
             )}
             {g.context && (
-              <div className="rounded-lg border border-amber-200 bg-white p-3 text-base leading-relaxed text-gray-800 whitespace-pre-wrap">
+              <div className="rounded-xl border border-amber-200 bg-white p-4 text-base leading-relaxed text-gray-800 whitespace-pre-wrap">
                 {g.context}
               </div>
             )}
