@@ -17,7 +17,7 @@
  * step.answer here. Hooks are declared top-level before any effect that references them
  * (#2279 TDZ gate).
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { validateStrategyAnswer } from '../../../services/learningApi';
 import type { StrategyGradeResult } from '../../../services/learning/sentence';
@@ -70,6 +70,35 @@ const GuidedStepsInput: React.FC<Props> = ({
   useEffect(() => {
     onAllStepsDone?.(allDone);
   }, [allDone, onAllStepsDone]);
+
+  // Restore per-step verdicts on mount from restored answers (progress resume): a step
+  // whose answer came back from saved progress should already show its ✓/再想想看 without
+  // the student re-confirming. select/multi_select are re-graded deterministically vs
+  // step.answer; free_text uses the offline local rubric (its original AI grade isn't
+  // persisted). Runs ONCE — never re-locks a step the student is actively editing.
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    if (Object.keys(value).length === 0) return; // nothing restored
+    const fb: Record<number, boolean | null> = {};
+    const gr: Record<number, StrategyGradeResult> = {};
+    steps.forEach((step, i) => {
+      const v = value[i];
+      if (v == null) return;
+      if (step.type === 'select' && typeof v === 'number') {
+        fb[i] = v === step.answer;
+      } else if (step.type === 'multi_select' && Array.isArray(v)) {
+        fb[i] = setEqualIndices(v as number[], step.answer);
+      } else if (step.type === 'free_text' && typeof v === 'string' && v.trim()) {
+        const ok = gradeRubricLocal(v, step.referenceAnswer);
+        gr[i] = { ...FALLBACK_GRADE, is_correct: ok, feedback: ok ? '✓ 答對了' : '再想想看' };
+        fb[i] = true;
+      }
+    });
+    if (Object.keys(fb).length) setFeedback((prev) => ({ ...fb, ...prev }));
+    if (Object.keys(gr).length) setGrades((prev) => ({ ...gr, ...prev }));
+  }, [value, steps]);
 
   // Group consecutive steps sharing a section into one region. The region carries the
   // worked-example passage (context) once; a step's own context is lifted to its group.
