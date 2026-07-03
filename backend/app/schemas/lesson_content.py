@@ -206,6 +206,13 @@ class GuidedStep(BaseModel):
     answer: Union[int, list[int], None] = Field(default=None)
     # Optional teacher-facing reference answer for free_text steps.
     reference_answer: Optional[str] = None
+    # Optional section label for visual grouping, e.g. "範例" / "課文" / "小試身手".
+    # Lets the renderer badge a worked-example step distinctly from the lesson text.
+    section: Optional[str] = None
+    # Optional context passage shown above this step (e.g. the 例一 worked-example story),
+    # so a worked example is self-contained inside the spotlight rather than relying on
+    # the lesson's 課文. Presentation-only; never carries the answer.
+    context: Optional[str] = None
 
     @field_validator("answer", mode="before")
     @classmethod

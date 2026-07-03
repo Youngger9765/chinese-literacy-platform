@@ -133,8 +133,33 @@ const GuidedStepsInput: React.FC<Props> = ({
         const fb = feedback[i];
         const submitted = fb === true || fb === false;
         const options = step.options ?? [];
+        const prevSection = i > 0 ? steps[i - 1].section : undefined;
+        const showSection = step.section && step.section !== prevSection;
+        const isExample = step.section === '範例';
         return (
-          <div key={i} className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+          <React.Fragment key={i}>
+            {showSection && (
+              <div className="flex items-center gap-2 pt-2">
+                <span
+                  className={[
+                    'inline-block rounded-full px-3 py-1 text-sm font-bold',
+                    isExample ? 'bg-amber-100 text-amber-800' : 'bg-violet-100 text-violet-800',
+                  ].join(' ')}
+                >
+                  {step.section}
+                </span>
+                <span className="h-px flex-1 bg-gray-200" />
+              </div>
+            )}
+          <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+            {step.context && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-base text-amber-900 whitespace-pre-wrap">
+                <span className="mr-2 align-middle rounded bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-amber-900">
+                  範例短文
+                </span>
+                {step.context}
+              </div>
+            )}
             <p className="text-base font-medium text-on-surface whitespace-pre-wrap">{step.prompt}</p>
 
             {step.type === 'select' && (
@@ -252,6 +277,7 @@ const GuidedStepsInput: React.FC<Props> = ({
               </>
             )}
           </div>
+          </React.Fragment>
         );
       })}
     </div>

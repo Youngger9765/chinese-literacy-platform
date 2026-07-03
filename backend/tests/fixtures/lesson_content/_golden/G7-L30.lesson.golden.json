@@ -509,49 +509,59 @@
         "steps": [
           {
             "answer": 0,
+            "context": null,
             "options": [
               "兩種八哥外形相近的整體印象",
               "兩種八哥近年的族群變化情形"
             ],
             "prompt": "練習一：第一段 vs 圖一\n1. 圖一最主要提供哪一類訊息？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": 1,
+            "context": null,
             "options": [
               "白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。",
               "這兩種八哥外形十分相似，不容易單靠外表一眼分辨。"
             ],
             "prompt": "2. 讀完第一段後，請你找出和圖一最相關的文字。",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": null,
+            "context": null,
             "options": null,
             "prompt": "練習二：第二段 vs 表一\n請把第二段文字中，要你看表的地方畫線或圈起來",
             "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
+            "section": null,
             "type": "free_text"
           },
           {
             "answer": 1,
+            "context": null,
             "options": [
               "白尾八哥和臺灣冠八哥近年的族群變化",
               "白尾八哥和臺灣冠八哥的異同"
             ],
             "prompt": "表一主要提供的是哪一類訊息？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": 0,
+            "context": null,
             "options": [
               "兩種八哥近年族群數量的變化",
               "白尾八哥和臺灣冠八哥的異同"
             ],
             "prompt": "練習三：第三段 vs 表二\n表二主要提供的是哪一類訊息？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
@@ -559,6 +569,7 @@
               1,
               2
             ],
+            "context": null,
             "options": [
               "外形都大致為黑色",
               "白尾八哥數量近年成長",
@@ -567,6 +578,7 @@
             ],
             "prompt": "整合題:哪些線索能同時從『表一+表二』讀出?(可複選)",
             "reference_answer": null,
+            "section": null,
             "type": "multi_select"
           }
         ],

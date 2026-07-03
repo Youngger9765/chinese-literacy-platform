@@ -107,6 +107,11 @@ const GuidedStep = z
       .union([z.number().int().min(0), z.array(z.number().int().min(0)), z.null()])
       .nullish(),
     referenceAnswer: z.string().nullish(),
+    // Optional section label for visual grouping, e.g. "範例" / "課文" / "小試身手".
+    section: z.string().nullish(),
+    // Optional context passage shown above this step (e.g. the 例一 worked example),
+    // so a worked example is self-contained. Presentation-only; never the answer.
+    context: z.string().nullish(),
   })
   .strict()
   .refine(

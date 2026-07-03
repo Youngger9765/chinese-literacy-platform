@@ -48,43 +48,52 @@
         "steps": [
           {
             "answer": 0,
+            "context": null,
             "options": [
               "烏鴉",
               "麻雀"
             ],
             "prompt": "例一：烏鴉喝水\n❶主角是誰？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": 0,
+            "context": null,
             "options": [
               "喝不到水",
               "天氣炎熱"
             ],
             "prompt": "例一：烏鴉喝水\n❷主角遇到了什麼「問題」？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": null,
+            "context": null,
             "options": null,
             "prompt": "例一：烏鴉喝水\n❸問題如何「解決」？",
             "reference_answer": "叼來小石頭丟進瓶子，讓水面升高",
+            "section": null,
             "type": "free_text"
           },
           {
             "answer": 0,
+            "context": null,
             "options": [
               "主角順利喝到水",
               "主角沒有喝到水"
             ],
             "prompt": "例一：烏鴉喝水\n❹最後得到什麼「結果」？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": 0,
+            "context": null,
             "options": [
               "孟嘗君",
               "秦昭王",
@@ -92,33 +101,40 @@
             ],
             "prompt": "接下來，我們來看課文的故事\n❶主角是誰？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": 1,
+            "context": null,
             "options": [
               "被追兵追到",
               "天沒亮，城門不能開"
             ],
             "prompt": "接下來，我們來看課文的故事\n❷主角遇到了什麼「問題」？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           },
           {
             "answer": null,
+            "context": null,
             "options": null,
             "prompt": "接下來，我們來看課文的故事\n❸問題如何「解決」？孟嘗君的食客【 】，引來附近公雞也一起叫。",
             "reference_answer": "模仿雞叫",
+            "section": null,
             "type": "free_text"
           },
           {
             "answer": 0,
+            "context": null,
             "options": [
               "成功出關",
               "沒有出關"
             ],
             "prompt": "接下來，我們來看課文的故事\n❹最後得到什麼「結果」？",
             "reference_answer": null,
+            "section": null,
             "type": "select"
           }
         ],
