@@ -61,6 +61,34 @@ logger = logging.getLogger(__name__)
 # scripts/ (adapter lives here, alongside the rest of the EDD bridge tooling).
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SCRIPTS_DIR = _REPO_ROOT / "scripts"
+# AI-extracted spotlight lessons (ai-lesson-extract skill). When present for a lesson
+# code, these are PREFERRED over the deterministic bridge adapter so the real
+# reading-strategy page renders the AI-produced 聚光燈. Still flag-gated + fail-safe.
+_AI_LESSONS_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_ai_lessons"
+
+
+def _try_ai_lesson(story: dict) -> Optional[dict]:
+    """If an AI-extracted spotlight lesson exists for this story's code, load + serve it
+    (contract-validated). Returns None (→ fall through to the deterministic adapter) when
+    absent or on any error."""
+    code = story.get("grade_code")
+    if not code:
+        return None
+    path = _AI_LESSONS_DIR / f"{code}.lesson.yml"
+    if not path.exists():
+        return None
+    try:
+        import yaml  # noqa: E402
+        from app.schemas.lesson_content import Lesson  # noqa: E402
+
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        lesson = Lesson.model_validate(raw)
+        return lesson.model_dump(mode="json", exclude_none=True)
+    except Exception as exc:  # noqa: BLE001 — fail-safe: fall back to the adapter
+        logger.warning(
+            "AI lesson override failed for %s (fall back to adapter): %s", code, exc
+        )
+        return None
 
 
 def _flag_on() -> bool:
@@ -102,6 +130,10 @@ def _build_by_story_id(story_id: int) -> Optional[dict]:
     story = _STORY_REGISTRY.get(story_id)
     if story is None:
         return None
+    # AI-extracted spotlight (ai-lesson-extract) takes precedence when present.
+    ai = _try_ai_lesson(story)
+    if ai is not None:
+        return ai
     spot = story.get("spotlight_v2")
     if not isinstance(spot, dict) or not spot:
         return None
