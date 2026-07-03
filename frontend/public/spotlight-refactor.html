@@ -248,6 +248,43 @@
     <tr><td>安全邊界</td><td>全部本地(未 push)· flag 預設 OFF · 未動 staging / 線上 / 正式 catalog</td></tr>
   </table>
 
+  <h2><span class="bar"></span>與重構前的關聯 · 技術繼承 · Merge</h2>
+
+  <div class="deep">
+    <h3>① 跟重構之前的關聯</h3>
+    <p>這不是砍掉重練。重構前平台已有一條 <b>#2205 確定性 pipeline</b>:regex 從 DOCX 抽出 <span class="mono">.spotlight.yml</span> → catalog → <span class="mono">spotlight_v2_loader</span> → 舊渲染器(<span class="mono">BlockSequenceRenderer</span> / <span class="mono">StrategyExercise</span>)。本次做的是<b>換掉「產生方式」</b>(改由 AI 讀原始學習單),但把資料流接到<b>同一套新契約與渲染器</b>上。</p>
+    <table class="maptbl">
+      <tr><td>產生方式</td><td>確定性 regex 擷取 &nbsp;→&nbsp; <b>AI 多模態判讀</b>(可審、判不出標 review)</td></tr>
+      <tr><td>資料形狀</td><td>扁平、無型別、答案存散文字串 &nbsp;→&nbsp; <b>typed 契約</b>(答案鎖成機器可比對)</td></tr>
+      <tr><td>渲染</td><td>一般/圖文兩套 layout &nbsp;→&nbsp; <b>單一 LessonRenderer</b>(差別只在 block 內容)</td></tr>
+      <tr><td>驗收</td><td>人眼為主 &nbsp;→&nbsp; <b>EDD</b>:schema 驗證 + 答案 round-trip + golden + 反 overfit</td></tr>
+    </table>
+    <p class="sub">新契約其實是舊 #2205 schema 的 <b>typed superset</b>(<span class="mono">keypoints_table</span> 當初就照 parser 輸出 1:1 設計),兩代互補而非打架。</p>
+  </div>
+
+  <div class="deep">
+    <h3>② 技術繼承(沿用 vs 新增 vs 未動)</h3>
+    <ul class="clean">
+      <li><b>沿用/接上既有基礎</b>:身分解析 <span class="mono">content_mapping_registry</span> / <span class="mono">catalog_to_parsed_code</span>(防張冠李戴)、課文來源 <span class="mono">_parsed</span> <span class="mono">paragraphs</span>(與朗讀同源)、進度儲存 <span class="mono">step_progress</span>(<span class="mono">saveStepProgressPatch</span>)、UI 沿用 <span class="mono">ComprehensionLayout</span> 的 height-safe 雙欄與 <span class="mono">MultipleChoiceExercise</span> 的字母選項、EDD 標準沿用 #2205 的 <span class="mono">issue-2205-eval-standard</span>。</li>
+      <li><b>本次新增</b>:AI 擷取 skill <span class="mono">.claude/skills/ai-lesson-extract</span>、契約 <span class="mono">lesson_content.py</span>+zod、通用 <span class="mono">LessonRenderer</span> 與 <span class="mono">GuidedStepsInput</span> 等 widget、EDD harness <span class="mono">eval_lesson_content.py</span> + <span class="mono">lint_prompt_overfit.py</span>、後端供給 <span class="mono">lesson_content_loader</span>。</li>
+      <li><b>保留為 fallback</b>:確定性橋接 <span class="mono">spotlight_to_lesson_content.py</span> 仍在 —— 後端 <span class="mono">lesson_content_loader</span> 有 <span class="mono">_ai_lessons/{code}.yml</span> 就用 AI 版,<b>否則自動落回</b>確定性 adapter(讀 #2205 產物)。</li>
+      <li><b>完全未動(flag OFF 時 byte-identical)</b>:<span class="mono">build_lesson_schema.py</span>、catalog 資料、舊渲染器與既有 API 行為。</li>
+    </ul>
+  </div>
+
+  <div class="deep">
+    <h3>③ 若要 merge,注意什麼 / 更動哪裡</h3>
+    <ul class="clean">
+      <li><b>合併本身是安全的(加法 + flag 關)</b>:所有變更都在 <span class="mono">LESSON_RENDERER_V1</span> 旗標之後,預設 OFF → 合進去對線上零行為改變。分支從 <span class="mono">staging</span> 開,PR 對 <span class="mono">staging</span>。</li>
+      <li><b>要真正上線 = 開旗標</b>:把 <span class="mono">LESSON_RENDERER_V1</span> 打開(先 staging)才會用新聚光燈 —— 這是可逆的顯性開關,開之前需視覺 QA。前後端各一顆(前端 <span class="mono">featureFlags.ts</span> / 後端 env)。</li>
+      <li><b>後端供給檔位置要拍板</b>:AI 產物現放 <span class="mono">backend/data/lessons/_ai_lessons/*.yml</span>,由 <span class="mono">lesson_content_loader._try_ai_lesson</span> 優先供給。正式落地位置、以及是否收斂成單一課文來源,屬團隊決策(見交接文件)。</li>
+      <li><b>兩頁分流的守衛不可少</b>:<span class="mono">get_lesson_content</span> 每課一份 → 已加守衛讓「閱讀理解頁只吃含 MCQ 的 lesson、聚光燈頁只吃含 spotlight 的 lesson」,否則會互相蓋掉。</li>
+      <li><b>DB migration</b>:本機曾補 <span class="mono">audio_gcs_path</span>(既有 drift,非本次產生);正式環境通常已 migrate,注意 <span class="mono">alembic heads</span>=1。</li>
+      <li><b>合併前跑的關卡</b>:<span class="mono">bash specs/run-ci.sh</span>、後端 <span class="mono">pytest</span>(lesson_content / adapter)、前端 <span class="mono">npm run lint</span>+<span class="mono">test</span>+<span class="mono">build</span>、<span class="mono">/qa</span> 截圖(改了 tsx)。動到 catalog 才需 content evidence gate(本次沒動)。</li>
+      <li><b>待團隊拍板(未做)</b>:兩套 eval 門檻調和、strategy metadata 是否進契約、前端 <span class="mono">storyToLesson</span> stopgap 退役、擴到 test15/catalog 全量、正式 on-disk 位置。</li>
+    </ul>
+  </div>
+
   <footer>
     <p>產生方式:Claude Code 依 <code>.claude/skills/ai-lesson-extract</code> 逐課擷取 → EDD eval 驗收 → 統一渲染器。<br>
     此頁為本次重構的本地揭露文件,連結指向本機 dev server(:3000)。</p>
