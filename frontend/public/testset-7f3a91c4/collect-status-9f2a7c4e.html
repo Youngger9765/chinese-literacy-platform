@@ -58,6 +58,9 @@
   .ai-score .ok{color:#15803d;font-weight:700}
   .ai-score .lo{color:#b45309;font-weight:700}
   .ai-score .anom{color:var(--red,#dc2626);font-weight:700}
+  .del-btn{background:#fff;border:1px solid var(--red,#dc2626);color:var(--red,#dc2626);border-radius:6px;padding:3px 9px;font:inherit;font-size:.82rem;cursor:pointer;line-height:1}
+  .del-btn:hover{background:#fee2e2}
+  .del-btn:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -153,6 +156,28 @@ function toggleDetail(id){
   row.style.display=shown?'none':'table-row';
   var btn=document.querySelector('[data-expand="'+id+'"]');
   if(btn) btn.textContent=shown?'展開 ▼':'收起 ▲';
+}
+
+/* ── 刪除單筆錄音（admin only）：DELETE /api/testset/recordings → reload ──
+   錄音跟貢獻者綁一起：刪這筆該貢獻者屬性隨之消失；若他還有其他錄音，貢獻資訊自動保留。 */
+async function deleteRecording(btn, audioPath, title, versionName, contributor){
+  var msg='確定刪除這筆錄音？\n\n課文：'+title+'\n版本：'+versionName+'\n貢獻者：'+contributor+
+    '\n\n此操作無法復原，該貢獻者若無其他錄音將一併從清單消失。';
+  if(!confirm(msg)) return;
+  var token=localStorage.getItem('lingoleap_token');
+  if(!token){ alert('登入已過期，請重新登入後再刪除。'); return; }
+  btn.disabled=true;
+  var orig=btn.textContent; btn.textContent='刪除中…';
+  try{
+    var r=await fetch(API+'/api/testset/recordings?audio_path='+encodeURIComponent(audioPath),
+      {method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+    if(r.status===401||r.status===403){ alert('權限不足或登入已過期，請重新登入後再試。'); btn.disabled=false; btn.textContent=orig; return; }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    await load();  // 重算統計 + pill + 明細；貢獻者若無其他錄音自動消失
+  }catch(e){
+    alert('刪除失敗：'+e.message);
+    btn.disabled=false; btn.textContent=orig;
+  }
 }
 
 /* ── load ── */
@@ -254,17 +279,21 @@ async function load(){
     if(hasDetail){
       h+='<tr class="detail-row" id="det-'+esc(id)+'"><td colspan="7"><div class="detail-inner">'+
         '<table class="det-table"><thead><tr>'+
-        '<th>版本</th><th>貢獻者</th><th>年級</th><th>時間</th><th>播放</th>'+
+        '<th>版本</th><th>貢獻者</th><th>年級</th><th>時間</th><th>播放</th><th>操作</th>'+
         '</tr></thead><tbody>';
       allRecs.forEach(function(m){
         var vn=m.version==='correct'?'正確版':'錯誤版';
         var t=(m.created_at||'').replace('T',' ').slice(0,16);
+        // 刪除鈕帶課文/版本/貢獻者 → 由 deleteRecording 組確認訊息（避免 inline JS 字串含換行）
+        var canDel=!!m.audio_path;
+        var delArgs="'"+esc(m.audio_path)+"','"+esc(s.title)+"','"+vn+"','"+esc(m.contributor_name||'—')+"'";
         h+='<tr>'+
           '<td>'+vn+'</td>'+
           '<td>'+esc(m.contributor_name)+'</td>'+
           '<td>'+esc(m.grade)+'</td>'+
           '<td class="muted">'+esc(t)+'</td>'+
           '<td>'+(m.play_url?'<audio controls preload="none" src="'+esc(m.play_url)+'"></audio>':'<span class="muted">—</span>')+'</td>'+
+          '<td>'+(canDel?'<button class="del-btn" title="刪除此錄音" onclick="deleteRecording(this,'+delArgs+')">🗑</button>':'<span class="muted">—</span>')+'</td>'+
           '</tr>';
       });
       h+='</tbody></table></div></td></tr>';

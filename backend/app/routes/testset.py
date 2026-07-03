@@ -300,6 +300,57 @@ def testset_recordings():
     return {"ok": True, "count": len(out), "recordings": out}
 
 
+@router.delete(
+    "/testset/recordings",
+    dependencies=[require_role("system_admin", "org_admin")],
+)
+def testset_delete_recording(
+    audio_path: str = Query(..., description="要刪除錄音的 .webm 完整 GCS 路徑"),
+):
+    """刪除單筆錄音（admin only）：刪同 stem 的 .webm + .json + .eval.json（#2465）。
+
+    Auth 與 GET /testset/recordings 相同（system_admin / org_admin）—— 錄音是平台級
+    敏感資料，刪除更不可逆，故用最緊的 gate。
+
+    貢獻者不是獨立儲存實體，只是每筆錄音 meta 的 contributor_name 欄位；刪掉這筆
+    錄音該筆貢獻者屬性即隨之消失。若該貢獻者尚有其他錄音（各自獨立 blob），其貢獻
+    資訊自然保留 —— 不需額外的貢獻者刪除邏輯。
+    """
+    # path 驗證：必須落在 test-dataset/ prefix 底下且為 .webm，擋 traversal / 跨 prefix / 絕對路徑
+    path = (audio_path or "").strip()
+    if not path.startswith(f"{_PREFIX}/") or not path.endswith(".webm") or ".." in path:
+        raise HTTPException(400, "invalid audio_path")
+
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        # fail-closed: storage unavailable
+        raise HTTPException(503, "storage temporarily unavailable")
+
+    base = path[: -len(".webm")]
+    # 同一筆錄音的三個 blob 共用 stem（.eval.json 跑分後才有，可能不存在）
+    targets = [path, base + ".json", base + ".eval.json"]
+
+    deleted: list[str] = []
+    audio_existed = False
+    try:
+        for t in targets:
+            blob = bucket.blob(t)
+            if blob.exists():
+                blob.delete()
+                deleted.append(t)
+                if t == path:
+                    audio_existed = True
+    except Exception as exc:  # never leak internals; fail-closed
+        logger.warning("testset delete failed: path=%s err=%s", path, exc)
+        raise HTTPException(503, "delete failed, please retry")
+
+    if not audio_existed:
+        raise HTTPException(404, "recording not found")
+
+    logger.info("testset delete OK: %s (removed %d blobs)", path, len(deleted))
+    return {"ok": True, "deleted": deleted}
+
+
 @router.post("/testset/batch-eval")
 async def testset_batch_eval(
     current_user: User = Depends(get_current_user),
