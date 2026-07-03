@@ -60,3 +60,28 @@ describe('BlockSequenceRenderer figure src contract (#2459)', () => {
     expect(img.getAttribute('src')).not.toContain('fig1.png');
   });
 });
+
+// #2463: a figure block referencing a table (referent: 'table') has no image
+// and no inline table data. It must render NOTHING inline (tables live in the
+// 重點表 step) — never the misleading empty「圖表參考」placeholder.
+const TABLE_FIGURE_FIXTURE: SpotlightV2 = {
+  lesson: 'G7-L30',
+  strategy_name: '圖文整合',
+  strategy_type: 'graphic_text',
+  blocks: [
+    { type: 'guide', text: '練習二：第二段 vs 表一' },
+    { type: 'figure', referent: 'table', asset: 'table1.json', bind_paragraph: '練習二：第二段 vs 表一' },
+  ],
+};
+
+describe('BlockSequenceRenderer referent=table figure guard (#2463)', () => {
+  it('renders nothing for a referent=table figure block (no empty 圖表參考 placeholder)', () => {
+    render(<BlockSequenceRenderer spotlight={TABLE_FIGURE_FIXTURE} story={STORY} />);
+    // The sibling guide still shows the instruction...
+    expect(screen.getByText('練習二：第二段 vs 表一')).toBeInTheDocument();
+    // ...but the table-figure block produces NO placeholder box and NO image.
+    expect(screen.queryByText(/圖表參考/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/table1\.json/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('figure-img')).not.toBeInTheDocument();
+  });
+});
