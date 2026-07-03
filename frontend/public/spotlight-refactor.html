@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>閱讀聚光燈 · 重構揭露</title>
+<style>
+  :root{
+    --violet:#564ABF; --violet2:#9D93FF; --ink:#1f2544; --muted:#6b7280;
+    --bg:#faf7f2; --card:#ffffff; --border:#ece7df; --emerald:#059669; --amber:#b45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:var(--violet);text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 20px 80px}
+  header.hero{padding:8px 0 20px;border-bottom:1px solid var(--border);margin-bottom:28px}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--violet);text-transform:uppercase}
+  h1{font-size:30px;margin:6px 0 8px;font-weight:800}
+  .sub{color:var(--muted);font-size:15px;margin:0}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .pill{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:#eef0ff;color:var(--violet)}
+  .pill.ok{background:#e7f6ef;color:var(--emerald)}
+  .pill.warn{background:#fdf1e3;color:var(--amber)}
+  h2{font-size:20px;margin:38px 0 12px;font-weight:800;display:flex;align-items:center;gap:9px}
+  h2 .bar{width:6px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--violet),var(--violet2))}
+  p{margin:10px 0}
+  .lead{font-size:16px}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:14px 0 4px}
+  .step{flex:1 1 150px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+  .step .n{font-size:12px;font-weight:700;color:var(--violet)}
+  .step .t{font-weight:700;margin-top:2px}
+  .step .d{font-size:13px;color:var(--muted);margin-top:3px}
+  .arrow{align-self:center;color:var(--violet2);font-size:20px;font-weight:800}
+  ul.clean{margin:8px 0;padding-left:0;list-style:none}
+  ul.clean li{position:relative;padding:7px 0 7px 26px;border-bottom:1px dashed var(--border)}
+  ul.clean li:last-child{border-bottom:0}
+  ul.clean li::before{content:"✦";position:absolute;left:4px;top:7px;color:var(--violet2)}
+  ul.clean b{color:var(--ink)}
+  .jump-chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+  .chip{font-size:13px;font-weight:700;padding:7px 13px;border-radius:999px;background:#fff;border:1px solid var(--border)}
+  .chip:hover{border-color:var(--violet2);background:#f5f4ff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .lesson{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 18px 16px;
+    box-shadow:0 4px 18px rgba(31,37,68,.04);display:flex;flex-direction:column}
+  .lesson .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .code{font-weight:800;font-size:15px;color:var(--violet)}
+  .tag{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .tag.text{background:#eef0ff;color:var(--violet)}
+  .tag.graphic{background:#e9f6f1;color:var(--emerald)}
+  .lesson h3{font-size:16px;margin:8px 0 4px;font-weight:800;line-height:1.4}
+  .strat{font-size:13px;color:var(--muted);margin:0 0 10px}
+  .stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .stat{font-size:12px;font-weight:600;color:#4b5563;background:#f6f5f2;border-radius:8px;padding:4px 9px}
+  .stat.green{background:#e7f6ef;color:var(--emerald)}
+  .actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{flex:1 1 auto;text-align:center;font-weight:700;font-size:13.5px;padding:9px 12px;border-radius:11px}
+  .btn.primary{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff}
+  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--violet2);color:var(--violet)}
+  .note{font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:16px}
+  table.verify{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  table.verify td{padding:9px 12px;border-bottom:1px solid var(--border)}
+  table.verify tr:last-child td{border-bottom:0}
+  table.verify td:first-child{color:var(--muted);width:44%}
+  table.verify td:last-child{font-weight:600}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
+  code{background:#f1eee8;padding:1px 6px;border-radius:6px;font-size:.9em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">LingoLeap · 閱讀學習</div>
+    <h1>🔦 閱讀聚光燈 — 重構揭露</h1>
+    <p class="sub">讓 AI 直接讀原始學習單、自己判斷題目意義與呈現,產出「可機器驗證」的結構化課文,並在統一的閱讀介面呈現。</p>
+    <div class="pills">
+      <span class="pill ok">dev7 教授七課 · 全數完成</span>
+      <span class="pill ok">eval PASS · needs_review 0</span>
+      <span class="pill">本地分支 feature/spotlight-edd-foundation</span>
+      <span class="pill warn">未 push · flag 預設 OFF</span>
+    </div>
+  </header>
+
+  <h2><span class="bar"></span>這次做了什麼</h2>
+  <p class="lead">把「紙本聚光燈 → 線上」的產生方式,從<b>逐課手工/確定性 regex 擷取</b>,改成<b>讓 AI 讀原始學習單自己判斷</b>——但答案一律鎖進<b>可機器判分的結構化契約</b>,再用<b>同一個渲染器</b>呈現(不再分「一般 / 圖文」兩套 layout)。</p>
+
+  <div class="flow">
+    <div class="step"><div class="n">① 原始素材</div><div class="t">DOCX(GCS)</div><div class="d">依課號下載學習單</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">② 轉檔</div><div class="t">→ PDF</div><div class="d">LibreOffice,保留版面/圖表</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">③ AI 判讀</div><div class="t">多模態閱讀</div><div class="d">判題意、圖片位置、表格意義</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">④ 契約</div><div class="t">typed lesson_content</div><div class="d">答案 + grader,可機器驗證</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">⑤ 呈現</div><div class="t">統一渲染器</div><div class="d">左課文 / 右作答,兩欄</div></div>
+  </div>
+
+  <h2><span class="bar"></span>關鍵設計原則</h2>
+  <ul class="clean">
+    <li><b>答案鎖進契約、可機器驗證</b>:每題強制 <code>answer_space + answer + grader</code>;判不出的誠實標 <code>needs_review</code>,不假裝完好。</li>
+    <li><b>只做「閱讀聚光燈」</b>:文章重點表、閱讀理解是各自獨立模組,不混入(頁面也按內容型別分流,互不污染)。</li>
+    <li><b>區段分組 + 範例自成一體</b>:例一/課文故事/小試身手各成一區,範例短文/祕訣只顯示一次,題目不重複區段名。</li>
+    <li><b>左課文 / 右作答</b>:左欄=完整課文(+課文的圖表,與朗讀同源);右欄=聚光燈作答區。</li>
+    <li><b>紙本動作數位化</b>:「畫線/圈起來」改寫成可作答的「找出…寫下來」。</li>
+    <li><b>UI 統一</b>:卡片外殼、A/B/C/D 字母選項、進度/回饋,對齊「閱讀理解 / 文章重點表」設計語言。</li>
+    <li><b>EDD 護欄</b>:schema 驗證 + 答案 round-trip + golden 凍結 + 反 overfit lint,罩在 AI 產出上。</li>
+    <li><b>進度接後端</b>:作答存入 learning session <code>step_progress</code>;重整可還原選擇與判分;答錯可「再試一次」。</li>
+  </ul>
+
+  <h2><span class="bar"></span>七課聚光燈 · 快速跳轉</h2>
+  <p class="sub">下列課號可直接開啟該課聚光燈(demo 頁,免登入)。「真實介面」為學習流程中的實際步驟(需以學生小明登入、開啟 flag)。</p>
+  <div class="jump-chips">
+    <a class="chip" href="/dev/lesson/G6-L22">G6-L22</a>
+    <a class="chip" href="/dev/lesson/G6-L23">G6-L23</a>
+    <a class="chip" href="/dev/lesson/G6-L24">G6-L24</a>
+    <a class="chip" href="/dev/lesson/G6-L25">G6-L25</a>
+    <a class="chip" href="/dev/lesson/G7-L28">G7-L28</a>
+    <a class="chip" href="/dev/lesson/G7-L29">G7-L29</a>
+    <a class="chip" href="/dev/lesson/G7-L30">G7-L30</a>
+  </div>
+
+  <div class="grid" id="lessons"></div>
+
+  <div class="note">
+    ⚙️ <b>本機開啟方式</b>:前端 <code>npm run dev</code>(:3000)。demo 頁免登入直接看;「真實介面」需先在瀏覽器 console 執行
+    <code>localStorage.setItem('flag_LESSON_RENDERER_V1','true')</code>、以「學生 小明」登入,後端帶 <code>LESSON_RENDERER_V1=true</code> 啟動。
+  </div>
+
+  <h2><span class="bar"></span>驗證與現況</h2>
+  <table class="verify">
+    <tr><td>擷取正確性(七課)</td><td>eval <b>RESULT: PASS</b> · answer round-trip 全綠 · golden 已凍結</td></tr>
+    <tr><td>誠實度</td><td>needs_review = 0 · overfit lint PASS(無答案洩漏)</td></tr>
+    <tr><td>前端品質</td><td>eslint 0 error · vitest 101 passed · build 成功</td></tr>
+    <tr><td>真實介面實測</td><td>七課 <code>/learn/:id/reading-strategy</code> headless:renderer 掛載 · console 0 error</td></tr>
+    <tr><td>安全邊界</td><td>全部本地(未 push)· flag 預設 OFF · 未動 staging / 線上 / 正式 catalog</td></tr>
+  </table>
+
+  <footer>
+    <p>產生方式:Claude Code 依 <code>.claude/skills/ai-lesson-extract</code> 逐課擷取 → EDD eval 驗收 → 統一渲染器。<br>
+    此頁為本次重構的本地揭露文件,連結指向本機 dev server(:3000)。</p>
+  </footer>
+
+</div>
+
+<script>
+  var LESSONS = [
+    {code:"G6-L22", id:1076, title:"小兵立大功:雞鳴狗盜的故事", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["9 段課文","聚光燈 16 步","範例:烏鴉喝水"]},
+    {code:"G6-L23", id:1077, title:"老鷹紅豆的故事", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["7 段課文","聚光燈 9 步"]},
+    {code:"G6-L24", id:1078, title:"白鯨救援:一場人與自然的協奏曲", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["7 段課文","聚光燈 8 步"]},
+    {code:"G6-L25", id:1079, title:"荷蘭東印度公司:全世界第一張股票的誕生", type:"text", strat:"摘要策略 · 段落定位版", stats:["11 段課文","聚光燈 11 步"]},
+    {code:"G7-L28", id:1108, title:"看不見的兇手:以實驗破解肉湯腐敗之謎", type:"graphic", strat:"圖文整合(初階)", stats:["5 段課文","1 圖","聚光燈 19 步"]},
+    {code:"G7-L29", id:1109, title:"從四張圖,看地球暖化的現象", type:"graphic", strat:"圖文整合(進階)", stats:["5 段課文","4 圖","聚光燈 32 步"]},
+    {code:"G7-L30", id:1110, title:"都是八哥,為什麼命運不一樣?", type:"graphic", strat:"圖文表整合", stats:["4 段課文","1 圖 · 2 表","5 個練習"]}
+  ];
+  var el = document.getElementById("lessons");
+  el.innerHTML = LESSONS.map(function(L){
+    var tag = L.type === "graphic"
+      ? '<span class="tag graphic">圖文</span>'
+      : '<span class="tag text">純文字</span>';
+    var stats = L.stats.map(function(s){return '<span class="stat">'+s+'</span>';}).join("")
+      + '<span class="stat green">needs_review 0</span>';
+    return ''
+      + '<div class="lesson">'
+      +   '<div class="top"><span class="code">'+L.code+'</span>'+tag+'</div>'
+      +   '<h3>'+L.title+'</h3>'
+      +   '<p class="strat">'+L.strat+'</p>'
+      +   '<div class="stats">'+stats+'</div>'
+      +   '<div class="actions">'
+      +     '<a class="btn primary" href="/dev/lesson/'+L.code+'">▶ 開啟聚光燈</a>'
+      +     '<a class="btn ghost" href="/learn/'+L.id+'/reading-strategy">真實介面</a>'
+      +   '</div>'
+      + '</div>';
+  }).join("");
+</script>
+</body>
+</html>
