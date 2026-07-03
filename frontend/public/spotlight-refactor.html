@@ -68,6 +68,24 @@
   table.verify td:last-child{font-weight:600}
   footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
   code{background:#f1eee8;padding:1px 6px;border-radius:6px;font-size:.9em}
+  .deep{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin:14px 0}
+  .deep h3{font-size:16px;margin:0 0 8px;font-weight:800;color:var(--violet)}
+  pre.yaml{background:#1e2233;color:#e6e9f5;border-radius:12px;padding:14px 16px;overflow-x:auto;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;margin:10px 0}
+  pre.yaml .k{color:#8fb6ff}      /* keys */
+  pre.yaml .s{color:#c3e88d}      /* strings/values */
+  pre.yaml .c{color:#7d8bb0;font-style:italic} /* comments */
+  pre.yaml .n{color:#f78c6c}      /* numbers/null */
+  .maptbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  .maptbl td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .maptbl tr:last-child td{border-bottom:0}
+  .maptbl td:first-child{color:var(--muted);white-space:nowrap;font-weight:600}
+  .maptbl td:first-child.g{color:var(--emerald)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:#f1eee8;padding:1px 5px;border-radius:5px}
+  .r-flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0;font-size:13.5px}
+  .r-flow .box{background:#f5f4ff;border:1px solid #e0dcff;border-radius:10px;padding:7px 11px;font-weight:600}
+  .r-flow .box b{color:var(--violet)}
+  .r-flow .ar{color:var(--violet2);font-weight:800}
 </style>
 </head>
 <body>
@@ -111,6 +129,96 @@
     <li><b>EDD 護欄</b>:schema 驗證 + 答案 round-trip + golden 凍結 + 反 overfit lint,罩在 AI 產出上。</li>
     <li><b>進度接後端</b>:作答存入 learning session <code>step_progress</code>;重整可還原選擇與判分;答錯可「再試一次」。</li>
   </ul>
+
+  <h2><span class="bar"></span>技術細節:從紙本到畫面</h2>
+
+  <div class="deep">
+    <h3>① AI 怎麼判讀</h3>
+    <p>AI(Claude)用<b>多模態</b>讀那份 PDF —— 同時看得到文字、<b>圖片在哪一段旁邊</b>、表格的結構與意義。然後把學習單上的每個元素,對應到契約裡的一種「積木(block)」或「題型」:</p>
+    <table class="maptbl">
+      <tr><td>課文段落</td><td>→ <span class="mono">paragraph</span> block(完整課文,與朗讀同源)</td></tr>
+      <tr><td>逐步引導練習(❶❷❸❹)</td><td>→ <span class="mono">guided_steps</span>;引用圖表時用 <span class="mono">graphic_text_integration</span></td></tr>
+      <tr><td>打勾單選(□)</td><td>→ step <span class="mono">select</span>,答案存成<b>選項索引(int)</b></td></tr>
+      <tr><td>可複選</td><td>→ step <span class="mono">multi_select</span>,答案存成<b>索引集合</b></td></tr>
+      <tr><td>連連看 / 配對</td><td>→ 每個左項一個 <span class="mono">select</span> step(選右欄哪一項)</td></tr>
+      <tr><td>畫線 / 開放填答</td><td>→ step <span class="mono">free_text</span> + <span class="mono">reference_answer</span>(紙本「畫線」改寫成「寫下來」)</td></tr>
+      <tr><td>課文的圖 / 表</td><td>→ <span class="mono">figure</span> / <span class="mono">table</span> block,由題目用 <span class="mono">anchors</span> 綁定</td></tr>
+      <tr><td class="g">判斷不出的結構</td><td>→ <span class="mono">custom</span> + <span class="mono">needs_review</span>(誠實標記待人工檢核,不硬湊)</td></tr>
+    </table>
+    <p class="sub">鐵律:每題必有<b>可機器比對的答案</b>(索引/字串/集合),散文不算答案;判不準就標 <span class="mono">needs_review</span>,寧可 🟡 不假 🟢。</p>
+  </div>
+
+  <div class="deep">
+    <h3>② 契約(schema)長什麼樣</h3>
+    <p>AI 只能「填」這份契約,不能繞過。它把「答案語意」鎖進結構化欄位(前端 zod + 後端 pydantic 同一份定義):</p>
+    <pre class="yaml"><span class="c"># 一課 = 有序的 typed blocks</span>
+<span class="k">Lesson</span> = { id, lesson_code, title, <span class="k">blocks</span>[] }
+
+<span class="k">Block</span> = paragraph | figure | table | parallel_passage | <span class="k">exercise</span>
+
+<span class="c"># 每個 exercise 強制帶「答案可驗證性不變量」——連 custom 都不豁免</span>
+<span class="k">ExerciseBlock</span> = {
+  question: { kind, … },          <span class="c"># 8 種題型之一</span>
+  <span class="k">answer_space</span>: choice | multi_choice | text | order | free_text,
+  <span class="k">answer</span>: <span class="s">機器可比對的標準答案</span>,   <span class="c"># 索引 / 字串 / 集合 / dict,不是散文</span>
+  <span class="k">grader</span>: exact | set | ordered | rubric_ai | manual,
+  <span class="k">anchors</span>: [{ block_id }],       <span class="c"># 這題對應課文哪個 block(聚光燈的「錨點」)</span>
+  <span class="k">needs_review</span>: <span class="n">false</span>
+}
+<span class="c"># 8 種題型:multiple_choice / fill_in_blank / ordering / trait_inference /</span>
+<span class="c">#          guided_steps / graphic_text_integration / keypoints_table / custom</span></pre>
+  </div>
+
+  <div class="deep">
+    <h3>③ 轉成 YAML 的樣子(G6-L22 真實片段)</h3>
+    <p>下面是「小兵立大功」聚光燈的實際產物(節錄):課文段落 + 摘要策略引導。注意 <span class="mono">section</span>(區段分組)、<span class="mono">context</span>(範例故事只顯示一次)、<span class="mono">answer</span>(選項索引)、<span class="mono">anchors</span>(綁到課文段落):</p>
+    <pre class="yaml"><span class="k">id</span>: <span class="s">G6-L22</span>
+<span class="k">title</span>: <span class="s">小兵立大功:雞鳴狗盜的故事</span>
+<span class="k">blocks</span>:
+  - <span class="k">id</span>: <span class="s">p1</span>
+    <span class="k">type</span>: <span class="s">paragraph</span>
+    <span class="k">text</span>: <span class="s">中國的戰國時期,有七個國家總是爭強鬥勝…</span>
+  - <span class="k">id</span>: <span class="s">ex-spotlight</span>
+    <span class="k">type</span>: <span class="s">exercise</span>
+    <span class="k">question</span>:
+      <span class="k">kind</span>: <span class="s">guided_steps</span>
+      <span class="k">strategy_name</span>: <span class="s">摘要策略-問題.解決.結果結構</span>
+      <span class="k">steps</span>:
+        - <span class="k">prompt</span>: <span class="s">❶主角是誰?</span>
+          <span class="k">type</span>: <span class="s">free_text</span>
+          <span class="k">reference_answer</span>: <span class="s">烏鴉</span>
+          <span class="k">section</span>: <span class="s">例一:烏鴉喝水</span>       <span class="c"># ← 區段分組</span>
+          <span class="k">context</span>: <span class="s">天氣炎熱,烏鴉又渴又累…最後順利喝到水。</span>  <span class="c"># ← 範例短文,顯示一次</span>
+        - <span class="k">prompt</span>: <span class="s">❷主角遇到了什麼「問題」?</span>
+          <span class="k">type</span>: <span class="s">select</span>
+          <span class="k">options</span>: [<span class="s">喝不到水</span>, <span class="s">天氣炎熱</span>]
+          <span class="k">answer</span>: <span class="n">0</span>                       <span class="c"># ← 正解=第0個選項</span>
+          <span class="k">section</span>: <span class="s">例一:烏鴉喝水</span>
+      <span class="c"># … 課文故事、小試身手各步驟 …</span>
+    <span class="k">answer_space</span>: <span class="s">free_text</span>
+    <span class="k">grader</span>: <span class="s">rubric_ai</span>
+    <span class="k">anchors</span>: [{ block_id: <span class="s">p2</span> }, { block_id: <span class="s">p3</span> }]  <span class="c"># ← 錨到課文</span></pre>
+  </div>
+
+  <div class="deep">
+    <h3>④ 渲染:資料怎麼變成你看到的樣子</h3>
+    <p>同一個 <span class="mono">LessonRenderer</span> 吃這份 YAML:先把 blocks 分成「閱讀材料(左)」與「作答(右)」兩欄,再依 <span class="mono">block.type</span> / <span class="mono">question.kind</span> 對應到元件。<b>沒有</b>「一般 vs 圖文」兩套程式碼,差別只在 block 內容。</p>
+    <div class="r-flow">
+      <span class="box"><b>paragraph / figure / table</b><br>→ 左欄「參考課文」</span>
+      <span class="ar">＋</span>
+      <span class="box"><b>exercise</b><br>→ 右欄「閱讀聚光燈」作答區</span>
+    </div>
+    <table class="maptbl">
+      <tr><td><span class="mono">paragraph</span></td><td>→ ParagraphBlockView(編號段落,含注音)</td></tr>
+      <tr><td><span class="mono">figure / table</span></td><td>→ FigureBlockView / TableBlockView(圖片、含合併儲存格的表)</td></tr>
+      <tr><td><span class="mono">question.kind</span></td><td>→ ExerciseBlockView 依題型挑 widget(guided_steps → 步驟卡 + A/B/C/D 選項)</td></tr>
+      <tr><td><span class="mono">section / context</span></td><td>→ 區段標題 + 範例短文框(顯示一次)</td></tr>
+      <tr><td><span class="mono">answer + grader</span></td><td>→ 學生作答 → <span class="mono">lessonGrading.grade()</span> 即時判分 ✓/再想想看</td></tr>
+      <tr><td><span class="mono">anchors</span></td><td>→ 標示這題對應課文哪一段(左欄對照)</td></tr>
+      <tr><td class="g"><span class="mono">needs_review</span></td><td>→ 顯示「需老師人工檢核」,不當作已完成</td></tr>
+    </table>
+    <p class="sub">作答會經 <span class="mono">onExerciseChange</span> 存進 learning session 的 <span class="mono">step_progress</span>(後端),重整可還原選擇與判分。</p>
+  </div>
 
   <h2><span class="bar"></span>七課聚光燈 · 快速跳轉</h2>
   <p class="sub">下列課號可直接開啟該課聚光燈(demo 頁,免登入)。「真實介面」為學習流程中的實際步驟(需以學生小明登入、開啟 flag)。</p>
