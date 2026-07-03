@@ -60,6 +60,8 @@
   .btn.primary:hover{filter:brightness(1.07)}
   .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--ink)}
   .btn.ghost:hover{border-color:var(--violet2);color:var(--violet)}
+  .btn.online{background:#fff;border:1px dashed #b9b3d6;color:var(--muted);flex-basis:100%}
+  .btn.online:hover{border-color:var(--violet2);color:var(--violet)}
   .note{font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:16px}
   table.verify{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
   table.verify td{padding:9px 12px;border-bottom:1px solid var(--border)}
@@ -221,7 +223,7 @@
   </div>
 
   <h2><span class="bar"></span>七課聚光燈 · 快速跳轉</h2>
-  <p class="sub">下列課號可直接開啟該課聚光燈(demo 頁,免登入)。「真實介面」為學習流程中的實際步驟(需以學生小明登入、開啟 flag)。</p>
+  <p class="sub">每張卡片三個連結:<b>新版聚光燈</b> = 本次 AI 重構的 demo(免登入)· <b>本機真實介面</b> = 學習流程中的實際步驟(需小明登入 + 開 flag)· <b>🌐 線上現版</b> = 目前部署在 <span class="mono">lingoleap-dev.web.app</span> 的<b>現行(舊版)</b>聚光燈,開新分頁<b>並排對照</b>新舊差異。</p>
   <div class="jump-chips">
     <a class="chip" href="/dev/lesson/G6-L22">G6-L22</a>
     <a class="chip" href="/dev/lesson/G6-L23">G6-L23</a>
@@ -237,6 +239,31 @@
   <div class="note">
     ⚙️ <b>本機開啟方式</b>:前端 <code>npm run dev</code>(:3000)。demo 頁免登入直接看;「真實介面」需先在瀏覽器 console 執行
     <code>localStorage.setItem('flag_LESSON_RENDERER_V1','true')</code>、以「學生 小明」登入,後端帶 <code>LESSON_RENDERER_V1=true</code> 啟動。
+  </div>
+
+  <h2><span class="bar"></span>EDD 的作法(怎麼確保 AI 不亂生、保護已完成課文)</h2>
+  <p class="lead"><b>EDD = Eval-Driven Design</b>:先把「可執行的驗收」當地基,任何 AI 產出都要<b>通過機器驗收才算數</b>——用來擋「好看但不能驗證 / overfit / 亂生 / 改壞已完成課文」。這是把 lead dev 的顧慮制度化,而非靠更聰明的 prompt。</p>
+  <div class="deep">
+    <h3>五道護欄(每課產出都要過)</h3>
+    <table class="maptbl">
+      <tr><td>① Schema 驗證</td><td><span class="mono">Lesson.model_validate</span> —— 不合契約直接 fail(缺 <span class="mono">answer_space/grader</span>、錨點指向不存在的 block 都擋下)。</td></tr>
+      <tr><td>② 答案 round-trip</td><td>把存下來的 <span class="mono">answer</span> 用它的 <span class="mono">grader</span> <b>機械重判一次</b>,必須判對 —— 證明「答案真的可機器判分」,<b>假答案自動 fail</b>。select 比索引、keypoints 比 dict、複選比集合。</td></tr>
+      <tr><td>③ Golden 凍結/比對</td><td>人工核准後把該課<b>凍結成快照</b>;之後任何重生/改 schema 若<b>悄悄動到已核准課文</b> → <span class="mono">--check-golden</span> diff 立刻報錯。<b>這就是「保護已完成課文」</b>。</td></tr>
+      <tr><td>④ 反 overfit lint</td><td><span class="mono">lint_prompt_overfit.py</span> 掃 skill/prompt 有沒有把<b>特定課的答案</b>背進去(distinctive 答案洩漏就 fail)—— 防「看起來很準其實 overfit」。</td></tr>
+      <tr><td class="g">⑤ 誠實出口</td><td>判不出的題 → <span class="mono">needs_review</span>(顯示「需人工檢核」),<b>絕不 fake pass</b>;<span class="mono">custom</span> 逃生口也強制帶答案 + review。</td></tr>
+    </table>
+    <p class="sub">EDD <b>與資料源無關</b>:不論 AI 產或腳本產,同一套 eval 都適用;沿用 #2205 的 <span class="mono">issue-2205-eval-standard</span> 與 no-overfit(DEV / held-out 分離)精神。輸出一張紅綠燈 coverage:每課 schema✓ / 答案可驗證✓ / 錨點✓ / needs_review 數。</p>
+  </div>
+  <div class="deep">
+    <h3>怎麼跑</h3>
+    <pre class="yaml"><span class="c"># 驗收(schema + 答案 round-trip + 紅綠燈)</span>
+eval_lesson_content.py backend/data/lessons/_ai_lessons/*.lesson.yml <span class="k">--markdown</span>
+<span class="c"># 核准後凍結 golden;日後回歸比對</span>
+eval_lesson_content.py … <span class="k">--freeze-golden</span> --golden-dir …/_golden
+eval_lesson_content.py … <span class="k">--check-golden</span> --golden-dir …/_golden
+<span class="c"># 反 overfit(prompt 是否洩漏特定課答案)</span>
+python scripts/<span class="k">lint_prompt_overfit.py</span>
+<span class="c"># → 七課結果:RESULT: PASS · round-trip 全綠 · needs_review 0 · overfit PASS</span></pre>
   </div>
 
   <h2><span class="bar"></span>驗證與現況</h2>
@@ -316,8 +343,9 @@
       +   '<p class="strat">'+L.strat+'</p>'
       +   '<div class="stats">'+stats+'</div>'
       +   '<div class="actions">'
-      +     '<a class="btn primary" href="/dev/lesson/'+L.code+'">▶ 開啟聚光燈</a>'
-      +     '<a class="btn ghost" href="/learn/'+L.id+'/reading-strategy">真實介面</a>'
+      +     '<a class="btn primary" href="/dev/lesson/'+L.code+'">▶ 新版聚光燈</a>'
+      +     '<a class="btn ghost" href="/learn/'+L.id+'/reading-strategy">本機真實介面</a>'
+      +     '<a class="btn online" href="https://lingoleap-dev.web.app/learn/'+L.id+'/reading-strategy" target="_blank" rel="noopener">🌐 線上現版(對照)</a>'
       +   '</div>'
       + '</div>';
   }).join("");
