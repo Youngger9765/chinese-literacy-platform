@@ -306,6 +306,7 @@ def testset_recordings():
 )
 def testset_delete_recording(
     audio_path: str = Query(..., description="要刪除錄音的 .webm 完整 GCS 路徑"),
+    current_user: User = Depends(get_current_user),
 ):
     """刪除單筆錄音（admin only）：刪同 stem 的 .webm + .json + .eval.json（#2465）。
 
@@ -347,7 +348,11 @@ def testset_delete_recording(
     if not audio_existed:
         raise HTTPException(404, "recording not found")
 
-    logger.info("testset delete OK: %s (removed %d blobs)", path, len(deleted))
+    # 不可逆破壞性操作 → 記錄執行的 admin（誰刪的），方便日後追查（#2466 review）
+    logger.info(
+        "testset delete OK: %s (removed %d blobs) by user_id=%s",
+        path, len(deleted), getattr(current_user, "id", None),
+    )
     return {"ok": True, "deleted": deleted}
 
 

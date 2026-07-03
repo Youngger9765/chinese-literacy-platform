@@ -160,7 +160,12 @@ function toggleDetail(id){
 
 /* ── 刪除單筆錄音（admin only）：DELETE /api/testset/recordings → reload ──
    錄音跟貢獻者綁一起：刪這筆該貢獻者屬性隨之消失；若他還有其他錄音，貢獻資訊自動保留。 */
-async function deleteRecording(btn, audioPath, title, versionName, contributor){
+async function deleteRecording(btn){
+  // 值一律從 data-* 讀（純字串，非 JS 原始碼）→ 不受信任的 contributor 也不會被當程式執行
+  var audioPath=btn.dataset.audio||'';
+  var title=btn.dataset.title||'';
+  var versionName=btn.dataset.version||'';
+  var contributor=btn.dataset.contrib||'';
   var msg='確定刪除這筆錄音？\n\n課文：'+title+'\n版本：'+versionName+'\n貢獻者：'+contributor+
     '\n\n此操作無法復原，該貢獻者若無其他錄音將一併從清單消失。';
   if(!confirm(msg)) return;
@@ -284,16 +289,25 @@ async function load(){
       allRecs.forEach(function(m){
         var vn=m.version==='correct'?'正確版':'錯誤版';
         var t=(m.created_at||'').replace('T',' ').slice(0,16);
-        // 刪除鈕帶課文/版本/貢獻者 → 由 deleteRecording 組確認訊息（避免 inline JS 字串含換行）
+        // 刪除鈕：不受信任的自由文字（contributor_name 來自無登入上傳，只 .strip()）一律走
+        // data-* 屬性，由 deleteRecording 用 this.dataset 當純字串讀 —— 不塞進可執行的 inline
+        // JS 字串，避免瀏覽器 decode attribute 後字串逃逸的 XSS（#2466 review）。
         var canDel=!!m.audio_path;
-        var delArgs="'"+esc(m.audio_path)+"','"+esc(s.title)+"','"+vn+"','"+esc(m.contributor_name||'—')+"'";
+        var delBtn=canDel
+          ?'<button class="del-btn" title="刪除此錄音"'+
+            ' data-audio="'+esc(m.audio_path)+'"'+
+            ' data-title="'+esc(s.title)+'"'+
+            ' data-version="'+esc(vn)+'"'+
+            ' data-contrib="'+esc(m.contributor_name||'—')+'"'+
+            ' onclick="deleteRecording(this)">🗑</button>'
+          :'<span class="muted">—</span>';
         h+='<tr>'+
           '<td>'+vn+'</td>'+
           '<td>'+esc(m.contributor_name)+'</td>'+
           '<td>'+esc(m.grade)+'</td>'+
           '<td class="muted">'+esc(t)+'</td>'+
           '<td>'+(m.play_url?'<audio controls preload="none" src="'+esc(m.play_url)+'"></audio>':'<span class="muted">—</span>')+'</td>'+
-          '<td>'+(canDel?'<button class="del-btn" title="刪除此錄音" onclick="deleteRecording(this,'+delArgs+')">🗑</button>':'<span class="muted">—</span>')+'</td>'+
+          '<td>'+delBtn+'</td>'+
           '</tr>';
       });
       h+='</tbody></table></div></td></tr>';
