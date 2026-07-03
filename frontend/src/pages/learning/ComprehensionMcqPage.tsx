@@ -87,7 +87,15 @@ const ComprehensionMcqPage: React.FC = () => {
     // adapter); fall back to the front-end storyToLesson stopgap when the backend flag is
     // OFF or the payload didn't parse (selectedStory.lessonContent is undefined).
     const lesson = selectedStory.lessonContent ?? storyToLesson(selectedStory).lesson;
-    if (lesson) {
+    // Only adopt a Lesson here if it actually carries COMPREHENSION content (a
+    // multiple_choice exercise). The AI-extracted lessons are 閱讀聚光燈-ONLY (guided_steps /
+    // graphic_text_integration) and must NOT hijack the 閱讀理解 step — without this guard the
+    // comprehension page would render the spotlight (the reading-strategy content). When the
+    // lesson has no MCQ, fall through to the legacy comprehension layout.
+    const lessonHasMcq =
+      !!lesson &&
+      lesson.blocks.some((b) => b.type === 'exercise' && b.question.kind === 'multiple_choice');
+    if (lesson && lessonHasMcq) {
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="comprehension" />

@@ -103,7 +103,17 @@ const StrategyExercisePage: React.FC = () => {
     // adapter); fall back to the front-end storyToLesson stopgap when the backend flag is
     // OFF or the payload didn't parse (selectedStory.lessonContent is undefined).
     const lesson = selectedStory.lessonContent ?? storyToLesson(selectedStory).lesson;
-    if (lesson) {
+    // Only adopt a Lesson here if it actually carries the 閱讀聚光燈 (a reading-strategy
+    // exercise: guided_steps / graphic_text_integration). Symmetric with ComprehensionMcqPage's
+    // MCQ guard — the two steps partition by content type so neither hijacks the other.
+    const lessonHasSpotlight =
+      !!lesson &&
+      lesson.blocks.some(
+        (b) =>
+          b.type === 'exercise' &&
+          (b.question.kind === 'guided_steps' || b.question.kind === 'graphic_text_integration'),
+      );
+    if (lesson && lessonHasSpotlight) {
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="reading-strategy" />
