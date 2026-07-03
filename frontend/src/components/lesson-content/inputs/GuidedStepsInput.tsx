@@ -93,6 +93,21 @@ const GuidedStepsInput: React.FC<Props> = ({
     [onChange, value],
   );
 
+  // Allow re-answering a step after a wrong verdict: clear its feedback + grade so the
+  // options re-enable and the confirm/submit button comes back (keep the current value).
+  const retryStep = (i: number) => {
+    setFeedback((prev) => {
+      const next = { ...prev };
+      delete next[i];
+      return next;
+    });
+    setGrades((prev) => {
+      const next = { ...prev };
+      delete next[i];
+      return next;
+    });
+  };
+
   const submitSelect = (i: number) => {
     const step = steps[i];
     const picked = value[i];
@@ -179,10 +194,19 @@ const GuidedStepsInput: React.FC<Props> = ({
               >
                 確認
               </button>
+            ) : fb === false ? (
+              <div className="flex items-center gap-3">
+                <p className="text-base font-medium text-amber-700">再想想看</p>
+                <button
+                  type="button"
+                  onClick={() => retryStep(i)}
+                  className="text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                >
+                  再試一次
+                </button>
+              </div>
             ) : (
-              <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                {fb ? '✓ 答對了' : '再想想看'}
-              </p>
+              <p className="text-base font-medium text-green-700">✓ 答對了</p>
             )}
           </>
         )}
@@ -219,10 +243,19 @@ const GuidedStepsInput: React.FC<Props> = ({
               >
                 確認
               </button>
+            ) : fb === false ? (
+              <div className="flex items-center gap-3">
+                <p className="text-base font-medium text-amber-700">再想想看</p>
+                <button
+                  type="button"
+                  onClick={() => retryStep(i)}
+                  className="text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                >
+                  再試一次
+                </button>
+              </div>
             ) : (
-              <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                {fb ? '✓ 答對了' : '再想想看'}
-              </p>
+              <p className="text-base font-medium text-green-700">✓ 答對了</p>
             )}
           </>
         )}
@@ -259,6 +292,15 @@ const GuidedStepsInput: React.FC<Props> = ({
                 </p>
                 {grades[i].suggestion ? (
                   <p className="mt-1.5 text-sm text-amber-700/90">{grades[i].suggestion}</p>
+                ) : null}
+                {!grades[i].is_correct ? (
+                  <button
+                    type="button"
+                    onClick={() => retryStep(i)}
+                    className="mt-2 block text-sm font-medium text-violet-600 underline underline-offset-2 cursor-pointer"
+                  >
+                    再試一次
+                  </button>
                 ) : null}
               </div>
             ) : null}
