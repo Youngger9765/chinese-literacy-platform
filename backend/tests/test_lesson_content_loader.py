@@ -156,6 +156,61 @@ def test_identity_lesson_code_matches_spotlight_lesson(monkeypatch):
         )
 
 
+def test_title_is_display_authoritative(monkeypatch):
+    """張冠李戴 regression (verifier 2026-07): the emitted title must be the DISPLAY
+    lesson's own title (story['title']), never a neighbour's borrowed from a mis-resolved
+    _parsed file. Locks the G8 catalog↔Layer-2 offset fix (e.g. display G8-L4 玻璃娃娃 must
+    NOT show 植物肉). Corpus-level, no hardcoded ids."""
+    _flag_on(monkeypatch)
+    mism: list[str] = []
+    for story in _spotlight_stories():
+        out = L.get_lesson_content(story)
+        assert out is not None
+        display_title = story.get("title")
+        if display_title and out.get("title") != display_title:
+            mism.append(f"{story['id']}: title={out.get('title')!r} != display {display_title!r}")
+    assert not mism, "lesson_content title diverged from the display title:\n" + "\n".join(mism)
+
+
+def test_neighbor_identity_source_is_never_a_silent_green(monkeypatch):
+    """張冠李戴 regression (verifier 2026-07): when the spotlight's OWN declared identity
+    (spot['lesson']) resolves to a DIFFERENT _parsed file than the display lesson's
+    authoritative twin (catalog_to_parsed_code(grade_code)), the spotlight source was
+    authored against a different lesson than the one displayed — its body/exercise may be a
+    neighbour's. Such a lesson must NEVER render as a clean green: every exercise block must
+    carry needs_review=True. This is the content-dimension gate the old lesson_code-only
+    check missed (4 of 5 G8 offset lessons were silently green)."""
+    import spotlight_to_lesson_content as adapter  # noqa: E402
+    from app.services.lesson_code_normalization import catalog_to_parsed_code  # noqa: E402
+
+    _flag_on(monkeypatch)
+    offenders: list[str] = []
+    checked = 0
+    for story in _spotlight_stories():
+        out = L.get_lesson_content(story)
+        assert out is not None
+        display_code = story.get("grade_code")
+        if not display_code:
+            continue
+        spot_code = normalize_manifest_code(
+            str(story["spotlight_v2"].get("lesson") or display_code)
+        )
+        parsed_code = catalog_to_parsed_code(str(display_code))
+        spot_path, _ = adapter.resolve_parsed_source(spot_code)
+        auth_path, _ = adapter.resolve_parsed_source(parsed_code)
+        if spot_path is None or auth_path is None or spot_path == auth_path:
+            continue  # spotlight identity aligns with the display — not a mis-binding risk
+        checked += 1
+        exercises = [b for b in out["blocks"] if b.get("type") == "exercise"]
+        if exercises and not all(b["needs_review"] for b in exercises):
+            offenders.append(
+                f"{story['id']} ({display_code}): spot resolves to {spot_path.name} but "
+                f"display authority resolves to {auth_path.name}; unflagged exercises exist"
+            )
+    assert checked > 0, "expected the corpus to contain at least one identity-offset lesson (G8)"
+    assert not offenders, "silent 張冠李戴 green (foreign-identity source, no needs_review):\n" + "\n".join(offenders)
+
+
 def test_needs_review_flag_is_honestly_carried(monkeypatch):
     """A needs_review course must surface block-level needs_review=True (honest 🟡);
     a GREEN course must carry needs_review=False on every exercise (no fake flag)."""

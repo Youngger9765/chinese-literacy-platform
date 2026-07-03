@@ -13,10 +13,20 @@ DATA FLOW (flag ON only)
      import time by ``lesson_layer_loaders._spotlight_enrichment``)  → return None
   3. else: import the deterministic bridge adapter
      (``scripts/spotlight_to_lesson_content.py``) and run its PUBLIC pipeline on the
-     SAME in-memory spotlight dict the legacy renderer already consumes — NO new identity
-     path, NO file re-read, NO DB, NO network, NO AI. The adapter fingerprints identity
-     off ``spot["lesson"]`` (already ``content_mapping_registry``-rebound upstream), so the
-     張冠李戴 risk equals the current spotlight_v2 supply exactly.
+     SAME in-memory spotlight dict the legacy renderer already consumes — NO file re-read
+     beyond an immutable ``_parsed`` YAML, NO DB, NO network, NO AI.
+
+     CONTENT-source identity (張冠李戴 fix): the exercise ``lesson_code`` stays the
+     spotlight's own display code (``resolve_identity(spot)``), but the keypoints/title
+     CONTENT source (the ``_parsed`` twin) is resolved through the platform authority
+     ``catalog_to_parsed_code(story["grade_code"])`` — the SAME mapping
+     ``load_layer2_lessons`` used to bind this story's ``story_structure_table`` + ``title``
+     — NOT the adapter's bare-first ``load_parsed(spot["lesson"])``, which bypasses that
+     authority and mis-binds the G8 catalog↔Layer-2 +1 numbering offset onto a NEIGHBOUR
+     lesson's keypoints/title. When the spotlight's own declared identity resolves to a
+     DIFFERENT ``_parsed`` file than the display lesson's authoritative twin, the spotlight
+     BODY may itself be a neighbour's (pre-existing spotlight_v2 mis-map) → every exercise
+     block is flagged ``needs_review`` (honest 「需人工檢核」, never a silent 張冠李戴 green).
   4. validate through ``Lesson.model_validate`` (adapter ``to_lesson``) and return
      ``model_dump(mode="json")`` — a pure snake_case JSON-safe dict.
 
@@ -43,6 +53,8 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Optional
+
+from app.services.lesson_code_normalization import catalog_to_parsed_code
 
 logger = logging.getLogger(__name__)
 
@@ -95,11 +107,22 @@ def _build_by_story_id(story_id: int) -> Optional[dict]:
         return None
     try:
         adapter = _get_adapter()
-        # Identity: fingerprint off the spotlight's own (already-rebound) lesson code;
-        # fall back to grade_code only if the spotlight omitted it. NO new identity path.
-        raw_code = spot.get("lesson") or story.get("grade_code")
-        code = adapter.normalize_manifest_code(str(raw_code))
-        parsed, parsed_kind = adapter.load_parsed(code)
+        # ── CONTENT-source identity (張冠李戴 fix — content-mapping-integrity 鐵律) ────────
+        # `lesson_code` (the page/exercise identity) stays the spotlight's own display code —
+        # that is resolved inside assemble_lesson via resolve_identity(spot). But the
+        # keypoints/title CONTENT source (the _parsed twin) must be resolved through the
+        # PLATFORM AUTHORITY catalog_to_parsed_code(display_code), NOT the adapter's bare-first
+        # load_parsed(spot["lesson"]). load_layer2_lessons already binds this story's
+        # story_structure_table + title through catalog_to_parsed_code; the adapter's bare-first
+        # bypasses it and mis-binds the G8 catalog↔Layer-2 +1 numbering offset onto a NEIGHBOUR
+        # lesson's keypoints/title (e.g. display G8-L4 玻璃娃娃 wrongly pulled G8-L4.yml 植物肉;
+        # authority maps G8-L4→G8-L5=玻璃娃娃). Fix the mapping once, at the authority.
+        display_code = story.get("grade_code")
+        spot_code = adapter.normalize_manifest_code(str(spot.get("lesson") or display_code))
+        parsed_code = (
+            catalog_to_parsed_code(str(display_code)) if display_code else spot_code
+        )
+        parsed, parsed_kind = adapter.load_parsed(parsed_code)
         lesson_dict = adapter.assemble_lesson(
             spot,
             parsed,
@@ -107,6 +130,32 @@ def _build_by_story_id(story_id: int) -> Optional[dict]:
             with_keypoints=True,
             parsed_source_kind=parsed_kind,
         )
+        # Title authority: the display lesson's own title is what the student sees. Prefer it
+        # over whatever the spotlight/parsed carried (defensive against a spotlight that
+        # declared a neighbour's title); fall back to the assembled title when absent.
+        display_title = story.get("title")
+        if display_title:
+            lesson_dict["title"] = display_title
+
+        # ── Honesty guard: never a silent 張冠李戴 green ──────────────────────────────────
+        # If the spotlight's OWN declared identity (spot["lesson"]) resolves to a DIFFERENT
+        # _parsed file than the display lesson's authoritative twin, the spotlight SOURCE (its
+        # passages + exercise) was authored against a different lesson than the one displayed —
+        # its BODY may be a neighbour's (a pre-existing spotlight_v2 mis-map this refactor does
+        # NOT silently paper over). Flag every exercise block needs_review so the renderer shows
+        # 「需人工檢核」 instead of a clean green. Content-verified corpus-wide: fires on EXACTLY
+        # the G8 catalog↔Layer-2 offset lessons, 0 false positives on aligned ones.
+        spot_parsed_path, _ = adapter.resolve_parsed_source(spot_code)
+        auth_parsed_path, _ = adapter.resolve_parsed_source(parsed_code)
+        if (
+            spot_parsed_path is not None
+            and auth_parsed_path is not None
+            and spot_parsed_path != auth_parsed_path
+        ):
+            for blk in lesson_dict.get("blocks", []):
+                if isinstance(blk, dict) and blk.get("type") == "exercise":
+                    blk["needs_review"] = True
+
         lesson = adapter.to_lesson(lesson_dict)  # Lesson.model_validate — fail LOUD → caught
         # exclude_none: the frontend zod contract uses `.optional()` (accepts ABSENT), not
         # `.nullish()`, for the char-range anchor fields — an explicit `char_start: null`
