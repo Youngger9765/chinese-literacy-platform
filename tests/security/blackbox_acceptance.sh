@@ -170,7 +170,7 @@ fi
 # ─────────────────────────────────────────────────────────────
 echo; echo "── 對抗複審發現（2026-07-04 appsec-pentest-reviewer；red→green 鎖，修好轉綠）──"
 # HIGH-1a: entrypoint 不得無條件信任 XFF（--forwarded-allow-ips='*' → 限流全線可繞）
-if grep -qa "forwarded-allow-ips='\*'" "$ROOT/backend/entrypoint.sh" 2>/dev/null; then
+if grep -qaE "^[^#]*forwarded-allow-ips='\*'" "$ROOT/backend/entrypoint.sh" 2>/dev/null; then
   no "A07/A04 · WSTG-ATHN-03/BUSL-01" "HIGH-1: entrypoint --forwarded-allow-ips='*'（信任任意 XFF）" "改可信代理範圍/信任 hop 數"
 else
   ok "A07/A04 · WSTG-ATHN-03" "entrypoint 未無條件信任 XFF"

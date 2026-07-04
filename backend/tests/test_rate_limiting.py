@@ -683,3 +683,30 @@ class TestGlobalRateLimitMiddleware:
         assert GlobalRateLimitMiddleware.READ_LIMIT == 300
         assert GlobalRateLimitMiddleware.WRITE_LIMIT == 90
         assert GlobalRateLimitMiddleware.WINDOW == 60
+
+
+class TestRealClientIpXFF:
+    """#2470 HIGH-1a: real client IP must come from the GCP-appended second-from-right
+    X-Forwarded-For entry, never the client-controlled leftmost one — else an attacker
+    rotates a fake leftmost IP to bypass per-IP rate limits."""
+
+    def test_takes_second_from_right(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        # GCP appends [real-client, load-balancer]; client prepended a spoof
+        assert real_ip_from_xff("1.1.1.1, 5.5.5.5, 9.9.9.9") == "5.5.5.5"
+
+    def test_rotating_leftmost_does_not_change_result(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        a = real_ip_from_xff("11.11.11.11, 5.5.5.5, 9.9.9.9")
+        b = real_ip_from_xff("22.22.22.22, 5.5.5.5, 9.9.9.9")
+        assert a == b == "5.5.5.5"  # bypass attempt (rotate spoof) has no effect
+
+    def test_no_spoof_prefix(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        # No client-supplied prefix: GCP set [real-client, lb]
+        assert real_ip_from_xff("5.5.5.5, 9.9.9.9") == "5.5.5.5"
+
+    def test_empty_falls_back_to_peer(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff("", "10.0.0.1") == "10.0.0.1"
+        assert real_ip_from_xff("") == "unknown"

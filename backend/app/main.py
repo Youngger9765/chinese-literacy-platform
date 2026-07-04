@@ -38,7 +38,7 @@ from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
 from .utils.logging_config import setup_logging
-from .auth.rate_limiter import general_rate_limiter
+from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -263,14 +263,12 @@ class GlobalRateLimitMiddleware:
             await self.app(scope, receive, send)
             return
 
-        # Extract real client IP from headers.
+        # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
+        # second-from-right XFF entry, not the client-controlled leftmost one.
         headers_raw = dict(scope.get("headers", []))
         forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
-        if forwarded_for:
-            ip = forwarded_for.split(",")[0].strip()
-        else:
-            client = scope.get("client")
-            ip = client[0] if client else "unknown"
+        client = scope.get("client")
+        ip = real_ip_from_xff(forwarded_for, client[0] if client else None)
         method = scope.get("method", "GET").upper()
         is_read = method in ("GET", "HEAD", "OPTIONS")
         limit = self.READ_LIMIT if is_read else self.WRITE_LIMIT

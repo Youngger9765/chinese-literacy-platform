@@ -48,4 +48,9 @@ PYEOF
     echo "Migrations complete."
 fi
 
-exec uvicorn app.main:app --host 0.0.0.0 --port 8080 --proxy-headers --forwarded-allow-ips='*'
+# (#2470 HIGH-1a) Do NOT trust X-Forwarded-For from arbitrary clients: removed the
+# forwarded-allow-ips wildcard (which let any caller spoof request.client.host).
+# Security-relevant client IP is derived in-app from the GCP-appended XFF entry
+# (see app.auth.rate_limiter.real_ip_from_xff). --proxy-headers stays with uvicorn's
+# safe default (trust only 127.0.0.1) so request.client.host is not client-spoofable.
+exec uvicorn app.main:app --host 0.0.0.0 --port 8080 --proxy-headers
