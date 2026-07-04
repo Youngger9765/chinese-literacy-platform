@@ -314,3 +314,24 @@ def test_idor_org_admin_cannot_read_cross_org_classroom(client):
     # 正確行為：跨 org 的 org_admin 不該讀到別家班級 → 應 403
     # 目前 is_admin bypass 會回 200（漏洞）→ 本測 xfail，修好後轉綠
     assert client.get(f"/api/classrooms/{cid}", headers=_auth(tok)).status_code == 403
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="NEW-1（Cursor 盲掃，已驗證）：schools.py list_school_members/classrooms 只有 get_current_user、"
+    "無 org/school scope → 任何登入者猜 school_id 即可撈全校成員 name/email/role。"
+    "加 org/school membership 檢查後此測轉綠，移除 xfail marker。",
+)
+def test_idor_any_user_cannot_enumerate_school_members(client):
+    # 註冊教師會建立預設 school（含該教師為成員，帶 email）
+    _register_teacher(client)
+    sid = _first_school_id()
+    assert sid is not None
+
+    # 與該 school 完全無關的登入者（無任何 role）
+    outsider = _create_user(f"outsider_{uuid.uuid4().hex[:8]}@example.com")
+    tok = create_access_token(outsider)
+
+    # 正確行為：無關使用者不該讀到全校成員名冊（PII）→ 應 403
+    # 目前無授權檢查會回 200 + email（漏洞）→ 本測 xfail，修好後轉綠
+    assert client.get(f"/api/schools/{sid}/members", headers=_auth(tok)).status_code == 403

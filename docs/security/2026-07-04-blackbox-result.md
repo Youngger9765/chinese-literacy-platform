@@ -6,9 +6,11 @@
 > - 綠燈 = 對映的 WSTG 條目「自測通過」，不保證通過官方稽核
 > - 全程 LOCAL：靜態 grep + Semgrep + gitleaks + in-process TestClient 動態測試 + 獨立對抗複審 agent；**未**對雲端正式站台燒錢掃描
 
-## 目前 gate 狀態：🔴 RED — 未通過（有 1 HIGH + 3 MED 待修）
+## 目前 gate 狀態：🔴 RED — 未通過
 
-> 底子做得比一般案子好（認證/授權/注入/機密大面積乾淨），但獨立對抗複審抓到 **1 個真 HIGH + 3 個 MED**，修好前**不建議送官方稽核**。
+> 兩輪獨立對抗複審後（appsec-pentest-reviewer + Cursor 不同引擎），確認 **≈4 HIGH + 5 MED + 多個 LOW**，且核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取路徑零授權）。修好前**不建議送官方稽核**。
+>
+> 認證/注入/機密底子仍好（JWT/bcrypt/ORM/無 committed secret 全綠），問題集中在**授權（tenant isolation）+ 限流信任鏈**。
 
 ## 受測標的
 - Repo：`chinese-literacy-platform`（LingoLeap）— 國小/國中中文閱讀學習平台
@@ -42,10 +44,13 @@
   - `backend/app/auth/rate_limiter.py:107-113` — `get_client_key` 讀 `request.state.user_id`，但**全 repo grep 證實此值從未被設定** → per-user 限流靜默退化成 per-IP
 - **修法**：(a) `--forwarded-allow-ips` 收窄可信代理範圍/hop 數；(b) 取 XFF **最右可信一跳**非 `[0]`；(c) auth dependency 解 JWT 後真的寫入 `request.state.user_id`
 - **red→green**：登入端點連打 11 次、每次不同 `X-Forwarded-For: 9.9.9.N` → 修前第 11 次仍 200/401（繞過=紅）、修後回 429（綠）；AI 端點同法
+- **✅ 活體 PoC 已確認（served layer）**：跑真 ASGI 中介層，limit=2 送 5 次——固定 XFF `9.9.9.9` → `[422,422,429,429,429]`（3×429，限流有效）；輪換 XFF `9.9.9.N` → `[422,422,422,422,422]`（**0×429，完全繞過**）
+- **範圍修正（Cursor）**：非「**所有**」限流——`tts_rate_limit(user_id)` 直接用 JWT user_id、不受 XFF 影響（安全）。受害的是 global middleware + 登入暴破 + AI dependency 限流三條
 
-### MED-1 — org_admin 可跨組織讀別家班級 / 作業 / 學生錄音
+### MED-1 → 升 HIGH（Cursor 論證）— `is_admin` 全域 bypass = 系統性跨組織越權
 `WSTG-ATHZ-02`（BOLA）/ CWE-639, CWE-863
-- **影響**：A 機構管理員可聽 B 機構小朋友朗讀錄音、改 B 機構作業。單機構期影響小，**多機構一上線 = 跨客戶個資外洩**。
+- **升級理由**：不是單一班級端點，是**系統性**——`is_admin()`（把 org_admin 當 system_admin）被當全域 bypass 用在 **classroom / assignment / 學生錄音 / student-sessions / semester / org-dashboard / org-points / school-regen-code** 等 8+ 路徑。含**讀 + 寫 + 學生 PII + 朗讀錄音 signed URL**。
+- **影響**：A 機構管理員可聽 B 機構小朋友朗讀錄音、讀 B 機構學生名單/email、改 B 機構作業。**多機構一上線 = 跨客戶個資外洩**。
 - **證據（同 bug 兩實作、只修一處）**：
   - `backend/app/auth/policies.py:17-35` `is_admin()` 只比角色名（含 org_admin），**無 org scope**——docstring 自己警告勿當全域 bypass
   - `backend/app/auth/policies.py:99-131` `require_classroom_owner/member`（org-scope 敏感情境）卻 `if is_admin(...): return`
@@ -69,6 +74,26 @@
 - **證據**：`backend/app/services/sso_login_service.py:53-57` 有驗 audience（綠）；但 `resolve_google_user:100-102` 直接 `filter(User.email == email)` 連結既有帳號，**全程未讀 `id_info.get("email_verified")`**（該檔 4 處 email_verified 全是註解/設定新帳號欄位，非驗 claim）
 - **現實性**：消費者 Gmail email_verified 恆 true，實際利用門檻高 → defense-in-depth，但修一行值得
 - **修法**：連結/建立帳號前 `if not id_info.get("email_verified"): raise 401`
+
+## 🔴 對抗複審新增發現（Cursor 盲掃，已逐條對 code 驗證）
+
+### NEW-1 — 任何登入者可枚舉全校成員 name/email/role（HIGH）
+`WSTG-ATHZ-04` / CWE-639
+- **證據**：`schools.py:203-231 list_school_classrooms` + `241-271 list_school_members` 只有 `Depends(get_current_user)` + 存在性檢查，**零 org/school membership 檢查、無 require_role**
+- **影響**：任何登入者（含學生）iterate `school_id` → `GET /api/schools/{id}/members` 撈全校師生 **email**。比 MED-1 更廣（任何人，非只 org_admin）
+- **red→green**：已鎖 `test_idor_any_user_cannot_enumerate_school_members`（strict xfail：無關 user 讀 members 應 403、目前 200）
+
+### NEW-2 — 任何教師可在別 org 的 school 建班（HIGH）
+`WSTG-ATHZ-02`
+- **證據**：`classroom_crud.py:51-77 create_classroom` 只 `filter(School.id==school_id)` 驗存在，**不驗 caller 對該 school 的 org membership**
+- **修法**：驗 caller 屬該 school 的 org；org_admin 限自己 org
+
+### NEW-3/4/5 — 同根 `is_admin` bypass / 缺 scope（MED）
+- **NEW-3** `organization_dashboard.py:37` + `organization_points.py`：`if not is_admin(...)` → org_admin 因 is_admin=True 直接跳過 org 檢查（has_org_role 對 org_admin 是死碼）→ 讀任意 org dashboard/points
+- **NEW-4** `semesters.py:107 _require_school_write_access` 用 `is_admin` → org_admin 對任意 school 建/改 semester；`list_school_semesters:135` 任何登入者可讀
+- **NEW-5** `schools.py:178-193 regenerate-code` 有 `require_role(org_admin)` 但**缺** org_ids 檢查（同檔 `update_school` 有）→ 跨 org 重置 join code
+
+### NEW-6 — testset recordings 對任意 org_admin 平台級跨校（LOW，已知 #2437）
 
 ## 🟡 LOW（Hardening）
 - **LOW-1** OMO 上傳只驗 header MIME 不驗 magic bytes（`omo_upload_validator.py:42`）— 與 testset 不一致；已登入+私有 bucket，風險有限。修：比照 testset 加前導位元組
@@ -113,5 +138,18 @@ cd backend && python -m pytest tests/security/test_dynamic_security.py -v
 - [ ] 本次為**靜態+in-process**，尚缺：staging 跑 `testssl.sh`（TLS 層）、`pip-audit`/`safety`（依賴 CVE）、關鍵繞過的動態 curl 實證
 - [ ] **需真人簽名背書上線時，這關要找真人資安顧問**——本報告是第一線自測，非最終背書
 
-## 對抗複審 verdict（已整合）
-`appsec-pentest-reviewer` agent 獨立 assume-guilty 白箱審查（221k tokens / 51 tool calls / 13.5 min），抓到主 agent 漏的 HIGH-1（entrypoint XFF）+ MED-1（policies vs tenant 兩實作只修一處）。我逐條對真實 code 驗證後全部確認為真（見上）。**教訓：最貴的洞常是「同件事兩套實作只修一套」+「防線的前提假設沒成立」（限流以為擋 IP，但 IP 本身可偽造）**——已各配 red→green 測試，看紅轉綠即可，不必讀 code。
+## 對抗複審 verdict（兩個獨立引擎，已整合）
+
+**輪 1 — `appsec-pentest-reviewer` agent**（Claude 系，assume-guilty 白箱，221k tokens / 51 tool calls / 13.5 min）：抓到主 agent 漏的 HIGH-1（entrypoint XFF）+ MED-1（policies vs tenant 兩實作只修一處）。我逐條對真實 code 驗證後全部確認。
+
+**輪 2 — Cursor（不同引擎，`cursor-safe-exec`，Young 在場手動觸發）**：
+- 4 條原發現**全部 CONFIRMED**
+- 修正主 agent overclaim：HIGH-1 非「所有」限流（TTS 走 JWT user_id 例外）
+- 論證 MED-1 應升 HIGH（系統性 `is_admin` 雙軌，跨讀+寫+PII+錄音）
+- **盲掃再找到 5 個新洞**（NEW-1~5），其中 NEW-1（任何人枚舉全校 email）+ NEW-2（跨校建班）severity 高於原 MED-1 單點
+- 我對 NEW-1/2/3/4 逐條讀 code 獨立驗證 = 全部為真（沒盲信 Cursor）
+
+**教訓**：
+1. 最貴的洞常是「**同件事兩套實作只修一套**」（policies.py vs tenant.py）+「**防線前提假設沒成立**」（限流以為擋 IP，但 XFF 由攻擊者填）
+2. **兩個不同引擎的對抗複審比一個強**——Cursor 抓到 appsec agent + 主 agent 都漏的 school 枚舉 IDOR。跨引擎覆審值得
+3. 根因單一：**授權沒統一走 tenant-scoped 模式** → 建議把所有 `is_admin` bypass + 無 scope 的 school-scoped 讀取，統一收斂到 `tenant.py` 的 org-scoped helper（修一次解 MED-1 + NEW-1~5）

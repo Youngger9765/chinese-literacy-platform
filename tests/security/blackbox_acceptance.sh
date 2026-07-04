@@ -203,6 +203,31 @@ grep -qaE 'id_info(\.get\(|\[)["'\'']?email_verified' "$BE/services/sso_login_se
   && ok "A07 · WSTG-ATHN-01" "SSO 讀取並驗 id_info.email_verified claim" \
   || no "A07 · WSTG-ATHN-01" "MED-3: SSO 未驗 id_info 的 email_verified claim（憑未驗 email 連結帳號）" "連結前 if not id_info.get('email_verified'): raise 401"
 
+echo; echo "── Cursor 盲掃新增發現（2026-07-04；red→green 鎖）──"
+# NEW-1: 全校成員/班級列舉端點需授權（org/school scope 或 require_role）
+grep -A18 'def list_school_members' "$BE/routes/schools.py" 2>/dev/null | grep -qaE 'require_role|get_user_org_ids|resolve_user_org_ids|status_code=403' \
+  && ok "A01 · WSTG-ATHZ-04" "list_school_members 有授權/scope 檢查" \
+  || no "A01 · WSTG-ATHZ-04" "NEW-1: schools 成員列舉零授權（任何登入者撈全校 email）" "加 org/school membership 檢查"
+# NEW-2: create_classroom 需驗 caller 對該 school 的 org membership
+grep -A28 'def create_classroom' "$BE/routes/classrooms/classroom_crud.py" 2>/dev/null | grep -qaE 'get_user_org_ids|resolve_user_org_ids|organization_id|is_system_admin' \
+  && ok "A01 · WSTG-ATHZ-02" "create_classroom 有 school→org membership 檢查" \
+  || no "A01 · WSTG-ATHZ-02" "NEW-2: 任何教師可在別 org 的 school 建班（只驗 school 存在）" "驗 caller 對該 school 的 org"
+# NEW-4: semester 寫入守衛不得用 is_admin 全域 bypass
+bad4=$(python3 - "$BE/routes/semesters.py" <<'PY'
+import ast, sys
+src = open(sys.argv[1]).read()
+out = []
+for n in ast.walk(ast.parse(src)):
+    if isinstance(n, ast.FunctionDef) and n.name == "_require_school_write_access":
+        body = ast.get_source_segment(src, n) or ""
+        if "is_admin(" in body and "is_system_admin(" not in body:
+            out.append(n.name)
+print(",".join(out))
+PY
+)
+[ -z "$bad4" ] && ok "A01 · WSTG-ATHZ-02" "semester 寫入守衛未用 is_admin 全域 bypass" \
+  || no "A01 · WSTG-ATHZ-02" "NEW-4: $bad4 用 is_admin bypass → org_admin 對任意 school 建/改 semester" "改 is_system_admin + org scope"
+
 # ─────────────────────────────────────────────────────────────
 # 黑箱動態（需 BASE_URL 指向本機起好的站台；⛔ 勿指向雲端正式站燒錢）
 if [ -n "${BASE_URL:-}" ]; then
