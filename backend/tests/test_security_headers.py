@@ -4,6 +4,8 @@ Tests for OWASP security headers added by SecurityHeadersMiddleware.
 Verifies that every response (success, error, CORS preflight) carries
 the required headers defined in backend/app/main.py.
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -164,3 +166,121 @@ class TestCspDirectives:
             f"CSP img-src must include 'blob:' for OMO cropped image previews (#1917). "
             f"Got: {img_src_directive!r}"
         )
+
+    def test_csp_frame_src_allows_cross_origin_run_app_backend(self):
+        """Regression test for #2486 (critic-found regression on the asset-proxy PR).
+
+        The worksheet PDF iframe (Intro.tsx) now points at whatever ASSET_BASE
+        resolves to. On the Firebase Hosting build that's a same-origin relative
+        "/assets/..." path — 'self' covers it. But on the Cloud-Run-direct
+        frontend (staging, prod, PR previews), ASSET_BASE resolves to the
+        *backend's own* Cloud Run origin (a different host from the frontend),
+        so the iframe src is genuinely cross-origin.
+
+        `frame-src 'self'` blocks that cross-origin iframe outright — confirmed
+        via real-browser reproduction on staging: iframe navigation is blocked
+        with "Framing '<backend-url>' violates ... frame-src 'self'", and the
+        worksheet modal renders permanently blank.
+
+        Fix: extend frame-src with the same `https://*.run.app` wildcard already
+        used by connect-src, covering prod/staging/PR-preview backends without
+        hardcoding per-environment URLs.
+        """
+        response = client.get("/")
+        csp = response.headers.get("content-security-policy", "")
+        frame_src_directive = ""
+        for part in csp.split(";"):
+            stripped = part.strip()
+            if stripped.startswith("frame-src"):
+                frame_src_directive = stripped
+                break
+        assert frame_src_directive, "CSP is missing frame-src directive entirely"
+        assert "https://*.run.app" in frame_src_directive, (
+            "CSP frame-src must allow https://*.run.app so the worksheet PDF "
+            "iframe isn't blocked on Cloud-Run-direct deploys (frontend and "
+            "backend on different *.run.app origins). "
+            f"Got: {frame_src_directive!r}"
+        )
+
+
+class TestAssetProxyFramingHeaders:
+    """Regression test for #2486 — SecurityHeadersMiddleware blanket-denied
+    framing of its OWN `/assets/*` responses, defeating the frame-src fix above.
+
+    Widening the *parent* page's `frame-src` (TestCspDirectives above) is
+    necessary but not sufficient: the middleware unconditionally stamps
+    every response — including the PDF/image bytes served by
+    app/routes/assets.py — with `X-Frame-Options: DENY` and
+    `frame-ancestors 'none'`. Both of those govern whether the *resource
+    itself* may be framed by anyone, including our own frontend. DENY /
+    'none' block that unconditionally, regardless of frame-src.
+
+    Confirmed via real-browser QA against a live PR preview: after fixing
+    frame-src alone, the iframe network request succeeded (200
+    application/pdf, no CSP console error) but the worksheet modal stayed
+    visually blank — because the framed PDF response itself refused to be
+    framed. curl against the same URL confirmed `x-frame-options: DENY` and
+    `frame-ancestors 'none'` on the PDF response.
+
+    This didn't matter pre-#2488 because storage.googleapis.com (which
+    doesn't set X-Frame-Options) served these files directly; it only
+    surfaced once they started flowing through our own
+    SecurityHeadersMiddleware-wrapped backend.
+    """
+
+    @staticmethod
+    def _mock_bucket_with_blob(content: bytes):
+        blob = MagicMock()
+        blob.download_as_bytes.return_value = content
+        bucket = MagicMock()
+        bucket.blob.return_value = blob
+        return bucket
+
+    @patch("app.routes.assets._get_bucket")
+    def test_asset_pdf_response_does_not_send_x_frame_options_deny(self, mock_get_bucket):
+        mock_get_bucket.return_value = self._mock_bucket_with_blob(b"%PDF-1.4 fake")
+
+        resp = client.get("/assets/worksheets/G5-L23.pdf")
+
+        assert resp.status_code == 200
+        assert resp.headers.get("x-frame-options") != "DENY", (
+            "X-Frame-Options: DENY on /assets/* blocks our own worksheet PDF "
+            "iframe from framing it, in every browser (DENY has no same-origin "
+            "exception, unlike SAMEORIGIN)."
+        )
+
+    @patch("app.routes.assets._get_bucket")
+    def test_asset_pdf_response_frame_ancestors_allows_own_origins(self, mock_get_bucket):
+        mock_get_bucket.return_value = self._mock_bucket_with_blob(b"%PDF-1.4 fake")
+
+        resp = client.get("/assets/worksheets/G5-L23.pdf")
+
+        csp = resp.headers.get("content-security-policy", "")
+        frame_ancestors_directive = ""
+        for part in csp.split(";"):
+            stripped = part.strip()
+            if stripped.startswith("frame-ancestors"):
+                frame_ancestors_directive = stripped
+                break
+        assert frame_ancestors_directive, "Asset response is missing frame-ancestors entirely"
+        assert "'none'" not in frame_ancestors_directive, (
+            f"frame-ancestors 'none' blocks our own worksheet PDF iframe "
+            f"unconditionally. Got: {frame_ancestors_directive!r}"
+        )
+        assert "'self'" in frame_ancestors_directive, (
+            f"frame-ancestors must allow 'self' (Firebase Hosting same-origin "
+            f"rewrite). Got: {frame_ancestors_directive!r}"
+        )
+        assert "https://*.run.app" in frame_ancestors_directive, (
+            f"frame-ancestors must allow https://*.run.app (Cloud-Run-direct "
+            f"frontend framing the backend's own cross-origin asset URL). "
+            f"Got: {frame_ancestors_directive!r}"
+        )
+
+    def test_html_routes_are_unaffected_by_the_asset_carveout(self):
+        """Anti-clickjacking on regular pages/API responses must stay intact —
+        the relaxed framing policy is scoped to /assets/* only."""
+        resp = client.get("/")
+        assert resp.headers.get("x-frame-options") == "DENY"
+        csp = resp.headers.get("content-security-policy", "")
+        assert "frame-ancestors 'none'" in csp

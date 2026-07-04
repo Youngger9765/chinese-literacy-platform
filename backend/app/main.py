@@ -99,20 +99,55 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://us-central1-aiplatform.googleapis.com; "
         # Issue #1496: worksheet PDF iframe (#1444), plus YouTube embeds for
         # the knowledge-station videos.
-        # Issue #2486: the worksheet PDF now loads through our own
-        # `/assets/*` proxy (same-origin), so storage.googleapis.com no
-        # longer needs a frame-src exception — 'self' covers it.
+        # Issue #2486: the worksheet PDF now loads through our own `/assets/*`
+        # proxy instead of storage.googleapis.com — but the iframe src is only
+        # same-origin on the Firebase Hosting build (ASSET_BASE == ""). On the
+        # Cloud-Run-direct frontend (staging/prod/PR previews), ASSET_BASE
+        # resolves to the *backend's own* Cloud Run origin, which is a
+        # different host from the frontend, so the iframe is genuinely
+        # cross-origin there. 'self' alone blocks it (confirmed via
+        # real-browser repro on staging: CSP frame-src violation, worksheet
+        # modal renders blank). https://*.run.app mirrors the same wildcard
+        # already trusted by connect-src above, covering prod/staging/preview
+        # backends without hardcoding per-environment URLs.
         "frame-src 'self' "
+        "https://*.run.app "
         "https://www.youtube.com "
         "https://www.youtube-nocookie.com; "
         "frame-ancestors 'none';"
     )
 
+    # Issue #2486 (part 2): widening frame-src above on the *parent* page is
+    # necessary but not sufficient. This middleware used to stamp EVERY
+    # response — including the PDF/image bytes served by
+    # app/routes/assets.py — with `X-Frame-Options: DENY` and
+    # `frame-ancestors 'none'`. Those headers govern whether the resource
+    # ITSELF may be framed by anyone, which unconditionally blocked our own
+    # worksheet PDF iframe from framing it (DENY has no same-origin
+    # exception, and 'none' means literally no one). Confirmed via
+    # real-browser QA: after fixing frame-src alone, the iframe's network
+    # request succeeded (200 application/pdf, no console error) but the
+    # modal stayed visually blank — curl against the same URL showed
+    # `x-frame-options: DENY` / `frame-ancestors 'none'` on the PDF response
+    # itself. This didn't matter pre-#2488 because storage.googleapis.com
+    # (which never sends X-Frame-Options) served these files directly.
+    #
+    # Fix: for `/assets/*` responses only, omit X-Frame-Options (it can't
+    # express "self OR this other specific origin" — only CSP frame-ancestors
+    # can) and relax frame-ancestors to the same origins frame-src above
+    # trusts. Every other route (HTML pages, JSON APIs) keeps the strict
+    # DENY / 'none' anti-clickjacking posture unchanged.
+    ASSET_FRAME_ANCESTORS_CSP = "frame-ancestors 'self' https://*.run.app;"
+
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        response.headers["Content-Security-Policy"] = self.CSP
+        is_asset_response = request.url.path.startswith("/assets/")
+        response.headers["Content-Security-Policy"] = (
+            self.ASSET_FRAME_ANCESTORS_CSP if is_asset_response else self.CSP
+        )
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        if not is_asset_response:
+            response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Strict-Transport-Security"] = (

@@ -509,6 +509,24 @@ def build_layer2_enrichment_index() -> dict[str, dict]:
             continue
         title = data.get("title", "")
         if title:
+            # Issue #2486 (part 3): ENRICHMENT_FIELDS (below) copies this dict's
+            # worksheet_pdf_url / worksheet_docx_url verbatim onto matching
+            # Layer-1 lessons (lesson_indexes.py). load_layer2_lessons() above
+            # already rewrites those fields via _to_asset_proxy_url before they
+            # reach an API response — but this index is a *separate* raw read
+            # of the same YAML files, so without the same rewrite here, a
+            # Layer-1 lesson enriched from this index would silently regain the
+            # literal storage.googleapis.com URL. Confirmed via real-browser QA:
+            # GET /api/stories/3 returned a same-origin /assets/... thumbnail_url
+            # (thumbnail_url isn't in ENRICHMENT_FIELDS, so Layer-1's own already
+            # -correct value was untouched) alongside an absolute-GCS
+            # worksheet_pdf_url — CSP frame-src widening alone can't fix a URL
+            # that was never routed through the proxy in the first place.
+            # _to_asset_proxy_url is idempotent (already-relative or falsy
+            # values pass through unchanged), so this only rewrites the literal
+            # legacy-absolute case — no other enrichment behavior changes.
+            data["worksheet_pdf_url"] = _to_asset_proxy_url(data.get("worksheet_pdf_url"))
+            data["worksheet_docx_url"] = _to_asset_proxy_url(data.get("worksheet_docx_url"))
             layer2_by_title[title] = data
 
     return layer2_by_title
