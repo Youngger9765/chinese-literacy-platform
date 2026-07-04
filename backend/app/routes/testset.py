@@ -328,8 +328,12 @@ def testset_delete_recording(
         raise HTTPException(503, "storage temporarily unavailable")
 
     base = path[: -len(".webm")]
-    # 同一筆錄音的三個 blob 共用 stem（.eval.json 跑分後才有，可能不存在）
-    targets = [path, base + ".json", base + ".eval.json"]
+    # 同一筆錄音的三個 blob 共用 stem（.eval.json 跑分後才有，可能不存在）。
+    # 順序關鍵（#2466 review, P0）：先刪 sidecar（.json/.eval.json）、.webm 最後刪。
+    # 中途失敗最多留一個「列表看不到」的 orphan .webm（無害 storage leak），列表狀態
+    # 永遠一致；且重試 DELETE 仍能清掉殘留的 .webm。反過來（.webm 先刪）中途失敗會留下
+    # 指向已刪音檔的 ghost .json，列表壞掉且再也刪不掉。
+    targets = [base + ".json", base + ".eval.json", path]
 
     deleted: list[str] = []
     audio_existed = False

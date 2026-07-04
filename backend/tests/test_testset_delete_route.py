@@ -229,3 +229,58 @@ def test_only_target_stem_deleted_other_contributor_untouched():
         assert bucket.existing == {other, other_json}  # 另一貢獻者完整保留
     finally:
         _clear_user()
+
+
+class _RaiseOnDeleteBucket(_FakeBucket):
+    """指定某個 blob 的 delete() 拋錯，模擬刪除中途 storage 失敗。"""
+
+    def __init__(self, existing: set[str], raise_on: str):
+        super().__init__(existing)
+        self.raise_on = raise_on
+
+    def blob(self, name: str):
+        parent = self
+
+        class _Blob:
+            def exists(self):
+                return name in parent.existing
+
+            def delete(self):
+                if name == parent.raise_on:
+                    raise RuntimeError("simulated GCS delete failure")
+                parent.existing.discard(name)
+                parent.deleted.append(name)
+
+        return _Blob()
+
+
+def test_sidecar_delete_failure_keeps_webm_and_returns_503():
+    """中途失敗（.json delete 拋錯）→ 503，且 .webm 未被刪（#2466 P0）。
+
+    刪除順序刻意為 sidecar 先、.webm 最後：sidecar 刪一半失敗時，不可取代的音檔仍在，
+    列表狀態一致、可重試清除；不會留下指向已刪音檔、又刪不掉的 ghost .json。
+    """
+    _as_admin()
+    bucket = _RaiseOnDeleteBucket(
+        {VALID, STEM + ".json", STEM + ".eval.json"}, raise_on=STEM + ".json"
+    )
+    try:
+        with patch("app.routes.testset._get_gcs_bucket", return_value=bucket):
+            with TestClient(app, raise_server_exceptions=False) as c:
+                r = c.delete(f"/api/testset/recordings?audio_path={VALID}")
+        assert r.status_code == 503, r.text
+        assert VALID in bucket.existing  # .webm 仍在（未被刪）→ 可重試，不變 ghost
+    finally:
+        _clear_user()
+
+
+def test_storage_unavailable_returns_503():
+    """_get_gcs_bucket 回 None（storage 不可用）→ fail-closed 503。"""
+    _as_admin()
+    try:
+        with patch("app.routes.testset._get_gcs_bucket", return_value=None):
+            with TestClient(app, raise_server_exceptions=False) as c:
+                r = c.delete(f"/api/testset/recordings?audio_path={VALID}")
+        assert r.status_code == 503, r.text
+    finally:
+        _clear_user()
