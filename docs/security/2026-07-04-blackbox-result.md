@@ -6,10 +6,10 @@
 > - 綠燈 = 對映的 WSTG 條目「自測通過」，不保證通過官方稽核
 > - 全程 LOCAL：靜態 grep + Semgrep + gitleaks + in-process TestClient 動態測試 + 獨立對抗複審 agent；**未**對雲端正式站台燒錢掃描
 
-## 目前 gate 狀態：🟡 大部分已修，2 項 deferred（追蹤中）
+## 目前 gate 狀態：🟢 全部已修 + 上 production（1 項邊緣 deferred 追蹤中）
 
-> 兩輪獨立對抗複審（appsec-pentest-reviewer + Cursor 不同引擎）確認核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取零授權）+ 限流信任鏈。
-> 認證/注入/機密底子好（JWT/bcrypt/ORM/無 committed secret 全綠）。
+> **2026-07-04 收尾**：10/11 findings 已修、驗證、部署到 **production**（served-layer curl 通過：health 200、batch-eval/users/me/schools-members no-auth → 401、security headers live）。僅 MED-1d（list_my_classrooms 平台級 metadata 列舉）仍 deferred，追蹤 #2470。
+> 三輪獨立對抗複審（appsec-pentest-reviewer + Cursor 設計/最終 QA）確認核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取零授權）+ 限流信任鏈。認證/注入/機密底子好（JWT/bcrypt/ORM/無 committed secret 全綠）。
 
 ## 修復狀態（2026-07-04 收尾）
 
@@ -25,12 +25,11 @@
 | HIGH-1 核心（per-user 限流 request.state.user_id）| HIGH | ✅ 已修+驗證 | ratelimit branch |
 | MED-2 batch-eval 燒錢（role gate + AI 限流）| MED | ✅ 已修+驗證 | ratelimit branch |
 | MED-3 SSO email_verified | MED | ✅ 已修+驗證 | ratelimit branch |
-| **NEW-2 跨校/跨 org 建班（create-pollution）** | MED* | ⏸ **Deferred** | 需 ~16 檔 test-fixture batch migration（做法已 proven，見 #2470）|
-| **HIGH-1a entrypoint XFF / 匿名 IP 限流** | HIGH | ⏸ **Deferred** | 需 Cloud Run proxy 語義查證（可能配 Cloud Armor）|
+| **NEW-2 跨校/跨 org 建班（create-pollution）** | MED | ✅ 已修+驗證+上 prod | PR #2478（create_classroom membership check + 15 檔 test-fixture 遷移）|
+| **HIGH-1a XFF / 匿名 IP 限流** | HIGH | ✅ 已修+驗證+上 prod | PR #2476（real_ip_from_xff 取 GCP-appended [-2]；entrypoint 去 forwarded-allow-ips 萬用字元）|
+| MED-1d list_my_classrooms org_admin 看全平台班級 metadata | MED | ⏸ **Deferred** | 邊緣（有 test blast radius + 部分是平台 admin view 預期）；追蹤 #2470 |
 
-> *NEW-2 實際影響 = 「teacher 在不屬於的 school 建自己的班」= 跨租戶**建立污染**，非讀取他人資料（讀取 IDOR = MED-1 已修）。自動資安複審 2 次旗標；為 conscious defer（正確修法連鎖破壞 ~16 個測試檔的 fixture，需獨立 batch pass；真實流程不受影響——teacher 註冊自動加入自己 school）。
->
-> **驗證**：dynamic security 12+ pass、test_admin_api 38、semesters 23、classroom 測試全綠、CI gate 綠，0 淨 regression（pre-existing 失敗經 baseline 對照確認與本次無關）。
+> **驗證**：dynamic security 全 pass、test_admin_api 38、semesters 23、classroom 測試全綠、spec 契約 748+205 pass、CI gate 綠，0 淨 regression（pre-existing jsonb/sqlite 失敗經 baseline + git stash 對照確認與本次無關）。NEW-2 fixture 遷移用 Claude subagent（codex 額度爆 fallback），create check 未弱化。
 
 ## 受測標的
 - Repo：`chinese-literacy-platform`（LingoLeap）— 國小/國中中文閱讀學習平台
