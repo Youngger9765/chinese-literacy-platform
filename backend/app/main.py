@@ -37,6 +37,7 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
+from .routes.assets import router as assets_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.seed import seed_default_data, repair_pii_accounts
@@ -96,14 +97,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://*.firebaseapp.com "
         "https://*.cloudfunctions.net "
         "https://us-central1-aiplatform.googleapis.com; "
-        # Issue #1496: allow GCS bucket for the worksheet PDF iframe (#1444),
-        # plus YouTube embeds for the knowledge-station videos.
-        # NOTE: CSP frame-src cannot restrict by path (spec limitation), so the
-        # entire storage.googleapis.com host is whitelisted. The actual PDFs
-        # live under public-read `lingoleap-assets/worksheets/`; tighter scoping
-        # would require proxying PDFs through our own origin.
+        # Issue #1496: worksheet PDF iframe (#1444), plus YouTube embeds for
+        # the knowledge-station videos.
+        # Issue #2486: the worksheet PDF now loads through our own
+        # `/assets/*` proxy (same-origin), so storage.googleapis.com no
+        # longer needs a frame-src exception — 'self' covers it.
         "frame-src 'self' "
-        "https://storage.googleapis.com "
         "https://www.youtube.com "
         "https://www.youtube-nocookie.com; "
         "frame-ancestors 'none';"
@@ -232,11 +231,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 
 class GlobalRateLimitMiddleware:
-    """Pure ASGI middleware for global per-IP rate limiting on /api/* endpoints.
+    """Pure ASGI middleware for global per-IP rate limiting on /api/* and /assets/*.
 
     Uses raw ASGI protocol instead of BaseHTTPMiddleware to guarantee headers
     are injected before the response starts streaming (BaseHTTPMiddleware +
     StreamingResponse can silently drop headers added after call_next).
+
+    /assets/* is included (#2486): it's the proxy in front of the now-private
+    lingoleap-assets GCS bucket. Without a rate limit here, closing off public
+    bucket listing would still leave the door open for a single IP to hammer
+    the proxy (and therefore our GCS egress) at unlimited rate.
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
@@ -258,8 +262,10 @@ class GlobalRateLimitMiddleware:
 
         path = scope["path"]
 
-        # Skip rate limiting for exempt or non-API paths.
-        if path in self._EXEMPT_PATHS or not path.startswith("/api"):
+        # Skip rate limiting for exempt paths, or paths outside the two
+        # limited surfaces (/api/* and /assets/*).
+        is_limited_surface = path.startswith("/api") or path.startswith("/assets")
+        if path in self._EXEMPT_PATHS or not is_limited_surface:
             await self.app(scope, receive, send)
             return
 
@@ -353,7 +359,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global rate limiting: 300 read req/min + 90 write req/min per IP for /api/*.
+# Global rate limiting: 300 read req/min + 90 write req/min per IP for
+# /api/* and /assets/* (#2486).
 # Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
 app.add_middleware(GlobalRateLimitMiddleware)
 
@@ -391,6 +398,8 @@ app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
+# No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
+app.include_router(assets_router)
 
 
 @app.get("/")

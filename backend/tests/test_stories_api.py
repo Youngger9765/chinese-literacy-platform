@@ -148,12 +148,15 @@ class TestLessonRequiredFields:
             assert "background" in intro, f"Lesson {lesson['lesson_number']} intro missing 'background'"
 
     def test_thumbnail_url_pattern(self):
+        """#2486: thumbnail_url is served via our same-origin /assets proxy —
+        lingoleap-assets is now a private bucket, no more absolute GCS URLs."""
         lessons = get_all_lessons()
         for lesson in lessons:
             url = lesson["thumbnail_url"]
-            assert url.startswith("https://storage.googleapis.com/lingoleap-assets/"), (
+            assert url.startswith("/assets/stories/thumbnails/"), (
                 f"Lesson {lesson['lesson_number']} has unexpected thumbnail_url: {url}"
             )
+            assert not url.startswith("https://storage.googleapis.com/")
             assert f"lesson-{lesson['lesson_number']}.webp" in url
 
     def test_char_count_is_non_negative_int(self):
@@ -384,10 +387,11 @@ class TestStoryListItemSchema:
         assert "paragraphs" not in story
 
     def test_thumbnail_url_is_string(self, client):
+        """#2486: relative same-origin /assets path, not an absolute GCS URL."""
         resp = client.get("/api/stories?page_size=5")
         for story in resp.json()["stories"]:
             assert isinstance(story["thumbnail_url"], str)
-            assert story["thumbnail_url"].startswith("https://")
+            assert story["thumbnail_url"].startswith("/assets/")
 
 
 class TestGetStoryDetailEndpoint:

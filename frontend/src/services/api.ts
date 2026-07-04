@@ -13,9 +13,35 @@
 
 import type { Story } from '../types';
 import { API_BASE } from './apiConfig';
+import { ASSET_BASE } from '../config/assetBase';
 import { stepSequenceFromWorksheet } from '../config/stepConfig';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
+
+/**
+ * Resolve a same-origin-relative "/assets/..." URL (thumbnail_url,
+ * worksheet_pdf_url, worksheet_docx_url — issue #2486) onto ASSET_BASE.
+ *
+ * The backend always returns these as relative paths. That's correct when
+ * the frontend is served through the Firebase Hosting `/assets/**` rewrite
+ * (ASSET_BASE === "", stays relative) — but when the frontend and backend
+ * are on different origins (Cloud Run direct-serve, PR previews, local dev),
+ * a bare "/assets/..." resolves against the FRONTEND's own origin, which has
+ * no such route and silently falls back to the SPA shell (broken <img>,
+ * found via real-browser QA on the #2486 PR preview). ASSET_BASE already
+ * encodes the correct origin for whichever deploy shape is active, so this
+ * is the single choke point every consumer (Intro.tsx, StoryCard.tsx, ...)
+ * goes through instead of each hand-rolling origin resolution.
+ */
+function resolveAssetUrl(url: string): string;
+function resolveAssetUrl(url: string | null | undefined): string | undefined;
+function resolveAssetUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('/assets/')) {
+    return `${ASSET_BASE}${url.slice('/assets'.length)}`;
+  }
+  return url; // already absolute (or some other shape) — leave unchanged
+}
 
 export class SessionExpiredError extends Error {
   constructor(message: string) {
@@ -121,7 +147,7 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
     title: item.title,
     level: item.grade,
     content: [],
-    thumbnail: item.thumbnail_url,
+    thumbnail: resolveAssetUrl(item.thumbnail_url),
     category: item.category as Story['category'],
     filename: '',
     intro: item.intro,
@@ -138,7 +164,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     title: detail.title,
     level: detail.grade,
     content: detail.paragraphs,
-    thumbnail: detail.thumbnail_url,
+    thumbnail: resolveAssetUrl(detail.thumbnail_url),
     category: detail.category as Story['category'],
     filename: detail.source_file,
     intro: detail.intro,
@@ -183,8 +209,8 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
-    worksheetPdfUrl: detail.worksheet_pdf_url ?? undefined,
-    worksheetDocxUrl: detail.worksheet_docx_url ?? undefined,
+    worksheetPdfUrl: resolveAssetUrl(detail.worksheet_pdf_url),
+    worksheetDocxUrl: resolveAssetUrl(detail.worksheet_docx_url),
     tables: detail.tables ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
