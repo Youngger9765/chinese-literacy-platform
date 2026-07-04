@@ -329,6 +329,44 @@ def test_idor_org_admin_cannot_read_cross_org_classroom(client):
     assert client.get(f"/api/classrooms/{cid}", headers=_auth(tok)).status_code == 403
 
 
+def _create_school(org_id: str) -> int:
+    from app.models.school import School
+
+    db = TestingSessionLocal()
+    try:
+        s = School(name=f"S_{uuid.uuid4().hex[:6]}", organization_id=org_id)
+        db.add(s)
+        db.commit()
+        db.refresh(s)
+        return s.id
+    finally:
+        db.close()
+
+
+def test_roles_list_requires_admin_not_mere_org_member(client):
+    # #2470 QA (Cursor): reading another user's roles must be admin-gated, not open
+    # to any same-org member. A school-scoped teacher belongs to the org (via
+    # school→org) but is NOT an admin → must be denied.
+    u = uuid.uuid4().hex[:6]
+    org = _create_org(f"RolesOrg_{u}")
+    school = _create_school(org)
+
+    teacher = _create_user(f"rl_teacher_{u}@example.com")
+    target = _create_user(f"rl_target_{u}@example.com")
+    _grant_role(teacher, "teacher", "school", str(school))
+    _grant_role(target, "teacher", "school", str(school))
+    org_admin = _create_user(f"rl_orgadmin_{u}@example.com")
+    _grant_role(org_admin, "org_admin", "organization", org)
+    sysadmin = _create_user(f"rl_sys_{u}@example.com")
+    _grant_role(sysadmin, "system_admin", "platform", None)
+
+    # 一般同 org teacher 讀他人 roles → 403（非 admin）
+    assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(teacher))).status_code == 403
+    # org_admin of the org → 200；system_admin → 200
+    assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(org_admin))).status_code == 200
+    assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(sysadmin))).status_code == 200
+
+
 def test_idor_any_user_cannot_enumerate_school_members(client):
     # 註冊教師會建立預設 school（含該教師為成員，帶 email）
     _register_teacher(client)
