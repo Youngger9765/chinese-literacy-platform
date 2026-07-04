@@ -31,7 +31,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, UserRole
 from app.models.school import School
 
 
@@ -64,6 +64,7 @@ SEED_ROLES = [
 
 # Module-level state shared across tests
 _state: dict = {}
+_test_school_id: int = 0
 
 
 def _seed_roles(session):
@@ -104,7 +105,25 @@ def _register(client, name, email, password="Password123!"):
     # Login to get access_token
     login_r = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_r.status_code == 200, login_r.text
-    return login_r.json()["access_token"]
+    token = login_r.json()["access_token"]
+
+    me_r = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
+    user_id = me_r.json()["id"]
+
+    _mk = TestingSessionLocal()
+    try:
+        _trole = _mk.query(Role).filter(Role.name == "teacher").first()
+        if _trole and not _mk.query(UserRole).filter(
+            UserRole.user_id == user_id, UserRole.role_id == _trole.id,
+            UserRole.scope_type == "school", UserRole.scope_id == str(_test_school_id),
+        ).first():
+            _mk.add(UserRole(user_id=user_id, role_id=_trole.id,
+                             scope_type="school", scope_id=str(_test_school_id)))
+            _mk.commit()
+    finally:
+        _mk.close()
+
+    return token
 
 
 def _create_classroom(client, token, school_id):
@@ -122,10 +141,12 @@ def _create_classroom(client, token, school_id):
 @pytest.fixture(scope="module", autouse=True)
 def setup_module():
     """Create tables, seed data, register users, create classroom."""
+    global _test_school_id
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
     _seed_roles(session)
     school_id = _seed_school(session)
+    _test_school_id = school_id
     session.close()
 
     app.dependency_overrides[get_db] = _override_get_db
