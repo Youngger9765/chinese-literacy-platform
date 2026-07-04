@@ -6,9 +6,9 @@
 > - 綠燈 = 對映的 WSTG 條目「自測通過」，不保證通過官方稽核
 > - 全程 LOCAL：靜態 grep + Semgrep + gitleaks + in-process TestClient 動態測試 + 獨立對抗複審 agent；**未**對雲端正式站台燒錢掃描
 
-## 目前 gate 狀態：🟢 全部已修 + 上 production（1 項邊緣 deferred 追蹤中）
+## 目前 gate 狀態：🟢 11/11 findings 全部已修 + 驗證 + 上 production
 
-> **2026-07-04 收尾**：10/11 findings 已修、驗證、部署到 **production**（served-layer curl 通過：health 200、batch-eval/users/me/schools-members no-auth → 401、security headers live）。僅 MED-1d（list_my_classrooms 平台級 metadata 列舉）仍 deferred，追蹤 #2470。
+> **2026-07-04 收尾**：11/11 findings 已修、驗證、部署到 **production**（served-layer curl 通過：health 200、batch-eval/users/me/schools-members/classrooms no-auth → 401、security headers live）。最後一項 MED-1d（list_my_classrooms 平台級 metadata 列舉）已於收尾補完，租戶收斂到 system_admin 看全平台 / org_admin 只看自己 org / teacher 只看自己班（PR #2482 staging + #2483 main，spec-ci 748+205 pass，prod 部署 success）。零 deferred。
 > 三輪獨立對抗複審（appsec-pentest-reviewer + Cursor 設計/最終 QA）確認核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取零授權）+ 限流信任鏈。認證/注入/機密底子好（JWT/bcrypt/ORM/無 committed secret 全綠）。
 
 ## 修復狀態（2026-07-04 收尾）
@@ -27,7 +27,7 @@
 | MED-3 SSO email_verified | MED | ✅ 已修+驗證 | ratelimit branch |
 | **NEW-2 跨校/跨 org 建班（create-pollution）** | MED | ✅ 已修+驗證+上 prod | PR #2478（create_classroom membership check + 15 檔 test-fixture 遷移）|
 | **HIGH-1a XFF / 匿名 IP 限流** | HIGH | ✅ 已修+驗證+上 prod | PR #2476（real_ip_from_xff 取 GCP-appended [-2]；entrypoint 去 forwarded-allow-ips 萬用字元）|
-| MED-1d list_my_classrooms org_admin 看全平台班級 metadata | MED | ⏸ **Deferred** | 邊緣（有 test blast radius + 部分是平台 admin view 預期）；追蹤 #2470 |
+| **MED-1d list_my_classrooms org_admin 看全平台班級 metadata** | MED | ✅ 已修+驗證+上 prod | PR #2482/#2483（system_admin=全平台 / org_admin=經 School join 限自己 org / teacher=自己 own+co-teach；`is_admin` 完全移除）|
 
 > **驗證**：dynamic security 全 pass、test_admin_api 38、semesters 23、classroom 測試全綠、spec 契約 748+205 pass、CI gate 綠，0 淨 regression（pre-existing jsonb/sqlite 失敗經 baseline + git stash 對照確認與本次無關）。NEW-2 fixture 遷移用 Claude subagent（codex 額度爆 fallback），create check 未弱化。
 
@@ -42,7 +42,7 @@
 |------|------|------|------|
 | 白箱靜態掃碼 | Semgrep（owasp-top-ten + python + javascript + secrets）| 1.168.0 | 0 ERROR（1 WARNING = 誤報）|
 | 機密外洩 | gitleaks（全 git 歷史 + 本機檔）| 8.30.1 | git 歷史 **0**；本機檔 4（全 gitignored）|
-| 動態行為 | FastAPI TestClient（in-process，sqlite）| — | 10 pass / 1 xfail（xfail = 鎖住 MED-1 待修）|
+| 動態行為 | FastAPI TestClient（in-process，sqlite）| — | **16 pass**（MED-1/MED-1d/NEW-1 等 IDOR 全綠；原 xfail 已隨修復轉真斷言）|
 | 靜態驗收 | `tests/security/blackbox_acceptance.sh` | — | **23 PASS / 5 FAIL / 2 DEFER（exit 1）** |
 | 獨立對抗複審 | `appsec-pentest-reviewer` agent（assume-guilty 白箱）| — | 1 HIGH + 3 MED + 5 LOW；大面積綠 |
 
@@ -50,9 +50,11 @@
 - **無** SQL injection / 命令注入 / SSRF / 硬編 secret / committed secret
 - 認證底子好：JWT 演算法 pin 死、prod secret fail-closed、bcrypt cost 12、密碼重設 token 一次性無 oracle
 - 授權大面積有擋：學生資料 IDOR 三層 ownership、org scope（users/organizations）正確、角色指派限 system_admin
-- **但** 有 1 HIGH（限流全線可繞）+ 3 MED（跨 org 班級越權 / LLM 燒錢 / SSO 未驗 email_verified）待修
+- **當時發現** 1 HIGH（限流全線可繞）+ 3 MED（跨 org 班級越權 / LLM 燒錢 / SSO 未驗 email_verified）→ **現已全數修復 + 上 prod**（見上方狀態表）
 
-## 🔴 待修發現（對抗複審，已逐條對 code 獨立驗證）
+## ✅ 原待修發現（對抗複審，已逐條對 code 獨立驗證 → 全數已修 + 上 prod）
+
+> 下列為稽核當下的發現與修法紀錄；狀態一律以上方「修復狀態」表為準（11/11 全綠）。
 
 ### HIGH-1 — 所有流量限制可被偽造 X-Forwarded-For 繞過
 `WSTG-ATHN-03`（弱鎖定）/ `WSTG-BUSL-01`（反自動化）/ CWE-307, CWE-799
@@ -94,7 +96,7 @@
 - **現實性**：消費者 Gmail email_verified 恆 true，實際利用門檻高 → defense-in-depth，但修一行值得
 - **修法**：連結/建立帳號前 `if not id_info.get("email_verified"): raise 401`
 
-## 🔴 對抗複審新增發現（Cursor 盲掃，已逐條對 code 驗證）
+## ✅ 對抗複審新增發現（Cursor 盲掃，已逐條對 code 驗證 → 全數已修 + 上 prod）
 
 ### NEW-1 — 任何登入者可枚舉全校成員 name/email/role（HIGH）
 `WSTG-ATHZ-04` / CWE-639
@@ -133,7 +135,7 @@ JWT 演算法 pin（`jwt.py:25`）｜JWT prod fail-closed（`main.py:72`）｜bc
 | INPV/BUSL | 上傳偽造 MIME / 路徑注入 → 400 | 動態測試 3 條 | ✅ |
 | ATHZ-04 | 教師 B 不能讀教師 A 班級 | B→403 / owner→200 / 匿名→401 | ✅ |
 | ATHZ-04 | org_admin 不能跨 org 讀使用者 | 跨→403 / 同→200 / sysadmin→200 | ✅ |
-| ATHZ-02 | org_admin 不能跨 org 讀班級 | **現 xfail（回 200，MED-1）** | 🔴 待修 |
+| ATHZ-02 | org_admin 不能跨 org 讀班級 | 跨→403 / 同 org→200 / sysadmin→200 | ✅（MED-1/MED-1d 已修）|
 
 ## Regression Lock（怎麼重複跑）
 ```bash
@@ -145,16 +147,16 @@ RUN_SEMGREP=1 ./tests/security/blackbox_acceptance.sh    # 加 Semgrep
 cd backend && python -m pytest tests/security/test_dynamic_security.py -v
 ```
 產出檔（committed = regression lock）：
-- `tests/security/blackbox_acceptance.sh` — WSTG-mapped 靜態 gate（含 5 條待修鎖）
-- `backend/tests/security/test_dynamic_security.py` — 動態 + IDOR gate（10 pass + 1 xfail=MED-1）
+- `tests/security/blackbox_acceptance.sh` — WSTG-mapped 靜態 gate（原待修鎖已隨修復轉綠）
+- `backend/tests/security/test_dynamic_security.py` — 動態 + IDOR gate（**16 pass**，含 MED-1/MED-1d/NEW-1 全綠）
 
 ## 送稽核就緒度清單
-- [ ] **必修** HIGH-1：`forwarded-allow-ips` 收窄 + XFF 取信任 hop + 落實 `request.state.user_id`（header-rotation 測試紅轉綠）
-- [ ] **必修** MED-1：`require_classroom_owner/member` 改 `is_system_admin`+org scope（xfail 轉綠）
-- [ ] **建議** MED-2：`batch-eval` role gate + AI 端點補限流
-- [ ] **建議** MED-3：SSO 加 `email_verified` 檢查
-- [ ] LOW-1~6 排待辦
-- [ ] 本次為**靜態+in-process**，尚缺：staging 跑 `testssl.sh`（TLS 層）、`pip-audit`/`safety`（依賴 CVE）、關鍵繞過的動態 curl 實證
+- [x] **必修** HIGH-1：`forwarded-allow-ips` 收窄 + XFF 取信任 hop + 落實 `request.state.user_id`（header-rotation 測試紅轉綠）— 已修+上 prod
+- [x] **必修** MED-1（+MED-1d）：`require_classroom_owner/member` + `list_my_classrooms` 改 `is_system_admin`+org scope（xfail 轉綠）— 已修+上 prod
+- [x] **建議** MED-2：`batch-eval` role gate + AI 端點補限流 — 已修+上 prod
+- [x] **建議** MED-3：SSO 加 `email_verified` 檢查 — 已修+上 prod
+- [ ] LOW-1~6 排待辦（Hardening，非阻擋）
+- [x] prod 動態 curl 實證（health 200 / batch-eval・users-me・schools-members・classrooms no-auth → 401）；⏳ 仍缺：staging 跑 `testssl.sh`（TLS 層）、`pip-audit`/`safety`（依賴 CVE）
 - [ ] **需真人簽名背書上線時，這關要找真人資安顧問**——本報告是第一線自測，非最終背書
 
 ## 對抗複審 verdict（兩個獨立引擎，已整合）
