@@ -164,3 +164,38 @@ class TestCspDirectives:
             f"CSP img-src must include 'blob:' for OMO cropped image previews (#1917). "
             f"Got: {img_src_directive!r}"
         )
+
+    def test_csp_frame_src_allows_cross_origin_run_app_backend(self):
+        """Regression test for #2486 (critic-found regression on the asset-proxy PR).
+
+        The worksheet PDF iframe (Intro.tsx) now points at whatever ASSET_BASE
+        resolves to. On the Firebase Hosting build that's a same-origin relative
+        "/assets/..." path — 'self' covers it. But on the Cloud-Run-direct
+        frontend (staging, prod, PR previews), ASSET_BASE resolves to the
+        *backend's own* Cloud Run origin (a different host from the frontend),
+        so the iframe src is genuinely cross-origin.
+
+        `frame-src 'self'` blocks that cross-origin iframe outright — confirmed
+        via real-browser reproduction on staging: iframe navigation is blocked
+        with "Framing '<backend-url>' violates ... frame-src 'self'", and the
+        worksheet modal renders permanently blank.
+
+        Fix: extend frame-src with the same `https://*.run.app` wildcard already
+        used by connect-src, covering prod/staging/PR-preview backends without
+        hardcoding per-environment URLs.
+        """
+        response = client.get("/")
+        csp = response.headers.get("content-security-policy", "")
+        frame_src_directive = ""
+        for part in csp.split(";"):
+            stripped = part.strip()
+            if stripped.startswith("frame-src"):
+                frame_src_directive = stripped
+                break
+        assert frame_src_directive, "CSP is missing frame-src directive entirely"
+        assert "https://*.run.app" in frame_src_directive, (
+            "CSP frame-src must allow https://*.run.app so the worksheet PDF "
+            "iframe isn't blocked on Cloud-Run-direct deploys (frontend and "
+            "backend on different *.run.app origins). "
+            f"Got: {frame_src_directive!r}"
+        )

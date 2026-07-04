@@ -99,10 +99,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://us-central1-aiplatform.googleapis.com; "
         # Issue #1496: worksheet PDF iframe (#1444), plus YouTube embeds for
         # the knowledge-station videos.
-        # Issue #2486: the worksheet PDF now loads through our own
-        # `/assets/*` proxy (same-origin), so storage.googleapis.com no
-        # longer needs a frame-src exception — 'self' covers it.
+        # Issue #2486: the worksheet PDF now loads through our own `/assets/*`
+        # proxy instead of storage.googleapis.com — but the iframe src is only
+        # same-origin on the Firebase Hosting build (ASSET_BASE == ""). On the
+        # Cloud-Run-direct frontend (staging/prod/PR previews), ASSET_BASE
+        # resolves to the *backend's own* Cloud Run origin, which is a
+        # different host from the frontend, so the iframe is genuinely
+        # cross-origin there. 'self' alone blocks it (confirmed via
+        # real-browser repro on staging: CSP frame-src violation, worksheet
+        # modal renders blank). https://*.run.app mirrors the same wildcard
+        # already trusted by connect-src above, covering prod/staging/preview
+        # backends without hardcoding per-environment URLs.
         "frame-src 'self' "
+        "https://*.run.app "
         "https://www.youtube.com "
         "https://www.youtube-nocookie.com; "
         "frame-ancestors 'none';"
