@@ -55,3 +55,14 @@ jobs:
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      - name: Run security regression tests (blackbox audit gate — WSTG-mapped)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/security/test_dynamic_security.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
