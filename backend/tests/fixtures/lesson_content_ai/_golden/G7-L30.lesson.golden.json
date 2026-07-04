@@ -429,7 +429,7 @@
       "label": "表二",
       "notes": [
         "註1. 資料來源：我們的島（2022）；環境資訊中心（2023）",
-        "註2. 「84 / 584」表示：研究人員一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
+        "註2.「84／584」表示：研究人員一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
       ],
       "row_sections": null,
       "rows": [
@@ -478,51 +478,7 @@
           "block_id": "fig-1",
           "char_end": null,
           "char_start": null
-        }
-      ],
-      "answer": [
-        0,
-        1
-      ],
-      "answer_space": "free_text",
-      "grader": "rubric_ai",
-      "id": "ex-spotlight-1",
-      "needs_review": false,
-      "question": {
-        "instruction": "練習一：第一段 vs 圖一。先讀文字抓重點，再判斷圖一提供什麼訊息，最後把文字和圖片連起來想。",
-        "kind": "graphic_text_integration",
-        "steps": [
-          {
-            "answer": 0,
-            "context": null,
-            "options": [
-              "兩種八哥外形相近的整體印象",
-              "兩種八哥近年的族群變化情形"
-            ],
-            "prompt": "1. 圖一最主要提供哪一類訊息？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": 1,
-            "context": null,
-            "options": [
-              "白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。",
-              "這兩種八哥外形十分相似，不容易單靠外表一眼分辨。"
-            ],
-            "prompt": "2. 讀完第一段後，請你找出和圖一最相關的文字。（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          }
-        ],
-        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
-      },
-      "type": "exercise"
-    },
-    {
-      "anchors": [
+        },
         {
           "block_id": "p2",
           "char_end": null,
@@ -532,9 +488,26 @@
           "block_id": "table-1",
           "char_end": null,
           "char_start": null
+        },
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "table-2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
         }
       ],
       "answer": [
+        0,
+        1,
         null,
         0,
         1,
@@ -549,157 +522,7 @@
         1,
         1,
         1,
-        0
-      ],
-      "answer_space": "free_text",
-      "grader": "rubric_ai",
-      "id": "ex-spotlight-2",
-      "needs_review": false,
-      "question": {
-        "instruction": "練習二：第二段 vs 表一。先找出文字中要你看表的提示，再讀懂表一比較什麼，最後文圖表對照、整合。",
-        "kind": "graphic_text_integration",
-        "steps": [
-          {
-            "answer": null,
-            "context": null,
-            "options": null,
-            "prompt": "步驟❶-1. 請把第二段文字中，要你看表的那句話寫下來。",
-            "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
-            "section": null,
-            "type": "free_text"
-          },
-          {
-            "answer": 0,
-            "context": null,
-            "options": [
-              "八哥的外形與習性",
-              "八哥的數量變化"
-            ],
-            "prompt": "步驟❶-2. 這段要你看表的什麼？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": 1,
-            "context": null,
-            "options": [
-              "白尾八哥和臺灣冠八哥近年的族群變化",
-              "白尾八哥和臺灣冠八哥的異同"
-            ],
-            "prompt": "步驟❷-1. 表一主要提供的是哪一類訊息？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": [
-              0,
-              1
-            ],
-            "context": null,
-            "options": [
-              "全身大致為黑色",
-              "身形大小接近",
-              "常在地面走動覓食，吃昆蟲、果實",
-              "都屬八哥屬、留鳥"
-            ],
-            "prompt": "步驟❸-1. 第二段說兩種八哥「外表相似」，表一中哪些資料可支持這句話？（複選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "multi_select"
-          },
-          {
-            "answer": [
-              0,
-              1
-            ],
-            "context": null,
-            "options": [
-              "嘴喙顏色",
-              "尾羽顏色",
-              "築巢地點",
-              "適應都市環境"
-            ],
-            "prompt": "步驟❸-2. 第二段說「只要觀察嘴喙和尾羽的顏色，就能分辨牠們」，表一中哪些資料正好對應這句話？（複選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "multi_select"
-          },
-          {
-            "answer": 1,
-            "context": null,
-            "options": [
-              "冠羽是否明顯",
-              "外來種／原生種",
-              "族群數量",
-              "保育身分"
-            ],
-            "prompt": "步驟❸-3. 第二段提到臺灣冠八哥又稱「臺灣八哥」，表一中的哪一項資料和這句話最有關？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": 1,
-            "context": null,
-            "options": [
-              "表一只是把第二段重新整理一次，並沒有幫助我們更清楚理解這段意思。",
-              "表一幫助我們更清楚看出，兩種八哥雖然外形相近，但仍可從特徵和習性加以分辨。"
-            ],
-            "prompt": "步驟❸-4. 讀表一，對理解第二段有什麼幫助？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": 1,
-            "context": null,
-            "options": [
-              "兩種八哥雖然外形相近，但只要知道牠們同屬八哥屬，就能解釋後來族群數量不同的原因",
-              "兩種八哥雖然外形相近，但仍可從嘴喙、尾羽等特徵區分，表一也進一步比較了牠們的習性差異"
-            ],
-            "prompt": "步驟❹-1. 下面哪一句最能把第二段和表一的意思一起說清楚？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          },
-          {
-            "answer": 0,
-            "context": null,
-            "options": [
-              "是否怕人、是否利用人造設施築巢、適應都市環境強弱",
-              "嘴喙顏色、尾羽顏色、冠羽是否明顯"
-            ],
-            "prompt": "步驟❹-2. 讀完第二段和表一後，你認為哪些差異最值得留意，因為它們可能和課文標題的「命運不一樣」有關？（單選）",
-            "reference_answer": null,
-            "section": null,
-            "type": "select"
-          }
-        ],
-        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
-      },
-      "type": "exercise"
-    },
-    {
-      "anchors": [
-        {
-          "block_id": "p3",
-          "char_end": null,
-          "char_start": null
-        },
-        {
-          "block_id": "table-2",
-          "char_end": null,
-          "char_start": null
-        },
-        {
-          "block_id": "table-1",
-          "char_end": null,
-          "char_start": null
-        }
-      ],
-      "answer": [
+        0,
         null,
         1,
         0,
@@ -718,23 +541,166 @@
           2
         ],
         1,
-        0
+        0,
+        1,
+        null
       ],
       "answer_space": "free_text",
       "grader": "rubric_ai",
-      "id": "ex-spotlight-3",
+      "id": "ex-spotlight",
       "needs_review": false,
       "question": {
-        "instruction": "練習三：第三段 vs 表二。讀懂表二的數量變化，並回頭看表一，思考數量差異的原因。",
+        "instruction": "這篇文章裡，文字、圖片和表格都提供了重要訊息。閱讀時，不能只看文字，也不能只看圖片或表格，而要先注意文字怎麼提醒你看圖表、怎麼告訴你圖表的功能，再把文字、圖片、表格連起來想。這一課我們用下面4個步驟，練習圖文表整合閱讀：❶先讀文字——抓出這段的重點　❷找出相關圖表——判斷各自提供什麼訊息　❸文圖表對照——從圖表中找到和文字對應的資訊　❹整合多種材料——比較、連結各項資訊之間的關係",
         "kind": "graphic_text_integration",
         "steps": [
+          {
+            "answer": 0,
+            "context": null,
+            "options": [
+              "兩種八哥外形相近的整體印象",
+              "兩種八哥近年的族群變化情形"
+            ],
+            "prompt": "圖一最主要提供哪一類訊息？",
+            "reference_answer": null,
+            "section": "練習一：第一段 vs 圖一",
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "context": null,
+            "options": [
+              "白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。",
+              "這兩種八哥外形十分相似，不容易單靠外表一眼分辨。"
+            ],
+            "prompt": "讀完第一段後，請你找出和圖一最相關的文字。",
+            "reference_answer": null,
+            "section": "練習一：第一段 vs 圖一",
+            "type": "select"
+          },
+          {
+            "answer": null,
+            "context": "小祕訣：含有表格的文章經常會告訴讀者，哪些地方要看表。當你讀到「表一」的提示時，你知道等一下要轉去看表一，並問自己這段要你看表的什麼？",
+            "options": null,
+            "prompt": "請找出第二段文字中，要你看表的那句話，把它寫下來。",
+            "reference_answer": "表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。",
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❶ 先讀文字，抓出這段的重點",
+            "type": "free_text"
+          },
+          {
+            "answer": 0,
+            "context": null,
+            "options": [
+              "八哥的外形與習性",
+              "八哥的數量變化"
+            ],
+            "prompt": "這段要你看表的什麼？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❶ 先讀文字，抓出這段的重點",
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "context": "小祕訣：看表時，要先讀表格「標題」、再讀「第一列」和「第一欄」的小標題，判斷一下這個表在比較什麼，最後讀表格裡的內容。",
+            "options": [
+              "白尾八哥和臺灣冠八哥近年的族群變化",
+              "白尾八哥和臺灣冠八哥的異同"
+            ],
+            "prompt": "表一主要提供的是哪一類訊息？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❷ 再看表一，讀懂這張表告訴我們什麼訊息",
+            "type": "select"
+          },
+          {
+            "answer": [
+              0,
+              1
+            ],
+            "context": "在表一找到對應文字說明的訊息，必要時回頭看圖一，看看表格怎麼幫助你把文字讀得更清楚。",
+            "options": [
+              "全身大致為黑色",
+              "身形大小接近",
+              "常在地面走動覓食，吃昆蟲、果實",
+              "都屬八哥屬、留鳥"
+            ],
+            "prompt": "第二段說兩種八哥「外表相似」，表一中哪些資料可支持這句話？（可複選）",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❸ 文圖表對照，從圖表中找到和文字對應的資訊",
+            "type": "multi_select"
+          },
+          {
+            "answer": [
+              0,
+              1
+            ],
+            "context": null,
+            "options": [
+              "嘴喙顏色",
+              "尾羽顏色",
+              "築巢地點",
+              "適應都市環境"
+            ],
+            "prompt": "第二段說「只要觀察嘴喙和尾羽的顏色，就能分辨牠們」，表一中的哪些資料正好對應這句話？（可複選）",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❸ 文圖表對照，從圖表中找到和文字對應的資訊",
+            "type": "multi_select"
+          },
+          {
+            "answer": 1,
+            "context": null,
+            "options": [
+              "冠羽是否明顯",
+              "外來種／原生種",
+              "族群數量",
+              "保育身分"
+            ],
+            "prompt": "第二段提到臺灣冠八哥又稱「臺灣八哥」，表一中的哪一項資料和這句話最有關？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❸ 文圖表對照，從圖表中找到和文字對應的資訊",
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "context": null,
+            "options": [
+              "表一只是把第二段重新整理一次，並沒有幫助我們更清楚理解這段意思。",
+              "表一幫助我們更清楚看出，兩種八哥雖然外形相近，但仍可從特徵和習性加以分辨。"
+            ],
+            "prompt": "讀表一，對理解第二段有什麼幫助？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❸ 文圖表對照，從圖表中找到和文字對應的資訊",
+            "type": "select"
+          },
+          {
+            "answer": 1,
+            "context": null,
+            "options": [
+              "兩種八哥雖然外形相近，但只要知道牠們同屬八哥屬，就能解釋後來族群數量不同的原因",
+              "兩種八哥雖然外形相近，但仍可從嘴喙、尾羽等特徵區分，表一也進一步比較了牠們的習性差異"
+            ],
+            "prompt": "下面哪一句最能把第二段和表一的意思一起說清楚？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❹ 整合多種材料，比較、連結各項資訊之間的關係",
+            "type": "select"
+          },
+          {
+            "answer": 0,
+            "context": null,
+            "options": [
+              "是否怕人、是否利用人造設施築巢、適應都市環境強弱",
+              "嘴喙顏色、尾羽顏色、冠羽是否明顯"
+            ],
+            "prompt": "讀完第二段和表一後，你認為哪些差異最值得留意，因為它們可能和課文標題的「命運不一樣」有關？",
+            "reference_answer": null,
+            "section": "練習二：第二段 vs 表一 ｜ 步驟❹ 整合多種材料，比較、連結各項資訊之間的關係",
+            "type": "select"
+          },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "步驟❶-1. 請把第三段文字中，要你看表的那句話寫下來。",
-            "reference_answer": "從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都明顯多過原生種臺灣冠八哥。",
-            "section": null,
+            "prompt": "請找出第三段文字中，要你看表的那句話，把它寫下來。",
+            "reference_answer": "表二則說明了兩種八哥近年族群數量的變化。",
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❶ 先讀文字，抓出這段的重點",
             "type": "free_text"
           },
           {
@@ -744,9 +710,9 @@
               "兩種八哥的外形與習性",
               "兩種八哥的數量變化"
             ],
-            "prompt": "步驟❶-2. 這段要你看表的什麼？（單選）",
+            "prompt": "這段要你看表的什麼？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❶ 先讀文字，抓出這段的重點",
             "type": "select"
           },
           {
@@ -756,9 +722,9 @@
               "兩種八哥近年族群數量的變化",
               "白尾八哥和臺灣冠八哥的異同"
             ],
-            "prompt": "步驟❷-1. 表二主要提供的是哪一類訊息？（單選）",
+            "prompt": "表二主要提供的是哪一類訊息？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❷ 再看表，讀懂這張表告訴我們什麼訊息",
             "type": "select"
           },
           {
@@ -768,16 +734,16 @@
               2,
               3
             ],
-            "context": null,
+            "context": "在表二找到對應文字說明的訊息，看看表格怎麼把第三段說的內容整理得更清楚。",
             "options": [
               "近年數量變化（2009-2020）",
               "看得到的地點數／總調查地點數（2009-2021）",
-              "2021 年看得到的地點數",
-              "2018 年花蓮調查結果"
+              "2021年看得到的地點數",
+              "2018年花蓮調查結果"
             ],
-            "prompt": "步驟❸-1. 第三段說「外來種白尾八哥都明顯多過原生種臺灣冠八哥」，表二中哪些資料可以支持這句話？（複選）",
+            "prompt": "第三段說「外來種白尾八哥都明顯多過原生種臺灣冠八哥」，表二中的哪些資料可以支持這句話？（可複選）",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❸ 文表對照，從表中找到和文字對應的資訊",
             "type": "multi_select"
           },
           {
@@ -787,9 +753,9 @@
               "註2會說明這個寫法的意思，幫助我們理解表格內容。",
               "註2會補充八哥的外形特徵，幫助我們分辨兩種八哥。"
             ],
-            "prompt": "步驟❸-2. 讀表二時，看到「84／584」旁邊有「註2」，到表格下方看註解有什麼幫助？（單選）",
+            "prompt": "讀表二時，看到「84／584」旁邊有「註2」，到表格下方看註解有什麼幫助？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❸ 文表對照，從表中找到和文字對應的資訊",
             "type": "select"
           },
           {
@@ -797,13 +763,13 @@
             "context": null,
             "options": [
               "近年數量變化：無明顯變化",
-              "2021 年看得到的地點數：23 個地點",
-              "2018 年花蓮調查結果：0 隻",
+              "2021年看得到的地點數：23個地點",
+              "2018年花蓮調查結果：0隻",
               "白尾八哥成長250%"
             ],
-            "prompt": "步驟❸-3. 第三段說「有些地方甚至已經看不到臺灣冠八哥的身影了」，表二中哪一項最直接支持這句話？（單選）",
+            "prompt": "第三段說「有些地方甚至已經看不到臺灣冠八哥的身影了」，表二中哪一項最直接支持這句話？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❸ 文表對照，從表中找到和文字對應的資訊",
             "type": "select"
           },
           {
@@ -815,9 +781,9 @@
               "可是，當初白尾八哥被引進臺灣時，牠們的數量很少，臺灣冠八哥才是隨處可見的常客。",
               "那麼，為什麼幾十年過去，原生種臺灣冠八哥逐漸消聲匿跡，白尾八哥卻愈來愈常見，聲勢愈來愈大呢？"
             ],
-            "prompt": "步驟❸-4. 請回到第三段，判斷哪一句最能統整表二最重要的訊息？（單選）",
+            "prompt": "作者呈現表格後，通常會在文字中說明這張表的重要訊息。請回到第三段，判斷哪一句最能統整表二最重要的訊息？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❸ 文表對照，從表中找到和文字對應的資訊",
             "type": "select"
           },
           {
@@ -833,9 +799,9 @@
               "適應都市環境較強／較弱",
               "嘴喙顏色不同"
             ],
-            "prompt": "步驟❹-1. 再回頭看表一，哪幾項差異最可能和第三段的數量變化有關？（複選）",
+            "prompt": "再回頭看表一，哪幾項差異最可能和第三段的數量變化有關？（可複選）",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❹ 整合多種材料，比較、連結各項資訊之間的關係",
             "type": "multi_select"
           },
           {
@@ -845,9 +811,9 @@
               "表二說明兩種八哥近年的數量差不多，而表一只是補充牠們名稱上的不同。",
               "表二告訴我們兩種八哥近年的族群差距很大，而表一提供了進一步思考原因的重要線索。"
             ],
-            "prompt": "步驟❹-2. 下面哪一句最能把第三段和表二的意思一起說清楚？（單選）",
+            "prompt": "下面哪一句最能把第三段和表二的意思一起說清楚？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❹ 整合多種材料，比較、連結各項資訊之間的關係",
             "type": "select"
           },
           {
@@ -857,40 +823,11 @@
               "表二讓我們知道哪一種八哥變多、哪一種變少；表一幫助我們思考為什麼會這樣。",
               "表二幫助我們思考為什麼會這樣；表一讓我們知道哪一種八哥變多、哪一種變少。"
             ],
-            "prompt": "步驟❹-3. 讀第三段不能只看表二，還要回頭看表一，是因為：（單選）",
+            "prompt": "你發現了嗎，讀第三段不能只看表二，還要回頭看表一，是因為：",
             "reference_answer": null,
-            "section": null,
+            "section": "練習三：第三段 vs 表二 ｜ 步驟❹ 整合多種材料，比較、連結各項資訊之間的關係",
             "type": "select"
-          }
-        ],
-        "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
-      },
-      "type": "exercise"
-    },
-    {
-      "anchors": [
-        {
-          "block_id": "p4",
-          "char_end": null,
-          "char_start": null
-        },
-        {
-          "block_id": "table-1",
-          "char_end": null,
-          "char_start": null
-        }
-      ],
-      "answer": [
-        1
-      ],
-      "answer_space": "free_text",
-      "grader": "rubric_ai",
-      "id": "ex-spotlight-4",
-      "needs_review": false,
-      "question": {
-        "instruction": "練習四：第四段 vs 表一、二。先抓出這段要你回到表一回答的問題。",
-        "kind": "graphic_text_integration",
-        "steps": [
+          },
           {
             "answer": 1,
             "context": null,
@@ -898,69 +835,22 @@
               "八哥的外形與習性",
               "根據表一試著推論兩種八哥族群變化的原因"
             ],
-            "prompt": "步驟❶-1. 這段要你「回到表一」回答什麼問題？（單選）",
+            "prompt": "這段要你「回到表一」回答什麼問題？",
             "reference_answer": null,
-            "section": null,
+            "section": "練習四：第四段 vs 表一、二 ｜ 步驟❶ 先讀文字，抓出這段的重點",
             "type": "select"
+          },
+          {
+            "answer": null,
+            "context": null,
+            "options": null,
+            "prompt": "請根據表一，並結合第四段提到的都市化背景，試著把兩種八哥族群變化的原因說清楚（填入空格）：白尾八哥＿＿＿，又＿＿＿，適應都市環境較強……；臺灣冠八哥＿＿＿，又＿＿＿，適應都市環境較弱……",
+            "reference_answer": "白尾八哥較不怕人，又較會利用人造設施築巢，適應都市環境較強，所以在都市化的環境中比較容易生存，族群逐漸增加；臺灣冠八哥較怕人，又較少利用人造設施築巢，適應都市環境較弱，因此族群逐漸減少。",
+            "section": "練習四：第四段 vs 表一、二 ｜ 步驟❷ 整合多種材料，比較、連結各項資訊之間的關係",
+            "type": "free_text"
           }
         ],
         "strategy_name": "閱讀聚光燈 - 圖文表整合閱讀策略"
-      },
-      "type": "exercise"
-    },
-    {
-      "anchors": [
-        {
-          "block_id": "p4",
-          "char_end": null,
-          "char_start": null
-        },
-        {
-          "block_id": "table-1",
-          "char_end": null,
-          "char_start": null
-        }
-      ],
-      "answer": {
-        "b1": "較不怕人",
-        "b2": "較會利用人造設施築巢",
-        "b3": "較怕人",
-        "b4": "較少利用人造設施築巢"
-      },
-      "answer_space": "text",
-      "grader": "exact",
-      "id": "ex-spotlight-4-infer",
-      "needs_review": false,
-      "question": {
-        "kind": "fill_in_blank",
-        "sentence": "白尾八哥＿＿，又＿＿，適應都市環境較強，所以在都市化的環境中比較容易生存，族群逐漸增加；臺灣冠八哥＿＿，又＿＿，適應都市環境較弱，因此族群逐漸減少。",
-        "slots": [
-          {
-            "answer": "較不怕人",
-            "grader": "exact",
-            "hint": null,
-            "id": "b1"
-          },
-          {
-            "answer": "較會利用人造設施築巢",
-            "grader": "exact",
-            "hint": null,
-            "id": "b2"
-          },
-          {
-            "answer": "較怕人",
-            "grader": "exact",
-            "hint": null,
-            "id": "b3"
-          },
-          {
-            "answer": "較少利用人造設施築巢",
-            "grader": "exact",
-            "hint": null,
-            "id": "b4"
-          }
-        ],
-        "vocab_bank": null
       },
       "type": "exercise"
     }

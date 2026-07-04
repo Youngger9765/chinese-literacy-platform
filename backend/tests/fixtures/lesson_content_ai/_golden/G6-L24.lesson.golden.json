@@ -27,7 +27,7 @@
     },
     {
       "id": "p6",
-      "text": "救援人員束手無策時，船員們想到白鯨若對聲音敏感、害怕噪音，那麼「來點音樂如何？」他們開始播放流行音樂、軍樂和古典音樂，結果，白鯨對古典音樂最有反應。於是船上開始播放起俄羅斯最著名的作曲家柴可夫斯基的《天鵝湖》、《睡美人》、《胡桃鉗》等旋律優美、情感豐富的曲子。神奇的事情發生了！原本害怕的白鯨們，聽到音樂後竟然緩緩游動，開始沿著破冰船開出的水道前進。人們屏󠇡氣凝神，注視著這動人的一幕。2月24日，數千頭白鯨隨著舒緩柔美的音樂，緩緩地游出了冰冷的困境，回到廣闊自由的大海。",
+      "text": "救援人員束手無策時，船員們想到白鯨若對聲音敏感、害怕噪音，那麼「來點音樂如何？」他們開始播放流行音樂、軍樂和古典音樂，結果，白鯨對古典音樂最有反應。於是船上開始播放起俄羅斯最著名的作曲家柴可夫斯基的《天鵝湖》、《睡美人》、《胡桃鉗》等旋律優美、情感豐富的曲子。神奇的事情發生了！原本害怕的白鯨們，聽到音樂後竟然緩緩游動，開始沿著破冰船開出的水道前進。人們屏氣凝神，注視著這動人的一幕。2月24日，數千頭白鯨隨著舒緩柔美的音樂，緩緩地游出了冰冷的困境，回到廣闊自由的大海。",
       "type": "paragraph"
     },
     {
@@ -66,35 +66,35 @@
           "block_id": "p6",
           "char_end": null,
           "char_start": null
+        },
+        {
+          "block_id": "p7",
+          "char_end": null,
+          "char_start": null
         }
       ],
       "answer": [
         1,
         2,
-        0,
-        null,
-        null,
-        null,
-        null,
-        null
+        0
       ],
       "answer_space": "free_text",
       "grader": "rubric_ai",
-      "id": "ex-spotlight",
+      "id": "ex-spotlight-match",
       "needs_review": false,
       "question": {
-        "instruction": "用「問題、解決、結果」的結構抓住報導式說明文的重點：先連連看複習策略祕訣，再回到「白鯨救援」找出各元素。",
+        "instruction": "這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，你還記得祕訣嗎？請把「問題、解決、結果」與其對應的「祕訣」配對起來。",
         "kind": "guided_steps",
         "steps": [
           {
             "answer": 1,
-            "context": "這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，你還記得祕訣嗎？請你連連看。",
+            "context": null,
             "options": [
               "通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。",
               "通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。",
               "通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。"
             ],
-            "prompt": "「問題」的祕訣是什麼？",
+            "prompt": "「問題」對應哪一個祕訣？",
             "reference_answer": null,
             "section": "連連看：策略與祕訣配對",
             "type": "select"
@@ -107,7 +107,7 @@
               "通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。",
               "通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。"
             ],
-            "prompt": "「解決」的祕訣是什麼？",
+            "prompt": "「解決」對應哪一個祕訣？",
             "reference_answer": null,
             "section": "連連看：策略與祕訣配對",
             "type": "select"
@@ -120,58 +120,111 @@
               "通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。",
               "通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。"
             ],
-            "prompt": "「結果」的祕訣是什麼？",
+            "prompt": "「結果」對應哪一個祕訣？",
             "reference_answer": null,
             "section": "連連看：策略與祕訣配對",
             "type": "select"
-          },
+          }
+        ],
+        "strategy_name": "摘要策略－問題.解決.結果結構找重點"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p3",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p4",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p5",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p6",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "answer_space": "free_text",
+      "grader": "rubric_ai",
+      "id": "ex-spotlight-tryit",
+      "needs_review": false,
+      "question": {
+        "instruction": "現在要給你一個比較難的任務哦，請你用上一課學到的方法，找出「白鯨救援」這一課的「問題、解決、結果」。",
+        "kind": "guided_steps",
+        "steps": [
           {
             "answer": null,
-            "context": "現在要給你一個比較難的任務哦，請你用上一課學到的方法，找出「白鯨救援」這一課的「問題、解決、結果」。",
+            "context": null,
             "options": null,
-            "prompt": "問題（第二段）：白鯨遇到什麼「不好的事或困難」？",
-            "reference_answer": "白鯨群困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了。",
-            "section": "小試身手：白鯨救援的問題.解決.結果",
+            "prompt": "【問題．第二段】提示：描述一個「不好的事或困難」。白鯨怎麼了？請寫出白鯨群遇到的困難。",
+            "reference_answer": "困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了",
+            "section": "小試身手",
             "type": "free_text"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "解決①：村民做了什麼？",
-            "reference_answer": "村民用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類。",
-            "section": "小試身手：白鯨救援的問題.解決.結果",
+            "prompt": "【解決．第三～六段】提示：有人想出辦法或行動（誰＋做什麼）。1. 村民做了什麼來幫助白鯨？請寫下來。",
+            "reference_answer": "用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類",
+            "section": "小試身手",
             "type": "free_text"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "解決②：政府做了什麼？",
-            "reference_answer": "政府派破冰船救援，開出一條二十多公里長的水道。",
-            "section": "小試身手：白鯨救援的問題.解決.結果",
+            "prompt": "2. 政府做了什麼來救援白鯨？請寫下來。",
+            "reference_answer": "派破冰船救援，開出一條20公里的水道",
+            "section": "小試身手",
             "type": "free_text"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "解決③：船員做了什麼？",
-            "reference_answer": "船員播放古典音樂，引導白鯨沿著水道前進。",
-            "section": "小試身手：白鯨救援的問題.解決.結果",
+            "prompt": "3. 船員最後想出什麼辦法引導白鯨前進？請寫下來。",
+            "reference_answer": "播放古典音樂引導白鯨前進",
+            "section": "小試身手",
             "type": "free_text"
           },
           {
             "answer": null,
             "context": null,
             "options": null,
-            "prompt": "結果（第六段）：行動後造成了什麼改變？",
-            "reference_answer": "數千頭白鯨游出冰原，回到廣闊自由的大海。",
-            "section": "小試身手：白鯨救援的問題.解決.結果",
+            "prompt": "【結果．第六段】提示：行動後，造成了什麼改變？請寫出白鯨最後怎麼了。",
+            "reference_answer": "數千頭白鯨游出冰原，回到大海",
+            "section": "小試身手",
             "type": "free_text"
           }
         ],
-        "strategy_name": "摘要策略—問題.解決.結果結構找重點"
+        "strategy_name": "摘要策略－問題.解決.結果結構找重點"
       },
       "type": "exercise"
     }

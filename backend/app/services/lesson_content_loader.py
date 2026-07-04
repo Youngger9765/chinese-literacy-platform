@@ -67,9 +67,85 @@ _SCRIPTS_DIR = _REPO_ROOT / "scripts"
 _AI_LESSONS_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_ai_lessons"
 
 
+_PARSED_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_parsed_2026-05-01"
+
+
+def _load_canonical_parsed(code: str) -> Optional[dict]:
+    """Load the authoritative ``_parsed_2026-05-01`` twin for a lesson code — the SAME
+    content source 朗讀 / 重點表 / 閱讀理解 read. Resolved through the platform authority
+    ``catalog_to_parsed_code`` (with a bare-code fallback). Returns None if absent/unreadable."""
+    import yaml  # noqa: E402
+
+    candidates = []
+    try:
+        pc = catalog_to_parsed_code(str(code))
+        if pc:
+            candidates.append(pc)
+    except Exception:  # noqa: BLE001
+        pass
+    candidates.append(code)
+    for c in candidates:
+        p = _PARSED_DIR / f"{c}.yml"
+        if p.exists():
+            try:
+                data = yaml.safe_load(p.read_text(encoding="utf-8"))
+                return data if isinstance(data, dict) else None
+            except Exception:  # noqa: BLE001
+                return None
+    return None
+
+
+def _hydrate_reading_from_parsed(lesson: dict, code: str) -> None:
+    """Overwrite paragraph TEXT and figure ASSET in an AI-extracted lesson with the
+    authoritative values from the ``_parsed`` twin, so 課文 (paragraph text) + 圖 (image
+    asset) ALWAYS match the shared canonical source — GCS-correct filenames, complete
+    paragraphs — regardless of what the extraction transcribed. This is why the
+    ai-lesson-extract skill no longer needs to (re)analyse the course text or pick image
+    assets (the two recurring conversion-bug sources).
+
+    Presentation ORDER + anchors stay exactly as the AI authored them (the AI judges layout
+    from the PDF). Tables are left untouched (verified-correct + non-trivial to reshape).
+    Mutates in place; fully fail-safe — any count mismatch / structural surprise leaves that
+    block as-is (never worse than before)."""
+    parsed = _load_canonical_parsed(code)
+    if parsed is None:
+        return
+    blocks = lesson.get("blocks")
+    if not isinstance(blocks, list):
+        return
+
+    paras = [str(p) for p in (parsed.get("paragraphs") or []) if str(p).strip()]
+    images = [im for im in (parsed.get("images") or []) if isinstance(im, dict)]
+    by_label = {
+        str(im.get("figure_label")): im for im in images if im.get("figure_label")
+    }
+
+    para_blocks = [b for b in blocks if isinstance(b, dict) and b.get("type") == "paragraph"]
+    fig_blocks = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure"]
+
+    # Paragraphs: hydrate only when counts match exactly (else skip — a differing split
+    # could misalign text onto the wrong paragraph; safer to keep the AI's own).
+    if paras and len(para_blocks) == len(paras):
+        for blk, text in zip(para_blocks, paras):
+            blk["text"] = text
+
+    # Figures: match by 圖N label; fall back to positional order. Asset is authoritative
+    # (kills the GCS/local numbering mismatch); AI caption kept when present.
+    for i, blk in enumerate(fig_blocks):
+        im = by_label.get(str(blk.get("label"))) if blk.get("label") else None
+        if im is None and i < len(images):
+            im = images[i]
+        if im and im.get("filename"):
+            blk["asset"] = im["filename"]
+            if not blk.get("caption") and im.get("caption"):
+                blk["caption"] = im["caption"]
+
+
 def _try_ai_lesson(story: dict) -> Optional[dict]:
     """If an AI-extracted spotlight lesson exists for this story's code, load + serve it
-    (contract-validated). Returns None (→ fall through to the deterministic adapter) when
+    (contract-validated). Reading-material CONTENT (paragraph text + figure asset) is
+    hydrated from the authoritative ``_parsed`` twin so 課文/圖 always match the shared
+    canonical source. Returns None (→ fall through to the deterministic adapter) when
     absent or on any error."""
     code = story.get("grade_code")
     if not code:
@@ -82,6 +158,13 @@ def _try_ai_lesson(story: dict) -> Optional[dict]:
         from app.schemas.lesson_content import Lesson  # noqa: E402
 
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        _hydrate_reading_from_parsed(raw, str(code))
+        # Title authority: serve the DISPLAY lesson's own title (same rule the deterministic
+        # path applies below), never a full/half-width colon variant the extraction happened
+        # to transcribe. Keeps the 張冠李戴 title-authority invariant across both paths.
+        display_title = story.get("title")
+        if display_title:
+            raw["title"] = display_title
         lesson = Lesson.model_validate(raw)
         return lesson.model_dump(mode="json", exclude_none=True)
     except Exception as exc:  # noqa: BLE001 — fail-safe: fall back to the adapter

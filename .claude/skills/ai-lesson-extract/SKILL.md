@@ -14,11 +14,18 @@ description: 讓 AI 直接讀「原始學習單」(從 GCS 下載 DOCX → 轉 P
 
 **這輪只擷取「閱讀聚光燈」(reading strategy)這一個模組,以及它所依賴的課文段落/圖/表。**
 
-- ✅ **擷取**:閱讀聚光燈的引導練習(通常是 `guided_steps` / `graphic_text_integration`)+ **完整課文**(全部段落)+ 課文用到的 `figure` / `table` / `parallel_passage`。
-  - ⚠️ **課文要完整、且與朗讀同源**:`paragraph` block 要放**整篇課文的全部段落**,文字取自正規來源 `backend/data/lessons/_parsed_2026-05-01/{CODE}.yml` 的 `paragraphs`(list)或 `story_text`,依原文順序給 id `p1..pN`。**絕不可只放聚光燈 anchor 到的那幾段**——否則左欄課文缺段、且與朗讀模組(用同一 `paragraphs` 來源)不一致。聚光燈 exercise 再用 `anchors` 指向其中相關段落即可。
+- ✅ **擷取**:閱讀聚光燈的引導練習(通常是 `guided_steps` / `graphic_text_integration`)+ 課文左欄的**骨架**(段落/圖/表 block)+ 聚光燈題目自帶的補充短文(放 exercise `context`)。
+
+  > **🔑 分工(重要,決定你要不要「分析課文」):課文左欄的「內容」由 loader 自動從權威來源 `_parsed_2026-05-01/{CODE}.yml` 灌入,你只負責「骨架 + 聚光燈題目」。** `lesson_content_loader._hydrate_reading_from_parsed` 在服務時會用 `_parsed` 覆蓋每個 `paragraph` 的 `text`(段落數一致時)與每個 `figure` 的 `asset`(依 `圖N` label / 順序)。所以:
+  > - **`paragraph`**:放**與 `_parsed.paragraphs` 相同數量、相同順序**的段落 block(id `p1..pN`)。text 直接**從 `_parsed` 複製**即可(loader 會再灌一次)——**不要**逐字重打 PDF、也不要只放 anchor 到的那幾段(段數不符 loader 會跳過灌入 → 又回到你抄的版本)。
+  > - **`figure`**:放與 `_parsed.images` 對應的 figure block,**標上 `圖N` 的 `label` + 正確交錯位置**;`asset` 直接抄 `_parsed.images[].filename`(loader 會依 label 確認/覆蓋成 GCS 正確檔)——**不必**自己去挑圖或核對圖檔(那是先前反覆出錯的地方,現在交給 loader)。
+  > - **`table`**:loader **不灌**表,仍要你依 `_parsed.tables` 忠實轉成契約 `TableBlock`(headers/rows/`grid` 合併格),見 §A。
+  > - 交錯順序(段落↔圖↔表)由你依 PDF 版面判斷(`_parsed` 沒存位置);`anchors` 指向這些 id。
 - ❌ **不擷取**(它們是**各自獨立的模組**,不在本 skill 範疇):
   - **文章重點表**(story-structure / keypoints_table)——獨立模組。
   - 語詞我最棒 / 語詞應用、閱讀理解選擇題、生字、朗讀計時、知識補給站…等非聚光燈練習。
+  - **主觀自評 / 後設反思清單**(如「◎自我檢核」「我學會找問題/解決/結果了嗎」「我覺得…」勾選)——**無客觀答案 → 依答案不變量根本不成題,不擷取**(與語詞/計時同屬範圍外,即使它印在聚光燈那一節的結尾)。判準:一個項目若沒有「能機器比對的正解」(它問的是學生的自我感受,勾幾項都不算錯)→ 就不是聚光燈作答題。
+    - ⚠️ 這類清單**最容易讓 skill 不穩定**:硬給它標準答案(如「四項全勾」)=造假客觀性(錯);塞成 `custom`+manual grader=前端無法判分、卡住完成閘(也錯)。**唯一穩定解=不做它**(留給紙本/未來的自評模組)。
   - 例外:若某題是聚光燈引導流程**內部**的一步(如 G7-L30 練習四的填空),那它算聚光燈,擷取。
 
 ### 哪些課「有閱讀聚光燈」值得做
@@ -93,7 +100,18 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 聚光燈常是「**範例 → 課文 → 小試身手**」這種多段引導。渲染器會**按 `section` 把步驟整併成一個區塊**,所以:
 
 1. **每個 `GuidedStep` 加 `section`**(區段標題,如 `例一：烏鴉喝水` / `課文故事` / `小試身手一` / `小試身手二：大象有多重？`)。同一段的步驟用**相同** section 字串 → 渲染成同一區塊,標題只出現一次。
-2. **區段層級的純呈現引導** → 放在該段**第一個 step 的 `context`**(渲染器在區塊頂只顯示一次)。這包含:範例/示範故事的短文(如烏鴉喝水),**以及**「祕訣」「我們可以這樣思考」思考框等區段引言。**不要**把範例短文塞進 `paragraph` 課文段落(會和真正課文混淆),也**不要**每步重複。(無範例故事的課,`context` 就放該區的祕訣/引言即可。)
+2. **呈現保真不變量(唯一原則,取代一長串「哪種段落放哪」的個案規則)**:
+
+   > **學生作答任一題時,答那題所需的全部材料(情境短文、圖、表、指示語)都必須在畫面上可得;紙上出現一次的東西,數位版也只呈現一次。**
+
+   這一句同時決定「context 放什麼、放哪、放幾次」。實務對應(以下是**例子,非窮舉**——遇到沒列到的版面,回到上面那句話判斷,不要硬套例子):
+   - 作答某題需要一段短文/故事,而它**不在左欄課文裡** → 該短文必須進所屬 `section` 第一步的 `context`,否則那題無材料可答(最常漏、後果最重)。
+   - 短文雖在課文裡、但學習單為該段另給了簡化版供作答 → 也放該段 `context`(忠實呈現,不逼學生翻全文)。
+   - 「祕訣」「我們可以這樣想」思考框、開場教學說明 → 也是材料,不可因擷取消失:**共用**開場(不屬任一子流程)放 exercise `instruction`;**某段專屬**引言放該段 `context`。
+   - **只放一處**:同一段文字不要同時進 `instruction` 和 `context`(會顯示兩次);開頭重疊即重複,擇一。
+   - 這些純呈現文字**不要**塞進 `paragraph` 課文段落(會和真正課文混淆),也不要每步重複。
+
+   **通則出口(這才是應付「沒見過的學習單」的機制,不是再加規則):** 遇到本 SKILL 未描述過的版面/題型,先用上面的不變量判斷;若判不出對應的契約結構、或無法確定材料歸屬 → **`needs_review: true` 並在回報說明**,絕不臆造、不硬塞。交給 eval + 人審接住。寧 🟡 不假 🟢。
 3. **step 的 `prompt` 只寫問題本身**(如 `❶主角是誰？`),**不要**在每步重複區段名(「例一:烏鴉喝水…」「接下來,我們來看課文的故事…」)——那交給 `section`。
 4. `context` / `section` / `render_hint` 都是**純呈現**,永遠**不放答案**。
 
@@ -112,12 +130,18 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 2. 每個 exercise 必有 `answer_space` + 機器可比 `answer` + `grader`。散文不是答案。
 3. `anchors.block_id` 必須指向存在的 paragraph/figure/table/parallel_passage block。
 4. block `id` 唯一且穩定(如 p1/fig-1/table-1/ex-spotlight)。
-5. 同段步驟用相同 `section`;範例短文放該段第一步的 `context`;prompt 不重複區段名。
+5. **呈現保真不變量**(見 §B.2):答每題所需材料都要在畫面上可得(不在課文的補充短文必進該段 `context`)、紙上一次數位一次(不重複)、教學鷹架不因擷取消失;同段步驟用相同 `section`,prompt 不重複區段名。
 6. 判不準 → `needs_review: true`,不要瞎填索引、不要把散文塞進 answer。
 7. **禁止把特定課的逐字答案寫進本 SKILL / few-shot**(overfit lint 會掃)。few-shot 用與目標課不同的例子。
 8. 逐題在對話/PR 說明判斷依據(reasoning **不寫進 YAML**,避免污染契約)。
+9. **`figure` 的 `asset` 交給 loader 從 `_parsed` 灌,你只要標對 `圖N` label**。服務時 `lesson_content_loader._hydrate_reading_from_parsed` 會依 `label`(或順序)把 asset 覆蓋成 `_parsed.images[].filename`(= GCS 正確檔,前端 `buildImageSrc` 打 GCS)。所以:figure block 的 `asset` 直接抄 `_parsed.images[].filename`、`label` 標對 `圖N` 即可,**不要**去挑本機 `backend/data/images/` 的檔(那份編號與 GCS 不同,曾害人把對的值改成 404)。你唯一要確認的:**`圖N` label 對應到 `_parsed` 裡正確那張圖**(caption 對得上)——asset 值本身錯了 loader 也會糾回。
 
 ## 收尾(自驗)
 1. `eval_lesson_content.py {CODE}.lesson.yml --markdown` → `RESULT: PASS`。
 2. coverage 紅綠燈:answer-verifiable 🟢;需人審的誠實 🟡(needs_review>0),不可假 🟢。
 3. 人眼抽審:對照 PDF,聚光燈的題目/選項/答案/圖表有沒有漏或錯,以及**區段分組/範例呈現**是否直覺(範例自成一體、prompt 沒重複區段名)。
+4. **呈現保真自問(逐題)**:「答這題需要的材料,學生在畫面上都拿得到嗎?」逐題掃過——引用的短文/圖/表/思考框有沒有漏掉(尤其不在課文的補充短文)、有沒有同段文字重複兩次。有漏→補;判不出→ `needs_review`。
+5. **課文左欄內容(段落 text / 圖 asset)由 loader 從 `_parsed` 灌,你只驗骨架對齊**:
+   - `paragraph` block 數量與順序要**等於 `_parsed.paragraphs`**(數量不符 loader 不灌,會退回你抄的版本 → 可能缺段)。核對:數 `_parsed.paragraphs` 幾段,YAML 就幾個 `p1..pN`。
+   - 每個 `figure` block 的 `label`(`圖N`)要對應到 `_parsed.images` 裡**正確那張**(caption 對得上);asset 抄 `_parsed.images[].filename` 即可,loader 會依 label 確認/覆蓋成 GCS 正確檔——**不需**自己 curl 每個 GCS URL(這關已由 loader hydration 保證)。
+   - `table` block loader **不灌**,仍要對照 `_parsed.tables` 逐格核對(含合併格)。
