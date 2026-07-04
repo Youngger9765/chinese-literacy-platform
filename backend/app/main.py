@@ -163,6 +163,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             except Exception:
                 pass  # Not critical — we just won't have user_id
 
+        # Expose the (signature-verified) user id for per-user rate limiting.
+        # (#2470 HIGH-1: get_client_key relies on request.state.user_id; without
+        # it, per-user AI limits silently fell back to a spoofable per-IP key.)
+        request.state.user_id = user_id
+
         try:
             response = await call_next(request)
             duration_ms = (time.perf_counter() - start) * 1000
