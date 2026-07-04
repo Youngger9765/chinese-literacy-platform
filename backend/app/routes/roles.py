@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, require_role
+from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..database import get_db
 from ..models.user import Role, User, UserRole
 from ..schemas.role import (
@@ -163,18 +164,13 @@ def list_user_roles(
 ):
     """List all active roles for a specific user."""
     if current_user.id != user_id:
-        admin_roles = (
-            db.query(UserRole)
-            .join(Role)
-            .filter(
-                UserRole.user_id == current_user.id,
-                UserRole.is_active == True,
-                Role.name.in_(["system_admin", "org_admin"]),
-            )
-            .first()
-        )
-        if not admin_roles:
-            raise HTTPException(status_code=403, detail="Not authorized")
+        # system_admin may read any user's roles; org_admin only for a user who
+        # shares one of their orgs (#2470: was any org_admin → any user, cross-org).
+        if not is_system_admin(current_user.id, db):
+            caller_orgs = resolve_user_org_ids(current_user.id, db)
+            target_orgs = resolve_user_org_ids(user_id, db)
+            if not (caller_orgs & target_orgs):
+                raise HTTPException(status_code=403, detail="Not authorized")
 
     # Verify target user exists
     target_user = db.query(User).filter(User.id == user_id).first()

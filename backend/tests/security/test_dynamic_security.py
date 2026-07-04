@@ -117,7 +117,27 @@ def _register_teacher(client) -> dict:
         client.get(f"/api/auth/verify-email?token={vt}")
     tok = client.post("/api/auth/login", json={"email": email, "password": pw}).json()["access_token"]
     uid = client.get("/api/users/me", headers=_auth(tok)).json()["id"]
-    return {"token": tok, "user_id": uid, "email": email}
+    return {"token": tok, "user_id": uid, "email": email, "school_id": _own_school_id(uid)}
+
+
+def _own_school_id(user_id: int):
+    """The school the user is scoped to (teachers auto-join a domain school on register)."""
+    from app.models.user import UserRole
+
+    db = TestingSessionLocal()
+    try:
+        r = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user_id,
+                UserRole.scope_type == "school",
+                UserRole.is_active == True,
+            )
+            .first()
+        )
+        return int(r.scope_id) if r and r.scope_id else None
+    finally:
+        db.close()
 
 
 def _first_school_id() -> int:
@@ -198,7 +218,7 @@ def test_upload_rejects_unknown_mime(client):
 def test_idor_teacher_cannot_read_other_teachers_classroom(client):
     a = _register_teacher(client)
     b = _register_teacher(client)
-    school_id = _first_school_id()
+    school_id = a["school_id"]  # teacher A creates in their OWN school (membership)
     assert school_id is not None, "註冊時應已建立預設 school"
 
     created = client.post(
@@ -287,16 +307,10 @@ def test_idor_org_admin_cannot_read_cross_org_user(client):
     assert client.get(f"/api/users/{cross_org_user}", headers=_auth(tok_sys)).status_code == 200
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="MED-1（對抗複審）：policies.require_classroom_member 用 is_admin（含 org_admin 無 org scope）"
-    " → 跨 org org_admin 可讀別家班級。修 policies.py 改 is_system_admin + org scope 後此測應轉綠，"
-    "屆時移除 xfail marker。",
-)
 def test_idor_org_admin_cannot_read_cross_org_classroom(client):
-    # 教師在預設 school 建一個班級
+    # 教師在自己的 school 建一個班級
     teacher = _register_teacher(client)
-    school_id = _first_school_id()
+    school_id = teacher["school_id"]
     created = client.post(
         "/api/classrooms",
         json={"name": f"ClsB_{uuid.uuid4().hex[:6]}", "grade": 6, "school_id": school_id},
@@ -311,17 +325,10 @@ def test_idor_org_admin_cannot_read_cross_org_classroom(client):
     _grant_role(outsider, "org_admin", "organization", other_org)
     tok = create_access_token(outsider)
 
-    # 正確行為：跨 org 的 org_admin 不該讀到別家班級 → 應 403
-    # 目前 is_admin bypass 會回 200（漏洞）→ 本測 xfail，修好後轉綠
+    # MED-1 已修（policies 收斂到 is_system_admin + org scope）：跨 org org_admin → 403
     assert client.get(f"/api/classrooms/{cid}", headers=_auth(tok)).status_code == 403
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="NEW-1（Cursor 盲掃，已驗證）：schools.py list_school_members/classrooms 只有 get_current_user、"
-    "無 org/school scope → 任何登入者猜 school_id 即可撈全校成員 name/email/role。"
-    "加 org/school membership 檢查後此測轉綠，移除 xfail marker。",
-)
 def test_idor_any_user_cannot_enumerate_school_members(client):
     # 註冊教師會建立預設 school（含該教師為成員，帶 email）
     _register_teacher(client)
