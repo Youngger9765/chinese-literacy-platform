@@ -88,6 +88,15 @@ def resolve_google_user(db: Session, id_info: dict) -> tuple[User, bool]:
             detail="Google account does not expose an email address.",
         )
 
+    # (#2470 MED-3): only trust the email for account lookup/linking if Google has
+    # verified it. Otherwise an attacker could add a victim's email (unverified) to
+    # their Google account and link/hijack the existing password account.
+    if not id_info.get("email_verified"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google email is not verified.",
+        )
+
     is_new_user = False
 
     # 1. Returning user (matched by google_id)

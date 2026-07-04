@@ -33,6 +33,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from ..auth.dependencies import get_current_user, require_role
+from ..auth.rate_limiter import make_ai_rate_limit_dependency
 from ..models.user import User
 from ..services.audio_upload_service import (
     _get_gcs_bucket,
@@ -300,15 +301,19 @@ def testset_recordings():
     return {"ok": True, "count": len(out), "recordings": out}
 
 
-@router.post("/testset/batch-eval")
+@router.post(
+    "/testset/batch-eval",
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=5, window_seconds=60))],
+)
 async def testset_batch_eval(
-    current_user: User = Depends(get_current_user),
+    current_user: User = require_role("system_admin", "org_admin", "teacher"),
     name: str | None = Query(default=None, description="過濾貢獻者名字（slug 比對）"),
     lesson: str | None = Query(default=None, description="過濾課文 lesson_id（字串精確比對）"),
 ) -> dict:
     """批次跑 STT + 評分 pipeline，驗測試集準度（Issue #2340）。
 
-    Auth: 登入使用者才可呼叫（get_current_user），不需 teacher/admin role。
+    Auth: 需 teacher/org_admin/system_admin role（#2470 MED-2：原本任何登入者即可，
+    含學生，且單次跑 ≤30 次 Gemini → 成本濫用）。另加 per-user AI rate-limit。
 
     Query params:
         name   — 過濾 contributor slug（局部比對，例如 '王小明' → slug '王小明'）

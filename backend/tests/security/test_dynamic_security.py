@@ -307,6 +307,40 @@ def test_idor_org_admin_cannot_read_cross_org_user(client):
     assert client.get(f"/api/users/{cross_org_user}", headers=_auth(tok_sys)).status_code == 200
 
 
+# ── A04 · WSTG-BUSL-01 MED-2：batch-eval 需 role gate（學生不可燒錢）──────────
+def test_med2_student_cannot_run_batch_eval(client):
+    u = uuid.uuid4().hex[:8]
+    student = _create_user(f"stud_{u}@example.com")
+    _grant_role(student, "student", "school", "1")
+    tok = create_access_token(student)
+    # 學生（無 teacher/admin role）呼叫 batch-eval → 403（role gate 擋在進 Gemini 前）
+    r = client.post("/api/testset/batch-eval", headers=_auth(tok))
+    assert r.status_code == 403, r.text
+
+
+# ── A07 · WSTG-ATHN-01 MED-3：SSO 未驗 email_verified 不得連結帳號 ──────────
+def test_med3_sso_rejects_unverified_email():
+    from fastapi import HTTPException
+    from app.services.sso_login_service import resolve_google_user
+
+    db = TestingSessionLocal()
+    try:
+        id_info = {
+            "sub": "attacker-google-sub",
+            "email": f"victim_{uuid.uuid4().hex[:8]}@custom-school.edu.tw",
+            "email_verified": False,  # Google 未驗證此 email
+            "name": "Attacker",
+        }
+        raised = None
+        try:
+            resolve_google_user(db, id_info)
+        except HTTPException as e:
+            raised = e
+        assert raised is not None and raised.status_code == 401, "未驗證 email 應被拒 401"
+    finally:
+        db.close()
+
+
 def test_idor_org_admin_cannot_read_cross_org_classroom(client):
     # 教師在自己的 school 建一個班級
     teacher = _register_teacher(client)
