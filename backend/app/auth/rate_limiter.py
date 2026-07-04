@@ -98,19 +98,42 @@ general_rate_limiter = InMemoryRateLimiter()
 # Helpers
 # ---------------------------------------------------------------------------
 
+def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
+    """Return the real client IP behind the Cloud Run / GCP load balancer.
+
+    (#2470 HIGH-1a) GCP appends [real-client-ip, load-balancer-ip] to any
+    client-supplied X-Forwarded-For, so the trustworthy client IP is the
+    SECOND-from-right. Entries to the left are attacker-controlled (a client can
+    prepend anything) and MUST NOT be used for rate-limiting / security — taking
+    the leftmost let an attacker rotate a fake IP to bypass per-IP limits.
+    """
+    parts = [p.strip() for p in (xff or "").split(",") if p.strip()]
+    if len(parts) >= 2:
+        return parts[-2]
+    if parts:
+        return parts[-1]
+    return peer or "unknown"
+
+
+def real_client_ip(request: Request) -> str:
+    """Real client IP for a FastAPI Request (see real_ip_from_xff)."""
+    return real_ip_from_xff(
+        request.headers.get("x-forwarded-for", ""),
+        request.client.host if request.client else None,
+    )
+
+
 def get_client_key(request: Request) -> str:
     """Return a stable key for the current request client.
 
     Uses the authenticated user ID when available (from a previously decoded
-    JWT stored by the auth dependency), falling back to the client IP address.
+    JWT stored by the auth dependency), falling back to the real client IP.
     """
     # The auth dependency stores the user id in request.state.user_id.
     user_id = getattr(request.state, "user_id", None)
     if user_id is not None:
         return f"user:{user_id}"
-    client = request.client
-    ip = client.host if client else "unknown"
-    return f"ip:{ip}"
+    return f"ip:{real_client_ip(request)}"
 
 
 # ---------------------------------------------------------------------------
