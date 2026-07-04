@@ -13,6 +13,7 @@
 import React, { useEffect, useState } from 'react';
 import type { StudentAssignmentResponse } from '../../../services/assignmentApi';
 import type { StudentEnrolledClassroom } from '../../../services/learningApi';
+import { ASSET_BASE } from '../../../config/assetBase';
 
 // ---------------------------------------------------------------------------
 // NoClassroomWaitingScreen — shown to students not yet added to any classroom
@@ -61,7 +62,8 @@ interface BookJacketCoverProps {
   title: string;
 }
 
-const THUMBNAIL_BASE = 'https://storage.googleapis.com/lingoleap-assets/stories/thumbnails';
+// Same-origin asset proxy (#2486) — lingoleap-assets is now a private GCS bucket.
+const THUMBNAIL_BASE = `${ASSET_BASE}/stories/thumbnails`;
 
 export const BookJacketCover: React.FC<BookJacketCoverProps> = ({ storyId, title }) => {
   const [imgOk, setImgOk] = useState(true);

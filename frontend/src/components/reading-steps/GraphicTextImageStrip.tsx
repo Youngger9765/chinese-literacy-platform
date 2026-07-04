@@ -22,6 +22,7 @@
  * overflow-y; this component fills 100% of that space.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { ASSET_BASE } from '../../config/assetBase';
 
 interface GraphicTextImageStripProps {
   images: { filename: string; caption?: string; figure_label?: string }[];
@@ -35,7 +36,8 @@ interface GraphicTextImageStripProps {
   lessonCode?: string;
 }
 
-const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
+// Same-origin asset proxy (#2486) — lingoleap-assets is now a private GCS bucket.
+const GCS_IMAGE_BASE = `${ASSET_BASE}/lessons-images`;
 
 /** Chinese numeral labels (1-based) for figure badges */
 const CHINESE_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];

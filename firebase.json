@@ -13,6 +13,13 @@
           }
         },
         {
+          "source": "/assets/**",
+          "run": {
+            "serviceId": "lingoleap-backend",
+            "region": "asia-east1"
+          }
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }
@@ -31,6 +38,13 @@
           }
         },
         {
+          "source": "/assets/**",
+          "run": {
+            "serviceId": "lingoleap-backend-staging",
+            "region": "asia-east1"
+          }
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }
@@ -43,6 +57,13 @@
       "rewrites": [
         {
           "source": "/api/**",
+          "run": {
+            "serviceId": "lingoleap-backend-staging",
+            "region": "asia-east1"
+          }
+        },
+        {
+          "source": "/assets/**",
           "run": {
             "serviceId": "lingoleap-backend-staging",
             "region": "asia-east1"
