@@ -131,6 +131,22 @@ def school_id():
     return _test_school_id
 
 
+def _grant_school_teacher_role(user_id: int) -> None:
+    """Grant a school-scoped teacher UserRole for `_test_school_id` (idempotent)."""
+    _mk = TestingSessionLocal()
+    try:
+        _trole = _mk.query(Role).filter(Role.name == "teacher").first()
+        if _trole and not _mk.query(UserRole).filter(
+            UserRole.user_id == user_id, UserRole.role_id == _trole.id,
+            UserRole.scope_type == "school", UserRole.scope_id == str(_test_school_id),
+        ).first():
+            _mk.add(UserRole(user_id=user_id, role_id=_trole.id,
+                             scope_type="school", scope_id=str(_test_school_id)))
+            _mk.commit()
+    finally:
+        _mk.close()
+
+
 def _register_user(client, suffix: str) -> dict:
     unique = uuid.uuid4().hex[:8]
     email = f"{suffix}_{unique}@example.com"
@@ -153,6 +169,7 @@ def _register_user(client, suffix: str) -> dict:
     token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))
     user_id = me_resp.json()["id"]
+    _grant_school_teacher_role(user_id)
     return {"email": email, "name": name, "token": token, "user_id": user_id}
 
 
@@ -1891,6 +1908,7 @@ def _register_and_login(client, suffix: str) -> dict:
     token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))
     user_id = me_resp.json()["id"]
+    _grant_school_teacher_role(user_id)
     return {"email": email, "name": name, "token": token, "user_id": user_id}
 
 

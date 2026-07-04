@@ -140,7 +140,24 @@ def _register_and_login(client) -> str:
     if verification_token:
         client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
-    return login_resp.json()["access_token"]
+    token = login_resp.json()["access_token"]
+
+    me_resp = client.get("/api/users/me", headers=_auth_header(token))
+    user_id = me_resp.json()["id"]
+    _mk = TestingSessionLocal()
+    try:
+        _trole = _mk.query(Role).filter(Role.name == "teacher").first()
+        if _trole and not _mk.query(UserRole).filter(
+            UserRole.user_id == user_id, UserRole.role_id == _trole.id,
+            UserRole.scope_type == "school", UserRole.scope_id == str(_test_school_id),
+        ).first():
+            _mk.add(UserRole(user_id=user_id, role_id=_trole.id,
+                             scope_type="school", scope_id=str(_test_school_id)))
+            _mk.commit()
+    finally:
+        _mk.close()
+
+    return token
 
 
 def _create_classroom(client, token: str, school_id: int) -> int:
