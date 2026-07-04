@@ -508,6 +508,67 @@ class TestGetStoryDetailEndpoint:
             )
 
 
+class TestWorksheetPdfUrlIsProxied:
+    """Regression test for #2486 (part 3) — worksheet_pdf_url leaked the raw
+    absolute GCS URL through GET /api/stories/{id} for Layer-1 lessons whose
+    worksheet_pdf_url came from the Layer-2 *enrichment* merge (#1666), even
+    though load_layer2_lessons() itself already rewrote the field correctly
+    for lessons served directly out of Layer-2.
+
+    Found via real-browser QA against a live PR preview (not caught by the
+    existing #2486 tests in test_asset_url_rewrite.py, which only exercise
+    load_layer1_lessons() *before* enrichment and load_layer2_lessons()
+    directly — neither one touches build_layer2_enrichment_index(), which is
+    where the raw copy actually happened).
+
+    Story id 3 (G4-L3, "長高的祕密") is the exact case reported: thumbnail_url
+    was already correctly /assets/-prefixed (it isn't a Layer-2 enrichment
+    field — see lesson_layer_loaders.py, it's synthesized fresh), but
+    worksheet_pdf_url came back as the literal
+    https://storage.googleapis.com/lingoleap-assets/... URL — which both (a)
+    defeats the CSP frame-src widening (the iframe was never pointed at a
+    *.run.app origin to begin with) and (b) would 403 the moment the bucket
+    ACL goes private.
+    """
+
+    def test_lesson_3_worksheet_pdf_url_is_proxied_not_absolute_gcs(self, client):
+        resp = client.get("/api/stories/3")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["worksheet_pdf_url"], "Expected lesson 3 to have a worksheet_pdf_url"
+        assert data["worksheet_pdf_url"].startswith("/assets/worksheets/"), (
+            f"worksheet_pdf_url must be proxied, got: {data['worksheet_pdf_url']!r}"
+        )
+        assert "storage.googleapis.com" not in data["worksheet_pdf_url"]
+
+    def test_no_story_leaks_absolute_gcs_worksheet_pdf_url(self, client):
+        """Sweep every served lesson — the bug was specific to lessons enriched
+        from Layer-2 parsed data, not universal, so a single lesson isn't
+        enough to prove the fix covers every affected id."""
+        from app.services.lesson_loader import get_all_lessons
+
+        offenders = []
+        for lesson in get_all_lessons():
+            resp = client.get(f"/api/stories/{lesson['id']}")
+            assert resp.status_code == 200
+            url = resp.json().get("worksheet_pdf_url")
+            if url and "storage.googleapis.com" in url:
+                offenders.append((lesson["id"], url))
+        assert not offenders, f"Lessons with un-proxied worksheet_pdf_url: {offenders}"
+
+    def test_no_story_leaks_absolute_gcs_worksheet_docx_url(self, client):
+        from app.services.lesson_loader import get_all_lessons
+
+        offenders = []
+        for lesson in get_all_lessons():
+            resp = client.get(f"/api/stories/{lesson['id']}")
+            assert resp.status_code == 200
+            url = resp.json().get("worksheet_docx_url")
+            if url and "storage.googleapis.com" in url:
+                offenders.append((lesson["id"], url))
+        assert not offenders, f"Lessons with un-proxied worksheet_docx_url: {offenders}"
+
+
 class TestStoryDetailSchema:
     """Validate StoryDetail response schema completeness."""
 
