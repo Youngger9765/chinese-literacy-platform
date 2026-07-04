@@ -6,11 +6,31 @@
 > - 綠燈 = 對映的 WSTG 條目「自測通過」，不保證通過官方稽核
 > - 全程 LOCAL：靜態 grep + Semgrep + gitleaks + in-process TestClient 動態測試 + 獨立對抗複審 agent；**未**對雲端正式站台燒錢掃描
 
-## 目前 gate 狀態：🔴 RED — 未通過
+## 目前 gate 狀態：🟡 大部分已修，2 項 deferred（追蹤中）
 
-> 兩輪獨立對抗複審後（appsec-pentest-reviewer + Cursor 不同引擎），確認 **≈4 HIGH + 5 MED + 多個 LOW**，且核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取路徑零授權）。修好前**不建議送官方稽核**。
+> 兩輪獨立對抗複審（appsec-pentest-reviewer + Cursor 不同引擎）確認核心是**系統性租戶隔離破口**（`is_admin` 被當全域 bypass + 多個 school-scoped 讀取零授權）+ 限流信任鏈。
+> 認證/注入/機密底子好（JWT/bcrypt/ORM/無 committed secret 全綠）。
+
+## 修復狀態（2026-07-04 收尾）
+
+| 發現 | 嚴重度 | 狀態 | 位置 |
+|------|--------|------|------|
+| MED-1 班級/學生存取 IDOR（is_admin 全域 bypass）| HIGH | ✅ 已修+驗證 | PR #2472（policies.py 收斂到 is_system_admin+org scope）|
+| NEW-1 任何登入者枚舉全校 email | HIGH | ✅ 已修+驗證 | PR #2472（schools.py 加 scope）|
+| NEW-3 org dashboard/points 跨 org | MED | ✅ 已修+驗證 | PR #2472（含 regression guard 不誤傷 org_admin）|
+| NEW-4 semesters 跨校 | MED | ✅ 已修+驗證 | PR #2472 |
+| NEW-5 regenerate-code 跨 org | MED | ✅ 已修+驗證 | PR #2472 |
+| create_school 跨 org | MED | ✅ 已修+驗證 | PR #2472 |
+| roles list 跨 org | MED | ✅ 已修+驗證 | PR #2472 |
+| HIGH-1 核心（per-user 限流 request.state.user_id）| HIGH | ✅ 已修+驗證 | ratelimit branch |
+| MED-2 batch-eval 燒錢（role gate + AI 限流）| MED | ✅ 已修+驗證 | ratelimit branch |
+| MED-3 SSO email_verified | MED | ✅ 已修+驗證 | ratelimit branch |
+| **NEW-2 跨校/跨 org 建班（create-pollution）** | MED* | ⏸ **Deferred** | 需 ~16 檔 test-fixture batch migration（做法已 proven，見 #2470）|
+| **HIGH-1a entrypoint XFF / 匿名 IP 限流** | HIGH | ⏸ **Deferred** | 需 Cloud Run proxy 語義查證（可能配 Cloud Armor）|
+
+> *NEW-2 實際影響 = 「teacher 在不屬於的 school 建自己的班」= 跨租戶**建立污染**，非讀取他人資料（讀取 IDOR = MED-1 已修）。自動資安複審 2 次旗標；為 conscious defer（正確修法連鎖破壞 ~16 個測試檔的 fixture，需獨立 batch pass；真實流程不受影響——teacher 註冊自動加入自己 school）。
 >
-> 認證/注入/機密底子仍好（JWT/bcrypt/ORM/無 committed secret 全綠），問題集中在**授權（tenant isolation）+ 限流信任鏈**。
+> **驗證**：dynamic security 12+ pass、test_admin_api 38、semesters 23、classroom 測試全綠、CI gate 綠，0 淨 regression（pre-existing 失敗經 baseline 對照確認與本次無關）。
 
 ## 受測標的
 - Repo：`chinese-literacy-platform`（LingoLeap）— 國小/國中中文閱讀學習平台
