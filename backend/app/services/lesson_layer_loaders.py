@@ -62,14 +62,37 @@ def _load_docx_codes() -> frozenset[str]:
 
 _DOCX_CODES: frozenset[str] = _load_docx_codes()
 
-_GCS_DOCX_BASE = "https://storage.googleapis.com/lingoleap-assets/worksheets"
+# Issue #2486: lingoleap-assets went private (was public-read, letting anyone
+# enumerate + bulk-download the whole course library). All URLs we derive now
+# point at our own same-origin proxy (backend `/assets/*` route, fronted by
+# the Firebase Hosting `/assets/**` rewrite) instead of the GCS host directly.
+_ASSET_PROXY_BASE = "/assets"
+_GCS_ABSOLUTE_PREFIX = "https://storage.googleapis.com/lingoleap-assets/"
+_GCS_DOCX_BASE = f"{_ASSET_PROXY_BASE}/worksheets"
+
+
+def _to_asset_proxy_url(url: str | None) -> str | None:
+    """Rewrite a legacy absolute GCS URL to our same-origin ``/assets/`` proxy path.
+
+    320+ YAML source files under ``backend/data/curriculum/lessons/`` still carry
+    literal ``https://storage.googleapis.com/lingoleap-assets/...`` strings for
+    ``worksheet_pdf_url`` (hand-editing every file was out of scope for #2486) —
+    this is the single point where those get rewritten before reaching an API
+    response. Idempotent: a value that's already relative (or unrelated to this
+    bucket) passes through unchanged. ``None``/empty pass through unchanged.
+    """
+    if not url:
+        return url
+    if url.startswith(_GCS_ABSOLUTE_PREFIX):
+        return _ASSET_PROXY_BASE + "/" + url[len(_GCS_ABSOLUTE_PREFIX):]
+    return url
 
 
 def _derive_docx_url(grade_code: str | None) -> str | None:
-    """Return the GCS docx URL if grade_code is in the checked-in manifest, else None.
+    """Return the proxied docx URL if grade_code is in the checked-in manifest, else None.
 
     YAML-explicit worksheet_docx_url always takes priority over this derived value
-    (callers use ``data.get("worksheet_docx_url") or _derive_docx_url(grade_code)``).
+    (callers use ``_to_asset_proxy_url(data.get("worksheet_docx_url")) or _derive_docx_url(grade_code)``).
     """
     if not grade_code or grade_code not in _DOCX_CODES:
         return None
@@ -243,7 +266,7 @@ def load_layer1_lessons() -> list[dict]:
             "full_text": data.get("story_text"),
             "char_count": data.get("char_count", 0),
             "thumbnail_url": (
-                f"https://storage.googleapis.com/lingoleap-assets/stories/"
+                f"{_ASSET_PROXY_BASE}/stories/"
                 f"thumbnails/lesson-{data['lesson_number']}.webp"
             ),
             "vocabulary": data.get("vocabulary") or [],
@@ -278,12 +301,14 @@ def load_layer1_lessons() -> list[dict]:
             "worksheet_intro": data.get("worksheet_intro"),
             # Lesson intro (#1443): docx 說明/導讀 or excel fallback
             "lesson_intro": data.get("lesson_intro"),
-            # Public PDF URL of the original 紙本學習單 (#1444)
-            "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Public PDF URL of the original 紙本學習單 (#1444). YAML source
+            # still has the absolute GCS URL (#2486) — rewritten to our
+            # same-origin proxy here, the single point of truth.
+            "worksheet_pdf_url": _to_asset_proxy_url(data.get("worksheet_pdf_url")),
             # Direct docx URL — YAML field takes priority; derive from GCS manifest
             # for all other lessons that have a .docx in worksheets/ (#2073, #2207)
             "worksheet_docx_url": (
-                data.get("worksheet_docx_url")
+                _to_asset_proxy_url(data.get("worksheet_docx_url"))
                 or _derive_docx_url(data.get("grade_code", ""))
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
@@ -404,7 +429,7 @@ def load_layer2_lessons(
             "full_text": data.get("story_text"),
             "char_count": data.get("char_count", 0),
             "thumbnail_url": (
-                f"https://storage.googleapis.com/lingoleap-assets/stories/"
+                f"{_ASSET_PROXY_BASE}/stories/"
                 f"thumbnails/{norm_code}.webp"
             ),
             "vocabulary": vocabulary,
@@ -443,12 +468,14 @@ def load_layer2_lessons(
             "worksheet_intro": data.get("worksheet_intro"),
             # Lesson intro (#1443): docx 說明/導讀 or excel fallback
             "lesson_intro": data.get("lesson_intro"),
-            # Public PDF URL of the original 紙本學習單 (#1444)
-            "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # Public PDF URL of the original 紙本學習單 (#1444). YAML source
+            # still has the absolute GCS URL (#2486) — rewritten to our
+            # same-origin proxy here, the single point of truth.
+            "worksheet_pdf_url": _to_asset_proxy_url(data.get("worksheet_pdf_url")),
             # Direct docx URL — YAML field takes priority; derive from GCS manifest
             # for all other lessons that have a .docx in worksheets/ (#2073, #2207)
             "worksheet_docx_url": (
-                data.get("worksheet_docx_url")
+                _to_asset_proxy_url(data.get("worksheet_docx_url"))
                 or _derive_docx_url(norm_code)
             ),
             # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
@@ -482,6 +509,24 @@ def build_layer2_enrichment_index() -> dict[str, dict]:
             continue
         title = data.get("title", "")
         if title:
+            # Issue #2486 (part 3): ENRICHMENT_FIELDS (below) copies this dict's
+            # worksheet_pdf_url / worksheet_docx_url verbatim onto matching
+            # Layer-1 lessons (lesson_indexes.py). load_layer2_lessons() above
+            # already rewrites those fields via _to_asset_proxy_url before they
+            # reach an API response — but this index is a *separate* raw read
+            # of the same YAML files, so without the same rewrite here, a
+            # Layer-1 lesson enriched from this index would silently regain the
+            # literal storage.googleapis.com URL. Confirmed via real-browser QA:
+            # GET /api/stories/3 returned a same-origin /assets/... thumbnail_url
+            # (thumbnail_url isn't in ENRICHMENT_FIELDS, so Layer-1's own already
+            # -correct value was untouched) alongside an absolute-GCS
+            # worksheet_pdf_url — CSP frame-src widening alone can't fix a URL
+            # that was never routed through the proxy in the first place.
+            # _to_asset_proxy_url is idempotent (already-relative or falsy
+            # values pass through unchanged), so this only rewrites the literal
+            # legacy-absolute case — no other enrichment behavior changes.
+            data["worksheet_pdf_url"] = _to_asset_proxy_url(data.get("worksheet_pdf_url"))
+            data["worksheet_docx_url"] = _to_asset_proxy_url(data.get("worksheet_docx_url"))
             layer2_by_title[title] = data
 
     return layer2_by_title

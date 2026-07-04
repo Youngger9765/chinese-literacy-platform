@@ -673,6 +673,32 @@ class TestGlobalRateLimitMiddleware:
         resp = client.get("/")
         assert resp.status_code != 429
 
+    def test_assets_endpoint_is_rate_limited(self, client):
+        """#2486: /assets/* (private-bucket proxy) shares the same global limit
+        as /api/* — otherwise the proxy itself becomes an uncapped abuse vector
+        for the very egress-cost concern this issue set out to close."""
+        from app.main import GlobalRateLimitMiddleware
+        from unittest.mock import patch, MagicMock
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch("app.routes.assets._get_bucket") as mock_get_bucket:
+            blob = MagicMock()
+            blob.download_as_bytes.return_value = b"data"
+            bucket = MagicMock()
+            bucket.blob.return_value = blob
+            mock_get_bucket.return_value = bucket
+            resp = client.get("/assets/lessons-images/G4-L1/x.jpg")
+
+        assert resp.status_code == 429
+
     def test_global_limit_constants(self):
         """Verify the configured limits match spec.
 

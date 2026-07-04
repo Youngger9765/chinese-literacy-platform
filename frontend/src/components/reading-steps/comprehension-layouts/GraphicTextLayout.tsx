@@ -11,9 +11,10 @@
  */
 import React from 'react';
 import { Story } from '../../../types';
+import { ASSET_BASE } from '../../../config/assetBase';
 
-/** GCS image base URL pattern (Day 2 will verify actual serving) */
-const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
+// Same-origin asset proxy (#2486) — lingoleap-assets is now a private GCS bucket.
+const GCS_IMAGE_BASE = `${ASSET_BASE}/lessons-images`;
 
 interface GraphicTextLayoutProps {
   story: Story;
