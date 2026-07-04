@@ -491,6 +491,7 @@ class TestSSOLogin:
             "email": email,
             "name": "Existing User",
             "picture": None,
+            "email_verified": True,  # #2470 MED-3: legitimate Google logins are verified
         }
 
         # After refactor: patch at the sso_login_service module level
@@ -522,6 +523,7 @@ class TestSSOLogin:
             "email": email,
             "name": "New Google User",
             "picture": None,
+            "email_verified": True,  # #2470 MED-3: legitimate Google logins are verified
         }
 
         with patch("app.services.sso_login_service.settings") as mock_settings:
@@ -565,6 +567,7 @@ class TestSSOLogin:
             "email": email,
             "name": "Returning Google User",
             "picture": None,
+            "email_verified": True,  # #2470 MED-3: legitimate Google logins are verified
         }
 
         with patch("app.services.sso_login_service.settings") as mock_settings:

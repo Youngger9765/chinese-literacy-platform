@@ -75,6 +75,7 @@ FAKE_ID_INFO = {
     "email": "newuser@gmail.com",
     "name": "New User",
     "picture": "https://lh3.googleusercontent.com/photo.jpg",
+    "email_verified": True,  # #2470 MED-3: legitimate Google logins are verified
 }
 
 
