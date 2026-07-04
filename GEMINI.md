@@ -21,7 +21,7 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 ## QA / 測試登入（重要 — 不要再說「卡登入牆/要帳號」）
 
 **`/login` 頁面直接有一鍵登入按鈕（懶人登入），QA 完全不需要真帳號或密碼。**
-所有環境（staging / preview / prod）的 `/login` 都有三顆 demo 登入鈕：
+⚠️ 僅 **staging / preview** 有 demo 登入鈕（`VITE_SHOW_DEMO_LOGIN=true`）；**production 已停用**（`deploy.yml` 設 `VITE_SHOW_DEMO_LOGIN=false`，按鈕 tree-shake 掉，verified 2026-07-02）。所以 QA 用 **staging** 一鍵登入，別在 prod /login 找 demo 鈕：
 
 | 按鈕 | 角色 | 用途 |
 |------|------|------|
@@ -42,6 +42,8 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | 新增或修改 `backend/app/models/*.py` | **先跑 `sqlalchemy-model-safety` checklist**（FK index / cascade / timestamps / alembic heads / idempotent DDL）；先讀對應 skill checklist | `~/.claude/skills/sqlalchemy-model-safety/` |
 | 新增或修改有 LLM import 的 `backend/app/routes/*.py` | **先跑 `llm-endpoint-hardening` checklist**（rate-limit-after-cache / auth / input cap / fail-closed / reasoning field）；先讀對應 skill checklist | `~/.claude/skills/llm-endpoint-hardening/` |
 | 新增 `backend/alembic/versions/*.py` migration | **先確認 `alembic heads` = 1**；先執行 `alembic heads` 並在 multi-head 時 WARN | `~/.claude/skills/postgres-best-practices/` |
+| 改 frontend render 檔（`*.tsx`）| **PR 前必跑 `/qa` 驗那頁**（console 乾淨 + 截圖），禁用 code-read 當 verified；`npm run lint + npm run test` render-smoke/eslint gate 自動擋 mount crash（#2279 TDZ postmortem）| `.claude/skills/ui-pr-verify/SKILL.md` |
+| 改**聚光燈 / 重點表內容或抽取器**（`catalog/*` / `_online-schema/*` / `_parsed*/*` / `build_lesson_schema.py` / `keypoints_manifest.json` / spotlight / story_structure）| **PR 前必跑 content evidence gate + ship-gate（fail-closed）**：`python scripts/content_evidence_gate.py --run-id <id>` → `bash scripts/content_evidence_ship_gate.sh --run-id <id>`，必須印 `CONTENT_EVIDENCE_GATE=PASS`。⛔ 禁用「API 回 200 / render 看一下 / 我覺得對了」當完成依據——口頭宣稱過不了 gate，只認 evidence 檔（fail_cells=0 + unknown_cells=0）。真內容缺口登錄 `backend/data/curriculum_qa/content_known_gaps.yaml`（known_gap，誠實標、非造假），**禁把缺口 fake 成 pass**。| `.claude/skills/build-keypoints/` `.claude/skills/build-spotlight/` + `docs/qa/layer-verification-framework.md` |
 
 > 相關 見對應 skill（#1273）。
 
@@ -51,8 +53,9 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 1. 讀 `specs/registry.yaml`（小，所有 module 的 `owns_code` / `owns_data` 索引）
 2. 要動的檔案落在某 module → 讀該 `specs/modules/<feature>/INTENT.md`（人讀 SOT）+ 需要時 `backend/specs/test_<feature>_spec.py`（機器契約）
-3. 改完跑 **`bash specs/run-ci.sh`**（= local CI：registry 新鮮度 + 全部契約）。契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一）。快檢只跑 registry：`bash specs/run-ci.sh --quick`
-4. 沒對應 module 又是新 feature → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code，並跑 `python specs/build_registry.py` 重建索引
+3. **Content / learning module**（聚光燈、重點表、未來 DOCX 流程）→ 另讀 **`docs/qa/layer-verification-framework.md`** + INTENT 內 **L-layer 對照表**；merge 前跑 module ship gate（見框架 §5–§6）
+4. 改完跑 **`bash specs/run-ci.sh`**（= local CI：registry 新鮮度 + 全部契約）。契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一）。快檢只跑 registry：`bash specs/run-ci.sh --quick`
+5. 沒對應 module 又是新 feature → 先建 `specs/modules/<feature>/INTENT.md` 再寫 code，並跑 `python specs/build_registry.py` 重建索引
 
 目前 **27 個 module**（OMO / 朗讀理解 / 計分 / 教材 / auth / 學習功能 / AI infra…）。完整索引 `specs/registry.yaml`，說明 `specs/README.md`。
 **Local CI**：GH Actions 自動跑卡在 workflow token（issue 2041），在那之前 push 前一律手動 `bash specs/run-ci.sh`（最近一次本機全綠：457 passed / 31 xfailed）。
