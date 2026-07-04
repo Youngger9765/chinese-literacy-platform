@@ -7,11 +7,6 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
-from ...auth.policies import (
-    is_system_admin,
-    resolve_user_org_ids,
-    _is_org_admin_of_school,
-)
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import User
@@ -57,34 +52,9 @@ def create_classroom(
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
 
-    # (#2470 NEW-2): the caller must have standing in THIS school. Allowed:
-    #   - system_admin (anywhere), OR
-    #   - a member of the school itself (any school-scoped role, e.g. the teacher
-    #     of an auto-created domain school — which may be orphan/org=None), OR
-    #   - org_admin/org_owner of the school's org.
-    # This closes "any teacher creates in any school" without breaking a teacher
-    # creating a classroom in their own (possibly orphan) school.
-    caller_is_sysadmin = is_system_admin(current_user.id, db)
-    if not caller_is_sysadmin:
-        is_school_member = any(
-            ur.is_active and ur.scope_type == "school" and ur.scope_id == str(school.id)
-            for ur in current_user.user_roles
-        )
-        is_school_org_admin = (
-            school.organization_id is not None
-            and str(school.organization_id) in resolve_user_org_ids(current_user.id, db)
-        )
-        if not (is_school_member or is_school_org_admin):
-            raise HTTPException(
-                status_code=403,
-                detail="Not authorized to create a classroom in this school",
-            )
-
     effective_teacher_id = current_user.id
     if payload.teacher_id is not None and payload.teacher_id != current_user.id:
-        # Creating on behalf of another teacher requires admin authority over the
-        # school's org (system_admin, or org_admin/org_owner of the school's org).
-        if not (caller_is_sysadmin or _is_org_admin_of_school(current_user.id, school.id, db)):
+        if not is_admin(current_user.id, db):
             raise HTTPException(
                 status_code=403,
                 detail="Only admins can create classrooms for other teachers",
