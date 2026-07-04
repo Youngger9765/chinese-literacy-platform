@@ -7,9 +7,9 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
-from ...auth.policies import is_system_admin, _is_org_admin_of_school
+from ...auth.policies import is_system_admin, _is_org_admin_of_school, _org_admin_org_ids
 from ...database import get_db
-from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ...models.user import User
 from ...schemas.classroom import (
     ClassroomCreateRequest,
@@ -27,7 +27,6 @@ from .helpers import (
     classroom_to_response,
     generate_join_code,
     get_classroom_or_404,
-    is_admin,
     require_member_or_admin,
     require_owner_or_admin,
 )
@@ -123,16 +122,26 @@ def list_my_classrooms(
 ):
     """List classrooms.
 
-    - system_admin / org_admin: returns ALL platform classrooms (platform-wide view).
-    - Regular teacher: returns only classrooms they own or co-teach.
+    - system_admin: ALL platform classrooms (platform-wide view).
+    - org_admin/org_owner: classrooms in schools of their org(s) only (#2470 MED-1d:
+      was is_admin → any org_admin saw the whole platform's classroom metadata).
+    - Regular teacher: only classrooms they own or co-teach.
 
     #1999: regular teachers also get dev/test classrooms (PM dogfood / Bulk驗證)
     filtered out — same regex as /api/teacher/classrooms (#1985). Admins still
-    see every classroom, including dev ones, for full platform visibility.
+    see dev ones for full visibility within their scope.
     """
-    caller_is_admin = is_admin(current_user.id, db)
-    if caller_is_admin:
+    caller_is_sysadmin = is_system_admin(current_user.id, db)
+    caller_org_ids = _org_admin_org_ids(current_user.id, db)
+    caller_is_admin = caller_is_sysadmin or bool(caller_org_ids)  # controls dev-classroom filter below
+    if caller_is_sysadmin:
         query = db.query(Classroom)
+    elif caller_org_ids:
+        query = (
+            db.query(Classroom)
+            .join(School, Classroom.school_id == School.id)
+            .filter(School.organization_id.in_(caller_org_ids))
+        )
     else:
         co_teacher_classroom_ids = (
             db.query(ClassroomTeacher.classroom_id)

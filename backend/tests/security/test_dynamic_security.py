@@ -414,3 +414,41 @@ def test_idor_any_user_cannot_enumerate_school_members(client):
     # 正確行為：無關使用者不該讀到全校成員名冊（PII）→ 應 403
     # 目前無授權檢查會回 200 + email（漏洞）→ 本測 xfail，修好後轉綠
     assert client.get(f"/api/schools/{sid}/members", headers=_auth(tok)).status_code == 403
+
+
+def _create_classroom_direct(school_id: int, teacher_id: int, name: str) -> int:
+    from app.models.school import Classroom
+    import secrets as _s
+    db = TestingSessionLocal()
+    try:
+        c = Classroom(school_id=school_id, teacher_id=teacher_id, name=name,
+                      grade=6, join_code=_s.token_hex(3).upper())
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        return c.id
+    finally:
+        db.close()
+
+
+def test_med1d_org_admin_lists_only_own_org_classrooms(client):
+    # #2470 MED-1d: GET /api/classrooms must scope org_admin to their own org's
+    # classrooms, not the whole platform (was is_admin → any org_admin saw all).
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"L1dA_{u}")
+    org_b = _create_org(f"L1dB_{u}")
+    school_a = _create_school(org_a)
+    school_b = _create_school(org_b)
+    t_a = _create_user(f"l1d_ta_{u}@example.com")
+    t_b = _create_user(f"l1d_tb_{u}@example.com")
+    cls_a = _create_classroom_direct(school_a, t_a, f"ClsA_{u}")
+    cls_b = _create_classroom_direct(school_b, t_b, f"ClsB_{u}")
+
+    admin_a = _create_user(f"l1d_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.get("/api/classrooms?limit=100", headers=_auth(create_access_token(admin_a)))
+    assert r.status_code == 200, r.text
+    ids = [c["id"] for c in r.json()["items"]]
+    assert cls_a in ids, "org_admin should see own org's classroom"
+    assert cls_b not in ids, "org_admin must NOT see another org's classroom (MED-1d)"
