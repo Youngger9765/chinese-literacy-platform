@@ -88,6 +88,17 @@ def create_school(
         if org is None:
             raise HTTPException(status_code=404, detail="Organization not found")
 
+    # (#2470 create_school): org_admin may only create schools inside their own org.
+    # system_admin (org_ids is None) may create anywhere, incl. an orphan school.
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and (
+        payload.organization_id is None or payload.organization_id not in org_ids
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to create a school in this organization",
+        )
+
     # Sanitize admin-provided text fields
     safe_name, _ = sanitize_ai_input(payload.name, user_id=str(current_user.id))
 
@@ -181,8 +192,15 @@ def regenerate_school_code(
     current_user: User = require_role("system_admin", "org_admin"),
     db: Session = Depends(get_db),
 ):
-    """Regenerate the join code for a school. Requires admin."""
+    """Regenerate the join code for a school. Requires admin.
+
+    (#2470 NEW-5: org_admin must be scoped to the school's org, mirroring
+    update_school — previously any org_admin could reset any school's join code.)
+    """
     school = _get_school_or_404(school_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and school.organization_id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
     school.join_code = _generate_school_join_code(db)
     db.commit()
     db.refresh(school)
@@ -205,8 +223,15 @@ def list_school_classrooms(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all classrooms belonging to a school (admin view)."""
-    _get_school_or_404(school_id, db)
+    """List all classrooms belonging to a school (admin view).
+
+    Scoped like get_school: system_admin sees any; org_admin only within their org.
+    (#2470 NEW-1: previously any authenticated user could enumerate a school.)
+    """
+    school = _get_school_or_404(school_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and school.organization_id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     classrooms = (
         db.query(Classroom)
@@ -243,8 +268,16 @@ def list_school_members(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all users who have a role scoped to this school."""
-    _get_school_or_404(school_id, db)
+    """List all users who have a role scoped to this school.
+
+    Scoped like get_school: system_admin sees any; org_admin only within their org.
+    (#2470 NEW-1: previously any authenticated user could read a school's member
+    roster incl. email — cross-tenant PII exposure.)
+    """
+    school = _get_school_or_404(school_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and school.organization_id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     rows = (
         db.query(User, Role, UserRole)

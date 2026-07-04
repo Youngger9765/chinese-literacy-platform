@@ -36,6 +36,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from app.models.organization import Organization
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +78,16 @@ def _seed_roles(session):
 
 
 def _seed_school(session) -> int:
-    school = School(name="Admin Test School")
+    # Give the school a real organization so org_admin scoping (school→org) works.
+    # Orphan schools (organization_id=None) are intentionally NOT claimable by any
+    # org_admin under the tenant-scoped authz model (#2470).
+    global _test_org_id
+    org = Organization(name="Admin Test Org")
+    session.add(org)
+    session.commit()
+    session.refresh(org)
+    _test_org_id = str(org.id)
+    school = School(name="Admin Test School", organization_id=org.id)
     session.add(school)
     session.commit()
     session.refresh(school)
@@ -97,6 +107,7 @@ def _override_get_db():
 # ---------------------------------------------------------------------------
 
 _test_school_id: int = 0
+_test_org_id: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -159,8 +170,13 @@ def _register_user(client, suffix: str) -> dict:
     }
 
 
-def _make_admin(user_id: int, role_name: str = "system_admin"):
-    """Assign admin role to a user directly via DB."""
+def _make_admin(user_id: int, role_name: str = "system_admin", scope_id: str | None = None):
+    """Assign admin role to a user directly via DB.
+
+    system_admin is platform-scoped (scope_id=None). org_admin/org_owner MUST be
+    scoped to a concrete org (scope_id=org.id) to match production; an org_admin
+    with scope_id=None manages no org and is correctly denied under tenant scoping.
+    """
     db = TestingSessionLocal()
     role = db.query(Role).filter(Role.name == role_name).first()
     scope_type = "platform" if role_name == "system_admin" else "organization"
@@ -168,7 +184,7 @@ def _make_admin(user_id: int, role_name: str = "system_admin"):
         user_id=user_id,
         role_id=role.id,
         scope_type=scope_type,
-        scope_id=None,
+        scope_id=scope_id,
     )
     db.add(user_role)
     db.commit()
@@ -176,17 +192,29 @@ def _make_admin(user_id: int, role_name: str = "system_admin"):
 
 
 def _assign_school_role(user_id: int, school_id: int, role_name: str = "teacher"):
-    """Assign a school-scoped role to a user directly via DB."""
+    """Assign a school-scoped role to a user directly via DB (idempotent)."""
     db = TestingSessionLocal()
     role = db.query(Role).filter(Role.name == role_name).first()
-    user_role = UserRole(
-        user_id=user_id,
-        role_id=role.id,
-        scope_type="school",
-        scope_id=str(school_id),
+    existing = (
+        db.query(UserRole)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.role_id == role.id,
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+        )
+        .first()
     )
-    db.add(user_role)
-    db.commit()
+    if existing is None:
+        db.add(
+            UserRole(
+                user_id=user_id,
+                role_id=role.id,
+                scope_type="school",
+                scope_id=str(school_id),
+            )
+        )
+        db.commit()
     db.close()
 
 
@@ -200,13 +228,18 @@ def admin_user(client):
 @pytest.fixture(scope="module")
 def org_admin_user(client):
     user = _register_user(client, "org_admin")
-    _make_admin(user["user_id"], "org_admin")
+    # Scope org_admin to the test org (which owns the test school), matching prod.
+    _make_admin(user["user_id"], "org_admin", scope_id=_test_org_id)
     return user
 
 
 @pytest.fixture(scope="module")
 def teacher(client):
-    return _register_user(client, "teacher")
+    user = _register_user(client, "teacher")
+    # Make the teacher a member of the test school so they can create classrooms
+    # there (#2470 NEW-2: create requires school membership / org-admin / sysadmin).
+    _assign_school_role(user["user_id"], _test_school_id, "teacher")
+    return user
 
 
 @pytest.fixture(scope="module")

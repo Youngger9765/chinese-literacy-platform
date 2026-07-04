@@ -39,10 +39,6 @@ spotlight:
     - 白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。
     - 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
     answer: 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
-  - type: figure
-    referent: table
-    asset: table1.json
-    bind_paragraph: 練習二：第二段 vs 表一
   - type: guide
     text: 練習二：第二段 vs 表一
   - type: guide
@@ -115,10 +111,6 @@ spotlight:
     - 是否怕人、是否利用人造設施築巢、適應都市環境強弱
     - 嘴喙顏色、尾羽顏色、冠羽是否明顯
     answer: 是否怕人、是否利用人造設施築巢、適應都市環境強弱
-  - type: figure
-    referent: table
-    asset: table2.json
-    bind_paragraph: 練習三：第三段 vs 表二
   - type: guide
     text: 練習三：第三段 vs 表二
   - type: guide
@@ -195,10 +187,6 @@ spotlight:
     text: ①表二讓我們知道哪一種八哥變多、哪一種變少；表一幫助我們思考為什麼會這樣。
   - type: guide
     text: □②表二幫助我們思考為什麼會這樣；表一讓我們知道哪一種八哥變多、哪一種變少。
-  - type: figure
-    referent: table
-    asset: table1.json
-    bind_paragraph: 練習四：第四段 vs 表一、二
   - type: guide
     text: 練習四：第四段 vs 表一、二
   - type: guide
