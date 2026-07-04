@@ -117,11 +117,37 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "frame-ancestors 'none';"
     )
 
+    # Issue #2486 (part 2): widening frame-src above on the *parent* page is
+    # necessary but not sufficient. This middleware used to stamp EVERY
+    # response — including the PDF/image bytes served by
+    # app/routes/assets.py — with `X-Frame-Options: DENY` and
+    # `frame-ancestors 'none'`. Those headers govern whether the resource
+    # ITSELF may be framed by anyone, which unconditionally blocked our own
+    # worksheet PDF iframe from framing it (DENY has no same-origin
+    # exception, and 'none' means literally no one). Confirmed via
+    # real-browser QA: after fixing frame-src alone, the iframe's network
+    # request succeeded (200 application/pdf, no console error) but the
+    # modal stayed visually blank — curl against the same URL showed
+    # `x-frame-options: DENY` / `frame-ancestors 'none'` on the PDF response
+    # itself. This didn't matter pre-#2488 because storage.googleapis.com
+    # (which never sends X-Frame-Options) served these files directly.
+    #
+    # Fix: for `/assets/*` responses only, omit X-Frame-Options (it can't
+    # express "self OR this other specific origin" — only CSP frame-ancestors
+    # can) and relax frame-ancestors to the same origins frame-src above
+    # trusts. Every other route (HTML pages, JSON APIs) keeps the strict
+    # DENY / 'none' anti-clickjacking posture unchanged.
+    ASSET_FRAME_ANCESTORS_CSP = "frame-ancestors 'self' https://*.run.app;"
+
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        response.headers["Content-Security-Policy"] = self.CSP
+        is_asset_response = request.url.path.startswith("/assets/")
+        response.headers["Content-Security-Policy"] = (
+            self.ASSET_FRAME_ANCESTORS_CSP if is_asset_response else self.CSP
+        )
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        if not is_asset_response:
+            response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Strict-Transport-Security"] = (
