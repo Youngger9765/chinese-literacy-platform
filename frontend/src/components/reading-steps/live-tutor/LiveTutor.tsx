@@ -705,6 +705,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               utteranceRef={utteranceRef}
               ttsRafRef={ttsRafRef}
               streamingUserInput={evalState.streamingUserInput}
+              spokenTranscript={savedLineResult?.transcript ?? ''}
               lastDiffTokens={displayLastDiffTokens}
               isAwaitingGemini={evalState.isAwaitingGemini}
               retryCount={evalState.retryCount}
