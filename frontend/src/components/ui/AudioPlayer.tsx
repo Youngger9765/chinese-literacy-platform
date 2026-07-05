@@ -34,14 +34,28 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, className = '', 'aria-la
   const [currentTime, setCurrentTime] = useState(0);
   // Guards the one-shot WebM duration-fix so it doesn't loop.
   const durationFixDoneRef = useRef(false);
+  // Holds the pending duration-fix 'timeupdate' listener so it can be removed on
+  // src change / unmount (review #2513): otherwise a stale listener left on the
+  // reused <audio> node could reset a new recording's currentTime to 0.
+  const fixListenerRef = useRef<(() => void) | null>(null);
 
-  // Reset when the source changes.
+  const removeFixListener = useCallback(() => {
+    const el = audioRef.current;
+    if (el && fixListenerRef.current) {
+      el.removeEventListener('timeupdate', fixListenerRef.current);
+    }
+    fixListenerRef.current = null;
+  }, []);
+
+  // Reset when the source changes; also drop any pending duration-fix listener
+  // (and on unmount) so it never fires against a different recording.
   useEffect(() => {
     durationFixDoneRef.current = false;
     setIsPlaying(false);
     setDuration(0);
     setCurrentTime(0);
-  }, [src]);
+    return removeFixListener;
+  }, [src, removeFixListener]);
 
   const handleLoadedMetadata = useCallback(() => {
     const el = audioRef.current;
@@ -52,16 +66,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, className = '', 'aria-la
       if (durationFixDoneRef.current) return;
       durationFixDoneRef.current = true;
       const onFixTimeUpdate = () => {
-        el.removeEventListener('timeupdate', onFixTimeUpdate);
+        removeFixListener();
         el.currentTime = 0;
         setDuration(Number.isFinite(el.duration) ? el.duration : 0);
       };
+      fixListenerRef.current = onFixTimeUpdate;
       el.addEventListener('timeupdate', onFixTimeUpdate);
       el.currentTime = 1e101;
     } else {
       setDuration(el.duration);
     }
-  }, []);
+  }, [removeFixListener]);
 
   const togglePlay = useCallback(() => {
     const el = audioRef.current;
@@ -83,12 +98,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, className = '', 'aria-la
   }, []);
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-3 ${className}`} role="group" aria-label={ariaLabel}>
       <audio
         ref={audioRef}
         src={src}
         preload="metadata"
-        aria-label={ariaLabel}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={() => {
           const el = audioRef.current;
