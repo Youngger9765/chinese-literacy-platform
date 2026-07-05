@@ -40,6 +40,8 @@ interface ParagraphCardProps {
   ttsRafRef: React.MutableRefObject<number | null>;
   // Evaluation state
   streamingUserInput: string;
+  /** Issue #2500 — student's verbatim STT transcript for this paragraph (對照左欄顯示). */
+  spokenTranscript?: string;
   lastDiffTokens: import('../../../types').DiffToken[] | null;
   isAwaitingGemini: boolean;
   retryCount: number;
@@ -81,6 +83,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   speakingProgress,
   utteranceRef,
   ttsRafRef,
+  spokenTranscript,
   lastDiffTokens,
   isAwaitingGemini,
   retryCount,
@@ -254,11 +257,13 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           </div>
           {/* 左右並陳 (md+) / 上下排 (sm) */}
           <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-on-surface/8">
-            {/* 左欄：課文原文 */}
+            {/* 左欄：學生實際唸的內容（Issue #2500 — 逐字 STT transcript，取代課文原文）*/}
             <div className="flex-1 p-4">
-              <p className="text-xs font-bold text-on-surface-variant mb-2">課文原文</p>
+              <p className="text-xs font-bold text-on-surface-variant mb-2">你唸的內容</p>
               <p className="text-base leading-relaxed text-on-surface/90">
-                {line}
+                {spokenTranscript && spokenTranscript.trim()
+                  ? spokenTranscript
+                  : <span className="text-on-surface-variant/50">（未擷取到逐字內容）</span>}
               </p>
             </div>
             {/* 右欄：朗讀轉譯（色碼）*/}
