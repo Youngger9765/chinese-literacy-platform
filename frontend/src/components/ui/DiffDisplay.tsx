@@ -78,9 +78,22 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({
                 </span>
               );
             case 'correct':
-            case 'forgiven':
               return (
                 <span key={idx} className="text-gray-900 inline-flex flex-col items-center">
+                  <CharWithZhuyin char={token.char} zhuyin={token.zhuyin} />
+                </span>
+              );
+            case 'forgiven':
+              // Issue #2498: render 通融 with the sky style its legend already advertises
+              // (previously it looked identical to 正確, so the legend entry was invisible).
+              return (
+                <span
+                  key={idx}
+                  className="bg-sky-100 text-sky-700 border-b-2 border-dashed border-sky-500 rounded-sm px-0.5 mx-px cursor-help inline-flex flex-col items-center"
+                  title={token.expected && token.expected !== token.char ? `課文是「${token.expected}」，讀音相近予以通融` : '讀音相近，予以通融'}
+                  aria-label={`通融：讀成「${token.char}」，讀音相近予以算對`}
+                  role="mark"
+                >
                   <CharWithZhuyin char={token.char} zhuyin={token.zhuyin} />
                 </span>
               );

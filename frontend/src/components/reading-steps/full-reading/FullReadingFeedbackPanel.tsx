@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { DiffToken } from '../../../types';
 import { interleavePunctuation } from '../../../utils/textDiff';
+import { ReadingDiffLegend, renderDiffTokenSpans } from '../readingDiffStyle';
 
 export interface FullReadingFeedbackPanelProps {
   /** Token array from reading evaluation. undefined or empty → renders nothing. */
@@ -16,23 +17,6 @@ export interface FullReadingFeedbackPanelProps {
   targetText: string;
   /** Lesson paragraphs — when provided and join to targetText, split 朗讀結果 by paragraph. */
   paragraphs?: string[];
-}
-
-function diffTokenClassName(type: DiffToken['type']): string {
-  return type === 'punctuation' ? 'text-on-surface' :
-    type === 'correct' ? 'text-emerald-600 font-medium' :
-    type === 'forgiven' ? 'text-blue-500' :
-    type === 'wrong' ? 'text-tertiary line-through' :
-    type === 'missing' || type === 'unread' ? 'text-on-surface-variant/30' :
-    'text-on-surface';
-}
-
-function renderDiffTokenSpans(tokens: DiffToken[], keyPrefix: string) {
-  return tokens.map((t, i) => (
-    <span key={`${keyPrefix}-${i}`} className={diffTokenClassName(t.type)}>
-      {t.char}
-    </span>
-  ));
 }
 
 const FullReadingFeedbackPanel: React.FC<FullReadingFeedbackPanelProps> = ({
@@ -69,6 +53,10 @@ const FullReadingFeedbackPanel: React.FC<FullReadingFeedbackPanelProps> = ({
       <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
         朗讀結果
       </p>
+      {/* Issue #2498：補上色碼圖例（含藍色「通融」），與逐段朗讀一致 */}
+      <div className="mb-4 pb-3 border-b border-on-surface/5">
+        <ReadingDiffLegend title={null} />
+      </div>
       <div className="space-y-4">
         {paragraphTokenGroups.map(({ idx, tokens }) => (
           <p key={idx} className="text-lg leading-relaxed indent-[2em]">
