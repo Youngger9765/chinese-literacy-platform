@@ -40,7 +40,11 @@ const _lsLesson =
     ? window.localStorage?.getItem('flag_LESSON_RENDERER_V1')
     : null;
 export const LESSON_RENDERER_V1: boolean =
-  _lsLesson != null ? _lsLesson === 'true' : _rawLesson === 'true'; // default false
+  _lsLesson != null
+    ? _lsLesson === 'true'
+    : _rawLesson != null
+      ? _rawLesson === 'true'
+      : true; // default ON (go-live); localStorage / VITE_LESSON_RENDERER_V1 override
 
 // FILLBLANK_OPTION_MODE: how answer options are presented (#7 教授「選項呈現兩案」).
 //   'all'      → show every bank word; used ones grey out (current default)

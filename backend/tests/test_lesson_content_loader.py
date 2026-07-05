@@ -47,8 +47,9 @@ FLAG = "LESSON_RENDERER_V1"
 
 @pytest.fixture(autouse=True)
 def _clean(monkeypatch):
-    """Each test starts flag-OFF with cleared caches; restore after."""
-    monkeypatch.delenv(FLAG, raising=False)
+    """Each test starts flag-OFF (set explicitly, since the code default is now ON) with
+    cleared caches; restore after."""
+    monkeypatch.setenv(FLAG, "false")
     L._reset_caches_for_test()
     yield
     L._reset_caches_for_test()
@@ -74,7 +75,7 @@ def _flag_on(monkeypatch):
 
 def test_flag_off_returns_none():
     story = _first_spotlight_story()
-    # flag not set (autouse fixture cleared it)
+    # flag explicitly OFF (autouse fixture set it to "false")
     assert L.get_lesson_content(story) is None
 
 
@@ -84,6 +85,14 @@ def test_flag_off_case_insensitive_and_non_true_values(monkeypatch):
         monkeypatch.setenv(FLAG, val)
         L._reset_caches_for_test()
         assert L.get_lesson_content(story) is None, f"{val!r} must NOT enable supply"
+
+
+def test_flag_default_on_when_unset(monkeypatch):
+    # Code default is now ON: an UNSET flag must ENABLE supply (go-live default).
+    story = _first_spotlight_story()
+    monkeypatch.delenv(FLAG, raising=False)
+    L._reset_caches_for_test()
+    assert L.get_lesson_content(story) is not None
 
 
 # ─── 2. no source → None ────────────────────────────────────────────────────────

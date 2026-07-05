@@ -175,9 +175,10 @@ def _try_ai_lesson(story: dict) -> Optional[dict]:
 
 
 def _flag_on() -> bool:
-    """Backend LESSON_RENDERER_V1 flag. Default OFF (DARK). Read live so tests can
-    monkeypatch ``os.environ`` per-case without a module reload."""
-    return os.getenv("LESSON_RENDERER_V1", "").strip().lower() == "true"
+    """Backend LESSON_RENDERER_V1 flag. Default ON (unset → enabled); set the env to a
+    non-"true" value (e.g. "false") to force OFF. Read live so tests can monkeypatch
+    ``os.environ`` per-case without a module reload."""
+    return os.getenv("LESSON_RENDERER_V1", "true").strip().lower() == "true"
 
 
 # Module-level singleton for the imported adapter (import once, reuse).
