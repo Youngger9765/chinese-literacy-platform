@@ -67,19 +67,35 @@ const BlockRenderer: React.FC<Props> = ({
       return <TableBlockView block={block as TableBlock} />;
     case 'parallel_passage':
       return <ParallelPassageBlockView block={block as ParallelPassageBlock} />;
-    case 'exercise':
+    case 'exercise': {
+      // #2505 review #5 — loader sets needsReview=true when the spotlight's declared
+      // identity mismatches the display lesson's authoritative _parsed twin (the
+      // 「內容放錯課」guard). `custom` carries its own 需人工檢核 affordance inside
+      // CustomExerciseView; for the machine-graded kinds surface a visible per-exercise
+      // badge so a flagged question isn't rendered/graded as if it were trustworthy
+      // (the aggregate "有 N 題需老師人工檢核" banner alone was easy to miss).
+      const flagForReview = block.needsReview === true && block.question.kind !== 'custom';
       return (
-        <ExerciseBlockView
-          exercise={block}
-          lessonCode={lessonCode}
-          storyTitle={storyTitle}
-          passage={passage}
-          value={answerValue}
-          onValueChange={(v) => onAnswerChange?.(v)}
-          onGraded={(r) => onGraded?.(r)}
-          verdict={verdict}
-        />
+        <>
+          {flagForReview && (
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
+              <span className="material-symbols-outlined text-base leading-none">flag</span>
+              需老師人工檢核：此題內容可能與本課不符
+            </div>
+          )}
+          <ExerciseBlockView
+            exercise={block}
+            lessonCode={lessonCode}
+            storyTitle={storyTitle}
+            passage={passage}
+            value={answerValue}
+            onValueChange={(v) => onAnswerChange?.(v)}
+            onGraded={(r) => onGraded?.(r)}
+            verdict={verdict}
+          />
+        </>
       );
+    }
     default:
       return null;
   }

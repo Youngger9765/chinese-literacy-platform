@@ -27,13 +27,12 @@ export const FILLBLANK_SHOW_ABCD: boolean =
   _lsAbcd != null ? _lsAbcd === 'true' : _rawAbcd === 'true';
 
 // LESSON_RENDERER_V1: Phase-2 unified block-based lesson renderer (閱讀聚光燈 refactor).
-// Default false → existing layouts (ComprehensionLayout / BlockSequenceRenderer /
-// StrategyExercise) are 100% unchanged. When true, StrategyExercisePage /
-// ComprehensionMcqPage try the new LessonRenderer (via storyToLesson) and fall back to
-// the legacy path if the adapter can't produce a valid Lesson. Final default-flip is a
-// manual visual-QA decision, out of scope for this round.
-// Toggle: VITE_LESSON_RENDERER_V1=true at build time, or per-browser at runtime via
-// localStorage key "flag_LESSON_RENDERER_V1" = "true" | "false".
+// Default ON (go-live). StrategyExercisePage / ComprehensionMcqPage render the new
+// LessonRenderer (via storyToLesson) and fall back to the legacy path
+// (ComprehensionLayout / BlockSequenceRenderer / StrategyExercise) whenever the adapter
+// can't produce a valid Lesson — so a bad lesson degrades to legacy, never white-screens.
+// To force the legacy path: VITE_LESSON_RENDERER_V1=false at build time, or per-browser
+// at runtime via localStorage key "flag_LESSON_RENDERER_V1" = "true" | "false".
 const _rawLesson = import.meta.env.VITE_LESSON_RENDERER_V1 as string | undefined;
 const _lsLesson =
   typeof window !== 'undefined'

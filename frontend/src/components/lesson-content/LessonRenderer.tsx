@@ -115,6 +115,14 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   const meta = useMemo(() => buildBlockMeta(lesson.blocks), [lesson.blocks]);
 
   // Aggregate state keyed by block.id.
+  // KNOWN LIMITATION (#2505 review #6): `initialState.answers` is the block-id-keyed shape
+  // this renderer writes. The legacy renderers (ComprehensionLayout / BlockSequenceRenderer)
+  // never wrote that shape, so a student who is mid-flight (progress saved, not yet complete)
+  // at the moment LESSON_RENDERER_V1 flips ON starts from {} rather than crashing — in-flight,
+  // not-yet-complete progress is lost on the flip. Acceptable for a one-time go-live flip
+  // (already saved-complete results rehydrate fine via the DB); covered explicitly in the
+  // staging QA pass. A legacy→block-id state migration would be the real fix if we ever
+  // toggle the flag repeatedly for live cohorts.
   const [answers, setAnswers] = useState<Record<string, unknown>>(
     () => (initialState?.answers as Record<string, unknown>) ?? {},
   );

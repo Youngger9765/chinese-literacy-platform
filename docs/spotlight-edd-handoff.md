@@ -1,7 +1,7 @@
 # 閱讀聚光燈重構 — EDD Foundation 交接文件
 
 > 分支:`feature/spotlight-edd-foundation`(從 `origin/staging` 開)
-> 狀態:**30 個 local commit,全綠,未 push、未上 staging、flag 預設 OFF(dark)**
+> 狀態(2026-07-05 更新):**flag `LESSON_RENDERER_V1` 預設 ON(go-live,壞則 fail-closed 退回 legacy);已 push、已與 staging 對齊(conflict 已解);EDD 護欄全綠(backend 183 / frontend 102 tests)。** 要強制走舊版:`VITE_LESSON_RENDERER_V1=false` 或 localStorage `flag_LESSON_RENDERER_V1=false`
 > 目的:把「一般/圖文兩套 layout + 逐課手工客製」收斂成「一份 typed 契約 + 一個通用渲染器 + EDD 護欄」,並把團隊 #2205 的確定性擷取產物橋接進來。
 
 ---

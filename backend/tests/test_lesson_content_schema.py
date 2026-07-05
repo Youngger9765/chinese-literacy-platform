@@ -762,3 +762,53 @@ def test_golden_snapshot(path: Path) -> None:
     lesson = load_lesson(path)
     ok, msg = check_golden(path, lesson)
     assert ok, msg
+
+
+# ── (6) REAL served content (_ai_lessons) — CI regression lock (#2505 review #2) ──
+# backend/data/lessons/_ai_lessons/*.lesson.yml is what students are actually served.
+# Before this it had NO pytest wiring — only a manual `eval_lesson_content.py --check-golden`
+# run — so a schema change or a YAML edit could silently drift the served content with a
+# green test suite. These parametrized tests lock the served lessons the same way the
+# hand fixtures above are locked (validate + answer round-trip + golden snapshot).
+AI_LESSONS_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_ai_lessons"
+AI_GOLDEN_DIR = _REPO_ROOT / "backend" / "tests" / "fixtures" / "lesson_content_ai" / "_golden"
+AI_LESSONS = sorted(AI_LESSONS_DIR.glob("*.lesson.yml"))
+AI_LESSON_IDS = [p.stem for p in AI_LESSONS]
+
+
+def test_ai_lessons_exist() -> None:
+    assert len(AI_LESSONS) >= 1, (
+        f"no AI-extracted served lessons found in {AI_LESSONS_DIR} — the served-content "
+        f"regression lock has nothing to guard"
+    )
+
+
+@pytest.mark.parametrize("path", AI_LESSONS, ids=AI_LESSON_IDS)
+def test_ai_lesson_validates(path: Path) -> None:
+    lesson = load_lesson(path)
+    assert isinstance(lesson, Lesson)
+    assert lesson.blocks, "lesson must have >= 1 block"
+
+
+@pytest.mark.parametrize("path", AI_LESSONS, ids=AI_LESSON_IDS)
+def test_ai_lesson_answer_round_trip(path: Path) -> None:
+    """Every machine-graded exercise in a served AI lesson must re-grade its own stored
+    answer (none may be 'fail' — that would ship a self-contradicting answer to students)."""
+    lesson = load_lesson(path)
+    for b in lesson.blocks:
+        if isinstance(b, ExerciseBlock):
+            assert answer_round_trip(b) != "fail", (
+                f"{path.name}: exercise '{b.id}' cannot re-grade its own answer"
+            )
+
+
+@pytest.mark.parametrize("path", AI_LESSONS, ids=AI_LESSON_IDS)
+def test_ai_lesson_golden_snapshot(path: Path) -> None:
+    """The served AI lessons must match their frozen golden under lesson_content_ai/_golden.
+    Intentional change → re-approve with:
+      python scripts/eval_lesson_content.py backend/data/lessons/_ai_lessons/<f>.lesson.yml \\
+        --freeze-golden --golden-dir backend/tests/fixtures/lesson_content_ai/_golden
+    """
+    lesson = load_lesson(path)
+    ok, msg = check_golden(path, lesson, golden_dir=AI_GOLDEN_DIR)
+    assert ok, msg
