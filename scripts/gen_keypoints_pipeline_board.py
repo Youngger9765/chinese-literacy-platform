@@ -33,6 +33,30 @@ MANIFEST = json.loads((ROOT / "backend/data/curriculum_qa/keypoints_manifest.jso
 BLANK_RE = re.compile(r"【[^】]*】")
 
 
+# Absolute backend /assets proxy base (#2486/#2495). Absolute — not relative
+# "/assets" — because these static QA boards are also opened on the Cloud Run
+# frontend origin, which has NO /assets rewrite (only Firebase Hosting does). The
+# backend proxy (app/routes/assets.py) reads the now-private lingoleap-assets
+# bucket with its own service-account credentials.
+ASSET_BASE = "https://lingoleap-backend-958347263320.asia-east1.run.app/assets"
+
+
+def _to_assets(u):
+    """Normalize a worksheet pdf/docx URL to the absolute backend /assets proxy.
+
+    Handles both legacy full-GCS URLs (storage.googleapis.com/lingoleap-assets/…,
+    which now 403 since the bucket is private) and already-relative "/assets/…"
+    URLs from the loader — both must become absolute so the board also works when
+    opened on the Cloud Run frontend origin (no /assets rewrite there). (#2486/#2495)
+    """
+    if not u:
+        return u
+    u = u.replace("https://storage.googleapis.com/lingoleap-assets/", "/assets/")
+    if u.startswith("/assets/"):
+        return ASSET_BASE + u[len("/assets"):]
+    return u
+
+
 def table_fingerprint(rows):
     """決定性指紋:當下從 story_structure_table 重算,不讀過時 manifest。
     row_count / n_blanks / n_sections + 內容 hash —— 同表同指紋。"""
@@ -83,7 +107,7 @@ def main():
             "code": code,
             "title": (l.get("title") or m.get("title") or "")[:26],
             "story_id": l.get("id") or m.get("story_id"),
-            "pdf": l.get("worksheet_pdf_url"), "docx": l.get("worksheet_docx_url"),
+            "pdf": _to_assets(l.get("worksheet_pdf_url")), "docx": _to_assets(l.get("worksheet_docx_url")),
             "tier": m.get("tier"),
             "has_kp_yml": arts.get("has_keypoints_yml"),
             "has_orig": arts.get("has_original_preview"),
@@ -146,7 +170,7 @@ def main():
 </tr></thead><tbody></tbody></table></div>
 <div class="gapbox" id="gaps"></div>
 <script>
-const GCS="https://storage.googleapis.com/lingoleap-assets/lessons-images";
+const GCS="__ASSET_BASE__/lessons-images";
 const DATA=__DATA__;
 function normCode(c){let m=c.match(/^(G\\d+)-L0*(\\d+)([a-z])?$/i);return m?m[1]+"-L"+m[2]+(m[3]||""):c;}
 function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
@@ -214,7 +238,7 @@ function filt(){const q=document.getElementById("q").value.toLowerCase();for(con
 document.getElementById("gaps").innerHTML="<b>誠實邊界(不假綠):</b> 結構維度(⑥)是當下從 story_structure_table 重算的決定性指紋(列數/填空數/content_hash),同表同指紋——這就是 keypoints ratchet 要鎖的東西。④ 版型欄另顯示 manifest 計法(API 轉換後 worksheet_rows),兩者基準不同<b>刻意不互比</b>(比了會造 54/140 假漂移)。gate 維度直連 keypoints_manifest L1/L3(148/148 pass)。<b>內容忠實度暫無 vision judge</b>(重點表是填空表非自由生成),靠 L3 結構+源比對把關——要抓「重點抄錯/年級不符」仍需人工抽樣 gold。8 課(G8-L3/6/9/12 等)重點表拆 a/b 分課,表格在分課課號。";
 </script>
 </body></html>"""
-    html = html.replace("__DATA__", data_json)
+    html = html.replace("__DATA__", data_json).replace("__ASSET_BASE__", ASSET_BASE)
     OUT.write_text(html, encoding="utf-8")
     print(f"wrote {OUT} ({len(lessons)} 課, with-table={n_with_table}, split-no-table={n_split_no_table}, "
           f"manifest pass={summary.get('pass')}/{summary.get('total')}, {OUT.stat().st_size // 1024}KB)")
