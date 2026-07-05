@@ -10,7 +10,7 @@
  * to keep this component focused on the summary score + playback.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { DiffToken } from '../../../types';
 
 const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
@@ -47,6 +47,35 @@ const FullReadingScoreCard: React.FC<FullReadingScoreCardProps> = ({
 }) => {
   const enc = getFullReadingEncouragement(result.matchRate);
 
+  // Issue #2501 — 你說的 transcript is collapsible (default 收合，避免佔版面).
+  // Show the 看全文/收合 toggle only when the text actually overflows the clamp.
+  const transcriptRef = useRef<HTMLParagraphElement>(null);
+  const [showFullTranscript, setShowFullTranscript] = useState(false);
+  const [isTranscriptClampable, setIsTranscriptClampable] = useState(false);
+
+  const measureClampable = useCallback(() => {
+    // Skip while expanded — clamp is removed so scrollHeight === clientHeight would
+    // wrongly read as "not clampable" and hide the button mid-expand.
+    if (showFullTranscript) return;
+    const el = transcriptRef.current;
+    if (el) setIsTranscriptClampable(el.scrollHeight > el.clientHeight + 1);
+  }, [showFullTranscript]);
+
+  useLayoutEffect(() => {
+    measureClampable();
+  }, [streamingTranscript, measureClampable]);
+
+  // Issue #2511 (review): re-measure on resize — a short transcript can start
+  // overflowing (or stop) when the container narrows/widens (e.g. tablet rotate),
+  // so the 看全文 button must appear/disappear accordingly.
+  useEffect(() => {
+    const el = transcriptRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => measureClampable());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measureClampable]);
+
   return (
     <>
       {/* Encouragement stars (Issues #1094, #1097 — no raw numbers shown to students) */}
@@ -69,11 +98,29 @@ const FullReadingScoreCard: React.FC<FullReadingScoreCardProps> = ({
         </p>
       </div>
 
-      {/* 你說的 transcript */}
+      {/* 你說的 transcript — Issue #2501: 完整內容可展開，預設收合 */}
       {streamingTranscript && (
         <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
           <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">你說的</p>
-          <p className="text-base text-on-surface leading-relaxed line-clamp-6">{streamingTranscript}</p>
+          <p
+            ref={transcriptRef}
+            className={`text-base text-on-surface leading-relaxed ${showFullTranscript ? '' : 'line-clamp-6'}`}
+          >
+            {streamingTranscript}
+          </p>
+          {(isTranscriptClampable || showFullTranscript) && (
+            <button
+              type="button"
+              onClick={() => setShowFullTranscript(v => !v)}
+              className="mt-2 inline-flex items-center gap-0.5 text-sm font-bold text-primary hover:underline"
+              aria-expanded={showFullTranscript}
+            >
+              {showFullTranscript ? '收合' : '看全文'}
+              <span className="material-symbols-outlined text-base">
+                {showFullTranscript ? 'expand_less' : 'expand_more'}
+              </span>
+            </button>
+          )}
         </div>
       )}
 
