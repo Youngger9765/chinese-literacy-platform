@@ -147,7 +147,7 @@ export async function saveReadingAudio(
   sessionId: number,
   attemptId?: number,
   token?: string,
-): Promise<{ ok: boolean; audio_gcs_path?: string }> {
+): Promise<{ ok: boolean; audio_gcs_path?: string; attempt_id?: number }> {
   if (!token) {
     console.warn('[saveReadingAudio] no token — skipping upload');
     return { ok: false };
@@ -172,6 +172,7 @@ export async function saveReadingAudio(
     return {
       ok: data?.ok === true,
       audio_gcs_path: typeof data?.audio_gcs_path === 'string' ? data.audio_gcs_path : undefined,
+      attempt_id: typeof data?.attempt_id === 'number' ? data.attempt_id : undefined,
     };
   } catch (err) {
     console.warn('[saveReadingAudio] error:', err);

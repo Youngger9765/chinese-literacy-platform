@@ -84,6 +84,9 @@ interface UseFullReadingSessionProps {
   dbSessionId?: number | null;
   stopTtsAll: () => void;
   onResultReady: (result: SavedResult, transcript: string) => void;
+  /** Issue #2503: fired when the accepted take's audio is persisted to GCS, so the
+   *  caller can remember the attempt id and replay the recording after remount. */
+  onAudioSaved?: (attemptId: number) => void;
 }
 
 interface UseFullReadingSessionReturn {
@@ -115,6 +118,7 @@ export function useFullReadingSession({
   dbSessionId,
   stopTtsAll,
   onResultReady,
+  onAudioSaved,
 }: UseFullReadingSessionProps): UseFullReadingSessionReturn {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -128,6 +132,11 @@ export function useFullReadingSession({
 
   const isSessionActiveRef = useRef(false);
   const startTimeRef       = useRef<number>(0);
+  // Issue #2503 (review): monotonic recording generation — bumped on each startSession.
+  // submitReading captures the current gen; the deferred saveReadingAudio callback only
+  // reports its attempt_id if the gen still matches, so a slow upload from a previous
+  // take can't overwrite a newer take's attempt id (張冠李戴 race).
+  const recordingGenRef = useRef(0);
 
   // Issue #2497: whole-article reading runs 2–4 min; the old 120 s cap truncated it.
   const audioRecorder = useAudioRecorder(FULL_READING_MAX_SECONDS);
@@ -159,6 +168,7 @@ export function useFullReadingSession({
     setMicError('');
 
     // Immediately activate — no Web Speech handshake needed.
+    recordingGenRef.current += 1; // Issue #2503: new take → invalidate prior upload callbacks
     startTimeRef.current = Date.now();
     isSessionActiveRef.current = true;
     setIsSessionActive(true);
@@ -184,6 +194,7 @@ export function useFullReadingSession({
     /* #1632 double-click guard: isSessionActiveRef is flipped synchronously. */
     if (!isSessionActiveRef.current) return;
     const durationMs = Date.now() - startTimeRef.current;
+    const submitGen = recordingGenRef.current; // Issue #2503: tie this take's async upload to its generation
     stopSession();
 
     /* P1#2: stop recorder FIRST (before any early-return) so the mic is always
@@ -236,6 +247,15 @@ export function useFullReadingSession({
       // Fail-safe: .catch() ensures upload failure never affects score display.
       if (token && dbSessionId != null) {
         saveReadingAudio(capturedAudioBlob, dbSessionId, undefined, token)
+          .then((res) => {
+            // Issue #2503: remember the attempt id so the recording can be replayed
+            // from GCS after the in-memory blob is gone (student navigates away/back).
+            // Ignore a stale callback from a superseded take (review): if the student
+            // re-recorded before this upload resolved, recordingGenRef has advanced.
+            if (res.ok && res.attempt_id != null && recordingGenRef.current === submitGen) {
+              onAudioSaved?.(res.attempt_id);
+            }
+          })
           .catch((err) => console.warn('[FullReading] saveReadingAudio error:', err));
       }
 
@@ -287,7 +307,7 @@ export function useFullReadingSession({
       // No token — cannot reach Gemini.
       setMicError('未偵測到語音，請重試。');
     }
-  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume]);
+  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, onAudioSaved, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume]);
 
   return {
     isSessionActive,
