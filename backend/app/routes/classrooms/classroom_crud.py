@@ -7,8 +7,9 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
+from ...auth.policies import is_system_admin, _is_org_admin_of_school, _org_admin_org_ids
 from ...database import get_db
-from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ...models.user import User
 from ...schemas.classroom import (
     ClassroomCreateRequest,
@@ -26,7 +27,6 @@ from .helpers import (
     classroom_to_response,
     generate_join_code,
     get_classroom_or_404,
-    is_admin,
     require_member_or_admin,
     require_owner_or_admin,
 )
@@ -52,9 +52,28 @@ def create_classroom(
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
 
+    # (#2470 NEW-2): caller must have standing in THIS school — system_admin (any),
+    # a member of the school (school-scoped role, incl. orphan/domain schools), or
+    # org_admin/org_owner of the school's org. Closes "any teacher creates in any
+    # school" (cross-school / cross-org create-pollution). The common attack sets
+    # teacher_id == self, so this must NOT live only in the delegation branch below.
+    caller_is_sysadmin = is_system_admin(current_user.id, db)
+    if not caller_is_sysadmin:
+        is_school_member = any(
+            ur.is_active and ur.scope_type == "school" and ur.scope_id == str(school.id)
+            for ur in current_user.user_roles
+        )
+        if not (is_school_member or _is_org_admin_of_school(current_user.id, school.id, db)):
+            raise HTTPException(
+                status_code=403,
+                detail="Not authorized to create a classroom in this school",
+            )
+
     effective_teacher_id = current_user.id
     if payload.teacher_id is not None and payload.teacher_id != current_user.id:
-        if not is_admin(current_user.id, db):
+        # Creating on behalf of another teacher requires admin authority over the
+        # school's org (system_admin, or org_admin/org_owner of the school's org).
+        if not (caller_is_sysadmin or _is_org_admin_of_school(current_user.id, school.id, db)):
             raise HTTPException(
                 status_code=403,
                 detail="Only admins can create classrooms for other teachers",
@@ -103,16 +122,26 @@ def list_my_classrooms(
 ):
     """List classrooms.
 
-    - system_admin / org_admin: returns ALL platform classrooms (platform-wide view).
-    - Regular teacher: returns only classrooms they own or co-teach.
+    - system_admin: ALL platform classrooms (platform-wide view).
+    - org_admin/org_owner: classrooms in schools of their org(s) only (#2470 MED-1d:
+      was is_admin → any org_admin saw the whole platform's classroom metadata).
+    - Regular teacher: only classrooms they own or co-teach.
 
     #1999: regular teachers also get dev/test classrooms (PM dogfood / Bulk驗證)
     filtered out — same regex as /api/teacher/classrooms (#1985). Admins still
-    see every classroom, including dev ones, for full platform visibility.
+    see dev ones for full visibility within their scope.
     """
-    caller_is_admin = is_admin(current_user.id, db)
-    if caller_is_admin:
+    caller_is_sysadmin = is_system_admin(current_user.id, db)
+    caller_org_ids = _org_admin_org_ids(current_user.id, db)
+    caller_is_admin = caller_is_sysadmin or bool(caller_org_ids)  # controls dev-classroom filter below
+    if caller_is_sysadmin:
         query = db.query(Classroom)
+    elif caller_org_ids:
+        query = (
+            db.query(Classroom)
+            .join(School, Classroom.school_id == School.id)
+            .filter(School.organization_id.in_(caller_org_ids))
+        )
     else:
         co_teacher_classroom_ids = (
             db.query(ClassroomTeacher.classroom_id)

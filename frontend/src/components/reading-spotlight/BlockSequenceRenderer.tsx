@@ -155,6 +155,10 @@ const BlockSequenceRenderer: React.FC<Props> = ({
 
   const renderFigure = (block: SpotlightBlock) => {
     if (block.type !== 'figure') return null;
+    // #2463: a figure referencing a table has no image and no inline table
+    // data, so it can only draw an empty 「圖表參考」 placeholder. Tables live in
+    // the 重點表 (keypoints) step — render nothing inline here.
+    if (block.referent === 'table') return null;
     const label = figureLabelFromBlock(block);
     const imgIdx = story?.images?.findIndex((i) => i.figure_label === label) ?? -1;
     const img = imgIdx >= 0 ? story?.images?.[imgIdx] : undefined;

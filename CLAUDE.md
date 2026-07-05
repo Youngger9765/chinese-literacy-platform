@@ -138,7 +138,7 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 ## QA / 測試登入（重要 — 不要再說「卡登入牆/要帳號」）
 
 **`/login` 頁面直接有一鍵登入按鈕（懶人登入），QA 完全不需要真帳號或密碼。**
-所有環境（staging / preview / prod）的 `/login` 都有三顆 demo 登入鈕：
+⚠️ 僅 **staging / preview** 有 demo 登入鈕（`VITE_SHOW_DEMO_LOGIN=true`）；**production 已停用**（`deploy.yml` 設 `VITE_SHOW_DEMO_LOGIN=false`，按鈕 tree-shake 掉，verified 2026-07-02）。所以 QA 用 **staging** 一鍵登入，別在 prod /login 找 demo 鈕：
 
 | 按鈕 | 角色 | 用途 |
 |------|------|------|
@@ -295,7 +295,8 @@ private/omo-real-samples/2026-05-18-batch-results/
 | `backend/app/services/dictionary_service.py` | 字典查詢服務 |
 | `backend/app/services/input_sanitizer.py` | 輸入消毒 |
 | `backend/app/routes/` | API 路由（140+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents, dictionary, feedback, jobs, privacy） |
-| `backend/data/lessons/` | 課文 YAML 來源檔（57 篇） |
+| `backend/data/curriculum/` | 現行課程 SOT（**158 課** + `manifest.yml` 158 entries，verified 2026-07-02） |
+| `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊；現行看 `data/curriculum/`） |
 
 ## 簡報資料（公開，不需登入）
 
@@ -308,3 +309,8 @@ private/omo-real-samples/2026-05-18-batch-results/
 ## 參考專案
 
 方大哥的原始實作：`github.com/Shinjou/lingoleap-ai-reading-tutor`（唯讀參考，不修改）
+
+## 架構地圖（graphify）
+
+`graphify-out/graph.json`（gitignored，本地）— 問「架構/誰呼叫誰/改這會動到誰/資料流」時**優先讀圖**（`/graphify query "..."` 或直接讀 JSON），不要冷 grep 全 repo
+code 大改後重建：`graphify . --update`｜批次腳本：job repo `scripts/build-repo-graphs.sh`

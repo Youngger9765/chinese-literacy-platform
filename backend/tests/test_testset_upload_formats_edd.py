@@ -20,8 +20,8 @@ inefficiency (natively-supported wav/mp3 get an unnecessary transcode), NOT a
 correctness bug. This test catches a regression if a future change to the
 wrong-mime path breaks these formats (e.g. switching ffmpeg to a hard `-f` flag).
 
-ffmpeg required — skips if absent (CI currently installs no ffmpeg; runs locally
-and in any prod-like image where the silence gate already depends on ffmpeg).
+ffmpeg required — the CI pytest job installs ffmpeg (#2440), so this runs in CI;
+skips only where ffmpeg is genuinely absent (e.g. a minimal local shell).
 
 Run: cd backend && python -m pytest tests/test_testset_upload_formats_edd.py -v
 """

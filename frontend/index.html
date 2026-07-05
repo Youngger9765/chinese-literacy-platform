@@ -6,7 +6,14 @@
     <!-- Content-Security-Policy: browser-level fallback.
          The primary CSP is set by SecurityHeadersMiddleware in backend/app/main.py.
          This meta tag covers direct frontend hosting (Firebase Hosting / CDN). -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' http://localhost:* ws://localhost:* https://*.run.app https://*.googleapis.com https://*.firebaseapp.com https://*.cloudfunctions.net https://us-central1-aiplatform.googleapis.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://storage.googleapis.com https://www.youtube.com https://www.youtube-nocookie.com;" />
+    <!-- #2486: frame-src no longer needs storage.googleapis.com — the worksheet
+         PDF iframe now loads through our own /assets/* proxy. That proxy is
+         same-origin on the Firebase Hosting build, but on the Cloud-Run-direct
+         frontend (staging/prod/PR previews) ASSET_BASE resolves to the
+         backend's own Cloud Run origin — a different host — so the iframe is
+         genuinely cross-origin there. https://*.run.app (same wildcard as
+         connect-src) covers that without hardcoding per-environment URLs. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' http://localhost:* ws://localhost:* https://*.run.app https://*.googleapis.com https://*.firebaseapp.com https://*.cloudfunctions.net https://us-central1-aiplatform.googleapis.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://*.run.app https://www.youtube.com https://www.youtube-nocookie.com;" />
     <!-- Note: frame-ancestors is intentionally omitted from this meta tag.
          Per CSP spec, frame-ancestors is a navigation directive and is ignored
          when delivered via <meta> elements (causes browser console warnings).

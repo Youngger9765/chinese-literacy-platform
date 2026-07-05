@@ -2,6 +2,48 @@
   "version": "2026-06-23.issue-2397.rebind.v1",
   "notes": "Title-anchored recovery mapping for rescued spotlight/story-structure content",
   "spotlight": {
+    "G8-L3a": {
+      "source_code": "G8-L3",
+      "title_anchor": "集中營裡的一門課",
+      "required_keywords": [
+        "集中營",
+        "態度"
+      ],
+      "reason": "Multi-text sibling; structure→主旨 spotlight of the Frankl text lives in base G8-L3 (#2461, content-verified)"
+    },
+    "G8-L6a": {
+      "source_code": "G8-L7",
+      "title_anchor": "讓你口中的甜蜜",
+      "required_keywords": [
+        "可可",
+        "農民"
+      ],
+      "reason": "Multi-text sibling; cocoa/farmer 因果推論 spotlight lives in G8-L7 (#2461, content-verified)"
+    },
+    "G8-L9b": {
+      "source_code": "G8-L12",
+      "title_anchor": "語言的足跡",
+      "required_keywords": [
+        "語言的足跡"
+      ],
+      "reason": "Multi-text sibling; 從例子推論作者觀點 spotlight (names 語言的足跡) lives in G8-L12 (#2461, content-verified)"
+    },
+    "G8-L12a": {
+      "source_code": "G8-L15",
+      "title_anchor": "球場上的另類指揮家",
+      "required_keywords": [
+        "啦啦隊"
+      ],
+      "reason": "Multi-text sibling; 啦啦隊 論點推論 spotlight lives in G8-L15 (#2461, content-verified)"
+    },
+    "G8-L12b": {
+      "source_code": "G8-L16",
+      "title_anchor": "我的阿嬤",
+      "required_keywords": [
+        "阿嬤"
+      ],
+      "reason": "Multi-text sibling; 阿嬤 角色關係推論 spotlight lives in G8-L16 (#2461, content-verified)"
+    },
     "G7-L31": {
       "source_code": "G7-L23",
       "title_anchor": "最後一隻旅人鴿",

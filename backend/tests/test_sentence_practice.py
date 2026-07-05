@@ -437,6 +437,35 @@ class TestValidateSentence:
             )
         assert res.status_code == 503
 
+    def test_validate_defaults_incorrect_when_ai_omits_is_correct(self, client: TestClient):
+        """Regression: a malformed-but-successful AI response missing 'is_correct'
+        must NOT auto-pass the student.
+
+        Platform invariant (see AI service memory): on ambiguous grader output,
+        fail closed (is_correct=False). Defaulting a missing verdict to True marks
+        any sentence correct whenever Gemini drops the field — a silent auto-pass.
+        """
+        token = _create_student_and_login(client)
+        # Valid JSON, but the grader omitted the is_correct verdict field.
+        mock_result = {"feedback": "嗯，再想想看", "suggestion": "換個說法試試"}
+        with patch(
+            "app.routes.learning.learning_vocab.validate_student_sentence",
+            new=AsyncMock(return_value=mock_result),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "word": "來源",
+                    "student_sentence": "老師講述這個故事的來源。",
+                    "story_title": "課文",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert res.status_code == 200
+        assert res.json()["is_correct"] is False, (
+            "AI response missing 'is_correct' must default to False (never auto-pass)"
+        )
+
 
 # ---------------------------------------------------------------------------
 # Tests: copy-paste detection (#928)
@@ -467,7 +496,7 @@ class TestCopyPasteDetection:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
+                    "word": "水",
                     "student_sentence": "小水滴從天上掉下來",
                     "story_title": "小水滴的旅行",
                 },
@@ -491,7 +520,7 @@ class TestCopyPasteDetection:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "溪",
+                    "word": "溪",
                     "student_sentence": "流進了小溪",
                     "story_title": "小水滴的旅行",
                 },
@@ -514,7 +543,7 @@ class TestCopyPasteDetection:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
+                    "word": "水",
                     "student_sentence": "我每天都會喝水來保持健康。",
                     "story_title": "小水滴的旅行",
                 },
@@ -536,7 +565,7 @@ class TestCopyPasteDetection:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
+                    "word": "水",
                     "student_sentence": "小水滴從天上掉下來",
                     "story_title": "不存在的課文",
                 },
@@ -558,7 +587,7 @@ class TestCopyPasteDetection:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
+                    "word": "水",
                     "student_sentence": "我喜歡在夏天喝冰水。",
                     "story_title": "小水滴的旅行",
                 },

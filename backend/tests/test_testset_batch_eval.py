@@ -29,7 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role, User
+from app.models.user import Role, User, UserRole
 from app.auth.dependencies import get_current_user
 from app.auth.rate_limiter import ai_rate_limiter, general_rate_limiter
 
@@ -134,6 +134,18 @@ def setup_db():
     db.commit()
     student_role = db.query(Role).filter(Role.name == "student").first()
     _fake_user.role_id = student_role.id if student_role else None
+    # batch-eval now requires teacher/org_admin/system_admin (#2470 MED-2); persist the
+    # fake evaluator + grant a teacher role so require_role passes (it queries UserRole,
+    # and the UserRole FK needs a real users row).
+    if not db.query(User).filter(User.id == _fake_user.id).first():
+        db.add(User(id=_fake_user.id, username="test_evaluator", name="Test Evaluator",
+                    email="eval@example.com", password_hash="fake"))
+        db.commit()
+    teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+    if teacher_role and not db.query(UserRole).filter(UserRole.user_id == _fake_user.id).first():
+        db.add(UserRole(user_id=_fake_user.id, role_id=teacher_role.id,
+                        scope_type="school", scope_id="1", is_active=True))
+        db.commit()
     db.close()
     yield
     Base.metadata.drop_all(bind=engine)

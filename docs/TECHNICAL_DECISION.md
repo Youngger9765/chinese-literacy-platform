@@ -484,3 +484,66 @@ Vertex AI (Gemini)：$50-100/月（蘇格拉底對話）
 **維護者**：Young Tsai
 
 **核心理念**：站在巨人肩膀上，用「拿來主義」快速建置並上線，讓兩位高中生在有經驗引導下專注於核心價值開發。
+
+---
+
+## 🔐 ADR：GCS 資產服務架構（2026-07-05，issue #2486）
+
+**狀態**：已決定並上線（維持現況 private + proxy）
+
+### 決策
+- **公開教材**（課程圖 / 縮圖 / 學習單 PDF·DOCX，即 `lessons-images/`、`stories/`、`worksheets/`）：GCS bucket **收 private**，經**同源 `/assets/*` Cloud Run backend proxy**（whitelist 只服務這 3 個 prefix）對外服務。前端用相對 `/assets/...`（Firebase Hosting rewrite / Cloud Run 直連經 resolver 補 backend 絕對 URL）。
+- **使用者個資**（`omo-uploads*` 學生手寫上傳、`reading-audio*` 學生朗讀錄音）：維持 **private + signed URL（IAM SignBlob）**，永不公開。
+- **backend runtime SA**（`958347263320-compute@`）需明確 `roles/storage.objectViewer` 才能讀 private bucket（收 private 前必先授，否則 proxy 全 404）。
+
+### 為何選 private+proxy（決策理由）
+比較過 4 種做法（全 public / public get-only / **private+proxy** / private+signed URL），選 private+proxy，因為它同時滿足「完整資安 + 不太複雜 + 成本可忽略」：
+
+1. **混合 bucket 的正確隔離**（最關鍵）：`lingoleap-assets` 混了公開教材 + 內部 QA 截圖（`pr-screenshots/`、`qa/`，可能含學生畫面）。proxy 的 **3-prefix 白名單**（只服務 `lessons-images/`、`stories/`、`worksheets/`）是唯一能「只放公開教材、擋掉 QA 產物」的乾淨做法。bucket-level IAM 無法只對部分 prefix 開放（除非 IAM condition，複雜脆弱），所以「public + 只開部分」做不乾淨。
+2. **關掉枚舉**：匿名無法 `gsutil ls` 整套課程庫（public bucket 的 allUsers objectViewer 含 list）。
+3. **關掉無上限直連 egress**：流量走我們自己 origin，可被 `GlobalRateLimitMiddleware` 限流；public 直連 GCS 無法限流。
+4. **單一資安姿態**：整顆 bucket private、只有 backend SA 能讀——跟必須 private 的個資 bucket（omo/audio）同一套規則，不用為不同 prefix 搞多套 IAM。
+5. **不吃 signed URL 的代價**：proxy 直接串流，不像 signed URL 會過期、殺瀏覽器快取、增加簽名負載（signed URL 適合真正要「限特定人存取」的個資，不適合公開教材）。
+6. **成本可忽略**：對公開教材，private+proxy 只比 public 多 Cloud Run 運算，近期規模 ~$0–2/月（見下）。
+7. **vs Cloud CDN 直接接 bucket**：那會逼 bucket 打回 public 或用 signed URL（backend bucket 限制）——與 1/2 衝突，故不選。
+
+一句話：**混合 bucket + 要擋枚舉/限流 + 又要跟個資 bucket 同一套 private 規則 + 不想吃 signed URL 代價 → proxy 白名單是唯一同時成立的解，成本代價又極小。**
+
+### 為什麼不打回 public（雖然成本更省）
+- **`lingoleap-assets` 是「混合」bucket**：除公開課程外，還混了 `pr-screenshots/`、`qa/`（QA 時的 App 畫面截圖，如 `issue-1146-student-home-qa.png`，**可能含測試時的學生畫面/個資**）。
+- 打回全 public → 連 QA 截圖一起公開 = **資安退步、可能洩個資**。proxy 的 3-prefix 白名單正是隔離「公開教材 vs 內部 QA 產物」的正確設計，故 private+proxy **不是過度設計，是被混合內容正當化**。
+- 附帶：此 bucket 收 private 前歷史上是 public，那些 QA 截圖一直公開可抓；收 private 順帶堵掉此既有洩漏。
+
+### 成本結構（供未來重估）
+- 儲存：373MB / 3977 物件 → ~$0.007/月（可忽略）
+- egress：public 直連 vs private+proxy **對外 egress 相同**（~$0.12/GB，user 都走 internet，不算差距）
+
+**「本可 public 的教材，改用 private solution」的實際成本差距 = 只有 Cloud Run 運算**（egress、儲存兩者相同）。每請求 ~$0.0000029（CPU 0.1s + mem + 請求費），且有 Cloud Run 免費額度（2M 請求 + 18 萬 vCPU-秒/月）先扣。估算：
+
+| 規模 | 教材資產請求/月 | private+proxy 比 public 多花 |
+|------|----------------|:---:|
+| 小（~500 學生，~300K 請求）| 在免費額度內 | **~$0/月** |
+| 中（~2000 學生，~2.4M 請求）| 略超免費 | **~$1.5–2/月** |
+| 大（~1 萬學生，~12M 請求無快取）| 超很多 | **~$25–30/月 + 運營風險** |
+
+- Firebase Hosting `/assets` rewrite 那條會**邊緣快取** → 命中不打 Cloud Run → 實際差距**更低**
+- **結論：小/近期規模差距 ~$0–2/月**；真正的代價不是這幾美金，是「靜態流量壓 3-instance API 後端（尖峰搶資源）+ proxy 維護複雜度」。**且此 bucket 混了 QA 截圖，打回 public 會洩個資，故現階段 private+proxy 仍正確**
+- 精確數字需看 GCP billing console 的 Cloud Run 明細（gcloud 此版拉不到 time-series）
+
+**Cloud CDN+LB**：+~$24/月固定（LB+Cloud Armor），只在高流量或**要 Cloud Armor 邊緣 DDoS**（ddos 稽核唯一缺口）才划算；若加，走 **serverless NEG → 現有 proxy**（bucket 維持 private，不用 signed URL），不是 CDN 直接接 backend bucket。
+
+- 總結：成本差距小（近期 ~$0–2/月），決策應由**複雜度 + 資安隔離**主導，非成本。
+
+### 快取 / 規模結論（2026-07-05 定案）
+- proxy 回應已設 `Cache-Control: public, max-age=31536000, immutable` → **瀏覽器端快取一年**（重複瀏覽 0 網路請求、0 後端負載）
+- **現階段用戶量小 → 現況足夠**：瀏覽器快取處理重複瀏覽，低流量下後端服務靜態的負載/成本可忽略。**不需要 Cloud CDN / LB / Cloud Armor**（那是高流量或要邊緣 DDoS 才評估）
+- 跨使用者共用邊緣快取（Firebase CDN / Cloud CDN）目前非必要；**流量顯著成長時再重估**（重估訊號：Cloud Run 帳單/延遲因 /assets 靜態流量明顯上升）
+
+### 待辦（hygiene，非緊急）
+- 把 `pr-screenshots/`、`qa/` 從 `lingoleap-assets` **搬去 `lingoleap-screenshots` bucket**（QA 產物不該跟教材混）。搬完 assets 變純教材，未來若要走 public 簡化才乾淨、才安全。
+- 上述完成後可再評估：純教材 bucket 是否走「public get-only（allUsers 只 get 不 list，擋整庫枚舉）」以退役 proxy 換簡化。
+
+### 相關
+- issue #2486、PR #2488/#2489/#2490（proxy + CJK 修復上 prod）
+- `docs/security/2026-07-04-blackbox-result.md`（黑白箱稽核）
+- proxy 實作：`backend/app/routes/assets.py`（whitelist + traversal guard）；signed URL：`backend/app/services/audio_upload_service.py`

@@ -12,7 +12,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
-from ..auth.policies import is_admin
+from ..auth.policies import is_system_admin
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.session import LearningSession
@@ -33,8 +33,9 @@ def get_organization_dashboard(
     """Return aggregate statistics for an organization."""
     org = _get_org_or_404(org_id, db)
 
-    # Permission check: system_admin, org_owner, or org_admin only
-    if not is_admin(current_user.id, db):
+    # Permission check: system_admin (global), or org_owner/org_admin of THIS org.
+    # Use is_system_admin (not is_admin) so org_admin can't bypass org scoping.
+    if not is_system_admin(current_user.id, db):
         has_org_role = any(
             ur.is_active
             and ur.scope_type == "organization"

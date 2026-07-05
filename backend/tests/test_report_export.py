@@ -145,9 +145,24 @@ def _register_user(client, suffix: str) -> dict:
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))
+    user_id = me_resp.json()["id"]
+
+    _mk = TestingSessionLocal()
+    try:
+        _trole = _mk.query(Role).filter(Role.name == "teacher").first()
+        if _trole and not _mk.query(UserRole).filter(
+            UserRole.user_id == user_id, UserRole.role_id == _trole.id,
+            UserRole.scope_type == "school", UserRole.scope_id == str(_test_school_id),
+        ).first():
+            _mk.add(UserRole(user_id=user_id, role_id=_trole.id,
+                             scope_type="school", scope_id=str(_test_school_id)))
+            _mk.commit()
+    finally:
+        _mk.close()
+
     return {
         "token": token,
-        "user_id": me_resp.json()["id"],
+        "user_id": user_id,
         "email": email,
         "name": name,
     }

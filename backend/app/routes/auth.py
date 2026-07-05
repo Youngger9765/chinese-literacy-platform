@@ -26,7 +26,7 @@ from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
-from ..auth.rate_limiter import InMemoryRateLimiter
+from ..auth.rate_limiter import InMemoryRateLimiter, real_client_ip
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
@@ -123,7 +123,7 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     - Dev/staging mode: token is returned in the response body for easy testing.
     - Production: token should be emailed; remove 'verification_token' from response.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
@@ -173,7 +173,7 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     Accepts either an email address or a username in the `email` field.
     If the value contains '@', it is treated as an email; otherwise as a username.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"login:{client_ip}", max_requests=10, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
@@ -267,7 +267,7 @@ def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = 
     Always returns HTTP 200 to prevent user enumeration.
     Dev mode: token returned in body. Production: send via email only.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"forgot-password:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
@@ -328,7 +328,7 @@ def resend_verification(req: ResendVerificationRequest, request: Request, db: Se
 
     Issue #460. Rate-limited. Dev/staging mode: returns token directly.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"resend-verification:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
@@ -351,7 +351,7 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
     3. Else if a user with matching email exists -> link the Google account.
     4. Else -> create a new user account (email_verified=True, no password).
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"google-login:{client_ip}", max_requests=20, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
@@ -426,7 +426,7 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
 
     The code is single-use with a 600s TTL (enforced by Junyi's backend).
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = real_client_ip(request)
     if not rate_limiter.check(f"junyi-login:{client_ip}", max_requests=20, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 

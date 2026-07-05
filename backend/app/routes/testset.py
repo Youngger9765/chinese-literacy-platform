@@ -32,7 +32,8 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, require_role
+from ..auth.rate_limiter import make_ai_rate_limit_dependency
 from ..models.user import User
 from ..services.audio_upload_service import (
     _get_gcs_bucket,
@@ -248,18 +249,19 @@ def testset_progress(name: str = "", lesson: str = ""):
     }
 
 
-@router.get("/testset/recordings")
+@router.get(
+    "/testset/recordings",
+    dependencies=[require_role("system_admin", "org_admin")],
+)
 def testset_recordings():
     """owner list UI 用：列出已收的所有錄音 meta + 10 分鐘播放 signed URL。
 
-    公開（Young 2026-06-21：不需登入即顯示貢獻者暱稱/數量）。暱稱為自選暱稱、
-    朗讀公開課文，非敏感 PII；list.html 現況表不登入就能看到誰貢獻了哪幾課。
-    （此前曾 admin/teacher → 任何登入者 → 現全公開。）
-
-    DECISION NEEDED — auth: 此 endpoint 日後應改為 require_role(system_admin, org_admin)，
-    但 frontend/public/testset-7f3a91c4/dashboard.html 目前無登入/token 機制；
-    現階段加 require_role 會 403 並讓 admin 無法看錄音清單。須先讓 dashboard 接上
-    auth flow 再鎖 endpoint；在此之前維持公開、勿在此加 require_role。
+    Auth: **平台級 admin（system_admin / org_admin）才可看**（#2437, Young 選 C）。
+    錄音是跨校跨課的平台級訓練資料 + signed 播放 URL（可聽真人朗讀）＝ 隱私敏感，
+    收回公開。唯一 caller 是 owner dashboard `collect-status-9f2a7c4e.html`，已送
+    `Authorization: Bearer <lingoleap_token>`；未登入/非 admin → 401/403，該頁顯示登入 banner。
+    公開頁 index.html / record.html 不呼叫此端點，故 re-gate 不影響貢獻者流程。
+    （歷史：admin/teacher → 任何登入者 → 2026-06-21 全公開 → 2026-07-01 收回 system_admin/org_admin。）
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -299,15 +301,79 @@ def testset_recordings():
     return {"ok": True, "count": len(out), "recordings": out}
 
 
-@router.post("/testset/batch-eval")
-async def testset_batch_eval(
+@router.delete(
+    "/testset/recordings",
+    dependencies=[require_role("system_admin", "org_admin")],
+)
+def testset_delete_recording(
+    audio_path: str = Query(..., description="要刪除錄音的 .webm 完整 GCS 路徑"),
     current_user: User = Depends(get_current_user),
+):
+    """刪除單筆錄音（admin only）：刪同 stem 的 .webm + .json + .eval.json（#2465）。
+
+    Auth 與 GET /testset/recordings 相同（system_admin / org_admin）—— 錄音是平台級
+    敏感資料，刪除更不可逆，故用最緊的 gate。
+
+    貢獻者不是獨立儲存實體，只是每筆錄音 meta 的 contributor_name 欄位；刪掉這筆
+    錄音該筆貢獻者屬性即隨之消失。若該貢獻者尚有其他錄音（各自獨立 blob），其貢獻
+    資訊自然保留 —— 不需額外的貢獻者刪除邏輯。
+    """
+    # path 驗證：必須落在 test-dataset/ prefix 底下且為 .webm，擋 traversal / 跨 prefix / 絕對路徑
+    path = (audio_path or "").strip()
+    if not path.startswith(f"{_PREFIX}/") or not path.endswith(".webm") or ".." in path:
+        raise HTTPException(400, "invalid audio_path")
+
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        # fail-closed: storage unavailable
+        raise HTTPException(503, "storage temporarily unavailable")
+
+    base = path[: -len(".webm")]
+    # 同一筆錄音的三個 blob 共用 stem（.eval.json 跑分後才有，可能不存在）。
+    # 順序關鍵（#2466 review, P0）：先刪 sidecar（.json/.eval.json）、.webm 最後刪。
+    # 中途失敗最多留一個「列表看不到」的 orphan .webm（無害 storage leak），列表狀態
+    # 永遠一致；且重試 DELETE 仍能清掉殘留的 .webm。反過來（.webm 先刪）中途失敗會留下
+    # 指向已刪音檔的 ghost .json，列表壞掉且再也刪不掉。
+    targets = [base + ".json", base + ".eval.json", path]
+
+    deleted: list[str] = []
+    audio_existed = False
+    try:
+        for t in targets:
+            blob = bucket.blob(t)
+            if blob.exists():
+                blob.delete()
+                deleted.append(t)
+                if t == path:
+                    audio_existed = True
+    except Exception as exc:  # never leak internals; fail-closed
+        logger.warning("testset delete failed: path=%s err=%s", path, exc)
+        raise HTTPException(503, "delete failed, please retry")
+
+    if not audio_existed:
+        raise HTTPException(404, "recording not found")
+
+    # 不可逆破壞性操作 → 記錄執行的 admin（誰刪的），方便日後追查（#2466 review）
+    logger.info(
+        "testset delete OK: %s (removed %d blobs) by user_id=%s",
+        path, len(deleted), getattr(current_user, "id", None),
+    )
+    return {"ok": True, "deleted": deleted}
+
+
+@router.post(
+    "/testset/batch-eval",
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=5, window_seconds=60))],
+)
+async def testset_batch_eval(
+    current_user: User = require_role("system_admin", "org_admin", "teacher"),
     name: str | None = Query(default=None, description="過濾貢獻者名字（slug 比對）"),
     lesson: str | None = Query(default=None, description="過濾課文 lesson_id（字串精確比對）"),
 ) -> dict:
     """批次跑 STT + 評分 pipeline，驗測試集準度（Issue #2340）。
 
-    Auth: 登入使用者才可呼叫（get_current_user），不需 teacher/admin role。
+    Auth: 需 teacher/org_admin/system_admin role（#2470 MED-2：原本任何登入者即可，
+    含學生，且單次跑 ≤30 次 Gemini → 成本濫用）。另加 per-user AI rate-limit。
 
     Query params:
         name   — 過濾 contributor slug（局部比對，例如 '王小明' → slug '王小明'）

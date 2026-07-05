@@ -91,3 +91,64 @@ class TestMagicBytesWiring:
         with patch("app.routes.testset._get_gcs_bucket", return_value=None):
             resp = _post(REAL_WAV, "audio/wav")
         assert resp.status_code == 503, resp.text
+
+
+class TestUploadValidation:
+    """Remaining upload validation branches — incl. the lesson_id whitelist
+    (path-injection guard, security #2304)."""
+
+    def test_lesson_id_path_injection_rejected_400(self):
+        """lesson_id outside [A-Za-z0-9_-] whitelist (path traversal) → 400."""
+        with patch("app.routes.testset._get_gcs_bucket", return_value=_mock_bucket()):
+            resp = _post(REAL_WAV, "audio/wav", lesson_id="../../etc/passwd")
+        assert resp.status_code == 400, resp.text
+        assert "lesson_id" in resp.json()["detail"]
+
+    def test_empty_audio_rejected_400(self):
+        with patch("app.routes.testset._get_gcs_bucket", return_value=_mock_bucket()):
+            resp = _post(b"", "audio/wav")
+        assert resp.status_code == 400, resp.text
+        assert "empty" in resp.json()["detail"]
+
+    def test_oversize_rejected_413(self):
+        """Size cap fires before magic-bytes (patch cap small to keep payload tiny)."""
+        with patch("app.routes.testset._MAX_AUDIO_BYTES", 8), \
+             patch("app.routes.testset._get_gcs_bucket", return_value=_mock_bucket()):
+            resp = _post(REAL_WAV, "audio/wav")  # 32 bytes > 8
+        assert resp.status_code == 413, resp.text
+
+    def test_bad_version_rejected_400(self):
+        with patch("app.routes.testset._get_gcs_bucket", return_value=_mock_bucket()):
+            resp = _post(REAL_WAV, "audio/wav", version="bogus")
+        assert resp.status_code == 400, resp.text
+        assert "version" in resp.json()["detail"]
+
+    def test_blank_contributor_rejected_400(self):
+        with patch("app.routes.testset._get_gcs_bucket", return_value=_mock_bucket()):
+            resp = client.post(
+                "/api/testset/upload",
+                data={"contributor_name": "  ", "lesson_id": "1", "version": "correct"},
+                files={"audio": ("x.wav", REAL_WAV, "audio/wav")},
+            )
+        assert resp.status_code == 400, resp.text
+        assert "required" in resp.json()["detail"]
+
+
+class TestUploadWritesContentType:
+    """#2434 write side: upload persists the real content_type into meta so
+    batch-eval can pass the true mime (read side locked in test_testset_batch_eval)."""
+
+    def test_meta_records_content_type(self):
+        bucket = MagicMock()
+        blob = MagicMock()
+        bucket.blob.return_value = blob
+        with patch("app.routes.testset._get_gcs_bucket", return_value=bucket):
+            resp = _post(REAL_WAV, "audio/wav")
+        assert resp.status_code == 200, resp.text
+        # the meta upload is the call whose first positional arg is a JSON string
+        meta_jsons = [
+            c.args[0]
+            for c in blob.upload_from_string.call_args_list
+            if c.args and isinstance(c.args[0], str)
+        ]
+        assert any('"content_type": "audio/wav"' in j for j in meta_jsons), meta_jsons

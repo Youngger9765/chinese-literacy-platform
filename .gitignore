@@ -58,3 +58,5 @@ qa/content-evidence/*/artifacts/
 # *.lesson.yml stay local; the runner + coverage table + known-gaps ledger ARE committed.
 # Regenerate: backend/.venv/bin/python scripts/batch_corpus_dryrun.py --with-keypoints
 backend/data/lessons/_lesson_content_dryrun/
+# graphify architecture map — local knowledge-graph cache (18M), rebuilt on demand, not committed
+graphify-out/

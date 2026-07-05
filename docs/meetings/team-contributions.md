@@ -8,6 +8,25 @@
 
 ---
 
+## 6/29 ~ 7/3
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #2452 fail-closed + 跨組織 RBAC + STT + 理解 (#2450) | 造句不 auto-pass、OMO 斷路器不卡死、跨組織個資隔離、朗讀長文不截斷 |
+| Young | ✅ | PR #2453 學習步驟動態對應學習單 (#2451) | nav 跟每課學習單 section 順序排（5/1 主軸）|
+| Young | ✅ | PR #2431~2435 testset 上傳 magic-bytes + TDD/EDD | 擋偽造 MIME、real-mime、鎖轉寫前處理 |
+| Young | ✅ | PR #2438 testset recordings 限 admin (#2437) | 權限收斂 |
+| Young | ✅ | PR #2444 LoginPage render-smoke (#2443) | mount 安全網 |
+| Young | ✅ | PR #2454 清 dead code (#2450) | Cursor review 指出的無用函式；全批上 prod |
+| 靖杭 | ✅ | PR #2411 快速登入朗讀測試頁按鈕 (#2410) | LoginPage 便利入口 |
+| 靖杭 | ✅ | PR #2427 record.html mp3/wav 上傳途徑 (#2426) | 錄音頁擴充 + 返回鈕（4 輪 review）|
+| 靖杭 | ✅ | PR #2429 npm run dev esbuild 降級修復 (#2428) | vite.config 獨立診斷 build 問題 |
+| 靖杭 | ✅ | PR #2449 admin 側邊欄「朗讀測試集」入口 (#2448) | 免手動貼隱藏網址；Cursor+Claude review APPROVE，7/3 merge staging |
+| 靖杭 | 🔧 | PR #2466 錄音明細每列 🗑 刪除 (#2465) | DELETE endpoint 刪 GCS 3 blob + admin gate + path traversal 防護；review 抓 P0 partial-failure 退回改順序 + 補 test |
+| 啟翔 | 🔧 | 聚光燈/重點表 AI 解析重構 (#2425 #2200 #2153) | 改用 AI 判讀 DOCX + EDD + schema → lesson.yaml（8 題型 + 需人工驗證標記）；本機 40+ commits 未推，七課處理中，7/5 前推 |
+
+---
+
 ## 6/22 ~ 6/25
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |

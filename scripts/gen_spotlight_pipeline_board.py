@@ -34,7 +34,30 @@ if sj.exists():
         if l.strip():
             r = json.loads(l); SWEEP[r.get("lesson_code")] = r
 
-GCS = "https://storage.googleapis.com/lingoleap-assets"
+# Absolute backend /assets proxy base (#2486/#2495). Absolute — not relative
+# "/assets" — because these static QA boards are also opened on the Cloud Run
+# frontend origin, which has NO /assets rewrite (only Firebase Hosting does). The
+# backend proxy (app/routes/assets.py) reads the now-private lingoleap-assets
+# bucket with its own service-account credentials.
+ASSET_BASE = "https://lingoleap-backend-958347263320.asia-east1.run.app/assets"
+GCS = ASSET_BASE  # legacy name kept for any downstream reference
+
+
+def _to_assets(u):
+    """Normalize a worksheet pdf/docx URL to the absolute backend /assets proxy.
+
+    Handles both legacy full-GCS URLs (storage.googleapis.com/lingoleap-assets/…,
+    which now 403 since the bucket is private) and already-relative "/assets/…"
+    URLs from the loader — both must become absolute so the board also works when
+    opened on the Cloud Run frontend origin (no /assets rewrite there). (#2486/#2495)
+    """
+    if not u:
+        return u
+    u = u.replace("https://storage.googleapis.com/lingoleap-assets/", "/assets/")
+    if u.startswith("/assets/"):
+        return ASSET_BASE + u[len("/assets"):]
+    return u
+
 FIXES = {
     "G5-L15": "fail-close→placeholder #2405", "G6-L12": "fail-close→placeholder #2405",
     "G7-L7": "fail-close→placeholder #2405", "G9-L8": "fail-close→placeholder #2405",
@@ -76,7 +99,7 @@ def main():
         lessons.append({
             "code": code, "title": (l.get("title") or "")[:26], "story_id": l.get("id"),
             "grade_code": l.get("grade_code") or code,
-            "pdf": l.get("worksheet_pdf_url"), "docx": l.get("worksheet_docx_url"),
+            "pdf": _to_assets(l.get("worksheet_pdf_url")), "docx": _to_assets(l.get("worksheet_docx_url")),
             "blocks": blocks, "hist": hist,
             "n_blocks": b.get("n_blocks"), "n_q": b.get("n_questions"),
             "layout": l.get("layout_mode"), "stype": sp.get("strategy_type") or l.get("reading_strategy_type"),
@@ -125,7 +148,7 @@ def main():
 </tr></thead><tbody></tbody></table></div>
 <div class="gapbox" id="gaps"></div>
 <script>
-const GCS="https://storage.googleapis.com/lingoleap-assets/lessons-images";
+const GCS="__ASSET_BASE__/lessons-images";
 const DATA=__DATA__;
 function normCode(c){let m=c.match(/^(G\\d+)-L0*(\\d+)([a-z])?$/i);return m?m[1]+"-L"+m[2]+(m[3]||""):c;}
 function imgSrc(asset,code){let bn=(asset||"").split("/").pop();return GCS+"/"+normCode(code)+"/"+bn;}
@@ -193,7 +216,7 @@ function filt(){const q=document.getElementById("q").value.toLowerCase();for(con
 document.getElementById("gaps").innerHTML="<b>誠實缺口(不假綠):</b> Table figures 需表格JSON資料(另pipeline): "+Object.entries({"G7-L30":"table1/2","G5-L16":"表1","G9-L9":"表2/3"}).map(([k,v])=>k+"("+v+")").join(", ")+" ｜ 文言文無聚光燈素材 ｜ judge 變異課(G5-L13/16/27)render verdict 跨次跳=噪音非退步";
 </script>
 </body></html>"""
-    html = html.replace("__DATA__", data_json)
+    html = html.replace("__DATA__", data_json).replace("__ASSET_BASE__", ASSET_BASE)
     OUT.write_text(html, encoding="utf-8")
     print(f"wrote {OUT} ({len(lessons)} 課, fixes={fixed}, {OUT.stat().st_size//1024}KB)")
 

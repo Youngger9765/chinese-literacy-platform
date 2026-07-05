@@ -86,6 +86,7 @@ _REASON_EMPTY     = "empty"
 _REASON_ERROR     = "error"
 _REASON_HALLUCINATION = "hallucination"  # Issue #2321 — Gemini hallucinated hint text
 _REASON_SILENT = "silent"                # Issue #2368 — deterministic no-speech energy gate
+_REASON_TRUNCATED = "truncated"          # output hit MAX_TOKENS → transcript JSON cut off
 
 # Issue #2368 — server-side silence / energy gate.
 # Gemini parrots the FULL reference text on silent / no-speech audio (it is given
@@ -122,6 +123,19 @@ def _strip_cjk_punctuation(text: str) -> str:
     """
     import re
     return re.sub(r'[\s　、-〿＀-￯‘-‟。，！？；：、─—…「」『』（）]', '', text)
+
+
+def _transcription_max_tokens(target_text: str) -> int:
+    """Size the transcription output budget to the reading length.
+
+    The response is JSON {transcript, reasoning} where transcript ≈ the full
+    reading (target_text up to ~3000 chars). A hardcoded 1024 truncated long
+    readings → the JSON was cut off → JSONDecodeError → silent generic-error
+    fallback (student had to re-read). Scale to the target length (≈2 output
+    tokens per CJK char) plus a buffer for the reasoning field, clamped to a
+    safe ceiling so cost/latency stay bounded.
+    """
+    return max(1024, min(8192, len(target_text or "") * 2 + 512))
 
 
 def _is_hallucination_transcript(transcript: str, target_text: str) -> bool:
@@ -410,7 +424,7 @@ async def transcribe_reading_audio(
                     system_instruction=system_prompt,
                     response_mime_type="application/json",
                     response_schema=response_schema,
-                    max_output_tokens=1024,
+                    max_output_tokens=_transcription_max_tokens(target_text),
                     temperature=0.1,  # low temp for transcription accuracy
                     thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
                     automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
@@ -422,6 +436,31 @@ async def transcribe_reading_audio(
         )
 
         _check_safety_filter(response)
+
+        # Explicit MAX_TOKENS detection: a truncated response yields cut-off JSON
+        # that would otherwise raise JSONDecodeError below and degrade to a
+        # generic-error fallback with no signal that the token budget was the
+        # cause. Surface it as its own reason (the dynamic budget above makes this
+        # rare). Fail-safe: never score against a partial transcript.
+        _finish_reason = ""
+        try:
+            if response.candidates:
+                _finish_reason = str(response.candidates[0].finish_reason)
+        except Exception:
+            _finish_reason = ""
+        if "MAX_TOKENS" in _finish_reason:
+            logger.warning(
+                "Reading transcription fallback — MAX_TOKENS truncation: duration_ms=%s target_len=%d",
+                duration_ms,
+                len(target_text),
+                extra={
+                    "event": "reading_transcribe_fallback",
+                    "reason": _REASON_TRUNCATED,
+                    "duration_ms": duration_ms,
+                    "target_len": len(target_text),
+                },
+            )
+            return {"transcript": None, "method": "fallback", "reason": _REASON_TRUNCATED}
 
         import json as _json
         raw = response.text

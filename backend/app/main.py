@@ -37,8 +37,9 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
+from .routes.assets import router as assets_router
 from .utils.logging_config import setup_logging
-from .auth.rate_limiter import general_rate_limiter
+from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -96,24 +97,57 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://*.firebaseapp.com "
         "https://*.cloudfunctions.net "
         "https://us-central1-aiplatform.googleapis.com; "
-        # Issue #1496: allow GCS bucket for the worksheet PDF iframe (#1444),
-        # plus YouTube embeds for the knowledge-station videos.
-        # NOTE: CSP frame-src cannot restrict by path (spec limitation), so the
-        # entire storage.googleapis.com host is whitelisted. The actual PDFs
-        # live under public-read `lingoleap-assets/worksheets/`; tighter scoping
-        # would require proxying PDFs through our own origin.
+        # Issue #1496: worksheet PDF iframe (#1444), plus YouTube embeds for
+        # the knowledge-station videos.
+        # Issue #2486: the worksheet PDF now loads through our own `/assets/*`
+        # proxy instead of storage.googleapis.com — but the iframe src is only
+        # same-origin on the Firebase Hosting build (ASSET_BASE == ""). On the
+        # Cloud-Run-direct frontend (staging/prod/PR previews), ASSET_BASE
+        # resolves to the *backend's own* Cloud Run origin, which is a
+        # different host from the frontend, so the iframe is genuinely
+        # cross-origin there. 'self' alone blocks it (confirmed via
+        # real-browser repro on staging: CSP frame-src violation, worksheet
+        # modal renders blank). https://*.run.app mirrors the same wildcard
+        # already trusted by connect-src above, covering prod/staging/preview
+        # backends without hardcoding per-environment URLs.
         "frame-src 'self' "
-        "https://storage.googleapis.com "
+        "https://*.run.app "
         "https://www.youtube.com "
         "https://www.youtube-nocookie.com; "
         "frame-ancestors 'none';"
     )
 
+    # Issue #2486 (part 2): widening frame-src above on the *parent* page is
+    # necessary but not sufficient. This middleware used to stamp EVERY
+    # response — including the PDF/image bytes served by
+    # app/routes/assets.py — with `X-Frame-Options: DENY` and
+    # `frame-ancestors 'none'`. Those headers govern whether the resource
+    # ITSELF may be framed by anyone, which unconditionally blocked our own
+    # worksheet PDF iframe from framing it (DENY has no same-origin
+    # exception, and 'none' means literally no one). Confirmed via
+    # real-browser QA: after fixing frame-src alone, the iframe's network
+    # request succeeded (200 application/pdf, no console error) but the
+    # modal stayed visually blank — curl against the same URL showed
+    # `x-frame-options: DENY` / `frame-ancestors 'none'` on the PDF response
+    # itself. This didn't matter pre-#2488 because storage.googleapis.com
+    # (which never sends X-Frame-Options) served these files directly.
+    #
+    # Fix: for `/assets/*` responses only, omit X-Frame-Options (it can't
+    # express "self OR this other specific origin" — only CSP frame-ancestors
+    # can) and relax frame-ancestors to the same origins frame-src above
+    # trusts. Every other route (HTML pages, JSON APIs) keeps the strict
+    # DENY / 'none' anti-clickjacking posture unchanged.
+    ASSET_FRAME_ANCESTORS_CSP = "frame-ancestors 'self' https://*.run.app;"
+
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        response.headers["Content-Security-Policy"] = self.CSP
+        is_asset_response = request.url.path.startswith("/assets/")
+        response.headers["Content-Security-Policy"] = (
+            self.ASSET_FRAME_ANCESTORS_CSP if is_asset_response else self.CSP
+        )
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        if not is_asset_response:
+            response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Strict-Transport-Security"] = (
@@ -162,6 +196,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 user_id = payload.get("sub")
             except Exception:
                 pass  # Not critical — we just won't have user_id
+
+        # Expose the (signature-verified) user id for per-user rate limiting.
+        # (#2470 HIGH-1: get_client_key relies on request.state.user_id; without
+        # it, per-user AI limits silently fell back to a spoofable per-IP key.)
+        request.state.user_id = user_id
 
         try:
             response = await call_next(request)
@@ -227,11 +266,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 
 class GlobalRateLimitMiddleware:
-    """Pure ASGI middleware for global per-IP rate limiting on /api/* endpoints.
+    """Pure ASGI middleware for global per-IP rate limiting on /api/* and /assets/*.
 
     Uses raw ASGI protocol instead of BaseHTTPMiddleware to guarantee headers
     are injected before the response starts streaming (BaseHTTPMiddleware +
     StreamingResponse can silently drop headers added after call_next).
+
+    /assets/* is included (#2486): it's the proxy in front of the now-private
+    lingoleap-assets GCS bucket. Without a rate limit here, closing off public
+    bucket listing would still leave the door open for a single IP to hammer
+    the proxy (and therefore our GCS egress) at unlimited rate.
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
@@ -253,19 +297,19 @@ class GlobalRateLimitMiddleware:
 
         path = scope["path"]
 
-        # Skip rate limiting for exempt or non-API paths.
-        if path in self._EXEMPT_PATHS or not path.startswith("/api"):
+        # Skip rate limiting for exempt paths, or paths outside the two
+        # limited surfaces (/api/* and /assets/*).
+        is_limited_surface = path.startswith("/api") or path.startswith("/assets")
+        if path in self._EXEMPT_PATHS or not is_limited_surface:
             await self.app(scope, receive, send)
             return
 
-        # Extract real client IP from headers.
+        # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
+        # second-from-right XFF entry, not the client-controlled leftmost one.
         headers_raw = dict(scope.get("headers", []))
         forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
-        if forwarded_for:
-            ip = forwarded_for.split(",")[0].strip()
-        else:
-            client = scope.get("client")
-            ip = client[0] if client else "unknown"
+        client = scope.get("client")
+        ip = real_ip_from_xff(forwarded_for, client[0] if client else None)
         method = scope.get("method", "GET").upper()
         is_read = method in ("GET", "HEAD", "OPTIONS")
         limit = self.READ_LIMIT if is_read else self.WRITE_LIMIT
@@ -350,7 +394,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global rate limiting: 300 read req/min + 90 write req/min per IP for /api/*.
+# Global rate limiting: 300 read req/min + 90 write req/min per IP for
+# /api/* and /assets/* (#2486).
 # Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
 app.add_middleware(GlobalRateLimitMiddleware)
 
@@ -388,6 +433,8 @@ app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
+# No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
+app.include_router(assets_router)
 
 
 @app.get("/")

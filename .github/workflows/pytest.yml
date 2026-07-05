@@ -26,6 +26,9 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
+      - name: Install ffmpeg (testset transcode + silence-gate tests)
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Run characterization tests (refactor safety gate)
         run: |
           cd backend
@@ -35,6 +38,28 @@ jobs:
             tests/test_characterization_tts_normalization.py \
             tests/test_characterization_tts_cache.py \
             tests/test_rate_limiting.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      - name: Run testset tests (upload security + auth + eval)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_testset_*.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      - name: Run security regression tests (blackbox audit gate — WSTG-mapped)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/security/test_dynamic_security.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

@@ -373,28 +373,39 @@ def normalize_gcs_lesson_code(lesson_code: str) -> str:
     return parsed
 
 
+# Non-figure data refs that can appear in images[]: tables mis-modeled as
+# figures carry a .json referent (e.g. G7-L30 table1.json). Those are never
+# rendered as <img>, so they are not figure assets. Everything else in images[]
+# IS audited — a DENYLIST (not an image-extension allowlist) keeps the audit
+# fail-closed: an unexpected real figure format from docx extraction (.x-emf /
+# .svg) is still checked against GCS rather than silently skipped (#2459 review).
+_NON_FIGURE_FILENAME_EXTS = (".json",)
+
+
 def figure_assets_from_story(story: dict[str, Any]) -> list[str]:
-    """Collect figure asset basenames from spotlight_v2 blocks (+ images[])."""
+    """Collect the figure image basenames the FRONTEND actually fetches.
+
+    The frontend (BlockSequenceRenderer.renderFigure) builds every figure src
+    from ``story.images[].filename`` via ``buildImageSrc``; the synthetic
+    ``spotlight_v2.blocks[].asset`` name (figN.png) is used only to derive the
+    figure label and is not the filename the frontend requests. Auditing
+    block.asset produced false 404 gaps on lessons whose real image is present
+    and rendering (#2459). Audit ``images[].filename`` only, skipping non-figure
+    data refs (table*.json mis-modeled as figures); any real image extension —
+    including vector formats — is still audited (fail-closed, no silent skip).
+    """
     out: list[str] = []
     seen: set[str] = set()
-    sv2 = story.get("spotlight_v2") or {}
-    for block in sv2.get("blocks") or []:
-        if block.get("type") != "figure":
-            continue
-        asset = (block.get("asset") or "").strip()
-        if asset:
-            base = asset.split("/")[-1]
-            if base not in seen:
-                seen.add(base)
-                out.append(base)
-    # images[] derived from figure assets — covers catalog gap-fill path.
     for img in story.get("images") or []:
         fn = (img.get("filename") or "").strip()
-        if fn:
-            base = fn.split("/")[-1]
-            if base not in seen:
-                seen.add(base)
-                out.append(base)
+        if not fn:
+            continue
+        base = fn.split("/")[-1]
+        if base.lower().endswith(_NON_FIGURE_FILENAME_EXTS):
+            continue  # table*.json etc. — not a rendered figure asset
+        if base not in seen:
+            seen.add(base)
+            out.append(base)
     return out
 
 
