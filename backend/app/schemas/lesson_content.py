@@ -425,6 +425,10 @@ class FigureBlock(BaseModel):
     caption: Optional[str] = None
     # Asset path/URL; may be None for a table-as-figure or a not-yet-bound asset.
     asset: Optional[str] = None
+    # Rendering column hint. Default (None/"reading") → left-column reference material.
+    # "exercise" → render in the RIGHT answer column, WITH the questions (e.g. a diagram
+    # that belongs to the 聚光燈 題目, not the 課文). Presentation-only; never an answer.
+    placement: Optional[Literal["reading", "exercise"]] = None
 
 
 class TableCell(BaseModel):
@@ -446,6 +450,9 @@ class TableBlock(BaseModel):
     type: Literal["table"] = "table"
     label: Optional[str] = None
     title: Optional[str] = None
+    # Rendering column hint (same semantics as FigureBlock.placement): default → left
+    # reference column; "exercise" → right answer column, with the questions.
+    placement: Optional[Literal["reading", "exercise"]] = None
     headers: list[str] = Field(default_factory=list)
     # Simple/default shape (fast path). `rows` cells align to `headers`; the vmerged
     # section-label COLUMN (below) is layered on top so `rows` stays pure cell data.

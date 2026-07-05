@@ -134,6 +134,9 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   }, [lesson.blocks]);
   const [needsReview, setNeedsReview] = useState<Record<string, boolean>>(initialNeedsReview);
 
+  // 參考課文(左欄)預設「收合」,學生可用聚光燈標頭的按鈕自由展開/收合。
+  const [readingOpen, setReadingOpen] = useState(false);
+
   const allDone = useMemo(
     () =>
       meta.gradableIds.length > 0 &&
@@ -193,7 +196,15 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
     const reading: Block[] = [];
     const exercises: Block[] = [];
     for (const b of lesson.blocks) {
-      if (b.type === 'exercise') exercises.push(b);
+      // Exercises always live in the answer column. A figure/table opts INTO the answer
+      // column via placement:'exercise' (a diagram/table that belongs WITH the 題目, not
+      // the left-column 課文 reference). Default keeps them on the LEFT. Document order is
+      // preserved within each column.
+      const toRight =
+        b.type === 'exercise' ||
+        ((b.type === 'figure' || b.type === 'table') &&
+          (b as { placement?: string }).placement === 'exercise');
+      if (toRight) exercises.push(b);
       else reading.push(b);
     }
     return { readingBlocks: reading, exerciseBlocks: exercises };
@@ -240,34 +251,61 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
         // 手機(單欄)整頁捲動;lg 以上各欄獨立捲動(min-h-0 + overflow)。
         // 兩欄各自是一張「參考課文 / 閱讀聚光燈」卡片,與 ComprehensionLayout 一致。
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1fr] gap-4 lg:gap-6 overflow-y-auto lg:overflow-hidden">
-          <section
-            aria-label="課文"
-            className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-2"
-          >
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
-                <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  參考課文
-                </span>
+          {readingOpen && (
+            <section
+              aria-label="課文"
+              className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-2"
+            >
+              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
+                    <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                      參考課文
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReadingOpen(false)}
+                    aria-label="收合參考課文"
+                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">close</span>
+                    收合
+                  </button>
+                </div>
+                <div className="space-y-6">
+                  {readingBlocks.map((block) => (
+                    <div key={block.id}>{renderBlock(block)}</div>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-6">
-                {readingBlocks.map((block) => (
-                  <div key={block.id}>{renderBlock(block)}</div>
-                ))}
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
           <section
             aria-label="閱讀聚光燈作答區"
-            className="lg:col-span-5 lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1"
+            className={`${readingOpen ? 'lg:col-span-5' : 'lg:col-span-12'} lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1`}
           >
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-accent text-xl">highlight</span>
-                <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  閱讀聚光燈
-                </span>
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-accent text-xl">highlight</span>
+                  <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                    閱讀聚光燈
+                  </span>
+                </div>
+                {readingBlocks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setReadingOpen((o) => !o)}
+                    aria-expanded={readingOpen}
+                    aria-label={readingOpen ? '收合參考課文' : '展開參考課文'}
+                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">menu_book</span>
+                    {readingOpen ? '收合課文' : '參考課文'}
+                  </button>
+                )}
               </div>
               <div className="space-y-6">
                 {exerciseBlocks.map((block) => (

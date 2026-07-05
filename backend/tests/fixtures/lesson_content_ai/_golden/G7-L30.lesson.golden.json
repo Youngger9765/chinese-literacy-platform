@@ -10,6 +10,7 @@
       "caption": "白尾八哥（左）與 臺灣冠八哥（右）外形圖",
       "id": "fig-1",
       "label": "圖一",
+      "placement": null,
       "type": "figure"
     },
     {
@@ -320,6 +321,7 @@
       "id": "table-1",
       "label": "表一",
       "notes": [],
+      "placement": null,
       "row_sections": [
         "相同處",
         "相同處",
@@ -431,6 +433,7 @@
         "註1. 資料來源：我們的島（2022）；環境資訊中心（2023）",
         "註2.「84／584」表示：研究人員一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。"
       ],
+      "placement": null,
       "row_sections": null,
       "rows": [
         [

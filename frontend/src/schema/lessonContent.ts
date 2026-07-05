@@ -236,6 +236,9 @@ const FigureBlock = z
     label: z.string().nullish(),
     caption: z.string().nullish(),
     asset: z.string().nullish(),
+    // Rendering column: default/'reading' → left reference column; 'exercise' → right
+    // answer column, WITH the questions (a diagram that belongs to the 題目, not 課文).
+    placement: z.enum(['reading', 'exercise']).nullish(),
   })
   .strict();
 
@@ -257,6 +260,8 @@ const TableBlock = z
     type: z.literal('table'),
     label: z.string().nullish(),
     title: z.string().nullish(),
+    // Same semantics as FigureBlock.placement (left reference vs right answer column).
+    placement: z.enum(['reading', 'exercise']).nullish(),
     headers: z.array(z.string()).default([]),
     rows: z.array(z.array(z.string())).default([]),
     // Gap 2(a): vmerged section-label COLUMN (G7-L30 表一 `異同`, G7-L2 story_structure).
