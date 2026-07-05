@@ -10,7 +10,7 @@
  * to keep this component focused on the summary score + playback.
  */
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { DiffToken } from '../../../types';
 
 const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
@@ -52,13 +52,29 @@ const FullReadingScoreCard: React.FC<FullReadingScoreCardProps> = ({
   const transcriptRef = useRef<HTMLParagraphElement>(null);
   const [showFullTranscript, setShowFullTranscript] = useState(false);
   const [isTranscriptClampable, setIsTranscriptClampable] = useState(false);
-  useLayoutEffect(() => {
+
+  const measureClampable = useCallback(() => {
     // Skip while expanded — clamp is removed so scrollHeight === clientHeight would
     // wrongly read as "not clampable" and hide the button mid-expand.
     if (showFullTranscript) return;
     const el = transcriptRef.current;
     if (el) setIsTranscriptClampable(el.scrollHeight > el.clientHeight + 1);
-  }, [streamingTranscript, showFullTranscript]);
+  }, [showFullTranscript]);
+
+  useLayoutEffect(() => {
+    measureClampable();
+  }, [streamingTranscript, measureClampable]);
+
+  // Issue #2511 (review): re-measure on resize — a short transcript can start
+  // overflowing (or stop) when the container narrows/widens (e.g. tablet rotate),
+  // so the 看全文 button must appear/disappear accordingly.
+  useEffect(() => {
+    const el = transcriptRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => measureClampable());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measureClampable]);
 
   return (
     <>
