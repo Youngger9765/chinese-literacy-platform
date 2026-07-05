@@ -129,9 +129,12 @@ function gradeExact(exercise: ExerciseBlockT, studentValue: unknown): GradeResul
           String(correctRaw).replace(/\s+/g, '').trim();
         if (!ok) allCorrect = false;
       } else {
-        // free fill: lenient CJK normalization (reuse legacy helper).
-        const ok = resolveFreeTextCorrect(String(student ?? ''), String(correctRaw));
-        if (!ok || String(student ?? '').trim() === '') allCorrect = false;
+        // free fill: EXACT (space-normalized) equality — grader is 'exact', so "光合" must NOT
+        // pass for "光合作用" (the lenient substring helper allowed it). Matches □-choice above.
+        const ok =
+          String(student ?? '').replace(/\s+/g, '').trim() ===
+          String(correctRaw).replace(/\s+/g, '').trim();
+        if (!ok) allCorrect = false;
       }
     }
     return allCorrect ? CORRECT : WRONG;

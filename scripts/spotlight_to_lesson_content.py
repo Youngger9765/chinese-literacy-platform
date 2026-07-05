@@ -447,6 +447,13 @@ def _make_step(
                 {"prompt": prompt, "type": "select", "options": options, "answer": None},
                 True,
             )
+        if len(idxs) < 2:
+            # Detected 複選 packaging (multi-marker options) but recovered only ONE correct
+            # index → the full correct set almost certainly wasn't restored. Flag for review
+            # (else a genuine full multi-pick grades as wrong), matching the non-splittable
+            # sibling's honesty (multi_choice_incomplete_answer) below.
+            gaps.add(lesson_code, "multi_choice_single_recovered", step_ref, str(answer))
+            unresolved = True
         return (
             {
                 "prompt": prompt,
@@ -607,6 +614,14 @@ def build_keypoints_exercise(
             bid = f"r{i}.b{k}"
             blank_ids.append(bid)
             blanks_out.append({"id": bid, "answer": answer})
+
+        # Honesty: only the LAST cell is scanned for 【】 fills; a 【】 in an interior column
+        # (wider rows) would be silently dropped. Flag it (module contract: answers are never
+        # silently dropped) rather than shipping an incomplete row.
+        for extra in row[1:-1]:
+            if _BLANK_RE.search(str(extra)):
+                gaps.add(lesson_code, "keypoints_interior_blank_dropped", f"r{i}", str(extra)[:40])
+                break
 
         rows_out.append({"label": label, "sub_label": sub_label, "blank_ids": blank_ids})
 

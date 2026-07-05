@@ -140,7 +140,7 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   const allDone = useMemo(
     () =>
       meta.gradableIds.length > 0 &&
-      meta.gradableIds.every((id) => feedback[id] === true || feedback[id] === false),
+      meta.gradableIds.every((id) => feedback[id] === true),
     [meta.gradableIds, feedback],
   );
 
@@ -160,8 +160,11 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
 
   const handleGraded = useCallback(
     (id: string, result: { verdict: boolean | null; needsReview: boolean }) => {
-      setFeedback((prev) => ({ ...prev, [id]: result.verdict }));
-      if (result.needsReview) setNeedsReview((prev) => ({ ...prev, [id]: true }));
+      // Bail when unchanged — onAllStepsDone fires onGraded on every render (incl. verdict:null
+      // when not-all-correct); without this guard the always-new feedback object would loop
+      // (render → effect → onGraded → setState → render …).
+      setFeedback((prev) => (prev[id] === result.verdict ? prev : { ...prev, [id]: result.verdict }));
+      if (result.needsReview) setNeedsReview((prev) => (prev[id] ? prev : { ...prev, [id]: true }));
     },
     [],
   );

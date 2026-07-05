@@ -66,7 +66,10 @@ const GuidedStepsInput: React.FC<Props> = ({
   const [gradingStep, setGradingStep] = useState<number | null>(null);
 
   const allDone = useMemo(
-    () => steps.every((_, i) => feedback[i] === true || feedback[i] === false),
+    // "complete" = every step CORRECT. free_text is rubric → feedback true once answered;
+    // a wrong select/multi_select stays `false` and MUST NOT count as done (fixes the false
+    // green「完成」on a wrong machine-gradable step).
+    () => steps.every((_, i) => feedback[i] === true),
     [steps, feedback],
   );
 
@@ -82,8 +85,8 @@ const GuidedStepsInput: React.FC<Props> = ({
   const restoredRef = useRef(false);
   useEffect(() => {
     if (restoredRef.current) return;
+    if (Object.keys(value).length === 0) return; // nothing restored YET — retry when it arrives
     restoredRef.current = true;
-    if (Object.keys(value).length === 0) return; // nothing restored
     const fb: Record<number, boolean | null> = {};
     const gr: Record<number, StrategyGradeResult> = {};
     steps.forEach((step, i) => {

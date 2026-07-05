@@ -107,7 +107,9 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
         value={stepValue}
         onChange={(v) => onValueChange(v)}
         onAllStepsDone={(done) => {
-          if (done) onGraded({ verdict: true, needsReview: false });
+          // Reset to null when not all-correct (a wrong step, or 再試一次) so the parent never
+          // latches a stale ✓ complete verdict.
+          onGraded({ verdict: done ? true : null, needsReview: false });
         }}
       />
     );
