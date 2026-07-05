@@ -80,6 +80,34 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     [exercise, onGraded],
   );
 
+  // Retry a wrong lock-on-submit exercise (parallels guided_steps' 再試一次): clear the
+  // selection + reset the verdict to null, which unlocks the input (submitted=false) and does
+  // NOT count toward completion (allDone requires === true). Without this a single wrong MCQ
+  // on the 閱讀理解 step is a dead-end (can't retry, can't advance).
+  const retry = useCallback(() => {
+    onValueChange(null);
+    onGraded({ verdict: null, needsReview: false });
+  }, [onValueChange, onGraded]);
+
+  // Shared submitted-state feedback + 再試一次 (only shown on a wrong verdict) for the
+  // machine-graded lock-on-submit kinds.
+  const submittedFeedback = (okMsg: string, wrongMsg: string) => (
+    <div className="mt-3 flex items-center gap-3">
+      <p className={`text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
+        {verdict ? okMsg : wrongMsg}
+      </p>
+      {verdict === false ? (
+        <button
+          type="button"
+          onClick={retry}
+          className="px-4 py-1.5 rounded-full text-base font-medium text-violet-700 border border-violet-300 hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          再試一次
+        </button>
+      ) : null}
+    </div>
+  );
+
   // ── custom (manual, needs review) — render + record, never auto-pass ──────────
   if (q.kind === 'custom') {
     return (
@@ -156,11 +184,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
           onChange={handlePick}
           verdict={verdict}
         />
-        {submitted ? (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 答對了' : '再想想看'}
-          </p>
-        ) : null}
+        {submitted ? submittedFeedback('✓ 答對了', '再想想看') : null}
         <McqRescueDialog
           isOpen={rescue !== null}
           context={rescue}
@@ -187,9 +211,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
             確認
           </button>
         ) : (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 答對了' : '再想想看'}
-          </p>
+          submittedFeedback('✓ 答對了', '再想想看')
         )}
       </div>
     );
@@ -211,9 +233,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
             確認排序
           </button>
         ) : (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 排序正確' : '再想想看'}
-          </p>
+          submittedFeedback('✓ 排序正確', '再想想看')
         )}
       </div>
     );
@@ -242,9 +262,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
             確認
           </button>
         ) : (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 答對了' : '再想想看'}
-          </p>
+          submittedFeedback('✓ 答對了', '再想想看')
         )}
       </div>
     );
@@ -265,9 +283,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
             確認
           </button>
         ) : (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 全部答對' : '再檢查看看'}
-          </p>
+          submittedFeedback('✓ 全部答對', '再檢查看看')
         )}
       </div>
     );
@@ -283,14 +299,17 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
         submit(i);
       };
       return (
-        <FillInBlankInput
-          shape="vocab-choice"
-          sentence={q.sentence}
-          vocabOptions={options}
-          choiceValue={typeof value === 'number' ? value : null}
-          onChoiceChange={handlePick}
-          verdict={verdict}
-        />
+        <div>
+          <FillInBlankInput
+            shape="vocab-choice"
+            sentence={q.sentence}
+            vocabOptions={options}
+            choiceValue={typeof value === 'number' ? value : null}
+            onChoiceChange={handlePick}
+            verdict={verdict}
+          />
+          {submitted ? submittedFeedback('✓ 答對了', '再想想看') : null}
+        </div>
       );
     }
     if (shape === 'slots') {
@@ -310,9 +329,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
               確認
             </button>
           ) : (
-            <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-              {verdict ? '✓ 答對了' : '再想想看'}
-            </p>
+            submittedFeedback('✓ 答對了', '再想想看')
           )}
         </div>
       );
@@ -333,9 +350,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
             確認
           </button>
         ) : (
-          <p className={`mt-3 text-base font-medium ${verdict ? 'text-green-700' : 'text-amber-700'}`}>
-            {verdict ? '✓ 答對了' : '再想想看'}
-          </p>
+          submittedFeedback('✓ 答對了', '再想想看')
         )}
       </div>
     );
