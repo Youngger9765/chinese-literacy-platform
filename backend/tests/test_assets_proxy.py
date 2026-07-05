@@ -100,6 +100,51 @@ class TestAssetProxyAllowedPrefixes:
         assert resp.status_code == 200
 
 
+class TestAssetProxyUnicodeFilenames:
+    """Regression: #2486 — CJK-named objects must be servable.
+
+    Found by /qa on 2026-07-05: the classical-Chinese (文言文) lesson
+    thumbnails are stored under CJK object names (e.g. `文-L1.webp`, verified
+    16266 bytes in the bucket). The original ASCII-only allow-list charset
+    404'd every one of them even though the object existed — a real regression
+    on a 國語文 platform. `\\w` is Unicode-aware, so these now pass while
+    traversal / control chars stay rejected.
+    """
+
+    @patch("app.routes.assets._get_bucket")
+    def test_cjk_thumbnail_returns_200_and_reaches_gcs(self, mock_get_bucket):
+        bucket, _blob = _mock_bucket_with_blob(b"webpbytes")
+        mock_get_bucket.return_value = bucket
+
+        # Browser URL-encodes 文 as %E6%96%87; FastAPI decodes before our guard.
+        resp = client.get("/assets/stories/thumbnails/文-L1.webp")
+
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "image/webp"
+        bucket.blob.assert_called_once_with("stories/thumbnails/文-L1.webp")
+
+    @patch("app.routes.assets._get_bucket")
+    def test_cjk_lesson_image_returns_200(self, mock_get_bucket):
+        bucket, _blob = _mock_bucket_with_blob(b"\x89PNGfake")
+        mock_get_bucket.return_value = bucket
+
+        resp = client.get("/assets/lessons-images/文-L1/文-L1-01.png")
+
+        assert resp.status_code == 200
+        bucket.blob.assert_called_once_with("lessons-images/文-L1/文-L1-01.png")
+
+    @patch("app.routes.assets._get_bucket")
+    def test_cjk_does_not_weaken_traversal_guard(self, mock_get_bucket):
+        """Allowing Unicode letters must not re-open `..` traversal."""
+        bucket, _blob = _mock_bucket_with_blob(b"x")
+        mock_get_bucket.return_value = bucket
+
+        resp = client.get("/assets/stories/thumbnails/../../文-secret.webp")
+
+        assert resp.status_code == 404
+        bucket.blob.assert_not_called()
+
+
 class TestAssetProxyAllowlistRejection:
     """Anything outside the 3 allow-listed prefixes must 404 — no general GCS proxy."""
 
