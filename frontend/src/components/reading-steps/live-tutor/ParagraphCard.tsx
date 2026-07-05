@@ -155,6 +155,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
     return getEncouragement(paragraphSummary.matchRate);
   }, [paragraphSummary?.matchRate]);
 
+  // Issue #2502: 有評估結果時課文（左）／AI 判斷（右）左右分欄；否則課文單欄。
+  const showEvalColumn = !!((readingResultTokens && !isSessionActive) || paragraphSummary);
+
   return (
     <div
       className={`transition-all duration-500 rounded-3xl p-5 md:p-14 ${
@@ -196,6 +199,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           }}
         />
       </div>
+
+      {/* Issue #2502: 左課文／右 AI 判斷雙欄（有評估結果時）；窄螢幕自動堆疊 */}
+      <div className={showEvalColumn ? 'grid lg:grid-cols-2 gap-8 items-start' : ''}>
+
+      {/* ── 左欄：該段課文 ── */}
+      <div>
 
       {/* Paragraph text — with TTS character highlight */}
       <p
@@ -247,6 +256,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           </button>
         </div>
       )}
+
+      </div>{/* /左欄課文（Issue #2502）*/}
+
+      {/* ── 右欄：AI 判斷結果（對照 + 摘要）（Issue #2502）── */}
+      {showEvalColumn && (
+      <div className="space-y-2">
 
       {/* ── Painpoint 4: 原文 vs 朗讀結果 — 左右並陳（桌機），上下排（手機） ── */}
       {readingResultTokens && !isSessionActive && (
@@ -447,6 +462,11 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           })()}
         </div>
       )}
+
+      </div>
+      )}{/* /右欄 AI 判斷（Issue #2502）*/}
+
+      </div>{/* /grid 左課文右判斷（Issue #2502）*/}
     </div>
   );
 };
