@@ -6,7 +6,7 @@ import { cancelTts } from '../../../services/ttsApi';
 import { scopedStepStorageKey, isToolboxMode } from '../../../services/learningStorageScope';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
-import { useAudioRecorder } from '../../../hooks/useAudioRecorder';
+import { useAudioRecorder, PARAGRAPH_MAX_SECONDS } from '../../../hooks/useAudioRecorder';
 import { transcribeReading, saveReadingAudio } from '../../../services/learning/session';
 import { validateRecording } from '../../../utils/recordingValidation';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -100,7 +100,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   // ── Per-paragraph Gemini audio recorder (Issue #2156 — I1 / I4) ──────────
   // Records while the student reads each paragraph; stops on paragraph submit
   // so we can send the blob to /reading/transcribe for high-quality Gemini STT.
-  const paragraphRecorder = useAudioRecorder(120);
+  const paragraphRecorder = useAudioRecorder(PARAGRAPH_MAX_SECONDS);
   /** I4: fallback alert per paragraph — set when Gemini audio transcription fails */
   const [paragraphFallbackReason, setParagraphFallbackReason] = useState<string | null>(null);
   const clearParagraphFallback = useCallback(() => setParagraphFallbackReason(null), []);
@@ -255,6 +255,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }, NO_AUDIO_TIMEOUT_MS);
     return clearNoAudioTimer;
   }, [paragraphRecorder.status, clearNoAudioTimer]);
+
+  // Issue #2497 — warn (instead of silently truncating) when a paragraph recording
+  // hits the cap, so a long paragraph that auto-stops isn't scored as partial 漏念.
+  useEffect(() => {
+    if (paragraphRecorder.reachedMaxDuration) {
+      setMicError(`錄音已達 ${Math.round(PARAGRAPH_MAX_SECONDS / 60)} 分鐘上限並自動停止，請按「完成」或重錄這段。`);
+    }
+  }, [paragraphRecorder.reachedMaxDuration]);
 
   useEffect(() => {
     if (paragraphRecorder.status !== 'recording') {
