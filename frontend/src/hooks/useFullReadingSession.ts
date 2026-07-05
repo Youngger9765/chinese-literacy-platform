@@ -84,6 +84,9 @@ interface UseFullReadingSessionProps {
   dbSessionId?: number | null;
   stopTtsAll: () => void;
   onResultReady: (result: SavedResult, transcript: string) => void;
+  /** Issue #2503: fired when the accepted take's audio is persisted to GCS, so the
+   *  caller can remember the attempt id and replay the recording after remount. */
+  onAudioSaved?: (attemptId: number) => void;
 }
 
 interface UseFullReadingSessionReturn {
@@ -115,6 +118,7 @@ export function useFullReadingSession({
   dbSessionId,
   stopTtsAll,
   onResultReady,
+  onAudioSaved,
 }: UseFullReadingSessionProps): UseFullReadingSessionReturn {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -226,6 +230,11 @@ export function useFullReadingSession({
       // Fail-safe: .catch() ensures upload failure never affects score display.
       if (token && dbSessionId != null) {
         saveReadingAudio(capturedAudioBlob, dbSessionId, undefined, token)
+          .then((res) => {
+            // Issue #2503: remember the attempt id so the recording can be replayed
+            // from GCS after the in-memory blob is gone (student navigates away/back).
+            if (res.ok && res.attempt_id != null) onAudioSaved?.(res.attempt_id);
+          })
           .catch((err) => console.warn('[FullReading] saveReadingAudio error:', err));
       }
 
@@ -277,7 +286,7 @@ export function useFullReadingSession({
       // No token — cannot reach Gemini.
       setMicError('未偵測到語音，請重試。');
     }
-  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume]);
+  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, onAudioSaved, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume]);
 
   return {
     isSessionActive,

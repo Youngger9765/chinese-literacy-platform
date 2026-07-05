@@ -7,6 +7,7 @@ import { useKaraoke } from '../../context/KaraokeContext';
 import { useFullReadingSession, type SavedResult } from '../../hooks/useFullReadingSession';
 import { useFullReadingTtsQueue } from '../../hooks/useFullReadingTtsQueue';
 import { useFullReadingResultPersistence } from '../../hooks/useFullReadingResultPersistence';
+import { getReadingAudioSignedUrl } from '../../services/learning/session';
 import ReadingMetricsCard from './full-reading/ReadingMetricsCard';
 import { EvalProgress } from './EvalProgress';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
@@ -68,6 +69,7 @@ const FullReading: React.FC<FullReadingProps> = ({
     userId: user?.id,
     storageKey,
     initialResult,
+    initialTranscript: initialProgress?.transcript,
   });
 
   /* ---- Self-assessment for current attempt (Issue #1386) ---- */
@@ -130,6 +132,12 @@ const FullReading: React.FC<FullReadingProps> = ({
     isTtsPlaying,
   } = useFullReadingTtsQueue({ storyContent: story.content });
 
+  /* ---- Issue #2503: persist the accepted take's attempt id so the recording can be
+   *      replayed from GCS after the in-memory blob is gone (remount). ---- */
+  const [audioAttemptId, setAudioAttemptId] = useState<number | undefined>(
+    () => initialProgress?.audio_attempt_id
+  );
+
   /* ---- STT / recording hook ---- */
   const {
     isSessionActive,
@@ -154,6 +162,7 @@ const FullReading: React.FC<FullReadingProps> = ({
       setStreamingTranscript(transcript);
       setHistoryRefreshKey(k => k + 1);
     }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
+    onAudioSaved: useCallback((attemptId: number) => setAudioAttemptId(attemptId), []),
   });
 
   /* ---- Issue #2266: In-memory audio replay (same-session).
@@ -228,10 +237,26 @@ const FullReading: React.FC<FullReadingProps> = ({
         },
         self_rating: selfRating,
         transcript: streamingTranscript,
+        audio_attempt_id: audioAttemptId,
       },
       false,
     );
-  }, [result, selfRating, streamingTranscript, onProgressChange]);
+  }, [result, selfRating, streamingTranscript, audioAttemptId, onProgressChange]);
+
+  /* ---- Issue #2503: replay recording from GCS when the in-memory blob is gone.
+   *      After handleFinish + remount, audioRecorder has no blob but the audio was
+   *      uploaded to GCS; fetch a short-lived signed URL via the persisted attempt id
+   *      so 重聽錄音 stays available. ---- */
+  const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (audioRecorder.audioUrl) return;           // in-memory blob still available
+    if (!result || !token || dbSessionId == null || audioAttemptId == null) return;
+    let cancelled = false;
+    getReadingAudioSignedUrl(dbSessionId, audioAttemptId, token)
+      .then((url) => { if (!cancelled && url) setPersistedAudioUrl(url); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [audioRecorder.audioUrl, result, token, dbSessionId, audioAttemptId]);
 
   const zhuyinLines = useMemo(
     () => processLinesSelective(story.content, vocabWords),
@@ -422,7 +447,7 @@ const FullReading: React.FC<FullReadingProps> = ({
               <FullReadingScoreCard
                 result={result}
                 streamingTranscript={streamingTranscript}
-                audioUrl={audioRecorder.audioUrl ?? null}
+                audioUrl={audioRecorder.audioUrl ?? persistedAudioUrl}
               />
 
               {/* 朗讀結果 (Issue #1960 — same style as LiveTutor ParagraphCard) */}

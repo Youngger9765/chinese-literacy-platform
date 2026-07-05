@@ -33,6 +33,9 @@ interface UseFullReadingResultPersistenceProps {
   storageKey: string;
   /** Session-level result rehydrated from DB (Bug #1320 — fallback when localStorage is cleared). */
   initialResult?: FullReadingResult | null;
+  /** Issue #2503: transcript rehydrated from DB step_data — fallback when localStorage
+   *  is cleared (handleFinish removes it) so 你說的 doesn't vanish on remount. */
+  initialTranscript?: string;
 }
 
 interface UseFullReadingResultPersistenceReturn {
@@ -52,6 +55,7 @@ export function useFullReadingResultPersistence({
   userId,
   storageKey,
   initialResult,
+  initialTranscript,
 }: UseFullReadingResultPersistenceProps): UseFullReadingResultPersistenceReturn {
   /* ---- Bug #1320 Bug 3: Derive initial result priority:
    *   1. localStorage (same-browser persistence, most complete — has diffTokens)
@@ -83,7 +87,9 @@ export function useFullReadingResultPersistence({
 
   const [result, setResult] = useState<SavedResult | null>(getInitialResult);
   const [streamingTranscript, setStreamingTranscript] = useState(
-    () => savedProgress.current?.transcript ?? ''
+    // Issue #2503: localStorage wins (most recent), else DB step_data transcript,
+    // so 你說的 survives handleFinish's localStorage clear + remount.
+    () => savedProgress.current?.transcript ?? initialTranscript ?? ''
   );
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 

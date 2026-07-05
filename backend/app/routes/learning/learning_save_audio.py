@@ -59,6 +59,10 @@ class SaveAudioResponse(BaseModel):
     ok: bool
     audio_gcs_path: str | None = None
     reason: str | None = None
+    # Issue #2503: the attempt row the audio was bound to, so the frontend can
+    # persist it and later request a replay signed URL after the in-memory blob
+    # is gone (e.g. student navigates away and back).
+    attempt_id: int | None = None
 
 
 @router.post(
@@ -199,7 +203,7 @@ async def save_reading_audio(
             current_user.id,
             stored_path,
         )
-        return SaveAudioResponse(ok=True, audio_gcs_path=stored_path)
+        return SaveAudioResponse(ok=True, audio_gcs_path=stored_path, attempt_id=attempt.id)
     except Exception as exc:
         db.rollback()
         logger.warning(
