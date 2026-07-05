@@ -16,7 +16,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { cleanChineseText } from '../utils/textDiff';
 import { analyzeFluency } from '../utils/fluencyAnalyzer';
 import { DiffToken } from '../types';
-import { useAudioRecorder } from './useAudioRecorder';
+import { useAudioRecorder, FULL_READING_MAX_SECONDS } from './useAudioRecorder';
 import { cancelTts } from '../services/ttsApi';
 import { saveReadingHistory } from '../services/readingHistoryApi';
 import { transcribeReading, saveReadingAudio } from '../services/learning/session';
@@ -129,7 +129,8 @@ export function useFullReadingSession({
   const isSessionActiveRef = useRef(false);
   const startTimeRef       = useRef<number>(0);
 
-  const audioRecorder = useAudioRecorder(120);
+  // Issue #2497: whole-article reading runs 2–4 min; the old 120 s cap truncated it.
+  const audioRecorder = useAudioRecorder(FULL_READING_MAX_SECONDS);
 
   /* ---- Cleanup on unmount ---- */
   useEffect(() => {
@@ -141,6 +142,15 @@ export function useFullReadingSession({
       cancelTts();
     };
   }, []);
+
+  /* Issue #2497 — surface the recording cap instead of truncating silently.
+   * When the recorder auto-stops at FULL_READING_MAX_SECONDS, tell the student the
+   * mic stopped so they can submit / re-record rather than keep reading into a dead mic. */
+  useEffect(() => {
+    if (audioRecorder.reachedMaxDuration && isSessionActiveRef.current) {
+      setMicError(`錄音已達 ${Math.round(FULL_READING_MAX_SECONDS / 60)} 分鐘上限並自動停止，請按「完成」送出，或重新錄音。`);
+    }
+  }, [audioRecorder.reachedMaxDuration]);
 
   /* ---- Session start ---- */
   const startSession = useCallback(() => {
