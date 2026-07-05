@@ -42,9 +42,17 @@ _ALLOWED_PREFIXES = ("lessons-images/", "stories/", "worksheets/")
 # Allow-list charset for the decoded object path. FastAPI's `{path:path}`
 # converter URL-decodes the raw request path once before this ever runs, so a
 # literal ".." here is a real traversal attempt, not a percent-encoding
-# artifact. Anything outside this charset (backslashes, NUL, unicode
-# lookalikes, control chars, ...) is rejected outright.
-_SAFE_PATH_RE = re.compile(r"^[A-Za-z0-9_\-./]+$")
+# artifact.
+#
+# `\w` (Unicode by default for str patterns) matches ASCII word chars PLUS
+# non-ASCII letters/digits, so CJK object names are allowed — this is a
+# 國語文 (Chinese-literacy) platform and real thumbnails are named e.g.
+# `文-L1.webp` (#2486 regression: the old ASCII-only class 404'd every
+# classical-Chinese lesson thumbnail even though the object existed). Still
+# rejected outright: backslashes, NUL, control chars, whitespace, `%`, quotes
+# — none are in `[\w\-./]`. Path traversal is caught by the explicit ".."
+# check + the allow-listed-prefix check in `_is_safe_object_path`.
+_SAFE_PATH_RE = re.compile(r"[\w\-./]+")
 
 _CONTENT_TYPES = {
     ".webp": "image/webp",
@@ -68,7 +76,7 @@ def _is_safe_object_path(object_path: str) -> bool:
         return False
     if object_path.startswith("/"):
         return False
-    if not _SAFE_PATH_RE.match(object_path):
+    if not _SAFE_PATH_RE.fullmatch(object_path):
         return False
     # Must have an actual filename component after the prefix — a bare
     # "lessons-images/" request is never a real object, reject it here
