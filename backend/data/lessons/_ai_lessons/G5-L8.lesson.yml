@@ -1,0 +1,133 @@
+# AI-extracted lesson_content — 閱讀聚光燈 only (ai-lesson-extract SKILL)
+# CODE: G5-L8  奧運銀牌的自我鍛鍊
+# Source worksheet: /tmp/lingoleap-worksheets/G5-L08.pdf  (原始學習單，多模態閱讀)
+# Full 課文 (p1): backend/data/lessons/_parsed_2026-05-01/G5-L8.yml  (parser 將全文併為 1 段)
+#
+# 聚光燈 = 推論策略──推論人物特質 (trait_inference)。原件呈現「1.推論主要特質 → 2.整理成表格
+# → 3.小試身手」。版面原則(啟翔指正)：題目與其材料都在右方作答區；表格用「代號對應」的
+# keypoints_table(rows→blank 代號)直接在右方呈現+作答，而非丟到左欄參考課文。
+#  - 左欄只放「參考課文」(p1，loader 會從 _parsed 灌權威全文)。
+#  - ex-q1 (guided_steps)：Q1 從全文推論主要特質「自律」(課文明載「從小就以自律…受矚目」、
+#    結尾「自律嚴格…楷模」)，free_text + reference_answer，不造 distractor。
+#  - ex-q2-table (keypoints_table)：Q2「整理成表格」──4 條「做的事」線索(row.label) → 人物特質
+#    blank(t1..t4，代號對應)，皆填「自律」，exact 判分，右方作答。
+#  - ex-q3 (guided_steps)：Q3 小試身手──兩個新線索(皆「」直接引語)。每條 select 判 做的事/說的話
+#    (皆說的話=1) + free_text 開放推論特質(附範答，rubric)。引語短、與作答緊綁，放該步 context。
+# 圖：原件有「凳子圖/步驟圖」兩張教學圖，但 renderer 無「右方圖片」機制(圖只能渲染在左欄
+# 參考區，G7 亦然)；且凳子圖內容與右方 keypoints_table 重複，故不放圖(見交接說明，若要圖需擴
+# renderer)。主觀自評(◎)= 範圍外。七/八/九(閱讀理解/詞語/影片)= 獨立模組非聚光燈。
+# ⚠ SKILL 原註 keypoints_table「範圍外(重點表模組)」──此處依啟翔指示，把它當「答案承載表格」
+#   的通用機制用於聚光燈；SKILL 該點待 Young 一併釐清。
+id: G5-L8
+lesson_code: G5-L8
+title: 奧運銀牌的自我鍛鍊
+blocks:
+  # ── 左欄：參考課文(loader 會從 _parsed 灌權威全文) ──────────────────────────
+  - id: p1
+    type: paragraph
+    text: >-
+      他緊緊抓住對手的柔道衣，他隨時感受到對手重心的移動，一抓到時機，就要運用技巧和力量，將對手狠狠的摔在地板上；就算被對手壓制，他也能冷靜應對，一個翻身就能將劣勢轉為優勢。他是目前男子60公斤量級世界第一的柔道選手──楊勇緯。楊勇緯從小就以自律和強韌的心理素質受到矚目。國小三年級，他就跟著哥哥一同練習柔道，最後擊敗哥哥成為國手。哥哥說：「勇緯勤於訓練，每天都提早三、四十分鐘到校練習，連休息時間也不得閒，總是不斷的精進自己。」楊媽媽也說，「其實沒有什麼天才啦，是勇緯自己埋頭苦幹，老師給他課表，他就按部就班去做。」楊勇緯的飲食也有嚴格的要求。有位記者採訪楊勇緯時，點了份薯條給他，卻馬上被拒絕：「我不能吃油炸的，當選手後就很克制！」比賽要到了，他更是小心注重，怎麼吃，怎麼睡，總要讓自己身體保持在最佳的狀態。不但如此，他隨身帶著手掌般大小的小冊子，隨時用工整的字記下每天所學、所想和該注意的事項，從不放掉任何精進的機會。心、體、技！心、體、技！競技場上，除了體能和技術，心理素質更是成敗關鍵。楊勇緯說：「賽前，我學會把注意力全部放在比賽上，讓身邊的干擾降到最低，專注在當下。先深呼吸冷靜，再調整好心情重新開始，然後思考應該再做些什麼，好讓自己多一點機會。」數年的苦練，2021年楊勇緯在東京奧運一路過關斬將，挺進六十公斤級金牌戰，最後卻不幸敗給日本選手，只得到銀牌。「奪奧運銀牌的心情如何？」記者問。楊勇緯眼眶泛紅，激動的說：「想拿金牌！」記者安慰：「拿銀牌也很好啊！」楊勇緯再也止不住淚水，搖著頭的對著鏡頭再說一次：「我的目標是金牌！」雖然失去了金牌，但楊勇緯仍展現了強大的心理素質，他說：「失敗讓你更成長，讓你知道自己哪裡做不好，在下一個階段更上層樓。」經歷了東奧的挫折後，2021、2022年楊勇緯奪下兩面柔道大滿貫金牌。他用行動告訴大家，他不只是拿獎牌的選手，更是一位自律嚴格、內心強大，能把挫折當養分，持續優化細節的運動員楷模。
+
+  # ── 右欄圖：原件凳子圖(人物特質桌面 + 4 條線索桌腳)。placement:exercise → 渲染在
+  #    右方作答區(跟題目一起),非左欄課文。asset=_parsed.images[0]=07(hydration figure[0]
+  #    → images[0]=07 安全，不會變 QR)。 ─────────────────────────────────────
+  - id: fig-stool
+    type: figure
+    placement: exercise
+    label: 推論人物特質圖
+    caption: 四條「做的事」線索（桌腳）共同支撐同一個人物特質（桌面）。
+    asset: images/G5-L8/G5-L8-07.png
+
+  # ── 右欄一：Q1 從全文推論主要特質 ─────────────────────────────────────────
+  - id: ex-q1
+    type: exercise
+    question:
+      kind: guided_steps
+      strategy_name: 推論策略──推論人物特質
+      instruction: >-
+        我們可以從一個人說的話、做的事來推論人物特質。閱讀時，讀者若能從文中線索推論人物特質，就能對文章有更好的掌握。推論方法有兩步：步驟一，找出角色言行的線索（做的事、說的話）；步驟二，從這些線索推論人物特質。
+      steps:
+        - prompt: 我們可以從課文中楊勇緯做的事、說的話和他呈現的態度，來推論他的人物特質是什麼？（用一個詞回答）
+          type: free_text
+          reference_answer: 自律
+          section: 一、推論主要特質
+    answer_space: free_text
+    answer: [null]
+    grader: rubric_ai
+    anchors:
+      - { block_id: p1 }
+    needs_review: false
+
+  # ── 右欄二：Q2 整理成表格（keypoints_table，代號對應，右方作答） ───────────
+  - id: ex-q2-table
+    type: exercise
+    question:
+      kind: keypoints_table
+      structure: flat
+      title: 二、整理成表格：四條「做的事」線索共同指向的人物特質
+      rows:
+        - label: 勤於訓練，每天都提早三、四十分鐘到校練習。（做的事）
+          blank_ids: [t1]
+        - label: 老師給他課表，他就按部就班去做。（做的事）
+          blank_ids: [t2]
+        - label: 飲食克制，身體保持最佳狀態。（做的事）
+          blank_ids: [t3]
+        - label: 隨時用工整的字記錄所學。（做的事）
+          blank_ids: [t4]
+      blanks:
+        - { id: t1, answer: 自律, hint: 人物特質 }
+        - { id: t2, answer: 自律, hint: 人物特質 }
+        - { id: t3, answer: 自律, hint: 人物特質 }
+        - { id: t4, answer: 自律, hint: 人物特質 }
+    answer_space: text
+    answer:
+      t1: 自律
+      t2: 自律
+      t3: 自律
+      t4: 自律
+    grader: exact
+    anchors:
+      - { block_id: p1 }
+    needs_review: false
+
+  # ── 右欄三：Q3 小試身手（兩個新引語線索：判言行類別 + 推論特質） ───────────
+  - id: ex-q3
+    type: exercise
+    question:
+      kind: guided_steps
+      strategy_name: 推論策略──推論人物特質
+      instruction: >-
+        小試身手：從下面兩個新的線索，判斷它是楊勇緯「做的事」還是「說的話」，再推論他是一個怎麼樣的人。
+      steps:
+        - prompt: 第一個線索是楊勇緯「做的事」還是「說的話」？
+          type: select
+          options:
+            - 做的事
+            - 說的話
+          answer: 1
+          section: 三、小試身手
+          context: >-
+            線索一：「賽前，我學會把注意力全部放在比賽上，讓身邊的干擾降到最低，專注在當下。先深呼吸冷靜，再調整好心情重新開始，然後思考應該再做些什麼，好讓自己多一點機會。」
+        - prompt: 從第一個線索，你認為楊勇緯是一個怎麼樣的人？（推論他的人物特質）
+          type: free_text
+          reference_answer: 專注、沉著冷靜──他能主動把注意力放在比賽上、把干擾降到最低，遇到狀況先深呼吸冷靜再調整。
+          section: 三、小試身手
+        - prompt: 第二個線索是楊勇緯「做的事」還是「說的話」？
+          type: select
+          options:
+            - 做的事
+            - 說的話
+          answer: 1
+          section: 三、小試身手
+          context: >-
+            線索二：「失敗讓你更成長，讓你知道自己哪裡做不好，在下一個階段更上層樓。」
+        - prompt: 從第二個線索，你認為楊勇緯是一個怎麼樣的人？（推論他的人物特質）
+          type: free_text
+          reference_answer: 積極正向、不怕失敗──他把失敗當成成長的養分，能從挫折中找出自己的不足，繼續往上進步。
+          section: 三、小試身手
+    answer_space: free_text
+    answer: [1, null, 1, null]
+    grader: rubric_ai
+    anchors:
+      - { block_id: p1 }
+    needs_review: false
