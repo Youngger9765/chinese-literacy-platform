@@ -261,7 +261,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
       {/* ── 右欄：AI 判斷結果（對照 + 摘要）（Issue #2502）── */}
       {showEvalColumn && (
-      <div className="space-y-2">
+      <div>
 
       {/* ── Painpoint 4: 原文 vs 朗讀結果 — 左右並陳（桌機），上下排（手機） ── */}
       {readingResultTokens && !isSessionActive && (
@@ -270,8 +270,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           <div className="px-4 pt-3 pb-2 border-b border-on-surface/5">
             <ReadingDiffLegend />
           </div>
-          {/* 左右並陳 (md+) / 上下排 (sm) */}
-          <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-on-surface/8">
+          {/* Issue #2502: 移到右欄後改為永遠上下排（你唸的／朗讀結果），
+              避免在窄的右欄內再被 md:flex-row 二度切欄導致中文擠壓 */}
+          <div className="flex flex-col divide-y divide-on-surface/8">
             {/* 左欄：學生實際唸的內容（Issue #2500 — 逐字 STT transcript，取代課文原文）*/}
             <div className="flex-1 p-4">
               <p className="text-xs font-bold text-on-surface-variant mb-2">你唸的內容</p>

@@ -681,6 +681,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     paragraphSummary,
     hideStaleEval,
   );
+  // Issue #2502 (review): widen the container when ParagraphCard shows the
+  // left課文/right判斷 two-column, so the right column isn't cramped at lg.
+  const showEvalColumn = !!(displayLastDiffTokens || displayParagraphSummary);
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -693,7 +696,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     >
       {/* ── Single-column centered layout ──────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48" style={{ scrollbarWidth: 'thin' }}>
-        <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
+        <div className={`mx-auto px-6 md:px-16 pt-4 ${showEvalColumn ? 'max-w-6xl' : 'max-w-4xl'}`}>
           <div className="mt-4" ref={activeLineRef}>
             <ParagraphCard
               idx={currentLineIndex}
