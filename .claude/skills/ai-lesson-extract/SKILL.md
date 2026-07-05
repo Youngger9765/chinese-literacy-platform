@@ -22,7 +22,7 @@ description: 讓 AI 直接讀「原始學習單」(從 GCS 下載 DOCX → 轉 P
   > - **`table`**:loader **不灌**表,仍要你依 `_parsed.tables` 忠實轉成契約 `TableBlock`(headers/rows/`grid` 合併格),見 §A。
   > - 交錯順序(段落↔圖↔表)由你依 PDF 版面判斷(`_parsed` 沒存位置);`anchors` 指向這些 id。
 - ❌ **不擷取**(它們是**各自獨立的模組**,不在本 skill 範疇):
-  - **文章重點表**(story-structure / keypoints_table)——獨立模組。
+  - **文章重點表**(story-structure)這個**練習模組的內容**——獨立模組,不擷取。(注:`keypoints_table` 這個**契約型別**可作為聚光燈內「答案承載表格」的機制使用,見 §A——此處指的是別去擷取「文章重點表」那個獨立練習,不是禁用該型別。)
   - 語詞我最棒 / 語詞應用、閱讀理解選擇題、生字、朗讀計時、知識補給站…等非聚光燈練習。
   - **主觀自評 / 後設反思清單**(如「◎自我檢核」「我學會找問題/解決/結果了嗎」「我覺得…」勾選)——**無客觀答案 → 依答案不變量根本不成題,不擷取**(與語詞/計時同屬範圍外,即使它印在聚光燈那一節的結尾)。判準:一個項目若沒有「能機器比對的正解」(它問的是學生的自我感受,勾幾項都不算錯)→ 就不是聚光燈作答題。
     - ⚠️ 這類清單**最容易讓 skill 不穩定**:硬給它標準答案(如「四項全勾」)=造假客觀性(錯);塞成 `custom`+manual grader=前端無法判分、卡住完成閘(也錯)。**唯一穩定解=不做它**(留給紙本/未來的自評模組)。
@@ -77,19 +77,23 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 
 ## 怎麼把聚光燈「判斷 + 呈現」成契約
 
-### A. 題型對應(聚光燈內部會用到的)
+### A. 大原則:先判「答案是什麼形狀」,再選讓答案可驗證的契約機制
 
-| 你在聚光燈看到 | 對應 | 答案形狀 |
+聚光燈每題 = 材料 + 一個要學生產出的答案。**擷取的核心判斷只有一個:這一題的答案是什麼形狀?** 依形狀選能讓答案「可機器比對」或「可對範答(rubric)」的機制。**不要用策略的名字(推論/摘要/圖文…)去對映題型——策略名 ≠ 呈現型別;同一種策略在不同學習單可能是填空、表格或申論。** 這張表是把「答案形狀」對應到機制,不是窮舉題型;沒見過的版面一樣先問「答案是什麼形狀」。
+
+| 紙上的作答形狀 | 契約機制 | 答案 |
 |---|---|---|
-| 逐步引導練習(❶❷❸❹…)| `guided_steps`;引用圖/表時用 `graphic_text_integration` | 逐 step + 組裝 list |
-| 打勾單選(□)/ 選分句 | step `type: select` | int 索引 |
-| 可複選 | step `type: multi_select` | list[int] |
-| 開放填答 / 畫線圈詞 | step `type: free_text`(`reference_answer` 放範答)| null(rubric) |
-| 連連看 / 配對 | `guided_steps`,每個左項一個 `select` step(選右欄哪一項)| 每 step int |
-| 聚光燈流程內的填空(如某練習的推論格)| step `free_text`,或 `fill_in_blank` 另一 exercise 綁同 anchors | — |
-| 聚光燈用到的圖 | `figure` block(**記錄在第幾段旁邊**,`caption` 寫圖在講什麼)| 用 exercise `anchors` 綁 |
-| 聚光燈用到的表 | `table` block(合併儲存格用 `grid`/`section_label_col`)| 用 `anchors` 綁 |
-| 真的沒有對應結構 | `custom` + `needs_review: true`(`render_hint` 寫呈現說明,**答案仍要填**)| — |
+| 有給選項 / □ 勾選一個 | `guided_steps` 內 step `select` | int 索引 |
+| □ 可複選 | step `multi_select` | list[int] |
+| 單一確定填空(紙上**沒給**選項) | step `free_text` + `reference_answer` —— **不要自己捏造選項把它變成選擇題** | null(rubric) |
+| 開放推論 / 申論(如「你覺得他是怎麼樣的人」,無唯一解) | step `free_text` + `reference_answer` —— rubric 判分**就是**它的機制,**不是** needs_review、也**不要**假造一個「標準答案」 | null(rubric) |
+| 一格格要填、每格都是答案的**表格**(代號對應) | `keypoints_table`:每列 `label`=給定線索、`blank_ids`→`blanks`(代號);格子可 free-fill,或帶 `options` 的 □-choice | dict{代號: 值},exact |
+| 逐步引導(❶❷❸…)、連連看 / 配對 | `guided_steps`(每個左項一個 `select`);題目要看圖/表作答時用 `graphic_text_integration` | 逐 step 組裝 list |
+| 畫線 / 圈詞這類**紙本動作** | 改寫 `prompt` 成數位可作答(見下),型別 `free_text` + `reference_answer` | null(rubric) |
+| 主觀自評 / 後設反思(◎自我檢核,勾幾項都不算錯) | **範圍外,不做**(無客觀答案 → 依答案不變量不成題) | — |
+| 真的判不出任何可比對 / 可對範的形狀 | `custom` + `needs_review: true`(答案仍要填,或 null) | — |
+
+> `keypoints_table` 是**機制**(答案承載表格),與範圍外的「文章重點表**模組**」是兩回事:聚光燈題目本身若是一個要填的表,就用這個機制;只是不要去擷取「文章重點表」那個獨立練習的內容。
 
 **圖片位置與表格意義(使用者特別在意)**:讀 PDF 時明確記錄每張圖在**哪一段旁邊**、每個表的意義;用 block 順序 + `anchors` 忠實表達。
 
@@ -115,26 +119,28 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 3. **step 的 `prompt` 只寫問題本身**(如 `❶主角是誰？`),**不要**在每步重複區段名(「例一:烏鴉喝水…」「接下來,我們來看課文的故事…」)——那交給 `section`。
 4. `context` / `section` / `render_hint` 都是**純呈現**,永遠**不放答案**。
 
-### C. 版面模型:左=課文、右=作答區(擷取時的分類原則)
+### C. 大原則:材料放哪一欄 = 「它是共用閱讀材料,還是這一題專屬的東西」
 
-渲染器把 reading-strategy 頁分成**兩欄**:
-- **左欄=閱讀材料**:所有非 exercise 的 block(`paragraph` / `figure` / `table` / `parallel_passage`),依原文順序。**本課課文自帶、供對照的圖/表放這裡**(學生邊看邊答)。
-- **右欄=聚光燈作答區**:所有 `exercise` block(引導步驟 + 選項/輸入)。
+渲染器兩欄:**左欄 = 學生『讀來作答的共用材料』**;**右欄 = 題目本身 + 這一題專屬的圖/表**。判斷原則(取代舊的「題目專屬圖只能 custom+needs_review」——契約已支援 `placement`):
 
-擷取時據此分類:
-- 課文段落、以及**課文的對照圖/表**(如 G7-L30 的圖一/表一/表二)→ 做成**頂層 `figure`/`table` block**(自動歸左),由聚光燈 exercise 的 `anchors` 指向它們。
-- **若某聚光燈題目自帶、只服務該題的圖**(非課文對照材料)→ 應歸右欄、跟著題目。目前契約**沒有** per-question 圖片欄位,所以這種情況:在該 exercise 用 `custom` 的 `render_hint` 記錄該圖語意 + 標 `needs_review: true`(誠實標記待補),**不要**把它當成課文對照圖放頂層(否則會錯誤出現在左欄當閱讀材料)。這是已知限制,遇到就登缺口,別硬塞。
+- **共用閱讀材料**(課文段落;全課共用、跨題對照的圖/表,如 G7-L30 的圖一/表一/表二)→ 頂層 `paragraph`/`figure`/`table` block,**預設歸左**,exercise 用 `anchors` 指向。
+- **某題專屬的圖/表**(只服務那一題、學生要看著它答那題)→ **歸右欄、跟題目一起**:
+  - 圖 → `figure` block 加 `placement: exercise`(渲染在右欄作答區;`asset` 規則見鐵律9)。
+  - 要作答的表(格子是答案) → 直接用 `keypoints_table`(它本身是 exercise,天生在右欄可填,見 §A)。
+  - 純呈現、不作答的對照小表 → `table` block 加 `placement: exercise`。
+- 讀 PDF 時明確記錄每張圖在哪一段旁、每個表的意義,用 block 順序 + `placement` + `anchors` 忠實表達。
+- **呈現保真不變量(§B.2)不變**:不論放左放右,答某題所需材料都要在畫面上、紙上一次數位一次;判不出歸屬 → `needs_review`,別硬塞。
 
 ## 鐵律(違反 = 失敗)
-1. 只做聚光燈 + 其 anchor 的段落/圖/表;不擷取重點表/語詞/閱讀理解等其他模組。課文對照圖表 → 頂層 block(渲染在左欄);題目專屬圖 → 依 §C 處理(勿當課文圖放左欄)。
-2. 每個 exercise 必有 `answer_space` + 機器可比 `answer` + `grader`。散文不是答案。
+1. 只做聚光燈 + 其 anchor 的段落/圖/表;不擷取重點表/語詞/閱讀理解等其他模組。分欄依 §C 的原則(共用材料→左欄 block;題目專屬圖/表→右欄,用 `placement: exercise` 或 `keypoints_table`),不再用「custom+needs_review 佔位」處理題目專屬圖。
+2. 每個 exercise 必有 `answer_space` + 機器可比 `answer` + `grader`(開放申論用 `free_text`+`reference_answer` 交給 rubric,也算滿足)。散文不是答案。答案形狀決定 exercise 型別,見 §A;**不要為了湊「可機器比對」而捏造選項**。
 3. `anchors.block_id` 必須指向存在的 paragraph/figure/table/parallel_passage block。
 4. block `id` 唯一且穩定(如 p1/fig-1/table-1/ex-spotlight)。
 5. **呈現保真不變量**(見 §B.2):答每題所需材料都要在畫面上可得(不在課文的補充短文必進該段 `context`)、紙上一次數位一次(不重複)、教學鷹架不因擷取消失;同段步驟用相同 `section`,prompt 不重複區段名。
 6. 判不準 → `needs_review: true`,不要瞎填索引、不要把散文塞進 answer。
 7. **禁止把特定課的逐字答案寫進本 SKILL / few-shot**(overfit lint 會掃)。few-shot 用與目標課不同的例子。
 8. 逐題在對話/PR 說明判斷依據(reasoning **不寫進 YAML**,避免污染契約)。
-9. **`figure` 的 `asset` 交給 loader 從 `_parsed` 灌,你只要標對 `圖N` label**。服務時 `lesson_content_loader._hydrate_reading_from_parsed` 會依 `label`(或順序)把 asset 覆蓋成 `_parsed.images[].filename`(= GCS 正確檔,前端 `buildImageSrc` 打 GCS)。所以:figure block 的 `asset` 直接抄 `_parsed.images[].filename`、`label` 標對 `圖N` 即可,**不要**去挑本機 `backend/data/images/` 的檔(那份編號與 GCS 不同,曾害人把對的值改成 404)。你唯一要確認的:**`圖N` label 對應到 `_parsed` 裡正確那張圖**(caption 對得上)——asset 值本身錯了 loader 也會糾回。
+9. **`figure` 的 `asset` 抄自 `_parsed.images[].filename`(= GCS 正確檔,前端 `buildImageSrc` 打 GCS),不要去挑本機 `backend/data/images/`**(那份編號與 GCS 不同,曾害人把對的值改成 404)。loader `_hydrate_reading_from_parsed` 會依 `圖N` label(**沒有 label 時退回位置對應** `images[i]`)覆蓋 asset。⚠**位置對應不可靠**:`_parsed.images` 可能夾雜非插圖(如 QR code)、且常無 `figure_label`——這時 `images[i]` 未必是你要的圖(G5-L8 就是 images=[凳子,QR,步驟圖,QR])。所以:**認圖看內容不看編號**——擷取聚光燈用到的圖時,先確認那個 `_parsed.images[].filename` 的內容真的是該圖(必要時開圖或 `curl` GCS 200 核對),對不上 / 判不出就 `needs_review`,別硬指一個編號。
 
 ## 收尾(自驗)
 1. `eval_lesson_content.py {CODE}.lesson.yml --markdown` → `RESULT: PASS`。
@@ -143,5 +149,5 @@ cd backend && .venv/bin/python ../scripts/eval_lesson_content.py ../backend/data
 4. **呈現保真自問(逐題)**:「答這題需要的材料,學生在畫面上都拿得到嗎?」逐題掃過——引用的短文/圖/表/思考框有沒有漏掉(尤其不在課文的補充短文)、有沒有同段文字重複兩次。有漏→補;判不出→ `needs_review`。
 5. **課文左欄內容(段落 text / 圖 asset)由 loader 從 `_parsed` 灌,你只驗骨架對齊**:
    - `paragraph` block 數量與順序要**等於 `_parsed.paragraphs`**(數量不符 loader 不灌,會退回你抄的版本 → 可能缺段)。核對:數 `_parsed.paragraphs` 幾段,YAML 就幾個 `p1..pN`。
-   - 每個 `figure` block 的 `label`(`圖N`)要對應到 `_parsed.images` 裡**正確那張**(caption 對得上);asset 抄 `_parsed.images[].filename` 即可,loader 會依 label 確認/覆蓋成 GCS 正確檔——**不需**自己 curl 每個 GCS URL(這關已由 loader hydration 保證)。
+   - 每個 `figure` block 的 `asset`/`label` 要對到 `_parsed.images` 裡**正確那張**(認內容,caption 對得上)。**別只信 loader hydration**:它沒 label 時是位置對應,而 `_parsed.images` 可能夾雜非插圖(QR)→ 位置對應會指錯(見鐵律9)。所以擷取聚光燈用到的圖時,必要時開圖 / `curl` GCS 200 核對內容,判不出就 `needs_review`。
    - `table` block loader **不灌**,仍要對照 `_parsed.tables` 逐格核對(含合併格)。

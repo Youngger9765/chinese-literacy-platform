@@ -95,7 +95,7 @@ const GuidedStepsInput: React.FC<Props> = ({
         fb[i] = setEqualIndices(v as number[], step.answer);
       } else if (step.type === 'free_text' && typeof v === 'string' && v.trim()) {
         const ok = gradeRubricLocal(v, step.referenceAnswer);
-        gr[i] = { ...FALLBACK_GRADE, is_correct: ok, feedback: ok ? '✓ 答對了' : '再想想看' };
+        gr[i] = { ...FALLBACK_GRADE, is_correct: ok, feedback: ok ? '答對了' : '再想想看' };
         fb[i] = true;
       }
     });
@@ -163,7 +163,7 @@ const GuidedStepsInput: React.FC<Props> = ({
       const localCorrect = gradeRubricLocal(text, step.referenceAnswer);
       setGrades((prev) => ({
         ...prev,
-        [i]: { ...FALLBACK_GRADE, is_correct: localCorrect, feedback: localCorrect ? '✓ 答對了' : '再想想看' },
+        [i]: { ...FALLBACK_GRADE, is_correct: localCorrect, feedback: localCorrect ? '答對了' : '再想想看' },
       }));
       setFeedback((prev) => ({ ...prev, [i]: true }));
       return;
