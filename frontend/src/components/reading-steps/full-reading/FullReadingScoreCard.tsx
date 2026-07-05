@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { DiffToken } from '../../../types';
+import AudioPlayer from '../../ui/AudioPlayer';
 
 const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
   { min: 0.90, stars: 5, text: '太厲害了！',         color: 'text-emerald-600' },
@@ -81,7 +82,8 @@ const FullReadingScoreCard: React.FC<FullReadingScoreCardProps> = ({
       {audioUrl && (
         <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
           <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">重聽錄音</p>
-          <audio src={audioUrl} controls className="w-full h-10" aria-label="播放您的朗讀錄音" />
+          {/* Issue #2499: custom seekable player — native <audio> can't seek WebM (Infinity duration) */}
+          <AudioPlayer src={audioUrl} aria-label="播放您的朗讀錄音" />
         </div>
       )}
     </>
