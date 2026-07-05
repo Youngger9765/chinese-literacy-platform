@@ -1,0 +1,224 @@
+{
+  "blocks": [
+    {
+      "id": "p1",
+      "text": "周天成極度自律，每天清晨即起，完成每日的羽球訓練菜單後，還會繼續進行重量訓練，對自己的要求從不鬆懈。他說：「強健的肌肉是每個運動員必備的條件之一。」",
+      "type": "paragraph"
+    },
+    {
+      "id": "p2",
+      "text": "即使已是頂尖選手，周天成仍時刻提醒自己保持謙虛不驕傲，並嚴格限制自己的口腹之慾，數年如一日地維持著規律的作息與飲食。",
+      "type": "paragraph"
+    },
+    {
+      "grid": null,
+      "headers": [
+        "文中線索（言／行）",
+        "推論的人物特質"
+      ],
+      "id": "clue-table",
+      "label": null,
+      "notes": [],
+      "placement": null,
+      "row_sections": null,
+      "rows": [
+        [
+          "每天完成訓練菜單後還做重量訓練",
+          "自律"
+        ],
+        [
+          "「保持謙虛不驕傲」",
+          "謙虛"
+        ],
+        [
+          "嚴格限制口腹之慾",
+          "自律"
+        ]
+      ],
+      "section_label_col": null,
+      "title": "言行線索 → 人物特質",
+      "type": "table"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "clue-table",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": 0,
+      "answer_space": "choice",
+      "grader": "exact",
+      "id": "ex-trait",
+      "needs_review": false,
+      "question": {
+        "character": "周天成",
+        "clues": [
+          "每天清晨即起，完成每日的羽球訓練菜單",
+          "訓練後還會繼續進行重量訓練",
+          "嚴格限制自己的口腹之慾"
+        ],
+        "instruction": "周天成完成每日的羽球訓練菜單，還繼續重量訓練。這屬於「做的事」。請推論周天成的人物特質。",
+        "kind": "trait_inference",
+        "trait_options": [
+          "自律",
+          "謙虛",
+          "熱情",
+          "感恩"
+        ]
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "answer_space": "order",
+      "grader": "ordered",
+      "id": "ex-order",
+      "needs_review": false,
+      "question": {
+        "instruction": "請依照周天成一天訓練的時間順序，將下列事件排序。",
+        "items": [
+          "清晨即起",
+          "完成羽球訓練菜單",
+          "進行重量訓練",
+          "提醒自己保持謙虛"
+        ],
+        "kind": "ordering"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        0,
+        2,
+        3
+      ],
+      "answer_space": "multi_choice",
+      "grader": "set",
+      "id": "ex-multi",
+      "needs_review": false,
+      "question": {
+        "explanation": null,
+        "kind": "multiple_choice",
+        "options": [
+          "每天完成訓練菜單後還做重量訓練",
+          "保持謙虛不驕傲",
+          "嚴格限制口腹之慾",
+          "維持規律的作息與飲食"
+        ],
+        "question": "下列哪些線索可以支持周天成「自律」的特質？（可複選）"
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": [
+        "自律",
+        "謙虛"
+      ],
+      "answer_space": "text",
+      "grader": "set",
+      "id": "ex-fill",
+      "needs_review": false,
+      "question": {
+        "kind": "fill_in_blank",
+        "sentence": "周天成靠著__與__，數年如一日地維持頂尖狀態。（填入兩個人物特質）",
+        "slots": null,
+        "vocab_bank": null
+      },
+      "type": "exercise"
+    },
+    {
+      "anchors": [
+        {
+          "block_id": "p1",
+          "char_end": null,
+          "char_start": null
+        },
+        {
+          "block_id": "p2",
+          "char_end": null,
+          "char_start": null
+        }
+      ],
+      "answer": {
+        "b1": "羽球訓練菜單",
+        "b2": [
+          "規律",
+          "自律"
+        ]
+      },
+      "answer_space": "text",
+      "grader": "exact",
+      "id": "ex-fill-slots",
+      "needs_review": false,
+      "question": {
+        "kind": "fill_in_blank",
+        "sentence": "周天成每天清晨即起，完成__，並維持__的作息與飲食。",
+        "slots": [
+          {
+            "answer": "羽球訓練菜單",
+            "grader": "exact",
+            "hint": null,
+            "id": "b1"
+          },
+          {
+            "answer": [
+              "規律",
+              "自律"
+            ],
+            "grader": "set",
+            "hint": null,
+            "id": "b2"
+          }
+        ],
+        "vocab_bank": null
+      },
+      "type": "exercise"
+    }
+  ],
+  "id": "G5-L9",
+  "lesson_code": "G5-L9",
+  "title": "周天成的一天──頂尖選手的養成"
+}

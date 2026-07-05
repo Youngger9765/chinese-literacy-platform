@@ -1,0 +1,478 @@
+/**
+ * lessonContent.contract.test.ts — front/back contract parity gate.
+ *
+ * Part of the 閱讀聚光燈 refactor (SPOTLIGHT_REFACTOR_PLAN.md), Phase 0 + Phase 1.
+ *
+ * Loads the SHARED fixtures in backend/tests/fixtures/lesson_content/ (the same files
+ * the pydantic tests use) and validates them through the zod contract. If the zod and
+ * pydantic schemas drift, a fixture the backend accepts will fail here — that's the
+ * whole point: one contract, two languages, one set of fixtures.
+ *
+ * Fixtures are authored in snake_case (matching pydantic + the repo YAML convention);
+ * this test snake→camel-cases keys before parsing (the frontend contract is camelCase).
+ * The KEY SET is intentionally identical between the two, only the casing differs.
+ */
+import { describe, expect, it } from 'vitest';
+
+import { ExerciseBlock, LessonSchema } from '../lessonContent';
+// Shared fixture loaders — single implementation, re-used by the Phase-2 renderer
+// tests so every spec stays lock-step with the frozen contract (see testHelpers.ts).
+import { listFixtureFiles, loadFixture } from '../testHelpers';
+
+const REGISTERED_KINDS = [
+  'multiple_choice',
+  'fill_in_blank',
+  'ordering',
+  'trait_inference',
+  'guided_steps',
+  'graphic_text_integration',
+  'keypoints_table',
+  'custom',
+] as const;
+
+const fixtureFiles = listFixtureFiles();
+
+describe('lesson content contract (zod ↔ pydantic parity)', () => {
+  it('has the 4 layered hard-case fixtures', () => {
+    expect(fixtureFiles.length).toBeGreaterThanOrEqual(4);
+  });
+
+  for (const file of fixtureFiles) {
+    it(`validates ${file} through the zod contract`, () => {
+      const lesson = loadFixture(file);
+      expect(lesson.blocks.length).toBeGreaterThan(0);
+    });
+  }
+
+  it('exercises all 8 registered question types across the corpus', () => {
+    const seen = new Set<string>();
+    for (const file of fixtureFiles) {
+      for (const b of loadFixture(file).blocks) {
+        if (b.type === 'exercise') seen.add(b.question.kind);
+      }
+    }
+    for (const k of REGISTERED_KINDS) expect(seen.has(k)).toBe(true);
+  });
+});
+
+describe('the answer invariant rejects bad lessons (zod)', () => {
+  const base = () => ({
+    id: 'neg',
+    lessonCode: 'NEG-1',
+    blocks: [
+      { id: 'p1', type: 'paragraph', text: 'some passage' },
+      {
+        id: 'ex1',
+        type: 'exercise',
+        question: { kind: 'multiple_choice', question: 'q?', options: ['a', 'b'] },
+        answerSpace: 'choice',
+        answer: 0,
+        grader: 'exact',
+        anchors: [{ blockId: 'p1' }],
+      },
+    ],
+  });
+
+  it('rejects a null answer without needsReview', () => {
+    const d = base();
+    (d.blocks[1] as Record<string, unknown>).answer = null;
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects custom without needsReview', () => {
+    const d = base();
+    const ex = d.blocks[1] as Record<string, unknown>;
+    ex.question = { kind: 'custom', prompt: 'do the thing' };
+    ex.answerSpace = 'text';
+    ex.answer = '42';
+    ex.grader = 'exact';
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects an incoherent answerSpace/grader pair', () => {
+    const d = base();
+    const ex = d.blocks[1] as Record<string, unknown>;
+    ex.answerSpace = 'free_text';
+    ex.grader = 'exact';
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects an anchor to a missing block', () => {
+    const d = base();
+    (d.blocks[1] as Record<string, unknown>).anchors = [{ blockId: 'nope' }];
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('accepts custom when it carries an answer + needsReview', () => {
+    const d = base();
+    const ex = d.blocks[1] as Record<string, unknown>;
+    ex.question = { kind: 'custom', prompt: 'do the thing' };
+    ex.answerSpace = 'text';
+    ex.answer = '42';
+    ex.grader = 'exact';
+    ex.needsReview = true;
+    const parsed = LessonSchema.safeParse(d);
+    expect(parsed.success).toBe(true);
+  });
+
+  it('ExerciseBlock parses a well-formed exercise directly', () => {
+    const parsed = ExerciseBlock.safeParse((base().blocks[1]));
+    expect(parsed.success).toBe(true);
+  });
+});
+
+// ── Gap 1: multi_select guided step ──────────────────────────────────────────
+describe('Gap 1 — multi_select guided step (zod)', () => {
+  const guided = (steps: unknown[]) => ({
+    id: 'g',
+    lessonCode: 'G-1',
+    blocks: [
+      { id: 'p1', type: 'paragraph', text: 'passage' },
+      {
+        id: 'ex1',
+        type: 'exercise',
+        question: { kind: 'guided_steps', strategyName: 's', instruction: 'i', steps },
+        answerSpace: 'free_text',
+        answer: [0],
+        grader: 'rubric_ai',
+        anchors: [{ blockId: 'p1' }],
+      },
+    ],
+  });
+
+  it('accepts a multi_select step', () => {
+    const d = guided([
+      { prompt: 'p', type: 'multi_select', options: ['a', 'b', 'c'], answer: [0, 2] },
+      { prompt: 'q', type: 'free_text' },
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects multi_select step out-of-range', () => {
+    const d = guided([
+      { prompt: 'p', type: 'multi_select', options: ['a', 'b'], answer: [0, 9] },
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a select step with a list answer', () => {
+    const d = guided([
+      { prompt: 'p', type: 'select', options: ['a', 'b'], answer: [0, 1] },
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a free_text step with an answer', () => {
+    const d = guided([{ prompt: 'p', type: 'free_text', answer: 0 }]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a select step with a negative index (parity with pydantic)', () => {
+    // 0-based option index has no negative slot. The pydantic mirror rejects this in
+    // GuidedStep._check_shape; zod rejects it via the field-level `.min(0)`. Both must
+    // agree so a -1 sentinel / off-by-one lesson is not accepted by one and not the other.
+    const d = guided([
+      { prompt: 'p', type: 'select', options: ['a', 'b'], answer: -1 },
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a graphic_text_integration select step with a negative index', () => {
+    const d = {
+      id: 'g',
+      lessonCode: 'G-1',
+      blocks: [
+        { id: 'p1', type: 'paragraph', text: 'passage' },
+        {
+          id: 'ex1',
+          type: 'exercise',
+          question: {
+            kind: 'graphic_text_integration',
+            strategyName: 's',
+            instruction: 'i',
+            steps: [{ prompt: 'p', type: 'select', options: ['a', 'b'], answer: -1 }],
+          },
+          answerSpace: 'free_text',
+          answer: [-1],
+          grader: 'rubric_ai',
+          needsReview: true,
+          anchors: [{ blockId: 'p1' }],
+        },
+      ],
+    };
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+});
+
+// ── Gap 2: merged-cell grid + keypoints_table ────────────────────────────────
+describe('Gap 2 — table grid overlay + keypoints_table (zod)', () => {
+  const withTable = (grid: unknown) => ({
+    id: 't',
+    lessonCode: 'T-1',
+    blocks: [
+      { id: 'tbl', type: 'table', headers: ['a', 'b', 'c'], grid },
+      { id: 'p1', type: 'paragraph', text: 'x' },
+    ],
+  });
+
+  it('accepts a table grid overlay', () => {
+    const d = withTable([
+      [{ text: 'section', colspan: 3, isSectionLabel: true }],
+      [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
+    ]);
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a grid width mismatch (via superRefine)', () => {
+    const d = withTable([[{ text: 'x', colspan: 2 }]]); // sum 2 != headers 3
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  // Gap 2(a): vmerged section-label COLUMN — the defining real-corpus topology.
+  const withFullTable = (table: unknown) => ({
+    id: 't',
+    lessonCode: 'T-1',
+    blocks: [table, { id: 'p1', type: 'paragraph', text: 'x' }],
+  });
+
+  it('accepts a vmerged section-label column grid (rowspan-aware)', () => {
+    const headers = ['異同', '比較項目', '白尾八哥', '臺灣冠八哥'];
+    const grid = [
+      [{ text: '相同處', rowspan: 5, isSectionLabel: true }, { text: '外形' }, { text: '黑' }, { text: '黑' }],
+      [{ text: '體型' }, { text: '接近' }, { text: '接近' }],
+      [{ text: '行動與食物' }, { text: '覓食' }, { text: '覓食' }],
+      [{ text: '棲息地' }, { text: '平地' }, { text: '平地' }],
+      [{ text: '生物分類' }, { text: '留鳥' }, { text: '留鳥' }],
+      [{ text: '相異處', rowspan: 9, isSectionLabel: true }, { text: '嘴喙顏色' }, { text: '黃' }, { text: '象牙白' }],
+      [{ text: '尾羽顏色' }, { text: '末白' }, { text: '部分白' }],
+      [{ text: '冠羽' }, { text: '不明顯' }, { text: '明顯' }],
+      [{ text: '來源' }, { text: '外來種' }, { text: '原生種' }],
+      [{ text: '族群數量' }, { text: '較多' }, { text: '較少' }],
+      [{ text: '習性' }, { text: '較不怕人' }, { text: '較怕人' }],
+      [{ text: '築巢地點' }, { text: '常利用人造' }, { text: '較少利用' }],
+      [{ text: '適應都市環境' }, { text: '較強' }, { text: '較弱' }],
+      [{ text: '保育身分' }, { text: '非保育類' }, { text: '保育類' }],
+    ];
+    const d = withFullTable({ id: 'table-1', type: 'table', headers, grid });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('accepts rowSections + sectionLabelCol fast path', () => {
+    const d = withFullTable({
+      id: 'table-1',
+      type: 'table',
+      headers: ['比較項目', '白尾八哥', '臺灣冠八哥'],
+      sectionLabelCol: '異同',
+      rowSections: ['相同處', '相同處', '相異處'],
+      rows: [['外形', '黑', '黑'], ['體型', '接近', '接近'], ['嘴喙', '黃', '白']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects rowSections without sectionLabelCol', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b'],
+      rowSections: ['x'], rows: [['1', '2']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects rowSections length mismatch', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b'],
+      sectionLabelCol: 's', rowSections: ['x'], rows: [['1', '2'], ['3', '4']],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('still accepts the earlier horizontal-band grid (backward compat)', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['比較項目', '白尾八哥', '臺灣冠八哥'],
+      grid: [
+        [{ text: '相同處', colspan: 3, isSectionLabel: true }],
+        [{ text: '外形' }, { text: '全身大致為黑色', colspan: 2 }],
+        [{ text: '相異處', colspan: 3, isSectionLabel: true }],
+        [{ text: '嘴喙顏色' }, { text: '黃色' }, { text: '象牙白色' }],
+      ],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a grid that under-supplies after a rowspan expires', () => {
+    const d = withFullTable({
+      id: 't1', type: 'table', headers: ['a', 'b', 'c'],
+      grid: [
+        [{ text: 'S', rowspan: 2, isSectionLabel: true }, { text: 'x' }, { text: 'y' }],
+        [{ text: 'z' }],
+      ],
+    });
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  const withKeypoints = (rows: unknown[], blanks: unknown[], answer: unknown) => ({
+    id: 'k',
+    lessonCode: 'K-1',
+    blocks: [
+      { id: 'p1', type: 'paragraph', text: 'x' },
+      {
+        id: 'ex1',
+        type: 'exercise',
+        question: { kind: 'keypoints_table', structure: 'nested', rows, blanks },
+        answerSpace: 'text',
+        answer,
+        grader: 'exact',
+        anchors: [{ blockId: 'p1' }],
+      },
+    ],
+  });
+
+  it('accepts keypoints_table with a dict answer', () => {
+    const d = withKeypoints(
+      [{ label: 'L', subLabel: 'S', blankIds: ['b1', 'b2'] }],
+      [{ id: 'b1', answer: 'x' }, { id: 'b2', answer: 'y' }],
+      { b1: 'x', b2: 'y' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects keypoints_table unknown blank id (via superRefine)', () => {
+    const d = withKeypoints(
+      [{ label: 'L', blankIds: ['nope'] }],
+      [{ id: 'b1', answer: 'x' }],
+      { b1: 'x' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects keypoints_table duplicate blank id (via superRefine)', () => {
+    const d = withKeypoints(
+      [{ label: 'L' }],
+      [{ id: 'b1', answer: 'x' }, { id: 'b1', answer: 'y' }],
+      { b1: 'x' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('accepts a □-choice keypoints blank (options + correct answer)', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '充足', options: ['充足', '少量'] }],
+      { b1: '充足' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a □-choice blank whose answer is not among options', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '中等', options: ['充足', '少量'] }],
+      { b1: '中等' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a □-choice blank with fewer than 2 options', () => {
+    const d = withKeypoints(
+      [{ label: '學校', blankIds: ['b1'] }],
+      [{ id: 'b1', answer: '充足', options: ['充足'] }],
+      { b1: '充足' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+});
+
+// ── Gap 3: fill_in_blank slots ────────────────────────────────────────────────
+describe('Gap 3 — fill_in_blank slots (zod)', () => {
+  const withFib = (question: unknown, answer: unknown) => ({
+    id: 'f',
+    lessonCode: 'F-1',
+    blocks: [
+      { id: 'p1', type: 'paragraph', text: 'x' },
+      {
+        id: 'ex1',
+        type: 'exercise',
+        question,
+        answerSpace: 'text',
+        answer,
+        grader: 'exact',
+        anchors: [{ blockId: 'p1' }],
+      },
+    ],
+  });
+
+  it('accepts fill_in_blank with slots', () => {
+    const d = withFib(
+      {
+        kind: 'fill_in_blank',
+        sentence: 'a__b__',
+        slots: [
+          { id: 'b1', answer: 'x', grader: 'exact' },
+          { id: 'b2', answer: ['a', 'b'], grader: 'set' },
+        ],
+      },
+      { b1: 'x', b2: ['a', 'b'] },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects duplicate slot id (via superRefine)', () => {
+    const d = withFib(
+      {
+        kind: 'fill_in_blank',
+        sentence: 'a__b__',
+        slots: [{ id: 'b1', answer: 'x' }, { id: 'b1', answer: 'y' }],
+      },
+      { b1: 'x' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('rejects a set slot with a scalar answer (via superRefine)', () => {
+    const d = withFib(
+      {
+        kind: 'fill_in_blank',
+        sentence: 'a__',
+        slots: [{ id: 'b1', answer: 'x', grader: 'set' }],
+      },
+      { b1: 'x' },
+    );
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+});
+
+// ── Gap 5: parallel_passage block ─────────────────────────────────────────────
+describe('Gap 5 — parallel_passage block (zod)', () => {
+  const withParallel = (rows: unknown[], anchorPp = false) => {
+    const blocks: unknown[] = [
+      { id: 'pp', type: 'parallel_passage', rows },
+      { id: 'p1', type: 'paragraph', text: 'x' },
+    ];
+    if (anchorPp) {
+      blocks.push({
+        id: 'ex1',
+        type: 'exercise',
+        question: { kind: 'fill_in_blank', sentence: 'count? __' },
+        answerSpace: 'text',
+        answer: '148',
+        grader: 'exact',
+        anchors: [{ blockId: 'pp' }],
+      });
+    }
+    return { id: 'pp', lessonCode: 'PP-1', blocks };
+  };
+
+  it('accepts a parallel_passage block', () => {
+    const d = withParallel([{ left: 'l', right: 'r' }]);
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+
+  it('rejects a parallel_passage with empty rows', () => {
+    const d = withParallel([]);
+    expect(LessonSchema.safeParse(d).success).toBe(false);
+  });
+
+  it('accepts an exercise anchoring a parallel_passage', () => {
+    const d = withParallel([{ left: 'l', right: 'r' }], true);
+    expect(LessonSchema.safeParse(d).success).toBe(true);
+  });
+});

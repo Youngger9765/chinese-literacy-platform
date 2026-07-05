@@ -81,6 +81,9 @@ const HelpPage = lazy(() => import('../pages/HelpPage'));
 // ToS consent page (issue #1013)
 const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 
+// Dev-only local demo harness for AI-extracted lesson_content (public, no API/DB).
+const DevLessonPage = lazy(() => import('../pages/dev/DevLessonPage'));
+
 // ---------------------------------------------------------------------------
 
 const AppRoutes: React.FC = () => (
@@ -434,6 +437,17 @@ const AppRoutes: React.FC = () => (
 
       {/* Privacy policy — public, no auth required */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
+
+      {/* Local demo harness for AI-extracted lesson_content — DEV builds only.
+          #2505 review #7: don't ship an unauthenticated dev route in the production
+          route table (content is public curriculum text, but dev tooling shouldn't
+          live on a public prod path). Tree-shaken out of prod bundles. */}
+      {import.meta.env.DEV && (
+        <>
+          <Route path="/dev/lesson" element={<DevLessonPage />} />
+          <Route path="/dev/lesson/:code" element={<DevLessonPage />} />
+        </>
+      )}
 
       {/* Help / user manual — public, no auth required */}
       <Route path="/help" element={<HelpPage />} />

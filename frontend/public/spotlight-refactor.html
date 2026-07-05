@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>閱讀聚光燈 · 重構揭露</title>
+<style>
+  :root{
+    --violet:#564ABF; --violet2:#9D93FF; --ink:#1f2544; --muted:#6b7280;
+    --bg:#faf7f2; --card:#ffffff; --border:#ece7df; --emerald:#059669; --amber:#b45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:var(--violet);text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 20px 80px}
+  header.hero{padding:8px 0 20px;border-bottom:1px solid var(--border);margin-bottom:28px}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--violet);text-transform:uppercase}
+  h1{font-size:30px;margin:6px 0 8px;font-weight:800}
+  .sub{color:var(--muted);font-size:15px;margin:0}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .pill{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:#eef0ff;color:var(--violet)}
+  .pill.ok{background:#e7f6ef;color:var(--emerald)}
+  .pill.warn{background:#fdf1e3;color:var(--amber)}
+  h2{font-size:20px;margin:38px 0 12px;font-weight:800;display:flex;align-items:center;gap:9px}
+  h2 .bar{width:6px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--violet),var(--violet2))}
+  p{margin:10px 0}
+  .lead{font-size:16px}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:14px 0 4px}
+  .step{flex:1 1 150px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+  .step .n{font-size:12px;font-weight:700;color:var(--violet)}
+  .step .t{font-weight:700;margin-top:2px}
+  .step .d{font-size:13px;color:var(--muted);margin-top:3px}
+  .arrow{align-self:center;color:var(--violet2);font-size:20px;font-weight:800}
+  ul.clean{margin:8px 0;padding-left:0;list-style:none}
+  ul.clean li{position:relative;padding:7px 0 7px 26px;border-bottom:1px dashed var(--border)}
+  ul.clean li:last-child{border-bottom:0}
+  ul.clean li::before{content:"✦";position:absolute;left:4px;top:7px;color:var(--violet2)}
+  ul.clean b{color:var(--ink)}
+  .jump-chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+  .chip{font-size:13px;font-weight:700;padding:7px 13px;border-radius:999px;background:#fff;border:1px solid var(--border)}
+  .chip:hover{border-color:var(--violet2);background:#f5f4ff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .lesson{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 18px 16px;
+    box-shadow:0 4px 18px rgba(31,37,68,.04);display:flex;flex-direction:column}
+  .lesson .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .code{font-weight:800;font-size:15px;color:var(--violet)}
+  .tag{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .tag.text{background:#eef0ff;color:var(--violet)}
+  .tag.graphic{background:#e9f6f1;color:var(--emerald)}
+  .lesson h3{font-size:16px;margin:8px 0 4px;font-weight:800;line-height:1.4}
+  .strat{font-size:13px;color:var(--muted);margin:0 0 10px}
+  .stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .stat{font-size:12px;font-weight:600;color:#4b5563;background:#f6f5f2;border-radius:8px;padding:4px 9px}
+  .stat.green{background:#e7f6ef;color:var(--emerald)}
+  .actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{flex:1 1 auto;text-align:center;font-weight:700;font-size:13.5px;padding:9px 12px;border-radius:11px}
+  .btn.primary{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff}
+  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--violet2);color:var(--violet)}
+  .btn.online{background:#fff;border:1px dashed #b9b3d6;color:var(--muted);flex-basis:100%}
+  .btn.online:hover{border-color:var(--violet2);color:var(--violet)}
+  .note{font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:16px}
+  table.verify{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  table.verify td{padding:9px 12px;border-bottom:1px solid var(--border)}
+  table.verify tr:last-child td{border-bottom:0}
+  table.verify td:first-child{color:var(--muted);width:44%}
+  table.verify td:last-child{font-weight:600}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
+  code{background:#f1eee8;padding:1px 6px;border-radius:6px;font-size:.9em}
+  .deep{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin:14px 0}
+  .deep h3{font-size:16px;margin:0 0 8px;font-weight:800;color:var(--violet)}
+  pre.yaml{background:#1e2233;color:#e6e9f5;border-radius:12px;padding:14px 16px;overflow-x:auto;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;margin:10px 0}
+  pre.yaml .k{color:#8fb6ff}      /* keys */
+  pre.yaml .s{color:#c3e88d}      /* strings/values */
+  pre.yaml .c{color:#7d8bb0;font-style:italic} /* comments */
+  pre.yaml .n{color:#f78c6c}      /* numbers/null */
+  .maptbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  .maptbl td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .maptbl tr:last-child td{border-bottom:0}
+  .maptbl td:first-child{color:var(--muted);white-space:nowrap;font-weight:600}
+  .maptbl td:first-child.g{color:var(--emerald)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:#f1eee8;padding:1px 5px;border-radius:5px}
+  .r-flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0;font-size:13.5px}
+  .r-flow .box{background:#f5f4ff;border:1px solid #e0dcff;border-radius:10px;padding:7px 11px;font-weight:600}
+  .r-flow .box b{color:var(--violet)}
+  .r-flow .ar{color:var(--violet2);font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">LingoLeap · 閱讀學習</div>
+    <h1>🔦 閱讀聚光燈 — 重構揭露</h1>
+    <p class="sub">讓 AI 直接讀原始學習單、自己判斷題目意義與呈現,產出「可機器驗證」的結構化課文,並在統一的閱讀介面呈現。</p>
+    <div class="pills">
+      <span class="pill ok">dev7 教授七課 · 全數完成</span>
+      <span class="pill ok">eval PASS · needs_review 0</span>
+      <span class="pill">本地分支 feature/spotlight-edd-foundation</span>
+      <span class="pill warn">未 push · flag 預設 OFF</span>
+    </div>
+  </header>
+
+  <h2><span class="bar"></span>這次做了什麼</h2>
+  <p class="lead">把「紙本聚光燈 → 線上」的產生方式,從<b>逐課手工/確定性 regex 擷取</b>,改成<b>讓 AI 讀原始學習單自己判斷</b>——但答案一律鎖進<b>可機器判分的結構化契約</b>,再用<b>同一個渲染器</b>呈現(不再分「一般 / 圖文」兩套 layout)。</p>
+
+  <div class="flow">
+    <div class="step"><div class="n">① 原始素材</div><div class="t">DOCX(GCS)</div><div class="d">依課號下載學習單</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">② 轉檔</div><div class="t">→ PDF</div><div class="d">LibreOffice,保留版面/圖表</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">③ AI 判讀</div><div class="t">多模態閱讀</div><div class="d">判題意、圖片位置、表格意義</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">④ 契約</div><div class="t">typed lesson_content</div><div class="d">答案 + grader,可機器驗證</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">⑤ 呈現</div><div class="t">統一渲染器</div><div class="d">左課文 / 右作答,兩欄</div></div>
+  </div>
+
+  <h2><span class="bar"></span>關鍵設計原則</h2>
+  <ul class="clean">
+    <li><b>答案鎖進契約、可機器驗證</b>:每題強制 <code>answer_space + answer + grader</code>;判不出的誠實標 <code>needs_review</code>,不假裝完好。</li>
+    <li><b>只做「閱讀聚光燈」</b>:文章重點表、閱讀理解是各自獨立模組,不混入(頁面也按內容型別分流,互不污染)。</li>
+    <li><b>區段分組 + 範例自成一體</b>:例一/課文故事/小試身手各成一區,範例短文/祕訣只顯示一次,題目不重複區段名。</li>
+    <li><b>左課文 / 右作答</b>:左欄=完整課文(+課文的圖表,與朗讀同源);右欄=聚光燈作答區。</li>
+    <li><b>紙本動作數位化</b>:「畫線/圈起來」改寫成可作答的「找出…寫下來」。</li>
+    <li><b>UI 統一</b>:卡片外殼、A/B/C/D 字母選項、進度/回饋,對齊「閱讀理解 / 文章重點表」設計語言。</li>
+    <li><b>EDD 護欄</b>:schema 驗證 + 答案 round-trip + golden 凍結 + 反 overfit lint,罩在 AI 產出上。</li>
+    <li><b>進度接後端</b>:作答存入 learning session <code>step_progress</code>;重整可還原選擇與判分;答錯可「再試一次」。</li>
+  </ul>
+
+  <h2><span class="bar"></span>技術細節:從紙本到畫面</h2>
+
+  <div class="deep">
+    <h3>① AI 怎麼判讀</h3>
+    <p>AI(Claude)用<b>多模態</b>讀那份 PDF —— 同時看得到文字、<b>圖片在哪一段旁邊</b>、表格的結構與意義。然後把學習單上的每個元素,對應到契約裡的一種「積木(block)」或「題型」:</p>
+    <table class="maptbl">
+      <tr><td>課文段落</td><td>→ <span class="mono">paragraph</span> block(完整課文,與朗讀同源)</td></tr>
+      <tr><td>逐步引導練習(❶❷❸❹)</td><td>→ <span class="mono">guided_steps</span>;引用圖表時用 <span class="mono">graphic_text_integration</span></td></tr>
+      <tr><td>打勾單選(□)</td><td>→ step <span class="mono">select</span>,答案存成<b>選項索引(int)</b></td></tr>
+      <tr><td>可複選</td><td>→ step <span class="mono">multi_select</span>,答案存成<b>索引集合</b></td></tr>
+      <tr><td>連連看 / 配對</td><td>→ 每個左項一個 <span class="mono">select</span> step(選右欄哪一項)</td></tr>
+      <tr><td>畫線 / 開放填答</td><td>→ step <span class="mono">free_text</span> + <span class="mono">reference_answer</span>(紙本「畫線」改寫成「寫下來」)</td></tr>
+      <tr><td>課文的圖 / 表</td><td>→ <span class="mono">figure</span> / <span class="mono">table</span> block,由題目用 <span class="mono">anchors</span> 綁定</td></tr>
+      <tr><td class="g">判斷不出的結構</td><td>→ <span class="mono">custom</span> + <span class="mono">needs_review</span>(誠實標記待人工檢核,不硬湊)</td></tr>
+    </table>
+    <p class="sub">鐵律:每題必有<b>可機器比對的答案</b>(索引/字串/集合),散文不算答案;判不準就標 <span class="mono">needs_review</span>,寧可 🟡 不假 🟢。</p>
+  </div>
+
+  <div class="deep">
+    <h3>② 契約(schema)長什麼樣</h3>
+    <p>AI 只能「填」這份契約,不能繞過。它把「答案語意」鎖進結構化欄位(前端 zod + 後端 pydantic 同一份定義):</p>
+    <pre class="yaml"><span class="c"># 一課 = 有序的 typed blocks</span>
+<span class="k">Lesson</span> = { id, lesson_code, title, <span class="k">blocks</span>[] }
+
+<span class="k">Block</span> = paragraph | figure | table | parallel_passage | <span class="k">exercise</span>
+
+<span class="c"># 每個 exercise 強制帶「答案可驗證性不變量」——連 custom 都不豁免</span>
+<span class="k">ExerciseBlock</span> = {
+  question: { kind, … },          <span class="c"># 8 種題型之一</span>
+  <span class="k">answer_space</span>: choice | multi_choice | text | order | free_text,
+  <span class="k">answer</span>: <span class="s">機器可比對的標準答案</span>,   <span class="c"># 索引 / 字串 / 集合 / dict,不是散文</span>
+  <span class="k">grader</span>: exact | set | ordered | rubric_ai | manual,
+  <span class="k">anchors</span>: [{ block_id }],       <span class="c"># 這題對應課文哪個 block(聚光燈的「錨點」)</span>
+  <span class="k">needs_review</span>: <span class="n">false</span>
+}
+<span class="c"># 8 種題型:multiple_choice / fill_in_blank / ordering / trait_inference /</span>
+<span class="c">#          guided_steps / graphic_text_integration / keypoints_table / custom</span></pre>
+  </div>
+
+  <div class="deep">
+    <h3>③ 轉成 YAML 的樣子(G6-L22 真實片段)</h3>
+    <p>下面是「小兵立大功」聚光燈的實際產物(節錄):課文段落 + 摘要策略引導。注意 <span class="mono">section</span>(區段分組)、<span class="mono">context</span>(範例故事只顯示一次)、<span class="mono">answer</span>(選項索引)、<span class="mono">anchors</span>(綁到課文段落):</p>
+    <pre class="yaml"><span class="k">id</span>: <span class="s">G6-L22</span>
+<span class="k">title</span>: <span class="s">小兵立大功:雞鳴狗盜的故事</span>
+<span class="k">blocks</span>:
+  - <span class="k">id</span>: <span class="s">p1</span>
+    <span class="k">type</span>: <span class="s">paragraph</span>
+    <span class="k">text</span>: <span class="s">中國的戰國時期,有七個國家總是爭強鬥勝…</span>
+  - <span class="k">id</span>: <span class="s">ex-spotlight</span>
+    <span class="k">type</span>: <span class="s">exercise</span>
+    <span class="k">question</span>:
+      <span class="k">kind</span>: <span class="s">guided_steps</span>
+      <span class="k">strategy_name</span>: <span class="s">摘要策略-問題.解決.結果結構</span>
+      <span class="k">steps</span>:
+        - <span class="k">prompt</span>: <span class="s">❶主角是誰?</span>
+          <span class="k">type</span>: <span class="s">free_text</span>
+          <span class="k">reference_answer</span>: <span class="s">烏鴉</span>
+          <span class="k">section</span>: <span class="s">例一:烏鴉喝水</span>       <span class="c"># ← 區段分組</span>
+          <span class="k">context</span>: <span class="s">天氣炎熱,烏鴉又渴又累…最後順利喝到水。</span>  <span class="c"># ← 範例短文,顯示一次</span>
+        - <span class="k">prompt</span>: <span class="s">❷主角遇到了什麼「問題」?</span>
+          <span class="k">type</span>: <span class="s">select</span>
+          <span class="k">options</span>: [<span class="s">喝不到水</span>, <span class="s">天氣炎熱</span>]
+          <span class="k">answer</span>: <span class="n">0</span>                       <span class="c"># ← 正解=第0個選項</span>
+          <span class="k">section</span>: <span class="s">例一:烏鴉喝水</span>
+      <span class="c"># … 課文故事、小試身手各步驟 …</span>
+    <span class="k">answer_space</span>: <span class="s">free_text</span>
+    <span class="k">grader</span>: <span class="s">rubric_ai</span>
+    <span class="k">anchors</span>: [{ block_id: <span class="s">p2</span> }, { block_id: <span class="s">p3</span> }]  <span class="c"># ← 錨到課文</span></pre>
+  </div>
+
+  <div class="deep">
+    <h3>④ 渲染:資料怎麼變成你看到的樣子</h3>
+    <p>同一個 <span class="mono">LessonRenderer</span> 吃這份 YAML:先把 blocks 分成「閱讀材料(左)」與「作答(右)」兩欄,再依 <span class="mono">block.type</span> / <span class="mono">question.kind</span> 對應到元件。<b>沒有</b>「一般 vs 圖文」兩套程式碼,差別只在 block 內容。</p>
+    <div class="r-flow">
+      <span class="box"><b>paragraph / figure / table</b><br>→ 左欄「參考課文」</span>
+      <span class="ar">＋</span>
+      <span class="box"><b>exercise</b><br>→ 右欄「閱讀聚光燈」作答區</span>
+    </div>
+    <table class="maptbl">
+      <tr><td><span class="mono">paragraph</span></td><td>→ ParagraphBlockView(編號段落,含注音)</td></tr>
+      <tr><td><span class="mono">figure / table</span></td><td>→ FigureBlockView / TableBlockView(圖片、含合併儲存格的表)</td></tr>
+      <tr><td><span class="mono">question.kind</span></td><td>→ ExerciseBlockView 依題型挑 widget(guided_steps → 步驟卡 + A/B/C/D 選項)</td></tr>
+      <tr><td><span class="mono">section / context</span></td><td>→ 區段標題 + 範例短文框(顯示一次)</td></tr>
+      <tr><td><span class="mono">answer + grader</span></td><td>→ 學生作答 → <span class="mono">lessonGrading.grade()</span> 即時判分 ✓/再想想看</td></tr>
+      <tr><td><span class="mono">anchors</span></td><td>→ 標示這題對應課文哪一段(左欄對照)</td></tr>
+      <tr><td class="g"><span class="mono">needs_review</span></td><td>→ 顯示「需老師人工檢核」,不當作已完成</td></tr>
+    </table>
+    <p class="sub">作答會經 <span class="mono">onExerciseChange</span> 存進 learning session 的 <span class="mono">step_progress</span>(後端),重整可還原選擇與判分。</p>
+  </div>
+
+  <h2><span class="bar"></span>七課聚光燈 · 快速跳轉</h2>
+  <p class="sub">每張卡片三個連結:<b>新版聚光燈</b> = 本次 AI 重構的 demo(免登入)· <b>本機真實介面</b> = 學習流程中的實際步驟(需小明登入 + 開 flag)· <b>🌐 線上現版</b> = 目前部署在 <span class="mono">lingoleap-dev.web.app</span> 的<b>現行(舊版)</b>聚光燈,開新分頁<b>並排對照</b>新舊差異。</p>
+  <div class="jump-chips">
+    <a class="chip" href="/dev/lesson/G6-L22">G6-L22</a>
+    <a class="chip" href="/dev/lesson/G6-L23">G6-L23</a>
+    <a class="chip" href="/dev/lesson/G6-L24">G6-L24</a>
+    <a class="chip" href="/dev/lesson/G6-L25">G6-L25</a>
+    <a class="chip" href="/dev/lesson/G7-L28">G7-L28</a>
+    <a class="chip" href="/dev/lesson/G7-L29">G7-L29</a>
+    <a class="chip" href="/dev/lesson/G7-L30">G7-L30</a>
+  </div>
+
+  <div class="grid" id="lessons"></div>
+
+  <div class="note">
+    ⚙️ <b>本機開啟方式</b>:前端 <code>npm run dev</code>(:3000)。demo 頁免登入直接看;「真實介面」需先在瀏覽器 console 執行
+    <code>localStorage.setItem('flag_LESSON_RENDERER_V1','true')</code>、以「學生 小明」登入,後端帶 <code>LESSON_RENDERER_V1=true</code> 啟動。
+  </div>
+
+  <h2><span class="bar"></span>EDD 的作法(怎麼確保 AI 不亂生、保護已完成課文)</h2>
+  <p class="lead"><b>EDD = Eval-Driven Design</b>:先把「可執行的驗收」當地基,任何 AI 產出都要<b>通過機器驗收才算數</b>——用來擋「好看但不能驗證 / overfit / 亂生 / 改壞已完成課文」。這是把 lead dev 的顧慮制度化,而非靠更聰明的 prompt。</p>
+  <div class="deep">
+    <h3>五道護欄(每課產出都要過)</h3>
+    <table class="maptbl">
+      <tr><td>① Schema 驗證</td><td><span class="mono">Lesson.model_validate</span> —— 不合契約直接 fail(缺 <span class="mono">answer_space/grader</span>、錨點指向不存在的 block 都擋下)。</td></tr>
+      <tr><td>② 答案 round-trip</td><td>把存下來的 <span class="mono">answer</span> 用它的 <span class="mono">grader</span> <b>機械重判一次</b>,必須判對 —— 證明「答案真的可機器判分」,<b>假答案自動 fail</b>。select 比索引、keypoints 比 dict、複選比集合。</td></tr>
+      <tr><td>③ Golden 凍結/比對</td><td>人工核准後把該課<b>凍結成快照</b>;之後任何重生/改 schema 若<b>悄悄動到已核准課文</b> → <span class="mono">--check-golden</span> diff 立刻報錯。<b>這就是「保護已完成課文」</b>。</td></tr>
+      <tr><td>④ 反 overfit lint</td><td><span class="mono">lint_prompt_overfit.py</span> 掃 skill/prompt 有沒有把<b>特定課的答案</b>背進去(distinctive 答案洩漏就 fail)—— 防「看起來很準其實 overfit」。</td></tr>
+      <tr><td class="g">⑤ 誠實出口</td><td>判不出的題 → <span class="mono">needs_review</span>(顯示「需人工檢核」),<b>絕不 fake pass</b>;<span class="mono">custom</span> 逃生口也強制帶答案 + review。</td></tr>
+    </table>
+    <p class="sub">EDD <b>與資料源無關</b>:不論 AI 產或腳本產,同一套 eval 都適用;沿用 #2205 的 <span class="mono">issue-2205-eval-standard</span> 與 no-overfit(DEV / held-out 分離)精神。輸出一張紅綠燈 coverage:每課 schema✓ / 答案可驗證✓ / 錨點✓ / needs_review 數。</p>
+  </div>
+  <div class="deep">
+    <h3>怎麼跑</h3>
+    <pre class="yaml"><span class="c"># 驗收(schema + 答案 round-trip + 紅綠燈)</span>
+eval_lesson_content.py backend/data/lessons/_ai_lessons/*.lesson.yml <span class="k">--markdown</span>
+<span class="c"># 核准後凍結 golden;日後回歸比對</span>
+eval_lesson_content.py … <span class="k">--freeze-golden</span> --golden-dir …/_golden
+eval_lesson_content.py … <span class="k">--check-golden</span> --golden-dir …/_golden
+<span class="c"># 反 overfit(prompt 是否洩漏特定課答案)</span>
+python scripts/<span class="k">lint_prompt_overfit.py</span>
+<span class="c"># → 七課結果:RESULT: PASS · round-trip 全綠 · needs_review 0 · overfit PASS</span></pre>
+  </div>
+
+  <h2><span class="bar"></span>驗證與現況</h2>
+  <table class="verify">
+    <tr><td>擷取正確性(七課)</td><td>eval <b>RESULT: PASS</b> · answer round-trip 全綠 · golden 已凍結</td></tr>
+    <tr><td>誠實度</td><td>needs_review = 0 · overfit lint PASS(無答案洩漏)</td></tr>
+    <tr><td>前端品質</td><td>eslint 0 error · vitest 101 passed · build 成功</td></tr>
+    <tr><td>真實介面實測</td><td>七課 <code>/learn/:id/reading-strategy</code> headless:renderer 掛載 · console 0 error</td></tr>
+    <tr><td>安全邊界</td><td>全部本地(未 push)· flag 預設 OFF · 未動 staging / 線上 / 正式 catalog</td></tr>
+  </table>
+
+  <h2><span class="bar"></span>與重構前的關聯 · 技術繼承 · Merge</h2>
+
+  <div class="deep">
+    <h3>① 跟重構之前的關聯</h3>
+    <p>這不是砍掉重練。重構前平台已有一條 <b>#2205 確定性 pipeline</b>:regex 從 DOCX 抽出 <span class="mono">.spotlight.yml</span> → catalog → <span class="mono">spotlight_v2_loader</span> → 舊渲染器(<span class="mono">BlockSequenceRenderer</span> / <span class="mono">StrategyExercise</span>)。本次做的是<b>換掉「產生方式」</b>(改由 AI 讀原始學習單),但把資料流接到<b>同一套新契約與渲染器</b>上。</p>
+    <table class="maptbl">
+      <tr><td>產生方式</td><td>確定性 regex 擷取 &nbsp;→&nbsp; <b>AI 多模態判讀</b>(可審、判不出標 review)</td></tr>
+      <tr><td>資料形狀</td><td>扁平、無型別、答案存散文字串 &nbsp;→&nbsp; <b>typed 契約</b>(答案鎖成機器可比對)</td></tr>
+      <tr><td>渲染</td><td>一般/圖文兩套 layout &nbsp;→&nbsp; <b>單一 LessonRenderer</b>(差別只在 block 內容)</td></tr>
+      <tr><td>驗收</td><td>人眼為主 &nbsp;→&nbsp; <b>EDD</b>:schema 驗證 + 答案 round-trip + golden + 反 overfit</td></tr>
+    </table>
+    <p class="sub">新契約其實是舊 #2205 schema 的 <b>typed superset</b>(<span class="mono">keypoints_table</span> 當初就照 parser 輸出 1:1 設計),兩代互補而非打架。</p>
+  </div>
+
+  <div class="deep">
+    <h3>② 技術繼承(沿用 vs 新增 vs 未動)</h3>
+    <ul class="clean">
+      <li><b>沿用/接上既有基礎</b>:身分解析 <span class="mono">content_mapping_registry</span> / <span class="mono">catalog_to_parsed_code</span>(防張冠李戴)、課文來源 <span class="mono">_parsed</span> <span class="mono">paragraphs</span>(與朗讀同源)、進度儲存 <span class="mono">step_progress</span>(<span class="mono">saveStepProgressPatch</span>)、UI 沿用 <span class="mono">ComprehensionLayout</span> 的 height-safe 雙欄與 <span class="mono">MultipleChoiceExercise</span> 的字母選項、EDD 標準沿用 #2205 的 <span class="mono">issue-2205-eval-standard</span>。</li>
+      <li><b>本次新增</b>:AI 擷取 skill <span class="mono">.claude/skills/ai-lesson-extract</span>、契約 <span class="mono">lesson_content.py</span>+zod、通用 <span class="mono">LessonRenderer</span> 與 <span class="mono">GuidedStepsInput</span> 等 widget、EDD harness <span class="mono">eval_lesson_content.py</span> + <span class="mono">lint_prompt_overfit.py</span>、後端供給 <span class="mono">lesson_content_loader</span>。</li>
+      <li><b>保留為 fallback</b>:確定性橋接 <span class="mono">spotlight_to_lesson_content.py</span> 仍在 —— 後端 <span class="mono">lesson_content_loader</span> 有 <span class="mono">_ai_lessons/{code}.yml</span> 就用 AI 版,<b>否則自動落回</b>確定性 adapter(讀 #2205 產物)。</li>
+      <li><b>完全未動(flag OFF 時 byte-identical)</b>:<span class="mono">build_lesson_schema.py</span>、catalog 資料、舊渲染器與既有 API 行為。</li>
+    </ul>
+  </div>
+
+  <div class="deep">
+    <h3>③ 若要 merge,注意什麼 / 更動哪裡</h3>
+    <ul class="clean">
+      <li><b>合併本身是安全的(加法 + flag 關)</b>:所有變更都在 <span class="mono">LESSON_RENDERER_V1</span> 旗標之後,預設 OFF → 合進去對線上零行為改變。分支從 <span class="mono">staging</span> 開,PR 對 <span class="mono">staging</span>。</li>
+      <li><b>要真正上線 = 開旗標</b>:把 <span class="mono">LESSON_RENDERER_V1</span> 打開(先 staging)才會用新聚光燈 —— 這是可逆的顯性開關,開之前需視覺 QA。前後端各一顆(前端 <span class="mono">featureFlags.ts</span> / 後端 env)。</li>
+      <li><b>後端供給檔位置要拍板</b>:AI 產物現放 <span class="mono">backend/data/lessons/_ai_lessons/*.yml</span>,由 <span class="mono">lesson_content_loader._try_ai_lesson</span> 優先供給。正式落地位置、以及是否收斂成單一課文來源,屬團隊決策(見交接文件)。</li>
+      <li><b>兩頁分流的守衛不可少</b>:<span class="mono">get_lesson_content</span> 每課一份 → 已加守衛讓「閱讀理解頁只吃含 MCQ 的 lesson、聚光燈頁只吃含 spotlight 的 lesson」,否則會互相蓋掉。</li>
+      <li><b>DB migration</b>:本機曾補 <span class="mono">audio_gcs_path</span>(既有 drift,非本次產生);正式環境通常已 migrate,注意 <span class="mono">alembic heads</span>=1。</li>
+      <li><b>合併前跑的關卡</b>:<span class="mono">bash specs/run-ci.sh</span>、後端 <span class="mono">pytest</span>(lesson_content / adapter)、前端 <span class="mono">npm run lint</span>+<span class="mono">test</span>+<span class="mono">build</span>、<span class="mono">/qa</span> 截圖(改了 tsx)。動到 catalog 才需 content evidence gate(本次沒動)。</li>
+      <li><b>待團隊拍板(未做)</b>:兩套 eval 門檻調和、strategy metadata 是否進契約、前端 <span class="mono">storyToLesson</span> stopgap 退役、擴到 test15/catalog 全量、正式 on-disk 位置。</li>
+    </ul>
+  </div>
+
+  <footer>
+    <p>產生方式:Claude Code 依 <code>.claude/skills/ai-lesson-extract</code> 逐課擷取 → EDD eval 驗收 → 統一渲染器。<br>
+    此頁為本次重構的本地揭露文件,連結指向本機 dev server(:3000)。</p>
+  </footer>
+
+</div>
+
+<script>
+  var LESSONS = [
+    {code:"G6-L22", id:1076, title:"小兵立大功:雞鳴狗盜的故事", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["9 段課文","聚光燈 16 步","範例:烏鴉喝水"]},
+    {code:"G6-L23", id:1077, title:"老鷹紅豆的故事", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["7 段課文","聚光燈 9 步"]},
+    {code:"G6-L24", id:1078, title:"白鯨救援:一場人與自然的協奏曲", type:"text", strat:"摘要策略 · 問題→解決→結果", stats:["7 段課文","聚光燈 8 步"]},
+    {code:"G6-L25", id:1079, title:"荷蘭東印度公司:全世界第一張股票的誕生", type:"text", strat:"摘要策略 · 段落定位版", stats:["11 段課文","聚光燈 11 步"]},
+    {code:"G7-L28", id:1108, title:"看不見的兇手:以實驗破解肉湯腐敗之謎", type:"graphic", strat:"圖文整合(初階)", stats:["5 段課文","1 圖","聚光燈 19 步"]},
+    {code:"G7-L29", id:1109, title:"從四張圖,看地球暖化的現象", type:"graphic", strat:"圖文整合(進階)", stats:["5 段課文","4 圖","聚光燈 32 步"]},
+    {code:"G7-L30", id:1110, title:"都是八哥,為什麼命運不一樣?", type:"graphic", strat:"圖文表整合", stats:["4 段課文","1 圖 · 2 表","5 個練習"]}
+  ];
+  var el = document.getElementById("lessons");
+  el.innerHTML = LESSONS.map(function(L){
+    var tag = L.type === "graphic"
+      ? '<span class="tag graphic">圖文</span>'
+      : '<span class="tag text">純文字</span>';
+    var stats = L.stats.map(function(s){return '<span class="stat">'+s+'</span>';}).join("")
+      + '<span class="stat green">needs_review 0</span>';
+    return ''
+      + '<div class="lesson">'
+      +   '<div class="top"><span class="code">'+L.code+'</span>'+tag+'</div>'
+      +   '<h3>'+L.title+'</h3>'
+      +   '<p class="strat">'+L.strat+'</p>'
+      +   '<div class="stats">'+stats+'</div>'
+      +   '<div class="actions">'
+      +     '<a class="btn primary" href="/dev/lesson/'+L.code+'">▶ 新版聚光燈</a>'
+      +     '<a class="btn ghost" href="/learn/'+L.id+'/reading-strategy">本機真實介面</a>'
+      +     '<a class="btn online" href="https://lingoleap-dev.web.app/learn/'+L.id+'/reading-strategy" target="_blank" rel="noopener">🌐 線上現版(對照)</a>'
+      +   '</div>'
+      + '</div>';
+  }).join("");
+</script>
+</body>
+</html>

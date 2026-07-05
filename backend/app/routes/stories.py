@@ -19,6 +19,7 @@ from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
+from ..services.lesson_content_loader import get_lesson_content
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -483,6 +484,10 @@ def get_story(story_id: str):
         # story_structure_rows: AI-generated dict rows (richer shape). Both may be None.
         story_structure_table=story.get("story_structure_table"),
         story_structure_rows=story.get("story_structure_rows"),
+        # Typed lesson_content contract (閱讀聚光燈 EDD, DARK). get_lesson_content is
+        # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
+        # behaviour when the flag is off. This is the ONLY endpoint that supplies it.
+        lesson_content=get_lesson_content(story),
     )
 
 
