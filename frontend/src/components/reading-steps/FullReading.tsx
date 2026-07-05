@@ -306,6 +306,11 @@ const FullReading: React.FC<FullReadingProps> = ({
     setResult(null);
     setStreamingTranscript('');
     audioRecorder.clearRecording();
+    // Issue #2503 (review): clear the persisted audio pointer on retry so the next
+    // take's 重聽錄音 can't fetch the PREVIOUS attempt's recording if this take's
+    // upload callback hasn't landed yet (張冠李戴 race).
+    setAudioAttemptId(undefined);
+    setPersistedAudioUrl(null);
     setSelfRating(undefined);
     setShowComparison(false);
     clearFallbackReason();
