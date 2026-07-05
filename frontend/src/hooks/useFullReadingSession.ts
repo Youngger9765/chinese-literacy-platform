@@ -132,6 +132,11 @@ export function useFullReadingSession({
 
   const isSessionActiveRef = useRef(false);
   const startTimeRef       = useRef<number>(0);
+  // Issue #2503 (review): monotonic recording generation — bumped on each startSession.
+  // submitReading captures the current gen; the deferred saveReadingAudio callback only
+  // reports its attempt_id if the gen still matches, so a slow upload from a previous
+  // take can't overwrite a newer take's attempt id (張冠李戴 race).
+  const recordingGenRef = useRef(0);
 
   const audioRecorder = useAudioRecorder(120);
 
@@ -153,6 +158,7 @@ export function useFullReadingSession({
     setMicError('');
 
     // Immediately activate — no Web Speech handshake needed.
+    recordingGenRef.current += 1; // Issue #2503: new take → invalidate prior upload callbacks
     startTimeRef.current = Date.now();
     isSessionActiveRef.current = true;
     setIsSessionActive(true);
@@ -178,6 +184,7 @@ export function useFullReadingSession({
     /* #1632 double-click guard: isSessionActiveRef is flipped synchronously. */
     if (!isSessionActiveRef.current) return;
     const durationMs = Date.now() - startTimeRef.current;
+    const submitGen = recordingGenRef.current; // Issue #2503: tie this take's async upload to its generation
     stopSession();
 
     /* P1#2: stop recorder FIRST (before any early-return) so the mic is always
@@ -233,7 +240,11 @@ export function useFullReadingSession({
           .then((res) => {
             // Issue #2503: remember the attempt id so the recording can be replayed
             // from GCS after the in-memory blob is gone (student navigates away/back).
-            if (res.ok && res.attempt_id != null) onAudioSaved?.(res.attempt_id);
+            // Ignore a stale callback from a superseded take (review): if the student
+            // re-recorded before this upload resolved, recordingGenRef has advanced.
+            if (res.ok && res.attempt_id != null && recordingGenRef.current === submitGen) {
+              onAudioSaved?.(res.attempt_id);
+            }
           })
           .catch((err) => console.warn('[FullReading] saveReadingAudio error:', err));
       }
