@@ -58,16 +58,27 @@ from app.services.lesson_code_normalization import catalog_to_parsed_code
 
 logger = logging.getLogger(__name__)
 
-# scripts/ (adapter lives here, alongside the rest of the EDD bridge tooling).
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+# Path bases. This file is backend/app/services/<name>.py, so parent.parent.parent
+# is the `backend/` package root in the repo AND `/app` in the deployed container
+# (Dockerfile: WORKDIR /app, `COPY app/ ./app/` + `COPY data/ ./data/`).
+# #2515: the previous `parents[3]` + literal "backend/" prefix assumed the REPO
+# layout, so in the container it resolved to `/backend/data/...` (nonexistent) →
+# _try_ai_lesson silently returned None → lesson_content:null → the new 聚光燈
+# never rendered on staging (worked in CI/local because the repo layout matched).
+# This mirrors the container-proven base used by spotlight_contract.py /
+# curriculum_qa_*.py (`parent.parent.parent / "data" / ...`, no "backend/" prefix).
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
+# scripts/ (adapter lives here) is NOT copied into the container image; the adapter
+# fallback is repo/local-only. _try_ai_lesson (the AI-lesson path) needs no scripts.
+_REPO_ROOT = _BACKEND_ROOT.parent
 _SCRIPTS_DIR = _REPO_ROOT / "scripts"
 # AI-extracted spotlight lessons (ai-lesson-extract skill). When present for a lesson
 # code, these are PREFERRED over the deterministic bridge adapter so the real
 # reading-strategy page renders the AI-produced 聚光燈. Still flag-gated + fail-safe.
-_AI_LESSONS_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_ai_lessons"
+_AI_LESSONS_DIR = _BACKEND_ROOT / "data" / "lessons" / "_ai_lessons"
 
 
-_PARSED_DIR = _REPO_ROOT / "backend" / "data" / "lessons" / "_parsed_2026-05-01"
+_PARSED_DIR = _BACKEND_ROOT / "data" / "lessons" / "_parsed_2026-05-01"
 
 
 def _load_canonical_parsed(code: str) -> Optional[dict]:
