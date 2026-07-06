@@ -356,3 +356,41 @@ def test_supply_regression_all_spotlight_stories(monkeypatch):
         except Exception as e:  # noqa: BLE001
             failures.append(f"{story['id']}: schema-fail ({e})")
     assert not failures, "supply regression failures:\n" + "\n".join(failures)
+
+
+# ── #2515: container-path resolution for the AI-lesson override ───────────────
+# Paths must resolve under the app package root (parent.parent.parent of the
+# module), NOT via the repo-only `parents[3] + "backend/"` form which broke in the
+# deployed container: /app/app/services → parents[3]=/ → /backend/data (nonexistent)
+# → _try_ai_lesson silently returned None → lesson_content:null → the new 聚光燈
+# never rendered on staging. CI/local passed because the repo layout matched.
+
+def test_ai_lessons_dir_container_safe_derivation():
+    """The AI-lessons dir derives from the app package root so it lands on
+    <repo>/backend/data locally AND /app/data in the container. Guards #2515."""
+    assert (
+        L._AI_LESSONS_DIR
+        == Path(L.__file__).resolve().parent.parent.parent / "data" / "lessons" / "_ai_lessons"
+    )
+    assert L._AI_LESSONS_DIR.exists(), f"{L._AI_LESSONS_DIR} must exist in this env"
+    assert (L._AI_LESSONS_DIR / "G6-L22.lesson.yml").exists()
+    # Simulate the deployed container path (Dockerfile: WORKDIR /app, COPY app/ ./app/,
+    # COPY data/ ./data/). Correct derivation → /app/data; the old buggy one → /backend/data.
+    container_file = Path("/app/app/services/lesson_content_loader.py")
+    correct = container_file.parent.parent.parent / "data" / "lessons" / "_ai_lessons"
+    buggy = container_file.parents[3] / "backend" / "data" / "lessons" / "_ai_lessons"
+    assert correct == Path("/app/data/lessons/_ai_lessons")
+    assert buggy == Path("/backend/data/lessons/_ai_lessons")  # the #2515 breakage
+    assert correct != buggy
+
+
+def test_ai_lesson_override_serves_content(monkeypatch):
+    """#2515 end-to-end: an AI-extracted lesson (has _ai_lessons/<code>.lesson.yml)
+    serves typed lesson_content via _try_ai_lesson (needs only yaml+schema, no
+    scripts/adapter). If the path base regresses, this returns None and fails."""
+    monkeypatch.delenv("LESSON_RENDERER_V1", raising=False)  # default ON
+    story = next(s for s in get_all_lessons() if s.get("grade_code") == "G6-L22")
+    out = L.get_lesson_content(story)
+    assert out is not None, "G6-L22 has an _ai_lessons file → must serve lesson_content"
+    assert out.get("blocks"), "served lesson_content must carry blocks"
+    Lesson.model_validate(out)  # contract-valid
