@@ -54,5 +54,9 @@ issue*done.md
 # stay local; the *.jsonl + coverage_manifest.json records ARE committed as evidence.
 qa/content-evidence/*/artifacts/
 
+# Spotlight→Lesson adapter full-corpus DRY-RUN output (#2205 EDD). Bulk 134× regenerable
+# *.lesson.yml stay local; the runner + coverage table + known-gaps ledger ARE committed.
+# Regenerate: backend/.venv/bin/python scripts/batch_corpus_dryrun.py --with-keypoints
+backend/data/lessons/_lesson_content_dryrun/
 # graphify architecture map — local knowledge-graph cache (18M), rebuilt on demand, not committed
 graphify-out/

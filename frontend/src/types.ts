@@ -1,3 +1,4 @@
+import type { Lesson } from './schema/lessonContent';
 
 export enum AppView {
   HOME = 'HOME',
@@ -202,6 +203,16 @@ export interface Story {
   videoLinks?: { title: string; url: string }[];
   strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
   spotlightV2?: SpotlightV2;  // Block-sequence 聚光燈 (#2205 dev7)
+  /**
+   * Typed lesson_content contract (閱讀聚光燈 EDD refactor, DARK — handoff §4-#2).
+   * Populated from the story-detail API's `lesson_content` field via
+   * `LessonSchema.safeParse(camelizeKeys(...))` in api.ts, ONLY when the backend supplies
+   * it (backend LESSON_RENDERER_V1 flag ON) and it parses. When present, the flag-guarded
+   * LessonRenderer consumes THIS (real course data) in preference to the `storyToLesson`
+   * front-end stopgap. Absent when the backend flag is OFF or the payload drifted from the
+   * contract (safeParse failed) — the pages then fall back to storyToLesson.
+   */
+  lessonContent?: Lesson;
   /**
    * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
    * When present, overrides DEFAULT_STEP_SEQUENCE for StepperNav and next/prev navigation.

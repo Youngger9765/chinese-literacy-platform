@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
     allowed_origins: str = "http://localhost:3000,http://localhost:5173,http://localhost:5174"
     gcs_bucket: str = "lingoleap-assets"
-    gcs_public_url: str = "https://storage.googleapis.com/lingoleap-assets"
     jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480  # 8 hours

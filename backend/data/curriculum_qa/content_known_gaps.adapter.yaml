@@ -1,0 +1,45 @@
+# Adapter schema-MAPPING known-gaps (spotlight_to_lesson_content.py).
+# SIBLING of content_known_gaps.yaml — the machine-checked content-ABSENCE
+# enum in content_evidence_gate.py is NOT touched by this file.
+spotlight-edd-adapter:
+- lesson_code: G6-L24
+  reason: no_anchorable_block
+  step: ex-spotlight
+- lesson_code: G6-L25
+  reason: no_anchorable_block
+  step: ex-spotlight
+- lesson_code: G7-L30
+  reason: multi_choice_incomplete_answer
+  step: spotlight#15
+  detail: 近年數量變化（2009-2020）
+- lesson_code: G7-L30
+  reason: multi_choice_incomplete_answer
+  step: spotlight#19
+  detail: 較不怕人／較怕人
+- lesson_code: G6-L22
+  reason: fill_table_stub_no_inline_content
+  step: fill_table
+- lesson_code: G6-L23
+  reason: fill_table_stub_no_inline_content
+  step: fill_table
+- lesson_code: G6-L24
+  reason: no_anchorable_passage_in_source
+  step: ex-spotlight
+- lesson_code: G6-L24
+  reason: fill_table_stub_no_inline_content
+  step: fill_table
+- lesson_code: G6-L24
+  reason: no_anchorable_passage_in_source
+  step: ex-keypoints
+- lesson_code: G6-L25
+  reason: no_anchorable_passage_in_source
+  step: ex-spotlight
+- lesson_code: G6-L25
+  reason: fill_table_stub_no_inline_content
+  step: fill_table
+- lesson_code: G6-L25
+  reason: no_anchorable_passage_in_source
+  step: ex-keypoints
+- lesson_code: G7-L28
+  reason: fill_table_stub_no_inline_content
+  step: fill_table

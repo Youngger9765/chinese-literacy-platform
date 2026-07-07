@@ -105,6 +105,9 @@ export interface FullReadingStepData {
   self_rating?: number;
   /** Raw streaming transcript captured during evaluation. */
   transcript?: string;
+  /** Issue #2503: ReadingAttemptHistory id the GCS audio was bound to — lets the
+   *  student replay their recording after the in-memory blob is gone (remount). */
+  audio_attempt_id?: number;
 }
 
 /** Step 7 — AssessmentReport. */

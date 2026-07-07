@@ -1,0 +1,220 @@
+# Fixture 2/4 — GRAPHIC-TEXT (圖文表整合)
+# Hand-transcribed from backend/data/lessons/_parsed_2026-05-01/G7-L30.yml
+# 都是八哥，為什麼命運不一樣？ — 圖文表整合閱讀策略
+#
+# The HARD case for a unified renderer: figure + two data tables interleaved with
+# paragraphs, and a graphic_text_integration spotlight whose steps reference 圖一/表一/表二.
+# Proves the "一般 vs 圖文" split degrades to block ORDERING + anchors, not a second layout.
+# Also proves table row data (lost by the docx→yml parser, later restored under `tables:`)
+# is first-class here as a `table` block.
+id: G7-L30
+lesson_code: G7-L30
+title: 都是八哥，為什麼命運不一樣？
+blocks:
+  - id: p1
+    type: paragraph
+    text: >-
+      你最常見到哪一種野鳥？近年，黑忽忽的八哥還分兩種：「白尾八哥」和「臺灣冠八哥」。從圖一可以看出，這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+  - id: fig-1
+    type: figure
+    label: 圖一
+    caption: 白尾八哥（左）與 臺灣冠八哥（右）外形圖
+    asset: images/G7-L30/G7-L30-06.png
+  - id: p2
+    type: paragraph
+    text: >-
+      表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。只要觀察嘴喙和尾羽的顏色，就能分辨牠們：白尾八哥尾羽末段白色，嘴喙黃色；臺灣冠八哥嘴喙白色、鼻頭有明顯的冠羽，因為是臺灣原生種，也被稱為「臺灣八哥」。
+  - id: table-1
+    type: table
+    label: 表一
+    title: 表一 白尾八哥與臺灣冠八哥比較異同表
+    # Gap 2(a) — the DEFINING real-corpus topology (see _parsed_2026-05-01/G7-L30.yml
+    # table-1): a vmerged 異同 section-label COLUMN, NOT a horizontal band. The section
+    # (相同處/相異處) lives in its OWN leftmost column while 比較項目/白尾/臺灣冠 stay aligned
+    # across sections. Faithfully transcribed with all 14 rows (5 相同處 + 9 相異處).
+    #   • `section_label_col` names that vmerged column's header (異同).
+    #   • `row_sections` gives each `rows` entry its section membership (order-aligned;
+    #     consecutive equal labels = one vmerge span). `rows` stays pure cell data
+    #     aligned to `headers` (fast path).
+    #   • `grid` is the physical merged-cell overlay: the section cell carries a rowspan
+    #     and the rows it spans omit that column's cell. The validator is rowspan-aware,
+    #     so this passes (the old colspan-only sum rejected it — plan §2.3).
+    headers: [比較項目, 白尾八哥, 臺灣冠八哥]
+    section_label_col: 異同
+    row_sections:
+      [相同處, 相同處, 相同處, 相同處, 相同處,
+       相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處, 相異處]
+    rows:
+      - [外形, 全身大致為黑色, 全身大致為黑色]
+      - [體型, 身形大小接近, 身形大小接近]
+      - [行動與食物, 常在地面走動覓食，吃昆蟲、果實, 常在地面走動覓食，吃昆蟲、果實]
+      - [棲息地, 低海拔平地, 低海拔平地]
+      - [生物分類, 八哥屬、留鳥, 八哥屬、留鳥]
+      - [嘴喙顏色, 黃色, 象牙白色]
+      - [尾羽顏色, 末段白色, 只有部分白色]
+      - [冠羽, 冠羽不明顯, 冠羽較明顯]
+      - [來源, 外來種, 原生種]
+      - [族群數量, 較多, 較少]
+      - [習性, 較不怕人, 較怕人]
+      - [築巢地點, 常利用人造設施築巢, 較少利用人造設施築巢]
+      - [適應都市環境, 較強, 較弱]
+      - [保育身分, 非保育類野生動物, 保育類野生動物]
+    grid:
+      # 相同處 vmerges 5 rows: origin row carries the section cell (rowspan=5) + 3 data
+      # cells; the next 4 rows carry 3 cells (section column stays spanned from above).
+      - [{ text: 相同處, rowspan: 5, is_section_label: true },
+         { text: 外形 }, { text: 全身大致為黑色 }, { text: 全身大致為黑色 }]
+      - [{ text: 體型 }, { text: 身形大小接近 }, { text: 身形大小接近 }]
+      - [{ text: 行動與食物 }, { text: 常在地面走動覓食，吃昆蟲、果實 }, { text: 常在地面走動覓食，吃昆蟲、果實 }]
+      - [{ text: 棲息地 }, { text: 低海拔平地 }, { text: 低海拔平地 }]
+      - [{ text: 生物分類 }, { text: 八哥屬、留鳥 }, { text: 八哥屬、留鳥 }]
+      # 相異處 vmerges 9 rows.
+      - [{ text: 相異處, rowspan: 9, is_section_label: true },
+         { text: 嘴喙顏色 }, { text: 黃色 }, { text: 象牙白色 }]
+      - [{ text: 尾羽顏色 }, { text: 末段白色 }, { text: 只有部分白色 }]
+      - [{ text: 冠羽 }, { text: 冠羽不明顯 }, { text: 冠羽較明顯 }]
+      - [{ text: 來源 }, { text: 外來種 }, { text: 原生種 }]
+      - [{ text: 族群數量 }, { text: 較多 }, { text: 較少 }]
+      - [{ text: 習性 }, { text: 較不怕人 }, { text: 較怕人 }]
+      - [{ text: 築巢地點 }, { text: 常利用人造設施築巢 }, { text: 較少利用人造設施築巢 }]
+      - [{ text: 適應都市環境 }, { text: 較強 }, { text: 較弱 }]
+      - [{ text: 保育身分 }, { text: 非保育類野生動物 }, { text: 保育類野生動物 }]
+  - id: p3
+    type: paragraph
+    text: >-
+      表二則說明了兩種八哥近年族群數量的變化。從表二可知，外來種白尾八哥都明顯多過原生種臺灣冠八哥；有些地方甚至已經看不到臺灣冠八哥的身影了。
+  - id: table-2
+    type: table
+    label: 表二
+    title: 表二 近年兩種臺灣常見八哥之族群數量之變化
+    headers: [指標, 白尾八哥, 臺灣冠八哥, 解讀重點]
+    rows:
+      - ["近年數量變化（2009-2020）", 成長 250%, 無明顯變化, 原生種的數量沒有增加，外來種快速擴張]
+      - [2021 年看得到的地點數, 225 個地點, 23 個地點, 2021 年外來種仍明顯多於原生種約 9.8 倍。]
+      - [2018 年花蓮調查結果, 674 隻, 0 隻, 某些區域幾乎看不到原生種]
+    notes:
+      - 註2. 「84 / 584」表示：一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。
+
+  # ── 閱讀聚光燈 (graphic_text_integration) — subset of the real 4-練習 flow ──
+  - id: ex-spotlight
+    type: exercise
+    question:
+      kind: graphic_text_integration
+      strategy_name: 閱讀聚光燈 - 圖文表整合閱讀策略
+      instruction: 閱讀時，先注意文字怎麼提醒你看圖表、怎麼告訴你圖表的功能，再把文字、圖片、表格連起來想。
+      steps:
+        - prompt: "練習一：第一段 vs 圖一\n1. 圖一最主要提供哪一類訊息？"
+          type: select
+          options: [兩種八哥外形相近的整體印象, 兩種八哥近年的族群變化情形]
+          answer: 0
+        - prompt: "2. 讀完第一段後，請你找出和圖一最相關的文字。"
+          type: select
+          options:
+            - 白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。
+            - 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+          answer: 1
+        - prompt: "練習二：第二段 vs 表一\n請把第二段文字中，要你看表的地方畫線或圈起來"
+          type: free_text
+          reference_answer: 表一比較了白尾八哥和臺灣冠八哥在外形與習性上的異同。
+        - prompt: "表一主要提供的是哪一類訊息？"
+          type: select
+          options:
+            - 白尾八哥和臺灣冠八哥近年的族群變化
+            - 白尾八哥和臺灣冠八哥的異同
+          answer: 1
+        - prompt: "練習三：第三段 vs 表二\n表二主要提供的是哪一類訊息？"
+          type: select
+          options: [兩種八哥近年族群數量的變化, 白尾八哥和臺灣冠八哥的異同]
+          answer: 0
+        # Gap 1: multi_select 步驟示範 (可複選). answer 是索引集合 (set 語意).
+        - prompt: "整合題:哪些線索能同時從『表一+表二』讀出?(可複選)"
+          type: multi_select
+          options: [外形都大致為黑色, 白尾八哥數量近年成長, 臺灣冠八哥是原生種, 兩種八哥叫聲相同]
+          answer: [1, 2]
+    answer_space: free_text
+    # assembled per-step answers; last element is the multi_select step's index set.
+    answer: [0, 1, null, 1, 0, [1, 2]]
+    grader: rubric_ai
+    anchors:
+      - { block_id: p1 }
+      - { block_id: fig-1 }
+      - { block_id: p2 }
+      - { block_id: table-1 }
+      - { block_id: p3 }
+      - { block_id: table-2 }
+
+  # ── 閱讀理解選擇題 ─────────────────────────────────────────────────────────
+  - id: ex-mcq-1
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 1.根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？
+      options:
+        - 白尾八哥是白色嘴喙、黑色尾羽；臺灣冠八哥是黃色嘴喙、白色尾羽
+        - 白尾八哥是黃色嘴喙、白色尾羽；臺灣冠八哥是白色嘴喙、黑色尾羽
+        - 白尾八哥是黑色嘴喙、白色尾羽；臺灣冠八哥是黃色嘴喙、黑色尾羽
+        - 白尾八哥是黃色嘴喙、黑色尾羽；臺灣冠八哥是白色嘴喙、白色尾羽
+    answer_space: choice
+    answer: 1 # option B
+    grader: exact
+    anchors:
+      - { block_id: table-1 }
+  - id: ex-mcq-5
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: ５.下列哪一個結論，最需要同時整合前文敘述、表一和表二，才能完整判斷？
+      options:
+        - 兩種八哥外形十分相似，所以只看整體羽色仍不容易正確分辨
+        - 白尾八哥較能適應人類環境，因此近年數量與分布都明顯增加
+        - 臺灣冠八哥原本就是臺灣原生種，所以現在在各地仍應較常見到
+        - 八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧
+    answer_space: choice
+    answer: 1 # option B
+    grader: exact
+    anchors:
+      - { block_id: table-1 }
+      - { block_id: table-2 }
+
+  # ── Gap 2(b): 重點表 (keypoints_table, 答案承載型) — 第 8 型 + dict answer ──────
+  # 1:1 aligned with parser extract_keypoints (structure=nested: label + sub_label +
+  # blanks) + parse_blanks ({answer, hint}). The block answer is a dict{blank_id: fill}
+  # (machine-comparable), answer_space=text, grader=exact.
+  - id: ex-keypoints
+    type: exercise
+    question:
+      kind: keypoints_table
+      structure: nested
+      title: 兩種八哥辨識重點表
+      rows:
+        - label: 辨識依據
+          sub_label: 嘴喙顏色
+          blank_ids: [r1.b1, r1.b2]
+        - label: 辨識依據
+          sub_label: 尾羽顏色
+          blank_ids: [r2.b1, r2.b2]
+        - label: 生態身分
+          sub_label: 來源
+          hint: 外來 / 原生
+          blank_ids: [r3.b1, r3.b2]
+      blanks:
+        - { id: r1.b1, answer: 黃色, hint: 白尾八哥 }
+        - { id: r1.b2, answer: 象牙白色, hint: 臺灣冠八哥 }
+        - { id: r2.b1, answer: 末段白色 }
+        - { id: r2.b2, answer: 只有部分白色 }
+        # □-choice blanks (Gap 2b): 來源 is a binary □-pick, not a free fill. `options`
+        # carries the offered choices (correct + distractor) so the pick is faithfully
+        # reconstructable/regradable; `answer` is the correct choice among them.
+        - { id: r3.b1, answer: 外來種, options: [外來種, 原生種] }
+        - { id: r3.b2, answer: 原生種, options: [外來種, 原生種] }
+    answer_space: text
+    answer:
+      r1.b1: 黃色
+      r1.b2: 象牙白色
+      r2.b1: 末段白色
+      r2.b2: 只有部分白色
+      r3.b1: 外來種
+      r3.b2: 原生種
+    grader: exact
+    anchors:
+      - { block_id: table-1 }

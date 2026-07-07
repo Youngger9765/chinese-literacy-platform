@@ -1,0 +1,119 @@
+# Fixture 3/4 — 文言文 (classical Chinese)
+# Hand-transcribed from backend/data/lessons/_parsed_2026-05-01/文-L2.yml
+# 文言文怎麼讀？-以「鞭虎救弟記」為例 — 文言文閱讀策略
+#
+# Layered "hard" case: exercises the `fill_in_blank` (詞義選擇) + `multiple_choice`
+# types, AND deliberately uses the `custom` escape hatch for the 白話/文言 對照表 —
+# a two-column parallel-passage widget the 6 registered types cannot faithfully model.
+# Per plan §2.3, custom is flagged needs_review and STILL carries a machine answer.
+id: wen-L2
+lesson_code: 文-L2
+title: 文言文怎麼讀？-以「鞭虎救弟記」為例
+blocks:
+  - id: p1
+    type: paragraph
+    text: >-
+      白話文比較容易懂，為什麼古人要用文言文寫文章？因為古時候書寫、記錄和印刷都太麻煩、花太多時間、太花錢，因此可以大幅精簡文字的文言文因應而生。
+  - id: p2
+    type: paragraph
+    text: >-
+      Ｑ１：文言文在哪裡節省用字？作者主要用了三個方式：用詞精簡、省略主詞或受詞、省略連接詞。讀文言文時必須強調「腦補」，讀者要試著推敲出被省略的部分。
+
+  # ── Gap 5: 白話/文言 對照表 promoted from `custom` to a first-class presentation
+  # block. `parallel_passage` carries NO answer — the 對照 is presentation. Judging
+  # regresses to a companion `fill_in_blank` exercise (ex-parallel-count) anchored here,
+  # which IS machine-verifiable so it drops needs_review. (plan §2.3: 白板的自由留給呈現，
+  # 不留給答案; §3.4 promote signal.)  [待 product 拍板 — 一行可退回 custom]
+  - id: pp-parallel
+    type: parallel_passage
+    title: 表１ 鞭虎救弟記的白話/文言文對照表
+    left_label: 白話
+    right_label: 文言
+    rows:
+      - left: 有一個名叫朱泰的人，和弟弟一起在山中砍柴。
+        right: 朱泰與弟採薪山中。
+      - left: 忽然有一隻老虎衝出來，咬住了弟弟就跑。
+        right: 忽虎出，噬其弟以去。
+      - left: 朱泰非常生氣，就拿起柴刀追上去，用力鞭打老虎。
+        right: 泰怒，持刀逐擊之。
+        note: 「肆」在此為「施展、放開」之意
+    notes:
+      - 白話 343 字 / 文言 195 字，對照後可數出差距。
+
+  # 判分回歸 fill_in_blank：數字填空，機器可驗證 → 移除 needs_review。
+  - id: ex-parallel-count
+    type: exercise
+    question:
+      kind: fill_in_blank
+      sentence: 對照上表後，文言文比白話文少了幾個字？__
+    answer_space: text
+    answer: "148"
+    grader: exact
+    needs_review: false
+    anchors:
+      - { block_id: pp-parallel }
+
+  # ── tiny `custom` escape hatch (真一次性範例) ────────────────────────────────
+  # parallel_passage graduated OUT of custom, but the contract still needs at least one
+  # `custom` example (test_all_question_types_covered). This is a genuinely one-off shape:
+  # a free-form annotation task the 7 registered types cannot model. custom is NOT exempt
+  # from the answer invariant, so it still carries answer + grader + needs_review.
+  - id: ex-custom-annotate
+    type: exercise
+    question:
+      kind: custom
+      prompt: 用你自己的話，在課文旁標註出「腦補」被省略的主詞或受詞。
+      render_hint: free-form margin-annotation widget over the passage; no fixed answer shape
+    answer_space: text
+    answer: 讀者需補出被省略的主詞／受詞
+    grader: manual
+    needs_review: true
+    anchors:
+      - { block_id: p2 }
+
+  # ── 詞義選擇 (fill_in_blank style: pick the correct gloss for a highlighted char) ──
+  - id: ex-vocab-si
+    type: exercise
+    question:
+      kind: fill_in_blank
+      sentence: 虎怒，力不得「肆」——「肆」的意思是？
+      vocab_bank:
+        A: 施展
+        B: 放肆
+    answer_space: choice
+    answer: A
+    grader: exact
+    anchors:
+      - { block_id: p2 }
+
+  # ── 閱讀理解選擇題 ─────────────────────────────────────────────────────────
+  - id: ex-mcq-2
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 2. 閱讀完本篇課文，請問有關「文言文」的敘述，何者為不正確？
+      options:
+        - 文言文的出現是為了要記錄古代的生難字，以供後人閱讀
+        - 因為古代書寫成本很高，文言文大幅精簡了需要紀錄的文字
+        - 文言文是書面用語，和古人平常說話的方式有所不同
+        - 精簡文字的方式有精簡用詞、省略主詞和受詞及省略連接詞
+    answer_space: choice
+    answer: 0 # option A (不正確者)
+    grader: exact
+    anchors:
+      - { block_id: p1 }
+  - id: ex-mcq-4
+    type: exercise
+    question:
+      kind: multiple_choice
+      question: 4. 下列何者是作者(曾世杰)想要學生學到的概念？
+      options:
+        - 宣揚文言文寫作之美，推廣文言文
+        - 說明文言文中生字、難字、古字的字義
+        - 告訴讀者文言文的由來以及閱讀的策略
+        - 說明文言文傳承古人智慧，現代人不可不學
+    answer_space: choice
+    answer: 2 # option C
+    grader: exact
+    anchors:
+      - { block_id: p2 }

@@ -98,6 +98,14 @@ class StoryDetail(StoryListItem):
     # Both None for lessons without this step; StoryStructure endpoint uses whichever is present.
     story_structure_table: Optional[list] = None
     story_structure_rows: Optional[list] = None
+    # Typed lesson_content contract (閱讀聚光燈 EDD refactor, DARK — handoff §4-#2).
+    # PURELY ADDITIVE, nullable, TRAILING. Populated at runtime by
+    # lesson_content_loader.get_lesson_content(story) ONLY when the backend
+    # LESSON_RENDERER_V1 flag is ON and a spotlight_v2 source exists; otherwise None.
+    # The frontend consumes it via LessonSchema.safeParse and renders through the unified
+    # LessonRenderer (falling back to its storyToLesson stopgap when null). Emitting the
+    # null key when flag OFF is harmless to legacy consumers (they never read this field).
+    lesson_content: Optional[dict] = None
 
 
 class StoryListResponse(BaseModel):

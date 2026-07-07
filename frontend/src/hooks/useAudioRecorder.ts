@@ -10,6 +10,14 @@ export interface AudioRecorderState {
   elapsedSeconds: number;
   remainingSeconds: number;
   volumeLevel: number;
+  /**
+   * Issue #2497 — true when the *last* recording session was auto-stopped because
+   * it hit `maxDurationSeconds`.  Consumers use this to warn the student that the
+   * recording may be incomplete (previously the cut-off was silent → the tail of a
+   * long reading was transcribed as nothing and scored as 漏念).
+   * Reset to false on startRecording().
+   */
+  reachedMaxDuration: boolean;
 }
 
 export interface AudioRecorderActions {
@@ -36,7 +44,22 @@ export interface AudioRecorderActions {
   clearRecording: () => void;
 }
 
-const MAX_DURATION_SECONDS = 120; // 2-minute limit
+const MAX_DURATION_SECONDS = 120; // default 2-minute limit (short clips)
+
+/**
+ * Issue #2497 — per-flow recording caps.
+ *
+ * The old shared 120 s cap silently truncated long readings: a whole-article
+ * FullReading (and the longest paragraphs) routinely runs 2–4 min, so the mic
+ * auto-stopped mid-reading, Gemini only transcribed the captured head, and the
+ * scorer marked every un-transcribed tail character as 漏念 → 27–40% false scores.
+ *
+ * Backend only enforces a 10 MB byte cap (opus ≈ 3 KB/s → ~55 min headroom) and a
+ * 1 s minimum, so raising these is safe.  Values are generous ceilings that comfortably
+ * exceed realistic reading time while still bounding runaway/idle recordings.
+ */
+export const FULL_READING_MAX_SECONDS = 600;  // whole-article read-aloud (≤10 min)
+export const PARAGRAPH_MAX_SECONDS = 180;      // single paragraph (≤3 min)
 
 function getSupportedMimeType(): string {
   const types = [
@@ -57,6 +80,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [reachedMaxDuration, setReachedMaxDuration] = useState(false);
 
   const [volumeLevel, setVolumeLevel] = useState(0);
 
@@ -121,6 +145,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     setAudioBlob(null);
     setErrorMessage('');
     setElapsedSeconds(0);
+    setReachedMaxDuration(false); // Issue #2497: reset auto-stop flag for new session
     chunksRef.current = [];
     peakVolumeRef.current = 0; // Issue #2321: reset silence gate for new session
 
@@ -233,6 +258,8 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       setElapsedSeconds(elapsed);
       if (elapsed >= maxDurationSeconds) {
+        // Issue #2497: flag the auto-stop so consumers can warn "錄音已達上限，可能未錄完".
+        setReachedMaxDuration(true);
         stopRecording();
       }
     }, 500);
@@ -320,6 +347,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     setAudioBlob(null);
     setErrorMessage('');
     setElapsedSeconds(0);
+    setReachedMaxDuration(false); // Issue #2497
     startTimeRef.current = 0;
     setStatus('idle');
   }, [audioUrl, stopRecording]);
@@ -347,6 +375,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
     elapsedSeconds,
     remainingSeconds,
     volumeLevel,
+    reachedMaxDuration,
     startRecording,
     stopRecording,
     stopAndGetBlob,

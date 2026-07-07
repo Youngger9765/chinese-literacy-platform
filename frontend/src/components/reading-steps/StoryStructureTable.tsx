@@ -236,12 +236,13 @@ function cellInteractiveText(cell: StructureRow | StructureSubRow): string {
 }
 
 function countBlanks(text: string): number {
-  return [...text.matchAll(INLINE_BLANK_RE)].length;
+  // 每次呼叫都用新鮮的 /g literal，避免共用單例 INLINE_BLANK_RE 的 lastIndex 殘留跨 cell 污染
+  return text.match(/【[^】]*】/g)?.length ?? 0;
 }
 
 function classifyInteractive(value: string): InteractiveType {
-  if (INLINE_BLANK_RE.test(value)) return 'fill_blank';
-  return 'display';
+  // 用不帶 /g 的 literal，.test() 不會推進 lastIndex（共用單例會有殘留狀態）
+  return /【[^】]*】/.test(value) ? 'fill_blank' : 'display';
 }
 
 function resolveGradeIndex(

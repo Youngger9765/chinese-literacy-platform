@@ -13,6 +13,9 @@ import BlockSequenceRenderer from '../../components/reading-spotlight/BlockSeque
 import OmoPaperResultBanner from '../../components/reading-steps/OmoPaperResultBanner';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { StrategyExercise as StrategyExerciseType, StrategyExerciseItem } from '../../types';
+import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
+import LessonRenderer from '../../components/lesson-content/LessonRenderer';
+import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 
 const StrategyExercisePage: React.FC = () => {
   const navigate = useNavigate();
@@ -91,6 +94,42 @@ const StrategyExercisePage: React.FC = () => {
       )}
     </div>
   );
+
+  // Phase-2 unified renderer (flag-guarded, default OFF). Placed BEFORE every legacy
+  // render branch below; engages only when the adapter yields a valid zod Lesson, else
+  // falls through to the byte-identical legacy path (fail-safe, never white-screens).
+  if (LESSON_RENDERER_V1) {
+    // Prefer the backend-supplied REAL lesson_content (typed contract from the story
+    // adapter); fall back to the front-end storyToLesson stopgap when the backend flag is
+    // OFF or the payload didn't parse (selectedStory.lessonContent is undefined).
+    const lesson = selectedStory.lessonContent ?? storyToLesson(selectedStory).lesson;
+    // Only adopt a Lesson here if it actually carries the 閱讀聚光燈 (a reading-strategy
+    // exercise: guided_steps / graphic_text_integration). Symmetric with ComprehensionMcqPage's
+    // MCQ guard — the two steps partition by content type so neither hijacks the other.
+    const lessonHasSpotlight =
+      !!lesson &&
+      lesson.blocks.some(
+        (b) =>
+          b.type === 'exercise' &&
+          (b.question.kind === 'guided_steps' || b.question.kind === 'graphic_text_integration'),
+      );
+    if (lesson && lessonHasSpotlight) {
+      return (
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
+          <OmoPaperResultBanner stepId="reading-strategy" />
+          <LessonRenderer
+            lesson={lesson}
+            story={selectedStory}
+            lessonCode={selectedStory.lesson_code || selectedStory.id}
+            onExerciseChange={(state) => handleAnswerChange({ ...state })}
+            onComplete={handleStrategyComplete}
+            initialState={savedStrategyData}
+          />
+          {nextButton}
+        </div>
+      );
+    }
+  }
 
   if (hasSpotlightV2 && spotlightV2) {
     return (
