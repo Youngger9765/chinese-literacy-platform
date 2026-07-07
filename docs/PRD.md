@@ -1573,6 +1573,27 @@
 
 ---
 
+## 🔦 閱讀聚光燈 EDD 現況與決策（2026-07-07）
+
+背景：#2504/#2505 把閱讀聚光燈重構為 block-based typed `lesson_content`（新 `LessonRenderer`，flag `LESSON_RENDERER_V1` 預設 ON）。
+
+### 現況（staging/dev + prod 皆同）
+- **8 策展課**（G5-L8 + dev7 七課：G6-L22~25 摘要策略 / G7-L28~30 圖文整合，各有 `backend/data/lessons/_ai_lessons/*.lesson.yml`）走 `_try_ai_lesson` → **新聚光燈已生效**
+- **其餘 ~109 帶 `spotlight_v2` 的課**仍退回舊版 `BlockSequenceRenderer`
+
+### #2515 容器路徑修（已上 prod）
+loader 用 repo-layout 路徑（`parents[3]` + literal `"backend/"`），容器內（WORKDIR `/app`）解析到不存在的 `/backend/data/...` → `lesson_content` 一律 null → 全站聚光燈退舊版（CI/本機因 repo 佈局吻合沒抓到）。修=改 `parent.parent.parent`（PR #2516 → staging，#2517 promote → prod）。8 策展課 prod `/api/stories/{id}` lesson_content 已 populated 驗過。
+
+### Part-2 全站點亮（暫緩 — 2026-07-07 決策）
+- **技術缺口**：adapter `scripts/spotlight_to_lesson_content.py` 未進 backend image（scripts/ 在 `./backend` build context 外）+ 有同 #2515 的 repo-layout 路徑陷阱
+- **品質實測**（本機跑全 117 非策展課）：49 valid / **68 needs_review** / 0 crash → **58% 會顯示「需人工檢核」**（spotlight 源 ↔ `_parsed` 課文綁定對不上，內容可能是隔壁課的）
+- **決策**：**先不全站點亮**，對齊教授 6/5「聚光燈先盤點分類再排程」。要 flip 前先修那 68 課的 content-source 綁定；技術修法（adapter file-move 進 `backend/app/services/` + 容器安全路徑 + site-wide gate flag `SPOTLIGHT_ADAPTER_SITEWIDE` 預設 OFF）已規劃、暫緩
+
+### 教授 6/5 checklist 驗收
+完整矩陣：`docs/qa/2026-07-06-professor-checklist-matrix.md`。render/結構層 + 部分互動層（#6 語詞應用、#10b 聚光燈即時批改、#13 報告架構、#14 字搜、#8 填空題號、#10c 老師端 code+可導覽）已驗；朗讀 STT 辨識（#3）、閱讀標記拖曳（#4）、詞語理解拖拉（#5）、老師報告端到端 render（#10c）留真人 audit（7/6-7/7）現場確認
+
+---
+
 ## 📚 參考文件
 
 ### 核心文件體系
@@ -1596,10 +1617,10 @@
 
 ---
 
-**文件版本**：1.7
+**文件版本**：1.8
 **建立日期**：2026-02-13
 **維護者**：Young Tsai
-**最後更新**：2026-03-14
+**最後更新**：2026-07-07
 
 **核心理念**：用 AI 技術解決真實教學痛點，讓每位學生都能獲得個別化的閱讀指導。
 
@@ -1609,6 +1630,7 @@
 
 | 版本 | 日期 | 變更內容 | Issues |
 |------|------|---------|--------|
+| 1.8 | 2026-07-07 | 新增「閱讀聚光燈 EDD 現況與決策」節：#2515 容器路徑修上 prod（8 策展課新聚光燈生效）；Part-2 全站點亮暫緩（117 非策展課 58% needs_review，對齊教授「先盤點分類再排程」）；教授 6/5 checklist 驗收矩陣連結 | #2504 #2505 #2515 #2516 #2517 |
 | 1.7 | 2026-03-14 | 新增技術品質 User Stories（US-X01~X09）：RWD、UI 模組化、API 重構、CI/CD、校班補完、錯題集、課文小測驗、前測/後測診斷、行事曆、Google Classroom/YouTube/Drive 整合 | — |
 | 1.6 | 2026-03-14 | 新增教師省力自動化功能（US-T05~T09）：AI 自動出題、課文自動解析、AI 差異化派題、每週學習摘要、成效報告生成。新增聽說讀寫 gap 功能：重複朗讀、課文難度標註、聽寫錯誤類型分析 | — |
 | 1.5 | 2026-03-12 | Demo 4 功能清單更新：(1) P1 教師功能標記完成（預警通知、熱力圖、卡點偵測、特別教學指示）；(2) P2 功能標記完成（家長端、遊戲化、聽力理解、聽寫、造句、AI 學習路徑、學習困難預測、跨課文分析）；(3) OAuth + 密碼強度標記完成；(4) 修復死連結（DEVELOPMENT_TIMELINE→ROADMAP） | #23-#30 #26 #86 #87 #90 #91 #92 #95 #96 #109 #251-#254 #255 |
