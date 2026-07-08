@@ -30,10 +30,14 @@
   function renderBase() {
     return IS_HTTP ? location.origin : baseUrl.replace(/\/+$/, "");
   }
-  // worksheet PDF 來源:遠端 → WS_HOST/assets;本機(file://或localhost)→ 本機 worksheets/
+  // worksheet PDF 來源:
+  //  - 遠端部署(*.run.app / *.web.app)→ WS_HOST/assets(其 CSP 允許 *.run.app 內嵌)
+  //  - file:// 本機工作台 → 本機 worksheets/(build.sh 轉好的)
+  //  - http localhost → 不可得(dev-hosting CSP 擋 localhost,且 worksheets 未進 public)→ 回 "" 走結構化文字
   function worksheetPdfSrc(L) {
     if (IS_REMOTE) return `${WS_HOST}/assets/worksheets/${L.dev_code}.pdf#view=FitH`;
-    return L.local_pdf ? L.local_pdf + "#view=FitH" : "";
+    if (!IS_HTTP) return L.local_pdf ? L.local_pdf + "#view=FitH" : "";
+    return "";
   }
 
   // 問題標籤: 穩定英文 key ↔ 中文顯示(對照 docx vs 渲染的保真檢查導向)。
@@ -56,6 +60,9 @@
   let baseUrl = localStorage.getItem(NS + "baseUrl") || DEFAULT_BASE;
   let leftView = localStorage.getItem(NS + "leftView") || "pdf"; // 'pdf' 原稿 PDF | 'text' 結構化
   if (leftView === "doc") leftView = "pdf"; // 舊值遷移
+  // http localhost 原稿 PDF 不可得(見 worksheetPdfSrc)→ 預設結構化文字,免載到 SPA fallback
+  if (leftView === "pdf" && location.protocol.startsWith("http") && !/\.(run|web)\.app$/.test(location.hostname))
+    leftView = "text";
   let renderCollapsed = localStorage.getItem(NS + "renderCollapsed") === "1";
   let checklistCollapsed = localStorage.getItem(NS + "checklistCollapsed") === "1";
   let overviewMode = false;
@@ -269,8 +276,9 @@
       pdf.removeAttribute("src");
       hint.style.display = "block";
       hint.innerHTML =
-        "此課無本機原稿 PDF。請跑 <code>bash build.sh</code>(下載 docx→LibreOffice 轉 PDF)," +
-        "或切到「📝 結構化文字」。(部署環境會改抓線上原稿)";
+        "本機 localhost 無法內嵌原稿 PDF(dev-hosting CSP 限制 + worksheets 未進 public)。" +
+        "請用「📝 結構化文字」對照;<b>部署到 staging 後原稿 PDF 會正常顯示</b>(改抓線上原稿)。" +
+        "file:// 版則用 <code>bash build.sh</code> 轉好的本機 PDF。";
     }
   }
 
