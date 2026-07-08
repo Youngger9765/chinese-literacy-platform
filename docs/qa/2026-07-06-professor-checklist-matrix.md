@@ -49,6 +49,21 @@
 | 5 | 詞語理解：放大字／欄位改名／答對錯回饋／拖拉點擊一致／注音輔讀 | ⬜ | 拖拉配對互動沒測 |
 | 10c | 聚光燈老師端 render 端到端 | 🟡 | 需真實有 session 的學生 + 真人點進老師報告確認 |
 
+## 2026-07-07 補驗確認（「沒把握」批次驗到底）
+
+把先前標 ⬜/🟡 且 headless 能驗的補驗到有把握：
+
+| # | 項目 | 結論 | 證據 |
+|---|---|---|---|
+| 2 | 移除三角形 | ✅ **做到** | `frontend/src/components/reading-steps/Intro.tsx:282` 註解 #2082 明確移除 ▷ 三角形 |
+| 7 | 語詞應用答錯不給正解 | ✅ **做到** | 像素：點錯「快馬加鞭」→ 橘框「↻ 再試試看！」+「點選其他選項繼續作答」，**不給正解**（順帶確認點擊即判、無確認鍵）|
+| 10 黃底 | 重點表黃底預設答案 | ⛔ **WON'T DO（Young 2026-07-07 算了）** | code：重點表 cell 交替底色 + input placeholder，無黃底 highlight = 沒做；Young 決定不修 |
+| — | /library 點擊進課 | ✅ **沒壞** | 先前「點不進」是 QA selector 找 `<a href>` 錯（卡片 onClick 導航）；真點「小兵立大功」→ `/learn/1076/intro` 0 error。小優化：卡片非真連結，a11y/SEO 略吃虧 |
+| 10c | 老師端看作答 | 🟡 機制驗到底 | 老師登入+班級 drill(→classroom/2)+學生進度表 render 全通 ✅ + code render SpotlightStrategyRecord ✅；端到端「看到聚光燈作答」需一個做過 dev7 聚光燈課的學生 session（demo 小美只做 L02）→ 真人 audit |
+| 12 | G7 intro 破圖 | 🟡 headless 0 破圖 | G7-L29 intro headless 僅 1 縮圖、0 broken；原 PPT 破圖情境需真人對照 |
+
+**真人 audit 現場清單（headless 本質做不到）**：#4 朗讀 STT 辨識、#5/#6 實際拖曳手勢、#14 報告完整填充（含朗讀真聲）、#16 字型嵌入、#10c 端到端。
+
 ## Part-2（全站聚光燈點亮）— 我方自己處理，不需啟翔判斷（2026-07-06 決）
 - Q「設計是否全站都用新 renderer」= 讀 code 即知（adapter 933 行專轉任何 spotlight_v2 + ~117 課有源）→ 不用問
 - Q「scripts/ 進 image 怎麼做」= 純技術（搬 scripts/ 進 backend/ 或改 build context + 修 _SCRIPTS_DIR）→ 我自己做
