@@ -44,13 +44,29 @@ _PATH_RE = re.compile(rf"^{_PREFIX}/[A-Za-z0-9_\-一-鿿]+/[0-9A-Za-z_\-]+\.json
 
 
 def _slug(name: str) -> str:
-    """Stable, path-safe slug from reviewer name (keeps CJK, strips separators)."""
-    s = re.sub(r"[^\w一-鿿]+", "_", (name or "").strip())
+    """Stable, path-safe slug from reviewer name.
+
+    Charset aligned with _PATH_RE's reviewer segment (ASCII word + BMP CJK) so a name
+    that saves can always be read back — non-BMP / accented names degrade to '_' rather
+    than producing a blob path that _PATH_RE later rejects on load (M2).
+    """
+    s = re.sub(r"[^A-Za-z0-9_一-鿿]+", "_", (name or "").strip())
     return (s.strip("_") or "anon")[:40]
 
 
 def _is_production() -> bool:
-    return os.environ.get("ENVIRONMENT", "").lower() == "production"
+    """Fail-closed: unknown/missing env on Cloud Run → treated as production (writes blocked).
+
+    This is a public unauthenticated write endpoint, so the gate must fail CLOSED. We can't
+    reuse config.is_dev — it counts staging as non-dev and would block staging too (板子就不能用).
+    """
+    env = os.environ.get("ENVIRONMENT", "").lower()
+    if env in ("staging", "development", "preview"):
+        return False
+    if env == "production":
+        return True
+    # Unset/unknown on Cloud Run (K_SERVICE present) → fail-closed as prod; local (no K_SERVICE) → allow
+    return bool(os.environ.get("K_SERVICE"))
 
 
 @router.post("/spotlight-qa/save")

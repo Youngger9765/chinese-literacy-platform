@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.routes.spotlight_qa import _PATH_RE, _slug
 
 client = TestClient(app, raise_server_exceptions=False)
 
@@ -58,6 +59,21 @@ class TestSave:
         ):
             r = client.post("/api/spotlight-qa/save", json=GOOD_PAYLOAD)
         assert r.status_code == 403
+
+    def test_fail_closed_unset_env_on_cloud_run_403(self):
+        # ENVIRONMENT unset/blank BUT running on Cloud Run (K_SERVICE) → fail-closed as prod → 403.
+        with patch.dict(os.environ, {"ENVIRONMENT": "", "K_SERVICE": "some-svc"}, clear=False), patch(
+            BUCKET, return_value=_mock_bucket()
+        ):
+            r = client.post("/api/spotlight-qa/save", json=GOOD_PAYLOAD)
+        assert r.status_code == 403
+
+    def test_unset_env_local_allowed(self):
+        # ENVIRONMENT unset AND not on Cloud Run (no K_SERVICE) → local dev → allowed.
+        env = {k: v for k, v in os.environ.items() if k not in ("ENVIRONMENT", "K_SERVICE")}
+        with patch.dict(os.environ, env, clear=True), patch(BUCKET, return_value=_mock_bucket()):
+            r = client.post("/api/spotlight-qa/save", json=GOOD_PAYLOAD)
+        assert r.status_code == 200, r.text
 
     def test_missing_lessons_400(self):
         with _non_prod(), patch(BUCKET, return_value=_mock_bucket()):
@@ -109,3 +125,9 @@ class TestListAndRead:
         for bad in ["test-dataset/x/y.json", "spotlight-qa/../secret.json", "spotlight-qa/a/b.txt"]:
             r = client.get("/api/spotlight-qa/review", params={"path": bad})
             assert r.status_code == 400, bad
+
+    def test_slug_charset_aligned_with_path_re(self):
+        # M2: any reviewer name → slug that _PATH_RE (load) will accept (save-then-load never breaks).
+        for name in ["啟翔", "José", "さくら", "김", "王 小明", "a-b/c", "", "🚀only"]:
+            path = f"spotlight-qa/{_slug(name)}/20260101T000000-abcd1234.json"
+            assert _PATH_RE.match(path), f"{name!r} → {path}"
