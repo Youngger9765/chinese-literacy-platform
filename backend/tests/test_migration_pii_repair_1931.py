@@ -1,6 +1,6 @@
 """Tests for Issue #1931: Alembic migration to repair existing PII rows in staging DB.
 
-Bug A: jay.tzeng@gmail.com and kuanweilu@gmail.com email fields still hold real PII
+Bug A: dogfood-a@gmail.com and dogfood-b@gmail.com email fields still hold real PII
        even though is_active=False (PR #1930 only deactivated, did not anonymize).
 Bug B: 王管理員 (admin@test.com) still has a UserRole row with role='teacher'.
 Bug C: 小明 (student@test.com) may still have a ClassroomStudent row for a grade-7 class.
@@ -93,16 +93,16 @@ def _seed_broken_state(session) -> dict:
 
     # Bug A: gmail users (is_active=False from #1930, but email still PII)
     jay = User(
-        email="jay.tzeng@gmail.com",
+        email="dogfood-a@gmail.com",
         password_hash=hash_password("test1234"),
-        name="Jay Tzeng",
+        name="Dogfood User A",
         is_active=False,
         email_verified=True,
     )
     kuan = User(
-        email="kuanweilu@gmail.com",
+        email="dogfood-b@gmail.com",
         password_hash=hash_password("test1234"),
-        name="Kuanweilu",
+        name="Dogfood User B",
         is_active=False,
         email_verified=True,
     )
@@ -241,8 +241,8 @@ def broken_state(db_session):
     db_session.query(UserRole).delete()
     db_session.query(User).filter(
         User.email.in_([
-            "jay.tzeng@gmail.com",
-            "kuanweilu@gmail.com",
+            "dogfood-a@gmail.com",
+            "dogfood-b@gmail.com",
             "admin@test.com",
             "student@test.com",
             f"inactive_{ids['jay_id']}@test.com",
@@ -332,7 +332,7 @@ class TestAfterRepairMigration:
             f"Bug A: Jay email not anonymized. Got: {jay.email}"
         )
         assert kuan.email == f"inactive_{kuan_id}@test.com", (
-            f"Bug A: Kuanweilu email not anonymized. Got: {kuan.email}"
+            f"Bug A: Dogfood User B email not anonymized. Got: {kuan.email}"
         )
 
     def test_admin_has_exactly_2_roles_after_repair(self, broken_state, db_session):
