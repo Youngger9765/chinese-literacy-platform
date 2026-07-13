@@ -155,6 +155,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
     return getEncouragement(paragraphSummary.matchRate);
   }, [paragraphSummary?.matchRate]);
 
+  // Issue #2502: 有評估結果時課文（左）／AI 判斷（右）左右分欄；否則課文單欄。
+  const showEvalColumn = !!((readingResultTokens && !isSessionActive) || paragraphSummary);
+
   return (
     <div
       className={`transition-all duration-500 rounded-3xl p-5 md:p-14 ${
@@ -196,6 +199,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           }}
         />
       </div>
+
+      {/* Issue #2502: 左課文／右 AI 判斷雙欄（有評估結果時）；窄螢幕自動堆疊 */}
+      <div className={showEvalColumn ? 'grid lg:grid-cols-2 gap-8 items-start' : ''}>
+
+      {/* ── 左欄：該段課文 ── */}
+      <div>
 
       {/* Paragraph text — with TTS character highlight */}
       <p
@@ -248,6 +257,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         </div>
       )}
 
+      </div>{/* /左欄課文（Issue #2502）*/}
+
+      {/* ── 右欄：AI 判斷結果（對照 + 摘要）（Issue #2502）── */}
+      {showEvalColumn && (
+      <div>
+
       {/* ── Painpoint 4: 原文 vs 朗讀結果 — 左右並陳（桌機），上下排（手機） ── */}
       {readingResultTokens && !isSessionActive && (
         <div className="mt-6 rounded-2xl bg-surface-container-low overflow-hidden">
@@ -255,8 +270,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           <div className="px-4 pt-3 pb-2 border-b border-on-surface/5">
             <ReadingDiffLegend />
           </div>
-          {/* 左右並陳 (md+) / 上下排 (sm) */}
-          <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-on-surface/8">
+          {/* Issue #2502: 移到右欄後改為永遠上下排（你唸的／朗讀結果），
+              避免在窄的右欄內再被 md:flex-row 二度切欄導致中文擠壓 */}
+          <div className="flex flex-col divide-y divide-on-surface/8">
             {/* 左欄：學生實際唸的內容（Issue #2500 — 逐字 STT transcript，取代課文原文）*/}
             <div className="flex-1 p-4">
               <p className="text-xs font-bold text-on-surface-variant mb-2">你唸的內容</p>
@@ -447,6 +463,11 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           })()}
         </div>
       )}
+
+      </div>
+      )}{/* /右欄 AI 判斷（Issue #2502）*/}
+
+      </div>{/* /grid 左課文右判斷（Issue #2502）*/}
     </div>
   );
 };

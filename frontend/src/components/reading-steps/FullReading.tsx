@@ -383,9 +383,32 @@ const FullReading: React.FC<FullReadingProps> = ({
 
       {/* ── Single-column centered layout ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
-        <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
+        <div className={`mx-auto px-6 md:px-16 pt-4 ${result ? 'max-w-6xl' : 'max-w-4xl'}`}>
 
-          {/* Full text card */}
+          {/* I4 (Issue #2156): Gemini fallback alert banner — 置於雙欄之上（全寬） */}
+          {fallbackReason && result && (
+            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
+              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
+              <div className="flex-1">
+                <p className="text-base font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  AI 音訊分析未能完成（{fallbackReason}），評分僅依瀏覽器語音辨識，準確度較低。建議重試以獲得精準評分。
+                </p>
+              </div>
+              <button
+                onClick={clearFallbackReason}
+                className="text-amber-600 hover:text-amber-800 transition-colors shrink-0 mt-0.5"
+                aria-label="關閉提示"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          )}
+
+          {/* Issue #2502: 完成後左課文／右 AI 判斷雙欄；未完成時課文單欄，窄螢幕自動堆疊 */}
+          <div className={result ? 'grid lg:grid-cols-2 gap-6 items-start' : ''}>
+
+          {/* 左欄：Full text card（全文課文）*/}
           <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-10 mt-4">
             {/* Instructions */}
             {!result && !isSessionActive && !isPreparing && !isTtsPlaying && (
@@ -420,34 +443,11 @@ const FullReading: React.FC<FullReadingProps> = ({
                 </div>
               ))}
             </div>
-          </div>
+          </div>{/* /左欄課文卡 */}
 
-
-          {/* I4 (Issue #2156): Gemini fallback alert banner — must be visible, never silent.
-              Shown when backend returns method='fallback' so user knows the result is
-              based on Web Speech only (lower quality) and can retry for a better score. */}
-          {fallbackReason && result && (
-            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
-              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
-              <div className="flex-1">
-                <p className="text-base font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
-                <p className="text-sm text-amber-700 mt-0.5">
-                  AI 音訊分析未能完成（{fallbackReason}），評分僅依瀏覽器語音辨識，準確度較低。建議重試以獲得精準評分。
-                </p>
-              </div>
-              <button
-                onClick={clearFallbackReason}
-                className="text-amber-600 hover:text-amber-800 transition-colors shrink-0 mt-0.5"
-                aria-label="關閉提示"
-              >
-                <span className="material-symbols-outlined text-base">close</span>
-              </button>
-            </div>
-          )}
-
-          {/* ── Result section ──────────────────────────────────────── */}
+          {/* ── 右欄：AI 判斷結果（Issue #2502）──────────────────────── */}
           {result && (
-            <div ref={resultRef} className="mt-6 space-y-6">
+            <div ref={resultRef} className="space-y-6 mt-4">
               {/* Stars + encouragement + transcript + audio (Issue #1960 — FullReadingScoreCard) */}
               <FullReadingScoreCard
                 result={result}
@@ -510,6 +510,7 @@ const FullReading: React.FC<FullReadingProps> = ({
               )}
             </div>
           )}
+          </div>{/* /grid 左課文右判斷（Issue #2502）*/}
         </div>
       </div>
 
