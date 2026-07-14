@@ -57,6 +57,22 @@
     border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-size: 13px;
     font-family: inherit;
   }
+  /* ⚙ 設定 popover(收納不常改的 render base / 審查者) */
+  .settings { position: relative; }
+  .settings > summary {
+    list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 8px;
+    padding: 5px 10px; font-size: 13px; background: #fff; color: var(--ink); user-select: none;
+  }
+  .settings > summary::-webkit-details-marker { display: none; }
+  .settings[open] > summary, .settings > summary:hover { border-color: var(--violet); color: var(--violet); }
+  .settings-pop {
+    position: absolute; right: 0; top: calc(100% + 6px); z-index: 60;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; white-space: nowrap;
+    box-shadow: 0 10px 30px rgba(0,0,0,.16);
+  }
+  .settings-pop label { display: flex; flex-direction: column; gap: 4px; }
+  .settings-pop .base-input { width: 320px; max-width: 60vw; }
   .lesson-select { border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-size: 13px;
     font-weight: 600; font-family: inherit; background: #fff; color: var(--ink); max-width: 340px; }
   .lesson-select:hover { border-color: var(--violet); }
@@ -340,23 +356,22 @@
   <div class="bar">
     <button class="nav-btn" id="homeBtn" title="總覽 / 各課審查進度">🏠 總覽</button>
     <select class="lesson-select" id="lessonSelect" title="選課"></select>
-    <span class="spacer"></span>
-    <button class="nav-btn" id="prevBtn">← 上一課</button>
-    <button class="nav-btn" id="nextBtn">下一課 →</button>
+    <button class="nav-btn" id="prevBtn" title="上一課">←</button>
+    <button class="nav-btn" id="nextBtn" title="下一課">→</button>
     <span class="progress" id="progress"></span>
-    <label class="meta">審查者 <input class="reviewer-input" id="reviewer" size="6" placeholder="啟翔"></label>
-    <button class="act-btn" id="saveCloudBtn" title="存到 staging(人工測試,不碰正式資料)">☁ 存 staging</button>
-    <button class="act-btn" id="loadCloudBtn" title="從雲端載回續審">☁ 載入</button>
-    <button class="act-btn primary" id="exportBtn">⬇ Export JSON</button>
-  </div>
-  <div class="bar row2">
-    <span class="strategy" id="strategy"></span>
-    <span class="meta" id="lessonMeta"></span>
     <span class="spacer"></span>
-    <label class="meta">dev server <input class="base-input" id="baseUrl" size="20" placeholder="http://localhost:3000"></label>
-    <input class="search-input" id="search" placeholder="🔎 在原文中搜尋…" size="14">
-    <a class="link-btn" id="docxLink" target="_blank" rel="noopener">📄 原稿 docx</a>
-    <a class="link-btn" id="liveLink" target="_blank" rel="noopener">▶ staging</a>
+    <input class="search-input" id="search" placeholder="🔎 搜尋原文…" size="12">
+    <label class="meta">審查者 <input class="reviewer-input" id="reviewer" size="6" placeholder="輸入姓名"></label>
+    <button class="act-btn" id="saveCloudBtn" title="存到 staging(人工測試,不碰正式資料)">☁ 存</button>
+    <button class="act-btn" id="loadCloudBtn" title="從雲端載回續審">☁ 載入</button>
+    <button class="act-btn primary" id="exportBtn" title="下載審查結果 JSON">⬇ Export</button>
+    <details class="settings">
+      <summary title="設定:render base">⚙</summary>
+      <div class="settings-pop">
+        <label class="meta" title="右欄渲染來源(staging;需先登入)">render base
+          <input class="base-input" id="baseUrl" placeholder="https://…staging….run.app"></label>
+      </div>
+    </details>
   </div>
 </header>
 
@@ -415,9 +430,8 @@
       <div class="frame-wrap">
         <iframe id="renderFrame" title="lesson render"></iframe>
         <div class="frame-hint" id="frameHint">
-          <div>🖥 右欄空白?請先啟動前端 dev server:</div>
-          <div><code>cd chinese-literacy-platform/.worktrees/feature/spotlight-edd-foundation/frontend &amp;&amp; npm run dev</code></div>
-          <div class="meta">起在 <span id="hintBase">localhost:3000</span> 後,按上方「↻ 重新載入」。圖片走 GCS,若 403 會破圖但版面照常。</div>
+          <div>🖥 右欄空白?請先在 staging <b>/login</b> 一鍵登入(學生 小明),再按上方「↻ 重新載入」。</div>
+          <div class="meta">render base = <span id="hintBase">staging</span>,渲染真 StrategyExercisePage(/learn/{id}/reading-strategy)。若聚光燈尚未併入 staging,該步驟可能空白。圖片走 GCS,若 403 會破圖但版面照常。</div>
         </div>
       </div>
     </div>

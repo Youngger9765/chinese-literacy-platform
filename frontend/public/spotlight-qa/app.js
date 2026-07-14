@@ -1,5 +1,5 @@
 /* 聚光燈 QA 工具 — docx 原文 ↔ 實際渲染(真 LessonRenderer)對照。file:// 可用。
-   右欄上:iframe 本機 dev server /dev/lesson/:code(重構後真渲染)
+   右欄上:iframe staging /learn/{story_id}/reading-strategy(真 StrategyExercisePage → LessonRenderer;需先在 staging 登入)
    右欄下:區塊清單(逐 block 🚩 標記 / 標籤 / 備註),findings 綁 block.id。 */
 (function () {
   "use strict";
@@ -8,7 +8,8 @@
   const TOOL_VERSION = 2; // v2: block-based(重構後);findings 綁 block_id,localStorage 換 namespace
   const NS = "spotlight-qa2:";
   const LIVE_BASE = "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app";
-  const DEFAULT_BASE = "http://localhost:3000";
+  // 右欄改指 staging 真學習頁 /learn/{story_id}/reading-strategy(放棄 /dev/lesson);render base 預設 = staging
+  const DEFAULT_BASE = LIVE_BASE;
   // 真原稿 worksheet 由前端 hosting 提供(public);GCS raw url 是 403,不要用。
   const WS_HOST = "https://lingoleap-dev.web.app";
 
@@ -26,9 +27,9 @@
     return "https://lingoleap-backend-staging-958347263320.asia-east1.run.app";
   }
   const API = apiBase();
-  // render iframe base:http → 同源(staging/localhost 都有 /dev/lesson);file:// → dev server 輸入框
+  // render iframe base:部署在 staging 同源(IS_REMOTE)→ 用同源;否則(file:// / 本機 http.server)吃輸入框(預設 staging)
   function renderBase() {
-    return IS_HTTP ? location.origin : baseUrl.replace(/\/+$/, "");
+    return IS_REMOTE ? location.origin : baseUrl.replace(/\/+$/, "");
   }
   // worksheet PDF 來源:
   //  - 遠端部署(*.run.app / *.web.app)→ WS_HOST/assets(其 CSP 允許 *.run.app 內嵌)
@@ -56,15 +57,20 @@
 
   // ---- state ----
   let current = 0;
-  let reviewer = localStorage.getItem(NS + "reviewer") || "啟翔";
+  let reviewer = localStorage.getItem(NS + "reviewer") || ""; // 預設空白,審查者需自行填名
   let baseUrl = localStorage.getItem(NS + "baseUrl") || DEFAULT_BASE;
+  // 舊本機 dev server 值(任何 localhost / 127.0.0.1 形式,含尾斜線)一律遷到 staging,並清乾淨 localStorage。
+  if (/localhost|127\.0\.0\.1/.test(baseUrl)) {
+    baseUrl = DEFAULT_BASE;
+    localStorage.setItem(NS + "baseUrl", baseUrl);
+  }
   let leftView = localStorage.getItem(NS + "leftView") || "pdf"; // 'pdf' 原稿 PDF | 'text' 結構化
   if (leftView === "doc") leftView = "pdf"; // 舊值遷移
   // http localhost 原稿 PDF 不可得(見 worksheetPdfSrc)→ 預設結構化文字,免載到 SPA fallback
   if (leftView === "pdf" && location.protocol.startsWith("http") && !/\.(run|web)\.app$/.test(location.hostname))
     leftView = "text";
   let renderCollapsed = localStorage.getItem(NS + "renderCollapsed") === "1";
-  let checklistCollapsed = localStorage.getItem(NS + "checklistCollapsed") === "1";
+  let checklistCollapsed = (localStorage.getItem(NS + "checklistCollapsed") ?? "1") === "1"; // 預設收起,省空間
   let overviewMode = false;
   let ovFilter = localStorage.getItem(NS + "ovFilter") || "all";
 
@@ -353,39 +359,42 @@
 
   function renderHeader() {
     const L = lesson();
-    $("strategy").innerHTML =
-      `<span class="badge">${esc(L.lesson_code)}</span>${esc(L.strategy_name || "")}`;
-    $("lessonMeta").innerHTML =
+    // 這幾個是已從精簡單行 bar 移除的元件(資訊已在別處顯示),存在才設,避免 null。
+    const setHtml = (id, html) => { const el = $(id); if (el) el.innerHTML = html; };
+    const setHref = (id, href) => { const el = $(id); if (el) el.href = href; };
+    setHtml("strategy", `<span class="badge">${esc(L.lesson_code)}</span>${esc(L.strategy_name || "")}`);
+    setHtml("lessonMeta",
       `${esc(L.title || "")}　<strong>${L.block_count}</strong> blocks` +
-      ` (段 ${L.paragraph_count} / 題 ${L.exercise_count} / 圖 ${L.figure_count} / 表 ${L.table_count})`;
+      ` (段 ${L.paragraph_count} / 題 ${L.exercise_count} / 圖 ${L.figure_count} / 表 ${L.table_count})`);
     $("blocksMeta").textContent = L.fixture_found
       ? `${(L.checklist || []).length} 項可審`
-      : "⚠ 缺 fixture,右欄無法渲染";
+      : "⚠ 缺 fixture,無審查清單";
     // 用前端 hosting 的 public 原稿(GCS raw url 403);dev_code 已是正規化課號
-    $("docxLink").href = `${WS_HOST}/assets/worksheets/${L.dev_code}.docx`;
-    $("liveLink").href = `${LIVE_BASE}/dev/lesson/${L.dev_code}`;
+    setHref("docxLink", `${WS_HOST}/assets/worksheets/${L.dev_code}.docx`);
+    setHref("liveLink", L.story_id ? `${LIVE_BASE}/learn/${L.story_id}/reading-strategy` : "#");
     $("prevBtn").disabled = current === 0;
     $("nextBtn").disabled = current === LESSONS.length - 1;
     $("lessonReviewed").checked = review.status === "reviewed";
     $("lessonNote").value = review.lesson_note || "";
   }
 
-  // ---- iframe (real render) ----
+  // ---- iframe (real render on staging) ----
   function devUrl() {
-    return `${renderBase()}/dev/lesson/${lesson().dev_code}`;
+    const id = lesson().story_id;
+    return id ? `${renderBase()}/learn/${id}/reading-strategy` : "about:blank";
   }
   function renderFrame() {
     const url = devUrl();
     $("renderFrame").src = url;
     $("openFrame").href = url;
     const hint = $("frameHint");
-    if (!lesson().fixture_found) {
+    if (!lesson().story_id) {
       hint.classList.add("show");
-      hint.querySelector("div").textContent = `本課缺 dev fixture,無法渲染(${lesson().lesson_code})。`;
+      hint.querySelector("div").textContent = `本課解析不到 story_id,無法在 staging 開啟渲染(${lesson().lesson_code})。`;
     } else {
       hint.classList.remove("show");
     }
-    $("hintBase").textContent = baseUrl;
+    $("hintBase").textContent = renderBase();
   }
 
   function renderCards() {
@@ -1164,7 +1173,7 @@
           lesson_code: L.lesson_code,
           title: L.title,
           strategy_name: L.strategy_name,
-          dev_url: `/dev/lesson/${L.dev_code}`,
+          dev_url: L.story_id ? `/learn/${L.story_id}/reading-strategy` : "",
           source_docx: L.source_file,
           worksheet_docx_url: L.worksheet_docx_url,
           lesson_status: r.status,
@@ -1179,7 +1188,7 @@
       exported_at: new Date().toISOString(),
       reviewer: reviewer,
       tool_version: TOOL_VERSION,
-      compared_against: "docx ground truth ↔ 重構後 LessonRenderer (/dev/lesson/:code)",
+      compared_against: "docx ground truth ↔ staging StrategyExercisePage (/learn/{story_id}/reading-strategy)",
       issue_tag_legend: Object.fromEntries(ISSUE_TAGS),
       lessons,
     };
@@ -1198,6 +1207,11 @@
   // ---- 雲端存 / 載(staging;比照 testset)----
   $("saveCloudBtn").onclick = async () => {
     const btn = $("saveCloudBtn");
+    if (!reviewer.trim()) {
+      alert("請先在上方「審查者」欄填入你的名字再存到 staging(存檔會用它當路徑)。");
+      $("reviewer").focus();
+      return;
+    }
     const out = buildExportObject();
     if (!out.lessons.length && !confirm("目前沒有任何標記/備註,仍要存空的 review 到 staging?")) return;
     btn.disabled = true;
