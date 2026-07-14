@@ -29,6 +29,15 @@
     if (IS_REMOTE) return `${WS_HOST}/assets/worksheets/${L.lesson_code}.pdf#view=FitH`;
     return L.local_pdf ? L.local_pdf + "#view=FitH" : "";
   }
+  // 後端 API base(比照 spotlight/testset):打對應環境後端存/載 QA JSON
+  function apiBase() {
+    const h = location.hostname;
+    if (h.indexOf("-frontend-") > -1) return location.origin.replace("-frontend-", "-backend-");
+    if (h === "localhost" || h === "127.0.0.1") return "http://localhost:8000";
+    if (/\.web\.app$/.test(h)) return ""; // Firebase 有 /api rewrite,用相對路徑
+    return "https://lingoleap-backend-staging-958347263320.asia-east1.run.app";
+  }
+  const API = apiBase();
 
   // 問題標籤(docx ↔ 重點表渲染的保真檢查導向)
   const ISSUE_TAGS = [
@@ -862,6 +871,110 @@
     a.click();
     URL.revokeObjectURL(a.href);
   };
+
+  // ---- 雲端存 / 載(staging;比照 spotlight-qa /api/keypoints-qa/*)----
+  $("saveCloudBtn").onclick = async () => {
+    const btn = $("saveCloudBtn");
+    const out = buildExportObject();
+    if (!out.lessons.length && !confirm("目前沒有任何標記/備註,仍要存空的 review 到 staging?")) return;
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = "存檔中…";
+    try {
+      const res = await fetch(`${API}/api/keypoints-qa/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(out),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok && j.ok) {
+        btn.textContent = "✅ 已存";
+        setTimeout(() => (btn.textContent = old), 1800);
+      } else {
+        alert("存檔失敗(" + res.status + "):" + (j.detail || JSON.stringify(j)));
+        btn.textContent = old;
+      }
+    } catch (e) {
+      alert("存檔失敗:" + e.message + "\nAPI=" + API);
+      btn.textContent = old;
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  $("loadCloudBtn").onclick = async () => {
+    const box = $("cloudList");
+    box.style.display = "block";
+    box.innerHTML = "<div class='cloud-row'>載入清單中…</div>";
+    try {
+      const res = await fetch(`${API}/api/keypoints-qa/reviews`);
+      const j = await res.json();
+      const list = (j && j.reviews) || [];
+      if (!list.length) {
+        box.innerHTML = "<div class='cloud-row'>雲端沒有已存的 review。</div>";
+        return;
+      }
+      box.innerHTML =
+        `<div class="cloud-head">雲端 review(點一筆載回,會覆寫本機同課標記)<button class="link-btn" id="cloudClose">✕</button></div>` +
+        list
+          .map(
+            (r) =>
+              `<div class="cloud-row" data-path="${esc(r.path)}"><b>${esc(r.reviewer)}</b>　${esc(
+                r.saved_at
+              )}　<span class="meta">${r.size || 0}B</span></div>`
+          )
+          .join("");
+      $("cloudClose").onclick = () => (box.style.display = "none");
+      box.querySelectorAll(".cloud-row[data-path]").forEach((row) => {
+        row.onclick = () => loadCloudReview(row.dataset.path);
+      });
+    } catch (e) {
+      box.innerHTML = "<div class='cloud-row'>載入清單失敗:" + esc(e.message) + "</div>";
+    }
+  };
+
+  async function loadCloudReview(path) {
+    if (!confirm("載回這筆 review?會覆寫本機對應課的標記/備註。")) return;
+    try {
+      const res = await fetch(`${API}/api/keypoints-qa/review?path=` + encodeURIComponent(path));
+      const payload = await res.json();
+      const lessons = (payload && payload.lessons) || [];
+      // 回填成本工具的 review 結構(findings 綁 row_key)
+      lessons.forEach((L) => {
+        const r = blankReview();
+        r.status = L.lesson_status || "pending";
+        r.lesson_note = L.lesson_note || "";
+        (L.row_findings || []).forEach((rf) => {
+          if (!rf.row_key) return;
+          r.findings[rf.row_key] = {
+            has_issue: !!rf.has_issue,
+            tags: rf.issue_tags || [],
+            note: rf.note || "",
+          };
+        });
+        r.annotations = (L.text_annotations || []).map((a) => ({
+          id: "a" + Math.random().toString(36).slice(2),
+          scope: a.scope,
+          block_id: a.block_id,
+          quote: a.quote,
+          note: a.note,
+        }));
+        saveReview(L.lesson_code, r);
+      });
+      if (payload.reviewer) {
+        reviewer = payload.reviewer;
+        $("reviewer").value = reviewer;
+        localStorage.setItem(NS + "reviewer", reviewer);
+      }
+      $("cloudList").style.display = "none";
+      review = loadReview(lesson().lesson_code);
+      renderAll();
+      showOverview();
+      alert("已載回 " + lessons.length + " 課的 review。");
+    } catch (e) {
+      alert("載回失敗:" + e.message);
+    }
+  }
 
   // ================= INIT =================
   if (!LESSONS.length) {

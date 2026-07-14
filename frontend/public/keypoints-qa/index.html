@@ -211,6 +211,17 @@
 
   .empty { color: var(--muted); padding: 40px; text-align: center; }
 
+  /* ---- cloud reviews list ---- */
+  #cloudList { display: none; position: fixed; top: 52px; right: 14px; z-index: 60;
+    width: 380px; max-height: 70vh; overflow-y: auto; background: #fff;
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+  .cloud-head { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 9px 12px; font-size: 12px; font-weight: 700; color: var(--muted);
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+  .cloud-row { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .cloud-row[data-path]:hover { background: var(--violet-bg); }
+  .cloud-row b { color: var(--ink); }
+
   /* ---- home / overview ---- */
   #homeBtn.active { background: var(--violet); border-color: var(--violet); color: #fff; }
   #overview { display: none; flex: 1 1 auto; overflow-y: auto; background: var(--bg); }
@@ -261,6 +272,8 @@
     <button class="nav-btn" id="nextBtn">下一課 →</button>
     <span class="progress" id="progress"></span>
     <label class="meta">審查者 <input class="reviewer-input" id="reviewer" size="6" placeholder="啟翔"></label>
+    <button class="act-btn" id="saveCloudBtn" title="存到 staging(人工測試,GCS 隔離,不碰正式資料)">☁ 存 staging</button>
+    <button class="act-btn" id="loadCloudBtn" title="從雲端載回續審">☁ 載入</button>
     <button class="act-btn primary" id="exportBtn">⬇ Export JSON</button>
   </div>
   <div class="bar row2">
@@ -361,6 +374,8 @@
     </div>
   </div>
 </section>
+
+<div id="cloudList"></div>
 
 <button id="annoBtn">＋ 標註</button>
 <div id="annoPop">
