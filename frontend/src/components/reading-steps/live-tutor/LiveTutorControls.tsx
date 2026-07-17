@@ -212,7 +212,7 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
                 onClick={onReadAgain}
                 className="h-14 px-6 rounded-full font-headline font-bold text-base bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0"
               >
-                <span className="material-symbols-outlined text-lg">replay</span>
+                <span className="material-symbols-outlined text-lg">refresh</span>
                 再讀一次
               </button>
             )}
