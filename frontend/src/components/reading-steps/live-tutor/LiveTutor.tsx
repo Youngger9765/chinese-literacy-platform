@@ -637,7 +637,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           const lr = getLineResultForParagraph(lineResults, Number(k));
           return {
             paragraph_index: Number(k),
-            attempts: 1,
+            attempts: 1, // placeholder：目前無逐段重試累計；此欄位尚無 consumer（review #2531）
             match_rate: v.matchRate,
             cpm: lr?.cpm ?? 0,
             duration_ms: lr?.durationMs ?? 0,

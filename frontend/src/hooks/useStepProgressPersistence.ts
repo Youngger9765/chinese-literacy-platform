@@ -229,13 +229,25 @@ export function useStepProgressPersistence({
         const completed = new Set<string>(prev.steps_completed);
         if (opts.completeStep) completed.add(opts.completeStep);
 
+        // Issue #2530: merge each step's patch ONE LEVEL deep instead of replacing the
+        // whole step entry. A partial finish patch (e.g. tutor's { readingAttempt }) must
+        // not wipe detailed data another writer already put under the same step key
+        // (e.g. LiveTutor's line_results / paragraph_summaries_data). Also fixes the
+        // latent same issue for full-reading (#2503). Non-object values still replace.
+        const mergedStepData: Record<string, unknown> = { ...prev.step_data };
+        const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+          !!v && typeof v === 'object' && !Array.isArray(v);
+        for (const [key, patchVal] of Object.entries(opts.stepDataPatch ?? {})) {
+          const prevVal = mergedStepData[key];
+          mergedStepData[key] = isPlainObject(prevVal) && isPlainObject(patchVal)
+            ? { ...prevVal, ...patchVal }
+            : patchVal;
+        }
+
         const next: StepProgressData = {
           current_step: opts.currentStep ?? prev.current_step,
           steps_completed: Array.from(completed),
-          step_data: {
-            ...prev.step_data,
-            ...(opts.stepDataPatch ?? {}),
-          },
+          step_data: mergedStepData,
         };
 
         const prevSig = JSON.stringify(prev);
