@@ -416,6 +416,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   //  2. dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
   //     段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
   //  3. 清 recorder / pending / fallback / 音量偵測旗標。
+  //  4. 清 tutor_completed_ localStorage —— completedParagraphsSet 的第三個來源（由
+  //     useStepProgressPersistence 讀取供 initialCompletedParagraphs），不清會在整頁
+  //     重載時讓「全段完成」復活（半套 reset 殘留）。
   const handleReadAgain = useCallback(() => {
     stopSession();
     stopTts();
@@ -426,7 +429,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setHasDetectedAudio(false);
     hasHeardAudioRef.current = false;
     volumeAboveSinceRef.current = null;
-    resetForRetry(); // 回到第 1 段、清 in-memory + localStorage
+    resetForRetry(); // 回到第 1 段、清 in-memory + liveTutor_progress_ localStorage
+    try {
+      localStorage.removeItem(scopedStepStorageKey('tutor_completed_', story.id));
+    } catch { /* non-fatal */ }
     if (!isToolboxMode()) {
       onProgressChange?.(
         {
@@ -439,7 +445,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         true, // immediate flush：使用者可能馬上導航，不能依賴 debounce
       );
     }
-  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onProgressChange]);
+  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onProgressChange, story.id]);
 
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;

@@ -44,6 +44,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 import LiveTutor from './LiveTutor';
+import { scopedStepStorageKey } from '../../../services/learningStorageScope';
 
 // jsdom has no navigator.mediaDevices; LiveTutor pre-warms the mic on mount (rejection
 // is caught internally). Stub so the mount effect doesn't throw.
@@ -125,5 +126,16 @@ describe('LiveTutor 「再讀一次」(#2532)', () => {
     });
     expect(clearingCall, 'onProgressChange 應被以清空的 tutor payload 呼叫').toBeTruthy();
     expect((clearingCall?.[0] as TutorStepData).paragraph_summaries_data).toEqual({});
+  });
+
+  it('clicking 再讀一次 also clears the tutor_completed_ localStorage (3rd completed source)', () => {
+    const tutorCompletedKey = scopedStepStorageKey('tutor_completed_', '99');
+    localStorage.setItem(tutorCompletedKey, JSON.stringify([0]));
+
+    renderCompletedLiveTutor();
+    fireEvent.click(screen.getByText('再讀一次'));
+
+    // RED before the fix: handler didn't touch this key → 全段完成 resurrects on full reload.
+    expect(localStorage.getItem(tutorCompletedKey)).toBeNull();
   });
 });
