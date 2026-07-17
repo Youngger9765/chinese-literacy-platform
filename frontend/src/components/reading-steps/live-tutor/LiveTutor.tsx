@@ -861,6 +861,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
+        onReadAgain={() => {          // Issue #2532: 重錄整課
+          stopSession();
+          stopTts();
+          resetForRetry();
+        }}
         onRequestMicPermission={startSession}
       />
 
