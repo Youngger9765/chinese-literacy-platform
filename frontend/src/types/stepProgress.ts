@@ -6,6 +6,8 @@
  * Step IDs match `STEP_REGISTRY` keys in `config/stepConfig.ts`.
  */
 
+import type { LineResult, ParagraphSummaryData } from '../components/reading-steps/live-tutor/liveTutorTypes';
+
 /** Step 1 — Intro: just a "visited" marker so teachers can see the student entered the lesson. */
 export interface IntroStepData {
   visited: true;
@@ -37,6 +39,11 @@ export interface TutorStepData {
     transcription?: string;
     timestamp: number;
   };
+  /** Issue #2530: full per-paragraph results (含 transcript / diffTokens) so the
+   *  「朗讀對照」與「這次成績」在導航去總結報告再回來、以及跨 session 都能還原，
+   *  逐段朗讀紀錄不再遺失。 */
+  line_results?: LineResult[];
+  paragraph_summaries_data?: Record<number, ParagraphSummaryData>;
 }
 
 /** Step 3 — Comprehension (multi-tab chat / mcq / strategy). */
