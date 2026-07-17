@@ -31,8 +31,14 @@ export interface TutorStepData {
   paragraph_summaries: TutorParagraphSummary[];
   /** Current paragraph the learner is on (for resume). */
   current_line_index?: number;
-  /** Final reading attempt summary, written when the whole flow finishes. */
-  reading_attempt?: {
+  /**
+   * Final reading attempt summary, written when the whole flow finishes.
+   * NOTE (#2533 review): the key is camelCase `readingAttempt` to match what is
+   * actually written/read at runtime (useLearningStepNavigation.ts writes
+   * `{ readingAttempt }`; useStepProgressPersistence.ts reads `tutorData.readingAttempt`).
+   * The previous snake_case `reading_attempt` never matched the stored key.
+   */
+  readingAttempt?: {
     storyId: string;
     accuracy: number;
     cpm: number;
