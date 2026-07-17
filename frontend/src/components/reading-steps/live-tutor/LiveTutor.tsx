@@ -409,6 +409,38 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
   }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
 
+  // ── Issue #2532「再讀一次」重錄整課 (review CHANGES_REQUESTED) ─────────────
+  // 完成所有段落後重錄整課。必須同時處理三件事，否則 reset 會被抵銷/殘留：
+  //  1. 清 DB step_data.tutor —— 否則 #2530 的 initialProgress 還原路徑會把舊成績＋
+  //     全段完成狀態復活（#2531 的 DB-write effect 對空狀態有 guard 不會自己清）。
+  //  2. dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
+  //     段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
+  //  3. 清 recorder / pending / fallback / 音量偵測旗標。
+  const handleReadAgain = useCallback(() => {
+    stopSession();
+    stopTts();
+    dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    resetForRetry(); // 回到第 1 段、清 in-memory + localStorage
+    if (!isToolboxMode()) {
+      onProgressChange?.(
+        {
+          completed_paragraphs: [],
+          paragraph_summaries: [],
+          current_line_index: 0,
+          line_results: [],
+          paragraph_summaries_data: {},
+        },
+        true, // immediate flush：使用者可能馬上導航，不能依賴 debounce
+      );
+    }
+  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onProgressChange]);
+
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;
     if (!pending || isSubmittingSentenceRef.current) return;
@@ -861,11 +893,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
-        onReadAgain={() => {          // Issue #2532: 重錄整課
-          stopSession();
-          stopTts();
-          resetForRetry();
-        }}
+        onReadAgain={handleReadAgain}
         onRequestMicPermission={startSession}
       />
 
