@@ -26,6 +26,7 @@ import { useSentenceRetry } from './hooks/useSentenceRetry';
 import LiveTutorControls from './LiveTutorControls';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
+import type { TutorStepData } from '../../../types/stepProgress';
 import { getLineResultForParagraph } from './liveTutorTypes';
 import {
   planParagraphEvalRestore,
@@ -129,6 +130,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onFinish,
     onParagraphComplete,
     initialCompletedParagraphs,
+    initialProgress, // Issue #2530: restore lineResults/summaries from DB step_data
   );
 
   const {
@@ -622,6 +624,34 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       );
     } catch {}
   }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
+
+  // ── Issue #2530: 同步把逐段結果寫進 DB step_data['tutor']，讓「朗讀對照／這次成績」
+  //     在導航去總結報告再回來、以及跨 session（換裝置/重新登入）時都能回歸 ──────────
+  useEffect(() => {
+    if (isToolboxMode()) return;            // toolbox 為暫時模式，不寫 session DB
+    if (lineResults.length === 0 && completedParagraphs.size === 0) return; // 無資料不寫，避免覆蓋還原值
+    onProgressChange?.(
+      {
+        completed_paragraphs: Array.from(completedParagraphs),
+        paragraph_summaries: Object.entries(paragraphSummaries).map(([k, v]) => {
+          const lr = getLineResultForParagraph(lineResults, Number(k));
+          return {
+            paragraph_index: Number(k),
+            attempts: 1, // placeholder：目前無逐段重試累計；此欄位尚無 consumer（review #2531）
+            match_rate: v.matchRate,
+            cpm: lr?.cpm ?? 0,
+            duration_ms: lr?.durationMs ?? 0,
+          };
+        }),
+        current_line_index: currentLineIndex,
+        line_results: lineResults,
+        paragraph_summaries_data: Object.fromEntries(
+          Object.entries(paragraphSummaries).map(([k, v]) => [k, { ...v, geminiPending: false }]),
+        ),
+      },
+      false,
+    );
+  }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, onProgressChange]);
 
   // ── Pre-warm mic ─────────────────────────────────────────────────────────
   useEffect(() => {
