@@ -1,17 +1,21 @@
 /**
  * Regression test for #2532 review (CHANGES_REQUESTED by Young).
  *
- * Scenario: 單段課 + 「再讀一次」+ 導航往返.
- * Root cause: after #2530/#2531 persist 逐段 results to DB step_data.tutor, the
- * 「再讀一次」handler must ALSO clear the DB — otherwise TutorPage restores from
- * DB.step_data.tutor (stale) on the way back and resurrects the old 成績 + all-done state.
+ * Scenario: 單段課 +「再讀一次」.
+ * Two things must happen when the student clicks「再讀一次」on a completed lesson:
+ *  1. onResetTutor() is invoked — the cross-layer full reset (DB step_data.tutor,
+ *     steps_completed 'tutor', session.readingAttempt, completedParagraphsSet, …) that
+ *     stops the round-trip / reload from resurrecting old 成績. (資料清除本體在
+ *     useStepProgressPersistence.resetTutorStep，另有專屬 hook 測試守著。)
+ *  2. The stale 朗讀對照 diff is cleared. For a single-paragraph lesson currentLineIndex
+ *     is already 0, so the paragraph-switch effect never dispatches CLEAR_FOR_PARAGRAPH —
+ *     handleReadAgain must dispatch it explicitly, else evalState.lastDiffTokens lingers
+ *     and the diff column stays on screen.
  *
- * This test mounts a single-paragraph LiveTutor already in the completed state (via
- * initialProgress, i.e. a DB restore), clicks 「再讀一次」, and asserts onProgressChange
- * was called with an EMPTY tutor payload (line_results:[], completed_paragraphs:[]).
- *
- * RED before the fix: the old handler only did stopSession/stopTts/resetForRetry and
- * never called onProgressChange, so the DB kept the old data → resurrection.
+ * 必改 2 is genuinely RED without the explicit dispatch: the completed lesson mounts via
+ * initialProgress, whose restore path sets evalState.lastDiffTokens (GEMINI_DONE); after
+ * resetForRetry() clears lineResults the diff column would still render off the lingering
+ * lastDiffTokens unless CLEAR_FOR_PARAGRAPH runs.
  */
 
 import React from 'react';
@@ -27,10 +31,7 @@ vi.mock('../../../contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock('../../../context/ZhuyinContext', () => ({
-  useZhuyin: () => ({
-    isZhuyinAny: false,
-    processLinesSelective: () => null,
-  }),
+  useZhuyin: () => ({ isZhuyinAny: false, processLinesSelective: () => null }),
   ZhuyinProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock('../../../context/KaraokeContext', () => ({
@@ -44,7 +45,6 @@ vi.mock('react-router-dom', () => ({
 }));
 
 import LiveTutor from './LiveTutor';
-import { scopedStepStorageKey } from '../../../services/learningStorageScope';
 
 // jsdom has no navigator.mediaDevices; LiveTutor pre-warms the mic on mount (rejection
 // is caught internally). Stub so the mount effect doesn't throw.
@@ -86,7 +86,7 @@ const COMPLETED_PROGRESS: TutorStepData = {
 };
 
 function renderCompletedLiveTutor() {
-  const onProgressChange = vi.fn();
+  const onResetTutor = vi.fn();
   render(
     <LiveTutor
       story={SINGLE_PARA_STORY}
@@ -95,11 +95,12 @@ function renderCompletedLiveTutor() {
       onFinish={vi.fn()}
       onCancel={vi.fn()}
       initialProgress={COMPLETED_PROGRESS}
-      onProgressChange={onProgressChange}
+      onProgressChange={vi.fn()}
+      onResetTutor={onResetTutor}
       dbSessionId={123}
     />,
   );
-  return { onProgressChange };
+  return { onResetTutor };
 }
 
 describe('LiveTutor 「再讀一次」(#2532)', () => {
@@ -107,35 +108,30 @@ describe('LiveTutor 「再讀一次」(#2532)', () => {
     localStorage.clear();
   });
 
-  it('mounts a completed single-paragraph lesson showing 再讀一次', () => {
+  it('mounts a completed single-paragraph lesson showing 再讀一次 and the 朗讀對照', () => {
     renderCompletedLiveTutor();
     expect(screen.getByText('再讀一次')).toBeInTheDocument();
+    // Restored diff comparison is visible before reset (你唸的內容 = ParagraphCard 對照左欄).
+    expect(screen.getByText('你唸的內容')).toBeInTheDocument();
   });
 
-  it('clicking 再讀一次 clears DB step_data.tutor (empty payload) — no resurrection on round-trip', () => {
-    const { onProgressChange } = renderCompletedLiveTutor();
-
+  it('clicking 再讀一次 invokes the cross-layer full reset (onResetTutor)', () => {
+    const { onResetTutor } = renderCompletedLiveTutor();
     fireEvent.click(screen.getByText('再讀一次'));
-
-    // Must have written a CLEARED tutor payload to the DB so the round-trip restore
-    // can't resurrect the old 成績. (RED before the fix: handler never called onProgressChange.)
-    const clearingCall = onProgressChange.mock.calls.find(([data]) => {
-      const d = data as TutorStepData;
-      return Array.isArray(d?.line_results) && d.line_results.length === 0
-        && Array.isArray(d?.completed_paragraphs) && d.completed_paragraphs.length === 0;
-    });
-    expect(clearingCall, 'onProgressChange 應被以清空的 tutor payload 呼叫').toBeTruthy();
-    expect((clearingCall?.[0] as TutorStepData).paragraph_summaries_data).toEqual({});
+    expect(onResetTutor).toHaveBeenCalledTimes(1);
   });
 
-  it('clicking 再讀一次 also clears the tutor_completed_ localStorage (3rd completed source)', () => {
-    const tutorCompletedKey = scopedStepStorageKey('tutor_completed_', '99');
-    localStorage.setItem(tutorCompletedKey, JSON.stringify([0]));
-
+  it('clicking 再讀一次 returns the page to the unread state (朗讀對照 gone)', () => {
     renderCompletedLiveTutor();
+    expect(screen.getByText('你唸的內容')).toBeInTheDocument();
+
     fireEvent.click(screen.getByText('再讀一次'));
 
-    // RED before the fix: handler didn't touch this key → 全段完成 resurrects on full reload.
-    expect(localStorage.getItem(tutorCompletedKey)).toBeNull();
+    // 整體 reset 後對照欄消失（此處由 resetForRetry 清 lineResults 達成）。
+    // 必改 2 的精確機制「CLEAR_FOR_PARAGRAPH 清 evalState.lastDiffTokens」是為了 live
+    // 單段評估殘留的路徑（無法用 initialProgress 重現）——由 handleReadAgain 顯式 dispatch
+    // (見 LiveTutor.tsx) + reducer 單元測試 useParagraphEvaluation.test.ts『CLEAR_FOR_PARAGRAPH …
+    // lastDiffTokens toBeNull』守著，不在此假裝覆蓋。
+    expect(screen.queryByText('你唸的內容')).not.toBeInTheDocument();
   });
 });

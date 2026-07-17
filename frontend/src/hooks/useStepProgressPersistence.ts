@@ -53,6 +53,8 @@ interface UseStepProgressPersistenceReturn {
   persistStep: (step: number) => void;
   saveStepProgressPatch: (opts: SaveStepProgressPatchOptions) => void;
   clearPersistedSession: () => void;
+  /** Issue #2532: full tutor reset for「再讀一次」— clears all completion/成績 sources. */
+  resetTutorStep: () => void;
   completedParagraphsSet: Set<number>;
   setCompletedParagraphsSet: Dispatch<SetStateAction<Set<number>>>;
   handleParagraphComplete: (paragraphIndex: number) => void;
@@ -356,12 +358,72 @@ export function useStepProgressPersistence({
     });
   }, [setSession, tutorCompletedStorageKey]);
 
+  /**
+   * Issue #2532 (review): full tutor reset for「再讀一次」. `resetForRetry()` in
+   * useLiveTutorProgress only clears React state + liveTutor_progress_ localStorage —
+   * that's a "half reset". Completion/成績 actually live in FOUR places; this clears
+   * ALL of them so navigating away+back or a full reload can't resurrect old data:
+   *   1. step_data.tutor — fully replaced with an empty entry (also drops readingAttempt)
+   *   2. steps_completed — 'tutor' removed (so the stepper doesn't stay ticked)
+   *   3. session.readingAttempt / completedParagraphs / completedSteps('tutor')
+   *      (ReportPage reads session.readingAttempt; reload rehydrates it from step_data)
+   *   4. completedParagraphsSet (in-memory) + tutor_completed_ / liveTutor_progress_ localStorage
+   */
+  const resetTutorStep = useCallback(() => {
+    setCompletedParagraphsSet(new Set());
+    if (tutorCompletedStorageKey) {
+      try { localStorage.removeItem(tutorCompletedStorageKey); } catch { /* non-fatal */ }
+    }
+    if (liveTutorProgressStorageKey) {
+      try { localStorage.removeItem(liveTutorProgressStorageKey); } catch { /* non-fatal */ }
+    }
+
+    setStepProgressState((prev) => {
+      const completed = new Set(prev.steps_completed);
+      completed.delete('tutor');
+      const next: StepProgressData = {
+        current_step: prev.current_step,
+        steps_completed: Array.from(completed),
+        step_data: {
+          ...prev.step_data,
+          // Full replace (not shallow merge) so readingAttempt / reading_attempt are dropped too.
+          tutor: {
+            completed_paragraphs: [],
+            paragraph_summaries: [],
+            current_line_index: 0,
+            line_results: [],
+            paragraph_summaries_data: {},
+          },
+        },
+      };
+      flushProgress(next); // immediate — the student may navigate right after
+      return next;
+    });
+
+    setSession((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        readingAttempt: null,
+        completedParagraphs: [],
+        completedSteps: (prev.completedSteps ?? []).filter((s) => s !== 'tutor'),
+      };
+    });
+  }, [
+    tutorCompletedStorageKey,
+    liveTutorProgressStorageKey,
+    setCompletedParagraphsSet,
+    flushProgress,
+    setSession,
+  ]);
+
   return {
     stepProgressState,
     persistStepProgressState,
     persistStep,
     saveStepProgressPatch,
     clearPersistedSession,
+    resetTutorStep,
     completedParagraphsSet,
     setCompletedParagraphsSet,
     handleParagraphComplete,

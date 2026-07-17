@@ -76,6 +76,10 @@ interface LiveTutorProps {
   initialProgress?: TutorStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
+  /** Issue #2532: full tutor reset for「再讀一次」— clears DB step_data.tutor,
+   *  steps_completed 'tutor', session-level tutor state and completedParagraphsSet.
+   *  Owned by useStepProgressPersistence (LearningLayout); undefined in toolbox mode. */
+  onResetTutor?: () => void;
   /** DB LearningSession integer id — used to bind accepted audio to the attempt row
    *  via POST /reading/save-audio (Issue #2297). Optional: upload is skipped if absent. */
   dbSessionId?: number | null;
@@ -91,6 +95,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   initialCompletedParagraphs,
   initialProgress,
   onProgressChange,
+  onResetTutor,
   dbSessionId,
 }) => {
   const { px: fontSizePx } = useFontSize();
@@ -410,15 +415,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
 
   // ── Issue #2532「再讀一次」重錄整課 (review CHANGES_REQUESTED) ─────────────
-  // 完成所有段落後重錄整課。必須同時處理三件事，否則 reset 會被抵銷/殘留：
-  //  1. 清 DB step_data.tutor —— 否則 #2530 的 initialProgress 還原路徑會把舊成績＋
-  //     全段完成狀態復活（#2531 的 DB-write effect 對空狀態有 guard 不會自己清）。
-  //  2. dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
-  //     段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
-  //  3. 清 recorder / pending / fallback / 音量偵測旗標。
-  //  4. 清 tutor_completed_ localStorage —— completedParagraphsSet 的第三個來源（由
-  //     useStepProgressPersistence 讀取供 initialCompletedParagraphs），不清會在整頁
-  //     重載時讓「全段完成」復活（半套 reset 殘留）。
+  // 「半套 reset」的完整版：completion/成績 有四個來源，全部要清乾淨，否則導航往返
+  // 或整頁重載會把舊成績/全段完成復活。
+  //  A. 本地 (LiveTutor)：
+  //     - dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
+  //       段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
+  //     - 清 recorder / pending / fallback / 音量旗標。
+  //     - resetForRetry() —— 清 in-memory lineResults/summaries/completed + liveTutor_progress_，
+  //       回到第 1 段。
+  //  B. 跨層 (onResetTutor → useStepProgressPersistence.resetTutorStep)：
+  //     DB step_data.tutor（含 readingAttempt）、steps_completed 'tutor'、
+  //     session.readingAttempt/completedParagraphs/completedSteps、completedParagraphsSet、
+  //     tutor_completed_ localStorage —— 這些狀態不在 LiveTutor，集中在該 hook 一次清乾淨。
   const handleReadAgain = useCallback(() => {
     stopSession();
     stopTts();
@@ -429,23 +437,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setHasDetectedAudio(false);
     hasHeardAudioRef.current = false;
     volumeAboveSinceRef.current = null;
-    resetForRetry(); // 回到第 1 段、清 in-memory + liveTutor_progress_ localStorage
-    try {
-      localStorage.removeItem(scopedStepStorageKey('tutor_completed_', story.id));
-    } catch { /* non-fatal */ }
-    if (!isToolboxMode()) {
-      onProgressChange?.(
-        {
-          completed_paragraphs: [],
-          paragraph_summaries: [],
-          current_line_index: 0,
-          line_results: [],
-          paragraph_summaries_data: {},
-        },
-        true, // immediate flush：使用者可能馬上導航，不能依賴 debounce
-      );
-    }
-  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onProgressChange, story.id]);
+    resetForRetry();
+    onResetTutor?.();
+  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onResetTutor]);
 
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;
