@@ -76,6 +76,10 @@ interface LiveTutorProps {
   initialProgress?: TutorStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
+  /** Issue #2532: full tutor reset for「再讀一次」— clears DB step_data.tutor,
+   *  steps_completed 'tutor', session-level tutor state and completedParagraphsSet.
+   *  Owned by useStepProgressPersistence (LearningLayout); undefined in toolbox mode. */
+  onResetTutor?: () => void;
   /** DB LearningSession integer id — used to bind accepted audio to the attempt row
    *  via POST /reading/save-audio (Issue #2297). Optional: upload is skipped if absent. */
   dbSessionId?: number | null;
@@ -91,6 +95,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   initialCompletedParagraphs,
   initialProgress,
   onProgressChange,
+  onResetTutor,
   dbSessionId,
 }) => {
   const { px: fontSizePx } = useFontSize();
@@ -408,6 +413,33 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     dispatch({ type: 'SET_STREAMING', value: '' });
     dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
   }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
+
+  // ── Issue #2532「再讀一次」重錄整課 (review CHANGES_REQUESTED) ─────────────
+  // 「半套 reset」的完整版：completion/成績 有四個來源，全部要清乾淨，否則導航往返
+  // 或整頁重載會把舊成績/全段完成復活。
+  //  A. 本地 (LiveTutor)：
+  //     - dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
+  //       段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
+  //     - 清 recorder / pending / fallback / 音量旗標。
+  //     - resetForRetry() —— 清 in-memory lineResults/summaries/completed + liveTutor_progress_，
+  //       回到第 1 段。
+  //  B. 跨層 (onResetTutor → useStepProgressPersistence.resetTutorStep)：
+  //     DB step_data.tutor（含 readingAttempt）、steps_completed 'tutor'、
+  //     session.readingAttempt/completedParagraphs/completedSteps、completedParagraphsSet、
+  //     tutor_completed_ localStorage —— 這些狀態不在 LiveTutor，集中在該 hook 一次清乾淨。
+  const handleReadAgain = useCallback(() => {
+    stopSession();
+    stopTts();
+    dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    resetForRetry();
+    onResetTutor?.();
+  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onResetTutor]);
 
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;
@@ -861,6 +893,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
+        onReadAgain={handleReadAgain}
         onRequestMicPermission={startSession}
       />
 
