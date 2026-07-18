@@ -267,6 +267,70 @@ VALID_STORY_ID = "1"
 INVALID_STORY_ID = "99999"
 
 
+def _create_classroom(client, teacher, school_id: int, name: str) -> int:
+    resp = client.post(
+        "/api/classrooms",
+        json={"name": name, "school_id": school_id},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
+def _enroll_student(client, teacher, classroom_id: int, student_id: int) -> None:
+    resp = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student_id},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code in (200, 201), resp.text
+
+
+def _create_assignment(
+    client,
+    teacher,
+    classroom_id: int,
+    *,
+    story_id: str = VALID_STORY_ID,
+    title: str = "Assignment Contract Test",
+) -> int:
+    resp = client.post(
+        f"/api/classrooms/{classroom_id}/assignments",
+        json={
+            "classroom_id": classroom_id,
+            "story_id": story_id,
+            "title": title,
+        },
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
+def _create_assignment_for_fresh_student(
+    client,
+    teacher,
+    school_id: int,
+    *,
+    student_suffix: str,
+    classroom_name: str,
+    title: str = "Assignment Contract Test",
+    story_id: str = VALID_STORY_ID,
+) -> tuple[dict, int, int]:
+    student = _register_user(client, student_suffix)
+    _make_student_role(student["user_id"], school_id)
+    classroom_id = _create_classroom(client, teacher, school_id, classroom_name)
+    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    assignment_id = _create_assignment(
+        client,
+        teacher,
+        classroom_id,
+        story_id=story_id,
+        title=title,
+    )
+    return student, classroom_id, assignment_id
+
+
 # ====================================================================# POST /api/classrooms/{id}/assignments — Create assignment
 # ====================================================================
 
@@ -923,6 +987,107 @@ class TestStartAssignment:
         resp = client.post("/api/assignments/1/start")
         assert resp.status_code == 401
 
+    def test_start_inactive_assignment_returns_400(
+        self, client, teacher, school_id
+    ):
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="start_inactive_stu",
+            classroom_name="Start Inactive Classroom",
+            title="Start Inactive Assignment",
+        )
+
+        deactivate_resp = client.patch(
+            f"/api/assignments/{assignment_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert deactivate_resp.status_code == 200
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "Assignment is not active"
+
+    def test_start_submitted_assignment_returns_400_use_restart(
+        self, client, teacher, school_id
+    ):
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="start_submitted_stu",
+            classroom_name="Start Submitted Classroom",
+            title="Start Submitted Assignment",
+        )
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert submit_resp.status_code == 200
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "Assignment already submitted. Use /restart to redo."
+
+    def test_start_graded_assignment_returns_400_use_restart(
+        self, client, teacher, school_id
+    ):
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="start_graded_stu",
+            classroom_name="Start Graded Classroom",
+            title="Start Graded Assignment",
+        )
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert submit_resp.status_code == 200
+
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submission_id = detail_resp.json()["submissions"][0]["id"]
+        grade_resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            json={"score": 95},
+            headers=auth_header(teacher["token"]),
+        )
+        assert grade_resp.status_code == 200
+        assert grade_resp.json()["status"] == "graded"
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "Assignment already submitted. Use /restart to redo."
+
     def test_start_assignment_atomic_submission_linked_after_session_reuse(
         self, client, teacher, student1, classroom_with_students
     ):
@@ -1353,6 +1518,56 @@ class TestSubmitAssignment:
         assert start_resp.status_code == 200
         return assignment_id
 
+    def test_submit_on_inactive_assignment_returns_400(
+        self, client, teacher, school_id
+    ):
+        student = _register_user(client, "submit_inactive_stu")
+        _make_student_role(student["user_id"], school_id)
+
+        classroom_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Submit Inactive Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert classroom_resp.status_code == 201
+        classroom_id = classroom_resp.json()["id"]
+
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201)
+
+        assignment_id = self._create_and_start(client, teacher, student, classroom_id)
+
+        deactivate_resp = client.patch(
+            f"/api/assignments/{assignment_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert deactivate_resp.status_code == 200
+        assert deactivate_resp.json()["is_active"] is False
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert submit_resp.status_code == 400
+        assert submit_resp.json()["detail"] == "Assignment is not active"
+
+    def test_submit_assignment_not_found(self, client, student1):
+        resp = client.post(
+            "/api/assignments/99999/submit",
+            headers=auth_header(student1["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Assignment not found"
+
+    def test_submit_assignment_requires_auth(self, client):
+        resp = client.post("/api/assignments/1/submit")
+        assert resp.status_code == 401
+
     def test_student_can_submit_assignment(
         self, client, teacher, student1, classroom_with_students
     ):
@@ -1580,6 +1795,139 @@ class TestSubmitAssignment:
             )
         finally:
             db.close()
+
+
+# ====================================================================# Restart assignment — POST /api/assignments/{id}/restart
+# ====================================================================
+
+class TestRestartAssignment:
+    def test_restart_submitted_assignment_creates_next_attempt_with_fresh_session(
+        self, client, teacher, school_id
+    ):
+        from app.models.assignment import AssignmentSubmission
+
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="restart_happy_stu",
+            classroom_name="Restart Happy Classroom",
+            title="Restart Happy Assignment",
+        )
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+        first_session_id = start_resp.json()["session_id"]
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert submit_resp.status_code == 200
+
+        restart_resp = client.post(
+            f"/api/assignments/{assignment_id}/restart",
+            headers=auth_header(student["token"]),
+        )
+        assert restart_resp.status_code == 201
+        data = restart_resp.json()
+        assert data["status"] == "in_progress"
+        assert data["attempt_number"] == 2
+        assert data["session_id"] != first_session_id
+
+        db = TestingSessionLocal()
+        try:
+            attempts = (
+                db.query(AssignmentSubmission)
+                .filter(
+                    AssignmentSubmission.assignment_id == assignment_id,
+                    AssignmentSubmission.student_id == student["user_id"],
+                )
+                .order_by(AssignmentSubmission.attempt_number.desc())
+                .all()
+            )
+            assert [attempt.attempt_number for attempt in attempts] == [2, 1]
+            assert attempts[0].status == "in_progress"
+            assert attempts[0].session_id == data["session_id"]
+            assert attempts[1].status == "submitted"
+        finally:
+            db.close()
+
+    def test_restart_latest_status_not_submitted_or_graded_returns_400(
+        self, client, teacher, school_id
+    ):
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="restart_pending_stu",
+            classroom_name="Restart Pending Classroom",
+            title="Restart Pending Assignment",
+        )
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/restart",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == (
+            "Assignment must be submitted or graded before restarting"
+        )
+
+    def test_restart_inactive_assignment_returns_400(
+        self, client, teacher, school_id
+    ):
+        student, _classroom_id, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="restart_inactive_stu",
+            classroom_name="Restart Inactive Classroom",
+            title="Restart Inactive Assignment",
+        )
+
+        deactivate_resp = client.patch(
+            f"/api/assignments/{assignment_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert deactivate_resp.status_code == 200
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/restart",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "Assignment is not active"
+
+    def test_restart_not_enrolled_returns_403(self, client, teacher, school_id):
+        classroom_id = _create_classroom(
+            client,
+            teacher,
+            school_id,
+            "Restart Unenrolled Classroom",
+        )
+        assignment_id = _create_assignment(
+            client,
+            teacher,
+            classroom_id,
+            title="Restart Unenrolled Assignment",
+        )
+        unenrolled = _register_user(client, "restart_unenrolled_stu")
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/restart",
+            headers=auth_header(unenrolled["token"]),
+        )
+        assert resp.status_code == 403
+        assert resp.json()["detail"] == "You are not enrolled in this assignment"
+
+    def test_restart_assignment_requires_auth(self, client):
+        resp = client.post("/api/assignments/1/restart")
+        assert resp.status_code == 401
 
 
 # ====================================================================

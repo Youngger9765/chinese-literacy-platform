@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import uuid
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -469,6 +470,46 @@ def _create_assignment_submission_direct(classroom_id: int, teacher_id: int, stu
         db.close()
 
 
+def _enroll_student_direct(classroom_id: int, student_id: int) -> None:
+    from app.models.school import ClassroomStudent
+
+    db = TestingSessionLocal()
+    try:
+        existing = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.student_id == student_id,
+            )
+            .first()
+        )
+        if existing is None:
+            db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student_id))
+            db.commit()
+    finally:
+        db.close()
+
+
+def _create_learning_session_direct(student_id: int) -> int:
+    from app.models.session import LearningSession
+
+    db = TestingSessionLocal()
+    try:
+        session = LearningSession(
+            student_id=student_id,
+            story_slug=f"security-session-{uuid.uuid4().hex[:8]}",
+            status="completed",
+            started_at=datetime.now(timezone.utc),
+            full_reading_attempts=[],
+        )
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+        return session.id
+    finally:
+        db.close()
+
+
 def test_med1d_org_admin_lists_only_own_org_classrooms(client):
     # #2470 MED-1d: GET /api/classrooms must scope org_admin to their own org's
     # classrooms, not the whole platform (was is_admin → any org_admin saw all).
@@ -585,6 +626,69 @@ def test_org_admin_cannot_grade_submission_in_another_org_classroom(client):
     r = client.patch(
         f"/api/assignments/{assignment_id}/submissions/{submission_id}",
         json={"score": 92, "teacher_feedback": "Cross-org grading must be denied"},
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_org_admin_cannot_access_cross_org_teacher_session_routes(client, monkeypatch):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"SessA_{u}")
+    org_b = _create_org(f"SessB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"sess_tb_{u}@example.com")
+    student_b = _create_user(f"sess_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"SessBClass_{u}")
+    _enroll_student_direct(classroom_b, student_b)
+    session_id = _create_learning_session_direct(student_b)
+
+    admin_a = _create_user(f"sess_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+    token = create_access_token(admin_a)
+
+    async def fake_generate_teacher_comment(**kwargs):
+        return "Should not be reachable cross-org"
+
+    monkeypatch.setattr(
+        "app.services.ai_generation.generate_teacher_comment",
+        fake_generate_teacher_comment,
+    )
+
+    assert client.get(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/report",
+        headers=_auth(token),
+    ).status_code == 403
+    assert client.post(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/generate-ai-comment",
+        headers=_auth(token),
+    ).status_code == 403
+    assert client.post(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/comment",
+        json={"comment": "Cross-org write must be denied"},
+        headers=_auth(token),
+    ).status_code == 403
+
+
+def test_org_admin_cannot_delete_assignment_in_another_org_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"DelA_{u}")
+    org_b = _create_org(f"DelB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"del_tb_{u}@example.com")
+    student_b = _create_user(f"del_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"DelBClass_{u}")
+    assignment_id, _ = _create_assignment_submission_direct(
+        classroom_b,
+        teacher_b,
+        student_b,
+    )
+
+    admin_a = _create_user(f"del_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.delete(
+        f"/api/assignments/{assignment_id}",
         headers=_auth(create_access_token(admin_a)),
     )
 
