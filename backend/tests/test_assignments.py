@@ -467,6 +467,39 @@ class TestCreateAssignment:
         assert data["submission_count"] == 2
         assert data["completed_count"] == 0
 
+    def test_create_assignment_sends_new_assignment_notifications(
+        self, client, teacher, student1, student2, classroom_with_students
+    ):
+        from unittest.mock import patch
+
+        with patch(
+            "app.services.assignment_lifecycle_service.send_new_assignment_notification",
+        ) as mock_notify:
+            resp = client.post(
+                f"/api/classrooms/{classroom_with_students}/assignments",
+                json={
+                    "classroom_id": classroom_with_students,
+                    "story_id": VALID_STORY_ID,
+                    "title": "Notification Assignment",
+                    "assignment_type": "reading",
+                },
+                headers=auth_header(teacher["token"]),
+            )
+
+        assert resp.status_code == 201
+        assert mock_notify.call_count == 2
+        notified_student_ids = {
+            call.kwargs["student_id"] for call in mock_notify.call_args_list
+        }
+        assert notified_student_ids == {student1["user_id"], student2["user_id"]}
+        for call in mock_notify.call_args_list:
+            assert call.kwargs["student_name"]
+            assert call.kwargs["story_title"]
+            assert call.kwargs["classroom_name"] == "Assignment Test Classroom"
+            assert call.kwargs["due_date"] is None
+            assert call.kwargs["assignment_type"] == "reading"
+            assert call.kwargs["db"] is not None
+
     def test_create_assignment_syncs_classroom_text_for_story(
         self, client, teacher, school_id
     ):
@@ -1668,6 +1701,26 @@ class TestSubmitAssignment:
         resp = client.post("/api/assignments/1/submit")
         assert resp.status_code == 401
 
+    def test_submit_from_pending_without_start_returns_400(
+        self, client, teacher, school_id
+    ):
+        student, _, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="submit_pending_guard_stu",
+            classroom_name="Submit Pending Guard Classroom",
+            title="Submit Pending Guard",
+        )
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "Assignment not started"
+
     def test_student_can_submit_assignment(
         self, client, teacher, student1, classroom_with_students
     ):
@@ -2498,6 +2551,59 @@ class TestTeacherFeedback:
         assert data["score"] == 85
         assert data["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
         assert data["status"] == "graded"
+
+    def test_grade_submission_sends_assignment_graded_notification(
+        self, client, school_id
+    ):
+        from unittest.mock import patch
+
+        teacher = _register_and_login(client, "grade_notify_teacher")
+        student, _, assignment_id = _create_assignment_for_fresh_student(
+            client,
+            teacher,
+            school_id,
+            student_suffix="grade_notify_student",
+            classroom_name="Grade Notify Classroom",
+            title="Grade Notify Assignment",
+            story_id="2",
+        )
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert submit_resp.status_code == 200
+
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submission_id = detail_resp.json()["submissions"][0]["id"]
+
+        with patch(
+            "app.services.assignment_lifecycle_service.send_assignment_graded_notification",
+        ) as mock_notify:
+            resp = client.patch(
+                f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+                headers=auth_header(teacher["token"]),
+                json={"score": 92, "teacher_feedback": "Great work"},
+            )
+
+        assert resp.status_code == 200
+        mock_notify.assert_called_once()
+        kwargs = mock_notify.call_args.kwargs
+        assert kwargs["student_id"] == student["user_id"]
+        assert kwargs["student_name"] == student["name"]
+        assert kwargs["story_title"]
+        assert kwargs["score"] == 92
+        assert kwargs["db"] is not None
 
     def test_feedback_visible_in_assignment_detail(self, client, setup):
         """Feedback saved appears in AssignmentDetailResponse submissions list."""
