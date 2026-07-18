@@ -50,6 +50,8 @@ interface LiveTutorControlsProps {
   onPauseResumeTts: () => void;
   onStopTts: () => void;
   onFinish: () => void;
+  /** Issue #2532: 完成所有段落後「再讀一次」重錄整課（比照全文朗讀）。 */
+  onReadAgain?: () => void;
   /** Painpoint 2: trigger getUserMedia to prompt browser permission dialog. */
   onRequestMicPermission?: () => void;
 }
@@ -94,6 +96,7 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
   onPauseResumeTts,
   onStopTts,
   onFinish,
+  onReadAgain,
   onRequestMicPermission,
 }) => {
   const isAllDone = completedCount === totalLines;
@@ -200,16 +203,28 @@ const LiveTutorControls: React.FC<LiveTutorControlsProps> = ({
           </div>
         )}
 
-        {/* All paragraphs done — final report */}
+        {/* All paragraphs done — 再讀一次 + 觀看總結報告（Issue #2532）*/}
         {isAllDone ? (
-          <button
-            onClick={onFinish}
-            className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-            style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-          >
-            <span>觀看總結報告</span>
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </button>
+          <div className="w-full flex gap-3">
+            {onReadAgain && (
+              <button
+                type="button"
+                onClick={onReadAgain}
+                className="h-14 px-6 rounded-full font-headline font-bold text-base bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0"
+              >
+                <span className="material-symbols-outlined text-lg">refresh</span>
+                再讀一次
+              </button>
+            )}
+            <button
+              onClick={onFinish}
+              className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+            >
+              <span>觀看總結報告</span>
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
 
         ) : isRecordingOrSubmitting ? (
           <div className="w-full flex flex-col items-center gap-2">

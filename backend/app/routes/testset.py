@@ -50,7 +50,13 @@ _ALLOWED_MIME = {"audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wa
 _ALLOWED_VERSION = {"correct", "error"}
 # lesson_id 進 GCS path → 必須白名單格式，否則可 ../ 跨 prefix 寫入學生錄音 (security #2304)
 _LESSON_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,20}$")
-_LIST_CAP = 500  # list_blobs hard cap，避免 unbounded read/signBlob
+# list_blobs 上限。原本 500 是「硬砍」：GCS 照物件名字典序回傳，一旦 test-dataset/
+# 底下 blob 總數超過 500（每筆錄音佔 2~3 個：.webm/.json/.eval.json，約 166 筆就觸頂），
+# 名字碼位偏後的貢獻者（中文名如「陳」U+9673、「睿」U+777F 排在英文名/「小明」之後）
+# 會整批被截掉、在 owner 列表消失（資料仍在 GCS，只是沒列出來）(#2524)。
+# 改成實務上「一定用不完」的大上限：不再截斷真實資料，仍保留防跑掉的最終 backstop；
+# list_blobs(max_results=N) 會由 SDK 自動分頁讀完全部。
+_LIST_CAP = 100_000
 
 # 批次評估單次硬上限：每次最多評 N 筆（cost guard，#2340）
 # Gemini transcribe 每筆約 2-5s，30 筆 = ~150s；超過截斷並回 truncated:true

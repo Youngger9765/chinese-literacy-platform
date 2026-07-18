@@ -26,6 +26,7 @@ import { useSentenceRetry } from './hooks/useSentenceRetry';
 import LiveTutorControls from './LiveTutorControls';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
+import type { TutorStepData } from '../../../types/stepProgress';
 import { getLineResultForParagraph } from './liveTutorTypes';
 import {
   planParagraphEvalRestore,
@@ -75,6 +76,10 @@ interface LiveTutorProps {
   initialProgress?: TutorStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
+  /** Issue #2532: full tutor reset for「再讀一次」— clears DB step_data.tutor,
+   *  steps_completed 'tutor', session-level tutor state and completedParagraphsSet.
+   *  Owned by useStepProgressPersistence (LearningLayout); undefined in toolbox mode. */
+  onResetTutor?: () => void;
   /** DB LearningSession integer id — used to bind accepted audio to the attempt row
    *  via POST /reading/save-audio (Issue #2297). Optional: upload is skipped if absent. */
   dbSessionId?: number | null;
@@ -90,6 +95,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   initialCompletedParagraphs,
   initialProgress,
   onProgressChange,
+  onResetTutor,
   dbSessionId,
 }) => {
   const { px: fontSizePx } = useFontSize();
@@ -129,6 +135,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onFinish,
     onParagraphComplete,
     initialCompletedParagraphs,
+    initialProgress, // Issue #2530: restore lineResults/summaries from DB step_data
   );
 
   const {
@@ -407,6 +414,33 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     dispatch({ type: 'SET_REALTIME_DIFF', tokens: null });
   }, [clearPendingRecording, paragraphRecorder, clearParagraphFallback, dispatch]);
 
+  // ── Issue #2532「再讀一次」重錄整課 (review CHANGES_REQUESTED) ─────────────
+  // 「半套 reset」的完整版：completion/成績 有四個來源，全部要清乾淨，否則導航往返
+  // 或整頁重載會把舊成績/全段完成復活。
+  //  A. 本地 (LiveTutor)：
+  //     - dispatch CLEAR_FOR_PARAGRAPH —— 單段課 currentLineIndex 已是 0，按鈕不觸發
+  //       段落切換，evalState.lastDiffTokens 會殘留舊朗讀對照，需在此顯式清。
+  //     - 清 recorder / pending / fallback / 音量旗標。
+  //     - resetForRetry() —— 清 in-memory lineResults/summaries/completed + liveTutor_progress_，
+  //       回到第 1 段。
+  //  B. 跨層 (onResetTutor → useStepProgressPersistence.resetTutorStep)：
+  //     DB step_data.tutor（含 readingAttempt）、steps_completed 'tutor'、
+  //     session.readingAttempt/completedParagraphs/completedSteps、completedParagraphsSet、
+  //     tutor_completed_ localStorage —— 這些狀態不在 LiveTutor，集中在該 hook 一次清乾淨。
+  const handleReadAgain = useCallback(() => {
+    stopSession();
+    stopTts();
+    dispatch({ type: 'CLEAR_FOR_PARAGRAPH' });
+    clearPendingRecording();
+    paragraphRecorder.clearRecording();
+    clearParagraphFallback();
+    setHasDetectedAudio(false);
+    hasHeardAudioRef.current = false;
+    volumeAboveSinceRef.current = null;
+    resetForRetry();
+    onResetTutor?.();
+  }, [stopSession, stopTts, dispatch, clearPendingRecording, paragraphRecorder, clearParagraphFallback, resetForRetry, onResetTutor]);
+
   const confirmEvaluate = useCallback(async () => {
     const pending = pendingRecordingRef.current;
     if (!pending || isSubmittingSentenceRef.current) return;
@@ -623,6 +657,34 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     } catch {}
   }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
 
+  // ── Issue #2530: 同步把逐段結果寫進 DB step_data['tutor']，讓「朗讀對照／這次成績」
+  //     在導航去總結報告再回來、以及跨 session（換裝置/重新登入）時都能回歸 ──────────
+  useEffect(() => {
+    if (isToolboxMode()) return;            // toolbox 為暫時模式，不寫 session DB
+    if (lineResults.length === 0 && completedParagraphs.size === 0) return; // 無資料不寫，避免覆蓋還原值
+    onProgressChange?.(
+      {
+        completed_paragraphs: Array.from(completedParagraphs),
+        paragraph_summaries: Object.entries(paragraphSummaries).map(([k, v]) => {
+          const lr = getLineResultForParagraph(lineResults, Number(k));
+          return {
+            paragraph_index: Number(k),
+            attempts: 1, // placeholder：目前無逐段重試累計；此欄位尚無 consumer（review #2531）
+            match_rate: v.matchRate,
+            cpm: lr?.cpm ?? 0,
+            duration_ms: lr?.durationMs ?? 0,
+          };
+        }),
+        current_line_index: currentLineIndex,
+        line_results: lineResults,
+        paragraph_summaries_data: Object.fromEntries(
+          Object.entries(paragraphSummaries).map(([k, v]) => [k, { ...v, geminiPending: false }]),
+        ),
+      },
+      false,
+    );
+  }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, onProgressChange]);
+
   // ── Pre-warm mic ─────────────────────────────────────────────────────────
   useEffect(() => {
     navigator.mediaDevices
@@ -681,6 +743,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     paragraphSummary,
     hideStaleEval,
   );
+  // Issue #2502 (review): widen the container when ParagraphCard shows the
+  // left課文/right判斷 two-column, so the right column isn't cramped at lg.
+  const showEvalColumn = !!(displayLastDiffTokens || displayParagraphSummary);
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -693,7 +758,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     >
       {/* ── Single-column centered layout ──────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48" style={{ scrollbarWidth: 'thin' }}>
-        <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
+        <div className={`mx-auto px-6 md:px-16 pt-4 ${showEvalColumn ? 'max-w-6xl' : 'max-w-4xl'}`}>
           <div className="mt-4" ref={activeLineRef}>
             <ParagraphCard
               idx={currentLineIndex}
@@ -828,6 +893,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         onPauseResumeTts={isTtsPaused ? resumeTts : pauseTts}
         onStopTts={stopTts}
         onFinish={() => handleFinish(stopSession)}
+        onReadAgain={handleReadAgain}
         onRequestMicPermission={startSession}
       />
 

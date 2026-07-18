@@ -12,6 +12,7 @@ const TutorPage: React.FC = () => {
     handleFinishReading,
     completedParagraphsSet,
     handleParagraphComplete,
+    resetTutorStep,
     stepProgressData,
     saveStepProgressPatch,
     dbSessionId,
@@ -43,6 +44,7 @@ const TutorPage: React.FC = () => {
       initialCompletedParagraphs={completedParagraphsSet}
       initialProgress={stepProgressData.step_data?.tutor as TutorStepData | undefined}
       onProgressChange={handleProgressChange}
+      onResetTutor={resetTutorStep}
       dbSessionId={dbSessionId}
     />
   );

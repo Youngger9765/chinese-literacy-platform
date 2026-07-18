@@ -81,6 +81,8 @@ export interface LearningContext {
   completedParagraphsSet: Set<number>;
   /** Notify layout that a paragraph was completed (Issue #85). */
   handleParagraphComplete: (paragraphIndex: number) => void;
+  /** Issue #2532: full tutor reset for「再讀一次」— clears every completion/成績 source. */
+  resetTutorStep: () => void;
   /** Reading goals set by teacher for the active assignment (Issue #414). Null for free-play. */
   assignmentReadingGoals: AssignmentReadingGoals | null;
   /**
@@ -178,6 +180,7 @@ const LearningLayout: React.FC = () => {
     persistStep,
     saveStepProgressPatch,
     clearPersistedSession,
+    resetTutorStep,
     completedParagraphsSet,
     handleParagraphComplete,
     missingAssignmentSteps,
@@ -298,6 +301,7 @@ const LearningLayout: React.FC = () => {
       dbSessionId,
       completedParagraphsSet,
       handleParagraphComplete,
+      resetTutorStep,
       assignmentReadingGoals,
       syncProgress,
       flushProgress,
@@ -334,6 +338,7 @@ const LearningLayout: React.FC = () => {
       dbSessionId,
       completedParagraphsSet,
       handleParagraphComplete,
+      resetTutorStep,
       assignmentReadingGoals,
       syncProgress,
       flushProgress,

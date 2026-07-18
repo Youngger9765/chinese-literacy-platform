@@ -14,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from .config import settings
-from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles, testset
+from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles, testset, spotlight_qa, keypoints_qa
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
 from .routes.assignments import router as assignments_router
@@ -404,6 +404,8 @@ app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(stories.router, prefix="/api")
 app.include_router(testset.router, prefix="/api")
+app.include_router(spotlight_qa.router, prefix="/api")
+app.include_router(keypoints_qa.router, prefix="/api")
 app.include_router(learning.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")

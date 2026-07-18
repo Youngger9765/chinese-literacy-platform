@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重點表 QA：docx ↔ 實際渲染對照</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --panel: #fff; --line: #e3e3e8; --ink: #1d1d22; --muted: #6b6b78;
+    --violet: #7c3aed; --violet-bg: #f3effe; --emerald: #059669; --emerald-bg: #ecfdf5;
+    --amber: #d97706; --amber-bg: #fffbeb; --red: #dc2626; --red-bg: #fef2f2;
+    --blue: #2563eb; --blue-bg: #eff6ff; --sky: #0284c7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.6;
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---- top bar ---- */
+  header { background: var(--panel); border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; flex-wrap: wrap; }
+  .bar.row2 { border-top: 1px dashed var(--line); padding-top: 6px; padding-bottom: 6px; }
+  .spacer { flex: 1; }
+  .nav-btn, .act-btn {
+    border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--ink);
+  }
+  .nav-btn:disabled { opacity: .4; cursor: default; }
+  .act-btn.primary { background: var(--violet); border-color: var(--violet); color: #fff; }
+  .act-btn.primary:hover { background: #6d28d9; }
+  .link-btn {
+    border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    padding: 4px 10px; font-size: 12px; color: var(--ink); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .link-btn:hover { border-color: var(--violet); color: var(--violet); }
+  .meta { font-size: 12px; color: var(--muted); }
+  .meta strong { color: var(--ink); }
+  .reviewer-input, .search-input, .base-input {
+    border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-size: 13px;
+    font-family: inherit;
+  }
+  .lesson-select { border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-size: 13px;
+    font-weight: 600; font-family: inherit; background: #fff; color: var(--ink); max-width: 360px; }
+  .lesson-select:hover { border-color: var(--violet); }
+  .progress { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .progress b { color: var(--ink); } .progress .iss { color: var(--red); }
+  .strategy { font-weight: 700; font-size: 14px; }
+  .strategy .badge {
+    font-size: 11px; font-weight: 600; color: var(--violet); background: var(--violet-bg);
+    border-radius: 6px; padding: 1px 7px; margin-right: 6px;
+  }
+  .strategy .gtag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 1px 7px; margin-right: 6px; }
+  .gtag.docx { color: var(--emerald); background: var(--emerald-bg); border: 1px solid #6ee7b7; }
+  .gtag.ai { color: var(--amber); background: var(--amber-bg); border: 1px solid #fcd9a3; }
+
+  /* ---- two-column body ---- */
+  main { flex: 1 1 auto; display: flex; min-height: 0; }
+  .col { flex: 1 1 50%; min-width: 0; }
+  .col.left { border-right: 1px solid var(--line); background: #fafafb; overflow-y: auto; padding: 14px; }
+  .col.right { display: flex; flex-direction: column; min-height: 0; }
+  .col-head {
+    font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .04em; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;
+  }
+
+  details.fold { margin-top: 12px; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+  details.fold > summary {
+    cursor: pointer; padding: 9px 14px; font-weight: 600; font-size: 13px; color: var(--ink); list-style: none;
+  }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: "▸ "; color: var(--muted); }
+  details.fold[open] > summary::before { content: "▾ "; }
+  details.fold > .fold-body { padding: 0 14px 12px; }
+  #docxView { margin-top: 12px; }
+  #docxView table, #pdfEmbed { width: 100%; }
+  #docxView table { border-collapse: collapse; }
+  #docxView td, #docxView th { border: 1px solid var(--line); padding: 4px 6px; font-size: 13px; }
+  #pdfEmbed { height: 70vh; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; display: none; }
+
+  /* ---- left: view toggle + worksheet pdf ---- */
+  .view-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .view-toggle .seg { border: none; background: #fff; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .view-toggle .seg.active { background: var(--violet); color: #fff; }
+  #wsWrap { display: none; }
+  #wsPdf { width: 100%; height: 82vh; border: 1px solid var(--line); border-radius: 10px; display: block; background: #fff; }
+  .ws-hint { color: var(--muted); padding: 20px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; }
+  .ws-hint code { background: #f1f1f4; border-radius: 6px; padding: 2px 6px; color: var(--ink); }
+
+  /* ---- left: structured 重點表 reader (ground truth from parsed yml) ---- */
+  .reader {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px 14px;
+    font-size: 14px; line-height: 1.85;
+  }
+  .kp-title { font-weight: 800; font-size: 15px; margin: 4px 0 10px; }
+  table.kp { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  table.kp td { border: 1px solid var(--line); padding: 6px 9px; vertical-align: top; word-break: break-word; }
+  table.kp td.lbl { font-weight: 700; white-space: nowrap; width: 1%; }
+  table.kp td.sublbl { color: var(--muted); font-weight: 600; white-space: nowrap; width: 1%; }
+  table.kp tr.title-row td { background: #f6f6f9; font-weight: 800; text-align: center; }
+  /* accent by 問題/解決/結果 */
+  td.acc-problem { border-left: 4px solid #fbbf24; background: var(--amber-bg); color: #92400e; }
+  td.acc-solution { border-left: 4px solid #38bdf8; background: #f0f9ff; color: #075985; }
+  td.acc-result { border-left: 4px solid #34d399; background: var(--emerald-bg); color: #065f46; }
+  td.acc-none { border-left: 4px solid #d1d5db; }
+  .reader mark { background: #fde68a; padding: 0 1px; }
+  .kp .blank { color: var(--emerald); font-weight: 700; }
+  .kp .opt-line { font-size: 12.5px; }
+  .kp .opt-line .ok { color: var(--emerald); font-weight: 700; }
+
+  /* ---- draggable divider between render / checklist ---- */
+  .v-resizer { flex: 0 0 8px; background: var(--line); cursor: row-resize; position: relative; }
+  .v-resizer::before { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 46px; height: 3px; border-radius: 3px; background: #b9b9c4; }
+  .v-resizer:hover { background: var(--violet-bg); }
+  .v-resizer:hover::before { background: var(--violet); }
+  .render-pane.collapsed + .v-resizer { display: none; }
+
+  /* ---- right-top: live render iframe ---- */
+  .render-pane { flex: 1 1 66%; display: flex; flex-direction: column; min-height: 0; }
+  .render-toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px; flex-wrap: wrap;
+    background: #fff; border-bottom: 1px solid var(--line);
+  }
+  .render-toolbar .col-head { margin: 0; }
+  .frame-wrap { flex: 1 1 auto; position: relative; min-height: 0; background: #fff; }
+  #renderFrame { width: 100%; height: 100%; border: 0; display: block; }
+  .frame-hint {
+    position: absolute; inset: 0; display: none; flex-direction: column; gap: 8px;
+    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    color: var(--muted); background: #fff;
+  }
+  .frame-hint.show { display: flex; }
+  .frame-hint code { background: #f1f1f4; border-radius: 6px; padding: 2px 6px; color: var(--ink); }
+  .login-note { font-size: 12px; color: var(--sky); background: #f0f9ff; border: 1px solid #bae6fd;
+    border-radius: 8px; padding: 5px 10px; }
+
+  /* ---- right-bottom: row checklist ---- */
+  .checklist-pane { flex: 1 1 42%; overflow-y: auto; padding: 12px 14px; min-height: 0; background: #fafafb; }
+  .lesson-note-wrap { margin-bottom: 12px; }
+  .lesson-note-wrap textarea {
+    width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 9px; font-family: inherit; font-size: 13px; resize: vertical;
+  }
+
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 12px; margin-bottom: 8px; scroll-margin-top: 8px;
+  }
+  .card.flagged { border-color: var(--red); box-shadow: 0 0 0 1px var(--red); background: #fffafa; }
+  .card.title-card { background: #f6f6f9; }
+  .card-top { display: flex; align-items: flex-start; gap: 8px; }
+  .blk-no { font-weight: 800; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .type-badge { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+  .type-badge.fill_blank { color: var(--emerald); background: var(--emerald-bg); }
+  .type-badge.display { color: var(--muted); background: #f1f1f4; }
+  .type-badge.checkbox { color: var(--blue); background: var(--blue-bg); }
+  .type-badge.section, .type-badge.title { color: var(--violet); background: var(--violet-bg); }
+  .row-label { font-weight: 700; white-space: nowrap; }
+  .row-cell { flex: 1 1 auto; min-width: 0; word-break: break-word; }
+  .row-cell .blank { color: var(--emerald); font-weight: 700; }
+  .flagchk-inline { margin-left: auto; }
+  .flag-toggle { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .row-opts { font-size: 12.5px; margin-top: 4px; color: var(--muted); }
+  .row-opts .ok { color: var(--emerald); font-weight: 700; }
+
+  .review { margin-top: 9px; border-top: 1px dashed var(--line); padding-top: 8px; display: none; }
+  .review.show { display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .chip {
+    border: 1px solid var(--line); background: #fff; border-radius: 999px;
+    padding: 3px 10px; font-size: 12px; color: var(--muted); font-weight: 600;
+  }
+  .chip.on { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .note-box {
+    width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 9px; font-family: inherit; font-size: 13px; resize: vertical;
+  }
+  .s-jump { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 0 6px;
+    font-size: 12px; color: var(--blue); line-height: 1.6; flex: 0 0 auto; }
+  .s-jump:hover { border-color: var(--blue); }
+
+  /* ---- collapsible panes ---- */
+  .render-pane.collapsed { flex: 0 0 auto; border-bottom: 2px solid var(--line); }
+  .render-pane.collapsed .frame-wrap { display: none; }
+  .checklist-pane.collapsed { flex: 0 0 auto; overflow: hidden; }
+  .checklist-pane.collapsed .lesson-note-wrap, .checklist-pane.collapsed #cards { display: none; }
+  .checklist-pane .col-head { margin-bottom: 8px; }
+
+  /* annotations */
+  .annos { margin-top: 8px; }
+  .anno { background: #fffdf5; border: 1px solid #fde68a; border-radius: 8px; padding: 7px 9px; font-size: 12.5px; margin-bottom: 6px; }
+  .anno .q { color: #92400e; font-weight: 600; }
+  .anno .del { float: right; color: var(--red); border: none; background: none; font-weight: 700; }
+  #annoBtn {
+    position: fixed; z-index: 50; display: none; background: var(--violet); color: #fff;
+    border: none; border-radius: 8px; padding: 5px 11px; font-size: 12px; font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  }
+  #annoPop {
+    position: fixed; z-index: 51; display: none; background: #fff; border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px; width: 320px; box-shadow: 0 8px 28px rgba(0,0,0,.18);
+  }
+  #annoPop .q { font-size: 12px; color: #92400e; background: #fffbeb; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; max-height: 70px; overflow: auto; }
+  #annoPop textarea { width: 100%; min-height: 60px; border: 1px solid var(--line); border-radius: 8px; padding: 7px; font-family: inherit; font-size: 13px; resize: vertical; }
+  #annoPop .pop-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+  .empty { color: var(--muted); padding: 40px; text-align: center; }
+
+  /* ---- cloud reviews list ---- */
+  #cloudList { display: none; position: fixed; top: 52px; right: 14px; z-index: 60;
+    width: 380px; max-height: 70vh; overflow-y: auto; background: #fff;
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+  .cloud-head { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 9px 12px; font-size: 12px; font-weight: 700; color: var(--muted);
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+  .cloud-row { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .cloud-row[data-path]:hover { background: var(--violet-bg); }
+  .cloud-row b { color: var(--ink); }
+
+  /* ---- home / overview ---- */
+  #homeBtn.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+  #overview { display: none; flex: 1 1 auto; overflow-y: auto; background: var(--bg); }
+  .ov-inner { max-width: 940px; margin: 0 auto; padding: 26px 18px 48px; }
+  .ov-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ov-head h1 { font-size: 20px; margin: 0; }
+  .ov-summary { color: var(--muted); font-size: 13px; }
+  .ov-summary b { color: var(--ink); }
+  .ov-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .ov-fbtn { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .ov-fbtn:hover { border-color: var(--violet); }
+  .ov-fbtn.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+  .ov-group { font-size: 13px; font-weight: 800; color: var(--muted); margin: 16px 0 6px; }
+  .ov-group:first-child { margin-top: 0; }
+  .ov-list { display: flex; flex-direction: column; gap: 8px; }
+  .ov-row { display: flex; align-items: center; gap: 14px; background: var(--panel);
+    border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 12px; padding: 12px 16px; cursor: pointer; }
+  .ov-row:hover { border-color: var(--violet); box-shadow: 0 1px 8px rgba(0,0,0,.07); }
+  .ov-row.reviewed { border-left-color: var(--emerald); }
+  .ov-row.has-issue { border-left-color: var(--red); }
+  .ov-code { font-weight: 800; color: var(--violet); background: var(--violet-bg); border-radius: 8px; padding: 4px 11px; font-size: 14px; white-space: nowrap; }
+  .ov-main { flex: 1 1 auto; min-width: 0; }
+  .ov-title { font-weight: 700; }
+  .ov-strat { color: var(--muted); font-size: 12px; }
+  .ov-note { color: var(--amber); font-size: 12px; margin-top: 2px; word-break: break-word; }
+  .ov-stats { display: flex; gap: 12px; align-items: center; flex: 0 0 auto; }
+  .ov-stat { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .ov-stat b { color: var(--ink); font-size: 15px; }
+  .ov-stat.flag b { color: var(--red); }
+  .ov-gtag { font-size: 11px; font-weight: 700; border-radius: 8px; padding: 3px 9px; white-space: nowrap; border: 1px solid transparent; }
+  .ov-gtag.docx { color: var(--emerald); background: var(--emerald-bg); border-color: #6ee7b7; }
+  .ov-gtag.ai { color: var(--amber); background: var(--amber-bg); border-color: #fcd9a3; }
+  .ov-pill { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+  .ov-pill.reviewed { color: #fff; background: var(--emerald); }
+  .ov-pill.issue { color: #fff; background: var(--red); }
+  .ov-pill.pending { color: var(--muted); background: #f1f1f4; }
+  .ov-actions { margin-top: 20px; text-align: center; }
+  @media (max-width: 720px) { .ov-stats { flex-wrap: wrap; gap: 6px 10px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <button class="nav-btn" id="homeBtn" title="總覽 / 各課審查進度">🏠 總覽</button>
+    <select class="lesson-select" id="lessonSelect" title="選課"></select>
+    <span class="spacer"></span>
+    <button class="nav-btn" id="prevBtn">← 上一課</button>
+    <button class="nav-btn" id="nextBtn">下一課 →</button>
+    <span class="progress" id="progress"></span>
+    <label class="meta">審查者 <input class="reviewer-input" id="reviewer" size="6" placeholder="啟翔"></label>
+    <button class="act-btn" id="saveCloudBtn" title="存到 staging(人工測試,GCS 隔離,不碰正式資料)">☁ 存 staging</button>
+    <button class="act-btn" id="loadCloudBtn" title="從雲端載回續審">☁ 載入</button>
+    <button class="act-btn primary" id="exportBtn">⬇ Export JSON</button>
+  </div>
+  <div class="bar row2">
+    <span class="strategy" id="strategy"></span>
+    <span class="meta" id="lessonMeta"></span>
+    <span class="spacer"></span>
+    <label class="meta">render base <input class="base-input" id="baseUrl" size="26" placeholder="https://lingoleap-frontend-staging-…run.app" title="右欄真渲染的來源站(預設 staging;可改本機 dev server)"></label>
+    <input class="search-input" id="search" placeholder="🔎 在重點表中搜尋…" size="14">
+    <a class="link-btn" id="docxLink" target="_blank" rel="noopener">📄 原稿 docx</a>
+    <a class="link-btn" id="openLearn" target="_blank" rel="noopener">▶ /learn 開新分頁</a>
+  </div>
+</header>
+
+<main>
+  <section class="col left">
+    <div class="col-head" style="justify-content:space-between">
+      <span>📄 原稿對照 (ground truth) <span class="meta" id="rawMeta"></span></span>
+      <span class="view-toggle">
+        <button class="seg" id="viewPdf">📄 原稿 PDF</button><button class="seg" id="viewText">📝 結構化重點表</button>
+      </span>
+    </div>
+    <div id="wsWrap">
+      <iframe id="wsPdf" title="worksheet pdf"></iframe>
+      <div class="ws-hint" id="wsHint"></div>
+    </div>
+    <div class="reader" id="reader"></div>
+
+    <details class="fold">
+      <summary>載入真實 docx / pdf 對照 (最高保真，需本機檔)</summary>
+      <div class="fold-body">
+        <div class="meta" style="margin-bottom:6px">GCS 上的 worksheet 需權限(通常 403);請先自行下載 <code>{課號}.pdf/.docx</code> 再選本機檔。</div>
+        <label class="link-btn" style="cursor:pointer">選擇本機 .pdf<input type="file" id="pdfFile" accept=".pdf" hidden></label>
+        <label class="link-btn" style="cursor:pointer">選擇本機 .docx<input type="file" id="docxFile" accept=".docx" hidden></label>
+        <button class="link-btn" id="loadGcsDocx">試從 hosting 載入 docx</button>
+        <div class="meta" id="docxStatus" style="margin-top:6px"></div>
+        <iframe id="pdfEmbed" title="worksheet pdf"></iframe>
+        <div id="docxView"></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="col right">
+    <div class="render-pane">
+      <div class="render-toolbar">
+        <button class="link-btn" id="collapseFrame" title="收合/展開渲染區">▾ 渲染</button>
+        <h2 class="col-head">🖥 實際渲染 (真 StoryStructureTable)</h2>
+        <span class="spacer"></span>
+        <span class="login-note">render base 預設 = <b>staging</b>。右欄空白通常只差登入 → 先到 staging <b>/login</b> 一鍵登入,再按「↻ 重新載入」</span>
+        <button class="link-btn" id="reloadFrame">↻ 重新載入</button>
+        <a class="link-btn" id="openFrame" target="_blank" rel="noopener">↗ 開新分頁</a>
+      </div>
+      <div class="frame-wrap">
+        <iframe id="renderFrame" title="story-structure render"></iframe>
+        <div class="frame-hint" id="frameHint">
+          <div>🖥 右欄空白?render base 預設已是 <b>staging</b>,通常只差「登入」:</div>
+          <div>1. 另開分頁到 <span id="hintBase">staging</span><code>/login</code> 點「學生 小明」一鍵登入,再回來按「↻ 重新載入」。</div>
+          <div class="meta">💡 想改用本機:把上方「render base」換成 <code>http://localhost:3000</code>(需該 dev server 有起、已登入、且 /api 打得到有資料的後端)。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-resizer" id="vResizer" title="拖曳調整渲染區高度"></div>
+
+    <div class="checklist-pane">
+      <div class="col-head" style="justify-content:flex-start;gap:8px">
+        <button class="link-btn" id="collapseChecklist" title="收合/展開審查清單">▾ 清單</button>
+        <span>☑ 重點表逐列審查</span>
+        <span class="meta" id="blocksMeta"></span>
+      </div>
+      <div class="lesson-note-wrap">
+        <label class="flag-toggle" style="margin-bottom:6px;display:flex;color:var(--ink)">
+          <input type="checkbox" id="lessonReviewed"> 本課已審畢
+        </label>
+        <textarea id="lessonNote" placeholder="這一課的整體備註（例：漏列、多列、空格位置錯、合併儲存格壞、答案沒遮罩…）"></textarea>
+      </div>
+      <div id="cards"></div>
+    </div>
+  </section>
+</main>
+
+<section id="overview">
+  <div class="ov-inner">
+    <div class="ov-head">
+      <h1>文章重點表 審查進度</h1>
+      <div class="ov-summary" id="ovSummary"></div>
+    </div>
+    <div class="ov-filter" id="ovFilter">
+      <button class="ov-fbtn active" data-f="all">全部</button>
+      <button class="ov-fbtn" data-f="docx">📄 docx 真解析</button>
+      <button class="ov-fbtn" data-f="ai">🤖 AI 生成</button>
+      <button class="ov-fbtn" data-f="flagged">🚩 有標記</button>
+      <button class="ov-fbtn" data-f="reviewed">✔ 已審畢</button>
+      <button class="ov-fbtn" data-f="pending">未審</button>
+    </div>
+    <div class="ov-list" id="ovList"></div>
+    <div class="ov-actions">
+      <button class="act-btn primary" id="ovExport">⬇ Export JSON</button>
+    </div>
+  </div>
+</section>
+
+<div id="cloudList"></div>
+
+<button id="annoBtn">＋ 標註</button>
+<div id="annoPop">
+  <div class="q" id="annoQuote"></div>
+  <textarea id="annoNote" placeholder="這段哪裡有問題？"></textarea>
+  <div class="pop-actions">
+    <button class="nav-btn" id="annoCancel">取消</button>
+    <button class="act-btn primary" id="annoSave">儲存標註</button>
+  </div>
+</div>
+
+<script src="lessons-data.js"></script>
+<script src="vendor/jszip.min.js" onerror="window.__noJSZip=true"></script>
+<script src="vendor/docx-preview.min.js" onerror="window.__noDocxPreview=true"></script>
+<script src="vendor/mammoth.browser.min.js" onerror="window.__noMammoth=true"></script>
+<script src="app.js"></script>
+</body>
+</html>

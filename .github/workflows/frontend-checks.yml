@@ -36,11 +36,15 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-      # Render-smoke gate (#2289). Scoped to the smoke suite on purpose: the wider
-      # vitest suite has ~38 pre-existing functional-test failures (UI text drift,
-      # tests missing AuthProvider wrappers) that predate this safety net. Gating
-      # the new render-safety check on that broken suite would make this workflow
-      # red on day one. The smoke suite is the actual mount-crash guard.
-      - name: Render-smoke tests (vitest)
+      # Render-smoke gate (#2289) + explicitly-pinned regression locks. Scoped to
+      # named files on purpose: the wider vitest suite has ~38 pre-existing
+      # functional-test failures (UI text drift, tests missing AuthProvider wrappers)
+      # that predate this safety net, so gating on the whole suite would make this
+      # workflow red on day one. Pin a file here whenever a fix ships a regression
+      # test that must stay enforced — an un-run lock is theatre (testing-strategy 鐵律).
+      #   - render-smoke: mount-crash guard (#2279/#2289)
+      #   - resetTutorStep / LiveTutor.readAgain: 「再讀一次」reset must clear every
+      #     completion/成績 source + the single-paragraph residual diff (#2532)
+      - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx

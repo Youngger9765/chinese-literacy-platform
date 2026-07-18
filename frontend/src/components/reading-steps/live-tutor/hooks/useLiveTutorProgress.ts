@@ -6,6 +6,7 @@ import { extractPracticeChars } from '../../../../utils/liveTutorHelpers';
 import { isToolboxMode, scopedStepStorageKey } from '../../../../services/learningStorageScope';
 import { LineResult, ParagraphSummaryData } from '../liveTutorTypes';
 import { ParagraphStatus } from '../../ParagraphProgress';
+import type { TutorStepData } from '../../../../types/stepProgress';
 
 export type ProgressPhase =
   | 'idle'
@@ -61,6 +62,9 @@ export function useLiveTutorProgress(
   onFinish: (attempt: ReadingAttempt) => void,
   onParagraphComplete?: (completedParagraphIndex: number) => void,
   initialCompletedParagraphs?: Set<number>,
+  /** Issue #2530: DB step_data['tutor'] — restore fallback when localStorage is empty
+   *  (e.g. cross-session / cleared), so 逐段朗讀紀錄回歸. */
+  initialProgress?: TutorStepData,
 ) {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('liveTutor_progress_', story.id);
@@ -68,21 +72,24 @@ export function useLiveTutorProgress(
 
   const [currentLineIndex, setCurrentLineIndex] = useState<number>(() => {
     const saved = savedProgress.current;
-    return saved ? (saved.currentLineIndex ?? 0) : 0;
+    if (saved) return saved.currentLineIndex ?? 0;
+    return initialProgress?.current_line_index ?? 0;
   });
 
   const [lineResults, setLineResults] = useState<LineResult[]>(
-    savedProgress.current?.lineResults ?? [],
+    savedProgress.current?.lineResults ?? initialProgress?.line_results ?? [],
   );
 
   const [completedParagraphs, setCompletedParagraphs] = useState<Set<number>>(
     savedProgress.current?.completedParagraphs
       ? new Set(savedProgress.current.completedParagraphs)
-      : initialCompletedParagraphs ?? new Set<number>(),
+      : initialProgress?.completed_paragraphs
+        ? new Set(initialProgress.completed_paragraphs)
+        : initialCompletedParagraphs ?? new Set<number>(),
   );
 
   const [paragraphSummaries, setParagraphSummaries] = useState<Record<number, ParagraphSummaryData>>(
-    savedProgress.current?.paragraphSummaries ?? {},
+    savedProgress.current?.paragraphSummaries ?? initialProgress?.paragraph_summaries_data ?? {},
   );
 
   const [isAdvancing, setIsAdvancing] = useState(false);
@@ -234,7 +241,9 @@ export function useLiveTutorProgress(
   const handleFinish = useCallback(
     (stopSession: () => void) => {
       stopSession();
-      try { localStorage.removeItem(storageKey); } catch {}
+      // Issue #2530: do NOT clear localStorage here. 「觀看總結報告」導航去 report 後
+      // 學生常會返回逐段朗讀頁；清掉會讓「朗讀對照／這次成績」在 remount 後全部消失。
+      // 只有明確「重練」(resetForRetry) 才清除。
       const avgMatchRate =
         lineResults.length > 0
           ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length
@@ -266,7 +275,7 @@ export function useLiveTutorProgress(
         })),
       });
     },
-    [story, lineResults, onFinish, storageKey],
+    [story, lineResults, onFinish],
   );
 
   const resetForRetry = useCallback(() => {
