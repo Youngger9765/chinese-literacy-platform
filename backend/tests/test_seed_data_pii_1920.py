@@ -1,6 +1,6 @@
 """Tests for Issue #1920: Seed data PII cleanup.
 
-Bug A: Real gmail PII addresses (jay.tzeng@gmail.com, kuanweilu@gmail.com) in staging DB
+Bug A: Real gmail PII addresses (2 early-dogfood accounts) in staging DB
 Bug B: 王管理員 (admin@test.com) incorrectly assigned teacher role (should have 2 roles only)
 Bug C: 小明 (student@test.com, grade-3 persona) enrolled in 七年甲班 (grade-7 class)
 
@@ -31,16 +31,16 @@ def seed_source() -> str:
 class TestBugA_NoGmailInSeedSource:
     """Bug A: seed.py must not *seed* real PII gmail addresses into the DB.
 
-    jay.tzeng@gmail.com and kuanweilu@gmail.com exist only in the live staging
-    DB from early dogfood sessions.  seed.py is allowed to reference them in a
-    repair constant (_PII_GMAIL_ACCOUNTS) to deactivate them, but must NEVER
-    use them in email= keyword arguments that would re-create those accounts.
+    The 2 early-dogfood gmail accounts exist only in the live staging DB. seed.py
+    references them for repair via the _PII_GMAIL_ACCOUNTS constant, which is sourced
+    from the PII_ACCOUNTS_TO_DEACTIVATE env var (never hardcoded — this repo is public),
+    and must NEVER use them in email= keyword arguments that would re-create the accounts.
     """
 
     def test_no_gmail_seeded_via_user_email_kwarg(self, seed_source: str) -> None:
         """gmail addresses must not appear in User(email=...) or email= assignments."""
-        # Match patterns like:  email="jay.tzeng@gmail.com"
-        # or:                   User(email="jay.tzeng@gmail.com", ...)
+        # Match patterns like:  email="someone@gmail.com"
+        # or:                   User(email="someone@gmail.com", ...)
         seeding_pattern = re.compile(r'email\s*=\s*"[^"]*@gmail\.com"')
         matches = seeding_pattern.findall(seed_source)
         assert matches == [], (
@@ -63,19 +63,29 @@ class TestBugA_NoGmailInSeedSource:
         assert "repair_pii_accounts" in seed_source or "cleanup_pii" in seed_source or "deactivate_pii" in seed_source, (
             "No PII repair function found in seed.py. "
             "Expected a function like repair_pii_accounts() that deactivates/anonymizes "
-            "jay.tzeng@gmail.com and kuanweilu@gmail.com in the live staging DB."
+            "the 2 early-dogfood gmail accounts in the live staging DB."
         )
 
-    def test_pii_gmail_list_defined_for_repair_only(self, seed_source: str) -> None:
-        """The _PII_GMAIL_ACCOUNTS constant must exist and list both gmail addresses."""
+    def test_pii_gmail_not_hardcoded_in_seed_source(self, seed_source: str) -> None:
+        """SECURITY regression (public repo): real gmail PII must NOT be hardcoded.
+
+        Flips the original #1920 test that (wrongly) *required* the literal addresses
+        to be present in source — that locked real PII into a public repo. The repair
+        list must instead be sourced from the PII_ACCOUNTS_TO_DEACTIVATE env var.
+        """
         assert "_PII_GMAIL_ACCOUNTS" in seed_source, (
             "_PII_GMAIL_ACCOUNTS constant not found in seed.py — needed for repair function"
         )
-        assert "jay.tzeng@gmail.com" in seed_source, (
-            "jay.tzeng@gmail.com not in _PII_GMAIL_ACCOUNTS — repair function can't target it"
+        assert "PII_ACCOUNTS_TO_DEACTIVATE" in seed_source, (
+            "_PII_GMAIL_ACCOUNTS must be sourced from the PII_ACCOUNTS_TO_DEACTIVATE env var, "
+            "not from hardcoded addresses"
         )
-        assert "kuanweilu@gmail.com" in seed_source, (
-            "kuanweilu@gmail.com not in _PII_GMAIL_ACCOUNTS — repair function can't target it"
+        # Real address = has a local part before @gmail.com; the bare "@gmail.com"
+        # substring used in anonymization logic (if "@gmail.com" in user.email) is fine.
+        real_gmail = re.search(r"[\w.+-]+@gmail\.com", seed_source)
+        assert real_gmail is None, (
+            f"Real gmail PII appears to be hardcoded in seed.py: {real_gmail.group()!r} — "
+            "this repo is PUBLIC. Move the addresses to the PII_ACCOUNTS_TO_DEACTIVATE env var (Cloud Run)."
         )
 
 

@@ -1,7 +1,7 @@
 """repair existing PII rows in staging DB (#1931)
 
 PR #1930 fixed future seeds but left existing data dirty:
-  - jay.tzeng@gmail.com and kuanweilu@gmail.com email fields still hold real PII
+  - 2 early-dogfood gmail accounts' email fields still hold real PII
     (is_active was set False but email was not anonymized)
   - 王管理員 (admin@test.com) still has a UserRole row with role='teacher'
   - 小明 (student@test.com) may still be enrolled in 七年甲班 (grade-7 class)
