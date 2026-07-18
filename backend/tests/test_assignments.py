@@ -287,6 +287,23 @@ class TestCreateAssignment:
         assert data["classroom_id"] == classroom_with_students
         assert data["story_id"] == VALID_STORY_ID
 
+    def test_create_assignment_body_classroom_id_mismatch_returns_422(
+        self, client, teacher, classroom_with_students
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students + 99999,
+                "story_id": VALID_STORY_ID,
+                "title": "Mismatched Classroom",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+        assert resp.json()["detail"] == (
+            "classroom_id in request body must match classroom_id in path"
+        )
+
     def test_create_assignment_success(self, client, teacher, classroom_with_students):
         resp = client.post(
             f"/api/classrooms/{classroom_with_students}/assignments",
@@ -327,6 +344,46 @@ class TestCreateAssignment:
         # 2 students enrolled -> 2 submissions
         assert data["submission_count"] == 2
         assert data["completed_count"] == 0
+
+    def test_create_assignment_syncs_classroom_text_for_story(
+        self, client, teacher, school_id
+    ):
+        classroom_resp = client.post(
+            "/api/classrooms",
+            json={"name": "ClassroomText Sync Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert classroom_resp.status_code == 201
+        classroom_id = classroom_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Sync ClassroomText",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+
+        db = TestingSessionLocal()
+        try:
+            from app.models.school import ClassroomText
+
+            classroom_text = (
+                db.query(ClassroomText)
+                .filter(
+                    ClassroomText.classroom_id == classroom_id,
+                    ClassroomText.text_id == VALID_STORY_ID,
+                    ClassroomText.deleted_at.is_(None),
+                )
+                .first()
+            )
+            assert classroom_text is not None
+            assert classroom_text.assigned_by == teacher["user_id"]
+        finally:
+            db.close()
 
     def test_create_assignment_invalid_story_id(self, client, teacher, classroom_with_students):
         resp = client.post(

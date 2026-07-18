@@ -385,6 +385,65 @@ class TestJoinClassroomByCode:
         assert resp.status_code == 404
         assert resp.json()["detail"] == "Invalid join code"
 
+    def test_join_inactive_classroom_returns_404(self, client, teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Inactive Join Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        classroom_id = create_resp.json()["id"]
+        join_code = create_resp.json()["join_code"]
+
+        update_resp = client.patch(
+            f"/api/classrooms/{classroom_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert update_resp.status_code == 200
+
+        joiner = _register_user(client, "inactive_classroom_joiner")
+        resp = client.post(
+            "/api/classrooms/join",
+            json={"join_code": join_code},
+            headers=auth_header(joiner["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Invalid join code"
+
+    def test_join_inactive_school_returns_404(self, client, admin_user):
+        school_resp = client.post(
+            "/api/schools",
+            json={"name": f"Inactive Join School {uuid.uuid4().hex[:8]}"},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert school_resp.status_code == 201
+        inactive_school_id = school_resp.json()["id"]
+
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Inactive School Join Class", "school_id": inactive_school_id},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert create_resp.status_code == 201
+        join_code = create_resp.json()["join_code"]
+
+        update_resp = client.patch(
+            f"/api/schools/{inactive_school_id}",
+            json={"is_active": False},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert update_resp.status_code == 200
+
+        joiner = _register_user(client, "inactive_school_joiner")
+        resp = client.post(
+            "/api/classrooms/join",
+            json={"join_code": join_code},
+            headers=auth_header(joiner["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Invalid join code"
+
     def test_join_duplicate_returns_409(self, client, teacher, school_id):
         create_resp = client.post(
             "/api/classrooms",
