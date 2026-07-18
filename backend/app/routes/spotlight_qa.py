@@ -28,8 +28,9 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Body, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+from ..auth.qa_tools import enforce_qa_content_length, require_qa_token
 from ..services.audio_upload_service import _get_gcs_bucket
 
 logger = logging.getLogger(__name__)
@@ -69,15 +70,30 @@ def _is_production() -> bool:
     return bool(os.environ.get("K_SERVICE"))
 
 
-@router.post("/spotlight-qa/save")
-def spotlight_qa_save(payload: dict = Body(...)):
+@router.post(
+    "/spotlight-qa/save",
+    dependencies=[Depends(require_qa_token), Depends(enforce_qa_content_length)],
+)
+async def spotlight_qa_save(request: Request):
     """存一份聚光燈 QA review JSON(無登入,人工測試用)。
 
     Returns: { ok, path } on success; 4xx on validation; 403 in production; 503 if GCS down.
+
+    Auth + early Content-Length cap run as dependencies (#2534) BEFORE the body is
+    read; body is parsed manually here so a forged large Content-Length is rejected
+    without buffering it or touching GCS.
     """
     # 純人工測試用:正式環境不接受寫入
     if _is_production():
         raise HTTPException(403, "spotlight QA save is disabled in production")
+
+    body_bytes = await request.body()
+    if len(body_bytes) > _MAX_BYTES:  # post-parse cap, defense-in-depth
+        raise HTTPException(413, "payload too large (max 4MB)")
+    try:
+        payload = json.loads(body_bytes)
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(400, "payload must be valid JSON")
 
     if not isinstance(payload, dict) or "lessons" not in payload:
         raise HTTPException(400, "payload must be a spotlight-qa export object (missing 'lessons')")
@@ -107,7 +123,7 @@ def spotlight_qa_save(payload: dict = Body(...)):
     return {"ok": True, "path": path}
 
 
-@router.get("/spotlight-qa/reviews")
+@router.get("/spotlight-qa/reviews", dependencies=[Depends(require_qa_token)])
 def spotlight_qa_reviews():
     """列出已存的 review(供雲端載入清單)。reviewer / 時間直接從 path 解,不下載內容。"""
     bucket = _get_gcs_bucket()
@@ -139,7 +155,7 @@ def spotlight_qa_reviews():
     return {"ok": True, "count": len(out), "reviews": out}
 
 
-@router.get("/spotlight-qa/review")
+@router.get("/spotlight-qa/review", dependencies=[Depends(require_qa_token)])
 def spotlight_qa_review(path: str = Query(...)):
     """讀回一份 review JSON(供載回續審)。path 須落在 spotlight-qa/ prefix。"""
     if not _PATH_RE.match(path):
