@@ -8,6 +8,20 @@
 
 ---
 
+## 7/4 ~ 7/18
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 靖杭 | ✅ | 朗讀全面優化（10 PR：#2533/#2531/#2514/#2513/#2512/#2511/#2510/#2509/#2508/#2525）| 再讀一次重錄整課、導航往返成績不丟+落 DB、左課文右 AI 雙欄、錄音進度條拖拉、全文朗讀保留+展開全文、逐段對照顯示學生逐字實唸、藍色通融圖例、錄音上限放寬(全文600s/逐段180s)、testset 列表上限修 |
+| 啟翔 | ✅ | 聚光燈/重點表 EDD + QA Board（5 PR：#2528/#2527/#2523/#2505/#2507）| 重點表 QA Board、spotlight-qa Board 上 staging + 右欄渲染真學習頁、block-based lesson-content 契約 + 通用渲染器 + AI 擷取(EDD)、story-structure 共用 regex lastIndex 污染修 |
+| Young | ✅ | 跨組織 RBAC 11 findings 全修（#2470 系列 #2473~#2482）| per-user 限流、batch-eval role gate、SSO email_verified、統一 tenant-scoped 授權、關跨校/org 建班；全上 prod |
+| Young | ✅ | public bucket 收 private + 同源 /assets 代理（#2488/#2491/#2494/#2496）| 燒錢 + IP 洞堵、CJK 物件名、CSP frame-src、asset-serving ADR |
+| Young | ✅ | 聚光燈上 staging + 教授 checklist matrix（#2516/#2518/#2520）| AI-lesson paths 修（8 策展課 render）、EDD status、6/5 教授 checklist × 7 課矩陣 |
+| Young | ✅ | #2533 re-review + 補 CI 回歸鎖（7/17）| 驗證靖杭修法 + mutation + staging QA；把 2 支回歸測試釘進 frontend-checks.yml（原本 CI 只跑 render-smoke）|
+| Young | 🔧 | PR #2536 public repo PII scrub（#2535）| 移除硬編碼 test-account 識別碼 → 改 env var；CI 綠 + 21 tests pass，待 review merge |
+
+---
+
 ## 6/29 ~ 7/3
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
