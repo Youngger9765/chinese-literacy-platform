@@ -10,6 +10,7 @@ Functions:
 """
 
 import logging
+import os
 import secrets
 import string
 from datetime import datetime, timezone, timedelta
@@ -29,12 +30,16 @@ logger = logging.getLogger(__name__)
 # PII repair (#1920)
 # ---------------------------------------------------------------------------
 
-# Real gmail addresses that were manually inserted into the staging DB during
-# early dogfood sessions.  These must never appear in code or seed data; this
-# function deactivates them idempotently so they disappear from the admin UI.
+# Real gmail addresses manually inserted into the staging DB during early dogfood
+# sessions. This repo is PUBLIC, so the addresses must NEVER live in source — they
+# are supplied via the PII_ACCOUNTS_TO_DEACTIVATE env var (comma-separated, set in
+# Cloud Run). Empty default = no-op, which is correct on prod/staging where migration
+# pii01rep02air03 already anonymized those rows to inactive_{id}@test.com. Keeps the
+# exact-match design so real Google-OAuth gmail users are never touched.
 _PII_GMAIL_ACCOUNTS = [
-    "jay.tzeng@gmail.com",
-    "kuanweilu@gmail.com",
+    e.strip()
+    for e in os.getenv("PII_ACCOUNTS_TO_DEACTIVATE", "").split(",")
+    if e.strip()
 ]
 
 
