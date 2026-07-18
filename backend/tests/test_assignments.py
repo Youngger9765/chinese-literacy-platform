@@ -368,6 +368,64 @@ class TestCreateAssignment:
             "classroom_id in request body must match classroom_id in path"
         )
 
+    def test_create_assignment_rejects_both_story_id_and_text_id(
+        self, client, teacher, classroom_with_students
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "text_id": 1,
+                "title": "Ambiguous Text Source",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+
+    def test_create_assignment_rejects_missing_text_source(
+        self, client, teacher, classroom_with_students
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "title": "Missing Text Source",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("target_cpm", [29, 601])
+    def test_create_assignment_rejects_target_cpm_out_of_range(
+        self, client, teacher, classroom_with_students, target_cpm
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "target_cpm": target_cpm,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("target_accuracy", [-1, 101])
+    def test_create_assignment_rejects_target_accuracy_out_of_range(
+        self, client, teacher, classroom_with_students, target_accuracy
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "target_accuracy": target_accuracy,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+
     def test_create_assignment_success(self, client, teacher, classroom_with_students):
         resp = client.post(
             f"/api/classrooms/{classroom_with_students}/assignments",
@@ -728,6 +786,26 @@ class TestUpdateAssignment:
             f"/api/assignments/{assignment_id}",
             json={"title": "Hacked Title"},
             headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_update_assignment_student_forbidden(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}",
+            json={"title": "Student Update Attempt"},
+            headers=auth_header(student1["token"]),
         )
         assert resp.status_code == 403
 
@@ -1413,6 +1491,28 @@ class TestDeleteAssignment:
         resp = client.delete(
             f"/api/assignments/{assignment_id}",
             headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_delete_assignment_student_forbidden(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """Student role cannot delete a teacher-owned assignment."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Student Delete Protected Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(student1["token"]),
         )
         assert resp.status_code == 403
 
@@ -2538,6 +2638,7 @@ class TestTeacherGradingAuthorization:
         return {
             "teacher": teacher,
             "other_teacher": other_teacher,
+            "student": student,
             "assignment_ids": assignment_ids,
             "submission_ids": submission_ids,
         }
@@ -2548,6 +2649,16 @@ class TestTeacherGradingAuthorization:
             f"/api/assignments/{setup['assignment_ids'][0]}/submissions/{setup['submission_ids'][0]}",
             headers=auth_header(setup["other_teacher"]["token"]),
             json={"score": 91, "teacher_feedback": "Unauthorized grade attempt"},
+        )
+
+        assert resp.status_code == 403
+
+    def test_student_cannot_grade_submission(self, client, setup):
+        """Student role gets explicit 403 on the teacher grading endpoint."""
+        resp = client.patch(
+            f"/api/assignments/{setup['assignment_ids'][0]}/submissions/{setup['submission_ids'][0]}",
+            headers=auth_header(setup["student"]["token"]),
+            json={"score": 91, "teacher_feedback": "Student grade attempt"},
         )
 
         assert resp.status_code == 403

@@ -618,6 +618,61 @@ class TestBatchStudentCreation:
         assert len(data["errors"]) == 1
         assert "already exists" in data["errors"][0]["error"]
 
+    def test_batch_create_json_partial_failure_keeps_valid_rows(
+        self, client, teacher, school_id
+    ):
+        """JSON batch uses per-row savepoints: one bad row does not roll back valid rows."""
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Batch JSON Savepoint Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        batch_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students/batch",
+            json={
+                "students": [
+                    {"name": "Json Good One", "seat_number": "31"},
+                    {"name": "Json Duplicate Seat", "seat_number": "31"},
+                    {"name": "Json Good Two", "seat_number": "32"},
+                ]
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert batch_resp.status_code == 201
+        data = batch_resp.json()
+        assert [student["name"] for student in data["created"]] == [
+            "Json Good One",
+            "Json Good Two",
+        ]
+        assert len(data["errors"]) == 1
+        assert data["errors"][0]["name"] == "Json Duplicate Seat"
+        assert "already exists" in data["errors"][0]["error"]
+
+        db = TestingSessionLocal()
+        try:
+            from app.models.school import ClassroomStudent
+            from app.models.user import User
+
+            classroom_student_ids = [
+                row.student_id
+                for row in db.query(ClassroomStudent)
+                .filter(ClassroomStudent.classroom_id == classroom_id)
+                .all()
+            ]
+            persisted_names = {
+                row.name
+                for row in db.query(User)
+                .filter(User.id.in_(classroom_student_ids))
+                .all()
+            }
+            assert "Json Good One" in persisted_names
+            assert "Json Good Two" in persisted_names
+            assert "Json Duplicate Seat" not in persisted_names
+        finally:
+            db.close()
+
     def test_batch_create_403_for_other_teacher(self, client, teacher, other_teacher, school_id):
         create_resp = client.post(
             "/api/classrooms",
@@ -683,6 +738,74 @@ class TestBatchStudentCreation:
         )
         assert resp.status_code == 201
         assert len(resp.json()["created"]) == 1
+
+
+# ===========================================================================
+# Late-join Assignment Submission Backfill
+# ===========================================================================
+
+
+class TestLateJoinSubmissionBackfill:
+    def test_create_submissions_for_new_student_skips_existing_submission(
+        self, client, teacher, school_id
+    ):
+        """Re-processing a student with an existing submission stays idempotent."""
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Backfill Idempotency Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        classroom_id = create_resp.json()["id"]
+
+        assignment_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": "1",
+                "title": "Backfill Idempotency Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert assignment_resp.status_code == 201
+        assignment_id = assignment_resp.json()["id"]
+
+        student = _register_user(client, "backfill_idem_student")
+
+        db = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission
+            from app.routes.classrooms.helpers import create_submissions_for_new_student
+
+            db.add(
+                AssignmentSubmission(
+                    assignment_id=assignment_id,
+                    student_id=student["user_id"],
+                    status="pending",
+                )
+            )
+            db.commit()
+
+            created_count = create_submissions_for_new_student(
+                classroom_id,
+                student["user_id"],
+                db,
+            )
+            db.commit()
+
+            submission_count = (
+                db.query(AssignmentSubmission)
+                .filter(
+                    AssignmentSubmission.assignment_id == assignment_id,
+                    AssignmentSubmission.student_id == student["user_id"],
+                )
+                .count()
+            )
+        finally:
+            db.close()
+
+        assert created_count == 0
+        assert submission_count == 1
 
 
 # ===========================================================================
