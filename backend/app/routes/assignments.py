@@ -604,6 +604,12 @@ def submit_assignment(
             status_code=403, detail="You are not enrolled in this assignment"
         )
 
+    if not assignment.is_active:
+        raise HTTPException(status_code=400, detail="Assignment is not active")
+
+    if submission.status == "pending" and submission.session_id is None:
+        raise HTTPException(status_code=400, detail="Assignment not started")
+
     # Idempotent: already submitted/graded, just return current state
     if submission.status in ("submitted", "graded"):
         return student_assignment_to_response(assignment, submission, db)

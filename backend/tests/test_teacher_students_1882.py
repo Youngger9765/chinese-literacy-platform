@@ -327,6 +327,18 @@ class TestTeacherVisibilityRequiredForEveryStudentRoute:
             f"Expected 403 on POST /comment for unauthorized teacher, got {resp.status_code}"
         )
 
+    def test_generate_ai_comment_returns_403_for_unauthorized_teacher(
+        self, client, teacher_b, student, session_id
+    ):
+        resp = client.post(
+            f"/api/teacher/students/{student['user_id']}/sessions/{session_id}/generate-ai-comment",
+            headers=auth_header(teacher_b["token"]),
+        )
+        assert resp.status_code == 403, (
+            "Expected 403 on POST /generate-ai-comment for unauthorized teacher, "
+            f"got {resp.status_code}"
+        )
+
     def test_authorized_teacher_can_still_access_sessions(
         self, client, teacher_a, student
     ):

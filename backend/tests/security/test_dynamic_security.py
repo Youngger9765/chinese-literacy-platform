@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import uuid
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -431,6 +432,84 @@ def _create_classroom_direct(school_id: int, teacher_id: int, name: str) -> int:
         db.close()
 
 
+def _create_assignment_submission_direct(classroom_id: int, teacher_id: int, student_id: int) -> tuple[int, int]:
+    from app.models.assignment import Assignment, AssignmentSubmission
+    from app.models.school import ClassroomStudent
+
+    db = TestingSessionLocal()
+    try:
+        enrolled = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.student_id == student_id,
+            )
+            .first()
+        )
+        if enrolled is None:
+            db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student_id))
+            db.flush()
+
+        assignment = Assignment(
+            classroom_id=classroom_id,
+            teacher_id=teacher_id,
+            story_id="1",
+            assignment_type="reading",
+        )
+        db.add(assignment)
+        db.flush()
+        submission = AssignmentSubmission(
+            assignment_id=assignment.id,
+            student_id=student_id,
+            status="submitted",
+        )
+        db.add(submission)
+        db.commit()
+        return assignment.id, submission.id
+    finally:
+        db.close()
+
+
+def _enroll_student_direct(classroom_id: int, student_id: int) -> None:
+    from app.models.school import ClassroomStudent
+
+    db = TestingSessionLocal()
+    try:
+        existing = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.student_id == student_id,
+            )
+            .first()
+        )
+        if existing is None:
+            db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student_id))
+            db.commit()
+    finally:
+        db.close()
+
+
+def _create_learning_session_direct(student_id: int) -> int:
+    from app.models.session import LearningSession
+
+    db = TestingSessionLocal()
+    try:
+        session = LearningSession(
+            student_id=student_id,
+            story_slug=f"security-session-{uuid.uuid4().hex[:8]}",
+            status="completed",
+            started_at=datetime.now(timezone.utc),
+            full_reading_attempts=[],
+        )
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+        return session.id
+    finally:
+        db.close()
+
+
 def test_med1d_org_admin_lists_only_own_org_classrooms(client):
     # #2470 MED-1d: GET /api/classrooms must scope org_admin to their own org's
     # classrooms, not the whole platform (was is_admin → any org_admin saw all).
@@ -452,3 +531,165 @@ def test_med1d_org_admin_lists_only_own_org_classrooms(client):
     ids = [c["id"] for c in r.json()["items"]]
     assert cls_a in ids, "org_admin should see own org's classroom"
     assert cls_b not in ids, "org_admin must NOT see another org's classroom (MED-1d)"
+
+
+def test_org_admin_cannot_create_classroom_in_another_org_school(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"WrbacA_{u}")
+    org_b = _create_org(f"WrbacB_{u}")
+    school_b = _create_school(org_b)
+    admin_a = _create_user(f"wrbac_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.post(
+        "/api/classrooms",
+        json={"name": f"Cross org create {u}", "school_id": school_b, "grade": 6},
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_teacher_without_school_membership_cannot_create_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"NoMemberA_{u}")
+    org_b = _create_org(f"NoMemberB_{u}")
+    school_a = _create_school(org_a)
+    school_b = _create_school(org_b)
+    teacher = _create_user(f"nomember_t_{u}@example.com")
+    _grant_role(teacher, "teacher", "school", str(school_a))
+
+    r = client.post(
+        "/api/classrooms",
+        json={"name": f"Not my school {u}", "school_id": school_b, "grade": 5},
+        headers=_auth(create_access_token(teacher)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_org_admin_cannot_add_student_to_another_org_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"AddA_{u}")
+    org_b = _create_org(f"AddB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"add_tb_{u}@example.com")
+    student_b = _create_user(f"add_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"AddBClass_{u}")
+    admin_a = _create_user(f"add_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.post(
+        f"/api/classrooms/{classroom_b}/students",
+        json={"student_id": student_b},
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_org_admin_cannot_create_assignment_in_another_org_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"AsnA_{u}")
+    org_b = _create_org(f"AsnB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"asn_tb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"AsnBClass_{u}")
+    admin_a = _create_user(f"asn_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.post(
+        f"/api/classrooms/{classroom_b}/assignments",
+        json={"story_id": "1", "title": f"Cross org assignment {u}"},
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_org_admin_cannot_grade_submission_in_another_org_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"GradeA_{u}")
+    org_b = _create_org(f"GradeB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"grade_tb_{u}@example.com")
+    student_b = _create_user(f"grade_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"GradeBClass_{u}")
+    assignment_id, submission_id = _create_assignment_submission_direct(
+        classroom_b,
+        teacher_b,
+        student_b,
+    )
+    admin_a = _create_user(f"grade_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.patch(
+        f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+        json={"score": 92, "teacher_feedback": "Cross-org grading must be denied"},
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
+
+
+def test_org_admin_cannot_access_cross_org_teacher_session_routes(client, monkeypatch):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"SessA_{u}")
+    org_b = _create_org(f"SessB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"sess_tb_{u}@example.com")
+    student_b = _create_user(f"sess_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"SessBClass_{u}")
+    _enroll_student_direct(classroom_b, student_b)
+    session_id = _create_learning_session_direct(student_b)
+
+    admin_a = _create_user(f"sess_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+    token = create_access_token(admin_a)
+
+    async def fake_generate_teacher_comment(**kwargs):
+        return "Should not be reachable cross-org"
+
+    monkeypatch.setattr(
+        "app.services.ai_generation.generate_teacher_comment",
+        fake_generate_teacher_comment,
+    )
+
+    assert client.get(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/report",
+        headers=_auth(token),
+    ).status_code == 403
+    assert client.post(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/generate-ai-comment",
+        headers=_auth(token),
+    ).status_code == 403
+    assert client.post(
+        f"/api/teacher/students/{student_b}/sessions/{session_id}/comment",
+        json={"comment": "Cross-org write must be denied"},
+        headers=_auth(token),
+    ).status_code == 403
+
+
+def test_org_admin_cannot_delete_assignment_in_another_org_classroom(client):
+    u = uuid.uuid4().hex[:6]
+    org_a = _create_org(f"DelA_{u}")
+    org_b = _create_org(f"DelB_{u}")
+    school_b = _create_school(org_b)
+    teacher_b = _create_user(f"del_tb_{u}@example.com")
+    student_b = _create_user(f"del_sb_{u}@example.com")
+    classroom_b = _create_classroom_direct(school_b, teacher_b, f"DelBClass_{u}")
+    assignment_id, _ = _create_assignment_submission_direct(
+        classroom_b,
+        teacher_b,
+        student_b,
+    )
+
+    admin_a = _create_user(f"del_oa_{u}@example.com")
+    _grant_role(admin_a, "org_admin", "organization", org_a)
+
+    r = client.delete(
+        f"/api/assignments/{assignment_id}",
+        headers=_auth(create_access_token(admin_a)),
+    )
+
+    assert r.status_code == 403, r.text
