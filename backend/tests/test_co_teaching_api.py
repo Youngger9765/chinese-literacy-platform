@@ -19,6 +19,7 @@ Run with:
 """
 import sys
 import os
+import uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -201,6 +202,63 @@ def _h(token):
     return {"Authorization": f"Bearer {token}"}
 
 
+def _fresh_co_teacher(client, owner_token, classroom_id) -> str:
+    suffix = uuid.uuid4().hex[:8]
+    email = f"readonly_{suffix}@test.com"
+    token = _register(client, "Read Only Co Teacher", email)
+    invite = client.post(
+        f"/api/classrooms/{classroom_id}/teachers",
+        json={"email": email},
+        headers=_h(owner_token),
+    )
+    assert invite.status_code == 201, invite.text
+    return token
+
+
+def _fresh_student(client) -> dict:
+    suffix = uuid.uuid4().hex[:8]
+    token = _register(client, "Boundary Student", f"boundary_student_{suffix}@test.com")
+    me = client.get("/api/users/me", headers=_h(token))
+    assert me.status_code == 200, me.text
+    return {"token": token, "user_id": me.json()["id"]}
+
+
+def _create_assignment(client, owner_token, classroom_id) -> int:
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/assignments",
+        json={"story_id": "1", "title": f"Co-teacher Boundary {uuid.uuid4().hex[:6]}"},
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 201, r.text
+    return r.json()["id"]
+
+
+def _create_boundary_classroom(client, owner_token) -> int:
+    r = client.post(
+        "/api/classrooms",
+        json={"name": f"Boundary Class {uuid.uuid4().hex[:6]}", "school_id": _test_school_id},
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 201, r.text
+    return r.json()["id"]
+
+
+def _first_submission_id(assignment_id: int) -> int:
+    from app.models.assignment import AssignmentSubmission
+
+    db = TestingSessionLocal()
+    try:
+        submission = (
+            db.query(AssignmentSubmission)
+            .filter(AssignmentSubmission.assignment_id == assignment_id)
+            .first()
+        )
+        assert submission is not None, "assignment setup should create at least one submission"
+        return submission.id
+    finally:
+        db.close()
+
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
@@ -260,6 +318,64 @@ def test_co_teacher_sees_classroom_in_dashboard(client, co_teacher_token, classr
     assert r.status_code == 200
     ids = [c["id"] for c in r.json()["items"]]
     assert classroom_id in ids
+
+
+def test_co_teacher_cannot_create_assignment(client, owner_token):
+    """Co-teacher can read the classroom but cannot create assignments."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id)
+
+    read = client.get(f"/api/classrooms/{classroom_id}", headers=_h(token))
+    assert read.status_code == 200
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/assignments",
+        json={"story_id": "1", "title": "Co-teacher should be read-only"},
+        headers=_h(token),
+    )
+    assert r.status_code == 403, r.text
+
+
+def test_co_teacher_cannot_add_student(client, owner_token):
+    """Co-teacher can read the classroom but cannot add students."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id)
+    student = _fresh_student(client)
+
+    read = client.get(f"/api/classrooms/{classroom_id}", headers=_h(token))
+    assert read.status_code == 200
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student["user_id"]},
+        headers=_h(token),
+    )
+    assert r.status_code == 403, r.text
+
+
+def test_co_teacher_cannot_grade_submission(client, owner_token):
+    """Co-teacher can read the classroom but cannot grade submissions."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id)
+    student = _fresh_student(client)
+    add = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student["user_id"]},
+        headers=_h(owner_token),
+    )
+    assert add.status_code == 201, add.text
+    assignment_id = _create_assignment(client, owner_token, classroom_id)
+    submission_id = _first_submission_id(assignment_id)
+
+    read = client.get(f"/api/classrooms/{classroom_id}", headers=_h(token))
+    assert read.status_code == 200
+
+    r = client.patch(
+        f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+        json={"score": 88, "teacher_feedback": "Co-teacher grading must be denied"},
+        headers=_h(token),
+    )
+    assert r.status_code == 403, r.text
 
 
 def test_co_teacher_cannot_invite_others(client, co_teacher_token, classroom_id):
