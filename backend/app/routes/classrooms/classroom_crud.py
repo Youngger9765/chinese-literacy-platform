@@ -1,4 +1,4 @@
-"""Classroom CRUD endpoints: create, list, get detail, update."""
+"""Classroom CRUD endpoints: create, list, get detail, update, delete."""
 import logging
 
 from fastapi import APIRouter, Depends, Query
@@ -21,6 +21,7 @@ from ...schemas.classroom import (
     StudentEnrolledClassroomsResponse,
 )
 from ...services.classroom_dev_filter import is_dev_classroom
+from ...services.classroom_lifecycle_service import delete_classroom_with_cleanup
 from ...services.input_sanitizer import sanitize_ai_input
 from .helpers import (
     classroom_to_detail_response,
@@ -307,3 +308,32 @@ def update_classroom(
     db.refresh(classroom)
     logger.info("Updated classroom %d: %s", classroom_id, list(update_data.keys()))
     return classroom_to_response(classroom, db)
+
+
+@router.delete("/classrooms/{classroom_id}", status_code=204)
+def delete_classroom(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete a classroom. Only the owner or scoped admin can delete."""
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    try:
+        cleanup_counts = delete_classroom_with_cleanup(classroom, db)
+    except Exception as exc:
+        db.rollback()
+        logger.exception(
+            "Failed to delete classroom %d for user %d",
+            classroom_id,
+            current_user.id,
+        )
+        raise HTTPException(status_code=500, detail="Failed to delete classroom") from exc
+
+    logger.info(
+        "Deleted classroom %d by user %d (cleanup=%s)",
+        classroom_id,
+        current_user.id,
+        cleanup_counts,
+    )
