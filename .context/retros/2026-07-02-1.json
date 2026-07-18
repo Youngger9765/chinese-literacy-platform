@@ -1,0 +1,32 @@
+{
+  "date": "2026-07-02",
+  "window": "7d",
+  "metrics": {
+    "commits": 25,
+    "contributors": 2,
+    "prs_merged": 19,
+    "insertions": 1809,
+    "deletions": 1136,
+    "net_loc": 673,
+    "active_days": 4,
+    "feat_pct": 0.12,
+    "fix_pct": 0.36,
+    "test_pct": 0.16,
+    "docs_pct": 0.20,
+    "refactor_pct": 0.08,
+    "chore_pct": 0.08,
+    "ai_assisted_commits": 22
+  },
+  "authors": {
+    "Young": { "commits": 22, "insertions": 1660, "deletions": 1106, "top_area": "backend/app (testset + auth/RBAC + learning)" },
+    "Raymond (靖杭)": { "commits": 3, "insertions": 149, "deletions": 30, "top_area": "frontend (login/record.html/vite)" }
+  },
+  "qa_only_no_commits": ["啟翔 (stgst) — 七課 QA (#2425 #2200 #2153)"],
+  "version_range": ["#2415", "#2455"],
+  "highlights": [
+    "backend fail-closed grader + cross-org RBAC isolation + reading STT truncation + nav 學習步驟動態對應學習單 → all shipped to prod (verified 200)",
+    "testset collection pipeline hardened: upload magic-bytes, recordings admin-gated, real-mime, TDD/EDD locks",
+    "靖杭 first independent build-env debug (vite/esbuild #2429, 0 review rounds)"
+  ],
+  "tweetable": "Week of 6/25: 25 commits (2 devs + 1 QA), backend safety+RBAC+學習單動態對應 all shipped to prod, testset pipeline hardened | fix-heavy (36%) but 16% tests"
+}
