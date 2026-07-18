@@ -341,6 +341,38 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
 }
 
 /**
+ * Parser section `type` → STEP_REGISTRY `id` aliases (#2526).
+ *
+ * The printed-worksheet parser emits a `type` vocabulary that does NOT line up
+ * 1:1 with STEP_REGISTRY ids. The plain `_`→`-` transform only rescues the
+ * cases that happen to match after that swap (e.g. `vocab_application` →
+ * `vocab-application`); everything else was silently dropped, so ~74% of
+ * sections vanished on ~16 courses that carry no manual `step_sequence`.
+ *
+ * These 5 mappings are UNAMBIGUOUS and applied BEFORE the dash transform.
+ * When the parser vocabulary drifts, add the new alias here (a console.warn in
+ * stepSequenceFromWorksheet flags any type that still resolves to nothing).
+ */
+const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
+  vocab_definitions: 'vocab-definition', // 語詞我最棒 (plural type → singular id)
+  structure_table: 'story-structure', //   文章重點表
+  spotlight: 'reading-strategy', //         閱讀聚光燈
+  mcq: 'comprehension', //                  閱讀理解
+  word_search: 'vocab-word-search', //      詞語複習
+};
+
+/**
+ * Worksheet section types that are KNOWN but deliberately NOT mapped, because
+ * their target step is ambiguous and needs product confirmation.
+ *
+ * - `reading_timer` (念順順): could be 逐段朗讀 (`tutor`) OR 全文朗讀
+ *   (`full-reading`). Do NOT guess — needs 方大哥/Young confirmation. Until then
+ *   it hits the console.warn in stepSequenceFromWorksheet (intended, so the drop
+ *   stays visible).
+ */
+export const KNOWN_UNMAPPED_WORKSHEET_TYPES = ['reading_timer'] as const;
+
+/**
  * Derive a per-lesson step sequence from the printed worksheet's section order.
  *
  * Each lesson YAML carries `worksheet_section_order`: the AUTHORITATIVE ordered
@@ -352,9 +384,9 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
  * DEFAULT_STEP_SEQUENCE (which e.g. orders 文章重點表/閱讀聚光燈 opposite to the paper).
  *
  * 'intro' is prepended (the online flow always opens with it; the paper starts
- * at 讀全文). Unknown types are skipped here; disabled steps are dropped later by
- * resolveActiveSteps. Returns null when there is no worksheet order so callers
- * fall back to DEFAULT_STEP_SEQUENCE.
+ * at 讀全文). Unmapped types are dropped (with a console.warn — see below), and
+ * disabled steps are dropped later by resolveActiveSteps. Returns null when
+ * there is no worksheet order so callers fall back to DEFAULT_STEP_SEQUENCE.
  */
 export function stepSequenceFromWorksheet(
   worksheet?: Array<{ number?: string; name?: string; type?: string }> | null,
@@ -364,8 +396,22 @@ export function stepSequenceFromWorksheet(
   for (const section of worksheet) {
     const type = section?.type;
     if (!type) continue;
-    const id = type.replace(/_/g, '-'); // reading_annotation → reading-annotation
-    if (STEP_REGISTRY[id] && !ids.includes(id)) ids.push(id);
+    // Alias BEFORE the dash transform, then look up in the registry.
+    const aliased = WORKSHEET_TYPE_ALIASES[type] ?? type;
+    const id = aliased.replace(/_/g, '-'); // reading_annotation → reading-annotation
+    if (STEP_REGISTRY[id]) {
+      if (!ids.includes(id)) ids.push(id);
+    } else {
+      // #2526: never silently drop. Surface unmapped types so future parser
+      // vocabulary drift is visible instead of quietly deleting steps.
+      // `reading_timer` (see KNOWN_UNMAPPED_WORKSHEET_TYPES) hits this until
+      // product confirms its target — intended.
+      console.warn(
+        `[stepConfig] worksheet section type "${type}" (resolved to "${id}") has no ` +
+          `matching STEP_REGISTRY id — section dropped. Add an alias to ` +
+          `WORKSHEET_TYPE_ALIASES or confirm the mapping.`,
+      );
+    }
   }
   return ids.length > 1 ? ids : null;
 }
