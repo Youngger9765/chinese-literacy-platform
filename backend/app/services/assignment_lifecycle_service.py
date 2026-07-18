@@ -7,7 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ..models.assignment import Assignment, AssignmentSubmission
-from ..models.school import ClassroomStudent, ClassroomText
+from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.session import CharacterError, DialogueTurn, LearningSession
 from ..models.text import Text
 from ..models.user import User
@@ -22,9 +22,14 @@ from ..schemas.assignment import (
 from ..models.session import ReadingAttemptHistory
 from ..services.assignment_responses import extract_reading_metrics
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
+from ..services.assignment_queries import resolve_title_for_assignment
 from ..services.audio_upload_service import delete_gcs_blobs_for_paths
 from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
+from ..services.notification_service import (
+    send_assignment_graded_notification,
+    send_new_assignment_notification,
+)
 from ..utils.slug import normalize_story_slug
 
 logger = logging.getLogger(__name__)
@@ -166,6 +171,76 @@ def list_classroom_assignments_with_counts(
     return assignments, precomputed
 
 
+def _send_new_assignment_notifications_best_effort(
+    assignment: Assignment,
+    student_ids: list[int],
+    db: Session,
+) -> None:
+    try:
+        classroom = db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+        students = db.query(User).filter(User.id.in_(student_ids)).all() if student_ids else []
+        students_by_id = {student.id: student for student in students}
+        story_title = resolve_title_for_assignment(assignment, db)
+        classroom_name = classroom.name if classroom else f"Classroom #{assignment.classroom_id}"
+
+        for student_id in student_ids:
+            student = students_by_id.get(student_id)
+            try:
+                send_new_assignment_notification(
+                    student_id=student_id,
+                    student_name=student.name if student else str(student_id),
+                    story_title=story_title,
+                    classroom_name=classroom_name,
+                    due_date=assignment.due_date,
+                    assignment_type=assignment.assignment_type,
+                    db=db,
+                )
+            except Exception:
+                logger.warning(
+                    "Failed to send new assignment notification for assignment %d student %d",
+                    assignment.id,
+                    student_id,
+                    exc_info=True,
+                )
+    except Exception:
+        logger.warning(
+            "Failed to send new assignment notifications for assignment %d",
+            assignment.id,
+            exc_info=True,
+        )
+
+
+def _send_assignment_graded_notification_best_effort(
+    submission: AssignmentSubmission,
+    db: Session,
+) -> None:
+    try:
+        student = db.query(User).filter(User.id == submission.student_id).first()
+        assignment = (
+            db.query(Assignment)
+            .filter(Assignment.id == submission.assignment_id)
+            .first()
+        )
+        story_title = (
+            resolve_title_for_assignment(assignment, db)
+            if assignment is not None
+            else f"Assignment #{submission.assignment_id}"
+        )
+        send_assignment_graded_notification(
+            student_id=submission.student_id,
+            student_name=student.name if student else str(submission.student_id),
+            story_title=story_title,
+            score=submission.score,
+            db=db,
+        )
+    except Exception:
+        logger.warning(
+            "Failed to send assignment graded notification for submission %d",
+            submission.id,
+            exc_info=True,
+        )
+
+
 def create_assignment_with_submissions(
     classroom_id: int,
     teacher_id: int,
@@ -257,10 +332,12 @@ def create_assignment_with_submissions(
     # Defensive dedupe: legacy/corrupt data may contain repeated student links.
     # Avoid unique constraint conflicts on (assignment_id, student_id).
     unique_student_ids: set[int] = set()
+    notified_student_ids: list[int] = []
     for enrollment in enrollments:
         if enrollment.student_id in unique_student_ids:
             continue
         unique_student_ids.add(enrollment.student_id)
+        notified_student_ids.append(enrollment.student_id)
         submission = AssignmentSubmission(
             assignment_id=assignment.id,
             student_id=enrollment.student_id,
@@ -270,6 +347,11 @@ def create_assignment_with_submissions(
 
     db.commit()
     db.refresh(assignment)
+    _send_new_assignment_notifications_best_effort(
+        assignment,
+        notified_student_ids,
+        db,
+    )
 
     logger.info(
         "Created assignment %d for classroom %d (story=%s, text_id=%s, students=%d)",
@@ -444,6 +526,7 @@ def grade_assignment_submission(
 
     db.commit()
     db.refresh(submission)
+    _send_assignment_graded_notification_best_effort(submission, db)
     logger.info(
         "Teacher %d graded submission %d (score=%s, feedback=%s)",
         user_id, submission.id, payload.score,
