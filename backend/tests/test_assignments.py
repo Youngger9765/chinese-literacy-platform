@@ -2076,6 +2076,113 @@ class TestTeacherFeedback:
         assert resp.json()["teacher_feedback"] == "更新後的評語"
 
 
+# ====================================================================
+# Teacher Grading Authorization / IDOR Contract Tests
+# ====================================================================
+
+class TestTeacherGradingAuthorization:
+    """Locks authz and assignment-scoped submission lookup for teacher grading."""
+
+    @pytest.fixture(scope="class")
+    def setup(self, client, school_id):
+        teacher = _register_and_login(client, "grade_auth_teacher")
+        other_teacher = _register_and_login(client, "grade_auth_other_teacher")
+        student = _register_and_login(client, "grade_auth_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Grade Auth Contract Class", "school_id": school_id},
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        enroll_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        assert enroll_resp.status_code in (200, 201)
+
+        assignment_ids = []
+        submission_ids = []
+        for idx in range(2):
+            asn_resp = client.post(
+                f"/api/classrooms/{classroom_id}/assignments",
+                headers=auth_header(teacher["token"]),
+                json={
+                    "classroom_id": classroom_id,
+                    "story_id": str(idx + 1),
+                    "title": f"Grade Auth Assignment {idx + 1}",
+                },
+            )
+            assert asn_resp.status_code == 201
+            assignment_id = asn_resp.json()["id"]
+            assignment_ids.append(assignment_id)
+
+            detail_resp = client.get(
+                f"/api/assignments/{assignment_id}",
+                headers=auth_header(teacher["token"]),
+            )
+            assert detail_resp.status_code == 200
+            submissions = detail_resp.json()["submissions"]
+            assert len(submissions) == 1
+            submission_ids.append(submissions[0]["id"])
+
+        return {
+            "teacher": teacher,
+            "other_teacher": other_teacher,
+            "assignment_ids": assignment_ids,
+            "submission_ids": submission_ids,
+        }
+
+    def test_non_owner_teacher_cannot_grade_submission(self, client, setup):
+        """A teacher who does not own the assignment classroom gets 403."""
+        resp = client.patch(
+            f"/api/assignments/{setup['assignment_ids'][0]}/submissions/{setup['submission_ids'][0]}",
+            headers=auth_header(setup["other_teacher"]["token"]),
+            json={"score": 91, "teacher_feedback": "Unauthorized grade attempt"},
+        )
+
+        assert resp.status_code == 403
+
+    def test_submission_id_must_belong_to_path_assignment(self, client, setup):
+        """A submission from another assignment must not be graded through this path."""
+        path_assignment_id = setup["assignment_ids"][0]
+        other_assignment_id = setup["assignment_ids"][1]
+        other_submission_id = setup["submission_ids"][1]
+
+        resp = client.patch(
+            f"/api/assignments/{path_assignment_id}/submissions/{other_submission_id}",
+            headers=auth_header(setup["teacher"]["token"]),
+            json={"score": 100, "teacher_feedback": "Wrong assignment path"},
+        )
+
+        assert resp.status_code == 404
+
+        detail_resp = client.get(
+            f"/api/assignments/{other_assignment_id}",
+            headers=auth_header(setup["teacher"]["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submission = next(
+            sub for sub in detail_resp.json()["submissions"] if sub["id"] == other_submission_id
+        )
+        assert submission["status"] == "pending"
+        assert submission["score"] is None
+        assert submission["teacher_feedback"] is None
+
+    def test_grade_submission_not_found(self, client, teacher):
+        resp = client.patch(
+            "/api/assignments/999999999/submissions/999999999",
+            headers=auth_header(teacher["token"]),
+            json={"score": 88, "teacher_feedback": "Missing records"},
+        )
+
+        assert resp.status_code == 404
+
+
 # ---------------------------------------------------------------------------
 # Issue #414 — Reading goals in StartAssignmentResponse
 # ---------------------------------------------------------------------------

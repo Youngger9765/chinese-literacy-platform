@@ -168,6 +168,25 @@ def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
+def _seed_teacher_report_session(student_id: int, **overrides) -> int:
+    db = TestingSessionLocal()
+    try:
+        session = LearningSession(
+            student_id=student_id,
+            story_slug=f"teacher-report-{uuid.uuid4().hex[:8]}",
+            status=overrides.pop("status", "completed"),
+            started_at=datetime.now(timezone.utc),
+            full_reading_attempts=[],
+            **overrides,
+        )
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+        return session.id
+    finally:
+        db.close()
+
+
 def _make_admin(user_id: int):
     db = TestingSessionLocal()
     role = db.query(Role).filter(Role.name == "system_admin").first()
@@ -657,6 +676,128 @@ class TestTeacherDashboardFullFlow:
         for p in progress:
             assert p["total_sessions"] == 0
             assert p["last_session_date"] is None
+
+
+# ===========================================================================
+# Teacher session report review/comment contract
+# ===========================================================================
+
+
+class TestTeacherSessionReportReviewContract:
+    def test_report_first_view_sets_teacher_reviewed_at(self, client, teacher, student1, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Review Timestamp Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        add_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code == 201
+        session_id = _seed_teacher_report_session(
+            student1["user_id"],
+            teacher_reviewed_at=None,
+        )
+
+        resp = client.get(
+            f"/api/teacher/students/{student1['user_id']}/sessions/{session_id}/report",
+            headers=auth_header(teacher["token"]),
+        )
+
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["teacher_reviewed_at"] is not None
+        db = TestingSessionLocal()
+        try:
+            session = db.query(LearningSession).filter(LearningSession.id == session_id).one()
+            assert session.teacher_reviewed_at is not None
+        finally:
+            db.close()
+
+    def test_save_teacher_comment_persists_and_unauthorized_teacher_gets_403(
+        self, client, teacher, other_teacher, student2, school_id
+    ):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Teacher Comment Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        add_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code == 201
+        session_id = _seed_teacher_report_session(student2["user_id"])
+        comment = "已確認朗讀狀況，請下次多練習容易混淆的字"
+
+        save_resp = client.post(
+            f"/api/teacher/students/{student2['user_id']}/sessions/{session_id}/comment",
+            json={"comment": comment},
+            headers=auth_header(teacher["token"]),
+        )
+
+        assert save_resp.status_code == 200, save_resp.text
+        assert save_resp.json()["teacher_comment"] == comment
+        db = TestingSessionLocal()
+        try:
+            session = db.query(LearningSession).filter(LearningSession.id == session_id).one()
+            assert session.teacher_comment == comment
+            assert session.teacher_reviewed_at is not None
+        finally:
+            db.close()
+
+        forbidden = client.post(
+            f"/api/teacher/students/{student2['user_id']}/sessions/{session_id}/comment",
+            json={"comment": "unauthorized edit"},
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert forbidden.status_code == 403, forbidden.text
+
+    def test_generate_ai_comment_uses_cached_comment_without_second_model_call(
+        self, client, teacher, student1, monkeypatch, school_id
+    ):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "AI Cache Contract Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        add_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code in (201, 409), add_resp.text
+        session_id = _seed_teacher_report_session(
+            student1["user_id"],
+            accuracy=91.0,
+            reading_result={"cpm": 142},
+            comprehension_score=86.0,
+        )
+        calls = {"count": 0}
+
+        async def fake_generate_teacher_comment(**kwargs):
+            calls["count"] += 1
+            return "Cached AI comment after first generation"
+
+        monkeypatch.setattr(
+            "app.services.ai_generation.generate_teacher_comment",
+            fake_generate_teacher_comment,
+        )
+
+        url = f"/api/teacher/students/{student1['user_id']}/sessions/{session_id}/generate-ai-comment"
+        first = client.post(url, headers=auth_header(teacher["token"]))
+        second = client.post(url, headers=auth_header(teacher["token"]))
+
+        assert first.status_code == 200, first.text
+        assert second.status_code == 200, second.text
+        assert first.json()["ai_comment"] == "Cached AI comment after first generation"
+        assert second.json()["ai_comment"] == "Cached AI comment after first generation"
+        assert calls["count"] == 1
 
 
 # ===========================================================================
