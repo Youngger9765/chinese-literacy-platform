@@ -10,6 +10,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...models.user import User
 from ...services.audit_logger import AuditAction, audit_log_endpoint
+from ...services.input_sanitizer import sanitize_ai_input
 from .teacher_schemas import (
     AICommentResponse,
     TeacherCommentRequest,
@@ -98,7 +99,8 @@ def save_teacher_comment(
 ):
     """Save or update teacher comment on a learning session."""
     session = _get_session_for_teacher(current_user.id, student_id, session_id, db)
-    session.teacher_comment = body.comment
+    safe_comment, _ = sanitize_ai_input(body.comment, user_id=str(current_user.id))
+    session.teacher_comment = safe_comment
     if session.teacher_reviewed_at is None:
         session.teacher_reviewed_at = datetime.now(timezone.utc)
     db.commit()

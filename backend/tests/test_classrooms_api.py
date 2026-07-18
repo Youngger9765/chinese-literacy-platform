@@ -494,6 +494,51 @@ class TestAddStudent:
         assert data["email"] == student1["email"]
         assert "enrolled_at" in data
 
+    def test_add_student_backfills_existing_assignment_submission(
+        self, client, teacher, school_id
+    ):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Late Add Backfill Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        classroom_id = create_resp.json()["id"]
+
+        assignment_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={"story_id": "1", "title": "Pre-existing Assignment"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert assignment_resp.status_code == 201
+        assignment_id = assignment_resp.json()["id"]
+        assert assignment_resp.json()["submission_count"] == 0
+
+        late_student = _register_user(client, "late_add_backfill")
+        add_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": late_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code == 201
+
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submissions = detail_resp.json()["submissions"]
+        late_student_submission = next(
+            (
+                submission
+                for submission in submissions
+                if submission["student_id"] == late_student["user_id"]
+            ),
+            None,
+        )
+        assert late_student_submission is not None
+        assert late_student_submission["status"] == "pending"
+
     def test_add_duplicate_student_returns_409(self, client, teacher, student1, school_id):
         create_resp = client.post(
             "/api/classrooms",
