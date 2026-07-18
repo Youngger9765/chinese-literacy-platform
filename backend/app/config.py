@@ -42,6 +42,11 @@ class Settings(BaseSettings):
     #                  preview → lingoleap-omo-uploads-preview.
     # Falls back to original shared bucket for backward compat / local dev.
     gcs_omo_bucket: str = "lingoleap-omo-uploads"
+    # Shared secret for the public QA-board tools (spotlight-qa / keypoints-qa) — Issue #2534.
+    # Empty (default): endpoints are OPEN (local-dev escape hatch).
+    # Set QA_TOOLS_SHARED_SECRET in staging/preview Cloud Run to require an
+    # `x-qa-token` header on every QA-board request (fail-closed once set).
+    qa_tools_shared_secret: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
