@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // StoryStructureTable 內部呼叫 useAuth；測試不掛 AuthProvider，
@@ -181,6 +181,58 @@ describe('StoryStructureTable', () => {
     // 空格總數 = 1 + 2 + 1 = 4；bug 時每列只畫 1 個光禿 input（共 3 個）→ 少畫
     const inputs = container.querySelectorAll('input');
     expect(inputs.length).toBe(4);
+  });
+
+  // 迴歸測試（#2193 single-blank key regression）：
+  // worksheet_table 的 InlineWorksheetContent 對單空格 cell 用 -b0 key 存答案，
+  // 但 tally/submit 用「單空格 → 無 -bN suffix」→ 填了卻算 0 → totalAnswered<totalInteractive
+  // → 提交鈕鎖住、送不出。修好後填單空格要算「已填 1/1」且提交鈕解鎖。
+  it('counts a filled single-blank cell as answered and enables submit (#2193 key)', async () => {
+    const singleBlankStructure = {
+      layout: 'worksheet_table',
+      title: '文章重點表',
+      worksheet_rows: [
+        {
+          kind: 'section_block',
+          section: '解決',
+          items: [{ label: '解決1', value: '食客中有一位會模仿【　　　】的樣子' }],
+        },
+      ],
+      rows: [
+        {
+          label: '解決',
+          value: '',
+          interactive_type: 'display',
+          sub_rows: [
+            {
+              label: '解決1',
+              value: '食客中有一位會模仿【　　　】的樣子',
+              interactive_type: 'fill_blank',
+            },
+          ],
+        },
+      ],
+    };
+
+    mockFetchSuccess(singleBlankStructure);
+    const { container } = render(
+      <StoryStructureTable storyId="lesson-g6-l22" showCoach={false} />
+    );
+
+    await waitFor(() => expect(screen.getByText('解決1')).toBeTruthy());
+
+    const submitBtn = screen.getByRole('button', { name: /提交答案/ }) as HTMLButtonElement;
+    // 尚未填 → 鎖住
+    expect(submitBtn.disabled).toBe(true);
+
+    const input = container.querySelector('input') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    fireEvent.change(input, { target: { value: '狗' } });
+
+    // 單空格 cell 填了要算「已填 1/1」→ 提交鈕解鎖(bug 時仍鎖住)
+    await waitFor(() => expect(submitBtn.disabled).toBe(false));
+    const filled = container.textContent?.replace(/\s+/g, '') ?? '';
+    expect(filled).toContain('已填1/1題');
   });
 
   it('re-fetches when storyId prop changes', async () => {

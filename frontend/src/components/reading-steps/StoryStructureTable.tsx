@@ -391,13 +391,18 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     const nodes: React.ReactNode[] = [];
     let last = 0;
     let blankIdx = 0;
+    // Single-blank cells must key WITHOUT a -bN suffix, to match the answer tally
+    // (totalAnswered) and submit payload — both use `blankCount > 1 ? b : undefined`.
+    // Keying single blanks as -b0 here made filled cells count as empty → 送不出 (#2193 regression).
+    const blankTotal = countBlanks(text);
     const re = new RegExp(INLINE_BLANK_RE.source, 'g');
     let match: RegExpExecArray | null;
     while ((match = re.exec(text)) !== null) {
       if (match.index > last) {
         nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
       }
-      const key = answerKey(rowIdx, subIdx, blankIdx);
+      const bIdx = blankTotal > 1 ? blankIdx : undefined;
+      const key = answerKey(rowIdx, subIdx, bIdx);
       nodes.push(
         <span key={`b-${blankIdx}`} className="inline-flex items-baseline">
           <span>【</span>
@@ -406,7 +411,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
             onChange={(v) => setAnswer(key, v)}
             submitted={submitted}
             gradeItem={
-              submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined
+              submitted ? findGradeItem(gradeResults, rowIdx, subIdx, bIdx) : undefined
             }
             compact
           />
