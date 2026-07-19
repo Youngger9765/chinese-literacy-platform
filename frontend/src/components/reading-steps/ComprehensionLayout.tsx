@@ -428,62 +428,64 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            * references (matched by figure_label, NOT array order, since the
            * YAML image array is often reversed vs. figure order).
            *
-           * - Single scroll container holds the whole paired list.
-           * - Desktop (lg): each row is text-left | figure-right.
-           * - Mobile: text-top / figure-bottom.
-           * - Exercise renders BELOW the paired reading, full width (not a side
-           *   gallery), so practice no longer scrolls back to find the figure.
+           * Layout: same left-right 7/5 grid as the standard branch below, so
+           * graphic-text lessons are consistent with the rest of the platform
+           * (課文對照 left, 答題區 right) — no longer stacked top-bottom.
+           * - Left (col-span-7): 圖文表對照閱讀 (PairedReading), scrolls independently.
+           *   Each paragraph row is text-left | figure-right (lg) / stacked (mobile).
+           * - Right (col-span-5): the exercise (答題區), same slot as standard lessons.
            * ══════════════════════════════════════════════════════════════════ */
-          <div className="w-full h-full overflow-y-auto custom-scrollbar pr-1">
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8" data-comprehension-lesson-text>
-              <div className="flex items-center gap-2 mb-5">
-                <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
-                <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                  圖文表對照閱讀
-                </span>
-                <span className="text-xs text-on-surface-variant ml-1">
-                  {images.length} 張圖{tables.length > 0 ? ` · ${tables.length} 張表` : ''}
-                </span>
-              </div>
+          <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-              {/* #2194: pass tables so PairedReading can inline 表N alongside 圖N.
-                  The standalone collapsible 紙本表格 panel is removed for graphic-text
-                  lessons — tables are now visible directly next to the paragraphs
-                  that reference them, matching the professor's 對照 intent. */}
-              <PairedReading
-                paragraphs={paragraphs}
-                images={images}
-                tables={tables}
-                lessonCode={resolvedLessonCode}
-                zhuyinLines={zhuyinLines}
-                zhuyinActive={zhuyinActive}
-              />
-
-              {progressPercent >= 0 && (
-                <div className="mt-6 pt-4 border-t border-surface-container-high">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-headline font-bold text-on-surface-variant">
-                      {progressLabel || '完成進度'}
-                    </span>
-                    <span className="text-xs font-headline font-bold text-accent">
-                      {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
+            {/* Left: 圖文表對照閱讀 (col-span-7) */}
+            <div className="md:col-span-7 min-h-0 flex flex-col overflow-y-auto custom-scrollbar pr-1">
+              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8" data-comprehension-lesson-text>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
+                  <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+                    圖文表對照閱讀
+                  </span>
+                  <span className="text-xs text-on-surface-variant ml-1">
+                    {images.length} 張圖{tables.length > 0 ? ` · ${tables.length} 張表` : ''}
+                  </span>
                 </div>
-              )}
+
+                {/* #2194: pass tables so PairedReading can inline 表N alongside 圖N.
+                    The standalone collapsible 紙本表格 panel is removed for graphic-text
+                    lessons — tables are now visible directly next to the paragraphs
+                    that reference them, matching the professor's 對照 intent. */}
+                <PairedReading
+                  paragraphs={paragraphs}
+                  images={images}
+                  tables={tables}
+                  lessonCode={resolvedLessonCode}
+                  zhuyinLines={zhuyinLines}
+                  zhuyinActive={zhuyinActive}
+                />
+
+                {progressPercent >= 0 && (
+                  <div className="mt-6 pt-4 border-t border-surface-container-high">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-headline font-bold text-on-surface-variant">
+                        {progressLabel || '完成進度'}
+                      </span>
+                      <span className="text-xs font-headline font-bold text-accent">
+                        {progressPercent === 100 ? '完成！' : `${progressPercent}%`}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Note: tables for graphic-text lessons are now inlined per-paragraph
-                inside PairedReading (above). No standalone 紙本表格 collapsible here. */}
-
-            {/* Exercise — full width, BELOW the paired reading */}
-            <div className="mt-4">
+            {/* Right: exercise (col-span-5) — 答題區,與一般課同位置 */}
+            <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
               {/* #2133: 閱讀理解 quiz 預設展開（教授「應一開始就直接呈現、不必點上方小字」）*/}
               <CollapsibleRefPanel
                 icon={exerciseIcon}
