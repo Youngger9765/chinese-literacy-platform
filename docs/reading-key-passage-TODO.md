@@ -72,6 +72,9 @@
 - 「重點朗讀」step 現在**仍唸全文**（FullReadingPage 未改內容來源）——Phase 1 接 `key_reading` 欄位後才真正「只唸指定段」
 - 全文朗讀不再是獨立可選項（改造掉了）；逐段走 ToolPicker
 
+### Phase 0 follow-up（code review 提的非阻擋項）
+- [ ] `FullReadingPage.tsx:37` back 鈕寫死指向 `/learn/{id}/tutor`，tutor 現 enabled:false → StepEnabledGuard 會 redirect 到第一個 enabled step（非 bug、UX 小驚訝）。改指向真正前一步（reading-annotation）
+
 ---
 
 ## Phase 1 — 重點段抽取 + 真正只唸指定段（跟啟翔 DOCX pipeline + 教材二修合流）
