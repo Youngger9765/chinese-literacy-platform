@@ -114,14 +114,19 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     view: AppView.TUTOR,
     dbStepNumber: 2,
     needsStory: true,
-    enabled: true,
+    enabled: false, // 2026-07-20 教授審查：朗讀簡化為單一「重點朗讀」→ 逐段從 StepperNav 隱藏（ToolPicker 仍可進）
     category: 'reading',
   },
+  // 2026-07-20 教授審查決策（曾世傑教授）：朗讀只練老師指定的「重點段落」(念順順，約 300-400 字，
+  // 課文旁手指頭符號標起點、右欄累計字數標長度)，不練全文。做法＝把既有 full-reading step **改造**成
+  // 重點朗讀（保留 step id 'full-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
+  // 重點段資料就緒前，FullReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
+  // （見 docs/reading-key-passage-TODO.md、skill build-key-reading）。
   'full-reading': {
     id: 'full-reading',
-    label: '全文朗讀',
-    displayChar: '讀',
-    hint: '挑戰一次唸完全篇課文',
+    label: '重點朗讀',
+    displayChar: '朗',
+    hint: '朗讀老師指定的重點段落，練習流暢度',
     view: AppView.FULL_READING,
     dbStepNumber: 6,
     needsStory: true,
@@ -359,18 +364,19 @@ const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
   spotlight: 'reading-strategy', //         閱讀聚光燈
   mcq: 'comprehension', //                  閱讀理解
   word_search: 'vocab-word-search', //      詞語複習
+  reading_timer: 'full-reading', //         念順順 → 重點朗讀（full-reading 已改造成重點朗讀，2026-07-20）
 };
 
 /**
- * Worksheet section types that are KNOWN but deliberately NOT mapped, because
- * their target step is ambiguous and needs product confirmation.
+ * Worksheet section types that are KNOWN but deliberately NOT mapped.
  *
- * - `reading_timer` (念順順): could be 逐段朗讀 (`tutor`) OR 全文朗讀
- *   (`full-reading`). Do NOT guess — needs 方大哥/Young confirmation. Until then
- *   it hits the console.warn in stepSequenceFromWorksheet (intended, so the drop
- *   stays visible).
+ * 2026-07-20 教授審查會議解決了唯一的歧義：`reading_timer` (念順順，1 分鐘計時流暢朗讀)
+ * 曾在 tutor(逐段) / full-reading(全文) 間無法定案，會議定調朗讀只練老師指定的「重點段落」
+ * → 把 full-reading step 改造成「重點朗讀」並把 reading_timer 對應過去（見 WORKSHEET_TYPE_ALIASES）。
+ * 目前沒有其他已知未對應的 type；若 parser 詞彙漂移，新的未對應 type 會在
+ * stepSequenceFromWorksheet 觸發 console.warn（intended，讓 drop 保持可見）。
  */
-export const KNOWN_UNMAPPED_WORKSHEET_TYPES = ['reading_timer'] as const;
+export const KNOWN_UNMAPPED_WORKSHEET_TYPES = [] as const;
 
 /**
  * Derive a per-lesson step sequence from the printed worksheet's section order.

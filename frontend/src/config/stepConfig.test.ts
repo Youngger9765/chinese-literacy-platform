@@ -76,7 +76,7 @@ describe('stepSequenceFromWorksheet — 學習步驟動態對應學習單', () =
 // ~74% of sections vanished on ~16 courses with no manual step_sequence.
 // ---------------------------------------------------------------------------
 const G8_L16_WORKSHEET = [
-  { number: '二', name: '念順順', type: 'reading_timer' }, //     AMBIGUOUS → not mapped (warns)
+  { number: '二', name: '念順順', type: 'reading_timer' }, //     → full-reading (重點朗讀, 2026-07-20)
   { number: '三', name: '語詞我最棒', type: 'vocab_definitions' }, // → vocab-definition
   { number: '四', name: '語詞應用', type: 'vocab_application' }, //  → vocab-application (dash only)
   { number: '五', name: '文章重點表', type: 'structure_table' }, //  → story-structure
@@ -108,10 +108,11 @@ describe('stepSequenceFromWorksheet — REAL parser vocabulary alias map (#2526)
     expect(seq).toContain(expectedId);
   });
 
-  it('resolves a full real worksheet in order (reading_timer dropped, other 7 kept)', () => {
+  it('resolves a full real worksheet in order (reading_timer → full-reading, all 8 kept)', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(stepSequenceFromWorksheet(G8_L16_WORKSHEET)).toEqual([
       'intro',
+      'full-reading', //  念順順 → 重點朗讀 (full-reading 改造, 2026-07-20 教授審查定調)
       'vocab-definition',
       'vocab-application',
       'story-structure',
@@ -131,21 +132,23 @@ describe('stepSequenceFromWorksheet — REAL parser vocabulary alias map (#2526)
     ).toBe(true);
   });
 
-  it('documents reading_timer as the single known-ambiguous unmapped type', () => {
-    // Ambiguous: 逐段朗讀 (tutor) vs 全文朗讀 (full-reading). Do NOT guess —
-    // needs 方大哥/Young product confirmation. Until then it hits the warn.
-    expect([...KNOWN_UNMAPPED_WORKSHEET_TYPES]).toEqual(['reading_timer']);
+  it('maps reading_timer → full-reading (重點朗讀); no known unmapped types remain', () => {
+    // 2026-07-20 教授審查會議解決了唯一歧義：念順順 (reading_timer) = 1 分鐘計時流暢朗讀。
+    // 做法＝把 full-reading step 改造成「重點朗讀」(保留 id 避免完成-識別 bug)，reading_timer 對應過去。
+    expect([...KNOWN_UNMAPPED_WORKSHEET_TYPES]).toEqual([]);
+    expect(STEP_REGISTRY['full-reading']).toBeDefined();
+    expect(STEP_REGISTRY['full-reading'].label).toBe('重點朗讀');
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const seq = stepSequenceFromWorksheet([
       { number: '二', name: '念順順', type: 'reading_timer' },
       { number: '八', name: '閱讀理解', type: 'mcq' },
     ]);
-    expect(seq).not.toContain('tutor'); //        not guessed
-    expect(seq).not.toContain('full-reading'); // not guessed
+    expect(seq).toContain('full-reading'); //     念順順 now resolves (重點朗讀)
+    expect(seq).not.toContain('tutor'); //        逐段 hidden from nav
     expect(seq).toContain('comprehension'); //    mcq still resolves alongside
     expect(
       warnSpy.mock.calls.some((args) => args.some((a) => String(a).includes('reading_timer'))),
-    ).toBe(true);
+    ).toBe(false); //                             no longer warns — it's mapped
   });
 });
