@@ -44,7 +44,7 @@ VALID_STEP_IDS = frozenset({
     "intro",
     "reading-annotation",
     "tutor",
-    "full-reading",
+    "full-reading",    # 2026-07-20 教授審查：label 改造成「重點朗讀」（keep id）
     "listening",
     "vocab",
     "vocab-definition",
