@@ -41,17 +41,17 @@ description: 從教師版 DOCX 抽「重點朗讀」（念順順）指定段落�
 4. **切段 + snap 句尾**：從起點取字，到**不含標點**字數 ≈ extent，**再往後 snap 到下一個句尾（。」！？）** → 不斷在句中。
 5. 輸出 schema（見下）。
 
-**輸出 schema**（寫進 lesson content YML/JSON，與 `story.content` 同源，供 `FullReadingPage` 讀）：
+**輸出 schema**（釘死；寫進 lesson content YML/JSON，與 `story.content` 同源，供 `FullReadingPage` 讀）：
 ```yaml
 key_reading:
-  start_paragraph: 3               # 課文段落 index（☞ 所在）
-  start_text: "這下孟嘗君頭大了"    # 起點錨（QA/驗證用，非渲染）
-  passage: "這下孟嘗君頭大了……命令即刻生效。"  # snap 到句尾的顯示朗讀段
-  extent_chars: 301                # max 累計字數（可讀範圍長度，不含標點）
-  source: docx-extract             # 來源標記（docx-extract / manual / fallback）
-  # CPM 流暢度 benchmark 不寫這裡 → 走既有 reading_benchmark 欄位（我的表現門檻）
+  start_text: "下班時刻，262路公車上有點擠"   # ☞ 起點錨（QA/比對用）
+  passage: "下班時刻…我說個話也不行了嗎？"      # snap 到句尾的顯示朗讀段
+  extent_chars: 371                            # max 累計字數 = 老師標的範圍長度（不含標點）
+  source: docx-extract                         # docx-extract / manual / fallback
+  needs_review: false                          # 抽不到/tail case → true
+  # CPM 流暢度 benchmark 不寫這裡 → 走既有 reading_benchmark 欄位（我的表現 <190/191~220/>221）
 ```
-- 抽不到（無 reading table / 無 ☞）→ **不寫 key_reading**，FullReadingPage fallback 唸全文 + 標 `needs_review`，**絕不 block**。
+- 抽不到（無 reading table / 無 ☞）→ **不寫 passage + 標 `needs_review: true`**，FullReadingPage fallback 唸全文，**絕不 block**。
 
 ---
 
@@ -87,7 +87,9 @@ regression lock：修任何抽取 bug → 先加一條會紅的斷言再修。
 - render DOCX 該頁 PNG → 多模態 Claude 看，比對：☞ 起點位置、累計字數 max、passage 邊界，是否與 coding 抽出一致
 - golden set：**5-10 課跨年級/排版**（G4/G5/G6/G8/G9 各抽樣），標正解 → 量命中率
 - ⚠️ 比對「真 render vs 真 DOCX」，別拿 source YAML 當 render（見 [[feedback-content-fidelity-compare-real-not-proxy]]）
-- 已驗：G6-L22（☞=這下孟嘗君, max=301）、G4-L10（☞=下班時刻262路公車, max=307）兩課 vision 完全命中；G6-L23/24 結構命中（未 vision）
+- 已驗：G6-L22（☞=這下孟嘗君,max301）、G4-L10（☞=下班時刻262路,max307）、**G4-L14 二修確認版（☞=下班時刻262路,max371,抽出377）** vision 命中；G6-L23/24 結構命中
+- **Golden-set（132 舊課真跑，2026-07-20）**：extract ok 123/132(93%)、**端到端全乾淨 114/132 ≈ 86%**。tail：6 no ☞/table、9 字數偏離、3 no DOCX。suspected 根因=挑錯 ☞ 起點（DOCX ~25 圖，取第一個 drawing 被裝飾圖騙）→ 修法：累計欄首數字行↔drawing 交叉定位或走 vision。dump `/tmp/key_reading_batch.json`
+- **二修確認版**（`private/curriculum-source/2026-07-21-二修確認版/`，G4/G5/G8/G9 共 73 課，65 課有念順順）結構與舊版一致，抽取器適用
 
 ---
 
