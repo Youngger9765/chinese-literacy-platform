@@ -107,6 +107,42 @@ class TestGetLessonById:
     def test_nonexistent_id_returns_none(self):
         assert get_lesson_by_id(9999) is None
 
+
+# ===========================================================================
+# 重點朗讀 key_reading contract (#2559 pilot) — regression lock
+#
+# Guards the exact bug code review caught: key_reading was declared on the wrong
+# schema class (StoryCreateRequest instead of StoryDetail), so Pydantic silently
+# dropped it from the served response → the pilot was a no-op. This asserts the
+# SERVED HTTP layer, not just the loader dict.
+# ===========================================================================
+
+
+class TestKeyReadingContract:
+    def test_g4l01_detail_serves_key_reading_passage(self, client):
+        """GET /api/stories/1 (戴資穎 G4-L01) must return a non-null key_reading.passage.
+
+        If this fails, the 重點朗讀 step silently falls back to full text.
+        """
+        resp = client.get("/api/stories/1")
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert "key_reading" in body, "StoryDetail response missing key_reading field"
+        kr = body["key_reading"]
+        assert kr is not None, "key_reading is null for the pilot lesson G4-L01"
+        assert kr.get("passage"), "key_reading.passage is empty"
+        # 老師標的重點段 = 奧運金牌賽段（小戴），非全文
+        assert "小戴" in kr["passage"]
+        assert kr.get("extent_chars") == 376
+
+    def test_lesson_without_key_reading_serves_null(self, client):
+        """A lesson without key_reading must serve key_reading: null (fallback path),
+        never 500 — proves the optional field degrades gracefully."""
+        # id 2 has no key_reading authored → must be null, response still 200.
+        resp = client.get("/api/stories/2")
+        assert resp.status_code == 200, resp.text
+        assert resp.json().get("key_reading") is None
+
     def test_zero_id_returns_none(self):
         assert get_lesson_by_id(0) is None
 

@@ -284,6 +284,7 @@ def load_layer1_lessons() -> list[dict]:
                 if data.get("knowledge_video_url") else None
             ),
             "reading_benchmark": data.get("reading_benchmark"),
+            "key_reading": data.get("key_reading"),  # 重點朗讀指定段 (#2559)
             "source_file": data.get("source_file"),
             "strategy_exercise": data.get("strategy_exercise"),
             # Schema-driven step composition (#1374): pass through if present in YAML.
@@ -445,6 +446,7 @@ def load_layer2_lessons(
             # Full video list (#1683) — KnowledgeStation renders all videos.
             "video_links": video_links,
             "reading_benchmark": data.get("reading_benchmark"),
+            "key_reading": data.get("key_reading"),  # 重點朗讀指定段 (#2559)
             "source_file": data.get("source_file"),
             # Accept both keys: 'strategy_exercise' (singular, guided_steps shape — Gemini
             # structured output from #1418) OR 'strategy_exercises' (plural, legacy skeleton

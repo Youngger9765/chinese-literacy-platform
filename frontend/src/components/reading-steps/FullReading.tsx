@@ -120,7 +120,13 @@ const FullReading: React.FC<FullReadingProps> = ({
     prevResultRef.current = result;
   }, [result]);
 
-  const fullText = useMemo(() => story.content.join(''), [story.content]);
+  /* ---- 重點朗讀 (#2559): 有 keyReading.passage 就只朗讀老師 ☞ 指定的重點段，
+   *      無則 fallback 唸全文 story.content。宣告在所有消費者(fullText/TTS/顯示)之前，避免 TDZ (#2279)。 ---- */
+  const readingContent = useMemo(
+    () => (story.keyReading?.passage ? [story.keyReading.passage] : story.content),
+    [story.keyReading, story.content]
+  );
+  const fullText = useMemo(() => readingContent.join(''), [readingContent]);
 
   /* ---- TTS queue hook (owns tts instance + paragraph queue) ---- */
   const {
@@ -130,7 +136,7 @@ const FullReading: React.FC<FullReadingProps> = ({
     speakFullStory,
     stopTtsAll,
     isTtsPlaying,
-  } = useFullReadingTtsQueue({ storyContent: story.content });
+  } = useFullReadingTtsQueue({ storyContent: readingContent });
 
   /* ---- Issue #2503: persist the accepted take's attempt id so the recording can be
    *      replayed from GCS after the in-memory blob is gone (remount). ---- */
@@ -259,8 +265,8 @@ const FullReading: React.FC<FullReadingProps> = ({
   }, [audioRecorder.audioUrl, result, token, dbSessionId, audioAttemptId]);
 
   const zhuyinLines = useMemo(
-    () => processLinesSelective(story.content, vocabWords),
-    [story.content, vocabWords, processLinesSelective]
+    () => processLinesSelective(readingContent, vocabWords),
+    [readingContent, vocabWords, processLinesSelective]
   );
 
   /* ---- Render paragraph text with optional KTV TTS highlighting ---- */
@@ -414,10 +420,14 @@ const FullReading: React.FC<FullReadingProps> = ({
             {!result && !isSessionActive && !isPreparing && !isTtsPlaying && (
               <div className="mb-8 pb-6 border-b border-surface-container-high">
                 <p className="text-lg font-headline font-bold text-on-surface leading-relaxed">
-                  從頭到尾讀完整篇文章，不要中斷！
+                  {story.keyReading?.passage
+                    ? '朗讀老師指定的重點段落，不要中斷！'
+                    : '從頭到尾讀完整篇文章，不要中斷！'}
                 </p>
                 <p className="text-sm text-on-surface-variant mt-1">
-                  標準比逐段朗讀寬鬆，放輕鬆自然地讀吧
+                  {story.keyReading?.passage
+                    ? '練習流暢度，放輕鬆自然地讀吧'
+                    : '標準比逐段朗讀寬鬆，放輕鬆自然地讀吧'}
                 </p>
               </div>
             )}
@@ -430,9 +440,9 @@ const FullReading: React.FC<FullReadingProps> = ({
               </div>
             )}
 
-            {/* Paragraphs */}
+            {/* Paragraphs（重點朗讀時只顯示指定段 readingContent，#2559） */}
             <div className="space-y-10">
-              {story.content.map((line, idx) => (
+              {readingContent.map((line, idx) => (
                 <div key={idx} className="flex gap-4 items-start">
                   <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
                     {String(idx + 1).padStart(2, '0')}
@@ -459,7 +469,7 @@ const FullReading: React.FC<FullReadingProps> = ({
               <FullReadingFeedbackPanel
                 diffTokens={result.diffTokens}
                 targetText={fullText}
-                paragraphs={story.content}
+                paragraphs={readingContent}
               />
 
               {/* ── Issue #2266: In-memory audio replay button ──────────── */}

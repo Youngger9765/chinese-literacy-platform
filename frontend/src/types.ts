@@ -189,6 +189,8 @@ export interface Story {
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
+  /** 重點朗讀指定段 (#2559)：學生只朗讀老師 ☞ 標的重點段。缺→唸全文 fallback。 */
+  keyReading?: { passage: string; startText?: string; extentChars?: number; source?: string };
   /** Teacher-defined difficulty override (overrides grade-based auto-detect). */
   difficultyLevel?: 'easy' | 'medium' | 'hard';
   /** Teacher-defined custom tags, e.g. ["重要考題", "期末複習"]. */
