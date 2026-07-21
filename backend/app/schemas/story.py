@@ -63,6 +63,7 @@ class StoryDetail(StoryListItem):
     # Each item: {title: '影片1', url: 'https://...'}
     video_links: Optional[list[dict]] = None
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
+    key_reading: Optional[KeyReadingSchema] = None  # 重點朗讀指定段 (#2559)；缺→前端唸全文 fallback
     text_type: str = "單"
     source_file: Optional[str] = None
     strategy_exercise: Optional[Union[dict, list]] = None  # 閱讀策略練習 (#943); list for multi-exercise lessons (G7 圖文整合)
@@ -142,7 +143,6 @@ class StoryCreateRequest(BaseModel):
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
-    key_reading: Optional[KeyReadingSchema] = None  # 重點朗讀指定段（#2559 pilot）；缺→前端唸全文
     source_file: Optional[str] = Field(default=None, max_length=200)
 
 
