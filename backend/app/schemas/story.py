@@ -17,6 +17,18 @@ class ReadingBenchmarkSchema(BaseModel):
     levels: list[ReadingBenchmarkLevel]
 
 
+class KeyReadingSchema(BaseModel):
+    """重點朗讀（念順順）指定段落 — 學生只朗讀老師 ☞ 標的重點段，非全文。
+
+    2026-07-20 教授審查決策。抽取見 skill build-key-reading。缺此欄位時前端
+    fallback 唸全文，故全欄 optional 以相容尚未抽取的課。
+    """
+    passage: str                            # snap 到句尾的顯示朗讀段
+    start_text: Optional[str] = None        # ☞ 起點錨（QA/比對用）
+    extent_chars: Optional[int] = None      # max 累計字數 = 老師標的範圍長度（不含標點）
+    source: Optional[str] = None            # docx-extract / manual / fallback
+
+
 class StoryIntroSchema(BaseModel):
     author: str
     background: str
@@ -130,6 +142,7 @@ class StoryCreateRequest(BaseModel):
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
+    key_reading: Optional[KeyReadingSchema] = None  # 重點朗讀指定段（#2559 pilot）；缺→前端唸全文
     source_file: Optional[str] = Field(default=None, max_length=200)
 
 

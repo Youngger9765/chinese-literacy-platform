@@ -458,6 +458,7 @@ def get_story(story_id: str):
         # Full video list (#1683): catalog has multiple videos; frontend KnowledgeStation renders all.
         video_links=story.get("video_links"),
         reading_benchmark=story["reading_benchmark"],
+        key_reading=story.get("key_reading"),  # 重點朗讀指定段 (#2559)
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
