@@ -420,10 +420,14 @@ const FullReading: React.FC<FullReadingProps> = ({
             {!result && !isSessionActive && !isPreparing && !isTtsPlaying && (
               <div className="mb-8 pb-6 border-b border-surface-container-high">
                 <p className="text-lg font-headline font-bold text-on-surface leading-relaxed">
-                  從頭到尾讀完整篇文章，不要中斷！
+                  {story.keyReading?.passage
+                    ? '朗讀老師指定的重點段落，不要中斷！'
+                    : '從頭到尾讀完整篇文章，不要中斷！'}
                 </p>
                 <p className="text-sm text-on-surface-variant mt-1">
-                  標準比逐段朗讀寬鬆，放輕鬆自然地讀吧
+                  {story.keyReading?.passage
+                    ? '練習流暢度，放輕鬆自然地讀吧'
+                    : '標準比逐段朗讀寬鬆，放輕鬆自然地讀吧'}
                 </p>
               </div>
             )}
