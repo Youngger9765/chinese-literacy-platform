@@ -13,6 +13,7 @@
 import React, { useState } from 'react';
 import type { ReadingHistoryItem } from '../../../services/readingHistoryApi';
 import ReadingTrendChart from './ReadingTrendChart';
+import { SHOW_READING_ACCURACY } from '../../../config/readingScoreDisplay';
 
 interface ReadingMetricsCardProps {
   /** 正確率 0–100 (integer %) */
@@ -47,9 +48,10 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
         這次成績
       </p>
 
-      {/* Metric pills — 正確率 + 語速 */}
+      {/* Metric pills — 語速(流暢度) + 正確率（Issue #2568：正確率預設隱藏） */}
       <div className="flex gap-3">
-        {/* 正確率 */}
+        {/* 正確率 — Issue #2568: 只留流暢度，正確率隱藏（計算仍保留） */}
+        {SHOW_READING_ACCURACY && (
         <div className="flex-1 flex flex-col items-center gap-1 bg-amber-50 rounded-2xl py-4 px-3 border border-amber-200">
           <span
             className="material-symbols-outlined text-amber-500 text-2xl"
@@ -62,6 +64,7 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
           </span>
           <span className="text-xs font-headline text-amber-600">正確率</span>
         </div>
+        )}
 
         {/* 語速 */}
         <div className="flex-1 flex flex-col items-center gap-1 bg-blue-50 rounded-2xl py-4 px-3 border border-blue-200">
@@ -95,9 +98,11 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
                     {idx === 0 ? '最新' : dateStr}
                   </span>
                   <div className="flex items-center gap-4">
-                    <span className="text-amber-700 font-headline font-bold">
-                      {Math.round(item.accuracy)}%
-                    </span>
+                    {SHOW_READING_ACCURACY && (
+                      <span className="text-amber-700 font-headline font-bold">
+                        {Math.round(item.accuracy)}%
+                      </span>
+                    )}
                     <span className="text-blue-700 font-headline font-bold">
                       {Math.round(item.cpm)} 字/分
                     </span>
@@ -121,7 +126,9 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
       {/* #1597 Trend chart — all-history dual-axis line. Renders an inline
           encouragement message when < 2 points (the chart component handles
           its own empty state). */}
-      {history && history.length > 0 && <ReadingTrendChart history={history} />}
+      {history && history.length > 0 && (
+        <ReadingTrendChart history={history} showAccuracy={SHOW_READING_ACCURACY} />
+      )}
     </div>
   );
 };

@@ -294,6 +294,10 @@ export function diffCharacters(
   const classifyMatch = (a: string, b: string): 'correct' | 'forgiven' => {
     if (a === b) return 'correct';
     if (isSttEquivalent(a, b)) return 'correct';
+    // Issue #2566: 曾教授三類台灣口音（前後鼻音 an/ang·en/eng·in/ing、捲舌 zh/z·sh/s·ch/c、
+    // n/l·r/l）視為「唸對」→ 判 correct、計入 CPM 流暢率（口音通融不再拖低流暢度）。
+    if (isNearSound(a, b)) return 'correct';
+    // 真同音字（isHomophone，如 在/再）仍為 forgiven：只進通過率、不進 CPM。
     return 'forgiven';
   };
 

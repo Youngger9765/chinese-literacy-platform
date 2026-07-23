@@ -119,9 +119,11 @@ export function useLiveTutorProgress(
     if (lineResults.length === 0) return null;
     const avgMatchRate =
       lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length;
+    // Issue #2568: 流暢度 = 綠色(correct)字數 / 分鐘（WPM）。只算 correct（純綠），
+    // 與全文朗讀 fluencyAnalyzer 的 correctCount 對齊。#2566 後，口音通融也算 correct，
+    // 所以口音變體會計入 CPM。
     const totalCorrectChars = lineResults.reduce(
-      (s, r) =>
-        s + r.diffTokens.filter((t) => t.type === 'correct' || t.type === 'forgiven').length,
+      (s, r) => s + r.diffTokens.filter((t) => t.type === 'correct').length,
       0,
     );
     const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
