@@ -119,9 +119,10 @@ export function useLiveTutorProgress(
     if (lineResults.length === 0) return null;
     const avgMatchRate =
       lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length;
+    // Issue #2568: 流暢度 = 綠色(correct)字數 / 分鐘。只算 correct（純綠），
+    // 不含 forgiven（藍/相似發音）——與全文朗讀 fluencyAnalyzer 的 correctCount 對齊。
     const totalCorrectChars = lineResults.reduce(
-      (s, r) =>
-        s + r.diffTokens.filter((t) => t.type === 'correct' || t.type === 'forgiven').length,
+      (s, r) => s + r.diffTokens.filter((t) => t.type === 'correct').length,
       0,
     );
     const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
