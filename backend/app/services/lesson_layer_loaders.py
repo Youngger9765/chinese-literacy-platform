@@ -20,8 +20,6 @@ from pathlib import Path
 
 import yaml
 
-logger = logging.getLogger(__name__)
-
 from app.services.content_mapping_registry import get_story_structure_override
 from app.services.lesson_code_normalization import (
     halfwidth,
@@ -34,6 +32,8 @@ from app.services.lesson_code_normalization import (
 )
 from app.services.spotlight_figure_images import merge_spotlight_images
 from app.services.spotlight_v2_loader import load_spotlight_v2
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
