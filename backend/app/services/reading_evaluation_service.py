@@ -56,6 +56,10 @@ _NEAR_SOUND_PAIRS: list[tuple[str, str]] = [
     ("sh", "s"),
     ("ch", "c"),
     ("n", "l"),
+    # Issue #2566 review (#2570): 補 r/l，與前端 pinyin/data.ts NEAR_SOUND_PAIRS 對齊
+    # （r/l 皆聲母，startswith 比對可正確處理）。前後鼻音 an/ang·en/eng·in/ing 因
+    # _is_near_sound 目前只比對開頭、抓不到帶聲母的韻母混淆，另立 follow-up issue 處理。
+    ("r", "l"),
 ]
 
 
