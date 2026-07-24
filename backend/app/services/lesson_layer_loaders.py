@@ -14,10 +14,13 @@ Public API:
     build_layer2_enrichment_index() — build title→Layer-2 data dict for enrichment
 """
 
+import logging
 import re
 from pathlib import Path
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 from app.services.content_mapping_registry import get_story_structure_override
 from app.services.lesson_code_normalization import (
@@ -69,8 +72,9 @@ def get_key_reading_passages() -> dict:
                 continue
             result[code] = {"passage": passage, "source": "worksheet-pdf-extract"}
     except FileNotFoundError:
-        pass
-    except Exception:  # 解析錯誤不可讓課程 API 掛掉
+        logger.warning("key_reading_passages.yml 不存在：%s（重點朗讀將 fallback 唸全文）", _KEY_READING_PASSAGES)
+    except Exception as exc:  # 解析錯誤不可讓課程 API 掛掉
+        logger.warning("解析 key_reading_passages.yml 失敗：%s（重點朗讀將 fallback 唸全文）", exc)
         result = {}
     _KEY_READING_CACHE = result
     return result
