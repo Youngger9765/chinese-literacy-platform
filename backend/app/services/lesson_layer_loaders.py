@@ -42,6 +42,39 @@ _PARSED_DIR = _LESSONS_DIR / "_parsed_2026-05-01"
 _CURRICULUM_MANIFEST = Path(__file__).parent.parent.parent / "data" / "curriculum" / "manifest.yml"
 # Checked-in manifest listing grade_codes that have a .docx in GCS worksheets/ (#2207)
 _DOCX_MANIFEST = Path(__file__).parent.parent.parent / "data" / "worksheet_docx_codes.txt"
+_KEY_READING_PASSAGES = Path(__file__).parent.parent.parent / "data" / "key_reading_passages.yml"
+
+# ---------------------------------------------------------------------------
+# 重點朗讀指定段落對照表 (Issue #2562) — lesson_code -> key_reading passage
+# 由紙本學習單 PDF 抽取（skill lingoleap-worksheet-pdf）。以 lesson_code (grade_code,
+# 例 "G4-L01") 為 key，後端在 story 詳情合併進 key_reading，map 優先於課文檔內既有值
+# （新規則：只取老師 ☞ 指定的那一段，取代舊的「☞→全文結尾」pilot 值）。
+# 讀一次快取；缺檔或解析失敗回空 dict（前端 fallback 唸全文，不 fail）。
+# ---------------------------------------------------------------------------
+_KEY_READING_CACHE: dict | None = None
+
+
+def get_key_reading_passages() -> dict:
+    """回傳 {lesson_code: {"passage": str, "source": str}}，載入一次後快取。"""
+    global _KEY_READING_CACHE
+    if _KEY_READING_CACHE is not None:
+        return _KEY_READING_CACHE
+    result: dict = {}
+    try:
+        with open(_KEY_READING_PASSAGES, encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        for code, entry in (data.get("passages") or {}).items():
+            passage = (entry or {}).get("passage")
+            if not passage:
+                continue
+            result[code] = {"passage": passage, "source": "worksheet-pdf-extract"}
+    except FileNotFoundError:
+        pass
+    except Exception:  # 解析錯誤不可讓課程 API 掛掉
+        result = {}
+    _KEY_READING_CACHE = result
+    return result
+
 
 # Offset added to curriculum display_order to generate synthetic integer IDs
 # for Layer-2 lessons (avoids collision with Layer-1 ids 1–57).

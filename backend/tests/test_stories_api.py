@@ -131,15 +131,22 @@ class TestKeyReadingContract:
         kr = body["key_reading"]
         assert kr is not None, "key_reading is null for the pilot lesson G4-L01"
         assert kr.get("passage"), "key_reading.passage is empty"
-        # 老師標的重點段 = 奧運金牌賽段（小戴），非全文
+        # Issue #2562 新規則：只取老師 ☞ 指定的那一段（第三段＝奧運金牌賽段），
+        # 取代舊 pilot 的「☞→全文結尾 376 字」。段落到「向心力！」結束。
         assert "小戴" in kr["passage"]
-        assert kr.get("extent_chars") == 376
+        assert kr["passage"].rstrip().endswith("向心力！")
 
     def test_lesson_without_key_reading_serves_null(self, client):
         """A lesson without key_reading must serve key_reading: null (fallback path),
         never 500 — proves the optional field degrades gracefully."""
-        # id 2 has no key_reading authored → must be null, response still 200.
-        resp = client.get("/api/stories/2")
+        # Issue #2562: 需用「對照表沒有」的課（閱讀策略類、無念順順，如 G7-L23）。
+        # 找一課 grade_code 不在對照表者，其詳情 key_reading 應為 null。
+        from app.services.lesson_layer_loaders import get_key_reading_passages
+        kr_map = get_key_reading_passages()
+        listing = client.get("/api/stories").json().get("stories", [])
+        target = next((s for s in listing if s.get("grade_code") not in kr_map), None)
+        assert target is not None, "找不到任何不在對照表的課可測 fallback"
+        resp = client.get(f"/api/stories/{target['id']}")
         assert resp.status_code == 200, resp.text
         assert resp.json().get("key_reading") is None
 
