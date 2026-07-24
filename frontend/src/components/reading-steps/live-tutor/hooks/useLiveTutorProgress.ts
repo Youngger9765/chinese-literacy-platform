@@ -57,6 +57,23 @@ function loadSavedProgress(storageKey: string) {
   }
 }
 
+/**
+ * Issue #2568/#2566 (review #2570): 流暢度 CPM = 綠色(correct)字數 / 分鐘。
+ * 只算 `type==='correct'`（#2566 後口音通融也是 correct），與 fluencyAnalyzer.correctCount
+ * 對齊。三處（overallMetrics 顯示 / advanceParagraph 存 attempt / handleFinish 存 attempt）
+ * 統一用此 helper，避免真同音字在不同處算出不同 CPM（顯示與報告對不上）。
+ */
+export function computeOverallCpm(lineResults: LineResult[]): number {
+  const totalCorrectChars = lineResults.reduce(
+    (s, r) => s + r.diffTokens.filter((t) => t.type === 'correct').length,
+    0,
+  );
+  const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
+  return totalDurationSec > 0
+    ? Math.round((totalCorrectChars / totalDurationSec) * 60)
+    : 0;
+}
+
 export function useLiveTutorProgress(
   story: Story,
   onFinish: (attempt: ReadingAttempt) => void,
@@ -119,19 +136,8 @@ export function useLiveTutorProgress(
     if (lineResults.length === 0) return null;
     const avgMatchRate =
       lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length;
-    // Issue #2568: 流暢度 = 綠色(correct)字數 / 分鐘（WPM）。只算 correct（純綠），
-    // 與全文朗讀 fluencyAnalyzer 的 correctCount 對齊。#2566 後，口音通融也算 correct，
-    // 所以口音變體會計入 CPM。
-    const totalCorrectChars = lineResults.reduce(
-      (s, r) => s + r.diffTokens.filter((t) => t.type === 'correct').length,
-      0,
-    );
-    const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
-    const cpm =
-      totalDurationSec > 0
-        ? Math.round((totalCorrectChars / totalDurationSec) * 60)
-        : 0;
-    return { accuracy: Math.round(avgMatchRate * 100), cpm };
+    // Issue #2568/#2566: 流暢度 WPM = 綠色(correct)字/分，統一用 computeOverallCpm。
+    return { accuracy: Math.round(avgMatchRate * 100), cpm: computeOverallCpm(lineResults) };
   }, [lineResults]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -194,18 +200,9 @@ export function useLiveTutorProgress(
         setTimeout(() => {
           const avgMatchRate =
             allLineResults.reduce((s, r) => s + r.matchRate, 0) / allLineResults.length;
-          const totalCorrectChars = allLineResults.reduce(
-            (s, r) =>
-              s +
-              r.diffTokens.filter((t) => t.type === 'correct' || t.type === 'forgiven').length,
-            0,
-          );
-          const totalDurationSec =
-            allLineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
-          const overallCpm =
-            totalDurationSec > 0
-              ? Math.round((totalCorrectChars / totalDurationSec) * 60)
-              : 0;
+          // Issue #2570 review: 統一用 computeOverallCpm（只算 correct），與 overallMetrics
+          // 顯示值一致，避免真同音字讓「畫面流暢度」與「存進報告的流暢度」對不上。
+          const overallCpm = computeOverallCpm(allLineResults);
           if (isToolboxMode()) {
             setToolboxComplete(true);
             return;
@@ -250,16 +247,8 @@ export function useLiveTutorProgress(
         lineResults.length > 0
           ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length
           : 0;
-      const totalCorrectChars = lineResults.reduce(
-        (s, r) =>
-          s + r.diffTokens.filter((t) => t.type === 'correct' || t.type === 'forgiven').length,
-        0,
-      );
-      const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
-      const overallCpm =
-        totalDurationSec > 0
-          ? Math.round((totalCorrectChars / totalDurationSec) * 60)
-          : 0;
+      // Issue #2570 review: 統一用 computeOverallCpm（只算 correct），與 overallMetrics 一致。
+      const overallCpm = computeOverallCpm(lineResults);
       onFinish({
         storyId: story.id,
         accuracy: Math.round(avgMatchRate * 100),
