@@ -196,7 +196,10 @@ Catherine Snow 領導的 RAND 研究小組提出閱讀理解的三因素互動�
 
 ### 3.2 各平台深度分析
 
-#### Amira Learning（美國，HMH 旗下）
+#### Amira Learning（美國）
+
+> ⚠️ **2026-07-26 更正 + 深度研究**：原文寫「HMH 旗下」有誤——HMH 只是投資人之一，Amira 2017 由 Mark Angel / Pete Jung 創立（源自 CMU Project LISTEN 25 年研究），2024/06 與 Istation 合併且 **Amira 為存續主體**。
+> 完整深度分析（商業模式 / closed-loop Claude 架構 / 中文為何不能直接移植）→ **[2026-07-26-ichinesereader-amira-study.md](2026-07-26-ichinesereader-amira-study.md)**
 
 **最值得學習的功能：**
 - **即時語音分析**：學生朗讀時，AI 即時辨識錯誤類型（省略、替換、倒讀、重複），不僅給分數，還分析錯誤模式
@@ -299,6 +302,8 @@ Squirrel AI 的知識圖譜概念可以應用到國語文——例如將 3000 �
 ---
 
 ## 四、台灣及華語圈閱讀平台
+
+> 📌 **2026-07-26 補**：本節漏收 **iChineseReader（爱读）**——美國 K-12 中文分級閱讀平台（2,000 讀本 / 20 級 / 對齊 ACTFL+AP），是華語圈目前規模最大的分級閱讀內容庫，深度分析見 **[2026-07-26-ichinesereader-amira-study.md](2026-07-26-ichinesereader-amira-study.md)**
 
 ### 4.1 SmartReading 適性閱讀
 
