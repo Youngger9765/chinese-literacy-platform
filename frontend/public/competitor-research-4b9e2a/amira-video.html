@@ -90,16 +90,25 @@
 <div class="wrap">
 <p class="eyebrow" style="margin-bottom:0"><a href="index.html" style="border-bottom-color:transparent">&larr; 回競品研究總覽</a></p>
 
+  <div class="banner" style="background:linear-gradient(135deg, var(--accent-wash) 0%, color-mix(in srgb, var(--accent) 8%, var(--paper)) 50%, var(--flag-wash) 100%);border-radius:10px;padding:2.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;border:1px solid var(--rule)">
+    <span style="font-size:2.5rem">🎬</span>
+    <span style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink)">Amira 介紹影片逐格解析</span>
+  </div>
+
   <header>
     <p class="eyebrow">競品研究 · 影片逐格</p>
     <h1>Amira 用一支 2 分 48 秒的影片，把自己的產品拍給我看了</h1>
     <p class="standfirst">我們沒有 Amira 的帳號，所以整份研究對它的介面本來是零視覺證據但產品介紹影片會實拍真實畫面——把逐字稿的時間碼對上影格，等於拿到它的產品截圖</p>
     <p class="meta">
-      來源：<a href="https://youtu.be/5pGJXsavwL0" target="_blank" rel="noopener">Introducing Amira · YouTube</a>（2:48）<br />
-      方法：yt-dlp 取官方自動字幕（含時間碼）→ ffmpeg 在指定秒數抽影格 → 逐格對讀<br />
-      時間碼可點，會跳到影片那一秒
+      來源：<a href="https://youtu.be/5pGJXsavwL0" target="_blank" rel="noopener">Introducing Amira · YouTube</a>（2:48）
     </p>
   </header>
+
+  <section>
+    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;border:1px solid var(--rule);box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <iframe src="https://www.youtube.com/embed/5pGJXsavwL0" title="Introducing Amira" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe>
+    </div>
+  </section>
 
   <section>
     <h2>先看四個結論</h2>
