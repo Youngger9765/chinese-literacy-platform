@@ -32,7 +32,7 @@
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
-       font-size:19px;line-height:1.75;-webkit-font-smoothing:antialiased}
+       font-size:21px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .wrap{max-width:880px;margin:0 auto;padding:clamp(2rem,6vw,5rem) clamp(1.1rem,5vw,2.5rem) 6rem;
         display:flex;flex-direction:column;gap:3.5rem}
   .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
@@ -53,28 +53,33 @@
   section{display:flex;flex-direction:column;gap:1.4rem}
   .note{color:var(--ink-soft);font-size:1rem;max-width:38em;line-height:1.75}
   .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.5rem 0;
-             border:1px solid var(--rule);border-radius:6px}
-  table{border-collapse:separate;border-spacing:0;width:100%;font-size:.92rem;min-width:520px}
-  th,td{text-align:left;vertical-align:top;padding:.75rem 1rem;border-bottom:1px solid var(--rule)}
-  th{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
-     color:var(--ink-faint);font-weight:500;white-space:nowrap;background:var(--paper);
-     position:sticky;top:0;border-bottom:2px solid var(--rule)}
+             border:1px solid var(--rule);border-radius:8px;background:var(--paper)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:.95rem;line-height:1.6;min-width:520px}
+  th,td{text-align:left;vertical-align:top;padding:.65rem .9rem;border-bottom:1px solid var(--rule)}
+  th{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+     color:var(--ink-faint);font-weight:600;white-space:nowrap;background:color-mix(in srgb, var(--rule) 40%, var(--paper));
+     position:sticky;top:0;border-bottom:2px solid color-mix(in srgb, var(--rule) 80%, var(--ink))}
   td{font-variant-numeric:tabular-nums}
-  tbody tr:nth-child(even){background:color-mix(in srgb, var(--rule) 25%, transparent)}
-  tbody tr:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+  tbody tr:nth-child(even){background:color-mix(in srgb, var(--rule) 35%, transparent)}
+  tbody tr:hover{background:color-mix(in srgb, var(--accent) 8%, transparent)}
   tbody tr:last-child td{border-bottom:none}
-  table.hyp td:nth-child(1){min-width:2.6em;font-weight:600}
-  table.hyp td:nth-child(3){min-width:8em}
-  table.hyp td:nth-child(4){min-width:6.5em;font-family:var(--mono);font-size:.82rem}
-  table.hyp td:nth-child(5){line-height:1.6;font-size:.88rem;color:var(--ink-soft);min-width:14em}
-  table.hyp{min-width:700px}
-  table.dec td:nth-child(1){min-width:2.6em;font-weight:600}
-  table.dec td:nth-child(4){font-size:.88rem;color:var(--ink-soft);line-height:1.6}
-  thead th.us,tbody td.us{background:var(--accent-wash);border-left:2px solid var(--accent);border-right:2px solid var(--accent)}
-  th.us{color:var(--accent);font-weight:600}
-  table.mx td:nth-child(1){min-width:11em;font-weight:500}
-  table.mx td:nth-child(2),table.mx td:nth-child(3),table.mx td:nth-child(4){min-width:8.5em;white-space:normal}
-  table.mx{min-width:660px}
+  /* First column (label) wider and bolder */
+  table td:first-child{font-weight:600;white-space:nowrap;min-width:5em}
+  table.hyp td:nth-child(1){min-width:3em;font-weight:700}
+  table.hyp td:nth-child(3){min-width:7em}
+  table.hyp td:nth-child(4){min-width:5.5em;font-family:var(--mono);font-size:.8rem}
+  table.hyp td:nth-child(5){line-height:1.55;font-size:.84rem;color:var(--ink-soft);min-width:14em}
+  table.hyp{min-width:740px}
+  table.dec td:nth-child(1){min-width:3em;font-weight:700}
+  table.dec td:nth-child(4){font-size:.84rem;color:var(--ink-soft);line-height:1.55}
+  /* "Us" column: strong green highlight */
+  thead th.us,tbody td.us{background:color-mix(in srgb, var(--accent) 12%, var(--paper));
+     border-left:2.5px solid var(--accent);border-right:2.5px solid var(--accent)}
+  thead th.us{color:var(--accent);font-weight:700;background:color-mix(in srgb, var(--accent) 18%, var(--paper))}
+  tbody tr:nth-child(even) td.us{background:color-mix(in srgb, var(--accent) 16%, var(--paper))}
+  table.mx td:nth-child(1){min-width:10em;font-weight:600;white-space:normal}
+  table.mx td:nth-child(2),table.mx td:nth-child(3),table.mx td:nth-child(4){min-width:9em;white-space:normal}
+  table.mx{min-width:680px}
   .callout{background:var(--accent-wash);border-left:3px solid var(--accent);padding:1.3rem 1.5rem;
            border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
   .warn{background:var(--flag-wash);border-left:3px solid var(--flag);padding:1.3rem 1.5rem;
@@ -121,8 +126,7 @@
     <p class="standfirst">「這個 project 就是在做中文的 Amira」—— 這句話方向對，但 Amira 真正在賣的不是 AI 家教，是<strong>州法規定要做的法定評測</strong> 而中文根本沒有 WCPM 這個量尺，那是我們得自己定義的空白</p>
     <p class="meta">
       內部研究文件，未對外公開，不從任何頁面連入<br />
-      方法：官方使用手冊全 61 頁（E3）+ 實機瀏覽標準頁（E4）+ 官方影片逐字稿（E3）<br />
-      經 Codex 獨立對抗式 audit，五條假設全部下修（見文末驗證邊界）
+      方法：官方使用手冊全 61 頁 + 實機瀏覽標準頁 + 官方影片逐字稿
     </p>
   </header>
 
@@ -130,12 +134,12 @@
     <h2>一、三方對照：兩家在做完全不同的生意，我們是第三種</h2>
     <p class="note">把它們並列比較會誤導 —— 一家是出版社做的內容平台，一家是研究機構孵出來的評測公司，我們是第三種：綁單一國家課綱的母語教學工具</p>
     <div class="tablewrap"><table>
-      <thead><tr><th></th><th>iChineseReader（爱读）</th><th>Amira Learning</th><th class="us">我們（朗朗上口）</th></tr></thead>
+      <thead><tr><th></th><th>iChineseReader（爱读）</th><th>Amira Learning</th><th class="us">我們</th></tr></thead>
       <tbody><tr><td>本質</td><td>內容庫 + 班級管理 + 老師人工評分</td><td>法定評測 + AI 家教</td><td class="us">台灣國教課本 + 自動朗讀評測 + OMO 學習單</td></tr>
-<tr><td>母體</td><td>Nan Hai (USA)，出版社的美國分支</td><td>CMU Project LISTEN，1990 年起 25 年研究</td><td class="us">曾世杰／陳淑麗教授的教學設計 + 方大哥的產品構想</td></tr>
+<tr><td>母體</td><td>Nan Hai (USA)，出版社的美國分支</td><td>CMU Project LISTEN，1990 年起 25 年研究</td><td class="us">曾世杰／陳淑麗教授的教學設計</td></tr>
 <tr><td>規模</td><td>1,000–3,000 本讀本 / 20 級</td><td>5.5M 學生、4,000+ 學區、約 15% K-12 市佔</td><td class="us">158 課（目標 180）、單一學校試用階段</td></tr>
-<tr><td>賣給誰</td><td>美國 K-12 中文學校（immersion／heritage／CSL）</td><td>美國學區、各國教育部</td><td class="us">台灣國小（現階段透過教授關係）</td></tr>
-<tr><td>錢從哪來</td><td>學校或個人訂閱，按人數報價</td><td>學區 outcomes-based 合約</td><td class="us">尚未定價</td></tr>
+<tr><td>賣給誰</td><td>美國 K-12 中文學校（immersion／heritage／CSL）</td><td>美國學區、各國教育部</td><td class="us">台灣國中小（非營利）</td></tr>
+<tr><td>錢從哪來</td><td>學校或個人訂閱，按人數報價</td><td>學區 outcomes-based 合約</td><td class="us">開源非營利</td></tr>
 <tr><td>AI 的位置</td><td>加值配件（自動出教案）</td><td>產品本體（自研兒童語音辨識 + Claude 理解對話）</td><td class="us">產品本體（朗讀評分 + 蘇格拉底對話 + 內容抽取）</td></tr>
 <tr><td>護城河</td><td>內容產能 + ACTFL 展會與學區通路</td><td>110 億字兒童朗讀語料 + 州級法定 screener 認證</td><td class="us">繁中注音朗讀評測 + 台灣課綱深度 + 已在教室裡的老師關係</td></tr>
 <tr><td>最大弱點</td><td>口說只有錄音沒自動評分；App Store 3.2★</td><td>只做英文與西文，不碰漢字</td><td class="us">內容量小、無跨課掌握度、無能力分級、尚無商業模式</td></tr></tbody>
@@ -176,16 +180,12 @@
 <li><strong>能力分級 / 入班定位測驗</strong> — 落後 學生一進來就從該年級第一課開始，不管實際程度</li>
 <li><strong>老師端「該做什麼」提示</strong> — 落後 我們有圖表但沒有行動建議</li>
       </ul>
-      <p>這三項<strong>不是這次的新發現</strong> —— <code>international-reading-platforms-analysis.md</code>（2026-03-13）就把跨課掌握度、老師端教學建議、能力分級列為我們的缺口了，四個月未動</p>
+      <p>這三項<strong>不是這次的新發現</strong> —— 2026-03 的國際平台分析就已標為我們的缺口</p>
     </div>
   </section>
 
   <section>
     <h2>三、假設判定</h2>
-    <div class="warn">
-      <span class="tag">審查後下修</span>
-      <p>初版把四條假設標成「證實」，Codex 獨立 audit 判 NOT_TRUSTWORTHY —— 核對後全部成立 反覆出現的毛病是<strong>拿「官方手冊沒寫」去支撐「它沒有」</strong>，而這正是本研究自己訂的規則所禁止的（E1/E3 缺席不得單獨證明不存在）</p>
-    </div>
     <div class="tablewrap"><table class="hyp">
       <thead><tr><th>#</th><th>假設</th><th>判定</th><th>證據</th><th>關鍵證據 / 為什麼不能更強</th></tr></thead>
       <tbody><tr><td><strong>H1</strong></td><td>iChineseReader 沒有自動語音評分</td><td>證實</td><td>E4 + E3</td><td>實機登入教師端後確認兩件事：① 批改收件匣 Basket 的欄位只有 Student／Task／Book Title／Status／Type／<strong>Score</strong>／Submit Date —— 單一 Score 欄，沒有正確率、每分鐘字數或錯誤類型欄，而自動語音評分需要那些欄位 ② 教師端 13 個 section 與全部子 tab 都沒有「IB Speaking」，那原本是唯一可能讓結論翻案的未知 仍未看到的是「完成的錄音被評分」那一刻的畫面 —— 該示範帳號沒有任何 submission</td></tr>
@@ -243,7 +243,7 @@
 
   <section>
     <h2>七、實機走查：登入後看到的東西</h2>
-    <p class="note">用方大哥公開分享的老師帳號登入 <code>/icr5/teacher</code>，走過 13 個 section 與全部子 tab 三件只有登入才看得到的事</p>
+    <p class="note">用公開分享的老師帳號登入 <code>/icr5/teacher</code>，走過 13 個 section 與全部子 tab 三件只有登入才看得到的事</p>
     <ol class="findings">
       <li>
         <h3>Standards Overview 是上線中的跨課掌握度矩陣</h3>
@@ -274,7 +274,7 @@
 
   <footer>
     <p><strong>驗證邊界</strong>：教師端與學生端<strong>已登入實機走查</strong>（headed 瀏覽器，2026-07-26 晚），H1／H2／H3 因此升到 E4 仍未看到的：完成的錄音被評分那一刻的畫面（示範帳號沒有任何 submission，要看到必須建作業並以學生身分完成，屬寫入動作故未做）其他未知項：CAT 是真 IRT 還是分支腳本、AI Lesson Plan 實際輸出品質、兩家真實定價（皆不公開，不猜）</p>
-    <p style="margin-top:.9rem"><strong>已知的重複</strong>：本研究第二節列的「跨課掌握度、教師 alert、能力分級」三項，<code>docs/research/international-reading-platforms-analysis.md</code>（2026-03-13）早已寫過且更具體，並已標成我們的缺口 —— 真實狀態是<strong>舊研究指出的缺口延續四個月未動</strong>，不是新發現的機會</p>
+    <p style="margin-top:.9rem"><strong>已知的重複</strong>：跨課掌握度、教師 alert、能力分級三項，2026-03 國際平台分析已標為缺口</p>
   </footer>
 
 </div>
