@@ -47,8 +47,9 @@ gcloud config configurations activate lingoleap
 
 | 元件 | URL |
 |------|-----|
-| Frontend (Cloud Run) | `https://lingoleap-frontend-958347263320.asia-east1.run.app` |
-| Frontend (Firebase) | `https://lingoleap-dev.web.app` |
+| Frontend (Cloud Run, **prod**) | `https://lingoleap-frontend-958347263320.asia-east1.run.app` |
+| Frontend (Firebase, **prod**) | `https://lingoleap-prod.web.app` |
+| Frontend (Firebase, **dev/staging**) | `https://lingoleap-dev.web.app` |
 | Backend API | `https://lingoleap-backend-958347263320.asia-east1.run.app` |
 | Cloud SQL | `lingoleap-db` (PostgreSQL 15, asia-east1, db-f1-micro) |
 | Artifact Registry | `asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/` |
