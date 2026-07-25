@@ -61,6 +61,11 @@
   table.hyp td:nth-child(4){min-width:6.5em;font-family:var(--mono);font-size:.82rem}
   table.hyp{min-width:700px}
   table.dec td:nth-child(1){min-width:2.6em}
+  th.us,td.us{background:var(--accent-wash);border-left:2px solid var(--accent);border-right:2px solid var(--accent)}
+  th.us{color:var(--accent);font-weight:600}
+  table.mx td:nth-child(1){min-width:11em;font-weight:500}
+  table.mx td:nth-child(2),table.mx td:nth-child(3),table.mx td:nth-child(4){min-width:8.5em;white-space:normal}
+  table.mx{min-width:660px}
   .callout{background:var(--accent-wash);border-left:2px solid var(--accent);padding:1.1rem 1.3rem;
            display:flex;flex-direction:column;gap:.45rem}
   .warn{background:var(--flag-wash);border-left:2px solid var(--flag);padding:1.1rem 1.3rem;
@@ -96,22 +101,61 @@
   </header>
 
   <section>
-    <h2>一、兩家在做完全不同的生意</h2>
-    <p class="note">把它們並列比較會誤導 —— 一家是出版社做的內容平台，一家是研究機構孵出來的評測公司</p>
+    <h2>一、三方對照：兩家在做完全不同的生意，我們是第三種</h2>
+    <p class="note">把它們並列比較會誤導 —— 一家是出版社做的內容平台，一家是研究機構孵出來的評測公司，我們是第三種：綁單一國家課綱的母語教學工具</p>
     <div class="tablewrap"><table>
-      <thead><tr><th></th><th>iChineseReader（爱读）</th><th>Amira Learning</th></tr></thead>
-      <tbody><tr><td>本質</td><td>內容庫 + 班級管理 + 老師人工評分</td><td>朗讀評測 + AI 家教</td></tr>
-<tr><td>母體</td><td>Nan Hai (USA)，出版社的美國分支</td><td>CMU Project LISTEN，1990 年起 25 年研究</td></tr>
-<tr><td>規模</td><td>1,000–3,000 本讀本（自家四個來源四個數字）/ 20 級</td><td>5.5M 學生、4,000+ 學區、約 15% K-12 市佔</td></tr>
-<tr><td>錢從哪來</td><td>學校或個人訂閱，按人數報價，不公開</td><td>學區 outcomes-based 合約</td></tr>
-<tr><td>AI 的位置</td><td>加值配件（自動出教案）</td><td>產品本體（自研兒童語音辨識 + Claude 理解對話）</td></tr>
-<tr><td>護城河</td><td>內容產能 + ACTFL 展會與學區通路</td><td>110 億字兒童朗讀語料 + 州級法定 screener 認證</td></tr>
-<tr><td>弱點</td><td>App Store 3.2★；口說只有錄音沒自動評分</td><td>只做英文與西文，不碰漢字</td></tr></tbody>
+      <thead><tr><th></th><th>iChineseReader（爱读）</th><th>Amira Learning</th><th class="us">我們（朗朗上口）</th></tr></thead>
+      <tbody><tr><td>本質</td><td>內容庫 + 班級管理 + 老師人工評分</td><td>法定評測 + AI 家教</td><td class="us">台灣國教課本 + 自動朗讀評測 + OMO 學習單</td></tr>
+<tr><td>母體</td><td>Nan Hai (USA)，出版社的美國分支</td><td>CMU Project LISTEN，1990 年起 25 年研究</td><td class="us">曾世杰／陳淑麗教授的教學設計 + 方大哥的產品構想</td></tr>
+<tr><td>規模</td><td>1,000–3,000 本讀本 / 20 級</td><td>5.5M 學生、4,000+ 學區、約 15% K-12 市佔</td><td class="us">158 課（目標 180）、單一學校試用階段</td></tr>
+<tr><td>賣給誰</td><td>美國 K-12 中文學校（immersion／heritage／CSL）</td><td>美國學區、各國教育部</td><td class="us">台灣國小（現階段透過教授關係）</td></tr>
+<tr><td>錢從哪來</td><td>學校或個人訂閱，按人數報價</td><td>學區 outcomes-based 合約</td><td class="us">尚未定價</td></tr>
+<tr><td>AI 的位置</td><td>加值配件（自動出教案）</td><td>產品本體（自研兒童語音辨識 + Claude 理解對話）</td><td class="us">產品本體（朗讀評分 + 蘇格拉底對話 + 內容抽取）</td></tr>
+<tr><td>護城河</td><td>內容產能 + ACTFL 展會與學區通路</td><td>110 億字兒童朗讀語料 + 州級法定 screener 認證</td><td class="us">繁中注音朗讀評測 + 台灣課綱深度 + 已在教室裡的老師關係</td></tr>
+<tr><td>最大弱點</td><td>口說只有錄音沒自動評分；App Store 3.2★</td><td>只做英文與西文，不碰漢字</td><td class="us">內容量小、無跨課掌握度、無能力分級、尚無商業模式</td></tr></tbody>
     </table></div>
   </section>
 
   <section>
-    <h2>二、假設判定</h2>
+    <h2>二、功能優劣矩陣</h2>
+    <p class="note">◎ 有且是強項｜△ 有但弱｜✕ 沒有｜— 不適用 <strong>最右欄是我們</strong>，🔴 標的是我們明確落後的項目</p>
+    <div class="tablewrap"><table class="mx">
+      <thead><tr><th>能力</th><th>iChineseReader</th><th>Amira</th><th class="us">我們</th></tr></thead>
+      <tbody><tr><td>自動語音評分（朗讀流暢度）</td><td>✕ 無</td><td>◎ 強 — 音素層級</td><td class='us'>◎ 有 — 字級正確率 + 每分鐘字數</td></tr>
+<tr><td>中文特有教學（注音／筆順／聽寫／破音）</td><td>✕ 無</td><td>— 不適用</td><td class='us'>◎ 強</td></tr>
+<tr><td>紙本學習單 ↔ 線上（OMO）</td><td>✕ 無</td><td>✕ 無</td><td class='us'>◎ 強</td></tr>
+<tr><td>台灣課綱對齊</td><td>✕ 對美國 CCSS／ACTFL</td><td>✕ 對美國各州標準</td><td class='us'>◎ 強</td></tr>
+<tr><td>AI 對話式理解教學</td><td>✕ 只有選擇題 eQuiz</td><td>◎ 有 — Claude 離線預生成</td><td class='us'>◎ 有 — 蘇格拉底即時對話</td></tr>
+<tr><td>跨課技能掌握度追蹤</td><td>◎ 有 — CCRA 矩陣（實機確認在線）</td><td>◎ 強 — 每日 Estimated Mastery</td><td class='us'>✕ 無</td></tr>
+<tr><td>能力分級 / 入班定位測驗</td><td>◎ 有 — 20 級 ACTFL／HSK／YCT + CAT</td><td>◎ 強 — ISIP 電腦適性</td><td class='us'>✕ 無 — 按年級排</td></tr>
+<tr><td>內容量</td><td>◎ 1,000–3,000 本</td><td>— 用學區既有教材</td><td class='us'>△ 158 課</td></tr>
+<tr><td>法定評測地位</td><td>✕ 無</td><td>◎ 強 — 州法 K-3 篩檢核准</td><td class='us'>✕ 無</td></tr>
+<tr><td>老師端「該做什麼」提示</td><td>✕ 只有報表</td><td>◎ 有 — 差異化教學建議</td><td class='us'>✕ 無 — 只有 dashboard</td></tr>
+<tr><td>自由閱讀書櫃 / 興趣分級</td><td>◎ 有 — Interest Level 與難度分開</td><td>— 不適用</td><td class='us'>✕ 無</td></tr>
+<tr><td>語言覆蓋</td><td>簡體 + 繁體 + <strong>粵語</strong></td><td>英文 + 西班牙文</td><td class='us'>繁體 + 注音</td></tr></tbody>
+    </table></div>
+    <div class="callout">
+      <span class="tag">我們獨佔（沒人競爭）</span>
+      <ul>
+<li><strong>自動語音評分（朗讀流暢度）</strong> — <strong>中文的自動朗讀評分只有我們在做</strong> Amira 的音素層級中文沒有等價物</li>
+<li><strong>中文特有教學（注音／筆順／聽寫／破音）</strong> — 無人競爭 這是母語教學的剛需，二語平台不做</li>
+<li><strong>紙本學習單 ↔ 線上（OMO）</strong> — 無人競爭 而且是老師眼中「省工」最直接的一塊</li>
+<li><strong>台灣課綱對齊</strong> — 無人競爭 但反面是無法輸出到美國市場</li>
+      </ul>
+    </div>
+    <div class="warn">
+      <span class="tag">我們落後（兩家都有，我們沒有）</span>
+      <ul>
+<li><strong>跨課技能掌握度追蹤</strong> — <strong>我們唯一明確落後的一項，而且兩家都有</strong> 我們是一堂課一份報告，課與課之間沒接起來</li>
+<li><strong>能力分級 / 入班定位測驗</strong> — 落後 學生一進來就從該年級第一課開始，不管實際程度</li>
+<li><strong>老師端「該做什麼」提示</strong> — 落後 我們有圖表但沒有行動建議</li>
+      </ul>
+      <p>這三項<strong>不是這次的新發現</strong> —— <code>international-reading-platforms-analysis.md</code>（2026-03-13）就把跨課掌握度、老師端教學建議、能力分級列為我們的缺口了，四個月未動</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>三、假設判定</h2>
     <div class="warn">
       <span class="tag">審查後下修</span>
       <p>初版把四條假設標成「證實」，Codex 獨立 audit 判 NOT_TRUSTWORTHY —— 核對後全部成立 反覆出現的毛病是<strong>拿「官方手冊沒寫」去支撐「它沒有」</strong>，而這正是本研究自己訂的規則所禁止的（E1/E3 缺席不得單獨證明不存在）</p>
@@ -128,7 +172,7 @@
   </section>
 
   <section>
-    <h2>三、我原本低估的東西</h2>
+    <h2>四、我原本低估的東西</h2>
     <p class="note">我一開始判斷「他們只有內容廣度，閱讀策略的深度是我們獨有」—— 實機看了他們的標準頁之後，這句話不準確</p>
     <figure>
       <img src="h2-ccra-matrix.jpg" alt="iChineseReader 的 CCRA 對齊矩陣頁面" loading="lazy" />
@@ -145,7 +189,7 @@
   </section>
 
   <section>
-    <h2>四、中文的量尺是一片空白</h2>
+    <h2>五、中文的量尺是一片空白</h2>
     <p class="note">Amira 整套建立在兩個英文特有的地基上：<strong>WCPM</strong>（每分鐘正確字數）和<strong>音素解碼</strong> 它自己的影片說得很明白 —— 「I can uniquely analyze their speech down to the phone level」，畫面上是學生把 h / i / p 三塊字母磚重組</p>
     <ul>
       <li>中文沒有音素解碼這一層，hip 可以拆三塊磚，中文沒有這個拆法 —— <strong>它最深的護城河剛好是中文最沒有的維度</strong></li>
@@ -155,7 +199,7 @@
   </section>
 
   <section>
-    <h2>五、決策建議</h2>
+    <h2>六、決策建議</h2>
     <p class="note">只有 D2 的「他們有策略框架」這半句站在 E4 上，其餘皆為 E3 或推論 —— 下注前先看「還缺什麼」</p>
     <div class="tablewrap"><table class="dec">
       <thead><tr><th>#</th><th>要決定的事</th><th>建議</th><th>還缺什麼才敢下注</th></tr></thead>
@@ -172,7 +216,7 @@
   </section>
 
   <section>
-    <h2>六、實機走查：登入後看到的東西</h2>
+    <h2>七、實機走查：登入後看到的東西</h2>
     <p class="note">用方大哥公開分享的老師帳號登入 <code>/icr5/teacher</code>，走過 13 個 section 與全部子 tab 三件只有登入才看得到的事</p>
     <ol class="findings">
       <li>
@@ -195,7 +239,7 @@
   </section>
 
   <section>
-    <h2>七、延伸閱讀</h2>
+    <h2>八、延伸閱讀</h2>
     <a class="cardlink" href="amira-video.html">
       <strong>Amira 介紹影片逐格解析</strong>
       <span class="sub">它用一支 2 分 48 秒的影片把產品拍給我們看了 —— 沒有帳號看不到 Amira 的介面，但產品影片會實拍 含真實學生端 UI、三合一迴圈圖、以及同一支影片裡旁白 68% 對畫面 63% 的矛盾</span>
