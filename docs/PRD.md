@@ -1594,6 +1594,35 @@ loader 用 repo-layout 路徑（`parents[3]` + literal `"backend/"`），容器�
 
 ---
 
+## 🔊 重點朗讀（Key-Passage Reading）架構與抽取決策（2026-07-20）
+
+> 來源：2026-07-20 教授審查會議（曾世傑教授）。實作追蹤 → `docs/reading-key-passage-TODO.md`。
+
+### 決策
+- 朗讀**只練老師指定的「重點段落」**（念順順，約 300-400 字），**不練全文**；主指標＝**流暢率**（每分鐘字數），非逐字正確率
+- **改造既有 `full-reading` step 成「重點朗讀」**（label 改、displayChar「朗」、**保留 step id**）；逐段朗讀（`tutor`）`enabled:false` 從 nav 隱藏（ToolPicker 仍可進）；`reading_timer`(念順順) worksheet 對應到此 step
+- ⚠️ **不新增 step**：code review 抓到 FullReadingPage 把 stepId 寫死 `'full-reading'`（完成/進度/assignment gate 佈線），新增 step 複用它會使完成記錯 step → 作業無法提交。保留 id = 沿用現成佈線 = 零 bug
+- Phase 0：full-reading 仍唸全文（fallback）；Phase 1 接重點段資料後只唸指定段（改內容來源，不動 stepId 佈線）
+
+### 資料錨點（紙本 → 數位）
+紙本課文旁：**手指頭符號 ☞** 標重點段起點、**右欄累計字數**標長度（世傑老師設計，挑最該練的段落）。
+
+| 錨點 | DOCX 形式 | 抽法 | 信心（實測 G6-L22） |
+|------|-----------|------|---------------------|
+| ☞ 起點 | `drawing/pict` 內嵌圖形（非文字） | render→vision（多模態 Claude） | 高（vision 一次抓對「這下孟嘗君頭大了」） |
+| 累計字數（長度） | 文字層可 grep（28/58/87…301） | 文字 grep + vision QA | 中高（文字框順序 flatten 會亂，需結構解析） |
+
+- **抽取架構**：抓取用**文字 grep（有效率）** + QA 用**穩定 render→vision**
+- **TDD 標準**：`抽出段字數 ≈ max(累計字數欄)` = 老師親自標的長度＝現成 ground truth（非 AI 自產，過「驗收不可自閉環」）；取 max 比抓序列穩
+- **⚠️ 未證明全體**：實測僅 G6-L22 一課全對；另 3 課文字層抓不到乾淨累計序列 → Phase 1 必跑 5-10 課 golden set 量命中率，禁 N=1 推全部；部分課可能無朗讀段（extractor 要優雅處理）
+
+### 實作分期
+- **Phase 0（已做）**：改造 full-reading step 成重點朗讀「朗」+ 隱藏逐段 + reading_timer→full-reading。gate 全綠（spec/lint/smoke）+ code review 修掉 assignment-gate bug
+- **Phase 1**：擴充啟翔 DOCX→schema 抽取器加「重點朗讀段」欄位 + TDD lock，跟教材二修合流
+- **Phase 2**：評分收斂流暢率 + 口音通融清單（曾教授提供）
+
+---
+
 ## 📚 參考文件
 
 ### 核心文件體系

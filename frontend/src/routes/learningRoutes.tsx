@@ -67,7 +67,7 @@ const STEP_PAGE_MAP: Record<string, LazyPage> = {
   'intro':                 IntroPage,
   'reading-annotation':    ReadingAnnotationPage,
   'tutor':                 TutorPage,
-  'full-reading':          FullReadingPage,
+  'full-reading':          FullReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
   'listening':             ListeningPage,
   'vocab':                 VocabPage,
   'vocab-definition':      VocabDefinitionMatchPage,

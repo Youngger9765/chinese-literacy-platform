@@ -337,6 +337,19 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('FullReading', <FullReading story={MINIMAL_STORY} onFinish={vi.fn()} onBack={vi.fn()} />);
   });
 
+  // #2559: 重點朗讀 — exercise the keyReading.passage branch (readingContent = [passage]),
+  // not just the full-text fallback, so the pilot code path is smoke-covered.
+  it('FullReading (重點朗讀 keyReading passage)', () => {
+    const storyWithKeyReading: Story = {
+      ...MINIMAL_STORY,
+      keyReading: { passage: '這是老師指定的重點段落，只練這一段。', extentChars: 18, source: 'docx-extract' },
+    };
+    mountGuard(
+      'FullReading-keyReading',
+      <FullReading story={storyWithKeyReading} onFinish={vi.fn()} onBack={vi.fn()} />,
+    );
+  });
+
   it('VocabDefinitionMatch', () => {
     mountGuard('VocabDefinitionMatch', <VocabDefinitionMatch story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });

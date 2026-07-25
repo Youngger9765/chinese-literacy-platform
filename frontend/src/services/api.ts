@@ -91,6 +91,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Full video list (#1683). null for legacy lessons without video_links field.
   video_links: { title: string; url: string }[] | null;
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
+  // 重點朗讀指定段 (#2559)。null → 前端唸全文 fallback。
+  key_reading: { passage: string; start_text: string | null; extent_chars: number | null; source: string | null } | null;
   text_type: string;
   source_file: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,6 +182,14 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
+    keyReading: detail.key_reading
+      ? {
+          passage: detail.key_reading.passage,
+          startText: detail.key_reading.start_text ?? undefined,
+          extentChars: detail.key_reading.extent_chars ?? undefined,
+          source: detail.key_reading.source ?? undefined,
+        }
+      : undefined,
     // Filter to legacy-format items only.
     // Two fill_in_blank schemas coexist (#1559, #1563):
     //   Legacy: { sentence, answer: "A" } — answer is a vocab_bank letter code.

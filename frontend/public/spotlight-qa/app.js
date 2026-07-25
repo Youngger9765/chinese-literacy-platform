@@ -27,6 +27,17 @@
     return "https://lingoleap-backend-staging-958347263320.asia-east1.run.app";
   }
   const API = apiBase();
+  // #2534: arm QA-board with the shared secret. Visit once with ?qa_token=<secret>
+  // to persist it; sent as x-qa-token on save/reviews/review. No token → header
+  // omitted → backend stays open (no regression until QA_TOOLS_SHARED_SECRET is set).
+  try {
+    const _qt = new URLSearchParams(location.search).get("qa_token");
+    if (_qt) localStorage.setItem(NS + "qaToken", _qt);
+  } catch (e) {}
+  function qaAuthHeaders() {
+    const t = localStorage.getItem(NS + "qaToken");
+    return t ? { "x-qa-token": t } : {};
+  }
   // render iframe base:部署在 staging 同源(IS_REMOTE)→ 用同源;否則(file:// / 本機 http.server)吃輸入框(預設 staging)
   function renderBase() {
     return IS_REMOTE ? location.origin : baseUrl.replace(/\/+$/, "");
@@ -1220,7 +1231,7 @@
     try {
       const res = await fetch(`${API}/api/spotlight-qa/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...qaAuthHeaders() },
         body: JSON.stringify(out),
       });
       const j = await res.json().catch(() => ({}));
@@ -1244,7 +1255,7 @@
     box.style.display = "block";
     box.innerHTML = "<div class='cloud-row'>載入清單中…</div>";
     try {
-      const res = await fetch(`${API}/api/spotlight-qa/reviews`);
+      const res = await fetch(`${API}/api/spotlight-qa/reviews`, { headers: qaAuthHeaders() });
       const j = await res.json();
       const list = (j && j.reviews) || [];
       if (!list.length) {
@@ -1273,7 +1284,7 @@
   async function loadCloudReview(path) {
     if (!confirm("載回這筆 review?會覆寫本機對應課的標記/備註。")) return;
     try {
-      const res = await fetch(`${API}/api/spotlight-qa/review?path=` + encodeURIComponent(path));
+      const res = await fetch(`${API}/api/spotlight-qa/review?path=` + encodeURIComponent(path), { headers: qaAuthHeaders() });
       const payload = await res.json();
       const lessons = (payload && payload.lessons) || [];
       // 把 payload 各課回填成本工具的 review 結構(findings 綁 block_id + steps)
