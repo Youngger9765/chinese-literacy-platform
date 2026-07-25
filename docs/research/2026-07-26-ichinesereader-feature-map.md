@@ -18,11 +18,13 @@ method: 官方使用手冊全 61 頁（E3）+ 實機瀏覽標準頁（E4）；�
 
 > ⚠️ **2026-07-26 二版（Codex 獨立 audit 後下修）**：初版把四條假設標成「證實」，Codex 判 NOT_TRUSTWORTHY —— 核對後**全部成立**，主要毛病是**拿「官方手冊沒寫」去支撐否定斷言**（違反本系統自己的規則「E1/E3 缺席不得單獨證明不存在」）。下表為修正後判定。
 
+> 🔺 **三版更新（2026-07-26 晚，headed 瀏覽器登入教師端實機走查）**：用方大哥公開分享的老師帳號登入 `/icr5/teacher`，逐一走過 13 個 section 與全部子 tab 並截圖。H1/H3 取得 E4 證據、H2 的一項判斷被**我自己的實機證據推翻**（見 §2.7）。
+
 | # | 假設 | 判定 | 證據等級 | 關鍵證據 / 為什麼不能更強 |
 |---|---|---|---|---|
-| **H1** | 沒有自動語音評分 | **部分證實 · 整平台未決** ⬇️ | **E3**（Running Record 流程）| ✅ 站得住的部分：**Running Record 這條流程的官方手冊步驟中未見任何自動評分** —— 學生錄音 → save/delete/replay/**send to teacher** → 學生從信封收「**grade and comments from teacher**」。<br>❌ **不能說「整個平台沒有自動語音評分」**：手冊沒寫 ≠ 沒有；教師端登入未成功（無 E4）；**IB Speaking 完全未驗**，那是最可能藏語音評分的地方 |
-| **H2** | 分級軸是語言難度、非閱讀策略 | **部分推翻** ⚠️ | **拆兩層** | **E4**（我實機看到頁面）：20 級 → ACTFL/HSK/YCT 是語言能力軸；另有正交的 **CCRA Alignment Matrix：15 子技能 × 5 領域 → Common Core Anchor Standards**<br>**E3**（僅官方手冊）：學生報表有 Skill Point 報表 + 深度分析 + PDF —— **此項未實機看到，不併入 E4** |
-| **H3** | AI 只在教師端，學生端無 AI | **部分證實 · 未決** ⬇️ | **E3** | ✅ 手冊記載的學生端互動全部無 AI（選單/護眼背景/全螢幕/錄音/寫字板/書櫃/書籤/獎勵遊戲；寫字板只有 save + send to teacher）<br>❌ 同 H1：手冊缺席不能證明沒有，**學生端未實機走過** |
+| **H1** | 沒有自動語音評分 | **證實（實務上）· 單一缺口已消除** ⬆️ | **E4 + E3** | **E4 實機**：① 批改收件匣 Basket 的資料模型只有 `Student / Task / Book Title / Status / Type / **Score** / Submit Date` —— **單一 Score 欄，無 accuracy / WCPM / 錯誤類型欄**，自動語音評分需要那些欄位 ② **整個教師端 13 section + 全部子 tab 沒有任何「IB Speaking」** → 原本唯一可能讓結論翻案的未知**已消除** ③ Running Record = 分級書 + 可下載 PDF（書本身），透過 Create Assessment 派送<br>**E3**：手冊流程為學生錄音 → 送老師 → 學生收「老師給的分數與評語」<br>❌ 仍未看到的：**完成的錄音實際被評分的畫面** —— 該帳號 0 submissions，要看得到必須建作業並以學生身分完成（需改學生密碼＝寫入動作，未做） |
+| **H2** | 分級軸是語言難度、非閱讀策略 | **部分推翻，且推翻得比二版更徹底** ⚠️⚠️ | **E4** | **E4**：20 級 → ACTFL/HSK/YCT 是語言能力軸；另有正交的 CCRA 對齊（15 子技能 × 5 領域）<br>🔺 **二版我寫「Skill Point 報表僅手冊記載、未實機看到、不併入 E4」—— 這句被推翻**：教師 dashboard 的 **Standards Overview 就是每個學生 × CCRA.R.1–R.8 的即時掌握度矩陣**（0-49% / 50-79% / 80-100% 三色帶），而且**每本書都掛 CCRA 技能標籤**。它不是靜態對齊頁，是**上線運轉中的跨課技能追蹤** |
+| **H3** | AI 只在教師端，學生端無 AI | **證實** ⬆️ | **E4** | **E4 實機進到學生端閱讀器**（`/book/`）：控制項為簡體／繁體／**無字**、**國語／粵語**／無音訊、自動播放、拼音、音檔播放器、書本背景、寫字板（楷體／雅黑，Save／Send 給老師與家長）、加入書櫃 —— **沒有任何 AI 回饋或評分控制項**。手冊記載與實機一致 |
 | **H6** | 「評測 > 練習」在台灣也成立（老師手工做的才是採購理由）| **未完全證實** ⬇️ | **E3**（自家會議紀錄）| ✅ 有證據的部分：老師**不想學新工具**、代跑服務有價值、三版本自動化確實省工（`docs/2026-07-22-教授溝通-recap.md:19-27`）<br>❌ **這不等於「評測 > 練習是採購理由」** —— 會議紀錄講的是交付形態偏好，不是採購決策依據。採購錨點要靠訪談或真實報價驗證 |
 | **H7** | Amira 短期不進繁中 | **拆三段** ⬇️ | **E3 / 待核 / 推論** | **E3 證實**：Amira **教學語言只有英文與西文**（官方產品頁 "100% bilingual in English and Spanish" + 官方影片旁白）<br>**待核**：v1 的「20 國 18 語言」出自 LinkedIn 二手摘要（E2），且「20 國」是市場足跡、與教學語言是兩件事，**原始來源未查到**<br>**推論非證據**：「12 個月內不會進繁中」是我的預測，不得當研究結論引用 |
 
@@ -102,6 +104,38 @@ method: 官方使用手冊全 61 頁（E3）+ 實機瀏覽標準頁（E4）；�
 | 第三方/行銷 | 「over **3,000** interactive e-books，每週上新 10-15」|
 
 → **實際規模只能說「1,000–3,000 本」區間**。我 v1 直接寫「2,000 讀本」是採信單一 E1 數字，不嚴謹
+
+### 2.7 教師端實機走查（E4 — 登入後的站點地圖）
+
+方大哥公開分享的老師帳號，`shinjou` / Class 1 / 20 名示範學生（0 recordings、0 quizzes，**帳號無任何 submission**）。
+
+**站點地圖**：`/icr5/teacher/` + 12 個 section
+
+| section | 子 tab / 內容 |
+|---|---|
+| `/` Home | Overview（Students / Average Level / Books Read / Unique Read / Quizzes Taken / **Recordings** / Writings）+ Homework·Assessments·Evaluation 各自的 Total／Submitted／Unfinished／Completion Rate + Frequency of Use + Progression & Mastery + **Standards Overview** |
+| `/students` | Add · Group · Remove · More Actions · Password · **Current Level** · **Level Progress** · **Game Access** · Last Login |
+| `/library` | Create Homework · **Level Standards** · **Skill Conversion** · 分級 filter · **In-Book Quiz** · **After Reading Quiz**；每本書掛 **CCRA 技能 + YCT 級 + ACTFL 級 + 主題 + 關鍵詞** |
+| `/bookshelf` | **My Word Cards** · Create/Edit/Delete Folder · Move/Remove Books |
+| `/basecamp` | 同 Overview 的指標組（per-student 進度盤）|
+| `/homework` | Management · Submitted |
+| `/assessments` | Management · **Grammar Tests** · **Running Records** · Records |
+| `/testprep` | Management · Records（表頭含 **Mode**）|
+| `/evaluation` | Management（Open/Queued/Closed）· Evaluation Books（**17 級**）· **Benchmark Tests** · Records · Overview · **Skill Center** · **Benchmark Reports** |
+| `/ichinesecat` | CAT 適性測評（此帳號無資料）|
+| `/basket` | **批改收件匣** — Homework · Assessment · Test Prep · Evaluation · QuizBook；欄位 `Student Name / Task / Book Title / Status / Type / Score / Submit Date` |
+| `/reports` | Class · Student · Homework · Assessment · Test Prep · QuizBook · Evaluation；Class 頁有 Reading Total / Quiz Total / Books Titles / Avg Completion / **Avg Accuracy** / **Avg Reading Level（L.0–L.6）** / **Reading Comprehensive Skills** |
+| `/profile` | 帳號設定 |
+
+**三個實機才看到的重點**
+
+1. **Standards Overview = 上線中的跨課技能掌握度矩陣**（推翻二版判斷）：每個學生 × `CCRA.R.1 Detail / R.2 Main Idea / R.3 Chronology / R.4 Vocab / R.5 Text Structure / R.6 Point of View·Purpose / R.7 Media Integration / R.8 …`，三色帶 0-49% / 50-79% / 80-100%
+2. **沒有 IB Speaking**：13 section 與所有子 tab 都沒有這個功能。行銷頁提過的名稱在產品裡不存在 → H1 原本唯一的翻案風險消除
+3. **粵語支援**：學生端閱讀器語言設定為 **國語 / 粵語 / 無音訊** —— 服務對象包含粵語背景的華裔學習者，這是市場定位訊號（我們完全不重疊）
+
+**技術路徑**：app 在 `/icr5/`（行銷站與 app 分離）。Flutter canvas 在 headless 無 WebGL 時登入 modal 打不開，**headed + GPU 才能登入** —— 這是二版驗不到教師端的真正原因。
+
+**截圖**：`/tmp/icr/nav-*.png`（13 section）、`t1-dashboard.png`、`basket-crop.png`、`rr-crop.png`、`rr-pdf-s.png`（不進 git：第三方產品畫面）
 
 ---
 
