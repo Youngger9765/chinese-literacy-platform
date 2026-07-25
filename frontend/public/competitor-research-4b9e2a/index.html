@@ -118,9 +118,9 @@
     </div>
     <div class="tablewrap"><table class="hyp">
       <thead><tr><th>#</th><th>假設</th><th>判定</th><th>證據</th><th>關鍵證據 / 為什麼不能更強</th></tr></thead>
-      <tbody><tr><td><strong>H1</strong></td><td>iChineseReader 沒有自動語音評分</td><td>部分證實 · 整平台未決</td><td>E3</td><td>官方手冊的 Running Record 流程未見任何自動評分：學生錄音 → 存/刪/重播/送給老師 → 學生從信封收「老師給的分數與評語」 但手冊沒寫 ≠ 沒有，教師端未登入驗證，IB Speaking 完全未驗</td></tr>
-<tr><td><strong>H2</strong></td><td>它的分級軸是語言難度、不是閱讀策略</td><td>部分推翻</td><td>E4 + E3</td><td>E4：20 級確實對照 ACTFL/HSK/YCT 語言能力，但另有正交的 CCRA 對齊矩陣 —— 15 個閱讀子技能 × 5 領域 → Common Core 錨標準 E3：學生報表有 Skill Point 分析與 PDF，僅手冊記載未實機看到</td></tr>
-<tr><td><strong>H3</strong></td><td>AI 只在教師端，學生端無 AI</td><td>部分證實 · 未決</td><td>E3</td><td>手冊記載的學生端互動全部無 AI（護眼背景/全螢幕/錄音/寫字板/書櫃/書籤/獎勵遊戲），寫字板只有存檔與送給老師 同 H1，手冊缺席不能證明沒有</td></tr>
+      <tbody><tr><td><strong>H1</strong></td><td>iChineseReader 沒有自動語音評分</td><td>證實</td><td>E4 + E3</td><td>實機登入教師端後確認兩件事：① 批改收件匣 Basket 的欄位只有 Student／Task／Book Title／Status／Type／<strong>Score</strong>／Submit Date —— 單一 Score 欄，沒有正確率、每分鐘字數或錯誤類型欄，而自動語音評分需要那些欄位 ② 教師端 13 個 section 與全部子 tab 都沒有「IB Speaking」，那原本是唯一可能讓結論翻案的未知 仍未看到的是「完成的錄音被評分」那一刻的畫面 —— 該示範帳號沒有任何 submission</td></tr>
+<tr><td><strong>H2</strong></td><td>它的分級軸是語言難度、不是閱讀策略</td><td>推翻，而且比我原本以為的更徹底</td><td>E4</td><td>20 級確實對照 ACTFL／HSK／YCT 語言能力，但那只是一條軸 實機登入後看到：教師 dashboard 的 Standards Overview 是<strong>每個學生 × CCRA.R.1–R.8 的即時掌握度矩陣</strong>（0-49％／50-79％／80-100％ 三色帶），而且每本書都掛 CCRA 技能標籤 也就是說那套閱讀技能框架不是靜態對齊頁，是<strong>上線運轉中的跨課技能追蹤</strong></td></tr>
+<tr><td><strong>H3</strong></td><td>AI 只在教師端，學生端無 AI</td><td>證實</td><td>E4</td><td>實機進到學生端閱讀器：控制項是簡體／繁體／無字、<strong>國語／粵語</strong>／無音訊、自動播放、拼音、音檔播放器、書本背景、寫字板（存檔／送給老師與家長）、加入書櫃 —— 沒有任何 AI 回饋或評分控制項</td></tr>
 <tr><td><strong>H6</strong></td><td>「評測 &gt; 練習」在台灣也成立</td><td>未完全證實</td><td>E3</td><td>有證據的是：老師不想學新工具、代跑服務有價值、三版本自動化確實省工 但這是交付形態偏好，不等於採購理由 —— 採購錨點要靠訪談或真實報價驗</td></tr>
 <tr><td><strong>H7</strong></td><td>Amira 短期不會進繁體中文</td><td>拆三段</td><td>E3 / 待核 / 推論</td><td>E3 證實：教學語言只有英文與西文（官方產品頁 + 官方影片旁白） 待核：「20 國 18 語言」出自二手摘要，且「20 國」是市場足跡與教學語言是兩件事 推論非證據：「12 個月內不會進」是預測</td></tr></tbody>
     </table></div>
@@ -160,7 +160,7 @@
     <div class="tablewrap"><table class="dec">
       <thead><tr><th>#</th><th>要決定的事</th><th>建議</th><th>還缺什麼才敢下注</th></tr></thead>
       <tbody><tr><td><strong>D1</strong></td><td>理解對話要不要改 closed-loop 預生成</td><td>值得做 spike，但先量涵蓋率再決定</td><td>涵蓋率 / 人審工時 / 單次成本三個數字</td></tr>
-<tr><td><strong>D2</strong></td><td>iChineseReader 是競品還是不同物種</td><td>不同物種，但不是「他們比較淺」—— 他們是國際閱讀技能框架 × 中文素材 × 人工評分；我們是台灣國教課本 × 中文特有語言結構 × 自動語音評分</td><td>「自動語音評分是真空」這句仍未確認 —— 要登入教師端 + 驗 IB Speaking，若它有自動評分，這段翻案</td></tr>
+<tr><td><strong>D2</strong></td><td>iChineseReader 是競品還是不同物種</td><td>不同物種，但<strong>不是「他們比較淺」</strong> —— 他們是國際閱讀技能框架 × 中文素材 × 老師人工評分；我們是台灣國教課本 × 中文特有語言結構 × 自動語音評分 <strong>語音評測確實是真空</strong>（實機確認）</td><td>只差最後一哩：沒看到「完成的錄音被評分」的畫面（示範帳號無 submission） 但翻案風險已消除 —— 全站沒有 IB Speaking，Basket 也沒有語音指標欄</td></tr>
 <tr><td><strong>D3</strong></td><td>對外敘事要不要改成「AI 幫老師省」</td><td>方向對，而且要決定服務 → 工具的切換條件，不只換文案</td><td>採購錨點未驗，要一次老師或學校端訪談問「你會為什麼付錢」</td></tr>
 <tr><td><strong>D4</strong></td><td>中文朗讀量尺下一個維度做哪個</td><td>斷句仍是最有原創性的候選 —— 英文有空格所以評測沒有這個維度，中文斷句錯就是句法沒解析對</td><td>斷句訊號能否從既有錄音抽出，以及與理解分數的相關性</td></tr>
 <tr><td><strong>D5</strong></td><td>Amira 進中文的時間窗有多急</td><td>教學語言只有英/西文，跨到漢字距離遠；近程壓力更可能來自 iChineseReader 加語音（它已有中文內容與 CCRA 框架，只缺語音）</td><td>「12 個月內不會進」是推論不是證據；「20 國 18 語言」原始來源仍待核</td></tr></tbody>
@@ -172,7 +172,30 @@
   </section>
 
   <section>
-    <h2>六、延伸閱讀</h2>
+    <h2>六、實機走查：登入後看到的東西</h2>
+    <p class="note">用方大哥公開分享的老師帳號登入 <code>/icr5/teacher</code>，走過 13 個 section 與全部子 tab 三件只有登入才看得到的事</p>
+    <ol class="findings">
+      <li>
+        <h3>Standards Overview 是上線中的跨課掌握度矩陣</h3>
+        <p>每個學生 × CCRA.R.1 Detail／R.2 Main Idea／R.3 Chronology／R.4 Vocab／R.5 Text Structure／R.6 Point of View·Purpose／R.7 Media Integration…，三色帶 0-49％／50-79％／80-100％ 我原本判斷這只是靜態對齊頁，錯了 —— <strong>這正是我在第五節說我們沒有的東西，而它在線上跑著</strong></p>
+        <span class="at">/icr5/teacher · Standards Overview</span>
+      </li>
+      <li>
+        <h3>批改收件匣只有一個 Score 欄</h3>
+        <p>Basket 的欄位是 Student Name／Task／Book Title／Status／Type／Score／Submit Date <strong>沒有正確率、每分鐘字數、錯誤類型</strong> —— 做自動語音評分的產品需要那些欄位（Amira 的 running record 就是給錯誤類型的）</p>
+        <span class="at">/icr5/teacher/basket</span>
+      </li>
+      <li>
+        <h3>全站沒有「IB Speaking」，但有粵語</h3>
+        <p>行銷頁提過的 IB Speaking 在產品裡不存在（13 section 全掃過）—— 這消除了唯一可能讓結論翻案的未知 反而看到學生端閱讀器支援 <strong>國語／粵語</strong>，服務對象包含粵語背景華裔，跟我們市場不重疊</p>
+        <span class="at">/icr5/teacher/* · /book/</span>
+      </li>
+    </ol>
+    <p class="note">技術路徑：app 在 <code>/icr5/</code>（與行銷站分離）Flutter canvas 在無 GPU 的 headless 環境登入視窗打不開 —— 這是第一輪驗不到教師端的真正原因，換成 headed + GPU 才進得去</p>
+  </section>
+
+  <section>
+    <h2>七、延伸閱讀</h2>
     <a class="cardlink" href="amira-video.html">
       <strong>Amira 介紹影片逐格解析</strong>
       <span class="sub">它用一支 2 分 48 秒的影片把產品拍給我們看了 —— 沒有帳號看不到 Amira 的介面，但產品影片會實拍 含真實學生端 UI、三合一迴圈圖、以及同一支影片裡旁白 68% 對畫面 63% 的矛盾</span>
@@ -180,7 +203,7 @@
   </section>
 
   <footer>
-    <p><strong>驗證邊界</strong>：教師端與學生端<strong>均未登入實機驗證</strong> —— 該站是 Flutter canvas 應用，headless 環境無 WebGL、登入 modal 無法開啟 所以本文所有「它沒有 X」的敘述都是<strong>官方文件未記載</strong>，不是實機確認不存在 未知項：IB Speaking 是否有自動語音評分、CAT 是真 IRT 還是分支腳本、AI Lesson Plan 實際輸出品質、兩家真實定價（皆不公開，不猜）</p>
+    <p><strong>驗證邊界</strong>：教師端與學生端<strong>已登入實機走查</strong>（headed 瀏覽器，2026-07-26 晚），H1／H2／H3 因此升到 E4 仍未看到的：完成的錄音被評分那一刻的畫面（示範帳號沒有任何 submission，要看到必須建作業並以學生身分完成，屬寫入動作故未做）其他未知項：CAT 是真 IRT 還是分支腳本、AI Lesson Plan 實際輸出品質、兩家真實定價（皆不公開，不猜）</p>
     <p style="margin-top:.9rem"><strong>已知的重複</strong>：本研究第二節列的「跨課掌握度、教師 alert、能力分級」三項，<code>docs/research/international-reading-platforms-analysis.md</code>（2026-03-13）早已寫過且更具體，並已標成我們的缺口 —— 真實狀態是<strong>舊研究指出的缺口延續四個月未動</strong>，不是新發現的機會</p>
   </footer>
 
