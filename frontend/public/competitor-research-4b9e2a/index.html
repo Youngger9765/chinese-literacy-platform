@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive" />
 <meta name="referrer" content="no-referrer" />
 <meta name="description" content="內部競品研究，未對外公開" />
-<title>競品研究：iChineseReader × Amira（內部）</title>
+<title>競品研究：iChineseReader × Amira × LingoLeap（內部）</title>
 <style>
   :root {
     --paper:#FBFAF7; --ink:#1C1B18; --ink-soft:#5A574E; --ink-faint:#6F6A5F;
@@ -80,6 +80,12 @@
   table.mx td:nth-child(1){min-width:10em;font-weight:600;white-space:normal}
   table.mx td:nth-child(2),table.mx td:nth-child(3),table.mx td:nth-child(4){min-width:9em;white-space:normal}
   table.mx{min-width:680px}
+  /* Colored markers for feature matrix */
+  table.mx td:nth-child(n+2){font-size:.9rem}
+  .mk-y{color:#1a7a52;font-weight:700} /* ◎ strong = green */
+  .mk-w{color:#8b6e00;font-weight:600} /* △ weak = amber */
+  .mk-n{color:#a04030;font-weight:600} /* ✕ none = red */
+  .mk-na{color:var(--ink-faint)} /* — not applicable */
   .callout{background:var(--accent-wash);border-left:3px solid var(--accent);padding:1.3rem 1.5rem;
            border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
   .warn{background:var(--flag-wash);border-left:3px solid var(--flag);padding:1.3rem 1.5rem;
@@ -122,7 +128,7 @@
 
   <header>
     <p class="eyebrow">內部資料 · 競品研究 · 2026-07-26</p>
-    <h1>iChineseReader × Amira Learning</h1>
+    <h1>iChineseReader × Amira × LingoLeap 三方比較</h1>
     <p class="standfirst">「這個 project 就是在做中文的 Amira」—— 這句話方向對，但 Amira 真正在賣的不是 AI 家教，是<strong>州法規定要做的法定評測</strong> 而中文根本沒有 WCPM 這個量尺，那是我們得自己定義的空白</p>
     <p class="meta">
       內部研究文件，未對外公開，不從任何頁面連入<br />
@@ -151,17 +157,17 @@
     <p class="note">◎ 有且是強項｜△ 有但弱｜✕ 沒有｜— 不適用 <strong>最右欄是我們</strong>，🔴 標的是我們明確落後的項目</p>
     <div class="tablewrap"><table class="mx">
       <thead><tr><th>能力</th><th>iChineseReader</th><th>Amira</th><th class="us">我們</th></tr></thead>
-      <tbody><tr><td>自動語音評分（朗讀流暢度）</td><td>✕ 無</td><td>◎ 強 — 音素層級</td><td class='us'>◎ 有 — 字級正確率 + 每分鐘字數</td></tr>
-<tr><td>中文特有教學（注音／筆順／聽寫／破音）</td><td>✕ 無</td><td>— 不適用</td><td class='us'>◎ 強</td></tr>
-<tr><td>紙本學習單 ↔ 線上（OMO）</td><td>✕ 無</td><td>✕ 無</td><td class='us'>◎ 強</td></tr>
-<tr><td>台灣課綱對齊</td><td>✕ 對美國 CCSS／ACTFL</td><td>✕ 對美國各州標準</td><td class='us'>◎ 強</td></tr>
-<tr><td>AI 對話式理解教學</td><td>✕ 只有選擇題 eQuiz</td><td>◎ 有 — Claude 離線預生成</td><td class='us'>◎ 有 — 蘇格拉底即時對話</td></tr>
-<tr><td>跨課技能掌握度追蹤</td><td>◎ 有 — CCRA 矩陣（實機確認在線）</td><td>◎ 強 — 每日 Estimated Mastery</td><td class='us'>✕ 無</td></tr>
-<tr><td>能力分級 / 入班定位測驗</td><td>◎ 有 — 20 級 ACTFL／HSK／YCT + CAT</td><td>◎ 強 — ISIP 電腦適性</td><td class='us'>✕ 無 — 按年級排</td></tr>
-<tr><td>內容量</td><td>◎ 1,000–3,000 本</td><td>— 用學區既有教材</td><td class='us'>△ 158 課</td></tr>
-<tr><td>法定評測地位</td><td>✕ 無</td><td>◎ 強 — 州法 K-3 篩檢核准</td><td class='us'>✕ 無</td></tr>
-<tr><td>老師端「該做什麼」提示</td><td>✕ 只有報表</td><td>◎ 有 — 差異化教學建議</td><td class='us'>✕ 無 — 只有 dashboard</td></tr>
-<tr><td>自由閱讀書櫃 / 興趣分級</td><td>◎ 有 — Interest Level 與難度分開</td><td>— 不適用</td><td class='us'>✕ 無</td></tr>
+      <tbody><tr><td>自動語音評分（朗讀流暢度）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-y">◎</span> 強 — 音素層級</td><td class='us'><span class="mk-y">◎</span> 有 — 字級正確率 + 每分鐘字數</td></tr>
+<tr><td>中文特有教學（注音／筆順／聽寫／破音）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-na">—</span> 不適用</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>紙本學習單 ↔ 線上（OMO）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-n">✕</span> 無</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>台灣課綱對齊</td><td><span class="mk-n">✕</span> 對美國 CCSS／ACTFL</td><td><span class="mk-n">✕</span> 對美國各州標準</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>AI 對話式理解教學</td><td><span class="mk-n">✕</span> 只有選擇題 eQuiz</td><td><span class="mk-y">◎</span> 有 — Claude 離線預生成</td><td class='us'><span class="mk-y">◎</span> 有 — 蘇格拉底即時對話</td></tr>
+<tr><td>跨課技能掌握度追蹤</td><td><span class="mk-y">◎</span> 有 — CCRA 矩陣（實機確認在線）</td><td><span class="mk-y">◎</span> 強 — 每日 Estimated Mastery</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
+<tr><td>能力分級 / 入班定位測驗</td><td><span class="mk-y">◎</span> 有 — 20 級 ACTFL／HSK／YCT + CAT</td><td><span class="mk-y">◎</span> 強 — ISIP 電腦適性</td><td class='us'><span class="mk-n">✕</span> 無 — 按年級排</td></tr>
+<tr><td>內容量</td><td><span class="mk-y">◎</span> 1,000–3,000 本</td><td><span class="mk-na">—</span> 用學區既有教材</td><td class='us'><span class="mk-w">△</span> 158 課</td></tr>
+<tr><td>法定評測地位</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-y">◎</span> 強 — 州法 K-3 篩檢核准</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
+<tr><td>老師端「該做什麼」提示</td><td><span class="mk-n">✕</span> 只有報表</td><td><span class="mk-y">◎</span> 有 — 差異化教學建議</td><td class='us'><span class="mk-n">✕</span> 無 — 只有 dashboard</td></tr>
+<tr><td>自由閱讀書櫃 / 興趣分級</td><td><span class="mk-y">◎</span> 有 — Interest Level 與難度分開</td><td><span class="mk-na">—</span> 不適用</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
 <tr><td>語言覆蓋</td><td>簡體 + 繁體 + <strong>粵語</strong></td><td>英文 + 西班牙文</td><td class='us'>繁體 + 注音</td></tr></tbody>
     </table></div>
     <div class="callout">
@@ -248,16 +254,19 @@
       <li>
         <h3>Standards Overview 是上線中的跨課掌握度矩陣</h3>
         <p>每個學生 × CCRA.R.1 Detail／R.2 Main Idea／R.3 Chronology／R.4 Vocab／R.5 Text Structure／R.6 Point of View·Purpose／R.7 Media Integration…，三色帶 0-49％／50-79％／80-100％ 我原本判斷這只是靜態對齊頁，錯了 —— <strong>這正是我在第五節說我們沒有的東西，而它在線上跑著</strong></p>
+        <figure><img src="icr-dashboard.jpg" alt="iChineseReader 教師端 Dashboard — Standards Overview" loading="lazy" /></figure>
         <span class="at">/icr5/teacher · Standards Overview</span>
       </li>
       <li>
         <h3>批改收件匣只有一個 Score 欄</h3>
         <p>Basket 的欄位是 Student Name／Task／Book Title／Status／Type／Score／Submit Date <strong>沒有正確率、每分鐘字數、錯誤類型</strong> —— 做自動語音評分的產品需要那些欄位（Amira 的 running record 就是給錯誤類型的）</p>
+        <figure><img src="icr-basket.jpg" alt="iChineseReader Basket 批改收件匣" loading="lazy" /></figure>
         <span class="at">/icr5/teacher/basket</span>
       </li>
       <li>
         <h3>全站沒有「IB Speaking」，但有粵語</h3>
         <p>行銷頁提過的 IB Speaking 在產品裡不存在（13 section 全掃過）—— 這消除了唯一可能讓結論翻案的未知 反而看到學生端閱讀器支援 <strong>國語／粵語</strong>，服務對象包含粵語背景華裔，跟我們市場不重疊</p>
+        <figure><img src="icr-nav.jpg" alt="iChineseReader 教師端 13 個 section 導覽" loading="lazy" /></figure>
         <span class="at">/icr5/teacher/* · /book/</span>
       </li>
     </ol>
