@@ -12,6 +12,7 @@ import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/perso
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
 import { encourageAccuracy, encourageReadingDone } from '../../utils/encouragement';
+import { SHOW_READING_ACCURACY } from '../../config/readingScoreDisplay';
 import type { Story } from '../../types';
 import type { FullReadingResult } from '../../types';
 import type { ReadingAttempt } from '../../types';
@@ -111,8 +112,9 @@ const AssessmentReadingSummary: React.FC<AssessmentReadingSummaryProps> = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
-          {/* 準確度 */}
+        <div className={`grid gap-4 ${SHOW_READING_ACCURACY ? 'grid-cols-3' : 'grid-cols-1'}`}>
+          {/* 準確度 — Issue #2568/#2570: 捨棄正確率、只留流暢度，預設隱藏（計算保留） */}
+          {SHOW_READING_ACCURACY && (
           <div className="text-center p-4 bg-slate-50 rounded-2xl">
             <div className="w-24 h-24 mx-auto relative">
               <SafeResponsiveContainer width="100%" height="100%">
@@ -128,6 +130,7 @@ const AssessmentReadingSummary: React.FC<AssessmentReadingSummaryProps> = ({
             </div>
             <p className="text-xs text-gray-500 font-bold mt-1">逐段準確度</p>
           </div>
+          )}
 
           {/* 語速 CPM */}
           <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
@@ -143,7 +146,8 @@ const AssessmentReadingSummary: React.FC<AssessmentReadingSummaryProps> = ({
             </p>
           </div>
 
-          {/* 全文匹配率 */}
+          {/* 全文匹配率 — Issue #2568/#2570: 正確率類指標，隨 flag 隱藏 */}
+          {SHOW_READING_ACCURACY && (
           <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
             {fullMatchPct !== null ? (
               <>
@@ -164,6 +168,7 @@ const AssessmentReadingSummary: React.FC<AssessmentReadingSummaryProps> = ({
               </>
             )}
           </div>
+          )}
         </div>
       )}
 

@@ -56,6 +56,10 @@ _NEAR_SOUND_PAIRS: list[tuple[str, str]] = [
     ("sh", "s"),
     ("ch", "c"),
     ("n", "l"),
+    # Issue #2566 review (#2570): 補 r/l，與前端 pinyin/data.ts NEAR_SOUND_PAIRS 對齊
+    # （r/l 皆聲母，startswith 比對可正確處理）。前後鼻音 an/ang·en/eng·in/ing 因
+    # _is_near_sound 目前只比對開頭、抓不到帶聲母的韻母混淆，另立 follow-up issue 處理。
+    ("r", "l"),
 ]
 
 
@@ -268,13 +272,26 @@ def _build_fallback_result(spoken_text: str, target_text: str) -> dict:
             stats["correct_count"] += 1
             diff_tokens.append({"char": t_ch, "type": "correct"})
             correct += 1
-        elif is_homophone(t_ch, s_ch) or _is_near_sound(t_ch, s_ch):
+        elif _is_near_sound(t_ch, s_ch):
+            # Issue #2566: 台灣口音三類（前後鼻音/捲舌/n·l·r·l）視為「唸對」→ correct，
+            # 計入 correct_count/CPM，與前端 textDiff.classifyMatch 對齊（口音通融要真正
+            # 反映在流暢度；避免 Gemini fallback 覆蓋 CPM 時前後端口徑不一致）。
+            # 真同音字（is_homophone，如 在/再）仍為 forgiven：只進通過率、不進 CPM。
+            stats["correct_count"] += 1
+            diff_tokens.append({
+                "char": t_ch,
+                "type": "correct",
+                "spoken": s_ch,
+                "reason": "近音字",
+            })
+            correct += 1
+        elif is_homophone(t_ch, s_ch):
             stats["forgiven_count"] += 1
             diff_tokens.append({
                 "char": t_ch,
                 "type": "forgiven",
                 "spoken": s_ch,
-                "reason": "同音字" if is_homophone(t_ch, s_ch) else "近音字",
+                "reason": "同音字",
             })
             forgiven += 1
         else:

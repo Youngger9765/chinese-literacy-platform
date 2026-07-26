@@ -20,8 +20,10 @@ from app.services.reading_evaluation_service import (
     _apply_short_text_compensation,
     _build_fallback_result,
     _calculate_tier,
+    _is_near_sound,
     _normalize_text,
 )
+from app.services.stt_service import is_homophone
 from app.services.persona import Thresholds
 
 MENGCHANGJUN_LINE = (
@@ -354,3 +356,54 @@ async def test_short_text_lowers_pass_threshold():
     )
     effective_pass = result["thresholds"]["reading_pass"]
     assert effective_pass < Thresholds.READING_PASS
+
+
+# ===========================================================================
+# 口音通融分類 golden set (Issue #2566 / #2570 review) — red-green regression
+#
+# 對齊前端 frontend/src/utils/textDiff.accentTolerance.test.ts：
+#   曾教授三類台灣口音（前後鼻音*/捲舌/n·l·r·l）視為「唸對」→ correct（計入
+#   correct_count/CPM）；真同音字（is_homophone）仍 forgiven；其餘真念錯仍 wrong。
+#   (*前後鼻音因 _is_near_sound 目前只比對開頭抓不到帶聲母者，另立 issue #2572)
+# 移除 reading_evaluation_service 的 `elif _is_near_sound: correct` 分支即會紅。
+# ===========================================================================
+
+
+class TestAccentToleranceClassification:
+    def test_is_near_sound_detects_three_categories(self):
+        assert _is_near_sound("知", "資")   # 捲舌 zh/z
+        assert _is_near_sound("是", "四")   # 捲舌 sh/s
+        assert _is_near_sound("吃", "詞")   # 捲舌 ch/c
+        assert _is_near_sound("你", "李")   # n/l
+        assert _is_near_sound("然", "懶")   # r/l（#2570 review 補）
+
+    def test_is_near_sound_excludes_true_homophone(self):
+        # 真同音字不是 near-sound（避免把標準開太寬）
+        assert not _is_near_sound("在", "再")
+        assert is_homophone("在", "再")
+
+    def test_near_sound_classified_correct_into_cpm(self):
+        # 知→資（zh/z 口音）+ 道完全相同 → 兩字都 correct、計入 correct_count
+        r = _build_fallback_result(spoken_text="資道", target_text="知道")
+        assert r["stats"]["correct_count"] == 2
+        assert r["stats"]["forgiven_count"] == 0
+        assert "forgiven" not in [t["type"] for t in r["diff_tokens"]]
+
+    def test_rl_confusion_classified_correct(self):
+        # r/l（#2570 review 新補）：懶→然 應判 correct
+        r = _build_fallback_result(spoken_text="懶", target_text="然")
+        assert r["stats"]["correct_count"] == 1
+        assert r["stats"]["forgiven_count"] == 0
+
+    def test_true_homophone_still_forgiven(self):
+        # 負向控制：真同音字（在/再）仍 forgiven，不進 correct_count/CPM
+        r = _build_fallback_result(spoken_text="再", target_text="在")
+        assert r["stats"]["forgiven_count"] == 1
+        assert r["stats"]["correct_count"] == 0
+
+    def test_genuine_mispronunciation_still_wrong(self):
+        # 負向控制：非三類的真念錯（馬/知）仍 wrong
+        r = _build_fallback_result(spoken_text="馬", target_text="知")
+        assert r["stats"]["wrong_count"] == 1
+        assert r["stats"]["correct_count"] == 0
+        assert r["stats"]["forgiven_count"] == 0
