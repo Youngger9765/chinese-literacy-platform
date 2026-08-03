@@ -20,6 +20,7 @@ from ..services.ai_service import generate_story_structure, grade_story_structur
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..services.lesson_content_loader import get_lesson_content
+from ..services.lesson_layer_loaders import get_key_reading_passages  # 重點朗讀對照 (#2562)
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -437,6 +438,12 @@ def get_story(story_id: str):
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
+    # Issue #2562: 重點朗讀指定段落 — 依 lesson_code(grade_code) 從對照表合併。
+    # 對照表為權威來源（新規則：只取 ☞ 那一段），優先於課文檔內既有 key_reading
+    # （取代舊 pilot 的「☞→全文結尾」值）；查無此課才 fallback 課文檔既有值。
+    mapped_key_reading = get_key_reading_passages().get(story.get("grade_code"))
+    key_reading = mapped_key_reading or story.get("key_reading")
+
     return StoryDetail(
         id=story["id"],
         lesson_number=story["lesson_number"],
@@ -458,7 +465,7 @@ def get_story(story_id: str):
         # Full video list (#1683): catalog has multiple videos; frontend KnowledgeStation renders all.
         video_links=story.get("video_links"),
         reading_benchmark=story["reading_benchmark"],
-        key_reading=story.get("key_reading"),  # 重點朗讀指定段 (#2559)
+        key_reading=key_reading,  # 重點朗讀指定段 (#2559; #2562 對照表合併)
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
