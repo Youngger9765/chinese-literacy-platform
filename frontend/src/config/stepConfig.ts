@@ -122,6 +122,9 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   // 重點朗讀（保留 step id 'full-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
   // 重點段資料就緒前，FullReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
   // （見 docs/reading-key-passage-TODO.md、skill build-key-reading）。
+  // ⚠️ 改這個 id 一定要同步更新後端 `backend/app/models/session.py` 的 `_FRONTEND_STEP_ALIAS`
+  // （前端 step key → 後端 canonical key → step number）。後端查無此 key 會算成 0，
+  // 完成度掉單、作業提交卡住且靜默無 error（#2588）。
   'full-reading': {
     id: 'full-reading',
     label: '重點朗讀',
