@@ -41,9 +41,25 @@ date: 2026-08-04
 
 ### R2 平台播放頁
 
-- 學生掃 QR code 直接落到該課的示範朗讀播放頁，不需登入、不需轉平台
+- 學生掃 QR code 直接落到該課的示範朗讀播放頁，不需轉平台
 - 播放頁旁接「開始朗讀」→ 直接進現有朗讀評分流程
 - **防呆優先**：使用端的老師不一定熟電子產品，操作要「按了就出結果」，不要多層設定
+
+#### ⚠️ 免登入播放的架構限制（實作前必讀）
+
+紙本 QR code 的使用情境是**學生掃碼即聽**，不可能先登入。但**現有的 TTS endpoint 明確拒絕匿名請求**：
+
+- `backend/app/routes/tts.py` 的 `POST /api/tts/synthesize` 有 `current_user: User = Depends(get_current_user)`
+- 該處註解寫明理由：`Anonymous requests are rejected with 401 to prevent bill-washing attacks on the Azure/GCP TTS quota`
+- 前端 `frontend/src/services/ttsApi.ts` 也是帶 auth header 呼叫
+
+**所以這個播放頁不可以打 `/api/tts/synthesize`。** 免登入播放只能走：
+
+1. **播放預先產生好的音檔**（批次產出時就寫進 GCS，播放頁只讀已存在的物件）
+2. 音檔的取得方式二選一：**同源 `/assets` proxy**（已有的做法，見 `#2486` 收 public bucket 那條路）或**簽名 URL**
+3. ⛔ 不要為了免登入而把 `synthesize` 的 auth 拿掉 —— 那正是它存在的理由（防止有人用我們的 quota 燒錢）
+
+換句話說：**示範朗讀是「批次預生成 + 靜態播放」，不是「即時合成」**。這個區分決定整個實作方向，別做成即時呼叫。
 
 ### R3 QR code 批次交付
 
@@ -77,7 +93,32 @@ date: 2026-08-04
 
 **三個 provider 全是雲端 API，不是本機模型** → 批次產出全部課數的音檔是「寫腳本 + 付 API 費」等級（依公開牌價粗算，全文部分約個位數美金一次性，且有快取不重跑），**不需要 GPU 或專用機器**。
 
-⚠️ `TTS_PROVIDER` 本機 default = `azure`；prod 實際值以 Cloud Run env var 為準（`CLAUDE.md` 另有記載 Google Chirp3-HD，兩者不一致 → 實作前先查 Cloud Run 設定，不要憑文件）。
+#### prod 實際跑哪個 provider（2026-08-04 查證，三份文件曾各說各話）
+
+| 來源 | 說法 | 判定 |
+|---|---|---|
+| **prod Cloud Run** `lingoleap-backend` | **沒有設任何 `TTS_*` env var** | ✅ **真相** |
+| `backend/app/services/tts/__init__.py:11` | `TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")` | ✅ 與上一列合起來 → **prod 實際 primary = Azure** |
+| `docs/DEVELOPMENT_GUIDE.md:311` | 「Gemini 3.1 Flash TTS（primary，台灣腔）」 | ❌ **過時** — `gemini31` 要顯式設定 env 才會走到 |
+| `specs/modules/tts/INTENT.md` | default `azure`，prod 待查 | ✅ 正確但當時未定案 → 本文件即為定案 |
+
+查法（可複現，**只取 env 名稱不取值**，避免把 secret dump 進 log）：
+
+```bash
+gcloud run services describe lingoleap-backend --region asia-east1 --project lingoleap-dev \
+  --format='value(spec.template.spec.containers[0].env[].name)' | tr ';' '\n' | grep -i TTS
+```
+
+派工前請自己重跑一次 —— 這份是 2026-08-04 的快照，env var 隨時可能被加上。
+
+#### ⚠️ 若批次改用 `gemini31` provider：有本機 `ffmpeg` 依賴
+
+`backend/app/services/tts/providers/gemini.py` 用 `subprocess` 呼叫 **`ffmpeg`** 把 PCM 轉 MP3。
+`ffmpeg` 不存在時它 catch `FileNotFoundError` 並**降級回傳 WAV bytes**，但呼叫端仍以 `audio/mpeg` 回應、cache path 仍是 `.mp3`
+→ **副檔名 / MIME / 實際 bytes 三者不一致**，批次產出 180 課會整批帶著這個錯。
+
+- prod 目前走 Azure，**這個風險現在不成立**
+- 但批次腳本若為了音質改用 `gemini31`，**執行環境必須有 `ffmpeg`**，且要驗第一個產出物的實際 bytes 是不是真 MP3（`file` 或 `ffprobe`），不要只看副檔名
 
 ## 驗收條件（BDD）
 
@@ -98,10 +139,13 @@ Given 同一課重跑批次
 When 音檔內容未變更
 Then 命中 GCS 快取，不重複呼叫 TTS API
 
-Given 學生完成同一課多次朗讀
-When 檢視統計圖表
-Then 以 5 或 10 課為區段顯示流暢度 / 字數 / 語詞的成長曲線
+Given 學生掃描 QR code 抵達播放頁且未登入
+When 播放頁取得音檔
+Then 不得呼叫 /api/tts/synthesize（該端點對匿名回 401），必須讀取已預生成的音檔物件
 ```
+
+⚠️ **R4 的統計圖表沒有寫成 BDD**，因為它現在還不可機器驗證 —— 「5 課或 10 課」到底哪個、bucket 怎麼切、尾段不足一組怎麼算、語詞分數的資料來源是什麼，全部未定（語詞資料來源本身還列在下方開放問題裡）。
+**拿到教材端的紙本監測表之後才補這段驗收條件**，在那之前不要寫測試去猜規則。
 
 ## 開放問題
 
