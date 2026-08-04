@@ -326,13 +326,22 @@ BLOB=$(git hash-object -w docs/index.html)
 NOJ=$(printf '' | git hash-object -w --stdin)
 TREE=$(printf '100644 blob %s\t.nojekyll\n100644 blob %s\tindex.html\n' "$NOJ" "$BLOB" | git mktree)
 PARENT=$(git ls-remote origin refs/heads/gh-pages | cut -f1)
-COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "chore: sync Brand Book")
+
+# fail-closed：branch 被誤刪時 PARENT 會是空字串，git commit-tree -p "" 會直接失敗
+if [ -n "$PARENT" ]; then
+  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "chore: sync Brand Book")
+else
+  echo "⚠️ gh-pages 不存在，改建 root commit（等於重建該 branch）"
+  COMMIT=$(git commit-tree "$TREE" -m "chore: republish Brand Book (gh-pages was missing)")
+fi
+
 git push origin "${COMMIT}:refs/heads/gh-pages"   # ⚠️ 大括號必要，zsh 會把 $COMMIT:r 當 modifier 吃掉
-gh api -X POST repos/Youngger9765/chinese-literacy-platform/pages/builds  # 改 source 後不會自動 rebuild
 ```
 
-> 驗證一定要帶 **positive + negative control**：Brand Book 回 200 且內容含 "Brand Book"、敏感路徑回 404、不存在的路徑也回 404。少了 positive control，整站掛掉也會看起來像「敏感檔下架成功」。
-> 有一份自動同步的 workflow 已寫好但**未 commit**（`.github/workflows/*.yml` 落在 pre-commit gate 的「未知檔案類型」→ 需先過 code review）。
+**build 觸發**：改「Pages source 設定」**不會**自動 rebuild —— 2026-08-04 實測改完 120 秒後舊 build 仍在服務敏感路徑，要 `gh api -X POST repos/Youngger9765/chinese-literacy-platform/pages/builds` 手動觸發。
+至於「push 到 `gh-pages` 會不會自動觸發 build」**尚未實測**（一般 Pages 對 source branch push 會觸發）→ 保險起見同步完就跑一次上面那個 POST，並用下面的方法驗證線上真的變了。
+
+> 驗證一定要帶 **positive + negative control**：Brand Book 回 200 **且內容含 "Brand Book"**、敏感路徑回 404、不存在的路徑也回 404。少了 positive control，整站掛掉也會看起來像「敏感檔下架成功」。
 
 ## 參考專案
 
