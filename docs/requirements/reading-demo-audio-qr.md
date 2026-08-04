@@ -93,32 +93,40 @@ date: 2026-08-04
 
 **三個 provider 全是雲端 API，不是本機模型** → 批次產出全部課數的音檔是「寫腳本 + 付 API 費」等級（依公開牌價粗算，全文部分約個位數美金一次性，且有快取不重跑），**不需要 GPU 或專用機器**。
 
-#### prod 實際跑哪個 provider（2026-08-04 查證，三份文件曾各說各話）
+#### 實際跑哪個 provider：**Gemini 3.1（`gemini31`）**
 
 | 來源 | 說法 | 判定 |
 |---|---|---|
-| **prod Cloud Run** `lingoleap-backend` | **沒有設任何 `TTS_*` env var** | ✅ **真相** |
-| `backend/app/services/tts/__init__.py:11` | `TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")` | ✅ 與上一列合起來 → **prod 實際 primary = Azure** |
-| `docs/DEVELOPMENT_GUIDE.md:311` | 「Gemini 3.1 Flash TTS（primary，台灣腔）」 | ❌ **過時** — `gemini31` 要顯式設定 env 才會走到 |
-| `specs/modules/tts/INTENT.md` | default `azure`，prod 待查 | ✅ 正確但當時未定案 → 本文件即為定案 |
+| `.github/workflows/deploy.yml`（prod） | `TTS_PROVIDER=gemini31` | ✅ **真相** |
+| `.github/workflows/staging-deploy.yml` | `TTS_PROVIDER=gemini31` | ✅ 同上 |
+| `.github/workflows/preview-deploy.yml` | `TTS_PROVIDER=gemini31` | ✅ 同上 |
+| `backend/app/services/tts/__init__.py:11` | default `azure` | ⚠️ **只在 env 未設時生效** — 三個部署環境全都覆寫了，實務上碰不到這個 default |
+| `docs/DEVELOPMENT_GUIDE.md:311` | 「Gemini 3.1 Flash TTS（primary，台灣腔）」 | ✅ **正確** |
+| `.github/workflows/{pytest,keypoints-manifest-gate}.yml` | `TTS_PROVIDER=google` | 測試環境專用，非部署值 |
 
-查法（可複現，**只取 env 名稱不取值**，避免把 secret dump 進 log）：
+⚠️ **不要拿 `backend/specs/test_tts_spec.py` 的 Contract 1（"default is azure"）當作「跑 azure」的依據** —— 它測的是「env 不存在時的 code default」這個契約，不是實際部署行為。這個區別害我一開始判斷相反。
+
+驗 runtime 實際值（需要 gcloud token 有效；**別用 `cmd | grep X || echo "沒有"` 的寫法**，gcloud 失敗時 stdout 空、grep exit 1、fallback 會印出「沒有」，看起來跟「真的沒設」一模一樣）：
 
 ```bash
-gcloud run services describe lingoleap-backend --region asia-east1 --project lingoleap-dev \
-  --format='value(spec.template.spec.containers[0].env[].name)' | tr ';' '\n' | grep -i TTS
+OUT=$(gcloud run services describe lingoleap-backend --region asia-east1 \
+  --project lingoleap-dev --format='value(spec.template.spec.containers[0].env[].name)' 2>&1); RC=$?
+[ $RC -ne 0 ] && { echo "查詢失敗（不是「沒設」）: $OUT" | head -2; exit 1; }
+echo "$OUT" | tr ';,' '\n\n' | grep -c ENVIRONMENT   # positive control：先證明抓得到已知存在的 env
+echo "$OUT" | tr ';,' '\n\n' | grep TTS
 ```
 
-派工前請自己重跑一次 —— 這份是 2026-08-04 的快照，env var 隨時可能被加上。
+#### 🔴 `gemini31` 有本機 `ffmpeg` 依賴 —— 批次產出前必須確認
 
-#### ⚠️ 若批次改用 `gemini31` provider：有本機 `ffmpeg` 依賴
+因為**所有部署環境都跑 `gemini31`**，這是真實風險不是假設：
 
 `backend/app/services/tts/providers/gemini.py` 用 `subprocess` 呼叫 **`ffmpeg`** 把 PCM 轉 MP3。
 `ffmpeg` 不存在時它 catch `FileNotFoundError` 並**降級回傳 WAV bytes**，但呼叫端仍以 `audio/mpeg` 回應、cache path 仍是 `.mp3`
-→ **副檔名 / MIME / 實際 bytes 三者不一致**，批次產出 180 課會整批帶著這個錯。
+→ **副檔名 / MIME / 實際 bytes 三者不一致**。批次跑 180 課會**整批**帶著這個錯，而且不會有任何 exception。
 
-- prod 目前走 Azure，**這個風險現在不成立**
-- 但批次腳本若為了音質改用 `gemini31`，**執行環境必須有 `ffmpeg`**，且要驗第一個產出物的實際 bytes 是不是真 MP3（`file` 或 `ffprobe`），不要只看副檔名
+- 批次執行環境（本機或 CI）**必須有 `ffmpeg`**
+- 產出第一個檔案就要驗**實際 bytes 是不是真 MP3**（`file <檔>` 或 `ffprobe`），不要只看副檔名
+- 另有既存的 Variant A 設定要一起帶：`GEMINI_TTS_PROMPT_PREFIX`（台灣腔 prompt）+ GCS path 是 `gemini31-prompt-only/sentences/`（PR #1133 切換過，已有 2408 個預生成句級檔案可命中快取）
 
 ## 驗收條件（BDD）
 
