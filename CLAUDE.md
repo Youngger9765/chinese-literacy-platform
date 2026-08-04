@@ -307,6 +307,33 @@ private/omo-real-samples/2026-05-18-batch-results/
 | 完整平台說明書 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/full.html |
 | 閱讀理解技能樹研究 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/research.html |
 
+### ⚠️ GitHub Pages 只發佈 Brand Book，不發佈 docs/（2026-08-04 收斂）
+
+**這個 repo 是 PUBLIC，而 GitHub Pages 曾設成 `main` branch 的 `/docs`** → 整個 `docs/` 目錄（含內部會議記錄、合作方顧問姓名、實習生就讀學校、product owner 個人背景）都被一個對外網站服務中，任何人與 Google 爬蟲可直接讀 `.md`（實測 `https://youngger9765.github.io/chinese-literacy-platform/meetings/*.md` 回 200 `text/markdown`）。
+
+**現行設定**：Pages source = **`gh-pages` branch / root**，該 branch 是 orphan、只有兩個檔（`index.html` = Brand Book、`.nojekyll`）。`docs/` 已不再對外發佈（實測敏感路徑回 404、Brand Book 仍 200、negative control 404）。
+
+| 情況 | 做法 |
+|------|------|
+| 改了 `docs/index.html`（Brand Book） | **線上不會自動更新** → 要手動把它推成 `gh-pages` 的 root（見下方指令），否則 github.io 上還是舊版 |
+| 想把 Pages source 改回 `main:/docs` | ⛔ **禁止** — 那會立刻重新對外發佈整個 `docs/`，包含內部會議記錄與個資 |
+| 新增任何含顧問姓名／客戶內容／實習生個資的文件 | 進 **L2 PRIVATE** `kist-curriculum`，不進這個 PUBLIC repo 的 `docs/`（完整原始版備份在 `kist-curriculum/l3-docs-originals/`） |
+
+同步 Brand Book 到線上（不動工作樹的 plumbing 做法）：
+
+```bash
+BLOB=$(git hash-object -w docs/index.html)
+NOJ=$(printf '' | git hash-object -w --stdin)
+TREE=$(printf '100644 blob %s\t.nojekyll\n100644 blob %s\tindex.html\n' "$NOJ" "$BLOB" | git mktree)
+PARENT=$(git ls-remote origin refs/heads/gh-pages | cut -f1)
+COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "chore: sync Brand Book")
+git push origin "${COMMIT}:refs/heads/gh-pages"   # ⚠️ 大括號必要，zsh 會把 $COMMIT:r 當 modifier 吃掉
+gh api -X POST repos/Youngger9765/chinese-literacy-platform/pages/builds  # 改 source 後不會自動 rebuild
+```
+
+> 驗證一定要帶 **positive + negative control**：Brand Book 回 200 且內容含 "Brand Book"、敏感路徑回 404、不存在的路徑也回 404。少了 positive control，整站掛掉也會看起來像「敏感檔下架成功」。
+> 有一份自動同步的 workflow 已寫好但**未 commit**（`.github/workflows/*.yml` 落在 pre-commit gate 的「未知檔案類型」→ 需先過 code review）。
+
 ## 參考專案
 
 方大哥的原始實作：`github.com/Shinjou/lingoleap-ai-reading-tutor`（唯讀參考，不修改）
