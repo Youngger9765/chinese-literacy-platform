@@ -1,0 +1,86 @@
+name: Sync Brand Book to gh-pages
+
+# Pages serves the gh-pages branch, which carries ONLY docs/index.html.
+# Without this, editing the Brand Book on main would silently never reach
+# the live site. Pages must not serve main:/docs — that would publish the
+# whole docs/ tree, including internal meeting records.
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/index.html']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write        # required to request a Pages build (see the last step)
+
+# Two merges touching docs/index.html in quick succession would each read the
+# same PARENT, and the second push would be rejected as non-fast-forward —
+# leaving the newer Brand Book unpublished until someone noticed. Serialise
+# instead of cancelling: the later run must still get its content out.
+concurrency:
+  group: sync-brand-book-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish docs/index.html as gh-pages root
+        id: publish
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          BLOB=$(git hash-object -w docs/index.html)
+          NOJ=$(printf '' | git hash-object -w --stdin)
+          TREE=$(printf '100644 blob %s\t.nojekyll\n100644 blob %s\tindex.html\n' "$NOJ" "$BLOB" | git mktree)
+          PARENT=$(git ls-remote origin refs/heads/gh-pages | cut -f1)
+          if [ -z "$PARENT" ]; then echo "::error::gh-pages branch missing"; exit 1; fi
+          if [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
+            echo "Brand Book unchanged on gh-pages, nothing to publish"
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "chore: sync Brand Book from ${GITHUB_SHA:0:7}")
+          git push origin "${COMMIT}:refs/heads/gh-pages"
+          echo "Published $COMMIT to gh-pages"
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      # A push made with GITHUB_TOKEN does not trigger a Pages build, so updating
+      # the branch alone would leave the live site stale — exactly the gap this
+      # workflow exists to close. Measured the same thing by hand on 2026-08-04:
+      # after changing the Pages source, the old build kept serving for 120s+
+      # until POST /pages/builds was called. Ask for the build explicitly.
+      - name: Request a Pages build
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null
+          echo "Requested Pages build for ${GITHUB_REPOSITORY}"
+
+      # Prove the live site actually serves the new bytes. Without this the job
+      # goes green on "pushed the branch", which is the weaker claim.
+      - name: Verify the live site picked it up
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          set -euo pipefail
+          URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+          EXPECT=$(git hash-object docs/index.html)
+          for i in $(seq 1 20); do
+            sleep 15
+            LIVE=$(curl -fsSL "$URL" 2>/dev/null | git hash-object --stdin || echo "")
+            if [ "$LIVE" = "$EXPECT" ]; then
+              echo "Live site matches docs/index.html after $((i*15))s"; exit 0
+            fi
+          done
+          echo "::error::Pages did not serve the new Brand Book within 5 minutes ($URL)"
+          exit 1
