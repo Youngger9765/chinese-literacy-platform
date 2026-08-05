@@ -38,11 +38,19 @@ jobs:
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           set -euo pipefail
+          # actions/checkout is a shallow clone (fetch-depth: 1), so the gh-pages
+          # commit is NOT a local object — `git ls-remote` returns its SHA but
+          # `rev-parse <sha>^{tree}` then dies with "not a valid object" (exit 128).
+          # Measured on the first real run: local testing cannot catch this, because
+          # a developer clone has the object. Fetch just that one commit.
+          if ! git fetch --no-tags --depth=1 origin \
+                 +refs/heads/gh-pages:refs/remotes/origin/gh-pages 2>/dev/null; then
+            echo "::error::gh-pages branch missing — cannot publish Brand Book"; exit 1
+          fi
+          PARENT=$(git rev-parse refs/remotes/origin/gh-pages)
           BLOB=$(git hash-object -w docs/index.html)
           NOJ=$(printf '' | git hash-object -w --stdin)
           TREE=$(printf '100644 blob %s\t.nojekyll\n100644 blob %s\tindex.html\n' "$NOJ" "$BLOB" | git mktree)
-          PARENT=$(git ls-remote origin refs/heads/gh-pages | cut -f1)
-          if [ -z "$PARENT" ]; then echo "::error::gh-pages branch missing"; exit 1; fi
           if [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
             echo "Brand Book unchanged on gh-pages, nothing to publish"
             echo "published=false" >> "$GITHUB_OUTPUT"
