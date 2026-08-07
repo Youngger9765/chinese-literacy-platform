@@ -45,6 +45,8 @@ jobs:
       #   - render-smoke: mount-crash guard (#2279/#2289)
       #   - resetTutorStep / LiveTutor.readAgain: 「再讀一次」reset must clear every
       #     completion/成績 source + the single-paragraph residual diff (#2532)
+      #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
+      #     banner) instead of silently playing a machine voice with no signal (#2609)
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts
