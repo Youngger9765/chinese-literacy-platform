@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-07-03",
+  "lastReview": "2026-08-07",
   "skills": {
     "1": {
       "level": 3,
@@ -337,7 +337,7 @@
     "目前 skill 都穩在 level 4 沒新證據可升。先解決 blocker（#1601 / #1340），有新 PR merge 後才有 evidence 可評",
     "Pattern note：啟翔過去一個月活躍度下降 — 4/23 ~ 5/8 各有 1 PR merge（#1480、#1130），5/8 後 0 PR。建議會議了解卡點（學業 / 興趣 / 技能 gap / 任務不合適）"
   ],
-  "summary": "5/22~5/29 共 0 個 PR merge — 連續第二週停滯（上次 merge 是 5/8 PR #1480）。Open PR #1601 自 5/22 起 0 update，CONFLICTING 狀態，已 stale。Open issues：#1340（7/1 deadline 閱讀聚光燈 AI 助教，已 4 週無進展）+ #1601 step_progress + #1635/#1636 ai-tutor + #1609 OMO test。本週無技能更新（沒新 PR evidence）。⚠️ 重點訊號：啟翔活躍度下降兩週，加上 7/1 deadline 倒數 33 天 + 教授 6/1 review 倒數 4 天，建議本週會議直接對話了解卡點 — pattern 看起來不是技能問題（過去 PR 品質好），更像 task allocation / motivation / scope alignment 議題",
+  "summary": "8/3~8/7 共 0 個 PR merge。本週無技能更新（無新 PR evidence，依規則不加 history entry）。3 個 open PR 全部自 7/19~7/20 起未更新，已卡 19 天：#2551 圖文整合課左右對照、#2552 單空格重點表填了卻送不出（#2193 regression）、#2554 聚光燈 guided_steps 範例子流程用整課 passage 判分導致答錯被判對（#2553）。#2561 二修教材整合（排序校正→內容更新→聚光燈/重點表檢查）自 7/21 建立起 17 天 0 comment / 0 PR。⚠️ 重點訊號：#2552 與 #2554 修的正是『重點表送不出』『聚光燈答錯判對』——也就是說『確認重點表、聚光燈品質』這題在這兩個 PR merge 前根本問不出答案，修好的東西還鎖在 PR 裡。卡點看起來在 review 端不在他端，建議本週先清 PR 再談 #2561 交付",
   "issues": [
     {
       "id": "環境建置",

@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-07-03",
+  "lastReview": "2026-08-07",
   "skills": {
     "1": {
       "level": 4,
@@ -334,7 +334,7 @@
       ]
     },
     "14": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -356,6 +356,11 @@
           "date": "2026-06-09",
           "level": 3,
           "reason": "本輪 4 個 PR 全部附測試，且涵蓋三種不同類型：(1) PR #2094 OmoCameraScanner.test.tsx 5 vitest cases（getUserMedia mock、track cleanup、佇列上限、permission denial 中文訊息）— 測試瀏覽器 API side effect 的進階場景；(2) PR #2088 test_g7l30_spotlight_step_2080.py 8 pytest cases（assert build_all_lessons 載入結果，防止 YAML 改壞）— 資料層回歸測試；(3) PR #2091 在 PR body 說明了以 935 個 fill_in_blank 全量驗證過濾規則（0 誤傷）— 資料驗證作為測試策略。不是「改完補一個 test」，而是根據被測物選對測試類型，level 升 3"
+        },
+        {
+          "date": "2026-08-07",
+          "level": 4,
+          "reason": "PR #2571（+538/-5，5 檔，13 則 review 討論）把 148 課的重點段抽取拆成四個處置桶並逐課寫明理由：123 課上線／3 課 ☞ 段號衝突待人工複核／13 課本無念順順段／12 課 passage 有缺陷（填空挖空、簡體、G8-L03b 內容掛錯課、PDF 文字層錯亂）。缺陷課刻意不進對照檔、讓前端 fallback 唸全文，而不是硬塞一個看起來有值的 passage。搭配 PR #2589 從『stepId 寫死』推導出漂移路徑（進度寫 A key、完成判定讀 B key，靜默無 error → 作業永遠無法提交）並改成型別上不可能發生。兩者都是把一個模糊問題切成可判定的分類再逐類處理，不是逐案硬修"
         }
       ]
     },
@@ -391,7 +396,7 @@
       ]
     },
     "17": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -408,6 +413,11 @@
           "date": "2026-06-09",
           "level": 3,
           "reason": "PR #2091 reference 對齊 + 過濾影片雜訊 + 依 UI 關卡順序批改（+300/-5，pure Python backend）：(1) 媒體雜訊過濾——識別 fill_in_blank 中夾雜的影片連結為雜訊 topic，設計過濾規則並以 935 個題目全量驗證 0 誤傷（這是以資料規模作為測試策略，而非寫 mock test）；(2) 確定性排序——以 _build_question_schema(lesson) 產出的 UI 關卡順序作為 source of truth，而非用 Gemini 回傳的隨機掃描順序，選擇「哪個順序是正確的 ground truth」是業務判斷不只是排序技巧；(3) PR #2088 fix(lesson-data) G7-L30 聚光燈補題目 + 移除 story-structure + 清 fb 雜訊，附 8 個 pytest cases 回歸測試 YAML 載入。後端 Python 已超出「讀懂並加工」的 level 2，開始能自主設計業務邏輯與對應的驗證策略"
+        },
+        {
+          "date": "2026-08-07",
+          "level": 4,
+          "reason": "PR #2571 純後端：新增 backend/data/key_reading_passages.yml（123 課對照表）+ lesson_layer_loaders.get_key_reading_passages() 一次載入快取、缺檔/解析失敗回空 dict 不 fail，並在 stories.py 詳情端點做『對照表優先、查無才 fallback 課文檔』的合併。測試驗真 API 回應（TestClient）而非 loader dict——正是 #2559 那次 schema 加錯 class 變 no-op 的教訓。延續 #1979 pypdfium2 / #1980 list endpoint 的後端 pattern，consistent 且這次自己選了 fail-open 的載入策略"
         }
       ]
     },
@@ -455,7 +465,7 @@
     "元件設計模式（#13）已升到 level 5，OmoPaperResultBanner 的 zero-prop-pollution isolation pattern 是教科書級示範。可考慮在下個 PR 嘗試 custom hook 抽取（把相機掃描器的 getUserMedia lifecycle 封裝成 useCameraScanner hook），這樣 #11 React 進階也有機會進一步鞏固",
     "測試能力（#14）在 level 3，本輪三種測試類型（browser API mock / 資料層回歸 / 全量資料驗證）展現測試策略思維。下一步：嘗試為現有 backend route 補 contract test（status code + response schema + auth boundary），這是 level 4 的條件"
   ],
-  "summary": "6/2~6/8 共 6 個 PR merge（#2024 / #2088 / #2090 / #2091 / #2093 / #2094），總 +2043/-101，是靖杭技能跳躍最多的一週。最重要的里程碑：#2093 紙本批改同步 LearningSession 的三個設計決策（best-effort / no-migration / self-study-only）同時展現架構判斷、業務語意理解、和可測試設計，是 level 5 獨立開發（#16）的解鎖依據。#2094 相機掃描器（getUserMedia + canvas + track cleanup + vitest mock）解鎖 React 進階（#11）level 5。#2090 group-by-lesson component + #2093 OmoPaperResultBanner isolation pattern 解鎖元件設計模式（#13）level 5。#2091 後端確定性排序 + 全量資料驗證策略解鎖後端 Python（#17）level 3。本輪技能升級：#13 4→5 / #16 4→5 / #17 2→3。#14 測試（2→3，之前已記錄）/ #11 React 進階（4→5，之前已記錄）/ #1 Git（→4，之前已記錄）",
+  "summary": "8/3~8/7 共 2 個 PR merge（#2571 / #2589），+784/-9。#2571 重點朗讀 123 課指定段落對照表 是本週主線：純後端、對照表優先合併、測試驗真 API 回應，最值得記的是他把 148 課誠實拆成 123 上線／3 待複核／13 無念順順／12 缺陷，缺陷課寧可 fallback 唸全文也不硬塞。#2589 清掉自己 pilot 留下的 stepId 寫死技術債，9 個新測試附紅→綠證明（stash 掉改動先讓測試紅），並用同機 staging baseline 對照證明零 regression（兩邊都 33 failed）。本輪技能升級：#14 問題拆解 3→4 / #17 後端 Python 3→4。⚠️ 註：7/4~8/2 之間的 merged PR 未逐一回填技能樹（上次 review 停在 7/3），本次只採計 8/3 之後的證據",
   "issues": [
     {
       "id": "環境建置",
