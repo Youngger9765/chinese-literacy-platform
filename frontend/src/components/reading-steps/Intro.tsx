@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { fontForZhuyin } from '../../constants/fonts';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,7 +26,6 @@ interface IntroProps {
 }
 
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showWorksheetModal, setShowWorksheetModal] = useState(false);
   const [showUploadedModal, setShowUploadedModal] = useState(false);
   const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
@@ -129,51 +129,46 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     });
   }, [priorUpload, token]);
 
-  const speakIntro = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+  // #2607: AI 朗讀 — real Gemini TTS (same useTtsPlayback hook LiveTutor/FullReading
+  // use), replacing the old browser-only window.speechSynthesis version. Progress
+  // tracking (onSpeakingProgress) and realtime-diff clearing aren't needed on this
+  // page — Intro has no per-char highlight to sync, unlike LiveTutor's paragraph view.
+  const {
+    isTtsLoading,
+    isTtsSpeaking,
+    ttsError,
+    speakText,
+    stopTts,
+  } = useTtsPlayback(
+    () => {},
+    () => {},
+  );
 
-    // #1598: 課文簡介 only — never fall back to strategy/target text (which would
-    // read aloud "圖文題就是..." instead of the actual lesson topic).
-    // #2082 A1: start at story content directly — do NOT prepend title or metadata header.
-    const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
-    if (!introText) return;
-
-    const text = introText;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    // #2082 A1: brisker pace ~260-270 字/分 (product-tunable)
-    utterance.rate = 1.05;
-
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-      if (preferred) utterance.voice = preferred;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+  // #2607: stop any in-progress AI 朗讀 playback if the user navigates away from
+  // Intro via a path that doesn't already call stopTts() explicitly (breadcrumb
+  // 圖書館, 返回圖書館, or a step-chip quick-jump) — otherwise the fetched audio
+  // clip keeps playing after the page has unmounted.
+  useEffect(() => {
+    return () => {
+      stopTts();
     };
+  }, [stopTts]);
 
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        doSpeak();
-      };
-    } else {
-      doSpeak();
-    }
-  }, [story]);
+  // #1598: 課文簡介 only — never fall back to strategy/target text (which would
+  // read aloud "圖文題就是..." instead of the actual lesson topic).
+  // #2082 A1: start at story content directly — do NOT prepend title or metadata header.
+  const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
 
-  const stopSpeaking = () => {
-    window.speechSynthesis?.cancel();
-    setIsSpeaking(false);
-  };
+  const speakIntro = useCallback(() => {
+    if (!introText) return;
+    // #2607: deliberately NOT passing lessonId/paragraphIdx. introText comes from
+    // story.lessonIntro.course_intro, which is NOT one of story.content's paragraphs
+    // — the backend's canonical-sentence cache (GET /api/tts/mapping/{lessonId}) is
+    // keyed by story.content paragraph index. Passing an arbitrary paragraphIdx here
+    // would make useTtsPlayback play back whatever cached sentences exist at that
+    // index of the LESSON BODY instead of this text (see Intro.aiTts.test.tsx #3).
+    speakText(introText);
+  }, [introText, speakText]);
 
   return (
     <div
@@ -388,7 +383,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               or intro.background fallback. No longer falls back to strategy
               content (which used to leak into 課文簡介 and confuse students). */}
           {(() => {
-            const introText = story.lessonIntro?.course_intro || story.intro?.background;
             if (!introText) {
               return (
                 <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
@@ -418,10 +412,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 )}
 
                 <div className="pt-2">
-                  {isSpeaking ? (
+                  {isTtsSpeaking ? (
                     <button
                       type="button"
-                      onClick={stopSpeaking}
+                      onClick={stopTts}
                       aria-label="停止朗讀課文簡介"
                       aria-pressed={true}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
@@ -436,17 +430,27 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     <button
                       type="button"
                       onClick={speakIntro}
-                      aria-label="朗讀課文簡介"
+                      disabled={isTtsLoading}
+                      aria-label="AI 朗讀課文簡介"
                       aria-pressed={false}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                      aria-busy={isTtsLoading}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:opacity-60 disabled:cursor-wait"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                      </svg>
-                      朗讀
+                      {isTtsLoading ? (
+                        <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
+                        </svg>
+                      )}
+                      {isTtsLoading ? 'AI 朗讀中…' : 'AI 朗讀'}
                     </button>
                   )}
                 </div>
+
+                {ttsError && (
+                  <p className="text-xs text-red-500" role="alert">{ttsError}</p>
+                )}
               </div>
             );
           })()}
@@ -494,7 +498,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <button
           type="button"
           onClick={() => {
-            stopSpeaking();
+            stopTts();
             onStartReading();
           }}
           className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
