@@ -30,6 +30,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -125,8 +126,32 @@ def _upload_if_absent(bucket, blob_path: str, audio: bytes) -> bool:
         return False
 
 
+# Matches any CJK ideograph, ASCII letter, or digit. Used to catch sentences
+# that are entirely punctuation (see _has_speakable_content docstring below).
+_SPEAKABLE_RE = re.compile(r"[一-鿿㐀-䶿A-Za-z0-9]")
+
+
+def _has_speakable_content(text: str) -> bool:
+    """False if `text` has nothing to actually speak (only punctuation/whitespace).
+
+    Root cause of the 3 confirmed 0-byte objects found in #2614's live audit:
+    upstream sentence segmentation occasionally leaves a fragment that is
+    ENTIRELY punctuation ('。', '」', '」。'). _clean_for_tts only strips a
+    specific punctuation subset (~, ──, …), so these survive unchanged, pass
+    the (non-empty!) `if not cleaned` check, and get sent to Azure — which
+    answers HTTP 200 with an empty body because there is nothing to speak.
+
+    This is a different failure path than validate_mp3_bytes (which catches
+    Azure misbehaving on a *normal*, speakable input) — both guards stay:
+    this one keeps unspeakable text from ever being queued for synthesis;
+    that one catches Azure failing on text that should have worked.
+    """
+    return bool(_SPEAKABLE_RE.search(text))
+
+
 def load_sentences() -> list[dict]:
     items: list[dict] = []
+    skipped: list[tuple[str, int, int, str]] = []
     with JSONL.open(encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -135,7 +160,8 @@ def load_sentences() -> list[dict]:
             rec = json.loads(line)
             raw = rec["text"]
             cleaned = _clean_for_tts(raw)
-            if not cleaned:
+            if not cleaned or not _has_speakable_content(cleaned):
+                skipped.append((rec["lesson_id"], rec["paragraph_idx"], rec["sentence_idx"], raw))
                 continue
             items.append({
                 "raw_text": raw,
@@ -145,6 +171,10 @@ def load_sentences() -> list[dict]:
                 "paragraph_idx": rec["paragraph_idx"],
                 "sentence_idx": rec["sentence_idx"],
             })
+    if skipped:
+        logger.info("Skipped %d punctuation-only/unspeakable sentence(s):", len(skipped))
+        for lesson_id, p, s, raw in skipped:
+            logger.info("  lesson=%s ¶%s s%s  %r", lesson_id, p, s, raw)
     return items
 
 
