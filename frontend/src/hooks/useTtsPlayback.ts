@@ -45,6 +45,19 @@ export function useTtsPlayback(
    * next time speakText() is called.
    */
   const [ttsError, setTtsError] = useState<string | null>(null);
+  /**
+   * isTtsDegraded — true while audio is playing via the Web Speech API
+   * fallback (browser's built-in machine voice) because Cloud TTS was
+   * unreachable.  Distinct from `ttsError`: this is NOT a failure — playback
+   * is happening, just with lower quality — so the UI should show a visible
+   * "this isn't the AI voice" notice rather than a retry/error affordance.
+   * Fix #2609: previously this fallback was completely silent (no ttsError,
+   * no other signal), so students/teachers heard a robotic voice with zero
+   * indication it wasn't the real AI narration.
+   * Reset to false at the start of every speakText() call, when fallback
+   * playback ends, and on stopTts().
+   */
+  const [isTtsDegraded, setIsTtsDegraded] = useState(false);
 
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
@@ -81,6 +94,7 @@ export function useTtsPlayback(
     setIsTtsPaused(false);
     setIsTtsLoading(true);
     setTtsError(null);
+    setIsTtsDegraded(false);
     // isTtsSpeaking stays false until audio actually starts playing —
     // during the loading window only isTtsLoading is true.
 
@@ -147,6 +161,9 @@ export function useTtsPlayback(
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
       setIsTtsLoading(false);
+      // No-op on the Cloud TTS path (isTtsDegraded is already false there);
+      // clears the fallback notice once degraded playback finishes.
+      setIsTtsDegraded(false);
     };
 
     const onSpeechError = () => {
@@ -155,6 +172,14 @@ export function useTtsPlayback(
       setIsTtsPaused(false);
       setIsTtsLoading(false);
       setTtsError('音檔載入失敗，請重試');
+      // Fix #2609 (code-review catch): if the fallback had already committed
+      // (isTtsDegraded=true) and the Web Speech engine itself then errors
+      // (autoplay-gesture rejection, no matching voice, engine crash), this
+      // is now a real hard failure — no audio is playing. Leaving
+      // isTtsDegraded true here would show "you're hearing a machine voice"
+      // on top of/instead of the ttsError retry affordance, contradicting
+      // the "these two signals must not be conflated" requirement.
+      setIsTtsDegraded(false);
     };
 
     // Try Cloud TTS first via <audio> element for better control
@@ -202,6 +227,10 @@ export function useTtsPlayback(
         // Fallback: Web Speech API — rAF + wall-clock timing path (unchanged)
         msPerCharRef.current = 240; // reset to default estimate for Web Speech
         if (!window.speechSynthesis) { onSpeechError(); return; }
+        // Fix #2609: mark this playback as degraded (machine voice, not AI)
+        // the moment we commit to the fallback — the UI banner must appear
+        // alongside the fallback audio, not silently.
+        setIsTtsDegraded(true);
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utteranceRef.current = utterance;
@@ -339,6 +368,7 @@ export function useTtsPlayback(
     setIsTtsPaused(false);
     setIsTtsLoading(false);
     setTtsError(null);
+    setIsTtsDegraded(false);
   }, []);
 
   return {
@@ -346,6 +376,7 @@ export function useTtsPlayback(
     isTtsPaused,
     isTtsLoading,
     ttsError,
+    isTtsDegraded,
     setIsTtsSpeaking,
     setIsTtsPaused,
     utteranceRef,

@@ -534,6 +534,35 @@ const FullReading: React.FC<FullReadingProps> = ({
         </div>
       )}
 
+      {/* Issue #2609: TTS Web Speech API fallback alert — must not be silent.
+          Shown while AI 朗讀 falls back to the browser's built-in voice (Cloud
+          TTS unreachable) so the student knows they're hearing a machine
+          voice, not the real AI narration. Auto-clears once fallback
+          playback ends or the next AI 朗讀 attempt succeeds.
+          `absolute bottom-48` (not in-flow `mt-4`): FullReadingControls is a
+          `fixed bottom-16` bar — on short passages (e.g. 重點朗讀 single
+          paragraph) an in-flow banner lands directly underneath it and is
+          fully invisible even though it's in the DOM (found via real-browser
+          QA, not code-read). Anchoring above the fixed footer like the
+          LiveTutor.tsx sibling banner does keeps it visible regardless of
+          passage length. */}
+      {tts.isTtsDegraded && (
+        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 z-30 w-[min(92%,520px)]">
+          <div
+            role="status"
+            className="flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-md"
+          >
+            <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
+            <div className="flex-1">
+              <p className="text-base font-bold text-amber-800">現在念的是系統語音，不是 AI 朗讀</p>
+              <p className="text-sm text-amber-700 mt-0.5">
+                AI 朗讀暫時連不上，先用手機或電腦內建的語音幫你唸，聲音可能比較機械。等一下可以再按一次「AI 朗讀」試試看。
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Fixed bottom CTA (Issue #1960 — FullReadingControls) ────── */}
       <FullReadingControls
         state={controlState}
