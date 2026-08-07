@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -18,6 +18,18 @@ const CATEGORY_LABEL: Record<string, string> = {
   History: '歷史故事',
   Daily: '生活文化',
 };
+
+// Module-level stable no-ops for useTtsPlayback's progress/diff-clear callbacks
+// (Intro has no per-char highlight to sync, unlike LiveTutor's paragraph view).
+// Must be stable identities, not inline `() => {}` literals — useTtsPlayback's
+// speakText is a useCallback keyed on these two, so a fresh literal every
+// render would make speakText (and everything built on it: speakParagraphAt,
+// the auto-advance effect's dep array) unstable too. Correctness today relies
+// on wasSpeakingRef doing the real true→false transition check rather than
+// the effect's own dep array — code-review flagged this as fragile-but-safe;
+// fixing it here removes the fragility outright rather than leaving it as a
+// footnote for a future refactor to trip over.
+function noop(): void {}
 
 interface IntroProps {
   story: Story;
@@ -129,46 +141,115 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     });
   }, [priorUpload, token]);
 
-  // #2607: AI 朗讀 — real Gemini TTS (same useTtsPlayback hook LiveTutor/FullReading
-  // use), replacing the old browser-only window.speechSynthesis version. Progress
-  // tracking (onSpeakingProgress) and realtime-diff clearing aren't needed on this
-  // page — Intro has no per-char highlight to sync, unlike LiveTutor's paragraph view.
+  // #2607 (revised — real staging data changed the design, see PR #2608): AI
+  // 朗讀 now narrates the actual full lesson body (story.content) via the same
+  // useTtsPlayback hook LiveTutor/FullReading already use, NOT the 課文簡介
+  // teaser below. Sampling 8 staging lessons found 0/8 had real course_intro
+  // data; all 8 fell back to intro.background, which is a hard-truncated
+  // substring of the lesson body (always ~103 chars, cutting off mid-word, e.g.
+  // "…神仙不"). That text is not a real summary and should not be read aloud as
+  // if it were one. This supersedes the original #2607 design (commit
+  // cd4b5f7d), which read course_intro/background and deliberately did NOT
+  // pass lessonId/paragraphIdx — correct for THAT text, since it wasn't one of
+  // story.content's paragraphs. Now that story.content itself is narrated, the
+  // opposite holds: passing lessonId + paragraphIdx per paragraph is what lets
+  // each call hit the backend's canonical-sentence cache (GET
+  // /api/tts/mapping/{id}, keyed by story.content's paragraph index) instead of
+  // paying a live 8-15s synthesis on every play — mirrors LiveTutor's
+  // `speakText(text, Number(story.id), currentLineIndex)`.
   const {
     isTtsLoading,
     isTtsSpeaking,
     ttsError,
     speakText,
     stopTts,
-  } = useTtsPlayback(
-    () => {},
-    () => {},
+  } = useTtsPlayback(noop, noop);
+
+  // #1598: 課文簡介 teaser — still shown below for context, but no longer what
+  // AI 朗讀 narrates. Never falls back to strategy/target text (which would
+  // read aloud "圖文題就是..." instead of the actual lesson topic).
+  const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
+
+  // The actual lesson body — same array LiveTutor/FullReading narrate from.
+  // Falls back to introText only when a lesson somehow has no content array at
+  // all, so the button is never left with literally nothing to read. Memoized
+  // so speakParagraphAt/speakFullText below don't get a new dependency identity
+  // (and thus recreate) on every render.
+  const paragraphs = useMemo(
+    () => (story.content?.length ? story.content : (introText ? [introText] : [])),
+    [story.content, introText],
   );
 
+  // Numeric lesson id for the TTS canonical-sentence cache. undefined (not NaN)
+  // when story.id isn't numeric, so useTtsPlayback takes the no-cache
+  // single-shot path per paragraph instead of sending a NaN lessonId that would
+  // 422 against GET /api/tts/mapping/{lessonId} (an int path param).
+  const storyIdAsNumber = Number(story.id);
+  const lessonIdForTts = Number.isFinite(storyIdAsNumber) ? storyIdAsNumber : undefined;
+
+  // "展開看全文" — collapsed by default; auto-expands when AI 朗讀 starts so the
+  // student sees the same text being narrated (看到的和聽到的一致), not just the
+  // short 課文簡介 teaser above it.
+  const [showFullText, setShowFullText] = useState(false);
+
+  // Sequential multi-paragraph playback queue — mirrors useFullReadingTtsQueue's
+  // proven advance-on-finish pattern (frontend/src/hooks/useFullReadingTtsQueue.ts),
+  // extended to pass lessonId/paragraphIdx per paragraph (that hook's own queue
+  // does not — a known, separate cache-miss issue, out of scope for this PR).
+  // -1 = idle / not playing.
+  const [activeParagraphIdx, setActiveParagraphIdx] = useState(-1);
+
+  const speakParagraphAt = useCallback((idx: number) => {
+    const text = paragraphs[idx];
+    if (!text) {
+      setActiveParagraphIdx(-1);
+      return;
+    }
+    setActiveParagraphIdx(idx);
+    speakText(text, lessonIdForTts, idx);
+  }, [paragraphs, lessonIdForTts, speakText]);
+
+  const speakFullText = useCallback(() => {
+    if (paragraphs.length === 0) return;
+    setShowFullText(true);
+    speakParagraphAt(0);
+  }, [paragraphs, speakParagraphAt]);
+
+  const stopFullText = useCallback(() => {
+    stopTts();
+    setActiveParagraphIdx(-1);
+  }, [stopTts]);
+
+  // Advance to the next paragraph once the current one finishes playing on its
+  // own (isTtsSpeaking true → false while a paragraph is active). Guarded on
+  // !ttsError so a failed paragraph aborts the sequence (via the effect below)
+  // instead of racing to also advance in the same render.
+  const wasSpeakingRef = useRef(false);
+  useEffect(() => {
+    if (wasSpeakingRef.current && !isTtsSpeaking && activeParagraphIdx >= 0 && !ttsError) {
+      speakParagraphAt(activeParagraphIdx + 1);
+    }
+    wasSpeakingRef.current = isTtsSpeaking;
+  }, [isTtsSpeaking, activeParagraphIdx, ttsError, speakParagraphAt]);
+
+  // A TTS error aborts the whole sequence (rather than silently advancing to
+  // the next paragraph) — returns the controls to idle so the error message
+  // below is the only thing implying "not playing", not a stuck stop-button.
+  useEffect(() => {
+    if (ttsError) setActiveParagraphIdx(-1);
+  }, [ttsError]);
+
+  const isFullTextActive = activeParagraphIdx >= 0;
+
   // #2607: stop any in-progress AI 朗讀 playback if the user navigates away from
-  // Intro via a path that doesn't already call stopTts() explicitly (breadcrumb
-  // 圖書館, 返回圖書館, or a step-chip quick-jump) — otherwise the fetched audio
-  // clip keeps playing after the page has unmounted.
+  // Intro via a path that doesn't already call stopFullText() explicitly
+  // (breadcrumb 圖書館, 返回圖書館, or a step-chip quick-jump) — otherwise the
+  // fetched audio clip keeps playing after the page has unmounted.
   useEffect(() => {
     return () => {
       stopTts();
     };
   }, [stopTts]);
-
-  // #1598: 課文簡介 only — never fall back to strategy/target text (which would
-  // read aloud "圖文題就是..." instead of the actual lesson topic).
-  // #2082 A1: start at story content directly — do NOT prepend title or metadata header.
-  const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
-
-  const speakIntro = useCallback(() => {
-    if (!introText) return;
-    // #2607: deliberately NOT passing lessonId/paragraphIdx. introText comes from
-    // story.lessonIntro.course_intro, which is NOT one of story.content's paragraphs
-    // — the backend's canonical-sentence cache (GET /api/tts/mapping/{lessonId}) is
-    // keyed by story.content paragraph index. Passing an arbitrary paragraphIdx here
-    // would make useTtsPlayback play back whatever cached sentences exist at that
-    // index of the LESSON BODY instead of this text (see Intro.aiTts.test.tsx #3).
-    speakText(introText);
-  }, [introText, speakText]);
 
   return (
     <div
@@ -411,45 +492,81 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   <p className="text-xs text-on-surface-variant">{sourceLabel}</p>
                 )}
 
-                <div className="pt-2">
-                  {isTtsSpeaking ? (
+                <div className="pt-2 flex flex-wrap items-center gap-2">
+                  {isFullTextActive ? (
                     <button
                       type="button"
-                      onClick={stopTts}
-                      aria-label="停止朗讀課文簡介"
+                      onClick={stopFullText}
+                      aria-label="停止朗讀"
                       aria-pressed={true}
+                      aria-busy={isTtsLoading}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
                     >
-                      <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                      </svg>
-                      停止朗讀
+                      {isTtsLoading ? (
+                        <span className="w-4 h-4 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      ) : (
+                        <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
+                        </svg>
+                      )}
+                      {isTtsLoading ? 'AI 朗讀中…' : '停止朗讀'}
                     </button>
                   ) : (
                     <button
                       type="button"
-                      onClick={speakIntro}
-                      disabled={isTtsLoading}
-                      aria-label="AI 朗讀課文簡介"
+                      onClick={speakFullText}
+                      aria-label="AI 朗讀全文"
                       aria-pressed={false}
-                      aria-busy={isTtsLoading}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:opacity-60 disabled:cursor-wait"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                     >
-                      {isTtsLoading ? (
-                        <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                        </svg>
-                      )}
-                      {isTtsLoading ? 'AI 朗讀中…' : 'AI 朗讀'}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
+                      </svg>
+                      AI 朗讀全文
                     </button>
                   )}
+
+                  {/* #2607: expand-to-full-text — makes the visible text match
+                      what AI 朗讀全文 narrates (看到的和聽到的一致), instead of
+                      only the short 課文簡介 teaser above. */}
+                  <button
+                    type="button"
+                    onClick={() => setShowFullText((v) => !v)}
+                    aria-expanded={showFullText}
+                    aria-controls="intro-full-text-panel"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-600 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                  >
+                    <svg
+                      className={`w-4 h-4 transition-transform ${showFullText ? 'rotate-180' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    {showFullText ? '收合全文' : '展開看全文'}
+                  </button>
                 </div>
 
                 {ttsError && (
                   <p className="text-xs text-red-500" role="alert">{ttsError}</p>
+                )}
+
+                {showFullText && (
+                  <div
+                    id="intro-full-text-panel"
+                    className={`pt-2 border-t border-gray-200 space-y-3 ${zhuyinActive ? 'text-lg leading-[2.2rem] tracking-[0.15em]' : 'text-base leading-[1.9]'}`}
+                  >
+                    {paragraphs.map((paragraph, idx) => (
+                      <p
+                        key={idx}
+                        className={`text-on-surface rounded-lg transition-colors ${
+                          activeParagraphIdx === idx ? 'bg-amber-200/50 -mx-2 px-2 py-1' : ''
+                        }`}
+                      >
+                        {processZhuyin(paragraph)}
+                      </p>
+                    ))}
+                  </div>
                 )}
               </div>
             );
@@ -498,7 +615,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <button
           type="button"
           onClick={() => {
-            stopTts();
+            stopFullText();
             onStartReading();
           }}
           className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
