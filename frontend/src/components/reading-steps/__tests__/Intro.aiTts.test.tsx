@@ -176,6 +176,22 @@ beforeEach(() => {
       onvoiceschanged: null,
     },
   });
+  // useTtsPlayback's no-lessonId path warms up speechSynthesis synchronously
+  // (inside the user gesture) BEFORE it fetches, by constructing a throwaway
+  // utterance. jsdom has no SpeechSynthesisUtterance, so without this stub that
+  // line throws and the fetch never runs — which looks exactly like "the button
+  // did nothing". The v2 path returns before that warmup, so only tests that
+  // exercise the fallback branch need it.
+  vi.stubGlobal('SpeechSynthesisUtterance', class {
+    text: string;
+    lang = '';
+    rate = 1;
+    voice: unknown = null;
+    onstart: (() => void) | null = null;
+    onend: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    constructor(text?: string) { this.text = text ?? ''; }
+  });
   // ttsApi.ts's _urlCache/_mappingCache are module-level singletons — clear
   // them between tests so a stale cache hit from a previous test's mock
   // response doesn't leak into the next test.
@@ -296,7 +312,9 @@ describe('Intro AI 朗讀全文 — #2607 v2 (full lesson body, not the 課文�
     render(<Intro story={baseStory} onStartReading={vi.fn()} onBack={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /AI 朗讀全文/ }));
 
-    const cancelButton = await screen.findByRole('button', { name: /停止朗讀|AI 朗讀中/ });
+    // Accessible name in the loading sub-state is 「AI 朗讀準備中，點擊取消」;
+    // it becomes 「停止朗讀」 once playback actually starts.
+    const cancelButton = await screen.findByRole('button', { name: /停止朗讀|準備中/ });
     expect(cancelButton).not.toBeDisabled();
 
     fireEvent.click(cancelButton);
@@ -376,5 +394,49 @@ describe('Intro AI 朗讀全文 — #2607 v2 (full lesson body, not the 課文�
 
     fireEvent.click(screen.getByRole('button', { name: /開始學習/ }));
     expect(onStartReading).toHaveBeenCalledOnce();
+  });
+
+  // ── Review findings (PR #2608 independent review) ────────────────────────
+
+  it('falls back to the 課文簡介 text when story.content is empty — and must NOT pair it with lessonId/paragraphIdx, because that text is not a canonical paragraph', async () => {
+    // Today api.ts always populates story.content from detail.paragraphs, so this
+    // fallback is unreachable — but speakParagraphAt passed lessonId+idx
+    // unconditionally, so if a lesson ever arrives with empty paragraphs the
+    // canonical cache would be asked for "paragraph 0" of a text that isn't one,
+    // and play back unrelated audio. That is exactly the bug v1 (cd4b5f7d)
+    // reasoned about and avoided; this locks it for the fallback branch too.
+    const noContentStory: Story = { ...baseStory, content: [], paragraphs: [] };
+
+    render(<Intro story={noContentStory} onStartReading={vi.fn()} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /AI 朗讀全文/ }));
+
+    await waitFor(() => expect(synthesizeCalls().length).toBeGreaterThan(0));
+
+    // It speaks the teaser text (that's all there is)…
+    expect(synthesizeCalls()[0]).toContain('這是被截斷');
+    // …but never consults the canonical mapping, because no paragraphIdx applies.
+    expect(mappingCallCount()).toBe(0);
+  });
+
+  it('announces the loading sub-state to screen readers, not only visually', async () => {
+    // Sighted users get three distinguishable states (idle / spinner+「AI 朗讀中…」/
+    // 「停止朗讀」). With a hardcoded aria-label, AT users only got two.
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).includes('/api/tts/mapping/')) {
+        return new Promise(() => {}); // never resolves — hold isTtsLoading true
+      }
+      return defaultFetchImpl(url);
+    });
+
+    render(<Intro story={baseStory} onStartReading={vi.fn()} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /AI 朗讀全文/ }));
+
+    // While loading, the accessible name must say it is preparing AND still
+    // offer the cancel affordance — not claim playback already started.
+    const loadingButton = await screen.findByRole('button', { name: /準備中/ });
+    expect(loadingButton).toHaveAttribute('aria-busy', 'true');
+    expect(loadingButton).not.toBeDisabled();
+    // The plain "停止朗讀" name belongs to the speaking state only.
+    expect(screen.queryByRole('button', { name: /^停止朗讀$/ })).toBeNull();
   });
 });

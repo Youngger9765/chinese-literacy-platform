@@ -174,6 +174,25 @@ describe('TTS canonical alignment: the REAL narration path (speakTextWithProgres
 
     let totalParagraphs = 0;
     const misalignedCalls: string[] = [];
+    // A paragraph that produces ZERO synthesize calls is vacuously "aligned" —
+    // it contributes nothing to misalignedCalls, and the aggregate guards below
+    // (totals across all 10 lessons) stay green because the other ~48 paragraphs
+    // carry them. So a paragraph could go completely silent and this eval would
+    // still say PASS.
+    //
+    // The shape that would trigger it: a mapping row present but carrying
+    // `sentences: []`. ttsApi would take the canonical branch anyway (`??` does
+    // not treat [] as nullish — verified), then return early on length 0, and
+    // the student hears nothing.
+    //
+    // Not currently reachable: backend/app/services/tts/lesson_mapping.py
+    // (`build_lesson_tts_mapping`) filters empty sentences and only appends a
+    // paragraph entry `if entries:`, so such a paragraph is *absent* from the
+    // response rather than present-and-empty — which makes _fetchLessonSentences
+    // return null and the frontend fall back to regex splitting, correctly.
+    // This assertion is defence-in-depth against that guard being removed later,
+    // or against another endpoint returning the empty-array shape.
+    const silentParagraphs: string[] = [];
 
     for (const lessonId of SAMPLE_LESSON_IDS) {
       const story = storyByLessonId.get(lessonId)!;
@@ -193,6 +212,12 @@ describe('TTS canonical alignment: the REAL narration path (speakTextWithProgres
         await speakTextWithProgress(paragraph, () => {}, lessonId, idx);
         const callsForThisParagraph = synthesizeCallTexts.slice(callsBefore);
 
+        if (callsForThisParagraph.length === 0) {
+          silentParagraphs.push(
+            `lesson ${lessonId} ¶${idx}: non-empty paragraph (${paragraph.trim().length} chars) produced 0 synthesize calls`,
+          );
+        }
+
         const canonicalTexts = canonicalTextsByParagraph.get(idx) ?? new Set<string>();
         for (const sentText of callsForThisParagraph) {
           if (!canonicalTexts.has(sentText)) {
@@ -210,12 +235,18 @@ describe('TTS canonical alignment: the REAL narration path (speakTextWithProgres
         `Checked ${totalParagraphs} paragraphs across ${SAMPLE_LESSON_IDS.length} lessons.`,
         `Synthesize calls made: ${synthesizeCallTexts.length}.`,
         `Misaligned: ${misalignedCalls.length}.`,
+        `Silent (0 calls): ${silentParagraphs.length}.`,
         ...misalignedCalls.slice(0, 10),
+        ...silentParagraphs.slice(0, 10),
       ].join('\n'),
     );
 
     expect(totalParagraphs).toBeGreaterThan(0);
     expect(synthesizeCallTexts.length).toBeGreaterThan(0);
+    // Per-paragraph, not just aggregate: every non-empty paragraph must actually
+    // produce audio. Without this, a paragraph that silently produces nothing
+    // passes as "aligned" (see comment at silentParagraphs).
+    expect(silentParagraphs).toEqual([]);
     // The real path must NEVER send non-canonical text when a mapping exists
     // for that paragraph — this is the actual guarantee Intro's cache-hit
     // design depends on.

@@ -180,6 +180,15 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     [story.content, introText],
   );
 
+  // Only story.content's paragraphs are addressable in the backend's canonical
+  // sentence cache (GET /api/tts/mapping/{id} is keyed by story.content's
+  // paragraph index). When we fall back to the 課文簡介 teaser there is no
+  // paragraph index that describes it, so passing one would make useTtsPlayback
+  // play back whatever sentences happen to sit at that index of the lesson body —
+  // unrelated audio. Same reasoning the superseded v1 (cd4b5f7d) used to justify
+  // omitting lessonId entirely; it still holds for this branch.
+  const paragraphsAreCanonical = Boolean(story.content?.length);
+
   // Numeric lesson id for the TTS canonical-sentence cache. undefined (not NaN)
   // when story.id isn't numeric, so useTtsPlayback takes the no-cache
   // single-shot path per paragraph instead of sending a NaN lessonId that would
@@ -206,8 +215,12 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       return;
     }
     setActiveParagraphIdx(idx);
-    speakText(text, lessonIdForTts, idx);
-  }, [paragraphs, lessonIdForTts, speakText]);
+    if (paragraphsAreCanonical) {
+      speakText(text, lessonIdForTts, idx);
+    } else {
+      speakText(text);
+    }
+  }, [paragraphs, paragraphsAreCanonical, lessonIdForTts, speakText]);
 
   const speakFullText = useCallback(() => {
     if (paragraphs.length === 0) return;
@@ -497,7 +510,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     <button
                       type="button"
                       onClick={stopFullText}
-                      aria-label="停止朗讀"
+                      aria-label={isTtsLoading ? 'AI 朗讀準備中，點擊取消' : '停止朗讀'}
                       aria-pressed={true}
                       aria-busy={isTtsLoading}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
