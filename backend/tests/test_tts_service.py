@@ -711,11 +711,20 @@ class TestAzureGoogleFallback:
 
 
 # ---------------------------------------------------------------------------
-# 10. Phoneme corrections — Issue #765
+# 10. Phoneme corrections — Issue #765, hardened against Azure 400 in #2612
 # ---------------------------------------------------------------------------
+#
+# #2612: Azure's SSML endpoint now rejects the <phoneme> element outright
+# (HTTP 400, empty body) for every alphabet we tried (x-microsoft-zhuyin,
+# sapi, ipa, ups). Any sentence matching PHONEME_CORRECTIONS silently failed
+# end-to-end while the 11 tests below stayed green, because none of them
+# asserted that Azure would actually accept the produced SSML — they only
+# asserted the correction *rule* fired. Fixed by switching to <sub alias>,
+# Azure's documented pronunciation-substitution element. Do NOT reintroduce
+# <phoneme> here without re-verifying against real Azure first.
 
 class TestPhonemeCorrections:
-    """Phoneme corrections must inject SSML <phoneme> tags for known mispronunciations."""
+    """Phoneme corrections must inject SSML <sub alias> tags for known mispronunciations."""
 
     def test_he_cai_detected(self):
         """'喝采' in text should trigger a phoneme correction."""
@@ -738,26 +747,27 @@ class TestPhonemeCorrections:
         assert _has_phoneme_corrections("她是一個好學生") is False
 
     def test_apply_he_cai_correction(self):
-        """'喝采' must be wrapped with phoneme tag for hè (ㄏㄜˋ)."""
+        """'喝采' must be wrapped with <sub alias="賀采"> to force hè (4th tone)."""
         from app.services.tts_service import _apply_phoneme_corrections
         result = _apply_phoneme_corrections("贏得喝采")
-        assert '<phoneme' in result
-        assert 'ㄏㄜˋ' in result
-        assert '喝</phoneme>采' in result
+        assert '<phoneme' not in result
+        assert '<sub alias="賀采">喝采</sub>' in result
 
     def test_apply_he_cai2_correction(self):
-        """'喝彩' must also get the phoneme correction."""
+        """'喝彩' must also get the <sub alias> correction."""
         from app.services.tts_service import _apply_phoneme_corrections
         result = _apply_phoneme_corrections("觀眾喝彩")
-        assert '<phoneme' in result
-        assert 'ㄏㄜˋ' in result
+        assert '<phoneme' not in result
+        assert '<sub alias="賀彩">喝彩</sub>' in result
 
     def test_apply_da_de_piaoliang_correction(self):
-        """'打的漂亮' — '的' must be corrected to neutral tone de (˙ㄉㄜ)."""
+        """'打的漂亮' — must be re-aliased to '打得漂亮' so Azure doesn't read
+        '打的' as the 打的(taxi) idiom (的 -> dī) instead of the V-得-Adj
+        complement particle (neutral tone de)."""
         from app.services.tts_service import _apply_phoneme_corrections
         result = _apply_phoneme_corrections("打的漂亮")
-        assert '<phoneme' in result
-        assert '˙ㄉㄜ' in result
+        assert '<phoneme' not in result
+        assert '<sub alias="打得漂亮">打的漂亮</sub>' in result
 
     def test_no_correction_applied_for_plain_text(self):
         """Text without patterns should pass through unchanged."""
@@ -766,9 +776,10 @@ class TestPhonemeCorrections:
         result = _apply_phoneme_corrections(text)
         assert result == text
         assert '<phoneme' not in result
+        assert '<sub' not in result
 
-    def test_azure_ssml_contains_phoneme_for_he_cai(self):
-        """Full Azure SSML output must contain phoneme tag when text has 喝采."""
+    def test_azure_ssml_contains_sub_alias_for_he_cai(self):
+        """Full Azure SSML output must contain <sub alias> (never <phoneme>) for 喝采."""
         import app.services.tts_service as tts_mod
 
         captured_request = {}
@@ -786,11 +797,11 @@ class TestPhonemeCorrections:
             tts_mod._synthesize_azure("贏得全國人民的尊敬及喝采")
 
         ssml = captured_request["data"]
-        assert '<phoneme' in ssml
-        assert 'ㄏㄜˋ' in ssml
+        assert '<phoneme' not in ssml
+        assert '<sub alias="賀采">喝采</sub>' in ssml
 
     def test_azure_ssml_no_phoneme_for_plain_text(self):
-        """SSML for plain text must NOT contain phoneme tags."""
+        """SSML for plain text must NOT contain phoneme or sub tags."""
         import app.services.tts_service as tts_mod
 
         captured_request = {}
@@ -809,6 +820,127 @@ class TestPhonemeCorrections:
 
         ssml = captured_request["data"]
         assert '<phoneme' not in ssml
+        assert '<sub' not in ssml
+
+    def test_no_correction_output_ever_contains_phoneme_element(self):
+        """Regression lock (#2612): Azure's SSML endpoint rejects <phoneme>
+        outright (HTTP 400 on every alphabet tried). No entry in
+        PHONEME_CORRECTIONS may ever produce that element again — this is
+        deterministic and needs no network access, so it runs in CI."""
+        from app.services.tts_service import PHONEME_CORRECTIONS
+        for pattern, replacement in PHONEME_CORRECTIONS:
+            assert '<phoneme' not in replacement, (
+                f"pattern {pattern!r} still emits <phoneme>, "
+                "which Azure returns HTTP 400 for (#2612)"
+            )
+
+    def test_all_corrections_use_sub_alias_element(self):
+        """Every PHONEME_CORRECTIONS entry must use the <sub alias> mechanism."""
+        from app.services.tts_service import PHONEME_CORRECTIONS
+        for pattern, replacement in PHONEME_CORRECTIONS:
+            assert '<sub alias="' in replacement, (
+                f"pattern {pattern!r} does not use <sub alias>"
+            )
+
+    def test_correction_output_not_double_substituted(self):
+        """Regression lock: applying corrections must be a single left-to-right
+        pass over the ORIGINAL text. A naive sequential str.replace() per
+        pattern mutates the accumulator in place, so a later pattern in the
+        loop can match a substring that only exists because an earlier
+        replacement introduced it — e.g. '打得漂亮' being used as the alias
+        for '打的漂亮' caused the '打得漂亮' rule to re-match and double-wrap
+        its own output (caught by TDD while fixing #2612). Every output must
+        contain each <sub>/<phoneme> opening tag exactly once, never nested."""
+        from app.services.tts_service import _apply_phoneme_corrections
+
+        result = _apply_phoneme_corrections("她，打的漂亮，也打得漂亮，還喝采喝彩")
+        assert result.count('<sub alias="') == 4
+        assert '<sub alias="<sub' not in result  # no nested/double-wrapped tag
+        assert result.count("</sub>") == 4
+
+    def test_correction_output_is_well_formed_xml_fragment(self):
+        """Every corrected sentence must parse as a valid XML fragment once
+        wrapped in a root element — catches malformed/unbalanced tags before
+        they ever reach Azure (which would 400 on them just like <phoneme>)."""
+        # stdlib ElementTree (not defusedxml): input here is 100% hardcoded
+        # test literals from PHONEME_CORRECTIONS + fixed prefixes, never
+        # untrusted/external data, so XXE is not in this test's threat model.
+        import xml.etree.ElementTree as ET
+        from app.services.tts_service import PHONEME_CORRECTIONS, _apply_phoneme_corrections
+
+        for pattern, _ in PHONEME_CORRECTIONS:
+            corrected = _apply_phoneme_corrections(f"前文{pattern}後文")
+            ET.fromstring(f"<root>{corrected}</root>")  # raises ParseError if malformed
+
+    def test_no_empty_pattern_in_corrections_table(self):
+        """An empty-string pattern would match at every index with i += 0 in
+        _apply_phoneme_corrections' scan loop, hanging every TTS request that
+        reaches it forever. Lock the table invariant directly (flagged during
+        #2612 review) rather than relying on nobody ever adding one."""
+        from app.services.tts_service import PHONEME_CORRECTIONS
+        assert all(pattern for pattern, _ in PHONEME_CORRECTIONS)
+
+    def test_apply_phoneme_corrections_terminates_on_pathological_input(self):
+        """Belt-and-suspenders: even if the table invariant above were ever
+        violated, calling _apply_phoneme_corrections must still terminate
+        (not hang) — this test itself times out via pytest-timeout-free
+        iteration bound rather than trusting the implementation blindly."""
+        from app.services.tts import normalization as norm_mod
+
+        original = norm_mod.PHONEME_CORRECTIONS
+        try:
+            norm_mod.PHONEME_CORRECTIONS = [("", "SHOULD_NOT_MATCH")]
+            # Must not hang: the `if pattern and ...` guard skips empty
+            # patterns entirely, so this call must complete immediately and
+            # return the input unchanged.
+            result = norm_mod._apply_phoneme_corrections("正常文字")
+            assert result == "正常文字"
+        finally:
+            norm_mod.PHONEME_CORRECTIONS = original
+
+
+# ---------------------------------------------------------------------------
+# 10b. Azure real-API compat lock — Issue #2612 (opt-in, needs real credentials)
+# ---------------------------------------------------------------------------
+#
+# The tests above are all mocked — they proved the *rule* fires, which is
+# exactly what stayed green for 4 months while Azure 400'd on every one of
+# these sentences in production. This class hits the real Azure endpoint
+# (same production code path, app.services.tts_service._synthesize_azure)
+# and is the only test that would actually have caught #2612.
+#
+# Opt-in only: skipped unless RUN_REAL_AZURE_TESTS=1 AND AZURE_SPEECH_KEY is
+# set. Never runs in CI (no credentials there, and CI shouldn't call external
+# paid services anyway).
+
+import os as _os  # noqa: E402
+
+_REAL_AZURE_ENABLED = bool(_os.environ.get("RUN_REAL_AZURE_TESTS")) and bool(
+    _os.environ.get("AZURE_SPEECH_KEY")
+)
+
+
+@pytest.mark.skipif(
+    not _REAL_AZURE_ENABLED,
+    reason="opt-in only — set RUN_REAL_AZURE_TESTS=1 with a real AZURE_SPEECH_KEY to run",
+)
+class TestAzureRealAPIPhonemeCorrections:
+    """Hits real Azure TTS with every PHONEME_CORRECTIONS pattern. This is the
+    regression lock for #2612 — mocked tests cannot catch 'Azure rejects this
+    SSML element', only a real call can."""
+
+    @pytest.mark.parametrize("sentence", [
+        "贏得全國人民的尊敬及喝采",
+        "觀眾喝彩叫好",
+        "她，打的漂亮，雖然輸了比賽",
+        "她打得漂亮",
+    ])
+    def test_real_azure_accepts_corrected_sentence(self, sentence):
+        import app.services.tts_service as tts_mod
+
+        audio = tts_mod._synthesize_azure(sentence)
+        assert isinstance(audio, bytes)
+        assert len(audio) > 1000  # real MP3, not an empty/error body
 
 
 # ---------------------------------------------------------------------------
