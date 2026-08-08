@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Download, Loader2, Play, QrCode, Square } from 'lucide-react';
 // Static, top-level, literal specifier — this is what makes Vite bundle the
 // library. Do not turn this back into a dynamic import with the module name in
@@ -46,6 +46,57 @@ function getAuthHeaders(token: string | null | undefined): Record<string, string
 
 function lessonTitle(story: StoryListItem): string {
   return `L${String(story.lesson_number).padStart(2, '0')}`;
+}
+
+export type PlaybackState = 'idle' | 'working' | 'playing';
+
+/**
+ * Pure derivation of a single row-button's playback state.
+ *
+ * `activeKey` is this component's own record of which `{storyId}:{mode}` it
+ * last targeted; `isFetchingDetail` covers the pre-audio `/api/stories/{id}`
+ * round trip (this component's own state); `isTtsLoading`/`isTtsSpeaking`
+ * come straight from useTtsPlayback and reflect what the browser's actual
+ * <audio> element (or Web Speech fallback) is really doing.
+ *
+ * `working` covers both the detail fetch and the hook's isTtsLoading window
+ * (speakText() called, no audio byte yet) — from the user's point of view
+ * both look identical (a spinner, no sound), so they are not split further.
+ * `playing` only becomes true once the hook confirms audio is flowing.
+ *
+ * Deliberately reads BOTH isTtsLoading and isTtsSpeaking rather than just the
+ * latter: once a clip finishes naturally (or errors, or is stopped) the hook
+ * drives both back to false on its own, and this function then falls through
+ * to 'idle' even though `activeKey` still equals `key` — nothing has to
+ * remember to reset activeKey for that to happen. Losing either read would
+ * either flash 'idle' during the detail fetch (the original "dead button"
+ * complaint) or strand a finished row showing 'working' forever.
+ */
+export function derivePlaybackState(
+  key: string,
+  activeKey: string | null,
+  isFetchingDetail: boolean,
+  isTtsLoading: boolean,
+  isTtsSpeaking: boolean,
+): PlaybackState {
+  if (activeKey !== key) return 'idle';
+  if (isTtsSpeaking) return 'playing';
+  return isFetchingDetail || isTtsLoading ? 'working' : 'idle';
+}
+
+interface PlaybackButtonContent {
+  icon: React.ReactNode;
+  label: string;
+}
+
+function playbackButtonContent(state: PlaybackState, idleLabel: string): PlaybackButtonContent {
+  if (state === 'working') {
+    return { icon: <Loader2 className="h-3.5 w-3.5 animate-spin" />, label: '準備中…' };
+  }
+  if (state === 'playing') {
+    return { icon: <Square className="h-3.5 w-3.5" />, label: '停止' };
+  }
+  return { icon: <Play className="h-3.5 w-3.5" />, label: idleLabel };
 }
 
 function detailToFullText(detail: StoryDetailResponse): string {
@@ -128,8 +179,24 @@ const LessonAudioTable: React.FC = () => {
   const [stories, setStories] = useState<StoryListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [playingKey, setPlayingKey] = useState<string | null>(null);
-  const { speakText, stopPlayback, isTtsLoading } = useTtsPlayback(() => {}, () => {});
+  // Playback failures (TTS backend down, empty audio, etc.) are a different
+  // failure mode from "the lesson list failed to load" — the latter replaces
+  // this whole view with a full-page retry screen (see `error` below), which
+  // must not happen just because one row's synthesis failed.
+  const [playbackError, setPlaybackError] = useState('');
+  // Which `{storyId}:{mode}` this component last targeted. Distinct from the
+  // hook's isTtsLoading/isTtsSpeaking (see derivePlaybackState above) because
+  // those two only turn on *after* speakText() is called — activeKey also
+  // covers the `/api/stories/{id}` round trip that happens before that.
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [isFetchingDetail, setIsFetchingDetail] = useState(false);
+  // Guards against an old click's detail-fetch response landing after a
+  // newer click has already moved on to a different lesson (out-of-order
+  // network responses) — without this, switching rows quickly could still
+  // start the *stale* lesson's audio after the new one, re-creating the
+  // overlap bug through a different path than "click while already playing".
+  const activeRequestRef = useRef(0);
+  const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError } = useTtsPlayback(() => {}, () => {});
 
   const sortedStories = useMemo(
     () => [...stories].sort((a, b) => a.lesson_number - b.lesson_number),
@@ -149,20 +216,48 @@ const LessonAudioTable: React.FC = () => {
     }
   }, [token]);
 
+  // Surface a failure from *inside* speakText's own pipeline (e.g. the TTS
+  // backend itself errors after the detail fetch already succeeded) as the
+  // same inline banner a detail-fetch failure uses, instead of leaving the
+  // row silently drop back to idle with no explanation.
+  useEffect(() => {
+    if (ttsError) setPlaybackError(ttsError);
+  }, [ttsError]);
+
+  const stopCurrentPlayback = useCallback(() => {
+    activeRequestRef.current += 1;
+    stopTts();
+    setActiveKey(null);
+    setIsFetchingDetail(false);
+  }, [stopTts]);
+
   const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode) => {
     const key = `${story.id}:${mode}`;
-    setPlayingKey(key);
+    const requestId = ++activeRequestRef.current;
+    // Always stop whatever is currently loading/playing *first*. The hook's
+    // single-shot playback path (used here, since no lessonId/paragraphIdx is
+    // passed) has no built-in "only one clip at a time" guard: calling
+    // speakText() again does not stop a previous single-shot <audio> that is
+    // still playing. Without this line, a second click just layers a second
+    // <audio> on top of the first (the reported "同時播其他的就會一堆聲音").
+    stopTts();
+    setActiveKey(key);
+    setIsFetchingDetail(true);
+    setPlaybackError('');
     try {
       const detail = await fetchStoryDetail(story.id, token);
+      if (activeRequestRef.current !== requestId) return; // superseded by a later click
       const fullText = detailToFullText(detail);
       const text = mode === 'key' ? (detail.key_reading?.passage || fullText) : fullText;
+      setIsFetchingDetail(false);
       speakText(text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setPlayingKey(null);
+      if (activeRequestRef.current !== requestId) return;
+      setIsFetchingDetail(false);
+      setActiveKey(null);
+      setPlaybackError(err instanceof Error ? err.message : String(err));
     }
-  }, [speakText, token]);
+  }, [speakText, stopTts, token]);
 
   useEffect(() => {
     loadStories();
@@ -205,6 +300,8 @@ const LessonAudioTable: React.FC = () => {
     );
   }
 
+  const hasActivePlayback = activeKey !== null;
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-4 py-2.5">
@@ -212,13 +309,20 @@ const LessonAudioTable: React.FC = () => {
         <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">{sortedStories.length} 課</span>
         <button
           type="button"
-          onClick={stopPlayback}
-          className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+          onClick={stopCurrentPlayback}
+          disabled={!hasActivePlayback}
+          className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Square className="h-3.5 w-3.5" />
           停止播放
         </button>
       </div>
+
+      {playbackError && (
+        <div className="shrink-0 border-b border-red-100 bg-red-50 px-4 py-2 text-xs text-red-700">
+          播放失敗：{playbackError}
+        </div>
+      )}
 
       <div className="grid grid-cols-[minmax(220px,1.5fr)_minmax(112px,0.7fr)_minmax(168px,0.9fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)] items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-500" role="row">
         <span>課程</span>
@@ -229,51 +333,67 @@ const LessonAudioTable: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto" role="grid" aria-label="課程音檔總表">
-        {sortedStories.map((story) => (
-          <div
-            key={story.id}
-            role="row"
-            className="grid grid-cols-[minmax(220px,1.5fr)_minmax(112px,0.7fr)_minmax(168px,0.9fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)] items-center gap-3 border-b border-gray-100 px-4 py-3 text-sm [content-visibility:auto] [contain-intrinsic-size:64px]"
-          >
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
-                  {lessonTitle(story)}
-                </span>
-                <span className="truncate font-medium text-gray-900">{story.title}</span>
-              </div>
-              <div className="mt-1 text-xs text-gray-400">{story.grade} 年級 · {story.grade_code}</div>
-            </div>
+        {sortedStories.map((story) => {
+          const fullKey = `${story.id}:full`;
+          const keyKey = `${story.id}:key`;
+          const fullState = derivePlaybackState(fullKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
+          const keyState = derivePlaybackState(keyKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
+          const fullContent = playbackButtonContent(fullState, '播放全文');
+          const keyContent = playbackButtonContent(keyState, '播放段落');
+          const isRowPlaying = fullState === 'playing' || keyState === 'playing';
 
-            <button
-              type="button"
-              onClick={() => playLesson(story, 'full')}
-              disabled={isTtsLoading || playingKey !== null}
-              className="inline-flex w-fit items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
+          return (
+            <div
+              key={story.id}
+              role="row"
+              className={`grid grid-cols-[minmax(220px,1.5fr)_minmax(112px,0.7fr)_minmax(168px,0.9fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)] items-center gap-3 border-b border-gray-100 px-4 py-3 text-sm [content-visibility:auto] [contain-intrinsic-size:64px] ${isRowPlaying ? 'bg-blue-50' : ''}`}
             >
-              {playingKey === `${story.id}:full` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-              播放全文
-            </button>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                    {lessonTitle(story)}
+                  </span>
+                  <span className="truncate font-medium text-gray-900">{story.title}</span>
+                </div>
+                <div className="mt-1 text-xs text-gray-400">{story.grade} 年級 · {story.grade_code}</div>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+              {/*
+                No `disabled` gate tied to other rows/keys here on purpose:
+                being unable to switch clips is its own annoyance. Clicking a
+                *different* row/mode always just switches (playLesson calls
+                stopTts() first); clicking *this same* button while it is
+                already working/playing stops it instead of restarting it —
+                this row's own control is the primary way to stop it.
+              */}
               <button
                 type="button"
-                onClick={() => playLesson(story, 'key')}
-                disabled={isTtsLoading || playingKey !== null}
-                className="inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
+                onClick={() => (fullState === 'idle' ? playLesson(story, 'full') : stopCurrentPlayback())}
+                className="inline-flex w-fit items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               >
-                {playingKey === `${story.id}:key` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-                播放段落
+                {fullContent.icon}
+                {fullContent.label}
               </button>
-              {!story.has_key_reading && (
-                <span className="text-xs text-amber-700">無重點段（唸全文）</span>
-              )}
-            </div>
 
-            <QrDownloadButton lessonId={story.id} step="intro" label="下載" filePrefix="intro-qr" />
-            <QrDownloadButton lessonId={story.id} step="full-reading" label="下載" filePrefix="full-reading-qr" />
-          </div>
-        ))}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => (keyState === 'idle' ? playLesson(story, 'key') : stopCurrentPlayback())}
+                  className="inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                >
+                  {keyContent.icon}
+                  {keyContent.label}
+                </button>
+                {!story.has_key_reading && (
+                  <span className="text-xs text-amber-700">無重點段（唸全文）</span>
+                )}
+              </div>
+
+              <QrDownloadButton lessonId={story.id} step="intro" label="下載" filePrefix="intro-qr" />
+              <QrDownloadButton lessonId={story.id} step="full-reading" label="下載" filePrefix="full-reading-qr" />
+            </div>
+          );
+        })}
         {sortedStories.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-gray-400">沒有課程資料</div>
         )}

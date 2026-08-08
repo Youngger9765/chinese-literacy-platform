@@ -51,6 +51,12 @@ jobs:
       #     specifier so Vite bundles it. A dynamic import with the name in a
       #     variable passed build, lint and vitest while the feature was broken
       #     in every browser (#2622)
+      #   - LessonAudioTable: admin audio panel must (a) stop the previous
+      #     clip before starting a new one — the hook's single-shot playback
+      #     path does not auto-cancel a prior <audio> on its own — and (b)
+      #     return a row to idle the instant it (or the header button) is
+      #     stopped. Regression of either reintroduces #2622's "不能停止 /
+      #     同時播其他的就會一堆聲音" follow-up bug.
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx
