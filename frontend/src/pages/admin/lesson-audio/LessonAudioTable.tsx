@@ -442,7 +442,13 @@ const LessonAudioTable: React.FC = () => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       }));
       triggerDownload(url, `課程QR-${rows.length}課.xlsx`);
-      URL.revokeObjectURL(url);
+      // Revoke on a later turn, not on this one. Chrome happens to start the
+      // download synchronously from click(), so an immediate revoke usually
+      // survives, but it is a race — the object URL can be dead before the
+      // browser has read it, and the download silently produces nothing. Found
+      // while trying to inspect the produced file: fetching the blob URL right
+      // after the click already failed.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
       setPlaybackError(err instanceof Error ? err.message : String(err));
     } finally {
