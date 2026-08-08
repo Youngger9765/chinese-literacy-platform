@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
-import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, derivePlaybackState } from './LessonAudioTable';
+import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, deliversFullText, derivePlaybackState } from './LessonAudioTable';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -425,7 +425,10 @@ describe('#2622 QR 交付表', () => {
     expect(rows[0].lesson_no).toBe('L01');
     expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
     expect(rows[0].passage_url).toBe('https://x.test/learn/1/full-reading');
-    expect(rows[1].full_url).toBe('https://x.test/learn/2/intro');
+    // Lesson 2 is grade 8, which per #2626 delivers 段落 only — its 全文
+    // column is deliberately blank rather than a code pointing at silence.
+    expect(rows[1].full_url).toBe('');
+    expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
   });
 
   it('quotes fields and leads with a BOM so Excel reads the Chinese correctly', () => {
@@ -472,5 +475,36 @@ describe('#2622 QR 預覽必須蓋在整頁之上', () => {
     // A direct child of body, so no ancestor can hijack its containing block.
     expect(dialog.parentElement).toBe(document.body);
     expect(dialog.closest('[role="row"]')).toBeNull();
+  });
+});
+
+describe('#2626 只有 4-7 年級交付全文', () => {
+  /**
+   * The batch generator already honours the grade rule — a dry run against
+   * staging planned 222 items across 165 lessons with zero whole-text rows in
+   * grades 8-9. The panel did not, so an admin could play, and hand out a QR
+   * for, audio that will never exist.
+   *
+   * Every shipped grade gets its own assertion rather than one per branch: the
+   * rule is defined *by* which grade you are in, and the boundary between 7 and
+   * 8 is the whole point.
+   */
+  it.each([[4, true], [5, true], [6, true], [7, true], [8, false], [9, false]])(
+    'grade %i delivers full text: %s',
+    (grade, expected) => {
+      expect(deliversFullText(grade as number)).toBe(expected);
+    },
+  );
+
+  it('leaves the 全文 URL blank for 8-9 so no code points at silence', () => {
+    const rows = buildQrManifestRows([
+      { id: 1, lesson_number: 1, title: 'G7 課', grade: 7, grade_code: 'G7-L01', char_count: 10, has_key_reading: true },
+      { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true },
+    ] as never, 'https://x.test');
+
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
+    expect(rows[1].full_url).toBe('');
+    // 段落 is delivered for every grade, so it must survive.
+    expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
   });
 });
