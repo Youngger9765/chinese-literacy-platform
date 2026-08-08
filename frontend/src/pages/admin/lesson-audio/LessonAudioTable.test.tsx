@@ -71,7 +71,12 @@ function deferred<T>() {
 }
 
 /** Sets the mocked useTtsPlayback() return value for the next render. */
-function mockTts(overrides: { isTtsLoading?: boolean; isTtsSpeaking?: boolean; ttsError?: string | null } = {}) {
+function mockTts(overrides: {
+  isTtsLoading?: boolean;
+  isTtsSpeaking?: boolean;
+  ttsError?: string | null;
+  utteranceRef?: { current: unknown };
+} = {}) {
   vi.mocked(useTtsPlayback).mockReturnValue({
     isTtsSpeaking: overrides.isTtsSpeaking ?? false,
     isTtsPaused: false,
@@ -80,7 +85,7 @@ function mockTts(overrides: { isTtsLoading?: boolean; isTtsSpeaking?: boolean; t
     isTtsDegraded: false,
     setIsTtsSpeaking: vi.fn(),
     setIsTtsPaused: vi.fn(),
-    utteranceRef: { current: null },
+    utteranceRef: overrides.utteranceRef ?? { current: null },
     ttsRafRef: { current: null },
     speakText: mockSpeakText,
     pauseTts: vi.fn(),
@@ -343,5 +348,46 @@ describe('derivePlaybackState', () => {
     // key (nothing told the component to clear it), but both hook flags have
     // dropped back to false — the row must not get stuck showing "working".
     expect(derivePlaybackState(KEY, KEY, false, false, false)).toBe('idle');
+  });
+});
+
+describe('#2622 stop must actually silence the audio, not just the UI', () => {
+  /**
+   * Measured on staging 2026-08-08, after the first attempt at this fix:
+   * clicking a playing row's own stop control flipped the button back to
+   * 「播放全文」while the clip kept going — currentTime advanced 13s → 18s → 41s
+   * across two clicks. Worse than the bug it replaced, because the screen then
+   * asserts something false.
+   *
+   * stopTts() reaches the clip through utteranceRef / the ttsApi module's
+   * _currentAudio, and on the single-shot path there is a window where neither
+   * points at the element that is actually sounding. The component therefore
+   * pauses utteranceRef.current itself. Removing that direct pause turns this
+   * red no matter how correct the surrounding state handling looks.
+   */
+  it('pauses the audio element the hook is holding', async () => {
+    const audio = document.createElement('audio');
+    const pauseSpy = vi.spyOn(audio, 'pause');
+
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts({ utteranceRef: { current: audio } });
+
+    const { rerender } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: /播放全文/ }));
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
+
+    // The browser has now fired `onplay`, so the hook reports audio flowing.
+    mockTts({ isTtsSpeaking: true, utteranceRef: { current: audio } });
+    rerender(<LessonAudioTable />);
+
+    pauseSpy.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: /停止播放/ }));
+
+    expect(pauseSpy).toHaveBeenCalled();
+    expect(audio.currentTime).toBe(0);
   });
 });

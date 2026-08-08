@@ -196,7 +196,7 @@ const LessonAudioTable: React.FC = () => {
   // start the *stale* lesson's audio after the new one, re-creating the
   // overlap bug through a different path than "click while already playing".
   const activeRequestRef = useRef(0);
-  const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError } = useTtsPlayback(() => {}, () => {});
+  const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError, utteranceRef } = useTtsPlayback(() => {}, () => {});
 
   const sortedStories = useMemo(
     () => [...stories].sort((a, b) => a.lesson_number - b.lesson_number),
@@ -227,9 +227,29 @@ const LessonAudioTable: React.FC = () => {
   const stopCurrentPlayback = useCallback(() => {
     activeRequestRef.current += 1;
     stopTts();
+    // Belt and braces: pause the element directly as well.
+    //
+    // Measured on staging 2026-08-08 — clicking this row's own stop control
+    // flipped the UI back to idle while the audio kept going, currentTime
+    // advancing 13s → 18s → 41s across two clicks. Which is worse than the
+    // original bug: the screen now claims it stopped.
+    //
+    // stopTts() reaches the clip through utteranceRef / the ttsApi module's
+    // _currentAudio, and on this single-shot path there is a window where
+    // neither points at the element that is actually sounding. The hook hands
+    // utteranceRef back to us, so pausing it here closes that window without
+    // touching the shared hook (which every student reading step also uses).
+    // Duck-typed rather than `instanceof HTMLAudioElement`: the ref also holds
+    // SpeechSynthesisUtterance on the fallback path, and an instanceof check
+    // depends on which realm the element came from.
+    const el = utteranceRef.current as { pause?: () => void; currentTime?: number } | null;
+    if (el && typeof el.pause === 'function') {
+      el.pause();
+      el.currentTime = 0;
+    }
     setActiveKey(null);
     setIsFetchingDetail(false);
-  }, [stopTts]);
+  }, [stopTts, utteranceRef]);
 
   const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode) => {
     const key = `${story.id}:${mode}`;
