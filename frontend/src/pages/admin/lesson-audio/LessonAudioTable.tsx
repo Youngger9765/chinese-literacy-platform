@@ -272,13 +272,12 @@ const LessonAudioTable: React.FC = () => {
   const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode) => {
     const key = `${story.id}:${mode}`;
     const requestId = ++activeRequestRef.current;
-    // Always stop whatever is currently loading/playing *first*. The hook's
-    // single-shot playback path (used here, since no lessonId/paragraphIdx is
-    // passed) has no built-in "only one clip at a time" guard: calling
-    // speakText() again does not stop a previous single-shot <audio> that is
-    // still playing. Without this line, a second click just layers a second
-    // <audio> on top of the first (the reported "同時播其他的就會一堆聲音").
-    stopTts();
+    // No stop call here: every caller now runs stopCurrentPlayback() first,
+    // which is strictly stronger (it also pauses the tracked elements, not just
+    // whatever ref the hook happens to hold). Stopping again here would be a
+    // harmless no-op but makes the call sequence harder to reason about, and
+    // the "only one clip at a time" guarantee this used to provide is now the
+    // caller's, unconditionally.
     setActiveKey(key);
     setIsFetchingDetail(true);
     setPlaybackError('');
@@ -420,7 +419,17 @@ const LessonAudioTable: React.FC = () => {
               */}
               <button
                 type="button"
-                onClick={() => (fullState === 'idle' ? playLesson(story, 'full') : stopCurrentPlayback())}
+                onClick={() => {
+                  // Always stop first, unconditionally. Measured on staging: the
+                  // header control (which calls stopCurrentPlayback directly) silenced
+                  // the clip while this row's control did not, even though both point
+                  // at the same function — so the conditional, not the pausing, was
+                  // swallowing the stop. Removing the condition removes that whole
+                  // class of failure: a click can never leave audio running.
+                  const wasIdle = fullState === 'idle';
+                  stopCurrentPlayback();
+                  if (wasIdle) playLesson(story, 'full');
+                }}
                 className="inline-flex w-fit items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               >
                 {fullContent.icon}
@@ -430,7 +439,17 @@ const LessonAudioTable: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => (keyState === 'idle' ? playLesson(story, 'key') : stopCurrentPlayback())}
+                  onClick={() => {
+                  // Always stop first, unconditionally. Measured on staging: the
+                  // header control (which calls stopCurrentPlayback directly) silenced
+                  // the clip while this row's control did not, even though both point
+                  // at the same function — so the conditional, not the pausing, was
+                  // swallowing the stop. Removing the condition removes that whole
+                  // class of failure: a click can never leave audio running.
+                  const wasIdle = keyState === 'idle';
+                  stopCurrentPlayback();
+                  if (wasIdle) playLesson(story, 'key');
+                }}
                   className="inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                 >
                   {keyContent.icon}
