@@ -308,7 +308,7 @@ Node.js + Express / Python FastAPI
 | 功能 | 技術選項 |
 |------|----------|
 | 語音識別 (STT) | Google Speech-to-Text / Azure Speech |
-| 文字轉語音 (TTS) | **Gemini 3.1 Flash TTS + Variant A prompt prefix（primary，台灣腔）** / Azure zh-TW HsiaoChen（fallback）／ Google Chirp3-HD（alternative）<br/>決策與實驗紀錄：`docs/research/tts-variant-ab-study-2026-04-18.md` |
+| 文字轉語音 (TTS) | **Azure Cognitive Speech `zh-TW-HsiaoChenNeural`（primary，192kbps 48kHz）** ／ Google Chirp3-HD `cmn-CN-Chirp3-HD-Sulafat`（fallback，⚠️ 中國腔）<br/>Gemini 3.1 Flash TTS 已於 2026-08-08 停用（primary/fallback 順序自此與舊文件相反）<br/>決策紀錄：`docs/research/tts-variant-ab-study-2026-04-18.md`（2026-04 的 A/B，當時結論是 Gemini，已被 2026-08-08 換掉）|
 | 蘇格拉底對話 | OpenAI GPT-4 / Claude / Gemini |
 | 手寫辨識 | Google ML Kit / Azure Computer Vision |
 
