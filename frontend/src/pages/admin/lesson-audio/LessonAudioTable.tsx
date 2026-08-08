@@ -38,6 +38,7 @@ interface QrButtonProps {
   step: LessonQrStep;
   label: string;
   filePrefix: string;
+  lessonTitle: string;
 }
 
 function getAuthHeaders(token: string | null | undefined): Record<string, string> {
@@ -143,34 +144,157 @@ async function qrCodeToDataUrl(value: string): Promise<string> {
   });
 }
 
-const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
+export interface QrManifestRow {
+  lesson_id: number;
+  lesson_no: string;
+  title: string;
+  grade: number;
+  kind: '全文' | '段落';
+  url: string;
+  qr_file: string;
+}
 
-  const downloadQr = useCallback(async () => {
+/**
+ * The index the 教材端 pastes alongside the images.
+ *
+ * RFC-4180 quoting throughout, not just where it currently matters — lesson
+ * titles are editorial content and will eventually contain a comma or a quote.
+ * A BOM leads the file so Excel on Windows opens the Chinese as UTF-8 instead
+ * of mojibake, which is the single most common way a correct CSV still arrives
+ * broken.
+ */
+export function buildQrManifestCsv(rows: QrManifestRow[]): string {
+  const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const header = ['lesson_id', 'lesson_no', 'title', 'grade', 'kind', 'url', 'qr_file'];
+  const lines = [header.map(esc).join(',')];
+  for (const r of rows) {
+    lines.push([r.lesson_id, r.lesson_no, r.title, r.grade, r.kind, r.url, r.qr_file].map(esc).join(','));
+  }
+  return `\uFEFF${lines.join('\r\n')}\r\n`;
+}
+
+export function buildQrManifestRows(stories: StoryListItem[], origin: string): QrManifestRow[] {
+  const rows: QrManifestRow[] = [];
+  for (const s of stories) {
+    rows.push({
+      lesson_id: s.id, lesson_no: lessonTitle(s), title: s.title, grade: s.grade,
+      kind: '全文', url: buildLessonQrValue(origin, s.id, 'intro'),
+      qr_file: qrFileName('intro-qr', s.id),
+    });
+    rows.push({
+      lesson_id: s.id, lesson_no: lessonTitle(s), title: s.title, grade: s.grade,
+      kind: '段落', url: buildLessonQrValue(origin, s.id, 'full-reading'),
+      qr_file: qrFileName('full-reading-qr', s.id),
+    });
+  }
+  return rows;
+}
+
+export function qrFileName(filePrefix: string, lessonId: number): string {
+  return `${filePrefix}-L${String(lessonId).padStart(2, '0')}.png`;
+}
+
+function triggerDownload(href: string, filename: string): void {
+  const link = document.createElement('a');
+  link.href = href;
+  link.download = filename;
+  link.click();
+}
+
+/**
+ * Preview dialog for one QR code.
+ *
+ * Downloading blind was the previous behaviour and it gives you no way to tell
+ * a correct code from a wrong one until you have already pasted it into a
+ * worksheet and scanned it with a phone. Showing the image and the URL it
+ * encodes turns that into a two-second check.
+ */
+const QrPreviewDialog: React.FC<{
+  title: string;
+  value: string;
+  dataUrl: string;
+  filename: string;
+  onClose: () => void;
+}> = ({ title, value, dataUrl, filename, onClose }) => {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="mb-3 text-sm font-semibold text-gray-800">{title}</h3>
+        <img src={dataUrl} alt={`${title} QR code`} className="mx-auto h-56 w-56" />
+        <p className="mt-3 break-all rounded bg-gray-50 px-2 py-1.5 text-xs text-gray-500">{value}</p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          >
+            關閉
+          </button>
+          <button
+            type="button"
+            onClick={() => triggerDownload(dataUrl, filename)}
+            className="inline-flex items-center gap-1.5 rounded bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
+          >
+            <Download className="h-3.5 w-3.5" />
+            下載 PNG
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle: title }) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [preview, setPreview] = useState<{ dataUrl: string; value: string } | null>(null);
+
+  const openPreview = useCallback(async () => {
     setIsGenerating(true);
     try {
       const value = buildLessonQrValue(window.location.origin, lessonId, step);
-      const dataUrl = await qrCodeToDataUrl(value);
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `${filePrefix}-L${String(lessonId).padStart(2, '0')}.png`;
-      link.click();
+      setPreview({ dataUrl: await qrCodeToDataUrl(value), value });
     } finally {
       setIsGenerating(false);
     }
-  }, [filePrefix, lessonId, step]);
+  }, [lessonId, step]);
 
   return (
-    <button
-      type="button"
-      onClick={downloadQr}
-      disabled={isGenerating}
-      className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
-      title={buildLessonQrValue(window.location.origin, lessonId, step)}
-    >
-      {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-      {label}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={openPreview}
+        disabled={isGenerating}
+        className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
+        title={buildLessonQrValue(window.location.origin, lessonId, step)}
+      >
+        {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <QrCode className="h-3.5 w-3.5" />}
+        {label}
+      </button>
+      {preview && (
+        <QrPreviewDialog
+          title={`${title}／${step === 'intro' ? '全文' : '段落'}`}
+          value={preview.value}
+          dataUrl={preview.dataUrl}
+          filename={qrFileName(filePrefix, lessonId)}
+          onClose={() => setPreview(null)}
+        />
+      )}
+    </>
   );
 };
 
@@ -229,6 +353,54 @@ const LessonAudioTable: React.FC = () => {
   useEffect(() => {
     if (ttsError) setPlaybackError(ttsError);
   }, [ttsError]);
+
+  const [isZipping, setIsZipping] = useState(false);
+  const [zipProgress, setZipProgress] = useState('');
+
+  /**
+   * One archive with every QR image plus the index that names them.
+   *
+   * The 教材端 pastes these into Word by hand, so downloading 330 files one
+   * click at a time was never going to be the workflow. A CSV cannot carry the
+   * images themselves, hence a zip: index.csv points at qr/<file>.png by the
+   * exact filename that is in the archive.
+   *
+   * Generated in the browser rather than server-side because the QR content is
+   * just this deployment's own origin plus a lesson id — there is nothing to
+   * compute that the page does not already know, and no reason to spend a
+   * backend round trip per lesson.
+   */
+  const downloadAllQrZip = useCallback(async () => {
+    setIsZipping(true);
+    try {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      const folder = zip.folder('qr');
+      const rows = buildQrManifestRows(sortedStories, window.location.origin);
+
+      for (let i = 0; i < rows.length; i += 1) {
+        const row = rows[i];
+        setZipProgress(`產生 QR ${i + 1}/${rows.length}`);
+        const dataUrl = await qrCodeToDataUrl(row.url);
+        folder?.file(row.qr_file, dataUrl.split(',')[1], { base64: true });
+        // Yield to the event loop so the progress label actually repaints;
+        // 330 synchronous QR renders otherwise freeze the tab with no feedback.
+        if (i % 10 === 0) await new Promise((r) => setTimeout(r, 0));
+      }
+
+      zip.file('index.csv', buildQrManifestCsv(rows));
+      setZipProgress('打包中…');
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      triggerDownload(url, `lesson-qr-${rows.length}.zip`);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setPlaybackError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsZipping(false);
+      setZipProgress('');
+    }
+  }, [sortedStories]);
 
   const stopCurrentPlayback = useCallback(() => {
     activeRequestRef.current += 1;
@@ -360,6 +532,16 @@ const LessonAudioTable: React.FC = () => {
         <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">{sortedStories.length} 課</span>
         <button
           type="button"
+          onClick={downloadAllQrZip}
+          disabled={isZipping || sortedStories.length === 0}
+          className="ml-auto inline-flex items-center gap-1.5 rounded border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:cursor-wait disabled:opacity-60"
+        >
+          {isZipping
+            ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{zipProgress}</>
+            : <><Download className="h-3.5 w-3.5" />下載全部 QR + CSV</>}
+        </button>
+        <button
+          type="button"
           onClick={stopCurrentPlayback}
           disabled={!hasActivePlayback}
           className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -460,8 +642,8 @@ const LessonAudioTable: React.FC = () => {
                 )}
               </div>
 
-              <QrDownloadButton lessonId={story.id} step="intro" label="下載" filePrefix="intro-qr" />
-              <QrDownloadButton lessonId={story.id} step="full-reading" label="下載" filePrefix="full-reading-qr" />
+              <QrDownloadButton lessonId={story.id} step="intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+              <QrDownloadButton lessonId={story.id} step="full-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
             </div>
           );
         })}

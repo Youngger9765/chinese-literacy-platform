@@ -49,9 +49,15 @@ describe('#2622 qrcode bundling', () => {
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/^\s*\/\/.*$/gm, '');
 
-    // No dynamic import at all in this module — that is the construct whose
-    // specifier the bundler cannot follow.
-    expect(code).not.toMatch(/\bimport\s*\(/);
+    // The bug was a dynamic import whose specifier the bundler cannot follow —
+    // a variable, not a string literal. `await import('jszip')` is fine and is
+    // used deliberately to keep a 100KB library out of the initial chunk, so
+    // this asserts on the dangerous shape rather than banning dynamic import
+    // outright.
+    const dynamicImports = [...code.matchAll(/\bimport\s*\(\s*([^)]*)\)/g)];
+    for (const [, specifier] of dynamicImports) {
+      expect(specifier.trim()).toMatch(/^['"][^'"]+['"]$/);
+    }
     // A literal top-level specifier is what makes Vite include the library.
     expect(code).toMatch(/^import QRCode from 'qrcode';$/m);
   });

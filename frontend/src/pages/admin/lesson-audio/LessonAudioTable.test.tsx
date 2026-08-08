@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
-import LessonAudioTable, { buildLessonQrValue, derivePlaybackState } from './LessonAudioTable';
+import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, derivePlaybackState } from './LessonAudioTable';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -81,7 +81,6 @@ function mockTts(overrides: {
   isTtsLoading?: boolean;
   isTtsSpeaking?: boolean;
   ttsError?: string | null;
-  utteranceRef?: { current: unknown };
 } = {}) {
   vi.mocked(useTtsPlayback).mockReturnValue({
     isTtsSpeaking: overrides.isTtsSpeaking ?? false,
@@ -91,7 +90,7 @@ function mockTts(overrides: {
     isTtsDegraded: false,
     setIsTtsSpeaking: vi.fn(),
     setIsTtsPaused: vi.fn(),
-    utteranceRef: overrides.utteranceRef ?? { current: null },
+    utteranceRef: { current: null },
     ttsRafRef: { current: null },
     speakText: mockSpeakText,
     pauseTts: vi.fn(),
@@ -406,5 +405,37 @@ describe('#2622 stop must actually silence the audio, not just the UI', () => {
 
     expect(pause).toHaveBeenCalled();
     expect(clip.currentTime).toBe(0);
+  });
+});
+
+describe('#2622 QR 交付表 CSV', () => {
+  const stories = [
+    { id: 1, lesson_number: 1, title: '贏得喝采的輸家', grade: 4, grade_code: 'G4-L01', char_count: 100, has_key_reading: true },
+    // A title containing both a comma and a quote — editorial content will
+    // eventually have them, and unquoted CSV silently shifts every later column.
+    { id: 2, lesson_number: 2, title: '他說「快,再快」', grade: 8, grade_code: 'G8-L02', char_count: 90, has_key_reading: false },
+  ];
+
+  it('emits two rows per lesson, 全文 and 段落', () => {
+    const rows = buildQrManifestRows(stories as never, 'https://x.test');
+    expect(rows).toHaveLength(4);
+    expect(rows.map((r) => r.kind)).toEqual(['全文', '段落', '全文', '段落']);
+    expect(rows[0].url).toBe('https://x.test/learn/1/intro');
+    expect(rows[1].url).toBe('https://x.test/learn/1/full-reading');
+    expect(rows[0].qr_file).toBe('intro-qr-L01.png');
+    expect(rows[1].qr_file).toBe('full-reading-qr-L01.png');
+  });
+
+  it('quotes fields and leads with a BOM so Excel reads the Chinese correctly', () => {
+    const csv = buildQrManifestCsv(buildQrManifestRows(stories as never, 'https://x.test'));
+
+    expect(csv.startsWith('﻿')).toBe(true);
+    // The comma inside the title must not create a column.
+    expect(csv).toContain('"他說「快,再快」"');
+    // Every line has the same field count as the header.
+    const lines = csv.replace(/^﻿/, '').trimEnd().split('\r\n');
+    const fieldCount = (line: string) => (line.match(/","/g) ?? []).length + 1;
+    expect(new Set(lines.map(fieldCount)).size).toBe(1);
+    expect(lines).toHaveLength(5); // header + 4 rows
   });
 });
