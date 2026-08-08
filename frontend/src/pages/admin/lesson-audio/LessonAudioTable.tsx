@@ -106,6 +106,19 @@ function detailToFullText(detail: StoryDetailResponse): string {
   return paragraphs.join('\n\n');
 }
 
+/**
+ * Whether the batch will produce a whole-text clip for this grade.
+ *
+ * The requirement (docs/requirements/reading-demo-audio-qr.md) gives grades 4-7
+ * both 全文 and 段落, and grades 8-9 段落 only. The batch generator already
+ * honours that — a dry run plans zero whole-text items for 8-9 — but this panel
+ * was offering play and QR for all of them, so an admin could hear and hand out
+ * a code for audio that will never be generated.
+ */
+export function deliversFullText(grade: number): boolean {
+  return grade <= 7;
+}
+
 export function buildLessonQrValue(origin: string, lessonId: number, step: LessonQrStep): string {
   return `${origin}/learn/${lessonId}/${step}`;
 }
@@ -166,7 +179,9 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     lesson_no: lessonTitle(s),
     title: s.title,
     grade: s.grade,
-    full_url: buildLessonQrValue(origin, s.id, 'intro'),
+    // Blank rather than a URL: the batch produces no whole-text clip for
+    // grades 8-9, so handing the 教材端 a code for it would point at silence.
+    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'intro') : '',
     passage_url: buildLessonQrValue(origin, s.id, 'full-reading'),
   }));
 }
@@ -424,6 +439,7 @@ const LessonAudioTable: React.FC = () => {
         row.alignment = { vertical: 'middle' };
 
         for (const [col, url] of [[3, r.full_url], [5, r.passage_url]] as const) {
+          if (!url) continue; // grades 8-9 have no whole-text clip to point at
           const dataUrl = await qrCodeToDataUrl(url);
           const imgId = wb.addImage({ base64: dataUrl.split(',')[1], extension: 'png' });
           ws.addImage(imgId, {
@@ -672,6 +688,9 @@ const LessonAudioTable: React.FC = () => {
                 {fullContent.icon}
                 {fullContent.label}
               </button>
+              {!deliversFullText(story.grade) && (
+                <span className="mt-1 block text-xs text-gray-400">僅試聽，不列入交付</span>
+              )}
 
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -697,7 +716,9 @@ const LessonAudioTable: React.FC = () => {
                 )}
               </div>
 
-              <QrDownloadButton lessonId={story.id} step="intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+              {deliversFullText(story.grade)
+                ? <QrDownloadButton lessonId={story.id} step="intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+                : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付段落朗讀">—</span>}
               <QrDownloadButton lessonId={story.id} step="full-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
             </div>
           );
