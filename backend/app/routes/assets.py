@@ -10,8 +10,8 @@ rewrite in prod/staging, or the backend's own Cloud Run URL directly in
 preview/local dev), never to storage.googleapis.com.
 
 Security posture:
-- Only 3 allow-listed top-level prefixes are servable (lessons-images/, stories/,
-  worksheets/) — these are exactly the prefixes referenced by frontend consts and
+- Only allow-listed top-level prefixes are servable (lessons-images/, stories/,
+  worksheets/, demo-reading/) — these are exactly the prefixes referenced by frontend consts and
   backend-generated URLs. Legacy prefixes not consumed by the app (pr-screenshots/,
   qa/) are NOT proxied — no general-purpose GCS object reader.
 - Strict allow-list regex on the full decoded path before it ever reaches GCS,
@@ -37,7 +37,7 @@ router = APIRouter(prefix="/assets", tags=["assets"])
 # Keep in sync with frontend `ASSET_BASE` consumers (assetBase.ts) and the
 # backend URL builders in lesson_layer_loaders.py — this list IS the public
 # content surface of the bucket.
-_ALLOWED_PREFIXES = ("lessons-images/", "stories/", "worksheets/")
+_ALLOWED_PREFIXES = ("lessons-images/", "stories/", "worksheets/", "demo-reading/")
 
 # Allow-list charset for the decoded object path. FastAPI's `{path:path}`
 # converter URL-decodes the raw request path once before this ever runs, so a
@@ -59,6 +59,7 @@ _CONTENT_TYPES = {
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
     ".png": "image/png",
+    ".mp3": "audio/mpeg",
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }

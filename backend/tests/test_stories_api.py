@@ -150,6 +150,31 @@ class TestKeyReadingContract:
         assert resp.status_code == 200, resp.text
         assert resp.json().get("key_reading") is None
 
+    def test_list_reports_has_key_reading_true_and_false(self, client):
+        resp = client.get("/api/stories?page_size=300")
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        stories = body["stories"]
+        assert len(stories) == body["total"]
+        values = {story.get("has_key_reading") for story in stories}
+        assert values == {True, False}
+        assert all("key_reading" not in story for story in stories)
+
+    def test_list_has_key_reading_matches_detail_key_reading(self, client):
+        stories = client.get("/api/stories?page_size=300").json()["stories"]
+        from app.services.lesson_layer_loaders import get_key_reading_passages
+        kr_map = get_key_reading_passages()
+        with_key_reading = next(story for story in stories if story["id"] == 1)
+        without_key_reading = next(story for story in stories if story.get("grade_code") not in kr_map)
+
+        with_detail = client.get(f"/api/stories/{with_key_reading['id']}").json()
+        without_detail = client.get(f"/api/stories/{without_key_reading['id']}").json()
+
+        assert with_detail["key_reading"] is not None
+        assert without_detail["key_reading"] is None
+        assert with_key_reading["has_key_reading"] is True
+        assert without_key_reading["has_key_reading"] is False
+
     def test_zero_id_returns_none(self):
         assert get_lesson_by_id(0) is None
 
@@ -412,7 +437,7 @@ class TestStoryListItemSchema:
         resp = client.get("/api/stories?page_size=1")
         story = resp.json()["stories"][0]
         required = ["id", "title", "grade", "grade_code", "genre", "category",
-                    "char_count", "thumbnail_url"]
+                    "char_count", "thumbnail_url", "has_key_reading"]
         for field in required:
             assert field in story, f"StoryListItem missing field: {field}"
 

@@ -47,6 +47,10 @@ jobs:
       #     completion/成績 source + the single-paragraph residual diff (#2532)
       #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
       #     banner) instead of silently playing a machine voice with no signal (#2609)
+      #   - qrcode-bundling: the QR library must be imported with a literal
+      #     specifier so Vite bundles it. A dynamic import with the name in a
+      #     variable passed build, lint and vitest while the feature was broken
+      #     in every browser (#2622)
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts

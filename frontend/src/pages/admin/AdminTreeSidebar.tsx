@@ -26,6 +26,7 @@ export type TreeNodeSelection =
   | { type: 'users'; id: 'users' }
   | { type: 'stories'; id: 'stories' }
   | { type: 'tts_audit'; id: 'tts_audit' }
+  | { type: 'lesson_audio'; id: 'lesson_audio' }
   | { type: 'story_structure_lab'; id: 'story_structure_lab' }
   | { type: 'keypoints_qa'; id: 'keypoints_qa' }
   | { type: 'create_org'; id: 'create_org' };
@@ -127,6 +128,19 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
               : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
           }`}
           title="TTS 句子稽核"
+        >
+          <TtsAuditIcon />
+        </button>
+
+        {/* Lesson audio icon */}
+        <button
+          onClick={() => onSelectNode({ type: 'lesson_audio', id: 'lesson_audio' })}
+          className={`p-1.5 rounded-md transition-colors cursor-pointer mb-1 ${
+            isSelected('lesson_audio', 'lesson_audio')
+              ? 'bg-cyan-50 text-cyan-600'
+              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+          }`}
+          title="課程音檔總表"
         >
           <TtsAuditIcon />
         </button>
