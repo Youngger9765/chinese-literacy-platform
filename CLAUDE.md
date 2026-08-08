@@ -257,21 +257,60 @@ private/omo-real-samples/2026-05-18-batch-results/
 - ❌ 用「貴 = 好」邏輯（3.5 Flash $9 完敗 2.5-flash-lite $0.30）
 - ❌ Skip 便宜的 model（之前漏測 2.5-flash-lite 差點省不到 78%）
 
-## 學習流程（7 步驟，StepperNav 定義）
+## 學習流程
 
-1. **簡介** — 課文背景介紹（Intro）
-2. **逐段朗讀** — AI 即時朗讀指導（LiveTutor）
-3. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
-4. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
-5. **聽寫練習** — AI 唸字學生打字（DictationPractice）
-6. **全文朗讀** — 完整朗讀評估（FullReading）
-7. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
+> ⛔ **這裡的步驟名稱只是導覽用。真相 SOT 是 `frontend/src/config/stepConfig.ts`**——
+> 每個 step 上方都有決策註解寫明「為什麼、何時改的」，**那些註解才是答案，不是 label 字串**。
+> 想知道某個 step 現在是什麼、還在不在用，讀那個檔並**讀完該段註解**。
+
+### 朗讀相關的三個名稱（最容易搞混，2026-08-08 我就搞混過）
+
+| URL step id | 現在的 label | 狀態 | 是什麼 |
+|---|---|---|---|
+| `intro` | 課程簡介 | ✅ 啟用 | AI 唸**全文**（#2607 從瀏覽器機器音改成 Gemini/Azure 人聲）|
+| `full-reading` | **重點朗讀** | ✅ 啟用 | 唸老師 ☞ 標的**重點段**（念順順），資料在 `key_reading.passage`；無資料時 fallback 唸全文 |
+| `tutor` | 逐段朗讀 | ⛔ **`enabled: false`** | 2026-07-20 專家審查後從 StepperNav 隱藏（ToolPicker 仍可進）。**新功能不要連到它** |
+
+2026-07-20 專家審查定調：朗讀**只練老師指定的重點段落**（約 300–400 字），**不練全文**，
+主指標是流暢率（每分鐘字數）而非逐字正確率。做法是把既有 `full-reading` step **改造**成重點朗讀
+並**保留 step id**（新增 step 會讓完成記錄寫錯 step → 作業無法提交）。
 
 ### 其他練習元件（未在主流程 stepper 中）
 - **SentencePractice** — AI 引導造句
 - **ListeningPractice** — 聽力理解（TTS + AI 評估）
 - **PronunciationPractice** — 發音練習
 - **ExitTicket** — 學習出場券
+
+## TTS（2026-08-08 全面切到 Azure）
+
+| 項目 | 現值 | 備註 |
+|---|---|---|
+| provider | **`azure`** | prod / staging / preview 三個環境一致 |
+| voice | `zh-TW-HsiaoChenNeural` | 192kbps 48kHz |
+| fallback | Google `cmn-CN-Chirp3-HD-Sulafat` | ⚠️ **中國腔**，2026-04 盲聽已否決 |
+| GCS bucket | `lingoleap-tts-cache` | prefix：`azure/sentences/` 6356 · `gemini31-prompt-only-v2/sentences/` 1418 · `tts-cache/` 10 |
+| 快取 key | `sha256(raw_text.strip())` | **不含 provider 或 voice**，prefix 是唯一區隔 |
+
+⚠️ **判斷現在跑哪個 provider 一律查 serving revision 的 env**，不要讀文件——
+2026-08-08 之前所有文件都寫「Gemini 是 primary」，切換後那些全錯。
+
+```bash
+gcloud run services describe lingoleap-backend --region asia-east1 --project lingoleap-dev \
+  --format='value(status.traffic)'          # 找 percent 100 那筆的 revisionName
+gcloud run revisions describe <該 revision> --region asia-east1 --project lingoleap-dev \
+  --format='json(spec.containers[0].env)'   # 看它的 TTS_PROVIDER
+```
+
+### 三個 TTS 地雷
+
+1. **有聲音 ≠ AI 朗讀成功**。`frontend/src/hooks/useTtsPlayback.ts` 約 201 行在後端失敗時
+   **靜默降級成瀏覽器機器音**，聽起來「有聲音」但不是 AI。驗證要看 network 回應大小
+   （Azure 約 177–197KB，瀏覽器語音沒有網路請求）。
+2. **Azure 拒收 `<phoneme>`**。四種 alphabet（zhuyin/sapi/ipa/ups）全部 HTTP 400。
+   多音字校正要用 `<sub alias="X">Y</sub>`。
+3. **fallback 會把中國腔永久寫進快取**。azure prefix miss 時讀取路徑會回讀 `tts-cache/`
+   （`tts/__init__.py` 約 281–285 行），所以一次短暫失敗就把該句永久釘在中國腔，
+   Azure 恢復也救不回。詳見 `specs/modules/tts/INTENT.md`。
 
 ## 關鍵檔案
 
@@ -296,8 +335,27 @@ private/omo-real-samples/2026-05-18-batch-results/
 | `backend/app/services/dictionary_service.py` | 字典查詢服務 |
 | `backend/app/services/input_sanitizer.py` | 輸入消毒 |
 | `backend/app/routes/` | API 路由（140+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents, dictionary, feedback, jobs, privacy） |
-| `backend/data/curriculum/` | 現行課程 SOT（**158 課** + `manifest.yml` 158 entries，verified 2026-07-02） |
-| `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊；現行看 `data/curriculum/`） |
+| `backend/data/curriculum/` | 課程來源檔（`manifest.yml` 158 entries）⚠️ **不是服務端真相**，見下方 |
+| `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊） |
+| `backend/data/key_reading_passages.yml` | 重點朗讀（念順順）段落 SOT，by lesson code（`G4-L01`）；134 條有 passage，其中 32 條對不到 DB 任一課（孤兒，待清） |
+
+### ⚠️ 課程清單的真相在 DB，不在 repo（2026-08-08 verified）
+
+```
+repo backend/data/curriculum/manifest.yml    158 筆
+staging DB（API 回應的 total）               165 筆     ← 服務端真相
+```
+
+要「所有課程」一律走 API，**不要 grep repo 檔案**：
+
+```bash
+curl -s "$BACKEND/api/stories?page_size=300" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['stories']), d['total'])"
+```
+
+⚠️ 分頁參數是 **`page_size`**（預設 60，上限 300），**不是 `limit`**。傳 `limit=500` 會被
+**靜默忽略**只回 60 筆，看起來像全部。**斷言拿到的筆數等於回應的 `total`**，否則就是沒拿全。
+
+（2026-08-08 我因此把「60 課 / 47 有重點段」當成全體回報，實際是 165 / 107。）
 
 ## 簡報資料（公開，不需登入）
 
