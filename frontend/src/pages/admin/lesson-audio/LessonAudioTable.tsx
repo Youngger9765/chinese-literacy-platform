@@ -182,7 +182,13 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
     full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'intro') : '',
-    passage_url: buildLessonQrValue(origin, s.id, 'full-reading'),
+    // Same rule on the passage side: build_demo_reading.plan_demo_audio only
+    // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
+    // (has_key_reading). Emitting a code for a lesson without one — as this
+    // did unconditionally before — is the identical "points at silence" bug
+    // the 全文 gate above prevents, just on the passage side. Gate on the data
+    // (does a passage exist), never on the grade.
+    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'full-reading') : '',
   }));
 }
 

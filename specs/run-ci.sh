@@ -82,4 +82,11 @@ else
   echo ""
 fi
 
+# ── Gate 4/4: QR-manifest reconciliation (no 空砲, no missing QR) ─────────────
+# Reusable: validates against current data, not hard-coded lesson numbers.
+# After importing new courses, re-run this same gate.
+echo "-- Gate 4/4: QR-manifest reconciliation (verify_qr_manifest) --"
+( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
+echo ""
+
 echo "== Local Spec CI: PASS =="

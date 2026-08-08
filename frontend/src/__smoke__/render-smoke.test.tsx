@@ -109,6 +109,7 @@ import LessonRenderer from '../components/lesson-content/LessonRenderer';
 import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
 import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
+import DemoReadingPage from '../pages/DemoReadingPage';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -412,5 +413,9 @@ describe('render-smoke: LoginPage — quick-login handler mounts without TDZ (#2
 describe('render-smoke: LessonAudioTable — admin audio table mounts without TDZ (#2622)', () => {
   it('LessonAudioTable', () => {
     mountGuard('LessonAudioTable', <LessonAudioTable />);
+  });
+
+  it('DemoReadingPage', () => {
+    mountGuard('DemoReadingPage', <DemoReadingPage />);
   });
 });

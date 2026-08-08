@@ -425,10 +425,12 @@ describe('#2622 QR 交付表', () => {
     expect(rows[0].lesson_no).toBe('L01');
     expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
     expect(rows[0].passage_url).toBe('https://x.test/learn/1/full-reading');
-    // Lesson 2 is grade 8, which per #2626 delivers 段落 only — its 全文
-    // column is deliberately blank rather than a code pointing at silence.
+    // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
+    // (has_key_reading=false), so the batch produces no passage clip for it.
+    // Both columns are therefore blank — a 段落 code here would point at a
+    // demo-reading/2/passage.mp3 that never gets generated (the "空砲" bug).
     expect(rows[1].full_url).toBe('');
-    expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
+    expect(rows[1].passage_url).toBe('');
   });
 
   it('quotes fields and leads with a BOM so Excel reads the Chinese correctly', () => {
@@ -504,7 +506,52 @@ describe('#2626 只有 4-7 年級交付全文', () => {
 
     expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
     expect(rows[1].full_url).toBe('');
-    // 段落 is delivered for every grade, so it must survive.
+    // Positive control: this G8 lesson DOES have a 念順順段
+    // (has_key_reading=true), so its 段落 code must survive even though 全文
+    // is blank. Passage now gates on has_key_reading, not on grade.
     expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
+  });
+});
+
+describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => {
+  /**
+   * The bug: buildQrManifestRows emitted a 段落 URL for every lesson
+   * unconditionally, but the batch generator (build_demo_reading.plan_demo_audio)
+   * only produces demo-reading/{id}/passage.mp3 when the lesson actually has a
+   * 念順順段 (key_reading.passage, surfaced as has_key_reading). 58 of 165
+   * lessons have no passage, so 58 段落 QR codes pointed at an mp3 that never
+   * gets generated — the same "points at silence" failure the 全文 grade gate
+   * was added (#2626) to prevent, just on the passage side where nobody gated.
+   *
+   * The invariant, gated on data not grade: a 段落 QR exists iff the passage
+   * audio will exist iff has_key_reading is true.
+   */
+  it('omits the 段落 URL when the lesson has no 念順順段', () => {
+    const rows = buildQrManifestRows([
+      { id: 10, lesson_number: 10, title: '有段落', grade: 5, grade_code: 'G5-L10', char_count: 50, has_key_reading: true },
+      { id: 11, lesson_number: 11, title: '無段落', grade: 5, grade_code: 'G5-L11', char_count: 50, has_key_reading: false },
+    ] as never, 'https://x.test');
+
+    // Positive control — a lesson with a passage still gets its 段落 code.
+    expect(rows[0].passage_url).toBe('https://x.test/learn/10/full-reading');
+    // The fix — a lesson without one does not.
+    expect(rows[1].passage_url).toBe('');
+  });
+
+  it('never emits a 段落 URL that outnumbers the lessons that have a passage', () => {
+    const stories = [
+      { id: 1, lesson_number: 1, title: 'a', grade: 4, grade_code: 'G4-L01', char_count: 10, has_key_reading: true },
+      { id: 2, lesson_number: 2, title: 'b', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: false },
+      { id: 3, lesson_number: 3, title: 'c', grade: 9, grade_code: 'G9-L03', char_count: 10, has_key_reading: false },
+      { id: 4, lesson_number: 4, title: 'd', grade: 6, grade_code: 'G6-L04', char_count: 10, has_key_reading: true },
+    ];
+    const rows = buildQrManifestRows(stories as never, 'https://x.test');
+
+    const passageCodes = rows.filter((r) => r.passage_url !== '').length;
+    const lessonsWithPassage = stories.filter((s) => s.has_key_reading).length;
+    // Count invariant, not "at least one" — every spurious 段落 QR is a code
+    // handed to a teacher that plays nothing.
+    expect(passageCodes).toBe(lessonsWithPassage);
+    expect(passageCodes).toBe(2);
   });
 });
