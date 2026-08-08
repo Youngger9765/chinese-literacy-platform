@@ -108,6 +108,7 @@ import AssessmentReport from '../components/reading-steps/AssessmentReport';
 import LessonRenderer from '../components/lesson-content/LessonRenderer';
 import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
+import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -405,5 +406,11 @@ describe('render-smoke: LessonRenderer — Phase-2 unified block renderer (#2289
 describe('render-smoke: LoginPage — quick-login handler mounts without TDZ (#2410)', () => {
   it('LoginPage', () => {
     mountGuard('LoginPage', <LoginPage onSwitchToRegister={vi.fn()} />);
+  });
+});
+
+describe('render-smoke: LessonAudioTable — admin audio table mounts without TDZ (#2622)', () => {
+  it('LessonAudioTable', () => {
+    mountGuard('LessonAudioTable', <LessonAudioTable />);
   });
 });

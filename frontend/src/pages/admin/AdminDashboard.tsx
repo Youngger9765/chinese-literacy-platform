@@ -9,6 +9,7 @@ import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
 import StoryManagementPanel from './StoryManagementPanel';
 import TtsSentenceTable from './tts-audit/TtsSentenceTable';
+import LessonAudioTable from './lesson-audio/LessonAudioTable';
 import StoryStructureLabPage from './story-structure-lab/StoryStructureLabPage';
 import KeypointsQADashboard from './KeypointsQADashboard';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
@@ -124,6 +125,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'users' && <UsersPanel />}
         {selectedNode?.type === 'stories' && <StoryManagementPanel />}
         {selectedNode?.type === 'tts_audit' && <TtsSentenceTable />}
+        {selectedNode?.type === 'lesson_audio' && <LessonAudioTable />}
         {selectedNode?.type === 'story_structure_lab' && <StoryStructureLabPage />}
         {selectedNode?.type === 'keypoints_qa' && <KeypointsQADashboard />}
       </div>

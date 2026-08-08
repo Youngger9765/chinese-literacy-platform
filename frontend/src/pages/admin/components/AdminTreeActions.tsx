@@ -73,6 +73,21 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         </span>
       </button>
 
+      {/* Lesson Audio */}
+      <button
+        onClick={() => onSelectNode({ type: 'lesson_audio', id: 'lesson_audio' })}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+          isSelected(selectedNode, 'lesson_audio', 'lesson_audio')
+            ? 'bg-cyan-50 text-cyan-700'
+            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        }`}
+      >
+        <TtsAuditIcon className={`shrink-0 ${isSelected(selectedNode, 'lesson_audio', 'lesson_audio') ? 'text-cyan-500' : ''}`} />
+        <span className={`text-sm ${isSelected(selectedNode, 'lesson_audio', 'lesson_audio') ? 'font-semibold' : ''}`}>
+          課程音檔總表
+        </span>
+      </button>
+
       {/* Keypoints QA */}
       <button
         onClick={() => onSelectNode({ type: 'keypoints_qa', id: 'keypoints_qa' })}

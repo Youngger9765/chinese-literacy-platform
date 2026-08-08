@@ -398,6 +398,7 @@ def list_stories(
     total = len(results)
     start = (page - 1) * page_size
     page_results = results[start : start + page_size]
+    key_reading_passages = get_key_reading_passages()
 
     return StoryListResponse(
         stories=[
@@ -412,6 +413,7 @@ def list_stories(
                 char_count=s["char_count"],
                 thumbnail_url=s["thumbnail_url"],
                 reading_strategy=s["reading_strategy"],
+                has_key_reading=bool(key_reading_passages.get(s.get("grade_code")) or s.get("key_reading")),
                 intro=StoryIntroSchema(**s["intro"]),
             )
             for s in page_results

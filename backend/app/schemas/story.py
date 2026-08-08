@@ -46,6 +46,7 @@ class StoryListItem(BaseModel):
     char_count: int
     thumbnail_url: Optional[str] = None
     reading_strategy: Optional[str] = None
+    has_key_reading: bool = False
     intro: Optional[StoryIntroSchema] = None
 
     model_config = {"from_attributes": True}
