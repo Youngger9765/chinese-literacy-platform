@@ -536,7 +536,10 @@ const LessonAudioTable: React.FC = () => {
       const fullText = detailToFullText(detail);
       const text = mode === 'key' ? (detail.key_reading?.passage || fullText) : fullText;
       setIsFetchingDetail(false);
-      speakText(text);
+      // Use sentence-level playback (lessonId + paragraphIdx) so the first
+      // sentence starts in ~150ms instead of waiting ~10s for the entire text
+      // to synthesize as one blob. (#2627)
+      speakText(text, story.id, 0);
     } catch (err) {
       if (activeRequestRef.current !== requestId) return;
       setIsFetchingDetail(false);

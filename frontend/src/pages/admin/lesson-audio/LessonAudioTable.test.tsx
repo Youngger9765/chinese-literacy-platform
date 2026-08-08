@@ -300,8 +300,8 @@ describe('LessonAudioTable', () => {
     pending[89].resolve({ paragraphs: ['lesson-89-text'] });
 
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
-    expect(mockSpeakText).toHaveBeenCalledWith('lesson-89-text');
-    expect(mockSpeakText).not.toHaveBeenCalledWith('lesson-1-text');
+    expect(mockSpeakText).toHaveBeenCalledWith('lesson-89-text', 89, 0);
+    expect(mockSpeakText).not.toHaveBeenCalledWith('lesson-1-text', 1, 0);
   });
 
   // The list-loading error screen (a full-page "載入失敗" replacement) and a
