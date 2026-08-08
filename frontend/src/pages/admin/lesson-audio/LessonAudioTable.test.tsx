@@ -15,6 +15,12 @@ vi.mock('../../../hooks/useTtsPlayback', () => ({
   useTtsPlayback: vi.fn(),
 }));
 
+// jsdom has no media playback; give the prototype a resolvable no-op so the
+// component's play() patch has something real to delegate to.
+if (!HTMLMediaElement.prototype.play.toString().includes('patchedPlay')) {
+  HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+}
+
 vi.mock('qrcode', () => ({
   default: {
     toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,test'),
@@ -353,25 +359,27 @@ describe('derivePlaybackState', () => {
 
 describe('#2622 stop must actually silence the audio, not just the UI', () => {
   /**
-   * Measured on staging 2026-08-08, after the first attempt at this fix:
-   * clicking a playing row's own stop control flipped the button back to
-   * 「播放全文」while the clip kept going — currentTime advanced 13s → 18s → 41s
-   * across two clicks. Worse than the bug it replaced, because the screen then
-   * asserts something false.
+   * Measured on staging 2026-08-08: clicking stop flipped the button back to
+   * 「播放全文」while the clip kept going, currentTime advancing 13s → 18s → 41s.
+   * Worse than the bug it replaced, because the screen then asserts something
+   * false.
    *
-   * stopTts() reaches the clip through utteranceRef / the ttsApi module's
-   * _currentAudio, and on the single-shot path there is a window where neither
-   * points at the element that is actually sounding. The component therefore
-   * pauses utteranceRef.current itself. Removing that direct pause turns this
-   * red no matter how correct the surrounding state handling looks.
+   * Two earlier fixes aimed at handles the TTS layer exposes — utteranceRef and
+   * ttsApi's _currentAudio — and both still missed the element that was
+   * sounding. So the component now records the elements themselves, by patching
+   * HTMLMediaElement.prototype.play while it is mounted. That the technique
+   * reaches and stops the real element was verified in a browser on staging:
+   * an element at p:false t:13 went to p:true t:0 and stayed there.
+   *
+   * This test drives that patch directly with a stub element rather than trying
+   * to make jsdom play audio — jsdom has no playback, and three attempts to
+   * simulate it failed for reasons that had nothing to do with the code under
+   * test.
    */
-  it('pauses the audio element the hook is holding', async () => {
-    const audio = document.createElement('audio');
-    const pauseSpy = vi.spyOn(audio, 'pause');
-
+  it('pauses every element that started playing while the panel was open', async () => {
     vi.clearAllMocks();
     mockFetchDispatcher();
-    mockTts({ utteranceRef: { current: audio } });
+    mockTts();
 
     const { rerender } = render(<LessonAudioTable />);
     await waitFor(() => screen.getByText('贏得喝采的輸家'));
@@ -380,14 +388,23 @@ describe('#2622 stop must actually silence the audio, not just the UI', () => {
     fireEvent.click(within(row).getByRole('button', { name: /播放全文/ }));
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
 
-    // The browser has now fired `onplay`, so the hook reports audio flowing.
-    mockTts({ isTtsSpeaking: true, utteranceRef: { current: audio } });
+    // Stand in for the <audio> the TTS layer creates: never in the document,
+    // reachable only because the component patched the prototype's play().
+    let paused = false;
+    const pause = vi.fn(() => { paused = true; });
+    const clip = {
+      get paused() { return paused; },
+      currentTime: 42,
+      pause,
+    } as unknown as HTMLMediaElement;
+    HTMLMediaElement.prototype.play.call(clip);
+
+    mockTts({ isTtsSpeaking: true });
     rerender(<LessonAudioTable />);
 
-    pauseSpy.mockClear();
     fireEvent.click(screen.getByRole('button', { name: /停止播放/ }));
 
-    expect(pauseSpy).toHaveBeenCalled();
-    expect(audio.currentTime).toBe(0);
+    expect(pause).toHaveBeenCalled();
+    expect(clip.currentTime).toBe(0);
   });
 });
