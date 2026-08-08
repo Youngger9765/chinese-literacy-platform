@@ -27,6 +27,8 @@ import type { ReadingHistoryItem } from '../../../services/readingHistoryApi';
 interface ReadingTrendChartProps {
   /** Reading history items — order from caller is preserved internally. */
   history: ReadingHistoryItem[];
+  /** Issue #2568: 隱藏正確率系列時傳 false（只留語速/流暢度）。預設 true 以相容既有呼叫。 */
+  showAccuracy?: boolean;
 }
 
 interface ChartPoint {
@@ -68,18 +70,21 @@ function buildChartData(
 interface TooltipProps {
   active?: boolean;
   payload?: Array<{ payload: ChartPoint }>;
+  showAccuracy?: boolean;
 }
 
-function CustomTooltip({ active, payload }: TooltipProps) {
+function CustomTooltip({ active, payload, showAccuracy = true }: TooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const p = payload[0].payload;
   return (
     <div className="bg-surface-container-lowest border border-surface-container-high rounded-lg shadow-md px-3 py-2 text-xs">
       <div className="font-headline font-bold text-on-surface mb-1">第 {p.attempt} 次 · {p.fullDate}</div>
-      <div className="flex items-center gap-2 text-amber-700">
-        <span className="w-2 h-2 rounded-full bg-amber-500" />
-        正確率：<span className="font-bold">{p.accuracy}%</span>
-      </div>
+      {showAccuracy && (
+        <div className="flex items-center gap-2 text-amber-700">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          正確率：<span className="font-bold">{p.accuracy}%</span>
+        </div>
+      )}
       <div className="flex items-center gap-2 text-blue-700">
         <span className="w-2 h-2 rounded-full bg-blue-500" />
         語速：<span className="font-bold">{p.cpm} 字/分</span>
@@ -88,7 +93,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
   );
 }
 
-const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
+const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history, showAccuracy = true }) => {
   const totalAttempts = history.length;
   /* #1633: start with the latest 4 attempts; 「載入更多」 unlocks more. */
   const [visiblePoints, setVisiblePoints] = useState(DEFAULT_POINTS);
@@ -132,6 +137,7 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
           <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="attempt" tick={{ fontSize: 10 }} stroke="#9ca3af" />
+            {showAccuracy && (
             <YAxis
               yAxisId="accuracy"
               orientation="left"
@@ -141,6 +147,7 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
               tickFormatter={(v) => `${v}%`}
               width={32}
             />
+            )}
             <YAxis
               yAxisId="cpm"
               orientation="right"
@@ -149,8 +156,9 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
               stroke="#2563eb"
               width={32}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip showAccuracy={showAccuracy} />} />
             <Legend wrapperStyle={{ fontSize: 10 }} iconSize={8} />
+            {showAccuracy && (
             <Line
               yAxisId="accuracy"
               type="monotone"
@@ -161,6 +169,7 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
               dot={{ r: 3 }}
               activeDot={{ r: 5 }}
             />
+            )}
             <Line
               yAxisId="cpm"
               type="monotone"

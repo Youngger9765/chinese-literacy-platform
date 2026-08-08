@@ -8,6 +8,23 @@
 
 ---
 
+## 8/3 ~ 8/7
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 靖杭 | ✅ | PR #2571 重點朗讀 123 課對照表 (#2562) | 把 pilot 從單課擴到 123 課指定段落對照表，key_reading 進 content，loader 合併 |
+| 靖杭 | ✅ | PR #2589 FullReadingPage stepId 改 step-aware (#2588) | 清掉 #2559 pilot 留下的寫死 stepId 技術債 |
+| Young | ✅ | PR #2597 示範朗讀音檔 + QR code 需求書 | 規格 land staging；含 codex review 修正：免登入不可打 /api/tts/synthesize、gemini31 的 ffmpeg 靜默降級風險 |
+| Young | ✅ | PR #2596 three-version-converter skill 移入本 repo | skill 本體從 L2 搬進 `.claude/skills/`，code byte-identical；字型未搬（48MB + 微軟授權字型） |
+| Young | ✅ | PR #2594 / #2598 / #2600 Pages 收斂 (#2590) | Pages source 改 gh-pages/root，docs/ 停止對外發佈；Brand Book 自動同步 workflow + shallow clone 修 |
+| Young | ✅ | PR #2599 移除實習生就讀學校 | 2026-05-01 會議記錄 PII 清理 |
+| 啟翔 | ⏳ | 本週無 PR | #2551 / #2552 / #2554 自 7/19–7/20 起卡 review 19 天；#2561 二修教材 17 天無動作 |
+
+> 本週三線兵推（Hans 三版本 skill／啟翔 二修教材／靖杭 朗讀 QR）→ `docs/meetings/2026-08-07-agenda.md`。
+> 最高風險：QR code 印上紙不可撤回，而 #2561① 正要重排 lesson_code → URL 必須綁不變碼。
+
+---
+
 ## 7/4 ~ 7/18
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |

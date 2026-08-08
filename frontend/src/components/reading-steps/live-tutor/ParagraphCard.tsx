@@ -11,6 +11,7 @@ import { useKaraoke } from '../../../context/KaraokeContext';
 import { interleavePunctuation } from '../../../utils/textDiff';
 import { getEncouragement } from '../../../utils/readingEncouragement';
 import { ReadingDiffLegend, renderDiffTokenSpans } from '../readingDiffStyle';
+import { SHOW_READING_ACCURACY } from '../../../config/readingScoreDisplay';
 
 /** Per-sentence retry (record + eval). Off until short-sentence practice ships. */
 const SENTENCE_RETRY_UI_ENABLED = false;
@@ -322,12 +323,15 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                   <span className="font-bold text-on-surface">{cpmVal}</span>
                   <span className="text-on-surface-variant text-xs">字/分</span>
                 </div>
+                {/* Issue #2568: 只留流暢度(語速)，正確率隱藏（計算仍保留） */}
+                {SHOW_READING_ACCURACY && (
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-base text-on-surface-variant">check_circle</span>
                   <span className="text-on-surface-variant">正確率</span>
                   <span className={`font-bold ${rateColor}`}>{Math.round(rate * 100)}%</span>
                   <span className="text-on-surface-variant text-xs">（不含標點、注音）</span>
                 </div>
+                )}
               </div>
             );
           })()}
