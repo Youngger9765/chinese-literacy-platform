@@ -50,7 +50,7 @@ describe('#2622 qrcode bundling', () => {
       .replace(/^\s*\/\/.*$/gm, '');
 
     // The bug was a dynamic import whose specifier the bundler cannot follow —
-    // a variable, not a string literal. `await import('jszip')` is fine and is
+    // a variable, not a string literal. `await import('exceljs')` is fine and is
     // used deliberately to keep a 100KB library out of the initial chunk, so
     // this asserts on the dangerous shape rather than banning dynamic import
     // outright.

@@ -146,49 +146,47 @@ async function qrCodeToDataUrl(value: string): Promise<string> {
 }
 
 export interface QrManifestRow {
-  lesson_id: number;
   lesson_no: string;
   title: string;
   grade: number;
-  kind: '全文' | '段落';
-  url: string;
-  qr_file: string;
+  full_url: string;
+  passage_url: string;
 }
 
 /**
- * The index the 教材端 pastes alongside the images.
+ * One row per lesson, with 全文 and 段落 side by side.
  *
- * RFC-4180 quoting throughout, not just where it currently matters — lesson
- * titles are editorial content and will eventually contain a comma or a quote.
- * A BOM leads the file so Excel on Windows opens the Chinese as UTF-8 instead
- * of mojibake, which is the single most common way a correct CSV still arrives
- * broken.
+ * The first version emitted two rows per lesson and a `kind` column, which is
+ * the shape a database wants and not the shape a person pasting into a
+ * worksheet wants — they work lesson by lesson, so both codes for a lesson
+ * belong on the same line.
+ */
+export function buildQrManifestRows(stories: StoryListItem[], origin: string): QrManifestRow[] {
+  return stories.map((s) => ({
+    lesson_no: lessonTitle(s),
+    title: s.title,
+    grade: s.grade,
+    full_url: buildLessonQrValue(origin, s.id, 'intro'),
+    passage_url: buildLessonQrValue(origin, s.id, 'full-reading'),
+  }));
+}
+
+/**
+ * CSV fallback for anyone who wants the URLs without the workbook.
+ *
+ * Every field quoted because lesson titles are editorial content and will
+ * eventually contain a comma or a quote, which unquoted shifts every later
+ * column. A BOM leads the file so Excel on Windows reads the Chinese as UTF-8
+ * rather than mojibake.
  */
 export function buildQrManifestCsv(rows: QrManifestRow[]): string {
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
-  const header = ['lesson_id', 'lesson_no', 'title', 'grade', 'kind', 'url', 'qr_file'];
+  const header = ['課程', '課名', '年級', '全文網址', '段落網址'];
   const lines = [header.map(esc).join(',')];
   for (const r of rows) {
-    lines.push([r.lesson_id, r.lesson_no, r.title, r.grade, r.kind, r.url, r.qr_file].map(esc).join(','));
+    lines.push([r.lesson_no, r.title, r.grade, r.full_url, r.passage_url].map(esc).join(','));
   }
   return `\uFEFF${lines.join('\r\n')}\r\n`;
-}
-
-export function buildQrManifestRows(stories: StoryListItem[], origin: string): QrManifestRow[] {
-  const rows: QrManifestRow[] = [];
-  for (const s of stories) {
-    rows.push({
-      lesson_id: s.id, lesson_no: lessonTitle(s), title: s.title, grade: s.grade,
-      kind: '全文', url: buildLessonQrValue(origin, s.id, 'intro'),
-      qr_file: qrFileName('intro-qr', s.id),
-    });
-    rows.push({
-      lesson_id: s.id, lesson_no: lessonTitle(s), title: s.title, grade: s.grade,
-      kind: '段落', url: buildLessonQrValue(origin, s.id, 'full-reading'),
-      qr_file: qrFileName('full-reading-qr', s.id),
-    });
-  }
-  return rows;
 }
 
 export function qrFileName(filePrefix: string, lessonId: number): string {
@@ -380,29 +378,70 @@ const LessonAudioTable: React.FC = () => {
    * compute that the page does not already know, and no reason to spend a
    * backend round trip per lesson.
    */
-  const downloadAllQrZip = useCallback(async () => {
+  /**
+   * One workbook, one row per lesson, QR images anchored in their cells.
+   *
+   * A CSV cannot carry images — it is plain text — so the previous version
+   * shipped a zip of PNGs plus an index and left the 教材端 to match filenames
+   * by hand. XLSX is a zip container underneath and can anchor images to cells,
+   * so the codes travel with the row they belong to and can be copied straight
+   * into Word.
+   *
+   * Generated in the browser: the QR content is only this deployment's origin
+   * plus a lesson id, so there is nothing a backend could compute that the page
+   * does not already know.
+   */
+  const downloadAllQrXlsx = useCallback(async () => {
     setIsZipping(true);
     try {
-      const { default: JSZip } = await import('jszip');
-      const zip = new JSZip();
-      const folder = zip.folder('qr');
+      const { default: ExcelJS } = await import('exceljs');
       const rows = buildQrManifestRows(sortedStories, window.location.origin);
 
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('課程 QR');
+      ws.columns = [
+        { header: '課程', key: 'no', width: 10 },
+        { header: '課名', key: 'title', width: 30 },
+        { header: '年級', key: 'grade', width: 6 },
+        { header: '全文 QR', key: 'fullQr', width: 22 },
+        { header: '全文網址', key: 'fullUrl', width: 52 },
+        { header: '段落 QR', key: 'passageQr', width: 22 },
+        { header: '段落網址', key: 'passageUrl', width: 52 },
+      ];
+      ws.getRow(1).font = { bold: true };
+      ws.views = [{ state: 'frozen', ySplit: 1 }];
+
       for (let i = 0; i < rows.length; i += 1) {
-        const row = rows[i];
-        setZipProgress(`產生 QR ${i + 1}/${rows.length}`);
-        const dataUrl = await qrCodeToDataUrl(row.url);
-        folder?.file(row.qr_file, dataUrl.split(',')[1], { base64: true });
-        // Yield to the event loop so the progress label actually repaints;
-        // 330 synchronous QR renders otherwise freeze the tab with no feedback.
-        if (i % 10 === 0) await new Promise((r) => setTimeout(r, 0));
+        const r = rows[i];
+        setZipProgress(`產生 ${i + 1}/${rows.length}`);
+        const row = ws.addRow({
+          no: r.lesson_no, title: r.title, grade: r.grade,
+          fullUrl: r.full_url, passageUrl: r.passage_url,
+        });
+        // Tall enough for a 150px image to sit inside the cell rather than
+        // spilling over the rows beneath it.
+        row.height = 118;
+        row.alignment = { vertical: 'middle' };
+
+        for (const [col, url] of [[3, r.full_url], [5, r.passage_url]] as const) {
+          const dataUrl = await qrCodeToDataUrl(url);
+          const imgId = wb.addImage({ base64: dataUrl.split(',')[1], extension: 'png' });
+          ws.addImage(imgId, {
+            tl: { col, row: row.number - 1 + 0.08 },
+            ext: { width: 150, height: 150 },
+          });
+        }
+        // Yield so the progress label repaints; 330 synchronous QR renders
+        // otherwise freeze the tab with no feedback at all.
+        if (i % 5 === 0) await new Promise((res) => setTimeout(res, 0));
       }
 
-      zip.file('index.csv', buildQrManifestCsv(rows));
       setZipProgress('打包中…');
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      triggerDownload(url, `lesson-qr-${rows.length}.zip`);
+      const buf = await wb.xlsx.writeBuffer();
+      const url = URL.createObjectURL(new Blob([buf], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }));
+      triggerDownload(url, `課程QR-${rows.length}課.xlsx`);
       URL.revokeObjectURL(url);
     } catch (err) {
       setPlaybackError(err instanceof Error ? err.message : String(err));
@@ -542,13 +581,13 @@ const LessonAudioTable: React.FC = () => {
         <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">{sortedStories.length} 課</span>
         <button
           type="button"
-          onClick={downloadAllQrZip}
+          onClick={downloadAllQrXlsx}
           disabled={isZipping || sortedStories.length === 0}
           className="ml-auto inline-flex items-center gap-1.5 rounded border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:cursor-wait disabled:opacity-60"
         >
           {isZipping
             ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{zipProgress}</>
-            : <><Download className="h-3.5 w-3.5" />下載全部 QR + CSV</>}
+            : <><Download className="h-3.5 w-3.5" />下載 Excel（含 QR 圖）</>}
         </button>
         <button
           type="button"
