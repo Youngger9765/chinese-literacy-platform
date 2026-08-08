@@ -439,3 +439,37 @@ describe('#2622 QR 交付表 CSV', () => {
     expect(lines).toHaveLength(5); // header + 4 rows
   });
 });
+
+describe('#2622 QR 預覽必須蓋在整頁之上', () => {
+  /**
+   * Reported with a screenshot: the QR appeared jammed between two table
+   * columns instead of centred over the page.
+   *
+   * `position: fixed` resolves against the nearest ancestor that establishes a
+   * containing block, and the admin shell has several (transform, contain,
+   * overflow). Rendered in place, the overlay laid itself out inside the row.
+   * No amount of z-index or overflow on the dialog escapes that — it has to be
+   * portalled out.
+   *
+   * Asserting on the DOM position rather than on styles, because the styles
+   * were already correct when it was broken.
+   */
+  it('portals the dialog out of the table and into document.body', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts();
+
+    const { container } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getAllByRole('button', { name: 'QR' })[0]);
+
+    const dialog = await screen.findByRole('dialog');
+    // Not inside the component's own tree — that is exactly the bug.
+    expect(container.contains(dialog)).toBe(false);
+    // A direct child of body, so no ancestor can hijack its containing block.
+    expect(dialog.parentElement).toBe(document.body);
+    expect(dialog.closest('[role="row"]')).toBeNull();
+  });
+});
