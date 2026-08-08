@@ -163,6 +163,35 @@ describe('useTtsPlayback — isTtsDegraded (silent fallback fix, #2609)', () => 
     expect(result.current.isTtsDegraded).toBe(false);
   });
 
+  // #2619: the test above only checks the isTtsDegraded flag. That flag is
+  // set inside the .catch() fallback branch, so it stays false whenever the
+  // .catch() branch simply doesn't run — it says nothing about whether the
+  // Web Speech engine was ever actually told to speak the real narration.
+  // This is the reverse assertion 2609's fix needs but never got: on a
+  // working backend, the machine voice must never be invoked with real
+  // content, full stop — not "invoked but the flag happens to read false".
+  it('never calls speechSynthesis.speak with real narration text when Cloud TTS succeeds (must not degrade a working backend)', async () => {
+    const synth = stubSpeechSynthesisAvailable();
+    mockFetchSuccess();
+    const { result } = renderHook(() => useTtsPlayback(() => {}, () => {}));
+
+    act(() => {
+      result.current.speakText('你好，早安。');
+    });
+
+    await waitFor(() => expect(result.current.isTtsSpeaking).toBe(true));
+
+    // speak() IS called once per speakText() call for the gesture-preserving
+    // warmup utterance (empty string, line ~145 of useTtsPlayback.ts) — that
+    // is deliberate and not a degradation signal. Only a call carrying the
+    // real narration text would mean the machine voice actually spoke it.
+    const realTextCalls = synth.speak.mock.calls.filter(
+      ([utterance]) => (utterance as MockUtterance).text !== ''
+    );
+    expect(realTextCalls).toHaveLength(0);
+    expect(result.current.isTtsDegraded).toBe(false);
+  });
+
   it('resets isTtsDegraded to false as soon as the next call starts', async () => {
     stubSpeechSynthesisAvailable();
     mockFetchNetworkFailure();

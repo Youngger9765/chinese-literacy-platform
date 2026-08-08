@@ -66,3 +66,19 @@ jobs:
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # TTS coverage lock (#2619): mocked logic only (existing_keys/missing_keys/
+      # expected_keys against FakeBucket doubles + the real manifest file) — no
+      # GCS credentials touched here. The real-bucket class
+      # (TestRealGCSCoverage) is opt-in via RUN_REAL_GCS_TESTS and self-skips
+      # without it, so it never runs in CI. An un-run lock is theatre — pin it.
+      - name: Run TTS coverage lock (mocked — real-GCS class self-skips)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_audit_tts_coverage.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
