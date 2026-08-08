@@ -254,7 +254,7 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
-        path="/admin"
+        path="/admin/*"
         element={
           <ProtectedRoute>
             <AppShell>
