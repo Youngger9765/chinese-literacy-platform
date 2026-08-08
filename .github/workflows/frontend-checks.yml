@@ -47,6 +47,16 @@ jobs:
       #     completion/成績 source + the single-paragraph residual diff (#2532)
       #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
       #     banner) instead of silently playing a machine voice with no signal (#2609)
+      #   - qrcode-bundling: the QR library must be imported with a literal
+      #     specifier so Vite bundles it. A dynamic import with the name in a
+      #     variable passed build, lint and vitest while the feature was broken
+      #     in every browser (#2622)
+      #   - LessonAudioTable: admin audio panel must (a) stop the previous
+      #     clip before starting a new one — the hook's single-shot playback
+      #     path does not auto-cancel a prior <audio> on its own — and (b)
+      #     return a row to idle the instant it (or the header button) is
+      #     stopped. Regression of either reintroduces #2622's "不能停止 /
+      #     同時播其他的就會一堆聲音" follow-up bug.
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx

@@ -16,6 +16,42 @@
 - 實數：`grep -rln reading_timer backend/data/lessons/_parsed_2026-05-01/` = **132 課**（橫跨 G4/G5/G6/G8/G9）
 - ⛔ 舊 memory「七年級無朗讀、只六年級幾課」= **錯（stale，已作廢）**
 
+## 🔴 Phase 1 現況對帳（2026-08-08，走 staging API 全 165 課實測）
+
+```
+worksheet 標了 reading_timer（該有重點朗讀）   132
+實際抽到 key_reading.passage                  107
+── 缺口 ──────────────────────────────────────
+該有但沒抽到                                   34    ← Phase 1 未完成的部分
+有資料但 worksheet 沒標 reading_timer            9    （98 + 9 = 107，對得起來）
+```
+
+**Phase 1 尚未完成。** 那 34 課目前走「唸全文」fallback，學生練的不是老師指定的段落，
+與 2026-07-20 教授審查的決策不符。
+
+缺口集中在 id ≥ 1000 那批（`1001, 1006–1009, 1028–1034, …`）。
+
+複現指令：
+
+```bash
+# 對每一課取 worksheet_section_order 與 key_reading，比對兩者
+curl -s "$BACKEND/api/stories?page_size=300"          # 拿全部 165 課（參數是 page_size 不是 limit）
+curl -s "$BACKEND/api/stories/{id}"                    # 逐課看 worksheet_section_order[].type 與 key_reading.passage
+```
+
+### 資料品質：重複課 + 字元污染
+
+`id=1`「贏得喝采的輸家」有 passage；`id=1001`「贏得喝󠇡采的輸家」沒有。
+兩者是同一課，但後者的「喝」後面夾了一個 **variation selector**（`U+E01Ex` 區段）。
+
+TTS 正規化層有濾這類字元（`normalization.py` 的 `[\U000E01E0-\U000E01E4]`），
+但**課名與比對邏輯沒有**，所以它在 catalog 層是另一課。抽取器按課名或課碼比對時會漏掉它。
+
+### `key_reading_passages.yml` 的孤兒條目
+
+該檔 134 條有 passage，其中 **32 條對不到 DB 任一課**。
+逐課比對後 API 與 YAML **沒有落差**（「只有 YAML 有」= 0），所以不影響現行行為，但該清。
+
 ## 抽取可行性 + 正確性驗證（2026-07-20 實測 G6-L22 教師版 DOCX，已跑真資料）
 
 課文在 **table[0]**：col1=課文、col3=累計字數（`28,58,87,117,147,177,206,216,244,273,301`）。

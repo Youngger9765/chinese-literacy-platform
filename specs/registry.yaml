@@ -712,7 +712,7 @@ modules:
   intent: specs/modules/stuck-detection/INTENT.md
 - spec_id: tts.synthesis.provider_chain
   module: tts
-  title: TTS 合成服務 — 提供者鏈（Chirp3-HD → Azure fallback）+ synthesize_speech 入口
+  title: TTS 合成服務 — 提供者鏈（Azure → Chirp3-HD fallback）+ synthesize_speech 入口
   stability: active
   canonical_source: backend/app/services/tts/__init__.py
   owns_code:
@@ -727,6 +727,6 @@ modules:
   related_issues: []
   source_meetings:
   - docs/meetings/2026-05-01-experts-review.md
-  last_reviewed: 2026-06-02
+  last_reviewed: 2026-08-08
   owner: young
   intent: specs/modules/tts/INTENT.md
