@@ -189,6 +189,12 @@ const LessonAudioTable: React.FC = () => {
   // those two only turn on *after* speakText() is called — activeKey also
   // covers the `/api/stories/{id}` round trip that happens before that.
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  // Every <audio> that has actually started playing while this panel is open.
+  // Filled by the play() patch in the effect below; drained by
+  // stopCurrentPlayback. The elements are created inside the TTS layer and are
+  // never attached to the document, so querySelectorAll cannot find them —
+  // patching play() is the only way to get a handle on them.
+  const startedAudioRef = useRef<Set<HTMLMediaElement>>(new Set());
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
   // Guards against an old click's detail-fetch response landing after a
   // newer click has already moved on to a different lesson (out-of-order
@@ -196,7 +202,7 @@ const LessonAudioTable: React.FC = () => {
   // start the *stale* lesson's audio after the new one, re-creating the
   // overlap bug through a different path than "click while already playing".
   const activeRequestRef = useRef(0);
-  const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError, utteranceRef } = useTtsPlayback(() => {}, () => {});
+  const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError } = useTtsPlayback(() => {}, () => {});
 
   const sortedStories = useMemo(
     () => [...stories].sort((a, b) => a.lesson_number - b.lesson_number),
@@ -239,17 +245,29 @@ const LessonAudioTable: React.FC = () => {
     // neither points at the element that is actually sounding. The hook hands
     // utteranceRef back to us, so pausing it here closes that window without
     // touching the shared hook (which every student reading step also uses).
-    // Duck-typed rather than `instanceof HTMLAudioElement`: the ref also holds
-    // SpeechSynthesisUtterance on the fallback path, and an instanceof check
-    // depends on which realm the element came from.
-    const el = utteranceRef.current as { pause?: () => void; currentTime?: number } | null;
-    if (el && typeof el.pause === 'function') {
-      el.pause();
-      el.currentTime = 0;
-    }
+    // Pause every element that has actually played while this panel was open.
+    //
+    // Three attempts reached staging before this one, and each failed the same
+    // way: currentTime kept advancing while the button showed idle. stopTts()
+    // reaches the clip through utteranceRef, and cancelTts() through ttsApi's
+    // module-level _currentAudio — measured on staging, neither of them is
+    // holding the element that is actually sounding by the time the user
+    // clicks stop, so both pause something else and report success.
+    //
+    // Rather than keep guessing which handle is the live one, track the
+    // elements themselves. startedAudioRef is filled by the play() patch
+    // installed in the effect below, which is the same technique that proved
+    // in the browser that these elements are reachable and pausable.
+    startedAudioRef.current.forEach((el) => {
+      if (!el.paused) {
+        el.pause();
+        el.currentTime = 0;
+      }
+    });
+    startedAudioRef.current.clear();
     setActiveKey(null);
     setIsFetchingDetail(false);
-  }, [stopTts, utteranceRef]);
+  }, [stopTts]);
 
   const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode) => {
     const key = `${story.id}:${mode}`;
@@ -278,6 +296,20 @@ const LessonAudioTable: React.FC = () => {
       setPlaybackError(err instanceof Error ? err.message : String(err));
     }
   }, [speakText, stopTts, token]);
+
+  useEffect(() => {
+    const started = startedAudioRef.current;
+    const originalPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function patchedPlay(this: HTMLMediaElement, ...args) {
+      started.add(this);
+      return originalPlay.apply(this, args);
+    };
+    return () => {
+      HTMLMediaElement.prototype.play = originalPlay;
+      started.forEach((el) => { if (!el.paused) el.pause(); });
+      started.clear();
+    };
+  }, []);
 
   useEffect(() => {
     loadStories();
