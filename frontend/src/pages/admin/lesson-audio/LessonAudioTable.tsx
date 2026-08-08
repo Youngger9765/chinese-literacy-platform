@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Download, Loader2, Play, QrCode, Square } from 'lucide-react';
 // Static, top-level, literal specifier — this is what makes Vite bundle the
 // library. Do not turn this back into a dynamic import with the module name in
@@ -222,7 +223,16 @@ const QrPreviewDialog: React.FC<{
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  return (
+  // Rendered into document.body rather than in place.
+  //
+  // `position: fixed` resolves against the nearest ancestor that establishes a
+  // containing block — any transform, filter, or contain on the way up does it,
+  // and the admin shell has several. In place, the overlay was laying itself
+  // out inside the table row, so the QR appeared jammed between two columns
+  // instead of centred over the page. A portal is the only reliable fix; there
+  // is no combination of z-index or overflow on the dialog itself that escapes
+  // an ancestor's containing block.
+  return createPortal((
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       role="dialog"
@@ -256,7 +266,7 @@ const QrPreviewDialog: React.FC<{
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 };
 
 const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle: title }) => {
