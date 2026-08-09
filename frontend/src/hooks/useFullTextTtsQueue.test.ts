@@ -28,6 +28,18 @@ const CANON_P0 = 'CANON-SENTENCE-FOR-PARAGRAPH-0';
 const CANON_P1 = 'CANON-SENTENCE-FOR-PARAGRAPH-1';
 const CANON_P2 = 'CANON-SENTENCE-FOR-PARAGRAPH-2';
 
+// Prefetch is stubbed here on purpose. These tests pin the *walk* — which
+// paragraph is spoken, in what order, and when it stops — and a real prefetch
+// would add a fetch for paragraph N+1 to every exact-sequence assertion,
+// blurring "what was spoken" into "what was requested". Prefetch has its own
+// assertions at the bottom of this file, and its overlap behaviour is covered
+// in ttsApi.prefetch.test.ts.
+const prefetchSpy = vi.fn();
+vi.mock('../services/ttsApi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../services/ttsApi')>()),
+  prefetchText: (...args: unknown[]) => prefetchSpy(...args),
+}));
+
 const MAPPING_RESPONSE = {
   lesson_id: LESSON_ID,
   paragraphs: [
@@ -265,5 +277,35 @@ describe('useFullTextTtsQueue', () => {
     const pauseSpy = vi.spyOn(audioInstances[0], 'pause');
     unmount();
     expect(pauseSpy).toHaveBeenCalled();
+  });
+});
+
+describe('useFullTextTtsQueue — paragraph-boundary prefetch', () => {
+  it('asks for the next paragraph while the current one is still being read', async () => {
+    // Owner, listening to a whole lesson: 「我覺得段落之間的延遲太多了」.
+    // Within a paragraph the in-loop prefetch keeps it smooth; the boundary is
+    // where it stalled, because nothing had asked for paragraph N+1 yet.
+    const { result } = renderHook(() =>
+      useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID })
+    );
+
+    act(() => result.current.play());
+
+    await waitFor(() =>
+      expect(prefetchSpy).toHaveBeenCalledWith(PARAGRAPHS[1], LESSON_ID, 1)
+    );
+  });
+
+  it('does not prefetch past the last paragraph', async () => {
+    const { result } = renderHook(() =>
+      useFullTextTtsQueue({ paragraphs: [PARAGRAPHS[0]], lessonId: LESSON_ID })
+    );
+
+    act(() => result.current.play());
+
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
+    // undefined is what a walker passes at the end; prefetchText ignores it,
+    // but asserting here keeps the walker from inventing a paragraph.
+    expect(prefetchSpy).toHaveBeenCalledWith(undefined, LESSON_ID, 1);
   });
 });

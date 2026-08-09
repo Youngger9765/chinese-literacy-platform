@@ -7,6 +7,8 @@ import { Download, Loader2, Play, QrCode, Square } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
+import { prefetchText } from '../../../services/ttsApi';
+import { planParagraphWalk, type ParagraphWalk } from './paragraphWalk';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -488,7 +490,7 @@ const LessonAudioTable: React.FC = () => {
 
   // Which paragraph of a whole-lesson walk plays next. Null when idle or when
   // playing a key passage (which is a single clip, not a walk).
-  const paragraphQueueRef = useRef<{ storyId: number; total: number; next: number; requestId: number } | null>(null);
+  const paragraphQueueRef = useRef<ParagraphWalk | null>(null);
 
   const stopCurrentPlayback = useCallback(() => {
     activeRequestRef.current += 1;
@@ -572,8 +574,12 @@ const LessonAudioTable: React.FC = () => {
         speakText(fullText);
         return;
       }
-      paragraphQueueRef.current = { storyId: story.id, total: paragraphs.length, next: 1, requestId };
+      const walk = planParagraphWalk({ storyId: story.id, paragraphs, requestId });
+      paragraphQueueRef.current = walk;
       speakText(paragraphs[0], story.id, 0);
+      // Warm paragraph 2 while paragraph 1 is being read, so the boundary
+      // doesn't stall (owner: 「段落之間的延遲太多了」).
+      prefetchText(walk.textAt(walk.next), story.id, walk.next);
     } catch (err) {
       if (activeRequestRef.current !== requestId) return;
       setIsFetchingDetail(false);
@@ -614,20 +620,25 @@ const LessonAudioTable: React.FC = () => {
     // play and every stop, so a stale queue can never resume over a new clip.
     if (!q || q.requestId !== activeRequestRef.current) return;
 
-    if (q.next >= q.total) {
+    if (q.isFinished) {
       paragraphQueueRef.current = null;
       setActiveKey(null);
       return;
     }
     const idx = q.next;
     q.next += 1;
-    fetchStoryDetail(q.storyId, token)
-      .then((d) => {
-        if (paragraphQueueRef.current?.requestId !== activeRequestRef.current) return;
-        const ps = d.paragraphs ?? d.content ?? [];
-        if (ps[idx]) speakText(ps[idx], q.storyId, idx);
-      })
-      .catch(() => { paragraphQueueRef.current = null; });
+
+    // The walk carries the paragraphs, so advancing costs nothing. This used to
+    // re-fetch the whole story detail here — one round trip of silence at every
+    // paragraph boundary, for text that cannot have changed since playback began.
+    const text = q.textAt(idx);
+    if (!text) {
+      paragraphQueueRef.current = null;
+      setActiveKey(null);
+      return;
+    }
+    speakText(text, q.storyId, idx);
+    prefetchText(q.textAt(q.next), q.storyId, q.next);
   }, [isTtsSpeaking, isTtsLoading, speakText, token]);
 
   useEffect(() => {

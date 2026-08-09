@@ -75,6 +75,7 @@ jobs:
         working-directory: frontend
         run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
             src/components/auth/LearningRouteGate.test.tsx \
-            src/components/reading-steps/FullTextAnnotate.readonly.test.tsx \
+            src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
             src/hooks/useFullTextTtsQueue.test.ts \
-            src/services/ttsApi.prefetch.test.ts
+            src/services/ttsApi.prefetch.test.ts \
+            src/pages/admin/lesson-audio/paragraphGap.test.ts

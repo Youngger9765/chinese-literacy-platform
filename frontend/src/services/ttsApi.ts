@@ -137,6 +137,37 @@ export async function speakText(
 }
 
 /**
+ * Warm the cache for text that will be spoken soon, without playing it.
+ *
+ * The in-loop prefetch only reaches the next sentence of the *current*
+ * paragraph, so every paragraph boundary still fetched cold — which is where
+ * a whole-lesson walk audibly stalls. A walker calls this with the next
+ * paragraph while the current one is still being read.
+ *
+ * Never throws and never interrupts playback: a failed warm-up simply means
+ * the real request pays for it later.
+ */
+export function prefetchText(text: string | undefined, lessonId?: number, paragraphIdx?: number): void {
+  if (!text || !text.trim()) return;
+  void (async () => {
+    try {
+      let sentences: string[] | null = null;
+      if (lessonId !== undefined && paragraphIdx !== undefined) {
+        sentences = await _fetchLessonSentences(lessonId, paragraphIdx);
+      }
+      const list = sentences ?? _splitSentences(_cleanForTts(text));
+      // Only the opening sentence. That is the one the listener is waiting on;
+      // the rest are covered by the in-loop prefetch once playback starts, and
+      // fetching more here would compete with the audio currently playing.
+      const first = list.find((x) => x.trim());
+      if (first) await _fetchAudioUrl(first);
+    } catch {
+      // deliberately silent — see doc comment
+    }
+  })();
+}
+
+/**
  * Progress info emitted during speakTextWithProgress playback.
  */
 export interface TtsProgressInfo {
