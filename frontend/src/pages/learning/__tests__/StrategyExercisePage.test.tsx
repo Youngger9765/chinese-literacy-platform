@@ -1,5 +1,5 @@
 /**
- * TDD tests for StrategyExercisePage empty-state (#1923)
+ * TDD tests for SpotlightPage empty-state (#1923)
  *
  * Bug A: When a lesson has no strategyExercise, the empty-state message
  * used to say「此課文尚未有閱讀聚光燈練習」which reads as apology/absence.
@@ -16,7 +16,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Mock dependencies ─────────────────────────────────────────────────────────
 
-// StrategyExercisePage uses useLearningContext from LearningLayout
+// SpotlightPage uses useLearningContext from LearningLayout
 vi.mock('../../../layouts/LearningLayout', () => ({
   useLearningContext: vi.fn(),
 }));
@@ -44,7 +44,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 import { useLearningContext } from '../../../layouts/LearningLayout';
-import StrategyExercisePage from '../StrategyExercisePage';
+import SpotlightPage from '../SpotlightPage';
 import type { Story } from '../../../types';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -79,36 +79,36 @@ beforeEach(() => {
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-describe('StrategyExercisePage — empty state (no strategyExercise)', () => {
+describe('SpotlightPage — empty state (no strategyExercise)', () => {
   it('does NOT show the old apology text「尚未有」', () => {
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     expect(screen.queryByText(/尚未有/)).toBeNull();
   });
 
   it('shows the new warm copy「本課暫無閱讀聚光燈練習」', () => {
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     expect(screen.getByText(/本課暫無閱讀聚光燈練習/)).toBeTruthy();
   });
 
   it('renders a「找其他課文練習」CTA button', () => {
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     expect(screen.getByRole('button', { name: /找其他課文練習/ })).toBeTruthy();
   });
 
   it('「找其他課文練習」CTA navigates to library when clicked', () => {
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     fireEvent.click(screen.getByRole('button', { name: /找其他課文練習/ }));
     expect(mockNavigate).toHaveBeenCalledWith('/library');
   });
 
   it('still renders a skip/next button', () => {
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     // The secondary skip button should still be present
     expect(screen.getByRole('button', { name: /跳過|下一關/ })).toBeTruthy();
   });
 });
 
-describe('StrategyExercisePage — with strategyExercise present', () => {
+describe('SpotlightPage — with strategyExercise present', () => {
   it('renders the strategy exercise component, not the empty state', () => {
     const storyWithStrategy: Story = {
       ...baseStory,
@@ -123,7 +123,7 @@ describe('StrategyExercisePage — with strategyExercise present', () => {
       makeContext(storyWithStrategy),
     );
 
-    render(<StrategyExercisePage />);
+    render(<SpotlightPage />);
     expect(screen.queryByText(/本課暫無/)).toBeNull();
     expect(screen.getByTestId('strategy-exercise')).toBeTruthy();
   });

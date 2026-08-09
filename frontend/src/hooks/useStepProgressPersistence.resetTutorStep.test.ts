@@ -2,7 +2,7 @@
  * Regression test for #2532 review 必改 1 (the resurrection bug):
  * 「再讀一次」must clear EVERY tutor completion / 成績 source so navigating away+back
  * or a full reload can't restore the old reading. The actual clearing lives in
- * useStepProgressPersistence.resetTutorStep (invoked via LiveTutor's onResetTutor).
+ * useStepProgressPersistence.resetTutorStep (invoked via ParagraphReading's onResetTutor).
  *
  * RED before the fix: resetForRetry() only cleared React state + liveTutor_progress_
  * localStorage, leaving step_data.tutor (incl. readingAttempt), steps_completed 'paragraph-reading',

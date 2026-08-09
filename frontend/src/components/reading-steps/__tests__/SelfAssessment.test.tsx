@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import SelfAssessment, { type AssessmentRating } from '../full-reading/SelfAssessment';
+import SelfAssessment, { type AssessmentRating } from '../key-passage-reading/SelfAssessment';
 
 describe('SelfAssessment', () => {
   it('renders 3 rating buttons', () => {

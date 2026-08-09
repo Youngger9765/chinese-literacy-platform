@@ -11,7 +11,7 @@ import {
   type DialogueTurnItem,
 } from '../../../services/learningApi';
 import { ReadingRecord } from './ReadingRecord';
-import { FullReadingRecord } from './FullReadingRecord';
+import { KeyPassageReadingRecord } from './KeyPassageReadingRecord';
 import { ComprehensionRecord } from './ComprehensionRecord';
 import { VocabRecord } from './VocabRecord';
 
@@ -43,10 +43,10 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   }, [token, sessionId, detail.comprehension_result]);
 
   const hasReading = !!detail.reading_result;
-  const hasFullReading = !!detail.full_reading_result;
+  const hasKeyPassageReading = !!detail.full_reading_result;
   const hasComprehension = !!detail.comprehension_result;
   const hasVocab = !!detail.vocab_result;
-  const hasAny = hasReading || hasFullReading || hasComprehension || hasVocab;
+  const hasAny = hasReading || hasKeyPassageReading || hasComprehension || hasVocab;
 
   if (!hasAny) {
     return (
@@ -62,7 +62,7 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   return (
     <div className="space-y-4">
       {hasReading && <ReadingRecord raw={detail.reading_result!} />}
-      {hasFullReading && <FullReadingRecord raw={detail.full_reading_result!} />}
+      {hasKeyPassageReading && <KeyPassageReadingRecord raw={detail.full_reading_result!} />}
       {hasComprehension &&
         (loadingTurns ? (
           <div className="bg-white rounded-2xl shadow-card p-4">

@@ -12,7 +12,7 @@
  * Pattern mirrors ZhuyinContext so the two toggles behave consistently.
  * Default: OFF (false) — following 5/1 expert review feedback.
  *
- * Components that drive the highlight (ParagraphCard, FullReading) gate
+ * Components that drive the highlight (ParagraphCard, KeyPassageReading) gate
  * the split-span render on `karaokeEnabled`. When off, plain text is shown
  * and the TTS audio plays normally without visual animation.
  */

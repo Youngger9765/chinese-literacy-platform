@@ -2,8 +2,8 @@
  * Unit tests for useTtsPlayback — Issue #2609 (silent Web Speech API fallback).
  *
  * Repro: when Cloud TTS (`POST /api/tts/synthesize`) fails, the single-shot
- * path (no lessonId/paragraphIdx — used by FullReading via
- * useFullReadingTtsQueue) silently falls back to the browser's built-in Web
+ * path (no lessonId/paragraphIdx — used by KeyPassageReading via
+ * useKeyPassageReadingTtsQueue) silently falls back to the browser's built-in Web
  * Speech API with no visible signal. `ttsError` stays null because the
  * fallback "succeeded" — the student hears a robotic voice with zero
  * indication it isn't the real AI narration.

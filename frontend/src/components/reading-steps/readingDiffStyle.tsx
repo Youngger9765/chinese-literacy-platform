@@ -2,7 +2,7 @@
  * readingDiffStyle — single source of truth for student-facing 朗讀結果 diff colors
  * and the accompanying legend (Issue #2498).
  *
- * Before this file, ParagraphCard (逐段) and FullReadingFeedbackPanel (全文) each
+ * Before this file, ParagraphCard (逐段) and KeyPassageReadingFeedbackPanel (全文) each
  * hard-coded the same color mapping, and the blue `forgiven` (同音通融) color had no
  * legend entry at all — students saw blue characters with no explanation.
  *
@@ -41,7 +41,7 @@ const LEGEND_ITEMS: { dotClass: string; label: string }[] = [
 ];
 
 /**
- * 朗讀對照色碼圖例 — shared by 逐段 (ParagraphCard) and 全文 (FullReadingFeedbackPanel).
+ * 朗讀對照色碼圖例 — shared by 逐段 (ParagraphCard) and 全文 (KeyPassageReadingFeedbackPanel).
  * `title` defaults to 朗讀對照; pass a custom label or null to omit.
  */
 export const ReadingDiffLegend: React.FC<{ title?: string | null }> = ({ title = '朗讀對照' }) => (

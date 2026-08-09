@@ -23,7 +23,7 @@ export interface TranscribeReadingResult {
    *   'no_audio'  — no recorded blob was available
    *   'no_token'  — auth token missing; request not attempted
    *
-   * Present only when method='fallback'. Used by both FullReading and LiveTutor
+   * Present only when method='fallback'. Used by both KeyPassageReading and ParagraphReading
    * to display the I4-compliant amber fallback alert banner.
    */
   reason?: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'no_audio' | 'no_token' | string;

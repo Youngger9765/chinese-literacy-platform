@@ -7,10 +7,10 @@ import type {
   ComprehensionResult,
   VocabResult,
   DictationResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
 } from '../types';
 import type { ListeningResult } from '../components/reading-steps/ListeningPractice';
-import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { AnnotationSummary } from '../components/reading-steps/FullTextAnnotate';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import { useAuth } from '../contexts/AuthContext';
@@ -64,7 +64,7 @@ export interface LearningContext {
   handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
-  handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishKeyPassageReading: (result: KeyPassageReadingResult) => void;
   handleFinishListening: (result: ListeningResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
@@ -77,7 +77,7 @@ export interface LearningContext {
   emptyAttempt: ReadingAttempt;
   /** DB LearningSession integer ID — set after the session is created in the DB (Issue #242) */
   dbSessionId: number | null;
-  /** Set of paragraph indices completed during LiveTutor (progressive unlock, Issue #85). */
+  /** Set of paragraph indices completed during ParagraphReading (progressive unlock, Issue #85). */
   completedParagraphsSet: Set<number>;
   /** Notify layout that a paragraph was completed (Issue #85). */
   handleParagraphComplete: (paragraphIndex: number) => void;
@@ -218,7 +218,7 @@ const LearningLayout: React.FC = () => {
     handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
-    handleFinishFullReading,
+    handleFinishKeyPassageReading,
     handleFinishListening,
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,
@@ -287,7 +287,7 @@ const LearningLayout: React.FC = () => {
       handleFinishReadingStrategy,
       handleFinishVocab,
       handleFinishDictation,
-      handleFinishFullReading,
+      handleFinishKeyPassageReading,
       handleFinishListening,
       handleFinishReadingAnnotation,
       handleFinishVocabDefinitionMatch,
@@ -325,7 +325,7 @@ const LearningLayout: React.FC = () => {
       handleFinishReadingStrategy,
       handleFinishVocab,
       handleFinishDictation,
-      handleFinishFullReading,
+      handleFinishKeyPassageReading,
       handleFinishListening,
       handleFinishReadingAnnotation,
       handleFinishVocabDefinitionMatch,

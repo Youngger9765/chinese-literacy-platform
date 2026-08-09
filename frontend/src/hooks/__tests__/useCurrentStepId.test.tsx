@@ -1,7 +1,7 @@
 /**
  * useCurrentStepId (#2588) — route-derived step id with a fail-safe fallback.
  *
- * Pages used to hardcode their step id (FullReadingPage wrote 'key-passage-reading' in
+ * Pages used to hardcode their step id (KeyPassageReadingPage wrote 'key-passage-reading' in
  * three places).  The hook derives it from the route so a renamed / re-mounted
  * step cannot split progress across two keys — but it must NEVER return an
  * unregistered id, because the backend maps step keys to step numbers and an

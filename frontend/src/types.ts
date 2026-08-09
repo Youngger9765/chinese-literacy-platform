@@ -393,7 +393,7 @@ export interface DictationResult {
   results: DictationWordResult[];
 }
 
-export interface FullReadingResult {
+export interface KeyPassageReadingResult {
   matchRate: number;
   feedback: string;
   cpm?: number;
@@ -411,8 +411,8 @@ export interface LearningSession {
   comprehensionResult: ComprehensionResult | null;
   vocabResult: VocabResult | null;
   dictationResult: DictationResult | null;
-  fullReadingResult: FullReadingResult | null;
-  /** Paragraph indices (0-based) completed during LiveTutor (progressive unlock). */
+  fullReadingResult: KeyPassageReadingResult | null;
+  /** Paragraph indices (0-based) completed during ParagraphReading (progressive unlock). */
   completedParagraphs?: number[];
   /** Completion flags for the 5 new steps (issue #690). */
   readingAnnotationCompleted?: boolean;

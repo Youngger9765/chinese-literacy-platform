@@ -1,5 +1,5 @@
 /**
- * FullReadingPage — step-aware step id (#2588)
+ * KeyPassageReadingPage — step-aware step id (#2588)
  *
  * The page used to hardcode 'key-passage-reading' in three places (patch stepId,
  * currentStep, and the step_data read key).  It now derives the id from the
@@ -25,7 +25,7 @@ vi.mock('../../../layouts/LearningLayout', () => ({
 
 // Capture what the page hands down instead of mounting the real recorder UI.
 const capturedProps: Record<string, unknown> = {};
-vi.mock('../../../components/reading-steps/FullReading', () => ({
+vi.mock('../../../components/reading-steps/KeyPassageReading', () => ({
   default: (props: Record<string, unknown>) => {
     Object.assign(capturedProps, props);
     return (
@@ -42,7 +42,7 @@ vi.mock('../../../components/reading-steps/FullReading', () => ({
 }));
 
 import { useLearningContext } from '../../../layouts/LearningLayout';
-import FullReadingPage from '../FullReadingPage';
+import KeyPassageReadingPage from '../KeyPassageReadingPage';
 import type { Story } from '../../../types';
 
 /**
@@ -67,7 +67,7 @@ const mockSaveStepProgressPatch = vi.fn();
 
 const makeContext = (stepData: Record<string, unknown> = {}) => ({
   selectedStory: story,
-  handleFinishFullReading: vi.fn(),
+  handleFinishKeyPassageReading: vi.fn(),
   session: null,
   stepProgressData: { current_step: null, steps_completed: [], step_data: stepData },
   saveStepProgressPatch: mockSaveStepProgressPatch,
@@ -78,7 +78,7 @@ const renderAt = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/learn/:storyId/:stepId" element={<FullReadingPage />} />
+        <Route path="/learn/:storyId/:stepId" element={<KeyPassageReadingPage />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -89,7 +89,7 @@ beforeEach(() => {
   (useLearningContext as ReturnType<typeof vi.fn>).mockReturnValue(makeContext());
 });
 
-describe('FullReadingPage — assignment-safety (progress key must stay full-reading)', () => {
+describe('KeyPassageReadingPage — assignment-safety (progress key must stay full-reading)', () => {
   it("persists stepId 'key-passage-reading' at the real route", () => {
     renderAt('/learn/1/key-passage-reading');
     fireEvent.click(screen.getByTestId('emit-progress'));
@@ -120,7 +120,7 @@ describe('FullReadingPage — assignment-safety (progress key must stay full-rea
   });
 });
 
-describe('FullReadingPage — step-aware (no hardcoded id drift)', () => {
+describe('KeyPassageReadingPage — step-aware (no hardcoded id drift)', () => {
   it('follows the route when mounted under another registered step id', () => {
     (useLearningContext as ReturnType<typeof vi.fn>).mockReturnValue(
       makeContext({ 'key-passage-reading': { cpm: 99 }, tutor: { cpm: 42 } }),

@@ -7,7 +7,7 @@ import type {
   ReadingAttempt,
   ComprehensionResult,
   VocabResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
   DiffToken,
 } from '../../../types';
 import type {
@@ -66,9 +66,9 @@ export function toVocabResult(raw: Record<string, unknown> | null): VocabResult 
   return { practicedWords: words, totalWords: total };
 }
 
-export function toFullReadingResult(
+export function toKeyPassageReadingResult(
   raw: Record<string, unknown> | null,
-): FullReadingResult | null {
+): KeyPassageReadingResult | null {
   if (!raw) return null;
   return {
     matchRate: typeof raw.match_rate === 'number' ? raw.match_rate : 0,
@@ -99,7 +99,7 @@ export function buildLearningSession(detail: SessionDetailResponse): LearningSes
     comprehensionResult: toComprehensionResult(detail.comprehension_result),
     vocabResult: toVocabResult(detail.vocab_result),
     dictationResult: null,
-    fullReadingResult: toFullReadingResult(detail.full_reading_result),
+    fullReadingResult: toKeyPassageReadingResult(detail.full_reading_result),
   };
 }
 

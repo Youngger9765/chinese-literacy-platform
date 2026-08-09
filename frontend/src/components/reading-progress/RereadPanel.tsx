@@ -1,5 +1,5 @@
 /**
- * RereadPanel — "再讀一次" encouragement panel shown after LiveTutor or FullReading.
+ * RereadPanel — "再讀一次" encouragement panel shown after ParagraphReading or KeyPassageReading.
  *
  * Shows the progress chart + a prominent "再讀一次" button.
  * Also saves the just-completed reading to history.

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import ReadingTrendChart from '../full-reading/ReadingTrendChart';
+import ReadingTrendChart from '../key-passage-reading/ReadingTrendChart';
 import type { ReadingHistoryItem } from '../../../services/readingHistoryApi';
 
 global.ResizeObserver = class {
