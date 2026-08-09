@@ -662,3 +662,33 @@ describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
     expect(titles.some((t) => t?.endsWith('/lesson-intro'))).toBe(false);
   });
 });
+
+describe('#2622 QR popup 標題要分得出全文與段落', () => {
+  /**
+   * The title compared against 'lesson-intro', which no step id uses any more
+   * after the 全文 target moved to full-text-annotate — so every dialog, both
+   * columns, was labelled 段落. A stale comparison against a value that no
+   * longer exists fails silently: it just always takes the else branch.
+   */
+  it.each([
+    ['full-text-annotate', '全文'],
+    ['key-passage-reading', '段落'],
+  ])('%s dialog is labelled %s', async (step, label) => {
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    const btn = within(row)
+      .getAllByRole('button', { name: 'QR' })
+      .find((b) => b.getAttribute('title')?.endsWith(`/${step}`));
+    expect(btn, `no QR button targeting ${step}`).toBeDefined();
+
+    fireEvent.click(btn!);
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.getAttribute('aria-label')).toContain(label);
+  });
+});

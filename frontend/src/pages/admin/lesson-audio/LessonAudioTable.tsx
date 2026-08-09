@@ -323,7 +323,7 @@ const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, file
       </button>
       {preview && (
         <QrPreviewDialog
-          title={`${title}／${step === 'lesson-intro' ? '全文' : '段落'}`}
+          title={`${title}／${step === 'full-text-annotate' ? '全文' : '段落'}`}
           value={preview.value}
           dataUrl={preview.dataUrl}
           filename={qrFileName(filePrefix, lessonId)}
