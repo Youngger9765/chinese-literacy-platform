@@ -11,8 +11,7 @@
  * without a user fires authenticated calls that 401 and leaves a half-built
  * session behind. This page talks to two endpoints, both verified public:
  *
- *   GET /api/stories/{id}                    → 200 (8.6 KB) anonymous
- *   GET /assets/demo-reading/{id}/full.mp3   → 200 audio/mpeg anonymous
+ *   GET /api/stories/{id}   → 200 (8.6 KB) anonymous
  *
  * Annotating stays behind the login wall — a mark has to belong to somebody.
  * The invitation to log in is right there, so the path onward is one tap.
