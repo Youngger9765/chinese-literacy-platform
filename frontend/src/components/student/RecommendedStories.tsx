@@ -135,7 +135,7 @@ const RecommendedStories: React.FC = () => {
   }, [fetchRecs]);
 
   const handleStart = (storySlug: string) => {
-    navigate(`/learn/${storySlug}/intro`);
+    navigate(`/learn/${storySlug}/lesson-intro`);
   };
 
   // ── Loading ──────────────────────────────────────────────────────────────

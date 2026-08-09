@@ -35,7 +35,7 @@ const ComprehensionPage: React.FC = () => {
       story={selectedStory}
       attempt={lastAttempt ?? emptyAttempt}
       onFinish={handleFinishComprehension}
-      onBack={() => navigate(`/learn/${storyId}/tutor`)}
+      onBack={() => navigate(`/learn/${storyId}/paragraph-reading`)}
       dbSessionId={dbSessionId ?? undefined}
       initialProgress={(stepProgressData.step_data?.comprehension as Record<string, unknown> | undefined) ?? undefined}
       onProgressChange={handleProgressChange}

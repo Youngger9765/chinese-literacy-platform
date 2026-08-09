@@ -213,9 +213,9 @@ describe('step_complete_handler_advances_through_active_step_config', () => {
   it('reading-annotation → tutor in default active sequence', () => {
     const activeSteps = resolveActiveSteps();
     const activeIds = activeSteps.map((s) => s.id);
-    const next = getNextEnabledStep('reading-annotation', activeIds);
+    const next = getNextEnabledStep('full-text-annotate', activeIds);
     // Tutor follows reading-annotation in the default 12-step sequence
-    expect(next).toBe('tutor');
+    expect(next).toBe('paragraph-reading');
   });
 
   it('knowledge-station → report (terminal step)', () => {
@@ -227,10 +227,10 @@ describe('step_complete_handler_advances_through_active_step_config', () => {
 
   it('custom sequence: skipped steps are bridged correctly', () => {
     // Simulates a lesson that goes: annotation → tutor → full-reading → report (skips vocab etc)
-    const custom = ['reading-annotation', 'tutor', 'full-reading', 'report'];
-    expect(getNextEnabledStep('reading-annotation', custom)).toBe('tutor');
-    expect(getNextEnabledStep('tutor', custom)).toBe('full-reading');
-    expect(getNextEnabledStep('full-reading', custom)).toBe('report');
+    const custom = ['full-text-annotate', 'paragraph-reading', 'key-passage-reading', 'report'];
+    expect(getNextEnabledStep('full-text-annotate', custom)).toBe('paragraph-reading');
+    expect(getNextEnabledStep('paragraph-reading', custom)).toBe('key-passage-reading');
+    expect(getNextEnabledStep('key-passage-reading', custom)).toBe('report');
   });
 
   it('every step in STEP_TRANSITIONS has a valid next step target', () => {
@@ -277,7 +277,7 @@ describe('assignment_completion_keeps_context_when_required_steps_missing', () =
   });
 
   it('partially completed → isReady false, missingSteps non-empty', () => {
-    const { isReady, missingSteps } = computeIsReady(['reading-annotation', 'tutor']);
+    const { isReady, missingSteps } = computeIsReady(['full-text-annotate', 'paragraph-reading']);
     expect(isReady).toBe(false);
     expect(missingSteps.length).toBeGreaterThan(0);
     // missingSteps will be used by report blocking UI to show what's left

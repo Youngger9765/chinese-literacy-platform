@@ -91,7 +91,7 @@ export interface DictationWordResult {
 export interface DictationStepData {
   word_results: DictationWordResult[];
   current_index: number;
-  phase: 'intro' | 'practice' | 'results';
+  phase: 'lesson-intro' | 'practice' | 'results';
   result?: {
     total_words: number;
     correct_count: number;
@@ -136,7 +136,7 @@ export interface StepDataMap {
   comprehension: ComprehensionStepData;
   vocab: VocabStepData;
   dictation: DictationStepData;
-  'full-reading': FullReadingStepData;
+  'key-passage-reading': FullReadingStepData;
   report: ReportStepData;
 }
 

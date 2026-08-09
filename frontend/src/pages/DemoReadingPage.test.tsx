@@ -128,13 +128,13 @@ describe('#2625 免登入播放頁 — DemoReadingPage', () => {
     expect(speakSpy).not.toHaveBeenCalled();
   });
 
-  it('5. 「開始朗讀」 link points to /learn/{id}/full-reading (login wall is expected)', async () => {
+  it('5. 「開始朗讀」 link points to /learn/{id}/key-passage-reading (login wall is expected)', async () => {
     renderAtRoute('/demo-reading/42/full');
     await waitFor(() => {
       expect(screen.getByText('愛讀書的顧寧人')).toBeInTheDocument();
     });
     const link = screen.getByRole('link', { name: /開始朗讀/ });
     expect(link).toBeInTheDocument();
-    expect(link.getAttribute('href')).toBe('/learn/42/full-reading');
+    expect(link.getAttribute('href')).toBe('/learn/42/key-passage-reading');
   });
 });

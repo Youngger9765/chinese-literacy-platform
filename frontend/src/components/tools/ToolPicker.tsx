@@ -19,18 +19,18 @@ export interface ToolOption {
 // (Future: derive from STEP_CONFIG to avoid manual sync — see #1333)
 export const TOOL_OPTIONS: ToolOption[] = [
   {
-    id: 'tutor',
+    id: 'paragraph-reading',
     label: '朗讀練習',
     description: '逐段朗讀，AI 即時糾正',
     icon: '🎤',
-    stepPath: 'tutor',
+    stepPath: 'paragraph-reading',
   },
   {
-    id: 'full-reading',
+    id: 'key-passage-reading',
     label: '全文朗讀',
     description: '完整朗讀評估',
     icon: '📖',
-    stepPath: 'full-reading',
+    stepPath: 'key-passage-reading',
   },
   {
     id: 'listening',
@@ -40,11 +40,11 @@ export const TOOL_OPTIONS: ToolOption[] = [
     stepPath: 'listening',
   },
   {
-    id: 'vocab',
+    id: 'character-practice',
     label: '生字書寫',
     description: '筆順練習 + 注音引導',
     icon: '🖊️',
-    stepPath: 'vocab',
+    stepPath: 'character-practice',
   },
   {
     id: 'sentence-practice',
@@ -76,11 +76,11 @@ export const TOOL_OPTIONS: ToolOption[] = [
     stepPath: 'comprehension',
   },
   {
-    id: 'vocab-word-search',
+    id: 'vocab-review',
     label: '詞語搜尋',
     description: '在文章中找出目標詞語',
     icon: '🔍',
-    stepPath: 'vocab-word-search',
+    stepPath: 'vocab-review',
   },
   {
     id: 'knowledge-station',

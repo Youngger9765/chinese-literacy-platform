@@ -79,7 +79,7 @@ export function useLiveTutorProgress(
   onFinish: (attempt: ReadingAttempt) => void,
   onParagraphComplete?: (completedParagraphIndex: number) => void,
   initialCompletedParagraphs?: Set<number>,
-  /** Issue #2530: DB step_data['tutor'] — restore fallback when localStorage is empty
+  /** Issue #2530: DB step_data['paragraph-reading'] — restore fallback when localStorage is empty
    *  (e.g. cross-session / cleared), so 逐段朗讀紀錄回歸. */
   initialProgress?: TutorStepData,
 ) {

@@ -72,12 +72,12 @@ interface LiveTutorProps {
   onParagraphComplete?: (completedParagraphIndex: number) => void;
   /** Initial set of completed paragraph indices (for session resume). */
   initialCompletedParagraphs?: Set<number>;
-  /** Rehydrate from previously saved step_progress.step_data['tutor'] (Issue #1549). */
+  /** Rehydrate from previously saved step_progress.step_data['paragraph-reading'] (Issue #1549). */
   initialProgress?: TutorStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
   /** Issue #2532: full tutor reset for「再讀一次」— clears DB step_data.tutor,
-   *  steps_completed 'tutor', session-level tutor state and completedParagraphsSet.
+   *  steps_completed 'paragraph-reading', session-level tutor state and completedParagraphsSet.
    *  Owned by useStepProgressPersistence (LearningLayout); undefined in toolbox mode. */
   onResetTutor?: () => void;
   /** DB LearningSession integer id — used to bind accepted audio to the attempt row
@@ -424,7 +424,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   //     - resetForRetry() —— 清 in-memory lineResults/summaries/completed + liveTutor_progress_，
   //       回到第 1 段。
   //  B. 跨層 (onResetTutor → useStepProgressPersistence.resetTutorStep)：
-  //     DB step_data.tutor（含 readingAttempt）、steps_completed 'tutor'、
+  //     DB step_data.tutor（含 readingAttempt）、steps_completed 'paragraph-reading'、
   //     session.readingAttempt/completedParagraphs/completedSteps、completedParagraphsSet、
   //     tutor_completed_ localStorage —— 這些狀態不在 LiveTutor，集中在該 hook 一次清乾淨。
   const handleReadAgain = useCallback(() => {
@@ -657,7 +657,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     } catch {}
   }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
 
-  // ── Issue #2530: 同步把逐段結果寫進 DB step_data['tutor']，讓「朗讀對照／這次成績」
+  // ── Issue #2530: 同步把逐段結果寫進 DB step_data['paragraph-reading']，讓「朗讀對照／這次成績」
   //     在導航去總結報告再回來、以及跨 session（換裝置/重新登入）時都能回歸 ──────────
   useEffect(() => {
     if (isToolboxMode()) return;            // toolbox 為暫時模式，不寫 session DB

@@ -198,7 +198,7 @@ const ReportPage: React.FC = () => {
         session={session}
         story={selectedStory}
         onRetry={handleRetry}
-        onGoToVocab={() => navigate(`/learn/${storyId}/vocab`)}
+        onGoToVocab={() => navigate(`/learn/${storyId}/character-practice`)}
         dbSessionId={dbSessionId}
         token={token}
         comprehensionScores={comprehensionScores}

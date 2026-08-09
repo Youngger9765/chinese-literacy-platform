@@ -435,7 +435,7 @@ const AppRoutes: React.FC = () => (
       >
         {learningRoutes}
         {/* Default: redirect to reading-annotation (new first step) */}
-        <Route index element={<Navigate to="reading-annotation" replace />} />
+        <Route index element={<Navigate to="full-text-annotate" replace />} />
       </Route>
 
       {/* Privacy policy — public, no auth required */}

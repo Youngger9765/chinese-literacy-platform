@@ -99,7 +99,7 @@ const DemoReadingPage: React.FC = () => {
 
       {/* Link to the practice flow — hits ProtectedRoute login wall, which is correct */}
       <Link
-        to={`/learn/${lessonId}/full-reading`}
+        to={`/learn/${lessonId}/key-passage-reading`}
         className="rounded-lg bg-blue-600 px-6 py-3 text-lg font-medium text-white shadow hover:bg-blue-700"
       >
         開始朗讀

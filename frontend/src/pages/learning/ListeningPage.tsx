@@ -25,7 +25,7 @@ const ListeningPage: React.FC = () => {
     <ListeningPractice
       story={selectedStory}
       onFinish={handleFinishListening}
-      onBack={() => navigate(`/learn/${storyId}/full-reading`)}
+      onBack={() => navigate(`/learn/${storyId}/key-passage-reading`)}
     />
   );
 };

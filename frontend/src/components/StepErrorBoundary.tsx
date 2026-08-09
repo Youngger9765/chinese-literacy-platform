@@ -17,7 +17,7 @@
  *   a "跳過此步驟" action without coupling the boundary to router logic
  *
  * Usage:
- *   <StepErrorBoundary stepLabel="逐段朗讀" onSkip={() => navigate('/learn/x/full-reading')}>
+ *   <StepErrorBoundary stepLabel="逐段朗讀" onSkip={() => navigate('/learn/x/key-passage-reading')}>
  *     <TutorPage />
  *   </StepErrorBoundary>
  */
