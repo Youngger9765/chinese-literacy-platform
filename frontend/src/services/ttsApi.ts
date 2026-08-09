@@ -301,7 +301,34 @@ async function _fetchLessonSentences(
  * On any other error: throws (existing behaviour, caught by outer try/catch in
  * speakText callers or surfaced to the user as a silent skip).
  */
+/**
+ * Requests in flight, so two callers asking for the same sentence at the same
+ * time produce one synthesis rather than two.
+ *
+ * Needed once prefetch exists: the prefetch for sentence N+1 is still on the
+ * wire when the loop arrives at N+1, and the plain `_urlCache` check misses it
+ * because nothing has been cached *yet*. Without this we paid for every
+ * prefetched sentence twice.
+ */
+const _inFlight = new Map<string, Promise<string | null>>();
+
 async function _fetchAudioUrl(sentence: string): Promise<string | null> {
+  const cached = _urlCache.get(sentence);
+  if (cached) return cached;
+
+  const pending = _inFlight.get(sentence);
+  if (pending) return pending;
+
+  const request = _fetchAudioUrlUncached(sentence);
+  _inFlight.set(sentence, request);
+  try {
+    return await request;
+  } finally {
+    _inFlight.delete(sentence);
+  }
+}
+
+async function _fetchAudioUrlUncached(sentence: string): Promise<string | null> {
   let audioUrl = _urlCache.get(sentence);
   if (!audioUrl) {
     // If still within a rate-limit window, skip this sentence silently.
@@ -360,7 +387,8 @@ async function _speakViaBackend(
 
   if (sentences.length === 0) return;
 
-  for (const sentence of sentences) {
+  for (let i = 0; i < sentences.length; i += 1) {
+    const sentence = sentences[i];
     if (_cancelRequested) break;
     if (!sentence.trim()) continue;
 
@@ -368,8 +396,33 @@ async function _speakViaBackend(
     // null = 429 rate-limited — skip this sentence (toast already fired)
     if (audioUrl === null) continue;
     if (_cancelRequested) break;
+
+    // Fetch the next sentence while this one is being said (#2627).
+    //
+    // Playback used to be strictly serial, so every uncached sentence inserted
+    // its whole synthesis time as silence — 4.5s on a cold key passage. A
+    // sentence takes seconds to say and well under a second to fetch, so the
+    // next fetch fits inside the current playback and the gap disappears.
+    //
+    // Deliberately not awaited, and deliberately before the play: the point is
+    // that it overlaps. _fetchAudioUrl caches by sentence text, so when the
+    // loop arrives at i+1 it is a local hit rather than a second request.
+    _prefetchSentence(sentences[i + 1]);
+
     await _playSingleAudio(audioUrl);
   }
+}
+
+/**
+ * Warm the cache for a sentence without playing it. Errors are swallowed —
+ * a failed prefetch must never break playback; the real request will retry
+ * and surface the failure then.
+ */
+function _prefetchSentence(sentence: string | undefined): void {
+  if (!sentence || !sentence.trim()) return;
+  if (_cancelRequested) return;
+  if (_urlCache.has(sentence)) return;
+  void _fetchAudioUrl(sentence).catch(() => undefined);
 }
 
 async function _speakViaBackendWithProgress(
