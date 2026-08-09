@@ -3,13 +3,13 @@
  * Issue #54: Unified "warm but firm" AI tutor persona across all steps.
  */
 
-// LiveTutor per-line reading thresholds (frontend fallback defaults).
+// ParagraphReading per-line reading thresholds (frontend fallback defaults).
 // Primary thresholds should come from backend /api/reading/evaluate response.
 export const READING_EXCELLENT = 0.80; // ≥80%: 很棒
 export const READING_PASS = 0.60; // ≥60%: 很好，過關
 // <60%: 重唸
 
-// FullReading fluency thresholds — FALLBACK DEFAULTS only.
+// KeyPassageReading fluency thresholds — FALLBACK DEFAULTS only.
 // Bug B fix (#1378): These constants are now used ONLY when lesson YAML
 // reading_benchmark is absent. The primary threshold should come from the
 // lesson's reading_benchmark.levels (grade-aware) via getThresholdsFromBenchmark().

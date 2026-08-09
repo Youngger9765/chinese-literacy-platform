@@ -40,19 +40,19 @@ import { resolveActiveSteps, STEP_REGISTRY, DEFAULT_STEP_SEQUENCE, StepConfig } 
 // ---------------------------------------------------------------------------
 
 const IntroPage               = lazy(() => import('../pages/learning/IntroPage'));
-const TutorPage               = lazy(() => import('../pages/learning/TutorPage'));
+const ParagraphReadingPage               = lazy(() => import('../pages/learning/ParagraphReadingPage'));
 const ComprehensionMcqPage    = lazy(() => import('../pages/learning/ComprehensionMcqPage'));
-const StoryStructurePage      = lazy(() => import('../pages/learning/StoryStructurePage'));
-const StrategyExercisePage    = lazy(() => import('../pages/learning/StrategyExercisePage'));
-const VocabPage               = lazy(() => import('../pages/learning/VocabPage'));
+const KeypointsTablePage      = lazy(() => import('../pages/learning/KeypointsTablePage'));
+const SpotlightPage    = lazy(() => import('../pages/learning/SpotlightPage'));
+const CharacterPracticePage               = lazy(() => import('../pages/learning/CharacterPracticePage'));
 const DictationPage           = lazy(() => import('../pages/learning/DictationPage'));
 const ListeningPage           = lazy(() => import('../pages/learning/ListeningPage'));
-const FullReadingPage         = lazy(() => import('../pages/learning/FullReadingPage'));
+const KeyPassageReadingPage         = lazy(() => import('../pages/learning/KeyPassageReadingPage'));
 const ReportPage              = lazy(() => import('../pages/learning/ReportPage'));
-const ReadingAnnotationPage   = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
+const FullTextAnnotatePage   = lazy(() => import('../pages/learning/FullTextAnnotatePage'));
 const VocabApplicationPage    = lazy(() => import('../pages/learning/VocabApplicationPage'));
 const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
-const VocabWordSearchPage     = lazy(() => import('../pages/learning/VocabWordSearchPage'));
+const VocabReviewPage     = lazy(() => import('../pages/learning/VocabReviewPage'));
 const KnowledgeStationPage    = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 const SentencePracticePage    = lazy(() => import('../pages/learning/SentencePracticePage'));
 
@@ -65,18 +65,18 @@ type LazyPage = React.LazyExoticComponent<React.ComponentType>;
 
 const STEP_PAGE_MAP: Record<string, LazyPage> = {
   'lesson-intro':                 IntroPage,
-  'full-text-annotate':    ReadingAnnotationPage,
-  'paragraph-reading':                 TutorPage,
-  'key-passage-reading':          FullReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
+  'full-text-annotate':    FullTextAnnotatePage,
+  'paragraph-reading':                 ParagraphReadingPage,
+  'key-passage-reading':          KeyPassageReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
   'listening':             ListeningPage,
-  'character-practice':                 VocabPage,
+  'character-practice':                 CharacterPracticePage,
   'vocab-definition':      VocabDefinitionMatchPage,
   'vocab-application':     VocabApplicationPage,
-  'keypoints-table':       StoryStructurePage,
-  'spotlight':      StrategyExercisePage,
+  'keypoints-table':       KeypointsTablePage,
+  'spotlight':      SpotlightPage,
   'sentence-practice':     SentencePracticePage,
   'comprehension':         ComprehensionMcqPage,
-  'vocab-review':     VocabWordSearchPage,
+  'vocab-review':     VocabReviewPage,
   'dictation':             DictationPage,
   'knowledge-station':     KnowledgeStationPage,
   'report':                ReportPage,

@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 /**
  * Levenshtein-aligned character diff for comparing spoken text against target text.
- * Used by LiveTutor and FullReading to show exactly which characters
+ * Used by ParagraphReading and KeyPassageReading to show exactly which characters
  * the student read correctly, incorrectly, missed, or added.
  */
 import type { DiffToken } from '../types';
@@ -77,7 +77,7 @@ export interface DiffResult {
   extraCount: number;
 }
 
-/* ---- Text normalization (shared with LiveTutor/FullReading) ---- */
+/* ---- Text normalization (shared with ParagraphReading/KeyPassageReading) ---- */
 
 export const cleanChineseText = (text: string) => {
   if (!text) return '';

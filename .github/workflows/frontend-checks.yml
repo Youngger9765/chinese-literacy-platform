@@ -43,10 +43,15 @@ jobs:
       # workflow red on day one. Pin a file here whenever a fix ships a regression
       # test that must stay enforced — an un-run lock is theatre (testing-strategy 鐵律).
       #   - render-smoke: mount-crash guard (#2279/#2289)
-      #   - resetTutorStep / LiveTutor.readAgain: 「再讀一次」reset must clear every
+      #   - resetTutorStep / ParagraphReading.readAgain: 「再讀一次」reset must clear every
       #     completion/成績 source + the single-paragraph residual diff (#2532)
       #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
       #     banner) instead of silently playing a machine voice with no signal (#2609)
+      #   - stepNaming / componentNaming: every step id and every component name
+      #     must say what its Chinese label says. Two were inverted before #2641 —
+      #     `full-reading` read one passage, `reading-annotation` read the whole
+      #     text — which is how a feature got wired to a step disabled since
+      #     2026-07-20 (#2641, #2643)
       #   - qrcode-bundling: the QR library must be imported with a literal
       #     specifier so Vite bundles it. A dynamic import with the name in a
       #     variable passed build, lint and vitest while the feature was broken
@@ -59,4 +64,4 @@ jobs:
       #     同時播其他的就會一堆聲音" follow-up bug.
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts

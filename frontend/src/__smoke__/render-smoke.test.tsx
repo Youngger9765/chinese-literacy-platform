@@ -1,7 +1,7 @@
 /**
  * render-smoke.test.tsx — Gate ① of the frontend render-safety net (#2289)
  *
- * Purpose: mount each of the 12 main step components + LiveTutorControls and
+ * Purpose: mount each of the 12 main step components + ParagraphReadingControls and
  * assert they do NOT throw a TDZ ReferenceError at mount.
  *
  * Scope: this is NOT a functional test. It only guards against mount-time
@@ -10,7 +10,7 @@
  * values are intentionally swallowed — they are a different risk profile from a
  * TDZ that white-screens the whole page.
  *
- * #2279 postmortem: LiveTutorControls declared `const stopPlaybackSync =
+ * #2279 postmortem: ParagraphReadingControls declared `const stopPlaybackSync =
  * useCallback(...)` AFTER the useEffect that listed it in deps → TDZ on mount →
  * 逐段朗讀 白屏. tsc + vite build did NOT catch it. This suite would have.
  *
@@ -93,10 +93,10 @@ vi.mock('react-router-dom', () => ({
 
 // ── Component imports (all default exports) ──────────────────────────────────
 import Intro from '../components/reading-steps/Intro';
-import ReadingAnnotation from '../components/reading-steps/ReadingAnnotation';
-import LiveTutor from '../components/reading-steps/live-tutor/LiveTutor';
-import LiveTutorControls from '../components/reading-steps/live-tutor/LiveTutorControls';
-import FullReading from '../components/reading-steps/FullReading';
+import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
+import ParagraphReading from '../components/reading-steps/paragraph-reading/ParagraphReading';
+import ParagraphReadingControls from '../components/reading-steps/paragraph-reading/ParagraphReadingControls';
+import KeyPassageReading from '../components/reading-steps/KeyPassageReading';
 import VocabDefinitionMatch from '../components/reading-steps/VocabDefinitionMatch';
 import VocabApplication from '../components/reading-steps/VocabApplication';
 import StrategyExercise from '../components/reading-steps/StrategyExercise';
@@ -322,10 +322,10 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('ReadingAnnotation', <ReadingAnnotation story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 
-  it('LiveTutor', () => {
+  it('ParagraphReading', () => {
     mountGuard(
-      'LiveTutor',
-      <LiveTutor
+      'ParagraphReading',
+      <ParagraphReading
         story={MINIMAL_STORY}
         rightPanelWidth={400}
         onPanelWidthChange={vi.fn()}
@@ -335,20 +335,20 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     );
   });
 
-  it('FullReading', () => {
-    mountGuard('FullReading', <FullReading story={MINIMAL_STORY} onFinish={vi.fn()} onBack={vi.fn()} />);
+  it('KeyPassageReading', () => {
+    mountGuard('KeyPassageReading', <KeyPassageReading story={MINIMAL_STORY} onFinish={vi.fn()} onBack={vi.fn()} />);
   });
 
   // #2559: 重點朗讀 — exercise the keyReading.passage branch (readingContent = [passage]),
   // not just the full-text fallback, so the pilot code path is smoke-covered.
-  it('FullReading (重點朗讀 keyReading passage)', () => {
+  it('KeyPassageReading (重點朗讀 keyReading passage)', () => {
     const storyWithKeyReading: Story = {
       ...MINIMAL_STORY,
       keyReading: { passage: '這是老師指定的重點段落，只練這一段。', extentChars: 18, source: 'docx-extract' },
     };
     mountGuard(
-      'FullReading-keyReading',
-      <FullReading story={storyWithKeyReading} onFinish={vi.fn()} onBack={vi.fn()} />,
+      'KeyPassageReading-keyReading',
+      <KeyPassageReading story={storyWithKeyReading} onFinish={vi.fn()} onBack={vi.fn()} />,
     );
   });
 
@@ -388,9 +388,9 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
   });
 });
 
-describe('render-smoke: LiveTutorControls — TDZ guard for stopPlaybackSync (#2279)', () => {
-  it('LiveTutorControls', () => {
-    mountGuard('LiveTutorControls', <LiveTutorControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
+describe('render-smoke: ParagraphReadingControls — TDZ guard for stopPlaybackSync (#2279)', () => {
+  it('ParagraphReadingControls', () => {
+    mountGuard('ParagraphReadingControls', <ParagraphReadingControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
   });
 });
 

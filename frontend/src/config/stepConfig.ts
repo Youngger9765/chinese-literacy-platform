@@ -120,7 +120,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   // 2026-07-20 教授審查決策（曾世傑教授）：朗讀只練老師指定的「重點段落」(念順順，約 300-400 字，
   // 課文旁手指頭符號標起點、右欄累計字數標長度)，不練全文。做法＝把既有 full-reading step **改造**成
   // 重點朗讀（保留 step id 'key-passage-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
-  // 重點段資料就緒前，FullReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
+  // 重點段資料就緒前，KeyPassageReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
   // （見 docs/reading-key-passage-TODO.md、skill build-key-reading）。
   // ⚠️ 改這個 id 一定要同步更新後端 `backend/app/models/session.py` 的 `_FRONTEND_STEP_ALIAS`
   // （前端 step key → 後端 canonical key → step number）。後端查無此 key 會算成 0，

@@ -1,5 +1,5 @@
 /**
- * FullReadingRecord — 全文朗讀 answer record section.
+ * KeyPassageReadingRecord — 全文朗讀 answer record section.
  * Extracted from SessionHistoryReportPage (Issue #1958).
  */
 
@@ -8,11 +8,11 @@ import DiffDisplay from '../../../components/ui/DiffDisplay';
 import type { DiffToken } from '../../../types';
 import { ReportSectionAccordion } from './ReportSectionAccordion';
 
-interface FullReadingRecordProps {
+interface KeyPassageReadingRecordProps {
   raw: Record<string, unknown>;
 }
 
-export const FullReadingRecord: React.FC<FullReadingRecordProps> = ({ raw }) => {
+export const KeyPassageReadingRecord: React.FC<KeyPassageReadingRecordProps> = ({ raw }) => {
   const feedback = typeof raw.feedback === 'string' ? raw.feedback : null;
   const diffTokens = Array.isArray(raw.diff_tokens) ? (raw.diff_tokens as DiffToken[]) : [];
 
@@ -37,4 +37,4 @@ export const FullReadingRecord: React.FC<FullReadingRecordProps> = ({ raw }) => 
   );
 };
 
-export default FullReadingRecord;
+export default KeyPassageReadingRecord;

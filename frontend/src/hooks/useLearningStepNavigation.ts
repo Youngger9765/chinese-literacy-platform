@@ -19,13 +19,13 @@ import { submitAssignment } from '../services/assignmentApi';
 import { STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { isToolboxMode } from '../services/learningStorageScope';
 import type { ListeningResult } from '../components/reading-steps/ListeningPractice';
-import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { AnnotationSummary } from '../components/reading-steps/FullTextAnnotate';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import type {
   ComprehensionResult,
   DictationResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
   LearningSession,
   ReadingAttempt,
   Story,
@@ -68,7 +68,7 @@ interface UseLearningStepNavigationReturn {
   handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
-  handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishKeyPassageReading: (result: KeyPassageReadingResult) => void;
   handleFinishListening: (result: ListeningResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
@@ -208,8 +208,8 @@ export function useLearningStepNavigation({
     [navigateAfterFinish, persistStep, setSession],
   );
 
-  const handleFinishFullReading = useCallback(
-    (result: FullReadingResult) => {
+  const handleFinishKeyPassageReading = useCallback(
+    (result: KeyPassageReadingResult) => {
       dispatchStepFinish('key-passage-reading', { result }, { fullReadingResult: result });
     },
     [dispatchStepFinish],
@@ -399,7 +399,7 @@ export function useLearningStepNavigation({
     handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
-    handleFinishFullReading,
+    handleFinishKeyPassageReading,
     handleFinishListening,
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,

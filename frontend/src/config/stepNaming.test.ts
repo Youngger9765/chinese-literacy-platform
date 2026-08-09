@@ -3,7 +3,7 @@
  *
  * Five names existed for one thing and no two agreed: 念順順 on the paper
  * worksheet, `reading_timer` in the data, `full-reading` in the URL, 重點朗讀 on
- * screen, `LiveTutor` in code. That cost real time twice in one day — a feature
+ * screen, `ParagraphReading` in code. That cost real time twice in one day — a feature
  * was wired to `tutor`, disabled since 2026-07-20, and the 「全文」 QR codes point
  * at the intro page because no whole-text reading step exists at all.
  *
