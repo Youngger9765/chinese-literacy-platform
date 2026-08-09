@@ -278,11 +278,17 @@ def synthesize_speech(text: str) -> bytes:
         _l1_put(key, gcs_data)
         return gcs_data
 
-    if active_provider == "azure":
-        gcs_data = _gcs_get(key, provider="google")
-        if gcs_data is not None:
-            _l1_put(key, gcs_data)
-            return gcs_data
+    # No cross-prefix read-through (#2649 item 4).
+    #
+    # Azure misses used to fall back to the google prefix. The two prefixes hold
+    # different voices — zh-TW-HsiaoChenNeural vs cmn-CN-Chirp3-HD, and the
+    # mainland accent was rejected in 2026-04 — so that fallback made a brief
+    # Azure outage permanent: the failure writes a mainland-accent object, every
+    # later request finds it, and Azure recovering never undoes it. 22 sentences
+    # reached production that way.
+    #
+    # A miss now costs one synthesis. That is the correct price for always
+    # shipping the voice we chose.
 
     cleaned = _clean_for_tts(text)
     if not cleaned:

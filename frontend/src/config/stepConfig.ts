@@ -413,6 +413,27 @@ export function resolveStepId(id: string): string {
   return LEGACY_STEP_ID_ALIASES[id] ?? id;
 }
 
+/**
+ * Steps a visitor may open without an account (#2649).
+ *
+ * A student scans a QR code printed on a paper worksheet. They have no session.
+ * If every learning step sits behind the login wall, that QR code does nothing
+ * but show them a password box — so the one step the QR code targets, 讀全文-做
+ * 記號, has to be readable and listenable anonymously.
+ *
+ * Every other step stays private, and the reason is the same in each case: it
+ * *writes* something. Recordings, annotations, practice results and scores all
+ * have to belong to a user. Reading and listening do not.
+ *
+ * Keep this set at one entry unless the same argument can be made again.
+ */
+export const PUBLIC_LEARNING_STEPS: ReadonlySet<string> = new Set(['full-text-annotate']);
+
+/** True when `id` (canonical or legacy) is openable without logging in. */
+export function isPublicLearningStep(id: string): boolean {
+  return PUBLIC_LEARNING_STEPS.has(resolveStepId(id));
+}
+
 export function stepSequenceFromWorksheet(
   worksheet?: Array<{ number?: string; name?: string; type?: string }> | null,
 ): string[] | null {

@@ -73,7 +73,46 @@ def test_corrections_load_into_the_tts_table() -> None:
 def test_generated_entries_wrap_in_sub_alias() -> None:
     from app.services.tts.normalization import PHONEME_CORRECTIONS
 
+    # Read through the real loader, not the JSON: what ships is whatever
+    # normalization.py ends up holding, and a data file that never gets loaded
+    # would satisfy a JSON-only assertion while changing nothing.
+    from app.services.tts.normalization import PHONEME_CORRECTIONS
+
     table = dict(PHONEME_CORRECTIONS)
     # Azure rejects <phoneme> outright — every alphabet returns HTTP 400 — so
     # <sub alias> is the only pronunciation control available here (#2612).
     assert table["音樂"] == '<sub alias="音岳">音樂</sub>'
+
+
+def test_hans_reported_words_2026_08_09():
+    """The four words Hans heard wrong, and what the table can honestly do.
+
+    Two are tone differences on characters with exactly one reading in the MOE
+    dictionary, so they are safe to correct blind — 擊 is ㄐㄧˊ everywhere it
+    appears, never ㄐㄧ.
+
+    Two are polyphones. 著 has five readings and 和 has six, and which one is
+    right depends on the sentence around it. A lookup table cannot see that, so
+    correcting them here would trade one wrong reading for another — 摸不著
+    would be fixed and 顯著 would break. They are deliberately absent, and this
+    test says so out loud rather than leaving the gap to look like an oversight.
+
+    This is also a regression lock on the corpus. The first pass built its word
+    list from backend/data/curriculum, which turned out not to contain lesson 1
+    at all — so 攻擊 was never a candidate and the table shipped without it.
+    """
+    # Read through the real loader, not the JSON: what ships is whatever
+    # normalization.py ends up holding, and a data file that never gets loaded
+    # would satisfy a JSON-only assertion while changing nothing.
+    from app.services.tts.normalization import PHONEME_CORRECTIONS
+
+    table = dict(PHONEME_CORRECTIONS)
+
+    assert table.get("攻擊") == '<sub alias="攻及">攻擊</sub>'
+    assert table.get("嘆息") == '<sub alias="嘆習">嘆息</sub>'
+
+    for polyphone in ("摸不著", "著", "和"):
+        assert polyphone not in table, (
+            f"{polyphone} reads differently depending on context; a blind "
+            "substitution fixes one sentence and breaks another"
+        )
