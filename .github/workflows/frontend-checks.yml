@@ -62,6 +62,15 @@ jobs:
       #     return a row to idle the instant it (or the header button) is
       #     stopped. Regression of either reintroduces #2622's "不能停止 /
       #     同時播其他的就會一堆聲音" follow-up bug.
+      # Production build. vitest and eslint both passed while `vite build` was
+      # broken — a rename left two files under their old names while every
+      # import already used the new ones, and nothing in this workflow resolved
+      # the module graph the way rollup does. Staging deployed red as a result
+      # (#2643). Build is the only gate that catches a filename/import mismatch.
+      - name: Build (production)
+        working-directory: frontend
+        run: npx vite build
+
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
         run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts
