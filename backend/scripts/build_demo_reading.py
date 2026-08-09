@@ -242,10 +242,19 @@ def _fetch_stories(base_api_url: str, page_size: int = 300) -> list[dict]:
 def _fetch_story_detail(base_api_url: str, story_id: int) -> dict:
     """GET single story detail for paragraphs and key_reading."""
     import requests
+    import time
 
     base_api_url = base_api_url.rstrip("/")
-    resp = requests.get(f"{base_api_url}/api/stories/{story_id}", timeout=30)
-    resp.raise_for_status()
+    for attempt in range(5):
+        resp = requests.get(f"{base_api_url}/api/stories/{story_id}", timeout=30)
+        if resp.status_code == 429:
+            wait = 2 ** attempt
+            logger.warning("429 on story %d, waiting %ds...", story_id, wait)
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp.json()
+    resp.raise_for_status()  # final attempt failed
     return resp.json()
 
 
@@ -344,8 +353,12 @@ def main(argv: list[str] | None = None) -> int:
 
     # 2. Fetch detail for each story (paragraphs + key_reading)
     lessons: list[dict] = []
-    for story in stories:
+    for i, story in enumerate(stories):
         sid = story["id"]
+        # Throttle to avoid backend 429 rate-limit (staging has per-IP limits)
+        if i > 0 and i % 10 == 0:
+            import time
+            time.sleep(1.0)
         detail = _fetch_story_detail(api_url, sid)
         lessons.append(
             {

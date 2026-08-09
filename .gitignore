@@ -60,3 +60,5 @@ qa/content-evidence/*/artifacts/
 backend/data/lessons/_lesson_content_dryrun/
 # graphify architecture map — local knowledge-graph cache (18M), rebuilt on demand, not committed
 graphify-out/
+.playwright-mcp/
+backend/demo-reading-output/
