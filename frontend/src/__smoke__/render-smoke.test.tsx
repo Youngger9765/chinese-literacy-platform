@@ -108,8 +108,8 @@ import AssessmentReport from '../components/reading-steps/AssessmentReport';
 import LessonRenderer from '../components/lesson-content/LessonRenderer';
 import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
+import GuestReadingPage from '../pages/GuestReadingPage';
 import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
-import DemoReadingPage from '../pages/DemoReadingPage';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -415,7 +415,10 @@ describe('render-smoke: LessonAudioTable — admin audio table mounts without TD
     mountGuard('LessonAudioTable', <LessonAudioTable />);
   });
 
-  it('DemoReadingPage', () => {
-    mountGuard('DemoReadingPage', <DemoReadingPage />);
+  it('GuestReadingPage', () => {
+    // Replaces the DemoReadingPage case: that page was the second audio source
+    // for 讀全文-做記號 and is gone. This is the page an anonymous QR visitor
+    // now lands on.
+    mountGuard('GuestReadingPage', <GuestReadingPage />);
   });
 });
