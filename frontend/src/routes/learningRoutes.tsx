@@ -141,6 +141,12 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
 //      steps added to STEP_REGISTRY before a page is built).
 // ---------------------------------------------------------------------------
 
+/** Replaces the legacy segment in place, preserving the storyId and the rest of the URL. */
+const LegacyStepRedirect: React.FC<{ to: string }> = ({ to }) => {
+  const { storyId } = useParams<{ storyId: string }>();
+  return <Navigate to={`/learn/${storyId}/${to}`} replace />;
+};
+
 function buildLearningRoutes(): React.ReactElement[] {
   const enabledSteps = resolveActiveSteps();
 
@@ -204,11 +210,7 @@ function buildLearningRoutes(): React.ReactElement[] {
   return routes;
 }
 
-/** Replaces the legacy segment in place, preserving the storyId and the rest of the URL. */
-const LegacyStepRedirect: React.FC<{ to: string }> = ({ to }) => {
-  const { storyId } = useParams<{ storyId: string }>();
-  return <Navigate to={`/learn/${storyId}/${to}`} replace />;
-};
+
 
 // ---------------------------------------------------------------------------
 // learningRoutes — the public export.
