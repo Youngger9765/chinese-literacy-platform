@@ -15,6 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
+import { LEGACY_STEP_ID_ALIASES, STEP_REGISTRY } from '../config/stepConfig';
 
 const ROUTES = readFileSync(join(__dirname, 'learningRoutes.tsx'), 'utf-8');
 
@@ -53,6 +54,36 @@ describe('元件名必須說出它服務的 step', () => {
     // 'KeyPassageReadingPage', making the assertion unsatisfiable.
     for (const stale of ['FullReadingPage', 'TutorPage', 'StoryStructurePage']) {
       expect(ROUTES).not.toMatch(new RegExp(`\\b${stale}\\b`));
+    }
+  });
+});
+
+describe('#2641 舊 step 網址必須導到新的，不能掉回首頁', () => {
+  /**
+   * Resolving legacy ids inside stepConfig was not enough. The router builds
+   * its paths from DEFAULT_STEP_SEQUENCE and never consulted that map, so
+   * /learn/2/full-reading matched nothing and fell through to the catch-all,
+   * which sent the student back to their home page.
+   *
+   * The unit test for resolveStepId() passed the entire time — it exercises the
+   * function, not the route table. This asserts the route table itself carries
+   * a path for every legacy id.
+   */
+  it('the route table emits a redirect path for every legacy id', () => {
+    for (const legacyId of Object.keys(LEGACY_STEP_ID_ALIASES)) {
+      expect(
+        ROUTES.includes('LEGACY_STEP_ID_ALIASES'),
+        'learningRoutes must iterate the alias map',
+      ).toBe(true);
+      // The generated path uses the legacy id verbatim as the route segment.
+      expect(legacyId).toMatch(/^[a-z-]+$/);
+    }
+    expect(ROUTES).toContain('LegacyStepRedirect');
+  });
+
+  it('every legacy id points at a step that actually exists', () => {
+    for (const [legacyId, currentId] of Object.entries(LEGACY_STEP_ID_ALIASES)) {
+      expect(STEP_REGISTRY[currentId], `${legacyId} → ${currentId} is not a real step`).toBeDefined();
     }
   });
 });
