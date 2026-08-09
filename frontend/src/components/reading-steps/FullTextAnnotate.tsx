@@ -75,12 +75,17 @@ interface ReadingAnnotationProps {
   /** DB session id — when provided, annotations are persisted to and loaded from DB. */
   dbSessionId?: number | null;
   /**
-   * Read-and-listen only (#2649). Set for a QR-code visitor who has no account:
-   * a mark has to belong to somebody, so every annotating affordance is removed
-   * rather than disabled — a greyed-out button reads as "broken", an absent one
-   * reads as "not part of this page". Reading and listening stay.
+   * Hide every annotating affordance (#2649). Set for a QR-code visitor who has
+   * no account: a mark has to belong to somebody. Removed rather than disabled —
+   * a greyed-out button reads as "broken", an absent one reads as "not part of
+   * this page".
+   *
+   * Named for what it hides, not for the visitor. It used to be `hideAnnotation`, and
+   * that name quietly took the player down with the annotations: the guest page
+   * then needed its own audio, which drifted from the signed-in one within days.
+   * Listening is not annotating, so it is not covered by this flag.
    */
-  readOnly?: boolean;
+  hideAnnotation?: boolean;
 }
 
 // ── A5: First-use onboarding coach component ───────────────────────────────
@@ -257,7 +262,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   onFinish,
   fontSizePx = 22,
   dbSessionId = null,
-  readOnly = false,
+  hideAnnotation = false,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -646,12 +651,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <div
           ref={containerRef}
           className="flex-1 overflow-y-auto relative pb-44"
-          onMouseUp={readOnly ? undefined : handleMouseUp}
-          onTouchEnd={readOnly ? undefined : handleTouchEnd}
+          onMouseUp={hideAnnotation ? undefined : handleMouseUp}
+          onTouchEnd={hideAnnotation ? undefined : handleTouchEnd}
           style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
         >
           {/* A5: First-use onboarding coach (dismissable, gated by localStorage) */}
-          {!readOnly && (showCoach ? (
+          {!hideAnnotation && (showCoach ? (
             <OnboardingCoach onDismiss={handleDismissCoach} />
           ) : (
             /* A5: Persistent mini hint bar shown after onboarding is dismissed */
@@ -660,7 +665,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* Whole-lesson player. Sits above the legend so it's the first control
               on the page — listening is what a lot of students come here to do. */}
-          {!readOnly && (
+          {(
             <div className="flex justify-center pt-4">
               <ReadingPlayer
                 isPlaying={reader.isPlaying}
@@ -805,7 +810,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           )}
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
-          {!readOnly && toolbar.visible && (
+          {!hideAnnotation && toolbar.visible && (
             <AnnotationToolbar
               x={toolbar.x}
               y={toolbar.y}
@@ -817,7 +822,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         </div>
 
         {/* ── Right panel: 我的記號 ──────────────────────────────────────── */}
-        {!readOnly && (
+        {!hideAnnotation && (
           <AnnotationSidePanel
             summary={summary}
             annotationsForPanel={annotationsForPanel}
@@ -826,7 +831,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         )}
       </div>
 
-      {!readOnly && (
+      {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
       <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"

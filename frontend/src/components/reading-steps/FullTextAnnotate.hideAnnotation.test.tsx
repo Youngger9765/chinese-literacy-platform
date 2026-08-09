@@ -46,8 +46,8 @@ const story = {
   images: [],
 } as unknown as Story;
 
-function renderStep(readOnly: boolean) {
-  return render(<ReadingAnnotation story={story} onFinish={vi.fn()} readOnly={readOnly} />);
+function renderStep(hideAnnotation: boolean) {
+  return render(<ReadingAnnotation story={story} onFinish={vi.fn()} hideAnnotation={hideAnnotation} />);
 }
 
 describe('FullTextAnnotate — read-only (anonymous QR visitor)', () => {
@@ -74,9 +74,13 @@ describe('FullTextAnnotate — read-only (anonymous QR visitor)', () => {
     expect(screen.queryByText(/畫線|標記|選取/)).not.toBeInTheDocument();
   });
 
-  it('does not mount the in-page player (the guest page supplies its own)', () => {
+  it('keeps the player — a visitor who cannot annotate can still listen', () => {
+    // This is the regression that produced two audio sources. Hiding the
+    // annotations used to hide the player too, so the guest page grew its own
+    // pre-generated mp3, and within days it no longer matched what a signed-in
+    // student heard. Owner: 「全文朗讀的登錄的前後那個用的音怎麼不一樣啊」.
     renderStep(true);
-    expect(screen.queryByTestId('reading-player')).not.toBeInTheDocument();
+    expect(screen.getByTestId('reading-player')).toBeInTheDocument();
   });
 });
 

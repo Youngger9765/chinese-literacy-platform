@@ -30,11 +30,12 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from ..auth.dependencies import get_current_user, require_role
+from ..auth.dependencies import get_current_user, get_optional_user, require_role
+from ..auth.rate_limiter import real_client_ip
 from ..auth.rate_limiter import make_ai_rate_limit_dependency, tts_rate_limit
 from ..models.user import User
 from ..services.tts_service import (
@@ -56,10 +57,35 @@ class TTSRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000, description="Plain text to synthesise (zh-TW)")
 
 
+
+def _who(user: "User | None") -> str:
+    return f"user={user.id}" if user is not None else "anonymous"
+
+
+def _rate_limit_key(user: "User | None", request: Request) -> str:
+    """Who to charge this request against.
+
+    A signed-in student is keyed by account so a whole classroom on one school
+    IP doesn't share a single bucket. An anonymous listener has no account, so
+    the IP is all there is.
+
+    Anonymous synthesis is allowed on purpose (owner: 「你登錄的時候就可以用你為
+    什麼未登錄的時候不能用啊」). A QR-code visitor has to hear the same reading a
+    signed-in student hears, and giving them a different audio source is what
+    made the two drift apart in the first place. The per-IP bucket here, plus
+    the global /api/* limiter, is what keeps that from being a way to burn the
+    TTS budget.
+    """
+    if user is not None:
+        return str(user.id)
+    return f"ip:{real_client_ip(request)}"
+
+
 @router.post("/synthesize")
 async def synthesize(
     req: TTSRequest,
-    current_user: User = Depends(get_current_user),
+    request: Request,
+    current_user: User | None = Depends(get_optional_user),
 ) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
 
@@ -88,7 +114,7 @@ async def synthesize(
     # without burning the user's TTS quota (Issue #1808).
     cached = get_cached_tts(req.text)
     if cached is not None:
-        logger.debug("TTS L1 cache hit — skipping rate limit check (user=%d)", current_user.id)
+        logger.debug("TTS L1 cache hit — skipping rate limit check (%s)", _who(current_user))
         return Response(
             content=cached,
             media_type="audio/mpeg",
@@ -96,7 +122,7 @@ async def synthesize(
         )
 
     # Fix #1 & #2: Rate limit keyed on user_id, dedicated ai:tts: bucket.
-    rl_info = tts_rate_limit(current_user.id)
+    rl_info = tts_rate_limit(_rate_limit_key(current_user, request))
     if not rl_info.allowed:
         raise HTTPException(
             status_code=429,
@@ -127,7 +153,8 @@ async def synthesize(
 @router.post("/synthesize-sentence")
 async def synthesize_sentence_endpoint(
     req: TTSRequest,
-    current_user: User = Depends(get_current_user),
+    request: Request,
+    current_user: User | None = Depends(get_optional_user),
 ) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
 
@@ -150,7 +177,7 @@ async def synthesize_sentence_endpoint(
     # Fix #3: Cache check BEFORE rate limit (Issue #1808).
     cached = get_cached_tts(req.text)
     if cached is not None:
-        logger.debug("TTS L1 cache hit (sentence) — skipping rate limit (user=%d)", current_user.id)
+        logger.debug("TTS L1 cache hit (sentence) — skipping rate limit (%s)", _who(current_user))
         return Response(
             content=cached,
             media_type="audio/mpeg",
@@ -158,7 +185,7 @@ async def synthesize_sentence_endpoint(
         )
 
     # Fix #1 & #2: Per-user TTS rate limit (Issue #1808).
-    rl_info = tts_rate_limit(current_user.id)
+    rl_info = tts_rate_limit(_rate_limit_key(current_user, request))
     if not rl_info.allowed:
         raise HTTPException(
             status_code=429,

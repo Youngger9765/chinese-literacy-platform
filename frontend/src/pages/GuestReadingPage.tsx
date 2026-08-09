@@ -16,13 +16,19 @@
  *
  * Annotating stays behind the login wall — a mark has to belong to somebody.
  * The invitation to log in is right there, so the path onward is one tap.
+ *
+ * The audio is deliberately NOT a separate source. An earlier version played a
+ * pre-generated whole-lesson mp3 here, and the two paths drifted apart within
+ * days: that file predated a pronunciation fix and, as it turned out, held the
+ * key passage rather than the whole text. Owner, hearing the difference: 「全文
+ * 朗讀的登錄的前後那個用的音怎麼不一樣啊」. Both paths now use the same
+ * paragraph walk over the same canonical sentences, so there is nothing left to
+ * drift.
  */
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
-import ReadingPlayer from '../components/reading-steps/ReadingPlayer';
-import { useAssetAudio, demoReadingUrl } from '../hooks/useAssetAudio';
 import { fetchStory } from '../services/api';
 import type { Story } from '../types';
 
@@ -30,8 +36,6 @@ const GuestReadingPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const [story, setStory] = useState<Story | null>(null);
   const [failed, setFailed] = useState(false);
-
-  const audio = useAssetAudio(demoReadingUrl(storyId ?? ''));
 
   useEffect(() => {
     if (!storyId) return;
@@ -81,17 +85,6 @@ const GuestReadingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            {!audio.hasError && (
-              <ReadingPlayer
-                isPlaying={audio.isPlaying}
-                isPaused={audio.isPaused}
-                isLoading={audio.isLoading}
-                onPlay={audio.play}
-                onPause={audio.pause}
-                onResume={audio.resume}
-                onStop={audio.stop}
-              />
-            )}
             <Link
               to="/login"
               className="text-sm font-medium text-accent whitespace-nowrap hover:underline"
@@ -102,7 +95,7 @@ const GuestReadingPage: React.FC = () => {
         </div>
       </div>
 
-      <ReadingAnnotation story={story} onFinish={() => {}} readOnly />
+      <ReadingAnnotation story={story} onFinish={() => {}} hideAnnotation />
     </div>
   );
 };
