@@ -28,7 +28,7 @@ interface VocabPracticeProps {
   attempt: ReadingAttempt | null;
   onFinish: (result: VocabResult) => void;
   onBack: () => void;
-  /** Rehydrate from previously saved step_progress.step_data['vocab']. */
+  /** Rehydrate from previously saved step_progress.step_data['character-practice']. */
   initialProgress?: VocabStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: VocabStepData, immediate?: boolean) => void;
@@ -249,7 +249,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
 
   const handleFinish = () => {
     // Immediate flush with the result summary so teacher dashboard can read it
-    // directly from step_data['vocab'].result (Issue #1549).
+    // directly from step_data['character-practice'].result (Issue #1549).
     onProgressChange?.(
       buildStepData({ result: { practiced_words: vocabWords, total_words: vocabWords.length } }),
       true,

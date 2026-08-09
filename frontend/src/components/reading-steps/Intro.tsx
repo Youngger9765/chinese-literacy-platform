@@ -591,7 +591,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               #2082 A4 removed the non-clickable ol — do NOT restore a static ol.
               This uses chip badges so each step is directly accessible. */}
           {(() => {
-            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
+            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'lesson-intro');
             if (digitalSteps.length === 0) return null;
             return (
               <div className="space-y-2 pb-2">

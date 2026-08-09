@@ -241,10 +241,10 @@ const TeacherSessionReportPage: React.FC = () => {
 
 
       {/* Issue #2083 — structured spotlight answers for teacher review */}
-      {report?.step_progress?.step_data?.['reading-strategy'] && (
+      {report?.step_progress?.step_data?.['spotlight'] && (
         <div className="mb-6">
           <SpotlightStrategyRecord
-            stepData={report.step_progress.step_data['reading-strategy'] as Record<string, unknown>}
+            stepData={report.step_progress.step_data['spotlight'] as Record<string, unknown>}
             spotlight={story?.spotlightV2}
             strategyExercise={
               story?.strategyExercise && !Array.isArray(story.strategyExercise)

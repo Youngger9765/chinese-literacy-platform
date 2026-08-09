@@ -31,18 +31,18 @@ import {
 describe('STEP_FINISH_TRANSITIONS table', () => {
   it('covers all 13 expected step ids', () => {
     const expectedKeys = [
-      'tutor',
+      'paragraph-reading',
       'comprehension',
-      'vocab',
-      'full-reading',
+      'character-practice',
+      'key-passage-reading',
       'listening',
-      'reading-annotation',
+      'full-text-annotate',
       'vocab-definition',
       'vocab-application',
-      'story-structure',
-      'reading-strategy',
+      'keypoints-table',
+      'spotlight',
       'sentence-practice',
-      'vocab-word-search',
+      'vocab-review',
       'knowledge-station',
     ];
     for (const key of expectedKeys) {
@@ -61,11 +61,11 @@ describe('STEP_FINISH_TRANSITIONS table', () => {
   });
 
   it('reading-annotation → nextStep is tutor', () => {
-    expect(STEP_FINISH_TRANSITIONS['reading-annotation'].nextStep).toBe('tutor');
+    expect(STEP_FINISH_TRANSITIONS['full-text-annotate'].nextStep).toBe('paragraph-reading');
   });
 
   it('tutor → nextStep is full-reading', () => {
-    expect(STEP_FINISH_TRANSITIONS['tutor'].nextStep).toBe('full-reading');
+    expect(STEP_FINISH_TRANSITIONS['paragraph-reading'].nextStep).toBe('key-passage-reading');
   });
 
   it('knowledge-station → nextStep is report', () => {
@@ -73,11 +73,11 @@ describe('STEP_FINISH_TRANSITIONS table', () => {
   });
 
   it('comprehension → nextStep is vocab-word-search', () => {
-    expect(STEP_FINISH_TRANSITIONS['comprehension'].nextStep).toBe('vocab-word-search');
+    expect(STEP_FINISH_TRANSITIONS['comprehension'].nextStep).toBe('vocab-review');
   });
 
   it('vocab-word-search → nextStep is knowledge-station', () => {
-    expect(STEP_FINISH_TRANSITIONS['vocab-word-search'].nextStep).toBe('knowledge-station');
+    expect(STEP_FINISH_TRANSITIONS['vocab-review'].nextStep).toBe('knowledge-station');
   });
 });
 
@@ -85,8 +85,8 @@ describe('STEP_FINISH_TRANSITIONS table', () => {
 
 describe('getDefaultNextStep', () => {
   it('returns the mapped nextStep for a known step', () => {
-    expect(getDefaultNextStep('tutor')).toBe('full-reading');
-    expect(getDefaultNextStep('comprehension')).toBe('vocab-word-search');
+    expect(getDefaultNextStep('paragraph-reading')).toBe('key-passage-reading');
+    expect(getDefaultNextStep('comprehension')).toBe('vocab-review');
     expect(getDefaultNextStep('knowledge-station')).toBe('report');
   });
 
@@ -95,8 +95,8 @@ describe('getDefaultNextStep', () => {
   });
 
   it('is a pure function (no side effects)', () => {
-    const result1 = getDefaultNextStep('tutor');
-    const result2 = getDefaultNextStep('tutor');
+    const result1 = getDefaultNextStep('paragraph-reading');
+    const result2 = getDefaultNextStep('paragraph-reading');
     expect(result1).toBe(result2);
   });
 });
@@ -105,9 +105,9 @@ describe('getDefaultNextStep', () => {
 
 describe('buildStepFinishPayload', () => {
   it('returns completeStep and nextStep from the transition table', () => {
-    const payload = buildStepFinishPayload('reading-annotation', {});
-    expect(payload.completeStep).toBe('reading-annotation');
-    expect(payload.nextStep).toBe('tutor');
+    const payload = buildStepFinishPayload('full-text-annotate', {});
+    expect(payload.completeStep).toBe('full-text-annotate');
+    expect(payload.nextStep).toBe('paragraph-reading');
   });
 
   it('includes stepDataPatch with the stepDataKey set to provided data', () => {
@@ -117,14 +117,14 @@ describe('buildStepFinishPayload', () => {
   });
 
   it('uses empty object as default stepData when none provided', () => {
-    const payload = buildStepFinishPayload('story-structure', {});
-    expect(payload.stepDataPatch).toEqual({ 'story-structure': {} });
+    const payload = buildStepFinishPayload('keypoints-table', {});
+    expect(payload.stepDataPatch).toEqual({ 'keypoints-table': {} });
   });
 
   it('produces correct currentStep (nextStep) for persistStepProgressState', () => {
     // persistStepProgressState `currentStep` = the step we navigate TO
     const payload = buildStepFinishPayload('vocab-application', {});
-    expect(payload.currentStep).toBe('story-structure');
+    expect(payload.currentStep).toBe('keypoints-table');
     expect(payload.completeStep).toBe('vocab-application');
   });
 
@@ -135,9 +135,9 @@ describe('buildStepFinishPayload', () => {
   });
 
   it('full-reading uses nextStep listening', () => {
-    const payload = buildStepFinishPayload('full-reading', { result: { score: 80 } });
+    const payload = buildStepFinishPayload('key-passage-reading', { result: { score: 80 } });
     expect(payload.nextStep).toBe('listening');
-    expect(payload.stepDataPatch).toEqual({ 'full-reading': { result: { score: 80 } } });
+    expect(payload.stepDataPatch).toEqual({ 'key-passage-reading': { result: { score: 80 } } });
   });
 
   it('sentence-practice uses nextStep vocab-definition', () => {
@@ -146,7 +146,7 @@ describe('buildStepFinishPayload', () => {
   });
 
   it('vocab-word-search: nextStep is knowledge-station', () => {
-    const payload = buildStepFinishPayload('vocab-word-search', { completed: true });
+    const payload = buildStepFinishPayload('vocab-review', { completed: true });
     expect(payload.nextStep).toBe('knowledge-station');
   });
 });
@@ -162,17 +162,17 @@ describe('default step sequence contract', () => {
    * knowledge-station → report
    */
   const expectedChain: [string, string][] = [
-    ['reading-annotation', 'tutor'],
-    ['tutor', 'full-reading'],
-    ['full-reading', 'listening'],
-    ['listening', 'vocab'],
-    ['vocab', 'vocab-definition'],
+    ['full-text-annotate', 'paragraph-reading'],
+    ['paragraph-reading', 'key-passage-reading'],
+    ['key-passage-reading', 'listening'],
+    ['listening', 'character-practice'],
+    ['character-practice', 'vocab-definition'],
     ['vocab-definition', 'vocab-application'],
-    ['vocab-application', 'story-structure'],
-    ['story-structure', 'reading-strategy'],
-    ['reading-strategy', 'comprehension'],
-    ['comprehension', 'vocab-word-search'],
-    ['vocab-word-search', 'knowledge-station'],
+    ['vocab-application', 'keypoints-table'],
+    ['keypoints-table', 'spotlight'],
+    ['spotlight', 'comprehension'],
+    ['comprehension', 'vocab-review'],
+    ['vocab-review', 'knowledge-station'],
     ['knowledge-station', 'report'],
   ];
 

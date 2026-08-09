@@ -55,7 +55,7 @@ const mockAssignmentPending: StudentAssignmentResponse = {
 const mockAssignmentInProgress: StudentAssignmentResponse = {
   ...mockAssignmentPending,
   status: 'in_progress',
-  current_step: 'tutor',
+  current_step: 'paragraph-reading',
 };
 
 const mockClassroom: StudentEnrolledClassroom = {

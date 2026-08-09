@@ -24,9 +24,9 @@ const StoryStructurePage: React.FC = () => {
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
       saveStepProgressPatch({
-        stepId: 'story-structure',
+        stepId: 'keypoints-table',
         stepData,
-        currentStep: 'story-structure',
+        currentStep: 'keypoints-table',
         immediate,
       });
     },

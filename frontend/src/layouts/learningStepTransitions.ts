@@ -30,35 +30,35 @@ export interface StepTransition {
  * handleFinish* callbacks in LearningLayout.tsx.
  */
 export const STEP_TRANSITIONS: Record<string, StepTransition> = {
-  'tutor': {
-    completeStep: 'tutor',
-    nextStep: 'full-reading',
-    stepDataKey: 'tutor',
+  'paragraph-reading': {
+    completeStep: 'paragraph-reading',
+    nextStep: 'key-passage-reading',
+    stepDataKey: 'paragraph-reading',
   },
   'comprehension': {
     completeStep: 'comprehension',
-    nextStep: 'vocab-word-search',
+    nextStep: 'vocab-review',
     stepDataKey: 'comprehension',
   },
-  'vocab': {
-    completeStep: 'vocab',
+  'character-practice': {
+    completeStep: 'character-practice',
     nextStep: 'vocab-definition',
-    stepDataKey: 'vocab',
+    stepDataKey: 'character-practice',
   },
-  'full-reading': {
-    completeStep: 'full-reading',
+  'key-passage-reading': {
+    completeStep: 'key-passage-reading',
     nextStep: 'listening',
-    stepDataKey: 'full-reading',
+    stepDataKey: 'key-passage-reading',
   },
   'listening': {
     completeStep: 'listening',
-    nextStep: 'vocab',
+    nextStep: 'character-practice',
     stepDataKey: 'listening',
   },
-  'reading-annotation': {
-    completeStep: 'reading-annotation',
-    nextStep: 'tutor',
-    stepDataKey: 'reading-annotation',
+  'full-text-annotate': {
+    completeStep: 'full-text-annotate',
+    nextStep: 'paragraph-reading',
+    stepDataKey: 'full-text-annotate',
   },
   'vocab-definition': {
     completeStep: 'vocab-definition',
@@ -67,28 +67,28 @@ export const STEP_TRANSITIONS: Record<string, StepTransition> = {
   },
   'vocab-application': {
     completeStep: 'vocab-application',
-    nextStep: 'story-structure',
+    nextStep: 'keypoints-table',
     stepDataKey: 'vocab-application',
   },
-  'story-structure': {
-    completeStep: 'story-structure',
-    nextStep: 'reading-strategy',
-    stepDataKey: 'story-structure',
+  'keypoints-table': {
+    completeStep: 'keypoints-table',
+    nextStep: 'spotlight',
+    stepDataKey: 'keypoints-table',
   },
-  'reading-strategy': {
-    completeStep: 'reading-strategy',
+  'spotlight': {
+    completeStep: 'spotlight',
     nextStep: 'comprehension',
-    stepDataKey: 'reading-strategy',
+    stepDataKey: 'spotlight',
   },
   'sentence-practice': {
     completeStep: 'sentence-practice',
     nextStep: 'vocab-definition',
     stepDataKey: 'sentence-practice',
   },
-  'vocab-word-search': {
-    completeStep: 'vocab-word-search',
+  'vocab-review': {
+    completeStep: 'vocab-review',
     nextStep: 'knowledge-station',
-    stepDataKey: 'vocab-word-search',
+    stepDataKey: 'vocab-review',
   },
   'knowledge-station': {
     completeStep: 'knowledge-station',

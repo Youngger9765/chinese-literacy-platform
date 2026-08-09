@@ -27,16 +27,16 @@ const StrategyExercisePage: React.FC = () => {
     stepProgressData,
   } = useLearningContext();
 
-  const savedStrategyData = stepProgressData.step_data?.['reading-strategy'] as Record<string, unknown> | undefined;
+  const savedStrategyData = stepProgressData.step_data?.['spotlight'] as Record<string, unknown> | undefined;
 
   const [strategyDone, setStrategyDone] = useState(() => !!(savedStrategyData?.allDone));
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
       saveStepProgressPatch({
-        stepId: 'reading-strategy',
+        stepId: 'spotlight',
         stepData,
-        currentStep: 'reading-strategy',
+        currentStep: 'spotlight',
         immediate,
       });
     },
@@ -116,7 +116,7 @@ const StrategyExercisePage: React.FC = () => {
     if (lesson && lessonHasSpotlight) {
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
-          <OmoPaperResultBanner stepId="reading-strategy" />
+          <OmoPaperResultBanner stepId="spotlight" />
           <LessonRenderer
             lesson={lesson}
             story={selectedStory}
@@ -134,7 +134,7 @@ const StrategyExercisePage: React.FC = () => {
   if (hasSpotlightV2 && spotlightV2) {
     return (
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto px-4 py-6">
-        <OmoPaperResultBanner stepId="reading-strategy" />
+        <OmoPaperResultBanner stepId="spotlight" />
         <BlockSequenceRenderer
           spotlight={spotlightV2}
           story={selectedStory}
@@ -142,7 +142,7 @@ const StrategyExercisePage: React.FC = () => {
           onComplete={handleStrategyComplete}
           onChange={handleAnswerChange}
           initialState={savedStrategyData}
-          onOpenKeypoints={() => navigate(`/learn/${selectedStory.id}/story-structure`)}
+          onOpenKeypoints={() => navigate(`/learn/${selectedStory.id}/keypoints-table`)}
         />
         {nextButton}
       </div>
@@ -156,7 +156,7 @@ const StrategyExercisePage: React.FC = () => {
       exerciseIcon="lightbulb"
       exerciseLabel="閱讀聚光燈"
     >
-      <OmoPaperResultBanner stepId="reading-strategy" />
+      <OmoPaperResultBanner stepId="spotlight" />
       {hasStrategy ? (
         <>
           {isGraphicTextList ? (

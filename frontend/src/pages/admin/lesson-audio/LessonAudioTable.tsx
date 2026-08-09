@@ -10,7 +10,7 @@ import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-type LessonQrStep = 'intro' | 'full-reading';
+type LessonQrStep = 'lesson-intro' | 'key-passage-reading';
 type AudioMode = 'full' | 'key';
 
 interface StoryListItem {
@@ -181,14 +181,14 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     grade: s.grade,
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
-    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'intro') : '',
+    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'lesson-intro') : '',
     // Same rule on the passage side: build_demo_reading.plan_demo_audio only
     // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
     // (has_key_reading). Emitting a code for a lesson without one — as this
     // did unconditionally before — is the identical "points at silence" bug
     // the 全文 gate above prevents, just on the passage side. Gate on the data
     // (does a passage exist), never on the grade.
-    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'full-reading') : '',
+    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'key-passage-reading') : '',
   }));
 }
 
@@ -316,7 +316,7 @@ const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, file
       </button>
       {preview && (
         <QrPreviewDialog
-          title={`${title}／${step === 'intro' ? '全文' : '段落'}`}
+          title={`${title}／${step === 'lesson-intro' ? '全文' : '段落'}`}
           value={preview.value}
           dataUrl={preview.dataUrl}
           filename={qrFileName(filePrefix, lessonId)}
@@ -726,9 +726,9 @@ const LessonAudioTable: React.FC = () => {
               </div>
 
               {deliversFullText(story.grade)
-                ? <QrDownloadButton lessonId={story.id} step="intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+                ? <QrDownloadButton lessonId={story.id} step="lesson-intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
                 : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付段落朗讀">—</span>}
-              <QrDownloadButton lessonId={story.id} step="full-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
+              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
             </div>
           );
         })}

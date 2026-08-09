@@ -27,7 +27,7 @@ import {
 
 /** Returns the first enabled step id in DEFAULT_STEP_SEQUENCE */
 function firstEnabledStepId(): string {
-  return resolveActiveSteps()[0]?.id ?? 'reading-annotation';
+  return resolveActiveSteps()[0]?.id ?? 'full-text-annotate';
 }
 
 /**
@@ -152,10 +152,10 @@ describe('protected_routes_wrap_app_shell_pages — key routes require auth + sh
   it('STEP_CONFIG contains the expected learning steps', () => {
     const ids = STEP_CONFIG.map((s) => s.id);
     // Core steps that must always be present
-    expect(ids).toContain('intro');
-    expect(ids).toContain('reading-annotation');
-    expect(ids).toContain('tutor');
-    expect(ids).toContain('full-reading');
+    expect(ids).toContain('lesson-intro');
+    expect(ids).toContain('full-text-annotate');
+    expect(ids).toContain('paragraph-reading');
+    expect(ids).toContain('key-passage-reading');
     expect(ids).toContain('comprehension');
     expect(ids).toContain('report');
   });

@@ -6,7 +6,7 @@ import { useLearningContext } from '../../layouts/LearningLayout';
 import type { FullReadingStepData } from '../../types/stepProgress';
 
 /** Canonical step id this page is registered under in STEP_REGISTRY. */
-const CANONICAL_STEP_ID = 'full-reading';
+const CANONICAL_STEP_ID = 'key-passage-reading';
 
 const FullReadingPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -43,7 +43,7 @@ const FullReadingPage: React.FC = () => {
     <FullReading
       story={selectedStory}
       onFinish={handleFinishFullReading}
-      onBack={() => navigate(`/learn/${storyId}/tutor`)}
+      onBack={() => navigate(`/learn/${storyId}/paragraph-reading`)}
       initialResult={session?.fullReadingResult ?? null}
       initialProgress={stepProgressData.step_data?.[stepId] as FullReadingStepData | undefined}
       onProgressChange={handleProgressChange}

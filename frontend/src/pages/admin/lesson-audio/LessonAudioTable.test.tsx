@@ -170,9 +170,9 @@ describe('LessonAudioTable', () => {
   it('builds QR values for intro and full-reading lesson routes', () => {
     const origin = 'https://staging.example.test';
 
-    expect(buildLessonQrValue(origin, 1, 'intro')).toBe('https://staging.example.test/learn/1/intro');
-    expect(buildLessonQrValue(origin, 1, 'full-reading')).toBe(
-      'https://staging.example.test/learn/1/full-reading',
+    expect(buildLessonQrValue(origin, 1, 'lesson-intro')).toBe('https://staging.example.test/learn/1/lesson-intro');
+    expect(buildLessonQrValue(origin, 1, 'key-passage-reading')).toBe(
+      'https://staging.example.test/learn/1/key-passage-reading',
     );
   });
 
@@ -423,8 +423,8 @@ describe('#2622 QR 交付表', () => {
     // lesson, so both codes belong on the same line.
     expect(rows).toHaveLength(2);
     expect(rows[0].lesson_no).toBe('L01');
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
-    expect(rows[0].passage_url).toBe('https://x.test/learn/1/full-reading');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/lesson-intro');
+    expect(rows[0].passage_url).toBe('https://x.test/learn/1/key-passage-reading');
     // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
     // (has_key_reading=false), so the batch produces no passage clip for it.
     // Both columns are therefore blank — a 段落 code here would point at a
@@ -504,12 +504,12 @@ describe('#2626 只有 4-7 年級交付全文', () => {
       { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true },
     ] as never, 'https://x.test');
 
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/lesson-intro');
     expect(rows[1].full_url).toBe('');
     // Positive control: this G8 lesson DOES have a 念順順段
     // (has_key_reading=true), so its 段落 code must survive even though 全文
     // is blank. Passage now gates on has_key_reading, not on grade.
-    expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
+    expect(rows[1].passage_url).toBe('https://x.test/learn/2/key-passage-reading');
   });
 });
 
@@ -533,7 +533,7 @@ describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => 
     ] as never, 'https://x.test');
 
     // Positive control — a lesson with a passage still gets its 段落 code.
-    expect(rows[0].passage_url).toBe('https://x.test/learn/10/full-reading');
+    expect(rows[0].passage_url).toBe('https://x.test/learn/10/key-passage-reading');
     // The fix — a lesson without one does not.
     expect(rows[1].passage_url).toBe('');
   });

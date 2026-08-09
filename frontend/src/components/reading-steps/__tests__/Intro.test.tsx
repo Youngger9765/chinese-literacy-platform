@@ -37,8 +37,8 @@ vi.mock('../../../hooks/useFocusTrap', () => ({
 
 vi.mock('../../../config/stepConfig', () => ({
   resolveActiveSteps: () => [
-    { id: 'reading-annotation', label: '做記號' },
-    { id: 'tutor', label: '逐段朗讀' },
+    { id: 'full-text-annotate', label: '做記號' },
+    { id: 'paragraph-reading', label: '逐段朗讀' },
   ],
 }));
 

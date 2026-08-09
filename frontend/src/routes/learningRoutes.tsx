@@ -64,19 +64,19 @@ const SentencePracticePage    = lazy(() => import('../pages/learning/SentencePra
 type LazyPage = React.LazyExoticComponent<React.ComponentType>;
 
 const STEP_PAGE_MAP: Record<string, LazyPage> = {
-  'intro':                 IntroPage,
-  'reading-annotation':    ReadingAnnotationPage,
-  'tutor':                 TutorPage,
-  'full-reading':          FullReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
+  'lesson-intro':                 IntroPage,
+  'full-text-annotate':    ReadingAnnotationPage,
+  'paragraph-reading':                 TutorPage,
+  'key-passage-reading':          FullReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
   'listening':             ListeningPage,
-  'vocab':                 VocabPage,
+  'character-practice':                 VocabPage,
   'vocab-definition':      VocabDefinitionMatchPage,
   'vocab-application':     VocabApplicationPage,
-  'story-structure':       StoryStructurePage,
-  'reading-strategy':      StrategyExercisePage,
+  'keypoints-table':       StoryStructurePage,
+  'spotlight':      StrategyExercisePage,
   'sentence-practice':     SentencePracticePage,
   'comprehension':         ComprehensionMcqPage,
-  'vocab-word-search':     VocabWordSearchPage,
+  'vocab-review':     VocabWordSearchPage,
   'dictation':             DictationPage,
   'knowledge-station':     KnowledgeStationPage,
   'report':                ReportPage,
@@ -120,7 +120,7 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
   const step = STEP_REGISTRY[stepId];
 
   if (step && !step.enabled) {
-    const fallbackId = resolveActiveSteps()[0]?.id ?? 'reading-annotation';
+    const fallbackId = resolveActiveSteps()[0]?.id ?? 'full-text-annotate';
     return <Navigate to={`/learn/${storyId ?? ''}/${fallbackId}`} replace />;
   }
 

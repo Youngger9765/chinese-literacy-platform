@@ -34,7 +34,7 @@ interface FullReadingProps {
   initialResult?: FullReadingResult | null;
   /** All reading attempts for this session from DB (Issue #1386 — 4-attempt progress chart). */
   fullReadingAttempts?: FullReadingAttempt[];
-  /** Full step_data['full-reading'] snapshot from DB (Issue #1549) — provides selfRating + transcript. */
+  /** Full step_data['key-passage-reading'] snapshot from DB (Issue #1549) — provides selfRating + transcript. */
   initialProgress?: FullReadingStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
   onProgressChange?: (stepData: FullReadingStepData, immediate?: boolean) => void;

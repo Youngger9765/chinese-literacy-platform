@@ -4,7 +4,7 @@
  * Scenario: 單段課 +「再讀一次」.
  * Two things must happen when the student clicks「再讀一次」on a completed lesson:
  *  1. onResetTutor() is invoked — the cross-layer full reset (DB step_data.tutor,
- *     steps_completed 'tutor', session.readingAttempt, completedParagraphsSet, …) that
+ *     steps_completed 'paragraph-reading', session.readingAttempt, completedParagraphsSet, …) that
  *     stops the round-trip / reload from resurrecting old 成績. (資料清除本體在
  *     useStepProgressPersistence.resetTutorStep，另有專屬 hook 測試守著。)
  *  2. The stale 朗讀對照 diff is cleared. For a single-paragraph lesson currentLineIndex

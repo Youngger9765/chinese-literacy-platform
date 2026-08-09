@@ -19,9 +19,9 @@ const VocabPage: React.FC = () => {
   const handleProgressChange = useCallback(
     (stepData: VocabStepData, immediate = false) => {
       saveStepProgressPatch({
-        stepId: 'vocab',
+        stepId: 'character-practice',
         stepData,
-        currentStep: 'vocab',
+        currentStep: 'character-practice',
         immediate,
       });
     },

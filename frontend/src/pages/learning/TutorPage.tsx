@@ -22,9 +22,9 @@ const TutorPage: React.FC = () => {
   const handleProgressChange = useCallback(
     (stepData: TutorStepData, immediate = false) => {
       saveStepProgressPatch({
-        stepId: 'tutor',
+        stepId: 'paragraph-reading',
         stepData,
-        currentStep: 'tutor',
+        currentStep: 'paragraph-reading',
         immediate,
       });
     },
