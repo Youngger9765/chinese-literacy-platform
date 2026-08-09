@@ -479,8 +479,13 @@ const LessonAudioTable: React.FC = () => {
     }
   }, [sortedStories]);
 
+  // Which paragraph of a whole-lesson walk plays next. Null when idle or when
+  // playing a key passage (which is a single clip, not a walk).
+  const paragraphQueueRef = useRef<{ storyId: number; total: number; next: number; requestId: number } | null>(null);
+
   const stopCurrentPlayback = useCallback(() => {
     activeRequestRef.current += 1;
+    paragraphQueueRef.current = null;
     stopTts();
     // Belt and braces: pause the element directly as well.
     //
@@ -533,13 +538,35 @@ const LessonAudioTable: React.FC = () => {
     try {
       const detail = await fetchStoryDetail(story.id, token);
       if (activeRequestRef.current !== requestId) return; // superseded by a later click
+      const paragraphs = detail.paragraphs ?? detail.content ?? [];
       const fullText = detailToFullText(detail);
-      const text = mode === 'key' ? (detail.key_reading?.passage || fullText) : fullText;
       setIsFetchingDetail(false);
-      // Use sentence-level playback (lessonId + paragraphIdx) so the first
-      // sentence starts in ~150ms instead of waiting ~10s for the entire text
-      // to synthesize as one blob. (#2627)
-      speakText(text, story.id, 0);
+
+      if (mode === 'key') {
+        // The key passage is its own text, not a paragraph of the lesson, so it
+        // must go through the single-shot path. Passing a paragraph index here
+        // is what made 「播放段落」 read paragraph 0 instead — the hook prefers
+        // the backend's cached sentences for that index and drops the text.
+        speakText(detail.key_reading?.passage || fullText);
+        return;
+      }
+
+      // Whole lesson: walk the paragraphs.
+      //
+      // speakText(text, lessonId, paragraphIdx) plays exactly ONE paragraph —
+      // there is no whole-lesson mode in the hook. This previously passed a
+      // hardcoded 0, so 「播放全文」 read 76 of lesson 1's 711 characters and
+      // stopped, which also made it indistinguishable from 「播放段落」.
+      //
+      // The walk is worth keeping over one big synthesis: each paragraph hits
+      // the backend's per-sentence cache, so the first words start in ~150ms
+      // rather than after a ~10s synthesis of the entire text.
+      if (paragraphs.length === 0) {
+        speakText(fullText);
+        return;
+      }
+      paragraphQueueRef.current = { storyId: story.id, total: paragraphs.length, next: 1, requestId };
+      speakText(paragraphs[0], story.id, 0);
     } catch (err) {
       if (activeRequestRef.current !== requestId) return;
       setIsFetchingDetail(false);
@@ -561,6 +588,40 @@ const LessonAudioTable: React.FC = () => {
       started.clear();
     };
   }, []);
+
+  // Advance the whole-lesson walk when a paragraph finishes.
+  //
+  // The hook reports playback through isTtsSpeaking/isTtsLoading; a paragraph is
+  // done when both fall back to false while a queue is still pending. There is
+  // no per-clip completion callback to hook into, so this watches the state the
+  // hook already publishes.
+  const wasPlayingRef = useRef(false);
+  useEffect(() => {
+    const busy = isTtsSpeaking || isTtsLoading;
+    const justFinished = wasPlayingRef.current && !busy;
+    wasPlayingRef.current = busy;
+    if (!justFinished) return;
+
+    const q = paragraphQueueRef.current;
+    // A newer click supersedes the walk — activeRequestRef moves on every
+    // play and every stop, so a stale queue can never resume over a new clip.
+    if (!q || q.requestId !== activeRequestRef.current) return;
+
+    if (q.next >= q.total) {
+      paragraphQueueRef.current = null;
+      setActiveKey(null);
+      return;
+    }
+    const idx = q.next;
+    q.next += 1;
+    fetchStoryDetail(q.storyId, token)
+      .then((d) => {
+        if (paragraphQueueRef.current?.requestId !== activeRequestRef.current) return;
+        const ps = d.paragraphs ?? d.content ?? [];
+        if (ps[idx]) speakText(ps[idx], q.storyId, idx);
+      })
+      .catch(() => { paragraphQueueRef.current = null; });
+  }, [isTtsSpeaking, isTtsLoading, speakText, token]);
 
   useEffect(() => {
     loadStories();

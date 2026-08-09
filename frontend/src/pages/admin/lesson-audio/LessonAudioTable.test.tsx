@@ -555,3 +555,73 @@ describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => 
     expect(passageCodes).toBe(2);
   });
 });
+describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
+  /**
+   * `speakText(text, lessonId, paragraphIdx)` plays ONE paragraph: given a
+   * lessonId and an index, the hook prefers the backend's cached sentences for
+   * that paragraph and ignores the `text` argument entirely.
+   *
+   * The admin panel passed a hardcoded 0, so 「播放全文」 read paragraph 0 —
+   * 76 of lesson 1's 711 characters — and 「播放段落」 was overridden to the
+   * same paragraph, which is why both buttons sounded identical.
+   *
+   * There is no whole-lesson playback in the hook. The component has to walk
+   * the paragraphs itself.
+   */
+  it('walks every paragraph for 全文, not just index 0', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher((id) => ({
+      paragraphs: [`p0-of-${id}`, `p1-of-${id}`, `p2-of-${id}`],
+      key_reading: { passage: `key-of-${id}` },
+    }));
+    mockTts();
+
+    const { rerender } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: /播放全文/ }));
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
+    expect(mockSpeakText.mock.calls[0]).toEqual(['p0-of-1', 1, 0]);
+
+    // Paragraph 0 starts, then finishes: the hook reports speaking, then idle.
+    // The component must pick that up and play paragraph 1 — an earlier version
+    // stopped here, reading 76 of the lesson's 711 characters.
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    mockTts();
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(2));
+    expect(mockSpeakText.mock.calls[1]).toEqual(['p1-of-1', 1, 1]);
+
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    mockTts();
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(3));
+    expect(mockSpeakText.mock.calls[2]).toEqual(['p2-of-1', 1, 2]);
+  });
+
+  it('段落 uses the key passage, not paragraph 0', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher((id) => ({
+      paragraphs: [`p0-of-${id}`, `p1-of-${id}`],
+      key_reading: { passage: `THE-KEY-PASSAGE-${id}` },
+    }));
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: /播放段落/ }));
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalled());
+    const [text, , idx] = mockSpeakText.mock.calls[0];
+    expect(text).toContain('THE-KEY-PASSAGE-1');
+    // A paragraph index would make the hook ignore the passage text entirely.
+    expect(idx).toBeUndefined();
+  });
+});
