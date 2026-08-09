@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import json
+import logging
 import re
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +55,42 @@ PHONEME_CORRECTIONS: list[tuple[str, str]] = [
         '<sub alias="打得漂亮">打得漂亮</sub>',
     ),
 ]
+
+
+def _load_taiwan_corrections() -> list[tuple[str, str]]:
+    """Generated Taiwan-reading corrections from the MOE dictionary.
+
+    The hand-maintained list above is four entries added one at a time as
+    someone happened to hear a mistake. That does not converge: the 2026-05-01
+    expert review's audit found 4298 items needing review across 31 characters
+    and 22 were ever fixed, and the four cases reported on 2026-08-09 were none
+    of them in the table.
+
+    These entries are derived instead: segment the corpus, look each word up in
+    教育部《重編國語辭典修訂本》, compare against pypinyin's mainland reading, and
+    for each differing syllable pick a character whose only reading is the
+    Taiwanese one. Adding coverage means regenerating the file, not appending
+    another tuple here.
+
+    Missing or malformed file degrades to the hand-maintained entries rather
+    than failing synthesis — a pronunciation nicety must never take down TTS.
+    """
+    path = Path(__file__).resolve().parents[3] / "data" / "tts" / "taiwan_pronunciation.json"
+    try:
+        rows = json.loads(path.read_text(encoding="utf-8"))["corrections"]
+    except (OSError, ValueError, KeyError) as exc:  # pragma: no cover
+        logger.warning("Taiwan pronunciation data unavailable (%s); using built-ins only", exc)
+        return []
+    return [(r["word"], f'<sub alias="{r["alias"]}">{r["word"]}</sub>') for r in rows]
+
+
+# Longest first: _apply_phoneme_corrections scans left to right and takes the
+# first match, so a shorter key that is a prefix of a longer one would win and
+# leave the rest of the longer phrase uncorrected.
+PHONEME_CORRECTIONS = sorted(
+    PHONEME_CORRECTIONS + _load_taiwan_corrections(),
+    key=lambda kv: -len(kv[0]),
+)
 
 _PHONEME_CORRECTIONS = PHONEME_CORRECTIONS
 

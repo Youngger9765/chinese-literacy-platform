@@ -1,0 +1,1265 @@
+{
+  "_source": "教育部《重編國語辭典修訂本》· g0v/moedict-data · CC BY-ND 3.0 TW",
+  "_method": "jieba 斷詞 → 教育部注音 vs pypinyin(大陸) 比對聲韻 → 自動生成同音單讀字 alias",
+  "_excluded": [
+    "似的",
+    "它們",
+    "類似"
+  ],
+  "_excluded_reason": "教育部收錄古音或兩讀皆通，現代課文語境不需校正",
+  "_verified": "6/6 抽樣送 Azure 實測 HTTP 200 且音檔 md5 改變",
+  "_generated": "2026-08-10",
+  "corrections": [
+    {
+      "word": "音樂",
+      "alias": "音岳",
+      "tw": "yin yue",
+      "cn": "yin le",
+      "sentences": 13,
+      "changed": [
+        [
+          "樂",
+          "岳",
+          "yue4"
+        ]
+      ]
+    },
+    {
+      "word": "仔細",
+      "alias": "姊細",
+      "tw": "zi xi",
+      "cn": "zai xi",
+      "sentences": 12,
+      "changed": [
+        [
+          "仔",
+          "姊",
+          "zi3"
+        ]
+      ]
+    },
+    {
+      "word": "穿著",
+      "alias": "穿灼",
+      "tw": "chuan zhuo",
+      "cn": "chuan zhu",
+      "sentences": 9,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "調整",
+      "alias": "迢整",
+      "tw": "tiao zheng",
+      "cn": "diao zheng",
+      "sentences": 9,
+      "changed": [
+        [
+          "調",
+          "迢",
+          "tiao2"
+        ]
+      ]
+    },
+    {
+      "word": "露出",
+      "alias": "陋出",
+      "tw": "lou chu",
+      "cn": "lu chu",
+      "sentences": 9,
+      "changed": [
+        [
+          "露",
+          "陋",
+          "lou4"
+        ]
+      ]
+    },
+    {
+      "word": "銀行",
+      "alias": "銀航",
+      "tw": "yin hang",
+      "cn": "yin xing",
+      "sentences": 8,
+      "changed": [
+        [
+          "行",
+          "航",
+          "hang2"
+        ]
+      ]
+    },
+    {
+      "word": "癌症",
+      "alias": "延症",
+      "tw": "yan zheng",
+      "cn": "ai zheng",
+      "sentences": 6,
+      "changed": [
+        [
+          "癌",
+          "延",
+          "yan2"
+        ]
+      ]
+    },
+    {
+      "word": "彈性",
+      "alias": "痰性",
+      "tw": "tan xing",
+      "cn": "dan xing",
+      "sentences": 6,
+      "changed": [
+        [
+          "彈",
+          "痰",
+          "tan2"
+        ]
+      ]
+    },
+    {
+      "word": "乾淨",
+      "alias": "尷淨",
+      "tw": "gan jing",
+      "cn": "qian jing",
+      "sentences": 6,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "供給",
+      "alias": "供擠",
+      "tw": "gong ji",
+      "cn": "gong gei",
+      "sentences": 6,
+      "changed": [
+        [
+          "給",
+          "擠",
+          "ji3"
+        ]
+      ]
+    },
+    {
+      "word": "暫時",
+      "alias": "戰時",
+      "tw": "zhan shi",
+      "cn": "zan shi",
+      "sentences": 6,
+      "changed": [
+        [
+          "暫",
+          "戰",
+          "zhan4"
+        ]
+      ]
+    },
+    {
+      "word": "擅長",
+      "alias": "擅腸",
+      "tw": "shan chang",
+      "cn": "shan zhang",
+      "sentences": 5,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "餅乾",
+      "alias": "餅尷",
+      "tw": "bing gan",
+      "cn": "bing qian",
+      "sentences": 5,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "細長",
+      "alias": "細腸",
+      "tw": "xi chang",
+      "cn": "xi zhang",
+      "sentences": 5,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "給予",
+      "alias": "擠予",
+      "tw": "ji yu",
+      "cn": "gei yu",
+      "sentences": 4,
+      "changed": [
+        [
+          "給",
+          "擠",
+          "ji3"
+        ]
+      ]
+    },
+    {
+      "word": "乾燥",
+      "alias": "尷燥",
+      "tw": "gan zao",
+      "cn": "qian zao",
+      "sentences": 4,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "發酵",
+      "alias": "發笑",
+      "tw": "fa xiao",
+      "cn": "fa jiao",
+      "sentences": 4,
+      "changed": [
+        [
+          "酵",
+          "笑",
+          "xiao4"
+        ]
+      ]
+    },
+    {
+      "word": "調味料",
+      "alias": "迢味料",
+      "tw": "tiao wei liao",
+      "cn": "diao wei liao",
+      "sentences": 3,
+      "changed": [
+        [
+          "調",
+          "迢",
+          "tiao2"
+        ]
+      ]
+    },
+    {
+      "word": "不給",
+      "alias": "不擠",
+      "tw": "bu ji",
+      "cn": "bu gei",
+      "sentences": 3,
+      "changed": [
+        [
+          "給",
+          "擠",
+          "ji3"
+        ]
+      ]
+    },
+    {
+      "word": "豬圈",
+      "alias": "豬倦",
+      "tw": "zhu juan",
+      "cn": "zhu quan",
+      "sentences": 3,
+      "changed": [
+        [
+          "圈",
+          "倦",
+          "juan4"
+        ]
+      ]
+    },
+    {
+      "word": "蛻變",
+      "alias": "睡變",
+      "tw": "shui bian",
+      "cn": "tui bian",
+      "sentences": 3,
+      "changed": [
+        [
+          "蛻",
+          "睡",
+          "shui4"
+        ]
+      ]
+    },
+    {
+      "word": "漫長",
+      "alias": "漫腸",
+      "tw": "man chang",
+      "cn": "man zhang",
+      "sentences": 2,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "執著",
+      "alias": "執灼",
+      "tw": "zhi zhuo",
+      "cn": "zhi zhu",
+      "sentences": 2,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "沉著",
+      "alias": "沉灼",
+      "tw": "chen zhuo",
+      "cn": "chen zhu",
+      "sentences": 2,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "滑稽",
+      "alias": "股稽",
+      "tw": "gu ji",
+      "cn": "hua ji",
+      "sentences": 2,
+      "changed": [
+        [
+          "滑",
+          "股",
+          "gu3"
+        ]
+      ]
+    },
+    {
+      "word": "午覺",
+      "alias": "午叫",
+      "tw": "wu jiao",
+      "cn": "wu jue",
+      "sentences": 2,
+      "changed": [
+        [
+          "覺",
+          "叫",
+          "jiao4"
+        ]
+      ]
+    },
+    {
+      "word": "寶藏",
+      "alias": "寶葬",
+      "tw": "bao zang",
+      "cn": "bao cang",
+      "sentences": 2,
+      "changed": [
+        [
+          "藏",
+          "葬",
+          "zang4"
+        ]
+      ]
+    },
+    {
+      "word": "特徵",
+      "alias": "特征",
+      "tw": "te zheng",
+      "cn": "te zhi",
+      "sentences": 2,
+      "changed": [
+        [
+          "徵",
+          "征",
+          "zheng1"
+        ]
+      ]
+    },
+    {
+      "word": "沒收",
+      "alias": "寞收",
+      "tw": "mo shou",
+      "cn": "mei shou",
+      "sentences": 2,
+      "changed": [
+        [
+          "沒",
+          "寞",
+          "mo4"
+        ]
+      ]
+    },
+    {
+      "word": "重重的",
+      "alias": "眾眾的",
+      "tw": "zhong zhong de",
+      "cn": "chong chong de",
+      "sentences": 2,
+      "changed": [
+        [
+          "重",
+          "眾",
+          "zhong4"
+        ],
+        [
+          "重",
+          "眾",
+          "zhong4"
+        ]
+      ]
+    },
+    {
+      "word": "囊括",
+      "alias": "囊瓜",
+      "tw": "nang gua",
+      "cn": "nang kuo",
+      "sentences": 2,
+      "changed": [
+        [
+          "括",
+          "瓜",
+          "gua1"
+        ]
+      ]
+    },
+    {
+      "word": "靦腆",
+      "alias": "勉腆",
+      "tw": "mian tian",
+      "cn": "tian tian",
+      "sentences": 2,
+      "changed": [
+        [
+          "靦",
+          "勉",
+          "mian3"
+        ]
+      ]
+    },
+    {
+      "word": "枯乾",
+      "alias": "枯尷",
+      "tw": "ku gan",
+      "cn": "ku qian",
+      "sentences": 2,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "調停",
+      "alias": "迢停",
+      "tw": "tiao ting",
+      "cn": "diao ting",
+      "sentences": 2,
+      "changed": [
+        [
+          "調",
+          "迢",
+          "tiao2"
+        ]
+      ]
+    },
+    {
+      "word": "恐嚇",
+      "alias": "恐賀",
+      "tw": "kong he",
+      "cn": "kong xia",
+      "sentences": 2,
+      "changed": [
+        [
+          "嚇",
+          "賀",
+          "he4"
+        ]
+      ]
+    },
+    {
+      "word": "說服",
+      "alias": "睡服",
+      "tw": "shui fu",
+      "cn": "shuo fu",
+      "sentences": 2,
+      "changed": [
+        [
+          "說",
+          "睡",
+          "shui4"
+        ]
+      ]
+    },
+    {
+      "word": "端的",
+      "alias": "端蒂",
+      "tw": "duan di",
+      "cn": "duan de",
+      "sentences": 2,
+      "changed": [
+        [
+          "的",
+          "蒂",
+          "di4"
+        ]
+      ]
+    },
+    {
+      "word": "暴露",
+      "alias": "舖露",
+      "tw": "pu lu",
+      "cn": "bao lu",
+      "sentences": 2,
+      "changed": [
+        [
+          "暴",
+          "舖",
+          "pu4"
+        ]
+      ]
+    },
+    {
+      "word": "著眼",
+      "alias": "灼眼",
+      "tw": "zhuo yan",
+      "cn": "zhu yan",
+      "sentences": 2,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "賞賜",
+      "alias": "賞飼",
+      "tw": "shang si",
+      "cn": "shang ci",
+      "sentences": 2,
+      "changed": [
+        [
+          "賜",
+          "飼",
+          "si4"
+        ]
+      ]
+    },
+    {
+      "word": "專長",
+      "alias": "專腸",
+      "tw": "zhuan chang",
+      "cn": "zhuan zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "彈跳",
+      "alias": "痰跳",
+      "tw": "tan tiao",
+      "cn": "dan tiao",
+      "sentences": 1,
+      "changed": [
+        [
+          "彈",
+          "痰",
+          "tan2"
+        ]
+      ]
+    },
+    {
+      "word": "一技之長",
+      "alias": "一技之腸",
+      "tw": "yi ji zhi chang",
+      "cn": "yi ji zhi zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "著落",
+      "alias": "灼落",
+      "tw": "zhuo luo",
+      "cn": "zhu luo",
+      "sentences": 1,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "彈力",
+      "alias": "痰力",
+      "tw": "tan li",
+      "cn": "dan li",
+      "sentences": 1,
+      "changed": [
+        [
+          "彈",
+          "痰",
+          "tan2"
+        ]
+      ]
+    },
+    {
+      "word": "重整",
+      "alias": "崇整",
+      "tw": "chong zheng",
+      "cn": "zhong zheng",
+      "sentences": 1,
+      "changed": [
+        [
+          "重",
+          "崇",
+          "chong2"
+        ]
+      ]
+    },
+    {
+      "word": "混淆",
+      "alias": "混遙",
+      "tw": "hun yao",
+      "cn": "hun xiao",
+      "sentences": 1,
+      "changed": [
+        [
+          "淆",
+          "遙",
+          "yao2"
+        ]
+      ]
+    },
+    {
+      "word": "震懾",
+      "alias": "震轍",
+      "tw": "zhen zhe",
+      "cn": "zhen she",
+      "sentences": 1,
+      "changed": [
+        [
+          "懾",
+          "轍",
+          "zhe2"
+        ]
+      ]
+    },
+    {
+      "word": "柏樹",
+      "alias": "搏樹",
+      "tw": "bo shu",
+      "cn": "bai shu",
+      "sentences": 1,
+      "changed": [
+        [
+          "柏",
+          "搏",
+          "bo2"
+        ]
+      ]
+    },
+    {
+      "word": "削瘦",
+      "alias": "消瘦",
+      "tw": "xiao shou",
+      "cn": "xue shou",
+      "sentences": 1,
+      "changed": [
+        [
+          "削",
+          "消",
+          "xiao1"
+        ]
+      ]
+    },
+    {
+      "word": "胃癌",
+      "alias": "胃延",
+      "tw": "wei yan",
+      "cn": "wei ai",
+      "sentences": 1,
+      "changed": [
+        [
+          "癌",
+          "延",
+          "yan2"
+        ]
+      ]
+    },
+    {
+      "word": "深長",
+      "alias": "深腸",
+      "tw": "shen chang",
+      "cn": "shen zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "著衣",
+      "alias": "灼衣",
+      "tw": "zhuo yi",
+      "cn": "zhu yi",
+      "sentences": 1,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "賈人",
+      "alias": "股人",
+      "tw": "gu ren",
+      "cn": "jia ren",
+      "sentences": 1,
+      "changed": [
+        [
+          "賈",
+          "股",
+          "gu3"
+        ]
+      ]
+    },
+    {
+      "word": "搖曳",
+      "alias": "搖亦",
+      "tw": "yao yi",
+      "cn": "yao ye",
+      "sentences": 1,
+      "changed": [
+        [
+          "曳",
+          "亦",
+          "yi4"
+        ]
+      ]
+    },
+    {
+      "word": "乾爽",
+      "alias": "尷爽",
+      "tw": "gan shuang",
+      "cn": "qian shuang",
+      "sentences": 1,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "調侃",
+      "alias": "迢侃",
+      "tw": "tiao kan",
+      "cn": "diao kan",
+      "sentences": 1,
+      "changed": [
+        [
+          "調",
+          "迢",
+          "tiao2"
+        ]
+      ]
+    },
+    {
+      "word": "蠕動",
+      "alias": "軟動",
+      "tw": "ruan dong",
+      "cn": "ru dong",
+      "sentences": 1,
+      "changed": [
+        [
+          "蠕",
+          "軟",
+          "ruan3"
+        ]
+      ]
+    },
+    {
+      "word": "的確",
+      "alias": "敵確",
+      "tw": "di que",
+      "cn": "de que",
+      "sentences": 1,
+      "changed": [
+        [
+          "的",
+          "敵",
+          "di2"
+        ]
+      ]
+    },
+    {
+      "word": "多重",
+      "alias": "多崇",
+      "tw": "duo chong",
+      "cn": "duo zhong",
+      "sentences": 1,
+      "changed": [
+        [
+          "重",
+          "崇",
+          "chong2"
+        ]
+      ]
+    },
+    {
+      "word": "覆轍",
+      "alias": "覆澈",
+      "tw": "fu che",
+      "cn": "fu zhe",
+      "sentences": 1,
+      "changed": [
+        [
+          "轍",
+          "澈",
+          "che4"
+        ]
+      ]
+    },
+    {
+      "word": "故技重施",
+      "alias": "故技崇施",
+      "tw": "gu ji chong shi",
+      "cn": "gu ji zhong shi",
+      "sentences": 1,
+      "changed": [
+        [
+          "重",
+          "崇",
+          "chong2"
+        ]
+      ]
+    },
+    {
+      "word": "特長",
+      "alias": "特腸",
+      "tw": "te chang",
+      "cn": "te zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "蝸牛",
+      "alias": "瓜牛",
+      "tw": "gua niu",
+      "cn": "wo niu",
+      "sentences": 1,
+      "changed": [
+        [
+          "蝸",
+          "瓜",
+          "gua1"
+        ]
+      ]
+    },
+    {
+      "word": "狹長",
+      "alias": "狹腸",
+      "tw": "xia chang",
+      "cn": "xia zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "軍樂",
+      "alias": "軍岳",
+      "tw": "jun yue",
+      "cn": "jun le",
+      "sentences": 1,
+      "changed": [
+        [
+          "樂",
+          "岳",
+          "yue4"
+        ]
+      ]
+    },
+    {
+      "word": "屏氣",
+      "alias": "餅氣",
+      "tw": "bing qi",
+      "cn": "ping qi",
+      "sentences": 1,
+      "changed": [
+        [
+          "屏",
+          "餅",
+          "bing3"
+        ]
+      ]
+    },
+    {
+      "word": "樂章",
+      "alias": "岳章",
+      "tw": "yue zhang",
+      "cn": "le zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "樂",
+          "岳",
+          "yue4"
+        ]
+      ]
+    },
+    {
+      "word": "著手",
+      "alias": "灼手",
+      "tw": "zhuo shou",
+      "cn": "zhu shou",
+      "sentences": 1,
+      "changed": [
+        [
+          "著",
+          "灼",
+          "zhuo2"
+        ]
+      ]
+    },
+    {
+      "word": "協調",
+      "alias": "協迢",
+      "tw": "xie tiao",
+      "cn": "xie diao",
+      "sentences": 1,
+      "changed": [
+        [
+          "調",
+          "迢",
+          "tiao2"
+        ]
+      ]
+    },
+    {
+      "word": "藤蔓",
+      "alias": "藤曼",
+      "tw": "teng man",
+      "cn": "teng wan",
+      "sentences": 1,
+      "changed": [
+        [
+          "蔓",
+          "曼",
+          "man4"
+        ]
+      ]
+    },
+    {
+      "word": "修長",
+      "alias": "修腸",
+      "tw": "xiu chang",
+      "cn": "xiu zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "身長",
+      "alias": "身腸",
+      "tw": "shen chang",
+      "cn": "shen zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "長蟲",
+      "alias": "腸蟲",
+      "tw": "chang chong",
+      "cn": "zhang chong",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "拉長",
+      "alias": "拉腸",
+      "tw": "la chang",
+      "cn": "la zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "大廈",
+      "alias": "大下",
+      "tw": "da xia",
+      "cn": "da sha",
+      "sentences": 1,
+      "changed": [
+        [
+          "廈",
+          "下",
+          "xia4"
+        ]
+      ]
+    },
+    {
+      "word": "嚇阻",
+      "alias": "賀阻",
+      "tw": "he zu",
+      "cn": "xia zu",
+      "sentences": 1,
+      "changed": [
+        [
+          "嚇",
+          "賀",
+          "he4"
+        ]
+      ]
+    },
+    {
+      "word": "匱乏",
+      "alias": "愧乏",
+      "tw": "kui fa",
+      "cn": "gui fa",
+      "sentences": 1,
+      "changed": [
+        [
+          "匱",
+          "愧",
+          "kui4"
+        ]
+      ]
+    },
+    {
+      "word": "顫抖",
+      "alias": "戰抖",
+      "tw": "zhan dou",
+      "cn": "chan dou",
+      "sentences": 1,
+      "changed": [
+        [
+          "顫",
+          "戰",
+          "zhan4"
+        ]
+      ]
+    },
+    {
+      "word": "乾脆",
+      "alias": "尷脆",
+      "tw": "gan cui",
+      "cn": "qian cui",
+      "sentences": 1,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "乾旱",
+      "alias": "尷旱",
+      "tw": "gan han",
+      "cn": "qian han",
+      "sentences": 1,
+      "changed": [
+        [
+          "乾",
+          "尷",
+          "gan1"
+        ]
+      ]
+    },
+    {
+      "word": "秘魯",
+      "alias": "碧魯",
+      "tw": "bi lu",
+      "cn": "mi lu",
+      "sentences": 1,
+      "changed": [
+        [
+          "秘",
+          "碧",
+          "bi4"
+        ]
+      ]
+    },
+    {
+      "word": "攜帶",
+      "alias": "醯帶",
+      "tw": "xi dai",
+      "cn": "xie dai",
+      "sentences": 1,
+      "changed": [
+        [
+          "攜",
+          "醯",
+          "xi1"
+        ]
+      ]
+    },
+    {
+      "word": "延長",
+      "alias": "延腸",
+      "tw": "yan chang",
+      "cn": "yan zhang",
+      "sentences": 1,
+      "changed": [
+        [
+          "長",
+          "腸",
+          "chang2"
+        ]
+      ]
+    },
+    {
+      "word": "重疊",
+      "alias": "崇疊",
+      "tw": "chong die",
+      "cn": "zhong die",
+      "sentences": 1,
+      "changed": [
+        [
+          "重",
+          "崇",
+          "chong2"
+        ]
+      ]
+    },
+    {
+      "word": "一轍",
+      "alias": "一澈",
+      "tw": "yi che",
+      "cn": "yi zhe",
+      "sentences": 1,
+      "changed": [
+        [
+          "轍",
+          "澈",
+          "che4"
+        ]
+      ]
+    },
+    {
+      "word": "樂曲",
+      "alias": "岳曲",
+      "tw": "yue qu",
+      "cn": "le qu",
+      "sentences": 1,
+      "changed": [
+        [
+          "樂",
+          "岳",
+          "yue4"
+        ]
+      ]
+    },
+    {
+      "word": "強勁",
+      "alias": "強逕",
+      "tw": "qiang jing",
+      "cn": "qiang jin",
+      "sentences": 1,
+      "changed": [
+        [
+          "勁",
+          "逕",
+          "jing4"
+        ]
+      ]
+    },
+    {
+      "word": "縝密",
+      "alias": "診密",
+      "tw": "zhen mi",
+      "cn": "chen mi",
+      "sentences": 1,
+      "changed": [
+        [
+          "縝",
+          "診",
+          "zhen3"
+        ]
+      ]
+    }
+  ]
+}
