@@ -170,7 +170,7 @@ describe('LessonAudioTable', () => {
   it('builds QR values for intro and full-reading lesson routes', () => {
     const origin = 'https://staging.example.test';
 
-    expect(buildLessonQrValue(origin, 1, 'lesson-intro')).toBe('https://staging.example.test/learn/1/lesson-intro');
+    expect(buildLessonQrValue(origin, 1, 'full-text-annotate')).toBe('https://staging.example.test/learn/1/full-text-annotate');
     expect(buildLessonQrValue(origin, 1, 'key-passage-reading')).toBe(
       'https://staging.example.test/learn/1/key-passage-reading',
     );
@@ -423,7 +423,7 @@ describe('#2622 QR 交付表', () => {
     // lesson, so both codes belong on the same line.
     expect(rows).toHaveLength(2);
     expect(rows[0].lesson_no).toBe('L01');
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/lesson-intro');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
     expect(rows[0].passage_url).toBe('https://x.test/learn/1/key-passage-reading');
     // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
     // (has_key_reading=false), so the batch produces no passage clip for it.
@@ -504,7 +504,7 @@ describe('#2626 只有 4-7 年級交付全文', () => {
       { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true },
     ] as never, 'https://x.test');
 
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/lesson-intro');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
     expect(rows[1].full_url).toBe('');
     // Positive control: this G8 lesson DOES have a 念順順段
     // (has_key_reading=true), so its 段落 code must survive even though 全文
@@ -623,5 +623,42 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     expect(text).toContain('THE-KEY-PASSAGE-1');
     // A paragraph index would make the hook ignore the passage text entirely.
     expect(idx).toBeUndefined();
+  });
+});
+
+
+describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
+  /**
+   * The 「全文」 QR pointed at lesson-intro, the 課程簡介 step, because when it
+   * was built no step was named for whole-text reading — `full-reading` was
+   * taken and read a single key passage. #2641 renamed the ids and made the
+   * real one visible: `full-text-annotate` (讀全文-做記號) renders story.content
+   * in full, and its hint says 閱讀全文.
+   *
+   * A student scanning the 全文 code landed on the lesson blurb instead of the
+   * text. Reported as 「QR code全文朗讀的部分會進到課程簡介」.
+   */
+  it('encodes full-text-annotate, not lesson-intro', () => {
+    const origin = 'https://x.test';
+    expect(buildLessonQrValue(origin, 7, 'full-text-annotate')).toBe(
+      'https://x.test/learn/7/full-text-annotate',
+    );
+  });
+
+  it('the 全文 column renders a QR for the whole-text step', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    const titles = within(row)
+      .getAllByRole('button', { name: 'QR' })
+      .map((b) => b.getAttribute('title'));
+
+    expect(titles.some((t) => t?.endsWith('/full-text-annotate'))).toBe(true);
+    expect(titles.some((t) => t?.endsWith('/lesson-intro'))).toBe(false);
   });
 });
