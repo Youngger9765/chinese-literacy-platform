@@ -12,7 +12,14 @@ import { planParagraphWalk, type ParagraphWalk } from './paragraphWalk';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-type LessonQrStep = 'lesson-intro' | 'key-passage-reading';
+// The 全文 code points at full-text-annotate, not lesson-intro.
+//
+// lesson-intro is the 課程簡介 blurb; full-text-annotate (讀全文-做記號) is the
+// step that renders story.content in full. The original wiring predates #2641,
+// when no id said "whole text" — `full-reading` was taken and read a single key
+// passage — so the closest thing was the intro. Reported as 「QR code全文朗讀的
+// 部分會進到課程簡介」.
+type LessonQrStep = 'full-text-annotate' | 'key-passage-reading';
 type AudioMode = 'full' | 'key';
 
 interface StoryListItem {
@@ -183,7 +190,7 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     grade: s.grade,
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
-    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'lesson-intro') : '',
+    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'full-text-annotate') : '',
     // Same rule on the passage side: build_demo_reading.plan_demo_audio only
     // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
     // (has_key_reading). Emitting a code for a lesson without one — as this
@@ -318,7 +325,7 @@ const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, file
       </button>
       {preview && (
         <QrPreviewDialog
-          title={`${title}／${step === 'lesson-intro' ? '全文' : '段落'}`}
+          title={`${title}／${step === 'full-text-annotate' ? '全文' : '段落'}`}
           value={preview.value}
           dataUrl={preview.dataUrl}
           filename={qrFileName(filePrefix, lessonId)}
@@ -798,7 +805,7 @@ const LessonAudioTable: React.FC = () => {
               </div>
 
               {deliversFullText(story.grade)
-                ? <QrDownloadButton lessonId={story.id} step="lesson-intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
                 : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付段落朗讀">—</span>}
               <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
             </div>
