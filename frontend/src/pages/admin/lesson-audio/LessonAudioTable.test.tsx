@@ -21,6 +21,15 @@ if (!HTMLMediaElement.prototype.play.toString().includes('patchedPlay')) {
   HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
 }
 
+// Spy on the cross-paragraph prefetch. A mutation check found this half
+// unguarded: deleting the prefetch call from the component left every test
+// green, so the fix for 「段落之間的延遲太多了」 could vanish silently.
+const prefetchSpy = vi.fn();
+vi.mock('../../../services/ttsApi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../services/ttsApi')>()),
+  prefetchText: (...args: unknown[]) => prefetchSpy(...args),
+}));
+
 vi.mock('qrcode', () => ({
   default: {
     toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,test'),
@@ -623,5 +632,59 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     expect(text).toContain('THE-KEY-PASSAGE-1');
     // A paragraph index would make the hook ignore the passage text entirely.
     expect(idx).toBeUndefined();
+  });
+});
+
+describe('LessonAudioTable — paragraph boundary', () => {
+  it('warms the second paragraph the moment the first starts playing', async () => {
+    prefetchSpy.mockClear();
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /播放全文/ })[0]);
+
+    // Paragraph 0 is spoken immediately; paragraph 1 must already be on its
+    // way, or the listener hears the whole synthesis as a gap at the boundary.
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
+    const [, lessonId, idx] = prefetchSpy.mock.calls[0];
+    expect(lessonId).toBe(1);
+    expect(idx).toBe(1);
+  });
+
+  it('keeps warming one paragraph ahead as the walk advances', async () => {
+    // The start-of-play prefetch and the per-advance prefetch are two separate
+    // calls in the component, and a mutation check proved it: deleting the
+    // advance one left the previous test green, because the start one still
+    // fired. This drives an actual paragraph transition.
+    prefetchSpy.mockClear();
+    // Three paragraphs: the default fixture has one, and a one-paragraph
+    // lesson can never exercise a boundary.
+    mockFetchDispatcher((id) => ({
+      id,
+      title: `lesson-${id}`,
+      paragraphs: [`p0-${id}`, `p1-${id}`, `p2-${id}`],
+      key_reading: { passage: `passage-${id}` },
+    }));
+    const { rerender } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /播放全文/ })[0]);
+
+    // The walk is created asynchronously (the click awaits story detail), so
+    // wait for it to exist before driving the transition — flipping the state
+    // first makes the finished-signal fire while there is no walk to advance.
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
+
+    // Audio starts...
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    // ...and paragraph 0 finishes, which is what advances the walk.
+    mockTts({ isTtsSpeaking: false });
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => {
+      const indices = prefetchSpy.mock.calls.map((c) => c[2]);
+      expect(indices).toContain(2);
+    });
   });
 });

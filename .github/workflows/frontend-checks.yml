@@ -77,4 +77,5 @@ jobs:
             src/components/auth/LearningRouteGate.test.tsx \
             src/components/reading-steps/FullTextAnnotate.readonly.test.tsx \
             src/hooks/useFullTextTtsQueue.test.ts \
-            src/services/ttsApi.prefetch.test.ts
+            src/services/ttsApi.prefetch.test.ts \
+            src/pages/admin/lesson-audio/paragraphGap.test.ts

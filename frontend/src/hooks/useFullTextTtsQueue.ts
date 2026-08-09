@@ -30,6 +30,7 @@
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTtsPlayback } from './useTtsPlayback';
+import { prefetchText } from '../services/ttsApi';
 
 interface UseFullTextTtsQueueProps {
   /** Whole-lesson paragraphs in on-screen order — story.content. Every entry
@@ -123,6 +124,11 @@ export function useFullTextTtsQueue({
     // Passing the paragraph's OWN index (not a hardcoded 0) is the #2627 fix —
     // this is what lets each call hit the backend's per-paragraph cache.
     tts.speakText(list[idx], lessonId, idx);
+    // Warm the next paragraph while this one is being read. The in-loop
+    // prefetch inside ttsApi only reaches the next *sentence* of the current
+    // paragraph, so without this every paragraph boundary fetches cold and the
+    // reading audibly stalls there (owner: 「段落之間的延遲太多了」).
+    prefetchText(list[idx + 1], lessonId, idx + 1);
   }, [tts, lessonId]);
 
   const play = useCallback(() => {
