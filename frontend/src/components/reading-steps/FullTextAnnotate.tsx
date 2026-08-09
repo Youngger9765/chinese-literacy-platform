@@ -35,6 +35,8 @@ import {
 import { type AnnotationWithText } from './AnnotationSidePanel';
 import AnnotationSidePanel from './AnnotationSidePanel';
 import AnnotationToolbar from './AnnotationToolbar';
+import ReadingPlayer from './ReadingPlayer';
+import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
 
 // Re-export types for consumers that import from ReadingAnnotation
@@ -72,6 +74,13 @@ interface ReadingAnnotationProps {
   fontSizePx?: number;
   /** DB session id — when provided, annotations are persisted to and loaded from DB. */
   dbSessionId?: number | null;
+  /**
+   * Read-and-listen only (#2649). Set for a QR-code visitor who has no account:
+   * a mark has to belong to somebody, so every annotating affordance is removed
+   * rather than disabled — a greyed-out button reads as "broken", an absent one
+   * reads as "not part of this page". Reading and listening stay.
+   */
+  readOnly?: boolean;
 }
 
 // ── A5: First-use onboarding coach component ───────────────────────────────
@@ -248,9 +257,27 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   onFinish,
   fontSizePx = 22,
   dbSessionId = null,
+  readOnly = false,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
+
+  // Whole-lesson playback (#2649). Paragraph-by-paragraph rather than one long
+  // clip, so the page knows which paragraph is being read and can carry the
+  // reader there. A QR-code visitor never reaches this hook — GuestReadingPage
+  // drives its own player off the pre-generated mp3, because the synthesis
+  // endpoint this one calls answers 401 without a session.
+  const numericLessonId = Number.isFinite(Number(story.id)) ? Number(story.id) : undefined;
+  const reader = useFullTextTtsQueue({ paragraphs: story.content, lessonId: numericLessonId });
+  const paragraphRefs = useRef<Record<number, HTMLElement | null>>({});
+
+  // Scroll the paragraph being read into view. `nearest` rather than `center`
+  // so a paragraph already on screen doesn't yank the page under the reader.
+  useEffect(() => {
+    const idx = reader.currentParagraphIdx;
+    if (idx === null || idx === undefined) return;
+    paragraphRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [reader.currentParagraphIdx]);
   const vocabWords = useMemo(
     () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
     [story.vocabulary]
@@ -619,16 +646,31 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <div
           ref={containerRef}
           className="flex-1 overflow-y-auto relative pb-44"
-          onMouseUp={handleMouseUp}
-          onTouchEnd={handleTouchEnd}
+          onMouseUp={readOnly ? undefined : handleMouseUp}
+          onTouchEnd={readOnly ? undefined : handleTouchEnd}
           style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
         >
           {/* A5: First-use onboarding coach (dismissable, gated by localStorage) */}
-          {showCoach ? (
+          {!readOnly && (showCoach ? (
             <OnboardingCoach onDismiss={handleDismissCoach} />
           ) : (
             /* A5: Persistent mini hint bar shown after onboarding is dismissed */
             <HintBar />
+          ))}
+
+          {/* Whole-lesson player. Sits above the legend so it's the first control
+              on the page — listening is what a lot of students come here to do. */}
+          {!readOnly && (
+            <div className="flex justify-center pt-4">
+              <ReadingPlayer
+                isPlaying={reader.isPlaying}
+                isPaused={reader.isPaused}
+                onPlay={reader.play}
+                onPause={reader.pause}
+                onResume={reader.resume}
+                onStop={reader.stop}
+              />
+            </div>
           )}
 
           {/* Legend pills + counts + undo/clear — floating centered */}
@@ -685,7 +727,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               const inlineTblIdx = inlineTableIdxByPara.get(paraIdx);
               return (
                 <React.Fragment key={paraIdx}>
-                  <section className="relative group">
+                  <section
+                    ref={(el) => { paragraphRefs.current[paraIdx] = el; }}
+                    data-reading-active={reader.currentParagraphIdx === paraIdx ? 'true' : undefined}
+                    className={`relative group rounded-lg transition-colors duration-300 ${
+                      reader.currentParagraphIdx === paraIdx ? 'bg-accent/[0.07]' : ''
+                    }`}
+                  >
                     {/* Paragraph number — lives outside the [data-para-idx] subtree
                         so its text doesn't inflate selection offsets. */}
                     <span
@@ -757,7 +805,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           )}
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
-          {toolbar.visible && (
+          {!readOnly && toolbar.visible && (
             <AnnotationToolbar
               x={toolbar.x}
               y={toolbar.y}
@@ -769,14 +817,18 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         </div>
 
         {/* ── Right panel: 我的記號 ──────────────────────────────────────── */}
-        <AnnotationSidePanel
-          summary={summary}
-          annotationsForPanel={annotationsForPanel}
-          onJump={jumpToAnnotation}
-        />
+        {!readOnly && (
+          <AnnotationSidePanel
+            summary={summary}
+            annotationsForPanel={annotationsForPanel}
+            onJump={jumpToAnnotation}
+          />
+        )}
       </div>
 
-      {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
+      {!readOnly && (
+        <>
+          {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
       <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
         <div className="max-w-md mx-auto pointer-events-auto">
@@ -791,6 +843,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           </button>
         </div>
       </div>
+        </>
+      )}
 
       {/* Background decoration */}
       <div className="fixed top-40 -left-20 w-64 h-64 bg-accent/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
