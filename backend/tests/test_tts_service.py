@@ -112,7 +112,7 @@ class TestTTSServiceSynthesize:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_returns_bytes_for_valid_text(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import synthesize_speech
@@ -127,7 +127,7 @@ class TestTTSServiceSynthesize:
     @patch("app.services.tts_service.TTS_PROVIDER", "google")
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_cache_prevents_second_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         # TTS_PROVIDER pinned to "google" so both calls land under the same
@@ -149,7 +149,7 @@ class TestTTSServiceSynthesize:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_different_texts_each_call_api(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import synthesize_speech
@@ -164,7 +164,7 @@ class TestTTSServiceSynthesize:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_raises_on_empty_audio(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import TTSError, synthesize_speech
@@ -177,7 +177,7 @@ class TestTTSServiceSynthesize:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_raises_on_api_exception(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import TTSError, synthesize_speech
@@ -197,12 +197,19 @@ class TestGCSSentinel:
     """After GCS init fails once, _get_gcs_bucket returns None immediately."""
 
     def test_gcs_init_failure_sets_sentinel(self):
+        # _get_gcs_bucket is defined in app.services.tts.cache and rebinds
+        # that module's own _gcs_client via `global` (#2649 consolidation).
+        # tts_mod._gcs_client (app.services.tts_service / tts_module) is a
+        # separate name bound once at import time — setting or reading it
+        # here would silently diverge from what _get_gcs_bucket actually
+        # updates, so this test operates on the canonical cache module.
         import app.services.tts_service as tts_mod
+        from app.services.tts import cache as cache_mod
         from app.services.tts.providers import azure as az_mod
 
         # Reset state
-        original = tts_mod._gcs_client
-        tts_mod._gcs_client = None  # force re-init
+        original = cache_mod._gcs_client
+        cache_mod._gcs_client = None  # force re-init
 
         try:
             with patch("app.services.tts_service.storage", create=True) as mock_storage_mod:
@@ -212,16 +219,19 @@ class TestGCSSentinel:
                 )}):
                     result = tts_mod._get_gcs_bucket()
                     assert result is None
-                    assert tts_mod._gcs_client is tts_mod._GCS_UNAVAILABLE
+                    assert cache_mod._gcs_client is cache_mod._GCS_UNAVAILABLE
         finally:
-            tts_mod._gcs_client = original
+            cache_mod._gcs_client = original
 
     def test_gcs_sentinel_skips_retry(self):
+        # See test_gcs_init_failure_sets_sentinel: operate on the canonical
+        # cache module, not the tts_service re-export.
         import app.services.tts_service as tts_mod
+        from app.services.tts import cache as cache_mod
         from app.services.tts.providers import azure as az_mod
 
-        original = tts_mod._gcs_client
-        tts_mod._gcs_client = tts_mod._GCS_UNAVAILABLE
+        original = cache_mod._gcs_client
+        cache_mod._gcs_client = cache_mod._GCS_UNAVAILABLE
 
         try:
             # Should return None immediately without attempting import
@@ -233,7 +243,7 @@ class TestGCSSentinel:
                 mock_storage = sys.modules["google.cloud.storage"]
                 mock_storage.Client.assert_not_called()
         finally:
-            tts_mod._gcs_client = original
+            cache_mod._gcs_client = original
 
 
 # ---------------------------------------------------------------------------
@@ -286,7 +296,7 @@ class TestEmptyAudioResponse:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_none_audio_content_raises(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import TTSError, synthesize_speech
@@ -301,7 +311,7 @@ class TestEmptyAudioResponse:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_empty_bytes_audio_content_raises(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from app.services.tts_service import TTSError, synthesize_speech
@@ -391,7 +401,7 @@ class TestSentenceSplitting:
 
         with patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
-             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True), \
              patch("app.services.tts_service._get_tts_client", return_value=mock_client):
             result = synthesize_speech(long_text)
 
@@ -413,7 +423,7 @@ class TestCostProtection:
         return resp
 
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_gcs_hit_skips_api_call(self, mock_get_client, mock_gcs_put):
         """L2 GCS cache hit → Cloud TTS API must NOT be called (saves money)."""
@@ -429,7 +439,7 @@ class TestCostProtection:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_api_result_saved_to_gcs(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         """After API call, result MUST be saved to GCS (prevents paying again)."""
@@ -448,7 +458,7 @@ class TestCostProtection:
         assert args[1] == b"NEW_AUDIO"
 
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_gcs_hit_also_populates_l1(self, mock_get_client, mock_gcs_put):
         """GCS hit should populate L1 so next call doesn't even hit GCS."""
@@ -499,7 +509,7 @@ class TestTTSRoute:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
     @patch("app.services.tts_service._get_tts_client")
     def test_synthesize_returns_audio_response(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from fastapi.testclient import TestClient
@@ -641,7 +651,7 @@ class TestAzureTTSSynthesis:
              patch.object(az_mod.requests, "post", return_value=fake_response), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put") as mock_put, \
-             patch("app.services.tts_service._TTS_CACHE", {}):
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True):
             tts_mod.synthesize_speech("你好")
 
         mock_put.assert_called_once()
@@ -673,7 +683,7 @@ class TestAzureGoogleFallback:
              patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
-             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True), \
              patch("app.services.tts_service._get_tts_client", return_value=mock_google_client):
             result = synthesize_speech("你好世界")
 
@@ -690,7 +700,7 @@ class TestAzureGoogleFallback:
              patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
-             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True), \
              patch("app.services.tts_service._get_tts_client",
                    side_effect=TTSError("Google also failed")):
             with pytest.raises(TTSError):
@@ -710,7 +720,7 @@ class TestAzureGoogleFallback:
         with patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
-             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True), \
              patch("app.services.tts_service._get_tts_client", return_value=mock_google_client), \
              patch("urllib.request.urlopen") as mock_urlopen:
             result = synthesize_speech("你好")
@@ -734,7 +744,7 @@ class TestAzureGoogleFallback:
              patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put") as mock_put, \
-             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True), \
              patch("app.services.tts_service._get_tts_client", return_value=mock_google_client):
             synthesize_speech("你好")
 
@@ -1000,7 +1010,13 @@ class TestDeleteTtsCache:
         key = _cache_key(text)
         tts_mod._l1_put(key, b"CACHED", provider="azure")
 
-        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+        # delete_tts_cache is defined in app.services.tts.cache and resolves
+        # _get_gcs_bucket against that module's own globals, not
+        # app.services.tts_service's — patching the latter is inert here
+        # (#2649 cache consolidation: the two used to be separate shadowing
+        # copies, so this patch target used to be correct; now there is one
+        # canonical function and it must be patched where it actually lives).
+        with patch("app.services.tts.cache._get_gcs_bucket", return_value=None):
             result = delete_tts_cache(text)
 
         assert result["l1_deleted"] is True
@@ -1016,7 +1032,9 @@ class TestDeleteTtsCache:
         key = _cache_key(text)
         tts_mod._TTS_CACHE.pop(key, None)  # ensure not present
 
-        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+        # See test_l1_eviction_when_present: delete_tts_cache now lives in
+        # app.services.tts.cache, so _get_gcs_bucket must be patched there.
+        with patch("app.services.tts.cache._get_gcs_bucket", return_value=None):
             result = delete_tts_cache(text)
 
         assert result["l1_deleted"] is False
@@ -1037,7 +1055,8 @@ class TestDeleteTtsCache:
         mock_bucket = MagicMock()
         mock_bucket.blob.return_value = mock_blob
 
-        with patch("app.services.tts_service._get_gcs_bucket", return_value=mock_bucket):
+        # See test_l1_eviction_when_present: patch the canonical module.
+        with patch("app.services.tts.cache._get_gcs_bucket", return_value=mock_bucket):
             result = delete_tts_cache(text)
 
         assert mock_blob.delete.call_count >= 1
@@ -1047,7 +1066,8 @@ class TestDeleteTtsCache:
         """If GCS bucket is None, delete_tts_cache should succeed silently."""
         from app.services.tts_service import delete_tts_cache
 
-        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+        # See test_l1_eviction_when_present: patch the canonical module.
+        with patch("app.services.tts.cache._get_gcs_bucket", return_value=None):
             result = delete_tts_cache("任何文字")
 
         assert "key" in result
@@ -1073,8 +1093,12 @@ class TestRegenerateEndpoint:
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
-    @patch("app.services.tts_service._TTS_CACHE", {})
-    @patch("app.services.tts_service._get_gcs_bucket", return_value=None)
+    @patch.dict("app.services.tts_service._TTS_CACHE", {}, clear=True)
+    # The route calls delete_tts_cache, which lives in app.services.tts.cache
+    # and resolves _get_gcs_bucket against that module's globals — patching
+    # app.services.tts_service._get_gcs_bucket (as before the #2649
+    # consolidation) would be inert and let the real GCS client run.
+    @patch("app.services.tts.cache._get_gcs_bucket", return_value=None)
     def test_regenerate_returns_ok(self, mock_bucket, mock_gcs_put, mock_gcs_get):
         """POST /api/tts/regenerate must return 200 with status=ok (uses Azure path)."""
         import app.services.tts_service as tts_mod

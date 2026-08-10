@@ -717,6 +717,7 @@ modules:
   canonical_source: backend/app/services/tts/__init__.py
   owns_code:
   - backend/app/services/tts/__init__.py
+  - backend/app/services/tts/cache.py
   - backend/app/services/tts/providers/azure.py
   - backend/app/services/tts/providers/gemini.py
   - backend/app/services/tts/providers/google.py
@@ -724,9 +725,11 @@ modules:
   owns_data: []
   spec_tests:
   - backend/specs/test_tts_spec.py
+  - backend/tests/test_characterization_tts_cache.py
+  - backend/tests/test_no_duplicate_azure_impl.py
   related_issues: []
   source_meetings:
   - docs/meetings/2026-05-01-experts-review.md
-  last_reviewed: 2026-08-08
+  last_reviewed: 2026-08-11
   owner: young
   intent: specs/modules/tts/INTENT.md
