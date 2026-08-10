@@ -112,4 +112,18 @@ describe('paragraph-level synthesis', () => {
 
     expect(synthesized.length).toBeGreaterThan(1);
   });
+
+  it('prefetches the same unit playback will ask for', async () => {
+    // The bug this catches shipped: prefetch warmed the next paragraph's first
+    // *sentence* while playback requested the whole *paragraph*. Different cache
+    // keys, so the warm-up bought nothing and paid for an extra synthesis on
+    // top. Visible on staging as 8 requests for a 5-paragraph lesson —
+    // alternating one long and one short — and 13% of playback silent.
+    const { prefetchText } = await import('./ttsApi');
+    prefetchText(PARAGRAPH, 1, 0);
+    await vi.waitFor(() => expect(synthesized.length).toBeGreaterThan(0));
+
+    expect(synthesized).toContain(PARAGRAPH);
+    expect(synthesized).not.toContain('第一句話。');
+  });
 });

@@ -155,12 +155,19 @@ export function prefetchText(text: string | undefined, lessonId?: number, paragr
       if (lessonId !== undefined && paragraphIdx !== undefined) {
         sentences = await _fetchLessonSentences(lessonId, paragraphIdx);
       }
-      const list = sentences ?? _splitSentences(_cleanForTts(text));
-      // Only the opening sentence. That is the one the listener is waiting on;
-      // the rest are covered by the in-loop prefetch once playback starts, and
-      // fetching more here would compete with the audio currently playing.
-      const first = list.find((x) => x.trim());
-      if (first) await _fetchAudioUrl(first);
+      // Warm exactly what playback will ask for, or the warm-up is wasted and
+      // pays for a second synthesis on top. When there is lesson context that
+      // is the whole paragraph — reassembled the same way _speakViaBackend
+      // reassembles it — not its first sentence. Getting this wrong was
+      // measurable on staging: 8 synthesis requests for a 5-paragraph lesson,
+      // alternating one long (the paragraph) and one short (a first sentence
+      // nothing would ever play), and 13% of playback silent because every
+      // paragraph still started cold.
+      const unit =
+        sentences !== null && sentences !== undefined
+          ? sentences.join('').trim()
+          : _splitSentences(_cleanForTts(text)).find((x) => x.trim());
+      if (unit) await _fetchAudioUrl(unit);
     } catch {
       // deliberately silent — see doc comment
     }
