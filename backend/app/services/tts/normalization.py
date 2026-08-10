@@ -97,6 +97,100 @@ _PHONEME_CORRECTIONS = PHONEME_CORRECTIONS
 MAX_SENTENCE_LEN = 40
 
 
+
+# ── 「和」as a conjunction ────────────────────────────────────────────────────
+#
+# Taiwan reads the conjunction 和 as ㄏㄢˋ; Azure says ㄏㄜˊ. Reported on L01
+# (「和」向心力) and confirmed by the owner as the target reading.
+#
+# This one gets a rule of its own rather than a table row, because 和 is a
+# polyphone and a blind swap trades one wrong reading for another — 和平 is
+# ㄏㄜˊ, 一唱一和 is ㄏㄜˋ. Two things make it tractable where 摸不著 is not:
+#
+#   - A stand-in exists. 漢 is single-reading ㄏㄢˋ. (摸不著 needs ㄓㄠˊ, and 著
+#     is the only character in the entire MOE dictionary with that reading, so
+#     there is nothing to substitute and it stays uncorrected.)
+#   - The exceptions are enumerable. data/tts/he_exceptions.json holds every
+#     multi-character MOE entry whose 和 is read as anything but ㄏㄢˋ — 489 of
+#     them, taken from the dictionary rather than guessed.
+#
+# In the lesson corpus, every standalone 和 (506 of 506, by POS tagging) is a
+# conjunction, so "standalone and not inside a listed word" is the whole rule.
+
+
+def _load_he_exceptions() -> tuple[str, ...]:
+    """Words where 和 is NOT ㄏㄢˋ, longest first for greedy matching."""
+    path = Path(__file__).resolve().parents[3] / "data" / "tts" / "he_exceptions.json"
+    try:
+        words = json.loads(path.read_text(encoding="utf-8"))["words"]
+    except (OSError, ValueError, KeyError) as exc:
+        logger.warning("和 exception list unavailable (%s); leaving 和 uncorrected", exc)
+        return ()
+    return tuple(sorted((w for w in words if isinstance(w, str) and "和" in w), key=len, reverse=True))
+
+
+_HE_EXCEPTIONS = _load_he_exceptions()
+
+
+def _he_exception_spans(text: str) -> set[int]:
+    """Indices covered by a word whose 和 is not ㄏㄢˋ.
+
+    Greedy and left-to-right, which is what keeps 「和平和戰爭」 working: 和平
+    claims index 1 first, so 平和 cannot then claim it and the second 和 stays a
+    conjunction. Scanning for any overlapping window instead — the first version
+    — swallowed that one.
+    """
+    covered: set[int] = set()
+    i = 0
+    n = len(text)
+    while i < n:
+        for w in _HE_EXCEPTIONS:          # longest first
+            if text.startswith(w, i):
+                covered.update(range(i, i + len(w)))
+                i += len(w)
+                break
+        else:
+            i += 1
+    return covered
+
+
+def _he_conjunction_positions(text: str) -> frozenset[int]:
+    """Indices of every 和 that should be read ㄏㄢˋ.
+
+    Two gates, because neither alone is enough:
+
+      - Segmentation says whether 和 stands alone. In the lesson corpus every
+        standalone 和 (506 of 506, by POS tagging) is a conjunction. But jieba
+        ships a Simplified-oriented dictionary and mis-splits some Traditional
+        words — 溫和 comes back as 很溫/和 — so it over-reports.
+      - The MOE exception list catches those. On its own it *under*-reports,
+        because substring matching crosses word boundaries: 「白天和黑夜」
+        contains the archaic 天和. The list is therefore curated to modern
+        words, and rare two-character entries are dropped for exactly that
+        reason (recorded in the data file).
+
+    Either gate failing leaves the 和 alone, which is the safe direction: an
+    unchanged 和 sounds like today, a wrong one sounds like a mistake.
+    """
+    try:
+        import jieba
+    except ImportError:  # pragma: no cover - jieba is a hard dependency
+        logger.warning("jieba unavailable; leaving 和 uncorrected")
+        return frozenset()
+
+    excluded = _he_exception_spans(text)
+    positions = []
+    cursor = 0
+    for token in jieba.cut(text):
+        if token == "和" and cursor not in excluded:
+            positions.append(cursor)
+        cursor += len(token)
+    return frozenset(positions)
+
+
+_HE_CONJUNCTION = '<sub alias="漢">和</sub>'
+
+
 def _apply_phoneme_corrections(text_escaped: str) -> str:
     # Single left-to-right pass over the ORIGINAL text — never re-scan text
     # we just emitted. Sequential `result.replace(...)` per pattern (the old
@@ -109,6 +203,9 @@ def _apply_phoneme_corrections(text_escaped: str) -> str:
     out: list[str] = []
     i = 0
     n = len(text_escaped)
+    # Computed once per call, against the ORIGINAL text — segmenting the
+    # partially-rewritten output would see SSML tags as words.
+    he_positions = _he_conjunction_positions(text_escaped) if "和" in text_escaped else frozenset()
     while i < n:
         for pattern, replacement in PHONEME_CORRECTIONS:
             # An empty pattern would match at every position with i += 0,
@@ -120,6 +217,10 @@ def _apply_phoneme_corrections(text_escaped: str) -> str:
                 i += len(pattern)
                 break
         else:
+            if text_escaped[i] == "和" and i in he_positions:
+                out.append(_HE_CONJUNCTION)
+                i += 1
+                continue
             out.append(text_escaped[i])
             i += 1
     return "".join(out)
