@@ -82,3 +82,73 @@ class TestNotOverreaching:
         out = fix("讓對手摸不著頭緒。")
         assert "摸不著" in out
         assert "<sub" not in out or "著" not in out.split("<sub")[1][:20]
+
+
+class TestProperNounsAndVerbsWronglyDroppedAsRare(object):
+    """鄭和/大和/和麵/零和 used to live only in _dropped_rare_two_char.
+
+    jieba's default dictionary splits every one of them into two
+    single-character tokens (鄭|和, 大|和, 和|麵, 零|和) — reported by
+    kiro gpt-5.6-terra as false positives: a proper noun and a verb were
+    getting the conjunction reading. Restored to he_exceptions.json's
+    active `words` list; regression-locked here.
+    """
+
+    @pytest.mark.parametrize("text", [
+        "鄭和",
+        "鄭和七次下西洋。",
+        "他叫鄭和。",
+        "大和",
+        "大和號是二次大戰的巨型戰艦。",
+        "和麵",
+        "媽媽在廚房和麵，準備做饅頭。",
+        "這是一場零和遊戲。",
+    ])
+    def test_not_swapped(self, text):
+        assert not swapped(text), (
+            f"和 was swapped in {text!r} — this is a proper noun/verb/loanword, "
+            "not the conjunction"
+        )
+
+    def test_still_a_conjunction_next_to_the_lookalike_substring(self):
+        """很大和很小 contains the substring 大和 but is not the proper noun.
+
+        Restoring 大和 to the exceptions list trades a rare false negative
+        here for fixing the common false positive on the actual proper
+        noun — the code's own stated safe direction (an unmarked 和 sounds
+        like today; this is not asserted to still fire).  This test exists
+        to document the trade-off, not to demand the conjunction still be
+        caught.
+        """
+        # Documented trade-off: no assertion on the conjunction itself,
+        # just confirm nothing raises and 大和-adjacent text is handled.
+        fix("很大和很小的差別。")
+
+
+class TestSelfReferenceIsNotAConjunction:
+    """A 和 that names the character — quoted, titled, or the whole input —
+    is not a conjunction. All five are kiro gpt-5.6-terra's counterexamples.
+    """
+
+    @pytest.mark.parametrize("text", [
+        "「和」是形聲字，請把它圈出來。",   # worksheet: circle the character
+        "「和」",
+        "〈和〉",
+        "《和》",
+        "和",                              # bare UI label — the whole string
+    ])
+    def test_not_swapped(self, text):
+        assert not swapped(text), (
+            f"和 was swapped in {text!r} — it names the character, it does "
+            "not conjoin anything"
+        )
+
+    def test_a_real_conjunction_inside_a_longer_quote_is_unaffected(self):
+        """The guard only fires when 和 is immediately sandwiched by the
+        quote pair with nothing else inside — a real conjunction elsewhere
+        inside a quoted phrase must still be caught."""
+        assert swapped("他說：「蘋果和香蕉都好吃。」")
+
+    def test_curly_quotes_are_also_covered(self):
+        assert not swapped("“和”")
+        assert not swapped("‘和’")

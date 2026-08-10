@@ -39,6 +39,7 @@ from ..auth.rate_limiter import real_client_ip
 from ..auth.rate_limiter import make_ai_rate_limit_dependency, tts_rate_limit
 from ..models.user import User
 from ..services.tts_service import (
+    TTS_PROVIDER,
     TTSError,
     build_lesson_tts_mapping,
     delete_tts_cache,
@@ -112,7 +113,11 @@ async def synthesize(
     """
     # Fix #3: Check L1 cache BEFORE rate limit — cached audio returns immediately
     # without burning the user's TTS quota (Issue #1808).
-    cached = get_cached_tts(req.text)
+    #
+    # provider=TTS_PROVIDER, not provider-blind (#2649 item 1) — otherwise a
+    # cache entry a past request wrote under a fallback provider would keep
+    # serving that voice here even after the active provider recovers.
+    cached = get_cached_tts(req.text, provider=TTS_PROVIDER)
     if cached is not None:
         logger.debug("TTS L1 cache hit — skipping rate limit check (%s)", _who(current_user))
         return Response(
@@ -175,7 +180,8 @@ async def synthesize_sentence_endpoint(
         503  application/json — TTS unavailable.
     """
     # Fix #3: Cache check BEFORE rate limit (Issue #1808).
-    cached = get_cached_tts(req.text)
+    # provider=TTS_PROVIDER — see the matching comment in synthesize() above.
+    cached = get_cached_tts(req.text, provider=TTS_PROVIDER)
     if cached is not None:
         logger.debug("TTS L1 cache hit (sentence) — skipping rate limit (%s)", _who(current_user))
         return Response(

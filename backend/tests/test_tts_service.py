@@ -124,11 +124,18 @@ class TestTTSServiceSynthesize:
         assert isinstance(result, bytes)
         assert result == b"AUDIO_BYTES"
 
+    @patch("app.services.tts_service.TTS_PROVIDER", "google")
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
     @patch("app.services.tts_service._TTS_CACHE", {})
     @patch("app.services.tts_service._get_tts_client")
     def test_cache_prevents_second_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
+        # TTS_PROVIDER pinned to "google" so both calls land under the same
+        # provider identity (#2649 item 1: L1 is now scoped by provider, so a
+        # test where the active provider silently drifted between calls —
+        # here, no AZURE_SPEECH_KEY means the default "azure" would fall back
+        # to "google" every time regardless — would otherwise look like a
+        # cache miss instead of what this test actually wants to prove.
         from app.services.tts_service import synthesize_speech
         mock_client = MagicMock()
         mock_client.synthesize_speech.return_value = self._make_fake_response(b"AUDIO_BYTES")
@@ -445,21 +452,28 @@ class TestCostProtection:
     @patch("app.services.tts_service._get_tts_client")
     def test_gcs_hit_also_populates_l1(self, mock_get_client, mock_gcs_put):
         """GCS hit should populate L1 so next call doesn't even hit GCS."""
-        from app.services.tts_service import synthesize_speech, _cache_key, _TTS_CACHE
+        from app.services.tts_service import synthesize_speech, get_cached_tts, TTS_PROVIDER
 
         with patch("app.services.tts_service._gcs_get", return_value=b"GCS_AUDIO"):
             synthesize_speech("測試L1填充")
 
-        # L1 should now have it
-        key = _cache_key("測試L1填充")
-        assert key in _TTS_CACHE
-        assert _TTS_CACHE[key] == b"GCS_AUDIO"
+        # L1 should now have it, tagged with the provider the GCS hit was
+        # fetched under (#2649 item 1 — L1 entries are provider-scoped).
+        assert get_cached_tts("測試L1填充", provider=TTS_PROVIDER) == b"GCS_AUDIO"
 
+    @patch("app.services.tts_service.TTS_PROVIDER", "google")
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
     @patch("app.services.tts_service._get_tts_client")
     def test_three_calls_same_text_only_one_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
-        """3 calls with same text = exactly 1 API call. Cost = 1x not 3x."""
+        """3 calls with same text = exactly 1 API call. Cost = 1x not 3x.
+
+        TTS_PROVIDER pinned to "google" for the same reason as
+        test_cache_prevents_second_api_call above: with no AZURE_SPEECH_KEY,
+        the default "azure" provider always falls back, but every call must
+        still land under one consistent provider identity for the L1 hit to
+        fire — that consistency is what this test is actually checking.
+        """
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
         # Clear L1 cache
@@ -975,20 +989,22 @@ class TestDeleteTtsCache:
     """delete_tts_cache must evict L1 and delete GCS blobs."""
 
     def test_l1_eviction_when_present(self):
-        """Key present in L1 cache must be removed."""
+        """Key present in L1 cache must be removed, regardless of which
+        provider produced the cached entry (#2649 item 1: L1 keys are now
+        provider-scoped; delete_tts_cache must check all of them)."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import delete_tts_cache, _cache_key
 
         text = "測試刪除L1"
         key = _cache_key(text)
-        tts_mod._TTS_CACHE[key] = b"CACHED"
+        tts_mod._l1_put(key, b"CACHED", provider="azure")
 
         with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
             result = delete_tts_cache(text)
 
         assert result["l1_deleted"] is True
-        assert key not in tts_mod._TTS_CACHE
+        assert tts_mod.get_cached_tts(text, provider="azure") is None
 
     def test_l1_eviction_when_absent(self):
         """Key absent from L1 must return l1_deleted=False without error."""

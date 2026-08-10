@@ -48,7 +48,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from app.services.tts.normalization import (  # noqa: E402
     CORRECTIONS_FINGERPRINT,
     _apply_phoneme_corrections,
-    _cache_key,
 )
 from app.services.tts.pauses import (  # noqa: E402
     LONG_PAUSE_MS,
@@ -64,6 +63,7 @@ DEFAULT_API = os.environ.get(
 MAX_INTERNAL_PAUSE_MS = 400   # A3 — TARGET_PAUSE_MS plus detector slack
 COMMA_PAUSE_RANGE = (150, 400)  # A4 — measured 235–288 ms in real paragraphs
 EDGE_MS = 250                 # head/tail silence is not an internal pause
+COMMA_LIKE_PUNCTUATION = "，、；："  # A4 — punctuation a comma-pause should follow
 
 
 def _decode(mp3: bytes) -> array.array:
@@ -89,8 +89,8 @@ def _paragraphs(api: str, lesson_id: int) -> list[str]:
     return ["".join(s["text"] for s in p["sentences"]) for p in mapping["paragraphs"]]
 
 
-def _synthesize(api: str, text: str) -> bytes:
-    """Synthesize locally, bypassing every cache.
+def _synthesize(api: str, text: str) -> tuple[bytes, str]:
+    """Synthesize locally, bypassing every cache. Returns (audio, provider).
 
     Deliberately NOT an HTTP call to the deployed backend. That version passed
     while the pause-shortening threshold was mutated to a no-op — twice over:
@@ -98,8 +98,12 @@ def _synthesize(api: str, text: str) -> bytes:
     and the deployed side answered from its cache without synthesizing at all.
     A gate that cannot go red is not a gate.
 
-    Going through synthesize_speech with the caches stubbed means this checks
-    the code in the working tree, every run, on freshly generated audio.
+    Going through _synthesize_speech_with_provider with the caches stubbed
+    means this checks the code in the working tree, every run, on freshly
+    generated audio — and reports which provider actually produced it, rather
+    than A1 inferring that from pause duration (a paragraph short enough to
+    have no long internal pause looked identical to a Google fallback: both
+    have "no pause over 890ms", for different reasons).
     """
     import app.services.tts as tts_module
 
@@ -108,10 +112,93 @@ def _synthesize(api: str, text: str) -> bytes:
     tts_module._gcs_put = lambda *a, **k: None
     tts_module._TTS_CACHE.clear()
     try:
-        return tts_module.synthesize_speech(text)
+        return tts_module._synthesize_speech_with_provider(text)
     finally:
         tts_module._gcs_get, tts_module._gcs_put = saved_get, saved_put
         tts_module._TTS_CACHE.clear()
+
+
+def _fingerprint_moves_the_key(sample: str) -> bool:
+    """A2 — does the cache key move when the corrections table's fingerprint
+    changes? If it doesn't, changing a pronunciation fixes nothing already
+    cached: the old audio keeps being served under the same key forever.
+
+    Probes this by swapping CORRECTIONS_FINGERPRINT to a sentinel value and
+    comparing the resulting key against the one computed under the real
+    fingerprint. The swap is always undone in a finally: an exception raised
+    while computing the probing key must not leave the shared normalization
+    module's fingerprint poisoned for every _cache_key call for the rest of
+    the process — every lesson checked after that point in the same run would
+    silently use the wrong key.
+    """
+    import app.services.tts.normalization as norm
+
+    key_now = norm._cache_key(sample)
+    original = norm.CORRECTIONS_FINGERPRINT
+    try:
+        norm.CORRECTIONS_FINGERPRINT = "probe"
+        key_other = norm._cache_key(sample)
+    finally:
+        norm.CORRECTIONS_FINGERPRINT = original
+    return key_now != key_other
+
+
+def _paragraph_findings(idx: int, text: str, audio: bytes, provider: str) -> list[str]:
+    """Everything checkable about one paragraph's freshly synthesized audio."""
+    findings: list[str] = []
+
+    if not audio:
+        findings.append(f"A1 paragraph {idx + 1}: empty audio")
+        return findings
+
+    samples = _decode(audio)
+    if not samples:
+        findings.append(f"A1 paragraph {idx + 1}: audio did not decode")
+        return findings
+
+    # A1 — is this the voice we ship? Asking the synthesis path directly
+    # (via _synthesize_speech_with_provider) rather than inferring it from
+    # pause duration: a paragraph with no long internal pause of its own
+    # looked identical to a Google fallback under the old duration-based
+    # check, and — the direction that actually matters — a paragraph that
+    # legitimately has a >890ms gap would have been misreported as the
+    # fallback even while genuinely served by Azure.
+    if provider != "azure":
+        findings.append(
+            f"A1 paragraph {idx + 1}: served from provider={provider}, not azure — "
+            "this is the Google fallback (mainland accent)"
+        )
+
+    total_ms = len(samples) * 1000 // 48000
+    internal = [
+        (start, dur) for start, dur in find_silences(samples)
+        if start > EDGE_MS and start + dur < total_ms - EDGE_MS
+    ]
+
+    # A3 — no long stalls left inside a paragraph.
+    too_long = [d for _, d in internal if d > MAX_INTERNAL_PAUSE_MS]
+    if too_long:
+        findings.append(
+            f"A3 paragraph {idx + 1}: pauses of {sorted(too_long, reverse=True)[:3]} ms "
+            f"exceed {MAX_INTERNAL_PAUSE_MS} ms"
+        )
+
+    # A4 — the short pauses must survive. Checked only when the source text
+    # actually contains comma-like punctuation that should have produced one:
+    # gating on `internal` being non-empty (the old check) meant the worst
+    # case of this exact failure — shortening flattened every pause down
+    # below the silence detector's floor, so find_silences reports nothing
+    # at all — made `internal` empty and silently skipped the check it was
+    # supposed to catch.
+    if any(p in text for p in COMMA_LIKE_PUNCTUATION):
+        commas = [d for _, d in internal if COMMA_PAUSE_RANGE[0] <= d <= COMMA_PAUSE_RANGE[1]]
+        if not commas:
+            findings.append(
+                f"A4 paragraph {idx + 1}: text has comma punctuation but no pause in "
+                f"{COMMA_PAUSE_RANGE} ms was found — the sentence rhythm was flattened"
+            )
+
+    return findings
 
 
 def check_lesson(api: str, lesson_id: int) -> dict:
@@ -124,13 +211,7 @@ def check_lesson(api: str, lesson_id: int) -> dict:
     # different fingerprints must produce different keys for the same text.
     sample = paragraphs[0] if paragraphs else "測試"
     if CORRECTIONS_FINGERPRINT not in (None, ""):
-        key_now = _cache_key(sample)
-        import app.services.tts.normalization as norm
-        original = norm.CORRECTIONS_FINGERPRINT
-        norm.CORRECTIONS_FINGERPRINT = "probe"
-        key_other = norm._cache_key(sample)
-        norm.CORRECTIONS_FINGERPRINT = original
-        if key_now == key_other:
+        if not _fingerprint_moves_the_key(sample):
             findings.append("A2 cache key ignores the corrections table — stale audio is unreachable-proof")
     else:
         findings.append("A2 no corrections fingerprint")
@@ -141,48 +222,8 @@ def check_lesson(api: str, lesson_id: int) -> dict:
         if _apply_phoneme_corrections(text) != text:
             corrected_paragraphs += 1
 
-        audio = _synthesize(api, text)
-        if not audio:
-            findings.append(f"A1 paragraph {idx + 1}: empty audio")
-            continue
-
-        samples = _decode(audio)
-        if not samples:
-            findings.append(f"A1 paragraph {idx + 1}: audio did not decode")
-            continue
-
-        total_ms = len(samples) * 1000 // 48000
-        internal = [
-            (start, dur) for start, dur in find_silences(samples)
-            if start > EDGE_MS and start + dur < total_ms - EDGE_MS
-        ]
-
-        # A3 — no long stalls left inside a paragraph.
-        #
-        # A pause longer than Azure's own 885 ms means this audio did not come
-        # from Azure at all: it fell back to Google (mainland accent), where the
-        # shortening does not apply. Worth naming separately, because "pauses
-        # too long" and "wrong voice entirely" need different fixes.
-        if any(d > 890 for _, d in internal):
-            findings.append(
-                f"A1 paragraph {idx + 1}: pauses exceed Azure's own 885 ms — "
-                "this is almost certainly the Google fallback (mainland accent)"
-            )
-        too_long = [d for _, d in internal if d > MAX_INTERNAL_PAUSE_MS]
-        if too_long:
-            findings.append(
-                f"A3 paragraph {idx + 1}: pauses of {sorted(too_long, reverse=True)[:3]} ms "
-                f"exceed {MAX_INTERNAL_PAUSE_MS} ms"
-            )
-
-        # A4 — the short pauses must survive. Their absence means the shortening
-        # flattened everything, which reads as one long run-on.
-        commas = [d for _, d in internal if COMMA_PAUSE_RANGE[0] <= d <= COMMA_PAUSE_RANGE[1]]
-        if internal and not commas:
-            findings.append(
-                f"A4 paragraph {idx + 1}: no pause in {COMMA_PAUSE_RANGE} ms — "
-                "the sentence rhythm was flattened"
-            )
+        audio, provider = _synthesize(api, text)
+        findings.extend(_paragraph_findings(idx, text, audio, provider))
 
     # A5 — reported, not failed. A lesson may legitimately contain no corrected
     # word; what would be wrong is the table never applying to *anything*.
