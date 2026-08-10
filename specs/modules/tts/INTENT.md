@@ -190,12 +190,24 @@ if active_provider == "azure":
 沒有動 fallback **合成**。一次 Azure 抖動就會把中國腔寫進快取，而快取鍵不含 provider，
 所以之後每次都命中它。
 
-**根因**：不是 Azure 拒絕，是 `IncompleteRead` —— 回應開始傳送後連線中斷，實測 10 次約 1 次。
-原本的 code 把它當 provider 失敗直接 fallback。
+**根因是 `urllib`，不是 Azure**。Azure 回應用 chunked transfer-encoding，urllib 對
+chunked 串流結尾的處理不可靠。同一段文字、同一時間連打 25 次：
 
-**修法**：`_synthesize_azure` 對傳輸類錯誤重試 3 次（backoff 0.5s×n）；`HTTPError` **不重試**
-（400 代表 SSML 寫錯，再送一次還是 400）。實測加了重試後同一段連打 20 次 **20/20 成功**，
-日誌顯示 2 次中斷都被接住。
+| | 失敗 |
+|---|---|
+| `urllib.request.urlopen` | 3 / 25（12%） |
+| `requests.post` | **0 / 25** |
+
+排除過的假設：**文字長度無關**（76–243 字各打 6 次，失敗落在中間長度）；
+分塊 `read(8192)` 只是減少不是根除（12 次 3 → 1）。
+
+**修法**：改用 `requests.post`，並保留重試 3 次（backoff 0.5s×n）當作任何網路呼叫都有的殘餘保險；
+HTTP 4xx/5xx **不重試**（400 代表 SSML 寫錯，再送一次還是 400）。
+
+實測：最長段落（243 字）連打 **30 次全過、零重試觸發**。
+
+⚠️ `requests` 原本只是間接依賴，現已明列進 `requirements.txt` —— 直接用卻不列，
+哪天上游拿掉就會在部署時才炸。
 
 **仍然存在的殘餘風險**：真的連續 3 次都失敗時，還是會落到 Google 中國腔且不壓縮。
 若要完全根除，需要拿掉 fallback 或讓 fallback 不寫進快取 —— 尚未做。
