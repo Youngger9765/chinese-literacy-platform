@@ -406,10 +406,22 @@ async function _speakViaBackend(
 ): Promise<void> {
   let sentences: string[];
 
-  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  // A paragraph is one synthesis unit, not a list of sentences.
+  //
+  // Splitting it costs almost nothing in timing — measured, three sentences as
+  // one request run 5.33 s against 5.50 s concatenated, and the resulting pause
+  // (763 ms) is shorter than the one Azure renders itself between sentences in
+  // a single request (873–883 ms). What splitting loses is prosody: each clip
+  // is generated in isolation, so the pitch contour resets at every sentence
+  // and the reading sounds like a list rather than someone reading aloud.
+  //
+  // The canonical sentence list is still fetched, but only to reconstruct the
+  // paragraph exactly as the backend split it, so the text sent matches the
+  // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
     const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
-    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+    const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
+    sentences = paragraph ? [paragraph] : [];
   } else {
     const cleaned = _cleanForTts(text);
     if (!cleaned) return;
@@ -464,10 +476,22 @@ async function _speakViaBackendWithProgress(
 ): Promise<void> {
   let sentences: string[];
 
-  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  // A paragraph is one synthesis unit, not a list of sentences.
+  //
+  // Splitting it costs almost nothing in timing — measured, three sentences as
+  // one request run 5.33 s against 5.50 s concatenated, and the resulting pause
+  // (763 ms) is shorter than the one Azure renders itself between sentences in
+  // a single request (873–883 ms). What splitting loses is prosody: each clip
+  // is generated in isolation, so the pitch contour resets at every sentence
+  // and the reading sounds like a list rather than someone reading aloud.
+  //
+  // The canonical sentence list is still fetched, but only to reconstruct the
+  // paragraph exactly as the backend split it, so the text sent matches the
+  // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
     const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
-    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+    const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
+    sentences = paragraph ? [paragraph] : [];
   } else {
     const cleaned = _cleanForTts(text);
     if (!cleaned) return;
