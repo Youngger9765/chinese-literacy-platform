@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 import time
+
+import requests
 import logging
 import urllib.error
 import urllib.request
@@ -46,40 +48,38 @@ def _synthesize_azure(text: str) -> bytes:
         "</speak>"
     )
 
-    req = urllib.request.Request(
-        url,
-        data=ssml.encode("utf-8"),
-        headers={
-            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-            "Content-Type": "application/ssml+xml",
-            "X-Microsoft-OutputFormat": "audio-48khz-192kbitrate-mono-mp3",
-        },
-    )
+    # requests, not urllib. Azure returns the audio with chunked
+    # transfer-encoding, and urllib's handling of the end of a chunked stream is
+    # where this broke: measured on the same payload back to back, 25 calls
+    # each, urllib failed 3 times with IncompleteRead and requests failed none.
+    # Not the text length (failures spread across 76–243 character paragraphs)
+    # and not Azure, which never refused anything.
+    #
+    # It mattered because a raised TTSError sent synthesize_speech to the Google
+    # fallback — cmn-CN-Chirp3-HD, the mainland accent rejected in 2026-04, with
+    # the pause shortening skipped and a cache key that cannot tell the two
+    # apart. One paragraph in ten came out wrong and stayed wrong.
+    #
+    # The retry below stays for the residual failures any network call has;
+    # HTTPError is not retried, because a 400 means the SSML is wrong and
+    # resending produces the same 400.
+    headers = {
+        "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
+        "Content-Type": "application/ssml+xml",
+        "X-Microsoft-OutputFormat": "audio-48khz-192kbitrate-mono-mp3",
+    }
 
-    # Retry a dropped connection; do not retry a refusal.
-    #
-    # Measured: the same paragraph, 10 consecutive calls, failed once — always
-    # `IncompleteRead`, the response starting to arrive and the connection
-    # closing mid-stream. Azure refused nothing; the transfer broke.
-    #
-    # That used to raise, and synthesize_speech would fall through to Google —
-    # cmn-CN-Chirp3-HD, the mainland accent rejected in 2026-04, which also
-    # skips the pause shortening. So about one paragraph in ten came out in the
-    # wrong accent with the long pauses left in, and since the cache key does
-    # not record the provider, once written it kept being served.
-    #
-    # HTTPError is deliberately not retried: a 400 means the SSML is wrong and
-    # sending it again produces the same 400, so retrying only multiplies the
-    # latency of a genuine mistake.
     audio_bytes = b""
     last_exc: Exception | None = None
     for attempt in range(AZURE_MAX_ATTEMPTS):
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                audio_bytes = resp.read()
+            resp = requests.post(url, data=ssml.encode("utf-8"), headers=headers, timeout=30)
+            if resp.status_code >= 400:
+                raise TTSError(f"Azure TTS HTTP error {resp.status_code}: {resp.reason}")
+            audio_bytes = resp.content
             break
-        except urllib.error.HTTPError as exc:
-            raise TTSError(f"Azure TTS HTTP error {exc.code}: {exc.reason}") from exc
+        except TTSError:
+            raise
         except Exception as exc:
             last_exc = exc
             if attempt + 1 < AZURE_MAX_ATTEMPTS:

@@ -19,9 +19,9 @@ a 400 means the SSML is wrong and sending it again produces the same 400.
 """
 from __future__ import annotations
 
-import http.client
-import urllib.error
 from unittest.mock import MagicMock, patch
+
+import requests
 
 import pytest
 
@@ -32,52 +32,52 @@ from app.services.tts.providers import azure as az
 AUDIO = b"ID3\x04\x00\x00" + b"\xff\xfb" * 100
 
 
-def _response(data: bytes):
+def _response(data: bytes, status: int = 200):
     resp = MagicMock()
-    resp.read.return_value = data
-    resp.__enter__ = lambda self: self
-    resp.__exit__ = lambda self, *a: False
+    resp.content = data
+    resp.status_code = status
+    resp.reason = "OK" if status < 400 else "Bad Request"
     return resp
 
 
 class TestTransientFailures:
     def test_a_truncated_read_is_retried(self):
         attempts = [
-            http.client.IncompleteRead(b"partial"),
+            requests.exceptions.ChunkedEncodingError("connection broken"),
             _response(AUDIO),
         ]
 
-        def urlopen(*_a, **_k):
+        def post(*_a, **_k):
             outcome = attempts.pop(0)
             if isinstance(outcome, Exception):
                 raise outcome
             return outcome
 
         with patch.object(az, "AZURE_SPEECH_KEY", "k"), \
-             patch.object(az.urllib.request, "urlopen", side_effect=urlopen), \
+             patch.object(az.requests, "post", side_effect=post), \
              patch.object(az, "time", MagicMock()):
             assert az._synthesize_azure("測試") == AUDIO
         assert attempts == [], "the second attempt was never made"
 
     def test_it_gives_up_rather_than_retrying_forever(self):
         with patch.object(az, "AZURE_SPEECH_KEY", "k"), \
-             patch.object(az.urllib.request, "urlopen",
-                          side_effect=http.client.IncompleteRead(b"")), \
+             patch.object(az.requests, "post",
+                          side_effect=requests.exceptions.ChunkedEncodingError("broken")), \
              patch.object(az, "time", MagicMock()):
             with pytest.raises(TTSError):
                 az._synthesize_azure("測試")
 
     def test_a_timeout_is_retried_too(self):
-        attempts = [TimeoutError("timed out"), _response(AUDIO)]
+        attempts = [requests.exceptions.Timeout("timed out"), _response(AUDIO)]
 
-        def urlopen(*_a, **_k):
+        def post(*_a, **_k):
             outcome = attempts.pop(0)
             if isinstance(outcome, Exception):
                 raise outcome
             return outcome
 
         with patch.object(az, "AZURE_SPEECH_KEY", "k"), \
-             patch.object(az.urllib.request, "urlopen", side_effect=urlopen), \
+             patch.object(az.requests, "post", side_effect=post), \
              patch.object(az, "time", MagicMock()):
             assert az._synthesize_azure("測試") == AUDIO
 
@@ -90,12 +90,12 @@ class TestPermanentFailures:
         """
         calls = []
 
-        def urlopen(*_a, **_k):
+        def post(*_a, **_k):
             calls.append(1)
-            raise urllib.error.HTTPError("u", 400, "Bad Request", {}, None)
+            return _response(b"", status=400)
 
         with patch.object(az, "AZURE_SPEECH_KEY", "k"), \
-             patch.object(az.urllib.request, "urlopen", side_effect=urlopen), \
+             patch.object(az.requests, "post", side_effect=post), \
              patch.object(az, "time", MagicMock()):
             with pytest.raises(TTSError):
                 az._synthesize_azure("測試")
@@ -104,7 +104,7 @@ class TestPermanentFailures:
 
     def test_empty_audio_is_still_an_error(self):
         with patch.object(az, "AZURE_SPEECH_KEY", "k"), \
-             patch.object(az.urllib.request, "urlopen", return_value=_response(b"")), \
+             patch.object(az.requests, "post", return_value=_response(b"")), \
              patch.object(az, "time", MagicMock()):
             with pytest.raises(TTSError):
                 az._synthesize_azure("測試")
