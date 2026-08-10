@@ -1,5 +1,5 @@
 /**
- * Canned response pools for LiveTutor paragraph evaluation feedback.
+ * Canned response pools for ParagraphReading paragraph evaluation feedback.
  * Randomly selected to avoid repetition.
  */
 

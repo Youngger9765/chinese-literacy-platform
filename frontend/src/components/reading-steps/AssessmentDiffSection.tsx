@@ -8,11 +8,11 @@
 
 import React, { useState } from 'react';
 import DiffDisplay from '../ui/DiffDisplay';
-import type { LineBreakdown, FullReadingResult } from '../../types';
+import type { LineBreakdown, KeyPassageReadingResult } from '../../types';
 
 export interface AssessmentDiffSectionProps {
   lineBreakdown: LineBreakdown[];
-  fullReadingResult: FullReadingResult | null;
+  fullReadingResult: KeyPassageReadingResult | null;
   hideScores: boolean;
 }
 

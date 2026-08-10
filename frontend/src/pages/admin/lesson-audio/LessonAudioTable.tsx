@@ -7,10 +7,19 @@ import { Download, Loader2, Play, QrCode, Square } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
+import { prefetchText } from '../../../services/ttsApi';
+import { planParagraphWalk, type ParagraphWalk } from './paragraphWalk';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-type LessonQrStep = 'intro' | 'full-reading';
+// The 全文 code points at full-text-annotate, not lesson-intro.
+//
+// lesson-intro is the 課程簡介 blurb; full-text-annotate (讀全文-做記號) is the
+// step that renders story.content in full. The original wiring predates #2641,
+// when no id said "whole text" — `full-reading` was taken and read a single key
+// passage — so the closest thing was the intro. Reported as 「QR code全文朗讀的
+// 部分會進到課程簡介」.
+type LessonQrStep = 'full-text-annotate' | 'key-passage-reading';
 type AudioMode = 'full' | 'key';
 
 interface StoryListItem {
@@ -181,14 +190,14 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     grade: s.grade,
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
-    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'intro') : '',
+    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'full-text-annotate') : '',
     // Same rule on the passage side: build_demo_reading.plan_demo_audio only
     // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
     // (has_key_reading). Emitting a code for a lesson without one — as this
     // did unconditionally before — is the identical "points at silence" bug
     // the 全文 gate above prevents, just on the passage side. Gate on the data
     // (does a passage exist), never on the grade.
-    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'full-reading') : '',
+    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'key-passage-reading') : '',
   }));
 }
 
@@ -316,7 +325,7 @@ const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, file
       </button>
       {preview && (
         <QrPreviewDialog
-          title={`${title}／${step === 'intro' ? '全文' : '段落'}`}
+          title={`${title}／${step === 'full-text-annotate' ? '全文' : '段落'}`}
           value={preview.value}
           dataUrl={preview.dataUrl}
           filename={qrFileName(filePrefix, lessonId)}
@@ -479,8 +488,13 @@ const LessonAudioTable: React.FC = () => {
     }
   }, [sortedStories]);
 
+  // Which paragraph of a whole-lesson walk plays next. Null when idle or when
+  // playing a key passage (which is a single clip, not a walk).
+  const paragraphQueueRef = useRef<ParagraphWalk | null>(null);
+
   const stopCurrentPlayback = useCallback(() => {
     activeRequestRef.current += 1;
+    paragraphQueueRef.current = null;
     stopTts();
     // Belt and braces: pause the element directly as well.
     //
@@ -533,13 +547,39 @@ const LessonAudioTable: React.FC = () => {
     try {
       const detail = await fetchStoryDetail(story.id, token);
       if (activeRequestRef.current !== requestId) return; // superseded by a later click
+      const paragraphs = detail.paragraphs ?? detail.content ?? [];
       const fullText = detailToFullText(detail);
-      const text = mode === 'key' ? (detail.key_reading?.passage || fullText) : fullText;
       setIsFetchingDetail(false);
-      // Use sentence-level playback (lessonId + paragraphIdx) so the first
-      // sentence starts in ~150ms instead of waiting ~10s for the entire text
-      // to synthesize as one blob. (#2627)
-      speakText(text, story.id, 0);
+
+      if (mode === 'key') {
+        // The key passage is its own text, not a paragraph of the lesson, so it
+        // must go through the single-shot path. Passing a paragraph index here
+        // is what made 「播放段落」 read paragraph 0 instead — the hook prefers
+        // the backend's cached sentences for that index and drops the text.
+        speakText(detail.key_reading?.passage || fullText);
+        return;
+      }
+
+      // Whole lesson: walk the paragraphs.
+      //
+      // speakText(text, lessonId, paragraphIdx) plays exactly ONE paragraph —
+      // there is no whole-lesson mode in the hook. This previously passed a
+      // hardcoded 0, so 「播放全文」 read 76 of lesson 1's 711 characters and
+      // stopped, which also made it indistinguishable from 「播放段落」.
+      //
+      // The walk is worth keeping over one big synthesis: each paragraph hits
+      // the backend's per-sentence cache, so the first words start in ~150ms
+      // rather than after a ~10s synthesis of the entire text.
+      if (paragraphs.length === 0) {
+        speakText(fullText);
+        return;
+      }
+      const walk = planParagraphWalk({ storyId: story.id, paragraphs, requestId });
+      paragraphQueueRef.current = walk;
+      speakText(paragraphs[0], story.id, 0);
+      // Warm paragraph 2 while paragraph 1 is being read, so the boundary
+      // doesn't stall (owner: 「段落之間的延遲太多了」).
+      prefetchText(walk.textAt(walk.next), story.id, walk.next);
     } catch (err) {
       if (activeRequestRef.current !== requestId) return;
       setIsFetchingDetail(false);
@@ -561,6 +601,45 @@ const LessonAudioTable: React.FC = () => {
       started.clear();
     };
   }, []);
+
+  // Advance the whole-lesson walk when a paragraph finishes.
+  //
+  // The hook reports playback through isTtsSpeaking/isTtsLoading; a paragraph is
+  // done when both fall back to false while a queue is still pending. There is
+  // no per-clip completion callback to hook into, so this watches the state the
+  // hook already publishes.
+  const wasPlayingRef = useRef(false);
+  useEffect(() => {
+    const busy = isTtsSpeaking || isTtsLoading;
+    const justFinished = wasPlayingRef.current && !busy;
+    wasPlayingRef.current = busy;
+    if (!justFinished) return;
+
+    const q = paragraphQueueRef.current;
+    // A newer click supersedes the walk — activeRequestRef moves on every
+    // play and every stop, so a stale queue can never resume over a new clip.
+    if (!q || q.requestId !== activeRequestRef.current) return;
+
+    if (q.isFinished) {
+      paragraphQueueRef.current = null;
+      setActiveKey(null);
+      return;
+    }
+    const idx = q.next;
+    q.next += 1;
+
+    // The walk carries the paragraphs, so advancing costs nothing. This used to
+    // re-fetch the whole story detail here — one round trip of silence at every
+    // paragraph boundary, for text that cannot have changed since playback began.
+    const text = q.textAt(idx);
+    if (!text) {
+      paragraphQueueRef.current = null;
+      setActiveKey(null);
+      return;
+    }
+    speakText(text, q.storyId, idx);
+    prefetchText(q.textAt(q.next), q.storyId, q.next);
+  }, [isTtsSpeaking, isTtsLoading, speakText, token]);
 
   useEffect(() => {
     loadStories();
@@ -726,9 +805,9 @@ const LessonAudioTable: React.FC = () => {
               </div>
 
               {deliversFullText(story.grade)
-                ? <QrDownloadButton lessonId={story.id} step="intro" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
                 : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付段落朗讀">—</span>}
-              <QrDownloadButton lessonId={story.id} step="full-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
+              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
             </div>
           );
         })}

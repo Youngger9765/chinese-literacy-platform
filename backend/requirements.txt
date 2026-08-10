@@ -12,6 +12,11 @@ jieba>=0.42
 pytest>=8.0
 pytest-asyncio>=0.23
 httpx>=0.27
+# Azure TTS is called through requests, not urllib: urllib fails ~12% of the
+# time on Azure's chunked responses (IncompleteRead), and each failure used to
+# become mainland-accent audio via the Google fallback. Listed explicitly
+# because it arrives here only as a transitive dependency today.
+requests>=2.31
 google-genai>=1.0
 alembic>=1.13
 google-cloud-storage>=2.14

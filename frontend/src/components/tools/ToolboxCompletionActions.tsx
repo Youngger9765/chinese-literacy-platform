@@ -28,15 +28,15 @@ import { recordToolboxCompletion, type ToolId } from '../../services/toolboxApi'
 
 // Order matches backend TOOL_MODEL_MAP and frontend TOOL_OPTIONS.
 const TOOLBOX_TOOL_IDS: readonly ToolId[] = [
-  'tutor',
-  'full-reading',
+  'paragraph-reading',
+  'key-passage-reading',
   'listening',
-  'vocab',
+  'character-practice',
   'sentence-practice',
   'vocab-definition',
   'vocab-application',
   'comprehension',
-  'vocab-word-search',
+  'vocab-review',
   'knowledge-station',
 ] as const;
 

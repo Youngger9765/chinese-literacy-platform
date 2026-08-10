@@ -19,13 +19,13 @@ import { submitAssignment } from '../services/assignmentApi';
 import { STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { isToolboxMode } from '../services/learningStorageScope';
 import type { ListeningResult } from '../components/reading-steps/ListeningPractice';
-import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { AnnotationSummary } from '../components/reading-steps/FullTextAnnotate';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import type {
   ComprehensionResult,
   DictationResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
   LearningSession,
   ReadingAttempt,
   Story,
@@ -68,7 +68,7 @@ interface UseLearningStepNavigationReturn {
   handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
-  handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishKeyPassageReading: (result: KeyPassageReadingResult) => void;
   handleFinishListening: (result: ListeningResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
@@ -126,9 +126,9 @@ export function useLearningStepNavigation({
       }
       return null;
     });
-    persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
+    persistStep(STEP_PATH_TO_NUMBER['full-text-annotate']);
     ensureDbSession();
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
+    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/full-text-annotate`);
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
   // ─── Navigation helpers ───────────────────────────────────────────────────
@@ -178,8 +178,8 @@ export function useLearningStepNavigation({
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
-      // handleFinishReading completes the 'tutor' step (live tutor readout)
-      dispatchStepFinish('tutor', { readingAttempt: attempt }, { readingAttempt: attempt });
+      // handleFinishReading completes the 'paragraph-reading' step (live tutor readout)
+      dispatchStepFinish('paragraph-reading', { readingAttempt: attempt }, { readingAttempt: attempt });
     },
     [dispatchStepFinish, setLastAttempt],
   );
@@ -193,7 +193,7 @@ export function useLearningStepNavigation({
 
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
-      dispatchStepFinish('vocab', { result }, { vocabResult: result });
+      dispatchStepFinish('character-practice', { result }, { vocabResult: result });
     },
     [dispatchStepFinish],
   );
@@ -202,15 +202,15 @@ export function useLearningStepNavigation({
     (result: DictationResult) => {
       // Dictation has no persistStepProgressState call in the original — just navigate
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigateAfterFinish('vocab-word-search');
+      persistStep(STEP_PATH_TO_NUMBER['vocab-review']);
+      navigateAfterFinish('vocab-review');
     },
     [navigateAfterFinish, persistStep, setSession],
   );
 
-  const handleFinishFullReading = useCallback(
-    (result: FullReadingResult) => {
-      dispatchStepFinish('full-reading', { result }, { fullReadingResult: result });
+  const handleFinishKeyPassageReading = useCallback(
+    (result: KeyPassageReadingResult) => {
+      dispatchStepFinish('key-passage-reading', { result }, { fullReadingResult: result });
     },
     [dispatchStepFinish],
   );
@@ -224,7 +224,7 @@ export function useLearningStepNavigation({
 
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
-      dispatchStepFinish('reading-annotation', { completed: true }, { readingAnnotationCompleted: true });
+      dispatchStepFinish('full-text-annotate', { completed: true }, { readingAnnotationCompleted: true });
     },
     [dispatchStepFinish],
   );
@@ -245,14 +245,14 @@ export function useLearningStepNavigation({
 
   const handleFinishStoryStructure = useCallback(
     () => {
-      dispatchStepFinish('story-structure', { completed: true });
+      dispatchStepFinish('keypoints-table', { completed: true });
     },
     [dispatchStepFinish],
   );
 
   const handleFinishReadingStrategy = useCallback(
     () => {
-      dispatchStepFinish('reading-strategy', { completed: true });
+      dispatchStepFinish('spotlight', { completed: true });
     },
     [dispatchStepFinish],
   );
@@ -266,7 +266,7 @@ export function useLearningStepNavigation({
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
-      dispatchStepFinish('vocab-word-search', { completed: true }, { vocabWordSearchCompleted: true });
+      dispatchStepFinish('vocab-review', { completed: true }, { vocabWordSearchCompleted: true });
     },
     [dispatchStepFinish],
   );
@@ -399,7 +399,7 @@ export function useLearningStepNavigation({
     handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
-    handleFinishFullReading,
+    handleFinishKeyPassageReading,
     handleFinishListening,
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,

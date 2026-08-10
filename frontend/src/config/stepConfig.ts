@@ -8,7 +8,7 @@
  *
  * DEFAULT_STEP_SEQUENCE: the canonical ordered list of step IDs for legacy lessons
  *   that do not carry their own step_sequence field.
- *   New lessons can include `step_sequence: ['reading-annotation', 'tutor', ...]`
+ *   New lessons can include `step_sequence: ['full-text-annotate', 'paragraph-reading', ...]`
  *   in their YAML to override this default.
  *
  * Consumers that need the active ordered list should use:
@@ -84,8 +84,8 @@ export interface StepConfig {
  *   New comprehension split steps use dbStepNumbers 15–16 (Issue #1335).
  */
 export const STEP_REGISTRY: Record<string, StepConfig> = {
-  'intro': {
-    id: 'intro',
+  'lesson-intro': {
+    id: 'lesson-intro',
     label: '課程簡介',
     displayChar: '簡',
     hint: '看看這堂課要學什麼策略，以及有哪些步驟',
@@ -95,8 +95,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     enabled: true,
     category: 'reading',
   },
-  'reading-annotation': {
-    id: 'reading-annotation',
+  'full-text-annotate': {
+    id: 'full-text-annotate',
     label: '讀全文-做記號',
     displayChar: '記',
     hint: '閱讀全文，選取不懂或重要的詞語做記號',
@@ -106,8 +106,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     enabled: true,
     category: 'reading',
   },
-  'tutor': {
-    id: 'tutor',
+  'paragraph-reading': {
+    id: 'paragraph-reading',
     label: '逐段朗讀',
     displayChar: '段',
     hint: '跟著 AI 一段一段大聲朗讀',
@@ -119,14 +119,14 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   },
   // 2026-07-20 教授審查決策（曾世傑教授）：朗讀只練老師指定的「重點段落」(念順順，約 300-400 字，
   // 課文旁手指頭符號標起點、右欄累計字數標長度)，不練全文。做法＝把既有 full-reading step **改造**成
-  // 重點朗讀（保留 step id 'full-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
-  // 重點段資料就緒前，FullReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
+  // 重點朗讀（保留 step id 'key-passage-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
+  // 重點段資料就緒前，KeyPassageReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
   // （見 docs/reading-key-passage-TODO.md、skill build-key-reading）。
   // ⚠️ 改這個 id 一定要同步更新後端 `backend/app/models/session.py` 的 `_FRONTEND_STEP_ALIAS`
   // （前端 step key → 後端 canonical key → step number）。後端查無此 key 會算成 0，
   // 完成度掉單、作業提交卡住且靜默無 error（#2588）。
-  'full-reading': {
-    id: 'full-reading',
+  'key-passage-reading': {
+    id: 'key-passage-reading',
     label: '重點朗讀',
     displayChar: '朗',
     hint: '朗讀老師指定的重點段落，練習流暢度',
@@ -147,8 +147,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'comprehension',
   },
-  'vocab': {
-    id: 'vocab',
+  'character-practice': {
+    id: 'character-practice',
     label: '生字練習',
     displayChar: '字',
     hint: '練習課文中的生字筆順與讀音',
@@ -181,8 +181,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     category: 'practice',
   },
   // Issue #1335: split old "comprehension" tab-container into 3 independent steps
-  'story-structure': {
-    id: 'story-structure',
+  'keypoints-table': {
+    id: 'keypoints-table',
     label: '文章重點表',
     displayChar: '重',
     hint: '把課文重點填進去，讓 AI 幫你檢查',
@@ -192,8 +192,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     enabled: true,
     category: 'comprehension',
   },
-  'reading-strategy': {
-    id: 'reading-strategy',
+  'spotlight': {
+    id: 'spotlight',
     label: '閱讀聚光燈',
     displayChar: '光',
     hint: '練習這課的閱讀策略',
@@ -227,8 +227,8 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     enabled: true,
     category: 'comprehension',
   },
-  'vocab-word-search': {
-    id: 'vocab-word-search',
+  'vocab-review': {
+    id: 'vocab-review',
     label: '語詞複習',
     displayChar: '複',
     hint: '在字母格中找出學過的詞語',
@@ -293,19 +293,19 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
  *   - 閱讀理解   (comprehension, dbStep 3)       — was tab 1 inside ComprehensionChat
  */
 export const DEFAULT_STEP_SEQUENCE: string[] = [
-  'intro',
-  'reading-annotation',
-  'tutor',
-  'full-reading',
+  'lesson-intro',
+  'full-text-annotate',
+  'paragraph-reading',
+  'key-passage-reading',
   'listening',
-  'vocab',
+  'character-practice',
   'vocab-definition',
   'vocab-application',
-  'reading-strategy',
-  'story-structure',
+  'spotlight',
+  'keypoints-table',
   'sentence-practice',
   'comprehension',
-  'vocab-word-search',
+  'vocab-review',
   'dictation',
   'knowledge-station',
   'report',
@@ -361,13 +361,13 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
  * When the parser vocabulary drifts, add the new alias here (a console.warn in
  * stepSequenceFromWorksheet flags any type that still resolves to nothing).
  */
-const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
+export const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
   vocab_definitions: 'vocab-definition', // 語詞我最棒 (plural type → singular id)
-  structure_table: 'story-structure', //   文章重點表
-  spotlight: 'reading-strategy', //         閱讀聚光燈
+  structure_table: 'keypoints-table', //   文章重點表
+  reading_strategy: 'spotlight', //   閱讀聚光燈（學習單的 section type 是 reading_strategy，不可改）
   mcq: 'comprehension', //                  閱讀理解
-  word_search: 'vocab-word-search', //      詞語複習
-  reading_timer: 'full-reading', //         念順順 → 重點朗讀（full-reading 已改造成重點朗讀，2026-07-20）
+  word_search: 'vocab-review', //      詞語複習
+  reading_timer: 'key-passage-reading', //         念順順 → 重點朗讀（full-reading 已改造成重點朗讀，2026-07-20）
 };
 
 /**
@@ -392,22 +392,70 @@ export const KNOWN_UNMAPPED_WORKSHEET_TYPES = [] as const;
  * — the 5/1 "學習步驟動態對應學習單" requirement — instead of the flat
  * DEFAULT_STEP_SEQUENCE (which e.g. orders 文章重點表/閱讀聚光燈 opposite to the paper).
  *
- * 'intro' is prepended (the online flow always opens with it; the paper starts
+ * 'lesson-intro' is prepended (the online flow always opens with it; the paper starts
  * at 讀全文). Unmapped types are dropped (with a console.warn — see below), and
  * disabled steps are dropped later by resolveActiveSteps. Returns null when
  * there is no worksheet order so callers fall back to DEFAULT_STEP_SEQUENCE.
  */
+export const LEGACY_STEP_ID_ALIASES: Record<string, string> = {
+  'full-reading': 'key-passage-reading',
+  tutor: 'paragraph-reading',
+  intro: 'lesson-intro',
+  'reading-annotation': 'full-text-annotate',
+  'reading-strategy': 'spotlight',
+  'story-structure': 'keypoints-table',
+  vocab: 'character-practice',
+  'vocab-word-search': 'vocab-review',
+};
+
+/** Resolve a possibly-legacy step id to the current one. Unknown ids pass through. */
+export function resolveStepId(id: string): string {
+  return LEGACY_STEP_ID_ALIASES[id] ?? id;
+}
+
+/**
+ * Steps a visitor may open without an account (#2649).
+ *
+ * A student scans a QR code printed on a paper worksheet. They have no session.
+ * If every learning step sits behind the login wall, that QR code does nothing
+ * but show them a password box — so the one step the QR code targets, 讀全文-做
+ * 記號, has to be readable and listenable anonymously.
+ *
+ * Every other step stays private, and the reason is the same in each case: it
+ * *writes* something. Recordings, annotations, practice results and scores all
+ * have to belong to a user. Reading and listening do not.
+ *
+ * Keep this set at one entry unless the same argument can be made again.
+ */
+export const PUBLIC_LEARNING_STEPS: ReadonlySet<string> = new Set([
+  'full-text-annotate',
+  // The 念順順 passage. Its own step both plays the passage and records the
+  // student reading it, so anonymous visitors get a listen-only view of it —
+  // the recording half still needs an account to belong to. Without this the
+  // 段落 QR printed on the worksheet walked straight into a login box.
+  'key-passage-reading',
+]);
+
+/** True when `id` (canonical or legacy) is openable without logging in. */
+export function isPublicLearningStep(id: string): boolean {
+  return PUBLIC_LEARNING_STEPS.has(resolveStepId(id));
+}
+
 export function stepSequenceFromWorksheet(
   worksheet?: Array<{ number?: string; name?: string; type?: string }> | null,
 ): string[] | null {
   if (!worksheet || worksheet.length === 0) return null;
-  const ids: string[] = ['intro'];
+  const ids: string[] = ['lesson-intro'];
   for (const section of worksheet) {
     const type = section?.type;
     if (!type) continue;
     // Alias BEFORE the dash transform, then look up in the registry.
     const aliased = WORKSHEET_TYPE_ALIASES[type] ?? type;
-    const id = aliased.replace(/_/g, '-'); // reading_annotation → reading-annotation
+    // Underscore→dash yields the *historical* id (reading_annotation →
+    // reading-annotation). Run it through the legacy resolver so worksheet
+    // vocabulary — printed on paper and therefore unrenameable — keeps
+    // reaching the current step ids.
+    const id = resolveStepId(aliased.replace(/_/g, '-'));
     if (STEP_REGISTRY[id]) {
       if (!ids.includes(id)) ids.push(id);
     } else {
@@ -433,12 +481,34 @@ export function stepSequenceFromWorksheet(
 /** All enabled steps in default display order. Equivalent to resolveActiveSteps(). */
 export const ACTIVE_STEPS = resolveActiveSteps();
 
-/** Map from URL path id (e.g. "intro") to dbStepNumber (e.g. 1). */
+/** Map from URL path id (e.g. "lesson-intro") to dbStepNumber (e.g. 1). */
 export const STEP_PATH_TO_NUMBER: Record<string, number> = Object.fromEntries(
   Object.values(STEP_REGISTRY).map((s) => [s.id, s.dbStepNumber]),
 );
 
-/** Map from URL path id to AppView (e.g. "intro" → AppView.INTRO). */
+/** Map from URL path id to AppView (e.g. "lesson-intro" → AppView.INTRO). */
 export const PATH_TO_VIEW: Record<string, AppView> = Object.fromEntries(
   Object.values(STEP_REGISTRY).map((s) => [s.id, s.view]),
 );
+
+// ---------------------------------------------------------------------------
+// Legacy step ids
+// ---------------------------------------------------------------------------
+
+/**
+ * Old id → current id.
+ *
+ * The ids were renamed so each one says what its label says. Two were
+ * outright inverted before that: `full-reading` read a single key passage,
+ * while `reading-annotation` was the step that actually read the whole text —
+ * which is how a feature ended up wired to `tutor`, a step disabled since
+ * 2026-07-20, and how the 「全文」 QR codes came to point at the intro page.
+ *
+ * These aliases exist because URLs have already been handed out: QR codes
+ * generated from the admin panel, links in issues, links in docs. Resolving
+ * them costs one lookup and saves every one of those from 404ing.
+ *
+ * dbStepNumber is deliberately untouched by the rename — student progress is
+ * stored as that integer, never as the id string, so no row had to move.
+ */
+

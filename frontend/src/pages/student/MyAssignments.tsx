@@ -31,7 +31,7 @@ const MyAssignments: React.FC = () => {
   const [classroomFilter, setClassroomFilter] = useState<string>('all');
 
   const assignmentSteps = useMemo(() => ACTIVE_STEPS, []);
-  const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
+  const defaultStepPath = assignmentSteps[0]?.id ?? 'full-text-annotate';
   const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
 
   // Build classroom name -> teacher name lookup

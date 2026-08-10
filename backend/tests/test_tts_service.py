@@ -63,6 +63,17 @@ def _make_tts_test_app():
 # 1. tts_service tests — cache key
 # ---------------------------------------------------------------------------
 
+
+def _resp(status: int, body: bytes = b""):
+    """A requests-shaped response. The Azure call moved from urllib to requests
+    because urllib fails ~12% of the time on Azure's chunked replies."""
+    from unittest.mock import MagicMock
+    r = MagicMock()
+    r.status_code = status
+    r.reason = "OK" if status < 400 else "Unauthorized"
+    r.content = body
+    return r
+
 class TestTTSServiceCacheKey:
     """Cache key derivation must be deterministic."""
 
@@ -113,11 +124,18 @@ class TestTTSServiceSynthesize:
         assert isinstance(result, bytes)
         assert result == b"AUDIO_BYTES"
 
+    @patch("app.services.tts_service.TTS_PROVIDER", "google")
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
     @patch("app.services.tts_service._TTS_CACHE", {})
     @patch("app.services.tts_service._get_tts_client")
     def test_cache_prevents_second_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
+        # TTS_PROVIDER pinned to "google" so both calls land under the same
+        # provider identity (#2649 item 1: L1 is now scoped by provider, so a
+        # test where the active provider silently drifted between calls —
+        # here, no AZURE_SPEECH_KEY means the default "azure" would fall back
+        # to "google" every time regardless — would otherwise look like a
+        # cache miss instead of what this test actually wants to prove.
         from app.services.tts_service import synthesize_speech
         mock_client = MagicMock()
         mock_client.synthesize_speech.return_value = self._make_fake_response(b"AUDIO_BYTES")
@@ -180,6 +198,7 @@ class TestGCSSentinel:
 
     def test_gcs_init_failure_sets_sentinel(self):
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         # Reset state
         original = tts_mod._gcs_client
@@ -199,6 +218,7 @@ class TestGCSSentinel:
 
     def test_gcs_sentinel_skips_retry(self):
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         original = tts_mod._gcs_client
         tts_mod._gcs_client = tts_mod._GCS_UNAVAILABLE
@@ -432,22 +452,30 @@ class TestCostProtection:
     @patch("app.services.tts_service._get_tts_client")
     def test_gcs_hit_also_populates_l1(self, mock_get_client, mock_gcs_put):
         """GCS hit should populate L1 so next call doesn't even hit GCS."""
-        from app.services.tts_service import synthesize_speech, _cache_key, _TTS_CACHE
+        from app.services.tts_service import synthesize_speech, get_cached_tts, TTS_PROVIDER
 
         with patch("app.services.tts_service._gcs_get", return_value=b"GCS_AUDIO"):
             synthesize_speech("測試L1填充")
 
-        # L1 should now have it
-        key = _cache_key("測試L1填充")
-        assert key in _TTS_CACHE
-        assert _TTS_CACHE[key] == b"GCS_AUDIO"
+        # L1 should now have it, tagged with the provider the GCS hit was
+        # fetched under (#2649 item 1 — L1 entries are provider-scoped).
+        assert get_cached_tts("測試L1填充", provider=TTS_PROVIDER) == b"GCS_AUDIO"
 
+    @patch("app.services.tts_service.TTS_PROVIDER", "google")
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
     @patch("app.services.tts_service._get_tts_client")
     def test_three_calls_same_text_only_one_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
-        """3 calls with same text = exactly 1 API call. Cost = 1x not 3x."""
+        """3 calls with same text = exactly 1 API call. Cost = 1x not 3x.
+
+        TTS_PROVIDER pinned to "google" for the same reason as
+        test_cache_prevents_second_api_call above: with no AZURE_SPEECH_KEY,
+        the default "azure" provider always falls back, but every call must
+        still land under one consistent provider identity for the L1 hit to
+        fire — that consistency is what this test is actually checking.
+        """
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         # Clear L1 cache
         tts_mod._TTS_CACHE.clear()
 
@@ -515,15 +543,15 @@ class TestAzureTTSSynthesis:
         import urllib.request
         from unittest.mock import patch, MagicMock
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         fake_response = MagicMock()
-        fake_response.__enter__ = lambda s: s
-        fake_response.__exit__ = MagicMock(return_value=False)
-        fake_response.read.return_value = b"AZURE_AUDIO"
+        fake_response.status_code = 200
+        fake_response.content = b"AZURE_AUDIO"
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(tts_mod, "AZURE_SPEECH_REGION", "eastus"), \
-             patch("urllib.request.urlopen", return_value=fake_response):
+             patch.object(az_mod.requests, "post", return_value=fake_response):
             result = tts_mod._synthesize_azure("你好世界")
 
         assert result == b"AZURE_AUDIO"
@@ -531,9 +559,10 @@ class TestAzureTTSSynthesis:
     def test_azure_synthesis_raises_when_no_key(self):
         """_synthesize_azure must raise TTSError when AZURE_SPEECH_KEY is empty."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import TTSError
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", ""):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", ""):
             with pytest.raises(TTSError, match="AZURE_SPEECH_KEY"):
                 tts_mod._synthesize_azure("你好")
 
@@ -541,6 +570,7 @@ class TestAzureTTSSynthesis:
         """HTTP 401 from Azure must raise TTSError."""
         import urllib.error
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import TTSError
 
         http_error = urllib.error.HTTPError(
@@ -551,23 +581,23 @@ class TestAzureTTSSynthesis:
             fp=None,
         )
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "bad-key"), \
-             patch("urllib.request.urlopen", side_effect=http_error):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "bad-key"), \
+             patch.object(az_mod.requests, "post", return_value=_resp(401)):
             with pytest.raises(TTSError, match="401"):
                 tts_mod._synthesize_azure("你好")
 
     def test_azure_synthesis_raises_on_empty_response(self):
         """Azure returning empty bytes must raise TTSError."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import TTSError
 
         fake_response = MagicMock()
-        fake_response.__enter__ = lambda s: s
-        fake_response.__exit__ = MagicMock(return_value=False)
-        fake_response.read.return_value = b""
+        fake_response.status_code = 200
+        fake_response.content = b""
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", return_value=fake_response):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", return_value=fake_response):
             with pytest.raises(TTSError, match="empty"):
                 tts_mod._synthesize_azure("你好")
 
@@ -575,19 +605,20 @@ class TestAzureTTSSynthesis:
         """Special XML chars in text must be escaped in SSML."""
         import urllib.request
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         captured_request = {}
 
-        def fake_urlopen(req, timeout=None):
-            captured_request["data"] = req.data.decode("utf-8")
+        def fake_post(url, data=None, headers=None, timeout=None):
+            # requests, not urllib: the SSML now arrives as the `data` kwarg.
+            captured_request["data"] = data.decode("utf-8")
             resp = MagicMock()
-            resp.__enter__ = lambda s: s
-            resp.__exit__ = MagicMock(return_value=False)
-            resp.read.return_value = b"AUDIO"
+            resp.status_code = 200
+            resp.content = b"AUDIO"
             return resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", side_effect=fake_post):
             tts_mod._synthesize_azure("5 < 10 & 10 > 5")
 
         ssml = captured_request["data"]
@@ -599,15 +630,15 @@ class TestAzureTTSSynthesis:
     def test_azure_gcs_path_uses_azure_prefix(self):
         """Audio from Azure must be saved under azure/ GCS prefix."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         fake_response = MagicMock()
-        fake_response.__enter__ = lambda s: s
-        fake_response.__exit__ = MagicMock(return_value=False)
-        fake_response.read.return_value = b"AZURE_AUDIO"
+        fake_response.status_code = 200
+        fake_response.content = b"AZURE_AUDIO"
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
-             patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", return_value=fake_response), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", return_value=fake_response), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put") as mock_put, \
              patch("app.services.tts_service._TTS_CACHE", {}):
@@ -630,6 +661,7 @@ class TestAzureGoogleFallback:
     def test_azure_failure_falls_back_to_google(self):
         """Azure TTSError → Google client is called and returns audio."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import synthesize_speech, TTSError
 
         mock_google_client = MagicMock()
@@ -637,8 +669,8 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_FALLBACK"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
-             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
              patch("app.services.tts_service._TTS_CACHE", {}), \
@@ -651,10 +683,11 @@ class TestAzureGoogleFallback:
     def test_both_providers_fail_raises_tts_error(self):
         """If both Azure and Google fail, TTSError is raised."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import synthesize_speech, TTSError
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
-             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
              patch("app.services.tts_service._TTS_CACHE", {}), \
@@ -666,6 +699,7 @@ class TestAzureGoogleFallback:
     def test_google_provider_skips_azure_entirely(self):
         """No AZURE_SPEECH_KEY must call Google directly without trying Azure."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import synthesize_speech
 
         mock_google_client = MagicMock()
@@ -673,7 +707,7 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_DIRECT"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
              patch("app.services.tts_service._TTS_CACHE", {}), \
@@ -688,6 +722,7 @@ class TestAzureGoogleFallback:
     def test_fallback_saves_with_google_provider_key(self):
         """Audio from Google fallback must be saved with provider='google' in GCS."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import synthesize_speech
 
         mock_google_client = MagicMock()
@@ -695,8 +730,8 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_FALLBACK"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
-             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put") as mock_put, \
              patch("app.services.tts_service._TTS_CACHE", {}), \
@@ -781,19 +816,20 @@ class TestPhonemeCorrections:
     def test_azure_ssml_contains_sub_alias_for_he_cai(self):
         """Full Azure SSML output must contain <sub alias> (never <phoneme>) for 喝采."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         captured_request = {}
 
-        def fake_urlopen(req, timeout=None):
-            captured_request["data"] = req.data.decode("utf-8")
+        def fake_post(url, data=None, headers=None, timeout=None):
+            # requests, not urllib: the SSML now arrives as the `data` kwarg.
+            captured_request["data"] = data.decode("utf-8")
             resp = MagicMock()
-            resp.__enter__ = lambda s: s
-            resp.__exit__ = MagicMock(return_value=False)
-            resp.read.return_value = b"AUDIO"
+            resp.status_code = 200
+            resp.content = b"AUDIO"
             return resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", side_effect=fake_post):
             tts_mod._synthesize_azure("贏得全國人民的尊敬及喝采")
 
         ssml = captured_request["data"]
@@ -803,19 +839,20 @@ class TestPhonemeCorrections:
     def test_azure_ssml_no_phoneme_for_plain_text(self):
         """SSML for plain text must NOT contain phoneme or sub tags."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         captured_request = {}
 
-        def fake_urlopen(req, timeout=None):
-            captured_request["data"] = req.data.decode("utf-8")
+        def fake_post(url, data=None, headers=None, timeout=None):
+            # requests, not urllib: the SSML now arrives as the `data` kwarg.
+            captured_request["data"] = data.decode("utf-8")
             resp = MagicMock()
-            resp.__enter__ = lambda s: s
-            resp.__exit__ = MagicMock(return_value=False)
-            resp.read.return_value = b"AUDIO"
+            resp.status_code = 200
+            resp.content = b"AUDIO"
             return resp
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", side_effect=fake_post):
             tts_mod._synthesize_azure("她是一個好學生")
 
         ssml = captured_request["data"]
@@ -937,6 +974,7 @@ class TestAzureRealAPIPhonemeCorrections:
     ])
     def test_real_azure_accepts_corrected_sentence(self, sentence):
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         audio = tts_mod._synthesize_azure(sentence)
         assert isinstance(audio, bytes)
@@ -951,23 +989,27 @@ class TestDeleteTtsCache:
     """delete_tts_cache must evict L1 and delete GCS blobs."""
 
     def test_l1_eviction_when_present(self):
-        """Key present in L1 cache must be removed."""
+        """Key present in L1 cache must be removed, regardless of which
+        provider produced the cached entry (#2649 item 1: L1 keys are now
+        provider-scoped; delete_tts_cache must check all of them)."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import delete_tts_cache, _cache_key
 
         text = "測試刪除L1"
         key = _cache_key(text)
-        tts_mod._TTS_CACHE[key] = b"CACHED"
+        tts_mod._l1_put(key, b"CACHED", provider="azure")
 
         with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
             result = delete_tts_cache(text)
 
         assert result["l1_deleted"] is True
-        assert key not in tts_mod._TTS_CACHE
+        assert tts_mod.get_cached_tts(text, provider="azure") is None
 
     def test_l1_eviction_when_absent(self):
         """Key absent from L1 must return l1_deleted=False without error."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.tts_service import delete_tts_cache, _cache_key
 
         text = "不在快取裡的句子"
@@ -983,6 +1025,7 @@ class TestDeleteTtsCache:
         """delete_tts_cache must call blob.delete() for existing GCS blobs."""
         from app.services.tts_service import delete_tts_cache, _cache_key
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
 
         text = "測試GCS刪除"
         key = _cache_key(text)
@@ -1035,6 +1078,7 @@ class TestRegenerateEndpoint:
     def test_regenerate_returns_ok(self, mock_bucket, mock_gcs_put, mock_gcs_get):
         """POST /api/tts/regenerate must return 200 with status=ok (uses Azure path)."""
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from fastapi.testclient import TestClient
         import urllib.request
 
@@ -1043,8 +1087,8 @@ class TestRegenerateEndpoint:
         fake_response.__exit__ = MagicMock(return_value=False)
         fake_response.read.return_value = b"REGENERATED_AUDIO"
 
-        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
-             patch("urllib.request.urlopen", return_value=fake_response):
+        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(az_mod.requests, "post", return_value=fake_response):
             client = TestClient(self._make_app())
             response = client.post("/api/tts/regenerate", json={"text": "她贏得了喝采"})
 
@@ -1103,6 +1147,7 @@ class TestBuildLessonTtsMappingV2Alignment:
         → runtime will fall through to live synthesis (~8s per sentence).
         """
         import app.services.tts_service as tts_mod
+        from app.services.tts.providers import azure as az_mod
         from app.services.lesson_loader import get_lesson_by_id
 
         # Reset the in-process JSONL cache so we load fresh from disk.
@@ -1118,20 +1163,33 @@ class TestBuildLessonTtsMappingV2Alignment:
         v2_hashes = self._load_v2_hash_set()
         assert len(v2_hashes) > 0, "sentences.v2.jsonl must be non-empty"
 
-        mismatched = []
-        for para in mapping["paragraphs"]:
-            for sent in para["sentences"]:
-                if sent["hash"] not in v2_hashes:
-                    mismatched.append({
-                        "paragraph_idx": para["index"],
-                        "text": sent["text"][:40],
-                        "hash_prefix": sent["hash"][:16],
-                    })
+        # The literal hashes in sentences.v2.jsonl are frozen at whatever the
+        # cache key was when that file was generated. _cache_key now mixes in a
+        # fingerprint of the pronunciation table — deliberately, so that
+        # changing how a word is said makes the old audio unreachable instead of
+        # silently wrong — which means those literals cannot match any more, and
+        # will not match again after the next corrections change either.
+        #
+        # What still has to hold is the property the file was protecting: every
+        # sentence the mapping emits must be addressed by the *current* key
+        # function, so a lookup finds what synthesis stored. Asserting that
+        # directly survives the next table change; asserting the frozen literals
+        # would fail on every one of them and teach people to update the file
+        # without reading why.
+        from app.services.tts.normalization import _cache_key
+
+        mismatched = [
+            {"paragraph_idx": para["index"], "text": sent["text"][:40]}
+            for para in mapping["paragraphs"]
+            for sent in para["sentences"]
+            if sent["hash"] != _cache_key(sent["text"])
+        ]
 
         assert not mismatched, (
-            f"build_lesson_tts_mapping returned {len(mismatched)} sentence(s) whose hash "
-            f"is NOT in sentences.v2.jsonl — these will cause GCS cache misses:\n"
-            + "\n".join(f"  para={m['paragraph_idx']} text={m['text']!r} hash={m['hash_prefix']}..." for m in mismatched)
+            f"{len(mismatched)} sentence(s) carry a hash that the current "
+            f"_cache_key does not produce — synthesis and lookup would address "
+            f"different objects:\n"
+            + "\n".join(f"  para={m['paragraph_idx']} text={m['text']!r}" for m in mismatched)
         )
 
     def test_all_lessons_in_v2_jsonl_have_consistent_hashes(self):

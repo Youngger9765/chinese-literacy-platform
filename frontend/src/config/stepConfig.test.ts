@@ -10,7 +10,7 @@ import {
 // lesson YAML (backend/data/lessons/L43.yml worksheet_section_order).
 const L43_WORKSHEET = [
   { number: '一', name: '讀全文-做記號', type: 'reading_annotation' },
-  { number: '二', name: '逐段朗讀', type: 'tutor' },
+  { number: '二', name: '逐段朗讀', type: 'paragraph-reading' },
   { number: '三', name: '全文朗讀', type: 'full_reading' },
   { number: '四', name: '詞語理解', type: 'vocab_definition' },
   { number: '五', name: '語詞應用', type: 'vocab_application' },
@@ -25,16 +25,16 @@ const L43_WORKSHEET = [
 describe('stepSequenceFromWorksheet — 學習步驟動態對應學習單', () => {
   it('maps section type (underscore) → step id (hyphen) and prepends intro', () => {
     expect(stepSequenceFromWorksheet(L43_WORKSHEET)).toEqual([
-      'intro',
-      'reading-annotation',
-      'tutor',
-      'full-reading',
+      'lesson-intro',
+      'full-text-annotate',
+      'paragraph-reading',
+      'key-passage-reading',
       'vocab-definition',
       'vocab-application',
-      'story-structure', // worksheet 六 — 文章重點表
-      'reading-strategy', // worksheet 七 — 閱讀聚光燈 (AFTER 重點表)
+      'keypoints-table', // worksheet 六 — 文章重點表
+      'spotlight', // worksheet 七 — 閱讀聚光燈 (AFTER 重點表)
       'comprehension',
-      'vocab-word-search',
+      'vocab-review',
       'knowledge-station',
       'report',
     ]);
@@ -44,9 +44,9 @@ describe('stepSequenceFromWorksheet — 學習步驟動態對應學習單', () =
     // DEFAULT_STEP_SEQUENCE orders reading-strategy BEFORE story-structure;
     // the paper worksheet is the opposite. The nav must follow the paper.
     const seq = stepSequenceFromWorksheet(L43_WORKSHEET)!;
-    expect(seq.indexOf('story-structure')).toBeLessThan(seq.indexOf('reading-strategy'));
+    expect(seq.indexOf('keypoints-table')).toBeLessThan(seq.indexOf('spotlight'));
     const ids = resolveActiveSteps(seq).map((s) => s.id);
-    expect(ids.indexOf('story-structure')).toBeLessThan(ids.indexOf('reading-strategy'));
+    expect(ids.indexOf('keypoints-table')).toBeLessThan(ids.indexOf('spotlight'));
   });
 
   it('returns null for empty/missing worksheet → caller falls back to DEFAULT', () => {
@@ -61,7 +61,7 @@ describe('stepSequenceFromWorksheet — 學習步驟動態對應學習單', () =
         { number: '一', name: 'X', type: 'bogus_type' },
         { number: '二', name: '閱讀理解', type: 'comprehension' },
       ]),
-    ).toEqual(['intro', 'comprehension']);
+    ).toEqual(['lesson-intro', 'comprehension']);
   });
 });
 
@@ -95,10 +95,10 @@ describe('stepSequenceFromWorksheet — REAL parser vocabulary alias map (#2526)
   // transform MUST resolve to a real STEP_REGISTRY id (no silent drop).
   it.each([
     ['vocab_definitions', 'vocab-definition'], //  ALIAS (plural → singular)
-    ['structure_table', 'story-structure'], //     ALIAS
-    ['spotlight', 'reading-strategy'], //          ALIAS
+    ['structure_table', 'keypoints-table'], //     ALIAS
+    ['spotlight', 'spotlight'], //          ALIAS
     ['mcq', 'comprehension'], //                   ALIAS
-    ['word_search', 'vocab-word-search'], //       ALIAS
+    ['word_search', 'vocab-review'], //       ALIAS
     ['vocab_application', 'vocab-application'], //  already worked (dash transform)
     ['knowledge_station', 'knowledge-station'], //  already worked (dash transform)
   ])('parser type "%s" resolves to registry id "%s"', (type, expectedId) => {
@@ -111,15 +111,15 @@ describe('stepSequenceFromWorksheet — REAL parser vocabulary alias map (#2526)
   it('resolves a full real worksheet in order (reading_timer → full-reading, all 8 kept)', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(stepSequenceFromWorksheet(G8_L16_WORKSHEET)).toEqual([
-      'intro',
-      'full-reading', //  念順順 → 重點朗讀 (full-reading 改造, 2026-07-20 教授審查定調)
+      'lesson-intro',
+      'key-passage-reading', //  念順順 → 重點朗讀 (full-reading 改造, 2026-07-20 教授審查定調)
       'vocab-definition',
       'vocab-application',
-      'story-structure',
+      'keypoints-table',
       'knowledge-station',
-      'reading-strategy',
+      'spotlight',
       'comprehension',
-      'vocab-word-search',
+      'vocab-review',
     ]);
   });
 
@@ -136,16 +136,16 @@ describe('stepSequenceFromWorksheet — REAL parser vocabulary alias map (#2526)
     // 2026-07-20 教授審查會議解決了唯一歧義：念順順 (reading_timer) = 1 分鐘計時流暢朗讀。
     // 做法＝把 full-reading step 改造成「重點朗讀」(保留 id 避免完成-識別 bug)，reading_timer 對應過去。
     expect([...KNOWN_UNMAPPED_WORKSHEET_TYPES]).toEqual([]);
-    expect(STEP_REGISTRY['full-reading']).toBeDefined();
-    expect(STEP_REGISTRY['full-reading'].label).toBe('重點朗讀');
+    expect(STEP_REGISTRY['key-passage-reading']).toBeDefined();
+    expect(STEP_REGISTRY['key-passage-reading'].label).toBe('重點朗讀');
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const seq = stepSequenceFromWorksheet([
       { number: '二', name: '念順順', type: 'reading_timer' },
       { number: '八', name: '閱讀理解', type: 'mcq' },
     ]);
-    expect(seq).toContain('full-reading'); //     念順順 now resolves (重點朗讀)
-    expect(seq).not.toContain('tutor'); //        逐段 hidden from nav
+    expect(seq).toContain('key-passage-reading'); //     念順順 now resolves (重點朗讀)
+    expect(seq).not.toContain('paragraph-reading'); //        逐段 hidden from nav
     expect(seq).toContain('comprehension'); //    mcq still resolves alongside
     expect(
       warnSpy.mock.calls.some((args) => args.some((a) => String(a).includes('reading_timer'))),

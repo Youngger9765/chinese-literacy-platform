@@ -6,7 +6,7 @@
  * Step IDs match `STEP_REGISTRY` keys in `config/stepConfig.ts`.
  */
 
-import type { LineResult, ParagraphSummaryData } from '../components/reading-steps/live-tutor/liveTutorTypes';
+import type { LineResult, ParagraphSummaryData } from '../components/reading-steps/paragraph-reading/paragraphReadingTypes';
 
 /** Step 1 — Intro: just a "visited" marker so teachers can see the student entered the lesson. */
 export interface IntroStepData {
@@ -15,7 +15,7 @@ export interface IntroStepData {
   pdf_opened?: boolean;
 }
 
-/** Step 2 — LiveTutor (per-paragraph reading evaluation). */
+/** Step 2 — ParagraphReading (per-paragraph reading evaluation). */
 export interface TutorParagraphSummary {
   paragraph_index: number;
   /** Cumulative attempts on this paragraph. */
@@ -91,7 +91,7 @@ export interface DictationWordResult {
 export interface DictationStepData {
   word_results: DictationWordResult[];
   current_index: number;
-  phase: 'intro' | 'practice' | 'results';
+  phase: 'lesson-intro' | 'practice' | 'results';
   result?: {
     total_words: number;
     correct_count: number;
@@ -100,8 +100,8 @@ export interface DictationStepData {
   };
 }
 
-/** Step 6 — FullReading (whole-text reading + self-rating). */
-export interface FullReadingResult {
+/** Step 6 — KeyPassageReading (whole-text reading + self-rating). */
+export interface KeyPassageReadingResult {
   matchRate?: number;
   feedback?: string;
   diffTokens?: unknown[];
@@ -112,8 +112,8 @@ export interface FullReadingResult {
   audioUrl?: string;
 }
 
-export interface FullReadingStepData {
-  result?: FullReadingResult;
+export interface KeyPassageReadingStepData {
+  result?: KeyPassageReadingResult;
   /** Student self-rating 1-5 (Issue #1386). */
   self_rating?: number;
   /** Raw streaming transcript captured during evaluation. */
@@ -136,7 +136,7 @@ export interface StepDataMap {
   comprehension: ComprehensionStepData;
   vocab: VocabStepData;
   dictation: DictationStepData;
-  'full-reading': FullReadingStepData;
+  'key-passage-reading': KeyPassageReadingStepData;
   report: ReportStepData;
 }
 

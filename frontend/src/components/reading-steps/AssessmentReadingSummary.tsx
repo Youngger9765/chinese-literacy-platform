@@ -14,7 +14,7 @@ import GoalAchievementCard from '../ui/GoalAchievementCard';
 import { encourageAccuracy, encourageReadingDone } from '../../utils/encouragement';
 import { SHOW_READING_ACCURACY } from '../../config/readingScoreDisplay';
 import type { Story } from '../../types';
-import type { FullReadingResult } from '../../types';
+import type { KeyPassageReadingResult } from '../../types';
 import type { ReadingAttempt } from '../../types';
 
 /** Duplicate-free within-file — avoids importing from AssessmentReport */
@@ -74,7 +74,7 @@ const getCurrentSegment = (cpm: number) => {
 
 export interface AssessmentReadingSummaryProps {
   readingAttempt: ReadingAttempt | null;
-  fullReadingResult: FullReadingResult | null;
+  fullReadingResult: KeyPassageReadingResult | null;
   hideScores: boolean;
   story?: Story | null;
   readingGoals?: { effectiveCpm: number; effectiveAccuracy: number; difficultyLabel?: string | null } | null;

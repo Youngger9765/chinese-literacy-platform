@@ -190,7 +190,7 @@ export function useLearningSessionBootstrap({
           saveActiveSession(String(user.id), {
             sessionId: 0,
             storyId,
-            currentStep: STEP_PATH_TO_NUMBER['reading-annotation'],
+            currentStep: STEP_PATH_TO_NUMBER['full-text-annotate'],
             timestamp: Date.now(),
           });
         }

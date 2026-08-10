@@ -33,26 +33,26 @@ import React, { lazy } from 'react';
 import { Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import StepErrorBoundary from '../components/StepErrorBoundary';
-import { resolveActiveSteps, STEP_REGISTRY, DEFAULT_STEP_SEQUENCE, StepConfig } from '../config/stepConfig';
+import { resolveActiveSteps, STEP_REGISTRY, DEFAULT_STEP_SEQUENCE, LEGACY_STEP_ID_ALIASES, StepConfig } from '../config/stepConfig';
 
 // ---------------------------------------------------------------------------
 // Lazy page imports — one chunk per step (code splitting preserved)
 // ---------------------------------------------------------------------------
 
 const IntroPage               = lazy(() => import('../pages/learning/IntroPage'));
-const TutorPage               = lazy(() => import('../pages/learning/TutorPage'));
+const ParagraphReadingPage               = lazy(() => import('../pages/learning/ParagraphReadingPage'));
 const ComprehensionMcqPage    = lazy(() => import('../pages/learning/ComprehensionMcqPage'));
-const StoryStructurePage      = lazy(() => import('../pages/learning/StoryStructurePage'));
-const StrategyExercisePage    = lazy(() => import('../pages/learning/StrategyExercisePage'));
-const VocabPage               = lazy(() => import('../pages/learning/VocabPage'));
+const KeypointsTablePage      = lazy(() => import('../pages/learning/KeypointsTablePage'));
+const SpotlightPage    = lazy(() => import('../pages/learning/SpotlightPage'));
+const CharacterPracticePage               = lazy(() => import('../pages/learning/CharacterPracticePage'));
 const DictationPage           = lazy(() => import('../pages/learning/DictationPage'));
 const ListeningPage           = lazy(() => import('../pages/learning/ListeningPage'));
-const FullReadingPage         = lazy(() => import('../pages/learning/FullReadingPage'));
+const KeyPassageReadingPage         = lazy(() => import('../pages/learning/KeyPassageReadingPage'));
 const ReportPage              = lazy(() => import('../pages/learning/ReportPage'));
-const ReadingAnnotationPage   = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
+const FullTextAnnotatePage   = lazy(() => import('../pages/learning/FullTextAnnotatePage'));
 const VocabApplicationPage    = lazy(() => import('../pages/learning/VocabApplicationPage'));
 const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
-const VocabWordSearchPage     = lazy(() => import('../pages/learning/VocabWordSearchPage'));
+const VocabReviewPage     = lazy(() => import('../pages/learning/VocabReviewPage'));
 const KnowledgeStationPage    = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 const SentencePracticePage    = lazy(() => import('../pages/learning/SentencePracticePage'));
 
@@ -64,19 +64,19 @@ const SentencePracticePage    = lazy(() => import('../pages/learning/SentencePra
 type LazyPage = React.LazyExoticComponent<React.ComponentType>;
 
 const STEP_PAGE_MAP: Record<string, LazyPage> = {
-  'intro':                 IntroPage,
-  'reading-annotation':    ReadingAnnotationPage,
-  'tutor':                 TutorPage,
-  'full-reading':          FullReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
+  'lesson-intro':                 IntroPage,
+  'full-text-annotate':    FullTextAnnotatePage,
+  'paragraph-reading':                 ParagraphReadingPage,
+  'key-passage-reading':          KeyPassageReadingPage, // 2026-07-20 label 改為「重點朗讀」；Phase 1 接 key_reading 後唸指定段
   'listening':             ListeningPage,
-  'vocab':                 VocabPage,
+  'character-practice':                 CharacterPracticePage,
   'vocab-definition':      VocabDefinitionMatchPage,
   'vocab-application':     VocabApplicationPage,
-  'story-structure':       StoryStructurePage,
-  'reading-strategy':      StrategyExercisePage,
+  'keypoints-table':       KeypointsTablePage,
+  'spotlight':      SpotlightPage,
   'sentence-practice':     SentencePracticePage,
   'comprehension':         ComprehensionMcqPage,
-  'vocab-word-search':     VocabWordSearchPage,
+  'vocab-review':     VocabReviewPage,
   'dictation':             DictationPage,
   'knowledge-station':     KnowledgeStationPage,
   'report':                ReportPage,
@@ -120,7 +120,7 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
   const step = STEP_REGISTRY[stepId];
 
   if (step && !step.enabled) {
-    const fallbackId = resolveActiveSteps()[0]?.id ?? 'reading-annotation';
+    const fallbackId = resolveActiveSteps()[0]?.id ?? 'full-text-annotate';
     return <Navigate to={`/learn/${storyId ?? ''}/${fallbackId}`} replace />;
   }
 
@@ -140,6 +140,12 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
 //   5. Steps with no page mapping are silently skipped (future-proof for
 //      steps added to STEP_REGISTRY before a page is built).
 // ---------------------------------------------------------------------------
+
+/** Replaces the legacy segment in place, preserving the storyId and the rest of the URL. */
+const LegacyStepRedirect: React.FC<{ to: string }> = ({ to }) => {
+  const { storyId } = useParams<{ storyId: string }>();
+  return <Navigate to={`/learn/${storyId}/${to}`} replace />;
+};
 
 function buildLearningRoutes(): React.ReactElement[] {
   const enabledSteps = resolveActiveSteps();
@@ -181,8 +187,30 @@ function buildLearningRoutes(): React.ReactElement[] {
     );
   }
 
+  // Legacy step ids → their current path.
+  //
+  // #2641 renamed the ids; QR codes generated by the admin panel and links
+  // written into issues still carry the old ones. Resolving them in
+  // stepConfig was not enough — the router never consulted that map, so
+  // /learn/2/full-reading fell through to the catch-all and dumped the
+  // student back on their home page. Verified in a browser, which is the
+  // only place this shows up: the unit test for resolveStepId() passed the
+  // whole time.
+  for (const [legacyId, currentId] of Object.entries(LEGACY_STEP_ID_ALIASES)) {
+    if (!STEP_REGISTRY[currentId] || !STEP_PAGE_MAP[currentId]) continue;
+    routes.push(
+      <Route
+        key={`legacy-${legacyId}`}
+        path={legacyId}
+        element={<LegacyStepRedirect to={currentId} />}
+      />,
+    );
+  }
+
   return routes;
 }
+
+
 
 // ---------------------------------------------------------------------------
 // learningRoutes — the public export.

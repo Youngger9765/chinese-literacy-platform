@@ -43,10 +43,15 @@ jobs:
       # workflow red on day one. Pin a file here whenever a fix ships a regression
       # test that must stay enforced — an un-run lock is theatre (testing-strategy 鐵律).
       #   - render-smoke: mount-crash guard (#2279/#2289)
-      #   - resetTutorStep / LiveTutor.readAgain: 「再讀一次」reset must clear every
+      #   - resetTutorStep / ParagraphReading.readAgain: 「再讀一次」reset must clear every
       #     completion/成績 source + the single-paragraph residual diff (#2532)
       #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
       #     banner) instead of silently playing a machine voice with no signal (#2609)
+      #   - stepNaming / componentNaming: every step id and every component name
+      #     must say what its Chinese label says. Two were inverted before #2641 —
+      #     `full-reading` read one passage, `reading-annotation` read the whole
+      #     text — which is how a feature got wired to a step disabled since
+      #     2026-07-20 (#2641, #2643)
       #   - qrcode-bundling: the QR library must be imported with a literal
       #     specifier so Vite bundles it. A dynamic import with the name in a
       #     variable passed build, lint and vitest while the feature was broken
@@ -57,6 +62,23 @@ jobs:
       #     return a row to idle the instant it (or the header button) is
       #     stopped. Regression of either reintroduces #2622's "不能停止 /
       #     同時播其他的就會一堆聲音" follow-up bug.
+      # Production build. vitest and eslint both passed while `vite build` was
+      # broken — a rename left two files under their old names while every
+      # import already used the new ones, and nothing in this workflow resolved
+      # the module graph the way rollup does. Staging deployed red as a result
+      # (#2643). Build is the only gate that catches a filename/import mismatch.
+      - name: Build (production)
+        working-directory: frontend
+        run: npx vite build
+
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx
+        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
+            src/components/auth/LearningRouteGate.test.tsx \
+            src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
+            src/hooks/useFullTextTtsQueue.test.ts \
+            src/services/ttsApi.prefetch.test.ts \
+            src/pages/admin/lesson-audio/paragraphGap.test.ts \
+            src/pages/GuestReadingPage.passage.test.tsx \
+            src/components/auth/publicSteps.test.ts \
+            src/services/ttsApi.paragraph.test.ts

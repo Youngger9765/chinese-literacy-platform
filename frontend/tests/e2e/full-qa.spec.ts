@@ -101,15 +101,17 @@ test.describe('A. Student path — 13 step walkthrough', () => {
     expect(bodyText.length).toBeGreaterThan(100);
   });
 
-  test('A3. Step 1 reading-annotation route loads', async ({ page, request }) => {
+  test('A3. Step 1 full-text-annotate route loads', async ({ page, request }) => {
     const storyId = await fetchFirstStoryId(request);
     test.skip(!storyId, 'No stories available from API');
     const token = await loginAs(page, request, 'student');
     test.skip(!token, 'Cannot login as student');
 
+    // The legacy id still has to work — QR codes carrying it are printed on
+    // paper — but it now redirects to the canonical id (#2649 rename).
     await page.goto(`/learn/${storyId}/reading-annotation`);
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/reading-annotation/);
+    await expect(page).toHaveURL(/full-text-annotate/);
   });
 
   test('A4. Step 2 tutor — UNTESTABLE without mic mock', async () => {
@@ -172,10 +174,10 @@ test.describe('A. Student path — 13 step walkthrough', () => {
     const stepsToProbe = [
       'vocab-definition',
       'vocab-application',
-      'story-structure',
-      'reading-strategy',
+      'keypoints-table',
+      'spotlight',
       'comprehension',
-      'vocab-word-search',
+      'vocab-review',
       'knowledge-station',
     ];
     for (const step of stepsToProbe) {

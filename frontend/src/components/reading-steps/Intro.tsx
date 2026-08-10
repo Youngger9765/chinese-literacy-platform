@@ -20,7 +20,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 // Module-level stable no-ops for useTtsPlayback's progress/diff-clear callbacks
-// (Intro has no per-char highlight to sync, unlike LiveTutor's paragraph view).
+// (Intro has no per-char highlight to sync, unlike ParagraphReading's paragraph view).
 // Must be stable identities, not inline `() => {}` literals — useTtsPlayback's
 // speakText is a useCallback keyed on these two, so a fresh literal every
 // render would make speakText (and everything built on it: speakParagraphAt,
@@ -143,7 +143,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
   // #2607 (revised — real staging data changed the design, see PR #2608): AI
   // 朗讀 now narrates the actual full lesson body (story.content) via the same
-  // useTtsPlayback hook LiveTutor/FullReading already use, NOT the 課文簡介
+  // useTtsPlayback hook ParagraphReading/KeyPassageReading already use, NOT the 課文簡介
   // teaser below. Sampling 8 staging lessons found 0/8 had real course_intro
   // data; all 8 fell back to intro.background, which is a hard-truncated
   // substring of the lesson body (always ~103 chars, cutting off mid-word, e.g.
@@ -155,7 +155,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   // opposite holds: passing lessonId + paragraphIdx per paragraph is what lets
   // each call hit the backend's canonical-sentence cache (GET
   // /api/tts/mapping/{id}, keyed by story.content's paragraph index) instead of
-  // paying a live 8-15s synthesis on every play — mirrors LiveTutor's
+  // paying a live 8-15s synthesis on every play — mirrors ParagraphReading's
   // `speakText(text, Number(story.id), currentLineIndex)`.
   const {
     isTtsLoading,
@@ -170,7 +170,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   // read aloud "圖文題就是..." instead of the actual lesson topic).
   const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
 
-  // The actual lesson body — same array LiveTutor/FullReading narrate from.
+  // The actual lesson body — same array ParagraphReading/KeyPassageReading narrate from.
   // Falls back to introText only when a lesson somehow has no content array at
   // all, so the button is never left with literally nothing to read. Memoized
   // so speakParagraphAt/speakFullText below don't get a new dependency identity
@@ -201,8 +201,8 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   // short 課文簡介 teaser above it.
   const [showFullText, setShowFullText] = useState(false);
 
-  // Sequential multi-paragraph playback queue — mirrors useFullReadingTtsQueue's
-  // proven advance-on-finish pattern (frontend/src/hooks/useFullReadingTtsQueue.ts),
+  // Sequential multi-paragraph playback queue — mirrors useKeyPassageReadingTtsQueue's
+  // proven advance-on-finish pattern (frontend/src/hooks/useKeyPassageReadingTtsQueue.ts),
   // extended to pass lessonId/paragraphIdx per paragraph (that hook's own queue
   // does not — a known, separate cache-miss issue, out of scope for this PR).
   // -1 = idle / not playing.
@@ -369,7 +369,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </p>
               )}
               {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
-                  they belong to the read-text phase (LiveTutor / annotations), not intro. */}
+                  they belong to the read-text phase (ParagraphReading / annotations), not intro. */}
             </div>
             );
           })()}
@@ -591,7 +591,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               #2082 A4 removed the non-clickable ol — do NOT restore a static ol.
               This uses chip badges so each step is directly accessible. */}
           {(() => {
-            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
+            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'lesson-intro');
             if (digitalSteps.length === 0) return null;
             return (
               <div className="space-y-2 pb-2">

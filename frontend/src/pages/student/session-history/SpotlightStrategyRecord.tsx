@@ -1,6 +1,6 @@
 /**
  * SpotlightStrategyRecord — 閱讀聚光燈作答紀錄（老師端 / 學生端共用）
- * Renders step_progress['reading-strategy'] for spotlight v2 + legacy guided steps.
+ * Renders step_progress['spotlight'] for spotlight v2 + legacy guided steps.
  * Issue #2083 — 老師端可檢視學生申論 / 選擇題答案
  */
 

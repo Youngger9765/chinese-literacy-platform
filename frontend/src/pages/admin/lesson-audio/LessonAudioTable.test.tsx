@@ -21,6 +21,15 @@ if (!HTMLMediaElement.prototype.play.toString().includes('patchedPlay')) {
   HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
 }
 
+// Spy on the cross-paragraph prefetch. A mutation check found this half
+// unguarded: deleting the prefetch call from the component left every test
+// green, so the fix for 「段落之間的延遲太多了」 could vanish silently.
+const prefetchSpy = vi.fn();
+vi.mock('../../../services/ttsApi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../services/ttsApi')>()),
+  prefetchText: (...args: unknown[]) => prefetchSpy(...args),
+}));
+
 vi.mock('qrcode', () => ({
   default: {
     toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,test'),
@@ -170,9 +179,9 @@ describe('LessonAudioTable', () => {
   it('builds QR values for intro and full-reading lesson routes', () => {
     const origin = 'https://staging.example.test';
 
-    expect(buildLessonQrValue(origin, 1, 'intro')).toBe('https://staging.example.test/learn/1/intro');
-    expect(buildLessonQrValue(origin, 1, 'full-reading')).toBe(
-      'https://staging.example.test/learn/1/full-reading',
+    expect(buildLessonQrValue(origin, 1, 'full-text-annotate')).toBe('https://staging.example.test/learn/1/full-text-annotate');
+    expect(buildLessonQrValue(origin, 1, 'key-passage-reading')).toBe(
+      'https://staging.example.test/learn/1/key-passage-reading',
     );
   });
 
@@ -423,8 +432,8 @@ describe('#2622 QR 交付表', () => {
     // lesson, so both codes belong on the same line.
     expect(rows).toHaveLength(2);
     expect(rows[0].lesson_no).toBe('L01');
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
-    expect(rows[0].passage_url).toBe('https://x.test/learn/1/full-reading');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
+    expect(rows[0].passage_url).toBe('https://x.test/learn/1/key-passage-reading');
     // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
     // (has_key_reading=false), so the batch produces no passage clip for it.
     // Both columns are therefore blank — a 段落 code here would point at a
@@ -504,12 +513,12 @@ describe('#2626 只有 4-7 年級交付全文', () => {
       { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true },
     ] as never, 'https://x.test');
 
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/intro');
+    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
     expect(rows[1].full_url).toBe('');
     // Positive control: this G8 lesson DOES have a 念順順段
     // (has_key_reading=true), so its 段落 code must survive even though 全文
     // is blank. Passage now gates on has_key_reading, not on grade.
-    expect(rows[1].passage_url).toBe('https://x.test/learn/2/full-reading');
+    expect(rows[1].passage_url).toBe('https://x.test/learn/2/key-passage-reading');
   });
 });
 
@@ -533,7 +542,7 @@ describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => 
     ] as never, 'https://x.test');
 
     // Positive control — a lesson with a passage still gets its 段落 code.
-    expect(rows[0].passage_url).toBe('https://x.test/learn/10/full-reading');
+    expect(rows[0].passage_url).toBe('https://x.test/learn/10/key-passage-reading');
     // The fix — a lesson without one does not.
     expect(rows[1].passage_url).toBe('');
   });
@@ -553,5 +562,197 @@ describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => 
     // handed to a teacher that plays nothing.
     expect(passageCodes).toBe(lessonsWithPassage);
     expect(passageCodes).toBe(2);
+  });
+});
+describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
+  /**
+   * `speakText(text, lessonId, paragraphIdx)` plays ONE paragraph: given a
+   * lessonId and an index, the hook prefers the backend's cached sentences for
+   * that paragraph and ignores the `text` argument entirely.
+   *
+   * The admin panel passed a hardcoded 0, so 「播放全文」 read paragraph 0 —
+   * 76 of lesson 1's 711 characters — and 「播放段落」 was overridden to the
+   * same paragraph, which is why both buttons sounded identical.
+   *
+   * There is no whole-lesson playback in the hook. The component has to walk
+   * the paragraphs itself.
+   */
+  it('walks every paragraph for 全文, not just index 0', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher((id) => ({
+      paragraphs: [`p0-of-${id}`, `p1-of-${id}`, `p2-of-${id}`],
+      key_reading: { passage: `key-of-${id}` },
+    }));
+    mockTts();
+
+    const { rerender } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: /播放全文/ }));
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
+    expect(mockSpeakText.mock.calls[0]).toEqual(['p0-of-1', 1, 0]);
+
+    // Paragraph 0 starts, then finishes: the hook reports speaking, then idle.
+    // The component must pick that up and play paragraph 1 — an earlier version
+    // stopped here, reading 76 of the lesson's 711 characters.
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    mockTts();
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(2));
+    expect(mockSpeakText.mock.calls[1]).toEqual(['p1-of-1', 1, 1]);
+
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    mockTts();
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(3));
+    expect(mockSpeakText.mock.calls[2]).toEqual(['p2-of-1', 1, 2]);
+  });
+
+  it('段落 uses the key passage, not paragraph 0', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher((id) => ({
+      paragraphs: [`p0-of-${id}`, `p1-of-${id}`],
+      key_reading: { passage: `THE-KEY-PASSAGE-${id}` },
+    }));
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: /播放段落/ }));
+
+    await waitFor(() => expect(mockSpeakText).toHaveBeenCalled());
+    const [text, , idx] = mockSpeakText.mock.calls[0];
+    expect(text).toContain('THE-KEY-PASSAGE-1');
+    // A paragraph index would make the hook ignore the passage text entirely.
+    expect(idx).toBeUndefined();
+  });
+});
+
+
+describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
+  /**
+   * The 「全文」 QR pointed at lesson-intro, the 課程簡介 step, because when it
+   * was built no step was named for whole-text reading — `full-reading` was
+   * taken and read a single key passage. #2641 renamed the ids and made the
+   * real one visible: `full-text-annotate` (讀全文-做記號) renders story.content
+   * in full, and its hint says 閱讀全文.
+   *
+   * A student scanning the 全文 code landed on the lesson blurb instead of the
+   * text. Reported as 「QR code全文朗讀的部分會進到課程簡介」.
+   */
+  it('encodes full-text-annotate, not lesson-intro', () => {
+    const origin = 'https://x.test';
+    expect(buildLessonQrValue(origin, 7, 'full-text-annotate')).toBe(
+      'https://x.test/learn/7/full-text-annotate',
+    );
+  });
+
+  it('the 全文 column renders a QR for the whole-text step', async () => {
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    const titles = within(row)
+      .getAllByRole('button', { name: 'QR' })
+      .map((b) => b.getAttribute('title'));
+
+    expect(titles.some((t) => t?.endsWith('/full-text-annotate'))).toBe(true);
+    expect(titles.some((t) => t?.endsWith('/lesson-intro'))).toBe(false);
+  });
+});
+
+describe('#2622 QR popup 標題要分得出全文與段落', () => {
+  /**
+   * The title compared against 'lesson-intro', which no step id uses any more
+   * after the 全文 target moved to full-text-annotate — so every dialog, both
+   * columns, was labelled 段落. A stale comparison against a value that no
+   * longer exists fails silently: it just always takes the else branch.
+   */
+  it.each([
+    ['full-text-annotate', '全文'],
+    ['key-passage-reading', '段落'],
+  ])('%s dialog is labelled %s', async (step, label) => {
+    vi.clearAllMocks();
+    mockFetchDispatcher();
+    mockTts();
+
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    const btn = within(row)
+      .getAllByRole('button', { name: 'QR' })
+      .find((b) => b.getAttribute('title')?.endsWith(`/${step}`));
+    expect(btn, `no QR button targeting ${step}`).toBeDefined();
+
+    fireEvent.click(btn!);
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.getAttribute('aria-label')).toContain(label);
+  });
+});
+
+
+describe('LessonAudioTable — paragraph boundary', () => {
+  it('warms the second paragraph the moment the first starts playing', async () => {
+    prefetchSpy.mockClear();
+    render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /播放全文/ })[0]);
+
+    // Paragraph 0 is spoken immediately; paragraph 1 must already be on its
+    // way, or the listener hears the whole synthesis as a gap at the boundary.
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
+    const [, lessonId, idx] = prefetchSpy.mock.calls[0];
+    expect(lessonId).toBe(1);
+    expect(idx).toBe(1);
+  });
+
+  it('keeps warming one paragraph ahead as the walk advances', async () => {
+    // The start-of-play prefetch and the per-advance prefetch are two separate
+    // calls in the component, and a mutation check proved it: deleting the
+    // advance one left the previous test green, because the start one still
+    // fired. This drives an actual paragraph transition.
+    prefetchSpy.mockClear();
+    // Three paragraphs: the default fixture has one, and a one-paragraph
+    // lesson can never exercise a boundary.
+    mockFetchDispatcher((id) => ({
+      id,
+      title: `lesson-${id}`,
+      paragraphs: [`p0-${id}`, `p1-${id}`, `p2-${id}`],
+      key_reading: { passage: `passage-${id}` },
+    }));
+    const { rerender } = render(<LessonAudioTable />);
+    await waitFor(() => screen.getByText('贏得喝采的輸家'));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /播放全文/ })[0]);
+
+    // The walk is created asynchronously (the click awaits story detail), so
+    // wait for it to exist before driving the transition — flipping the state
+    // first makes the finished-signal fire while there is no walk to advance.
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
+
+    // Audio starts...
+    mockTts({ isTtsSpeaking: true });
+    rerender(<LessonAudioTable />);
+    // ...and paragraph 0 finishes, which is what advances the walk.
+    mockTts({ isTtsSpeaking: false });
+    rerender(<LessonAudioTable />);
+
+    await waitFor(() => {
+      const indices = prefetchSpy.mock.calls.map((c) => c[2]);
+      expect(indices).toContain(2);
+    });
   });
 });

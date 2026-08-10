@@ -34,7 +34,7 @@ export interface StepFinishPayload {
  *
  * Pure function — no React dependency, fully testable in isolation.
  *
- * @param stepId   The step that just finished (e.g. 'reading-annotation').
+ * @param stepId   The step that just finished (e.g. 'full-text-annotate').
  * @param stepData Arbitrary data to store in the step's progress record.
  */
 export function buildStepFinishPayload(

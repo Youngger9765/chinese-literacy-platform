@@ -1,6 +1,6 @@
 /**
  * ReadingGoalsBadge — shows teacher-set (or default) reading goals.
- * Used in LiveTutor header, FullReading header, and AssessmentReport.
+ * Used in ParagraphReading header, KeyPassageReading header, and AssessmentReport.
  *
  * Issue #84: 課文目標設定（語速、正確率門檻）
  */

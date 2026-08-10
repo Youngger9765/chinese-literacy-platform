@@ -4,7 +4,7 @@
  *
  * Unlike the top-level ErrorBoundary (which auto-reloads the whole page),
  * this boundary is scoped to a single step so a failure in one step
- * (e.g. an AI call timeout in ComprehensionChat or LiveTutor) does NOT
+ * (e.g. an AI call timeout in ComprehensionChat or ParagraphReading) does NOT
  * crash the entire learning session.
  *
  * Features:
@@ -17,8 +17,8 @@
  *   a "跳過此步驟" action without coupling the boundary to router logic
  *
  * Usage:
- *   <StepErrorBoundary stepLabel="逐段朗讀" onSkip={() => navigate('/learn/x/full-reading')}>
- *     <TutorPage />
+ *   <StepErrorBoundary stepLabel="逐段朗讀" onSkip={() => navigate('/learn/x/key-passage-reading')}>
+ *     <ParagraphReadingPage />
  *   </StepErrorBoundary>
  */
 import React, { Component, ErrorInfo } from 'react';

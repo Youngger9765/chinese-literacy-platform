@@ -23,15 +23,15 @@ import { handle401Response } from './apiUnauthorized';
 // Order matches frontend/src/components/tools/ToolPicker.tsx TOOL_OPTIONS
 // and backend/app/routes/learning/toolbox.py TOOL_MODEL_MAP.
 export type ToolId =
-  | 'tutor'
-  | 'full-reading'
+  | 'paragraph-reading'
+  | 'key-passage-reading'
   | 'listening'
-  | 'vocab'
+  | 'character-practice'
   | 'sentence-practice'
   | 'vocab-definition'
   | 'vocab-application'
   | 'comprehension'
-  | 'vocab-word-search'
+  | 'vocab-review'
   | 'knowledge-station';
 
 export interface ToolboxSession {

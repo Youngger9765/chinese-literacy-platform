@@ -2,10 +2,10 @@
  * Regression test for #2532 review 必改 1 (the resurrection bug):
  * 「再讀一次」must clear EVERY tutor completion / 成績 source so navigating away+back
  * or a full reload can't restore the old reading. The actual clearing lives in
- * useStepProgressPersistence.resetTutorStep (invoked via LiveTutor's onResetTutor).
+ * useStepProgressPersistence.resetTutorStep (invoked via ParagraphReading's onResetTutor).
  *
  * RED before the fix: resetForRetry() only cleared React state + liveTutor_progress_
- * localStorage, leaving step_data.tutor (incl. readingAttempt), steps_completed 'tutor',
+ * localStorage, leaving step_data.tutor (incl. readingAttempt), steps_completed 'paragraph-reading',
  * session.readingAttempt, and completedParagraphsSet intact → old 成績 resurrected.
  */
 
@@ -50,7 +50,7 @@ describe('useStepProgressPersistence.resetTutorStep (#2532 必改 1)', () => {
     // Simulate a completed tutor reading (what would otherwise resurrect).
     act(() => {
       result.current.saveStepProgressPatch({
-        stepId: 'tutor',
+        stepId: 'paragraph-reading',
         stepData: {
           line_results: [{ lineIndex: 0, matchRate: 0.98 }],
           completed_paragraphs: [0],
@@ -62,7 +62,7 @@ describe('useStepProgressPersistence.resetTutorStep (#2532 必改 1)', () => {
       result.current.setCompletedParagraphsSet(new Set([0]));
     });
 
-    expect(result.current.stepProgressState.steps_completed).toContain('tutor');
+    expect(result.current.stepProgressState.steps_completed).toContain('paragraph-reading');
     expect(result.current.completedParagraphsSet.size).toBe(1);
 
     act(() => {
@@ -76,8 +76,8 @@ describe('useStepProgressPersistence.resetTutorStep (#2532 必改 1)', () => {
     expect(tutor.paragraph_summaries_data).toEqual({});
     expect(tutor.readingAttempt).toBeUndefined();
 
-    // 2. 'tutor' removed from steps_completed
-    expect(result.current.stepProgressState.steps_completed).not.toContain('tutor');
+    // 2. 'paragraph-reading' removed from steps_completed
+    expect(result.current.stepProgressState.steps_completed).not.toContain('paragraph-reading');
 
     // 3. in-memory completedParagraphsSet cleared
     expect(result.current.completedParagraphsSet.size).toBe(0);
@@ -87,10 +87,10 @@ describe('useStepProgressPersistence.resetTutorStep (#2532 必改 1)', () => {
     const cleared = updater({
       readingAttempt: { accuracy: 0.98 },
       completedParagraphs: [0],
-      completedSteps: ['tutor', 'vocab'],
+      completedSteps: ['paragraph-reading', 'character-practice'],
     } as unknown as LearningSession);
     expect(cleared.readingAttempt).toBeNull();
     expect(cleared.completedParagraphs).toEqual([]);
-    expect(cleared.completedSteps).toEqual(['vocab']);
+    expect(cleared.completedSteps).toEqual(['character-practice']);
   });
 });

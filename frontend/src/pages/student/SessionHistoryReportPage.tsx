@@ -31,7 +31,7 @@ import { StepRecordsView as _StepRecordsView } from './session-history/StepRecor
 // ---------------------------------------------------------------------------
 export { ReportSectionAccordion } from './session-history/ReportSectionAccordion';
 export { ReadingRecord } from './session-history/ReadingRecord';
-export { FullReadingRecord } from './session-history/FullReadingRecord';
+export { KeyPassageReadingRecord } from './session-history/KeyPassageReadingRecord';
 export { VocabRecord } from './session-history/VocabRecord';
 export { ComprehensionRecord } from './session-history/ComprehensionRecord';
 export { StepRecordsView } from './session-history/StepRecordsView';

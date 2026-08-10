@@ -251,7 +251,7 @@ const StoryStructureLabPage: React.FC = () => {
               </header>
               <iframe
                 title="story-structure-preview"
-                src={`/learn/${detail.story_id}/story-structure`}
+                src={`/learn/${detail.story_id}/keypoints-table`}
                 className="w-full h-[520px] border-0 bg-white"
               />
             </section>

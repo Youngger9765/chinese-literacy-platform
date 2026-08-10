@@ -4,7 +4,7 @@
  * Scope:
  *  - SessionHistoryHeader: renders lesson title, date, score badge
  *  - ReportSectionAccordion: expand / collapse behaviour
- *  - Section sub-components (ReadingRecord, FullReadingRecord, ComprehensionRecord, VocabRecord)
+ *  - Section sub-components (ReadingRecord, KeyPassageReadingRecord, ComprehensionRecord, VocabRecord)
  *  - StepRecordsView: renders empty state when no step records
  *
  * TDD: these tests are written BEFORE the extracted components exist (RED phase).
@@ -74,7 +74,7 @@ vi.mock('../../../components/ui/DiffDisplay', () => ({
 import SessionHistoryReportPage from '../SessionHistoryReportPage';
 import { ReportSectionAccordion } from '../SessionHistoryReportPage';
 import { ReadingRecord } from '../SessionHistoryReportPage';
-import { FullReadingRecord } from '../SessionHistoryReportPage';
+import { KeyPassageReadingRecord } from '../SessionHistoryReportPage';
 import { VocabRecord } from '../SessionHistoryReportPage';
 import { ComprehensionRecord } from '../SessionHistoryReportPage';
 
@@ -147,12 +147,12 @@ describe('ReadingRecord', () => {
   });
 });
 
-// ─── FullReadingRecord ─────────────────────────────────────────────────────────
+// ─── KeyPassageReadingRecord ─────────────────────────────────────────────────────────
 
-describe('FullReadingRecord', () => {
+describe('KeyPassageReadingRecord', () => {
   it('shows AI feedback', () => {
     const raw = { feedback: '朗讀很流暢！', diff_tokens: [] };
-    render(<FullReadingRecord raw={raw as Record<string, unknown>} />);
+    render(<KeyPassageReadingRecord raw={raw as Record<string, unknown>} />);
     expect(screen.getByText('朗讀很流暢！')).toBeInTheDocument();
   });
 
@@ -161,7 +161,7 @@ describe('FullReadingRecord', () => {
       feedback: '',
       diff_tokens: [{ text: '春', type: 'match' }],
     };
-    render(<FullReadingRecord raw={raw as Record<string, unknown>} />);
+    render(<KeyPassageReadingRecord raw={raw as Record<string, unknown>} />);
     expect(screen.getByTestId('diff-display')).toBeInTheDocument();
   });
 });

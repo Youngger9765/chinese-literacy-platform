@@ -8,7 +8,7 @@ function _ttsAuthHeaders(): Record<string, string> {
 }
 
 /**
- * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
+ * Manages TTS (Text-to-Speech) audio playback for ParagraphReading.
  *
  * Responsibilities:
  *  - Cloud TTS fetch → <audio> element playback (primary)
@@ -282,7 +282,7 @@ export function useTtsPlayback(
   // #1780: wrap in useCallback so downstream effects depending on these
   // functions don't re-fire every render. State setters + refs are stable;
   // onSpeakingProgress is the only varying dep (caller's responsibility to
-  // pass a stable callback — already memoized in FullReading per existing code).
+  // pass a stable callback — already memoized in KeyPassageReading per existing code).
   const pauseTts = useCallback(() => {
     if (v2PathActiveRef.current) {
       // v2 sentence-level path: Audio element lives inside ttsApi, pause via helper.

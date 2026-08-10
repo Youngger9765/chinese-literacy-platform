@@ -1,7 +1,7 @@
 /**
- * Unit tests for FullReading refactor hooks (Issue #1880).
+ * Unit tests for KeyPassageReading refactor hooks (Issue #1880).
  *
- * TDD-first: these 3 tests are written against the CURRENT FullReading.tsx
+ * TDD-first: these 3 tests are written against the CURRENT KeyPassageReading.tsx
  * logic (extracted as pure functions / hook contracts) so they pass BEFORE
  * the refactor, and continue to pass AFTER the hooks are extracted.
  *
@@ -14,7 +14,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // ─── 1. localStorage preference logic ────────────────────────────────────────
-// Mirrors getInitialResult() priority in FullReading.tsx:
+// Mirrors getInitialResult() priority in KeyPassageReading.tsx:
 //   1st: localStorage saved result (has diffTokens)
 //   2nd: DB-rehydrated initialResult prop
 //   null otherwise

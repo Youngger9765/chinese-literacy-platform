@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import FluencyProgressChart, { type FullReadingAttempt } from '../full-reading/FluencyProgressChart';
+import FluencyProgressChart, { type KeyPassageReadingAttempt } from '../key-passage-reading/FluencyProgressChart';
 import type { ParsedBenchmark } from '../../../utils/fluencyAnalyzer';
 
 // Recharts uses ResizeObserver internally — stub it for test env
@@ -10,7 +10,7 @@ global.ResizeObserver = class {
   disconnect() {}
 };
 
-const makeAttempt = (idx: number, cpm: number, durationMs?: number): FullReadingAttempt => ({
+const makeAttempt = (idx: number, cpm: number, durationMs?: number): KeyPassageReadingAttempt => ({
   attempt_index: idx,
   cpm,
   accuracy: 0.9,
