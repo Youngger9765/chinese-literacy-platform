@@ -23,9 +23,11 @@ current table.
 
 Selection never guesses. `pronunciation` mode derives candidates from
 backend/data/sentences.v2.jsonl, the same corpus the serving path uses to
-build a lesson's sentence list, and keeps only sentences the live correction
-table actually fires on. `mainland-orphans` mode lists the google prefix and
-keeps only objects with no azure counterpart.
+build a lesson's sentence list, and keeps the ones the live transform actually
+rewrites — asked by running it, not by consulting the table it reads from.
+Candidates cover both units the runtime requests: individual sentences, and
+whole paragraphs since #2662 made a paragraph one request. `mainland-orphans`
+mode lists the google prefix and keeps only objects with no azure counterpart.
 
 Deleting is opt-in. Without --delete this reports and exits, and even with it
 only the objects this run itself flagged are removed — never a prefix sweep.
@@ -47,6 +49,7 @@ making a student pay the first-hit latency, run batch_azure_tts.py afterwards.
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import logging
 import sys
@@ -93,8 +96,39 @@ def load_corpus_sentences(path: Path = SENTENCES_PATH) -> list[dict]:
     return rows
 
 
+def build_paragraph_texts(sentences: list[dict]) -> list[dict]:
+    """Reconstruct each paragraph exactly as the player synthesizes it.
+
+    Since #2662 a paragraph is one TTS request — the pitch contour resets at
+    every request, so per-sentence clips read like a list rather than someone
+    reading. The client rebuilds the paragraph as `canonical.join('').trim()`
+    over the mapping's sentence list, so that is reproduced verbatim here; any
+    other join produces a key the runtime never looks up.
+
+    Both granularities live in the bucket at once (the keys are just sha256 of
+    whatever text was sent), so both have to be enumerated. Sentence keys alone
+    would repeat, one unit up, exactly the miss that #2661 caused.
+    """
+    grouped: dict[tuple, list[dict]] = {}
+    for row in sentences:
+        grouped.setdefault((row.get("lesson_id"), row.get("paragraph_idx")), []).append(row)
+
+    paragraphs: list[dict] = []
+    for (lesson_id, paragraph_idx), rows in grouped.items():
+        ordered = sorted(rows, key=lambda r: r.get("sentence_idx", 0))
+        text = "".join(r["text"] for r in ordered).strip()
+        if text:
+            paragraphs.append({
+                "lesson_id": lesson_id,
+                "paragraph_idx": paragraph_idx,
+                "sentence_idx": None,
+                "text": text,
+            })
+    return paragraphs
+
+
 def select_pronunciation_affected(sentences: list[dict]) -> list[dict]:
-    """Sentences whose synthesized reading today differs from what is cached.
+    """Every cached text unit whose synthesized reading now differs.
 
     Asks corrections_change_text — the transform itself — not a word list and
     not _has_phoneme_corrections. Both of those go stale: a copied list dies
@@ -103,18 +137,36 @@ def select_pronunciation_affected(sentences: list[dict]) -> list[dict]:
     _apply_phoneme_corrections. Selecting on the predicate would have skipped
     every sentence whose only change is 和 → 漢 — including 「和」向心力 on
     L01, one of the sentences actually reported — and reported success.
+
+    Covers sentences and paragraphs, because both are units the runtime asks
+    for and therefore both are units the bucket holds. A single-granularity
+    sweep looks complete and is not.
     """
+    candidates = [{**row, "unit": "sentence"} for row in sentences]
+    candidates += [{**row, "unit": "paragraph"} for row in build_paragraph_texts(sentences)]
+
     affected: list[dict] = []
-    for row in sentences:
+    seen: set[str] = set()
+    for row in candidates:
         text = row["text"]
-        if corrections_change_text(text):
-            affected.append({
-                "lesson_id": row.get("lesson_id"),
-                "paragraph_idx": row.get("paragraph_idx"),
-                "sentence_idx": row.get("sentence_idx"),
-                "text": text,
-                "key": _cache_key(text),
-            })
+        if not corrections_change_text(text):
+            continue
+        key = _cache_key(text)
+        # A one-sentence paragraph has the same text as its only sentence, so
+        # the same key arrives twice. Deduplicating here rather than at delete
+        # time keeps the reported count equal to the number of objects — an
+        # inflated "973 flagged" that deletes 900 is a number nobody can check.
+        if key in seen:
+            continue
+        seen.add(key)
+        affected.append({
+            "unit": row["unit"],
+            "lesson_id": row.get("lesson_id"),
+            "paragraph_idx": row.get("paragraph_idx"),
+            "sentence_idx": row.get("sentence_idx"),
+            "text": text,
+            "key": key,
+        })
     return affected
 
 
@@ -230,8 +282,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.mode == "pronunciation":
         sentences = load_corpus_sentences()
         affected = select_pronunciation_affected(sentences)
-        logger.info("Corpus: %d sentences, %d affected by the current correction table (%.1f%%)",
-                    len(sentences), len(affected), 100.0 * len(affected) / max(len(sentences), 1))
+        by_unit = collections.Counter(a.get("unit") for a in affected)
+        logger.info(
+            "Corpus: %d sentences in %d paragraphs. Affected: %d sentence(s) + %d paragraph(s).",
+            len(sentences), len(build_paragraph_texts(sentences)),
+            by_unit["sentence"], by_unit["paragraph"],
+        )
         prefixes = [AZURE_PREFIX]
         if args.include_dormant_prefixes:
             prefixes += [GEMINI_PREFIX, GOOGLE_PREFIX]

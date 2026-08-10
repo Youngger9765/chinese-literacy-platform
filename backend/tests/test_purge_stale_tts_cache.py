@@ -71,8 +71,9 @@ def test_flags_the_words_hans_reported_and_leaves_clean_sentences_alone(purge):
         {"lesson_id": 2, "paragraph_idx": 0, "sentence_idx": 0, "text": "今天天氣很好。"},
     ]
     affected = purge.select_pronunciation_affected(rows)
+    sentences = [a["text"] for a in affected if a["unit"] == "sentence"]
 
-    assert [a["text"] for a in affected] == ["她的攻擊很凌厲。", "他發出一聲嘆息。"]
+    assert sentences == ["她的攻擊很凌厲。", "他發出一聲嘆息。"]
 
 
 def test_key_matches_the_runtime_lookup(purge):
@@ -86,9 +87,11 @@ def test_key_matches_the_runtime_lookup(purge):
 
 
 def test_polyphones_the_table_excludes_are_not_flagged(purge):
-    """摸不著 and 和 were deliberately left out — 著 has five readings, 和 six,
-    and correcting them blind fixes 摸不著 while breaking 顯著. If this ever
-    turns red, the table grew an unsafe entry, not the purger."""
+    """摸不著 needs ㄓㄠˊ, and 著 is the only character in the dictionary with
+    that reading — there is nothing to substitute, so it stays uncorrected and
+    the data file says why. (和 was in this category until #2661 found 漢 as a
+    stand-in; it is corrected now.) If this turns red, the table grew an unsafe
+    entry — the purger is the messenger."""
     rows = [
         {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "他摸不著頭緒。"},
     ]
@@ -181,6 +184,61 @@ def test_the_predicate_compares_the_exact_string_azure_is_sent(purge, monkeypatc
 
     assert _apply_phoneme_corrections(escape_for_ssml(text)) in sent["body"]
     assert "&amp;" in sent["body"] and "a & b" not in sent["body"]
+
+
+def test_paragraphs_are_rebuilt_the_way_the_player_sends_them(purge):
+    """#2662 made a paragraph one TTS request, joined as canonical.join('')
+    then trimmed. Any other join — a space, a newline — hashes to a key the
+    runtime never looks up, so the purge would delete nothing and say it did."""
+    rows = [
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 1, "text": "第二句。"},
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "第一句。"},
+        {"lesson_id": 1, "paragraph_idx": 1, "sentence_idx": 0, "text": "另一段。"},
+    ]
+
+    paragraphs = purge.build_paragraph_texts(rows)
+
+    assert [p["text"] for p in paragraphs] == ["第一句。第二句。", "另一段。"]
+
+
+def test_a_paragraph_is_flagged_even_when_no_single_sentence_is(purge):
+    """The whole point of covering both units. Sentence-only selection leaves
+    the paragraph object serving the old reading, and the evidence file still
+    reads as a complete purge."""
+    rows = [
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "她很努力。"},
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 1, "text": "她的攻擊很凌厲。"},
+    ]
+
+    affected = purge.select_pronunciation_affected(rows)
+    units = {a["unit"] for a in affected}
+
+    assert units == {"sentence", "paragraph"}
+    assert any(a["unit"] == "paragraph" and a["text"] == "她很努力。她的攻擊很凌厲。" for a in affected)
+    # The clean sentence on its own is still not flagged — coverage widened,
+    # the filter did not loosen.
+    assert not any(a["unit"] == "sentence" and a["text"] == "她很努力。" for a in affected)
+
+
+def test_a_clean_paragraph_is_not_flagged(purge):
+    rows = [
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "今天天氣很好。"},
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 1, "text": "我們去公園。"},
+    ]
+
+    assert purge.select_pronunciation_affected(rows) == []
+
+
+def test_paragraph_key_matches_the_runtime_lookup(purge):
+    from app.services.tts.normalization import _cache_key
+
+    rows = [
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "她的攻擊很凌厲。"},
+        {"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 1, "text": "他發出一聲嘆息。"},
+    ]
+    para = [a for a in purge.select_pronunciation_affected(rows) if a["unit"] == "paragraph"]
+
+    assert para[0]["key"] == _cache_key("她的攻擊很凌厲。他發出一聲嘆息。")
 
 
 def test_corpus_loader_skips_blank_lines_and_empty_text(purge, tmp_path):
@@ -382,7 +440,8 @@ def test_limit_caps_the_blast_radius(purge, monkeypatch):
     ])
     monkeypatch.setattr(
         purge, "select_pronunciation_affected",
-        lambda rows: [{"key": key, "text": "a"}, {"key": other, "text": "b"}],
+        lambda rows: [{"key": key, "text": "a", "unit": "sentence"},
+                      {"key": other, "text": "b", "unit": "sentence"}],
     )
 
     _run(purge, monkeypatch, bucket, ["--mode", "pronunciation", "--delete", "--limit", "1"])
