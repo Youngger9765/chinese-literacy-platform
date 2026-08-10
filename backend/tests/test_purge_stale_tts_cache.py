@@ -95,13 +95,92 @@ def test_polyphones_the_table_excludes_are_not_flagged(purge):
     assert purge.select_pronunciation_affected(rows) == []
 
 
-def test_selection_follows_the_live_table_not_a_copy(purge, monkeypatch):
-    """Empty the table and nothing is affected. A hardcoded word list here
-    would keep flagging sentences after the table is regenerated."""
-    monkeypatch.setattr(purge, "_has_phoneme_corrections", lambda text: False)
+def test_selection_follows_the_live_transform_not_a_copy(purge, monkeypatch):
+    """Make the transform a no-op and nothing is affected. A hardcoded word
+    list here would keep flagging sentences after the table is regenerated."""
+    monkeypatch.setattr(purge, "corrections_change_text", lambda text: False)
 
     rows = [{"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "她的攻擊很凌厲。"}]
     assert purge.select_pronunciation_affected(rows) == []
+
+
+def test_the_he_conjunction_is_flagged(purge):
+    """#2661 added 和 → 漢 as its own branch inside _apply_phoneme_corrections,
+    not as a PHONEME_CORRECTIONS entry. Selecting on _has_phoneme_corrections
+    silently skipped every such sentence — including the one reported on L01 —
+    so this is the regression lock for asking the transform instead."""
+    rows = [{"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "向心力和向心加速度。"}]
+
+    affected = purge.select_pronunciation_affected(rows)
+
+    assert [a["text"] for a in affected] == ["向心力和向心加速度。"]
+
+
+def test_the_stale_predicate_would_have_missed_it(purge):
+    """States the defect as a fact, not a comment. If a future change makes
+    _has_phoneme_corrections complete again, this turns red and the test above
+    stops being interesting — that is the moment to simplify, deliberately."""
+    from app.services.tts.normalization import _has_phoneme_corrections
+
+    assert _has_phoneme_corrections("向心力和向心加速度。") is False
+    assert purge.corrections_change_text("向心力和向心加速度。") is True
+
+
+def test_he_inside_a_word_is_not_flagged(purge):
+    """和平 is ㄏㄜˊ and the exception list keeps it whole. Flagging it would
+    purge audio that is already correct — the count inflates, the bucket
+    churns, and nobody hears a difference."""
+    rows = [{"lesson_id": 1, "paragraph_idx": 0, "sentence_idx": 0, "text": "我們追求和平的生活。"}]
+
+    assert purge.select_pronunciation_affected(rows) == []
+
+
+def test_the_predicate_compares_the_exact_string_azure_is_sent(purge, monkeypatch):
+    """The point of escaping inside corrections_change_text is faithfulness:
+    it must evaluate the same bytes the synthesizer puts in the SSML body, so
+    the two can never answer different questions about the same sentence.
+
+    Asserted against the real request the provider builds, captured at the
+    urllib boundary — not against a re-implementation of the escaping here,
+    which would pass even if azure.py stopped escaping tomorrow.
+
+    Note on scope: no sentence in the shipped corpus contains an escapable
+    character, and none flips the boolean either way (verified across all 6515),
+    so this does not change which sentences get purged today. It is a lock on
+    the two paths staying identical, not a bug fix.
+    """
+    import urllib.request
+
+    from app.services.tts.normalization import (
+        _apply_phoneme_corrections,
+        escape_for_ssml,
+    )
+    from app.services.tts.providers import azure
+
+    sent = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return b"audio"
+
+    def capture(req, timeout=None):
+        sent["body"] = req.data.decode("utf-8")
+        return FakeResponse()
+
+    monkeypatch.setattr(azure, "AZURE_SPEECH_KEY", "test-key")
+    monkeypatch.setattr(urllib.request, "urlopen", capture)
+
+    text = '他說「a & b」，向心力和向心加速度。'
+    azure._synthesize_azure(text)
+
+    assert _apply_phoneme_corrections(escape_for_ssml(text)) in sent["body"]
+    assert "&amp;" in sent["body"] and "a & b" not in sent["body"]
 
 
 def test_corpus_loader_skips_blank_lines_and_empty_text(purge, tmp_path):

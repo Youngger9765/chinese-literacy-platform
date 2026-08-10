@@ -191,6 +191,41 @@ def _he_conjunction_positions(text: str) -> frozenset[int]:
 _HE_CONJUNCTION = '<sub alias="漢">和</sub>'
 
 
+def escape_for_ssml(text: str) -> str:
+    """XML-escape a sentence before it enters the SSML body.
+
+    Lives here rather than inline in the Azure provider because it is the
+    first half of a pair: _apply_phoneme_corrections is documented to take
+    ALREADY-escaped text, so anything that wants to know what the corrections
+    would do to a sentence has to escape it the same way first. One definition
+    means the answer cannot drift from what the provider actually sends.
+    """
+    return (
+        text
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&apos;")
+    )
+
+
+def corrections_change_text(text: str) -> bool:
+    """True when synthesizing this sentence today would differ from the plain
+    text — i.e. some correction fires on it.
+
+    Asks the transform, not the table. _has_phoneme_corrections only consults
+    PHONEME_CORRECTIONS, so it went stale the moment the 和 conjunction rule
+    (#2661) landed as a separate branch inside _apply_phoneme_corrections: a
+    sentence whose only change is 和 → 漢 answers False there while the
+    synthesizer happily rewrites it. Comparing before and after cannot fall
+    behind that way — a future rule added anywhere in the pass is covered
+    without touching this function.
+    """
+    escaped = escape_for_ssml(text)
+    return _apply_phoneme_corrections(escaped) != escaped
+
+
 def _apply_phoneme_corrections(text_escaped: str) -> str:
     # Single left-to-right pass over the ORIGINAL text — never re-scan text
     # we just emitted. Sequential `result.replace(...)` per pattern (the old

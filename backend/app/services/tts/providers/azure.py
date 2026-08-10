@@ -5,7 +5,7 @@ import urllib.error
 import urllib.request
 
 from .. import TTSError
-from ..normalization import _apply_phoneme_corrections
+from ..normalization import _apply_phoneme_corrections, escape_for_ssml
 
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
@@ -18,14 +18,7 @@ def _synthesize_azure(text: str) -> bytes:
 
     url = f"https://{AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1"
 
-    text_escaped = (
-        text
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-        .replace("'", "&apos;")
-    )
+    text_escaped = escape_for_ssml(text)
     ssml_body = _apply_phoneme_corrections(text_escaped)
 
     # #2082 A1: brisker pace ~260-270 字/分 (product-tunable; was 0.95)

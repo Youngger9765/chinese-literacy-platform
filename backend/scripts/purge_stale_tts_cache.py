@@ -57,7 +57,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.services.tts.normalization import (  # noqa: E402
     _cache_key,
-    _has_phoneme_corrections,
+    corrections_change_text,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
@@ -94,16 +94,20 @@ def load_corpus_sentences(path: Path = SENTENCES_PATH) -> list[dict]:
 
 
 def select_pronunciation_affected(sentences: list[dict]) -> list[dict]:
-    """Sentences the *current* correction table changes the reading of.
+    """Sentences whose synthesized reading today differs from what is cached.
 
-    Asks the live table via _has_phoneme_corrections rather than re-listing
-    words here. A hardcoded copy would drift the moment the table is
-    regenerated, and then this script would quietly purge the wrong set.
+    Asks corrections_change_text — the transform itself — not a word list and
+    not _has_phoneme_corrections. Both of those go stale: a copied list dies
+    when the table is regenerated, and the predicate already died once, when
+    #2661 added the 和 conjunction rule as its own branch inside
+    _apply_phoneme_corrections. Selecting on the predicate would have skipped
+    every sentence whose only change is 和 → 漢 — including 「和」向心力 on
+    L01, one of the sentences actually reported — and reported success.
     """
     affected: list[dict] = []
     for row in sentences:
         text = row["text"]
-        if _has_phoneme_corrections(text):
+        if corrections_change_text(text):
             affected.append({
                 "lesson_id": row.get("lesson_id"),
                 "paragraph_idx": row.get("paragraph_idx"),
