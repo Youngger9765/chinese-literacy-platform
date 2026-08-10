@@ -35,6 +35,7 @@ from .lesson_mapping import (  # noqa: E402
     build_lesson_tts_mapping,
     synthesize_sentence,
 )
+from .pauses import shorten_sentence_pauses
 from .normalization import (  # noqa: E402
     MAX_SENTENCE_LEN,
     PHONEME_CORRECTIONS,
@@ -307,6 +308,11 @@ def synthesize_speech(text: str) -> bytes:
                 len(cleaned), AZURE_TTS_VOICE,
             )
             audio_bytes = _synthesize_azure(cleaned)
+            # Azure leaves ~885 ms of silence at every sentence end — a quarter
+            # of a paragraph's runtime is dead air, and it is what makes a
+            # whole-lesson reading drag. Shortened here, once, on the way into
+            # the cache, so no listener ever waits for the re-encode.
+            audio_bytes = shorten_sentence_pauses(audio_bytes)
             used_provider = "azure"
         except TTSError as exc:
             logger.warning("Azure TTS failed, falling back to Google: %s", exc)

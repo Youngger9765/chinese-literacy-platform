@@ -247,8 +247,44 @@ def _clean_for_tts(text: str) -> str:
     return text
 
 
+def _compute_corrections_fingerprint() -> str:
+    """A short digest of the pronunciation table.
+
+    Sorted first, so the fingerprint tracks the table's *content* and not the
+    order it happens to be in. PHONEME_CORRECTIONS is sorted by length, and a
+    tie between two same-length entries could reorder between runs — that must
+    not invalidate the entire cache for a change nobody made.
+    """
+    body = "\u0000".join(f"{k}\u0001{v}" for k, v in sorted(PHONEME_CORRECTIONS))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()[:12]
+
+
+CORRECTIONS_FINGERPRINT = _compute_corrections_fingerprint()
+
+
 def _cache_key(text: str) -> str:
-    return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
+    """Cache key for a piece of synthesized speech.
+
+    Includes how the text is *pronounced*, not just what it says. The key used
+    to be the text alone, which meant adding a correction fixed nothing already
+    cached: every stored clip containing that word kept serving the old reading
+    forever, because its key had not moved. The only escape was deleting those
+    objects by hand — and the person who forgets is the person who just changed
+    the table.
+
+    That is the mechanism behind the mispronunciations that got reported, not a
+    hypothetical. With the fingerprint in the key, a corrections change makes
+    the old audio *unreachable* instead of *wrong*, and the next request
+    regenerates it. Regenerating the whole corpus costs about $2.
+
+    Not yet included: the voice and the prosody rate. Both are currently fixed,
+    but the rate is commented "product-tunable" in azure.py, so changing it
+    would resurrect exactly this bug. Add them here when either becomes a
+    variable.
+    """
+    return hashlib.sha256(
+        f"{CORRECTIONS_FINGERPRINT}\u0000{text.strip()}".encode("utf-8")
+    ).hexdigest()
 
 
 def _numbers_to_chinese_tw(text: str) -> str:
