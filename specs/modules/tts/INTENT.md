@@ -6,6 +6,7 @@ stability: active
 canonical_source: backend/app/services/tts/__init__.py
 owns_code:
   - backend/app/services/tts/__init__.py
+  - backend/app/services/tts/cache.py
   - backend/app/services/tts/providers/azure.py
   - backend/app/services/tts/providers/gemini.py
   - backend/app/services/tts/providers/google.py
@@ -13,10 +14,12 @@ owns_code:
 owns_data: []
 spec_tests:
   - backend/specs/test_tts_spec.py
+  - backend/tests/test_characterization_tts_cache.py
+  - backend/tests/test_no_duplicate_azure_impl.py
 related_issues: []
 source_meetings:
   - docs/meetings/2026-05-01-experts-review.md
-last_reviewed: 2026-08-08
+last_reviewed: 2026-08-11
 owner: young
 ---
 
@@ -212,7 +215,7 @@ HTTP 4xx/5xx **不重試**（400 代表 SSML 寫錯，再送一次還是 400）�
 **仍然存在的殘餘風險**：真的連續 3 次都失敗時，還是會落到 Google 中國腔且不壓縮。
 若要完全根除，需要拿掉 fallback 或讓 fallback 不寫進快取 —— 尚未做。
 
-### 🔴 `__init__.py` 曾重複定義 `_synthesize_azure`（已修，但同型問題還有 6 個）
+### 🔴 `__init__.py` 曾重複定義 `_synthesize_azure`（已修）
 
 `__init__.py` 第 50 行 `from .providers.azure import _synthesize_azure`，第 166 行**又定義一次**。
 Python 取後者，所以那個 import 是死的 —— **整晚對 `providers/azure.py` 的修改在執行期完全沒作用**
@@ -220,9 +223,55 @@ Python 取後者，所以那個 import 是死的 —— **整晚對 `providers/a
 
 已刪除重複定義並加回歸鎖 `tests/test_no_duplicate_azure_impl.py`（用 AST 比對 import 與 def）。
 
-⚠️ **同樣被遮蔽的還有 6 個**：`_gcs_get`、`_gcs_put`、`_get_gcs_bucket`、`_l1_put`、
-`get_cached_tts`、`delete_tts_cache`。它們登記在測試的 `KNOWN` 白名單裡，**尚未處理** ——
-順手刪掉的風險太大（快取行為改變會直接影響線上），要單獨評估。
+### ✅ 同樣被遮蔽的 6 個 cache helper 已合併進 `cache.py`（2026-08-11，#2649）
+
+`_gcs_get`、`_gcs_put`、`_get_gcs_bucket`、`_l1_put`、`get_cached_tts`、`delete_tts_cache`
+曾經是同一種 shadow：`__init__.py` 從 `.cache` import 這六個名字，接著在同一檔案又各定義一次，
+Python 取後者，`cache.py` 裡的六份是不會被執行到的死程式碼。跟 `_synthesize_azure` 不同的是這次
+**兩份實作不等價**——`__init__.py` 裡實際在跑的六份是 provider-aware 的（`_l1_key(key, provider)`
+把 provider 併進 L1 鍵，避免 Google fallback 的音檔在 Azure 恢復後仍被誤讀），`cache.py` 裡被蓋掉
+的六份是舊的裸 key 版本。`tests/test_characterization_tts_cache.py` 測的正是 `cache.py`（死程式碼）
+那份，跟 `_synthesize_azure` 的教訓一樣：測試全綠不代表測到跑的那份。
+
+修法（kiro gpt-5.6-terra review 選定的方案）：把 `__init__.py` 裡「實際在跑」的 provider-aware 版本
+（含 `_PROVIDERS`、`_l1_key`）搬進 `cache.py`，`__init__.py` 只 import + re-export，不再定義任何一個。
+`_get_gcs_bucket`／`_gcs_get`／`_gcs_put` 的 import 語法也改用 `__init__.py` 原本那份的
+`import google.cloud.storage as storage`（跟 `cache.py` 舊版的 `from google.cloud import storage`
+在 sys.modules 已被真實填過的情況下其實同樣會繞過 mock——見下——但至少統一成正在跑的那個版本，
+不留兩種寫法）。`tests/test_no_duplicate_azure_impl.py` 的 `KNOWN` 白名單已清空——這六個名字現在
+和其他名字一樣，再被 shadow 就會讓測試紅。
+
+**consolidate 過程中另外抓到兩個既有測試「patch 目標下錯模組」的洞**（不是新 bug，是這次搬移才讓
+它現形）：
+- `_get_gcs_bucket` 的 `global _gcs_client` 現在只會改到 `cache.py` 自己的 `_gcs_client`——任何測試
+  用 `patch("app.services.tts_service._get_gcs_bucket", ...)`（或 `tts_module._gcs_client = ...`）
+  在合併前是對的（那時 `_get_gcs_bucket` 就住在 `__init__.py`），合併後這個 patch **完全接不到**，
+  會讓真的 `google.cloud.storage.Client()` 在測試裡跑起來。`tests/test_tts_service.py` 的
+  `TestDeleteTtsCache`（4 條）、`TestRegenerateEndpoint::test_regenerate_returns_ok`、
+  `TestGCSSentinel`（2 條，含 `_gcs_client` 本身的讀寫）、`tests/test_tts_l1_cache_not_provider_blind.py`
+  的 `TestDeleteTtsCacheClearsEveryProvider`（2 條）都改成對 `app.services.tts.cache` patch。
+- `@patch("app.services.tts_service._TTS_CACHE", {})`（字面 dict 取代整個屬性，不是就地清空）在
+  `_l1_put`/`delete_tts_cache` 搬進 `cache.py` 後會造成 split-brain：`_synthesize_speech_with_provider`
+  （還住在 `__init__.py`）讀的是被 patch 過的空 dict，但它呼叫的 `_l1_put`（住在 `cache.py`）寫的是
+  沒被 patch 到的真 dict——於是同一個 text 兩次 `synthesize_speech` 都被判定 cache miss。
+  `test_cache_prevents_second_api_call` 用這個 mutation 實測會紅（`assert 2 == 1`）。改成
+  `patch.dict(..., {}, clear=True)`——就地清空同一個物件，不論從哪個模組名字取都看得到。
+
+**這兩個洞怎麼被抓到的**：consolidate 完後拿 `#2649` 既有的 4 個 provider-blind regression 測試檔
+（`test_tts_l1_cache_not_provider_blind.py`、`test_tts_no_cross_provider_readthrough.py`、
+`test_no_duplicate_azure_impl.py`、`test_tts_service.py`）合起來跑，才冒出 `assert <Bucket:...> is None`
+這種「mock 沒接到、真的連了 GCS」的失敗——單獨跑每個檔案都是綠的，因為污染要跨測試才會顯出來
+（這台機器有真的 GCP ADC 憑證，Client() 真的會成功）。跟 `_synthesize_azure` 的教訓同源：
+**兩份看起來一樣的程式碼，測試分別匯入各自那份，各自綠，合起來看才知道哪個是活的。**
+
+**`test_characterization_tts_cache.py::TestGCSSentinel::test_sentinel_set_after_connection_failure`
+跟 `test_tts_service.py` 合跑仍會紅——這個是既有環境問題，consolidate 沒有讓它變好也沒有變壞**：
+一旦某個沒 mock TTS 的測試（`TestTTSPydanticValidation` 的 `test_whitespace_only_text_rejected`／
+`test_exactly_5000_chars_accepted`，故意不 mock、接受 200/422/503 都算過）讓 `google.cloud.storage`
+真的成功 import 過一次，`google.cloud` 這個 namespace package 就會把 `storage` 記成一個真實屬性，
+之後任何 `from google.cloud import storage` 或 `import google.cloud.storage as storage`
+都會先抓到這個屬性、完全不理會 `patch.dict("sys.modules", ...)`——這是 CPython import 系統本身的
+行為，跟 `_get_gcs_bucket` 住在哪個檔案無關。在沒有真 GCP 憑證的機器（如大部分 CI）上不會發生。
 
 ### ⚠️ 三個已知會騙過人的陷阱
 
@@ -268,9 +317,12 @@ provider 函式，非猜測）復現：Azure 失敗一次→Google 命中→Azur
 回歸鎖：`tests/test_tts_l1_cache_not_provider_blind.py`（含「重複呼叫仍命中 L1」的正向對照，
 證明沒有把 L1 整個關掉）。
 
-`_l1_put`/`get_cached_tts`/`delete_tts_cache` 仍在 §「已刪除重複定義」那段講的 6 個
-shadowed 函式名單裡（`__init__.py` 蓋掉 `cache.py` 的匯入）——這次只改了 `__init__.py`
-裡實際在跑的那份，`cache.py` 裡被蓋掉的死程式碼刻意沒動（風險隔離，見上一節的理由）。
+`_l1_put`/`get_cached_tts`/`delete_tts_cache` 當時仍在 §「已刪除重複定義」那段講的 6 個
+shadowed 函式名單裡（`__init__.py` 蓋掉 `cache.py` 的匯入）——這裡描述的修復只改了
+`__init__.py` 裡實際在跑的那份，`cache.py` 裡被蓋掉的死程式碼當時刻意沒動（風險隔離）。
+**這個保留已經不成立**：2026-08-11 的 consolidate（見上「同樣被遮蔽的 6 個 cache helper 已
+合併進 `cache.py`」）把這份 provider-aware 版本搬進了 `cache.py`，`cache.py` 不再有任何一份
+死程式碼，`__init__.py` 也不再定義這六個名字中的任何一個。
 
 ### ✅ 「和」連接詞規則的假陽性（2026-08-11，同一次 review）
 

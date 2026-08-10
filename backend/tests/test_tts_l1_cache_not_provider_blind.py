@@ -25,6 +25,7 @@ from unittest.mock import patch
 import pytest
 
 from app.services import tts as tts_module
+from app.services.tts import cache as tts_cache_module
 
 
 AZURE_BYTES = b"AZURE-zh-TW-HsiaoChenNeural-BYTES"
@@ -103,7 +104,11 @@ class TestDeleteTtsCacheClearsEveryProvider:
         key = tts_module._cache_key("被 regenerate 的句子")
         tts_module._l1_put(key, GOOGLE_BYTES, provider="google")
 
-        with patch.object(tts_module, "_get_gcs_bucket", return_value=None):
+        # delete_tts_cache is defined in app.services.tts.cache and resolves
+        # _get_gcs_bucket against that module's own globals — patching
+        # tts_module (the __init__.py re-export) is inert post-#2649
+        # consolidation and would let a real GCS client run here.
+        with patch.object(tts_cache_module, "_get_gcs_bucket", return_value=None):
             result = tts_module.delete_tts_cache("被 regenerate 的句子")
 
         assert result["l1_deleted"] is True
@@ -111,6 +116,6 @@ class TestDeleteTtsCacheClearsEveryProvider:
             assert tts_module._TTS_CACHE.get(tts_module._l1_key(key, provider)) is None
 
     def test_l1_deleted_false_when_nothing_was_cached(self):
-        with patch.object(tts_module, "_get_gcs_bucket", return_value=None):
+        with patch.object(tts_cache_module, "_get_gcs_bucket", return_value=None):
             result = tts_module.delete_tts_cache("從來沒被合成過的句子")
         assert result["l1_deleted"] is False
