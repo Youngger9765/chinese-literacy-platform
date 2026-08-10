@@ -427,7 +427,14 @@ export function resolveStepId(id: string): string {
  *
  * Keep this set at one entry unless the same argument can be made again.
  */
-export const PUBLIC_LEARNING_STEPS: ReadonlySet<string> = new Set(['full-text-annotate']);
+export const PUBLIC_LEARNING_STEPS: ReadonlySet<string> = new Set([
+  'full-text-annotate',
+  // The 念順順 passage. Its own step both plays the passage and records the
+  // student reading it, so anonymous visitors get a listen-only view of it —
+  // the recording half still needs an account to belong to. Without this the
+  // 段落 QR printed on the worksheet walked straight into a login box.
+  'key-passage-reading',
+]);
 
 /** True when `id` (canonical or legacy) is openable without logging in. */
 export function isPublicLearningStep(id: string): boolean {
