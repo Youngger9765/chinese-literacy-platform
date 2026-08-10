@@ -75,8 +75,16 @@ describe('LearningRouteGate', () => {
       expect(await screen.findByText('GUEST-READER')).toBeInTheDocument();
     });
 
+    it('opens key-passage-reading too — the 段落 QR points there', async () => {
+      // It used to redirect, which made the second code on every printed
+      // worksheet useless. The step both plays the passage and records the
+      // student; anonymous visitors get the listening half only, and the guest
+      // reader is what enforces that (see GuestReadingPage.passage.test.tsx).
+      renderAt('/learn/1/key-passage-reading');
+      expect(await screen.findByText('GUEST-READER')).toBeInTheDocument();
+    });
+
     it.each([
-      ['key-passage-reading', 'recording is scored against a user'],
       ['character-practice', 'writes practice results'],
       ['report', 'shows one specific student’s data'],
       ['lesson-intro', 'not the step the QR code targets'],

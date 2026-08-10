@@ -25,14 +25,19 @@
  * drift.
  */
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
+import { resolveStepId } from '../config/stepConfig';
 import { fetchStory } from '../services/api';
 import type { Story } from '../types';
 
 const GuestReadingPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
+  // The step is NOT a route param here. The gate that renders this page sits on
+  // /learn/:storyId, so the step is the third path segment — read it from the
+  // location, exactly as LearningRouteGate does when deciding to render us.
+  const step = useLocation().pathname.split('/')[3] ?? '';
   const [story, setStory] = useState<Story | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -71,6 +76,15 @@ const GuestReadingPage: React.FC = () => {
     );
   }
 
+  // The worksheet carries two codes and they must not show the same thing.
+  // 段落 shows only the 念順順 passage; 全文 shows the lesson. When a lesson has
+  // no passage recorded, the passage code falls back to the whole text rather
+  // than showing an empty page.
+  const wantsPassage = resolveStepId(step) === 'key-passage-reading';
+  const passage = story.keyReading?.passage?.trim();
+  const shown: Story =
+    wantsPassage && passage ? { ...story, content: [passage] } : story;
+
   return (
     <div className="min-h-screen bg-surface" data-testid="guest-reading-page">
       {/* Top bar — the player lives here so it stays reachable while reading. */}
@@ -80,7 +94,9 @@ const GuestReadingPage: React.FC = () => {
             <h1 className="font-headline font-bold text-lg text-on-surface truncate">
               {story.title}
             </h1>
-            <p className="text-xs text-on-surface-variant">課文朗讀</p>
+            <p className="text-xs text-on-surface-variant">
+              {wantsPassage && passage ? '重點段落朗讀' : '課文朗讀'}
+            </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
@@ -94,7 +110,7 @@ const GuestReadingPage: React.FC = () => {
         </div>
       </div>
 
-      <ReadingAnnotation story={story} onFinish={() => {}} hideAnnotation />
+      <ReadingAnnotation story={shown} onFinish={() => {}} hideAnnotation />
     </div>
   );
 };

@@ -78,4 +78,6 @@ jobs:
             src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
             src/hooks/useFullTextTtsQueue.test.ts \
             src/services/ttsApi.prefetch.test.ts \
-            src/pages/admin/lesson-audio/paragraphGap.test.ts
+            src/pages/admin/lesson-audio/paragraphGap.test.ts \
+            src/pages/GuestReadingPage.passage.test.tsx \
+            src/components/auth/publicSteps.test.ts
