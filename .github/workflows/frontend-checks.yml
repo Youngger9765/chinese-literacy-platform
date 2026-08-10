@@ -80,4 +80,5 @@ jobs:
             src/services/ttsApi.prefetch.test.ts \
             src/pages/admin/lesson-audio/paragraphGap.test.ts \
             src/pages/GuestReadingPage.passage.test.tsx \
-            src/components/auth/publicSteps.test.ts
+            src/components/auth/publicSteps.test.ts \
+            src/services/ttsApi.paragraph.test.ts
