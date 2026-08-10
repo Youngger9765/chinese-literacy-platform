@@ -131,6 +131,47 @@ def _load_he_exceptions() -> tuple[str, ...]:
 
 _HE_EXCEPTIONS = _load_he_exceptions()
 
+# 和 that names the character itself, rather than joining two things, is not
+# a conjunction: a worksheet asking students to circle 「和」, a title like
+# 〈和〉/《和》, or a UI label that is nothing but the bare glyph. jieba
+# tokenizes all of these as a standalone "和" exactly like a real conjunction
+# — segmentation cannot tell the two apart — so this is a second, independent
+# gate checked alongside the exception-word list. Straight ASCII quotes are
+# included for completeness (and for testing this function directly on raw
+# text) even though in production they never reach here as literal characters:
+# _synthesize_azure XML-escapes the text before calling
+# _apply_phoneme_corrections, turning '"' into "&quot;" and "'" into
+# "&apos;" first. The CJK brackets and curly quotes are not XML-special and
+# survive that escaping unchanged, which is the case that matters in practice
+# — Taiwanese worksheets quote a single character with 「」, not with ASCII
+# quotes.
+_QUOTE_PAIRS = {
+    "「": "」",
+    "〈": "〉",
+    "《": "》",
+    "“": "”",  # “ ”
+    "‘": "’",  # ‘ ’
+    '"': '"',
+    "'": "'",
+}
+
+
+def _is_self_reference(text: str, i: int) -> bool:
+    """True when the 和 at index i names the character, not a conjunction.
+
+    Two shapes: the entire input is nothing but 和 (a bare UI label with no
+    surrounding sentence to conjoin), or it is immediately sandwiched by a
+    matching quote/bracket pair with nothing else inside (「和」, 〈和〉,
+    《和》) — a reference to the character, not a use of it.
+    """
+    if text.strip() == "和":
+        return True
+    if i > 0 and i + 1 < len(text):
+        closer = _QUOTE_PAIRS.get(text[i - 1])
+        if closer is not None and text[i + 1] == closer:
+            return True
+    return False
+
 
 def _he_exception_spans(text: str) -> set[int]:
     """Indices covered by a word whose 和 is not ㄏㄢˋ.
@@ -157,19 +198,27 @@ def _he_exception_spans(text: str) -> set[int]:
 def _he_conjunction_positions(text: str) -> frozenset[int]:
     """Indices of every 和 that should be read ㄏㄢˋ.
 
-    Two gates, because neither alone is enough:
+    Three gates, because neither of the first two alone is enough:
 
       - Segmentation says whether 和 stands alone. In the lesson corpus every
         standalone 和 (506 of 506, by POS tagging) is a conjunction. But jieba
         ships a Simplified-oriented dictionary and mis-splits some Traditional
-        words — 溫和 comes back as 很溫/和 — so it over-reports.
+        words — 溫和 comes back as 很溫/和 — so it over-reports. It also
+        cannot tell a proper noun it has never seen (鄭和, 大和) from a real
+        conjunction; both come back as two single-character tokens.
       - The MOE exception list catches those. On its own it *under*-reports,
         because substring matching crosses word boundaries: 「白天和黑夜」
         contains the archaic 天和. The list is therefore curated to modern
         words, and rare two-character entries are dropped for exactly that
-        reason (recorded in the data file).
+        reason (recorded in the data file) — 鄭和/大和/和麵/零和 were
+        wrongly dropped as "rare" when they are a proper noun, a proper
+        noun, a verb, and a modern loanword respectively, and jieba's
+        segmentation does not catch any of them, so they are back in the list.
+      - Neither gate has any notion of a 和 that names the character rather
+        than using it — 「和」, 〈和〉, a bare UI label. That is
+        _is_self_reference's job, checked per position below.
 
-    Either gate failing leaves the 和 alone, which is the safe direction: an
+    Any gate failing leaves the 和 alone, which is the safe direction: an
     unchanged 和 sounds like today, a wrong one sounds like a mistake.
     """
     try:
@@ -182,7 +231,11 @@ def _he_conjunction_positions(text: str) -> frozenset[int]:
     positions = []
     cursor = 0
     for token in jieba.cut(text):
-        if token == "和" and cursor not in excluded:
+        if (
+            token == "和"
+            and cursor not in excluded
+            and not _is_self_reference(text, cursor)
+        ):
             positions.append(cursor)
         cursor += len(token)
     return frozenset(positions)
