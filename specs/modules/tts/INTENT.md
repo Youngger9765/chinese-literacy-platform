@@ -212,6 +212,18 @@ HTTP 4xx/5xx **不重試**（400 代表 SSML 寫錯，再送一次還是 400）�
 **仍然存在的殘餘風險**：真的連續 3 次都失敗時，還是會落到 Google 中國腔且不壓縮。
 若要完全根除，需要拿掉 fallback 或讓 fallback 不寫進快取 —— 尚未做。
 
+### 🔴 `__init__.py` 曾重複定義 `_synthesize_azure`（已修，但同型問題還有 6 個）
+
+`__init__.py` 第 50 行 `from .providers.azure import _synthesize_azure`，第 166 行**又定義一次**。
+Python 取後者，所以那個 import 是死的 —— **整晚對 `providers/azure.py` 的修改在執行期完全沒作用**
+（換 requests、加重試、拉長 timeout 全部無效），而測試也一路綠，因為它們也是從 providers 匯入的。
+
+已刪除重複定義並加回歸鎖 `tests/test_no_duplicate_azure_impl.py`（用 AST 比對 import 與 def）。
+
+⚠️ **同樣被遮蔽的還有 6 個**：`_gcs_get`、`_gcs_put`、`_get_gcs_bucket`、`_l1_put`、
+`get_cached_tts`、`delete_tts_cache`。它們登記在測試的 `KNOWN` 白名單裡，**尚未處理** ——
+順手刪掉的風險太大（快取行為改變會直接影響線上），要單獨評估。
+
 ### ⚠️ 三個已知會騙過人的陷阱
 
 1. **`<sub alias>` 對多音字無效**。`著` 要讀 ㄓㄠˊ，但全教育部辭典**只有「著」這個字**讀
