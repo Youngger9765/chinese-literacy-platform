@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import os
+import time
+import logging
 import urllib.error
 import urllib.request
 
 from .. import TTSError
 from ..normalization import _apply_phoneme_corrections
+
+logger = logging.getLogger(__name__)
+
+# One retry covers the observed ~1-in-10 truncated transfer; more would
+# only add latency to a genuine outage, which the caller handles.
+AZURE_MAX_ATTEMPTS = 3
+AZURE_RETRY_BACKOFF_S = 0.5
 
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
@@ -47,13 +56,40 @@ def _synthesize_azure(text: str) -> bytes:
         },
     )
 
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            audio_bytes = resp.read()
-    except urllib.error.HTTPError as exc:
-        raise TTSError(f"Azure TTS HTTP error {exc.code}: {exc.reason}") from exc
-    except Exception as exc:
-        raise TTSError(f"Azure TTS request failed: {exc}") from exc
+    # Retry a dropped connection; do not retry a refusal.
+    #
+    # Measured: the same paragraph, 10 consecutive calls, failed once — always
+    # `IncompleteRead`, the response starting to arrive and the connection
+    # closing mid-stream. Azure refused nothing; the transfer broke.
+    #
+    # That used to raise, and synthesize_speech would fall through to Google —
+    # cmn-CN-Chirp3-HD, the mainland accent rejected in 2026-04, which also
+    # skips the pause shortening. So about one paragraph in ten came out in the
+    # wrong accent with the long pauses left in, and since the cache key does
+    # not record the provider, once written it kept being served.
+    #
+    # HTTPError is deliberately not retried: a 400 means the SSML is wrong and
+    # sending it again produces the same 400, so retrying only multiplies the
+    # latency of a genuine mistake.
+    audio_bytes = b""
+    last_exc: Exception | None = None
+    for attempt in range(AZURE_MAX_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                audio_bytes = resp.read()
+            break
+        except urllib.error.HTTPError as exc:
+            raise TTSError(f"Azure TTS HTTP error {exc.code}: {exc.reason}") from exc
+        except Exception as exc:
+            last_exc = exc
+            if attempt + 1 < AZURE_MAX_ATTEMPTS:
+                logger.warning(
+                    "Azure TTS transfer failed (attempt %d/%d), retrying: %s",
+                    attempt + 1, AZURE_MAX_ATTEMPTS, exc,
+                )
+                time.sleep(AZURE_RETRY_BACKOFF_S * (attempt + 1))
+    else:
+        raise TTSError(f"Azure TTS request failed: {last_exc}") from last_exc
 
     if not audio_bytes:
         raise TTSError("Azure TTS returned empty audio content")
