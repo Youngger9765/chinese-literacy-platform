@@ -11,6 +11,8 @@ owns_code:
   - backend/app/services/spotlight_pse_parser.py
   - scripts/build_lesson_schema.py
   - frontend/src/components/reading-spotlight/
+owns_data:
+  - backend/data/lessons/spotlight/**
 spec_tests:
   - backend/specs/test_spotlight_block_model_spec.py
   - backend/specs/test_spotlight_v2_spec.py
@@ -40,6 +42,25 @@ owner: young
 | **L5** | `/learn/{id}/reading-strategy` 渲染 `BlockSequenceRenderer`（非 legacy StrategyExercise） | browse + 代表課；見下表 | merge 後必 spot-check |
 
 **L2 gold 說明**：`backend/data/lessons/spotlight/{dev7,test15}/gold_manifest.json` 存 fingerprint（block 序列、計數、mcq_leakage 等），抓 parser 回歸；**不**保證 passage/answer 語意 — 靠 L1 + 人眼 checklist
+
+### B4 決議（2026-08-14）：L1 門檻以 code 為準
+
+`docs/issue-2205-eval-standard.md:38` 曾寫 `answer_recall == 1.0`；實測
+`scripts/eval_lesson_schema.py:406-409`（`eval_spotlight`）：
+
+```python
+passed = (
+    mcq_leakage == 0 and
+    guide_retained and
+    answer_recall >= 0.99
+)
+```
+
+**裁決：code 是 SOT。** `answer_recall` 門檻是 `>= 0.99`，不是 `== 1.0`——與
+`story-structure` module 的 `row_recall`/`blank_recall`（`== 1.0` 文件 vs
+`>= 0.95` code）是同一種「文件寫死 1.0、code 實際留容錯」模式。文件已同步改正
+（`docs/issue-2205-eval-standard.md` §2）。往後若要改門檻，先改
+`eval_lesson_schema.py`，文件跟著改，不要反過來。
 
 一鍵本地 gate：
 

@@ -45,6 +45,27 @@ owner: young
 
 **L2 gold 說明**：`backend/data/curriculum_qa/keypoints_manifest.json` + snapshots — 儀表板與 runtime 一致；非 DOCX 全文 gold
 
+### B4 決議（2026-08-14）：L1 門檻以 code 為準
+
+`docs/issue-2205-eval-standard.md:19`（`row_recall == 1.0 AND blank_recall ==
+1.0 AND cell_integrity AND label_family_correct`）與
+`docs/qa/story-structure-verification-standard.md:70-75`（`>= 0.95`，且
+`label_family_correct` 只 warn）兩份互相矛盾。實測 `scripts/eval_lesson_schema.py:345-350`：
+
+```python
+passed = (
+    row_recall >= 0.95 and
+    blank_recall >= 0.95 and
+    nesting_preserved and
+    label_family_correct
+)
+```
+
+**裁決：code 是 SOT。** 門檻是 `>= 0.95`（不是 `== 1.0`），且
+`label_family_correct` **是**硬 gate（不是 warn-only）。兩份文件已同步改正
+（`docs/issue-2205-eval-standard.md` §1、`docs/qa/story-structure-verification-standard.md`
+L1 表）。往後若要改門檻，先改 `eval_lesson_schema.py`，文件跟著改，不要反過來。
+
 一鍵本地：
 
 ```bash

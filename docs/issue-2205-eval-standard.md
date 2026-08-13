@@ -16,7 +16,15 @@ All validation reports MUST use these metric names.
 | `cell_integrity` | bool: 無合併格 value 串接錯亂 | true |
 | `label_family_correct` | 判對 摘要/敘事人物/比較/研究 哪一族 | true |
 
-**PASS criteria**: `row_recall == 1.0 AND blank_recall == 1.0 AND cell_integrity AND label_family_correct`
+**PASS criteria** (code SOT — `scripts/eval_lesson_schema.py::eval_keypoints`, verified 2026-08-14):
+`row_recall >= 0.95 AND blank_recall >= 0.95 AND nesting_preserved AND label_family_correct`
+
+> ⚠️ This table previously said `row_recall == 1.0 AND blank_recall == 1.0`, which
+> the implementation has never enforced (it uses `>= 0.95`, matching
+> `docs/qa/story-structure-verification-standard.md`). `label_family_correct`
+> **is** a hard blocking condition in code (unlike the old claim in the
+> story-structure doc that it's warn-only). See B4 resolution in
+> `specs/modules/story-structure/INTENT.md`.
 
 ---
 
@@ -35,7 +43,9 @@ All validation reports MUST use these metric names.
 | `bind_paragraph_correct` | figure bind_paragraph is non-empty | true |
 | `mcq_leakage` | MCQ blocks in spotlight output | 0 |
 
-**PASS criteria**: `answer_recall == 1.0 AND mcq_leakage == 0 AND guide_retained`
+**PASS criteria** (code SOT — `scripts/eval_lesson_schema.py::eval_spotlight`, verified
+2026-08-14): `answer_recall >= 0.99 AND mcq_leakage == 0 AND guide_retained` — same
+0.99-vs-1.0 gap as the keypoints table above; code uses `>= 0.99`, not `== 1.0`.
 
 ---
 
