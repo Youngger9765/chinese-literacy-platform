@@ -163,11 +163,67 @@ published:
 
 ---
 
+## 三之二、清理清單（全部實測盤過，逐項標明刪或留）
+
+> 原則：**舊資料不要了 → 該刪就刪，不留半條相容路徑。**
+> 唯一例外是與課文版本無關的快取。
+
+### repo 內
+
+| 對象 | 量 | 動作 | 理由 |
+|---|---|---|---|
+| `backend/data/lessons/L*.yml`（Layer-1） | 57 檔 | 🔴 **刪** | 2026-02 手工建，5/1 就該退役 |
+| `backend/data/lessons/_parsed_2026-05-01/`（Layer-2） | 152 檔 | 🔴 **刪** | 一修 parse 產物 |
+| `backend/data/lessons/_reparsed_2026-05-02/` | 3 檔 | 🔴 **刪** | 同上（被 4 處引用，要一起清） |
+| `backend/data/lessons/_ai_lessons/` | 8 檔 | 🔴 **刪** | 早期 AI 產物（被 2 處引用，要一起清） |
+| `backend/data/lessons/spotlight/catalog/` | 113 檔 | 🔴 **刪** | 檔名綁舊課號，重抽 |
+| `backend/data/lessons/spotlight/dev7/` | 8 檔 | 🔴 **刪** | 早期手工策展 7 課，二修後無意義 |
+| `backend/data/lessons/spotlight/test15/` | 15 檔 | 🔴 **刪** | 同上 |
+| `backend/data/curriculum/manifest.yml` | 158 筆 | 🔴 **重建** | 改成 `catalog_manifest.yml`（slot → uid+version） |
+| `backend/data/key_reading_passages.yml` | 134 條 | 🔴 **重建** | by 舊課號，且 32 條已是孤兒 |
+| `docs/lesson-schema-registry.yaml` | — | 🔴 **重建** | 由新 pipeline 產 |
+
+⚠️ `_ai_lessons` 與 `_reparsed_2026-05-02` 各有引用點（2 處 / 4 處），
+**刪之前要先跑反向依賴掃描**，不能直接 `rm -rf`。
+
+### GCS
+
+| 對象 | 量 | 動作 | 理由 |
+|---|---|---|---|
+| `gs://lingoleap-assets/worksheets/` | **458 物件** | 🔴 **清空重上** | 全一修，最後更新 6/16，檔名綁舊課號 |
+| `gs://lingoleap-assets/demo-reading/` | **444 物件** | 🔴 **清空重產** | 綁舊 story_id 的音檔 + QR |
+| `gs://lingoleap-assets/lessons-images/` | — | 🟡 **盤點後再定** | 圖片可能與課文版本無關，先查引用 |
+| `gs://lingoleap-assets/stories/` | — | 🟡 **盤點後再定** | 同上 |
+| `gs://lingoleap-assets/qa/`、`pr-screenshots/` | — | ⚪ **不動** | 與教材無關 |
+| **`gs://lingoleap-tts-cache/azure/`** | — | ✅ **保留** | 快取鍵是 `sha256(文字)`，與課號版本無關；刪＝重燒錢 |
+| `gs://lingoleap-tts-cache/gemini31-prompt-only-v2/` | — | 🟡 **可刪** | 已切 Azure，非現行 provider |
+| `gs://lingoleap-tts-cache/tts-cache/` | — | 🔴 **刪** | 中國腔 fallback 的來源，留著會被回讀汙染 |
+| `gs://lingoleap-tts-cache/_backup-*` ×3 | 22 / 340 / 235 物件 | 🟡 **可刪** | 8/10 修音時的備份，已無用 |
+
+### DB
+
+| 對象 | 動作 |
+|---|---|
+| 課文相關資料表（stories / lesson content） | 🔴 **清空重建** |
+| 學習紀錄（learning session / reading history） | 🔴 **清空** —— 都是內部測試資料，且舊紀錄綁舊 `lesson_id`，留著只會污染新版統計 |
+| 使用者 / 班級 / 作業 | ⚪ **不動** —— 與教材版本無關 |
+
+### 清理順序（不可顛倒）
+
+```
+1. 先掃反向依賴（_ai_lessons / _reparsed / dev7 / test15 的引用點）
+2. 先在 staging 清 + 重建 + 驗收
+3. 驗收過才動 prod
+4. tts-cache/azure/ 全程不碰
+```
+
+---
+
 ## 四、不做（本次範圍外）
 
 | 不做 | 為什麼 |
 |---|---|
-| **不刪 `tts-cache`** | 快取鍵是 `sha256(文字)`，與課號版本無關。刪掉等於重燒一次 TTS 費用 |
+| **不刪 `tts-cache/azure/`** | 快取鍵是 `sha256(文字)`，與課號版本無關。刪掉等於重燒一次 TTS 費用（其餘 prefix 見清理清單） |
 | **不動 prod** | staging 驗完才複製 |
 | **不上學生版下載** | Hans 轉換中，本次只上教師版抽出的平台內容 |
 | **不點亮未檢核的聚光燈** | 機制修好 ≠ 內容驗過，用 manifest 逐批開 |
@@ -209,7 +265,8 @@ uid 無重複、無重用。
 **驗收**：`build_ok` 175/175；失敗逐課列原因，不隱藏。
 
 ### Phase 5 — 落地 staging
-清 `catalog/` 113 檔、清 `assets/worksheets/` 458 檔、寫入新結構、deploy。
+照「三之二 清理清單」逐項執行：repo 內 356 檔 + GCS 902 物件 + DB 課文與學習紀錄，
+寫入新結構、deploy。**清理前先跑反向依賴掃描。**
 
 **驗收**：staging 抽 10 課真瀏覽器走完流程、0 console error。
 
