@@ -1,46 +1,57 @@
-# PRD — 二修教材全刷重建（Second-Edition Re-ink）
+# PRD — 教材重建與課文身份架構重整
 
-> 2026-08-14 ｜ 決策人：Young ｜ 來源：8/14 團隊會議逐字稿 + 當日實測查證
-> 狀態：待啟動
+> 2026-08-14 ｜ 決策人：Young ｜ 來源：8/14 會議逐字稿 + 當日實測
+> 取代目標：一次解決「每次改版都會亂」的結構問題，不只是這次的二修
 
 ---
 
-## 一、WHY — 為什麼要「全刷」而不是「增量修」
+## 一、WHY
 
-### 1. 內容改動幅度太大，增量不划算
+### 1. 二修改了 7~8 成，增量修不划算
 
-啟翔在 8/14 會議實測後回報：**二修改了 7~8 成的課**。
-在這個比例下，「找出一修與二修的差異、只改動到的部分」的成本高於直接重建，
-而且每一課都要人工確認差異，等於做了兩次工。
-
-Young 的原話：**「我根本不知道二修跟一修的差別，不如重刷。」**
+啟翔實測回報。Young：「我根本不知道二修跟一修的差別，不如重刷。」
 
 ### 2. 舊資料沒有保留價值
 
-平台**尚未進入真實教學現場**，目前所有資料都是內部測試產生的。
-沒有真實學生學習紀錄、沒有已發出的紙本、沒有對外承諾綁定任何一課。
-→ **一修資料的保留成本 > 保留價值**。
+平台**尚未進真實現場**，無學生紀錄、無已發紙本、無對外承諾綁課。
 
-### 3. 現行資料結構會讓每次改版都重痛一次
+### 3. 🔴 真正的病根：現在沒有任何可靠的「這是哪一課」的鍵
 
-啟翔的原話：
-> 「全部都在同一份 YAML 裡面，然後就很大份……我請他做某件事，他會一直去抓其他的，
-> 有關聯但又不全然有關聯，因為太多東西混在一起了。我人腦去看他給我的 output 也很痛苦。」
+載入層是**兩層合併**，而且是歷史意外不是設計：
 
-現況是**兩種結構並存**：
-- 舊：一課一個大 YAML，所有模組混在一起（設計目的是預先全載）
-- 新：聚光燈另外獨立成 `catalog/<課號>.spotlight.yml`
+```
+2026-02-26  Layer-1  backend/data/lessons/L*.yml            57 課，手工建
+2026-05-01  Layer-2  backend/data/lessons/_parsed_2026-05-01/  152 檔，DOCX 批次 parse
+```
 
-而且**聚光燈檔名是綁課號的**，二修重排課號後全部對不到。
+5/1 批次 parse 了 158 課，**沒有把舊的 57 課退役**，改寫一段「用課名去重 + enrich」
+把兩層黏起來（`lesson_indexes.py: build_all_lessons()`）。
 
-### 4. 一個擋了四個月的 bug 剛修好，正好是重建的前提
+**實測後果**：
 
-`backend/Dockerfile` 只 COPY `app/ data/ alembic/`，沒有 COPY `scripts/`
-（也複製不到 —— build context 是 `./backend`，`scripts/` 在上一層）。
-runtime 動態 import adapter 失敗 → fail-closed → **124 課有素材但只有 7 課吐得出內容**。
+| 用什麼當鍵 | 撞鍵組數 | 涉及課數 |
+|---|---|---|
+| 課名（正規化後） | 10 組 | 20 課 |
+| 正規化課號 | **13 組** | **26 課** |
 
-已修並 merged（`33b0532c`）。容器內實測：修前 7 課、修後 124 課。
-**沒有這個修復，重建出來的內容一樣顯示不出來。**
+```
+G4-L1   → ids=[1, 1001]      贏得喝采的輸家
+G5-L11  → ids=[11, 1038]     「拳」力出擊 vs 拳力出擊     ← 引號差異
+G6-L1   → ids=[14, 1055]     運動傷害，怎麼辦？ vs 怎麼辦  ← 問號差異
+文-L1   → ids=[44, 1149]
+```
+
+每一組都是「Layer-1 低 id」對上「Layer-2 的 1000+ id」。
+課名差一個標點 → enrich 失敗 → **Layer-1 那筆變空殼**。
+這就是 165 課裡有 20 課沒有聚光燈素材的真因（不是內容缺，是對應斷）。
+
+**課名會變、課號會變，兩個都不能當身份。** 不解掉這件事，三修四修還會再亂一次。
+
+### 4. adapter 進不了 image 的 bug 剛修好，是重建的前提
+
+`backend/Dockerfile` 只 COPY `app/ data/ alembic/`，沒 COPY `scripts/`（也複製不到，
+build context 是 `./backend`）→ runtime import 失敗 → fail-closed → **124 課有素材只有 7 課吐得出內容**。
+已 merged `33b0532c`；容器內實測：修前 7、修後 124。
 
 ---
 
@@ -48,162 +59,161 @@ runtime 動態 import adapter 失敗 → fail-closed → **124 課有素材但�
 
 | 項目 | 數字 | 取得方式 |
 |---|---|---|
-| Drive 新教材（SOT） | **175 課** docx | `rclone lsf` 該資料夾，扣掉 1 個 `~$` 暫存檔 |
-| 線上 DB 課數 | **165** | `/api/stories?page_size=300` 的 `total` |
-| 聚光燈 catalog 檔 | 113（manifest 列 108） | `ls` + 讀 manifest.json |
-| 有 `spotlight_v2` 素材 | 124 | 容器內跑 loader 統計 |
+| Drive 新教材（SOT） | **175 課** | `rclone lsf`，扣 1 個 `~$` 暫存檔 |
+| 線上 DB | **165**（= L1 57 + L2 108） | `/api/stories?page_size=300` |
+| 其中重複空殼 | **20~26 課** | 課名/課號撞鍵實測 |
+| 聚光燈 catalog | 113 檔（manifest 列 108） | `ls` + manifest |
+| 有 `spotlight_v2` 素材 | 124 | 容器內跑 loader |
 | `assets/worksheets/` | 458 檔，最後更新 **6/16** | `gcloud storage ls -l` |
 | `tts-cache` | **1523 MB** | `gcloud storage du` |
-| `reading-audio` ×2 | 0 MB（空） | 同上 |
 
-Drive 年級分佈：G4=20 / G5=28 / G6=29 / G7=30 / G8=23 / G9=23 / 文言文=12 / 體育生品格=11
-
-> ⚠️ 這解掉了會議上「159 還是 180 課」的爭議 —— **實際是 175**。
-> 比線上多 10 課，代表二修有新增課次。
+Drive 分佈：G4=20 / G5=28 / G6=29 / G7=30 / G8=23 / G9=23 / 文言文=12 / 體育生品格=11
+→ 解掉會議上「159 還是 180」的爭議：**是 175**。
 
 ---
 
-## 三、WHAT — 做什麼 / 不做什麼
+## 三、WHAT — 新的身份架構
 
-### 做
+### 核心原則：身份跟編號、名稱、內容全部脫鉤
 
-1. 以 Drive 175 課教師版 docx 為唯一來源，**重建全部課文內容**
-2. **改資料結構**：一課一個 folder，模組各自獨立 YAML，按需載入
-3. 清掉一修的 DB 資料、講義檔、聚光燈 catalog
-4. 重跑聚光燈、重點表、重點朗讀
-5. 朗讀改用 AI TTS（不再人工錄音）
-6. intro 頁移除全文朗讀鈕（全文朗讀統一在第二頁）
+| 候選鍵 | 課號重排 | 課名改標點 | 新增課文 | 同課出新版 |
+|---|---|---|---|---|
+| 課名 | ✅ | 🔴 | ✅ | 🔴 |
+| 課號 `G4-L1` | 🔴 | ✅ | ✅ | ✅ |
+| 年級+課次複合鍵 | 🔴 | ✅ | ✅ | ✅ |
+| 內容雜湊 | ✅ | ✅ | ✅ | 🔴 |
+| **不可變流水號** | ✅ | ✅ | ✅ | ✅ |
 
-### 不做（本次範圍外）
+**只有「發一次就不再改的號碼」四種情況全過。**
+
+### 資料形狀
+
+```
+backend/data/lessons/<lesson_uid>/
+  ├── lesson.yml        # 身份 + 屬性（見下）
+  ├── passage.yml       # 課文
+  ├── spotlight.yml     # 閱讀聚光燈
+  ├── keypoints.yml     # 文章重點表
+  ├── key_reading.yml   # 重點朗讀
+  └── assets/           # 圖片等
+```
+
+`lesson.yml`：
+
+```yaml
+lesson_uid: L0042          # 🔴 發一次，永不改、永不重用。QR 綁這個
+title: 救援大隊的好幫手      # 屬性，可變
+codes:                     # 歷次課號，保留歷史
+  - {code: G4-L19, edition: 1}
+  - {code: G5-L11, edition: 2}   # 二修搬到五年級
+grade: 5                   # 屬性，可變
+edition: 2                 # 目前版本
+```
+
+**課號、課名、年級、策略標籤 → 全部降級成屬性。**
+
+### 三個直接後果
+
+1. **課號重排 = 改屬性** —— 不搬檔、不改 folder、不動 QR
+2. **新增課文 = 發一個新 uid** —— 不影響任何既有課
+3. **同課出新版 = 同一個 uid 換 edition** —— 學習紀錄與 QR 都不斷
+
+### 為什麼 folder 用 uid 而不是課號
+
+現在聚光燈是 `catalog/G4-L11.spotlight.yml` —— 課號一改，113 個檔全部對不到。
+改用 uid 之後，**任何改版都不需要動檔名**。
+
+### 順帶解掉啟翔的痛點
+
+他的原話：「全部都在同一份 YAML 裡面……我請他做某件事，他會一直去抓其他的，
+太多東西混在一起了。」
+
+模組各自一檔 + 按需載入 → 做聚光燈時只看得到 `spotlight.yml`。
+
+---
+
+## 四、不做（本次範圍外）
 
 | 不做 | 為什麼 |
 |---|---|
-| **不刪 `tts-cache`** | 快取鍵是 `sha256(文字)`，與課號、版本無關。二修沒改到的句子會直接命中；刪掉等於重新燒一次 TTS 費用 |
-| **不動 prod** | 先在 staging 完成並驗收，prod 待 staging 驗過再複製 |
-| **不上學生版/解答版下載** | Hans 還在轉換中，本次只上教師版抽出的**平台內容** |
-| **不點亮未檢核的聚光燈** | 機制修好 ≠ 內容驗過。用 manifest 控制，逐批開 |
-| **不追教授正式審稿** | 會議已定調：雙方無合約義務，改以「模組完成即上線、未完成先隱藏」 |
-
----
-
-## 四、資料結構變更
-
-### 現況（會讓每次改版重痛）
-
-```
-backend/data/lessons/spotlight/catalog/G4-L11.spotlight.yml   ← 檔名綁課號
-backend/data/lessons/<某個大 YAML>                            ← 所有模組混在一起
-```
-
-### 目標
-
-```
-backend/data/lessons/<story_id>/
-  ├── meta.yml            # 課名、年級、課號、策略
-  ├── passage.yml         # 課文
-  ├── spotlight.yml       # 閱讀聚光燈
-  ├── keypoints.yml       # 文章重點表
-  ├── key_reading.yml     # 重點朗讀（念順順）
-  └── ...                 # 其他模組各自一份
-```
-
-**兩個關鍵設計**：
-
-1. **folder 用 `story_id` 不用課號** —— 課號會隨改版重排，`story_id` 不會。
-   這樣二修、三修、四修都不會再撞到「檔名對不到」的問題。
-2. **按需載入** —— 點到哪個關卡才讀那個模組的 YAML。
-   AI 做某個模組時只會看到那個模組的資料，不會再吃到別的模組（直接解掉啟翔的痛點）。
+| **不刪 `tts-cache`** | 快取鍵是 `sha256(文字)`，與課號版本無關。刪掉等於重燒一次 TTS 費用 |
+| **不動 prod** | staging 驗完才複製 |
+| **不上學生版下載** | Hans 轉換中，本次只上教師版抽出的平台內容 |
+| **不點亮未檢核的聚光燈** | 機制修好 ≠ 內容驗過，用 manifest 逐批開 |
+| **不追教授正式審稿** | 會議定調：雙方無合約義務，改「模組完成即上線、未完成先隱藏」 |
 
 ---
 
 ## 五、HOW — 手順
 
-> 每個階段都是一張 issue、一個 PR。**上一階段驗收通過才進下一階段。**
+> 每階段一張 issue、一個 PR。**上一階段驗收過才進下一階段。**
+> 驗收一律以**容器內**行為為準 —— adapter 那個 bug 就是本機綠、線上壞。
 
 ### Phase 0 — 前置（已完成）
+- [x] adapter 修復 merged（`33b0532c`）
+- [x] Drive SOT 就位，175 課
+- [x] 實習生 GCS 讀取權限開通
 
-- [x] adapter 進不了 image 的 bug 修復並 merged（`33b0532c`）
-- [x] Drive SOT 建立，175 課教師版就位
-- [x] 實習生 GCS 讀取權限開通（`objectViewer` + `legacyBucketReader`）
+### Phase 1 — 發 uid + 建對照表
+產出 `docs/curriculum/lesson-uid-registry.yml`：
+每課一個 `lesson_uid`，記錄 `舊 story_id / 舊課號 / 二修課號 / 課名 / Drive 路徑`。
 
-### Phase 1 — 對照表：175 課 ↔ 線上 165 課
+**驗收**：175 課全部有 uid；線上 165 課逐筆對到 uid 或標 `retire`；
+uid 無重複、無重用。
 
-**產出**：`docs/curriculum/second-edition-mapping.csv`
+### Phase 2 — 改載入層，單層化
+- 廢除 Layer-1/Layer-2 合併與課名 enrich
+- loader 改讀 `<lesson_uid>/` 單層
+- 舊的 57 個 `L*.yml` 退役
 
-| 欄位 | 說明 |
-|---|---|
-| `docx_path` | Drive 上的相對路徑 |
-| `new_code` | 從檔名解析的二修課號 |
-| `title` | 課名 |
-| `story_id` | 對應的線上 story_id（**沿用**）；查無對應則標 `NEW` |
-| `status` | `matched` / `new` / `online_only` |
+**驗收**：容器內 loader 讀得到；撞鍵組數 = **0**（現在是 13）。
 
-**為什麼要先做這張表**：165 → 175 之間有 10 課的差額，
-不知道哪些是新增、哪些是改名，就無法判斷「線上那課該保留還是該刪」。
+### Phase 3 — 抽取 5 課試跑
+`run_lesson_pipeline.py` 已實測可吃二修 DOCX（72 課 `build_ok` 72/72），
+但**輸出路徑是寫死的扁平結構**（`{lesson_id}.spotlight.yml`）→ 要改成寫進 `<uid>/`。
 
-**驗收**：`matched + new` 覆蓋全部 175 課；`online_only` 逐筆有處置決定。
+**驗收**：5 課在容器內能被讀到並吐出 `lesson_content`。
 
-### Phase 2 — 重建腳本（先跑 5 課，不碰線上）
+### Phase 4 — 全量 175 課
+**驗收**：`build_ok` 175/175；失敗逐課列原因，不隱藏。
 
-用既有的 `run_lesson_pipeline.py`（已實測可吃二修 DOCX，72 課 `build_ok` 72/72），
-輸出改寫成 Phase 4 的新 folder 結構。
+### Phase 5 — 落地 staging
+清 `catalog/` 113 檔、清 `assets/worksheets/` 458 檔、寫入新結構、deploy。
 
-**驗收**：5 課在**容器內**能被 loader 讀到並吐出 `lesson_content`。
-⛔ 本機綠不算 —— 這次的 adapter bug 就是本機綠、線上壞。
+**驗收**：staging 抽 10 課真瀏覽器走完流程、0 console error。
 
-### Phase 3 — 全量抽取 175 課（仍不碰線上）
+### Phase 6 — 朗讀 TTS
+**`tts-cache` 不清**，未改動的句子直接命中。
+**驗收**：抽 10 課有音檔且非瀏覽器機器音（回應約 177–197KB）。
 
-**驗收**：`build_ok` 175/175；失敗的逐課列出原因，不隱藏。
-
-### Phase 4 — 資料結構切換 + 落地 staging
-
-1. 清掉 `backend/data/lessons/spotlight/catalog/`（113 檔）
-2. 寫入新的 `<story_id>/` 結構
-3. loader 改讀新結構
-4. `assets/worksheets/` 458 檔清掉，改上二修教師版
-5. deploy staging
-
-**驗收**：staging 上抽驗 10 課，真瀏覽器走完學習流程、0 console error。
-
-### Phase 5 — 朗讀重生成
-
-AI TTS 重跑。**`tts-cache` 不清** —— 未改動的句子直接命中。
-
-**驗收**：抽驗 10 課有音檔且非瀏覽器機器音（看回應大小，Azure 約 177–197KB）。
-
-### Phase 6 — 聚光燈 / 重點表 QA 與逐批點亮
-
-由啟翔、靖杭 QA。用 `catalog/manifest.json` 控制開關 —— **驗過一批才加一批**。
-未通過的先隱藏，會議已定調「模組完成即上線，未完成先隱藏」。
-
-### Phase 7 — prod
-
-staging 驗收通過後複製到 prod。
+### Phase 7 — QA 逐批點亮 → prod
+啟翔（聚光燈）、靖杭（重點表/朗讀）。用 manifest 控制，驗過一批開一批。
 
 ---
 
-## 六、風險與回退
+## 六、風險
 
 | 風險 | 處置 |
 |---|---|
-| 抽取失敗率高於預期 | Phase 2 先跑 5 課即可發現；不進 Phase 3 |
-| 新資料結構讓 loader 壞掉 | Phase 4 前先在容器內驗過；staging 先行，prod 不動 |
-| 誤刪 tts-cache | **明列為不做事項**；任何刪除指令要先確認 bucket 名 |
-| 二修還有課沒給齊 | Hans 向明珠老師確認 175 是否為全部（會議 action item） |
-| 線上 10 課在 Drive 找不到對應 | Phase 1 的 `online_only` 逐筆決定：保留舊版 or 下架 |
+| 🔴 **Phase 2 改載入層是全域影響** | 最危險的一步。先在容器內驗，staging 先行，prod 不動 |
+| pipeline 輸出格式要改 code | 已確認 `process_lesson()` 寫死扁平路徑，Phase 3 含這項改動 |
+| 二修課名/課號對不到舊課 | Phase 1 的 uid registry 逐筆人工確認，不自動猜 |
+| 誤刪 tts-cache | 明列不做；刪除指令先確認 bucket 名 |
+| 175 課不是全部 | Hans 向明珠老師確認（會議 action item） |
 
-**回退路徑**：全程只動 staging；一修資料在 git 有完整歷史，隨時可還原。
+**回退**：全程只動 staging；一修資料 git 有完整歷史。
 
 ---
 
-## 七、驗收條件（全部達成才算完成）
+## 七、驗收條件
 
-1. Drive 175 課全部在 staging 可見且可完成學習流程
-2. 資料結構已切換成 `<story_id>/<模組>.yml`，loader 讀得到
-3. 容器內（非本機）驗證通過
-4. 講義下載指向二修版本，或**明確關閉**（學生版未就位前不得指向一修）
-5. 聚光燈/重點表：通過 QA 的已點亮，未通過的已隱藏且列冊
-6. `tts-cache` 未被清空
+1. 175 課在 staging 可見且可完成學習流程
+2. 資料結構為 `<lesson_uid>/<模組>.yml`，loader 讀得到
+3. **撞鍵組數 = 0**（現在 13）
+4. 容器內（非本機）驗證通過
+5. 講義下載指向二修版，或**明確關閉**（學生版未就位前不得指向一修）
+6. 聚光燈/重點表：過 QA 的已點亮，未過的已隱藏且列冊
+7. `tts-cache` 未被清空
 
 ---
 
@@ -211,19 +221,20 @@ staging 驗收通過後複製到 prod。
 
 | Phase | 主責 |
 |---|---|
-| 1–5 | Young（會議決定先自己跑一版，卡住再交接） |
-| 6 | 啟翔（聚光燈）、靖杭（重點表 / 朗讀） |
-| 學生版 + 解答版 docx | Hans（三版本轉換，8/31 前） |
-| 向明珠老師確認 175 是否為全部 | Hans |
+| 1–6 | Young（先自己跑一版，卡住再交接） |
+| 7 | 啟翔（聚光燈）、靖杭（重點表/朗讀） |
+| 學生版 + 解答版 docx | Hans，8/31 前 |
+| 確認 175 是否為全部 | Hans |
 
 ---
 
-## 附錄：本文件所有數字的取得方式
+## 附錄：本文所有數字的取得方式
 
-- Drive 課數 — `rclone lsf --drive-root-folder-id <id> gdrive: -R --files-only --include "*.docx"`
-- 線上課數 — `curl /api/stories?page_size=300` 讀 `total`（⚠️ 參數是 `page_size` 不是 `limit`）
-- 容器內行為 — `docker run --rm -i --entrypoint python <prod image digest> - < probe.py`
-- GCS 用量 — `gcloud storage du -s gs://<bucket>`
-- 一修最後改動 — `git log --since=2026-07-21 -- backend/data/curriculum/`（空 = 未動）
+- Drive — `rclone lsf --drive-root-folder-id <id> gdrive: -R --files-only --include "*.docx"`
+- 線上課數 — `curl /api/stories?page_size=300` 讀 `total`（參數是 `page_size` 不是 `limit`）
+- 撞鍵統計 — 載入 `_ALL_LESSONS` 後用課名正規化 / `normalize_manifest_code` 分別分組
+- 容器內行為 — `docker run --rm -i --entrypoint python <image digest> - < probe.py`
+- GCS — `gcloud storage du -s gs://<bucket>`
+- 兩層何時生的 — `git log --reverse -- backend/data/lessons/L01.yml` 與 `_parsed_2026-05-01/`
 
-⛔ 本文件不採用狀態檔、舊議程或記憶作為事實來源。
+⛔ 不採用狀態檔、舊議程或記憶作為事實來源。
