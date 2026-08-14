@@ -86,28 +86,59 @@ Drive 分佈：G4=20 / G5=28 / G6=29 / G7=30 / G8=23 / G9=23 / 文言文=12 / �
 
 **只有「發一次就不再改的號碼」四種情況全過。**
 
+### 四個要分開的概念（codex 審查後修正）
+
+第一版只有 `lesson_uid` 一層，**分不出一修/二修** —— `<uid>/spotlight.yml`
+沒有版本資訊。四個概念必須分開：
+
+| 概念 | 是什麼 | 會不會變 |
+|---|---|---|
+| `lesson_uid` | 這是哪一篇課文 | **永不變** |
+| `version_id` | 教材版本（一修/二修/三修） | 每次改版新增 |
+| `catalog_slot` | 當期排在哪（`G4-L10`） | 每次重排都變 |
+| `published_version` | 目前預設出哪一版 | 可切換、可回退 |
+
+**`catalog_slot` 不是身份** —— 它住在 manifest 裡，指向 `uid + version`，
+不可以變成資料夾名。
+
 ### 資料形狀
 
 ```
-backend/data/lessons/<lesson_uid>/
-  ├── lesson.yml        # 身份 + 屬性（見下）
+backend/data/lessons/<lesson_uid>/<version_id>/
+  ├── lesson.yml        # 屬性
   ├── passage.yml       # 課文
   ├── spotlight.yml     # 閱讀聚光燈
   ├── keypoints.yml     # 文章重點表
   ├── key_reading.yml   # 重點朗讀
-  └── assets/           # 圖片等
+  └── assets/
+
+backend/data/catalog_manifest.yml     # catalog_slot → uid + version + 各模組狀態
 ```
+
+`catalog_manifest.yml` 同時承擔 **partial publish** —— 一課可能課文已上、
+聚光燈未過 QA、講義待補，要能逐模組標狀態，不是整課全開或全關。
 
 `lesson.yml`：
 
 ```yaml
-lesson_uid: L0042          # 🔴 發一次，永不改、永不重用。QR 綁這個
+lesson_uid: L0042          # 🔴 registry 分配，永不改、永不重用。QR 綁這個
+version_id: v2             # 這個資料夾是哪一版
 title: 救援大隊的好幫手      # 屬性，可變
-codes:                     # 歷次課號，保留歷史
-  - {code: G4-L19, edition: 1}
-  - {code: G5-L11, edition: 2}   # 二修搬到五年級
 grade: 5                   # 屬性，可變
-edition: 2                 # 目前版本
+```
+
+`catalog_manifest.yml`：
+
+```yaml
+published:
+  G5-L11:                  # catalog_slot（每次重排都變）
+    lesson_uid: L0042
+    version_id: v2
+    modules:               # partial publish — 逐模組狀態
+      passage:    on
+      spotlight:  qa_pending
+      keypoints:  on
+      worksheet:  missing
 ```
 
 **課號、課名、年級、策略標籤 → 全部降級成屬性。**
@@ -195,7 +226,10 @@ uid 無重複、無重用。
 
 | 風險 | 處置 |
 |---|---|
-| 🔴 **Phase 2 改載入層是全域影響** | 最危險的一步。先在容器內驗，staging 先行，prod 不動 |
+| 🔴 **舊 `lesson_id` → 新 `uid/version` 的對照回填** | **最危險的一步，不是搬檔案。** 公開 URL、slug normalization、學習紀錄、OMO、TTS 都已把 integer `lesson_id` 當成事實（`lesson_loader.py:97`、`slug.py:73`、`stories.py:436`、`learning_reading_history.py:92`）。mapping 錯一筆，**API 照樣 200**，但學生紀錄、QR、音檔會接到錯課 —— 資料忠實度錯，一般測試抓不到。→ 對照表逐筆人工確認 + 寫回歸鎖 |
+| 🔴 **學習紀錄沒有版本欄位** | `learning_reading_history.py:92` 只存 `lesson_id`，查詢也只用 `student_id + lesson_id`（:135）。二修後舊紀錄會被新課文語意覆蓋，成績比較失真。→ 存紀錄時要一併寫入 `version_id` |
+| **Phase 2 改載入層是全域影響** | 先在容器內驗，staging 先行，prod 不動 |
+| **uid 不可自行推導** | 必須由 registry 分配。若有人從檔名生 uid，就又回到「檔名即身份」的老錯 |
 | pipeline 輸出格式要改 code | 已確認 `process_lesson()` 寫死扁平路徑，Phase 3 含這項改動 |
 | 二修課名/課號對不到舊課 | Phase 1 的 uid registry 逐筆人工確認，不自動猜 |
 | 誤刪 tts-cache | 明列不做；刪除指令先確認 bucket 名 |
@@ -208,12 +242,13 @@ uid 無重複、無重用。
 ## 七、驗收條件
 
 1. 175 課在 staging 可見且可完成學習流程
-2. 資料結構為 `<lesson_uid>/<模組>.yml`，loader 讀得到
+2. 資料結構為 `<lesson_uid>/<version_id>/<模組>.yml`，loader 讀得到
 3. **撞鍵組數 = 0**（現在 13）
 4. 容器內（非本機）驗證通過
 5. 講義下載指向二修版，或**明確關閉**（學生版未就位前不得指向一修）
 6. 聚光燈/重點表：過 QA 的已點亮，未過的已隱藏且列冊
 7. `tts-cache` 未被清空
+8. **學習紀錄寫入時帶 `version_id`**
 
 ---
 
