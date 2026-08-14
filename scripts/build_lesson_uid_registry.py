@@ -110,45 +110,29 @@ def build(drive: list[dict], online: list[dict]) -> tuple[dict, list[dict]]:
     """
     ambiguous: list[dict] = []
 
-    # One uid per text, not per file. The same text legitimately appears under
-    # several grades: 大自然的氣象小幫手 is G4-L12 and G7-L17; 把手上的餅吃香一點 is
-    # G6-L16 and G7-L19; 正太與小豬 is G4-L2 plus five "-L0" demo placeholders.
-    # That is the uid ↔ catalog_slot split: identity is the text, the grade slot
-    # is a property.
-    by_text: dict[str, list[dict]] = defaultdict(list)
-    for f in sorted(drive, key=lambda x: x["Path"]):
-        code, title = parse_drive_name(f["Name"])
-        by_text[norm_title(title)].append({"file": f, "code": code, "title": title})
-
+    # One uid per FILE. Not per title.
+    #
+    # Titles repeat across grades, but a repeated title is not the same lesson:
+    # 大自然的氣象小幫手 exists as both G4-L12 (摘要策略, Level 4) and G7-L17
+    # (自我提問策略1, Level 7) — 62% text similarity, different worksheet, 200
+    # paragraphs apart. Same source text, different lesson built on top of it.
+    # Merging them by title would collapse two real lessons into one and lose a
+    # whole grade's worth of material.
     entries: list[dict] = []
-    counter = 0
-
-    for nt, group in sorted(by_text.items(), key=lambda kv: kv[1][0]["file"]["Path"]):
-        counter += 1
-        uid = f"L{counter:04d}"
-        codes = [g["code"] for g in group if g["code"]]
-
+    for i, f in enumerate(sorted(drive, key=lambda x: x["Path"]), start=1):
+        code, title = parse_drive_name(f["Name"])
         entries.append({
-            "lesson_uid": uid,
-            "title": group[0]["title"],
-            "catalog_slots": codes,
-            "drive_files": [
-                {"code": g["code"], "file_id": g["file"].get("ID"), "path": g["file"]["Path"]}
-                for g in group
-            ],
+            "lesson_uid": f"L{i:04d}",
+            "title": title,
+            "catalog_slot": code,
+            "drive_file_id": f.get("ID"),
+            "drive_path": f["Path"],
         })
-
-        reasons = []
-        if not codes:
-            reasons.append("檔名解析不出課號")
-        if len(group) > 1:
-            reasons.append(f"同一課文出現在 {len(group)} 個課號（跨年級共用）: {', '.join(codes)}")
-        if reasons:
+        if not code:
             ambiguous.append({
-                "lesson_uid": uid, "new_code": ", ".join(codes),
-                "title": group[0]["title"], "drive_path": group[0]["file"]["Path"],
-                "reasons": reasons, "legacy": [],
-                "reviewed_by": None, "reviewed_at": None, "reason": None,
+                "lesson_uid": f"L{i:04d}", "new_code": "", "title": title,
+                "drive_path": f["Path"], "reasons": ["檔名解析不出課號"],
+                "legacy": [], "reviewed_by": None, "reviewed_at": None, "reason": None,
             })
 
     retired = [
@@ -184,17 +168,15 @@ def gate(reg: dict, amb: list[dict], drive: list[dict], online: list[dict]) -> l
         fails.append(f"1. uid 格式錯: {bad[:5]}")
 
     # 2 every Drive file has exactly one registry row
-    n_files = sum(len(e["drive_files"]) for e in lessons)
-    if n_files != len(drive):
-        fails.append(f"2. registry 涵蓋 {n_files} 檔 != Drive {len(drive)}")
-    paths = Counter(d["path"] for e in lessons for d in e["drive_files"])
+    if len(lessons) != len(drive):
+        fails.append(f"2. registry {len(lessons)} != Drive {len(drive)}")
+    paths = Counter(e["drive_path"] for e in lessons)
     d = [p for p, n in paths.items() if n > 1]
     if d:
         fails.append(f"2. drive_path 重複: {d[:3]}")
 
     # 3 drive_file_id present
-    noid = [e["lesson_uid"] for e in lessons
-            if any(not d.get("file_id") for d in e["drive_files"])]
+    noid = [e["lesson_uid"] for e in lessons if not e.get("drive_file_id")]
     if noid:
         fails.append(f"3. 缺 drive_file_id: {len(noid)} 筆 {noid[:5]}")
 
@@ -209,15 +191,25 @@ def gate(reg: dict, amb: list[dict], drive: list[dict], online: list[dict]) -> l
     # 6 one catalog_slot must not map to multiple uids
     slot: dict[str, list[str]] = defaultdict(list)
     for e in lessons:
-        for c in e["catalog_slots"]:
-            slot[norm_code(c)].append(e["lesson_uid"])
+        if e["catalog_slot"]:
+            slot[norm_code(e["catalog_slot"])].append(e["lesson_uid"])
     dslot = {k: v for k, v in slot.items() if len(v) > 1}
     if dslot:
         fails.append(f"6. 同一課號對到多個 uid: {list(dslot.items())[:5]}")
 
     # 7 ambiguous report exists (informational — presence is expected)
     # 8 every ambiguous row reviewed
-    unreviewed = [a["lesson_uid"] for a in amb if not a.get("reviewed_by")]
+    # check 8 reads the committed ambiguous report, not the freshly built list —
+    # the build has no memory of who reviewed what.
+    reviewed: set[str] = set()
+    if AMBIGUOUS.exists():
+        txt = AMBIGUOUS.read_text(encoding="utf-8")
+        for block in txt.split("\n## ")[1:]:
+            uid = block.split(" ")[0].strip()
+            body = block.split("\n- reviewed_by:")
+            if len(body) > 1 and body[1].splitlines()[0].strip():
+                reviewed.add(uid)
+    unreviewed = [a["lesson_uid"] for a in amb if a["lesson_uid"] not in reviewed]
     if unreviewed:
         fails.append(f"8. {len(unreviewed)} 筆 ambiguous 未經人工 review: {unreviewed[:5]}")
 

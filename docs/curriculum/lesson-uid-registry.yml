@@ -6,1376 +6,879 @@ generated_from:
 lessons:
 - lesson_uid: L0001
   title: 十秒的背後
-  catalog_slots:
-  - G4-L10
-  drive_files:
-  - code: G4-L10
-    file_id: 1reIxovZFFNT1FZK_nvkTOsEMBRWKGbbs
-    path: 4年級/G4-L10十秒的背後（寫作手法：順敘－從時間詞判斷事件順序）.docx
+  catalog_slot: G4-L10
+  drive_file_id: 1reIxovZFFNT1FZK_nvkTOsEMBRWKGbbs
+  drive_path: 4年級/G4-L10十秒的背後（寫作手法：順敘－從時間詞判斷事件順序）.docx
 - lesson_uid: L0002
   title: 動物生存的妙招
-  catalog_slots:
-  - G4-L11
-  drive_files:
-  - code: G4-L11
-    file_id: 1nhFImIw7eu3_8LwWrUwNomdJ3bg3V2ni
-    path: 4年級/G4-L11動物生存的妙招（摘要策略-找小主題與重要細節）.docx
+  catalog_slot: G4-L11
+  drive_file_id: 1nhFImIw7eu3_8LwWrUwNomdJ3bg3V2ni
+  drive_path: 4年級/G4-L11動物生存的妙招（摘要策略-找小主題與重要細節）.docx
 - lesson_uid: L0003
   title: 大自然的氣象小幫手
-  catalog_slots:
-  - G4-L12
-  - G7-L17
-  drive_files:
-  - code: G4-L12
-    file_id: 1Sz4V63hGkMGgqa2Yct0jBeQmhvjK9plj
-    path: 4年級/G4-L12大自然的氣象小幫手（摘要策略-找小主題與重要細節）.docx
-  - code: G7-L17
-    file_id: 1DEVCQVef1YvlbI8Tizpfv1SfABURj0__
-    path: 7年級/G7-L17大自然的氣象小幫手（自我提問策略1-讀出重點）.docx
+  catalog_slot: G4-L12
+  drive_file_id: 1Sz4V63hGkMGgqa2Yct0jBeQmhvjK9plj
+  drive_path: 4年級/G4-L12大自然的氣象小幫手（摘要策略-找小主題與重要細節）.docx
 - lesson_uid: L0004
   title: 感情小日記2──喜歡是什麼？
-  catalog_slots:
-  - G4-L13
-  drive_files:
-  - code: G4-L13
-    file_id: 1BVgWA0gzKu39tR63bfI1_aJq9ahMbsaK
-    path: 4年級/G4-L13感情小日記2──喜歡是什麼？（品格力-自我覺察─想法與情緒的關係）.docx
+  catalog_slot: G4-L13
+  drive_file_id: 1BVgWA0gzKu39tR63bfI1_aJq9ahMbsaK
+  drive_path: 4年級/G4-L13感情小日記2──喜歡是什麼？（品格力-自我覺察─想法與情緒的關係）.docx
 - lesson_uid: L0005
   title: 美好的一天
-  catalog_slots:
-  - G4-L14
-  drive_files:
-  - code: G4-L14
-    file_id: 10EHeL2LvKuyWNLPpeJz2XCSdRQ2_Rlzd
-    path: 4年級/G4-L14美好的一天（推論策略-推論情緒和感受）.docx
+  catalog_slot: G4-L14
+  drive_file_id: 10EHeL2LvKuyWNLPpeJz2XCSdRQ2_Rlzd
+  drive_path: 4年級/G4-L14美好的一天（推論策略-推論情緒和感受）.docx
 - lesson_uid: L0006
   title: 誤會
-  catalog_slots:
-  - G4-L15
-  drive_files:
-  - code: G4-L15
-    file_id: 18Ph7k7VRHBufZ5EGs3VwALXIV-WdHD97
-    path: 4年級/G4-L15誤會（推論策略-推論情緒和感受）.docx
+  catalog_slot: G4-L15
+  drive_file_id: 18Ph7k7VRHBufZ5EGs3VwALXIV-WdHD97
+  drive_path: 4年級/G4-L15誤會（推論策略-推論情緒和感受）.docx
 - lesson_uid: L0007
   title: 黃絲帶
-  catalog_slots:
-  - G4-L16
-  drive_files:
-  - code: G4-L16
-    file_id: 1FR7aeOwXNhx9iXDRF9R2pV-eRqCjac9i
-    path: 4年級/G4-L16黃絲帶（推論策略-推論情緒和感受）.docx
+  catalog_slot: G4-L16
+  drive_file_id: 1FR7aeOwXNhx9iXDRF9R2pV-eRqCjac9i
+  drive_path: 4年級/G4-L16黃絲帶（推論策略-推論情緒和感受）.docx
 - lesson_uid: L0008
   title: 第一百碗麵
-  catalog_slots:
-  - G4-L17
-  drive_files:
-  - code: G4-L17
-    file_id: 1v5IezTQxqrWyioyf4zhHPq2IYSCZ53ye
-    path: 4年級/G4-L17第一百碗麵（品格力-想法感受的換位思考）.docx
+  catalog_slot: G4-L17
+  drive_file_id: 1v5IezTQxqrWyioyf4zhHPq2IYSCZ53ye
+  drive_path: 4年級/G4-L17第一百碗麵（品格力-想法感受的換位思考）.docx
 - lesson_uid: L0009
   title: 白牙的最後一戰
-  catalog_slots:
-  - G4-L18
-  drive_files:
-  - code: G4-L18
-    file_id: 1ABkoCMyMsi4DMJIraTYIb2vlJ8W6jiuW
-    path: 4年級/G4-L18白牙的最後一戰（品格力-情緒管理ＡＢＣ）.docx
+  catalog_slot: G4-L18
+  drive_file_id: 1ABkoCMyMsi4DMJIraTYIb2vlJ8W6jiuW
+  drive_path: 4年級/G4-L18白牙的最後一戰（品格力-情緒管理ＡＢＣ）.docx
 - lesson_uid: L0010
   title: 把球打好，就夠了嗎？—阿耀與健豪學長的通信
-  catalog_slots:
-  - G4-L19
-  drive_files:
-  - code: G4-L19
-    file_id: 1SPi4iPrr-GXuJxL134M-W5J7zV6l-uTK
-    path: 4年級/G4-L19把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
+  catalog_slot: G4-L19
+  drive_file_id: 1SPi4iPrr-GXuJxL134M-W5J7zV6l-uTK
+  drive_path: 4年級/G4-L19把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
 - lesson_uid: L0011
   title: 贏得喝采的輸家
-  catalog_slots:
-  - G4-L1
-  drive_files:
-  - code: G4-L1
-    file_id: 1SXkX-qmQUjHZzsz3l1SnEwFcNRBIuKHN
-    path: 4年級/G4-L1贏得喝采的輸家.docx
+  catalog_slot: G4-L1
+  drive_file_id: 1SXkX-qmQUjHZzsz3l1SnEwFcNRBIuKHN
+  drive_path: 4年級/G4-L1贏得喝采的輸家.docx
 - lesson_uid: L0012
   title: 想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)
-  catalog_slots:
-  - G4-L20
-  drive_files:
-  - code: G4-L20
-    file_id: 1ygQLuYZ3tUxl6wWuMMTKllt1crRqZsNR
-    path: 4年級/G4-L20想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)（生涯探索-轉個彎，熱愛還在前方）.docx
+  catalog_slot: G4-L20
+  drive_file_id: 1ygQLuYZ3tUxl6wWuMMTKllt1crRqZsNR
+  drive_path: 4年級/G4-L20想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)（生涯探索-轉個彎，熱愛還在前方）.docx
 - lesson_uid: L0013
   title: 正太與小豬：武僧的養成之路
-  catalog_slots:
-  - G4-L2
-  - G5-L0
-  - G6-L0
-  - G7-L0
-  - G8-L0
-  - G9-L0
-  drive_files:
-  - code: G4-L2
-    file_id: 1JRJapP9_gpmz8l9QcoHGv-QPHNNIPzXW
-    path: 4年級/G4-L2正太與小豬：武僧的養成之路（推論策略-找出故事道理）.docx
-  - code: G5-L0
-    file_id: 1pbkTdPjek6arpcLc-7XmGuZyHinccvi5
-    path: 5年級/G5-L0正太與小豬：武僧的養成之路.docx
-  - code: G6-L0
-    file_id: 1aRd7WLQSem_TmYnVuWAuWS9DBcdR7D5f
-    path: 6年級/G6-L0正太與小豬：武僧的養成之路.docx
-  - code: G7-L0
-    file_id: 1wAqeY4d_ocSXsJbXR6KR9sLYy6Sbu_UA
-    path: 7年級/G7-L0正太與小豬：武僧的養成之路.docx
-  - code: G8-L0
-    file_id: 1KKN2K7MgoOW5WeE9M9r6CzgyyNV2gt8V
-    path: 8年級/G8-L0正太與小豬：武僧的養成之路.docx
-  - code: G9-L0
-    file_id: 1_JAm5bIv9u3_1KOSip06VE-Kz-A5TDYm
-    path: 9年級/G9-L0正太與小豬：武僧的養成之路.docx
+  catalog_slot: G4-L2
+  drive_file_id: 1JRJapP9_gpmz8l9QcoHGv-QPHNNIPzXW
+  drive_path: 4年級/G4-L2正太與小豬：武僧的養成之路（推論策略-找出故事道理）.docx
 - lesson_uid: L0014
   title: 最美的畫面
-  catalog_slots:
-  - G4-L3
-  drive_files:
-  - code: G4-L3
-    file_id: 1C7HQiEX-jqsdGQ35zww5u8k0_MdGcAu8
-    path: 4年級/G4-L3最美的畫面（推論策略-推論文章主旨）.docx
+  catalog_slot: G4-L3
+  drive_file_id: 1C7HQiEX-jqsdGQ35zww5u8k0_MdGcAu8
+  drive_path: 4年級/G4-L3最美的畫面（推論策略-推論文章主旨）.docx
 - lesson_uid: L0015
   title: 穿越極限的跑者
-  catalog_slots:
-  - G4-L4
-  drive_files:
-  - code: G4-L4
-    file_id: 1aZ1I16tgQ_5CUxuNDk3kNhAyBNjumh2v
-    path: 4年級/G4-L4穿越極限的跑者（推論策略-推論代名詞）.docx
+  catalog_slot: G4-L4
+  drive_file_id: 1aZ1I16tgQ_5CUxuNDk3kNhAyBNjumh2v
+  drive_path: 4年級/G4-L4穿越極限的跑者（推論策略-推論代名詞）.docx
 - lesson_uid: L0016
   title: 這是什麼「意思」
-  catalog_slots:
-  - G4-L5
-  drive_files:
-  - code: G4-L5
-    file_id: 1bc6HijJcqnzN6UkkLlVMoLqy3tT0hETU
-    path: 4年級/G4-L5這是什麼「意思」（推論策略-推論代名詞）.docx
+  catalog_slot: G4-L5
+  drive_file_id: 1bc6HijJcqnzN6UkkLlVMoLqy3tT0hETU
+  drive_path: 4年級/G4-L5這是什麼「意思」（推論策略-推論代名詞）.docx
 - lesson_uid: L0017
   title: 感情小日記1──是友情還是愛情？
-  catalog_slots:
-  - G4-L6
-  drive_files:
-  - code: G4-L6
-    file_id: 1fm5G6PPtayHAjdBuxuBYS_ImdpGIX9mi
-    path: 4年級/G4-L6感情小日記1──是友情還是愛情？（品格力-自我覺察-是友情還是愛情）.docx
+  catalog_slot: G4-L6
+  drive_file_id: 1fm5G6PPtayHAjdBuxuBYS_ImdpGIX9mi
+  drive_path: 4年級/G4-L6感情小日記1──是友情還是愛情？（品格力-自我覺察-是友情還是愛情）.docx
 - lesson_uid: L0018
   title: 長高的祕密
-  catalog_slots:
-  - G4-L7
-  drive_files:
-  - code: G4-L7
-    file_id: 1tSu1neAC75gexWxyQtoEXanzl4J0MCiE
-    path: 4年級/G4-L7長高的祕密（認識句型-遞進複句）.docx
+  catalog_slot: G4-L7
+  drive_file_id: 1tSu1neAC75gexWxyQtoEXanzl4J0MCiE
+  drive_path: 4年級/G4-L7長高的祕密（認識句型-遞進複句）.docx
 - lesson_uid: L0019
   title: 運動科學
-  catalog_slots:
-  - G4-L8
-  drive_files:
-  - code: G4-L8
-    file_id: 1bby4A7QCfY8Q6fo_x-iOEmlxnTrJNmQw
-    path: 4年級/G4-L8運動科學（認識句型-條件複句）.docx
+  catalog_slot: G4-L8
+  drive_file_id: 1bby4A7QCfY8Q6fo_x-iOEmlxnTrJNmQw
+  drive_path: 4年級/G4-L8運動科學（認識句型-條件複句）.docx
 - lesson_uid: L0020
   title: 跟著「但是」轉個彎
-  catalog_slots:
-  - G4-L9
-  drive_files:
-  - code: G4-L9
-    file_id: 1d7PrfINzd8XARgI76QR0Y4ZyRgzi5cUT
-    path: 4年級/G4-L9跟著「但是」轉個彎（解題策略-轉折詞後有重點）.docx
+  catalog_slot: G4-L9
+  drive_file_id: 1d7PrfINzd8XARgI76QR0Y4ZyRgzi5cUT
+  drive_path: 4年級/G4-L9跟著「但是」轉個彎（解題策略-轉折詞後有重點）.docx
 - lesson_uid: L0021
-  title: 感情小日記3──吃醋的滋味
-  catalog_slots:
-  - G5-L10
-  drive_files:
-  - code: G5-L10
-    file_id: 1n52RhF7yWC3pdw-mpWoIzm6VPlcBsCHC
-    path: 5年級/G5-L10感情小日記3──吃醋的滋味（品格力-情緒覺察與調節-當我「吃醋」時）.docx
+  title: 正太與小豬：武僧的養成之路
+  catalog_slot: G5-L0
+  drive_file_id: 1pbkTdPjek6arpcLc-7XmGuZyHinccvi5
+  drive_path: 5年級/G5-L0正太與小豬：武僧的養成之路.docx
 - lesson_uid: L0022
-  title: 比運氣更重要的事：《長腿叔叔》的啟發
-  catalog_slots:
-  - G5-L11
-  drive_files:
-  - code: G5-L11
-    file_id: 18KJOygKNjW_ou69dIMGxC5FGBT9V7FD2
-    path: 5年級/G5-L11比運氣更重要的事：《長腿叔叔》的啟發（推論策略-觀點找支持理由）.docx
+  title: 感情小日記3──吃醋的滋味
+  catalog_slot: G5-L10
+  drive_file_id: 1n52RhF7yWC3pdw-mpWoIzm6VPlcBsCHC
+  drive_path: 5年級/G5-L10感情小日記3──吃醋的滋味（品格力-情緒覺察與調節-當我「吃醋」時）.docx
 - lesson_uid: L0023
-  title: 堅持到底的棒球人生──周思齊(前篇)
-  catalog_slots:
-  - G5-L12
-  drive_files:
-  - code: G5-L12
-    file_id: 1_b9H0mYrVTzOrut3L7aP_LYQF6pY8AeO
-    path: 5年級/G5-L12堅持到底的棒球人生──周思齊(前篇)（推論策略-找出觀點和支持理由）.docx
+  title: 比運氣更重要的事：《長腿叔叔》的啟發
+  catalog_slot: G5-L11
+  drive_file_id: 18KJOygKNjW_ou69dIMGxC5FGBT9V7FD2
+  drive_path: 5年級/G5-L11比運氣更重要的事：《長腿叔叔》的啟發（推論策略-觀點找支持理由）.docx
 - lesson_uid: L0024
-  title: 堅持到底的棒球人生──周思齊(後篇)
-  catalog_slots:
-  - G5-L13
-  drive_files:
-  - code: G5-L13
-    file_id: 12VHQAVmP6HfDvMtpI7Vy8yeo4nL-Z5r-
-    path: 5年級/G5-L13堅持到底的棒球人生──周思齊(後篇)（推論策略-找出觀點與支持理由）.docx
+  title: 堅持到底的棒球人生──周思齊(前篇)
+  catalog_slot: G5-L12
+  drive_file_id: 1_b9H0mYrVTzOrut3L7aP_LYQF6pY8AeO
+  drive_path: 5年級/G5-L12堅持到底的棒球人生──周思齊(前篇)（推論策略-找出觀點和支持理由）.docx
 - lesson_uid: L0025
-  title: 感情小日記4──我被告白了
-  catalog_slots:
-  - G5-L14
-  drive_files:
-  - code: G5-L14
-    file_id: 17N5ZgbsUAjtPtj4SaZSMLDF8qOfLYAP6
-    path: 5年級/G5-L14感情小日記4──我被告白了（品格力-人際溝通-拒絕的藝術）.docx
+  title: 堅持到底的棒球人生──周思齊(後篇)
+  catalog_slot: G5-L13
+  drive_file_id: 12VHQAVmP6HfDvMtpI7Vy8yeo4nL-Z5r-
+  drive_path: 5年級/G5-L13堅持到底的棒球人生──周思齊(後篇)（推論策略-找出觀點與支持理由）.docx
 - lesson_uid: L0026
-  title: 救援大隊的好幫手
-  catalog_slots:
-  - G5-L15
-  drive_files:
-  - code: G5-L15
-    file_id: 10sia4dG2PHIlKLJe0K8Bp1fIrkZV784p
-    path: 5年級/G5-L15救援大隊的好幫手（用表格整理訊息-比較兩個對象）.docx
+  title: 感情小日記4──我被告白了
+  catalog_slot: G5-L14
+  drive_file_id: 17N5ZgbsUAjtPtj4SaZSMLDF8qOfLYAP6
+  drive_path: 5年級/G5-L14感情小日記4──我被告白了（品格力-人際溝通-拒絕的藝術）.docx
 - lesson_uid: L0027
-  title: 掃雷英雄馬嘎瓦
-  catalog_slots:
-  - G5-L16
-  drive_files:
-  - code: G5-L16
-    file_id: 1yPd9bw4lY-FvNG0wzzGvQ7ZeVF9PQ94h
-    path: 5年級/G5-L16掃雷英雄馬嘎瓦（用表格整理訊息-閱讀表格策略）.docx
+  title: 救援大隊的好幫手
+  catalog_slot: G5-L15
+  drive_file_id: 10sia4dG2PHIlKLJe0K8Bp1fIrkZV784p
+  drive_path: 5年級/G5-L15救援大隊的好幫手（用表格整理訊息-比較兩個對象）.docx
 - lesson_uid: L0028
-  title: -18牧羊少年的逆轉勝
-  catalog_slots:
-  - G5-L17
-  drive_files:
-  - code: G5-L17
-    file_id: 1td8BhoU6wsAlowtrQPkw9HXFQzr6PGhk
-    path: 5年級/G5-L17-18牧羊少年的逆轉勝（多文本閱讀-品格力-認識自我-看見長處與限制）.docx
+  title: 掃雷英雄馬嘎瓦
+  catalog_slot: G5-L16
+  drive_file_id: 1yPd9bw4lY-FvNG0wzzGvQ7ZeVF9PQ94h
+  drive_path: 5年級/G5-L16掃雷英雄馬嘎瓦（用表格整理訊息-閱讀表格策略）.docx
 - lesson_uid: L0029
-  title: 六塊肌六塊雞
-  catalog_slots:
-  - G5-L19
-  drive_files:
-  - code: G5-L19
-    file_id: 1WRab2afP4YiImvDmKbAybc17SE5Ab_rk
-    path: 5年級/G5-L19六塊肌六塊雞（摘要策略-用主題細節結構整理重點）.docx
+  title: -18牧羊少年的逆轉勝
+  catalog_slot: G5-L17
+  drive_file_id: 1td8BhoU6wsAlowtrQPkw9HXFQzr6PGhk
+  drive_path: 5年級/G5-L17-18牧羊少年的逆轉勝（多文本閱讀-品格力-認識自我-看見長處與限制）.docx
 - lesson_uid: L0030
-  title: 奧運銀牌背後的自我鍛鍊
-  catalog_slots:
-  - G5-L1
-  drive_files:
-  - code: G5-L1
-    file_id: 1Nm6pPPMg9XG1ht5aqAMy0s8Zx9oLImTd
-    path: 5年級/G5-L1奧運銀牌背後的自我鍛鍊（推論策略-找言行，認識人物特質）.docx
+  title: 六塊肌六塊雞
+  catalog_slot: G5-L19
+  drive_file_id: 1WRab2afP4YiImvDmKbAybc17SE5Ab_rk
+  drive_path: 5年級/G5-L19六塊肌六塊雞（摘要策略-用主題細節結構整理重點）.docx
 - lesson_uid: L0031
-  title: 小丑醫生
-  catalog_slots:
-  - G5-L20
-  drive_files:
-  - code: G5-L20
-    file_id: 1F_5OVBCLGNiJ4QiPNtsqVqoiq4LRRmDJ
-    path: 5年級/G5-L20小丑醫生（摘要策略-從細節找小主題）.docx
+  title: 奧運銀牌背後的自我鍛鍊
+  catalog_slot: G5-L1
+  drive_file_id: 1Nm6pPPMg9XG1ht5aqAMy0s8Zx9oLImTd
+  drive_path: 5年級/G5-L1奧運銀牌背後的自我鍛鍊（推論策略-找言行，認識人物特質）.docx
 - lesson_uid: L0032
-  title: 垃圾食物的誘惑與代價
-  catalog_slots:
-  - G5-L21
-  drive_files:
-  - code: G5-L21
-    file_id: 1hHMDpRLt4YgdK9EKplYxzHo94XhDVKqi
-    path: 5年級/G5-L21垃圾食物的誘惑與代價（摘要策略-刪除法找重點-刪除舉例）.docx
+  title: 小丑醫生
+  catalog_slot: G5-L20
+  drive_file_id: 1F_5OVBCLGNiJ4QiPNtsqVqoiq4LRRmDJ
+  drive_path: 5年級/G5-L20小丑醫生（摘要策略-從細節找小主題）.docx
 - lesson_uid: L0033
-  title: 抗拒指尖上的誘惑
-  catalog_slots:
-  - G5-L22
-  drive_files:
-  - code: G5-L22
-    file_id: 1JqVJWs4tz74MTTPdOlN4DZvfMLI5t27I
-    path: 5年級/G5-L22抗拒指尖上的誘惑（品格力-建立好習慣）.docx
+  title: 垃圾食物的誘惑與代價
+  catalog_slot: G5-L21
+  drive_file_id: 1hHMDpRLt4YgdK9EKplYxzHo94XhDVKqi
+  drive_path: 5年級/G5-L21垃圾食物的誘惑與代價（摘要策略-刪除法找重點-刪除舉例）.docx
 - lesson_uid: L0034
-  title: 信件的力量──寫信馬拉松
-  catalog_slots:
-  - G5-L23
-  drive_files:
-  - code: G5-L23
-    file_id: 10D9jPl2Vl3ZbAcCmDzXNa5vC_Zt5OSr4
-    path: 5年級/G5-L23信件的力量──寫信馬拉松（提取上位概念-從具體描述提取上位概念）.docx
+  title: 抗拒指尖上的誘惑
+  catalog_slot: G5-L22
+  drive_file_id: 1JqVJWs4tz74MTTPdOlN4DZvfMLI5t27I
+  drive_path: 5年級/G5-L22抗拒指尖上的誘惑（品格力-建立好習慣）.docx
 - lesson_uid: L0035
-  title: 臺灣棒球先驅──來自花蓮的能高團
-  catalog_slots:
-  - G5-L24
-  drive_files:
-  - code: G5-L24
-    file_id: 1yYs0hlxYIIkkJ6TAPtIFqJ140qI-fkO5
-    path: 5年級/G5-L24臺灣棒球先驅──來自花蓮的能高團（提取上位概念-從具體描述提取上位概念）.docx
+  title: 信件的力量──寫信馬拉松
+  catalog_slot: G5-L23
+  drive_file_id: 10D9jPl2Vl3ZbAcCmDzXNa5vC_Zt5OSr4
+  drive_path: 5年級/G5-L23信件的力量──寫信馬拉松（提取上位概念-從具體描述提取上位概念）.docx
 - lesson_uid: L0036
-  title: 小兵立大功：雞鳴狗盜的故事
-  catalog_slots:
-  - G5-L25
-  drive_files:
-  - code: G5-L25
-    file_id: 1r6FNuBDRmn5krhN15fbGL-0nBf0JqDjZ
-    path: 5年級/G5-L25小兵立大功：雞鳴狗盜的故事（摘要策略-問題.解決.結果找重點）.docx
+  title: 臺灣棒球先驅──來自花蓮的能高團
+  catalog_slot: G5-L24
+  drive_file_id: 1yYs0hlxYIIkkJ6TAPtIFqJ140qI-fkO5
+  drive_path: 5年級/G5-L24臺灣棒球先驅──來自花蓮的能高團（提取上位概念-從具體描述提取上位概念）.docx
 - lesson_uid: L0037
-  title: 魚來了，叮咚叮咚請開門
-  catalog_slots:
-  - G5-L26
-  drive_files:
-  - code: G5-L26
-    file_id: 186beMYuoSxOe5Q5B4PbCs0FRfmer6ldo
-    path: 5年級/G5-L26魚來了，叮咚叮咚請開門（摘要策略-問題.解決結構找重點）.docx
+  title: 小兵立大功：雞鳴狗盜的故事
+  catalog_slot: G5-L25
+  drive_file_id: 1r6FNuBDRmn5krhN15fbGL-0nBf0JqDjZ
+  drive_path: 5年級/G5-L25小兵立大功：雞鳴狗盜的故事（摘要策略-問題.解決.結果找重點）.docx
 - lesson_uid: L0038
-  title: 我有一個棒球夢
-  catalog_slots:
-  - G5-L27
-  drive_files:
-  - code: G5-L27
-    file_id: 1cJ-HuoLfRWaB2MOg0WUfqlJRGOCEzXnd
-    path: 5年級/G5-L27我有一個棒球夢（自我管理-時間管理策略）.docx
+  title: 魚來了，叮咚叮咚請開門
+  catalog_slot: G5-L26
+  drive_file_id: 186beMYuoSxOe5Q5B4PbCs0FRfmer6ldo
+  drive_path: 5年級/G5-L26魚來了，叮咚叮咚請開門（摘要策略-問題.解決結構找重點）.docx
 - lesson_uid: L0039
-  title: 我的電競夢：從熬夜打遊戲到拿下全國冠軍
-  catalog_slots:
-  - G5-L28
-  drive_files:
-  - code: G5-L28
-    file_id: 1rL7hla7ImLChIGafurZWiDr7766Sv3wz
-    path: 5年級/G5-L28我的電競夢：從熬夜打遊戲到拿下全國冠軍（自我管理-制定作息時間表）.docx
+  title: 我有一個棒球夢
+  catalog_slot: G5-L27
+  drive_file_id: 1cJ-HuoLfRWaB2MOg0WUfqlJRGOCEzXnd
+  drive_path: 5年級/G5-L27我有一個棒球夢（自我管理-時間管理策略）.docx
 - lesson_uid: L0040
-  title: 周天成的一天──頂尖選手的養成
-  catalog_slots:
-  - G5-L2
-  drive_files:
-  - code: G5-L2
-    file_id: 1T7Q8w0ZYwwRiZGv4ideud26xUjpuwokW
-    path: 5年級/G5-L2周天成的一天──頂尖選手的養成（推論策略-從言行推論人物特質）.docx
+  title: 我的電競夢：從熬夜打遊戲到拿下全國冠軍
+  catalog_slot: G5-L28
+  drive_file_id: 1rL7hla7ImLChIGafurZWiDr7766Sv3wz
+  drive_path: 5年級/G5-L28我的電競夢：從熬夜打遊戲到拿下全國冠軍（自我管理-制定作息時間表）.docx
 - lesson_uid: L0041
-  title: 拳力出擊──陳念琴
-  catalog_slots:
-  - G5-L3
-  drive_files:
-  - code: G5-L3
-    file_id: 1F9Kpp18EGwvHUUQMRXcKPcZHCQNj8And
-    path: 5年級/G5-L3拳力出擊──陳念琴（推論策略──用特質理解人物成長）.docx
+  title: 周天成的一天──頂尖選手的養成
+  catalog_slot: G5-L2
+  drive_file_id: 1T7Q8w0ZYwwRiZGv4ideud26xUjpuwokW
+  drive_path: 5年級/G5-L2周天成的一天──頂尖選手的養成（推論策略-從言行推論人物特質）.docx
 - lesson_uid: L0042
-  title: 從童工到大學教授之路
-  catalog_slots:
-  - G5-L4
-  drive_files:
-  - code: G5-L4
-    file_id: 1QikSTWd4CqOMqSb2Me8iQUU40qqSvf_q
-    path: 5年級/G5-L4從童工到大學教授之路（推論人物特質-從特質理解選擇與發展）.docx
+  title: 拳力出擊──陳念琴
+  catalog_slot: G5-L3
+  drive_file_id: 1F9Kpp18EGwvHUUQMRXcKPcZHCQNj8And
+  drive_path: 5年級/G5-L3拳力出擊──陳念琴（推論策略──用特質理解人物成長）.docx
 - lesson_uid: L0043
-  title: 文字路上的閱讀號誌
-  catalog_slots:
-  - G5-L5
-  drive_files:
-  - code: G5-L5
-    file_id: 1UXqq8R3cL74vne8uvdryUPTPQpYP3_xG
-    path: 5年級/G5-L5文字路上的閱讀號誌 （解題策略-看特殊標點找線索）.docx
+  title: 從童工到大學教授之路
+  catalog_slot: G5-L4
+  drive_file_id: 1QikSTWd4CqOMqSb2Me8iQUU40qqSvf_q
+  drive_path: 5年級/G5-L4從童工到大學教授之路（推論人物特質-從特質理解選擇與發展）.docx
 - lesson_uid: L0044
-  title: 兵來將擋，水來土掩
-  catalog_slots:
-  - G5-L6
-  drive_files:
-  - code: G5-L6
-    file_id: 19LSaQ3ReKiANm7sGbwyRvsm2BtxRyjci
-    path: 5年級/G5-L6兵來將擋，水來土掩（詞彙推測策略-拆詞釋義）.docx
+  title: 文字路上的閱讀號誌
+  catalog_slot: G5-L5
+  drive_file_id: 1UXqq8R3cL74vne8uvdryUPTPQpYP3_xG
+  drive_path: 5年級/G5-L5文字路上的閱讀號誌 （解題策略-看特殊標點找線索）.docx
 - lesson_uid: L0045
-  title: 以植物為師的科學
-  catalog_slots:
-  - G5-L7
-  drive_files:
-  - code: G5-L7
-    file_id: 1EJ0ix-wICLUI_7A7kFowrRBq3yIvJT0J
-    path: 5年級/G5-L7以植物為師的科學（詞彙推測策略-拆詞釋義）.docx
+  title: 兵來將擋，水來土掩
+  catalog_slot: G5-L6
+  drive_file_id: 19LSaQ3ReKiANm7sGbwyRvsm2BtxRyjci
+  drive_path: 5年級/G5-L6兵來將擋，水來土掩（詞彙推測策略-拆詞釋義）.docx
 - lesson_uid: L0046
-  title: 工地大嫂
-  catalog_slots:
-  - G5-L8
-  drive_files:
-  - code: G5-L8
-    file_id: 1wVDctiBP37J9IYJWxQwZM_dXcwUpmcAz
-    path: 5年級/G5-L8工地大嫂（詞彙推測策略-從上下文推測詞義）.docx
+  title: 以植物為師的科學
+  catalog_slot: G5-L7
+  drive_file_id: 1EJ0ix-wICLUI_7A7kFowrRBq3yIvJT0J
+  drive_path: 5年級/G5-L7以植物為師的科學（詞彙推測策略-拆詞釋義）.docx
 - lesson_uid: L0047
-  title: 災難預言準不準
-  catalog_slots:
-  - G5-L9
-  drive_files:
-  - code: G5-L9
-    file_id: 1lP3wDU7XeAH1ZMMm2oSfsT-6fNvp4Its
-    path: 5年級/G5-L9災難預言準不準（拆詞釋義＋從上下文推測詞義）.docx
+  title: 工地大嫂
+  catalog_slot: G5-L8
+  drive_file_id: 1wVDctiBP37J9IYJWxQwZM_dXcwUpmcAz
+  drive_path: 5年級/G5-L8工地大嫂（詞彙推測策略-從上下文推測詞義）.docx
 - lesson_uid: L0048
-  title: 荷蘭東印度公司：全世界第一張股票的誕生
-  catalog_slots:
-  - G6-L10
-  drive_files:
-  - code: G6-L10
-    file_id: 121Q0YER5msP3rr2PummmGUTvbYN0H87L
-    path: 6年級/G6-L10荷蘭東印度公司：全世界第一張股票的誕生（摘要策略-問題.解決.結果找重點）.docx
+  title: 災難預言準不準
+  catalog_slot: G5-L9
+  drive_file_id: 1lP3wDU7XeAH1ZMMm2oSfsT-6fNvp4Its
+  drive_path: 5年級/G5-L9災難預言準不準（拆詞釋義＋從上下文推測詞義）.docx
 - lesson_uid: L0049
-  title: 奇蹟行動
-  catalog_slots:
-  - G6-L11
-  drive_files:
-  - code: G6-L11
-    file_id: 1QWU_s5Gk4t3Ptgoyap0r7-x1B-UBUpqv
-    path: 6年級/G6-L11奇蹟行動（摘要策略-問題-解決-結果找重點）.docx
+  title: 正太與小豬：武僧的養成之路
+  catalog_slot: G6-L0
+  drive_file_id: 1aRd7WLQSem_TmYnVuWAuWS9DBcdR7D5f
+  drive_path: 6年級/G6-L0正太與小豬：武僧的養成之路.docx
 - lesson_uid: L0050
-  title: 小藍鯨之死
-  catalog_slots:
-  - G6-L12
-  drive_files:
-  - code: G6-L12
-    file_id: 1VZJqVqkUlJTciviSL32UNey8pF-Z9bTQ
-    path: 6年級/G6-L12小藍鯨之死（推論策略-看證據如何支持判斷）.docx
+  title: 荷蘭東印度公司：全世界第一張股票的誕生
+  catalog_slot: G6-L10
+  drive_file_id: 121Q0YER5msP3rr2PummmGUTvbYN0H87L
+  drive_path: 6年級/G6-L10荷蘭東印度公司：全世界第一張股票的誕生（摘要策略-問題.解決.結果找重點）.docx
 - lesson_uid: L0051
-  title: 昆蟲會思考嗎？
-  catalog_slots:
-  - G6-L13
-  drive_files:
-  - code: G6-L13
-    file_id: 1eyWj02aoi4iWoIpACNMjwyyNwlri4xq0
-    path: 6年級/G6-L13昆蟲會思考嗎？（推論策略-整合證據，形成結論）.docx
+  title: 奇蹟行動
+  catalog_slot: G6-L11
+  drive_file_id: 1QWU_s5Gk4t3Ptgoyap0r7-x1B-UBUpqv
+  drive_path: 6年級/G6-L11奇蹟行動（摘要策略-問題-解決-結果找重點）.docx
 - lesson_uid: L0052
-  title: 動物談情說愛的方式
-  catalog_slots:
-  - G6-L14
-  drive_files:
-  - code: G6-L14
-    file_id: 1A3Cx37doCoEHq5FiHoEAf7jQrf1DBGJc
-    path: 6年級/G6-L14動物談情說愛的方式（摘要策略-用標題整理重點）.docx
+  title: 小藍鯨之死
+  catalog_slot: G6-L12
+  drive_file_id: 1VZJqVqkUlJTciviSL32UNey8pF-Z9bTQ
+  drive_path: 6年級/G6-L12小藍鯨之死（推論策略-看證據如何支持判斷）.docx
 - lesson_uid: L0053
-  title: 愛冒險逞強的雄性動物
-  catalog_slots:
-  - G6-L15
-  drive_files:
-  - code: G6-L15
-    file_id: 1U0YWhBYebK9Ktcnl8JHqkwEJe6UwZUxO
-    path: 6年級/G6-L15愛冒險逞強的雄性動物（摘要策略-從段落找主題句）.docx
+  title: 昆蟲會思考嗎？
+  catalog_slot: G6-L13
+  drive_file_id: 1eyWj02aoi4iWoIpACNMjwyyNwlri4xq0
+  drive_path: 6年級/G6-L13昆蟲會思考嗎？（推論策略-整合證據，形成結論）.docx
 - lesson_uid: L0054
-  title: 把手上的餅吃香一點
-  catalog_slots:
-  - G6-L16
-  - G7-L19
-  drive_files:
-  - code: G6-L16
-    file_id: 1D0QU3d5NXZBIyLSnNBHgVZT6k6ncvkLS
-    path: 6年級/G6-L16把手上的餅吃香一點（品格力-正向思考-換個角度看事情）.docx
-  - code: G7-L19
-    file_id: 1D13CzogMeONUYmEi71JE7lUvvFR4TY6V
-    path: 7年級/G7-L19把手上的餅吃香一點（自我提問策略3-問好問題）.docx
+  title: 動物談情說愛的方式
+  catalog_slot: G6-L14
+  drive_file_id: 1A3Cx37doCoEHq5FiHoEAf7jQrf1DBGJc
+  drive_path: 6年級/G6-L14動物談情說愛的方式（摘要策略-用標題整理重點）.docx
 - lesson_uid: L0055
-  title: 祝你好眠
-  catalog_slots:
-  - G6-L17
-  drive_files:
-  - code: G6-L17
-    file_id: 1dIrja6hpwYMbQCcb3z__xEG8zoF3GWVl
-    path: 6年級/G6-L17祝你好眠（摘要策略-從主題句找小主題）.docx
+  title: 愛冒險逞強的雄性動物
+  catalog_slot: G6-L15
+  drive_file_id: 1U0YWhBYebK9Ktcnl8JHqkwEJe6UwZUxO
+  drive_path: 6年級/G6-L15愛冒險逞強的雄性動物（摘要策略-從段落找主題句）.docx
 - lesson_uid: L0056
-  title: 末日種子庫
-  catalog_slots:
-  - G6-L18
-  drive_files:
-  - code: G6-L18
-    file_id: 12vCocr9xZlblsrZoLvFBjNZdSAAa8NQA
-    path: 6年級/G6-L18末日種子庫（摘要策略-找小主題與細節）.docx
+  title: 把手上的餅吃香一點
+  catalog_slot: G6-L16
+  drive_file_id: 1D0QU3d5NXZBIyLSnNBHgVZT6k6ncvkLS
+  drive_path: 6年級/G6-L16把手上的餅吃香一點（品格力-正向思考-換個角度看事情）.docx
 - lesson_uid: L0057
-  title: 紅領帶
-  catalog_slots:
-  - G6-L19
-  drive_files:
-  - code: G6-L19
-    file_id: 1ezFtIVm-iCTJvgMKASz43SytfRGmowmf
-    path: 6年級/G6-L19紅領帶（品格力-正向思考-如何面對不能改變的事）.docx
+  title: 祝你好眠
+  catalog_slot: G6-L17
+  drive_file_id: 1dIrja6hpwYMbQCcb3z__xEG8zoF3GWVl
+  drive_path: 6年級/G6-L17祝你好眠（摘要策略-從主題句找小主題）.docx
 - lesson_uid: L0058
-  title: 心理出狀況,是壞事導致的嗎
-  catalog_slots:
-  - G6-L1
-  drive_files:
-  - code: G6-L1
-    file_id: 1n10b_ZoqL79RdCLHtiKsIGpBTiBaK-5w
-    path: 6年級/G6-L1心理出狀況,是壞事導致的嗎（推論策略-推論故事主旨）.docx
+  title: 末日種子庫
+  catalog_slot: G6-L18
+  drive_file_id: 12vCocr9xZlblsrZoLvFBjNZdSAAa8NQA
+  drive_path: 6年級/G6-L18末日種子庫（摘要策略-找小主題與細節）.docx
 - lesson_uid: L0059
-  title: 因人而異，才有真正的公平
-  catalog_slots:
-  - G6-L20
-  drive_files:
-  - code: G6-L20
-    file_id: 1uSD9VQrSWtv6WDecOGwzd3jQuZsW9rpk
-    path: 6年級/G6-L20因人而異，才有真正的公平（寫作手法-用例子說明觀點）.docx
+  title: 紅領帶
+  catalog_slot: G6-L19
+  drive_file_id: 1ezFtIVm-iCTJvgMKASz43SytfRGmowmf
+  drive_path: 6年級/G6-L19紅領帶（品格力-正向思考-如何面對不能改變的事）.docx
 - lesson_uid: L0060
-  title: 感情小日記5──我該告白嗎？
-  catalog_slots:
-  - G6-L21
-  drive_files:
-  - code: G6-L21
-    file_id: 17pka12Tmfcw9fMlxi-Wj-QgMUHrRs1ZE
-    path: 6年級/G6-L21感情小日記5──我該告白嗎？（品格力-負責任的決定-區辨控制圈）.docx
+  title: 心理出狀況,是壞事導致的嗎
+  catalog_slot: G6-L1
+  drive_file_id: 1n10b_ZoqL79RdCLHtiKsIGpBTiBaK-5w
+  drive_path: 6年級/G6-L1心理出狀況,是壞事導致的嗎（推論策略-推論故事主旨）.docx
 - lesson_uid: L0061
-  title: -24物以稀為貴
-  catalog_slots:
-  - G6-L22
-  drive_files:
-  - code: G6-L22
-    file_id: 1w_7G7z68pBxYtgzLcQg4i7Mn2F4UhttU
-    path: 6年級/G6-L22-24物以稀為貴（多文本閱讀-寫作手法-用不同角度的例子說明概念）.docx
+  title: 因人而異，才有真正的公平
+  catalog_slot: G6-L20
+  drive_file_id: 1uSD9VQrSWtv6WDecOGwzd3jQuZsW9rpk
+  drive_path: 6年級/G6-L20因人而異，才有真正的公平（寫作手法-用例子說明觀點）.docx
 - lesson_uid: L0062
-  title: 感情小日記6──我失戀了
-  catalog_slots:
-  - G6-L25
-  drive_files:
-  - code: G6-L25
-    file_id: 18bNmCkgRjwZPULXyMJX2Wjd7LUrCxADH
-    path: 6年級/G6-L25感情小日記6──我失戀了（品格力-情緒管理-悲傷五階段）.docx
+  title: 感情小日記5──我該告白嗎？
+  catalog_slot: G6-L21
+  drive_file_id: 17pka12Tmfcw9fMlxi-Wj-QgMUHrRs1ZE
+  drive_path: 6年級/G6-L21感情小日記5──我該告白嗎？（品格力-負責任的決定-區辨控制圈）.docx
 - lesson_uid: L0063
-  title: 運動傷害，怎麼辦
-  catalog_slots:
-  - G6-L26
-  drive_files:
-  - code: G6-L26
-    file_id: 1_d-6PfQPAAzCR5fHuyTkZvdGwH-77n3c
-    path: 6年級/G6-L26運動傷害，怎麼辦（寫作手法-倒反：讀懂反話）.docx
+  title: -24物以稀為貴
+  catalog_slot: G6-L22
+  drive_file_id: 1w_7G7z68pBxYtgzLcQg4i7Mn2F4UhttU
+  drive_path: 6年級/G6-L22-24物以稀為貴（多文本閱讀-寫作手法-用不同角度的例子說明概念）.docx
 - lesson_uid: L0064
-  title: 古代畫家心中的仙境
-  catalog_slots:
-  - G6-L27
-  drive_files:
-  - code: G6-L27
-    file_id: 1TCZJY6mA3jS_IMP6uxJtZfuBoa2IgGKn
-    path: 6年級/G6-L27古代畫家心中的仙境（寫作手法-從具體內容到作者觀點）.docx
+  title: 感情小日記6──我失戀了
+  catalog_slot: G6-L25
+  drive_file_id: 18bNmCkgRjwZPULXyMJX2Wjd7LUrCxADH
+  drive_path: 6年級/G6-L25感情小日記6──我失戀了（品格力-情緒管理-悲傷五階段）.docx
 - lesson_uid: L0065
-  title: 森林大軍的守護者
-  catalog_slots:
-  - G6-L28
-  drive_files:
-  - code: G6-L28
-    file_id: 1TjEwc19kYSB-MxNUjKt0r5lL5cZgm2eT
-    path: 6年級/G6-L28森林大軍的守護者（自我提問策略1-跟著人物故事線問問題）.docx
+  title: 運動傷害，怎麼辦
+  catalog_slot: G6-L26
+  drive_file_id: 1_d-6PfQPAAzCR5fHuyTkZvdGwH-77n3c
+  drive_path: 6年級/G6-L26運動傷害，怎麼辦（寫作手法-倒反：讀懂反話）.docx
 - lesson_uid: L0066
-  title: 植物獵人
-  catalog_slots:
-  - G6-L29
-  drive_files:
-  - code: G6-L29
-    file_id: 1Et7IPNN5ZwGTcnawBv4t2WOXHHej3ZGf
-    path: 6年級/G6-L29植物獵人（自我提問策略2-跟著人物故事線問問題）.docx
+  title: 古代畫家心中的仙境
+  catalog_slot: G6-L27
+  drive_file_id: 1TCZJY6mA3jS_IMP6uxJtZfuBoa2IgGKn
+  drive_path: 6年級/G6-L27古代畫家心中的仙境（寫作手法-從具體內容到作者觀點）.docx
 - lesson_uid: L0067
-  title: 一件班服，一場思辨討論
-  catalog_slots:
-  - G6-L2
-  drive_files:
-  - code: G6-L2
-    file_id: 1DiBjtneMFqUbrjChUbAD8hMn0lheynvr
-    path: 6年級/G6-L2一件班服，一場思辨討論（多元觀點）.docx
+  title: 森林大軍的守護者
+  catalog_slot: G6-L28
+  drive_file_id: 1TjEwc19kYSB-MxNUjKt0r5lL5cZgm2eT
+  drive_path: 6年級/G6-L28森林大軍的守護者（自我提問策略1-跟著人物故事線問問題）.docx
 - lesson_uid: L0068
-  title: 文章中的「關鍵少數」
-  catalog_slots:
-  - G6-L3
-  drive_files:
-  - code: G6-L3
-    file_id: 1sFTu3fo3agg8GpKpIhYER4uOoo6HWvYz
-    path: 6年級/G6-L3文章中的「關鍵少數」 （解題策略-看頭尾、找結論線索）.docx
+  title: 植物獵人
+  catalog_slot: G6-L29
+  drive_file_id: 1Et7IPNN5ZwGTcnawBv4t2WOXHHej3ZGf
+  drive_path: 6年級/G6-L29植物獵人（自我提問策略2-跟著人物故事線問問題）.docx
 - lesson_uid: L0069
-  title: 數字記憶的奧秘
-  catalog_slots:
-  - G6-L4
-  drive_files:
-  - code: G6-L4
-    file_id: 1aCi8dXVNsciajP-Nns_xL4eFt-9uf-J0
-    path: 6年級/G6-L4數字記憶的奧秘（用表格整理訊息-比較異同）.docx
+  title: 一件班服，一場思辨討論
+  catalog_slot: G6-L2
+  drive_file_id: 1DiBjtneMFqUbrjChUbAD8hMn0lheynvr
+  drive_path: 6年級/G6-L2一件班服，一場思辨討論（多元觀點）.docx
 - lesson_uid: L0070
-  title: 重複朗讀的重要性：柳丁和文旦的比喻
-  catalog_slots:
-  - G6-L5
-  drive_files:
-  - code: G6-L5
-    file_id: 1-D08_U6r3MCzmHFqEOCf8252ZDi4sYkj
-    path: 6年級/G6-L5重複朗讀的重要性：柳丁和文旦的比喻（寫作手法：譬喻-以A比喻B）.docx
+  title: 文章中的「關鍵少數」
+  catalog_slot: G6-L3
+  drive_file_id: 1sFTu3fo3agg8GpKpIhYER4uOoo6HWvYz
+  drive_path: 6年級/G6-L3文章中的「關鍵少數」 （解題策略-看頭尾、找結論線索）.docx
 - lesson_uid: L0071
-  title: 與小學說再見
-  catalog_slots:
-  - G6-L6
-  drive_files:
-  - code: G6-L6
-    file_id: 11IR_kW_4_f2foD8I-uSXL3FjzZ-97AV5
-    path: 6年級/G6-L6與小學說再見（寫作手法：譬喻-從譬喻推論作者感受）.docx
+  title: 數字記憶的奧秘
+  catalog_slot: G6-L4
+  drive_file_id: 1aCi8dXVNsciajP-Nns_xL4eFt-9uf-J0
+  drive_path: 6年級/G6-L4數字記憶的奧秘（用表格整理訊息-比較異同）.docx
 - lesson_uid: L0072
-  title: 老鷹紅豆的故事
-  catalog_slots:
-  - G6-L7
-  drive_files:
-  - code: G6-L7
-    file_id: 1P62BCwAirWinphQPIWL_xEQRspGq-Anj
-    path: 6年級/G6-L7老鷹紅豆的故事（摘要策略—問題—解決—結果找重點）.docx
+  title: 重複朗讀的重要性：柳丁和文旦的比喻
+  catalog_slot: G6-L5
+  drive_file_id: 1-D08_U6r3MCzmHFqEOCf8252ZDi4sYkj
+  drive_path: 6年級/G6-L5重複朗讀的重要性：柳丁和文旦的比喻（寫作手法：譬喻-以A比喻B）.docx
 - lesson_uid: L0073
-  title: 白鯨救援
-  catalog_slots:
-  - G6-L8
-  drive_files:
-  - code: G6-L8
-    file_id: 1lrX2npuADy4-HczoYgWrxPKQJ5s374Se
-    path: 6年級/G6-L8白鯨救援（摘要策略—問題—解決—結果找重點）.docx
+  title: 與小學說再見
+  catalog_slot: G6-L6
+  drive_file_id: 11IR_kW_4_f2foD8I-uSXL3FjzZ-97AV5
+  drive_path: 6年級/G6-L6與小學說再見（寫作手法：譬喻-從譬喻推論作者感受）.docx
 - lesson_uid: L0074
-  title: 給神明發會診單
-  catalog_slots:
-  - G6-L9
-  drive_files:
-  - code: G6-L9
-    file_id: 1vuQdGq6Ar6Yl4Ynvl9h7MsSCx7BdWO5X
-    path: 6年級/G6-L9給神明發會診單（品格力-跨文化理解與接納）.docx
+  title: 老鷹紅豆的故事
+  catalog_slot: G6-L7
+  drive_file_id: 1P62BCwAirWinphQPIWL_xEQRspGq-Anj
+  drive_path: 6年級/G6-L7老鷹紅豆的故事（摘要策略—問題—解決—結果找重點）.docx
 - lesson_uid: L0075
-  title: 別上「誘餌式標題」的鉤
-  catalog_slots:
-  - G7-L10
-  drive_files:
-  - code: G7-L10
-    file_id: 1OER4UXlbykU4MYX6xYcS0v39ne6UN7oJ
-    path: 7年級/G7-L10別上「誘餌式標題」的鉤（媒體素養與識讀-認識誘餌式新聞標題）.docx
+  title: 白鯨救援
+  catalog_slot: G6-L8
+  drive_file_id: 1lrX2npuADy4-HczoYgWrxPKQJ5s374Se
+  drive_path: 6年級/G6-L8白鯨救援（摘要策略—問題—解決—結果找重點）.docx
 - lesson_uid: L0076
-  title: 一封向醫師求助的信
-  catalog_slots:
-  - G7-L11
-  drive_files:
-  - code: G7-L11
-    file_id: 1hI6N3FW-uv8cPkYoWwI3cfV2NxPAsD0W
-    path: 7年級/G7-L11一封向醫師求助的信（從事實歸納概念-從具體事實提取上位概念）.docx
+  title: 給神明發會診單
+  catalog_slot: G6-L9
+  drive_file_id: 1vuQdGq6Ar6Yl4Ynvl9h7MsSCx7BdWO5X
+  drive_path: 6年級/G6-L9給神明發會診單（品格力-跨文化理解與接納）.docx
 - lesson_uid: L0077
-  title: 澳洲奧運金牌的X機密
-  catalog_slots:
-  - G7-L12
-  drive_files:
-  - code: G7-L12
-    file_id: 1N8_XBZx4r96Wg6xQc7uszB90RL5hNPvO
-    path: 7年級/G7-L12澳洲奧運金牌的X機密（用表格整理訊息-比較兩者異同）.docx
+  title: 正太與小豬：武僧的養成之路
+  catalog_slot: G7-L0
+  drive_file_id: 1wAqeY4d_ocSXsJbXR6KR9sLYy6Sbu_UA
+  drive_path: 7年級/G7-L0正太與小豬：武僧的養成之路.docx
 - lesson_uid: L0078
-  title: 女性太空人登月（用表格整理訊息-從細節歸納比較項目)
-  catalog_slots:
-  - G7-L13
-  drive_files:
-  - code: G7-L13
-    file_id: 1uhX3lkQfhpIaYw6wD03zogSTd8yyD3vJ
-    path: 7年級/G7-L13女性太空人登月（用表格整理訊息-從細節歸納比較項目).docx
+  title: 別上「誘餌式標題」的鉤
+  catalog_slot: G7-L10
+  drive_file_id: 1OER4UXlbykU4MYX6xYcS0v39ne6UN7oJ
+  drive_path: 7年級/G7-L10別上「誘餌式標題」的鉤（媒體素養與識讀-認識誘餌式新聞標題）.docx
 - lesson_uid: L0079
-  title: 從〈螞蟻與蟋蟀〉看生命的多樣性
-  catalog_slots:
-  - G7-L14
-  drive_files:
-  - code: G7-L14
-    file_id: 1sgQkpV6KflAFSySsQWVm9cnOgzjtW74l
-    path: 7年級/G7-L14從〈螞蟻與蟋蟀〉看生命的多樣性（用表格整理訊息-依比較項目看出異同）.docx
+  title: 一封向醫師求助的信
+  catalog_slot: G7-L11
+  drive_file_id: 1hI6N3FW-uv8cPkYoWwI3cfV2NxPAsD0W
+  drive_path: 7年級/G7-L11一封向醫師求助的信（從事實歸納概念-從具體事實提取上位概念）.docx
 - lesson_uid: L0080
-  title: 爺爺奶奶來了以後
-  catalog_slots:
-  - G7-L15
-  drive_files:
-  - code: G7-L15
-    file_id: 1wg58oT5Kd6hCaV7VtE6r1X2aLfyWUfjQ
-    path: 7年級/G7-L15爺爺奶奶來了以後（用表格整理訊息-從細節歸納比較項目）.docx
+  title: 澳洲奧運金牌的X機密
+  catalog_slot: G7-L12
+  drive_file_id: 1N8_XBZx4r96Wg6xQc7uszB90RL5hNPvO
+  drive_path: 7年級/G7-L12澳洲奧運金牌的X機密（用表格整理訊息-比較兩者異同）.docx
 - lesson_uid: L0081
-  title: 長大後，我才讀懂〈夏夜〉
-  catalog_slots:
-  - G7-L16
-  drive_files:
-  - code: G7-L16
-    file_id: 1tm9DId6z1J3OCyCsOKMn8qBTP0HWg8kO
-    path: 7年級/G7-L16長大後，我才讀懂〈夏夜〉（寫作手法：排比─從排比歸納文意重點）.docx
+  title: 女性太空人登月（用表格整理訊息-從細節歸納比較項目)
+  catalog_slot: G7-L13
+  drive_file_id: 1uhX3lkQfhpIaYw6wD03zogSTd8yyD3vJ
+  drive_path: 7年級/G7-L13女性太空人登月（用表格整理訊息-從細節歸納比較項目).docx
 - lesson_uid: L0082
-  title: 正太與小豬
-  catalog_slots:
-  - G7-L18
-  drive_files:
-  - code: G7-L18
-    file_id: 1pGUXB85Ua9FzDFn9gRxTn3GsHbvrghST
-    path: 7年級/G7-L18正太與小豬（自我提問策略2-讀出關係）.docx
+  title: 從〈螞蟻與蟋蟀〉看生命的多樣性
+  catalog_slot: G7-L14
+  drive_file_id: 1sgQkpV6KflAFSySsQWVm9cnOgzjtW74l
+  drive_path: 7年級/G7-L14從〈螞蟻與蟋蟀〉看生命的多樣性（用表格整理訊息-依比較項目看出異同）.docx
 - lesson_uid: L0083
-  title: 塑膠，好用不好甩
-  catalog_slots:
-  - G7-L1
-  drive_files:
-  - code: G7-L1
-    file_id: 1JUXDJQhgkWN7scm1dSaVp6ZdrHxZwmCS
-    path: 7年級/G7-L1塑膠，好用不好甩（推論策略-找作者觀點和支持理由）.docx
+  title: 爺爺奶奶來了以後
+  catalog_slot: G7-L15
+  drive_file_id: 1wg58oT5Kd6hCaV7VtE6r1X2aLfyWUfjQ
+  drive_path: 7年級/G7-L15爺爺奶奶來了以後（用表格整理訊息-從細節歸納比較項目）.docx
 - lesson_uid: L0084
-  title: 「背影」讀書會
-  catalog_slots:
-  - G7-L20
-  drive_files:
-  - code: G7-L20
-    file_id: 1CjNyIoaBnvIWyQYhs-8Idz05soqghYiG
-    path: 7年級/G7-L20「背影」讀書會（自我提問-詰問作者）.docx
+  title: 長大後，我才讀懂〈夏夜〉
+  catalog_slot: G7-L16
+  drive_file_id: 1tm9DId6z1J3OCyCsOKMn8qBTP0HWg8kO
+  drive_path: 7年級/G7-L16長大後，我才讀懂〈夏夜〉（寫作手法：排比─從排比歸納文意重點）.docx
 - lesson_uid: L0085
-  title: 奧運性別平等這條路
-  catalog_slots:
-  - G7-L21
-  drive_files:
-  - code: G7-L21
-    file_id: 1ihqcFY8-mgQdPzw8sBPAzXjhOpeHovlY
-    path: 7年級/G7-L21奧運性別平等這條路（用表格整理訊息-從數據資料歸納趨勢）.docx
+  title: 大自然的氣象小幫手
+  catalog_slot: G7-L17
+  drive_file_id: 1DEVCQVef1YvlbI8Tizpfv1SfABURj0__
+  drive_path: 7年級/G7-L17大自然的氣象小幫手（自我提問策略1-讀出重點）.docx
 - lesson_uid: L0086
-  title: 你看見時代的灰犀牛了嗎談人口負成長
-  catalog_slots:
-  - G7-L22
-  drive_files:
-  - code: G7-L22
-    file_id: 1V6X-Az8f7W-xulx7xi26tDyHi_YqDAzd
-    path: 7年級/G7-L22你看見時代的灰犀牛了嗎談人口負成長（圖表繪製與判讀-折線圖）.docx
+  title: 正太與小豬
+  catalog_slot: G7-L18
+  drive_file_id: 1pGUXB85Ua9FzDFn9gRxTn3GsHbvrghST
+  drive_path: 7年級/G7-L18正太與小豬（自我提問策略2-讀出關係）.docx
 - lesson_uid: L0087
-  title: 信眾與教主
-  catalog_slots:
-  - G7-L23
-  drive_files:
-  - code: G7-L23
-    file_id: 12YvUnQhFBsSjFOONkSsujIFSfkyq2sPM
-    path: 7年級/G7-L23信眾與教主（媒體素養與識讀-檢查誠信，辨識詐騙）.docx
+  title: 把手上的餅吃香一點
+  catalog_slot: G7-L19
+  drive_file_id: 1D13CzogMeONUYmEi71JE7lUvvFR4TY6V
+  drive_path: 7年級/G7-L19把手上的餅吃香一點（自我提問策略3-問好問題）.docx
 - lesson_uid: L0088
-  title: 用科學方法伸張正義的神探
-  catalog_slots:
-  - G7-L24
-  drive_files:
-  - code: G7-L24
-    file_id: 1z_zvfHVjUW89S7YSJCUovp8oSqbjMrSN
-    path: 7年級/G7-L24用科學方法伸張正義的神探（科學推理策略--用科學步驟解決問題）.docx
+  title: 塑膠，好用不好甩
+  catalog_slot: G7-L1
+  drive_file_id: 1JUXDJQhgkWN7scm1dSaVp6ZdrHxZwmCS
+  drive_path: 7年級/G7-L1塑膠，好用不好甩（推論策略-找作者觀點和支持理由）.docx
 - lesson_uid: L0089
-  title: 看到了嗎，然後呢
-  catalog_slots:
-  - G7-L25
-  drive_files:
-  - code: G7-L25
-    file_id: 1EUuyQz4jiPKUxxo2GebXsMdc1Bt5ZVDF
-    path: 7年級/G7-L25看到了嗎，然後呢（科學推理策略-用線索和知識推論）.docx
+  title: 「背影」讀書會
+  catalog_slot: G7-L20
+  drive_file_id: 1CjNyIoaBnvIWyQYhs-8Idz05soqghYiG
+  drive_path: 7年級/G7-L20「背影」讀書會（自我提問-詰問作者）.docx
 - lesson_uid: L0090
-  title: 科學怪人
-  catalog_slots:
-  - G7-L26
-  drive_files:
-  - code: G7-L26
-    file_id: 1bD0-M9CMCSbCE4EpxDHHINzvddPsygra
-    path: 7年級/G7-L26科學怪人（推論策略—從文本線索理解標題）.docx
+  title: 奧運性別平等這條路
+  catalog_slot: G7-L21
+  drive_file_id: 1ihqcFY8-mgQdPzw8sBPAzXjhOpeHovlY
+  drive_path: 7年級/G7-L21奧運性別平等這條路（用表格整理訊息-從數據資料歸納趨勢）.docx
 - lesson_uid: L0091
-  title: 吐瓦魯：逐漸被淹沒的島國
-  catalog_slots:
-  - G7-L27
-  drive_files:
-  - code: G7-L27
-    file_id: 1zPUoEg-hK1lQ8Yy1S2eBD4EOcuO6LKKB
-    path: 7年級/G7-L27吐瓦魯：逐漸被淹沒的島國（反思策略-4F反思法）.docx
+  title: 你看見時代的灰犀牛了嗎談人口負成長
+  catalog_slot: G7-L22
+  drive_file_id: 1V6X-Az8f7W-xulx7xi26tDyHi_YqDAzd
+  drive_path: 7年級/G7-L22你看見時代的灰犀牛了嗎談人口負成長（圖表繪製與判讀-折線圖）.docx
 - lesson_uid: L0092
-  title: 綠色賽事
-  catalog_slots:
-  - G7-L28
-  drive_files:
-  - code: G7-L28
-    file_id: 14OHqtkEBjSIw_g0HVF--Ow1jECeWJRUw
-    path: 7年級/G7-L28綠色賽事（品格力-落實環保3R-從問題到行動）.docx
+  title: 信眾與教主
+  catalog_slot: G7-L23
+  drive_file_id: 12YvUnQhFBsSjFOONkSsujIFSfkyq2sPM
+  drive_path: 7年級/G7-L23信眾與教主（媒體素養與識讀-檢查誠信，辨識詐騙）.docx
 - lesson_uid: L0093
-  title: 隱藏在日常對話中的微歧視
-  catalog_slots:
-  - G7-L29
-  drive_files:
-  - code: G7-L29
-    file_id: 1FWKOHA88DLDblqDJLWnsiZkUDstW0BQY
-    path: 7年級/G7-L29隱藏在日常對話中的微歧視（品格力-辨識與回應微歧視）.docx
+  title: 用科學方法伸張正義的神探
+  catalog_slot: G7-L24
+  drive_file_id: 1z_zvfHVjUW89S7YSJCUovp8oSqbjMrSN
+  drive_path: 7年級/G7-L24用科學方法伸張正義的神探（科學推理策略--用科學步驟解決問題）.docx
 - lesson_uid: L0094
-  title: AI什麼都會，我們還要學什麼？
-  catalog_slots:
-  - G7-L2
-  drive_files:
-  - code: G7-L2
-    file_id: 1Giuod8ZPA1UdwubQ2jgoCWiIYeHae1Da
-    path: 7年級/G7-L2AI什麼都會，我們還要學什麼？（推論策略-找觀點與理由，推隱含意義）.docx
+  title: 看到了嗎，然後呢
+  catalog_slot: G7-L25
+  drive_file_id: 1EUuyQz4jiPKUxxo2GebXsMdc1Bt5ZVDF
+  drive_path: 7年級/G7-L25看到了嗎，然後呢（科學推理策略-用線索和知識推論）.docx
 - lesson_uid: L0095
-  title: 你以為的浪漫可能是跟騷
-  catalog_slots:
-  - G7-L3
-  drive_files:
-  - code: G7-L3
-    file_id: 19edNAYk7nU231g2CZA0ABRindNwDOApg
-    path: 7年級/G7-L3你以為的浪漫可能是跟騷（推論策略-推論作者觀點和寫作目的）.docx
+  title: 科學怪人
+  catalog_slot: G7-L26
+  drive_file_id: 1bD0-M9CMCSbCE4EpxDHHINzvddPsygra
+  drive_path: 7年級/G7-L26科學怪人（推論策略—從文本線索理解標題）.docx
 - lesson_uid: L0096
-  title: 小米酒的祝福
-  catalog_slots:
-  - G7-L4
-  drive_files:
-  - code: G7-L4
-    file_id: 1vw-zI_Txq9lpUXD8qD2u4-FBPGMqDsAM
-    path: 7年級/G7-L4小米酒的祝福（推論策略-找段落重點.推論作者觀點）.docx
+  title: 吐瓦魯：逐漸被淹沒的島國
+  catalog_slot: G7-L27
+  drive_file_id: 1zPUoEg-hK1lQ8Yy1S2eBD4EOcuO6LKKB
+  drive_path: 7年級/G7-L27吐瓦魯：逐漸被淹沒的島國（反思策略-4F反思法）.docx
 - lesson_uid: L0097
-  title: 網紅的電子煙實驗：偽科學的陷阱
-  catalog_slots:
-  - G7-L5
-  drive_files:
-  - code: G7-L5
-    file_id: 1dSxZRgINnm5bpXsxTdShiFL5a1oFS_lo
-    path: 7年級/G7-L5網紅的電子煙實驗：偽科學的陷阱（媒體素養與識讀-辨別網路訊息真偽）.docx
+  title: 綠色賽事
+  catalog_slot: G7-L28
+  drive_file_id: 14OHqtkEBjSIw_g0HVF--Ow1jECeWJRUw
+  drive_path: 7年級/G7-L28綠色賽事（品格力-落實環保3R-從問題到行動）.docx
 - lesson_uid: L0098
-  title: 果醬男孩
-  catalog_slots:
-  - G7-L6
-  drive_files:
-  - code: G7-L6
-    file_id: 1bxXra0Q7XlK82L8bw-PLWUzngvDYKnTL
-    path: 7年級/G7-L6果醬男孩（摘要策略-用問題、解決、結果找重點）.docx
+  title: 隱藏在日常對話中的微歧視
+  catalog_slot: G7-L29
+  drive_file_id: 1FWKOHA88DLDblqDJLWnsiZkUDstW0BQY
+  drive_path: 7年級/G7-L29隱藏在日常對話中的微歧視（品格力-辨識與回應微歧視）.docx
 - lesson_uid: L0099
-  title: 當全世界都在笑你，你可以怎麼做
-  catalog_slots:
-  - G7-L7
-  drive_files:
-  - code: G7-L7
-    file_id: 1LJOXTwABGWcl1lB9F6YQnZj4NDgeRZ2l
-    path: 7年級/G7-L7當全世界都在笑你，你可以怎麼做（摘要策略-用問題解決結果找重點）.docx
+  title: AI什麼都會，我們還要學什麼？
+  catalog_slot: G7-L2
+  drive_file_id: 1Giuod8ZPA1UdwubQ2jgoCWiIYeHae1Da
+  drive_path: 7年級/G7-L2AI什麼都會，我們還要學什麼？（推論策略-找觀點與理由，推隱含意義）.docx
 - lesson_uid: L0100
-  title: 黑猩猩的守護者
-  catalog_slots:
-  - G7-L8
-  drive_files:
-  - code: G7-L8
-    file_id: 12FT5tgblR7u59y2hDoOWjhWRvAT7S2UB
-    path: 7年級/G7-L8黑猩猩的守護者（摘要策略-從人物發展找重點）.docx
+  title: 你以為的浪漫可能是跟騷
+  catalog_slot: G7-L3
+  drive_file_id: 19edNAYk7nU231g2CZA0ABRindNwDOApg
+  drive_path: 7年級/G7-L3你以為的浪漫可能是跟騷（推論策略-推論作者觀點和寫作目的）.docx
 - lesson_uid: L0101
-  title: 帶著血拼清單閱讀
-  catalog_slots:
-  - G7-L9
-  drive_files:
-  - code: G7-L9
-    file_id: 1ZJEMkFnnJ8zQEaRmdQRt9PVPrhc0JVUh
-    path: 7年級/G7-L9帶著血拼清單閱讀（解題策略-帶著問題閱讀）.docx
+  title: 小米酒的祝福
+  catalog_slot: G7-L4
+  drive_file_id: 1vw-zI_Txq9lpUXD8qD2u4-FBPGMqDsAM
+  drive_path: 7年級/G7-L4小米酒的祝福（推論策略-找段落重點.推論作者觀點）.docx
 - lesson_uid: L0102
-  title: 虎襲事件的真相：誰才是受害者？
-  catalog_slots:
-  - G8-L10
-  drive_files:
-  - code: G8-L10
-    file_id: 1SvuZqROIyk_gl447yWDHxGVZlXg4KjfZ
-    path: 8年級/G8-L10虎襲事件的真相：誰才是受害者？（推論策略-從多個例子推論作者觀點）.docx
+  title: 網紅的電子煙實驗：偽科學的陷阱
+  catalog_slot: G7-L5
+  drive_file_id: 1dSxZRgINnm5bpXsxTdShiFL5a1oFS_lo
+  drive_path: 7年級/G7-L5網紅的電子煙實驗：偽科學的陷阱（媒體素養與識讀-辨別網路訊息真偽）.docx
 - lesson_uid: L0103
-  title: 球場上的另類指揮家
-  catalog_slots:
-  - G8-L11
-  drive_files:
-  - code: G8-L11
-    file_id: 1alCkkr1y0xU352QKT8e0E6JEneSZt1lQ
-    path: 8年級/G8-L11球場上的另類指揮家（推論策略-推論主要論點與作者意圖）.docx
+  title: 果醬男孩
+  catalog_slot: G7-L6
+  drive_file_id: 1bxXra0Q7XlK82L8bw-PLWUzngvDYKnTL
+  drive_path: 7年級/G7-L6果醬男孩（摘要策略-用問題、解決、結果找重點）.docx
 - lesson_uid: L0104
-  title: 我的阿嬤
-  catalog_slots:
-  - G8-L12
-  drive_files:
-  - code: G8-L12
-    file_id: 145LAkCaR2Zrx3WlhtRhFyIZMSk1Ugirh
-    path: 8年級/G8-L12我的阿嬤（推論策略-推論角色關係與觀點）.docx
+  title: 當全世界都在笑你，你可以怎麼做
+  catalog_slot: G7-L7
+  drive_file_id: 1LJOXTwABGWcl1lB9F6YQnZj4NDgeRZ2l
+  drive_path: 7年級/G7-L7當全世界都在笑你，你可以怎麼做（摘要策略-用問題解決結果找重點）.docx
 - lesson_uid: L0105
-  title: -14雨林裡的奇蹟藥物和最後一隻旅人鴿
-  catalog_slots:
-  - G8-L13
-  drive_files:
-  - code: G8-L13
-    file_id: 1njIHa0murfrYndV8JZvTWjErAU3MDSNP
-    path: 8年級/G8-L13-14雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，先瀏覽全文）.docx
+  title: 黑猩猩的守護者
+  catalog_slot: G7-L8
+  drive_file_id: 12FT5tgblR7u59y2hDoOWjhWRvAT7S2UB
+  drive_path: 7年級/G7-L8黑猩猩的守護者（摘要策略-從人物發展找重點）.docx
 - lesson_uid: L0106
-  title: 未來的農夫
-  catalog_slots:
-  - G8-L15
-  drive_files:
-  - code: G8-L15
-    file_id: 1Hu5-JT4rSGyIjK69YaXg_rYmN7ll7A6a
-    path: 8年級/G8-L15未來的農夫（閱讀策略-跳過卡關，先瀏覽全文）.docx
+  title: 帶著血拼清單閱讀
+  catalog_slot: G7-L9
+  drive_file_id: 1ZJEMkFnnJ8zQEaRmdQRt9PVPrhc0JVUh
+  drive_path: 7年級/G7-L9帶著血拼清單閱讀（解題策略-帶著問題閱讀）.docx
 - lesson_uid: L0107
-  title: 我能不能選擇告別方式(比較多元觀點)
-  catalog_slots:
-  - G8-L16
-  drive_files:
-  - code: G8-L16
-    file_id: 1dkxzjkjsGzcKAYhv5yxlfHtGzmJT5D6c
-    path: 8年級/G8-L16我能不能選擇告別方式(比較多元觀點).docx
+  title: 正太與小豬：武僧的養成之路
+  catalog_slot: G8-L0
+  drive_file_id: 1KKN2K7MgoOW5WeE9M9r6CzgyyNV2gt8V
+  drive_path: 8年級/G8-L0正太與小豬：武僧的養成之路.docx
 - lesson_uid: L0108
-  title: 石虎保育：遷移與否的兩難
-  catalog_slots:
-  - G8-L17
-  drive_files:
-  - code: G8-L17
-    file_id: 14KGPbb5WEnP5lDEL9v1niMR2R5fYlOFi
-    path: 8年級/G8-L17石虎保育：遷移與否的兩難（比較多元觀點）.docx
+  title: 虎襲事件的真相：誰才是受害者？
+  catalog_slot: G8-L10
+  drive_file_id: 1SvuZqROIyk_gl447yWDHxGVZlXg4KjfZ
+  drive_path: 8年級/G8-L10虎襲事件的真相：誰才是受害者？（推論策略-從多個例子推論作者觀點）.docx
 - lesson_uid: L0109
-  title: 核能的兩難抉擇
-  catalog_slots:
-  - G8-L18
-  drive_files:
-  - code: G8-L18
-    file_id: 1H1kz5EJVt0dGEH1VZWr1FE0lFp4PYQov
-    path: 8年級/G8-L18核能的兩難抉擇（比較多元觀點）.docx
+  title: 球場上的另類指揮家
+  catalog_slot: G8-L11
+  drive_file_id: 1alCkkr1y0xU352QKT8e0E6JEneSZt1lQ
+  drive_path: 8年級/G8-L11球場上的另類指揮家（推論策略-推論主要論點與作者意圖）.docx
 - lesson_uid: L0110
-  title: 塞翁失馬，焉知非福
-  catalog_slots:
-  - G8-L19
-  drive_files:
-  - code: G8-L19
-    file_id: 1qu6wyJurI0RJLcBunkXRoc0Lg02FdjXE
-    path: 8年級/G8-L19塞翁失馬，焉知非福（寫作手法-用故事和例子支持觀點）.docx
+  title: 我的阿嬤
+  catalog_slot: G8-L12
+  drive_file_id: 145LAkCaR2Zrx3WlhtRhFyIZMSk1Ugirh
+  drive_path: 8年級/G8-L12我的阿嬤（推論策略-推論角色關係與觀點）.docx
 - lesson_uid: L0111
-  title: 讓你口中的甜蜜成為遠方農民的希望
-  catalog_slots:
-  - G8-L1
-  drive_files:
-  - code: G8-L1
-    file_id: 1LBh9ppt-QSFtrFNNmoUlhL1xzq7fxi3H
-    path: 8年級/G8-L1讓你口中的甜蜜成為遠方農民的希望（推論策略-找出一連串因果）.docx
+  title: -14雨林裡的奇蹟藥物和最後一隻旅人鴿
+  catalog_slot: G8-L13
+  drive_file_id: 1njIHa0murfrYndV8JZvTWjErAU3MDSNP
+  drive_path: 8年級/G8-L13-14雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，先瀏覽全文）.docx
 - lesson_uid: L0112
-  title: 懸崖邊的那顆草莓
-  catalog_slots:
-  - G8-L20
-  drive_files:
-  - code: G8-L20
-    file_id: 1UJt1-EENbcYCOSJ7J18zJt-AAS6brXTY
-    path: 8年級/G8-L20懸崖邊的那顆草莓（寫作手法-用故事說道理）.docx
+  title: 未來的農夫
+  catalog_slot: G8-L15
+  drive_file_id: 1Hu5-JT4rSGyIjK69YaXg_rYmN7ll7A6a
+  drive_path: 8年級/G8-L15未來的農夫（閱讀策略-跳過卡關，先瀏覽全文）.docx
 - lesson_uid: L0113
-  title: 致台東：一封過客的情書
-  catalog_slots:
-  - G8-L21
-  drive_files:
-  - code: G8-L21
-    file_id: 1VlBsvnR6K9RQi3HBsN4_ETHhvqKn2Enf
-    path: 8年級/G8-L21致台東：一封過客的情書（寫作手法-擬人－從擬人推論文章意涵）.docx
+  title: 我能不能選擇告別方式(比較多元觀點)
+  catalog_slot: G8-L16
+  drive_file_id: 1dkxzjkjsGzcKAYhv5yxlfHtGzmJT5D6c
+  drive_path: 8年級/G8-L16我能不能選擇告別方式(比較多元觀點).docx
 - lesson_uid: L0114
-  title: 靈異與科學
-  catalog_slots:
-  - G8-L22
-  drive_files:
-  - code: G8-L22
-    file_id: 1D4Z6kZ9gVAoHwlRx1cDyhSZ575Qs8_mp
-    path: 8年級/G8-L22靈異與科學（科學探究策略-假設與假設檢驗）.docx
+  title: 石虎保育：遷移與否的兩難
+  catalog_slot: G8-L17
+  drive_file_id: 14KGPbb5WEnP5lDEL9v1niMR2R5fYlOFi
+  drive_path: 8年級/G8-L17石虎保育：遷移與否的兩難（比較多元觀點）.docx
 - lesson_uid: L0115
-  title: MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人)
-  catalog_slots:
-  - G8-L23
-  drive_files:
-  - code: G8-L23
-    file_id: 1aXNp6mZmbK1nkynJGPn-GJCNg4QK8ps4
-    path: 8年級/G8-L23MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人).docx
+  title: 核能的兩難抉擇
+  catalog_slot: G8-L18
+  drive_file_id: 1H1kz5EJVt0dGEH1VZWr1FE0lFp4PYQov
+  drive_path: 8年級/G8-L18核能的兩難抉擇（比較多元觀點）.docx
 - lesson_uid: L0116
-  title: 隱形的征服者
-  catalog_slots:
-  - G8-L2
-  drive_files:
-  - code: G8-L2
-    file_id: 1byDZfSpeUiKgSErj9zssZDr1r3sPWtjD
-    path: 8年級/G8-L2隱形的征服者（推論策略-找出一連串因果）.docx
+  title: 塞翁失馬，焉知非福
+  catalog_slot: G8-L19
+  drive_file_id: 1qu6wyJurI0RJLcBunkXRoc0Lg02FdjXE
+  drive_path: 8年級/G8-L19塞翁失馬，焉知非福（寫作手法-用故事和例子支持觀點）.docx
 - lesson_uid: L0117
-  title: 爸爸的恩人們
-  catalog_slots:
-  - G8-L3
-  drive_files:
-  - code: G8-L3
-    file_id: 1mL-A1UMo5sw1NYAmBcF9MPr4V2ICd6xK
-    path: 8年級/G8-L3爸爸的恩人們（寫作手法-對比-從對比歸納作者意圖）.docx
+  title: 讓你口中的甜蜜成為遠方農民的希望
+  catalog_slot: G8-L1
+  drive_file_id: 1LBh9ppt-QSFtrFNNmoUlhL1xzq7fxi3H
+  drive_path: 8年級/G8-L1讓你口中的甜蜜成為遠方農民的希望（推論策略-找出一連串因果）.docx
 - lesson_uid: L0118
-  title: 新奇!「植物肉」你聽過嗎
-  catalog_slots:
-  - G8-L4
-  drive_files:
-  - code: G8-L4
-    file_id: 1JkM4V3gIfpKlbi19jhzLZ2qb7_RICXlj
-    path: 8年級/G8-L4新奇!「植物肉」你聽過嗎（推論策略-由課文觀點找出支持理由）.docx
+  title: 懸崖邊的那顆草莓
+  catalog_slot: G8-L20
+  drive_file_id: 1UJt1-EENbcYCOSJ7J18zJt-AAS6brXTY
+  drive_path: 8年級/G8-L20懸崖邊的那顆草莓（寫作手法-用故事說道理）.docx
 - lesson_uid: L0119
-  title: 好心沒好報的玻璃娃娃爭議事件
-  catalog_slots:
-  - G8-L5
-  drive_files:
-  - code: G8-L5
-    file_id: 1AP1ykyS8kbgMvcYq9Kj7Lz8luYIT6TjB
-    path: 8年級/G8-L5好心沒好報的玻璃娃娃爭議事件（推論策略-推論人物行為的背後動機）.docx
+  title: 致台東：一封過客的情書
+  catalog_slot: G8-L21
+  drive_file_id: 1VlBsvnR6K9RQi3HBsN4_ETHhvqKn2Enf
+  drive_path: 8年級/G8-L21致台東：一封過客的情書（寫作手法-擬人－從擬人推論文章意涵）.docx
 - lesson_uid: L0120
-  title: 戲院、賭場、檳榔攤：在時代夾縫中成長的我
-  catalog_slots:
-  - G8-L6
-  drive_files:
-  - code: G8-L6
-    file_id: 1EbqX2a3y3Zvb8sBJGgeKsIxq5uWJ1Dvy
-    path: 8年級/G8-L6戲院、賭場、檳榔攤：在時代夾縫中成長的我（推論策略-推論人物的動機、情緒與想法）.docx
+  title: 靈異與科學
+  catalog_slot: G8-L22
+  drive_file_id: 1D4Z6kZ9gVAoHwlRx1cDyhSZ575Qs8_mp
+  drive_path: 8年級/G8-L22靈異與科學（科學探究策略-假設與假設檢驗）.docx
 - lesson_uid: L0121
-  title: 當壞事已不可逆轉：集中營裡的一門課
-  catalog_slots:
-  - G8-L7
-  drive_files:
-  - code: G8-L7
-    file_id: 1QWv1M1_t7T3tpZZkp7s2N2OHw-WuncIs
-    path: 8年級/G8-L7當壞事已不可逆轉：集中營裡的一門課（寫作手法-用例子與道理支持主旨）.docx
+  title: MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人)
+  catalog_slot: G8-L23
+  drive_file_id: 1aXNp6mZmbK1nkynJGPn-GJCNg4QK8ps4
+  drive_path: 8年級/G8-L23MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人).docx
 - lesson_uid: L0122
-  title: 讓黑猩猩被看見的人
-  catalog_slots:
-  - G8-L8
-  drive_files:
-  - code: G8-L8
-    file_id: 1cFKrMdIpHGIHye0KZn3XtCrYoc-U4syw
-    path: 8年級/G8-L8讓黑猩猩被看見的人（推論策略-從對比推論作者觀點）.docx
+  title: 隱形的征服者
+  catalog_slot: G8-L2
+  drive_file_id: 1byDZfSpeUiKgSErj9zssZDr1r3sPWtjD
+  drive_path: 8年級/G8-L2隱形的征服者（推論策略-找出一連串因果）.docx
 - lesson_uid: L0123
-  title: 「按讚」背後的真相
-  catalog_slots:
-  - G8-L9
-  drive_files:
-  - code: G8-L9
-    file_id: 12ZMf8Cm4wJJ0ZKVpTzEpw0d6o1PfdzJJ
-    path: 8年級/G8-L9「按讚」背後的真相（推論策略-整合各段觀點，找主要論點）.docx
+  title: 爸爸的恩人們
+  catalog_slot: G8-L3
+  drive_file_id: 1mL-A1UMo5sw1NYAmBcF9MPr4V2ICd6xK
+  drive_path: 8年級/G8-L3爸爸的恩人們（寫作手法-對比-從對比歸納作者意圖）.docx
 - lesson_uid: L0124
-  title: 國高中數學當然可以使用計算機
-  catalog_slots:
-  - G9-L10
-  drive_files:
-  - code: G9-L10
-    file_id: 1KCT5LAw2FMQOX98JQZbf73p1Ais4JiLI
-    path: 9年級/G9-L10國高中數學當然可以使用計算機（議論文結構-用論據支持論點）.docx
+  title: 新奇!「植物肉」你聽過嗎
+  catalog_slot: G8-L4
+  drive_file_id: 1JkM4V3gIfpKlbi19jhzLZ2qb7_RICXlj
+  drive_path: 8年級/G8-L4新奇!「植物肉」你聽過嗎（推論策略-由課文觀點找出支持理由）.docx
 - lesson_uid: L0125
-  title: 預防近視？多點戶外活動就對了！
-  catalog_slots:
-  - G9-L11
-  drive_files:
-  - code: G9-L11
-    file_id: 1d7BCX2IEMelgaJTulT-sFOLl4bNaGg-l
-    path: 9年級/G9-L11預防近視？多點戶外活動就對了！（科學推理策略-整合多項研究證據）.docx
+  title: 好心沒好報的玻璃娃娃爭議事件
+  catalog_slot: G8-L5
+  drive_file_id: 1AP1ykyS8kbgMvcYq9Kj7Lz8luYIT6TjB
+  drive_path: 8年級/G8-L5好心沒好報的玻璃娃娃爭議事件（推論策略-推論人物行為的背後動機）.docx
 - lesson_uid: L0126
-  title: 看不見的兇手：以實驗破解肉湯腐敗之謎
-  catalog_slots:
-  - G9-L12
-  drive_files:
-  - code: G9-L12
-    file_id: 1eKq1dwxHznNx7FOxfOy37zZbTy26-56h
-    path: 9年級/G9-L12看不見的兇手：以實驗破解肉湯腐敗之謎（圖文整合閱讀策略）.docx
+  title: 戲院、賭場、檳榔攤：在時代夾縫中成長的我
+  catalog_slot: G8-L6
+  drive_file_id: 1EbqX2a3y3Zvb8sBJGgeKsIxq5uWJ1Dvy
+  drive_path: 8年級/G8-L6戲院、賭場、檳榔攤：在時代夾縫中成長的我（推論策略-推論人物的動機、情緒與想法）.docx
 - lesson_uid: L0127
-  title: 四張圖看地球暖化
-  catalog_slots:
-  - G9-L13
-  drive_files:
-  - code: G9-L13
-    file_id: 1_eHLx_NqUuhAhlAeIru0Z7bupOwSm2nM
-    path: 9年級/G9-L13四張圖看地球暖化（圖文整合閱讀策略）.docx
+  title: 當壞事已不可逆轉：集中營裡的一門課
+  catalog_slot: G8-L7
+  drive_file_id: 1QWv1M1_t7T3tpZZkp7s2N2OHw-WuncIs
+  drive_path: 8年級/G8-L7當壞事已不可逆轉：集中營裡的一門課（寫作手法-用例子與道理支持主旨）.docx
 - lesson_uid: L0128
-  title: 都是八哥為什麼命運不一樣
-  catalog_slots:
-  - G9-L14
-  drive_files:
-  - code: G9-L14
-    file_id: 15bFXZgfdkg3bmbBNjuMC7oLRzmmKYUkY
-    path: 9年級/G9-L14都是八哥為什麼命運不一樣（文圖表整合閱讀策略）.docx
+  title: 讓黑猩猩被看見的人
+  catalog_slot: G8-L8
+  drive_file_id: 1cFKrMdIpHGIHye0KZn3XtCrYoc-U4syw
+  drive_path: 8年級/G8-L8讓黑猩猩被看見的人（推論策略-從對比推論作者觀點）.docx
 - lesson_uid: L0129
-  title: 會考圖文題實戰
-  catalog_slots:
-  - G9-L15
-  drive_files:
-  - code: G9-L15
-    file_id: 1bPsPX-wlNDnu3sCSIUtIoEBk9QFof6Fb
-    path: 9年級/G9-L15會考圖文題實戰（圖文整合閱讀策略）.docx
+  title: 「按讚」背後的真相
+  catalog_slot: G8-L9
+  drive_file_id: 12ZMf8Cm4wJJ0ZKVpTzEpw0d6o1PfdzJJ
+  drive_path: 8年級/G8-L9「按讚」背後的真相（推論策略-整合各段觀點，找主要論點）.docx
 - lesson_uid: L0130
-  title: ~17多文本-未解之謎-巨石陣+摩艾石像
-  catalog_slots:
-  - G9-L16
-  drive_files:
-  - code: G9-L16
-    file_id: 1nlIbDBbymAjHcSwm35vsQ4OTuiyllG6i
-    path: 9年級/G9-L16~17多文本-未解之謎-巨石陣+摩艾石像（多文本閱讀-比較異同＋科學步驟-假設驗證歷程）.docx
+  title: 正太與小豬：武僧的養成之路
+  catalog_slot: G9-L0
+  drive_file_id: 1_JAm5bIv9u3_1KOSip06VE-Kz-A5TDYm
+  drive_path: 9年級/G9-L0正太與小豬：武僧的養成之路.docx
 - lesson_uid: L0131
-  title: 樂觀者勝：向NBA球員學習「詮釋失敗」的智慧
-  catalog_slots:
-  - G9-L18
-  drive_files:
-  - code: G9-L18
-    file_id: 19BXj23lz-HC_a4GZ21P-XuqlG5-eqr7S
-    path: 9年級/G9-L18樂觀者勝：向NBA球員學習「詮釋失敗」的智慧（品格力-正向思考-用樂觀詮釋面對失敗）.docx
+  title: 國高中數學當然可以使用計算機
+  catalog_slot: G9-L10
+  drive_file_id: 1KCT5LAw2FMQOX98JQZbf73p1Ais4JiLI
+  drive_path: 9年級/G9-L10國高中數學當然可以使用計算機（議論文結構-用論據支持論點）.docx
 - lesson_uid: L0132
-  title: 長喙天蛾見前人所未見
-  catalog_slots:
-  - G9-L19
-  drive_files:
-  - code: G9-L19
-    file_id: 1XH0tXWsbswRfvsnK0v8JpsnBOxMEipc1
-    path: 9年級/G9-L19長喙天蛾見前人所未見（摘要策略-科學探究故事結構）.docx
+  title: 預防近視？多點戶外活動就對了！
+  catalog_slot: G9-L11
+  drive_file_id: 1d7BCX2IEMelgaJTulT-sFOLl4bNaGg-l
+  drive_path: 9年級/G9-L11預防近視？多點戶外活動就對了！（科學推理策略-整合多項研究證據）.docx
 - lesson_uid: L0133
-  title: 認命是強者的選項
-  catalog_slots:
-  - G9-L1
-  drive_files:
-  - code: G9-L1
-    file_id: 165Gydho4gnkMDDflD_6RO7wah2no8RE4
-    path: 9年級/G9-L1認命是強者的選項（寫作手法-用故事帶出觀點）.docx
+  title: 看不見的兇手：以實驗破解肉湯腐敗之謎
+  catalog_slot: G9-L12
+  drive_file_id: 1eKq1dwxHznNx7FOxfOy37zZbTy26-56h
+  drive_path: 9年級/G9-L12看不見的兇手：以實驗破解肉湯腐敗之謎（圖文整合閱讀策略）.docx
 - lesson_uid: L0134
-  title: 臺灣的太空之眼
-  catalog_slots:
-  - G9-L20
-  drive_files:
-  - code: G9-L20
-    file_id: 1ZrelvFKeI0L5BE7qltZa3CnzRd0XJwR6
-    path: 9年級/G9-L20臺灣的太空之眼（摘要策略-從小標題找重要細節）.docx
+  title: 四張圖看地球暖化
+  catalog_slot: G9-L13
+  drive_file_id: 1_eHLx_NqUuhAhlAeIru0Z7bupOwSm2nM
+  drive_path: 9年級/G9-L13四張圖看地球暖化（圖文整合閱讀策略）.docx
 - lesson_uid: L0135
-  title: 焚而不毀的倫敦
-  catalog_slots:
-  - G9-L21
-  drive_files:
-  - code: G9-L21
-    file_id: 18Xj8NPeMaJT3JpkTzVnvGYOrYfW88O4y
-    path: 9年級/G9-L21焚而不毀的倫敦（品格力-正向思考-培養心理韌性）.docx
+  title: 都是八哥為什麼命運不一樣
+  catalog_slot: G9-L14
+  drive_file_id: 15bFXZgfdkg3bmbBNjuMC7oLRzmmKYUkY
+  drive_path: 9年級/G9-L14都是八哥為什麼命運不一樣（文圖表整合閱讀策略）.docx
 - lesson_uid: L0136
-  title: 高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題)
-  catalog_slots:
-  - G9-L22
-  drive_files:
-  - code: G9-L22
-    file_id: 10GGDT9KGh58mGINikIxQNs30IJ4jrScW
-    path: 9年級/G9-L22高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題).docx
+  title: 會考圖文題實戰
+  catalog_slot: G9-L15
+  drive_file_id: 1bPsPX-wlNDnu3sCSIUtIoEBk9QFof6Fb
+  drive_path: 9年級/G9-L15會考圖文題實戰（圖文整合閱讀策略）.docx
 - lesson_uid: L0137
-  title: ~25運動記錄的突破與公平
-  catalog_slots:
-  - G9-L23
-  drive_files:
-  - code: G9-L23
-    file_id: 1_H396XS0V3c2slaZjwAb6Ap8KLQEAR_1
-    path: 9年級/G9-L23~25運動記錄的突破與公平（多文本閱讀-看文章之間的關係）.docx
+  title: ~17多文本-未解之謎-巨石陣+摩艾石像
+  catalog_slot: G9-L16
+  drive_file_id: 1nlIbDBbymAjHcSwm35vsQ4OTuiyllG6i
+  drive_path: 9年級/G9-L16~17多文本-未解之謎-巨石陣+摩艾石像（多文本閱讀-比較異同＋科學步驟-假設驗證歷程）.docx
 - lesson_uid: L0138
-  title: 看不見的故事，推動看得見的世界
-  catalog_slots:
-  - G9-L2
-  drive_files:
-  - code: G9-L2
-    file_id: 12IVXPGI6B0Qd0NM9Wi_XsvjBDih1AVVg
-    path: 9年級/G9-L2看不見的故事，推動看得見的世界（寫作手法-用例子說明觀點）.docx
+  title: 樂觀者勝：向NBA球員學習「詮釋失敗」的智慧
+  catalog_slot: G9-L18
+  drive_file_id: 19BXj23lz-HC_a4GZ21P-XuqlG5-eqr7S
+  drive_path: 9年級/G9-L18樂觀者勝：向NBA球員學習「詮釋失敗」的智慧（品格力-正向思考-用樂觀詮釋面對失敗）.docx
 - lesson_uid: L0139
-  title: 語言的足跡：從臺北萬華到南太平洋的航海之路
-  catalog_slots:
-  - G9-L3
-  drive_files:
-  - code: G9-L3
-    file_id: 1N13sWmCyBGrGNJqzB8ofd_b9R43MH9k5
-    path: 9年級/G9-L3語言的足跡：從臺北萬華到南太平洋的航海之路（推論策略-從例子推論作者觀點）.docx
+  title: 長喙天蛾見前人所未見
+  catalog_slot: G9-L19
+  drive_file_id: 1XH0tXWsbswRfvsnK0v8JpsnBOxMEipc1
+  drive_path: 9年級/G9-L19長喙天蛾見前人所未見（摘要策略-科學探究故事結構）.docx
 - lesson_uid: L0140
-  title: 構樹：南島祖先「出台灣說」的植物證據
-  catalog_slots:
-  - G9-L4
-  drive_files:
-  - code: G9-L4
-    file_id: 1BryzjHt5HbPlRAY3_45bz68OQ1KotGrM
-    path: 9年級/G9-L4構樹：南島祖先「出台灣說」的植物證據（科學推理策略-研究結果支持假說嗎？）.docx
+  title: 認命是強者的選項
+  catalog_slot: G9-L1
+  drive_file_id: 165Gydho4gnkMDDflD_6RO7wah2no8RE4
+  drive_path: 9年級/G9-L1認命是強者的選項（寫作手法-用故事帶出觀點）.docx
 - lesson_uid: L0141
-  title: 科學辦案：破解蝴蝶蘭的花期密碼
-  catalog_slots:
-  - G9-L5
-  drive_files:
-  - code: G9-L5
-    file_id: 1UbC5TkuflGGGgHrqqfW1c2RkLjy2VwGM
-    path: 9年級/G9-L5科學辦案：破解蝴蝶蘭的花期密碼（科學推理策略-用科學步驟解決問題）.docx
+  title: 臺灣的太空之眼
+  catalog_slot: G9-L20
+  drive_file_id: 1ZrelvFKeI0L5BE7qltZa3CnzRd0XJwR6
+  drive_path: 9年級/G9-L20臺灣的太空之眼（摘要策略-從小標題找重要細節）.docx
 - lesson_uid: L0142
-  title: 從基因來的特別禮物
-  catalog_slots:
-  - G9-L6
-  drive_files:
-  - code: G9-L6
-    file_id: 1evQVB7W91LIVS5ATj7NP1E-4WOkl7A6T
-    path: 9年級/G9-L6從基因來的特別禮物（圖表繪製與判讀-長條圖與圓形圖）.docx
+  title: 焚而不毀的倫敦
+  catalog_slot: G9-L21
+  drive_file_id: 18Xj8NPeMaJT3JpkTzVnvGYOrYfW88O4y
+  drive_path: 9年級/G9-L21焚而不毀的倫敦（品格力-正向思考-培養心理韌性）.docx
 - lesson_uid: L0143
-  title: 臺灣學生的閱讀力：美麗與哀愁
-  catalog_slots:
-  - G9-L7
-  drive_files:
-  - code: G9-L7
-    file_id: 196dPBy5dKC_QNpCRPwOTs9gOSmtbIs9Y
-    path: 9年級/G9-L7臺灣學生的閱讀力：美麗與哀愁（圖表判讀-折線圖）.docx
+  title: 高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題)
+  catalog_slot: G9-L22
+  drive_file_id: 10GGDT9KGh58mGINikIxQNs30IJ4jrScW
+  drive_path: 9年級/G9-L22高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題).docx
 - lesson_uid: L0144
-  title: 盡信書不如無書：從一件殺人案談起
-  catalog_slots:
-  - G9-L8
-  drive_files:
-  - code: G9-L8
-    file_id: 1xOcu5_DZzO6Ge3FKuU6LsiKE2F0YMuP-
-    path: 9年級/G9-L8盡信書不如無書：從一件殺人案談起（媒體素養與識讀-查核、辨識假新聞）.docx
+  title: ~25運動記錄的突破與公平
+  catalog_slot: G9-L23
+  drive_file_id: 1_H396XS0V3c2slaZjwAb6Ap8KLQEAR_1
+  drive_path: 9年級/G9-L23~25運動記錄的突破與公平（多文本閱讀-看文章之間的關係）.docx
 - lesson_uid: L0145
-  title: 帝國家書：一個普通家庭的生與死
-  catalog_slots:
-  - G9-L9
-  drive_files:
-  - code: G9-L9
-    file_id: 1yBuh1GqRD6BvprptPNGJcXtPkFIuZLoZ
-    path: 9年級/G9-L9帝國家書：一個普通家庭的生與死（分辨事實與判斷）.docx
+  title: 看不見的故事，推動看得見的世界
+  catalog_slot: G9-L2
+  drive_file_id: 12IVXPGI6B0Qd0NM9Wi_XsvjBDih1AVVg
+  drive_path: 9年級/G9-L2看不見的故事，推動看得見的世界（寫作手法-用例子說明觀點）.docx
 - lesson_uid: L0146
-  title: 荒野救亡記
-  catalog_slots:
-  - 文-L10
-  drive_files:
-  - code: 文-L10
-    file_id: 13xrieaXpJyoIsSLF_Gbgc0MQChulbLAf
-    path: 文言文/文-L10荒野救亡記（固定句式：以--為.）.docx
+  title: 語言的足跡：從臺北萬華到南太平洋的航海之路
+  catalog_slot: G9-L3
+  drive_file_id: 1N13sWmCyBGrGNJqzB8ofd_b9R43MH9k5
+  drive_path: 9年級/G9-L3語言的足跡：從臺北萬華到南太平洋的航海之路（推論策略-從例子推論作者觀點）.docx
 - lesson_uid: L0147
-  title: 祁黃羊的思路解密(疑問助詞)
-  catalog_slots:
-  - 文-L11
-  drive_files:
-  - code: 文-L11
-    file_id: 1t8NcdcyJ790UvL3EfYoCgIaTVyOZQmCg
-    path: 文言文/文-L11祁黃羊的思路解密(疑問助詞).docx
+  title: 構樹：南島祖先「出台灣說」的植物證據
+  catalog_slot: G9-L4
+  drive_file_id: 1BryzjHt5HbPlRAY3_45bz68OQ1KotGrM
+  drive_path: 9年級/G9-L4構樹：南島祖先「出台灣說」的植物證據（科學推理策略-研究結果支持假說嗎？）.docx
 - lesson_uid: L0148
-  title: -不流血的戰爭
-  catalog_slots:
-  - 文-L12
-  drive_files:
-  - code: 文-L12
-    file_id: 1HPwyo-Huz-IOjBAdxUZErsBYKvU8zABg
-    path: 文言文/文-L12-不流血的戰爭.docx
+  title: 科學辦案：破解蝴蝶蘭的花期密碼
+  catalog_slot: G9-L5
+  drive_file_id: 1UbC5TkuflGGGgHrqqfW1c2RkLjy2VwGM
+  drive_path: 9年級/G9-L5科學辦案：破解蝴蝶蘭的花期密碼（科學推理策略-用科學步驟解決問題）.docx
 - lesson_uid: L0149
-  title: 假新聞？鞭虎救弟記
-  catalog_slots:
-  - 文-L1
-  drive_files:
-  - code: 文-L1
-    file_id: 1t8-vEz-JIcpYLGRopNN7iufAsHR2g5EB
-    path: 文言文/文-L1假新聞？鞭虎救弟記（媒體素養與識讀-善用網路資源找證據）.docx
+  title: 從基因來的特別禮物
+  catalog_slot: G9-L6
+  drive_file_id: 1evQVB7W91LIVS5ATj7NP1E-4WOkl7A6T
+  drive_path: 9年級/G9-L6從基因來的特別禮物（圖表繪製與判讀-長條圖與圓形圖）.docx
 - lesson_uid: L0150
-  title: 文言文怎麼讀？以鞭虎救弟記為例
-  catalog_slots:
-  - 文-L2
-  drive_files:
-  - code: 文-L2
-    file_id: 1Rzz-C6gsP34ye_me-WPFuD0MEAOrD4u-
-    path: 文言文/文-L2文言文怎麼讀？以鞭虎救弟記為例（文言文閱讀策略-如何讀懂文言文）.docx
+  title: 臺灣學生的閱讀力：美麗與哀愁
+  catalog_slot: G9-L7
+  drive_file_id: 196dPBy5dKC_QNpCRPwOTs9gOSmtbIs9Y
+  drive_path: 9年級/G9-L7臺灣學生的閱讀力：美麗與哀愁（圖表判讀-折線圖）.docx
 - lesson_uid: L0151
-  title: 不量田
-  catalog_slots:
-  - 文-L3
-  drive_files:
-  - code: 文-L3
-    file_id: 1fDepzmBNKeXCXv1xRCTgyDOTZwtpfAiH
-    path: 文言文/文-L3不量田（判讀主語）.docx
+  title: 盡信書不如無書：從一件殺人案談起
+  catalog_slot: G9-L8
+  drive_file_id: 1xOcu5_DZzO6Ge3FKuU6LsiKE2F0YMuP-
+  drive_path: 9年級/G9-L8盡信書不如無書：從一件殺人案談起（媒體素養與識讀-查核、辨識假新聞）.docx
 - lesson_uid: L0152
-  title: 陸公買硯
-  catalog_slots:
-  - 文-L4
-  drive_files:
-  - code: 文-L4
-    file_id: 1hkfr3pMubl3zQsxg7GpHGydppf8O38mC
-    path: 文言文/文-L4陸公買硯（斷句與判讀主語II）.docx
+  title: 帝國家書：一個普通家庭的生與死
+  catalog_slot: G9-L9
+  drive_file_id: 1yBuh1GqRD6BvprptPNGJcXtPkFIuZLoZ
+  drive_path: 9年級/G9-L9帝國家書：一個普通家庭的生與死（分辨事實與判斷）.docx
 - lesson_uid: L0153
-  title: 重義的荀巨伯
-  catalog_slots:
-  - 文-L5
-  drive_files:
-  - code: 文-L5
-    file_id: 1USvxpKMHaD_Vfn9iw9jVXSPOPv88Fq3_
-    path: 文言文/文-L5重義的荀巨伯（人稱代詞）.docx
+  title: 荒野救亡記
+  catalog_slot: 文-L10
+  drive_file_id: 13xrieaXpJyoIsSLF_Gbgc0MQChulbLAf
+  drive_path: 文言文/文-L10荒野救亡記（固定句式：以--為.）.docx
 - lesson_uid: L0154
-  title: 江乙媽媽告御狀
-  catalog_slots:
-  - 文-L6
-  drive_files:
-  - code: 文-L6
-    file_id: 1EYKhA2DCjMU_JdDphXg10n9Ct2vlluMF
-    path: 文言文/文-L6江乙媽媽告御狀（指示與疑問代詞）.docx
+  title: 祁黃羊的思路解密(疑問助詞)
+  catalog_slot: 文-L11
+  drive_file_id: 1t8NcdcyJ790UvL3EfYoCgIaTVyOZQmCg
+  drive_path: 文言文/文-L11祁黃羊的思路解密(疑問助詞).docx
 - lesson_uid: L0155
-  title: 相隔千里的約定
-  catalog_slots:
-  - 文-L7
-  drive_files:
-  - code: 文-L7
-    file_id: 1PM-fM8JpJx6x0oJpoOqSTQGN7jcRGhXc
-    path: 文言文/文-L7相隔千里的約定（判斷句）.docx
+  title: -不流血的戰爭
+  catalog_slot: 文-L12
+  drive_file_id: 1HPwyo-Huz-IOjBAdxUZErsBYKvU8zABg
+  drive_path: 文言文/文-L12-不流血的戰爭.docx
 - lesson_uid: L0156
-  title: 愛讀書的顧寧人
-  catalog_slots:
-  - 文-L8
-  drive_files:
-  - code: 文-L8
-    file_id: 10ZBMGp0ZUlsN1qDSVpuknmPsf4bJYHLz
-    path: 文言文/文-L8愛讀書的顧寧人（一字多義「少」）.docx
+  title: 假新聞？鞭虎救弟記
+  catalog_slot: 文-L1
+  drive_file_id: 1t8-vEz-JIcpYLGRopNN7iufAsHR2g5EB
+  drive_path: 文言文/文-L1假新聞？鞭虎救弟記（媒體素養與識讀-善用網路資源找證據）.docx
 - lesson_uid: L0157
-  title: 從天才跌為凡人的神童
-  catalog_slots:
-  - 文-L9
-  drive_files:
-  - code: 文-L9
-    file_id: 1G_YU4kqR1JsjuPSiRYx_QV_XcgQyXmKt
-    path: 文言文/文-L9從天才跌為凡人的神童（一字多義「聞」）.docx
+  title: 文言文怎麼讀？以鞭虎救弟記為例
+  catalog_slot: 文-L2
+  drive_file_id: 1Rzz-C6gsP34ye_me-WPFuD0MEAOrD4u-
+  drive_path: 文言文/文-L2文言文怎麼讀？以鞭虎救弟記為例（文言文閱讀策略-如何讀懂文言文）.docx
 - lesson_uid: L0158
-  title: 信任_下一球，我相信你
-  catalog_slots:
-  - 體-L10
-  drive_files:
-  - code: 體-L10
-    file_id: 1_4qgaDBn799kTkCHqSpNPg75ECRqqbtb
-    path: 體育生品格教育/體-L10信任_下一球，我相信你（品格力-合作中的信任：溝通與調整）.docx
+  title: 不量田
+  catalog_slot: 文-L3
+  drive_file_id: 1fDepzmBNKeXCXv1xRCTgyDOTZwtpfAiH
+  drive_path: 文言文/文-L3不量田（判讀主語）.docx
 - lesson_uid: L0159
-  title: 信任_因為相信，所以能向前
-  catalog_slots:
-  - 體-L11
-  drive_files:
-  - code: 體-L11
-    file_id: 1NnbBVKmP5CkXqCpQ0UsZSlMGnVnkSqY8
-    path: 體育生品格教育/體-L11信任_因為相信，所以能向前（品格力-成為值得信任的夥伴）.docx
+  title: 陸公買硯
+  catalog_slot: 文-L4
+  drive_file_id: 1hkfr3pMubl3zQsxg7GpHGydppf8O38mC
+  drive_path: 文言文/文-L4陸公買硯（斷句與判讀主語II）.docx
 - lesson_uid: L0160
-  title: 心，也要一起練
-  catalog_slots:
-  - 體-L1
-  drive_files:
-  - code: 體-L1
-    file_id: 1cHrwbQGdQ9VJsup0GcwwP_oLww8PCaDN
-    path: 體育生品格教育/體-L1心，也要一起練（品格力-自我覺察）.docx
+  title: 重義的荀巨伯
+  catalog_slot: 文-L5
+  drive_file_id: 1USvxpKMHaD_Vfn9iw9jVXSPOPv88Fq3_
+  drive_path: 文言文/文-L5重義的荀巨伯（人稱代詞）.docx
 - lesson_uid: L0161
-  title: 成為身體的最佳夥伴
-  catalog_slots:
-  - 體-L2
-  drive_files:
-  - code: 體-L2
-    file_id: 1w7pIRPmCC0mQtA4FXOlVKrd_ulFpJWMx
-    path: 體育生品格教育/體-L2成為身體的最佳夥伴（品格力-身體覺察與照護）.docx
+  title: 江乙媽媽告御狀
+  catalog_slot: 文-L6
+  drive_file_id: 1EYKhA2DCjMU_JdDphXg10n9Ct2vlluMF
+  drive_path: 文言文/文-L6江乙媽媽告御狀（指示與疑問代詞）.docx
 - lesson_uid: L0162
-  title: 身體，謝謝你
-  catalog_slots:
-  - 體-L3
-  drive_files:
-  - code: 體-L3
-    file_id: 1wdB_dBgCPPVVhdyUXEjyiPZNVGTjG84N
-    path: 體育生品格教育/體-L3身體，謝謝你（品格力-身體覺察與照護）.docx
+  title: 相隔千里的約定
+  catalog_slot: 文-L7
+  drive_file_id: 1PM-fM8JpJx6x0oJpoOqSTQGN7jcRGhXc
+  drive_path: 文言文/文-L7相隔千里的約定（判斷句）.docx
 - lesson_uid: L0163
-  title: 專注當下：關掉內心的批評噪音
-  catalog_slots:
-  - 體-L4
-  drive_files:
-  - code: 體-L4
-    file_id: 1bURxZ99s_3Vdwpm-ook4rX1PE6lHALap
-    path: 體育生品格教育/體-L4專注當下：關掉內心的批評噪音（品格力-念頭覺察）.docx
+  title: 愛讀書的顧寧人
+  catalog_slot: 文-L8
+  drive_file_id: 10ZBMGp0ZUlsN1qDSVpuknmPsf4bJYHLz
+  drive_path: 文言文/文-L8愛讀書的顧寧人（一字多義「少」）.docx
 - lesson_uid: L0164
-  title: 從白熊到藍海豚：學習與念頭和平相處
-  catalog_slots:
-  - 體-L5
-  drive_files:
-  - code: 體-L5
-    file_id: 13PzV181OISBLZPnG7BTdGOZY7vIpFyQS
-    path: 體育生品格教育/體-L5從白熊到藍海豚：學習與念頭和平相處（品格力-念頭覺察）.docx
+  title: 從天才跌為凡人的神童
+  catalog_slot: 文-L9
+  drive_file_id: 1G_YU4kqR1JsjuPSiRYx_QV_XcgQyXmKt
+  drive_path: 文言文/文-L9從天才跌為凡人的神童（一字多義「聞」）.docx
 - lesson_uid: L0165
-  title: 不是想太多，只是好在乎
-  catalog_slots:
-  - 體-L6
-  drive_files:
-  - code: 體-L6
-    file_id: 1rugmC7LOSkY0OuqDs-2X2t6dM6aT4Iji
-    path: 體育生品格教育/體-L6不是想太多，只是好在乎（品格力-特質的多元樣貌）.docx
+  title: 信任_下一球，我相信你
+  catalog_slot: 體-L10
+  drive_file_id: 1_4qgaDBn799kTkCHqSpNPg75ECRqqbtb
+  drive_path: 體育生品格教育/體-L10信任_下一球，我相信你（品格力-合作中的信任：溝通與調整）.docx
 - lesson_uid: L0166
-  title: 讓「想很多」助你一臂之力
-  catalog_slots:
-  - 體-L7
-  drive_files:
-  - code: 體-L7
-    file_id: 1HP1PEwr3I2F-nXoeiYsse61QVh3F5VSd
-    path: 體育生品格教育/體-L7讓「想很多」助你一臂之力（品格力-把焦慮化為助力）.docx
+  title: 信任_因為相信，所以能向前
+  catalog_slot: 體-L11
+  drive_file_id: 1NnbBVKmP5CkXqCpQ0UsZSlMGnVnkSqY8
+  drive_path: 體育生品格教育/體-L11信任_因為相信，所以能向前（品格力-成為值得信任的夥伴）.docx
 - lesson_uid: L0167
-  title: 面對「失敗」不只有一種可能
-  catalog_slots:
-  - 體-L8
-  drive_files:
-  - code: 體-L8
-    file_id: 1kLo6qG9i8zep5YVB_nzu_lhvetmPkFxp
-    path: 體育生品格教育/體-L8面對「失敗」不只有一種可能（品格力-面對失敗）.docx
+  title: 心，也要一起練
+  catalog_slot: 體-L1
+  drive_file_id: 1cHrwbQGdQ9VJsup0GcwwP_oLww8PCaDN
+  drive_path: 體育生品格教育/體-L1心，也要一起練（品格力-自我覺察）.docx
 - lesson_uid: L0168
+  title: 成為身體的最佳夥伴
+  catalog_slot: 體-L2
+  drive_file_id: 1w7pIRPmCC0mQtA4FXOlVKrd_ulFpJWMx
+  drive_path: 體育生品格教育/體-L2成為身體的最佳夥伴（品格力-身體覺察與照護）.docx
+- lesson_uid: L0169
+  title: 身體，謝謝你
+  catalog_slot: 體-L3
+  drive_file_id: 1wdB_dBgCPPVVhdyUXEjyiPZNVGTjG84N
+  drive_path: 體育生品格教育/體-L3身體，謝謝你（品格力-身體覺察與照護）.docx
+- lesson_uid: L0170
+  title: 專注當下：關掉內心的批評噪音
+  catalog_slot: 體-L4
+  drive_file_id: 1bURxZ99s_3Vdwpm-ook4rX1PE6lHALap
+  drive_path: 體育生品格教育/體-L4專注當下：關掉內心的批評噪音（品格力-念頭覺察）.docx
+- lesson_uid: L0171
+  title: 從白熊到藍海豚：學習與念頭和平相處
+  catalog_slot: 體-L5
+  drive_file_id: 13PzV181OISBLZPnG7BTdGOZY7vIpFyQS
+  drive_path: 體育生品格教育/體-L5從白熊到藍海豚：學習與念頭和平相處（品格力-念頭覺察）.docx
+- lesson_uid: L0172
+  title: 不是想太多，只是好在乎
+  catalog_slot: 體-L6
+  drive_file_id: 1rugmC7LOSkY0OuqDs-2X2t6dM6aT4Iji
+  drive_path: 體育生品格教育/體-L6不是想太多，只是好在乎（品格力-特質的多元樣貌）.docx
+- lesson_uid: L0173
+  title: 讓「想很多」助你一臂之力
+  catalog_slot: 體-L7
+  drive_file_id: 1HP1PEwr3I2F-nXoeiYsse61QVh3F5VSd
+  drive_path: 體育生品格教育/體-L7讓「想很多」助你一臂之力（品格力-把焦慮化為助力）.docx
+- lesson_uid: L0174
+  title: 面對「失敗」不只有一種可能
+  catalog_slot: 體-L8
+  drive_file_id: 1kLo6qG9i8zep5YVB_nzu_lhvetmPkFxp
+  drive_path: 體育生品格教育/體-L8面對「失敗」不只有一種可能（品格力-面對失敗）.docx
+- lesson_uid: L0175
   title: 成長型思維 翻轉失敗的關鍵
-  catalog_slots:
-  - 體-L9
-  drive_files:
-  - code: 體-L9
-    file_id: 1_U0aNlpIGVAbNDoIcG8kFDxSwRcjkbm8
-    path: 體育生品格教育/體-L9成長型思維 翻轉失敗的關鍵（品格力-成長型思維）.docx
+  catalog_slot: 體-L9
+  drive_file_id: 1_U0aNlpIGVAbNDoIcG8kFDxSwRcjkbm8
+  drive_path: 體育生品格教育/體-L9成長型思維 翻轉失敗的關鍵（品格力-成長型思維）.docx
 retired:
 - story_id: 1
   code: G4-L01
