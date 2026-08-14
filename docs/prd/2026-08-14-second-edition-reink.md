@@ -118,6 +118,10 @@ backend/data/catalog_manifest.yml     # catalog_slot → uid + version + 各模�
 `catalog_manifest.yml` 同時承擔 **partial publish** —— 一課可能課文已上、
 聚光燈未過 QA、講義待補，要能逐模組標狀態，不是整課全開或全關。
 
+**schema contract（fail-closed）**：合法狀態只有 `on` / `qa_pending` / `missing` / `off`。
+**只有 `on` 會被 loader 供應**；`qa_pending` 與 `missing` 一律當關閉，
+未知值也當關閉。⛔ 不可把 `qa_pending` 當 `on` 處理。
+
 `lesson.yml`：
 
 ```yaml
@@ -130,10 +134,15 @@ grade: 5                   # 屬性，可變
 `catalog_manifest.yml`：
 
 ```yaml
+lessons:
+  L0042:
+    published_version: v2  # 🔴 目前預設出哪版，切換與回退改這裡
+    versions: [v1, v2]
+
 published:
   G5-L11:                  # catalog_slot（每次重排都變）
     lesson_uid: L0042
-    version_id: v2
+    version_id: v2         # 通常 == published_version，可刻意釘舊版
     modules:               # partial publish — 逐模組狀態
       passage:    on
       spotlight:  qa_pending
@@ -241,40 +250,78 @@ published:
 - [x] Drive SOT 就位，175 課
 - [x] 實習生 GCS 讀取權限開通
 
-### Phase 1 — 發 uid + 建對照表
-產出 `docs/curriculum/lesson-uid-registry.yml`：
-每課一個 `lesson_uid`，記錄 `舊 story_id / 舊課號 / 二修課號 / 課名 / Drive 路徑`。
+### Phase 1 — 發 uid + 建對照表 + **Mapping Gate**
 
-**驗收**：175 課全部有 uid；線上 165 課逐筆對到 uid 或標 `retire`；
-uid 無重複、無重用。
+產出 `docs/curriculum/lesson-uid-registry.yml`。
 
-### Phase 2 — 改載入層，單層化
-- 廢除 Layer-1/Layer-2 合併與課名 enrich
-- loader 改讀 `<lesson_uid>/` 單層
-- 舊的 57 個 `L*.yml` 退役
+#### 🔴 Mapping Gate（可機器驗，CI 擋）
 
-**驗收**：容器內 loader 讀得到；撞鍵組數 = **0**（現在是 13）。
+「逐筆人工確認」**不是 gate** —— 175 課做不完，而且無法驗證有沒有真的看過。
+改成下列機器檢查，任一不過就 fail：
 
-### Phase 3 — 抽取 5 課試跑
+| # | 檢查 | 為什麼 |
+|---|---|---|
+| 1 | `lesson_uid` 全域唯一、格式固定、**永不重用**（比對歷史 registry） | 重用＝把兩課混成一課 |
+| 2 | 175 個 Drive 檔各有且僅有一筆 registry | 漏課 / 重複建 |
+| 3 | registry 存 **`drive_file_id`**（不是只有路徑） | 路徑會改名，file_id 不會 |
+| 4 | 每筆舊 `story_id` **exactly one of** `maps_to` / `retire` / `duplicate_of` | 沒對到或對兩次都會爆 |
+| 5 | 同一個 `old_story_id` **不可對多個 uid** | 學生紀錄會分裂 |
+| 6 | 同一個 `catalog_slot` **不可對多個 published uid+version** | 同一課號指到兩課 |
+| 7 | 課名／課號／normalized title／grade／舊正文 hash／新 DOCX fingerprint **任一不一致** → 自動進 `ambiguous_report` | 自動抓出需人工看的少數 |
+| 8 | 所有 ambiguous row 必須有 `reviewed_by` / `reviewed_at` / `reason` | 人工確認要留痕，CI 檢查 |
+
+**人工只看第 7 條篩出來的少數，不是 175 課全看。**
+
+**驗收**：上表 8 條全綠；撞鍵組數 = 0（現在 13，26 筆重複課須合併成單一 uid）。
+
+### Phase 2 — 抽取 5 課到新結構（先產生結構，還不動 loader）
 `run_lesson_pipeline.py` 已實測可吃二修 DOCX（72 課 `build_ok` 72/72），
-但**輸出路徑是寫死的扁平結構**（`{lesson_id}.spotlight.yml`）→ 要改成寫進 `<uid>/`。
+但 `process_lesson()` **輸出路徑是寫死的扁平結構**（`{lesson_id}.spotlight.yml`）
+→ 改成寫進 `<lesson_uid>/<version_id>/`。
 
-**驗收**：5 課在容器內能被讀到並吐出 `lesson_content`。
+⚠️ **順序理由**（codex 審查修正）：原本排「先改 loader 再抽內容」是錯的 ——
+抽內容才會產生新結構，先改 loader 等於切到一個不存在的目錄。
 
-### Phase 4 — 全量 175 課
-**驗收**：`build_ok` 175/175；失敗逐課列原因，不隱藏。
+**驗收**：5 課的 `<uid>/<version_id>/` 目錄實際產生且結構正確。
 
-### Phase 5 — 落地 staging
-照「三之二 清理清單」逐項執行：repo 內 356 檔 + GCS 902 物件 + DB 課文與學習紀錄，
-寫入新結構、deploy。**清理前先跑反向依賴掃描。**
+### Phase 3 — loader 支援新結構（雙路徑 / feature flag）
+loader **同時**讀舊的兩層與新的 `<uid>/<version_id>/`，用 flag 控制哪些課走新路徑。
+先只讓 Phase 2 那 5 課走新路。**此時不移除舊路徑。**
 
-**驗收**：staging 抽 10 課真瀏覽器走完流程、0 console error。
+**驗收**：容器內那 5 課走新路徑讀得到並吐出 `lesson_content`；其餘 165 課行為不變。
 
-### Phase 6 — 朗讀 TTS
-**`tts-cache` 不清**，未改動的句子直接命中。
+### Phase 4 — 全量抽取 175 課
+**驗收**：`build_ok` 175/175；失敗逐課列原因，不隱藏、不 fake pass。
+
+### Phase 5 — 切單層化，移除 Layer-1/Layer-2
+- 廢除兩層合併與課名 enrich
+- 舊的 57 個 `L*.yml` 退役
+- 移除雙路徑，只留新結構
+
+**驗收**：容器內 loader 讀得到；**撞鍵組數 = 0**（現在 13）。
+
+### Phase 6 — 🔴 清理舊資料（不可逆）+ 落地 staging
+照「三之二 清理清單」執行：repo 356 檔 + GCS 902 物件 + DB 課文與學習紀錄。
+
+**⛔ 每一個刪除動作執行前必須具備四件，缺一不得執行**：
+
+| | |
+|---|---|
+| **backup artifact** | 刪除對象的完整備份（GCS 用 `cp` 到 `_backup-<date>/`，repo 靠 git，DB 用 dump） |
+| **dry-run manifest** | 先列出「將要刪哪些」的清單檔，人看過才執行 |
+| **object count match** | 刪除後的數量 == 預期數量，不符就停 |
+| **restore plan** | 寫下「怎麼還原」的確切指令 |
+
+**清理前先跑反向依賴掃描**（`_ai_lessons` 2 處、`_reparsed_2026-05-02` 4 處引用）。
+
+**驗收**：staging 抽 10 課真瀏覽器走完流程、0 console error；
+`tts-cache/azure/` 物件數未減少。
+
+### Phase 7 — 朗讀 TTS
+**`tts-cache/azure/` 不清**，未改動的句子直接命中。
 **驗收**：抽 10 課有音檔且非瀏覽器機器音（回應約 177–197KB）。
 
-### Phase 7 — QA 逐批點亮 → prod
+### Phase 8 — QA 逐批點亮 → prod
 啟翔（聚光燈）、靖杭（重點表/朗讀）。用 manifest 控制，驗過一批開一批。
 
 ---
@@ -284,7 +331,7 @@ uid 無重複、無重用。
 | 風險 | 處置 |
 |---|---|
 | 🔴 **舊 `lesson_id` → 新 `uid/version` 的對照回填** | **最危險的一步，不是搬檔案。** 公開 URL、slug normalization、學習紀錄、OMO、TTS 都已把 integer `lesson_id` 當成事實（`lesson_loader.py:97`、`slug.py:73`、`stories.py:436`、`learning_reading_history.py:92`）。mapping 錯一筆，**API 照樣 200**，但學生紀錄、QR、音檔會接到錯課 —— 資料忠實度錯，一般測試抓不到。→ 對照表逐筆人工確認 + 寫回歸鎖 |
-| 🔴 **學習紀錄沒有版本欄位** | `learning_reading_history.py:92` 只存 `lesson_id`，查詢也只用 `student_id + lesson_id`（:135）。二修後舊紀錄會被新課文語意覆蓋，成績比較失真。→ 存紀錄時要一併寫入 `version_id` |
+| 🔴 **學習紀錄沒有版本欄位** | `learning_reading_history.py:92` 只存 `lesson_id`，查詢也只用 `student_id + lesson_id`（:135）。二修後舊紀錄會被新課文語意覆蓋，成績比較失真。→ 存紀錄時要一併寫入 **`lesson_uid` + `version_id`**（只寫 version_id 無法識別是哪一課） |
 | **Phase 2 改載入層是全域影響** | 先在容器內驗，staging 先行，prod 不動 |
 | **uid 不可自行推導** | 必須由 registry 分配。若有人從檔名生 uid，就又回到「檔名即身份」的老錯 |
 | pipeline 輸出格式要改 code | 已確認 `process_lesson()` 寫死扁平路徑，Phase 3 含這項改動 |
@@ -305,7 +352,7 @@ uid 無重複、無重用。
 5. 講義下載指向二修版，或**明確關閉**（學生版未就位前不得指向一修）
 6. 聚光燈/重點表：過 QA 的已點亮，未過的已隱藏且列冊
 7. `tts-cache` 未被清空
-8. **學習紀錄寫入時帶 `version_id`**
+8. **學習紀錄寫入時帶 `lesson_uid` + `version_id`**（只帶 version_id 沒意義 —— 每課都叫 `v2`）
 
 ---
 
