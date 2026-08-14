@@ -201,9 +201,12 @@ def _get_adapter():
     same public entrypoints the eval + dry-run runner use. Cached module-level."""
     global _adapter
     if _adapter is None:
-        if str(_SCRIPTS_DIR) not in sys.path:
-            sys.path.insert(0, str(_SCRIPTS_DIR))
-        import spotlight_to_lesson_content as adapter  # noqa: E402
+        # #2680: import from the app package. It previously lived under scripts/ and
+        # was pulled in via a sys.path trick — but backend/Dockerfile never COPYs
+        # scripts/ (nor can it: the build context is ./backend and scripts/ is one
+        # level up), so in the container this raised ModuleNotFoundError and the
+        # fail-closed path returned null lesson_content for every spotlight lesson.
+        from app.services import spotlight_to_lesson_content as adapter
 
         _adapter = adapter
     return _adapter
