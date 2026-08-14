@@ -9,6 +9,11 @@
 
 **用途**：自動查詢本週 PR/issue 數據，產出 4 份文件（議程 + 貢獻紀錄 + 靖杭 JSON + 啟翔 JSON），開 PR 到 staging，等 Young admin merge
 
+> ⚠️ **議程「內容怎麼想」不在這裡** —— 先走 global skill **`meeting-agenda-design`**
+> （議程是為決策不是傳達狀態、四欄議題骨架、單向門 vs 雙向門、上次 action items 閉環、
+> 長度上限與五題自檢），再回來照本 skill 的機械流程落檔開 PR。
+> 本 skill 只管「更新哪些檔、開哪個 PR、跑哪個腳本」，兩者疊加使用。
+
 **參考 PR**：#1483（merged 2026-05-07）是這個 skill 第一次跑的完整範例
 
 ---
@@ -325,30 +330,34 @@ cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 - 不要 bump 到 maxLevel 以上
 - 不要根據 PR title 猜技術難度，要看 diff 規模 + review 輪數
 
-**skill ID 對應技能**（raymond.json 有 1~18+，xiung.json 結構類似）：
+**skill ID 對應技能** —— ⚠️ **SOT 是 `frontend/public/intern-training/dashboard.html`**（`id:N, tier:.., name:".."`），
+不是這張表。下表是 2026-08-14 從該檔抄出的快照，**動 JSON 前先回去對一次**：
 
-| ID | 技能 |
-|----|------|
-| 1  | Git 操作 |
-| 2  | HTML 語意 |
-| 3  | JS 基礎 |
-| 4  | 本地開發環境 |
-| 5  | React 元件閱讀 |
-| 6  | React 元件開發 |
-| 7  | TypeScript |
-| 8  | State management |
-| 9  | API 串接 |
-| 10 | CSS / Tailwind |
-| 11 | useEffect / useRef / hooks |
-| 12 | 測試撰寫 |
-| 13 | Code review 回應 |
-| 14 | 問題拆解能力 |
-| 15 | 溝通能力 |
-| 16 | DB schema 理解 |
-| 17 | 後端 Python 閱讀 |
-| 18 | 後端 API 設計 |
+```bash
+grep -noE 'id:[0-9]+, tier:[0-9], icon:"[^"]*", name:"[^"]*"' \
+  frontend/public/intern-training/dashboard.html
+```
 
-新增 skill ID（需要時）：在 `skills` object 新增對應 key，初始 level 1。
+| ID | 技能 | tier | | ID | 技能 | tier |
+|----|------|------|---|----|------|------|
+| 1  | Git 基礎 | 1 | | 10 | Bug 修復 | 2 |
+| 2  | HTML/CSS 基礎 | 1 | | 11 | React 進階 | 3 |
+| 3  | JavaScript 基礎 | 1 | | 12 | API 串接 | 3 |
+| 4  | 開發環境 | 1 | | 13 | 元件設計模式 | 3 |
+| 5  | 讀懂現有程式碼 | 1 | | 14 | 測試 | 3 |
+| 6  | React 元件開發 | 2 | | 15 | Code Review | 3 |
+| 7  | TypeScript | 2 | | 16 | 獨立開發功能 | 4 |
+| 8  | Tailwind CSS | 2 | | 17 | 效能優化 | 4 |
+| 9  | Git 工作流 | 2 | | 18 | 架構理解 | 4 |
+
+> 🔴 **2026-08-14 修正**：本表原本從 ID 5 起全部錯位（原寫 9=API 串接、12=測試撰寫、
+> 17=後端 Python 閱讀、18=後端 API 設計，實際是 9=Git 工作流、12=API 串接、
+> 14=測試、17=效能優化、18=架構理解）。照舊表更新會把評語寫到**錯的技能**上。
+> 兩份 JSON 都沒有 name 欄位，光看 JSON 看不出錯 —— 必須回 dashboard.html 對。
+
+新增 skill ID（需要時）：在 `skills` object 新增對應 key。預設初始 level 1，
+但若該技能是**首次評定**而非從零起步（例如 intern 本來就會、只是先前沒被評過），
+可依證據直接定在對應 level，並在 history reason 寫明「首次評定，非 bump」。
 
 ---
 
