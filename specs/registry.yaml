@@ -635,6 +635,8 @@ modules:
   - backend/app/services/spotlight_pse_parser.py
   - scripts/build_lesson_schema.py
   - frontend/src/components/reading-spotlight/
+  owns_data:
+  - backend/data/lessons/spotlight/**
   spec_tests:
   - backend/specs/test_spotlight_block_model_spec.py
   - backend/specs/test_spotlight_v2_spec.py
