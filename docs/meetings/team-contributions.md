@@ -8,6 +8,28 @@
 
 ---
 
+## 8/10 ~ 8/14
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #2662~#2666 段落合成 + Azure 穩定性 (#2627) | 段落一次合成修語調、預抓改整段、句間停頓 889→350ms、Azure 中斷改重試、IncompleteRead 根因是 urllib 改用 requests（12%→0%） |
+| Young | ✅ | PR #2667 `__init__` 重複定義遮蔽 Azure 實作 (#2627) | 前一晚對 `providers/azure.py` 的修改執行期全部沒生效，測試卻全綠；同型的六個遮蔽 helper 一併收進 `cache.py`（#2669） |
+| Young | ✅ | PR #2660 #2661 #2658 段落 QR + 多音字 (#2649) | QR 掃進去不再撞登入牆；「和」讀 ㄏㄢˋ；「摸不著」查證後確認無解，誠實標記不硬修 |
+| Young | ✅ | PR #2668 kiro 複審三項缺陷 (#2649) | L1 快取 provider 隔離、和連接詞假陽性、verify_lesson_audio 自身缺陷 |
+| Young | ✅ | PR #2657 staging → main release | Hans 回報兩件事 + step 命名對齊 + 全文朗讀播放器上 prod |
+| 啟翔 | ✅ | PR #2673 二修抽取 pilot 報告 (#2561) | 成對 DOCX A/B 證明 pipeline 吃得下二修教材；自行列出一個抽取器迴歸缺陷，未為了讓 diff 好看而調整抽取器 |
+| 啟翔 | ✅ | PR #2674 per-lesson gate + known_gap 矛盾修正 (#2561) | 解掉 gate 與 ship-gate 互相矛盾造成 PASS 不可達的 blocker；附 5 條回歸鎖，precedence 經 mutation 驗證 |
+| 啟翔 | ✅ | PR #2675 二修課號校正清單 (#2561) | 178 筆待簽核異動的唯讀比對工具；未動 manifest 與 story_id |
+| 靖杭 | ⏳ | 本週無 PR | 最後一次 merge 為 8/03 #2589，至今 11 天；名下 18 張 open issue 待收斂 |
+
+> 附帶效果：啟翔三個 PR 夾帶的 `npm audit fix` 把 **#2582（Security Audit 從 7/21 紅到今天）** 解掉了，
+> gate 恢復綠。
+> 本週最大教訓是 #2667 —— `import` 後同檔案再 `def` 同名函式會**靜默覆蓋**，測試若也從原模組匯入會一起綠，
+> 整晚的修改在執行期一行都沒跑。
+> 議程 → `docs/meetings/2026-08-14-agenda.md`
+
+---
+
 ## 8/3 ~ 8/7
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
