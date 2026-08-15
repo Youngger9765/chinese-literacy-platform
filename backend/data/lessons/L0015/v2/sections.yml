@@ -74,19 +74,23 @@ comprehension:
     answer: A
     stem: 第一段陳彥博為亞洲創下了什麼成就？
     options:
-      A: 勇奪四大極地超級馬拉松巡迴賽總冠軍（第一段）
+      A: 勇奪四大極地超級馬拉松巡迴賽總冠軍
       B: 醫生告知他得了咽喉癌，但他成功復原
       C: 高中時即為田徑長跑選手，有亮眼成績
       D: 他克服家人與醫生的勸說，不放棄夢想
     rationale: null
+    source_paragraphs:
+      A: 第一段
   - index: 2
     answer: B
     stem: 第三段陳彥博意外的遇到一段「插曲」，根據後文這裡的「插曲」指的是什麼事件？
     options:
-      B: 醫生告知他得癌症（第四段）
+      B: 醫生告知他得癌症
       C: 害怕麻醉後醒不來
       D: 肌肉強度都不見了
     rationale: 第二段，這場比賽帶給他的感動無可言喻。
+    source_paragraphs:
+      B: 第四段
   - index: 3
     answer: A
     stem: 為什麼陳彥博說磁北極六百五十公里極限馬拉松是他的夢想起點？
@@ -101,19 +105,23 @@ comprehension:
     stem: 第六段說陳彥博『超越自己的極限』，下列哪一項最能說明這句話的意思？
     options:
       A: 跑出極地馬拉松的世界紀錄
-      B: 克服癌症，完成自己的夢想（第四段及第六段）
+      B: 克服癌症，完成自己的夢想
       C: 磁北極極限馬松獲得第三名
       D: 他成功登上喜馬拉雅的高山
     rationale: null
+    source_paragraphs:
+      B: 第四段及第六段
   - index: 5
     answer: C
     stem: 根據本文，哪一項最能表現陳彥博的精神？
     options:
       A: 充滿智慧，眼光長遠
       B: 寬宏大量，有容乃大
-      C: 不屈不撓，永不放棄（第六段）
+      C: 不屈不撓，永不放棄
       D: 身體強壯，精力過人
     rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    source_paragraphs:
+      C: 第六段
   extraction_check:
     answers_without_option: []
     questions_with_few_options: []

@@ -86,8 +86,10 @@ comprehension:
       A: 來回擺動
       B: 左右兩邊
       C: 暗中影響著
-      D: 分成兩部分（此處「左右」是動詞，指「影響、牽動」）
+      D: 分成兩部分
     rationale: null
+    marker_notes:
+      D: 此處「左右」是動詞，指「影響、牽動」
   - index: 2
     answer: A
     stem: 作者舉「網紅艾絲娜」與「11歲瑟琳娜」的例子，最主要要說明什麼？

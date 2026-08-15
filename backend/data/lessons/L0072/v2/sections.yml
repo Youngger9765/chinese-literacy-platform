@@ -70,7 +70,7 @@ comprehension:
   extraction_check:
     answers_without_option: []
     questions_with_few_options: []
-    questions_grounded_in_body: 0.4
+    questions_grounded_in_body: 1.0
     answers_recovered_from_rationale: 0
     verdict: ok
 resources:
