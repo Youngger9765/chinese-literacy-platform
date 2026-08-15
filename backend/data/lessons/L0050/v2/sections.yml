@@ -1,0 +1,136 @@
+lesson_uid: L0050
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 股票
+    definition: 代表投資一家公司、擁有公司一部分的證明。股票可以買賣，可能賺錢，也可能虧損。
+  - index: 2
+    word: 利潤
+    definition: 收入扣掉成本後，真正賺到的錢。
+  - index: 3
+    word: 股東
+    definition: 擁有公司股票的人。公司獲利時，股東可以分到部分利潤。
+  - index: 4
+    word: 滿手老繭
+    definition: 形容經常做粗重工作，手上長滿又厚又硬的皮。
+  - index: 5
+    word: 獲利
+    definition: 賺到錢。
+  - index: 6
+    word: 集資
+    definition: 為完成某事，向許多人一起籌錢。
+  - index: 7
+    word: 大手一揮
+    definition: 形容人很有氣勢、很爽快的作出決定。
+  - index: 8
+    word: 揚帆啟航
+    definition: 原指升起船帆開始航行；也比喻開始新的旅程、計畫或人生階段。
+  - index: 9
+    word: 節衣縮食
+    definition: 形容生活非常節省。
+  - index: 10
+    word: 派遣
+    definition: 指派某人到某地工作或執行任務。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 揚帆啟航
+    B: 股票
+    C: 節衣縮食
+    D: 滿手老繭
+    E: 集資
+    F: 獲利
+    G: 股東
+    H: 大手一揮
+    I: 派遣
+  questions:
+  - index: 1
+    text: 公司今年（　）大增，決定發放員工獎金。
+    answer: F
+  - index: 2
+    text: 大學畢業後，他準備（　），展開新的生活。
+    answer: A
+  - index: 3
+    text: 農夫長年在田裡工作，雙手早已（　）。
+    answer: D
+  - index: 4
+    text: 我們想（　）開一家飲料店，大家各出一點錢吧。
+    answer: E
+  - index: 5
+    text: 公司（　）他到海外受訓。
+    answer: I
+  - index: 6
+    text: 雖然家裡經濟不寬裕，爸媽仍靠著（　），努力供我念書。
+    answer: C
+  - index: 7
+    text: 富有的企業家（　），當場答應贊助全校一年的午餐費用。
+    answer: H
+  - index: 8
+    text: 他每天關注（　）市場的變化，希望找到投資機會。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列句子中，哪一個語詞使用是錯誤的？
+    options:
+      A: 為了存錢買電腦，每天「節衣縮食」，連飲料都不買
+      C: 公司決定「派遣」專家前往災區，協助災後重建
+      D: 學校「集資」了三位同學代表參加全國比賽，大家都很期待
+    rationale: 「集資」的意思是大家出錢，D應該是「派遣」或「推選」
+  - index: 2
+    answer: D
+    stem: 文中說「四百多年前，要展開一場長途遠洋探險可不容易」，下列哪一項不是造成當時遠航困難的原因？
+    options:
+      A: 需要造船和準備大量糧食
+      B: 船員可能遭遇疾病或受傷
+      C: 航行中要應付壞天氣和海盜
+      D: 香料價格太低無法回本
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 本文提到「瑪莉、達安和奧倫治這三個背景不同的人都成為股東」，作者舉這個例子最主要是想說明股票制度的什麼特點？
+    options:
+      B: 股東的股票下跌，公司無法付出股利
+      C: 公司要賠錢給每一位投資的股東
+      D: 公司會先欠著股東錢，等賺錢了再還
+      A: 公司仍然會發放給股東18%的股利
+    rationale: 文中說明股票發明後連平民百姓都可以參與投資了。
+  - index: 5
+    answer: C
+    stem: 這篇課文主要在介紹什麼？
+    options:
+      A: 瑪莉如何利用股票投資賺了一大筆錢
+      B: 十七世紀航海探險的種種危險與高昂成本
+      C: 股票制度的起源以及所帶來的影響
+      D: 荷蘭人在臺灣建立殖民地的歷史經過
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 什麼是股票？ 股票的歷史
+    duration_seconds: 311
+    source: 阿翔投資
+  - index: 2
+    title: 大航海時代#7-縱橫兩百年的商業巨獸-荷蘭東印度公司 有史以來最大的公司
+    duration_seconds: 445
+    source: Cheap
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

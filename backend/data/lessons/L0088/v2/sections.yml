@@ -1,0 +1,50 @@
+lesson_uid: L0088
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 塑膠微粒
+    definition: 塑膠製品碎裂後形成的微小的塑膠碎片，可進入河川、海洋與生物體內。
+  - index: 2
+    word: 功敗垂成
+    definition: 事情快成功了，卻在最後一刻失敗。
+  - index: 3
+    word: 自行其是
+    definition: 不聽別人的意見，只照自己的想法做事。
+  - index: 4
+    word: 簽署
+    definition: 在正式文件上簽名，使協議或公文生效。
+  - index: 5
+    word: 闕如
+    definition: 缺少、不足。
+  - index: 6
+    word: 杯水車薪
+    definition: 力量太小，像用一杯水去救一車著火的柴薪，難以解決大問題。
+  - index: 7
+    word: 無遠弗屆
+    definition: 沒有到不了的地方。指的是影響或力量傳得很遠。
+  - index: 8
+    word: 倡議者
+    definition: 為了公共議題發聲、提出做法並帶頭推動的人。
+  - index: 9
+    word: 有增無減
+    definition: 只有增加，沒有減少。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 一分鐘快速了解《國際塑膠公約》（綠色和平）
+    duration_seconds: 96
+    source: 綠色和平
+  - index: 2
+    title: 別讓塑膠吃了你！我的減塑之道（行政院環保署）
+    duration_seconds: 157
+    source: 大苑子dayungs official
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

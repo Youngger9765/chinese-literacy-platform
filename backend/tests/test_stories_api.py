@@ -104,14 +104,6 @@ class TestGetLessonById:
         assert isinstance(lesson["paragraphs"], list)
         assert len(lesson["paragraphs"]) > 0
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_lesson_1_has_vocabulary(self):
         lesson = get_lesson_by_id(20001)
         assert isinstance(lesson["vocabulary"], list)
@@ -588,28 +580,12 @@ class TestGetStoryDetailEndpoint:
         assert len(data["paragraphs"]) > 0
         assert all(isinstance(p, str) for p in data["paragraphs"])
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_lesson_1_has_vocabulary(self, client):
         resp = client.get("/api/stories/20001")
         data = resp.json()
         assert "vocabulary" in data
         assert isinstance(data["vocabulary"], list)
         assert len(data["vocabulary"]) > 0
-
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
 
     def test_vocabulary_item_has_word_and_definition(self, client):
         resp = client.get("/api/stories/20001")
@@ -662,27 +638,11 @@ class TestGetStoryDetailEndpoint:
         assert data["reading_benchmark"] is not None
         assert "levels" in data["reading_benchmark"]
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_lesson_1_has_fill_in_blank(self, client):
         resp = client.get("/api/stories/20001")
         data = resp.json()
         assert "fill_in_blank" in data
         assert isinstance(data["fill_in_blank"], list)
-
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
 
     def test_lesson_1_has_multiple_choice(self, client):
         resp = client.get("/api/stories/20001")

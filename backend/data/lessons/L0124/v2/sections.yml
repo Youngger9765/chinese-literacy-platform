@@ -1,0 +1,125 @@
+lesson_uid: L0124
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 質地
+    definition: 物品表面的觸感、組織或口感。本文指植物肉吃起來的口感與組織。
+  - index: 2
+    word: 媲美
+    definition: 媲：比得上。通常用於稱讚對方的能力比得上厲害的人。例如：媽媽的廚藝媲美五星級大廚。
+  - index: 3
+    word: 悄然興起
+    definition: 某一事物或現象在大家未察覺的情況下，慢慢興起或發展起來。
+  - index: 4
+    word: 刮目相看
+    definition: 另眼看待，用新的眼光來看待。
+  - index: 5
+    word: 應運而生
+    definition: 順應時勢需求而產生。
+  - index: 6
+    word: 膳食纖維
+    definition: 植物性食物中人體不易消化吸收的成分，可以增加飽足感，幫助腸道蠕動與排便。
+  - index: 7
+    word: 追溯
+    definition: 回想、探究事物發生的原因。溯：逆著、往前或往回。
+  - index: 8
+    word: 蓬勃
+    definition: 茂盛繁榮的樣子。
+  - index: 9
+    word: 屠宰
+    definition: 宰殺牲畜。
+  - index: 10
+    word: 不分軒輊
+    definition: 比喻分不出高下，實力相當。軒，車前高起的部分。輊，車後低下的部分。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 應󠇡運而生
+    B: 媲美
+    C: 不分軒輊
+    D: 蓬勃
+    E: 悄然興起
+    F: 追溯
+    G: 刮目相󠇡看
+    H: 屠宰
+    I: 膳食纖維
+  questions:
+  - index: 1
+    text: 近年來，東部觀光（　）發展，進而提升了當地的就業率。
+    answer: D
+  - index: 2
+    text: 由於國人健康意識抬頭，於是各式各樣的運動中心（　）。
+    answer: A
+  - index: 3
+    text: 媽媽的廚藝和專業大廚（　）。
+    answer: C
+  - index: 4
+    text: 媽媽烹飪的技術足以（　）米其林三星級名廚。
+    answer: B
+  - index: 5
+    text: 這學期他的數學成績突飛猛進，令人（　）。
+    answer: G
+  - index: 6
+    text: 農業部目前推動農糧產品生產履歷，讓消費者在選購時可以（　）產品來源，購買時更加安心。
+    answer: F
+  - index: 7
+    text: 蔬菜、水果和全穀類含有豐富的（　），有助於維持腸道健康。
+    answer: I
+  - index: 8
+    text: 近年來，復古穿搭的風潮在校園裡（　），許多同學開始穿寬褲和毛帽。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，，最強調哪一項改進？
+    options:
+      A: 價錢
+      B: 口感
+      C: 營養
+      D: 成分
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 根據課文，下列何者不是現代植物肉的風行的原因？
+    options:
+      A: 希望藉由介紹植物肉來探討環境保護的議題
+      B: 希望介紹植物肉讓更多人認識並願意考慮嘗試
+      C: 比較兩種肉品的不同，質疑動物肉的必要性
+      D: 教導讀者如何正確的寫出植物肉的介紹文章
+    rationale: 選項A為植物肉風行後的結果，並非風行原因。
+  - index: 5
+    answer: C
+    stem: 下列有關文章觀點與支持理由的配對，何者正確？
+    options:
+      A: 雨林是個祕密的地方，搖曳的篝火令人有無限的遐想
+      B: 雨林是個深沉寧靜的地方，因為有各種新鮮有趣的事物
+      C: 雨林是個危險的地方，因為有很多自然殺手隱藏其中
+      D: 雨林是個有豐富生物的地方，因為有很多毒蟲及猛獸
+    rationale: 坐在搖曳的篝火旁邊，他用低沉的聲音，告訴我熱帶雨林的祕密。原來，這表面看來深沉寧靜的叢林，往往有突如其來的殺手──大風、暴雨、毒蟲、猛獸，盤桓其中，隨時可能要人性命；不過，只要謹慎小心，這片赤道旁的熱帶雨林，不只會讓我們走入神祕的世界，更會讓我們見識到各種新鮮有趣的事物。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 直擊全台第一家素肉廠!"口感媲美真肉排"..植物肉需求飆!搶全球1成肉品市場│非凡財經新聞│・片長：(4:03)
+    source: USTV 非凡電視
+  - index: 2
+    title: 素肉跟植物肉不同？ 關鍵在於這幾點・片長：(2:23)・來源：人間福報The Merit Times
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

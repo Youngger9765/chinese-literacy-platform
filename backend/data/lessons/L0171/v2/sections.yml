@@ -1,0 +1,16 @@
+lesson_uid: L0171
+version_id: v2
+resources:
+  items:
+  - index: 1
+    title: 白熊效應∣越想壓抑，越難抗拒
+    duration_seconds: 258
+    source: JT才知道
+  - index: 2
+    title: 為什麼越不想越會想？｜怪心理 EP02｜白熊效應White Bear Effect
+    duration_seconds: 274
+    source: ZenPhonicFlow
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

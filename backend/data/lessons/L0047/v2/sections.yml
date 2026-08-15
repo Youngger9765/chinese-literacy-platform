@@ -1,0 +1,123 @@
+lesson_uid: L0047
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 溫柔婉約
+    definition: 溫和柔順，柔美含蓄。
+  - index: 2
+    word: 心知肚明
+    definition: 不用明說，心裡也非常清楚。
+  - index: 3
+    word: 粗野陽剛
+    definition: 粗獷豪放，顯得剛強有力。
+  - index: 4
+    word: 穿梭
+    definition: 快速的來回移動。
+  - index: 5
+    word: 調度
+    definition: 安排、調配人力或工作。
+  - index: 6
+    word: 調停折衝
+    definition: 調解爭端、協調各方。
+  - index: 7
+    word: 銜接無虞
+    definition: 前後接續順利，沒有問題。
+  - index: 8
+    word: 使臂使指
+    definition: 比喻指揮、調度得靈活自如。
+  - index: 9
+    word: 度量
+    definition: 能寬容、體諒別人的氣度。
+  - index: 10
+    word: 長袖善舞
+    definition: 比喻善於交際、協調，辦事靈活。
+  - index: 11
+    word: 當面戳破
+    definition: 當著對方的面揭穿謊言或指出問題。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 粗野陽剛
+    B: 溫柔婉約
+    C: 長袖善舞
+    D: 銜接無虞
+    E: 度量
+    F: 使臂使指
+    G: 調停折衝
+    H: 穿梭
+    I: 當面戳破
+    J: 心知肚明
+  questions:
+  - index: 1
+    text: 她說話總是（　），輕聲細語，讓人感到如沐春風。
+    answer: B
+  - index: 2
+    text: 雙方爭執不下，里長出面（　），終於化解衝突。
+    answer: G
+  - index: 3
+    text: 她每天（　）於各科教室之間，忙碌得像個小蜜蜂。
+    answer: H
+  - index: 4
+    text: 他（　）了對方的藉口，場面一度尷尬。
+    answer: I
+  - index: 5
+    text: 區間車準時到站，接著轉乘高鐵，兩段行程（　），時間充裕。
+    answer: D
+  - index: 6
+    text: 領導者應有（　），接納不同的看法，才能服眾。
+    answer: E
+  - index: 7
+    text: 他（　），交際手腕高明，一下子就能和各方談成合作。
+    answer: C
+  - index: 8
+    text: 他喜歡把大家（　）的事直接說出來，常常弄得現場很尷尬。
+    answer: J
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: C
+    stem: 綜合第5至9段，下列哪一項最能說明大嫂在工地的核心功能？
+    options:
+      A: 監工驗收
+      B: 行政核帳
+      C: 協調與支援
+      D: 專業設計
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 根據文中「約束丈夫、顧好工作」與「丈夫帶上妻子後有所收斂、能繼續接案」的說明，大嫂陪同丈夫工作，主要發揮什麼作用？
+    options:
+      B: 男人粗野陽剛功夫一流，這是女人辦不到的
+      C: 說明大嫂在工地的弱勢，希望推動性別平等
+      D: 凸顯工地大嫂的多元能力並表達敬意
+      A: 介紹工地常見的輩分稱呼與新手求生禮儀
+    rationale: 第四段，作者提到大嫂陪在身邊，不但多一分人力，也能約束丈夫，顧好工作。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 「工地缺工潮」年輕人不願做　師傅嘆：有野心賺錢不難｜工作｜職業｜工人
+    duration_seconds: 467
+    source: 即新聞
+  - index: 2
+    title: 「工地」新手月薪達10萬up！台灣女孩分享澳洲熱門職業日常｜TVBS新聞｜網友熱搜
+    duration_seconds: 300
+    source: TVBS NEWS
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

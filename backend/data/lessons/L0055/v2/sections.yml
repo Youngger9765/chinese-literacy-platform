@@ -1,0 +1,113 @@
+lesson_uid: L0055
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 英姿煥發
+    definition: 形容人外表有精神、神采飛揚的樣子。
+  - index: 2
+    word: 清一色
+    definition: 形容全部都是同一種類或同一樣式。例如：參賽者清一色是男生。
+  - index: 3
+    word: 相去無幾
+    definition: 事物之間的差距不大，幾乎相同。
+  - index: 4
+    word: 飛簷走壁
+    definition: 形容人在屋簷、牆壁間敏捷移動，身手十分輕快。
+  - index: 5
+    word: 有過之而無不及
+    definition: 指互相比較後，不但沒有落後，反而超越對方。
+  - index: 6
+    word: 逞強
+    definition: 為了顯示自己厲害而勉強做一些超過能力的事。
+  - index: 7
+    word: 審時度󠇡勢
+    definition: 先看清當時的情況和變化，再做合適的決定。
+  - index: 8
+    word: 自命不凡
+    definition: 自以為聰明、不平凡，常表現出高傲自負的態度。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 飛簷走壁
+    B: 審時度勢
+    C: 逞強
+    D: 清一色
+    E: 自命不凡
+    F: 相去無幾
+    G: 英姿煥發
+    H: 有過之而無不及
+  questions:
+  - index: 1
+    text: 這兩種茶葉喝起來的口感（　），讓人難以分辨。
+    answer: F
+  - index: 2
+    text: 小華明知自己的體力有限，仍為了證明自己而（　），參加連續三天的登山活動，最後因體力不支而送醫。
+    answer: C
+  - index: 3
+    text: 這次比賽參賽的選手（　）都是年輕人，平均年齡不超過二十歲，充滿青春活力。
+    answer: D
+  - index: 4
+    text: 在運動會的開幕式上，運動員穿著整齊劃一的服裝，（　）的接受大家的喝采。
+    answer: G
+  - index: 5
+    text: 電影中的武俠人物經常能（　），讓觀眾驚嘆不已。
+    answer: A
+  - index: 6
+    text: 他是全校第一名，但為人謙虛，從不（　）。
+    answer: E
+  - index: 7
+    text: 企業面對市場激烈競爭時，必須（　），隨著環境變化調整策略。
+    answer: B
+  - index: 8
+    text: 哥哥每天都認真練球，弟弟練習的時間比哥哥更長，努力程度真是 （　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: A
+    stem: 心理學實驗中，男生在有旁觀者時，為什麼會選擇站得更遠投圈圈？
+    options:
+      B: 威爾遜以幽默化解危機，值得大家學習
+      C: 英國首相威爾遜的演講進行到一半時被打斷了
+      D: 台下突然有個異議分子高聲打斷了他：「狗屎！垃圾！」
+      A: 這位先生，請稍安勿躁，我馬上就會講到你所提出的關於環保的問題
+    rationale: 第八段，當有旁觀者時，男生會選擇站得更遠來投圈圈，這種行為反映了男性傾向展示自己的能力，希望獲得他人認可或尊重。
+  - index: 5
+    answer: A
+    stem: 心理學實驗通常用來回答研究問題。課文中的實驗一和實驗二主要想回答哪一個問題？
+    options:
+      B: 誰能把圈圈丟的比較遠？男生還是女生？
+      C: 誰能把圈圈丟的比較準？男生還是女生？
+      D: 誰比較能和旁觀者合作？男生還是女生？
+      A: 第二段中的「公猴」案例展示了雄性動物普遍具有更高的冒險傾向，這種特性導致雄性在成長過程中面臨更大的生存風險。
+    rationale: 第二段中的「公猴」案例展示了雄性動物普遍具有更高的冒險傾向，這種特性導致雄性在成長過程中面臨更大的生存風險。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 動物星天頻道 EP14《深入探索：山道猴子》搶先看 [4K]
+    duration_seconds: 90
+    source: 星期天
+  - index: 2
+    title: 男女大（腦）不同，超中肯演說
+    duration_seconds: 309
+    source: 有小鳥
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

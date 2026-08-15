@@ -1,0 +1,105 @@
+lesson_uid: L0036
+version_id: v2
+vocab_application:
+  options:
+    A: 著稱
+    B: 先驅
+    C: 正統
+    D: 敬仰
+    E: 輝煌
+    F: 嶄露頭角
+    G: 跌破眼鏡
+    H: 一絲不苟
+  questions:
+  - index: 1
+    text: 他接受（　）的音樂訓練，因此技巧非常扎實。
+    answer: C
+  - index: 2
+    text: 在這次科技展中，許多年輕設計師（　），受到企業關注。
+    answer: F
+  - index: 3
+    text: 人高馬大的他，看到蟑螂卻尖叫逃走，讓同學們都（　）。
+    answer: G
+  - index: 4
+    text: 這間小吃攤以料多味美（　），受到當地人和觀光客的喜愛。
+    answer: A
+  - index: 5
+    text: 這位醫師最早投入偏鄉巡迴醫療，成為當地行動醫療的 （　）。
+    answer: B
+  - index: 6
+    text: 這位教練帶著球隊走過低潮，創下了最（　）的戰績。
+    answer: E
+  - index: 7
+    text: 他長期投入偏鄉教育，不計時間、心力，令人由衷（　）。
+    answer: D
+  - index: 8
+    text: 他對實驗數據的處理（　），絲毫不容許誤差。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 一絲不苟
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 這位發明家開啟全新的研究方向，是研發綠能的「先驅」
+      B: 這家公司產品以品質不佳「著稱」，受到許多消費者批評
+      C: 小孩子洗完澡後，常常「一絲不苟」在房間裡跑來跑去
+      D: 他個性內向，不喜歡「嶄露頭角」，但做事十分認真負責
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據第三段「日本觀眾忍不住瞪大了眼睛」這句話最可能表達什麼意思？
+    options:
+      B: 觀眾對規則不熟，不懂發生什麼事
+      C: 觀眾對球隊的表現感到震驚與讚嘆
+      D: 觀眾想表達對比賽結果的無法接受
+    rationale: 從段三可看出能高團的表現令人出乎意料。
+  - index: 3
+    answer: B
+    stem: 根據第五段，60年後能高團的故事仍被日本媒體提及，最可能的原因是什麼？
+    options:
+      B: 球員的表現超出當時他們對臺灣球隊的期待
+      C: 能高團曾經擊敗過所有日本的頂尖棒球隊伍
+      D: 他們比賽時使用阿美族語作為溝通暗號語言
+    rationale: 第五段有提及「由此可知，當年能高團使日本人印象深刻」
+  - index: 4
+    answer: B
+    stem: 本文以「2024年臺灣奪冠」作為引入，最主要的用意是什麼？
+    options:
+      B: 引起讀者興趣並銜接到能高團的歷史地位
+      C: 讓讀者對現代棒球情況有更多的深入了解
+      D: 暗示能高團的組成與2024年的冠軍隊有關
+    rationale: A)奪冠隊伍和日治時期無關
+  - index: 5
+    answer: D
+    stem: 「2021年，臺灣體操選手李智凱在東京奧運男子鞍馬決賽中，以招式『湯瑪士迴旋』獲得銀牌，創下臺灣在奧運體操項目的最佳成績，被媒體稱為『鞍馬王子』。」根據本段文字，下列內容對應的上位概念何者正確？
+    options:
+      B: 鞍馬王子──比賽結果
+      C: 湯瑪士迴旋──比賽項目
+      D: 創下最佳成績──比賽成就
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【國球的起點 花蓮能高團】
+    duration_seconds: 409
+    source: 花蓮縣政府
+  - index: 2
+    title: 能高團成立百年 花蓮市設展回顧輝煌歷史
+    duration_seconds: 171
+    source: 原視新聞網 TITV News
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,140 @@
+lesson_uid: L0102
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 信以為真
+    definition: 把錯誤或尚未證實的內容當成真的。
+  - index: 2
+    word: 相提並論
+    definition: 把不同的人或事物放在一起比較；討論。多用來指出兩者並不適合相比。
+  - index: 3
+    word: 迷魂陣
+    definition: 使人迷惑而上當的圈套。
+  - index: 4
+    word: 尼古丁
+    definition: 香菸中的成癮性物質，可能危害身體健康。
+  - index: 5
+    word: 混淆
+    definition: 使事情變得模糊、無法分辨。
+  - index: 6
+    word: 黏稠
+    definition: 濃稠有黏性的。
+  - index: 7
+    word: 長期提款機
+    definition: 本文是指電子煙的消費者會長期消費，為業者帶來穩定的收入。
+  - index: 8
+    word: 似是而非
+    definition: 表面上好像正確，實際上並不正確。
+  - index: 9
+    word: 查緝
+    definition: 搜查並取締違法行為，或追捕犯罪者。
+  - index: 10
+    word: 指鹿為馬
+    definition: 用來比喻人故意顛倒是非、混淆視聽。
+  - index: 11
+    word: 偽科學
+    definition: 表面看起來像科學，實際上缺乏證據與合理方法、且經不起考驗的說法。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 混淆
+    B: 查緝
+    C: 信以為真
+    D: 似是而非
+    E: 黏稠
+    F: 迷魂陣
+    G: 相提並論
+    H: 指鹿為馬
+    I: 混淆
+    J: 偽科學
+  questions:
+  - index: 1
+    text: 這兩件事情性質完全不同，怎麼可以（　）。
+    answer: G
+  - index: 2
+    text: 他的論點半真半假、（　），聽到的人都半信半疑。
+    answer: D
+  - index: 3
+    text: 最近警方都在（　）毒品，以杜絕犯罪活動，維護社會秩序。
+    answer: B
+  - index: 4
+    text: 如果對網路上的虛假消息（　），就容易成為網路詐騙的對象。
+    answer: C
+  - index: 5
+    text: 誇大不實的廣告，容易使民眾對產品的療效產生 （　）。
+    answer: A
+  - index: 6
+    text: 班會紀錄寫得很清楚，他卻故意扭曲內容，企圖 （　）。
+    answer: H
+  - index: 7
+    text: 用星座、血型算命，根本就是（　），經不起科學考驗。
+    answer: J
+  - index: 8
+    text: 他感冒後鼻涕又黃又（　），醫生提醒他多喝水、多休息。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: A
+    stem: 電子煙的廠商為何會把目標鎖定在年輕族群?
+    options:
+      B: 因為年輕族群很有錢，可以當廠商長期提款機
+      C: 因為電子煙有龐大的利益，如果越多人抽越好
+      D: 因為年輕族群比較聰明，可躲開執法機關的查緝
+      A: 年輕人容易因為廠商的行銷手法而上當，而忽略了實際的問題。
+    rationale: 年輕人容易因為廠商的行銷手法而上當，而忽略了實際的問題。
+    is_rationale: true
+  - index: 3
+    answer: C
+    stem: 在本文中，判斷「電子煙好不好？」時，阿政犯了什麼錯誤？
+    options:
+      B: 查找科學影片去證實想法
+      C: 毫不懷疑，直接相信網紅的實驗
+      D: 對電子煙充滿好奇心
+    rationale: 第六段，阿政看的兩部影片都有問題
+  - index: 4
+    answer: D
+    stem: 「社會上多的是『指鹿為馬』的人，常常亂說話混淆大眾視聽，所以閱讀媒體報導時，不可不慎。」請問『指鹿為馬』不可用哪個詞語替換？（D比喻愚賢不一、高低程度不一樣的人混在一起）
+    options:
+      B: 是非不分
+      D: 龍蛇混雜
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 請問何種情況最不符合本文所說的「理性判斷、聰明識讀」呢？
+    options:
+      A: 高人氣網紅製作、在網路上瘋傳的影片的可信度一定較高
+      B: 看到吸引我的訊息時，我會想一想傳播者的動機是什麼
+      C: 我可以用關鍵詞在Google上搜尋，查證新聞的正確性
+      D: 投票前夕突然出現對某陣營特別不利的消息，我會特別小心
+    rationale: A要先蒐證再下判斷，不可人云亦云。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 4
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: weak
+resources:
+  items:
+  - index: 1
+    title: 泰國短片-「眼見不一定為憑」。
+    duration_seconds: 321
+    source: 集合視頻 JIHE.TV
+  - index: 2
+    title: 中國廣告-眼見不一定為實，最後的結局真的沒想到！
+    duration_seconds: 337
+    source: 微博最火視頻搬運工
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

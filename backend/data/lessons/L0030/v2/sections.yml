@@ -1,0 +1,135 @@
+lesson_uid: L0030
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 倘若
+    definition: 如果、假使，假設語氣。
+  - index: 2
+    word: 結實
+    definition: 堅固的，強健的。
+  - index: 3
+    word: 不可或缺
+    definition: 指非常重要，一定要有，缺少了就不行。
+  - index: 4
+    word: 壁壘分明
+    definition: 比喻彼此界限清楚，各自有自己的範圍。
+  - index: 5
+    word: 一󠇡步登天
+    definition: 比喻輕易達到極高的地位或境界。
+  - index: 6
+    word: 分量
+    definition: 事物的輕重、多寡。
+  - index: 7
+    word: 循序漸進
+    definition: 按照一定的次序與步驟逐漸推進。
+  - index: 8
+    word: 欲速則不達
+    definition: 只想快速達成，卻因此失敗了。
+  - index: 9
+    word: 覆蓋
+    definition: 完全遮住、蓋住。
+  - index: 10
+    word: 舒適區
+    definition: 將舒服安適的狀態。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 結實
+    B: 覆蓋
+    C: 倘若
+    D: 循序漸進
+    E: 不可或缺
+    F: 分量
+    G: 一步登天
+    H: 欲速則不達
+  questions:
+  - index: 1
+    text: 要贏球，球隊裡每位球員的貢獻都是（　）的。
+    answer: E
+  - index: 2
+    text: 氣低溫加上水氣足夠，讓玉山步道沿線都（　）白雪，好像灑了糖霜般的童話世界。
+    answer: B
+  - index: 4
+    text: 他長期舉重，因此鍛鍊出一身（　）的肌肉。
+    answer: A
+  - index: 6
+    text: 他急著完成美術作品，結果畫得十分潦草，真是（　）。
+    answer: H
+  - index: 7
+    text: 教練提醒新手不要一開始就跑太遠，要（　）增加訓練量。
+    answer: D
+  - index: 8
+    text: 雖然他說話不多，但每一句都很有（　），大家都認真聆聽。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 請問文中第四段所提到的：「練肌肉沒有一步登天的方法，循序漸進的飲食控制和規律練習才會慢慢看見成效。」，「循序漸進」可以用哪個詞語替換？   （指的是做事依照一定的層次、步驟進行）
+    options:
+      A: 我們先把計畫擬訂好，然後「按部就班」去做，如期完成工作
+      B: 我們做事要腳踏實地，不要老是想「一步登天」
+      C: 小明為了趕時間，一路狂飆，結果「欲速則不達」，半路就出了車禍
+      D: 他做事往往「求好心切」，操之過急，反而得到反效果
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 請問下列運動訓練肌肉的部位，何者配對正確？
+    options:
+      A: 深蹲－胸肌、三頭肌（伏地挺身）
+      B: 棒式－核心肌群、肩膀、胸部
+      C: 拉單槓－大腿、臀大肌（深蹲）
+      D: 伏地挺身－背肌、二頭肌（拉單槓）
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 根據本文，請問養成肌肉的基本原則何者為非？
+    options:
+      A: 均衡的飲食控制
+      B: 維持良好的睡眠
+      C: 先增肌，再減脂（先減脂，再增肌）D.專業規律的訓練
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 下列敘述的訓練，誰最有機會練出肌肉？
+    options:
+      A: 我吃完肯德基之後，都會去健身房重訓
+      B: 我一天只睡四小時，剩下時間都在訓練
+      C: 我都拉單槓拉到身體不能再做為止
+      D: 我固定在睡前二十分鐘做伏地挺身（第四段）
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 如果要換一個標題，請問最適合本課標題是什麼？
+    options:
+      A: 快速的肌肉養成步驟
+      B: 減脂、增肌的關鍵(本篇在說明肌肉的生成及鍛鍊方式。)
+      C: 運動類型與肌肉塑造
+      D: 肌肉和飲食控制的關係
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 運動前後飲食　成增加肌肉關鍵之一・片長：(1:39)
+    source: TVBS NEWS
+  - index: 2
+    title: 《花家の故事》210媽媽的體脂肪｜我們這一家・片長：(9:00)・來源：Muse木棉花-闔家歡
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

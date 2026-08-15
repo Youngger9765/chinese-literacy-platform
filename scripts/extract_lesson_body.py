@@ -51,7 +51,13 @@ from pathlib import Path
 from typing import Optional
 
 _PARA = re.compile(r"<w:p[ >].*?</w:p>", re.S)
-_TEXT = re.compile(r"<w:t[^>]*>(.*?)</w:t>", re.S)
+# `(.*?)` was `.*?` with DOTALL, which happily crossed nested tags: when a <w:p>
+# contains formatting elements between its runs, the lazy match still reached the
+# next </w:t> and swallowed the intervening markup as if it were text. The paragraph
+# then began with "<w:tab …" and was discarded by the markup guard below — taking the
+# real sentence with it. Four of five comprehension questions per lesson vanished
+# this way, and it read as "this worksheet only has one question".
+_TEXT = re.compile(r"<w:t[^>]*>([^<]*)</w:t>")
 
 # The heading that closes the body. Most worksheets use section 2 (念順順 /
 # 重點朗讀), but 文言文 and several 品格教育 lessons follow a different layout with no

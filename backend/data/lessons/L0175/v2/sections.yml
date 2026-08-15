@@ -1,0 +1,72 @@
+lesson_uid: L0175
+version_id: v2
+vocab_application:
+  options:
+    A: 截然不同
+    B: 義無反顧
+    C: 一步到位
+    D: 思維
+    E: 良機
+    F: 喃喃自語
+    G: 羅盤
+    H: 氣餒
+  questions:
+  - index: 1
+    text: 清楚的目標就像（　），能幫助我們在迷惘時找到方向。
+    answer: G
+  - index: 2
+    text: 儘管這項作業複雜，但為了小組榮譽，他（　）擔任組長。
+    answer: B
+  - index: 3
+    text: 比賽結束後，他低著頭（　）的說：「下次一定要贏。」
+    answer: F
+  - index: 4
+    text: 面對挑戰時，與其（　）、放棄，不如先找出問題所在。
+    answer: H
+  - index: 5
+    text: 面對失敗時，不同的（　）會影響是否願意再努力。
+    answer: D
+  - index: 6
+    text: 分組討論是練習表達想法的（　），不應該只是沉默旁聽。
+    answer: E
+  - index: 7
+    text: 學會控制情緒不太可能 （　），但每次覺察都是進步。
+    answer: C
+  - index: 8
+    text: 他在球場上很有自信，回到課堂卻表現得死氣沉沉，真是（　）。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: D
+    stem: 根據第六段，作者提到棒球是「高失敗率的運動」，即使優秀打者也常常失敗。作者舉這個例子，最主要是為了說明什麼？
+    options:
+      B: 阿玖：「避免失敗、避免犯錯，才是追求成功的最高原則。」
+      C: 奇奇：「遇到問題或挫折，不代表做不到，只是還需要找方法。」
+      D: 方仔：「人生的追逐無窮無盡，練習知足才能帶來真正的快樂。」
+      A: 小荷：「每個人天生就有擅長與不擅長的事情，不用過分執著。」
+    rationale: 第六段最後一句：只要能從失敗中修正、調整，就能更靠近成功。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 成長心態vs.定型心態
+    duration_seconds: 303
+    source: Sprouts
+  - index: 2
+    title: 成功的要訣是什麽？是意志力
+    duration_seconds: 372
+    source: 李彥甫
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,98 @@
+lesson_uid: L0119
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 邂逅
+    definition: 偶然相遇、相逢。
+  - index: 2
+    word: 風塵僕僕
+    definition: 旅途艱辛奔波。
+  - index: 3
+    word: 佇足
+    definition: 停下腳步。
+  - index: 4
+    word: 揣想
+    definition: 猜測、猜想。
+  - index: 5
+    word: 呢喃
+    definition: 小聲說話。
+  - index: 6
+    word: 林立
+    definition: 像樹林一樣密集排列，形容數量很多。
+  - index: 7
+    word: 絡繹不絕
+    definition: 連續不斷，通常指人車接連不斷。
+  - index: 8
+    word: 一貫
+    definition: 從來沒改變。
+  - index: 9
+    word: 流連忘返
+    definition: 沉醉而不願離開。
+  - index: 10
+    word: 汲汲營營
+    definition: 形容一心急切追求名利。
+  - index: 11
+    word: 遣返
+    definition: 把人送回原來的國家或地區。
+  - index: 12
+    word: 餞行
+    definition: 為人送行。相似詞有「餞別」。若歡迎歸來可用「接風」、「洗塵」。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 風塵僕僕
+    B: 揣想
+    C: 林立
+    D: 絡繹不絕
+    E: 流連忘返
+    F: 汲汲營營
+    G: 遣返
+    H: 餞行
+  questions:
+  - index: 1
+    text: 週年慶期間，購物中心裡的人潮（　），非常熱鬧。
+    answer: D
+  - index: 2
+    text: 圖書館內書架（　），各類書籍應有盡有，讓人目不暇給。
+    answer: C
+  - index: 3
+    text: 人生不應該只為名聲、利益（　），還要懂得享受生活。
+    answer: F
+  - index: 4
+    text: 他從國外（　）趕回來，只為參加好友的婚禮。
+    answer: A
+  - index: 5
+    text: 這裡的美麗風景讓遊客們（　），捨不得離去。
+    answer: E
+  - index: 6
+    text: 看見他滿面春風，令我不禁（　） 他是否有了新戀情。
+    answer: B
+  - index: 7
+    text: 由於違反當地法律，幾名外國遊客被（　）回國。
+    answer: G
+  - index: 8
+    text: 好朋友即將出國留學，我們約在餐廳為她 （　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 遇見一首詩：台東 / 余光中
+    duration_seconds: 65
+    source: 趨勢教育基金會
+  - index: 2
+    title: 飛閱文學地景Ⅲ Ep 12 - 少年池上 蔣勳
+    duration_seconds: 122
+    source: 民視讚夯
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

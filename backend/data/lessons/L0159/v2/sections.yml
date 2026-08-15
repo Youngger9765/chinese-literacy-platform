@@ -1,0 +1,55 @@
+lesson_uid: L0159
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列選項「」中字，何者字音、字義完全正確？
+    options:
+      B: 既「還」邸，使門人往——ㄏㄞˊ，還是
+      C: 吾嫌其微「凸」——ㄊㄨ，突出
+      D: 公大「惋」惜——ㄨㄢˇ，可惜
+      A: B字音ㄏㄨㄢˊ，字義「返回」；
+    rationale: B字音ㄏㄨㄢˊ，字義「返回」；
+    is_rationale: true
+  - index: 2
+    answer: B
+    stem: 根據「陸公買硯」一文，關於陸盧峰這個人的敘述下列何者正確？
+    options:
+      B: 淳于恭個性溫厚寬容，能體恤他人
+      C: 北海地區盜賊兇悍，人民不敢與之對抗
+      D: 淳于恭伏於草中，乃心中有愧，不欲見人
+    rationale: B由僕人任意花錢請人磨平主人(陸公)的硯臺，而陸公僅是「大惋惜」可知。
+  - index: 4
+    answer: C
+    stem: 據「陸公買硯」一文，下列關於故事中人物的敘述，何者最恰當？
+    options:
+      A: 門人買錯硯臺卻不知道
+      B: 陸公惋惜是因為石工技藝不佳
+      C: 門人請人磨平硯眼是自作聰明
+      D: 陸公對門人購硯的價格感到驚訝
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 下列何者不可能是「陸公買硯」一文的寓意？
+    options:
+      B: 即使是好心也可能辦壞事
+      C: 知人善任才不會反受其害
+      D: 託人辦事，一定要先清楚溝通
+      A: A諺語。意思是不聽有經驗者的意見，往往會吃虧後悔。
+    rationale: A諺語。意思是不聽有經驗者的意見，往往會吃虧後悔。
+    is_rationale: true
+  - index: 6
+    answer: D
+    stem: 下列哪一選項的閩南語俗諺可以形容課文中的僕人？
+    options:
+      B: 好心予雷唚
+      C: 目睭花花，匏仔看做菜瓜
+      D: 生雞卵的無，放雞屎的一大堆
+    rationale: A嘲笑人一時恍神，把形狀相近的物品看成別的東西。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 2
+    verdict: ok

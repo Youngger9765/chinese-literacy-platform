@@ -1,0 +1,115 @@
+lesson_uid: L0002
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 融為一體
+    definition: 不同的事物融合在一起，形成一個整體。
+  - index: 2
+    word: 掠食者
+    definition: 掠：奪取、捕捉；食：吃；指會捕捉其他動物來吃的動物。
+  - index: 3
+    word: 偽裝
+    definition: 裝成別的樣子，讓別人不容易發現。
+  - index: 4
+    word: 一模一樣
+    definition: 完全相同，看不出差別。
+  - index: 5
+    word: 枯萎
+    definition: 枯：乾枯；萎：下垂；指植物失去水分，變乾、變黃、下垂。
+  - index: 6
+    word: 威嚇
+    definition: 用可怕的樣子或動作讓對方害怕。
+  - index: 7
+    word: 活靈活現
+    definition: 模仿、描寫或表演得很生動，像真的一樣。
+  - index: 8
+    word: 銅牆鐵壁
+    definition: 像銅和鐵做的牆一樣堅固；比喻非常堅固，很難攻破。
+  - index: 9
+    word: 讚嘆
+    definition: 覺得很厲害或很美好，而佩服、稱讚。
+  - index: 10
+    word: 弱肉強食
+    definition: 在自然界中，弱小的動物容易被強大的動物吃掉；也可形容競爭很殘酷。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 掠食者
+    B: 融為一體
+    C: 偽裝
+    D: 枯萎
+    E: 一模一樣
+    F: 活靈活現
+    G: 威嚇
+    H: 銅牆鐵壁
+    I: 弱肉強食
+    J: 讚嘆
+  questions:
+  - index: 1
+    text: 盆栽好幾天沒有澆水，葉子慢慢變黃，開始（　）。
+    answer: D
+  - index: 2
+    text: 這對雙胞胎不只長得像，連說話的聲音都幾乎（　）。
+    answer: E
+  - index: 3
+    text: 他把老師說話的語氣模仿得（　），全班都笑了。
+    answer: F
+  - index: 4
+    text: 詐騙集團把假訊息（　）成銀行簡訊，騙人點連結填資料。
+    answer: C
+  - index: 5
+    text: 決賽最後一分鐘，球隊防守得像（　），讓對手完全攻不進來。
+    answer: H
+  - index: 6
+    text: 陌生人靠近時，小狗露出牙齒低吼，像是在（　）對方。
+    answer: G
+  - index: 7
+    text: 科展上，同學用回收材料做出自動澆水器，讓評審都忍不住（　）。
+    answer: J
+  - index: 8
+    text: 小青蛙趴在綠葉上，遠遠看去幾乎和葉子（　），不仔細看，根本找不到牠。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列句子中，「　」內的語詞使用何者錯誤？
+    options:
+      A: 保護色靠毒液防禦，偽裝靠外殼抵擋攻擊
+      B: 保護色讓顏色接近環境，偽裝讓外形像其他事物
+      C: 保護色需要同伴合作，偽裝只能由動物單獨完成
+      D: 保護色用來嚇退天敵，偽裝只用來隱藏身體
+    rationale: 保護色的重點是身體顏色接近周圍環境；偽裝則是讓外形或花紋看起來像其他事物或動物
+  - index: 3
+    answer: A
+    stem: 本文第4段先說：「有些動物雖然跑不快，卻能用毒液或難聞的氣味保護自己。」作者這樣寫，主要想說明什麼？
+    options:
+      A: 動物即使有行動上的弱點，也能用其他方法保護自己
+      B: 動物只要跑得不快，就一定會使用毒液攻擊敵人
+      C: 動物能不能生存，主要由牠們奔跑的速度決定
+      D: 掠食者通常只會選擇跑得較慢的動物當食物
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 作者把動物的生存方法比成「祕密武器」，又把堅殼硬甲比成「銅牆鐵壁般的小房子」和「厚厚的裝甲」，主要想達到什麼效果？
+    options:
+      A: 介紹臺灣常見動物不同的外形與生活習慣
+      B: 說明掠食者如何尋找並捕捉各種野生動物
+      C: 比較五種生存方法，判斷哪一種最有效果
+      D: 說明動物運用不同妙招，提高自己或群體的存活機會
+    rationale: 第4題解析：這些比喻把抽象的保護功能轉成容易想像的畫面，使讀者更容易理解動物如何防禦敵人
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

@@ -1,0 +1,101 @@
+lesson_uid: L0087
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 難如登天
+    definition: 形容非常困難，像登天一樣困難。
+  - index: 2
+    word: 嘀咕
+    definition: 小聲說話，常帶有抱怨、不滿或懷疑的語氣。
+  - index: 3
+    word: 怨懟
+    definition: 心裡怨恨、不滿。
+  - index: 4
+    word: 慢條斯理
+    definition: 形容說話或做事從容緩慢、不慌不忙。
+  - index: 5
+    word: 自怨自艾
+    definition: 因為事情不順利而埋怨、責備自己，心情低落。
+  - index: 6
+    word: 儼然
+    definition: 好像、很像。
+  - index: 7
+    word: 嘴饞
+    definition: 看到或想到好吃的東西，就很想吃。
+  - index: 8
+    word: 撒賴
+    definition: 賴皮、不講道理。
+  - index: 9
+    word: 醍醐灌頂
+    definition: 受到很大的啟發，突然明白重要的道理。「醍醐」原指從牛奶提煉出的精華，佛教用來比喻智慧。
+  - index: 10
+    word: 故技重施
+    definition: 再次使用以前用過的同一種手段或方法。
+  - index: 11
+    word: 層出不窮
+    definition: 接連不斷的出現，好像沒有盡頭。「窮」是盡頭的意思。
+  - index: 12
+    word: 百思不解
+    definition: 經過反覆思考，還是不能了解。
+  - index: 13
+    word: 犯小人
+    definition: 遇到故意要害你的人。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 胖虎把桌上的牛奶倒在大雄頭上，讓大雄「醍醐灌頂」，好過分
+      B: 弟弟遊戲輸了都會「撒賴」，要大家陪他再玩一次，真拿他沒辦法
+      C: 小夫在教室大聲的「嘀咕」說小明的壞話，讓小明氣到不跟他說話
+      D: 馬戲團表演者被大砲發射出去，飛到天上去，可說是「難如登天」
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 作者小時候百思不解的問題是什麼呢？
+    options:
+      A: 為什麼大人給零食時，都要他們「公家吃」
+      B: 為什麼作者常常要被迫跟姊姊分享同一個餅
+      C: 為什麼祖母都是讓姊姊來分餅，作者選餅呢
+      D: 為什麼他用盡策略，最後仍覺得姊姊的餅比較大
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 第六段中提到「……，吸引了一位跟我有同樣毛病的小朋友，……」，請問這裡指的「同樣毛病」，是什麼毛病呢？
+    options:
+      A: 愛計較，見到糖果餅乾都非常「餓鬼」
+      B: 只要遇到不順心的事，就對家人耍賴
+      C: 覺得別人得到的，都比自己擁有的好
+      D: 平常愛抱怨，總是自怨自艾感到鬱悶
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 作者讀完《湯姆歷險記》後，最重要的改變是什麼？
+    options:
+      A: 事情不一定改變，但他開始換個角度看自己遇到的事
+      B: 他學會用方法讓別人替自己完成所有麻煩的工作
+      C: 他發現只要說自己很幸運，生活中的問題就會消失
+      D: 他認為別人擁有的東西，其實都不如自己的東西好
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 運動會，大家期待已久的大隊接力比賽，因為下雨而延期了，下面哪些想法是比較正向的呢？
+    options:
+      A: 甲乙
+      B: 乙丙
+      C: 丙丁
+      D: 甲丁
+    rationale: 甲、比賽延期我們就能多練習幾天了
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok

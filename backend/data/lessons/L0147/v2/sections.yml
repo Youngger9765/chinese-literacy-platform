@@ -1,0 +1,126 @@
+lesson_uid: L0147
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 廣闊無垠
+    definition: 範圍非常大，廣大到沒有邊界。
+  - index: 2
+    word: 天各一󠇢方
+    definition: 形容彼此距離非常遙遠，各自在不同地方，很難相見。
+  - index: 3
+    word: 精湛
+    definition: 形容技術或能力非常高明，做得又好又準。
+  - index: 4
+    word: 綿延
+    definition: 形容事物連續不斷的延伸，很長、很久都沒有中斷；常用來描述長度或時間。
+  - index: 5
+    word: 星羅棋布
+    definition: 形容事物分散在各處，數量很多，到處都有。
+  - index: 6
+    word: 舉足輕重
+    definition: 形容某件事或某個角色非常重要，會影響整個情況。
+  - index: 7
+    word: 掛一漏萬
+    definition: 漏：遺漏。形容只提到一小部分，卻遺漏了非常多重要內容。
+  - index: 8
+    word: 支離破碎
+    definition: 零散又破裂。形容內容零散、不完整，前後連不起來。
+  - index: 9
+    word: 一󠇡目了󠇡然
+    definition: 目：眼睛；了然：清楚明白。形容事情或結果非常清楚，看一眼就懂，不需要再解釋。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 廣闊無垠
+    B: 星羅棋布
+    C: 舉足輕重
+    D: 精湛
+    E: 綿延
+    F: 支離破碎
+    G: 一目了然
+    H: 掛一漏萬
+    I: 天各一󠇢方
+    J: 耐人尋味
+  questions:
+  - index: 1
+    text: 從飛機上往下看台北市，街燈（　），整個城市看起來閃閃發亮。
+    answer: B
+  - index: 2
+    text: 放眼望去，山脈一座接著一座，（　）到遠方，看不到盡頭。
+    answer: E
+  - index: 3
+    text: 老師提醒我們，整理筆記時不要（　），重要資訊都要記錄下來。
+    answer: H
+  - index: 4
+    text: 老師用圖表整理重點，整個內容（　），非常清楚。
+    answer: G
+  - index: 5
+    text: 飛機起飛後，窗外是一片（　）的雲海，非常美麗。
+    answer: A
+  - index: 6
+    text: 在這次合作中，他的角色（　），負責最關鍵工作。
+    answer: C
+  - index: 7
+    text: 讀書如果只記零散的重點，沒有整理，理解就會變得（　），容易遺忘。
+    answer: F
+  - index: 8
+    text: 他在比賽中展現出（　）的球技，讓全場觀眾不斷拍手叫好。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 耐人尋味
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 第五段中，研究者在進行 DNA 分析前，其實已經隱含一個「可檢驗的預測」。下列哪一項最接近這個預測內容？
+    options:
+      A: 南島人口必然很多，經濟實力不容忽視，應受看重
+      B: 南島天各一方，卻有相似的語言文化，太有趣了
+      C: 距離太遠必定隔絕，所以語言和文化不可能相像
+      D: 各島分布這麼遠，才能說明科學家的研究有多困難
+    rationale: 距離數據用來強化「範圍廣闊卻仍相似」的張力，讓「共同源頭在哪」變得更值得追問。
+  - index: 4
+    answer: D
+    stem: 依文章的推理方式，如果某島的構樹 DNA「基因型態很少」，最可能代表什麼？
+    options:
+      A: 該島的構樹完全沒有被人類汙染過
+      C: 該島一定是構樹最早出現的源頭
+      D: 該島可能位在遷徙路徑較末端的位置
+    rationale: 文章的推理是「源頭最多、往外逐層遞減」，越往外（越末端）多樣性越低。
+  - index: 5
+    answer: C
+    stem: 根據課文第六段，支持「南島語族可能從臺灣出發（出臺灣說）」的「多面向證據」包括哪些？
+    options:
+      A: 臺灣的地理位置、南島語族的分布範圍，及海洋交通的便利性
+      B: 構樹的分布情形、南島語族的文化活動，及島嶼的自然環境
+      C: 構樹 DNA 的研究結果、南島語族語言的相似性，及文化證據
+      D: 南島語族遷徙的距離、各島嶼的氣候條件，及航海技術的發展
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: '【 #Wah幾散竹東誰來唱 】 #構樹藝術家 #李欣 #構樹手工藝介紹 | #38'
+    duration_seconds: 219
+    source: Wah幾散竹東
+  - index: 2
+    title: 【東加王國】反覆敲打構樹皮延展做禮服 南島族群千年樹皮布文化｜《世界第一等》533集精華版
+    duration_seconds: 578
+    source: GTV自由的旅行者Freedom Travelers
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

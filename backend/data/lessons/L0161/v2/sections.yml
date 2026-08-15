@@ -1,0 +1,63 @@
+lesson_uid: L0161
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項「」文字中讀音與字義，何者錯誤？
+    options:
+      B: 若無其事——好像沒有那麼一回事
+      C: 心不在焉——心思不在這裡
+      D: 愛莫能助——最無私的愛就是能助人
+      A: 顧此失彼——注意這個卻忽略了那個
+    rationale: D字音正確，但字義是「我」。
+  - index: 3
+    answer: B
+    stem: 下列哪一選項中的「之」，代指的是江乙媽媽被偷的布？
+    options:
+      C: 有盜王宮中「之」物者，妾子坐而黜
+      B: 妾夜亡布八匹，令尹盜「之」
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 根據本文，下列文句「」中的字義，何者說明最恰當？
+    options:
+      B: 令尹「信」盜之：隨意
+      C: 妾子「坐」而黜：受罰
+    rationale: D「其」，表示期望的祈使語氣。
+  - index: 5
+    answer: D
+    stem: 根據本文，下列關於令尹與楚王的敘述何者最恰當？
+    options:
+      B: 令尹主張楚國盜賊橫行是須正視的問題
+      C: 楚王覺得宮中之物被盜應是令尹的責任
+      D: 由「令尹信盜之，寡人不為其富貴而不行法焉。若不盜而誣之，楚國有常法」可知。
+    rationale: 由「令尹信盜之，寡人不為其富貴而不行法焉。若不盜而誣之，楚國有常法」可知。
+    is_rationale: true
+  - index: 6
+    answer: B
+    stem: 根據本文，江母見楚王的目的最可能是下列何者？
+    options:
+      A: 想要替兒子江乙頂罪
+      B: 想表達江乙被懲處的不公
+      C: 向楚王告發郢大夫的罪行
+      D: 要求楚王懲處失職的令尹
+    rationale: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
+  - index: 1
+    answer: A
+    stem: 根據這段文字，下列敘述何者正確？
+    options:
+      B: 子胥以美珠賄賂邊候換取自由
+      C: 邊候侵吞子胥的美珠又誣陷他
+      D: 邊候相信子胥的清白而釋放他
+      A: 解析：子胥說上面的人要抓他是因為他有美珠，但假如美珠不在自己身上，而在邊候身上，那上面的人就該改抓邊候了。邊候擔心引火自焚，只好放了子胥。
+    rationale: 解析：子胥說上面的人要抓他是因為他有美珠，但假如美珠不在自己身上，而在邊候身上，那上面的人就該改抓邊候了。邊候擔心引火自焚，只好放了子胥。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 3
+    - 4
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 2
+    verdict: weak

@@ -1,0 +1,140 @@
+lesson_uid: L0037
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 開門見山
+    definition: 說話或寫文章一開始就直接切入主題。
+  - index: 2
+    word: 投奔
+    definition: 投靠別人或某個地方，多指在困境中尋求保護。
+  - index: 3
+    word: 互比苗頭
+    definition: 彼此競爭、比一比誰比較厲害。
+  - index: 4
+    word: 唯妙唯肖
+    definition: 形容模仿得非常逼真、傳神。
+  - index: 5
+    word: 讒言
+    definition: 挑撥離間󠇡或陷害他人的壞話。
+  - index: 6
+    word: 爭強鬥勝
+    definition: 凡事都想贏過別人，不肯認輸。
+  - index: 7
+    word: 匪夷所思
+    definition: 形容事情非常奇特、難以想像或理解。
+  - index: 8
+    word: 悶不吭聲
+    definition: 一句話也不說，保持沉默。
+  - index: 9
+    word: 凶多吉少
+    definition: 指情況不樂觀，可能會有不好的結果。
+  - index: 10
+    word: 面面相覷
+    definition: 大家彼此看著對方，不知道該怎麼辦；常用於尷尬或錯愕的場面。
+  - index: 11
+    word: 津津樂道
+    definition: 形容人對某件事情非常感興趣，並且樂於談論或分享。
+  - index: 12
+    word: 鴉雀無聲
+    definition: 連烏鴉麻雀的聲音都沒有，形容非常安靜。
+  - index: 13
+    word: 快馬加鞭
+    definition: 騎著快馬還用鞭子催促，比喻加快速度、加緊進行。
+  - index: 14
+    word: 軟禁
+    definition: 把人限制在一個地方並加以監視，讓他不能自由行動。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 互比苗頭
+    B: 津津樂道
+    C: 開門見山
+    D: 凶多吉少
+    E: 面面相覷
+    F: 鴉雀無聲
+    G: 悶不吭聲
+    H: 匪夷所思
+    I: 唯妙唯肖
+    J: 快馬加鞭
+  questions:
+  - index: 1
+    text: 考試時，教室裡（　），只有筆尖劃過紙面的聲音。
+    answer: F
+  - index: 2
+    text: 他一開口就（　），立刻說明來意，毫不拖泥帶水。
+    answer: C
+  - index: 3
+    text: 那位登山者失聯多日，恐怕（　）。
+    answer: D
+  - index: 4
+    text: 他們嘴上說要合作，實際上卻（　），誰也不肯示弱。
+    answer: A
+  - index: 5
+    text: 那場經典籃球比賽至今仍然令人（　），大家一談起來就停不下來。
+    answer: B
+  - index: 6
+    text: 我們必須（　），才能如期完成這份重要的報告。
+    answer: J
+  - index: 7
+    text: 他把老師說話的聲音和動作模仿得 （　），全班笑成一團。
+    answer: I
+  - index: 8
+    text: 她明明有更好的機會卻選擇放棄，真讓人（　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列語詞，何者使用正確？
+    options:
+      A: 有了白狐裘，孟嘗君可以再次收買更多食客，幫助他逃難
+      B: 白狐裘象徵孟嘗君的誠意，可能讓秦國君王重新考慮釋放他
+      C: 白狐裘的光芒喚醒了孟嘗君求生的意志，使他下定決心逃亡
+      D: 代表孟嘗君終於能滿足幸姬的條件，換取她出面求情的機會
+    rationale: Ｄ ）2. 第五段說：「狗盜先生捧了個包袱進來，白狐裘雪亮的光芒帶來了活下去的希望。」這裡的「活下去的希望」最可能代表什麼？
+  - index: 3
+    answer: A
+    stem: 哪一個選項正確描述了孟嘗君從赴秦到成功逃離秦國的順序？
+    options:
+      A: 秦昭王想再見孟嘗君一面，當面解釋誤會
+      B: 秦昭王後悔放走孟嘗君，重新生出殺意
+      C: 秦昭王覺得孟嘗君的才能可貴，想重新任用孟嘗君
+      D: 秦昭王回憶兩人曾經的交情，希望孟嘗君能常伴左右
+    rationale: 「想念」在日常語境中是帶有情感的正面詞，但在這段話中，是帶有隱含殺意的諷刺轉義，代表秦昭王情緒反覆、心懷殺機。
+  - index: 5
+    answer: C
+    stem: 孟嘗君最後能夠逃出秦國的關鍵因素是什麼？
+    options:
+      B: 秦昭王心軟，主動赦免孟嘗君讓他自由離開
+      C: 食客們發揮各自的專長，幫助孟嘗君化解危機
+      D: 齊國軍隊立刻出兵支援，幫助孟嘗君逃出秦國
+    rationale: 雞鳴與狗盜先生的技能看似無用，但在關鍵時刻發揮出力量，解救孟嘗君。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 成語任務22-雞鳴狗盜
+    duration_seconds: 242
+    source: 中華文化永續
+  - index: 2
+    title: 15 曹沖秤象
+    duration_seconds: 106
+    source: 均一教育平台
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

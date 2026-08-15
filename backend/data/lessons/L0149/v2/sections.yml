@@ -1,0 +1,130 @@
+lesson_uid: L0149
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 事半功倍
+    definition: 費力少但收穫大。
+  - index: 2
+    word: 效率
+    definition: 付出心力與獲得成效的比率。
+  - index: 3
+    word: 職涯
+    definition: 指職業、生涯。
+  - index: 4
+    word: 過度表徵
+    definition: 某一群體在某個類別中的比率太高，超出預期。例如，全臺灣國中男生佔52%，但某國中的男生占全校人數的70%，表示這個國中的男生是過度表徵。
+  - index: 5
+    word: 因材施教
+    definition: 根據學生不同的特質，給予不同的教導。
+  - index: 6
+    word: 代謝
+    definition: 生物體內物質被轉換、利用或排出的過程。本文指運動後身體處理並排出二氧化碳的過程。
+  - index: 7
+    word: 得天獨厚
+    definition: 獨具特殊的優越條件。
+  - index: 8
+    word: 水滴石穿
+    definition: 比喻雖然力量小，只要堅持不懈，就能把艱難的事做成。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 職涯
+    B: 效率
+    C: 代謝
+    D: 水滴石穿
+    E: 事半功倍
+    F: 得天獨厚
+    G: 因材施教
+  questions:
+  - index: 1
+    text: 每天堅持十分鐘的練習，日積月累，（　），讓他獲得好成果。
+    answer: D
+  - index: 2
+    text: 我們得先思考問題在哪兒，才能讓事情處理得更有（　）。
+    answer: B
+  - index: 3
+    text: （　）規畫要先掌握自己的興趣、能力、價值觀，再看看有什麼樣的機會適合自己。
+    answer: A
+  - index: 4
+    text: 教練不會要求每位選手用同一種訓練方式，而是根據個別差異（　）。
+    answer: G
+  - index: 5
+    text: 他天生嗓音清亮，再加上勤奮練習，在歌唱比賽中展現出（　）的優勢。
+    answer: F
+  - index: 6
+    text: 熬夜會影響身體的（　），也可能讓人白天更容易疲倦。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項的描述，何者出現「過度表徵」的現象？
+    options:
+      A: 華語人口占世界人口的14.8%，華語是世界排名第一的常用語言
+      B: 大安區人口占全台人口的1.2%，但台大有6.9%學生來自大安區
+      C: 2023年印度總人口14億2千萬人，是全世界人口數最高的國家
+      D: 男生占全臺灣國中生52%，但某國中的男生卻占全校人數的50%
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據課文第五段長條圖，以下描述何者是錯誤的？
+    options:
+      B: 各個族裔帶有米田堡血型的比率差異很大
+      C: 世界上只有這六種族裔具備米田堡血型
+      D: 阿美族有米田堡血型的比率遠超過其他族裔
+    rationale: 選項Ｃ－過度推論，長條圖雖未畫到，但不代表只有這六種族裔具米田堡血型。
+  - index: 3
+    answer: D
+    stem: 馬偕醫院想知道「米田堡血型的人，運動後代謝二氧化碳能力的強弱」，因而進行了實驗。根據課文對實驗的描述，以下選項何者錯誤？
+    options:
+      B: 實驗設計比較有、無米田堡血型者的代謝效能
+      C: 結果發現具有米田堡血型的人，能較快排出二氧化碳
+      D: 結果發現運動產生的二氧化碳在體內越久、效能越好
+    rationale: D-體內二氧化碳越少，效能越好。
+  - index: 4
+    answer: A
+    stem: 根據本文結尾，下列何者是本文想要傳達給讀者的理念？
+    options:
+      A: 選擇職涯可綜合評估天賦及努力
+      C: 後天的努力比先天基因更為重要
+      D: 有米田堡血型的人都是運動健將
+    rationale: 根據總結，努力和先天身體素質都是影響運動關鍵之一，所以依照自己的能力選擇自己的方向，將能事半功倍。
+  - index: 5
+    answer: B
+    stem: 作者在課文第一、二段用了三個例子描述「阿美族人」在運動與勞動表現上的突出現象，請問這樣的寫作方式目的為何？
+    options:
+      A: 為了與結尾相互呼應
+      C: 方便比較三種例子的差異
+      D: 科學問題一定要有三個支持的證據
+      B: 作者用三個例子說明阿美族的特殊之處，加強文章說服力。
+    rationale: 作者用三個例子說明阿美族的特殊之處，加強文章說服力。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: '"米田堡血型"呼吸代謝快 原住民體能具優勢'
+    duration_seconds: 214
+    source: TVBS NEWS
+  - index: 2
+    title: 賽先生科學小常識：聊聊米田堡
+    duration_seconds: 203
+    source: 賽先生科學工廠
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

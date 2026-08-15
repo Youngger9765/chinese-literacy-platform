@@ -1,0 +1,94 @@
+lesson_uid: L0140
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 契機
+    definition: 讓事情開始改變或發展的關鍵機會。
+  - index: 2
+    word: 奢求
+    definition: 過度期待很難得到的事物。
+  - index: 3
+    word: 耐人玩味
+    definition: 值得仔細思考、反覆體會。
+  - index: 4
+    word: 心存怨懟
+    definition: 心裡有怨恨和不滿。
+  - index: 5
+    word: 提心吊膽
+    definition: 非常擔心、害怕，心裡一直不安。
+  - index: 6
+    word: 刁鑽
+    definition: 指問題、情況或人的個性很難處理、很難應付。
+  - index: 7
+    word: 愛怨糾葛
+    definition: 愛、不滿、委屈等感情交纏在一起，難以分清。
+  - index: 8
+    word: 吞忍
+    definition: 把委屈或痛苦忍下來，不說出來或反抗。
+  - index: 9
+    word: 泫然欲泣
+    definition: 欲泣：快要哭出來；指眼淚快要流下來，像要哭出來的樣子。
+  extraction_check:
+    vocabulary_agreement: 0.91
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 奢求
+    B: 契機
+    C: 泫然欲泣
+    D: 耐人玩味
+    E: 心存怨懟
+    F: 愛怨糾葛
+    G: 提心吊膽
+    H: 刁鑽
+    I: 吞忍
+  questions:
+  - index: 1
+    text: 這次段考數學題目很（　），題目看起來簡單，卻藏了好幾個陷阱。
+    answer: H
+  - index: 2
+    text: 每次打掃，阿翔都藉故離開，留下同組同學收拾善後；大家心裡早已對他（　） 。
+    answer: E
+  - index: 3
+    text: 每次小組分工，整理資料和上台報告都落在小芸身上，她原本選擇（　），最後終於開口要求重新分配。
+    answer: I
+  - index: 4
+    text: 球隊傷兵累累，吃盡苦頭後終於反敗為勝，教練在旁（　），卻強忍著不讓眼淚掉下來。
+    answer: C
+  - index: 5
+    text: 他知道父親向來不擅表達，卻仍盼著一句溫柔的道歉；那份（　）背後其實藏著多年的委屈。
+    answer: A
+  - index: 6
+    text: 颱風夜裡，山區居民聽著土石滑落的聲音，整晚都（　），無法入睡。
+    answer: G
+  - index: 7
+    text: 她一方面渴望母親理解自己，一方面又怨母親從不傾聽；這份（　），讓兩人的距離越來越遠。
+    answer: F
+  - index: 8
+    text: 那場失敗讓球員第一次看見自己的鬆散，也成了全隊開始認真練習的（　）。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 心存怨懟
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 張曼娟聽到「吸管」後大笑，最合理的理解是什麼？
+    options:
+      A: 因為她能用笑聲掩飾自己的失望，不讓父親看見她的委屈
+      B: 因為她在認清現實後，有強大的智慧作出不必為此受困的選擇
+      C: 因為她終於明白父親只是口齒不清，所以不再誤會父親的意思
+      D: 因為她長期照顧失能父親，即使得不到感謝，也繼續忍耐付出
+    rationale: 前文鋪陳張曼娟期待父親說「謝謝」，所以當父親說出「ㄒㄧ……」時，張曼娟和讀者都會以為那是「謝謝」。最後是「吸管」，形成強烈落差，也讓讀者更能理解她期待落空的心情。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

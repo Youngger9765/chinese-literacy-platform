@@ -1,0 +1,105 @@
+lesson_uid: L0082
+version_id: v2
+vocab_application:
+  options:
+    A: 覓食
+    B: 繁衍
+    C: 紀律
+    D: 體現
+    E: 求偶
+    F: 鎮日
+    G: 此起彼落
+    H: 本能
+    I: 片面
+    J: 基因
+  questions:
+  - index: 1
+    text: 做公共決策時，不能只聽某方（　）的說法，必須聽到多元的意見。
+    answer: I
+  - index: 2
+    text: 他（　）忙於工作，幾乎沒有時間休息。
+    answer: F
+  - index: 3
+    text: 雄孔雀為了（　），開屏展現美麗的羽毛來吸引異性。
+    answer: E
+  - index: 4
+    text: 這些植物在適宜的環境中迅速（　），覆蓋了整個花園。
+    answer: B
+  - index: 5
+    text: 良好的（　）能幫助團隊達成目標。
+    answer: C
+  - index: 6
+    text: 他為朋友兩肋插刀，充分（　）了他對朋友的義氣。
+    answer: D
+  - index: 7
+    text: 過年時鞭炮聲 （　），不絕於耳。
+    answer: G
+  - index: 8
+    text: 對陌生的事物提高警覺，是所有動物的（　）反應。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 片面
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 文章第二段指出，螞蟻和蟋蟀的行為背後有什麼共同目的？
+    options:
+      A: 都是為了儲存食物
+      C: 都是為了避免天敵
+      D: 都是為了獲得娛樂
+      B: 第4題解析：(作者批判的是過度簡化昆蟲行為，讓人們以「美德 vs. 惡習」的二元對立方式去理解，而忽視了昆蟲行為背後共同的生物學目的—延續生命。
+    rationale: 第4題解析：(作者批判的是過度簡化昆蟲行為，讓人們以「美德 vs. 惡習」的二元對立方式去理解，而忽視了昆蟲行為背後共同的生物學目的—延續生命。
+    is_rationale: true
+  - index: 3
+    answer: C
+    stem: 作者寫「螞蟻可能覺得蟋蟀荒廢正業，蟋蟀也可能認為螞蟻缺乏情趣，但行為背後可能都有共同的目的」，主要想提醒讀者什麼？
+    options:
+      A: 生物行為不同，就不可能有共同目的
+      B: 螞蟻和蟋蟀應改變行為，符合彼此期待
+      C: 只從自己的角度看事物，容易形成片面結論
+      D: 螞蟻和蟋蟀的行為都不符合生存需求
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 作者認為《伊索寓言》的做法有什麼問題？
+    options:
+      A: 為了教育兒童，把人類的道德標準加在昆蟲身上
+      B: 讓昆蟲像人一樣說話，使故事缺少科學的真實感
+      C: 作者為蟋蟀打抱不平，高歌行為並沒有對錯
+      D: 強調昆蟲的個體行為，忽略了群體行為的重要性
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 「如果只從自己的角度出發，導致片面結論，常會因此失去對事物多元客觀的理解。」下列情況，哪一個不是片面的結論？
+    options:
+      A: 看到一些畫家收入不高，便認定「藝術不能當飯吃」
+      B: 認為孩子只有在學校名列前茅，未來才有可能成功
+      C: 認為遊民未必懶惰，也許他們遭遇了不得已的困境
+    rationale: A、B、D 都以單一的主觀價值或標準評斷，缺乏對文化背景、行為目的或多元價值的理解。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 七下生物｜【觀念】生物多樣性
+    duration_seconds: 536
+    source: 臺北酷課雲
+  - index: 2
+    title: 走進螞蟻的世界，感受螞蟻的神奇與偉大
+    duration_seconds: 459
+    source: L科學探索號
+  - index: 3
+    title: 【在地真台灣】蟋蟀學問多 蟋蟀生態館在雲林麥寮
+    duration_seconds: 161
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

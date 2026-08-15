@@ -1,0 +1,16 @@
+lesson_uid: L0166
+version_id: v2
+resources:
+  items:
+  - index: 1
+    title: 建立信任感的六步驟，你覺得很困難嗎？
+    duration_seconds: 370
+    source: Mr.Ant安老爹切諾
+  - index: 2
+    title: 怎樣說話才能獲得別人的信任？
+    duration_seconds: 258
+    source: Wisdom Bread 智慧麵包
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true
