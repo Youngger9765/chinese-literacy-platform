@@ -83,8 +83,18 @@ def main() -> int:
                 "verdict": check["verdict"],
             },
         }
-        if check["verdict"] == "suspect":
+        # `suspect` — the check ran and came back low. `no_vocab` — the check could not
+        # run at all, because these worksheets (11 of them 文言文, which use 古文今譯
+        # instead of a 本課語詞 box) name no vocabulary to compare against. That is a
+        # body with NO cross-validation: the extraction produced text and nothing
+        # confirms the boundary. Unflagged it would read as verified, which is the
+        # distinction the QA plan exists to preserve.
+        if check["verdict"] in ("suspect", "no_vocab"):
             doc["needs_review"] = True
+            doc["review_reason"] = (
+                "語詞比對結果偏低" if check["verdict"] == "suspect"
+                else "這份學習單沒有本課語詞，課文邊界無從交叉驗證"
+            )
 
         if not a.dry_run:
             (vdir / "body.yml").write_text(

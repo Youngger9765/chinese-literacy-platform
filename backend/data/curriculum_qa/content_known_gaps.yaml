@@ -343,3 +343,26 @@ resolved:
       課程簡介: DOCX 沒有這一節。不拿課文首段充當，那會讓簡介變成課文重複一次
       詞語複習: 找字方陣，需要能驗證「每個語詞都在方陣裡找得到」才寫入，尚未做
       知識補給站: 抽到 129 課但無交叉驗證可做，標 needs_human_review
+
+bodies_without_a_cross_check:
+  count: 29
+  of: 175
+  what: 這 29 課的課文抽出來了，但**沒有任何交叉驗證** —— 學習單沒有「本課語詞」可以拿來比對邊界（其中 11 課是文言文，用「古文今譯」不是語詞框）。
+  how_marked: body.yml 標 needs_review + review_reason，跟通過檢查的 111 課區分開
+  why_not_withheld: 課文本身很可能是對的（suspect 那 5 課人工看過都對），扣住等於讓學生沒課文可讀。標註比隱藏誠實。
+  how_to_close: 人工確認這 29 課的課文起訖是否正確，或替這兩種版型找出各自的交叉驗證欄位
+
+reading_benchmark_not_in_source:
+  count: 0
+  of: 175
+  status: 不是缺口 —— 來源沒有這份資料
+  what: reading_benchmark 是每課的朗讀速度分級門檻（字/分鐘）。學習單只印空白的計時表格給學生自己填，沒有任何目標值。
+  current_behaviour: 前端 personaConfig.ts 走「課別基準 → 年級預設 → 全域 120」的鏈，缺這欄仍有門檻可用
+  how_to_close: 需要教學端提供各年級/各課的目標值，不是抽取問題
+
+lesson_without_a_passage:
+  count: 1
+  of: 175
+  status: 不是缺口 —— 這課本來就沒有課文
+  lesson: L0136《會考圖文題實戰》
+  what: 這是用 112 年國中教育會考圖文題做的實戰練習課，本身不含閱讀文本。

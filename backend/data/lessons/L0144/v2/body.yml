@@ -46,3 +46,4 @@ extraction_check:
   ratio: 0.0
   verdict: suspect
 needs_review: true
+review_reason: 語詞比對結果偏低

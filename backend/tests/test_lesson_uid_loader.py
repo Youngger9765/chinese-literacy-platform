@@ -785,3 +785,24 @@ def test_the_knowledge_section_stops_at_the_first_index_reset():
         if idx != sorted(set(idx)) or len(idx) > 8:
             over.append((l["lesson_uid"], idx[:8]))
     assert over == [], f"resource indices are not one increasing run: {over[:3]}"
+
+
+def test_a_body_with_no_cross_check_says_so():
+    """Extraction ran and produced text is not the same as extraction was verified.
+
+    29 worksheets name no vocabulary to compare the body against — 11 of them 文言文,
+    which use 古文今譯 rather than a 本課語詞 box — so nothing confirms their boundary.
+    Left unflagged they are indistinguishable from the 111 that passed a real check.
+    """
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    unflagged = []
+    for uid in L.available_uids():
+        for f in (L.LESSONS_ROOT / uid).glob("v*/body.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+            verdict = (doc.get("extraction_check") or {}).get("verdict")
+            if verdict in ("no_vocab", "suspect") and not doc.get("needs_review"):
+                unflagged.append((uid, verdict))
+    assert unflagged == [], f"unverifiable bodies presented as checked: {unflagged[:4]}"
