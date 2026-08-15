@@ -155,7 +155,7 @@ fields_not_extracted:
       of: 175
       是什麼: 朗讀字數基準
     has_key_reading:
-      count: 146
+      count: 147
       of: 175
       是什麼: 重點朗讀段落
 locks_removed_with_the_first_edition:
@@ -189,15 +189,14 @@ key_reading_passages:
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
 key_reading_withheld:
-  count: 29
+  count: 28
   of: 175
-  status: 其中 28 課不是缺口 —— 那個課型本身沒有這個練習
+  status: 不是缺口 —— 那個課型本身沒有這個練習
   breakdown:
     no_section: 28   # 學習單裡根本沒有「念順順」這一節（多為文言文與品格教育），不做計時朗讀
-    anchor_out_of_range: 1   # L0012 書信體，署名與信頭短於 12 字下限被略過，段數少於學習單的段號
   what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
   why_28_is_not_a_gap: 逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣。沒有老師標的重點段可抽，跟某課沒有影片一樣是正常狀態。
-  how_to_close: 只有 L0012 有得修 —— 需要讓書信體的短行（「阿耀 敬上」「寄件人：…」）進入課文。
+  how_to_close: 無 —— 這 28 份學習單沒有這一節。若日後改版加入，重跑 build_key_reading.py 即可。
 
 key_reading_flagged:
   count: 2
@@ -372,3 +371,14 @@ lesson_without_a_passage:
   status: 不是缺口 —— 這課本來就沒有課文
   lesson: L0136《會考圖文題實戰》
   what: 這是用 112 年國中教育會考圖文題做的實戰練習課，本身不含閱讀文本。
+
+spreadsheet_title_unmatched:
+  count: 13
+  of: 175
+  what: 這 13 課的課名在 自學教材總表.xlsx 找不到對應列，所以沒有簡介／文體來源（文體另從學習單刊頭的「Level N・文體」取得，故仍有值）。
+  breakdown:
+    absent_from_sheet: 9   # 試算表確實沒有這課（用同一套查法對已知存在的課做過正向對照）
+    ambiguous: 2           # 「正太與小豬」有兩列都以它開頭，挑哪一列都是擲骰子
+    multi_text: 2          # 一課取材自試算表的兩列（巨石陣＋摩艾石像），非 1:1
+  why_not_forced: 課名配對錯一列 = 這課掛上別課的簡介與策略。一修的封面就是這樣接錯的。寧可留白。
+  how_to_close: 請教材端在總表補上這 9 課，或確認「正太與小豬」兩列各對應哪一課

@@ -848,9 +848,11 @@ def test_no_lesson_is_shorter_than_its_own_worksheet_says():
         if anchor and body and anchor > len(body):
             over.append((lesson["lesson_uid"], anchor, len(body)))
 
-    # L0012 is a letter whose salutations and signatures run under the short-paragraph
-    # floor, so its body is genuinely a few paragraphs shorter than the worksheet counts.
-    assert len(over) <= 1, f"bodies shorter than their worksheet claims: {over[:5]}"
+    # Zero, not "at most one". The last holdout was L0012, a letter whose salutations
+    # and signature ran under the short-paragraph floor — 應用文 lessons are made of
+    # such lines and now keep them. Every anchor a worksheet names now exists in the
+    # body it points into.
+    assert over == [], f"bodies shorter than their worksheet claims: {over[:5]}"
 
 
 def test_key_reading_disagreements_are_flagged_not_silently_preferred():
