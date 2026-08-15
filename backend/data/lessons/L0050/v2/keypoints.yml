@@ -1,0 +1,38 @@
+keypoints:
+  lesson: G6-L10
+  structure: flat
+  columns:
+  - label
+  - hint
+  - value
+  rows:
+  - label: 問題～2）
+    hint: 描述一個「不好的事或困難」
+    value: '歐洲人遇到什麼困難？
+
+      歐洲人想要航行到亞洲買香料回來賣，__'
+    blanks:
+    - answer: 遠洋探險需要龐大的費用，任何人都無法單獨承擔
+      hint: ''
+    paragraph: '1'
+  - label: 解決
+    hint: 有人想出辦法或行動 (誰＋做什麼)
+    value: '荷蘭人想出什麼方法籌錢？
+
+      荷蘭人成立__'
+    blanks:
+    - answer: 荷蘭東印度公司，並發行股票，讓許多人一起投資
+      hint: ''
+    paragraph: '3'
+  - label: 結果
+    hint: 行動後，造成了什麼改變？
+    value: '1.對投資者：平民百姓也能__
+
+      2.對公司：荷蘭東印度公司__'
+    blanks:
+    - answer: 參與投資，買股票，成為公司的股東
+      hint: ''
+    - answer: 集到龐大的資金，能派遣船隊遠洋航行，完成大型計畫
+      hint: ''
+    paragraph: 5、10
+  locate_paragraph: true

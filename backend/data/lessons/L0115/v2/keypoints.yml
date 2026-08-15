@@ -1,0 +1,36 @@
+keypoints:
+  lesson: G8-L18
+  structure: flat
+  columns:
+  - label
+  - hint
+  - value
+  rows:
+  - label: 引出議題
+    hint: 【   1   】
+    value: 生活與產業都需要__，文章提出臺灣是否應使用__的爭議。
+    blanks:
+    - answer: 電力
+      hint: ''
+    - answer: 核電
+      hint: ''
+  - label: 反方論述
+    hint: 【2～4   】
+    value: 強調萬一出事__，並指出臺灣疏散困難與核廢選址的困境。
+    blanks:
+    - answer: 代價太大
+      hint: ''
+  - label: 正方論述
+    hint: 【 5～7  】
+    value: 強調「不用核能也有風險」，包括能源__、減碳壓力與__。
+    blanks:
+    - answer: 供應依賴進口
+      hint: ''
+    - answer: 用電需求上升
+      hint: ''
+  - label: 結尾
+    hint: 【  8    】
+    value: 作者提醒要用__來做出民主決策。
+    blanks:
+    - answer: 透明數據、嚴格監管與持續對話
+      hint: ''

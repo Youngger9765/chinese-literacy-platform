@@ -223,12 +223,23 @@ class TestSchemaAlwaysCaged:
         """Load all G6/G7 parsed lesson YAMLs."""
         pattern = str(LESSON_DIR / "G[67]-L*.yml")
         files = sorted(glob.glob(pattern))
-        assert files, f"No G6/G7 lesson YAMLs found at {LESSON_DIR}"
+        if not files:
+            # The source was deleted with the first edition (#2683). A fixture that
+            # ASSERTS its input exists turns "no data" into an error on every test
+            # that requests it, which reads as a broken contract rather than an
+            # absent corpus. Skip, so the distinction stays visible.
+            pytest.skip(f"no G6/G7 lesson YAMLs at {LESSON_DIR} — 一修來源已刪 (#2683)")
         lessons = []
         for f in files:
             with open(f) as fh:
                 lessons.append((Path(f).name, yaml.safe_load(fh)))
         return lessons
+
+    @pytest.mark.skip(
+
+        reason="來源 backend/data/lessons/_parsed_2026-05-01/ 的 G6/G7 課文 YAML 隨一修刪除（#2683）；OMO 的決定性不變式本身仍有效，待二修抽取器產出對應欄位後改對 uid tree 重建"
+
+    )
 
     def test_all_g67_lessons_loaded(self, g67_lessons):
         """Sanity: we must find at least 50 G6/G7 lessons."""

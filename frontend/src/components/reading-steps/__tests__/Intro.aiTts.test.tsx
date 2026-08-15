@@ -83,7 +83,7 @@ const LESSON_ID = 42;
 const baseStory: Story = {
   id: String(LESSON_ID),
   title: '測試課文',
-  level: 3,
+  level: '3',
   content: [P0, P1],
   thumbnail: '/test.jpg',
   category: 'Fable',

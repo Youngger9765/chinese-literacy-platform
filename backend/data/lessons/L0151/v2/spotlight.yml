@@ -1,0 +1,33 @@
+spotlight:
+  lesson: G9-L8
+  strategy_name: 媒體素養與識讀-查核、辨識假新聞
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎ 小試身手
+  - type: guide
+    text: 讀完文章後，我們一起來追查凱蒂案吧。
+  - type: guide
+    text: 王大宏有一些讓他對假新聞保持警覺的好習慣：
+  - type: guide
+    text: Ａ.看來源：誰發布的？可信媒體、專家、官方資料？還是匿名轉傳？
+  - type: guide
+    text: 'Ｂ.查證據: 證據符合常理？有無正式紀錄或可查證的來源？'
+  - type: guide
+    text: Ｃ.辨語氣：標題是否過度煽情、絕對化，刻意引發憤怒或恐懼？
+  - type: guide
+    text: Ｄ.想目的：這則訊息可能讓誰得利？想影響我的什麼想法或行動？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 他看了以上的報導後，疑心大起，請你判斷他底下的反應，是哪一個好習慣帶來的? （在空格裡填入A, B, C, D）
+  - type: guide
+    text: （ C ）①這標題太誇張聳動了吧！
+  - type: guide
+    text: （ A ）②紐約時報？這家媒體常常因不實報導挨罵啊？
+  - type: guide
+    text: （ B ）③全都冷漠旁觀？這太不可能，和常理有衝突
+  - type: guide
+    text: （ B ）④記者怎麼可能一家家去調查窗後的目擊者有38人？
+  - type: guide
+    text: （ D ）⑤報紙快被電視和多媒體打敗了，它想用這個多賣點報紙？

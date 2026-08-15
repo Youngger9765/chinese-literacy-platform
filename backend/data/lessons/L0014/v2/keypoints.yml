@@ -1,0 +1,35 @@
+keypoints:
+  lesson: G4-L3
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 觀察遊戲
+    sub_rows:
+    - sub_label: 起因
+      template: 作者和媽媽搭區間車時，媽媽提議作者可以   觀察   車廂上的人。
+      blanks: []
+    - sub_label: 經過
+      template: '作者發現車廂上最常見的畫面是
+
+        __。
+
+        2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。
+
+        3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。'
+      blanks:
+      - answer: □①閱讀□②講電話③滑手機
+        hint: ''
+    - sub_label: 結果
+      template: '發現讀書的畫面給人__的感覺。
+
+        (請打勾，複選)'
+      blanks:
+      - answer: ①正向□②用功③愉悅
+        hint: ''
+  - label: 影響
+    value: 作者出門都會隨身帶   一本書/書   ，一有空檔就拿出來閱讀。
+    blanks: []
+  title: 最美的畫面

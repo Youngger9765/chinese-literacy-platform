@@ -1,0 +1,62 @@
+keypoints:
+  lesson: 體-L1
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 舉例
+    sub_rows:
+    - sub_label: 二~五
+      template: '1.小美看見隊友的表現亮眼而感到__
+
+        2.阿哲練習後對自己的表現感到__
+
+        3.小宇站在罰球線，心裡十分（①緊張　□②雀躍）
+
+        4.佳恩準備上場，腦中都是他人
+
+        （□①肯定  ②批評）的聲音'
+      blanks:
+      - answer: 不是滋味
+        hint: ''
+      - answer: 沮喪
+        hint: ''
+  - label: 提出主旨
+    sub_rows:
+    - sub_label: 六
+      template: '1.運動不只需要體力、技術，還需要可以和
+
+        __好好合作。
+
+        2.__會影響你面對壓力和挫折，以及看待自己與隊友。'
+      blanks:
+      - answer: 身體
+        hint: ''
+      - answer: 心
+        hint: ''
+  - label: 提出證據與建議
+    sub_rows:
+    - sub_label: 七
+      template: '1.證據：研究顯示，在實力相當的情況下，
+
+        __往往是勝負的關鍵。
+
+        2.建議：把握每一次訓練和比賽的機會，隨時
+
+        __、調整自己的情緒與想法。'
+      blanks:
+      - answer: 心理素質
+        hint: ''
+      - answer: 覺察
+        hint: ''
+  - label: 結論
+    sub_rows:
+    - sub_label: 八
+      template: '比賽帶來的不只是輸贏，更是對自己和他人的
+
+        __。'
+      blanks:
+      - answer: 了解
+        hint: ''
+  title: 心，也要一起練

@@ -1,0 +1,168 @@
+spotlight:
+  lesson: G7-L19
+  strategy_name: 自我提問策略3-問好問題
+  strategy_type: self_questioning
+  blocks:
+  - type: guide
+    text: '自我提問策略：一邊讀、一邊問自己的讀書方法
+
+      閱讀高手，讀書時不是一直往下讀；高手會在關鍵處停一下，問自己問題，並且回到文章中找線索檢查自己的理解。
+
+      前兩課，我們已經練習過：讀完一小段，要停一下，問自己「這段主要在說什麼？」也練習過如何找出前後段落文字之間的關係。
+
+      這一課，我們要再往前一步：閱讀時，不是每個地方都問同一個問題，而是要判斷自己需要理解什麼，再問自己一個最有幫助的問題。
+
+      這一課，我們練習三個常用的自我提問。
+
+      本課口訣：先抓主要內容→再串連前後文→最後讀出作者想法'
+  - type: guide
+    text: 一、一邊讀，一邊問自己好問題
+  - type: guide
+    text: 右欄提問是提醒你，閱讀到關鍵處時，先停下來想一想。看到問題時，請做兩件事：
+  - type: free_text
+    prompt: ❶先在心裡回答這個問題。
+  - type: free_text
+    prompt: ❷在課文中，圈出可以支持你回答的句子或關鍵詞。
+  - type: guide
+    text: 提醒：只看問題不算完成自我提問；能找出文章線索，並回答問題，才表示你真的讀懂了
+  - type: guide
+    text: 二、先判斷：現在需要問哪一個問題
+  - type: guide
+    text: 閱讀時，先判斷閱讀任務，再選出最適合的自我提問。請把①②③填入【 】中。
+  - type: single
+    prompt: 自我提問小卡：①這裡主要在說什麼？
+    options:
+    - 這段和前面內容有什麼關係？
+    - 作者真正想告訴我們什麼？
+    answer: 這段和前面內容有什麼關係？
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、比較看看：自我提問後，理解有什麼不同？
+  - type: guide
+    text: 請看第5–8段，作者寫湯姆刷油漆的故事。這段可以讀出兩層意思：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 1.你覺得課文的作者，希望告訴讀者的是哪一個層次呢？  □ ①     ②
+    options:
+    - 你覺得課文的作者，希望告訴讀者的是哪一個層次呢？
+    - ①     ②
+    answer: 你覺得課文的作者，希望告訴讀者的是哪一個層次呢？
+  - type: single
+    prompt: 2.對湯姆的故事，如果我的理解要從①提升到②，最需要問自己哪一個問題？
+    options:
+    - 這段主要在說什麼？
+    - 這段（湯姆的故事）和前面內容有什麼關係？
+    - 這段故事最有趣的地方是什麼？
+    answer: 這段（湯姆的故事）和前面內容有什麼關係？
+  - type: guide
+    text: 四、小試身手：在關鍵處依需求問自己一個好問題
+  - type: guide
+    text: 步驟一：請照下表最左兩欄的說明，回頭再讀一次課文
+  - type: guide
+    text: 步驟二：在第三欄選一個最能說明該段文字的選項
+  - type: guide
+    text: 步驟三：在最右欄填上該段文字最適用的自我提問好問題（請填入①②③）
+  - type: single
+    prompt: 自我提問小卡：①這裡主要在說什麼？
+    options:
+    - 這段和前面內容有什麼關係？
+    - 作者真正想告訴我們什麼？
+    answer: 這段和前面內容有什麼關係？
+  - type: fill_table
+  - type: guide
+    text: 五、換我試試看：少一點提示
+  - type: guide
+    text: 剛剛已經練習過，怎麼用自我提問讀出理解。現在提示變少了，請你自己判斷：讀到這裡時，哪一個自我提問的問題最能幫助理解？選完後，再勾選這個問題幫你做了什麼。（請參考自我提問小卡）
+  - type: guide
+    text: 六、我的發現與自我檢核
+  - type: free_text
+    prompt: 1.我的發現：
+  - type: guide
+    text: 做完上面的練習後，請選出「自我提問策略」的功能：
+  - type: single
+    prompt: 請選擇
+    options:
+    - 自我提問是在讀不懂時使用；如果看懂文字，就不用再問。
+    - 自我提問可以幫自己抓段落內容、連結前後文，讀出作者想法。
+    answer: 自我提問是在讀不懂時使用；如果看懂文字，就不用再問。
+  - type: free_text
+    prompt: 2.自我檢核
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 我知道自我提問不是每一句都問，而是在重要地方停一下問自己。
+    - 我會依照閱讀任務，選出適合的問題問自己。
+    - 我會用自我提問幫自己抓住主要內容、連結前後文，或讀出作者想法。
+    - 當我答不出來時，我會回到文章找線索，而不是直接猜答案。
+    - 我以後閱讀時，會想要試著使用自我提問的策略。
+    answer:
+    - 我知道自我提問不是每一句都問，而是在重要地方停一下問自己。
+    - 我會依照閱讀任務，選出適合的問題問自己。
+    - 我會用自我提問幫自己抓住主要內容、連結前後文，或讀出作者想法。
+    - 當我答不出來時，我會回到文章找線索，而不是直接猜答案。
+    - 我以後閱讀時，會想要試著使用自我提問的策略。
+  - type: guide
+    text: 接下來做什麼？
+  - type: guide
+    text: 恭喜你完成「自我提問策略」的練習了。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+    - 沒學過這篇課文：請繼續做後面的學習單，從「讀全文－做記號」開始。
+    answer: 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：自我提問策略3
+  - type: guide
+    text: ◎ 我的表現
+  - type: free_text
+    prompt: (1)    難如登天    ：形容非常困難，像登天一樣困難。
+  - type: free_text
+    prompt: (2)    嘀咕        ：小聲說話，常帶有抱怨、不滿或懷疑的語氣。
+  - type: free_text
+    prompt: (3)    怨懟        ：心裡怨恨、不滿。
+  - type: free_text
+    prompt: (4)    慢條斯理    ：形容說話或做事從容緩慢、不慌不忙。
+  - type: free_text
+    prompt: (5)    自怨自艾    ：因為事情不順利而埋怨、責備自己，心情低落。
+  - type: free_text
+    prompt: (6)    儼然        ：好像、很像。
+  - type: free_text
+    prompt: (7)   嘴饞         ：看到或想到好吃的東西，就很想吃。
+  - type: free_text
+    prompt: (8)   撒賴          ：賴皮、不講道理。
+  - type: free_text
+    prompt: (9)    醍醐灌頂     ：受到很大的啟發，突然明白重要的道理。「醍醐」原指從牛奶提煉出的精華，佛教用來比喻智慧。
+  - type: free_text
+    prompt: (10)    故技重施    ：再次使用以前用過的同一種手段或方法。
+  - type: free_text
+    prompt: (11)    層出不窮    ：接連不斷的出現，好像沒有盡頭。「窮」是盡頭的意思。
+  - type: free_text
+    prompt: (12)    百思不解    ：經過反覆思考，還是不能了解。
+  - type: free_text
+    prompt: (13)   犯小人       ：遇到故意要害你的人。
+  - type: free_text
+    prompt: (1)教練要小夫每天多練習半小時，小夫不滿的(  Ｂ  )幾句，讓教練大發雷霆。
+  - type: free_text
+    prompt: (2)他向來小氣，你想要他請你吃東西，簡直就(  Ｄ  )。
+  - type: free_text
+    prompt: (3)詐騙集團騙人的手法不斷更新，被騙的案例(  Ｃ  )，大家應該多加小心。
+  - type: free_text
+    prompt: (4)她總是認為自己受到了不公平的對待，因此內心充滿了 (  Ｆ  )。
+  - type: free_text
+    prompt: (5)集合時間快要到了，同組的同學們還(  Ｈ  )的收拾行李，讓我好著急。
+  - type: free_text
+    prompt: (6)胖虎站在新歌發表會的舞台上，表情十分自信，(  Ｇ  )就是一位大歌星。
+  - type: free_text
+    prompt: (7) 輸球後，他一直(  Ｅ  )，責怪自己當天出現大失誤，因而與冠軍擦肩而過。
+  - type: free_text
+    prompt: (8)我們本來是無話不談的好朋友，為什麼她突然變得冷淡，這讓我(  Ａ  )。
+  - type: fill_table

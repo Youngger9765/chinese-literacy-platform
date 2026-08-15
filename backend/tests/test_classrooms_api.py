@@ -507,7 +507,7 @@ class TestAddStudent:
 
         assignment_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
-            json={"story_id": "1", "title": "Pre-existing Assignment"},
+            json={"story_id": "20001", "title": "Pre-existing Assignment"},
             headers=auth_header(teacher["token"]),
         )
         assert assignment_resp.status_code == 201

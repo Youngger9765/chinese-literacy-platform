@@ -1,0 +1,67 @@
+spotlight:
+  lesson: G6-L21
+  strategy_name: 品格力-負責任的決定-區辨控制圈
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: 一、認識「關注圈」與「控制圈」：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 生活中，健康、人際、課業等我們所關心的各種事物，都在「關注圈」裡。這些關注的事情裡，能由自己掌控或改變的部分，就是「控制圈」。若你的「關注圈」裡有這幾件事，請判斷哪些事情會落在你的「控制圈」呢？
+  - type: guide
+    text: 請在你可以掌控、改變的項目打勾：
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 今天的天氣       ②早上的起床時間
+    - 公車上人多不多
+    - 要不要找同學聊天 ⑤功課有沒有完成
+    - ⑥老師幾點下課
+    - ⑦回家作業多不多
+    - ⑧手機要使用多久
+    answer:
+    - 今天的天氣       ②早上的起床時間
+    - 公車上人多不多
+    - 要不要找同學聊天 ⑤功課有沒有完成
+    - ⑥老師幾點下課
+    - ⑦回家作業多不多
+    - ⑧手機要使用多久
+  - type: guide
+    text: 二、區辨「控制圈」：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 從文章中，我們可以看出主角的兩難，請判斷主角在乎的事情是否落在他的「控制圈」（能不能由主角單方面決定？）：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: passage
+    source: unknown
+    paragraphs:
+    - ☆主角的心煩，也來自於他的焦點多在（□①控制圈之內　②控制圈之外），一起來幫主角想想，哪些是在控制圈內的事情吧！（請打勾）
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 告白時機  ②告白方式
+    - 對方的回應
+    - 告白內容
+    - 得到回覆的時間 ⑥自己如何回應對方的答案
+    answer:
+    - 告白時機  ②告白方式
+    - 對方的回應
+    - 告白內容
+    - 得到回覆的時間 ⑥自己如何回應對方的答案
+  - type: guide
+    text: ◎在生活中，也有許多兩難情境，就讓我們透過情境，來練習區辨「控制圈」：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: ☆控制圈之外的事，仍值得努力；但努力過後也要明白，結果不是我們單方面能控制的。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 在面對兩難抉擇時，我們容易被各種擔憂困住，感到焦慮或茫然。而當我們專注在控制圈裡，能減少那些無力和不安，也能逐漸找回自己的主動權和力量。練習把注意力放在自己能影響的行動和選擇上，會更能勇敢、自在的面對每一次選擇❤︎

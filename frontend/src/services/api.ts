@@ -68,7 +68,7 @@ interface ApiStoryListItem {
   id: number;
   lesson_number: number;
   title: string;
-  grade: number;
+  grade: string;   // "4".."9" / 文言文 / 品格教育
   grade_code: string;
   genre: string;
   category: string;
@@ -146,7 +146,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
 interface ApiStoryListResponse {
   stories: ApiStoryListItem[];
   total: number;
-  grades: number[];
+  grades: string[];
 }
 
 function apiListItemToStory(item: ApiStoryListItem): Story {
@@ -252,7 +252,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
   };
 }
 
-export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: number[] }> {
+export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: string[] }> {
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
   // Bounded content (~270 lessons): fetch all in one request so client-side

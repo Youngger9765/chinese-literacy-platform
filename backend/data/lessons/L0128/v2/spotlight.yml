@@ -1,0 +1,25 @@
+spotlight:
+  lesson: G8-L8
+  strategy_name: 推論策略-從對比推論作者觀點
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: "這篇文章透過珍古德的故事，帶你看見作者的想法，作者沒有用一個句子完整說出所有觀點，而是透過多組對比與前後轉變，逐步引導讀者看見黑猩猩的複雜全貌；結尾再以明示的句子收束「理解應走向行動」的觀點。你在閱讀的過程中會慢慢發現：\n\
+      「啊！這些對比各自凸顯不同重點，最後共同支持一個主要觀點。」\n「啊！原來作者想透過這些對比，改變我原本的想法。」\n讀這樣的文章，你要先讀出對比，然後一邊讀一邊問自己兩個問題：\
+      \   \n1.這組對比想讓我看見什麼？（重點）\n2.作者透過這些重點想影響我什麼？（作者意圖）"
+  - type: guide
+    text: 一、找對比與歸納重點：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、歸納主要論點/主旨
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: self_check
+    items:
+    - 我能找到文本裡的對比訊息，並歸納出重點。
+    - 我能根據歸納出的重點，進一步推論出本文的重點和作者觀點。

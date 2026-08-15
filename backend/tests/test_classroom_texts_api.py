@@ -1,3 +1,4 @@
+# 課文 id 在二修重刷後是 `20000 + n`（uid tree，#2683）——舊的 1..N 已不存在。
 """
 Tests for the classroom texts API.
 
@@ -215,7 +216,7 @@ class TestAssignText:
     def test_assign_returns_201(self, client, teacher, classroom_id):
         resp = client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "2", "copyright_confirmed": True},
+            json={"text_id": "20002", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 201
@@ -231,13 +232,13 @@ class TestAssignText:
 
         resp = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "3", "copyright_confirmed": True},
+            json={"text_id": "20003", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 201
         data = resp.json()
         assert "id" in data
-        assert data["text_id"] == "3"
+        assert data["text_id"] == "20003"
         assert "title" in data
         assert isinstance(data["title"], str)
         assert len(data["title"]) > 0
@@ -254,7 +255,7 @@ class TestAssignText:
         # First assignment
         resp1 = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "4", "copyright_confirmed": True},
+            json={"text_id": "20004", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp1.status_code == 201
@@ -262,7 +263,7 @@ class TestAssignText:
         # Second assignment — duplicate
         resp2 = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "4", "copyright_confirmed": True},
+            json={"text_id": "20004", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp2.status_code == 409
@@ -280,7 +281,7 @@ class TestAssignText:
     def test_assign_nonexistent_classroom_returns_404(self, client, teacher):
         resp = client.post(
             "/api/classrooms/99999/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 404
@@ -295,7 +296,7 @@ class TestAssignText:
 
         resp = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(other_teacher["token"]),
         )
         assert resp.status_code == 403
@@ -303,7 +304,7 @@ class TestAssignText:
     def test_assign_401_without_auth(self, client, classroom_id):
         resp = client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
         )
         assert resp.status_code == 401
 
@@ -317,7 +318,7 @@ class TestAssignText:
 
         resp = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "5", "copyright_confirmed": True},
+            json={"text_id": "20005", "copyright_confirmed": True},
             headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 201
@@ -369,12 +370,12 @@ class TestListClassroomTexts:
         # Assign two texts
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "6", "copyright_confirmed": True},
+            json={"text_id": "20006", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "7", "copyright_confirmed": True},
+            json={"text_id": "20007", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
@@ -396,7 +397,7 @@ class TestListClassroomTexts:
 
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "8", "copyright_confirmed": True},
+            json={"text_id": "20008", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
@@ -411,7 +412,7 @@ class TestListClassroomTexts:
         assert "text_id" in item
         assert "title" in item
         assert "assigned_at" in item
-        assert item["text_id"] == "8"
+        assert item["text_id"] == "20008"
         assert isinstance(item["title"], str)
         assert len(item["title"]) > 0
 
@@ -423,16 +424,16 @@ class TestListClassroomTexts:
         )
         cid = cr.json()["id"]
 
-        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "9", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
-        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "10", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
+        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "20009", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
+        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "20010", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
 
         resp = client.get(
             f"/api/classrooms/{cid}/texts",
             headers=auth_header(teacher["token"]),
         )
         text_ids = {item["text_id"] for item in resp.json()}
-        assert "9" in text_ids
-        assert "10" in text_ids
+        assert "20009" in text_ids
+        assert "20010" in text_ids
 
     def test_list_403_for_non_owner(self, client, teacher, other_teacher, school_id):
         cr = client.post(
@@ -484,12 +485,12 @@ class TestUnassignText:
 
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
         resp = client.delete(
-            f"/api/classrooms/{cid}/texts/1",
+            f"/api/classrooms/{cid}/texts/20001",
             headers=auth_header(teacher["token"]),
         )
         # Route declares status_code=200; accept both 200 and 204 as success
@@ -504,11 +505,11 @@ class TestUnassignText:
         cid = cr.json()["id"]
 
         # Assign two texts
-        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "1", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
-        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "2", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
+        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "20001", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
+        client.post(f"/api/classrooms/{cid}/texts", json={"text_id": "20002", "copyright_confirmed": True}, headers=auth_header(teacher["token"]))
 
         # Unassign one
-        del_resp = client.delete(f"/api/classrooms/{cid}/texts/1", headers=auth_header(teacher["token"]))
+        del_resp = client.delete(f"/api/classrooms/{cid}/texts/20001", headers=auth_header(teacher["token"]))
         assert del_resp.status_code in (200, 204)
 
         # Verify only text 2 remains
@@ -519,7 +520,7 @@ class TestUnassignText:
         assert list_resp.status_code == 200
         data = list_resp.json()
         assert len(data) == 1
-        assert data[0]["text_id"] == "2"
+        assert data[0]["text_id"] == "20002"
 
     def test_unassign_text_not_assigned_returns_404(self, client, teacher, school_id):
         cr = client.post(
@@ -530,7 +531,7 @@ class TestUnassignText:
         cid = cr.json()["id"]
 
         resp = client.delete(
-            f"/api/classrooms/{cid}/texts/1",
+            f"/api/classrooms/{cid}/texts/20001",
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 404
@@ -538,7 +539,7 @@ class TestUnassignText:
 
     def test_unassign_nonexistent_classroom_returns_404(self, client, teacher):
         resp = client.delete(
-            "/api/classrooms/99999/texts/1",
+            "/api/classrooms/99999/texts/20001",
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 404
@@ -553,18 +554,18 @@ class TestUnassignText:
 
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
         resp = client.delete(
-            f"/api/classrooms/{cid}/texts/1",
+            f"/api/classrooms/{cid}/texts/20001",
             headers=auth_header(other_teacher["token"]),
         )
         assert resp.status_code == 403
 
     def test_unassign_401_without_auth(self, client, classroom_id):
-        resp = client.delete(f"/api/classrooms/{classroom_id}/texts/1")
+        resp = client.delete(f"/api/classrooms/{classroom_id}/texts/20001")
         assert resp.status_code == 401
 
     def test_admin_can_unassign_from_any_classroom(self, client, teacher, admin_user, school_id):
@@ -577,12 +578,12 @@ class TestUnassignText:
 
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
         resp = client.delete(
-            f"/api/classrooms/{cid}/texts/1",
+            f"/api/classrooms/{cid}/texts/20001",
             headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code in (200, 204)
@@ -597,12 +598,12 @@ class TestUnassignText:
 
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
         resp = client.delete(
-            f"/api/classrooms/{cid}/texts/1",
+            f"/api/classrooms/{cid}/texts/20001",
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code in (200, 204)
@@ -639,7 +640,7 @@ class TestClassroomTextsFullFlow:
         cid = cr.json()["id"]
 
         # 2. Assign 3 texts
-        for tid in ["1", "2", "3"]:
+        for tid in ["20001", "20002", "20003"]:
             resp = client.post(
                 f"/api/classrooms/{cid}/texts",
                 json={"text_id": tid, "copyright_confirmed": True},
@@ -656,21 +657,21 @@ class TestClassroomTextsFullFlow:
         assert len(list_resp.json()) == 3
 
         # 4. Unassign text 2
-        del_resp = client.delete(f"/api/classrooms/{cid}/texts/2", headers=headers)
+        del_resp = client.delete(f"/api/classrooms/{cid}/texts/20002", headers=headers)
         assert del_resp.status_code in (200, 204)
 
         # 5. List texts: should be 2
         list_resp2 = client.get(f"/api/classrooms/{cid}/texts", headers=headers)
         assert list_resp2.status_code == 200
         remaining_ids = {item["text_id"] for item in list_resp2.json()}
-        assert "1" in remaining_ids
-        assert "3" in remaining_ids
-        assert "2" not in remaining_ids
+        assert "20001" in remaining_ids
+        assert "20003" in remaining_ids
+        assert "20002" not in remaining_ids
 
         # 6. Duplicate assign text 1 returns 409
         dup_resp = client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=headers,
         )
         assert dup_resp.status_code == 409
@@ -686,7 +687,7 @@ class TestClassroomTextsFullFlow:
         assert invalid_resp.json()["detail"] == "Story not found"
 
         # 8. Delete text that was already unassigned returns 404
-        del_again = client.delete(f"/api/classrooms/{cid}/texts/2", headers=headers)
+        del_again = client.delete(f"/api/classrooms/{cid}/texts/20002", headers=headers)
         assert del_again.status_code == 404
         assert del_again.json()["detail"] == "Text not assigned to classroom"
 
@@ -795,7 +796,7 @@ class TestNonNumericTextId:
         # Assign a known-good numeric text
         client.post(
             f"/api/classrooms/{cid}/texts",
-            json={"text_id": "1", "copyright_confirmed": True},
+            json={"text_id": "20001", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
@@ -822,7 +823,7 @@ class TestNonNumericTextId:
         )
         assert resp.status_code == 200
         data = resp.json()
-        # At minimum the valid text "1" should be present; the bad row should
+        # At minimum the valid text "20001" should be present; the bad row should
         # either be resolved or silently skipped, never 500.
         text_ids = {item["text_id"] for item in data}
-        assert "1" in text_ids
+        assert "20001" in text_ids

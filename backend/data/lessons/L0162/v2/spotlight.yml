@@ -1,0 +1,10 @@
+spotlight:
+  lesson: 文-L7
+  strategy_name: 判斷句
+  strategy_type: classical_grammar
+  blocks:
+  - type: guide
+    text: '[MISSING_SPOTLIGHT_SOURCE] 判斷句（文言聚光燈）缺可抽取素材，需人工補件（語法焦點：判斷句）'
+  - type: free_text
+    prompt: 判斷句（文言聚光燈）缺料（語法焦點：判斷句，待補件）
+  _missing_source: true

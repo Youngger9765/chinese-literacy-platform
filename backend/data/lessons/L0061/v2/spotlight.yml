@@ -1,0 +1,100 @@
+spotlight:
+  lesson: G6-L20
+  strategy_name: 寫作手法-用例子說明觀點
+  strategy_type: writing_technique
+  blocks:
+  - type: guide
+    text: 步驟❶──找觀點
+  - type: single
+    prompt: 本文的觀點是明說的。作者對「公平」的看法是什麼？
+    options:
+    - 公平就是每個人接受完全相同的標準與安排。
+    - 公平不能只看表面是否相同，也要考慮差異與需要。
+    answer: 公平不能只看表面是否相同，也要考慮差異與需要。
+  - type: guide
+    text: 步驟❷──找例子：整理校園的例子
+  - type: single
+    prompt: 1.作者一開始寫了三種不同安排。只看表面，這三位同學都像是：
+    options:
+    - 得到比其他同學較寬鬆的安排。
+    - 接受和其他同學完全不同的學習內容。
+    answer: 得到比其他同學較寬鬆的安排。
+  - type: free_text
+    prompt: 2.完成表格，看看這些例子有什麼共同點：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟❸──判斷共同點
+  - type: free_text
+    prompt: 1.整合出三個校園例子的共同點
+  - type: guide
+    text: （選一格詞填入：不公平、不同的安排、困難與需要、不同的調整）
+  - type: guide
+    text: 只看表面，三位同學得到【 不同的安排    】
+  - type: guide
+    text: →看起來好像【  不公平   】
+  - type: guide
+    text: →知道背後情況後，才發現他們有不同的【  困難與需要      】
+  - type: guide
+    text: →學校或老師因此依照需要，作出【 不同的調整      】
+  - type: guide
+    text: 步驟❹──回扣觀點
+  - type: single
+    prompt: 這些例子如何支持作者對「公平」的看法？
+    options:
+    - 公平就是不論每個人的情況，都接受完全相同的安排。
+    - 公平不能只看表面是否一樣，也要依不同需要作出調整。
+    answer: 公平不能只看表面是否一樣，也要依不同需要作出調整。
+  - type: guide
+    text: 二、再練一次：整理孔子的例子
+  - type: guide
+    text: 步驟❷──找例子
+  - type: free_text
+    prompt: 1.子路和冉有問同一個問題，卻得到不同回答。
+  - type: guide
+    text: 只看表面，孔子的做法好像：
+  - type: single
+    prompt: 請選擇
+    options:
+    - 對同一個問題，給出不同的答案，看起來像是雙重標準。
+    - 先了解兩人的情況，再給適合的提醒。
+    answer: 對同一個問題，給出不同的答案，看起來像是雙重標準。
+  - type: free_text
+    prompt: 2.請完成表格，找出孔子回答不同的原因，以及若給兩人相同回答，可能造成的結果。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 步驟❸──判斷共同點
+  - type: single
+    prompt: 把子路和冉有的情況合起來看，它們共同說明什麼？（單選）
+    options:
+    - 兩人問相同問題，孔子卻給不同答案，表示孔子標準前後不一。
+    - 兩人個性不同，孔子便讓他們各自決定，不必接受共同規範。
+    - 兩人問相同問題，但特質與需要不同，因此孔子給予不同提醒。
+    answer: 兩人問相同問題，但特質與需要不同，因此孔子給予不同提醒。
+  - type: guide
+    text: →這就是「因材施教」：依學生不同的特質與需要，採取適合的教導方式。
+  - type: guide
+    text: 三、步驟❹──扣回觀點：判斷例子的作用
+  - type: free_text
+    prompt: 1.請判斷前面的兩組例子，分別支持主要觀點的哪一個面向。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 2.把兩組例子合起來看，它們共同支持作者哪一個觀點？（單選）
+    options:
+    - 為了避免爭議，公平就是對每個人採取完全相同的做法。
+    - 真正的公平不是齊頭式平等，而是看見差異，依需要給予適合的安排或教導。
+    answer: 真正的公平不是齊頭式平等，而是看見差異，依需要給予適合的安排或教導。
+  - type: fill_table
+  - type: self_check
+    items:
+    - 我能判斷例子是如何支持作者的觀點。
+    - 我能把多個例子合起來看，說出它們共同支持的觀點。
+    - 下次讀到「用例子說明觀點」的文章時，我會問自己：這些例子有什麼共同點？怎麼支持作者的觀點？

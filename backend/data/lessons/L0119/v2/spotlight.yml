@@ -1,0 +1,16 @@
+spotlight:
+  lesson: G8-L21
+  strategy_name: 寫作手法-擬人－從擬人推論文章意涵
+  strategy_type: writing_technique
+  blocks:
+  - type: guide
+    text: "擬人，是把非人的事、物、景寫得像人一樣，會動作、會說話、會有感受或態度。擬人手法可使景物更生動，也把自己的感情放進景物裡。就像我們對小時候的玩具或娃娃一樣，可能會幫被描述的事、物、景命名、跟它說話，把它當作人一樣對待。\n\
+      \    而文章使用擬人之處，也是作者投入想像和感情之重點，這篇文章將台東聯想成心愛的對象，進而對其傾訴，因此閱讀時我們可以留意擬人的句子，推論作者主要想傳達的感受或意涵。"
+  - type: guide
+    text: ◎小試身手
+  - type: guide
+    text: 試試看，從這篇文章的擬人句讀出原先的客觀事實，再找出其中的聯想，並推論作者背後想表達的意涵：
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

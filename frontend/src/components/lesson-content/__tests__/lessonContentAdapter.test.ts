@@ -27,7 +27,7 @@ function graphicTextStory(overrides: Partial<Story> = {}): Story {
   return {
     id: 'GT-1',
     title: '兩種八哥',
-    level: 7,
+    level: '7',
     content: [],
     thumbnail: '',
     category: 'Science',
@@ -65,7 +65,7 @@ function plainTextStory(): Story {
   return {
     id: 'PT-1',
     title: '普通課文',
-    level: 5,
+    level: '5',
     content: [],
     thumbnail: '',
     category: 'Fable',

@@ -1,0 +1,32 @@
+spotlight:
+  lesson: G4-L10
+  strategy_name: 寫作手法：順敘－從時間詞判斷事件順序
+  strategy_type: writing_technique
+  blocks:
+  - type: guide
+    text: ◎ 小試身手：
+  - type: free_text
+    prompt: 1.先圈出時間，再讀一讀這個時間點發生了什麼事，最後依先後順序在（ ）中填入1~4。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 2.排完時間順序後，把這些事件連起來看。哪一個說法最能整理楊俊瀚這幾年的經歷？
+    options:
+    - 拿下世大運金牌後，一路順利，最後取得奧運資格
+    - 先拿下金牌，後來遇到失敗與受傷，但仍努力復健、重回賽場
+    - 一開始就受傷復健，後來才拿下世大運金牌，最後參加亞運比賽
+    answer: 先拿下金牌，後來遇到失敗與受傷，但仍努力復健、重回賽場
+  - type: free_text
+    prompt: 3.〈𪹚龍慶元宵〉　彭仁星
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 你發現了嗎？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 時間詞不一定都是年份，也可能是「元宵節前、前一天、元宵夜、過後」這類說法。找到時間詞，就比較能看懂事情怎麼發展。

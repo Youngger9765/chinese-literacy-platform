@@ -94,8 +94,11 @@ from app.services.lesson_code_normalization import (
 #  Paths (all under the worktree root; tests/fixtures dir, NOT catalog)
 # ═══════════════════════════════════════════════════════════════════════════
 
-SPOTLIGHT_DIR = _BACKEND_ROOT / "data" / "lessons" / "spotlight" / "dev7"
-PARSED_DIR = _BACKEND_ROOT / "data" / "lessons" / "_parsed_2026-05-01"
+# The uid tree written by scripts/build_lesson_uid_tree.py:
+#   data/lessons/<lesson_uid>/<version_id>/{lesson,spotlight,keypoints}.yml
+# The two constants that stood here (`spotlight/dev7/`, `_parsed_2026-05-01/`) were
+# both keyed by lesson CODE and both deleted with the first edition (#2683).
+LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 DEFAULT_OUT_DIR = _BACKEND_ROOT / "tests" / "fixtures" / "lesson_content_dev7"
 DEFAULT_GAPS_OUT = (
     _BACKEND_ROOT / "data" / "curriculum_qa" / "content_known_gaps.adapter.yaml"
@@ -854,20 +857,67 @@ def write_gaps(gaps: GapLog, gaps_out: Path) -> None:
 def build_lesson_dict(
     lesson_code: str, gaps: Optional[GapLog] = None, with_keypoints: bool = False
 ) -> tuple[dict[str, Any], GapLog]:
-    """Load DEV7 sources for a code and return (lesson_dict, gaps)."""
+    """Load a lesson from the uid tree and return (lesson_dict, gaps).
+
+    `lesson_code` is a lesson_uid (`L0042`). It used to be a catalogue code read out
+    of `spotlight/dev7/` — but a code says where a lesson sits this edition, not which
+    lesson it is, and 11 of them were being rewritten by a first-edition offset table.
+    """
     gaps = gaps or GapLog()
-    spot = load_spotlight(SPOTLIGHT_DIR / f"{lesson_code}.spotlight.yml")
-    parsed, parsed_kind = load_parsed(lesson_code)
-    lesson_dict = assemble_lesson(spot, parsed, gaps, with_keypoints, parsed_kind)
+    vdir = _uid_version_dir(lesson_code)
+    spot = load_spotlight(vdir / "spotlight.yml")
+    # The keypoints source used to be the `_parsed` twin's raw `story_structure_table`.
+    # The uid tree emits keypoints already structured, so convert back to that raw
+    # shape and keep ONE keypoints parser rather than teaching the adapter a second.
+    parsed: dict[str, Any] = {}
+    if with_keypoints:
+        from app.services.keypoints_to_structure import keypoints_to_structure_table
+
+        kp_path = vdir / "keypoints.yml"
+        if kp_path.exists():
+            table = keypoints_to_structure_table(
+                yaml.safe_load(kp_path.read_text(encoding="utf-8"))
+            )
+            if table:
+                parsed = {"story_structure_table": table}
+    lesson_dict = assemble_lesson(spot, parsed, gaps, with_keypoints)
     return lesson_dict, gaps
 
 
-def dev7_codes() -> list[str]:
-    """The 7 DEV7 codes, discovered from the dev7 dir (gold_manifest.json excluded)."""
-    codes = []
-    for p in sorted(SPOTLIGHT_DIR.glob("*.spotlight.yml")):
-        codes.append(p.name[: -len(".spotlight.yml")])
-    return codes
+def _uid_version_dir(uid: str) -> Path:
+    """Latest version dir for a uid (the dir itself when it has no versions yet)."""
+    d = LESSONS_ROOT / uid
+    vdirs = sorted((c for c in d.iterdir() if c.is_dir() and c.name.startswith("v")),
+                   key=lambda c: c.name) if d.is_dir() else []
+    return vdirs[-1] if vdirs else d
+
+
+def _uid_spotlight_path(uid: str) -> Path:
+    """Latest version's spotlight.yml for a uid."""
+    return _uid_version_dir(uid) / "spotlight.yml"
+
+
+def sample_uids(limit: int = 0) -> list[str]:
+    """lesson_uids from the tree that actually have spotlight blocks to convert.
+
+    Replaces `dev7_codes()`, which globbed a hand-curated `spotlight/dev7/` fixture
+    dir keyed by lesson CODE. Codes move between editions; uids do not, and the tree
+    is the real corpus rather than seven files someone copied in. Lessons whose
+    extraction produced zero blocks are skipped — they are a registered content gap
+    (`data/curriculum_qa/content_known_gaps.yaml`), not adapter behaviour to assert on.
+    """
+    uids = []
+    for d in sorted(LESSONS_ROOT.glob("L[0-9][0-9][0-9][0-9]")):
+        vdirs = sorted((c for c in d.iterdir() if c.is_dir() and c.name.startswith("v")),
+                       key=lambda c: c.name)
+        if not vdirs:
+            continue
+        spot = load_spotlight(vdirs[-1] / "spotlight.yml")
+        if spot.get("blocks"):
+            uids.append(d.name)
+        if limit and len(uids) >= limit:
+            break
+    return uids
 
 
 # ═══════════════════════════════════════════════════════════════════════════

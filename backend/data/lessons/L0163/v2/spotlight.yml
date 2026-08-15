@@ -1,0 +1,10 @@
+spotlight:
+  lesson: 文-L8
+  strategy_name: 一字多義「少」
+  strategy_type: classical_grammar
+  blocks:
+  - type: guide
+    text: '[MISSING_SPOTLIGHT_SOURCE] 一字多義「少」（文言聚光燈）缺可抽取素材，需人工補件（語法焦點：一字多義）'
+  - type: free_text
+    prompt: 一字多義「少」（文言聚光燈）缺料（語法焦點：一字多義，待補件）
+  _missing_source: true

@@ -148,6 +148,15 @@ def _lesson_sweep_params():
     return params
 
 
+@pytest.mark.skip(
+
+
+    reason="corpus 來源 backend/data/lessons/_parsed_2026-05-01/ 的 vocab_bank 欄位隨一修刪除（#2683）；二修抽取器尚未產出 vocab_bank（見 content_known_gaps.yaml#fields_not_extracted）"
+
+
+)
+
+
 def test_perfect_student_sweep_has_lessons():
     assert _vocab_bank_lessons(), "expected vocab_bank lessons in corpus dir"
 

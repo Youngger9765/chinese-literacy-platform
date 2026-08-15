@@ -1,0 +1,51 @@
+spotlight:
+  lesson: G8-L9
+  strategy_name: 推論策略-整合各段觀點，找主要論點
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: 議論文章常會先引出議題，再由各段提出觀點、說明、案例或做法，最後形成全文的主要論點。閱讀時，可以先找出各段的核心訊息，再判斷它在全文中扮演的角色，最後沿著論述主線整合出主要論點。
+  - type: guide
+    text: 一、找出各段的核心訊息（看法／判斷）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 下表列出每個段落的兩個句子。請先選出本段最重要的句子，再判斷另一句在段落中具有什麼功能。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 你在任務一已經找出各段的主要觀點，這讓複雜的文字有了清楚的概念。
+  - type: guide
+    text: 二、本文主要論點的論述架構：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 任務二要做的是：看見作者怎麼把這些觀點，做清楚的論述——讓你一眼就看見文章的論述主線，即「描述現象說明它的影響給出建議」。
+    - 請根據論述的主線，找到對應的段落，填入段落數代號，並選出該段的關鍵詞。下一題要用這條主線和關鍵詞，整合出文章的主要論點。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、整合主要論點：請用一句話說出作者的主要論點。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 提示：參考上表的「論述主線」與「關鍵詞」，合起來，用「心理影響＋資訊影響＋作者建議」三個元素，寫出作者的主要論點。（答案合理就好）
+  - type: guide
+    text: ①按讚看似小動作，但它背後另有真相，②它會影響你的自我價值和心理健康　      ，③還會讓你受困於過濾泡泡，視野變窄                 　，④因此，不要讓讚數左右情緒與自我價值，要懂得平衡使用，讓社群媒體成為幫手　　　　                                                　。
+  - type: guide
+    text: （提示詞可選用：自我價值、心理健康、過濾泡泡、視野、平衡使用）
+  - type: guide
+    text: ※如果你四項都打勾，恭喜你，表示你能統整各段的看法，整合成一個主要看法。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: self_check
+    items:
+    - 我能判斷出每段作者的主要看法/觀點。
+    - 我能判斷每一段的主要看法的角色
+    - 我能寫出本文的主要論點

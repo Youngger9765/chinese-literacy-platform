@@ -1,0 +1,168 @@
+spotlight:
+  lesson: G7-L18
+  strategy_name: 自我提問策略2-讀出關係
+  strategy_type: self_questioning
+  blocks:
+  - type: guide
+    text: '自我提問策略：一邊讀、一邊問自己的讀書方法
+
+      前一課的自我提問策略，是讓你練習閱讀時，每段都要問自己：「這段主要在說什麼？」這個策略能夠幫我們抓到段落的重點。
+
+      但讀懂文章，不能只看懂個別的段落，也要看出前後內容怎麼連貫起來。這一課，我們要練習問自己：「這段和前面內容有什麼關係？」
+
+      閱讀時，看到「可是、從此、所以、原來…」這類語詞，通常表示這一段和前面的內容有關。這時可以停一下，問自己：「這段和前面內容有什麼關係？」常見的前後文關係包括：前後反差、接續發展、過程與結果、疑問與回答。
+
+      問完後，可以用三步驟幫自己回答：'
+  - type: guide
+    text: 一、一邊讀，一邊問
+  - type: guide
+    text: 下表的左欄呈現「正太與小豬」這個有趣的故事，右欄則列出自我提問的問題，提醒你在關鍵地方停下來，把這段和前面連起來想。看到問題時，請做兩件事：
+  - type: single
+    prompt: 請選擇
+    options:
+    - 先在心裡回答問題。
+    - 回到課文，圈出「這段」和「前面」最有關的線索。
+    answer: 先在心裡回答問題。
+  - type: guide
+    text: 二、比較看看：自我提問後，有沒有幫助你抓到訊息間的關係？
+  - type: guide
+    text: 請再讀一次2~4段，讀完後，先看看你現在比較接近哪一種理解？請打勾
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 如果你勾①或②，沒關係，表示你已經抓到一部分內容。接下來，我們要用自我提問，幫自己把理解推到層級③。
+  - type: single
+    prompt: 1.第2～4段，如果我要讀到層級③，最需要問自己哪一個問題？（３選１）
+    options:
+    - 這段主要在說什麼？
+    - 這段和前面內容有什麼關係？
+    - 這段讓我想到什麼道理？
+    answer: 這段和前面內容有什麼關係？
+  - type: free_text
+    prompt: 2.要看出前後關係，不能只看這一段，也要回頭看前面。請依步驟把「前面線索」和「這段線索」連起來。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 3.你發現了嗎？問自己「這段和前面內容有什麼關係？」可以……
+    options:
+    - 幫我記住這一段發生了哪些事情，並回憶前一段發生哪些事情。
+    - 幫我把這一段和前面的內容連起來，看出兩段之間的關係。
+    answer: 幫我把這一段和前面的內容連起來，看出兩段之間的關係。
+  - type: guide
+    text: 三、換你試試看：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 現在換你試試看。每讀完一段，問「這段和前面內容有什麼關係？」接著用以下步驟讀出訊息間的關係：讀這段→找前面→說關係
+  - type: guide
+    text: （一）第5～7段
+  - type: free_text
+    prompt: 1.□我已經先問自己：「這段和前面內容有什麼關係？」
+  - type: free_text
+    prompt: 2.找出訊息間的關係
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: （二）第8～9段
+  - type: free_text
+    prompt: 1.□ 我已經先問自己：「這段和前面內容有什麼關係？」
+  - type: free_text
+    prompt: 2.找出訊息間的關係
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: （三）第10～11段
+  - type: free_text
+    prompt: 1.□ 我已經先問自己：「這段和前面內容有什麼關係？」
+  - type: free_text
+    prompt: 2.找出訊息間的關係
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 四、我的發現與自我檢核
+  - type: free_text
+    prompt: 1.我的發現：
+  - type: single
+    prompt: 請選出「這段和前面內容有什麼關係？」這個提問的功能：
+    options:
+    - 幫我看出：這段和前面哪裡不一樣、怎麼接著發展、出現什麼結果，或回答了什麼疑問。
+    - 問自己這個問題，可以幫我記住故事裡先發生什麼、後發生什麼。
+    answer: 幫我看出：這段和前面哪裡不一樣、怎麼接著發展、出現什麼結果，或回答了什麼疑問。
+  - type: free_text
+    prompt: 2.自我檢核
+  - type: single
+    prompt: □①我讀到重要段落時，會停下來問：「這段和前面內容有什麼關係？」
+    options:
+    - 我會先讀這一段重要的事，再回頭找前面有關的內容。
+    - 我能把「這段」和「前面」的內容連起來，說出它們之間的關係。
+    - 我以後閱讀故事或文章時，會試著用這個問題把段落連起來。
+    answer: 我會先讀這一段重要的事，再回頭找前面有關的內容。
+  - type: guide
+    text: 接下來做什麼？
+  - type: guide
+    text: 恭喜你完成「自我提問策略」的練習了。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+    - 沒學過這篇課文：請繼續做後面的學習單，從「讀全文－做記號」開始。
+    answer: 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：自我提問策略2
+  - type: guide
+    text: ◎ 我的表現
+  - type: free_text
+    prompt: (1)    剃度        ：為了成為出家人而剃去頭髮的宗教儀式。
+  - type: free_text
+    prompt: (2)    萬紫千紅    ：形容百花盛開的景象。
+  - type: free_text
+    prompt: (3)    敢怒不敢言   ：心中有怒氣卻沒有勇氣說出來。
+  - type: free_text
+    prompt: (4)    寒氣逼人   ：形容非常寒冷。
+  - type: free_text
+    prompt: (5)    抱頭鼠竄    ：形容慌張逃走時狼狽尷尬的樣子。
+  - type: free_text
+    prompt: (6)    身材魁梧󠇠    ：形容身材高大雄偉。
+  - type: free_text
+    prompt: (7)    惡言相向    ：用惡劣或無禮、侮辱人的話罵人。
+  - type: free_text
+    prompt: (8)    囑咐     ：交代吩咐、叮嚀。
+  - type: free_text
+    prompt: (9)    金風送爽    ：指秋天帶來了涼意。金風指秋天的風。
+  - type: free_text
+    prompt: (10)    帥氣挺拔    ：形容男人外表英俊、身材高大。
+  - type: free_text
+    prompt: (11)    暑氣蒸人    ：指夏天的氣溫很高，讓人感到很濕熱。
+  - type: free_text
+    prompt: (12)    循序漸進    ：按照一定的次序與步驟逐漸推進。
+  - type: free_text
+    prompt: (13)    滴水穿石    ：滴水久了可以穿透石頭。比喻雖然力量小，只要堅持不懈，就能把艱難的事做成。
+  - type: free_text
+    prompt: (1)每當(  D  )的時候，爺爺總是喜歡在院子裡喝茶，欣賞秋天的景色。
+  - type: free_text
+    prompt: (2)他們吵架時，常常(  C  )，最後誰也不開心，兩人都很後悔。
+  - type: free_text
+    prompt: (3)妹妹學習游泳時，從基本動作開始(  A  )的練習，最後能游完整個泳池。
+  - type: free_text
+    prompt: (4)他每天都練習寫書法，終於像(  E  )一樣，寫得越來越好。
+  - type: free_text
+    prompt: (5)天氣冷了，媽媽(  H  )我要加件外套。
+  - type: free_text
+    prompt: (6)春天一到，百花盛開，一片(  F  )，美不勝收。
+  - type: free_text
+    prompt: (7)一聽到警笛聲，聚賭的一群人立即(  B  )，逃之夭夭。
+  - type: free_text
+    prompt: (8)他們個個都是(  G  )、強悍有力的士兵。
+  - type: fill_table

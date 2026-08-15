@@ -1,0 +1,57 @@
+keypoints:
+  lesson: 文-L8
+  structure: flat
+  columns:
+  - label
+  - hint
+  - value
+  rows:
+  - label: 主角
+    value: __
+    blanks:
+    - answer: 顧寧人
+      hint: ''
+  - label: 背景
+    hint: 居住地：【　 崑山　    】
+    value: '家世背景：
+
+      __'
+    blanks:
+    - answer: 世族/世代做官的家族
+      hint: ''
+  - label: 特質
+    value: __，而且精力__。
+    blanks:
+    - answer: 絕異之資/超越其他人的資質
+      hint: ''
+    - answer: 絕人/超越一般人
+      hint: ''
+  - label: 專長
+    value: __，九經諸史，都能背誦。
+    blanks:
+    - answer: 古學/古代的學問
+      hint: ''
+  - label: 嗜好：__
+    value: 支持的證據有：
+    blanks: []
+    label_blanks:
+    - answer: 讀書
+      hint: ''
+  - label: 嗜好：__
+    value: 1.自少至老，未嘗__。
+    blanks:
+    - answer: 一日廢書/從來沒有一天不讀書
+      hint: ''
+    label_blanks:
+    - answer: 讀書
+      hint: ''
+  - label: 嗜好：__
+    value: 2.出必__數簏自隨，旅店少休，披尋搜討，曾無__。
+    blanks:
+    - answer: 載書/帶上書
+      hint: ''
+    - answer: 倦色/疲倦的樣子
+      hint: ''
+    label_blanks:
+    - answer: 讀書
+      hint: ''

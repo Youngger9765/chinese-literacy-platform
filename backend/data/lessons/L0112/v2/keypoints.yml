@@ -1,0 +1,64 @@
+keypoints:
+  lesson: G8-L15
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 志向與進入場域(段1-2)
+    value: '1.宇晴的志向是當__。
+
+      2.宇晴到桃園__實習，農場沒有泥土味，反而有消毒酒精味，農場像__。'
+    blanks:
+    - answer: 農夫
+      hint: ''
+    - answer: 垂直農場
+      hint: ''
+    - answer: 高科技無塵室
+      hint: ''
+  - label: 農場外觀（段3）
+    value: 農場一層層栽培架和LED燈光，像__，每層水耕槽的葉片__。
+    blanks:
+    - answer: 太空站
+      hint: ''
+    - answer: 嫩綠、整齊
+      hint: ''
+  - label: 農場運作方式(段4)
+    value: '1.水耕蔬菜不是用土種出來的，而是用__。
+
+      2.透過__監測並調整各項條件，讓農場的環境維持在最適合蔬菜生長的範圍。'
+    blanks:
+    - answer: 營養液
+      hint: ''
+    - answer: 全環境控制系統
+      hint: ''
+  - label: 工作內容(段5)
+    value: '1.宇晴每天__，找出__的地方，能處理就處理，必要時回報。
+
+      2.她的領悟：讀圖表、看趨勢、抓異常也是在__。'
+    blanks:
+    - answer: 巡檢數據
+      hint: ''
+    - answer: 偏離／異常
+      hint: ''
+    - answer: 種菜
+      hint: ''
+  - label: 農場優勢(段6)
+    value: '1.垂直農場一開始__，宇晴擔心不賺錢。
+
+      2.無毒、蔬菜長得又快又漂亮，因此可賣__。'
+    blanks:
+    - answer: 所費不貲
+      hint: ''
+    - answer: 較高價格
+      hint: ''
+  - label: 傳統與未來(段7-8)
+    value: '1.宇晴回憶__（徒手、糞肥等），因此起雞皮疙瘩。
+
+      2.未來農夫不再是戴斗笠拿鋤頭，而更像__'
+    blanks:
+    - answer: 傳統農耕
+      hint: ''
+    - answer: 工程師
+      hint: ''
+  title: 未來的農夫

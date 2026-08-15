@@ -1,0 +1,48 @@
+keypoints:
+  lesson: G6-L29
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 主角
+    value: '1.洪信介，大家稱他為阿介，是臺灣山林界的__
+
+      2.他熱愛植物，透過__和請教__的方式持續學習，累積山林經驗與植物知識。'
+    blanks:
+    - answer: 傳奇植物獵人
+      hint: ''
+    - answer: 閱讀植物圖鑑
+      hint: ''
+    - answer: 專家
+      hint: ''
+  - label: 想做什麼
+    value: 他想進入保種中心，讓自己的專長真正用在__上。
+    blanks:
+    - answer: 植物保育
+      hint: ''
+  - label: 困難與行動
+    value: '1.困難一：他因只有國中學歷，多次被保種中心拒絕；
+
+      2.行動一：在中年__，考上員林農工園藝科，最後進入保種中心。
+
+      3.困難二：山林採集辛苦又危險
+
+      4.行動二：為了__的使命，持續進入山林採集。'
+    blanks:
+    - answer: 重新回到校園
+      hint: ''
+    - answer: 保存瀕臨絕種植物
+      hint: ''
+  - label: 成果與改變
+    value: '1.對植物與研究：二十五年來，他採集了__種植物，協助植物保育與科學研究。
+
+      2.對阿介自己：他的專業，為他贏得__，也讓他找回 __，重新找回自己。'
+    blanks:
+    - answer: 兩萬
+      hint: ''
+    - answer: 尊重
+      hint: ''
+    - answer: 自信
+      hint: ''
+  title: 植物獵人

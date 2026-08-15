@@ -1,0 +1,112 @@
+keypoints:
+  lesson: G7-L11
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 寫作目的
+    value: 信件內容
+    blanks: []
+  - label: 說明來信目的
+    value: '1.說明阿嬤就醫前的症狀，希望對__有所幫助。
+
+      2.說明阿嬤症狀帶來的困難，希望醫師提供幫助。'
+    blanks:
+    - answer: 診斷治療
+      hint: ''
+  - label: 說明困難與具體事例
+    sub_rows:
+    - sub_label: 困難
+      template: 具體事例
+      blanks: []
+    - sub_label: '亂發
+
+        脾氣'
+      template: 發生時間 __年前 一年多前 今年年初
+      blanks:
+      - answer: 五
+        hint: ''
+    - sub_label: '亂發
+
+        脾氣'
+      template: 對象 __ 阿公 阿公、__
+      blanks:
+      - answer: 阿公
+        hint: ''
+      - answer: 銀行
+        hint: ''
+    - sub_label: '亂發
+
+        脾氣'
+      template: 發生頻次 2~3天一次 1~2天一次 每天2~3次
+      blanks: []
+    - sub_label: '亂發
+
+        脾氣'
+      template: 持續時間 1鐘頭 2~3個鐘頭 __個鐘頭
+      blanks:
+      - answer: 2~4
+        hint: ''
+    - sub_label: '亂發
+
+        脾氣'
+      template: 方式 怪罪、責罵 大鬧、揮菜刀、丟尖銳物
+      blanks: []
+    - sub_label: '遺失
+
+        物品'
+      template: 物品 (1)遺失__和鄰居的__
+      blanks:
+      - answer: 機車
+        hint: ''
+      - answer: 腳踏車
+        hint: ''
+    - sub_label: '遺失
+
+        物品'
+      template: 金錢 數萬元現金不知去向
+      blanks: []
+    - sub_label: 就醫
+      template: 阿嬤沒有__，不知道自己生病，不願就醫，
+      blanks:
+      - answer: 病識感
+        hint: ''
+    - sub_label: '經濟
+
+        與
+
+        照顧的
+
+        負擔'
+      template: '(1)家境不好，作者與妹妹忙於__。
+
+
+        (2)阿公無固定收入。
+
+        (3((3)擔心阿嬤的行為造成經濟損失。
+
+        ((4)擔心若阿嬤無法改善，未來的照顧問題。'
+      blanks:
+      - answer: 打工
+        hint: ''
+  - label: 說明具體請求
+    value: '1.請求醫師開立__，我們要向法院聲請監護宣告。
+
+      2.請求醫師協助聯繫__，我們要諮詢相關問題。'
+    blanks:
+    - answer: 診斷書
+      hint: ''
+    - answer: 社工師
+      hint: ''
+  - label: 感謝與祝福
+    value: '1.感謝提供病床，讓阿嬤__。
+
+      2.敬祝__。'
+    blanks:
+    - answer: 住院
+      hint: ''
+    - answer: 秋祺
+      hint: ''
+  title: 一封向醫師求助的信

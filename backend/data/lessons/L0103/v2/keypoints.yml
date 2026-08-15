@@ -1,0 +1,43 @@
+keypoints:
+  lesson: G7-L6
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 結構名稱
+    value: 簡要內容
+    blanks: []
+  - label: 1.主要問題
+    value: 林韡勳想要製作出高品質、受歡迎的果醬。
+    blanks: []
+  - label: '2.__'
+    value: 他遇上食譜、熬煮火候、知名度、失敗果醬處理和出國比賽等問題。
+    blanks: []
+    label_blanks:
+    - answer: 拆解問題
+      hint: ''
+  - label: '3.__'
+    value: 他逐一面對所有的問題，一再嘗試，直到問題解決為止。
+    blanks: []
+    label_blanks:
+    - answer: 逐一解決
+      hint: ''
+  - label: '4.__'
+    value: 最後，他到英國參賽，得到一金二銅的榮耀。
+    blanks: []
+    label_blanks:
+    - answer: 確認結果
+      hint: ''
+  - label: 摘要：（把簡要內容組合成摘要）林韡勳想要製作出高品質、受歡迎的__。他遇上食譜、熬煮火候、知名度、失敗果醬處理和__等問題。他逐一面對所有的問題，一再嘗試，直到__為止。最後，他到英國參賽，得到__的榮耀。
+    value: ''
+    blanks: []
+    label_blanks:
+    - answer: 果醬
+      hint: ''
+    - answer: 出國比賽
+      hint: ''
+    - answer: 問題解決
+      hint: ''
+    - answer: 一金二銅
+      hint: ''

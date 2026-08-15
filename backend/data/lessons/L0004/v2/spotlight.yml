@@ -1,0 +1,45 @@
+spotlight:
+  lesson: G4-L13
+  strategy_name: 品格力-自我覺察─想法與情緒的關係
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: ☆勾完後，再看看沒有勾選的選項，那樣的想法所帶來的情緒有什麼不同呢？
+  - type: guide
+    text: ◎接著，我們再來看看更多情境事件，並根據題目的情緒，選擇對應的想法。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: ◎根據上面的回答，請試著歸納，能帶來平靜、好心情的想法多半具備下列哪些特質呢？
+  - type: free_text
+    prompt: '1.能換位思考，願意站在他人立場理解行為
+
+      （如：他放學沒等我，可能是剛好跟家人有約，來不及說。）'
+  - type: free_text
+    prompt: '2.願意接受事情有很多種可能，不針對自己
+
+      （如：他已讀不回，可能是不小心按到，或是點開後手機沒電了。）'
+  - type: free_text
+    prompt: '4.能從善意的角度解釋他人行為
+
+      （如：他沒約我打遊戲，也許是怕我作業太多會分心。）'
+  - type: free_text
+    prompt: '5.能保持好奇，不急著下判斷
+
+      （如：他今天都沒跟我說話，不知道他怎麼了？晚點來關心他。）'
+  - type: free_text
+    prompt: '7.能看見自己的優點，不隨意否定自己
+
+      （如：雖然我的意見沒有被小組採用，但勇敢分享本身就是很棒的表現。）'
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 回到文章，我們會看見，作者雖然是因為那份「喜歡」，所以十分在乎對方，以至於心情劇烈起伏，但影響情緒的關鍵也包含他的想法。所以當我們學會覺察想法，就能慢慢讓情緒變得穩定、有力量❤︎

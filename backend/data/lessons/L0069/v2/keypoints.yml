@@ -1,0 +1,51 @@
+keypoints:
+  lesson: G6-L2
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 討論議題(第1段)
+    value: 班上要進行__，兩組代表準備為自己的方案進行__。
+    blanks:
+    - answer: 班服投票
+      hint: ''
+    - answer: 政見發表
+      hint: ''
+  - label: 提案與質疑(第2～5段)
+    value: '1.第一組提出__的重磅純棉班服。
+
+      2.第二組提出兩百元的__。
+
+      3.同學分別提出質疑，兩組一直無法達成__。'
+    blanks:
+    - answer: 八百元
+      hint: ''
+    - answer: 吸濕排汗衫
+      hint: ''
+    - answer: 共識
+      hint: ''
+  - label: 討論轉折(第6～7段)
+    value: '1.班長提醒，團體討論不是要找出人人滿意的__，而是尋找較多人能接受的__。
+
+      2.夏恩不再死守原來的方案，討論開始出現新的方向。'
+    blanks:
+    - answer: 超完美決策
+      hint: ''
+    - answer: 折衷方案
+      hint: ''
+  - label: 形成決定(第8段)
+    value: 450元方案以__的同意票__；班上也約定不強迫購買，有困難可以另外討論。
+    blanks:
+    - answer: 三分之二以上
+      hint: ''
+    - answer: 通過
+      hint: ''
+  - label: 作者觀點(第9段)
+    value: 盲目堅持己見和一味__，都無助於團體決策。大家要__、接納差異，才較可能形成共同決定。
+    blanks:
+    - answer: 妥協退讓
+      hint: ''
+    - answer: 衡量得失
+      hint: ''
+  title: 一件班服，一場思辨討論

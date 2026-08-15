@@ -13,7 +13,7 @@ import { Story } from '../../../types';
 const baseStory: Story = {
   id: 'L01',
   title: '測試課文',
-  level: 1,
+  level: '1',
   content: ['課文內容'],
   thumbnail: '',
   category: 'Fable',

@@ -1,0 +1,29 @@
+spotlight:
+  lesson: G5-L19
+  strategy_name: 摘要策略-用主題細節結構整理重點
+  strategy_type: summary
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：摘要策略──
+  - type: guide
+    text: 以本課第三段為例：看文章怎麼變成結構圖
+  - type: single
+    prompt: ⑴大主題：第三段主要講什麼？
+    options:
+    - 鍛鍊肌肉的方法
+    - 動作訓練
+    answer: 鍛鍊肌肉的方法
+  - type: guide
+    text: 這就是結構圖最上方的大主題喔。
+  - type: guide
+    text: ⑵小主題：第三段用「首先、再來、最後」依序說明三個小主題。請看下面的結構圖，找出作者分別用了哪三個小主題來說明，並填入【 】中。
+  - type: guide
+    text: ◎ 小試身手：
+  - type: guide
+    text: 剛才我們試著用本課內容整理結構圖。現在請讀下面短文，也用「大主題—小主題—細節」的方法，把重點填進結構圖。
+  - type: guide
+    text: (範文擷取自黃金萍〈海中霸王〉）
+  - type: guide
+    text: 換你試試看

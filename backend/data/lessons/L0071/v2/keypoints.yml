@@ -1,0 +1,74 @@
+keypoints:
+  lesson: G6-L4
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 小主題
+    value: 重要細節
+    blanks: []
+  - label: 數字記憶廣度測驗
+    sub_rows:
+    - sub_label: 測驗目的
+      template: 測量受試者記憶數字的能力
+      blanks: []
+    - sub_label: 測驗方法
+      template: '施測者依序唸出一串數字，受試者要
+
+        __數字。'
+      blanks:
+      - answer: 照樣唸一遍（或依照順序唸一遍）
+        hint: ''
+    - sub_label: 得分標準
+      template: '如果受試者能記住「9個」數字，無法記住
+
+        10個數字，那麼得分為__。'
+      blanks:
+      - answer: '9'
+        hint: ''
+  - label: 實驗一：老中與老美的數字記憶廣度比較
+    sub_rows:
+    - sub_label: 參與者
+      template: 說__語與__語的兩組大學生。
+      blanks:
+      - answer: 漢
+        hint: ''
+      - answer: 英
+        hint: ''
+    - sub_label: 結果
+      template: 老中的記憶廣度得分比老美高，可能和漢語數字的發音__有關。
+      blanks:
+      - answer: 較短
+        hint: ''
+  - label: 其他科學家的異議
+    sub_rows:
+    - sub_label: '另一種
+
+        可能'
+      template: 兩組從小接受的__可能不同，因此不能只用發音長度解釋。
+      blanks:
+      - answer: 補習或數字訓練
+        hint: ''
+  - label: 實驗二：小老中與小老美的數字記憶廣度比較
+    sub_rows:
+    - sub_label: 參與者
+      template: __至__歲的小老中和小老美。降低長期補習或數字訓練的影響。
+      blanks:
+      - answer: '4'
+        hint: ''
+      - answer: '6'
+        hint: ''
+    - sub_label: 結果
+      template: '小老中的數字記憶廣度依然高於小老美。
+
+        而且，小老中的平均發音時間較短。
+
+        這個結果支持了__會影響__的說法。'
+      blanks:
+      - answer: 發音長度
+        hint: ''
+      - answer: 數字記憶
+        hint: ''
+  title: 大主題：數字記憶的奧秘

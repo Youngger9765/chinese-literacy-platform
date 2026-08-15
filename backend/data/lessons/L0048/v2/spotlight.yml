@@ -1,0 +1,164 @@
+spotlight:
+  lesson: G5-L9
+  strategy_name: 拆詞釋義＋從上下文推測詞義
+  strategy_type: inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：詞彙推測策略－拆詞釋義＋從上下文推測詞義
+  - type: guide
+    text: 一、詞彙：恐慌
+  - type: guide
+    text: 課文句子：大多數災難預言缺乏科學根據，我們無須過度恐慌。
+  - type: single
+    prompt: 1.先判斷：拆開後，「恐」和「慌」的意思你都熟悉嗎？
+    options:
+    - 都熟悉，可以先用「拆詞釋義」
+    - 不熟悉，改用「從上下文推測詞義」或其他方法
+    answer: 都熟悉，可以先用「拆詞釋義」
+  - type: free_text
+    prompt: 2.如果你選「拆詞釋義」，試著推測詞義
+  - type: guide
+    text: 「恐」： 恐懼、害怕
+  - type: guide
+    text: 「慌」： 慌張、慌亂     兩個字義合起來：【   害怕慌張　】
+  - type: single
+    prompt: 3.把推測的意思放回課文：
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 二、詞彙：熱議
+  - type: guide
+    text: 課文句子：她在作品中描繪了自己夢境中出現的災難場景，後來有人認為這些場景與2011年3月11日的日本東北大地震高度雷同，因此引發了熱議。
+  - type: single
+    prompt: 1.先判斷：拆開後，「熱」和「議」的意思你都熟悉嗎？
+    options:
+    - 都熟悉，可以先用「拆詞釋義」
+    - 不熟悉，改用「從上下文推測詞義」或其他方法
+    answer: 都熟悉，可以先用「拆詞釋義」
+  - type: free_text
+    prompt: 2.如果你選「拆詞釋義」，試著推測詞義
+  - type: guide
+    text: 「熱」： 熱烈
+  - type: guide
+    text: 「議」： 討論         兩個字義合起來：【   熱烈討論　】
+  - type: single
+    prompt: 3.把推測的意思放回上面的句子：意思合理嗎？
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 三、詞彙：屏息以待
+  - type: single
+    prompt: 1.先判斷：拆開後，「屏、息、以、待」的意思你都熟悉嗎？
+    options:
+    - 大多熟悉，可以先用「拆詞釋義」
+    - 大多不熟悉，改用「從上下文推測詞義」
+    answer: 大多熟悉，可以先用「拆詞釋義」
+  - type: free_text
+    prompt: 2.如果你選「從上下文推測詞義」，試著畫線找線索
+  - type: guide
+    text: 課文句子：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 這項預言在社群媒體上廣泛流傳，讓許多人感到不安，…。7月5日，預言中的世界末日到了，許多人屏󠇡息以待，等待災難的到來。
+  - type: single
+    prompt: 3.根據這些線索，可以推論「屏息以待」的意思是：（單選）
+    options:
+    - 緊張地等待
+    - 安靜地等待
+    answer: 緊張地等待
+  - type: single
+    prompt: 4.把推測的意思放回上面的句子：意思合理嗎？
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 四、詞彙：點閱率
+  - type: guide
+    text: 課文句子：
+  - type: guide
+    text: 再加上網路盛行，有人把預言說得繪聲繪影；點閱率一飆升，內容就傳得更快，相信的人也可能跟著增加。
+  - type: single
+    prompt: 1.先判斷：拆開後，「點閱、率」的意思你都熟悉嗎？
+    options:
+    - 都熟悉，可以先用「拆詞釋義」
+    - 不熟悉，改用「從上下文推測詞義」
+    answer: 都熟悉，可以先用「拆詞釋義」
+  - type: free_text
+    prompt: 2.如果你選「從上下文推測詞義」，請試著在上面的句子畫線找線索
+  - type: single
+    prompt: 3.根據這些線索，可以推論「點閱率」大概是指：（單選）
+    options:
+    - ①網路內容受到相信的程度
+    - ②網路內容被點開閱讀的比率
+    answer: ②網路內容被點開閱讀的比率
+  - type: single
+    prompt: 4.把推測的意思放回上面的句子：意思合理嗎？
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 五、詞彙：繪聲繪影
+  - type: guide
+    text: 課文句子：再加上網路盛行，有人把預言說得繪聲繪影；點閱率一飆升，內容就傳得更快，相信的人也可能跟著增加。
+  - type: free_text
+    prompt: 1.先用「拆詞釋義」，猜大概意思
+  - type: guide
+    text: 「繪聲」： 描繪聲音
+  - type: guide
+    text: 「繪影」： 描繪景象    兩個部分合起來：【   描繪聲音和景象  　】
+  - type: single
+    prompt: 2.這個意思能完整說明「把預言說得繪聲繪影」嗎？
+    options:
+    - ①能
+    - ②還不能，需要再看上下文
+    answer: ②還不能，需要再看上下文
+  - type: free_text
+    prompt: 3.再用「從上下文推測詞義」，補充意思：把能幫助你推測詞義的文字畫線。
+  - type: single
+    prompt: 4.結合拆詞和上下文線索可以推測「繪聲繪影」的意思是：
+    options:
+    - 把事情說得生動逼真，讓人覺得像真的一樣
+    - 把事情說得詳細，讓人容易了解
+    answer: 把事情說得生動逼真，讓人覺得像真的一樣
+  - type: single
+    prompt: 5.把推測的意思放回上面的句子：意思合理嗎？
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: ※小提醒：遇到難詞時，如果這些方法都不適用，不要硬猜，可以查字典或請教同學、老師。
+  - type: free_text
+    prompt: (1)網路謠言引發不必要的(  E  )，政府呼籲大家要冷靜。
+  - type: free_text
+    prompt: (2)他把昨晚的驚悚電影說得(  D  )，讓人聽得毛骨悚然。
+  - type: free_text
+    prompt: (3)當裁判舉起手準備宣布比賽結果時，全場(  B  )，現場一片安靜。
+  - type: free_text
+    prompt: (4)他看到幾個成功的創業故事，就以為創業一定能賺大錢，這種想法有(  C  )，因為他忽略了失敗的案例。
+  - type: free_text
+    prompt: (5)這款手機的外型與前一代產品(  A  )，消費者反應平平。
+  - type: free_text
+    prompt: (6)奧運選手的表現引發社群媒體上的(  F  )。
+  - type: free_text
+    prompt: (7)這支影片上線後，(  G  )快速上升，顯示受到許多人關注。
+  - type: free_text
+    prompt: (8)政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民(  I  )的措施。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: self_check
+    items:
+    - 遇到難詞時，我會先判斷哪一種線索比較有用。
+    - 我會用「拆詞釋義」或「從上下文推測詞義」來推測意思。
+    - 如果一種方法還不夠，我會再用另一種方法，並把推測的意思放回句子檢查。

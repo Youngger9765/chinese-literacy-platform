@@ -21,7 +21,7 @@ vi.mock('../StandardLayout', () => ({
 const baseStory: Story = {
   id: 'test-1',
   title: '測試課文',
-  level: 5,
+  level: '5',
   content: ['第一段', '第二段'],
   thumbnail: '',
   category: 'Daily',

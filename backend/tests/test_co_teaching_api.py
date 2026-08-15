@@ -226,7 +226,7 @@ def _fresh_student(client) -> dict:
 def _create_assignment(client, owner_token, classroom_id) -> int:
     r = client.post(
         f"/api/classrooms/{classroom_id}/assignments",
-        json={"story_id": "1", "title": f"Co-teacher Boundary {uuid.uuid4().hex[:6]}"},
+        json={"story_id": "20001", "title": f"Co-teacher Boundary {uuid.uuid4().hex[:6]}"},
         headers=_h(owner_token),
     )
     assert r.status_code == 201, r.text
@@ -330,7 +330,7 @@ def test_co_teacher_cannot_create_assignment(client, owner_token):
 
     r = client.post(
         f"/api/classrooms/{classroom_id}/assignments",
-        json={"story_id": "1", "title": "Co-teacher should be read-only"},
+        json={"story_id": "20001", "title": "Co-teacher should be read-only"},
         headers=_h(token),
     )
     assert r.status_code == 403, r.text

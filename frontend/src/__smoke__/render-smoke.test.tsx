@@ -116,13 +116,13 @@ import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
 const MINIMAL_STORY: Story = {
   id: '1',
   title: '測試課文',
-  level: 1,
+  level: '1',
   content: ['這是第一段。', '這是第二段。'],
   paragraphs: ['這是第一段。', '這是第二段。'],
   thumbnail: '',
   category: 'Fable',
   filename: 'smoke-test.yml',
-  grade: 4,
+  grade: '4',
   charCount: 10,
   vocabulary: [{ word: '測試', definition: '試驗' }],
 };

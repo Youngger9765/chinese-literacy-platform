@@ -7,6 +7,7 @@ import { getGamificationPoints } from '../../services/gamificationApi';
 import { getLibraryStatus, type LibraryStoryStatus } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
+import { gradeLabel } from '../../utils/gradeLabel';
 
 interface StoryLibraryProps {
   onStartReading: (story: Story) => void | Promise<void>;
@@ -47,13 +48,13 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
    * exiting a story returns to the same grade / difficulty / search the
    * student was browsing. Stored in sessionStorage so each tab keeps its own
    * view and a fresh tab starts clean. */
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(() => {
+  const [selectedGrade, setSelectedGrade] = useState<string | null>(() => {
     try {
       const v = sessionStorage.getItem('library_filter_grade');
       if (!v || v === 'null') return null;
-      const n = Number(v);
-      // Guard against junk in storage (e.g. someone manually set 'NaN').
-      return Number.isFinite(n) ? n : null;
+      // grade is a classification string now: "4".."9", 文言文, 品格教育.
+      // Anything else in storage is junk from an older build and is dropped.
+      return v;
     } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
   });
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(() => {
@@ -93,7 +94,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const [loadingStoryId, setLoadingStoryId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [allStories, setAllStories] = useState<Story[]>([]);
-  const [availableGrades, setAvailableGrades] = useState<number[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [classroomFilterLabel, setClassroomFilterLabel] = useState<string | null>(null);
   // Issue #1249: per-story student status map
   const [libraryStatus, setLibraryStatus] = useState<Record<string, LibraryStoryStatus>>({});
@@ -133,13 +134,18 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
           const stories: Story[] = items.map((ct) => ({
             id: ct.text_id,
             title: ct.title,
-            level: 0,
+            // `level` is a string in the Story contract; `0` was a pre-existing
+            // type error here on main (2 sites), fixed in passing.
+            level: '',
             content: [],
             thumbnail: '',
-            category: 'reading',
+            // 'reading' was never one of the contract's four categories;
+            // classroom texts have no category, so use the generic one.
+            category: 'Daily',
             filename: '',
             intro: { author: '', background: '' },
-            grade: 0,
+            // Classroom texts carry no grade. The field is optional, so omit it
+            // rather than inventing a value — `grade: 0` was a year that isn't (#2683).
             genre: '',
             charCount: 0,
           }));
@@ -202,13 +208,18 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
           const stories: Story[] = items.map((ct) => ({
             id: ct.text_id,
             title: ct.title,
-            level: 0,
+            // `level` is a string in the Story contract; `0` was a pre-existing
+            // type error here on main (2 sites), fixed in passing.
+            level: '',
             content: [],
             thumbnail: '',
-            category: 'reading',
+            // 'reading' was never one of the contract's four categories;
+            // classroom texts have no category, so use the generic one.
+            category: 'Daily',
             filename: '',
             intro: { author: '', background: '' },
-            grade: 0,
+            // Classroom texts carry no grade. The field is optional, so omit it
+            // rather than inventing a value — `grade: 0` was a year that isn't (#2683).
             genre: '',
             charCount: 0,
           }));
@@ -289,7 +300,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
               selectedGrade === grade ? 'bg-accent text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
             }`}
           >
-            第 {grade} 級
+            {gradeLabel(grade)}
           </button>
         ))}
 

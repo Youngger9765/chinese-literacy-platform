@@ -5,6 +5,7 @@ Module spec: specs/modules/story-structure/INTENT.md (I-6)
 """
 
 import json
+import pytest
 import sys
 from pathlib import Path
 
@@ -20,6 +21,12 @@ class TestKeypointsManifestFreshness:
         assert MANIFEST_PATH.is_file(), (
             "keypoints_manifest.json missing — run scripts/build_keypoints_qa_manifest.py --all"
         )
+
+    @pytest.mark.skip(
+
+        reason="manifest 由 scripts/build_keypoints_qa_manifest.py 從 private/curriculum-source/_online-schema 產生，那是一修的策展流程來源，二修沒有；重點表本身改由 keypoints.yml → keypoints_to_structure 供給（147/175 課），有 tests/test_keypoints_to_structure.py 覆蓋（#2683）"
+
+    )
 
     def test_manifest_matches_runtime(self):
         errors = default_verify()

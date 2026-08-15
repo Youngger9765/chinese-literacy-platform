@@ -64,21 +64,25 @@ class TestPageSizeCap:
 # ── 7 educator-designated lessons reachable on page 1 with page_size=300 ────
 
 
-class TestSevenDesignatedLessonsReachable:
-    """7 lessons assigned for 7/1 deadline must be in first response when
-    frontend uses page_size=300."""
+class TestWholeLibraryReachableInOneRequest:
+    """The frontend library asks for page_size=300 and expects the whole catalogue
+    back in one response.
 
-    DESIGNATED_CODES = [
-        "G6-L22", "G6-L23", "G6-L24", "G6-L25",
-        "G7-L28", "G7-L29", "G7-L30",
-    ]
+    This pinned seven named lesson codes (the 7/1 deadline batch). Three of them —
+    G6-L23, G6-L24, G7-L30 — do not exist in the second edition, and G4-L01-style
+    zero padding is gone too. What the test was actually protecting is that one
+    request reaches every lesson, so it now asserts that against the corpus rather
+    than against a list of codes that expired with the first edition."""
 
-    def test_all_seven_visible_on_page1_with_300(self, client):
+    def test_page_size_300_returns_the_whole_catalogue(self, client):
         resp = client.get("/api/stories?page_size=300")
         assert resp.status_code == 200
-        codes_in_response = {s["grade_code"] for s in resp.json()["stories"]}
-        missing = [c for c in self.DESIGNATED_CODES if c not in codes_in_response]
-        assert missing == [], f"Missing designated lessons: {missing}"
+        data = resp.json()
+        assert data["total"] <= 300, (
+            "the catalogue outgrew a single page — the library UI would silently "
+            "show a subset; raise the cap or paginate the library view"
+        )
+        assert len(data["stories"]) == data["total"]
 
     def test_total_count_unchanged_by_page_size(self, client):
         """`total` reflects the full library size regardless of page_size."""

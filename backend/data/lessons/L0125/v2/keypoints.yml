@@ -1,0 +1,77 @@
+keypoints:
+  lesson: G8-L5
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 事件概要
+    value: 陳同學好心協助玻璃娃娃顏同學下樓，不幸摔倒受傷，顏同學因傷死亡，隨後顏家對學校與陳同學提告、要求賠償，引起社會爭議。
+    blanks: []
+  - label: 主要爭議請在□打勾（單選）
+    value: "①事故發生後，陳同學、學校與家長各自是否應負責任？\n □②顏旭男是否應該上體育課？\n □③學校是否應該設立無障礙設施？"
+    blanks: []
+  - label: 法院判決(單選）
+    sub_rows:
+    - sub_label: 一審判決
+      template: 二審判決 三審判決
+      blanks: []
+  - label: 請在□打勾
+    sub_rows:
+    - sub_label: 陳同學
+      template: '①不用賠償
+
+        □②需要賠償 □①不用賠償
+
+        ②需要賠償 ①不用賠償
+
+        □②需要賠償'
+      blanks: []
+    - sub_label: 學校
+      template: '①不用賠償
+
+        □②需要賠償 □①不用賠償
+
+        ②需要賠償 □①不用賠償
+
+        ②需要賠償'
+      blanks: []
+    - sub_label: 顏父
+      template: 應負20%過失
+      blanks: []
+  - label: 法官理由
+    sub_rows:
+    - sub_label: '1.陳同學已發揮
+
+        __的美德。
+
+        2.家長延誤就醫可能是導致顏同學離世的原因之一。'
+      template: '1.陳同學未考量自身能力，因__導致意外應負責任。
+
+        2.學校未提供__及個別化體育教學。 1.陳同學已盡力保護顏同學。
+
+        2.學校未提供無障礙設施及個別化體育教學。
+
+        3.顏爸爸
+
+        __。'
+      blanks:
+      - answer: 照顧同學
+        hint: ''
+      - answer: 疏忽
+        hint: ''
+      - answer: 無障礙設施
+        hint: ''
+      - answer: 延誤就醫
+        hint: ''
+  - label: 學生對判決的回應
+    sub_rows:
+    - sub_label: 雅柔：感同身受顏家的悲痛，若此事沒人需負責，對家屬也不公平。
+      template: 承熹：助人卻被法院處罰，實在令人氣餒。 語菲：最高法院判決最合理，此判決也避免社會大眾不敢主動助人。
+      blanks: []
+  - label: 總結請在□打勾(多選)
+    value: "老師希望透過這次討論讓學生學到什麼？\n ①助人時應先考量自己的能力。\n ②理解社會中兩難問題的複雜性。\n □③證明幫助別人一定會有好報。\n\
+      \ ④讓學生了解助人過程中可能遇到的風險與挑戰。"
+    blanks: []
+  title: 好心沒好報的玻璃娃娃爭議事件

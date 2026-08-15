@@ -1,0 +1,43 @@
+keypoints:
+  lesson: G9-L23
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 主要爭議（第1段）
+    value: 2019年，基普喬吉穿著尚未公開販售的高科技__，在兩小時內跑完馬拉松，但成績不列入__。
+    blanks:
+    - answer: 原型跑鞋
+      hint: ''
+    - answer: 世界紀錄
+      hint: ''
+  - label: 跑鞋的特色（第2段）
+    value: 這款跑鞋「極輕」又__，鞋面不容易吸收汗水和雨水，腳掌跑步時也更__。
+    blanks:
+    - answer: 高回彈
+      hint: ''
+    - answer: 穩定
+      hint: ''
+  - label: 公平爭議（第3段）
+    value: 有人認為，選手仍須長年__；質疑者擔心，跑鞋可能讓裝備影響__。
+    blanks:
+    - answer: 苦練
+      hint: ''
+    - answer: 勝負
+      hint: ''
+  - label: 規則界線（第4段）
+    value: 參賽鞋款必須先公開販售至少__，鞋底厚度等規格也要符合__。
+    blanks:
+    - answer: 四個月
+      hint: ''
+    - answer: 規定
+      hint: ''
+  - label: 尚未解決的問題（第5段）
+    value: 如何讓科技幫助選手__，又不讓裝備  __？
+    blanks:
+    - answer: 突破極限
+      hint: ''
+    - answer: 左右勝負
+      hint: ''
+  title: 靠跑鞋破紀錄，合理嗎?

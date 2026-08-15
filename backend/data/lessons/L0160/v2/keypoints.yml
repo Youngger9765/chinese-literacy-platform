@@ -1,0 +1,43 @@
+keypoints:
+  lesson: 文-L5
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 故事結構
+    value: '內容摘要
+
+      【 】處填入原文，找不到原文時，再用自己的話寫。'
+    blanks: []
+  - label: 起因
+    value: __去看望__，卻遇上胡兵準備攻打朋友所在的城邑。
+    blanks:
+    - answer: 荀巨伯
+      hint: ''
+    - answer: 友人疾/生病的朋友
+      hint: ''
+  - label: 【經過】
+    value: '胡兵攻城前
+
+      1.荀巨伯的朋友因為拖著病體跑不了，就勸荀巨伯趕快逃。
+
+      2.荀巨伯告訴朋友，自己絕不會做__的事。
+
+      胡兵入城後
+
+      1.胡兵發現竟然還有人沒逃，驚訝地問荀巨伯為何不逃跑？
+
+      2.荀巨伯回答：因為不忍心__，所以才沒逃，甚至表達__代替朋友死。'
+    blanks:
+    - answer: 敗義以求生/敗壞道義而求取生路
+      hint: ''
+    - answer: 委之/拋下朋友
+      hint: ''
+    - answer: 寧以我身/寧願用自己的命
+      hint: ''
+  - label: 結果
+    value: 胡兵被荀巨伯的捨命護友的情操感動，於是決定__，一城的人因此倖免了一場可能的戰爭。
+    blanks:
+    - answer: 班軍而還/撤兵回去
+      hint: ''
