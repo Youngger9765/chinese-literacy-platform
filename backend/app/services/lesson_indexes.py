@@ -108,6 +108,13 @@ def _video_links(l: dict) -> list[dict] | None:
     ]
 
 
+def _spotlight_or_none(l: dict) -> dict | None:
+    sp = (l.get("spotlight") or {}).get("spotlight")
+    if not isinstance(sp, dict) or sp.get("error") or not sp.get("blocks"):
+        return None
+    return sp
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -311,7 +318,12 @@ def _uid_tree_lessons() -> list[dict]:
             "key_reading": _key_reading(l),
             "text_type": "單",
             "source_file": None,
-            "spotlight_v2": (l.get("spotlight") or {}).get("spotlight"),
+            # An extraction that failed is stored as {"lesson": …, "error": …} in
+            # spotlight.yml, and serving that object counts as "has a spotlight" while
+            # the step renders 參考課文 and nothing else. 30 lessons looked present that
+            # way — the field was 175/175 and the exercises were 143/175. Absent is the
+            # honest value, and it is what makes the step show its empty state.
+            "spotlight_v2": _spotlight_or_none(l),
             "keypoints": (l.get("keypoints") or {}).get("keypoints"),
             # The 重點表 step reads `story_structure_table` off the story and asks an
             # LLM to invent one when it is absent. The second-edition pipeline emits
