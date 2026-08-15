@@ -202,3 +202,37 @@ def test_the_guard_cannot_brick_a_preview_deploy(tmp_path, monkeypatch):
 
     monkeypatch.setenv("ENVIRONMENT", "staging")
     assert guard.main() == 1, "staging must refuse to start on a schema it cannot verify"
+
+
+def test_everything_the_entrypoint_runs_is_in_the_image():
+    """The guard's first three deploys all failed with 「container failed to start and
+    listen on the port」, which reads as a port or timeout problem. It was neither: the
+    Dockerfile copies app/, data/, alembic/ and entrypoint.sh, and the guard lives in
+    scripts/ — so the file the entrypoint invoked did not exist, the shell returned
+    non-zero, and the container exited before uvicorn ever ran.
+
+    Nothing warns about this. A COPY that is absent is not an error, and the runtime
+    message names the symptom rather than the cause.
+    """
+    import re
+
+    root = os.path.join(os.path.dirname(__file__), "..")
+    dockerfile = open(os.path.join(root, "Dockerfile"), encoding="utf-8").read()
+    entrypoint = open(os.path.join(root, "entrypoint.sh"), encoding="utf-8").read()
+
+    copied = set()
+    for line in dockerfile.splitlines():
+        m = re.match(r"\s*COPY\s+(\S+)", line)
+        if m:
+            copied.add(m.group(1).rstrip("/"))
+
+    referenced = set(re.findall(r"python3?\s+([\w./-]+\.py)", entrypoint))
+    assert referenced, "no scripts referenced — has the entrypoint changed shape?"
+
+    for path in referenced:
+        top = path.split("/")[0]
+        assert top in copied, (
+            f"entrypoint.sh runs {path}, but the Dockerfile never copies {top}/ — "
+            f"the container will exit 1 before uvicorn starts. Copied: {sorted(copied)}"
+        )
+        assert os.path.exists(os.path.join(root, path)), f"{path} does not exist"
