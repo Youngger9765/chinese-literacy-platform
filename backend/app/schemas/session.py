@@ -97,13 +97,20 @@ class SessionSummaryResponse(BaseModel):
     story_title: str | None = None  # human-readable title, e.g. "第六課 牛頓的故事"
     learning_source: Literal["self", "assignment"] | None = None
     status: str
-    current_step: int
+    # Read from `current_step_derived`, not the column of the same name. #1182 made
+    # `step_progress.steps_completed` the single source of truth and stopped syncing the
+    # integer column — which this schema kept reading, so every session in the list and
+    # detail responses reported step 1 no matter how far the student had got. The
+    # `/status` endpoint passes the derived value explicitly and was the only one telling
+    # the truth. #1182 says plainly: do NOT read the deprecated column from application
+    # code. This is application code.
+    current_step: int = Field(validation_alias="current_step_derived")
     accuracy: float | None
     overall_score: float | None
     started_at: datetime
     completed_at: datetime | None
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class SessionDetailResponse(SessionSummaryResponse):
