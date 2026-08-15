@@ -49,35 +49,60 @@ def _vocabulary_from(l: dict) -> list[dict]:
 
 
 def _cloze_from(l: dict) -> list[dict]:
-    """四 語詞應用 → fill-in-the-blank items."""
+    """四 語詞應用 → the LEGACY fill-in-blank shape the frontend requires.
+
+    `frontend/src/services/api.ts` keeps only items matching `{sentence, answer}`
+    where `answer` is a letter into `vocab_bank`; anything else is filtered out and
+    the step falls back to its empty state. Emitting `{question, options[]}` — the
+    shape that reads naturally from the worksheet — meant the step either showed
+    nothing or crashed on `.sentence`.
+    """
     sec = _sections(l).get("vocab_application") or {}
-    options = sec.get("options") or {}
-    out = []
-    for q in sec.get("questions") or []:
-        out.append({
-            "question": q.get("text", ""),
-            "options": [{"label": k, "text": v} for k, v in sorted(options.items())],
-            "answer": q.get("answer"),
-        })
-    return out
+    return [
+        {"sentence": q.get("text", ""), "answer": q.get("answer"), "_schema": "legacy"}
+        for q in sec.get("questions") or []
+        if q.get("text") and q.get("answer")
+    ]
+
+
+def _vocab_bank_from(l: dict) -> dict:
+    """四 語詞應用's options, as the letter → word map the cloze exercise resolves
+    its answers against. Without it every answer letter matches nothing."""
+    return dict((_sections(l).get("vocab_application") or {}).get("options") or {})
 
 
 def _mcq_from(l: dict) -> list[dict]:
-    """七 閱讀理解 → multiple-choice items.
+    """七 閱讀理解 → the shape declared in `api.ts`:
+    `{question, options: string[], answer, explanation}`.
 
-    `is_rationale` marks a question whose correct option was replaced by the answer
-    explanation in the teacher edition — the text is the reason, not a distractor.
-    Carried through so a renderer can present it accordingly rather than showing an
-    explanation as if it were a choice.
+    Options are a list of STRINGS there, not label/text objects — passing objects
+    made the step throw on render. The letter is preserved by position (index 0 = A),
+    which is how the component maps an answer onto a choice.
+
+    `explanation` carries the teacher edition's rationale. Where that rationale had
+    overwritten the correct option in the source, it is both the option text and the
+    explanation — the worksheet genuinely has nothing else there.
     """
     out = []
     for q in (_sections(l).get("comprehension") or {}).get("questions") or []:
         opts = q.get("options") or {}
+        if not opts:
+            continue
+        # Positional list, so a gap in the letters SHIFTS every later option: a
+        # question with A, C, D and answer D would land on C. Worksheets do have
+        # gaps — an option can be missing from the source entirely — so the run is
+        # filled from A to the highest letter present, and a hole becomes an empty
+        # string rather than a silent renumbering.
+        last = max(opts)
+        letters = [chr(c) for c in range(ord("A"), ord(last) + 1)]
+        answer = q.get("answer")
+        if answer and answer > last:
+            continue          # answer points past every option — withhold the question
         out.append({
             "question": q.get("stem", ""),
-            "options": [{"label": k, "text": v} for k, v in sorted(opts.items())],
-            "answer": q.get("answer"),
-            "answer_is_rationale": bool(q.get("is_rationale")),
+            "options": [opts.get(k, "") for k in letters],
+            "answer": answer,
+            "explanation": opts.get(answer) if q.get("is_rationale") else None,
         })
     return out
 
@@ -188,6 +213,7 @@ def _uid_tree_lessons() -> list[dict]:
             # step renders 「本課尚無…」 instead of another lesson's questions.
             "vocabulary": _vocabulary_from(l) or None,
             "fill_in_blank": _cloze_from(l) or None,
+            "vocab_bank": _vocab_bank_from(l) or None,
             "multiple_choice": _mcq_from(l) or None,
             "reading_benchmark": None,
             "text_type": "單",
