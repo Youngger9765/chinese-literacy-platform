@@ -57,15 +57,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
       return v;
     } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
   });
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(() => {
-    try {
-      const v = sessionStorage.getItem('library_filter_difficulty');
-      // Whitelist-check the stored value so stale entries from a renamed
-      // Difficulty enum get silently discarded instead of as-casted.
-      const valid: Difficulty[] = ['easy', 'medium', 'hard'];
-      return v && (valid as string[]).includes(v) ? (v as Difficulty) : null;
-    } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
-  });
+  // Clear the retired difficulty filter from anyone who still has one stored.
+  // Without this, a student who landed on an impossible grade+difficulty pair before
+  // the filter was removed keeps an empty library across reloads — the value sits in
+  // sessionStorage and nothing reads it any more to clear it.
+  useEffect(() => {
+    try { sessionStorage.removeItem('library_filter_difficulty'); } catch { /* unavailable */ }
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState<string>(() => {
     try { return sessionStorage.getItem('library_filter_search') ?? ''; }
     catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return ''; }
@@ -81,9 +80,6 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   useEffect(() => {
     try { sessionStorage.setItem('library_filter_grade', String(selectedGrade)); } catch { /* sessionStorage unavailable */ }
   }, [selectedGrade]);
-  useEffect(() => {
-    try { sessionStorage.setItem('library_filter_difficulty', String(selectedDifficulty)); } catch { /* sessionStorage unavailable */ }
-  }, [selectedDifficulty]);
   useEffect(() => {
     try { sessionStorage.setItem('library_filter_search', searchQuery); } catch { /* sessionStorage unavailable */ }
   }, [searchQuery]);
@@ -174,7 +170,6 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   let filtered = allStories;
   if (!inClassroomMode) {
     if (selectedGrade != null) filtered = filtered.filter((s) => s.grade === selectedGrade);
-    if (selectedDifficulty != null) filtered = filtered.filter((s) => getDifficulty(s) === selectedDifficulty);
   }
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -238,11 +233,10 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedGrade(null);
-    setSelectedDifficulty(null);
     setShowOnlyUnread(false);
   };
 
-  const hasActiveFilter = searchQuery || selectedGrade != null || selectedDifficulty != null || showOnlyUnread;
+  const hasActiveFilter = searchQuery || selectedGrade != null || showOnlyUnread;
 
   return (
     <div className="space-y-5">
@@ -304,22 +298,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
           </button>
         ))}
 
-        <span className="text-gray-300 text-sm">|</span>
+        {/* 難度篩選已移除 (#2683)。
 
-        {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => {
-          const cfg = DIFFICULTY_CONFIG[d];
-          return (
-            <button
-              key={d}
-              onClick={() => setSelectedDifficulty(selectedDifficulty === d ? null : d)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
-                selectedDifficulty === d ? `${cfg.className} border-current` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-              }`}
-            >
-              {cfg.label}
-            </button>
-          );
-        })}
+              它不是獨立屬性 —— getDifficulty 直接從年級推導（4-5 → 入門、6-7 → 中階、
+              8-9 → 進階），所以兩排按鈕是同一個軸的兩種說法。並排放著等於邀請使用者
+              組合，而 15 種組合裡有 10 種必定回 0 篇。
+
+              更糟的是篩選狀態存在 sessionStorage：點到不可能的組合之後，重新整理仍是
+              空的，看起來像「課文全部不見了」。年級已經表達了同一件事。*/}
       </div>
       )}
 
