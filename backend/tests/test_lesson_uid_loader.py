@@ -991,3 +991,51 @@ def test_the_glosses_that_belong_to_an_option_are_left_alone():
         if o and o.strip().endswith(("）", ")"))
     ]
     assert len(kept) >= 30, f"only {len(kept)} options keep a parenthetical — the strip is too broad"
+
+
+def test_a_failed_extraction_is_not_served_as_content():
+    """`spotlight.yml` stores a failure as an object — lesson + error — and serving it
+    counted as 「this lesson has a spotlight」 while the step rendered 參考課文 and
+    nothing else. The field read 175/175; the exercises were 143/175.
+
+    Absent is the honest value. It is also what makes the step show its empty state
+    instead of a page that looks finished.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    served = [l for l in get_all_lessons() if l.get("spotlight_v2")]
+    broken = [l["lesson_uid"] for l in served
+              if not isinstance(l["spotlight_v2"], dict)
+              or l["spotlight_v2"].get("error")
+              or not l["spotlight_v2"].get("blocks")]
+    assert broken == [], f"error payloads served as spotlight: {broken[:4]}"
+    assert 130 <= len(served) < 175, (
+        f"{len(served)}/175 — 30 lessons have no extractable spotlight "
+        "(content_known_gaps.yaml#spotlight_range_not_found); full coverage here means "
+        "failures are being counted as content again"
+    )
+
+
+def test_the_lessons_without_a_spotlight_are_a_recorded_pipeline_failure():
+    """Not a structural absence, which is what the code used to claim.
+
+    Checked against the source: 27 of the 30 have 閱讀聚光燈 in their DOCX. Their
+    worksheets print that heading in the MASTHEAD and open the exercises with
+    「示範１：」/「練習1：」, which `find_spotlight_range` does not recognise — the same
+    layout variant that truncated three lesson bodies.
+
+    This asserts the registry entry stays, because the wrong version of this claim sat
+    in a comment for long enough that nobody re-checked it.
+    """
+    import yaml
+    from pathlib import Path
+
+    gaps = yaml.safe_load(
+        (Path(__file__).resolve().parent.parent / "data" / "curriculum_qa"
+         / "content_known_gaps.yaml").read_text(encoding="utf-8")
+    )
+    entry = gaps.get("spotlight_range_not_found")
+    assert entry, "the spotlight gap is no longer recorded"
+    assert "是" in str(entry.get("is_it_a_pipeline_failure", "")), (
+        "the entry no longer says this is a pipeline failure"
+    )

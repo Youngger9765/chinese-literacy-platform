@@ -382,3 +382,21 @@ spreadsheet_title_unmatched:
     multi_text: 2          # 一課取材自試算表的兩列（巨石陣＋摩艾石像），非 1:1
   why_not_forced: 課名配對錯一列 = 這課掛上別課的簡介與策略。一修的封面就是這樣接錯的。寧可留白。
   how_to_close: 請教材端在總表補上這 9 課，或確認「正太與小豬」兩列各對應哪一課
+
+spotlight_range_not_found:
+  count: 30
+  of: 175
+  真實狀態: 聚光燈練習實際只有 143/175，不是 175/175 —— 先前的計數把 error 物件當成「有內容」
+  what: |
+    這 30 課的 spotlight.yml 內容是一個錯誤物件（lesson + error: spotlight range not found）。
+    它被當成資料送到前端，畫面因此只剩「參考課文」而沒有任何練習題，且不會報錯。
+  is_it_a_pipeline_failure: |
+    是。code 裡原本寫「not a pipeline failure, but a structural absence」，那句話是錯的，
+    而且正因為寫下來了所以沒人去查。逐份開 DOCX 確認：30 課裡 27 課文件中確實有「閱讀聚光燈」，
+    只有 3 課真的沒有。
+  root_cause: |
+    `scripts/build_lesson_schema.py` 的 `find_spotlight_range()` 用很窄的 marker 開節：
+    ◎/※ 加上固定字樣，或「步驟❶」，或特定的小表格。這些學習單把「閱讀聚光燈」印在**刊頭**，
+    練習本身以「示範１：」「練習1：」開頭 —— 跟課文邊界那個 bug 是同一種版型差異。
+  current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
+  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate + ship gate
