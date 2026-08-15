@@ -1,55 +1,121 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "二",
+      "三\n、\n四",
+      "四\n、\n五",
+      "五"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "六塊肌、六塊雞",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "堅持到底的棒球人生──周思齊",
+      "value": ""
     },
     {
-      "label": "主題：】肌肉【的鍛鍊",
-      "value": "",
       "interactive_type": "display",
+      "label": "背景",
       "sub_rows": [
         {
-          "label": "關鍵",
-          "value": "想要有結實的肌肉，要先【　　　】再【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "訓練要點",
-          "value": "要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：\nA.均衡的飲食控制：要減少【　　　】類和甜食的攝取。\nB.保持良好的【　　　】：可以幫助分泌生長激素促進生長。\nC.專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　　　】區，練習的分量要比自己承受的最大量再高一些才行。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "二",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
         }
-      ]
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "挑戰",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0
+          ],
+          "interactive_type": "checkbox",
+          "label": "三\n、\n四",
+          "options": [
+            "天賦　□",
+            "努力 】不夠"
+          ],
+          "value": "1.三軍負責【打雜】：整理場地、處理積水。\n2.練球時只有【菜單】，球員自己練習。\n3.不被看重，內心感到【委屈】與不甘心。\n4.看見實力差距，發現「【人外有人】，天外有天」。\n5.被教練勸退，也被學長說【 ①天賦　□②努力 】不夠"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "努力",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "四\n、\n五",
+          "value": "調適心態：先【　　　】，再以【　　　】的精神努力。\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "成就",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "五",
+          "value": "於高二暑假，升上【　　　】"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "六塊肌、六塊雞",
+  "title": "堅持到底的棒球人生──周思齊",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "主題：】肌肉【的鍛鍊",
       "items": [
         {
-          "label": "關鍵",
-          "value": "想要有結實的肌肉，要先【　　　】再【　　　】。"
-        },
-        {
-          "label": "訓練要點",
-          "value": "要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：\nA.均衡的飲食控制：要減少【　　　】類和甜食的攝取。\nB.保持良好的【　　　】：可以幫助分泌生長激素促進生長。\nC.專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　　　】區，練習的分量要比自己承受的最大量再高一些才行。"
+          "label": "二",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "背景"
+    },
+    {
+      "items": [
+        {
+          "label": "三\n、\n四",
+          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說（①天賦　□②努力）不夠"
+        }
+      ],
+      "kind": "section_block",
+      "section": "挑戰"
+    },
+    {
+      "items": [
+        {
+          "label": "四\n、\n五",
+          "value": "調適心態：先【　　　】，再以【　　　】的精神努力。\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "努力"
+    },
+    {
+      "items": [
+        {
+          "label": "五",
+          "value": "於高二暑假，升上【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "成就"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "關鍵",
-      "訓練要點"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -1,94 +1,76 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "連結經驗【 段1～3 】",
+      "提出想法【 段4 】",
+      "舉出實例【 段5～7 】",
+      "連結閱讀【 段8 】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "大自然的氣象小幫手 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "跟著「但是」轉個彎",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①蜘蛛結網代表快下雨 ②蜘蛛結網代表天氣穩定 □③蜘蛛結網代表風很大",
-      "interactive_type": "checkbox",
-      "options": [
-        "蜘蛛結網代表快下雨",
-        "蜘蛛結網代表天氣穩定 □",
-        "蜘蛛結網代表風很大"
-      ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "fill_blank",
+      "label": "連結經驗【 段1～3 】",
+      "value": "1.聽別人說話時覺得自己有【　　　】，可以猜到下一句。\n2.「但是」之後【　　　】都接壞消息。"
     },
     {
-      "label": "重要事實 2",
-      "value": "□①蟋蟀叫聲頻率與濕度有關 ②蟋蟀叫聲頻率與氣溫有關 □③蟋蟀叫聲頻率與風速有關",
-      "interactive_type": "checkbox",
-      "options": [
-        "蟋蟀叫聲頻率與濕度有關",
-        "蟋蟀叫聲頻率與氣溫有關 □",
-        "蟋蟀叫聲頻率與風速有關"
-      ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "fill_blank",
+      "label": "提出想法【 段4 】",
+      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」 【　　　】的訊息。"
     },
     {
-      "label": "重要事實 3",
-      "value": "□①日暈月暈是好運的象徵 ②日暈月暈是天氣變化的前兆 □③日暈月暈是外星人的信號",
-      "interactive_type": "checkbox",
-      "options": [
-        "日暈月暈是好運的象徵",
-        "日暈月暈是天氣變化的前兆 □",
-        "日暈月暈是外星人的信號"
-      ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "fill_blank",
+      "label": "舉出實例【 段5～7 】",
+      "value": "1.起因：作者希望能和小恩【　　　】。\n2.經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】\n3.結果：小恩最後【　　　】了作者的邀約。"
     },
     {
-      "label": "結論",
-      "value": "大自然的線索能幫助我們預測天氣 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "連結閱讀【 段8 】",
+      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的【　　　】。要先留意後面的訊息，再配合前後文理解。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "統整結論【 段9～10 】",
+      "value": "1.轉折詞後面出現的狀況，常常和一般預期的\n【　　　】，也是整句話的重點所在。\n2.閱讀的時候要留意【　　　】之後的句子。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "跟著「但是」轉個彎",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主題",
-      "value": "大自然的氣象小幫手 【　　　】"
+      "label": "連結經驗(段1～3)",
+      "value": "1.聽別人說話時覺得自己有【　　　】，可以猜到下一句。\n2.「但是」之後（□一定　不一定）都接壞消息。"
     },
     {
       "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①蜘蛛結網代表快下雨 ②蜘蛛結網代表天氣穩定 □③蜘蛛結網代表風很大"
+      "label": "提出想法（段4）",
+      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」 （□之前 　之後）的訊息。"
     },
     {
       "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①蟋蟀叫聲頻率與濕度有關 ②蟋蟀叫聲頻率與氣溫有關 □③蟋蟀叫聲頻率與風速有關"
+      "label": "舉出實例(段5～7)",
+      "value": "1.起因：作者希望能和小恩【　　　】。\n2.經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】\n3.結果：小恩最後（答應　□婉拒）了作者的邀約。"
     },
     {
       "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①日暈月暈是好運的象徵 ②日暈月暈是天氣變化的前兆 □③日暈月暈是外星人的信號"
+      "label": "連結閱讀（段8）",
+      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的（□前面　後面）。要先留意後面的訊息，再配合前後文理解。"
     },
     {
       "kind": "pair",
-      "label": "結論",
-      "value": "大自然的線索能幫助我們預測天氣 【　　　】"
+      "label": "統整結論（段9～10）",
+      "value": "1.轉折詞後面出現的狀況，常常和一般預期的\n（□相同　不同），也是整句話的重點所在。\n2.閱讀的時候要留意【　　　】之後的句子。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

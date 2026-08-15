@@ -1,118 +1,114 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "二",
+      "三\n、\n四",
+      "四、五",
+      "六"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "小丑醫生",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "起源",
-      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主要服務對象",
-      "value": "面臨【　　　】、手術或治療的孩子。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "主要工作內容",
-      "value": "",
       "interactive_type": "display",
+      "label": "堅持到底的棒球人生──周思齊",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "背景",
       "sub_rows": [
         {
-          "label": "緩解醫院緊張的氛圍",
-          "value": "常見方式：【　　　】\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "二",
+          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "所需專業",
-      "value": "",
       "interactive_type": "display",
+      "label": "挑戰",
       "sub_rows": [
         {
-          "label": "表演",
-          "value": "以多元的表演方式，讓孩子們感受到放鬆。",
-          "interactive_type": "display"
-        },
-        {
-          "label": "專業知識",
-          "value": "了解醫院的規範和病人的需求。",
-          "interactive_type": "display"
-        },
-        {
-          "label": "__學",
-          "value": "應對病人和家屬的負面情緒。【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "三\n、\n四",
+          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "貢獻",
-      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "選擇與行動",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "四、五",
+          "value": "1.保護自己：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.守住原則：不願違背【　　　】，也不願辜負支持他的【　　　】。\n3.持續投入：不論環境如何，每場比賽都全力以赴。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "成就",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "六",
+          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "小丑醫生",
+  "title": "堅持到底的棒球人生──周思齊",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "起源",
-      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。"
-    },
-    {
-      "kind": "pair",
-      "label": "主要服務對象",
-      "value": "面臨【　　　】、手術或治療的孩子。"
-    },
-    {
-      "kind": "section_block",
-      "section": "主要工作內容",
       "items": [
         {
-          "label": "緩解醫院緊張的氛圍",
-          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
+          "label": "二",
+          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "背景"
     },
     {
-      "kind": "section_block",
-      "section": "所需專業",
       "items": [
         {
-          "label": "表演",
-          "value": "以多元的表演方式，讓孩子們感受到放鬆。"
-        },
-        {
-          "label": "專業知識",
-          "value": "了解醫院的規範和病人的需求。"
-        },
-        {
-          "label": "__學",
-          "value": "應對病人和家屬的負面情緒。【　　　】"
+          "label": "三\n、\n四",
+          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "挑戰"
     },
     {
-      "kind": "pair",
-      "label": "貢獻",
-      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。"
+      "items": [
+        {
+          "label": "四、五",
+          "value": "1.保護自己：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.守住原則：不願違背【　　　】，也不願辜負支持他的【　　　】。\n3.持續投入：不論環境如何，每場比賽都全力以赴。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "選擇與行動"
+    },
+    {
+      "items": [
+        {
+          "label": "六",
+          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "成就"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "主要服務對象",
-      "緩解醫院緊張的氛圍",
-      "__學",
-      "貢獻"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

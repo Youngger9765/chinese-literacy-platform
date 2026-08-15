@@ -1,148 +1,118 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 2,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "介紹對象",
+      "特徵",
+      "救援任務",
+      "優勢"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "寫信馬拉松",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "起源與目的",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "行動起源",
-          "value": "由【　　　】組織發起，目的是為【　　　】的人發聲。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "行動時間",
-          "value": "每年【　　　】，是【　　　】日。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "行動目的",
-          "value": "透過【　　　】支持遭受【　　　】的人，並向【　　　】或相關單位施壓。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "救援大隊的好幫手",
+      "value": ""
     },
     {
-      "label": "援助對象",
-      "value": "",
+      "interactive_type": "fill_blank",
+      "label": "介紹對象",
+      "value": "【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "特徵",
+      "value": "1.體型如小貓。\n2.嗅覺與聽力【　　　】及能鑽進狹小縫隙。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "救援任務",
+      "value": "1.巨鼠要在地震廢墟中尋找【　　　】。\n2.巨鼠身上裝備有麥克風、攝影機、定位追蹤器。\n3.巨鼠發現倖存者後，拉扯警報器發出【　　　】。"
+    },
+    {
+      "correct_options": [
+        0,
+        1,
+        3
+      ],
+      "interactive_type": "checkbox",
+      "label": "優勢",
+      "options": [
+        "能與多位訓練員合作",
+        "體型小，可以進入狗無法進入的地方\n□",
+        "比狗的嗅覺更靈敏",
+        "訓練與飼養成本較低\n□",
+        "比狗更容易訓練"
+      ],
+      "value": "相較於狗，非洲巨鼠有哪些優勢？【 多選 】\n①能與多位訓練員合作\n②體型小，可以進入狗無法進入的地方\n□③比狗的嗅覺更靈敏\n④訓練與飼養成本較低\n□⑤比狗更容易訓練"
+    },
+    {
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "兩位受迫害\n的青少年",
-          "value": "琪哈姆 嘗試逃離【　　　】失敗，被捕至今【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "兩位受迫害\n的青少年",
-          "value": "米基塔 因捲入抗議，被判【　　　】，不但未獲【　　　】，且疑似遭受酷刑。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "潛在問題",
+      "value": "巨鼠可能會嚇壞瓦礫中的倖存者。"
     },
     {
-      "label": "具體影響與成果",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "成功案例",
-          "value": "泰國的蓉因批評王室特權，而面臨【　　　】，後因「寫信馬拉松」行動而被釋放。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "行動成果\n【 第五段 】",
-          "value": "已成功改變【　　　】的命運，使其擺脫【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "correct_options": [
+        0,
+        2
+      ],
+      "interactive_type": "checkbox",
+      "label": "科學家的對策",
+      "options": [
+        "透過媒體宣傳巨鼠的救援能力。\n□",
+        "平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。",
+        "在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。\n□",
+        "在巨鼠的背包外印上醒目的救援標語。"
+      ],
+      "value": "為了解決人們對巨鼠的恐懼，科學家採取了哪些方法？\n【 多選 】\n①透過媒體宣傳巨鼠的救援能力。\n□②平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。\n③在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。\n□④在巨鼠的背包外印上醒目的救援標語。"
     },
     {
-      "label": "臺灣參與",
-      "value": "每年12月於【　　　】舉行活動，寫明信片傳遞【　　　】與【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "行動意義",
-      "value": "1.一封封充滿關懷與支持的信，位身陷困境的人們帶來【　　　】與【　　　】。\n2.讓大家看見，【　　　】都能成為改變的推手。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "結論",
+      "value": "巨鼠是【　　　】的重要夥伴。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "寫信馬拉松",
+  "title": "救援大隊的好幫手",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "起源與目的",
-      "items": [
-        {
-          "label": "行動起源",
-          "value": "由【　　　】組織發起，目的是為【　　　】的人發聲。"
-        },
-        {
-          "label": "行動時間",
-          "value": "每年【　　　】，是【　　　】日。"
-        },
-        {
-          "label": "行動目的",
-          "value": "透過【　　　】支持遭受【　　　】的人，並向【　　　】或相關單位施壓。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "援助對象",
-      "items": [
-        {
-          "label": "兩位受迫害\n的青少年",
-          "value": "琪哈姆 嘗試逃離【　　　】失敗，被捕至今【　　　】。"
-        },
-        {
-          "label": "兩位受迫害\n的青少年",
-          "value": "米基塔 因捲入抗議，被判【　　　】，不但未獲【　　　】，且疑似遭受酷刑。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "具體影響與成果",
-      "items": [
-        {
-          "label": "成功案例",
-          "value": "泰國的蓉因批評王室特權，而面臨【　　　】，後因「寫信馬拉松」行動而被釋放。"
-        },
-        {
-          "label": "行動成果\n(第五段)",
-          "value": "已成功改變【　　　】的命運，使其擺脫【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "介紹對象",
+      "value": "【　　　】"
     },
     {
       "kind": "pair",
-      "label": "臺灣參與",
-      "value": "每年12月於【　　　】舉行活動，寫明信片傳遞【　　　】與【　　　】。"
+      "label": "特徵",
+      "value": "1.體型如小貓。\n2.嗅覺與聽力【　　　】及能鑽進狹小縫隙。"
     },
     {
       "kind": "pair",
-      "label": "行動意義",
-      "value": "1.一封封充滿關懷與支持的信，位身陷困境的人們帶來【　　　】與【　　　】。\n2.讓大家看見，【　　　】都能成為改變的推手。"
+      "label": "救援任務",
+      "value": "1.巨鼠要在地震廢墟中尋找【　　　】。\n2.巨鼠身上裝備有麥克風、攝影機、定位追蹤器。\n3.巨鼠發現倖存者後，拉扯警報器發出【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "優勢",
+      "value": "相較於狗，非洲巨鼠有哪些優勢？（多選）\n①能與多位訓練員合作\n②體型小，可以進入狗無法進入的地方\n□③比狗的嗅覺更靈敏\n④訓練與飼養成本較低\n□⑤比狗更容易訓練"
+    },
+    {
+      "kind": "pair",
+      "label": "潛在問題",
+      "value": "巨鼠可能會嚇壞瓦礫中的倖存者。"
+    },
+    {
+      "kind": "pair",
+      "label": "科學家的對策",
+      "value": "為了解決人們對巨鼠的恐懼，科學家採取了哪些方法？\n（多選）\n①透過媒體宣傳巨鼠的救援能力。\n□②平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。\n③在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。\n□④在巨鼠的背包外印上醒目的救援標語。"
+    },
+    {
+      "kind": "pair",
+      "label": "結論",
+      "value": "巨鼠是【　　　】的重要夥伴。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 9,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "行動起源",
-      "行動時間",
-      "行動目的",
-      "兩位受迫害\n的青少年"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

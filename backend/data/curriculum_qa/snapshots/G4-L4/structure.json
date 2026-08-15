@@ -1,65 +1,93 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "主角",
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "運動科學",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "穿越極限的跑者",
+      "value": ""
     },
     {
-      "label": "文章主題：運動科學",
-      "value": "",
+      "interactive_type": "fill_blank",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
       "interactive_type": "display",
+      "label": "主題",
+      "value": "陳彥博雖然遇到了身體的病痛，仍然不放棄，超越自己的極限。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "事例",
       "sub_rows": [
         {
-          "label": "是什麼  \n  【 定義 】",
-          "value": "運動科學是對【　　　】活動進行【　　　】分析的一個綜合性學科。",
-          "interactive_type": "fill_blank"
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "起因",
+          "options": [
+            "骨癌",
+            "咽喉癌，必須動手術。"
+          ],
+          "value": "他【2011】年罹患了 □①骨癌  ②咽喉癌，必須動手術。"
         },
         {
-          "label": "方法\n與應用",
-          "value": "1.透過【　　　】，了解運動方式是否有效。\n例如：運動者應該要把肌肉鍛鍊跟【　　　】的時間分開，才會達到較好的訓練效果。\n2.透過【　　　】的測量、明白問題、加強訓練等程序，幫助運動者改善自己的運動表現。\n例如：味全龍職棒隊的投手林逸達，就是透過運動科學的應用，重新設計投球動作，成功恢復球速。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "經過",
+          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難？【　　　】\n①體力不足  ②肌肉強度不見  ③身邊親友的反對"
         },
         {
-          "label": "適用對象",
-          "value": "普及推廣，讓【　　　】都有機會參與󠇡，知道如何運動能更有效、更健康。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "他在【　　　】年完成了當初的超馬夢想。"
         }
-      ]
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "運動科學",
+  "title": "穿越極限的跑者",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "文章主題：運動科學",
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "主題",
+      "value": "陳彥博雖然遇到了身體的病痛，仍然不放棄，超越自己的極限。"
+    },
+    {
       "items": [
         {
-          "label": "是什麼  \n  (定義)",
-          "value": "運動科學是對【　　　】活動進行【　　　】分析的一個綜合性學科。"
+          "label": "起因",
+          "value": "他【　　　】年罹患了 □①骨癌  ②咽喉癌，必須動手術。"
         },
         {
-          "label": "方法\n與應用",
-          "value": "1.透過【　　　】，了解運動方式是否有效。\n例如：運動者應該要把肌肉鍛鍊跟【　　　】的時間分開，才會達到較好的訓練效果。\n2.透過【　　　】的測量、明白問題、加強訓練等程序，幫助運動者改善自己的運動表現。\n例如：味全龍職棒隊的投手林逸達，就是透過運動科學的應用，重新設計投球動作，成功恢復球速。"
+          "label": "經過",
+          "value": "他認為跑步是他唯一擅長且享受其中的事，所以他克服了什麼困難？(多選)\n①體力不足  ②肌肉強度不見  ③身邊親友的反對"
         },
         {
-          "label": "適用對象",
-          "value": "普及推廣，讓【　　　】都有機會參與󠇡，知道如何運動能更有效、更健康。"
+          "label": "結果",
+          "value": "他在【　　　】年完成了當初的超馬夢想。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "事例"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "是什麼  \n  【 定義 】",
-      "方法\n與應用",
-      "適用對象"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -1,145 +1,90 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "主角",
+      "背景",
+      "特質",
+      "專長"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "fill_blank",
       "label": "主角",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "value": "【　　　】"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "背景",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "居住地：【　 崑山　    】",
-          "value": "家世背景：\n【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "value": "家世背景：\n【　　　】"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "特質",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "",
-          "value": "【　　　】，而且精力【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "value": "【　　　】，而且精力【　　　】。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "專長",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "",
-          "value": "【　　　】，九經諸史，都能背誦。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "value": "【　　　】，九經諸史，都能背誦。"
     },
     {
-      "label": "嗜好：【 讀書 】",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "",
-          "value": "支持的證據有：",
-          "interactive_type": "display"
-        },
-        {
-          "label": "",
-          "value": "1.自少至老，未嘗【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "",
-          "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "嗜好：__",
+      "value": "支持的證據有："
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "嗜好：__",
+      "value": "1.自少至老，未嘗【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "嗜好：__",
+      "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "主角",
-      "items": [
-        {
-          "label": "",
-          "value": "【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
     },
     {
-      "kind": "section_block",
-      "section": "背景",
-      "items": [
-        {
-          "label": "居住地：【　　　】",
-          "value": "家世背景：\n【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "背景",
+      "value": "家世背景：\n【　　　】"
     },
     {
-      "kind": "section_block",
-      "section": "特質",
-      "items": [
-        {
-          "label": "",
-          "value": "【　　　】，而且精力【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "特質",
+      "value": "【　　　】，而且精力【　　　】。"
     },
     {
-      "kind": "section_block",
-      "section": "專長",
-      "items": [
-        {
-          "label": "",
-          "value": "【　　　】，九經諸史，都能背誦。"
-        }
-      ]
+      "kind": "pair",
+      "label": "專長",
+      "value": "【　　　】，九經諸史，都能背誦。"
     },
     {
-      "kind": "section_block",
-      "section": "嗜好：【 讀書 】",
-      "items": [
-        {
-          "label": "",
-          "value": "支持的證據有："
-        },
-        {
-          "label": "",
-          "value": "1.自少至老，未嘗【　　　】。"
-        },
-        {
-          "label": "",
-          "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "嗜好：__",
+      "value": "支持的證據有："
+    },
+    {
+      "kind": "pair",
+      "label": "嗜好：__",
+      "value": "1.自少至老，未嘗【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "嗜好：__",
+      "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "居住地：【　 崑山　    】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

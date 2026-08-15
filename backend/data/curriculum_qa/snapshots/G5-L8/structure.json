@@ -1,85 +1,70 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "來工地的原因",
+      "大嫂的類型",
+      "大嫂在工地的功用",
+      "總結"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "奧運銀牌的自我鍛鍊",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主角",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "主題",
-      "value": "楊勇緯從小就以自律和強韌的心理素質著稱。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "事例",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "背景",
-          "value": "東京奧運只奪下銀牌。",
-          "interactive_type": "display"
-        },
-        {
-          "label": "經過",
-          "value": "楊勇緯雖然流下了眼淚，但最後他認為?【　　　】\n失敗讓人成長        □休息才能走更長遠的路 \n調整心情重新開始",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "結果",
-          "value": "楊勇緯最後獲得了兩面柔道大滿貫金牌，他值得學習的地方是什麼?【　　　】\n把挫折當養分    持續優化細節    內心強大",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "定義",
+      "value": "作者稱六十歲以下，和丈夫一起來工地工作的女性叫大嫂。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "來工地的原因",
+      "value": "1.工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。\n2.大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。\n3.跟著丈夫進工地，不僅可多出一分勞力，也能\n　【　　　】丈夫、照應工作。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "大嫂的類型",
+      "value": "1.互補型：丈夫技術好，但是好強高傲。\n大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。\n2.管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。\n3.人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "大嫂在工地的功用",
+      "value": "1.【　　　】工人爭執。\n2.提供偏方與【　　　】給身體不適的工人。\n3.協助【　　　】工地死亡的貓狗。\n4.工程順利時，帶工人同樂慶祝。\n5.工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "總結",
+      "value": "工地大嫂是臺灣社會中堅強、溫柔又美麗的女性縮影，值得眾人【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "奧運銀牌的自我鍛鍊",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主角",
-      "value": "【　　　】"
+      "label": "定義",
+      "value": "作者稱六十歲以下，和丈夫一起來工地工作的女性叫大嫂。"
     },
     {
       "kind": "pair",
-      "label": "主題",
-      "value": "楊勇緯從小就以自律和強韌的心理素質著稱。"
+      "label": "來工地的原因",
+      "value": "1.工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。\n2.大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。\n3.跟著丈夫進工地，不僅可多出一分勞力，也能\n　【　　　】丈夫、照應工作。"
     },
     {
-      "kind": "section_block",
-      "section": "事例",
-      "items": [
-        {
-          "label": "背景",
-          "value": "東京奧運只奪下銀牌。"
-        },
-        {
-          "label": "經過",
-          "value": "楊勇緯雖然流下了眼淚，但最後他認為?(多選)\n失敗讓人成長        □休息才能走更長遠的路 \n調整心情重新開始"
-        },
-        {
-          "label": "結果",
-          "value": "楊勇緯最後獲得了兩面柔道大滿貫金牌，他值得學習的地方是什麼?(多選)\n把挫折當養分    持續優化細節    內心強大"
-        }
-      ]
+      "kind": "pair",
+      "label": "大嫂的類型",
+      "value": "1.互補型：丈夫技術好，但是好強高傲。\n大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。\n2.管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。\n3.人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+    },
+    {
+      "kind": "pair",
+      "label": "大嫂在工地的功用",
+      "value": "1.【　　　】工人爭執。\n2.提供偏方與【　　　】給身體不適的工人。\n3.協助【　　　】工地死亡的貓狗。\n4.工程順利時，帶工人同樂慶祝。\n5.工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "工地大嫂是臺灣社會中堅強、溫柔又美麗的女性縮影，值得眾人【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "主角",
-      "經過",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

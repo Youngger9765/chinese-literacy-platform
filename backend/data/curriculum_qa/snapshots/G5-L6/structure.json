@@ -1,114 +1,170 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 9,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題",
+      "執行方式",
+      "產生問題",
+      "執行方式"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "堅持到底的棒球人生──周思齊",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "兵來將擋，水來土掩",
+      "value": ""
     },
     {
-      "label": "背景",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "二",
-          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "問題",
+      "value": "【　　　】入侵臺灣，農民深受其害，昆蟲學家嘗試許多方法解決問題。"
     },
     {
-      "label": "挑戰",
-      "value": "",
       "interactive_type": "display",
+      "label": "人工噴農藥",
       "sub_rows": [
         {
-          "label": "三\n、\n四",
-          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說【　　　】不夠。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "執行方式",
+          "value": "每週噴藥【　　　】次，持續【　　　】週。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "產生問題",
+          "value": "種植面積很大時，人工噴農藥太【　　　】、【　　　】、【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "努力",
-      "value": "",
       "interactive_type": "display",
+      "label": "無人機噴農藥",
       "sub_rows": [
         {
-          "label": "四\n、\n五",
-          "value": "1.調適心態：先【　　　】，再以【　　　】的精神努力\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "執行方式",
+          "value": "大型無人機，噴一公頃的農藥只要【　　　】分鐘，一天可以噴【　　　】公頃。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "產生問題",
+          "value": "較能耐受藥劑的害蟲容易存活並繁殖，經過幾代，具有【　　　】的害蟲可能愈來愈多。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "成就",
-      "value": "",
       "interactive_type": "display",
+      "label": "寄生蜂片",
       "sub_rows": [
         {
-          "label": "五",
-          "value": "於高二暑假，升上【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "執行方式",
+          "value": "研究人員把已被寄生的蟲卵黏在小紙卡上，做成蜂片；農民再把蜂片釘在【　　　】背面，一公頃放【　　　】片就可以防治蟲害。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "產生問題",
+          "value": "釘121片蜂片要花【　　　】個鐘頭，對年紀【　　　】的農民仍是苦差事。"
         }
-      ]
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "寄生蜂扭蛋",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "執行方式",
+          "value": "1.把原本黏在蜂片上的蟲卵放進紙製扭蛋，【　　　】長大後會從小孔飛出。\n2.把【　　　】丟進玉米田裡，就能讓寄生蜂防治秋行軍蟲。\n3.扭蛋可以用【　　　】施作，一公頃約20到30分鐘就可以灑完了。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "解決問題",
+          "value": "比人工釘蜂片省時又省力。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "總結",
+      "value": "昆蟲學家運用科技，針對防治中不斷出現的新問題改進方法，可說是「【　　　】」。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "堅持到底的棒球人生──周思齊",
+  "title": "兵來將擋，水來土掩",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "背景",
-      "items": [
-        {
-          "label": "二",
-          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
-        }
-      ]
+      "kind": "pair",
+      "label": "問題",
+      "value": "【　　　】入侵臺灣，農民深受其害，昆蟲學家嘗試許多方法解決問題。"
     },
     {
-      "kind": "section_block",
-      "section": "挑戰",
       "items": [
         {
-          "label": "三\n、\n四",
-          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說（天賦　□努力）不夠。"
+          "label": "執行方式",
+          "value": "每週噴藥【　　　】次，持續【　　　】週。"
+        },
+        {
+          "label": "產生問題",
+          "value": "種植面積很大時，人工噴農藥太【　　　】、【　　　】、【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "人工噴農藥"
     },
     {
-      "kind": "section_block",
-      "section": "努力",
       "items": [
         {
-          "label": "四\n、\n五",
-          "value": "1.調適心態：先【　　　】，再以【　　　】的精神努力\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
+          "label": "執行方式",
+          "value": "大型無人機，噴一公頃的農藥只要【　　　】分鐘，一天可以噴【　　　】公頃。"
+        },
+        {
+          "label": "產生問題",
+          "value": "較能耐受藥劑的害蟲容易存活並繁殖，經過幾代，具有【　　　】的害蟲可能愈來愈多。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "無人機噴農藥"
     },
     {
-      "kind": "section_block",
-      "section": "成就",
       "items": [
         {
-          "label": "五",
-          "value": "於高二暑假，升上【　　　】"
+          "label": "執行方式",
+          "value": "研究人員把已被寄生的蟲卵黏在小紙卡上，做成蜂片；農民再把蜂片釘在【　　　】背面，一公頃放【　　　】片就可以防治蟲害。"
+        },
+        {
+          "label": "產生問題",
+          "value": "釘121片蜂片要花【　　　】個鐘頭，對年紀【　　　】的農民仍是苦差事。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "寄生蜂片"
+    },
+    {
+      "items": [
+        {
+          "label": "執行方式",
+          "value": "1.把原本黏在蜂片上的蟲卵放進紙製扭蛋，【　　　】長大後會從小孔飛出。\n2.把【　　　】丟進玉米田裡，就能讓寄生蜂防治秋行軍蟲。\n3.扭蛋可以用【　　　】施作，一公頃約20到30分鐘就可以灑完了。"
+        },
+        {
+          "label": "解決問題",
+          "value": "比人工釘蜂片省時又省力。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "寄生蜂扭蛋"
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "昆蟲學家運用科技，針對防治中不斷出現的新問題改進方法，可說是「【　　　】」。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "二",
-      "三\n、\n四",
-      "四\n、\n五",
-      "五"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

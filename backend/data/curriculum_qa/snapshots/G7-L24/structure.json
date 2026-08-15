@@ -1,86 +1,132 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "前言",
+      "案發現場",
+      "被刺了十八刀，血呢？",
+      "去哪裡找鞋子的主人？"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "未來農夫",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "用科學方法伸張正義的神探",
+      "value": ""
     },
     {
-      "label": "志向與進入場域【 段1-2 】",
-      "value": "1.宇晴的志向是想要當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，有消毒味，農場像【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "前言",
+      "value": "1.科學是一種【　　　】解決問題的方法。\n2.警察也會依循【　　　】、【　　　】、\n【　　　】、【　　　】的程序來辦案。"
     },
     {
-      "label": "農場外觀【 段3 】",
-      "value": "農場一層層栽培架，LED燈光，像【　　　】，每層水耕槽葉片【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "案件背景",
+      "value": "1.鄰居孩子發現老太太倒在自家廚房，老太太已死去。\n2.當天晚上十二點，李昌鈺博士趕到現場。"
     },
     {
-      "label": "農場運作方式【 段4 】",
-      "value": "1.水耕蔬菜不是用土種出來的是，而是用【　　　】。\n2.透過【　　　】監測與控制條件，讓農場的環境維持在最適合蔬菜生長的範圍。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "案發現場",
+      "value": "1.警方已在現場調查【　　　】小時。\n2.法醫發現：老太太【　　　】被刺十八刀】。\n3.凶器：【　　　】。"
     },
     {
-      "label": "工作內容【 段5 】",
-      "value": "1.宇晴的任務：每天【　　　】，找【　　　】並處理或回報校正。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "辦案歷程",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "問題",
+          "value": "假設 檢驗假設 解答"
+        },
+        {
+          "correct_options": [
+            0
+          ],
+          "interactive_type": "checkbox",
+          "label": "被刺了十八刀，血呢？",
+          "options": [
+            "假設一\n□",
+            "假設二"
+          ],
+          "value": "假設一：血跡\n【已被清理】\n假設二、廚房不是\n【第一現場】 噴化學藥劑，觀察地板是否出現\n【血跡反應】 地板確有血跡反應，支持了：\n①假設一\n□②假設二"
+        },
+        {
+          "interactive_type": "display",
+          "label": "鞋子在哪裡？",
+          "value": "凶手不會再穿沾血的鞋，鞋子會被丟到垃圾箱。 派200名刑警到附近垃圾箱找鞋子。 鞋子在附近垃圾箱找到，假設獲得支持。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "去哪裡找鞋子的主人？",
+          "value": "凶手把鞋丟了，會需要去【　　　】買新鞋。 去問【　　　】，有沒有人來買鞋 循線找到當天下午買鞋的人"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "農場優勢【 段6 】",
-      "value": "1.水耕蔬菜成本【　　　】會不會賺錢？\n2.風險低、長得快、乾淨漂亮，能創造【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "案件真相",
+      "value": "凶手是老太太的【　　　】，有【　　　】惡習。感恩節當天向老太太要錢，老太太不給，情緒失控殺了老太太。"
     },
     {
-      "label": "傳統與未來【 段7-8 】",
-      "value": "1.宇晴回憶【　　　】【　　　】，因此起雞皮疙瘩。\n2.未來農夫不再是斗笠鋤頭，而更像【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "總結",
+      "value": "李博士和他的團隊用【　　　】，替無聲的死者說話，讓正義得到伸張。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "未來農夫",
+  "title": "用科學方法伸張正義的神探",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "志向與進入場域(段1-2)",
-      "value": "1.宇晴的志向是想要當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，有消毒味，農場像【　　　】。"
+      "label": "前言",
+      "value": "1.科學是一種【　　　】解決問題的方法。\n2.警察也會依循【　　　】、【　　　】、\n【　　　】、【　　　】的程序來辦案。"
     },
     {
       "kind": "pair",
-      "label": "農場外觀（段3）",
-      "value": "農場一層層栽培架，LED燈光，像【　　　】，每層水耕槽葉片【　　　】。"
+      "label": "案件背景",
+      "value": "1.鄰居孩子發現老太太倒在自家廚房，老太太已死去。\n2.當天晚上十二點，李昌鈺博士趕到現場。"
     },
     {
       "kind": "pair",
-      "label": "農場運作方式(段4)",
-      "value": "1.水耕蔬菜不是用土種出來的是，而是用【　　　】。\n2.透過【　　　】監測與控制條件，讓農場的環境維持在最適合蔬菜生長的範圍。"
+      "label": "案發現場",
+      "value": "1.警方已在現場調查【　　　】小時。\n2.法醫發現：老太太【　　　】。\n3.凶器：【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "問題",
+          "value": "假設 檢驗假設 解答"
+        },
+        {
+          "label": "被刺了十八刀，血呢？",
+          "value": "假設一：血跡\n【　　　】\n假設二、廚房不是\n【　　　】 噴化學藥劑，觀察地板是否出現\n【　　　】 地板確有血跡反應，支持了：\n①假設一\n□②假設二"
+        },
+        {
+          "label": "鞋子在哪裡？",
+          "value": "凶手不會再穿沾血的鞋，鞋子會被丟到垃圾箱。 派200名刑警到附近垃圾箱找鞋子。 鞋子在附近垃圾箱找到，假設獲得支持。"
+        },
+        {
+          "label": "去哪裡找鞋子的主人？",
+          "value": "凶手把鞋丟了，會需要去【　　　】買新鞋。 去問【　　　】，有沒有人來買鞋 循線找到當天下午買鞋的人"
+        }
+      ],
+      "kind": "section_block",
+      "section": "辦案歷程"
     },
     {
       "kind": "pair",
-      "label": "工作內容(段5)",
-      "value": "1.宇晴的任務：每天【　　　】，找【　　　】並處理或回報校正。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】"
+      "label": "案件真相",
+      "value": "凶手是老太太的【　　　】，有【　　　】惡習。感恩節當天向老太太要錢，老太太不給，情緒失控殺了老太太。"
     },
     {
       "kind": "pair",
-      "label": "農場優勢(段6)",
-      "value": "1.水耕蔬菜成本【　　　】會不會賺錢？\n2.風險低、長得快、乾淨漂亮，能創造【　　　】"
-    },
-    {
-      "kind": "pair",
-      "label": "傳統與未來(段7-8)",
-      "value": "1.宇晴回憶【　　　】（農具徒手、糞肥等），因此起雞皮疙瘩。\n2.未來農夫不再是斗笠鋤頭，而更像【　　　】"
+      "label": "總結",
+      "value": "李博士和他的團隊用【　　　】，替無聲的死者說話，讓正義得到伸張。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "志向與進入場域【 段1-2 】",
-      "農場外觀【 段3 】",
-      "農場運作方式【 段4 】",
-      "工作內容【 段5 】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

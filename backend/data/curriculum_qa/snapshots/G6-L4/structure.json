@@ -1,98 +1,160 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 7,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "測驗方法",
+      "得分標準",
+      "參與者",
+      "結果"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "兩千五百歲的酷老師",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主角",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "背景",
-      "value": "孔子喜歡唱歌、吟詩、射箭，後人尊稱為至聖先師。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "教育理念",
-      "value": "",
       "interactive_type": "display",
+      "label": "大主題：數字記憶的奧秘",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "小主題",
+      "value": "重要細節"
+    },
+    {
+      "interactive_type": "display",
+      "label": "數字記憶廣度測驗",
       "sub_rows": [
         {
-          "label": "【 單選 】\n有教無類\n□因材施教",
-          "value": "1.孔子開辦【　　　】，不分老小、貧富、貴賤或家世，將教育普及到一般平民百姓。\n2.下列哪些人可以成為孔子的學生？【　　　】\n   乞丐    農夫    大官",
-          "interactive_type": "fill_blank"
+          "interactive_type": "display",
+          "label": "測驗目的",
+          "value": "測量受試者記憶數字的能力"
         },
         {
-          "label": "【　　　】\n□有教無類\n因材施教",
-          "value": "孔子了解每位學生，並依據他們的特質給予不同的教導。",
           "interactive_type": "fill_blank",
-          "blank_in_label": true
+          "label": "測驗方法",
+          "value": "施測者依序唸出一串數字，受試者要\n【　　　】】數字。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "得分標準",
+          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "成就",
-      "value": "1.開創教育新格局。\n2.教過的學生人數，約【　　　】人。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "實驗一：老中與老美的數字記憶廣度比較",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "參與者",
+          "value": "說【　　　】語與【　　　】語的兩組大學生。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "老中的記憶廣度得分比老美高，可能和漢語數字的發音【　　　】有關。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "影響",
-      "value": "學生敬念孔子，將他與學生的對話記錄、集結成【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "其他科學家的異議",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "另一種\n可能",
+          "value": "兩組從小接受的【　　　】可能不同，因此不能只用發音長度解釋。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "實驗二：小老中與小老美的數字記憶廣度比較",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "參與者",
+          "value": "【　　　】至【　　　】歲的小老中和小老美。降低長期補習或數字訓練的影響。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "小老中的數字記憶廣度依然高於小老美。\n而且，小老中的平均發音時間較短。\n這個結果支持了【　　　】會影響【　　　】的說法。"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "兩千五百歲的酷老師",
+  "title": "大主題：數字記憶的奧秘",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主角",
-      "value": "【　　　】"
+      "label": "小主題",
+      "value": "重要細節"
     },
     {
-      "kind": "pair",
-      "label": "背景",
-      "value": "孔子喜歡唱歌、吟詩、射箭，後人尊稱為至聖先師。"
-    },
-    {
-      "kind": "section_block",
-      "section": "教育理念",
       "items": [
         {
-          "label": "（單選）\n有教無類\n□因材施教",
-          "value": "1.孔子開辦【　　　】，不分老小、貧富、貴賤或家世，將教育普及到一般平民百姓。\n2.下列哪些人可以成為孔子的學生？(多選)\n   乞丐    農夫    大官"
+          "label": "測驗目的",
+          "value": "測量受試者記憶數字的能力"
         },
         {
-          "label": "（單選）\n□有教無類\n因材施教",
-          "value": "孔子了解每位學生，並依據他們的特質給予不同的教導。"
+          "label": "測驗方法",
+          "value": "施測者依序唸出一串數字，受試者要\n【　　　】數字。"
+        },
+        {
+          "label": "得分標準",
+          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "數字記憶廣度測驗"
     },
     {
-      "kind": "pair",
-      "label": "成就",
-      "value": "1.開創教育新格局。\n2.教過的學生人數，約【　　　】人。"
+      "items": [
+        {
+          "label": "參與者",
+          "value": "說【　　　】語與【　　　】語的兩組大學生。"
+        },
+        {
+          "label": "結果",
+          "value": "老中的記憶廣度得分比老美高，可能和漢語數字的發音【　　　】有關。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "實驗一：老中與老美的數字記憶廣度比較"
     },
     {
-      "kind": "pair",
-      "label": "影響",
-      "value": "學生敬念孔子，將他與學生的對話記錄、集結成【　　　】。"
+      "items": [
+        {
+          "label": "另一種\n可能",
+          "value": "兩組從小接受的【　　　】可能不同，因此不能只用發音長度解釋。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "其他科學家的異議"
+    },
+    {
+      "items": [
+        {
+          "label": "參與者",
+          "value": "【　　　】至【　　　】歲的小老中和小老美。降低長期補習或數字訓練的影響。"
+        },
+        {
+          "label": "結果",
+          "value": "小老中的數字記憶廣度依然高於小老美。\n而且，小老中的平均發音時間較短。\n這個結果支持了【　　　】會影響【　　　】的說法。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "實驗二：小老中與小老美的數字記憶廣度比較"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "主角",
-      "【 單選 】\n有教無類\n□因材施教",
-      "【　　　】\n□有教無類\n因材施教",
-      "成就"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

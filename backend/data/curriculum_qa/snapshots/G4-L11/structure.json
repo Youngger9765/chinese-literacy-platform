@@ -1,76 +1,48 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 2,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "五種生存妙招",
+      "共同目的"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "誤會",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "大主題",
+      "value": "動物的生存妙招"
     },
     {
-      "label": "事件起點",
-      "value": "1.一位老爺爺上了擁擠的公車，全車已滿座，他只好站在【　　　】旁邊。\n2.博愛座上坐著一位正專心【　　　】的年輕人，沒有注意到老爺爺。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "五種生存妙招",
+      "value": "【　　　】、【　　　】、【　　　】、【　　　】和【　　　】。"
     },
     {
-      "label": "情緒反應",
-      "value": "作者【　　　】看了心裡不高興，猶豫著要不要開口提醒他。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "事件引爆",
-      "value": "1.公車突然急煞，老人差點【　　　】。\n2.作者大聲斥責年輕人佔著博愛座卻不讓位，其他乘客也加入【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "轉折",
-      "value": "1.年輕人站起來，手拿一支【　　　】，往車門走。\n2.他每經過每一個人，那人的頭就低了下來。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "結局反思",
-      "value": "1.作者【　　　】道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者【　　　】反芻那句「我習慣了」，發現自己是無數加害者之一。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "共同目的",
+      "value": "提高自己、【　　　】和下一代的【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "誤會",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "事件起點",
-      "value": "1.一位老爺爺上了擁擠的公車，全車已滿座，他只好站在【　　　】旁邊。\n2.博愛座上坐著一位正專心【　　　】的年輕人，沒有注意到老爺爺。"
+      "label": "大主題",
+      "value": "動物的生存妙招"
     },
     {
       "kind": "pair",
-      "label": "情緒反應",
-      "value": "作者（我）看了心裡不高興，猶豫著要不要開口提醒他。"
+      "label": "五種生存妙招",
+      "value": "【　　　】、【　　　】、【　　　】、【　　　】和【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "事件引爆",
-      "value": "1.公車突然急煞，老人差點【　　　】。\n2.作者大聲斥責年輕人佔著博愛座卻不讓位，其他乘客也加入【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "轉折",
-      "value": "1.年輕人站起來，手拿一支【　　　】，往車門走。\n2.他每經過每一個人，那人的頭就低了下來。"
-    },
-    {
-      "kind": "pair",
-      "label": "結局反思",
-      "value": "1.作者（我）道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者（我）反芻那句「我習慣了」，發現自己是無數加害者之一。"
+      "label": "共同目的",
+      "value": "提高自己、【　　　】和下一代的【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "事件起點",
-      "情緒反應",
-      "事件引爆",
-      "轉折"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

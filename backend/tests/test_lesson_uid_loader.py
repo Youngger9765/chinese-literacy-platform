@@ -164,3 +164,44 @@ def test_assetless_table_figures_are_stripped_at_load():
         and not b.get("asset")
     ]
     assert leftover == [], f"{len(leftover)} assetless table figures survived loading"
+
+
+def test_the_code_offset_table_stays_empty():
+    """`CATALOG_TO_PARSED_OVERRIDE` patched a numbering offset between two layers.
+    There is one source now, so a code means itself — and leaving the first-edition
+    pairs in place was not neutral: after the renumber they redirected live lookups
+    to a DIFFERENT lesson (G8-L9 「按讚」背後的真相 resolved to G8-L7 集中營裡的一門課,
+    which surfaced as a 'stale manifest' rather than as the mis-binding it was)."""
+    from app.services.lesson_code_normalization import (
+        CATALOG_TO_PARSED_OVERRIDE,
+        catalog_to_parsed_code,
+        parsed_to_catalog_codes,
+    )
+
+    assert CATALOG_TO_PARSED_OVERRIDE == {}, (
+        f"offset table repopulated with {list(CATALOG_TO_PARSED_OVERRIDE)[:5]} — "
+        "two numbering schemes need a version_id on the uid, not a position lookup"
+    )
+    # And the mapping functions are the identity for real catalogue codes.
+    from app.services.lesson_loader import get_all_lessons
+
+    for lesson in get_all_lessons()[:20]:
+        code = lesson["grade_code"]
+        assert catalog_to_parsed_code(code) == code
+        assert parsed_to_catalog_codes(code) == [code]
+
+
+def test_importing_the_lab_service_does_not_need_the_lesson_loader():
+    """`story_structure_lab_service` computed a pinned-id set at module scope. When
+    the representative list stopped carrying `story_id`, that raised KeyError during
+    IMPORT — taking down every module that imports it, which surfaced as four test
+    files failing to collect rather than as one broken feature."""
+    import importlib
+    import sys
+
+    for name in list(sys.modules):
+        if "story_structure_lab_service" in name:
+            del sys.modules[name]
+    mod = importlib.import_module("app.services.story_structure_lab_service")
+    assert hasattr(mod, "_pinned_story_ids")
+    assert mod._pinned_story_ids() is not None   # resolvable when actually asked

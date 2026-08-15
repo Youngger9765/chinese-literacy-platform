@@ -412,3 +412,58 @@ Young 的判斷：使用者要的就是一排可以點的分類，年級和專�
 uid 快取清除、欄位 overlay、封存整目錄、grade 字串化、年級篩選、
 可定址範圍守衛、空框 block 過濾、by-code 索引。
 
+---
+
+## 段落九：CI 紅燈追出第九、十、十一個真 bug（2026-08-15）
+
+PR #2694 開出來後，12 個 CI 檢查裡 11 綠 1 紅（`Manifest freshness`）。
+追下去不是 manifest 過期而已。
+
+### ⑨ QA 工具裡還活著一張一修的課號偏移表
+
+`CATALOG_TO_PARSED_OVERRIDE` 有 20 幾組手維護的對應
+（「catalog 的 G8-L4 其實是 parsed 的 G8-L5」），存在的理由是一修有兩層、兩套編號。
+
+二修只剩一層，但那張表還在，**於是它把活的查詢導去別課**：
+
+```
+G8-L9「按讚」背後的真相  →  偏移表導到  →  G8-L7 集中營裡的一門課
+G8-L6 戲院、賭場、檳榔攤  →  偏移表導到  →  G8-L5 玻璃娃娃
+```
+
+而症狀顯示成「manifest 過期」—— 如果照著錯誤訊息去重建 manifest，
+就會把錯誤的對應**烤進基準線**，之後再也看不出來。
+
+`MULTI_LESSON_PRIMARY` / `MULTI_LESSON_MAP` 同病：它們把課號改寫成一修
+「多課併一個 YAML」的檔名（`G4-L20-22`），那些檔名在二修不存在，
+三個活的課號因此被導到查無此檔。
+
+三張表全部清空並寫明「不要填回來」。回歸鎖 + mutation 驗過。
+
+### ⑩ 匯入這個模組就會炸
+
+`story_structure_lab_service.py` 在**模組層**算 `_PINNED_STORY_IDS`，
+資料來源是釘死的代表課清單。清單改掉之後 `KeyError` 發生在 **import 期** ——
+不是一個功能壞掉，而是**所有 import 它的模組一起掛**，
+表現成四個測試檔「收集失敗」。改成延後求值 + 用 uid 查。
+
+### ⑪ 代表課清單釘死不存在的課
+
+七課清單裡三課二修沒有（G6-L22、G8-L13 有課但沒抽出重點表，G8-L14 根本不存在），
+且每筆都帶著已廢除的 `story_id`（1076、31、1123…）。
+
+清單的**用意**仍然成立：每種表格版型都要有人守。所以改成**從真語料按版型動態選**，
+現在四種版型（mixed / fill_blank / checkbox / display_only）各有代表。
+
+### manifest 重建
+
+`build_keypoints_qa_manifest.py` 讀 `private/curriculum-source/_online-schema`，
+那是一修的策展工作區，二修沒有 → 腳本直接 exit。
+
+新寫 `scripts/rebuild_keypoints_manifest.py` 從**執行期**重建（147 課 + 147 個 snapshot）。
+**人工審查結論不重新產生** —— `overall_pass` / `known_data_gap` 從舊 manifest 沿用，
+新課沒有結論就是沒有。拿被 QA 的輸出去重新產生 QA 結論，等於讓閘門同意任何東西。
+
+`summary.pass` 的語意也寫清楚了：它是「**沒有已知失敗**」，不是「審過了」。
+兩者容易混淆，所以另外輸出 `unreviewed: 29`，把差別留在檔案上而不是在誰的印象裡。
+

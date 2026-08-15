@@ -1,115 +1,76 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "段1~2灰犀牛？本課主題",
+      "段３人口負成長：定義及現狀",
+      "段４~5圖1、２:臺灣婦女總生育率與人口負成長趨勢",
+      "段６人口負成長的影響"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "信眾與教主",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "預言/事件",
-      "value": "一位【　　　】聲稱\n【　　　】即將來臨，洪水會淹沒全世界，只有【　　　】會被外星人用飛碟救走。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "研究問題",
-      "value": "信眾對教主的態度是否因預言結果有所改變？",
-      "interactive_type": "display"
-    },
-    {
-      "label": "研究方法",
-      "value": "三位心理學家潛入組織，匿名進行蒐集資料。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "觀察結果",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "末日前",
-          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "末日當日",
-          "value": "什麼都沒有發生　　□外星人出現。【　　　】",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "末日後",
-          "value": "【　　　】原來就不太投入的人怎麼做？→【　　　】",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "末日後",
-          "value": "【　　　】對教主付出很多的人怎麼做？→【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "看見時代的灰犀牛了嗎？談人口負成長",
+      "value": ""
     },
     {
-      "label": "研究結論",
-      "value": "有特定信仰的人：【　　　】\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "段1~2灰犀牛？本課主題",
+      "value": "灰犀牛是指明明可見，會造成重大衝擊的【　　　】事件，但因為壞影響還有一段時間才發生，因此被大眾忽視。高糖飲料和炸雞對國中生健康的影響就是一例。\n揭示本課主題—人口負成長。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "段３人口負成長：定義及現狀",
+      "value": "1.當每年的「【　　　】人口數」少於「【　　　】人口數」時，出現人口負成長。\n2.人口負成長主要原因是【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "段４~5圖1、２:臺灣婦女總生育率與人口負成長趨勢",
+      "value": "1.臺灣自1951年以來婦女總生育率【　　　】。\n2.2011年至2023年，臺灣出生人數逐年【　　　】，死亡人數逐年【　　　】。\n3.2020年開始，死亡人數【　　　】出生人數，臺灣出現人口負成長。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "段６人口負成長的影響",
+      "value": "1.缺點：工作年齡人口扶養壓力加重，每人平均要負擔的扶養人數　【　　　】。\n2.可能的正面影響：【　　　】老年人多，會帶動消費經濟。\n　　　　【　　　】減少資源消耗和污染，對環境更【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "段7結論",
+      "value": "臺灣人口負成長呈現【　　　】的趨勢，帶來人口結構改變、【　　　】人口比率下降、【　　　】扶養負擔加重，但也可能帶動經濟變革。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "信眾與教主",
+  "title": "看見時代的灰犀牛了嗎？談人口負成長",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "預言/事件",
-      "value": "一位【　　　】聲稱\n【　　　】即將來臨，洪水會淹沒全世界，只有【　　　】會被外星人用飛碟救走。"
+      "label": "段1~2灰犀牛？本課主題",
+      "value": "灰犀牛是指明明可見，會造成重大衝擊的【　　　】事件，但因為壞影響還有一段時間才發生，因此被大眾忽視。高糖飲料和炸雞對國中生健康的影響就是一例。\n揭示本課主題—人口負成長。"
     },
     {
       "kind": "pair",
-      "label": "研究問題",
-      "value": "信眾對教主的態度是否因預言結果有所改變？"
+      "label": "段３人口負成長：定義及現狀",
+      "value": "1.當每年的「【　　　】人口數」少於「【　　　】人口數」時，出現人口負成長。\n2.人口負成長主要原因是【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "研究方法",
-      "value": "三位心理學家潛入組織，匿名進行蒐集資料。"
-    },
-    {
-      "kind": "section_block",
-      "section": "觀察結果",
-      "items": [
-        {
-          "label": "末日前",
-          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
-        },
-        {
-          "label": "末日當日",
-          "value": "什麼都沒有發生　　□外星人出現。(單選)"
-        },
-        {
-          "label": "末日後",
-          "value": "(1)原來就不太投入的人怎麼做？→【　　　】"
-        },
-        {
-          "label": "末日後",
-          "value": "(2)對教主付出很多的人怎麼做？→【　　　】"
-        }
-      ]
+      "label": "段４~5圖1、２:臺灣婦女總生育率與人口負成長趨勢",
+      "value": "1.臺灣自1951年以來婦女總生育率【　　　】。\n2.2011年至2023年，臺灣出生人數逐年【　　　】，死亡人數逐年【　　　】。\n3.2020年開始，死亡人數【　　　】出生人數，臺灣出現人口負成長。"
     },
     {
       "kind": "pair",
-      "label": "研究結論",
-      "value": "有特定信仰的人：(單選)\n可能會不看證據，做出匪夷所思的判斷\n□比較能根據證據做判斷。"
+      "label": "段６人口負成長的影響",
+      "value": "1.缺點：工作年齡人口扶養壓力加重，每人平均要負擔的扶養人數　【　　　】。\n2.可能的正面影響：(1)老年人多，會帶動消費經濟。\n　　　　(2)減少資源消耗和污染，對環境更【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "段7結論",
+      "value": "臺灣人口負成長呈現【　　　】的趨勢，帶來人口結構改變、【　　　】人口比率下降、【　　　】扶養負擔加重，但也可能帶動經濟變革。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "預言/事件",
-      "末日前",
-      "末日當日",
-      "末日後"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

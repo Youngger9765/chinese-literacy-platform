@@ -1,65 +1,86 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "青少年的睡眠需求",
+      "睡眠對【身體健康】的影響",
+      "睡眠對【學習】的影響",
+      "常見的睡眠__【 迷思 】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "給神明發會診單",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "祝你好眠",
+      "value": ""
     },
     {
-      "label": "起因",
-      "value": "病人的狀況不好，家屬想請乩童來看看病人。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "label": "青少年的睡眠需求",
+      "value": "青少年每天需要【　　　】小時的睡眠。"
     },
     {
-      "label": "陳醫師想法",
-      "value": "1.請乩童來看病人，這是家屬的【　　　】。\n2.病人預後不樂觀，現在更重要的是【　　　】。\n3.一般醫師拒絕乩童、符水的原因是？【　　　】\n認為這些東西很迷信無知  認為自己專業受到挑戰\n感覺自己不被信任 \n4.陳醫師不拒絕民間信仰進入醫院的原因？\n【　　　】把這件事用【　　　】看待，家屬只是想盡一分心力。\n【　　　】乩童、符水其實就是家屬的【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "睡眠對【身體健康】的影響",
+      "value": "1.睡眠能幫助身體修復【　　　】、調整運作，並清除【　　　】產生的廢物。\n2.長期睡不夠，可能增加健康風險。"
     },
     {
-      "label": "請神明會診",
-      "value": "1.陳醫師自我介紹及說明病情，並感謝乩童的協助。\n2.乩童比手畫腳，代替病人跟家屬說了一番話，並給了他們大大的【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "睡眠對【學習】的影響",
+      "value": "1.睡眠時，大腦會【　　　】，把白天接收的訊息【　　　】。\n2.睡眠不足則會較難吸收新知，反應也會變【　　　】。"
     },
     {
-      "label": "結果",
-      "value": "陳醫師由衷感謝乩童對家屬的【　　　】、【　　　】，療癒了家屬的心靈。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "常見的睡眠__【 迷思 】",
+      "value": "1.平日熬夜可利用假日補眠？\n生理時鐘不規律，會影響睡眠的品質。\n2.睡前喝酒能幫助入眠？\n睡覺時血液若有【　　　】，容易頻繁的醒來，降低睡眠品質。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "睡前拖延的原因與影響",
+      "value": "睡前長時間使用3C產品，容易延後睡覺；晚睡使白天更疲倦，晚上又繼續滑手機，形成【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "改善睡眠的行動",
+      "value": "睡前放下【　　　】，讓煩擾的思緒慢慢安靜，以飽滿的精神迎接新的一天。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "給神明發會診單",
+  "title": "祝你好眠",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "起因",
-      "value": "病人的狀況不好，家屬想請乩童來看看病人。"
+      "label": "青少年的睡眠需求",
+      "value": "青少年每天需要【　　　】小時的睡眠。"
     },
     {
       "kind": "pair",
-      "label": "陳醫師想法",
-      "value": "1.請乩童來看病人，這是家屬的【　　　】。\n2.病人預後不樂觀，現在更重要的是【　　　】。\n3.一般醫師拒絕乩童、符水的原因是？（請打勾，複選）\n認為這些東西很迷信無知  認為自己專業受到挑戰\n感覺自己不被信任 \n4.陳醫師不拒絕民間信仰進入醫院的原因？\n(1)把這件事用【　　　】看待，家屬只是想盡一分心力。\n(2)乩童、符水其實就是家屬的【　　　】。"
+      "label": "睡眠對【　　　】的影響",
+      "value": "1.睡眠能幫助身體修復【　　　】、調整運作，並清除【　　　】產生的廢物。\n2.長期睡不夠，可能增加健康風險。"
     },
     {
       "kind": "pair",
-      "label": "請神明會診",
-      "value": "1.陳醫師自我介紹及說明病情，並感謝乩童的協助。\n2.乩童比手畫腳，代替病人跟家屬說了一番話，並給了他們大大的【　　　】。"
+      "label": "睡眠對【　　　】的影響",
+      "value": "1.睡眠時，大腦會【　　　】，把白天接收的訊息【　　　】。\n2.睡眠不足則會較難吸收新知，反應也會變【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "結果",
-      "value": "陳醫師由衷感謝乩童對家屬的【　　　】、【　　　】，療癒了家屬的心靈。"
+      "label": "常見的睡眠__(迷思)",
+      "value": "1.平日熬夜可利用假日補眠？\n生理時鐘不規律，會影響睡眠的品質。\n2.睡前喝酒能幫助入眠？\n睡覺時血液若有【　　　】，容易頻繁的醒來，降低睡眠品質。"
+    },
+    {
+      "kind": "pair",
+      "label": "睡前拖延的原因與影響",
+      "value": "睡前長時間使用3C產品，容易延後睡覺；晚睡使白天更疲倦，晚上又繼續滑手機，形成【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "改善睡眠的行動",
+      "value": "睡前放下【　　　】，讓煩擾的思緒慢慢安靜，以飽滿的精神迎接新的一天。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "陳醫師想法",
-      "請神明會診",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -17,51 +17,67 @@ CHECKBOX_GAP_LESSONS = frozenset()
 # Parsed YAML / DOCX lesson ids (not catalog grade_code — see REPRESENTATIVE_LESSONS)
 SMOKE_LESSONS = ("G6-L22", "G7-L28", "G4-L1", "G4-L6", "G7-L6")
 
-# Pinned lessons for Story Structure Lab + manual regression (parsed ↔ catalog ↔ story_id)
-REPRESENTATIVE_LESSONS: tuple[dict[str, Any], ...] = (
-    {
-        "parsed_code": "G6-L22",
-        "catalog_code": "G6-L22",
-        "story_id": 1076,
-        "note": "nested PSR + worksheet_table + fill_blank",
-    },
-    {
-        "parsed_code": "G4-L1",
-        "catalog_code": "G4-L1",
-        "story_id": 1001,
-        "note": "theme_facts + multi-row worksheet",
-    },
-    {
-        "parsed_code": "G7-L6",
-        "catalog_code": "G7-L06",
-        "story_id": 31,
-        "note": "label_blanks + worksheet_table fill_blank",
-    },
-    {
-        "parsed_code": "G8-L13",
-        "catalog_code": "G8-L10",
-        "story_id": 1123,
-        "note": "nested scientific + checkbox in value cells",
-    },
-    {
-        "parsed_code": "G8-L14",
-        "catalog_code": "G8-L11",
-        "story_id": 1124,
-        "note": "checkbox worksheet_table (same class as G8-L13)",
-    },
-    {
-        "parsed_code": "G4-L6",
-        "catalog_code": "G4-L6",
-        "story_id": 1006,
-        "note": "ai_fallback + mixed fill_blank/checkbox",
-    },
-    {
-        "parsed_code": "G7-L28",
-        "catalog_code": "G7-L28",
-        "story_id": 1108,
-        "note": "scientific inquiry + image_text DOM",
-    },
-)
+# Representative lessons for the Story Structure Lab + manual regression.
+#
+# This was a pinned tuple of seven first-edition lessons, each carrying a
+# `story_id` (1076, 31, 1123 …) and a parsed↔catalog code pair. The second edition
+# renumbered every lesson and retired every story_id, so three of the seven no
+# longer exist and the ids point at nothing (#2683).
+#
+# What the list was FOR is still needed: one lesson per table layout, so a
+# regression in any layout has someone watching it. That is derivable — pick the
+# first lesson exhibiting each distinct interaction profile — instead of naming
+# lessons that a renumber can invalidate.
+def representative_lessons() -> tuple[dict[str, Any], ...]:
+    """One lesson per distinct 重點表 interaction profile, from the live corpus."""
+    from app.routes.stories import _format_yaml_structure_table, _sanitize_structure_for_client
+    from app.services.lesson_loader import get_all_lessons
+
+    seen: dict[tuple, dict[str, Any]] = {}
+    for lesson in get_all_lessons():
+        table = lesson.get("story_structure_table")
+        code = lesson.get("grade_code")
+        if not table or not code:
+            continue
+        try:
+            struct = _sanitize_structure_for_client(_format_yaml_structure_table(table))
+        except Exception:  # noqa: BLE001 — a lesson that cannot format is not a representative
+            continue
+        prof = struct.get("interaction_profile") or {}
+        key = (prof.get("mode"), prof.get("layout"),
+               bool(prof.get("fill_blank_count")), bool(prof.get("checkbox_count")))
+        seen.setdefault(key, {
+            "parsed_code": code,
+            "catalog_code": code,
+            "lesson_uid": lesson.get("lesson_uid"),
+            "note": f"mode={prof.get('mode')} layout={prof.get('layout')}",
+        })
+    return tuple(seen.values())
+
+
+class _LazyRepresentatives(tuple):
+    """`REPRESENTATIVE_LESSONS` is imported at module scope by several scripts, but
+    computing it needs the lesson loader — importing that here would make this
+    module import the app at import time. Resolve on first iteration instead."""
+
+    _cache: tuple | None = None
+
+    def _resolved(self):
+        if type(self)._cache is None:
+            type(self)._cache = representative_lessons()
+        return type(self)._cache
+
+    def __iter__(self):
+        return iter(self._resolved())
+
+    def __len__(self):
+        return len(self._resolved())
+
+    def __getitem__(self, i):
+        return self._resolved()[i]
+
+
+REPRESENTATIVE_LESSONS = _LazyRepresentatives()
 
 IMAGE_TEXT_LESSONS = frozenset({"G7-L28", "G7-L29", "G7-L30"})
 

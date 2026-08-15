@@ -1,74 +1,65 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "是什麼  \n  【 定義 】",
+      "方法\n與\n應用",
+      "適用對象"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "最美的畫面",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "運動科學",
+      "value": ""
     },
     {
-      "label": "觀察遊戲",
-      "value": "",
       "interactive_type": "display",
+      "label": "文章主題：運動科學",
       "sub_rows": [
         {
-          "label": "起因",
-          "value": "作者和媽媽搭區間車時，媽媽提議作者可以   觀察   車廂上的人。",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "label": "是什麼  \n  【 定義 】",
+          "value": "運動科學是對【　　　】活動進行【　　　】分析的一個綜合性學科。"
         },
         {
-          "label": "經過",
-          "value": "作者發現車廂上最常見的畫面是\n【　　　】。\n2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。\n3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "方法\n與\n應用",
+          "value": "1.透過【　　　】，了解運動方式是否有效。\n例如：運動者應該要把肌肉鍛鍊跟【　　　】的時間分開，才會達到較好的訓練效果。\n2.透過【　　　】的測量、明白問題、加強訓練等程序，幫助運動者改善自己的運動表現。\n例如：味全龍職棒隊的投手林逸達，就是透過運動科學的應用，重新設計投球動作，成功恢復球速。"
         },
         {
-          "label": "結果",
-          "value": "發現讀書的畫面給人【　　　】的感覺。【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "適用對象",
+          "value": "普及推廣，讓【　　　】都有機會參與󠇡，知道如何運動能更有效、更健康。"
         }
-      ]
-    },
-    {
-      "label": "影響",
-      "value": "作者出門都會隨身帶   一本書/書   ，一有空檔就拿出來閱讀。",
-      "interactive_type": "display"
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "最美的畫面",
+  "title": "運動科學",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "觀察遊戲",
       "items": [
         {
-          "label": "起因",
-          "value": "作者和媽媽搭區間車時，媽媽提議作者可以   觀察   車廂上的人。"
+          "label": "是什麼  \n  (定義)",
+          "value": "運動科學是對【　　　】活動進行【　　　】分析的一個綜合性學科。"
         },
         {
-          "label": "經過",
-          "value": "作者發現車廂上最常見的畫面是\n【　　　】。\n2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。\n3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。"
+          "label": "方法\n與\n應用",
+          "value": "1.透過【　　　】，了解運動方式是否有效。\n例如：運動者應該要把肌肉鍛鍊跟【　　　】的時間分開，才會達到較好的訓練效果。\n2.透過【　　　】的測量、明白問題、加強訓練等程序，幫助運動者改善自己的運動表現。\n例如：味全龍職棒隊的投手林逸達，就是透過運動科學的應用，重新設計投球動作，成功恢復球速。"
         },
         {
-          "label": "結果",
-          "value": "發現讀書的畫面給人【　　　】的感覺。(請打勾，複選)"
+          "label": "適用對象",
+          "value": "普及推廣，讓【　　　】都有機會參與󠇡，知道如何運動能更有效、更健康。"
         }
-      ]
-    },
-    {
-      "kind": "pair",
-      "label": "影響",
-      "value": "作者出門都會隨身帶   一本書/書   ，一有空檔就拿出來閱讀。"
+      ],
+      "kind": "section_block",
+      "section": "文章主題：運動科學"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "經過",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

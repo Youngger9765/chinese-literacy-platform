@@ -1,0 +1,124 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "一",
+      "二",
+      "三\n~\n四",
+      "五"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "身體，謝謝你",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "引言",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "一",
+          "value": "人體是一座精密的【　　　】，無論簡單或困難的動作，都是這支團隊的傑出【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "論點",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "二",
+          "value": "每個人都是自己工廠的【　　　】。\n優秀的【　　　】會是好老闆，知道【　　　】、水分、【　　　】都很重要。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0,
+            3
+          ],
+          "interactive_type": "checkbox",
+          "label": "三\n~\n四",
+          "options": [
+            "口渴前　    □",
+            "口渴後 】補充水分。\n3.休息的重要：「休息」、「放鬆」與「耍廢」         \n【 □",
+            "相同",
+            "不同 】，充足的【睡眠】及運動後的【收操/伸展】都能降低運動傷害的風險。"
+          ],
+          "value": "1.營養的重要：運動員會適時補充碳水化合物與【蛋白質】，幫助肌肉【修復】。\n2.【水分】的重要：應該在\n【 ①口渴前　    □②口渴後 】補充水分。\n3.休息的重要：「休息」、「放鬆」與「耍廢」         \n【 □①相同　②不同 】，充足的【睡眠】及運動後的【收操/伸展】都能降低運動傷害的風險。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結語",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "五",
+          "value": "身體支持我們完成各種事情，我們可以練習對身體說聲【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "身體，謝謝你",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "一",
+          "value": "人體是一座精密的【　　　】，無論簡單或困難的動作，都是這支團隊的傑出【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "引言"
+    },
+    {
+      "items": [
+        {
+          "label": "二",
+          "value": "每個人都是自己工廠的【　　　】。\n優秀的【　　　】會是好老闆，知道【　　　】、水分、【　　　】都很重要。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "論點"
+    },
+    {
+      "items": [
+        {
+          "label": "三\n~\n四",
+          "value": "1.營養的重要：運動員會適時補充碳水化合物與【　　　】，幫助肌肉【　　　】。\n2.【　　　】的重要：應該在\n（①口渴前　    □②口渴後）補充水分。\n3.休息的重要：「休息」、「放鬆」與「耍廢」         \n（□①相同　②不同），充足的【　　　】及運動後的【　　　】都能降低運動傷害的風險。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "五",
+          "value": "身體支持我們完成各種事情，我們可以練習對身體說聲【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結語"
+    }
+  ]
+}

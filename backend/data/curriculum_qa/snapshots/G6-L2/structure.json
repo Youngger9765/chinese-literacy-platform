@@ -1,116 +1,76 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "討論議題【 第1段 】",
+      "提案與質疑【 第2～5段 】",
+      "討論轉折【 第6～7段 】",
+      "形成決定【 第8段 】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "與小學說再見",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "適應國中的歷程",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "時間【 點 】",
-          "value": "感受【　　　】 原因",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "剛上國中",
-          "value": "雀躍興奮\n□傷心不捨\n喜悅無比\n忙碌充實 1.迎接新生活、新朋友。\n2.自己長大成為【　　　】。\n3.適應不同的課程、老師、同學，每天都是全新的【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "新鮮感退去後",
-          "value": "格格不入\n□如魚得水\n倍感壓力\n思念不已 1.無法成為別人【　　　】的朋友，又和【　　　】變得陌生尷尬，不斷想起過往時光。\n2.小學的【　　　】無法應付國中的課業。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "遇見小學好友已有新夥伴",
-          "value": "恍然大悟\n□不知所措\n□無憂無慮 □發現小學朋友仍然很重視自己。\n發現小學朋友已經有了新的人際關係，開始新的國中生活。",
-          "interactive_type": "display"
-        }
-      ]
+      "label": "一件班服，一場思辨討論",
+      "value": ""
     },
     {
-      "label": "想法轉折",
-      "value": "對「畢業的淚水」… 對「懷舊主題的文章」…",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "label": "討論議題【 第1段 】",
+      "value": "班上要進行【　　　】，兩組代表準備為自己的方案進行【　　　】。"
     },
     {
-      "label": "想法轉折",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "上國中前",
-          "value": "感到【　　　】：為什麼大家這麼難過？ 覺得【　　　】：自己不曾經歷，也沒興趣。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "上國中後",
-          "value": "能夠理解：眼淚是向【　　　】說再見。 深深【　　　】：理解文章背後的那份捨不得。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "提案與質疑【 第2～5段 】",
+      "value": "1.第一組提出【　　　】的重磅純棉班服。\n2.第二組提出兩百元的【　　　】。\n3.同學分別提出質疑，兩組一直無法達成【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "討論轉折【 第6～7段 】",
+      "value": "1.班長提醒，團體討論不是要找出人人滿意的【　　　】，而是尋找較多人能接受的【　　　】。\n2.夏恩不再死守原來的方案，討論開始出現新的方向。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "形成決定【 第8段 】",
+      "value": "450元方案以【　　　】的同意票【　　　】；班上也約定不強迫購買，有困難可以另外討論。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者觀點【 第9段 】",
+      "value": "盲目堅持己見和一味【　　　】，都無助於團體決策。大家要【　　　】、接納差異，才較可能形成共同決定。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "與小學說再見",
+  "title": "一件班服，一場思辨討論",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "適應國中的歷程",
-      "items": [
-        {
-          "label": "時間(點)",
-          "value": "感受(多選) 原因"
-        },
-        {
-          "label": "剛上國中",
-          "value": "雀躍興奮\n□傷心不捨\n喜悅無比\n忙碌充實 1.迎接新生活、新朋友。\n2.自己長大成為【　　　】。\n3.適應不同的課程、老師、同學，每天都是全新的【　　　】。"
-        },
-        {
-          "label": "新鮮感退去後",
-          "value": "格格不入\n□如魚得水\n倍感壓力\n思念不已 1.無法成為別人【　　　】的朋友，又和【　　　】變得陌生尷尬，不斷想起過往時光。\n2.小學的【　　　】無法應付國中的課業。"
-        },
-        {
-          "label": "遇見小學好友已有新夥伴",
-          "value": "恍然大悟\n□不知所措\n□無憂無慮 □發現小學朋友仍然很重視自己。\n發現小學朋友已經有了新的人際關係，開始新的國中生活。"
-        }
-      ]
+      "kind": "pair",
+      "label": "討論議題(第1段)",
+      "value": "班上要進行【　　　】，兩組代表準備為自己的方案進行【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "想法轉折",
-      "value": "對「畢業的淚水」… 對「懷舊主題的文章」…"
+      "label": "提案與質疑(第2～5段)",
+      "value": "1.第一組提出【　　　】的重磅純棉班服。\n2.第二組提出兩百元的【　　　】。\n3.同學分別提出質疑，兩組一直無法達成【　　　】。"
     },
     {
-      "kind": "section_block",
-      "section": "想法轉折",
-      "items": [
-        {
-          "label": "上國中前",
-          "value": "感到【　　　】：為什麼大家這麼難過？ 覺得【　　　】：自己不曾經歷，也沒興趣。"
-        },
-        {
-          "label": "上國中後",
-          "value": "能夠理解：眼淚是向【　　　】說再見。 深深【　　　】：理解文章背後的那份捨不得。"
-        }
-      ]
+      "kind": "pair",
+      "label": "討論轉折(第6～7段)",
+      "value": "1.班長提醒，團體討論不是要找出人人滿意的【　　　】，而是尋找較多人能接受的【　　　】。\n2.夏恩不再死守原來的方案，討論開始出現新的方向。"
+    },
+    {
+      "kind": "pair",
+      "label": "形成決定(第8段)",
+      "value": "450元方案以【　　　】的同意票【　　　】；班上也約定不強迫購買，有困難可以另外討論。"
+    },
+    {
+      "kind": "pair",
+      "label": "作者觀點(第9段)",
+      "value": "盲目堅持己見和一味【　　　】，都無助於團體決策。大家要【　　　】、接納差異，才較可能形成共同決定。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "時間【 點 】",
-      "剛上國中",
-      "新鮮感退去後",
-      "上國中前"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -1,66 +1,66 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題",
+      "解決【 誰＋做什麼 】",
+      "結果",
+      "結語"
+    ],
+    "template_kind": "psr"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "黑猩猩的守護者",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "老鷹紅豆的故事",
+      "value": ""
     },
     {
-      "label": "背景",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "問題",
+      "value": "農民為了減少農業損失，使用會傷害鳥類的農藥，造成大量鳥類【　　　】死亡。"
     },
     {
-      "label": "起因",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "解決【 誰＋做什麼 】",
+      "value": "1. 研究團隊追查毒鳥原因，並向林先生說明這場【　　　】。\n2.農民承認錯誤後，改變種植紅豆的方式。他們不再使用毒餌、落葉劑和除草劑，而是改用【　　　】種植紅豆。\n3.全聯與農民簽訂契作協議，【　　　】收購紅豆。"
     },
     {
-      "label": "經過",
-      "value": "1.一開始，她不知道該如何追蹤行動迅速的黑猩猩。\n2.研究初期，她只能用【　　　】觀察，或搜集黑猩猩的【　　　】與【　　　】。幾個月後黑猩猩們習慣她的存在。\n3.後來，她取得黑猩猩的【　　　】，讓她更能深入了解黑猩猩，願意一輩子守護黑猩猩。",
-      "interactive_type": "fill_blank"
-    },
-    {
+      "interactive_type": "fill_blank",
       "label": "結果",
-      "value": "珍古德成為有名的黑猩猩【　　　】，並成立「國際珍古德協會」，成為動物【　　　】和【　　　】教育的推廣者。",
-      "interactive_type": "fill_blank"
+      "value": "老鷹紅豆的友善耕作方式保護了【　　　】，也帶來了【　　　】上的成功。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結語",
+      "value": "老鷹紅豆的成功，除了大學、農民和企業，還有許多【　　　】，支持購買老鷹紅豆，用行動守護臺灣生態。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "黑猩猩的守護者",
+  "title": "老鷹紅豆的故事",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "背景",
-      "value": "（如同你前面寫的背景）"
+      "label": "問題",
+      "value": "農民為了減少農業損失，使用會傷害鳥類的農藥，造成大量鳥類【　　　】死亡。"
     },
     {
       "kind": "pair",
-      "label": "起因",
-      "value": "（如同你前面寫的起因）"
-    },
-    {
-      "kind": "pair",
-      "label": "經過",
-      "value": "1.一開始，她不知道該如何追蹤行動迅速的黑猩猩。\n2.研究初期，她只能用【　　　】觀察，或搜集黑猩猩的【　　　】與【　　　】。幾個月後黑猩猩們習慣她的存在。\n3.後來，她取得黑猩猩的【　　　】，讓她更能深入了解黑猩猩，願意一輩子守護黑猩猩。"
+      "label": "解決（誰＋做什麼）",
+      "value": "1. 研究團隊追查毒鳥原因，並向林先生說明這場【　　　】。\n2.農民承認錯誤後，改變種植紅豆的方式。他們不再使用毒餌、落葉劑和除草劑，而是改用【　　　】種植紅豆。\n3.全聯與農民簽訂契作協議，【　　　】收購紅豆。"
     },
     {
       "kind": "pair",
       "label": "結果",
-      "value": "珍古德成為有名的黑猩猩【　　　】，並成立「國際珍古德協會」，成為動物【　　　】和【　　　】教育的推廣者。"
+      "value": "老鷹紅豆的友善耕作方式保護了【　　　】，也帶來了【　　　】上的成功。"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "老鷹紅豆的成功，除了大學、農民和企業，還有許多【　　　】，支持購買老鷹紅豆，用行動守護臺灣生態。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "背景",
-      "起因",
-      "經過",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

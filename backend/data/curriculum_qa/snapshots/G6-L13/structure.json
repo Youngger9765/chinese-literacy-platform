@@ -1,106 +1,76 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "提出問題",
+      "證據一：捲葉象鼻蟲",
+      "證據二：黃面蜂",
+      "兩項觀察"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "森林大軍的守護者-賴倍元",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "昆蟲會思考嗎？",
+      "value": ""
     },
     {
-      "label": "背景",
-      "value": "賴倍元從小熱愛【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "提出問題",
+      "value": "昆蟲會不會【　　　】？"
     },
     {
-      "label": "起因",
-      "value": "工作之餘到山上看神木，感受自然的永恆，下決心【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "證據一：捲葉象鼻蟲",
+      "value": "1.捲葉象鼻蟲母蟲通常依照相似的程序選葉、測量和捲葉，這些是牠的【　　　】行為。\n2.一隻母蟲遇到葉苞轉不動的困難時，改把【　　　】拉過來包住葉苞，成功固定育嬰室。"
     },
     {
-      "label": "問題1",
-      "value": "1.三千萬元買下的第一座山，滿是【　　　】。\n2.這座山過去種植果樹，使用除草劑，【　　　】被破壞，不能涵養水份，難以種樹。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "證據二：黃面蜂",
+      "value": "1.黃面蜂原本跟著捲葉蛾幼蟲在葉苞前後來回【　　　】。\n2.等幼蟲形成來回奔跑的規律後，黃面蜂改守在【　　　】，最後抓住幼蟲。"
     },
     {
-      "label": "解決1",
-      "value": "1.清理垃圾：親自開卡車清運垃圾，耗時數月，來回兩千趟。\n2.友善環境：【　　　】不使用化學肥料和除草劑，改以人工【　　　】\n            【　　　】鋪設四十多公里水管，澆灌剛種下的小樹苗。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "兩項觀察",
+      "value": "捲葉象鼻蟲和黃面蜂遇到新的情況後，都改變原來的【　　　】，並達成目的。"
     },
     {
-      "label": "問題2",
-      "value": "賴桑種樹的錢從哪裡來？",
-      "interactive_type": "display"
-    },
-    {
-      "label": "解決2",
-      "value": "【　　　】接下家庭及公司，並為種樹籌措資金。\n兒子們也開始種咖啡、販售所得再投入種樹志業。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "結果",
-      "value": "1.種樹成就：三十年來在大雪山種了三十多萬棵樹。\n2.【　　　】恢復：大雪山林場生態豐富，多樣性增加。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "迴響",
-      "value": "越來越多的人認同賴桑的理念，一起【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "結尾問題",
+      "value": "把兩項觀察合起來，這些證據能支持什麼【　　　】？"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "森林大軍的守護者-賴倍元",
+  "title": "昆蟲會思考嗎？",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "背景",
-      "value": "賴倍元從小熱愛【　　　】。"
+      "label": "提出問題",
+      "value": "昆蟲會不會【　　　】？"
     },
     {
       "kind": "pair",
-      "label": "起因",
-      "value": "工作之餘到山上看神木，感受自然的永恆，下決心【　　　】。"
+      "label": "證據一：捲葉象鼻蟲",
+      "value": "1.捲葉象鼻蟲母蟲通常依照相似的程序選葉、測量和捲葉，這些是牠的【　　　】行為。\n2.一隻母蟲遇到葉苞轉不動的困難時，改把【　　　】拉過來包住葉苞，成功固定育嬰室。"
     },
     {
       "kind": "pair",
-      "label": "問題1",
-      "value": "1.三千萬元買下的第一座山，滿是【　　　】。\n2.這座山過去種植果樹，使用除草劑，【　　　】被破壞，不能涵養水份，難以種樹。"
+      "label": "證據二：黃面蜂",
+      "value": "1.黃面蜂原本跟著捲葉蛾幼蟲在葉苞前後來回【　　　】。\n2.等幼蟲形成來回奔跑的規律後，黃面蜂改守在【　　　】，最後抓住幼蟲。"
     },
     {
       "kind": "pair",
-      "label": "解決1",
-      "value": "1.清理垃圾：親自開卡車清運垃圾，耗時數月，來回兩千趟。\n2.友善環境：(1)不使用化學肥料和除草劑，改以人工【　　　】\n            (2)鋪設四十多公里水管，澆灌剛種下的小樹苗。"
+      "label": "兩項觀察",
+      "value": "捲葉象鼻蟲和黃面蜂遇到新的情況後，都改變原來的【　　　】，並達成目的。"
     },
     {
       "kind": "pair",
-      "label": "問題2",
-      "value": "賴桑種樹的錢從哪裡來？"
-    },
-    {
-      "kind": "pair",
-      "label": "解決2",
-      "value": "【　　　】接下家庭及公司，並為種樹籌措資金。\n兒子們也開始種咖啡、販售所得再投入種樹志業。"
-    },
-    {
-      "kind": "pair",
-      "label": "結果",
-      "value": "1.種樹成就：三十年來在大雪山種了三十多萬棵樹。\n2.【　　　】恢復：大雪山林場生態豐富，多樣性增加。"
-    },
-    {
-      "kind": "pair",
-      "label": "迴響",
-      "value": "越來越多的人認同賴桑的理念，一起【　　　】。"
+      "label": "結尾問題",
+      "value": "把兩項觀察合起來，這些證據能支持什麼【　　　】？"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 7,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "背景",
-      "起因",
-      "問題1",
-      "解決1"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

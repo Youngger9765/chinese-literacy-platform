@@ -40,9 +40,12 @@ class TestKeypointsManifestFreshness:
         assert summary["pass"] == summary["total"]
         assert manifest.get("smoke_only") is False
 
-    def test_g7_l6_not_parser_gap(self):
+    def test_no_lesson_is_marked_a_parser_gap(self):
+        """Was pinned to G7-L6 having >= 5 fill-blanks (#2273 fixed a parser gap
+        there). G7-L6 is a different lesson in the second edition — 果醬男孩, one
+        blank — so that number described material that no longer exists. What the
+        test was protecting is that no lesson sits in the manifest flagged as a
+        parser gap, which is checkable without naming one."""
         manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        g7 = next(l for l in manifest["lessons"] if l["lesson_id"] == "G7-L6")
-        assert g7["known_data_gap"] is False
-        assert g7["layout"]["mode"] == "fill_blank"
-        assert g7["layout"]["fill_blank_count"] >= 5
+        gaps = [l["lesson_id"] for l in manifest["lessons"] if l.get("known_data_gap")]
+        assert gaps == [], f"lessons still flagged as parser gaps: {gaps}"

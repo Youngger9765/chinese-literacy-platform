@@ -1,0 +1,119 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "人物困境\n【 段2～5 】",
+      "轉折：\n法師說故事\n【 段6 】",
+      "樵夫故事\n【 段7～11 】",
+      "明示道理【 段12 】"
+    ],
+    "template_kind": "psr"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "懸崖邊的那顆草莓",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "問題",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "人物困境\n【 段2～5 】",
+          "value": "1.處境：林奶奶在癌症治療中心，受【　　　】折磨。\n2.感受：她心裡充滿【　　　】與【　　　】。\n3.想法：她覺得生病花了很多錢，把兒孫都【　　　】了。\n4.反應：林爺爺勸她，反而讓她更覺得自己在【　　　】家人。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "解決",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "轉折：\n法師說故事\n【 段6 】",
+          "value": "1.林奶奶以為法師是來【　　　】她。\n2.法師沒有直接勸她，而是說：「我是來講一個好聽的【　　　】的。」"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "樵夫故事\n【 段7～11 】",
+          "value": "1.處境：樵夫上山砍柴，遇見【　　　】。他被逼到【　　　】邊，只好往下跳。\n2.轉機：幸好有一條【　　　】勾住他，讓他暫時保住性命。\n3.危機：可是黑白老鼠開始【　　　】藤蔓，藤蔓遲早會斷。\n4.結果：就在這時，樵夫看見一顆【　　　】，摘下來吃，覺得「好香好甜」。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "明示道理【 段12 】",
+          "value": "有些痛苦我們終究【　　　】，但痛苦旁邊仍有可以【　　　】的美好。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結果",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "故事後反應\n【 段13 】",
+          "value": "林奶奶吃著孫女削的蘋果，說「【　　　】。謝謝你們，還陪在我身邊。」"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結尾\n【 段14 】",
+          "value": "林奶奶像是終於嘗到了【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "懸崖邊的那顆草莓",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "人物困境\n(段2～5)",
+          "value": "1.處境：林奶奶在癌症治療中心，受【　　　】折磨。\n2.感受：她心裡充滿【　　　】與【　　　】。\n3.想法：她覺得生病花了很多錢，把兒孫都【　　　】了。\n4.反應：林爺爺勸她，反而讓她更覺得自己在【　　　】家人。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "問題"
+    },
+    {
+      "items": [
+        {
+          "label": "轉折：\n法師說故事\n（段6）",
+          "value": "1.林奶奶以為法師是來【　　　】她。\n2.法師沒有直接勸她，而是說：「我是來講一個好聽的【　　　】的。」"
+        },
+        {
+          "label": "樵夫故事\n(段7～11)",
+          "value": "1.處境：樵夫上山砍柴，遇見【　　　】。他被逼到【　　　】邊，只好往下跳。\n2.轉機：幸好有一條【　　　】勾住他，讓他暫時保住性命。\n3.危機：可是黑白老鼠開始【　　　】藤蔓，藤蔓遲早會斷。\n4.結果：就在這時，樵夫看見一顆【　　　】，摘下來吃，覺得「好香好甜」。"
+        },
+        {
+          "label": "明示道理（段12）",
+          "value": "有些痛苦我們終究【　　　】，但痛苦旁邊仍有可以【　　　】的美好。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "解決"
+    },
+    {
+      "items": [
+        {
+          "label": "故事後反應\n（段13）",
+          "value": "林奶奶吃著孫女削的蘋果，說「【　　　】。謝謝你們，還陪在我身邊。」"
+        },
+        {
+          "label": "結尾\n（段14）",
+          "value": "林奶奶像是終於嘗到了【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結果"
+    }
+  ]
+}
