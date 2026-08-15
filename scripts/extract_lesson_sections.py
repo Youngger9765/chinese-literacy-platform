@@ -67,6 +67,19 @@ _INLINE_OPTIONS = re.compile(r"([A-Z])\s*[.、．]\s*([^A-Z\n]{1,40}?)(?=\s+[A-Z
 # A wholly parenthesised line standing where an option should be: in the TEACHER
 # edition the correct option is overwritten by the answer rationale.
 _RATIONALE = re.compile(r"^[（(].+[）)]$")
+_TRAILING_PAREN = re.compile(r"[（(]\s*([^（）()]{2,12})\s*[）)]\s*$")
+_QUOTED = re.compile(r"[「『]([^」』]{2,12})[」』]")
+#: A trailing parenthesis long enough to be a clause rather than a gloss.
+_TRAILING_CLAUSE = re.compile(r"[（(]\s*([^（）()]{13,})\s*[）)]\s*$")
+#: A trailing 「(第三段)」 / 「（第三、四段）」 — the marker's note about where the
+#: evidence sits, not part of the option.
+_PARAGRAPH_CITE = re.compile(
+    # 「(第三段)」「（第三、四段）」「（第四段及第六段）」 — the marker's note about where
+    # the evidence sits. Written as a character class rather than a numeral grammar
+    # because the forms vary more than they look: 「第三、四段」 puts 段 only after the
+    # LAST number, which a per-number pattern misses.
+    r"[（(]\s*(第[一二三四五六七八九十0-9、,及和與段第\s]*段)\s*[）)]\s*$"
+)
 
 _VIDEO = re.compile(r"^(\d+)\s*[.、．]\s*(.+)$")
 _DURATION = re.compile(r"片長[：:]\s*[(（]?(\d+):(\d{2})")
@@ -186,7 +199,7 @@ def extract_vocab_application(paras, bounds, lesson_vocab: list[str]) -> dict:
 
 # ── 七 閱讀理解 ─────────────────────────────────────────────────────────────
 
-def extract_comprehension(paras, bounds, body_text: str) -> dict:
+def extract_comprehension(paras, bounds, body_text: str, lesson_vocab: list[str] = ()) -> dict:
     """Multiple choice, from the TEACHER edition — which has two shapes a naive
     reader gets wrong.
 
@@ -239,6 +252,69 @@ def extract_comprehension(paras, bounds, body_text: str) -> dict:
         questions.append(current)
     if not questions:
         return {"questions": [], "check": {"verdict": "empty"}}
+
+    # Strip the teacher's paragraph citations off the options a student reads.
+    #
+    # 「失敗是我不夠努力，我要加強自己(第三段)」 — the trailing 「(第三段)」 is the
+    # marker's note about where the evidence is, and 10 of the 15 in the corpus sit on
+    # the CORRECT option. A student does not have to read anything to see which choice
+    # carries a paragraph reference.
+    #
+    # Only paragraph citations. Ordinary parentheses in an option are usually a gloss
+    # that belongs to the answer — 「圓形而中空的東西（玉環）」, 「圍繞（環繞）」 — and
+    # 28 of the 46 trailing parentheses are exactly that. Removing those would delete
+    # the meaning rather than the annotation.
+    for q in questions:
+        for letter, text in list(q["options"].items()):
+            m = _PARAGRAPH_CITE.search((text or "").strip())
+            if m:
+                q["options"][letter] = text.strip()[: m.start()].strip()
+                q.setdefault("source_paragraphs", {})[letter] = m.group(1)
+
+    # The other giveaway: a 「何者使用正確」 question whose wrong options carry the word
+    # that WOULD have been right — 「體育競賽總是讓人『事與願違』，相當刺激(血脈賁張)」.
+    # Every annotated option is a wrong one, so the unannotated option is the answer and
+    # the student never reads a sentence.
+    #
+    # Narrow on purpose: the parenthetical must be one of THIS lesson's vocabulary
+    # words, the option must already quote a DIFFERENT one, and the two must not be the
+    # same word. Ordinary glosses fail all three — 「圓形而中空的東西（玉環）」 quotes
+    # nothing, 「深蹲－胸肌、三頭肌（伏地挺身）」 quotes nothing. Measured: 2 hits, both
+    # real; 33 parentheses left alone, every one of them a gloss.
+    vocab_set = {normalise(w) for w in lesson_vocab if w}
+    for q in questions:
+        for letter, text in list(q["options"].items()):
+            m = _TRAILING_PAREN.search((text or "").strip())
+            if not m:
+                continue
+            inner = normalise(m.group(1))
+            quoted = {normalise(x) for x in _QUOTED.findall(text)}
+            if inner in vocab_set and (quoted & vocab_set) and inner not in quoted:
+                q["options"][letter] = text.strip()[: m.start()].strip()
+                q.setdefault("marker_notes", {})[letter] = m.group(1)
+
+    # And the third form: the marker's REASONING, appended in brackets.
+    #
+    #   懊惱 （由前後文「唉聲嘆氣」，後句「滿臉失落」可推論是懊惱的情緒）
+    #   減脂、增肌的關鍵(本篇在說明肌肉的生成及鍛鍊方式。)
+    #
+    # Three of the six sit on the correct option and explain why it is right; the other
+    # three explain why a distractor is wrong. Either way the student is told.
+    #
+    # The threshold is measured, not guessed. Every trailing parenthesis of 2–12
+    # characters in the corpus is a gloss belonging to the option (玉環, 環繞, 伏地挺身);
+    # every one of 13 or more is a marker's note. It moves to `explanation`, which is
+    # where a rationale belongs and where the renderer already shows it after answering.
+    for q in questions:
+        for letter, text in list(q["options"].items()):
+            m = _TRAILING_CLAUSE.search((text or "").strip())
+            if not m:
+                continue
+            head = text.strip()[: m.start()].strip()
+            if not head:                    # the whole option IS the note — leave it
+                continue
+            q["options"][letter] = head
+            q.setdefault("marker_notes", {})[letter] = m.group(1)
 
     for q in questions:
         if q["answer"] not in q["options"] and q["rationale"]:
@@ -358,7 +434,7 @@ def extract_all(docx: Path, lesson_vocab: list[str], body_text: str) -> dict:
     return {
         "vocab_definitions": extract_vocab_definitions(paras, bounds, lesson_vocab),
         "vocab_application": extract_vocab_application(paras, bounds, lesson_vocab),
-        "comprehension": extract_comprehension(paras, bounds, body_text),
+        "comprehension": extract_comprehension(paras, bounds, body_text, lesson_vocab),
         "resources": extract_resources(paras, bounds),
     }
 

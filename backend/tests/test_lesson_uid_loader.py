@@ -938,3 +938,56 @@ def test_no_lesson_carries_the_code_addressed_image_shape():
         f"{len(carriers)} lessons feed the code-addressed image path — point those "
         f"components at lesson_uid before shipping this: {carriers[:4]}"
     )
+
+
+def test_options_do_not_carry_the_marker_s_notes():
+    """The worksheet is the TEACHER's copy, and its annotations were reaching students
+    inside the option text. Found by looking at what 閱讀理解 actually renders:
+
+        B 體育競賽總是讓人「事與願違」，相當刺激(血脈賁張)
+        C 日本的冬季溫度與高雄相比真是「血脈賁張」(天壤之別)
+
+    The question asks which usage is correct. Every annotated option is a wrong one, so
+    the unannotated option is the answer and no reading is required. Three forms, all
+    now stripped into `marker_notes` / `source_paragraphs`:
+
+        a paragraph citation — 「(第三段)」, 10 of 15 on the correct option
+        the word that would have been right — 「(血脈賁張)」
+        the marker's reasoning — 「（由前後文…可推論是懊惱的情緒）」, 3 of 6 on the answer
+
+    A gloss that belongs to the option is NOT stripped: 「圓形而中空的東西（玉環）」,
+    「圍繞（環繞）」, 「深蹲－胸肌、三頭肌（伏地挺身）」. 38 of those survive, which is
+    what makes this a filter rather than a blanket rule.
+    """
+    import re
+
+    from app.services.lesson_loader import get_all_lessons
+
+    CITE = re.compile(r"[（(]\s*第[一二三四五六七八九十0-9].{0,12}段.{0,4}[）)]\s*$")
+    CLAUSE = re.compile(r"[（(]\s*[^（）()]{13,}\s*[）)]\s*$")
+
+    leaks = []
+    for lesson in get_all_lessons():
+        for q in lesson.get("multiple_choice") or []:
+            for o in q.get("options") or []:
+                if not o:
+                    continue
+                if CITE.search(o.strip()):
+                    leaks.append((lesson["lesson_uid"], "paragraph citation", o[:44]))
+                elif CLAUSE.search(o.strip()):
+                    leaks.append((lesson["lesson_uid"], "marker rationale", o[:44]))
+    assert leaks == [], f"teacher annotations visible to students: {leaks[:4]}"
+
+
+def test_the_glosses_that_belong_to_an_option_are_left_alone():
+    """The counterpart. Without it, stripping every trailing parenthesis would pass the
+    test above while deleting the meaning of 「圓形而中空的東西（玉環）」."""
+    from app.services.lesson_loader import get_all_lessons
+
+    kept = [
+        o for l in get_all_lessons()
+        for q in (l.get("multiple_choice") or [])
+        for o in (q.get("options") or [])
+        if o and o.strip().endswith(("）", ")"))
+    ]
+    assert len(kept) >= 30, f"only {len(kept)} options keep a parenthetical — the strip is too broad"

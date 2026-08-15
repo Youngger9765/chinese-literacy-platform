@@ -86,8 +86,10 @@ comprehension:
       A: 哥哥在比賽中禮讓弟弟
       B: 楊勇緯天生比哥哥厲害
       C: 楊勇緯三年級就學柔道
-      D: 他長期勤於訓練、持續精進（第二段）
+      D: 他長期勤於訓練、持續精進
     rationale: null
+    source_paragraphs:
+      D: 第二段
   - index: 3
     answer: B
     stem: 楊勇緯說：「我的目標是金牌！」你認為他說這句話的心情是什麼？

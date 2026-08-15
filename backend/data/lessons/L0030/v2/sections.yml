@@ -106,17 +106,21 @@ comprehension:
       A: 我吃完肯德基之後，都會去健身房重訓
       B: 我一天只睡四小時，剩下時間都在訓練
       C: 我都拉單槓拉到身體不能再做為止
-      D: 我固定在睡前二十分鐘做伏地挺身（第四段）
+      D: 我固定在睡前二十分鐘做伏地挺身
     rationale: null
+    source_paragraphs:
+      D: 第四段
   - index: 5
     answer: B
     stem: 如果要換一個標題，請問最適合本課標題是什麼？
     options:
       A: 快速的肌肉養成步驟
-      B: 減脂、增肌的關鍵(本篇在說明肌肉的生成及鍛鍊方式。)
+      B: 減脂、增肌的關鍵
       C: 運動類型與肌肉塑造
       D: 肌肉和飲食控制的關係
     rationale: null
+    marker_notes:
+      B: 本篇在說明肌肉的生成及鍛鍊方式。
   extraction_check:
     answers_without_option: []
     questions_with_few_options: []
