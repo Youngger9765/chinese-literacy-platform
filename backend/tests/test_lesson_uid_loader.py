@@ -508,3 +508,71 @@ def test_metadata_records_which_row_it_matched():
             assert doc.get("matched_spreadsheet_title"), f"{uid}: no provenance"
             checked += 1
     assert checked >= 140, f"only {checked} lessons carry metadata"
+
+
+# ---------------------------------------------------------------------------
+# 重點朗讀 (念順順) — #2683
+#
+# The bug this locks was live on staging: 《十秒的背後》, about a sprinter, played a
+# passage about giving up a seat on a bus. `key_reading_passages.yml` is keyed by
+# lesson code, the second edition renumbered every lesson, and so the lookup kept
+# succeeding and kept returning someone else's paragraph. No error anywhere.
+#
+# The property that catches it is containment: a lesson's reading passage is a
+# quotation from that lesson's own body. A passage from any other lesson fails it,
+# which is what makes this test worth more than counting how many lessons have one.
+# ---------------------------------------------------------------------------
+
+
+def test_key_reading_passage_comes_from_this_lessons_own_body():
+    from app.services.lesson_loader import get_all_lessons
+
+    strangers = []
+    for lesson in get_all_lessons():
+        kr = lesson.get("key_reading")
+        if not kr:
+            continue
+        body = "".join(lesson.get("paragraphs") or [])
+        for para in kr["passage"].split("\n"):
+            if para.strip() and para.strip() not in body:
+                strangers.append((lesson["lesson_uid"], lesson["title"], para[:30]))
+                break
+    assert strangers == [], f"passage is not from this lesson: {strangers[:3]}"
+
+
+def test_key_reading_is_long_enough_for_the_timed_minute():
+    """The worksheet times a one-minute read. A single paragraph runs 145 characters
+    at the median — the student would run out before the timer, which is why the
+    passage accumulates from the anchor instead of stopping at one paragraph."""
+    from app.services.lesson_loader import get_all_lessons
+
+    short = [
+        (l["lesson_uid"], len(l["key_reading"]["passage"]))
+        for l in get_all_lessons()
+        if l.get("key_reading") and len(l["key_reading"]["passage"]) < 120
+    ]
+    assert short == [], f"too short to read for a minute: {short[:5]}"
+
+
+def test_key_reading_is_absent_rather_than_guessed():
+    """35 lessons have no anchor, an anchor past the end of the body, or an anchor
+    the first edition's independent extraction disagreed with. Those read the whole
+    text — degraded, but their own text. Clamping to the nearest paragraph would
+    produce a plausible passage that no teacher marked."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    have = [l for l in lessons if l.get("key_reading")]
+    assert 130 <= len(have) <= len(lessons) - 1, (
+        f"{len(have)}/{len(lessons)} — a jump to full coverage means the withheld "
+        "lessons started being guessed at"
+    )
+    for l in lessons:
+        assert l["has_key_reading"] == bool(l.get("key_reading"))
+
+
+def test_reading_strategy_reaches_the_library_card():
+    from app.services.lesson_loader import get_all_lessons
+
+    have = [l for l in get_all_lessons() if l.get("reading_strategy")]
+    assert len(have) >= 145, f"only {len(have)} lessons carry a reading strategy"

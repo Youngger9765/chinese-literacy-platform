@@ -43,6 +43,24 @@ def _meta(l: dict) -> dict:
     return m if isinstance(m, dict) else {}
 
 
+def _key_reading(l: dict) -> dict | None:
+    """The 重點朗讀 passage, shaped for KeyReadingSchema.
+
+    `key_reading.yml` only exists for a lesson whose anchor paragraph was confirmed
+    against the body, so its presence is the check — there is no verdict to re-test
+    here.
+    """
+    kr = l.get("key_reading")
+    if not isinstance(kr, dict) or not kr.get("passage"):
+        return None
+    return {
+        "passage": kr["passage"],
+        "start_text": kr.get("start_text"),
+        "extent_chars": kr.get("extent_chars"),
+        "source": kr.get("source") or "docx-extract",
+    }
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -203,8 +221,10 @@ def _uid_tree_lessons() -> list[dict]:
                 f"/assets/lesson/{uid}/{_thumbnail_name(uid, l.get('version_id'))}"
                 if _thumbnail_name(uid, l.get("version_id")) else None
             ),
-            "reading_strategy": None,
-            "has_key_reading": False,
+            # 閱讀聚光燈策略 from the master spreadsheet — the reading method the
+            # lesson teaches, shown on the library card and the spotlight step.
+            "reading_strategy": _meta(l).get("strategy") or None,
+            "has_key_reading": bool(_key_reading(l)),
             # The intro is a sentence about what the lesson is FOR, built from its
             # unit topic and reading strategy — not the opening paragraph, which
             # would make "introduction" mean "the lesson, again".
@@ -229,6 +249,11 @@ def _uid_tree_lessons() -> list[dict]:
             "vocab_bank": _vocab_bank_from(l) or None,
             "multiple_choice": _mcq_from(l) or None,
             "reading_benchmark": None,
+            # 重點朗讀 (念順順). Absent means the step reads the whole text, which is
+            # what the 2026-07-20 review ruled against but is at least this lesson's
+            # own text — the first-edition table, keyed by code, was serving another
+            # lesson's paragraph aloud.
+            "key_reading": _key_reading(l),
             "text_type": "單",
             "source_file": None,
             "spotlight_v2": (l.get("spotlight") or {}).get("spotlight"),

@@ -1,0 +1,11 @@
+lesson_uid: L0003
+version_id: v2
+passage: 當然，這些自然的線索不是百分之百準確，但連中央氣象署的預報也不是絕對正確啊，它們就像是大自然的小提示。所以，當你擔心明天會不會下雨時，除了查手機上的天氣預報，也可以看看蜘蛛有沒有結網、毛小孩是不是焦躁不安，或是月亮是不是戴了光圈。說不定，大自然早就偷偷告訴你答案了！
+start_text: 當然，這些自然的線索不是百分之百準確，但連中央氣
+extent_chars: 133
+source: docx-extract
+anchor_paragraph: 7
+paragraphs_used: 1
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: 7
