@@ -1,5 +1,79 @@
 lesson_uid: L0026
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 映入眼簾 _
+    definition: 某個景象出現在眼前，常用來形容第一眼看到的畫面。
+  - index: 2
+    word: 尷尬
+    definition: 處在不好意思、不知道該怎麼辦的情況中。
+  - index: 3
+    word: 苦惱
+    definition: 感到困擾、不知道怎麼辦。
+  - index: 4
+    word: 坦然
+    definition: 心裡平靜，能自然面對，不感到不安或愧疚。
+  - index: 5
+    word: 惱怒
+    definition: 因為不高興而生氣。
+  - index: 6
+    word: 猶豫
+    definition: 拿不定主意，不知道該不該做。
+  - index: 7
+    word: 忽視
+    definition: 不重視、不在意某件事情或人。
+  - index: 8
+    word: 卸下
+    definition: 拿下、放下；也可比喻放下心理負擔。
+  - index: 9
+    word: 悸動
+    definition: 心跳突然加快的感覺，常因感動或緊張。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 映入眼簾
+    B: 坦然
+    C: 悸動
+    D: 猶豫
+    E: 惱怒
+    F: 卸下
+    G: 尷尬
+    H: 忽視
+  questions:
+  - index: 1
+    text: 面對網友的批評，他感到一陣（　），朋友勸他要冷靜回應。
+    answer: E
+  - index: 2
+    text: 她不小心叫錯了對方的名字，場面頓時變得十分（　）。
+    answer: G
+  - index: 3
+    text: 打開窗戶，一大片綠油油的田野（　）。
+    answer: A
+  - index: 4
+    text: 期末作業終於繳交後，他（　）了心中的焦慮與壓力。
+    answer: F
+  - index: 5
+    text: 他總是（　）別人的建議，結果吃了大虧。
+    answer: H
+  - index: 6
+    text: 他在眾人面前（　）承認自己的錯誤，贏得尊敬。
+    answer: B
+  - index: 7
+    text: 第一次收到他的情書，心中泛起一陣甜蜜而不確定的（　）。
+    answer: C
+  - index: 8
+    text: 雖然參賽機會難得，卻會因此錯過期末考，他不禁（　）起來。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
 comprehension:
   questions:
   - index: 1

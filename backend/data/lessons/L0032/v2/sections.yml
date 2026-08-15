@@ -45,7 +45,8 @@ vocab_definitions:
     word: 壓力鍋
     definition: 可以快速加壓烹煮食物的鍋具。這裡引申為壓力極大、情緒緊繃的環境或狀態。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

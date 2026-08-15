@@ -58,6 +58,6 @@ comprehension:
     questions_with_few_options:
     - 3
     - 4
-    questions_grounded_in_body: 0.5
+    questions_grounded_in_body: 0.67
     answers_recovered_from_rationale: 2
     verdict: weak

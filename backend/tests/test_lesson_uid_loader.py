@@ -576,3 +576,136 @@ def test_reading_strategy_reaches_the_library_card():
 
     have = [l for l in get_all_lessons() if l.get("reading_strategy")]
     assert len(have) >= 145, f"only {len(have)} lessons carry a reading strategy"
+
+
+# ---------------------------------------------------------------------------
+# 課文完整性 — #2683
+#
+# The body had a 46-character minimum, which is longer than a story's closing line.
+# 《獵人與白牙》 ended on 「白牙已經奄奄一息…然後，永遠閉上了牠的眼睛。」 — 36 characters,
+# dropped, so the lesson was served without its ending. 111 lessons were losing
+# paragraphs this way and nothing reported it: the text was present and plausible,
+# just incomplete. Its own worksheet quotes that line as 第十三段, and the body was
+# ten paragraphs long.
+# ---------------------------------------------------------------------------
+
+
+def test_the_lesson_that_lost_its_ending_has_it_back():
+    from app.services.lesson_loader import get_all_lessons
+
+    hunter = next((l for l in get_all_lessons() if l["lesson_uid"] == "L0009"), None)
+    assert hunter, "L0009 is missing from the tree"
+    body = "".join(hunter["paragraphs"])
+    assert "奄奄一息" in body, "the closing paragraph is gone again"
+    assert len(hunter["paragraphs"]) >= 13, (
+        f"{len(hunter['paragraphs'])} paragraphs — the worksheet cites 第十三段"
+    )
+
+
+def test_short_closing_paragraphs_survive_across_the_collection():
+    """Not just the one lesson: a floor that cuts short paragraphs cuts them
+    everywhere, so this counts how many lessons end on one."""
+    from app.services.lesson_loader import get_all_lessons
+
+    short_ending = [
+        l["lesson_uid"] for l in get_all_lessons()
+        if l.get("paragraphs") and len(l["paragraphs"][-1]) < 46
+    ]
+    assert len(short_ending) >= 18, (
+        f"only {len(short_ending)} lessons end on a short paragraph — a length floor "
+        "is truncating them again"
+    )
+
+
+def test_vocabulary_words_are_not_welded_together():
+    """The 本課語詞 box wraps mid-list and Word does not always put a 、 at the break,
+    so two words arrive fused (「揮之不去起伏」). A fused token is in no lesson's text,
+    which is what this measures — and what marked 42 lessons as mismatched when their
+    definitions were right."""
+    from app.services.lesson_loader import get_all_lessons
+
+    bad = []
+    for lesson in get_all_lessons():
+        words = [i["word"] for i in (lesson.get("vocabulary") or []) if i.get("word")]
+        body = "".join(lesson.get("paragraphs") or [])
+        if not words or not body:
+            continue
+        absent = sum(1 for w in words if w not in body)
+        if absent > len(words) * 0.5:
+            bad.append((lesson["lesson_uid"], absent, len(words)))
+    assert len(bad) <= 12, f"{len(bad)} lessons have vocabulary absent from their text: {bad[:4]}"
+
+
+def test_every_served_choice_question_has_its_answer_among_the_options():
+    """Nothing with a dangling answer reaches a student.
+
+    This locks the WITHHOLDING, not the extraction — verified by mutation: breaking the
+    option regex leaves this test green, because the damaged questions are filtered out
+    upstream and simply never arrive. What that break actually costs is coverage, which
+    is why `test_comprehension_coverage_does_not_slip` exists beside it. Both are
+    needed; neither substitutes for the other."""
+    from app.services.lesson_loader import get_all_lessons
+
+    broken = []
+    for lesson in get_all_lessons():
+        for q in lesson.get("multiple_choice") or []:
+            opts, ans = q.get("options") or [], q.get("answer")
+            if ans is None:
+                continue
+            # The API serves options as a positional list and the answer as its letter,
+            # so A is opts[0]. A letter past the end means an option was lost.
+            idx = ord(str(ans).upper()) - ord("A") if str(ans)[:1].isalpha() else -1
+            if not (0 <= idx < len(opts)) or not str(opts[idx]).strip():
+                broken.append((lesson["lesson_uid"], q.get("question", "")[:24], ans, len(opts)))
+    assert broken == [], f"answer not among options: {broken[:4]}"
+
+
+def test_comprehension_coverage_does_not_slip():
+    """The counterpart to the invariant above.
+
+    A parsing regression does not produce bad data — the gate withholds it — so it
+    shows up only as lessons quietly losing their questions, with every other check
+    still green. This floor catches a broad regression; a narrow one is caught by
+    `test_the_question_whose_option_was_swallowed`, because measurement showed the
+    single-space option bug cost exactly one lesson, and a collection-wide floor
+    cannot see one lesson move.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    have = [l for l in lessons if l.get("multiple_choice")]
+    assert len(have) >= 150, (
+        f"{len(have)}/{len(lessons)} lessons have comprehension questions — "
+        "extraction is losing questions the gate then withholds"
+    )
+
+
+def test_vocabulary_section_coverage_does_not_slip():
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    for field, floor in (("vocabulary", 140), ("fill_in_blank", 132), ("intro", 155)):
+        have = sum(1 for l in lessons if l.get(field))
+        assert have >= floor, f"{field}: {have}/{len(lessons)}, floor {floor}"
+
+
+def test_the_question_whose_option_was_swallowed():
+    """L0018 question 1 prints its four options across two lines with ONE space
+    between each pair. The inline-option pattern demanded two, so option A matched
+    nothing, fell through to the single-option pattern, and took 「B.其中一個重要部分」
+    into its own text. B — the answer — ceased to exist.
+
+    Locked on the lesson rather than on a count: measurement put the cost at exactly
+    one lesson, and no collection-wide floor can see one lesson move.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    lesson = next((l for l in get_all_lessons() if l["lesson_uid"] == "L0018"), None)
+    assert lesson, "L0018 is missing from the tree"
+    q = next((q for q in (lesson.get("multiple_choice") or [])
+              if "一環" in (q.get("question") or "")), None)
+    assert q, "the 一環 question is gone — its options were swallowed again"
+    assert len(q["options"]) == 4, f"{len(q['options'])} options, expected 4"
+    assert "其中一個重要部分" in q["options"][1], (
+        f"option B is not itself: {q['options'][1][:40]}"
+    )

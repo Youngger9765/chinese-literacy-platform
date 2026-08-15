@@ -1,5 +1,40 @@
 lesson_uid: L0069
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 迫不及待
+    definition: 心情很急切，等不及要立刻去做。
+  - index: 2
+    word: 摩拳擦掌
+    definition: 形容已做好準備，很想立刻開始。
+  - index: 3
+    word: 凝聚力
+    definition: 讓一群人團結在一起、共同努力的力量。
+  - index: 4
+    word: 激昂
+    definition: 情緒高昂，說話充滿力量與熱情。
+  - index: 5
+    word: 盲點
+    definition: 自己沒有注意到的問題或不足。
+  - index: 6
+    word: 共識
+    definition: 大家經過討論後，共同接受的想法或決定。
+  - index: 7
+    word: 折衷
+    definition: 考量不同意見，找出各方較能接受的做法。
+  - index: 8
+    word: 衡量得失
+    definition: 比較一件事的好處和壞處，再做決定。
+  - index: 9
+    word: 妥協
+    definition: 為了解決爭議，願意放棄部分原來的要求。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 摩拳擦掌
@@ -37,8 +72,7 @@ vocab_application:
     text: 蛋糕才剛端上桌，弟弟就（　）地想吃第一口。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 衡量得失
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

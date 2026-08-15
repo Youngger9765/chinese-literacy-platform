@@ -60,30 +60,68 @@ GENRE_TO_CATEGORY = {
 }
 
 
+#: Character pairs the two sources spell differently. Not a normalisation any library
+#: performs — these are distinct code points, and 沒/没 and 毀/燬 are simply the
+#: variant each editor happened to type.
+_VARIANTS = str.maketrans({"没": "沒", "燬": "毀", "喫": "吃", "牠": "它", "颱": "台"})
+
+
 def norm_title(t: str | None) -> str:
     t = unicodedata.normalize("NFKC", str(t or ""))
-    # A stray ordinal sometimes leads the title (「-18牧羊少年的逆轉勝」) — an editing
-    # artefact, not part of the name.
-    t = re.sub(r"^[-－\s]*\d{1,3}\s*", "", t)
-    return "".join(c for c in t if c not in _PUNCT)
+    # Editing artefacts that lead a title: a stray ordinal (「-18牧羊少年的逆轉勝」), a
+    # drafting marker (「~25運動記錄的突破與公平」), a collection prefix
+    # (「信任_下一球，我相信你」, 「多文本-未解之謎」).
+    t = re.sub(r"^[-－~～#＃\s]*\d{0,3}\s*", "", t)
+    t = re.sub(r"^(多文本|信任|勇氣|合作)[-_－—]\s*", "", t)
+    return "".join(c for c in t if c not in _PUNCT).translate(_VARIANTS)
+
+
+#: Pairs a human confirmed, where the two titles differ by more than a threshold can
+#: safely bridge. Named individually rather than by loosening the fuzzy cutoff — a
+#: lower cutoff would quietly change every other join to recover this one.
+ALIASES = {
+    # Same lesson, different phrasing of the same four charts.
+    "四張圖看地球暖化": "從四張圖看地球暖化的現象",
+}
+
+#: Titles that look like near-misses but must NOT be joined:
+#:   正太與小豬          — two spreadsheet rows share the opening; picking one is a coin flip
+#:   多文本-巨石陣+摩艾石像 — one lesson drawing on two spreadsheet rows, not a 1:1 row
 
 
 def lookup(meta: dict[str, dict], title: str) -> dict | None:
     """Find a lesson's row, tolerating the ways the two sources spell a title.
 
-    Exact match first. Then containment either way: the spreadsheet sometimes carries
-    a parenthesised strategy tag the worksheet drops
-    (「把球打好，就夠了嗎？—阿耀與健豪學長的通信（生涯探索…）」). Containment is only
-    accepted above 6 characters — below that it matches unrelated lessons.
+    Exact, then a shared opening, then a high-cutoff fuzzy match — each step only
+    when it is unambiguous, because a title join that guesses is how the first
+    edition's covers ended up on the wrong lessons. Every non-exact pairing is
+    recorded in metadata.yml so it can be read back.
     """
     key = norm_title(title)
+    key = ALIASES.get(key, key)
     if key in meta:
         return meta[key]
-    if len(key) < 6:
-        return None
-    for k, v in meta.items():
-        if len(k) >= 6 and (k.startswith(key) or key.startswith(k)):
-            return v
+
+    # A shared opening, where one side carries a subtitle the other drops
+    # (「正太與小豬」 / 「正太與小豬：武僧的養成之路」). Prefix only, and only when the
+    # shorter side is long enough to identify a lesson on its own — 「信任」 would
+    # match a dozen.
+    prefixed = [v for k, v in meta.items()
+                if min(len(k), len(key)) >= 4 and (k.startswith(key) or key.startswith(k))]
+    if len(prefixed) == 1:
+        return prefixed[0]
+
+    # Last resort, for titles that differ by a word rather than a subtitle
+    # (「國高中數學當然可以…」 / 「國高中數學課當然可以…」). The threshold is high and
+    # the match must be unambiguous; every pairing it makes is recorded in
+    # metadata.yml, because a fuzzy join is how mis-bindings get made.
+    import difflib
+
+    near = difflib.get_close_matches(key, list(meta), n=2, cutoff=0.86)
+    if len(near) == 1 or (len(near) == 2 and
+                          difflib.SequenceMatcher(None, key, near[0]).ratio()
+                          - difflib.SequenceMatcher(None, key, near[1]).ratio() > 0.06):
+        return meta[near[0]]
     return None
 
 

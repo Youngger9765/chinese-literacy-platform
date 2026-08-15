@@ -30,9 +30,50 @@ vocab_definitions:
     word: 有增無減
     definition: 只有增加，沒有減少。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 杯水車薪
+    B: 功敗垂成
+    C: 塑膠微粒
+    D: 闕如
+    E: 簽署
+    F: 自行其是
+    G: 無遠弗屆
+    H: 倡議者
+    I: 有增無減
+  questions:
+  - index: 1
+    text: 我決定少用一次性餐具，因為它們最後可能變成（　）進入海洋。
+    answer: C
+  - index: 2
+    text: 代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前，最後仍（　）。
+    answer: B
+  - index: 3
+    text: 海灘垃圾太多，靠一兩個人撿拾只是（　），要見到成效，必須由社區長期動員清理。
+    answer: A
+  - index: 4
+    text: 反霸凌的（　）設計了匿名投訴信箱，讓同學更願意求助。
+    answer: H
+  - index: 5
+    text: 參加校外教學前，家長要先（　）同意書。
+    answer: E
+  - index: 6
+    text: 網路的影響（　），一個影片能在幾小時內傳到全世界。
+    answer: G
+  - index: 7
+    text: 教練要求全隊遵守比賽戰術安排，不能（　），破壞整個比賽的默契。
+    answer: F
+  - index: 8
+    text: 這份報告的參考資料仍（　），需要再補上出處。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
     verdict: ok
 resources:
   items:

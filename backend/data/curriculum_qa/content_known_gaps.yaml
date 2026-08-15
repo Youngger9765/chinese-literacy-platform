@@ -155,7 +155,7 @@ fields_not_extracted:
       of: 175
       是什麼: 朗讀字數基準
     has_key_reading:
-      count: 140
+      count: 143
       of: 175
       是什麼: 重點朗讀段落
 locks_removed_with_the_first_edition:
@@ -189,12 +189,12 @@ key_reading_passages:
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
 key_reading_withheld:
-  count: 35
+  count: 32
   of: 175
   what: 這 35 課沒有重點朗讀段落，朗讀步驟會退回唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
   breakdown:
     no_anchor: 28      # 第二節沒有「從指定段落（X）開始朗讀」這句，多為文言文與品格教育的另一種版型
-    anchor_out_of_range: 5   # 段號超過課文段數，代表段號與課文分段互相矛盾，無法判斷誰對
+    anchor_out_of_range: 2   # 段號超過課文段數，代表段號與課文分段互相矛盾，無法判斷誰對
     disagrees_with_first_edition: 2  # 一修由紙本 PDF 抽的段號與 DOCX 段號不同，兩條流程打架
   why_withheld: 夾一個看起來合理的段落比留白更糟 —— 學生會照著唸完，而沒有任何人會發現那不是老師標的段。
   how_to_close: no_anchor 需要人工看該課第二節指定哪一段；另外 7 課需要人工裁決段號。

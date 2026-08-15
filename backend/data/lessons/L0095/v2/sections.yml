@@ -36,7 +36,8 @@ vocab_definitions:
     word: 哀鳴
     definition: 因痛苦或悲傷而發出的叫聲。
   extraction_check:
-    vocabulary_agreement: 0.86
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.79
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -66,8 +67,7 @@ vocab_application:
     text: 受傷的小狗躲在牆角低聲（　），讓路過的人聽了很心疼。
     answer: F
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 哀鳴
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

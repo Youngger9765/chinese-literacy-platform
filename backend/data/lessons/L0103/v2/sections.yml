@@ -1,5 +1,46 @@
 lesson_uid: L0103
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 兩全其美
+    definition: 一件事同時顧到兩方面，讓兩方面都能獲益。
+  - index: 2
+    word: 脫穎而出
+    definition: 在眾人中顯露出優秀的表現。
+  - index: 3
+    word: 籌措
+    definition: 設法準備或募集需要的錢、物品。
+  - index: 4
+    word: 坐困愁城
+    definition: 形容情況艱難，沒有出路，而且無力擺脫。
+  - index: 5
+    word: 口碑
+    definition: 眾人口耳相傳的評價。
+  - index: 6
+    word: 靈機一動
+    definition: 突然想到了解決問題的方法。
+  - index: 7
+    word: 虜獲
+    definition: 吸引並獲得。本文指獲得評審的喜愛。
+  - index: 8
+    word: 雲集
+    definition: 許多人從各地聚集在一起。
+  - index: 9
+    word: 桂冠
+    definition: 原指月桂葉編成的冠帽，後來比喻比賽中的最高榮譽。
+  - index: 10
+    word: 大為嘆服
+    definition: 很讚嘆、佩服。
+  - index: 11
+    word: 層出不窮
+    definition: 形容接連不斷地出現，好像永遠不會停止。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.73
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 桂冠
@@ -26,8 +67,7 @@ vocab_application:
     text: 他只看一次示範，就能把舞步完整跳出來，讓同學們（　）。
     answer: D
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 層出不窮
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

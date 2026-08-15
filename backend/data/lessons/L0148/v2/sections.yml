@@ -30,9 +30,41 @@ vocab_definitions:
     word: 大放異彩
     definition: 有突出、與眾不同的表現。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 首屈一指
+    B: 花團錦簇
+    C: 奼紫嫣紅
+    D: 動輒
+    E: 入不敷出
+    F: 匠心獨具
+    G: 別出心裁
+    H: 暑氣蒸人
+    I: 大放異彩
+  questions:
+  - index: 2
+    text: 他薪水太少，常常（　），吃飯都得選便宜的。
+    answer: E
+  - index: 5
+    text: 在世界木工大賽中，臺灣選手（　），是表現最突出的團隊之一。
+    answer: A
+  - index: 6
+    text: 教室冷氣壞了，（　），大家一直流汗。
+    answer: H
+  - index: 7
+    text: 她在國際鋼琴大賽中（　），讓世界看見了臺灣的音樂實力。
+    answer: I
+  - index: 8
+    text: 他很衝動，（　）為小事發火，同學都怕跟他相處。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
     verdict: ok
 comprehension:
   questions:

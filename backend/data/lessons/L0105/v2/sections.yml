@@ -36,7 +36,8 @@ vocab_definitions:
     word: 拒人於千里之外
     definition: 千里以外就將人擋住，形容堅決拒絕別人。也可以形容人態度傲慢或沒有商量的餘地。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

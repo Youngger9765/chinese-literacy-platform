@@ -27,7 +27,8 @@ vocab_definitions:
     word: 凝血現象
     definition: 血液由液態逐漸凝固，形成血塊的過程。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

@@ -6,12 +6,14 @@ passage: '有位72歲的老太太獨居在美國康乃狄克州的一個城市�
 
   當天晚上十二點，世界聞名的刑事鑑識專家李昌鈺博士從床上爬起來接電話，電話那頭說：「李博士，我們是警局的重案小組，這裡發生了一樁令人髮指的命案，要請您移駕過來看看。」李昌鈺立刻著衣，冒著大雪趕到現場。
 
-  李昌鈺環顧四周，問：「十八刀？血呢？」地上沒有血。他馬上提出兩個假設：血跡已經清理過了，或者，這裡不是第一現場。'
+  李昌鈺到了現場，先問在場辦案的警方人員：「你們來多久了？」
+
+  「十小時了。」法醫同時報告：「老太太被刺了18刀，凶刀就是廚房的刀，被丟在洗碗槽裡。」'
 start_text: 有位72歲的老太太獨居在美國康乃狄克州的一個城市
-extent_chars: 308
+extent_chars: 325
 source: docx-extract
 anchor_paragraph: 2
-paragraphs_used: 4
+paragraphs_used: 5
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

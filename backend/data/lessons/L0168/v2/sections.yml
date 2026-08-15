@@ -1,5 +1,40 @@
 lesson_uid: L0168
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 力不從心
+    definition: 想做某事卻因能力或體力不足而無法完成。
+  - index: 2
+    word: 貼紮
+    definition: 以肌貼貼於皮膚以達到增進或保護肌肉骨骼的輔助治療。
+  - index: 3
+    word: 一針見血
+    definition: 比喻說話或文章切中要害，非常精確。
+  - index: 4
+    word: 垂頭喪氣
+    definition: 形容人因為失敗或挫折而顯得沮喪、沒有精神。
+  - index: 5
+    word: 耳邊風
+    definition: 對別人的話語當作沒聽見，完全不放在心上。
+  - index: 6
+    word: 微不足道
+    definition: 形容事物非常渺小，不值得一提。
+  - index: 7
+    word: 乏善可陳
+    definition: 沒有什麼優點可以稱讚。陳，述說。
+  - index: 8
+    word: 家常便飯
+    definition: 比喻常見、習以為常的事情。
+  - index: 9
+    word: 使喚___
+    definition: 指派他人去做事。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 家常便飯
@@ -38,6 +73,56 @@ vocab_application:
   extraction_check:
     options_not_in_lesson_vocabulary: []
     answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 這枚戒指也許對其他人來說「微不足道」，卻是他的傳家之寶
+      B: 她第一次擔任幹部，對她來說要管理同學是「家常便飯」
+      C: 他說話「一針見血」，常常讓人聽完後還是摸不著頭緒
+      D: 他這次比賽的表現「乏善可陳」，最後獲得了最佳投手獎
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 根據第四段「我像瞬間被戳破的氣球，洩氣地搖搖頭」這句話主要是想表達什麼？
+    options:
+      B: 主角被教練說中，心裡也感到沮喪
+      C: 主角面對錯誤不想面對，只想逃避
+      D: 主角心中因此產生退出球隊的念頭
+    rationale: 第2題解析：根據前後文，主角的確沒有好好休息，和教練說的一樣。
+  - index: 3
+    answer: C
+    stem: 根據本文，關於主角的情緒推論，下列何者正確？
+    options:
+      A: 被換下場，心想「唉，又搞砸了！」──慶幸
+      B: 被隊長拍拍肩膀打氣、被邀請去找教練──自責
+      C: 聽完隊長的話，反思自己的身體狀況──困惑
+    rationale: B)倍受鼓勵(D)慚愧
+  - index: 4
+    answer: C
+    stem: 根據本文，下列何者最符合文章想傳達的重點？
+    options:
+      A: 求表現應該是運動員的首要責任和目標
+      C: 運動員應該懂得平衡訓練與身體照顧
+      D: 教練透過挑剔球員來讓球員繼續進步
+    rationale: A)照顧身體才是首要責任 (B)應該按時休息(D)沒有提到
+  - index: 5
+    answer: D
+    stem: 下列哪一項行為最符合「把身體當作夥伴」的態度？
+    options:
+      A: 練球時為了有好表現，即使肌肉拉傷也硬撐到底
+      B: 回家後先好好放鬆滑手機，之後再熬夜把作業寫完
+      C: 儘管身體還發著燒，但不想錯過比賽，決定帶病上場
+      D: 練球後覺得身體疲憊，主動伸展放鬆並增加睡眠時間
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.6
+    answers_recovered_from_rationale: 0
     verdict: ok
 resources:
   items:

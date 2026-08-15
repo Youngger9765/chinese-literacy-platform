@@ -36,7 +36,8 @@ vocab_definitions:
     word: 偽科學
     definition: 表面看起來像科學，實際上缺乏證據與合理方法、且經不起考驗的說法。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -105,7 +106,9 @@ comprehension:
     answer: D
     stem: 「社會上多的是『指鹿為馬』的人，常常亂說話混淆大眾視聽，所以閱讀媒體報導時，不可不慎。」請問『指鹿為馬』不可用哪個詞語替換？（D比喻愚賢不一、高低程度不一樣的人混在一起）
     options:
+      A: 顛倒黑白
       B: 是非不分
+      C: 扭曲事實
       D: 龍蛇混雜
     rationale: null
   - index: 5
@@ -119,11 +122,10 @@ comprehension:
     rationale: A要先蒐證再下判斷，不可人云亦云。
   extraction_check:
     answers_without_option: []
-    questions_with_few_options:
-    - 4
+    questions_with_few_options: []
     questions_grounded_in_body: 1.0
     answers_recovered_from_rationale: 1
-    verdict: weak
+    verdict: ok
 resources:
   items:
   - index: 1

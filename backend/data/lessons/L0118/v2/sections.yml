@@ -1,5 +1,49 @@
 lesson_uid: L0118
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 鎮日
+    definition: 一整天、從早到晚。
+  - index: 2
+    word: 呼天搶地
+    definition: 非常傷心或痛苦而向天、向地大聲哭喊。
+  - index: 3
+    word: 淚眼婆娑
+    definition: 眼裡充滿淚水，視線變得模糊。
+  - index: 4
+    word: 唸叨
+    definition: 不停地反覆說同樣的話。
+  - index: 5
+    word: 惴惴不安
+    definition: 心裡很擔心、害怕，無法安心。
+  - index: 6
+    word: 深不可測
+    definition: 深到無法知道有多深；常用來比喻很難了解。
+  - index: 7
+    word: 娓娓道來
+    definition: 慢慢地、清楚地把事情說出來。
+  - index: 8
+    word: 鮮豔欲滴
+    definition: 顏色非常鮮亮，好像飽含水分、快要滴出來。
+  - index: 9
+    word: 啃嚙
+    definition: 用牙齒一點一點地咬；比喻事物被一點一點消耗。
+  - index: 10
+    word: 百感交集
+    definition: 許多感受同時湧上心頭，心情很複雜。
+  - index: 11
+    word: 晶瑩飽滿
+    definition: 又亮又圓潤，看起來很有光澤。
+  - index: 12
+    word: 大限
+    definition: 指生命快要結束的時候。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 鎮日

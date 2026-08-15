@@ -30,7 +30,8 @@ vocab_definitions:
     word: 泫然欲泣
     definition: 欲泣：快要哭出來；指眼淚快要流下來，像要哭出來的樣子。
   extraction_check:
-    vocabulary_agreement: 0.91
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.82
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -71,8 +72,7 @@ vocab_application:
     text: 那場失敗讓球員第一次看見自己的鬆散，也成了全隊開始認真練習的（　）。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 心存怨懟
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

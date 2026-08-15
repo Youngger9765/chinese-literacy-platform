@@ -27,7 +27,8 @@ vocab_definitions:
     word: 白駒過隙
     definition: 形容時間過得很快，像白色的駿馬一閃而過。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

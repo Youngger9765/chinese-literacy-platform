@@ -42,7 +42,8 @@ vocab_definitions:
     word: 有幸窺見
     definition: 很幸運的看見一部分不容易看見的事情。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

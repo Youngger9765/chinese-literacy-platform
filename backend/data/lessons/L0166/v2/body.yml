@@ -14,7 +14,7 @@ paragraph_count: 8
 char_count: 1203
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 9
-  vocabulary_total: 14
-  ratio: 0.64
+  vocabulary_found: 10
+  vocabulary_total: 15
+  ratio: 0.67
   verdict: weak

@@ -30,7 +30,8 @@ vocab_definitions:
     word: 逆轉
     definition: 事情的發展方向改變，出現不同或相反的結果。「不可逆轉」是指事情已經無法回到原來的狀態，也無法挽回。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

@@ -15,10 +15,64 @@ vocab_definitions:
     word: 工作記憶
     definition: 大腦暫時保存和處理訊息的能力，但能保存的訊息有限。
   extraction_check:
-    vocabulary_agreement: 0.8
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.8
     missing_definitions: []
     indices_contiguous: false
     verdict: weak
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 這篇文章講到「柳丁」和「文旦」和「籃子」的比喻，主要想說明哪一項差異？這項差異會造成什麼結果？
+    options:
+      A: 顏色/ 影響水果的辨認和分類
+      B: 體積/ 影響籃子能裝入的數量
+      C: 水果/ 影響水果是否容易腐壞
+      D: 價錢/ 影響水果的銷售和運輸
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 根據課文內容，下列對「重複朗讀」的描述，哪一項是錯誤的？
+    options:
+      A: 重複朗讀一至五課，對第六課的朗讀速度沒有影響
+      B: 重複朗讀的練習效果，也能提升新文章的閱讀速度與理解
+      C: 重複朗讀會讓訊息更容易記憶與處理
+      D: 重複朗讀的練習，有助於會考時的閱讀表現
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 根據課文，若要提升小歐的閱讀表現，你會給什麼建議？
+    options:
+      A: 不必特別練習，按照原來的速度閱讀就好
+      B: 只要閱讀許多不同文章，不需要重複朗讀
+      C: 經常找文章做重複的計時朗讀，訓練自己讀得快一點
+      D: 每篇文章只讀一次，但都挑比較容易的文章閱讀
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 請問哪一個句子使用了譬喻法？
+    options:
+      A: 蝴蝶和蜜蜂們帶著花朵的蜜糖回家了（擬人）
+      B: 經過半睡眠的山崗，去探初醒的海洋（擬人）
+      C: 淺灘上，老是棲息著五色的魚群（視覺摹寫）
+      D: 這個人瘦得像一支竹竿，頭髮亂得像一個鳥巢
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 作者寫這篇文章，最主要的目的是什麼？
+    options:
+      A: 以文旦、柳丁、籃子教導讀者譬喻的寫作手法
+      B: 教導讀者認識什麼是工作記憶，及其功能與特性
+      C: 告訴讀者，重複朗讀可以提升閱讀速度與理解能力
+      D: 教導讀者重複朗讀的訓練方法
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.4
+    answers_recovered_from_rationale: 0
+    verdict: ok
 resources:
   items:
   - index: 1

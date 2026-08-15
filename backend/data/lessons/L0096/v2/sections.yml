@@ -39,7 +39,8 @@ vocab_definitions:
     word: 先例
     definition: 以前發生過，可以拿來參考的相同或類似例子。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -80,8 +81,7 @@ vocab_application:
     text: 大地震過後的豪雨讓土石鬆動，山坡上的住宅顯得（　）。
     answer: A
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 冤屈
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

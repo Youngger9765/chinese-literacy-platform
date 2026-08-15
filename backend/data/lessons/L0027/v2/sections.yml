@@ -39,7 +39,8 @@ vocab_definitions:
     word: 成本
     definition: 為了完成某件事所需要付出的代價。例如：開飲料店需要材料費、店租、水電費和店員薪水，這些都是開店的「成本」。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

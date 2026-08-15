@@ -58,7 +58,12 @@ _CLOZE = re.compile(r"^[(（]\s*(\d+)\s*[)）](.*?)[(（]\s*([A-Z])\s*[)）](.*)
 # pattern silently lost that question — one in five, per lesson.
 _MCQ_STEM = re.compile(r"[（(]\s*([A-Z])\s*[）)]\s*(\d+)\s*[.、．]\s*(.+)")
 # Some questions print all four options on one line.
-_INLINE_OPTIONS = re.compile(r"([A-Z])\s*[.、．]\s*([^A-Z\n]{1,40}?)(?=\s{2,}[A-Z]\s*[.、．]|$)")
+# Two or more options printed on one line. The lookahead required TWO spaces before
+# the next letter; L0018 separates them with one, so option A failed to match at all,
+# fell through to the single-option pattern, and swallowed 「B.其中一個重要部分」 as
+# part of its own text — leaving the answer B with no option and the question withheld.
+# One space is enough, provided the letter is followed by an option delimiter.
+_INLINE_OPTIONS = re.compile(r"([A-Z])\s*[.、．]\s*([^A-Z\n]{1,40}?)(?=\s+[A-Z]\s*[.、．]|$)")
 # A wholly parenthesised line standing where an option should be: in the TEACHER
 # edition the correct option is overwritten by the answer rationale.
 _RATIONALE = re.compile(r"^[（(].+[）)]$")
@@ -103,33 +108,38 @@ def extract_vocab_definitions(paras, bounds, lesson_vocab: list[str]) -> dict:
     if not rows:
         return {"items": [], "check": {"verdict": "empty"}}
 
-    # A: the words defined here must be the lesson's own, which the worksheet lists
-    # separately under 本課語詞.
+    # A: every word defined here must be one of THIS lesson's words, which the
+    # worksheet lists separately under 本課語詞. A definition list lifted from another
+    # lesson fails this; that is the failure worth gating on.
     #
-    # The 本課語詞 box wraps across lines and Word does not always put a delimiter at
-    # the break, so two words arrive fused: 「揮之不去起伏」 is 揮之不去 + 起伏. Compared
-    # naively that is one unknown word and two misses, and it marked 42 lessons as
-    # disagreeing when the definitions were right. So a listed entry counts as found
-    # if a defined word is CONTAINED in it — the definitions are the reliable side
-    # here, being one per line with an explicit index.
-    want = [normalise(w) for w in lesson_vocab]
-    got = {normalise(r["word"]) for r in rows}
-    matched = sum(1 for w in want if w in got or any(g in w for g in got))
-    overlap = matched / len(want) if want else None
+    # The gate used to run the other way — 本課語詞 must all be defined — and it was
+    # measuring the worksheet's design rather than the extraction's correctness. The
+    # 語詞我最棒 section does not define every word in the bank, by design, so the
+    # ratio sat at 0.91 with 36 lessons below the line and their definitions perfectly
+    # correct. Defined-belongs-to-lesson sits at 0.98 with 3 below. Both directions are
+    # recorded; only this one decides.
+    want = {normalise(w) for w in lesson_vocab}
+    got = [normalise(r["word"]) for r in rows]
+    belongs = (sum(1 for g in got if any(g in w or w in g for w in want)) / len(got)
+               if got and want else None)
+    covered = (sum(1 for w in want if any(g in w or w in g for g in got)) / len(want)
+               if want else None)
 
     no_def = [r["word"] for r in rows if not r["definition"]]
     indices = [r["index"] for r in rows]
     contiguous = indices == list(range(1, len(indices) + 1))
 
     verdict = "ok"
-    if overlap is not None and overlap < 0.8:
+    if belongs is not None and belongs < 0.8:
         verdict = "mismatch"
     elif no_def or not contiguous:
         verdict = "weak"
     return {
         "items": rows,
         "check": {
-            "vocabulary_agreement": round(overlap, 2) if overlap is not None else None,
+            "defined_words_belong_to_lesson": round(belongs, 2) if belongs is not None else None,
+            # Recorded, not gated: how much of the word bank carries a definition.
+            "vocabulary_bank_covered": round(covered, 2) if covered is not None else None,
             "missing_definitions": no_def,
             "indices_contiguous": contiguous,
             "verdict": verdict,
@@ -258,8 +268,29 @@ def extract_comprehension(paras, bounds, body_text: str) -> dict:
         if body_text else None
     )
 
+    # What gates, and what does not.
+    #
+    # `dangling` gates: an answer letter with no option is a broken question whichever
+    # lesson it came from, and it is the shape the teacher-edition overwrite produces
+    # when the rationale is not recovered.
+    #
+    # Grounding does NOT gate, and the 0.5 threshold it used to carry was removing
+    # correct work. Comprehension stems are largely question language — 「下列選項何者
+    #使用正確？」, 「這個故事主要想告訴讀者什麼道理？」 — and a worksheet whose five
+    # questions are all phrased that way grounds nowhere while being entirely about its
+    # own lesson (L0017 and L0021, both checked by hand). Across 166 lessons the measure
+    # never falls below 0.3, so a threshold above that removes correct lessons and one
+    # below it fires never; either way it is not discriminating and should not decide.
+    #
+    # That leaves comprehension without a working A-check. Two candidates were measured
+    # and rejected rather than assumed:
+    #   · quoted spans in the stem appearing in the body — 97 of 164 quotes do not,
+    #     because worksheets paraphrase and quote from other sections
+    #   · a 4-gram floor — 24 lessons score zero with correct extractions, same cause
+    # So the section is written with `grounding_is_not_a_gate` recorded, and its checks
+    # are structural. Saying so is better than a threshold that looks like verification.
     verdict = "ok"
-    if dangling or (grounded is not None and grounded < 0.5):
+    if dangling:
         verdict = "mismatch"
     elif thin:
         verdict = "weak"
@@ -325,7 +356,9 @@ def main() -> int:
         paras = _paragraphs(path)
         body = extract_body(path)
         result = extract_all(
-            path, extract_vocabulary(paras), "".join(body.get("paragraphs") or []),
+            path,
+            extract_vocabulary(paras, body.get("paragraphs") or []),
+            "".join(body.get("paragraphs") or []),
         )
         if not a.quiet:
             print(f"  {path.stem}")

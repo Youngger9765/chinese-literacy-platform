@@ -24,7 +24,8 @@ vocab_definitions:
     word: 含糊其辭
     definition: 說話或表達得不清楚，讓人難以知道真正的意思。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

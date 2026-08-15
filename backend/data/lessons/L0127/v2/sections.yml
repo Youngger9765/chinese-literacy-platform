@@ -33,7 +33,8 @@ vocab_definitions:
     word: 蹣跚
     definition: 走路不穩、搖搖晃晃的樣子，常見於受傷、年老、疲憊或身體虛弱時的步伐。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok

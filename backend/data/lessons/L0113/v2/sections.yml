@@ -1,5 +1,49 @@
 lesson_uid: L0113
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 家喻戶曉
+    definition: 幾乎每家每戶都知道，形容非常有名。
+  - index: 2
+    word: 瘦骨嶙峋
+    definition: 形容人很瘦，骨頭都凸出來，多指生病或受苦。
+  - index: 3
+    word: 叱吒風雲
+    definition: 形容一個人氣勢很強、影響力很大。
+  - index: 4
+    word: 形容枯槁
+    definition: 枯槁：乾枯、沒有生氣。形容人很憔悴、消瘦，精神很差。
+  - index: 5
+    word: 不言而喻
+    definition: 不用特別解釋，就能明白。
+  - index: 6
+    word: 設身處地
+    definition: 把自己放到別人的立場想，理解對方的處境與感受。
+  - index: 7
+    word: 臨終
+    definition: 臨：接近；終：結束。生命快要結束、接近死亡的時候。
+  - index: 8
+    word: 迫在眉睫
+    definition: 事情非常緊急，立刻就要處理。
+  - index: 9
+    word: 非黑即白
+    definition: 把事情看成只有兩種結果：不是對就是錯、不是好就是壞，忽略中間的灰色地帶。
+  - index: 10
+    word: 覆水難收
+    definition: 事情一旦發生就很難挽回，像潑出去的水收不回來。
+  - index: 11
+    word: 莫衷一是
+    definition: 意見分歧，無法判定哪一個最恰當，也無法形成一致結論。
+  - index: 12
+    word: 眾說紛紜
+    definition: 大家提出許多不同的說法或意見。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 叱吒風雲
@@ -38,8 +82,7 @@ vocab_application:
     text: 這部動畫在臺灣（　），大家對它的經典情節都能舉出例子。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 莫衷一是
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

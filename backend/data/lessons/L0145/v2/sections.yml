@@ -27,7 +27,8 @@ vocab_definitions:
     word: 約定俗成
     definition: 大家長久以來都這樣做，慢慢形成大家都認同的習慣或規則。
   extraction_check:
-    vocabulary_agreement: 0.82
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.73
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -67,8 +68,7 @@ vocab_application:
     text: 石虎是臺灣珍貴的野生（　），需要大家一起保護。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 共同編織
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

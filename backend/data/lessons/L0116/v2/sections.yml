@@ -1,5 +1,52 @@
 lesson_uid: L0116
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 契機
+    definition: 讓事情可能出現改變的好機會。
+  - index: 2
+    word: 轉圜
+    definition: 事情還有改變或挽回的機會。
+  - index: 3
+    word: 無常
+    definition: 事情變化不定，難以預料。
+  - index: 4
+    word: 心不在焉
+    definition: 心思不在正在做的事情上，不專心。
+  - index: 5
+    word: 奠定
+    definition: 建立穩固的基礎。
+  - index: 6
+    word: 禍福相倚
+    definition: 壞事和好事常常連在一起，一件事不一定永遠是好或壞。
+  - index: 7
+    word: 詮釋
+    definition: 「詮、釋」都有解釋的意思。指對一件事的理解和解釋。
+  - index: 8
+    word: 得意忘形
+    definition: 「得意」是高興；「忘形」是忘了分寸。因為太高興、太驕傲，言行變得不恰當。
+  - index: 9
+    word: 愁雲慘霧
+    definition: 形容心情低落，或氣氛沉重。
+  - index: 10
+    word: 於事無補
+    definition: 對事情沒有幫助，不能讓情況變好。
+  - index: 11
+    word: 鄙夷
+    definition: 看不起、輕視別人。
+  - index: 12
+    word: 門可羅雀
+    definition: 形容生意非常冷清，來的人非常少，門口可以張網捕麻雀。
+  - index: 13
+    word: 市井
+    definition: 一般老百姓生活、買賣、活動的地方。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.72
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 心不在焉
@@ -38,8 +85,7 @@ vocab_application:
     text: 小傑的海報被老師稱讚後，有些（　），開始到處炫耀。
     answer: H
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 門可羅雀
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

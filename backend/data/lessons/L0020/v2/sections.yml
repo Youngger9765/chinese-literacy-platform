@@ -1,5 +1,43 @@
 lesson_uid: L0020
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 婉拒
+    definition: 用有禮貌的方式拒絕別人。
+  - index: 2
+    word: 常理
+    definition: 一般人都知道、都認同的道理。
+  - index: 3
+    word: 吶喊
+    definition: 大聲喊叫。
+  - index: 4
+    word: 預期
+    definition: 在事情發生前，先想到或猜測可能的情況。
+  - index: 5
+    word: 顧慮
+    definition: 對某件事情感到擔心。
+  - index: 6
+    word: 工整
+    definition: 整齊、端正。
+  - index: 7
+    word: 讀心術
+    definition: 知道別人在想什麼的能力，也用來形容很了解別人的想法。
+  - index: 8
+    word: 路標
+    definition: 用來告訴大家方向或地點的標誌。
+  - index: 9
+    word: 出乎意料
+    definition: 事情的結果和原本想的不一樣。
+  - index: 10
+    word: 截然不同
+    definition: 完全不一樣，差別很大。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 讀心術
@@ -36,8 +74,7 @@ vocab_application:
     text: 這裡有許多岔路，如果沒有（　），遊客很容易迷路。
     answer: C
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 出乎意料
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

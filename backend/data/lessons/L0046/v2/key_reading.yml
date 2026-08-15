@@ -6,12 +6,14 @@ passage: '沙馬雷和一般的無人機不一樣，它只有一片翅膀，因�
 
   一般的太陽能板角度是固定的，當太陽移動後，吸收陽光的效率就會降低。但這種仿生設計模仿向日葵的特性，讓太陽能板可以「跟
 
-  西部電影中，常看到有些乾草球在荒涼的大地上滾來滾去，那就是風滾草！風滾草其實是某些植物成熟或枯死後，由枯乾的莖葉形成的大草球。強風吹起時，草球就會在原野上翻滾和轉動，藉此散播種子。'
+  著太陽轉」，整天都能吸收到最多陽光，發電量大幅提升。這項技術
+
+  已經在多個國家被應用，為地球提供更多乾淨能源！'
 start_text: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此
-extent_chars: 361
+extent_chars: 325
 source: docx-extract
 anchor_paragraph: 3
-paragraphs_used: 4
+paragraphs_used: 5
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: 3

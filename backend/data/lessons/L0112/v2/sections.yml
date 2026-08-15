@@ -1,5 +1,43 @@
 lesson_uid: L0112
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 鬱鬱蔥蔥
+    definition: 植物長得很茂盛、很濃密，一片綠油油。
+  - index: 2
+    word: 始終如一
+    definition: 常用來形容人的態度、想法或做法從開始到結束都沒有改變。
+  - index: 3
+    word: 冷冽
+    definition: 形容寒冷、清冷；也可形容色調、語氣或氣氛給人冷峻、刺骨的感覺。
+  - index: 4
+    word: 生機勃勃
+    definition: 充滿生命力，看起來很有活力、很旺盛。
+  - index: 5
+    word: 狐疑
+    definition: 像狐狸一樣多疑。比喻心中懷疑、拿不定主意。
+  - index: 6
+    word: 雞皮疙瘩
+    definition: 因為冷、害怕或噁心，皮膚毛孔出現的一粒一粒小突起。
+  - index: 7
+    word: 徒手
+    definition: 空手、未用工具。
+  - index: 8
+    word: 模擬
+    definition: 模仿真實的動作、情境或過程，讓人看出相似的樣子；也可用於教學、訓練或研究。
+  - index: 9
+    word: 所費不貲
+    definition: 不貲：不可計算。形容花費非常高。
+  - index: 10
+    word: 校正
+    definition: 修正錯誤，把不準或有偏差的地方調整回正確的狀態。可用於數據、儀器或位置等。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 始終如一
@@ -38,8 +76,7 @@ vocab_application:
     text: 山難發生時，雖然北風（　），消防隊員們仍冒著嚴寒上山搜救。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 雞皮疙瘩
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

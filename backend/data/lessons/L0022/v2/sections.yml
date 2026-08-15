@@ -30,7 +30,8 @@ vocab_definitions:
     word: 愣
     definition: 因為驚訝、害怕或一時反應不過來，而短暫的停住或不說話、不動作。
   extraction_check:
-    vocabulary_agreement: 0.82
+    defined_words_belong_to_lesson: 0.89
+    vocabulary_bank_covered: 0.73
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -70,8 +71,7 @@ vocab_application:
     text: 看見多年不見的老友，他開心的（　）腳步迎上前去。
     answer: A
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 漣漪
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:
