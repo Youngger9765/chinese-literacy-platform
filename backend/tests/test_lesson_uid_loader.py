@@ -806,3 +806,71 @@ def test_a_body_with_no_cross_check_says_so():
             if verdict in ("no_vocab", "suspect") and not doc.get("needs_review"):
                 unflagged.append((uid, verdict))
     assert unflagged == [], f"unverifiable bodies presented as checked: {unflagged[:4]}"
+
+
+def test_no_lesson_is_shorter_than_its_own_worksheet_says():
+    """The worksheet names the paragraph the reading timer starts from — 「從指定段落
+    （六）開始朗讀」 — so the body must have at least that many paragraphs. That is the
+    document contradicting itself, and it is the only signal here that catches a body
+    cut short without knowing in advance how long it should be.
+
+    It caught two: section headings were matched as substrings ANYWHERE, so lessons
+    ABOUT reading comprehension closed their own body by saying so
+    (「閱讀的速度愈快…閱讀理解就會愈強哦」) — L0072 was served as one paragraph while its
+    worksheet asked the student to start at the sixth.
+
+    A length threshold would not do this. 《陸公買硯》 is two paragraphs and 193
+    characters, and complete: classical stories are short, and an arbitrary floor
+    flags it while missing the lessons that are genuinely truncated.
+    """
+    import json
+    import subprocess
+    import sys as _sys
+    from pathlib import Path
+
+    src = Path("/tmp/docx-src")
+    if not src.is_dir():
+        pytest.skip("worksheet sources not present")
+
+    from app.services.lesson_loader import get_all_lessons
+
+    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+    from extract_key_reading import find_anchor
+    from extract_lesson_body import _paragraphs
+
+    over = []
+    for lesson in get_all_lessons():
+        docx = src / f"{lesson['lesson_uid']}.docx"
+        if not docx.exists():
+            continue
+        anchor = find_anchor(_paragraphs(docx))
+        body = lesson.get("paragraphs") or []
+        if anchor and body and anchor > len(body):
+            over.append((lesson["lesson_uid"], anchor, len(body)))
+
+    # L0012 is a letter whose salutations and signatures run under the short-paragraph
+    # floor, so its body is genuinely a few paragraphs shorter than the worksheet counts.
+    assert len(over) <= 1, f"bodies shorter than their worksheet claims: {over[:5]}"
+
+
+def test_key_reading_disagreements_are_flagged_not_silently_preferred():
+    """Two lessons have the DOCX marking one paragraph and the first edition's table
+    marking another. The DOCX wins — it is this edition's own instruction, and the
+    passage is still this lesson's — but the file has to say a human should look, and
+    say why. Setting the verdict before the length check and falling through
+    overwrote it with 'ok': the flag survived, the reason did not."""
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    flagged = 0
+    for uid in L.available_uids():
+        for f in (L.LESSONS_ROOT / uid).glob("v*/key_reading.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+            if not doc.get("needs_human_review"):
+                continue
+            flagged += 1
+            assert doc.get("review_reason"), f"{uid}: flagged with no reason"
+            verdict = (doc.get("extraction_check") or {}).get("verdict")
+            assert verdict == "disagrees_with_first_edition", f"{uid}: verdict {verdict!r}"
+    assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"

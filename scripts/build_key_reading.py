@@ -24,7 +24,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from extract_key_reading import extract  # noqa: E402
 
 LESSONS = ROOT / "backend" / "data" / "lessons"
-WRITEABLE = {"ok", "confirmed"}
+#: `disagrees_with_first_edition` is written and FLAGGED rather than withheld: the
+#: two editions marked paragraphs one apart on two lessons, the passage is still this
+#: lesson's, and withholding sends the student back to reading the whole text.
+WRITEABLE = {"ok", "confirmed", "disagrees_with_first_edition"}
 
 
 def _read_body(vdir: Path) -> list[str] | None:
@@ -79,6 +82,11 @@ def main() -> int:
                 "corroborated_by_first_edition": r["corroborated_by_first_edition"],
             },
         }
+        if r.get("needs_human_review"):
+            doc["needs_human_review"] = True
+            doc["review_reason"] = (
+                f"二修 DOCX 標第 {r['anchor']} 段，一修對照表標第 "
+                f"{r['corroborated_by_first_edition']} 段；採用二修")
         if not a.dry_run:
             (vdir / "key_reading.yml").write_text(
                 yaml.dump(doc, allow_unicode=True, sort_keys=False, width=10**6),
