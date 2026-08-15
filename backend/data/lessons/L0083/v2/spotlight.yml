@@ -1,0 +1,25 @@
+spotlight:
+  lesson: G7-L15
+  strategy_name: 用表格整理訊息-從細節歸納比較項目
+  strategy_type: comparison
+  blocks:
+  - type: guide
+    text: '第10課，我們學會從比較的細節命名「比較項目」；第11課，我們又學會依比較項目找出相同與不同。這一課要把兩個方法合起來：面對不同形式的比較，先找出可以放在同一列的細節，再替這一列取一個能概括所有細節的比較項目名稱。記得以下的整理表格的步驟嗎？
+
+      找比較對象　②找同列細節　❸問比較項目　❹填入並檢查
+
+      底下我們用這些步驟將本課訊息整理成表格，注意，步驟❸、❹是本課練習的重點哦！'
+  - type: guide
+    text: ◎ 小試身手
+  - type: free_text
+    prompt: 1.將課文第三～六段內容整理成表格。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 2.請根據下表同一列的比較細節，取一個比較項目的名稱，填入最左欄。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

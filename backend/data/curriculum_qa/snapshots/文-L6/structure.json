@@ -1,27 +1,39 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "故事結構",
+      "__/案由",
+      "經過/告訴人主張"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "fill_blank",
       "label": "故事結構",
-      "value": "內容摘要\n【　　　】處填入原文，找不到原文時，再用自己的話寫。",
-      "interactive_type": "fill_blank"
+      "value": "內容摘要\n【　　　】處填入原文，找不到原文時，再用自己的話寫。"
     },
     {
-      "label": "【 起因 】/案由",
-      "value": "【　　　】媽媽的布被偷了，於是她到王宮向王上告發【　　　】盜竊。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "__/案由",
+      "value": "【　　　】媽媽的布被偷了，於是她到王宮向王上告發【　　　】盜竊。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "經過/告訴人主張",
-      "value": "主張一 令尹指使人偷她的布。\n說明：從前令尹治理時，路【　　　】，門不關閉，而盜賊自息；現在的令尹治理後，盜賊【　　　】。\n結論：盜賊猖狂，皆因令尹治理【　　　】，所以盜賊偷就等於是令尹偷。\n主張二 依判決先例，令尹應負本案連帶責任。\n說明：從前江乙作為郢都的官員，因為王宮的失竊案，而受到【　　　】被免職；現在【　　　】擔任最高行政官員，人民【　　　】的布被偷，令尹也應該連坐受罰。\n結論：如果江乙有罪，那麼令尹也有罪。\n主張三 補充說明，強化觀點。\n上面的官員不賢明，下面的【　　　】就不能治理好；宰相不賢能，那麼【　　　】就不安寧。",
-      "interactive_type": "fill_blank"
+      "value": "主張一 令尹指使人偷她的布。\n說明：從前令尹治理時，路【　　　】，門不關閉，而盜賊自息；現在的令尹治理後，盜賊【　　　】。\n結論：盜賊猖狂，皆因令尹治理【　　　】，所以盜賊偷就等於是令尹偷。\n主張二 依判決先例，令尹應負本案連帶責任。\n說明：從前江乙作為郢都的官員，因為王宮的失竊案，而受到【　　　】被免職；現在【　　　】擔任最高行政官員，人民【　　　】的布被偷，令尹也應該連坐受罰。\n結論：如果江乙有罪，那麼令尹也有罪。\n主張三 補充說明，強化觀點。\n上面的官員不賢明，下面的【　　　】就不能治理好；宰相不賢能，那麼【　　　】就不安寧。"
     },
     {
+      "interactive_type": "display",
       "label": "結果/聲請",
-      "value": "請王上明察這件事。",
-      "interactive_type": "display"
+      "value": "請王上明察這件事。"
     }
   ],
-  "layout": "worksheet_table",
   "worksheet_rows": [
     {
       "kind": "pair",
@@ -30,7 +42,7 @@
     },
     {
       "kind": "pair",
-      "label": "【　　　】/案由",
+      "label": "__/案由",
       "value": "【　　　】媽媽的布被偷了，於是她到王宮向王上告發【　　　】盜竊。"
     },
     {
@@ -43,17 +55,5 @@
       "label": "結果/聲請",
       "value": "請王上明察這件事。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "故事結構",
-      "【 起因 】/案由",
-      "經過/告訴人主張"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

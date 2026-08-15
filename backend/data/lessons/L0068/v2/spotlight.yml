@@ -1,0 +1,70 @@
+spotlight:
+  lesson: G6-L29
+  strategy_name: 自我提問策略2-跟著人物故事線問問題
+  strategy_type: self_questioning
+  blocks:
+  - type: guide
+    text: '上一課，我們學會：讀人物故事時，先看故事發展到哪裡，再選一個適合的問題，帶著問題讀下一部分：
+
+      ①他想做什麼？為什麼想做？
+
+      ②他遇到什麼困難？怎麼繼續下去？
+
+      ③最後有什麼成果？帶來哪些改變？
+
+      讀完後，再檢查：我能回答問題，也找得到課文線索嗎？回答不完整，就回頭找線索。
+
+      這一課，我們用同樣的方法讀阿介的故事。'
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 先問，再讀：閱讀比較有方向
+  - type: guide
+    text: 帶著問題讀，你已經根據人物故事線，找到重點了，接著我們進一步整理出重點嘍！
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: (1)    奠定     ：建立穩固的基礎。
+  - type: free_text
+    prompt: (2)    永續   　：能長久維持下去。
+  - type: free_text
+    prompt: (3)    瀕臨   　：接近、快要面臨。本文「瀕臨滅絕」是指快要滅絕。
+  - type: free_text
+    prompt: (4)   樹冠    　：樹木上方長著許多樹枝和葉子的部分。
+  - type: free_text
+    prompt: (5)   汲取    　：吸收、取得。常用來指學到知識或經驗。
+  - type: free_text
+    prompt: (6)   倚重   　：信任並重視，常把重要工作交給他。
+  - type: free_text
+    prompt: (7)   變遷    　：隨著時間產生的變化。
+  - type: free_text
+    prompt: (8)   杳無人煙   ：形容地方偏僻荒涼，幾乎看不到人。
+  - type: free_text
+    prompt: (9)   佼佼者   　：在一群人中特別優秀、出眾的人。
+  - type: free_text
+    prompt: (10)   僥倖   　  ：靠運氣意外成功或逃過危險。
+  - type: free_text
+    prompt: (11)   棲地       ：生物居住、覓食和繁殖的地方。
+  - type: free_text
+    prompt: (1)這場車禍十分嚴重，只有他（ E ）逃過一劫。
+  - type: free_text
+    prompt: (2)她常閱讀科普書，不斷(  F  )新知。
+  - type: free_text
+    prompt: (3)這座森林是石虎重要的 (  G  )，需要大家一起保護。
+  - type: free_text
+    prompt: (4)經過多年努力，他已成為這個領域的(  H  )。
+  - type: free_text
+    prompt: (5)良好的閱讀習慣，能為日後學習(  C  )基礎。
+  - type: free_text
+    prompt: (6)受到氣候( B  )影響，許多動植物的生活環境正在改變。
+  - type: free_text
+    prompt: (7)這種動物數量快速減少，已經(  D  )滅絕。
+  - type: free_text
+    prompt: (8)校長十分(  A  )這位經驗豐富的老師，常請他協助重要計畫。
+  - type: self_check
+    items:
+    - 我會跟著人物故事的發展，選出適合的問題，帶著問題讀。
+    - 我會檢查答案是否完整；不完整時，回頭找線索。
+    - 下次讀人物故事時，我會再用這三個問題，讓閱讀更有方向。

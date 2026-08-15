@@ -1,146 +1,118 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "主要服務對象",
+      "緩解醫院緊張\n的氛圍",
+      "__學",
+      "貢獻"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "感情小日記4──我被告白了",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "小丑醫生",
+      "value": ""
     },
     {
-      "label": "一、二",
-      "value": "",
       "interactive_type": "display",
+      "label": "起源",
+      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "主要服務對象",
+      "value": "面臨【　　　】、手術或治療的孩子。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "主要工作內容",
       "sub_rows": [
         {
-          "label": "被傳訊息告白",
-          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】 【　　　】\n驚訝 □驚喜 \n惱怒 煩躁",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "緩解醫院緊張\n的氛圍",
+          "value": "常見方式：【　　　】\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "三",
-      "value": "",
       "interactive_type": "display",
+      "label": "所需專業",
       "sub_rows": [
         {
-          "label": "猶豫是否該答應",
-          "value": "1.也許選擇【　　　】，比較不會受傷\n2.不想【　　　】接受沒有心動的關係 【　　　】\n混亂 □輕鬆 \n□悸動 矛盾",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "四",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
+          "interactive_type": "display",
+          "label": "表演",
+          "value": "以多元的表演方式，讓孩子們感受到放鬆。"
+        },
         {
-          "label": "猶豫如何拒絕",
-          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】 【　　　】\n苦惱 猶豫 \n□憤怒 □無奈",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "五",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
+          "interactive_type": "display",
+          "label": "專業知識",
+          "value": "了解醫院的規範和病人的需求。"
+        },
         {
-          "label": "傳訊息  拒絕",
-          "value": "盡可能給出最【　　　】的回應 感到【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "__學",
+          "value": "應對病人和家屬的負面情緒。【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "六",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "收到對方回覆",
-          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】 【　　　】\n如釋重負 \n坦然 □難過",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "統整",
-      "value": "作者寫下這篇小日記，是想抒發被告白後【　　　】的感受，以及勇敢【　　　】後，內心的【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "貢獻",
+      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "感情小日記4──我被告白了",
+  "title": "小丑醫生",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "一、二",
-      "items": [
-        {
-          "label": "被傳訊息告白",
-          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】 (勾選，可複選)\n驚訝 □驚喜 \n惱怒 煩躁"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "三",
-      "items": [
-        {
-          "label": "猶豫是否該答應",
-          "value": "1.也許選擇（□自己喜歡的人　喜歡自己的人），比較不會受傷\n2.不想【　　　】接受沒有心動的關係 (勾選，可複選)\n混亂 □輕鬆 \n□悸動 矛盾"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "四",
-      "items": [
-        {
-          "label": "猶豫如何拒絕",
-          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】 (勾選，可複選)\n苦惱 猶豫 \n□憤怒 □無奈"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "五",
-      "items": [
-        {
-          "label": "傳訊息  拒絕",
-          "value": "盡可能給出最【　　　】的回應 感到【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "六",
-      "items": [
-        {
-          "label": "收到對方回覆",
-          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】 (勾選，可複選)\n如釋重負 \n坦然 □難過"
-        }
-      ]
+      "kind": "pair",
+      "label": "起源",
+      "value": "1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。"
     },
     {
       "kind": "pair",
-      "label": "統整",
-      "value": "作者寫下這篇小日記，是想抒發被告白後（ 混亂  □平靜）的感受，以及勇敢（ □答應   拒絕）後，內心的（ 踏實坦然  □沮喪難過）。"
+      "label": "主要服務對象",
+      "value": "面臨【　　　】、手術或治療的孩子。"
+    },
+    {
+      "items": [
+        {
+          "label": "緩解醫院緊張\n的氛圍",
+          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
+        }
+      ],
+      "kind": "section_block",
+      "section": "主要工作內容"
+    },
+    {
+      "items": [
+        {
+          "label": "表演",
+          "value": "以多元的表演方式，讓孩子們感受到放鬆。"
+        },
+        {
+          "label": "專業知識",
+          "value": "了解醫院的規範和病人的需求。"
+        },
+        {
+          "label": "__學",
+          "value": "應對病人和家屬的負面情緒。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "所需專業"
+    },
+    {
+      "kind": "pair",
+      "label": "貢獻",
+      "value": "讓病房多了笑聲，幫助病童降低【　　　】，也舒緩了壓力鍋下家長緊繃的心情。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "被傳訊息告白",
-      "猶豫是否該答應",
-      "猶豫如何拒絕",
-      "傳訊息  拒絕"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

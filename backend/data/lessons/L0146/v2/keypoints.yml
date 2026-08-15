@@ -1,0 +1,47 @@
+keypoints:
+  lesson: G9-L3
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 萬華地名典故
+    value: 「萬華」這個地名，來自原住民語 manga，原本是指__
+    blanks:
+    - answer: 小船／獨木舟
+      hint: ''
+  - label: 擴大觀察
+    value: 不只臺北，__　與 __等地，也以manga（或vanga）指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為__。
+    blanks:
+    - answer: 東南亞
+      hint: ''
+    - answer: 南太平洋
+      hint: ''
+    - answer: 南島語族
+      hint: ''
+  - label: 更多例子
+    value: '南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）
+
+      語言在傳遞過程中會產生__，這是一種自然現象。'
+    blanks:
+    - answer: 音變
+      hint: ''
+  - label: 疑問與解釋
+    value: '1.南島語族彼此相隔很遠，怎麼可能使用相似語言？
+
+      2.科學界的解釋：他們曾有__，並透過航海逐步__、拓展至各島嶼。'
+    blanks:
+    - answer: 共同祖先
+      hint: ''
+    - answer: 遷徙
+      hint: ''
+  - label: 結尾
+    value: 語言是一條__，語言能保存族群__與__ 的歷史。
+    blanks:
+    - answer: 跨越千年的足跡
+      hint: ''
+    - answer: 遷徙
+      hint: ''
+    - answer: 交流、生活
+      hint: ''
+  title: 語言的足跡：從臺北 萬華到南太平洋的航海之路

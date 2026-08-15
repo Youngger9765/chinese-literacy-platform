@@ -11,6 +11,9 @@ These are called once at module load time by lesson_loader.py (and directly
 by tests that need to verify index construction in isolation).
 """
 
+import os
+import re
+
 from app.services.lesson_layer_loaders import (
     ENRICHMENT_FIELDS,
     load_curriculum_manifest,
@@ -35,77 +38,114 @@ def _reapply_spotlight_images(lesson: dict) -> None:
     lesson["images"] = merge_spotlight_images(lesson.get("images") or [], spotlight_v2)
 
 
-def build_all_lessons() -> list[dict]:
-    """Load all lessons from both layers and return sorted by display_order / lesson_number.
+def _uid_tree_lessons() -> list[dict]:
+    """Second-edition lessons from the uid tree (#2687/#2692).
 
-    Merge strategy:
-      1. Load Layer-1 (L*.yml, 57 lessons with integer IDs 1-57)
-      2. Load Layer-2 (_parsed_2026-05-01/*.yml, deduped by title)
-      3. Enrich Layer-1 entries with truthy fields from matching Layer-2 parsed files
-      4. Sort: Layer-1 by lesson_number, Layer-2 by display_order
+    Returns [] when the tree is absent, so this is a no-op on any checkout that
+    has not run the extraction yet. Shaped to look like the existing lesson
+    dicts so downstream code needs no change during the dual-path window.
     """
-    manifest_index = load_curriculum_manifest()
-
-    # Layer 1: existing production L*.yml
-    layer1 = load_layer1_lessons()
-    layer1_titles = {lesson["title"] for lesson in layer1}
-
-    # Layer 2: new parsed lessons (title-deduped against Layer-1)
-    layer2 = load_layer2_lessons(manifest_index, layer1_titles)
-
-    # Merge Layer-2 enrichment into Layer-1 entries with matching title (#1666).
-    #
-    # Problem: when a curriculum slot has BOTH a Layer-1 L*.yml (legacy, no
-    # step_sequence) AND a Layer-2 _parsed_/G*-L*.yml (new SOT with
-    # step_sequence + worksheet_* + lesson_intro + layout_mode), load_layer2_lessons()
-    # skips the Layer-2 entry on title match to avoid duplicate cards. Result:
-    # /api/stories/G6-L10 resolves to Layer-1 entry with step_sequence=null.
-    #
-    # Fix: build a title→Layer-2 lookup from _parsed_ files (regardless of
-    # whether the Layer-2 entry was kept after dedup), then copy the enrichment
-    # fields onto matching Layer-1 entries. Layer-1 keeps its id/lesson_number
-    # /title/paragraphs (preserves DB Text FK + session.story_slug back-compat).
-    layer2_by_title = build_layer2_enrichment_index()
-
-    for lesson in layer1:
-        l2_data = layer2_by_title.get(lesson["title"])
-        if not l2_data:
-            continue
-        for field in ENRICHMENT_FIELDS:
-            l2_value = l2_data.get(field)
-            # strategy_exercise: Layer-2 may use plural key (legacy G7 圖文整合)
-            if field == "strategy_exercise" and l2_value is None:
-                l2_value = l2_data.get("strategy_exercises")
-            if l2_value:  # only override when Layer-2 has a truthy value
-                lesson[field] = l2_value
-
-        _reapply_spotlight_images(lesson)
-
-    all_lessons = layer1 + layer2
-
-    # #2397: render-confirmed cross_lesson via the legacy strategy_exercise
-    # fallback. Applied AFTER the Layer-2 enrichment merge above (which would
-    # otherwise re-populate strategy_exercise with the foreign example), so the
-    # null sticks. The frontend StrategyExercisePage then shows the honest
-    # "no spotlight yet" placeholder instead of another topic's content.
-    for lesson in all_lessons:
-        code = lesson.get("lesson_code") or lesson.get("grade_code") or ""
-        if should_suppress_legacy_strategy_exercise(code):
-            lesson["strategy_exercise"] = None
-
-    # Sort: Layer-1 by lesson_number, Layer-2 by display_order, then mix.
-    # Use display_order from manifest for Layer-2; for Layer-1 use lesson_number as proxy.
-    def sort_key(lesson: dict) -> tuple[int, int]:
-        if lesson["_layer"] == 1:
-            # Layer-1 lessons map to curriculum display_order via manifest.
-            # For simplicity, sort them by lesson_number (1-57) at the front.
-            return (0, lesson["lesson_number"])
+    try:
+        from app.services.keypoints_to_structure import keypoints_to_structure_table
+        from app.services.lesson_uid_loader import load_all as _load_uid_all
+    except Exception:
+        return []
+    out = []
+    for i, l in enumerate(_load_uid_all(), start=1):
+        uid = l["lesson_uid"]
+        code = l.get("catalog_slot") or ""
+        # `grade` is the single classification axis the library filters on, and
+        # it is a STRING, not a year number: "4".."9" plus 文言文 and 品格教育.
+        #
+        # 文-L2 / 體-L6 carry no year in their filename because they are not a
+        # year — they are standalone collections. Modelling them as a separate
+        # `track` field forced every caller to handle two axes; modelling them as
+        # a fake grade number (90/91) would have been inventing data. Making the
+        # axis a string lets one filter cover all eight categories.
+        m = re.match(r"^G(\d+)-", code or "")
+        if m:
+            grade = m.group(1)
+        elif code.startswith("文"):
+            grade = "文言文"
+        elif code.startswith("體"):
+            grade = "品格教育"      # 檔名寫的是「品格力」，非「品德」
         else:
-            return (1, lesson.get("display_order", 9999))
+            grade = ""
+        # Fields the extraction pipeline does not produce, so they default empty —
+        # but a lesson.yml may carry them (the admin editor writes a full record, and
+        # future pipeline versions will too). Anything present on disk wins over the
+        # default: hardcoding these meant an admin could save a story and get back a
+        # row with its genre and paragraphs blanked, with no error anywhere.
+        row = {
+            # 20000+ keeps these clear of Layer-1 (1-57) and Layer-2 (1000+)
+            # during the dual-path window; Phase 5 drops the other two and the
+            # uid becomes the only identity.
+            "id": 20000 + int(uid[1:]),
+            "lesson_uid": uid,
+            "version_id": l.get("version_id"),
+            "lesson_number": 20000 + int(uid[1:]),
+            "grade_code": code,
+            # `build_indexes` keys the by-code lookup on `lesson_code`, and the tree
+            # rows only carried `grade_code` — so `_LESSONS_BY_CODE` built empty and
+            # `get_lesson_by_code` returned None for every code in the catalogue,
+            # silently. The two names are the same value; the older loaders set both.
+            "lesson_code": code,
+            "grade": grade,
+            "title": l.get("title"),
+            # fields the API schema expects; the uid tree has no genre/category
+            # taxonomy yet, so they stay empty rather than being invented.
+            "genre": "",
+            "category": "",
+            "char_count": 0,
+            "thumbnail_url": None,
+            "reading_strategy": None,
+            "has_key_reading": False,
+            "intro": None,
+            "paragraphs": [],
+            # StoryDetail indexes these directly. The second-edition extraction
+            # produces spotlight + keypoints; the remaining practice modules are
+            # not yet extracted, so they are present-but-empty rather than absent
+            # (absent would 500 the detail route, empty renders as "no exercise").
+            "vocabulary": None,
+            "fill_in_blank": None,
+            "multiple_choice": None,
+            "reading_benchmark": None,
+            "text_type": "單",
+            "source_file": None,
+            "spotlight_v2": (l.get("spotlight") or {}).get("spotlight"),
+            "keypoints": (l.get("keypoints") or {}).get("keypoints"),
+            # The 重點表 step reads `story_structure_table` off the story and asks an
+            # LLM to invent one when it is absent. The second-edition pipeline emits
+            # the same table already structured, so convert rather than regenerate —
+            # an AI-written table is not the one the teacher authored.
+            "story_structure_table": keypoints_to_structure_table(l.get("keypoints")),
+            "assets": l.get("assets") or [],
+            "source": "uid_tree",
+        }
+        # Overlay what lesson.yml actually carries. Identity stays computed — a
+        # lesson must never be able to rename its own uid or id from its payload.
+        _IDENTITY = {"id", "lesson_uid", "version_id", "grade", "assets", "source",
+                     "spotlight_v2", "keypoints", "story_structure_table"}
+        for k, v in l.items():
+            if k in _IDENTITY or v in (None, "", [], {}):
+                continue
+            if k in row:
+                row[k] = v
+        out.append(row)
+    return out
 
-    all_lessons.sort(key=sort_key)
-    return all_lessons
 
+def build_all_lessons() -> list[dict]:
+    """All lessons, from the uid tree.
+
+    The two historical layers (`L*.yml` hand-built 2026-02 and
+    `_parsed_2026-05-01/` batch-parsed 2026-05) were deleted in the second-edition
+    re-ink. They were merged on *title*, which silently produced empty shells
+    whenever a title drifted by one punctuation mark, and duplicated 26 lessons
+    across the two layers. Identity is now the directory name under
+    `backend/data/lessons/<lesson_uid>/<version_id>/` and nothing else.
+    """
+    return _uid_tree_lessons()
 
 def build_indexes(all_lessons: list[dict]) -> tuple[
     dict[int, dict],
@@ -126,5 +166,9 @@ def build_indexes(all_lessons: list[dict]) -> tuple[
         l["lesson_code"]: l for l in all_lessons if l.get("lesson_code")
     }
     lessons_by_title: dict[str, dict] = {l["title"]: l for l in all_lessons}
-    available_grades: list[int] = sorted({l["grade"] for l in all_lessons})
+    # Years first in numeric order, then the named collections.
+    _g = {l["grade"] for l in all_lessons if l.get("grade")}
+    available_grades: list[str] = (
+        sorted((x for x in _g if x.isdigit()), key=int) + sorted(x for x in _g if not x.isdigit())
+    )
     return lessons_by_id, lessons_by_code, lessons_by_title, available_grades

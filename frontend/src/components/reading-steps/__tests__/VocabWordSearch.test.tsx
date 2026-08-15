@@ -10,7 +10,7 @@ import { Story } from '../../../types';
 const mockStory: Story = {
   id: 'L01',
   title: '贏得喝采的輸家',
-  level: 4,
+  level: '4',
   content: ['測試課文內容'],
   thumbnail: '',
   category: 'History',

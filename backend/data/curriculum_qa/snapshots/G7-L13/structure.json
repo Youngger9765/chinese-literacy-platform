@@ -1,55 +1,125 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 0,
+    "layout": "worksheet_table",
+    "mode": "display_only",
+    "primary_labels": [],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "綠色賽事",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "項目對象",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "阿波羅計畫",
+          "value": "阿提米絲計畫"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "覺察問題",
-      "value": "【　　　】阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n【　　　】賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "範例【計畫特色】",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "實現人類登月夢想",
+          "value": "強調性別、族裔多元參與"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "具體做法",
-      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "【代表神話人物】",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "太陽神阿波羅",
+          "value": "月亮女神阿提米絲"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "結論",
-      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "【執行時間】",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "1969年~1972年",
+          "value": "2022年~2025年"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "【太空人的背景】",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "12位太空人都是男性",
+          "value": "第一位女性太空人與\n第一位有色族裔太空人"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "綠色賽事",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "覺察問題",
-      "value": "(1)阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n(2)賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。"
+      "items": [
+        {
+          "label": "阿波羅計畫",
+          "value": "阿提米絲計畫"
+        }
+      ],
+      "kind": "section_block",
+      "section": "項目對象"
     },
     {
-      "kind": "pair",
-      "label": "具體做法",
-      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。"
+      "items": [
+        {
+          "label": "實現人類登月夢想",
+          "value": "強調性別、族裔多元參與"
+        }
+      ],
+      "kind": "section_block",
+      "section": "範例【計畫特色】"
     },
     {
-      "kind": "pair",
-      "label": "結論",
-      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！"
+      "items": [
+        {
+          "label": "太陽神阿波羅",
+          "value": "月亮女神阿提米絲"
+        }
+      ],
+      "kind": "section_block",
+      "section": "【代表神話人物】"
+    },
+    {
+      "items": [
+        {
+          "label": "1969年~1972年",
+          "value": "2022年~2025年"
+        }
+      ],
+      "kind": "section_block",
+      "section": "【執行時間】"
+    },
+    {
+      "items": [
+        {
+          "label": "12位太空人都是男性",
+          "value": "第一位女性太空人與\n第一位有色族裔太空人"
+        }
+      ],
+      "kind": "section_block",
+      "section": "【太空人的背景】"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "覺察問題",
-      "具體做法",
-      "結論"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

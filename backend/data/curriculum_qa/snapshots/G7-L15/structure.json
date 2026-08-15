@@ -1,89 +1,59 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "家庭生活的改變",
+      "作者的理解與收穫"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "看到了嗎？然後呢？",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "人物一】福爾摩斯【",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "特質與 \n支持理由",
-          "value": "1.特質：有敏銳的【　　　】及能洞察一切的【　　　】。\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n❶由帽子是三年前的流行款，用料高級可知，帽主至少三年前【　　　】\n❷由帽子內襯中的灰白髮絲及髮膏味可知，帽主可能【　　　】\n❸由壞掉的鬆緊帶、補丁處有墨水染黑的痕跡可知，帽主如今家道中落，但仍力圖【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "成功推理要素",
-          "value": "1.對事物要【　　　】。\n2.要能掌握【　　　】。\n3.平時養成【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "爺爺奶奶來了以後",
+      "value": ""
     },
     {
-      "label": "人物二】王戎【",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "特質與 \n支持理由",
-          "value": "1.特質：厲害的觀察和推理能力\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n 答：他觀察到【　　　】的李子樹【　　　】卻不去採，因為他推論樹上的李子肯定【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "correct_options": [
+        1,
+        3,
+        4,
+        5
+      ],
+      "interactive_type": "checkbox",
+      "label": "家庭生活的改變",
+      "options": [
+        "吵鬧",
+        "熱鬧□",
+        "擁擠】【 單選 】\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n【",
+        "高齡友善空間的改造",
+        "餐桌上菜色的變化",
+        "生活作息的調整 　　　□",
+        "音樂喜好的改變　　　 】"
+      ],
+      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【□①吵鬧②熱鬧□③擁擠】【 單選 】\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n【①高齡友善空間的改造   ②餐桌上菜色的變化  \n③生活作息的調整 　　　□④音樂喜好的改變　　　 】"
     },
     {
-      "label": "結論",
-      "value": "試著培養敏銳的【　　　】及【　　　】能力，會讓你有不同的視野。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "作者的理解與收穫",
+      "value": "1.理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。\n2.認為與長輩同住有助於青少年【　　　】的培養。\n3.學會傾聽不同世代的聲音和【　　　】為他人著想。\n4.學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "看到了嗎？然後呢？",
+  "title": "爺爺奶奶來了以後",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "人物一】福爾摩斯【",
-      "items": [
-        {
-          "label": "特質與 \n支持理由",
-          "value": "1.特質：有敏銳的【　　　】及能洞察一切的【　　　】。\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n❶由帽子是三年前的流行款，用料高級可知，帽主至少三年前【　　　】\n❷由帽子內襯中的灰白髮絲及髮膏味可知，帽主可能【　　　】\n❸由壞掉的鬆緊帶、補丁處有墨水染黑的痕跡可知，帽主如今家道中落，但仍力圖【　　　】。"
-        },
-        {
-          "label": "成功推理要素",
-          "value": "1.對事物要【　　　】。\n2.要能掌握【　　　】。\n3.平時養成【　　　】。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "人物二】王戎【",
-      "items": [
-        {
-          "label": "特質與 \n支持理由",
-          "value": "1.特質：厲害的觀察和推理能力\n2.支持理由：從哪裡可知主角有厲害的觀察和推理能力？\n 答：他觀察到【　　　】的李子樹【　　　】卻不去採，因為他推論樹上的李子肯定【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "家庭生活的改變",
+      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】（單選）\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？（多選）\n【　　　】"
     },
     {
       "kind": "pair",
-      "label": "結論",
-      "value": "試著培養敏銳的【　　　】及【　　　】能力，會讓你有不同的視野。"
+      "label": "作者的理解與收穫",
+      "value": "1.理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。\n2.認為與長輩同住有助於青少年【　　　】的培養。\n3.學會傾聽不同世代的聲音和【　　　】為他人著想。\n4.學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "特質與 \n支持理由",
-      "成功推理要素",
-      "特質與 \n支持理由",
-      "結論"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

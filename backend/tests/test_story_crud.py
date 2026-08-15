@@ -110,22 +110,30 @@ def isolated_lessons_dir():
     tests don't touch real YAML files and don't interfere with the stories API."""
     import app.routes.admin_stories as admin_mod
     import app.services.lesson_loader as loader_mod
+    import app.services.lesson_uid_loader as uid_mod
 
     real_lessons_dir = loader_mod._LESSONS_DIR
+    real_uid_root = uid_mod.LESSONS_ROOT
     real_all_lessons = list(loader_mod._ALL_LESSONS)
     real_by_id = dict(loader_mod._LESSONS_BY_ID)
     real_grades = list(loader_mod._AVAILABLE_GRADES)
 
     tmp = Path(tempfile.mkdtemp())
 
-    # Copy a couple of real lessons into the temp dir for baseline tests
-    if real_lessons_dir.exists():
-        for p in list(real_lessons_dir.glob("*.yml"))[:3]:
-            shutil.copy(p, tmp / p.name)
+    # Seed with real lessons. These are directories now, not flat `L{n}.yml` files —
+    # the store is `data/lessons/<lesson_uid>/<version>/`, so a glob for "*.yml"
+    # silently copied nothing and every baseline test read an empty corpus.
+    if real_uid_root.exists():
+        for d in sorted(real_uid_root.glob("L[0-9][0-9][0-9][0-9]"))[:3]:
+            shutil.copytree(d, tmp / d.name)
 
-    # Patch loader path
+    # Patch BOTH paths: the admin route writes through `_LESSONS_DIR` while reads go
+    # through the uid loader's own root. Patching one and not the other let writes
+    # land in the temp dir and reads come from the real tree.
     loader_mod._LESSONS_DIR = tmp
     admin_mod._LESSONS_DIR = tmp
+    uid_mod.LESSONS_ROOT = tmp
+    uid_mod.reset_cache()
 
     # Reload from temp dir
     loader_mod._ALL_LESSONS = loader_mod._load_lessons()
@@ -137,6 +145,8 @@ def isolated_lessons_dir():
     # Restore
     loader_mod._LESSONS_DIR = real_lessons_dir
     admin_mod._LESSONS_DIR = real_lessons_dir
+    uid_mod.LESSONS_ROOT = real_uid_root
+    uid_mod.reset_cache()
     loader_mod._ALL_LESSONS = real_all_lessons
     loader_mod._LESSONS_BY_ID = real_by_id
     loader_mod._AVAILABLE_GRADES = real_grades
@@ -145,6 +155,8 @@ def isolated_lessons_dir():
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+# ids in the tree are `20000 + n`, and lessons live in <uid>/<version>/ rather than
+# a flat L{n}.yml — both changed with the second-edition re-ink (#2683).
 SAMPLE_STORY = {
     "lesson_number": 9001,
     "title": "測試課文",
@@ -252,7 +264,7 @@ class TestCreateStory:
             json=story,
             headers=auth_headers(admin_token),
         )
-        yaml_path = isolated_lessons_dir / "L9003.yml"
+        yaml_path = isolated_lessons_dir / "L9003" / "v1" / "lesson.yml"
         assert yaml_path.exists()
 
     def test_create_yaml_content_correct(self, client, admin_token, isolated_lessons_dir):
@@ -262,11 +274,11 @@ class TestCreateStory:
             json=story,
             headers=auth_headers(admin_token),
         )
-        yaml_path = isolated_lessons_dir / "L9004.yml"
+        yaml_path = isolated_lessons_dir / "L9004" / "v1" / "lesson.yml"
         with open(yaml_path, encoding="utf-8") as f:
             doc = yaml.safe_load(f)
         assert doc["title"] == "YAML內容驗證"
-        assert doc["grade"] == 5
+        assert doc["grade"] == "5"   # the axis is a string (文言文 / 品格教育 are not years)
         assert len(doc["paragraphs"]) == 2
 
     def test_create_duplicate_lesson_number_returns_409(self, client, admin_token):
@@ -304,7 +316,7 @@ class TestCreateStory:
             headers=auth_headers(admin_token),
         )
         import app.services.lesson_loader as loader
-        assert loader.get_lesson_by_id(9005) is not None
+        assert loader.get_lesson_by_id(29005) is not None
 
     def test_create_paragraph_count_computed(self, client, admin_token, isolated_lessons_dir):
         story = {**SAMPLE_STORY, "lesson_number": 9006, "title": "段落計算"}
@@ -313,7 +325,7 @@ class TestCreateStory:
             json=story,
             headers=auth_headers(admin_token),
         )
-        yaml_path = isolated_lessons_dir / "L9006.yml"
+        yaml_path = isolated_lessons_dir / "L9006" / "v1" / "lesson.yml"
         with open(yaml_path, encoding="utf-8") as f:
             doc = yaml.safe_load(f)
         assert doc["paragraph_count"] == 2
@@ -357,7 +369,8 @@ class TestUpdateStory:
             json={"title": "YAML持久化測試"},
             headers=auth_headers(admin_token),
         )
-        yaml_path = isolated_lessons_dir / "L9001.yml"
+        # The store is a tree now: <lesson_uid>/<version>/lesson.yml
+        yaml_path = isolated_lessons_dir / "L9001" / "v1" / "lesson.yml"
         with open(yaml_path, encoding="utf-8") as f:
             doc = yaml.safe_load(f)
         assert doc["title"] == "YAML持久化測試"
@@ -369,7 +382,8 @@ class TestUpdateStory:
             json={"paragraphs": new_paragraphs},
             headers=auth_headers(admin_token),
         )
-        yaml_path = isolated_lessons_dir / "L9001.yml"
+        # The store is a tree now: <lesson_uid>/<version>/lesson.yml
+        yaml_path = isolated_lessons_dir / "L9001" / "v1" / "lesson.yml"
         with open(yaml_path, encoding="utf-8") as f:
             doc = yaml.safe_load(f)
         assert doc["paragraph_count"] == 1
@@ -404,7 +418,7 @@ class TestUpdateStory:
             headers=auth_headers(admin_token),
         )
         import app.services.lesson_loader as loader
-        cached = loader.get_lesson_by_id(9001)
+        cached = loader.get_lesson_by_id(29001)
         assert cached is not None
         assert cached["title"] == "記憶體快取更新"
 
@@ -425,8 +439,8 @@ class TestDeleteStory:
         client.post("/api/admin/stories", json=story, headers=auth_headers(admin_token))
         client.delete("/api/admin/stories/9011", headers=auth_headers(admin_token))
 
-        original_path = isolated_lessons_dir / "L9011.yml"
-        archive_path = isolated_lessons_dir / "archive" / "L9011.yml"
+        original_path = isolated_lessons_dir / "L9011" / "v1" / "lesson.yml"
+        archive_path = isolated_lessons_dir / "archive" / "L9011"
         assert not original_path.exists(), "Original file should be gone"
         assert archive_path.exists(), "Archived file should exist"
 
@@ -436,7 +450,7 @@ class TestDeleteStory:
         client.delete("/api/admin/stories/9012", headers=auth_headers(admin_token))
 
         import app.services.lesson_loader as loader
-        assert loader.get_lesson_by_id(9012) is None
+        assert loader.get_lesson_by_id(29012) is None
 
     def test_delete_nonexistent_returns_404(self, client, admin_token):
         resp = client.delete("/api/admin/stories/99999", headers=auth_headers(admin_token))
@@ -450,3 +464,92 @@ class TestDeleteStory:
         resp = client.get("/api/admin/stories", headers=auth_headers(admin_token))
         lesson_numbers = [s["lesson_number"] for s in resp.json()["stories"]]
         assert 9013 not in lesson_numbers
+
+
+# ── #2683 regression locks: the four defects the re-ink introduced here ──────
+
+class TestUidTreeWriteInvariants:
+    """Each of these was live at some point during the second-edition re-ink, and
+    each failed *silently* — the API returned 2xx and the work went nowhere. That
+    shape of failure is what this whole effort exists to remove, so it gets locked
+    from the write side too."""
+
+    def test_created_story_is_visible_without_a_restart(self, client, admin_token):
+        """The uid loader memoises its directory scan with lru_cache. Rebuilding the
+        lesson list without clearing it re-read the memoised answer, so a created
+        story returned 201 and then could not be found until the process restarted."""
+        payload = {**SAMPLE_STORY, "lesson_number": 9101, "title": "重載測試"}
+        assert client.post("/api/admin/stories", json=payload,
+                           headers=auth_headers(admin_token)).status_code == 201
+        resp = client.get("/api/admin/stories/9101", headers=auth_headers(admin_token))
+        assert resp.status_code == 200, "created story not visible in the same process"
+        assert resp.json()["title"] == "重載測試"
+
+    def test_created_story_keeps_the_fields_it_was_given(self, client, admin_token):
+        """The tree builder hardcoded genre/paragraphs/char_count to empty defaults,
+        so an admin could save a full record and get one back with its content blanked."""
+        payload = {**SAMPLE_STORY, "lesson_number": 9102, "title": "欄位保留",
+                   "genre": "說明文", "paragraphs": ["甲段。", "乙段。", "丙段。"]}
+        client.post("/api/admin/stories", json=payload, headers=auth_headers(admin_token))
+        item = client.get("/api/admin/stories/9102",
+                          headers=auth_headers(admin_token)).json()
+        assert item["genre"] == "說明文"
+        assert len(item["paragraphs"]) == 3
+
+    def test_archiving_two_stories_does_not_overwrite_the_first(
+        self, client, admin_token, isolated_lessons_dir
+    ):
+        """Every lesson's file is now `<uid>/<version>/lesson.yml`, so archiving the
+        FILE put them all at `archive/lesson.yml` — the second delete destroyed the
+        first one's only copy."""
+        for n, title in ((9103, "先刪的"), (9104, "後刪的")):
+            client.post("/api/admin/stories", json={**SAMPLE_STORY,
+                        "lesson_number": n, "title": title},
+                        headers=auth_headers(admin_token))
+            assert client.delete(f"/api/admin/stories/{n}",
+                                 headers=auth_headers(admin_token)).status_code == 204
+        archive = isolated_lessons_dir / "archive"
+        assert (archive / "L9103").exists(), "first archived lesson was destroyed"
+        assert (archive / "L9104").exists()
+
+    def test_a_named_collection_does_not_break_the_admin_list(self, client, admin_token):
+        """`grade` was `int Field(ge=4, le=9)`. 文言文 and 品格教育 are not years, so
+        the admin list 500ed on the first one it reached — the whole page, not one row."""
+        client.post("/api/admin/stories", json={**SAMPLE_STORY, "lesson_number": 9105,
+                    "title": "文言文測試", "grade": "文言文", "grade_code": "文-L99"},
+                    headers=auth_headers(admin_token))
+        resp = client.get("/api/admin/stories", headers=auth_headers(admin_token))
+        assert resp.status_code == 200, "a non-year grade took down the whole list"
+        assert any(s["grade"] == "文言文" for s in resp.json()["stories"])
+
+    def test_grade_filter_matches_string_grades(self, client, admin_token):
+        """The filter was typed `int`, so comparing it against a string grade never
+        matched: every year returned an empty list and the two collections could not
+        be filtered at all."""
+        client.post("/api/admin/stories", json={**SAMPLE_STORY, "lesson_number": 9106,
+                    "title": "篩選測試", "grade": "7", "grade_code": "G7-L99"},
+                    headers=auth_headers(admin_token))
+        resp = client.get("/api/admin/stories?grade=7", headers=auth_headers(admin_token))
+        assert resp.status_code == 200
+        stories = resp.json()["stories"]
+        assert stories, "grade filter returned nothing"
+        assert all(s["grade"] == "7" for s in stories)
+
+    def test_a_lesson_number_the_uid_format_cannot_hold_is_rejected(self, client, admin_token):
+        """`f"L{n:04d}"` pads but does not truncate, so lesson_number 19999 became
+        `L19999` — five digits, which `_is_uid_dir` rejects as not-a-uid. The file was
+        written, 201 came back, and the lesson never appeared. The boundary must fail
+        loudly instead of accepting something it cannot serve."""
+        resp = client.post("/api/admin/stories",
+                           json={**SAMPLE_STORY, "lesson_number": 19999, "title": "超出範圍"},
+                           headers=auth_headers(admin_token))
+        assert resp.status_code == 422, f"expected rejection, got {resp.status_code}"
+        assert "L19999" in resp.text or "uid" in resp.text.lower()
+
+    def test_the_largest_addressable_lesson_number_still_works(self, client, admin_token):
+        """Positive control for the check above — without it, a guard that rejected
+        everything would look identical to a guard that rejects the right things."""
+        resp = client.post("/api/admin/stories",
+                           json={**SAMPLE_STORY, "lesson_number": 9999, "title": "邊界內"},
+                           headers=auth_headers(admin_token))
+        assert resp.status_code == 201, resp.text

@@ -1,0 +1,49 @@
+spotlight:
+  lesson: G4-L20
+  strategy_name: 生涯探索-轉個彎，熱愛還在前方
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 情境一：品妤的寫作困境
+  - type: guide
+    text: 品妤喜歡寫小說，常在網路上分享自己的故事。
+  - type: guide
+    text: 可是，最近有幾則留言說她的文筆「太幼稚」，讓她開始懷疑自己是不是沒有天分。
+  - type: fill_table
+  - type: guide
+    text: 情境二：社團與課業的衝突
+  - type: guide
+    text: 芸涵最喜歡跳舞，每天都期待熱舞社的時間。
+  - type: guide
+    text: 但這學期功課變多，爸媽說：「社團先停一下，考好再跳。」
+  - type: guide
+    text: 她很矛盾，一方面想聽父母的話，一方面又捨不得放下練舞。
+  - type: fill_table
+  - type: guide
+    text: ◎換你試試看：
+  - type: guide
+    text: 一、我現在最熱愛的事或興趣是什麼？
+  - type: guide
+    text: 我最熱愛的事是：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  - type: single
+    prompt: 二、最近進行熱愛的事時，遇到的阻礙是什麼？
+    options:
+    - 時間不夠
+    - 家人期待不同
+    - 成績壓力
+    - 經費／器材不足
+    - 作品被批評
+    - 身體狀況
+    - 其他：＿＿＿＿＿＿＿＿＿
+    answer: 時間不夠
+  - type: single
+    prompt: 三、如果有一天，不能靠它成功或無法繼續下去，你可以怎麼做？
+    options:
+    - 縮時練習（每天10–15分鐘基本功）
+    - 角色轉換（例：籃球選手變籃球教練、運動選手變體育主播）
+    - 延伸學習（例：喜歡唱歌→學錄音；喜歡球類→學習戰術分析）
+    - 把學到的精神用在別的地方（例：堅持、專注、團隊合作）
+    - 用其他方式將熱愛的事物與夥伴分享（寫文、拍短片、辦展覽）
+    answer: 縮時練習（每天10–15分鐘基本功）

@@ -1,0 +1,60 @@
+spotlight:
+  lesson: G6-L27
+  strategy_name: 寫作手法-從具體內容到作者觀點
+  strategy_type: writing_technique
+  blocks:
+  - type: guide
+    text: '本文以說明為主，介紹古代仙境畫。文章不只提供相關內容，也一步一步帶出作者的想法。閱讀時，要看懂前面的說明如何形成最後的觀點。
+
+      這一課，我們要練習看懂三個層次如何一步一步接起來：
+
+      具體內容→作者解釋→全文觀點'
+  - type: guide
+    text: 一、從具體內容讀出作者的解釋
+  - type: guide
+    text: 作者從不同方面介紹古代仙境畫。先判斷每一項具體內容屬於哪一方面，再選出作者對這項內容的解釋。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、三方面的說明為什麼要放在一起？
+  - type: single
+    prompt: 第五至七段分別介紹畫中元素、畫面安排和畫家稱號。作者把這三方面放在一起，主要有什麼作用？（單選）
+    options:
+    - 從不同方面介紹仙境畫的特色，讓讀者增加更多古畫知識。
+    - 從不同方面共同呈現畫家對自然與理想世界的內心嚮往。
+    - 比較三種表現方式，判斷哪一種最能代表古代仙境畫。
+    answer: 從不同方面共同呈現畫家對自然與理想世界的內心嚮往。
+  - type: guide
+    text: 三、前面的說明如何形成全文觀點？
+  - type: single
+    prompt: 1.最後兩段為什麼要寫現代人欣賞仙境畫時的感受？（單選）
+    options:
+    - 補充現代人參觀博物館、欣賞水墨畫時可能出現的情景。
+    - 比較古今對自然的喜愛，說明現代人比古人更嚮往山林。
+    - 把畫家的內心嚮往連到現代人，說明藝術能跨越時空。
+    answer: 把畫家的內心嚮往連到現代人，說明藝術能跨越時空。
+  - type: single
+    prompt: 2.下列哪一項最能說明作者如何一步一步形成全文觀點？（單選）
+    options:
+    - 先介紹仙境畫的多種特色，再說明古畫能長久保存，讓現代人看見過去的山水。
+    - 先解釋仙境畫如何呈現畫家的嚮往，再連結現代人的相似感受，帶出藝術能連結古今。
+    - 先比較古今對神仙的看法，再指出兩者具有相同信仰，所以欣賞仙境畫時感受相同。
+    answer: 先解釋仙境畫如何呈現畫家的嚮往，再連結現代人的相似感受，帶出藝術能連結古今。
+  - type: guide
+    text: ◎策略帶著走
+  - type: guide
+    text: 讀介紹畫作、建築或文物的文章時，可以問自己：
+  - type: free_text
+    prompt: 1.作者寫了哪些具體內容？
+  - type: free_text
+    prompt: 2.作者怎麼解釋這些內容？
+  - type: free_text
+    prompt: 3.這些解釋最後形成什麼觀點？
+  - type: guide
+    text: ◎小試身手：練習完閱讀聚光燈的題目後，請你完成文章重點表。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

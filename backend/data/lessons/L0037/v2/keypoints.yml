@@ -1,0 +1,51 @@
+keypoints:
+  lesson: G5-L25
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 問題
+    value: 秦昭王軟禁了孟嘗君，還想想殺掉他；孟嘗君想要逃離秦國。
+    blanks: []
+  - label: 第一個難題
+    sub_rows:
+    - sub_label: 問題1
+      template: 孟嘗君求幸姬幫忙，幸姬要求孟嘗君給她白狐裘，但大衣已經送給秦昭王，不給，自己就__，孟嘗君去哪裡再找一件皮大衣呢？
+      blanks:
+      - answer: 凶多吉少
+        hint: ''
+    - sub_label: 解決1
+      template: 食客中有一位會模仿__的樣子和動作潛入家戶偷東西，他可以潛入寶庫中偷出白狐裘。
+      blanks:
+      - answer: 狗
+        hint: ''
+    - sub_label: 結果1
+      template: 幸姬得到了白狐裘，替孟嘗君求情，秦昭王解除了對孟嘗君的__。
+      blanks:
+      - answer: 軟禁
+        hint: ''
+  - label: 第二個難題
+    sub_rows:
+    - sub_label: 問題2
+      template: 一行人想趕快逃離秦國，他們到了函谷關，但是規定__時，士兵才能把城門打開，現在他們__。
+      blanks:
+      - answer: 天亮
+        hint: ''
+      - answer: 出不了關
+        hint: ''
+    - sub_label: 解決2
+      template: 食客中有一位會模仿__的人，他唯妙唯肖的叫聲，讓公雞們以為天亮了，也都跟著鳴叫，騙過守門人。
+      blanks:
+      - answer: 公雞叫
+        hint: ''
+    - sub_label: 結果2
+      template: 城門__，孟嘗君也順利出關。
+      blanks:
+      - answer: 終於打開／提前開啟
+        hint: ''
+  - label: 結果
+    value: 孟嘗君在食客們的幫助下成功逃離秦國。
+    blanks: []
+  title: 小兵立大功：雞鳴狗盜的故事

@@ -1,0 +1,11 @@
+spotlight:
+  lesson: G4-L4
+  strategy_name: 推論策略-推論代名詞
+  strategy_type: inference
+  blocks:
+  - type: guide
+    text: ◎ 小試身手：請看前後文，勾選框框內代名詞指的是誰或什麼。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

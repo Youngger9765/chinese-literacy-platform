@@ -1,96 +1,232 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "將腦袋中的__外化到紙筆。",
+      "將複雜的計算外化到計算機。",
+      "將__外化到語言。",
+      "將數千年來累積的知識，從__外化到圖書館儲存。"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "高地訓練有助於運動表現嗎？",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "假設問題",
-      "value": "高地訓練有助於運動表現嗎？",
-      "interactive_type": "display"
-    },
-    {
-      "label": "答案",
-      "value": "不一定，因人而異。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "支持證據",
-      "value": "",
       "interactive_type": "display",
+      "label": "國高中數學當然可以使用計算機",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "作者論點",
+      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "外化的好處",
+      "value": "解決學習時大腦負荷超載的問題。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "外化工具",
       "sub_rows": [
         {
-          "label": "研究一",
-          "value": "在高地，紅血球生成素的濃度變化【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "研究二",
-          "value": "【　　　】重複研究一的結論，高地訓練對紅血球增生效果因人而異\n【　　　】在高地訓練後，長跑成績能進步的人是：\n【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "研究三",
-          "value": "玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生【　　　】，對運動員來說\n【　　　】是好事。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "display",
+          "label": "外化歷程",
+          "value": "外化目的"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "研究結論",
-      "value": "高地訓練需要考量【　　　】，才能發揮最大功效。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "紙筆",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "將腦袋中的__外化到紙筆。",
+          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "【計算機】",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "將複雜的計算外化到計算機。",
+          "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "長竿",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "將身體力量外化到長竿。",
+          "value": "幫人類獲取遠處或高處的東西。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "【語言】",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "將__外化到語言。",
+          "value": "將重要訊息分享給同伴。【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "文字",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
+          "value": "保存與傳遞智慧，促進文明持續發展。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "圖書館",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
+          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "網路",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "電腦、網路的興起，將圖書館外化到網路上。",
+          "value": "保存與傳遞智慧，促進文明持續發展。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結論",
+      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "高地訓練有助於運動表現嗎？",
+  "title": "國高中數學當然可以使用計算機",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "假設問題",
-      "value": "高地訓練有助於運動表現嗎？"
+      "label": "作者論點",
+      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
     },
     {
       "kind": "pair",
-      "label": "答案",
-      "value": "不一定，因人而異。"
+      "label": "外化的好處",
+      "value": "解決學習時大腦負荷超載的問題。"
     },
     {
-      "kind": "section_block",
-      "section": "支持證據",
       "items": [
         {
-          "label": "研究一",
-          "value": "在高地，紅血球生成素的濃度變化【　　　】。"
-        },
-        {
-          "label": "研究二",
-          "value": "(1)重複研究一的結論，高地訓練對紅血球增生效果因人而異\n(2)在高地訓練後，長跑成績能進步的人是：\n【　　　】。"
-        },
-        {
-          "label": "研究三",
-          "value": "玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生【　　　】，對運動員來說\n【　　　】是好事。"
+          "label": "外化歷程",
+          "value": "外化目的"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "外化工具"
+    },
+    {
+      "items": [
+        {
+          "label": "將腦袋中的__外化到紙筆。",
+          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "紙筆"
+    },
+    {
+      "items": [
+        {
+          "label": "將複雜的計算外化到計算機。",
+          "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "【計算機】"
+    },
+    {
+      "items": [
+        {
+          "label": "將身體力量外化到長竿。",
+          "value": "幫人類獲取遠處或高處的東西。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "長竿"
+    },
+    {
+      "items": [
+        {
+          "label": "將__外化到語言。",
+          "value": "將重要訊息分享給同伴。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "【語言】"
+    },
+    {
+      "items": [
+        {
+          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
+          "value": "保存與傳遞智慧，促進文明持續發展。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "文字"
+    },
+    {
+      "items": [
+        {
+          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
+          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "圖書館"
+    },
+    {
+      "items": [
+        {
+          "label": "電腦、網路的興起，將圖書館外化到網路上。",
+          "value": "保存與傳遞智慧，促進文明持續發展。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "網路"
     },
     {
       "kind": "pair",
-      "label": "研究結論",
-      "value": "高地訓練需要考量【　　　】，才能發揮最大功效。"
+      "label": "結論",
+      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "研究一",
-      "研究二",
-      "研究三",
-      "研究結論"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

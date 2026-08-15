@@ -14,7 +14,9 @@ from ..database import get_db
 from ..models.user import User
 from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
-from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
+from ..services.lesson_loader import (
+    search_lessons, get_lesson_by_id, get_available_grades,
+)
 from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
@@ -379,7 +381,7 @@ router = APIRouter(tags=["stories"])
 
 @router.get("/stories", response_model=StoryListResponse)
 def list_stories(
-    grade: int | None = Query(None, ge=1, le=12),
+    grade: str | None = Query(None, max_length=10),
     genre: str | None = Query(None),
     category: str | None = Query(None),
     search: str | None = Query(None, max_length=100),
@@ -393,6 +395,20 @@ def list_stories(
     Note: classroom-specific filtering is handled by
     GET /api/classrooms/{id}/texts and the frontend classroom library mode.
     """
+    # `grade` used to be `int Field(ge=4, le=9)`, so a nonsense value was a 422. It is
+    # a string now — the axis carries 文言文 and 品格教育 alongside the years — and a
+    # free string would have quietly answered `grade=13` with an empty list, which
+    # reads to the caller as "no lessons in year 13" rather than "there is no year 13".
+    # Validate against the grades the corpus actually has, so the contract survives
+    # the type change.
+    if grade is not None:
+        valid = set(get_available_grades())
+        if grade not in valid:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unknown grade {grade!r}. Valid: {sorted(valid)}",
+            )
+
     results = search_lessons(grade=grade, genre=genre, category=category, search=search)
 
     total = len(results)
@@ -414,7 +430,7 @@ def list_stories(
                 thumbnail_url=s["thumbnail_url"],
                 reading_strategy=s["reading_strategy"],
                 has_key_reading=bool(key_reading_passages.get(s.get("grade_code")) or s.get("key_reading")),
-                intro=StoryIntroSchema(**s["intro"]),
+                intro=(StoryIntroSchema(**s["intro"]) if s.get("intro") else None),
             )
             for s in page_results
         ],
@@ -457,7 +473,7 @@ def get_story(story_id: str):
         char_count=story["char_count"],
         thumbnail_url=story["thumbnail_url"],
         reading_strategy=story["reading_strategy"],
-        intro=StoryIntroSchema(**story["intro"]),
+        intro=(StoryIntroSchema(**story["intro"]) if story.get("intro") else None),
         paragraphs=story["paragraphs"],
         vocabulary=story["vocabulary"],
         fill_in_blank=story["fill_in_blank"],

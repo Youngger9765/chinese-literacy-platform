@@ -1,0 +1,125 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "1",
+      "2-5",
+      "6-7",
+      "8"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "因為相信，所以能向前",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "經驗連結",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0,
+            1,
+            2
+          ],
+          "interactive_type": "checkbox",
+          "label": "1",
+          "options": [
+            "習慣一個人扛起所有事情",
+            "不放心交給夥伴，總是擔心出錯",
+            "很希望被相信，卻得不到信任\n□",
+            "積極配合組員，努力貢獻能力"
+          ],
+          "value": "團隊分工中，常出現的三種角色：【 可複選 】\n①習慣一個人扛起所有事情\n②不放心交給夥伴，總是擔心出錯\n③很希望被相信，卻得不到信任\n□④積極配合組員，努力貢獻能力"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "2-5",
+          "value": "舉例一：【　　　】比賽\n接棒時能相信隊友，不用一直【　　　】\n舉例二：世界 12 強【　　　】賽\n隊長陳傑憲相信他的【　　　】，團隊互相合作，拿下了比賽的【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出與回應質疑",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "6-7",
+          "value": "1.大家常見的質疑：有的人不值得【　　　】；有的人不被相信。\n2.回應質疑：不是只能在「冒險相信」或是「全部自己來」之間二選一，可以練習把任務內容、【　　　】和【　　　】說清楚。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "統整結論",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "8",
+          "value": "1.成為值得信任的人：答應的事要做到；失誤後願意承擔責任並【　　　】。\n2.給予夥伴成熟的信任：不要求對方永遠完美，而是看見他願意【　　　】，並一起補救。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "因為相信，所以能向前",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "團隊分工中，常出現的三種角色：(可複選)\n①習慣一個人扛起所有事情\n②不放心交給夥伴，總是擔心出錯\n③很希望被相信，卻得不到信任\n□④積極配合組員，努力貢獻能力"
+        }
+      ],
+      "kind": "section_block",
+      "section": "經驗連結"
+    },
+    {
+      "items": [
+        {
+          "label": "2-5",
+          "value": "舉例一：【　　　】比賽\n接棒時能相信隊友，不用一直【　　　】\n舉例二：世界 12 強【　　　】賽\n隊長陳傑憲相信他的【　　　】，團隊互相合作，拿下了比賽的【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "6-7",
+          "value": "1.大家常見的質疑：有的人不值得【　　　】；有的人不被相信。\n2.回應質疑：不是只能在「冒險相信」或是「全部自己來」之間二選一，可以練習把任務內容、【　　　】和【　　　】說清楚。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出與回應質疑"
+    },
+    {
+      "items": [
+        {
+          "label": "8",
+          "value": "1.成為值得信任的人：答應的事要做到；失誤後願意承擔責任並【　　　】。\n2.給予夥伴成熟的信任：不要求對方永遠完美，而是看見他願意【　　　】，並一起補救。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整結論"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+keypoints:
+  lesson: G5-L2
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 主角
+    value: __
+    blanks:
+    - answer: 周天成
+      hint: ''
+  - label: 周天成的一天──自律事例
+    sub_rows:
+    - sub_label: 早上
+      template: "1.基本訓練：\n(1)周天成進行基本訓練時，依序做了哪些事？請按照文章順序填入代號。\n  A.放鬆腳底筋膜      B.旋轉身體拉筋\n\
+        \  C.對打比賽       D.網前平推、殺球和發球練習\n▶首先做__，接著是__，再來是__，最後是__。\n(2)為了強健肌肉、開發身體潛能，周天成做了哪些訓練？(多選)\n\
+        ①核心肌群訓練  ②下肢肌群訓練  \n③上肢肌群訓練"
+      blanks:
+      - answer: B
+        hint: ''
+      - answer: A
+        hint: ''
+      - answer: D
+        hint: ''
+      - answer: C
+        hint: ''
+    - sub_label: 中午
+      template: "2.飲食控制：為了減少熱量的攝取，保持輕盈的身軀，他的飲食有哪些特點？(多選) \n①吃原型食物    ②依照順序吃各類食物\n\
+        □③快速吃完食物"
+      blanks: []
+    - sub_label: 晚上
+      template: '3.安全意識：為了降低受傷風險，周天成晚上外出時會選擇哪種方式？(單選)　　
+
+        □①騎腳踏車  □②自己開車 ③搭乘大眾運輸工具'
+      blanks: []
+    - sub_label: 深夜
+      template: "4.自我反省與調整：周天成持續尋找進步的方法，是為了什麼？(單選)\n□①提高成績領比賽獎金。\n②提高成績，讓自己有能力回饋並影響更多人。\
+        \      \n□③提高成績爭取更多企業贊助。"
+      blanks: []
+  title: 周天成的一天──頂尖選手的養成

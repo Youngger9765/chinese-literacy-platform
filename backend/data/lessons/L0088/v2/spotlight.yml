@@ -1,0 +1,104 @@
+spotlight:
+  lesson: G7-L1
+  strategy_name: 推論策略-找作者觀點和支持理由
+  strategy_type: main_idea_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾。
+  - type: guide
+    text: 一、小試身手（I）：找觀點、支持理由與隱含意義
+  - type: guide
+    text: 步驟❶找觀點
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 祕訣：觀點是作者對議題的主要看法或主張，常出現在標題、開頭、結尾或結論句。可以先看標題與開頭段。
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 根據〈塑膠，好用不好甩〉的標題和第一段內容判斷，作者主要強調塑膠具備怎樣的特性？（請打勾，單選）
+  - type: single
+    prompt: 請選擇
+    options:
+    - 塑膠進入環境後很難消失
+    - 塑膠玩具可以隨海洋漂流到世界各地
+    answer: 塑膠進入環境後很難消失
+  - type: guide
+    text: 步驟❷找支持理由
+  - type: guide
+    text: 祕訣：支持理由常是事實、數據、例子或說明，可能出現在觀點之前或之後。
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 找一找，針對「塑膠進入環境後很難消失」觀點，作者提出什麼支持理由？（請打勾，單選）
+  - type: single
+    prompt: 請選擇
+    options:
+    - 1997年樂高玩具落海，二十多年後仍被海浪沖上岸
+    - 臺灣塑膠回收率約為世界平均值的四倍。
+    answer: 1997年樂高玩具落海，二十多年後仍被海浪沖上岸
+  - type: guide
+    text: 步驟❸推論隱含意義
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 祕訣：問自己：這個觀點與證據告訴我們什麼？（這是讀者自己讀出來的結論，不一定是課文原句）
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: ⑴觀點：「塑膠一旦進入環境，就很難消失。」
+  - type: guide
+    text: ⑵理由：「樂高玩具漂流二十多年後仍被海浪沖上岸。」
+  - type: guide
+    text: ⑶我讀到的結論
+  - type: single
+    prompt: 請選擇
+    options:
+    - 漂上海岸的積木可以撿回使用，表示塑膠污染最後會自行消失。
+    - 所以塑膠不是短期問題，而是長期存在環境中的污染物。
+    answer: 漂上海岸的積木可以撿回使用，表示塑膠污染最後會自行消失。
+  - type: guide
+    text: 二、小試身手（II）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 接下來請你用同樣的三步驟（找觀點→找支持理由→推論隱含意義；從左欄到右欄），找出本文其他觀點。請在勾選□適合的答案。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、推論主旨與寫作目的
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 本文觀點的鋪陳，作者先說明塑膠污染的持久與無所不在，再指出回收不足與減塑困難的現實挑戰，最後提出個人行動仍有力量。這樣的安排讓我們理解──面對難題不能只等待國際協商，改變可以從自己開始。我們再回到全文，思考透過這樣的鋪陳，本文的主旨和寫作目的是什麼？
+  - type: free_text
+    prompt: 1.本文主旨是什麼？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - □①各主要塑膠生產國已協議推動回收、減產，應在短期內可以解決塑膠垃圾問題。
+    - ②塑膠污染嚴重、持久，難以靠回收或國際協議解決，呼籲從個人生活減塑以改善環境。
+  - type: free_text
+    prompt: 2.作者寫作目的：
+  - type: guide
+    text: 作者希望我們未來可以怎麼做?
+  - type: passage
+    source: unknown
+    paragraphs:
+    - ①從日常小行動開始減塑，成為推動改變的人
+    - □②靜待國際協議與民間廠商主動解決塑膠問題。
+  - type: guide
+    text: ※如果你三項都打勾，恭喜你，表示你已經學會用 3 步驟「找到作者觀點與支持理由，並能推論出隱含意義」，你超厲害的！
+  - type: self_check
+    items:
+    - 我能找到作者的觀點。
+    - 我能找到支持作者觀點的理由或證據。
+    - 我能根據觀點和支持理由，進一步歸納出結論（隱含意義）。

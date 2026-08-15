@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Union
 
 
@@ -39,11 +39,11 @@ class StoryListItem(BaseModel):
     id: int
     lesson_number: Optional[int] = None
     title: str
-    grade: int
+    grade: str = ""                  # "4".."9" / 文言文 / 品格教育
     grade_code: str
-    genre: str
-    category: str
-    char_count: int
+    genre: str = ""
+    category: str = ""
+    char_count: int = 0
     thumbnail_url: Optional[str] = None
     reading_strategy: Optional[str] = None
     has_key_reading: bool = False
@@ -125,7 +125,17 @@ class StoryDetail(StoryListItem):
 class StoryListResponse(BaseModel):
     stories: list[StoryListItem]
     total: int
-    grades: list[int]  # available grades for filter UI
+    grades: list[str]  # "4".."9" + 文言文 / 品格教育
+
+
+def _grade_as_str(v):
+    """Accept a year sent as a number and store it as the string it means.
+
+    The axis is a string because 文言文 and 品格教育 are not years, but a caller
+    that has always sent `grade: 6` is not wrong — rejecting it would break every
+    existing admin client for a representation detail.
+    """
+    return str(v) if isinstance(v, int) else v
 
 
 # ── Admin CRUD schemas ───────────────────────────────────────────────────────
@@ -134,7 +144,11 @@ class StoryCreateRequest(BaseModel):
     """Request body for creating a new story (writes a new YAML file)."""
     lesson_number: int = Field(..., ge=1, description="Unique lesson number")
     title: str = Field(..., min_length=1, max_length=200)
-    grade: int = Field(..., ge=4, le=9)
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: str = Field(..., min_length=1, max_length=10)
     grade_code: str = Field(..., min_length=1, max_length=10)
     genre: str = Field(..., min_length=1, max_length=20)
     text_type: str = Field(default="單", max_length=10)
@@ -146,11 +160,18 @@ class StoryCreateRequest(BaseModel):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     source_file: Optional[str] = Field(default=None, max_length=200)
 
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
+
 
 class StoryUpdateRequest(BaseModel):
     """Request body for updating an existing story. All fields optional."""
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
-    grade: Optional[int] = Field(default=None, ge=4, le=9)
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: Optional[str] = Field(default=None, min_length=1, max_length=10)
     grade_code: Optional[str] = Field(default=None, min_length=1, max_length=10)
     genre: Optional[str] = Field(default=None, min_length=1, max_length=20)
     text_type: Optional[str] = Field(default=None, max_length=10)
@@ -162,12 +183,19 @@ class StoryUpdateRequest(BaseModel):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     source_file: Optional[str] = Field(default=None, max_length=200)
 
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
+
 
 class StoryAdminListItem(BaseModel):
     """Admin story list item — lighter than StoryDetail, includes metadata."""
     lesson_number: int
     title: str
-    grade: int
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: str
     grade_code: str
     genre: str
     text_type: str
@@ -175,6 +203,9 @@ class StoryAdminListItem(BaseModel):
     char_count: int
     reading_strategy: Optional[str] = None
     source_file: Optional[str] = None
+
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
 
 
 class StoryAdminListResponse(BaseModel):

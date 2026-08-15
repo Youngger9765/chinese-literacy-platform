@@ -1,0 +1,47 @@
+keypoints:
+  lesson: G7-L28
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 運動賽事環境問題
+    value: 運動賽事雖然帶來健康和快樂，也會消耗__，增加碳排放和產生__，造成環境負擔。
+    blanks:
+    - answer: 資源和能源
+      hint: ''
+    - answer: 廢棄物
+      hint: ''
+  - label: 綠色賽事目的
+    value: 把__理念融入體育賽事，減少自然資源的消耗與碳排放，降低環境負擔，也提升大眾的__。
+    blanks:
+    - answer: 永續
+      hint: ''
+    - answer: 環境意識
+      hint: ''
+  - label: 保護環境怎麼做？
+    value: "1.Reduce__：減少不必要的物品與資源使用。例如，不再印製賽事手冊。\n2.Reuse__：讓器材、裝備或容器多次使用。例如：布置改用__下次可再使用；提供可重複使用的__。\
+      \  \n3.Recycle__：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作__；用回收寶特瓶製作__。"
+    blanks:
+    - answer: 減少使用
+      hint: ''
+    - answer: 重複使用
+      hint: ''
+    - answer: 可保存
+      hint: ''
+    - answer: 環保杯
+      hint: ''
+    - answer: 回收再利用
+      hint: ''
+    - answer: 獎盃
+      hint: ''
+    - answer: 環保球衣
+      hint: ''
+  - label: 從想法到行動
+    value: 阿國把綠色賽事的想法分享給同學，邀請大家向學校提案，從每年的__做起，落實環保__。
+    blanks:
+    - answer: 運動會
+      hint: ''
+    - answer: 3R
+      hint: ''
+  title: 綠色賽事

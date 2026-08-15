@@ -1,55 +1,127 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 7,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "種子庫是什麼【 第1～2段 】",
+      "目的\n【 第3段 】",
+      "__",
+      "安全設計\n【 第5段 】"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "把手上的餅吃香一點！",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "大主題：末日種子庫",
+      "value": ""
     },
     {
-      "label": "問題",
-      "value": "1.作者百思不解的問題是：\n小時候大人分餅，為什麼每次總覺得【　　　】？\n2.類似的狀況在生活中層出不窮：\n【　　　】分組任務時，覺得別人的任務比較【　　　】。\n【　　　】看書時，覺得別人手裡的書比較有趣。\n【　　　】點餐時，覺得別人的餐點比較好吃。\n【　　　】看同學的家庭，覺得別人的家庭比較【　　　】。\n→作者遇到的問題是：無論在任何情況中，為什麼別人都比較【　　　】？",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "小主題",
+      "value": "重要細節"
     },
     {
-      "label": "解決契機",
-      "value": "1.作者從【　　　】中的小故事，解決了他的問題。\n2.湯姆的姨媽要他去【　　　】，一開始他刷得【　　　】。後來他靈機一動，假裝正在創作偉大壁畫的藝術家，全神投入。\n3.湯姆的舉動吸引很多羨慕別人的小朋友，拿玩具跟他換取【　　　】的權利。\n4.最後湯姆不但一個下午把牆刷完，還多了許多【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "種子庫是什麼【 第1～2段 】",
+      "value": "斯瓦爾巴全球種子庫是挪威政府出資興建的【　　　】，用來保存【　　　】。"
     },
     {
-      "label": "結果",
-      "value": "作者發現：原來問題不在於【　　　】，而在怎麼把手上的餅【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "種子銀行的建置",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "目的\n【 第3段 】",
+          "value": "如聚光燈－【　　　】所寫。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "__",
+          "value": "如聚光燈－【　　　】所寫。【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "安全設計\n【 第5段 】",
+          "value": "種子庫設計具備高度的安全性，可以防範【　　　】帶來的威脅。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "參與種子銀行的例子",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "__",
+          "value": "為保存臺灣原生小米的【　　　】，臺灣把小米種子存入斯瓦爾巴全球種子庫。【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "敘利亞取出保存種子",
+          "value": "2015年，因阿勒坡種子庫遭到內戰波及，中東研究人員首次【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者提醒【 第8段 】",
+      "value": "科學家未雨綢繆建設種子庫，我們應該保護【　　　】，希望永遠不會用到種子庫。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "把手上的餅吃香一點！",
+  "title": "大主題：末日種子庫",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "問題",
-      "value": "1.作者百思不解的問題是：\n小時候大人分餅，為什麼每次總覺得【　　　】？\n2.類似的狀況在生活中層出不窮：\n(1)分組任務時，覺得別人的任務比較【　　　】。\n(2)看書時，覺得別人手裡的書比較有趣。\n(3)點餐時，覺得別人的餐點比較好吃。\n(4)看同學的家庭，覺得別人的家庭比較【　　　】。\n→作者遇到的問題是：無論在任何情況中，為什麼別人都比較【　　　】？"
+      "label": "小主題",
+      "value": "重要細節"
     },
     {
       "kind": "pair",
-      "label": "解決契機",
-      "value": "1.作者從【　　　】中的小故事，解決了他的問題。\n2.湯姆的姨媽要他去【　　　】，一開始他刷得【　　　】。後來他靈機一動，假裝正在創作偉大壁畫的藝術家，全神投入。\n3.湯姆的舉動吸引很多羨慕別人的小朋友，拿玩具跟他換取【　　　】的權利。\n4.最後湯姆不但一個下午把牆刷完，還多了許多【　　　】。"
+      "label": "種子庫是什麼（第1～2段）",
+      "value": "斯瓦爾巴全球種子庫是挪威政府出資興建的【　　　】，用來保存【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "目的\n（第3段）",
+          "value": "如聚光燈－（第三段）所寫。"
+        },
+        {
+          "label": "__",
+          "value": "如聚光燈－（第四段）所寫。【　　　】"
+        },
+        {
+          "label": "安全設計\n（第5段）",
+          "value": "種子庫設計具備高度的安全性，可以防範【　　　】帶來的威脅。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "種子銀行的建置"
+    },
+    {
+      "items": [
+        {
+          "label": "__",
+          "value": "為保存臺灣原生小米的【　　　】，臺灣把小米種子存入斯瓦爾巴全球種子庫。【　　　】"
+        },
+        {
+          "label": "敘利亞取出保存種子",
+          "value": "2015年，因阿勒坡種子庫遭到內戰波及，中東研究人員首次【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "參與種子銀行的例子"
     },
     {
       "kind": "pair",
-      "label": "結果",
-      "value": "作者發現：原來問題不在於【　　　】，而在怎麼把手上的餅【　　　】。"
+      "label": "作者提醒（第8段）",
+      "value": "科學家未雨綢繆建設種子庫，我們應該保護【　　　】，希望永遠不會用到種子庫。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "問題",
-      "解決契機",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

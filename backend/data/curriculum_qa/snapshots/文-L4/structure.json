@@ -1,27 +1,39 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "背景",
+      "起因",
+      "經過"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "fill_blank",
       "label": "背景",
-      "value": "明朝人【　　　】。",
-      "interactive_type": "fill_blank"
+      "value": "明朝人【　　　】。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "起因",
-      "value": "陸盧峰在市集看上一塊【　　　】，當下沒有買，後來後悔了。",
-      "interactive_type": "fill_blank"
+      "value": "陸盧峰在市集看上一塊【　　　】，當下沒有買，後來後悔了。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "經過",
-      "value": "1.派僕人用【　　　】銀子買回來。\n2.僕人買回來的硯臺，跟他想買的【　　　】？\n3.陸盧峰問硯臺怎麼沒有【　　　】，原來僕人請【　　　】把微凸的地方磨平了。",
-      "interactive_type": "fill_blank"
+      "value": "1.派僕人用【　　　】銀子買回來。\n2.僕人買回來的硯臺，跟他想買的【　　　】。\n3.陸盧峰問硯臺怎麼沒有【　　　】，原來僕人請【　　　】把微凸的地方磨平了。"
     },
     {
+      "interactive_type": "display",
       "label": "結果",
-      "value": "陸盧峰感到十分可惜。",
-      "interactive_type": "display"
+      "value": "陸盧峰感到十分可惜。"
     }
   ],
-  "layout": "worksheet_table",
   "worksheet_rows": [
     {
       "kind": "pair",
@@ -36,24 +48,12 @@
     {
       "kind": "pair",
       "label": "經過",
-      "value": "1.派僕人用【　　　】銀子買回來。\n2.僕人買回來的硯臺，跟他想買的【　　　】？\n3.陸盧峰問硯臺怎麼沒有【　　　】，原來僕人請【　　　】把微凸的地方磨平了。"
+      "value": "1.派僕人用【　　　】銀子買回來。\n2.僕人買回來的硯臺，跟他想買的【　　　】。\n3.陸盧峰問硯臺怎麼沒有【　　　】，原來僕人請【　　　】把微凸的地方磨平了。"
     },
     {
       "kind": "pair",
       "label": "結果",
       "value": "陸盧峰感到十分可惜。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "背景",
-      "起因",
-      "經過"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

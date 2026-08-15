@@ -1,0 +1,125 @@
+spotlight:
+  lesson: G7-L20
+  strategy_name: 自我提問-詰問作者
+  strategy_type: self_questioning
+  blocks:
+  - type: guide
+    text: 一、跟著問題，重新看〈背影〉
+  - type: guide
+    text: 我們就帶著這個問題，再看看文章前後的線索：
+  - type: guide
+    text: 〈背影〉的作者朱自清為什麼特別描寫父親買橘子時的「背影」？
+  - type: free_text
+    prompt: ❶前面和後來，有什麼不同？
+  - type: guide
+    text: 請把「前三次父子互動」和「父親買橘子」的兩個情節放在一起看。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: ❷把前後放在一起想
+  - type: single
+    prompt: 哪一項最能說明兒子對父親的看法為什麼改變？
+    options:
+    - 父親前面主要用說話表示關心，買橘子時才真正用行動付出。
+    - 父親一直都在關心兒子，只是兒子後來才看見父親為自己的付出。
+    - 父親前面處理事情的方式讓兒子不滿，買橘子時才完全改掉原來的做法
+    answer: 父親一直都在關心兒子，只是兒子後來才看見父親為自己的付出。
+  - type: guide
+    text: 二、把線索接起來，回答問題
+  - type: guide
+    text: 回到一開始的問題：
+  - type: single
+    prompt: 〈背影〉的作者朱自清為什麼特別描寫父親買橘子時的「背影」？
+    options:
+    - 背影看不到父親的表情，可以讓讀者自行想像他的心情。
+    - 背影讓兒子遠遠看見年老的父親仍費力為自己付出，重新看見先前忽略的父愛。
+    - 背影讓兒子發現父親已經老了，因此開始擔心父親以後需要人照顧。
+    answer: 背影讓兒子遠遠看見年老的父親仍費力為自己付出，重新看見先前忽略的父愛。
+  - type: guide
+    text: →你發現了嗎？
+  - type: free_text
+    prompt: 1.如果只看故事，我們可能只讀到：「父親辛苦買橘子，兒子很感動。」
+  - type: free_text
+    prompt: 2.追問「作者為什麼特別描寫這個背影」，再把前後線索放在一起，我們會更能看懂：
+  - type: guide
+    text: 父親的愛一直都在，只是兒子原本沒有看見。看到背影時，他才重新看見父親一直為自己的付出。
+  - type: guide
+    text: 三、換你問本課作者林玫伶
+  - type: guide
+    text: 前面，我們跟著問題，詰問的是〈背影〉的作者朱自清。
+  - type: guide
+    text: 現在換你試著問這篇〈「背影」讀書會〉的作者——林玫伶。
+  - type: guide
+    text: 讀書會上，大家已經找出「背影」感人的原因。可是文章後半段，林玫伶又寫了義傑和愛玲的生活經驗。你會想問，為什麼作者要寫這些呢？
+  - type: free_text
+    prompt: ❶換你提出問題
+  - type: guide
+    text: 請用「為什麼……？」完成你的問題
+  - type: guide
+    text: 我想問作者林玫伶：（問題合理即可）
+  - type: guide
+    text: 「你為什麼【  要寫義傑和愛玲自己的生活經驗？  　　　　　  】
+  - type: free_text
+    prompt: ❷回文章找線索
+  - type: single
+    prompt: 課文中，義傑和愛玲的經驗有什麼共同點？
+    options:
+    - 兩人都曾和家人爭吵，最後主動向家人道歉。
+    - 兩人原本都對家人的關心感到不耐，後來從背影看見家人的付出。
+    - 兩人都因為家人特地來幫忙，才發現自己以前誤會了家人。
+    answer: 兩人原本都對家人的關心感到不耐，後來從背影看見家人的付出。
+  - type: free_text
+    prompt: ❸用線索回答自己的問題
+  - type: single
+    prompt: 林玫伶為什麼還要寫義傑和愛玲的生活經驗？（單選）
+    options:
+    - 補充不同家庭中，長輩照顧孩子的不同方式。
+    - 說明只要看見家人的背影，就會改變原來的想法。
+    - 把〈背影〉中的感受連到生活，讓讀者感同身受，引起共鳴。
+    answer: 把〈背影〉中的感受連到生活，讓讀者感同身受，引起共鳴。
+  - type: guide
+    text: →你發現了嗎？
+  - type: guide
+    text: 詰問作者時，可以問：
+  - type: guide
+    text: 作者為什麼這樣寫？這樣寫讓我多看懂什麼？
+  - type: guide
+    text: 四、這次換你自己問
+  - type: guide
+    text: 剛才，我們已經練習對本文作者林玫伶提出問題。這一次，換你自己試試看。
+  - type: free_text
+    prompt: ❶找一個想問的地方
+  - type: guide
+    text: 再看一看〈「背影」讀書會〉，找一個讓你想問作者「為什麼這樣寫？」的地方。
+  - type: free_text
+    prompt: ❷提出問題
+  - type: guide
+    text: 我注意到作者寫了…，我想問林玫伶：（問題合理即可）
+  - type: guide
+    text: 【                                                         】
+  - type: free_text
+    prompt: ❸請你回到文章找線索，並用線索回答自己的問題
+  - type: single
+    prompt: 請選擇
+    options:
+    - 我找到能幫助我回答問題的線索。
+    - 我能根據找到的線索，回答自己提出的問題。
+    answer: 我找到能幫助我回答問題的線索。
+  - type: guide
+    text: ★策略帶著走
+  - type: free_text
+    prompt: 1.詰問作者時，可以想一想：
+  - type: guide
+    text: 「作者為什麼這樣寫？這樣寫讓我多看懂什麼？」
+  - type: free_text
+    prompt: 2.再回文章找線索，把前後內容連起來想，就能把文章讀得更完整、更深入。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: self_check
+    items:
+    - 讀文章時，我會想一想：作者這裡想讓我看懂什麼？
+    - 我會回文章找相關線索，把相關內容連起來，回答自己的問題。

@@ -1,0 +1,235 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 5,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "打籃球時沒投進會\n①鍥而不捨\n□②原地躺平",
+      "□①天生決定 \n②越練越強",
+      "①受到激勵 \n□②感到挫折",
+      "□①想藏起來，不被發現\n②找到可以加強的地方"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "成長型思維：翻轉失敗的關鍵",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "類型",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "成長型思維",
+          "value": "固定型思維"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "情境",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "打籃球時沒投進會\n①鍥而不捨\n□②原地躺平",
+          "options": [
+            "鍥而不捨",
+            "原地躺平"
+          ],
+          "value": "遇到練習題不會就\n□①鍥而不捨\n②原地躺平"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "比較1：大腦能力",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0
+          ],
+          "interactive_type": "checkbox",
+          "label": "□①天生決定 \n②越練越強",
+          "options": [
+            "天生決定 \n□",
+            "越練越強"
+          ],
+          "value": "①天生決定 \n□②越練越強"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "比較2：看到他人的成就",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "①受到激勵 \n□②感到挫折",
+          "options": [
+            "受到激勵",
+            "感到挫折"
+          ],
+          "value": "□①受到激勵 \n②感到挫折"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "比較3：遭遇挫折時",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0
+          ],
+          "interactive_type": "checkbox",
+          "label": "□①想藏起來，不被發現\n②找到可以加強的地方",
+          "options": [
+            "想藏起來，不被發現\n□",
+            "找到可以加強的地方"
+          ],
+          "value": "①想藏起來，不被發現\n□②找到可以加強的地方"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "目標",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "不斷學習，追求成長",
+          "value": "遠離【　　　】，\n確保【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "比喻",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "像是大腦在__",
+          "value": "像是大腦進入\n【　　　】。【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "correct_options": [
+        0
+      ],
+      "interactive_type": "checkbox",
+      "label": "小結",
+      "options": [
+        "成長型思維　□",
+        "固定型思維 】。"
+      ],
+      "value": "如果期待看見成長、突破失敗，就需要\n【 ①成長型思維　□②固定型思維 】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "舉例",
+      "value": "1.周思齊：失敗是另一次【　　　】的起點，要從失敗中【　　　】、調整。\n2.陳冠宇：相信每次的失敗都有【　　　】，將失敗視為檢視自己的【　　　】。"
+    }
+  ],
+  "title": "成長型思維：翻轉失敗的關鍵",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "成長型思維",
+          "value": "固定型思維"
+        }
+      ],
+      "kind": "section_block",
+      "section": "類型"
+    },
+    {
+      "items": [
+        {
+          "label": "打籃球時沒投進會\n①鍥而不捨\n□②原地躺平",
+          "value": "遇到練習題不會就\n□①鍥而不捨\n②原地躺平"
+        }
+      ],
+      "kind": "section_block",
+      "section": "情境"
+    },
+    {
+      "items": [
+        {
+          "label": "□①天生決定 \n②越練越強",
+          "value": "①天生決定 \n□②越練越強"
+        }
+      ],
+      "kind": "section_block",
+      "section": "比較1：大腦能力"
+    },
+    {
+      "items": [
+        {
+          "label": "①受到激勵 \n□②感到挫折",
+          "value": "□①受到激勵 \n②感到挫折"
+        }
+      ],
+      "kind": "section_block",
+      "section": "比較2：看到他人的成就"
+    },
+    {
+      "items": [
+        {
+          "label": "□①想藏起來，不被發現\n②找到可以加強的地方",
+          "value": "①想藏起來，不被發現\n□②找到可以加強的地方"
+        }
+      ],
+      "kind": "section_block",
+      "section": "比較3：遭遇挫折時"
+    },
+    {
+      "items": [
+        {
+          "label": "不斷學習，追求成長",
+          "value": "遠離【　　　】，\n確保【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "目標"
+    },
+    {
+      "items": [
+        {
+          "label": "像是大腦在__",
+          "value": "像是大腦進入\n【　　　】。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "比喻"
+    },
+    {
+      "kind": "pair",
+      "label": "小結",
+      "value": "如果期待看見成長、突破失敗，就需要\n（①成長型思維　□②固定型思維）。"
+    },
+    {
+      "kind": "pair",
+      "label": "舉例",
+      "value": "1.周思齊：失敗是另一次【　　　】的起點，要從失敗中【　　　】、調整。\n2.陳冠宇：相信每次的失敗都有【　　　】，將失敗視為檢視自己的【　　　】。"
+    }
+  ]
+}

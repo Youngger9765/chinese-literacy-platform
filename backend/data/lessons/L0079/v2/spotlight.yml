@@ -1,0 +1,53 @@
+spotlight:
+  lesson: G7-L11
+  strategy_name: 從事實歸納概念-從具體事實提取上位概念
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: '寫作時，作者常用具體事實或例子來說明一個概念；閱讀時，我們則要反過來，把多個具體事實的細節合起來，提取出這些具體事實共同顯示的上位概念。這樣才能不只看見細節，還能讀懂整體。來看底下這兩個定義：具體事實：文章中看得到的時間、數量、行為或事件。
+
+      上位概念：把多個事實合起來說出的整體意思，例如「負擔沉重」「症狀惡化」。'
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 以下讓我們先練習用常見的「具體事實」提取出「上位概念」，注意，上位概念可以是名詞，也可以是形容詞。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、接著回到本課課文，下表整理了第二、三段所描述的具體事實，作者想要表達什麼上位概念？
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 5.作者想要描述的上位概念是？答：【 ①精神症狀 □②性格特質　】
+    options:
+    - 答：【 ①精神症狀
+    - 性格特質
+    - 】
+    answer: 答：【 ①精神症狀
+  - type: single
+    prompt: 6.阿嬤的情況隨著時間如何變化？答：阿嬤愈來愈【□①痛苦  ②嚴重】
+    options:
+    - 答：阿嬤愈來愈【
+    - 痛苦
+    - 嚴重】
+    answer: 答：阿嬤愈來愈【
+  - type: free_text
+    prompt: 7.綜合第5、6題，用一句話整合第二、三段的上位概念，寫在【  】中：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 上位概念：隨著時間，阿嬤的【   精神症狀    】愈來愈【    嚴重  】。
+  - type: guide
+    text: 三、下表整理了第四段描述的具體事實，作者想要表達什麼上位概念？
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 5.請把第1~4題右欄的上位概念整合在一起，成為第四段的上位概念。
+  - type: guide
+    text: 答：  我們經濟及工作的負擔非常沉重，阿公的狀況不佳，也無法解決阿嬤的問題。我們對現在及未來非常擔憂，這一切都讓我們覺得無助。

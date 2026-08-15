@@ -1,0 +1,96 @@
+spotlight:
+  lesson: G5-L3
+  strategy_name: 推論策略──用特質理解人物成長
+  strategy_type: inference
+  blocks:
+  - type: guide
+    text: '上一課，我們學會把幾個言行線索合起來，找出共同點，再推論人物特質。
+
+      這一課，我們要再往前一步：不只找出人物有什麼特質，還要把她在不同階段的言行連起來，看看同一項特質如何在不同困境中反覆表現，又如何影響人物一步一步成長。
+
+      陳念琴一再遇到困難，她每次怎麼面對？這些做法又讓她產生哪些改變？我們用四個步驟來讀懂：
+
+      ❶看前後變化　  ❷看困境、做法與發展
+
+      ❸推論核心特質　❹用特質理解成長'
+  - type: guide
+    text: 一、看陳念琴的前後變化
+  - type: free_text
+    prompt: 1.先讀一讀故事開始與結尾的陳念琴
+  - type: guide
+    text: 故事開始：那時的陳念琴很自卑，不管到哪裡都躲在哥哥身後。
+  - type: guide
+    text: 故事結尾：她再次戴起拳擊手套，準備揮出下一拳，迎戰一個又一個新的挑戰。
+  - type: single
+    prompt: 2.故事開始到結尾，陳念琴最大的改變是什麼？（單選）
+    options:
+    - 從害怕練拳、常想放棄，變成只重視比賽成績。
+    - 從自卑、躲在哥哥身後，變成有力量、有信心迎向挑戰。
+    answer: 從自卑、躲在哥哥身後，變成有力量、有信心迎向挑戰。
+  - type: guide
+    text: ➡我們已經看見陳念琴前後有明顯的改變。
+  - type: guide
+    text: 接著看看：她在一次次的困難中怎麼做，才逐漸成為後來的自己。
+  - type: guide
+    text: 二、看陳念琴的困境、做法與發展
+  - type: guide
+    text: 請根據課文，勾選她怎麼面對困難，以及後來的外在成果與內在成長。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 三、推論人物特質
+  - type: free_text
+    prompt: 1.找共同點
+  - type: single
+    prompt: 把三次困境合起來看，陳念琴面對困難的方式有什麼共同點？（單選）
+    options:
+    - 遇到困難時，她總想用成績證明自己比別人強。
+    - 遇到困難時，她會穩住自己、尋找方法，繼續前進。
+    - 遇到困難時，她主要等待教練替她解決問題。
+    answer: 遇到困難時，她會穩住自己、尋找方法，繼續前進。
+  - type: free_text
+    prompt: 2.推論核心特質
+  - type: single
+    prompt: 這些反覆出現的做法，最能表現陳念琴具有哪一項特質？（單選）
+    options:
+    - 自律──能按計畫要求自己
+    - 堅韌──受挫後仍能調整前進
+    - 感恩──會記得別人的幫助
+    answer: 堅韌──受挫後仍能調整前進
+  - type: guide
+    text: ➡遇到困難仍能調整方法、繼續前進，就是「堅韌」。
+  - type: guide
+    text: 四、用特質理解成長
+  - type: guide
+    text: 請把前面的活動和課文線索連起來，讀一讀陳念琴的兩條發展線。
+  - type: guide
+    text: A.外在成果：
+  - type: guide
+    text: 獲得女子拳擊賽冠軍→取得奧運拳擊資格→進入東京奧運前八強
+  - type: guide
+    text: B.內在成長：
+  - type: guide
+    text: 自卑→感受到自己有力量→開始相信自己可以變強→真正找回自信→心中多了一份感恩
+  - type: single
+    prompt: 1.把兩條發展線合起來看，陳念琴的「堅韌」如何影響她的成長？(單選)
+    options:
+    - 讓她的拳擊成績不斷進步，往後也不再遇到任何困難。
+    - 讓她的拳擊生涯持續向前，內心也由自卑走向自信與感恩。
+    - 讓她更重視比賽勝負，希望用成績回應所有質疑。
+    answer: 讓她的拳擊生涯持續向前，內心也由自卑走向自信與感恩。
+  - type: guide
+    text: ➡陳念琴的成長，不只有外在成果，也有內在成長；她在困境中反覆展現的堅韌，正是連起這兩條發展線的關鍵。
+  - type: self_check
+    items:
+    - 我能把人物在不同困境中的做法合起來，推論核心特質。
+    - 我能用核心特質，看懂人物的外在成果和內在成長。

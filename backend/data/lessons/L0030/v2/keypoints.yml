@@ -1,0 +1,32 @@
+keypoints:
+  lesson: G5-L19
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 主題：】肌肉【的鍛鍊
+    sub_rows:
+    - sub_label: 關鍵
+      template: 想要有結實的肌肉，要先__再__。
+      blanks:
+      - answer: 減脂
+        hint: ''
+      - answer: 增肌
+        hint: ''
+    - sub_label: 訓練要點
+      template: '要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：
+
+        A.均衡的飲食控制：要減少__類和甜食的攝取。
+
+        B.保持良好的__：可以幫助分泌生長激素促進生長。
+
+        C.專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開__區，練習的分量要比自己承受的最大量再高一些才行。'
+      blanks:
+      - answer: 油炸󠇡
+        hint: ''
+      - answer: 睡眠
+        hint: ''
+      - answer: 舒適
+        hint: ''
+  title: 六塊肌、六塊雞

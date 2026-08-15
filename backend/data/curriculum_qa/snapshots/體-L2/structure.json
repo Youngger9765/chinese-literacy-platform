@@ -1,0 +1,138 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 3,
+    "fill_blank_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "一",
+      "二\n\n~\n\n十",
+      "十一\n~\n十五",
+      "十六"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "成為身體的最佳夥伴",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "起因",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "一",
+          "options": [
+            "得心應手",
+            "乏善可陳 】，而被教練從場上【換下來】。"
+          ],
+          "value": "阿哲因為狀況表現【 □①得心應手　②乏善可陳 】，而被教練從場上【換下來】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "經過",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0,
+            3
+          ],
+          "interactive_type": "checkbox",
+          "label": "二\n\n~\n\n十",
+          "options": [
+            "舊傷復發　□",
+            "受了新傷 】\n學長說，教練認為求表現之前，要先【顧好身體】，成為【榜樣】。\n阿哲說出自己腦中的【疑惑】，學長邀請他一起去找教練。\n阿哲內心反省自己時常【 □",
+            "看重",
+            "忽略 】教練的叮嚀，也許無形中影響身體。"
+          ],
+          "value": "阿哲收到學長的打氣，並關心學長【沒上場】的原因：學長【 ①舊傷復發　□②受了新傷 】\n學長說，教練認為求表現之前，要先【顧好身體】，成為【榜樣】。\n阿哲說出自己腦中的【疑惑】，學長邀請他一起去找教練。\n阿哲內心反省自己時常【 □①看重　②忽略 】教練的叮嚀，也許無形中影響身體。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結果",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "十一\n~\n十五",
+          "value": "教練提醒他們【　　　】和【　　　】也是訓練的一環，此外，【　　　】也是運動員重要的夥伴，要懂得照顧他。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "省思",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "十六",
+          "options": [
+            "如何讓身體更有力量",
+            "傾聽身體的聲音 】"
+          ],
+          "value": "阿哲認為自己要學習【 □①如何讓身體更有力量　 \n                    ②傾聽身體的聲音 】"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "成為身體的最佳夥伴",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "一",
+          "value": "阿哲因為狀況表現（□①得心應手　②乏善可陳），而被教練從場上【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "起因"
+    },
+    {
+      "items": [
+        {
+          "label": "二\n\n~\n\n十",
+          "value": "阿哲收到學長的打氣，並關心學長【　　　】的原因：學長（①舊傷復發　□②受了新傷）\n學長說，教練認為求表現之前，要先【　　　】，成為【　　　】。\n阿哲說出自己腦中的【　　　】，學長邀請他一起去找教練。\n阿哲內心反省自己時常（□①看重　②忽略）教練的叮嚀，也許無形中影響身體。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "經過"
+    },
+    {
+      "items": [
+        {
+          "label": "十一\n~\n十五",
+          "value": "教練提醒他們【　　　】和【　　　】也是訓練的一環，此外，【　　　】也是運動員重要的夥伴，要懂得照顧他。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結果"
+    },
+    {
+      "items": [
+        {
+          "label": "十六",
+          "value": "阿哲認為自己要學習（□①如何讓身體更有力量　 \n                    ②傾聽身體的聲音     ）"
+        }
+      ],
+      "kind": "section_block",
+      "section": "省思"
+    }
+  ]
+}

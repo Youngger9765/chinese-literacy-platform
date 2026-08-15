@@ -1,0 +1,43 @@
+spotlight:
+  lesson: G9-L5
+  strategy_name: 科學推理策略-用科學步驟解決問題
+  strategy_type: problem_solving
+  blocks:
+  - type: guide
+    text: '這又是一篇「用科學步驟解決問題」的說明文，讀起來就像科學偵探故事。作者先找「問題」，再提出「假設」，接著做實驗，用證據「驗證假設」，最後下「結論」，再把結論應用出來。
+
+      這樣的文章，閱讀時要先注意「證據是否能支持（或推翻）假設」。
+
+      我們要先用4個步驟把「解決科學問題的過程」整理清楚。請根據你過去所學，把底下「四個科學步驟」和「ＡＢＣＤ的說明」連連看：'
+  - type: guide
+    text: 一、找問題→提假說→看驗證→下結論
+  - type: guide
+    text: 表：本課的科學解決四步驟：找問題→提假說→看驗證→下結論
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、應用（把結論帶回現場：問題→解決→結果）
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 前面我們用科學步驟找出「低溫能催花」。再來是把結論應用到現場。但農民遇到了新的問題，請根據課文寫出他們如何解決問題。
+  - type: free_text
+    prompt: 1.問題：    花房面積大，冷氣電費成本太高
+  - type: multi
+    prompt: 2.解決：
+    options:
+    - 把平地蘭花送到高海拔蘭園降溫
+    - 在高海拔地方設置蘭園
+    - 用深層海水降溫
+    answer:
+    - 把平地蘭花送到高海拔蘭園降溫
+    - 在高海拔地方設置蘭園
+    - 用深層海水降溫
+  - type: free_text
+    prompt: 3.結果：用大自然降溫，降低電費負擔，也能順利催花。
+  - type: self_check
+    items:
+    - 我能用四步驟整理文章：找問題→提假說→看驗證→下結論
+    - 我能看懂作者如何用證據進行驗證，並判斷結果是否支持原本的假說。

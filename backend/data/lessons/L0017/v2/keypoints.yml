@@ -1,0 +1,43 @@
+keypoints:
+  lesson: G4-L6
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 二
+    sub_rows:
+    - sub_label: 他主動詢問要幫我交__
+      template: "(勾選，可複選)\n①茫然 ②害羞 \n③緊張"
+      blanks:
+      - answer: 聯絡簿
+        hint: ''
+  - label: 三
+    sub_rows:
+    - sub_label: __課被分在同一組
+      template: __漏了一拍
+      blanks:
+      - answer: 體育
+        hint: ''
+      - answer: 心跳
+        hint: ''
+  - label: 四
+    sub_rows:
+    - sub_label: 習慣看向他、__突然對上、偷偷觀察他
+      template: 在乎、緊張、期待
+      blanks:
+      - answer: 眼神
+        hint: ''
+  - label: 五
+    sub_rows:
+    - sub_label: 幫我撿掉在地上的筆、小組討論時叫我的__
+      template: "(勾選，可複選)\n①溫暖 ②害羞 \n③興奮"
+      blanks:
+      - answer: 名字
+        hint: ''
+  - label: 統整
+    value: '結合第一段與最後一段，作者寫下這篇小日記，
+
+      是想抒發（ ①不知所措  □②深情思念 ）的心情。'
+    blanks: []
+  title: 感情小日記1──是友情還是愛情？

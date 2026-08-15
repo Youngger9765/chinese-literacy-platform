@@ -1,150 +1,103 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "阿耀的問題",
+      "學長的觀點",
+      "例子1",
+      "例子2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "職業",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
-          "value": "引水人",
-          "interactive_type": "display"
-        }
-      ]
+      "label": "想讀書，該從哪裡著手？",
+      "value": ""
     },
     {
-      "label": "薪水",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低",
-          "interactive_type": "display"
-        }
-      ]
+      "correct_options": [
+        1
+      ],
+      "interactive_type": "checkbox",
+      "label": "阿耀的問題",
+      "options": [
+        "阿耀的疑問：一定要讀書嗎？",
+        "阿耀覺得自己跟不上課程，想請教學長。"
+      ],
+      "value": "下列哪個是阿耀遇到的問題？【 單選 】\n□①阿耀的疑問：一定要讀書嗎？\n②阿耀覺得自己跟不上課程，想請教學長。"
     },
     {
-      "label": "技術門檻",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低",
-          "interactive_type": "display"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "學長的觀點",
+      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
     },
     {
-      "label": "條件",
-      "value": "",
       "interactive_type": "display",
+      "label": "舉例說明",
       "sub_rows": [
         {
-          "label": "__",
-          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "例子1",
+          "value": "問題：高中隊友想去美國打球，但雖然每天自學英文，卻跟不上學校的英文課。\n解決：從最熟悉的棒球開始，每天學一點英文，看【　　　】、看體育台報導。\n結果：沒有繼續打棒球，但成為旅美選手的【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "例子2",
+          "value": "問題：第二位朋友因為運動傷害，打球期間需要復健。\n解決：一邊復健，一邊研究身體骨骼肌肉的【　　　】，探討如何訓練才能預防運動傷害。\n結果：大量投入後，考上醫學相關科系，成為【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "例子3",
+          "value": "問題：第三位朋友進棒球隊後不愛讀書，到國中連簡單的文章都讀不懂。\n解決：從青少棒揚威記愛上閱讀，繼續讀了更多【　　　】，和少年小說，帶動了所有學科的學習信心。\n結果：會考時，他的成績和普通班學生不相上下。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "市場稀有性",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□常見　　□稀有",
-          "value": "□常見　　□稀有",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "市場供需情況（填多或少）",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "供給__\n需求__",
-          "value": "供給【　　　】\n需求【　　　】【　　　】【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "結尾",
+      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "想讀書，該從哪裡著手？",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "職業",
-      "items": [
-        {
-          "label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
-          "value": "引水人"
-        }
-      ]
+      "kind": "pair",
+      "label": "阿耀的問題",
+      "value": "下列哪個是阿耀遇到的問題？(單選)\n□①阿耀的疑問：一定要讀書嗎？\n②阿耀覺得自己跟不上課程，想請教學長。"
     },
     {
-      "kind": "section_block",
-      "section": "薪水",
-      "items": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低"
-        }
-      ]
+      "kind": "pair",
+      "label": "學長的觀點",
+      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
     },
     {
-      "kind": "section_block",
-      "section": "技術門檻",
       "items": [
         {
-          "label": "□高　　□低",
-          "value": "□高　　□低"
+          "label": "例子1",
+          "value": "問題：高中隊友想去美國打球，但雖然每天自學英文，卻跟不上學校的英文課。\n解決：從最熟悉的棒球開始，每天學一點英文，看【　　　】、看體育台報導。\n結果：沒有繼續打棒球，但成為旅美選手的【　　　】。"
+        },
+        {
+          "label": "例子2",
+          "value": "問題：第二位朋友因為運動傷害，打球期間需要復健。\n解決：一邊復健，一邊研究身體骨骼肌肉的【　　　】，探討如何訓練才能預防運動傷害。\n結果：大量投入後，考上醫學相關科系，成為【　　　】。"
+        },
+        {
+          "label": "例子3",
+          "value": "問題：第三位朋友進棒球隊後不愛讀書，到國中連簡單的文章都讀不懂。\n解決：從青少棒揚威記愛上閱讀，繼續讀了更多【　　　】，和少年小說，帶動了所有學科的學習信心。\n結果：會考時，他的成績和普通班學生不相上下。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
     },
     {
-      "kind": "section_block",
-      "section": "條件",
-      "items": [
-        {
-          "label": "__",
-          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "市場稀有性",
-      "items": [
-        {
-          "label": "□常見　　□稀有",
-          "value": "□常見　　□稀有"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "市場供需情況（填多或少）",
-      "items": [
-        {
-          "label": "供給__\n需求__",
-          "value": "供給【　　　】\n需求【　　　】【　　　】【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "結尾",
+      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "__",
-      "供給__\n需求__"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

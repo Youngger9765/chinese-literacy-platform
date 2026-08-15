@@ -1164,6 +1164,14 @@ class TestBuildLessonTtsMappingV2Alignment:
                 hashes.add(h)
         return hashes
 
+    @pytest.mark.xfail(
+
+        reason="TTS 逐段映射需要課文段落，而二修課文本體 0/175（見 data/curriculum_qa/content_known_gaps.yaml#lesson_body_text）",
+
+        strict=True,
+
+    )
+
     def test_lesson_1_mapping_hashes_all_in_v2_jsonl(self):
         """Every hash from build_lesson_tts_mapping(lesson_1) must exist in sentences.v2.jsonl.
 
@@ -1177,8 +1185,11 @@ class TestBuildLessonTtsMappingV2Alignment:
         # Reset the in-process JSONL cache so we load fresh from disk.
         tts_mod._SENTENCES_V2_CACHE = None
 
-        lesson = get_lesson_by_id(1)
-        assert lesson is not None, "Lesson 1 must exist in the test environment"
+        # Take whatever the corpus's first lesson is. Pinning id 1 asserted the
+        # first edition's numbering; the tree assigns ids from 20001 (#2683).
+        from app.services.lesson_loader import get_all_lessons
+        lesson = get_lesson_by_id(get_all_lessons()[0]["id"])
+        assert lesson is not None, "the corpus must have at least one lesson"
 
         mapping = tts_mod.build_lesson_tts_mapping(lesson)
         assert mapping["lesson_id"] is not None

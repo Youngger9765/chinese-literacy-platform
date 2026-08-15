@@ -1,0 +1,85 @@
+keypoints:
+  lesson: G5-L6
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 問題
+    value: __入侵臺灣，農民深受其害，昆蟲學家嘗試許多方法解決問題。
+    blanks:
+    - answer: 秋行軍蟲
+      hint: ''
+  - label: 人工噴農藥
+    sub_rows:
+    - sub_label: 執行方式
+      template: 每週噴藥__次，持續__週。
+      blanks:
+      - answer: 一
+        hint: ''
+      - answer: 二～三
+        hint: ''
+    - sub_label: 產生問題
+      template: 種植面積很大時，人工噴農藥太__、__、__。
+      blanks:
+      - answer: 耗工
+        hint: ''
+      - answer: 辛苦
+        hint: ''
+      - answer: 危險
+        hint: ''
+  - label: 無人機噴農藥
+    sub_rows:
+    - sub_label: 執行方式
+      template: 大型無人機，噴一公頃的農藥只要__分鐘，一天可以噴__公頃。
+      blanks:
+      - answer: '20'
+        hint: ''
+      - answer: '5'
+        hint: ''
+    - sub_label: 產生問題
+      template: 較能耐受藥劑的害蟲容易存活並繁殖，經過幾代，具有__的害蟲可能愈來愈多。
+      blanks:
+      - answer: 抗藥性
+        hint: ''
+  - label: 寄生蜂片
+    sub_rows:
+    - sub_label: 執行方式
+      template: 研究人員把已被寄生的蟲卵黏在小紙卡上，做成蜂片；農民再把蜂片釘在__背面，一公頃放__片就可以防治蟲害。
+      blanks:
+      - answer: 玉米葉
+        hint: ''
+      - answer: '121'
+        hint: ''
+    - sub_label: 產生問題
+      template: 釘121片蜂片要花__個鐘頭，對年紀__的農民仍是苦差事。
+      blanks:
+      - answer: '2'
+        hint: ''
+      - answer: 大
+        hint: ''
+  - label: 寄生蜂扭蛋
+    sub_rows:
+    - sub_label: 執行方式
+      template: '1.把原本黏在蜂片上的蟲卵放進紙製扭蛋，__長大後會從小孔飛出。
+
+        2.把__丟進玉米田裡，就能讓寄生蜂防治秋行軍蟲。
+
+        3.扭蛋可以用__施作，一公頃約20到30分鐘就可以灑完了。'
+      blanks:
+      - answer: 寄生蜂
+        hint: ''
+      - answer: 扭蛋
+        hint: ''
+      - answer: 無人機
+        hint: ''
+    - sub_label: 解決問題
+      template: 比人工釘蜂片省時又省力。
+      blanks: []
+  - label: 總結
+    value: 昆蟲學家運用科技，針對防治中不斷出現的新問題改進方法，可說是「__」。
+    blanks:
+    - answer: 兵來將擋，水來土掩
+      hint: ''
+  title: 兵來將擋，水來土掩

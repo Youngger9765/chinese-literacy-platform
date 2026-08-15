@@ -1,0 +1,39 @@
+keypoints:
+  lesson: G6-L5
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 工作記憶的功能
+    value: 工作記憶就像大腦裡的籃子，可以__保存訊息，也能初步__訊息。
+    blanks:
+    - answer: 暫時
+      hint: ''
+    - answer: 處理和理解
+      hint: ''
+  - label: 工作記憶與閱讀速度的關係
+    value: "※請勾選出正確答案(單選) \n1.東西越大(文旦)，工作記憶能記得的越__；\n  東西越小(柳丁)，工作記憶能記得的越__。\n2.讀得快的人，工作記憶能記住更多內容。\n\
+      3.讀得快的人，閱讀理解能力比讀得慢的人來得 \n__。"
+    blanks:
+    - answer: □①多②少
+      hint: ''
+    - answer: ①多□②少
+      hint: ''
+    - answer: ①好□②不好
+      hint: ''
+  - label: 重複朗讀的優點
+    value: '1.重複朗讀，朗讀速度會__，也有提升閱讀理解力的效果。
+
+      2.重複朗讀課文的效果，可以__到新的課文上。'
+    blanks:
+    - answer: 越來越快
+      hint: ''
+    - answer: 遷移
+      hint: ''
+  - label: 結論
+    value: 重複朗讀可以提升閱讀速度，使__能容納更多內容，最終提升閱讀理解力。
+    blanks:
+    - answer: 工作記憶
+      hint: ''
+  title: 重複朗讀的重要性

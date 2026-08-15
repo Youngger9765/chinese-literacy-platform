@@ -1,0 +1,33 @@
+keypoints:
+  lesson: G7-L15
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 家庭生活的改變
+    value: "爺爺奶奶搬來後，\n1.家裡氣氛變得__（單選）\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？（多選）\n【①高齡友善空間的改造  \
+      \ ②餐桌上菜色的變化  \n③生活作息的調整 　　　□④音樂喜好的改變　　　 】"
+    blanks:
+    - answer: □①吵鬧②熱鬧□③擁擠
+      hint: ''
+  - label: 作者的理解與收穫
+    value: '1.理解不同世代有各自的__和__，如：音樂喜好和冷氣使用習慣等。
+
+      2.認為與長輩同住有助於青少年__的培養。
+
+      3.學會傾聽不同世代的聲音和__為他人著想。
+
+      4.學會__，帶著好奇心聆聽爺爺奶奶的故事。'
+    blanks:
+    - answer: 生活方式
+      hint: ''
+    - answer: 價值觀
+      hint: ''
+    - answer: 情緒智商
+      hint: ''
+    - answer: 設身處地
+      hint: ''
+    - answer: 轉換觀點
+      hint: ''
+  title: 爺爺奶奶來了以後

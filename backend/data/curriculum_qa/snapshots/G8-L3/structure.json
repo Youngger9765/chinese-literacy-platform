@@ -1,66 +1,98 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "對比句型",
+      "落差焦點【　　　】",
+      "凸顯重點【 依序將重點填入句中 】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "當壞事已不可逆轉：集中營裡的一門課",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "第二組(段10)「（爸爸）說著說著，哼起歌來……泫然欲泣……『我哪裡來的甜蜜的家庭？我從小就無父無母……』」",
+      "value": ""
     },
     {
-      "label": "問題【 段1 】",
-      "value": "遇上【　　　】的壞事，人還可能過著【　　　】嗎？",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "對比句型",
+      "value": "【　　　】VS 【　　　】"
     },
     {
-      "label": "背景【 段2-4 】",
-      "value": "1.二戰期間的【　　　】使猶太人被送往【　　　】；法蘭柯全家被捕並在月台面臨【　　　】。\n2.青壯年被挑選進營區成為【　　　】；老人、小孩與病人往往【　　　】，被屠殺。\n3.在生不如死的煎熬裡，法蘭柯卻親眼看見人的【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "關鍵詞",
+      "value": "甜蜜的家庭／無父無母的家庭"
     },
     {
-      "label": "舉例-意義的證據【 段5-9 】",
-      "value": "1.仍分享最後一口麵包：情況壞到極點，人仍能決定自己【　　　】的高度。\n2.獄卒辱罵羞辱：我們不能阻止別人說什麼，但可以選擇不讓【　　　】定義我。\n3.女子將死仍感恩：在死亡前一刻，有人能靠【　　　】而感恩。\n4.寒夜長途跋涉：靠著愛與期待，受苦的人仍能得到【　　　】。\n5.仍看見黎明之美：人仍保有對【　　　】的感受力，並因此短暫脫離【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "文句內容",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "A：甜蜜意象\n①歌名是「甜蜜的家庭」",
+          "value": "B：落淚情緒\n①爸爸唱著唱著泫然欲泣\n②爸爸說：「我哪裡來的甜蜜的家庭？我從小就無父無母……」"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "結論【 段10 】",
-      "value": "1.外在一切可能被奪走，但仍能決定用什麼【　　　】回應遭遇。\n2.提出意義治療法，幫助人找到【　　　】，走出可以前進的一步。",
-      "interactive_type": "fill_blank"
+      "blank_in_label": true,
+      "interactive_type": "fill_blank",
+      "label": "落差焦點【　　　】",
+      "value": "□1.技巧落差：吹口琴很熟練 vs 歌唱很走音 \n2.情緒落差：甜蜜的家庭 vs 不堪提起的家庭"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "凸顯重點【 依序將重點填入句中 】",
+      "value": "作者用「  歌名甜蜜的家庭  」對比「 自己不堪提起的家庭   」，想凸顯的是：爸爸想到自己的【　　　】，所以情緒才會被放大。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "回到理解",
+      "value": "接下來讀例子時，請注意：恩人不只幫忙解決生活問題，也可能在他想起傷口時，仍有人用行動讓他感到溫暖、不孤單。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "當壞事已不可逆轉：集中營裡的一門課",
+  "title": "第二組(段10)「（爸爸）說著說著，哼起歌來……泫然欲泣……『我哪裡來的甜蜜的家庭？我從小就無父無母……』」",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "問題（段1）",
-      "value": "遇上【　　　】的壞事，人還可能過著【　　　】嗎？"
+      "label": "對比句型",
+      "value": "【　　　】VS 【　　　】"
     },
     {
       "kind": "pair",
-      "label": "背景（段2-4）",
-      "value": "1.二戰期間的【　　　】使猶太人被送往【　　　】；法蘭柯全家被捕並在月台面臨【　　　】。\n2.青壯年被挑選進營區成為【　　　】；老人、小孩與病人往往【　　　】，被屠殺。\n3.在生不如死的煎熬裡，法蘭柯卻親眼看見人的【　　　】。"
+      "label": "關鍵詞",
+      "value": "甜蜜的家庭／無父無母的家庭"
+    },
+    {
+      "items": [
+        {
+          "label": "A：甜蜜意象\n①歌名是「甜蜜的家庭」",
+          "value": "B：落淚情緒\n①爸爸唱著唱著泫然欲泣\n②爸爸說：「我哪裡來的甜蜜的家庭？我從小就無父無母……」"
+        }
+      ],
+      "kind": "section_block",
+      "section": "文句內容"
     },
     {
       "kind": "pair",
-      "label": "舉例-意義的證據（段5-9)",
-      "value": "1.仍分享最後一口麵包：情況壞到極點，人仍能決定自己【　　　】的高度。\n2.獄卒辱罵羞辱：我們不能阻止別人說什麼，但可以選擇不讓【　　　】定義我。\n3.女子將死仍感恩：在死亡前一刻，有人能靠【　　　】而感恩。\n4.寒夜長途跋涉：靠著愛與期待，受苦的人仍能得到【　　　】。\n5.仍看見黎明之美：人仍保有對【　　　】的感受力，並因此短暫脫離【　　　】。"
+      "label": "落差焦點(二選一)",
+      "value": "□1.技巧落差：吹口琴很熟練 vs 歌唱很走音 \n2.情緒落差：甜蜜的家庭 vs 不堪提起的家庭"
     },
     {
       "kind": "pair",
-      "label": "結論(段10)",
-      "value": "1.外在一切可能被奪走，但仍能決定用什麼【　　　】回應遭遇。\n2.提出意義治療法，幫助人找到【　　　】，走出可以前進的一步。"
+      "label": "凸顯重點(依序將重點填入句中)",
+      "value": "作者用「  歌名甜蜜的家庭  」對比「 自己不堪提起的家庭   」，想凸顯的是：爸爸想到自己的【　　　】，所以情緒才會被放大。"
+    },
+    {
+      "kind": "pair",
+      "label": "回到理解",
+      "value": "接下來讀例子時，請注意：恩人不只幫忙解決生活問題，也可能在他想起傷口時，仍有人用行動讓他感到溫暖、不孤單。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "問題【 段1 】",
-      "背景【 段2-4 】",
-      "舉例-意義的證據【 段5-9 】",
-      "結論【 段10 】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

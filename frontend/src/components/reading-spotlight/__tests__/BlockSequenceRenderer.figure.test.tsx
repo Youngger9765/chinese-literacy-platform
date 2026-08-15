@@ -32,7 +32,7 @@ const STORY: Story = {
   id: '1234',
   title: '巴斯德的鵝頸瓶',
   content: ['課文段落'],
-  level: 7,
+  level: '7',
   thumbnail: '',
   category: 'Daily',
   filename: '',

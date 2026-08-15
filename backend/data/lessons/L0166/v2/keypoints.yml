@@ -1,0 +1,63 @@
+keypoints:
+  lesson: 體-L11
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 經驗連結
+    sub_rows:
+    - sub_label: '1'
+      template: '團隊分工中，常出現的三種角色：(可複選)
+
+        ①習慣一個人扛起所有事情
+
+        ②不放心交給夥伴，總是擔心出錯
+
+        ③很希望被相信，卻得不到信任
+
+        □④積極配合組員，努力貢獻能力'
+      blanks: []
+  - label: 舉例說明
+    sub_rows:
+    - sub_label: 2-5
+      template: '舉例一：__比賽
+
+        接棒時能相信隊友，不用一直__
+
+        舉例二：世界 12 強__賽
+
+        隊長陳傑憲相信他的__，團隊互相合作，拿下了比賽的__'
+      blanks:
+      - answer: 大隊接力
+        hint: ''
+      - answer: 回頭
+        hint: ''
+      - answer: 棒球
+        hint: ''
+      - answer: 隊友
+        hint: ''
+      - answer: 冠軍
+        hint: ''
+  - label: 提出與回應質疑
+    sub_rows:
+    - sub_label: 6-7
+      template: "1.大家常見的質疑：有的人不值得__；有的人不被相信。\n2.回應質疑：不是只能在「冒險相信」或是「全部自己來」之間二選一，可以練習把任務內容、【\
+        \  完成標準                   \n     】和__說清楚。"
+      blanks:
+      - answer: 信任
+        hint: ''
+      - answer: 下一步行動
+        hint: ''
+  - label: 統整結論
+    sub_rows:
+    - sub_label: '8'
+      template: '1.成為值得信任的人：答應的事要做到；失誤後願意承擔責任並__。
+
+        2.給予夥伴成熟的信任：不要求對方永遠完美，而是看見他願意__，並一起補救。'
+      blanks:
+      - answer: 修正補救
+        hint: ''
+      - answer: 負責的行動
+        hint: ''
+  title: 因為相信，所以能向前

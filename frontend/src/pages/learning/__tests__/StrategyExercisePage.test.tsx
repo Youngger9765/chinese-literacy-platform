@@ -52,7 +52,7 @@ import type { Story } from '../../../types';
 const baseStory: Story = {
   id: 'L-test',
   title: '贏得喝采的輸家',
-  level: 5,
+  level: '5',
   content: ['段落一', '段落二'],
   thumbnail: '/thumb.jpg',
   category: 'Fable',

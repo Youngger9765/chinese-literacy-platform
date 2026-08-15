@@ -1,0 +1,38 @@
+keypoints:
+  lesson: G6-L9
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 起因
+    value: 病人的狀況不好，家屬想請乩童來看看病人。
+    blanks: []
+  - label: 陳醫師想法
+    value: "1.請乩童來看病人，這是家屬的__。\n2.病人預後不樂觀，陳醫師認為現在更重要的是__、減少遺憾。\n3.有些醫師拒絕乩童或符水，可能有哪些原因？（複選）\n\
+      ①認為這些東西很迷信、很無知 \n②認為自己專業受到挑戰\n③感覺自己不被信任\n4.陳醫師為什麼不拒絕民間信仰進入醫院？\n(1)把這件事用平常心看待，家屬只是想盡__。\n\
+      (2)乩童、符水其實就是家屬的__。"
+    blanks:
+    - answer: 心意
+      hint: ''
+    - answer: 讓家屬安心
+      hint: ''
+    - answer: 一份心力
+      hint: ''
+    - answer: 祝福
+      hint: ''
+  - label: 請神明會診
+    value: '1.陳醫師自我介紹及說明病情，並感謝乩童的協助。
+
+      2.乩童作法後，代替病人向家屬說了一番話，並給了他們大大的__。'
+    blanks:
+    - answer: 擁抱
+      hint: ''
+  - label: 結果
+    value: 陳醫師由衷感謝乩童對家屬的__、__，療癒了家屬的心靈。
+    blanks:
+    - answer: 關懷
+      hint: ''
+    - answer: 同理
+      hint: ''
+  title: 給神明發會診單

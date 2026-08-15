@@ -1,0 +1,52 @@
+keypoints:
+  lesson: G5-L7
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 大主題
+    value: 以植物為師的科學
+    blanks: []
+  - label: 小主題
+    sub_rows:
+    - sub_label: 會飛的小種子
+      template: 跟著太陽轉的花苞 滾來滾去的草球
+      blanks: []
+  - label: 細節
+    sub_rows:
+    - sub_label: 植物的特性
+      template: '楓樹的種子從樹上飄落時，會像小直升機一樣__ 向日葵花苞整天追逐太陽，具有
+
+        __ 風滾草的草球藉著強風在原野翻滾和轉動，藉此__。'
+      blanks:
+      - answer: 旋轉降落
+        hint: ''
+      - answer: 向陽性
+        hint: ''
+      - answer: 散播種子
+        hint: ''
+    - sub_label: 科學家的設計
+      template: 只有__翅膀的飛行機器人 自動調整角度的__ 風吹時，會滾來滾去的__
+      blanks:
+      - answer: 一片
+        hint: ''
+      - answer: 仿生太陽能板
+        hint: ''
+      - answer: 探測器
+        hint: ''
+    - sub_label: 功能
+      template: 構造簡單，體積小、省電。沒電時它會__而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓__大幅提升。 探測器靠火星上的強風滾動，可以快速探索__地表。
+      blanks:
+      - answer: 盤旋
+        hint: ''
+      - answer: 發電量
+        hint: ''
+      - answer: 火星
+        hint: ''
+  - label: 總結
+    value: 植物有許多聰明的生存技巧，為人類帶來__。
+    blanks:
+    - answer: 無限啟發
+      hint: ''

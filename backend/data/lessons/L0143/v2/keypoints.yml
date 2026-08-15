@@ -1,0 +1,45 @@
+keypoints:
+  lesson: G9-L22
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 探究問題
+    value: 高地訓練有助於運動表現嗎？
+    blanks: []
+  - label: 答案
+    value: 不一定，因人而異。
+    blanks: []
+  - label: 支持證據
+    sub_rows:
+    - sub_label: 研究一
+      template: 在高地，紅血球生成素的濃度變化__。
+      blanks:
+      - answer: 因人而異
+        hint: ''
+    - sub_label: 研究二
+      template: '(1)重複研究一的結論，高地訓練對紅血球增生效果因人而異
+
+        (2)高地訓練後，紅血球增加者5000公尺成績__；         紅血球未增加者成績反而略為__。'
+      blanks:
+      - answer: 進步
+        hint: ''
+      - answer: 退步
+        hint: ''
+    - sub_label: 研究三
+      template: '玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生__，對運動員來說
+
+        __是好事。'
+      blanks:
+      - answer: 血栓
+        hint: ''
+      - answer: 未必/不一定/不見得
+        hint: ''
+  - label: 研究結論
+    value: 高地訓練需要考量__，才可能得到最好成效。
+    blanks:
+    - answer: 個別差異
+      hint: ''
+  title: 高地訓練有助於運動表現嗎？

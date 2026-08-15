@@ -1,0 +1,49 @@
+spotlight:
+  lesson: G5-L24
+  strategy_name: 提取上位概念-從具體描述提取上位概念
+  strategy_type: main_idea_inference
+  blocks:
+  - type: guide
+    text: ◎小試身手
+  - type: guide
+    text: 以「高砂棒球隊／能高團」為中心，提取相關上位概念。
+  - type: guide
+    text: 一、找出上位概念：請判斷文章中粗楷體文字的上位概念，並從右欄中選出正確答案，填在【    】裡
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 二、練習提取上位概念：請閱讀以下段落，根據內容，填寫對應的上位概念。
+  - type: guide
+    text: 1925年，能高團赴日比賽，首戰面對豐島師範棒球隊，前四局以28比0大幅領先，獲「若武者」稱號。
+  - type: guide
+    text: ◎從這段文章可以看出：
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 「1925」是比賽的【　　時間 　　 】
+    - 「日本」是比賽的【　　地點 　　】
+    - 「豐島師範棒球隊」是比賽的【　　對手　　】
+    - 「28比0」是比賽的【　　比數／結果　　　】
+    - 「若武者」是比賽後他們得到的【　　稱號  　】
+    answer:
+    - 「1925」是比賽的【　　時間 　　 】
+    - 「日本」是比賽的【　　地點 　　】
+    - 「豐島師範棒球隊」是比賽的【　　對手　　】
+    - 「28比0」是比賽的【　　比數／結果　　　】
+    - 「若武者」是比賽後他們得到的【　　稱號  　】
+  - type: guide
+    text: 三、延伸練習：請閱讀以下段落，根據內容，提取上位概念。
+  - type: guide
+    text: 2021年，臺灣羽球選手李洋與王齊麟在東京奧運男子雙打決賽中，以直落二擊敗中國隊，奪下臺灣史上首面奧運羽球金牌。比賽結束後，兩人被媒體譽為「麟
+      洋配」，成為全國矚目的焦點。這場比賽不僅創造歷史，也帶動臺灣羽球熱潮。
+  - type: guide
+    text: ◎請閱讀這段文字後，填寫下表1, 2, 3的細節與上位概念，第4個空格，請你自己找一個細節，並寫出它的上位概念（可參考前面兩大題的作法）：
+  - type: fill_table
+  - type: guide
+    text: 在閱讀聚光燈時，我們整理了部分的上位概念，接著我們要練習從內容那欄中整理的上位概念尋找對應的文章細節，來完成文章重點表。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

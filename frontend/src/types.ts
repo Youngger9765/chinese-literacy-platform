@@ -177,13 +177,13 @@ export interface StrategyExerciseItem {
 export interface Story {
   id: string;
   title: string;
-  level: number;
+  level: string;                // "4".."9" / 文言文 / 品格教育
   content: string[];
   thumbnail: string;
   category: 'Fable' | 'Science' | 'History' | 'Daily';
   filename: string;
   intro?: StoryIntro;
-  grade?: number;               // 4-9
+  grade?: string;               // "4".."9" / 文言文 / 品格教育
   genre?: string;               // 記敘文/說明文/議論文
   readingStrategy?: string;     // for future Intro enhancement
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement

@@ -1,124 +1,76 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "事件起點",
+      "情緒反應",
+      "事件引爆",
+      "轉折"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "感情小日記1──是友情還是愛情？",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "二",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "他主動詢問要幫我交__",
-          "value": "【　　　】\n茫然 害羞 緊張【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "誤會",
+      "value": ""
     },
     {
-      "label": "三",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "__課被分在同一組",
-          "value": "【　　　】漏了一拍【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "事件起點",
+      "value": "1.一位老爺爺上了擁擠的公車，全車已滿座，他只好站在【　　　】旁邊。\n2.博愛座上坐著一位正專心【　　　】的年輕人，沒有注意到老爺爺。"
     },
     {
-      "label": "四",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "習慣看向他、__突然對上、偷偷觀察他",
-          "value": "在乎、緊張、期待【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "情緒反應",
+      "value": "作者【　　　】看了心裡不高興，猶豫著要不要開口提醒他。"
     },
     {
-      "label": "五",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
-          "value": "【　　　】\n溫暖 害羞 興奮【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "事件引爆",
+      "value": "1.公車突然急煞，老人差點【　　　】。\n2.作者以為年輕人佔著博愛座卻不讓位，便大聲斥責，其他乘客也加入【　　　】。"
     },
     {
-      "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發【　　　】的心情。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "轉折",
+      "value": "1.年輕人站起來，手拿一支【　　　】，往車門走。\n2.他每經過每個人，那人的頭就低了下來。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結局反思",
+      "value": "1.作者【　　　】道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者【　　　】反芻那句「我習慣了」，發現自己是無數加害者之一。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "感情小日記1──是友情還是愛情？",
+  "title": "誤會",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "二",
-      "items": [
-        {
-          "label": "他主動詢問要幫我交__",
-          "value": "(勾選，可複選)\n茫然 害羞 緊張【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "三",
-      "items": [
-        {
-          "label": "__課被分在同一組",
-          "value": "【　　　】漏了一拍【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "四",
-      "items": [
-        {
-          "label": "習慣看向他、__突然對上、偷偷觀察他",
-          "value": "在乎、緊張、期待【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "五",
-      "items": [
-        {
-          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
-          "value": "(勾選，可複選)\n溫暖 害羞 興奮【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "事件起點",
+      "value": "1.一位老爺爺上了擁擠的公車，全車已滿座，他只好站在【　　　】旁邊。\n2.博愛座上坐著一位正專心【　　　】的年輕人，沒有注意到老爺爺。"
     },
     {
       "kind": "pair",
-      "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發（ 不知所措  □深情思念 ）的心情。"
+      "label": "情緒反應",
+      "value": "作者（我）看了心裡不高興，猶豫著要不要開口提醒他。"
+    },
+    {
+      "kind": "pair",
+      "label": "事件引爆",
+      "value": "1.公車突然急煞，老人差點【　　　】。\n2.作者以為年輕人佔著博愛座卻不讓位，便大聲斥責，其他乘客也加入【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "轉折",
+      "value": "1.年輕人站起來，手拿一支【　　　】，往車門走。\n2.他每經過每個人，那人的頭就低了下來。"
+    },
+    {
+      "kind": "pair",
+      "label": "結局反思",
+      "value": "1.作者（我）道歉，\n年輕人說：「沒關係，【　　　】。」\n2.作者（我）反芻那句「我習慣了」，發現自己是無數加害者之一。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "他主動詢問要幫我交__",
-      "__課被分在同一組",
-      "習慣看向他、__突然對上、偷偷觀察他",
-      "幫我撿掉在地上的筆、小組討論時叫我的__"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

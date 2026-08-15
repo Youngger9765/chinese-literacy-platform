@@ -1,0 +1,78 @@
+keypoints:
+  lesson: 體-L6
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 事件
+    sub_rows:
+    - sub_label: 阿翔行動／反應
+      template: 阿翔特質
+      blanks: []
+  - label: 寫訓練日誌
+    sub_rows:
+    - sub_label: 內容（①紮實  □②馬虎），一筆一畫都__
+      template: "□①固執倔強  \n②認真細心"
+      blanks:
+      - answer: 專心投入
+        hint: ''
+  - label: 訓練日誌被誇獎
+    sub_rows:
+    - sub_label: 感到（□①洋洋得意  ②不好意思），一邊說「哪有啦！」
+      template: "①謙虛  \n□②冷漠"
+      blanks: []
+  - label: 遇到學長、教練
+    sub_rows:
+    - sub_label: 精神__的問好，並微微鞠躬
+      template: "①有禮貌  \n□②有想法"
+      blanks:
+      - answer: 抖擻
+        hint: ''
+  - label: 聽到教練對大家訓話
+    sub_rows:
+    - sub_label: '（□①充滿自信  ②自我懷疑）
+
+        ，覺得是不是自己沒做好'
+      template: "①容易焦慮  \n□②容易放棄"
+      blanks: []
+  - label: 傳球被教練糾正
+    sub_rows:
+    - sub_label: '__一沉，
+
+        （①很在意  □②不在乎），
+
+        心情__'
+      template: "①沒信心  \n□②沒毅力"
+      blanks:
+      - answer: 臉色
+        hint: ''
+      - answer: 悶悶不樂
+        hint: ''
+  - label: 練習失誤，卻又被選上先發
+    sub_rows:
+    - sub_label: '覺得自己
+
+        （①不夠資格  □②備受肯定）
+
+        ，擔心__大家'
+      template: "□①容易後悔  \n②容易擔心"
+      blanks:
+      - answer: 拖累
+        hint: ''
+  - label: 收到教練和隊友的提醒和鼓勵
+    sub_rows:
+    - sub_label: '心中的烏雲被趕走了，覺得
+
+        （□①自責   ②感謝）'
+      template: "①懂得感恩  \n□②樂於分享"
+      blanks: []
+  - label: 隊友省思
+    value: 面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有__，提醒他多相信__、相信自己，讓「想很多」成為__。
+    blanks:
+    - answer: 力量
+      hint: ''
+    - answer: 隊友
+      hint: ''
+    - answer: 助力
+      hint: ''

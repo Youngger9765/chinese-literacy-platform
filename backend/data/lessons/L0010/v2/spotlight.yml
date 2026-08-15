@@ -1,0 +1,78 @@
+spotlight:
+  lesson: G4-L19
+  strategy_name: 生涯探索-讀書，讓夢想多一條路
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 情境一：運動員的退路
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 智凱是學校羽球隊的王牌，他的夢想是打進國家代表隊。教練提醒他：「如果哪天受傷不能打球，你還有別的計畫嗎？」智凱開始想，如果不能當選手，也許他可以當體能教練或裁判、體育主播。這麼一想，他突然覺得自己該好好讀書了。
+  - type: single
+    prompt: 1.【想方向】你覺得智凱為什麼開始想「讀書」？（單選）
+    options:
+    - 想比同學更厲害
+    - 想改變夢想
+    answer: 想比同學更厲害
+  - type: single
+    prompt: 2.【找能力】以下哪些能力對智凱的未來有幫助？（複選）
+    options:
+    - 英文：出國比賽、與外隊交流　②溝通表達：接受訪問、與隊友合作
+    - 醫學與運動防護：預防受傷　　④分析能力：能分析不同戰術
+    answer: 英文：出國比賽、與外隊交流　②溝通表達：接受訪問、與隊友合作
+  - type: free_text
+    prompt: 3.承第2題，智凱如何學會上述的能力呢？請連連看。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: single
+    prompt: 4.從智凱的例子可以學到：
+    options:
+    - 讀書不是放棄打球，而是讓他擁有【①多
+    - 少】一條能走的路。
+    answer: 讀書不是放棄打球，而是讓他擁有【①多
+  - type: guide
+    text: 情境二：讓作品更有內容
+  - type: guide
+    text: 宥蓁喜歡拍短影片，常常上傳搞笑的片段。但她發現，只靠搞笑，大家看幾次就不想看了。後來，她開始學著寫腳本、學著拍攝並剪輯更精緻的畫面、學著構思主題，她的影片變得更有故事性，也有越來越多人喜歡看。
+  - type: single
+    prompt: 1.【想方向】宥蓁開始「學更多」後，有什麼好處？（複選）
+    options:
+    - 讓作品更有內容         ②讓興趣變成能力
+    - 全心投入拍片，不管課業
+    answer: 讓作品更有內容         ②讓興趣變成能力
+  - type: single
+    prompt: 2.【找能力】根據情境描述，以下哪些能力對宥蓁未來有幫助？（複選）
+    options:
+    - 寫作能力：能想出好看的內容
+    - 唱跳能力：能增加表演效果
+    - 觀察能力：能找到有趣的主題  ④攝影能力：能做出流暢的畫面
+    answer: 寫作能力：能想出好看的內容
+  - type: free_text
+    prompt: 3.承第2題，宥蓁如何學會上述的能力呢？請連連看。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: free_text
+    prompt: 4.從宥蓁的例子可以學到：
+  - type: guide
+    text: 讀書不是放棄興趣，而是讓她【用興趣做更多事／擁有更多能力】。
+  - type: guide
+    text: 情境三：學會為自己多準備
+  - type: guide
+    text: 庭萱很喜歡玩遊戲。有一天，她看到有人能自己設計地圖和角色，便好奇地想：「如果我也會做這些，應該會更好玩吧！」於是，她上網查資料。她發現許多教學影片是英文，就一邊查單字，一邊學習簡單的程式指令，慢慢做出自己的遊戲關卡，還獲得許多網友的支持。
+  - type: free_text
+    prompt: 1.【想方向】你覺得庭萱為什麼會想學新的東西？
+  - type: guide
+    text: 因為她看見別人能設計遊戲，也想挑戰看看 (參考答案)
+  - type: free_text
+    prompt: 2.【找能力】庭萱學會英文和電腦的基礎知識，這對她有什麼幫助？
+  - type: guide
+    text: 英文讓她看懂國外教學影片，電腦知識讓她學會設計地圖、角色   (參考答案)
+  - type: guide
+    text: 結語：有些學習看不出眼前的用途，卻可能在未來為你開啟新的選擇。

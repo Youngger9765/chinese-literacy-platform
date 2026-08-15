@@ -92,7 +92,7 @@ describe('BlockSequenceRenderer — free_text AI grading (#2192)', () => {
       feedback: '你有抓到重點句的方向！',
       suggestion: '',
     });
-    render(<BlockSequenceRenderer spotlight={FREE_TEXT_FIXTURE} story={{ id: '1077', title: '毒鳥', content: ['課文'], level: 6, thumbnail: '', category: 'Daily', filename: '' }} />);
+    render(<BlockSequenceRenderer spotlight={FREE_TEXT_FIXTURE} story={{ id: '1077', title: '毒鳥', content: ['課文'], level: '6', thumbnail: '', category: 'Daily', filename: '' }} />);
 
     fireEvent.change(screen.getByPlaceholderText(/寫下你的答案/), {
       target: { value: '發現超過3000隻野鳥屍體' },

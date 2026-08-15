@@ -1,66 +1,164 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 4,
+    "fill_blank_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "螞 蟻",
+      "①合作\n□②競爭",
+      "合作協力幫助蟻后繁衍後代",
+      "①延續生命\n□②爭取最多資源"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "隱藏在日常對話中的「微歧視」",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "對象項目",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "螞 蟻",
+          "value": "【　　　】 異同比較"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "定義",
-      "value": "微歧視：指的是那些看似微小、隱蔽且多半是\n【　　　】的歧視行為，\n雖不易察覺，但對特定群體影響深遠。【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "行為模式",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1,
+            3
+          ],
+          "interactive_type": "checkbox",
+          "label": "①合作\n□②競爭",
+          "options": [
+            "合作",
+            "競爭 □",
+            "相同",
+            "不同"
+          ],
+          "value": "□①合作\n②競爭 □①相同\n②不同"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "例子分析",
-      "value": "※請勾選出正確答案【　　　】\n1對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n2.對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與憐憫，並剝奪了他參與活動的決定權。\n3.對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "①延續生命的方式□②同類競爭的方式",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "合作協力幫助蟻后繁衍後代",
+          "options": [
+            "相同",
+            "不同"
+          ],
+          "value": "雄蟋蟀彼此競爭，爭取交配機會 □①相同\n②不同"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "影響與特點",
-      "value": "1.微歧視雖然看似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到每個人的   價值觀   中，最終影響整個社會。\n2.微歧視的特點在於它【　　　】，因此難以被發現和改正。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "行為背後的【目標/目的】",
+      "sub_rows": [
+        {
+          "correct_options": [
+            0,
+            2
+          ],
+          "interactive_type": "checkbox",
+          "label": "①延續生命\n□②爭取最多資源",
+          "options": [
+            "延續生命\n□",
+            "爭取最多資源",
+            "相同\n□",
+            "不同"
+          ],
+          "value": "①延續生命\n□②爭取最多資源 ①相同\n□②不同"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "破除方法",
-      "value": "※如何破除微歧視 【　　　】\n破除微歧視的關鍵是　A  ，並且在言行中避免對某個群體產生簡化的刻板印象。\nA.經常反思自己的言行。\nB.對每個人保持低期望。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "人類強加的【道德標準】",
+      "sub_rows": [
+        {
+          "correct_options": [
+            1
+          ],
+          "interactive_type": "checkbox",
+          "label": "__",
+          "options": [
+            "相同",
+            "不同【勤勞節儉】"
+          ],
+          "value": "懶惰、沒骨氣、天兵 □①相同\n②不同【勤勞節儉】"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "隱藏在日常對話中的「微歧視」",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "定義",
-      "value": "微歧視：指的是那些看似微小、隱蔽且多半是\n【　　　】的歧視行為，\n雖不易察覺，但對特定群體影響深遠。(單選)"
+      "items": [
+        {
+          "label": "螞 蟻",
+          "value": "【　　　】 異同比較"
+        }
+      ],
+      "kind": "section_block",
+      "section": "對象項目"
     },
     {
-      "kind": "pair",
-      "label": "例子分析",
-      "value": "※請勾選出正確答案(單選)\n1對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n2.對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與憐憫，並剝奪了他參與活動的決定權。\n3.對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。"
+      "items": [
+        {
+          "label": "①合作\n□②競爭",
+          "value": "□①合作\n②競爭 □①相同\n②不同"
+        }
+      ],
+      "kind": "section_block",
+      "section": "行為模式"
     },
     {
-      "kind": "pair",
-      "label": "影響與特點",
-      "value": "1.微歧視雖然看似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到每個人的   價值觀   中，最終影響整個社會。\n2.微歧視的特點在於它【　　　】，因此難以被發現和改正。"
+      "items": [
+        {
+          "label": "合作協力幫助蟻后繁衍後代",
+          "value": "雄蟋蟀彼此競爭，爭取交配機會 □①相同\n②不同"
+        }
+      ],
+      "kind": "section_block",
+      "section": "①延續生命的方式□②同類競爭的方式"
     },
     {
-      "kind": "pair",
-      "label": "破除方法",
-      "value": "※如何破除微歧視 (填入代號)\n破除微歧視的關鍵是　A  ，並且在言行中避免對某個群體產生簡化的刻板印象。\nA.經常反思自己的言行。\nB.對每個人保持低期望。"
+      "items": [
+        {
+          "label": "①延續生命\n□②爭取最多資源",
+          "value": "①延續生命\n□②爭取最多資源 ①相同\n□②不同"
+        }
+      ],
+      "kind": "section_block",
+      "section": "行為背後的【目標/目的】"
+    },
+    {
+      "items": [
+        {
+          "label": "__",
+          "value": "懶惰、沒骨氣、天兵 □①相同\n②不同【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "人類強加的【道德標準】"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "定義",
-      "例子分析",
-      "影響與特點",
-      "破除方法"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

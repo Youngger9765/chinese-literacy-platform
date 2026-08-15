@@ -13,11 +13,14 @@ export function getDifficulty(story: Story): Difficulty {
   if (story.difficultyLevel === 'easy' || story.difficultyLevel === 'medium' || story.difficultyLevel === 'hard') {
     return story.difficultyLevel;
   }
-  const grade = story.grade;
-  if (grade == null) return 'medium';
-  if (grade <= 5) return 'easy';   // 4-5年級
-  if (grade <= 7) return 'medium'; // 6-7年級
-  return 'hard';                   // 8-9年級
+  // grade is a classification string: "4".."9", 文言文, 品格教育.
+  // The named collections are not a year, so no automatic difficulty applies —
+  // for those a teacher override (difficultyLevel) is the only signal.
+  const year = Number(story.grade);
+  if (!Number.isFinite(year) || !story.grade) return 'medium';
+  if (year <= 5) return 'easy';   // 4-5年級
+  if (year <= 7) return 'medium'; // 6-7年級
+  return 'hard';                  // 8-9年級
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; className: string }> = {

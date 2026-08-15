@@ -1,91 +1,104 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 10,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "開頭",
+      "起因",
+      "母親信念",
+      "沒有胃，無法躺著睡。"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "display",
       "label": "紅領帶",
-      "value": "",
-      "interactive_type": "display"
+      "value": ""
     },
     {
+      "interactive_type": "fill_blank",
       "label": "開頭",
-      "value": "作者繫著【　　　】參加媽媽的【　　　】。",
-      "interactive_type": "fill_blank"
+      "value": "作者繫著【　　　】參加媽媽的【　　　】。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "起因",
-      "value": "作者媽媽得了惡性【　　　】。",
-      "interactive_type": "fill_blank"
+      "value": "作者媽媽罹患惡性【　　　】。"
     },
     {
+      "interactive_type": "fill_blank",
       "label": "母親信念",
-      "value": "落在【　　　】中，都要引以為大【　　　】。",
-      "interactive_type": "fill_blank"
+      "value": "落在【　　　】中，都要引以為大【　　　】。"
     },
     {
-      "label": "母親抗癌經過",
-      "value": "",
       "interactive_type": "display",
+      "label": "母親面對病痛",
       "sub_rows": [
         {
-          "label": "母親遇到的試煉",
-          "value": "轉換觀點",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "不能掌控的事",
+          "value": "媽媽選擇的面對方式"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "沒有胃，無法躺著睡。",
-          "value": "沒有胃，就不會【　　　】。",
-          "interactive_type": "fill_blank"
+          "value": "沒有胃，就不會【　　　】。"
         },
         {
-          "label": "身體很__，只能坐在沙發上看電視。",
-          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "身體很__，\n只能坐在沙發上看電視。",
+          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【　　　】"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "完全不能進食，只能喝一點點水。",
-          "value": "【　　　】。",
-          "interactive_type": "fill_blank"
+          "value": "【　　　】。"
         },
         {
-          "label": "醫生建議放棄治療，接受安寧治療【 面對死亡 】。",
-          "value": "有天會在天父那【　　　】。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "醫生建議不再繼續化療，改接受安寧照護。",
+          "value": "有天會在天父那裡【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "作者實踐母親信念",
-      "value": "",
       "interactive_type": "display",
+      "label": "面對離別",
       "sub_rows": [
         {
-          "label": "面對母親死亡的悲傷",
-          "value": "轉換觀點",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "不能掌控的事",
+          "value": "作者和家人選擇的面對方式"
         },
         {
-          "label": "媽媽臨終了",
-          "value": "打定主意【　　　】陪媽媽最後一段。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "媽媽臨終時",
+          "value": "打定主意【　　　】\n陪媽媽最後一段路。"
         },
         {
-          "label": "媽媽__，作者很傷心。",
-          "value": "感謝上帝結束媽媽在世界上的【　　　】。【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "媽媽__，作者很\n傷心。",
+          "value": "感謝上帝結束媽媽在世界上的\n【　　　】。【　　　】"
         },
         {
-          "label": "媽媽的葬禮",
-          "value": "決定用開心的心情參加葬禮",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "媽媽的葬禮和追思禮拜",
+          "value": "決定用開心的心情參加葬禮"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "fill_blank",
       "label": "影響",
-      "value": "紅領帶提醒作者，即使困難已【　　　】，我們還可以轉換自己的【　　　】。",
-      "interactive_type": "fill_blank"
+      "value": "紅領帶提醒作者，即使事情已【　　　】，我們還可以轉換自己的【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
   "title": "紅領帶",
   "worksheet_rows": [
     {
@@ -96,7 +109,7 @@
     {
       "kind": "pair",
       "label": "起因",
-      "value": "作者媽媽得了惡性【　　　】。"
+      "value": "作者媽媽罹患惡性【　　　】。"
     },
     {
       "kind": "pair",
@@ -104,19 +117,17 @@
       "value": "落在【　　　】中，都要引以為大【　　　】。"
     },
     {
-      "kind": "section_block",
-      "section": "母親抗癌經過",
       "items": [
         {
-          "label": "母親遇到的試煉",
-          "value": "轉換觀點"
+          "label": "不能掌控的事",
+          "value": "媽媽選擇的面對方式"
         },
         {
           "label": "沒有胃，無法躺著睡。",
           "value": "沒有胃，就不會【　　　】。"
         },
         {
-          "label": "身體很__，只能坐在沙發上看電視。",
+          "label": "身體很__，\n只能坐在沙發上看電視。",
           "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【　　　】"
         },
         {
@@ -124,50 +135,39 @@
           "value": "【　　　】。"
         },
         {
-          "label": "醫生建議放棄治療，接受安寧治療（面對死亡）。",
-          "value": "有天會在天父那【　　　】。"
+          "label": "醫生建議不再繼續化療，改接受安寧照護。",
+          "value": "有天會在天父那裡【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "母親面對病痛"
     },
     {
-      "kind": "section_block",
-      "section": "作者實踐母親信念",
       "items": [
         {
-          "label": "面對母親死亡的悲傷",
-          "value": "轉換觀點"
+          "label": "不能掌控的事",
+          "value": "作者和家人選擇的面對方式"
         },
         {
-          "label": "媽媽臨終了",
-          "value": "打定主意【　　　】陪媽媽最後一段。"
+          "label": "媽媽臨終時",
+          "value": "打定主意【　　　】\n陪媽媽最後一段路。"
         },
         {
-          "label": "媽媽__，作者很傷心。",
-          "value": "感謝上帝結束媽媽在世界上的【　　　】。【　　　】"
+          "label": "媽媽__，作者很\n傷心。",
+          "value": "感謝上帝結束媽媽在世界上的\n【　　　】。【　　　】"
         },
         {
-          "label": "媽媽的葬禮",
+          "label": "媽媽的葬禮和追思禮拜",
           "value": "決定用開心的心情參加葬禮"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "面對離別"
     },
     {
       "kind": "pair",
       "label": "影響",
-      "value": "紅領帶提醒作者，即使困難已【　　　】，我們還可以轉換自己的【　　　】。"
+      "value": "紅領帶提醒作者，即使事情已【　　　】，我們還可以轉換自己的【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 10,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "開頭",
-      "起因",
-      "母親信念",
-      "沒有胃，無法躺著睡。"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

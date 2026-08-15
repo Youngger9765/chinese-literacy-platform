@@ -1,0 +1,63 @@
+spotlight:
+  lesson: 體-L5
+  strategy_name: 品格力-念頭覺察
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: guide
+    text: 練習一：辨識藍海豚──判斷文章中，作者提出的「藍海豚」，分別屬於哪個層面。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: ※前一課〈專注當下，關掉內心的批評噪音〉中，主角因為做了棒式訓練，感受到肌肉越來越痠，呼吸越來越急，這是
+  - type: single
+    prompt: 請選擇
+    options:
+    - 行動
+    - 問題解決 ）類型的藍海豚。
+    answer: 行動
+  - type: guide
+    text: 練習二：區辨白熊與藍海豚──比較下列相同情境的不同回應，哪個聚焦在白熊（抗拒的念頭），哪個聚焦在藍海豚（新的焦點）？
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 練習三：找出自己的藍海豚──找到自己日常的「藍海豚」，幫助自己在負面念頭冒出來時，可以派上用場。
+  - type: single
+    prompt: 1.使用時機：什麼時候我需要召喚藍海豚？請選出你能察覺的訊號。
+    options:
+    - 我開始反覆重播剛剛的失誤
+    - 我一直想「不要緊張」
+    - 我心跳變快／手心冒汗
+    - 我腦中出現「都是我害的」
+    - 我一直在想別人會怎麼看我
+    - 其他：____________________
+    answer: 我開始反覆重播剛剛的失誤
+  - type: free_text
+    prompt: 2.選擇策略：勾選你覺得適合你或可能有效的方法。
+  - type: free_text
+    prompt: ３.檢核成效：請選出藍海豚出現的訊號。
+  - type: guide
+    text: 我們不需要把白熊趕走，只要做到：
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 念頭音量小一點點
+    - 能將注意力回到當下30秒
+    - 能開始採取行動，做到第一步
+    - 其他：___________________
+    answer:
+    - 念頭音量小一點點
+    - 能將注意力回到當下30秒
+    - 能開始採取行動，做到第一步
+    - 其他：___________________
+  - type: guide
+    text: ◎總結：給自己一句話帶走召喚藍海豚的魔法──
+  - type: guide
+    text: （例：當我反覆要自己不要緊張時，我可以數呼吸10秒。）
+  - type: guide
+    text: →當我________________________時，我可以____________________。

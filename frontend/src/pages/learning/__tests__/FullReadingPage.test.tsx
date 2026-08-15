@@ -55,7 +55,7 @@ const BACKEND_KNOWN_STEP_KEYS = ['key-passage-reading', 'paragraph-reading', 'fu
 const story: Story = {
   id: '1',
   title: '戴資穎',
-  level: 4,
+  level: '4',
   content: ['段落一', '段落二'],
   thumbnail: '/t.jpg',
   category: 'Nonfiction',

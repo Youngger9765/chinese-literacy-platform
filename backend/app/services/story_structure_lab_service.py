@@ -31,7 +31,32 @@ _REPO_ROOT = _BACKEND_ROOT.parent
 _SCHEMA_DIR = _REPO_ROOT / "private" / "curriculum-source" / "_online-schema"
 _DOCX_SNAPSHOT_DIR = _BACKEND_ROOT / "data" / "qa" / "docx_table_snapshots"
 _QA_REPORT_PATH = _SCHEMA_DIR / "story_structure_qa_report.json"
-_PINNED_STORY_IDS = {item["story_id"] for item in REPRESENTATIVE_LESSONS}
+def _pinned_story_ids() -> set:
+    """Ids of the representative lessons, resolved on first use.
+
+    This was a module-level set comprehension over `REPRESENTATIVE_LESSONS`, which
+    (a) crashed at IMPORT time once that list stopped carrying `story_id` — the
+    second edition retired story_ids — taking down every module that imports this
+    one, and (b) pinned a list of first-edition lessons that no longer exist.
+
+    The representatives are now derived from the live corpus, so they are looked up
+    by the id the tree assigns and computed lazily: importing this module must not
+    require the lesson loader.
+    """
+    global _PINNED_CACHE
+    if _PINNED_CACHE is None:
+        from app.services.lesson_loader import get_lesson_by_code
+
+        ids = set()
+        for item in REPRESENTATIVE_LESSONS:
+            lesson = get_lesson_by_code(item.get("catalog_code") or item.get("parsed_code") or "")
+            if lesson:
+                ids.add(lesson["id"])
+        _PINNED_CACHE = ids
+    return _PINNED_CACHE
+
+
+_PINNED_CACHE: set | None = None
 
 
 def _read_docx_snapshot(parsed_code: str | None) -> dict[str, Any] | None:
@@ -209,7 +234,7 @@ def build_lab_index() -> dict[str, Any]:
                 "qa_gates": {**qa_gates, "L3_live": live_l3},
                 "known_data_gap": known_gap,
                 "overall_pass": overall_pass,
-                "pinned": story_id in _PINNED_STORY_IDS,
+                "pinned": story_id in _pinned_story_ids(),
             }
         )
 
@@ -250,7 +275,7 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
         "catalog_code": catalog_code,
         "parsed_code": parsed_code,
         "tier": tier.value,
-        "pinned": story_id in _PINNED_STORY_IDS,
+        "pinned": story_id in _pinned_story_ids(),
         "known_data_gap": known_gap,
         "yaml_table": yaml_table,
         "yaml_rows": lesson.get("story_structure_rows"),

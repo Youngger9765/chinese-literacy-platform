@@ -1,0 +1,220 @@
+spotlight:
+  lesson: G7-L17
+  strategy_name: 自我提問策略1-讀出重點
+  strategy_type: self_questioning
+  blocks:
+  - type: guide
+    text: '自我提問策略：一邊讀、一邊問自己的讀書方法
+
+      你閱讀時，會不會一邊讀，一邊在心裡問自己問題？例如「這段在講什麼？」「哪些句子最重要？」
+
+      這種一邊讀、一邊問自己的方法，叫做自我提問策略。它可以幫助你更容易讀懂文章內容。
+
+      這一課，我們先練習一個最常用的自我提問：「這段主要在說什麼？」讀文章時，若你能停一下，問自己這個問題，再回到文章找出能回答這個問題的關鍵詞句，就能幫助自己抓住這段的主要意思。這一課要學的步驟是：
+
+      停一下→問「這段主要在說什麼？」→找關鍵詞句→說出重點'
+  - type: guide
+    text: 一、一邊讀，一邊問
+  - type: guide
+    text: 右欄的提問，是提醒你在關鍵地方停下來想一想。看到問題時，請做兩件事：
+  - type: free_text
+    prompt: ❶先在心裡回答這個問題。
+  - type: free_text
+    prompt: ❷在課文中，圈出可以支持你回答的句子或關鍵詞。
+  - type: guide
+    text: 二、比較看看：自我提問後，有沒有幫助你抓到這段重點？
+  - type: guide
+    text: 讀完第3段後，先看看你現在比較接近哪一種理解？請打勾。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null
+  - type: guide
+    text: 如果你勾①或②，沒關係，表示你已經抓到一部分內容。接下來，我們要用自我提問，幫自己把理解推到最高級的層級③。
+  - type: single
+    prompt: 1.第3段，如果我要讀到層級③，最需要問自己哪一個問題？(單選)
+    options:
+    - 這段主要在說什麼？
+    - 這段的主角是誰？它做了什麼？
+    - 這段文字有什麼值得記憶的地方？
+    answer: 這段主要在說什麼？
+  - type: single
+    prompt: 2.找重點時，要回到文章找線索，底下哪兩句最能直接說明「如何從蜘蛛結的網判斷天氣」？（４選２）
+    options:
+    - 蜘蛛的絲纖細到幾乎隱形，又怕風、又怕雨。
+    - 如果即將下雨，蜘蛛察覺到空氣中的濕度，就不會浪費力氣結大網。
+    - 看到蜘蛛在結大網，代表空氣是乾的，天氣會穩定，可能還會放晴。
+    - 蜘蛛網縮得很小，甚至整張網都不見了，也許就是快要下雨的信號。
+    answer: 看到蜘蛛在結大網，代表空氣是乾的，天氣會穩定，可能還會放晴。
+  - type: single
+    prompt: 3.「這段主要在說什麼？」這個問題可以幫我什麼忙？(單選)
+    options:
+    - 幫我找出作者最後真正想表達的觀點。
+    - 幫我把細節整理成比較完整的段落重點。
+    answer: 幫我把細節整理成比較完整的段落重點。
+  - type: free_text
+    prompt: 4.你發現了嗎？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 問自己「這段主要在說什麼？」可以幫你確認：我是不是只抓到一個詞或一個細節？還是已經抓到這段比較完整的重點？
+  - type: guide
+    text: 三、換你試試看：讀完一段，先問自己
+  - type: guide
+    text: 現在換你試試看。每讀完一段，請照著本課方法完成：
+  - type: guide
+    text: 停一下→ 問「這段主要在說什麼？」→找關鍵詞句→說出重點
+  - type: guide
+    text: 下面的練習，請完成兩件事：
+  - type: free_text
+    prompt: ❶ 找關鍵詞句：找最能回答「這段主要在說什麼？」的詞句
+  - type: free_text
+    prompt: ❷ 選出完整重點：選出最能說出這段主要意思的答案
+  - type: guide
+    text: （一）第5段：蟋蟀叫聲
+  - type: free_text
+    prompt: ❶ 找關鍵詞句
+  - type: single
+    prompt: 哪些句子最能幫你說出「蟋蟀叫聲怎麼幫人估算氣溫」？請先選兩個。
+    options:
+    - 有位農夫宣稱，他可以從蟋蟀叫聲的頻率，判斷現在的氣溫大概幾度。
+    - 科學家的確發現氣溫越高，蟋蟀叫得越快。
+    - 數一數8秒內叫了幾聲，再把數字加5，就是現在的氣溫。
+    answer: 科學家的確發現氣溫越高，蟋蟀叫得越快。
+  - type: free_text
+    prompt: ❷ 說出重點
+  - type: single
+    prompt: 這段主要在說什麼？(單選)
+    options:
+    - 蟋蟀叫聲的快慢，可以幫助人們估算氣溫。
+    - 有位農夫很會觀察蟋蟀，知道牠們叫幾聲。
+    answer: 蟋蟀叫聲的快慢，可以幫助人們估算氣溫。
+  - type: guide
+    text: （二）第6段：毛小孩的行為
+  - type: free_text
+    prompt: ❶ 找關鍵詞句
+  - type: single
+    prompt: 哪些句子最能幫你說出「下雨前，貓狗可能出現什麼行為」？請先選兩個。
+    options:
+    - 狗狗可能會一直在屋子裡走來走去、發出低鳴。
+    - 貓咪可能變得特別愛躲藏，或身體有不定時的抽搐。
+    - 下雨前，空氣中的濕氣提高，氣壓降低。
+    - 除了蜘蛛、蟋蟀之外，你家的毛小孩也會偷偷告訴你天氣的祕密。
+    answer: 狗狗可能會一直在屋子裡走來走去、發出低鳴。
+  - type: free_text
+    prompt: ❷ 說出重點
+  - type: single
+    prompt: 這段主要在說什麼？(單選)
+    options:
+    - 下雨前，貓狗可能出現焦躁、躲藏等異常行為。
+    - 貓狗的毛髮乾爽度會受到濕氣和氣壓影響。
+    answer: 下雨前，貓狗可能出現焦躁、躲藏等異常行為。
+  - type: guide
+    text: （三）第7段：天空現象
+  - type: free_text
+    prompt: ❶ 找關鍵詞句
+  - type: single
+    prompt: 哪些句子最能幫你說出「天空現象可以提示天氣變化」？請先選兩個。
+    options:
+    - 所謂「暈」就是圍繞著太陽或月亮的光環。
+    - 看到日暈，可能夜裡會下雨，看到月暈，隔天白天可能會起風。
+    - 高空有層很薄的冰晶雲，把光折射開來，我們才會看到日暈或月暈。
+    - 星星或遠山變得清楚，通常預示天氣即將轉晴或變涼。
+    answer: 看到日暈，可能夜裡會下雨，看到月暈，隔天白天可能會起風。
+  - type: free_text
+    prompt: ❷ 說出重點
+  - type: single
+    prompt: 這段主要在說什麼？(單選)
+    options:
+    - 日暈和月暈是高空冰晶雲折射光線形成的自然現象。
+    - 日暈、月暈和天空清晰度，都可能透露天氣變化。
+    answer: 日暈、月暈和天空清晰度，都可能透露天氣變化。
+  - type: guide
+    text: 四、我的發現與自我檢核
+  - type: free_text
+    prompt: 1.我的發現：
+  - type: single
+    prompt: 做完上面的練習後，請選出「自我提問策略」的功能：(單選)
+    options:
+    - 問「這段主要在說什麼？」只是幫我找出段落裡出現最多次的詞。
+    - 問「這段主要在說什麼？」可以幫我把重要細節整理成段落重點。
+    answer: 問「這段主要在說什麼？」可以幫我把重要細節整理成段落重點。
+  - type: free_text
+    prompt: 2.自我檢核
+  - type: single
+    prompt: □①我讀完一段時，會停一下問：「這段主要在說什麼？」
+    options:
+    - 我會回到文章找能回答問題的關鍵詞句。
+    - 我不只抓一個詞或一個細節，會試著說出比較完整的段落重點。
+    - 我以後閱讀時，會試著用這個問題幫自己抓住段落重點。
+    answer: 我會回到文章找能回答問題的關鍵詞句。
+  - type: guide
+    text: 接下來做什麼？
+  - type: guide
+    text: 恭喜你完成「自我提問策略」的練習了。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+    - 沒學過這篇課文：請繼續做後面的學習單，從「讀全文－做記號」開始。
+    answer: 已經學過這篇課文：可以跳過後面的學習單，進入下一課。
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：自我提問策略1
+  - type: guide
+    text: ◎ 我的表現
+  - type: free_text
+    prompt: (1)    纖細        ：細小、細緻。
+  - type: free_text
+    prompt: (2)   明察秋毫     ：形容人觀察
+  - type: guide
+    text: 事物仔細，就像能看見秋天鳥獸新長的細毛。
+  - type: free_text
+    prompt: (3)    徵兆、前兆   ：指事情發生
+  - type: guide
+    text: 前所出現的跡象。（提示：有兩個詞）
+  - type: free_text
+    prompt: (4)   遠山如洗     ：形容遠處山
+  - type: guide
+    text: 景清晰明亮，像被清洗過。
+  - type: free_text
+    prompt: (5)   彷彿        ：好像。
+  - type: free_text
+    prompt: (6)    即將       ：表示事情快要發生。
+  - type: free_text
+    prompt: (7)     坐立難安    ：形容人或動
+  - type: guide
+    text: 物心情焦躁、不安穩，坐也不是、站也不是。
+  - type: free_text
+    prompt: (8)    焦躁不安    ：焦急不耐煩
+  - type: guide
+    text: 的樣子。
+  - type: free_text
+    prompt: (9)   歷歷在目    ：通常形容記憶
+  - type: guide
+    text: 中的畫面清楚的在眼前。本文則指畫面很清楚。
+  - type: free_text
+    prompt: (10)    頻率       ：指在一段時
+  - type: guide
+    text: 間內同一件事情發生的次數。發生次數越多，頻率就越高。
+  - type: free_text
+    prompt: (1)他因車禍被送進醫院，在急診室外的家屬(  I  )，不停來回踱步。
+  - type: free_text
+    prompt: (2)這位警察辦案非常認真，總是能(  D  )，順利破案。
+  - type: free_text
+    prompt: (3)雨後的清晨，空氣格外清新，抬頭望去，(　B　)，景物看得一清二楚。
+  - type: free_text
+    prompt: (4)那天看牙醫的恐怖經驗(  G  )，讓我想到就不寒而慄。
+  - type: free_text
+    prompt: (5)她流鼻水可能是感冒的(  F  )，要及早治療以免加重病情。
+  - type: free_text
+    prompt: (6)這台機器故障的(  C  )太高，該換新的了。
+  - type: free_text
+    prompt: (7)畫家用(  A  )的筆觸畫出雲朵的柔軟感。
+  - type: free_text
+    prompt: (8)天空的雲層很低，(  E  )隨手就能觸碰到。
+  - type: figure
+    referent: table
+    asset: null
+    bind_paragraph: null

@@ -14,15 +14,17 @@ interface LessonPickerProps {
   onChange: (story: Story | null) => void;
 }
 
-function gradeToLevelLabel(grade: number): string {
-  return `第 ${grade} 級`;
+function gradeToLevelLabel(grade: string | undefined): string {
+  // "4".."9" render as 第 N 級; 文言文 / 品格教育 are shown by name.
+  if (!grade) return '';
+  return /^\d+$/.test(grade) ? `第 ${grade} 級` : grade;
 }
 
 const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => {
   const { token } = useAuth();
   const [allStories, setAllStories] = useState<Story[]>([]);
-  const [grades, setGrades] = useState<number[]>([]);
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [grades, setGrades] = useState<string[]>([]);
+  const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
