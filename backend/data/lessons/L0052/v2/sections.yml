@@ -30,7 +30,8 @@ vocab_definitions:
     word: 消耗殆盡
     definition: 因不斷使用而幾乎沒有剩下。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -89,4 +90,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 3
   needs_human_review: true

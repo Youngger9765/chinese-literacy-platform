@@ -29,7 +29,7 @@ import yaml
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
 LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 
-MODULES = ("spotlight", "keypoints", "body", "sections")
+MODULES = ("spotlight", "keypoints", "body", "sections", "metadata", "key_reading")
 
 
 def _is_uid_dir(p: Path) -> bool:

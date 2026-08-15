@@ -1,5 +1,46 @@
 lesson_uid: L0175
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 喃喃自語_
+    definition: 小聲說話、自言自語的樣子。
+  - index: 2
+    word: 良機
+    definition: 良好的時機或機會。
+  - index: 3
+    word: 一步到位_
+    definition: 指事情一次就做到完整或達到目標。
+  - index: 4
+    word: 停損點
+    definition: 指在情緒、行動上，設定一個停止線，避免繼續損失。
+  - index: 5
+    word: 羅盤
+    definition: 用來指示方向的工具；比喻能幫助人判斷方向或做決定的依據。
+  - index: 6
+    word: 截然不同
+    definition: 完全不同。
+  - index: 7
+    word: 躺平
+    definition: 形容遇壓力或困難時，不想努力、選擇放棄。
+  - index: 8
+    word: 義無反顧_
+    definition: 指為了正確或重要的事勇敢向前，不退縮。反顧：回頭看。
+  - index: 9
+    word: 氣餒____
+    definition: 因為遇到困難或失敗而失去信心。
+  - index: 10
+    word: 思維____
+    definition: 指一個人思考事情的方式或習慣。
+  - index: 11
+    word: 懊惱
+    definition: 後悔、煩惱。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 截然不同
@@ -69,4 +110,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

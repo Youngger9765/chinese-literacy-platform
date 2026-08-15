@@ -455,3 +455,354 @@ def test_section_fields_match_the_frontend_contract():
                 f"{lesson['lesson_uid']}: answer {item.get('answer')!r} does not "
                 f"resolve in vocab_bank {sorted(bank)}"
             )
+
+
+# ── 試算表 metadata (#2683) ─────────────────────────────────────────────────
+
+def test_spreadsheet_metadata_reaches_the_api():
+    """課程簡介, 文體, 分類 and video links come from 自學教材總表.xlsx.
+
+    I had reported the intro as unobtainable because the worksheet DOCX has no such
+    section. That was true and beside the point — the first edition never took it
+    from the DOCX either, and `scripts/build_lesson_intro_from_excel.py` had been
+    sitting in the repo the whole time. The check that matters is that the fields
+    arrive, not that a particular source was ruled out."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    counts = {k: sum(1 for l in lessons if l.get(k))
+              for k in ("intro", "genre", "category", "video_links")}
+    assert counts["intro"] >= 140, counts
+    assert counts["genre"] >= 140, counts
+    assert counts["category"] >= 130, counts
+
+
+def test_intro_is_about_the_lesson_not_a_copy_of_it():
+    """An introduction assembled from the opening paragraph would be the lesson
+    again. These are built from the unit topic and reading strategy, so no intro
+    should be a prefix of its own body."""
+    from app.services.lesson_loader import get_all_lessons
+
+    echoes = []
+    for lesson in get_all_lessons():
+        intro = (lesson.get("intro") or {}).get("background") or ""
+        paras = lesson.get("paragraphs") or []
+        if intro and paras and paras[0].startswith(intro[:12]):
+            echoes.append(lesson["lesson_uid"])
+    assert echoes == [], f"intro repeats the body: {echoes[:3]}"
+
+
+def test_metadata_records_which_row_it_matched():
+    """The join is on title, across two sources that spell titles differently. The
+    matched spreadsheet title is stored so a wrong pairing is inspectable — the
+    first edition's images were joined on lesson code and nobody could see that
+    every one of them pointed at a different lesson."""
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    checked = 0
+    for uid in L.available_uids():
+        for f in (L.LESSONS_ROOT / uid).glob("v*/metadata.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8"))
+            assert doc.get("matched_spreadsheet_title"), f"{uid}: no provenance"
+            checked += 1
+    assert checked >= 140, f"only {checked} lessons carry metadata"
+
+
+# ---------------------------------------------------------------------------
+# 重點朗讀 (念順順) — #2683
+#
+# The bug this locks was live on staging: 《十秒的背後》, about a sprinter, played a
+# passage about giving up a seat on a bus. `key_reading_passages.yml` is keyed by
+# lesson code, the second edition renumbered every lesson, and so the lookup kept
+# succeeding and kept returning someone else's paragraph. No error anywhere.
+#
+# The property that catches it is containment: a lesson's reading passage is a
+# quotation from that lesson's own body. A passage from any other lesson fails it,
+# which is what makes this test worth more than counting how many lessons have one.
+# ---------------------------------------------------------------------------
+
+
+def test_key_reading_passage_comes_from_this_lessons_own_body():
+    from app.services.lesson_loader import get_all_lessons
+
+    strangers = []
+    for lesson in get_all_lessons():
+        kr = lesson.get("key_reading")
+        if not kr:
+            continue
+        body = "".join(lesson.get("paragraphs") or [])
+        for para in kr["passage"].split("\n"):
+            if para.strip() and para.strip() not in body:
+                strangers.append((lesson["lesson_uid"], lesson["title"], para[:30]))
+                break
+    assert strangers == [], f"passage is not from this lesson: {strangers[:3]}"
+
+
+def test_key_reading_is_long_enough_for_the_timed_minute():
+    """The worksheet times a one-minute read. A single paragraph runs 145 characters
+    at the median — the student would run out before the timer, which is why the
+    passage accumulates from the anchor instead of stopping at one paragraph."""
+    from app.services.lesson_loader import get_all_lessons
+
+    short = [
+        (l["lesson_uid"], len(l["key_reading"]["passage"]))
+        for l in get_all_lessons()
+        if l.get("key_reading") and len(l["key_reading"]["passage"]) < 120
+    ]
+    assert short == [], f"too short to read for a minute: {short[:5]}"
+
+
+def test_key_reading_is_absent_rather_than_guessed():
+    """35 lessons have no anchor, an anchor past the end of the body, or an anchor
+    the first edition's independent extraction disagreed with. Those read the whole
+    text — degraded, but their own text. Clamping to the nearest paragraph would
+    produce a plausible passage that no teacher marked."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    have = [l for l in lessons if l.get("key_reading")]
+    assert 130 <= len(have) <= len(lessons) - 1, (
+        f"{len(have)}/{len(lessons)} — a jump to full coverage means the withheld "
+        "lessons started being guessed at"
+    )
+    for l in lessons:
+        assert l["has_key_reading"] == bool(l.get("key_reading"))
+
+
+def test_reading_strategy_reaches_the_library_card():
+    from app.services.lesson_loader import get_all_lessons
+
+    have = [l for l in get_all_lessons() if l.get("reading_strategy")]
+    assert len(have) >= 145, f"only {len(have)} lessons carry a reading strategy"
+
+
+# ---------------------------------------------------------------------------
+# 課文完整性 — #2683
+#
+# The body had a 46-character minimum, which is longer than a story's closing line.
+# 《獵人與白牙》 ended on 「白牙已經奄奄一息…然後，永遠閉上了牠的眼睛。」 — 36 characters,
+# dropped, so the lesson was served without its ending. 111 lessons were losing
+# paragraphs this way and nothing reported it: the text was present and plausible,
+# just incomplete. Its own worksheet quotes that line as 第十三段, and the body was
+# ten paragraphs long.
+# ---------------------------------------------------------------------------
+
+
+def test_the_lesson_that_lost_its_ending_has_it_back():
+    from app.services.lesson_loader import get_all_lessons
+
+    hunter = next((l for l in get_all_lessons() if l["lesson_uid"] == "L0009"), None)
+    assert hunter, "L0009 is missing from the tree"
+    body = "".join(hunter["paragraphs"])
+    assert "奄奄一息" in body, "the closing paragraph is gone again"
+    assert len(hunter["paragraphs"]) >= 13, (
+        f"{len(hunter['paragraphs'])} paragraphs — the worksheet cites 第十三段"
+    )
+
+
+def test_short_closing_paragraphs_survive_across_the_collection():
+    """Not just the one lesson: a floor that cuts short paragraphs cuts them
+    everywhere, so this counts how many lessons end on one."""
+    from app.services.lesson_loader import get_all_lessons
+
+    short_ending = [
+        l["lesson_uid"] for l in get_all_lessons()
+        if l.get("paragraphs") and len(l["paragraphs"][-1]) < 46
+    ]
+    assert len(short_ending) >= 18, (
+        f"only {len(short_ending)} lessons end on a short paragraph — a length floor "
+        "is truncating them again"
+    )
+
+
+def test_vocabulary_words_are_not_welded_together():
+    """The 本課語詞 box wraps mid-list and Word does not always put a 、 at the break,
+    so two words arrive fused (「揮之不去起伏」). A fused token is in no lesson's text,
+    which is what this measures — and what marked 42 lessons as mismatched when their
+    definitions were right."""
+    from app.services.lesson_loader import get_all_lessons
+
+    bad = []
+    for lesson in get_all_lessons():
+        words = [i["word"] for i in (lesson.get("vocabulary") or []) if i.get("word")]
+        body = "".join(lesson.get("paragraphs") or [])
+        if not words or not body:
+            continue
+        absent = sum(1 for w in words if w not in body)
+        if absent > len(words) * 0.5:
+            bad.append((lesson["lesson_uid"], absent, len(words)))
+    assert len(bad) <= 12, f"{len(bad)} lessons have vocabulary absent from their text: {bad[:4]}"
+
+
+def test_every_served_choice_question_has_its_answer_among_the_options():
+    """Nothing with a dangling answer reaches a student.
+
+    This locks the WITHHOLDING, not the extraction — verified by mutation: breaking the
+    option regex leaves this test green, because the damaged questions are filtered out
+    upstream and simply never arrive. What that break actually costs is coverage, which
+    is why `test_comprehension_coverage_does_not_slip` exists beside it. Both are
+    needed; neither substitutes for the other."""
+    from app.services.lesson_loader import get_all_lessons
+
+    broken = []
+    for lesson in get_all_lessons():
+        for q in lesson.get("multiple_choice") or []:
+            opts, ans = q.get("options") or [], q.get("answer")
+            if ans is None:
+                continue
+            # The API serves options as a positional list and the answer as its letter,
+            # so A is opts[0]. A letter past the end means an option was lost.
+            idx = ord(str(ans).upper()) - ord("A") if str(ans)[:1].isalpha() else -1
+            if not (0 <= idx < len(opts)) or not str(opts[idx]).strip():
+                broken.append((lesson["lesson_uid"], q.get("question", "")[:24], ans, len(opts)))
+    assert broken == [], f"answer not among options: {broken[:4]}"
+
+
+def test_comprehension_coverage_does_not_slip():
+    """The counterpart to the invariant above.
+
+    A parsing regression does not produce bad data — the gate withholds it — so it
+    shows up only as lessons quietly losing their questions, with every other check
+    still green. This floor catches a broad regression; a narrow one is caught by
+    `test_the_question_whose_option_was_swallowed`, because measurement showed the
+    single-space option bug cost exactly one lesson, and a collection-wide floor
+    cannot see one lesson move.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    have = [l for l in lessons if l.get("multiple_choice")]
+    assert len(have) >= 150, (
+        f"{len(have)}/{len(lessons)} lessons have comprehension questions — "
+        "extraction is losing questions the gate then withholds"
+    )
+
+
+def test_vocabulary_section_coverage_does_not_slip():
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    for field, floor in (("vocabulary", 140), ("fill_in_blank", 132), ("intro", 155)):
+        have = sum(1 for l in lessons if l.get(field))
+        assert have >= floor, f"{field}: {have}/{len(lessons)}, floor {floor}"
+
+
+def test_the_question_whose_option_was_swallowed():
+    """L0018 question 1 prints its four options across two lines with ONE space
+    between each pair. The inline-option pattern demanded two, so option A matched
+    nothing, fell through to the single-option pattern, and took 「B.其中一個重要部分」
+    into its own text. B — the answer — ceased to exist.
+
+    Locked on the lesson rather than on a count: measurement put the cost at exactly
+    one lesson, and no collection-wide floor can see one lesson move.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    lesson = next((l for l in get_all_lessons() if l["lesson_uid"] == "L0018"), None)
+    assert lesson, "L0018 is missing from the tree"
+    q = next((q for q in (lesson.get("multiple_choice") or [])
+              if "一環" in (q.get("question") or "")), None)
+    assert q, "the 一環 question is gone — its options were swallowed again"
+    assert len(q["options"]) == 4, f"{len(q['options'])} options, expected 4"
+    assert "其中一個重要部分" in q["options"][1], (
+        f"option B is not itself: {q['options'][1][:40]}"
+    )
+
+
+def test_the_title_join_is_confirmed_by_an_independent_field():
+    """The spreadsheet is joined on title, and a title join that guesses is how the
+    first edition's covers ended up on the wrong lessons. This checks the join against
+    a field neither side of it controls: the worksheet's own masthead line,
+    「Level 4・記敘文」, written with the lesson rather than in the planning sheet.
+
+    A join that were guessing would agree at chance across six genres. Measured: 130
+    of 146 agree, and the 16 that differ are editorial calls on the same lesson — a
+    letter-writing lesson filed as 說明文 in one place and 應用文 in the other.
+    """
+    from app.services.lesson_loader import get_all_lessons
+    from app.services.lesson_uid_loader import load_all
+
+    fold = lambda s: (s or "").replace("説", "說")
+    pairs = []
+    for l in load_all():
+        sheet = fold((l.get("metadata") or {}).get("genre"))
+        sheet_from_worksheet = fold(((l.get("body") or {}).get("level") or {}).get("genre"))
+        if sheet and sheet_from_worksheet:
+            pairs.append(sheet == sheet_from_worksheet)
+
+    assert len(pairs) >= 120, f"only {len(pairs)} lessons carry both labels"
+    rate = sum(pairs) / len(pairs)
+    assert rate >= 0.80, (
+        f"worksheet and spreadsheet agree on genre for only {rate:.0%} of lessons — "
+        "the title join is pairing lessons with the wrong spreadsheet rows"
+    )
+    # And the served genre must be the worksheet's, not the spreadsheet's.
+    served = [l for l in get_all_lessons() if l.get("genre")]
+    assert len(served) >= 168, f"{len(served)} lessons carry a genre"
+
+
+def test_video_links_carry_the_shape_the_frontend_declares():
+    """`api.ts` declares `{title, url}[]`. Shape mismatches here do not raise — the
+    API returns 200 with a populated field and the step renders wrong or throws, which
+    is how four learning steps broke earlier in this rebuild while every presence check
+    stayed green."""
+    from app.services.lesson_loader import get_all_lessons
+
+    wrong = []
+    for lesson in get_all_lessons():
+        for v in lesson.get("video_links") or []:
+            if not isinstance(v, dict) or not v.get("url") or not v.get("title"):
+                wrong.append((lesson["lesson_uid"], repr(v)[:40]))
+    assert wrong == [], f"video_links is not {{title, url}}: {wrong[:3]}"
+
+
+def test_videos_are_titled_from_the_worksheet_where_both_sources_agree():
+    """URLs come from the spreadsheet, titles from the worksheet — neither source has
+    both. Where the two list the same number of videos the pairing is positional and
+    the student sees the real title; where they disagree the titles are dropped rather
+    than confidently mislabelled."""
+    from app.services.lesson_loader import get_all_lessons
+
+    titled = [
+        l for l in get_all_lessons()
+        if l.get("video_links") and not l["video_links"][0]["title"].startswith("影片 ")
+    ]
+    assert len(titled) >= 100, f"only {len(titled)} lessons show real video titles"
+
+
+def test_the_knowledge_section_stops_at_the_first_index_reset():
+    """知識補給站 is the last section, so when its bounds run long every numbered list
+    after it is swept in. L0029 collected 24 「videos」 — 3 videos and 21 exercise items
+    whose numbering restarted at 1."""
+    from app.services.lesson_uid_loader import load_all
+
+    over = []
+    for l in load_all():
+        items = ((l.get("sections") or {}).get("resources") or {}).get("items") or []
+        idx = [i["index"] for i in items]
+        if idx != sorted(set(idx)) or len(idx) > 8:
+            over.append((l["lesson_uid"], idx[:8]))
+    assert over == [], f"resource indices are not one increasing run: {over[:3]}"
+
+
+def test_a_body_with_no_cross_check_says_so():
+    """Extraction ran and produced text is not the same as extraction was verified.
+
+    29 worksheets name no vocabulary to compare the body against — 11 of them 文言文,
+    which use 古文今譯 rather than a 本課語詞 box — so nothing confirms their boundary.
+    Left unflagged they are indistinguishable from the 111 that passed a real check.
+    """
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    unflagged = []
+    for uid in L.available_uids():
+        for f in (L.LESSONS_ROOT / uid).glob("v*/body.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+            verdict = (doc.get("extraction_check") or {}).get("verdict")
+            if verdict in ("no_vocab", "suspect") and not doc.get("needs_review"):
+                unflagged.append((uid, verdict))
+    assert unflagged == [], f"unverifiable bodies presented as checked: {unflagged[:4]}"

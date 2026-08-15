@@ -1,5 +1,46 @@
 lesson_uid: L0082
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 本能
+    definition: 生物天生就會，不必經過學習的行為或能力。
+  - index: 2
+    word: 此起彼落
+    definition: 這裡起來，那裡落下。形容連續不斷。
+  - index: 3
+    word: 求偶
+    definition: 尋找配偶的行為。
+  - index: 4
+    word: 覓食
+    definition: 找尋食物。
+  - index: 5
+    word: 基因
+    definition: 生物遺傳訊息的基本單位。
+  - index: 6
+    word: 鎮日
+    definition: 整天。
+  - index: 7
+    word: 體現
+    definition: 把抽象的特質具體表現出來。例如：螞蟻的合作精神體現了群體的力量。
+  - index: 8
+    word: 繁衍
+    definition: 生物透過生殖產生後代，使族群延續。
+  - index: 9
+    word: 天兵
+    definition: 原指天神的兵。現在被用來指稱搞不清狀況，做事糊塗或常出錯的人。
+  - index: 10
+    word: 紀律
+    definition: 團體成員共同遵守的規則與秩序。
+  - index: 11
+    word: 片面
+    definition: 只看到事情的一部分，不夠完整。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.69
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 覓食
@@ -38,8 +79,7 @@ vocab_application:
     text: 對陌生的事物提高警覺，是所有動物的（　）反應。
     answer: H
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 片面
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:
@@ -102,4 +142,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 3
   needs_human_review: true

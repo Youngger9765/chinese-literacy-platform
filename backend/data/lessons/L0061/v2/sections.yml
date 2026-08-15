@@ -1,5 +1,43 @@
 lesson_uid: L0061
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 經典
+    definition: 經過時間考驗，仍具有重要價值或代表性的作品或事物。
+  - index: 2
+    word: 一視同仁
+    definition: 對每個人都用相同的態度或方式，不偏向任何人。
+  - index: 3
+    word: 劍及履及
+    definition: 形容行動迅速，立刻去做。
+  - index: 4
+    word: 怯生生
+    definition: 因害怕或不自在，說話、動作顯得小心膽怯。
+  - index: 5
+    word: 目睹
+    definition: 親眼看見事情發生。
+  - index: 6
+    word: 因材施教
+    definition: 依照學生不同的能力、特質與需要，採取適合的教導方式。
+  - index: 7
+    word: 韁繩
+    definition: 繫在馬頭上，用來控制方向和速度的繩子。
+  - index: 8
+    word: 不偏不倚
+    definition: 不偏向任何一方，態度公正。
+  - index: 9
+    word: 對症下藥
+    definition: 針對問題，採取適合的解決方法。
+  - index: 10
+    word: 木訥
+    definition: 不善於表達，說話不多，個性較沉默。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 經典
@@ -38,8 +76,7 @@ vocab_application:
     text: 教練不因球員是主力或替補而偏心，對每個人都 （　）。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 對症下藥
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

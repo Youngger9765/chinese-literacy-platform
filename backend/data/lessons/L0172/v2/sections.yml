@@ -39,7 +39,8 @@ vocab_definitions:
     word: 低潮
     definition: 情緒或狀況不佳的時期。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -82,6 +83,42 @@ vocab_application:
     options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列選項中「  」的語詞，何者使用正確？
+    options:
+      A: 那位高級餐廳的服務生態度親切，詢問也十分「刁鑽」
+      B: 上台前五分鐘他還拿著稿子練習，看起來很「荒謬」
+      C: 聽到這個假消息後，他「氣急敗壞」的說要找出造謠的人
+      D: 他做人不老實，說話常常變來變去，絕對「不可置信」
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 根據第三段，作者說阿翔是「隊上動作最標準、最像教科書的那一個」，這句話最能推論出下列何者？
+    options:
+      B: 描寫比賽競爭激烈，提醒球員必須保持絕對專注
+      C: 說明自我反省的重要，唯有反省才能不斷提升實力
+      D: 藉阿翔的故事，指出特質若運用適宜也能成為助力
+      A: 強調球隊紀律的重要性，說明成功來自嚴格訓練
+    rationale: 從前後文可看出，阿翔的認真努力，而此處的「教科書」有可以效法和標準答案的意思。
+  - index: 5
+    answer: A
+    stem: 根據品格聚光燈，下列關於「特質」的敘述，何者最符合？
+    options:
+      B: 我們不需要刻意隱藏自己的特質，要大方展現
+      C: 某個特質如果帶來困擾，就代表那不是好特質
+      D: 我們可以改變自己的特質，來符合他人的期待
+      A: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.33
+    answers_recovered_from_rationale: 1
+    verdict: ok
 resources:
   items:
   - index: 1
@@ -95,4 +132,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

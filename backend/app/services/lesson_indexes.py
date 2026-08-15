@@ -38,6 +38,76 @@ def _reapply_spotlight_images(lesson: dict) -> None:
     lesson["images"] = merge_spotlight_images(lesson.get("images") or [], spotlight_v2)
 
 
+def _meta(l: dict) -> dict:
+    m = l.get("metadata")
+    return m if isinstance(m, dict) else {}
+
+
+def _key_reading(l: dict) -> dict | None:
+    """The 重點朗讀 passage, shaped for KeyReadingSchema.
+
+    `key_reading.yml` only exists for a lesson whose anchor paragraph was confirmed
+    against the body, so its presence is the check — there is no verdict to re-test
+    here.
+    """
+    kr = l.get("key_reading")
+    if not isinstance(kr, dict) or not kr.get("passage"):
+        return None
+    return {
+        "passage": kr["passage"],
+        "start_text": kr.get("start_text"),
+        "extent_chars": kr.get("extent_chars"),
+        "source": kr.get("source") or "docx-extract",
+    }
+
+
+#: 文體 → the four categories the API contract allows. Mirrors the table in
+#: `scripts/extract_lesson_metadata.py`; kept here because the genre now comes from
+#: the worksheet at serve time rather than from the spreadsheet at build time.
+_GENRE_TO_CATEGORY = {
+    "記敘文": "Fable", "抒情文": "Fable",
+    "說明文": "Science", "説明文": "Science",
+    "議論文": "History", "論說文": "History", "文言文": "History",
+    "應用文": "Daily",
+}
+
+
+def _category_for(genre: str | None, meta: dict) -> str:
+    g = genre or ""
+    if g in _GENRE_TO_CATEGORY:
+        return _GENRE_TO_CATEGORY[g]
+    # Compound labels — 「說明/議論」, 「記敘抒情文」, 「記敘文/科學故事」. Eight lessons
+    # name two forms; the first is the primary one, and the four-way category axis has
+    # nowhere to put a hybrid anyway.
+    for form, cat in _GENRE_TO_CATEGORY.items():
+        stem = form.rstrip("文")
+        if g.startswith(stem):
+            return cat
+    return meta.get("category") or ""
+
+
+def _video_links(l: dict) -> list[dict] | None:
+    """知識補給站's videos, as the `{title, url}` pairs `api.ts` declares.
+
+    The URLs are in the master spreadsheet and the TITLES are in the worksheet — two
+    sources, neither of which has both. Where they list the same number of videos the
+    pairing is taken positionally and the student sees what the video is called;
+    where they disagree the count itself is the warning, so the titles are dropped and
+    a placeholder is used rather than confidently labelling video 2 with video 1's name.
+
+    109 lessons agree, 17 differ, 31 have URLs with no worksheet list, 3 the reverse.
+    """
+    urls = _meta(l).get("video_links") or []
+    if not urls:
+        return None
+    items = (_sections(l).get("resources") or {}).get("items") or []
+    titled = len(items) == len(urls)
+    return [
+        {"title": (items[i]["title"] if titled else f"影片 {i + 1}"), "url": u}
+        for i, u in enumerate(urls)
+    ]
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -183,8 +253,20 @@ def _uid_tree_lessons() -> list[dict]:
             "title": l.get("title"),
             # fields the API schema expects; the uid tree has no genre/category
             # taxonomy yet, so they stay empty rather than being invented.
-            "genre": "",
-            "category": "",
+            # From 自學教材總表.xlsx (#2683). These were hardcoded empty because the
+            # worksheet DOCX carries no taxonomy — but the spreadsheet always has,
+            # and the first edition read it from there too. Reporting the field as
+            # unobtainable was a failure to look at how it had been obtained before.
+            # The worksheet's own masthead over the planning spreadsheet: they disagree
+            # on 16 lessons and the worksheet is the one authored with the lesson.
+            "genre": (((l.get("body") or {}).get("level") or {}).get("genre")
+                      or _meta(l).get("genre") or ""),
+            # Derived from the genre actually served, not from the spreadsheet's —
+            # otherwise a lesson shows 說明文 beside a category computed from 應用文.
+            "category": _category_for(
+                ((l.get("body") or {}).get("level") or {}).get("genre"),
+                _meta(l),
+            ),
             "char_count": (l.get("body") or {}).get("char_count") or 0,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
@@ -194,9 +276,15 @@ def _uid_tree_lessons() -> list[dict]:
                 f"/assets/lesson/{uid}/{_thumbnail_name(uid, l.get('version_id'))}"
                 if _thumbnail_name(uid, l.get("version_id")) else None
             ),
-            "reading_strategy": None,
-            "has_key_reading": False,
-            "intro": None,
+            # 閱讀聚光燈策略 from the master spreadsheet — the reading method the
+            # lesson teaches, shown on the library card and the spotlight step.
+            "reading_strategy": _meta(l).get("strategy") or None,
+            "has_key_reading": bool(_key_reading(l)),
+            # The intro is a sentence about what the lesson is FOR, built from its
+            # unit topic and reading strategy — not the opening paragraph, which
+            # would make "introduction" mean "the lesson, again".
+            "intro": ({"author": "", "background": _meta(l)["intro"]}
+                      if _meta(l).get("intro") else None),
             # 課文本體, extracted from the DOCX section the worksheet calls
             # 讀全文-做記號 (#2683). It was absent for all 175 lessons because the
             # pipeline read paragraphs back out of the layer the re-ink deleted —
@@ -216,6 +304,11 @@ def _uid_tree_lessons() -> list[dict]:
             "vocab_bank": _vocab_bank_from(l) or None,
             "multiple_choice": _mcq_from(l) or None,
             "reading_benchmark": None,
+            # 重點朗讀 (念順順). Absent means the step reads the whole text, which is
+            # what the 2026-07-20 review ruled against but is at least this lesson's
+            # own text — the first-edition table, keyed by code, was serving another
+            # lesson's paragraph aloud.
+            "key_reading": _key_reading(l),
             "text_type": "單",
             "source_file": None,
             "spotlight_v2": (l.get("spotlight") or {}).get("spotlight"),
@@ -225,6 +318,7 @@ def _uid_tree_lessons() -> list[dict]:
             # the same table already structured, so convert rather than regenerate —
             # an AI-written table is not the one the teacher authored.
             "story_structure_table": keypoints_to_structure_table(l.get("keypoints")),
+            "video_links": _video_links(l),
             "assets": l.get("assets") or [],
             "source": "uid_tree",
         }

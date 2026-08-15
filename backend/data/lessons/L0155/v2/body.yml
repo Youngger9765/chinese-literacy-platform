@@ -13,9 +13,12 @@ paragraphs:
 - 後十月，魯梁之民，餓餒相󠇡及，魯梁之君，即令其民.去綈.修農穀，不可以.三月而得，魯梁之人，糴十百，齊糶十錢。二十四月，魯梁之民.歸齊者十分之六，三年，魯梁之君.請服。
 paragraph_count: 9
 char_count: 1036
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0
   vocabulary_total: 0
   ratio: null
   verdict: no_vocab
+needs_review: true
+review_reason: 這份學習單沒有本課語詞，課文邊界無從交叉驗證

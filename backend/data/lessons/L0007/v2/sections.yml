@@ -1,5 +1,46 @@
 lesson_uid: L0007
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 嘲弄
+    definition: 取笑或羞辱別人，讓人難堪。
+  - index: 2
+    word: 調侃
+    definition: 用開玩笑的語氣說話，有時帶點諷刺。
+  - index: 3
+    word: 譏諷
+    definition: 嘲笑、諷刺別人，讓人感到受辱。
+  - index: 4
+    word: 靦腆
+    definition: 害羞、不太敢表現自己。
+  - index: 5
+    word: 飛馳而過
+    definition: 形容速度很快，像風一樣奔馳過去。
+  - index: 6
+    word: 哽咽
+    definition: 因為情緒激動，說不出話或聲音顫抖。
+  - index: 7
+    word: 小心翼翼
+    definition: 形容非常小心，害怕弄壞或做錯。
+  - index: 8
+    word: 輕蔑
+    definition: 看不起人、態度不屑或鄙視。
+  - index: 9
+    word: 歉疚
+    definition: 因為做錯事或傷害別人，心裡感到後悔和不安。
+  - index: 10
+    word: 刮目相看
+    definition: 改變原本看法，重新用欣賞的眼光看待某人。
+  - index: 11
+    word: 忐忑不安
+    definition: 心情緊張、焦慮，不知道會發生什麼事。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.69
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 哽咽
@@ -38,8 +79,7 @@ vocab_application:
     text: 他被三振兩次已經很不好意思了，大家就別再用「台灣巨棒」（　）他了。
     answer: J
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 忐忑不安
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

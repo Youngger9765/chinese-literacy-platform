@@ -13,6 +13,10 @@ paragraphs:
 - 或許你會覺得外太空遙不可及，但請記得，這不是課本裡的冷冰冰的知識，而是與你我生活休戚與共的真實故事。當這八顆衛星全部就位，敏銳的「太空之眼」就會日夜在五百多公里的高空，為我們守望家園。你不一定要會設計衛星，但你可以成為那個「看見臺灣、珍惜臺灣」的人。
 paragraph_count: 9
 char_count: 1299
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

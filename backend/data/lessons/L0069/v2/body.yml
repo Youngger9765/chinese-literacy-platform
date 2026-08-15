@@ -13,9 +13,13 @@ paragraphs:
 - 這場由同學們共同編織的校園思辨對話，給全班留下最酷的一課：盲目堅持己見，或一味妥協退讓，都無助於團體決策。只有當大家願意聽見彼此的需求與難處，用理性的尺衡量得失，用包容的心接納差異，那些看似衝突的絲線，才可能織成一件真正屬於全班的班服。
 paragraph_count: 9
 char_count: 1330
+level:
+  level: 6
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 8
-  vocabulary_total: 13
-  ratio: 0.62
+  vocabulary_found: 9
+  vocabulary_total: 14
+  ratio: 0.64
   verdict: weak

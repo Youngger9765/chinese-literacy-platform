@@ -24,7 +24,8 @@ vocab_definitions:
     word: 平均值
     definition: 把一組數值加起來，再除以數值的個數，得到的代表性數字。例如：50、60、70 公斤的平均值是 60 公斤。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -91,4 +92,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 1
   needs_human_review: true

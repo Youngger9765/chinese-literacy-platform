@@ -39,7 +39,8 @@ vocab_definitions:
     word: 疾駛
     definition: 疾：快；駛：車子行駛。車子開得很快。
   extraction_check:
-    vocabulary_agreement: 0.93
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.86
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -81,8 +82,7 @@ vocab_application:
     text: 豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　）。
     answer: B
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 掠食者
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

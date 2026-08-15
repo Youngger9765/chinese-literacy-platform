@@ -13,9 +13,15 @@ paragraphs:
 - 下次讀文章時，如果遇到冒號、分號、破折號，可以先停一下，想一想：這個號誌正在提醒我什麼？看懂這些小提醒，就比較不會遺漏重點，也能幫助我們找到解題所需的線索。
 paragraph_count: 9
 char_count: 983
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0
   vocabulary_total: 0
   ratio: null
   verdict: no_vocab
+needs_review: true
+review_reason: 這份學習單沒有本課語詞，課文邊界無從交叉驗證

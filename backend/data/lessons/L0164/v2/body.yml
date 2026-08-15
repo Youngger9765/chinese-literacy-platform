@@ -11,9 +11,12 @@ paragraphs:
 - 1.還自揚州：這個句子中的「還」意思是「回來」；「自」的解釋是「從」。配合後方的地名，整句翻譯成「從揚州回來」。
 paragraph_count: 7
 char_count: 627
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0
   vocabulary_total: 0
   ratio: null
   verdict: no_vocab
+needs_review: true
+review_reason: 這份學習單沒有本課語詞，課文邊界無從交叉驗證

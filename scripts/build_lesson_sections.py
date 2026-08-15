@@ -68,7 +68,9 @@ def main() -> int:
         paras = _paragraphs(docx)
         body = extract_body(docx)
         result = extract_all(
-            docx, extract_vocabulary(paras), "".join(body.get("paragraphs") or []),
+            docx,
+            extract_vocabulary(paras, body.get("paragraphs") or []),
+            "".join(body.get("paragraphs") or []),
         )
 
         doc: dict = {"lesson_uid": uid, "version_id": vdir.name}

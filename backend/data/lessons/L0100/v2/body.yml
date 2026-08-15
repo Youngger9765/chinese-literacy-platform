@@ -10,6 +10,10 @@ paragraphs:
 - 感情無法勉強，浪漫更不是誇張的付出或死纏爛打。如果真心喜歡一個人，那就從學習尊重對方開始吧！
 paragraph_count: 6
 char_count: 950
+level:
+  level: 7
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

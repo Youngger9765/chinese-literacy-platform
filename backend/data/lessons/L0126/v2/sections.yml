@@ -39,7 +39,8 @@ vocab_definitions:
     word: 蜂擁而至
     definition: 形容人群像蜜蜂一樣迅速且大量的朝某個方向聚集。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -141,4 +142,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

@@ -42,7 +42,8 @@ vocab_definitions:
     word: 分寸
     definition: 言行舉止的適度與界線。例如，在葬禮中嬉笑，就是「沒有分寸」。
   extraction_check:
-    vocabulary_agreement: 0.81
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.76
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -84,8 +85,7 @@ vocab_application:
     text: 網路已成為現代社會最重要的（　），使資訊得以迅速流通。
     answer: A
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 殊途同歸
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:
@@ -150,4 +150,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

@@ -33,7 +33,8 @@ vocab_definitions:
     word: 未雨綢繆
     definition: 事情還沒發生前，先做好準備。
   extraction_check:
-    vocabulary_agreement: 0.82
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -109,4 +110,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 1
   needs_human_review: true

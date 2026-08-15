@@ -1,5 +1,49 @@
 lesson_uid: L0009
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 凜冽
+    definition: 形容天氣非常寒冷。
+  - index: 2
+    word: 遍體鱗傷
+    definition: 全身都是傷。
+  - index: 3
+    word: 蹭
+    definition: 用身體輕輕靠著、磨一磨，有時是撒嬌。
+  - index: 4
+    word: 奄奄一息
+    definition: 形容生命快要結束，或非常虛弱。
+  - index: 5
+    word: 忠心耿耿
+    definition: 非常忠實，不會背叛或離開。
+  - index: 6
+    word: 毫髮無傷
+    definition: 形容在危險或災難中平安無事，連一點傷都沒有。
+  - index: 7
+    word: 輾󠇡轉難眠
+    definition: 因為緊張、擔心或想太多事，翻來翻去睡不著。
+  - index: 8
+    word: 忐忑不安
+    definition: 心情緊張、焦慮，不知道會發生什麼事。
+  - index: 9
+    word: 淚水奪眶而出
+    definition: 眼淚不由自主的流出來。
+  - index: 10
+    word: 凌亂
+    definition: 雜亂沒有秩序。
+  - index: 11
+    word: 威風凜凜
+    definition: 看起來很有氣勢，讓人覺得厲害或很強。
+  - index: 12
+    word: 不寒而慄
+    definition: 形容在極度恐懼之下，明明不冷，卻在發抖。
+  extraction_check:
+    defined_words_belong_to_lesson: 0.92
+    vocabulary_bank_covered: 0.69
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 凌亂
@@ -84,4 +128,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

@@ -10,6 +10,10 @@ paragraphs:
 - 大多數災難預言缺乏科學根據，常靠模糊語言吸引注意，我們無須過度恐慌。雖然這些預言並不可信，但有時也會提醒人們重新關心防災。像2025年7月5日的大地震預言，就讓不少人重新重視地震防災準備。面對災難，與其聽信末日傳言，不如平時就具備風險意識與防災能力，並多留意專業機構發布的資訊。
 paragraph_count: 6
 char_count: 1155
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 7

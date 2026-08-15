@@ -1,5 +1,43 @@
 lesson_uid: L0120
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 毛骨悚然
+    definition: 讓人感到毛髮直立、背脊發涼，形容極度害怕。
+  - index: 2
+    word: 週期
+    definition: 指的是一定的時間間隔，定期的重複發生。
+  - index: 3
+    word: 喑啞無聲
+    definition: 發不出聲音。
+  - index: 4
+    word: 癱瘓
+    definition: 失去行走的能力。
+  - index: 5
+    word: 窮凶極惡
+    definition: 形容人十分凶惡。
+  - index: 6
+    word: 乍見
+    definition: 忽然看見。
+  - index: 7
+    word: 引人入勝
+    definition: 故事或景物很吸引人，引起人們極大的興趣。
+  - index: 8
+    word: 睡眼惺忪
+    definition: 剛睡醒，眼神模糊，神智不清醒的樣子。
+  - index: 9
+    word: 啟人疑竇
+    definition: 讓人開始懷疑事情的合理性。
+  - index: 10
+    word: 閃爍
+    definition: 光線快速閃動的樣子。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 引人入勝
@@ -31,8 +69,7 @@ vocab_application:
     text: （　）這座老屋時，只覺得它歷史悠久；走近細看，才發現牆上保留著精緻的雕花。
     answer: H
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 喑啞無聲
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:
@@ -86,4 +123,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 3
   needs_human_review: true

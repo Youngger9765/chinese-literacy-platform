@@ -1,5 +1,43 @@
 lesson_uid: L0115
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 眾說紛紜
+    definition: 眾說：很多人的說法；紛紜：雜亂、不相同。大家說法很多、意見不一致。
+  - index: 2
+    word: 兵凶戰危
+    definition: 戰爭可能發生，局勢十分緊張不安。
+  - index: 3
+    word: 系統性風險
+    definition: 不是單一問題，而是整個系統連鎖出問題的大風險。
+  - index: 4
+    word: 因噎廢食
+    definition: 因為害怕出問題，便停止原本有益的作法，反而失去應有的好處。
+  - index: 5
+    word: 風靡
+    definition: 非常流行，迅速受到很多人喜愛與追捧。
+  - index: 6
+    word: 置身事外
+    definition: 置：放；事外：事情之外。把自己放在事情之外，認為事情與自己無關。
+  - index: 7
+    word: 捉襟見肘
+    definition: 捉襟：拉住前襟；見肘：露出手肘。資源不夠用，怎麼安排都很吃緊。
+  - index: 8
+    word: 尤有甚者
+    definition: 更糟的是、甚至更過分的是（用來加重後面情況）。
+  - index: 9
+    word: 權衡
+    definition: 把不同選項的利弊放在一起比較，再做選擇。
+  - index: 10
+    word: 鄰避效應
+    definition: 大家知道某設施「有需要」，但不希望蓋在自己家附近（例如垃圾場、核廢料）。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 眾說紛紜
@@ -38,9 +76,7 @@ vocab_application:
     text: 團隊出現問題，主管若（　），只會讓衝突擴大。
     answer: G
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 眾說紛紜
-    - 權衡
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

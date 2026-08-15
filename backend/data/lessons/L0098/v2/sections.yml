@@ -1,5 +1,43 @@
 lesson_uid: L0098
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 開場白
+    definition: 指對話或演講開始時所說的話。
+  - index: 2
+    word: 偏見
+    definition: 還沒有充分了解一個人或一件事，就先有固定、不公平的看法。
+  - index: 3
+    word: 隱蔽
+    definition: 不易被發現或察覺。
+  - index: 4
+    word: 屢見不鮮
+    definition: 經常看到，並不新奇。
+  - index: 5
+    word: 滲透
+    definition: 液體在物體中慢慢穿透的現象，用以比喻思想或勢力逐漸侵入或影響其他領域。
+  - index: 6
+    word: 日積月累
+    definition: 隨著時間一天天過去，經歷長時間的累積。
+  - index: 7
+    word: 無傷大雅
+    definition: 指事情雖有些錯誤或不完美，但影響不大。
+  - index: 8
+    word: 憐憫
+    definition: 看見別人弱小、困苦或不幸，而產生同情。
+  - index: 9
+    word: 刻板印象
+    definition: 對某一群人形成固定、簡化的看法，忽略每個人的差異。例如：認為原住民同學一定能歌善舞。
+  - index: 10
+    word: 內化
+    definition: 將外界的觀念逐漸吸收並轉變成自己的想法和態度。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 屢見不鮮
@@ -106,4 +144,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

@@ -1,5 +1,40 @@
 lesson_uid: L0005
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 示意
+    definition: 用動作、眼神等方式讓別人知道自己的意思。
+  - index: 2
+    word: 局面
+    definition: 事情進行到某一階段時，出現的整體情況或狀態。
+  - index: 3
+    word: 火藥味
+    definition: 比喻氣氛緊張，好像快要吵起來或發生衝突。
+  - index: 4
+    word: 不可收拾
+    definition: 事情變得很嚴重、很混亂，已經沒辦法解決或控制。
+  - index: 5
+    word: 尷尬
+    definition: 讓人不好意思，不知道該怎麼辦。
+  - index: 6
+    word: 顫顫巍巍
+    definition: 形容人因老弱、害怕或不舒服，動作不穩、發抖的樣子。
+  - index: 7
+    word: 一溜煙
+    definition: 形容動作非常快，像煙一樣迅速不見。
+  - index: 8
+    word: 側目
+    definition: 斜著眼睛看人，通常表示驚訝、不滿、或看不慣。
+  - index: 9
+    word: 路見不平
+    definition: 看到不公正或不合理的事情，挺身而出，打抱不平。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 尷尬
@@ -37,8 +72,7 @@ vocab_application:
     text: 學校開會討論要不要取消早自修，學生和學校立場不同，誰也不讓誰，會議室裡充滿（　）。
     answer: D
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 路見不平
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:

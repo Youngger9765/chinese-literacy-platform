@@ -10,9 +10,12 @@ paragraphs:
 - 孔子.聞之曰.：「善哉.，祁黃羊之論也.！外舉.4不避仇，內舉.不避子。祁黃羊可謂.公矣.。」
 paragraph_count: 6
 char_count: 572
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0
   vocabulary_total: 0
   ratio: null
   verdict: no_vocab
+needs_review: true
+review_reason: 這份學習單沒有本課語詞，課文邊界無從交叉驗證

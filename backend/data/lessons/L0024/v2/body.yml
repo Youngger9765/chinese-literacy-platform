@@ -11,6 +11,10 @@ paragraphs:
 - 高中、大學畢業後，周思齊帶著熱愛棒球的心加入了職棒，沒想到卻面臨了前所未有的威脅和考驗，甚至讓他一度想放棄打棒球。到底發生了什麼事？周思齊又如何選擇？我們下篇繼續。
 paragraph_count: 7
 char_count: 1114
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

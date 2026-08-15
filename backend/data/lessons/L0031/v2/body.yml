@@ -11,6 +11,10 @@ paragraphs:
 - 經歷了東奧的挫折後，楊勇緯持續調整，在2021年及2022年的柔道大滿貫賽中各奪下一面金牌。他用行動告訴大家，他不只是拿獎牌的選手，更是一位自律嚴格、內心強大，能把挫折當養分，持續優化細節的運動員楷模。
 paragraph_count: 7
 char_count: 843
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

@@ -39,7 +39,8 @@ vocab_definitions:
     word: 餞行
     definition: 為人送行。相似詞有「餞別」。若歡迎歸來可用「接風」、「洗塵」。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -82,6 +83,41 @@ vocab_application:
     options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列語詞何者使用正確？
+    options:
+      A: 作者考試項目是跳舞，必須踏準節拍
+      B: 是指星光被霓虹的光害掩蓋
+      C: 是指在台北生活失去自由之感
+      D: 作者行程緊湊，腳步匆忙，深怕耽擱
+    rationale: 從考生身分，及「不容錯過」可知應該與考試的行程安排有關。
+  - index: 3
+    answer: A
+    stem: 下列文句的解讀何者正確？
+    options:
+      A: 「台北的天空被建築擠得破碎」──台北的高樓遮蔽了天空
+      B: 「台北的星光被霓虹無聲淹沒」──台北人對星星不抱興趣
+      C: 「台北那棋盤般的巷弄，更讓人宛如一枚身不由己的棋。」
+      D: 「那城市灰濛濛的一切，都被陣陣長風吹得好遠、好遠」
+    rationale: ──台北方方正正的街道讓人不敢為非作歹
+  - index: 4
+    answer: B
+    stem: 關於余光中〈台東〉及本文與此詩的關係，下列敘述何者正確？
+    options:
+      A: 從「致台東」可知是將台東想像成寫信的人
+      B: 從「過客」可知作者自認與觀光客有所不同
+      C: 從「情書」可知此信主要訴說對台東的情感
+      D: 從本文標題可知作者預計未來仍會拜訪台東
+    rationale: A)是收信人 (B)沒有特別強調與觀光客的不同(D)無法從標題得知
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.33
+    answers_recovered_from_rationale: 0
+    verdict: ok
 resources:
   items:
   - index: 1
@@ -95,4 +131,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

@@ -1,5 +1,37 @@
 lesson_uid: L0083
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 獨門
+    definition: 特殊的、獨有的。
+  - index: 2
+    word: 窸窸窣窣
+    definition: 狀聲詞，指斷
+  - index: 3
+    word: 動員
+    definition: 發動、號召眾人
+  - index: 4
+    word: 悲歡離合
+    definition: 比喻人世間的
+  - index: 5
+    word: 躡手躡腳
+    definition: 放輕動作，小
+  - index: 6
+    word: 喧鬧紛雜
+    definition: 形容聲音雜亂。
+  - index: 7
+    word: 蘊含
+    definition: 包含。
+  - index: 8
+    word: 設身處地
+    definition: 站在別人的
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 蘊含
@@ -40,7 +72,6 @@ vocab_application:
   extraction_check:
     options_not_in_lesson_vocabulary:
     - 典型
-    - 設身處地
     answers_without_option: []
     verdict: ok
 comprehension:
@@ -102,4 +133,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 3
   needs_human_review: true

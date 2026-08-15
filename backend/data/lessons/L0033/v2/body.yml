@@ -11,6 +11,10 @@ paragraphs:
 - 青少年的你正處於快速成長期，同時又面臨學業與人際等各種壓力，很容易選擇方便、好吃的垃圾食物作為「加油站」。雖然偶爾吃點無傷大雅，但千萬不要讓這些誘惑主導你的飲食習慣。別忘了，垃圾食物帶來的快樂是短暫的，但帶來的傷害卻會讓你付出長久的代價！
 paragraph_count: 7
 char_count: 919
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

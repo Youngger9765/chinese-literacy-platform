@@ -11,6 +11,10 @@ paragraphs:
 - 也就是說，當前的世界已經把大量極為複雜的知識及計算外化，我們國家的數學教育當然也要有前瞻性，讓國高中生學習時部分的心智歷程外化，使用計算機讓數學學習更有效能，如果此時我們還規定國高中數學課不能使用計算機，那實在太不可思議了。
 paragraph_count: 7
 char_count: 1336
+level:
+  level: 9
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

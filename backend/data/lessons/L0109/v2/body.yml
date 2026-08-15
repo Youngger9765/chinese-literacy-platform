@@ -10,6 +10,10 @@ paragraphs:
 - 啦啦隊的興起，帶來視覺與聽覺的活力，也讓球場文化更加豐富。下次當我們坐在看台上，感受腳下的震動，聽著整齊劃一的口號時，不妨換一種角度看待這群「氣氛指揮家」。你會發現，在俐落的舞步與燦爛的笑容背後，藏著長時間的訓練、專注的紀律，以及即使球隊落後、氣氛低迷，仍努力帶動他人的堅定心意。
 paragraph_count: 6
 char_count: 1237
+level:
+  level: 8
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

@@ -11,6 +11,10 @@ paragraphs:
 - 引退那天，大家唱起五月天的〈倔強〉。歌詞說：「無論這世界如何變化，始終堅持自己的信仰。」這句話，就像是為他而寫的。
 paragraph_count: 7
 char_count: 1045
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

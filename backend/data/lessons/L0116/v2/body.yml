@@ -11,9 +11,13 @@ paragraphs:
 - 考差了，輸球了，和好友翻臉了，不必把它看成是一張張失敗的判決書，而是一面面照出問題的鏡子。只要願意先穩住心，再調整方法，眼前的挫敗就可能成為反敗為勝的起點。人生就是這麼回事：禍福相倚，得失難料；塞翁失馬，焉知非福哦。
 paragraph_count: 7
 char_count: 1247
+level:
+  level: 8
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 12
-  vocabulary_total: 17
-  ratio: 0.71
+  vocabulary_found: 13
+  vocabulary_total: 18
+  ratio: 0.72
   verdict: weak

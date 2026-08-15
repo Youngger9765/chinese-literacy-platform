@@ -18,6 +18,10 @@ paragraphs:
 - 這場讀書會不僅讓大家理解朱自清特別描寫「背影」的用意，也透過表演與討論，看見兒子對父親的情感轉變。〈背影〉之所以感人，正是因為無聲卻真實的背影，引發了人們內心深處的共鳴。
 paragraph_count: 14
 char_count: 1425
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

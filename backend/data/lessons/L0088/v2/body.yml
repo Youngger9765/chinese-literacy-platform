@@ -12,9 +12,13 @@ paragraphs:
 - 當你理解這些問題，就能成為一位環保倡議者，你可以跟同學討論、跟家人分享，讓更多人知道，塑膠真的「好用不好甩」，它會長久留在環境中，而我們也甩不掉它帶來的後果，因為將來承受這份麻煩的，就是長大後的我們。
 paragraph_count: 8
 char_count: 1286
+level:
+  level: 7
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 5
-  vocabulary_total: 7
-  ratio: 0.71
-  verdict: weak
+  vocabulary_found: 9
+  vocabulary_total: 9
+  ratio: 1.0
+  verdict: ok

@@ -10,6 +10,10 @@ paragraphs:
 - 現在回想起那個聽到消息的當下，已經沒有那麼刺痛了。雖然心裡還是會有點酸澀，但至少，我知道這份喜歡並沒有白費。我還是會喜歡那個勇敢去感受的自己，還是會欣賞那個如此美好的他。而或許，這場小小的失戀，也只是生命中的一場小雨，現在，天氣已經慢慢轉晴了。
 paragraph_count: 6
 char_count: 877
+level:
+  level: 6
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

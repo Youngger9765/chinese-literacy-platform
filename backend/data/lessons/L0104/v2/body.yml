@@ -13,9 +13,13 @@ paragraphs:
 - 連好萊塢的大明星都會遭到網路霸凌，可見這問題無所不在。如果你正在被霸凌，安海瑟薇的故事提醒你，不必為了迎合網路的意見而否定自己，願意求助、保護自己，也照顧自己的情緒，在支持與協助下，好好活著、慢慢走下去，終有撥雲見日的一天。
 paragraph_count: 9
 char_count: 1340
+level:
+  level: 7
+  genre: 說明/議論
+  genre_detail: 說明/議論
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 15
-  vocabulary_total: 19
-  ratio: 0.79
-  verdict: weak
+  vocabulary_found: 16
+  vocabulary_total: 20
+  ratio: 0.8
+  verdict: ok

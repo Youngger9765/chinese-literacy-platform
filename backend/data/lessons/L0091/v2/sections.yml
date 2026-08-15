@@ -30,7 +30,8 @@ vocab_definitions:
     word: 視而不見
     definition: 明明知道有事情發生，但卻故意不去注意或不去關心。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -124,4 +125,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

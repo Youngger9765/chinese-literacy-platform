@@ -98,6 +98,13 @@ _CJK_INDEX = re.compile(r"^[一二三四五六七八九十]$")
 # the 做記號 checklist, the level line, the byline — is excluded by prefix instead,
 # because a threshold high enough to clear it also eats short body paragraphs.
 _MIN_BODY = 46
+#: The floor for a short paragraph recovered next to a long one. Below this sit the
+#: numbering marks (「一」「二」) and table cells, not sentences.
+_MIN_SHORT_BODY = 12
+#: How far acceptance propagates along a run of short paragraphs. A story's closing
+#: lines run two or three short; a scaffolding block runs much longer, so this is what
+#: separates them.
+_SHORT_RUN_LIMIT = 3
 _CHROME_PREFIX = ("※", "□", "☐", "◎", "Level ", "字數", "課文", "學習單", "說明：", "提醒：")
 _CHROME_CONTAINS = ("讀全文", "讀課文", "做記號")
 # Instruction paragraphs from the NEXT section that sit above its heading in document
@@ -108,6 +115,11 @@ _CHROME_CONTAINS = ("讀全文", "讀課文", "做記號")
 _INSTRUCTION_MARKERS = (
     "請用計時器", "計時1分鐘", "計時3次", "我的表現",
     "請在空格內填入", "請根據文章內容", "請圈出", "找一找：",
+    # Strategy scaffolding. In a few worksheets the 閱讀聚光燈 teaching block sits
+    # ABOVE its own heading, so it falls inside the body span and only the length
+    # filter kept it out — which stopped mattering once short paragraphs were
+    # recovered. These are the phrases that scaffolding uses and narrative does not.
+    "閱讀文章後", "完成表格", "我們練習", "步驟幫自己", "回看標題", "回看前面",
 )
 
 # Structural marks that only ever appear in exercises: an option box, a single/multi
@@ -209,11 +221,49 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
         )
     if end is None:
         return None
+    # Short paragraphs are real text and were being dropped wholesale. 《獵人與白牙》
+    # ended on 「白牙已經奄奄一息…然後，永遠閉上了牠的眼睛。」— 36 characters, under
+    # the 46 floor, so the story was served without its ending. 111 lessons were losing
+    # paragraphs this way, 672 in all, and nothing reported it: the body was present and
+    # plausible, just incomplete.
+    #
+    # The floor cannot simply be lowered. In a few worksheets the 閱讀聚光燈 teaching
+    # block sits above its own heading and so falls inside the body span; the length
+    # filter was the only thing excluding it, and dropping to 12 pulled 56 lines of
+    # 「②這段和前面內容有什麼關係？」 into three lessons' text.
+    #
+    # So a short paragraph is recovered only when it sits directly beside a full-length
+    # body paragraph. Narrative runs long-then-short; scaffolding comes in runs of short
+    # lines with no long neighbour. That keeps 264 of the 672 and caps any single lesson
+    # at 10 — and 《獵人與白牙》 gets its last line back.
+    span = paras[first:end]
+    keep = [bool(t) and not _is_chrome(t) and not any(m in t for m in _EXERCISE_MARKS)
+            for t in span]
+    is_long = [keep[i] and len(t) >= _MIN_BODY for i, t in enumerate(span)]
+    filled = [i for i, t in enumerate(span) if t]
+    order = {v: k for k, v in enumerate(filled)}
+
+    # Acceptance propagates along a run of short paragraphs, because a story can end on
+    # two short lines in a row: 《獵人與白牙》 closes with the hunter's cry and then the
+    # dog's last tail-wag, and testing only against FULL-length neighbours recovered the
+    # first and left the second out — the worksheet then quotes 「白牙已經奄奄一息…」 as
+    # 第十三段 and the passage is not in the text the student read. Capped, so a single
+    # body paragraph cannot drag a whole block of scaffolding in behind it.
+    anchored = list(is_long)
+    for _ in range(_SHORT_RUN_LIMIT):
+        for j, i in enumerate(filled):
+            if anchored[i] or not keep[i] or len(span[i]) < _MIN_SHORT_BODY:
+                continue
+            near = ([filled[j - 1]] if j > 0 else []) + \
+                   ([filled[j + 1]] if j + 1 < len(filled) else [])
+            if any(anchored[n] for n in near):
+                anchored[i] = True
+
     body, seen = [], set()
-    for t in paras[:end]:
-        if len(t) < _MIN_BODY or _is_chrome(t):
+    for i, t in enumerate(span):
+        if not keep[i] or len(t) < _MIN_SHORT_BODY:
             continue
-        if any(m in t for m in _EXERCISE_MARKS):
+        if len(t) < _MIN_BODY and not anchored[i]:
             continue
         key = normalise(t)
         if key in seen:          # Word duplicates runs when a table repeats a header
@@ -223,10 +273,58 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
     return body or None
 
 
-def extract_vocabulary(paras: list[str]) -> list[str]:
+def _unglue(words: list[str], body: list[str]) -> list[str]:
+    """Split vocabulary tokens that lost the 、 between them.
+
+    The list is typeset to fit a box, so it wraps mid-list and sometimes drops the
+    separator outright: 「亂竄、動向、揮之不去 / 起伏、深淵、煙消雲散偵測」 yields
+    揮之不去起伏 and 煙消雲散偵測. Both then fail the containment check, and the whole
+    section is withheld as a mismatch — a source typo read as a content gap.
+
+    The body is the authority. A real vocabulary word appears in the lesson text, so a
+    token that does not is a candidate for splitting, and a split is accepted only when
+    BOTH halves appear. Where more than one split point satisfies that, the token is
+    left alone rather than guessed at.
+    """
+    text = normalise("".join(body))
+    out: list[str] = []
+    for w in words:
+        if len(w) < 4 or normalise(w) in text:
+            out.append(w)
+            continue
+        splits = [(w[:i], w[i:]) for i in range(2, len(w) - 1)
+                  if normalise(w[:i]) in text and normalise(w[i:]) in text]
+        out.extend(splits[0] if len(splits) == 1 else [w])
+    return out
+
+
+#: 「Level 4・記敘文」 — the worksheet's own masthead line, carrying the grade band and
+#: the genre. Authored WITH the lesson, unlike the planning spreadsheet, so it is both
+#: the better source for genre and an independent field to check the title join
+#: against: 130 of 146 agree, and the 16 that differ are editorial calls on the same
+#: lesson (a letter-writing lesson as 說明文 or 應用文), not different lessons.
+_LEVEL = re.compile(r"^Level\s*(\d+)\s*[・·．.]\s*(.+)$")
+
+
+def extract_level(paras: list[str]) -> dict | None:
+    for t in paras:
+        m = _LEVEL.match(t)
+        if m:
+            genre = m.group(2).strip()
+            # 「應用文(讀書報告)」 — the parenthetical names the sub-form.
+            base = re.sub(r"[（(].*", "", genre).strip()
+            return {"level": int(m.group(1)), "genre": base or genre, "genre_detail": genre}
+    return None
+
+
+def extract_vocabulary(paras: list[str], body: list[str] | None = None) -> list[str]:
     """The 本課語詞 list. Take the LAST occurrence: the instructions above it quote
     the phrase 「從本課語詞框中找語詞」, and matching the first one captures those
-    instructions instead of the words."""
+    instructions instead of the words.
+
+    Pass `body` to repair tokens the typesetting glued together — without it the list
+    is returned as the document spells it, glue and all.
+    """
     idx = [i for i, t in enumerate(paras) if t.startswith("本課語詞")]
     if not idx:
         return []
@@ -239,7 +337,10 @@ def extract_vocabulary(paras: list[str]) -> list[str]:
             buf.append(t)
         if buf and "。" in buf[-1]:
             break
-    return [w.strip() for w in re.split(r"[、，,。\s]+", "".join(buf)) if len(w.strip()) >= 2]
+    # Joined on 、, not "": the list wraps mid-item, and concatenating the lines welds
+    # the last word of one to the first word of the next.
+    words = [w.strip() for w in re.split(r"[、，,。\s]+", "、".join(buf)) if len(w.strip()) >= 2]
+    return _unglue(words, body) if body else words
 
 
 def check(body: list[str], vocab: list[str]) -> dict:
@@ -258,10 +359,14 @@ def extract(docx: Path) -> dict:
     body = extract_body(paras)
     if not body:
         return {"ok": False, "reason": "找不到課文邊界（第二節標題）", "paragraphs": []}
-    vocab = extract_vocabulary(paras)
+    vocab = extract_vocabulary(paras, body)
     result = check(body, vocab)
     return {
         "ok": True,
+        # The masthead's own grade/genre. Preferred over the planning spreadsheet's
+        # 文體 column, which disagrees on 16 lessons — every one of them an editorial
+        # call rather than a different lesson.
+        "level": extract_level(paras),
         "paragraphs": body,
         "char_count": sum(len(normalise(p)) for p in body),
         "vocabulary": vocab,

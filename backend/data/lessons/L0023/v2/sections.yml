@@ -39,7 +39,8 @@ vocab_definitions:
     word: 脫穎而出
     definition: 比喻在眾人之中顯露出色的才華或能力。
   extraction_check:
-    vocabulary_agreement: 1.0
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
     missing_definitions: []
     indices_contiguous: true
     verdict: ok
@@ -122,4 +123,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

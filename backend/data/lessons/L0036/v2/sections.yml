@@ -1,5 +1,52 @@
 lesson_uid: L0036
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 平起平坐
+    definition: 指地位、能力與他人差不多。
+  - index: 2
+    word: 輝煌
+    definition: 光彩耀眼或是成就非凡的樣子。
+  - index: 3
+    word: 著稱
+    definition: 因為具有某種特色而出名、被大家知道。
+  - index: 4
+    word: 敬仰
+    definition: 尊敬、仰慕。
+  - index: 5
+    word: 嶄露頭角
+    definition: 形容表現出色，開始受到注意。
+  - index: 6
+    word: 招募
+    definition: 尋找需要的人加入組織或參與活動。
+  - index: 7
+    word: 一絲不苟
+    definition: 做事非常仔細，連最細微的地方都不馬虎。
+  - index: 8
+    word: 清一色
+    definition: 形容全部都是同一種類型，沒有混雜。
+  - index: 9
+    word: 摸不著頭緒
+    definition: 不知道從哪裡開始，不明白事情的狀況。
+  - index: 10
+    word: 跌破眼鏡
+    definition: 形容事情的結果出乎意料，令人驚訝。
+  - index: 11
+    word: 脫韁野馬
+    definition: 比喻行動快速、難以控制。本文形容能高團的攻勢猛烈。
+  - index: 12
+    word: 正統
+    definition: 指最被認可或最標準的形式或做法。
+  - index: 13
+    word: 先驅
+    definition: 最早開始做某件事，並為後來的人開路的人或團體。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.72
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 著稱
@@ -36,8 +83,7 @@ vocab_application:
     text: 他對實驗數據的處理（　），絲毫不容許誤差。
     answer: H
   extraction_check:
-    options_not_in_lesson_vocabulary:
-    - 一絲不苟
+    options_not_in_lesson_vocabulary: []
     answers_without_option: []
     verdict: ok
 comprehension:
@@ -102,4 +148,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

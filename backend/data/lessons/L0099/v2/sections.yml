@@ -1,5 +1,43 @@
 lesson_uid: L0099
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 情感共鳴
+    definition: 產生情感上的共同感受，能互相理解或感受對方的心情。
+  - index: 2
+    word: 牽著鼻子走
+    definition: 比喻被人操控，照著別人的意思行動，自己沒有主見。
+  - index: 3
+    word: 汙名化
+    definition: 把負面標籤加在人或事物上，讓大家對他產生偏見或排斥。
+  - index: 4
+    word: 構思
+    definition: 創作前先思考內容、安排與表達方式。
+  - index: 5
+    word: 詞藻優美
+    definition: 用詞生動優美，讀起來富有美感。
+  - index: 6
+    word: 轉瞬之間
+    definition: 形容時間極短，好像一眨眼就過去了。
+  - index: 7
+    word: 破關攻略
+    definition: 指在遊戲中闖關或解題的具體方法與技巧。
+  - index: 8
+    word: 磨難
+    definition: 指生活或成長中遇到的艱苦與挫折。
+  - index: 9
+    word: 磨合
+    definition: 互相調整和適應，讓彼此更合得來。
+  - index: 10
+    word: 駕馭
+    definition: 原指控制馬匹，現在也指能掌握並妥善運用某種工具或能力。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 汙名化
@@ -89,4 +127,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

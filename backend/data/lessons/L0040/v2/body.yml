@@ -15,6 +15,10 @@ paragraphs:
 - 回顧這段旅程，我最大的收穫不僅是得到比賽的勝利，還體認到追逐夢想並不一定要放棄學業，無論是在遊戲裡，還是現實生活中，我們都應該勇於接受挑戰、採取適當策略，並堅持不懈，才能不斷突破自己，在人生的賽場上贏得專屬自我的精彩！
 paragraph_count: 11
 char_count: 1662
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

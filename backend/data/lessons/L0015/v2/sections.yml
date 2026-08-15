@@ -1,5 +1,43 @@
 lesson_uid: L0015
 version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 家常便飯
+    definition: 比喻很常見或很普通的事情。
+  - index: 2
+    word: 罹癌
+    definition: 罹患癌症。
+  - index: 3
+    word: 殊榮
+    definition: 特殊的榮耀。
+  - index: 4
+    word: 頑強
+    definition: 堅強，不容易被打敗或放棄。
+  - index: 5
+    word: 痛快淋漓
+    definition: 心情非常暢快。
+  - index: 6
+    word: 歷屆
+    definition: 以往各屆。
+  - index: 7
+    word: 執著
+    definition: 對某件事、目標或想法非常堅持，不容易放下。
+  - index: 8
+    word: 崩潰
+    definition: 精神潰散，情緒相當難過。
+  - index: 9
+    word: 無可言喻
+    definition: 無法用話說明白。
+  - index: 10
+    word: 插曲
+    definition: 進行的事情過程中，意外發生的故事。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
 vocab_application:
   options:
     A: 崩潰
@@ -95,4 +133,5 @@ resources:
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 2
   needs_human_review: true

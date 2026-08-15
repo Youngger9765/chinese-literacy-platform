@@ -11,6 +11,10 @@ paragraphs:
 - 澳洲人口2600多萬，臺灣人口2300多萬，相差不多，但是兩國在奧運會獎牌數上卻有天壤之別。原因是什麼？如果想和澳洲一樣，成為奧運奪牌榜上的前幾名，你認為應該怎麼做呢？
 paragraph_count: 7
 char_count: 1154
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

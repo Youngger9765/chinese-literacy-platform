@@ -12,6 +12,10 @@ paragraphs:
 - 《長腿叔叔》不僅是一部成長故事，也讓我學到：當我們羨慕朱蒂藉著好運脫胎換骨時，更應該看見她愈挫愈勇、挑燈夜戰的努力；正是這些努力，讓她蛻變為獨立自主的女性！
 paragraph_count: 8
 char_count: 1050
+level:
+  level: 5
+  genre: 應用文
+  genre_detail: 應用文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

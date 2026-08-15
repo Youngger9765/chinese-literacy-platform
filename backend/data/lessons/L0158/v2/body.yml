@@ -8,9 +8,12 @@ paragraphs:
 - 蓋.張素豐，積粟.甚富。每春間.貧民就貸，償時.多寡不較，悉納之，未嘗.執概3取盈4，故名.「不量󠇡」，非.不良也。眾趨.田中，見稞穗.摧折如麻，獨.張氏諸田.無恙5。
 paragraph_count: 4
 char_count: 420
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0
   vocabulary_total: 0
   ratio: null
   verdict: no_vocab
+needs_review: true
+review_reason: 這份學習單沒有本課語詞，課文邊界無從交叉驗證

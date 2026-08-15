@@ -10,9 +10,13 @@ paragraphs:
 - 我知道明天或許還是沒有答案，也知道這件事只能由自己決定；但我希望自己能有足夠的勇氣和智慧，做出讓自己不後悔的選擇。
 paragraph_count: 6
 char_count: 746
+level:
+  level: 6
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 7
-  vocabulary_total: 14
-  ratio: 0.5
+  vocabulary_found: 10
+  vocabulary_total: 16
+  ratio: 0.62
   verdict: weak

@@ -11,6 +11,10 @@ paragraphs:
 - 下一次，當你想買巧克力時，請留意包裝上的「公平交易」標章或「永續認證」標章，支持有良心的品牌，讓你的每一口甜蜜，都能成為遠方農民的希望。
 paragraph_count: 7
 char_count: 1238
+level:
+  level: 8
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

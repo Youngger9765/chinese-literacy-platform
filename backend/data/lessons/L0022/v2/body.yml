@@ -9,9 +9,13 @@ paragraphs:
 - 這種感覺好奇怪，說不清、講不明，卻讓我的心情亂成一團。我的指尖不自覺捏緊了衣角，心裡有股莫名的煩躁，但我又不知道該往哪裡發洩。難道這就是吃醋嗎？這個念頭像是狠狠砸進水裡的石頭，激起陣陣漣漪，我不想因為這種小事而生氣，不想對阿葉擺臭臉，更不想承認自己會因為眼前那一幕而吃醋。唉，到底該怎麼辦……
 paragraph_count: 5
 char_count: 800
+level:
+  level: 5
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
-  vocabulary_found: 8
-  vocabulary_total: 11
-  ratio: 0.73
+  vocabulary_found: 9
+  vocabulary_total: 12
+  ratio: 0.75
   verdict: weak

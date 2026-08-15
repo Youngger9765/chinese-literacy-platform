@@ -13,6 +13,10 @@ paragraphs:
 - 動物透過多采多姿的求偶方式，尋找配偶、繁衍後代。聲音、舞姿、氣味和力量，各有不同作用，也讓大自然展現出萬千丰采。
 paragraph_count: 9
 char_count: 981
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

@@ -12,6 +12,10 @@ paragraphs:
 - 總之，植物肉代表了一種創新的飲食選擇，它不僅為我們提供另一種蛋白質來源，對環境保護、動物福利，甚至全球糧食安全等也有正向的影響。隨著技術的不斷進步，未來的植物肉會在口感和營養上更接近傳統肉類，為我們的餐桌帶來更多驚喜。你願意嘗試植物肉嗎？也許下次點餐時，可以考慮來一份植物肉漢堡哦！
 paragraph_count: 8
 char_count: 1222
+level:
+  level: 8
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10
