@@ -60,6 +60,53 @@ def missing_schema(engine) -> list[str]:
     return problems
 
 
+def repair(engine) -> None:
+    """Add what is missing. PREVIEW ONLY.
+
+    The shared preview database is scratch: #1477 already truncates its
+    `alembic_version` and re-stamps rather than asking anyone to investigate. This is
+    the same bargain one step further — the stamp is what left the schema behind, so
+    finish the job it claimed to have done.
+
+    A NOT NULL column is added nullable when it has no server_default, because the
+    table may already hold rows and a preview that runs beats a column that is exactly
+    right. Staging and production never reach this function.
+    """
+    from sqlalchemy import inspect
+    from app.models import Base
+
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names())
+
+    with engine.begin() as conn:
+        for name, table in Base.metadata.tables.items():
+            if name not in present:
+                print(f"  creating table {name}")
+                table.create(bind=conn, checkfirst=True)
+
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names())
+    with engine.begin() as conn:
+        for name, table in Base.metadata.tables.items():
+            if name not in present:
+                continue
+            have = {c["name"] for c in inspect(engine).get_columns(name)}
+            for column in table.columns:
+                if column.name in have:
+                    continue
+                ddl_type = column.type.compile(engine.dialect)
+                clause = f'ALTER TABLE "{name}" ADD COLUMN "{column.name}" {ddl_type}'
+                default = getattr(column.server_default, "arg", None)
+                default_sql = getattr(default, "text", None) or (
+                    default if isinstance(default, str) else None)
+                if default_sql:
+                    clause += f" DEFAULT {default_sql}"
+                    if not column.nullable:
+                        clause += " NOT NULL"
+                print(f"  adding column {name}.{column.name}")
+                conn.exec_driver_sql(clause)
+
+
 def main() -> int:
     url = os.environ.get("DATABASE_URL")
     if not url:
@@ -71,25 +118,39 @@ def main() -> int:
     engine = create_engine(url)
     try:
         problems = missing_schema(engine)
+        if not problems:
+            print("Schema check: database covers every table and column the models declare.")
+            return 0
+
+        print("Schema check: the database is behind the models.", file=sys.stderr)
+        print(
+            "  A migration did not reach it. On preview this is the `alembic stamp head` "
+            "recovery path (#1477) marking a genuinely-behind schema as up to date — the "
+            "service then starts, reports success, and 500s on the affected tables.",
+            file=sys.stderr,
+        )
+        for p in problems[:40]:
+            print(f"    {p}", file=sys.stderr)
+        if len(problems) > 40:
+            print(f"    … and {len(problems) - 40} more", file=sys.stderr)
+
+        if os.environ.get("ENVIRONMENT") != "preview":
+            print("  Staging/production: aborting. Investigate before deploying.",
+                  file=sys.stderr)
+            return 1
+
+        print("  Preview environment — repairing the scratch database.", file=sys.stderr)
+        repair(engine)
+        remaining = missing_schema(engine)
+        if remaining:
+            print(f"  Repair incomplete, {len(remaining)} still missing:", file=sys.stderr)
+            for p in remaining[:20]:
+                print(f"    {p}", file=sys.stderr)
+            return 1
+        print("  Repaired: the database now covers every table and column.", file=sys.stderr)
+        return 0
     finally:
         engine.dispose()
-
-    if not problems:
-        print("Schema check: database covers every table and column the models declare.")
-        return 0
-
-    print("Schema check FAILED — the database is behind the models.", file=sys.stderr)
-    print(
-        "  A migration did not reach this database. On preview this is usually the "
-        "`alembic stamp head` recovery path marking a genuinely-behind schema as "
-        "up to date; the service would start and then 500 on the affected tables.",
-        file=sys.stderr,
-    )
-    for p in problems[:40]:
-        print(f"    {p}", file=sys.stderr)
-    if len(problems) > 40:
-        print(f"    … and {len(problems) - 40} more", file=sys.stderr)
-    return 1
 
 
 if __name__ == "__main__":

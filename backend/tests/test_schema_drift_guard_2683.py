@@ -93,3 +93,76 @@ def test_the_models_can_actually_build_a_postgres_schema():
         f"these tables cannot be created on Postgres — server_default is double-quoted: "
         f"{line[4:]}"
     )
+
+
+# ---------------------------------------------------------------------------
+# The repair path — preview only, and run in a SUBPROCESS.
+#
+# Second time in this file. `conftest.py` rewrites both the column TYPES (JSONB→JSON)
+# and the server_defaults on the shared `Base.metadata` at import time, so a test that
+# exercises the repair in-process generates DDL from a metadata object that no longer
+# resembles what the container has. It produced `DEFAULT []` — a Python list where SQL
+# was needed — and the failure was in the test's own subject, not in the code.
+# ---------------------------------------------------------------------------
+
+_REPAIR_PROBE = r"""
+import subprocess, sys
+sys.path.insert(0, ".")
+from sqlalchemy import create_engine, inspect, text as sql
+from app.models import Base
+from scripts.assert_schema_matches_models import missing_schema, repair
+
+DB = "lingoleap_repair_probe"
+subprocess.run(["psql","-d","postgres","-c",f"DROP DATABASE IF EXISTS {DB}"], capture_output=True)
+subprocess.run(["psql","-d","postgres","-c",f"CREATE DATABASE {DB}"], capture_output=True, check=True)
+engine = create_engine(f"postgresql://localhost/{DB}")
+try:
+    Base.metadata.create_all(bind=engine)
+    assert missing_schema(engine) == [], "positive control: a fresh build is complete"
+
+    with engine.begin() as c:
+        c.execute(sql("ALTER TABLE learning_sessions DROP COLUMN full_reading_attempts"))
+        c.execute(sql("DROP TABLE reading_attempt_history"))
+    before = missing_schema(engine)
+    assert any("full_reading_attempts" in p for p in before), before
+    assert any("reading_attempt_history" in p for p in before), before
+
+    repair(engine)
+    assert missing_schema(engine) == [], "repair left something behind"
+
+    # Usable, not merely present: a NOT NULL column added without its default breaks
+    # the next INSERT rather than the next query.
+    from sqlalchemy.orm import sessionmaker
+    from app.models.user import User
+    S = sessionmaker(bind=engine)
+    db = S()
+    db.add(User(email="r@example.com", name="R", password_hash="x"))
+    db.commit()
+    uid = db.query(User).first().id
+    db.close()
+    from app.models.session import LearningSession
+    db = S()
+    db.add(LearningSession(student_id=uid, status="in_progress"))
+    db.commit()
+    db.close()
+    with engine.begin() as c:
+        got = c.execute(sql("SELECT full_reading_attempts FROM learning_sessions")).scalar()
+    assert got == [], f"default did not apply: {got!r}"
+    print("REPAIR-OK")
+finally:
+    engine.dispose()
+    subprocess.run(["psql","-d","postgres","-c",f"DROP DATABASE IF EXISTS {DB}"], capture_output=True)
+"""
+
+
+@pytest.mark.skipif(
+    os.system("psql -d postgres -c 'SELECT 1' >/dev/null 2>&1") != 0,
+    reason="no local Postgres; the repair emits Postgres DDL and SQLite cannot stand in",
+)
+def test_repair_puts_back_what_a_stamped_migration_skipped():
+    import subprocess
+
+    root = os.path.join(os.path.dirname(__file__), "..")
+    out = subprocess.run([sys.executable, "-c", _REPAIR_PROBE], cwd=root,
+                         capture_output=True, text=True, timeout=300)
+    assert "REPAIR-OK" in out.stdout, (out.stdout[-500:] + "\n" + out.stderr[-1500:])
