@@ -1,0 +1,89 @@
+lesson_uid: L0120
+version_id: v2
+vocab_application:
+  options:
+    A: 引人入勝
+    B: 毛骨悚然
+    C: 啟人疑竇
+    D: 睡眼惺忪
+    E: 窮凶極惡
+    F: 喑啞無聲
+    G: 閃爍
+    H: 乍見
+    I: 週期
+  questions:
+  - index: 2
+    text: 一大早，他還（　），頭腦無法回答困難的數學問題。
+    answer: D
+  - index: 4
+    text: 講師的教學風格非常生動有趣，每一堂課都能夠 （　）。
+    answer: A
+  - index: 5
+    text: 警察詢問竊案嫌犯時，嫌犯吞吞吐吐、眼神閃躲，（　）。
+    answer: C
+  - index: 6
+    text: 這名罪犯不但偷竊，還威脅受害者，行為可說是（　）。
+    answer: E
+  - index: 7
+    text: 月亮的形狀會照著固定的（　）改變，所以我能預測滿月出現的時間。
+    answer: I
+  - index: 8
+    text: （　）這座老屋時，只覺得它歷史悠久；走近細看，才發現牆上保留著精緻的雕花。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 喑啞無聲
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列語詞何者用法使用正確?
+    options:
+      B: 「乍見」新年的曙光，讓人內心雀躍不已
+      C: 他能言善道，完全不像個「喑啞」人士
+      D: 這棟鬼屋傳說眾多，真是「窮凶極惡」之地
+    rationale: C)前後矛盾，瘖啞人士不會說話
+  - index: 2
+    answer: D
+    stem: 有關「睡眠癱瘓症」的描述，何者正確？
+    options:
+      A: 調整思考，依據科學的角度去解釋異狀
+      C: 身體檢查，看看是否有腦部或癲癇等疾病
+      D: 敬畏鬼神，常去廟裡收驚、拜拜、保平安
+      B: 心理治療，透過專業協助，找到問題的根源
+    rationale: C)因為還在作夢，所以無法馬上移動。
+  - index: 5
+    answer: A
+    stem: 解決科學問題的步驟為(1)提出問題→(2)提出假設→(3)檢驗假設。  以「止癢」為例，請將代號依步驟排出正確的順序。
+    options:
+      A: 乙甲丙
+      B: 乙丙甲
+      C: 甲乙丙
+      D: 丙乙甲
+    rationale: 甲.我推測抓癢時會產生痛覺，我們抓癢是想要用「痛覺」蓋過「癢覺」。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 這些可怕的靈異現象其實可以用科學來解釋？
+    duration_seconds: 471
+    source: 志祺七七 X 圖文不符
+  - index: 2
+    title: 合理不等於正確
+    duration_seconds: 243
+    source: 均一教育           平台
+  - index: 3
+    title: 為甚麼抓癢可以止癢呢？馬上解鎖「止癢」的奧祕
+    duration_seconds: 265
+    source: 均一教育平台
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

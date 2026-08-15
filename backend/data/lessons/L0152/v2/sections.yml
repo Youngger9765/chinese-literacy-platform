@@ -1,0 +1,154 @@
+lesson_uid: L0152
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 英姿颯爽
+    definition: 形容威武豪邁，意氣風發的樣子。
+  - index: 2
+    word: 兵餉
+    definition: 士兵的薪水。
+  - index: 3
+    word: 拋頭顱灑熱血
+    definition: 拋棄頭顱，灑出熱血。比喻願意為理想犧牲自己的生命，在所不惜。
+  - index: 4
+    word: 轉嫁
+    definition: 將應該承受的負擔轉移到他人身上。嫁，轉移。
+  - index: 5
+    word: 嚴峻
+    definition: 形容情勢嚴重困難。本文指兄弟倆借錢過活，再不還錢就可能喪命，情況非常嚴重。
+  - index: 6
+    word: 搏命
+    definition: 以性命相爭。形容不顧生命，全力以赴。搏，搏鬥、拚鬥。
+  - index: 7
+    word: 絕筆
+    definition: 臨死前最後的文字。
+  - index: 8
+    word: 書吏
+    definition: 古代專門替人記錄事情或抄寫文本的人。吏，是職位較低的政府官員。
+  - index: 9
+    word: 安然
+    definition: 平安無事的樣子。然，意思是「…的樣子」。
+  - index: 10
+    word: 竹簡
+    definition: 古代刻寫文字用的竹片。
+  - index: 11
+    word: 生死未卜
+    definition: 不知道是死還是活。
+  - index: 12
+    word: 贍養
+    definition: 提供生活所需的物品、金錢。本文是指照顧年邁的父母。
+  - index: 13
+    word: 有幸窺見
+    definition: 很幸運的看見一部分不容易看見的事情。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 嚴峻
+    B: 英姿颯爽
+    C: 歉疚
+    D: 生死未卜
+    E: 轉嫁
+    F: 拋頭顱灑熱血
+    G: 贍養
+    H: 搏命
+  questions:
+  - index: 1
+    text: 這位演員常在電影中（　）演出，從不使用替身。
+    answer: H
+  - index: 2
+    text: 戰爭開始了，許多士兵（　），就為了保衛自己的國家。
+    answer: F
+  - index: 3
+    text: 近日腸病毒疫情（　），感染人數高達2.5萬人。
+    answer: A
+  - index: 4
+    text: 他獨自去登山後失聯十天了，（　），讓家人很擔心。
+    answer: D
+  - index: 5
+    text: 商人將運費上漲的成本（　）給消費者，加重消費者的負擔。
+    answer: E
+  - index: 6
+    text: 國慶大典上，（　）的三軍儀隊邁著整齊的步伐，朝司令臺敬禮。
+    answer: B
+  - index: 7
+    text: 他成年後開始工作，承諾每月寄生活費回家（　）年邁的父母。
+    answer: G
+  - index: 8
+    text: 因為忘了朋友的生日，她感到非常 （　）。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 歉疚
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 請問哪一個句子的語詞使用正確?
+    options:
+      A: 黑夫將白米裝進「竹簡」，煮竹筒飯給弟弟吃
+      B: 經過細心的照顧，總算「安然」度過危險期
+      C: 他被斬首，現場「拋頭顱灑熱血」，畫面驚悚
+      D: 她畢業後搬到臺北，工作地點也「轉嫁」過去
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據本文，秦朝士兵的生活狀況為何？
+    options:
+      A: 家人支援充足，前線衣食無虞
+      B: 官府供給完善，只需專心作戰(從第4、5段可知)
+      C: 艱難困苦，連衣物錢財都缺
+      D: 戰功獎勵穩定，生活逐漸改善
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 根據作者推論，大哥把弟弟們的家書當陪葬品的主要原因為何？
+    options:
+      A: 秦國最後打了勝仗，家書是光榮的印記
+      B: 竹簡在當時很昂貴，適合當作陪葬品
+      C: 書信內容可能透露國家機密，他擔心外洩
+      D: 兄弟戰死沙場，他悲傷歉疚，念念不忘(從13段可知)。
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 根據本文，下列哪句話最能總結這兩封家書所揭露的歷史真相？
+    options:
+      A: 帝國勝利背後，藏著平民家庭的犧牲
+      B: 秦軍強盛背後，來自家人對前線支持
+      C: 軍功制度推行，使士兵家庭獲得保障(根據第5及11段可知)
+      D: 家書能被保存，主要因古人重視親情
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 本篇文章對於研究秦朝歷史有何重要意義？
+    options:
+      A: 揭示了秦朝統一戰爭的過程
+      B: 展示了秦朝皇帝的英明神武
+      C: 反映秦代底層人民的生活壓力
+      D: 說明了秦朝的徵兵制度非常完善
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 秦朝軍隊為什麼強大？ 秦朝軍隊制度 | 秦朝士兵有幾個等級？兵馬俑・片長：(6:28)
+    source: 有点意思
+  - index: 2
+    title: 古墓出土兩封秦朝家書，家書內容讓專家哭笑不得，「媽媽，寄點錢來呀，快凍死啦！」・片長：(11:46)・來源：歷史天空
+  - index: 3
+    title: 事實有真假，觀點無對錯｜劉潤《5分鐘商學院・基礎》-149-事實和觀點・片長：(8:55)・來源：耀鈞x商業修煉筆記
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

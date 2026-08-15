@@ -1,0 +1,37 @@
+lesson_uid: L0157
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列文句，何者語詞使用最恰當？
+    options:
+      A: 小朋友被路上的石頭絆倒「墜地」，痛得哇哇大哭
+      B: 為了這場比賽，他練習游泳許久，在泳池中大汗「淋漓」
+      C: 他看起來很面熟，我苦思良久，「俄而」才喚出他的名字
+      D: 街頭畫家掌握模特兒的神韻，運筆「疾速」，完成畫像
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 閱讀完本篇課文，請問有關「文言文」的敘述，何者為不正確？
+    options:
+      A: 左手據虎頸，右手以鞭亂捶虎頭，呼號󠇡聲震山谷
+      B: 含光喘亦略定，起視仲肩，前後十餘孔，血淋漓滿地
+      C: 虎怒，力不得肆，舍其弟據嵎而吼，將以搏含光
+      D: 猛虎攫其弟去。含光大驚墜地，持短鞭力追
+    rationale: 解析：B.只能說明弟弟傷勢嚴重。
+  - index: 4
+    answer: C
+    stem: 下列何者是作者(曾世杰)想要學生學到的概念？
+    options:
+      A: 宣揚文言文寫作之美，推廣文言文
+      B: 說明文言文中生字、難字、古字的字義
+      C: 告訴讀者文言文的由來以及閱讀的策略
+      D: 說明文言文傳承古人智慧，現代人不可不學
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok

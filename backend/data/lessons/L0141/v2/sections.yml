@@ -1,0 +1,112 @@
+lesson_uid: L0141
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 劃破
+    definition: 像把某種東西切開。指打破原本的狀態。
+  - index: 2
+    word: 萬籟俱寂
+    definition: 寂：安靜。指四周所有聲音都安靜下來。
+  - index: 3
+    word: 縝密周延
+    definition: 規劃非常嚴謹完整。
+  - index: 4
+    word: 覆水難收
+    definition: 水倒在地上就收不回來，比喻事情一旦出錯，就很難挽回。
+  - index: 5
+    word: 麻雀雖小，五臟俱全
+    definition: 俱全：全部都有。指地方或東西雖然小，但功能很完整。
+  - index: 6
+    word: 一蹴可幾
+    definition: 一下子就能成功或達成。
+  - index: 7
+    word: 仰人鼻息
+    definition: 比喻完全依賴別人，自己沒有主導權。
+  - index: 8
+    word: 潰決
+    definition: 多指堤防出現破口，水一下子衝出來。
+  - index: 9
+    word: 休戚與共
+    definition: 與共：一起分享、共同承擔。形容彼此的好事、壞事都連在一起，要一起承擔。
+  - index: 10
+    word: 未雨綢繆
+    definition: 事情還沒發生前，先做好準備。
+  extraction_check:
+    vocabulary_agreement: 0.82
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 休戚與共
+    B: 潰決
+    C: 一蹴可幾
+    D: 萬籟俱寂
+    E: 未雨綢繆
+    F: 仰人鼻息
+    G: 覆水難收
+    H: 縝密周延
+    I: 麻雀雖小，五臟俱全
+  questions:
+  - index: 1
+    text: 建立團隊合作無法（　），通常需要長時間的磨合才能形成默契。
+    answer: C
+  - index: 2
+    text: 深夜下著毛毛雨的校園（　），只聽見屋簷的滴水聲。
+    answer: D
+  - index: 3
+    text: 如果我們不能掌握關鍵技術，全靠進口，產業發展就只能（　）了。
+    answer: F
+  - index: 5
+    text: 我們是同一個團隊，成敗得失都與大家（　），沒有人能置身事外。
+    answer: A
+  - index: 6
+    text: 連日豪雨後，河堤突然（　），低窪地區立刻淹水。
+    answer: B
+  - index: 7
+    text: 你洩露同學的祕密，傷害造成後往往（　），道歉也難修補信任。
+    answer: G
+  - index: 8
+    text: 這份報告不只資料完整，連結論與建議也非常（　），很有說服力。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 麻雀雖小，五臟俱全
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 本文第三段：衛星「像一支日夜不休的巡邏隊，輪流飛過臺灣和周邊地區拍攝」，主要想強調什麼？
+    options:
+      A: 用誇張比喻製造緊張氣氛，讓讀者覺得太空很可怕
+      B: 用具體比喻解說科技，凸顯「看見／守望」的主題
+      C: 用擬人法強調衛星像人一樣有感情，會主動做判斷
+      D: 用各種比喻說明現代科技已經複製了齊導演的眼力
+    rationale: 「不必仰人鼻息」指的是主導權與自主性：不必看別人臉色、受他人限制。
+  - index: 5
+    answer: B
+    stem: 這篇文章最主要想表達的核心主旨是什麼？
+    options:
+      A: 即使臺灣可自製人造衛星，仍需仰賴SpaceX的火箭技術
+      B: 高自製率的福衛八號星系功能提升，更能以太空科技守望家園
+      C: 衛星上的工作，一出錯就覆水難收，需要縝密周延的規劃
+    rationale: 全文從發射現場切入，介紹星系運作與提升，再談太空任務的難度、臺灣災害背景，最後連到「看見臺灣、珍惜臺灣」。重點是「衛星星系的公共價值」與「守護家園的意義」，不是在歌頌火箭公司或只談齊柏林作品。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 2
+    title: '從空中看見台灣令人疼惜的一面: Po-lin Chi (齊柏林) at TEDxTaipeiChange 2012'
+    duration_seconds: 445
+    source: TEDxTalks
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

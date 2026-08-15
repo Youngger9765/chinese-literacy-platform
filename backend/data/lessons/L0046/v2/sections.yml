@@ -1,0 +1,121 @@
+lesson_uid: L0046
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 仿生學
+    definition: 模仿生物的構造或特性，設計產品或技術的學問。
+  - index: 2
+    word: 廣闊無垠
+    definition: 形容廣大、寬闊，沒有邊界。
+  - index: 3
+    word: 盤旋
+    definition: 在空中繞圈飛行；也可形容想法一直留在腦中。
+  - index: 4
+    word: 危機四伏
+    definition: 到處隱藏著危險。
+  - index: 5
+    word: 險象環生
+    definition: 危險的狀況一直出現。
+  - index: 6
+    word: 向陽性
+    definition: 植物朝向陽光生長的特性。
+  - index: 7
+    word: 引領
+    definition: 引導、帶領。
+  - index: 8
+    word: 崎嶇難行
+    definition: 地面高低不平，很難行走。
+  - index: 9
+    word: 內建
+    definition: 機器或系統中原本就裝有某種配件或功能。
+  - index: 10
+    word: 追逐
+    definition: 從後面追趕。
+  - index: 11
+    word: 垂直起降
+    definition: 垂直起飛和降落。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 內建
+    B: 險象環生
+    C: 追逐
+    D: 引領
+    E: 危機四伏
+    F: 廣闊無垠
+    G: 盤旋
+    H: 向陽性
+  questions:
+  - index: 2
+    text: 小朋友在操場上互相（　）著，嘻嘻哈哈真開心。
+    answer: C
+  - index: 5
+    text: 這支手機（　）多種拍照功能。
+    answer: A
+  - index: 6
+    text: 站在山頂上，看著（　）的綠色草原，心情格外愉快。
+    answer: F
+  - index: 7
+    text: 教室窗邊的植物具有（　），枝葉總是朝著陽光生長。
+    answer: H
+  - index: 8
+    text: 與同學的人際關係一直困擾著我，各種想法在腦海中（　），始終找不到答案。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: D
+    stem: 根據本文，下列發明與其功能的對應關係，何者描述不正確？
+    options:
+      A: 比較說明─透過科技產品的比較來說明仿生學
+      B: 舉例說明─透過列舉具體事例讓讀者理解仿生學
+      C: 定義說明─直接解釋各種科技品的概念和用途
+      D: 過程說明─詳細描述仿生學是如何逐步發明出來的
+    rationale: Ｂ ）3. 本課是說明文，作者主要運用哪一種說明方法來介紹「仿生學」？
+  - index: 4
+    answer: D
+    stem: 有許多語詞，可以用「拆詞釋義」的方式猜出它的意思，例如，防腐劑、危機四伏。請問底下選項中，哪一個語詞無法用「拆詞釋義」的策略來猜出它的意思？
+    options:
+      A: 一目十行
+      B: 日新月異
+      C: 垂直起降
+      D: 馬馬虎虎
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 課文末段說明了什麼是「仿生學」，請問底下選項中哪一個是「仿生學」的例子？
+    options:
+      A: 把速度最快的游泳選手取一個叫飛魚的綽號
+      B: 把河馬張開大嘴的相片貼在大胃王餐廳的招牌上
+      C: 模仿荷葉不易沾水的特性，設計不容易沾水的雨傘
+      D: 把虎豹的斑紋印在布料上，做成服飾，以吸引人注意
+    rationale: 第1題解析：（A-「險象環生」用於形容危機四伏的情境，而美術比賽並無危險性，現場氣氛應為緊張刺激。C-「引領」通常用於帶領人群或象徵性的指導、領導。D-「廣闊無垠」用來形容空間的無邊無際，而非興趣範圍，應為廣泛。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【延伸】向大自然借鏡-仿生學
+    duration_seconds: 380
+    source: 均一教育平台
+  - index: 2
+    title: 仿生學的奧秘 探索生物界的靈感
+    duration_seconds: 692
+    source: 亞伯看世界,發現你想知道的
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,145 @@
+lesson_uid: L0053
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 覓食
+    definition: 尋找食物。
+  - index: 2
+    word: 依循
+    definition: 按照一定的方式或規則行動。
+  - index: 3
+    word: 守株待兔
+    definition: 比喻不主動想辦法，只想等機會或成果自己送上門。本文指黃面蜂守在葉苞開口，等幼蟲自己跑過來。
+  - index: 4
+    word: 巧妙
+    definition: 做法聰明又合適，能順利達成目的。
+  - index: 5
+    word: 葉苞
+    definition: 由葉子捲成、外形像花苞的構造。
+  - index: 6
+    word: 彷彿
+    definition: 似乎、好像。
+  - index: 7
+    word: 孵化
+    definition: 卵裡的小動物發育後，破殼而出的過程。
+  - index: 8
+    word: 規律
+    definition: 事情反覆出現時，有固定的順序或變化方式。
+  - index: 9
+    word: 臨機應變
+    definition: 遇到新的情況時，立刻調整做法。
+  - index: 10
+    word: 迅雷不及掩耳
+    definition: 雷聲突然響起，讓人來不及掩住耳朵；比喻速度非常快，讓人來不及反應或防備。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 依循
+    B: 規律
+    C: 彷彿
+    D: 覓食
+    E: 巧妙
+    F: 守株待兔
+    G: 迅雷不及掩耳
+    H: 臨機應變
+  questions:
+  - index: 1
+    text: 他每週固定運動三天，（　）的運動習慣，讓他能保持身體健康。
+    answer: B
+  - index: 2
+    text: 這本小說情節安排的很（　），讓讀者在閱讀過程中驚喜連連。
+    answer: E
+  - index: 3
+    text: 他不去推銷，只希望客人自己上門，這是（　），這種做法很難成功。
+    answer: F
+  - index: 4
+    text: 下課鐘聲一響，同學們以（　）的速度衝向籃球場。
+    answer: G
+  - index: 5
+    text: 飄動的雲朵，（　）大自然的畫筆，在空中畫下一幅又一幅的畫作。
+    answer: C
+  - index: 6
+    text: 主持人發現麥克風故障，便（　）改用其他設備，活動順利進行。
+    answer: H
+  - index: 7
+    text: 天色漸暗，蝙蝠開始飛出洞穴（　），準備補充一天所需的能量。
+    answer: D
+  - index: 8
+    text: 我們（　）地圖上的指示前進，順利抵達目的地。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列哪一項最能作為「昆蟲可能會因情況改變做法」的證據？
+    options:
+      A: 捲葉象鼻蟲母蟲在交配後，會尋找葉片並產卵
+      B: 捲葉象鼻蟲會在葉片不同部位來回檢查葉片
+      C: 葉苞轉不動時，捲葉象鼻蟲改用葉緣包住葉苞
+      D: 黃面蜂會在野地尋找獵物，為幼蟲準備食物
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 文中捲葉象鼻蟲如何找出適合的葉子作為「育嬰室」，請排出正確的順序？
+    options:
+      A: ㄆ→ㄅ→ㄇ
+      B: ㄅ→ㄆ→ㄇ
+      C: ㄇ→ㄆ→ㄅ
+      D: ㄆ→ㄇ→ㄅ
+    rationale: ㄅ.在葉片不同部位來回重複檢查
+  - index: 3
+    answer: D
+    stem: 黃面蜂最後能抓到捲葉蛾幼蟲，最關鍵的做法是什麼？
+    options:
+      A: 用觸鬚碰葉苞底部，讓幼蟲開始在葉苞裡移動
+      B: 以迅雷不及掩耳的速度，追趕在葉苞裡逃跑的幼蟲
+      C: 在葉苞外前後追逐，跟著幼蟲來回變換位置
+      D: 不再來回追逐，改守在葉苞開口，等幼蟲自己跑過來
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 小丸想知道：「彩虹是怎麼形成的？」哪一種做法最符合「根據證據形成結論」的方法？
+    options:
+      A: 只看見一次雨後出現彩虹，就判斷彩虹一定是雨水造成的
+      B: 查找可靠的科學資料，再用三稜鏡觀察陽光能否分散成不同顏色
+      C: 詢問同學支持哪一種說法的人最多，把多數意見當成答案
+      D: 看到網紅說彩虹是飛機留下的，就直接接受他的說法
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 為什麼作者要用疑問句當標題呢？
+    options:
+      A: 因為作者還沒有找到任何證據，只能把問題留給讀者
+      B: 因為全文從問題出發，引導讀者根據觀察一步步尋找答案
+      C: 因為作者想比較兩種昆蟲的能力，判斷哪一種比較聰明
+      D: 因為昆蟲是否會思考無法研究，所以只能用疑問句當標題
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 「《昆蟲捉迷藏》巧奪天工的偉大母親【 摺紙藝術師：捲葉象鼻蟲 】
+    duration_seconds: 301
+    source: 客家電視 HakkaTV
+  - index: 2
+    title: 【See Yellow-Face bee (Hylaeus communis) making its cellophane-like nest】
+    duration_seconds: 265
+    source: George Pilkington
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

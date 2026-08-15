@@ -1,0 +1,55 @@
+lesson_uid: L0169
+version_id: v2
+vocab_application:
+  options:
+    A: 固然
+    B: 不妨
+    C: 精湛
+    D: 馬虎
+    E: 本錢
+    F: 祕訣
+    G: 輸人一截
+    H: 突如其來
+  questions:
+  - index: 1
+    text: 手機（　）為生活帶來許多便利，也可能造成專注力下降的問題。
+    answer: A
+  - index: 2
+    text: 他（　）的演技，讓台下的觀眾目不轉睛，也因此獲得許多好評。
+    answer: C
+  - index: 3
+    text: 考試前夕，（　）提早就寢，讓大腦消化和運用知識更有效率。
+    answer: B
+  - index: 4
+    text: 他做事（　），又常推卸責任，讓同組同學都感到氣憤不已。
+    answer: D
+  - index: 5
+    text: 「健康」是探索世界的（　），唯有顧好身體，才能走得更遠。
+    answer: E
+  - index: 6
+    text: 保持良好人際關係的（　），其實就是多傾聽與尊重他人。
+    answer: F
+  - index: 7
+    text: 面對同學（　）的公開告白，他一時不知所措，惹得全班哄堂大笑。
+    answer: H
+  - index: 8
+    text: 在籃球場上，我們的默契明顯（　），也因此最終無緣晉級。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 「我的餐盤」均衡飲食_青少年篇
+    duration_seconds: 71
+    source: 衛生福利部國民健康署
+  - index: 2
+    title: 84期午餐通訊-喝水的好處
+    duration_seconds: 212
+    source: 營養探索樂園
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

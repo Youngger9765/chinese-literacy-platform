@@ -1,0 +1,70 @@
+lesson_uid: L0112
+version_id: v2
+vocab_application:
+  options:
+    A: 始終如一
+    B: 冷冽
+    C: 鬱鬱蔥蔥
+    D: 生機勃勃
+    E: 校正
+    F: 所費不貲
+    G: 狐疑
+    H: 模擬
+    I: 徒手
+    J: 雞皮疙瘩
+  questions:
+  - index: 1
+    text: 儘管環境困難，他追求夢想的態度 （　），令人敬佩。
+    answer: A
+  - index: 2
+    text: 在使用儀器前，必須先進行（　），以確保精準。
+    answer: E
+  - index: 3
+    text: 古蹟的修復 （　） ，還要投入大量的人力，只為喚回歷史的光彩。
+    answer: F
+  - index: 4
+    text: 這公司在創新策略的推動下，展現出（　）的成長動能，前景看好。
+    answer: D
+  - index: 5
+    text: 他（　）攀爬台北101大樓，展現出驚人的體能與技術。
+    answer: I
+  - index: 6
+    text: 面對這項提議，他露出（　）的神情，心想：「這有可能嗎？」
+    answer: G
+  - index: 7
+    text: 上台前，我先在家（　）正式報告的情境，練習說話的速度和抑揚頓挫。
+    answer: H
+  - index: 8
+    text: 山難發生時，雖然北風（　），消防隊員們仍冒著嚴寒上山搜救。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 雞皮疙瘩
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列語詞何者使用正確？
+    options:
+      A: 面對新提案，他立刻「狐疑」地答應了
+      B: 青菜份量突然變大，吃到最後想吐
+      C: 青菜加了太多鹽巴，吃起來很噁心
+      D: 青菜裡混進讓人反胃的蠕動菜蟲
+    rationale: Ｄ ）2.第六段提到「令人作嘔的『加菜』」，最可能指的是什麼？
+  - index: 3
+    answer: C
+    stem: 從第四段大仁哥的說明來看，垂直農場的哪一項特點最有助於穩定蔬菜品質？
+    options:
+      B: 理髮技術不同，髮型就一定更好看
+      C: 家庭理髮比較省錢，所以更值得選
+      D: 髮廊設計師更辛苦，所以應該多收費
+      A: 品質與專業的價值會帶來價格差異
+    rationale: 文中詳述各項數據（如溫濕度、酸鹼值）由系統控管，強調科技與監測系統對蔬菜生長條件的精準維持
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 0
+    verdict: ok

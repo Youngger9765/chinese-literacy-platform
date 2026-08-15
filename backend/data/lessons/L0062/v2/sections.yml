@@ -1,0 +1,16 @@
+lesson_uid: L0062
+version_id: v2
+resources:
+  items:
+  - index: 1
+    title: JingTong Talk | 影響圈關注圈 | leader in me
+    duration_seconds: 103
+    source: JingTong菁桐國民小學
+  - index: 2
+    title: 吿白失敗了該怎麼辦？｜一起戀愛吧｜卓苡瑄
+    duration_seconds: 350
+    source: 卓苡瑄Jessie
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

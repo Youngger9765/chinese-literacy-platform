@@ -1,0 +1,70 @@
+lesson_uid: L0153
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 鮑子都在荒野中遇到心絞痛的書生時，第一個動作是什麼？
+    options:
+      A: 立即將他送往城裡
+      B: 賣掉一個金餅買藥
+      C: 下馬為他按摩心臟
+      D: 向路人求助
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 書生身上攜帶了哪些物品？
+    options:
+      A: 一卷兵書和十個金餅
+      B: 一袋銀子和一把劍
+      C: 一把劍和十個餅
+      D: 一卷佛經和九個金餅
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 根據故事，下列哪一選項不適合用來形容鮑子都？
+    options:
+      C: 光明磊落
+      D: 面惡心善
+      B: 見義勇為
+    rationale: 鮑子都在書生死後變賣金餅為書生安葬，可見他懂得隨機應變。
+  - index: 4
+    answer: B
+    stem: 根據本文，書生家人對鮑子都的態度發生了怎樣的轉變？
+    options:
+      A: 從「冷漠忽視」轉為「重金酬謝」
+      B: 從「懷疑指責」轉為「感佩德義」
+      C: 從「悲慟萬分」轉為「欣慰釋懷」
+      D: 從「感激不盡」轉為「猜忌疏遠」
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 「之」在文言中有時當代詞，有時又有白話文「的」的意思。請問：哪一選項中的「之」字當「的」使用？
+    options:
+      A: 乃賣一餅，具葬書生，其餘枕󠇡「之」頭下
+      C: 舉家感子都󠇡「之」德義
+      D: 「之」暮行於野，見一󠇢書生卒󠇡心痛
+    rationale: null
+  - index: 6
+    answer: B
+    stem: 書生的家人相信鮑子都並非盜賊的關鍵原因為何？
+    options:
+      A: 鮑子都長相正經，不像是會作惡的人
+      B: 看到九塊金餅與素書放在屍身的頭下、身旁
+      C: 鮑子都主動帶路，表現出問心無愧的樣子
+      D: 鮑子都󠇡詳細描述了書生當時發病的情況
+    rationale: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
+  - index: 1
+    answer: C
+    stem: 這段文字的主要涵義，與下列何者最接近?
+    options:
+      C: A以物為寄應該有所節制，不可浮濫
+    rationale: A以物為寄應該有所節制，不可浮濫
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 1
+    questions_grounded_in_body: 0.86
+    answers_recovered_from_rationale: 1
+    verdict: weak

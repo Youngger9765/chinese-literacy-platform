@@ -1,0 +1,92 @@
+lesson_uid: L0025
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 膽戰心驚
+    definition: 非常害怕、緊張，內心充滿恐懼。
+  - index: 2
+    word: 倔強
+    definition: 堅持自己的想法或做法，不輕易改變。
+  - index: 3
+    word: 自傳
+    definition: 描述自己人生經歷和想法的文章或書。
+  - index: 4
+    word: 睽違
+    definition: 經過許久時間後，再次發生或遇見。
+  - index: 5
+    word: 大展身手
+    definition: 充分發揮自己的才能或本領，多用於難得有表現機會時。
+  - index: 6
+    word: 嫌疑
+    definition: 被懷疑與某件壞事有關。
+  - index: 7
+    word: 身家資料
+    definition: 指個人背景相關的資料，包括家庭、學歷、經歷、財產等。
+  - index: 8
+    word: 辜負
+    definition: 讓別人原本的期待或付出落空。
+  - index: 9
+    word: 利誘
+    definition: 用金錢或好處誘惑他人。
+  - index: 10
+    word: 起訴
+    definition: 檢察官向法院提出控告，要求追究法律責任。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 倔強
+    B: 利誘
+    C: 睽違
+    D: 嫌疑
+    E: 辜負
+    F: 身家資料
+    G: 膽戰心驚
+    H: 大展身手
+  questions:
+  - index: 1
+    text: 他不眠不休的練習，只為不（　）父母的支持。
+    answer: E
+  - index: 2
+    text: 因為現場沒有留下線索，警方一時難以判斷誰最有 （　）。
+    answer: D
+  - index: 3
+    text: 儘管大家都勸他換一個方法試試，但他依然（　），不肯改變。
+    answer: A
+  - index: 4
+    text: 即使遭受各種威脅、（　），他從未心動，也不曾改變信念。
+    answer: B
+  - index: 5
+    text: 他終於等到上場機會，準備在國際舞台上（　）。
+    answer: H
+  - index: 6
+    text: （　）多年，臺灣才再次於奧運的殿堂拿下金牌，十分振奮人心。
+    answer: C
+  - index: 7
+    text: 詐騙集團假冒政府人員，騙取民眾的（　），再進行詐騙操作。
+    answer: F
+  - index: 8
+    text: 每當回想當時事故發生的瞬間，她仍（　）。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 周思齊 feat. 五月天 [ 倔強 Persistence ]
+    duration_seconds: 349
+    source: 相信音樂BinMusic
+  - index: 2
+    title: 20年來周思齊的「頑固」精神
+    duration_seconds: 284
+    source: CTBC Brothers 中信兄弟
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

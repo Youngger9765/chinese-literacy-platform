@@ -1,0 +1,52 @@
+lesson_uid: L0004
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 煙消雲散
+    definition: 比喻事情或情緒完全消失不見。
+  - index: 2
+    word: 不是滋味
+    definition: 心裡覺得不舒服、不開心，但又難以形容。
+  - index: 3
+    word: 亂竄
+    definition: 到處亂跑、亂動。
+  - index: 4
+    word: 揮之不去
+    definition: 無法從心中或腦中去掉，常指記憶或情緒。
+  - index: 5
+    word: 動向
+    definition: 行動和事情發展的方向。
+  - index: 6
+    word: 起伏
+    definition: 高高低低的變化，常用來形容情緒或局勢。
+  - index: 7
+    word: 心花怒放
+    definition: 形容心情像盛開的花朵一樣，非常開心。
+  - index: 8
+    word: 深淵
+    definition: 比喻危險或苦痛的地方。
+  - index: 9
+    word: 一言一行
+    definition: 說的每句話、做的每件事；常用來形容行為表現的細節。
+  - index: 10
+    word: 偵測
+    definition: 查看有沒有出現某種情況。
+  - index: 11
+    word: 雀躍
+    definition: 像麻雀輕快地跳躍；形容心情輕快愉悅。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+resources:
+  items:
+  - index: 2
+    title: 【發展輔導】困擾你的不是事件本身，而是你對事件的想法！理性情緒治療法RET|兩分鐘讀教育
+    duration_seconds: 138
+    source: 王聖傑（SHENG CHIEH）
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

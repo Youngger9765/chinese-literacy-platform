@@ -1,0 +1,136 @@
+lesson_uid: L0028
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 晝伏夜出
+    definition: 白天藏起來，夜晚才出現；「晝」是白天，「伏」是潛伏；描述夜行性動物的習性。
+  - index: 2
+    word: 成效斐然
+    definition: 成果非常好。
+  - index: 3
+    word: 刻不容緩
+    definition: 形容情況十分緊急，一刻也不容耽擱。
+  - index: 4
+    word: 表彰
+    definition: 公開表揚傑出的表現或貢獻。
+  - index: 5
+    word: 肉眼
+    definition: 人的眼睛，指不倚賴眼鏡或光學設備的視力。
+  - index: 6
+    word: 刨地
+    definition: 用爪子或工具挖地。
+  - index: 7
+    word: 雜草叢生
+    definition: 到處長滿雜草。
+  - index: 8
+    word: 層出不窮
+    definition: 接連不斷地出現。（注意：這個詞常用來形容壞事）。
+  - index: 9
+    word: 繁殖
+    definition: 生出新的生命，讓物種的數量增加。例如，老鼠生出小老鼠、植物的種子變成小苗，都是繁殖。
+  - index: 10
+    word: 救苦救難
+    definition: 提供救助，使人脫離痛苦與災難。
+  - index: 11
+    word: 效能
+    definition: 做事的效率和效果。「工作效能很好」指的是工作做得又快、又好。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 表彰
+    B: 層出不窮
+    C: 雜草叢生
+    D: 肉眼
+    E: 效能
+    F: 救苦救難
+    G: 繁殖
+    H: 刻不容緩
+    I: 晝伏夜出
+    J: 成效斐然
+  questions:
+  - index: 1
+    text: 這個花園多年無人管理，已經（　），整理恐怕要花一段時間。
+    answer: C
+  - index: 2
+    text: 貓頭鷹和老鼠都是（　）的生物，白天休息，晚上才出來覓食。
+    answer: I
+  - index: 3
+    text: 這種昆蟲的（　）力很強，短短幾週，數量就增加到成千上萬隻。
+    answer: G
+  - index: 4
+    text: 地震導致大量人員受困，救援行動（　），每分每秒都攸關生死。
+    answer: H
+  - index: 5
+    text: 這種生物體型太小，以（　）無法看見，必須使用顯微鏡。
+    answer: D
+  - index: 6
+    text: 這款新型手機的（　）很好，開啟程式很快，處理照片也很順暢。
+    answer: E
+  - index: 7
+    text: 總統今日上午頒獎給舉重國手郭婞淳，以（　）其榮獲奧運金牌。
+    answer: A
+  - index: 8
+    text: 由於詐騙案件（　），警方提醒民眾不要輕信來路不明的訊息。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: B
+    stem: 根據表1，使用巨鼠掃雷的優勢不包括哪一項？
+    options:
+      A: 較不容易受到鋁罐、瓶蓋等廢金屬干擾
+      B: 可以直接引爆地雷，減少人力需求
+      C: 訓練和飼養成本比金屬探測器低
+      D: 在雜草叢生的環境中仍能有效工作
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 巨鼠掃雷時為什麼不容易引爆地雷？
+    options:
+      A: 因為巨鼠受過專業訓練
+      B: 因為巨鼠嗅覺很靈敏
+      C: 因為巨鼠體重很輕
+      D: 因為巨鼠不會踩在地雷上
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 文章提到，巨鼠的形象發生了什麼變化？
+    options:
+      A: 牠們從讓農民頭痛的害鼠，轉變為掃雷英雄
+      B: 牠們從被當作實驗動物，變成受保護的瀕危物種
+      C: 牠們從被當作寵物飼養，轉變為軍用動物
+      D: 牠們從森林動物，變成都市中常見的寵物
+    rationale: 表彰、刻不容緩、成效斐然、繁殖、救苦救難、層出不窮、
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 7年在柬埔寨找地雷，非洲巨鼠獲獎
+    duration_seconds: 118
+    source: 公視新聞網
+  - index: 2
+    title: 這則短片說明馬嘎瓦怎樣嗅出地雷來
+    duration_seconds: 77
+    source: Al Jazeera English
+  - index: 3
+    title: 嗅出超過100枚地雷的英雄鼠過世
+    duration_seconds: 135
+    source: BBC News 中文
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

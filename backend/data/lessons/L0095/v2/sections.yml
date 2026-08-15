@@ -1,0 +1,130 @@
+lesson_uid: L0095
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 抽搐
+    definition: 肌肉不受控制的收縮、抖動。
+  - index: 2
+    word: 遲滯
+    definition: 緩慢、停止不動。
+  - index: 3
+    word: 神祇
+    definition: 指神明。
+  - index: 4
+    word: 離群索居
+    definition: 離開人群，自己生活。
+  - index: 5
+    word: 魁梧
+    definition: 體格高大強壯。
+  - index: 6
+    word: 奪門而出
+    definition: 迅速衝出大門。「奪」是指衝出去的意思。
+  - index: 7
+    word: 禁忌
+    definition: 因為風俗習慣或想法，而被禁止說的話或做的事。
+  - index: 8
+    word: 轉瞬即逝
+    definition: 一眨眼間就消失不見。
+  - index: 9
+    word: 隻手遮天
+    definition: 想用一隻手遮住天，比喻隱瞞事實的真相。
+  - index: 10
+    word: 倫理
+    definition: 判斷一件事應不應該做、做法是否合宜的
+  - index: 11
+    word: 哀鳴
+    definition: 因痛苦或悲傷而發出的叫聲。
+  extraction_check:
+    vocabulary_agreement: 0.86
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 魁梧
+    B: 隻手遮天
+    C: 轉瞬即逝
+    D: 遲滯
+    E: 抽搐
+    F: 哀鳴
+    G: 離群索居
+    H: 奪門而出
+    I: 禁忌
+    J: 神祇
+  questions:
+  - index: 2
+    text: 老人對兒孫說，歳月（　），你們一定要珍惜和家人相處的機會。
+    answer: C
+  - index: 6
+    text: 他因為緊張過度，嘴角微微（　），臉上表情極不自然。
+    answer: E
+  - index: 7
+    text: 進入寺廟參觀時，要尊重當地的（　），不要大聲喧嘩或隨意拍照。
+    answer: I
+  - index: 8
+    text: 受傷的小狗躲在牆角低聲（　），讓路過的人聽了很心疼。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 哀鳴
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 下列哪個句子中的語詞運用錯誤？
+    options:
+      A: 夫妻大吵一架後，這位太太一時氣不過便「奪門而出」
+      B: 陽光太強，小美一手提東西，只好「隻手遮天」擋住陽光
+      C: 為了準備國家考試，他「離群索居」，專心讀書了三個月
+      D: 這外國人不了解台灣的「禁忌」，居然用紅筆寫信給友人
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 根據文章，下列敘述何者不正確？
+    options:
+      A: 弗蘭肯斯坦因爲想起曾看見樹被閃電擊中的景象，而得到用電流進行造人實驗的靈感
+      B: 雖然弗蘭肯斯坦成功的造出「人」來，但隨後就被自己創造出來的「人」嚇得奪門而出
+      C: 怪物透過學習，慢慢擁有知識和判斷力，起初被討厭，最終因他的善良而被人類接納
+      D: 小說的中文翻譯是《科學怪人》，有人認為「科學怪人」是指怪物，也有人認為是科學家
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 為什麼小說原作者給本書書名的副標題是「現代普羅米修斯」？
+    options:
+      A: 弗蘭肯斯坦造人的行為和普羅米修斯一樣，都觸犯了禁忌
+      B: 弗蘭肯斯坦把普羅米修斯當成目標，立志成為普羅米修斯
+      C: 科學怪人和普羅米修斯一樣，都被用鐵鍊綁起來並鎖在高處
+      D: 作者希望弗蘭肯斯坦能像普羅米修斯一樣，接受神的懲罰
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 根據課文，下面哪一個選項比較可能是小說原作者透過故事想要傳達給讀者的？
+    options:
+      A: 為了讓科學可以有更好的發展，我們應該要投注所有的心力
+      B: 不要隨便觸犯神的禁忌，否則將會招來厄運，最後不得善終
+      C: 怪物很可憐，沒有名字，也沒有人愛，才會造成一連串悲劇
+      D: 發展科學時不能只關注研發成果，也要留意可能帶來的後果
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 用屍塊造人但不想負責！《科學怪人》科技時代的警示寓言
+    duration_seconds: 602
+    source: TaiwanBar
+  - index: 2
+    title: 希臘神話-眾神篇 第八期】盜火的普羅米修斯，偉大的先知被囚禁。
+    duration_seconds: 735
+    source: 錢丟丟文明神話講解
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

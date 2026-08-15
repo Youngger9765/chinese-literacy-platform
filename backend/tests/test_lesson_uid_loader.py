@@ -359,3 +359,60 @@ def test_body_paragraphs_are_prose():
             if cjk < len(p) * 0.3:
                 offenders.append((lesson["lesson_uid"], p[:30]))
     assert offenders == [], f"non-prose runs in body text: {offenders[:3]}"
+
+
+# ── 學習單其餘節次 (#2683) ──────────────────────────────────────────────────
+
+def test_sections_reach_the_learning_steps():
+    """語詞理解 / 語詞應用 / 閱讀理解 rendered 「本課尚無…」 for every lesson because
+    the pipeline extracted two of the worksheet's nine sections. These are the other
+    three, and this asserts they arrive on the story dict the steps read."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    counts = {k: sum(1 for l in lessons if l.get(k))
+              for k in ("vocabulary", "fill_in_blank", "multiple_choice")}
+    assert counts["vocabulary"] >= 100, counts
+    assert counts["fill_in_blank"] >= 110, counts
+    assert counts["multiple_choice"] >= 120, counts
+
+
+def test_every_question_can_actually_be_answered():
+    """The failure this guards is subtle and would reach a student: an answer key
+    pointing at an option that is not on screen. The teacher edition overwrites the
+    correct option with its rationale, so the letter genuinely goes missing from the
+    source — the extractor reattaches it, and this checks the reattachment held."""
+    from app.services.lesson_loader import get_all_lessons
+
+    broken = []
+    for lesson in get_all_lessons():
+        for field in ("fill_in_blank", "multiple_choice"):
+            for q in lesson.get(field) or []:
+                labels = {o["label"] for o in q.get("options") or []}
+                if q.get("answer") and q["answer"] not in labels:
+                    broken.append((lesson["lesson_uid"], field, q["answer"], sorted(labels)))
+    assert broken == [], f"answers with no matching option: {broken[:3]}"
+
+
+def test_withheld_sections_are_absent_not_empty():
+    """A section that failed its check must not be written at all. Present-but-empty
+    would render as a step with zero questions, which reads as 'this lesson has no
+    exercises' rather than 'this extraction could not be verified'."""
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    for uid in L.available_uids()[:40]:
+        for f in (L.LESSONS_ROOT / uid).glob("v*/sections.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8"))
+            for name, sec in doc.items():
+                if not isinstance(sec, dict) or "extraction_check" not in sec:
+                    continue
+                verdict = sec["extraction_check"]["verdict"]
+                assert verdict in ("ok", "weak", "unverified"), (
+                    f"{uid}/{name}: verdict {verdict!r} should not have been written"
+                )
+                if verdict == "unverified":
+                    assert sec.get("needs_human_review") is True, (
+                        f"{uid}/{name}: unverified content must say so"
+                    )

@@ -1,0 +1,74 @@
+lesson_uid: L0118
+version_id: v2
+vocab_application:
+  options:
+    A: 鎮日
+    B: 呼天搶地
+    C: 唸叨
+    D: 惴惴不安
+    E: 娓娓道來
+    F: 深不可測
+    G: 百感交集
+    H: 晶瑩飽滿
+    I: 鮮豔欲滴
+    J: 大限
+  questions:
+  - index: 2
+    text: 奶奶坐在搖椅上，（　）她年輕時逃難的故事。
+    answer: E
+  - index: 3
+    text: 他站在懸崖邊往下看，只見雲霧翻騰，谷底 （　）。
+    answer: F
+  - index: 4
+    text: 我今天忘了帶課本，老師忍不住（　）：「你怎麼老是忘東忘西？」
+    answer: C
+  - index: 5
+    text: 大地震後，罹難者家屬悲痛欲絕，在靈堂前（　）。
+    answer: B
+  - index: 6
+    text: 小明打破爸爸的花瓶後，整天（　），擔心被罵。
+    answer: D
+  - index: 7
+    text: 老爺爺知道自己（　）將至，便把想說的話一一交代給家人。
+    answer: J
+  - index: 8
+    text: 畢業典禮當天，我對未來有著期待，卻又不捨得離開，心中真是（　）。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: C
+    stem: 本文採用「故事中有故事」的寫法，主要用意是什麼？
+    options:
+      A: 讓文章看起來更長，增加故事情節的曲折變化
+      B: 讓法師顯得更神祕，強調他比家人更了解病人
+      C: 讓讀者跟著林奶奶一起，從樵夫故事中理解人生處境
+      D: 讓樵夫故事成為主線，取代林奶奶的病房故事
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 法師說的故事，是在說明林奶奶的人生處境。下列哪一組「故事中的事物—象徵意義」的配對最符合文章意思？
+    options:
+      B: 藤蔓象徵醫院規定，黑白老鼠象徵醫生與家人
+      C: 懸崖象徵旅行冒險，蘋果象徵孫女的烹飪技巧
+      D: 草莓象徵痛苦旁邊仍然可以珍惜的小小美好
+    rationale: 草莓不是逃避現實，也不是單純好吃的水果。它象徵人在無法逃開痛苦與生命限制時，仍能感受當下的一點美好。
+  - index: 5
+    answer: B
+    stem: 下列哪一項最能說明本文最可能帶給讀者的體會？
+    options:
+      A: 照顧病人時，應該多勸病人接受現實，才有助於改善情緒
+      B: 故事不一定改變事實，卻可能改變當事人看待事實的眼光
+      C: 遇到痛苦時，故事可轉移注意力，幫當事人忘記所有煩惱
+      D: 生病的人應該忍耐情緒，不能讓身邊的照顧者承受壓力
+    rationale: 本文不是說故事能治好病，也不是要求病人壓抑情緒。林奶奶的病痛和害怕仍然存在，但故事讓她換了一種眼光，看見家人的愛與生活中仍可品嘗的美好。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok

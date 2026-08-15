@@ -1,0 +1,116 @@
+lesson_uid: L0022
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 思緒
+    definition: 內心的想法、思考的歷程。
+  - index: 2
+    word: 邁開
+    definition: 跨步向前。
+  - index: 3
+    word: 計較
+    definition: 計算、比較，通常用於在意細節或小事。
+  - index: 4
+    word: 莫名
+    definition: 說不出原因、無法解釋的感覺。
+  - index: 5
+    word: 漣漪
+    definition: 水面上微小的波紋，也可比喻內心的細微感受或變化。
+  - index: 6
+    word: 異樣
+    definition: 不一樣、和平常不同。
+  - index: 7
+    word: 靦腆
+    definition: 不好意思、害羞的樣子。
+  - index: 8
+    word: 一如往常
+    definition: 和以前一樣，沒有改變。
+  - index: 9
+    word: 愣
+    definition: 因為驚訝、害怕或一時反應不過來，而短暫的停住或不說話、不動作。
+  extraction_check:
+    vocabulary_agreement: 0.82
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 邁開
+    B: 莫名
+    C: 靦腆
+    D: 漣漪
+    E: 計較
+    F: 思緒
+    G: 異樣
+    H: 一如往常
+  questions:
+  - index: 1
+    text: 他心愛的吊飾被同學弄髒，他卻一點也不（　），真是不容易。
+    answer: E
+  - index: 2
+    text: 看著泛黃的舊照片，他的（　）飄回了在公園玩耍的童年時光。
+    answer: F
+  - index: 3
+    text: 雖然風雨交加，交通警察還是（　）的站在路口指揮，十分敬業。
+    answer: H
+  - index: 4
+    text: 在作品得獎後，面對大家的稱讚，她露出了（　）的笑容。
+    answer: C
+  - index: 5
+    text: 講者勵志的人生故事，在我心中起了小小的（　），也讓我更有勇氣。
+    answer: D
+  - index: 6
+    text: 走在黑漆漆、空無一人的校園，他感到（　）的緊張，想趕緊離開。
+    answer: B
+  - index: 7
+    text: 幸好同學及時發現他的（　），才來得及在他暈倒前扶住他。
+    answer: G
+  - index: 8
+    text: 看見多年不見的老友，他開心的（　）腳步迎上前去。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 漣漪
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 作者認為自己不該為了心上人和朋友生氣、冷戰
+      B: 作者非常不認同阿葉的行為，認為阿葉不夠義氣
+      C: 作者不想讓阿葉看出自己心情，怕被心上人知道
+      D: 作者想成全阿葉和自己喜歡的人，默默退出競爭
+    rationale: 從前後文可推知作者其實介意，但不願承認，所以選(B
+  - index: 4
+    answer: C
+    stem: 根據本文內容，關於作者的情緒變化，下列何者正確？
+    options:
+      B: 小綠：和人相處應該保持開放心態，一旦吃醋就要檢討
+      C: 大華：吃醋代表對關係的重視和在乎，但也要避免傷人
+      D: 阿勇：如果朋友不會吃你的醋，就代表他沒有很重視你
+      A: 美美：常常吃醋的人通常個性小氣又愛計較，很難相處
+    rationale: 第二段「愣了一下」是驚訝、
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 愛情關係中的嫉妒｜❤️情感關係系列❤️
+    duration_seconds: 362
+    source: 輔仁大學學生輔導中心
+  - index: 2
+    title: 【Tilaine 姐跟你說】在感情裡，能不能吃醋？
+    duration_seconds: 298
+    source: 我是Tilaine
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

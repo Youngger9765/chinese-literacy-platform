@@ -38,6 +38,50 @@ def _reapply_spotlight_images(lesson: dict) -> None:
     lesson["images"] = merge_spotlight_images(lesson.get("images") or [], spotlight_v2)
 
 
+def _sections(l: dict) -> dict:
+    return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
+
+
+def _vocabulary_from(l: dict) -> list[dict]:
+    """三 語詞我最棒 → the shape StoryDetail's vocabulary field expects."""
+    items = (_sections(l).get("vocab_definitions") or {}).get("items") or []
+    return [{"word": i["word"], "definition": i["definition"]} for i in items if i.get("word")]
+
+
+def _cloze_from(l: dict) -> list[dict]:
+    """四 語詞應用 → fill-in-the-blank items."""
+    sec = _sections(l).get("vocab_application") or {}
+    options = sec.get("options") or {}
+    out = []
+    for q in sec.get("questions") or []:
+        out.append({
+            "question": q.get("text", ""),
+            "options": [{"label": k, "text": v} for k, v in sorted(options.items())],
+            "answer": q.get("answer"),
+        })
+    return out
+
+
+def _mcq_from(l: dict) -> list[dict]:
+    """七 閱讀理解 → multiple-choice items.
+
+    `is_rationale` marks a question whose correct option was replaced by the answer
+    explanation in the teacher edition — the text is the reason, not a distractor.
+    Carried through so a renderer can present it accordingly rather than showing an
+    explanation as if it were a choice.
+    """
+    out = []
+    for q in (_sections(l).get("comprehension") or {}).get("questions") or []:
+        opts = q.get("options") or {}
+        out.append({
+            "question": q.get("stem", ""),
+            "options": [{"label": k, "text": v} for k, v in sorted(opts.items())],
+            "answer": q.get("answer"),
+            "answer_is_rationale": bool(q.get("is_rationale")),
+        })
+    return out
+
+
 def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
     """The cover file for a lesson, or None.
 
@@ -138,9 +182,13 @@ def _uid_tree_lessons() -> list[dict]:
             # produces spotlight + keypoints; the remaining practice modules are
             # not yet extracted, so they are present-but-empty rather than absent
             # (absent would 500 the detail route, empty renders as "no exercise").
-            "vocabulary": None,
-            "fill_in_blank": None,
-            "multiple_choice": None,
+            # From sections.yml — the worksheet sections the pipeline now extracts.
+            # A section that failed its check is absent from that file rather than
+            # present-and-wrong, so `or None` here is the honest empty state and the
+            # step renders 「本課尚無…」 instead of another lesson's questions.
+            "vocabulary": _vocabulary_from(l) or None,
+            "fill_in_blank": _cloze_from(l) or None,
+            "multiple_choice": _mcq_from(l) or None,
             "reading_benchmark": None,
             "text_type": "單",
             "source_file": None,

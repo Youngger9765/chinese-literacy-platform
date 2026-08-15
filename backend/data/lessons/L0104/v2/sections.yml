@@ -1,0 +1,156 @@
+lesson_uid: L0104
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 加油添醋
+    definition: 把事情說得更誇張，加入原本沒有的細節。
+  - index: 2
+    word: 跟風起鬨
+    definition: 不太了解事情就跟著別人一起鬧、一起附和，常把事情越弄越大。
+  - index: 3
+    word: 做作
+    definition: 表現得刻意、不自然，像在表演給人看。
+  - index: 4
+    word: 進退維谷
+    definition: 前進也難、後退也難，左右為難。
+  - index: 5
+    word: 發酵
+    definition: 本文指事情持續擴散，引起更多討論，影響越來越大。
+  - index: 6
+    word: 如坐針氈
+    definition: 氈是毯子；像坐在會刺人的毯子上，形容非常不安、坐立難安。
+  - index: 7
+    word: 眾矢之的
+    definition: 眾是許多；矢是箭，的是箭靶；許多支箭射在同一個靶上，指的是「大家一起指責、攻擊的共同目標」。
+  - index: 8
+    word: 強顏歡笑
+    definition: 明明很難過，卻勉強擠出笑容裝作沒事。
+  - index: 9
+    word: 重整旗鼓
+    definition: 失敗或受挫後重新振作、再出發。
+  - index: 10
+    word: 無妄之災
+    definition: 沒做錯事卻遭到牽連的倒楣事。
+  - index: 11
+    word: 孤立無援
+    definition: 遇到困難沒人幫忙，只能獨自面對。
+  - index: 12
+    word: 逞強
+    definition: 明明撐不住，還硬要裝作沒事、自己扛。
+  - index: 13
+    word: 撥雲見日
+    definition: 困難慢慢過去，情況變好，看見希望。
+  - index: 14
+    word: 有憑有據
+    definition: 有證據、有依據，不是隨便說說。
+  - index: 15
+    word: 咆哮
+    definition: 很大聲、很兇地吼叫或怒罵。
+  - index: 16
+    word: 得不償失
+    definition: 得到的好處比付出的代價還小，結果不划算。
+  extraction_check:
+    vocabulary_agreement: 0.84
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 眾矢之的
+    B: 如坐針氈
+    C: 強顏歡笑
+    D: 無妄之災
+    E: 重整旗鼓
+    F: 做作
+    G: 撥雲見日
+    H: 咆哮
+    I: 得不償失
+    J: 進退維谷
+  questions:
+  - index: 1
+    text: 有人發現他就是謠言的源頭，他因此成為（　），大家都罵他。
+    answer: A
+  - index: 2
+    text: 校際盃連敗兩場後，球隊（　），把失誤逐項檢討。
+    answer: E
+  - index: 3
+    text: 她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常（　）。
+    answer: F
+  - index: 4
+    text: 她被闖紅燈的摩托車嚇到，閃避時重重跌了一跤，真是（　）。
+    answer: D
+  - index: 5
+    text: 他校隊選拔遭到淘汰後，雖然難過，仍然（　）安慰隊友。
+    answer: C
+  - index: 6
+    text: 經過完整調查，真相終於（　），被冤枉的人也得以澄清。
+    answer: G
+  - index: 7
+    text: 大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是（　）。
+    answer: J
+  - index: 8
+    text: 導師叫我下課找她說明作弊的事，我這節課（　），無法專心上課。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 第四段提及，安海瑟薇「猶豫要不要上台領獎」，最可能的原因是什麼？
+    options:
+      B: 她覺得獎項不重要，想低調生活
+      C: 她天生很害羞，不喜歡公開場合
+      D: 她認為自己不配得獎，想先反省
+      A: 文中描述她陷入「笑也錯、不笑也錯」：笑被說假掰，不笑被說冷漠。她不是不在乎獎項，而是擔心任何反應都被剪輯嘲弄。
+    rationale: 文中描述她陷入「笑也錯、不笑也錯」：笑被說假掰，不笑被說冷漠。她不是不在乎獎項，而是擔心任何反應都被剪輯嘲弄。
+    is_rationale: true
+  - index: 2
+    answer: B
+    stem: 本課為什麼要說安海瑟薇的故事？作者最主要的用意是什麼？
+    options:
+      B: 只要沉默到底，就能證明自己問心無愧、問題會消失
+      C: 反擊可能升高衝突、被抓把柄，應先冷處理並保護自己
+      D: 霸凌者不可理喻，因此最好的做法是完全切斷所有關係
+      A: 遇到霸凌要更強硬回擊，才不會被看扁
+    rationale: 名人案例能提高說服力：連好萊塢明星也會受害，表示這不是「你太脆弱」，而是霸凌機制本來就會擴散與貼標籤。
+  - index: 4
+    answer: D
+    stem: 下列何者最符合本文主旨？
+    options:
+      A: 成名後難免被討厭，最好的方法就是習慣網路酸言
+      B: 被霸凌多半是誤會，只要有適當的解釋就能讓大家改觀
+      C: 演員形象影響工作，因此應該避免在網路上表達任何情緒
+      D: 網路霸凌會造成傷害，遭遇時應如何面對、求助、避免受傷
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 同學在班群被取笑後想立刻回嗆，最符合本文建議的做法是什麼？
+    options:
+      B: 發限動公審對方，讓他也難堪
+      C: 退出群組就好，不需要留下任何紀錄
+      D: 先停損離開現場，截圖蒐證再求助
+    rationale: 文章主張「冷處理、不要以牙還牙」並「蒐證」，同時要「不要一個人扛」尋求師長協助。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 現實生活中的好人，為何一上網就變酸民！？網路霸凌問題，真的有解嗎？｜《七七說書》EP 037
+    duration_seconds: 708
+    source: 志祺七七
+  - index: 2
+    title: 安海瑟薇談霸凌 怕搜尋自己
+    duration_seconds: 89
+    source: 華視新聞CH52
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

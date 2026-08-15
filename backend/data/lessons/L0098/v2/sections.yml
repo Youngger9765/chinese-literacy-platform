@@ -1,0 +1,109 @@
+lesson_uid: L0098
+version_id: v2
+vocab_application:
+  options:
+    A: 屢見不鮮
+    B: 刻板印象
+    C: 日積月累
+    D: 內化
+    E: 無傷大雅
+    F: 開場白
+    G: 滲透
+    H: 憐憫
+    I: 隱蔽
+    J: 偏見
+  questions:
+  - index: 1
+    text: 這份報告只有幾個小錯字，不影響整體內容，應該（　）。
+    answer: E
+  - index: 2
+    text: 日本動漫和遊戲逐漸（　）到日常生活，改變了年輕人的價值觀。
+    answer: G
+  - index: 3
+    text: 含糖飲料看似安全，但（　）後，會對身體產生長遠的傷害。
+    answer: C
+  - index: 4
+    text: 經過一次次練習，他逐漸把教練教的技能 （　）成自己的能力。
+    answer: D
+  - index: 5
+    text: 比賽中因為緊張而失誤的情形（　），選手必須學會調整心情。
+    answer: A
+  - index: 6
+    text: 我們不應該根據他黑壯的外表，就帶著（　）說他會很粗魯。
+    answer: J
+  - index: 7
+    text: 這條小路藏在樹林後方，位置十分（　），外地人很難發現。
+    answer: I
+  - index: 8
+    text: 看到流浪狗在雨中發抖，她心生（　），便拿出毛巾幫牠擦乾。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列語詞，何者使用錯誤？
+    options:
+      A: 模範生的她偶爾犯錯，被老師罵的場景「屢見不鮮」
+      B: 他偶爾說話失禮，大家都覺得「無傷大雅」，沒必要太過在意
+      C: 她靠著「日積月累」的練習，終於在舉重比賽中獲勝
+      D: 這間小店位置「隱蔽」，第一次來的人很難發現
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 為什麼老師每次都讓體育班學生搬桌椅，可能構成微歧視？
+    options:
+      A: 因為老師可能忽略了其他班學生也可以搬桌椅的能力
+      B: 因為老師只根據體育班身分，認為他們最適合體力勞動
+      C: 因為體育班學生只有喝飲料就願意幫忙老師搬桌椅
+      D: 因為老師不喜歡體育班的學生，故意使喚他們勞動
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 下列選項何者最能表達本文的主旨？
+    options:
+      A: 微歧視看似事小，實則影響深遠，應反思言行促成多元接納
+      B: 微歧視是一種社會問題，應立法制止防治、處罰此類行為
+      C: 弱勢群體需要被大家保護，讓他們不再被歧視
+      D: 大眾應多關注社會問題，並尋求公平解決方案
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 要破除微歧視，何者不是正確的方法？
+    options:
+      B: 要留意自己脫口而出的話語
+      C: 被微歧視時可直接溫和溝通
+      D: 可減少與他人的交談
+    rationale: 課文末段說明，要時常反思言行、避免過度簡化形容某些群體。而非減少交談。
+  - index: 5
+    answer: C
+    stem: 下列情境敘述中，哪一項符合「微歧視」現象？
+    options:
+      A: 在公司裡，所有員工都必須參加安全培訓，無論其背景如何
+      B: 每年學校都會舉辦運動會，鼓勵所有學生參與各項比賽
+      C: 對轉學生說：「你從臺東來的，你會搭臺北的公車捷運嗎？」
+      D: 老師在課堂上鼓勵學生提出不同的意見和觀點
+    rationale: 最能反映文章的主旨，強調微歧視的隱蔽性及其影響，並呼籲人們反思與避免此類行為。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.6
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 歧視無所不在！一次搞懂刻板印象、無意識偏見、微攻擊
+    duration_seconds: 622
+    source: Sherry's Notes 雪力的心理學筆記
+  - index: 2
+    title: 原來這樣會產生「無形的歧視」？一起來了解為什麼身心障礙者會提倡「自立生活」吧！
+    duration_seconds: 568
+    source: 志祺七七 X 圖文不符
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

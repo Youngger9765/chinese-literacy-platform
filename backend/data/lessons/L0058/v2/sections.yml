@@ -1,0 +1,97 @@
+lesson_uid: L0058
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 多樣性
+    definition: 事物或生物有許多不同的種類或特色。
+  - index: 2
+    word: 未雨綢繆
+    definition: 事情還沒發生前，先做好準備。
+  - index: 3
+    word: 森嚴
+    definition: 防守或警戒非常嚴密。
+  - index: 4
+    word: 倖免
+    definition: 在災難或危險中，幸運的沒有受傷。
+  - index: 5
+    word: 戒備
+    definition: 保持警覺，並做好防備，以應付可能發生的危險。
+  - index: 6
+    word: 烽火漫天
+    definition: 形容戰爭激烈，到處都有戰火。
+  - index: 7
+    word: 活性
+    definition: 生物或細胞仍能生長或發揮作用的狀態。本文指種子還能發芽。
+  - index: 8
+    word: 甦醒
+    definition: 從昏迷、沉睡的狀態恢復過來。本文把種子恢復發芽比作甦醒。
+  - index: 9
+    word: 極端
+    definition: 程度非常高或非常低，超出一般範圍。
+  - index: 10
+    word: 殃及池魚
+    definition: 比喻原本與事情無關的人或事物受到牽連。
+  - index: 11
+    word: 出資
+    definition: 提供金錢，讓某項計畫或工作可以進行。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 甦醒
+    B: 倖免
+    C: 殃及池魚
+    D: 戒備
+    E: 未雨綢繆
+    F: 出資
+    G: 活性
+    H: 烽火漫天
+    I: 森嚴
+    J: 多樣性
+  questions:
+  - index: 1
+    text: 哥哥打破花瓶，弟弟卻也被責罵，真是（　）。
+    answer: C
+  - index: 2
+    text: 這次空難事件，機上乘客無一（　）。
+    answer: B
+  - index: 3
+    text: 戰爭爆發後，城裡（　），人們被迫逃離家園。
+    answer: H
+  - index: 4
+    text: 由於可能會有強烈餘震，居民們都保持高度（　），隨時準備撤離。
+    answer: D
+  - index: 5
+    text: 颱風季來臨前，居民 （　） ，先準備防災物資。
+    answer: E
+  - index: 6
+    text: 春天來臨，沉睡了一整個冬天的大地逐漸（　），到處充滿生機。
+    answer: A
+  - index: 7
+    text: 研究人員努力保存疫苗的（　），確保施打後能發揮預期效果。
+    answer: G
+  - index: 8
+    text: 幾位同學共同（　），購買畢業紀念品送給老師。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 永凍層下造植物方舟-種子金庫藏冷岸群島-T觀點 20170611 (2/4)
+    duration_seconds: 741
+    source: TVBS優選頻道-T觀點
+  - index: 2
+    title: 台灣小米種原入庫北極世界種子庫【發現科學】
+    duration_seconds: 341
+    source: 台視新聞
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

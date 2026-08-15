@@ -1,0 +1,128 @@
+lesson_uid: L0039
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 不外乎
+    definition: 通常就是這幾種情況，不會超出這個範圍。
+  - index: 2
+    word: 汗流浹背
+    definition: 全身流了很多汗，形容天氣炎熱或做事非常辛苦。
+  - index: 3
+    word: 僧多粥少
+    definition: 人多資源少，供不應求。
+  - index: 4
+    word: 達標
+    definition: 達到原先設立的標準或目標。
+  - index: 5
+    word: 合作無間󠇡
+    definition: 形容彼此間密切合作。
+  - index: 6
+    word: 想方設法
+    definition: 用各種方法來達成目標。
+  - index: 7
+    word: 精湛
+    definition: 技術或技能非常高超。
+  - index: 8
+    word: 朝思暮想
+    definition: 白天晚上都在想念。形容非常想念某個人或非常想做某件事。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 汗流浹背
+    B: 精湛
+    C: 不外乎
+    D: 合作無間󠇡
+    E: 僧多粥少
+    F: 想方設法
+    G: 朝思暮想
+    H: 達標
+  questions:
+  - index: 1
+    text: 他們兩人（　），順利完成了這項艱難的任務。
+    answer: D
+  - index: 2
+    text: 這家公司提供的職位有限，應徵者卻很多，真是（　）。
+    answer: E
+  - index: 3
+    text: 他的球技非常（　），讓人驚嘆不已。
+    answer: B
+  - index: 4
+    text: 在烈日下訓練，他們個個都（　），卻不輕言放棄。
+    answer: A
+  - index: 5
+    text: 問起班上同學常做的休閒活動，（　）是運動、看影片和玩遊戲。
+    answer: C
+  - index: 6
+    text: 哥哥到外地讀書後，奶奶天天（　），盼望他早日回家。
+    answer: G
+  - index: 7
+    text: 為了完成科展作品，小組成員（　）解決實驗中遇到的困難。
+    answer: F
+  - index: 8
+    text: 經過每天努力練習，他的體能成績終於（　），獲得參賽資格。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: D
+    stem: 學生棒球運動員如果無法進入職棒，常見的職業選擇是什麼？
+    options:
+      A: 科技業
+      C: 醫療業
+      D: 服務業
+    rationale: 在第四段提到：「職業軍人、低技術體力工、服務業成為最常見的生涯選項。」
+  - index: 3
+    answer: B
+    stem: 根據本文，臺灣學生棒球運動員主要面臨的困難是什麼？
+    options:
+      B: 學業與棒球訓練難以兼顧
+      C: 缺乏家長的支持
+      D: 教練資源不足
+    rationale: 在第二段中提到：「因為投入大量的時間接受訓練、比賽，學生球員經常難以兼顧學校課業。」
+  - index: 4
+    answer: C
+    stem: 學生球員努力多年後，為什麼仍可能面臨職涯困境？
+    options:
+      A: 比賽次數太少，球員缺少展現球技的機會
+      B: 訓練設備不足，球員難以提升體能與技術
+      C: 職棒機會少、職涯短，加上學業基礎弱，轉業不易
+      D: 家長缺少支持，球員常在訓練途中離開球隊
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 課文最後希望學生的棒球夢「能有更多不同的未來」，這句話是什麼意思？
+    options:
+      A: 學生球員可以提早轉職，去體驗不同的職業活動
+      B: 讓學生兼顧球技與學力，未來有更多職涯選擇
+      C: 讓學生把全部時間投入棒球，提高進入職棒的機會
+      D: 讓學生先放下棒球訓練，專心準備升學與就業
+    rationale: 根據本文，學校和教練們的努力，希望學生棒球員能在學業和運動間取得平衡，為未來提供更多職涯選擇的機會。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 績優運動選手就業輔導"上路 培育優秀人才 2020-10-12
+    duration_seconds: 249
+    source: IPCF-TITV  原文會 原視新聞
+  - index: 2
+    title: 運動員退役後殘酷真相 ! 「兩大關鍵」贏回人生下半場
+    duration_seconds: 337
+    source: 拜倫
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

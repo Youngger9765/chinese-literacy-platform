@@ -1,0 +1,55 @@
+lesson_uid: L0168
+version_id: v2
+vocab_application:
+  options:
+    A: 家常便飯
+    B: 微不足道
+    C: 一針見血
+    D: 力不從心
+    E: 乏善可陳
+    F: 垂頭喪氣
+    G: 耳邊風
+    H: 使喚
+  questions:
+  - index: 1
+    text: 這場比賽球員們頻頻失誤，（　）的表現讓許多球迷大失所望。
+    answer: E
+  - index: 2
+    text: 他總喜歡（　）學弟妹幫他跑腿，讓人覺得不太尊重。
+    answer: H
+  - index: 3
+    text: 雖然第一局不幸失分，但隊長鼓勵大家不要（　），繼續努力。
+    answer: F
+  - index: 4
+    text: 因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分（　）。
+    answer: D
+  - index: 5
+    text: 營養師一再警告青少年少喝含糖飲料，但許多人仍當成（　）。
+    answer: G
+  - index: 6
+    text: 在段考前熬夜唸書，對他來說已是（　），週末也幾乎沒有休息。
+    answer: A
+  - index: 7
+    text: 這筆募款儘管 （　），但也代表我們對流浪動物的一點心意。
+    answer: B
+  - index: 8
+    text: 議員在院會上（　）的詢問市長有關預算的問題，引起媒體關注。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: win身體保養手冊日常如何觀察身體的健康
+    duration_seconds: 144
+    source: win身體保養手冊
+  - index: 2
+    title: 【每天一分鐘練習呼吸！紓壓、解鬱還能促進健康遠離焦慮】
+    duration_seconds: 280
+    source: World Gym Taiwan
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

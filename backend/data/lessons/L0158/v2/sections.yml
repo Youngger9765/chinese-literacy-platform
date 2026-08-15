@@ -1,0 +1,28 @@
+lesson_uid: L0158
+version_id: v2
+comprehension:
+  questions:
+  - index: 2
+    answer: A
+    stem: 課文中的商人把「不量」誤以為是「不良」，從而產生疑惑，這就是諧音雙關。請問下列何者造成誤解的原因與課文商人相同？
+    options:
+      A: 「四海」昇平
+      B: 「群魔」亂舞
+      C: 「氣焰」囂張
+      D: 「百年」樹人
+    rationale: 客人：「不、不，我是叔叔。」
+  - index: 4
+    answer: A
+    stem: 根據本文，「張田獨無恙」的原因最可能是下列何？
+    options:
+      A: 天助自助者，自助者人恆助之
+      B: 好心自有好報
+      C: 人在做，天在看
+      D: 謀事在人，成事在天
+    rationale: A強調「要努力上進、自力自強」；
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

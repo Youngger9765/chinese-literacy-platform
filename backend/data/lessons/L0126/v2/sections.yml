@@ -1,0 +1,144 @@
+lesson_uid: L0126
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 妄想
+    definition: 不切實際、難以實現的想法。
+  - index: 2
+    word: 突如其來
+    definition: 形容事情發生得非常突然，讓人措手不及。
+  - index: 3
+    word: 集資
+    definition: 許多人一起出錢，湊足所需要的資金。
+  - index: 4
+    word: 驚心動魄
+    definition: 形容情況驚險緊張，令人十分震撼。
+  - index: 5
+    word: 倉皇
+    definition: 匆忙驚慌的樣子。
+  - index: 6
+    word: 喧嘩
+    definition: 大聲說話、叫喊、笑鬧的聲音。
+  - index: 7
+    word: 崛起
+    definition: 迅速興起、發展起來。
+  - index: 8
+    word: 蕭條
+    definition: 冷清、沒有生機的樣子，常用來形容經濟或景氣低迷。
+  - index: 9
+    word: 驚駭不已
+    definition: 形容非常震驚、害怕，久久無法平靜。「不已」是無法停止的意思。
+  - index: 10
+    word: 訣竅
+    definition: 做好一件事的重要方法或技巧。
+  - index: 11
+    word: 狼狽
+    definition: 形容人處在困難、尷尬或混亂的情況，進退兩難的樣子。
+  - index: 12
+    word: 蜂擁而至
+    definition: 形容人群像蜜蜂一樣迅速且大量的朝某個方向聚集。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 蜂擁而至
+    B: 崛起
+    C: 妄想
+    D: 倉皇
+    E: 狼狽
+    F: 突如其來
+    G: 驚心動魄
+    H: 喧嘩
+    I: 驚駭不已
+    J: 蕭條
+  questions:
+  - index: 1
+    text: 他整天（　）能中大樂透，卻不願認真工作。
+    answer: C
+  - index: 2
+    text: 她在路上目睹嚴重車禍，（　），好一會兒才回過神來。
+    answer: I
+  - index: 3
+    text: 火警警報一響，大家（　）離開大樓，有人連包包都沒拿。
+    answer: D
+  - index: 4
+    text: 一場午後雷陣雨讓他全身濕透，樣子非常（　）。
+    answer: E
+  - index: 5
+    text: 只要聽聞偶像出現在車站，粉絲們必定（　），場面非常熱鬧。
+    answer: A
+  - index: 6
+    text: 近年來，這個新品牌快速（　），備受市場關注。
+    answer: B
+  - index: 7
+    text: 這場電影的爆破場面實在是（　），非常刺激。
+    answer: G
+  - index: 8
+    text: 圖書館內應保持安靜，不可大聲（　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列語詞何者使用不正確?Ａ－蜂擁而至指的是大家前來，語意錯誤
+    options:
+      A: 一聽到警報聲，大家「蜂擁而至」的逃出教室
+      B: 這座城市因觀光業「崛起」，變得越來越繁榮
+      C: 颱風來襲前，民眾「倉皇」搶購物資
+      D: 他講稿沒準備好，上場時顯得非常「狼狽」
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 作者提到戲院是她的家，但為什麼她說「這個家讓人不安心」？
+    options:
+      A: 因為戲院經常斷電停水
+      B: 戲院裡常發生混亂與危險事件
+      C: 作者和家人關係不好
+      D: 作者常需要在戲院旁顧攤而遇到同學
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 文章中提到作者用「黑色十字繡罩在燈上，在縫隙滲出的微光下解題」，這段文字作者主要想凸顯什麼？
+    options:
+      A: 她熱愛刺繡工藝
+      B: 奶奶不疼愛她，嫌棄她是女生
+      C: 她不喜歡在那麼亮的燈光下學習
+      D: 她在艱困中仍舊堅持學習
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 這篇文章最主要想要表達的想法是什麼？
+    options:
+      A: 最大化的展現父親管理戲院的混亂
+      B: 豐富文章情節，使文章更具有可看性
+      C: 用童年所處的艱難環境，襯托她仍能努力讀書的可貴
+      D: 呈現早期鄉鎮戲院的治安隱憂，提醒觀眾自我保護
+    rationale: 這些事件皆為鋪陳童年的社會背景與不安定感，為後段作者奮發讀書做情境對比與情感深化。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 戲劇童年溫暖閱讀人生 林玫伶校長
+    duration_seconds: 278
+    source: 林玫伶
+  - index: 2
+    title: 熱線追蹤 - 台灣電影院 80年起落
+    duration_seconds: 611
+    source: TTV台視新聞節目
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

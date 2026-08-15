@@ -1,0 +1,127 @@
+lesson_uid: L0091
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 不可逆
+    definition: 一旦發生了，就無法恢復原來的狀態。
+  - index: 2
+    word: 每況愈下
+    definition: 情況變得越來越糟糕。
+  - index: 3
+    word: 蹂躪
+    definition: 任意踐踏或嚴重破壞，使事物受到傷害。
+  - index: 4
+    word: 負成長
+    definition: 表示經濟或某個指標的成長率為負數，代表該項目在一段時間內數量減少了。
+  - index: 5
+    word: 不容小覷
+    definition: 不能輕視或低估。
+  - index: 6
+    word: 長此以往
+    definition: 長久像這樣持續下去，通常用來說明可能造成不好的結果。
+  - index: 7
+    word: 首當其衝
+    definition: 最先受到影響或承受衝擊。
+  - index: 8
+    word: 未雨綢繆
+    definition: 趁著天還沒下雨，先把門窗綁牢，比喻事先做好準備工作，以防範未然。
+  - index: 9
+    word: 視而不見
+    definition: 明明知道有事情發生，但卻故意不去注意或不去關心。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 視而不見
+    B: 每況愈下
+    C: 蹂躪
+    D: 不可逆
+    E: 負成長
+    F: 首當其衝
+    G: 長此以往
+    H: 未雨綢繆
+    I: 首當其衝
+    J: 不容小覷
+  questions:
+  - index: 1
+    text: 他因為沉迷遊戲，荒廢課業，導致成績（　）。
+    answer: B
+  - index: 2
+    text: 村莊經過暴風雨的（　），許多住宅殘破不堪。
+    answer: C
+  - index: 3
+    text: 最近我們公司的業績出現了（　），業績每況愈下，公司開始裁員。
+    answer: E
+  - index: 4
+    text: 生命中的某些決定是（　）的，做了就沒有回頭的機會。
+    answer: D
+  - index: 5
+    text: 如果我們對社會上發生的事件 （　），可能會導致人們越來越冷漠。
+    answer: A
+  - index: 6
+    text: 颱風季即將到來，鎮公所（　），開始修剪路樹、疏通水溝。
+    answer: H
+  - index: 7
+    text: 每天熬夜又不運動， （　） ，身體容易出現問題。
+    answer: G
+  - index: 8
+    text: 網路假消息造成的影響 （　），轉傳前應先查證。
+    answer: J
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: A
+    stem: 臺灣2020年後開始人口負成長，造成重大衝擊，請問人口負成長所帶來的影響為何？
+    options:
+      A: 未來工作年齡人口的比率下降
+      B: 青壯年人口的經濟負擔減輕（加重，因為扶養的人變多了)
+      C: 育齡婦女不婚人數增多（此為人口負成長的原因)
+      D: 老年人口壽命延長（與人口負成長無關)
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 臺灣的少子化已經造成許多衝擊，有專家學者認為或許可以透過國家邊境開放政策，讓國民人數增加。請問根據上述的內容判斷，下列哪一個對策與專家的意見最相符？（改寫112年社會科會考題）
+    options:
+      A: 提高外籍移工的雇用人數（雇用仍是非本國民，無法增加國民人數)
+      C: 推動老人長期照顧政策
+      D: 增加公立幼兒托育中心
+      B: 由國家邊境開放政策可知，是讓外來的人口移民臺灣，以增加人口數，故答案為Ｂ
+    rationale: 由國家邊境開放政策可知，是讓外來的人口移民臺灣，以增加人口數，故答案為Ｂ
+    is_rationale: true
+  - index: 5
+    answer: B
+    stem: 作者把「人口負成長」比作「灰犀牛」，主要想表達什麼？
+    options:
+      A: 人口負成長突然發生，社會幾乎無法事先預防
+      B: 人口負成長跡象明顯、影響重大，卻容易長期被忽視
+      C: 人口負成長只會造成經濟衰退與環境持續惡化
+      D: 人口負成長就是像犀牛一樣，造成重量級的衝擊
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把長框內的語詞劃掉。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 為何大腦對危機視而不見？灰犀牛(四月新書推薦-The Gray Rhino) | 夯翻鼠說書5
+    duration_seconds: 323
+    source: 柴鼠兄弟
+  - index: 2
+    title: 熱線追蹤-臺灣總人口首度負成長
+    duration_seconds: 473
+    source: TTV台視新聞
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

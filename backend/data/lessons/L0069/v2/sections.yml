@@ -1,0 +1,68 @@
+lesson_uid: L0069
+version_id: v2
+vocab_application:
+  options:
+    A: 摩拳擦掌
+    B: 迫不及待
+    C: 凝聚力
+    D: 激昂
+    E: 盲點
+    F: 共識
+    G: 折衷
+    H: 妥協
+    I: 衡量得失
+  questions:
+  - index: 1
+    text: 選擇參加比賽前，他先（　），再決定是否報名。
+    answer: I
+  - index: 2
+    text: 討論時多聽不同意見，才能看見原本沒有注意到的 （　）。
+    answer: E
+  - index: 3
+    text: 經過多次討論，全班終於對校外教學地點達成 （　）。
+    answer: F
+  - index: 4
+    text: 球隊一起接受訓練，彼此支持的過程提升了團隊（　）。
+    answer: C
+  - index: 5
+    text: 決賽即將開始，選手們早已（　），準備上場。
+    answer: A
+  - index: 6
+    text: 爸爸想爬山，媽媽想泡湯，最後選擇有步道的溫泉區，作為（　） 方案。
+    answer: G
+  - index: 7
+    text: 演講者談到守護海洋時，語氣十分（　），感動了在場聽眾。
+    answer: D
+  - index: 8
+    text: 蛋糕才剛端上桌，弟弟就（　）地想吃第一口。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 衡量得失
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 根據本文第8段，全班最後作出什麼決定？
+    options:
+      A: 強調製作一件班服，需要準備許多材料與複雜工序
+      B: 說明班上意見過於零散，很難整理成有用的討論結果
+      C: 暗示所有人的意見都要相同，班級才可能真正團結
+      D: 把抽象的意見整合寫得具體，也呼應全文的班服主題
+    rationale: 宜靜認為低價排汗衫的版型與剪裁不理想，可能讓大家不想穿，畢業後很快被當成抹布，因此仍是浪費
+  - index: 5
+    answer: C
+    stem: 下列哪一項最能概括本文主旨？
+    options:
+      A: 班服能留下共同回憶，因此選擇班服時應優先考量紀念價值
+      B: 班服是運動會的重要服裝，因此選擇時應以舒適實用為主要考量
+      C: 團體決策要聽見不同需求、衡量得失，也要照顧少數同學的困難
+    rationale: 全文從兩組方案、同學質疑、班長統整到最後表決，強調聆聽需求、衡量得失與照顧少數。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

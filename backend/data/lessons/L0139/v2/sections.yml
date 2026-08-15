@@ -1,0 +1,139 @@
+lesson_uid: L0139
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 難以置信
+    definition: 讓人很難相信、超出一般想像。
+  - index: 2
+    word: 懸而未決
+    definition: 問題或爭議暫時沒有定論，還沒被解決。
+  - index: 3
+    word: 引人矚目
+    definition: 非常吸引大家注意。
+  - index: 4
+    word: 膾炙人口
+    definition: 形容作品或事物非常受歡迎。
+  - index: 5
+    word: 洞察
+    definition: 看得深入、看出表面之下的關鍵與本質。
+  - index: 6
+    word: 機制
+    definition: 事物「怎麼運作」的方式與規則。例如比賽獎勵機制，指的是比賽提供獎勵的辦法。
+  - index: 7
+    word: 繁衍
+    definition: 生物透過生殖而增加數量、延續族群。
+  - index: 8
+    word: 白駒過隙
+    definition: 形容時間過得很快，像白色的駿馬一閃而過。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 引人矚目
+    B: 白駒過隙
+    C: 難以置信
+    D: 膾炙人口
+    E: 洞察
+    F: 繁衍
+    G: 懸而未決
+    H: 機制
+  questions:
+  - index: 1
+    text: 校園假日是否開放民眾使用，因為安全與維護問題，至今仍（　）。
+    answer: G
+  - index: 2
+    text: 那支公益廣告因為內容溫暖感人，因此 （　），分享數衝破百萬。
+    answer: D
+  - index: 3
+    text: 校慶展場裡，那幅寶特瓶做成的鯨魚最（　），大家都來拍照。
+    answer: A
+  - index: 4
+    text: 如果棲地被破壞，動物將失去生存條件，進而難以（　），族群數量也會快速下降。
+    answer: F
+  - index: 5
+    text: 平常沉默的同學拿到全國演說冠軍，大家都覺得（　）。
+    answer: C
+  - index: 6
+    text: 回想國中三年如（　），轉眼就要畢業了。
+    answer: B
+  - index: 7
+    text: 同學的書評能（　）角色內心的矛盾，讓評論更有深度與說服力。
+    answer: E
+  - index: 8
+    text: 學校設計的服務獎勵（　）很清楚，服務時數達標就能換到社團點數。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 達爾文在收到大彗星風蘭標本時，最令他驚訝的是什麼？
+    options:
+      A: 花朵帶有約30公分長的花距
+      B: 蘭花的花朵潔白芳香，形狀如星
+      C: 蘭花屬於達爾文未見過的新品種
+      D: 蘭花裡藏著一隻巨型飛蛾
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 第五段有一段文字：「達爾文先生帶著他的預言離世了。人們開始淡忘他的推測，甚至淡忘這種神奇的風蘭。」這段話透露出當時人們對達爾文預言抱著什麼樣的態度？
+    options:
+      A: 半信半疑，選擇靜候未來證明
+      B: 深信不疑，並持續投入尋找巨蛾
+      C: 認為缺乏證據而漸漸不再關注
+      D: 熱烈討論，使預言成為熱門話題
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 達爾文能提出長喙天蛾存在的推測，這顯示他具備怎樣的特質？
+    options:
+      A: 敏銳的觀察力與嚴謹推理的能力
+      B: 大膽想像但缺乏科學依據的作風
+      C: 過度自信，容易忽略他人意見
+      D: 謹慎保守，不願提出新假設
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 作者透過這篇文章最想傳達的用意是什麼？
+    options:
+      A: 詳細介紹長喙天蛾的外形、棲地與生活習性
+      B: 倡導細心觀察與大膽假設的精神，激勵讀者勇於探索未知
+      C: 批評當時科學界不尊重達爾文預言的態度，以警惕現代人
+      D: 說明科學預言成真的不易，告誡研究者應該及早驗證假說
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 下列哪一種情境最符合本文所體現的「見前人所未見」精神？
+    options:
+      A: 科學家只相信現有定論，排斥任何與傳統相悖的新假說
+      B: 學生完全遵循教科書範例解題，毫無變通創意
+      C: 探險家走訪前人踏過的路線，結果未有任何新發現
+      D: 偵探憑藉他人忽略的細微線索成功破解疑案
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: Hawk moth matches its favorite flower(飛蛾與花朵互動)
+    duration_seconds: 24
+    source: MaxPlanckSociety
+  - index: 2
+    title: 長喙天蛾｜台版蜂鳥｜紅花金銀花｜Macroglossum
+    duration_seconds: 90
+    source: 尼克の香草田園生活 talk2herb
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,125 @@
+lesson_uid: L0108
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 殘骸
+    definition: 災難或事故後留下的破碎遺體、碎片。
+  - index: 2
+    word: 邊陲
+    definition: 靠近國家或地區邊界的偏遠地方。
+  - index: 3
+    word: 日益猖獗
+    definition: 一日比一日更嚴重，越來越難控制。
+  - index: 4
+    word: 人心惶惶
+    definition: 大家都很害怕，氣氛緊張。
+  - index: 5
+    word: 束手無策
+    definition: 「束手」：把手綁起來；「無策」：沒有辦法。想不出辦法、無能為力，只能乾著急。
+  - index: 6
+    word: 荒蕪
+    definition: 土地無人耕作或缺乏生機，顯得雜草叢生、十分荒涼。
+  - index: 7
+    word: 攫取
+    definition: 猛力抓住並奪走。
+  - index: 8
+    word: _霧靄
+    definition: 瀰漫的霧氣，常使遠處景物顯得朦朧不清。
+  - index: 9
+    word: 眾目睽睽
+    definition: 「眾目」：很多眼睛。許多人同時注視著。
+  - index: 10
+    word: 蠶食鯨吞
+    definition: 「蠶食」：像
+  extraction_check:
+    vocabulary_agreement: 0.9
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 日益猖獗
+    B: 束手無策
+    C: 攫取
+    D: 人心惶惶
+    E: 殘骸
+    F: 眾目睽睽
+    G: 蠶食鯨吞
+    H: 荒蕪
+    I: 霧靄
+    J: 邊陲
+  questions:
+  - index: 1
+    text: 搜救隊找到飛機的（　），才確認墜機地點。
+    answer: E
+  - index: 3
+    text: 清晨，操場籠罩在（　）中，遠處景物模糊不清。
+    answer: I
+  - index: 4
+    text: 對方防守太嚴，我們一時（　），找不到突破的方法。
+    answer: B
+  - index: 5
+    text: 他在（　）之下推人犯規，很多同學都看見了。
+    answer: F
+  - index: 6
+    text: 近期詐騙案件（　），班導提醒別亂點不明連結。
+    answer: A
+  - index: 8
+    text: 老房子人去樓空，院子長年（　），長滿了雜草。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 文中寫婦女去洗衣「還得請兩名壯丁持矛守望」，主要說明什麼？
+    options:
+      B: 食人虎多在清晨出沒，因此村民只敢在白天洗衣西
+      C: 虎患已侵入日常生活，連洗衣都必須有人持矛警戒
+      D: 村民準備主動搜尋老虎，所以先安排壯丁在河邊守候
+    rationale: 這句話的重點是「恐懼已進入生活」
+  - index: 2
+    answer: B
+    stem: 科貝先走遍村莊訪察虎襲時間與地形，最主要的用意是什麼？
+    options:
+      A: 確認受害者身分，方便逐戶向家屬說明
+      B: 整理遇襲線索，推定老虎出沒路線並安排伏擊
+      C: 比較各村傷亡人數，決定先保護人口較多的村落
+      D: 尋找最容易召集村民的地方，方便發放火把與武器
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 根據本文「人口增加、農園擴大、棲地被侵占」的說明，下列哪一項最符合作者對「人虎衝突增加」原因的推論？
+    options:
+      A: 棲地被侵占→人虎活動範圍重疊→衝突變多
+      B: 村落人口增加→食物垃圾增加→老虎偏好進村覓食
+      C: 農園不斷擴大→村民持械巡守→老虎因受驚而攻擊
+      D: 士兵圍剿失敗→老虎不再害怕人類→衝突增加
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 第２段連續寫了「夜裡／清晨／正午」的虎襲情境，其用意為何？
+    options:
+      B: 透過連續列舉，營造虎患隨時可能發生的壓迫感
+      C: 比較夜間與白天的危險程度，說明正午最難防備
+      D: 預告科貝將依照不同時段安排圍捕老虎的計畫
+    rationale: 不同時段都出事，讓人感到「隨時可能遇襲」，是典型的氣氛鋪陳與危機堆疊手法
+  - index: 5
+    answer: D
+    stem: 下列哪一項最能概括全文主旨？
+    options:
+      A: 文章著重歌頌獵人英勇除害，成功獵殺猛虎以安定人心
+      B: 文章強調虎患殘酷可怕，主張必須徹底圍剿才能自救救人
+      C: 文章重點在追虎與伏擊技巧，呈現獵虎過程並教人方法
+      D: 文章透過虎襲案例反思，指出人虎衝突常與人類行為相關
+    rationale: 文章，最後談人口與棲地擠壓、科貝轉向保育，核心在「反思原因與責任」。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok

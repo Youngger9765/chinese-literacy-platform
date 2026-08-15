@@ -1,0 +1,129 @@
+lesson_uid: L0040
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 按表操課
+    definition: 比喻按照計劃或時間表進行工作或活動。
+  - index: 2
+    word: 融會貫通
+    definition: 把不同的知識理解後連結起來，並能靈活運用。
+  - index: 3
+    word: 依樣畫葫蘆
+    definition: 形容跟著樣子模仿學習。
+  - index: 4
+    word: 康莊大道
+    definition: 平坦暢通的大路。比喻美好的前途。
+  - index: 5
+    word: 節節攀升
+    definition: 形容某種數據或成績持續上升，不斷突破新高。
+  - index: 6
+    word: 激情洋溢
+    definition: 形容情感非常熱烈、激動，通常指人很投入活動當中。
+  - index: 7
+    word: 座無虛席
+    definition: 形容場內座位全部坐滿，一個空位都沒有。
+  - index: 8
+    word: 愧疚
+    definition: 因做錯事或未完成應盡責任而感到內疚、不安。
+  - index: 9
+    word: 沸騰
+    definition: 液體汽化的現象，從液體變成氣體，例如：水燒開時，水面會劇烈滾動。在此比喻現場氣氛熱烈，帶動觀眾情緒高漲。
+  - index: 10
+    word: 出爐
+    definition: 原指從烤爐中取出。例如：剛出爐的麵包。也可比喻新事物的誕生或出現，例如：新出爐的影后，新出爐的課表。
+  - index: 11
+    word: 相輔相成
+    definition: 兩者互相幫助、互相配合，使結果變得更好。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 節節攀升
+    B: 相輔相成
+    C: 依樣畫葫蘆
+    D: 座無虛席
+    E: 愧疚
+    F: 激情洋溢
+    G: 出爐
+    H: 沸騰
+  questions:
+  - index: 1
+    text: 朋友有難時，不能及時援救，讓他感到非常的（　）。
+    answer: E
+  - index: 2
+    text: 她是新（　）的影后，各方邀約如雪片般飛來。
+    answer: G
+  - index: 3
+    text: 閱讀和寫作（　），兩者並進可以提升語文能力。
+    answer: B
+  - index: 4
+    text: 這場音樂會吸引很多觀眾，整個劇院（　），氣氛十分熱烈。
+    answer: D
+  - index: 5
+    text: 這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率（　）。
+    answer: A
+  - index: 6
+    text: 我看過學長操作一次後，便（　），照著他的步驟完成任務。
+    answer: C
+  - index: 7
+    text: 當球隊獲勝時，全場立刻（　），響起雷鳴般的掌聲。
+    answer: H
+  - index: 8
+    text: 在畢業典禮上，優秀校友的演講（　），激勵了所有的畢業生。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列語詞，何者使用錯誤？
+    options:
+      A: 對手操作連續失誤，使他們得以輕鬆逆轉
+      B: 主角運用統計知識，分析對手的戰術模式
+      C: 他的隊友們發揮卓越的技術，憑靠實力獲勝
+      D: 隊友們默契十足，一起想到了一個新的戰術
+    rationale: 第6段指出，主角學會了時間管理，並制定了一個作息時間表，使他能夠兼顧學業與電競活動，最終在兩者上都取得進展。
+  - index: 4
+    answer: D
+    stem: 主角覺得晚上九點半時要關機很痛苦，但他說：「還好這不是我一個人的武林」，請問他最可能的意思是什麼？
+    options:
+      B: 表示一起練武功的人，不會覺得孤單
+      C: 我們關機了，總還有人在線上繼續努力
+      D: 如果只有他一個人，想抗拒誘惑就更難了
+    rationale: 關掉喜愛的遊戲是痛苦的，還好他有一群人在陪他奮鬥，如果只有一個人，根本難以抗拒誘惑。
+  - index: 5
+    answer: C
+    stem: 從主角的經歷中，我們可以學到什麼樣的生活態度？
+    options:
+      A: 追逐夢想時，應優先提升專業能力，學業可以稍後補足
+      B: 找到優秀的夥伴後，團隊合作會比個人自律更重要
+      C: 安排好時間並持續努力，可以兼顧夢想與學業
+      D: 只要把課本知識運用在電競上，就能提高比賽成績
+    rationale: 第11段指出，不論是在追求夢想還是學業上，關鍵是找到平衡，並在面對困難時保持堅持和努力，這樣才能取得成功。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 電競專班-追逐選手夢
+    duration_seconds: 694
+    source: 新聞思想啟
+  - index: 2
+    title: 殘酷的夢幻職業?!電競選手生活是怎樣
+    duration_seconds: 576
+    source: 金金長知識_小冷知識科普
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,91 @@
+lesson_uid: L0084
+version_id: v2
+vocab_application:
+  options:
+    A: 面面相覷
+    B: 熱衷
+    C: 微薄
+    D: 習以為常
+    E: 乏味
+    F: 感佩
+    G: 希冀
+    H: 黯淡
+    I: 領略
+  questions:
+  - index: 1
+    text: 在花蓮居住多年後，他已經對頻繁的小地震（　）。
+    answer: D
+  - index: 2
+    text: 為了改變（　）的生活，她決定重拾年輕時的吉他夢。
+    answer: E
+  - index: 3
+    text: 走失的阿公平安返家後，全家都非常（　）那位熱心協助的警察。
+    answer: F
+  - index: 4
+    text: 雖然薪水（　），但他依然堅持這份富有意義的工作。
+    answer: C
+  - index: 5
+    text: 聽到最喜愛的老師即將調離學校，同學們都（　）、不知所措。
+    answer: A
+  - index: 6
+    text: 這群年輕人（　）於參與社區服務，為社會貢獻心力。
+    answer: B
+  - index: 7
+    text: 考試失利後，他的眼神變得有些（　），不像平常那樣有精神。
+    answer: H
+  - index: 8
+    text: 走進山林後，他第一次（　）到大自然安靜而壯闊的美。
+    answer: I
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 希冀
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列語詞何者使用正確？
+    options:
+      A: 「來了！來了！」是在營造緊張不安的氛圍
+      B: 「羊隊和牛群告別了田野回家了」運用擬人修辭
+      C: 由第四段可知楊喚的童年缺乏溫暖
+      D: 楊喚的朋友曾鼓勵他繼續專心投身兒童文學創作
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 關於本文作者閱讀〈夏夜〉及認識楊喚後的轉變，下列敘述何者正確？
+    options:
+      B: 作者長大後知道楊喚童年十分辛苦，因此深有共鳴
+      C: 作者從困惑、羨慕，轉為理解〈夏夜〉並感佩楊喚
+      D: 作者認為楊喚持續創作兒童詩僅是為了療癒自己
+    rationale: A)由第一段可知當時無法理解
+  - index: 5
+    answer: D
+    stem: 「燕子去了，有再來的時候；楊柳枯了，有再青的時候；桃花謝了，有再開的時候。」（朱自清〈匆匆〉），下列何者最能歸納這組排比句的共同意思？
+    options:
+      A: 對時間一去不復返的感慨　B.讚美春天景物呈現繽紛色彩
+      D: 排比句型為：……了，有再……的時候，「燕子去了」、「楊柳枯了」、「桃花謝了」，可歸納為生命消逝，而「來」、「青」、「開」可歸納為生命出現。因此答案選(D
+    rationale: 排比句型為：……了，有再……的時候，「燕子去了」、「楊柳枯了」、「桃花謝了」，可歸納為生命消逝，而「來」、「青」、「開」可歸納為生命出現。因此答案選(D
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 5
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 1
+    verdict: weak
+resources:
+  items:
+  - index: 1
+    title: 文青小抄之兒童詩人楊喚
+    duration_seconds: 230
+    source: 趨勢教育基金會TRENDFD
+  - index: 2
+    title: 遇見一首詩：楊喚 / 七彩的虹
+    duration_seconds: 53
+    source: 趨勢教育基金會TRENDFD
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true

@@ -1,0 +1,98 @@
+lesson_uid: L0172
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 精神抖擻
+    definition: 精神很好、充滿活力與幹勁。
+  - index: 2
+    word: 刁鑽
+    definition: 形容問題或行為難以應付。
+  - index: 3
+    word: 氣急敗壞
+    definition: 因為生氣或著急而失去理智、表現慌亂。
+  - index: 4
+    word: 臉色一沉
+    definition: 臉上的表情突然變得嚴肅或不高興。
+  - index: 5
+    word: 悠悠
+    definition: 形容冷靜、慢慢說話的樣子。
+  - index: 6
+    word: 鑽牛角尖
+    definition: 一直在無法解決的細節或小問題上，反覆思考，無法跳脫。
+  - index: 7
+    word: 游擊
+    definition: 棒球中防守二、三壘間的位置。
+  - index: 8
+    word: 荒謬
+    definition: 非常不合理，讓人覺得無法接受。
+  - index: 9
+    word: 靦腆
+    definition: 害羞、難為情，有些不自在。
+  - index: 10
+    word: 不可置信
+    definition: 無法相信；另一種用法是「難以置信」。
+  - index: 11
+    word: 五體投地
+    definition: 指雙膝、雙肘及頭頂等五處著地，形容非常佩服或崇拜。
+  - index: 12
+    word: 低潮
+    definition: 情緒或狀況不佳的時期。
+  extraction_check:
+    vocabulary_agreement: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 五體投地
+    B: 精神抖擻
+    C: 氣急敗壞
+    D: 不可置信
+    E: 悠悠
+    F: 荒謬
+    G: 刁鑽
+    H: 靦腆
+  questions:
+  - index: 1
+    text: 他平常溫文有禮，竟會在街上破口大罵，真令人（　）。
+    answer: D
+  - index: 2
+    text: 網路上充滿（　）的假訊息與詐騙，大家都要養成查證的習慣。
+    answer: F
+  - index: 3
+    text: 她發現自己的模型被弟弟弄壞後，（　）的去找奶奶告狀。
+    answer: C
+  - index: 4
+    text: 教練示範投球時，展現出高超的控球能力，令大家 （　）。
+    answer: A
+  - index: 5
+    text: 聽完朋友激動的抱怨，她只是（　）的說：「不要理他就好了。」
+    answer: E
+  - index: 6
+    text: 啦啦隊（　）的動作與整齊的口號，瞬間吸引了觀眾的目光。
+    answer: B
+  - index: 7
+    text: 面對大家的讚美，她總是謙虛又（　），將功勞歸給背後的團隊。
+    answer: H
+  - index: 8
+    text: 面對顧客 （　）的提問與要求，他仍然耐著性子，一一回應。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 夢想雨果｜想過你自己的特質嗎? 別輕看自己!｜動畫
+    duration_seconds: 103
+    source: Dream Hugo 夢想雨果
+  - index: 2
+    title: 【Sizz翻譯】悲觀主義者獨有的智慧
+    duration_seconds: 150
+    source: SIZZ
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+  needs_human_review: true
