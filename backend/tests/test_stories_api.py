@@ -99,14 +99,6 @@ class TestGetLessonById:
         assert lesson["id"] == 20001
         assert lesson["lesson_number"] == 20001
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_lesson_1_has_paragraphs(self):
         lesson = get_lesson_by_id(20001)
         assert isinstance(lesson["paragraphs"], list)
@@ -565,14 +557,6 @@ class TestStoryListItemSchema:
         story = resp.json()["stories"][0]
         assert "paragraphs" not in story
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_thumbnail_url_is_string(self, client):
         """#2486: relative same-origin /assets path, not an absolute GCS URL."""
         resp = client.get("/api/stories?page_size=5")
@@ -595,14 +579,6 @@ class TestGetStoryDetailEndpoint:
         resp = client.get("/api/stories/20001")
         data = resp.json()
         assert data["grade"] == "4"
-
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
 
     def test_lesson_1_has_paragraphs(self, client):
         resp = client.get("/api/stories/20001")

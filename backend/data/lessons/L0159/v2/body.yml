@@ -1,0 +1,14 @@
+lesson_uid: L0159
+version_id: v2
+source: DOCX 第一節（讀全文-做記號）
+paragraphs:
+- 明朝有位叫陸盧峰的人，在京城等待朝廷的任用。他曾在市集上見到一塊上好的硯臺，可是議價沒有成功。回到官邸之後，他還是派僕人前往，用一兩銀子買硯臺回來。
+- 僕人拿著硯臺回來，陸公驚訝它不像自己想買的那個，僕人卻堅持說它就是。陸公說：「剛才我看的硯臺有個八哥眼，現在為何沒有了？」僕人回答說：「我嫌棄它有點凸，路上正好遇見石工，幸好有剩餘的銀子，就叫他打磨讓微凸的地方平整了。」陸公感到十分可惜。
+paragraph_count: 2
+char_count: 193
+extraction_check:
+  method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
+  vocabulary_found: 0
+  vocabulary_total: 0
+  ratio: null
+  verdict: no_vocab

@@ -23,6 +23,7 @@ Security posture:
 """
 import logging
 import re
+from pathlib import Path
 from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException
@@ -106,6 +107,49 @@ def _content_type_for(object_path: str) -> str:
         return _DEFAULT_CONTENT_TYPE
     ext = "." + object_path.rsplit(".", 1)[-1].lower()
     return _CONTENT_TYPES.get(ext, _DEFAULT_CONTENT_TYPE)
+
+
+_LESSONS_ROOT = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
+_UID_RE = re.compile(r"^L\d{4}$")
+
+
+@router.get("/lesson/{lesson_uid}/{filename}")
+def get_lesson_asset(lesson_uid: str, filename: str) -> Response:
+    """Serve a file from the uid tree: cover images, figures, anything shipped with
+    the lesson.
+
+    These live in the repo rather than in GCS because they are part of the lesson —
+    the first edition kept covers in a bucket keyed by lesson code, and when the
+    codes were renumbered every image pointed at a different story. Filing them under
+    the uid removes that class of mistake entirely.
+
+    Registered ABOVE the catch-all GCS proxy so `/assets/lesson/...` resolves here;
+    everything else still goes to the bucket.
+    """
+    if not _UID_RE.match(lesson_uid) or "/" in filename or ".." in filename:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    uid_dir = _LESSONS_ROOT / lesson_uid
+    if not uid_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Not found")
+    versions = sorted(
+        (c for c in uid_dir.iterdir() if c.is_dir() and c.name.startswith("v")),
+        key=lambda c: c.name,
+    )
+    if not versions:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    path = versions[-1] / "assets" / filename
+    # resolve() before the containment check: a symlink inside assets/ would
+    # otherwise pass the string checks above and read outside the tree.
+    if not path.resolve().is_file() or _LESSONS_ROOT.resolve() not in path.resolve().parents:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    return Response(
+        content=path.read_bytes(),
+        media_type=_content_type_for(filename),
+        headers={"Cache-Control": _CACHE_CONTROL},
+    )
 
 
 @router.get("/{object_path:path}")

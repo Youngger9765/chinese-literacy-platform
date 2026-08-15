@@ -235,3 +235,111 @@ def test_key_reading_is_not_bound_by_lesson_code():
         "the stories route is reading key_reading_passages.yml again — that table is "
         "keyed by catalogue position and after the renumber it serves another lesson"
     )
+
+
+# ── 課文本體 (#2683) ────────────────────────────────────────────────────────
+
+def test_lessons_carry_their_body_text():
+    """The body was absent for all 175 lessons: the pipeline read paragraphs back
+    out of the layer the re-ink deleted, so 朗讀 / 閱讀理解 / 生字 / 造句 had no text
+    to work on and 「參考課文」 rendered blank beside the keypoints table.
+
+    3 lessons legitimately have none — 會考圖文題實戰 is exam questions end to end,
+    with no passage — so this asserts the corpus, not perfection."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    with_body = [l for l in lessons if l.get("paragraphs")]
+    assert len(with_body) >= 170, (
+        f"only {len(with_body)}/{len(lessons)} lessons carry body text"
+    )
+    for lesson in with_body[:20]:
+        assert lesson["char_count"] > 0, f"{lesson['lesson_uid']} has paragraphs but 0 chars"
+
+
+def test_body_text_is_the_lesson_not_the_worksheet():
+    """The failure mode worth guarding is not an empty body but a WRONG one — the
+    worksheet's own instructions captured as the text to read aloud. Those lines are
+    recognisable: they address the student directly about the exercise."""
+    from app.services.lesson_loader import get_all_lessons
+
+    INSTRUCTION = ("請用計時器", "計時1分鐘", "◎ 我的表現", "請在空格內填入",
+                   "請根據文章內容", "找一找：")
+    offenders = [
+        (l["lesson_uid"], p[:24])
+        for l in get_all_lessons()
+        for p in (l.get("paragraphs") or [])
+        if any(m in p for m in INSTRUCTION)
+    ]
+    assert offenders == [], f"worksheet instructions landed in the body: {offenders[:3]}"
+
+
+def test_every_body_records_how_it_was_checked():
+    """The extraction check travels with the data. Without it a body is just text
+    that appeared — there is no way to tell a verified extraction from one that
+    merely ran."""
+    import yaml
+    from pathlib import Path
+
+    from app.services import lesson_uid_loader as L
+
+    checked = 0
+    for uid in L.available_uids():
+        vdirs = sorted((c for c in (L.LESSONS_ROOT / uid).iterdir()
+                        if c.is_dir() and c.name.startswith("v")), key=lambda c: c.name)
+        if not vdirs:
+            continue
+        f = vdirs[-1] / "body.yml"
+        if not f.exists():
+            continue
+        doc = yaml.safe_load(f.read_text(encoding="utf-8"))
+        chk = doc.get("extraction_check") or {}
+        assert chk.get("verdict") in ("ok", "weak", "suspect", "no_vocab"), (
+            f"{uid}: body.yml has no usable extraction_check"
+        )
+        checked += 1
+    assert checked >= 170, f"only {checked} bodies carry a check"
+
+
+# ── 封面 (#2683) ────────────────────────────────────────────────────────────
+
+def test_covers_are_card_sized_not_source_sized():
+    """The generator returns ~1.4 MB square PNGs and the library card renders them at
+    400 px wide. Committing the source images put 99 MB into the repository for
+    pictures nobody sees at that size, so covers are converted on the way in.
+
+    This locks the OUTCOME rather than the conversion code: any route that lands a
+    full-size image in the tree — a rerun with the resize removed, a hand-copied
+    file — fails here."""
+    from PIL import Image
+
+    from app.services import lesson_uid_loader as L
+
+    oversized, wrong_shape = [], []
+    for uid in L.available_uids():
+        # `thumbnail.*` also matches thumbnail.source.json, the provenance note
+        # written beside reused first-edition art — opening that as an image raises.
+        for cover in (L.LESSONS_ROOT / uid).glob("v*/assets/thumbnail.webp"):
+            kb = cover.stat().st_size // 1024
+            if kb > 120:
+                oversized.append((uid, kb))
+            if Image.open(cover).size != (400, 300):
+                wrong_shape.append((uid, Image.open(cover).size))
+    assert oversized == [], f"covers over 120 KB: {oversized[:5]}"
+    assert wrong_shape == [], f"covers not 400x300: {wrong_shape[:5]}"
+
+
+def test_most_lessons_have_a_cover():
+    """One lesson legitimately has none — 會考圖文題實戰 is exam questions with no
+    passage, so there is no scene to draw."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    with_cover = [l for l in lessons if l.get("thumbnail_url")]
+    assert len(with_cover) >= 170, f"only {len(with_cover)}/{len(lessons)} have a cover"
+    for l in with_cover[:10]:
+        assert l["thumbnail_url"].startswith(f"/assets/lesson/{l['lesson_uid']}/"), (
+            f"{l['lesson_uid']}: cover addressed by something other than its uid — "
+            "keying on the lesson code is what pointed every first-edition image at "
+            "the wrong story after the renumber"
+        )
