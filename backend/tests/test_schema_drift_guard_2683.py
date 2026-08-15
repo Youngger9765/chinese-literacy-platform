@@ -166,3 +166,39 @@ def test_repair_puts_back_what_a_stamped_migration_skipped():
     out = subprocess.run([sys.executable, "-c", _REPAIR_PROBE], cwd=root,
                          capture_output=True, text=True, timeout=300)
     assert "REPAIR-OK" in out.stdout, (out.stdout[-500:] + "\n" + out.stderr[-1500:])
+
+
+def test_the_guard_cannot_brick_a_preview_deploy(tmp_path, monkeypatch):
+    """A diagnostic that can stop every preview deploying is worse than the drift it
+    reports — this one did exactly that on its first two runs, before the repair path
+    and this exit code existed.
+
+    So on preview a schema that cannot be repaired is a loud warning and a zero exit;
+    on staging and production it is still an abort. The repair is made to fail rather
+    than assumed to: an empty database file, the obvious way to write this, turned out
+    to be perfectly repairable and the test passed without reaching the branch.
+    """
+    from sqlalchemy import create_engine, text as sql
+
+    from app.models import Base
+    import scripts.assert_schema_matches_models as guard
+
+    db = tmp_path / "behind.sqlite"
+    engine = create_engine(f"sqlite:///{db}")
+    Base.metadata.create_all(bind=engine)
+    with engine.begin() as c:
+        c.execute(sql("DROP TABLE reading_attempt_history"))
+    engine.dispose()
+
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db}")
+
+    def _fails(_engine):
+        raise RuntimeError("no permission to alter this database")
+
+    monkeypatch.setattr(guard, "repair", _fails)
+
+    monkeypatch.setenv("ENVIRONMENT", "preview")
+    assert guard.main() == 0, "preview must start even when the schema cannot be repaired"
+
+    monkeypatch.setenv("ENVIRONMENT", "staging")
+    assert guard.main() == 1, "staging must refuse to start on a schema it cannot verify"
