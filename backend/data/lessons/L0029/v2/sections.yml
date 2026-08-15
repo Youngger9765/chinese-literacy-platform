@@ -50,49 +50,8 @@ resources:
     title: 如何把自己變強？聽聽教授怎麼說
     duration_seconds: 215
     source: 智慧麵包
-  - index: 1
-    title: 這兩篇文章雖然主角都是大衛，但是聰明的你有發現嗎？兩篇文章的敘述方式有點不太一樣。現在請把下列寫法，連到對應的課文。
-  - index: 2
-    title: 從寫作手法判斷文體：透過配對，我們可以進行以下判斷
-  - index: 3
-    title: 把兩篇文章合起來讀，第二篇讓我們對第一篇多懂了什麼？
-  - index: 1
-    title: 反應快，適合處理需要即時決策的事情。
-  - index: 2
-    title: 口語表達清楚，能說服別人採納好點子。
-  - index: 3
-    title: 視覺敏銳，擅長圖像。
-  - index: 4
-    title: 喜歡統整資料，找出規律或關鍵數字。
-  - index: 5
-    title: 不怕陌生人，勇於跨出舒適圈交朋友。
-  - index: 6
-    title: 實作能力強，熟悉家務、修繕等動手能力
-  - index: 7
-    title: 體力很好，一整天運動都不會累
-  - index: 8
-    title: 身體協調性佳，柔軟度很好
-  - index: 9
-    title: 幽默感強，常逗得大家哈哈大笑
-  - index: 10
-    title: 換你試試看，你的優勢能力是什麼呢？
-  - index: 1
-    title: 午餐挑剔，讓營養師頭痛
-  - index: 2
-    title: 在圖書館自習室討人厭
-  - index: 3
-    title: 寫字不方便、不會用開罐器
-  - index: 4
-    title: 上課常插嘴，被老師罵
-  - index: 5
-    title: 做海報一直調整字距、顏色，導致進度落後
-  - index: 6
-    title: 一粒灰都受不了，同學覺得難相處
-  - index: 1
-    title: 你的一項特點：
-  - index: 3
-    title: 換個角度看──可能的優勢：
   extraction_check:
     verdict: unverified
     needs_human_review: true
+    video_count: 3
   needs_human_review: true

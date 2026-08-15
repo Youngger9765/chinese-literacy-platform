@@ -326,9 +326,30 @@ def extract_resources(paras, bounds) -> dict:
             items[-1]["source"] = s.group(1).strip()
     if not items:
         return {"items": [], "check": {"verdict": "empty"}}
-    # No A-level check exists: a video title has no machine-checkable relation to the
-    # lesson. Recorded as unverified rather than presented as checked.
-    return {"items": items, "check": {"verdict": "unverified", "needs_human_review": True}}
+
+    # Keep only the run of strictly increasing indices that starts the section. A
+    # numbered line is not evidence of a video, and 知識補給站 sits last in the
+    # document, so when its bounds run long every numbered list after it is swept in:
+    # L0029 collected 24 「videos」, of which 3 were videos and the rest were exercise
+    # items whose numbering restarted at 1. An index that does not advance is a
+    # different list.
+    kept = []
+    for it in items:
+        if kept and it["index"] <= kept[-1]["index"]:
+            break
+        kept.append(it)
+    items = kept
+
+    # A count agreement, which is a check rather than a claim: the worksheet lists the
+    # videos and the master spreadsheet holds their URLs, written separately. Where the
+    # two counts match, the section is corroborated; where they do not, one source is
+    # stale and this says so instead of implying the pairing was verified. Titles still
+    # have no machine-checkable relation to the lesson, so this never rises above B.
+    return {
+        "items": items,
+        "check": {"verdict": "unverified", "needs_human_review": True,
+                  "video_count": len(items)},
+    }
 
 
 def extract_all(docx: Path, lesson_vocab: list[str], body_text: str) -> dict:

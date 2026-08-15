@@ -741,3 +741,47 @@ def test_the_title_join_is_confirmed_by_an_independent_field():
     # And the served genre must be the worksheet's, not the spreadsheet's.
     served = [l for l in get_all_lessons() if l.get("genre")]
     assert len(served) >= 168, f"{len(served)} lessons carry a genre"
+
+
+def test_video_links_carry_the_shape_the_frontend_declares():
+    """`api.ts` declares `{title, url}[]`. Shape mismatches here do not raise — the
+    API returns 200 with a populated field and the step renders wrong or throws, which
+    is how four learning steps broke earlier in this rebuild while every presence check
+    stayed green."""
+    from app.services.lesson_loader import get_all_lessons
+
+    wrong = []
+    for lesson in get_all_lessons():
+        for v in lesson.get("video_links") or []:
+            if not isinstance(v, dict) or not v.get("url") or not v.get("title"):
+                wrong.append((lesson["lesson_uid"], repr(v)[:40]))
+    assert wrong == [], f"video_links is not {{title, url}}: {wrong[:3]}"
+
+
+def test_videos_are_titled_from_the_worksheet_where_both_sources_agree():
+    """URLs come from the spreadsheet, titles from the worksheet — neither source has
+    both. Where the two list the same number of videos the pairing is positional and
+    the student sees the real title; where they disagree the titles are dropped rather
+    than confidently mislabelled."""
+    from app.services.lesson_loader import get_all_lessons
+
+    titled = [
+        l for l in get_all_lessons()
+        if l.get("video_links") and not l["video_links"][0]["title"].startswith("影片 ")
+    ]
+    assert len(titled) >= 100, f"only {len(titled)} lessons show real video titles"
+
+
+def test_the_knowledge_section_stops_at_the_first_index_reset():
+    """知識補給站 is the last section, so when its bounds run long every numbered list
+    after it is swept in. L0029 collected 24 「videos」 — 3 videos and 21 exercise items
+    whose numbering restarted at 1."""
+    from app.services.lesson_uid_loader import load_all
+
+    over = []
+    for l in load_all():
+        items = ((l.get("sections") or {}).get("resources") or {}).get("items") or []
+        idx = [i["index"] for i in items]
+        if idx != sorted(set(idx)) or len(idx) > 8:
+            over.append((l["lesson_uid"], idx[:8]))
+    assert over == [], f"resource indices are not one increasing run: {over[:3]}"

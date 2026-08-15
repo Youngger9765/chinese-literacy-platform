@@ -86,6 +86,28 @@ def _category_for(genre: str | None, meta: dict) -> str:
     return meta.get("category") or ""
 
 
+def _video_links(l: dict) -> list[dict] | None:
+    """知識補給站's videos, as the `{title, url}` pairs `api.ts` declares.
+
+    The URLs are in the master spreadsheet and the TITLES are in the worksheet — two
+    sources, neither of which has both. Where they list the same number of videos the
+    pairing is taken positionally and the student sees what the video is called;
+    where they disagree the count itself is the warning, so the titles are dropped and
+    a placeholder is used rather than confidently labelling video 2 with video 1's name.
+
+    109 lessons agree, 17 differ, 31 have URLs with no worksheet list, 3 the reverse.
+    """
+    urls = _meta(l).get("video_links") or []
+    if not urls:
+        return None
+    items = (_sections(l).get("resources") or {}).get("items") or []
+    titled = len(items) == len(urls)
+    return [
+        {"title": (items[i]["title"] if titled else f"影片 {i + 1}"), "url": u}
+        for i, u in enumerate(urls)
+    ]
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -296,10 +318,7 @@ def _uid_tree_lessons() -> list[dict]:
             # the same table already structured, so convert rather than regenerate —
             # an AI-written table is not the one the teacher authored.
             "story_structure_table": keypoints_to_structure_table(l.get("keypoints")),
-            "video_links": [
-                {"title": f"影片 {i}", "url": u}
-                for i, u in enumerate(_meta(l).get("video_links") or [], start=1)
-            ] or None,
+            "video_links": _video_links(l),
             "assets": l.get("assets") or [],
             "source": "uid_tree",
         }
