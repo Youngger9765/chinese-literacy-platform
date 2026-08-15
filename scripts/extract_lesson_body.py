@@ -106,6 +106,12 @@ _MIN_BODY = 46
 #: The floor for a short paragraph recovered next to a long one. Below this sit the
 #: numbering marks (「一」「二」) and table cells, not sentences.
 _MIN_SHORT_BODY = 12
+#: 應用文 — letters, reports, application forms — are made of short lines: 「寄件人：健豪
+#: 學長」, 「收件人：阿耀」, 「阿耀 敬上」, 「一、故事大意：」. Those ARE the lesson; a
+#: letter-writing lesson without its headers and signature is not the text the worksheet
+#: teaches. L0012 was nine paragraphs while its own timer instruction named the twelfth.
+#: The masthead declares the genre, so this does not need guessing.
+_MIN_SHORT_BODY_APPLIED = 4
 #: How far acceptance propagates along a run of short paragraphs. A story's closing
 #: lines run two or three short; a scaffolding block runs much longer, so this is what
 #: separates them.
@@ -258,6 +264,11 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
     # body paragraph. Narrative runs long-then-short; scaffolding comes in runs of short
     # lines with no long neighbour. That keeps 264 of the 672 and caps any single lesson
     # at 10 — and 《獵人與白牙》 gets its last line back.
+    # 應用文's short lines are content, not chrome. Every other genre keeps the higher
+    # floor, where a 4-character run is a table cell or a numbering mark.
+    genre = (extract_level(paras) or {}).get("genre") or ""
+    short_floor = _MIN_SHORT_BODY_APPLIED if genre.startswith("應用") else _MIN_SHORT_BODY
+
     span = paras[first:end]
     keep = [bool(t) and not _is_chrome(t) and not any(m in t for m in _EXERCISE_MARKS)
             for t in span]
@@ -274,7 +285,7 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
     anchored = list(is_long)
     for _ in range(_SHORT_RUN_LIMIT):
         for j, i in enumerate(filled):
-            if anchored[i] or not keep[i] or len(span[i]) < _MIN_SHORT_BODY:
+            if anchored[i] or not keep[i] or len(span[i]) < short_floor:
                 continue
             near = ([filled[j - 1]] if j > 0 else []) + \
                    ([filled[j + 1]] if j + 1 < len(filled) else [])
@@ -283,7 +294,7 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
 
     body, seen = [], set()
     for i, t in enumerate(span):
-        if not keep[i] or len(t) < _MIN_SHORT_BODY:
+        if not keep[i] or len(t) < short_floor:
             continue
         if len(t) < _MIN_BODY and not anchored[i]:
             continue
