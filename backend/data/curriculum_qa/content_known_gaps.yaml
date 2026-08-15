@@ -1,138 +1,106 @@
 generated: '2026-08-15'
 issue: 2683
-what_this_is: 二修 175 課裡，抽取器對這些課產不出任何聚光燈 block。後端 fail-closed 讓它們回 lesson_content:null（前端退回
-  storyToLesson），而不是送一個空殼出去 —— 空殼正是這次重刷要根除的病。這份檔案是誠實登錄，不是把缺口當成已完成。
+what_this_is: 二修 175 課裡，有 43 課的閱讀聚光燈服務 null（前端退回 storyToLesson）。成因有兩種，分開登錄：抽取器完全沒產出
+  block（32 課），以及有 block 但全是渲染不出內容的類型（11 課）。
 not_a_bug: 載入層與 adapter 對這些課的行為正確。缺的是來源學習單裡抽取器認得的結構，要補要回到抽取器或原始 DOCX，不是改載入層。
-count: 32
+count: 43
 lessons:
 - lesson_uid: L0009
   catalog_slot: G4-L18
   title: 白牙的最後一戰
-  gap: spotlight_blocks_empty
 - lesson_uid: L0011
   catalog_slot: G4-L1
   title: 贏得喝采的輸家
-  gap: spotlight_blocks_empty
 - lesson_uid: L0022
   catalog_slot: G5-L10
   title: 感情小日記3──吃醋的滋味
-  gap: spotlight_blocks_empty
 - lesson_uid: L0041
   catalog_slot: G5-L2
   title: 周天成的一天──頂尖選手的養成
-  gap: spotlight_blocks_empty
 - lesson_uid: L0044
   catalog_slot: G5-L5
   title: 文字路上的閱讀號誌
-  gap: spotlight_blocks_empty
 - lesson_uid: L0052
   catalog_slot: G6-L12
   title: 小藍鯨之死
-  gap: spotlight_blocks_empty
 - lesson_uid: L0056
   catalog_slot: G6-L16
   title: 把手上的餅吃香一點
-  gap: spotlight_blocks_empty
 - lesson_uid: L0059
   catalog_slot: G6-L19
   title: 紅領帶
-  gap: spotlight_blocks_empty
 - lesson_uid: L0064
   catalog_slot: G6-L25
   title: 感情小日記6──我失戀了
-  gap: spotlight_blocks_empty
 - lesson_uid: L0065
   catalog_slot: G6-L26
   title: 運動傷害，怎麼辦
-  gap: spotlight_blocks_empty
 - lesson_uid: L0069
   catalog_slot: G6-L2
   title: 一件班服，一場思辨討論
-  gap: spotlight_blocks_empty
 - lesson_uid: L0072
   catalog_slot: G6-L5
   title: 重複朗讀的重要性：柳丁和文旦的比喻
-  gap: spotlight_blocks_empty
 - lesson_uid: L0076
   catalog_slot: G6-L9
   title: 給神明發會診單
-  gap: spotlight_blocks_empty
 - lesson_uid: L0092
   catalog_slot: G7-L23
   title: 信眾與教主
-  gap: spotlight_blocks_empty
 - lesson_uid: L0094
   catalog_slot: G7-L25
   title: 看到了嗎，然後呢
-  gap: spotlight_blocks_empty
 - lesson_uid: L0102
   catalog_slot: G7-L5
   title: 網紅的電子煙實驗：偽科學的陷阱
-  gap: spotlight_blocks_empty
 - lesson_uid: L0106
   catalog_slot: G7-L9
   title: 帶著血拼清單閱讀
-  gap: spotlight_blocks_empty
 - lesson_uid: L0112
   catalog_slot: G8-L15
   title: 未來的農夫
-  gap: spotlight_blocks_empty
 - lesson_uid: L0121
   catalog_slot: G8-L23
   title: MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人)
-  gap: spotlight_blocks_empty
 - lesson_uid: L0123
   catalog_slot: G8-L3
   title: 爸爸的恩人們
-  gap: spotlight_blocks_empty
 - lesson_uid: L0126
   catalog_slot: G8-L6
   title: 戲院、賭場、檳榔攤：在時代夾縫中成長的我
-  gap: spotlight_blocks_empty
 - lesson_uid: L0136
   catalog_slot: G9-L15
   title: 會考圖文題實戰
-  gap: spotlight_blocks_empty
 - lesson_uid: L0137
   catalog_slot: G9-L16
   title: ~17多文本-未解之謎-巨石陣+摩艾石像
-  gap: spotlight_blocks_empty
 - lesson_uid: L0143
   catalog_slot: G9-L22
   title: 高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題)
-  gap: spotlight_blocks_empty
 - lesson_uid: L0144
   catalog_slot: G9-L23
   title: ~25運動記錄的突破與公平
-  gap: spotlight_blocks_empty
 - lesson_uid: L0145
   catalog_slot: G9-L2
   title: 看不見的故事，推動看得見的世界
-  gap: spotlight_blocks_empty
 - lesson_uid: L0153
   catalog_slot: 文-L10
   title: 荒野救亡記
-  gap: spotlight_blocks_empty
 - lesson_uid: L0154
   catalog_slot: 文-L11
   title: 祁黃羊的思路解密(疑問助詞)
-  gap: spotlight_blocks_empty
 - lesson_uid: L0155
   catalog_slot: 文-L12
   title: -不流血的戰爭
-  gap: spotlight_blocks_empty
 - lesson_uid: L0173
   catalog_slot: 體-L7
   title: 讓「想很多」助你一臂之力
-  gap: spotlight_blocks_empty
 - lesson_uid: L0174
   catalog_slot: 體-L8
   title: 面對「失敗」不只有一種可能
-  gap: spotlight_blocks_empty
 - lesson_uid: L0175
   catalog_slot: 體-L9
   title: 成長型思維 翻轉失敗的關鍵
-  gap: spotlight_blocks_empty
 lesson_body_text:
   status: 缺，全部 175 課
   what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader`
@@ -249,3 +217,85 @@ mcq_options_emitted_as_guides:
     catalog_slot: G8-L9
     title: 「按讚」背後的真相
     leaked_options: 1
+blocks_present_but_none_renderable:
+  count: 11
+  what: 這些課的 spotlight 只抽到 guide／figure／self_check，沒有 passage 也沒有 exercise —— 有指引文字，沒有要學的東西。
+  why_they_serve_null: 載入層會濾掉沒有圖檔的 referent=table 空框（#2455 的重跑產物），濾完這些課就剩 0 個可渲染 block，schema
+    要求至少 1 個 → fail-closed 回 null。**過濾前它們是 139 課『有內容』的一部分，但那個『有』會渲染成空白頁** —— 回 null
+    讓前端退回 storyToLesson，比送一頁空的出去誠實。
+  lessons:
+  - lesson_uid: L0015
+    catalog_slot: G4-L4
+    title: 穿越極限的跑者
+    blocks: 2
+    block_types:
+    - figure
+    - guide
+  - lesson_uid: L0031
+    catalog_slot: G5-L1
+    title: 奧運銀牌背後的自我鍛鍊
+    blocks: 14
+    block_types:
+    - figure
+    - guide
+    - self_check
+  - lesson_uid: L0081
+    catalog_slot: G7-L13
+    title: 女性太空人登月（用表格整理訊息-從細節歸納比較項目)
+    blocks: 4
+    block_types:
+    - figure
+    - guide
+  - lesson_uid: L0093
+    catalog_slot: G7-L24
+    title: 用科學方法伸張正義的神探
+    blocks: 5
+    block_types:
+    - guide
+  - lesson_uid: L0096
+    catalog_slot: G7-L27
+    title: 吐瓦魯：逐漸被淹沒的島國
+    blocks: 9
+    block_types:
+    - guide
+  - lesson_uid: L0119
+    catalog_slot: G8-L21
+    title: 致台東：一封過客的情書
+    blocks: 4
+    block_types:
+    - figure
+    - guide
+  - lesson_uid: L0128
+    catalog_slot: G8-L8
+    title: 讓黑猩猩被看見的人
+    blocks: 6
+    block_types:
+    - figure
+    - guide
+    - self_check
+  - lesson_uid: L0131
+    catalog_slot: G9-L10
+    title: 國高中數學當然可以使用計算機
+    blocks: 6
+    block_types:
+    - figure
+    - guide
+  - lesson_uid: L0165
+    catalog_slot: 體-L10
+    title: 信任_下一球，我相信你
+    blocks: 2
+    block_types:
+    - guide
+  - lesson_uid: L0166
+    catalog_slot: 體-L11
+    title: 信任_因為相信，所以能向前
+    blocks: 1
+    block_types:
+    - guide
+  - lesson_uid: L0172
+    catalog_slot: 體-L6
+    title: 不是想太多，只是好在乎
+    blocks: 13
+    block_types:
+    - figure
+    - guide
