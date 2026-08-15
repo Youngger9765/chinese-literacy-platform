@@ -38,6 +38,11 @@ def _reapply_spotlight_images(lesson: dict) -> None:
     lesson["images"] = merge_spotlight_images(lesson.get("images") or [], spotlight_v2)
 
 
+def _meta(l: dict) -> dict:
+    m = l.get("metadata")
+    return m if isinstance(m, dict) else {}
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -183,8 +188,12 @@ def _uid_tree_lessons() -> list[dict]:
             "title": l.get("title"),
             # fields the API schema expects; the uid tree has no genre/category
             # taxonomy yet, so they stay empty rather than being invented.
-            "genre": "",
-            "category": "",
+            # From 自學教材總表.xlsx (#2683). These were hardcoded empty because the
+            # worksheet DOCX carries no taxonomy — but the spreadsheet always has,
+            # and the first edition read it from there too. Reporting the field as
+            # unobtainable was a failure to look at how it had been obtained before.
+            "genre": _meta(l).get("genre") or "",
+            "category": _meta(l).get("category") or "",
             "char_count": (l.get("body") or {}).get("char_count") or 0,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
@@ -196,7 +205,11 @@ def _uid_tree_lessons() -> list[dict]:
             ),
             "reading_strategy": None,
             "has_key_reading": False,
-            "intro": None,
+            # The intro is a sentence about what the lesson is FOR, built from its
+            # unit topic and reading strategy — not the opening paragraph, which
+            # would make "introduction" mean "the lesson, again".
+            "intro": ({"author": "", "background": _meta(l)["intro"]}
+                      if _meta(l).get("intro") else None),
             # 課文本體, extracted from the DOCX section the worksheet calls
             # 讀全文-做記號 (#2683). It was absent for all 175 lessons because the
             # pipeline read paragraphs back out of the layer the re-ink deleted —
@@ -225,6 +238,10 @@ def _uid_tree_lessons() -> list[dict]:
             # the same table already structured, so convert rather than regenerate —
             # an AI-written table is not the one the teacher authored.
             "story_structure_table": keypoints_to_structure_table(l.get("keypoints")),
+            "video_links": [
+                {"title": f"影片 {i}", "url": u}
+                for i, u in enumerate(_meta(l).get("video_links") or [], start=1)
+            ] or None,
             "assets": l.get("assets") or [],
             "source": "uid_tree",
         }

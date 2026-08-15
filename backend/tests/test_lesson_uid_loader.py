@@ -455,3 +455,56 @@ def test_section_fields_match_the_frontend_contract():
                 f"{lesson['lesson_uid']}: answer {item.get('answer')!r} does not "
                 f"resolve in vocab_bank {sorted(bank)}"
             )
+
+
+# ── 試算表 metadata (#2683) ─────────────────────────────────────────────────
+
+def test_spreadsheet_metadata_reaches_the_api():
+    """課程簡介, 文體, 分類 and video links come from 自學教材總表.xlsx.
+
+    I had reported the intro as unobtainable because the worksheet DOCX has no such
+    section. That was true and beside the point — the first edition never took it
+    from the DOCX either, and `scripts/build_lesson_intro_from_excel.py` had been
+    sitting in the repo the whole time. The check that matters is that the fields
+    arrive, not that a particular source was ruled out."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    counts = {k: sum(1 for l in lessons if l.get(k))
+              for k in ("intro", "genre", "category", "video_links")}
+    assert counts["intro"] >= 140, counts
+    assert counts["genre"] >= 140, counts
+    assert counts["category"] >= 130, counts
+
+
+def test_intro_is_about_the_lesson_not_a_copy_of_it():
+    """An introduction assembled from the opening paragraph would be the lesson
+    again. These are built from the unit topic and reading strategy, so no intro
+    should be a prefix of its own body."""
+    from app.services.lesson_loader import get_all_lessons
+
+    echoes = []
+    for lesson in get_all_lessons():
+        intro = (lesson.get("intro") or {}).get("background") or ""
+        paras = lesson.get("paragraphs") or []
+        if intro and paras and paras[0].startswith(intro[:12]):
+            echoes.append(lesson["lesson_uid"])
+    assert echoes == [], f"intro repeats the body: {echoes[:3]}"
+
+
+def test_metadata_records_which_row_it_matched():
+    """The join is on title, across two sources that spell titles differently. The
+    matched spreadsheet title is stored so a wrong pairing is inspectable — the
+    first edition's images were joined on lesson code and nobody could see that
+    every one of them pointed at a different lesson."""
+    import yaml
+
+    from app.services import lesson_uid_loader as L
+
+    checked = 0
+    for uid in L.available_uids():
+        for f in (L.LESSONS_ROOT / uid).glob("v*/metadata.yml"):
+            doc = yaml.safe_load(f.read_text(encoding="utf-8"))
+            assert doc.get("matched_spreadsheet_title"), f"{uid}: no provenance"
+            checked += 1
+    assert checked >= 140, f"only {checked} lessons carry metadata"
