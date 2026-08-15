@@ -12,6 +12,10 @@ paragraphs:
 - 所以，成為值得信任的人，不代表永遠不會失誤，而是失誤後願意繼續承擔責任、修正補救。一份成熟的相信，也不是期待對方永遠完美，而是當對方失誤時，仍願意看見他負責的行動，並和他一起把事情做好，完成任務。
 paragraph_count: 8
 char_count: 1203
+level:
+  level: 5
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

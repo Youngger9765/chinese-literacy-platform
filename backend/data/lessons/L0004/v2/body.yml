@@ -8,6 +8,10 @@ paragraphs:
 - 這幾天睡前，我都躺在床上盯著天花板，覺得好累。為什麼會這麼在意他的眼神？為什麼他隨口的一句話，能讓我高興一整天？為什麼喜歡一個人，反而讓我這麼不快樂？我以前認為喜歡一個人應該是開心的事，但現在卻覺得腦中被強行安裝了警報器，時時都在偵測他和我的距離，太近或太遠都會讓警鈴大作。喜歡到底是什麼？
 paragraph_count: 4
 char_count: 570
+level:
+  level: 4
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

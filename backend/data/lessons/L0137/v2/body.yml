@@ -32,6 +32,10 @@ paragraphs:
 - (11)    肅然起敬    ：因敬佩某人或某事，而自然產生尊敬的感受。
 paragraph_count: 28
 char_count: 2499
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

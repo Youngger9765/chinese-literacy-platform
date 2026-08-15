@@ -19,6 +19,10 @@ paragraphs:
 - 相較之下，我們這一代成長於物質相對充裕的年代，完全沒有那種走投無路的經驗，雖然生命中仍然有許多值得感謝的人，但可以稱為「恩人」的，好像一位也沒有了。
 paragraph_count: 15
 char_count: 1500
+level:
+  level: 8
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

@@ -709,3 +709,35 @@ def test_the_question_whose_option_was_swallowed():
     assert "其中一個重要部分" in q["options"][1], (
         f"option B is not itself: {q['options'][1][:40]}"
     )
+
+
+def test_the_title_join_is_confirmed_by_an_independent_field():
+    """The spreadsheet is joined on title, and a title join that guesses is how the
+    first edition's covers ended up on the wrong lessons. This checks the join against
+    a field neither side of it controls: the worksheet's own masthead line,
+    「Level 4・記敘文」, written with the lesson rather than in the planning sheet.
+
+    A join that were guessing would agree at chance across six genres. Measured: 130
+    of 146 agree, and the 16 that differ are editorial calls on the same lesson — a
+    letter-writing lesson filed as 說明文 in one place and 應用文 in the other.
+    """
+    from app.services.lesson_loader import get_all_lessons
+    from app.services.lesson_uid_loader import load_all
+
+    fold = lambda s: (s or "").replace("説", "說")
+    pairs = []
+    for l in load_all():
+        sheet = fold((l.get("metadata") or {}).get("genre"))
+        sheet_from_worksheet = fold(((l.get("body") or {}).get("level") or {}).get("genre"))
+        if sheet and sheet_from_worksheet:
+            pairs.append(sheet == sheet_from_worksheet)
+
+    assert len(pairs) >= 120, f"only {len(pairs)} lessons carry both labels"
+    rate = sum(pairs) / len(pairs)
+    assert rate >= 0.80, (
+        f"worksheet and spreadsheet agree on genre for only {rate:.0%} of lessons — "
+        "the title join is pairing lessons with the wrong spreadsheet rows"
+    )
+    # And the served genre must be the worksheet's, not the spreadsheet's.
+    served = [l for l in get_all_lessons() if l.get("genre")]
+    assert len(served) >= 168, f"{len(served)} lessons carry a genre"

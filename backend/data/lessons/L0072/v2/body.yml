@@ -5,6 +5,10 @@ paragraphs:
 - 前一課提到，科學家發現老中的「1、2、3…」唸起來比老美的「one, two, three…」快得多，結果老中的「數字記憶廣度」就明顯的贏過老美。這就好像大腦裡有一個籃子，如果裝小小柳丁，可以裝10個，如果裝比較大的文旦，就只能裝5個了。科學家把這個大腦裡的籃子稱為「工作記憶」，它負責暫時保存訊息，也會初步處理和理解訊息。
 paragraph_count: 1
 char_count: 164
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 1

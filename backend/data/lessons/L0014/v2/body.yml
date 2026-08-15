@@ -9,6 +9,10 @@ paragraphs:
 - 現在，我出門也會在背包裡放一本書，一有空檔就拿出來讀，我猜，現在我也成了別人眼中最美的畫面啦！
 paragraph_count: 5
 char_count: 728
+level:
+  level: 4
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

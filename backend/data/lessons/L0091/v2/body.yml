@@ -13,6 +13,10 @@ paragraphs:
 - 在臺灣，人口負成長已呈現近乎不可逆的趨勢，它會改變人口結構、使工作年齡人口比率下降，雖然加重扶養壓力；但同時也可能帶動新一波的經濟與產業變革。人口負成長是我們的現在、更是我們必須面對的未來，認識它帶來的改變，才能未雨綢繆󠇡，為自己的未來做好準備。
 paragraph_count: 9
 char_count: 1179
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 8

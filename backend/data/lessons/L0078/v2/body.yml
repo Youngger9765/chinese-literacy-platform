@@ -14,6 +14,10 @@ paragraphs:
 - 數位時代帶來前所未有的便利，但也讓扭曲的訊息四處氾濫。上網時別忘了提醒自己：不要輕易上誘餌式標題的鉤，也別讓誇張、失真的標題輕易騙走你的點擊。
 paragraph_count: 10
 char_count: 1091
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 13

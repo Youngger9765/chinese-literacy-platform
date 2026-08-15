@@ -18,6 +18,10 @@ paragraphs:
 - 這項研究提醒我們：判斷一個人是否值得相信，不能只聽他說得多麼動人，也不能因為自己已經付出很多，就不願重新思考。當承諾一再落空，說法和現實南轅北轍時，更要停下來看看證據，檢查對方的言行是否一致。真正獨立的判斷，不是永遠相信自己沒有看錯，而是在新的證據出現時，仍有勇氣修正原來的想法。
 paragraph_count: 14
 char_count: 1075
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 7

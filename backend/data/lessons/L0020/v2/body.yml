@@ -18,6 +18,10 @@ paragraphs:
 - 所以，不論是聽人說話，還是讀一篇文章，只要出現「可是、但是、不過、然而」這樣的轉折詞，你就知道，轉彎路標來了。跟著這些小路標看下去，先留意後面的話，再配合前後文，常常就能更快掌握重要訊息。
 paragraph_count: 14
 char_count: 957
+level:
+  level: 4
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

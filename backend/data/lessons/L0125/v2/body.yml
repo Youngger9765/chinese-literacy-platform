@@ -24,6 +24,10 @@ paragraphs:
 - 景杰老師說：「哇嗚，沒想到年紀輕輕的你們都這麼有想法，以後可以考慮當法官了。是的，這世界經常出現這種兩難、沒有簡單答案的問題，但今天在這裡，我們聽到了大家不同的意見，這樣我們才會有機會做出最適當的決定。今天的討論真精采，我對下一次上課充滿期待哦。」
 paragraph_count: 20
 char_count: 1638
+level:
+  level: 8
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

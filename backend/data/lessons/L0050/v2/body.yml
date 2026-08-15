@@ -14,6 +14,10 @@ paragraphs:
 - 最後，荷蘭東印度公司集到龐大資金，派遣船隊遠航。1624年，船隊航行半個地球後來到臺灣，在臺南建立了熱蘭遮城（今天的安平古堡），統治臺灣長達38年。這支厲害的船隊，原來是股票制度撐起來的呢。
 paragraph_count: 10
 char_count: 1109
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

@@ -12,6 +12,10 @@ paragraphs:
 - 小丑醫生的到來，讓冰冷的病房多了笑聲，這份歡樂不僅幫助病童降低治療的焦慮，也舒緩了壓力鍋下家長緊繃的心情，他們讓我們知道：笑，本身就是最好的良藥！
 paragraph_count: 8
 char_count: 964
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 13

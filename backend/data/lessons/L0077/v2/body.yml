@@ -13,6 +13,7 @@ paragraphs:
 - 這麼重的豬，他怎麼抱得動呢？
 paragraph_count: 9
 char_count: 691
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

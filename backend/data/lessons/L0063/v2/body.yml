@@ -11,6 +11,10 @@ paragraphs:
 - 總之，商品價格的波動是「供給」和「需求」決定的。大家都想要的東西，價格就上揚；供給超過需求，價格就下滑。這就是「物以稀為貴」的道理。
 paragraph_count: 7
 char_count: 804
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

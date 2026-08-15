@@ -23,6 +23,10 @@ paragraphs:
 - 結論是，「認命」不是弱者的吞忍，而是強者的轉身。強者不是從來不受傷，而是受傷之後，做出一個強者的決定，離開傷痛，轉向那條光明、更有希望的路。
 paragraph_count: 19
 char_count: 1296
+level:
+  level: 9
+  genre: 記敘說理文
+  genre_detail: 記敘說理文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

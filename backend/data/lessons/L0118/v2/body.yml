@@ -18,6 +18,10 @@ paragraphs:
 - 窗外的夕陽斜斜照進病房，那一刻，她像是終於嘗到了懸崖邊的那顆草莓。
 paragraph_count: 14
 char_count: 1149
+level:
+  level: 8
+  genre: 記敘說理文
+  genre_detail: 記敘說理文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

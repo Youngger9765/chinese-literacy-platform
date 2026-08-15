@@ -15,6 +15,10 @@ paragraphs:
 - 回到一開始的問題：「AI什麼都會，我們還需要學習嗎？」答案是：需要，而且比以往更需要。因為學習不只是獲得知識，更要學會發問、親身體驗、判斷選擇與創造。當AI越來越聰明，我們更應該培養思考的深度、情感的溫度，以及面對未知的勇氣。學習，就是這一切的起點。
 paragraph_count: 11
 char_count: 1456
+level:
+  level: 7
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

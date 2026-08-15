@@ -12,6 +12,10 @@ paragraphs:
 - 周天成日復一日過著高度自律的生活，從訓練、飲食到外出方式，每個環節都仔細安排，讓自己保持最佳狀態。陪他過一天，也許會覺得新鮮；但要一年三百六十五天，天天這樣過並不容易。你能像他一樣，每天鍛鍊技術、增強體能、控制飲食，也好好保護自己嗎？
 paragraph_count: 8
 char_count: 1168
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

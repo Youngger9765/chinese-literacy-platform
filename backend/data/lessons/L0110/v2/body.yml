@@ -18,6 +18,10 @@ paragraphs:
 - 後記：本文強調的是「我們可以重新詮釋童年經驗」，不表示暴力是可接受的。若你或身邊的人正遭遇身體或言語暴力，請向可信任的大人、學校輔導室或相關資源尋求協助。
 paragraph_count: 14
 char_count: 1481
+level:
+  level: 8
+  genre: 記敘抒情文
+  genre_detail: 記敘抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

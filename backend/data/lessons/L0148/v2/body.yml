@@ -14,6 +14,10 @@ paragraphs:
 - 農業專家提出肥料、光照、低溫等不同假設，再以實驗一一驗證，找到催花因素後，花農又用種種巧思，把研究結論帶回現場實踐。於是，一盆盆蝴蝶蘭能準時含苞待放，臺灣被稱為「蝴蝶蘭王國」，一點也不意外。你看出其中的道理了嗎？
 paragraph_count: 10
 char_count: 1314
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

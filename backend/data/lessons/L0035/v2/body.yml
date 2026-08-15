@@ -13,6 +13,10 @@ paragraphs:
 - (文章資料來源：國際特赦組織網站)
 paragraph_count: 9
 char_count: 1170
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

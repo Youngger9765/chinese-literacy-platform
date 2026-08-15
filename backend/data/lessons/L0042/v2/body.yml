@@ -11,6 +11,10 @@ paragraphs:
 - 東京奧運時，她進入前八強。比賽結束後，她親吻擂台，感謝一路走來所經歷的苦難與挫折，也感謝一路上幫助她的人。陳念琴把苦難和挫折化為祝福，再次戴起拳擊手套，準備揮出下一拳，迎戰一個又一個新的挑戰。
 paragraph_count: 7
 char_count: 1179
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

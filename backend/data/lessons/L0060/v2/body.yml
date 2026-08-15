@@ -20,6 +20,10 @@ paragraphs:
 - 你發現這三個故事的共同主題了嗎？是的，主角都遇到了自己不能控制的壞事。但即使惡劣的情況已不可能逆轉，一個人只要「改變自己對壞事的看法」，就不至於讓自己的情緒跌入萬丈深淵。最後再問一次：心理生病了，真的是「壞事」導致的嗎？
 paragraph_count: 16
 char_count: 1318
+level:
+  level: 6
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

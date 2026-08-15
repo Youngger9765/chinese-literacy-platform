@@ -22,6 +22,10 @@ paragraphs:
 - 對家屬的「關懷、同理」，也療癒了家屬的心靈，她真的是一位非常
 paragraph_count: 18
 char_count: 1321
+level:
+  level: 6
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

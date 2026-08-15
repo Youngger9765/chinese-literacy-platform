@@ -20,6 +20,10 @@ paragraphs:
 - 離開辦公室後，我反覆想著教練的話。一直以來，我只希望自己的身體能更快、更有力量，卻從沒想過他需要什麼，或許，是學著傾聽他的聲音、學著成為他可靠的夥伴的時候了。
 paragraph_count: 16
 char_count: 1011
+level:
+  level: 4
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

@@ -15,6 +15,10 @@ paragraphs:
 - 後來，我當了老師、校長，還成了一位作家。回顧年少時的點滴，至今歷歷在目。我曾埋怨家庭的動盪不安，生氣爸媽的工作讓我難堪，但我也漸漸體會他們在時代巨浪下的掙扎，心疼他們的無奈。更難忘學校老師的關愛，穩住了當時徬徨無助的我，讓我相信自己擁有改變命運的力量。
 paragraph_count: 11
 char_count: 1455
+level:
+  level: 8
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

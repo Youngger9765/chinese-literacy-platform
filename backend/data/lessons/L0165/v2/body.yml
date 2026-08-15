@@ -14,6 +14,10 @@ paragraphs:
 - 這一次，他沒有抗拒，他想再次相信，相信他身後的隊友。他知道自己該怎麼投。
 paragraph_count: 10
 char_count: 1329
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

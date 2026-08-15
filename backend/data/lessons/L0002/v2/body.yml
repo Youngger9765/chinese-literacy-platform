@@ -12,6 +12,10 @@ paragraphs:
 - 動物使用的方法雖然不同，目的卻一樣──都是為了讓自己、同伴和下一代，在弱肉強食的自然競技場裡，有更高的存活機會。這些有趣的生存妙招，讓我們看見大自然令人讚嘆的智慧與奧妙，也讓我們更懂得珍惜這個豐富多彩的世界。
 paragraph_count: 8
 char_count: 769
+level:
+  level: 4
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 6

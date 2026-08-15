@@ -12,6 +12,10 @@ paragraphs:
 - 也許這就是《人類大歷史》最令人驚訝的地方：人類統治世界，靠的不是爪子，而是想像力。世界上最強大的力量，常常不是刀劍、機器或城牆，而是許多人同時相信的故事。想一想，這不是很奇妙嗎？
 paragraph_count: 8
 char_count: 1310
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

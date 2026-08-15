@@ -11,6 +11,10 @@ paragraphs:
 - 讀到這裡，你可能會發現：兩派其實都在乎石虎，差別在於他們對風險的排序不同——一派怕「做錯後難以收拾」，另一派怕「不做就來不及了」。原來，石虎的未來，不只是一個生物學問題，也是一個社會選擇：為了這種可愛的動物，我們願意付出怎樣的改變？你的看法是什麼？
 paragraph_count: 7
 char_count: 1238
+level:
+  level: 8
+  genre: 論說文
+  genre_detail: 論說文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 13

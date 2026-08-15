@@ -10,6 +10,10 @@ paragraphs:
 - 圖一  巴斯德鵝頸瓶實驗的設計與程序
 paragraph_count: 6
 char_count: 722
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

@@ -21,6 +21,10 @@ paragraphs:
 - 案子破了。你能看到李博士「發現問題、提出假設、檢驗假設、提出解答」的辦案過程嗎？一個沒有人目睹、線索有限的凶案，李博士和他的團隊用鑑識科學，替無聲的死者說話，終於讓正義得到伸張。
 paragraph_count: 17
 char_count: 1382
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

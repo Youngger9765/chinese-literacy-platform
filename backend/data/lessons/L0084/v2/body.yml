@@ -11,6 +11,10 @@ paragraphs:
 - 心理學家阿德勒有句名言：「幸福的人用童年治癒一生，不幸的人用一生治癒童年。」或許楊喚也是如此。但令人感佩的是，他不僅嘗試治癒自己的童年，也將這份對幸福的渴望化為文字，希冀能滋養更多在困苦煎熬中成長的孩子，讓他們也能擁有一方心靈與想像都富足美好的天地。
 paragraph_count: 7
 char_count: 1200
+level:
+  level: 7
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

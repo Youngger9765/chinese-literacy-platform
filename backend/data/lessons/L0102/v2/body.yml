@@ -15,6 +15,10 @@ paragraphs:
 - 2023年「菸害防制法」修法後，已全面禁止電子煙，但仍有業者不斷變換行銷手法，除了利用高人氣網紅行銷，也利用網路拍賣平台暗中販售，因此，只靠政府查緝禁止是不夠的，更重要的是認清菸品行銷手法，多方查證、辨識網路訊息，才不會掉進菸害的陷阱。
 paragraph_count: 11
 char_count: 1085
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

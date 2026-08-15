@@ -13,6 +13,10 @@ paragraphs:
 - 這三位朋友都有一個共同點：當原本的路受挫時，他們想辦法從熱愛的棒球出發，找出新的可能，靠著行動與學習，繼續留在自己熱愛的領域。相信你也一定找得到自己的方法，往夢想前進！
 paragraph_count: 9
 char_count: 912
+level:
+  level: 4
+  genre: 應用文
+  genre_detail: 應用文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

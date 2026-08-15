@@ -11,6 +11,10 @@ paragraphs:
 - 科學家未雨綢繆󠇡，運用科技為人類的生存而努力。我們每個人更要保護生態環境，也希望永遠沒有人需要使用斯瓦爾巴種子庫裡的種子！
 paragraph_count: 7
 char_count: 963
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

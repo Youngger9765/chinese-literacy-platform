@@ -38,6 +38,7 @@ paragraphs:
 - 不管哪一種運動項目，每位選手想取得奧運門票，一定得經過千錘百鍊的訓練和比賽。但這篇文章告訴我們，除了訓練之外，原來科技的運用和針對專項需求的選才，也是影響運動成績的重要因素哦。
 paragraph_count: 34
 char_count: 2987
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

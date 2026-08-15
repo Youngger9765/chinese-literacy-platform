@@ -10,6 +10,10 @@ paragraphs:
 - 如今，小藍鯨已蛻變為博物館永久典藏的標本，以不同的形式延續牠的生命故事，並有了新的意義和價值。然而，唯有人們願意反省並採取行動，共同為保育海洋盡一份心力，還給海洋原本乾淨的面貌，這才是小藍鯨之死教我們最重要的功課。
 paragraph_count: 6
 char_count: 907
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

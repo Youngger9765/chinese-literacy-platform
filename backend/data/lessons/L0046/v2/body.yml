@@ -14,6 +14,10 @@ paragraphs:
 - 科學家從動物、植物獲取靈感，模仿它們的特性，設計出有用的科技產品，這門學問叫做仿生學。植物看似不動，但它們經過億萬年的演化，擁有許多聰明的生存技巧，為人類帶來無限啟發。下次，當你看到身邊的花草樹木，不妨仔細觀察，說不定也會從植物身上激發出好點子呢！
 paragraph_count: 10
 char_count: 879
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

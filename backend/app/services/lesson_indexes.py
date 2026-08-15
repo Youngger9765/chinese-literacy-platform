@@ -61,6 +61,31 @@ def _key_reading(l: dict) -> dict | None:
     }
 
 
+#: 文體 → the four categories the API contract allows. Mirrors the table in
+#: `scripts/extract_lesson_metadata.py`; kept here because the genre now comes from
+#: the worksheet at serve time rather than from the spreadsheet at build time.
+_GENRE_TO_CATEGORY = {
+    "記敘文": "Fable", "抒情文": "Fable",
+    "說明文": "Science", "説明文": "Science",
+    "議論文": "History", "論說文": "History", "文言文": "History",
+    "應用文": "Daily",
+}
+
+
+def _category_for(genre: str | None, meta: dict) -> str:
+    g = genre or ""
+    if g in _GENRE_TO_CATEGORY:
+        return _GENRE_TO_CATEGORY[g]
+    # Compound labels — 「說明/議論」, 「記敘抒情文」, 「記敘文/科學故事」. Eight lessons
+    # name two forms; the first is the primary one, and the four-way category axis has
+    # nowhere to put a hybrid anyway.
+    for form, cat in _GENRE_TO_CATEGORY.items():
+        stem = form.rstrip("文")
+        if g.startswith(stem):
+            return cat
+    return meta.get("category") or ""
+
+
 def _sections(l: dict) -> dict:
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
 
@@ -210,8 +235,16 @@ def _uid_tree_lessons() -> list[dict]:
             # worksheet DOCX carries no taxonomy — but the spreadsheet always has,
             # and the first edition read it from there too. Reporting the field as
             # unobtainable was a failure to look at how it had been obtained before.
-            "genre": _meta(l).get("genre") or "",
-            "category": _meta(l).get("category") or "",
+            # The worksheet's own masthead over the planning spreadsheet: they disagree
+            # on 16 lessons and the worksheet is the one authored with the lesson.
+            "genre": (((l.get("body") or {}).get("level") or {}).get("genre")
+                      or _meta(l).get("genre") or ""),
+            # Derived from the genre actually served, not from the spreadsheet's —
+            # otherwise a lesson shows 說明文 beside a category computed from 應用文.
+            "category": _category_for(
+                ((l.get("body") or {}).get("level") or {}).get("genre"),
+                _meta(l),
+            ),
             "char_count": (l.get("body") or {}).get("char_count") or 0,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition

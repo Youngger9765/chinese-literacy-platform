@@ -16,6 +16,10 @@ paragraphs:
 - 讀書，不是要你考高分，而是讓你多一條路。當棒球這條路卡住的時候，你還有別的方向可以走。就像比賽不能只練一招，人生也不能只靠一種能力。你準備得越多，選擇就越多喔！祝福你。
 paragraph_count: 12
 char_count: 668
+level:
+  level: 4
+  genre: 應用文
+  genre_detail: 應用文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

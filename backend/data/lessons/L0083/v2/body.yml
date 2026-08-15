@@ -14,6 +14,10 @@ paragraphs:
 - 現在當爺爺奶奶分享「古時候」的事時，我不再覺得是囉嗦或嘮叨了，我會帶著好奇心聆聽、理解故事裡的悲歡離合。三代同堂對我來說，只要轉換個觀點，得到的歡喜收穫，就會遠多於衝突和不適呢。
 paragraph_count: 10
 char_count: 1206
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

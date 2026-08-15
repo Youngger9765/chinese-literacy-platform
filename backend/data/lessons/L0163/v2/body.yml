@@ -8,6 +8,7 @@ paragraphs:
 - 精力.絕人，無他.嗜好󠇡，自少󠇡.至老，未嘗.一󠇡日.廢書。出.必載書.數簏1.自隨，旅店少休，披尋.搜討，曾無.倦色。
 paragraph_count: 4
 char_count: 248
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

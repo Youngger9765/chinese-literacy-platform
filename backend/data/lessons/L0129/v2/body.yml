@@ -10,6 +10,10 @@ paragraphs:
 - 現在你讀完這篇文章了，會想給個讚嗎？為什麼？
 paragraph_count: 6
 char_count: 1134
+level:
+  level: 8
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

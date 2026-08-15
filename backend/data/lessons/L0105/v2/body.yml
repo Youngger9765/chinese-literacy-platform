@@ -15,6 +15,10 @@ paragraphs:
 - 一九七七年，她成立「國際珍古德協會」，推動全世界的環境教育和野生動物保育。演講、寫書、參與世界各地的保育活動……滿滿的計畫行程，佔據了珍古德的生活。她飛遍全世界，馬不停蹄，一心一意希望能實現的是：讓所有動物能夠在最美麗的大地上，快快樂樂的生活。
 paragraph_count: 11
 char_count: 1364
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

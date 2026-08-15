@@ -10,6 +10,10 @@ paragraphs:
 - 總結來說，雖然近代科學家找到了一個新的、很強的解釋，可以說明地球暖化，但地球本來就會自己變冷或變熱，所以到底今天地球暖化的原因為何？在推論時，還需要特別小心才行。
 paragraph_count: 6
 char_count: 1092
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

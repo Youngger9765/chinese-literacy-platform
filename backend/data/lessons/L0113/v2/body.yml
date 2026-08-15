@@ -14,6 +14,10 @@ paragraphs:
 - 傅達仁的故事像一面鏡子：它照見痛苦，也照見我們對自由、家庭與社會責任的拉扯。如果有一天，躺在病床上的是你，或站在病床邊的人是你——你希望自己被允許做什麼選擇呢？
 paragraph_count: 10
 char_count: 1255
+level:
+  level: 8
+  genre: 論說文
+  genre_detail: 論說文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

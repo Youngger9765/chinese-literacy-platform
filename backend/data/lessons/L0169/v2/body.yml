@@ -9,6 +9,10 @@ paragraphs:
 - 而我想，沒有一個員工在全力以赴付出後，不希望收到老闆的真誠感謝。我們的身體默默支持、陪伴我們完成大大小小的事。失去健康後，即使再輕而易舉的事，也可能變得困難重重。也許，在每天洗澡或睡前、在每次竭盡全力的努力後，我們可以輕聲對身體說聲：「謝謝有你，辛苦了」。
 paragraph_count: 5
 char_count: 1016
+level:
+  level: 4
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

@@ -10,6 +10,10 @@ paragraphs:
 - 「小承恩」把握這三個關鍵，又剛好進入青春期，上國中後，短短一年內長高了25公分，連他自己也相當的意外。因為進入青春期後，身體會有大幅度的成長。但成長的前提是要把握前面提到的關鍵：「充足的睡眠」、「適當的運動」、及「均衡的飲食」，進入青春期後，才有機會「高」人一等喔。
 paragraph_count: 6
 char_count: 832
+level:
+  level: 4
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

@@ -12,6 +12,10 @@ paragraphs:
 - NASA的目標不只登月，還希望在月球建立長期研究基地，並為將來登陸更遙遠的火星做準備。女性太空人的參與，預期將有助於人類探索更遙遠的宇宙。
 paragraph_count: 8
 char_count: 917
+level:
+  level: 7
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

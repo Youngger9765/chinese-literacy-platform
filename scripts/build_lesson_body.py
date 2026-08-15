@@ -72,6 +72,9 @@ def main() -> int:
             "paragraphs": result["paragraphs"],
             "paragraph_count": len(result["paragraphs"]),
             "char_count": result["char_count"],
+            # 「Level 4・記敘文」 from the masthead — grade band and genre, authored with
+            # the lesson rather than in the planning spreadsheet.
+            "level": result.get("level"),
             "extraction_check": {
                 "method": "本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）",
                 "vocabulary_found": check["hit"],

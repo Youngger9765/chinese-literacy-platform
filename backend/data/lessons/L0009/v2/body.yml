@@ -17,6 +17,10 @@ paragraphs:
 - 白牙已經奄奄一息，但牠用盡全力，把尾巴搖了幾下，然後，永遠閉上了牠的眼睛。
 paragraph_count: 13
 char_count: 1206
+level:
+  level: 4
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

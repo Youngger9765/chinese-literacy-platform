@@ -17,6 +17,10 @@ paragraphs:
 - 「好厲害！」你也許會非常佩服福爾摩斯與王戎，但這樣的觀察與推理也可以透過練習逐漸提升。平時多留意線索、累積背景知識，再練習把兩者連起來思考，你會開始用不一樣的眼光看這個世界，或許就能看見現象背後的道理或故事喔！
 paragraph_count: 13
 char_count: 927
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

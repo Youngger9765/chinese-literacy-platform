@@ -13,6 +13,10 @@ paragraphs:
 - 這場名為「奇蹟行動」的搜救行動受到國際注目。軍人和原住民志工等搜救人員始終沒有放棄，持續搜尋，直到找到四個孩子；萊絲莉也運用族人教導的求生方法，帶領弟妹撐過艱困的40天，成為大家心目中的英雄。
 paragraph_count: 9
 char_count: 1153
+level:
+  level: 6
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

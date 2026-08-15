@@ -9,6 +9,10 @@ paragraphs:
 - 練得專業、吃得好、睡得飽就是減脂增肌的基本原則。欲速則不達，想要擁有令人羨慕的身材，是需要時間跟訓練堆疊而成，只要有心就能拋去「六塊雞」，擁有「六塊肌」。
 paragraph_count: 5
 char_count: 689
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

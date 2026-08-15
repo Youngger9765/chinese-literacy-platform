@@ -298,6 +298,25 @@ def _unglue(words: list[str], body: list[str]) -> list[str]:
     return out
 
 
+#: 「Level 4・記敘文」 — the worksheet's own masthead line, carrying the grade band and
+#: the genre. Authored WITH the lesson, unlike the planning spreadsheet, so it is both
+#: the better source for genre and an independent field to check the title join
+#: against: 130 of 146 agree, and the 16 that differ are editorial calls on the same
+#: lesson (a letter-writing lesson as 說明文 or 應用文), not different lessons.
+_LEVEL = re.compile(r"^Level\s*(\d+)\s*[・·．.]\s*(.+)$")
+
+
+def extract_level(paras: list[str]) -> dict | None:
+    for t in paras:
+        m = _LEVEL.match(t)
+        if m:
+            genre = m.group(2).strip()
+            # 「應用文(讀書報告)」 — the parenthetical names the sub-form.
+            base = re.sub(r"[（(].*", "", genre).strip()
+            return {"level": int(m.group(1)), "genre": base or genre, "genre_detail": genre}
+    return None
+
+
 def extract_vocabulary(paras: list[str], body: list[str] | None = None) -> list[str]:
     """The 本課語詞 list. Take the LAST occurrence: the instructions above it quote
     the phrase 「從本課語詞框中找語詞」, and matching the first one captures those
@@ -344,6 +363,10 @@ def extract(docx: Path) -> dict:
     result = check(body, vocab)
     return {
         "ok": True,
+        # The masthead's own grade/genre. Preferred over the planning spreadsheet's
+        # 文體 column, which disagrees on 16 lessons — every one of them an editorial
+        # call rather than a different lesson.
+        "level": extract_level(paras),
         "paragraphs": body,
         "char_count": sum(len(normalise(p)) for p in body),
         "vocabulary": vocab,

@@ -12,6 +12,10 @@ paragraphs:
 - 昆蟲學家面對秋行軍蟲的來襲，想方設法，以日新月異的科技幫農民解決問題，從噴農藥到生物防治，從純人工到無人機，遇到新的問題，他們就再想新的辦法，真可說是「兵來將󠇡擋，水來土掩」啊。
 paragraph_count: 8
 char_count: 910
+level:
+  level: 5
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

@@ -11,6 +11,10 @@ paragraphs:
 - 語言真的很有趣，一個「意思」，就像一塊拼圖，只有放進文章裡，參考前後文，才看得出它真正的圖案。也正因為這些不同，讓語言變得這麼好玩、有趣。下次再看到這個詞時，不妨停下來想一想：這是什麼「意思」呢？
 paragraph_count: 7
 char_count: 535
+level:
+  level: 4
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 5

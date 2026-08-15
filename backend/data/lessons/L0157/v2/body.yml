@@ -27,6 +27,7 @@ paragraphs:
 - 請依照文意，勾選出原文「 」中的白話文意思。
 paragraph_count: 23
 char_count: 1766
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

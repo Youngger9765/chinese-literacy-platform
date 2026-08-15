@@ -19,6 +19,7 @@ paragraphs:
 - 綜合相關的資訊看來，350年前蔣衡採訪的故事是很可能是真的，但失血的部分被誇大了。含光兄弟運氣不好，在山中遇虎，這隻老虎可能老、病、殘或幼，攻擊力道不強，被勇敢的含光打退了。幸好傷者失血有限，在救治後終於能夠倖存，留下了這個故事。
 paragraph_count: 15
 char_count: 1547
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

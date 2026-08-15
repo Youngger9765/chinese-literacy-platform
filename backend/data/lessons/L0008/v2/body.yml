@@ -13,6 +13,10 @@ paragraphs:
 - 祖孫倆離開小麵攤時，背影在街燈下漸行漸遠。暈󠇡黃的路燈，把整條街渲染成一個溫暖的世界呢！
 paragraph_count: 9
 char_count: 799
+level:
+  level: 4
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 7

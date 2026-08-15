@@ -11,6 +11,10 @@ paragraphs:
 - 這次救援行動讓我們看見，人類在面對野生動物時，除了屠殺與利用，也可以展現關懷與創意。白鯨對古典音樂的回應，似乎說明著這些高智商的動物與人類之間，有可以共同欣賞的「文化」。當我們用心去理解與接觸其他生命時，也許就有機會創造奇蹟，共同譜寫出一曲關於「希望與愛」的樂章！
 paragraph_count: 7
 char_count: 1049
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

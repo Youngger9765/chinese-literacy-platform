@@ -10,6 +10,10 @@ paragraphs:
 - 最後，運動科學並不專屬於體育選手，很多人都對運動有興趣，但不一定可以成為選手，而運動科學的目標則是讓每個人都有機會參與󠇡，讓自己知道如何運動能更有效、更健康，更能享受運動的快樂！
 paragraph_count: 6
 char_count: 1095
+level:
+  level: 4
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

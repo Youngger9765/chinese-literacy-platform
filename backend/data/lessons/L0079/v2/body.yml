@@ -15,6 +15,10 @@ paragraphs:
 - 最後，還是要感謝您的協助，在凱旋醫院病床不足的狀況下，您仍緊急排出病床讓阿嬤入院，11月20日我們到凱旋急診時，若沒有病床，急診處理完就得回家，之後要再送她進醫院就幾乎不可能了。最後敬祝
 paragraph_count: 11
 char_count: 1102
+level:
+  level: 7
+  genre: 應用文
+  genre_detail: 應用文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 8

@@ -54,6 +54,7 @@ GENRE_TO_CATEGORY = {
     "說明文": "Science",
     "説明文": "Science",
     "議論文": "History",
+    "論說文": "History",
     "文言文": "History",
     "應用文": "Daily",
     "抒情文": "Fable",

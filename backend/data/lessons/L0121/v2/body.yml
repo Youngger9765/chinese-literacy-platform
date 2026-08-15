@@ -23,6 +23,10 @@ paragraphs:
 - 總之，#MeToo運動讓受害者打破沉默，也帶動大眾身體自主權的覺醒，提醒每個人都有責任創造一個安全和彼此尊重的環境。
 paragraph_count: 19
 char_count: 1617
+level:
+  level: 8
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

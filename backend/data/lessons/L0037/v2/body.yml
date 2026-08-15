@@ -13,6 +13,10 @@ paragraphs:
 - 函谷關的門終於打開，孟嘗君和食客們策馬狂奔而出，消失在夜色裡。秦昭王一早離開美人窩後，果然開始「想念」孟嘗君。他發現軟禁處已經人去樓空，立刻派兵快馬加鞭去追；但這時孟嘗君已經脫困，來到安全的地方了。
 paragraph_count: 9
 char_count: 1411
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 14

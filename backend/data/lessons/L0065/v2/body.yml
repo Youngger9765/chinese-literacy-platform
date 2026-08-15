@@ -16,6 +16,10 @@ paragraphs:
 - 皓祥扶著額頭說：「喔，天啊，我光聽就頭昏了。」接著，他搭著揚安的肩說：「兄弟，你可要聽仔細！下次我再受傷，記得先叫我別亂動，再趕快去找詹老師救我！」圍在旁邊的隊友被他滑稽的模樣逗得哄堂大笑。
 paragraph_count: 12
 char_count: 1292
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

@@ -10,6 +10,7 @@ paragraphs:
 - 開墓，取兒屍歸，見金九餅在頭下，素書在腹旁。舉家感子都󠇡之德義。由是聲名大振。
 paragraph_count: 6
 char_count: 466
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

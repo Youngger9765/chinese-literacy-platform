@@ -17,6 +17,10 @@ paragraphs:
 - 或許這才是倫敦大轟炸給人類最意想不到的遺產。大轟炸帶來了死傷、破壞與恐懼，但也讓人看見勇氣、團結、互助形成的希望防線——一種名為「心理韌性」的力量。
 paragraph_count: 13
 char_count: 1673
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 12

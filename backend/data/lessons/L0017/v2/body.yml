@@ -11,6 +11,10 @@ paragraphs:
 - 這到底是什麼感覺呢？為什麼他會如此吸引我的目光？這感覺跟我對朋友不太一樣，卻又說不上來是哪裡不同。我只是單純覺得他很不錯，和他相處總是很開心。好複雜，我覺得我的腦袋要炸掉了。
 paragraph_count: 7
 char_count: 663
+level:
+  level: 4
+  genre: 抒情文
+  genre_detail: 抒情文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

@@ -13,6 +13,10 @@ paragraphs:
 - 昆蟲會不會思考呢？這類問題可不是隨口說說就算了。科學家必須經過細緻的觀察，蒐集足夠的證據，才能下結論。李淳陽已經累積了一些證據，你覺得，這些證據能支持什麼結論呢？
 paragraph_count: 9
 char_count: 965
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10

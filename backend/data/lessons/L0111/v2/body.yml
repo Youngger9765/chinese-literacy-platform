@@ -10,6 +10,10 @@ paragraphs:
 - 這些樹樁提醒人們：珍貴的治療方法或藥物，真的可能在一夜間消失。每一年，被破壞的雨林面積相當於四分之三個臺灣那麼大。全球雨林持續遭到破壞，已導致成千上萬種動植物滅絕。
 paragraph_count: 6
 char_count: 580
+level:
+  level: 8
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

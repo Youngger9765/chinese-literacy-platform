@@ -29,6 +29,10 @@ paragraphs:
 - （段12）他曾說：「在社會中，我是個貧窮失敗的人。」但是，在森林裡，他不只保存了植物，也找回了自己，走出一條真正屬於自己的路。【停點E】
 paragraph_count: 25
 char_count: 2025
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

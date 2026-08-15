@@ -18,6 +18,10 @@ paragraphs:
 - 電視劇《大秦賦》中的秦帝國無比驕傲、軍容壯盛。但你在仔細讀完這兩封家書後，還會想要成為秦國的子民嗎？也許你沒有回答的勇氣。
 paragraph_count: 14
 char_count: 1432
+level:
+  level: 9
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 13

@@ -15,6 +15,10 @@ paragraphs:
 - 你來猜猜看，影片的主角是男的還是女的？
 paragraph_count: 11
 char_count: 1195
+level:
+  level: 6
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 8

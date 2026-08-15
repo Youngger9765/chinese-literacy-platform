@@ -11,6 +11,10 @@ paragraphs:
 - 總之，透過這些數據，我們知道臺灣國中學生在2022年PISA評量中，閱讀能力在全世界七、八十個參與國家裡名列前茅，這可能與臺灣疫情期間學校教育因應得當，以及課程改革重視自主學習等因素有關。但資料也顯示臺灣偏鄉地區學生閱讀力有待加強，這是我們亟待改進的一個弱項。
 paragraph_count: 7
 char_count: 743
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

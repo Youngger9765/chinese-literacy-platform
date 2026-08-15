@@ -13,6 +13,10 @@ paragraphs:
 - 在一對一的肉搏戰裡，少年絕對不可能擊敗巨人。但只要有勇氣，用了正確的方法，巨人並沒有想像中的那樣堅不可摧。我們的生活中，難免遇上像巨人般可怕的挑戰與困難，這時，不妨想起那個勇敢牧羊少年，勇敢面對，發揮自己的長處，就會有機會戰勝困難，把危機變成轉機！
 paragraph_count: 9
 char_count: 1037
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 1

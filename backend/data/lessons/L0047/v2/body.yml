@@ -14,6 +14,10 @@ paragraphs:
 - 我很尊敬這些在工地的大嫂，無比尊敬。
 paragraph_count: 10
 char_count: 988
+level:
+  level: 5
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

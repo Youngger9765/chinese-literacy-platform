@@ -14,6 +14,10 @@ paragraphs:
 - 原來，我們路邊司空見慣的構樹，不只是一棵普通植物。它可能曾陪著航海者跨越海洋，也在不知不覺間記錄了南島語族的遷移故事。構樹的DNA像一封來自千年前的訊息，提醒我們：臺灣，或許正是那場偉大航海故事的起點。
 paragraph_count: 10
 char_count: 1272
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 9

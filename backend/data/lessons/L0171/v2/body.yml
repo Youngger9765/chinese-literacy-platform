@@ -11,6 +11,10 @@ paragraphs:
 - 所以，下次你的大腦又開始酸言酸語時，記得喚出你的藍海豚，把注意力拉回當下真正重要的事。那些念頭只是路過而已——你看見它就好，可以不必跟著它跑喔。
 paragraph_count: 7
 char_count: 1214
+level:
+  level: 4
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

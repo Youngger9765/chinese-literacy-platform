@@ -16,6 +16,10 @@ paragraphs:
 - 小說1818年出版至今已超過兩百年，多次被改編成影視作品。大家閱讀這本書時，難以忘懷怪物「出生」以來不斷發出渴望擁有愛的哀鳴，進而思考科學的發展是不是也該有一條倫理的界線。
 paragraph_count: 12
 char_count: 1153
+level:
+  level: 7
+  genre: 應用文
+  genre_detail: 應用文(讀書報告)
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 13

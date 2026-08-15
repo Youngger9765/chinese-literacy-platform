@@ -22,6 +22,10 @@ paragraphs:
 - 其實，除了預防近視，陽光還有強化骨骼和預防憂鬱的效果，孩子本來就喜歡爬山涉水，喜歡在公園、遊樂場、游泳池嬉戲，就別再把孩子關在家裡了，帶他們出去玩吧！
 paragraph_count: 18
 char_count: 1750
+level:
+  level: 9
+  genre: 說明文
+  genre_detail: 說明文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 8

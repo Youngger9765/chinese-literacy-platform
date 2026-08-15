@@ -11,6 +11,7 @@ paragraphs:
 - 2.「相」視：具代詞功能的助詞。這裡的代詞指的是「你」；「相視」的意思是「看你」。
 paragraph_count: 7
 char_count: 546
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

@@ -15,6 +15,10 @@ paragraphs:
 - 林韡勳走得又苦又甜。未來，他期許能把臺灣水果製成的果醬行銷到世界，讓更多人都能品嘗到臺灣果醬的滋味。
 paragraph_count: 11
 char_count: 1151
+level:
+  level: 7
+  genre: 記敘文
+  genre_detail: 記敘文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 11

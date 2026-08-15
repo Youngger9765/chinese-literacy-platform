@@ -11,6 +11,7 @@ paragraphs:
 - 「對啊，那王宮掉了東西，又跟我兒子有什麼關係？」江乙媽媽說出了心中的話。
 paragraph_count: 7
 char_count: 326
+level: null
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

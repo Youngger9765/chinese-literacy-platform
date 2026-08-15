@@ -15,6 +15,10 @@ paragraphs:
 - 這些因人而異、精準對症下藥的師生對話，後來被孔子的學生一筆一筆記錄下來，集結成了《論語》。這部經典留給現代國中生最酷的提醒是：當你下次又想脫口而出「這不公平」時，不妨先停三秒鐘想想——公平，難道就是大家都只能穿同一尺寸的鞋子嗎？
 paragraph_count: 11
 char_count: 1224
+level:
+  level: 6
+  genre: 議論文
+  genre_detail: 議論文
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 10
