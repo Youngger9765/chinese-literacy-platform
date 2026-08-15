@@ -22,7 +22,6 @@ from ..services.ai_service import generate_story_structure, grade_story_structur
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..services.lesson_content_loader import get_lesson_content
-from ..services.lesson_layer_loaders import get_key_reading_passages  # 重點朗讀對照 (#2562)
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -414,7 +413,6 @@ def list_stories(
     total = len(results)
     start = (page - 1) * page_size
     page_results = results[start : start + page_size]
-    key_reading_passages = get_key_reading_passages()
 
     return StoryListResponse(
         stories=[
@@ -429,7 +427,10 @@ def list_stories(
                 char_count=s["char_count"],
                 thumbnail_url=s["thumbnail_url"],
                 reading_strategy=s["reading_strategy"],
-                has_key_reading=bool(key_reading_passages.get(s.get("grade_code")) or s.get("key_reading")),
+                # Not `key_reading_passages.get(grade_code)` — that table is
+                # first-edition data keyed by catalogue position, so after the
+                # renumber it matched the wrong lesson. See the detail route.
+                has_key_reading=bool(s.get("key_reading")),
                 intro=(StoryIntroSchema(**s["intro"]) if s.get("intro") else None),
             )
             for s in page_results
@@ -456,11 +457,27 @@ def get_story(story_id: str):
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # Issue #2562: 重點朗讀指定段落 — 依 lesson_code(grade_code) 從對照表合併。
-    # 對照表為權威來源（新規則：只取 ☞ 那一段），優先於課文檔內既有 key_reading
-    # （取代舊 pilot 的「☞→全文結尾」值）；查無此課才 fallback 課文檔既有值。
-    mapped_key_reading = get_key_reading_passages().get(story.get("grade_code"))
-    key_reading = mapped_key_reading or story.get("key_reading")
+    # 重點朗讀指定段落。
+    #
+    # This looked the passage up by `grade_code` against
+    # `data/key_reading_passages.yml` (#2562). That file is FIRST-EDITION data keyed
+    # by catalogue position, and the second edition renumbered every lesson — so the
+    # lookup kept succeeding and kept returning a DIFFERENT lesson's text. Live on
+    # staging, G4-L10 《十秒的背後》 (a sprinter) was serving the first edition's
+    # G4-L10, about giving up a seat on a bus. The student read the wrong lesson
+    # aloud, and nothing anywhere reported an error.
+    #
+    # The file cannot be repaired by remapping: its entries carry only `passage` /
+    # `tou_paragraph` / `needs_review` — no title, no uid, nothing that could
+    # establish which lesson a passage belongs to. And the lesson body is absent for
+    # all 175 lessons, so containment cannot be checked either. So it is not read.
+    #
+    # The passage exists in the second-edition DOCX (section 二 念順順) and belongs in
+    # the uid tree beside spotlight.yml and keypoints.yml. Until it is extracted there,
+    # a lesson simply has no key-reading passage — which is what
+    # `content_known_gaps.yaml#key_reading_passages` records. Serving the wrong
+    # passage is worse than serving none.
+    key_reading = story.get("key_reading")
 
     return StoryDetail(
         id=story["id"],

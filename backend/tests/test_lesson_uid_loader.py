@@ -205,3 +205,33 @@ def test_importing_the_lab_service_does_not_need_the_lesson_loader():
     mod = importlib.import_module("app.services.story_structure_lab_service")
     assert hasattr(mod, "_pinned_story_ids")
     assert mod._pinned_story_ids() is not None   # resolvable when actually asked
+
+
+def test_key_reading_is_not_bound_by_lesson_code():
+    """`data/key_reading_passages.yml` is first-edition data keyed by catalogue
+    position. The second edition renumbered every lesson, so looking a passage up by
+    `grade_code` kept SUCCEEDING and kept returning a different lesson's text.
+
+    Live on staging: G4-L10 《十秒的背後》 (about a sprinter) served the first
+    edition's G4-L10, about giving up a seat on a bus. G4-L19 《把球打好，就夠了嗎》
+    would have served a passage about African giant rats. No error anywhere — the
+    student simply read the wrong lesson aloud.
+
+    The file has no title, no uid, nothing that could establish which lesson a
+    passage belongs to, and the lesson body is absent for all 175 lessons so
+    containment cannot be checked either. So the route must not read it.
+    """
+    from pathlib import Path
+
+    import app.routes.stories as stories
+
+    src = Path(stories.__file__).read_text(encoding="utf-8")
+    # Strip comments — they explain the removal and name the function on purpose.
+    code = "\n".join(
+        line for line in src.splitlines()
+        if not line.lstrip().startswith("#")
+    )
+    assert "get_key_reading_passages" not in code, (
+        "the stories route is reading key_reading_passages.yml again — that table is "
+        "keyed by catalogue position and after the renumber it serves another lesson"
+    )
