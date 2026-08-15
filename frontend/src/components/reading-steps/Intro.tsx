@@ -11,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
 import type { OmoPriorUploadResponse } from '../../services/omoApi';
 import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
+import { gradeLabel } from '../../utils/gradeLabel';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -311,7 +312,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     discouraging for older students. Mapping: story.level is
                     already a numeric level (e.g. 4), shown as 「第 N 級」.
                     Product-tunable: owner may prefer pure number or different label. */}
-                <span className="text-[10px] text-gray-400">第 {story.level} 級</span>
+                <span className="text-[10px] text-gray-400">{gradeLabel(String(story.level))}</span>
               </div>
               <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}

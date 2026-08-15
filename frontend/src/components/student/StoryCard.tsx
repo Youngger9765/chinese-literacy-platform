@@ -5,6 +5,7 @@
 import React from 'react';
 import { Story } from '../../types';
 import type { LibraryStoryStatus } from '../../services/progressApi';
+import { gradeLabel } from '../../utils/gradeLabel';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -78,7 +79,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {story.grade && (
             <div className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded">
-              第 {story.grade} 級
+              {gradeLabel(String(story.grade))}
             </div>
           )}
           <div className={`text-xs font-medium px-2 py-0.5 rounded ${diffConfig.className}`}>
