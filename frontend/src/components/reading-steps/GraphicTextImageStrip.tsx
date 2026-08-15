@@ -37,6 +37,16 @@ interface GraphicTextImageStripProps {
 }
 
 // Same-origin asset proxy (#2486) — lingoleap-assets is now a private GCS bucket.
+// ⚠️ CODE-ADDRESSED, and a lesson code is a catalogue POSITION that the second-edition
+// re-ink renumbered (#2683). `story.lesson_code` comes from `grade_code` in api.ts, so a
+// URL built here resolves to whatever the FIRST edition filed at that position — the same
+// mistake that put a bus interior on a sprinting lesson. The <img onError> below hides
+// that behind a grey placeholder, so a wrong image looks identical to no image.
+//
+// Inert today: no second-edition lesson carries `filename`
+// (backend test_no_lesson_carries_the_code_addressed_image_shape). Before feeding these
+// components again, address the asset by lesson_uid — /assets/lesson/<uid>/<name> — as
+// the cover already is.
 const GCS_IMAGE_BASE = `${ASSET_BASE}/lessons-images`;
 
 /** Chinese numeral labels (1-based) for figure badges */

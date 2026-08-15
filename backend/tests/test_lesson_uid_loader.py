@@ -876,3 +876,65 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
             verdict = (doc.get("extraction_check") or {}).get("verdict")
             assert verdict == "disagrees_with_first_edition", f"{uid}: verdict {verdict!r}"
     assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"
+
+
+def test_every_asset_a_lesson_serves_is_addressed_by_its_own_uid():
+    """No asset URL may contain a lesson CODE.
+
+    A code is a catalogue position and the re-ink renumbered every one of them, so a
+    code-addressed asset resolves to whatever the first edition filed at that position
+    — which is how a bus interior ended up on a sprinting lesson and another lesson's
+    passage in 重點朗讀. The cover was fixed by addressing it as
+    `/assets/lesson/<uid>/`; this asserts nothing has drifted back.
+
+    Three code-addressed paths still exist in the frontend and are inert only because
+    no second-edition lesson carries the data that feeds them:
+
+        InlineImageCard / GraphicTextLayout / GraphicTextImageStrip
+            `${ASSET_BASE}/lessons-images/${story.lesson_code}/${basename}` — and
+            `lesson_code` is set from `grade_code` in api.ts, i.e. the new position.
+            The <img onError> handler hides a failure behind a grey placeholder, so a
+            wrong or missing image says nothing at all.
+
+        worksheet_pdf_url / worksheet_docx_url
+            documented as gs://lingoleap-assets/worksheets/{lesson_code}.pdf, currently
+            null for all 175.
+
+    They stay dead as long as this holds. If a lesson starts serving either, this test
+    is where it gets caught rather than a student opening someone else's worksheet.
+    """
+    import re
+
+    from app.services.lesson_loader import get_all_lessons
+
+    CODE = re.compile(r"/(G\d+-L\d+[a-z]?|文-L\d+|體-L\d+)/", re.I)
+    offenders = []
+    for lesson in get_all_lessons():
+        uid = lesson["lesson_uid"]
+        for field in ("thumbnail_url", "worksheet_pdf_url", "worksheet_docx_url"):
+            url = lesson.get(field)
+            if not url:
+                continue
+            if CODE.search(url):
+                offenders.append((uid, field, url))
+            elif "/assets/lesson/" in url and f"/assets/lesson/{uid}/" not in url:
+                offenders.append((uid, field, f"addressed as another lesson: {url}"))
+    assert offenders == [], f"code-addressed assets: {offenders[:4]}"
+
+
+def test_no_lesson_carries_the_code_addressed_image_shape():
+    """`{filename: "images/G7-L28/G7-L28-01.png"}` is the shape the three frontend
+    components turn into a code-addressed URL. Zero lessons carry it, which is the only
+    reason those components cannot mis-bind."""
+    import json
+
+    from app.services.lesson_loader import get_all_lessons
+
+    carriers = [
+        l["lesson_uid"] for l in get_all_lessons()
+        if '"filename"' in json.dumps(l, ensure_ascii=False, default=str)
+    ]
+    assert carriers == [], (
+        f"{len(carriers)} lessons feed the code-addressed image path — point those "
+        f"components at lesson_uid before shipping this: {carriers[:4]}"
+    )
