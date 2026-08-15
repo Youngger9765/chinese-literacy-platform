@@ -17,7 +17,7 @@ sqlalchemy-model-safety checklist:
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, DateTime, func, Index
+from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, DateTime, func, Index, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -86,7 +86,7 @@ class OmoUpload(Base):
     #   "flag": null | {"flagged_by": int, "reason": str, "flagged_at": str}
     # }
     answers: Mapped[list] = mapped_column(
-        JSONB, nullable=False, server_default="'[]'::jsonb"
+        JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
 
     # Grading progress and overall score
@@ -96,7 +96,7 @@ class OmoUpload(Base):
     # Progress tracking for async grading job
     # Shape: {"total": int, "graded": int, "stage": str}
     progress: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, server_default="'{}'::jsonb"
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
 
     # Status of AI pipeline
@@ -171,7 +171,7 @@ class OmoUploadAttempt(Base):
     # GCS object paths for this attempt (one per photo)
     # Shape: ["1/42/0/0.jpg", "1/42/0/1.jpg"]
     image_paths: Mapped[list] = mapped_column(
-        JSONB, nullable=False, server_default="'[]'::jsonb"
+        JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
 
     # SHA-256 content hash of the primary uploaded image (first file).

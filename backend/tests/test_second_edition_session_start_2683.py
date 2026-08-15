@@ -112,3 +112,22 @@ def test_listing_sessions_filtered_by_that_story_does_not_explode(client, token)
     r = client.get(f"/api/learning/sessions?story_slug={lesson['id']}&status=in_progress&limit=1",
                    headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200, f"{r.status_code} {r.text}"
+
+
+def test_listing_after_progress_is_saved_does_not_explode(client, token):
+    """The preview kept 500ing on this exact call AFTER a session existed with saved
+    progress — the state my first version of this test never reached, because it
+    listed sessions that had never been touched."""
+    lesson = get_all_lessons()[0]
+    h = {"Authorization": f"Bearer {token}"}
+    sid = client.post("/api/learning/sessions",
+                      json={"story_slug": str(lesson["id"])}, headers=h).json()["id"]
+    client.put(f"/api/learning/sessions/{sid}/progress",
+               json={"current_step": "comprehension",
+                     "steps_completed": ["intro", "live_tutor"], "step_data": {}},
+               headers=h)
+    r = client.get(
+        f"/api/learning/sessions?story_slug={lesson['id']}&status=in_progress&limit=1",
+        headers=h)
+    assert r.status_code == 200, f"{r.status_code} {r.text}"
+    assert r.json()["items"][0]["current_step"] == 3

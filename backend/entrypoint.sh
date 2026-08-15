@@ -46,6 +46,17 @@ PYEOF
         fi
     fi
     echo "Migrations complete."
+
+    # `alembic stamp head` above records the database as being at head WITHOUT running
+    # anything. That is right when the only problem was another PR's stale revision row
+    # on the shared preview DB, and wrong when the schema is genuinely behind — then the
+    # container starts, reports success, and serves 500s on whatever the missing columns
+    # touch. `alembic current` cannot tell the two apart, because after a stamp it
+    # truthfully reports head. So compare the models to what is actually there.
+    if ! python3 scripts/assert_schema_matches_models.py; then
+        echo "ERROR: migrations reported success but the schema is behind the models."
+        exit 1
+    fi
 fi
 
 # (#2470 HIGH-1a) Do NOT trust X-Forwarded-For from arbitrary clients: removed the
