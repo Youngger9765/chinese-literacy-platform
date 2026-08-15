@@ -38,6 +38,26 @@ def _reapply_spotlight_images(lesson: dict) -> None:
     lesson["images"] = merge_spotlight_images(lesson.get("images") or [], spotlight_v2)
 
 
+def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
+    """The cover file for a lesson, or None.
+
+    All covers are 400×300 WebP — the first edition's spec, kept because it is the
+    size the library card actually renders. Newly generated art arrives as ~1.4 MB
+    PNG from the model and is converted on the way in: 69 of those would have put
+    99 MB of images into the repository for pictures displayed at 400 px wide.
+    """
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent.parent / "data" / "lessons" / uid
+    if not version_id:
+        vs = sorted((c.name for c in root.iterdir()
+                     if c.is_dir() and c.name.startswith("v"))) if root.is_dir() else []
+        version_id = vs[-1] if vs else None
+    if not version_id:
+        return None
+    return "thumbnail.webp" if (root / version_id / "assets" / "thumbnail.webp").is_file() else None
+
+
 def _uid_tree_lessons() -> list[dict]:
     """Second-edition lessons from the uid tree (#2687/#2692).
 
@@ -96,12 +116,24 @@ def _uid_tree_lessons() -> list[dict]:
             # taxonomy yet, so they stay empty rather than being invented.
             "genre": "",
             "category": "",
-            "char_count": 0,
-            "thumbnail_url": None,
+            "char_count": (l.get("body") or {}).get("char_count") or 0,
+            # Served from the uid tree, so the image is addressed by the lesson's
+            # identity rather than its catalogue position. Under the first edition
+            # covers were keyed by code; the renumber pointed every one of them at a
+            # different story (verified: G4-L10's bus interior against 《十秒的背後》).
+            "thumbnail_url": (
+                f"/assets/lesson/{uid}/{_thumbnail_name(uid, l.get('version_id'))}"
+                if _thumbnail_name(uid, l.get("version_id")) else None
+            ),
             "reading_strategy": None,
             "has_key_reading": False,
             "intro": None,
-            "paragraphs": [],
+            # 課文本體, extracted from the DOCX section the worksheet calls
+            # 讀全文-做記號 (#2683). It was absent for all 175 lessons because the
+            # pipeline read paragraphs back out of the layer the re-ink deleted —
+            # which left 朗讀 / 閱讀理解 / 生字 / 造句 with no text to work on and
+            # 「參考課文」 blank beside the keypoints table.
+            "paragraphs": (l.get("body") or {}).get("paragraphs") or [],
             # StoryDetail indexes these directly. The second-edition extraction
             # produces spotlight + keypoints; the remaining practice modules are
             # not yet extracted, so they are present-but-empty rather than absent

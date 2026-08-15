@@ -119,7 +119,7 @@ fields_not_extracted:
   source: 多數欄位的原料在原始 DOCX 裡（語詞、閱讀理解題目都在學習單上），需要擴充抽取器
   fields:
     paragraphs:
-      count: 0
+      count: 174
       of: 175
       是什麼: 課文本體（見 lesson_body_text）
     vocabulary:
@@ -139,7 +139,7 @@ fields_not_extracted:
       of: 175
       是什麼: 課文簡介（作者／背景）
     thumbnail_url:
-      count: 0
+      count: 174
       of: 175
       是什麼: 課文縮圖
     genre:
@@ -299,3 +299,18 @@ blocks_present_but_none_renderable:
     block_types:
     - figure
     - guide
+resolved:
+  note: 以下缺口已補上，登錄留著是為了記錄怎麼補的與剩下什麼
+  lesson_body_text:
+    was: 0 / 175
+    now: 174 / 175
+    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是
+      1:1（96 份誤報 14 份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
+    remaining: 1 課（G9-L15 會考圖文題實戰）整份是考題，本來就沒有課文
+  thumbnail_url:
+    was: 0 / 175
+    now: 174 / 175
+    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69
+      課新生成。Imagen 3/4 全系列在本專案已 404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
+    spec: 400×300 WebP，中位數 19 KB，最大 42 KB —— 與一修同規格
+    remaining: 同上那 1 課（沒有課文就沒有場景可畫）
