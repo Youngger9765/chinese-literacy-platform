@@ -3,11 +3,10 @@ version_id: v2
 source: DOCX 第一節（讀全文-做記號）
 paragraphs:
 - 閱讀是最重要的能力，因為它是所有學校學習的基礎。閱讀能力越強，越有能力處理複雜的資訊，各領域的學習都會如魚得水。但只要不會讀、讀不懂，甚至讀得慢，都會造成學習的全面挫敗。在生活與未來職場上，閱讀也是確保一個人具備終身學習能力的根本，也是適應現在生活及面對未來挑戰的關鍵。
-- 圖1是臺灣學生歷年的閱讀成績。從圖1可知，臺灣學生的閱讀分數呈現上升的趨勢，參加國（指全部參加的國家）及OECD國家的平均分數則呈現下降的趨勢，2022的分數和2018比較，臺灣進步12分，但參加國卻退步了18分，OECD退步了11分；再看閱讀力的世界排名，從圖2可知，臺灣學生的閱讀力排名從2015年的23名，進步到<w:p w14:paraId="1FFD3807" w14:textId="77777777" w:rsidR="00CB2F25" w:rsidRPr="001610BD" w:rsidRDefault="00CB2F25" w:rsidP="00CB2F25"><w:pPr><w:adjustRightInd w:val="0"/><w:snapToGrid w:val="0"/><w:spacing w:beforeLines="2" w:before="7" w:line="280" w:lineRule="exact"/><w:ind w:left="280" w:hangingChars="100" w:hanging="280"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="芫荽" w:eastAsia="芫荽" w:hAnsi="芫荽" w:cs="芫荽"/><w:sz w:val="28"/><w:szCs w:val="26"/></w:rPr></w:pPr><w:r w:rsidRPr="001610BD"><w:rPr><w:rFonts w:ascii="芫荽" w:eastAsia="芫荽" w:hAnsi="芫荽" w:cs="芫荽" w:hint="eastAsia"/><w:noProof/><w:sz w:val="28"/><w:szCs w:val="26"/></w:rPr><w:t>圖2：PISA 2015～2022臺灣閱讀表現排名
 - 臺灣學生的閱讀表現雖然相當不錯，但城鄉差距仍然明顯，以2022年的PISA資料為例，偏遠地區的分數落後於都會區43分，PISA評量20分大概就等於一個學年的學習，43分的意思是差距超過兩個年級。有許多研究指出，偏鄉學生不只是「閱讀力」落後，在更基礎的「識字能力」上，也出現遙遙落後的現象。表1呈現了花東地區國中學生識字能力和全國平均值的差異，不論是全體學生或低成就學生，偏鄉程度較高的花東地區，學生的識字能力，是相對落後的。
 - 總之，透過這些數據，我們知道臺灣國中學生在2022年PISA評量中，閱讀能力在全世界七、八十個參與國家裡名列前茅，這可能與臺灣疫情期間學校教育因應得當，以及課程改革重視自主學習等因素有關。但資料也顯示臺灣偏鄉地區學生閱讀力有待加強，這是我們亟待改進的一個弱項。
-paragraph_count: 4
-char_count: 1281
+paragraph_count: 3
+char_count: 477
 extraction_check:
   method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
   vocabulary_found: 0

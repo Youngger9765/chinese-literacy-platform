@@ -343,3 +343,19 @@ def test_most_lessons_have_a_cover():
             "keying on the lesson code is what pointed every first-edition image at "
             "the wrong story after the renumber"
         )
+
+
+def test_body_paragraphs_are_prose():
+    """One extraction picked up a 71-character run of the digit 5 — table filler that
+    passed every length and prefix check, and that a secret scanner then flagged as a
+    credential in a file of children's reading material. Real lesson text is mostly
+    CJK; anything below a third is an artefact."""
+    from app.services.lesson_loader import get_all_lessons
+
+    offenders = []
+    for lesson in get_all_lessons():
+        for p in lesson.get("paragraphs") or []:
+            cjk = sum(1 for c in p if "一" <= c <= "鿿")
+            if cjk < len(p) * 0.3:
+                offenders.append((lesson["lesson_uid"], p[:30]))
+    assert offenders == [], f"non-prose runs in body text: {offenders[:3]}"

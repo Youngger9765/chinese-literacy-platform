@@ -149,9 +149,21 @@ def normalise(s: str) -> str:
     )
 
 
+def _looks_like_prose(t: str) -> bool:
+    """Reject runs with no sentence structure.
+
+    One worksheet's body picked up a 71-character run of the digit 5 — table filler
+    or a layout artefact, not text. It passed every length and prefix check, and a
+    secret scanner then flagged it as a credential. Real lesson text is mostly CJK.
+    """
+    cjk = sum(1 for c in t if "\u4e00" <= c <= "\u9fff")
+    return cjk >= len(t) * 0.3
+
+
 def _is_chrome(t: str) -> bool:
     return (
-        not t
+        not _looks_like_prose(t)
+        or not t
         or any(t.startswith(p) for p in _CHROME_PREFIX)
         or any(c in t for c in _CHROME_CONTAINS)
         or any(m in t for m in _INSTRUCTION_MARKERS)
