@@ -145,7 +145,7 @@ def extract(docx: Path, body: list[str] | None = None) -> dict:
         body = (extract_body(docx) or {}).get("paragraphs") or []
     anchor = find_anchor(paras)
     out: dict = {"anchor": anchor, "verdict": "empty", "passage": None,
-                 "corroborated_by_first_edition": None}
+                 "corroborated_by_first_edition": None, "needs_human_review": False}
 
     if anchor is None:
         out["verdict"] = "no_anchor"
@@ -174,17 +174,32 @@ def extract(docx: Path, body: list[str] | None = None) -> dict:
     agreed = corroborate(body, load_legacy())
     out["corroborated_by_first_edition"] = agreed
     if agreed is not None and agreed != anchor:
-        # Two pipelines reading the same lesson picked different paragraphs. One of
-        # them is wrong and this script cannot say which.
-        out["verdict"] = "disagrees_with_first_edition"
-        return out
+        # The two editions marked different paragraphs. Checked by hand on both
+        # lessons: the numbering is not offset — the first edition's passage sits at
+        # OUR paragraph 2 and 3 respectively, so the segmentations agree and the
+        # markings genuinely differ by one.
+        #
+        # The DOCX wins. It is the second edition's own instruction about the second
+        # edition's worksheet, and the first edition's table came from a different
+        # printing whose rule was 「只取 ☞ 那一段」 rather than 「從指定段落開始」. It is
+        # also a much smaller error than the one this whole extraction exists to avoid:
+        # the passage is still this lesson's, starting a paragraph later. Withholding
+        # it means a student reads the entire text aloud instead, which is the thing the
+        # review ruled against.
+        out["needs_human_review"] = True
 
     if not (MIN_CHARS <= len(passage) <= MAX_CHARS):
         out["verdict"] = "implausible_length"
         out["length"] = len(passage)
         return out
 
-    out["verdict"] = "confirmed" if agreed == anchor else "ok"
+    # The verdict has to survive to the file, so it is set once, here. Setting it at
+    # the disagreement above and falling through overwrote it with "ok" — the flag
+    # remained but the data no longer said WHY it was flagged.
+    if out["needs_human_review"]:
+        out["verdict"] = "disagrees_with_first_edition"
+    else:
+        out["verdict"] = "confirmed" if agreed == anchor else "ok"
     return out
 
 

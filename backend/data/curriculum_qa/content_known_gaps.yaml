@@ -155,7 +155,7 @@ fields_not_extracted:
       of: 175
       是什麼: 朗讀字數基準
     has_key_reading:
-      count: 143
+      count: 146
       of: 175
       是什麼: 重點朗讀段落
 locks_removed_with_the_first_edition:
@@ -189,15 +189,21 @@ key_reading_passages:
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
 key_reading_withheld:
-  count: 32
+  count: 29
   of: 175
-  what: 這 35 課沒有重點朗讀段落，朗讀步驟會退回唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
+  status: 其中 28 課不是缺口 —— 那個課型本身沒有這個練習
   breakdown:
-    no_anchor: 28      # 第二節沒有「從指定段落（X）開始朗讀」這句，多為文言文與品格教育的另一種版型
-    anchor_out_of_range: 2   # 段號超過課文段數，代表段號與課文分段互相矛盾，無法判斷誰對
-    disagrees_with_first_edition: 2  # 一修由紙本 PDF 抽的段號與 DOCX 段號不同，兩條流程打架
-  why_withheld: 夾一個看起來合理的段落比留白更糟 —— 學生會照著唸完，而沒有任何人會發現那不是老師標的段。
-  how_to_close: no_anchor 需要人工看該課第二節指定哪一段；另外 7 課需要人工裁決段號。
+    no_section: 28   # 學習單裡根本沒有「念順順」這一節（多為文言文與品格教育），不做計時朗讀
+    anchor_out_of_range: 1   # L0012 書信體，署名與信頭短於 12 字下限被略過，段數少於學習單的段號
+  what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
+  why_28_is_not_a_gap: 逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣。沒有老師標的重點段可抽，跟某課沒有影片一樣是正常狀態。
+  how_to_close: 只有 L0012 有得修 —— 需要讓書信體的短行（「阿耀 敬上」「寄件人：…」）進入課文。
+
+key_reading_flagged:
+  count: 2
+  lessons: [L0101, L0139]
+  what: 二修 DOCX 標的段號與一修對照表差一段。已採用二修（那是二修自己的學習單指示），並在 key_reading.yml 標 needs_human_review + review_reason。
+  why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
 
 mcq_options_emitted_as_guides:
   count: 6

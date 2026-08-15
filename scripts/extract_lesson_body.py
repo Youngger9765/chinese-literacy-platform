@@ -88,6 +88,11 @@ _BODY_END_TIERS = (
 # (「◎策略說明：」). Both start the exercise material in worksheets whose 閱讀聚光燈
 # heading sits in the masthead above the text, leaving nothing named after it.
 _FALLBACK_HEADING = re.compile(r"^([一二三四五六七八九十]、|◎)")
+#: 「示範１：」 / 「練習1：」 — the sub-headings that open the worked-example block in a
+#: worksheet whose 閱讀聚光燈 heading sits in the masthead, so nothing named follows the
+#: text. L0106 read to paragraph 46 without them, sweeping the strategy lesson and three
+#: 會考 questions into the text a student is asked to read; its body is the first eight.
+_EXERCISE_SUBHEADING = re.compile(r"^(示範|練習)\s*[0-9０-９一二三四五六七八九十]")
 # Later section headings, used to bound the vocabulary list.
 _SECTIONS = re.compile(
     r"^(語詞我最棒|語詞應用|文章重點表|閱讀聚光燈|閱讀理解|詞語複習|知識補給站)$"
@@ -105,6 +110,9 @@ _MIN_SHORT_BODY = 12
 #: lines run two or three short; a scaffolding block runs much longer, so this is what
 #: separates them.
 _SHORT_RUN_LIMIT = 3
+#: Longest a section heading can be. Above this the paragraph is prose that happens to
+#: mention a section's name, not the section starting.
+_MAX_HEADING = 24
 _CHROME_PREFIX = ("※", "□", "☐", "◎", "Level ", "字數", "課文", "學習單", "說明：", "提醒：")
 _CHROME_CONTAINS = ("讀全文", "讀課文", "做記號")
 # Instruction paragraphs from the NEXT section that sit above its heading in document
@@ -209,9 +217,23 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
     # the text — taking the first tier to match anywhere meant 閱讀聚光燈 at
     # paragraph 465 beat 閱讀理解 at 348, and L0144 swallowed 117 paragraphs of
     # exercises into its body (its 29th "paragraph" was a multiple-choice question).
+    # A boundary is a HEADING, and the marker was being matched as a substring
+    # anywhere in a paragraph. Three lessons are ABOUT reading comprehension and say so
+    # in their own prose — 「閱讀的速度愈快…閱讀理解就會愈強哦」 — which closed the body
+    # at its second paragraph. L0072 was served as a single paragraph while its
+    # worksheet asked the student to start reading at the sixth.
+    #
+    # Headings are short. Real ones run to about a dozen characters even when Word has
+    # merged the section number into them (「七閱讀理解」); the shortest prose that
+    # tripped this was 51.
     candidates = [
         i for i, t in enumerate(paras)
-        if i > first and t and any(m in t for tier in _BODY_END_TIERS for m in tier)
+        if i > first and t
+        and (
+            (len(t) <= _MAX_HEADING
+             and any(m in t for tier in _BODY_END_TIERS for m in tier))
+            or _EXERCISE_SUBHEADING.match(t)
+        )
     ]
     end = min(candidates) if candidates else None
     if end is None:

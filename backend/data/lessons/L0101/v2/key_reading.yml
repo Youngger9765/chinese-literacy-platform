@@ -1,0 +1,17 @@
+lesson_uid: L0101
+version_id: v2
+passage: '小米酒的意義，在一次次被舉起的場合中展現無遺。
+
+  排灣族在農作的重要時刻，會以小米酒灑地，向百穀神與祖靈祈求平安與豐收；阿美族青年在通過成年禮的試煉後，會飲下小米酒，象徵正式獲得成年身分，能承擔保護部落的責任；魯凱族新人在婚禮上舉起小米酒，象徵家族的連結，也向祖靈致敬；在卑南族與阿美族的豐年祭裡，小米酒常被用來敬天、敬地，也獻給祖靈，感謝這一年大地的給予；而鄒族的祖靈祭中，小米酒會獻給戰神廟或神木，象徵敬意與感恩。這些儀式的動作與細節或許各有千秋，卻殊途同歸：小米酒是一種連結，連結人與天地，也連結人與族人。
+
+  在部落的日常生活裡，小米酒同樣具有重要的象徵。如果你聽到有人說：「來我們部落，請你喝小米酒。」那不只是請你喝一杯飲料，更不是可以想喝就喝的飲品，而是代表主人願意把珍貴的東西與你'
+start_text: 小米酒的意義，在一次次被舉起的場合中展現無遺。
+extent_chars: 344
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 3
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: 2
+needs_human_review: true
+review_reason: 二修 DOCX 標第 3 段，一修對照表標第 2 段；採用二修
