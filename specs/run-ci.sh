@@ -89,4 +89,17 @@ echo "-- Gate 4/4: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
 echo ""
 
+# ── Gate 5/5: spotlight structural ratchet ───────────────────────────────────
+# The spotlight gate existed and nothing ran it. `run_spotlight_dev_gate.sh` and
+# `content_evidence_gate.py` appear in no workflow and were not here either, while
+# CLAUDE.md said a spotlight PR must print CONTENT_EVIDENCE_GATE=PASS. The gate had
+# been exiting 1 on a deleted first-edition fixture for the whole re-ink.
+#
+# This is the cheap half — structure only, deterministic, all 175 lessons — and it is
+# the half that matters before a full rebuild: #2713 and #2714 both end by rebuilding
+# every lesson's spotlight, and without this nothing says what else moved.
+echo "-- Gate 5/5: spotlight structural ratchet (spotlight_fingerprints) --"
+"$PYBIN" scripts/spotlight_fingerprints.py --check
+echo ""
+
 echo "== Local Spec CI: PASS =="
