@@ -92,6 +92,7 @@ KNOWN_BLOCK_TYPES = frozenset({
     "match",
     # 排序題：（N）| 句子 的兩欄表格。原本落到「無圖 figure」而被 loader 丟棄，
     # 學生只看到題目提示、底下什麼都沒有（#2683）。
+    "ordering",
     # 表格練習的內容本身。同上，172 個表格、88 課因為被歸成無圖 figure 而消失。
     "table",
     "unknown",
