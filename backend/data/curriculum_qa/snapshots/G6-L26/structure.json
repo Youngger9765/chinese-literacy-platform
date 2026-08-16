@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "如何預防",
       "如何預防",

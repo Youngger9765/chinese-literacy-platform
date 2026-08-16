@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 2,
+    "checkbox_count": 1,
+    "fill_blank_count": 1,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "起源與發展",
       "面對性騷擾，我們該怎麼做?"

@@ -1,7 +1,7 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
-    "fill_blank_count": 4,
+    "checkbox_count": 3,
+    "fill_blank_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
