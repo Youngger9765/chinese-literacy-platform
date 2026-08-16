@@ -115,9 +115,11 @@ comprehension:
     options:
       A: 提供一個在逆境中成長的案例
       B: 說明除了努力之外，也要感恩幫助自己的人
-      C: 只要肯長時間工作，就一定能改變命運（作者未提到這點）
+      C: 只要肯長時間工作，就一定能改變命運
       D: 強調教育是翻轉人生的關鍵力量
     rationale: 嗷嗷待哺、目不󠇡識丁、貼補、按件計酬、俐落、
+    marker_notes:
+      C: 作者未提到這點
   extraction_check:
     answers_without_option: []
     questions_with_few_options: []

@@ -979,18 +979,64 @@ def test_options_do_not_carry_the_marker_s_notes():
     assert leaks == [], f"teacher annotations visible to students: {leaks[:4]}"
 
 
-def test_the_glosses_that_belong_to_an_option_are_left_alone():
-    """The counterpart. Without it, stripping every trailing parenthesis would pass the
-    test above while deleting the meaning of 「圓形而中空的東西（玉環）」."""
+def test_no_option_ends_in_the_marker_s_bracket():
+    """Superseded `test_the_glosses_that_belong_to_an_option_are_left_alone`, which
+    asserted that 30-odd options KEEP a trailing parenthesis because they were glosses.
+    That premise was wrong, and the test was protecting the wrong thing.
+
+    Reading all 40 in the corpus: 「圓形而中空的東西（玉環）」 is not a gloss. The question
+    asks what 「一環」 means and its options are
+
+        圓形而中空的東西（玉環）  其中一個重要部分  圍繞（環繞）  玉石雕的圓形圈子（玉環）
+
+    The answer is the only one WITHOUT a bracket. Every other case is the same kind of
+    note — （擬人）naming the device the question asks about, （文中未提到）explaining why
+    an option is wrong, (從第4、5段可知) citing the source. Not one is content the option
+    needs, so all of them move to `marker_notes`.
+
+    The guard against over-stripping is not "keep some brackets" but the two below:
+    nothing is emptied, and the section coverage does not fall.
+    """
     from app.services.lesson_loader import get_all_lessons
 
-    kept = [
-        o for l in get_all_lessons()
+    left = [
+        (l["lesson_uid"], o[:40]) for l in get_all_lessons()
         for q in (l.get("multiple_choice") or [])
         for o in (q.get("options") or [])
         if o and o.strip().endswith(("）", ")"))
     ]
-    assert len(kept) >= 30, f"only {len(kept)} options keep a parenthetical — the strip is too broad"
+    assert left == [], f"marker brackets still visible: {left[:4]}"
+
+
+def test_stripping_annotations_never_empties_an_option():
+    """The real guard against over-stripping. An option that is ENTIRELY a parenthesis
+    is the teacher edition's rationale standing in for the overwritten correct option —
+    removing its brackets would leave nothing at all."""
+    from app.services.lesson_loader import get_all_lessons
+
+    empty = [
+        (l["lesson_uid"], q.get("question", "")[:26])
+        for l in get_all_lessons()
+        for q in (l.get("multiple_choice") or [])
+        for o in (q.get("options") or [])
+        if o is not None and not str(o).strip() and q.get("answer")
+        and (q.get("options") or []).index(o) == ord(str(q["answer"])[0]) - 65
+    ]
+    assert empty == [], f"answer option emptied by the strip: {empty[:4]}"
+
+
+def test_the_teacher_edition_rationale_still_fills_the_missing_option():
+    """Deleted by accident while consolidating the annotation rules, and the effect was
+    not subtle: 48 questions became 「answer not among options」 and comprehension fell
+    from 155 lessons to 107. The section counts caught it; no individual option looked
+    wrong."""
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = [l for l in get_all_lessons() if l.get("multiple_choice")]
+    assert len(lessons) >= 150, (
+        f"{len(lessons)} lessons carry comprehension questions — the rationale is no "
+        "longer filling options the teacher edition overwrote"
+    )
 
 
 def test_a_failed_extraction_is_not_served_as_content():

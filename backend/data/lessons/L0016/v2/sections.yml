@@ -99,9 +99,13 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 不好意思！台灣人最愛說這句話・片長：(1:30) ・來源：三立iNEWS
+    title: 不好意思！台灣人最愛說這句話
+    duration_seconds: 90
+    source: 三立iNEWS
   - index: 2
-    title: 你覺得異性說你可愛會是什麼意思？・片長：(2:40) ・來源：問問 wenwen
+    title: 你覺得異性說你可愛會是什麼意思？
+    duration_seconds: 160
+    source: 問問 wenwen
   extraction_check:
     verdict: unverified
     needs_human_review: true

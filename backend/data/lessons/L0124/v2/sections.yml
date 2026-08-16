@@ -116,10 +116,13 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 直擊全台第一家素肉廠!"口感媲美真肉排"..植物肉需求飆!搶全球1成肉品市場│非凡財經新聞│・片長：(4:03)
+    title: 直擊全台第一家素肉廠!"口感媲美真肉排"..植物肉需求飆!搶全球1成肉品市場│非凡財經新聞│
+    duration_seconds: 243
     source: USTV 非凡電視
   - index: 2
-    title: 素肉跟植物肉不同？ 關鍵在於這幾點・片長：(2:23)・來源：人間福報The Merit Times
+    title: 素肉跟植物肉不同？ 關鍵在於這幾點
+    duration_seconds: 143
+    source: 人間福報The Merit Times
   extraction_check:
     verdict: unverified
     needs_human_review: true

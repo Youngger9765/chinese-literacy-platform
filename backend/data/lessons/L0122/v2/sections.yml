@@ -82,7 +82,9 @@ vocab_application:
 resources:
   items:
   - index: 2
-    title: 比流感新冠更可怕的神秘病毒-天花・片長：(6:30)・來源：達特方的胰萬個胃什麼
+    title: 比流感新冠更可怕的神秘病毒-天花
+    duration_seconds: 390
+    source: 達特方的胰萬個胃什麼
   extraction_check:
     verdict: unverified
     needs_human_review: true

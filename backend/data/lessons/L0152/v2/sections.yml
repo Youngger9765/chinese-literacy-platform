@@ -103,10 +103,12 @@ comprehension:
     stem: 根據本文，秦朝士兵的生活狀況為何？
     options:
       A: 家人支援充足，前線衣食無虞
-      B: 官府供給完善，只需專心作戰(從第4、5段可知)
+      B: 官府供給完善，只需專心作戰
       C: 艱難困苦，連衣物錢財都缺
       D: 戰功獎勵穩定，生活逐漸改善
     rationale: null
+    marker_notes:
+      B: 從第4、5段可知
   - index: 3
     answer: D
     stem: 根據作者推論，大哥把弟弟們的家書當陪葬品的主要原因為何？
@@ -122,9 +124,11 @@ comprehension:
     options:
       A: 帝國勝利背後，藏著平民家庭的犧牲
       B: 秦軍強盛背後，來自家人對前線支持
-      C: 軍功制度推行，使士兵家庭獲得保障(根據第5及11段可知)
+      C: 軍功制度推行，使士兵家庭獲得保障
       D: 家書能被保存，主要因古人重視親情
     rationale: null
+    marker_notes:
+      C: 根據第5及11段可知
   - index: 5
     answer: C
     stem: 本篇文章對於研究秦朝歷史有何重要意義？
@@ -143,12 +147,17 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 秦朝軍隊為什麼強大？ 秦朝軍隊制度 | 秦朝士兵有幾個等級？兵馬俑・片長：(6:28)
+    title: 秦朝軍隊為什麼強大？ 秦朝軍隊制度 | 秦朝士兵有幾個等級？兵馬俑
+    duration_seconds: 388
     source: 有点意思
   - index: 2
-    title: 古墓出土兩封秦朝家書，家書內容讓專家哭笑不得，「媽媽，寄點錢來呀，快凍死啦！」・片長：(11:46)・來源：歷史天空
+    title: 古墓出土兩封秦朝家書，家書內容讓專家哭笑不得，「媽媽，寄點錢來呀，快凍死啦！」
+    duration_seconds: 706
+    source: 歷史天空
   - index: 3
-    title: 事實有真假，觀點無對錯｜劉潤《5分鐘商學院・基礎》-149-事實和觀點・片長：(8:55)・來源：耀鈞x商業修煉筆記
+    title: 事實有真假，觀點無對錯｜劉潤《5分鐘商學院
+    duration_seconds: 535
+    source: 耀鈞x商業修煉筆記
   extraction_check:
     verdict: unverified
     needs_human_review: true

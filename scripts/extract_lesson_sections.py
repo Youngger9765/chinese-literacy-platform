@@ -69,8 +69,7 @@ _INLINE_OPTIONS = re.compile(r"([A-Z])\s*[.、．]\s*([^A-Z\n]{1,40}?)(?=\s+[A-Z
 _RATIONALE = re.compile(r"^[（(].+[）)]$")
 _TRAILING_PAREN = re.compile(r"[（(]\s*([^（）()]{2,12})\s*[）)]\s*$")
 _QUOTED = re.compile(r"[「『]([^」』]{2,12})[」』]")
-#: A trailing parenthesis long enough to be a clause rather than a gloss.
-_TRAILING_CLAUSE = re.compile(r"[（(]\s*([^（）()]{13,})\s*[）)]\s*$")
+_TRAILING_PAREN_ANY = re.compile(r"[（(]\s*([^（）()]{1,60})\s*[）)]\s*$")
 #: A trailing 「(第三段)」 / 「（第三、四段）」 — the marker's note about where the
 #: evidence sits, not part of the option.
 _PARAGRAPH_CITE = re.compile(
@@ -260,10 +259,8 @@ def extract_comprehension(paras, bounds, body_text: str, lesson_vocab: list[str]
     # the CORRECT option. A student does not have to read anything to see which choice
     # carries a paragraph reference.
     #
-    # Only paragraph citations. Ordinary parentheses in an option are usually a gloss
-    # that belongs to the answer — 「圓形而中空的東西（玉環）」, 「圍繞（環繞）」 — and
-    # 28 of the 46 trailing parentheses are exactly that. Removing those would delete
-    # the meaning rather than the annotation.
+    # Recorded separately from the other notes because a citation says something
+    # specific — WHERE the evidence is — which is worth keeping under its own key.
     for q in questions:
         for letter, text in list(q["options"].items()):
             m = _PARAGRAPH_CITE.search((text or "").strip())
@@ -271,51 +268,44 @@ def extract_comprehension(paras, bounds, body_text: str, lesson_vocab: list[str]
                 q["options"][letter] = text.strip()[: m.start()].strip()
                 q.setdefault("source_paragraphs", {})[letter] = m.group(1)
 
-    # The other giveaway: a 「何者使用正確」 question whose wrong options carry the word
-    # that WOULD have been right — 「體育競賽總是讓人『事與願違』，相當刺激(血脈賁張)」.
-    # Every annotated option is a wrong one, so the unannotated option is the answer and
-    # the student never reads a sentence.
+    # Trailing parentheses on a comprehension option are the MARKER's notes, and the
+    # evidence for that is stronger than it first looked.
     #
-    # Narrow on purpose: the parenthetical must be one of THIS lesson's vocabulary
-    # words, the option must already quote a DIFFERENT one, and the two must not be the
-    # same word. Ordinary glosses fail all three — 「圓形而中空的東西（玉環）」 quotes
-    # nothing, 「深蹲－胸肌、三頭肌（伏地挺身）」 quotes nothing. Measured: 2 hits, both
-    # real; 33 parentheses left alone, every one of them a gloss.
-    vocab_set = {normalise(w) for w in lesson_vocab if w}
+    # I originally wrote three narrow rules — paragraph citations, the word that would
+    # have been right, and long reasoning clauses — on the belief that short trailing
+    # parentheses were glosses belonging to the option. Reading all 40 in the corpus
+    # showed that belief was wrong. 「圓形而中空的東西（玉環）」 is not a gloss: the
+    # question asks what 「一環」 means, its four options are
+    #
+    #     圓形而中空的東西（玉環）  其中一個重要部分  圍繞（環繞）  玉石雕的圓形圈子（玉環）
+    #
+    # and the ANSWER is the only one without a bracket. Same shape as
+    # 「…相當刺激(血脈賁張)」: whichever options are annotated, the unannotated one is
+    # the answer, and the student never reads a definition.
+    #
+    # Every remaining case is the same kind of note — （擬人）naming the device the
+    # question asks about, （文中未提到）explaining why an option is wrong,
+    # (從第4、5段可知) citing the source, （鬱悶）supplying the right word. Not one of
+    # the 40 is content the option needs. So: all of them move to `marker_notes`.
+    #
+    # An option that is ENTIRELY a parenthesis is left alone — that is the teacher
+    # edition overwriting the correct option with its rationale, handled below.
     for q in questions:
         for letter, text in list(q["options"].items()):
-            m = _TRAILING_PAREN.search((text or "").strip())
-            if not m:
-                continue
-            inner = normalise(m.group(1))
-            quoted = {normalise(x) for x in _QUOTED.findall(text)}
-            if inner in vocab_set and (quoted & vocab_set) and inner not in quoted:
-                q["options"][letter] = text.strip()[: m.start()].strip()
-                q.setdefault("marker_notes", {})[letter] = m.group(1)
-
-    # And the third form: the marker's REASONING, appended in brackets.
-    #
-    #   懊惱 （由前後文「唉聲嘆氣」，後句「滿臉失落」可推論是懊惱的情緒）
-    #   減脂、增肌的關鍵(本篇在說明肌肉的生成及鍛鍊方式。)
-    #
-    # Three of the six sit on the correct option and explain why it is right; the other
-    # three explain why a distractor is wrong. Either way the student is told.
-    #
-    # The threshold is measured, not guessed. Every trailing parenthesis of 2–12
-    # characters in the corpus is a gloss belonging to the option (玉環, 環繞, 伏地挺身);
-    # every one of 13 or more is a marker's note. It moves to `explanation`, which is
-    # where a rationale belongs and where the renderer already shows it after answering.
-    for q in questions:
-        for letter, text in list(q["options"].items()):
-            m = _TRAILING_CLAUSE.search((text or "").strip())
+            m = _TRAILING_PAREN_ANY.search((text or "").strip())
             if not m:
                 continue
             head = text.strip()[: m.start()].strip()
-            if not head:                    # the whole option IS the note — leave it
+            if not head:
                 continue
             q["options"][letter] = head
             q.setdefault("marker_notes", {})[letter] = m.group(1)
 
+    # In the TEACHER edition the correct option is often overwritten by the answer
+    # rationale, so the letter has no text. Attach the rationale as that option and mark
+    # it, so a renderer can tell it from a real distractor. (Deleted by accident while
+    # consolidating the annotation rules above; its absence turned 48 questions into
+    # 「answer not among options」 and dropped comprehension from 155 lessons to 107.)
     for q in questions:
         if q["answer"] not in q["options"] and q["rationale"]:
             q["options"][q["answer"]] = q["rationale"]
@@ -389,7 +379,24 @@ def extract_resources(paras, bounds) -> dict:
     for t in _slice(paras, bounds, "知識補給站"):
         m = _VIDEO.match(t)
         if m and len(m.group(2)) > 6:
-            items.append({"index": int(m.group(1)), "title": m.group(2).strip()})
+            # 片長 and 來源 are usually their own lines and handled below, but some
+            # worksheets put all three on one, separated by ・:
+            #   「1. 戴資穎力戰三局落敗-東京奧運獲銀牌・片長：(1:50)」
+            # Taking the line as the title then shows the student
+            # 「…獲銀牌・片長：(1:50)・來源：財經向前看」 as the name of the video. 19 of
+            # the 336 titles read that way.
+            rest = m.group(2).strip()
+            head, *tail = re.split(r"\s*・\s*", rest)
+            item = {"index": int(m.group(1)), "title": head.strip()}
+            for seg in tail:
+                d = _DURATION.search(seg)
+                if d:
+                    item["duration_seconds"] = int(d.group(1)) * 60 + int(d.group(2))
+                    continue
+                src = _SOURCE.search(seg)
+                if src:
+                    item["source"] = src.group(1).strip()
+            items.append(item)
             continue
         if not items:
             continue

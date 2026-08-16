@@ -116,10 +116,13 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 運動也瘋科學-專訪科學家，什麼是運動科學？・片長：(4:57)
+    title: 運動也瘋科學-專訪科學家，什麼是運動科學？
+    duration_seconds: 297
     source: 科技魅癮
   - index: 2
-    title: 【運動科學】改善陳冠偉、賴智垣、林逸達投球機制的幕後機密・片長：(8:15)・來源：TSNA
+    title: 【運動科學】改善陳冠偉、賴智垣、林逸達投球機制的幕後機密
+    duration_seconds: 495
+    source: TSNA
   extraction_check:
     verdict: unverified
     needs_human_review: true

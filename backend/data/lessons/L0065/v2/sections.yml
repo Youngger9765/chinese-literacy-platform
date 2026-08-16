@@ -68,10 +68,13 @@ comprehension:
     answer: B
     stem: 請問下列句子內使用的詞語，哪一個使用正確？
     options:
-      A: 她眉頭緊皺，冷汗直流，看起來似乎非常「放鬆」(痛苦)
+      A: 她眉頭緊皺，冷汗直流，看起來似乎非常「放鬆」
       B: 他「全神貫注」的聆聽音樂，連門鈴響了也不知道
-      C: 他品學兼優，表現良好， 令父母親「憂心忡忡」（驕傲）
+      C: 他品學兼優，表現良好， 令父母親「憂心忡忡」
     rationale: null
+    marker_notes:
+      A: 痛苦
+      C: 驕傲
   - index: 2
     answer: B
     stem: 詹老師說皓祥的右腿「雙喜臨門」，真正想表達什麼？
@@ -86,11 +89,15 @@ comprehension:
     answer: B
     stem: 下列關於 PEACE 原則的說明，何者正確？
     options:
-      A: 保護（Protect）：把受傷部位抬高，幫助減少腫脹(抬高)
+      A: 保護（Protect）：把受傷部位抬高，幫助減少腫脹
       B: 壓迫（Compress）：由專業人員適度包紮，幫助抑制腫脹
-      C: 避免（Avoid）：為加快復原，應立即恢復原本的運動量(保護)
-      D: 抬高（Elevation）：認識恢復的進程、避免過度的壓力(教育)
+      C: 避免（Avoid）：為加快復原，應立即恢復原本的運動量
+      D: 抬高（Elevation）：認識恢復的進程、避免過度的壓力
     rationale: null
+    marker_notes:
+      A: 抬高
+      C: 保護
+      D: 教育
   - index: 4
     answer: A
     stem: 下列關於運動前暖身的說明，何者最符合課文？
