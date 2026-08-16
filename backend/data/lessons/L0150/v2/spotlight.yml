@@ -9,12 +9,12 @@ spotlight:
     bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾。
   - type: guide
     text: Ａ.讀懂圖一——臺灣新生兒及全國性別比變化圖
-  - type: free_text
-    prompt: (1)先觀察圖表類型：折線圖
+  - type: guide
+    text: 新生兒性別比 全國性別比 圖一新生兒性別比 全國性別比 圖一(1)先觀察圖表類型：折線圖
   - type: free_text
     prompt: (2)閱讀標題：
   - type: guide
-    text: 臺灣新生兒及全國性別比變化圖
+    text: (%)(%)臺灣新生兒及全國性別比變化圖
   - type: free_text
     prompt: '(3)了解橫軸、縱軸名稱與意義:'
   - type: guide
@@ -36,55 +36,55 @@ spotlight:
   - type: single
     prompt: (4)理解圖例：
     options:
-    - ––   代表  ①新生兒性別比
+    - 新生兒性別比
     - 全國性別比
-    answer: ––   代表  ①新生兒性別比
+    answer: 新生兒性別比
   - type: single
     prompt: 請選擇
     options:
-    - ·······  代表
-    - 新生兒性別比   ②全國性別比
-    answer: ·······  代表
+    - 新生兒性別比
+    - 全國性別比
+    answer: 新生兒性別比
   - type: free_text
     prompt: (5)讀懂折線圖：折線的趨勢
   - type: free_text
-    prompt: ❶先看新生兒性別比（––）和全國性別比（·······）這兩條折線歷年的趨勢（變化情形），你得到什麼印象？
+    prompt: ❶先看新生兒性別比（–●–）和全國性別比（····▲···）這兩條折線歷年的趨勢（變化情形），你得到什麼印象？
   - type: single
-    prompt: ❷兩條折線都隨著年代逐漸上升或下降？□①上升   ②下降
+    prompt: ❷兩條折線都隨著年代逐漸上升或下降？□①上升   □②下降
     options:
     - 上升
     - 下降
-    answer: 下降
+    answer: 上升
   - type: single
     prompt: 請選擇
     options:
-    - 可知：①男女性的比例愈來愈近
+    - 男女性的比例愈來愈近
     - 男女性的比例愈來愈遠
-    answer: 可知：①男女性的比例愈來愈近
+    answer: 男女性的比例愈來愈近
   - type: single
-    prompt: ❸哪一條折線下降的比較不明顯？①新生兒性別比  □②全國性別比
+    prompt: ❸哪一條折線下降的比較不明顯？□①新生兒性別比  □②全國性別比
     options:
-    - ①新生兒性別比
+    - 新生兒性別比
     - 全國性別比
-    answer: ①新生兒性別比
+    answer: 新生兒性別比
   - type: single
     prompt: 請選擇
     options:
-    - 可知：①新生兒性別比下降較不明顯
+    - 新生兒性別比下降較不明顯
     - 全國性別比下降較不明顯
-    answer: 可知：①新生兒性別比下降較不明顯
+    answer: 新生兒性別比下降較不明顯
   - type: single
-    prompt: ❹哪一條折線比較高？　①新生兒性別比   □②全國性別比
+    prompt: ❹哪一條折線比較高？　□①新生兒性別比   □②全國性別比
     options:
-    - ①新生兒性別比
+    - 新生兒性別比
     - 全國性別比
-    answer: ①新生兒性別比
+    answer: 新生兒性別比
   - type: single
     prompt: 請選擇
     options:
-    - 可知：
-    - 出生時男女性別比較平衡  ②出生時男女性別比較不平衡
-    answer: 可知：
+    - 出生時男女性別比較平衡
+    - 出生時男女性別比較不平衡
+    answer: 出生時男女性別比較平衡
   - type: guide
     text: ❺可推論(單勾選)
   - type: single
@@ -94,7 +94,7 @@ spotlight:
     - 臺灣人口呈現負成長趨勢
     answer: 臺灣父母可能仍有重男輕女觀念
   - type: guide
-    text: B.如果只看全國性別比（·······）（空格內填上升或下降）
+    text: B.如果只看全國性別比（····▲···）（空格內填上升或下降）
   - type: free_text
     prompt: ❶由右圖可知，
   - type: guide
@@ -105,8 +105,10 @@ spotlight:
     - 全國男性佔比逐漸降低
     - 全國女性佔比逐漸降低
     answer: 全國男性佔比逐漸降低
-  - type: free_text
-    prompt: １.請由圖二臺灣近百年來的人口成長變化圖研判，下列何者是(I)、(II)、(III)階段的特徵？
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 圖二 臺灣近百年來的人口成長變化圖圖二圖二 臺灣近百年來的人口成長變化圖圖二１.請由圖二臺灣近百年來的人口成長變化圖研判，下列何者是(I)、(II)、(III)階段的特徵？
   - type: free_text
     prompt: (1)閱讀標題：臺灣近百年來的人口成長變化圖。
   - type: free_text
@@ -135,12 +137,14 @@ spotlight:
     - B.第【 II   】階段，人口總數快速增長。
   - type: free_text
     prompt: 2. 112國中會考社會科練習題：
+  - type: guide
+    text: 答案：  (B)    答案：  (B)
   - type: single
-    prompt: (1)判斷圖表類型：此題為①折線圖  □②圓餅圖
+    prompt: (1)判斷圖表類型：此題為□①折線圖  □②圓餅圖
     options:
-    - (1)判斷圖表類型：此題為①折線圖
-    - ②圓餅圖
-    answer: (1)判斷圖表類型：此題為①折線圖
+    - 折線圖
+    - 圓餅圖
+    answer: 折線圖
   - type: free_text
     prompt: (2)閱讀標題：收入最高20%及最低20%的家庭可支配所得成長率變化。
   - type: free_text
@@ -150,17 +154,17 @@ spotlight:
   - type: free_text
     prompt: (4)理解圖例：(單勾選)
   - type: single
-    prompt: ❶—— 代表  ①收入最高20%家庭   □②收入最低20%家庭
-    options:
-    - ①收入最高20%家庭
-    - ②收入最低20%家庭
-    answer: ①收入最高20%家庭
-  - type: single
-    prompt: ❷…… 代表  □①收入最高20%家庭   ②收入最低20%家庭
+    prompt: ❶—— 代表  □①收入最高20%家庭   □②收入最低20%家庭
     options:
     - 收入最高20%家庭
     - 收入最低20%家庭
-    answer: 收入最低20%家庭
+    answer: 收入最高20%家庭
+  - type: single
+    prompt: ❷…… 代表  □①收入最高20%家庭   □②收入最低20%家庭
+    options:
+    - 收入最高20%家庭
+    - 收入最低20%家庭
+    answer: 收入最高20%家庭
   - type: free_text
     prompt: (5)讀出統計圖表達什麼：
   - type: single
@@ -174,28 +178,20 @@ spotlight:
     - - ''
       - 網路泡沫時期
       - 金融海嘯時期
-    - - '收入最高
-
-        20%家庭'
-      - "可支配所得成長率\n①小幅上升 \n□②大幅下降"
-      - "可支配所得成長率\n①下降較少  \n□②下降較多"
-    - - '收入最低
-
-        20%家庭'
-      - '可支配所得成長率
-
-        □①小幅上升
-
-        ②大幅下降'
-      - "可支配所得成長率\n□①下降較少 \n②下降較多"
+    - - 收入最高20%家庭
+      - 可支配所得成長率□①小幅上升 □②大幅下降
+      - 可支配所得成長率□①下降較少  □②下降較多
+    - - 收入最低20%家庭
+      - 可支配所得成長率□①小幅上升□②大幅下降
+      - 可支配所得成長率□①下降較少 □②下降較多
   - type: single
     prompt: ❷請根據圖(九)，判斷下列敘述 (單選)：
     options:
-    - A.圖中
-    - 看得出 ②看不出  經濟大幅衰退與區域發展的關係
-    - B.在網路泡沫和金融海嘯時期，兩條線（虛線和實線）的距離都較其他時間來的大，所以可判斷貧富差距  ①增大
+    - 看得出
+    - 看不出  經濟大幅衰退與區域發展的關係
+    - 增大
     - 縮小
-    answer: A.圖中
+    answer: 看得出
   - type: free_text
     prompt: ❸可推論：(對的畫，錯的畫)
   - type: guide
@@ -206,14 +202,14 @@ spotlight:
     text: （　　）(C)經濟大幅衰退造成區域間發展不均。
   - type: guide
     text: （　　）(D)經濟大幅衰退反而縮小了貧富差距。
-  - type: free_text
-    prompt: 3.自由挑戰題：111國中會考社會科練習題
+  - type: guide
+    text: 答案：  (A)   答案：  (A)   3.自由挑戰題：111國中會考社會科練習題
   - type: single
-    prompt: (1)判斷圖表類型：此題為 ①折線圖  □②圓餅圖
+    prompt: (1)判斷圖表類型：此題為 □①折線圖  □②圓餅圖
     options:
-    - (1)判斷圖表類型：此題為 ①折線圖
-    - ②圓餅圖
-    answer: (1)判斷圖表類型：此題為 ①折線圖
+    - 折線圖
+    - 圓餅圖
+    answer: 折線圖
   - type: free_text
     prompt: (2)閱讀標題：不同年份出生的婦女，在育齡期間累積的生育數。
   - type: free_text
@@ -233,12 +229,14 @@ spotlight:
   - type: single
     prompt: (5)結論：
     options:
-    - 該國未來【  ①少子化
+    - 少子化
     - 高齡化  】問題嚴重，
-    answer: 該國未來【  ①少子化
+    answer: 少子化
   - type: guide
     text: 必須【  提升生育率      】。(勾選和填寫)
   - type: guide
     text: 因此，政府可採取提高幼兒教育補助金額等政策，減輕育兒負擔。
   - type: guide
     text: 答案：（A）
+  - type: guide
+    text: 三閱讀理解三閱讀理解請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。

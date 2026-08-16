@@ -19,23 +19,17 @@ keypoints:
   - label: 主要發現
     sub_rows:
     - sub_label: 代表球隊
-      template: "波士頓塞爾提克\n(樂觀型) 紐澤西籃網 \n(悲觀型)"
+      template: 波士頓塞爾提克(樂觀型) 紐澤西籃網 (悲觀型)
       blanks: []
-    - sub_label: '1.對失敗
-
-        的看法'
+    - sub_label: 1.對失敗的看法
       template: __ __
       blanks:
       - answer: 暫時、特定、可改變
         hint: ''
       - answer: 長久、全面、無法改變
         hint: ''
-    - sub_label: "2.之後表現 \n(單選)"
-      template: '①越打越好
-
-        □②連敗不止 □①越打越好
-
-        ②連續低潮'
+    - sub_label: 2.之後表現 (單選)
+      template: □①越打越好□②連敗不止 □①越打越好□②連續低潮
       blanks: []
   - label: 研究結論
     value: __可能會影響後續表現。
@@ -48,11 +42,7 @@ keypoints:
     - answer: 詮釋
       hint: ''
   - label: 作者結論
-    value: '1.失敗並不可怕，關鍵在於你怎麼__。
-
-      2.__能讓人重新站起來，培養__。
-
-      3.下次遇到挫折，告訴自己：「__只是暫時的、特定的、可改變的。」'
+    value: 1.失敗並不可怕，關鍵在於你怎麼__。2.__能讓人重新站起來，培養__。3.下次遇到挫折，告訴自己：「__只是暫時的、特定的、可改變的。」
     blanks:
     - answer: 解釋失敗
       hint: ''

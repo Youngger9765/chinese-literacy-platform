@@ -18,9 +18,7 @@ keypoints:
       hint: ''
   - label: 種子銀行的建置
     sub_rows:
-    - sub_label: '目的
-
-        （第3段）'
+    - sub_label: 目的（第3段）
       template: 如聚光燈－（第三段）所寫。
       blanks: []
     - sub_label: __
@@ -28,9 +26,7 @@ keypoints:
       blanks:
       - answer: 保存環境與方式
         hint: ''
-    - sub_label: '安全設計
-
-        （第5段）'
+    - sub_label: 安全設計（第5段）
       template: 種子庫設計具備高度的安全性，可以防範__帶來的威脅。
       blanks:
       - answer: 地震、核武與海平面上升

@@ -14,39 +14,23 @@ keypoints:
         hint: ''
   - label: 行為模式
     sub_rows:
-    - sub_label: '①合作
-
-        □②競爭'
-      template: '□①合作
-
-        ②競爭 □①相同
-
-        ②不同'
+    - sub_label: □①合作□②競爭
+      template: □①合作□②競爭 □①相同□②不同
       blanks: []
-  - label: ①延續生命的方式□②同類競爭的方式
+  - label: □①延續生命的方式□②同類競爭的方式
     sub_rows:
     - sub_label: 合作協力幫助蟻后繁衍後代
-      template: '雄蟋蟀彼此競爭，爭取交配機會 □①相同
-
-        ②不同'
+      template: 雄蟋蟀彼此競爭，爭取交配機會 □①相同□②不同
       blanks: []
   - label: 行為背後的【目標/目的】
     sub_rows:
-    - sub_label: '①延續生命
-
-        □②爭取最多資源'
-      template: '①延續生命
-
-        □②爭取最多資源 ①相同
-
-        □②不同'
+    - sub_label: □①延續生命□②爭取最多資源
+      template: □①延續生命□②爭取最多資源 □①相同□②不同
       blanks: []
   - label: 人類強加的【道德標準】
     sub_rows:
     - sub_label: __
-      template: '懶惰、沒骨氣、天兵 □①相同
-
-        ②不同'
+      template: 懶惰、沒骨氣、天兵 □①相同□②不同
       blanks:
       - answer: 勤勞節儉
         hint: ''

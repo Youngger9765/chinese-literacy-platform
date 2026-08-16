@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 0,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "display_only",
     "primary_labels": [
       "主要服務對象",
       "緩解醫院緊張\n的氛圍",

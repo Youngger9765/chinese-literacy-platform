@@ -532,6 +532,13 @@ def cell_grid(tc):
     return span, vmerge
 
 
+def _cell_text(cell) -> str:
+    """Cell text WITH the checked box. `Cell.text` drops `w:sym` the same way
+    `Paragraph.text` does, and the keypoints table is built entirely from cells — which
+    is why fixing only the paragraph readers left 68 lessons still leaking (#2555)."""
+    return _para_text(cell, cell._tc).strip()
+
+
 def table_cells(tbl):
     rows = []
     for ri, row in enumerate(tbl.rows):
@@ -540,13 +547,13 @@ def table_cells(tbl):
         for ci, cell in enumerate(row.cells):
             tc = cell._tc
             if id(tc) in seen:
-                cells.append({"col": ci, "text": cell.text.strip(), "dup": True})
+                cells.append({"col": ci, "text": _cell_text(cell), "dup": True})
                 continue
             seen.add(id(tc))
             span, vmerge = cell_grid(tc)
             cells.append({
                 "col": ci,
-                "text": cell.text.strip(),
+                "text": _cell_text(cell),
                 "gridspan": span,
                 "vmerge": vmerge,
                 "has_blank": bool(BLANK_RE.search(cell.text)),
@@ -561,6 +568,29 @@ def img_count(el_or_doc):
     return len(blips)
 
 
+_W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+_BOX_GLYPHS = str.maketrans({"⃞": "□", "▢": "□", "☐": "□", "◻": "□"})
+
+
+def _para_text(para, child) -> str:
+    """Paragraph text WITH the checked-box glyph, which `Paragraph.text` drops.
+
+    `Paragraph.text` concatenates `w:t` only. A checked box is `<w:sym w:font="Wingdings"
+    w:char="F0FE"/>` and produces nothing, so the option the teacher checked arrives with
+    no box while its siblings keep theirs — and the odd one out is the answer (#2555).
+    Emitted as an ordinary 「□」 so every option looks the same. The same substitution is
+    in `extract_lesson_body._paragraphs`; both readers exist and both were leaking.
+    """
+    parts = []
+    for node in child.iter():
+        tag = node.tag
+        if tag == _W_NS + "t":
+            parts.append(node.text or "")
+        elif tag == _W_NS + "sym" and node.get(_W_NS + "char", "").upper() == "F0FE":
+            parts.append("□")
+    return "".join(parts).translate(_BOX_GLYPHS) if parts else para.text
+
+
 def extract_raw(path):
     d = docx.Document(path)
     out = []
@@ -568,7 +598,7 @@ def extract_raw(path):
     for child in d.element.body.iterchildren():
         if isinstance(child, CT_P):
             p = Paragraph(child, d)
-            t = p.text.strip()
+            t = _para_text(p, child).strip()
             if not t:
                 continue
             out.append({"kind": "p", "style": p.style.name, "text": t})

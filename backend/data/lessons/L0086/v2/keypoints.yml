@@ -9,16 +9,12 @@ keypoints:
     value: 兩百年前日本奈良，市集。
     blanks: []
   - label: 起因
-    value: '正太看到僧人制服惡霸，讓他想要去興福寺
-
-      __。'
+    value: 正太看到僧人制服惡霸，讓他想要去興福寺__。
     blanks:
     - answer: 學武功
       hint: ''
   - label: 經過
-    value: '師父給他__，每天讓正太抱著小豬走上走下，
-
-      持續__年，每日不間斷。'
+    value: 師父給他__，每天讓正太抱著小豬走上走下，持續__年，每日不間斷。
     blanks:
     - answer: 小豬
       hint: ''
