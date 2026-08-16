@@ -1,3 +1,67 @@
 spotlight:
   lesson: G7-L25
-  error: spotlight range not found
+  strategy_name: 科學推理策略-用線索和知識推論
+  strategy_type: unknown
+  blocks:
+  - type: guide
+    text: 一、看福爾摩斯如何推理
+  - type: guide
+    text: 推理能力可以透過訓練提升，我們先用福爾摩斯的帽子推理，看看三個要素運作的細節。
+  - type: free_text
+    prompt: ❶細心觀察線索：關於帽主的訊息，福爾摩斯觀察到：
+  - type: free_text
+    prompt: 1.固定鬆緊帶的小圓環是請【　　專人　　】製作的、襯裡用料
+  - type: guide
+    text: 【高級　　　　】，還帶有一條【精緻　　　】的絲綢箍帶。
+  - type: free_text
+    prompt: 2.鬆緊帶壞了卻沒有換，帽子的補丁處用墨水【　染黑　】。
+  - type: free_text
+    prompt: ❷連結背景知識❸進行推論
+  - type: guide
+    text: 對以上的線索，福爾摩斯連結到許多背景知識，並進行推論：
+  - type: guide
+    text: 先備知識：帽子是【　三年前　】款式；專人製作、用料高級，價格通常【　不便宜　】
+  - type: guide
+    text: 推論：帽主三年前是有錢人。
+  - type: guide
+    text: 二、小試身手：你來試試看
+  - type: guide
+    text: 接下來有兩個情境，都有點挑戰，請你利用觀察力與背景知識，試著推論看看！
+  - type: guide
+    text: （一）推論人的個性：福爾摩斯能推測出帽主「家道中落」，是比較容易理解的。但是為什麼福爾摩斯還可以進一步推論帽主的個性，說帽主「不想讓人看出來（家道中落）」、「力圖保持體面」呢？他觀察到什麼線索？連結了什麼背景知識？請推論出最可能的選項。
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 觀察線索（選１項）：
+    - 鬆緊帶壞了，也沒有換新
+    - 補丁的地方，用墨水塗黑
+    - 背景知識（選１項）：
+    - 鬆緊帶壞了反而比較好用舒服
+    - 用墨水塗黑就比較看不出補丁
+    answer:
+    - 觀察線索（選１項）：
+    - 鬆緊帶壞了，也沒有換新
+    - 補丁的地方，用墨水塗黑
+    - 背景知識（選１項）：
+    - 鬆緊帶壞了反而比較好用舒服
+    - 用墨水塗黑就比較看不出補丁
+  - type: guide
+    text: 福爾摩斯的推論：他買不起新帽子，把舊帽破損處補丁，不想讓人看見，所以塗上墨水，以保持自己的【　體面　　　　】。
+  - type: guide
+    text: （二）停電夜的真相
+  - type: guide
+    text: （在【 】中填入適當推理步驟：觀察線索、背景知識、進行推論。）
+  - type: guide
+    text: 問題：中村警官判斷伊藤沒有說實話的理由是什麼？
+  - type: guide
+    text: 【　觀察線索　　　　】：伊藤從冰箱拿冰塊。
+  - type: guide
+    text: 【　背景知識　　　　】：冰箱的冰塊停電８小時左右就會融化。
+  - type: guide
+    text: 【　進行推論　　　　】：三天前開始停電，本案發生時，冰塊早該融光了，但伊藤喝酒卻能加冰塊？
+  - type: single
+    prompt: 請選擇
+    options:
+    - 最後推論
+    - 伊藤很愛喝酒；②伊藤沒有說實話。
+    answer: 最後推論

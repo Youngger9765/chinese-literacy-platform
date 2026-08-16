@@ -19,6 +19,11 @@ spotlight:
     text: 這就是結構圖最上方的大主題喔。
   - type: guide
     text: ⑵小主題：第三段用「首先、再來、最後」依序說明三個小主題。請看下面的結構圖，找出作者分別用了哪三個小主題來說明，並填入【 】中。
+  - type: table
+    rows:
+    - - 大主題
+      - 小主題
+      - 細  節
   - type: guide
     text: ◎ 小試身手：
   - type: guide
@@ -27,3 +32,8 @@ spotlight:
     text: (範文擷取自黃金萍〈海中霸王〉）
   - type: guide
     text: 換你試試看
+  - type: table
+    rows:
+    - - 大主題
+      - 小主題
+      - 細  節

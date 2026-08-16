@@ -1,3 +1,14 @@
 spotlight:
   lesson: G4-L18
-  error: spotlight range not found
+  strategy_name: 品格力-情緒管理ＡＢＣ
+  strategy_type: emotion_management
+  blocks:
+  - type: guide
+    text: 一、請你自己檢查以下3項，確定自己是否已經學會運用「情緒管理ABC模型」來思考與判斷。
+  - type: guide
+    text: 二、如果三項都打勾，恭喜你，你已經學會在情緒來臨時，做出更冷靜、更正確的選擇。你超厲害的！
+  - type: self_check
+    items:
+    - 我能分辨A（事件）、B（想法）、C（情緒）之間的關係。
+    - 我會嘗試改變B（想法），並觀察情緒是否因此改變。
+    - 我能用改變想法的方式，避免因衝動做出錯誤決定。
