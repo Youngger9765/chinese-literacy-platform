@@ -63,6 +63,19 @@ def main() -> int:
         r = extract(docx, stored)
         counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
         if r["verdict"] not in WRITEABLE:
+            # No passage to serve. The target is still worth keeping: it belongs to the
+            # 念順順 section, not to the paragraph, and a lesson can have a rubric while
+            # its anchor is withheld — the 12 文言文 lessons time in seconds and mostly
+            # have no anchor at all. `_key_reading()` gates on `passage`, so a file with
+            # only a benchmark does not conjure a reading step that has no text.
+            if r.get("reading_benchmark") and not a.dry_run:
+                (vdir / "key_reading.yml").write_text(
+                    yaml.dump({"lesson_uid": uid, "version_id": vdir.name,
+                               "passage": None,
+                               "reading_benchmark": r["reading_benchmark"],
+                               "extraction_check": {"verdict": r["verdict"]}},
+                              allow_unicode=True, sort_keys=False, width=10**6),
+                    encoding="utf-8")
             continue
 
         doc = {
@@ -74,6 +87,11 @@ def main() -> int:
             "source": "docx-extract",
             "anchor_paragraph": r["anchor"],
             "paragraphs_used": r["paragraphs_used"],
+            # The fluency target the worksheet sets for THIS lesson, in the shape the
+            # frontend already parses. Absent on the lessons whose worksheet has no
+            # rubric; there the UI falls back to the grade default, as it did for every
+            # lesson before this.
+            **({"reading_benchmark": r["reading_benchmark"]} if r.get("reading_benchmark") else {}),
             # Recorded so the stronger of the two verdicts stays visible in the data:
             # a paragraph number the first edition's PDF pipeline also arrived at,
             # matched by content rather than by the lesson code that misbound before.
