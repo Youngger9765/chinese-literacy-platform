@@ -1164,10 +1164,22 @@ def textbox_heading_anchor(path) -> int | None:
                 # The heading itself is not emitted, so the section starts at whatever
                 # `extract_raw` emits next.
                 #
-                # LAST occurrence, not first. 文言文 worksheets print their strategy name
-                # (文言聚光燈：固定句式) in the MASTHEAD as well — the same note
-                # `extract_lesson_body` records for its own boundary search. Taking the
-                # first match anchored seven of them at block 0, the top of the document.
+                # LAST occurrence, not first — defensive, and load-bearing for nothing
+                # in the current corpus. Stated plainly because the version of this
+                # comment that shipped claimed it FIXED the seven 文言文 lessons that
+                # anchored at block 0, and it did not: taking the last match still left
+                # all seven moved. What fixed them is the call site, which passes None
+                # for classical_grammar because those lessons already build a schema
+                # through the no-start branch.
+                #
+                # Measured: first and last differ in 6 of 175 lessons. Five are the
+                # 文言文 ones the call site excludes. The sixth, L0111, never reaches
+                # this function — its phrase rules return a start of their own.
+                #
+                # Kept because 文言文 worksheets do print 文言聚光燈：固定句式 in the
+                # masthead, the same note `extract_lesson_body` records for its own
+                # boundary search, and a lesson that starts using this path while
+                # carrying a masthead hit would anchor at the top of the document.
                 last = emitted
         elif isinstance(child, CT_Tbl):
             emitted += 1
