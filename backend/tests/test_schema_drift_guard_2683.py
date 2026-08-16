@@ -121,10 +121,30 @@ try:
     assert missing_schema(engine) == [], "positive control: a fresh build is complete"
 
     with engine.begin() as c:
+        # A JSONB default written as a SQL expression …
         c.execute(sql("ALTER TABLE learning_sessions DROP COLUMN full_reading_attempts"))
+        # … and one written as a plain string LITERAL. Hand-built DDL emitted the
+        # literal unquoted — DEFAULT self_study — which Postgres reads as a column
+        # reference; the repair aborted after one column and the preview kept 500ing.
+        c.execute(sql("ALTER TABLE learning_sessions DROP COLUMN session_mode"))
         c.execute(sql("DROP TABLE reading_attempt_history"))
+    # A row must exist for the NOT NULL case to fire — an empty table accepts the
+    # column and the failure never happens. `users` is seeded here rather than
+    # `assignments` because it needs no foreign keys, and `onboarding_completed` is the
+    # same shape as the column that actually broke: NOT NULL, Python-side default only.
+    from sqlalchemy.orm import sessionmaker as _sm
+    from app.models.user import User as _U
+    _db = _sm(bind=engine)()
+    _db.add(_U(email="seed@example.com", name="S", password_hash="x"))
+    _db.commit()
+    _db.close()
+    with engine.begin() as c:
+        c.execute(sql("ALTER TABLE users DROP COLUMN onboarding_completed"))
+
     before = missing_schema(engine)
     assert any("full_reading_attempts" in p for p in before), before
+    assert any("session_mode" in p for p in before), before
+    assert any("onboarding_completed" in p for p in before), before
     assert any("reading_attempt_history" in p for p in before), before
 
     repair(engine)
@@ -148,6 +168,18 @@ try:
     with engine.begin() as c:
         got = c.execute(sql("SELECT full_reading_attempts FROM learning_sessions")).scalar()
     assert got == [], f"default did not apply: {got!r}"
+    with engine.begin() as c:
+        mode = c.execute(sql("SELECT session_mode FROM learning_sessions")).scalar()
+    assert mode == "self_study", f"string default did not apply: {mode!r}"
+
+    # The NOT NULL-without-default column comes back nullable, and inserting still works
+    # — which is the whole point: a column that exists beats a service that 500s.
+    cols = {c["name"]: c for c in inspect(engine).get_columns("users")}
+    assert "onboarding_completed" in cols, "the NOT NULL column was not restored"
+    db2 = S()
+    db2.add(User(email="after@example.com", name="A", password_hash="x"))
+    db2.commit()
+    db2.close()
     print("REPAIR-OK")
 finally:
     engine.dispose()

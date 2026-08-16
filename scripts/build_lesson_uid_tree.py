@@ -49,8 +49,40 @@ def load_registry() -> list[dict]:
     return reg["lessons"]
 
 
-def build_one(entry: dict, docx: Path, version: str, python: str) -> dict:
-    """Run the pipeline for one lesson and re-home its output under the uid."""
+#: What this pipeline owns in a lesson's version directory. Everything else there —
+#: body.yml, sections.yml, metadata.yml, key_reading.yml, assets/thumbnail.webp — is
+#: built by a different extractor from the same DOCX and must survive a re-run here.
+MODULES = ("spotlight", "keypoints", "assets", "lesson")
+
+
+def _clear_module(dest: Path, module: str) -> None:
+    """Remove only what `module` owns, so a re-run repairs one thing at a time."""
+    if module == "assets":
+        # assets/ is shared: the figures come from this pipeline, the cover
+        # (thumbnail.webp) from reuse_lesson_thumbnails.py.
+        if (dest / "assets").is_dir():
+            for f in (dest / "assets").iterdir():
+                if f.name == "thumbnail.webp":
+                    continue
+                shutil.rmtree(f) if f.is_dir() else f.unlink()
+    else:
+        (dest / f"{module}.yml").unlink(missing_ok=True)
+
+
+def build_one(entry: dict, docx: Path, version: str, python: str,
+              modules: tuple[str, ...] = MODULES) -> dict:
+    """Run the pipeline for one lesson and re-home its output under the uid.
+
+    `modules` selects what gets rebuilt. Anything not selected is left exactly as it
+    is — including files this pipeline does not produce at all.
+
+    This used to `rmtree(dest)` before writing. That was safe when spotlight, keypoints
+    and assets were the only things in the directory; they are not any more, and a
+    re-run silently deleted body.yml, sections.yml, metadata.yml and key_reading.yml.
+    Reproduced on a copy of L0001: eight files in, an empty directory out. The tree
+    still looked populated afterwards because the pipeline immediately wrote three of
+    them back.
+    """
     uid = entry["lesson_uid"]
     code = entry["catalog_slot"] or uid
     dest = LESSONS_ROOT / uid / version
@@ -74,34 +106,35 @@ def build_one(entry: dict, docx: Path, version: str, python: str) -> dict:
         kp = next(tmp_path.glob("*.keypoints.yml"), None)
         assets_src = next((p for p in (tmp_path / "assets").glob("*") if p.is_dir()), None)
 
-        if dest.exists():
-            shutil.rmtree(dest)
         dest.mkdir(parents=True, exist_ok=True)
+        for m in modules:
+            _clear_module(dest, m)
 
-        if sp:
+        if sp and "spotlight" in modules:
             shutil.copy2(sp, dest / "spotlight.yml")
             result["spotlight"] = True
-        if kp:
+        if kp and "keypoints" in modules:
             shutil.copy2(kp, dest / "keypoints.yml")
             result["keypoints"] = True
-        if assets_src:
-            shutil.copytree(assets_src, dest / "assets")
+        if assets_src and "assets" in modules:
+            shutil.copytree(assets_src, dest / "assets", dirs_exist_ok=True)
             result["assets"] = len(list((dest / "assets").iterdir()))
 
         # identity file — the only place uid/version/slot are asserted together
-        (dest / "lesson.yml").write_text(
-            yaml.dump({
-                "lesson_uid": uid,
-                "version_id": version,
-                "title": entry["title"],
-                "catalog_slot": entry["catalog_slot"],
-                "source": {
-                    "drive_file_id": entry["drive_file_id"],
-                    "drive_path": entry["drive_path"],
-                },
-            }, allow_unicode=True, sort_keys=False),
-            encoding="utf-8",
-        )
+        if "lesson" in modules:
+            (dest / "lesson.yml").write_text(
+                yaml.dump({
+                    "lesson_uid": uid,
+                    "version_id": version,
+                    "title": entry["title"],
+                    "catalog_slot": entry["catalog_slot"],
+                    "source": {
+                        "drive_file_id": entry["drive_file_id"],
+                        "drive_path": entry["drive_path"],
+                    },
+                }, allow_unicode=True, sort_keys=False),
+                encoding="utf-8",
+            )
         result["ok"] = True
     return result
 
@@ -114,6 +147,9 @@ def main() -> int:
     ap.add_argument("--uid", action="append", help="只跑指定 uid，可重複")
     ap.add_argument("--version", default=DEFAULT_VERSION)
     ap.add_argument("--python", default=sys.executable)
+    ap.add_argument("--module", action="append", choices=MODULES,
+                    help="只重建指定 module，可重複（預設全部）。"
+                         "其餘檔案（body / sections / metadata / key_reading / 封面）永不觸碰")
     a = ap.parse_args()
 
     src = Path(a.source_root)
@@ -131,7 +167,7 @@ def main() -> int:
             missing += 1
             rows.append((e["lesson_uid"], e["catalog_slot"], "MISSING_DOCX", ""))
             continue
-        r = build_one(e, docx, a.version, a.python)
+        r = build_one(e, docx, a.version, a.python, tuple(a.module) if a.module else MODULES)
         if r["ok"]:
             ok += 1
             rows.append((r["lesson_uid"], r["catalog_slot"], "ok",
