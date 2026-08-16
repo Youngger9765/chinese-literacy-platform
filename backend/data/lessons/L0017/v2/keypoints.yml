@@ -8,7 +8,7 @@ keypoints:
   - label: 二
     sub_rows:
     - sub_label: 他主動詢問要幫我交__
-      template: "(勾選，可複選)\n①茫然 ②害羞 \n③緊張"
+      template: (勾選，可複選)□①茫然 □②害羞 □③緊張
       blanks:
       - answer: 聯絡簿
         hint: ''
@@ -31,13 +31,11 @@ keypoints:
   - label: 五
     sub_rows:
     - sub_label: 幫我撿掉在地上的筆、小組討論時叫我的__
-      template: "(勾選，可複選)\n①溫暖 ②害羞 \n③興奮"
+      template: (勾選，可複選)□①溫暖 □②害羞 □③興奮
       blanks:
       - answer: 名字
         hint: ''
   - label: 統整
-    value: '結合第一段與最後一段，作者寫下這篇小日記，
-
-      是想抒發（ ①不知所措  □②深情思念 ）的心情。'
+    value: 結合第一段與最後一段，作者寫下這篇小日記，是想抒發（ □①不知所措  □②深情思念 ）的心情。
     blanks: []
   title: 感情小日記1──是友情還是愛情？

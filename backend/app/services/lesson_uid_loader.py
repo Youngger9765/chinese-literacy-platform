@@ -127,6 +127,22 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
             if mod == "spotlight":
                 _drop_assetless_table_figures(data)
             lesson[mod] = data
+    # 念順順 carries two things that fail independently: the passage a student reads
+    # aloud, and the characters-per-minute target they read it against. #2722 gave the
+    # eleven lessons whose passage is withheld a file holding only the target — correct
+    # for the index, which gates on `passage`, and a 500 for the detail route, which
+    # reads THIS dict and hands `key_reading` straight to a schema whose `passage` is a
+    # required str.
+    #
+    # Split here rather than in either consumer, because both read this function and
+    # only one of them was applying the gate.
+    kr = lesson.get("key_reading")
+    if isinstance(kr, dict):
+        if kr.get("reading_benchmark") and not lesson.get("reading_benchmark"):
+            lesson["reading_benchmark"] = kr["reading_benchmark"]
+        if not kr.get("passage"):
+            lesson.pop("key_reading")
+
     assets = vdir / "assets"
     lesson["assets"] = (
         sorted(p.name for p in assets.iterdir() if p.is_file()) if assets.is_dir() else []

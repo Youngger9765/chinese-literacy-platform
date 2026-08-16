@@ -13,9 +13,7 @@ keypoints:
       hint: ''
   - label: 背景
     hint: 居住地：【　 崑山　    】
-    value: '家世背景：
-
-      __'
+    value: 家世背景：__
     blanks:
     - answer: 世族/世代做官的家族
       hint: ''

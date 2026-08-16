@@ -1,3 +1,100 @@
 spotlight:
   lesson: 文-L10
-  error: spotlight range not found
+  strategy_name: 固定句式：以--為.
+  strategy_type: writing_technique
+  blocks:
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 三文章重點表 三文章重點表 我們練習過很多次「問題、解決、結果」的故事結構，相信你現在已經是拆解故事的高手了！
+    - 這次我們換個方式，把這篇課文當成一部微電影。在電影開拍前，我們要先佈置好「故事舞台」，然後跟著鮑子都一起經歷高潮迭起的三幕劇。
+    - 準備好了嗎？讓我們一起看看這場發生在荒野的意外，鮑子都如何化解危機，寫下自己的傳奇吧！
+  - type: fill_table
+  - type: guide
+    text: 四文言文聚光燈固定句式：以……為……四文言文聚光燈固定句式：以……為……
+  - type: guide
+    text: 一、溫故：複習「主語判斷」
+  - type: free_text
+    prompt: 1.下面的文字取自課文，請根據提問判讀主語：
+  - type: guide
+    text: (  A  )(1)本文第二段末「既及，以子都󠇡為盜，固問兒屍所在。」這句話主語是誰？
+  - type: guide
+    text: A.乘驄馬者     B.書生     C.鮑子都󠇡     D.舉家
+  - type: guide
+    text: (  C  )(2)本文第三段末「由是聲名大振。」這句話主語是誰？
+  - type: guide
+    text: A.乘驄馬者     B.書生     C.鮑子都󠇡     D.舉家
+  - type: guide
+    text: 二、知新：本課新策略「固定句式：以……為」
+  - type: guide
+    text: 課文中，鮑子都義務幫書生安葬，卻被人「以子都為盜」，差點要讓人懷疑是不是沒天理了呢！
+  - type: guide
+    text: 話說回來，類似「以子都為盜」這樣的句子，我們現在還在用哦！例如「以中央伍為準，向右看齊！」
+  - type: guide
+    text: 是不是很熟悉呢？其實是文言文中很常見的表達方式，又因為這種句子的結構有一定的模式，所以我們稱它——固定句式。
+  - type: guide
+    text: 現在，我們先認識第一式：
+  - type: guide
+    text: 句式：「以A為B」，意思：「把A當作是B」
+  - type: guide
+    text: 這個句式在文言文中不但常見，意思也很清楚，像是剛才的例句「以子都為盜」，意思就是「把子都當作是盜賊」；
+  - type: guide
+    text: 這種結構不只出現在人物評價上，也常用在觀念判斷、價值選擇中，是很重要的表達方式。
+  - type: guide
+    text: 接下來，我們就透過例句、分析、練習，一步一步掌握這個句型的用法吧！
+  - type: guide
+    text: 輕練習1 依原文找出意思對的句子；正確的請打勾。（單選）
+  - type: guide
+    text: 例題：以子都為盜。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 把子都當作是盜賊
+    - 把盜賊當作是子都
+    answer: 把子都當作是盜賊
+  - type: single
+    prompt: 1.以和為貴。
+    options:
+    - 把貴重的當作是和諧
+    - 把和諧當作是可貴的
+    answer: 把貴重的當作是和諧
+  - type: single
+    prompt: 2.以叢草為林。
+    options:
+    - 把樹林當作是草叢
+    - 把草叢當作是樹林
+    answer: 把樹林當作是草叢
+  - type: single
+    prompt: 3.民以食為天。
+    options:
+    - 人民把糧食當作是生存的根本
+    - 人民把上天當作是食物來索求
+    answer: 人民把糧食當作是生存的根本
+  - type: single
+    prompt: 4.以天下興亡為己任。
+    options:
+    - 把天下的興亡當作自己的責任
+    - 把天下的興亡任由自己處理與決定
+    answer: 把天下的興亡當作自己的責任
+  - type: guide
+    text: 輕練習2 以下各題都是固定句式「……以……為……」的句子。請在翻譯的空格處填入適當的語詞，讓意思完整。
+  - type: guide
+    text: 句子：以土礫凸者為丘。
+  - type: guide
+    text: 翻譯：   把   凸起的小石頭   當作是    山丘
+  - type: guide
+    text: 句子：以退為進。 (退，退讓／進，進攻)
+  - type: guide
+    text: 翻譯：把   退讓   當作是   進攻   的手段
+  - type: guide
+    text: 句子：以史為鏡。
+  - type: guide
+    text: 翻譯：把  歷史  當作是  鏡子  來對照。提醒後人不要犯同樣的錯
+  - type: guide
+    text: 句子：以鄰為壑。 (鄰，鄰國／壑，山溝)
+  - type: guide
+    text: 翻譯：把  鄰國  當作是  山溝  來洩洪。比喻傷害別人讓自己得到好處
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。✓✓五閱讀理解五閱讀理解

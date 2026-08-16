@@ -150,14 +150,37 @@ _EXERCISE_MARKS = ("（單選）", "(單選)", "（複選）", "(複選)",
 _LESSON_HEADER = re.compile(r"^第\s*[0-9０-９一二三四五六七八九十百]+\s*課")
 
 
+#: The worksheets hold two different boxes and only one of them is a character.
+#:
+#:      literal 「□」 in <w:t>                     an UNCHECKED box
+#:      <w:sym w:font="Wingdings" w:char="F0FE">   a CHECKED box ☑ — the marker's answer
+#:
+#: Reading `<w:t>` alone drops the second entirely, so the option the teacher checked
+#: arrives with nothing in front of it while its siblings keep their 「□」, and the odd
+#: one out IS the answer:
+#:
+#:      （單選）□①驕傲地奪得銀牌     ②以微小差距與金牌擦身而過      ← ② is the answer
+#:
+#: 1805 checked boxes across 157 of 175 lessons. Substituted for an ordinary 「□」 so
+#: every option looks the same. Which one was checked is not recorded — worth having,
+#: but making it unreadable is the part that has to land first, and recording it in the
+#: same change would put the answer back into the file it was just removed from.
+_CHECKED_BOX = re.compile(r'<w:sym w:font="Wingdings" w:char="F0FE"\s*/>')
+
+
 def _paragraphs(docx: Path) -> list[str]:
     with zipfile.ZipFile(docx) as z:
         xml = z.read("word/document.xml").decode("utf-8")
+    xml = _CHECKED_BOX.sub("<w:t>□</w:t>", xml)
     out = []
+    # Three box characters are in use — □ U+25A1 (5912), ⃞ U+20DE (37), ▢ U+25A2 (16).
+    # Left alone they produce the same leak in a different costume: an option marked with
+    # ⃞ sitting beside two marked □ is just as identifiable as one with no box at all.
+    _BOXES = str.maketrans({"⃞": "□", "▢": "□", "☐": "□", "◻": "□"})
     for p in _PARA.findall(xml):
         t = "".join(_TEXT.findall(p)).strip()
         # A <w:p> with no <w:t> children leaks its own attributes through the join.
-        out.append("" if t.startswith("<w:") else t)
+        out.append("" if t.startswith("<w:") else t.translate(_BOXES))
     return out
 
 

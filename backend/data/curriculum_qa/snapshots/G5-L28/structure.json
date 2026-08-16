@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
-    "fill_blank_count": 2,
+    "checkbox_count": 4,
+    "fill_blank_count": 0,
     "layout": "worksheet_table",
-    "mode": "mixed",
+    "mode": "checkbox",
     "primary_labels": [
       "起因與困境",
       "觀念轉變的契機",

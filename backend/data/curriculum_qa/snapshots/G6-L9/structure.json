@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 3,
+    "checkbox_count": 1,
+    "fill_blank_count": 2,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "陳醫師想法",
       "請神明會診",

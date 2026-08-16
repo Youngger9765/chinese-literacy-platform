@@ -1,3 +1,27 @@
 spotlight:
   lesson: G4-L18
-  error: spotlight range not found
+  strategy_name: 品格力-情緒管理ＡＢＣ
+  strategy_type: emotion_management
+  blocks:
+  - type: free_text
+    prompt: (5)他裹緊大衣、縮著脖子，仍無法抵擋(  Ｄ  )的寒風。
+  - type: free_text
+    prompt: (6)癌症檢驗的結果明天才出來，他一直 (  Ｇ  )，擔心有不好的結果。
+  - type: free_text
+    prompt: (7)突發狀況發生，她的思緒變得(  Ａ  )，一時不知道該怎麼辦。
+  - type: guide
+    text: 五文章重點表 五文章重點表 (8)努力了這麼久，當聽到得獎的名字是自己時，她高興得(  I  )。
+  - type: fill_table
+  - type: guide
+    text: 六品格聚光燈情緒管理ＡＢＣ六品格聚光燈情緒管理ＡＢＣ
+  - type: guide
+    text: 一、請你自己檢查以下3項，確定自己是否已經學會運用「情緒管理ABC模型」來思考與判斷。
+  - type: guide
+    text: 二、如果三項都打勾，恭喜你，你已經學會在情緒來臨時，做出更冷靜、更正確的選擇。你超厲害的！
+  - type: guide
+    text: (「奄奄一息」意思是生命垂危、快要死掉了，多用在重病、重傷或極度虛弱的情境中，語氣非常強烈。)(「奄奄一息」意思是生命垂危、快要死掉了，多用在重病、重傷或極度虛弱的情境中，語氣非常強烈。)七閱讀理解七閱讀理解請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  - type: self_check
+    items:
+    - 我能分辨A（事件）、B（想法）、C（情緒）之間的關係。
+    - 我會嘗試改變B（想法），並觀察情緒是否因此改變。
+    - 我能用改變想法的方式，避免因衝動做出錯誤決定。
