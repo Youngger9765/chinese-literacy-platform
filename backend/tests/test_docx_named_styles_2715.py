@@ -85,3 +85,43 @@ def test_the_plain_text_reader_still_works_unchanged():
     assert len(plain) == len(rich), f"{len(plain)} paragraphs vs {len(rich)}"
     mismatched = [(i, a, b) for i, (a, b) in enumerate(zip(plain, rich)) if a and a != b]
     assert mismatched[:3] == [], f"the two readers disagree: {mismatched[:3]}"
+
+
+def test_no_body_paragraph_carries_a_teacher_answer():
+    """A cheap boundary check that only the named styles make possible.
+
+    A paragraph of the lesson text does not contain the marker's answers. Where one
+    does, the paragraph is not body — it is exercise material that got past the section
+    boundary. Found this way:
+
+        L0137  (6)眾說紛紜:各式各樣的說法…        a vocabulary definition row
+        L0144  (A)3.本文第6至8段寫到…             a comprehension question with its answer
+
+    Both are boundary failures the existing length-and-prefix rules did not catch, and
+    neither is visible without reading the run styles.
+    """
+    import sys as _s
+    from pathlib import Path as _P
+
+    from app.services.lesson_loader import get_all_lessons
+    from extract_lesson_body import normalise, read_runs
+
+    src = _P("/tmp/docx-src")
+    by_uid = {l["lesson_uid"]: l for l in get_all_lessons()}
+    leaked = []
+    for docx in sorted(src.glob("*.docx")):
+        lesson = by_uid.get(docx.stem)
+        if not lesson or not lesson.get("paragraphs"):
+            continue
+        body = {normalise(p) for p in lesson["paragraphs"]}
+        for para in read_runs(docx):
+            joined = normalise("".join(r["text"] for r in para))
+            if joined not in body:
+                continue
+            if any((r.get("style_name") or "").startswith("教材：教師解答")
+                   and r["text"].strip() for r in para):
+                leaked.append((docx.stem, joined[:32]))
+    assert leaked == [], (
+        f"{len(leaked)} body paragraphs contain the marker's answers — they are exercise "
+        f"lines that crossed the section boundary: {leaked[:4]}"
+    )
