@@ -9,9 +9,7 @@ spotlight:
       判斷：\n作者根據文章中的事實，結合自己的知識和經驗所做的推測。例如，作者從黑夫「請母親寄衣物或錢」這個事實，推論秦國士兵沒有兵餉，國家只提供武器和口糧，這就是「作者判斷」。\n\
       接下來讓我們來練習分辨「事實」與「判斷」吧。"
   - type: free_text
-    prompt: 1.基礎題：
-  - type: guide
-    text: 根據這篇文章，以下的文句是事實的請寫上F，是作者判斷的請寫上J。
+    prompt: 1.基礎題：根據這篇文章，以下的文句是事實的請寫上F，是作者判斷的請寫上J。
   - type: guide
     text: ★事實的英文為Fact，判斷的英文為Judgment
   - type: free_text
@@ -25,29 +23,23 @@ spotlight:
   - type: free_text
     prompt: (5)【 J 】(第十三段)大哥失去兩個弟弟後，深感悲傷和歉疚。
   - type: free_text
-    prompt: (6)【 F 】大哥的墓中有書寫用品。
+    prompt: (6)【 F 】大哥的墓中有書寫用品
   - type: free_text
     prompt: (7)【 J 】大哥能讀書識字，他們不會是社會最底層的家庭。
   - type: free_text
-    prompt: 2.進階題：
-  - type: guide
-    text: 連連看，將「文章中的事實」與「作者判斷」配對。
+    prompt: 2.進階題：連連看，將「文章中的事實」與「作者判斷」配對。
   - type: figure
     referent: table
     asset: null
     bind_paragraph: null
   - type: free_text
-    prompt: 3.挑戰題：
-  - type: passage
-    source: unknown
-    paragraphs:
-    - 文中作者認為秦國將戰爭的成本轉嫁給底層民眾。下列哪些「事實」能支持這個判斷？能支持的畫O，不能的畫X。
+    prompt: 3.挑戰題：文中作者認為秦國將戰爭的成本轉嫁給底層民眾。下列哪些「事實」能支持這個判斷？能支持的畫O，不能的畫X。
   - type: guide
     text: （1）【 O 】黑夫在信中請母親寄夏衣或錢。
   - type: guide
     text: （2）【 O 】三兄弟中，有兩個剛成年兒子在前線征戰。
   - type: guide
-    text: （3）【 X 】根據出土文物，秦國一件夏衣價值五十五錢。
+    text: （3）【 X 】根據出土文物，秦國一件夏衣價值五十五錢
   - type: guide
     text: （4）【 O 】兄弟倆沒有收到錢物，只能借錢過活。
   - type: guide

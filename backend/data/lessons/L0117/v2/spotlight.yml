@@ -101,13 +101,13 @@ spotlight:
   - type: guide
     text: 二、挑戰題：推論因果關係-再以第五段為例
   - type: guide
-    text: 1.本課第五段也有一組因果鏈，請你用4個步驟，畫出第五段的因果鏈。
+    text: 1.本課第五段也有一組因果鏈，請你用4步驟，畫出第五段的因果鏈。
   - type: passage
     source: unknown
     paragraphs:
     - 氣候變遷 + 農民貧困  砍伐森林  破壞生態　  病蟲害增加 可可產量不穩     農民更貧困
   - type: free_text
-    prompt: 2.這條因果鏈告訴我們：環境變遷和農民貧困問題交織在一起，最終讓農民更貧困。
+    prompt: 2.這條因果鏈告訴我們：環境變遷和農民貧困問題交織在一起，最終讓農民更貧困
   - type: guide
     text: 並用箭頭連接因果關係。
   - type: guide

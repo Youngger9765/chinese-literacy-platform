@@ -6,7 +6,7 @@ spotlight:
   - type: figure
     referent: image
     asset: fig1.png
-    bind_paragraph: 目標策略：摘要策略──
+    bind_paragraph: 目標策略：摘要策略
   - type: guide
     text: 以本課第三段為例：看文章怎麼變成結構圖
   - type: single
@@ -22,7 +22,7 @@ spotlight:
   - type: guide
     text: ◎ 小試身手：
   - type: guide
-    text: 剛才我們試著用本課內容整理結構圖。現在請讀下面短文，也用「大主題—小主題—細節」的方法，把重點填進結構圖。
+    text: 剛才我們試了本課練習整理結構圖。現在請讀下面短文，也用「大主題—小主題—細節」的方法，把重點填進結構圖。
   - type: guide
     text: (範文擷取自黃金萍〈海中霸王〉）
   - type: guide

@@ -60,7 +60,7 @@ spotlight:
   - type: guide
     text: 三、從上述作者觀點轉變歷程，本文最想提醒讀者的是什麼?(單選)
   - type: guide
-    text: 人不是被早期經驗決定的；我們可以選擇怎麼詮釋自己的童年
+    text: 人不是早期經驗決定的；我們可以選擇怎麼詮釋自己的童年
   - type: multi
     prompt: 請選擇
     options:

@@ -55,7 +55,7 @@ spotlight:
   - type: free_text
     prompt: 4.你發現了嗎？
   - type: passage
-    source: unknown
+    source: lesson_text
     paragraphs:
     - 問自己「這段主要在說什麼？」可以幫你確認：我是不是只抓到一個詞或一個細節？還是已經抓到這段比較完整的重點？
   - type: guide

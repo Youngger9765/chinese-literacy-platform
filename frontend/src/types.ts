@@ -133,6 +133,19 @@ export interface SpotlightFigureBlock {
   bind_paragraph?: string | number | null;
 }
 
+/** 聚光燈裡的表格練習。抽取器原本把無圖表格標成 figure(referent=table)，
+ *  而 loader 會丟棄沒有圖檔的 figure —— 172 個表格、88 課的練習內容因此消失。 */
+export interface SpotlightTableBlock {
+  type: 'table';
+  rows: string[][];
+}
+
+/** 排序題：把句子依時間／因果順序編號。`correct_order` 是老師的答案，不可顯示。 */
+export interface SpotlightOrderingBlock {
+  type: 'ordering';
+  items: { text: string; correct_order: number | null }[];
+}
+
 export interface SpotlightSelfCheckBlock {
   type: 'self_check';
   items: string[];
@@ -156,6 +169,8 @@ export type SpotlightBlock =
   | SpotlightMultiBlock
   | SpotlightFreeTextBlock
   | SpotlightFigureBlock
+  | SpotlightOrderingBlock
+  | SpotlightTableBlock
   | SpotlightSelfCheckBlock
   | SpotlightFillTableBlock
   | SpotlightUnknownBlock;

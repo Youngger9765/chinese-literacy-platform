@@ -1,21 +1,11 @@
 lesson_uid: L0121
 version_id: v2
-passage: '你會不會感到奇怪，為什麼「Me Too」兩個字要合併為一個詞：MeToo，前面還加上「#」符號？
-
-  這是因為在社群網站上，「#」代表「標籤」，用來標記特定主題，加了「#」的詞彙，就會變成可點擊的鏈結，其他人只要點擊該標籤，就能看到所有包含相同標籤的內容，達到串連的效果，而不含空格的單詞「MeToo」也更容易被搜尋。
-
-  總之，「#MeToo」的格式一方面是為了技術上的方便，另一方面也是為了在社群媒體上建立一個強大且一致的運動標識󠇡。
-
-  不是你的錯，可以安心求助
-
-  「勇敢站出來」並不是一件容易的事。
-
-  性犯罪常發生在隱密的空間，這讓受害者難以舉證。有些受害者也擔心一旦說出來，自己會成為大眾茶餘飯後的八卦話題，甚至被指責「為什麼不早點說」、「為什麼不反抗」、「你自己也有問題吧」……這些都會造成受害者的二度傷害。'
+passage: 你會不會感到奇怪，為什麼「Me Too」兩個字要合併為一個詞：MeToo，前面還加上「#」符號？
 start_text: 你會不會感到奇怪，為什麼「Me Too」兩個字要
-extent_chars: 352
+extent_chars: 48
 source: docx-extract
 anchor_paragraph: 7
-paragraphs_used: 6
+paragraphs_used: 1
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

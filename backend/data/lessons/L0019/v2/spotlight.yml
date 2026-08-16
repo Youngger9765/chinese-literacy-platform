@@ -36,7 +36,7 @@ spotlight:
   - type: free_text
     prompt: (5)【 無論   】謊言聽起來多麼動聽，最終【 都    】會被人拆穿。
   - type: free_text
-    prompt: 4.讀和課文有關的句子：判斷「條件」和「結果」
+    prompt: 4. 讀和課文有關的句子：判斷「條件」和「結果」
   - type: free_text
     prompt: (1)請圈出「條件」：
   - type: guide

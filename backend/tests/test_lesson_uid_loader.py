@@ -540,18 +540,34 @@ def test_key_reading_passage_comes_from_this_lessons_own_body():
     assert strangers == [], f"passage is not from this lesson: {strangers[:3]}"
 
 
-def test_key_reading_is_long_enough_for_the_timed_minute():
-    """The worksheet times a one-minute read. A single paragraph runs 145 characters
-    at the median — the student would run out before the timer, which is why the
-    passage accumulates from the anchor instead of stopping at one paragraph."""
+def test_key_reading_is_the_marked_paragraph_not_an_inferred_span():
+    """Superseded `test_key_reading_is_long_enough_for_the_timed_minute`, which asserted
+    every passage ran at least 120 characters.
+
+    That test encoded the mistake rather than guarding against it. I had reasoned that a
+    single paragraph — 145 characters at the median — was too short for the timed minute
+    and made the extractor accumulate to 300. 靖杭 found the result on staging: the
+    ranges were 「比教授畫的範圍多出不少」, median 370 against the professor's 153, with 60
+    of 67 comparable lessons more than half again too long.
+
+    The timer is about how long the student reads. The passage is what the professor
+    marked. The first edition said so outright — 「新規則：只取 ☞ 那一段」 — and the lock
+    I wrote made the override permanent.
+
+    The professor's own ranges run 19 to 412 characters. A length floor is exactly the
+    wrong shape of check here; what matters is that the passage IS one of the lesson's
+    paragraphs.
+    """
     from app.services.lesson_loader import get_all_lessons
 
-    short = [
-        (l["lesson_uid"], len(l["key_reading"]["passage"]))
-        for l in get_all_lessons()
-        if l.get("key_reading") and len(l["key_reading"]["passage"]) < 120
-    ]
-    assert short == [], f"too short to read for a minute: {short[:5]}"
+    wrong = []
+    for l in get_all_lessons():
+        kr = l.get("key_reading")
+        if not kr:
+            continue
+        if kr["passage"].strip() not in [p.strip() for p in (l.get("paragraphs") or [])]:
+            wrong.append((l["lesson_uid"], len(kr["passage"])))
+    assert wrong == [], f"passage is not one of the lesson's paragraphs: {wrong[:4]}"
 
 
 def test_key_reading_is_absent_rather_than_guessed():

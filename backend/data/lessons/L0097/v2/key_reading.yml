@@ -1,19 +1,11 @@
 lesson_uid: L0097
 version_id: v2
-passage: '打造「綠色賽事」，可以從落實「環保3R」做起：
-
-  1.Reduce（減少使用）：減少不必要的物品與資源使用，降低垃圾與碳足跡。
-
-  2.Reuse（重複使用）：讓器材、裝備或容器多次使用。
-
-  3.Recycle（回收再利用）：將使用過的材料回收處理，再製成新的材料或產品。
-
-  舉例來說，許多賽事採用網路報名，不再印製賽事手冊，連完賽證書都能線上下載，減少紙張的使用；比賽紀念衫也改為自由選購，參賽者有需要再買，避免無謂浪費，這就是Reduce（減少使用）。再者，布置改用可保存、下次比賽還可以再用的器材或物品；比賽過程提供可重複使用的環保杯，讓參賽者「一杯用到底、杯杯不落地」，就是Reuse（重複使用）的實踐。此外，回收材料也開始在各種運動賽事中大放異彩。臺北馬拉松選用花蓮再生石材，新竹城市馬拉松以回收玻璃製作獎盃；世界盃足球賽中，也有許多國家球隊穿著以回收寶特瓶製成的環保球衣。這些都是Recycle（回收再利用）的展現。'
+passage: 打造「綠色賽事」，可以從落實「環保3R」做起：
 start_text: 打造「綠色賽事」，可以從落實「環保3R」做起：
-extent_chars: 409
+extent_chars: 23
 source: docx-extract
 anchor_paragraph: 5
-paragraphs_used: 5
+paragraphs_used: 1
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

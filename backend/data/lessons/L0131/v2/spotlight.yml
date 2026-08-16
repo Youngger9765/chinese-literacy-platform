@@ -4,9 +4,7 @@ spotlight:
   strategy_type: express_opinion
   blocks:
   - type: guide
-    text: ◎小試身手：
-  - type: guide
-    text: 請根據論點和支持理由，判斷下列例子是否適合作為論據，並在□打勾。
+    text: ◎ 小試身手：請根據論點和支持理由，判斷下列例子是否適合作為論據，並在□打勾。
   - type: guide
     text: 練習一
   - type: figure

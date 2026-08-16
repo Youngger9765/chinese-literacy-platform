@@ -161,6 +161,70 @@ def _paragraphs(docx: Path) -> list[str]:
     return out
 
 
+#: A run: `<w:r>` with its properties. The text-only reader below takes the `<w:t>` and
+#: discards everything wrapping it, which is where the worksheet keeps its meaning.
+_RUN = re.compile(r"<w:r[ >].*?</w:r>", re.S)
+_RUN_STYLE = re.compile(r'<w:rStyle w:val="([^"]+)"')
+_SYM = re.compile(r'<w:sym w:font="([^"]*)" w:char="([^"]*)"')
+_STYLE_DEF = re.compile(r'<w:style [^>]*w:styleId="([^"]+)"[^>]*>(.*?)</w:style>', re.S)
+_STYLE_NAME = re.compile(r'<w:name w:val="([^"]+)"')
+
+
+def style_names(docx: Path) -> dict[str, str]:
+    """styleId → the human name the author gave it.
+
+    The names carry the teaching semantics: 「教材：教師解答」 marks the marker's answers
+    in 169 of 175 lessons, 「教材：課文內文」 the body, 「教材：(1)＿：填空題目」 the
+    fill-in-blanks. A styleId on its own (`af`, `a3`) says nothing.
+    """
+    with zipfile.ZipFile(docx) as z:
+        if "word/styles.xml" not in z.namelist():
+            return {}
+        xml = z.read("word/styles.xml").decode("utf-8")
+    out = {}
+    for sid, body in _STYLE_DEF.findall(xml):
+        m = _STYLE_NAME.search(body)
+        if m:
+            out[sid] = m.group(1)
+    return out
+
+
+def read_runs(docx: Path) -> list[list[dict]]:
+    """Paragraphs as lists of runs, each carrying its text, style name and symbol.
+
+    Beside `_paragraphs()`, not instead of it: every other extractor depends on that
+    one's output, so it keeps returning exactly what it returned before. Joining the
+    text of these runs reproduces it — asserted in the tests.
+
+    A run's `sym` is a symbol-font character, which `<w:t>` does not contain at all.
+    Wingdings F0FE is ☑ and appears 1806 times across the corpus, marking the chosen
+    option of every multiple-choice question.
+    """
+    names = style_names(docx)
+    with zipfile.ZipFile(docx) as z:
+        xml = z.read("word/document.xml").decode("utf-8")
+
+    out: list[list[dict]] = []
+    for p in _PARA.findall(xml):
+        runs: list[dict] = []
+        for r in _RUN.findall(p):
+            text = "".join(_TEXT.findall(r))
+            sym = _SYM.search(r)
+            if not text and not sym:
+                continue
+            sid = _RUN_STYLE.search(r)
+            runs.append({
+                "text": _unescape(text),
+                "style_id": sid.group(1) if sid else None,
+                "style_name": names.get(sid.group(1)) if sid else None,
+                "sym": (sym.group(1), sym.group(2)) if sym else None,
+            })
+        # Mirror `_paragraphs`: a <w:p> whose join starts with markup is not text.
+        joined = "".join(r["text"] for r in runs).strip()
+        out.append([] if joined.startswith("<w:") else runs)
+    return out
+
+
 def _unescape(s: str) -> str:
     return (s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"')
              .replace("&apos;", "'").replace("&amp;", "&"))

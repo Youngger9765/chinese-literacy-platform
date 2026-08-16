@@ -331,6 +331,44 @@ const BlockSequenceRenderer: React.FC<Props> = ({
           </div>
         );
 
+      case 'ordering': {
+        // 排序題。The sentences live in a 2-column table in the DOCX — one column of
+        // 「（ N ）」 slots, one of sentences — and used to be classified as a figure
+        // with a table referent, which the loader drops when it has no asset. The
+        // prompt then arrived with nothing under it: 「3.〈𪹚龍慶元宵〉　彭仁星」 and
+        // then a blank.
+        //
+        // `correct_order` is the MARKER's answer and is never rendered. The student
+        // types a number into the empty slot beside each sentence.
+        const items = block.items ?? [];
+        const answers = (blockState[key] as Record<number, string>) ?? {};
+        return (
+          <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
+            <p className="text-sm text-on-surface-variant mb-3">
+              在每句前面的空格填入順序
+            </p>
+            <ol className="space-y-3 list-none">
+              {items.map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    aria-label={`第 ${i + 1} 句的順序`}
+                    value={answers[i] ?? ''}
+                    onChange={(e) => {
+                      const next = { ...answers, [i]: e.target.value.slice(0, 2) };
+                      setBlockValue(key, next);
+                    }}
+                    className="w-12 shrink-0 rounded-lg border border-gray-300 text-center py-1"
+                  />
+                  <p className="text-base text-on-surface leading-relaxed">{item.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        );
+      }
+
       case 'figure':
         return <div key={key}>{renderFigure(block)}</div>;
 

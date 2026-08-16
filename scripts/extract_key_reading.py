@@ -63,17 +63,29 @@ _CN_NUM = {c: i for i, c in enumerate("一二三四五六七八九十", start=1)
 _ANCHOR = re.compile(r"從指定段落\s*[（(]?\s*([一二三四五六七八九十]+|\d+)\s*[)）]?")
 _ANCHOR_LOOSE = re.compile(r"指定段落[^0-9一二三四五六七八九十]{0,6}([一二三四五六七八九十]+|\d+)")
 
-#: 「從指定段落（四）開始朗讀」 says start, not read-only-this. The distinction is not
-#: pedantry: a single paragraph runs 145 characters at the median, and a student
-#: reading aloud for the timed minute gets through more than twice that — they would
-#: run out of text before the timer. Whole paragraphs are accumulated from the anchor
-#: until the passage is long enough to fill the minute, which lands the median at 371
-#: and puts 126 of 140 lessons inside 300–500 — the band the 2026-07-20 review set.
-TARGET_CHARS = 300
+#: 「從指定段落（四）開始朗讀」 names WHERE THE PASSAGE STARTS. It is one paragraph.
+#:
+#: This accumulated whole paragraphs from the anchor until the passage reached 300
+#: characters, on the reasoning that a single paragraph runs 145 at the median and a
+#: student reading aloud for the timed minute would run out of text. 靖杭 found the
+#: result on staging: 「大部分課程的朗讀範圍都比教授畫的範圍多出不少」. Measured against
+#: the first edition's table — extracted from the worksheets the professor marked —
+#: the median went from the professor's 153 characters to 370, and 60 of 67 comparable
+#: lessons exceeded the marked range by more than half again.
+#:
+#: The reasoning was about the TIMER. The passage is what the professor MARKED, and how
+#: long the student reads is the student's business. The first edition's file header
+#: said so plainly — 「新規則：只取 ☞ 那一段」 — and I read that line before overriding it.
 
-#: A passage short enough to be a caption, or long enough to be the whole text, is not
-#: a one-minute reading target.
-MIN_CHARS, MAX_CHARS = 40, 900
+#: Bounds taken from what the professor actually marked, not from what seems reasonable.
+#: The first edition's 134 marked ranges run 19 to 412 characters, median 147; six of
+#: them are under 40. A floor of 40 — which is what this used to have, left over from
+#: the accumulation design — rejected 19 lessons whose single paragraph is simply short,
+#: including one the professor marked at 22 characters.
+#:
+#: These exist only to catch a paragraph that is obviously not prose (a stray caption, a
+#: whole page swallowed), so they sit outside the observed range rather than inside it.
+MIN_CHARS, MAX_CHARS = 12, 900
 
 
 def cn_to_int(s: str) -> int | None:
@@ -160,16 +172,10 @@ def extract(docx: Path, body: list[str] | None = None) -> dict:
         out["body_paragraphs"] = len(body)
         return out
 
-    picked, total = [], 0
-    for para in body[anchor - 1:]:
-        picked.append(para.strip())
-        total += len(para.strip())
-        if total >= TARGET_CHARS:
-            break
-    passage = "\n".join(picked)
+    passage = body[anchor - 1].strip()
     out["passage"] = passage
-    out["start_text"] = picked[0][:24]
-    out["paragraphs_used"] = len(picked)
+    out["start_text"] = passage[:24]
+    out["paragraphs_used"] = 1
 
     agreed = corroborate(body, load_legacy())
     out["corroborated_by_first_edition"] = agreed

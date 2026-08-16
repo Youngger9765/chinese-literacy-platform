@@ -6,13 +6,13 @@ spotlight:
   - type: figure
     referent: image
     asset: fig1.png
-    bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾
+    bind_paragraph: 目標策略：推論策略──
   - type: guide
     text: 推論本文的因果關係
   - type: guide
     text: 步驟❶──找事件
   - type: free_text
-    prompt: 1.問自己：這段文字提到提到了哪些重要事件或現象？
+    prompt: 1.問自己：這段文字提到的重要事件或現象？
   - type: guide
     text: ◎小試身手：
   - type: passage
@@ -86,7 +86,7 @@ spotlight:
   - type: guide
     text: B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
   - type: guide
-    text: ①天花病菌傳入印加 ③印加人大量死亡，皇帝也染疫去世  　 ②帝國持續內戰與分裂     　  ④帝國政治經濟瓦解
+    text: ①天花病菌傳入印加 ③印加人大量死亡，皇帝也染疫去世  　 ②帝國持續內戰與分裂　  ④帝國政治經濟瓦解
   - type: guide
     text: C.最後造成的總結果：帝國變得非常虛弱、不堪一擊。
   - type: passage

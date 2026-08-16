@@ -55,7 +55,7 @@ spotlight:
   - type: guide
     text: 三、換你試試看：
   - type: passage
-    source: unknown
+    source: lesson_text
     paragraphs:
     - 現在換你試試看。每讀完一段，問「這段和前面內容有什麼關係？」接著用以下步驟讀出訊息間的關係：讀這段→找前面→說關係
   - type: guide

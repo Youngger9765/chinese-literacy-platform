@@ -16,7 +16,7 @@ spotlight:
 
       這一課，我們用同樣的方法讀阿介的故事。'
   - type: passage
-    source: unknown
+    source: lesson_text
     paragraphs:
     - 先問，再讀：閱讀比較有方向
   - type: guide
