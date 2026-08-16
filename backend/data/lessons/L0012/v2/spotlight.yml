@@ -4,7 +4,7 @@ spotlight:
   strategy_type: sel_character
   blocks:
   - type: guide
-    text: ◎小試身手：
+    text: ◎ 小試身手：
   - type: guide
     text: 情境一：品妤的寫作困境
   - type: guide
@@ -28,7 +28,7 @@ spotlight:
   - type: guide
     text: 我最熱愛的事是：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   - type: single
-    prompt: 二、最近進行熱愛的事時，遇到的阻礙是什麼？
+    prompt: 二、最近進行熱愛的事時，遇到的阻礙是什麼?
     options:
     - 時間不夠
     - 家人期待不同

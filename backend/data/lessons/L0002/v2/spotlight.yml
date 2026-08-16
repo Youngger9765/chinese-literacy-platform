@@ -44,7 +44,7 @@ spotlight:
   - type: guide
     text: 小試身手：堅殼硬甲
   - type: passage
-    source: unknown
+    source: lesson_text
     paragraphs:
     - 有些動物沒有尖牙利爪、沒有毒，連跑都跑不快，但是牠們有堅硬的外殼。柴棺龜和食蛇龜遇到危險時，會把頭和四肢縮進龜殼裡；穿山甲則會把身體捲成一個圓球，用身上的硬鱗片保護自己。牠們一縮、一捲，就像躲進銅牆鐵壁般的小房子，也像穿上厚厚的裝甲，可以抵擋敵人的攻擊。
   - type: free_text

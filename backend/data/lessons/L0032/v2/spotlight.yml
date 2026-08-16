@@ -6,7 +6,7 @@ spotlight:
   - type: figure
     referent: image
     asset: fig1.png
-    bind_paragraph: ※ 如果你有做到下列事項，請在□內打勾。
+    bind_paragraph: 目標策略：摘要策略──
   - type: guide
     text: 一、先確定大主題：
   - type: guide

@@ -30,7 +30,7 @@ spotlight:
   - type: guide
     text: 請根據上述訊息，歸納作者的主要論點。（答案合理就好）
   - type: guide
-    text: 提示①定位(她們是什麼樣的工作者) ②評價標準(不應……；應……)
+    text: 提示①定位(她們是什麼樣的工作者) ②評價標準(不應..；應..)
   - type: passage
     source: unknown
     paragraphs:
