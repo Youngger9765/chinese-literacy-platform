@@ -3,9 +3,23 @@ spotlight:
   strategy_name: 推論策略-推論人物的動機、情緒與想法
   strategy_type: emotion_inference
   blocks:
+  - type: free_text
+    prompt: (4)一場午後雷陣雨讓他全身濕透，樣子非常(  E  )。
+  - type: free_text
+    prompt: (5)只要聽聞偶像出現在車站，粉絲們必定(  A  )，場面非常熱鬧。
+  - type: free_text
+    prompt: (6) 近年來，這個新品牌快速(  B  )，備受市場關注。
+  - type: free_text
+    prompt: (7)這場電影的爆破場面實在是(  G  )，非常刺激。
+  - type: free_text
+    prompt: (8)圖書館內應保持安靜，不可大聲(  H  )。
+  - type: guide
+    text: 五文章重點表 五文章重點表
+  - type: fill_table
   - type: passage
     source: unknown
     paragraphs:
+    - 推論策略─推論動機、情緒和想法心推論策略─推論動機、情緒和想法心六閱讀聚光燈六閱讀聚光燈
     - 上一課，我們讀人物的行為，推想他為什麼這樣做。這一課，我們要學會用三個步驟，找出有根據的推論。
   - type: guide
     text: 推論人物內心三步驟
@@ -54,9 +68,9 @@ spotlight:
   - type: single
     prompt: ❷看情境：當時發生了什麼事？（二選一）
     options:
-    - 作者看見：
-    - 爸爸紅著臉快步離開　②爸爸在社區活動中心賭博
-    answer: 作者看見：
+    - 爸爸紅著臉快步離開
+    - 爸爸在社區活動中心賭博
+    answer: 爸爸紅著臉快步離開
   - type: single
     prompt: ❸推內心：把「言行」和「情境」合起來，推論主角的內心。
     options:
@@ -72,10 +86,10 @@ spotlight:
   - type: single
     prompt: ❶找言行：後來，當事人（作者）反覆出現了什麼行為？（3選1）
     options:
-    - ①每天晚上在床上瞇著眼偷聽
-    - ②每晚等父母平安進門才睡
+    - 每天晚上在床上瞇著眼偷聽
+    - 每晚等父母平安進門才睡
     - 每天幫父母清洗沾滿泥巴的衣服
-    answer: ②每晚等父母平安進門才睡
+    answer: 每天晚上在床上瞇著眼偷聽
   - type: single
     prompt: ❷看情境：當時發生了什麼事？（2選1）
     options:
@@ -88,16 +102,17 @@ spotlight:
     prompt: 情緒：作者每晚等父母回家的情緒是什麼？（4選1）
     options:
     - 安心
-    - 得意　　③擔心
+    - 得意
+    - 擔心
     - 憤怒
     answer: 安心
   - type: single
     prompt: 想法：作者心裡可能有什麼想法？（3選1）
     options:
-    - ①希望父母賺更多錢回家
-    - ②希望每晚父母都可以平安回來
+    - 希望父母賺更多錢回家
+    - 希望每晚父母都可以平安回來
     - 希望父母晚一點回來，讓她安心睡著
-    answer: ②希望每晚父母都可以平安回來
+    answer: 希望父母賺更多錢回家
   - type: guide
     text: 動機：作者等父母回家的動機是什麼？
   - type: guide
@@ -109,13 +124,11 @@ spotlight:
     options:
     - 父母為了維持家計想盡辦法，作者也期待他們靠賭博改善生活。
     - 父母為了維持家計想盡辦法，但其中賭博的做法讓作者感到難堪與擔心。
-    answer: 父母為了維持家計想盡辦法，但其中賭博的做法讓作者感到難堪與擔心。
+    answer: 父母為了維持家計想盡辦法，作者也期待他們靠賭博改善生活。
   - type: guide
     text: 二、師長支持與作者讀書行動
   - type: guide
-    text: '請閱讀下面的課文。你可以一邊讀，一邊把角色做的事畫線。
-
-      （課文第九段）'
+    text: 請閱讀下面的課文。你可以一邊讀，一邊把角色做的事畫線。（課文第九段）
   - type: passage
     source: unknown
     paragraphs:
@@ -133,7 +146,7 @@ spotlight:
     options:
     - 成績太差，不願意讀書
     - 家境困難，也缺少安靜的讀書環境
-    answer: 家境困難，也缺少安靜的讀書環境
+    answer: 成績太差，不願意讀書
   - type: free_text
     prompt: ❸推內心：
   - type: single
@@ -163,7 +176,7 @@ spotlight:
     options:
     - 每天都有安靜、明亮的讀書空間。
     - 要幫家裡工作，也缺少合適的讀書環境
-    answer: 要幫家裡工作，也缺少合適的讀書環境
+    answer: 每天都有安靜、明亮的讀書空間。
   - type: free_text
     prompt: ❸推內心：
   - type: single
@@ -171,14 +184,14 @@ spotlight:
     options:
     - 讀書環境太差，即使努力也無法改變結果。
     - 環境雖然不好，我仍能找時間和方法學習。
-    answer: 環境雖然不好，我仍能找時間和方法學習。
+    answer: 讀書環境太差，即使努力也無法改變結果。
   - type: single
     prompt: （2）作者不斷想辦法讀書，她的動機可能是什麼？（單選）
     options:
     - 想得到客人的稱讚，證明自己是一個用功的學生。
     - 想藉由持續學習，為自己走出不同的人生。
     - 想趕快離開戲院，不必再幫家裡做任何工作。
-    answer: 想藉由持續學習，為自己走出不同的人生。
+    answer: 想得到客人的稱讚，證明自己是一個用功的學生。
   - type: free_text
     prompt: 3.把前面的推論合起來
   - type: single
@@ -186,7 +199,7 @@ spotlight:
     options:
     - 老師想幫助作者繼續學習，作者只要接受老師的安排即可。
     - 老師想支持作者繼續學習，作者也主動把握時間、想辦法讀書。
-    answer: 老師想支持作者繼續學習，作者也主動把握時間、想辦法讀書。
+    answer: 老師想幫助作者繼續學習，作者只要接受老師的安排即可。
   - type: guide
     text: 三、串起前後線索，回到全文想一想
   - type: single
@@ -197,3 +210,5 @@ spotlight:
     answer: 家庭困境讓作者不安，但老師的支持和自己的努力，幫助她逐漸改變人生。
   - type: guide
     text: ※我會推論了嗎？請你檢查自己是否做到：
+  - type: guide
+    text: 七閱讀理解七閱讀理解請根據文章內容，讀完每一個選項後，選出最適合的答案。請根據文章內容，讀完每一個選項後，選出最適合的答案。

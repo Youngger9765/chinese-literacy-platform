@@ -35,9 +35,7 @@ keypoints:
       blanks:
       - answer: 胃痛
         hint: ''
-    - sub_label: '身體很__，
-
-        只能坐在沙發上看電視。'
+    - sub_label: 身體很__，只能坐在沙發上看電視。
       template: 生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。
       blanks:
       - answer: 虛弱
@@ -58,18 +56,12 @@ keypoints:
       template: 作者和家人選擇的面對方式
       blanks: []
     - sub_label: 媽媽臨終時
-      template: '打定主意__
-
-        陪媽媽最後一段路。'
+      template: 打定主意__陪媽媽最後一段路。
       blanks:
       - answer: 開開心心
         hint: ''
-    - sub_label: '媽媽__，作者很
-
-        傷心。'
-      template: '感謝上帝結束媽媽在世界上的
-
-        __。'
+    - sub_label: 媽媽__，作者很傷心。
+      template: 感謝上帝結束媽媽在世界上的__。
       blanks:
       - answer: 過世
         hint: ''

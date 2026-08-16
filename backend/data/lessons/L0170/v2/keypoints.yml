@@ -10,20 +10,22 @@ keypoints:
     value: 內容
     blanks: []
   - label: 主要問題
-    value: "只要關鍵時刻或遭遇__，腦中就會出現【 毒舌球評    \n     】不斷廣播，內心充滿自我批評的聲音。"
+    value: 只要關鍵時刻或遭遇__，腦中就會出現__不斷廣播，內心充滿自我批評的聲音。
     blanks:
     - answer: 挫折
+      hint: ''
+    - answer: 毒舌球評
       hint: ''
   - label: 情境一
     sub_rows:
     - sub_label: 事件
-      template: （①漏接  □②接殺）對手的高飛球，讓對手得分
+      template: （□①漏接  □②接殺）對手的高飛球，讓對手得分
       blanks: []
     - sub_label: 念頭
       template: 「你真是爛透了！」、「都是你害的！」
       blanks: []
     - sub_label: 反應
-      template: 內心充滿（①自責  □②鬥志）
+      template: 內心充滿（□①自責  □②鬥志）
       blanks: []
   - label: 情境二
     sub_rows:
@@ -43,7 +45,7 @@ keypoints:
   - label: 情境三
     sub_rows:
     - sub_label: 事件
-      template: 站上打擊區，被三球（①三振  □②保送）
+      template: 站上打擊區，被三球（□①三振  □②保送）
       blanks: []
     - sub_label: 念頭
       template: 「又來了……」、「真的很討厭現在的自己」
@@ -54,9 +56,7 @@ keypoints:
       - answer: 失落
         hint: ''
   - label: 解決方法
-    value: '1.收到隊友、朋友的__、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點__，但還是感到有些__
-
-      2.收到教練的提醒：「懊悔不如__」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）'
+    value: 1.收到隊友、朋友的__、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點__，但還是感到有些__2.收到教練的提醒：「懊悔不如__」，並起身去做棒式訓練→效果：內在批評（□①變小聲  □②變大聲）
     blanks:
     - answer: 鼓勵
       hint: ''

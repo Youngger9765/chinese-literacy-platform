@@ -28,7 +28,5 @@ keypoints:
   - label: 【太空人的背景】
     sub_rows:
     - sub_label: 12位太空人都是男性
-      template: '第一位女性太空人與
-
-        第一位有色族裔太空人'
+      template: 第一位女性太空人與第一位有色族裔太空人
       blanks: []

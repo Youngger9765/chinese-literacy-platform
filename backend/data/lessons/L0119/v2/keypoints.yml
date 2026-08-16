@@ -10,9 +10,7 @@ keypoints:
     value: ''
     blanks: []
   - label: 邂逅
-    value: '作者到訪台東不到一天的原因是__。
-
-      令作者眷戀的是__。'
+    value: 作者到訪台東不到一天的原因是__。令作者眷戀的是__。
     blanks:
     - answer: 考試
       hint: ''
@@ -25,27 +23,17 @@ keypoints:
       blanks:
       - answer: 搭火車
         hint: ''
-    - sub_label: '沿途景色
-
-        （多選）'
-      template: '①寬廣田野    □②遼闊天空
-
-        □③點點星光    ④層層山巒'
+    - sub_label: 沿途景色（多選）
+      template: □①寬廣田野    □②遼闊天空□③點點星光    □④層層山巒
       blanks: []
-    - sub_label: '台北景色
-
-        （多選）'
-      template: "□①耀眼星空    ②狹小天空 \n③閃爍霓虹    ④棋盤街道"
+    - sub_label: 台北景色（多選）
+      template: □①耀眼星空    □②狹小天空 □③閃爍霓虹    □④棋盤街道
       blanks: []
-    - sub_label: '車站景色
-
-        （多選）'
-      template: '①青草茶店生意興隆   ②麻糬已經售完
-
-        □③站前廣場冷冷清清   □④車站因沙塵一片灰濛濛'
+    - sub_label: 車站景色（多選）
+      template: □①青草茶店生意興隆   □②麻糬已經售完□③站前廣場冷冷清清   □④車站因沙塵一片灰濛濛
       blanks: []
     - sub_label: 作者感受
-      template: 較喜歡 □①台北  ②台東 的景色。
+      template: 較喜歡 □①台北  □②台東 的景色。
       blanks: []
   - label: 相處
     sub_rows:
@@ -75,9 +63,7 @@ keypoints:
         hint: ''
       - answer: 雨
         hint: ''
-    - sub_label: '最著迷
-
-        之景'
+    - sub_label: 最著迷之景
       template: 有各種__色的__景。
       blanks:
       - answer: 藍
@@ -98,9 +84,7 @@ keypoints:
       blanks:
       - answer: 過客
         hint: ''
-    - sub_label: '分別之景
-
-        （多選）'
-      template: "①湛藍天空    ②燦爛陽光 \n③蔚藍海洋    □④霓虹夜景"
+    - sub_label: 分別之景（多選）
+      template: □①湛藍天空    □②燦爛陽光 □③蔚藍海洋    □④霓虹夜景
       blanks: []
   title: 致台東：一封過客的情書

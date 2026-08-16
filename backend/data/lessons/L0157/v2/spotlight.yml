@@ -27,9 +27,9 @@ spotlight:
   - type: single
     prompt: 5.讀出作者意圖：試試看，從文中角色的關係，推論作者意圖：（單選）
     options:
-    - 野獸們怕的是誰？（①老虎
+    - 老虎
     - 狐狸），因為會害怕被牠吃掉。
-    answer: 野獸們怕的是誰？（①老虎
+    answer: 老虎
   - type: guide
     text: 狐狸藉著老虎讓自己看來很厲害，讓野獸們紛紛走避。
   - type: passage
@@ -45,16 +45,18 @@ spotlight:
   - type: single
     prompt: (1)這個故事有哪些角色？（複選）
     options:
-    - 哥哥　②弟弟　③父親
-    - 母親
-    answer: 哥哥　②弟弟　③父親
-  - type: single
-    prompt: (2)這個故事的作者是誰？①哥哥　□②弟弟　□③父親
-    options:
-    - ①哥哥
+    - 哥哥
     - 弟弟
     - 父親
-    answer: ①哥哥
+    - 母親
+    answer: 哥哥
+  - type: single
+    prompt: (2)這個故事的作者是誰？□①哥哥　□②弟弟　□③父親
+    options:
+    - 哥哥
+    - 弟弟
+    - 父親
+    answer: 哥哥
   - type: free_text
     prompt: (3)請你把人物用螢光筆畫出來。
   - type: free_text
@@ -69,3 +71,5 @@ spotlight:
     prompt: (5)推測作者想要傳達的意圖：
   - type: guide
     text: 抱怨爸爸對弟弟偏心，都叫我（哥哥）做事。
+  - type: guide
+    text: Ａ－墜地為高處往低處掉落，跌倒不適合用此詞。Ｂ－泳池看不出大汗淋漓。Ｃ－俄而是時間短暫。）Ａ－墜地為高處往低處掉落，跌倒不適合用此詞。Ｂ－泳池看不出大汗淋漓。Ｃ－俄而是時間短暫。）請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。四閱讀理解四閱讀理解

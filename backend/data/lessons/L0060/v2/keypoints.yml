@@ -76,9 +76,7 @@ keypoints:
       template: 學生 黃美廉
       blanks: []
     - sub_label: 想法
-      template: '你長這樣，怎麼
-
-        __得起來？ 我擁有這麼多，為什麼你只看我所沒有的呢？'
+      template: 你長這樣，怎麼__得起來？ 我擁有這麼多，為什麼你只看我所沒有的呢？
       blanks:
       - answer: 快樂
         hint: ''

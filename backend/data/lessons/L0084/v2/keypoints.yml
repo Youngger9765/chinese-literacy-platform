@@ -17,26 +17,20 @@ keypoints:
   - label: 感受
     sub_rows:
     - sub_label: 帶來__
-      template: '□①能感受到詩意
-
-        ②仍未感受到詩意'
+      template: □①能感受到詩意□②仍未感受到詩意
       blanks:
       - answer: 歡樂
         hint: ''
   - label: 原因
     sub_rows:
-    - sub_label: '「來了！來了！」
-
-        可以__，也可以在__派上用場'
-      template: '對十三歲的我們來說，更深刻的是那份
-
-        __'
+    - sub_label: 「來了！來了！」可以__，也可以在__派上用場
+      template: 對十三歲的我們來說，更深刻的是那份__
       blanks:
       - answer: 千變萬化
         hint: ''
       - answer: 不同時機
         hint: ''
-      - answer: ①嬉笑的快樂□②浪漫的詩意
+      - answer: □①嬉笑的快樂□②浪漫的詩意
         hint: ''
   - label: 讀〈夏夜〉中的「擬人」
     value: ''
@@ -53,7 +47,7 @@ keypoints:
       blanks:
       - answer: 困惑
         hint: ''
-      - answer: □①不解②讚嘆
+      - answer: □①不解□②讚嘆
         hint: ''
   - label: 原因
     sub_rows:
@@ -79,26 +73,16 @@ keypoints:
       blanks:
       - answer: 羨慕
         hint: ''
-      - answer: ①感佩□②失望
+      - answer: □①感佩□②失望
         hint: ''
   - label: 原因
     sub_rows:
-    - sub_label: '認為作者能寫下如此溫馨詩，一定是因為有著：
-
-        __
-
-        的童年。'
-      template: '發現作者有著：
-
-        __
-
-        的童年，
-
-        投入__文學寫作是為了讓經歷苦難的孩子童年裡也有快樂。'
+    - sub_label: 認為作者能寫下如此溫馨詩，一定是因為有著：__的童年。
+      template: 發現作者有著：__的童年，投入__文學寫作是為了讓經歷苦難的孩子童年裡也有快樂。
       blanks:
-      - answer: ①幸福□②悲慘
+      - answer: □①幸福□②悲慘
         hint: ''
-      - answer: ①艱辛悲苦□②無憂無慮
+      - answer: □①艱辛悲苦□②無憂無慮
         hint: ''
       - answer: 兒童
         hint: ''
