@@ -28,9 +28,29 @@ spotlight:
     answer: ①關聯詞
   - type: free_text
     prompt: 2.請先圈出遞進關聯詞，再勾選作者最想強調的重點。
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 課文句子
+      - '作者想強調哪一句？
+
+        (單選)'
+    - - １.
+      - '但運動若是太過激烈
+
+        （1）不只容易造成運動傷害
+
+        （2）更無法達到促進長高的效果'
+      - '□第(1)句
+
+        第(2)句'
+    - - '2.'
+      - '如果常吃這類食物，
+
+        （1）不但容易造成體重過重
+
+        （2）也可能會影響生長激素的分泌，進而影響長高喔'
+      - '□第(1)句
+
+        第(2)句'
   - type: free_text
     prompt: 3. 讀一讀，把運動的兩個好處合成一句遞進複句

@@ -41,6 +41,14 @@ spotlight:
     prompt: 2.祕訣：
   - type: guide
     text: A.「有關鍵詞」的文句：
+  - type: table
+    rows:
+    - - ''
+      - 原因
+      - 結果
+    - - 關鍵詞
+      - 因為、由於、為了
+      - 因此、所以、導致、造成
   - type: guide
     text: B.「沒有關鍵詞」的文句：
   - type: guide
@@ -51,10 +59,26 @@ spotlight:
     text: 加入關鍵詞「因為皇帝死了，所以內戰爆發。」
   - type: guide
     text: ◎小試身手
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 句子
+      - 判斷是否為因果句
+    - - 1. 1528年，印加皇帝也染疫去世，兩位繼承人爆發激烈的內戰。
+      - '①是因果句
+
+        □②不是因果句'
+    - - 2.天花透過歐洲水手和士兵傳入美洲，造成印加人民大量死亡
+      - '①是因果句
+
+        □②不是因果句'
+    - - 3.皮薩羅帶著168人偷偷觀察印加軍隊
+      - '□①是因果句
+
+        ②不是因果句'
+    - - 4.皇帝染病死亡，引發繼承人爭奪王位，爆發內戰
+      - '①是因果句
+
+        □②不是因果句'
   - type: guide
     text: 步驟❸──判斷因果，畫箭頭
   - type: free_text
@@ -65,10 +89,36 @@ spotlight:
     text: ◎小試身手
   - type: guide
     text: 根據上表，請判斷誰是因？誰是果？並畫正確箭頭方向
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 事件
+      - 因
+      - 果
+      - 箭頭方向
+      - 事件
+      - 因
+      - 果
+    - - 1.天花病菌傳入印加
+      - ''
+      - □
+      - →
+      - 印加人大量死亡，皇帝也染病死亡
+      - □
+      - ''
+    - - 2.皇帝染病死亡
+      - ''
+      - □
+      - →
+      - 繼承人爭奪王位，爆發內戰
+      - □
+      - ''
+    - - 3.內戰與分裂多年
+      - ''
+      - □
+      - →
+      - 帝國政治經濟瓦解
+      - □
+      - ''
   - type: guide
     text: 步驟❹──連成一連串因果
   - type: guide

@@ -7,16 +7,48 @@ spotlight:
     text: 一、先讀懂一項研究
   - type: guide
     text: （一）研究比較澳洲和新加坡六、七歲的華裔兒童，以下是研究數據：
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 比較項目
+      - 澳洲兒童
+      - 新加坡兒童
+    - - 室內閱讀和近距離功課時間
+      - 較多
+      - 較少
+    - - 每週戶外活動時間
+      - 約13小時
+      - 約3小時
+    - - 近視率
+      - 約3％
+      - 約29％
   - type: guide
     text: （二）解讀研究數據
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 閱讀步驟
+      - 根據研究內容勾選答案
+    - - ❶看做法
+      - '□①安排一組兒童增加戶外活動，再和另一組比較。
+
+        ②比較兩地兒童原有的生活情形和近視率。'
+    - - ❷讀結果
+      - '近距離用眼時間：
+
+        ①澳洲兒童較多　□②新加坡兒童較多
+
+        戶外活動時間：
+
+        ①澳洲兒童較多　□②新加坡兒童較多
+
+        近視率：
+
+        □①澳洲兒童較高　②澳洲兒童較低
+
+        統整→澳洲兒童近距離用眼較多、戶外活動較多，近視率卻較低'
+    - - ❸研究帶來什麼新線索？
+      - '□①近距離用眼較多，近視率就一定比較高。
+
+        ②除了近距離用眼，戶外活動也可能是影響近視的重要因素。'
   - type: guide
     text: （三）這項研究還留下什麼問題？
   - type: single
@@ -33,10 +65,20 @@ spotlight:
     text: 前一項研究發現：戶外活動較多的兒童，近視率較低。為了繼續檢查這條線索，其他研究安排兒童增加戶外活動，看看近視發生的機會會不會降低。
   - type: guide
     text: （一）比較兩項研究，看看研究者如何繼續檢查前面的線索
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 比較項目
+      - 跨國比較研究
+      - 戶外活動實驗
+    - - 研究怎麼做？
+      - 比較兩地兒童原有的生活情形
+      - 安排一組兒童增加戶外活動，再和另一組比較
+    - - 研究看到什麼？
+      - 戶外活動較多的兒童，近視率較低
+      - 增加戶外活動組，近視發生的機會較低
+    - - 研究的作用
+      - 找到線索：戶外活動可能和近視有關
+      - 繼續檢查：增加戶外活動可能真的有幫助
   - type: single
     prompt: 1.戶外活動實驗和跨國比較研究最大的不同是什麼？
     options:
@@ -73,10 +115,18 @@ spotlight:
     answer: 一般室內燈光很難達到戶外自然光的亮度。
   - type: guide
     text: 四、把不同研究合起來
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 研究線索
+      - 研究幫助我們知道什麼？
+    - - 研究：戶外活動較多的兒童，近視率較低
+      - 戶外活動可能和近視率有關
+    - - 研究：增加戶外活動組，近視發生機會較低
+      - 增加戶外活動可能真的有幫助
+    - - 研究：明亮光線下，動物較不容易被誘發近視
+      - 光線可能具有保護眼球的作用
+    - - 研究：戶外自然光遠比普通室內照明明亮
+      - 一般室內燈光很難達到戶外自然光的亮度
   - type: single
     prompt: 把四項線索合起來，哪一個結論最合理？
     options:
@@ -95,10 +145,6 @@ spotlight:
     text: ☆這項研究幫助我們知道什麼？
   - type: guide
     text: ☆不同研究合起來，支持什麼結論？
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
   - type: self_check
     items:
     - 我能從研究資料中，找出研究怎麼做、看到了什麼結果。

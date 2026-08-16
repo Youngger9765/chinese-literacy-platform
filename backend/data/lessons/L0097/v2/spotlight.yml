@@ -7,10 +7,20 @@ spotlight:
     text: 一、從生活中辨認3R
   - type: guide
     text: 下面三種做法，主要運用哪一個R？(請填入A、B或C)
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 生活中的做法
+      - 主要運用哪個R？
+    - - ①能看電子資料時，就不另外列印紙本。
+      - 【】
+    - - ②哥哥在二手網站購買仍可使用的家電
+      - 【】
+    - - ③選用回收紙再製成的筆記本。
+      - 【】
+    answers:
+    - A
+    - B
+    - C
   - type: guide
     text: 二、用3R解決問題：
   - type: guide

@@ -54,10 +54,20 @@ spotlight:
     text: 現在，你已經知道自己容易在什麼時候、因為什麼原因而拖延。接著來看看主角怎麼安排時間。
   - type: guide
     text: 主角的作息安排：
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 類別
+      - 內容
+      - 關鍵策略
+    - - 學習時間
+      - 晨讀、上課、複習、預習
+      - 在固定時間專心學習
+    - - 電競練習
+      - 19:30–21:30
+      - 九點半準時下線
+    - - 休息時間
+      - 晚餐、洗漱、睡眠
+      - 保留充足睡眠時間
   - type: guide
     text: 任務：請勾選你覺得主角值得學習的做法。（複選）
   - type: guide
@@ -66,10 +76,30 @@ spotlight:
     text: 步驟❸：安排作息──設計自己的作息時間表
   - type: guide
     text: 現在，請你根據自己的生活節奏，設計「我的自律作息表」
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - '時間
+
+        （可依自己的作息 修改）'
+      - 我要做的事
+      - '提醒方式
+
+        （選填）'
+    - - 06:30–07:30
+      - ''
+      - ''
+    - - 08:00–16:00
+      - ''
+      - ''
+    - - 16:00–19:00
+      - ''
+      - ''
+    - - 19:00–21:30
+      - ''
+      - ''
+    - - 21:30–22:00
+      - ''
+      - ''
   - type: guide
     text: 步驟❹：檢查調整──選擇可行的反拖延方法
   - type: guide

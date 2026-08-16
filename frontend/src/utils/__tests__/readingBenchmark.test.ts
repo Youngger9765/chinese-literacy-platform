@@ -1,5 +1,5 @@
 /**
- * parseReadingBenchmark — every notation the worksheets actually use (#2719).
+ * parseReadingBenchmark — every notation the worksheets actually use (#2722).
  *
  * The parser was written against ＜ and ＞. Now that the lessons carry their own targets
  * instead of falling through to a grade default, one lesson turned out to write its outer

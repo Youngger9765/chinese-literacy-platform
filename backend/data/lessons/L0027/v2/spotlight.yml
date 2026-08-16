@@ -65,10 +65,23 @@ spotlight:
     prompt: ❷這句話比較的項目是什麼？　　訓練成本
   - type: free_text
     prompt: 2.請將比較項目與細節填入表格內(請打勾，單選)
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 比較項目          對象
+      - 巨鼠
+      - 狗
+    - - 1.可合作的訓練員人數
+      - ①多位 □②一位
+      - □①多位 ②一位
+    - - 2.【】
+      - □①大   ②小
+      - ①大   □②小
+    - - 3.【】
+      - □①高   ②低
+      - ①高   □②低
+    answers:
+    - 體型
+    - 訓練成本
   - type: free_text
     prompt: 3.想一想表格內容告訴我們什麼？
   - type: single

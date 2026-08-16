@@ -1,3 +1,59 @@
 spotlight:
   lesson: G9-L22
-  error: spotlight range not found
+  strategy_name: 說明文結構─用研究證據回答問題
+  strategy_type: unknown
+  blocks:
+  - type: free_text
+    prompt: ❶找核心問題
+  - type: single
+    prompt: 本文想回答的問題是什麼？
+    options:
+    - 肯亞為什麼常在馬拉松比賽獲獎？
+    - 高地訓練是否有助於運動表現？
+    - 紅血球太多會不會造成血栓？
+    - 玻利維亞人為什麼住在高地？
+    answer: 高地訓練是否有助於運動表現？
+  - type: guide
+    text: 重點句：但是，高地訓練真的對每個運動員都有幫助嗎？
+  - type: free_text
+    prompt: ❷找初步答案
+  - type: single
+    prompt: 作者對這個問題的初步答案是什麼？
+    options:
+    - 一定有幫助
+    - 完全沒有幫助
+    - 不一定，因人而異
+    - 只有肯亞選手有幫助
+    answer: 不一定，因人而異
+  - type: guide
+    text: 重點句：答案是「不一定」。
+  - type: free_text
+    prompt: ❸整理研究證據
+  - type: table
+    rows:
+    - - 研究
+      - 研究發現
+      - 支持的重點
+    - - 研究一
+      - 同樣待在高地，有人 EPO 降低，有人升高400%以上
+      - '人體對高地的生理反應
+
+        【】'
+    - - 研究二
+      - 紅血球增加者長跑成績【】；紅血球未增加者成績略退步
+      - 同研究一，高地訓練是否提升成績，也是【】
+    - - 研究三
+      - 玻利維亞人紅血球太多，血液變【】，可能增加血栓風險
+      - 紅血球不是越多越好，太多也可能有心血管病變的【】
+    answers:
+    - 因人而異
+    - 進步
+    - 因人而異
+    - 濃稠
+    - 風險
+  - type: free_text
+    prompt: ❹判斷哪些證據能支持結論
+  - type: guide
+    text: 結論：高地訓練的效果因人而異，訓練要考量個別差異。
+  - type: guide
+    text: 下列哪些證據能支持這個結論？能支持的畫 O，不能支持的畫 X。

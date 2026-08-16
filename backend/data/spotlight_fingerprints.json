@@ -1,7 +1,7 @@
 {
   "description": "Structural fingerprints for every lesson's spotlight. Regenerate with scripts/spotlight_fingerprints.py --write and state why.",
   "lesson_count": 175,
-  "with_spotlight": 143,
+  "with_spotlight": 168,
   "lessons": {
     "L0001": {
       "strategy_type": "writing_technique",
@@ -34,12 +34,13 @@
       "strategy_type": "summary",
       "block_count": 36,
       "type_histogram": {
-        "figure": 4,
+        "figure": 1,
         "free_text": 4,
         "guide": 19,
         "passage": 3,
         "self_check": 1,
-        "single": 5
+        "single": 5,
+        "table": 3
       },
       "type_sequence": [
         "figure",
@@ -61,14 +62,14 @@
         "single",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "single",
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -76,7 +77,7 @@
         "guide",
         "single",
         "single",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 19,
@@ -90,12 +91,12 @@
       "strategy_type": "summary",
       "block_count": 12,
       "type_histogram": {
-        "figure": 1,
         "free_text": 2,
         "guide": 3,
         "multi": 3,
         "passage": 1,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "multi",
@@ -109,7 +110,7 @@
         "single",
         "multi",
         "passage",
-        "figure"
+        "table"
       ],
       "guide_count": 3,
       "passage_count": 1,
@@ -122,17 +123,17 @@
       "strategy_type": "sel_character",
       "block_count": 12,
       "type_histogram": {
-        "figure": 2,
         "free_text": 5,
         "guide": 4,
-        "passage": 1
+        "passage": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
@@ -152,13 +153,13 @@
       "strategy_type": "emotion_inference",
       "block_count": 36,
       "type_histogram": {
-        "figure": 2,
         "free_text": 9,
         "guide": 16,
         "multi": 1,
         "passage": 2,
         "self_check": 1,
-        "single": 5
+        "single": 5,
+        "table": 2
       },
       "type_sequence": [
         "single",
@@ -186,7 +187,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "multi",
@@ -195,7 +196,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 16,
@@ -209,13 +210,13 @@
       "strategy_type": "emotion_inference",
       "block_count": 30,
       "type_histogram": {
-        "figure": 3,
         "free_text": 3,
         "guide": 15,
         "multi": 1,
         "passage": 3,
         "self_check": 1,
-        "single": 4
+        "single": 4,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -234,19 +235,19 @@
         "single",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "multi",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "single",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 15,
@@ -260,31 +261,31 @@
       "strategy_type": "emotion_inference",
       "block_count": 19,
       "type_histogram": {
-        "figure": 3,
         "guide": 10,
         "multi": 2,
         "passage": 3,
-        "self_check": 1
+        "self_check": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "multi",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "multi",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 10,
@@ -298,20 +299,20 @@
       "strategy_type": "perspective_taking",
       "block_count": 12,
       "type_histogram": {
-        "figure": 2,
         "free_text": 3,
         "guide": 4,
-        "passage": 3
+        "passage": 3,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "passage",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "passage",
         "free_text",
@@ -324,16 +325,34 @@
       "first_guide_prefix": "「換位思考」是站在別人的角度看事情，試著理解對方的處境、想法與感受。故事中的阿公、小男孩或是麵攤老闆，他們都能夠換位思考",
       "mcq_leakage": 0
     },
-    "L0009": null,
+    "L0009": {
+      "strategy_type": "emotion_management",
+      "block_count": 3,
+      "type_histogram": {
+        "guide": 2,
+        "self_check": 1
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "self_check"
+      ],
+      "guide_count": 2,
+      "passage_count": 0,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "一、請你自己檢查以下3項，確定自己是否已經學會運用「情緒管理ABC模型」來思考與判斷。",
+      "mcq_leakage": 0
+    },
     "L0010": {
       "strategy_type": "sel_character",
       "block_count": 21,
       "type_histogram": {
-        "figure": 2,
         "free_text": 5,
         "guide": 8,
         "passage": 1,
-        "single": 5
+        "single": 5,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -342,14 +361,14 @@
         "single",
         "single",
         "free_text",
-        "figure",
+        "table",
         "single",
         "guide",
         "guide",
         "single",
         "single",
         "free_text",
-        "figure",
+        "table",
         "free_text",
         "guide",
         "guide",
@@ -402,16 +421,16 @@
       "strategy_type": "inference",
       "block_count": 22,
       "type_histogram": {
-        "figure": 2,
         "free_text": 5,
         "guide": 13,
-        "single": 2
+        "single": 2,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "free_text",
         "guide",
         "guide",
@@ -419,7 +438,7 @@
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "free_text",
         "guide",
         "guide",
@@ -500,12 +519,12 @@
       "strategy_type": "inference",
       "block_count": 2,
       "type_histogram": {
-        "figure": 1,
-        "guide": 1
+        "guide": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 1,
       "passage_count": 0,
@@ -518,10 +537,10 @@
       "strategy_type": "inference",
       "block_count": 11,
       "type_histogram": {
-        "figure": 1,
         "free_text": 3,
         "guide": 6,
-        "passage": 1
+        "passage": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -531,7 +550,7 @@
         "free_text",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "passage"
@@ -547,15 +566,15 @@
       "strategy_type": "sel_character",
       "block_count": 6,
       "type_histogram": {
-        "figure": 2,
         "guide": 3,
-        "passage": 1
+        "passage": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage"
       ],
@@ -570,10 +589,10 @@
       "strategy_type": "writing_technique",
       "block_count": 9,
       "type_histogram": {
-        "figure": 1,
         "free_text": 5,
         "guide": 1,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -583,7 +602,7 @@
         "single",
         "single",
         "free_text",
-        "figure",
+        "table",
         "free_text"
       ],
       "guide_count": 1,
@@ -597,19 +616,19 @@
       "strategy_type": "writing_technique",
       "block_count": 19,
       "type_histogram": {
-        "figure": 2,
         "free_text": 10,
         "guide": 5,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "single",
         "free_text",
-        "figure",
+        "table",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
@@ -700,20 +719,50 @@
       "first_guide_prefix": "本課閱讀策略：未知策略",
       "mcq_leakage": 0
     },
-    "L0022": null,
+    "L0022": {
+      "strategy_type": "sel_character",
+      "block_count": 12,
+      "type_histogram": {
+        "guide": 5,
+        "multi": 2,
+        "passage": 1,
+        "single": 2,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "single",
+        "single",
+        "guide",
+        "multi",
+        "guide",
+        "table",
+        "guide",
+        "multi",
+        "guide",
+        "table",
+        "passage"
+      ],
+      "guide_count": 5,
+      "passage_count": 1,
+      "qa_total": 4,
+      "null_answers": 0,
+      "first_guide_prefix": "一、辨識「吃醋」",
+      "mcq_leakage": 0
+    },
     "L0023": {
       "strategy_type": "main_idea_inference",
       "block_count": 16,
       "type_histogram": {
-        "figure": 1,
         "free_text": 2,
         "guide": 9,
-        "multi": 4
+        "multi": 4,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "free_text",
@@ -829,12 +878,12 @@
       "strategy_type": "comparison",
       "block_count": 23,
       "type_histogram": {
-        "figure": 1,
         "fill_table": 1,
         "free_text": 6,
         "guide": 7,
         "multi": 1,
-        "single": 7
+        "single": 7,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -851,7 +900,7 @@
         "single",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "free_text",
         "single",
         "single",
@@ -890,16 +939,16 @@
       "strategy_type": "sel_character",
       "block_count": 11,
       "type_histogram": {
-        "figure": 2,
         "free_text": 3,
-        "guide": 6
+        "guide": 6,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
@@ -916,11 +965,12 @@
     },
     "L0030": {
       "strategy_type": "summary",
-      "block_count": 9,
+      "block_count": 11,
       "type_histogram": {
         "figure": 1,
         "guide": 7,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "figure",
@@ -928,10 +978,12 @@
         "single",
         "guide",
         "guide",
+        "table",
         "guide",
         "guide",
         "guide",
-        "guide"
+        "guide",
+        "table"
       ],
       "guide_count": 7,
       "passage_count": 0,
@@ -944,23 +996,23 @@
       "strategy_type": "trait_inference",
       "block_count": 14,
       "type_histogram": {
-        "figure": 3,
         "guide": 10,
-        "self_check": 1
+        "self_check": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "self_check"
       ],
@@ -973,11 +1025,12 @@
     },
     "L0032": {
       "strategy_type": "summary",
-      "block_count": 13,
+      "block_count": 14,
       "type_histogram": {
-        "figure": 2,
+        "figure": 1,
         "guide": 10,
-        "passage": 1
+        "passage": 1,
+        "table": 2
       },
       "type_sequence": [
         "figure",
@@ -989,10 +1042,11 @@
         "guide",
         "guide",
         "guide",
+        "table",
         "guide",
         "guide",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 10,
       "passage_count": 1,
@@ -1059,11 +1113,11 @@
       "strategy_type": "sel_character",
       "block_count": 12,
       "type_histogram": {
-        "figure": 1,
         "fill_table": 1,
         "free_text": 3,
         "guide": 6,
-        "passage": 1
+        "passage": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -1073,7 +1127,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "free_text",
         "guide",
@@ -1090,9 +1144,9 @@
       "strategy_type": "main_idea_inference",
       "block_count": 15,
       "type_histogram": {
-        "figure": 2,
         "guide": 11,
-        "passage": 2
+        "passage": 2,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -1104,12 +1158,12 @@
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "passage",
         "guide",
         "guide",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 11,
       "passage_count": 2,
@@ -1122,16 +1176,16 @@
       "strategy_type": "main_idea_inference",
       "block_count": 14,
       "type_histogram": {
-        "figure": 2,
         "fill_table": 1,
         "guide": 10,
-        "multi": 1
+        "multi": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -1141,7 +1195,7 @@
         "guide",
         "fill_table",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 10,
       "passage_count": 0,
@@ -1243,10 +1297,10 @@
       "strategy_type": "sel_character",
       "block_count": 35,
       "type_histogram": {
-        "figure": 3,
         "guide": 30,
         "multi": 1,
-        "single": 1
+        "single": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -1261,7 +1315,7 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -1276,14 +1330,14 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
         "guide",
         "multi",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 30,
       "passage_count": 0,
@@ -1296,11 +1350,11 @@
       "strategy_type": "sel_character",
       "block_count": 32,
       "type_histogram": {
-        "figure": 2,
         "free_text": 6,
         "guide": 22,
         "multi": 1,
-        "self_check": 1
+        "self_check": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -1322,12 +1376,12 @@
         "multi",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -1343,16 +1397,41 @@
       "first_guide_prefix": "上一課，我們學會在時間不夠時，用「列出任務、排出先後、安排做法、檢查調整」處理臨時出現的時間衝突。\n    〈我的電競夢",
       "mcq_leakage": 0
     },
-    "L0041": null,
+    "L0041": {
+      "strategy_type": "trait_inference",
+      "block_count": 8,
+      "type_histogram": {
+        "guide": 5,
+        "self_check": 1,
+        "single": 1,
+        "table": 1
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "table",
+        "self_check"
+      ],
+      "guide_count": 5,
+      "passage_count": 0,
+      "qa_total": 1,
+      "null_answers": 0,
+      "first_guide_prefix": "一、先複習：哪些言行能支持「自律」？",
+      "mcq_leakage": 0
+    },
     "L0042": {
       "strategy_type": "inference",
       "block_count": 28,
       "type_histogram": {
-        "figure": 3,
         "free_text": 3,
         "guide": 17,
         "self_check": 1,
-        "single": 4
+        "single": 4,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -1365,9 +1444,9 @@
         "guide",
         "guide",
         "guide",
-        "figure",
-        "figure",
-        "figure",
+        "table",
+        "table",
+        "table",
         "guide",
         "free_text",
         "single",
@@ -1395,32 +1474,32 @@
       "strategy_type": "trait_inference",
       "block_count": 22,
       "type_histogram": {
-        "figure": 5,
         "free_text": 4,
         "guide": 11,
-        "single": 2
+        "single": 2,
+        "table": 5
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "guide"
       ],
@@ -1431,7 +1510,189 @@
       "first_guide_prefix": "前面，我們學會從人物說的話、做的事的言行推論人物特質。這一課要再往前一步：把推論出的特質放回故事裡，看看這項特質如何影響",
       "mcq_leakage": 0
     },
-    "L0044": null,
+    "L0044": {
+      "strategy_type": "self_questioning",
+      "block_count": 163,
+      "type_histogram": {
+        "free_text": 59,
+        "guide": 75,
+        "multi": 1,
+        "passage": 8,
+        "single": 19,
+        "table": 1
+      },
+      "type_sequence": [
+        "table",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "single",
+        "multi",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "single",
+        "guide",
+        "single",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "passage",
+        "free_text",
+        "passage",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "single",
+        "passage",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "passage",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "passage",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "free_text",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "free_text",
+        "passage",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "passage",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 75,
+      "passage_count": 8,
+      "qa_total": 20,
+      "null_answers": 0,
+      "first_guide_prefix": "一、特殊標點──分號",
+      "mcq_leakage": 0
+    },
     "L0045": {
       "strategy_type": "inference",
       "block_count": 60,
@@ -1515,10 +1776,10 @@
       "strategy_type": "inference",
       "block_count": 57,
       "type_histogram": {
-        "figure": 1,
         "free_text": 27,
         "guide": 24,
-        "single": 5
+        "single": 5,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -1577,7 +1838,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure"
+        "table"
       ],
       "guide_count": 24,
       "passage_count": 0,
@@ -1590,12 +1851,12 @@
       "strategy_type": "inference",
       "block_count": 51,
       "type_histogram": {
-        "figure": 1,
         "free_text": 34,
         "guide": 6,
         "passage": 4,
         "self_check": 1,
-        "single": 5
+        "single": 5,
+        "table": 1
       },
       "type_sequence": [
         "single",
@@ -1647,7 +1908,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 6,
@@ -1661,12 +1922,13 @@
       "strategy_type": "inference",
       "block_count": 49,
       "type_histogram": {
-        "figure": 2,
+        "figure": 1,
         "free_text": 14,
         "guide": 18,
         "passage": 1,
         "self_check": 1,
-        "single": 13
+        "single": 13,
+        "table": 1
       },
       "type_sequence": [
         "figure",
@@ -1716,7 +1978,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 18,
@@ -1806,7 +2068,44 @@
       "first_guide_prefix": "這是一個真實故事，過去，我們已經學會用「問題—解決—結果」整理文章重點：\n1.發生了什麼問題？\n2.誰採取了什麼行動？\n",
       "mcq_leakage": 0
     },
-    "L0052": null,
+    "L0052": {
+      "strategy_type": "inference",
+      "block_count": 19,
+      "type_histogram": {
+        "free_text": 1,
+        "guide": 13,
+        "self_check": 1,
+        "single": 2,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "single",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "single",
+        "self_check"
+      ],
+      "guide_count": 13,
+      "passage_count": 0,
+      "qa_total": 2,
+      "null_answers": 0,
+      "first_guide_prefix": "一、找出要回答的問題",
+      "mcq_leakage": 0
+    },
     "L0053": {
       "strategy_type": "inference",
       "block_count": 26,
@@ -1958,7 +2257,48 @@
       "first_guide_prefix": "主題句是段落中最能說出主要內容的句子。其他句子通常會說明、舉例或補充它。\n有些段落的主題句在開頭，有些在中間或結尾。找主",
       "mcq_leakage": 0
     },
-    "L0056": null,
+    "L0056": {
+      "strategy_type": "sel_character",
+      "block_count": 24,
+      "type_histogram": {
+        "free_text": 3,
+        "guide": 17,
+        "single": 3,
+        "table": 1
+      },
+      "type_sequence": [
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 17,
+      "passage_count": 0,
+      "qa_total": 3,
+      "null_answers": 0,
+      "first_guide_prefix": "一、整理例子：看作者怎麼換一個角度看事情",
+      "mcq_leakage": 0
+    },
     "L0057": {
       "strategy_type": "summary",
       "block_count": 46,
@@ -2027,12 +2367,12 @@
       "strategy_type": "summary",
       "block_count": 29,
       "type_histogram": {
-        "figure": 2,
         "free_text": 7,
         "guide": 13,
         "passage": 1,
         "self_check": 1,
-        "single": 5
+        "single": 5,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -2049,7 +2389,7 @@
         "free_text",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "free_text",
         "passage",
@@ -2062,7 +2402,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 13,
@@ -2072,7 +2412,49 @@
       "first_guide_prefix": "一、找小主題與重要細節：第三段",
       "mcq_leakage": 0
     },
-    "L0059": null,
+    "L0059": {
+      "strategy_type": "sel_character",
+      "block_count": 24,
+      "type_histogram": {
+        "free_text": 4,
+        "guide": 10,
+        "self_check": 1,
+        "single": 7,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "table",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "single",
+        "free_text",
+        "table",
+        "guide",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "single",
+        "free_text",
+        "free_text",
+        "free_text",
+        "single",
+        "self_check"
+      ],
+      "guide_count": 10,
+      "passage_count": 0,
+      "qa_total": 7,
+      "null_answers": 0,
+      "first_guide_prefix": "一、從媽媽的反應找出共同信念",
+      "mcq_leakage": 0
+    },
     "L0060": {
       "strategy_type": "main_idea_inference",
       "block_count": 15,
@@ -2110,12 +2492,12 @@
       "strategy_type": "writing_technique",
       "block_count": 31,
       "type_histogram": {
-        "figure": 3,
         "fill_table": 1,
         "free_text": 5,
         "guide": 15,
         "self_check": 1,
-        "single": 6
+        "single": 6,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -2123,7 +2505,7 @@
         "guide",
         "single",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "guide",
@@ -2139,13 +2521,13 @@
         "guide",
         "single",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "fill_table",
         "self_check"
@@ -2161,10 +2543,10 @@
       "strategy_type": "sel_character",
       "block_count": 13,
       "type_histogram": {
-        "figure": 2,
         "guide": 5,
         "multi": 2,
-        "passage": 4
+        "passage": 4,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -2173,11 +2555,11 @@
         "multi",
         "guide",
         "passage",
-        "figure",
+        "table",
         "passage",
         "multi",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage"
       ],
@@ -2192,9 +2574,9 @@
       "strategy_type": "summary_pse",
       "block_count": 24,
       "type_histogram": {
-        "figure": 3,
         "guide": 19,
-        "single": 2
+        "single": 2,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -2202,10 +2584,10 @@
         "single",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
@@ -2216,7 +2598,7 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -2229,22 +2611,90 @@
       "first_guide_prefix": "這三篇都是說明文，分別從商品價格、政府政策和工作薪資，說明「物以稀為貴」背後的供需關係。為了說清楚這個抽象概念，三篇文章",
       "mcq_leakage": 0
     },
-    "L0064": null,
-    "L0065": null,
+    "L0064": {
+      "strategy_type": "summary_pse",
+      "block_count": 18,
+      "type_histogram": {
+        "guide": 8,
+        "multi": 2,
+        "passage": 3,
+        "single": 3,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "table",
+        "passage",
+        "multi",
+        "passage",
+        "guide",
+        "guide",
+        "single",
+        "guide",
+        "single",
+        "guide",
+        "single",
+        "guide",
+        "multi",
+        "guide",
+        "table",
+        "guide",
+        "passage"
+      ],
+      "guide_count": 8,
+      "passage_count": 3,
+      "qa_total": 5,
+      "null_answers": 0,
+      "first_guide_prefix": "一、辨識情緒--悲傷五階段：",
+      "mcq_leakage": 0
+    },
+    "L0065": {
+      "strategy_type": "writing_technique",
+      "block_count": 15,
+      "type_histogram": {
+        "free_text": 3,
+        "guide": 4,
+        "single": 6,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "single",
+        "single",
+        "guide",
+        "free_text",
+        "table",
+        "free_text",
+        "single",
+        "single",
+        "free_text",
+        "single",
+        "single"
+      ],
+      "guide_count": 4,
+      "passage_count": 0,
+      "qa_total": 6,
+      "null_answers": 0,
+      "first_guide_prefix": "一、找出反話，讀懂真正意思",
+      "mcq_leakage": 0
+    },
     "L0066": {
       "strategy_type": "writing_technique",
       "block_count": 16,
       "type_histogram": {
-        "figure": 2,
         "free_text": 3,
         "guide": 8,
-        "single": 3
+        "single": 3,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
@@ -2256,7 +2706,7 @@
         "free_text",
         "free_text",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 8,
       "passage_count": 0,
@@ -2269,23 +2719,24 @@
       "strategy_type": "self_questioning",
       "block_count": 66,
       "type_histogram": {
-        "figure": 4,
+        "figure": 1,
         "fill_table": 1,
         "free_text": 28,
         "guide": 26,
         "multi": 1,
-        "single": 6
+        "single": 6,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "single",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "single",
@@ -2342,7 +2793,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure"
+        "table"
       ],
       "guide_count": 26,
       "passage_count": 0,
@@ -2355,17 +2806,17 @@
       "strategy_type": "self_questioning",
       "block_count": 24,
       "type_histogram": {
-        "figure": 1,
         "free_text": 19,
         "guide": 2,
         "passage": 1,
-        "self_check": 1
+        "self_check": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "passage",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "free_text",
         "free_text",
@@ -2394,7 +2845,43 @@
       "first_guide_prefix": "上一課，我們學會：讀人物故事時，先看故事發展到哪裡，再選一個適合的問題，帶著問題讀下一部分：\n①他想做什麼？為什麼想做？",
       "mcq_leakage": 0
     },
-    "L0069": null,
+    "L0069": {
+      "strategy_type": "multiple_perspectives",
+      "block_count": 16,
+      "type_histogram": {
+        "fill_table": 1,
+        "free_text": 1,
+        "guide": 6,
+        "passage": 2,
+        "self_check": 1,
+        "single": 3,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "single",
+        "guide",
+        "free_text",
+        "table",
+        "single",
+        "guide",
+        "passage",
+        "fill_table",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "single",
+        "table",
+        "self_check"
+      ],
+      "guide_count": 6,
+      "passage_count": 2,
+      "qa_total": 3,
+      "null_answers": 0,
+      "first_guide_prefix": "一、確定議題",
+      "mcq_leakage": 0
+    },
     "L0070": {
       "strategy_type": "self_questioning",
       "block_count": 144,
@@ -2562,17 +3049,17 @@
       "strategy_type": "comparison",
       "block_count": 28,
       "type_histogram": {
-        "figure": 3,
         "free_text": 9,
         "guide": 9,
-        "single": 7
+        "single": 7,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "free_text",
         "single",
@@ -2581,7 +3068,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "free_text",
         "single",
@@ -2590,7 +3077,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "single",
         "single",
@@ -2609,15 +3096,15 @@
       "strategy_type": "emotion_inference",
       "block_count": 6,
       "type_histogram": {
-        "figure": 1,
         "guide": 3,
         "passage": 1,
-        "single": 1
+        "single": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "passage"
@@ -2718,7 +3205,45 @@
       "first_guide_prefix": "◎小試身手",
       "mcq_leakage": 0
     },
-    "L0076": null,
+    "L0076": {
+      "strategy_type": "sel_character",
+      "block_count": 20,
+      "type_histogram": {
+        "free_text": 4,
+        "guide": 7,
+        "multi": 1,
+        "single": 7,
+        "table": 1
+      },
+      "type_sequence": [
+        "guide",
+        "free_text",
+        "table",
+        "single",
+        "guide",
+        "free_text",
+        "guide",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "multi"
+      ],
+      "guide_count": 7,
+      "passage_count": 0,
+      "qa_total": 8,
+      "null_answers": 0,
+      "first_guide_prefix": "看看陳醫師怎麼做",
+      "mcq_leakage": 0
+    },
     "L0077": {
       "strategy_type": "unknown",
       "block_count": 2,
@@ -2741,12 +3266,12 @@
       "strategy_type": "sel_character",
       "block_count": 55,
       "type_histogram": {
-        "figure": 2,
         "free_text": 10,
         "guide": 25,
         "multi": 2,
         "passage": 4,
-        "single": 12
+        "single": 12,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -2759,7 +3284,7 @@
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "single",
         "free_text",
         "guide",
@@ -2777,7 +3302,7 @@
         "free_text",
         "passage",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -2816,24 +3341,24 @@
       "strategy_type": "main_idea_inference",
       "block_count": 13,
       "type_histogram": {
-        "figure": 3,
         "free_text": 2,
         "guide": 4,
         "passage": 2,
-        "single": 2
+        "single": 2,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "single",
         "single",
         "free_text",
         "passage",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "guide"
       ],
@@ -2848,15 +3373,15 @@
       "strategy_type": "comparison",
       "block_count": 5,
       "type_histogram": {
-        "figure": 1,
         "guide": 3,
-        "passage": 1
+        "passage": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide"
       ],
       "guide_count": 3,
@@ -2870,14 +3395,14 @@
       "strategy_type": "comparison",
       "block_count": 4,
       "type_histogram": {
-        "figure": 1,
-        "guide": 3
+        "guide": 3,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 3,
       "passage_count": 0,
@@ -2890,16 +3415,16 @@
       "strategy_type": "comparison",
       "block_count": 5,
       "type_histogram": {
-        "figure": 1,
         "free_text": 1,
-        "guide": 3
+        "guide": 3,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "free_text",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 3,
       "passage_count": 0,
@@ -2912,17 +3437,17 @@
       "strategy_type": "comparison",
       "block_count": 6,
       "type_histogram": {
-        "figure": 2,
         "free_text": 2,
-        "guide": 2
+        "guide": 2,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "free_text",
-        "figure"
+        "table"
       ],
       "guide_count": 2,
       "passage_count": 0,
@@ -2964,13 +3489,14 @@
     },
     "L0085": {
       "strategy_type": "self_questioning",
-      "block_count": 71,
+      "block_count": 72,
       "type_histogram": {
-        "figure": 3,
+        "figure": 1,
         "free_text": 31,
         "guide": 24,
         "passage": 1,
-        "single": 12
+        "single": 12,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -2978,9 +3504,10 @@
         "guide",
         "free_text",
         "free_text",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "single",
@@ -3043,7 +3570,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure"
+        "table"
       ],
       "guide_count": 24,
       "passage_count": 1,
@@ -3054,42 +3581,44 @@
     },
     "L0086": {
       "strategy_type": "self_questioning",
-      "block_count": 58,
+      "block_count": 59,
       "type_histogram": {
-        "figure": 6,
+        "figure": 1,
         "fill_table": 1,
         "free_text": 30,
         "guide": 14,
         "passage": 1,
-        "single": 6
+        "single": 6,
+        "table": 6
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
         "single",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "free_text",
-        "figure",
+        "table",
         "single",
         "guide",
         "passage",
         "guide",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "single",
@@ -3132,14 +3661,15 @@
     },
     "L0087": {
       "strategy_type": "self_questioning",
-      "block_count": 56,
+      "block_count": 57,
       "type_histogram": {
-        "figure": 3,
+        "figure": 1,
         "fill_table": 2,
         "free_text": 25,
         "guide": 19,
         "multi": 1,
-        "single": 6
+        "single": 6,
+        "table": 3
       },
       "type_sequence": [
         "guide",
@@ -3147,14 +3677,15 @@
         "guide",
         "free_text",
         "free_text",
+        "table",
         "guide",
         "guide",
         "guide",
         "single",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "single",
         "single",
         "guide",
@@ -3210,12 +3741,13 @@
       "strategy_type": "main_idea_inference",
       "block_count": 31,
       "type_histogram": {
-        "figure": 2,
+        "figure": 1,
         "free_text": 2,
         "guide": 15,
         "passage": 8,
         "self_check": 1,
-        "single": 3
+        "single": 3,
+        "table": 1
       },
       "type_sequence": [
         "figure",
@@ -3239,7 +3771,7 @@
         "single",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "free_text",
@@ -3261,11 +3793,11 @@
       "strategy_type": "self_questioning",
       "block_count": 45,
       "type_histogram": {
-        "figure": 2,
         "free_text": 12,
         "guide": 25,
         "self_check": 1,
-        "single": 5
+        "single": 5,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -3273,7 +3805,7 @@
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "single",
         "guide",
@@ -3311,7 +3843,7 @@
         "free_text",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 25,
@@ -3325,12 +3857,12 @@
       "strategy_type": "info_organization",
       "block_count": 29,
       "type_histogram": {
-        "figure": 1,
         "fill_table": 1,
         "free_text": 7,
         "guide": 13,
         "self_check": 1,
-        "single": 6
+        "single": 6,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -3338,7 +3870,7 @@
         "guide",
         "guide",
         "single",
-        "figure",
+        "table",
         "single",
         "guide",
         "guide",
@@ -3424,7 +3956,46 @@
       "first_guide_prefix": "根據課文，李昌鈺博士在辦案的過程中，不斷運用這四個步驟思考、解決問題。發現問題→提出假設→檢驗假設→提出解答。\n*發現問",
       "mcq_leakage": 0
     },
-    "L0094": null,
+    "L0094": {
+      "strategy_type": "unknown",
+      "block_count": 22,
+      "type_histogram": {
+        "free_text": 4,
+        "guide": 16,
+        "multi": 1,
+        "single": 1
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "multi",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "single"
+      ],
+      "guide_count": 16,
+      "passage_count": 0,
+      "qa_total": 2,
+      "null_answers": 0,
+      "first_guide_prefix": "一、看福爾摩斯如何推理",
+      "mcq_leakage": 0
+    },
     "L0095": {
       "strategy_type": "inference",
       "block_count": 33,
@@ -3504,16 +4075,16 @@
       "strategy_type": "image_text",
       "block_count": 18,
       "type_histogram": {
-        "figure": 1,
         "fill_table": 1,
         "guide": 12,
         "multi": 2,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -3541,19 +4112,19 @@
       "strategy_type": "image_text",
       "block_count": 31,
       "type_histogram": {
-        "figure": 2,
         "free_text": 8,
-        "guide": 21
+        "guide": 21,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
@@ -3589,12 +4160,13 @@
       "strategy_type": "main_idea_inference",
       "block_count": 23,
       "type_histogram": {
-        "figure": 2,
+        "figure": 1,
         "guide": 11,
         "multi": 1,
         "passage": 5,
         "self_check": 1,
-        "single": 3
+        "single": 3,
+        "table": 1
       },
       "type_sequence": [
         "figure",
@@ -3615,7 +4187,7 @@
         "single",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -3632,13 +4204,13 @@
       "strategy_type": "main_idea_inference",
       "block_count": 53,
       "type_histogram": {
-        "figure": 1,
         "free_text": 17,
         "guide": 23,
         "multi": 2,
         "passage": 5,
         "self_check": 1,
-        "single": 4
+        "single": 4,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -3692,7 +4264,7 @@
         "passage",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 23,
@@ -3706,21 +4278,21 @@
       "strategy_type": "main_idea_inference",
       "block_count": 20,
       "type_histogram": {
-        "figure": 2,
         "free_text": 3,
         "guide": 7,
         "passage": 6,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -3742,7 +4314,72 @@
       "first_guide_prefix": "這是一篇說明文，說明文的重要觀點經常會出現在文章開頭或結尾，有時則分散在不同段落中，需要讀者先找出各段重點，再把它們整合",
       "mcq_leakage": 0
     },
-    "L0102": null,
+    "L0102": {
+      "strategy_type": "sel_character",
+      "block_count": 46,
+      "type_histogram": {
+        "free_text": 13,
+        "guide": 10,
+        "multi": 7,
+        "passage": 13,
+        "single": 2,
+        "table": 1
+      },
+      "type_sequence": [
+        "passage",
+        "guide",
+        "passage",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "passage",
+        "single",
+        "free_text",
+        "passage",
+        "multi",
+        "free_text",
+        "passage",
+        "multi",
+        "passage",
+        "single",
+        "guide",
+        "multi",
+        "guide",
+        "passage",
+        "free_text",
+        "passage",
+        "multi",
+        "free_text",
+        "passage",
+        "multi",
+        "free_text",
+        "passage",
+        "multi",
+        "passage",
+        "free_text",
+        "passage",
+        "multi",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "passage"
+      ],
+      "guide_count": 10,
+      "passage_count": 13,
+      "qa_total": 9,
+      "null_answers": 0,
+      "first_guide_prefix": "可是，看起來「像」科學，不代表結論真的有科學根據。",
+      "mcq_leakage": 0
+    },
     "L0103": {
       "strategy_type": "summary_pse",
       "block_count": 30,
@@ -3796,17 +4433,17 @@
       "strategy_type": "summary_pse",
       "block_count": 10,
       "type_histogram": {
-        "figure": 1,
         "guide": 5,
         "passage": 1,
         "self_check": 1,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "single",
@@ -3825,13 +4462,13 @@
       "strategy_type": "summary",
       "block_count": 23,
       "type_histogram": {
-        "figure": 2,
         "free_text": 5,
         "guide": 10,
         "multi": 1,
         "passage": 2,
         "self_check": 1,
-        "single": 2
+        "single": 2,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -3844,10 +4481,10 @@
         "passage",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "single",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
@@ -3865,7 +4502,98 @@
       "first_guide_prefix": "一、找到文章裡的人物發展",
       "mcq_leakage": 0
     },
-    "L0106": null,
+    "L0106": {
+      "strategy_type": "self_questioning",
+      "block_count": 72,
+      "type_histogram": {
+        "free_text": 24,
+        "guide": 37,
+        "multi": 1,
+        "passage": 1,
+        "single": 5,
+        "table": 4
+      },
+      "type_sequence": [
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "table",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "passage",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "guide",
+        "free_text",
+        "single",
+        "free_text",
+        "table",
+        "single",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "single",
+        "free_text",
+        "free_text",
+        "guide",
+        "single",
+        "free_text",
+        "free_text",
+        "table",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "multi",
+        "free_text",
+        "free_text",
+        "table",
+        "free_text",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 37,
+      "passage_count": 1,
+      "qa_total": 6,
+      "null_answers": 0,
+      "first_guide_prefix": "示範１：來看一個例子（110年會考國文第５題；110-5）",
+      "mcq_leakage": 0
+    },
     "L0107": {
       "strategy_type": "unknown",
       "block_count": 2,
@@ -3888,19 +4616,19 @@
       "strategy_type": "main_idea_inference",
       "block_count": 17,
       "type_histogram": {
-        "figure": 2,
         "free_text": 1,
         "guide": 7,
         "multi": 1,
         "passage": 5,
-        "self_check": 1
+        "self_check": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "passage",
@@ -3911,7 +4639,7 @@
         "multi",
         "guide",
         "passage",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 7,
@@ -3925,26 +4653,26 @@
       "strategy_type": "main_idea_inference",
       "block_count": 14,
       "type_histogram": {
-        "figure": 3,
         "guide": 6,
         "passage": 3,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
         "passage",
         "single",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 6,
@@ -3958,17 +4686,17 @@
       "strategy_type": "main_idea_inference",
       "block_count": 12,
       "type_histogram": {
-        "figure": 1,
         "free_text": 2,
         "guide": 3,
         "multi": 1,
         "passage": 2,
         "self_check": 1,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "single",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "passage",
@@ -3989,15 +4717,17 @@
     },
     "L0111": {
       "strategy_type": "inference",
-      "block_count": 44,
+      "block_count": 47,
       "type_histogram": {
         "free_text": 7,
         "guide": 18,
-        "passage": 3,
-        "single": 16
+        "passage": 4,
+        "single": 16,
+        "table": 2
       },
       "type_sequence": [
         "guide",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -4018,6 +4748,8 @@
         "single",
         "single",
         "free_text",
+        "passage",
+        "table",
         "passage",
         "guide",
         "passage",
@@ -4043,24 +4775,84 @@
         "guide"
       ],
       "guide_count": 18,
-      "passage_count": 3,
+      "passage_count": 4,
       "qa_total": 16,
       "null_answers": 0,
       "first_guide_prefix": "說明：\n閱讀的時候，如果文章出現很多不熟的新詞，越讀越卡時，該怎麼辦？這一課要練一個策略──「跳過卡關、先瀏覽全文」。這",
       "mcq_leakage": 0
     },
-    "L0112": null,
+    "L0112": {
+      "strategy_type": "inference",
+      "block_count": 42,
+      "type_histogram": {
+        "free_text": 22,
+        "guide": 9,
+        "passage": 2,
+        "single": 8,
+        "table": 1
+      },
+      "type_sequence": [
+        "guide",
+        "passage",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "single",
+        "guide",
+        "single",
+        "single",
+        "guide",
+        "passage",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "guide",
+        "single",
+        "guide",
+        "single",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "table"
+      ],
+      "guide_count": 9,
+      "passage_count": 2,
+      "qa_total": 8,
+      "null_answers": 0,
+      "first_guide_prefix": "〈未來的農夫〉",
+      "mcq_leakage": 0
+    },
     "L0113": {
       "strategy_type": "multiple_perspectives",
       "block_count": 16,
       "type_histogram": {
-        "figure": 2,
         "fill_table": 1,
         "free_text": 1,
         "guide": 6,
         "passage": 4,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -4068,10 +4860,10 @@
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -4091,12 +4883,12 @@
       "strategy_type": "multiple_perspectives",
       "block_count": 16,
       "type_histogram": {
-        "figure": 2,
         "fill_table": 1,
         "guide": 9,
         "passage": 2,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -4105,10 +4897,10 @@
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -4127,12 +4919,12 @@
       "strategy_type": "multiple_perspectives",
       "block_count": 22,
       "type_histogram": {
-        "figure": 4,
         "guide": 9,
         "multi": 1,
         "passage": 6,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 4
       },
       "type_sequence": [
         "guide",
@@ -4140,11 +4932,11 @@
         "guide",
         "guide",
         "guide",
-        "figure",
-        "figure",
+        "table",
+        "table",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
@@ -4155,7 +4947,7 @@
         "single",
         "guide",
         "passage",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 9,
@@ -4169,18 +4961,18 @@
       "strategy_type": "writing_technique",
       "block_count": 23,
       "type_histogram": {
-        "figure": 3,
         "free_text": 4,
         "guide": 10,
         "passage": 1,
         "self_check": 1,
-        "single": 4
+        "single": 4,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "guide",
         "free_text",
@@ -4191,13 +4983,13 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "single",
         "guide",
         "passage",
         "guide",
         "free_text",
-        "figure",
+        "table",
         "single",
         "self_check"
       ],
@@ -4212,13 +5004,14 @@
       "strategy_type": "causal_inference",
       "block_count": 50,
       "type_histogram": {
-        "figure": 3,
+        "figure": 1,
         "fill_table": 1,
         "free_text": 10,
         "guide": 30,
         "passage": 4,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "figure",
@@ -4240,13 +5033,13 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "guide",
         "guide",
@@ -4281,21 +5074,22 @@
     },
     "L0118": {
       "strategy_type": "writing_technique",
-      "block_count": 12,
+      "block_count": 13,
       "type_histogram": {
-        "figure": 1,
         "guide": 5,
         "passage": 1,
         "self_check": 1,
-        "single": 4
+        "single": 4,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
+        "table",
         "guide",
         "single",
         "single",
@@ -4314,14 +5108,14 @@
       "strategy_type": "writing_technique",
       "block_count": 4,
       "type_histogram": {
-        "figure": 1,
-        "guide": 3
+        "guide": 3,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 3,
       "passage_count": 0,
@@ -4378,17 +5172,64 @@
       "first_guide_prefix": "一、鬼火是怎麼回事？科學探究的步驟",
       "mcq_leakage": 0
     },
-    "L0121": null,
+    "L0121": {
+      "strategy_type": "sel_character",
+      "block_count": 30,
+      "type_histogram": {
+        "guide": 20,
+        "passage": 9,
+        "table": 1
+      },
+      "type_sequence": [
+        "passage",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "passage",
+        "guide",
+        "passage",
+        "guide",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "passage",
+        "guide",
+        "guide",
+        "passage",
+        "guide",
+        "guide",
+        "passage"
+      ],
+      "guide_count": 20,
+      "passage_count": 9,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "一、辨識界線",
+      "mcq_leakage": 0
+    },
     "L0122": {
       "strategy_type": "causal_inference",
-      "block_count": 31,
+      "block_count": 32,
       "type_histogram": {
-        "figure": 3,
+        "figure": 1,
         "free_text": 5,
         "guide": 18,
         "multi": 1,
         "passage": 3,
-        "single": 1
+        "single": 1,
+        "table": 3
       },
       "type_sequence": [
         "figure",
@@ -4402,18 +5243,19 @@
         "free_text",
         "free_text",
         "guide",
+        "table",
         "guide",
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "passage",
@@ -4430,22 +5272,48 @@
       "first_guide_prefix": "推論本文的因果關係",
       "mcq_leakage": 0
     },
-    "L0123": null,
+    "L0123": {
+      "strategy_type": "writing_technique",
+      "block_count": 8,
+      "type_histogram": {
+        "fill_table": 1,
+        "guide": 3,
+        "passage": 1,
+        "self_check": 1,
+        "table": 2
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "table",
+        "fill_table",
+        "table",
+        "guide",
+        "passage",
+        "self_check"
+      ],
+      "guide_count": 3,
+      "passage_count": 1,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "一、一起來看看本篇文章中的三組對比：",
+      "mcq_leakage": 0
+    },
     "L0124": {
       "strategy_type": "main_idea_inference",
       "block_count": 20,
       "type_histogram": {
-        "figure": 1,
         "free_text": 3,
         "guide": 13,
         "passage": 1,
-        "single": 2
+        "single": 2,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -4500,16 +5368,84 @@
       "first_guide_prefix": "◎ 小試身手：",
       "mcq_leakage": 0
     },
-    "L0126": null,
+    "L0126": {
+      "strategy_type": "emotion_inference",
+      "block_count": 50,
+      "type_histogram": {
+        "free_text": 13,
+        "guide": 14,
+        "passage": 5,
+        "single": 17,
+        "table": 1
+      },
+      "type_sequence": [
+        "passage",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "table",
+        "guide",
+        "free_text",
+        "single",
+        "free_text",
+        "guide",
+        "guide",
+        "passage",
+        "single",
+        "single",
+        "single",
+        "guide",
+        "passage",
+        "single",
+        "single",
+        "free_text",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "guide",
+        "guide",
+        "passage",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "single",
+        "free_text",
+        "single",
+        "free_text",
+        "guide",
+        "passage",
+        "single",
+        "single",
+        "free_text",
+        "single",
+        "single",
+        "free_text",
+        "single",
+        "guide",
+        "single",
+        "guide"
+      ],
+      "guide_count": 14,
+      "passage_count": 5,
+      "qa_total": 17,
+      "null_answers": 0,
+      "first_guide_prefix": "推論人物內心三步驟",
+      "mcq_leakage": 0
+    },
     "L0127": {
       "strategy_type": "writing_technique",
       "block_count": 21,
       "type_histogram": {
-        "figure": 2,
         "fill_table": 1,
         "guide": 8,
         "passage": 5,
-        "single": 5
+        "single": 5,
+        "table": 2
       },
       "type_sequence": [
         "guide",
@@ -4524,11 +5460,11 @@
         "passage",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "single",
         "single",
@@ -4545,16 +5481,16 @@
       "strategy_type": "main_idea_inference",
       "block_count": 6,
       "type_histogram": {
-        "figure": 2,
         "guide": 3,
-        "self_check": 1
+        "self_check": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 3,
@@ -4568,26 +5504,26 @@
       "strategy_type": "main_idea_inference",
       "block_count": 15,
       "type_histogram": {
-        "figure": 3,
         "guide": 8,
         "passage": 3,
-        "self_check": 1
+        "self_check": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "passage",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 8,
@@ -4619,15 +5555,15 @@
       "strategy_type": "express_opinion",
       "block_count": 5,
       "type_histogram": {
-        "figure": 2,
-        "guide": 3
+        "guide": 3,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure"
+        "table"
       ],
       "guide_count": 3,
       "passage_count": 0,
@@ -4638,27 +5574,27 @@
     },
     "L0132": {
       "strategy_type": "unknown",
-      "block_count": 32,
+      "block_count": 31,
       "type_histogram": {
-        "figure": 5,
         "free_text": 2,
         "guide": 18,
         "self_check": 1,
-        "single": 6
+        "single": 6,
+        "table": 4
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "single",
         "single",
         "guide",
@@ -4669,7 +5605,7 @@
         "free_text",
         "single",
         "guide",
-        "figure",
+        "table",
         "single",
         "guide",
         "guide",
@@ -4677,7 +5613,6 @@
         "guide",
         "guide",
         "guide",
-        "figure",
         "self_check"
       ],
       "guide_count": 18,
@@ -4895,16 +5830,16 @@
       "strategy_type": "sel_character",
       "block_count": 29,
       "type_histogram": {
-        "figure": 3,
         "free_text": 5,
         "guide": 20,
-        "self_check": 1
+        "self_check": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -4912,9 +5847,9 @@
         "guide",
         "free_text",
         "guide",
-        "figure",
+        "table",
         "free_text",
-        "figure",
+        "table",
         "guide",
         "free_text",
         "guide",
@@ -4991,19 +5926,19 @@
       "strategy_type": "writing_technique",
       "block_count": 15,
       "type_histogram": {
-        "figure": 2,
         "guide": 11,
         "passage": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -5024,11 +5959,11 @@
       "strategy_type": "summary",
       "block_count": 26,
       "type_histogram": {
-        "figure": 1,
         "guide": 14,
         "multi": 2,
         "self_check": 1,
-        "single": 8
+        "single": 8,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -5055,7 +5990,7 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 14,
@@ -5069,23 +6004,23 @@
       "strategy_type": "sel_character",
       "block_count": 21,
       "type_histogram": {
-        "figure": 2,
         "free_text": 3,
         "guide": 11,
         "multi": 1,
         "passage": 3,
-        "self_check": 1
+        "self_check": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "free_text",
@@ -5106,25 +6041,53 @@
       "first_guide_prefix": "生活有時候會讓人喘不過氣：壞事突然發生、努力了卻沒結果……但課文中的倫敦人告訴我們一件事：心理韌性不是不會害怕，而是雖然",
       "mcq_leakage": 0
     },
-    "L0143": null,
+    "L0143": {
+      "strategy_type": "unknown",
+      "block_count": 11,
+      "type_histogram": {
+        "free_text": 4,
+        "guide": 4,
+        "single": 2,
+        "table": 1
+      },
+      "type_sequence": [
+        "free_text",
+        "single",
+        "guide",
+        "free_text",
+        "single",
+        "guide",
+        "free_text",
+        "table",
+        "free_text",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 4,
+      "passage_count": 0,
+      "qa_total": 2,
+      "null_answers": 0,
+      "first_guide_prefix": "重點句：但是，高地訓練真的對每個運動員都有幫助嗎？",
+      "mcq_leakage": 0
+    },
     "L0144": null,
     "L0145": null,
     "L0146": {
       "strategy_type": "main_idea_inference",
       "block_count": 15,
       "type_histogram": {
-        "figure": 2,
         "guide": 7,
         "multi": 1,
         "passage": 3,
         "self_check": 1,
-        "single": 1
+        "single": 1,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
         "passage",
-        "figure",
+        "table",
         "single",
         "guide",
         "guide",
@@ -5134,7 +6097,7 @@
         "multi",
         "guide",
         "passage",
-        "figure",
+        "table",
         "self_check"
       ],
       "guide_count": 7,
@@ -5148,11 +6111,11 @@
       "strategy_type": "unknown",
       "block_count": 10,
       "type_histogram": {
-        "figure": 1,
         "free_text": 3,
         "guide": 4,
         "passage": 1,
-        "self_check": 1
+        "self_check": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -5161,7 +6124,7 @@
         "free_text",
         "guide",
         "guide",
-        "figure",
+        "table",
         "free_text",
         "passage",
         "self_check"
@@ -5177,18 +6140,18 @@
       "strategy_type": "problem_solving",
       "block_count": 9,
       "type_histogram": {
-        "figure": 1,
         "free_text": 1,
         "guide": 4,
         "multi": 1,
         "passage": 1,
-        "single": 1
+        "single": 1,
+        "table": 1
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "passage",
         "free_text",
@@ -5240,11 +6203,12 @@
       "strategy_type": "image_text",
       "block_count": 70,
       "type_histogram": {
-        "figure": 2,
+        "figure": 1,
         "free_text": 24,
         "guide": 24,
         "passage": 3,
-        "single": 17
+        "single": 17,
+        "table": 1
       },
       "type_sequence": [
         "figure",
@@ -5296,7 +6260,7 @@
         "single",
         "free_text",
         "single",
-        "figure",
+        "table",
         "single",
         "free_text",
         "guide",
@@ -5358,9 +6322,9 @@
       "strategy_type": "express_opinion",
       "block_count": 18,
       "type_histogram": {
-        "figure": 1,
         "free_text": 10,
-        "guide": 7
+        "guide": 7,
+        "table": 1
       },
       "type_sequence": [
         "guide",
@@ -5374,7 +6338,7 @@
         "free_text",
         "free_text",
         "free_text",
-        "figure",
+        "table",
         "free_text",
         "guide",
         "guide",
@@ -5389,22 +6353,194 @@
       "first_guide_prefix": "本篇文章是作者讀完兩封秦朝家書後，結合其他史料，對信中內容做出推論，並在結尾提出自己的看法。\n　　也就是說，文章中的訊息",
       "mcq_leakage": 0
     },
-    "L0153": null,
-    "L0154": null,
-    "L0155": null,
-    "L0156": {
-      "strategy_type": "sel_character",
-      "block_count": 10,
+    "L0153": {
+      "strategy_type": "writing_technique",
+      "block_count": 31,
       "type_histogram": {
-        "figure": 2,
         "free_text": 1,
-        "guide": 6,
-        "passage": 1
+        "guide": 25,
+        "single": 5
+      },
+      "type_sequence": [
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "single",
+        "single",
+        "single",
+        "single",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 25,
+      "passage_count": 0,
+      "qa_total": 5,
+      "null_answers": 0,
+      "first_guide_prefix": "一、溫故：複習「主語判斷」",
+      "mcq_leakage": 0
+    },
+    "L0154": {
+      "strategy_type": "unknown",
+      "block_count": 47,
+      "type_histogram": {
+        "free_text": 26,
+        "guide": 21
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text"
+      ],
+      "guide_count": 21,
+      "passage_count": 0,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "古人沒有「問號 (?)」，沒有「嗎、呢」等「句尾」疑問助詞，也沒有「如何、為什麼、哪裡、怎麼」等「非句尾」的疑問詞，但他",
+      "mcq_leakage": 0
+    },
+    "L0155": {
+      "strategy_type": "unknown",
+      "block_count": 47,
+      "type_histogram": {
+        "free_text": 13,
+        "guide": 34
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "free_text",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "free_text",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 34,
+      "passage_count": 0,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "你看過文字在句子裡玩「大風吹、換位子」嗎？在中文裡，有一種神奇的魔法叫做「倒裝句」！",
+      "mcq_leakage": 0
+    },
+    "L0156": {
+      "strategy_type": "sel_character",
+      "block_count": 10,
+      "type_histogram": {
+        "figure": 1,
+        "free_text": 1,
+        "guide": 6,
+        "passage": 1,
+        "table": 1
+      },
+      "type_sequence": [
+        "guide",
+        "guide",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -5698,21 +6834,21 @@
       "strategy_type": "sel_character",
       "block_count": 20,
       "type_histogram": {
-        "figure": 3,
         "free_text": 3,
         "guide": 12,
         "multi": 1,
-        "single": 1
+        "single": 1,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
         "multi",
         "guide",
@@ -5737,16 +6873,16 @@
       "strategy_type": "sel_character",
       "block_count": 28,
       "type_histogram": {
-        "figure": 3,
         "guide": 22,
-        "single": 3
+        "single": 3,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "single",
@@ -5768,7 +6904,7 @@
         "guide",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide"
       ],
       "guide_count": 22,
@@ -5780,25 +6916,26 @@
     },
     "L0171": {
       "strategy_type": "sel_character",
-      "block_count": 16,
+      "block_count": 17,
       "type_histogram": {
-        "figure": 2,
         "free_text": 2,
         "guide": 9,
         "multi": 1,
-        "single": 2
+        "single": 2,
+        "table": 3
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "guide",
-        "figure",
+        "table",
         "guide",
         "single",
         "free_text",
+        "table",
         "free_text",
         "guide",
         "multi",
@@ -5817,16 +6954,16 @@
       "strategy_type": "sel_character",
       "block_count": 13,
       "type_histogram": {
-        "figure": 2,
-        "guide": 11
+        "guide": 11,
+        "table": 2
       },
       "type_sequence": [
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
-        "figure",
+        "table",
         "guide",
         "guide",
         "guide",
@@ -5842,8 +6979,118 @@
       "first_guide_prefix": "每個人都有自己的特質，而每種特質都有適合的舞台。本文主角阿翔比較內向、自省，因此容易焦慮和想很多，這樣的特質可以幫助他更",
       "mcq_leakage": 0
     },
-    "L0173": null,
-    "L0174": null,
-    "L0175": null
+    "L0173": {
+      "strategy_type": "sel_character",
+      "block_count": 20,
+      "type_histogram": {
+        "free_text": 1,
+        "guide": 12,
+        "single": 3,
+        "table": 4
+      },
+      "type_sequence": [
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "table",
+        "single",
+        "guide",
+        "guide",
+        "guide",
+        "guide"
+      ],
+      "guide_count": 12,
+      "passage_count": 0,
+      "qa_total": 3,
+      "null_answers": 0,
+      "first_guide_prefix": "◎當我們感到擔心、焦慮時，可以先判斷：當下還有沒有可以採取的努力或行動？如果有，則把焦慮化為行動；如果沒有，就練習將焦慮",
+      "mcq_leakage": 0
+    },
+    "L0174": {
+      "strategy_type": "sel_character",
+      "block_count": 30,
+      "type_histogram": {
+        "free_text": 7,
+        "guide": 13,
+        "single": 10
+      },
+      "type_sequence": [
+        "guide",
+        "single",
+        "guide",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "single",
+        "single",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "free_text",
+        "guide",
+        "single",
+        "guide",
+        "free_text",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "guide",
+        "free_text",
+        "single",
+        "single",
+        "single",
+        "free_text",
+        "guide"
+      ],
+      "guide_count": 13,
+      "passage_count": 0,
+      "qa_total": 10,
+      "null_answers": 0,
+      "first_guide_prefix": "◎從小齊的故事出發：先從小齊的故事來看看他可能的感受與想法，並進一步幫助他找出適合的下一步。",
+      "mcq_leakage": 0
+    },
+    "L0175": {
+      "strategy_type": "sel_character",
+      "block_count": 12,
+      "type_histogram": {
+        "guide": 8,
+        "table": 4
+      },
+      "type_sequence": [
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "table",
+        "guide",
+        "guide",
+        "guide",
+        "table"
+      ],
+      "guide_count": 8,
+      "passage_count": 0,
+      "qa_total": 0,
+      "null_answers": 0,
+      "first_guide_prefix": "◎練習一：請閱讀下列情境中的「腦中想法」，完成兩件事：",
+      "mcq_leakage": 0
+    }
   }
 }

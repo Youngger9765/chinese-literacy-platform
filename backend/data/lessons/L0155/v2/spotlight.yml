@@ -1,3 +1,99 @@
 spotlight:
   lesson: 文-L12
-  error: spotlight range not found
+  strategy_name: 未知策略
+  strategy_type: unknown
+  blocks:
+  - type: guide
+    text: 你看過文字在句子裡玩「大風吹、換位子」嗎？在中文裡，有一種神奇的魔法叫做「倒裝句」！
+  - type: guide
+    text: 通常我們說話都有固定的順序，但有時候，為了「強調重點」或「傳達強烈的情感」，會故意把最重要的語詞搬到句子最前面，讓人第一眼就看到這個被強調的焦點，留下深刻的印象！而且，這種換位子的魔法，還能讓句子讀起來更有節奏感呢！
+  - type: guide
+    text: 接下來，請跟著說明，一起認識「賓語前置的倒裝句」。
+  - type: guide
+    text: 一、重點攻略
+  - type: guide
+    text: 國文課本有一課〈愛蓮說〉，作者說他很愛蓮花，但他卻把「愛蓮」寫成「蓮之愛」。來看看這是怎麼回事？
+  - type: guide
+    text: 正常敘事句結構：(主語) + 述語(動詞) + 賓語           (我)愛蓮
+  - type: guide
+    text: 賓語前置的倒裝：(主語) + 賓語 + 之(為) + 述語(動詞)    蓮之愛
+  - type: guide
+    text: 是
+  - type: guide
+    text: 觀察到了嗎?為了達到倒裝的目的，賓語被移到動詞前面，而且賓語與動詞間還必須加「是」或「之(為)」，讓人知道這是文字「換位子」哦！
+  - type: guide
+    text: 可能有同學會問：文言文中，「之」很常見啊，要怎麼判斷句子是不是倒裝了呢?我們可以思考：賓語的詞性應該是什麼?沒錯！就是名詞、代詞。所以，賓語前置的倒裝句的結構應該像下面這樣：
+  - type: guide
+    text: 賓語提前倒裝句型
+  - type: guide
+    text: (主語)    賓語     是/之     述語
+  - type: guide
+    text: 可省略       名/代詞         助詞          動詞
+  - type: guide
+    text: 另一種常見的形式是：
+  - type: guide
+    text: 唯     賓語      是     述語
+  - type: guide
+    text: 副詞       名/代詞        助詞        動詞
+  - type: guide
+    text: 寫成「唯……是……」。「唯」意思是「只」，用來限定動詞的範圍，「是」是表示賓語前置了。
+  - type: guide
+    text: 比如「只吃肉」，動詞是「吃」，吃肉，加了「只」就可以讓人知道限定吃肉，在「肉的範圍內都吃，其他的都不吃」。
+  - type: guide
+    text: 「只吃肉」是正常的敘事句，古文用語寫成「唯吃肉」，按照文字大風吹的規則：動詞跟賓語要換位子；賓語(肉)前置，動詞(吃)被擠到後面，賓語跟動詞中間要放助詞(是)讓人知道這是倒裝句。剩下的語詞(唯)位子不動，「唯吃肉」就會變成「唯肉是吃」了。
+  - type: guide
+    text: 現在，你已經了解賓語前置倒裝句的魔法了，但我們還需要進一步地熟悉「怎麼還原」?這將有助於我們快速地理解句意哦！具體步驟如下：
+  - type: guide
+    text: 還原賓語前置倒裝句
+  - type: guide
+    text: 步驟                             句子1          句子2
+  - type: guide
+    text: 倒裝句                         牡 丹 之 愛      唯 利 是 圖
+  - type: free_text
+    prompt: 1.去助詞                         牡 丹 之 愛      唯 利 是 圖
+  - type: free_text
+    prompt: 2.助詞前後的賓語、動詞換位子      愛  牡丹            圖  利
+  - type: free_text
+    prompt: 3.有副詞就補(虛線表示)                             唯 圖 利
+  - type: free_text
+    prompt: 4.理解句意                         愛牡丹         只 貪圖 利益
+  - type: guide
+    text: 透過以上的說明，你是否對還原「賓語前置的倒裝句」更有信心了呢?
+  - type: guide
+    text: 你想挑戰看看：自己解開語序顛倒的文字密碼嗎？以下的題目，請務必嘗試看看。
+  - type: guide
+    text: 二、輕練習
+  - type: guide
+    text: (一)選一選。下列都是倒裝句，請選出還原後的句子。
+  - type: free_text
+    prompt: 1.  B  「何陋之有」 A陋何有 / B有何陋
+  - type: free_text
+    prompt: 2.  B  「馬首是瞻」 A馬瞻首 / B瞻馬首
+  - type: free_text
+    prompt: 3.  A  「何難之有」 A有何難 / B何難有
+  - type: free_text
+    prompt: 4.  B  「唯你是問」 A問唯你 / B唯問你
+  - type: free_text
+    prompt: 5.  A  「何懼之有」 A有何懼 / B何有懼
+  - type: free_text
+    prompt: 6.  B  「唯利是圖」 A 圖唯利/ B唯圖利
+  - type: guide
+    text: (二)寫一寫。先還原倒裝句，再依還原句及語境圈出適當的意思解釋。
+  - type: free_text
+    prompt: 1.韓愈說他很小的時候就失去父母，對父母沒有印象，「唯兄嫂是依」。
+  - type: guide
+    text: 「唯兄嫂是依」句子還原 → 唯   依兄嫂
+  - type: guide
+    text: 意思：只能  依靠 / 依然  哥哥、嫂嫂生活。
+  - type: free_text
+    prompt: 2.孔子說：當父母的人「唯其疾之憂」。所以，子女愛護身體，不生病，就是孝順。
+  - type: guide
+    text: 「唯其疾之憂」句子還原 →    唯憂其疾
+  - type: guide
+    text: 意思：唯一   解憂 / 憂心  的是孩子生病。
+  - type: free_text
+    prompt: 3.劉蓉讀書時習慣邊走邊思考。房間有個窪坑，劉蓉常被絆倒卻不理會，時間久了竟也習慣了。他的父親看到後指正他：「一室之不治」，將來還談什麼治理國家？劉蓉這才領悟到習慣對人的影響有多深。
+  - type: guide
+    text: 「一室之不治」句子還原 →    不治一室
+  - type: guide
+    text: 意思：不能  管理 / 醫治  好一個房間。

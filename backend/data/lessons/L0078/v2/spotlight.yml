@@ -35,10 +35,14 @@ spotlight:
     prompt: ❷對內容：
   - type: guide
     text: 標題和內容有什麼落差？請看底下表格的分析：
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 標題寫法
+      - 實際內容
+    - - 雷雨炸全臺
+      - 部分地區可能出現雷擊與瞬間大雨
+    - - 急發快訊
+      - 氣象署例行發布天氣預報
   - type: single
     prompt: 請問這個標題用了哪兩種誤導方式？（複選）
     options:
@@ -117,10 +121,20 @@ spotlight:
     - 標題刻意省略「戲中角色」這項重要資訊，使讀者誤以為是真實事件，因此屬於誘餌式標題。
   - type: guide
     text: 三、你發現了嗎？誘餌式標題常用的三種方法
-  - type: figure
-    referent: table
-    asset: null
-    bind_paragraph: null
+  - type: table
+    rows:
+    - - 誤導方式
+      - 意思
+      - 例子
+    - - ❶放大
+      - 把局部、少數或可能發生，寫成全部、普遍或一定發生
+      - 把「部分地區有雨」寫成「雷雨炸全臺」
+    - - ❷省略
+      - 故意不說重要背景，引起好奇或誤解
+      - 不說明「明星被打」是戲劇情節
+    - - ❸扭曲
+      - 改變原本的程度、原因或關係
+      - 把「例行預報」寫成「急發快訊」
   - type: guide
     text: 提醒：看到下列誇張的語詞，可以先提高警覺：
   - type: guide

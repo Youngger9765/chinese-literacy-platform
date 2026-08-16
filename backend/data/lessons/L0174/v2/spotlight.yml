@@ -1,3 +1,126 @@
 spotlight:
   lesson: 體-L8
-  error: spotlight range not found
+  strategy_name: 品格力-面對失敗
+  strategy_type: sel_character
+  blocks:
+  - type: guide
+    text: ◎從小齊的故事出發：先從小齊的故事來看看他可能的感受與想法，並進一步幫助他找出適合的下一步。
+  - type: single
+    prompt: 1.覺察感受：小齊被三振後，球隊輸了，你覺得此時他可能有哪些感受？請勾選。（可複選）
+    options:
+    - 難過
+    - 自責
+    - 不甘心
+    - 害怕被責怪
+    - 想逃避
+    answer: 難過
+  - type: guide
+    text: →失敗後有情緒是正常的。真正重要的不是「不能難過」，而是察覺自己難過之後，怎麼理解這件事，而且，想法會影響情緒。
+  - type: free_text
+    prompt: 2.感受背後的事實與想法：根據小齊的故事，哪些是事實？哪些是想法？
+  - type: single
+    prompt: (1)小齊在最後一球揮空，被三振──①事實　□②想法
+    options:
+    - (1)小齊在最後一球揮空，被三振──①事實
+    - ②想法
+    answer: (1)小齊在最後一球揮空，被三振──①事實
+  - type: single
+    prompt: (2)球隊最後輸掉比賽──①事實　□②想法
+    options:
+    - (2)球隊最後輸掉比賽──①事實
+    - ②想法
+    answer: (2)球隊最後輸掉比賽──①事實
+  - type: single
+    prompt: (3)小齊一定不適合打棒球──□①事實　②想法
+    options:
+    - 事實
+    - 想法
+    answer: 想法
+  - type: single
+    prompt: (4)小齊這段時間的努力都白費了──□①事實　②想法
+    options:
+    - 事實
+    - 想法
+    answer: 想法
+  - type: single
+    prompt: (5)小齊應該要加強判斷球路──□①事實　②想法
+    options:
+    - 事實
+    - 想法
+    answer: 想法
+  - type: free_text
+    prompt: (6)同樣是「被三振」，下面哪一句比較像事實？ 答：【  B   】
+  - type: guide
+    text: A.小齊很沒用，害大家輸球  B.小齊在關鍵時刻被三振
+  - type: guide
+    text: C.小齊以後都不該再上場    D.小齊的努力全部都白費了
+  - type: guide
+    text: →事實是已經發生的事；想法是我們對事情的解釋。失敗讓人痛苦，常常是因為我們腦中出現的想法。
+  - type: free_text
+    prompt: 3.看見想法的影響：
+  - type: free_text
+    prompt: (1)請閱讀小齊可能出現的四種想法，選出「最能幫助他繼續前進」的一句。答：【  C   】
+  - type: guide
+    text: 'A.都是我害大家輸球，我真的很沒用。
+
+      B.我不適合打棒球，以後不要再上場。
+
+      C.我很難過，但這次提醒我要多練判斷球路。
+
+      D.反正只是運氣不好，不用再想這件事。'
+  - type: single
+    prompt: (2) 為什麼上題的答案比較有幫助？請勾選兩個原因。
+    options:
+    - 它承認小齊會難過。
+    - '它把責任全部推給別人。
+
+      ③它指出可以練習的方向。'
+    - '它假裝失敗完全不重要。
+
+      ⑤它沒有否定小齊整個人。'
+    - 它認為小齊無法控制成敗。
+    answer: 它承認小齊會難過。
+  - type: guide
+    text: →有些想法會讓我們卡住；有些想法會讓我們看見下一步。成長是從失敗中找出可以調整的地方。
+  - type: free_text
+    prompt: 4.提出行動方案：請練習將下面的想法改寫成比較有行動力的說法。
+  - type: guide
+    text: 例如：原本想法──「我數學就是不好，再讀也沒有用。」
+  - type: guide
+    text: 改寫──「我不是數學不好，而是需要更多有效的練習方法。」
+  - type: guide
+    text: 題目1：小齊可能的想法──「我不適合打棒球。」
+  - type: guide
+    text: 改寫──「我不是【  不適合打棒球   】，而是【  判斷球路   】還需要練習。」
+  - type: guide
+    text: ◎回到你的生活中，找一個你曾經覺得失敗或表現不好的事情，完成練習。
+  - type: free_text
+    prompt: 1.發生的事：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  - type: single
+    prompt: 2.當時的感受：□①難過 □②生氣 □③自責 □④丟臉 □⑤其他_______
+    options:
+    - 難過
+    - 生氣
+    - 自責
+    - 丟臉
+    - 其他_______
+    answer: 難過
+  - type: single
+    prompt: 3.當時的想法讓我：□①想逃避  □②更否定自己  □③想再試一次
+    options:
+    - 想逃避
+    - 更否定自己
+    - 想再試一次
+    answer: 想逃避
+  - type: single
+    prompt: 請選擇
+    options:
+    - 找到可以調整的地方
+    - 其他_____________________
+    answer: 找到可以調整的地方
+  - type: free_text
+    prompt: '4.我可以用比較有力量的解釋：
+
+      這次失敗提醒我________________，所以我下一步可以________________。'
+  - type: guide
+    text: →有幫助的想法，是承認自己會難過，並從中找出一個可以前進的方向。
