@@ -1300,14 +1300,80 @@ def classify_block(b, idx, all_blocks, strategy_type):
                                     if not row["cells"][0].get("dup")
                                 ]}
 
-        # Data table (表一/表二) — figure with table referent
-        if b["n_cols"] >= 2 and b["n_rows"] >= 3:
-            return {"type": "figure", "referent": "table",
-                    "asset": None, "bind_paragraph": None, "_needs_asset_bind": True}
+        # Ordering exercise: a 2-column table of （N）| sentence.
+        #
+        # 《十秒的背後》 asks the student to number four events by time, and the four
+        # events live in a table like this. It matched none of the branches above, fell
+        # through to 「data table → figure with a table referent」, and figures with no
+        # asset are dropped by the uid loader — so the prompt was served with nothing
+        # under it and the step read as 「3.〈𪹚龍慶元宵〉　彭仁星」 and then nothing.
+        #
+        # The numbers in the brackets are the ANSWER, so they become `correct_order`
+        # and never reach the option text. Blank brackets (a student copy) yield an
+        # item with no order, which is still worth showing.
+        ordered = _ordering_rows(b)
+        if ordered:
+            return {"type": "ordering", "items": ordered}
+
+        # Data table — carry the CELLS, not a pointer to a picture that does not exist.
+        #
+        # This returned {figure, referent: table} for any unrecognised multi-column
+        # table, and `lesson_uid_loader._drop_assetless_table_figures` removes those
+        # because a figure with no asset renders as an empty box. The content went with
+        # it: 172 tables across 88 of 175 lessons, and they are exercise material —
+        #
+        #     動物例子 | 重要細節      柴棺龜、食蛇龜 | 把頭和四肢【 縮進龜殼 】
+        #     事件 | 想法（單選）| 情緒  1.上課舉手發言… □①天啊… ②幸好…
+        #
+        # Dropping was right while the alternative was an empty box. Carrying the rows
+        # is better than either. A table that DOES have an image stays a figure.
+        if b["n_cols"] >= 2 and b["n_rows"] >= 2:
+            rows = [
+                [c["text"].strip() for c in row["cells"] if not c.get("dup")]
+                for row in b["rows"]
+            ]
+            rows = [r for r in rows if any(r)]
+            if rows:
+                return {"type": "table", "rows": rows}
 
         return None
 
     return None
+
+
+#: 「（ 4 ）」 / 「（　）」 — an answer slot, optionally already filled in by the marker.
+_ORDER_SLOT_RE = re.compile(r"^[（(]\s*(\d+)?\s*[）)]$")
+
+
+def _ordering_rows(b):
+    """Rows of a 2-column ordering table, or None when the table is something else.
+
+    One column holds answer slots and the other holds the sentences. Which side is
+    which varies between worksheets, so it is decided by looking at the cells rather
+    than assumed. Requires at least two slot rows: a single bracketed cell in an
+    otherwise ordinary table is not an ordering exercise.
+    """
+    if b.get("n_cols") != 2 or b.get("n_rows", 0) < 2:
+        return None
+
+    pairs = []
+    for row in b.get("rows") or []:
+        cells = [c for c in row.get("cells", []) if not c.get("dup")]
+        if len(cells) < 2:
+            continue
+        left, right = cells[0]["text"].strip(), cells[1]["text"].strip()
+        for slot_text, sentence in ((left, right), (right, left)):
+            m = _ORDER_SLOT_RE.match(slot_text)
+            if m and len(sentence) >= 6:
+                pairs.append({
+                    "text": sentence,
+                    "correct_order": int(m.group(1)) if m.group(1) else None,
+                })
+                break
+
+    if len(pairs) < 2:
+        return None
+    return pairs
 
 
 def _classify_question_para(txt, strategy_type):
