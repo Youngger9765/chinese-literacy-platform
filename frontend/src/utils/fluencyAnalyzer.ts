@@ -169,7 +169,7 @@ function parseCpmBenchmark(
       continue;
     }
 
-    // Less than: ＜190字
+    // Less than: ＜190字 — the boundary is NOT included, so the tier ends one below it.
     const ltMatch = raw.match(/[＜<]\s*(\d+)\s*字/);
     if (ltMatch) {
       result.push({
@@ -180,11 +180,37 @@ function parseCpmBenchmark(
       continue;
     }
 
+    // At most: ≦220字 (L0082 alone writes it this way). The boundary IS included, so
+    // this is one higher than ＜220 — normalising the symbol away at extraction time
+    // would have moved the threshold by one. Before #2719 both this and its ≧ partner
+    // fell through every branch and vanished, leaving a three-tier rubric with one tier.
+    const leMatch = raw.match(/[≦≤]\s*(\d+)\s*字/);
+    if (leMatch) {
+      result.push({
+        minCpm: 0,
+        maxCpm: parseInt(leMatch[1], 10),
+        feedback: level.feedback,
+      });
+      continue;
+    }
+
     // Greater than: ＞221字
     const gtMatch = raw.match(/[＞>]\s*(\d+)\s*字/);
     if (gtMatch) {
       result.push({
         minCpm: parseInt(gtMatch[1], 10),
+        maxCpm: Infinity,
+        feedback: level.feedback,
+      });
+      continue;
+    }
+
+    // At least: ≧251字 — same value as ＞251 for an integer count, kept separate so the
+    // symbol is read rather than assumed.
+    const geMatch = raw.match(/[≧≥]\s*(\d+)\s*字/);
+    if (geMatch) {
+      result.push({
+        minCpm: parseInt(geMatch[1], 10),
         maxCpm: Infinity,
         feedback: level.feedback,
       });

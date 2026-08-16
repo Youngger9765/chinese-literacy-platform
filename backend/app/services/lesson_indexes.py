@@ -310,7 +310,12 @@ def _uid_tree_lessons() -> list[dict]:
             "fill_in_blank": _cloze_from(l) or None,
             "vocab_bank": _vocab_bank_from(l) or None,
             "multiple_choice": _mcq_from(l) or None,
-            "reading_benchmark": None,
+            # The lesson's own characters-per-minute (or seconds, for 文言文) target,
+            # read from 念順順 and stored beside the passage it belongs to. Hard-coded
+            # None until #2722, which meant `getThresholdsFromBenchmark` fell through to
+            # a grade-wide default on every lesson while each worksheet carried its own.
+            "reading_benchmark": ((l.get("key_reading") or {}).get("reading_benchmark")
+                                  if isinstance(l.get("key_reading"), dict) else None),
             # 重點朗讀 (念順順). Absent means the step reads the whole text, which is
             # what the 2026-07-20 review ruled against but is at least this lesson's
             # own text — the first-edition table, keyed by code, was serving another
