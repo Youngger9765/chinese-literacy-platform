@@ -72,7 +72,7 @@ def repair(engine) -> None:
     table may already hold rows and a preview that runs beats a column that is exactly
     right. Staging and production never reach this function.
     """
-    from sqlalchemy import inspect
+    from sqlalchemy import Column, inspect
     from sqlalchemy.schema import CreateColumn
     from app.models import Base
 
@@ -105,8 +105,20 @@ def repair(engine) -> None:
                 #
                 # which aborted the repair after one column and left the preview 500ing
                 # on every learning_sessions query. CreateColumn knows the difference.
-                spec = CreateColumn(column).compile(dialect=engine.dialect)
-                print(f"  adding column {name}.{column.name}")
+                # NOT NULL with no server_default cannot be added to a table that
+                # already has rows — Postgres has nothing to put in them, and the
+                # ALTER fails with 「contains null values」, ending the repair. The
+                # model's default is Python-side, applied on insert, so existing rows
+                # would have to be backfilled with a value this script has no business
+                # choosing. It is added NULLABLE instead: on a scratch preview database
+                # a column that exists beats a column that is exactly right, and the
+                # alternative is the service 500ing on every query that touches it.
+                addable = column
+                if not column.nullable and column.server_default is None:
+                    addable = Column(column.name, column.type, nullable=True)
+                spec = CreateColumn(addable).compile(dialect=engine.dialect)
+                print(f"  adding column {name}.{column.name}"
+                      + ("  (as nullable — no server default)" if addable is not column else ""))
                 conn.exec_driver_sql(f'ALTER TABLE "{name}" ADD COLUMN {spec}')
 
 
