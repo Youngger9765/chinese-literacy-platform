@@ -121,10 +121,16 @@ try:
     assert missing_schema(engine) == [], "positive control: a fresh build is complete"
 
     with engine.begin() as c:
+        # A JSONB default written as a SQL expression …
         c.execute(sql("ALTER TABLE learning_sessions DROP COLUMN full_reading_attempts"))
+        # … and one written as a plain string LITERAL. Hand-built DDL emitted the
+        # literal unquoted — DEFAULT self_study — which Postgres reads as a column
+        # reference; the repair aborted after one column and the preview kept 500ing.
+        c.execute(sql("ALTER TABLE learning_sessions DROP COLUMN session_mode"))
         c.execute(sql("DROP TABLE reading_attempt_history"))
     before = missing_schema(engine)
     assert any("full_reading_attempts" in p for p in before), before
+    assert any("session_mode" in p for p in before), before
     assert any("reading_attempt_history" in p for p in before), before
 
     repair(engine)
@@ -148,6 +154,9 @@ try:
     with engine.begin() as c:
         got = c.execute(sql("SELECT full_reading_attempts FROM learning_sessions")).scalar()
     assert got == [], f"default did not apply: {got!r}"
+    with engine.begin() as c:
+        mode = c.execute(sql("SELECT session_mode FROM learning_sessions")).scalar()
+    assert mode == "self_study", f"string default did not apply: {mode!r}"
     print("REPAIR-OK")
 finally:
     engine.dispose()

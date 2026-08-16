@@ -73,6 +73,7 @@ def repair(engine) -> None:
     right. Staging and production never reach this function.
     """
     from sqlalchemy import inspect
+    from sqlalchemy.schema import CreateColumn
     from app.models import Base
 
     inspector = inspect(engine)
@@ -94,17 +95,19 @@ def repair(engine) -> None:
             for column in table.columns:
                 if column.name in have:
                     continue
-                ddl_type = column.type.compile(engine.dialect)
-                clause = f'ALTER TABLE "{name}" ADD COLUMN "{column.name}" {ddl_type}'
-                default = getattr(column.server_default, "arg", None)
-                default_sql = getattr(default, "text", None) or (
-                    default if isinstance(default, str) else None)
-                if default_sql:
-                    clause += f" DEFAULT {default_sql}"
-                    if not column.nullable:
-                        clause += " NOT NULL"
+                # Let SQLAlchemy compile the column definition. Hand-building it got the
+                # quoting wrong in the direction that matters: `server_default` is a
+                # SQL EXPRESSION when wrapped in text() and a LITERAL when it is a plain
+                # string, and emitting the literal raw produced
+                #
+                #   ADD COLUMN "session_mode" VARCHAR(20) DEFAULT self_study NOT NULL
+                #   → cannot use column reference in DEFAULT expression
+                #
+                # which aborted the repair after one column and left the preview 500ing
+                # on every learning_sessions query. CreateColumn knows the difference.
+                spec = CreateColumn(column).compile(dialect=engine.dialect)
                 print(f"  adding column {name}.{column.name}")
-                conn.exec_driver_sql(clause)
+                conn.exec_driver_sql(f'ALTER TABLE "{name}" ADD COLUMN {spec}')
 
 
 def main() -> int:
