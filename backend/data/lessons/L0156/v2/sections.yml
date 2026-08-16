@@ -125,7 +125,9 @@ resources:
     duration_seconds: 572
     source: 雲端世界
   - index: 2
-    title: 小心!背對老虎多危險實驗影片告訴你・片長：(1:50)・來源：台視新聞TTV NEWS
+    title: 小心!背對老虎多危險實驗影片告訴你
+    duration_seconds: 110
+    source: 台視新聞TTV NEWS
   extraction_check:
     verdict: unverified
     needs_human_review: true

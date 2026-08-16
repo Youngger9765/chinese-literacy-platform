@@ -147,9 +147,13 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 小丑醫生來了 帶給病童歡笑・片長：(04:07)・來源：華視新聞
+    title: 小丑醫生來了 帶給病童歡笑
+    duration_seconds: 247
+    source: 華視新聞
   - index: 2
-    title: 癌童隨小丑醫生起舞 點閱爆巨量・片長：(2:47)・來源：公視新聞網
+    title: 癌童隨小丑醫生起舞 點閱爆巨量
+    duration_seconds: 167
+    source: 公視新聞網
   extraction_check:
     verdict: unverified
     needs_human_review: true

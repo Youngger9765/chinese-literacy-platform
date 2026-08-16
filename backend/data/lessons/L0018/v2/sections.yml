@@ -74,11 +74,15 @@ comprehension:
     answer: B
     stem: 請問文中第四段提到「適當的運動也是長高相當重要的一環。」這裡的「一環」最可能是什麼意思?
     options:
-      A: 圓形而中空的東西（玉環）
+      A: 圓形而中空的東西
       B: 其中一個重要部分
-      C: 圍繞（環繞）
-      D: 玉石雕的圓形圈子（玉環）
+      C: 圍繞
+      D: 玉石雕的圓形圈子
     rationale: null
+    marker_notes:
+      A: 玉環
+      C: 環繞
+      D: 玉環
   - index: 2
     answer: C
     stem: 小承恩不喜歡他的外號的原因是什麼？
@@ -123,7 +127,8 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 多補鈣會長高? 打籃球會長高? 打臉各種長高迷思!・片長：(3:35)
+    title: 多補鈣會長高? 打籃球會長高? 打臉各種長高迷思!
+    duration_seconds: 215
     source: 蒼藍鴿的醫
   - index: 2
     title: 網路「長高貼片」真有效？ 花千元實測30天成果他傻眼

@@ -86,11 +86,15 @@ comprehension:
     answer: B
     stem: 請問下列運動訓練肌肉的部位，何者配對正確？
     options:
-      A: 深蹲－胸肌、三頭肌（伏地挺身）
+      A: 深蹲－胸肌、三頭肌
       B: 棒式－核心肌群、肩膀、胸部
-      C: 拉單槓－大腿、臀大肌（深蹲）
-      D: 伏地挺身－背肌、二頭肌（拉單槓）
+      C: 拉單槓－大腿、臀大肌
+      D: 伏地挺身－背肌、二頭肌
     rationale: null
+    marker_notes:
+      A: 伏地挺身
+      C: 深蹲
+      D: 拉單槓
   - index: 3
     answer: C
     stem: 根據本文，請問養成肌肉的基本原則何者為非？
@@ -130,10 +134,13 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 運動前後飲食　成增加肌肉關鍵之一・片長：(1:39)
+    title: 運動前後飲食　成增加肌肉關鍵之一
+    duration_seconds: 99
     source: TVBS NEWS
   - index: 2
-    title: 《花家の故事》210媽媽的體脂肪｜我們這一家・片長：(9:00)・來源：Muse木棉花-闔家歡
+    title: 《花家の故事》210媽媽的體脂肪｜我們這一家
+    duration_seconds: 540
+    source: Muse木棉花-闔家歡
   extraction_check:
     verdict: unverified
     needs_human_review: true

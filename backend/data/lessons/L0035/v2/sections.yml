@@ -119,11 +119,17 @@ comprehension:
 resources:
   items:
   - index: 1
-    title: 【文字的力量】貝爾納多自由了！他想親自傳達對你的感謝・片長：(1:30)・來源：國際特赦組織台灣分會
+    title: 【文字的力量】貝爾納多自由了！他想親自傳達對你的感謝
+    duration_seconds: 90
+    source: 國際特赦組織台灣分會
   - index: 2
-    title: 【2020寫信馬拉松】你有能力改變世界！2021-05-20・片長：(2:04)・來源：國際特赦組織台灣分會
+    title: 【2020寫信馬拉松】你有能力改變世界！2021-05-20
+    duration_seconds: 124
+    source: 國際特赦組織台灣分會
   - index: 3
-    title: 【2021寫信馬拉松】泰國/蓉：要求社會改革而面臨終身監禁・片長：(3:01)・來源：國際特赦組織台灣分會
+    title: 【2021寫信馬拉松】泰國/蓉：要求社會改革而面臨終身監禁
+    duration_seconds: 181
+    source: 國際特赦組織台灣分會
   extraction_check:
     verdict: unverified
     needs_human_review: true
