@@ -87,6 +87,15 @@ SPLIT_RE = re.compile(
     r"|\n"                  # 抽取結果的換行 = 原稿的段落界線
 )
 
+# Word 的自動編號（1. / 一、/ (一) / ❶）由 numbering.xml 產生，不在 w:t 文字流裡。
+# 抽取結果照著版面打會把它們寫進字串，於是每個列點都對不上——全是假陽性。
+LIST_MARKER_RE = re.compile(
+    r"^(?:[0-9]{1,2}[.、)]"
+    r"|[一二三四五六七八九十]{1,2}[、.)]"
+    r"|[(][一二三四五六七八九十0-9]{1,2}[)]"
+    r"|[\u2776-\u277f\u2460-\u2473\u2780-\u2793])"
+)
+
 # 這些 key 的值是抽取者自己寫的，不是原稿字串
 ANNOTATION_KEYS = frozenset({
     "note", "notes", "verdict", "method", "answer_carrier", "extraction_check",
@@ -173,7 +182,7 @@ def check(yaml_path: Path, docx_path: Path, min_len: int):
     pairs = walk(data, unverifiable=unverifiable)
     checked, misses = 0, []
     for key, val in pairs:
-        segs = [s for s in (norm(p) for p in SPLIT_RE.split(val))
+        segs = [s for s in (LIST_MARKER_RE.sub("", norm(p)) for p in SPLIT_RE.split(val))
                 if len(s) >= min_len and has_cjk(s)]
         if not segs:
             continue
