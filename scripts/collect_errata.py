@@ -54,6 +54,48 @@ def collect(roots: list[Path]) -> list[dict]:
     return rows
 
 
+# 抽取者記在 `*_note` 欄位、但沒列成 errata 的落差。命名有幾種寫法，
+# 用後綴比對而不是列舉 —— 列舉一定會漏掉下一個 worker 發明的名字。
+# 只收「抽取者標記為落差」的註記，判準有二：
+#   ① 欄位名以 `_mismatch_note` 結尾（明確在講「這裡對不上」）
+#   ② 內容含 🔴（worker 自己標的嚴重度）
+#
+# ⚠️ 不要用寬鬆的後綴比對。第一版收所有 `*_note`，結果 58 筆裡混進教材自己印的
+#    解析（`teacher_note`）與指示語（`benchmark_note`／`column_note`）——
+#    真正需要編輯判斷的三五筆被淹掉。
+#    **報告的價值在少而準**：這張表是拿去問人「這個要怎麼處理」的，
+#    每多一筆不需要決定的東西，就多一分被整張忽略的機率。
+MISMATCH_SUFFIX = "_mismatch_note"
+SEVERITY_MARK = "🔴"
+
+
+def collect_notes() -> list[dict]:
+    out = []
+    extracted = Path(__file__).resolve().parent.parent / "backend/data/lessons/_extracted"
+    for f in sorted(extracted.glob("*.yml")):
+        doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        meta = doc.get("meta") or {}
+        slot = meta.get("catalog_slot", "")
+
+        def walk(n):
+            if isinstance(n, dict):
+                for k, v in n.items():
+                    if not isinstance(v, str) or len(v) < 12:
+                        walk(v)
+                        continue
+                    is_mismatch = isinstance(k, str) and k.endswith(MISMATCH_SUFFIX)
+                    if is_mismatch or SEVERITY_MARK in v:
+                        out.append({"lesson_uid": f.stem, "catalog_slot": slot,
+                                    "field": k, "text": v})
+                    walk(v)
+            elif isinstance(n, list):
+                for v in n:
+                    walk(v)
+
+        walk(doc)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", action="append", default=None,
@@ -96,6 +138,33 @@ def main() -> int:
             )
         if not rows:
             lines.append("| （尚無紀錄） | | | | | | |")
+
+        # 第二區：抽取者看到、但**刻意沒有列成勘誤**的落差。
+        #
+        # 為什麼要分開列：這些不是錯字，是**編輯決定**——命題引文跟課文對不上、
+        # 總表與學習單的語詞整組互換、同一句在兩處寫法不同。改它們等於改題目或
+        # 改教材設計，抽取者不該替編輯做這個決定，但把它藏在 YAML 註解裡等於沒說。
+        #
+        # 混進第一區才是真正的錯：勘誤表是拿去請人修的，裡面每一筆都該是
+        # 「照著改就對了」。需要判斷的東西放進去，會讓整張表變得不能直接執行。
+        notes = collect_notes()
+        if notes:
+            lines += [
+                "",
+                "## 觀察到但未列為勘誤（需編輯判斷）",
+                "",
+                f"共 **{len(notes)}** 筆。這些不是錯字，是需要有人決定的落差 ——",
+                "改動它們等於改題目或改教材設計，抽取時一律照原樣保留。",
+                "",
+                "| 課 | 課號 | 欄位 | 內容 |",
+                "|---|---|---|---|",
+            ]
+            for n in notes:
+                cell = lambda s: str(s).replace("|", "\\|").replace("\n", " ")
+                lines.append(
+                    f"| {n['lesson_uid']} | {n['catalog_slot']} | {n['field']} | {cell(n['text'])[:260]} |"
+                )
+
         text = "\n".join(lines) + "\n"
 
     if a.out:

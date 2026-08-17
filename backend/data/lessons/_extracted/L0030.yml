@@ -1,0 +1,329 @@
+# L0030 / G5-L19《六塊肌、六塊雞》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 8/8 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/5年級/G5-L19六塊肌六塊雞（摘要策略-用主題細節結構整理重點）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+# 已掃過：抽出的內容無簡體字。
+
+meta:
+  lesson_uid: L0030
+  catalog_slot: G5-L19
+  title: 六塊肌、六塊雞
+  level: 5
+  genre: 說明文
+  strategy: 摘要策略──用主題細節結構整理重點
+  header_target: 目標策略：摘要策略──用主題細節結構整理重點
+  課文: 吳漢庭
+  學習單: 陳允捷
+  pdf_pages: 8
+
+source_errata:
+  - id: E1
+    section: 六 閱讀聚光燈
+    locator: 第三段結構圖「細節」欄，對應「保持良好的睡眠」那一格
+    source: 幫助分泌生長激素激素素
+    corrected: 幫助分泌生長激素
+    kind: 贅字（重複）
+    why: 「激素」後面又多打了「激素素」。同一份教材第五大題寫的是「可以幫助分泌生長激素促進生長。」，可見正確的詞就是「生長激素」
+    confidence: high
+    evidence: document.xml 該儲存格原文；PDF p5 也印成「幫助分泌生長激素」後面吊一個「素」
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 閱讀聚光燈, subtitle: 摘要策略—用主題細節整理重點}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  marking_instruction:
+    header: ※ 如果你有做到下列事項，請在□內打勾。
+    items:
+      - 請在不太了解的字、詞或句做記號。
+      - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  # 段號欄印 一二三四五 共 5 個。段號欄行距比課文欄窄會往下漂
+  #（「三」印在第 2 段末行旁、「四」「五」同理），對位靠語意起頭。
+  paragraph_count: 5
+  paragraphs:
+    - idx: 1
+      text: 飾演雷神索爾的克里斯·漢斯沃（C. Hemsworth）結實的胸肌、壁壘分明的腹肌，令許多粉絲羨慕不已。但是我們低頭看看自己的肚子，卻是一團軟綿綿的脂肪。為什麼他們是整齊的六塊肌，而我們卻像是六塊雞組成的全家餐呢？
+    - idx: 2
+      text: 其實，我們每一個人都有這些肌肉，只是都被厚厚的脂肪覆蓋住了，所以想要有結實的肌肉，首先要做到「減脂」，等到肌肉出現後再開始做「增肌」，但這中間可是需要相當的毅力跟專業才能做到。
+    - idx: 3
+      text: 想擁有雷神索爾般的身材，首先要做到「均衡的飲食控制」，倘若每餐都是炸雞、薯條、可樂、珍奶，就算運動得很努力，也跟不上脂肪增加的速度，因此減少油炸類、甜食的攝取是非常關鍵的；再來是「保持良好的睡眠」，因為生長激素在睡覺時，濃度會快速上升，以利身體組織成長，所以充足的睡眠是不可或缺的；最後是「專業且規律的訓練」，身體的肌肉有相當多種類，不同的訓練方式，則會增強不同的肌肉，例如：伏地挺身會練到胸肌、三頭肌；拉單槓會練到背肌、二頭肌；棒式是核心肌群、肩膀、胸部；深蹲則是大腿、臀大肌。重要的是，每次練習，都要「離開舒適區」，練習的分量，要比自己能承受的最大重量再高一點點才行。
+      note: 念順順的 ☞ 錨點印在本段首行
+    - idx: 4
+      text: 不過有很多新手急於速成，想要趕快擁有肌肉，例如：教練說一天做二十下，新手卻一天做四十下，造成一個星期的肌肉酸痛，甚至帶來運動傷害，真是欲速則不達。其實，練肌肉沒有一步登天的方法，新手可以請教教練或是閱讀專門的書籍，循序漸進的飲食控制和規律練習才會慢慢看見成效。
+    - idx: 5
+      text: 練得專業、吃得好、睡得飽就是減脂增肌的基本原則。欲速則不達，想要擁有令人羨慕的身材，是需要時間跟訓練堆疊而成，只要有心就能拋去「六塊雞」，擁有「六塊肌」。
+  inline_marked_terms: [結實, 壁壘分明, 脂肪, 覆蓋, 倘若, 炸, 不可或缺, 舒適區, 分量, 欲速則不達, 一步登天, 循序漸進]
+  inline_marked_terms_note: 課文框起來的除了 10 個本課語詞，還多框了「脂肪」與「炸」兩處（不在本課語詞清單裡）
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（三☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 3
+  end: 課文結束
+  spans_paragraphs: [3, 4, 5]
+  printed_char_count: 418
+  # ⚠️ 又是同一個樣態（L0022/L0026/L0027 都有）：右緣「字數」欄只標到第 4 段（418），
+  #    第 5 段整段沒標。教材沒印結束記號，指示語只說「從指定段落開始朗讀」，
+  #    所以朗讀範圍取到課文結束。
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark:
+    - {threshold: ＜200字, feedback: 還要多加練習。}
+    - {threshold: 201~230字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞231字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank: [覆蓋, 壁壘分明, 結實, 不可或缺, 舒適區, 倘若, 欲速則不達, 分量, 一步登天, 循序漸進]
+  items:
+    - {index: 1, word: 倘若, definition: 如果、假使，假設語氣。}
+    - {index: 2, word: 結實, definition: 堅固的，強健的。}
+    - {index: 3, word: 不可或缺, definition: 指非常重要，一定要有，缺少了就不行。}
+    - {index: 4, word: 壁壘分明, definition: 比喻彼此界限清楚，各自有自己的範圍。}
+    - {index: 5, word: 一步登天, definition: 比喻輕易達到極高的地位或境界。}
+    - {index: 6, word: 分量, definition: 事物的輕重、多寡。}
+    - {index: 7, word: 循序漸進, definition: 按照一定的次序與步驟逐漸推進。}
+    - {index: 8, word: 欲速則不達, definition: 只想快速達成，卻因此失敗了。}
+    - {index: 9, word: 覆蓋, definition: 完全遮住、蓋住。}
+    - {index: 10, word: 舒適區, definition: 讓人感到舒服、安適的狀態。}
+  answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank: {A: 結實, B: 覆蓋, C: 倘若, D: 循序漸進, E: 不可或缺, F: 分量, G: 一步登天, H: 欲速則不達}
+  items:
+    - {index: 1, stem: 要贏球，球隊裡每位球員的貢獻都是（　）的。, answer: E}
+    - {index: 2, stem: 天氣低溫加上水氣足夠，讓玉山步道沿線都（　）白雪，好像灑了糖霜般的童話世界。, answer: B}
+    - {index: 3, stem: 我們做事要腳踏實地，不要老是想（　）。, answer: G}
+    - {index: 4, stem: 他長期舉重，因此鍛鍊出一身（　）的肌肉。, answer: A}
+    - {index: 5, stem: （　）這件事不是你做的，為什麼你一見到我就跑？, answer: C}
+    - {index: 6, stem: 他急著完成美術作品，結果畫得十分潦草，真是（　）。, answer: H}
+    - {index: 7, stem: 教練提醒新手不要一開始就跑太遠，要（　）增加訓練量。, answer: D}
+    - {index: 8, stem: 雖然他說話不多，但每一句都很有（　），大家都認真聆聽。, answer: F}
+  answer_note: 第 3、5 題原稿的答案印的是全形「Ｇ」「Ｃ」
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 六塊肌、六塊雞
+  layout: list
+  # ⚠️ 左側「主題：【　】的鍛鍊」是一個直排的合併儲存格，document.xml 的 run 順序被打散成
+  #    「主題：】肌肉【的鍛鍊」。版面上讀起來是「主題：【肌肉】的鍛鍊」，肌肉是橘色答案。
+  topic_cell: 主題：【　】的鍛鍊
+  topic_blanks: [{answer: 肌肉}]
+  rows:
+    - label: 關鍵
+      value: 想要有結實的肌肉，要先【　】再【　】。
+      blanks: [{answer: 減脂}, {answer: 增肌}]
+    - label: 訓練要點
+      value: 要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點：
+      items:
+        - label: A
+          value: 均衡的飲食控制：要減少【　】類和甜食的攝取。
+          blanks: [{answer: 油炸}]
+        - label: B
+          value: 保持良好的【　】：可以幫助分泌生長激素促進生長。
+          blanks: [{answer: 睡眠}]
+        - label: C
+          value: 專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　】區，練習的分量要比自己承受的最大量再高一些才行。
+          blanks: [{answer: 舒適}]
+  answer_carrier: 橘色手寫字（圖形層）
+
+# ── 六 閱讀聚光燈 ──
+spotlight:
+  strategy_name: 摘要策略—用主題細節整理重點
+  strategy_type: comprehension_strategy
+  blocks:
+    - type: concept_box
+      text: |-
+        說明文有許多不同的寫法。本課是一篇說明文，主要介紹與鍛鍊肌肉有關的知識。這一課很適合用「主題—細節結構」來整理：先找出文章的大主題，再看作者分成哪幾個小主題來說明，最後找出每個小主題中最重要的說明細節。
+        下面的結構圖，可以幫助我們把文章重點分成三層，並把大主題、小主題和重要細節放到圖裡。
+    - type: guide
+      text: 以本課第三段為例：看文章怎麼變成結構圖
+    - type: single
+      label: ⑴
+      prompt: 大主題：第三段主要講什麼？
+      options: {1: 鍛鍊肌肉的方法, 2: 動作訓練}
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元），文字流無此資訊
+    - type: guide
+      text: 這就是結構圖最上方的大主題喔。
+    - type: guide
+      label: ⑵
+      text: 小主題：第三段用「首先、再來、最後」依序說明三個小主題。請看下面的結構圖，找出作者分別用了哪三個小主題來說明，並填入【 】中。
+    - type: fill_table
+      label: 第三段結構圖
+      columns: [大主題, 小主題, 細  節]
+      # ⚠️ 這是一張「主題—細節」樹狀結構圖，不是一般表格：大主題只有一格、
+      #    跨三個小主題；每個小主題各連到自己的細節格。此處攤平成三列表達。
+      rows:
+        - 大主題: 鍛鍊肌肉的方法
+          小主題: 均衡的飲食控制
+          細  節: 減少油炸類和甜食的攝取
+        - 小主題: 保持【　】
+          小主題_blanks: [{answer: 良好的睡眠}]
+          細  節: 幫助分泌生長激素
+          細  節_source_text: 幫助分泌生長激素激素素
+          細  節_errata_ref: E1
+        - 小主題: 【　】
+          小主題_blanks: [{answer: 專業且規律的訓練}]
+          細  節: |-
+            不同肌肉部位有不同的訓練方式
+            每次練習都要離開舒適圈
+      answer_carrier: 答案就寫在文字流的【 】裡（不是圖形層）；⚠️ LibreOffice 轉出的 PDF 把這幾格畫成空白，是轉檔漏字，不是教材沒答案
+    - type: guide
+      text: '◎ 小試身手：'
+    - type: guide
+      text: 剛才我們試著用本課內容整理結構圖。現在請讀下面短文，也用「大主題—小主題—細節」的方法，把重點填進結構圖。
+    - type: passage
+      label: 範文
+      attribution: (範文擷取自黃金萍〈海中霸王〉）
+      paragraphs:
+        - 鯊魚在水域食物鏈中位居頂端。牠們會成為海中霸王，主要歸功於靈敏的感覺功能。犀利的聽覺，可以感覺到海洋六千公尺外的音波；敏銳的嗅覺，能夠分辨五百公尺外的味道；至於電覺，則能發覺隱藏在沙底下的獵物，鯊魚是動物界感應電流的第一高手。
+    - type: guide
+      text: 換你試試看
+    - type: fill_table
+      label: 鯊魚結構圖
+      columns: [大主題, 小主題, 細  節]
+      rows:
+        - 大主題: 鯊魚感官功能
+          小主題: 【　】
+          小主題_blanks: [{answer: 聽覺}]
+          細  節: 感覺海洋六千公尺外的【　】
+          細  節_blanks: [{answer: 音波}]
+        - 小主題: 【　】
+          小主題_blanks: [{answer: 嗅覺}]
+          細  節: 分辨五百公尺外的【　】
+          細  節_blanks: [{answer: 味道}]
+        - 小主題: 電覺
+          細  節: |-
+            發覺隱藏在【　】的獵物
+            是動物界感應電流的第一高手
+          細  節_blanks: [{answer: 沙底下}]
+      answer_carrier: 答案寫在文字流的【 】裡；PDF 同樣把這幾格畫成空白（轉檔漏字）
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: A
+      stem: 請問文中第四段所提到的：「練肌肉沒有一步登天的方法，循序漸進的飲食控制和規律練習才會慢慢看見成效。」，「循序漸進」可以用哪個詞語替換？
+      options:
+        A: 我們先把計畫擬訂好，然後「按部就班」去做，如期完成工作
+        B: 我們做事要腳踏實地，不要老是想「一步登天」
+        C: 小明為了趕時間，一路狂飆，結果「欲速則不達」，半路就出了車禍
+        D: 他做事往往「求好心切」，操之過急，反而得到反效果
+      teacher_note: （指的是做事依照一定的層次、步驟進行）
+    - index: 2
+      answer: B
+      stem: 請問下列運動訓練肌肉的部位，何者配對正確？
+      options:
+        A: 深蹲－胸肌、三頭肌
+        B: 棒式－核心肌群、肩膀、胸部
+        C: 拉單槓－大腿、臀大肌
+        D: 伏地挺身－背肌、二頭肌
+      teacher_note: 選項 A 後面註「（伏地挺身）」、C 註「（深蹲）」、D 註「（拉單槓）」，是教師版標出各該正確的運動
+    - index: 3
+      answer: C
+      stem: 根據本文，請問養成肌肉的基本原則何者為非？
+      options:
+        A: 均衡的飲食控制
+        B: 維持良好的睡眠
+        C: 先增肌，再減脂
+        D: 專業規律的訓練
+      teacher_note: C 後面註「（先減脂，再增肌）」
+    - index: 4
+      answer: D
+      stem: 下列敘述的訓練，誰最有機會練出肌肉？
+      options:
+        A: 我吃完肯德基之後，都會去健身房重訓
+        B: 我一天只睡四小時，剩下時間都在訓練
+        C: 我都拉單槓拉到身體不能再做為止
+        D: 我固定在睡前二十分鐘做伏地挺身
+      teacher_note: D 後面註「（第四段）」
+    - index: 5
+      answer: B
+      stem: 如果要換一個標題，請問最適合本課標題是什麼？
+      options:
+        A: 快速的肌肉養成步驟
+        B: 減脂、增肌的關鍵
+        C: 運動類型與肌肉塑造
+        D: 肌肉和飲食控制的關係
+      teacher_note: (本篇在說明肌肉的生成及鍛鍊方式。)
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [覆蓋, 壁壘分明, 結實, 倘若, 不可或缺, 舒適區, 分量, 欲速則不達, 一步登天, 循序漸進]
+  grid_size: [10, 10]
+  grid:
+    - 循序漸進按部就班干擾
+    - 規環繞促缺一不可或缺
+    - 蹈境壁崩塌步全神貫注
+    - 矩距壘潰堤登孤寂感重
+    - 拒離分僵硬天單舒適區
+    - 絕緣明迎刃欲解攝氏溫
+    - 對糾正面速躺脫取度差
+    - 團結實則趟倘若應分量
+    - 束欲不則不達歷屆殊榮
+    - 帶達壓制覆蓋幅度量衡
+  answers_are_graphical: true
+  # 10 個目標語詞全部都有橘圈，逐一轉錄，並用腳本把 cells 套回 grid 逐條驗過。
+  # ⚠️ 格子跨頁：第 1~9 列印在 p7、第 10 列印在 p8。「覆蓋」的圈**整個留在 p7 底部**，
+  #    在 p7 上看起來是一個空的橘框（框裡沒有字），很容易被當成沒圈到；
+  #    「欲速則不達」那條長斜線也一樣延伸出 p7 底緣。這是分頁造成的，不是漏圈。
+  answer_paths:
+    - word: 循序漸進
+      cells: [[1, 1], [1, 2], [1, 3], [1, 4]]
+      direction: horizontal
+    - word: 一步登天
+      cells: [[2, 6], [3, 6], [4, 6], [5, 6]]
+      direction: vertical
+    - word: 不可或缺
+      cells: [[2, 7], [2, 8], [2, 9], [2, 10]]
+      direction: horizontal
+    - word: 壁壘分明
+      cells: [[3, 3], [4, 3], [5, 3], [6, 3]]
+      direction: vertical
+    - word: 舒適區
+      cells: [[5, 8], [5, 9], [5, 10]]
+      direction: horizontal
+    - word: 欲速則不達
+      cells: [[6, 6], [7, 5], [8, 4], [9, 3], [10, 2]]
+      direction: diagonal_down_left
+    - word: 結實
+      cells: [[8, 2], [8, 3]]
+      direction: horizontal
+    - word: 倘若
+      cells: [[8, 6], [8, 7]]
+      direction: horizontal
+    - word: 分量
+      cells: [[8, 9], [8, 10]]
+      direction: horizontal
+    - word: 覆蓋
+      cells: [[10, 5], [10, 6]]
+      direction: horizontal
+
+# ── 九 知識補給站 ──
+resources:
+  label: 影片連結
+  items:
+    - {index: 1, title: 運動前後飲食　成增加肌肉關鍵之一, duration: '1:39', duration_seconds: 99, source: TVBS NEWS}
+    - {index: 2, title: 《花家の故事》210媽媽的體脂肪｜我們這一家, duration: '9:00', duration_seconds: 540, source: Muse木棉花-闔家歡}
