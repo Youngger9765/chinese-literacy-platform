@@ -212,7 +212,18 @@ def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
     qa = [b for b in blocks if b.get("type") in ("single", "multi")]
     guides = [b for b in blocks if b.get("type") == "guide"]
     passages = [b for b in blocks if b.get("type") == "passage"]
-    nulls = sum(1 for b in qa if b.get("answer") is None)
+    # ⚠️ 複選題的答案在 `answers`（複數）。只看 `answer` 的話，答案抓齊的複選題
+    #    會被算成「沒答案」—— L0013 明明有 `answers: [2, 3]`，contract 卻判
+    #    answer_recall=0.5 而擋下整課。是計數器看漏，不是抽取漏抓。
+    #
+    #    另外：**沒有標準答案的題目本來就不該有答案**（「哪些是你認同的？」這種
+    #    自我覺察題，學習單上不會有 ☑）。硬要求它有答案，等於逼抽取者編一個。
+    #    這種題目標 `no_correct_answer: true`，不計入分母。
+    scored = [b for b in qa if not b.get("no_correct_answer")]
+    nulls = sum(
+        1 for b in scored
+        if b.get("answer") is None and not b.get("answers")
+    )
     mcq_leakage = sum(
         1 for b in qa if MCQ_LEAK_RE.match(b.get("prompt", "") or "")
     )
@@ -223,7 +234,7 @@ def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
         "type_sequence": [b.get("type") for b in blocks],
         "guide_count": len(guides),
         "passage_count": len(passages),
-        "qa_total": len(qa),
+        "qa_total": len(scored),
         "null_answers": nulls,
         "first_guide_prefix": (guides[0].get("text", "")[:60] if guides else ""),
         "mcq_leakage": mcq_leakage,

@@ -1,0 +1,106 @@
+lesson_uid: L0015
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 推論代名詞
+  strategy_type: inference
+  blocks:
+  - type: concept_box
+    text: '代名詞，也叫做指稱詞。文章中，作者常會用「他、她、牠、它、我、你、您」來代替前面出現的人、動物或東西。我們要知道這些詞指的是誰或什麼，才會讀懂句子的意思。要推論代名詞，可以這樣做：
+
+      ❶找代名詞：他、她、牠、它、我、你、您。
+
+      ❷看看前後文：可能是在說誰或什麼？
+
+      ❸放回句子讀：意思通順嗎？'
+  - type: sub_block
+    label: ◎ 小試身手
+    instruction: ◎ 小試身手：請看前後文，勾選框框內代名詞指的是誰或什麼。
+    items:
+    - type: single
+      index: 1
+      prompt: 陳彥博與超馬好手林義傑、劉柏園組隊，挑戰磁北極六百五十公里極限馬拉松，他是歷屆最年輕完賽的選手。
+      pronoun: 他
+      options:
+        1: 林義傑
+        2: 劉柏園
+        3: 陳彥博
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 2
+      prompt: 跑步是他唯一擅長也享受其中的事，如果上天給了他再活一次的機會，怎麼能夠不痛快淋漓的享受它？
+      pronoun: 它
+      options:
+        1: 跑步
+        2: 上天
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 3
+      prompt: 阿雄很好奇的問外婆：「為什麼您的心地這麼好？」
+      pronoun: 您
+      options:
+        1: 阿雄
+        2: 外婆
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 4
+      prompt: 意如的爸爸是軍人，畫中的他穿著軍服，看起來真神氣。
+      pronoun: 他
+      options:
+        1: 意如
+        2: 爸爸
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 5
+      prompt: 蘇利文老師用盡一切方法教導海倫‧凱勒，讓她靠著觸摸了解世界。
+      pronoun: 她
+      options:
+        1: 蘇利文老師
+        2: 海倫‧凱勒
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 6
+      prompt: 多多遇到忙著撿果實的小松鼠，他問：「我的寶物失蹤了，它摸起來冰涼光滑，你撿到了嗎？」
+      pronoun: 它
+      options:
+        1: 多多
+        2: 小松鼠
+        3: 寶物
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 7
+      prompt: 彼得在小精靈叮叮的協助下找到影子，溫蒂也好心的用針線幫他把影子縫回身上。
+      pronoun: 他
+      options:
+        1: 彼得
+        2: 叮叮
+        3: 溫蒂
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 8
+      prompt: 姐姐在教室裡教我染布，讓我先綁緊布料，再把它們放到染桶裡，靜靜等待染料施展魔法。
+      pronoun: 它
+      options:
+        1: 姊姊
+        2: 布料
+        3: 我
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 9
+      prompt: 事實上，美不專屬於藝術家，「美」是人人都能感受得到的一種愉悅經驗，它可能就在街頭轉角，也可能在不經意間的一瞥裡。
+      pronoun: 它
+      citation: 《美，是一種感動》－李賢文
+      options:
+        1: 美
+        2: 藝術家
+        3: 人人
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊

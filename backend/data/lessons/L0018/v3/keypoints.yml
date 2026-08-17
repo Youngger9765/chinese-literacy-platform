@@ -1,0 +1,36 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 五
+keypoints:
+  title: 長高的祕密
+  layout: list
+  theme: 主題：【　】的關鍵
+  theme_source_text: 主題：】長高【的關鍵
+  theme_blanks:
+  - answer: 長高
+  theme_errata_ref: E1
+  rows:
+  - label: 迷思
+    value: 「多喝【　】就可以長高。」──這是錯誤的迷思唷！
+    blanks:
+    - answer: 牛奶
+  - label: 研究支持的方法
+    value: '根據研究，長高的關鍵有哪三項？
+
+      1.充足的【　】。
+
+      2.適當的【　】。
+
+      (1)有氧運動─讓核心體溫適度上升，促進生長激素分泌。
+
+      (2)跳躍的動作─刺激【　】。
+
+      (3)肌力訓練（弓箭步、深蹲）和【　】運動（瑜珈）。
+
+      3.均衡的【　】。'
+    blanks:
+    - answer: 睡眠
+    - answer: 運動
+    - answer: 生長板
+    - answer: 伸展
+    - answer: 飲食

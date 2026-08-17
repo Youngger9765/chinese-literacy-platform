@@ -1,0 +1,16 @@
+lesson_uid: L0017
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 他喜歡你還是把你當朋友？從這10點來判斷！｜酸酸
+    duration: (5:38)
+    source: 酸酸脫口秀
+    qr_code: true
+  - index: 2
+    title: 【兩性】他是把你當朋友？還是喜歡你？#戀愛補償效應｜心理學｜阿畫
+    duration: (10:25)
+    source: 阿畫
+    qr_code: true

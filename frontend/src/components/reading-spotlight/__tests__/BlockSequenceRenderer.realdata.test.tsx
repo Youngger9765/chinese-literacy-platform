@@ -10,7 +10,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import BlockSequenceRenderer from '../BlockSequenceRenderer';
@@ -28,11 +28,18 @@ const load = (uid: string) => {
   return doc?.spotlight ?? null;
 };
 
-// 已翻新到 v3 的課。清單寫死是刻意的：新增課要有人來這裡加一行，
-// 順手看一眼它畫得出來 —— 自動掃目錄會讓新課靜悄悄地沒被驗過。
-const UIDS = ['L0001', 'L0002', 'L0003', 'L0004', 'L0005', 'L0006',
-              'L0007', 'L0008', 'L0009', 'L0010', 'L0011', 'L0012',
-              'L0034', 'L0072', 'L0105', 'L0124', 'L0140', 'L0161', 'L0174'];
+// 自動掃出所有翻新到 v3 的課。
+// 原本寫死清單，用意是「新增課要有人來加一行、順手看一眼」；到了 175 課的規模，
+// 那個儀式只會變成漏加。改成自動掃 + 下限斷言：課數只會增加，掉下去就是有東西被刪了。
+const V3_DIR = (uid: string) => resolve(LESSONS, uid, 'v3/spotlight.yml');
+const UIDS = readdirSync(LESSONS)
+  .filter(n => /^L\d{4}$/.test(n) && existsSync(V3_DIR(n)))
+  .sort();
+
+// 掃到 0 課 = 路徑錯了或資料沒了，別讓空跑看起來像全過
+it('至少要掃到 20 課，否則是路徑錯或資料被刪', () => {
+  expect(UIDS.length).toBeGreaterThanOrEqual(20);
+});
 
 describe('真資料進 renderer', () => {
   for (const uid of UIDS) {
