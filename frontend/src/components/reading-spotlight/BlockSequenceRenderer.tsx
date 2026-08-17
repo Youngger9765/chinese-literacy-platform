@@ -43,6 +43,25 @@ const FALLBACK_GRADE: StrategyGradeResult = {
   suggestion: '',
 };
 
+/**
+ * 選項有兩種形狀：陣列 `["甲","乙"]`，或以代號為 key 的物件 `{A:"甲", B:"乙"}`。
+ *
+ * ⚠️ 這不是「小心一點比較好」，是**整頁白屏**：對物件呼叫 `.map` 會丟
+ * `options.map is not a function`，整個聚光燈步驟畫不出來。2026-08-17 拿真資料
+ * 跑 renderer，L0003（single）與 L0007（multi）第一次就這樣掛掉——
+ * 而型別檢查、lint、我手寫的 fixture 三個都看不到，因為它們用的都是陣列。
+ *
+ * 物件形狀的 key 順序照 YAML 原序，不重新排序：代號本身（A/B/C、1/2/3）就是
+ * 教材印出來的順序，排序會讓答案索引對不上。
+ */
+const toOptionList = (options: unknown): string[] => {
+  if (Array.isArray(options)) return options.map(o => String(o ?? ''));
+  if (options && typeof options === 'object') {
+    return Object.values(options as Record<string, unknown>).map(o => String(o ?? ''));
+  }
+  return [];
+};
+
 const BlockSequenceRenderer: React.FC<Props> = ({
   spotlight,
   story,
@@ -102,7 +121,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     const key = blockStateKey(segIdx, blockIdx);
     const selected = blockState[key];
     if (typeof selected !== 'number') return;
-    const options = block.options ?? [];
+    const options = toOptionList(block.options);
     const correct = resolveSingleCorrect(options, block.answer, selected);
     setFeedback((prev) => ({ ...prev, [key]: correct }));
     checkCompletion(blockState);
@@ -123,7 +142,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     if (selected.length === 0) return;
     // `SpotlightUnknownBlock` 的 index signature 讓 union 成員窄化後仍是 unknown
     // （既有問題，非本次引入），所以這裡明確取型別。
-    const options = (block.options ?? []) as string[];
+    const options = toOptionList(block.options);
     const answer = block.answer as unknown;
     const answerUnusable =
       answer == null || (Array.isArray(answer) && answer.length >= options.length);
@@ -310,7 +329,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         );
 
       case 'single': {
-        const options = block.options ?? [];
+        const options = toOptionList(block.options);
         const selected = blockState[key];
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
@@ -594,7 +613,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       }
 
       case 'multi': {
-        const options = (block.options ?? []) as string[];
+        const options = toOptionList(block.options);
         const selected = (blockState[key] as number[] | undefined) ?? [];
         const toggle = (oi: number) =>
           setBlockValue(key, selected.includes(oi) ? selected.filter((x) => x !== oi) : [...selected, oi]);

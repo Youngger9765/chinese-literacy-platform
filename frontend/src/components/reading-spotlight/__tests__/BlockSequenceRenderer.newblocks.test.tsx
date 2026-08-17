@@ -255,3 +255,23 @@ describe('fill_table 的兩種用途', () => {
     expect(screen.getByText('調整周遭環境，減少誘惑')).toBeTruthy();
   });
 });
+
+describe('options 是物件而不是陣列', () => {
+  // 🔴 白屏等級：對物件呼叫 .map 會讓整個聚光燈步驟畫不出來。
+  //    L0003（single）與 L0007（multi）的真資料都是物件形狀。
+  it('single 的物件選項要畫得出來', () => {
+    renderSpotlight([
+      { type: 'single', prompt: '哪一個對？', options: { A: '保護色', B: '偽裝' }, answer: 'A' },
+    ]);
+    expect(screen.getByText(/保護色/)).toBeTruthy();
+    expect(screen.getByText(/偽裝/)).toBeTruthy();
+  });
+
+  it('multi 的物件選項要畫得出來，而且每個都可以點', () => {
+    renderSpotlight([
+      { type: 'multi', prompt: '哪些對？', options: { '1': '甲', '2': '乙', '3': '丙' }, answer: [0] },
+    ]);
+    expect(screen.getAllByRole('checkbox')).toHaveLength(3);
+    for (const t of ['甲', '乙', '丙']) expect(screen.getByText(new RegExp(t))).toBeTruthy();
+  });
+});
