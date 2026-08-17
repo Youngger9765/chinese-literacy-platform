@@ -56,6 +56,12 @@ jobs:
       #     specifier so Vite bundles it. A dynamic import with the name in a
       #     variable passed build, lint and vitest while the feature was broken
       #     in every browser (#2622)
+      #   - BlockSequenceRenderer.newblocks: every spotlight block type must have a
+      #     case in the renderer. `multi` sat in types.ts with no branch, so 68
+      #     blocks across 37 lessons fell through to default — the question printed,
+      #     the options never did, and nothing errored. Assertions check that the
+      #     options/sub-items/right-column entries actually reach the DOM, because
+      #     "renders without throwing" cannot tell those two states apart.
       #   - LessonAudioTable: admin audio panel must (a) stop the previous
       #     clip before starting a new one — the hook's single-shot playback
       #     path does not auto-cancel a prior <audio> on its own — and (b)
@@ -81,4 +87,5 @@ jobs:
             src/pages/admin/lesson-audio/paragraphGap.test.ts \
             src/pages/GuestReadingPage.passage.test.tsx \
             src/components/auth/publicSteps.test.ts \
-            src/services/ttsApi.paragraph.test.ts
+            src/services/ttsApi.paragraph.test.ts \
+            src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx

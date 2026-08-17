@@ -1,0 +1,25 @@
+lesson_uid: L0002
+version_id: v3
+section_no: 五
+keypoints:
+  title: 文章重點表
+  structure: flat
+  columns:
+  - 文章內容
+  - 重點
+  rows:
+  - label: 大主題
+    value: 動物的生存妙招
+  - label: 五種生存妙招
+    value: 【　】、【　】、【　】、【　】和【　】。
+    blanks:
+    - answer: 保護色
+    - answer: 偽裝
+    - answer: 化學武器
+    - answer: 堅殼硬甲
+    - answer: 互助合作
+  - label: 共同目的
+    value: 提高自己、【　】和下一代的【　】。
+    blanks:
+    - answer: 同伴
+    - answer: 存活機會

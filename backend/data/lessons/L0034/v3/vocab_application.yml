@@ -1,0 +1,50 @@
+lesson_uid: L0034
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 風靡
+    B: 廢寢忘食
+    C: 沉浸
+    D: 起色
+    E: 天人交戰
+    F: 渾然不覺
+    G: 重蹈覆轍
+    H: 蠢蠢欲動
+    I: 菁華
+  items:
+  - index: 1
+    stem: 他考試作弊受良心折磨，在（　）後，他終於主動向老師認錯。
+    answer: E
+  - index: 2
+    stem: 我們必須從失敗中學習，避免（　）。
+    answer: G
+  - index: 3
+    stem: 這部動畫片迅速（　）全球，成為熱門話題。
+    answer: A
+  - index: 4
+    stem: 敵軍在邊界（　），準備攻打我國，戰爭一觸即發。
+    answer: H
+  - index: 5
+    stem: 病人的情況終於有了（　），守在病房外的家屬都放心了。
+    answer: D
+  - index: 6
+    stem: 面對她明裡暗裡的告白，他卻（　），真是個不解風情的大木頭！
+    answer: F
+  - index: 7
+    stem: 研究人員為了解開謎團，日夜專注工作，幾乎到了（　）的地步。
+    answer: B
+  - index: 8
+    stem: 新婚半年的她，至今仍（　）在幸福喜悅中。
+    answer: C
+  cloze:
+    instruction: ※小試身手：下面是一段短文，請根據語境填入合適的語詞代號。
+    text: '阿傑是一個設計師，最近收到大型品牌邀請，希望他設計出一款功能獨特的球鞋。為了趕上進度，他連續幾週【　】，不斷修改樣式與功能，也改善了之前發現有問題的地方，避免【　】。
+
+      新球鞋得到消費者的肯定，而且引發許多網路上的討論。球鞋的銷售不但漸漸有了【　】，在半年後，還【　】了全台灣'
+    blanks:
+    - answer: B
+    - answer: G
+    - answer: D
+    - answer: A

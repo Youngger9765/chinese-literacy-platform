@@ -287,6 +287,53 @@ paragraphs:
 
 ---
 
+## 8.5 模組化：一個大題一份 yml
+
+舊結構只有 4 個大題有自己的檔：
+
+| 大題 | v2 | v3 |
+|---|---|---|
+| 一 讀全文-做記號 | `body.yml` | **`full_text_annotate.yml`** |
+| 二 念順順 | `key_reading.yml` | 同 |
+| 三 語詞我最棒 | 🔴 擠在 `sections.yml` | `vocab_definitions.yml` |
+| 四 語詞應用 | 🔴 **沒有檔案** | `vocab_application.yml` |
+| 五 文章重點表 | `keypoints.yml` | 同 |
+| 六 閱讀聚光燈 | `spotlight.yml` | 同 |
+| 七 閱讀理解 | 🔴 擠在 `sections.yml` | `comprehension.yml` |
+| 八 詞語複習 | 🔴 **沒有檔案** | `vocab_review.yml` |
+| 九 知識補給站 | 🔴 擠在 `sections.yml` | `resources.yml` |
+
+- `body` 改名 `full_text_annotate`：`body` 是 HTML 詞彙，說不出它在學習單上是哪一大題
+  —— 跟 #2641「step id 沒說出中文 label 的事」同一個病。對齊既有元件 `FullTextAnnotate.tsx`
+- **檔名 == 檔案內層 key**，兩者不一致就是再造一個「檔名說一件事、內容說另一件事」的坑
+- 文言文自動走它自己的模組集合（`classical_text` / `sentence_matching` / `word_matching` /
+  `self_challenge` / `intro_guide` / `modern_translation`），大題集合與白話課完全不同
+- ⛔ **不留 v2 相容入口**。#2683 刪兩個歷史 layer 時就寫過，留一條相容路徑會把問題原封不動
+  保存下來。代價（167 課暫時讀不到那幾個大題）由 `scripts/module_migration_gate.py` 數出來，
+  數字降到 0 才算翻新完成
+
+工具：`scripts/split_lesson_modules.py`（整份 → 模組，含 passage/char_count 推導）
+
+## 8.6 端到端驗證（v3 八課）
+
+| 課 | 段落 | 語詞 | 選擇 | 填空 | 聚光燈 blocks |
+|---|---:|---:|---:|---:|---:|
+| L0072 柳丁和文旦 | 9 | 5 | 5 | **9** | 8 |
+| L0002 動物的生存妙招 | 9 | 10 | 5 | **8** | 12 |
+| L0034 抗拒指尖上的誘惑 | 7 | 12 | 5 | **8** | 7 |
+| L0105 黑猩猩的守護者 | 10 | 11 | 5 | **8** | 9 |
+| L0124 植物肉 | 7 | 10 | 5 | **8** | 8 |
+| L0140 認命是強者的選項 | 22 | 9 | 5 | **8** | 5 |
+| L0174 面對失敗 | 6 | 10 | 5 | **8** | 7 |
+
+`fill_in_blank`（四 語詞應用）以前**全部是 0** —— consumer 早就準備好 `vocab_application`
+的位置，是抽取器從來沒寫出那個檔。
+
+四道門全綠：逐字 7/7 PASS・渲染覆蓋 PASS・後端 specs 1267 passed・前端 57 passed。
+翻新進度門刻意 FAIL（8/175），那是進度不是缺陷。
+
+---
+
 ## 9. 驗收條件
 
 - [x] skill 可重跑：換一課照著做，不必重新發明
@@ -295,10 +342,23 @@ paragraphs:
 - [x] 第三方盲測：新版勝（6:3 vs 3:4）
 - [x] 有實測單課耗時（269s，非估計）
 - [x] 覆蓋門可產生渲染缺口清單
-- [ ] 補齊 5 個渲染元件
+- [x] 補齊 5 個渲染元件（multi / concept_box / matching / sub_block / exercise），mutation 5/5 見紅
+- [x] 一個大題一份 yml，8 課落到 `backend/data/lessons/<uid>/v3/`
+- [x] 後端契約認得新型別；`guide_retained` 改成也認 `concept_box`
 - [ ] 接上 schema 門（第 1 道）
 - [ ] 刪除 §8.1 的形狀啟發式
-- [ ] 全庫 175 課重抽
+- [ ] 全庫 175 課重抽（現 8/175）
+
+### 待驗證 TODO（不是猜測，是還沒查）
+
+| # | 事項 | 為什麼要查 |
+|---|---|---|
+| T1 | **QR code 連結在二修版是否正確** | 明珠老師要把 QR 貼進 Word。課號在二修跨年級重排過，QR 若編碼的是舊課號或舊 id，貼出去就是錯的連結。**逐課實際掃過或 curl 過才算驗**，不可只看產生器的 code |
+| T2 | **Azure TTS 是否已在服務中的 revision 上** | 只認「正在服務 100% 流量的 revision 跑的 image 的 `TTS_PROVIDER`」，不看文件、不看 `services describe` 的 spec 欄位 |
+| T3 | 朗讀二修是否影響 QR | 重點朗讀段落若隨二修改變，預生成的音檔與 QR 指向可能失效 |
+| T4 | 影片 URL 未接 | v3 的 `resources` 只有標題/片長（來自學習單），**URL 在總表 sheet 4「影片連結」**，尚未 join |
+| T5 | 文言文（L0161）的 `paragraphs`/`vocabulary` 為 0 | 它沒有 `body`/`vocab_definitions` 模組，consumer 需要一條文言文專屬映射 |
+| T6 | v3 尚未在瀏覽器真的走過一次 | 目前只驗到 loader → `get_lesson_by_id` 的欄位齊全；還沒登入走完整條 user journey |
 
 ---
 

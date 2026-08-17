@@ -1,0 +1,117 @@
+lesson_uid: L0072
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 寫作手法──譬喻
+  strategy_type: writing_technique
+  blocks:
+  - type: concept_box
+    text: "譬喻是把一個事物A，用另一個熟悉的事物B來說明，讓意思更生動、更容易理解。\n例如：我家的貓像精明的警察，緊盯著老鼠。\n這句把「貓」（A）比喻成「警察」（B）。\n讀到譬喻時，不只要找出「把什麼比喻成什麼」，還要想：兩者有什麼相同點？這個譬喻有什麼作用？\n小祕訣：譬喻句中常會出現「像、好像、如同、彷彿、似的、一樣」等詞；有時也會直接說「A是B」。\n例如：1.「工作記憶」好像大腦裡的「籃子」。\n※ 注意：句子裡有「好像」，不一定是譬喻。要看句子有沒有把A比喻成B。\n例如：（O）夜空裡的星星好像寶石一樣，閃閃發亮。\n      （X）小寶寶哭個不停，好像肚子餓了。\n      （X）小峻長得好像他爸爸。"
+  - type: guide
+    text: 一、找出課文中的A和B
+  - type: sub_block
+    label: （一）
+    prompt: 課文句子：工作記憶好像大腦裡的籃子。
+    items:
+    - index: 1
+      stem: 作者想說明的事物A是：
+      options:
+        1: 工作記憶
+        2: 籃子
+      answer: 1
+    - index: 2
+      stem: 作者用來比喻的事物B是：
+      options:
+        1: 工作記憶
+        2: 籃子
+      answer: 2
+    - index: 3
+      stem: 工作記憶和籃子有什麼共同點？
+      options:
+        1: 都可以裝進無限多的東西
+        2: 容量有限，能裝的東西有限
+      answer: 2
+  - type: sub_block
+    label: （二）
+    prompt: 看文旦和柳丁各比喻什麼
+    instruction: 請讀一讀下面的句子，圈出「文旦」和「柳丁」所代表的閱讀情況。
+    items:
+    - index: 1
+      stem: 小歐讀得慢，工作記憶裡裝的是文旦。
+      circled: 讀得慢
+    - index: 2
+      stem: 小莉讀得快，工作記憶裡裝的是柳丁。
+      circled: 讀得快
+    - index: 3
+      stem: 文旦比柳丁大，放進同個籃子時，能裝的文旦比較（　）
+      options:
+        1: 多
+        2: 少
+      answer: 2
+  - type: sub_block
+    label: （三）
+    prompt: 看懂譬喻的作用
+    stem: 作者用「籃子、文旦、柳丁」這組譬喻，主要有什麼作用？
+    options:
+      1: 用水果大小說明柳丁比文旦更適合放進籃子
+      2: 用水果大小說明閱讀速度、工作記憶和理解的關係
+      3: 用水果大小說明工作記憶會隨閱讀次數逐漸變大
+    answer: 2
+  - type: guide
+    text: 二、小試身手
+  - type: exercise
+    index: 1
+    prompt: 哪些句子使用了譬喻？請在句子前打勾，再圈出拿來比喻的事物B。
+    rows:
+    - example: true
+      text: 機車像老虎奔馳在大地上。
+      note: 機車比喻老虎
+      checked: true
+      B: 老虎
+    - index: 1
+      text: 天上的白雲潔白如雪，看起來非常夢幻。
+      note: 白雲比喻成雪
+      checked: true
+      B: 雪
+    - index: 2
+      text: 妹妹的臉紅通通的，如同一顆蘋果一般。
+      checked: true
+      B: 蘋果
+    - index: 3
+      text: 夜空是一匹深黑色的綢緞。
+      checked: true
+      B: 綢緞
+    - index: 4
+      text: 書本就像一個魔法箱，許多的知識都藏在裡面。
+      checked: true
+      B: 魔法箱
+    - index: 5
+      text: 媽媽好像把錢包弄丟了，真糊塗。
+      checked: false
+  - type: exercise
+    index: 2
+    prompt: 換你試試看：請選出最適合用來比喻的事物，把代號填入【　】。
+    option_bank:
+      A: 扇子
+      B: 眼睛
+      C: 小喇叭
+      D: 水蜜桃
+      E: 機關槍
+      F: 降落傘
+      G: 鑽石
+    items:
+    - index: 1
+      stem: 孔雀開屏，尾巴如同張開的【　】。
+      answer: A
+    - index: 2
+      stem: 葉子上閃閃發亮的露珠，像是一顆顆璀璨的【　】。
+      answer: G
+    - index: 3
+      stem: 妹妹粉嫩的臉龐，像一粒飽滿又可口的【　】。
+      answer: D
+    - index: 4
+      stem: 湖泊是大地的【　】，藍天白雲、青山綠樹，都倒映在其中。
+      answer: B
+    - index: 5
+      stem: 姐姐的說話速度太快了，簡直就像【　】一樣。
+      answer: E

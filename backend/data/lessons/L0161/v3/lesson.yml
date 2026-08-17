@@ -1,0 +1,29 @@
+lesson_uid: L0161
+version_id: v3
+title: 江乙媽媽告御狀
+catalog_slot: 文-L6
+sections_present:
+- false: null
+  name: 導讀
+- false: null
+  name: 古文今譯
+- false: null
+  name: 原文（含斷詞點）＋注釋
+- false: null
+  name: 朗讀計時
+- false: 一
+  name: 文白句子比對
+- false: 二
+  name: 文白詞語比對
+- false: 三
+  name: 文章重點表
+- false: 四
+  name: 文言文聚光燈
+  subtitle: 指示代詞、疑問代詞
+- false: 五
+  name: 閱讀理解
+- false: 六
+  name: 自我挑戰
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 13

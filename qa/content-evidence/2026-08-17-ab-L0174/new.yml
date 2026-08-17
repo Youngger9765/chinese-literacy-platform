@@ -193,6 +193,7 @@ spotlight:
           blanks: [{answer: 不適合打棒球}, {answer: 判斷球路}]
     - type: free_text
       label: ◎回到你的生活中，找一個你曾經覺得失敗或表現不好的事情，完成練習。
+      prompt: 回到你的生活中，找一個你曾經覺得失敗或表現不好的事情，完成練習。
       items:
         - {index: 1, stem: 發生的事：}
         - {index: 2, stem: 當時的感受：, options: {1: 難過, 2: 生氣, 3: 自責, 4: 丟臉, 5: 其他}}

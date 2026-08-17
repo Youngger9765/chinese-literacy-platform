@@ -95,6 +95,15 @@ KNOWN_BLOCK_TYPES = frozenset({
     "ordering",
     # 表格練習的內容本身。同上，172 個表格、88 課因為被歸成無圖 figure 而消失。
     "table",
+    # 多模態抽取（#2736）才抽得出來的四種。舊的 regex 管線看不到它們：
+    #   concept_box — 每課聚光燈的開場說明框，以前被壓成 guide 文字流
+    #   sub_block   — 巢狀小題（一、→（一）→ 1.2.3.），以前被壓平、層級消失
+    #   exercise    — 小試身手（打勾表格＋填代號）
+    #   matching    — 連連看，答案是紅色連線，文字流裡根本沒有
+    "concept_box",
+    "sub_block",
+    "exercise",
+    "matching",
     "unknown",
 })
 
@@ -258,7 +267,14 @@ def eval_spotlight_v2(
     fp = fingerprint_spotlight(spotlight)
     struct_errors = validate_block_structure(blocks)
 
-    guide_retained = fp["guide_count"] > 0
+    # 這條檢查存在的理由是「教學引導語不可以被丟掉」，不是「一定要有 guide 這個型別」。
+    # 多模態抽取（#2736）把引導語放進 `concept_box`（策略說明框），因為它在學習單上
+    # 本來就是一個獨立的框，壓成 guide 文字流才是失真。L0105 / L0140 兩課的引導語
+    # 全在 concept_box 裡，用舊寫法會判成「引導語不見了」—— 假紅。
+    guide_retained = fp["guide_count"] > 0 or any(
+        isinstance(b, dict) and b.get("type") == "concept_box" and (b.get("text") or "").strip()
+        for b in blocks
+    )
     answer_recall = (
         1.0
         if fp["qa_total"] == 0

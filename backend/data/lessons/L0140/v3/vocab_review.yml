@@ -1,0 +1,20 @@
+lesson_uid: L0140
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 奢求
+  - 契機
+  - 泫然欲泣
+  - 耐人玩味
+  - 心存怨懟
+  - 愛怨糾葛
+  - 提心吊膽
+  - 刁鑽
+  - 吞忍
+  grid_size:
+  - 10
+  - 10
+  answers_are_graphical: true

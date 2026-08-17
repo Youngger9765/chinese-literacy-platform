@@ -1,0 +1,27 @@
+lesson_uid: L0124
+version_id: v3
+title: 新奇！「植物肉」你聽過嗎？
+catalog_slot: G8-L4
+sections_present:
+- false: 一
+  name: 讀全文-做記號
+- false: 二
+  name: 念順順
+- false: 三
+  name: 語詞我最棒
+- false: 四
+  name: 語詞應用
+- false: 五
+  name: 文章重點表
+- false: 六
+  name: 閱讀聚光燈
+  subtitle: 推論策略──由觀點找出支持理由
+- false: 七
+  name: 閱讀理解
+- false: 八
+  name: 詞語複習
+- false: 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10

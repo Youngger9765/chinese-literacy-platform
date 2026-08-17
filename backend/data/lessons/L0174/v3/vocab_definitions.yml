@@ -1,0 +1,46 @@
+lesson_uid: L0174
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 頻頻
+  - 傾盡
+  - 局面
+  - 敗北
+  - 艱困
+  - 勁敵
+  - 契機
+  - 補強
+  - 亮眼
+  - 外行人
+  items:
+  - index: 1
+    word: 補強
+    definition: 加強不足的地方。
+  - index: 2
+    word: 勁敵
+    definition: 實力強大、難以戰勝的對手。
+  - index: 3
+    word: 亮眼
+    definition: 表現突出，引人注意。
+  - index: 4
+    word: 艱困
+    definition: 困難且處境不佳，常指環境或條件不好。
+  - index: 5
+    word: 頻頻
+    definition: 表示短時間內發生很多次。
+  - index: 6
+    word: 敗北
+    definition: 失敗。
+  - index: 7
+    word: 局面
+    definition: 事情發展的整體情況。
+  - index: 8
+    word: 外行人
+    definition: 對某領域不熟悉、缺乏專業知識的人。
+  - index: 9
+    word: 傾盡
+    definition: 用盡全部的力量或資源，毫無保留。
+  - index: 10
+    word: 契機
+    definition: 對轉變與發展有幫助的關鍵機會。

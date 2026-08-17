@@ -201,6 +201,7 @@ spotlight:
     - type: free_text
       index: 3
       label: 自我省思
+      prompt: 自我省思：你是否有想改掉的壞習慣？
       instruction: 你是否有想改掉的壞習慣？試著運用本文介紹的三大策略──「改變環境」「設定規範」「自我提醒」。請先寫下你想改變的壞習慣，再從三種策略中勾選一項或多項，並思考具體做法，填入下列表格。
       table:
         rows: [想改變的壞習慣, 策略, 具體作法]
@@ -209,6 +210,7 @@ spotlight:
     - type: free_text
       index: 4
       label: 分享與回饋
+      prompt: 分享與回饋：和同學交換學習單，分享你的心得，也請同學寫下回饋。
       instruction: 和同學交換學習單，分享你的心得，也請同學寫下回饋。
       fields: [同學回饋, 簽名]
       student_filled: true

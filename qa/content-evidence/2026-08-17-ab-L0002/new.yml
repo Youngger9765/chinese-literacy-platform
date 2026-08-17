@@ -127,6 +127,7 @@ spotlight:
         閱讀這類文章時，可以先找出文章的大主題，再找作者列舉的小主題，接著看看每個小主題舉了哪些例子、哪些重要細節。這樣就能抓住文章的重點嘍！
     - type: figure
       id: 三層階梯圖
+      referent: diagram          # 契約要求：figure 必須說出它指向什麼
       text_carrier: image        # 文字畫在圖上，document.xml 沒有 → 逐字門無法驗證
       steps:
         - {no: 1, label: 先找主題, hint: 常可在文章名稱找到，或想想文章主要在介紹誰。}
