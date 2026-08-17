@@ -349,13 +349,42 @@ paragraphs:
 - [ ] 刪除 §8.1 的形狀啟發式
 - [ ] 全庫 175 課重抽（現 8/175）
 
-### 待驗證 TODO（不是猜測，是還沒查）
+### 待驗證 TODO
+
+| # | 事項 | 狀態 | 證據 / 為什麼要查 |
+|---|---|---|---|
+| T1 | QR code 連結在二修版是否正確 | ✅ **已驗** | `buildLessonQrValue` 編的是 `/learn/{lesson_id}/{step}`，`lesson_id` 源自 **lesson_uid**（#2683 訂為身分、明文「永不從 title 或 code 推導」），不是被重排的 `grade_code`。實走 `/learn/20072/key-passage-reading` 與 `/full-text-annotate`，兩者 200 且落在正確的課。**可以給明珠老師貼 Word** |
+| T2 | Azure TTS 是否在服務中的 revision 上 | ✅ **已驗** | serving revision `lingoleap-backend-staging-01190-w4l`（percent 100）的 `TTS_PROVIDER=azure`、`AZURE_SPEECH_REGION=eastus`。音檔規格反推一致（mp3/48kHz/192kbps，Google Chirp3 是 24kHz） |
+| T3 | 朗讀二修是否影響 QR | ✅ **已釐清** | QR 指向不受影響（用 uid）。受影響的是**音檔快取**：key 是 `sha256(passage)`，二修改了重點段落 → key 變 → cache miss → 重新合成。不是失效，是重付一次合成成本 |
+| T2b | 🔴 **`AZURE_SPEECH_KEY` 以明文 env var 存在 Cloud Run** | ⛔ **待處理** | 任何能 `run revisions describe` 的人都看得到，且 2026-08-17 已被讀進 session transcript。**必須 rotate**：Azure Portal regenerate → 新 key 進 Secret Manager → Cloud Run 改 `--set-secrets`，staging/preview/prod 三環境都換 |
+
+### 重點朗讀 × Azure 的驗證順序（2026-08-17 確認）
+
+**passage 正確是驗 Azure 的前提，但不必等 175 課全抽完。**
+
+理由：TTS 快取 key 是 `sha256(passage 文字)`。passage 錯的話，Azure 會「成功」合成
+——合成出**錯段落的正確語音**。那種情況下說「Azure 對應成功」沒有意義。
+
+但可以逐課驗，不是全有全無：某課 passage 過了逐字門，那課的 Azure 對應就可以驗。
+序列化反而有風險 —— 抽 167 課要 ~12 小時，若 Azure 那層有系統性問題，等抽完才發現就白等。
+
+快取機制已查過，兩個歷史地雷都不在了：
+
+| 風險 | 狀態 |
+|---|---|
+| 跨 prefix 回讀（Azure miss → 讀到 google prefix 的中國腔） | ✅ #2649 item 4 已移除，程式碼有註解記錄那次 22 句事故 |
+| Azure 失敗寫髒快取 | ✅ 失敗時寫 `google` prefix，而讀取只認 active provider（azure），毒不回來 |
+
+| # | 事項 | 狀態 |
+|---|---|---|
+| T7 | 每課 `key_reading.passage` 對照原稿正確 | 8/175（逐字門驗過的那 8 課） |
+| T8 | 對已驗課逐句比對 Azure 音檔：`sha256(passage)` → GCS `azure/sentences/{key}.mp3` 存在且可播 | 未做 |
+| T9 | 音檔內容抽驗：隨機取幾句真的聽過（不是只看檔案存在） | 未做 |
+
+### 其餘
 
 | # | 事項 | 為什麼要查 |
 |---|---|---|
-| T1 | **QR code 連結在二修版是否正確** | 明珠老師要把 QR 貼進 Word。課號在二修跨年級重排過，QR 若編碼的是舊課號或舊 id，貼出去就是錯的連結。**逐課實際掃過或 curl 過才算驗**，不可只看產生器的 code |
-| T2 | **Azure TTS 是否已在服務中的 revision 上** | 只認「正在服務 100% 流量的 revision 跑的 image 的 `TTS_PROVIDER`」，不看文件、不看 `services describe` 的 spec 欄位 |
-| T3 | 朗讀二修是否影響 QR | 重點朗讀段落若隨二修改變，預生成的音檔與 QR 指向可能失效 |
 | T4 | 影片 URL 未接 | v3 的 `resources` 只有標題/片長（來自學習單），**URL 在總表 sheet 4「影片連結」**，尚未 join |
 | T5 | 文言文（L0161）的 `paragraphs`/`vocabulary` 為 0 | 它沒有 `body`/`vocab_definitions` 模組，consumer 需要一條文言文專屬映射 |
 | T6 | v3 尚未在瀏覽器真的走過一次 | 目前只驗到 loader → `get_lesson_by_id` 的欄位齊全；還沒登入走完整條 user journey |
