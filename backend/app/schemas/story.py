@@ -20,7 +20,7 @@ class ReadingBenchmarkSchema(BaseModel):
 class KeyReadingSchema(BaseModel):
     """重點朗讀（念順順）指定段落 — 學生只朗讀老師 ☞ 標的重點段，非全文。
 
-    2026-07-20 教授審查決策。抽取見 skill build-key-reading。缺此欄位時前端
+    2026-07-20 教授審查決策。抽取見 skill lesson-reading-pipeline。缺此欄位時前端
     fallback 唸全文，故全欄 optional 以相容尚未抽取的課。
     """
     passage: str                            # snap 到句尾的顯示朗讀段

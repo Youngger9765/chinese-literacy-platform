@@ -115,7 +115,8 @@ TTS 正規化層有濾這類字元（`normalization.py` 的 `[\U000E01E0-\U00
 
 ## Phase 1 — 重點段抽取 + 真正只唸指定段（跟啟翔 DOCX pipeline + 教材二修合流）
 
-> SOP 已固化成 skill：**`.claude/skills/build-key-reading/`**（extract 演算法 + 三層 QA SPEC/TDD/EDD + reference `extract_key_reading.py`）。抽取器已對 G6-L22 / G4-L10 vision 驗證、G6-L23/24 結構驗證。
+> SOP 已固化成 skill：**`.claude/skills/lesson-reading-pipeline/`**（重點段落抽取 + 預生成朗讀音檔）。
+> ⚠️ 舊的 `build-key-reading` 已停用 —— 它記載的「extent = max(累計字數)」是 #2712 的成因，該規則在 2026-07-20 教授審查就被否決（正解：只取指定的那一段）。
 
 - [ ] 擴充 DOCX→schema 抽取器（啟翔 `build_lesson_schema.py` 那條 pipeline）：加「重點朗讀段」欄位
   - vision 認 ☞ 起點 + 文字 grep 累計字數 → 段落範圍（`key_reading: {start_para, end_para}` 或 char range）
