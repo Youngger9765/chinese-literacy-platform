@@ -3,24 +3,24 @@ version_id: v3
 title: 面對「失敗」，不只有一種可能
 catalog_slot: 體-L8
 sections_present:
-- false: 一
+- 'no': 一
   name: 讀全文-做記號
-- false: 二
+- 'no': 二
   name: 念順順
-- false: 三
+- 'no': 三
   name: 語詞我最棒
-- false: 四
+- 'no': 四
   name: 語詞應用
-- false: 五
+- 'no': 五
   name: 文章重點表
-- false: 六
+- 'no': 六
   name: 品格聚光燈
   subtitle: 面對失敗，你的想法是……
-- false: 七
+- 'no': 七
   name: 閱讀理解
-- false: 八
+- 'no': 八
   name: 詞語複習
-- false: 九
+- 'no': 九
   name: 知識補給站
 source:
   extracted_by: extract-lesson-multimodal

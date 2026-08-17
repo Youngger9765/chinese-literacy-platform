@@ -242,6 +242,30 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     // data, so it can only draw an empty 「圖表參考」 placeholder. Tables live in
     // the 重點表 (keypoints) step — render nothing inline here.
     if (block.referent === 'table') return null;
+
+    // 學習單裡有些「圖」其實是把教學步驟畫成圖（L0002 的三層階梯圖：先找主題 →
+    // 再找小主題 → 補充細節）。那些字只存在於圖片像素裡，多模態抽取把它們轉錄下來，
+    // 但沒有對應的圖檔資產可以配對。舊寫法在配不到圖時只畫一個佔位方塊，於是
+    // **轉錄到的教學內容整段消失**，而且不報錯 —— 跟 multi 缺 case 同一種消失法。
+    const steps = (block as { steps?: { label?: string; hint?: string }[] }).steps;
+    if (Array.isArray(steps) && steps.length > 0) {
+      return (
+        <ol className="rounded-xl border border-gray-200 bg-white p-5 space-y-3">
+          {steps.map((s, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-sm font-semibold grid place-items-center">
+                {i + 1}
+              </span>
+              <span className="text-base text-on-surface">
+                {s.label ? <span className="font-medium">{s.label}</span> : null}
+                {s.hint ? <span className="block text-sm text-on-surface-variant mt-0.5">{s.hint}</span> : null}
+              </span>
+            </li>
+          ))}
+        </ol>
+      );
+    }
+
     const label = figureLabelFromBlock(block);
     const imgIdx = story?.images?.findIndex((i) => i.figure_label === label) ?? -1;
     const img = imgIdx >= 0 ? story?.images?.[imgIdx] : undefined;

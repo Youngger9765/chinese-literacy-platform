@@ -14,13 +14,13 @@ spotlight:
     referent: diagram
     text_carrier: image
     steps:
-    - false: 1
+    - 'no': 1
       label: 先找主題
       hint: 常可在文章名稱找到，或想想文章主要在介紹誰。
-    - false: 2
+    - 'no': 2
       label: 再找小主題
       hint: 常可在段落前的小標題找到，或想想這個段落主要在講什麼。
-    - false: 3
+    - 'no': 3
       label: 補充細節
       hint: 可以說明小主題的重要細節或舉例。
   - type: guide

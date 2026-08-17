@@ -173,3 +173,27 @@ describe('未知型別仍走 default，不可讓整頁 crash', () => {
     expect(screen.getByText('暫時只印文字')).toBeTruthy();
   });
 });
+
+describe('figure 帶轉錄步驟（沒有圖檔資產）', () => {
+  // L0002 的三層階梯圖：字只在圖片像素裡，多模態轉錄下來但配不到圖檔。
+  // 舊寫法只畫佔位方塊，轉錄到的教學內容整段消失且不報錯。
+  it('配不到圖檔時，要畫出轉錄的步驟而不是佔位方塊', () => {
+    renderSpotlight([
+      {
+        type: 'figure',
+        id: '三層階梯圖',
+        referent: 'diagram',
+        text_carrier: 'image',
+        steps: [
+          { no: 1, label: '先找主題', hint: '常可在文章名稱找到' },
+          { no: 2, label: '再找小主題', hint: '常可在段落前的小標題找到' },
+          { no: 3, label: '補充細節', hint: '可以說明小主題的重要細節或舉例' },
+        ],
+      },
+    ]);
+    expect(screen.getByText('先找主題')).toBeTruthy();
+    expect(screen.getByText('再找小主題')).toBeTruthy();
+    expect(screen.getByText('補充細節')).toBeTruthy();
+    expect(screen.getByText(/常可在文章名稱找到/)).toBeTruthy();
+  });
+});

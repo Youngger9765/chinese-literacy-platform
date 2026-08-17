@@ -1,7 +1,7 @@
-lesson_uid: L0034
+lesson_uid: L0003
 version_id: v3
-title: 抗拒指尖上的誘惑
-catalog_slot: G5-L22
+title: 大自然的氣象小幫手
+catalog_slot: G4-L12
 sections_present:
 - 'no': 一
   name: 讀全文-做記號
@@ -12,10 +12,10 @@ sections_present:
 - 'no': 四
   name: 語詞應用
 - 'no': 五
-  name: 文章重點表
+  name: 閱讀聚光燈
+  subtitle: 摘要策略──找小主題與重要細節
 - 'no': 六
-  name: 品格聚光燈
-  subtitle: 建立好習慣
+  name: 文章重點表
 - 'no': 七
   name: 閱讀理解
 - 'no': 八
@@ -24,4 +24,4 @@ sections_present:
   name: 知識補給站
 source:
   extracted_by: extract-lesson-multimodal
-  pdf_pages: 11
+  pdf_pages: 9

@@ -137,6 +137,43 @@ python3 -c "import fitz;d=fitz.open('$W/src.pdf');print('pages',d.page_count)"
 
 型別放不下的細節寫進欄位（`label` / `note` / `instruction`），不要寫進型別名。
 
+### ⑥.6 幾個非聚光燈的固定形狀
+
+封閉清單管的是 `spotlight.blocks[].type`。**別的大題也會漂**——同一件事三個人寫三種
+形狀，消費端就要寫三套。已經固定下來的：
+
+**詞語複習（找字遊戲）`vocab_review.type: word_search`**
+
+```yaml
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞…
+  target_words: [嘲弄, 調侃, 歉疚]
+  grid_size: [10, 10]
+  grid:                                  # 每列**一個字串**，不是字元 list
+    - 瓦礫小心翼翼翻騰本顫
+    - 敢怒力不從心稻收顫忐
+  answers_are_graphical: true            # 答案是畫上去的圈，文字層沒有
+  answer_paths:                          # 沒圈到／沒轉錄就整個省略，不要寫空 list
+    - word: 小心翼翼
+      cells: [[1, 3], [1, 4], [1, 5], [1, 6]]   # 1-based [列, 欄]，逐格列出
+      direction: horizontal
+```
+
+`direction` 只有這幾個值：`horizontal` `vertical` `diagonal_down_right`
+`diagonal_down_left` `diagonal_up_right` `diagonal_up_left`。
+
+⛔ **不要寫 `起點: 第1列第3欄` 這種散文**：那句話原稿上沒有，逐字門會判 FAIL——
+而它判得對，因為那是你算出來的，不是教材印的。中文欄名（`方向` / `起點`）同樣不要用。
+
+⛔ 也不要只寫起點省略中間格。逐格列出才驗得到：`scripts/normalize_word_search.py`
+會把 `cells` 套回 `grid` 取字，**拼不回 word 就 FAIL**。這是整個找字遊戲唯一的
+正確性檢查——答案在圖片像素裡，除此之外沒有第二個地方可以對。
+
+```bash
+python3 scripts/normalize_word_search.py --check    # 交件前必跑
+```
+
 ### ⑦ 三道格式門
 
 | 道 | 檢查 | 抓什麼 |

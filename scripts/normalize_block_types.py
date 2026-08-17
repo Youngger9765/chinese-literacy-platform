@@ -56,10 +56,36 @@ ALIASES = {
 
 
 def walk_files():
-    for p in sorted((REPO / "qa/content-evidence").glob("*/new.yml")):
-        yield p
-    for p in sorted((REPO / "qa/content-evidence").glob("*/truth.yml")):
-        yield p
+    """抽取結果的唯一落點。實驗期的 `qa/content-evidence/*/new.yml` 已經收掉了。"""
+    yield from sorted((REPO / "backend/data/lessons/_extracted").glob("*.yml"))
+
+
+def check_yaml_traps(path: Path) -> list[str]:
+    """抓 YAML 1.1 的裸 boolean key。
+
+    `no:` / `yes:` / `on:` / `off:` / `y:` / `n:` 不加引號會被解析成 **boolean**，
+    於是 `{no: 1}` 變成 `{False: 1}` —— 欄位名整個消失，而且不會報錯。
+    2026-08-17 首次全庫檢查：8 課全中，共 77 處，全來自階梯圖與表格的 `no:` 序號欄。
+
+    逐字門抓不到這種：它比對的是字串**值**，key 壞掉不在它的視野裡。
+    """
+    problems = []
+
+    def scan(node, where=""):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if isinstance(k, bool):
+                    problems.append(f"{where} 有 boolean key `{k}` —— 原文多半是裸的 no:/yes:，要加引號")
+                scan(v, f"{where}/{k}")
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                scan(v, f"{where}[{i}]")
+
+    try:
+        scan(yaml.safe_load(path.read_text(encoding="utf-8")))
+    except Exception as exc:
+        problems.append(f"YAML 解析失敗：{exc}")
+    return problems
 
 
 def main() -> int:
@@ -107,6 +133,16 @@ def main() -> int:
 
     if a.write:
         print(f"\n共改 {changed} 個 block")
+
+    trap_hits = 0
+    for p in walk_files():
+        for msg in check_yaml_traps(p):
+            print(f"  🔴 {p.parent.name if p.parent.name != '_extracted' else p.stem}: {msg}")
+            trap_hits += 1
+    if trap_hits:
+        print(f"\n⛔ {trap_hits} 個 YAML 陷阱")
+        print("BLOCK_TYPE_LINT=FAIL")
+        return 1
 
     if unknown:
         print("\n⛔ 清單外、且沒有對應規則的型別（要先決定併到哪，不可自動猜）：")
