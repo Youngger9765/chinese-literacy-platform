@@ -1,0 +1,29 @@
+lesson_uid: L0090
+version_id: v3
+title: 奧運性別平等這條路
+catalog_slot: G7-L21
+sections_present:
+- 'no': 一
+  name: 讀全文—做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 用表格整理訊息──從數據歸納趨勢
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 11
+  drive_path: 7年級/G7-L21奧運性別平等這條路（用表格整理訊息-從數據資料歸納趨勢）.docx
+  docx_md5: md5-12:5b7185c56fe3

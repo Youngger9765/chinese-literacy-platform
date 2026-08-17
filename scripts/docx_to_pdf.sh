@@ -133,10 +133,33 @@ if [ ! -s "$OUT_PDF" ]; then
 fi
 
 # 頁數不只是資訊：0 頁代表轉出了一個空殼，那比失敗更糟（後面會當成「讀完了」）
-pages=$(python3 -c "import fitz,sys;print(fitz.open(sys.argv[1]).page_count)" "$OUT_PDF" 2>/dev/null || echo 0)
-if [ "${pages:-0}" -lt 1 ]; then
-  echo "⛔ PDF 產出了但 0 頁：$OUT_PDF" >&2
-  exit 1
-fi
+#
+# ⚠️ 這裡曾經寫成 `pages=$(python3 -c "import fitz..." 2>/dev/null || echo 0)`，
+#    那是把「工具不存在」跟「真的 0 頁」壓成同一個值。PyMuPDF 只裝在系統 python3，
+#    沒裝在 backend/.venv —— 而派工單的標準開頭就是先 activate venv，於是每個照做的人
+#    轉出完全正常的 12 頁 PDF 都會被報「0 頁失敗」，然後跑去查 LibreOffice、profile 鎖、
+#    殭屍行程，全都查不出東西（症狀在轉檔，病灶在頁數檢查）。
+#
+# 改法：讓失敗跟空值分得開 —— 先落地 rc，讀不到就換一個讀得到的工具，
+# 兩個都不可用就明說「檢查不了」，不要謊報 0。
+read_pages() {
+  local out rc
+  out=$(python3 -c "import fitz,sys;print(fitz.open(sys.argv[1]).page_count)" "$1" 2>&1); rc=$?
+  if [ "$rc" -eq 0 ] && [ -n "$out" ]; then echo "$out"; return 0; fi
+  # 系統本來就有 pdfinfo（poppler），拿它當第二來源
+  out=$(pdfinfo "$1" 2>/dev/null | awk '/^Pages:/{print $2}'); rc=$?
+  if [ "$rc" -eq 0 ] && [ -n "$out" ]; then echo "$out"; return 0; fi
+  return 1
+}
 
-echo "$OUT_PDF pages=$pages"
+if pages=$(read_pages "$OUT_PDF"); then
+  if [ "$pages" -lt 1 ]; then
+    echo "⛔ PDF 產出了但 0 頁：$OUT_PDF" >&2
+    exit 1
+  fi
+  echo "$OUT_PDF pages=$pages"
+else
+  # 檔案存在且非空，只是數不出頁數 —— 這不該擋住流程，但也不可以假裝驗過了
+  echo "⚠️ 頁數檢查不可用（fitz 與 pdfinfo 都讀不到），未驗頁數：$OUT_PDF" >&2
+  echo "$OUT_PDF pages=unverified"
+fi

@@ -1,0 +1,55 @@
+lesson_uid: L0085
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 纖細
+  - 即將
+  - 頻率
+  - 明察秋毫
+  - 坐立難安
+  - 徵兆
+  - 歷歷在目
+  - 彷彿
+  - 遠山如洗
+  - 焦躁不安
+  - 前兆
+  vocabulary_bank_note: 語詞框印 11 個、句末有句號；第 3 題把「徵兆、前兆」併成一題，所以本大題只有 10 小題。
+  answer_carrier: 橘色手寫字（PDF p9）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 纖細
+    definition: 細小、細緻。
+  - index: 2
+    word: 明察秋毫
+    definition: 形容人觀察事物仔細，就像能看見秋天鳥獸新長的細毛。
+  - index: 3
+    word: 徵兆、前兆
+    definition: 指事情發生前所出現的跡象。（提示：有兩個詞）
+    note: 這一題的答案是**兩個語詞**，原稿自己在題目裡註明「提示：有兩個詞」
+  - index: 4
+    word: 遠山如洗
+    definition: 形容遠處山景清晰明亮，像被清洗過。
+  - index: 5
+    word: 彷彿
+    definition: 好像。
+  - index: 6
+    word: 即將
+    definition: 表示事情快要發生。
+  - index: 7
+    word: 坐立難安
+    definition: 形容人或動物心情焦躁、不安穩，坐也不是、站也不是。
+  - index: 8
+    word: 焦躁不安
+    definition: 焦急不耐煩的樣子。
+  - index: 9
+    word: 歷歷在目
+    definition: 通常形容記憶中的畫面清楚的在眼前。本文則指畫面很清楚。
+  - index: 10
+    word: 頻率
+    definition: 指在一段時間內同一件事情發生的次數。發生次數越多，頻率就越高。

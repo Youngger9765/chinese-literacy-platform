@@ -1,0 +1,23 @@
+lesson_uid: L0086
+version_id: v3
+section_no: 八
+resources:
+  row_label: 影片連結
+  items:
+  - index: 1
+    title: 品格教育－勇敢說不
+    duration: '5:17'
+    duration_seconds: 317
+    source: 孝養父母，奉事師長
+    qr_code: true
+  - index: 2
+    title: 「高雄好家載」短片分析：手法細膩且精準到位的政府廣告｜敘事X光機
+    duration: '12:04'
+    duration_seconds: 724
+    source: 朱宥勳使出人生攻擊
+    qr_code: true
+  items_note: '原稿的片長印成「・片長：(5:17)」（含括號），本欄照既有形狀去掉括號存成
+
+    `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
+
+    文字層只有標題、片長、來源三項，沒有 URL。'

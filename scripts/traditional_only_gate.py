@@ -86,9 +86,23 @@ NOTE_KEYS = {
 }
 NOTE_SUFFIXES = ("_note", "_notes", "_reason", "_caveat", "_rationale")
 
+# 跟 verbatim_gate 用同一條規則（`ANNOTATION_RE`）。
+#
+# ⚠️ 為什麼不能只靠 NOTE_SUFFIXES：它要求底線，於是 `_節次順序note`（結尾是「序note」）
+#    漏掉了，門就去掃我方自己寫的評註，抓到「綴」——那個字沒有任何一份原稿用過，
+#    所以理所當然不在字集裡。
+#
+#    這是**判準錯**，不是漏網：這道門的判準是「全庫 175 份原稿的用字聯集」，
+#    那個判準只對**轉錄來的內容**成立；套到我方的中文評註上，等於要求所有註解
+#    都只能用教材出現過的字。而且它的引導語會說「多半是照 PDF 抄到被字型換掉的
+#    字形」，把人往完全錯的方向帶 —— 有 worker 因此去改自己的措辭來遷就門。
+ANNOTATION_RE = re.compile(r"^(note_|_)|(_note|_check|_carrier|_ref)$")
+
 
 def _is_note_key(k: str) -> bool:
-    return k in NOTE_KEYS or any(k.endswith(sfx) for sfx in NOTE_SUFFIXES)
+    return (k in NOTE_KEYS
+            or any(k.endswith(sfx) for sfx in NOTE_SUFFIXES)
+            or bool(ANNOTATION_RE.search(k)))
 
 
 def scan(path: Path, allowed: set[str]) -> list[tuple[str, str]]:
