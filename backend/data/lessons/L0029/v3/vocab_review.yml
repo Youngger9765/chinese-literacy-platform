@@ -38,7 +38,7 @@ vocab_review:
   - 池爪舞張桃挑弱可勢維
   - 獨排眾議興釁信廝殺艱
   answers_are_graphical: true
-  excluded_path_note: 「堅不可摧」有圈，路徑為第5列第8欄→第6列第7欄→第7列第6欄→第8列第5欄（diagonal_down_left）， 套回格子拼出「堅不可催」——第 8 列第 5 欄印成「催」，見 source_errata E1。已用腳本驗過這四格拼得出「堅不可催」。
+  intended_word_note: 「堅不可催」那一條的目標語詞是「堅不可摧」，格子第 8 列第 5 欄印成「催」，見 source_errata E1
   answer_paths:
   - word: 駕輕就熟
     cells:
@@ -129,6 +129,17 @@ vocab_review:
     - - 5
       - 6
     direction: horizontal
+  - word: 堅不可催
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    - - 7
+      - 6
+    - - 8
+      - 5
+    direction: diagonal_down_left
   - word: 迅雷不及掩耳
     cells:
     - - 6
