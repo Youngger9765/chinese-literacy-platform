@@ -1,0 +1,340 @@
+# L0001 / G4-L10《十秒的背後》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 8/8 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/4年級/G4-L10十秒的背後（寫作手法：順敘－從時間詞判斷事件順序）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+
+meta:
+  lesson_uid: L0001
+  catalog_slot: G4-L10
+  title: 十秒的背後
+  level: 4
+  genre: 記敘文
+  strategy: 寫作手法──順敘－從時間詞判斷事件順序
+  課文作者: 吳漢庭
+  學習單: 巫怡蓉
+  pdf_pages: 8
+  # 總表（自學教材總表0812.xlsx．1.總表）決定性讀取；`_` 開頭 = 值不在 DOCX，不進逐字門
+  _總表_文體: 記敘文
+  _總表_類型: 記(人)
+  _總表_議題: 運動+克服挫折
+  _總表_聚光燈策略: 寫作手法──順敘──從時間詞判斷事件順序
+  _總表_第六大題標題: 寫作手法──順敘
+  _總表_語詞: [擊垮, 沮喪, 睽違, 孤寂感, 天壤之別, 事與願違, 迎刃而解, 血脈賁張, 轉瞬而逝, 經年累月]
+  _總表_對照note: 總表語詞9 寫「轉瞬而逝」，學習單與課文皆印「轉瞬即逝」——差異在總表側，非 DOCX 勘誤。
+
+# ── 原稿勘誤 ──────────────────────────────────────────────────
+# 逐頁比對後未發現教材印錯之處。
+# 兩處僅記錄、不列勘誤（皆非印錯）：
+#   ① 八 詞語複習 灰框列出「喝采」，但它不在本課 10 個語詞內；格子裡確實有「喝采」
+#      且被圈起（灰色框線，其餘為橘色）——版面自洽，照實記錄。
+#   ② 二 念順順 指示語的括號在文字流是「（四    )」（前全形後半形），
+#      ☞ 是圖形物件不在文字流。
+source_errata: []
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 閱讀聚光燈, subtitle: 寫作手法──順敘──從時間詞判斷事件順序}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  checklist_instruction: ※ 如果你有做到下列事項，請在□內打勾。
+  checklist:
+    - 請在不太了解的字、詞或句做記號。
+    - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  paragraph_count: 6
+  paragraphs:
+    - idx: 1
+      text: 十秒鐘你能做什麼？裝一杯水、哼一段小曲、等待手機略過廣告？這十秒可能還不夠呢。這轉瞬即逝的十秒，對於一百公尺短跑的選手來說足以決定一場令人血脈賁張、緊張刺激的勝負。
+    - idx: 2
+      text: 在眾人期待的目光下，「臺灣最速男」——楊俊瀚，在2017年夏季世界大學運動會田徑男子一百公尺決賽，以10.22秒獲得第一名，替中華臺北拿下睽違二十六年的世大運田徑金牌。
+    - idx: 3
+      text: 2018年雅加達亞運上，他以千分之二秒的差距與金牌擦身而過，些微秒數的差距帶來天壤之別的結果，讓好不容易站上的國際舞台的他心有不甘，他告訴自己：「那代表我還不夠努力，今天我輸千分位，那是上天給我的結果。」他更下定決心要超越現在的自己。
+    - idx: 4
+      text: 但事與願違，在2019年，楊俊瀚的體育生涯反而走到了谷底。他在拿坡里世大運比賽時受傷，開始了漫長的復健。運動員一旦受傷，不只要花時間復健、無法訓練和出賽，心裡更負擔著損失積分與自我懷疑的種種壓力。
+      marker: ☞ 印在本段句首（念順順起點）
+    - idx: 5
+      text: 然而，壓力並沒有擊垮他，他跟著物理治療師安排的復健課表，一步一腳印的復健，終於熬過了這段恢復期，突破困境，在2021年重新回到賽場。他最終順利拿下東京奧運參賽資格，一圓當時沒能跑進里約奧運的夢想，也成為臺灣二十五年來再度站上奧運一百公尺短跑項目的臺灣選手。
+    - idx: 6
+      text: 短跑競賽是一項孤獨的運動，「十秒間的每個擺手、衝刺，都是經年累月的訓練與堅持。」很多時候必須自己獨自承受訓練受傷帶來的壓力、沮喪和孤寂感。不過楊俊瀚認為無論如何都要學會擁抱恐懼，深刻了解自己所害怕的事物，堅持到底，進而戰勝它。即便是在低潮、逆境時，試著與自己對話，從中尋找答案，現在所遇到的挫折都將成為下一次起跑的能量。人生路上的問題，相信也將可以迎刃而解。
+  # 課文右緣印的累計字數（從 ☞ 所在的第四段起算，止於第六段末）
+  running_char_counts: [26, 55, 85, 96, 124, 151, 181, 210, 221, 249, 278, 306, 336, 366, 396, 400]
+  inline_marked_terms: [轉瞬即逝, 血脈賁張, 睽違, 天壤之別, 事與願違, 擊垮, 經年累月, 沮喪, 孤寂感, 迎刃而解]
+  underlined_proper_nouns: [楊俊瀚, 田徑, 中華臺北, 雅加達亞運, 拿坡里, 東京奧運, 里約奧運, 臺灣]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 4          # ☞ 印在「但事與願違」該行
+  end_paragraph: 6            # 右緣累計字數止於 400（第六段末）
+  spans_paragraphs: [4, 5, 6]
+  approx_chars_from_start: 400
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+    - {threshold: ＜190字, feedback: 還要多加練習。}
+    - {threshold: 191~220字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞221字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    - 從本課語詞框框，找語詞。
+    - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    - 問同學。
+  vocabulary_bank: [轉瞬即逝, 睽違, 血脈賁張, 天壤之別, 事與願違, 經年累月, 沮喪, 孤寂感, 擊垮, 迎刃而解]
+  items:
+    - {index: 1, word: 血脈賁張, definition: 形容情緒非常激動、緊張。}
+    - {index: 2, word: 擊垮, definition: 心志被打敗了。}
+    - {index: 3, word: 事與願違, definition: 事情的發展和願望相反、相違背。}
+    - {index: 4, word: 孤寂感, definition: 孤單寂寞的感覺。}
+    - {index: 5, word: 沮喪, definition: 情緒難過、非常灰心。}
+    - {index: 6, word: 天壤之別, definition: 比喻差別極大。}
+    - {index: 7, word: 迎刃而解, definition: 比喻事情很容易處理。}
+    - {index: 8, word: 經年累月, definition: 形容時間長久。}
+    - {index: 9, word: 轉瞬即逝, definition: 在很短的時間就消失。}
+    - {index: 10, word: 睽違, definition: 隔了很久沒有見到或發生。}
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank: {A: 經年累月, B: 事與願違, C: 轉瞬即逝, D: 血脈賁張, E: 天壤之別, F: 睽違, G: 擊垮}
+  items:
+    - {index: 1, stem: 這精采的比賽看得大家（　），緊張萬分。, answer: D}
+    - {index: 2, stem: 小美一直想考第一名，但總是（　），每次都只差一點。, answer: B}
+    - {index: 3, stem: 哥哥的運動能力與弟弟有著（　），落差很大。, answer: E}
+    - {index: 4, stem: 燦爛的煙火，雖然漂亮但（　），令人惋惜。, answer: C}
+    - {index: 5, stem: 這座壯麗的峽谷是河流（　）向下侵蝕的結果。, answer: A}
+    - {index: 6, stem: 原本領先的球隊在最後幾分鐘被對手連得十分，士氣完全被（　）。, answer: G}
+    - {index: 7, stem: 電影最後的追逐場面節奏緊張刺激，讓觀眾看得（　），目不轉睛。, answer: D}
+    - {index: 8, stem: （　）已久的校慶終於舉辦，全校師生都期待這場盛會。, answer: F}
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 十秒的背後
+  structure: nested
+  rows:
+    - label: 主角
+      value: 【　】
+      blanks: [{answer: 楊俊瀚}]
+    - label: 挫折事件
+      items:
+        - label: 雅加達亞運
+          instruction: （單選）
+          select: single
+          options:
+            1: 驕傲地奪得銀牌
+            2: 以微小差距與金牌擦身而過，感到不甘心
+          answer: 2
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - label: 拿坡里世大運
+          value: 比賽時受傷了，他選擇（單選）
+          select: single
+          options:
+            1: 積極的面對與復健
+            2: 放棄跑步、不願治療
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+          note: 此列在 PDF 被分頁切開（「拿坡里」在 p3、「世大運」在 p4），實為同一列
+    - label: 結果
+      value: 他成為再度登上奧運（單選）【　】的短跑項目的臺灣選手。
+      select: single
+      options:
+        1: 100公尺
+        2: 400公尺
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - label: 他學到了什麼？
+      value: |-
+        1.他學會了先了解害怕的事物，【　】，再戰勝它。
+        2.學習和自己【　】，找尋答案。
+      blanks: [{answer: 擁抱恐懼}, {answer: 對話}]
+
+# ── 六 閱讀聚光燈 ──
+spotlight:
+  strategy_name: 寫作手法——順敘──從時間詞判斷事件順序
+  strategy_type: writing_technique
+  blocks:
+    - type: concept_box
+      text: |-
+        有些文章會照著事情發生的順序來寫，這叫做順敘。
+        讀順敘文章時，可以先找出時間詞，例如：幾年、之前、過後。
+        時間詞就像路標，能幫助我們知道事情的先後順序。
+        找到時間詞後，再看看每個時間點發生了什麼事，就能看清楚事情怎麼一步一步發展。
+      note: PDF 上此框被裝飾圖形部分遮住，內文以 document.xml 文字流為準
+
+    - type: guide
+      text: ◎ 小試身手：
+
+    - type: ordering
+      label: 小試身手 1（本課課文）
+      instruction: 1.先圈出時間，再讀一讀這個時間點發生了什麼事，最後依先後順序在（ ）中填入1~4。
+      marked_time_words: [2019年, 2018年, 2017年, 2021年]
+      answers_are_graphical: false
+      items:
+        - {index: 1, text: 2019年，楊俊瀚的體育生涯反而走到了谷底。他在拿坡里世大運比賽時受傷，開始了漫長的復健。, answer: 3}
+        - {index: 2, text: 2018年雅加達亞運上，他以千分之二秒的差距與金牌擦身而過。, answer: 2}
+        - {index: 3, text: 2017年夏季世界大學運動會田徑男子一百公尺決賽，替中華臺北拿下睽違二十六年的世大運田徑金牌。, answer: 1}
+        - {index: 4, text: 終於熬過了這段恢復期，突破困境，在2021年重新回到賽場。他最終順利拿下東京奧運參賽的資格。, answer: 4}
+
+    - type: single
+      label: 小試身手 2
+      prompt: 2.排完時間順序後，把這些事件連起來看。哪一個說法最能整理楊俊瀚這幾年的經歷？
+      options:
+        1: 拿下世大運金牌後，一路順利，最後取得奧運資格
+        2: 先拿下金牌，後來遇到失敗與受傷，但仍努力復健、重回賽場
+        3: 一開始就受傷復健，後來才拿下世大運金牌，最後參加亞運比賽
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+
+    - type: ordering
+      label: 小試身手 3（延伸文本）
+      instruction: 3.〈𪹚龍慶元宵〉　彭仁星
+      title: 〈𪹚龍慶元宵〉
+      author: 彭仁星
+      marked_time_words: [元宵節過後, 元宵節前, 元宵節前一天]
+      items:
+        - {index: 1, text: 元宵節過後，「化龍返天」是活動的尾聲，火化神龍象徵事事圓滿。, answer: 4}
+        - {index: 2, text: 今年元宵節前，我回到苗栗的阿公家，參加𪹚龍慶元宵活動。, answer: 1}
+        - {index: 3, text: 元宵夜，我們到公園參加「𪹚龍之夜」，這是活動的高潮。相傳「炸龍」可以納吉招福，越炸越旺，人山人海，歡天喜地，熱鬧得不得了。, answer: 3}
+        - {index: 4, text: 元宵節前一天，街上家家戶戶歡喜的「迎龍」，希望迎來新年的好福氣。, answer: 2}
+
+    - type: guide
+      text: |-
+        你發現了嗎？
+        時間詞不一定都是年份，也可能是「元宵節前、前一天、元宵夜、過後」這類說法。找到時間詞，就比較能看懂事情怎麼發展。
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: A
+      stem: 下列哪個詞語使用正確？
+      options:
+        A: 快樂的連假時光總是「轉瞬即逝」，令人不捨
+        B: 體育競賽總是讓人「事與願違」，相當刺激
+        C: 日本的冬季溫度與高雄相比真是「血脈賁張」
+        D: 他想出去玩，沒想到「天壤之別」，颱風來襲，只好在家
+      option_corrections: {B: (血脈賁張), C: (天壤之別), D: (事與願違)}
+      note: 橘色手寫更正印在 B/C/D 三個選項旁，指出各該用的正確語詞
+    - index: 2
+      answer: C
+      stem: 楊俊瀚在2018年面對失敗的態度是什麼呢？
+      options:
+        A: 失敗是我天份不足，比不上別人
+        B: 失敗是對手太強，並不是我太弱
+        C: 失敗是我不夠努力，我要加強自己
+        D: 失敗是命中注定，要聽從命運安排
+      teacher_note: (第三段)
+    - index: 3
+      answer: B
+      stem: 2017-2021年楊俊瀚的體育生涯有什麼轉變？
+      reference_box:
+        - 甲：眾人期待（第二段）
+        - 乙：心有不甘（第三段）
+        - 丙：自我懷疑（第四段）
+        - 丁：突破困境（第五段）
+      options:
+        A: 甲丁丙乙
+        B: 甲乙丙丁
+        C: 乙甲丙丁
+        D: 丁甲乙丙
+      note: 甲乙丙丁四項的段落標註為橘色手寫加註
+    - index: 4
+      answer: C
+      stem: 「十秒間的每個擺手、衝刺，都是經年累月的訓練與堅持。」這句話與下列哪句話相符合？
+      options:
+        A: 一沙一世界，剎那即永恆
+        B: 莫要人不知，除非己莫為
+        C: 台上一分鐘，台下十年功
+        D: 一朝被蛇咬，十年怕草繩
+      teacher_note: （從經年累月這句話可知道長久的訓練，才能在舞台上有精彩的表現）
+    - index: 5
+      answer: B
+      stem: 根據這篇文章，下列敘述何者不正確？
+      options:
+        A: 遇到逆境時，可以進行自我對話找尋答案
+        B: 短跑主要靠團隊合作，不需要自己承受壓力
+        C: 學會擁抱恐懼，了解、堅持到底並戰勝它
+        D: 現今的挫折都會成為未來人生路上的養分
+      teacher_note: （第六段，短跑競賽是一項孤獨的運動）
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [喝采, 擊垮, 事與願違, 孤寂感, 迎刃而解, 沮喪, 天壤之別, 血脈賁張, 睽違, 轉瞬即逝, 經年累月]
+  grid_size: [10, 10]
+  grid:
+    - 熬過沮疑難雜症再度喝
+    - 擊關喪問經年累月登采
+    - 垮物理治療師見血上負
+    - 撫迎刃而解藥脈目勢擔
+    - 摸不著頭緒賁復不均事
+    - 上緊差距張下健轉力與
+    - 天張轉掉落定龍睛敵願
+    - 壤刺眼瞬寞決爭搶睽違
+    - 之激勝負即心虎凝聚力
+    - 別捶胸頓足逝鬥孤寂感
+  answers_are_graphical: true
+  answer_paths:
+    - word: 沮喪
+      cells: [[1, 3], [2, 3]]
+      direction: vertical
+    - word: 喝采
+      cells: [[1, 10], [2, 10]]
+      direction: vertical
+    - word: 經年累月
+      cells: [[2, 5], [2, 6], [2, 7], [2, 8]]
+      direction: horizontal
+    - word: 擊垮
+      cells: [[2, 1], [3, 1]]
+      direction: vertical
+    - word: 血脈賁張
+      cells: [[3, 8], [4, 7], [5, 6], [6, 5]]
+      direction: diagonal_down_left
+    - word: 迎刃而解
+      cells: [[4, 2], [4, 3], [4, 4], [4, 5]]
+      direction: horizontal
+    - word: 事與願違
+      cells: [[5, 10], [6, 10], [7, 10], [8, 10]]
+      direction: vertical
+    - word: 天壤之別
+      cells: [[7, 1], [8, 1], [9, 1], [10, 1]]
+      direction: vertical
+    - word: 轉瞬即逝
+      cells: [[7, 3], [8, 4], [9, 5], [10, 6]]
+      direction: diagonal_down_right
+    - word: 睽違
+      cells: [[8, 9], [8, 10]]
+      direction: horizontal
+    - word: 孤寂感
+      cells: [[10, 8], [10, 9], [10, 10]]
+      direction: horizontal
+
+# ── 九 知識補給站 ──
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+    - index: 1
+      title: 【蘋中人】跨越0.001秒的遺憾 最速男楊俊瀚
+      duration: (5:23)
+      source: 蘋果新聞網
+      has_qr: true
+    - index: 2
+      title: 田徑為運動之母! 直擊飛毛腿養成班-台灣「這樣練」挑戰世界高手
+      duration: (3:53)
+      source: TVBS NEWS
+      has_qr: true

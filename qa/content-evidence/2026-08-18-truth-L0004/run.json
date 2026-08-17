@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0004",
+  "catalog_slot": "G4-L13",
+  "pdf_pages": 8,
+  "pages_read": 8,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 2, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 1,
+  "notes": "逐字門抓到 2 個真錯（皆為抽取端）：keypoints.intro 多打一個「曾」字（潤稿）；影片標題把分隔符 U+007C 讀成大寫 I。修正後全綠。"
+}

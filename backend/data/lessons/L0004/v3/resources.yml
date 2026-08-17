@@ -1,0 +1,18 @@
+lesson_uid: L0004
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 戀愛總是患得患失？工作總是失常？教你三招擺脫情緒變幸福
+    duration: (5:38)
+    source: 朵娜Donna
+    has_qr: true
+  - index: 2
+    title: 【發展輔導】困擾你的不是事件本身，而是你對事件的想法！理性情緒治療法RET|兩分鐘讀教育
+    duration: (2:18)
+    source: 王聖傑（SHENG CHIEH）
+    has_qr: true
+    note: 「RET|兩分鐘讀教育」的分隔符是半形豎線 U+007C（RET＝理性情緒治療法，「兩分鐘讀教育」為頻道名），PDF 上該字形近似大寫 I

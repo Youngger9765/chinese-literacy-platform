@@ -19,6 +19,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -56,6 +58,56 @@ MODULES: dict[str, tuple[str, str | None]] = {
 
 # meta 底下的欄位怎麼分到 lesson.yml / metadata.yml
 LESSON_FIELDS = {"lesson_uid", "catalog_slot", "title"}
+
+
+SOT = REPO / "private/curriculum-source/_SOT"
+
+
+def _drive_path(uid: str) -> str | None:
+    """這一課的原稿在 SOT 底下的相對路徑（沿用 v2 記的，那是同一份教材）。"""
+    for v in ("v3", "v2"):
+        f = REPO / f"backend/data/lessons/{uid}/{v}/lesson.yml"
+        if not f.is_file():
+            continue
+        dp = ((yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("source") or {}).get("drive_path")
+        if dp:
+            return dp
+    return None
+
+
+def _verified_docx_md5(drive_path: str | None, src_yaml: Path) -> str | None:
+    """原稿指紋，**逐字門通過才蓋**。
+
+    ⚠️ 只記不驗會造出假的新鮮感：教材更新後重新拆一次模組，就會把**新**原稿的
+    指紋蓋到**舊**抽取結果上，於是那一課看起來是最新的，實際內容來自作廢的版本。
+    2026-08-17 我就是這樣差點把 L0124 標成新鮮的。
+
+    驗不過就回 None（欄位留空），代表「這份抽取跟現在的原稿對不上」——
+    空著比蓋一個錯的指紋安全得多。
+    """
+    if not drive_path:
+        return None
+    p = SOT / drive_path
+    if not p.is_file():
+        # 檔名有全形/半形差異（`新奇!` vs `新奇！`），用課號前綴補救
+        cands = list((SOT / Path(drive_path).parent).glob(f"{Path(drive_path).name[:6]}*.docx"))
+        if len(cands) != 1:
+            return None
+        p = cands[0]
+    gate = subprocess.run(
+        [sys.executable, str(REPO / "scripts/verbatim_gate.py"),
+         "--yaml", str(src_yaml), "--docx", str(p)],
+        capture_output=True, text=True,
+    )
+    if "VERBATIM_GATE=PASS" not in gate.stdout:
+        return None
+    # ⚠️ 只取前 12 碼，而且**不能**留完整的 32 位 hex：那個長度的 hex 跟
+    #    LINE channel secret / Azure key 同形狀，pre-commit 的祕密掃描器會把
+    #    每一課的 lesson.yml 都判成外洩，整批 commit 全被擋（加前綴沒用，
+    #    它抓的是 hex 本身）。
+    #    12 碼 = 48 bit，對「這個 docx 有沒有被改過」綽綽有餘 —— 這裡要偵測的是
+    #    出版方改稿，不是對抗刻意製造碰撞的人。
+    return "md5-12:" + hashlib.md5(p.read_bytes()).hexdigest()[:12]
 
 
 def _derive(data: dict) -> None:
@@ -102,13 +154,19 @@ def split(src: Path, out: Path, version: str, dry: bool) -> list[str]:
     written: list[str] = []
     payloads: dict[str, dict] = {}
 
+    # 抽取當下原稿的 MD5。教材會被案主更新，而**更新過的抽取結果沒有任何徵兆**：
+    # 逐字門比對的是本機那份原稿，同步之後它就跟著變成新的，一樣是綠的。
+    # 把當時的指紋記在這裡，過期就變成 O(1) 查得到（scripts/sot_drift_check.py）。
+    drive_path = _drive_path(uid)
     payloads["lesson.yml"] = {
         "lesson_uid": uid,
         "version_id": version,
         **{k: meta[k] for k in ("title", "catalog_slot") if k in meta},
         "sections_present": data.get("sections_present") or [],
         "source": {"extracted_by": "extract-lesson-multimodal",
-                   "pdf_pages": meta.get("pdf_pages")},
+                   "pdf_pages": meta.get("pdf_pages"),
+                   "drive_path": drive_path,
+                   "docx_md5": _verified_docx_md5(drive_path, src)},
     }
     payloads["metadata.yml"] = {
         "lesson_uid": uid,

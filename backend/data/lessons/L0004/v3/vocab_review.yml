@@ -1,0 +1,131 @@
+lesson_uid: L0004
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 亂竄
+  - 動向
+  - 起伏
+  - 深淵
+  - 偵測
+  - 雀躍
+  - 揮之不去
+  - 煙消雲散
+  - 不是滋味
+  - 心花怒放
+  - 一言一行
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 大同小異亂不揮不測風
+  - 心花怒放來目是之念淵
+  - 願讚崩潰不煙伏深不怒
+  - 一雀躍轉消經年累月去
+  - 言不睛雲年天伏亂雲事
+  - 一已散無齡壤竄散深與
+  - 行滋可家不之目放淵願
+  - 無言執常是別起伏張違
+  - 喻動著便滋勢均力敵偵
+  - 心情向飯味言累事測消
+  answers_are_graphical: true
+  answer_paths:
+  - word: 揮之不去
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 心花怒放
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 煙消雲散
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 5
+    - - 5
+      - 4
+    - - 6
+      - 3
+    direction: diagonal_down_left
+  - word: 雀躍
+    cells:
+    - - 4
+      - 2
+    - - 4
+      - 3
+    direction: horizontal
+  - word: 一言一行
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 1
+    - - 6
+      - 1
+    - - 7
+      - 1
+    direction: vertical
+  - word: 亂竄
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    direction: diagonal_down_left
+  - word: 深淵
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 9
+    direction: vertical
+  - word: 不是滋味
+    cells:
+    - - 7
+      - 5
+    - - 8
+      - 5
+    - - 9
+      - 5
+    - - 10
+      - 5
+    direction: vertical
+  - word: 起伏
+    cells:
+    - - 8
+      - 7
+    - - 8
+      - 8
+    direction: horizontal
+  - word: 動向
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 3
+    direction: diagonal_down_right
+  - word: 偵測
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 9
+    direction: diagonal_down_left

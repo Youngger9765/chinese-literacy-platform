@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0011",
+  "catalog_slot": "G4-L1",
+  "pdf_pages": 8,
+  "pages_read": 8,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 1, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 1,
+  "notes": "本課沒有聚光燈大題（第六大題直接是閱讀理解），與總表兩個策略欄皆空一致 —— 是教材本來就沒有，不是漏抽。逐字門抓到 1 處：「形容眼睛盯著、非常專心的樣子」的頓號被 PDF 換行藏住，我照 PDF 抄成沒有頓號；以 DOCX 為準修正。重點表的球風／事例列在 p5 印在「六 閱讀理解」標題下方，經 document.xml 順序確認仍屬第五大題（浮動標題造成的排版假象）。字陣 11 個圈選全數還原，其中「鷹眼」的框是灰色、其餘橘色。"
+}

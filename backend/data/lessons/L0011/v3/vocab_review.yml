@@ -1,0 +1,144 @@
+lesson_uid: L0011
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 鷹眼
+  - 喝采
+  - 龍爭虎鬥
+  - 讚嘆不已
+  - 摸不著頭緒
+  - 勢均力敵
+  - 目不轉睛
+  - 凝聚力
+  - 捶胸頓足
+  - 疑難雜症
+  - 落寞
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 偉大飛餓丞讚嘆不已日
+  - 作喝龍虎相爭氣行經光
+  - 文采在爭老摸不著頭緒
+  - 章花天羊虎頭勢平手皇
+  - 捶天疑問話鬥不均大帝
+  - 胸酒難題撒寂兩一力情
+  - 頓地雜墜落寞立平士敵
+  - 足少症狀下默正鷹眼隊
+  - 球人稀少數目不轉睛手
+  - 員凝聚力以萬計謀畫冊
+  answers_are_graphical: true
+  answer_paths_note: 11 個目標語詞全部都有圈記，其中「鷹眼」的框是**灰色**、其餘 10 個是橘色。
+  answer_paths:
+  - word: 讚嘆不已
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 喝采
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    direction: vertical
+  - word: 龍爭虎鬥
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    direction: diagonal_down_right
+  - word: 摸不著頭緒
+    cells:
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 勢均力敵
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 8
+    - - 6
+      - 9
+    - - 7
+      - 10
+    direction: diagonal_down_right
+  - word: 捶胸頓足
+    cells:
+    - - 5
+      - 1
+    - - 6
+      - 1
+    - - 7
+      - 1
+    - - 8
+      - 1
+    direction: vertical
+  - word: 疑難雜症
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 3
+    - - 7
+      - 3
+    - - 8
+      - 3
+    direction: vertical
+  - word: 落寞
+    cells:
+    - - 7
+      - 5
+    - - 7
+      - 6
+    direction: horizontal
+  - word: 鷹眼
+    cells:
+    - - 8
+      - 8
+    - - 8
+      - 9
+    direction: horizontal
+  - word: 目不轉睛
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  - word: 凝聚力
+    cells:
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal

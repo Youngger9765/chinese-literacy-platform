@@ -1,0 +1,142 @@
+lesson_uid: L0012
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 生涯探索──轉個彎，熱愛還在前方
+  strategy_type: career
+  blocks:
+  - type: concept_box
+    text: '你也曾懷疑過嗎？喜歡的事，真的能當成一輩子的志向嗎？
+
+      喜歡的事，不一定只有一條路。當原來的方法受阻時，可以換個方法、學習新能力，或用不同角色延續熱愛。遇到阻礙時，可以這樣想：
+
+      ①看問題：我現在卡在哪裡？
+
+      ②找新路：我可以換方法、學能力，或換個角色嗎？
+
+      ③踏一步：我現在先做哪一件事？'
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: 情境一：品妤的寫作困境
+    items:
+    - type: passage
+      paragraphs:
+      - 品妤喜歡寫小說，常在網路上分享自己的故事。
+      - 可是，最近有幾則留言說她的文筆「太幼稚」，讓她開始懷疑自己是不是沒有天分。
+    - type: single
+      index: 1
+      prompt: 【看問題】她的問題是什麼？(單選)
+      options:
+        1: 想紅太快
+        2: 受批評而自我懷疑
+        3: 沒時間寫作
+        4: 家人反對
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形）
+    - type: multi
+      index: 2
+      prompt: 【找新路】她可以怎麼做？(複選)
+      options:
+        1: 刪掉所有作品，從此不再寫故事
+        2: 立刻反擊留言者，為自己辯護
+        3: 先休息幾天，讓心情平靜再繼續創作
+        4: 請信任的老師或朋友給意見
+        5: 觀察優良作品，學習新技巧
+        6: 告訴自己：「我寫作，是因為喜歡這件事。」
+      answer:
+      - 3
+      - 4
+      - 5
+      - 6
+      answer_carrier: 紅色 ☑（圖形）
+    - type: multi
+      index: 3
+      prompt: 她這樣做可能帶來哪些幫助？(複選)
+      options:
+        1: 更清楚自己的優點與不足，提升寫作能力
+        2: 重新找回寫作的熱情與信心
+        3: 完全喪失動力，覺得自己不可能進步
+        4: 只為了取悅別人而寫作，越來越不快樂
+      answer:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形）
+  - type: sub_block
+    label: 情境二：社團與課業的衝突
+    items:
+    - type: passage
+      paragraphs:
+      - 芸涵最喜歡跳舞，每天都期待熱舞社的時間。
+      - 但這學期功課變多，爸媽說：「社團先停一下，考好再跳。」
+      - 她很矛盾，一方面想聽父母的話，一方面又捨不得放下練舞。
+    - type: single
+      index: 1
+      prompt: 【看問題】她的問題是什麼？
+      options:
+        1: 成績與練舞難以兼顧
+        2: 社團太無聊
+        3: 身體受傷
+        4: 同學排擠
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形）
+    - type: multi
+      index: 2
+      prompt: 【找新路】她可以怎麼做？(複選)
+      options:
+        1: 每天利用短時間練習基本動作，維持節奏感
+        2: 假日再與同學合練，調整練習次數
+        3: 完全停掉社團、不再練舞
+        4: 與爸媽溝通並提出讀書計畫
+        5: 把舞蹈當作紓壓方式，在休息時練舞
+      answer:
+      - 1
+      - 2
+      - 4
+      - 5
+      answer_carrier: 紅色 ☑（圖形）
+    - type: multi
+      index: 3
+      prompt: 這樣做可能帶來哪些幫助？(複選)
+      options:
+        1: 繼續保持對舞蹈的熱情，也不影響課業
+        2: 可能一輩子與舞蹈無緣，後悔不已
+        3: 父母看到責任感而支持
+        4: 偷練被抓、親子衝突升高
+      answer:
+      - 1
+      - 3
+      answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: ◎換你試試看：
+  - type: sub_block
+    label: 換你試試看
+    items:
+    - type: free_text
+      index: 1
+      prompt: 一、我現在最熱愛的事或興趣是什麼？
+      answer_line: 我最熱愛的事是：
+    - type: multi
+      index: 2
+      prompt: 二、最近進行熱愛的事時，遇到的阻礙是什麼？
+      options:
+        1: 時間不夠
+        2: 家人期待不同
+        3: 成績壓力
+        4: 經費／器材不足
+        5: 作品被批評
+        6: 身體狀況
+        7: 其他：
+      answer: null
+      answer_carrier: 學生自填，原稿無勾選
+    - type: multi
+      index: 3
+      prompt: 三、如果有一天，不能靠它成功或無法繼續下去，你可以怎麼做？
+      options:
+        1: 縮時練習（每天10–15分鐘基本功）
+        2: 角色轉換（例：籃球選手變籃球教練、運動選手變體育主播）
+        3: 延伸學習（例：喜歡唱歌→學錄音；喜歡球類→學習戰術分析）
+        4: 把學到的精神用在別的地方（例：堅持、專注、團隊合作）
+        5: 用其他方式將熱愛的事物與夥伴分享（寫文、拍短片、辦展覽）
+      answer: null
+      answer_carrier: 學生自填，原稿無勾選

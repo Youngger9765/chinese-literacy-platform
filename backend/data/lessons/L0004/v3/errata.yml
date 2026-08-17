@@ -1,0 +1,21 @@
+lesson_uid: L0004
+version_id: v3
+errata:
+- id: E1
+  section: 一 讀全文-做記號
+  locator: 第 4 段「一言一行」與「起伏」之間
+  source: 但我卻發現我的情緒總是隨著他的一言一行 起伏。
+  corrected: 但我卻發現我的情緒總是隨著他的一言一行起伏。
+  kind: 贅餘空格
+  why: 中文句中不應有半形空格；此處為排版殘留
+  confidence: high
+  evidence: document.xml 與 PDF p1 一致，右緣累計字數 269-155=114 亦不計此空格
+- id: E2
+  section: 三 語詞我最棒（本課語詞框）
+  locator: 語詞框第 2 行行末
+  source: 起伏、深淵、煙消雲散偵測、不是滋味、雀躍、
+  corrected: 起伏、深淵、煙消雲散、偵測、不是滋味、雀躍、
+  kind: 漏標點
+  why: 語詞框每項以「、」分隔，唯獨「煙消雲散」與「偵測」之間漏了頓號（換行處）
+  confidence: high
+  evidence: document.xml 該段為單一字串，PDF p3 顯示為換行

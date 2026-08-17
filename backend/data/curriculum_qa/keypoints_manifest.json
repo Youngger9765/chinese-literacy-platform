@@ -20,8 +20,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 3
+        "fill_blank_count": 3,
+        "checkbox_count": 2
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -34,8 +34,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 3
+        "fill_blank_count": 3,
+        "checkbox_count": 2
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -74,10 +74,10 @@
       "lesson_uid": "L0004",
       "title": "感情小日記2──喜歡是什麼？",
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 5
+        "fill_blank_count": 6,
+        "checkbox_count": 0
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -186,10 +186,10 @@
       "lesson_uid": "L0012",
       "title": "想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)",
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 1
+        "checkbox_count": 0
       },
       "docx_keypoints": null,
       "overall_pass": true,

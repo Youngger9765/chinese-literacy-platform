@@ -275,3 +275,14 @@ describe('options 是物件而不是陣列', () => {
     for (const t of ['甲', '乙', '丙']) expect(screen.getByText(new RegExp(t))).toBeTruthy();
   });
 });
+
+describe('題幹欄位有三個名字', () => {
+  // 契約門會擋掉沒有 prompt 的題目，這裡是萬一溜過去時的降級：
+  // 只讀 prompt 的話，畫面會是「四個選項但不知道在問什麼」，而且不報錯。
+  it.each(['prompt', 'instruction', 'stem'])('用 %s 當題幹也要顯示得出來', (field) => {
+    renderSpotlight([
+      { type: 'multi', [field]: '這個故事想告訴我們什麼？', options: { 1: '甲', 2: '乙' }, answer: [1] },
+    ]);
+    expect(screen.getByText('這個故事想告訴我們什麼？')).toBeTruthy();
+  });
+});

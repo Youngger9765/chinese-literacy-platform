@@ -144,6 +144,20 @@ def _flatten_items(items: list) -> list[dict]:
                 # 母項自己的文字（「天空的變化」）當第一個子項，不然那句話會消失
                 out.insert(len(out) - len(subs), {"sub_label": label, "template": head, "blanks": None})
             continue
+        # ⚠️ 帶 `options` 的小題要轉成 `□①…` 記法，不然它只是一段純文字：
+        #    畫得出來、但**學生點不了**，而 interaction_profile 也看不到它
+        #    （checkbox_count 掉成 0，整課被判成 display_only）。
+        #    答案在 `answer`／`answers`，來源是紅色 ☑（圖形層），文字流沒有。
+        if item.get("options"):
+            base = str(item.get("value") or item.get("template") or "").strip()
+            rendered = _render_choice_cell(item)
+            out.append({
+                "sub_label": label,
+                "template": f"{base}\n{rendered}" if base else rendered,
+                "blanks": None,
+            })
+            continue
+
         out.append({
             "sub_label": label,
             "template": item.get("template") if item.get("template") is not None else item.get("value"),
@@ -208,6 +222,23 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
         out.append([title])
 
     head, rest = columns[0], columns[1:]
+
+    # ⚠️ `columns` 的名字不一定對得上 row 的 key。L0004 的 columns 是中文
+    #    （段落／事件／感受），row 的 key 卻是英文（paragraph／event／feeling）——
+    #    照名字查一個都查不到，整張表變成空的，而且**不會報錯**。
+    #    對不上就改用 row 自己的 key（照原序，扣掉旁掛欄位），欄名仍用 columns 顯示。
+    sample = next((r for r in rows_in if isinstance(r, dict)), {})
+    if sample and not any(c in sample for c in columns):
+        keys = [k for k in sample
+                if isinstance(k, str)
+                and not any(k.endswith(suf) for suf in ("_blanks", "_blank", "_choices",
+                                                        "_multi_answer", "_options"))
+                and k not in ("blanks", "items", "sub_rows", "sub_items", "tail", "tail_blank")]
+        if len(keys) >= 2:
+            head, rest = keys[0], keys[1:]
+            # 顯示用的欄名還是照 columns（那是教材印的），只有取值改用實際 key
+            rest = list(zip(rest, columns[1:] + rest[len(columns) - 1:]))
+
     for row in rows_in:
         if not isinstance(row, dict):
             continue
@@ -217,12 +248,18 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
         #    2026-08-17 preview 實測：填了之後 文-L6 的第一格印出「【起因】/案由」。
         #    答案仍留在 keypoints.yml 裡，教師端要用再取。
         cells = [str(row.get(head) or "").strip()]
-        for i, col in enumerate(rest):
-            text = row.get(col)
+        for i, entry in enumerate(rest):
+            key, shown = entry if isinstance(entry, tuple) else (entry, entry)
+            text = row.get(key)
             if text is None:
                 continue
-            cells.append(col)
-            blanks = _sidecar(row, col, "_blanks", is_last=(i == len(rest) - 1))
+            cells.append(str(shown))
+            opts = _sidecar(row, key, "_options", is_last=(i == len(rest) - 1))
+            if opts:
+                answers = _sidecar(row, key, "_multi_answer", is_last=(i == len(rest) - 1))
+                cells.append(_render_choice_cell({"options": opts, "answers": answers}))
+                continue
+            blanks = _sidecar(row, key, "_blanks", is_last=(i == len(rest) - 1))
             cells.append(_render_cell(text, blanks))
         if len(cells) >= 3:
             out.append(cells)

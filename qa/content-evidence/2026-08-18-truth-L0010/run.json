@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0010",
+  "catalog_slot": "G4-L19",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 0,
+  "notes": "課文是兩封信、段號各自從一重數，故 paragraphs 同時給 idx（學習單印的號碼）與 seq（全文連續）；念順順「二☞」指第二封信第 2 段 = seq 6。字陣 10 個圈選全部用向量圖形座標比對還原並經 normalize_word_search 驗過（其中「報酬」的橘框畫在 p9 座標系但格子在 p10，肉眼看是空框，靠座標外推才對上）。連連看答案為紅色線段、只畫了前兩列且未落在右欄錨點，判讀不出配對，answer 記 null 不臆測。source_errata 1 筆：語詞框漏列「孤注一擲」。marking_instruction 需放在 body 底下，否則 split_lesson_modules 會靜默丟掉。"
+}

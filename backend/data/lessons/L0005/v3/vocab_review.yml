@@ -1,0 +1,37 @@
+lesson_uid: L0005
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 示意
+  - 側目
+  - 火藥味
+  - 局面
+  - 不可收拾
+  - 顫顫巍巍
+  - 尷尬
+  - 一溜煙
+  - 路見不平
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 瓦礫不可收拾翻騰本顫
+  - 敢怒不敢言輕稻收顫訓
+  - 錯徒顫抖囑而契巍限練
+  - 火拯救唱咐易巍金局有
+  - 藥滴落行舉示意風滯素
+  - 味水側目無倖議一靈敏
+  - 寒氣逼人大存積溜馬路
+  - 抱頭鼠竄局量啄煙看見
+  - 遣尷派持面苦撐待縫不
+  - 尬循序漸進暑廢墟隙平
+  answers_are_graphical: true
+  answers_printed: false
+  render_note: '文字流有完整 100 字（10×10），但 DOCX→PDF 轉出的版面只印第 2~10 列，
+
+    第 1 列「瓦礫不可收拾翻騰本顫」被分頁切掉（p9 末與 p10 首皆無）。
+
+    grid 以文字層為準；Word 原生版面是否同樣切掉未經證實。'

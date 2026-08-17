@@ -54,6 +54,22 @@ const FALLBACK_GRADE: StrategyGradeResult = {
  * 物件形狀的 key 順序照 YAML 原序，不重新排序：代號本身（A/B/C、1/2/3）就是
  * 教材印出來的順序，排序會讓答案索引對不上。
  */
+/**
+ * 題幹。抽取者寫過三個名字：`prompt`（規格）、`instruction`、`stem`。
+ *
+ * 契約門會擋掉沒有 `prompt` 的題目，但那是**落地前**的檢查；萬一有一筆溜過去，
+ * 只讀 `prompt` 的後果是「選項在、題目整段不見」—— 學生看到四個選項不知道在問什麼，
+ * 而且畫面不報錯。退化成「顯示得出來」比顯示空白安全得多。
+ */
+const promptOf = (block: unknown): string => {
+  const b = (block ?? {}) as Record<string, unknown>;
+  for (const k of ['prompt', 'instruction', 'stem']) {
+    const v = b[k];
+    if (typeof v === 'string' && v.trim()) return v;
+  }
+  return '';
+};
+
 const toOptionList = (options: unknown): string[] => {
   if (Array.isArray(options)) return options.map(o => String(o ?? ''));
   if (options && typeof options === 'object') {
@@ -185,7 +201,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     setGradingKey(key);
     try {
       const grade = await validateStrategyAnswer(token, {
-        question: block.prompt ?? '',
+        question: promptOf(block) ?? '',
         studentAnswer: text,
         strategyName: spotlight.strategy_name,
         storyTitle,
@@ -333,7 +349,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         const selected = blockState[key];
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
-            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
+            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{promptOf(block)}</p>
             <div className="space-y-2">
               {options.map((opt, oi) => (
                 <button
@@ -371,15 +387,15 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       }
 
       case 'free_text': {
-        if (isSectionHeaderPrompt(block.prompt)) {
-          return renderGuide(key, block.prompt);
+        if (isSectionHeaderPrompt(promptOf(block))) {
+          return renderGuide(key, promptOf(block));
         }
         const grade = textGrades[key];
         const isGrading = gradingKey === key;
         const isSubmitted = fb !== undefined && fb !== null;
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
-            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{block.prompt}</p>
+            <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{promptOf(block)}</p>
             <textarea
               value={String(blockState[key] ?? '')}
               disabled={isSubmitted || isGrading}
@@ -619,7 +635,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
           setBlockValue(key, selected.includes(oi) ? selected.filter((x) => x !== oi) : [...selected, oi]);
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
-            <p className="text-base font-medium text-on-surface mb-1 whitespace-pre-wrap">{block.prompt}</p>
+            <p className="text-base font-medium text-on-surface mb-1 whitespace-pre-wrap">{promptOf(block)}</p>
             <p className="text-sm text-on-surface-variant mb-3">可以選一個以上</p>
             <div className="space-y-2">
               {options.map((opt, oi) => (

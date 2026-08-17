@@ -1,0 +1,9 @@
+{
+  "lesson_uid": "L0009",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 0
+}
