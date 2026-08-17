@@ -28,10 +28,15 @@ import yaml
 
 REPO = Path(__file__).resolve().parent.parent
 
-# 每個模組 → (檔名, 教材上的大題序號)。序號 None = 不是大題（身分/課級屬性）。
-# 來源 key → (模組名, 教材上的大題序號)。模組名同時是檔名與檔案內層的 key ——
+# 來源 key → (模組名, **預設**大題序號)。模組名同時是檔名與檔案內層的 key ——
 # 兩者不一致等於又造一個「檔名說一件事、內容說另一件事」的坑（#2641 同型）。
 # 序號 None = 不是大題（身分／課級屬性）。
+#
+# ⚠️ 這裡的序號只是**沒有資料時的退路**，真正的序號一律以該課的 `sections_present`
+#    為準。原因：大題順序不是固定的 —— 實測 175 份原稿，**70 課重點表在前、
+#    39 課聚光燈在前**（其餘 66 課缺其中一節）。寫死常數對那 39 課會把
+#    `section_no` 標反（keypoints 標成五、spotlight 標成六，而學習單印的相反）。
+#    四成不是例外，是另一種常態。
 MODULES: dict[str, tuple[str, str | None]] = {
     "lesson":            ("lesson", None),
     "metadata":          ("metadata", None),
@@ -110,6 +115,44 @@ def _verified_docx_md5(drive_path: str | None, src_yaml: Path) -> str | None:
     return "md5-12:" + hashlib.md5(p.read_bytes()).hexdigest()[:12]
 
 
+# `sections_present[].name` 上的大題名 → 模組名。抽取者照教材抄名字，
+# 而教材的用字有幾種寫法，所以用「包含」比對而不是全等。
+SECTION_NAME_TO_MODULE = [
+    ("讀全文", "full_text_annotate"),
+    ("念順順", "key_reading"),
+    ("語詞我最棒", "vocab_definitions"),
+    ("語詞應用", "vocab_application"),
+    ("文章重點表", "keypoints"),
+    ("重點表", "keypoints"),
+    ("聚光燈", "spotlight"),
+    ("閱讀理解", "comprehension"),
+    ("詞語複習", "vocab_review"),
+    ("知識補給站", "resources"),
+    ("語詞書寫", "writing_practice"),
+]
+
+
+def _printed_section_numbers(data: dict) -> dict[str, str]:
+    """模組名 → 教材**印出來**的大題序號。
+
+    這是 `section_no` 的唯一正確來源。常數表只是退路 —— 大題順序在這批教材裡
+    不固定（70 課重點表在前、39 課聚光燈在前），寫死會有四成標反。
+    """
+    out: dict[str, str] = {}
+    for row in data.get("sections_present") or []:
+        if not isinstance(row, dict):
+            continue
+        no = row.get("no") or row.get("No")
+        name = str(row.get("name") or "")
+        if no in (None, "", True, False) or not name:
+            continue
+        for needle, mod in SECTION_NAME_TO_MODULE:
+            if needle in name:
+                out.setdefault(mod, str(no))
+                break
+    return out
+
+
 def _derive(data: dict) -> None:
     """補上「抽取時記了做法、但消費端要成品」的欄位。
 
@@ -176,12 +219,16 @@ def split(src: Path, out: Path, version: str, dry: bool) -> list[str]:
 
     _derive(data)
 
-    for key, (mod, no) in MODULES.items():
+    printed = _printed_section_numbers(data)
+
+    for key, (mod, default_no) in MODULES.items():
         if key in ("lesson", "metadata"):
             continue
         if key not in data or data[key] in (None, [], {}):
             continue
         payload: dict = {"lesson_uid": uid, "version_id": version}
+        # 教材印的號碼優先；沒印才退回預設
+        no = printed.get(mod, default_no)
         if no:
             payload["section_no"] = no
         # 內層 key == 模組名 == 檔名（去掉 .yml）

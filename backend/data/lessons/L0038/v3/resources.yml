@@ -1,0 +1,16 @@
+lesson_uid: L0038
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 千萬雙眼緊盯水底直播  魚群遷徙幫按門鈴
+    duration: (1:57)
+    source: 大愛新聞
+    qr_code: true
+  - index: 2
+    title: 荷蘭學者運河安裝「魚門鈴」 協助魚群洄游產卵－民視新聞
+    duration: (1:24)
+    source: 民視新聞網
+    qr_code: true

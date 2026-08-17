@@ -1,0 +1,67 @@
+lesson_uid: L0037
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 爭強鬥勝
+  - 投奔
+  - 互比苗頭
+  - 開門見山
+  - 讒言
+  - 軟禁
+  - 凶多吉少
+  - 面面相覷
+  - 鴉雀無聲
+  - 悶不吭聲
+  - 匪夷所思
+  - 唯妙唯肖
+  - 津津樂道
+  - 快馬加鞭
+  items:
+  - index: 1
+    word: 開門見山
+    definition: 說話或寫文章一開始就直接切入主題。
+  - index: 2
+    word: 投奔
+    definition: 投靠別人或某個地方，多指在困境中尋求保護。
+  - index: 3
+    word: 互比苗頭
+    definition: 彼此競爭、比一比誰比較厲害。
+  - index: 4
+    word: 唯妙唯肖
+    definition: 形容模仿得非常逼真、傳神。
+  - index: 5
+    word: 讒言
+    definition: 挑撥離間或陷害他人的壞話。
+  - index: 6
+    word: 爭強鬥勝
+    definition: 凡事都想贏過別人，不肯認輸。
+  - index: 7
+    word: 匪夷所思
+    definition: 形容事情非常奇特、難以想像或理解。
+  - index: 8
+    word: 悶不吭聲
+    definition: 一句話也不說，保持沉默。
+  - index: 9
+    word: 凶多吉少
+    definition: 指情況不樂觀，可能會有不好的結果。
+  - index: 10
+    word: 面面相覷
+    definition: 大家彼此看著對方，不知道該怎麼辦；常用於尷尬或錯愕的場面。
+  - index: 11
+    word: 津津樂道
+    definition: 形容人對某件事情非常感興趣，並且樂於談論或分享。
+  - index: 12
+    word: 鴉雀無聲
+    definition: 連烏鴉麻雀的聲音都沒有，形容非常安靜。
+  - index: 13
+    word: 快馬加鞭
+    definition: 騎著快馬還用鞭子催促，比喻加快速度、加緊進行。
+  - index: 14
+    word: 軟禁
+    definition: 把人限制在一個地方並加以監視，讓他不能自由行動。

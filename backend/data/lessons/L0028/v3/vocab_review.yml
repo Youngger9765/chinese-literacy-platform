@@ -1,0 +1,34 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 表彰
+  - 刻不容緩
+  - 成效斐然
+  - 繁殖
+  - 救苦救難
+  - 層出不窮
+  - 晝伏夜出
+  - 肉眼
+  - 刨地
+  - 雜草叢生
+  - 效能
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 如魚得水包嗷成嗚彌累
+  - 效能識丁庇熱嗷效能積
+  - 不彌晝伏夜出待待斐丘
+  - 轉撒貼蔭果貼補成哺然
+  - 睛刻心救苦救難效撰餘
+  - 店木不按件計酬覓層鋪
+  - 雜肉食容按鍵食出天剪
+  - 草眼指莽緩庇不蓋體貼
+  - 叢不浩給撞窮地表樹繁
+  - 生案繁刨地便飯護彰殖
+  answers_are_graphical: true
+  answer_paths_note: 未轉錄 —— 本課無法產生 PDF，圈選只存在於圖形層

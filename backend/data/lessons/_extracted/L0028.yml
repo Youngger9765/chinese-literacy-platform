@@ -1,0 +1,437 @@
+# L0028 / G5-L16《掃雷英雄馬嘎瓦》— LLM 多模態抽取
+# 來源：private/curriculum-source/_SOT/5年級/G5-L16掃雷英雄馬嘎瓦（用表格整理訊息-閱讀表格策略）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+#
+# 🔴🔴 **這一課沒有走「逐頁讀 PDF」那條主抽取路線 —— 因為做不出 PDF。**
+#
+# 轉檔失敗的證據（不是我沒試）：
+#   · `scripts/docx_to_pdf.sh` 對這個檔跑了 4 次（300s / 300s / 600s / 900s），
+#     LibreOffice 26.2.2.2 全程 99% CPU、一個位元組都沒吐出來 —— 是版面演算法
+#     無窮迴圈，不是卡在 profile 鎖（`--doctor` 每次都顯示 0 個殘留行程）。
+#   · **正向對照**：同一支腳本、同一時間，重轉一個已知會過的檔（L0021）→ 3 頁、數秒完成。
+#     所以壞的是這一份 DOCX 的內容，不是工具或環境。
+#   · 換引擎：`docx2pdf`（驅動 Microsoft Word）回 `Error: 不明的訊息。`
+#     （Word 的自動化權限要人工授權，我無法自行給予）。
+#   · 換中介格式：DOCX → ODT 幾秒就好，ODT → PDF **一樣無窮迴圈** ——
+#     證實迴圈在 Writer 的版面引擎，跟輸入格式無關。
+#
+# 所以下面的內容來自 `word/document.xml`，而**圖形層的答案改用可驗證的方式取得**：
+#   · ☑ 勾選答案 = `<w:sym w:font="Wingdings" w:char="F0FE"/>`，本檔共 12 個，全部收錄。
+#   · 框起來的語詞 = run 上的 `<w:bdr>` 字元框，本檔共 11 個語詞。
+#   兩種方法都先用 **L0027 當正向對照驗過**：L0027 的 23 個 F0FE 與我逐頁讀 PDF
+#   抄到的 23 個 ☑ 完全對得上，框線也還原出一模一樣的 12 個語詞。
+#
+# ⚠️ **仍然缺的一塊**：第八大題找字遊戲的圈選路徑。那是畫上去的橘色線，
+#    不在文字流也不是 w:sym，只有像素裡有。**`answer_paths` 因此整個省略**（不寫空 list），
+#    等 PDF 轉得出來要回頭補。這一課在「重跑清單」上。
+meta:
+  # ⚠️ 放在 meta 底下：split_lesson_modules.py 只搬對照表上的頂層 key，
+  #    放頂層會被靜默丟掉（同 L0012 的 marking_instruction 教訓）。
+  extraction_gap_note: 找字遊戲圈選路徑未轉錄（PDF 產不出來）；其餘內容已由 XML + w:sym + w:bdr 取得
+  lesson_uid: L0028
+  catalog_slot: G5-L16
+  title: 掃雷英雄馬嘎瓦
+  level: 5
+  genre: 說明文
+  text_type: 科學
+  strategy: 用表格整理訊息──閱讀表格策略
+  header_target: 目標策略：用表格整理訊息──閱讀表格策略
+  課文: 曾世杰
+  學習單: 陳淑麗
+  # ⚠️ 不是 pdf_pages —— 我沒有產出 PDF，也沒有讀任何一頁。
+  #    9 這個數字來自 docProps/app.xml 的 <Pages>，是 Word 存檔時記下的。
+  pdf_pages: null
+  pages_from_docprops: 9
+  pages_read: 0
+  intro_topic_note: 擴展視野： 有趣的（總表原值，看起來未寫完）
+
+source_errata:
+  - id: E1
+    section: 五 文章重點表
+    locator: 「巨鼠掃雷」列第 2 小項
+    source: 2安全：不會引爆地雷。
+    corrected: 2.安全：不會引爆地雷。
+    kind: 漏字（序號後的點）
+    why: 同一格的第 1、3 小項都寫「1.」「3.」，只有第 2 項的序號後面少了點
+    confidence: high
+    evidence: document.xml 該儲存格原文
+  - id: E2
+    section: 六 閱讀聚光燈 步驟五
+    locator: 引用課文第五段的那一段引文
+    source: 簡單的說，以巨鼠掃雷相對安全、有效能、便宜而且方便。
+    corrected: 簡單來說，以巨鼠掃雷相對安全、有效能、便宜而且方便。
+    kind: 引文與課文不一致
+    why: 課文第五段印的是「簡單來說」，聚光燈引用同一句時寫成「簡單的說」。無法判定哪一邊才是作者本意，所以**兩處都照原樣保留、未更正**，只登錄這個落差
+    confidence: high
+    evidence: document.xml 內兩處並存（課文段落 vs 步驟五引文）
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 閱讀聚光燈, subtitle: 閱讀表格策略}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  marking_instruction:
+    header: ※ 如果你有做到下列事項，請在□內打勾。
+    items:
+      - 請在不太了解的字、詞或句做記號。
+      - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  # 段號欄印 一二三四五六 共 6 個（document.xml 的段號儲存格）。
+  # 第 4 段之後嵌著「表1」，表格不算段落，段號也沒有給它編號。
+  paragraph_count: 6
+  paragraphs:
+    - idx: 1
+      text: 馬嘎瓦是一隻非洲巨鼠，牠長得和台灣常見的田鼠很像，但是大了三、四倍，有小貓那麼大，約1到1.5公斤重。巨鼠晝伏夜出，繁殖力強，讓農民傷透腦筋。沒想到，後來有科學家看到牠們嗅覺靈敏的優點，在訓練後，開始用巨鼠在全球各地偵測地雷，成效斐然！
+    - idx: 2
+      text: 地雷是一種埋在土裡的炸彈，人員或車輛壓過時，只要重量超過6公斤，就會爆炸，殺傷敵人。地雷製造容易，成本低廉，戰爭時，軍人經常在重要的地點埋設地雷，好讓敵人無法通過。最糟糕的是，雖然地雷是為了殺傷敵對陣營的武裝人員而設置的，但是地雷殺傷的平民更多。即使戰事已經結束幾十年，被地下的地雷殺傷的情況仍然層出不窮，造成人們行動時的害怕與不便。聯合國估計，2015年全世界約有6,500人因地雷而死亡或受傷，大多數受害者是平民，其中三分之一是兒童。因此，偵測和掃除地雷成為刻不容緩的工作。
+      note: 念順順的起讀段落（指定段落「二」）
+    - idx: 3
+      text: 但地雷埋在地下，肉眼看不出來，要怎麼掃雷呢？這時馬嘎瓦和牠的弟兄姊妹就派上用場了。
+    - idx: 4
+      text: 傳統上，軍隊的掃雷人員要手持金屬探測器，像除草機一樣左右扇形擺動，如果探測器嗶嗶作響，就表示地下有金屬，掃雷人員就會停下來，小心翼翼的用小鏟子挖掘，確定是地雷後，再遠距引爆。若使用馬嘎瓦掃雷，牠靠「嗅覺」偵測地雷，只要聞到地雷裡的TNT炸藥，馬嘎瓦就會原地不動，用爪子刨地，工作人員會立刻在這個地點插上小旗子，確認是地雷後，再遠距引爆。表１整理了使用巨鼠掃雷的許多優點。
+    - idx: 5
+      text: 簡單來說，以巨鼠掃雷相對安全、有效能、便宜而且方便。例如，馬嘎瓦可在30分鐘內掃描完一個網球場大小的區域，而人類使用金屬探測器則需要1至4天才能完成相同的任務。
+      note: 第六大題「步驟五」引用這一段時寫成「簡單的說」，見 source_errata E2
+    - idx: 6
+      text: 從2000年到今天，在非洲的安哥拉、莫三比克和亞洲的柬埔寨等國家，巨鼠已經幫助清理了超過2,300萬平方公尺的土地，找到107,600枚地雷和未爆炸的彈藥。其中最知名的掃雷鼠就是馬嘎瓦，牠在柬埔寨掃雷五年，成功發現71枚地雷和38件未爆炸物，協助清理了相當於42個足球場大小的土地，預防了大批平民與兒童的傷亡，並且讓大片的土地可以重新被開發利用。2020年，英國獸醫慈善協會頒發了動物勇氣金牌獎給馬嘎瓦，表彰牠為拯救生命所做的重大貢獻，在馬嘎瓦和眾多弟兄姊妹的努力下，巨鼠的形象，已經從令人噁心的大老鼠，轉變成救苦救難的英雄了。
+  # 課文第 4 段之後嵌的表格（第六大題會整張再引用一次）
+  table_1:
+    caption: 表1 兩種掃雷方式的比較：「金屬探測器」和「非洲巨鼠」
+    columns: [項目, 金屬探測器, 非洲巨鼠]
+    columns_note: 第一欄的表頭在教材上是空白格
+    rows:
+      - [1.安全性, 掃雷人員常被地雷炸傷, 不會引爆地雷]
+      - [2.效能, 對所有金屬(如鋁罐、瓶蓋)發出警報，須逐一確認, 只對TNT炸藥發出警報]
+      - [3.成本, 購買、維護金屬探測器很貴, 飼養和訓練便宜很多]
+      - [4.方便性, 在泥濘、雜草叢生處無法工作, 在泥濘、雜草叢生處仍可工作]
+  # 由 run 的 <w:bdr> 字元框還原（方法已用 L0027 正向對照驗過）
+  inline_marked_terms: [晝伏夜出, 繁殖, 成效斐然, 層出不窮, 刻不容緩, 肉眼, 刨地, 效能, 雜草叢生, 表彰, 救苦救難]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（二☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 2
+  end: 課文結束
+  spans_paragraphs: [2, 3, 4, 5, 6]
+  printed_char_count: 456
+  # 右緣「字數」欄共 17 個累計數，最後一個是 456。
+  # ⚠️ 這一欄的逐行對位需要看版面，而這一課沒有 PDF，所以只記最後一個累計數，
+  #    不宣稱它涵蓋到哪一段（前三課 L0022/L0026/L0027 都是「只標到倒數第二段」，
+  #    這一課無法確認是否相同）。
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark:
+    - {threshold: ＜200字, feedback: 還要多加練習。}
+    - {threshold: 201~230字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞231字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank: [表彰, 刻不容緩, 成效斐然, 救苦救難, 肉眼, 層出不窮, 刨地, 效能, 雜草叢生, 晝伏夜出, 繁殖]
+  items:
+    - {index: 1, word: 晝伏夜出, definition: 白天藏起來，夜晚才出現；「晝」是白天，「伏」是潛伏；描述夜行性動物的習性。}
+    - {index: 2, word: 成效斐然, definition: 成果非常好。}
+    - {index: 3, word: 刻不容緩, definition: 形容情況十分緊急，一刻也不容耽擱。}
+    - {index: 4, word: 表彰, definition: 公開表揚傑出的表現或貢獻。}
+    - {index: 5, word: 肉眼, definition: 人的眼睛，指不倚賴眼鏡或光學設備的視力。}
+    - {index: 6, word: 刨地, definition: 用爪子或工具挖地。}
+    - {index: 7, word: 雜草叢生, definition: 到處長滿雜草。}
+    - {index: 8, word: 層出不窮, definition: 接連不斷地出現。（注意：這個詞常用來形容壞事）。}
+    - {index: 9, word: 繁殖, definition: 生出新的生命，讓物種的數量增加。例如，老鼠生出小老鼠、植物的種子變成小苗，都是繁殖。}
+    - {index: 10, word: 救苦救難, definition: 提供救助，使人脫離痛苦與災難。}
+    - {index: 11, word: 效能, definition: 做事的效率和效果。「工作效能很好」指的是工作做得又快、又好。}
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  # ⚠️ 選項有 10 個（A~J）；本課 11 個語詞裡的「刨地」沒有進選項框。
+  option_bank: {A: 表彰, B: 層出不窮, C: 雜草叢生, D: 肉眼, E: 效能, F: 救苦救難, G: 繁殖, H: 刻不容緩, I: 晝伏夜出, J: 成效斐然}
+  items:
+    - {index: 1, stem: 這個花園多年無人管理，已經（　），整理恐怕要花一段時間。, answer: C}
+    - {index: 2, stem: 貓頭鷹和老鼠都是（　）的生物，白天休息，晚上才出來覓食。, answer: I}
+    - {index: 3, stem: 這種昆蟲的（　）力很強，短短幾週，數量就增加到成千上萬隻。, answer: G}
+    - {index: 4, stem: 地震導致大量人員受困，救援行動（　），每分每秒都攸關生死。, answer: H}
+    - {index: 5, stem: 這種生物體型太小，以（　）無法看見，必須使用顯微鏡。, answer: D}
+    - {index: 6, stem: 這款新型手機的（　）很好，開啟程式很快，處理照片也很順暢。, answer: E}
+    - {index: 7, stem: 總統今日上午頒獎給舉重國手郭婞淳，以（　）其榮獲奧運金牌。, answer: A}
+    - {index: 8, stem: 由於詐騙案件（　），警方提醒民眾不要輕信來路不明的訊息。, answer: B}
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 掃雷英雄馬嘎瓦
+  layout: list
+  rows:
+    - label: 巨鼠外型與優點
+      value: 馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　】。
+      blanks: [{answer: 地雷}]
+    - label: 地雷危害
+      value: 戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　】的工作。
+      blanks: [{answer: 刻不容緩}]
+    - label: 兩種掃雷方式的比較
+      items:
+        - label: 傳統掃雷
+          value: 由掃雷人員手持【　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。
+          blanks: [{answer: 金屬探測器}]
+        - label: 巨鼠掃雷1
+          value: 靠【　】偵測地雷，只對【　】反應，工作人員能快速鎖定炸藥位置
+          blanks: [{answer: 嗅覺}, {answer: 炸藥}]
+        - label: 巨鼠掃雷2
+          value: 安全：不會引爆地雷。
+          source_text: 2安全：不會引爆地雷。
+          errata_ref: E1
+        - label: 巨鼠掃雷3-效率
+          value: 效率（　）
+          options: {1: 高, 2: 低}
+          answer: 1
+          answer_carrier: Wingdings F0FE（☑，圖形字元），一般文字抽取讀不到
+        - label: 巨鼠掃雷3-訓練成本
+          value: 訓練成本（　）
+          options: {1: 高, 2: 低}
+          answer: 2
+          answer_carrier: Wingdings F0FE（☑，圖形字元），一般文字抽取讀不到
+    - label: 巨鼠貢獻
+      items:
+        - label: '1'
+          value: 巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。
+        - label: '2'
+          value: 其中最著名的巨鼠就是馬嘎瓦。
+        - label: '3'
+          value: 巨鼠的形象已經變成【　】的英雄。
+          blanks: [{answer: 救苦救難}]
+
+# ── 六 閱讀聚光燈 ──
+spotlight:
+  strategy_name: 閱讀表格策略
+  strategy_type: comprehension_strategy
+  blocks:
+    - type: concept_box
+      text: 如果一篇文章能善用表格整理訊息，就能讓讀者一目了然，更容易讀到重點。本課運用表格整理了「使用巨鼠掃雷」和「使用金屬探測器」的差異，就是一個好例子。底下以表１為例，說明閱讀表格的步驟：
+    - type: table
+      label: 表1（第一次引用）
+      caption: 表1 兩種掃雷方式的比較：「金屬探測器」和「非洲巨鼠」
+      columns: [項目, 金屬探測器, 非洲巨鼠]
+      columns_note: 第一欄的表頭在教材上是空白格；表格外另有「第一欄」「第一列」兩個指示文字方塊
+      rows:
+        - [1.安全性, 掃雷人員常被地雷炸傷, 不會引爆地雷]
+        - [2.效能, 對所有金屬(如鋁罐、瓶蓋)發出警報，須逐一確認, 只對TNT炸藥發出警報]
+        - [3.成本, 購買、維護金屬探測器很貴, 飼養和訓練便宜很多]
+        - [4.方便性, 在泥濘、雜草叢生處無法工作, 在泥濘、雜草叢生處仍可工作]
+
+    - type: guide
+      text: 步驟一：看標題
+    - type: guide
+      text: 標題會告訴我們表格想表達的主題喔。你會看到，表１的標題是【兩種掃雷方式的比較：「金屬探測器」和「非洲巨鼠」】，你心裡馬上就要浮現一個概念：「啊，我知道了，這個表格是要比較兩樣事物的。」
+
+    - type: guide
+      text: 步驟二：找比較對象和項目：
+    - type: sub_block
+      label: 步驟二 小挑戰
+      instruction: 小挑戰：請你閱讀表１的「第一列」和「第一欄」，判斷一下，它們寫了什麼，並在正確的□打勾。(單選）
+      items:
+        - type: single
+          prompt: 「第一列」寫的是什麼？
+          options: {1: 比較的對象, 2: 比較的項目}
+          answer: 1
+          answer_carrier: Wingdings F0FE（☑，圖形字元）
+        - type: single
+          prompt: 「第一欄」寫的是什麼？
+          options: {1: 比較的對象, 2: 比較的項目}
+          answer: 2
+          answer_carrier: Wingdings F0FE（☑，圖形字元）
+
+    - type: guide
+      text: 步驟三：閱讀表格裡的內容
+    - type: guide
+      text: 請仔細閱讀下面(1)的範例說明，並以同樣的方法，回答(2)~(4)題，在正確的□打勾。(單選）
+    - type: single
+      label: (1) 範例
+      prompt: 範例「只對TNT炸藥發出警報」是在表達什麼？
+      options: {1: 金屬探測器的效能, 2: 非洲巨鼠的效能, 3: 非洲巨鼠的安全性}
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: guide
+      text: 說明：a.先找到「只對TNT炸藥發出警報」的格子；b.往第一列看，就是「非洲巨鼠」;往第一欄看是「效能」，所以題目「 」裡講的是「非洲巨鼠的效能」。
+    - type: table
+      label: 表1（第二次引用）
+      columns: [項目, 金屬探測器, 非洲巨鼠]
+      rows:
+        - [1.安全性, 掃雷人員常被地雷炸傷, 不會引爆地雷]
+        - [2.效能, 對所有金屬(如鋁罐、瓶蓋)發出警報，須逐一確認, 只對TNT炸藥發出警報]
+        - [3.成本, 購買、維護金屬探測器很貴, 飼養和訓練便宜很多]
+        - [4.方便性, 在泥濘、雜草叢生處無法工作, 在泥濘、雜草叢生處仍可工作]
+    - type: guide
+      text: 再來，請你看著表1，回答底下的單選題
+    - type: single
+      label: (2)
+      prompt: 「掃雷人員常被地雷炸傷」是在表達什麼？
+      options: {1: 金屬探測器的效能, 2: 非洲巨鼠的安全性, 3: 金屬探測器的安全性}
+      answer: 3
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: single
+      label: (3)
+      prompt: 「飼養和訓練便宜很多」是在表達什麼？
+      options: {1: 金屬探測器的成本, 2: 非洲巨鼠的成本, 3: 金屬探測器的方便性}
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: single
+      label: (4)
+      prompt: 「在泥濘、雜草叢生處無法工作」是在表達什麼？
+      options: {1: 金屬探測器的方便性, 2: 非洲巨鼠的安全性, 3: 非洲巨鼠的方便性}
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+
+    - type: guide
+      text: 步驟四：讀出重點：問自己，這個表在表達什麼？
+    - type: guide
+      text: 例如：不斷的問自己：「兩種掃雷方式，哪一種成本比較便宜？」你帶著這個疑問，在讀表１時，很容易就看到「3.成本」那列，你就會讀到，使用巨鼠掃雷便宜很多。
+    - type: sub_block
+      label: 步驟四 小挑戰
+      instruction: 小挑戰：請你看著表1，問自己底下的問題，並勾選出正確的選項。
+      items:
+        - type: single
+          label: (1)
+          prompt: 哪一種掃雷方式比較安全？
+          options: {1: 金屬探測器, 2: 非洲巨鼠}
+          answer: 2
+          answer_carrier: Wingdings F0FE（☑，圖形字元）
+        - type: single
+          label: (2)
+          prompt: 哪一種掃雷方式效能比較好？
+          options: {1: 金屬探測器, 2: 非洲巨鼠}
+          answer: 2
+          answer_carrier: Wingdings F0FE（☑，圖形字元）
+        - type: single
+          label: (3)
+          prompt: 哪一種掃雷方式比較不方便？
+          options: {1: 金屬探測器, 2: 非洲巨鼠}
+          answer: 1
+          answer_carrier: Wingdings F0FE（☑，圖形字元）
+
+    - type: guide
+      text: 步驟五：在文章裡找到這個表格的結論
+    - type: guide
+      text: 作者呈現表格之後，通常會在文字段落裡，做一個結論—簡單的寫出這個表格最重要的訊息。你閱讀文章第五段，判斷哪一句是這個表格的結論呢？
+    - type: passage
+      label: 步驟五 引文
+      paragraphs:
+        - 簡單的說，以巨鼠掃雷相對安全、有效能、便宜而且方便。例如，馬嘎瓦可在30分鐘內掃描完一個網球場大小的區域，而人類使用金屬探測器則需要1至4天才能完成相同的任務。
+      note: 課文第五段原文是「簡單來說」，此處引文寫成「簡單的說」，見 source_errata E2；兩處均照原樣保留
+    - type: single
+      prompt: 判斷哪一句是這個表格的結論呢？
+      options:
+        1: 以巨鼠掃雷相對安全、有效能、便宜而且方便性高
+        2: 巨鼠已經幫助清理2,300萬平方公尺的土地
+        3: 巨鼠得到英國頒發的動物勇氣金牌獎
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+
+    - type: single
+      label: ◎自我評估
+      prompt: 「利用這五個步驟，我學會怎樣讀表格了嗎？」
+      options: {1: 我學會了, 2: 我還沒學會}
+      no_correct_answer: true
+      answer_carrier: 學生自我評估，原稿兩個 □ 都沒有勾（全檔 12 個 F0FE 都不在這一題）
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: C
+      stem: 下列語詞何者使用正確？
+      options:
+        A: 既然此事「刻不容緩」，明天再處理就好了
+        B: 這場脫口秀實在太好笑了，「效能」超級讚
+        C: 近年來，網路謠言「層出不窮」，必須提高警覺
+        D: 籃球校隊在跨校聯賽裡連三敗，「成效斐然」（前後邏輯錯誤）
+      teacher_note: A誤用，刻不容緩指的是緊急的事；B誤用，效能指的是效率和能力
+    - index: 2
+      answer: D
+      stem: 根據課文，哪一選項不是地雷對於戰爭結束後的影響？
+      options:
+        A: 戰爭結束數十年後，地雷仍可能造成危險
+        B: 讓許多人在行動交通時，提心吊膽
+        C: 使大片的土地無法被開發利用
+        D: 讓土地裡有許多廢棄金屬，可以回收利用
+      answer_carrier: 原稿此題答案印的是全形「Ｄ」
+    - index: 3
+      answer: B
+      stem: 根據表1，使用巨鼠掃雷的優勢不包括哪一項？
+      options:
+        A: 較不容易受到鋁罐、瓶蓋等廢金屬干擾
+        B: 可以直接引爆地雷，減少人力需求
+        C: 訓練和飼養成本比金屬探測器低
+        D: 在雜草叢生的環境中仍能有效工作
+    - index: 4
+      answer: C
+      stem: 巨鼠掃雷時為什麼不容易引爆地雷？
+      options:
+        A: 因為巨鼠受過專業訓練
+        B: 因為巨鼠嗅覺很靈敏
+        C: 因為巨鼠體重很輕
+        D: 因為巨鼠不會踩在地雷上
+    - index: 5
+      answer: A
+      stem: 文章提到，巨鼠的形象發生了什麼變化？
+      options:
+        A: 牠們從讓農民頭痛的害鼠，轉變為掃雷英雄
+        B: 牠們從被當作實驗動物，變成受保護的瀕危物種
+        C: 牠們從被當作寵物飼養，轉變為軍用動物
+        D: 牠們從森林動物，變成都市中常見的寵物
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [表彰, 刻不容緩, 成效斐然, 繁殖, 救苦救難, 層出不窮, 晝伏夜出, 肉眼, 刨地, 雜草叢生, 效能]
+  grid_size: [10, 10]
+  grid:
+    - 如魚得水包嗷成嗚彌累
+    - 效能識丁庇熱嗷效能積
+    - 不彌晝伏夜出待待斐丘
+    - 轉撒貼蔭果貼補成哺然
+    - 睛刻心救苦救難效撰餘
+    - 店木不按件計酬覓層鋪
+    - 雜肉食容按鍵食出天剪
+    - 草眼指莽緩庇不蓋體貼
+    - 叢不浩給撞窮地表樹繁
+    - 生案繁刨地便飯護彰殖
+  answers_are_graphical: true
+  # 🔴 圈選路徑**未轉錄**：圈是畫上去的線，不在文字流、也不是 w:sym，只有像素裡才有，
+  #    而這一課的 PDF 產不出來（見檔頭）。照 skill 的規定「沒轉錄就整個省略，不要寫空 list」，
+  #    所以這裡沒有 answer_paths。11 個目標語詞在格子裡都找得到，等 PDF 能轉出來再回頭補圈選。
+  answer_paths_note: 未轉錄 —— 本課無法產生 PDF，圈選只存在於圖形層
+
+# ── 九 知識補給站 ──
+resources:
+  label: 影片連結
+  items:
+    - index: 1
+      title: 7年在柬埔寨找地雷，非洲巨鼠獲獎
+      duration: '1:58'
+      duration_seconds: 118
+      source: 公視新聞網
+    - index: 2
+      title: 這則短片說明馬嘎瓦怎樣嗅出地雷來
+      duration: '1:17'
+      duration_seconds: 77
+      source: Al Jazeera English
+    - index: 3
+      title: 嗅出超過100枚地雷的英雄鼠過世
+      duration: '2:15'
+      duration_seconds: 135
+      source: BBC News 中文

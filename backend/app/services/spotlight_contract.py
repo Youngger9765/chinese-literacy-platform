@@ -209,7 +209,7 @@ def test15_fixture_for_catalog(catalog_code: str) -> str | None:
 def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
     blocks = spotlight.get("blocks") or []
     hist = dict(sorted(Counter(b.get("type", "?") for b in blocks).items()))
-    qa = [b for b in blocks if b.get("type") in ("single", "multi")]
+    qa = _all_questions(blocks)
     guides = [b for b in blocks if b.get("type") == "guide"]
     passages = [b for b in blocks if b.get("type") == "passage"]
     # ⚠️ 複選題的答案在 `answers`（複數）。只看 `answer` 的話，答案抓齊的複選題
@@ -239,6 +239,38 @@ def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
         "first_guide_prefix": (guides[0].get("text", "")[:60] if guides else ""),
         "mcq_leakage": mcq_leakage,
     }
+
+
+def _all_questions(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """所有選擇題，**含巢在 sub_block / exercise 底下的**。
+
+    ⚠️ 原本只數 top-level 的 single/multi。教材本身有標題分組時，抽取者照結構
+    把題目放進 `sub_block.items[]` —— 於是 `qa_total` 變成 0，而
+    `answer_recall = 1.0 if qa_total == 0` 讓那一課直接拿滿分。
+    **那個 1.000 什麼都沒驗到**：L0017／L0018／L0019／L0023 全是這樣過的。
+
+    假綠比沒有檢查更糟 —— 它讓人以為驗過了。修在計數器，不是叫抽取者為了
+    讓 gate 有數字而把結構攤平（那是為了指標改資料，本末倒置）。
+    """
+    out: list[dict[str, Any]] = []
+
+    def walk(items):
+        for b in items or []:
+            if not isinstance(b, dict):
+                continue
+            # 判準：**有選項才算可評分的題目**。
+            # 沒有 options 的 single 是自我評估表的一列（「被他叫到名字時感到心裡發熱」
+            # 這種），學生自己勾，談不上答案對不對 —— 把它算進分母，等於要求
+            # 抽取者替一列自述編一個答案。
+            if b.get("options") and not b.get("no_correct_answer"):
+                out.append(b)
+            for key in ("items", "sub_blocks", "blocks", "rows"):
+                v = b.get(key)
+                if isinstance(v, list):
+                    walk(v)
+
+    walk(blocks)
+    return out
 
 
 def validate_block_structure(blocks: list[dict[str, Any]]) -> list[str]:

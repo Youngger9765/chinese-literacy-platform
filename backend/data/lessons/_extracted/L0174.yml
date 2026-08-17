@@ -143,6 +143,8 @@ spotlight:
       stem: 小齊被三振後，球隊輸了，你覺得此時他可能有哪些感受？請勾選。（可複選）
       options: {1: 難過, 2: 自責, 3: 不甘心, 4: 害怕被責怪, 5: 想逃避}
       student_filled: true          # 教師版未預填，由學生自選
+      # codex 獨立看圖確認：選項前無任何勾選記號，由學生自己勾。
+      no_correct_answer: true
       reflection: →失敗後有情緒是正常的。真正重要的不是「不能難過」，而是察覺自己難過之後，怎麼理解這件事，而且，想法會影響情緒。
     - type: sub_block
       label: 2.感受背後的事實與想法
@@ -196,10 +198,12 @@ spotlight:
       prompt: 回到你的生活中，找一個你曾經覺得失敗或表現不好的事情，完成練習。
       items:
         - {index: 1, stem: 發生的事：}
-        - {index: 2, stem: 當時的感受：, options: {1: 難過, 2: 生氣, 3: 自責, 4: 丟臉, 5: 其他}}
-        - {index: 3, stem: 當時的想法讓我：, options: {1: 想逃避, 2: 更否定自己, 3: 想再試一次, 4: 找到可以調整的地方, 5: 其他}}
+        - {index: 2, stem: 當時的感受：, options: {1: 難過, 2: 生氣, 3: 自責, 4: 丟臉, 5: 其他}, no_correct_answer: true}
+        - {index: 3, stem: 當時的想法讓我：, options: {1: 想逃避, 2: 更否定自己, 3: 想再試一次, 4: 找到可以調整的地方, 5: 其他}, no_correct_answer: true}
         - {index: 4, stem: 我可以用比較有力量的解釋：這次失敗提醒我【　】，所以我下一步可以【　】。}
       student_filled: true
+      # codex 獨立看圖確認：選項前無任何勾選記號，由學生自己勾。
+      no_correct_answer: true
       reflection: →有幫助的想法，是承認自己會難過，並從中找出一個可以前進的方向。
 
 comprehension:

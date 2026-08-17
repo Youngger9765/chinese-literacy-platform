@@ -79,6 +79,10 @@ def corpus_charset(rebuild: bool = False) -> set[str]:
 NOTE_KEYS = {
     "note", "kind", "confidence", "answer_carrier", "locator", "section",
     "extracted_by", "source_of_truth", "reason", "comment", "caveat",
+    # `evidence` / `why` 跟 `kind` 同性質，都是抽取者寫的散文。
+    # 少了它們會出現最沒道理的狀況：同一筆勘誤裡的同一個詞，
+    # 寫在 `kind:` 過、寫在 `evidence:` 不過。
+    "evidence", "why",
 }
 NOTE_SUFFIXES = ("_note", "_notes", "_reason", "_caveat", "_rationale")
 

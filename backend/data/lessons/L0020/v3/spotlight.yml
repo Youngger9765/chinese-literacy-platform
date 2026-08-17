@@ -94,7 +94,8 @@ spotlight:
   - type: sub_block
     label: 1.111年第5題
     items:
-    - type: passage
+    - type: single
+      answer: D
       text_carrier: image
       paragraphs:
       - 「過去賭客玩拉霸機時，需要把紙鈔塞進機器裡，所以會看見皮夾裡的鈔票越來越少，能提醒自己適時收手。但現在他們用卡片玩拉霸機，卡片僅會記錄他們的輸贏情況。賭客難以意識到自己正不斷輸錢，只能隱約記得花了多少錢。」這段文字的主旨與下列何者最接近？

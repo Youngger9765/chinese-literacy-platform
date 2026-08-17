@@ -19,6 +19,7 @@ spotlight:
       4: 害怕被責怪
       5: 想逃避
     student_filled: true
+    no_correct_answer: true
     reflection: →失敗後有情緒是正常的。真正重要的不是「不能難過」，而是察覺自己難過之後，怎麼理解這件事，而且，想法會影響情緒。
   - type: sub_block
     label: 2.感受背後的事實與想法
@@ -114,6 +115,7 @@ spotlight:
         3: 自責
         4: 丟臉
         5: 其他
+      no_correct_answer: true
     - index: 3
       stem: 當時的想法讓我：
       options:
@@ -122,7 +124,9 @@ spotlight:
         3: 想再試一次
         4: 找到可以調整的地方
         5: 其他
+      no_correct_answer: true
     - index: 4
       stem: 我可以用比較有力量的解釋：這次失敗提醒我【　】，所以我下一步可以【　】。
     student_filled: true
+    no_correct_answer: true
     reflection: →有幫助的想法，是承認自己會難過，並從中找出一個可以前進的方向。

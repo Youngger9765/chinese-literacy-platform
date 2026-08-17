@@ -113,10 +113,13 @@ trap 'rm -rf "$PROFILE"' EXIT
 OUT_PDF="$OUTDIR/$(basename "${SRC%.*}").pdf"
 rm -f "$OUT_PDF"
 
+# ⚠️ `rc` 一定要先給值。`set -u` 之下，如果 timeout 被外部訊號中斷、
+#    這一行沒跑完就跳走，下面的錯誤處理會炸 `rc: unbound variable`，
+#    **把真正的失敗訊息蓋掉** —— 有 worker 因此看不到自己是逾時還是轉檔失敗。
+rc=0
 timeout "$CONVERT_TIMEOUT" soffice --headless \
   -env:UserInstallation="file://$PROFILE" \
-  --convert-to pdf --outdir "$OUTDIR" "$SRC" >/dev/null 2>&1
-rc=$?
+  --convert-to pdf --outdir "$OUTDIR" "$SRC" >/dev/null 2>&1 || rc=$?
 
 if [ ! -s "$OUT_PDF" ]; then
   # 分清楚「逾時」跟「轉檔本身失敗」——兩者要查的東西完全不同

@@ -1,0 +1,16 @@
+lesson_uid: L0042
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 「奧運前罹癌」秘密做化療！ 抗癌拳后陳念琴咬牙備戰勇奪銅牌
+    duration: (03:15)
+    source: 中時新聞網
+    qr_code: true
+  - index: 2
+    title: 《哈哈台街訪》運動習慣大調查
+    duration: (07:54)
+    source: HahaTai    哈哈台
+    qr_code: true

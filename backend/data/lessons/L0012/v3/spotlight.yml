@@ -117,6 +117,7 @@ spotlight:
       prompt: 一、我現在最熱愛的事或興趣是什麼？
       answer_line: 我最熱愛的事是：
     - type: multi
+      no_correct_answer: true
       index: 2
       prompt: 二、最近進行熱愛的事時，遇到的阻礙是什麼？
       options:
@@ -130,6 +131,7 @@ spotlight:
       answer: null
       answer_carrier: 學生自填，原稿無勾選
     - type: multi
+      no_correct_answer: true
       index: 3
       prompt: 三、如果有一天，不能靠它成功或無法繼續下去，你可以怎麼做？
       options:

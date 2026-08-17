@@ -1,0 +1,39 @@
+lesson_uid: L0035
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 緣起
+    B: 極權
+    C: 突發奇想
+    D: 聲援
+    E: 乾著急
+    F: 壓迫
+    G: 素未謀面
+    H: 充耳不聞
+  items:
+  - index: 1
+    stem: 在討論運動會進場表演時，小明（　），提了一個好點子，大家紛紛拍手叫好。
+    answer: C
+  - index: 2
+    stem: 最近兩位消防人員，因裝備老舊，不幸在救災中殉職，老師帶著同學們一起製作海報，（　）消防人員的權益。
+    answer: D
+  - index: 3
+    stem: 面對同學們的嘲笑，小強選擇（　），繼續專心做自己的事情。
+    answer: H
+  - index: 4
+    stem: 這個國家被（　）政府統治，人民的自由與人權受到嚴重限制。
+    answer: B
+  - index: 5
+    stem: 面對他人不合理的（　），我們應該站出來為自己爭取權益。
+    answer: F
+  - index: 6
+    stem: 透過多間學校共同舉辦的「跨校筆友」寫信活動，讓我和原本（　）的小華建立了深厚的友誼。
+    answer: G
+  - index: 7
+    stem: 這場二手義賣活動的（　），是一群學生想幫助流浪狗。
+    answer: A
+  - index: 8
+    stem: 妹妹在醫院縫合傷口，家屬不能進入陪同，爸爸只能在外面（　）。
+    answer: E

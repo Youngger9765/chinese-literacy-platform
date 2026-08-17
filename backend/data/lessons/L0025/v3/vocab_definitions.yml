@@ -1,0 +1,51 @@
+lesson_uid: L0025
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 大展身手
+  - 利誘
+  - 睽違
+  - 身家資料
+  - 起訴
+  - 嫌疑
+  - 膽戰心驚
+  - 辜負
+  - 自傳
+  - 倔強
+  items:
+  - index: 1
+    word: 膽戰心驚
+    definition: 非常害怕、緊張，內心充滿恐懼。
+  - index: 2
+    word: 倔強
+    definition: 堅持自己的想法或做法，不輕易改變。
+  - index: 3
+    word: 自傳
+    definition: 描述自己人生經歷和想法的文章或書。
+  - index: 4
+    word: 睽違
+    definition: 經過許久時間後，再次發生或遇見。
+  - index: 5
+    word: 大展身手
+    definition: 充分發揮自己的才能或本領，多用於難得有表現機會時。
+  - index: 6
+    word: 嫌疑
+    definition: 被懷疑與某件壞事有關。
+  - index: 7
+    word: 身家資料
+    definition: 指個人背景相關的資料，包括家庭、學歷、經歷、財產等。
+  - index: 8
+    word: 辜負
+    definition: 讓別人原本的期待或付出落空。
+  - index: 9
+    word: 利誘
+    definition: 用金錢或好處誘惑他人。
+  - index: 10
+    word: 起訴
+    definition: 檢察官向法院提出控告，要求追究法律責任。

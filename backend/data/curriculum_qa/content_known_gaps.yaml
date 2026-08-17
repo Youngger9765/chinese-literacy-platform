@@ -205,15 +205,12 @@ key_reading_flagged:
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
 
 mcq_options_emitted_as_guides:
-  count: 6
+  # 2026-08-18：L0033 經多模態重抽已修復，從 6 降到 5。
+  count: 5
   what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。
   not_introduced_by_the_reink: 這是抽取器既有的行為，二修語料上出現在 6 課；spec 的 mcq_leakage 閘本來就在測它，只是舊
     spec 跑的是 7 課手抄樣本，剛好不含這 6 課。
   lessons:
-  - lesson_uid: L0033
-    catalog_slot: G5-L21
-    title: 垃圾食物的誘惑與代價
-    leaked_options: 1
   - lesson_uid: L0054
     catalog_slot: G6-L14
     title: 動物談情說愛的方式
