@@ -211,8 +211,12 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
     for row in rows_in:
         if not isinstance(row, dict):
             continue
-        # 第一欄自己也可能有空格要填（L0161 的「【　】/案由」）
-        cells = [_render_cell(row.get(head), _sidecar(row, head, "_blanks"))]
+        # ⚠️ 第一欄**不填答案**，即使抽取到了。
+        #    第一欄在原始形式裡是「區段標題」，而消毒（把答案換回空格再給學生）只走
+        #    value 不走區段標題 —— 填進去的話學生直接看到答案。
+        #    2026-08-17 preview 實測：填了之後 文-L6 的第一格印出「【起因】/案由」。
+        #    答案仍留在 keypoints.yml 裡，教師端要用再取。
+        cells = [str(row.get(head) or "").strip()]
         for i, col in enumerate(rest):
             text = row.get(col)
             if text is None:

@@ -197,3 +197,61 @@ describe('figure 帶轉錄步驟（沒有圖檔資產）', () => {
     expect(screen.getByText(/常可在文章名稱找到/)).toBeTruthy();
   });
 });
+
+describe('table 的兩種 rows 形狀', () => {
+  // 🔴 這是「整頁白屏」等級的缺陷，不是「一格畫不出來」。
+  //    多模態抽取寫「以欄名為 key 的物件」，renderer 原本只認陣列的陣列，
+  //    `row.map is not a function` 直接讓整個聚光燈步驟掛掉（文-L6 preview 實測）。
+  it('以欄名為 key 的 rows 要畫得出來，而且不可以 throw', () => {
+    renderSpotlight([
+      {
+        type: 'table',
+        label: '常見用字',
+        columns: ['指示代詞', '作用', '例句'],
+        rows: [
+          { 指示代詞: '之、此', 作用: '指「近的」', 例句: ['學而時習之', '此物最相思'] },
+          { 指示代詞: '彼、其', 作用: '指「遠的」', 例句: '顧此失彼' },
+        ],
+      },
+    ]);
+    // 表頭要來自 columns
+    expect(screen.getByText('指示代詞')).toBeTruthy();
+    expect(screen.getByText('之、此')).toBeTruthy();
+    expect(screen.getByText('彼、其')).toBeTruthy();
+    // 一格多個例句：兩個都要在，不能只留第一個
+    expect(screen.getByText(/學而時習之/)).toBeTruthy();
+    expect(screen.getByText(/此物最相思/)).toBeTruthy();
+    // 同一欄有時字串有時陣列，字串那筆也要出來
+    expect(screen.getByText('顧此失彼')).toBeTruthy();
+  });
+
+  it('陣列的陣列（既有形狀）不可以壞掉', () => {
+    renderSpotlight([
+      { type: 'table', rows: [['欄一', '欄二'], ['值一', '值二']] },
+    ]);
+    expect(screen.getByText('欄一')).toBeTruthy();
+    expect(screen.getByText('值二')).toBeTruthy();
+  });
+});
+
+describe('fill_table 的兩種用途', () => {
+  it('沒有 rows → 指路牌，叫學生去重點表那一步', () => {
+    renderSpotlight([{ type: 'fill_table' }]);
+    expect(screen.getByText(/請在「文章重點表」步驟填寫/)).toBeTruthy();
+  });
+
+  it('自己帶 rows → 這張表就住在聚光燈裡，要畫出來', () => {
+    // L0034 的策略對照表。以前被換成一句「請到重點表填寫」，而那一步沒有這張表 ——
+    // 學生照指路牌走過去會撲空。
+    renderSpotlight([
+      {
+        type: 'fill_table',
+        columns: ['策略', '改變環境', '設定規範'],
+        rows: [{ 列: '目的', 改變環境: '調整周遭環境，減少誘惑', 設定規範: '事前訂出明確規則' }],
+      },
+    ]);
+    expect(screen.queryByText(/請在「文章重點表」步驟填寫/)).toBeNull();
+    expect(screen.getByText('改變環境')).toBeTruthy();
+    expect(screen.getByText('調整周遭環境，減少誘惑')).toBeTruthy();
+  });
+});

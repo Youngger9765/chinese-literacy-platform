@@ -45,7 +45,9 @@ def test_bare_blanks_belongs_to_the_last_column():
                                 "blanks": [{"answer": "江乙"}]}]},
     })
     row = _rows(table)[0]
-    assert row[0] == "【起因】/案由", "單數 `_blank` 沒接到 → 第一欄的空格永遠是空的"
+    # 第一欄刻意不填答案：它在原始形式裡是區段標題，而消毒只處理 value —— 填了
+    # 學生就直接看到「【起因】/案由」。preview 實測踩過，答案留在 yml 供教師端用。
+    assert row[0] == "【　】/案由", "第一欄不可以填答案，那會讓學生看到答案"
     assert row[-1] == "【江乙】媽媽的布被偷了。", "裸 `blanks` 沒接到 → 主要內容欄的答案掉了"
 
 

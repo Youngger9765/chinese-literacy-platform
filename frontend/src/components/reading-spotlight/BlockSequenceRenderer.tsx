@@ -480,34 +480,42 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         return <div key={key}>{renderFigure(block)}</div>;
 
       case 'fill_table':
-        return (
-          <div
-            key={key}
-            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-base text-blue-900"
-          >
-            文章重點表請在「文章重點表」步驟填寫
-            {onOpenKeypoints ? (
+        // ⚠️ `fill_table` 有兩種用途，差別在它自己帶不帶 rows：
+        //    (a) 沒有 rows ＝ 指路牌，內容其實住在「文章重點表」那一步
+        //    (b) 有 rows ＝ 這張表**就住在聚光燈裡**（L0034 的策略對照表）
+        //    以前一律當 (a)，於是 (b) 的整張表被換成一句「請到重點表填寫」——
+        //    而那一步根本沒有這張表，學生照著指路牌走過去會撲空。
+        if (!((block as { rows?: unknown[] }).rows ?? []).length) {
+          return (
+            <div
+              key={key}
+              className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-base text-blue-900"
+            >
+              文章重點表請在「文章重點表」步驟填寫
+              {onOpenKeypoints ? (
+                <button
+                  type="button"
+                  onClick={onOpenKeypoints}
+                  className="ml-3 underline text-blue-700"
+                >
+                  前往重點表
+                </button>
+              ) : null}
               <button
                 type="button"
-                onClick={onOpenKeypoints}
+                onClick={() => {
+                  setBlockValue(key, true);
+                  checkCompletion({ ...blockState, [key]: true });
+                }}
                 className="ml-3 underline text-blue-700"
               >
-                前往重點表
+                知道了
               </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => {
-                setBlockValue(key, true);
-                checkCompletion({ ...blockState, [key]: true });
-              }}
-              className="ml-3 underline text-blue-700"
-            >
-              知道了
-            </button>
-          </div>
-        );
-
+            </div>
+          );
+        }
+      // 帶 rows 的 fill_table 走下面同一套表格繪製
+      // falls through
       case 'table': {
         // The extractor labelled image-less tables as `figure` with `referent: 'table'`,
         // and the loader drops a figure with no asset — 217 tables across 109 lessons
@@ -516,7 +524,31 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         // Cells carry 【】 where the student writes. This is the TEACHER's copy, so the
         // extractor empties them and keeps the values in `answers`, which is never
         // rendered — the same arrangement `ordering` uses for `correct_order`.
-        const rows = block.rows ?? [];
+        // ⚠️ `rows` 有兩種形狀，而且混在同一批資料裡：
+        //    (a) 陣列的陣列 —— `[["指示代詞","作用"], ["之、此","指近的"]]`
+        //    (b) 以欄名為 key 的物件 + 另一個 `columns` —— 多模態抽取寫這種
+        //    直接對 (b) 做 `row.map` 會丟 `v.map is not a function`，
+        //    而那不是「這一格畫不出來」，是**整個聚光燈步驟白屏**。
+        //    2026-08-17 preview 實測：文-L6 的聚光燈就是這樣整頁掛掉的。
+        const rawRows = (block.rows ?? []) as unknown[];
+        const columns = ((block as { columns?: unknown }).columns ?? []) as unknown[];
+        const cellText = (v: unknown) =>
+          // 一格裡可以有多個例句（`["學而時習之","此物最相思"]`），換行排比較好讀
+          Array.isArray(v) ? v.map(x => String(x ?? '')).join('\n') : String(v ?? '');
+        const isKeyed = rawRows.some(
+          r => r !== null && typeof r === 'object' && !Array.isArray(r),
+        );
+        const header = isKeyed && columns.length ? [columns.map(c => String(c))] : [];
+        const rows: string[][] = [
+          ...header,
+          ...rawRows.map(r =>
+            Array.isArray(r)
+              ? r.map(cellText)
+              : columns.length
+                ? columns.map(c => cellText((r as Record<string, unknown>)?.[String(c)]))
+                : Object.values((r ?? {}) as Record<string, unknown>).map(cellText),
+          ),
+        ];
         const answers = (blockState[key] as Record<string, string>) ?? {};
         let blankNo = 0;
         return (
