@@ -38,9 +38,11 @@ _BLANK_OPEN, _BLANK_CLOSE = "【", "】"
 # that follows it, not content — the raw form carries the answer in the cell itself.
 _PLACEHOLDER = set("_＿ 　")
 
-# A gap the teacher wrote: two or more underscores (half- or full-width) in a row.
+# A gap the teacher wrote. Two notations, because the two extractors chose
+# differently: the first edition wrote runs of underscores, the multimodal one writes
+# an empty 【　】 (that is a full-width space inside). Both mean "student fills this".
 # One underscore is not a gap — it appears inside ordinary text.
-_GAP_RE = re.compile(r"[_＿]{2,}")
+_GAP_RE = re.compile(r"[_＿]{2,}|【[\s　]*】")
 
 
 def _render_cell(text: Any, blanks: Optional[list]) -> str:
@@ -81,6 +83,149 @@ def _render_cell(text: Any, blanks: Optional[list]) -> str:
     return out + "".join(wrap(a) for a in remaining)
 
 
+def _sidecar(row: dict, column: str, suffix: str, *, is_last: bool = False) -> Any:
+    """找 `column` 這一欄的旁掛資料（答案 / 選項）。
+
+    正規寫法是 `{欄名}_blanks`（skill ⑥.7 已寫死），但已經抽出來的課有三種變體：
+
+        事件_blanks        正規
+        想法_blanks        長欄名縮寫（欄名是「面對失敗的想法」）
+        故事結構_blank     單數
+        blanks             裸的 —— 指的是主要內容欄（最後一欄）
+
+    容錯放在這裡是**安全網不是機制**：`normalize_block_types.py` 會要求新抽的課用
+    正規寫法。少了這層網，寫錯名字的後果是「答案沒填進去、畫面照樣出得來」——
+    沒有任何錯誤訊息，只是那格永遠是空的。
+    """
+    singular = suffix[:-1] if suffix.endswith("s") else None
+    best, best_len = None, -1
+    for key, value in row.items():
+        if not isinstance(key, str):
+            continue
+        for suf in (suffix, singular):
+            if not suf or not key.endswith(suf):
+                continue
+            prefix = key[: -len(suf)]
+            if prefix and prefix in column and len(prefix) > best_len:
+                best, best_len = value, len(prefix)
+    if best is not None:
+        # 單數形只裝一筆，統一成 list，下游才不用分兩種情況
+        return [best] if isinstance(best, dict) else best
+
+    bare = row.get(suffix.lstrip("_"))
+    return bare if (is_last and bare is not None) else None
+
+
+def _flatten_items(items: list) -> list[dict]:
+    """`items[]`（可能還有 `sub_items[]`）攤平成 `sub_rows` 的形狀。
+
+    原始 list-of-lists 只有兩層（區段 → 子項），沒有第三層。抽取到的第三層
+    （L0003「天空的變化」底下還有兩個小項）用序號帶進子項標籤保留層級關係，
+    而不是丟掉 —— 丟掉的話畫面上會少兩個空格，而且不會有人發現。
+    """
+    out: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("sub_label") or item.get("index") or "").strip()
+        subs = item.get("sub_items")
+        if isinstance(subs, list) and subs:
+            head = str(item.get("value") or item.get("template") or "").strip()
+            for sub in subs:
+                if not isinstance(sub, dict):
+                    continue
+                inner = str(sub.get("index") or "").strip()
+                out.append({
+                    "sub_label": f"{label}-{inner}" if inner else label,
+                    "template": sub.get("value") if sub.get("value") is not None else sub.get("template"),
+                    "blanks": sub.get("blanks"),
+                })
+            if head:
+                # 母項自己的文字（「天空的變化」）當第一個子項，不然那句話會消失
+                out.insert(len(out) - len(subs), {"sub_label": label, "template": head, "blanks": None})
+            continue
+        out.append({
+            "sub_label": label,
+            "template": item.get("template") if item.get("template") is not None else item.get("value"),
+            "blanks": item.get("blanks"),
+        })
+    return out
+
+
+def _render_choice_cell(question: dict) -> str:
+    """選擇題 → 原始形式的 `□①…②…`。
+
+    `parse_checkbox_options` 的規則是「有 □ 的是誘答，沒 □ 的是答案」，所以答案不加
+    □、其餘加。答案欄位兩種都收：`answer`（單選）與 `answers`（複選）。
+
+    ⚠️ 全部選項都是答案時，這個記法表達不了「這是選擇題」（沒有任何 □ → 偵測器
+    不會觸發），那一列會退成 display。內容還在、只是不能作答 —— 記在 PRD TODO，
+    不在這裡用假的 □ 硬湊，那會把正確選項標成誘答。
+    """
+    options = question.get("options") or {}
+    items = (sorted(options.items(), key=lambda kv: str(kv[0]))
+             if isinstance(options, dict) else list(enumerate(options, 1)))
+    answers = question.get("answers")
+    if answers is None:
+        answers = [question["answer"]] if question.get("answer") is not None else []
+    correct = {str(a).strip() for a in answers}
+
+    marks = "①②③④⑤⑥⑦⑧⑨⑩"
+    out = []
+    for i, (key, text) in enumerate(items):
+        mark = marks[i] if i < len(marks) else f"({i + 1})"
+        is_answer = str(key).strip() in correct or str(i + 1) in correct
+        out.append(f"{'' if is_answer else '□'}{mark}{text}")
+    return " ".join(out)
+
+
+def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
+    """欄位式重點表（多模態抽取的形狀）→ 原始 list-of-lists。
+
+    形狀長這樣，第一欄是段落/主角，其餘每欄是一個子項：
+
+        columns: [主角, 事件, 面對失敗的想法]
+        rows:
+          - 主角: 小齊（1～3段）
+            事件: 1.…輪到小齊站上【　】。2.小齊（①被投手三振 □②擊出安打）…
+            事件_blanks:  [{answer: 打擊區}]
+            事件_choices: [{options: [被投手三振, 擊出安打], answer: 1}]
+
+    為什麼要接這一層：不接的話，`_format_yaml_structure_table` 讀不到任何 label／
+    value，整張表變成 5 列空的 display 列 —— 畫面上是一張空表格，而且**學生不能作答**。
+    2026-08-17 v3 換上去之後就是這個狀態，逐字門、拆模組、聚光燈 render 全綠，
+    只有 keypoints manifest 那道 ratchet 因為 `interaction_profile` 掉成
+    `display_only` 才叫出來。
+    """
+    columns = [str(c) for c in (kp.get("columns") or []) if str(c).strip()]
+    rows_in = kp.get("rows")
+    if len(columns) < 2 or not isinstance(rows_in, list) or not rows_in:
+        return None
+
+    out: list[list[str]] = []
+    title = str(kp.get("title") or "").strip()
+    if title:
+        out.append([title])
+
+    head, rest = columns[0], columns[1:]
+    for row in rows_in:
+        if not isinstance(row, dict):
+            continue
+        # 第一欄自己也可能有空格要填（L0161 的「【　】/案由」）
+        cells = [_render_cell(row.get(head), _sidecar(row, head, "_blanks"))]
+        for i, col in enumerate(rest):
+            text = row.get(col)
+            if text is None:
+                continue
+            cells.append(col)
+            blanks = _sidecar(row, col, "_blanks", is_last=(i == len(rest) - 1))
+            cells.append(_render_cell(text, blanks))
+        if len(cells) >= 3:
+            out.append(cells)
+
+    return out or None
+
+
 def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
     """Structured keypoints → the raw ``story_structure_table`` list-of-lists.
 
@@ -97,6 +242,13 @@ def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
     if not isinstance(rows_in, list) or not rows_in:
         return None
 
+    # 欄位式（多模態抽取）跟 label/sub_rows 式（第一版）兩種形狀都要收。
+    # 判準用「列裡有沒有 label」而不是「有沒有 columns」—— 兩種形狀都可能有 columns。
+    if not any(isinstance(r, dict) and r.get("label") for r in rows_in):
+        table = _columns_to_structure_table(kp)
+        if table:
+            return table
+
     out: list[list[str]] = []
     title = str(kp.get("title") or "").strip()
     if title:
@@ -106,14 +258,21 @@ def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
         if not isinstance(row, dict):
             continue
         label = str(row.get("label") or "").strip()
-        subs = row.get("sub_rows")
+        # `items` 是 `sub_rows` 的別名（多模態抽取寫 items，第一版寫 sub_rows），
+        # 兩者同義。不認得的話整列只剩 label，底下的小題全部不見。
+        subs = row.get("sub_rows") or row.get("items")
+        if isinstance(subs, list) and subs:
+            subs = _flatten_items(subs)
         if isinstance(subs, list) and subs:
             cells = [label]
             for sub in subs:
                 if not isinstance(sub, dict):
                     continue
                 cells.append(str(sub.get("sub_label") or "").strip())
-                cells.append(_render_cell(sub.get("template"), sub.get("blanks")))
+                cells.append(_render_cell(
+                    sub.get("template") if sub.get("template") is not None else sub.get("value"),
+                    sub.get("blanks"),
+                ))
             # `_parse_yaml_table_row` reads a >3-cell row as paired only when the
             # remainder after the label is even. It always is here: cells starts at
             # one (the label) and every accepted sub_row appends exactly two, so the
@@ -123,5 +282,20 @@ def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
                 out.append(cells)
             continue
         out.append([label, _render_cell(row.get("value"), row.get("blanks"))])
+
+        # 有些列在主要內容之後還接一句結語，自己帶一個空格
+        # （L0124「→所以製作植物肉需額外添加維生素【　】。」）。不接的話那一格不見。
+        tail = row.get("tail")
+        if tail:
+            tail_blank = row.get("tail_blank")
+            out.append([label, _render_cell(tail,
+                                            [tail_blank] if isinstance(tail_blank, dict) else tail_blank)])
+
+    # 表末的星號題（多為複選）。它印在重點表下方、屬於這張表，
+    # 不接的話整題連題幹都不會出現在畫面上。
+    tq = kp.get("tail_question")
+    if isinstance(tq, dict) and str(tq.get("stem") or "").strip():
+        out.append([("★ " if tq.get("star") else "") + str(tq["stem"]).strip(),
+                    _render_choice_cell(tq)])
 
     return out or None

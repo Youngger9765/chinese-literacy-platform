@@ -137,6 +137,29 @@ python3 -c "import fitz;d=fitz.open('$W/src.pdf');print('pages',d.page_count)"
 
 型別放不下的細節寫進欄位（`label` / `note` / `instruction`），不要寫進型別名。
 
+### ⑥.55 段號以**學習單印出來的**為準，未編號的引言另存
+
+課文段落的 `idx` 必須對齊學習單印出來的段號（常是獨立一欄的 `ㄧ二三四五六七`）。
+念順順的 `☞` 用那個號碼索引，差一號就會唸到錯的段落（#2555 整批 bug 的形狀）。
+
+有些課在段號欄**之外**還印了一段引言（L0124 的「前言：植物是植物，肉是肉…」）。
+
+```yaml
+body:
+  preface: 前言：植物是植物，肉是肉，但你聽說過…    # 未編號的引言，獨立欄位
+  paragraph_count: 7                                # 只數有編號的
+  paragraphs:
+    - idx: 1
+      text: 近年來，一種由植物製成…                  # 印著「ㄧ」的那一段
+```
+
+⛔ **不要把引言併成第 1 段**（v2 就是這樣，導致印著「四☞」的目標實際指到第 3 段）。
+⛔ **也不要因為它沒編號就不抽**——L0124 的 v3 整段沒抽到，逐字門 PASS、拆模組成功、
+前端畫得出來，沒有任何一道檢查在看這件事。`scripts/coverage_gate.py` 現在會抓。
+
+怎麼分辨：看 DOCX 表格列。段號那一欄是**一個儲存格裝多個號碼**，跟它同列的才是
+編號段落；引言自己一列，旁邊配的是「字數」表頭。
+
 ### ⑥.6 幾個非聚光燈的固定形狀
 
 封閉清單管的是 `spotlight.blocks[].type`。**別的大題也會漂**——同一件事三個人寫三種
@@ -174,15 +197,31 @@ vocab_review:
 python3 scripts/normalize_word_search.py --check    # 交件前必跑
 ```
 
-### ⑦ 三道格式門
+### ⑦ 交件前必跑的門（全部都要綠，缺一不可交）
 
-| 道 | 檢查 | 抓什麼 |
-|---|---|---|
-| 1 | JSON/YAML schema：欄位、型別、必填 | 結構跑掉 |
-| 2 | 契約：`answer ∈ options`、答案不出現在題幹、索引連續 | 語意矛盾 |
-| 3 | **逐字比對**（`scripts/verbatim_gate.py`） | LLM 潤稿、看錯字形、漏字 |
+```bash
+python3 scripts/verbatim_gate.py --yaml <抽出的.yml> --docx <原稿.docx>  # 抄得對嗎
+python3 scripts/coverage_gate.py --uid <UID>                            # 有沒有漏抄
+python3 scripts/normalize_block_types.py --check                        # 型別在清單內嗎
+python3 scripts/normalize_word_search.py --check                        # 找字座標對嗎
+```
 
-**第 3 道是強制的，不是選配。**
+| 道 | 檢查 | 抓什麼 | 抓不到什麼 |
+|---|---|---|---|
+| 1 | JSON/YAML schema：欄位、型別、必填 | 結構跑掉 | |
+| 2 | 契約：`answer ∈ options`、答案不出現在題幹、索引連續 | 語意矛盾 | |
+| 3 | **逐字比對** `verbatim_gate.py` | 潤稿、看錯字形、改到原稿 | **漏抄**（少一段，剩下的字還是對的）|
+| 4 | **覆蓋率** `coverage_gate.py` | 整段課文沒抽到 | 課文以外的漏抄（見下）|
+| 5 | **型別清單** `normalize_block_types.py` | 發明型別、YAML 裸 `no:` 陷阱 | |
+| 6 | **找字座標** `normalize_word_search.py` | 圈選答案的座標轉錯 | |
+
+**第 3、4 道互為表裡**：3 問「寫下來的對嗎」，4 問「該寫的寫了嗎」。
+只有 3 的時候，L0124 少抄一整段課文照樣 PASS —— 剩下的每個字都是對的。
+
+⚠️ 第 4 道目前**只管課文**。其他大題的完整性還沒有可靠的判準（v2 是平的、v3 是
+巢狀的，任何比「字串接起來長什麼樣」的做法都會把排版差異報成內容遺失 ——
+試過三種寫法都在量相鄰關係，見 `coverage_gate.py` 的檔頭）。所以那些大題目前
+**靠逐頁讀 PDF 的紀律，不靠機器**：④ 那條「每一頁都要讀，不抽樣」是這個缺口的擋箭牌。
 
 ```bash
 python3 scripts/verbatim_gate.py --yaml <抽出的.yml> --docx <原稿.docx>
