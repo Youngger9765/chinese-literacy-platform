@@ -1,0 +1,15 @@
+lesson_uid: L0016
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 不好意思！台灣人最愛說這句話
+    duration: '1:30'
+    duration_seconds: 90
+    source: 三立iNEWS
+  - index: 2
+    title: 你覺得異性說你可愛會是什麼意思？
+    duration: '2:40'
+    duration_seconds: 160
+    source: 問問 wenwen

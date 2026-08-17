@@ -76,6 +76,23 @@ cd $W && unzip -o -q src.docx word/document.xml
 - 看到的是**印出來的樣子**——教材上印什麼就記什麼，不要腦補、不要潤稿
 - 版面會騙人（元素互相遮擋、換行、裁切）。判「缺／錯」前先換基準確認，不要直接寫進差異表
 
+🔴 **PDF 上的簡體字是假的，不要照抄也不要開 bug。**
+本機缺那幾套圓體／手寫體字型，LibreOffice 會代換成簡體字型，於是 PDF 印出
+「读全文-做记号」「语词我最棒」「文章重点表」「阅读聚光灯」，連教師答案都變簡體
+（体育／虽然／数据／沮丧）。**教材本身是正體，`document.xml` 是乾淨的。**
+兩個 worker 各自撞到，其中一個差點把它當成教材缺陷寫進 errata。
+
+→ 所有**文字**以 `document.xml` 為準，PDF 只負責提供文字層沒有的東西
+（紅色 ☑、橘圈、版面關係）。抽完掃一次有沒有簡體專用字，有就是被字型騙了。
+
+🔵 **找字遊戲的圈選可以用幾何驗，不必用眼睛猜。**
+圈是 `document.xml` 裡的 `roundRect` 圖形，有中心座標與尺寸；把群組尺寸對到
+10×10 格，就能把每個框換算回「第幾列第幾欄」，跟你從格子推的路徑逐一對照。
+
+這條在兩種情況下是唯一可靠的做法：
+- **格子跨頁**：圈是同一個群組，分頁時整組留在前一頁 → 只看後半頁會判成「這課沒圈任何答案」
+- **框的顏色不一致**：有一課 11 個框裡 1 個是黑色（其餘 accent2），顏色不同不代表它不是答案
+
 ### ⑤ 總表欄位（不經 LLM）
 
 `$SOT/自學教材總表0812.xlsx`，分頁 `1.總表`／`2.體育生的品格教材`／`3.文言文`：
@@ -166,6 +183,20 @@ body:
 
 怎麼分辨：看 DOCX 表格列。段號那一欄是**一個儲存格裝多個號碼**，跟它同列的才是
 編號段落；引言自己一列，旁邊配的是「字數」表頭。
+
+### ⑥.53 題幹欄位：聚光燈用 `prompt`，其他大題用 `stem`
+
+**不是統一用一個。** 兩邊的消費端不同，寫錯會靜默變空字串：
+
+| 位置 | 欄位 | 誰在讀 |
+|---|---|---|
+| `spotlight.blocks[]` | **`prompt`** | `BlockSequenceRenderer.tsx` |
+| `comprehension.items[]` | **`stem`** | `lesson_indexes.py:226` → `q.get("stem", "")` |
+| `vocab_application.items[]` | **`stem`** | `lesson_indexes.py:176` → `q.get("stem") or q.get("text")` |
+
+⚠️ 我一度在派工單上寫「題幹一律用 `prompt`」，那是錯的 —— 照著改會讓閱讀理解與
+語詞應用的題目在畫面上變成空白，而且**不會報錯**（`.get("stem", "")` 回空字串）。
+是 worker 回頭查了 service 才擋下來。前 28 課都是 `stem`，維持不動。
 
 ### ⑥.54 沒有標準答案的題目要標出來
 
@@ -297,6 +328,7 @@ python3 scripts/verbatim_gate.py --yaml <抽出的.yml> --docx <原稿.docx>  # 
 python3 scripts/coverage_gate.py --uid <UID>                            # 有沒有漏抄
 python3 scripts/normalize_block_types.py --check                        # 型別在清單內嗎
 python3 scripts/normalize_word_search.py --check                        # 找字座標對嗎
+python3 scripts/traditional_only_gate.py --uid <UID>                    # 有沒有簡體字
 ```
 
 | 道 | 檢查 | 抓什麼 | 抓不到什麼 |
@@ -307,6 +339,13 @@ python3 scripts/normalize_word_search.py --check                        # 找字
 | 4 | **覆蓋率** `coverage_gate.py` | 整段課文沒抽到 | 課文以外的漏抄（見下）|
 | 5 | **型別清單** `normalize_block_types.py` | 發明型別、YAML 裸 `no:` 陷阱 | |
 | 6 | **找字座標** `normalize_word_search.py` | 圈選答案的座標轉錯 | |
+| 7 | **正體字** `traditional_only_gate.py` | 照 PDF 抄到被字型換掉的字形 | 圖上的字（`text_carrier: image`）|
+
+第 7 道的判準是**全庫 175 份原稿的用字聯集**，不是手維護的簡體字清單 ——
+我試過手打清單三輪，每輪都混進正體字（只／起／里／干／累），每輪都讓一整批
+正確的課被判 FAIL。**判準錯的門比沒有門更糟**：它會叫人去改沒有壞的東西。
+語料推導還會自動處理灰色地帶：「拮据」的「据」、引用頻道名「有点意思」的「点」
+都在原稿裡，所以不會被誤報。
 
 **第 3、4 道互為表裡**：3 問「寫下來的對嗎」，4 問「該寫的寫了嗎」。
 只有 3 的時候，L0124 少抄一整段課文照樣 PASS —— 剩下的每個字都是對的。
