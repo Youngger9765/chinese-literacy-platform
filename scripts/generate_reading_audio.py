@@ -45,14 +45,24 @@ and live-synthesised clips differed by 2–6 dB in adjacent sentences. Going thr
 runtime's encoder means the two are identical by construction. Uniform-but-unnormalised
 beats normalised-but-inconsistent.
 
-BOTH TRACKS AT ONCE, FOR FREE
------------------------------
-#2606 measured that the key passage needed its own 210 sentences because it started and
-ended mid-sentence. That is no longer true: since #2720, `key_reading.passage` is
-required to be one of `body.yml`'s paragraphs, so its sentences ARE full-text sentences.
-Measured on the current tree: 全文 7236 unique, 重點 470 unique, union 7236. Generating
-the full-text track covers the key track completely, and it stays covered no matter which
-paragraph a later re-extraction picks.
+WHAT UNIT, AND WHY IT IS NOT DECIDED HERE
+-----------------------------------------
+The first version of this script generated one clip per SENTENCE for every track. The
+player sends a whole PARAGRAPH whenever it has lesson context (`ttsApi.ts::
+_speakViaBackend`), so 53 of 1657 paragraph units matched — the same class of miss as
+#1208 and #2605, committed while the docstring above warned against it.
+
+The unit now comes from `reading_audio_units.py`, derived from the call sites, and the
+report imports the same module. Two families, both derived from `body.yml` alone:
+
+    paragraph   1657   speakText(text, lessonId, idx)  — 逐段/全文朗讀
+    sentence    7243   speakText(text)                 — 重點朗讀, 後台試聽
+    union       8703
+
+Deriving both from `body.yml` and nothing else is deliberate: the key passage must be one
+of its paragraphs (#2720 check 3), so this covers the passage deployed today AND any
+passage a later re-extraction picks. The audio can therefore be generated and tested
+before the extraction change merges.
 
 USAGE
 -----
@@ -80,12 +90,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_reading_audio_manifest import (  # noqa: E402
-    BUCKET, PROVIDER, build_manifest, list_existing,
-)
+from build_reading_audio_manifest import BUCKET, PROVIDER, list_existing  # noqa: E402
+from reading_audio_units import all_units  # noqa: E402
 
 from app.services.tts.cache import _gcs_put  # noqa: E402
-from app.services.tts.normalization import _cache_key  # noqa: E402
 from app.services.tts.providers.gemini import _synthesize_gemini  # noqa: E402
 
 
@@ -96,12 +104,7 @@ def main() -> int:
     ap.add_argument("--provenance", default="/tmp/reading-audio-provenance.jsonl")
     a = ap.parse_args()
 
-    manifest = build_manifest()
-    todo: dict[str, str] = {}
-    for entry in manifest.values():
-        for track in ("full", "key"):
-            for s in entry[track]:
-                todo.setdefault(_cache_key(s), s)
+    todo = {k: u["text"] for k, u in all_units().items()}
 
     existing = list_existing()
     if existing is None:
