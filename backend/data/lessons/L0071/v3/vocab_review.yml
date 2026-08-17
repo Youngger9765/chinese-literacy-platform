@@ -1,0 +1,95 @@
+lesson_uid: L0071
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 推論
+  - 差距
+  - 異議
+  - 差異
+  - 複製
+  - 平均值
+  - 年齡層
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 差研究科學家母語漢語
+  - 複牛肉漢堡長親言推言
+  - 製作文語言日節論測量
+  - 補充糕發記憶快速體重
+  - 習慣平音憶回樂重差異
+  - 班長均樂廣度招致距形
+  - 果千值麵度劑以為離系
+  - 異發音年究所致使遙列
+  - 奇要注意齡以於得遠電
+  - 異議閱讀理層是分電影
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 複製
+    cells:
+    - - 2
+      - 1
+    - - 3
+      - 1
+    direction: vertical
+  - word: 推論
+    cells:
+    - - 2
+      - 9
+    - - 3
+      - 8
+    direction: diagonal_down_left
+  - word: 平均值
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 3
+    - - 7
+      - 3
+    direction: vertical
+  - word: 差異
+    cells:
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 差距
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 9
+    direction: vertical
+  - word: 年齡層
+    cells:
+    - - 8
+      - 4
+    - - 9
+      - 5
+    - - 10
+      - 6
+    direction: diagonal_down_right
+  - word: 異議
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    direction: horizontal
+  answer_paths_note: '7 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有錯字。
+
+    ✅ 幾何交叉驗證乾淨：document.xml 有 **7 個 roundRect**，讀圖也是 7 個圈，數量相符
+
+    （本批三課裡唯一數量對得上的一課；L0069 是 10 vs 9）。
+
+    ⚠️ 「差異」與「差距」**共用第 5 列第 9 欄的「差」**（一橫一直從同一格出發），
+
+    所以那一格被兩個框疊到；這不是重複圈選，是原稿的設計。
+
+    格子裡沒有第二個「差」可以讓兩條路徑分開走 —— 逐格取字已確認。'

@@ -1,0 +1,15 @@
+lesson_uid: L0060
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 腦麻畫家的彩色人生 黃美廉
+    duration: (7:16)
+    source: Naer330
+  - index: 2
+    title: 憂鬱症才不只是心情不好！憂鬱症症狀、成因與治療
+    duration: (3:30)
+    source: Una Who
+  qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）

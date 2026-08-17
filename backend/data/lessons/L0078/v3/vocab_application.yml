@@ -1,0 +1,45 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 博取
+    B: 目不暇給
+    C: 辛辣
+    D: 誘餌
+    E: 文不對題
+    F: 聳動
+    G: 帶風向
+    H: 氾濫
+    I: 語不驚人死不休
+  option_bank_note: 9 個代號對應 9 道小題，每個代號各用一次。語詞框有 13 個語詞，推播／核對／眼花撩亂沒有進第四大題。
+  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 他用哭泣來（　）同情，希望老師能原諒他作弊的行為。
+    answer: A
+  - index: 2
+    stem: 這位同學經常用（　）的言詞來批評老師，讓許多人很反感。
+    answer: C
+  - index: 3
+    stem: 網路上不實訊息（　），容易誤導人們的判斷，引發社會問題。
+    answer: H
+  - index: 4
+    stem: 他做任何事都想要與眾不同，說話也是（　）。
+    answer: I
+  - index: 5
+    stem: 在寫作文前，要先弄清楚題目的意思，才不會寫出（　）的文章。
+    answer: E
+  - index: 6
+    stem: 他發的這篇文章很明顯在（　），想要影響大家對這件事的看法。
+    answer: G
+  - index: 7
+    stem: 詐騙集團都以高薪的工作當作（　），實際上大多是騙局。
+    answer: D
+  - index: 8
+    stem: 網路新聞為了提高點閱率，常常使用（　）的標題來吸引閱聽者。
+    answer: F
+  - index: 9
+    stem: 初次體驗潛水，海底世界的奇妙景觀令人（　），讓人流連忘返。
+    answer: B

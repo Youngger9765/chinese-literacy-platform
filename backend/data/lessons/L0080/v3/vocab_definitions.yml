@@ -1,0 +1,52 @@
+lesson_uid: L0080
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 幅員遼闊
+  - 發掘
+  - 退役
+  - 鞏固
+  - 井井有條
+  - 後顧之憂
+  - 斥資
+  - 熱衷
+  - 天壤之別
+  - 遍地開花
+  answer_carrier: 橘色手寫字（PDF p3）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 退役
+    definition: 軍人退伍或運動員結束服役或選手生涯。
+  - index: 2
+    word: 鞏固
+    definition: 使原有的基礎、力量或成果更加穩固。
+  - index: 3
+    word: 幅員遼闊
+    definition: 國土範圍非常廣大。
+  - index: 4
+    word: 遍地開花
+    definition: 滿地開花，比喻好的事物到處湧現。
+  - index: 5
+    word: 發掘
+    definition: 發現、引出。
+  - index: 6
+    word: 後顧之憂
+    definition: 在前進過程中，擔心有其他的壞事發生。
+  - index: 7
+    word: 天壤之別
+    definition: 有巨大的差別。
+  - index: 8
+    word: 熱衷
+    definition: 十分喜愛，急切的追求且全心投入。
+  - index: 9
+    word: 井井有條
+    definition: 形容整齊有秩序的樣子。
+  - index: 10
+    word: 斥資
+    definition: 投入大量經費。

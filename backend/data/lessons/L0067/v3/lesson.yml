@@ -1,0 +1,28 @@
+lesson_uid: L0067
+version_id: v3
+title: 森林大軍的守護者
+catalog_slot: G6-L28
+sections_present:
+- 'no': 一
+  name: 閱讀聚光燈-自我提問策略1──跟著人物故事線問問題
+- 'no': 二
+  name: 讀全文
+- 'no': 三
+  name: 念順順
+- 'no': 四
+  name: 語詞我最棒
+- 'no': 五
+  name: 語詞應用
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 13
+  drive_path: 6年級/G6-L28森林大軍的守護者（自我提問策略1-跟著人物故事線問問題）.docx
+  docx_md5: md5-12:b9c4d7f799c8

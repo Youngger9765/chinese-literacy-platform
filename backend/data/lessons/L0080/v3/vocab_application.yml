@@ -1,0 +1,41 @@
+lesson_uid: L0080
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 斥資
+    B: 遍地開花
+    C: 後顧之憂
+    D: 幅員遼闊
+    E: 發掘
+    F: 鞏固
+    G: 井井有條
+    H: 退役
+  option_bank_note: 8 個代號對應 8 道小題，每個代號各用一次。語詞框有 10 個語詞，熱衷／天壤之別沒有進第四大題。
+  answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 因為建物老舊，政府決定（　）兩千萬元修建新的體育館。
+    answer: A
+  - index: 2
+    stem: 因為有全家人的支持，他能專心從事體育工作，毫無（　）。
+    answer: C
+  - index: 3
+    stem: 他的藏書很多但不雜亂，整理得（　）。
+    answer: G
+  - index: 4
+    stem: 教練善於（　）學員的潛能，然後根據每個人的專長進行培訓。
+    answer: E
+  - index: 5
+    stem: 俄羅斯是世界上土地面積最大的國家，（　），資源相當豐富。
+    answer: D
+  - index: 6
+    stem: 隨著環保意識提高，無塑市集逐漸（　），成為新的生活風潮。
+    answer: B
+  - index: 7
+    stem: 球隊每天加強基本動作，是為了（　）基本功，避免比賽時失誤。
+    answer: F
+  - index: 8
+    stem: 這架老舊飛機完成最後一次任務後，終於（　），改放在博物館展示。
+    answer: H

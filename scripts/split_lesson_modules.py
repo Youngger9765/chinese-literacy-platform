@@ -52,6 +52,12 @@ MODULES: dict[str, tuple[str, str | None]] = {
     "comprehension":     ("comprehension", "七"),
     "vocab_review":      ("vocab_review", "八"),
     "resources":         ("resources", "九"),
+    # 以下三個是學習單上真的印出來的小節，但不佔大題號。2026-08-18 之前
+    # 它們不在這張表裡，所以**整節被靜默丟掉** —— 15 課受影響，而七道門全綠
+    # （門都在比 top-level key 更低的層級看東西）。現由 orphan_key_gate.py 守。
+    "goal_box":          ("goal_box", None),                    # 開頭的「目標策略」框
+    "self_check_before_reading": ("self_check_before_reading", None),  # 讀前自我檢核清單
+    "writing_practice":  ("writing_practice", None),            # 「寫一寫」抄寫練習
     # 文言文專屬（大題集合與白話課不同）
     "intro_guide":       ("intro_guide", None),
     "modern_translation": ("modern_translation", None),

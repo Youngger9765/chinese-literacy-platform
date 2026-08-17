@@ -205,16 +205,16 @@ key_reading_flagged:
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
 
 mcq_options_emitted_as_guides:
-  # 2026-08-18：L0033、L0054 經多模態重抽已修復，從 6 降到 4。
-  count: 4
+  # 2026-08-18：L0033、L0054、L0067、L0070 經多模態重抽已修復，從 6 降到 3。
+  #
+  # ⚠️ 這份清單與 specs/test_spotlight_v2_spec.py 的 KNOWN 集合**從建立起就不同步**：
+  # 這裡列 L0067，那裡列 L0070，兩邊各漏對方一課。兩課都在 2026-08-18 重抽後修好，
+  # 才順勢對齊。兩份各自維護的清單會這樣漂移 —— 之後只從 spec 那一份長出來。
+  count: 3
   what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。
   not_introduced_by_the_reink: 這是抽取器既有的行為，二修語料上出現在 6 課；spec 的 mcq_leakage 閘本來就在測它，只是舊
     spec 跑的是 7 課手抄樣本，剛好不含這 6 課。
   lessons:
-  - lesson_uid: L0067
-    catalog_slot: G6-L28
-    title: 森林大軍的守護者
-    leaked_options: 2
   - lesson_uid: L0100
     catalog_slot: G7-L3
     title: 你以為的浪漫可能是跟騷

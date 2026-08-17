@@ -78,6 +78,22 @@ const toOptionList = (options: unknown): string[] => {
   return [];
 };
 
+/**
+ * The option map's own keys, or undefined for a plain array.
+ *
+ * Exam questions print (A)(B)(C)(D) and the worksheet's answer line names the
+ * letter, so the key carries the option's identity while the text carries none of
+ * it. Flattening with `toOptionList` alone drops the letter, leaving the answer
+ * 'A' to be compared against a whole Chinese sentence — false either way. All 9
+ * letter-keyed blocks in the library (L0020, L0044, L0070) were ungradeable.
+ */
+const toOptionKeys = (options: unknown): string[] | undefined => {
+  if (options && typeof options === 'object' && !Array.isArray(options)) {
+    return Object.keys(options as Record<string, unknown>);
+  }
+  return undefined;
+};
+
 const BlockSequenceRenderer: React.FC<Props> = ({
   spotlight,
   story,
@@ -138,7 +154,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     const selected = blockState[key];
     if (typeof selected !== 'number') return;
     const options = toOptionList(block.options);
-    const correct = resolveSingleCorrect(options, block.answer, selected);
+    const correct = resolveSingleCorrect(options, block.answer, selected, toOptionKeys(block.options));
     setFeedback((prev) => ({ ...prev, [key]: correct }));
     checkCompletion(blockState);
   };

@@ -1,0 +1,135 @@
+lesson_uid: L0080
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 幅員遼闊
+  - 發掘
+  - 退役
+  - 後顧之憂
+  - 鞏固
+  - 熱衷
+  - 斥資
+  - 遍地開花
+  - 井井有條
+  - 天壤之別
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 科全神貫注熱衷大滿貫
+  - 普遍地開花捶胸頓足衝
+  - 堵住摸幅著頭緒斥責鋒
+  - 富福員蝠輻後崎資頑陷
+  - 沮遼圓園顧及嶇生強陣
+  - 闊干副之睽天壤之別倔
+  - 崩擾憂優違井里怒發強
+  - 鞏潰陪秀莽撞井迢挖掘
+  - 固堤襯退役遲疑有迢審
+  - 回饋雞腿事與願違條視
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 熱衷
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    direction: horizontal
+  - word: 遍地開花
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    direction: horizontal
+  - word: 幅員遼闊
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 3
+    - - 5
+      - 2
+    - - 6
+      - 1
+    direction: diagonal_down_left
+  - word: 斥資
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 8
+    direction: vertical
+  - word: 後顧之憂
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 5
+    - - 6
+      - 4
+    - - 7
+      - 3
+    direction: diagonal_down_left
+  - word: 天壤之別
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    direction: horizontal
+  - word: 井井有條
+    cells:
+    - - 7
+      - 6
+    - - 8
+      - 7
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 發掘
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 鞏固
+    cells:
+    - - 8
+      - 1
+    - - 9
+      - 1
+    direction: vertical
+  - word: 退役
+    cells:
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  answer_paths_note: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+    幾何交叉驗證（單向警報）：以找字表格元素當邊界，表格內、扣掉紙外殘留後的 roundRect
+
+    = **10 個**，路徑 10 條 → 沒有「紙上 > 路徑」的缺條警報，0 個紙外。
+
+    全文 11 個，多的 1 個在表格外（別處的圓角框），不是漏抽的答案。
+
+    ⚠️ **格子跨頁**：第 1~9 列印在 PDF p7、第 10 列（回饋雞腿事與願違條視）印在 p8。
+
+    「井井有條」的終點「條」落在第 10 列，圈線整組畫在 p7 —— 只看 p8 會判成那一條沒被圈到。'

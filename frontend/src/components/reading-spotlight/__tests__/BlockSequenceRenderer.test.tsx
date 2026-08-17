@@ -144,3 +144,52 @@ describe('BlockSequenceRenderer — free_text AI grading (#2192)', () => {
     });
   });
 });
+
+/**
+ * Wiring, not logic.
+ *
+ * `resolveSingleCorrect` learned to resolve a letter answer through the option
+ * keys, and its unit test passes those keys in by hand — so that test stays green
+ * even if the renderer never hands them over. `toOptionList` flattens the option
+ * map with `Object.values`, which drops the letters, so without an explicit
+ * `toOptionKeys` at the call site the letter branch is unreachable and the answer
+ * is compared against the whole Chinese sentence: false either way.
+ *
+ * This one goes through the component, so it is red until the call site passes
+ * the keys. Fixture is L0070's real block (G6-L3, 會考題 keyed A/B).
+ */
+describe('letter-keyed options are graded through the renderer', () => {
+  const LETTER_FIXTURE: SpotlightV2 = {
+    lesson: 'G6-L3',
+    strategy_name: '解題策略',
+    blocks: [
+      {
+        type: 'single',
+        prompt: '根據本文，作者最可能贊成下列哪一種做法？',
+        options: {
+          A: '讀書時先關閉手機通知，減少注意力被打斷',
+          B: '查看通知後立即回到功課，就不會影響學習',
+        },
+        answer: 'A',
+      },
+    ],
+  } as unknown as SpotlightV2;
+
+  it('marks the option named by the answer letter correct', async () => {
+    render(<BlockSequenceRenderer spotlight={LETTER_FIXTURE} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /讀書時先關閉手機通知/ }));
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+
+    expect(await screen.findByText(/答對了/)).toBeInTheDocument();
+  });
+
+  it('marks the other option wrong', async () => {
+    render(<BlockSequenceRenderer spotlight={LETTER_FIXTURE} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /查看通知後立即回到功課/ }));
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+
+    expect(await screen.findByText(/再想想看/)).toBeInTheDocument();
+  });
+});

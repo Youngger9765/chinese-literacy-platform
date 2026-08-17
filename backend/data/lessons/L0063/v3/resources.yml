@@ -1,0 +1,22 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 九
+resources:
+  _scope: 三篇合讀
+  label: 影片連結
+  items:
+  - index: 1
+    title: 公民叮：市場與貨幣(2)-市場機能
+    duration: (05:25)
+    source: 公民叮：教學影片分享平台
+    qr_code: true
+  - index: 2
+    title: 【九上公民】【觀念】看得見的手與經濟制度
+    duration: (04:48)
+    source: 均一教育平台
+    qr_code: true
+  - index: 3
+    title: 帶領船舶安全進出港的守護者，江湖人稱「海上蜘蛛人」：引水人
+    duration: (14:02)
+    source: 目映台北
+    qr_code: true

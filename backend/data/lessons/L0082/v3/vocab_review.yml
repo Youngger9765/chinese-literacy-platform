@@ -1,0 +1,133 @@
+lesson_uid: L0082
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 灌木
+  - 紀律
+  - 覓食
+  - 天兵
+  - 鎮日
+  - 片面
+  - 求偶
+  - 繁衍
+  - 體現
+  - 基因
+  - 此起彼落
+  - 本能
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 社會規範尋找冰鎮繁法
+  - 鎮片面群覓食鎮此體律
+  - 靜念策求婚基定起天鎮
+  - 罐群星偶天金實彼將日
+  - 力體察本性紀現落頻生
+  - 飲貼現能整律遵循繁殖
+  - 料理象量日積月累星基
+  - 社交風氣延多灌水因礎
+  - 天配繁衍續樣權木士紀
+  - 兵偶榮生本能利火兵錄
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 片面
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    direction: horizontal
+  - word: 覓食
+    cells:
+    - - 2
+      - 5
+    - - 2
+      - 6
+    direction: horizontal
+  - word: 此起彼落
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 8
+    - - 4
+      - 8
+    - - 5
+      - 8
+    direction: vertical
+  - word: 求偶
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 4
+    direction: vertical
+  - word: 鎮日
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 體現
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    direction: diagonal_down_right
+  - word: 紀律
+    cells:
+    - - 5
+      - 6
+    - - 6
+      - 6
+    direction: vertical
+  - word: 基因
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 9
+    direction: diagonal_down_left
+  - word: 灌木
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 8
+    direction: diagonal_down_right
+  - word: 繁衍
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+  - word: 天兵
+    cells:
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 本能
+    cells:
+    - - 10
+      - 5
+    - - 10
+      - 6
+    direction: horizontal
+  answer_paths_note: '12 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+    格子跨頁（p7 只有第 1~2 列，p8 是第 3~10 列）：「此起彼落」的圈整條畫在 p7，
+
+    終點落在 p8 的第 5 列 —— 只看 p8 會判成這條沒被圈到。
+
+    個數交叉驗證：紙上 13 個 roundRect > 12 條路徑，依規則回查，多的是聚光燈說明框
+
+    範例表右緣那個線色寫死 FF0000 的紅框（見 source_errata_note ④），扣掉後 12 = 12。'

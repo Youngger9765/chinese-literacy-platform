@@ -1,0 +1,67 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 文不對題
+  - 辛辣
+  - 誘餌
+  - 閱聽大眾
+  - 博取
+  - 聳動
+  - 語不驚人死不休
+  - 推播
+  - 帶風向
+  - 目不暇給
+  - 核對
+  - 氾濫
+  - 眼花撩亂
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  layout_note: '原稿是雙欄排版，文字流順序是 1,2,3,4,5,7,11,6,8,9,10,12,13（左欄先流一段再跳右欄）。
+
+    本檔依 index 排序。PDF p3 這一區與念順順的表格互相疊印，(1)(7)(11) 在 PDF 上被壓成碎字。'
+  items:
+  - index: 1
+    word: 博取
+    definition: 設法獲得。在本文指的是吸引並獲得別人注意。
+  - index: 2
+    word: 誘餌
+    definition: 用來引誘目標上鉤的事物。
+  - index: 3
+    word: 閱聽大眾
+    definition: 普遍指接收影、音、文字媒體訊息的所有人。
+  - index: 4
+    word: 語不驚人死不休
+    definition: 形容說話或寫文章時，刻意追求驚人、引人注意的效果。
+  - index: 5
+    word: 帶風向
+    definition: 透過訊息或言論，引導大眾朝某一方向思考或表態。
+  - index: 6
+    word: 聳動
+    definition: 用誇張、刺激的方式引起注意或強烈反應。
+  - index: 7
+    word: 辛辣
+    definition: 言語尖銳、刺激。
+  - index: 8
+    word: 氾濫
+    definition: 原指河水流出河道。本文形容事物大量出現、到處擴散。
+  - index: 9
+    word: 文不對題
+    definition: 文章內容和題目的意思不符合。
+  - index: 10
+    word: 推播
+    definition: 網站或平台主動把訊息傳送到使用者的裝置上。
+  - index: 11
+    word: 核對
+    definition: 互相比對檢查。
+  - index: 12
+    word: 目不暇給
+    definition: 眼前事物太多或變化太快，來不及一一觀看。
+  - index: 13
+    word: 眼花撩亂
+    definition: 形容看到的東西眾多而且雜亂，難以分辨或選擇。

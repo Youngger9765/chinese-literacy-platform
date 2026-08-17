@@ -1,0 +1,130 @@
+lesson_uid: L0079
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 祈請
+  - 與日俱增
+  - 雪上加霜
+  - 哄騙
+  - 拮据
+  - 病識感
+  - 秋祺
+  - 諮詢
+  - 聯手
+  - 錦上添花
+  target_words_note: 灰框 10 個詞，比本課語詞（9 個）多一個「錦上添花」—— 它是第三大題「雪上加霜」定義裡寫的相反詞。
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 舒適區分你我奮力一搏
+  - 伯合雪花冰富數哄騙執
+  - 特加持上沮喪而黃前著
+  - 生機盎然加散旗魚鬆聯
+  - 活大同小異霜害秋收手
+  - 諮滿與日俱增孤祺藏節
+  - 詢貫口國字滿寂法傾性
+  - 底徹合覆病識感外告訴
+  - 結拮据蓋深測可會拜祈
+  - 實踏腳錦上添花否請說
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 哄騙
+    cells:
+    - - 2
+      - 8
+    - - 2
+      - 9
+    direction: horizontal
+  - word: 雪上加霜
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    direction: diagonal_down_right
+  - word: 聯手
+    cells:
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 秋祺
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 8
+    direction: vertical
+  - word: 諮詢
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 1
+    direction: vertical
+  - word: 與日俱增
+    cells:
+    - - 6
+      - 3
+    - - 6
+      - 4
+    - - 6
+      - 5
+    - - 6
+      - 6
+    direction: horizontal
+  - word: 病識感
+    cells:
+    - - 8
+      - 5
+    - - 8
+      - 6
+    - - 8
+      - 7
+    direction: horizontal
+  - word: 拮据
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    direction: horizontal
+  - word: 祈請
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 9
+    direction: diagonal_down_left
+  - word: 錦上添花
+    cells:
+    - - 10
+      - 4
+    - - 10
+      - 5
+    - - 10
+      - 6
+    - - 10
+      - 7
+    direction: horizontal
+  answer_paths_note: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+    幾何交叉驗證（單向警報）：以找字表格元素當邊界，表格內、扣掉紙外殘留後的 roundRect
+
+    = **10 個**（全文也是 10），路徑 10 條 → 沒有「紙上 > 路徑」的缺條警報，0 個紙外。
+
+    ⚠️ **格子跨頁**：第 1~2 列印在 PDF p11、第 3~10 列印在 p12。
+
+    p11 上只看得到「哄騙」一個圈，其餘九個都在 p12 —— 只讀 p12 會漏掉「哄騙」，
+
+    只讀 p11 會判成「這課只圈了一個」。兩頁都要讀。'

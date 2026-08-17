@@ -14,7 +14,8 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import BlockSequenceRenderer from '../BlockSequenceRenderer';
-import type { SpotlightV2 } from '../../../types';
+import { segmentBlocks } from '../spotlightBlockLogic';
+import type { SpotlightV2, SpotlightBlock } from '../../../types';
 
 vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ token: null, user: null }) }));
 vi.mock('../../../services/learningApi', () => ({ validateStrategyAnswer: vi.fn() }));
@@ -49,9 +50,15 @@ describe('真資料進 renderer', () => {
       const { container } = render(<BlockSequenceRenderer spotlight={spotlight} />);
       const text = container.textContent ?? '';
       // 有 block 卻幾乎沒字 = 畫了個空殼，跟 white screen 一樣沒用
-      const blocks = (spotlight as { blocks?: unknown[] }).blocks ?? [];
-      expect(text.length, `${uid} 有 ${blocks.length} 個 block 卻只畫出 ${text.length} 個字`)
-        .toBeGreaterThan(blocks.length * 10);
+      //
+      // 分母是**第一段**的 block 數，不是全課。渲染器是漸進式揭露，一次只畫一段，
+      // 學生做完才出現下一段 —— 所以拿全課 block 數當分母的話，段數越多的課門檻
+      // 越高、實際該畫的比例卻越小，兩者往相反方向跑。L0070（87 block／9 passage，
+      // 全庫段數最多）就是這條錯誤分母第一次露餡的地方：畫出 854 字被要求 >870。
+      const blocks = ((spotlight as { blocks?: unknown[] }).blocks ?? []) as SpotlightBlock[];
+      const firstSegment = segmentBlocks(blocks)[0] ?? [];
+      expect(text.length, `${uid} 第一段有 ${firstSegment.length} 個 block 卻只畫出 ${text.length} 個字（全課 ${blocks.length} block）`)
+        .toBeGreaterThan(firstSegment.length * 10);
     });
   }
 

@@ -1,0 +1,19 @@
+lesson_uid: L0079
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 你一定要懂得成年監護制度(90秒)國語版 2022-04-21
+    duration: '1:30'
+    source: 衛生福利部社會及家庭署
+    _總表_url: https://youtu.be/QYRCkJA3-ZKwrlkO
+    _總表_url_note: 總表這格的影片 ID 有 16 碼（YouTube 是 11 碼），疑似總表側貼錯；未自行修正。
+  - index: 2
+    title: 新北衛生局失智動畫 阿嬤的大腦迷宮2021-05-20
+    duration: '4:40'
+    source: 新北市政府衛生局
+    _總表_url: https://youtu.be/EH-CQfTk4_Q
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 92 列，故加 `_` 前綴標示非 DOCX 內容。

@@ -1,0 +1,13 @@
+lesson_uid: L0069
+version_id: v3
+errata:
+- id: E1
+  section: 一 讀全文-做記號
+  locator: 段號欄第 1 個號碼
+  source: ㄧ
+  corrected: 一
+  kind: 錯字（注音符號誤植）
+  why: 段號欄第一格打成注音「ㄧ」(U+3127)，其餘 8 個都是漢字數字
+  confidence: high
+  evidence: document.xml 段號儲存格首字碼位 U+3127；PDF p1 該格與其餘段號字形不同
+  note: 本檔的段落用數字 idx，不受此字影響；記錄供修稿參考。
