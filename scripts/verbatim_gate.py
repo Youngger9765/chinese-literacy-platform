@@ -159,6 +159,14 @@ def walk(node, key=None, parent=None, out=None, unverifiable=None, in_image=Fals
                 continue
             if ks == "source" and parent in SOURCE_IS_ANNOTATION_PARENTS:
                 continue
+            if ks == "answer_paths":
+                # ⚠️ 找字遊戲的 `word` 是**從座標套回格子算出來的**，不是抄來的。
+                #    教材的格子印錯字時（「堅不可摧」印成「堅不可催」），
+                #    座標門要求 word == 拼出來的字，逐字門卻要求它在原稿找得到 ——
+                #    而斜著拼出來的字串原稿任何地方都不存在，兩道門直接互相打架。
+                #    L0026 的「苦腦」只是因為 2 個字低於 4 字門檻才躲過。
+                #    這一段交給 `normalize_word_search.py` 用格子驗，不歸逐字門管。
+                continue
             walk(v, ks, key, out, unverifiable, in_image)
     elif isinstance(node, list):
         for v in node:
