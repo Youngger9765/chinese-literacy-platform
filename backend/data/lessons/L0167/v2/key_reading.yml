@@ -1,11 +1,13 @@
 lesson_uid: L0167
 version_id: v2
-passage: 很多時候，競技場上的較勁，不是只靠體能和技巧，還要靠心。兩個實力平分秋色的選手，勝負的關鍵往往就在心理素質，獲勝的經常是那個情緒比較穩定、意志堅定、不易受干擾、比較能專注的人。研究也告訴我們，心理狀態對運動表現的影響不容小看。而就像肌肉、技術可以透過訓練變強，心理素質也可以。優秀的選手會把握每一次訓練和比賽的機會，隨時覺察、調整自己的情緒與想法。隨著經驗、汗水的累積，這些心理力量，都能幫助我們在關鍵時刻展現最好的自己。
-start_text: 很多時候，競技場上的較勁，不是只靠體能和技巧，還
-extent_chars: 211
+passage: 小美他們的經驗，你是否也曾經遭遇？明明想好好表現，卻被緊張、疲累或心裡的小劇場絆住腳步。運動不只是跑得快、打得準，更需要一顆能和身體好好合作的心。它會影響你面對壓力時的反應，左右你看待隊友與自己的方式，也決定你能不能從低潮中再站起來。
+start_text: 小美他們的經驗，你是否也曾經遭遇？明明想好好表現
+extent_chars: 117
 source: docx-extract
 anchor_paragraph: 6
 paragraphs_used: 1
 extraction_check:
   verdict: confirmed
-  corroborated_by_first_edition: 6
+  corroborated_by_first_edition: true
+  printed_marks: 8
+  cell_paragraphs: 8

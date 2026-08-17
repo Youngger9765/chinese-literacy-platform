@@ -1,44 +1,107 @@
 #!/usr/bin/env python3
-"""extract_key_reading.py — 重點朗讀（念順順）指定段落, from section 二 (#2683).
+"""extract_key_reading.py — 重點朗讀（念順順）指定段落, from section 二 (#2683, #2720).
 
 WHY THIS EXISTS
 ---------------
-Every one of the 175 lessons currently falls back to reading the whole text aloud,
-which is the exact thing the 2026-07-20 expert review ruled against: 朗讀只練老師指定的
-重點段（約 300–400 字），不練全文.
+Every one of the 175 lessons used to fall back to reading the whole text aloud, which
+is the exact thing the 2026-07-20 expert review ruled against: 朗讀只練老師指定的重點段,
+不練全文.
 
-The first edition had this data. It is not reusable — `data/key_reading_passages.yml`
-is keyed by lesson code, the second edition renumbered every lesson, and the lookup
-therefore kept succeeding while returning another lesson's paragraph. Live on staging
-《十秒的背後》, about a sprinter, was serving a passage about giving up a bus seat.
+The first edition had this data. It is not reusable as an answer key — it is keyed by
+lesson code, the second edition renumbered every lesson, and 23 of the 53 comparable
+lessons had their text rewritten. It is a regression golden set, not a source.
 
 WHERE THE PASSAGE ACTUALLY LIVES
 --------------------------------
 Section 二 念順順 does not contain the passage. It names it:
 
-    請用計時器，從指定段落（四）開始朗讀，計時 1 分鐘讀的字數…
+    請用計時器，從指定段落（三）開始朗讀，計時 1 分鐘讀的字數…
 
-So the anchor is a paragraph NUMBER, and the paragraph itself is back in section 一.
-Reassembling the two is what this script does — which makes the extraction a genuine
-cross-section join rather than a lift, and gives it a check that can fail.
+So the anchor is a paragraph NUMBER. The question this file has to answer correctly is
+what that number counts.
 
-THE CHECK THAT CAN CATCH A WRONG PAIRING
-----------------------------------------
-Two independent confirmations, neither of which trusts a lesson code:
+THE BUG THIS REPLACES, AND WHY IT WAS INVISIBLE (#2720)
+-------------------------------------------------------
+It used to answer with `body[anchor - 1]` against `body.yml` — the paragraph list that
+`extract_lesson_body` DERIVES with a chain of heuristics (a 46-character floor, a
+short-paragraph recovery capped at three, chrome prefixes, instruction markers,
+exercise marks, dedup, five tiers of boundary heading).
 
-  1. Cross-section — the number comes from 二, the prose from 一. An anchor past the
-     end of the body, or one landing on a table row rather than prose, means the body
-     segmentation and the anchor disagree, and neither can be trusted.
+「第三段」 does not mean "the third surviving element of that list". It means the
+paragraph the worksheet PRINTS as 三. Those two coincide only when no heuristic
+happened to drop or keep a paragraph ahead of the anchor, and 靖杭's scan of the
+first edition's 148 hand-checked passages measured how often that holds:
 
-  2. Independent-process agreement — the first edition's passages were extracted from
-     the printed PDFs by a different pipeline. Matching them BY CONTENT (is this
-     passage a substring of this lesson's body?) rather than by code sidesteps the
-     renumbering entirely, and their 「第N段」 should then agree with our anchor. Where
-     both pipelines independently land on the same paragraph, the pairing is confirmed
-     by something outside this script.
+    課文沒改、段界一致的 28 課 → 錨點只有 17 課正確，錯的 11 課有 10 課差一整段
 
-Disagreement is not written. A student reading the wrong paragraph aloud is worse than
-a student reading the whole text.
+Worse, the check that was supposed to catch this reported `confirmed` on 8 of those 11.
+It took the first edition's passage TEXT, used it only to look up a paragraph NUMBER,
+and then compared two numbers from two different coordinate systems. Comparing the text
+it already held would have caught every one.
+
+WHERE THE NUMBERING ACTUALLY IS
+-------------------------------
+The worksheet prints its own paragraph numbers, in a column of the body table:
+
+    row: [ 段號欄 ] [ 課文欄 ] [ 字數欄 ]
+          ㄧ⏎二⏎⏎⏎三⏎⏎⏎四…   最近心情起起伏伏…⏎上課時…⏎然而最近…   27⏎57⏎85⏎…
+
+So the answer is read, not re-derived: the anchor indexes the 課文 CELL's own
+paragraphs. On 靖杭's golden set that moves the hit rate from 20/34 to 30/34, and the
+four remaining misses are all lessons where the printed numbering and the cell's
+paragraph count disagree — which is a condition this file can test.
+
+Two traps in that column, both real:
+
+  · the first mark is often 「ㄧ」 = U+3127 BOPOMOFO LETTER I, not 「一」 = U+4E00. A
+    CJK-only numeral class does not match it, and the lesson then looks unnumbered.
+  · python-docx reports a horizontally merged cell once per grid column, so the 課文
+    text appears two or three times in one row. Dedup before picking the longest.
+
+THE CHECKS, AND WHAT THEY COST
+------------------------------
+Nothing is written unless the numbering can be trusted, because a student reading the
+wrong paragraph aloud is worse than a student reading the whole text — the whole-text
+fallback is degraded, a confidently wrong passage is a lie.
+
+  1. The 課文 cell must hold as many paragraphs as the author numbered, give or take a
+     couple of unnumbered tail lines. Measured over all 175 second-edition worksheets,
+     against the 33 lessons 靖杭's golden set can judge:
+
+         paras - marks     correct   wrong
+              0               22        2      L0030, L0072
+              1                5        1      L0110
+              2                2        0
+              3, 5, 6, 10      0        4      L0122, L0046, L0071, L0060
+
+     One or two unnumbered paragraphs are closing lines the author did not number, and
+     they sit after the anchor, so indexing still lands — 2 recovers seven lessons over
+     strict equality, both judgeable ones correct. Three or more means the cell and the
+     numbering disagree about where paragraphs BEGIN, and every such lesson was wrong.
+     `paras < marks` fails too: the cell lost a numbered paragraph.
+
+     This gate alone runs ~90% (29/32). It is not the last line of defence — the three
+     that slip past it are exactly the three check 2 catches, so nothing wrong reaches a
+     lesson that has a first-edition counterpart. Lessons without one rest on this gate,
+     which is why the CI golden test exists and why the number is stated rather than
+     rounded up.
+  2. The first edition's PASSAGE TEXT, when this lesson has one. Compared as text
+     against the passage about to be written, not as a paragraph number.
+  3. The passage must be one of `body.yml`'s paragraphs. It is what the student reads,
+     what the TTS sentence table is built from, and what #2718's test asserts; a
+     passage outside that list means the body extractor and the numbering disagree
+     about paragraph boundaries (Word splits a paragraph at a manual line break in a
+     handful of lessons), and the tail would be served missing.
+
+Two checks that were tried and do NOT work, recorded so they are not tried again:
+
+  · 字數欄 as a completeness check. Its max runs 280–520 while the body runs 535–1670
+    characters, because the column counts the printed one-minute excerpt, not the text.
+    (This also retires the first edition's belief that max 累計字數 = the passage
+    length — the rule that produced the 370-character passages of #2712.)
+  · re-deriving the numbering by counting prose paragraphs across the whole document.
+    Tried; 22/30 against the golden set, because other table columns, teacher
+    annotations and Word's duplicated runs all land in the same paragraph stream.
 """
 
 from __future__ import annotations
@@ -47,7 +110,10 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
+
+import docx
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -56,46 +122,59 @@ from extract_lesson_body import _paragraphs, extract as extract_body  # noqa: E4
 
 LEGACY_TABLE = ROOT / "backend" / "data" / "key_reading_passages.yml"
 
-_CN_NUM = {c: i for i, c in enumerate("一二三四五六七八九十", start=1)}
+#: 「ㄧ」 U+3127 is BOPOMOFO LETTER I, not the CJK 一. It is what the worksheet actually
+#: prints for the first paragraph in a large share of lessons, and leaving it out of the
+#: numeral class made those lessons read as having no numbering at all.
+_BOPOMOFO_ONE = "ㄧ"
+_CN_UNITS = {c: i for i, c in enumerate("一二三四五六七八九十", start=1)}
+_NUMERAL_CHARS = "一二三四五六七八九十" + _BOPOMOFO_ONE
 
 #: 「從指定段落（四）開始朗讀」 — the parenthesis is sometimes half-width, sometimes
 #: unclosed, and sometimes padded with the tab that follows it in the form.
-_ANCHOR = re.compile(r"從指定段落\s*[（(]?\s*([一二三四五六七八九十]+|\d+)\s*[)）]?")
-_ANCHOR_LOOSE = re.compile(r"指定段落[^0-9一二三四五六七八九十]{0,6}([一二三四五六七八九十]+|\d+)")
-
-#: 「從指定段落（四）開始朗讀」 names WHERE THE PASSAGE STARTS. It is one paragraph.
-#:
-#: This accumulated whole paragraphs from the anchor until the passage reached 300
-#: characters, on the reasoning that a single paragraph runs 145 at the median and a
-#: student reading aloud for the timed minute would run out of text. 靖杭 found the
-#: result on staging: 「大部分課程的朗讀範圍都比教授畫的範圍多出不少」. Measured against
-#: the first edition's table — extracted from the worksheets the professor marked —
-#: the median went from the professor's 153 characters to 370, and 60 of 67 comparable
-#: lessons exceeded the marked range by more than half again.
-#:
-#: The reasoning was about the TIMER. The passage is what the professor MARKED, and how
-#: long the student reads is the student's business. The first edition's file header
-#: said so plainly — 「新規則：只取 ☞ 那一段」 — and I read that line before overriding it.
+_ANCHOR = re.compile(
+    r"從指定段落\s*[（(]?\s*([" + _NUMERAL_CHARS + r"]+|\d+)\s*[)）]?"
+)
+_ANCHOR_LOOSE = re.compile(
+    r"指定段落[^0-9" + _NUMERAL_CHARS + r"]{0,6}([" + _NUMERAL_CHARS + r"]+|\d+)"
+)
 
 #: Bounds taken from what the professor actually marked, not from what seems reasonable.
-#: The first edition's 134 marked ranges run 19 to 412 characters, median 147; six of
-#: them are under 40. A floor of 40 — which is what this used to have, left over from
-#: the accumulation design — rejected 19 lessons whose single paragraph is simply short,
-#: including one the professor marked at 22 characters.
-#:
-#: These exist only to catch a paragraph that is obviously not prose (a stray caption, a
-#: whole page swallowed), so they sit outside the observed range rather than inside it.
+#: The first edition's 134 marked ranges run 19 to 412 characters, median 147; six are
+#: under 40. These exist only to catch a paragraph that is obviously not prose (a stray
+#: caption, a whole page swallowed), so they sit outside the observed range.
 MIN_CHARS, MAX_CHARS = 12, 900
+
+#: How many paragraphs the 課文 cell may hold beyond the numbered ones. One or two are
+#: closing lines the author left unnumbered, and they sit after the anchor. Three is
+#: where the two disagree about paragraph STARTS. See the module docstring for the
+#: measurement behind this bound.
+MAX_UNNUMBERED_TAIL = 2
+
+#: A 段號 cell holds only numerals, one per paragraph. Three is the smallest run that
+#: cannot be a stray character — two would match a 「一/二」 heading pair.
+_MIN_MARKS = 3
+#: The 課文 cell has to actually hold the text. Below this it is a caption column.
+_MIN_CELL_CHARS = 100
 
 
 def cn_to_int(s: str) -> int | None:
+    """Chinese or Arabic numeral → int.
+
+    NFKC first: the worksheets mix full-width digits into the same field. 二十 and
+    二十一 appear in the longer lessons and used to return None, which silently dropped
+    those lessons rather than reporting anything.
+    """
+    s = unicodedata.normalize("NFKC", s.strip()).replace(_BOPOMOFO_ONE, "一")
     if s.isdigit():
         return int(s)
-    if s in _CN_NUM:
-        return _CN_NUM[s]
-    # 十一 / 十二 / 十三 — the only compound forms that appear.
-    if len(s) == 2 and s[0] == "十" and s[1] in _CN_NUM:
-        return 10 + _CN_NUM[s[1]]
+    if s in _CN_UNITS:
+        return _CN_UNITS[s]
+    if len(s) == 2 and s[0] == "十" and s[1] in _CN_UNITS:      # 十一 – 十九
+        return 10 + _CN_UNITS[s[1]]
+    if len(s) == 2 and s[1] == "十" and s[0] in _CN_UNITS:      # 二十, 三十 …
+        return _CN_UNITS[s[0]] * 10
+    if len(s) == 3 and s[1] == "十" and s[0] in _CN_UNITS and s[2] in _CN_UNITS:
+        return _CN_UNITS[s[0]] * 10 + _CN_UNITS[s[2]]           # 二十一 …
     return None
 
 
@@ -105,10 +184,83 @@ def find_anchor(paras: list[str]) -> int | None:
     return cn_to_int(m.group(1)) if m else None
 
 
-def load_legacy() -> list[tuple[str, int | None]]:
-    """First-edition passages as (passage, paragraph_number). Codes are discarded:
-    they are what made the old lookup wrong, and matching by content does not need
-    them."""
+def _norm(s: str) -> str:
+    """Fold width, drop whitespace, combining marks and variation selectors.
+
+    Word stores variation selectors inside words (`融為一︀體`), so two strings that read
+    identically compare unequal without this.
+    """
+    s = unicodedata.normalize("NFKC", s or "")
+    return "".join(
+        c for c in s
+        if not c.isspace()
+        and unicodedata.category(c) not in ("Cf", "Mn")
+        and not (0xE0100 <= ord(c) <= 0xE01EF)
+    )
+
+
+def _is_mark_cell(cell) -> list[str] | None:
+    """The 段號 column: one numeral per paragraph, running 1, 2, 3, … with no gaps.
+
+    Requiring the sequence to be complete and ascending is what separates it from a
+    column of scores or a numbered list of questions.
+    """
+    marks = [p.text.strip() for p in cell.paragraphs if p.text.strip()]
+    if len(marks) < _MIN_MARKS:
+        return None
+    if not all(len(m) <= 2 and m[0] in _NUMERAL_CHARS for m in marks):
+        return None
+    values = [cn_to_int(m) for m in marks]
+    if None in values or values != list(range(1, len(values) + 1)):
+        return None
+    return marks
+
+
+def read_numbered_body(docx_path: Path) -> tuple[list[str], list[str]] | None:
+    """(段號 marks, 課文 cell paragraphs) from the body table, or None.
+
+    Picks the row with a 段號 column and, within it, the longest DISTINCT cell as the
+    text. The dedup is load-bearing: python-docx reports a horizontally merged cell once
+    per grid column it spans, so `row.cells` yields the body text two or three times and
+    "the longest cell" would otherwise be satisfied by a duplicate of the 段號 column in
+    the lessons where that one is merged instead.
+    """
+    doc = docx.Document(str(docx_path))
+    best: tuple[list[str], list[str]] | None = None
+    for table in doc.tables:
+        for row in table.rows:
+            cells = list(row.cells)
+            for i, cell in enumerate(cells):
+                marks = _is_mark_cell(cell)
+                if marks is None:
+                    continue
+                seen, candidates = set(), []
+                for j, other in enumerate(cells):
+                    if j == i:
+                        continue
+                    key = _norm(other.text)
+                    if not key or key in seen:
+                        continue
+                    seen.add(key)
+                    candidates.append(other)
+                if not candidates:
+                    continue
+                text_cell = max(candidates, key=lambda c: len(_norm(c.text)))
+                paras = [p.text.strip() for p in text_cell.paragraphs if p.text.strip()]
+                if len(_norm("".join(paras))) < _MIN_CELL_CHARS:
+                    continue
+                if best is None or len(_norm("".join(paras))) > len(_norm("".join(best[1]))):
+                    best = (marks, paras)
+    return best
+
+
+def load_legacy() -> list[str]:
+    """First-edition passages, TEXT only.
+
+    The paragraph numbers are deliberately discarded. Keeping them is what let the old
+    corroboration compare 「第三段」 in one edition's printing against an index into the
+    other edition's derived paragraph list and call the two agreeing a confirmation.
+    """
     import yaml
 
     if not LEGACY_TABLE.exists():
@@ -117,95 +269,121 @@ def load_legacy() -> list[tuple[str, int | None]]:
     out = []
     for entry in (doc.get("passages") or {}).values():
         passage = (entry or {}).get("passage")
-        if not passage:
-            continue
-        tou = (entry or {}).get("tou_paragraph") or ""
-        m = re.search(r"([一二三四五六七八九十]+|\d+)", str(tou))
-        out.append((passage.strip(), cn_to_int(m.group(1)) if m else None))
+        if passage:
+            out.append(passage.strip())
     return out
 
 
-def _norm(s: str) -> str:
-    return re.sub(r"\s+", "", s)
+def corroborate(passage: str, body: list[str], legacy: list[str]) -> bool | None:
+    """Does the first edition agree with the passage we are about to write?
 
+    True  — a first-edition passage belongs to this lesson AND is this passage.
+    False — one belongs to this lesson and is a DIFFERENT paragraph.
+    None  — this lesson has no first-edition counterpart (its text was rewritten, or it
+            is new). Not a pass: the caller must not treat None as agreement.
 
-def corroborate(body: list[str], legacy: list[tuple[str, int | None]]) -> int | None:
-    """The paragraph number the first edition's pipeline chose for THIS lesson.
-
-    Found by content: a first-edition passage that is a substring of this body belongs
-    to this lesson, whatever code either edition filed it under. Ambiguous matches
-    (a passage appearing in two lessons) are discarded rather than guessed.
+    "Belongs to this lesson" is decided by content, not by lesson code — the codes are
+    what made the old lookup serve another lesson's paragraph. Ambiguous matches (a
+    passage occurring in two lessons) are discarded rather than guessed.
     """
-    joined = _norm("\n".join(body))
-    hits = [num for passage, num in legacy if num and _norm(passage)[:60] in joined]
-    return hits[0] if len(set(hits)) == 1 else None
+    joined = _norm("".join(body))
+    mine = _norm(passage)
+    hits = [p for p in legacy if _norm(p)[:60] and _norm(p)[:60] in joined]
+    if not hits:
+        return None
+    if len({_norm(p) for p in hits}) > 1:
+        return None
+    return _norm(hits[0]) == mine
 
 
-def extract(docx: Path, body: list[str] | None = None) -> dict:
+def extract(docx_path: Path, body: list[str] | None = None) -> dict:
     """`body` should be the paragraphs as STORED, not a fresh re-extraction.
 
-    The anchor is an index, so it is only meaningful against the exact segmentation
-    it will be applied to. Six lessons had a `body.yml` written by an older version of
-    the extractor — 《我的阿嬤》 was stored as 10 paragraphs and re-extracted as 11 —
-    and indexing a fresh extraction while serving the stored one silently shifts the
-    passage by a paragraph. Containment caught it in that one lesson because the
-    off-by-one crossed a scene break; in the other five it would have picked a
-    neighbouring paragraph and looked entirely reasonable.
+    The stored body is what the student reads and what the TTS sentence table is built
+    from, so a passage that is not one of its paragraphs cannot be served whole even if
+    the numbering says it is right.
     """
-    paras = _paragraphs(docx)
+    docx_path = Path(docx_path)
+    paras = _paragraphs(docx_path)
     if body is None:
-        body = (extract_body(docx) or {}).get("paragraphs") or []
-    anchor = find_anchor(paras)
-    out: dict = {"anchor": anchor, "verdict": "empty", "passage": None,
-                 "corroborated_by_first_edition": None, "needs_human_review": False}
+        body = (extract_body(docx_path) or {}).get("paragraphs") or []
 
+    out: dict = {
+        "anchor": None,
+        "verdict": "empty",
+        "passage": None,
+        "corroborated_by_first_edition": None,
+        "needs_human_review": False,
+    }
+
+    anchor = find_anchor(paras)
+    out["anchor"] = anchor
     if anchor is None:
         out["verdict"] = "no_anchor"
         return out
-    if not body:
-        out["verdict"] = "no_body"
-        return out
-    if anchor > len(body):
-        # The anchor and the body segmentation disagree. Clamping to the last
-        # paragraph would produce a plausible-looking passage that no one marked.
-        out["verdict"] = "anchor_out_of_range"
-        out["body_paragraphs"] = len(body)
+
+    numbered = read_numbered_body(docx_path)
+    if numbered is None:
+        # No 段號 column found. The anchor names a printed paragraph number and there is
+        # nothing here that says which paragraph carries it; indexing the derived body
+        # instead is exactly the substitution that produced #2720.
+        out["verdict"] = "no_printed_numbering"
         return out
 
-    passage = body[anchor - 1].strip()
+    marks, cell_paras = numbered
+    out["printed_marks"] = len(marks)
+    out["cell_paragraphs"] = len(cell_paras)
+
+    slack = len(cell_paras) - len(marks)
+    out["unnumbered_tail"] = slack
+    if not 0 <= slack <= MAX_UNNUMBERED_TAIL:
+        # The numbering and the cell disagree about where paragraphs begin, so "the Nth
+        # paragraph" is not a well-defined thing. Every lesson measured in this state
+        # produced the wrong paragraph.
+        out["verdict"] = "numbering_disagrees"
+        out["needs_human_review"] = True
+        return out
+
+    if anchor > len(cell_paras):
+        out["verdict"] = "anchor_out_of_range"
+        out["needs_human_review"] = True
+        return out
+
+    passage = cell_paras[anchor - 1].strip()
     out["passage"] = passage
     out["start_text"] = passage[:24]
     out["paragraphs_used"] = 1
 
-    agreed = corroborate(body, load_legacy())
-    out["corroborated_by_first_edition"] = agreed
-    if agreed is not None and agreed != anchor:
-        # The two editions marked different paragraphs. Checked by hand on both
-        # lessons: the numbering is not offset — the first edition's passage sits at
-        # OUR paragraph 2 and 3 respectively, so the segmentations agree and the
-        # markings genuinely differ by one.
-        #
-        # The DOCX wins. It is the second edition's own instruction about the second
-        # edition's worksheet, and the first edition's table came from a different
-        # printing whose rule was 「只取 ☞ 那一段」 rather than 「從指定段落開始」. It is
-        # also a much smaller error than the one this whole extraction exists to avoid:
-        # the passage is still this lesson's, starting a paragraph later. Withholding
-        # it means a student reads the entire text aloud instead, which is the thing the
-        # review ruled against.
-        out["needs_human_review"] = True
-
-    if not (MIN_CHARS <= len(passage) <= MAX_CHARS):
+    if not (MIN_CHARS <= len(_norm(passage)) <= MAX_CHARS):
         out["verdict"] = "implausible_length"
-        out["length"] = len(passage)
+        out["length"] = len(_norm(passage))
+        out["needs_human_review"] = True
         return out
 
-    # The verdict has to survive to the file, so it is set once, here. Setting it at
-    # the disagreement above and falling through overwrote it with "ok" — the flag
-    # remained but the data no longer said WHY it was flagged.
-    if out["needs_human_review"]:
+    if not body:
+        out["verdict"] = "no_body"
+        return out
+
+    if _norm(passage) not in {_norm(p) for p in body}:
+        # Word splits a paragraph at a manual line break in a handful of lessons, so the
+        # cell's paragraph and the stored body's are not the same unit. Serving it means
+        # serving a fragment (《感情小日記1》 lost its last 24 characters mid-sentence
+        # this way), and #2718's test asserts the passage is one of the lesson's own
+        # paragraphs. Withheld and listed rather than trimmed to fit.
+        out["verdict"] = "not_a_stored_paragraph"
+        out["needs_human_review"] = True
+        return out
+
+    agreed = corroborate(passage, body, load_legacy())
+    out["corroborated_by_first_edition"] = agreed
+    if agreed is False:
+        # The first edition marked a different paragraph of this same lesson. One of the
+        # two is wrong and this file cannot say which, so it says so.
         out["verdict"] = "disagrees_with_first_edition"
-    else:
-        out["verdict"] = "confirmed" if agreed == anchor else "ok"
+        out["needs_human_review"] = True
+        return out
+
+    out["verdict"] = "confirmed" if agreed else "ok"
     return out
 
 
@@ -216,20 +394,23 @@ def main() -> int:
     a = ap.parse_args()
 
     results, counts = {}, {}
-    for docx in sorted(Path(a.source).glob("*.docx")):
-        r = extract(docx)
-        results[docx.stem] = r
+    for docx_file in sorted(Path(a.source).glob("*.docx")):
+        r = extract(docx_file)
+        results[docx_file.stem] = r
         counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
 
-    Path(a.out).write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+    Path(a.out).write_text(
+        json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(f"  {len(results)} 課")
     for v, n in sorted(counts.items(), key=lambda kv: -kv[1]):
         print(f"    {v:30s} {n}")
     ok = [r for r in results.values() if r["verdict"] in ("ok", "confirmed")]
     if ok:
         conf = sum(1 for r in ok if r["verdict"] == "confirmed")
-        print(f"\n  可寫入 {len(ok)}（其中 {conf} 課與一修獨立抽取結果相符）")
-        print(f"  段落長度 中位 {sorted(len(r['passage']) for r in ok)[len(ok)//2]} 字")
+        lengths = sorted(len(r["passage"]) for r in ok)
+        print(f"\n  可寫入 {len(ok)}（其中 {conf} 課與一修的段落文字相符）")
+        print(f"  段落長度 中位 {lengths[len(lengths) // 2]} 字")
     return 0
 
 

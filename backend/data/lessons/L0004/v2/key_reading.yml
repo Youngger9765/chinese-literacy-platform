@@ -1,11 +1,13 @@
 lesson_uid: L0004
 version_id: v2
-passage: 我變得很敏感，雖然還是維持著同學般的互動，但我卻發現我的情緒總是隨著他的一言一行 起伏。當他下課時沒有找我，我會感到失落，但他一旦對我說句話或我們剛好對到眼，我內心就莫名雀躍。心情就像坐雲霄飛車一樣，有時心花怒放，有時卻跌入深淵。
-start_text: 我變得很敏感，雖然還是維持著同學般的互動，但我卻
-extent_chars: 115
+passage: 然而最近我更發現當他和其他同學聊天聊得很開心，我的胸口就會被抓緊，心裡很不是滋味，也開始胡思亂想：他是不是喜歡那個很幽默的同學？他們會不會常常傳訊息？他跟我聊天有這麼開心嗎？還是我根本不特別？這些念頭在我腦中亂竄，有時候一閃而過，但有時候卻揮之不去，像是一群停不下來的蜜蜂，在腦袋裡嗡嗡作響，也讓我越想越難過。
+start_text: 然而最近我更發現當他和其他同學聊天聊得很開心，我
+extent_chars: 155
 source: docx-extract
 anchor_paragraph: 3
 paragraphs_used: 1
 extraction_check:
   verdict: confirmed
-  corroborated_by_first_edition: 3
+  corroborated_by_first_edition: true
+  printed_marks: 6
+  cell_paragraphs: 7

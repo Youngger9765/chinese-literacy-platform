@@ -1,11 +1,13 @@
 lesson_uid: L0090
 version_id: v2
-passage: 這段期間，隨著性別平等的趨勢，國際奧林匹克委員會也增加了女子比賽項目。自1991年以來，任何新增的奧運運動項目都必須有女子比賽，而且所有奧運參賽國也必須有女性選手參與。
-start_text: 這段期間，隨著性別平等的趨勢，國際奧林匹克委員會
-extent_chars: 84
+passage: 2024年巴黎奧運，分別有5,250名男性和5,250名女性參與，男女參賽比例達到1：1。巧合的是，1900年巴黎奧運扮演了女性參賽的開路先鋒；124年後，同樣在巴黎舉辦的奧運又創下性別平衡的全新里程碑。巴黎這個城市，將在奧林匹克運動史上留下不可抹滅的印記。
+start_text: 2024年巴黎奧運，分別有5,250名男性和5,
+extent_chars: 129
 source: docx-extract
 anchor_paragraph: 6
 paragraphs_used: 1
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 9

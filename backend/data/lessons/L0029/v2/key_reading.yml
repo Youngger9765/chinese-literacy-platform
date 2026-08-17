@@ -8,4 +8,6 @@ anchor_paragraph: 7
 paragraphs_used: 1
 extraction_check:
   verdict: confirmed
-  corroborated_by_first_edition: 7
+  corroborated_by_first_edition: true
+  printed_marks: 9
+  cell_paragraphs: 9
