@@ -154,9 +154,9 @@ def main() -> int:
 
     jobs: list[tuple[Path, Path]] = []
     if a.all:
-        for p in sorted((REPO / "qa/content-evidence").rglob("*.yml")):
-            if p.name not in ("new.yml", "truth.yml"):
-                continue
+        # 抽取結果的正式落點。`qa/content-evidence/*/new.yml` 是 A/B 實驗期間的
+        # 過渡命名 —— 實驗結束後還叫 "new" 等於把臨時詞彙當永久。
+        for p in sorted((REPO / "backend/data/lessons/_extracted").glob("*.yml")):
             data = yaml.safe_load(p.read_text(encoding="utf-8"))
             uid = ((data or {}).get("meta") or {}).get("lesson_uid")
             if uid:

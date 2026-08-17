@@ -47,8 +47,11 @@ DOCX_PARTS = ("word/document.xml", "word/footnotes.xml", "word/endnotes.xml")
 # 破折號/連字號在 DOCX 與抽取結果之間常互換（──／—／–／-），不算歧異
 DASHES = str.maketrans({c: "-" for c in "──—–－―‒"})
 
-# 清單項目符號由 numbering.xml 產生；☞ 等指標是圖形 —— 都不在 w:t 文字流裡
-BULLETS = "・•·‧◆▪▶●○☞☜➤"
+# 清單項目符號由 numbering.xml 產生；☞ 指標與 ※ 標記有時是圖形／符號物件
+# —— 都不保證在 w:t 文字流裡。實測：L0072 的「※注意：」在原稿文字流中只有
+# 「注意：」，※ 不在；但 L0124 的「※請勾選出正確答案」整串都在。同一個符號
+# 兩種下場，所以兩邊都拿掉再比 —— 它是裝飾不是內容。
+BULLETS = "・•·‧◆▪▶●○☞☜➤※"
 
 
 def norm(s: str) -> str:

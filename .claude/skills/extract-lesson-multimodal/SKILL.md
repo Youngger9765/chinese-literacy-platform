@@ -96,6 +96,47 @@ python3 -c "import fitz;d=fitz.open('$W/src.pdf');print('pages',d.page_count)"
 **每個大題都要出現**，包含現行產物完全沒有的（語詞應用、詞語複習）——
 差異表要看得出「整節沒產出」。
 
+### ⑥.5 block type 是**封閉清單**，不可以自己發明
+
+聚光燈的 `blocks[].type` 只能用下面這 14 個。看到教材上有新花樣，**用最接近的既有型別裝**，
+不要造新名字。
+
+| type | 裝什麼 |
+|---|---|
+| `concept_box` | 策略說明框（每課開場的教學說明） |
+| `guide` | 段落標題／指示語（「一、找出課文中的A和B」「◎小試身手」） |
+| `passage` | 引用的文本段落（`paragraphs: []`） |
+| `single` | 單選（`prompt` + `options[]` + `answer`） |
+| `multi` | 複選 |
+| `free_text` | 自由書寫（必須有 `prompt`） |
+| `fill_table` | 填空表格 |
+| `table` | 純資訊表格（`rows: [[…]]`） |
+| `figure` | 圖（必須有 `referent`） |
+| `self_check` | 自我檢核清單 |
+| `ordering` | 排序題 |
+| `sub_block` | 巢狀小題（可遞迴 `items[]`） |
+| `exercise` | 小試身手容器（`option_bank` + `items[]`） |
+| `matching` | 連連看（`left` / `right` / `answer`） |
+
+**常見的錯誤命名 → 該用什麼**
+
+| 你想寫的 | 改用 |
+|---|---|
+| `multi_select` / `multi_choice` | `multi` |
+| `choice_group` | `single` 或 `multi`（看單複選） |
+| `definition_list` / `example_chain` | `table` 或 `sub_block` |
+| `inference_table` / `thought_emotion_table` | `fill_table`（有填空）或 `table` |
+| `conclusion` / `closing_box` | `guide`（純文字結語）或 `concept_box` |
+| `matching_with_inference` | `matching` |
+| `challenge` | `sub_block` |
+
+**為什麼是封閉的**：每個 type 都要有一個 React 元件才畫得出來
+（`frontend/src/components/reading-spotlight/BlockSequenceRenderer.tsx`）。
+發明一個新名字＝製造一個畫不出來的 block，而且它不會報錯，只是在畫面上消失。
+`scripts/render_coverage_gate.py` 會抓，但那是最後一道網，不是設計。
+
+型別放不下的細節寫進欄位（`label` / `note` / `instruction`），不要寫進型別名。
+
 ### ⑦ 三道格式門
 
 | 道 | 檢查 | 抓什麼 |
