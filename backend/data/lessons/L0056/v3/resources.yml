@@ -1,0 +1,22 @@
+lesson_uid: L0056
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 湯姆歷險記（舊版配音）第二集 快樂的油漆匠(看9:45－20:45)
+    duration: (22:55)
+    source: Wesley Timo
+    qr_code: true
+  - index: 2
+    title: 當你面對逆境時，這段話能幫到你 簡單三個字，就能改變一切... - Hal Elrod 哈爾.埃爾羅德（中英字幕
+    title_note: 原稿的括號沒有收尾（「（中英字幕」後面沒有「）」），照原樣抄。
+    duration: (4:26)
+    source: Wisdom Bread 智慧麵包
+    qr_code: true
+  - index: 3
+    title: 德育故事——孔融讓梨
+    duration: (7:15)
+    source: 普通話教室/故事廊
+    qr_code: true

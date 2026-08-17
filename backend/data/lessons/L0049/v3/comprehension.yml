@@ -4,7 +4,7 @@ section_no: 二
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
   answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
-  items:
+  questions:
   - index: 1
     answer: C
     stem: 師父讓正太每天抱小豬，真正的用意最可能是什麼？
