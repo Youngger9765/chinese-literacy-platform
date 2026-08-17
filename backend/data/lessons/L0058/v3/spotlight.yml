@@ -1,0 +1,139 @@
+lesson_uid: L0058
+version_id: v3
+section_no: 五
+spotlight:
+  strategy_name: 摘要策略─找小主題與細節
+  strategy_type: summarization
+  section_title_printed: 閱讀聚光燈
+  blocks:
+  - type: concept_box
+    text: '本課是一篇說明文，主要介紹末日種子庫。
+
+      上一課〈祝你好眠〉，我們學會從主題句找出段落的小主題。這一課要再多做一步：找到小主題後，用小主題判斷哪些細節重要，再把小主題和重要細節整理成段落重點。
+
+      本課的大主題就是課文標題：末日種子庫 。這一課我們來練習找小主題和重要細節。'
+  - type: sub_block
+    label: 一、找小主題與重要細節：第三段
+    instruction: 一、找小主題與重要細節：第三段
+    answer_carrier: 紅色 ☑（圖形）與橘色手寫字；☑ 不在文字流，橘字已在文字流的【】內
+    items:
+    - type: passage
+      paragraphs:
+      - ❶由於全球氣候變遷越來越劇烈，對生物多樣性造成威脅，不僅影響動物的生存，連植物也難以倖免。❷萬一發生區域性或全球性的大災害，某些農作物可能從此滅絕。❸興建種子庫，就是為了預防這樣的末日景象，保護農作物的多樣性，因此它也被稱為「末日種子庫」。
+    - type: guide
+      text: （一）找主題句、寫出小主題：
+    - type: single
+      prompt: 1.哪一句最能說出第3段的主要內容？（單選）
+      options:
+        1: 句❶
+        2: 句❷
+        3: 句❸
+      answer: 3
+    - type: free_text
+      prompt: 2.本段的小主題是：【　】（答案合理即可）
+      blanks:
+      - answer: 興建種子庫的目的
+    - type: guide
+      text: （二）找重要細節
+    - type: single
+      prompt: 1.除了主題句外，哪一句最能直接說明為什麼要「興建末日種子庫」？
+      options:
+        1: 句❶
+        2: 句❷
+      answer: 2
+    - type: guide
+      text: （三）整理成段落重點
+    - type: free_text
+      prompt: '1.請把主題句（句❸）和重要細節（句❷）精簡合成一句話。
+
+        興建末日種子庫，是為了避免【　】造成【　】，以保護【　】。(答案合理即可）'
+      blanks:
+      - answer: 區域性或全球性的大災害
+      - answer: 某些農作物滅絕
+      - answer: 農作物的多樣性
+  - type: sub_block
+    label: 二、找小主題與重要細節：第四段
+    instruction: 二、找小主題與重要細節：第四段
+    answer_carrier: 紅色 ☑（圖形）與橘色手寫字；☑ 不在文字流，橘字已在文字流的【】內
+    items:
+    - type: passage
+      paragraphs:
+      - ❶低溫乾燥的環境有利於保存種子，這座種子庫因而建造在斯瓦爾巴群島永久凍土區的山脈內部。❷這裡是挪威最北邊的國土，位於北極地區，土地長年冰凍，氣候極為寒冷，像一座大型的自然冷凍庫。❸種子庫的溫度維持在攝氏零下18度，這樣的低溫可讓種子的代謝活動變慢，減少消耗，並維持發芽活性，最適合長期保存種子。❹即使停電或製冷機故障，永凍土也能讓內部溫度保持在零下8度左右。❺這個世界最大的種子銀行，最多可存放450萬種作物的種子。❻珍貴的種子要先經過真空包裝，再用三層鋁箔密封，才能上架。
+    - type: guide
+      text: （一）找小主題
+    - type: sub_block
+      label: 1.第3段有主題句，但是第4段沒有。請讀各組句子，判斷它們主要在說什麼。（單選）
+      table_header:
+      - 句子
+      - 這些句子主要在說明什麼？
+      table_header_note: 原稿是一張兩欄表格，左欄為句子群組、右欄為兩個選項；三列各是一題單選
+      items:
+      - type: single
+        label: 句❶～❹
+        options:
+          1: 種子庫的低溫保存環境
+          2: 種子庫的嚴密安全設計
+        answer: 1
+      - type: single
+        label: 句❺
+        options:
+          1: 種子可以保存多少年
+          2: 種子庫可以存放多少種子
+        answer: 2
+      - type: single
+        label: 句❻
+        options:
+          1: 種子如何包裝與密封
+          2: 種子如何恢復發芽
+        answer: 1
+    - type: multi
+      prompt: 2.哪兩組內容都在說明「種子如何長期保存」？（3選2）
+      options:
+        1: 種子庫的低溫保存環境
+        2: 種子庫可以存放多少種子
+        3: 種子如何包裝與密封
+      answers:
+      - 1
+      - 3
+    - type: free_text
+      prompt: '3.把上面兩組內容合起來，寫出本段的小主題。
+
+        本段的小主題是：【　】（答案合理即可）'
+      blanks:
+      - answer: 種子庫的保存環境與方式
+    - type: guide
+      text: '（二）找重要細節
+
+        找到小主題後，從兩組內容中，找最重要的細節。'
+    - type: single
+      prompt: '1.在句❶～❹，哪一句最能說明低溫為什麼有利於長期保存種子？
+
+        （單選）'
+      options:
+        1: 句❷
+        2: 句❸
+        3: 句❹
+      answer: 2
+    - type: single
+      prompt: 2.哪一句直接說明種子的包裝與密封方法？（單選）
+      options:
+        1: 句❺
+        2: 句❻
+      answer: 2
+    - type: guide
+      text: →句❺說明種子庫的容量，和「保存環境與方法」關係較遠，可以省略。
+    - type: guide
+      text: （三）整理成段落重點
+    - type: free_text
+      prompt: '1.請把小主題和兩個重要細節精簡成一句話。
+
+        種子庫利用【　】減慢種子的代謝活動，並將種子【　】，讓種子能長期保存。(答案合理即可）'
+      blanks:
+      - answer: 攝氏零下18度的低溫
+      - answer: 真空包裝和三層鋁箔密封
+  - type: self_check
+    label: ◎自我檢核
+    items:
+    - 1.我能找出段落的小主題。
+    - 2.我能依小主題選出重要細節。
+    - 3.我能把小主題和重要細節整理成段落重點。

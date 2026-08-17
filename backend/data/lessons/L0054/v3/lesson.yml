@@ -1,0 +1,27 @@
+lesson_uid: L0054
+version_id: v3
+title: 動物談情說愛的方式
+catalog_slot: G6-L14
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 摘要策略—用標題整理重點
+- 'no': 六
+  name: 閱讀理解
+- 'no': 七
+  name: 詞語複習
+- 'no': 八
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 6年級/G6-L14動物談情說愛的方式（摘要策略-用標題整理重點）.docx
+  docx_md5: md5-12:973df6b261fc

@@ -1,0 +1,16 @@
+lesson_uid: L0058
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 永凍層下造植物方舟-種子金庫藏冷岸群島-T觀點 20170611 (2/4)
+    duration: (12:21)
+    source: TVBS優選頻道-T觀點
+    qr_code: true
+  - index: 2
+    title: 台灣小米種原入庫北極世界種子庫【發現科學】
+    duration: (5:41)
+    source: 台視新聞
+    qr_code: true

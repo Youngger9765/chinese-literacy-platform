@@ -1,0 +1,42 @@
+lesson_uid: L0058
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 甦醒
+    B: 倖免
+    C: 殃及池魚
+    D: 戒備
+    E: 未雨綢繆
+    F: 出資
+    G: 活性
+    H: 烽火漫天
+    I: 森嚴
+    J: 多樣性
+  option_bank_note: 列滿 10 個代號（本課 11 個語詞中的「極端」未入選項），對應 8 道小題；I.森嚴、J.多樣性 兩個代號未被任何小題用到
+  items:
+  - index: 1
+    stem: 哥哥打破花瓶，弟弟卻也被責罵，真是（　）。
+    answer: C
+  - index: 2
+    stem: 這次空難事件，機上乘客無一（　）。
+    answer: B
+  - index: 3
+    stem: 戰爭爆發後，城裡（　），人們被迫逃離家園。
+    answer: H
+  - index: 4
+    stem: 由於可能會有強烈餘震，居民們都保持高度（　），隨時準備撤離。
+    answer: D
+  - index: 5
+    stem: 颱風季來臨前，居民（　），先準備防災物資。
+    answer: E
+  - index: 6
+    stem: 春天來臨，沉睡了一整個冬天的大地逐漸（　），到處充滿生機。
+    answer: A
+  - index: 7
+    stem: 研究人員努力保存疫苗的（　），確保施打後能發揮預期效果。
+    answer: G
+  - index: 8
+    stem: 幾位同學共同（　），購買畢業紀念品送給老師。
+    answer: F

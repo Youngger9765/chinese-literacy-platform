@@ -111,7 +111,7 @@ def test_mcq_options_are_not_emitted_as_guides(uid: str):
     # L0033 已在 #2736 多模態重抽時修好（選項不再被抽成 guide），
     # 測試自己要求移除 —— 一個「已知缺口」清單如果只進不出，
     # 過一陣子就會變成「這些永遠都壞」的免死金牌。
-    KNOWN = {"L0054", "L0070", "L0100", "L0122", "L0129"}
+    KNOWN = {"L0070", "L0100", "L0122", "L0129"}
     leaked = count_mcq_option_guides(BY_UID[uid].get("blocks") or [])
     if uid in KNOWN:
         # Registered in content_known_gaps.yaml#mcq_options_emitted_as_guides. Asserted
