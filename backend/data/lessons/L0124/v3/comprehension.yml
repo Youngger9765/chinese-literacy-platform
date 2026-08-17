@@ -16,7 +16,7 @@ comprehension:
   - index: 2
     answer: B
     stem: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，最強調哪一項改進？
-    stem_source_text: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，，最強調哪一項改進？
+    stem_source_text: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，最強調哪一項改進？
     errata_ref: E1
     options:
       A: 價錢
@@ -25,7 +25,7 @@ comprehension:
       D: 成分
   - index: 3
     answer: A
-    stem: 根據課文，下列何者不是現代植物肉的風行的原因？
+    stem: 根據課文，下列何者不是現代植物肉風行的原因？
     options:
       A: 商店提供了消費者更多樣化的產品選擇
       B: 植物肉的營養價值及口感逐漸接近真肉

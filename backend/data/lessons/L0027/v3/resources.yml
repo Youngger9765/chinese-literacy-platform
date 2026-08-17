@@ -1,0 +1,18 @@
+lesson_uid: L0027
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 非洲巨鼠不只掃雷 震災救援也行
+    duration: 0:58
+    duration_seconds: 58
+    source: DaAi News Storage
+  - index: 2
+    title: 「搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    title_source_text: 搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    errata_ref: E1
+    duration: 01:50
+    duration_seconds: 110
+    source: 雅虎香港
