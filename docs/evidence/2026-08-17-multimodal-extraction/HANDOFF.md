@@ -1,11 +1,11 @@
 # 接手指南 — #2736 多模態抽取
 
 > 給下一個 session。照這份走就能繼續，不需要回頭讀對話。
-> 最後更新：2026-08-18 04:00，commit 見 git log
+> 最後更新：2026-08-18，commit 見 `git log`（抬頭的數字可能落後，**以 `ls backend/data/lessons/_extracted/*.yml | wc -l` 為準**）
 
 ## 現在在哪
 
-**50 / 175 課**已抽取，七道門全綠。分支 `fix/issue-2736-truth-l0072`，PR #2739。
+**51 / 175 課**已抽取，七道門全綠。分支 `fix/issue-2736-truth-l0072`，PR #2739。
 
 ```bash
 cd /Users/young/project/clp-2736
