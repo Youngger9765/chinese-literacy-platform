@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 import yaml
@@ -220,6 +221,26 @@ def rewrite_paths(raw: str, paths: list[dict]) -> str:
     return "\n".join(out)
 
 
+# ── 為什麼這裡**沒有**「圈數 vs 路徑數」的檢查 ──────────────────────
+#
+# 有 worker 建議加一條：`roundRect` 數 ≠ `answer_paths` 數就警告，
+# 好讓「教材格子印錯字導致少列一條」自動浮出來（已出現 4 課：突發**其**想／
+# 朝思**慕**想／愧**咎**／堅不可**催**）。動機是對的，但實作出來不成立。
+#
+# 實測 50 課：**14 課會噴警告，而且數字毫無意義**（26 vs 10、27 vs 14）——
+# 因為 `roundRect` 在 DOCX 裡到處都是（圓角方框、標註框、裝飾），不只找字圈。
+# 用橘色 E97132 過濾也救不了（橘色數 2/10/1/0 對路徑數 10/14/11/7，全不對），
+# 顏色多半寫在 theme 參照或 style 裡而不是 shape 上。
+#
+# 另有 worker 早就拿四課回測過同一件事，四課只有一課數字相等。
+#
+# ⛔ 一個在 14/50 課上叫、而且叫得沒道理的警告，會被學會忽略 ——
+#    然後真的有問題的那一次也一起被忽略。這比沒有檢查更糟。
+#
+# 要做對需要真正的幾何解算：解析每個 shape 的錨點座標與尺寸，換算回格子的
+# 列欄範圍，只認落在格子矩形內的那些。那是一份獨立的工作，不是一行條件式。
+# 在那之前，「圈有沒有全部列出來」靠 skill 的紀律（逐頁讀、不抽樣）。
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -248,6 +269,7 @@ def main() -> int:
             # 沒轉錄到答案是真實缺口（不是錯誤）—— 教師版沒圈或沒讀到
             print(f"  · {p.stem}: word_search 無答案路徑（未轉錄）")
             continue
+
 
         current = vr.get("answer_paths")
         needs = current != paths or "circled_answers" in vr
