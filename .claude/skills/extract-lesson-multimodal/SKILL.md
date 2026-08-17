@@ -54,9 +54,16 @@ SOT 的來源與同步方式見 `$SOT/STAMP.md`。**不要用 archive 裡的一�
 ```bash
 W=<scratchpad>/$UID
 mkdir -p $W && cp "$SOT/<drive_path>" $W/src.docx
-soffice --headless --convert-to pdf --outdir $W $W/src.docx
+
+# ⚠️ **一定要走這支腳本**，不要自己敲 soffice。
+#    LibreOffice 預設所有 headless 轉檔共用同一個 user profile 並對它上鎖；
+#    第二個進來不報錯、不退出，就掛在那裡等 —— 平行抽取必然全體卡死。
+#    實測（三個同時轉）：裸 soffice → **0 個 PDF**、兩個逾時；這支 → 3/3、2.9 秒。
+#    腳本內含：樣板 profile（建一次，之後複製，省掉每次 4 分鐘的 bootstrap）、
+#    過期殭屍清理、timeout、產出與頁數檢查（0 頁也算失敗）。
+scripts/docx_to_pdf.sh $W/src.docx $W $UID     # 印出 `<pdf路徑> pages=N`
+
 cd $W && unzip -o -q src.docx word/document.xml
-python3 -c "import fitz;d=fitz.open('$W/src.pdf');print('pages',d.page_count)"
 ```
 
 ### ④ 逐頁讀 PDF ← 主抽取
