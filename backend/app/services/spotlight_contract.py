@@ -262,7 +262,16 @@ def _all_questions(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
             # 沒有 options 的 single 是自我評估表的一列（「被他叫到名字時感到心裡發熱」
             # 這種），學生自己勾，談不上答案對不對 —— 把它算進分母，等於要求
             # 抽取者替一列自述編一個答案。
-            if b.get("options") and not b.get("no_correct_answer"):
+            # 兩種狀態都不計入 answer_recall 的分母，但**意思不同、不可合併**：
+            #   no_correct_answer  = 本來就沒有標準答案（自我覺察題）
+            #   answers_printed:false = 有標準答案，但教師版沒印出來
+            # 合併會讓之後的人分不出「開放題」與「教材缺印」。
+            #
+            # 為什麼兩者都要排除：算進分母就等於**逼抽取者補一個推論出來的答案**，
+            # 而推論出來的答案跟真答案在檔案裡長得一模一樣，之後沒人分得出來。
+            if (b.get("options")
+                    and not b.get("no_correct_answer")
+                    and b.get("answers_printed") is not False):
                 out.append(b)
             for key in ("items", "sub_blocks", "blocks", "rows"):
                 v = b.get(key)
