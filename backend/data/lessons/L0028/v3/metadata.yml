@@ -1,6 +1,6 @@
 lesson_uid: L0028
 version_id: v3
-extraction_gap_note: 找字遊戲圈選路徑未轉錄（PDF 產不出來）；其餘內容已由 XML + w:sym + w:bdr 取得
+extraction_gap_note: 無缺口 —— 找字遊戲圈選路徑已於 2026-08-18 用「單表拆檔轉 PDF + 像素解圈」補齊；其餘內容由 XML + w:sym + w:bdr 取得
 level: 5
 genre: 說明文
 text_type: 科學

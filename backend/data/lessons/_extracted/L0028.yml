@@ -21,13 +21,34 @@
 #   兩種方法都先用 **L0027 當正向對照驗過**：L0027 的 23 個 F0FE 與我逐頁讀 PDF
 #   抄到的 23 個 ☑ 完全對得上，框線也還原出一模一樣的 12 個語詞。
 #
-# ⚠️ **仍然缺的一塊**：第八大題找字遊戲的圈選路徑。那是畫上去的橘色線，
-#    不在文字流也不是 w:sym，只有像素裡有。**`answer_paths` 因此整個省略**（不寫空 list），
-#    等 PDF 轉得出來要回頭補。這一課在「重跑清單」上。
+# ✅ **2026-08-18 重跑：圈選路徑已補齊，這個缺口關掉了。**
+#
+# 圈選怎麼補到的（沒有讀到完整 PDF，是繞過去的）：
+#   · 先重試整份轉檔 → 300s **一樣逾時**，上面那段診斷仍然成立，不是環境問題。
+#   · 換 Word（AppleScript）→ `-10000 無法執行 AppleEvent 處理程式`，自動化權限仍未授權。
+#   · 突破口：**只把找字那張表單獨拆成一份 DOCX 再轉**（body 只留該 w:tbl + sectPr）。
+#     → **1.4 秒轉出 1 頁**。所以無窮迴圈來自這份檔的**其他**內容
+#     （全檔有 borderCallout2 / curvedConnector3 與 35 個 mc:AlternateContent VML 退版），
+#     不是找字那張表 —— 圈選本身一直都渲染得出來，只是被別的東西擋住。
+#   · 11 條圈選路徑是**從像素獨立解出來的，不是我看圖用眼睛抄的**：
+#     橘色遮罩取連通元件 → `binary_fill_holes` 填出每個圈的內部 →
+#     用 `pdftotext -bbox` 的 100 個字元座標判斷哪些字落在圈內 → 逐格輸出。
+#
+# 三重佐證都指向同一組答案：
+#   · **像素**：橘色連通元件恰好 **11 個**（每個都 >3000 px，無碎片）。
+#   · **XML**：`mc:Choice` 裡 12 個 roundRect，但其中一個是 `scheme:bg1`（白框）、
+#     5.64×1.01in ——那不是圈選，是張看不見的底框；扣掉它剛好 **11 個**
+#     （群組 anchor 內 9 個 accent2 ＋ 繁殖、雜草叢生各一個獨立 anchor）。
+#     ⚠️ 繁殖／雜草叢生那兩個框線硬寫死 `srgb E97132`，但 `positionH` 換算都在紙內、
+#     像素上也都看得到 —— 再次印證「硬寫死顏色只是相關、不是紙外殘留的判準」。
+#   · **內容**：11 條路徑逐格套回 grid，拼出來的正好是 11 個 target_words，一字不差。
+#
+# 另外，這份重建的表格 PDF 文字層抽出的 10×10 格子，與本檔 `grid` **逐字完全相同**，
+# 等於順帶驗證了原本從 XML 抄出來的格子沒有抄錯。
 meta:
   # ⚠️ 放在 meta 底下：split_lesson_modules.py 只搬對照表上的頂層 key，
   #    放頂層會被靜默丟掉（同 L0012 的 marking_instruction 教訓）。
-  extraction_gap_note: 找字遊戲圈選路徑未轉錄（PDF 產不出來）；其餘內容已由 XML + w:sym + w:bdr 取得
+  extraction_gap_note: 無缺口 —— 找字遊戲圈選路徑已於 2026-08-18 用「單表拆檔轉 PDF + 像素解圈」補齊；其餘內容由 XML + w:sym + w:bdr 取得
   lesson_uid: L0028
   catalog_slot: G5-L16
   title: 掃雷英雄馬嘎瓦
@@ -411,10 +432,42 @@ vocab_review:
     - 叢不浩給撞窮地表樹繁
     - 生案繁刨地便飯護彰殖
   answers_are_graphical: true
-  # 🔴 圈選路徑**未轉錄**：圈是畫上去的線，不在文字流、也不是 w:sym，只有像素裡才有，
-  #    而這一課的 PDF 產不出來（見檔頭）。照 skill 的規定「沒轉錄就整個省略，不要寫空 list」，
-  #    所以這裡沒有 answer_paths。11 個目標語詞在格子裡都找得到，等 PDF 能轉出來再回頭補圈選。
-  answer_paths_note: 未轉錄 —— 本課無法產生 PDF，圈選只存在於圖形層
+  # 圈選路徑已補（2026-08-18 重跑）。做法見檔頭「圈選怎麼補到的」。
+  # 11 條路徑 = 11 個目標語詞，格子裡逐格拼得回原詞，沒有錯字。
+  answer_paths:
+    - word: 成效斐然
+      cells: [[1, 7], [2, 8], [3, 9], [4, 10]]
+      direction: diagonal_down_right
+    - word: 效能
+      cells: [[2, 1], [2, 2]]
+      direction: horizontal
+    - word: 晝伏夜出
+      cells: [[3, 3], [3, 4], [3, 5], [3, 6]]
+      direction: horizontal
+    - word: 刻不容緩
+      cells: [[5, 2], [6, 3], [7, 4], [8, 5]]
+      direction: diagonal_down_right
+    - word: 救苦救難
+      cells: [[5, 4], [5, 5], [5, 6], [5, 7]]
+      direction: horizontal
+    - word: 層出不窮
+      cells: [[6, 9], [7, 8], [8, 7], [9, 6]]
+      direction: diagonal_down_left
+    - word: 雜草叢生
+      cells: [[7, 1], [8, 1], [9, 1], [10, 1]]
+      direction: vertical
+    - word: 肉眼
+      cells: [[7, 2], [8, 2]]
+      direction: vertical
+    - word: 表彰
+      cells: [[9, 8], [10, 9]]
+      direction: diagonal_down_right
+    - word: 繁殖
+      cells: [[9, 10], [10, 10]]
+      direction: vertical
+    - word: 刨地
+      cells: [[10, 4], [10, 5]]
+      direction: horizontal
 
 # ── 九 知識補給站 ──
 resources:

@@ -31,4 +31,105 @@ vocab_review:
   - 叢不浩給撞窮地表樹繁
   - 生案繁刨地便飯護彰殖
   answers_are_graphical: true
-  answer_paths_note: 未轉錄 —— 本課無法產生 PDF，圈選只存在於圖形層
+  answer_paths:
+  - word: 成效斐然
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 效能
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    direction: horizontal
+  - word: 晝伏夜出
+    cells:
+    - - 3
+      - 3
+    - - 3
+      - 4
+    - - 3
+      - 5
+    - - 3
+      - 6
+    direction: horizontal
+  - word: 刻不容緩
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 救苦救難
+    cells:
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    - - 5
+      - 7
+    direction: horizontal
+  - word: 層出不窮
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    - - 9
+      - 6
+    direction: diagonal_down_left
+  - word: 雜草叢生
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 肉眼
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 表彰
+    cells:
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 繁殖
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 刨地
+    cells:
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
