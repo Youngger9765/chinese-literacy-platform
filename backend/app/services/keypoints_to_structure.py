@@ -64,7 +64,18 @@ def _render_cell(text: Any, blanks: Optional[list]) -> str:
     if isinstance(text, Mapping):
         return _render_mapping_cell(text, blanks)
 
-    s = "" if text is None else str(text)
+    # ⛔ 同理，也不可以 str() 一個 list。有幾課把編號小題寫成 list[str]
+    #    （L0167／L0168／L0169 的「內容」欄），`str()` 出來是 Python 的 list repr ——
+    #    學生看到的是 `['1.小美看見…', '2.阿哲…']`，連方括號和引號都在畫面上。
+    #    這些本來就是一行一題，用換行接起來就是它們該有的樣子。
+    if isinstance(text, (list, tuple)):
+        s = "\n".join(
+            _render_cell(item, None) if isinstance(item, (Mapping, list, tuple))
+            else ("" if item is None else str(item))
+            for item in text
+        )
+    else:
+        s = "" if text is None else str(text)
     answers = [
         str(b.get("answer", "")).strip()
         for b in (blanks or [])

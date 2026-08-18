@@ -38,7 +38,11 @@ def parse_checkbox_options(text: str) -> dict | None:
         chunk = text[start:end].strip()
         prefix = text[max(0, start - 1) : start + 1]
         is_distractor = "□" in prefix or chunk.startswith("□")
-        clean = _CIRCLED_NUM_RE.sub("", chunk, count=1).lstrip("□").strip()
+        # chunk 的範圍是「這個圈號到**下一個**圈號」，所以尾巴會吃到下一項的 □。
+        # 只 lstrip 會留下它 → 學生看到「積極的面對與復健 □」。
+        # ⚠️ 尾巴那個 □ 是下一項的干擾項標記，而下一項是從**原始 text** 讀 prefix
+        #    判斷的（見下方 is_distractor），所以在這裡拿掉不影響誰是正解。
+        clean = _CIRCLED_NUM_RE.sub("", chunk, count=1).strip(" \u3000□■☑▢").strip()
         if not clean:
             continue
         idx = len(options)

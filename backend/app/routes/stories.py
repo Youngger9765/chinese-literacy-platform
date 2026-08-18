@@ -60,9 +60,36 @@ def _set_cached_structure(story_id: str, result):
 # YAML-first: convert story_structure_table → API response (no AI call)
 # ---------------------------------------------------------------------------
 
+# 學習單用 `【…】` 裝兩種完全不同的東西：**答案**（【上升】）和**作答指示**
+# （【單選】【勾選，可複選】）。第一版一律挖空 —— 指示語跟著沒了，學生看到
+# `【　　　】`，不知道該勾一個還是勾多個，而選項還在，畫面看起來完全正常。
+_INSTRUCTION_WORDS = ("單選", "多選", "複選", "勾選", "打勾")
+
+# 教師版用 `□` 標**干擾項**（這個選項是錯的），緊接在圈號前面：`□②放棄`。
+# 送到學生端等於把答案印出來 —— 42 課 / 256 個（#2736 查出）。
+# ⚠️ 只拿掉「圈號前面那個」。`請在□打勾` 這種指示語裡的 □ 要留著。
+_DISTRACTOR_BOX_RE = re.compile(r"[□■☑▢]+\s*(?=[①②③④⑤⑥⑦⑧⑨⑩])")
+
+
 def _strip_blank_answers(text: str) -> str:
-    """Replace 【answer】 with empty blanks for student-facing display."""
-    return _BLANK_RE.sub("【　　　】", text)
+    """Blank out 【answer】 but keep 【單選】-style instructions.
+
+    An instruction tells the student how to answer; blanking it removes
+    information they need and leaves no trace that anything was lost.
+    """
+
+    def _one(m: re.Match) -> str:
+        inner = m.group(1).strip()
+        if any(w in inner for w in _INSTRUCTION_WORDS):
+            return m.group(0)
+        return "【　　　】"
+
+    return _BLANK_RE.sub(_one, text)
+
+
+def _strip_distractor_marks(text: str) -> str:
+    """Remove the `□` that marks an option as wrong before it reaches a student."""
+    return _DISTRACTOR_BOX_RE.sub("", text)
 
 
 # 學生看得到的 row 允許帶的欄位。**白名單，不是黑名單。**
@@ -88,11 +115,14 @@ def _sanitize_row_for_client(row: dict) -> dict:
     `/structure/grade` 的結果拿到正解，作答後才會知道。
     """
     out = {k: v for k, v in row.items() if k in _CLIENT_VISIBLE_ROW_KEYS}
-    if out.get("interactive_type") == "fill_blank":
-        if out.get("blank_in_label") and out.get("label"):
-            out["label"] = _strip_blank_answers(out["label"])
-        if out.get("value"):
-            out["value"] = _strip_blank_answers(out["value"])
+    # ⚠️ 挖空不分列型。原本只在 fill_blank 時做，checkbox 列整條跳過 ——
+    #    於是 `【①上升】`、`【文旦】` 這些答案原樣送出去（9 課 / 39 處）。
+    for field in ("label", "value"):
+        if out.get(field):
+            out[field] = _strip_distractor_marks(_strip_blank_answers(out[field]))
+    out["options"] = [_strip_distractor_marks(o) for o in out["options"]] if out.get("options") else out.get("options")
+    if out.get("options") is None:
+        out.pop("options", None)
     sub_rows = out.get("sub_rows")
     if sub_rows:
         out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
