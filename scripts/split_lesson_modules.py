@@ -142,6 +142,8 @@ SECTION_NAME_TO_MODULE = [
     ("詞語複習", "vocab_review"),
     ("知識補給站", "resources"),
     ("語詞書寫", "writing_practice"),
+    # 文言文的朗讀節印「朗讀計時」而不是「念順順」
+    ("朗讀計時", "key_reading"),
 ]
 
 
@@ -155,9 +157,19 @@ def _printed_section_numbers(data: dict) -> dict[str, str]:
     for row in data.get("sections_present") or []:
         if not isinstance(row, dict):
             continue
-        no = row.get("no") or row.get("No")
+        no = row.get("no") if "no" in row else row.get("No")
         name = str(row.get("name") or "")
-        if no in (None, "", True, False) or not name:
+        if not name or no in (True, False):
+            continue
+        if no in (None, ""):
+            # ⚠️ 「明寫不編號」跟「沒提到這一節」不是同一件事。
+            #    這裡原本一律 continue，於是明寫 `"no": null` 的節掉回 MODULES 的
+            #    常數預設 —— 文言文的朗讀計時因此拿到「二」，跟 word_matching 撞號
+            #    （L0153、L0161 都中）。明寫 null 就要**明確標成沒有序號**。
+            for needle, mod in SECTION_NAME_TO_MODULE:
+                if needle in name:
+                    out.setdefault(mod, None)
+                    break
             continue
         for needle, mod in SECTION_NAME_TO_MODULE:
             if needle in name:

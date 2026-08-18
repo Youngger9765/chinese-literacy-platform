@@ -1,0 +1,7 @@
+{
+  "lesson_uid": "L0157", "catalog_slot": "文-L2", "pdf_pages": 8, "pages_read": 8,
+  "wall_clock_seconds": null, "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 1,
+  "notes": "🔴 連連看的 4 條紅線在 XML 裡、PDF 上一條都看不到（同 SKILL 記的 L0104）。四條同屬一個 anchor 群組，只數 anchor 得到 1、遞迴到 wps:wsp 才是 4。解群組子座標還原配對：左端 y=0.088/0.464/0.936/1.302 對應左欄第 1/2/4/3 項，右端 y=1.310/0.936/0.936/0.352 對應 C/B/B/A → 1→C 2→B 3→A 4→B。三重佐證：幾何、語意（之=狐狸/子=老虎/之=百獸/之=老虎）、題目自己印的「（其中有複選）」而 B 剛好用兩次。🔴 橘色答案 run 層掃到 0 個、解 rStyle→styles.xml（樣式 af）才有 26 個 —— 這課正是 SKILL 說的那 45 課之一。本課有 18 個 w16se:symEx（Segoe UI Emoji 25E4 ◤ 與 25CF ●），是我第一次遇到；我的 dump 工具原本印成 [SYMEX:?:?]，因為 symEx 的屬性是 namespace 前綴的 w16se:font/w16se:char 不是裸屬性，已修。箭號兩種混用：字面 → 保留、Wingdings 2 F045 指標不寫入。大題只有四個（讀全文/古今對照表/文言文聚光燈/閱讀理解），沒有朗讀計時也沒有文白句子比對 —— 是「怎麼讀文言文」的導論課，沒有硬套 L0155 那一套。段號 5 個對 11 個區塊，用段落樣式（a7/a9+numPr/無樣式+縮排）判，並註明區塊 3 與 4 樣式相同、單看樣式分不開，是靠漂移方向定的。retry 1 次是逐字門：`role` 沒用 _note 結尾，以及白話對照欄我把橘色答案直接接到黑字上（原稿中間有 34 個全形Ｏ與一組括號）。"
+}

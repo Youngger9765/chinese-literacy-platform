@@ -164,10 +164,19 @@ def check(uid: str) -> tuple[bool, list[str]]:
     body3 = squeeze(lesson_text(uid, "v3"))
     lost = []
     for para in v2:
-        anchor = squeeze(para)[:ANCHOR]
+        sq = squeeze(para)
+        anchor = sq[:ANCHOR]
         if len(anchor) < ANCHOR:
             continue          # 太短的段落（標題行之類）不當課文看
-        if anchor in src and anchor not in body3:
+        if anchor not in src:
+            continue
+        # ⚠️ 錨點只取前 16 字，所以**開頭多一個編號就對不上**，而那是結構差異不是漏抄。
+        #    L0160（文言文）的注釋在 v2 是「1.胡賊：胡，古代…」一整段，
+        #    v3 把編號拆進別的欄位、只留「胡賊：胡，古代…」——
+        #    內容一字不差，門卻報「2 段不見了」。
+        #    這跟門已知的「段首多印一個（段1）」同族，只是編號在注釋上。
+        alt = anchor.lstrip("0123456789")
+        if anchor not in body3 and (alt == anchor or alt not in body3):
             lost.append(para)
 
     if not lost:

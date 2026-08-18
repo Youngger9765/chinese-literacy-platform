@@ -5,7 +5,7 @@
 
 ## 現在在哪
 
-**八道門全綠。** 分支 `fix/issue-2736-truth-l0072`，PR #2739。
+**九道門全綠。** 分支 `fix/issue-2736-truth-l0072`，PR #2739。
 課數不寫在這裡（抬頭的數字一定會過期）—— 跑下面那條指令看。
 
 ```bash
@@ -85,6 +85,7 @@ PY
 ```bash
 source /Users/young/project/chinese-literacy-platform/backend/.venv/bin/activate
 python3 scripts/split_lesson_modules.py --all --version v3
+python3 scripts/verbatim_all.py          # 逐字門（全庫版）—— 原本只有逐課介面，不在例行掃描裡
 python3 scripts/coverage_gate.py --all
 python3 scripts/traditional_only_gate.py --all
 python3 scripts/normalize_block_types.py --check
@@ -97,11 +98,11 @@ cd backend && python -m pytest specs/ -q
 ```
 
 ⚠️ **`pytest specs/` 一定要跑。** 我有一輪的派工清單只列了 gate script 沒列它，
-於是有課的 spec 契約紅著交上來（`single needs >=2 options`），而八道門全綠。
+於是有課的 spec 契約紅著交上來（`single needs >=2 options`），而九道門全綠。
 
 ⚠️ 有一次我在 worker 還在寫檔的當下跑閘門，讀到半寫的檔案報 FAIL。**重跑就好**。
 
-## 八道門各管什麼、看不到什麼
+## 九道門各管什麼、看不到什麼
 
 | 門 | 抓什麼 | **看不到什麼** |
 |---|---|---|
@@ -113,6 +114,12 @@ cd backend && python -m pytest specs/ -q
 | `keypoints_shape_gate.py` | 重點表畫不出東西（空表格）| |
 | `render_coverage_gate.py` | 型別沒有對應元件 | 資料沒進 v3 的東西（沒被渲染就看不到）|
 | **`orphan_key_gate.py`** | **top-level key 沒有人搬 → 整節靜默消失** | |
+| **`verbatim_all.py`** | **逐字門的全庫版** | 同逐字門（漏抄看不到）|
+
+第九道 2026-08-18 新增。逐字門是主門，但它的介面是**逐課**的（`--yaml`+`--docx`），
+八道門的例行掃描裡沒有它 —— 於是一課可以在**逐字門從沒執行過**的情況下進 repo。
+真的發生了（L0122 帶著 3 處對不上被 commit），而抓到它的是 `sot_drift_check` 的副作用
+（`docx_md5` 只在逐字門通過時才蓋，沒指紋反過來洩漏了它沒過）。
 
 第八道 2026-08-18 新增。起因是一個 worker 把「知識補給站」寫成 `supplement`
 （搬運表叫 `resources`）→ 整節被丟掉，**而前七道全綠**。掃全庫發現同一個形狀
@@ -190,8 +197,20 @@ LibreOffice 26.2.2.2 對它 99% CPU 跑到逾時，換 ODT 中介一樣。正向
 兩個不同的 worker 拿到它都以 `API Error: Output blocked by content filtering policy`
 結束 —— 一個交完前兩課死在它身上，一個一課都沒交。**共同因子只有這一課，不是隨機。**
 
-⛔ **不要再原樣派給第三個 worker**，那只會再燒一個。還沒查明是哪一段觸發，
-可能的做法（都未驗證）：分頁抽（一次讀 2~3 頁而不是整課）、或由工頭自己逐頁處理。
+⛔ **不要再原樣派給第三個 worker**，那只會再燒一個。
+
+**2026-08-18 查到的線索**（不是結論）：
+- **文字層完全無害** —— 楊喚〈夏夜〉的排比教學，6655 字，內容平常
+- **26 個 media 檔**，而兩個 worker **都是在讀圖階段死的**（一個交完前兩課才死、
+  一個一課都沒交）
+→ 觸發點比較可能在**圖**不在文字，但**沒有證實**。
+
+未驗證的做法（照成本排）：
+1. **只從 XML 抽文字部分**（課文、題目、指示語都在文字層），圖只在必要時單張讀
+2. 分頁抽：一次讀 2~3 頁而不是整課，撞到就知道是哪幾頁
+3. 工頭自己逐頁處理（同樣有撞的風險，但至少不會讓一個 worker 的整批工作陪葬）
+
+⚠️ 不管走哪條，**先把已完成的部分寫檔再讀下一頁** —— 前兩次失敗都是整批歸零。
 
 **L0084 在重跑清單上。**
 
@@ -295,7 +314,7 @@ w4，其餘五個手上都還有找字課，補推才齊）。
 8. 文字一律以 document.xml 為準（PDF 的簡體是字型代換的假象）
 9. 轉檔走 `scripts/docx_to_pdf.sh`，不要自己敲 soffice
 
-## 交件前八道門 + `pytest specs/ -q` 全跑（貼實際輸出）
+## 交件前九道門 + `pytest specs/ -q` 全跑（貼實際輸出）
 [見上方閘門清單]
 
 不 commit、不 push、不改 scripts/ frontend/ backend/app/。

@@ -1,0 +1,68 @@
+lesson_uid: L0159
+version_id: v3
+section_no: 二
+word_matching:
+  instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
+  answer_carrier: 橘色手寫（字元樣式 aff，色 E97132），文字流有此資訊
+  shape_note: 每題兩列：上列「文言」（要解釋的詞用**灰底** `w:shd` 標出，不是框線），下列「白話」留括號填空
+  items:
+  - index: 1
+    classical: 嘗於市遇一佳硯，議價未定。
+    shaded_terms:
+    - 嘗
+    - 市
+    vernacular: 他（　）在（　）上見到一塊上好的硯臺，可是議價沒有成功。
+    blanks:
+    - answer: 曾/曾經
+    - answer: 市集/市場
+  - index: 2
+    classical: 既還邸，使門人往，以一金易歸
+    shaded_terms:
+    - 既還
+    - 易
+    vernacular: （　）官邸之後，他還是派僕人前往，用一兩銀子（　）硯臺回來。
+    blanks:
+    - answer: 回到
+    - answer: 買
+  - index: 3
+    classical: 門人持硯歸，公訝其不類，門人堅稱其是。
+    shaded_terms:
+    - 訝
+    - 不類
+    - 堅
+    - 是
+    vernacular: 僕人拿著硯臺回來，陸公（　）它（　）自己想買的那個。僕人卻（　）說它（　）。
+    blanks:
+    - answer: 驚訝
+    - answer: 不像
+    - answer: 堅持
+    - answer: 就是
+  - index: 4
+    classical: 公曰：「向觀硯有鴝鵒眼，今何無之？」
+    shaded_terms:
+    - 向觀
+    - 今何
+    vernacular: 陸公說：「（　）我看的硯臺有個八哥眼，現在（　）沒有了？」
+    blanks:
+    - answer: 剛才
+    - answer: 為何
+  - index: 5
+    classical: 答曰：「吾嫌其微凸，路值石工，幸有餘銀，令磨而平之。」
+    shaded_terms:
+    - 嫌
+    - 值
+    - 幸
+    - 餘
+    vernacular: (僕人)回答說：「我（　）它有點凸，路上（　）石工，（　）有（　）的銀子，就叫他打磨讓微凸的地方平整了。」
+    blanks:
+    - answer: 嫌棄
+    - answer: 正好遇見
+    - answer: 幸好
+    - answer: 剩餘
+  - index: 6
+    classical: 公大惋惜。
+    shaded_terms:
+    - 大
+    vernacular: 陸公感到（　）可惜。
+    blanks:
+    - answer: 十分

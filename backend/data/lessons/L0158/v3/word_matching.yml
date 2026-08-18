@@ -1,0 +1,72 @@
+lesson_uid: L0158
+version_id: v3
+section_no: 二
+word_matching:
+  instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
+  answer_carrier: 橘色手寫（run 層 w:color ＋ 字元樣式兩種），文字流有此資訊
+  shape_note: '每題兩列：上列「文言」（要解釋的詞用**灰底**標出，不是框線），下列「白話」留括號填空。
+
+    ⚠️ 與 L0155 不同 —— 那一課用的是黑色框線 `w:bdr`，本課 `w:bdr` 非 auto 顏色為 0。'
+  items:
+  - index: 1
+    classical: 賈人某，至直隸界，忽大雨雹，伏禾中。
+    shaded_terms:
+    - 賈人
+    - 大雨雹
+    vernacular: 某位（　），來到直隸省的邊界附近，忽然（　）大冰雹，他連忙躲到田間。
+    blanks:
+    - answer: 商人
+    - answer: 下起
+  - index: 2
+    classical: 聞空中云：「此張不量田，勿傷其稼。」
+    shaded_terms:
+    - 聞
+    - 云
+    - 其
+    vernacular: 他（　）空中有聲音（　）：「這是張不量的田，不要傷了（　）莊稼。」
+    blanks:
+    - answer: 聽到
+    - answer: 說
+    - answer: 他的
+  - index: 3
+    classical: 賈私意張氏既云不良，何反佑護？雹止，入村，訪問其人，且問取名之義
+    shaded_terms:
+    - 私意
+    - 云
+    - 其人
+    vernacular: 商人（　）：這張氏既然（　）不良，為何反而受上天庇佑？等冰雹停止，商人進入村子，向人打聽（　），並且詢問那人叫這名字的意思。
+    blanks:
+    - answer: 心想
+    - answer: 叫/叫做
+    - answer: 那個人
+  - index: 4
+    classical: 蓋張素豐，積粟甚富。
+    shaded_terms:
+    - 蓋
+    - 素
+    vernacular: （　）張氏（　）富有，積蓄的穀物很多。
+    blanks:
+    - answer: 原來
+    - answer: 素來
+  - index: 5
+    classical: 每春間貧民就貸，償時多寡不較，悉納之，未嘗執概取盈。
+    shaded_terms:
+    - 貸
+    - 悉
+    - 未嘗
+    vernacular: 每到春天，窮人就來找他（　）穀物，償還時不管多少也不計較，（　）都收下，（　）拿工具測量，要人還到足夠的數量。
+    blanks:
+    - answer: 借貸
+    - answer: 全/全部
+    - answer: 不曾
+  - index: 6
+    classical: 眾趨田中，見稞穗摧折如麻，獨張氏諸田無恙。
+    shaded_terms:
+    - 趨
+    - 獨
+    - 無恙
+    vernacular: 眾人（　）田中，只見麥子被冰雹砸得像亂麻一樣，（　）張氏的田（　）。
+    blanks:
+    - answer: 趕到
+    - answer: 只有
+    - answer: 一點事也沒有

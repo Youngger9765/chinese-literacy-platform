@@ -1,0 +1,20 @@
+lesson_uid: L0150
+version_id: v3
+errata:
+- id: E1
+  section: 二 閱讀聚光燈／B 段之後、「1.請由圖二…」之前的裝飾標題
+  text_carrier: image
+  source: （EMF 內的字碼，缺字型時 fallback 畫成「庸振耋」之類的字形）
+  corrected: null
+  kind: 圖片標題字型未嵌入，標題無法辨讀
+  why: '這個標題是一張 EMF 圖（word/media/image11.emf），字碼存在 EMF 裡但字型沒有隨檔嵌入。
+
+    在沒有那套字型的機器上（含本次轉檔）會照碼位用 fallback 字型畫出來，
+
+    印出三個與原意無關的字。判準：那三個字在 document.xml／footnotes.xml／endnotes.xml
+
+    以及 docx 內所有 xml part **全部 grep 回 0** —— 它們不是教材的文字。
+
+    實際字樣無法還原（字碼是該字型專用的對應），所以 corrected 留 null，不臆測。'
+  confidence: high
+  evidence: PDF p5 與 word/media/image11.emf 的字碼一致；docx 全部 xml part grep 皆 0

@@ -35,6 +35,18 @@ PARA_RE = re.compile(r"<w:p(?:\s[^>]*)?>.*?</w:p>", re.S)
 # 課文以外的文字散落在這些 part：註腳漏掉會誤報
 DOCX_PARTS = ("word/document.xml", "word/footnotes.xml", "word/endnotes.xml")
 
+# 第五種載體：**Word 原生圖表**。座標軸標籤、圖例、系列名住在 `word/charts/*.xml`
+# 的 `<a:t>` 裡，`document.xml` 一個字都沒有。
+#
+# 2026-08-18 L0150：課文的圖1、圖2 在 PDF 上一片空白（LibreOffice 畫不出來），
+# 而數字完整躺在 chart XML 裡。只看 PDF 會判成「這兩張圖沒內容」，
+# 而逐字門讀不到 charts，所以抽取者只能借 `text_carrier: image` 讓它進「無法驗證」——
+# 那等於把可以驗的東西放進不驗的桶子。
+#
+# 全庫實測：157 課裡只有 2 課有圖表文字（合計 96 字），量很小但是真的內容。
+# ⚠️ 加來源 part **只會讓更多字串找得到**，不可能製造新的 FAIL。
+CHART_PART_RE = "word/charts/"
+
 # 為什麼不用「以段落為比對單位」擋跨段拼接（2026-08-17 實測後放棄）
 # ------------------------------------------------------------------
 # 理論上把 `<w:p>` 之間放分隔符，可以擋掉「上段結尾＋下段開頭」拼出來的假 PASS。
@@ -74,6 +86,10 @@ def docx_text(path: Path) -> str:
             if part in names:
                 raw = z.read(part).decode("utf-8", "ignore")
                 chunks.append("".join(WT_RE.findall(raw)))
+        # 圖表用的是 DrawingML 的 `<a:t>`，不是 `<w:t>`，所以要另外抓
+        for part in sorted(n for n in names if n.startswith(CHART_PART_RE) and n.endswith(".xml")):
+            raw = z.read(part).decode("utf-8", "ignore")
+            chunks.append("".join(re.findall(r"<a:t>([^<]*)</a:t>", raw)))
     return norm("".join(chunks))
 
 

@@ -1,0 +1,138 @@
+lesson_uid: L0165
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 反射性
+  - 仰賴
+  - 篤定
+  - 咬中
+  - 奮不顧身
+  - 配球
+  - 心結
+  - 一意孤行
+  - 保送
+  - 孤軍奮戰
+  - 趨前
+  - 俐落
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 配求反社性義俐呆送奮
+  - 返一意孤行無抑落一不
+  - 驅前單交中反反賴義顧
+  - 心洛配球趨顧射我孤身
+  - 結孤一步到位性意行保
+  - 良身軍截保送停仰宋利
+  - 機篤定憤然不馬損賴落
+  - 喃喃自語戰同羅定點配
+  - 趨心節信咬盤孤軍奮戰
+  - 棒前任中憤不雇身氣餒
+  answers_are_graphical: true
+  answer_paths:
+  - word: 俐落
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    direction: diagonal_down_right
+  - word: 奮不顧身
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 一意孤行
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    direction: horizontal
+  - word: 反射性
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    direction: vertical
+  - word: 心結
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 1
+    direction: vertical
+  - word: 配球
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    direction: horizontal
+  - word: 保送
+    cells:
+    - - 6
+      - 5
+    - - 6
+      - 6
+    direction: horizontal
+  - word: 仰賴
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 9
+    direction: diagonal_down_right
+  - word: 篤定
+    cells:
+    - - 7
+      - 2
+    - - 7
+      - 3
+    direction: horizontal
+  - word: 孤軍奮戰
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    - - 9
+      - 10
+    direction: horizontal
+  - word: 咬中
+    cells:
+    - - 9
+      - 5
+    - - 10
+      - 4
+    direction: diagonal_down_left
+  - word: 趨前
+    cells:
+    - - 9
+      - 1
+    - - 10
+      - 2
+    direction: diagonal_down_right
+  grid_note: '干擾字密集：「孤」4 次、「一」3 次、「反」3 次、「身」3 次、「前」2 次、「趨」2 次、
+
+    「配」3 次，只有落在路徑上的才被圈。近音／形近干擾：求（球）、驅（趨）、洛（落）、
+
+    抑（仰）、憤（奮）、雇（顧）、單（軍）。'
