@@ -13,6 +13,7 @@ owns_code:
   - scripts/story_structure_qa.py
   - scripts/build_keypoints_qa_manifest.py
   - scripts/keypoints_manifest_verify.py
+  - backend/app/services/keypoints_to_structure.py
 owns_data:
   - backend/data/lessons/_parsed_2026-05-01/**/*.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
@@ -22,7 +23,13 @@ spec_tests:
   - backend/specs/test_keypoints_manifest_spec.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
-related_issues: [2205, 2261, 2273]
+legacy_tests:
+  - backend/tests/test_yaml_first_structure.py
+  - backend/tests/test_story_structure_qa_contract.py
+  - backend/tests/test_keypoints_to_structure.py
+  - backend/tests/test_keypoints_subitem_label_2736.py
+  - backend/tests/test_keypoints_prompt_stem_2736.py
+related_issues: [2205, 2261, 2273, 2736]
 last_reviewed: 2026-06-19
 owner: young
 ---
@@ -32,6 +39,24 @@ owner: young
 > 通用 L-layer 框架：`docs/qa/layer-verification-framework.md`
 > 人讀 SOT（L1–L5 詳標）：`docs/qa/story-structure-verification-standard.md`
 > 機器契約：`backend/specs/test_story_structure_spec.py`
+
+## 這個 module 為什麼要認領 `keypoints_to_structure.py`（2026-08-18 / #2736）
+
+`backend/app/services/keypoints_to_structure.py` 是 `keypoints.yml` → `story_structure_table`
+的橋，`lesson_indexes.py` 靠它供給 150 課的重點表。但在此之前它**不屬於任何 module**，
+而 `.github/workflows/pytest.yml` 是點名清單、`run-ci.sh` Gate 3 只跑 `legacy_tests` 聯集
+—— 於是 `backend/tests/test_keypoints_to_structure.py` 存在、卻沒有任何門會執行它
+（GHA 0 / run-ci 0 / registry 0，以 `test_rate_limiting`、`test_verify_qr_manifest` 當正向對照）。
+
+代價是兩個靜默流失的 bug 在服務端活了很久，兩個都不報錯、九道門全綠：
+
+| bug | 影響 | 為什麼門看不到 |
+|---|---|---|
+| 子項標題只讀 `sub_label`/`index`，不讀規格叫大家寫的 `label` | **63 課 / 365 個標題**渲染成空字串 | 形狀門只要求「每列至少一格非空」，其他格空掉照樣過 |
+| 全檔沒讀過 `prompt`（題幹） | **3 課 / 5 句**題幹消失，其中 L0012 整格空白 | 同上；逐字門也過，因為 YAML 裡的字沒被改 |
+
+所以 `legacy_tests` 這一欄現在把這條橋的鎖釘進 `run-ci.sh`。
+**沒有人跑的鎖是裝飾品** —— 加鎖的同時要確認它真的會被執行。
 
 ## L-layer 對照
 

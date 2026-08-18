@@ -11,6 +11,9 @@
 #   Gate 2: spec contracts   (pytest specs/)
 #   Gate 3: legacy_tests     (union of all legacy_tests: paths from the registry)
 #           Skip if no module has legacy_tests entries.
+#   Gate 4: QR-manifest reconciliation
+#   Gate 5: spotlight structural ratchet
+#   Gate 6: 原稿過期偵測 (sot_drift_check --offline)
 #
 # Usage:
 #   bash specs/run-ci.sh          # run all gates, exit non-zero on any failure
@@ -100,6 +103,25 @@ echo ""
 # every lesson's spotlight, and without this nothing says what else moved.
 echo "-- Gate 5/5: spotlight structural ratchet (spotlight_fingerprints) --"
 "$PYBIN" scripts/spotlight_fingerprints.py --check
+echo ""
+
+# ── Gate 6/6: 原稿有沒有悄悄過期（SOT_STALE，離線半） ────────────────────────
+# 2026-08-17：案主 20:28 更新 6/7/8 年級 12 個檔，本機快照停在那之前，其中 G8-L4
+# 已經抽完 —— 抽出來的 yml 忠實反映一份**作廢的教材**，而**所有門都是綠的**，
+# 因為每一道門比對的都是本機那份過期原稿。這種過期沒有任何徵兆。
+#
+# `sot_drift_check.py` 早就會用 MD5 抓它，但**只有人想到才會被跑** —— 跟 Gate 5
+# 那個「門存在、沒人跑」是同一種病。
+#
+# 只跑 `--offline` 那半：完整版要 rclone 打 Google Drive（要網路、要憑證、逾時
+# 上限 600 秒），那不能當 push 前的門。離線半問的是「這份**已經 commit** 的抽取
+# 結果，還對得上它宣稱的來源嗎」，答案完全在 repo 與本機快照裡。
+#
+# 沒有本機原稿快照時（例：CI runner，private/ 是 gitignored 的 symlink）它會**明講**
+# 只驗得到「有沒有指紋」、驗不到「指紋對不對」—— 不會假裝全驗過了。
+# 看得見 Drive 那一側要另外跑：`python3 scripts/sot_drift_check.py`
+echo "-- Gate 6/6: 原稿過期偵測（sot_drift_check --offline） --"
+"$PYBIN" scripts/sot_drift_check.py --offline
 echo ""
 
 echo "== Local Spec CI: PASS =="

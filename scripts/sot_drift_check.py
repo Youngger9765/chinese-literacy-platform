@@ -15,11 +15,22 @@
 
 真正有用的輸出不是「3 個資料夾變了」，而是**哪幾課要重抽**。
 
+這支問的是**兩個**問題，只有第一個需要 Drive
+--------------------------------------------
+    SOT_DRIFT   本機快照 vs Drive         → 要 rclone／網路／folder id，逾時上限 600 秒
+    SOT_STALE   已抽的課 vs 本機原稿指紋   → **純本機**，不碰網路
+
+`--offline` 只跑第二個。它答的是「這份**已經 commit** 的抽取結果，還對得上它
+宣稱的來源嗎」—— 正是 8/17 那種靜默作廢的形狀，而且答案完全在 repo 與本機
+快照裡。因為不用網路也不用憑證，它接得進 `specs/run-ci.sh` 當 push 前的門；
+完整那半留給排程與手動。
+
 用法：
-    python3 scripts/sot_drift_check.py                 # 比對並報告
+    python3 scripts/sot_drift_check.py                 # 完整（要 Drive）
+    python3 scripts/sot_drift_check.py --offline       # 只查指紋，不碰網路
     python3 scripts/sot_drift_check.py --json out.json # 另存機器可讀
 
-退出碼：0 = 本機與 Drive 一致；1 = 有差異（或查詢失敗）
+退出碼：0 = 一致；1 = 有差異、有作廢的課、或什麼都沒掃到
 """
 from __future__ import annotations
 
@@ -82,25 +93,29 @@ def remote_files(fid: str) -> dict[str, dict]:
     return out
 
 
-def local_files() -> dict[str, dict]:
+def local_files(sot_root: Path | None = None) -> dict[str, dict]:
+    root = sot_root or SOT
     out = {}
-    for p in SOT.rglob("*"):
+    if not root.is_dir():
+        return out
+    for p in root.rglob("*"):
         if not p.is_file() or p.name.startswith(".") or p.name == "STAMP.md":
             continue
-        out[nfc(str(p.relative_to(SOT)))] = {
+        out[nfc(str(p.relative_to(root)))] = {
             "md5": hashlib.md5(p.read_bytes()).hexdigest(),
             "size": p.stat().st_size,
         }
     return out
 
 
-def extracted_by_drive_path() -> dict[str, str]:
+def extracted_by_drive_path(lessons_root: Path | None = None) -> dict[str, str]:
     """drive_path → lesson_uid，只收**已經抽過**的課（那些才需要重抽）。"""
-    done = {p.stem for p in (LESSONS / "_extracted").glob("*.yml")}
+    root = lessons_root or LESSONS
+    done = {p.stem for p in (root / "_extracted").glob("*.yml")}
     out = {}
     for uid in done:
         for v in ("v3", "v2"):
-            f = LESSONS / uid / v / "lesson.yml"
+            f = root / uid / v / "lesson.yml"
             if not f.is_file():
                 continue
             dp = ((yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("source") or {}).get("drive_path")
@@ -110,12 +125,79 @@ def extracted_by_drive_path() -> dict[str, str]:
     return out
 
 
+def stale_lessons(local: dict[str, dict], by_path: dict[str, str],
+                  seed: set[str] | None = None,
+                  lessons_root: Path | None = None) -> set[str]:
+    """哪幾課的抽取結果對不上它宣稱的來源。
+
+    ⚠️ 只有這一段是**純本機**的（`--offline` 跑的就是它）。`seed` 給完整模式
+    放「Drive 上已經改掉／刪掉的檔對到的課」，離線模式沒有那條線。
+    """
+    root = lessons_root or LESSONS
+    stale = set(seed or ())
+    for uid in sorted(set(by_path.values())):
+        f = root / uid / "v3/lesson.yml"
+        if not f.is_file():
+            continue
+        src = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("source") or {}
+        dp, stamped = nfc(src.get("drive_path") or ""), src.get("docx_md5")
+        if not stamped:
+            stale.add(uid)          # 沒指紋 = 抽取當時沒通過逐字門，或原稿已經變了
+        elif dp in local and f"md5-12:{local[dp]['md5'][:12]}" != stamped:
+            stale.add(uid)
+    return stale
+
+
+def run_offline(sot_root: Path | None, lessons_root: Path | None) -> int:
+    """只問「已經 commit 的抽取結果，還對得上它宣稱的來源嗎」。
+
+    不碰網路、不需要 Drive 憑證，所以接得進 push 前的門（`specs/run-ci.sh`）。
+    看不到的那一半是「Drive 上已經改了但本機還沒同步」—— 那要完整模式才知道。
+    """
+    lessons = lessons_root or LESSONS
+    local = local_files(sot_root)
+    by_path = extracted_by_drive_path(lessons)
+
+    if not by_path:
+        # ⛔ 一課都沒掃到不是「全部通過」，是「這道門沒在看」。
+        #    `curriculum-drift-check.yml` 就是這樣：private/ 在 runner 裡不存在 →
+        #    skip → 綠燈，每個碰 lesson 資料的 PR 都拿到一個什麼都沒檢查的 ✅。
+        print("⛔ 一課都沒掃到 —— 視為失敗，別讓空跑看起來像成功")
+        print("SOT_STALE=UNKNOWN")
+        return 1
+
+    stale = stale_lessons(local, by_path, lessons_root=lessons)
+
+    scope = (f"原稿快照 {len(local)} 檔" if local
+             else "⚠️ 沒有本機原稿快照 —— 只驗得到「有沒有指紋」，驗不到「指紋對不對」")
+    print(f"離線模式：已抽取 {len(set(by_path.values()))} 課 / {scope}")
+
+    if stale:
+        print(f"\n🔴 抽取結果與本機原稿對不上、**必須重抽**：{len(stale)} 課")
+        for uid in sorted(stale):
+            print(f"  {uid}")
+        print("\n   下一步：`python3 scripts/sot_drift_check.py` 跑完整版看 Drive 那邊改了什麼，")
+        print("   先 `--backup` 留舊版再同步，然後重抽這幾課。")
+    else:
+        print("✅ 已抽取的課，都對得上它宣稱的來源")
+
+    print(f"\nSOT_STALE={len(stale)}" + (f"  → {' '.join(sorted(stale))}" if stale else ""))
+    return 1 if stale else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", type=Path)
     ap.add_argument("--backup", type=Path, metavar="DIR",
                     help="把即將被覆蓋的本機檔先複製到 DIR（同步前跑）")
+    ap.add_argument("--offline", action="store_true",
+                    help="只查 SOT_STALE（已抽的課 vs 本機原稿指紋），不碰 Drive／網路")
+    ap.add_argument("--sot-root", type=Path, default=None, help="改看別的原稿快照（測試用）")
+    ap.add_argument("--lessons-root", type=Path, default=None, help="改看別的課樹（測試用）")
     a = ap.parse_args()
+
+    if a.offline:
+        return run_offline(a.sot_root, a.lessons_root)
 
     remote = remote_files(folder_id())
     local = local_files()
@@ -146,18 +228,8 @@ def main() -> int:
     #   (2) 抽取時的指紋 vs 現在的原稿 → 「這份抽取結果本身作廢了」（同步之後才看得到）
     # 只看 (1) 的話，同步完訊號就消失，作廢的抽取結果會靜靜留在庫裡。
     by_path = extracted_by_drive_path()
-    stale = {by_path[k] for k in changed + removed if k in by_path}
-
-    for uid in sorted(by_path.values()):
-        f = LESSONS / uid / "v3/lesson.yml"
-        if not f.is_file():
-            continue
-        src = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("source") or {}
-        dp, stamped = nfc(src.get("drive_path") or ""), src.get("docx_md5")
-        if not stamped:
-            stale.add(uid)          # 沒指紋 = 抽取當時沒通過逐字門，或原稿已經變了
-        elif dp in local and f"md5-12:{local[dp]['md5'][:12]}" != stamped:
-            stale.add(uid)
+    stale = stale_lessons(local, by_path,
+                          seed={by_path[k] for k in changed + removed if k in by_path})
 
     print(f"\n{'=' * 46}")
     if stale:
