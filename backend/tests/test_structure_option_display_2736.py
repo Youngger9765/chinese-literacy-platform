@@ -157,6 +157,61 @@ def test_options_carry_no_leftover_box_marker():
     )
 
 
+def test_the_whole_payload_is_clean_not_just_rows():
+    """掃**整個** payload，不是只掃 `rows`。
+
+    2026-08-18 的教訓：干擾項移除只加在 `_sanitize_row_for_client`（管 `rows`），
+    而 `worksheet_rows` 走的是另一條消毒路徑，漏掉了。
+    我本機的鎖也只走 `rows` —— 於是**本機全綠、staging 40 課裡有 39 個 `□①`**。
+
+    鎖跟修復犯了同一個錯：都只看了一半。所以這條改成序列化整個 payload 再掃，
+    結構長出新的分支時不會再從縫隙溜走。
+    """
+    bad_box, bad_ans = [], []
+    for uid, served in _served():
+        blob = json.dumps(served, ensure_ascii=False)
+        for m in DISTRACTOR_RE.finditer(blob):
+            bad_box.append((uid, blob[max(0, m.start() - 16): m.start() + 20]))
+        for m in BLANK_RE.finditer(blob):
+            inner = m.group(1).strip()
+            if not inner or inner == "\u3000\u3000\u3000":
+                continue
+            if any(w in inner for w in INSTRUCTION_WORDS):
+                continue
+            # 章節標題用 `【】` 點名主角（`人物一【福爾摩斯】`），那是標題不是填空。
+            # 判準：那一段前面緊接著「人物」「角色」這種標題詞。
+            before = blob[max(0, m.start() - 8): m.start()]
+            if any(w in before for w in ("人物", "角色", "篇章", "文本")):
+                continue
+            bad_ans.append((uid, inner[:20]))
+    assert not bad_box, (
+        f"{len({b[0] for b in bad_box})} 課的 payload 仍有干擾項標記：\n"
+        + "\n".join(f"  {u} …{c}…" for u, c in bad_box[:6])
+    )
+    assert not bad_ans, (
+        f"{len({b[0] for b in bad_ans})} 課的 payload 仍有沒挖空的答案：\n"
+        + "\n".join(f"  {u} 【{v}】" for u, v in bad_ans[:6])
+    )
+
+
+def test_options_are_never_split_artifacts():
+    """選項不可以帶 `【` `】` —— 那一定是整格按圈號切壞的碎片。
+
+    L0072 有一列在 value 裡寫了三組行內選擇（`【□①多 ②少】`），整格切開之後
+    options 變成 `'少】；\n 東西越小【 柳丁 】…'`，而 `【 柳丁 】` 是答案。
+    """
+    bad = []
+    for uid, served in _served():
+        for row in _walk(served.get("rows")):
+            for o in row.get("options") or []:
+                if "【" in o or "】" in o:
+                    bad.append((uid, o[:36]))
+    assert not bad, (
+        f"{len({b[0] for b in bad})} 課的選項是切壞的碎片：\n"
+        + "\n".join(f"  {u} {o!r}" for u, o in bad[:6])
+    )
+
+
 def test_no_distractor_marker_reaches_the_student():
     """`□①` 是「這個選項是錯的」，送到學生端就是把答案印出來。
 
