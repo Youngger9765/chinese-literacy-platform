@@ -101,6 +101,7 @@ from build_reading_audio_manifest import BUCKET, PROVIDER, list_existing  # noqa
 from reading_audio_units import all_units  # noqa: E402
 
 from app.services.tts import synthesize_speech  # noqa: E402
+from app.services.tts.cache import _blob_path, _get_gcs_bucket  # noqa: E402
 
 
 def main() -> int:
@@ -134,6 +135,8 @@ def main() -> int:
     started = time.time()
     prov = open(a.provenance, "a", encoding="utf-8")
 
+    bucket = _get_gcs_bucket()
+
     def work(key: str) -> tuple[str, str | None]:
         # `synthesize_speech` IS the runtime path: it computes the key, checks L1 and
         # GCS, synthesises with the CONFIGURED provider, applies that provider's
@@ -141,9 +144,19 @@ def main() -> int:
         # script cannot name a provider, and therefore cannot name the wrong one.
         try:
             audio = synthesize_speech(missing[key])
-            return key, None if audio else "empty audio"
         except Exception as exc:                       # one sentence must not kill the run
             return key, f"{type(exc).__name__}: {exc}"[:200]
+        if not audio:
+            return key, "empty audio"
+        # Returning bytes is not the same as having filled the cache this run is for.
+        # When Azure fails, `_synthesize_speech_with_provider` falls back to Google and
+        # stores under the GOOGLE prefix (`used_provider` decides the path) — so the
+        # student gets a mainland-accent clip live, the `azure/` key stays missing, and
+        # this loop would report success. Every miss this corpus has ever had was a
+        # success report that nobody checked, so the landing is checked.
+        if bucket is not None and not bucket.blob(_blob_path(key, PROVIDER)).exists():
+            return key, f"synthesised but not stored under {PROVIDER} (provider fell back?)"
+        return key, None
 
     with ThreadPoolExecutor(max_workers=a.workers) as pool:
         futures = {pool.submit(work, k): k for k in keys}
