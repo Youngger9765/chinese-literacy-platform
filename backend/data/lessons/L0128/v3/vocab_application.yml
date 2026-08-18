@@ -1,0 +1,44 @@
+lesson_uid: L0128
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  instruction_note: 本課這句句末沒有句號（其他課多半有），照原稿抄
+  option_bank:
+    A: 屏息以待
+    B: 震撼彈
+    C: 打量
+    D: 鼎力相助
+    E: 嗤之以鼻
+    F: 改寫
+    G: 緊張
+    H: 難以為繼
+    I: 命運共同體
+    J: 大聲疾呼
+  option_bank_note: 代號表印成 2 列 5 欄（A~E／F~J）；A 屏息以待 與 I 命運共同體 未被任何一題使用（原稿如此）
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    stem: 出國參訪經費不足，多虧家長會(   )，募款後才得以順利參賽。
+    answer: D
+  - index: 2
+    stem: 他每天又是珍奶又是炸雞，卻誇口要減肥5公斤，同學都(   )。
+    answer: E
+  - index: 3
+    stem: COVID-19疫情(   )了學習方式，線上上課與會議變得很常見。
+    answer: F
+  - index: 4
+    stem: 新同事走進會議室，先(   )在場的人，想確認哪一位是主管。
+    answer: C
+  - index: 5
+    stem: 他失業後沒有收入，生活(   )，必須省吃儉用。
+    answer: H
+  - index: 6
+    stem: 颱風後，蔬菜供應(   )，大家擔心買不到蔬菜。
+    answer: G
+  - index: 7
+    stem: 塑膠垃圾不會自動分解，環保團體(   )，希望政府加強減塑。
+    answer: J
+  - index: 8
+    stem: 公司毫無預警宣布裁撤部門，這顆(   )讓許多員工措手不及。
+    answer: B

@@ -1,0 +1,451 @@
+# L0010 / G4-L19《把球打好，就夠了嗎？──阿耀與健豪學長的通信（一）》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 10/10 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/4年級/G4-L19把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+
+meta:
+  lesson_uid: L0010
+  catalog_slot: G4-L19
+  title: 把球打好，就夠了嗎？──阿耀與健豪學長的通信（一）
+  level: 4
+  genre: 應用文
+  strategy: 生涯探索──讀書，讓夢想多一條路
+  課文作者: 許元耕
+  學習單: 張明珠
+  pdf_pages: 10
+
+# ── 原稿勘誤 ──────────────────────────────────────────────────
+# 教材本身印錯的地方。線上呈現用修正後的欄位，原樣留在 *_source_text（逐字門比對它）。
+# 彙整全庫：python3 scripts/collect_errata.py
+source_errata:
+  - id: E1
+    section: 三 語詞我最棒
+    locator: 「本課語詞」框
+    source: 揮之不去、有朝一日、勸誡、累癱、雀屏中選、疲憊、豐厚、報酬、擦身而過、
+    corrected: 揮之不去、有朝一日、勸誡、累癱、雀屏中選、疲憊、豐厚、報酬、擦身而過、孤注一擲
+    kind: 漏列
+    why: 框內只列 9 個語詞且以頓號結尾，但第 (3) 小題的答案就是「孤注一擲」，
+      第四大題選項 B 也是它，總表語詞10 同樣列它 —— 學生在框裡找不到要填的字
+    confidence: high
+    evidence: PDF p3 與 document.xml 一致（框內末字為「擦身而過、」）
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 品格聚光燈, subtitle: 生涯探索──讀書，讓夢想多一條路}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  # ⚠️ marking_instruction 放在 body 底下不是排版偏好：split_lesson_modules.py 只搬
+  #    對照表上的頂層 key，放在頂層會被靜默丟掉（v3 完全沒有它，且沒有任何一道門會叫）。
+  marking_instruction:
+    header: ※ 如果你有做到下列事項，請在□內打勾。
+    items:
+      - 請在不太了解的字、詞或句做記號
+      - 重要的地方、喜歡的語詞、句子或段落做上記號。
+
+  # ⚠️ 本課課文是「兩封信」，段號欄在**每封信各自從一重數**（第一封 一~四、第二封 一~八）。
+  #    所以 idx = 學習單印出來的號碼（會重複），seq = 全文連續序號（給 spans 用）。
+  #    念順順印的是「二☞」，而 ☞ 圖形實際落在第二封信的第 2 段（說實話…），
+  #    對應 seq 6 —— 只看 idx 會唸到第一封信的第 2 段，差了四段。
+  paragraph_count: 12
+  letters:
+    - index: 1
+      sender: 阿耀
+      recipient: 健豪學長
+      subject: 主旨：請教─棒球隊學生需要讀書嗎？
+      salutation: 健豪學長，您好：
+      signature: 阿耀 敬上
+      numbered_paragraphs: [1, 2, 3, 4]
+    - index: 2
+      sender: 健豪學長
+      recipient: 阿耀
+      subject: 主旨：RE:請教─棒球隊學生需要讀書嗎？
+      salutation: 阿耀，你好：
+      signature: 健豪學長
+      numbered_paragraphs: [1, 2, 3, 4, 5, 6, 7, 8]
+  paragraphs:
+    - seq: 1
+      idx: 1
+      letter: 1
+      text: 我叫阿耀，是您母校棒球隊的學弟，現在八年級，擔任投手兼外野手。最近我有個煩惱一直在腦中揮之不去，想請教您。
+    - seq: 2
+      idx: 2
+      letter: 1
+      text: 升上八年級後，我被排進先發名單，除了大隊訓練和晨操，我晚上還會自己加練。雖然很累很操，但我真的喜歡棒球，而且不少學長都告訴我們：「球打得好，以後就有高中、大學可讀；更強的話，高中就能直接進職棒！」我總是夢想有朝一日能像您一樣進職棒。
+    - seq: 3
+      idx: 3
+      letter: 1
+      text: 但老師又會勸誡我們：「打球雖然重要，但書還是要讀。」我知道這是為我們好，可是訓練後真的累癱了，一聽到這些話就覺得煩，甚至有點想逃避。我總是在想：一定要讀書嗎？未來真的不能只靠打球嗎？
+    - seq: 4
+      idx: 4
+      letter: 1
+      text: 您是我最崇拜的學長，也是真正走過這條路的人，想聽聽您的看法。謝謝您！
+    - seq: 5
+      idx: 1
+      letter: 2
+      text: 謝謝你的來信，很開心看到你對棒球這麼熱愛。我當年和你一樣，天天拚命練球，心裡只想著怎麼打得更好。
+    - seq: 6
+      idx: 2
+      letter: 2
+      text: 說實話，我以前也覺得只要球打得好，就能進職棒、獲得豐厚報酬。但等我真的進了職棒，我才發現：成功，不只要努力，還要「運氣站在你這邊」。
+    - seq: 7
+      idx: 3
+      letter: 2
+      text: 怎麼說呢？就算你再怎麼拚，還是可能遇到以下這些情況：
+    - seq: 8
+      idx: 4
+      letter: 2
+      text: 同年選秀剛好出現一堆「怪物級」選手，你就算很強，也未必雀屏中選。
+    - seq: 9
+      idx: 5
+      letter: 2
+      text: 長時間比賽、過度疲憊，身體很容易受傷，萬一需要休息，就可能和機會擦身而過。
+    - seq: 10
+      idx: 6
+      letter: 2
+      text: 守備的位置有太多人爭取，即使你實力不錯，也可能沒機會上場。
+    - seq: 11
+      idx: 7
+      letter: 2
+      text: 這些都不是你能控制的。所以我想跟你說：「打球很重要，但如果你孤注一擲，只有這一條路可走，真的太冒險了。」
+    - seq: 12
+      idx: 8
+      letter: 2
+      text: 讀書，不是要你考高分，而是讓你多一條路。當棒球這條路卡住的時候，你還有別的方向可以走。就像比賽不能只練一招，人生也不能只靠一種能力。你準備得越多，選擇就越多喔！祝福你。
+  inline_marked_terms: [揮之不去, 有朝一日, 勸誡, 累癱, 豐厚報酬, 雀屏中選, 疲憊, 擦身而過, 孤注一擲]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（二☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 2          # 學習單印的號碼；第二封信的第 2 段
+  start_letter: 2
+  start_seq: 6                # 全文連續序號（☞ 圖形印在「說實話，我以前也覺得…」該行）
+  end: 課文結束
+  spans_paragraphs: [6, 7, 8, 9, 10, 11, 12]   # 用 seq
+  approx_chars_from_start: 330                 # 教材右緣印的累計字數末值
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark:
+    - {threshold: ＜190字, feedback: 還要多加練習。}
+    - {threshold: 191~220字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞221字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank: [揮之不去, 有朝一日, 勸誡, 累癱, 雀屏中選, 疲憊, 豐厚, 報酬, 擦身而過, 孤注一擲]
+  vocabulary_bank_errata_ref: E1     # 原稿框內漏列「孤注一擲」，見 source_errata
+  items:
+    - {index: 1, word: 有朝一日, definition: 未來的某一天}
+    - {index: 2, word: 疲憊, definition: 身體或精神非常累。}
+    - {index: 3, word: 孤注一擲, definition: 把全部力量或希望放在一次行動上，冒險做最後一搏。}
+    - {index: 4, word: 累癱, definition: 累到像癱瘓了一樣，幾乎動不了。}
+    - {index: 5, word: 雀屏中選, definition: 在一群優秀人才中，被選中了。}
+    - {index: 6, word: 豐厚, definition: 形容東西很豐富、很充足。常用來形容報酬或獎品。}
+    - {index: 7, word: 揮之不去, definition: 一直留在心中或腦中，想忘也忘不了。}
+    - {index: 8, word: 報酬, definition: 指完成事情之後得到的回報。}
+    - {index: 9, word: 勸誡, definition: 好好的提醒或告訴別人不要做錯事。}
+    - {index: 10, word: 擦身而過, definition: 比喻差一點就得到，最後卻錯過人、事或機會。}
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank: {A: 勸誡, B: 孤注一擲, C: 累癱, D: 揮之不去, E: 擦身而過, F: 雀屏中選, G: 豐厚, H: 報酬, I: 有朝一日, J: 疲憊}
+  items:
+    - {index: 1, stem: 今天爬山爬了一整天，我一回家就（　）在沙發上。, answer: C}
+    - {index: 2, stem: 姊姊弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺就（　）。, answer: D}
+    - {index: 3, stem: 這次比賽的獎品非常（　），有玩具、文具，還有禮券！, answer: G}
+    - {index: 4, stem: 公司面臨倒閉危機，老闆（　），拿出全部資金研發新產品。, answer: B}
+    - {index: 5, stem: 他做事總是猶豫不決，每次下定決心時，機會早就和他（　）。, answer: E}
+    - {index: 6, stem: 經過校隊選拔，小華（　），成為正式隊員。, answer: F}
+    - {index: 7, stem: 姊姊（　）哥哥不要一直玩手機，要注意眼睛健康。, answer: A}
+    - {index: 8, stem: 走了一整天的路，我已經（　）不堪，只想躺下休息。, answer: J}
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 把球打好，就夠了嗎？
+  structure: flat
+  rows:
+    - label: 阿耀背景
+      value: |-
+        1.阿耀的夢想：想成為【　】。
+        2.阿耀的疑問：一定要【　】嗎？未來真的不能只靠打球嗎？
+      blanks: [{answer: 職棒選手}, {answer: 讀書}]
+    - label: 健豪學長的回覆
+      value: |-
+        1.學長以前的想法：
+        只要球打好，就能進職棒、獲得豐厚的【　】。
+        2.進職棒後才發現，成功不只要【　】，還要【　】。
+        3.舉例可能會遇到的三種情況
+        (1)選秀遇到怪物級選手，自己未能【　】。
+        (2)因為長時間比賽，身體容易【　】而受傷。
+        (3)守備位置競爭激烈，即使實力不錯，也沒機會上場。
+        4.結論
+        (1)我們無法控制各種情況，雖然打球很重要，但不要【　】，不要只剩一條路可以走。
+        (2)讀書是要讓你【　】。
+      blanks:
+        - {answer: 報酬}
+        - {answer: 努力}
+        - {answer: 運氣}
+        - {answer: 雀屏中選}
+        - {answer: 疲憊}
+        - {answer: 孤注一擲}
+        - {answer: 多一條路可走}
+
+# ── 六 品格聚光燈 ──
+spotlight:
+  strategy_name: 生涯探索──讀書，讓夢想多一條路
+  strategy_type: career
+  blocks:
+    - type: concept_box
+      text: |-
+        「我現在學的這些，真的有用嗎？」讀書不只是為了考高分，也是在累積未來需要的知識和能力。想讓夢想多一條路，可以這樣想：
+        ①想方向：如果原來的計畫改變，還有哪些方向？
+        ②找能力：這些方向需要哪些能力？
+        ③做準備：我現在可以怎麼學？
+    - type: guide
+      text: ◎小試身手：
+
+    # ── 情境一 ──
+    - type: sub_block
+      label: 情境一：運動員的退路
+      items:
+        - type: passage
+          paragraphs:
+            - 智凱是學校羽球隊的王牌，他的夢想是打進國家代表隊。教練提醒他：「如果哪天受傷不能打球，你還有別的計畫嗎？」智凱開始想，如果不能當選手，也許他可以當體能教練或裁判、體育主播。這麼一想，他突然覺得自己該好好讀書了。
+        - type: single
+          index: 1
+          prompt: 【想方向】你覺得智凱為什麼開始想「讀書」？（單選）
+          options: {1: 想讓自己有退路, 2: 想比同學更厲害, 3: 想改變夢想}
+          answer: 1
+        - type: multi
+          index: 2
+          prompt: 【找能力】以下哪些能力對智凱的未來有幫助？（複選）
+          options:
+            1: 英文：出國比賽、與外隊交流
+            2: 溝通表達：接受訪問、與隊友合作
+            3: 醫學與運動防護：預防受傷
+            4: 分析能力：能分析不同戰術
+          answer: [1, 2, 3, 4]
+        - type: matching
+          index: 3
+          instruction: 承第2題，智凱如何學會上述的能力呢？請連連看。
+          left_header: 智凱可以學習的能力
+          right_header: 要怎麼做才能培養這些能力？
+          left:
+            1: 英文
+            2: 醫學與運動防護
+            3: 溝通表達
+            4: 分析能力
+          right:
+            A: 每天練習英文，主動開口與外國人交流。
+            B: 閱讀醫學運動防護文章，學習照顧身體的方法。
+            C: 觀看比賽，練習分析球員表現和戰術。
+            D: 把握小組合作機會，練習聆聽與表達。
+          answer: null
+          answer_carrier: 紅色連線（圖形），文字流無此資訊。⚠️ 原稿的線判讀不出配對：
+            只有 (1)(2) 兩列有筆跡，(3)(4) 兩列完全沒畫；且線段止於連線欄中間、
+            未落在右欄任何錨點上（(1) 一條黑一條紅皆水平向右，(2) 為紅色交叉 X）。
+            不臆測配對 —— 見 diff 註記。
+        - type: multi
+          index: 4
+          label: 從智凱的例子可以學到：
+          prompt: 讀書不是放棄打球，而是讓他擁有【】一條能走的路。
+          options: {1: 多, 2: 少}
+          answer: 1
+      trailing_table:
+        type: table
+        title: 智凱未來可以從事的職業（複選）
+        multi: true
+        options: {ㄅ: 體育教練, ㄆ: 國際比賽翻譯, ㄇ: 體能訓練員或防護員, ㄈ: 體育記者、運動主播}
+        answer: [ㄅ, ㄆ, ㄇ, ㄈ]
+        answer_carrier: 紅色 ☑（圖形）；四項全勾
+
+    # ── 情境二 ──
+    - type: sub_block
+      label: 情境二：讓作品更有內容
+      items:
+        - type: passage
+          paragraphs:
+            - 宥蓁喜歡拍短影片，常常上傳搞笑的片段。但她發現，只靠搞笑，大家看幾次就不想看了。後來，她開始學著寫腳本、學著拍攝並剪輯更精緻的畫面、學著構思主題，她的影片變得更有故事性，也有越來越多人喜歡看。
+        - type: multi
+          index: 1
+          prompt: 【想方向】宥蓁開始「學更多」後，有什麼好處？（複選）
+          options: {1: 讓作品更有內容, 2: 讓興趣變成能力, 3: 全心投入拍片，不管課業}
+          answer: [1, 2]
+        - type: multi
+          index: 2
+          prompt: 【找能力】根據情境描述，以下哪些能力對宥蓁未來有幫助？（複選）
+          options:
+            1: 寫作能力：能想出好看的內容
+            2: 唱跳能力：能增加表演效果
+            3: 觀察能力：能找到有趣的主題
+            4: 攝影能力：能做出流暢的畫面
+          answer: [1, 3, 4]
+        - type: matching
+          index: 3
+          instruction: 承第2題，宥蓁如何學會上述的能力呢？請連連看。
+          left_header: 宥蓁可以學習的能力
+          right_header: 要怎麼做才能培養這些能力？
+          left:
+            1: 寫作能力
+            2: 觀察能力
+            3: 攝影能力
+          right:
+            A: 多觀察生活裡的有趣畫面
+            B: 練習拍攝並剪輯不同主題的影片
+            C: 閱讀故事，練習寫短腳本
+          answer: null
+          answer_carrier: 紅色連線（圖形），文字流無此資訊。⚠️ 同情境一：筆跡只集中在
+            (1) 附近的三筆交叉線，(2)(3) 未畫，線段未落在右欄錨點，判讀不出配對。
+        - type: free_text
+          index: 4
+          label: 從宥蓁的例子可以學到：
+          prompt: 讀書不是放棄興趣，而是讓她【　】。
+          answer: 用興趣做更多事／擁有更多能力
+      trailing_table:
+        type: table
+        title: 未來可以從事的職業（複選）
+        multi: true
+        options: {ㄅ: 作家, ㄆ: 攝影師, ㄇ: 運動員, ㄈ: Youtuber}
+        answer: [ㄅ, ㄆ, ㄈ]
+        answer_carrier: 紅色 ☑（圖形）；ㄇ.運動員 未勾
+
+    # ── 情境三 ──
+    - type: sub_block
+      label: 情境三：學會為自己多準備
+      items:
+        - type: passage
+          paragraphs:
+            - 庭萱很喜歡玩遊戲。有一天，她看到有人能自己設計地圖和角色，便好奇地想：「如果我也會做這些，應該會更好玩吧！」於是，她上網查資料。她發現許多教學影片是英文，就一邊查單字，一邊學習簡單的程式指令，慢慢做出自己的遊戲關卡，還獲得許多網友的支持。
+        - type: free_text
+          index: 1
+          prompt: 【想方向】你覺得庭萱為什麼會想學新的東西？
+          answer: 因為她看見別人能設計遊戲，也想挑戰看看
+          answer_label: (參考答案)
+        - type: free_text
+          index: 2
+          prompt: 【找能力】庭萱學會英文和電腦的基礎知識，這對她有什麼幫助？
+          answer: 英文讓她看懂國外教學影片，電腦知識讓她學會設計地圖、角色
+          answer_label: (參考答案)
+    - type: guide
+      text: 結語：有些學習看不出眼前的用途，卻可能在未來為你開啟新的選擇。
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: D
+      stem: 下列的語詞，何者使用錯誤？
+      options:
+        A: 他憑著流利的英文，從眾多應徵者中「雀屏中選」，得到工作
+        B: 他與夢想的大學「擦身而過」，只差一分沒錄取
+        C: 那次比賽失誤的畫面，一直在他心中「揮之不去」
+        D: 這部電影富含教育意義，小明「勸誡」我去看那部電影
+      teacher_note: D.「勸誡」。語氣嚴肅，此句適合用於「邀請」或「推薦」。
+    - index: 2
+      answer: B
+      stem: 信中提到「成功，不只要努力，還要『運氣站在你這邊』」，這句話主要想表達什麼？
+      options:
+        A: 努力很重要，但運氣比努力更重要
+        B: 成功需要努力，也會受到運氣和機會影響
+        C: 只要實力夠強，就能克服所有外在影響
+        D: 遇到運氣不好時，再努力也沒有什麼作用
+      teacher_note: 這句話表達的是「努力不是唯一因素」，說明人生中有些事無法掌控。
+    - index: 3
+      answer: C
+      stem: 健豪學長列出「遇到怪物級選手」「身體受傷」「沒機會上場」等例子，主要想說明什麼？
+      options:
+        A: 打球時要小心身體健康，避免受傷
+        B: 只有最強的人才能在職棒中生存
+        C: 有些不可預測的因素會影響成功機會
+        D: 運氣不好就不要打球，以免白費心力
+      teacher_note: 健豪學長這一段的重點是：努力並不保證成功，外在條件（運氣、機會、競爭）也會影響結果。他並非在講健康、強弱或勸人放棄，而是在提醒要「多準備不同能力」。
+    - index: 4
+      answer: A
+      stem: 從兩封信的內容推論，阿耀最可能是哪一種學生？
+      options:
+        A: 對讀書有些抗拒，但非常熱愛打球
+        B: 認為課業和球技一樣，都值得投入
+        C: 對未來沒有想法，只照學長的話做
+        D: 想放棄棒球，專心準備學校考試
+      teacher_note: 阿耀說「訓練後真的累癱了，一聽到這些話就覺得煩」，顯示他熱愛棒球但對讀書感到抗拒。
+    - index: 5
+      answer: B
+      stem: 健豪學長在回信中，用了哪一種方法，讓阿耀更明白「讀書能讓人多一條路」？
+      options:
+        A: 他用很多難詞和成語，讓文章更有氣勢
+        B: 他舉出不同的例子，說明只靠打球太危險
+        C: 他用誇張的說法，讓故事更精采
+        D: 他請阿耀自己去體會，不直接告訴他
+      teacher_note: 幫助學生理解：這些例子都是在說明「只靠打球太冒險要多準備一條路」。
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words: [揮之不去, 有朝一日, 勸誡, 累癱, 雀屏中選, 疲憊, 豐厚, 報酬, 擦身而過, 孤注一擲]
+  grid_size: [10, 10]
+  grid:
+    - 疲指累積哽咽豐收疲倦
+    - 勞揮之不去喉橡皮擦憊
+    - 鴉雀無聲豐刮目相看孔
+    - 豐光屏厚滿有狐孤確雀
+    - 富輝障中打渾朝注定開
+    - 循序漸進選歉嘲一投屏
+    - 擦身而過擇疚笑擲日飛
+    - 海灘猶報仇勸浪鄭先馳
+    - 勸回豫恩敵誡潮累癱而
+    - 告報酬靦腆小心翼翼過
+  answers_are_graphical: true
+  answer_paths:
+    - word: 疲憊
+      cells: [[1, 9], [2, 10]]
+      direction: diagonal_down_right
+    - word: 揮之不去
+      cells: [[2, 2], [2, 3], [2, 4], [2, 5]]
+      direction: horizontal
+    - word: 雀屏中選
+      cells: [[3, 2], [4, 3], [5, 4], [6, 5]]
+      direction: diagonal_down_right
+    - word: 豐厚
+      cells: [[3, 5], [4, 4]]
+      direction: diagonal_down_left
+    - word: 有朝一日
+      cells: [[4, 6], [5, 7], [6, 8], [7, 9]]
+      direction: diagonal_down_right
+    - word: 孤注一擲
+      cells: [[4, 8], [5, 8], [6, 8], [7, 8]]
+      direction: vertical
+    - word: 擦身而過
+      cells: [[7, 1], [7, 2], [7, 3], [7, 4]]
+      direction: horizontal
+    - word: 勸誡
+      cells: [[8, 6], [9, 6]]
+      direction: vertical
+    - word: 累癱
+      cells: [[9, 8], [9, 9]]
+      direction: horizontal
+    - word: 報酬
+      cells: [[10, 2], [10, 3]]
+      direction: horizontal
+
+# ── 九 知識補給站 ──
+resources:
+  items:
+    - {index: 1, title: 蔡康永｜如何讓自己更進步, duration: '2:30', duration_seconds: 150, source: EC couple x 安麗小夫妻}
+    - {index: 2, title: '【 心靈七湯 】讀書不是為了考試，而是為了認識厲害的人。《 心靈七湯 》EP 004', duration: '3:29', duration_seconds: 209, source: 志祺七七}

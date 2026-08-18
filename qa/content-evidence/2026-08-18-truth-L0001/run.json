@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0001",
+  "catalog_slot": "G4-L10",
+  "pdf_pages": 8,
+  "pages_read": 8,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 0,
+  "notes": "四道門一次過。找字 11 條路徑全部由 grid 反查驗證。"
+}

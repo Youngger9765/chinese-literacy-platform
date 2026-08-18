@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0130",
+  "catalog_slot": "G9-L0",
+  "pdf_pages": 3,
+  "pages_read": 3,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 0,
+  "notes": "與 L0021/L0049/L0077/L0107 同一個檔（md5 122123fc7cdb216d4d8684d196a9c4a7）。獨立重抽後得 11 段，與 L0021/L0077/L0107 逐字相同。L0049 的 12 段是誤切：直接查 word/document.xml，『過了一千多天』在同一個 <w:p> 之內（該儲存格的直接 w:p 子節點共 28 個，課文佔前 11 個），既無段落界線也無 w:br —— 機器證據，不只是三比一多數決。本課三種答案載體都是 0（sym/roundRect/非 auto bdr），且是『本來就沒有』：只有兩個大題。"
+}

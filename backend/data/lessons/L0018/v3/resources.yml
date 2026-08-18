@@ -1,0 +1,16 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 多補鈣會長高？ 打籃球會長高？ 打臉各種長高迷思!
+    duration: (3:35)
+    source: 蒼藍鴿的醫學天地
+    qr_code: true
+  - index: 2
+    title: 網路「長高貼片」真有效？ 花千元實測30天成果他傻眼
+    duration: (6:13)
+    source: 台灣達人秀
+    qr_code: true

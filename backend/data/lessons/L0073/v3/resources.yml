@@ -1,0 +1,16 @@
+lesson_uid: L0073
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 邊緣人被排擠？會讓你被朋友討厭的三件事！
+    duration: '8:15'
+    duration_seconds: 495
+    source: SKimmy
+  - index: 2
+    title: 讀書時間長不一定有效，5個方法讓你輕鬆變學霸
+    duration: ４:20
+    duration_seconds: 260
+    source: 風傳媒

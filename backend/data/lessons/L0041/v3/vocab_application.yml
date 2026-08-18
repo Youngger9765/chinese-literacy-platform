@@ -1,0 +1,39 @@
+lesson_uid: L0041
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 羅馬不是一天造成的
+    B: 鬆懈
+    C: 贊助
+    D: 口腹之欲
+    E: 輕盈
+    F: 鍛鍊
+    G: 日復一日
+    H: 拜會
+  items:
+  - index: 1
+    stem: 他（　）進行重量訓練，逐漸練出結實有力的肌肉。
+    answer: G
+  - index: 2
+    stem: 他持續（　）核心肌群，身體變得更加穩定有力。
+    answer: F
+  - index: 3
+    stem: 她隨著音樂（　）起舞，成為眾人的焦點。
+    answer: E
+  - index: 4
+    stem: 這場義賣晚會是由國內各大廠商（　），義賣所得將全數捐出。
+    answer: C
+  - index: 5
+    stem: 每一個人都有（　），但應適可而止，以免增加身體的負擔。
+    answer: D
+  - index: 6
+    stem: 多給點時間吧！（　），一名偉大的投手也是需要花時間成長。
+    answer: A
+  - index: 7
+    stem: 畢業後，他特地回到母校（　）恩師，感謝老師多年的教導。
+    answer: H
+  - index: 8
+    stem: 養成運動習慣需要持之以恆，一旦（　），就可能退回原來的狀態。
+    answer: B

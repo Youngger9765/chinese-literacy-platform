@@ -1,0 +1,39 @@
+lesson_uid: L0022
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 邁開
+    B: 莫名
+    C: 靦腆
+    D: 漣漪
+    E: 計較
+    F: 思緒
+    G: 異樣
+    H: 一如往常
+  items:
+  - index: 1
+    stem: 他心愛的吊飾被同學弄髒，他卻一點也不（　），真是不容易。
+    answer: E
+  - index: 2
+    stem: 看著泛黃的舊照片，他的（　）飄回了在公園玩耍的童年時光。
+    answer: F
+  - index: 3
+    stem: 雖然風雨交加，交通警察還是（　）的站在路口指揮，十分敬業。
+    answer: H
+  - index: 4
+    stem: 在作品得獎後，面對大家的稱讚，她露出了（　）的笑容。
+    answer: C
+  - index: 5
+    stem: 講者勵志的人生故事，在我心中起了小小的（　），也讓我更有勇氣。
+    answer: D
+  - index: 6
+    stem: 走在黑漆漆、空無一人的校園，他感到（　）的緊張，想趕緊離開。
+    answer: B
+  - index: 7
+    stem: 幸好同學及時發現他的（　），才來得及在他暈倒前扶住他。
+    answer: G
+  - index: 8
+    stem: 看見多年不見的老友，他開心的（　）腳步迎上前去。
+    answer: A

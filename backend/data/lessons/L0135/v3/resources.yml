@@ -1,0 +1,18 @@
+lesson_uid: L0135
+version_id: v3
+section_no: 二
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 外來鳥界流氓「八哥」入侵 繁衍神速生態災難超囂張？
+    duration: (6:49)
+    source: 台灣達人秀
+    has_qr: true
+  - index: 2
+    title: 【外來種】到處都看到八哥越來越多？你知道八哥有分本土和外來種嗎？｜八哥「隻」多少
+    duration: (22:48)
+    recommend_range: 建議觀看：(06:53~08:07)
+    source: 公共電視
+    has_qr: true
+  note: 兩則各附一個 QR code 圖片；QR 圖上沒有可讀文字

@@ -1,0 +1,126 @@
+lesson_uid: L0040
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 愧疚
+  - 激情洋溢
+  - 按表操課
+  - 節節攀升
+  - 相輔相成
+  - 融會貫通
+  - 康莊大道
+  - 座無虛席
+  - 出爐
+  - 沸騰
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 激情感康莊大道輔導師
+  - 發文武雙全武出助允許
+  - 相允動激按沸融爐諾允
+  - 交輔情融表騰解攀文幸
+  - 通洋相化操費爬允博福
+  - 溢按就成課力武愛座洋
+  - 案扭節節攀升座位無溢
+  - 件激動金塊慚愧貫虛揪
+  - 沸融會貫通內咎通席心
+  - 水藤條鐵路人愧對次無
+  answers_are_graphical: true
+  answers_printed: partial
+  answer_note: 10 個目標語詞都圈了，但「愧疚」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。
+  answer_paths:
+  - word: 康莊大道
+    cells:
+    - - 1
+      - 4
+    - - 1
+      - 5
+    - - 1
+      - 6
+    - - 1
+      - 7
+    direction: horizontal
+  - word: 出爐
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 8
+    direction: diagonal_down_right
+  - word: 相輔相成
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 激情洋溢
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 3
+    - - 5
+      - 2
+    - - 6
+      - 1
+    direction: diagonal_down_left
+  - word: 按表操課
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 5
+    - - 5
+      - 5
+    - - 6
+      - 5
+    direction: vertical
+  - word: 沸騰
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 座無虛席
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    direction: vertical
+  - word: 節節攀升
+    cells:
+    - - 7
+      - 3
+    - - 7
+      - 4
+    - - 7
+      - 5
+    - - 7
+      - 6
+    direction: horizontal
+  - word: 融會貫通
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal

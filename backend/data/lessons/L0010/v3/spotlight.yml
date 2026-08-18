@@ -1,0 +1,164 @@
+lesson_uid: L0010
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 生涯探索──讀書，讓夢想多一條路
+  strategy_type: career
+  blocks:
+  - type: concept_box
+    text: '「我現在學的這些，真的有用嗎？」讀書不只是為了考高分，也是在累積未來需要的知識和能力。想讓夢想多一條路，可以這樣想：
+
+      ①想方向：如果原來的計畫改變，還有哪些方向？
+
+      ②找能力：這些方向需要哪些能力？
+
+      ③做準備：我現在可以怎麼學？'
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: 情境一：運動員的退路
+    items:
+    - type: passage
+      paragraphs:
+      - 智凱是學校羽球隊的王牌，他的夢想是打進國家代表隊。教練提醒他：「如果哪天受傷不能打球，你還有別的計畫嗎？」智凱開始想，如果不能當選手，也許他可以當體能教練或裁判、體育主播。這麼一想，他突然覺得自己該好好讀書了。
+    - type: single
+      index: 1
+      prompt: 【想方向】你覺得智凱為什麼開始想「讀書」？（單選）
+      options:
+        1: 想讓自己有退路
+        2: 想比同學更厲害
+        3: 想改變夢想
+      answer: 1
+    - type: multi
+      index: 2
+      prompt: 【找能力】以下哪些能力對智凱的未來有幫助？（複選）
+      options:
+        1: 英文：出國比賽、與外隊交流
+        2: 溝通表達：接受訪問、與隊友合作
+        3: 醫學與運動防護：預防受傷
+        4: 分析能力：能分析不同戰術
+      answer:
+      - 1
+      - 2
+      - 3
+      - 4
+    - type: matching
+      index: 3
+      instruction: 承第2題，智凱如何學會上述的能力呢？請連連看。
+      left_header: 智凱可以學習的能力
+      right_header: 要怎麼做才能培養這些能力？
+      left:
+        1: 英文
+        2: 醫學與運動防護
+        3: 溝通表達
+        4: 分析能力
+      right:
+        A: 每天練習英文，主動開口與外國人交流。
+        B: 閱讀醫學運動防護文章，學習照顧身體的方法。
+        C: 觀看比賽，練習分析球員表現和戰術。
+        D: 把握小組合作機會，練習聆聽與表達。
+      answer: null
+      answer_carrier: 紅色連線（圖形），文字流無此資訊。⚠️ 原稿的線判讀不出配對： 只有 (1)(2) 兩列有筆跡，(3)(4) 兩列完全沒畫；且線段止於連線欄中間、 未落在右欄任何錨點上（(1) 一條黑一條紅皆水平向右，(2) 為紅色交叉 X）。 不臆測配對 —— 見 diff 註記。
+    - type: multi
+      index: 4
+      label: 從智凱的例子可以學到：
+      prompt: 讀書不是放棄打球，而是讓他擁有【】一條能走的路。
+      options:
+        1: 多
+        2: 少
+      answer: 1
+    trailing_table:
+      type: table
+      title: 智凱未來可以從事的職業（複選）
+      multi: true
+      options:
+        ㄅ: 體育教練
+        ㄆ: 國際比賽翻譯
+        ㄇ: 體能訓練員或防護員
+        ㄈ: 體育記者、運動主播
+      answer:
+      - ㄅ
+      - ㄆ
+      - ㄇ
+      - ㄈ
+      answer_carrier: 紅色 ☑（圖形）；四項全勾
+  - type: sub_block
+    label: 情境二：讓作品更有內容
+    items:
+    - type: passage
+      paragraphs:
+      - 宥蓁喜歡拍短影片，常常上傳搞笑的片段。但她發現，只靠搞笑，大家看幾次就不想看了。後來，她開始學著寫腳本、學著拍攝並剪輯更精緻的畫面、學著構思主題，她的影片變得更有故事性，也有越來越多人喜歡看。
+    - type: multi
+      index: 1
+      prompt: 【想方向】宥蓁開始「學更多」後，有什麼好處？（複選）
+      options:
+        1: 讓作品更有內容
+        2: 讓興趣變成能力
+        3: 全心投入拍片，不管課業
+      answer:
+      - 1
+      - 2
+    - type: multi
+      index: 2
+      prompt: 【找能力】根據情境描述，以下哪些能力對宥蓁未來有幫助？（複選）
+      options:
+        1: 寫作能力：能想出好看的內容
+        2: 唱跳能力：能增加表演效果
+        3: 觀察能力：能找到有趣的主題
+        4: 攝影能力：能做出流暢的畫面
+      answer:
+      - 1
+      - 3
+      - 4
+    - type: matching
+      index: 3
+      instruction: 承第2題，宥蓁如何學會上述的能力呢？請連連看。
+      left_header: 宥蓁可以學習的能力
+      right_header: 要怎麼做才能培養這些能力？
+      left:
+        1: 寫作能力
+        2: 觀察能力
+        3: 攝影能力
+      right:
+        A: 多觀察生活裡的有趣畫面
+        B: 練習拍攝並剪輯不同主題的影片
+        C: 閱讀故事，練習寫短腳本
+      answer: null
+      answer_carrier: 紅色連線（圖形），文字流無此資訊。⚠️ 同情境一：筆跡只集中在 (1) 附近的三筆交叉線，(2)(3) 未畫，線段未落在右欄錨點，判讀不出配對。
+    - type: free_text
+      index: 4
+      label: 從宥蓁的例子可以學到：
+      prompt: 讀書不是放棄興趣，而是讓她【　】。
+      answer: 用興趣做更多事／擁有更多能力
+    trailing_table:
+      type: table
+      title: 未來可以從事的職業（複選）
+      multi: true
+      options:
+        ㄅ: 作家
+        ㄆ: 攝影師
+        ㄇ: 運動員
+        ㄈ: Youtuber
+      answer:
+      - ㄅ
+      - ㄆ
+      - ㄈ
+      answer_carrier: 紅色 ☑（圖形）；ㄇ.運動員 未勾
+  - type: sub_block
+    label: 情境三：學會為自己多準備
+    items:
+    - type: passage
+      paragraphs:
+      - 庭萱很喜歡玩遊戲。有一天，她看到有人能自己設計地圖和角色，便好奇地想：「如果我也會做這些，應該會更好玩吧！」於是，她上網查資料。她發現許多教學影片是英文，就一邊查單字，一邊學習簡單的程式指令，慢慢做出自己的遊戲關卡，還獲得許多網友的支持。
+    - type: free_text
+      index: 1
+      prompt: 【想方向】你覺得庭萱為什麼會想學新的東西？
+      answer: 因為她看見別人能設計遊戲，也想挑戰看看
+      answer_label: (參考答案)
+    - type: free_text
+      index: 2
+      prompt: 【找能力】庭萱學會英文和電腦的基礎知識，這對她有什麼幫助？
+      answer: 英文讓她看懂國外教學影片，電腦知識讓她學會設計地圖、角色
+      answer_label: (參考答案)
+  - type: guide
+    text: 結語：有些學習看不出眼前的用途，卻可能在未來為你開啟新的選擇。

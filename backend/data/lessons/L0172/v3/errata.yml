@@ -1,0 +1,12 @@
+lesson_uid: L0172
+version_id: v3
+errata:
+- id: E1
+  section: 七 閱讀理解
+  locator: 第 4 題右側的深藍色解析文字方塊
+  source: (Ｄ)符合「想很多」是認真、細心，也可以是力量。」
+  corrected: (Ｄ)符合「想很多」是認真、細心，也可以是力量。
+  kind: 贅餘標點
+  why: 句末多一個沒有配對的下引號「」」；前面的「想很多」已經自行閉合
+  confidence: medium
+  evidence: PDF（w1s6.pdf p1）與 document.xml 一致，兩處都有那個多出來的 」

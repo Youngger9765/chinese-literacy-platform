@@ -1,0 +1,111 @@
+lesson_uid: L0158
+version_id: v3
+section_no: 一
+sentence_matching:
+  instruction: '請模仿例句作法：
+
+    ❶閱讀參考句；❷找出參考句對應的原文；❸將對應的原文(  )起來
+
+    ❹在下方的[  ]寫上參考句代號。'
+  answer_carrier: 橘色代號（run 層 w:color 與字元樣式兩種都有），文字流有此資訊
+  shape_note: '本課**分成兩題**（第一題標「例句」、第二題），各自有一份原文與一組 7 個參考句，
+
+    兩題的參考句代號各自從 1 編到 7（不是連號）。與 L0155 的「一份原文 8 段」形狀不同。'
+  parts:
+  - part: 第一題
+    label: 例句
+    passage_paragraphs:
+    - (賈人某，至直隸界)，（忽大雨雹，伏禾中）。（聞空中云）：
+    - 「此張不量田，勿傷其稼。」(賈私意張氏既云「不良」，何反佑護)？
+    - （雹止，入村，訪問其人），（且問取名之義）
+    passage_note: '照原稿的**印刷斷行**分成三行（每一行下方另有一行放［N］代號）。
+
+      ⚠️ 不要把三行接成一整段 —— 原稿沒有那個接法，逐字門會判 FAIL 而且判得對。
+
+      括號有全形也有半形，照各自原樣。'
+    reference_label: 參考句：
+    reference_sentences:
+      1: 他聽到空中有聲音說
+      2: 並且詢問那人叫這名字的意思
+      3: 商人心想：這張氏既然叫「不良」，為何反而受上天庇佑
+      4: 忽然下起大冰雹，他連忙躲到田間
+      5: 等冰雹停止，商人進入村子，向人打聽那個人
+      6: 某位商人，來到直隸省的邊界附近
+      7: 這是張不量的田，不要傷了他的莊稼
+    segments:
+    - index: 1
+      classical: 賈人某，至直隸界
+      answer: 6
+    - index: 2
+      classical: 忽大雨雹，伏禾中
+      answer: 4
+    - index: 3
+      classical: 聞空中云
+      answer: 1
+    - index: 4
+      classical: 此張不量田，勿傷其稼。
+      answer: 7
+      note: 這一段用原有的引號「」當界線，沒有另外加括號
+    - index: 5
+      classical: 賈私意張氏既云「不良」，何反佑護
+      answer: 3
+    - index: 6
+      classical: 雹止，入村，訪問其人
+      answer: 5
+    - index: 7
+      classical: 且問取名之義
+      answer: 2
+    pointer_note: 參考句［6］那一行左邊印了一個指標符號（圖形，非文字），指向例句的第一個答案
+  - part: 第二題
+    passage_paragraphs:
+    - text: '　　（蓋張素豐，積粟甚富）。（每春間貧民就貸），（償時多寡不較，悉納
+
+        之），(未嘗執概取盈)，（故名「不量」，非不良也）。(眾趨田中，見稞穗
+
+        摧折如麻）。(獨張氏諸田無恙)。'
+      source_text: '　　（蓋張素豐，積粟甚富）。（每春間民就貸），（償時多寡不較，悉納
+
+        之），(未嘗執概取盈)，（故名「不量」，非不良也）。(眾趨田中，見稞穗
+
+        摧折如麻）。(獨張氏諸田無恙)。'
+      errata_ref: E1
+    passage_note: '照原稿的**印刷斷行**分成三行（行與行之間另有一行放［N］代號）。
+
+      ⚠️ 斷行處會把一個括號段切開（「悉納／之）」「見稞穗／摧折如麻）」），
+
+      那是版面換行不是兩段 —— segments 欄位裡是完整的段。'
+    reference_label: 參考句：
+    reference_sentences:
+      1: 不曾拿工具測量，要人還到足夠的數量
+      2: 原來張氏素來富有，積蓄的穀物很多
+      3: 償還時不管多少也不計較，全都收下
+      4: 只有張氏的田一點事也沒有
+      5: 每到春天，窮人就來找他借貸穀物
+      6: 後來眾人趕到田中，只見麥子被冰雹砸得像亂麻一樣
+      7: 所以才叫他「不量」，並非不良啊
+    segments:
+    - index: 1
+      classical: 蓋張素豐，積粟甚富
+      answer: 2
+    - index: 2
+      classical: 每春間貧民就貸
+      answer: 5
+      note: 原稿此處漏一個「貧」字，見 source_errata E1
+    - index: 3
+      classical: 償時多寡不較，悉納之
+      answer: 3
+    - index: 4
+      classical: 未嘗執概取盈
+      answer: 1
+    - index: 5
+      classical: 故名「不量」，非不良也
+      answer: 7
+    - index: 6
+      classical: 眾趨田中，見稞穗摧折如麻
+      answer: 6
+    - index: 7
+      classical: 獨張氏諸田無恙
+      answer: 4
+  answer_check_note: '兩題各自的 7 個代號都恰好是 1~7 的完整排列、每個參考句只被用到一次，
+
+    而且逐條語意都對得上 —— 兩項交叉檢查都通過。'

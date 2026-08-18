@@ -1,0 +1,51 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 嘰嘰喳喳
+  - 根據
+  - 均衡
+  - 分泌
+  - 促進
+  - 富含
+  - 大幅度
+  - 迷思
+  - 攝取
+  - 前提
+  items:
+  - index: 1
+    word: 均衡
+    definition: 各方面搭配得剛好，不會只偏重某一部分。
+  - index: 2
+    word: 前提
+    definition: 做一件事之前，要先做到或注意的事。
+  - index: 3
+    word: 嘰嘰喳喳
+    definition: 形容很多人一直說話，聲音又多又吵。
+  - index: 4
+    word: 根據
+    definition: 按照、依據。
+  - index: 5
+    word: 富含
+    definition: 含有很多，很豐富。
+  - index: 6
+    word: 攝取
+    definition: 把食物或營養吃進、喝進身體裡。
+  - index: 7
+    word: 分泌
+    definition: 身體自己製造某種物質，並把它釋放出來。
+  - index: 8
+    word: 促進
+    definition: 幫助某件事發展得更快、更好。
+  - index: 9
+    word: 迷思
+    definition: 很多人相信，但其實不一定正確的想法。
+  - index: 10
+    word: 大幅度
+    definition: 改變或變動的程度很大。

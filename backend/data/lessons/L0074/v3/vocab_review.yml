@@ -1,0 +1,137 @@
+lesson_uid: L0074
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 食物鏈
+  - 追根究柢
+  - 猛禽
+  - 侷限
+  - 坦承錯誤
+  - 先驅
+  - 苦撐待變
+  - 契作協議
+  - 層層把關
+  - 青睞
+  - 鍥而不捨
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 坦協友善耕作天青睞自
+  - 承助心血機械稻收購掏
+  - 錯青劇毒老鷹契侷限腰
+  - 誤來鳥食物鏈作促局包
+  - 推千落葉劑老協使科鍥
+  - 廣層出不窮鷹議猛學而
+  - 追派層手氣紅豆禽證不
+  - 根根出把大量啄食據捨
+  - 知研究持關苦撐待變棄
+  - 底發追柢卡噴灑命先驅
+  answers_are_graphical: true
+  answer_paths:
+  - word: 青睞
+    cells:
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 坦承錯誤
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 1
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 侷限
+    cells:
+    - - 3
+      - 8
+    - - 3
+      - 9
+    direction: horizontal
+  - word: 契作協議
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    direction: vertical
+  - word: 食物鏈
+    cells:
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 鍥而不捨
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 層層把關
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 3
+    - - 8
+      - 4
+    - - 9
+      - 5
+    direction: diagonal_down_right
+  - word: 猛禽
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 8
+    direction: vertical
+  - word: 追根究柢
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 2
+    - - 9
+      - 3
+    - - 10
+      - 4
+    direction: diagonal_down_right
+  - word: 苦撐待變
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  - word: 先驅
+    cells:
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal

@@ -1,0 +1,41 @@
+lesson_uid: L0064
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 遙不可及
+    B: 難以平息
+    C: 沉悶
+    D: 拉扯
+    E: 交織
+    F: 悲壯
+    G: 反駁
+    H: 苦澀
+  option_bank_note: 8 個代號對應 8 道小題，一一對應無剩餘。語詞框的 10 個語詞裡，波瀾、酸澀未被本大題使用。
+  answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 這部電影討論的議題比較嚴肅，因此有的人覺得劇情太過（　）。
+    answer: C
+  - index: 2
+    stem: 看著喜歡的人和別人一起離開校園，我心裡湧起一股說不出的（　）。
+    answer: H
+  - index: 3
+    stem: 看著孫子上台領獎的身影，阿婆的眼神中（　）著感動與驕傲。
+    answer: E
+  - index: 4
+    stem: 電影中的戰士為了保護同伴奮戰到最後，畫面十分（　）。
+    answer: F
+  - index: 5
+    stem: 科技日新月異，使得人類探索宇宙的夢想不再（　）。
+    answer: A
+  - index: 6
+    stem: 即使誤會已經澄清，他心中的不滿仍（　）。
+    answer: B
+  - index: 7
+    stem: 雖然理想與現實的（　）從未停歇，但他仍選擇堅持夢想。
+    answer: D
+  - index: 8
+    stem: 面對沒有根據的指控，他冷靜提出具體證據（　）對方。
+    answer: G

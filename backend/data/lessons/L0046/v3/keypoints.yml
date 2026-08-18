@@ -1,0 +1,66 @@
+lesson_uid: L0046
+version_id: v3
+section_no: 六
+keypoints:
+  title: 文章重點表
+  layout: matrix
+  columns:
+  - 細節
+  - 會飛的小種子
+  - 跟著太陽轉的花苞
+  - 滾來滾去的草球
+  column_note: '第一欄是表格最左側的直排合併儲存格，教材印「細節」；它底下三列的名稱
+
+    （植物的特性／科學家的設計／功能）就是各列的列名，所以用「細節」當這一欄的欄名。
+
+    後三欄的欄名是教材第二列「小主題」印的三個標題，由左到右。
+
+    ⚠️ row 的 key 與 columns 逐字相同（skill ⑥.55b 的 L0004 事故），不要改成英文。'
+  main_topic_label: 大主題
+  main_topic: 以植物為師的科學
+  sub_topic_label: 小主題
+  summary_label: 總結
+  summary: 植物有許多聰明的生存技巧，為人類帶來【　】。
+  summary_blanks:
+  - answer: 無限啟發
+  spanning_rows_note: '「大主題」與「總結」是橫跨全部三個小主題欄的整列合併儲存格，塞不進 matrix 的
+
+    row×column 網格，故照 L0030 的 `topic_cell` 前例另存成純量欄位。
+
+    ⚠️ 已知落差：消費端 keypoints_to_structure._columns_to_structure_table 只吃
+
+    `columns`＋`rows`，這兩列**目前不會被畫出來**。資料在檔案裡沒有遺失，
+
+    但要讓它上畫面得改消費端，不在本次抽取範圍。'
+  answer_carrier: 橘色手寫字；文字流的【　】內已填有答案
+  rows:
+  - 細節: 植物的特性
+    會飛的小種子: 楓樹的種子從樹上飄落時，會像小直升機一樣【　】
+    會飛的小種子_blanks:
+    - answer: 旋轉降落
+    跟著太陽轉的花苞: 向日葵花苞整天追逐太陽，具有【　】
+    跟著太陽轉的花苞_blanks:
+    - answer: 向陽性
+    滾來滾去的草球: 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　】。
+    滾來滾去的草球_blanks:
+    - answer: 散播種子
+  - 細節: 科學家的設計
+    會飛的小種子: 只有【　】翅膀的飛行機器人
+    會飛的小種子_blanks:
+    - answer: 一片
+    跟著太陽轉的花苞: 自動調整角度的【　】
+    跟著太陽轉的花苞_blanks:
+    - answer: 仿生太陽能板
+    滾來滾去的草球: 風吹時，會滾來滾去的【　】
+    滾來滾去的草球_blanks:
+    - answer: 探測器
+  - 細節: 功能
+    會飛的小種子: 構造簡單，體積小、省電。沒電時它會【　】而下，比較不會摔壞。
+    會飛的小種子_blanks:
+    - answer: 盤旋
+    跟著太陽轉的花苞: 仿生太陽能板跟著太陽轉，讓【　】大幅提升。
+    跟著太陽轉的花苞_blanks:
+    - answer: 發電量
+    滾來滾去的草球: 探測器靠火星上的強風滾動，可以快速探索【　】地表。
+    滾來滾去的草球_blanks:
+    - answer: 火星

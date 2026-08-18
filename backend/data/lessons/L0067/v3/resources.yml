@@ -1,0 +1,11 @@
+lesson_uid: L0067
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 《賴桑的千年之約》
+    duration: (12:00)
+    source: 遠見叢書
+    has_qr: true

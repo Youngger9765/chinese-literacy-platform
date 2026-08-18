@@ -1,0 +1,40 @@
+lesson_uid: L0031
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 心理素質
+    B: 自律
+    C: 注重
+    D: 干擾
+    E: 劣勢
+    F: 過關斬將
+    G: 不得閒
+    H: 按部就班
+  items:
+  - index: 1
+    stem: 夜深了，請把電視機的音量轉小，以免（　）他人的睡眠。
+    answer: D
+  - index: 2
+    stem: （　）強的人，面對重要比賽時，較能保持冷靜、發揮實力。
+    answer: A
+  - index: 3
+    stem: 這次的辯論比賽，反方陷入（　），勝算不大。
+    answer: E
+  - index: 4
+    stem: 他生活十分（　），每天按時作息，也固定安排運動。
+    answer: B
+  - index: 5
+    stem: 隨著國民平均所得的提高，國人也越來越（　）生活品質。
+    answer: C
+  - index: 6
+    stem: 老師提醒大家只要（　）複習，每天累積一點，就能提升成績。
+    answer: H
+  - index: 7
+    stem: 媽媽一下班就忙著煮飯、整理家裡，從早到晚都（　）。
+    answer: G
+  - index: 8
+    stem: 籃球隊一路（　），接連擊敗強敵，終於闖進冠軍賽。
+    answer: F
+  answer_note: 第 2、4、5 題原稿的答案印的是全形「Ａ」「Ｂ」「Ｃ」

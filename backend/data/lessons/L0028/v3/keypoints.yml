@@ -1,0 +1,54 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 五
+keypoints:
+  title: 掃雷英雄馬嘎瓦
+  layout: list
+  rows:
+  - label: 巨鼠外型與優點
+    value: 馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　】。
+    blanks:
+    - answer: 地雷
+  - label: 地雷危害
+    value: 戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　】的工作。
+    blanks:
+    - answer: 刻不容緩
+  - label: 兩種掃雷方式的比較
+    items:
+    - label: 傳統掃雷
+      value: 由掃雷人員手持【　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。
+      blanks:
+      - answer: 金屬探測器
+    - label: 巨鼠掃雷1
+      value: 靠【　】偵測地雷，只對【　】反應，工作人員能快速鎖定炸藥位置
+      blanks:
+      - answer: 嗅覺
+      - answer: 炸藥
+    - label: 巨鼠掃雷2
+      value: 安全：不會引爆地雷。
+      source_text: 2安全：不會引爆地雷。
+      errata_ref: E1
+    - label: 巨鼠掃雷3-效率
+      value: 效率（　）
+      options:
+        1: 高
+        2: 低
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元），一般文字抽取讀不到
+    - label: 巨鼠掃雷3-訓練成本
+      value: 訓練成本（　）
+      options:
+        1: 高
+        2: 低
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元），一般文字抽取讀不到
+  - label: 巨鼠貢獻
+    items:
+    - label: '1'
+      value: 巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。
+    - label: '2'
+      value: 其中最著名的巨鼠就是馬嘎瓦。
+    - label: '3'
+      value: 巨鼠的形象已經變成【　】的英雄。
+      blanks:
+      - answer: 救苦救難

@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0142",
+  "catalog_slot": "G9-L21",
+  "pdf_pages": 14,
+  "pages_read": 14,
+  "wall_clock_seconds": null,
+  "read_calls": 3,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "本課同時有兩種箭號：2 個是 w:sym Wingdings F0E0（圖形符號，不在文字層，照字面寫會被逐字門判抄錯，改用 leading_marker_note 記載），3 個是概念框裡真的 w:t 字元（照抄無誤）—— 同一課兩種都有，不能一概而論。念順順起點第 8 段有兩個印出來的訊號（instruction「（八）」＋ ☞ 錨在段號欄的「八」）；字數欄另給獨立佐證 306−146=160＝段8 套第 1 條口徑的長度，而 146=段7 83 字+註腳 63 字，換句話說計數器零點在第 7 段開頭不在 ☞ 上（本課特有，已記進 char_marks_note，沒有拿它反推段界）。roundRect 12 個全在紙內＝12 條路徑＝12 個語詞。retry 1 次：leading_marker 不是註記鍵被逐字門收，改成 leading_marker_note。"
+}

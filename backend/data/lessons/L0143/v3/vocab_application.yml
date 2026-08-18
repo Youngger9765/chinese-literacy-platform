@@ -1,0 +1,42 @@
+lesson_uid: L0143
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  instruction_note: 本課這句句末沒有句號，照原稿抄
+  option_bank:
+    A: 囊括
+    B: 堵住
+    C: 稀薄
+    D: 因人而異
+    E: 濃稠
+    F: 凝血現象
+    G: 功不可沒
+    H: 血栓
+  option_bank_note: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）；8 個代號全部用到
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    stem: 每個人的體質不同，對藥物的反應也(  )。
+    answer: D
+  - index: 2
+    stem: 豚骨拉麵的湯底是用(  )的豬骨湯調製而成。
+    answer: E
+  - index: 3
+    stem: 天氣一冷，血管彈性不佳的老人較容易形成(  )，引發腦中風。
+    answer: H
+  - index: 4
+    stem: 愛迪生有許多重要發明，為人類帶來新文明，真是(  )。
+    answer: G
+  - index: 5
+    stem: 哥哥是體育健將，只要是他參加的比賽，幾乎(  )所有金牌。
+    answer: A
+  - index: 6
+    stem: 他一緊張，喉嚨像被什麼(  )一樣，半天說不出話。
+    answer: B
+  - index: 7
+    stem: 皮膚受傷流血時，身體會出現 (  )，幫助傷口止血。
+    answer: F
+  - index: 8
+    stem: 高山上的空氣比較(  )，剛爬上去時容易覺得喘。
+    answer: C

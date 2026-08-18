@@ -1,0 +1,20 @@
+{
+  "lesson_uid": "L0135",
+  "catalog_slot": "G9-L14",
+  "pdf_pages": 8,
+  "pages_read": 8,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0,
+    "render_coverage": 0
+  },
+  "retries": 1,
+  "notes": "🔴 **本課只有四個大題，而且序號重編**：一 讀全文／二 知識補給站／三 閱讀聚光燈／四 閱讀理解。知識補給站在多數課是「九」，這裡印「二」。splitter 由 sections_present 推出的 section_no 實測正確（一/二/三/四），不是靠常數表。沒有念順順、語詞我最棒、語詞應用、文章重點表、詞語複習 —— document.xml 全文 grep「念順順」「重點表」「找一找」「詞語複習」皆 0，Wingdings F0D8（☞）0 個，總表「語詞1」欄寫「無」，四者互相印證，不是漏抽。三載體全查：☑ `w:sym F0FE` 27 個全是紅色教師答案；roundRect **0** 個（無找字遊戲）；w:bdr 非 auto **0** 個（35 個全 auto）。第四種載體是橘色手寫填答，但**在文字層**，用 prompt_source_text 保留原樣。🔴 **勘誤 E1：第 1 段段號是 U+2014 EM DASH 不是「一」**（二三四都是正常國字），PDF 上印出來像一條略長的橫線，肉眼幾乎分不出來。🔴 **勘誤 E2：練習序號跳號** —— 熱身練習／練習一／練習**三**／練習**四**，沒有「練習二」。先確認不是漏抽：8 頁逐頁看過都沒有，且合併 run 後的 dump 全文「練習」只有 5 個命中。⚠️ raw XML grep「練習一」回 **0**（Word 把它拆成多個 run），只看 raw grep 會誤判整批練習標題都不存在 —— 這正是 SKILL ⑥.63 說的「要拿合併 run 之後的 dump 去 grep」。本檔的 guide block **維持原稿印的序號不改**，跳號可能是編輯抽掉一個練習，重編等於替教材做決定。閱讀理解 5 題用字母 A~D 選項、答案 B/D/B/A/Ｃ（第 5 題全形），維持字母 key。課文 4 段外另有 1 張圖（圖一）與 2 張表（表一/表二）＋2 條註解，都不是課文段落，分別存進 body.figures / body.inline_tables / body.footnotes（v2 把這 5 筆混進 paragraphs 算成 9 段）。一次重跑：errata E2 的 source 我原本寫成四個標題用／串起來的摘要，原稿沒有這個連續字串 → 逐字門 FAIL；改成單一實際印出的字串「練習三：第三段 vs 表二」後 PASS，而且更精準。"
+}

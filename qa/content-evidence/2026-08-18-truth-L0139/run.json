@@ -1,0 +1,7 @@
+{
+  "lesson_uid": "L0139", "catalog_slot": "G9-L19", "pdf_pages": 12, "pages_read": 12,
+  "wall_clock_seconds": null, "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "key_reading_flagged 課。照工頭指示以這份 DOCX 自己印的 ☞ 為準 = 第 4 段，並附兩組互相獨立的機器證據：① 字數欄四個界線 172/187/193/387 全部精準（要同時套 SKILL 6.7 第 1 條與第 5 條，只套第 1 條四個界線全差 1~2）② 聚光燈自己的五題段落答案（段1・段2/段4/段4/段6・段8/段9）與本檔段號一一對得上、語意各自成立。→ 這份 DOCX 內部自洽，差一段是它與一修對照表之間的差異。第 4 段在 XML 被拆成兩個 w:p，切在『長達30公|分的蛾類』詞中間，合併後才是 9 段。sym 17 = F0FE 15 + F0E0 2；那 2 個箭號是『小撇步』前綴、不在 w:t，未寫入（照新規則 4）；但概念框與自我檢核的『觀察→提問→…』是真的箭號字元，照抄 —— 同一份原稿兩種都有。retry 1 次是逐字門 4 處：3 處是我自己的註記欄沒用 _note 結尾（paragraph_numbering_evidence / review_reason）與 genre 用了總表值；第 4 處 meta.title 是門的來源錯配（title 來自總表 xlsx、門比對 DOCX），已回報並由工頭在 verbatim_gate.py 加了 meta.title 豁免，現在綠。"
+}

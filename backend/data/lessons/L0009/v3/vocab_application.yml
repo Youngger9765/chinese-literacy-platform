@@ -1,0 +1,40 @@
+lesson_uid: L0009
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 凌亂
+    B: 不寒而慄
+    C: 蹭
+    D: 凜冽
+    E: 威風凜凜
+    F: 忠心耿耿
+    G: 忐忑不安
+    H: 輾轉難眠
+    I: 淚水奪眶而出
+  items:
+  - index: 1
+    stem: 小貓一直(　)我的腳，好像在說「摸我！」
+    answer: C
+  - index: 2
+    stem: 即使遭到懷疑，他仍然(　)的為團隊付出。
+    answer: F
+  - index: 3
+    stem: 聽完那個可怕的故事，我整個人都(　)。
+    answer: B
+  - index: 4
+    stem: 想到明天要比賽，他因緊張而整夜(　)。
+    answer: H
+  - index: 5
+    stem: 他裹緊大衣、縮著脖子，仍無法抵擋(　)的寒風。
+    answer: D
+  - index: 6
+    stem: 癌症檢驗的結果明天才出來，他一直(　)，擔心有不好的結果。
+    answer: G
+  - index: 7
+    stem: 突發狀況發生，她的思緒變得(　)，一時不知道該怎麼辦。
+    answer: A
+  - index: 8
+    stem: 努力了這麼久，當聽到得獎的名字是自己時，她高興得(　)。
+    answer: I

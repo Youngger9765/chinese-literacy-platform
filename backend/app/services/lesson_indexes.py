@@ -13,6 +13,7 @@ by tests that need to verify index construction in isolation).
 
 import os
 import re
+from typing import Any
 
 from app.services.lesson_layer_loaders import (
     ENRICHMENT_FIELDS,
@@ -100,7 +101,7 @@ def _video_links(l: dict) -> list[dict] | None:
     urls = _meta(l).get("video_links") or []
     if not urls:
         return None
-    items = (_sections(l).get("resources") or {}).get("items") or []
+    items = _unwrap(_sections(l).get("resources"), "resources").get("items") or []
     titled = len(items) == len(urls)
     return [
         {"title": (items[i]["title"] if titled else f"影片 {i + 1}"), "url": u}
@@ -109,19 +110,53 @@ def _video_links(l: dict) -> list[dict] | None:
 
 
 def _spotlight_or_none(l: dict) -> dict | None:
-    sp = (l.get("spotlight") or {}).get("spotlight")
+    # loader 已經把模組檔的外層拆掉，所以 `l["spotlight"]` 就是內容本身。
+    # 這裡再 .get("spotlight") 一次會拿到 None —— 聚光燈整節消失且不報錯。
+    sp = _unwrap(l.get("spotlight"), "spotlight")
     if not isinstance(sp, dict) or sp.get("error") or not sp.get("blocks"):
         return None
     return sp
 
 
 def _sections(l: dict) -> dict:
+    """v3 起每個大題是自己的模組，不再擠在 `sections` 裡。
+
+    這個 helper 把新舊兩種形狀收斂成同一個 dict，讓下面幾個讀取器不必各自判斷。
+    ⚠️ 不是相容層 —— loader 已經不讀 v2 的 `sections.yml`；這裡收的是 v3 攤在
+    lesson 頂層的模組。留 `sections` 這條只為了讓還沒重抽的課回傳空 dict 而不是炸開。
+    """
+    merged = {
+        k: l[k]
+        for k in ("vocab_definitions", "vocab_application", "comprehension", "resources")
+        if isinstance(l.get(k), dict)
+    }
+    if merged:
+        return merged
     return (l.get("sections") or {}) if isinstance(l.get("sections"), dict) else {}
+
+
+def _unwrap(mod: Any, key: str) -> dict:
+    """模組檔的外層是 `{lesson_uid, version_id, section_no, <key>: {...}}`。"""
+    if not isinstance(mod, dict):
+        return {}
+    inner = mod.get(key)
+    return inner if isinstance(inner, dict) else mod
+
+
+def _body(l: dict) -> dict:
+    """一 讀全文-做記號。
+
+    v3 起模組叫 `full_text_annotate` —— `body` 是 HTML 詞彙，說不出它在學習單上
+    是哪一大題，跟 #2641 那組「step id 沒說出中文 label 的事」是同一個病。
+    """
+    return _unwrap(l.get("full_text_annotate"), "full_text_annotate") or (
+        l.get("body") if isinstance(l.get("body"), dict) else {}
+    )
 
 
 def _vocabulary_from(l: dict) -> list[dict]:
     """三 語詞我最棒 → the shape StoryDetail's vocabulary field expects."""
-    items = (_sections(l).get("vocab_definitions") or {}).get("items") or []
+    items = _unwrap(_sections(l).get("vocab_definitions"), "vocab_definitions").get("items") or []
     return [{"word": i["word"], "definition": i["definition"]} for i in items if i.get("word")]
 
 
@@ -134,18 +169,30 @@ def _cloze_from(l: dict) -> list[dict]:
     shape that reads naturally from the worksheet — meant the step either showed
     nothing or crashed on `.sentence`.
     """
-    sec = _sections(l).get("vocab_application") or {}
+    sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
+    # v2 寫 `questions[{text,answer}]`；v3 照學習單寫 `items[{stem,answer}]`。
+    rows = sec.get("items") or sec.get("questions") or []
     return [
-        {"sentence": q.get("text", ""), "answer": q.get("answer"), "_schema": "legacy"}
-        for q in sec.get("questions") or []
-        if q.get("text") and q.get("answer")
+        {"sentence": q.get("stem") or q.get("text") or "", "answer": q.get("answer"), "_schema": "legacy"}
+        for q in rows
+        if (q.get("stem") or q.get("text")) and q.get("answer")
     ]
 
 
 def _vocab_bank_from(l: dict) -> dict:
     """四 語詞應用's options, as the letter → word map the cloze exercise resolves
     its answers against. Without it every answer letter matches nothing."""
-    return dict((_sections(l).get("vocab_application") or {}).get("options") or {})
+    sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
+    # 一課可能有多個代號表（L0072 的語詞應用分成 A-C 與 D-G 兩組），全部合起來 ——
+    # 只取第一組會讓後半題的答案代號查無對應。
+    banks = sec.get("option_banks")
+    if isinstance(banks, list):
+        merged: dict = {}
+        for b in banks:
+            if isinstance(b, dict):
+                merged.update(b)
+        return merged
+    return dict(sec.get("option_bank") or sec.get("options") or {})
 
 
 def _mcq_from(l: dict) -> list[dict]:
@@ -161,7 +208,7 @@ def _mcq_from(l: dict) -> list[dict]:
     explanation — the worksheet genuinely has nothing else there.
     """
     out = []
-    for q in (_sections(l).get("comprehension") or {}).get("questions") or []:
+    for q in _unwrap(_sections(l).get("comprehension"), "comprehension").get("questions") or []:
         opts = q.get("options") or {}
         if not opts:
             continue
@@ -266,15 +313,15 @@ def _uid_tree_lessons() -> list[dict]:
             # unobtainable was a failure to look at how it had been obtained before.
             # The worksheet's own masthead over the planning spreadsheet: they disagree
             # on 16 lessons and the worksheet is the one authored with the lesson.
-            "genre": (((l.get("body") or {}).get("level") or {}).get("genre")
+            "genre": ((_body(l).get("level") or {}).get("genre")
                       or _meta(l).get("genre") or ""),
             # Derived from the genre actually served, not from the spreadsheet's —
             # otherwise a lesson shows 說明文 beside a category computed from 應用文.
             "category": _category_for(
-                ((l.get("body") or {}).get("level") or {}).get("genre"),
+                (_body(l).get("level") or {}).get("genre"),
                 _meta(l),
             ),
-            "char_count": (l.get("body") or {}).get("char_count") or 0,
+            "char_count": _body(l).get("char_count") or 0,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
             # covers were keyed by code; the renumber pointed every one of them at a
@@ -297,7 +344,10 @@ def _uid_tree_lessons() -> list[dict]:
             # pipeline read paragraphs back out of the layer the re-ink deleted —
             # which left 朗讀 / 閱讀理解 / 生字 / 造句 with no text to work on and
             # 「參考課文」 blank beside the keypoints table.
-            "paragraphs": (l.get("body") or {}).get("paragraphs") or [],
+            "paragraphs": [
+                (p.get("text") if isinstance(p, dict) else p)
+                for p in _body(l).get("paragraphs") or []
+            ],
             # StoryDetail indexes these directly. The second-edition extraction
             # produces spotlight + keypoints; the remaining practice modules are
             # not yet extracted, so they are present-but-empty rather than absent

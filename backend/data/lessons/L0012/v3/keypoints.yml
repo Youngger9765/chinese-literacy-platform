@@ -1,0 +1,48 @@
+lesson_uid: L0012
+version_id: v3
+section_no: 五
+keypoints:
+  title: 想讀書，該從哪裡著手？
+  structure: nested
+  rows:
+  - label: 阿耀的問題
+    prompt: 下列哪個是阿耀遇到的問題？(單選)
+    options:
+      1: 阿耀的疑問：一定要讀書嗎？
+      2: 阿耀覺得自己跟不上課程，想請教學長。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - label: 學長的觀點
+    value: 他學習方式有【　】，不一定在教室讀課本才叫學習。
+    blanks:
+    - answer: 很多種
+  - label: 舉例說明
+    sub_rows:
+    - label: 例子1
+      problem: 問題：高中隊友想去美國打球，但雖然每天自學英文，卻跟不上學校的英文課。
+      solution: 解決：從最熟悉的棒球開始，每天學一點英文，看【　】、看體育台報導。
+      result: 結果：沒有繼續打棒球，但成為旅美選手的【　】。
+      blanks:
+      - answer: 英文棒球雜誌
+      - answer: 翻譯
+    - label: 例子2
+      problem: 問題：第二位朋友因為運動傷害，打球期間需要復健。
+      solution: 解決：一邊復健，一邊研究身體骨骼肌肉的【　】，探討如何訓練才能預防運動傷害。
+      result: 結果：大量投入後，考上醫學相關科系，成為【　】。
+      blanks:
+      - answer: 解剖學
+      - answer: 隊醫
+    - label: 例子3
+      problem: 問題：第三位朋友進棒球隊後不愛讀書，到國中連簡單的文章都讀不懂。
+      solution: 解決：從青少棒揚威記愛上閱讀，繼續讀了更多【　】，和少年小說，帶動了所有學科的學習信心。
+      result: 結果：會考時，他的成績和普通班學生不相上下。
+      blanks:
+      - answer: 漫畫
+  - label: 結尾
+    value: '三人共通點：當原本的路受挫時，想辦法從【　】的事物出發、找出新的可能，靠【　】與【　】，
+
+      繼續留在熱愛的領域。'
+    blanks:
+    - answer: 熱愛
+    - answer: 行動
+    - answer: 學習

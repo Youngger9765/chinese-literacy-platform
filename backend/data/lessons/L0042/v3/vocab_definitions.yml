@@ -1,0 +1,55 @@
+lesson_uid: L0042
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 獨當一面
+  - 雕琢
+  - 扳回一城
+  - 沉著
+  - 防禦
+  - 如魚得水
+  - 橫逆
+  - 監測
+  - 傾訴
+  - 心力交瘁
+  - 質疑
+  items:
+  - index: 1
+    word: 沉著
+    definition: 鎮靜而不慌亂。
+  - index: 2
+    word: 監測
+    definition: 持續觀察並測量。
+  - index: 3
+    word: 獨當一面
+    definition: 獨力擔當重任。
+  - index: 4
+    word: 傾訴
+    definition: 把心中的話全部說出來。
+  - index: 5
+    word: 如魚得水
+    definition: 像魚得到水一樣自在。比喻得到適合自己的環境，或遇到和自己很合得來的人。
+  - index: 6
+    word: 質疑
+    definition: 心中懷疑而提出問題。
+  - index: 7
+    word: 防禦
+    definition: 抵擋對手的進攻。
+  - index: 8
+    word: 雕琢
+    definition: 細緻地雕刻玉石；也比喻費心培育人才。
+  - index: 9
+    word: 扳回一城
+    definition: 在比賽或競爭中挽回一些劣勢。
+  - index: 10
+    word: 心力交瘁
+    definition: 精神和體力都非常疲憊。
+  - index: 11
+    word: 橫逆
+    definition: 生活不順利或艱難的遭遇，例如生病或受挫。

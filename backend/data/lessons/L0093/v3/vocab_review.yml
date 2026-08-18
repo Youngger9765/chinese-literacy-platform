@@ -1,0 +1,132 @@
+lesson_uid: L0093
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉刪除。
+  instruction_note: 大題標題那行印「劃掉刪除」（兩個動詞並列），格子上方那行印「刪除」。兩句原稿都在，本欄採大題標題那一句
+  target_words:
+  - 紛飛
+  - 孤苦伶仃
+  - 逕自
+  - 移駕
+  - 環顧
+  - 赫然
+  - 惺忪
+  - 一不做二不休
+  - 兵貴神速
+  - 令人髮指
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 問號伸張正義三更半夜
+  - 題紛垃圾令人髮指有用
+  - 購飛情緒失控飛舞限科
+  - 物假孤一不做二不休學
+  - 中設苦清血跡話睡伸方
+  - 心情伶二逕莖不眼張法
+  - 移檢仃楚目自兵惺正確
+  - 駕驗美刑事鑑貴忪義赫
+  - 辦假國環顧感神節然神
+  - 案設康乃迪克速汙染探
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 令人髮指
+    cells:
+    - - 2
+      - 5
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    direction: horizontal
+  - word: 紛飛
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    direction: vertical
+  - word: 一不做二不休
+    cells:
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    - - 4
+      - 7
+    - - 4
+      - 8
+    - - 4
+      - 9
+    direction: horizontal
+  - word: 孤苦伶仃
+    cells:
+    - - 4
+      - 3
+    - - 5
+      - 3
+    - - 6
+      - 3
+    - - 7
+      - 3
+    direction: vertical
+  - word: 逕自
+    cells:
+    - - 6
+      - 5
+    - - 7
+      - 6
+    direction: diagonal_down_right
+  - word: 移駕
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    direction: vertical
+  - word: 兵貴神速
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 惺忪
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    direction: vertical
+  - word: 赫然
+    cells:
+    - - 8
+      - 10
+    - - 9
+      - 9
+    direction: diagonal_down_left
+  - word: 環顧
+    cells:
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  answer_paths_note: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
+
+    像素驗證：p10 橘色連通元件 10 個、觸紙緣（紙外殘留）0 個，與 10 條路徑一一對應。
+
+    ⚠️ 全檔 `roundRect` 共 22 個，但**不能拿這個數字跟路徑數比** —— 聚光燈三張流程圖的
+
+    圓角方框也是 roundRect。比較的範圍要限在找字那一頁，否則會誤報「少抓 12 條」。'

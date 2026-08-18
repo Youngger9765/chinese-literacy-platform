@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0143",
+  "catalog_slot": "G9-L22",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 0,
+  "notes": "known gaps 的 top-level lessons（issue 2683 spotlight 服務 null）那一組，重抽後九個大題全有，缺口可關。PDF p3 三個「研究」文字方塊疊印到完全無法閱讀（研究一的框裡同時印著研究二的內容、研究三的框壓在總之那段上），這是 LibreOffice 轉檔的版面崩壞不是教材缺陷 —— 三段內容全部取自 document.xml。找到一筆教材勘誤 E1：目標框句末多一個「無」字（獨立 w:r、同字型同顏色，兩份 mc 副本都有），因為方框高度固定所以印不出來，用 strategy_line_source_text 保留原樣。念順順起點第 3 段有三個獨立佐證：instruction「（三）」、☞ 錨在第 3 段、144＝段3 146 字扣掉段首兩個全形空格。閱讀理解第 1 題的四個選項是四張圖，已標 options_are_images。F0FE 只有 2 個是因為本課多數答案是橘色手寫文字不是勾選。"
+}

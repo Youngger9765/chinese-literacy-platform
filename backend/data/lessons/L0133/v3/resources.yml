@@ -1,0 +1,18 @@
+lesson_uid: L0133
+version_id: v3
+section_no: 二
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 國家地理探索系列：「微生物學之父」巴斯德
+    duration: (04:29)
+    source: 國家地理雜誌National Geographic Magazine
+    has_qr: true
+  - index: 2
+    title: 巴斯德-史上第一支疫苗的發明人【LIS科學史】
+    duration: (12:59)
+    recommend_range: 建議觀看：(06:27~09:46)
+    source: LIS情境科學教材
+    has_qr: true

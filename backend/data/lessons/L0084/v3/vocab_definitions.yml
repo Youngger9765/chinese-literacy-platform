@@ -1,0 +1,63 @@
+lesson_uid: L0084
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 面面相覷
+  - 壯膽
+  - 驚悚
+  - 黯淡
+  - 習以為常
+  - 乏味
+  - 熱衷
+  - 微薄
+  - 傾盡
+  - 感佩
+  - 領略
+  - 希冀
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  answer_carrier: 橘色手寫（**字元樣式 af**，色 E97132；run 層掃不到）
+  items:
+  - index: 1
+    word: 乏味
+    definition: 無趣。
+  - index: 2
+    word: 傾盡
+    definition: 用盡。
+  - index: 3
+    word: 感佩
+    definition: 因感動而佩服。
+  - index: 4
+    word: 黯淡
+    definition: 光線或色彩灰暗、不明亮。
+  - index: 5
+    word: 領略
+    definition: 知道、了解。
+  - index: 6
+    word: 驚悚
+    definition: 令人害怕、緊張。
+  - index: 7
+    word: 壯膽
+    definition: 增加勇氣、膽量。
+  - index: 8
+    word: 面面相覷
+    definition: 彼此看著，不知道該怎麼辦或怎麼回答。
+  - index: 9
+    word: 希冀
+    definition: 希望。
+  - index: 10
+    word: 習以為常
+    definition: 因為習慣而視為平常。
+  - index: 11
+    word: 微薄
+    definition: 微小單薄，形容少量。常用來形容收入、薪資。
+  - index: 12
+    word: 熱衷
+    definition: 十分喜愛、投入。

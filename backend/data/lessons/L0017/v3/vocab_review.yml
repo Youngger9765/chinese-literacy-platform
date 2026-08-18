@@ -1,0 +1,116 @@
+lesson_uid: L0017
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 腦海
+  - 茫然
+  - 結結巴巴
+  - 心跳漏了一拍
+  - 片段
+  - 不經意
+  - 不自覺
+  - 目光
+  - 瞬間
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 目不轉睛我惱言外之意
+  - 心跳漏了一拍覺啪結露
+  - 海洋翻目然而得結沮喪
+  - 皺巴巴前棋徑巴分腦海
+  - 黑不經意越巴學家依炒
+  - 爿段可消息走漏常依片
+  - 期待目留意腦無便不段
+  - 無所謂光想霧不飯瞬結
+  - 茫然發熱不光自可間碌
+  - 陸陸續續到年覺經過去
+  grid_note: '第 6 列第 1 字是「爿」不是「片」（DOCX 文字層如此），第 2 列第 8 字是「啪」、
+
+    第 9 列第 10 字是「碌」—— 三處在 PDF 上都容易看成別的字，以文字層為準。
+
+    「爿段」是與答案「片段」形近的誘答，不是教材印錯。'
+  answers_are_graphical: true
+  answer_paths:
+  - word: 心跳漏了一拍
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    - - 2
+      - 6
+    direction: horizontal
+  - word: 結結巴巴
+    cells:
+    - - 2
+      - 9
+    - - 3
+      - 8
+    - - 4
+      - 7
+    - - 5
+      - 6
+    direction: diagonal_down_left
+  - word: 腦海
+    cells:
+    - - 4
+      - 9
+    - - 4
+      - 10
+    direction: horizontal
+  - word: 不經意
+    cells:
+    - - 5
+      - 2
+    - - 5
+      - 3
+    - - 5
+      - 4
+    direction: horizontal
+  - word: 片段
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    direction: vertical
+  - word: 目光
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 4
+    direction: diagonal_down_right
+  - word: 不自覺
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 瞬間
+    cells:
+    - - 8
+      - 9
+    - - 9
+      - 9
+    direction: vertical
+  - word: 茫然
+    cells:
+    - - 9
+      - 1
+    - - 9
+      - 2
+    direction: horizontal

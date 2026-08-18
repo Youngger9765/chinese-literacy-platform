@@ -1,0 +1,55 @@
+lesson_uid: L0083
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 動員
+  - 獨門
+  - 蘊含
+  - 躡手躡腳
+  - 窸窸窣窣
+  - 琢磨
+  - 喧鬧紛雜
+  - 悲歡離合
+  - 設身處地
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 獨門
+    definition: 特殊的、獨有的。
+  - index: 2
+    word: 窸窸窣窣
+    definition: 狀聲詞，指斷斷續續的細碎聲音。例如穿衣服的摩擦聲。
+  - index: 3
+    word: 動員
+    definition: 發動、號召眾人加入某項活動。
+  - index: 4
+    word: 悲歡離合
+    definition: 比喻人世間的聚散無常。
+  - index: 5
+    word: 躡手躡腳
+    definition: 放輕動作，小心翼翼、不敢出聲的樣子。形容走路非常小心，怕吵醒別人或是偷偷摸摸、鬼鬼祟祟的樣子。
+  - index: 6
+    word: 喧鬧紛雜
+    definition: 形容聲音雜亂。
+  - index: 7
+    word: 蘊含
+    definition: 包含。
+  - index: 8
+    word: 設身處地
+    definition: 站在別人的立場替對方想。
+  - index: 9
+    type: single
+    stem: 「琢磨」有三種解釋，課文中「琢磨」的意思應該是下列哪個選項？（單選）
+    options:
+      A: 雕琢和磨製玉石。
+      B: 思索、研究、考慮，著重深入思考。
+      C: 在課業或品德不斷精益求精，好還要更好，著重改進的過程。
+    answer: B
+    answer_carrier: 紅色 ☑（w:sym），印在選項 B 前
+    note: 本題與前 8 題形狀不同 —— 不是填空，是三選一的單選題（原稿如此）

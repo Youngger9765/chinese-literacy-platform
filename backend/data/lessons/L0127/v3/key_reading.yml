@@ -1,0 +1,53 @@
+lesson_uid: L0127
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（五     ）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 6
+  start_paragraph_note: '⚠️ instruction 印的是「五」，但 ☞ 圖形錨在第 6 段開頭、字數欄的兩個段界（150／341）
+
+    也只有從第 6 段起算才吻合。以第 6 段為準，印錯的部分登錄在 source_errata E1。'
+  errata_ref: E1
+  end: 課文結束
+  printed_char_marks:
+  - 27
+  - 57
+  - 86
+  - 116
+  - 145
+  - 150
+  - 177
+  - 207
+  - 236
+  - 266
+  - 297
+  - 327
+  - 341
+  char_marks_cover_paragraphs:
+  - 6
+  - 7
+  char_marks_note: '兩個段界都精準吻合，不必套 SKILL ⑥.7 的任何一條口徑：
+
+    150 ＝ 第 6 段 150 字；341 ＝ 150＋第 7 段 191 字。
+
+    末筆 341 只算到第 7 段結束，第 8~10 段沒有被算進去 —— 原稿如此（已知的常見形狀）。'
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_instruction: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 難友每天最重要的餐，是一碗內容貧乏的湯。領湯時囚犯必須照規定「脫帽」領湯，用屈從的姿態領取施捨，獄卒還常辱罵：「你們根本不配喝這碗湯。」但法蘭柯發現，有些難友的情緒並不受影響，只說：「他們罵的不是事實，只是想羞辱我們，我為什麼要受假話影響？」原來，我們不能阻止別人說什麼，但可以選擇不讓謊言定義自己。
+  start_text: 難友每天最重要的餐，是一碗內容貧乏的湯。領湯時囚
+  extent_chars: 150
+  source: derived-from-body

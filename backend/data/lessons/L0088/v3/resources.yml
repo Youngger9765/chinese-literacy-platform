@@ -1,0 +1,16 @@
+lesson_uid: L0088
+version_id: v3
+section_no: 八
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 一分鐘快速了解《國際塑膠公約》（綠色和平）
+    duration: 01:36
+    duration_seconds: 96
+    source: 綠色和平 臺灣
+  - index: 2
+    title: 別讓塑膠吃了你！我的減塑之道（行政院環保署）
+    duration: 02:37
+    duration_seconds: 157
+    source: 大苑子dayungs official

@@ -1,0 +1,16 @@
+lesson_uid: L0045
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【十點不一樣】蝗蟲爆發恐侵陸？秋行軍蟲立足台灣繁衍
+    duration: (7:04)
+    source: TVBS NEWS
+    qr_code: true
+  - index: 2
+    title: 秋行軍蟲的天敵 兇手只有1釐米的大小？！【科普TIME】Ke Pu TIME＿EP.12
+    duration: (9:13)
+    source: 台視新聞 TTV NEWS
+    qr_code: true

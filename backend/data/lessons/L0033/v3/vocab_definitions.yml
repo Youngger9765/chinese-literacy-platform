@@ -1,0 +1,55 @@
+lesson_uid: L0033
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 色彩繽紛
+  - 濃郁
+  - 大快朵頤
+  - 焦頭爛額
+  - 愁眉不展
+  - 垂涎欲滴
+  - 膳食纖維
+  - 釋放
+  - 戰友
+  - 損友
+  - 無傷大雅
+  items:
+  - index: 1
+    word: 愁眉不展
+    definition: 雙眉緊鎖，很煩惱的樣子。
+  - index: 2
+    word: 色彩繽紛
+    definition: 顏色很多且亮麗。
+  - index: 3
+    word: 垂涎欲滴
+    definition: 形容看到美食時，口水快要流下來，超級想吃。
+  - index: 4
+    word: 大快朵頤
+    definition: 形容吃得非常開心、滿足。
+  - index: 5
+    word: 釋放
+    definition: 讓原本累積、被壓住或藏在裡面的東西出來。例如：運動可以幫助我們釋放壓力，保持身心健康。
+  - index: 6
+    word: 無傷大雅
+    definition: 指某件事雖然不太好，但並不影響整體或大局。
+  - index: 7
+    word: 膳食纖維
+    definition: 一種存在於植物性食物中的營養成分，有助於促進消化、維持腸道健康。
+  - index: 8
+    word: 濃郁
+    definition: 香氣或味道很濃。
+  - index: 9
+    word: 焦頭爛額
+    definition: 形容事情很多或遇到困難，讓人感覺焦慮疲累。
+  - index: 10
+    word: 戰友
+    definition: 比喻一起奮鬥、解決困難的人。
+  - index: 11
+    word: 損友
+    definition: 會帶來不良影響的朋友。

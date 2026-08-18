@@ -1,0 +1,43 @@
+lesson_uid: L0099
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 汙名化
+    B: 轉瞬之間
+    C: 情感共鳴
+    D: 詞藻優美
+    E: 磨難
+    F: 磨合
+    G: 破關攻略
+    H: 駕馭
+    I: 牽著鼻子走
+    J: 構思
+  option_bank_note: 10 個代號對應 8 道小題；D.詞藻優美、J.構思 未被任何一題用到。
+  answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 他太在意別人的看法，常被大家的喜好（　），沒有自己的想法。
+    answer: I
+  - index: 2
+    stem: 他在人生的（　）中學會堅強，每一次跌倒都讓他更懂得珍惜幸福。
+    answer: E
+  - index: 3
+    stem: 夕陽的光彩在（　）消失在地平線下，天空也逐漸被夜色籠罩。
+    answer: B
+  - index: 4
+    stem: 經過多次練習，他終於能（　）這套功能複雜的影音剪輯軟體。
+    answer: H
+  - index: 5
+    stem: 有些人對精神疾病缺乏了解，常以負面言詞（　）患者，這會讓患者更不敢尋求幫助。
+    answer: A
+  - index: 6
+    stem: 他將自己整理的（　）上傳網路，吸引了許多同好前來交流遊戲心得。
+    answer: G
+  - index: 7
+    stem: 新成員加入團隊後，大家花了幾週時間（　），才逐漸找到最佳的合作默契。
+    answer: F
+  - index: 8
+    stem: 這部電影讓我產生了（　），因為我也曾經經歷過類似的事情。
+    answer: C

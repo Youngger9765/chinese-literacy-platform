@@ -1,0 +1,135 @@
+lesson_uid: L0024
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 盛夏
+  - 引退
+  - 寄予厚望
+  - 力邀
+  - 菜單
+  - 自立自強
+  - 直言
+  - 鴻溝
+  - 技不如人
+  - 懈怠
+  - 激勵
+  - 晉升
+  target_words_source_text: 盛夏、引退、寄予厚望、力邀、菜單、自立自強、直言、鴻溝、技不如人、懈怠、激勵、晉升、
+  target_words_errata_ref: E2
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 懈怠周引解擊支不力邀
+  - 搶洪溝退我怠菜人崩潰
+  - 立與眾不同單總結激立
+  - 邀直言勵自弓解台根據
+  - 記隱禁升立生寄予厚望
+  - 技予退質自惡力徵強自
+  - 剩不夏我強言激鴻兆力
+  - 夏如如忘值相晉蔡溝厚
+  - 引用怠人言向升單負擔
+  - 激勵坐立難安真根盛夏
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 懈怠
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    direction: horizontal
+  - word: 引退
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 4
+    direction: vertical
+  - word: 力邀
+    cells:
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 菜單
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 6
+    direction: diagonal_down_left
+  - word: 直言
+    cells:
+    - - 4
+      - 2
+    - - 4
+      - 3
+    direction: horizontal
+  - word: 自立自強
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 5
+    - - 6
+      - 5
+    - - 7
+      - 5
+    direction: vertical
+  - word: 寄予厚望
+    cells:
+    - - 5
+      - 7
+    - - 5
+      - 8
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 技不如人
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 2
+    - - 8
+      - 3
+    - - 9
+      - 4
+    direction: diagonal_down_right
+  - word: 鴻溝
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 9
+    direction: diagonal_down_right
+  - word: 晉升
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 7
+    direction: vertical
+  - word: 激勵
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    direction: horizontal
+  - word: 盛夏
+    cells:
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  answer_paths_note: 12 個目標語詞全部圈到。

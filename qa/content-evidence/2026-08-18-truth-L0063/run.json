@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0063",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 22,
+  "pages_read": 22,
+  "read_calls": 2,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 12,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "多文本課（三篇合讀），22 頁分兩次 Read（1-11、12-22）。verbatim 首跑 12 筆對不上，**全部是我自己寫的註解欄位被當成原稿字串比對**（schema_gap 的說明段、sections_present 的 scope、以及我把兩層表頭用『／』併起來的 column_headers_printed），0 筆是真的抄錯。改成 annotation 形式的 key（`_` 前綴）後 453 條全過、3 條標 image 為無法驗證。另外實測確認 multi_text_parts 與 keypoints_followup_questions 在拆模組時被靜默丟掉（見 yml 的 schema_gap）。 ｜2026-08-18 依 skill 兩條新規回頭複驗：(a) 圈選個數改成「找字那一 block 的 roundRect」15 == 15 條路徑，不觸發警報（拿全檔 29 比會假警報）；另做像素級獨立驗證，55 格全中、0 漏 0 多。(b) 第三種載體 w:bdr 非 auto：全課 68 個 bdr 全 auto，本課無框選答案。 ｜第八道門 orphan_key_gate：PASS（multi_text_parts / keypoints_followup_questions 由工頭列入 BOOKKEEPING）。resources+items 命名確認無誤。"
+}

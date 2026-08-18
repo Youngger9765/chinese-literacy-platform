@@ -1,0 +1,24 @@
+lesson_uid: L0068
+version_id: v3
+title: 植物獵人
+catalog_slot: G6-L29
+sections_present:
+- 'no': 一
+  name: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
+- 'no': 二
+  name: 文章重點表
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀理解
+- 'no': 六
+  name: 詞語複習
+- 'no': 七
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 8
+  drive_path: 6年級/G6-L29植物獵人（自我提問策略2-跟著人物故事線問問題）.docx
+  docx_md5: md5-12:63ce1d9055c0

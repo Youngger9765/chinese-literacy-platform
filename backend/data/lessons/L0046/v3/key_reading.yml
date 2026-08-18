@@ -1,0 +1,34 @@
+lesson_uid: L0046
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三　）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 原稿括號內是「三」加一個 ☞ 圖形；☞ 是圖形物件，不在文字流（文字流為「（三    )」，前全形後半形）。
+  start_paragraph: 3
+  end_paragraph: 5
+  spans_paragraphs:
+  - 3
+  - 4
+  - 5
+  includes_section_heading: 跟著太陽轉的花苞
+  approx_chars_from_start: 329
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此構造簡單，體積更小，更省電，而且沒電時，它會盤旋而下，比較不會摔壞！它和一般無人機一樣，可以垂直起降，在狹窄的空間靈活飛行。內建攝影機時，可以幫助人類進行搜救、環境監測，甚至探索危機四伏、險象環生的災難現場。還沒開花的向日葵花苞，早晨朝向東方，到了下午則轉向西方，整天彷彿在追逐太陽！這種「向陽性」讓科學家發明了一種能自動調整角度的仿生太陽能板，讓太陽能發電變得更有效率！一般的太陽能板角度是固定的，當太陽移動後，吸收陽光的效率就會降低。但這種仿生設計模仿向日葵的特性，讓太陽能板可以「跟著太陽轉」，整天都能吸收到最多陽光，發電量大幅提升。這項技術已經在多個國家被應用，為地球提供更多乾淨能源！
+  start_text: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此
+  extent_chars: 321
+  source: derived-from-body

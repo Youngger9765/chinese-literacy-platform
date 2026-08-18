@@ -1,0 +1,25 @@
+lesson_uid: L0125
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 熱心助人也要賠償嗎？玻璃娃娃案 | 貓奴律師 | 律師說故事
+    duration: (9:04)
+    source: 喵星律師-施宇宸
+    has_qr: true
+    title_note: 標題印「貓奴律師」但來源印「喵星律師-施宇宸」，兩個寫法都照原稿
+  - index: 2
+    title: 「玻璃娃娃」載客助人　123公分運將趴趴走
+    duration: (2:11)
+    source: NOWnews
+    has_qr: true
+  videos_note: 'PDF 上兩個標題前面印有「1.」「2.」，但那是 Word 自動編號（numbering.xml 產生），
+
+    不在 w:t 文字流裡，所以 title 不含編號。
+
+    總表「4.影片連結」分頁記的兩個網址是 http://youtu.be/bLOHlPOXfR8 與 http://youtu.be/hqJkg8Be-ik
+
+    （學習單上只印 QR code，沒有印網址）。'

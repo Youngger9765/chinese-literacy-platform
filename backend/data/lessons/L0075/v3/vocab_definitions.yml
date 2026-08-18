@@ -1,0 +1,50 @@
+lesson_uid: L0075
+version_id: v3
+section_no: 四
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 翻騰
+  - 凜冽
+  - 窒息
+  - 緩不濟急
+  - 僧多粥少
+  - 徒勞無功
+  - 筋疲力竭
+  - 束手無策
+  - 屏氣凝神
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 束手無策
+    definition: 束手是「手被綁起來」，無策是「沒有辦法」。束手無策是形容完全沒有辦法解決問題。
+  - index: 2
+    word: 翻騰
+    definition: 形容水、浪等劇烈地上下滾動；也可比喻情緒起伏很大、難以平靜。本課用來形容海水翻動。
+  - index: 3
+    word: 屏氣凝神
+    definition: 屏住呼吸，集中精神，形容非常專注的樣子。
+  - index: 4
+    word: 凜冽
+    definition: 形容天氣非常寒冷。
+  - index: 5
+    word: 筋疲力竭
+    definition: 形容非常疲累，一點力氣也沒有了。
+  - index: 6
+    word: 僧多粥少
+    definition: 比喻資源有限，需求的人太多，無法滿足每個人。
+  - index: 7
+    word: 窒息
+    definition: 無法呼吸；也可比喻感到非常壓迫，像喘不過氣來。
+  - index: 8
+    word: 緩不濟急
+    definition: 行動太慢，無法應付迫切的需要。
+  - index: 9
+    word: 徒勞無功
+    definition: 努力想做某件事，卻沒達成目標，白費力氣。

@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0065",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "read_calls": 1,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 0,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 0,
+  "notes": "首跑即通過（162 條、0 對不上、0 無法驗證）。roundRect 10 個 == answer_paths 10 條，F0FE 15 個 == 記錄的 ☑ 15 個，兩項幾何/符號對照都相符。 ｜2026-08-18 複驗：紙上 roundRect 10 == 10 條路徑（紙外 0），不觸發警報。w:bdr 13 個裡 2 個是 E97132/accent2＝『雙喜臨門』『好運』，正是已記錄的 circled_terms，無遺漏。 ｜第八道門 orphan_key_gate：PASS，並對這道新門做過 mutation 驗證（把 resources 改成 supplement → 門轉紅且指名該 key；還原後轉綠、檔案與備份逐位元相同）。resources+items 命名確認無誤。"
+}

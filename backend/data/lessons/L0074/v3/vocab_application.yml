@@ -1,0 +1,44 @@
+lesson_uid: L0074
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 坦承錯誤
+    B: 鍥而不捨
+    C: 青睞
+    D: 侷限
+    E: 層層把關
+    F: 苦撐待變
+    G: 追根究柢
+    H: 先驅
+    I: 食物鏈
+  option_bank_note: 代號表只收 9 個語詞（本課 11 個語詞中的「猛禽」「契作協議」沒有列入）
+  unused_options:
+  - F
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    stem: 面對這次實驗室爆炸，我們需要（　），找出真正的原因。
+    answer: G
+  - index: 2
+    stem: 體育館空間有限，使搖滾音樂會的入場人數受到（　）。
+    answer: D
+  - index: 3
+    stem: 發現自己做錯事時，我們應該（　），而不是推卸責任。
+    answer: A
+  - index: 4
+    stem: 如果大量捕捉小魚，可能會影響大魚和鳥類，使整個（　）失去平衡。
+    answer: I
+  - index: 5
+    stem: 新產品一上市，立刻獲得消費者的（　），賣得很好。
+    answer: C
+  - index: 6
+    stem: 他每天練習跑步，靠著（　）的精神，終於克服種種困難，跑完全程。
+    answer: B
+  - index: 7
+    stem: 學校對午餐的採購與烹煮（　），以確保食物的品質與安全。
+    answer: E
+  - index: 8
+    stem: 阿姆斯壯是太空探索的（　），他是第一個登上月球的人。
+    answer: H

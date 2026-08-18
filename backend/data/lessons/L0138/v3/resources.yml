@@ -1,0 +1,22 @@
+lesson_uid: L0138
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【樂觀－在生命的順流或逆流中成為更好的自己】
+    duration: (3:00)
+    source: Life Education生命教育
+    has_qr: true
+  - index: 2
+    title: 泰國廣告《努力一點點》：面對挫折仍持續練習的故事
+    duration: (04:35)
+    source: 邱耀進
+    has_qr: true
+  items_note: '第 2 支的片長印「(04:35)」（補零），第 1 支印「(3:00)」（不補零）—— 原稿不一致，照抄。
+
+    總表 4.影片連結 分頁對應網址為 http://youtu.be/5rIhliTNP7o 與 http://youtu.be/cOfEIeMd72I
+
+    —— 學習單上只印 QR code，網址不在 DOCX 文字層。'

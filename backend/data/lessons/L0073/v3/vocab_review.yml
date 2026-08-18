@@ -1,0 +1,127 @@
+lesson_uid: L0073
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 雀躍
+  - 嶄新
+  - 格格不入
+  - 唾手可得
+  - 如影隨形
+  - 恍然大悟
+  - 枯燥乏味
+  - 翻天覆地
+  - 韶光
+  - 眷戀
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 攝取格方法唾手可得引
+  - 閱嶄光格重一步登天人
+  - 好新躍動不永續眷記入
+  - 滲透朗賀是入注目戀勝
+  - 恍然大悟大顯身手漫如
+  - 鴉雀無聲拋雀躍負盪影
+  - 還怪荷翻家讀眷屬事隨
+  - 如日天寬棄恍神入口形
+  - 反覆如魚得水新韶願容
+  - 地韌枯燥乏味穎光違道
+  answers_are_graphical: true
+  answer_paths:
+  - word: 唾手可得
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 格格不入
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 4
+    - - 3
+      - 5
+    - - 4
+      - 6
+    direction: diagonal_down_right
+  - word: 嶄新
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    direction: vertical
+  - word: 眷戀
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 9
+    direction: diagonal_down_right
+  - word: 恍然大悟
+    cells:
+    - - 5
+      - 1
+    - - 5
+      - 2
+    - - 5
+      - 3
+    - - 5
+      - 4
+    direction: horizontal
+  - word: 如影隨形
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 雀躍
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 翻天覆地
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 3
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 韶光
+    cells:
+    - - 9
+      - 8
+    - - 10
+      - 8
+    direction: vertical
+  - word: 枯燥乏味
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    - - 10
+      - 6
+    direction: horizontal

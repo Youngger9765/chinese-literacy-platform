@@ -1,0 +1,53 @@
+lesson_uid: L0076
+version_id: v3
+section_no: 五
+keypoints:
+  title: 給神明發會診單
+  layout: list
+  answer_carrier: 橘色手寫字與紅色 ☑（w:sym Wingdings F0FE，在文字層但非 ☑ 字元），PDF p5~p6 可見
+  rows:
+  - label: 起因
+    value: 病人的狀況不好，家屬想請乩童來看看病人。
+  - label: 陳醫師想法
+    items:
+    - label: '1'
+      value: 請乩童來看病人，這是家屬的【　】。
+      blanks:
+      - answer: 心意
+    - label: '2'
+      value: 病人預後不樂觀，陳醫師認為現在更重要的是【　】、減少遺憾。
+      blanks:
+      - answer: 讓家屬安心
+    - label: '3'
+      value: 有些醫師拒絕乩童或符水，可能有哪些原因？（複選）
+      options:
+        1: 認為這些東西很迷信、很無知
+        2: 認為自己專業受到挑戰
+        3: 感覺自己不被信任
+      answers:
+      - 1
+      - 2
+      - 3
+    - label: '4'
+      value: 陳醫師為什麼不拒絕民間信仰進入醫院？
+    - label: 4-1
+      value: 把這件事用平常心看待，家屬只是想盡【　】。
+      blanks:
+      - answer: 一份心力
+    - label: 4-2
+      value: 乩童、符水其實就是家屬的【　】。
+      blanks:
+      - answer: 祝福
+  - label: 請神明會診
+    items:
+    - label: '1'
+      value: 陳醫師自我介紹及說明病情，並感謝乩童的協助。
+    - label: '2'
+      value: 乩童作法後，代替病人向家屬說了一番話，並給了他們大大的【　】。
+      blanks:
+      - answer: 擁抱
+  - label: 結果
+    value: 陳醫師由衷感謝乩童對家屬的【　】、【　】，療癒了家屬的心靈。
+    blanks:
+    - answer: 關懷
+    - answer: 同理

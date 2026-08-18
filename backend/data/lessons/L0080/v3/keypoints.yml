@@ -1,0 +1,58 @@
+lesson_uid: L0080
+version_id: v3
+section_no: 五
+keypoints:
+  title: 澳洲奧運金牌的Ｘ機密
+  layout: list
+  title_note: 這張表的標題用全形「Ｘ」，課文標題列用半形「X」，照各自原樣記錄。
+  answer_carrier: 橘色手寫字與 1 個紅色 ☑（w:sym Wingdings F0FE），PDF p4 可見
+  rows:
+  - label: 澳洲全民重視體育
+    items:
+    - label: 人民
+      value: 經常自發運動。
+    - label: 政府
+      value: '設立了【　】的體育系統。
+
+        1.【　】設置體育場設施、體育場館、學校。
+
+        2.成立【　】，提供專業的科學訓練及獎學金。'
+      blanks:
+      - answer: 完善
+      - answer: 斥資
+      - answer: 國家運動中心
+    - label: 學校
+      value: '1.學生有【☑①充足 □②少量】的課後時間進行體育活動
+
+        2.經常舉辦校內、校際的體育競賽。'
+      options:
+        1: 充足
+        2: 少量
+      answer: 1
+      answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）—— 全課唯一的一個
+    - label: 家長
+      value: 熱衷讓孩子運動，以鍛鍊孩子身心，培養重要【　】。
+      blanks:
+      - answer: 品格
+  - label: 運動選手生涯
+    items:
+    - label: 培育階段
+      value: '(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。
+
+        (2)表現【　】者，可持續晉級，有機會成為兼職或全職的運動員，或進入國家代表隊。'
+      blanks:
+      - answer: 優異
+    - label: 退役後
+      value: '(1)可從事其他或原本的職業
+
+        (2)回到社區俱樂部當【　】。'
+      blanks:
+      - answer: 教練
+  - label: 臺灣體育的問題
+    value: '1.運動績優生選才不易。
+
+      2.運動選手主要是由政府與學校培育，較少俱樂部。
+
+      3.體育班長時間嚴格的體育訓練，犧牲了選手的課業與職業發展，造成退役選手的就業【　】。'
+    blanks:
+    - answer: 困難

@@ -1,0 +1,42 @@
+lesson_uid: L0096
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 岌岌可危
+    B: 首當其衝
+    C: 池魚之殃
+    D: 流離失所
+    E: 鳥瞰
+    F: 先例
+    G: 雲端
+    H: 沒有人是局外人
+    I: 冤屈
+  option_bank_note: 9 個代號對應 8 道小題；F.先例未被任何一題用到。語詞框的 12 個裡，臨界點、元宇宙、氣候難民沒有進代號表。
+  answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 運動團隊中，（　），每個隊員的努力對團隊的成功都很重要。
+    answer: H
+  - index: 2
+    stem: 大地震時大批房子倒塌，導致許多人（　）、無家可歸。
+    answer: D
+  - index: 3
+    stem: 學校運動場改建，田徑隊（　），需要重新尋找訓練地點。
+    answer: B
+  - index: 4
+    stem: 從飛機上（　）大地，夜晚城市的燈火，如閃爍的星星般美麗。
+    answer: E
+  - index: 5
+    stem: 同學打架時，小華從旁經過，沒想到遭受（　），不慎被打傷。
+    answer: C
+  - index: 6
+    stem: 照片和影片上傳（　）後，家人和朋友就可以立即查看和分享了。
+    answer: G
+  - index: 7
+    stem: 他明明沒有打破窗戶，卻被大家誤會，心裡覺得十分（　）。
+    answer: I
+  - index: 8
+    stem: 大地震過後的豪雨讓土石鬆動，山坡上的住宅顯得（　）。
+    answer: A

@@ -1,0 +1,21 @@
+lesson_uid: L0141
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 守望台灣 觀照世界｜齊柏林衛星
+    duration: (2:03)
+    source: 國家太空中心TASA
+    has_qr: true
+    index_note: 第 1 支的「1.」是 Word 自動編號（w:t 文字流裡沒有），第 2 支的「2.」是印出來的字元
+  - index: 2
+    title: '從空中看見台灣令人疼惜的一面: Po-lin Chi (齊柏林) at TEDxTaipeiChange 2012'
+    duration: (7:25)
+    source: TEDxTalks
+    has_qr: true
+  items_note: '總表 4.影片連結 分頁對應網址為 http://youtu.be/Cn8DLA074hE 與 http://youtu.be/G9YXfVHXGqM
+
+    —— 學習單上只印 QR code，網址不在 DOCX 文字層。'

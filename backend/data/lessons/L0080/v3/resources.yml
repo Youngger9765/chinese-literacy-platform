@@ -1,0 +1,18 @@
+lesson_uid: L0080
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 人口差不多 金牌是臺灣的8.5倍 為什麼澳洲體育如此強
+    duration: '12:09'
+    source: Cheap
+    _總表_url: http://youtu.be/yFk52GnXkkY
+  - index: 2
+    title: 奧運小常識06古代奧林匹克運動會
+    duration: 01:40
+    source: MOESports
+    _總表_url: http://youtu.be/RVNFPfx58Tk
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 93 列，故加 `_` 前綴標示非 DOCX 內容。

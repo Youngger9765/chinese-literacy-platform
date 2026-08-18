@@ -1,0 +1,43 @@
+lesson_uid: L0016
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 連忙
+  - 諧音
+  - 不妨
+  - 略表
+  - 歉意
+  - 好感
+  - 器具
+  - 總結
+  items:
+  - index: 1
+    word: 不妨
+    definition: 可以、沒關係。
+  - index: 2
+    word: 諧音
+    definition: 字詞的讀音相似，常用於語言遊戲、吉祥話或雙關語。
+  - index: 3
+    word: 總結
+    definition: 整理重點後，作出簡要說明。
+  - index: 4
+    word: 連忙
+    definition: 趕緊、急忙。
+  - index: 5
+    word: 好感
+    definition: 對某人或某事產生喜歡或欣賞的感覺。
+  - index: 6
+    word: 歉意
+    definition: 抱歉的心意。
+  - index: 7
+    word: 器具
+    definition: 工具、用具。
+  - index: 8
+    word: 略表
+    definition: 以簡單的方式表達心意。

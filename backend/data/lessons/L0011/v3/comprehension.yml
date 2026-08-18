@@ -1,0 +1,51 @@
+lesson_uid: L0011
+version_id: v3
+section_no: 六
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+  - index: 1
+    answer: C
+    stem: 請問「勢均力敵」，可以用哪個詞語替換？
+    options:
+      A: 天差地遠
+      B: 揚眉吐氣
+      C: 不分上下
+      D: 寡不敵眾
+    teacher_note: （勢均力敵表示兩方對手實力相近）
+  - index: 2
+    answer: B
+    stem: 請問文中第三段「捶胸頓足」最可能的情緒是哪個？
+    options:
+      A: 開心
+      B: 懊惱
+      C: 欣喜
+      D: 寂寞
+    teacher_note: （由前後文「唉聲嘆氣」，後句「滿臉失落」可推論是懊惱的情緒）
+  - index: 3
+    answer: B
+    stem: 「贏了值得開心，輸了不必難過」，和下列哪一句話的意思最接近？
+    options:
+      A: 天生我材必有用
+      B: 勝不驕，敗不餒。
+      C: 天塌下來有高個子擋著
+      D: 失敗是成功的必要條件
+    teacher_note: （輸了不必難過代表失敗了不用氣餒）
+  - index: 4
+    answer: A
+    stem: 為什麼戴資穎在落後的時候，沒有改為穩定的打法？
+    options:
+      A: 她要用自己的方式戰鬥
+      B: 高風險才有高得分
+      C: 她認為自己打不出穩定的球路
+      D: 對手太強了，讓她無法獲勝
+    teacher_note: （第三段）
+  - index: 5
+    answer: D
+    stem: 根據本文，戴資穎在這場比賽中最重視的是什麼？
+    options:
+      A: 賺進大量廣告代言費
+      B: 希望贏得比賽的勝利
+      C: 希望獲得人民的喝采
+      D: 做自己、為自己比賽
+    teacher_note: （第三、四段）

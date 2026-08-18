@@ -1,0 +1,65 @@
+lesson_uid: L0096
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 臨界點
+  - 岌岌可危
+  - 首當其衝
+  - 雲端
+  - 鳥瞰
+  - 先例
+  - 流離失所
+  - 元宇宙
+  - 池魚之殃
+  - 氣候難民
+  - 冤屈
+  - 沒有人是局外人
+  vocabulary_bank_note: '語詞框原文（含贅字，見 source_errata E1）：
+
+    「本課語詞：臨界點、岌岌可危、首當其衝、雲端、鳥瞰、先例、流離失所、元宇宙、池魚之殃、氣候難民、先例冤屈、沒有人是局外人。」
+
+    本欄列的是修正後的 12 個（拿掉重複的「先例」）。這是「A 組」清單，含「元宇宙」不含「溫室氣體」。'
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 鳥瞰
+    definition: 從高處往下看。
+  - index: 2
+    word: 池魚之殃
+    definition: 無緣無故受到災害連累。
+  - index: 3
+    word: 流離失所
+    definition: 失去原本的住所，到處流亡、分散到各地。
+  - index: 4
+    word: 首當其衝
+    definition: 最先遭遇災難或是最先受到衝擊。
+  - index: 5
+    word: 沒有人是局外人
+    definition: 這件事和每個人都有關，沒有人可以置身事外。
+  - index: 6
+    word: 岌岌可危
+    definition: 形容非常危險。岌岌，山勢陡峭或危險的樣子。
+  - index: 7
+    word: 元宇宙
+    definition: 利用數位科技建立的虛擬世界，人們可以透過網路在其中活動、互動。
+  - index: 8
+    word: 臨界點
+    definition: 事物發展到即將發生重大改變的關鍵點。本文指島嶼接近嚴重淹沒的程度。
+  - index: 9
+    word: 冤屈
+    definition: 受到不公平的對待，心裡感到委屈。
+  - index: 10
+    word: 雲端
+    definition: 把資料或服務放在網路系統中，讓人透過網路存取或使用。
+  - index: 11
+    word: 氣候難民
+    definition: 因為居住環境氣候的劇烈改變，導致被迫離開家園的人。
+  - index: 12
+    word: 先例
+    definition: 以前發生過，可以拿來參考的相同或類似例子。

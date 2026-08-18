@@ -1,0 +1,31 @@
+lesson_uid: L0158
+version_id: v3
+title: 不量田
+catalog_slot: 文-L3
+sections_present:
+- 'no': ''
+  name: 古文今譯
+  note: 無大題編號，印在標題下方
+- 'no': ''
+  name: 原文
+  note: 無大題編號，含注釋
+- 'no': ''
+  name: 朗讀計時
+  note: 無大題編號
+- 'no': ㄧ
+  name: 文白句子比對
+  note: 原稿印注音符號「ㄧ」(U+3127) 不是漢字「一」
+- 'no': 二
+  name: 文白詞語比對
+- 'no': 三
+  name: 文章重點表
+- 'no': 四
+  name: 文言文聚光燈
+  subtitle: 判讀主語
+- 'no': 五
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 文言文/文-L3不量田（判讀主語）.docx
+  docx_md5: md5-12:8f03b2406047

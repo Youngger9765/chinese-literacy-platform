@@ -1,0 +1,55 @@
+lesson_uid: L0035
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 突發奇想
+  - 壓迫
+  - 國際特赦組織
+  - 求助無門
+  - 乾著急
+  - 癲癇
+  - 極權
+  - 聲援
+  - 充耳不聞
+  - 素未謀面
+  - 緣起
+  items:
+  - index: 1
+    word: 極權
+    definition: 一種由一個人或少數人掌握國家權力的制度，人民的言論、選舉等自由受到嚴格限制。
+  - index: 2
+    word: 突發奇想
+    definition: 突然產生奇特的想法。
+  - index: 3
+    word: 素未謀面
+    definition: 表示從來沒有見過面。
+  - index: 4
+    word: 乾著急
+    definition: 遇到問題時非常著急，但卻無法解決。
+  - index: 5
+    word: 充耳不聞
+    definition: 故意裝作沒聽見，不理會別人的話或提醒。
+  - index: 6
+    word: 求助無門
+    definition: 在遇到困難或危險時，找不到可以幫助的人或地方。
+  - index: 7
+    word: 聲援
+    definition: 用言語或行動支持他人，幫助他們對抗困難或不公。
+  - index: 8
+    word: 壓迫
+    definition: 壓制逼迫。
+  - index: 9
+    word: 緣起
+    definition: 事物的由來。
+  - index: 10
+    word: 癲癇
+    definition: 一種腦部疾病。發作時可能突然失去意識或身體抽動，症狀因人而不同。
+  - index: 11
+    word: 國際特赦組織
+    definition: 一個關注人權的非政府組織。

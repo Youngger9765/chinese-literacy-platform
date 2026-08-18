@@ -1,0 +1,136 @@
+lesson_uid: L0128
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 屏息以待
+  - 震撼彈
+  - 打量
+  - 鼎力相助
+  - 嗤之以鼻
+  - 改寫
+  - 緊張
+  - 難以為繼
+  - 命運共同體
+  - 大聲疾呼
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 改赤一瞭望遠登郝打量
+  - 黝寫烈體嗤命鼎運彈耀
+  - 邱天去難之十陸力姚隻
+  - 馬立屏息以待栩如相之
+  - 課每況枝鼻為生大比助
+  - 體震愈幾元畫繼聲的月
+  - 離撼次緊張利接疾枝釀
+  - 田彈連新南廖採呼白引
+  - 越響山趣命運共同體剛
+  - 下岳光康皮花糖洪咬量
+  answers_are_graphical: true
+  answer_paths:
+  - word: 打量
+    cells:
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 改寫
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 2
+    direction: diagonal_down_right
+  - word: 嗤之以鼻
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 5
+    - - 4
+      - 5
+    - - 5
+      - 5
+    direction: vertical
+  - word: 鼎力相助
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 8
+    - - 4
+      - 9
+    - - 5
+      - 10
+    direction: diagonal_down_right
+  - word: 難以為繼
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    direction: diagonal_down_right
+  - word: 屏息以待
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 大聲疾呼
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 8
+    - - 7
+      - 8
+    - - 8
+      - 8
+    direction: vertical
+  - word: 震撼彈
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 緊張
+    cells:
+    - - 7
+      - 4
+    - - 7
+      - 5
+    direction: horizontal
+  - word: 命運共同體
+    cells:
+    - - 9
+      - 5
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  answer_paths_note: '10 條路徑 ＝ 10 個目標語詞 ＝ 紙上 10 個 roundRect（11 個 anchor 扣掉 1 個紙外殘留），三者相符，無警報。
+
+    第 4 列第 5 欄的「以」同時被「嗤之以鼻」「難以為繼」「屏息以待」三條路徑共用（原稿如此，三個圈確實交叉）。
+
+    格子沒有印錯字：10 條路徑套回 grid 全部拼得回目標語詞。'

@@ -1,0 +1,97 @@
+lesson_uid: L0143
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 說明文結構──用研究證據回答問題
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層）2 個 + 橘色手寫填空與 O／X，PDF p7~p9 可見
+  blocks:
+  - type: concept_box
+    text: '這是一篇典型的科普說明文，這類文章常常會先提出一個問題，接著引用研究、實驗或觀察資料來回答問題。閱讀這類文章時，不要只看作者最後說「答案是什麼」，還要看每一個研究證據支持了哪一部分，以及這個答案有沒有條件限制。
+
+      閱讀時可以用四步驟：
+
+      ❶找核心問題：作者想回答什麼？
+
+      ❷找初步答案：作者先給出的答案是什麼？
+
+      ❸整理研究證據：每個研究發現了什麼？支持哪個重點？
+
+      ❹統整結論：這些證據共同指向什麼答案？有沒有例外或限制？'
+  - type: single
+    label: ❶找核心問題
+    prompt: 本文想回答的問題是什麼？
+    options:
+      1: 肯亞為什麼常在馬拉松比賽獲獎？
+      2: 高地訓練是否有助於運動表現？
+      3: 紅血球太多會不會造成血栓？
+      4: 玻利維亞人為什麼住在高地？
+    answer: 2
+  - type: guide
+    text: 重點句：但是，高地訓練真的對每個運動員都有幫助嗎？
+  - type: single
+    label: ❷找初步答案
+    prompt: 作者對這個問題的初步答案是什麼？
+    options:
+      1: 一定有幫助
+      2: 完全沒有幫助
+      3: 不一定，因人而異
+      4: 只有肯亞選手有幫助
+    answer: 3
+  - type: guide
+    text: 重點句：答案是「不一定」。
+  - type: fill_table
+    label: ❸整理研究證據
+    columns:
+    - 研究
+    - 研究發現
+    - 支持的重點
+    rows:
+    - 研究: 研究一
+      研究發現: 同樣待在高地，有人 EPO 降低，有人升高400%以上
+      支持的重點: 人體對高地的生理反應【　】
+      支持的重點_blanks:
+      - answer: 因人而異
+    - 研究: 研究二
+      研究發現: 紅血球增加者長跑成績【　】；紅血球未增加者成績略退步
+      研究發現_blanks:
+      - answer: 進步
+      支持的重點: 同研究一，高地訓練是否提升成績，也是【　】
+      支持的重點_blanks:
+      - answer: 因人而異
+    - 研究: 研究三
+      研究發現: 玻利維亞人紅血球太多，血液變【　】，可能增加血栓風險
+      研究發現_blanks:
+      - answer: 濃稠
+      支持的重點: 紅血球不是越多越好，太多也可能有心血管病變的【　】
+      支持的重點_blanks:
+      - answer: 風險
+  - type: exercise
+    label: ❹判斷哪些證據能支持結論
+    instruction: 下列哪些證據能支持這個結論？能支持的畫 O，不能支持的畫 X。
+    note: 題目上方另印「結論：高地訓練的效果因人而異，訓練要考量個別差異。」
+    items:
+    - type: free_text
+      prompt: 1.同樣在高地，有些人的 EPO 上升，有些人卻下降。
+      answer: O
+    - type: free_text
+      prompt: 2.紅血球增加者回到平地後，5000公尺成績進步。
+      answer: O
+    - type: free_text
+      prompt: 3.紅血球未增加者回到平地後，成績反而略退步。
+      answer: O
+    - type: free_text
+      prompt: 4.基普喬吉小時候住在高海拔地區。
+      answer: X
+    - type: free_text
+      prompt: 5.歷年來馬拉松前十傑中，有七人是肯亞選手。
+      answer: X
+  - type: self_check
+    prompt: ◎自我檢核
+    items:
+    - 1.我能找出文章提出的核心問題。
+    - 2.我能找出作者的初步答案。
+    - 3.我能整理每個研究證據支持的重點。
+    - 4.我能判斷證據是否能支持結論。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選

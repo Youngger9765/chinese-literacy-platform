@@ -1,0 +1,68 @@
+lesson_uid: L0101
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  methods_note: 原稿的三個項目符號是 🅐 🅑 🅒（圓圈字母），不是自動編號。
+  vocabulary_bank:
+  - 祖靈
+  - 媒介
+  - 莊嚴以對
+  - 展現無遺
+  - 陶甕
+  - 酒麴
+  - 試煉
+  - 豐年祭
+  - 伴手禮
+  - 分寸
+  - 各有千秋
+  - 款待
+  - 殊途同歸
+  vocabulary_bank_note: '「本課語詞」框列 **13 個**；七 詞語複習的灰框列 **12 個**（多「通過試煉」、少「款待」，
+
+    且把「試煉」寫成「通過試煉」）。總表的 12 個與灰框那份一致。三份不完全相同，照各自原樣記錄。'
+  answer_carrier: 橘色手寫字（PDF p3）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 殊途同歸
+    definition: 方法或過程不同，但結果和目的是一樣的。
+  - index: 2
+    word: 媒介
+    definition: 傳遞、連結或溝通事物的中間橋樑。
+  - index: 3
+    word: 陶甕
+    definition: 用陶土燒製的大型容器，常用來儲水或釀酒。
+  - index: 4
+    word: 莊嚴以對
+    definition: 以敬重、嚴肅的態度面對某件重要的事情。
+  - index: 5
+    word: 試煉
+    definition: 困難的考驗。
+  - index: 6
+    word: 各有千秋
+    definition: 各自具有不同的優點或特色。
+  - index: 7
+    word: 款待
+    definition: 熱情而周到地招待客人，以表達歡迎與重視。
+  - index: 8
+    word: 伴手禮
+    definition: 探訪或旅行時帶回送人的禮物。
+  - index: 9
+    word: 祖靈
+    definition: 原住民族信仰中守護族人的祖先靈體。
+  - index: 10
+    word: 豐年祭
+    definition: 原住民族為感謝收成而舉行的重要祭典。
+  - index: 11
+    word: 酒麴
+    definition: 釀酒時用來促進發酵的菌種物質。
+  - index: 12
+    word: 展現無遺
+    definition: 完整呈現、毫無保留的表現出來。
+  - index: 13
+    word: 分寸
+    definition: 言行舉止的適度與界線。例如，在葬禮中嬉笑，就是「沒有分寸」。

@@ -1,0 +1,49 @@
+lesson_uid: L0062
+version_id: v3
+section_no: 五
+keypoints:
+  title: 感情小日記5──我該告白嗎？
+  layout: list
+  instruction: 本篇日記呈現了主角面對「該不該告白」的兩難思考，讓我們一起根據文章，整理主角的想法。
+  answer_carrier: 橘色手寫字（PDF p5~p6）；文字層的【　】內已填有同樣的答案
+  structure_note: '原稿右半邊是「告白──確認關係」「不告白──維持現狀」兩欄對照。
+
+    兩欄的列數不一樣（風險列左 4 項右 2 項），不是規整的矩陣，
+
+    所以依 skill §⑥.55b 用 list 攤平，欄名以「──」接在列名後寫進 label。'
+  rows:
+  - label: 兩難問題
+    value: 該不該告白
+  - label: 立場
+    columns:
+    - 告白──確認關係
+    - 不告白──維持現狀
+    note: 原稿這一列是兩個並排的欄標題儲存格；欄名放 columns，不另造串接字串
+  - label: 風險──告白（確認關係）
+    value: '萬一告白失敗──
+
+      1.（段三）對方可能刻意【　】
+
+      2.（段三）相處尷尬，無法毫無【　】
+
+      3.（段四）被大家指指點點，被當成【　】流傳
+
+      4.被人亂開玩笑，影響心情，或變成【　】'
+    blanks:
+    - answer: 保持距離
+    - answer: 顧忌
+    - answer: 八卦
+    - answer: 話題焦點
+  - label: 風險──不告白（維持現狀）
+    value: '1.（段五）對【　】不明的處境感到【　】不安
+
+      2.萬一對方也有好感，就會錯失【　】、錯過對方'
+    blanks:
+    - answer: 曖昧
+    - answer: 焦躁
+    - answer: 機會
+  - label: 兩難心情
+    value: 像是被困在【　】中，找不到出口，期許自己有足夠的勇氣和【　】做出選擇。
+    blanks:
+    - answer: 迷霧
+    - answer: 智慧

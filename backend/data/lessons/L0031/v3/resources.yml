@@ -1,0 +1,16 @@
+lesson_uid: L0031
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 奮戰不懈楊勇緯-讓世界看見台灣
+    duration: '11:23'
+    duration_seconds: 683
+    source: 鏡新聞
+  - index: 2
+    title: 射擊、柔道警專必備技能-台灣警察搖籃！
+    duration: '3:43'
+    duration_seconds: 223
+    source: 民視新聞網

@@ -1,0 +1,16 @@
+lesson_uid: L0047
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 「工地缺工潮」年輕人不願做　師傅嘆：有野心賺錢不難｜工作｜職業｜工人
+    duration: (7:47)
+    source: 即新聞
+    qr_code: true
+  - index: 2
+    title: 「工地」新手月薪達10萬up！台灣女孩分享澳洲熱門職業日常｜TVBS新聞｜網友熱搜
+    duration: (5:00)
+    source: TVBS NEWS
+    qr_code: true

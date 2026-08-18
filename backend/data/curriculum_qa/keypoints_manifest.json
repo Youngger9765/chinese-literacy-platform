@@ -4,8 +4,8 @@
   "source": "runtime story-structure (uid tree keypoints, #2683)",
   "smoke_only": false,
   "summary": {
-    "total": 147,
-    "pass": 147,
+    "total": 148,
+    "pass": 148,
     "fail": 0,
     "known_gap_count": 0,
     "failure_count": 0,
@@ -20,8 +20,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 3
+        "fill_blank_count": 3,
+        "checkbox_count": 2
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -34,8 +34,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 3
+        "fill_blank_count": 3,
+        "checkbox_count": 2
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -56,14 +56,28 @@
       "known_data_gap": false
     },
     {
+      "lesson_id": "G4-L12",
+      "lesson_uid": "L0003",
+      "title": "大自然的氣象小幫手",
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0
+      },
+      "docx_keypoints": null,
+      "overall_pass": true,
+      "known_data_gap": false
+    },
+    {
       "lesson_id": "G4-L13",
       "lesson_uid": "L0004",
       "title": "感情小日記2──喜歡是什麼？",
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 5
+        "fill_blank_count": 6,
+        "checkbox_count": 0
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -172,10 +186,10 @@
       "lesson_uid": "L0012",
       "title": "想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)",
       "layout": {
-        "mode": "mixed",
+        "mode": "fill_blank",
         "layout": "worksheet_table",
         "fill_blank_count": 5,
-        "checkbox_count": 1
+        "checkbox_count": 0
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -1468,7 +1482,7 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
+        "fill_blank_count": 4,
         "checkbox_count": 1
       },
       "docx_keypoints": null,
@@ -1832,7 +1846,7 @@
       "layout": {
         "mode": "fill_blank",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
+        "fill_blank_count": 2,
         "checkbox_count": 0
       },
       "docx_keypoints": null,
@@ -1996,7 +2010,7 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 1,
+        "fill_blank_count": 4,
         "checkbox_count": 3
       },
       "docx_keypoints": null

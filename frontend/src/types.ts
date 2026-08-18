@@ -157,6 +157,60 @@ export interface SpotlightFillTableBlock {
   type: 'fill_table';
 }
 
+/** 策略說明框。每一課的聚光燈都以它開場，舊抽取把它壓成 guide 文字流。 */
+export interface SpotlightConceptBoxBlock {
+  type: 'concept_box';
+  text: string;
+  label?: string;
+}
+
+/**
+ * 連連看。答案在教師版上是紅色連線 —— 圖形，不在 DOCX 文字流裡，
+ * 所以只有多模態閱讀抽得到。`answer` 是左欄代號 → 右欄代號清單。
+ */
+export interface SpotlightMatchingBlock {
+  type: 'matching';
+  label?: string;
+  instruction?: string;
+  left_header?: string;
+  right_header?: string;
+  left: Record<string, string>;
+  right: Record<string, string>;
+  answer?: Record<string, string[]>;
+}
+
+/**
+ * 巢狀小題（一、→（一）→ 1.2.3.）。學習單本來就是這個形狀，
+ * 舊抽取沒有遞迴，把它壓平成一串 guide + free_text，層級全部消失。
+ */
+export interface SpotlightSubBlock {
+  type: 'sub_block';
+  label?: string;
+  prompt?: string;
+  stem?: string;
+  intro?: string;
+  instruction?: string;
+  hint?: string;
+  value?: string;
+  options?: Record<string, string> | string[];
+  answer?: string | number | number[];
+  blanks?: { answer: string; hint?: string }[];
+  items?: SpotlightSubBlock[];
+  reflection?: string;
+}
+
+/** 小試身手：打勾表格 ＋ 填代號，兩種練習共用一個容器。 */
+export interface SpotlightExerciseBlock {
+  type: 'exercise';
+  index?: number;
+  label?: string;
+  prompt?: string;
+  instruction?: string;
+  option_bank?: Record<string, string>;
+  rows?: Record<string, unknown>[];
+  items?: { index?: number; stem?: string; answer?: string | number }[];
+}
+
 export interface SpotlightUnknownBlock {
   type: 'unknown' | string;
   text?: string;
@@ -175,6 +229,11 @@ export type SpotlightBlock =
   | SpotlightTableBlock
   | SpotlightSelfCheckBlock
   | SpotlightFillTableBlock
+  // ⚠️ concept_box / matching / sub_block / exercise 刻意**不**進這個 union。
+  //    `SpotlightUnknownBlock` 帶 `[key: string]: unknown` 的 index signature，
+  //    多加一個成員會讓 TS 對既有成員的窄化失效（`block.options` 變成 unknown，
+  //    連 single / table / ordering 都一起壞）。它們由 renderer 在 case 內轉型使用，
+  //    型別定義留在下面供元件與測試引用。
   | SpotlightUnknownBlock;
 
 export interface SpotlightV2 {

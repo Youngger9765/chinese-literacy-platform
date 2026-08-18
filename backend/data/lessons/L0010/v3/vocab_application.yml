@@ -1,0 +1,41 @@
+lesson_uid: L0010
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 勸誡
+    B: 孤注一擲
+    C: 累癱
+    D: 揮之不去
+    E: 擦身而過
+    F: 雀屏中選
+    G: 豐厚
+    H: 報酬
+    I: 有朝一日
+    J: 疲憊
+  items:
+  - index: 1
+    stem: 今天爬山爬了一整天，我一回家就（　）在沙發上。
+    answer: C
+  - index: 2
+    stem: 姊姊弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺就（　）。
+    answer: D
+  - index: 3
+    stem: 這次比賽的獎品非常（　），有玩具、文具，還有禮券！
+    answer: G
+  - index: 4
+    stem: 公司面臨倒閉危機，老闆（　），拿出全部資金研發新產品。
+    answer: B
+  - index: 5
+    stem: 他做事總是猶豫不決，每次下定決心時，機會早就和他（　）。
+    answer: E
+  - index: 6
+    stem: 經過校隊選拔，小華（　），成為正式隊員。
+    answer: F
+  - index: 7
+    stem: 姊姊（　）哥哥不要一直玩手機，要注意眼睛健康。
+    answer: A
+  - index: 8
+    stem: 走了一整天的路，我已經（　）不堪，只想躺下休息。
+    answer: J

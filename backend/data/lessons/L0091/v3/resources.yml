@@ -1,0 +1,16 @@
+lesson_uid: L0091
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 為何大腦對危機視而不見？灰犀牛(四月新書推薦-The Gray Rhino) | 夯翻鼠說書5
+    duration: (5:23)
+    source: 柴鼠兄弟
+    has_qr: true
+  - index: 2
+    title: 熱線追蹤-臺灣總人口首度負成長
+    duration: (07:53)
+    source: TTV台視新聞
+    has_qr: true

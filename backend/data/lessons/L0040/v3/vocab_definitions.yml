@@ -1,0 +1,55 @@
+lesson_uid: L0040
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 愧疚
+  - 依樣畫葫蘆
+  - 激情洋溢
+  - 按表操課
+  - 出爐
+  - 節節攀升
+  - 相輔相成
+  - 沸騰
+  - 康莊大道
+  - 座無虛席
+  - 融會貫通
+  items:
+  - index: 1
+    word: 按表操課
+    definition: 比喻按照計劃或時間表進行工作或活動。
+  - index: 2
+    word: 融會貫通
+    definition: 把不同的知識理解後連結起來，並能靈活運用。
+  - index: 3
+    word: 依樣畫葫蘆
+    definition: 形容跟著樣子模仿學習。
+  - index: 4
+    word: 康莊大道
+    definition: 平坦暢通的大路。比喻美好的前途。
+  - index: 5
+    word: 節節攀升
+    definition: 形容某種數據或成績持續上升，不斷突破新高。
+  - index: 6
+    word: 激情洋溢
+    definition: 形容情感非常熱烈、激動，通常指人很投入活動當中。
+  - index: 7
+    word: 座無虛席
+    definition: 形容場內座位全部坐滿，一個空位都沒有。
+  - index: 8
+    word: 愧疚
+    definition: 因做錯事或未完成應盡責任而感到內疚、不安。
+  - index: 9
+    word: 沸騰
+    definition: 液體汽化的現象，從液體變成氣體，例如：水燒開時，水面會劇烈滾動。在此比喻現場氣氛熱烈，帶動觀眾情緒高漲。
+  - index: 10
+    word: 出爐
+    definition: 原指從烤爐中取出。例如：剛出爐的麵包。也可比喻新事物的誕生或出現，例如：新出爐的影后，新出爐的課表。
+  - index: 11
+    word: 相輔相成
+    definition: 兩者互相幫助、互相配合，使結果變得更好。

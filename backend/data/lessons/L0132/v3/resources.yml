@@ -1,0 +1,19 @@
+lesson_uid: L0132
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 眼睛裡面是什麼樣的呢
+    duration: (8:36)
+    source: 亮生活
+    has_qr: true
+  - index: 2
+    title: '古代沒眼鏡 近視怎麼辦?
+
+      ▶ 近視的歷史'
+    duration: (影片由開頭至7:31為止)
+    source: Cheap
+    has_qr: true

@@ -1,0 +1,45 @@
+lesson_uid: L0089
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 囑託
+    B: 鉅細靡遺
+    C: 老邁
+    D: 不置可否
+    E: 敏捷
+    F: 輕蔑
+    G: 迂
+    H: 經典之作
+    I: 獨白
+    J: 笨拙
+  unused_options:
+  - E
+  - I
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    stem: 她整理資料一向（　），連最小的細節都不會放過。
+    answer: B
+  - index: 2
+    stem: 面對記者追問，他既不承認也不否認，始終（　），微笑帶過。
+    answer: D
+  - index: 3
+    stem: 母親出去辦事，把妹妹（　）給鄰居照顧。
+    answer: A
+  - index: 4
+    stem: 三歲的弟弟（　）的拿起筷子，夾麵條時還掉了好幾根。
+    answer: J
+  - index: 5
+    stem: 由於母親（　），急需照顧，他便辭職回鄉。
+    answer: C
+  - index: 6
+    stem: 比賽前，對手（　）的嘲笑臺灣隊不可能獲勝。
+    answer: F
+  - index: 7
+    stem: 爺爺做事十分守舊，不願嘗試新方法，家人笑他有些（　）。
+    answer: G
+  - index: 8
+    stem: 這部電影上映多年後仍受到肯定，被大家認為是科幻片的（　）。
+    answer: H

@@ -1,0 +1,12 @@
+lesson_uid: L0127
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 他她的故事：「地獄中也能開出小花」
+    duration: (1:00)
+    source: 痛快銷研-閱讀治痛知識消炎
+    has_qr: true

@@ -1,0 +1,159 @@
+lesson_uid: L0165
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 合作中的信任：溝通與調整
+  strategy_type: character_teamwork_trust
+  section_label: 品格聚光燈
+  section_label_note: ⚠️ 本課型第六大題叫「品格聚光燈」不是「閱讀聚光燈」。
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，本節 5 個）＋橘色代號（單選題）
+  blocks:
+  - type: concept_box
+    text: 在需要團隊合作的挑戰中，當隊友或組員出錯時，可能有些人會想：「算了，我自己來。」自己獨立完成看起來比較快，也比較能夠掌握，可是真的能解決合作的問題嗎？讓我們看看這個故事中阿澤前後的做法。
+  - type: guide
+    text: ◎故事回顧與推敲：
+  - type: single
+    index: 1
+    prompt: 1.小宇漏接後，阿澤為什麼只想靠直球三振打者？
+    options:
+      A: 他認為直球一定能三振所有打者
+      B: 他不想再讓隊友處理打出去的球
+    answer: B
+    options_note: 選項代號在原稿是圈框字🄐🄑（U+1F150/U+1F151），此處以 A/B 記錄；答案欄填的是全形Ａ/Ｂ。
+  - type: single
+    index: 2
+    prompt: 2.阿澤當時最接近哪一種想法？
+    options:
+      A: 隊友失誤了，他應該要立刻退出比賽
+      B: 隊友失誤了，我只能把事情全扛下來
+    answer: B
+  - type: guide
+    text: →從故事可以看見，阿澤因為不放心，所以想將所有事情抓回自己手中。但阿澤的選擇帶來了好結果嗎？我們來看底下的整理表格。
+  - type: table
+    columns:
+    - 阿澤的做法
+    - 造成的結果
+    rows:
+    - - 拒絕阿凱的低球配球
+      - 放棄自己原本擅長的方法
+    - - 一直想靠直球三振
+      - 心情慌亂，接連投出壞球，差點保送打者
+  - type: single
+    prompt: →阿澤想把事情全部扛下來的決定，讓事情（　）。
+    options:
+      1: 更好
+      2: 不好
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym），PDF p7 可見
+  - type: single
+    index: 3
+    prompt: 3.阿澤想自己解決，為什麼反而讓情況更加危險？
+    options:
+      A: 他為了不依靠隊友，放棄了原本有效的分工
+      B: 他看到隊友失誤後，立刻失去了原有的投球能力。
+    answer: A
+    options_note: B 選項句末有句號、A 沒有，原稿如此。
+  - type: guide
+    text: '→由此可知，
+
+      把事情全接過來，也許暫時比較放心，卻不一定真正解決問題。
+
+      那還可以怎麼辦呢？除了獨撐大局，還能怎麼做？
+
+      ❶說清楚疑慮：我真正不放心的是什麼？
+
+      ❷調整合作：分工、做法或時間需要怎麼調整？
+
+      ❸做好本分，準備支援：不把工作全搶走，也不完全放著不管。'
+  - type: guide
+    text: ※我們先來看看故事中的人物怎麼做：
+  - type: single
+    label: ❶說清楚疑慮
+    prompt: ❶說清楚疑慮：阿凱問出阿澤真正不放心的地方：
+    options:
+      1: 沒辦法相信內野會把打出去的球接起來
+      2: 沒辦法相信自己的球可以有效壓制打者
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym）
+  - type: guide
+    text: →不要只說「我自己來」，先說清楚自己擔心什麼。
+  - type: fill_table
+    label: ❷調整合作
+    columns:
+    - 人物
+    - 調整
+    answer_carrier: 紅色 ☑（w:sym），本表 2 個
+    rows:
+    - 人物: 阿澤
+      調整: '①接受阿凱的指示和配球
+
+        ②堅持用直球和打者對決'
+      調整_options:
+        1: 接受阿凱的指示和配球
+        2: 堅持用直球和打者對決
+      調整_answer: 1
+    - 人物: 小宇
+      調整: '①認為失誤沒什麼大不了，下一球努力就好
+
+        ②為自己的失誤道歉，並在下一次調整動作'
+      調整_options:
+        1: 認為失誤沒什麼大不了，下一球努力就好
+        2: 為自己的失誤道歉，並在下一次調整動作
+      調整_answer: 2
+  - type: guide
+    text: →問題說清楚後，再調整分工或做法。
+  - type: single
+    label: ❸做好本分，也準備支援
+    prompt: ❸做好本分，也準備支援：從哪裡可以看出來？
+    options:
+      1: 阿澤照捕手的配球投球，同時往前跨一步，準備補位
+      2: 阿澤不再理會守備，只專心站在投手丘上，好好投球
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym）
+  - type: guide
+    text: '→相信隊友會完成他的部分，自己也做好本分，必要時準備支援。
+
+      每個人仍要完成自己的責任，也可以在需要時互相協助。'
+  - type: guide
+    text: ◎換個情境試試看：
+  - type: passage
+    paragraphs:
+    - 下週要進行分組報告。小安負責找圖片，但到了星期五仍然沒有傳給組員。組長小傑擔心來不及，想把小安的工作全部接過來。
+  - type: single
+    index: 1
+    prompt: 1.小傑「全部自己做」可能造成什麼問題？
+    options:
+      A: 小安會更清楚自己的工作哪裡需要改進
+      B: 小傑負擔變重，小安也失去負責的機會
+    answer: B
+  - type: single
+    index: 2
+    prompt: 2.哪一個做法最符合今天學到的方法？
+    options:
+      A: 問清楚困難，重新確認期限，必要時協助一部分
+      B: 不詢問進度也不告訴小安，直接把圖片全部找完
+    answer: A
+  - type: single
+    index: 3
+    prompt: 3.小傑可以怎麼說？
+    options:
+      A: 「我擔心報告來不及。你目前做到哪裡？我們一起確認下一步」
+      B: 「這已經是最簡單的工作了，如果你做不到就要提前交代給別人」
+    answer: A
+  - type: guide
+    text: '→隊友沒做好時，把工作全部接過來，也許能暫時完成任務，卻可能讓自己負擔更重，也讓隊友失去負責和改進的機會。
+
+      →先說出疑慮，再調整合作；各自做好本分，也準備在需要時互相支援，才是更好的合作方法。
+
+      →但如果遇到有同學太過被動、不參與，甚至推卸責任，這時候就可以尋求老師的幫忙唷！'
+    text_note: 這三行印在一個圓角外框裡（PDF p9），是本節的結語框。
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 讀完這一課，我能：
+    items:
+    - 1.看出阿澤為什麼想把事情全部抓回自己手中。
+    - 2.我能說明把事情全部自己做，為什麼沒有真正解決合作問題。
+    - 3.我能用「說清楚疑慮、調整合作、做好本分並支援」處理新的情境。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+    items_note: 第 1 項沒有「我能」開頭，第 2、3 項有。原稿如此。

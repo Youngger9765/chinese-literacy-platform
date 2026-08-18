@@ -1,0 +1,17 @@
+lesson_uid: L0075
+version_id: v3
+section_no: 二
+resources:
+  section_no_printed: 二
+  label: 影片連結
+  items:
+  - index: 1
+    title: '白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in Ice'
+    duration: 0:59
+    duration_seconds: 59
+    source: World Amazing Facts
+  - index: 2
+    title: 柴可夫斯基《天鵝湖》四小天鵝舞 - 柏林國家歌劇院獻演
+    duration: '1:39'
+    duration_seconds: 99
+    source: 我視音樂 - I SEE

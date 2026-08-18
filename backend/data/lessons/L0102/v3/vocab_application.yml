@@ -1,0 +1,48 @@
+lesson_uid: L0102
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 混淆
+    B: 查緝
+    C: 信以為真
+    D: 似是而非
+    E: 黏稠
+    F: 迷魂陣
+    G: 相提並論
+    H: 指鹿為馬
+    I: 混淆
+    J: 偽科學
+  option_bank_note: '🔴 **A 與 I 都是「混淆」**（原稿如此，見 source_errata E1），
+
+    而語詞框的「尼古丁」「長期提款機」沒有出現在代號表裡。
+
+    十個代號對 8 小題；扣掉重複後實際只有 9 個相異語詞。'
+  answer_carrier: 橘色手寫代號（PDF p5）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 這兩件事情性質完全不同，怎麼可以（　）。
+    answer: G
+  - index: 2
+    stem: 他的論點半真半假、（　），聽到的人都半信半疑。
+    answer: D
+  - index: 3
+    stem: 最近警方都在（　）毒品，以杜絕犯罪活動，維護社會秩序。
+    answer: B
+  - index: 4
+    stem: 如果對網路上的虛假消息（　），就容易成為網路詐騙的對象。
+    answer: C
+  - index: 5
+    stem: 誇大不實的廣告，容易使民眾對產品的療效產生（　）。
+    answer: A
+    answer_note: 原稿印「A」；但 A 與 I 同為「混淆」，無法區分指哪一個代號（見 E1）。
+  - index: 6
+    stem: 班會紀錄寫得很清楚，他卻故意扭曲內容，企圖（　）。
+    answer: H
+  - index: 7
+    stem: 用星座、血型算命，根本就是（　），經不起科學考驗。
+    answer: J
+  - index: 8
+    stem: 他感冒後鼻涕又黃又（　），醫生提醒他多喝水、多休息。
+    answer: E

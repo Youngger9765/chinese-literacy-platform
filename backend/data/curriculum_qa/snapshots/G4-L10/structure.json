@@ -1,78 +1,58 @@
 {
-  "interaction_profile": {
-    "checkbox_count": 3,
-    "fill_blank_count": 2,
-    "layout": "worksheet_table",
-    "mode": "mixed",
-    "primary_labels": [
-      "主角",
-      "雅加達亞運",
-      "拿坡里世大運",
-      "結果"
-    ],
-    "template_kind": "theme_facts"
-  },
-  "layout": "worksheet_table",
   "rows": [
     {
-      "interactive_type": "display",
       "label": "十秒的背後",
-      "value": ""
+      "value": "",
+      "interactive_type": "display"
     },
     {
-      "interactive_type": "fill_blank",
       "label": "主角",
-      "value": "【　　　】"
+      "value": "【　　　】",
+      "interactive_type": "fill_blank"
     },
     {
-      "interactive_type": "display",
       "label": "挫折事件",
+      "value": "",
+      "interactive_type": "display",
       "sub_rows": [
         {
-          "correct_options": [
-            1
-          ],
+          "label": "",
+          "value": "□①驕傲地奪得銀牌 ②以微小差距與金牌擦身而過，感到不甘心",
           "interactive_type": "checkbox",
-          "label": "雅加達亞運",
           "options": [
             "驕傲地奪得銀牌",
             "以微小差距與金牌擦身而過，感到不甘心"
           ],
-          "value": "【 單選 】\n□①驕傲地奪得銀牌     \n②以微小差距與金牌擦身而過，感到不甘心"
+          "correct_options": [
+            1
+          ]
         },
         {
-          "correct_options": [
-            0
-          ],
+          "label": "",
+          "value": "比賽時受傷了，他選擇【 單選 】\n①積極的面對與復健 □②放棄跑步、不願治療",
           "interactive_type": "checkbox",
-          "label": "拿坡里世大運",
           "options": [
-            "積極的面對與復健   □",
+            "積極的面對與復健 □",
             "放棄跑步、不願治療"
           ],
-          "value": "比賽時受傷了，他選擇【 單選 】\n①積極的面對與復健   □②放棄跑步、不願治療"
+          "correct_options": [
+            0
+          ]
         }
-      ],
-      "value": ""
+      ]
     },
     {
-      "correct_options": [
-        0
-      ],
-      "interactive_type": "checkbox",
       "label": "結果",
-      "options": [
-        "100公尺  □",
-        "400公尺 的短跑項目的臺灣選手。"
-      ],
-      "value": "他成為再度登上奧運【 單選 】\n①100公尺  □②400公尺 的短跑項目的臺灣選手。"
+      "value": "他成為再度登上奧運【　　　】【　　　】的短跑項目的臺灣選手。",
+      "interactive_type": "fill_blank"
     },
     {
-      "interactive_type": "fill_blank",
       "label": "他學到了什麼？",
-      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。"
+      "value": "1.他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。",
+      "interactive_type": "fill_blank"
     }
   ],
+  "layout": "worksheet_table",
   "title": "十秒的背後",
   "worksheet_rows": [
     {
@@ -81,28 +61,40 @@
       "value": "【　　　】"
     },
     {
+      "kind": "section_block",
+      "section": "挫折事件",
       "items": [
         {
-          "label": "雅加達亞運",
-          "value": "（單選）\n□①驕傲地奪得銀牌     \n②以微小差距與金牌擦身而過，感到不甘心"
+          "label": "",
+          "value": "□①驕傲地奪得銀牌 ②以微小差距與金牌擦身而過，感到不甘心"
         },
         {
-          "label": "拿坡里世大運",
-          "value": "比賽時受傷了，他選擇（單選）\n①積極的面對與復健   □②放棄跑步、不願治療"
+          "label": "",
+          "value": "比賽時受傷了，他選擇（單選）\n①積極的面對與復健 □②放棄跑步、不願治療"
         }
-      ],
-      "kind": "section_block",
-      "section": "挫折事件"
+      ]
     },
     {
       "kind": "pair",
       "label": "結果",
-      "value": "他成為再度登上奧運（單選）\n①100公尺  □②400公尺 的短跑項目的臺灣選手。"
+      "value": "他成為再度登上奧運（單選）【　　　】的短跑項目的臺灣選手。"
     },
     {
       "kind": "pair",
       "label": "他學到了什麼？",
-      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。"
+      "value": "1.他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。"
     }
-  ]
+  ],
+  "interaction_profile": {
+    "mode": "mixed",
+    "template_kind": "theme_facts",
+    "fill_blank_count": 3,
+    "checkbox_count": 2,
+    "primary_labels": [
+      "主角",
+      "結果",
+      "他學到了什麼？"
+    ],
+    "layout": "worksheet_table"
+  }
 }

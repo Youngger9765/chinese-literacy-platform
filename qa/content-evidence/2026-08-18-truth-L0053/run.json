@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0053",
+  "catalog_slot": "G6-L13",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "念順順「六☞」= 第 6 段；累計字數三個段界全中（119 / 219 / 362），本課不需要任何特殊口徑，也因此確認 PDF 上「段號比實際低一行」是 LibreOffice 版面錯位、不是抓錯段。PDF 兩處假空白已回查文字層補回：◎我的表現整張表沒畫出來、三大題 (1)(2)(6)(7) 與語詞框疊印。找字格 roundRect 共 11 個但只有 10 個是答案圈 —— 第 11 個是 bg1 灰色、2.98×0.77in 的『灰框』（框語詞清單），錨點在格子上方。格子跨頁（1~7 列 p8、8~10 列 p9）而所有圈都畫在 p8，後三列的圈在 p8 底部看起來像空框。🔴 找到一個格子錯字：第 10 欄圈起的四格拼出「臨機應便」，目標語詞是「臨機應變」（同音 biàn），格子裡沒有第二個「變」，故 word 記格子實際拼法＋intended_word_note＋source_errata E1＋answers_printed: partial。"
+}

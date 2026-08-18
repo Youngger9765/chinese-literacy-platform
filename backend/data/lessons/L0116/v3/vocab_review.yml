@@ -1,0 +1,162 @@
+lesson_uid: L0116
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 心不在焉
+  - 鄙夷
+  - 轉圜
+  - 契機
+  - 禍福相倚
+  - 無常
+  - 詮釋
+  - 愁雲慘霧
+  - 得意忘形
+  - 於事無補
+  - 市井
+  - 門可羅雀
+  - 奠定
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 素泫然欲轉泣於支離路
+  - 心不在焉雕圜事生技投
+  - 立鄙合為錐貴無常貧門
+  - 破夷鏤廣禍擴補智萬可
+  - 響經之福日愁點賀無羅
+  - 契機相群貨雲老新緣雀
+  - 精倚星詮釋慘布鄙市走
+  - 經濟中段拜霧跡斑斑井
+  - 奠淺綿臨得意忘形舉足
+  - 定葉延終脹一目了龍手
+  answers_are_graphical: true
+  answer_paths:
+  - word: 轉圜
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 6
+    direction: diagonal_down_right
+  - word: 於事無補
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 7
+    - - 3
+      - 7
+    - - 4
+      - 7
+    direction: vertical
+  - word: 心不在焉
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 鄙夷
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 2
+    direction: vertical
+  - word: 無常
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 門可羅雀
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 禍福相倚
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 4
+    - - 6
+      - 3
+    - - 7
+      - 2
+    direction: diagonal_down_left
+  - word: 愁雲慘霧
+    cells:
+    - - 5
+      - 6
+    - - 6
+      - 6
+    - - 7
+      - 6
+    - - 8
+      - 6
+    direction: vertical
+  - word: 契機
+    cells:
+    - - 6
+      - 1
+    - - 6
+      - 2
+    direction: horizontal
+  - word: 詮釋
+    cells:
+    - - 7
+      - 4
+    - - 7
+      - 5
+    direction: horizontal
+  - word: 市井
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 奠定
+    cells:
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 得意忘形
+    cells:
+    - - 9
+      - 5
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    direction: horizontal
+  geometry_check: '全檔 roundRect 錨點 14 個。扣掉 1 個紙外殘留 ＝ 紙上 13 個，與 13 條 answer_paths 相同，無警報。
+
+    紙外那個的兩個旁證同時成立：`positionH relativeFrom="rightMargin" posOffset=+5.76in`
+
+    （換算距頁左超過 A4 頁寬 8.27in），且框線硬寫死 srgb E97132，其餘 13 個都是佈景色 accent2。
+
+    ⚠️ 依 SKILL，「硬寫死 E97132」單獨不足以判定殘留（L0122 全部都是硬寫死的），
+
+    這裡是靠 posOffset 換算出界才判掉，顏色只當旁證。
+
+    格子沒有跨頁（10 列都在 p12）；13 個目標語詞在格子裡都拼得回來，無錯字。'

@@ -680,6 +680,7 @@ modules:
   - scripts/story_structure_qa.py
   - scripts/build_keypoints_qa_manifest.py
   - scripts/keypoints_manifest_verify.py
+  - backend/app/services/keypoints_to_structure.py
   owns_data:
   - backend/data/lessons/_parsed_2026-05-01/**/*.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
@@ -689,10 +690,17 @@ modules:
   - backend/specs/test_keypoints_manifest_spec.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
+  legacy_tests:
+  - backend/tests/test_yaml_first_structure.py
+  - backend/tests/test_story_structure_qa_contract.py
+  - backend/tests/test_keypoints_to_structure.py
+  - backend/tests/test_keypoints_subitem_label_2736.py
+  - backend/tests/test_keypoints_prompt_stem_2736.py
   related_issues:
   - 2205
   - 2261
   - 2273
+  - 2736
   last_reviewed: 2026-06-19
   owner: young
   intent: specs/modules/story-structure/INTENT.md

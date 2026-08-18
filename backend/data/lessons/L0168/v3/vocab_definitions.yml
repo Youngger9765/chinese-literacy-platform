@@ -1,0 +1,61 @@
+lesson_uid: L0168
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    乏善可陳、垂頭喪氣、
+
+    力不從心、貼紮、使喚、
+
+    耳邊風、家常便飯、
+
+    微不足道、一針見血、'
+  word_bank:
+  - 乏善可陳
+  - 垂頭喪氣
+  - 力不從心
+  - 貼紮
+  - 使喚
+  - 耳邊風
+  - 家常便飯
+  - 微不足道
+  - 一針見血
+  word_bank_note: 框內最後以頓號「、」結尾而非句號，照原稿抄
+  answers_printed: true
+  answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
+  items:
+  - index: 1
+    definition: 想做某事卻因能力或體力不足而無法完成。
+    answer: 力不從心
+  - index: 2
+    definition: 以肌貼貼於皮膚以達到增進或保護肌肉骨骼的輔助治療。
+    answer: 貼紮
+  - index: 3
+    definition: 比喻說話或文章切中要害，非常精確。
+    answer: 一針見血
+  - index: 4
+    definition: 形容人因為失敗或挫折而顯得沮喪、沒有精神。
+    answer: 垂頭喪氣
+  - index: 5
+    definition: 對別人的話語當作沒聽見，完全不放在心上。
+    answer: 耳邊風
+  - index: 6
+    definition: 形容事物非常渺小，不值得一提。
+    answer: 微不足道
+  - index: 7
+    definition: 沒有什麼優點可以稱讚。陳，述說。
+    answer: 乏善可陳
+  - index: 8
+    definition: 比喻常見、習以為常的事情。
+    answer: 家常便飯
+  - index: 9
+    definition: 指派他人去做事。
+    answer: 使喚

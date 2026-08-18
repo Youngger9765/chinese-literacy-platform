@@ -1,0 +1,192 @@
+lesson_uid: L0154
+version_id: v3
+section_no: 四
+spotlight:
+  strategy_name: 疑問標籤：疑問助詞
+  strategy_type: classical_grammar
+  section_title_printed: 文言文聚光燈
+  answer_carrier: 橘色代號（字元樣式 aff6）＋ 橘色字元框線（w:bdr E97132／E76D29）＋ 橘色連線（圖形）
+  blocks:
+  - type: concept_box
+    text: 古人沒有「問號 (?)」，沒有「嗎、呢」等「句尾」疑問助詞，也沒有「如何、為什麼、哪裡、怎麼」等「非句尾」的疑問詞，但他們會利用特定的字來表達「疑問」。這就像是句子的「標籤」，看到它們，就知道這是在提問哦！
+  - type: guide
+    text: 一、重點攻略：問句的兩大「標籤」
+  - type: guide
+    text: 我們把疑問句分成兩種最常見的標籤，只要記住位置就很好認：
+  - type: table
+    columns:
+    - 標籤字
+    - 意思
+    rows:
+    - - 誰、孰（ㄕㄨˊ）
+      - 問「是哪個人」。
+    - - 何
+      - 問「什麼」或「為什麼」。
+    - - 安、焉
+      - 問「哪裡」或「怎麼」。
+    instruction: '1. 不是放在句尾的：問題主角
+
+      這些字通常指著某個「人」或「事情」在提問。'
+  - type: table
+    columns:
+    - 標籤字
+    - 意思
+    rows:
+    - - 乎
+      - 相當於「嗎」。最常出現的疑問詞，可以用於真的提問，也常用於反問。
+    - - 耶 / 邪（ㄧㄝˊ）
+      - 相當於「嗎、呢」。它通常帶有說話者主觀的猜測、為難或悲傷情感。
+    - - 與 / 歟（ㄩˊ）
+      - 相當於「吧、呢」。說話者心裡大概有答案，但用一種比較委婉、推測的語氣問。
+    instruction: '2. 放在句子結尾：語氣標籤(疑問助詞)
+
+      這些字就像我們現在說「嗎」、「呢」，放在句子的最後面。'
+  - type: guide
+    text: 你可能注意到了，「問題主角」的概念，其實就是我們在〈江乙媽媽告御狀〉裡學過的「疑問代詞」。接下來的練習，可以幫助你更熟悉文言文的疑問句，請務必練習看看。
+  - type: guide
+    text: 二、輕練習
+  - type: guide
+    text: (一)連連看：請將文言文的「標籤字」與它的白話意思連起來。
+  - type: matching
+    prompt: 連連看1：
+    left:
+      1: 孰
+      2: 何
+      3: 乎
+    right:
+      A: 嗎
+      B: 誰 / 哪一個
+      C: 什麼 / 為什麼
+    answer:
+      1: B
+      2: C
+      3: A
+    answer_carrier: 橘色手繪連線（圖形，佈景色 accent2），文字流無此資訊
+  - type: matching
+    prompt: 連連看2：
+    left:
+      1: 與、歟
+      2: 安
+      3: 耶、邪
+    right:
+      A: 哪裡 / 怎麼
+      B: 嗎 / 呢
+      C: 吧 / 呢
+    answer:
+      1: C
+      2: A
+      3: B
+    answer_carrier: 橘色手繪連線（圖形，佈景色 accent2），文字流無此資訊
+  - type: guide
+    text: (二)標籤圈圈看：圈出句子中的「疑問標籤」，並選出正確的白話意思。
+  - type: exercise
+    instruction: (二)標籤圈圈看
+    items:
+    - type: single
+      index: 例題
+      stem: 解狐非子之仇邪？ 標籤的意思是：A什麼 B嗎
+      answer: B
+      is_printed_example: true
+      boxed_term: 邪
+    - type: single
+      index: 1
+      stem: 不亦樂乎？  A嗎 / B誰
+      answer: A
+      boxed_term: 乎
+    - type: single
+      index: 2
+      stem: 人非聖賢，孰能無過？ A什麼 / B誰
+      answer: B
+      boxed_term: 孰
+    - type: single
+      index: 3
+      stem: 何不各言爾志？  A為什麼 / B哪裡
+      answer: A
+      boxed_term: 何
+    - type: single
+      index: 4
+      stem: 安能辨我是雄雌？  A嗎 / B怎麼
+      answer: B
+      boxed_term: 安
+    - type: single
+      index: 5
+      stem: 兵法寧可以小試耶?  A嗎 / B怎麼
+      answer: A
+      boxed_term: 耶
+    boxed_terms_note: '`boxed_term` 是原稿用**橘色字元框線**圈起來的那個疑問標籤字（也就是題目要學生「圈出來」的答案）。
+
+      例題的「邪」是黑框（color=auto，示範用）；1~5 題是橘框：
+
+      「乎」用 E76D29，「孰／何／安／耶」用 E97132 —— **同一課兩種橘色碼**，只認一種會漏掉「乎」。'
+  - type: guide
+    text: (三)讀讀看：閱讀下列句子，再根據提示填入正確的代號：
+  - type: exercise
+    instruction: 讀讀看1
+    prompt: 讀讀看1：提示 (A)呢　(B)誰　(C)嗎
+    option_bank:
+      A: 呢
+      B: 誰
+      C: 嗎
+    items:
+    - type: single
+      index: 1
+      stem: 「汝亦知射乎」 — 你也懂射箭（   ）？
+      answer: C
+    - type: single
+      index: 2
+      stem: 「我與徐公孰美」 — 我跟徐公（   ）美？
+      answer: B
+    - type: single
+      index: 3
+      stem: 「是何言歟」—這是什麼話(   )？
+      answer: A
+  - type: exercise
+    instruction: 讀讀看2
+    prompt: 讀讀看2：提示 (A)哪裡、怎麼　(B)吧　(C)嗎  (D)呢
+    option_bank:
+      A: 哪裡、怎麼
+      B: 吧
+      C: 嗎
+      D: 呢
+    items:
+    - type: single
+      index: 1
+      stem: 敗義以求生，豈荀巨伯所行邪——敗壞道義來求生存，哪裡是我荀巨伯會做的事（   ）？
+      answer: D
+    - type: single
+      index: 2
+      stem: 覆巢之下，安有完卵——傾覆的鳥巢下，（   ）會有完好的鳥蛋？
+      answer: A
+    - type: single
+      index: 3
+      stem: 一室之不治，何以天下國家邪——一個房間都管理不好，如何(談)治理國家(    )?
+      answer: D
+    - type: single
+      index: 4
+      stem: 若棄城而走，必不能遠遁，得不為司馬懿所擒乎——如果棄城跑了，必不能跑遠，能不被司馬懿抓住(    )?
+      answer: C
+    - type: single
+      index: 5
+      stem: 天下事有難易乎——天下的事有困難或容易的區別（   ）?
+      answer: C
+    - type: single
+      index: 6
+      stem: 何必名山吾廬邪——我家何必一定要在有名的山中（   ）?
+      answer: D
+    - type: single
+      index: 7
+      stem: 愛國治民，能無知乎——愛國而治理人民，能無知（   ）?
+      answer: C
+    - type: single
+      index: 8
+      stem: 既已納其自託，寧可以急相棄邪——既然已經接受他的請託，怎麼可以因為事情緊急了就丟棄他(    )?
+      answer: D
+    - type: single
+      index: 9
+      stem: 孝悌也者，其為仁之本與——孝順父母，友愛兄弟，這就是實踐仁愛的根本（   ）？
+      answer: B
+    - type: single
+      index: 10
+      stem: 燕雀安知鴻鵠之志——燕子麻雀（  ）知道大鳥的志向?
+      answer: A
+  connect_the_dots_geometry_note: "兩組連連看的答案是 6 條橘線（佈景色 accent2 的 `prstGeom prst=\"line\"`），\nPDF 上畫得出來，但為了不靠肉眼，另外用幾何解過一次，兩邊結論一致：\n  每條線的 `<wp:anchor>` 掛在**左欄該列的段落**上，`wp:extent` 的高度 ≈ 跨幾列\n  （一列約 0.34in），`<a:xfrm flipV=\"1\">` 代表由左下往右上（往上連），無 flipV 代表往下連。\n連連看1：孰(列1)↓1列→B ／ 掛列1、h=0.69↑2列 ⇒ 左端在列3(乎)、右端在列1 ⇒ 乎→A ／ 何(列2)↓1列→C\n連連看2：掛列1、h=0.38↑1列 ⇒ 安(列2)→A ／ 與、歟(列1)↓2列→C ／ 掛列2、h=0.30↑1列 ⇒ 耶、邪(列3)→B\n結果與「重點攻略」給的定義完全吻合（孰=誰/哪一個、何=什麼/為什麼、乎=嗎；\n與/歟=吧/呢、安=哪裡/怎麼、耶/邪=嗎/呢），三方互相印證。"

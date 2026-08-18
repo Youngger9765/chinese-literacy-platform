@@ -74,13 +74,29 @@ export function blockStateKey(segmentIdx: number, blockIdx: number): string {
   return `${segmentIdx}-${blockIdx}`;
 }
 
+/**
+ * @param optionKeys the option map's own keys, when it had any. Exam questions are
+ *   keyed by letter — (A)(B)(C)(D) — and `answer` is that letter, so without the keys
+ *   the string branch below compares 'A' against the whole Chinese option text and
+ *   nothing can ever match.
+ */
 export function resolveSingleCorrect(
   options: string[],
   answer: string | number | null | undefined,
   selectedIdx: number,
+  optionKeys?: string[],
 ): boolean {
   if (answer === null || answer === undefined) return false;
-  if (typeof answer === 'number') return selectedIdx === answer;
+  // `answer` counts from ①, `selectedIdx` from 0 — the worksheets write 1, 2, 3
+  // and every one of the 312 numeric answers in the extracted library is 1-based
+  // (none is 0, none exceeds its option count).
+  if (typeof answer === 'number') return selectedIdx + 1 === answer;
+  // A letter (or any other key) names a position in the option map.
+  if (optionKeys?.length) {
+    const want = answer.trim().toUpperCase();
+    const keyIdx = optionKeys.findIndex(k => String(k).trim().toUpperCase() === want);
+    if (keyIdx !== -1) return selectedIdx === keyIdx;
+  }
   const selected = options[selectedIdx] ?? '';
   const norm = (s: string) => s.replace(/\s+/g, '').trim();
   return norm(selected) === norm(answer) || selected.includes(answer) || answer.includes(selected);

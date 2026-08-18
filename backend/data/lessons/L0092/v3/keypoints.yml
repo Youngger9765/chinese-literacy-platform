@@ -1,0 +1,46 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 五
+keypoints:
+  title: 信眾與教主
+  layout: list
+  answer_carrier: 橘色手寫字與紅色 ☑（w:sym，2 個）；PDF p5~p6
+  rows:
+  - label: 預言/事件
+    value: '一位【　】聲稱
+
+      【　】即將來臨，洪水會淹沒全世界，只有【　】會被外星人用飛碟救走。'
+    blanks:
+    - answer: 家庭主婦／宗教教主
+    - answer: 世界末日
+    - answer: 信徒
+  - label: 研究問題
+    value: 信眾對教主的態度是否因預言結果有所改變？
+  - label: 研究方法
+    value: 三位心理學家以假身分加入團體，祕密觀察並蒐集資料。
+  - label: 觀察結果．末日前
+    value: 許多人心生恐懼，為了得到【　】而加入這個宗教。
+    blanks:
+    - answer: 救贖
+  - label: 觀察結果．末日當日
+    value: ①什麼都沒有發生　　□②外星人出現。(單選)
+    value_note: '原稿這一列的兩個方框編碼不同：第 1 個是 `w:sym` F0FE（教師版已勾的 ☑，不在 w:t），
+
+      第 2 個是**文字流裡真的 `□` 字元**（U+25A1）。所以 value 保留那個 □ 才與原稿逐字相同。'
+    options:
+      1: 什麼都沒有發生
+      2: 外星人出現。
+    answer: 1
+  - label: 觀察結果．末日後
+    value: '(1)原來就不太投入的人怎麼做？→【　】
+
+      (2)對教主付出很多的人怎麼做？→【　】'
+    blanks:
+    - answer: 離開
+    - answer: 更加投入
+  - label: 研究結論
+    value: 當一個人為某種信念投入大量時間、金錢或人際關係時，(單選)
+    options:
+      1: 可能會不看證據，做出匪夷所思的判斷
+      2: 比較能根據證據做判斷。
+    answer: 1

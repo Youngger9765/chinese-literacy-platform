@@ -1,0 +1,18 @@
+lesson_uid: L0098
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 歧視無所不在！一次搞懂刻板印象、無意識偏見、微攻擊
+    duration: '10:22'
+    source: Sherry's Notes 雪力的心理學筆記
+    _總表_url: http://youtu.be/oayS5zQH-HI
+  - index: 2
+    title: 原來這樣會產生「無形的歧視」？一起來了解為什麼身心障礙者會提倡「自立生活」吧！
+    duration: '9:28'
+    source: 志祺七七 X 圖文不符
+    _總表_url: http://youtu.be/ehfB0NdLCNY
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 110 列，故加 `_` 前綴標示非 DOCX 內容。

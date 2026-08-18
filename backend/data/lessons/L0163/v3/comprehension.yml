@@ -1,0 +1,61 @@
+lesson_uid: L0163
+version_id: v3
+section_no: 五
+comprehension:
+  label: 五、閱讀理解
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p5 可見
+  questions:
+  - index: 1
+    stem: 下列成語，何者最適合用來形容顧寧人先生的讀書態度？
+    options:
+      A: 旁徵博引
+      B: 溫故知新
+      C: 孳孳不倦
+      D: 披星戴月
+    answer: C
+    explanation: '第1題解析：
+
+      表達想法時，廣泛引用材料，做為證據說服人。
+
+      一邊複習已經學過的，同時有學習新的。
+
+      勤於讀書或工作。孳孳，勤勉不懈。孳，音ㄗ。
+
+      早早出門，很晚才回家，非常辛苦的意思。'
+    explanation_note: 解析方塊在 PDF p5 上逐項對到 A~D，但文字層沒有印 A./B./C./D. 前綴，照文字層抄
+  - index: 2
+    stem: 有關顧寧人先生的描述，下列何者沒有在本文中提及？
+    options:
+      A: 家世背景
+      B: 興趣嗜好
+      C: 資質稟賦
+      D: 學術地位
+    answer: D
+  - index: 3
+    stem: 下列選項，何者無法證明顧寧人是愛讀書的人？
+    options:
+      A: 生長世族，少負絕異之資
+      B: 潛心古學，九經諸史，略能背誦
+      C: 自少至老，未嘗一日廢書
+      D: 旅店少休，披尋搜討，曾無倦色
+    answer: A
+  - index: 4
+    stem: 下列何者是本文主旨？
+    options:
+      A: 敘述顧寧人優秀不凡的資質
+      B: 讚美顧寧人勝過一般人的精力
+      C: 推崇顧寧人勤勉好學的精神
+      D: 介紹顧寧人顯赫尊貴的家世
+    answer: C
+  - index: 5
+    stem: 「旅店少休」的「少」，與下列哪一選項的「少」字意思相同？
+    options:
+      A: 老「少」咸宜
+      B: 「少」安勿躁
+      C: 「少」管閒事
+      D: 積「少」成多
+    answer: B
+    explanation: '第5題解析：
+
+      A年幼的人；B稍微；C不要；D很少、不多的。'

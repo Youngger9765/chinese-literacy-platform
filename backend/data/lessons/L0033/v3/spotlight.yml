@@ -1,0 +1,169 @@
+lesson_uid: L0033
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 摘要策略──刪除法找重點：刪除舉例
+  strategy_type: summarize
+  blocks:
+  - type: concept_box
+    text: '本課是一篇說明文。為了幫助讀者理解，作者常會加入許多細節，例如具體的事物或生活情境。不過，做摘要時，不必把所有細節都留下。
+
+      舉例是常見的補充細節。我們可以運用「刪除法」，刪除舉例的文字，讓段落重點更清楚。
+
+      作者舉例時，常會使用「例如」、「如」、「舉例來說」或「像」等提示詞。
+
+      刪除舉例兩個步驟：
+
+      ❶找出並刪除舉例
+
+      找出提示詞後面的具體例子，用筆劃掉。刪除後多餘的標點，也要一起刪除。
+
+      ❷檢查刪除後的文字
+
+      讀一讀沒有劃掉的文字，確認：
+
+      □①句子完整、通順。
+
+      □②原文最重要的意思仍然保留。
+
+      先看一個例子：請閱讀下面的文字'
+  - type: sub_block
+    label: 先看一個例子
+    items:
+    - type: passage
+      paragraphs:
+      - 臺東有名的風景區，如鹿野高台、池上伯朗大道等，每到假日都吸引許多遊客。
+    - type: guide
+      text: '❶找出並刪除舉例：
+
+        可以刪除「如」後面的文字，「鹿野高台、池上伯朗大道」都是臺東著名景點的具體例子，可以刪除。'
+    - type: free_text
+      prompt: ❷檢查刪除後的文字（打勾）
+      delete_spans:
+      - 如
+      - 鹿野高台
+      - 、
+      - 池上伯朗大道
+      - 等
+      - ，
+      delete_carrier: 字元刪除線（w:strike），文字流查得到
+      result: 臺東有許多著名景點，每到假日都吸引許多遊客。
+    - type: self_check
+      items:
+      - ①句子完整、通順。
+      - ②原文最重要的意思仍然保留。
+      checked:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: guide
+      text: 你發現了嗎，刪掉景點名稱後，我們仍然知道：臺東有許多著名景點，能吸引遊客。
+  - type: guide
+    text: ◎小試身手
+  - type: sub_block
+    label: 1.請把下段文字中的舉例刪除(課內練習)
+    instruction: ❶找出並刪除舉例：請用筆把舉例的文字劃掉
+    items:
+    - type: passage
+      paragraphs:
+      - 垃圾食物常和快樂時光連結在一起，例如生日時吃蛋糕、看電影配爆米花、邊逛街邊吃薯條。
+    - type: free_text
+      prompt: ❷檢查刪除後的文字（打勾）
+      delete_spans:
+      - 例如生日時吃蛋糕、看電影配爆米花、邊逛街邊吃薯條
+      delete_carrier: 紅色刪除線＋黃色螢光（圖形），字元格式無 w:strike
+      result: 垃圾食物常和快樂時光連結在一起。
+    - type: self_check
+      items:
+      - ①句子完整、通順。
+      - ②原文最重要的意思仍然保留。
+      checked:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: sub_block
+    label: 2.請把下段文字中的舉例刪除(課內練習)
+    instruction: ❶找出並刪除舉例：請用筆把舉例的文字劃掉
+    items:
+    - type: passage
+      paragraphs:
+      - 垃圾食物的味道都經過精心調配，製造商會找到鹽、糖、油的完美比例，讓食物又香又酥，像外酥內軟的雞塊、酸酸甜甜的糖果、又脆又鹹的洋芋片、香甜濃郁的巧克力……都讓人難以抗拒。
+    - type: free_text
+      prompt: ❷檢查刪除後的文字（打勾）
+      delete_spans:
+      - 像外酥內軟的雞塊、酸酸甜甜的糖果、又脆又鹹的洋芋片、香甜濃郁的巧克力……
+      delete_carrier: 紅色刪除線＋黃色螢光（圖形），字元格式無 w:strike
+      result: 垃圾食物的味道都經過精心調配，製造商會找到鹽、糖、油的完美比例，讓食物又香又酥，都讓人難以抗拒。
+    - type: self_check
+      items:
+      - ①句子完整、通順。
+      - ②原文最重要的意思仍然保留。
+      checked:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: sub_block
+    label: 3.請把下段文字中的舉例刪除(延伸文章)
+    instruction: ❶找出並刪除舉例：請用筆把舉例的文字劃掉
+    items:
+    - type: passage
+      paragraphs:
+      - 運動有益身體健康，因為它能增強體力，讓我們更有精神。例如，跑步能鍛鍊心肺，提升耐力，使我們不易疲勞；跳繩能增強耐力，讓身體更有活力；打籃球能提升協調性與爆發力，使動作更敏捷，專注力更高。
+    - type: free_text
+      prompt: '❷檢查刪除後的文字
+
+        讀一讀沒有劃掉的文字，再打勾。'
+      delete_spans:
+      - 例如，跑步能鍛鍊心肺，提升耐力，使我們不易疲勞；跳繩能增強耐力，讓身體更有活力；打籃球能提升協調性與爆發力，使動作更敏捷，專注力更高。
+      delete_carrier: 紅色刪除線＋黃色螢光（圖形），字元格式無 w:strike
+      result: null
+      result_note: 這一題原稿**沒有印出刪除後的文字**（第 1、2 題有）。不臆測補寫。
+    - type: self_check
+      items:
+      - ①句子完整、通順。
+      - ②原文最重要的意思仍然保留。
+      checked:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: sub_block
+    label: 4.請把下段文字中的舉例刪除(延伸文章)
+    instruction: ❶找出並刪除舉例：請用筆把舉例的文字劃掉
+    items:
+    - type: passage
+      paragraphs:
+      - 早餐是一天中重要的一餐，能提供能量與營養，幫助我們開始一天的生活。例如，有些人選擇麵包配牛奶，補充碳水化合物和蛋白質；也有人吃粥和饅頭，因為容易消化，利於吸收養分。相反的，不營養的早餐，如高油、高糖食物，可能導致疲倦，影響專注力。
+    - type: free_text
+      prompt: '❷檢查刪除後的文字
+
+        讀一讀沒有劃掉的文字，再打勾。'
+      delete_spans:
+      - 例如，有些人選擇麵包配牛奶，補充碳水化合物和蛋白質；也有人吃粥和饅頭，因為容易消化，利於吸收養分
+      - 如高油、高糖食物
+      delete_carrier: 紅色刪除線＋黃色螢光（圖形），字元格式無 w:strike
+      result: null
+      result_note: 這一題原稿**沒有印出刪除後的文字**。不臆測補寫。
+    - type: self_check
+      items:
+      - ①句子完整、通順。
+      - ②原文最重要的意思仍然保留。
+      checked:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: guide
+    text: '★策略帶著走
+
+      做摘要時，如果文章用舉例補充內容，可以問自己：
+
+      ①哪些文字是舉例細節？②刪掉後，留下的文字是否完整，原文重點是否保留？
+
+      刪除法不是刪得越多越好，而是刪去舉例細節，留下重要訊息。'
+  - type: self_check
+    label: ◎自我檢核
+    items:
+    - 1.我能找出並刪除舉例細節。
+    - 2.我會檢查留下的文字是否完整，並保留原文重點。
+    checked: []
+    no_correct_answer: true
+    note: 學生自評用的檢核清單，教師版兩格都是空的 □ —— 本來就沒有標準答案。

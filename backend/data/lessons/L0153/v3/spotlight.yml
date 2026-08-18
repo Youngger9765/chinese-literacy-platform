@@ -1,0 +1,129 @@
+lesson_uid: L0153
+version_id: v3
+section_no: 四
+spotlight:
+  strategy_name: 固定句式：以……為……
+  strategy_type: classical_fixed_pattern
+  answer_carrier: '紅色 ☑（w:sym Wingdings F0FE，共 5 個，全在輕練習1）
+
+    ＋橘色填答（字元樣式 rStyle=aff6，輕練習2 與溫故兩題的代號）'
+  blocks:
+  - type: guide
+    text: 一、溫故：複習「主語判斷」
+  - type: guide
+    text: 1.下面的文字取自課文，請根據提問判讀主語：
+  - type: single
+    index: 1
+    prompt: (1)本文第二段末「既及，以子都為盜，固問兒屍所在。」這句話主語是誰？
+    options:
+      A: 乘驄馬者
+      B: 書生
+      C: 鮑子都
+      D: 舉家
+    answer: A
+  - type: single
+    index: 2
+    prompt: (2)本文第三段末「由是聲名大振。」這句話主語是誰？
+    options:
+      A: 乘驄馬者
+      B: 書生
+      C: 鮑子都
+      D: 舉家
+    answer: C
+  - type: guide
+    text: 二、知新：本課新策略「固定句式：以……為」
+    text_note: 這個小標的策略名只寫到「以……為」（少了後面的「……」），與大題標題「以……為……」不同。原稿如此。
+  - type: concept_box
+    text: '課文中，鮑子都義務幫書生安葬，卻被人「以子都為盜」，差點要讓人懷疑是不是沒天理了呢！
+
+      話說回來，類似「以子都為盜」這樣的句子，我們現在還在用哦！例如「以中央伍為準，向右看齊！」
+
+      是不是很熟悉呢？其實是文言文中很常見的表達方式，又因為這種句子的結構有一定的模式，所以我們稱它——固定句式。
+
+      現在，我們先認識第一式：'
+  - type: concept_box
+    label: 句式框
+    text: 句式：「以A為B」，意思：「把A當作是B」
+  - type: guide
+    text: '這個句式在文言文中不但常見，意思也很清楚，像是剛才的例句「以子都為盜」，意思就是「把子都當作是盜賊」；
+
+      這種結構不只出現在人物評價上，也常用在觀念判斷、價值選擇中，是很重要的表達方式。
+
+      接下來，我們就透過例句、分析、練習，一步一步掌握這個句型的用法吧！'
+  - type: exercise
+    label: 輕練習1
+    instruction: 依原文找出意思對的句子；正確的請打勾。（單選）
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE），PDF p8 可見；本節 5 個 ☑ 即全課全部
+    items:
+    - type: single
+      index: 0
+      label: 例題
+      prompt: 以子都為盜。
+      options:
+        1: 把子都當作是盜賊
+        2: 把盜賊當作是子都
+      answer: 1
+    - type: single
+      index: 1
+      prompt: 1.以和為貴。
+      options:
+        1: 把貴重的當作是和諧
+        2: 把和諧當作是可貴的
+      answer: 2
+    - type: single
+      index: 2
+      prompt: 2.以叢草為林。
+      options:
+        1: 把樹林當作是草叢
+        2: 把草叢當作是樹林
+      answer: 2
+    - type: single
+      index: 3
+      prompt: 3.民以食為天。
+      options:
+        1: 人民把糧食當作是生存的根本
+        2: 人民把上天當作是食物來索求
+      answer: 1
+    - type: single
+      index: 4
+      prompt: 4.以天下興亡為己任。
+      options:
+        1: 把天下的興亡當作自己的責任
+        2: 把天下的興亡任由自己處理與決定
+      answer: 1
+  - type: exercise
+    label: 輕練習2
+    instruction: 以下各題都是固定句式「……以……為……」的句子。請在翻譯的空格處填入適當的語詞，讓意思完整。
+    answer_carrier: 橘色（字元樣式 rStyle=aff6），PDF p8 可見
+    items:
+    - type: free_text
+      index: 1
+      prompt: 句子：以土礫凸者為丘。
+      stem: 翻譯：(　)凸起的小石頭(　)山丘
+      blanks:
+      - answer: 把
+      - answer: 當作是
+    - type: free_text
+      index: 2
+      prompt: 句子：以退為進。 (退，退讓／進，進攻)
+      stem: 翻譯：把(　)當作是(　)的手段
+      blanks:
+      - answer: 退讓
+      - answer: 進攻
+    - type: free_text
+      index: 3
+      prompt: 句子：以史為鏡。
+      stem: 翻譯：把(　)當作是(　)來對照。提醒後人不要犯同樣的錯
+      blanks:
+      - answer: 歷史
+      - answer: 鏡子
+    - type: free_text
+      index: 4
+      prompt: 句子：以鄰為壑。 (鄰，鄰國／壑，山溝)
+      stem: 翻譯：把(　)當作是(　)來洩洪。比喻傷害別人讓自己得到好處
+      blanks:
+      - answer: 鄰國
+      - answer: 山溝
+    items_note: '第 1 題連「把」「當作是」本身都是空格（其餘三題「把」「當作是」是印好的），原稿如此。
+
+      原稿的空格是底線留白，此處以(　)標示位置。'
