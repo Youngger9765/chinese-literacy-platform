@@ -97,7 +97,9 @@ jobs:
             tests/test_keypoints_to_structure.py \
             tests/test_keypoints_subitem_label_2736.py \
             tests/test_keypoints_prompt_stem_2736.py \
-            tests/test_structure_answer_key_not_served_2736.py
+            tests/test_structure_answer_key_not_served_2736.py \
+            tests/test_structure_option_display_2736.py \
+            tests/test_asset_url_rewrite.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
