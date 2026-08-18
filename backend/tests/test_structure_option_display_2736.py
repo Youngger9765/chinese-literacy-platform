@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 import sys
@@ -54,6 +55,8 @@ BLANK_RE = re.compile(r"【([^】]*)】")
 BOX_RE = re.compile(r"[□■☑▢]")
 # 干擾項標記：緊接在圈號前面的 □（`請在□打勾` 那種不算）
 DISTRACTOR_RE = re.compile(r"[□■☑▢]+\s*(?=[①②③④⑤⑥⑦⑧⑨⑩])")
+# Python 容器被 str() 之後的特徵（dict 與 list 兩種）
+CONTAINER_REPR_RE = re.compile(r"\{'|': '|\{\d+: |\['")
 
 MIN_LESSONS_SCANNED = 100
 
@@ -176,6 +179,34 @@ def test_no_distractor_marker_reaches_the_student():
         f"{len({b[0] for b in bad})} 課 / {len(bad)} 個干擾項標記送到了學生端：\n"
         + "\n".join(f"  {u} …{c}…" for u, c in bad[:10])
     )
+
+
+def test_no_python_container_repr_reaches_the_student():
+    """`['1.小美…', '2.阿哲…']` 不該出現在畫面上。
+
+    有幾課把編號小題寫成 list[str]（L0167／L0168／L0169 的「內容」欄），
+    橋 `str()` 了它 —— 學生看到的是 Python 的 list repr，方括號和引號都在。
+    dict 那半（`{'answer': [1, 3]}`）先前已修，list 這半沒接上。
+
+    ⚠️ 這條不只是美觀：dict 那半的 repr 裡帶著答案。兩種容器都不可以 str()。
+    """
+    bad = []
+    for uid, served in _served():
+        blob = json.dumps(served, ensure_ascii=False)
+        for m in CONTAINER_REPR_RE.finditer(blob):
+            bad.append((uid, blob[max(0, m.start() - 20): m.start() + 40]))
+    assert not bad, (
+        f"{len({b[0] for b in bad})} 課 / {len(bad)} 處把容器 repr 印給學生：\n"
+        + "\n".join(f"  {u} …{c}…" for u, c in bad[:6])
+    )
+
+
+def test_list_cell_renders_as_lines_not_repr():
+    """正向對照：list 要接成換行，不是變成空的。"""
+    from app.services.keypoints_to_structure import _render_cell
+
+    got = _render_cell(["1.第一題", "2.第二題"], None)
+    assert got == "1.第一題\n2.第二題", repr(got)
 
 
 def test_instructional_box_is_not_removed():
