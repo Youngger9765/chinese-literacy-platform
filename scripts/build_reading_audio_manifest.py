@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -37,10 +38,57 @@ from reading_audio_units import all_units, lesson_bodies, paragraph_unit, senten
 
 from app.services.tts.normalization import _cache_key  # noqa: E402
 
-#: Must match the serving Cloud Run revision. A different value writes the audio to a
-#: prefix the runtime never reads — a whole batch wasted, silently.
-PROVIDER = os.getenv("TTS_PROVIDER", "gemini31")
+#: The deploy workflows are the authority on which provider is serving, and they are in
+#: this repo, so the default is READ from them rather than written here.
+#:
+#: `docs/ops/ai-reading-batch.md` asserted 「`staging-deploy.yml` / `deploy.yml` 皆為
+#: gemini31」. They are both `azure`. Trusting that sentence instead of the workflow put
+#: 8666 clips into `gemini31-prompt-only-v2/`, which nothing reads — a 55-minute run that
+#: changed nothing, found by 靖杭 pressing play and still waiting. `_blob_path` sends the
+#: two providers to different prefixes, so naming the wrong one is silent by design.
+_DEPLOY_WORKFLOWS = ("staging-deploy.yml", "deploy.yml", "preview-deploy.yml")
+
+
+def _deployed_providers() -> dict[str, str]:
+    """{workflow: TTS_PROVIDER} as the deploy workflows actually set it."""
+    found = {}
+    for name in _DEPLOY_WORKFLOWS:
+        f = ROOT / ".github" / "workflows" / name
+        if not f.exists():
+            continue
+        m = re.search(r"TTS_PROVIDER=([A-Za-z0-9_]+)", f.read_text(encoding="utf-8"))
+        if m:
+            found[name] = m.group(1)
+    return found
+
+
+def _default_provider() -> str:
+    """What the serving environments run, or `google` (the code's own default) if unknown.
+
+    Disagreement between the workflows is not resolved here — it is raised, because
+    generating for one environment while another reads a different prefix is exactly the
+    failure this function exists to prevent.
+    """
+    deployed = set(_deployed_providers().values())
+    if len(deployed) == 1:
+        return deployed.pop()
+    if len(deployed) > 1:
+        raise SystemExit(
+            f"deploy workflows disagree about TTS_PROVIDER: {_deployed_providers()}\n"
+            "產生的音檔只會落在其中一個 prefix，另一個環境讀不到。先讓它們一致。"
+        )
+    return "google"
+
+
+PROVIDER = os.getenv("TTS_PROVIDER") or _default_provider()
 BUCKET = os.getenv("TTS_GCS_BUCKET", "lingoleap-tts-cache")
+
+if os.getenv("TTS_PROVIDER") and os.getenv("TTS_PROVIDER") not in set(_deployed_providers().values()):
+    # An explicit override that does not match any serving environment. Allowed —
+    # someone may be filling a prefix on purpose — but never silent.
+    print(f"⚠️  TTS_PROVIDER={os.getenv('TTS_PROVIDER')} 與部署中的 "
+          f"{_deployed_providers()} 都不符 —— 生出來的音檔線上讀不到。",
+          file=sys.stderr)
 
 
 def blob_prefix() -> str:

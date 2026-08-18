@@ -25,25 +25,32 @@ So this script is not topping up a cache. It is the regeneration that the finger
 change always implied, and it will be needed again the next time that table is edited —
 which is why it is a checked-in script rather than a one-off.
 
-WHY IT CALLS THE RUNTIME'S OWN FUNCTIONS
-----------------------------------------
-Every previous attempt at pre-generation drifted from the runtime and became unreachable:
+WHY IT CALLS `synthesize_speech` AND NOTHING ELSE
+------------------------------------------------
+Every attempt at pre-generating this corpus has drifted from the runtime and become
+unreachable. Four now, each a different way of re-implementing something the runtime
+already does:
 
-  · #1208 — the front end split sentences with its own regex, so the sha256 it requested
-    was not the sha256 that was generated. 303 of 2871 matched.
-  · this one — the key scheme moved and the generator was never re-run.
+  · #1208 — the front end split sentences with its own regex, so the sha256 it asked for
+    was not the sha256 that had been generated. 303 of 2871 matched.
+  · #2605 — the cache key gained the pronunciation fingerprint; the corpus was never
+    regenerated. 0 of 7236 matched.
+  · 2026-08-17 — this script generated one clip per SENTENCE while the player sends a
+    whole PARAGRAPH when it has lesson context. 53 of 1657 matched.
+  · 2026-08-18 — this script called `_synthesize_gemini` and wrote the `gemini31` prefix.
+    Every deployed environment runs `TTS_PROVIDER=azure` (`staging-deploy.yml`,
+    `deploy.yml`, `preview-deploy.yml`), which reads `azure/sentences/`. 8666 clips
+    landed in a prefix nothing reads. 靖杭 found it by pressing play and still waiting.
 
-Both are the same failure: a second implementation of something the runtime already
-does. So there is no synthesiser, no sentence splitter, no path builder and no MP3
-encoder in this file. It imports `_synthesize_gemini`, `_split_sentences`, `_cache_key`
-and `_gcs_put` and calls them. If the runtime changes, this follows for free; if it
-cannot follow, the import breaks loudly instead of producing unreachable audio.
+The last one is the reason this file no longer names a provider. `synthesize_speech` IS
+the runtime path — it computes the key, checks L1 and GCS, picks the provider from
+`TTS_PROVIDER`, applies that provider's post-processing (Azure's 885 ms sentence-end
+silence is shortened on the way into the cache; Gemini's is not), and writes to that
+provider's prefix. So the only thing this script decides is WHICH TEXTS to synthesise;
+everything about HOW belongs to the runtime.
 
-That also settles the loudness question the ops doc raised. `batch_gemini_tts_v2.py`
-applied EBU R128 loudnorm and the runtime's `_pcm_to_mp3` does not, so batch-generated
-and live-synthesised clips differed by 2–6 dB in adjacent sentences. Going through the
-runtime's encoder means the two are identical by construction. Uniform-but-unnormalised
-beats normalised-but-inconsistent.
+That also settles the loudness question the ops doc raised: going through the runtime's
+own encoder makes batch and live clips identical by construction.
 
 WHAT UNIT, AND WHY IT IS NOT DECIDED HERE
 -----------------------------------------
@@ -93,8 +100,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from build_reading_audio_manifest import BUCKET, PROVIDER, list_existing  # noqa: E402
 from reading_audio_units import all_units  # noqa: E402
 
-from app.services.tts.cache import _gcs_put  # noqa: E402
-from app.services.tts.providers.gemini import _synthesize_gemini  # noqa: E402
+from app.services.tts import synthesize_speech  # noqa: E402
 
 
 def main() -> int:
@@ -129,13 +135,13 @@ def main() -> int:
     prov = open(a.provenance, "a", encoding="utf-8")
 
     def work(key: str) -> tuple[str, str | None]:
-        text = missing[key]
+        # `synthesize_speech` IS the runtime path: it computes the key, checks L1 and
+        # GCS, synthesises with the CONFIGURED provider, applies that provider's
+        # post-processing, and writes to that provider's prefix. Calling it means this
+        # script cannot name a provider, and therefore cannot name the wrong one.
         try:
-            audio = _synthesize_gemini(text)
-            if not audio:
-                return key, "empty audio"
-            _gcs_put(key, audio, PROVIDER)
-            return key, None
+            audio = synthesize_speech(missing[key])
+            return key, None if audio else "empty audio"
         except Exception as exc:                       # one sentence must not kill the run
             return key, f"{type(exc).__name__}: {exc}"[:200]
 
