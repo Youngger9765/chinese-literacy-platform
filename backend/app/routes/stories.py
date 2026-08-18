@@ -65,9 +65,29 @@ def _strip_blank_answers(text: str) -> str:
     return _BLANK_RE.sub("【　　　】", text)
 
 
+# 學生看得到的 row 允許帶的欄位。**白名單，不是黑名單。**
+#
+# 這裡本來是 `if k not in ("hint", "blank_hints")` —— 一份黑名單，預設放行。
+# `correct_options` 從來沒被列進去，於是 41 課、104 個 checkbox 的正解索引
+# 跟著題目一起送到瀏覽器（#2736 查出）。黑名單的問題不是漏了這一個，
+# 是下一個新欄位一樣會靜默送出去。
+#
+# 改成白名單之後，新欄位預設不送；要送必須有人主動加進來，
+# 而那一刻他得先回答「這個能給學生看嗎」。
+# 回測鎖：backend/tests/test_structure_answer_key_not_served_2736.py
+_CLIENT_VISIBLE_ROW_KEYS = frozenset(
+    {"label", "value", "interactive_type", "options", "sub_rows", "blank_in_label"}
+)
+
+
 def _sanitize_row_for_client(row: dict) -> dict:
-    """Remove grading answers from a structure row before API response."""
-    out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
+    """Keep only the fields a student is allowed to see.
+
+    ⚠️ 判分用的 `correct_options` 留在**伺服器端**的快取裡
+    （`_get_cached_structure`），只是不再放進回應 —— 前端改由
+    `/structure/grade` 的結果拿到正解，作答後才會知道。
+    """
+    out = {k: v for k, v in row.items() if k in _CLIENT_VISIBLE_ROW_KEYS}
     if out.get("interactive_type") == "fill_blank":
         if out.get("blank_in_label") and out.get("label"):
             out["label"] = _strip_blank_answers(out["label"])

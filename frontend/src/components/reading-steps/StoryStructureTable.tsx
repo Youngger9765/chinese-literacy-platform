@@ -75,6 +75,9 @@ interface GradeResultItem {
   correct: boolean;
   feedback: string;
   correct_answer: string;
+  // 勾選題的正解索引。#2736 之前它跟著題目一起從 /structure 送過來 ——
+  // 也就是作答前就在瀏覽器裡。現在改由判分結果帶回，作答後才拿得到。
+  correct_options?: number[];
 }
 
 interface GradeResult {
@@ -1072,7 +1075,7 @@ const StoryStructureTable: React.FC<Props> = ({
             onChange={(v) => setAnswer(key, v)}
             submitted={submitted}
             gradeItem={gradeItem}
-            correctOptions={cell.correct_options}
+            correctOptions={gradeItem?.correct_options ?? cell.correct_options}
           />
         );
       }

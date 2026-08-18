@@ -323,6 +323,9 @@ async def grade_story_structure(
             is_correct = selected == expected
             result_entry["correct"] = is_correct
             result_entry["correct_answer"] = correct_answer
+            # 正解索引改由這裡回 —— 結構端點不再預先送（#2736 洩題修復）。
+            # 前端拿它在作答後把正確選項標綠；作答前拿不到。
+            result_entry["correct_options"] = sorted(expected)
             if is_correct:
                 result_entry["feedback"] = "答對了！"
             else:
