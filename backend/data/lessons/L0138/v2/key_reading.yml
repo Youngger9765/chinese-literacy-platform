@@ -1,6 +1,11 @@
 lesson_uid: L0138
 version_id: v2
-passage: null
+passage: 對學生來說也是如此，不管是學習、運動或人際關係，能夠用樂觀語言詮釋挫敗經驗的人，會更有心理韌性，也更能長期維持動力。例如：你也許會說：「我沒有數學細胞」、「我程度差，做什麼都來不及了」，這是悲觀的詮釋，你可以試著轉念：「我這次太晚開始準備考試，下次要提早一點」、「有些題型我其實懂，只是不夠熟，下次提早複習、再多練幾題」。雖然考不好，你沒有全然否定自己，仍然認為有峰迴路轉的可能。
+start_text: 對學生來說也是如此，不管是學習、運動或人際關係，
+extent_chars: 190
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -10,4 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: numbering_disagrees
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 14

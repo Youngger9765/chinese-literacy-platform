@@ -1,6 +1,11 @@
 lesson_uid: L0131
 version_id: v2
-passage: null
+passage: 其實，人類的文明發展，就是一部把能力、經驗與知識「外化」的歷史。當人類祖先執起長竿打落樹上的果實，或撿起石子丟向獵物時，他異於禽獸之處，在於把自身的力量外化到長竿和石子上了；當最早使用語言的祖先，大喊：「有蛇！」以警告旁人時，他異於禽獸之處，在於把感官經驗外化成語言，將攸關生命的警報分享給同伴。六千年前，語言被外化成書面文字，知識得以有系統的被保存，讓今人仍然可知二千五百年前孔子講了什麼，人類的溝通因此得以跨越時空。二十世紀的圖書資訊專業，將數千年來累積的知識從書籍外化到圖書館；而二十一世紀電腦、網路及行動裝置的興起，又把圖書館外化到網路上。
+start_text: 其實，人類的文明發展，就是一部把能力、經驗與知識
+extent_chars: 274
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -11,3 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 6
+  cell_paragraphs: 6

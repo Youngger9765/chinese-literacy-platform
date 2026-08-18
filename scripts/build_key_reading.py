@@ -36,9 +36,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from extract_key_reading import extract  # noqa: E402
 
 LESSONS = ROOT / "backend" / "data" / "lessons"
-#: Fail-closed. See the module docstring for why `disagrees_with_first_edition` left
-#: this set in #2720.
-WRITEABLE = {"ok", "confirmed"}
+#: Fail-closed on everything the numbering cannot answer. `disagrees_with_first_edition`
+#: is IN the set: 二修教材為主 (靖杭, 2026-08-18) — the second edition's own instruction
+#: outranks a passage read off the first edition's printing. It is written and flagged,
+#: and the flagged lessons get their own list so the disagreement stays visible.
+WRITEABLE = {"ok", "confirmed", "disagrees_with_first_edition"}
 
 
 def _read_body(vdir: Path) -> list[str] | None:
@@ -64,6 +66,7 @@ def main() -> int:
     written = 0
     counts: dict[str, int] = {}
     withheld: list[tuple[str, dict]] = []
+    disagrees: list[str] = []
     for docx in sorted(Path(a.source).glob("*.docx")):
         uid = docx.stem
         vdir = latest_version(LESSONS / uid)
@@ -74,6 +77,8 @@ def main() -> int:
         stored = _read_body(vdir)
         r = extract(docx, stored)
         counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
+        if r["verdict"] == "disagrees_with_first_edition":
+            disagrees.append(uid)
         if r["verdict"] not in WRITEABLE:
             withheld.append((uid, r))
             # Withholding has to REPLACE a stale file, not merely decline to write one.
@@ -156,6 +161,23 @@ def main() -> int:
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text("\n".join(lines) + "\n", encoding="utf-8")
         print(f"  待人工確認 {len(withheld)} 課 → {out.relative_to(ROOT)}")
+    # Written, but the first edition names a different paragraph of the same lesson.
+    # Kept in its own list rather than mixed into the withheld one: these lessons DO
+    # serve a passage, so they are a review queue, not a gap.
+    if disagrees:
+        out = ROOT / "docs" / "curriculum" / "key-reading-disagrees-first-edition.md"
+        lines = ["# 重點朗讀：與一修對照表標的段落不同（已寫入，二修為主）", "",
+                 "由 `scripts/build_key_reading.py` 自動產生。這些課**有**服務段落 —— "
+                 "採用二修 DOCX 的指定段落，因為二修教材為主。",
+                 "", "但一修人工掃描的段落是這一課的另一段，而且那段文字在二修課文裡"
+                 "**仍逐字存在**（否則配不上），所以課文沒改、標記卻不同 —— "
+                 "可能是二修真的重新畫過，也可能是我們讀錯。需要人拿二修學習單確認。",
+                 "", "| lesson_uid |", "|---|"]
+        lines += [f"| {u} |" for u in sorted(disagrees)]
+        if not a.dry_run:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"  與一修標記不同（已寫入，待確認）{len(disagrees)} 課 → {out.relative_to(ROOT)}")
     return 0
 
 

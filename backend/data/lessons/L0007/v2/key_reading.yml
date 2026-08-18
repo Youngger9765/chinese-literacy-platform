@@ -1,6 +1,11 @@
 lesson_uid: L0007
 version_id: v2
-passage: null
+passage: 吉他及歌聲開始飄揚，男人看著窗外飛馳而過的青山與稻田，輕輕的跟著哼唱。然後，這首歌出現了：
+start_text: 吉他及歌聲開始飄揚，男人看著窗外飛馳而過的青山與
+extent_chars: 45
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -11,3 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 18
+  cell_paragraphs: 19

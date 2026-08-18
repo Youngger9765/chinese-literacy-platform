@@ -1,6 +1,11 @@
 lesson_uid: L0054
 version_id: v2
-passage: null
+passage: 到了繁殖季節，鴕鳥會舉行熱鬧非凡、令人耳目一新的招親活動。平常沉默的雄鳥，在求偶期間卻大展身手：一方面發出低沉的叫聲，呼喚雌鳥；一方面有節奏的展開、收合翅膀，露出尖端的白色羽毛，繞著雌鳥跳起獨特的求偶舞。
+start_text: 到了繁殖季節，鴕鳥會舉行熱鬧非凡、令人耳目一新的
+extent_chars: 102
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜210字
@@ -10,4 +15,7 @@ reading_benchmark:
   - threshold: ＞241字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: numbering_disagrees
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 13

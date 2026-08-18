@@ -1,6 +1,11 @@
 lesson_uid: L0096
 version_id: v2
-passage: null
+passage: 由於國土狹小，地勢又低，在全球暖化、海平面持續上升的威脅下，吐瓦魯已有兩座島嶼逼近被淹沒󠇡的臨界點，其他島嶼也岌岌可危。這個有「南太平洋天堂」之稱的國家，正面臨越來越嚴重的淹水與生存危機。如果你是吐瓦魯的人民，你該怎麼辦？
+start_text: 由於國土狹小，地勢又低，在全球暖化、海平面持續上
+extent_chars: 111
+source: docx-extract
+anchor_paragraph: 2
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -11,3 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 8
+  cell_paragraphs: 8

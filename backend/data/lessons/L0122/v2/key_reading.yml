@@ -1,6 +1,11 @@
 lesson_uid: L0122
 version_id: v2
-passage: null
+passage: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，自己卻不會生病？
+start_text: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，
+extent_chars: 32
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -10,4 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: numbering_disagrees
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 11
+  cell_paragraphs: 14

@@ -1,6 +1,11 @@
 lesson_uid: L0095
 version_id: v2
-passage: null
+passage: 他從此離群索居，祕密進行實驗，從停屍房和墓穴找來許多屍塊當作「實驗材料」，將屍塊縫補成人的形狀，幻想他自己可以扮演上帝的角色，讓冰冷的屍體甦醒過來。某個夜晚，他苦心製造的「人」居然慢慢睜開了枯黃遲滯的眼睛，開始吃力的呼吸，四肢不斷抽搐著。
+start_text: 他從此離群索居，祕密進行實驗，從停屍房和墓穴找來
+extent_chars: 119
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -10,4 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: numbering_disagrees
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 11
+  cell_paragraphs: 15

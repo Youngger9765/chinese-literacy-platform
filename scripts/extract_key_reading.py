@@ -150,6 +150,16 @@ MIN_CHARS, MAX_CHARS = 12, 900
 #: measurement behind this bound.
 MAX_UNNUMBERED_TAIL = 2
 
+#: 說明文的小標題不算一段。The author numbers the prose paragraphs and not the
+#: sub-headings above them — 《秋行軍蟲》 numbers six paragraphs while its cell holds
+#: twelve, and the extras are 「人工噴農藥」「無人機噴農藥」「寄生蜂片」「寄生蜂扭蛋」.
+#: A heading is short and does not end a sentence.
+_HEADING_MAX = 14
+#: 「……」 ends a paragraph. Leaving it out merged 《感情小日記2》's opening line into the
+#: next paragraph and moved every anchor after it — the exact misfire #2726 warned this
+#: signal has, caught on the lesson this whole mechanism was worked out on.
+_SENTENCE_END = "。！？」』…⋯"
+
 #: A 段號 cell holds only numerals, one per paragraph. Three is the smallest run that
 #: cannot be a stray character — two would match a 「一/二」 heading pair.
 _MIN_MARKS = 3
@@ -301,6 +311,59 @@ def read_numbered_body(docx_path: Path) -> tuple[list[str], list[str]] | None:
     return best
 
 
+def _is_heading(text: str) -> bool:
+    return len(_norm(text)) <= _HEADING_MAX and not text.rstrip().endswith(tuple(_SENTENCE_END))
+
+
+def align_to_numbering(marks: list[str], cell_paras: list[str]) -> list[str] | None:
+    """The cell's paragraphs, transformed until there are exactly as many as the author
+    numbered — or None when no transformation gets there.
+
+    Two transformations, tried in this order, each attempted only when the counts do not
+    already agree:
+
+      1. drop sub-headings — 說明文 prints 「無形的殺手」 above a run of paragraphs and
+         does not number it. Dropping a short unpunctuated line cannot corrupt a
+         paragraph's text, so this is the safe one.
+      2. merge continuations — Word splits a paragraph at a manual line break, leaving a
+         tail that starts mid-sentence (《感情小日記1》 lost 「有多一些互動，我就會覺得…」).
+         This one CHANGES text, so it goes last.
+
+    WHY THE COUNT IS THE ACCEPTANCE TEST, AND WHY THAT IS NOT ENOUGH
+    ----------------------------------------------------------------
+    Matching the author's own count is the only ground truth available here, and it is
+    what makes each transformation confirmed rather than assumed. But it is necessary,
+    not sufficient: two different transformations can reach the same count and the wrong
+    one still "passes". That happened while this was being written — merging with 「……」
+    absent from the sentence-end set hit the right count on 《感情小日記2》 by merging two
+    genuinely separate paragraphs, and produced the wrong passage.
+
+    So the transformations are ordered least-destructive-first, applied only when needed,
+    and the result is still checked against the first edition's text where one exists.
+    Measured on the 36 lessons 靖杭's golden set can judge: 29 → 31 correct, withheld
+    4 → 2, and the 3 remaining errors are anchor-level (L0030 / L0072 / L0110) which no
+    alignment can fix.
+    """
+    if 0 <= len(cell_paras) - len(marks) <= MAX_UNNUMBERED_TAIL:
+        # One or two unnumbered tail lines; indexing lands regardless. Transforming here
+        # would be solving a problem that is not present.
+        return cell_paras
+
+    dropped = [p for p in cell_paras if not _is_heading(p)]
+    if len(dropped) == len(marks):
+        return dropped
+
+    merged: list[str] = []
+    for para in dropped:
+        if merged and not merged[-1].rstrip().endswith(tuple(_SENTENCE_END)):
+            merged[-1] = merged[-1] + para
+        else:
+            merged.append(para)
+    if len(merged) == len(marks):
+        return merged
+    return None
+
+
 def load_legacy() -> list[str]:
     """First-edition passages, TEXT only.
 
@@ -341,6 +404,21 @@ def corroborate(passage: str, body: list[str], legacy: list[str]) -> bool | None
     if len({_norm(p) for p in hits}) > 1:
         return None
     return _norm(hits[0]) == mine
+
+
+def _is_body_span(passage: str, body: list[str]) -> bool:
+    """Is `passage` one stored paragraph, or a run of consecutive stored paragraphs?"""
+    target = _norm(passage)
+    normed = [_norm(p) for p in body]
+    for i in range(len(normed)):
+        acc = ""
+        for j in range(i, len(normed)):
+            acc += normed[j]
+            if acc == target:
+                return True
+            if len(acc) > len(target):
+                break
+    return False
 
 
 def extract(docx_path: Path, body: list[str] | None = None) -> dict:
@@ -389,15 +467,16 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
     out["printed_marks"] = len(marks)
     out["cell_paragraphs"] = len(cell_paras)
 
-    slack = len(cell_paras) - len(marks)
-    out["unnumbered_tail"] = slack
-    if not 0 <= slack <= MAX_UNNUMBERED_TAIL:
-        # The numbering and the cell disagree about where paragraphs begin, so "the Nth
-        # paragraph" is not a well-defined thing. Every lesson measured in this state
-        # produced the wrong paragraph.
+    out["unnumbered_tail"] = len(cell_paras) - len(marks)
+    aligned = align_to_numbering(marks, cell_paras)
+    if aligned is None:
+        # No transformation reaches the author's count, so "the Nth paragraph" is not a
+        # well-defined thing here. Withheld rather than guessed at.
         out["verdict"] = "numbering_disagrees"
         out["needs_human_review"] = True
         return out
+    out["aligned_paragraphs"] = len(aligned)
+    cell_paras = aligned
 
     if anchor > len(cell_paras):
         out["verdict"] = "anchor_out_of_range"
@@ -419,12 +498,13 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
         out["verdict"] = "no_body"
         return out
 
-    if _norm(passage) not in {_norm(p) for p in body}:
-        # Word splits a paragraph at a manual line break in a handful of lessons, so the
-        # cell's paragraph and the stored body's are not the same unit. Serving it means
-        # serving a fragment (《感情小日記1》 lost its last 24 characters mid-sentence
-        # this way), and #2718's test asserts the passage is one of the lesson's own
-        # paragraphs. Withheld and listed rather than trimmed to fit.
+    if not _is_body_span(passage, body):
+        # The passage has to be text the student is actually shown. One printed paragraph
+        # can span two of `body.yml`'s (Word split it at a manual line break), which is
+        # why a RUN of consecutive stored paragraphs counts — serving only the first
+        # would cut 《感情小日記1》 off mid-sentence. Anything that is not such a run
+        # means the body extractor and the numbering disagree about the text itself, and
+        # that is withheld rather than trimmed to fit.
         out["verdict"] = "not_a_stored_paragraph"
         out["needs_human_review"] = True
         return out
@@ -432,8 +512,16 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
     agreed = corroborate(passage, body, load_legacy())
     out["corroborated_by_first_edition"] = agreed
     if agreed is False:
-        # The first edition marked a different paragraph of this same lesson. One of the
-        # two is wrong and this file cannot say which, so it says so.
+        # 二修教材為主 (靖杭, 2026-08-18). The second edition's own instruction about the
+        # second edition's worksheet outranks a passage read off the first edition's
+        # printing, so a disagreement no longer withholds — it is written and FLAGGED.
+        #
+        # The cost is measured, not assumed: on the 36 judgeable lessons this writes 3
+        # passages (L0030 / L0072 / L0110) that the first edition says are the wrong
+        # paragraph, and in those three the first edition's text still appears verbatim
+        # in the second edition's body — so the text did not change and the disagreement
+        # is more likely our misread than a re-marking. They are listed in
+        # `docs/curriculum/key-reading-disagrees-first-edition.md` for a human to settle.
         out["verdict"] = "disagrees_with_first_edition"
         out["needs_human_review"] = True
         return out

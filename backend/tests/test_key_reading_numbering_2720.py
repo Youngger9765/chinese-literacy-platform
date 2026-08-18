@@ -40,6 +40,7 @@ collapse` is the other half of the vice.
 """
 
 import os
+import re
 import sys
 import unicodedata
 
@@ -78,6 +79,29 @@ def _latest_version(uid_dir: str) -> str | None:
     return os.path.join(uid_dir, versions[-1]) if versions else None
 
 
+#: How many of `body.yml`'s paragraphs one PRINTED paragraph may span. Word splits a
+#: paragraph at a manual line break in a handful of lessons, so the printed unit the
+#: professor numbered is sometimes two stored ones — 《感情小日記1》 is 176 + 24
+#: characters and serving only the first cuts it off mid-sentence. Bounded, because an
+#: unbounded run is how a passage gets assembled to hit a length (#2712).
+MAX_BODY_SPAN = 3
+
+
+def _is_body_span(passage: str, paragraphs: list[str]) -> bool:
+    """Is `passage` one stored paragraph, or a short run of consecutive ones?"""
+    target = _norm(passage)
+    normed = [_norm(p) for p in paragraphs]
+    for i in range(len(normed)):
+        acc = ""
+        for j in range(i, min(i + MAX_BODY_SPAN, len(normed))):
+            acc += normed[j]
+            if acc == target:
+                return True
+            if len(acc) > len(target):
+                break
+    return False
+
+
 def _lessons() -> list[tuple[str, list[str], str | None]]:
     """(uid, body paragraphs, written passage or None) for every lesson with a body."""
     out = []
@@ -98,7 +122,15 @@ def _lessons() -> list[tuple[str, list[str], str | None]]:
         passage = None
         if os.path.exists(kf):
             with open(kf, encoding="utf-8") as f:
-                passage = (yaml.safe_load(f) or {}).get("passage")
+                doc = yaml.safe_load(f) or {}
+            passage = doc.get("passage")
+            # 二修教材為主: a lesson whose second-edition instruction names a different
+            # paragraph than the first edition's printing is served from the second and
+            # flagged. Asserting it against the first edition would assert against the
+            # policy, so those are excluded here and covered by the test below instead.
+            if ((doc.get("extraction_check") or {}).get("verdict")
+                    == "disagrees_with_first_edition"):
+                passage = None
         out.append((uid, paras, passage))
     return out
 
@@ -179,9 +211,54 @@ def test_no_passage_is_served_outside_its_own_body():
 
     Cheap, and it is the failure that reaches a student most visibly — 《十秒的背後》,
     about a sprinter, once served a passage about giving up a bus seat.
+
+    Reads every written passage, including the ones the test above excludes: whichever
+    edition a passage came from, it has to be THIS lesson's text.
     """
-    stray = [
-        uid for uid, paras, p in _lessons()
-        if p and _norm(p) not in {_norm(x) for x in paras}
-    ]
+    stray = []
+    for uid in sorted(os.listdir(LESSONS)) if os.path.isdir(LESSONS) else []:
+        vdir = _latest_version(os.path.join(LESSONS, uid))
+        if vdir is None or not os.path.exists(os.path.join(vdir, "body.yml")):
+            continue
+        with open(os.path.join(vdir, "body.yml"), encoding="utf-8") as f:
+            paras = (yaml.safe_load(f) or {}).get("paragraphs") or []
+        kf = os.path.join(vdir, "key_reading.yml")
+        if not os.path.exists(kf):
+            continue
+        with open(kf, encoding="utf-8") as f:
+            passage = (yaml.safe_load(f) or {}).get("passage")
+        if passage and not _is_body_span(passage, paras):
+            stray.append(uid)
     assert stray == [], f"這些課的重點朗讀段落不在自己的課文裡: {stray}"
+
+
+def test_first_edition_disagreements_are_all_listed():
+    """A flag nobody reads is not a safeguard.
+
+    The 二修為主 policy writes a passage the first edition contradicts. That is a
+    decision, not an accident — so every such lesson must appear in the review list a
+    human works from, or the decision quietly becomes a silent difference.
+    """
+    listed = set()
+    path = os.path.join(
+        os.path.dirname(__file__), "..", "..",
+        "docs", "curriculum", "key-reading-disagrees-first-edition.md")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            listed = set(re.findall(r"\bL\d{4}\b", f.read()))
+
+    flagged = set()
+    for uid in sorted(os.listdir(LESSONS)) if os.path.isdir(LESSONS) else []:
+        vdir = _latest_version(os.path.join(LESSONS, uid))
+        kf = os.path.join(vdir, "key_reading.yml") if vdir else None
+        if not kf or not os.path.exists(kf):
+            continue
+        with open(kf, encoding="utf-8") as f:
+            doc = yaml.safe_load(f) or {}
+        if ((doc.get("extraction_check") or {}).get("verdict")
+                == "disagrees_with_first_edition"):
+            flagged.add(uid)
+
+    assert flagged <= listed, (
+        f"這些課採用了二修段落、與一修衝突，但沒有列進待確認清單: "
+        f"{sorted(flagged - listed)}")

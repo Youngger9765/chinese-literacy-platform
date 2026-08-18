@@ -1,6 +1,11 @@
 lesson_uid: L0011
 version_id: v2
-passage: null
+passage: 2021年8月1日，小戴在東京奧運金牌賽的轉播收視率創下新高，這場小戴與陳雨菲的龍爭虎鬥，戰況勢均力敵，全臺觀眾守在電視前，目不轉睛。小戴一得分，大家歡天喜地、讚嘆不已；不幸鷹眼判定小戴的殺球出界，大家不免唉聲嘆氣、捶胸頓足。一場比賽帶出全國人民不可思議的凝聚力和向心力！
+start_text: 2021年8月1日，小戴在東京奧運金牌賽的轉播收
+extent_chars: 136
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -11,3 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 5
+  cell_paragraphs: 6

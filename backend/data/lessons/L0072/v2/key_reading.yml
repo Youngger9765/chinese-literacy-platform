@@ -1,6 +1,11 @@
 lesson_uid: L0072
 version_id: v2
-passage: null
+passage: 也許會有人想問：「可是我閱讀真的超慢的，那怎麼辦呢？」「現在會考的國文考卷，字數有一萬個字，我要怎樣才可以讀快一點呢？」科學家的答案很簡單──「重複朗讀」。
+start_text: 也許會有人想問：「可是我閱讀真的超慢的，那怎麼辦
+extent_chars: 78
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -11,3 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 9
+  cell_paragraphs: 9

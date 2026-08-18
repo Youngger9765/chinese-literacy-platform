@@ -1,6 +1,11 @@
 lesson_uid: L0128
 version_id: v2
-passage: null
+passage: 走進非洲之前，珍古德常被人用懷疑的眼光打量：一個來自英國、沒念過大學的年輕女子，有什麼能力去森林裡做研究？她從小迷戀動物，卻因家裡無法負擔大學學費，只好先去工作維持生活。她做過祕書，也在餐廳當過服務生，一點一滴存下旅費。後來，她在人類學家李奇博士的鼎力相助下，帶著望遠鏡和筆記本，走進岡貝的森林，用最基本、也最費力的方法──長時間守候與觀察，一步步走進黑猩猩的世界。當時許多人對她的計畫嗤之以鼻，認為她撐不了多久，更不可能做出像樣的研究；然而，珍古德把時間交給森林。她一天天蹲守、一頁頁記錄，直到黑猩猩習慣她的存在。幾個月、幾年過去，許多黑猩猩不為人知的細節慢慢浮現。她的筆記越寫越厚，也在不知不覺中改寫了科學界理解黑猩猩的方式。
+start_text: 走進非洲之前，珍古德常被人用懷疑的眼光打量：一個
+extent_chars: 315
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -10,4 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: numbering_disagrees
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 14
