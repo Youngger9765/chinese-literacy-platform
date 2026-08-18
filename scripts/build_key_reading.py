@@ -76,14 +76,30 @@ def main() -> int:
         counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
         if r["verdict"] not in WRITEABLE:
             withheld.append((uid, r))
-            # Withholding has to REMOVE a stale file, not merely decline to write one.
+            # Withholding has to REPLACE a stale file, not merely decline to write one.
             # A lesson that a previous run wrote wrongly would otherwise keep serving
             # that passage while this run reports it as withheld — the gate would read
             # as fail-closed while behaving fail-open.
+            #
+            # But the fluency target survives the withholding (#2722): it belongs to the
+            # 念順順 section, not to the paragraph. So the file becomes benchmark-only
+            # rather than disappearing, which is also the shape #2725 taught the loader
+            # to tolerate — `passage: null` is not a reading step with no text, it is a
+            # lesson that has a rubric and no marked paragraph.
             stale = vdir / "key_reading.yml"
-            if stale.exists() and not a.dry_run:
-                stale.unlink()
-                r["removed_stale"] = True
+            if not a.dry_run:
+                if r.get("reading_benchmark"):
+                    stale.write_text(
+                        yaml.dump({"lesson_uid": uid, "version_id": vdir.name,
+                                   "passage": None,
+                                   "reading_benchmark": r["reading_benchmark"],
+                                   "extraction_check": {"verdict": r["verdict"]}},
+                                  allow_unicode=True, sort_keys=False, width=10**6),
+                        encoding="utf-8")
+                    r["kept_benchmark"] = True
+                elif stale.exists():
+                    stale.unlink()
+                    r["removed_stale"] = True
             continue
 
         doc = {
@@ -95,6 +111,10 @@ def main() -> int:
             "source": "docx-extract",
             "anchor_paragraph": r["anchor"],
             "paragraphs_used": r["paragraphs_used"],
+            # The fluency target the worksheet sets for THIS lesson (#2722), in the shape
+            # `frontend/src/utils/fluencyAnalyzer.ts` already parses. Absent where the
+            # worksheet sets none; the UI then falls back to the grade default.
+            **({"reading_benchmark": r["reading_benchmark"]} if r.get("reading_benchmark") else {}),
             # Recorded so the stronger of the two verdicts stays visible in the data:
             # a paragraph number the first edition's PDF pipeline also arrived at,
             # matched by content rather than by the lesson code that misbound before.
@@ -125,13 +145,13 @@ def main() -> int:
         lines = ["# 重點朗讀待人工確認清單", "",
                  "由 `scripts/build_key_reading.py` 自動產生。列在這裡的課**沒有**寫入 "
                  "`key_reading.yml`，線上會 fallback 唸全文。",
-                 "", "| lesson_uid | verdict | 段號數 | 課文段數 | anchor | 已移除舊檔 |",
+                 "", "| lesson_uid | verdict | 段號數 | 課文段數 | anchor | 舊檔處理 |",
                  "|---|---|---:|---:|---:|---|"]
         for uid, r in sorted(withheld):
             lines.append(
                 f"| {uid} | {r['verdict']} | {r.get('printed_marks') or '—'} "
                 f"| {r.get('cell_paragraphs') or '—'} | {r.get('anchor') or '—'} "
-                f"| {'是' if r.get('removed_stale') else '—'} |")
+                f"| {'保留字數目標' if r.get('kept_benchmark') else ('已刪除' if r.get('removed_stale') else '—')} |")
         if not a.dry_run:
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text("\n".join(lines) + "\n", encoding="utf-8")

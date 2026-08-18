@@ -150,14 +150,37 @@ _EXERCISE_MARKS = ("（單選）", "(單選)", "（複選）", "(複選)",
 _LESSON_HEADER = re.compile(r"^第\s*[0-9０-９一二三四五六七八九十百]+\s*課")
 
 
+#: The worksheets hold two different boxes and only one of them is a character.
+#:
+#:      literal 「□」 in <w:t>                     an UNCHECKED box
+#:      <w:sym w:font="Wingdings" w:char="F0FE">   a CHECKED box ☑ — the marker's answer
+#:
+#: Reading `<w:t>` alone drops the second entirely, so the option the teacher checked
+#: arrives with nothing in front of it while its siblings keep their 「□」, and the odd
+#: one out IS the answer:
+#:
+#:      （單選）□①驕傲地奪得銀牌     ②以微小差距與金牌擦身而過      ← ② is the answer
+#:
+#: 1805 checked boxes across 157 of 175 lessons. Substituted for an ordinary 「□」 so
+#: every option looks the same. Which one was checked is not recorded — worth having,
+#: but making it unreadable is the part that has to land first, and recording it in the
+#: same change would put the answer back into the file it was just removed from.
+_CHECKED_BOX = re.compile(r'<w:sym w:font="Wingdings" w:char="F0FE"\s*/>')
+
+
 def _paragraphs(docx: Path) -> list[str]:
     with zipfile.ZipFile(docx) as z:
         xml = z.read("word/document.xml").decode("utf-8")
+    xml = _CHECKED_BOX.sub("<w:t>□</w:t>", xml)
     out = []
+    # Three box characters are in use — □ U+25A1 (5912), ⃞ U+20DE (37), ▢ U+25A2 (16).
+    # Left alone they produce the same leak in a different costume: an option marked with
+    # ⃞ sitting beside two marked □ is just as identifiable as one with no box at all.
+    _BOXES = str.maketrans({"⃞": "□", "▢": "□", "☐": "□", "◻": "□"})
     for p in _PARA.findall(xml):
         t = "".join(_TEXT.findall(p)).strip()
         # A <w:p> with no <w:t> children leaks its own attributes through the join.
-        out.append("" if t.startswith("<w:") else t)
+        out.append("" if t.startswith("<w:") else t.translate(_BOXES))
     return out
 
 
@@ -267,7 +290,19 @@ def _is_chrome(t: str) -> bool:
     )
 
 
-def extract_body(paras: list[str]) -> Optional[list[str]]:
+#: A paragraph carrying the marker's answer is not lesson text. It is exercise material
+#: that crossed the section boundary — a vocabulary definition row, a comprehension
+#: question with its answer letter — and the length-and-prefix rules cannot see it
+#: because the marking lives in the run style, not the text.
+_ANSWER_STYLE_PREFIX = "教材：教師解答"
+
+
+def _answer_marked(runs: list[dict]) -> bool:
+    return any((r.get("style_name") or "").startswith(_ANSWER_STYLE_PREFIX)
+               and r["text"].strip() for r in runs)
+
+
+def extract_body(paras: list[str], runs: list[list[dict]] | None = None) -> Optional[list[str]]:
     # A boundary is only a boundary if there is body text before it. 文言文
     # worksheets print their strategy heading (文言聚光燈：固定句式) in the masthead,
     # at paragraph 3 — matching that as the end yielded a zero-length body and the
@@ -334,8 +369,19 @@ def extract_body(paras: list[str]) -> Optional[list[str]]:
     short_floor = _MIN_SHORT_BODY_APPLIED if genre.startswith("應用") else _MIN_SHORT_BODY
 
     span = paras[first:end]
+    # Same slice of the run-level view, when the caller supplied one. The two views must
+    # be the same paragraphs in the same order — they are built from the same regex over
+    # the same XML, and are 175/175 aligned today. Degrading quietly on a mismatch would
+    # remove the boundary guard without removing the test that says it is there, so a
+    # mismatch is raised rather than absorbed.
+    if runs is not None and len(runs) != len(paras):
+        raise ValueError(
+            f"run view and paragraph view disagree: {len(runs)} runs vs {len(paras)} paragraphs"
+        )
+    span_runs = runs[first:end] if runs else [[] for _ in span]
     keep = [bool(t) and not _is_chrome(t) and not any(m in t for m in _EXERCISE_MARKS)
-            for t in span]
+            and not _answer_marked(span_runs[i])
+            for i, t in enumerate(span)]
     is_long = [keep[i] and len(t) >= _MIN_BODY for i, t in enumerate(span)]
     filled = [i for i, t in enumerate(span) if t]
     order = {v: k for k, v in enumerate(filled)}
@@ -453,7 +499,7 @@ def check(body: list[str], vocab: list[str]) -> dict:
 
 def extract(docx: Path) -> dict:
     paras = _paragraphs(docx)
-    body = extract_body(paras)
+    body = extract_body(paras, read_runs(docx))
     if not body:
         return {"ok": False, "reason": "找不到課文邊界（第二節標題）", "paragraphs": []}
     vocab = extract_vocabulary(paras, body)

@@ -3,9 +3,8 @@
  * 讀全文-做記號 (FullTextAnnotate) step's audio player.
  *
  * Exercises the REAL useTtsPlayback + ttsApi (mocking fetch + Audio only, same
- * pattern as src/components/reading-steps/__tests__/Intro.aiTts.test.tsx) so
- * assertions prove the actual wiring — not a re-implementation of the queue
- * logic inside the test.
+ * pattern as src/__tests__/ttsApi.test.ts) so assertions prove the actual
+ * wiring — not a re-implementation of the queue logic inside the test.
  *
  * MockAudio here does NOT extend HTMLMediaElement (a plain stand-in class),
  * so it never touches the hook's own belt-and-suspenders

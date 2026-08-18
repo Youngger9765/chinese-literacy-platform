@@ -178,6 +178,53 @@ def cn_to_int(s: str) -> int | None:
     return None
 
 
+#: 念順順 sets a fluency target, calibrated per lesson, printed as a run of checkbox
+#: lines followed by the marker's message for each tier:
+#:
+#:      □ ＜190字        □ 191~220字      □ ＞221字          (146 lessons, characters/minute)
+#:      還要多加練習。    嗯，還不錯喲！    哇嗚，超級厲害！
+#:
+#:      □42秒以下        □42~55秒         □55秒以上          (12 lessons, 文言文, seconds)
+#:      速度有點快…      強者就是你啦！    速度再快一點！
+#:
+#: Stored as the raw worksheet strings under the `reading_benchmark` contract that
+#: `frontend/src/utils/fluencyAnalyzer.ts` already parses — it handles both units and
+#: knows that a seconds benchmark has no characters-per-minute pass mark. Emitting a
+#: parsed {min,max} shape instead would have been a second contract for the same data,
+#: and the frontend was already reading nothing: `lesson_indexes` hard-coded
+#: `reading_benchmark: None`, so every lesson fell back to a grade-wide default while
+#: its own thresholds sat in the DOCX.
+_BOX = re.compile(r"^[□☐■◻▢]\s*")
+_TIER = re.compile(r"\d{2,4}\s*[字秒]")
+
+
+def find_reading_benchmark(paras: list[str]) -> dict | None:
+    """The tiers and their messages, or None where the worksheet sets no target.
+
+    A tier line is a checkbox carrying a number and a unit. They run consecutively; the
+    same number of non-empty lines after them are the messages, paired by position —
+    which is what the seconds form needs, since there the FIRST tier is the fast one and
+    its message is a caution rather than praise.
+    """
+    text = [p.strip() for p in paras]
+    i = 0
+    while i < len(text):
+        if not (_BOX.match(text[i]) and _TIER.search(text[i])):
+            i += 1
+            continue
+        run = []
+        while i < len(text) and _BOX.match(text[i]) and _TIER.search(text[i]):
+            run.append(_BOX.sub("", text[i]).strip())
+            i += 1
+        if not 2 <= len(run) <= 4:
+            continue
+        msgs = [t for t in text[i:i + len(run) + 4] if t][:len(run)]
+        if len(msgs) < len(run):
+            msgs = [""] * len(run)
+        return {"levels": [{"threshold": t, "feedback": m} for t, m in zip(run, msgs)]}
+    return None
+
+
 def find_anchor(paras: list[str]) -> int | None:
     text = "\n".join(paras)
     m = _ANCHOR.search(text) or _ANCHOR_LOOSE.search(text)
@@ -315,6 +362,14 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
         "corroborated_by_first_edition": None,
         "needs_human_review": False,
     }
+
+    # Set before every early return below: the fluency target belongs to the 念順順
+    # section, not to the paragraph, so a lesson keeps its target even when the anchor
+    # is withheld (#2722). The 12 文言文 lessons time in seconds and mostly have no
+    # anchor at all.
+    benchmark = find_reading_benchmark(paras)
+    if benchmark:
+        out["reading_benchmark"] = benchmark
 
     anchor = find_anchor(paras)
     out["anchor"] = anchor

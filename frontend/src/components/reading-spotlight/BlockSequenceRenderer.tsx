@@ -401,6 +401,59 @@ const BlockSequenceRenderer: React.FC<Props> = ({
           </div>
         );
 
+      case 'table': {
+        // The extractor labelled image-less tables as `figure` with `referent: 'table'`,
+        // and the loader drops a figure with no asset — 217 tables across 109 lessons
+        // disappeared, leaving a prompt followed by nothing. They arrive as rows now.
+        //
+        // Cells carry 【】 where the student writes. This is the TEACHER's copy, so the
+        // extractor empties them and keeps the values in `answers`, which is never
+        // rendered — the same arrangement `ordering` uses for `correct_order`.
+        const rows = block.rows ?? [];
+        const answers = (blockState[key] as Record<string, string>) ?? {};
+        let blankNo = 0;
+        return (
+          <div key={key} className="rounded-xl border border-gray-200 bg-white p-4">
+            {/* Wide tables scroll inside their own box; the page never scrolls sideways. */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-base">
+                <tbody>
+                  {rows.map((row, r) => (
+                    <tr key={r} className={r === 0 ? 'bg-gray-50 font-medium' : ''}>
+                      {row.map((cell, c) => (
+                        <td key={c} className="border border-gray-200 px-3 py-2 align-top whitespace-pre-wrap">
+                          {String(cell).split('【】').map((part, i, all) => {
+                            if (i === all.length - 1) return <span key={i}>{part}</span>;
+                            const slot = `${r}-${c}-${i}`;
+                            blankNo += 1;
+                            return (
+                              <span key={i}>
+                                {part}
+                                <input
+                                  type="text"
+                                  aria-label={`第 ${blankNo} 個空格`}
+                                  value={answers[slot] ?? ''}
+                                  onChange={e => {
+                                    const next = { ...answers, [slot]: e.target.value };
+                                    setBlockValue(key, next);
+                                    checkCompletion({ ...blockState, [key]: next });
+                                  }}
+                                  className="mx-1 min-w-[5rem] border-b border-gray-400 bg-transparent px-1 focus:outline-none focus:border-blue-500"
+                                />
+                              </span>
+                            );
+                          })}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      }
+
       default:
         return (
           <div key={key} className="rounded-lg border border-gray-300 bg-gray-100 px-4 py-3 text-base text-on-surface-variant">

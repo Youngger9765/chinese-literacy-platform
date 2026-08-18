@@ -138,6 +138,8 @@ export interface SpotlightFigureBlock {
 export interface SpotlightTableBlock {
   type: 'table';
   rows: string[][];
+  /** 老師版填在【】裡的答案，依閱讀順序。不可顯示 —— 同 ordering 的 correct_order。 */
+  answers?: string[];
 }
 
 /** 排序題：把句子依時間／因果順序編號。`correct_order` 是老師的答案，不可顯示。 */

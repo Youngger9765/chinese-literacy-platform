@@ -6,6 +6,14 @@ extent_chars: 113
 source: docx-extract
 anchor_paragraph: 5
 paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

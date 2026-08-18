@@ -216,8 +216,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 1
+        "fill_blank_count": 2,
+        "checkbox_count": 3
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -298,10 +298,10 @@
       "lesson_uid": "L0023",
       "title": "比運氣更重要的事：《長腿叔叔》的啟發",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 0
+        "fill_blank_count": 4,
+        "checkbox_count": 1
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -396,9 +396,9 @@
       "lesson_uid": "L0030",
       "title": "六塊肌六塊雞",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "display_only",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
+        "fill_blank_count": 0,
         "checkbox_count": 0
       },
       "docx_keypoints": null,
@@ -412,8 +412,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 3
+        "fill_blank_count": 1,
+        "checkbox_count": 4
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -424,9 +424,9 @@
       "lesson_uid": "L0032",
       "title": "小丑醫生",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "display_only",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
+        "fill_blank_count": 0,
         "checkbox_count": 0
       },
       "docx_keypoints": null,
@@ -532,10 +532,10 @@
       "lesson_uid": "L0040",
       "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
       "layout": {
-        "mode": "mixed",
+        "mode": "checkbox",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 2
+        "fill_blank_count": 0,
+        "checkbox_count": 4
       },
       "docx_keypoints": null
     },
@@ -824,10 +824,10 @@
       "lesson_uid": "L0065",
       "title": "運動傷害，怎麼辦",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0
+        "fill_blank_count": 3,
+        "checkbox_count": 1
       },
       "docx_keypoints": null
     },
@@ -848,10 +848,10 @@
       "lesson_uid": "L0067",
       "title": "森林大軍的守護者",
       "layout": {
-        "mode": "mixed",
+        "mode": "checkbox",
         "layout": "worksheet_table",
-        "fill_blank_count": 1,
-        "checkbox_count": 2
+        "fill_blank_count": 0,
+        "checkbox_count": 3
       },
       "docx_keypoints": null
     },
@@ -942,10 +942,10 @@
       "lesson_uid": "L0076",
       "title": "給神明發會診單",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 0
+        "fill_blank_count": 2,
+        "checkbox_count": 1
       },
       "docx_keypoints": null,
       "overall_pass": true,
@@ -1440,10 +1440,10 @@
       "lesson_uid": "L0121",
       "title": "MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人)",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 2,
-        "checkbox_count": 0
+        "fill_blank_count": 1,
+        "checkbox_count": 1
       },
       "docx_keypoints": null
     },

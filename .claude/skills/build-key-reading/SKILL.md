@@ -39,4 +39,16 @@ description: 【已停用，請改用 lesson-reading-pipeline】舊版重點朗�
 - `scripts/extract_key_reading.py` — 錨點解析 + 三道 fail-closed 檢查
 - `scripts/build_key_reading.py` — 寫入 / withhold / 產待人工確認清單
 
-歷史內容可從 git 取得：`git show 7567483e:.claude/skills/build-key-reading/SKILL.md`
+## #2726 加在這裡的二修章節去哪了
+
+PR #2726（`docs/key-reading-skill-second-edition`）在本檔尾端加了一節
+「⚠️ 二修（2026-08）：錨點的載體變了」，獨立診斷出與 #2720 相同的根因，並帶進了
+本檔原本沒有的資訊（#2722 每分鐘字數目標當回歸鎖、兩個會誤傷的合併判準、#2724）。
+
+**那一節沒有被刪掉，整段搬進了 `lesson-reading-pipeline`**（§① 的「不要用這兩個訊號判斷」
+與 §③「每分鐘字數目標」）。搬家的理由是這份檔案要停用 —— 前半部仍在教
+`extent = max(累計字數)`，把正確的新章節留在錯誤的舊章節下面，讀的人會先讀到錯的。
+
+歷史內容可從 git 取得：
+- 本檔一修版：`git show 7567483e:.claude/skills/build-key-reading/SKILL.md`
+- #2726 的二修章節：`git show acc18b30:.claude/skills/build-key-reading/SKILL.md`

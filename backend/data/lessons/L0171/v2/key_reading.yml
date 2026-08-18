@@ -1,0 +1,13 @@
+lesson_uid: L0171
+version_id: v2
+passage: null
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition

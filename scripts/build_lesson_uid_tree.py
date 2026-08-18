@@ -62,7 +62,12 @@ def _clear_module(dest: Path, module: str) -> None:
         # (thumbnail.webp) from reuse_lesson_thumbnails.py.
         if (dest / "assets").is_dir():
             for f in (dest / "assets").iterdir():
-                if f.name == "thumbnail.webp":
+                # The thumbnail is chosen once and not re-derivable from the DOCX, and
+                # neither is the record of WHICH figure it came from. Keeping the image
+                # but not its provenance deleted 105 `thumbnail.source.json` on the first
+                # full rebuild — quietly, because a rebuild that writes 175 lessons looks
+                # identical whether or not it took something with it.
+                if f.name.startswith("thumbnail."):
                     continue
                 shutil.rmtree(f) if f.is_dir() else f.unlink()
     else:

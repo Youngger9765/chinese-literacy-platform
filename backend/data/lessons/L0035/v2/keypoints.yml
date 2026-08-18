@@ -33,18 +33,14 @@ keypoints:
         hint: ''
   - label: 聲援對象
     sub_rows:
-    - sub_label: '兩位受迫害
-
-        的青少年'
+    - sub_label: 兩位受迫害的青少年
       template: 琪哈姆 嘗試逃離__失敗，被捕至今__。
       blanks:
       - answer: 厄利垂亞
         hint: ''
       - answer: 生死不明
         hint: ''
-    - sub_label: '兩位受迫害
-
-        的青少年'
+    - sub_label: 兩位受迫害的青少年
       template: 米基塔 意外捲入抗議人群，被判__，不但未獲__，且疑似遭受酷刑。
       blanks:
       - answer: 五年徒刑
@@ -58,9 +54,7 @@ keypoints:
       blanks:
       - answer: 終身監禁
         hint: ''
-    - sub_label: '行動成果
-
-        (第五段)'
+    - sub_label: 行動成果(第五段)
       template: 已成功改變__的命運，使他們擺脫__。
       blanks:
       - answer: 超過百人
@@ -77,9 +71,7 @@ keypoints:
     - answer: 祝福
       hint: ''
   - label: 行動意義
-    value: '1.一封封充滿關懷與支持的信，為身陷困境的人們帶來__與__。
-
-      2.讓大家看見，__都能成為改變的推手。'
+    value: 1.一封封充滿關懷與支持的信，為身陷困境的人們帶來__與__。2.讓大家看見，__都能成為改變的推手。
     blanks:
     - answer: 希望
       hint: ''
