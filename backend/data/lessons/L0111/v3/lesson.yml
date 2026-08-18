@@ -1,0 +1,32 @@
+lesson_uid: L0111
+version_id: v3
+title: 雨林裡的奇蹟藥物
+catalog_slot: G8-L13
+sections_present:
+- 'no': 一
+  name: 讀全文
+  part: 1
+  note: 第13課 雨林裡的奇蹟藥物
+- 'no': 二
+  name: 閱讀聚光燈
+  part: 1
+  subtitle: 閱讀策略——跳過卡關，先瀏覽全文
+- 'no': 三
+  name: 讀全文
+  part: 2
+  note: 第14課 最後一隻旅人鴿
+- 'no': 四
+  name: 閱讀聚光燈
+  part: 2
+  subtitle: 閱讀策略——跳過卡關，先瀏覽全文
+- 'no': 五
+  name: 知識補給站
+  part: 3
+- 'no': 六
+  name: 閱讀理解
+  part: 3
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 8
+  drive_path: 8年級/G8-L13-14雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，先瀏覽全文）.docx
+  docx_md5: md5-12:78679d41aa98

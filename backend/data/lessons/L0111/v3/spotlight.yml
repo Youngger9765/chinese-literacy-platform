@@ -1,0 +1,94 @@
+lesson_uid: L0111
+version_id: v3
+section_no: 二
+spotlight:
+  strategy_name: 閱讀策略——跳過卡關，先瀏覽全文
+  strategy_type: reading_strategy
+  practises: 第13課 雨林裡的奇蹟藥物
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE ＋ w:color FF0000）＋橘色手寫填空；兩者都在文字流裡
+  blocks:
+  - type: concept_box
+    text: 你剛剛讀過全文，你發現了嗎？第一段出現了許多不容易懂的專有名詞，這時「跳過卡關」的策略就派上用場了——你不必細究，略讀就好，先繼續往下讀，文章經常比你想像的更容易懂。讓我們來練習看看。
+  - type: passage
+    label: 〈雨林裡的奇蹟藥物〉
+    paragraphs:
+    - （段1）亞馬遜雨林的原住民，會用藤蔓中提煉出的「箭毒」製作毒箭。箭毒屬神經肌肉阻斷劑，拮抗乙醯膽鹼受體，它會阻斷神經肌肉傳導，被毒箭射中的動物會全身肌肉鬆弛，最後因呼吸衰竭而死。如今，現代醫院的外科醫師在手術中，卻把箭毒當作救命的藥物來使用，許多能治療白血病與其他癌症的強效藥物，也同樣來自雨林的植物。這讓科學家在世界各地的雨林中探索，尋找新的「奇蹟」藥物。
+    note: 圓角外框內的引文；粗體範圍與課文相同。與讀全文版差一個「另外還有」，見 body.duplicate_copy_note
+  - type: guide
+    text: 步驟0：30秒快速瀏覽（先抓方向）
+  - type: free_text
+    prompt: 1.任務：只抓「第一段大概在講什麼？」（約10–15字）　→我猜這段在講：【　】
+    blanks:
+    - answer: 致命箭毒也可以變成救命良藥
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  - type: guide
+    text: 步驟1：標示卡關點（本課的粗體明示＋原因判斷）
+  - type: single
+    prompt: 1.粗體的地方讀起來不容易，你覺得主要原因是什麼？（單選）
+    options:
+      1: 醫學專有名詞密集，句子又長
+      2: 事件跳太快，我很難把前後接起來
+    answer: 1
+  - type: guide
+    text: 步驟2：跳過卡關點、先瀏覽全文（不中斷）
+  - type: guide
+    text: 1.再讀一次第一段：看到粗體就先快速讀過，不要細究，直接往下讀。
+  - type: single
+    prompt: 2.自我檢核：我有把第一段讀完（單選）
+    options:
+      1: 有，我能順順讀完
+      2: 沒有，我還是卡在粗體處
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿兩個 □ 都沒有勾
+  - type: guide
+    text: 步驟3：抓重點（重點句＋段意）
+  - type: single
+    prompt: 1.重點句：第一段最關鍵的一句話？（單選）
+    options:
+      1: 箭毒會讓動物全身肌肉鬆弛，最後甚至致死
+      2: 外科醫師在手術中，卻把箭毒當作救命的藥物
+      3: 科學家在世界各地雨林探索，尋找新的奇蹟藥物
+    answer: 2
+  - type: single
+    prompt: 2.段意二選一（單選）
+    options:
+      1: 雨林的致命箭毒，竟能被醫師用來救命，雨林可能藏著新藥。
+      2: 雨林裡的箭毒太可怕，所以大家應該遠離雨林，避免中毒。
+    answer: 1
+  - type: guide
+    text: 步驟4：驗證：我真的懂了嗎？（不用看粗體字）
+  - type: single
+    prompt: 1.這段最想強調的「反差」是什麼？（單選）
+    options:
+      1: 致命的箭毒，竟能在醫療中變成救命藥
+      2: 原住民用毒箭狩獵，方法比現代人更厲害
+      3: 雨林植物很神祕，所以很多人想去冒險
+    answer: 1
+  - type: single
+    prompt: 2.作者提到「科學家在雨林探索」主要想表達什麼？（單選）
+    options:
+      1: 雨林可能藏有新藥來源，值得科學家研究
+      2: 雨林的路線複雜危險，需要專業探險隊帶路
+      3: 雨林的動物種類很多，最適合做生態觀察
+    answer: 1
+  - type: guide
+    text: 步驟5：覺察與回顧（把方法說出來，才能遷移）
+  - type: single
+    prompt: 1.你是否發現：跳過看不懂的粗體，仍能抓到第一段重點？（單選）
+    options:
+      1: 有，我更能抓到重點句與段意
+      2: 沒有，只要有地方不懂，就覺得沒讀懂
+    answer: 1
+  - type: single
+    prompt: 2.為什麼粗體字先跳過沒關係？（單選）
+    options:
+      1: 它是補充的細節，先抓轉折或結論句（例如「卻」）就能掌握重點
+      2: 它只是把同樣的概念重複說一次，所以跳過不會影響理解
+    answer: 1
+  - type: free_text
+    prompt: 3.完成一句話（方法回顧）：下次閱讀，遇到專有名詞很多的段落，我可以標示卡關點後，【　】，先【　】，再判斷【　】。
+    blanks:
+    - answer: 跳過卡關點
+    - answer: 瀏覽全文
+    - answer: 重點
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

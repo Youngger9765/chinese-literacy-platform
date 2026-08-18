@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0103",
+  "catalog_slot": "G7-L6",
+  "pdf_pages": 11,
+  "pages_read": 11,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 2,
+  "notes": "🔴 找字格子第 3 列第 3 欄印的是異體字「脱」(U+8131)，目標語詞是「脫穎而出」(U+812B)；全檔「脱」只出現這一次、「脫」出現 7 次 → 判定為格子單獨印錯，登 source_errata E1，answer_paths.word 照格子實際拼得出來的字寫，intended_word_note 放在 vocab_review 層（放進 item 內會讓座標門判「要改寫」）。 🔴 「問題➔解決➔結果」的箭頭是 w:sym Wingdings F0E0（8 個），不在文字流；照 L0031 的既有做法以換行代替。實測補上「→」逐字門會 FAIL（拿一個只有兩行的探針檔驗過：帶箭頭那行 FAIL、不帶的 PASS）。 ⚠️ 字數欄要同時套兩條口徑：skill ⑥.7 第 1 條（阿拉伯數字串算 1 字，第 1 段 98→95）＋「破折號『——』不計入」（第 3 段 145→143）。兩個段界 255／340 同時精準吻合。後者不是 skill 既有四條之一，是本課與 L0104 各自實測出來的觀察，未寫成通則。 找字：全檔 roundRect 20 個，先把範圍限在找字那一頁（另外 9 個是聚光燈流程圖 7 個方塊＋泰國故事外框＋閱讀理解甲~戊框），落在格子上的正好 11 ＝ 路徑數。 重點表「困境」那一列在原稿是兩欄四列的子表格，照 §⑥.55b 攤平成 items（label＝問題欄、value＝解決辦法欄），問題欄本身是空格的那一列用 label_blanks（L0057/L0058 既有做法）。"
+}

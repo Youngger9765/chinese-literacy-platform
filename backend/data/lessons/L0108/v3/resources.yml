@@ -1,0 +1,18 @@
+lesson_uid: L0108
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 只顧保育老虎卻沒設緩衝區 尼泊爾村民慘遭虎咬喪命! 保育人士設"生態旅館"成解方 沒客人旅館就"消失不見"!│【消失的國界】20250920三立新聞台
+    duration: '7:32'
+    duration_seconds: 452
+    source: 消失的國界│從台灣看見世界的故事
+    url: http://youtu.be/CtGvfGmhRXs
+  - index: 2
+    title: 尼泊爾的瀕危猛虎終於回歸，當地人為何喜憂參半－ BBC News 中文
+    duration: '4:50'
+    duration_seconds: 290
+    source: BBC News中文
+    url: http://youtu.be/tl64FF19MvA

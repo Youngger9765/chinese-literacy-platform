@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -85,6 +86,44 @@ def check_yaml_traps(path: Path) -> list[str]:
         scan(yaml.safe_load(path.read_text(encoding="utf-8")))
     except Exception as exc:
         problems.append(f"YAML 解析失敗：{exc}")
+
+    problems += check_hash_swallow(path)
+    return problems
+
+
+def check_hash_swallow(path: Path) -> list[str]:
+    """抓「值以 `#` 開頭而沒加引號」—— 整個值被當註解吃掉，欄位變成 null。
+
+    `text: #MeToo運動也在2018年傳到臺灣…` 解析出來是 `{"text": None}`。
+    2026-08-18 在 L0121 吃掉**兩整段課文**，而**八道門沒有一道看得到**：
+    逐字門 PASS（沒東西可比）、orphan PASS、型別門 PASS、找字 PASS ——
+    只有 coverage_gate 抓得到，而它需要有 v2 可比，全新的課會一路綠燈。
+
+    跟上面的裸 `no:` 是同一族：YAML 靜默改變語意，而不是報錯。
+
+    ⚠️ 要跟**正當的行尾註解**分開：`sub_table:   # ⚠️ 巢狀表格…` 的值在後續縮排行裡，
+    那是註解不是被吃掉的值。判準是「這一行之後有沒有更深的縮排」——沒有才是真的 null。
+    """
+    problems = []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"^(\s*)(?:- )?([^:#\n]+):\s+#", line)
+        if not m:
+            continue
+        indent = len(m.group(1))
+        # 往下找第一行有內容的，比這行更深 = 值在下面（正當註解）
+        nested = False
+        for nxt in lines[i + 1:]:
+            if not nxt.strip():
+                continue
+            if len(nxt) - len(nxt.lstrip()) > indent:
+                nested = True
+            break
+        if not nested:
+            problems.append(
+                f"第 {i + 1} 行 `{m.group(2).strip()}:` 的值以 # 開頭且沒加引號 —— "
+                f"整個值會被當註解吃掉、欄位變 null。加引號：`{m.group(2).strip()}: \"#…\"`"
+            )
     return problems
 
 

@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0094",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "read_calls": 1,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 4,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "verbatim 首跑 4 筆全是我把 `→` 寫進字串 —— 那個箭頭是 `w:sym Wingdings F0E0` 符號物件、不在文字流。移出被檢查的字串後 177 條全過。0 筆真的抄錯。找字格子跨頁（第 1 列在 p8、2~10 列在 p9，圈整組留在 p9 被頁首裁掉）。個數警報：找字 block 11 個 roundRect == 11 條路徑，不觸發（全檔 15 個裡有 4 個是聚光燈流程圖）。第三載體 w:bdr 非 auto = 0。字數欄八個檢查點全中。"
+}

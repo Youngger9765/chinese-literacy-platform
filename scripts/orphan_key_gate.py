@@ -63,6 +63,15 @@ BOOKKEEPING: dict[str, str] = {
 }
 
 
+# 註記形狀的 key：**開頭 `_` 且結尾 note/notes**。兩個條件都要，故意訂得很窄 ——
+# 這道門的價值在於逼人回答「這是內容還是記帳」，通配符會把那個問題消掉。
+#
+# 掃全庫時真的被丟掉的四個 key（supplement / writing_practice / goal_box /
+# self_check_before_reading）沒有一個長這樣，而記帳用的（`_總表_對照note`、
+# `_節次順序note`、`_siblings_note`）全都長這樣 —— 兩邊在形狀上是分得開的。
+ANNOTATION_RE = re.compile(r"^_.*notes?$")
+
+
 def module_keys() -> set[str]:
     """從 splitter 讀 MODULES，不要在這裡抄一份（抄的那份一定會漂）。"""
     src = SPLITTER.read_text(encoding="utf-8")
@@ -89,7 +98,7 @@ def main() -> int:
     bad: dict[str, list[str]] = {}
     for f in files:
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
-        orphans = [k for k in doc if k not in known]
+        orphans = [k for k in doc if k not in known and not ANNOTATION_RE.match(k)]
         if orphans:
             bad[f.stem] = orphans
         else:

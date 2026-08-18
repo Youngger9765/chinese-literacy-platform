@@ -1,0 +1,24 @@
+lesson_uid: L0102
+version_id: v3
+section_no: 九
+resources:
+  row_label: 影片連結
+  items:
+  - index: 1
+    title: 泰國短片-「眼見不一定為憑」。
+    duration: 05:21
+    duration_seconds: 321
+    source: 集合視頻 JIHE.TV
+    qr_code: true
+    title_note: 標題末尾原稿就有一個句號，照原稿保留。
+  - index: 2
+    title: 中國廣告-眼見不一定為實，最後的結局真的沒想到！
+    duration: 05:37
+    duration_seconds: 337
+    source: 微博最火視頻搬運工
+    qr_code: true
+  items_note: '原稿的片長印成「・片長：(05:21)」（含括號、分鐘數補零），本欄照既有形狀去掉括號存成
+
+    `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
+
+    文字層只有標題、片長、來源三項，沒有 URL。'

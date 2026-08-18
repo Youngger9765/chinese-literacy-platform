@@ -1,0 +1,56 @@
+lesson_uid: L0102
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 黏稠
+  - 信以為真
+  - 尼古丁
+  - 查緝
+  - 相提並論
+  - 混淆
+  - 迷魂陣
+  - 似是而非
+  - 長期提款機
+  - 指鹿為馬
+  - 偽科學
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 信以為真
+    definition: 把錯誤或尚未證實的內容當成真的。
+  - index: 2
+    word: 相提並論
+    definition: 把不同的人或事物放在一起比較；討論。多用來指出兩者並不適合相比。
+  - index: 3
+    word: 迷魂陣
+    definition: 使人迷惑而上當的圈套。
+  - index: 4
+    word: 尼古丁
+    definition: 香菸中的成癮性物質，可能危害身體健康。
+  - index: 5
+    word: 混淆
+    definition: 使事情變得模糊、無法分辨。
+  - index: 6
+    word: 黏稠
+    definition: 濃稠有黏性的。
+  - index: 7
+    word: 長期提款機
+    definition: 本文是指電子煙的消費者會長期消費，為業者帶來穩定的收入。
+  - index: 8
+    word: 似是而非
+    definition: 表面上好像正確，實際上並不正確。
+  - index: 9
+    word: 查緝
+    definition: 搜查並取締違法行為，或追捕犯罪者。
+  - index: 10
+    word: 指鹿為馬
+    definition: 用來比喻人故意顛倒是非、混淆視聽。
+  - index: 11
+    word: 偽科學
+    definition: 表面看起來像科學，實際上缺乏證據與合理方法、且經不起考驗的說法。

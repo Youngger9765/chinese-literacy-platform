@@ -1,0 +1,18 @@
+lesson_uid: L0099
+version_id: v3
+section_no: 八
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【新聞抓重點】AI未來將完全取代人類？ 探討AI優缺點－民視新聞
+    duration: 06:02
+    source: 民視新聞網
+    _總表_url: http://youtu.be/f3Gc-GQKV-0
+  - index: 2
+    title: 掌握這6種能力，你就不會被淘汰｜如何不被AI取代？AI時代學什麼？
+    duration: 09:54
+    source: Brayden Chen
+    _總表_url: http://youtu.be/8YIpQJMbIRw
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 83 列，故加 `_` 前綴標示非 DOCX 內容。

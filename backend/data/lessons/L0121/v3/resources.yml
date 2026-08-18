@@ -1,0 +1,22 @@
+lesson_uid: L0121
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 感到不舒服，就算性騷擾！勇敢拒絕適時求助
+    duration: (1:59)
+    source: 照護線上
+    has_qr: true
+  - index: 2
+    title: 防治性騷擾_專業非藉口篇
+    duration: (3:11)
+    source: 衛生福利部保           護服務司
+    has_qr: true
+  - index: 3
+    title: 王淨「人選之人」遭豬哥性騷 賴佩霞爆氣飆罵下屬超解氣！
+    duration: (3:21)
+    source: 噓!新聞
+    has_qr: true

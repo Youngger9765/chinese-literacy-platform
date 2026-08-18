@@ -1,0 +1,72 @@
+lesson_uid: L0102
+version_id: v3
+section_no: 六
+keypoints:
+  title: 網紅的電子煙實驗：偽科學的陷阱
+  layout: list
+  answer_carrier: 橘色手寫字＋紅色 ☑（w:sym）2 個；PDF p10 可見
+  rows:
+  - label: 好奇的問題
+    value: 電子煙是否安全？
+  - label: 訊息來源
+    value: 看朋友傳來的兩部【　】。
+    blanks:
+    - answer: 電子煙實驗影片
+  - label: 網紅的實驗
+    items:
+    - label: (1)
+      value: '【　】實驗：
+
+        用紙菸和電子煙的煙霧試驗棉花有沒有變色。'
+      blanks:
+      - answer: 棉花肺
+    - label: (2)
+      value: '【　】實驗：
+
+        把煙油加入食物、飲料後吃下，宣稱煙油無害。'
+      blanks:
+      - answer: 煙油食材
+    items_note: 這一列原稿是**左右並排的兩格**（不是上下兩列），此處攤平成 items 保留 (1)(2) 的層級。
+  - label: 錯誤推論
+    value: 棉花未變色、煙油可以吃
+  - label: 網紅暗示、阿政誤信的結論
+    value: 棉花未變色、煙油可以吃，所以，電子煙對人體【　】。
+    blanks:
+    - answer: 無害
+  - label: 對網紅實驗的批判
+    value: '(1)棉花肺實驗的問題
+
+      →A.棉花不等於人的肺。B.光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【　】。
+
+      (2)煙油食材實驗的問題(單選)
+
+      →電子煙是【　】到肺裡的，
+
+      網紅把煙油【　】下肚，完全沒有說明吸電子煙對人體的影響。'
+    blanks:
+    - answer: 看不見
+    inline_choices:
+    - locator: 電子煙是【…】到肺裡的
+      options:
+        1: 吸
+        2: 吃
+      answer: 1
+    - locator: 網紅把煙油【…】下肚
+      options:
+        1: 吸
+        2: 吃
+      answer: 2
+    inline_choices_note: '這一格同時有「填空」與「兩個單選」。兩個單選是紅色 ☑（w:sym），原稿印成
+
+      【☑①吸　□②吃】與【□①吸　☑②吃】。用 `inline_choices` 記，
+
+      ⛔ 沒有把它拆成獨立的 rows —— 那會讓重點表的列數與原稿對不上。'
+  - label: 總結
+    value: '理性判斷、聰明識讀的方法：
+
+      (1)認清廠商的行銷手法，學會質疑傳播者的【　】。
+
+      (2)多方【　】網路上訊息的正確性。'
+    blanks:
+    - answer: 動機
+    - answer: 查證

@@ -1,0 +1,161 @@
+lesson_uid: L0118
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 淚眼婆娑
+  - 鎮日
+  - 呼天搶地
+  - 唸叨
+  - 惴惴不安
+  - 娓娓道來
+  - 深不可測
+  - 百感交集
+  - 晶瑩飽滿
+  - 鮮豔欲滴
+  - 啃嚙
+  - 大限
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 淚無鍾鎮日經之禮方點
+  - 鄙眼走精湛娓娓道來布
+  - 態舉婆輕膨淺大臨天湊
+  - 欲貧無娑啃以合限晶悄
+  - 呼天搶地嚙泫然欲瑩落
+  - 智萬核破通雕百廣飽補
+  - 唸緣惴歲貨眠感群滿老
+  - 叨技惴終雕條交素昧平
+  - 了深不可測葉集終一目
+  - 斑斑安經拜濟鮮豔欲滴
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 鎮日
+    cells:
+    - - 1
+      - 4
+    - - 1
+      - 5
+    direction: horizontal
+  - word: 淚眼婆娑
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 2
+    - - 3
+      - 3
+    - - 4
+      - 4
+    direction: diagonal_down_right
+  - word: 娓娓道來
+    cells:
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    - - 2
+      - 9
+    direction: horizontal
+  - word: 大限
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 8
+    direction: diagonal_down_right
+  - word: 啃嚙
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 5
+    direction: vertical
+  - word: 晶瑩飽滿
+    cells:
+    - - 4
+      - 9
+    - - 5
+      - 9
+    - - 6
+      - 9
+    - - 7
+      - 9
+    direction: vertical
+  - word: 呼天搶地
+    cells:
+    - - 5
+      - 1
+    - - 5
+      - 2
+    - - 5
+      - 3
+    - - 5
+      - 4
+    direction: horizontal
+  - word: 百感交集
+    cells:
+    - - 6
+      - 7
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    direction: vertical
+  - word: 唸叨
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    direction: vertical
+  - word: 惴惴不安
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    - - 9
+      - 3
+    - - 10
+      - 3
+    direction: vertical
+  - word: 深不可測
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  - word: 鮮豔欲滴
+    cells:
+    - - 10
+      - 7
+    - - 10
+      - 8
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  geometry_check: '全檔 13 個 roundRect 錨點，找字這一頁 12 個在格子裡（其中「惴」那格有兩個，
+
+    對應「惴惴不安」與「深不可測」交叉），與 12 條 answer_paths 相同。
+
+    第 13 個是紙外殘留：positionH relativeFrom=rightMargin、posOffset 5.76in，
+
+    加上 rightMargin 起點 7.27in ＝ 距頁左 13.03in，超過 A4 頁寬 8.27in，從未印出來；
+
+    旁證是它的框線寫死 srgb E97132，其餘 12 個都用佈景色 accent2。'

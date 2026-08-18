@@ -5,7 +5,8 @@
 
 ## 現在在哪
 
-**51 / 175 課**已抽取，七道門全綠。分支 `fix/issue-2736-truth-l0072`，PR #2739。
+**八道門全綠。** 分支 `fix/issue-2736-truth-l0072`，PR #2739。
+課數不寫在這裡（抬頭的數字一定會過期）—— 跑下面那條指令看。
 
 ```bash
 cd /Users/young/project/clp-2736
@@ -25,10 +26,26 @@ python3 scripts/build_progress_table.py              # 重生成進度表
 | 載體 | 舊管線 | 實測 |
 |---|---|---|
 | DOCX 文字流 | 讀，但漏文字方塊 | 175/175 課有文字方塊，中位 64 個/課 |
-| DOCX 圖形層（☑ 勾選答案、橘圈） | **讀不到** | `☑` 在文字流出現 0 次的課：**169/175** |
+| DOCX 圖形層（橘圈、手繪連線、疊印壓掉的表格）| **讀不到** | 見下 |
 | DOCX 版面關係（☞ 錨點、印刷段號） | 誤當索引 | #2720 |
 
-所以答案（教師版的紅色 ☑）**只有看圖才拿得到**，這就是多模態存在的理由。
+### ⚠️ 這裡原本寫錯了一句，而且是最關鍵的那句
+
+原文寫「`☑` 在文字流出現 0 次的課：169/175」→「所以答案只有看圖才拿得到，
+這就是多模態存在的理由」。**那句話量錯了東西** —— 它量的是字面字元 `☑`，
+而勾選在 DOCX 裡編碼成 `<w:sym w:font="Wingdings" w:char="F0FE"/>`（沒有 `w:t`）。
+
+全庫實測：**157/175 份用 `w:sym F0FE`（共 1807 個），字面 `☑` 出現 0 份。**
+換句話說，**多數課的勾選就在 `document.xml` 裡**，grep 得到。
+
+→ 找勾選一律 `grep 'w:char="F0FE"'` **搭配**讀圖。多模態仍然必要，但理由要換成準的：
+
+- **圖補 XML 的洞**：橘色圈選、手繪連線、「圈住第幾個」這種位置型答案，文字層沒有
+- **XML 補圖的洞**：LibreOffice 會把某些表格疊印壓掉，那幾格在 PDF 上完全看不到勾
+  （L0061 有 6 個 F0FE 是這樣救回來的）
+- 第三種載體：**`<w:bdr>` 非 auto 顏色的字元框線**（框選語詞），前兩種做法都讀不到
+
+⚠️ 這個更正 2026-08-18 才做。**如果你讀到別處還寫著「☑ 只有看圖才拿得到」，那是舊的。**
 
 ## 怎麼繼續抽
 
@@ -73,23 +90,34 @@ python3 scripts/traditional_only_gate.py --all
 python3 scripts/normalize_block_types.py --check
 python3 scripts/normalize_word_search.py --check
 python3 scripts/keypoints_shape_gate.py --all --legacy-ok
+python3 scripts/render_coverage_gate.py
+python3 scripts/orphan_key_gate.py
 python3 scripts/sot_drift_check.py
 cd backend && python -m pytest specs/ -q
 ```
 
+⚠️ **`pytest specs/` 一定要跑。** 我有一輪的派工清單只列了 gate script 沒列它，
+於是有課的 spec 契約紅著交上來（`single needs >=2 options`），而八道門全綠。
+
 ⚠️ 有一次我在 worker 還在寫檔的當下跑閘門，讀到半寫的檔案報 FAIL。**重跑就好**。
 
-## 七道門各管什麼、看不到什麼
+## 八道門各管什麼、看不到什麼
 
 | 門 | 抓什麼 | **看不到什麼** |
 |---|---|---|
 | `verbatim_gate.py` | 潤稿、看錯字形、改到原稿 | **漏抄**（少一段，剩下的字還是對的）|
-| `coverage_gate.py` | 整段課文沒抽到 | 課文以外的漏抄 |
-| `traditional_only_gate.py` | 照 PDF 抄到被字型換掉的字形 | 圖上的字（`text_carrier: image`）|
-| `normalize_block_types.py` | 發明型別、YAML 裸 `no:` 陷阱 | |
+| `coverage_gate.py` | 整段課文沒抽到 | 課文以外的漏抄；而且它的基準 v2 body 對某些課混入了攤平的聚光燈內容 → **它列的是候選不是判決** |
+| `traditional_only_gate.py` | 照 PDF 抄到被字型換掉的字形 | 圖上的字（`text_carrier: image`）、我方自己寫的評註（刻意跳過）|
+| `normalize_block_types.py` | 發明型別、YAML 裸 `no:` 陷阱 | 比 block 高一層的東西 |
 | `normalize_word_search.py` | 找字座標轉錯 | |
 | `keypoints_shape_gate.py` | 重點表畫不出東西（空表格）| |
-| `render_coverage_gate.py` | 型別沒有對應元件 | |
+| `render_coverage_gate.py` | 型別沒有對應元件 | 資料沒進 v3 的東西（沒被渲染就看不到）|
+| **`orphan_key_gate.py`** | **top-level key 沒有人搬 → 整節靜默消失** | |
+
+第八道 2026-08-18 新增。起因是一個 worker 把「知識補給站」寫成 `supplement`
+（搬運表叫 `resources`）→ 整節被丟掉，**而前七道全綠**。掃全庫發現同一個形狀
+影響 15 課 4 個 key。沒有一道舊門在看那一層：逐字門驗「寫下來的對嗎」、
+覆蓋率門比課文段落、型別門看 block 的 `type`（低一層）、渲染門只看得到已進 v3 的資料。
 
 **新增門的時候要問「它看不到什麼」，不是「它看得到什麼」**。這一輪抓到的三個
 「所有閘門都綠但東西是壞的」，共通形狀是**壞掉的東西剛好在每道門的背面**。
@@ -133,12 +161,20 @@ cd backend && python -m pytest specs/ -q
 
 **回頭逐格取字確認**，不要把座標塞進去湊數。
 
-⚠️ 我試過把「roundRect 數 ≠ 路徑數就警告」做成自動檢查，**不成立**：
-50 課裡 14 課會噴警告而且數字毫無意義（26 vs 10、27 vs 14），因為 `roundRect`
-在 DOCX 裡到處都是不只找字圈；用橘色過濾也救不了。詳見
-`scripts/normalize_word_search.py` 檔尾那段說明。
-要做對需要真正的幾何解算（解析每個 shape 的錨點與尺寸、只認落在格子矩形內的），
-那是獨立的一份工作。
+⚠️ 我一度寫「roundRect 數 ≠ 路徑數就警告」**不成立、要放棄** —— 那個結論
+**2026-08-18 已被推翻一半**，正確版在 SKILL.md「個數只能當單向警報」那節：
+
+1. 只數 `<wp:anchor>` 裡的 roundRect（不是全文件，全文件到處都是所以才會噴 26 vs 10）
+2. 扣掉**錨在紙外**的殘留（`positionH` 的基準加回去換算超過頁寬 7563600 EMU）
+3. 只有 **`紙上 roundRect > 路徑數`** 一個方向算警報；反向什麼都不代表
+   （圈選常用別種圖形畫，roundRect 不是全部）
+
+17 課回測：4 課相等、13 課少於、**0 課多於**。沒有第 2 步的話 L0069／L0061／L0035
+都會誤報 —— 那正是當初讓我放棄的雜訊。
+
+⚠️ 而第 2 步也有邊界（w3 在 L0068 測出來）：溢出有兩種，posOffset 只認得
+「錨點被放到紙外」，認不得「錨點位移正常但掛在儲存格裡被排版推出去」——
+後者只有像素驗得到。**判準沒命中不代表沒有殘留。**
 
 ### 🔴 有一課轉不出 PDF（L0028）
 
@@ -147,6 +183,17 @@ LibreOffice 26.2.2.2 對它 99% CPU 跑到逾時，換 ODT 中介一樣。正向
 `w:bdr` 抓框選語詞，並**先拿已知會過的課驗證方法可信**才用。仍缺找字遊戲的圈選路徑。
 
 **L0028 與 L0029 在重跑清單上**（等 PDF 轉得出來補圈選 / 手繪連線）。
+
+### 🔴 L0084 連續燒掉兩個 worker（content filter）
+
+`7年級/G7-L16長大後，我才讀懂〈夏夜〉…docx`（文字層 7774 字）。
+兩個不同的 worker 拿到它都以 `API Error: Output blocked by content filtering policy`
+結束 —— 一個交完前兩課死在它身上，一個一課都沒交。**共同因子只有這一課，不是隨機。**
+
+⛔ **不要再原樣派給第三個 worker**，那只會再燒一個。還沒查明是哪一段觸發，
+可能的做法（都未驗證）：分頁抽（一次讀 2~3 頁而不是整課）、或由工頭自己逐頁處理。
+
+**L0084 在重跑清單上。**
 
 ### ⚠️ 判準錯的門比沒有門更糟
 
@@ -248,7 +295,7 @@ w4，其餘五個手上都還有找字課，補推才齊）。
 8. 文字一律以 document.xml 為準（PDF 的簡體是字型代換的假象）
 9. 轉檔走 `scripts/docx_to_pdf.sh`，不要自己敲 soffice
 
-## 交件前七道門全跑（貼實際輸出）
+## 交件前八道門 + `pytest specs/ -q` 全跑（貼實際輸出）
 [見上方閘門清單]
 
 不 commit、不 push、不改 scripts/ frontend/ backend/app/。
