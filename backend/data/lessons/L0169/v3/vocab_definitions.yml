@@ -1,0 +1,72 @@
+lesson_uid: L0169
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    精湛、紮實、固然、祕訣、
+
+    碳水化合物、輸人一截、
+
+    不妨、鹽漬、突如其來、
+
+    照表操課、馬虎、本錢。'
+  word_bank:
+  - 精湛
+  - 紮實
+  - 固然
+  - 祕訣
+  - 碳水化合物
+  - 輸人一截
+  - 不妨
+  - 鹽漬
+  - 突如其來
+  - 照表操課
+  - 馬虎
+  - 本錢
+  answers_printed: true
+  answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
+  items:
+  - index: 1
+    definition: 發生得很突然，讓人來不及反應。
+    answer: 突如其來
+  - index: 2
+    definition: 雖然。
+    answer: 固然
+  - index: 3
+    definition: 能讓事情成功的小方法或關鍵技巧。
+    answer: 祕訣
+  - index: 4
+    definition: 穩固、結實，此形容內容充實。
+    answer: 紮實
+  - index: 5
+    definition: 比別人差一些，落後對方。
+    answer: 輸人一截
+  - index: 6
+    definition: 依照固定的計畫或流程來做事情。
+    answer: 照表操課
+  - index: 7
+    definition: 表示可以試試看，用來表達建議。
+    answer: 不妨
+  - index: 8
+    definition: 一種主要的營養素，像是飯、麵、糖類等，是提供能量的來源。
+    answer: 碳水化合物
+  - index: 9
+    definition: 能用來達成目標的資源、條件或優勢。
+    answer: 本錢
+  - index: 10
+    definition: 技藝高明、熟練。
+    answer: 精湛
+  - index: 11
+    definition: 流汗後留下的白色汗漬。
+    answer: 鹽漬
+  - index: 12
+    definition: 做事隨便、不仔細，常出錯。
+    answer: 馬虎

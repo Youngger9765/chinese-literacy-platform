@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0162",
+  "catalog_slot": "文-L7",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 1,
+  "notes": "三課裡唯一有導讀（intro_guide）的。答案三種載體混用：F0FE 只有 2 個（數 ☑ 對本課幾乎沒有效力）、橘字 run 層 0 個/解 rStyle 後 82 個、以及文字層的字母 V（判斷句表格 7 格）。找一筆勘誤 E1：原文印「與汝南張元伯為友。劭字元伯」，用「字」介紹一個從未出現的本名，句子自己不通；同檔另兩處（句子比對、古文今譯）都作「張劭」，《後漢書》原文亦作張劭。retry 1 次：我把自我挑戰的策略流程行少打一個箭號（寫成兩個），逐字門抓到 —— 改成直接從 dump 取原字串，不手打。另查證：全檔紅色 srgbClr 0 個、roundRect 0 個（遞迴 wps:wsp 數）、無字數欄，所以紅線紙外殘留與六條字數口徑對本課都不適用；文字層 2 個 ✓(U+2713) 是「五 閱讀理解」標題圖示的裝飾（Choice/Fallback 兩份副本），不是答案。"
+}

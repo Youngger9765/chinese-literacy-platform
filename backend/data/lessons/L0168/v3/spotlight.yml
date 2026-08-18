@@ -1,0 +1,172 @@
+lesson_uid: L0168
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 身體覺察與照護
+  blocks:
+  - type: concept_box
+    text: 看完阿哲的故事，我們也可以回到自己的日常想一想──我們，真的有「顧好身體」嗎？在成為身體的好夥伴之前，就像交新朋友一樣，我們可以先帶著好奇的眼光去認識他。透過觀察、體驗與小小的練習，讓我們一起傾聽身體的聲音，一起更認識這位默默陪著你的好夥伴，也更了解適合自己的放鬆和休息方式。
+  - type: guide
+    text: '◎小試身手：
+
+      練習一：身體有些小習慣、小動作是我們平常沒有發覺的，請根據題目觀察看看，並記錄下來。'
+  - type: single
+    prompt: 雙手交叉放在胸前，哪一隻手臂在外側？
+    options:
+      1: 右手
+      2: 左手
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: single
+    prompt: 翹腳坐著，通常是哪一腳在上方？
+    options:
+      1: 右腳
+      2: 左腳
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: single
+    prompt: 聳肩時，哪邊比較容易抬高？
+    options:
+      1: 右肩
+      2: 左肩
+      3: 一樣容易
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: single
+    prompt: 輕輕轉頭看右邊、再看左邊，哪一邊轉得比較順？
+    options:
+      1: 右邊
+      2: 左邊
+      3: 一樣順
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: single
+    prompt: 雙腳自然放地面，感覺哪一隻腳踩得比較實？
+    options:
+      1: 右腳
+      2: 左腳
+      3: 一樣踏實
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: single
+    prompt: 感受一下臀部與椅子接觸的感覺，觀察身體重量放在哪一邊比較多？
+    options:
+      1: 右半邊
+      2: 左半邊
+      3: 一樣多
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: free_text
+    prompt: '※好奇的眼光是重新認識身體的第一步，用一句話寫下你對身體的發現與觀察吧！
+
+      例如：我發現原來我的身體重心很常放在右邊
+
+      →我發現，原來______________________________________________'
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿橫線是空的
+  - type: guide
+    text: 練習二：在生活中，你都如何讓身體放鬆和休息呢？根據以下題目找出適合自己的方法。（可複選）
+  - type: multi
+    prompt: 1.當身體覺得「累」的時候，我最想──
+    options:
+      1: 躺下來或靠著椅背閉眼休息
+      2: 喝幾口水
+      3: 慢慢伸展或轉動肩膀、手、腳
+      4: 深呼吸幾次，讓身體放慢節奏
+      5: 讓身體靜止不動幾分鐘
+      6: 其他：＿＿＿＿＿＿＿＿＿
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+    errata_ref: E3
+    note: 原稿排成兩欄，左欄③④、右欄⑤⑥，依左到右閱讀會讀成 ③⑤④⑥（見 E3）；此處按編號排序
+  - type: multi
+    prompt: 2.當身體某個地方「卡卡的」或覺得緊繃時，我會──
+    options:
+      1: 起身走一走或換個姿勢
+      2: 抬手伸懶腰，做全身的伸展
+      3: 輕拍緊繃的部位
+      4: 用手按壓、按摩緊繃的部位
+      5: 轉一轉、動一動緊繃的部位
+      6: 其他：＿＿＿＿＿＿＿＿＿＿
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: multi
+    prompt: 3.當身體「沒力」的時候，我覺得他最需要──
+    options:
+      1: 睡一覺或小睡一下
+      2: 吃一點營養的東西
+      3: 安靜坐一會兒
+      4: 喝水或補充飲料
+      5: 不說話，只是慢慢呼吸
+      6: 和人互動、聊天
+      7: 其他：＿＿＿＿＿＿＿＿＿＿＿
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: multi
+    prompt: ４.如果給我 10 分鐘讓身體休息，我會選擇──
+    options:
+      1: 躺平閉眼
+      2: 慢走或伸展
+      3: 輕輕按摩肩膀或腿
+      4: 坐著深呼吸
+      5: 靜靜喝水、什麼都不做
+      6: 其他：＿＿＿＿＿＿＿＿＿＿＿
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+    note: 這一題的題號用全形「４.」，同節其他三題用半形「1./2./3.」，照原稿抄
+  - type: free_text
+    prompt: '※每個人都有適合自己的放鬆休息套餐，寫下你的觀察，也作為對身體「回信」，讓他知道你願意開始照顧他。
+
+      例如：我發現我的身體最需要睡眠，可能因為我太常熬夜了。
+
+      →我發現我的身體最需要＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿，
+
+      因為＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿。'
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿橫線是空的
+  - type: guide
+    text: ※如果你發現有些方法「越休息越累」，例如：滑手機時大腦需要不斷切換注意力、想休息但卻又擔心還沒做完的事情。那就代表需要換個方式，好好讓身體靜下來、讓心停下來。
+  - type: guide
+    text: 練習三：感受呼吸，呼吸時時刻刻陪伴著我們，透過一些小練習，也能幫助身體、大腦放鬆，休息。
+  - type: single
+    prompt: 觀察呼吸，數一數吸氣和吐氣的秒數，哪一個比較長？
+    options:
+      1: 吸氣
+      2: 吐氣
+      3: 一樣長
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: multi
+    prompt: '試試看「4-4-4呼吸法」：放鬆的坐在椅子上，吸氣時默數4秒，接著閉氣4秒，再吐氣4秒，重複三回合。
+
+      結束後，你的身體感覺(可複選)：'
+    options:
+      1: 放鬆
+      2: 平靜
+      3: 煩躁
+      4: 焦慮
+      5: 沒感覺
+      6: 其他：______
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  - type: free_text
+    prompt: '※呼吸是我們與身體連結的小幫手，也是放鬆休息的好方法，在這個練習中，你最喜歡哪一個環節？為什麼呢？
+
+      例如：我最喜歡吸氣的時候，因為可以讓我覺得充滿力量。
+
+      →我最喜歡（ □①吸氣　□②閉氣　□③吐氣 ）的時候，
+
+      因為______________________________________________________'
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿三個□都沒有勾選
+    note: 這一題把選項印在填答句中間，三個□都是空的，所以顯示版保留 □ 不會洩漏答案
+  - type: free_text
+    prompt: '※聽聽身體的聲音，如果吐氣可以幫助你帶走一些痠痛、緊繃，你最希望哪些地方的不舒服可以被帶走呢？
+
+      例如：我最希望可以帶走膝蓋的不舒服，因為他很常發炎受傷。
+
+      →我最希望可以帶走__________________________的不舒服，
+
+      因為______________________________________________________'
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿橫線是空的
