@@ -1,0 +1,29 @@
+lesson_uid: L0109
+version_id: v3
+title: 球場上的另類指揮家
+catalog_slot: G8-L11
+sections_present:
+- 'no': 一
+  name: 讀全文—做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 推論策略——推論主要論點與作者意圖
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 8年級/G8-L11球場上的另類指揮家（推論策略-推論主要論點與作者意圖）.docx
+  docx_md5: md5-12:8e990f416b0f

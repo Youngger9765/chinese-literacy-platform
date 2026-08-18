@@ -1,0 +1,81 @@
+lesson_uid: L0122
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 區區
+    B: 對峙
+    C: 蔓延
+    D: 勢單力薄
+    E: 哀鴻遍野
+    F: 懸殊
+    G: 肆虐
+    H: 抗體
+    I: 不堪一擊
+    J: 撕心裂肺
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  unused_options:
+  - B
+  - G
+  items:
+  - index: 1
+    stem: (  )一場小病竟然拖了這麼久，真令人煩惱。
+    answer: A
+  - index: 2
+    stem: 他的論點漏洞百出，一再被大眾質疑，簡直是(  )。
+    answer: I
+  - index: 3
+    stem: 網路上的謠言正在(  )，令人擔憂。
+    answer: C
+  - index: 4
+    stem: 在國際談判中，我國代表團人數稀少，與其他大國相比顯得(  )，談判過程格外艱難。
+    answer: D
+  - index: 5
+    stem: 戰火過後，百姓流離失所、(  )，情況十分慘重。
+    answer: E
+  - index: 6
+    stem: 這場比賽雙方實力(  )，還沒開打便可預見結果。
+    answer: F
+  - index: 7
+    stem: 打過疫苗，身體產生(  )，感染新冠病毒的機率才會下降。
+    answer: H
+  - index: 8
+    stem: 她聽到媽媽過世的消息，忍不住(  )的哭了起來。
+    answer: J
+  word_discrimination:
+    title: ◎牛刀小試
+    instruction: 「肆虐」與「蔓延」，勾選出最適合填入空格的詞語。(單選)
+    option_bank:
+      A: 肆虐
+      B: 蔓延
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層）；「例」那一列的 ☑ 是**黑色**，屬原稿印的示範
+    example:
+      label: 例
+      stem: 你覺得哪一個詞的破壞性比較強？
+      answer: A
+      is_printed_example: true
+    items:
+    - index: 1
+      stem: 強颱(   )台灣，造成嚴重災害。
+      answer: A
+    - index: 2
+      stem: 流感病毒在社區中逐漸(   )。
+      answer: B
+    - index: 3
+      stem: 豪雨來襲，山區水患(   )，村民被迫撤離。
+      answer: A
+    - index: 4
+      stem: 疾病快速(   )，學校緊急停課。
+      answer: B
+    tip:
+      title: 小提點
+      text: '「肆虐」與「蔓延」這兩個詞都與事物的擴散有關，但著重的點不同。
+
+        肆虐：指災害、疾病或負面影響的猛烈擴散，帶有破壞性和嚴重程度。
+
+        →這個詞常用來形容災害、戰爭或病毒快速侵害的狀況。
+
+        蔓延：強調範圍逐漸擴大，但不一定帶有劇烈破壞性。
+
+        →這可以用來描述疾病、思想、影響力等的擴散過程。'

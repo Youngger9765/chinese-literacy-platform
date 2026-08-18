@@ -1,0 +1,17 @@
+lesson_uid: L0126
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 戲劇童年溫暖閱讀人生  林玫伶校長
+    duration: (4:38)
+    source: 林玫伶
+    has_qr: true
+  - index: 2
+    title: 熱線追蹤-台灣電影院 80年起落
+    duration: (10:11)
+    source: TTV台視新聞節目
+    has_qr: true

@@ -1,0 +1,276 @@
+lesson_uid: L0135
+version_id: v3
+section_no: 三
+spotlight:
+  strategy_name: 圖文表整合閱讀策略
+  title_note: '橫幅印「圖文表整合閱讀策略」，但第一頁的目標策略框與總表都寫「文圖表整合閱讀策略」。
+
+    兩種寫法在同一份文件並存，各自照印出來的抄。'
+  blocks:
+  - type: concept_box
+    text: '這篇文章裡，文字、圖片和表格都提供了重要訊息。閱讀時，不能只看文字，也不能只看圖片或表格，而要先注意文字怎麼提醒你看圖表、怎麼理解圖表的功能，再整合文字、圖片和表格——把相關訊息連起來想。
+
+      這一課我們用下面4個步驟，練習圖文表整合閱讀：
+
+      ❶先文字——找出要看哪一張圖或表，並抓出這段文字的重點
+
+      ❷後圖表——判斷各圖表提供了什麼訊息
+
+      ❸文圖表對照——找出文字與圖表相同或互相補充的訊息
+
+      ❹整合推論——比較、連結各項資訊之間的關係'
+  - type: guide
+    text: 熱身練習：第一段 vs 圖一
+  - type: single
+    prompt: 1.圖一最主要提供哪一類訊息？（單選）
+    options:
+      1: 兩種八哥外形相近的整體印象
+      2: 兩種八哥近年的族群變化情形
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: single
+    prompt: 2.讀完第一段後，請你找出和圖一最相關的文字。（單選）
+    options:
+      1: 白尾八哥的數量已經遠遠超過臺灣原生種的臺灣冠八哥。
+      2: 這兩種八哥外形十分相似，不容易單靠外表一眼分辨。
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 練習一：第二段 vs 表一
+  - type: guide
+    text: '步驟❶：先文字——抓出這段文字的重點
+
+      小祕訣：當讀到「表一比較了……」時，就要轉去看表一，並問自己：「這段要我從表一找什麼？」'
+  - type: free_text
+    prompt: 1.請把第二段文字中，要你看表的地方畫線或圈起來
+    no_correct_answer: true
+    answer_carrier: 學生在課文上畫記，原稿無示範答案
+  - type: single
+    prompt: 2.這段要你從表一看什麼？（單選）
+    options:
+      1: 八哥的外形習性等特徵
+      2: 八哥的數量變化
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: '步驟❷：後圖、表——再看表一，讀懂表一提供了什麼訊息
+
+      小祕訣：看表時，可以依序進行：
+
+      ①看表題：這張表在談什麼？
+
+      ②找比較對象：在比較誰和誰？
+
+      ③找比較項目：最左邊每一列在比什麼？
+
+      ④沿同一列橫向比較：兩個對象有什麼相同或不同？
+
+      ⑤看單位與註解：數字或符號代表什麼？'
+  - type: free_text
+    prompt: 1.表一比較的兩個對象是：【　】和【　】。
+    prompt_source_text: 1.表一比較的兩個對象是：  白尾八哥         和  臺灣冠八哥        。
+    blanks:
+    - answer: 白尾八哥
+    - answer: 臺灣冠八哥
+    answer_carrier: 橘色手寫體填在橫線上（教師版答案），文字流有此資訊
+  - type: single
+    prompt: 2.表一把資料分成哪兩大類？
+    options:
+      1: 相同處與相異處
+      2: 原因與結果
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+    note: 兩個選項印在同一行，沒有 ①② 編號，只有 ☑／□ 前導
+  - type: single
+    prompt: 3.表一主要提供的是哪一類訊息？（單選）
+    options:
+      1: 白尾八哥和臺灣冠八哥近年的族群變化的調查結果
+      2: 白尾八哥和臺灣冠八哥外形、習性等特徵的異同
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: '步驟❸：文圖表對照——從圖表中找到和文字對應的資訊
+
+      在表一找到對應文字說明的訊息，必要時回頭看圖一，看看表格怎麼幫助你更了解文字在說什麼。'
+  - type: multi
+    prompt: 1.第二段說兩種八哥「外表相似」，表一中哪些資料可支持這句話？（複選）
+    options:
+      1: 全身大致為黑色
+      2: 身形大小接近
+      3: 常在地面走動覓食，吃昆蟲、果實
+      4: 都屬八哥屬、留鳥
+    answers:
+    - 1
+    - 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）×2
+  - type: multi
+    prompt: 2.第二段說「只要觀察嘴喙和尾羽的顏色，就能分辨牠們」，表一中的哪些資料正好對應這句話？（複選）
+    options:
+      1: 嘴喙顏色
+      2: 尾羽顏色
+      3: 築巢地點
+      4: 適應都市環境
+    answers:
+    - 1
+    - 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）×2
+  - type: single
+    prompt: 3.第二段提到臺灣冠八哥又稱「臺灣八哥」，表一中的哪一項資料和這句話最有關？（單選）
+    options:
+      1: 冠羽是否明顯
+      2: 外來種／原生種
+      3: 族群數量
+      4: 保育身分
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: single
+    prompt: 4.讀表一，對理解第二段有什麼幫助？（單選）
+    options:
+      1: 表一只是把第二段重新整理一次，並沒有幫助我們更清楚理解這段意思。
+      2: 表一幫助我們更清楚看出，兩種八哥外形相近，但仍可從特徵和習性加以分辨。
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 步驟❹：整合推論——比較、連結文圖表各項資訊之間的關係
+  - type: single
+    prompt: 1.下面哪一句最能把第二段和表一的意思一起說清楚？（單選）
+    options:
+      1: 兩種八哥雖然外形相近，但只要知道牠們同屬八哥屬，就能解釋後來族群數量不同的原因
+      2: 兩種八哥雖然外形相近，但仍可從嘴喙、尾羽等特徵區分，表一也進一步比較了牠們的習性差異
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 練習三：第三段 vs 表二
+    errata_ref: E2
+  - type: guide
+    text: 步驟❶：先讀文字——抓出這段的重點
+  - type: free_text
+    prompt: 1.請把第三段文字中，要你看表的地方畫線
+    no_correct_answer: true
+    answer_carrier: 學生在課文上畫記，原稿無示範答案
+  - type: single
+    prompt: 2.第三段要你看表的什麼？（單選）
+    options:
+      1: 兩種八哥的外形與習性
+      2: 兩種八哥的數量變化
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 步驟❷：再看表——讀懂這張表告訴我們什麼訊息
+  - type: single
+    prompt: 1.表二主要提供的是哪一類訊息？（單選）
+    options:
+      1: 近年對兩種八哥族群與分布的調查結果
+      2: 白尾八哥和臺灣冠八哥習性與食物的異同
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: '步驟❸：文表對照——從表中找到和文字對應的資訊
+
+      在表二找到對應文字說明的訊息，看看表格怎麼把第三段說的內容整理得更清楚。'
+  - type: multi
+    prompt: 1.第三段說「白尾八哥都呈現較快的擴張或較高的出現量」，表二中的哪些資料可以支持這句話？（複選）
+    options:
+      1: 近年數量變化（2009-2020）
+      2: 出現地點數／總調查地點數（2009-2021）
+      3: 2021年看得到的地點數
+      4: 2018年花蓮調查結果
+    answers:
+    - 1
+    - 2
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）×4 —— 四個選項全部勾選
+    errata_ref: E3
+  - type: single
+    prompt: 2.讀表二時，看到「84／584」旁邊有「註2」，到表格下方看註解有什麼幫助？（單選）
+    options:
+      1: 註2會說明這個寫法的意思，幫助我們理解表格內容。
+      2: 註2會補充八哥的外形特徵，幫助我們分辨兩種八哥。
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: single
+    prompt: 3.第三段說「有些地方甚至已經看不到臺灣冠八哥的身影了」，表二中哪一項最直接支持這句話？（單選）
+    options:
+      1: 白尾八哥成長250%
+      2: 2021年看得到的地點數：23個地點
+      3: 2018年花蓮調查結果：0隻
+    answer: 3
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: single
+    prompt: 4.作者呈現表格後，通常會在文字中說明這張表的重要訊息。請回到第三段，判斷哪一句最能統整表二最重要的訊息？（單選）
+    options:
+      1: 表二則說明了兩種八哥近年族群數量的變化
+      2: 從表二可知，不論是整體數量、出現的地點，還是在部分地區的觀察結果，外來種白尾八哥都佔優勢
+      3: 當初白尾八哥被引進臺灣時，牠們的數量很少，臺灣冠八哥才是隨處可見的常客。
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 步驟❹：整合推論——比較、連結文圖表各項資訊之間的關係
+  - type: single
+    prompt: １.下面哪一句最能把「表一 ＋ 表二」的意思一起說清楚？（單選）
+    options:
+      1: 表二說明兩種八哥近年的數量差不多，而表一只是補充牠們名稱、習性上的不同。
+      2: 表二告訴我們兩種八哥近年的族群差距很大，而表一提供了進一步思考原因的重要線索。
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: single
+    prompt: ２.你發現了嗎，讀第三段不能只看表二，還要回頭看表一，是因為：
+    options:
+      1: 表二讓我們知道哪一種八哥變多、哪一種變少；表一幫助我們思考為什麼會這樣。
+      2: 表二幫助我們思考為什麼會這樣；表一讓我們知道哪一種八哥變多、哪一種變少。
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+    note: 這兩題的題號用全形「１.」「２.」，與同節其他題的半形「1.」不同，照原稿抄
+  - type: guide
+    text: 練習四：第四段 vs 表一、二
+  - type: guide
+    text: 步驟❶：先讀文字——抓出這段的重點
+  - type: single
+    prompt: 1.這段要你「回到表一」回答什麼問題？（單選）
+    options:
+      1: 八哥的外形與習性
+      2: 根據表一試著推論表二所說的、兩種八哥族群變化的原因
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 步驟❷：整合推論——比較、連結第四段文字及表一、二資訊之間的關係
+  - type: multi
+    prompt: 1.表一呈現的哪兩項八哥特徵差異可能和都市化最有關？
+    options:
+      1: 冠羽是否明顯
+      2: 是否怕人
+      3: 是否利用人造設施築巢
+      4: 是否為外來種
+    answers:
+    - 2
+    - 3
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）×2
+  - type: single
+    prompt: 2.根據上題的兩項特徵，哪一種八哥可能較容易適應都市環境？
+    options:
+      1: 白尾八哥
+      2: 臺灣冠八哥
+    answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: free_text
+    prompt: 最後，你怎麼回應第四段結束時提出的問題呢？
+    note: 下面的答句是接著這一行印的統整填空，答案已印在教師版
+  - type: free_text
+    prompt: 答：白尾八哥【　】，又【　】，適應都市環境較臺灣冠八哥強、比較容易生存，因此族群逐漸擴張。
+    prompt_source_text: 答：白尾八哥  較不怕人      ，又   較會利用人造設施築巢              ，適應都市環境較臺灣冠八哥強、比較容易生存，因此族群逐漸擴張。
+    blanks:
+    - answer: 較不怕人
+    - answer: 較會利用人造設施築巢
+    answer_carrier: 橘色手寫體填在橫線上（教師版答案），文字流有此資訊
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 請你勾選下面５項，檢查自己是否學會閱讀圖文表文章的方法。
+    items:
+    - 1.我會找出文章裡要看圖表的地方。
+    - 2.我會從圖表中找到和文字對應的訊息。
+    - 3.我會讀圖、表的註解，也知道註解的功能。
+    - 4.我會把文圖表合起來想，判斷它們的重點。
+    - 5.我知道圖片和表格的功能不同：本文圖片先提供整體印象，表格能幫助我把訊息看得更清楚。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿五個□全部沒有勾選

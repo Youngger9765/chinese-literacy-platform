@@ -1,0 +1,49 @@
+lesson_uid: L0123
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（十三   ）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 13
+  end: 第 16 段結束（＝課文結束）
+  printed_char_marks:
+  - 27
+  - 56
+  - 82
+  - 109
+  - 138
+  - 167
+  - 196
+  - 225
+  - 254
+  - 270
+  - 287
+  - 314
+  - 343
+  - 361
+  char_marks_cover_paragraphs:
+  - 13
+  - 14
+  - 15
+  - 16
+  span_confidence: high
+  char_marks_note: "四個段界值全部對得上，起點是第 13 段、一路數到課文結束：\n  段13 → 82  （＝ 文字層裸算 82，完全吻合）\n  段14 → 270－82 ＝ 188（裸算 190；本段有「80」「5」兩串數字與一組刪節號「……」）\n  段15 → 287－270 ＝ 17 （＝ 裸算 17，完全吻合）\n  段16 → 361－287 ＝ 74 （＝ 裸算 74，完全吻合，也是最後一個數字）\n段14 差的那 2 個字，用「非中文的連續字串各算 1 個字」可以解釋\n（刪節號 2→1 省 1、「80」2→1 省 1、「5」1→1 省 0，合計省 2）。\n⚠️ 但**同一個模型套到 L0116 的段3 會多算 1**（見該課 char_marks_note），\n   所以我不把它寫成通則，只記錄本課的觀測值。\n第 2 條（註腳）本課不必套：footnotes.xml 是空的。\n本課字數欄**數到最後一段**，沒有提早停止。"
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_instruction: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 爸爸九十歲生日那天，我們把當年他阿公用來養家那把鏽跡斑斑的老斧頭裱裝加框，送給爸爸當禮物。斧頭旁的卡片上有爸爸顫巍巍的筆跡：「紀念那個貧無立錐，卻彼此相愛的日子。」
+  start_text: 爸爸九十歲生日那天，我們把當年他阿公用來養家那把
+  extent_chars: 82
+  source: derived-from-body

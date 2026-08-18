@@ -205,24 +205,16 @@ key_reading_flagged:
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
 
 mcq_options_emitted_as_guides:
-  # 2026-08-18：L0033、L0054、L0067、L0070、L0100 經多模態重抽已修復，從 6 降到 2。
+  # 2026-08-18：**這個缺口已經清空**。原本 6 課（L0033 L0054 L0067 L0070 L0100
+  # L0122 L0129，兩份清單合計）全部經多模態重抽修好，選項正確落在 options。
   #
-  # ⚠️ 這份清單與 specs/test_spotlight_v2_spec.py 的 KNOWN 集合**從建立起就不同步**：
-  # 這裡列 L0067，那裡列 L0070，兩邊各漏對方一課。兩課都在 2026-08-18 重抽後修好，
-  # 才順勢對齊。兩份各自維護的清單會這樣漂移 —— 之後只從 spec 那一份長出來。
-  count: 2
+  # 每一課都是 specs/test_spotlight_v2_spec.py 的斷言自己開火要求移除的
+  # （它把已知缺口寫成「斷言仍然壞」，修好就變紅），不是誰決定「算了」。
+  # 條目保留為紀錄，count 0 代表沒有待修的課。
+  count: 0
   what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。
-  not_introduced_by_the_reink: 這是抽取器既有的行為，二修語料上出現在 6 課；spec 的 mcq_leakage 閘本來就在測它，只是舊
-    spec 跑的是 7 課手抄樣本，剛好不含這 6 課。
-  lessons:
-  - lesson_uid: L0122
-    catalog_slot: G8-L2
-    title: 隱形的征服者
-    leaked_options: 1
-  - lesson_uid: L0129
-    catalog_slot: G8-L9
-    title: 「按讚」背後的真相
-    leaked_options: 1
+  resolved_2026_08_18: 多模態重抽（#2736）
+  lessons: []
 blocks_present_but_none_renderable:
   count: 11
   what: 這些課的 spotlight 只抽到 guide／figure／self_check，沒有 passage 也沒有 exercise —— 有指引文字，沒有要學的東西。

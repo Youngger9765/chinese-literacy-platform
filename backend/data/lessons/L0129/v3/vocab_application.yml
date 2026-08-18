@@ -1,0 +1,47 @@
+lesson_uid: L0129
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號。
+  option_bank:
+    A: 席捲
+    B: 自我價值
+    C: 起伏不定
+    D: 推播
+    E: 悵然若失
+    F: 備受矚目
+    G: 左右
+    H: 心緒
+  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  option_bank_note: '語詞框有 11 個語詞，但本大題的代號欄只列 8 個（沒有欲罷不能、演算法、過濾泡泡），
+
+    而且 8 個代號全部都被用到 —— 沒有 unused_options。'
+  items:
+  - index: 1
+    stem: 同儕的意見常常會(　)青少年的選擇與行為。
+    answer: G
+  - index: 2
+    stem: 受到外界評價影響時，人的情緒容易(　)，難以保持平靜。
+    answer: C
+    answer_printed_form_note: 原稿印全形Ｃ
+  - index: 3
+    stem: 這場球賽只差一分就能獲勝，離場時他（　），久久無法釋懷。
+    answer: E
+  - index: 4
+    stem: 老師提醒我：考差一次不代表你沒用，（　）不該只看成績。
+    answer: B
+  - index: 5
+    stem: 那支影片因為內容新奇，在短時間內(　)，被大量轉傳。
+    answer: F
+  - index: 6
+    stem: 這支影片在網路上爆紅，短時間內(　)各大平台。
+    answer: A
+  - index: 7
+    stem: 當你觀看某類廣告後，相關內容就會不斷被(　)到你的手機裡。
+    answer: D
+  - index: 8
+    stem: 接連看到許多負面消息後，他的(　)受到影響，整天難以平靜。
+    answer: H
+  items_note: '第 (3)(4) 題的括號原稿是**全形開頭、半形收尾**（「（ E　)」「（ B　）」），
+
+    第 (4) 題兩邊都是全形。這裡照原稿保留左右括號的形狀，只把答案字母抽掉。'

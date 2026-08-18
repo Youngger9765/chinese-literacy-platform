@@ -114,7 +114,10 @@ def test_mcq_options_are_not_emitted_as_guides(uid: str):
     # 2026-08-18：L0070 重抽後不再漏（那個沒有題幹的選項清單已掛回第二題），
     # 一併發現這個集合與 content_known_gaps.yaml 從建立起就不同步 —— 這裡有 L0070、
     # 那裡有 L0067，兩邊各漏對方一課。兩課都修好後對齊，之後以這一份為準。
-    KNOWN = {"L0122", "L0129"}
+    # 2026-08-18：L0122、L0129 也在重抽後不再漏 —— 這個清單清空了。
+    # 原本 6 課（L0033 L0054 L0067 L0070 L0100 L0122 L0129，兩份清單合計）全部由
+    # 多模態重抽修好，每一課都是這條斷言自己開火要求移除的，不是誰決定「算了」。
+    KNOWN: set[str] = set()
     leaked = count_mcq_option_guides(BY_UID[uid].get("blocks") or [])
     if uid in KNOWN:
         # Registered in content_known_gaps.yaml#mcq_options_emitted_as_guides. Asserted

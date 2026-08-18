@@ -1,0 +1,21 @@
+lesson_uid: L0133
+version_id: v3
+title: 看不見的兇手：以實驗破解肉湯腐敗之謎
+catalog_slot: G9-L12
+sections_present:
+- 'no': 一
+  name: 讀全文
+- 'no': 二
+  name: 知識補給站
+- 'no': 三
+  name: 閱讀聚光燈
+  subtitle: 圖文整合閱讀策略──看圖、找對應、整合文圖
+- 'no': 四
+  name: 文章重點表
+- 'no': 五
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 7
+  drive_path: 9年級/G9-L12看不見的兇手：以實驗破解肉湯腐敗之謎（圖文整合閱讀策略）.docx
+  docx_md5: md5-12:ec8135194d90

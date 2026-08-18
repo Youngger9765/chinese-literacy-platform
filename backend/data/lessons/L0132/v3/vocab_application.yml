@@ -1,0 +1,41 @@
+lesson_uid: L0132
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 望塵莫及
+    B: 鳳毛麟角
+    C: 咎責
+    D: 流行疫病
+    E: 刻板印象
+    F: 多巴胺
+    G: 罹患
+    H: 不言而喻
+  option_bank_note: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 4 題的代號印成全形（Ｈ），其餘半形
+  items:
+  - index: 1
+    stem: 政府正在採取措施來阻止這次(  )的擴散。
+    answer: D
+  - index: 2
+    stem: 這部電影打破了人們對性別的(  )，讓觀眾能重新思考。
+    answer: E
+  - index: 3
+    stem: 他100公尺爆發力實在太強了，衝線時，其他選手還(  )。
+    answer: A
+  - index: 4
+    stem: 看他如此慎重打扮，這場面試對他的重要性(  )。
+    answer: H
+  - index: 5
+    stem: 珍珠奶茶實在太吸引人了，能抗拒誘惑的青少年(  )，不易找到。
+    answer: B
+  - index: 6
+    stem: 老師提醒我們，討論問題的原因不是為了(  )，找出戰犯，而是為了避免再犯相同的錯誤。
+    answer: C
+  - index: 7
+    stem: 長期抽菸的人，(  )肺部疾病的風險會比較高。
+    answer: G
+  - index: 8
+    stem: 手機遊戲常用獎勵和提示音刺激大腦分泌(  )，讓人想一直玩下去。
+    answer: F

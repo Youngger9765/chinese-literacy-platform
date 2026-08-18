@@ -1,0 +1,136 @@
+lesson_uid: L0114
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 瀕危
+  - 坎坷
+  - 絕種
+  - 棲地
+  - 破碎化
+  - 疾駛
+  - 路殺
+  - 干預
+  - 植被
+  - 掠食者
+  - 補償機制
+  - 緩不濟急
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 扣摟坎坷陶張冰製葛路
+  - 我龍到公智絕天歡氣殺
+  - 落瀕緩機干種七棲緩馬
+  - 掠奪危直破碎化士不攔
+  - 食播破疾邱驚然港濟職
+  - 棲地經駛脊子干裁急址
+  - 咬及植其用不預柴禪獵
+  - 梧療被於掠所補償機制
+  - 生勝老沛喜食吾葉產補
+  - 極姜香去疾償者玩宏氣
+  answers_are_graphical: true
+  answer_paths:
+  - word: 坎坷
+    cells:
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 路殺
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 絕種
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    direction: vertical
+  - word: 瀕危
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 3
+    direction: diagonal_down_right
+  - word: 緩不濟急
+    cells:
+    - - 3
+      - 9
+    - - 4
+      - 9
+    - - 5
+      - 9
+    - - 6
+      - 9
+    direction: vertical
+  - word: 破碎化
+    cells:
+    - - 4
+      - 5
+    - - 4
+      - 6
+    - - 4
+      - 7
+    direction: horizontal
+  - word: 疾駛
+    cells:
+    - - 5
+      - 4
+    - - 6
+      - 4
+    direction: vertical
+  - word: 棲地
+    cells:
+    - - 6
+      - 1
+    - - 6
+      - 2
+    direction: horizontal
+  - word: 干預
+    cells:
+    - - 6
+      - 7
+    - - 7
+      - 7
+    direction: vertical
+  - word: 植被
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    direction: vertical
+  - word: 掠食者
+    cells:
+    - - 8
+      - 5
+    - - 9
+      - 6
+    - - 10
+      - 7
+    direction: diagonal_down_right
+  - word: 補償機制
+    cells:
+    - - 8
+      - 7
+    - - 8
+      - 8
+    - - 8
+      - 9
+    - - 8
+      - 10
+    direction: horizontal
+  answer_paths_note: '12 個目標語詞全部圈到，逐格套回 grid 都拼得回目標語詞，並與 PDF p11 的橘圈逐一核對一致。
+
+    干擾字：另有「掠」(4,1)＋「食」(5,1)（直的「掠食」但下一格是「棲」，湊不出「掠食者」）、
+
+    「緩」(3,3)、「干」(3,5)、「破」(5,3)、「疾」(10,5)、「償」(10,6)、「補」(9,10)。'

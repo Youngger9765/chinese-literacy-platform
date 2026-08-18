@@ -1,0 +1,159 @@
+lesson_uid: L0123
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 雕鏤
+  - 老態龍鍾
+  - 臨終
+  - 泫然欲泣
+  - 通貨膨脹
+  - 嫌棄
+  - 鏽跡斑斑
+  - 貧無立錐
+  - 素昧平生
+  - 經濟蕭條
+  - 走投無路
+  target_words_note: '灰框列 11 個語詞，比第三大題的「本課語詞」框多一個「嫌棄」（總表也只有 10 個）。
+
+    格子裡確實圈了 11 個，所以是原稿刻意多給，不是抄錯。'
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 雕鏤廣擴補智萬核破通
+  - 眠駭群各老新緣嫌棄貨
+  - 淺綿臨天湊態舉足輕膨
+  - 葉延終一目了龍手重脹
+  - 經之禮方點賀無鍾響日
+  - 濟中段鏽跡斑斑濟經拜
+  - 蕭星羅棋布鄙赤走精湛
+  - 條物素昧平生技投終雕
+  - 以合為貴悄欲貧無立錐
+  - 泫然欲泣落支離路素態
+  answers_are_graphical: true
+  answer_paths:
+  - word: 雕鏤
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    direction: horizontal
+  - word: 通貨膨脹
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 老態龍鍾
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 6
+    - - 4
+      - 7
+    - - 5
+      - 8
+    direction: diagonal_down_right
+  - word: 嫌棄
+    cells:
+    - - 2
+      - 8
+    - - 2
+      - 9
+    direction: horizontal
+  - word: 臨終
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 3
+    direction: vertical
+  - word: 經濟蕭條
+    cells:
+    - - 5
+      - 1
+    - - 6
+      - 1
+    - - 7
+      - 1
+    - - 8
+      - 1
+    direction: vertical
+  - word: 鏽跡斑斑
+    cells:
+    - - 6
+      - 4
+    - - 6
+      - 5
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 走投無路
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    - - 10
+      - 8
+    direction: vertical
+  - word: 素昧平生
+    cells:
+    - - 8
+      - 3
+    - - 8
+      - 4
+    - - 8
+      - 5
+    - - 8
+      - 6
+    direction: horizontal
+  - word: 貧無立錐
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    - - 9
+      - 10
+    direction: horizontal
+  - word: 泫然欲泣
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  geometry_check: '全檔 roundRect 錨點 12 個。扣掉 1 個紙外殘留 ＝ 紙上 11 個，與 11 條 answer_paths 相同，無警報。
+
+    紙外那個：`positionH relativeFrom="rightMargin" posOffset=+5.76in`（換算距頁左超過 A4 頁寬 8.27in）。
+
+    ⚠️ 紙上 11 個裡有 1 個框線硬寫死 srgb E97132（其餘 10 個用佈景色 accent2），但它位置正常、在紙內
+
+    —— 印證 SKILL 說的「硬寫死 E97132 只能當旁證」。
+
+    格子沒有跨頁（10 列都在 p11）；11 個目標語詞在格子裡都拼得回來，無錯字。
+
+    第 9 列第 8 欄的「無」同時屬於「走投無路」（直）與「貧無立錐」（橫），兩條路徑在該格交叉，
+
+    圖上看得到兩個框重疊，這是原稿如此。'
