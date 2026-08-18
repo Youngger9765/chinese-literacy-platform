@@ -1,0 +1,151 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 五
+keypoints:
+  title: 文章重點整理
+  instruction: 1.依據兩篇課文，完成下列表格
+  layout: matrix
+  columns:
+  - 項目
+  - 巨石陣
+  - 摩艾走路
+  columns_note: '原稿表頭第一格是**空白的**，只有第二、三欄印「巨石陣」「摩艾走路」。
+
+    第一欄的名字「項目」是本檔為了讓 row 的 key 對得上 columns 而取的，
+
+    原稿沒有印這兩個字（`columns` 不進逐字門，見 verbatim_gate 的 ANNOTATION_KEYS）。'
+  answer_carrier: 橘色手寫體（填空）＋ 紅色 ☑（勾選題，w:sym Wingdings F0FE）
+  rows:
+  - 項目: 發現時間
+    巨石陣: 【　】年
+    巨石陣_blanks:
+    - answer: '1130'
+    摩艾走路: 【　】年
+    摩艾走路_blanks:
+    - answer: '1722'
+  - 項目: 發現人
+    巨石陣: 一位英格蘭史學家
+    摩艾走路: 【　】
+    摩艾走路_blanks:
+    - answer: 羅格文船長
+  - 項目: 相同處
+    巨石陣: '1.介紹的主題都和【　】有關。
+
+      2.對於人們好奇的疑問，均提出【　】個假設。
+
+      3.謎團是否被解開'
+    巨石陣_blanks:
+    - answer: 石頭
+    - answer: '3'
+    巨石陣_choices:
+    - options:
+      - 是
+      - 否
+      answer: 2
+    巨石陣_choices_note: 原稿在選項後面還印一個「(勾選)」，那是作答方式提示不是選項
+    merged_note: 這一列在原稿是**跨兩欄合併**的（沒有分左右），內容整列共用
+  - 項目: 相異處(單選)
+    巨石陣: 石頭排列成【　】
+    巨石陣_blanks:
+    - answer: 圓形
+    摩艾走路: '石像背向（　）
+
+      面向（　）'
+    摩艾走路_choices:
+    - options:
+      - 海洋
+      - 島內
+      answer: 1
+    - options:
+      - 海洋
+      - 島內
+      answer: 2
+  - 項目: ''
+    巨石陣: 最上方巨石的方向為
+    巨石陣_choices:
+    - options:
+      - 橫向
+      - 直向
+      answer: 1
+    摩艾走路: 部分石像頭上最上方會加一塊
+    摩艾走路_choices:
+    - options:
+      - 帕洛
+      - 帽子
+      answer: 2
+    merged_note: 這一列的第一欄在原稿是空的（與上一列的「相異處」合併儲存格）
+  matching:
+    instruction: 2.依據課文，連出正確答案。
+    left_header: 假設
+    right_header: 質疑
+    group_labels:
+      1: 巨石陣
+      2: 摩艾走路
+    left:
+      '1': (1)古代人為觀測天文而創造
+      '2': (2)是外星人基地
+      '3': (3)是古代的醫院
+      '4': (4)超自然力量造成
+      '5': (5)用滾輪移動
+      '6': (6)用繩索拉扯移動
+    right:
+      A: A.青石治療效果證據不足
+      B: B.古代人哪有天文知識？
+      C: C.幽浮照片模糊不清
+      D: D.複製石像小很多，結果無法推論到巨大石像
+      E: E.超自然力量無可檢驗證據
+      F: F.地形崎嶇，不適用滾輪
+    answer:
+      '1': B
+      '2': C
+      '3': A
+      '4': E
+      '5': F
+      '6': D
+    answers_are_graphical: true
+    answer_carrier: '6 條紅色手繪連線（`prstGeom prst="line"` + `srgbClr FF0000`）。
+
+      🔴 **PDF 上完全看不到這些線** —— 只讀 PDF 會判成「教師版沒連線、無答案」。
+
+      端點由群組內 `a:off` + `a:ext` + flipV 解出（列距約 0.58in），
+
+      並與課文語意獨立核對，兩者完全一致。詳見檔頭。'
+  exercise:
+    instruction: 3.小試身手(單選)
+    summary_line: '※學習重點小結：
+
+      這兩篇課文的重點都是科學家「問題-假設-驗證-結果」的歷程。現在換你當科學家，用「問題-假設-驗證-結果」的方法解決問題！'
+    problem: 發現：「放學回家後，看到桌上的魚缸被打破了，裡面金魚不見了。」魚缸是怎麼被打破的？
+    row_labels:
+    - 發現問題
+    - 假設
+    - 驗證方式
+    - 結果
+    - 結論
+    columns:
+    - hypothesis: (1)魚缸裡的馬達發生爆裂
+      verify: 檢查馬達是否破裂、燒焦，附近是否有爆裂痕跡
+      result: 馬達完整，沒有燒焦痕跡
+      conclusion_options:
+      - 支持
+      - 不支持
+      conclusion_answer: 2
+    - hypothesis: (2)被地震震破
+      verify_options:
+      - 查中央氣象署
+      - 打1999服務專線，查詢今天有無地震紀錄。
+      verify_answer: 1
+      result: 沒有地震紀錄。
+      conclusion_options:
+      - 支持
+      - 不支持
+      conclusion_answer: 2
+    - hypothesis: (3)鄰居的貓打破魚缸
+      verify: 查監視器或地上貓腳印、毛髮
+      result: 貓咪偷溜進家中想吃魚，結果打破魚缸。（答案有理即可）
+      conclusion_options:
+      - 支持
+      - 不支持
+      conclusion_answer: 1
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）＋ 第 3 欄「結果」是橘色手寫體
+    note: 只有第 2 欄的「驗證方式」是選擇題，第 1、3 欄直接印答案

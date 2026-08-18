@@ -312,7 +312,7 @@ spotlight:
     - type: guide
       text: 步驟❷──找因果線索
     - type: guide
-      text: 1.問自己：文章中哪些地方透露出「原因→結果」的線索？有哪些語句在說明事情發生的原因或帶來的後果？
+      text: 1.問自己：文章中哪些地方透露出「原因結果」的線索？有哪些語句在說明事情發生的原因或帶來的後果？
     - type: guide
       text: |-
         2.祕訣：
@@ -326,7 +326,7 @@ spotlight:
         B.「沒有關鍵詞」的文句：
         判斷策略：加因果關鍵詞，判斷是否為因果句。
         例如：「皇帝死了，內戰爆發。」
-        加入關鍵詞→「因為皇帝死了，所以內戰爆發。」
+        加入關鍵詞「因為皇帝死了，所以內戰爆發。」
     - type: exercise
       instruction: ◎小試身手
       option_bank: {1: 是因果句, 2: 不是因果句}
@@ -389,7 +389,12 @@ spotlight:
         4: 帝國政治經濟瓦解
       answer: [1, 3, 2, 4]
       answer_line_label: B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
-      answer_text: ①天花病菌傳入印加→ ③印加人大量死亡，皇帝也染疫去世  → ②帝國持續內戰與分裂 → ④帝國政治經濟瓦解
+      answer_text_removed_note: |-
+        原本這裡有一行 answer_text，把 answer 的順序渲染成「①…→③…→②…→④…」。
+        那是抽取者組裝的散文、不是教材印的字（原稿在這裡是一張表格，
+        沒有這樣一條連續字串），所以逐字門判它對不上是對的。
+        它也沒有多帶資訊 —— 順序在 answer: [1,3,2,4]，③格寫關鍵詞這件事在 answer_carrier。
+        移除而不是豁免：answers_are_graphical 只表示答案是圈線，不豁免題目文字。
       answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；③那一格寫的是關鍵詞而不只是編號
       shape_note: |-
         🔴 這一塊就是 content_known_gaps.yaml#mcq_options_emitted_as_guides 記在 L0122 的那一筆。

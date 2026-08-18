@@ -186,9 +186,20 @@ def main() -> int:
             {"added": added, "removed": removed, "changed": changed, "stale_lessons": stale},
             ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # ⚠️ 判決要**同時**反映兩個方向，否則就是假綠。
+    #
+    #    2026-08-18：這裡原本只算 `added/removed/changed`（本機 vs Drive），
+    #    於是畫面上印著「🔴 必須重抽：1 課 L0122」，最後一行卻印 `IN_SYNC` ——
+    #    而我拿那行寫進 commit 訊息。本檔開頭自己寫著「它問兩個不同的問題，
+    #    缺一不可」，判決行卻只問了一個。
+    #
+    #    兩個方向意思不同，所以verdict 也要分得開：
+    #      SOT_DRIFT=DRIFT  → 你手上的原稿過期了（去同步）
+    #      SOT_STALE=N      → 那 N 課的抽取結果本身作廢了（去重抽）
     drifted = bool(added or removed or changed)
     print(f"\nSOT_DRIFT={'DRIFT' if drifted else 'IN_SYNC'}")
-    return 1 if drifted else 0
+    print(f"SOT_STALE={len(stale)}" + (f"  → {' '.join(sorted(stale))}" if stale else ""))
+    return 1 if (drifted or stale) else 0
 
 
 if __name__ == "__main__":

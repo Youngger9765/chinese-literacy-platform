@@ -1,0 +1,126 @@
+lesson_uid: L0110
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 直接了當
+  - 一無是處
+  - 挑剔
+  - 橫眉豎目
+  - 剽悍
+  - 風雨不透
+  - 嫌惡
+  - 重溫舊夢
+  - 薰陶
+  - 拮据
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 挑剔震耳欲聾別出心裁
+  - 群情激昂蛻薰花園無風
+  - 氣勢如虹變陶朵瓣遠雨
+  - 嫌棄重三直接了當弗不
+  - 惡霸王溫排山倒海屆透
+  - 入剽竊暖舊河川秀花馨
+  - 氣氛悍一交夢橫持有瓶
+  - 旺財富無織鄉豎眉度假
+  - 振憤怒是低迷不振豎日
+  - 鯨魚池處拮据宇宙曰目
+  answers_are_graphical: true
+  answer_paths:
+  - word: 挑剔
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    direction: horizontal
+  - word: 薰陶
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    direction: vertical
+  - word: 風雨不透
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 嫌惡
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 1
+    direction: vertical
+  - word: 重溫舊夢
+    cells:
+    - - 4
+      - 3
+    - - 5
+      - 4
+    - - 6
+      - 5
+    - - 7
+      - 6
+    direction: diagonal_down_right
+  - word: 直接了當
+    cells:
+    - - 4
+      - 5
+    - - 4
+      - 6
+    - - 4
+      - 7
+    - - 4
+      - 8
+    direction: horizontal
+  - word: 剽悍
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 3
+    direction: diagonal_down_right
+  - word: 一無是處
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 4
+    - - 9
+      - 4
+    - - 10
+      - 4
+    direction: vertical
+  - word: 橫眉豎目
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 8
+    - - 9
+      - 9
+    - - 10
+      - 10
+    direction: diagonal_down_right
+  - word: 拮据
+    cells:
+    - - 10
+      - 5
+    - - 10
+      - 6
+    direction: horizontal
+  grid_note: '格子裡另有兩個干擾用的「豎」（r8c7、r9c9）與兩個「目」（r9c10 是「日」、r10c10 才是「目」）；
+
+    橫眉豎目走的是 r7c7→r10c10 的斜線（PDF p11 圈選圖可見），不是 r8 那一列的「豎眉」。'

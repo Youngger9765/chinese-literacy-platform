@@ -56,10 +56,9 @@ BOOKKEEPING: dict[str, str] = {
     "sections_note": "大題編號的異常說明（重複號、跳號、順序與多數課相反）",
     "source_errata_note": "勘誤的散文補充；結構化的那份走 source_errata 模組",
     "schema_gap": "這課有東西裝不進現行 schema，明著記下來而不是丟掉",
-    # ⚠️ 以下兩個是 L0063 多文本課的溢出，**是真的沒有歸宿**，不是記帳。
-    # 暫列於此讓門綠，但它們仍在 known gaps 裡；schema 擴好就要移出這張表。
-    "multi_text_parts": "【暫】多文本課的第 2、3 篇；schema 只吃一篇（見 known gaps）",
-    "keypoints_followup_questions": "【暫】第一篇專屬的理解題；comprehension 已被三篇合讀佔用",
+    # 2026-08-18：`multi_text_parts` / `keypoints_followup_questions` 已改成真模組
+    # （見 split_lesson_modules.py），不再需要暫列在這裡 —— 內容該進 v3，
+    # 而不是靠白名單留在來源檔。
 }
 
 

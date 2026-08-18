@@ -491,7 +491,7 @@ vocab_review:
 resources:
   section_name: 知識補給站
   label: 影片連結
-  videos:
+  items:
     - index: 1
       title: 滑臉書、滑IG滑到身心焦慮？你也社群中毒了嗎？快來試試「社群媒體排毒」！《 七七心理學 》EP 048｜志祺七七
       duration: (9:50)
@@ -502,7 +502,7 @@ resources:
       duration: (10:51)
       source: 志祺七七
       has_qr: true
-  videos_note: |-
+  items_note: |-
     兩支影片的「1.」「2.」是 Word 自動編號（numbering.xml），w:t 文字流裡沒有。
     總表 4.影片連結 分頁對應的網址是 http://youtu.be/_a_BPHCma3Q 與 http://youtu.be/wpCKcR3rRQk
     —— 學習單上只印 QR code，網址不在 DOCX 文字層。

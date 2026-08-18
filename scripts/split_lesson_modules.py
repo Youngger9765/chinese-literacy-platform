@@ -58,6 +58,13 @@ MODULES: dict[str, tuple[str, str | None]] = {
     "goal_box":          ("goal_box", None),                    # 開頭的「目標策略」框
     "self_check_before_reading": ("self_check_before_reading", None),  # 讀前自我檢核清單
     "writing_practice":  ("writing_practice", None),            # 「寫一寫」抄寫練習
+    # 多文本課的溢出。schema 目前 `body` 只裝得下一篇、`keypoints` 只吃一組 rows，
+    # 所以第二/三篇與其專屬題目原本停在 `_extracted` 不會進 v3 —— 那等於
+    # **內容還在來源檔裡，但翻新產物看不到**，覆蓋率門也因此把它們報成漏抄。
+    # 給模組不代表 schema 補好了（消費端還沒讀），但至少東西有進來、不會被當成不見。
+    "multi_text_parts":  ("multi_text_parts", None),
+    "cross_text_banner": ("cross_text_banner", None),
+    "keypoints_followup_questions": ("keypoints_followup_questions", None),
     # 文言文專屬（大題集合與白話課不同）
     "intro_guide":       ("intro_guide", None),
     "modern_translation": ("modern_translation", None),

@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0126",
+  "catalog_slot": "G8-L6",
+  "pdf_pages": 11,
+  "pages_read": 11,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 0,
+  "notes": "這課原本在 blocks_present_but_none_renderable 缺口清單裡，但原稿內容是完整的：九個大題全印、聚光燈 17 個 ☑ 答案、重點表 10 個 ☑、找字 12 條路徑全可還原，重抽後沒有任何一節是空的。三種答案載體都查過：F0FE 27 個（全在文字層）／roundRect 12 個 anchor 全在紙內且 = 12 條路徑（無警報）／w:bdr 非 auto 顏色 0 個。念順順起點三訊號一致（印「九」、☞ 錨在第 9 段、字數欄 288=第9段長、339=第9+10段長），SKILL ⑥.7 四條口徑一條都不必套。找字格子第 4 列第 9 欄原稿就是空白（PDF 與文字層一致），用全形空格佔位維持 10 欄。逐字門一次過，受檢 211 字串 0 對不上。"
+}
