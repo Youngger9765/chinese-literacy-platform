@@ -1,0 +1,63 @@
+lesson_uid: L0142
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 心神不寧
+  - 餘燼
+  - 滿目瘡痍
+  - 殘垣敗瓦
+  - 瓦礫
+  - 呼天搶地
+  - 面不改色
+  - 百廢待舉
+  - 同舟共濟
+  - 生死與共
+  - 處變不驚
+  - 心理韌性
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 餘燼
+    definition: 火燒後殘留下來尚未熄滅的火灰；也比喻災難後的殘跡。
+  - index: 2
+    word: 殘垣敗瓦
+    definition: 建築物倒塌後破碎的牆壁與瓦片。
+  - index: 3
+    word: 瓦礫
+    definition: 破碎的磚瓦與石塊。
+  - index: 4
+    word: 面不改色
+    definition: 臉色神情沒有改變，形容在壓力或危險下仍保持冷靜鎮定。
+  - index: 5
+    word: 同舟共濟
+    definition: 在同一條小船上互相幫忙，形容團結合作，共同面對困難。
+  - index: 6
+    word: 處變不驚
+    definition: 遇到突發狀況仍保持沉著冷靜應對，不慌亂。
+  - index: 7
+    word: 滿目瘡痍
+    definition: 形容景象破壞嚴重，比喻災後景象極為淒慘。
+  - index: 8
+    word: 百廢待舉
+    definition: 形容經歷動亂或災難後，許多事務都需要重新整頓。
+  - index: 9
+    word: 心神不寧
+    definition: 形容心裡不安穩，精神緊張。
+  - index: 10
+    word: 生死與共
+    definition: 共同面對生死危難，表示在危難中互相扶持，不離不棄的深厚情誼。
+  - index: 11
+    word: 呼天搶地
+    definition: 叫喊上天，用頭撞地，形容極度悲痛的樣子。
+  - index: 12
+    word: 心理韌性
+    definition: 面對壓力、災難或挫折時，能調整心態、尋找支持，並重新站起來的能力。

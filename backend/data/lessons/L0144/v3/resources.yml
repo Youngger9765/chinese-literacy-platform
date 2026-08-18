@@ -1,0 +1,24 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 八
+resources:
+  part_note: 三篇合讀
+  section_name: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【人類歷史新頁！】全馬1小時59分40秒 奇普喬蓋史上第一人
+    duration: (02:00)
+    source: 愛爾達體育家族
+    has_qr: true
+    title_note: 影片標題把選手譯名寫成「奇普喬蓋」，課文寫「基普喬吉」；影片標題照原樣抄
+  - index: 2
+    title: 基普喬吉的破2跑鞋到底是不是外掛？為什麼遭到田聯的封殺？
+    duration: (03:22)
+    source: HIRUN
+    has_qr: true
+  - index: 3
+    title: 運動如何影響體型的？不同運動不同的身材！
+    duration: (09:10)
+    source: 吃貨男友的健身女友
+    has_qr: true

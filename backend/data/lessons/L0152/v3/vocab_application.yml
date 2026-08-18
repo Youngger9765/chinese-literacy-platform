@@ -1,0 +1,45 @@
+lesson_uid: L0152
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 嚴峻
+    B: 英姿颯爽
+    C: 歉疚
+    D: 生死未卜
+    E: 轉嫁
+    F: 拋頭顱灑熱血
+    G: 贍養
+    H: 搏命
+  option_bank_note: '⚠️ 只有 8 個選項（其他課多為 10 個），而且 **C.歉疚 不在本課任何一份語詞清單裡**
+
+    （不在總表 14 個、不在第三大題 13 個、也不在第八大題灰框 14 個）。原稿如此。'
+  unused_options: []
+  answer_carrier: 橘色（字元樣式 rStyle=af），PDF p4~p5 可見
+  items:
+  - index: 1
+    stem: 這位演員常在電影中(　)演出，從不使用替身。
+    answer: H
+  - index: 2
+    stem: 戰爭開始了，許多士兵(　)，就為了保衛自己的國家。
+    answer: F
+  - index: 3
+    stem: 近日腸病毒疫情(　)，感染人數高達2.5萬人。
+    answer: A
+  - index: 4
+    stem: 他獨自去登山後失聯十天了，(　)，讓家人很擔心。
+    answer: D
+  - index: 5
+    stem: 商人將運費上漲的成本(　)給消費者，加重消費者的負擔。
+    answer: E
+  - index: 6
+    stem: 國慶大典上，(　)的三軍儀隊邁著整齊的步伐，朝司令臺敬禮。
+    answer: B
+  - index: 7
+    stem: 他成年後開始工作，承諾每月寄生活費回家（　）年邁的父母。
+    answer: G
+  - index: 8
+    stem: 因為忘了朋友的生日，她感到非常 (　)。
+    answer: C
+  items_note: 第 (7) 題的括號是**全形（　）**，其餘七題是半形(　)。原稿如此。

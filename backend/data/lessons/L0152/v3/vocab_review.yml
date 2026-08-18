@@ -1,0 +1,165 @@
+lesson_uid: L0152
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 竹簡
+  - 書吏
+  - 搏命
+  - 兵餉
+  - 英姿颯爽
+  - 轉嫁
+  - 絕筆
+  - 嚴峻
+  - 贍養
+  - 有幸窺見
+  - 安然
+  - 生死未卜
+  - 拋頭顱灑熱血
+  - 兵馬俑
+  target_words_note: '⚠️ 14 個，比第三大題語詞框多一個「兵馬俑」（它不在任何語詞清單裡，
+
+    但課文第 5 段出現過）。原稿如此。'
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 竹簡陪有品搏帝國家書
+  - 兵轉陷幸苦戰命占爵拋
+  - 馬稼書窺生死未卜位頭
+  - 俑衣吏見家書價轉嫁顱
+  - 謙服安役嚴厲值生取灑
+  - 疚飾落然俊害英死晝熱
+  - 絕筆竹間文姿博末贍血
+  - 毫無疑問颯兵命養淮揚
+  - 乒响抵爽秦國馬內激嚴
+  - 兵餉抗統一大業俑烈峻
+  answers_are_graphical: true
+  answer_paths:
+  - word: 竹簡
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    direction: horizontal
+  - word: 有幸窺見
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 4
+    - - 3
+      - 4
+    - - 4
+      - 4
+    direction: vertical
+  - word: 搏命
+    cells:
+    - - 1
+      - 6
+    - - 2
+      - 7
+    direction: diagonal_down_right
+  - word: 拋頭顱灑熱血
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    - - 7
+      - 10
+    direction: vertical
+  - word: 書吏
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 3
+    direction: vertical
+  - word: 生死未卜
+    cells:
+    - - 3
+      - 5
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 轉嫁
+    cells:
+    - - 4
+      - 8
+    - - 4
+      - 9
+    direction: horizontal
+  - word: 安然
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 英姿颯爽
+    cells:
+    - - 6
+      - 7
+    - - 7
+      - 6
+    - - 8
+      - 5
+    - - 9
+      - 4
+    direction: diagonal_down_left
+  - word: 絕筆
+    cells:
+    - - 7
+      - 1
+    - - 7
+      - 2
+    direction: horizontal
+  - word: 贍養
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 8
+    direction: diagonal_down_left
+  - word: 兵馬俑
+    cells:
+    - - 8
+      - 6
+    - - 9
+      - 7
+    - - 10
+      - 8
+    direction: diagonal_down_right
+  - word: 嚴峻
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 兵餉
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    direction: horizontal
+  grid_note: '干擾字密集：「兵」3 次（r2c1／r8c6／r10c1，只有後兩者在路徑上，而且分屬
+
+    兵馬俑與兵餉兩條）、「書」3 次、「竹」2 次、「俑」2 次（r4c1 不是答案、r10c8 才是）。
+
+    「乒」「响」「博」「稼」是形近或音近的干擾字。'

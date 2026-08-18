@@ -1,0 +1,12 @@
+lesson_uid: L0151
+version_id: v3
+errata:
+- id: E1
+  section: 六 閱讀聚光燈
+  locator: 大題編號圓圈
+  source: 六一木六
+  corrected: 六
+  kind: 文字層殘字（未印出）
+  why: 圓圈圖形內的文字層有「一木六」三個多餘字元，被圖形裁切，PDF 與原稿畫面上都只看得到「六」
+  confidence: high
+  evidence: document.xml 該段三個 run（六／一木／六，同字級同顏色）；PDF p7 只印出「六」

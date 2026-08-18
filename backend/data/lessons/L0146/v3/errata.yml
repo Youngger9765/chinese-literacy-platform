@@ -1,0 +1,27 @@
+lesson_uid: L0146
+version_id: v3
+errata:
+- id: E1
+  section: 二 念順順
+  locator: 指示語的括號
+  source: 從指定段落（六    )開始朗讀
+  corrected: 從指定段落（六    ）開始朗讀
+  kind: 全半形括號不成對
+  why: 開括號是全形「（」，閉括號是半形「)」。與同批 L0145 完全同型。
+  confidence: high
+  evidence: document.xml 念順順文字方塊；PDF p3 一致
+- id: E2
+  section: 八 詞語複習
+  locator: 找字格第 9 列第 5 欄
+  source: ''
+  corrected: null
+  kind: 格子有一個空格
+  why: '10×10 的格子裡，第 9 列第 5 欄是**空的**（其餘 99 格都有字）。
+
+    不是抽取漏掉：document.xml 該儲存格存在但無 w:t，PDF p10 該位置也是明顯的空白。
+
+    它不影響任何一條答案路徑（14 條路徑都不經過該格）。
+
+    照原樣以全形空格記在 grid 裡，並登錄於此，交給人判斷是不是排版漏字。'
+  confidence: high
+  evidence: T10.r9c5 儲存格無文字；PDF p10 第 9 列可見空格

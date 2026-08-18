@@ -1,0 +1,12 @@
+lesson_uid: L0152
+version_id: v3
+self_check_before_reading:
+  instruction: ※ 如果你有做到下列事項，請在□內打勾
+  items:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記
+  items_note: '第 2 項在文字層就是以「做上記」結束 —— 少了「號。」二字，PDF p1 也印成這樣。
+
+    與 L0151 的「做上記號」（少句號）不同，本課是**少了一個字**。記為 source_errata E1。'
+  no_correct_answer: true
+  answer_carrier: 學生自填，原稿無勾選

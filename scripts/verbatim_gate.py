@@ -159,6 +159,14 @@ def walk(node, key=None, parent=None, out=None, unverifiable=None, in_image=Fals
                 continue
             if ks == "source" and parent in SOURCE_IS_ANNOTATION_PARENTS:
                 continue
+            if ks == "title" and key == "meta":
+                # ⚠️ `meta.title` 來自**總表 xlsx**（skill ⑤：「課名 → 對照 lesson.yml 的 title」），
+                #    而這道門比對的是 **DOCX**。拿 A 來源的欄位去 B 來源找，找不到是必然的。
+                #    L0139 就是這樣：總表課名「長喙天蛾見前人所未見」，
+                #    學習單印的標題是「見前人所未見──達爾文與長喙天蛾的故事」——
+                #    兩個都對，只是不同來源。門報 FAIL 會叫人去改一個沒有壞的欄位。
+                #    真正該驗 title 的是「它跟總表對不對得上」，那是另一件事、另一個來源。
+                continue
             if ks == "answer_paths":
                 # ⚠️ 找字遊戲的 `word` 是**從座標套回格子算出來的**，不是抄來的。
                 #    教材的格子印錯字時（「堅不可摧」印成「堅不可催」），

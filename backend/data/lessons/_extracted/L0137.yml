@@ -158,19 +158,29 @@ schema_gap:
     - 第二篇篇末的重點表（未解之謎：石頭的祕密（二）──摩艾石像）
     - 四*文章重點整理的**第 2 題連連看**與**第 3 題小試身手**
   _where_i_put_them: |-
-    第二篇 → 本檔 top-level 的 `multi_text_parts:`（orphan_key_gate 白名單裡已有這個 key）。
+    第二篇 → 本檔 top-level 的 `multi_text_parts:`。
     連連看與小試身手 → `keypoints.matching:` / `keypoints.exercise:`。
   _verified_not_guessed: |-
-    ⛔ **已實測，不是推測。** 跑完 `split_lesson_modules.py --all --version v3` 後：
-      ・`multi_text_parts` 不在 MODULES 對照表裡 → 第二篇整段**沒有落地到 v3/**
-      ・`keypoints_to_structure.py` 只讀 `title` / `columns` / `rows` / `tail_question`
-        四個 key（實際 grep 過該檔），所以 `keypoints.matching` 與 `keypoints.exercise`
-        **不會被畫出來**，資料進得去但畫面上不存在
-    兩件事都沒有任何錯誤訊息。詳細的 grep / 落地驗證結果寫在交件報告裡。
+    ⛔ **以下每一條都實跑驗證過，不是推測**（2026-08-18 13:50 的狀態）：
+      ・`multi_text_parts` **已經**是 MODULES 裡的模組 → 第二篇**有**落地到
+        `v3/multi_text_parts.yml`（grep「西元1722年4月5日」命中 1；
+        正向對照：第一篇的「西元1130年前後」在 full_text_annotate.yml 命中 1）。
+      ・`keypoints.matching` / `keypoints.exercise` 的**資料**有進 v3/keypoints.yml
+        （grep「青石治療效果證據不足」「魚缸裡的馬達發生爆裂」命中 2），
+        但 `keypoints_to_structure.py` 只讀 `title`/`columns`/`rows`/`tail_question`
+        四個 key（實際 grep 該檔確認）→ **這兩節畫不出來**：資料在、畫面上沒有。
+    ⚠️ 這一段我改寫過一次。第一版寫「multi_text_parts 沒有落地」，那是根據我開工時
+    讀到的 MODULES 表；`split_lesson_modules.py` 在 13:47 被更新，多文本容器已經加進去了。
+    **舊的觀察在幾十分鐘內就過期**，所以這裡記的是重跑後的結果，不是我第一次讀到的結果。
   _section_no_mismatch: |-
-    ⚠️ `SECTION_NAME_TO_MODULE` 的needle 是「文章重點表」與「重點表」，
-    而本課印的是「文章重點**整理**」——**對不上**，所以 keypoints 會退回常數表標成
-    `section_no: 五`，而學習單印的是「四」。（同 L0136 的對照表缺條目問題，已回報工頭。）
+    ⚠️ 實測結果（不是推測）：`SECTION_NAME_TO_MODULE` 的 needle 是「文章重點表」與
+    「重點表」，本課印的是「文章重點**整理**」——**對不上**，keypoints 因此退回常數表。
+    產出的 v3 是：
+        keypoints.yml     section_no: 五   ← 學習單印的是「四」
+        comprehension.yml section_no: 五   ← 這個才是對的（五*閱讀理解）
+    也就是說**兩個模組同時宣稱自己是「五」**，而「四」沒有人認領。
+    修法：在 SECTION_NAME_TO_MODULE 補一條 ("文章重點整理", "keypoints")，
+    或把 needle 從「文章重點表」放寬成「文章重點」。我沒有改 scripts/（不在授權範圍），已回報工頭。
   _why_not_workaround: |-
     考慮過但不採用：把兩篇課文串成一個 `body.paragraphs`。
     兩篇各自的段號都是從「一」重新起算（第16課 5 段、第17課 4 段），串起來會變成 9 段，

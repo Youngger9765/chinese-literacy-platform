@@ -1,0 +1,26 @@
+lesson_uid: L0152
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 秦朝軍隊為什麼強大？ 秦朝軍隊制度 | 秦朝士兵有幾個等級？兵馬俑
+    duration: '6:28'
+    duration_seconds: 388
+    source: 有点意思
+    source_note: 頻道名「有点意思」是簡體，原稿如此（頻道本名），未改。
+    url: https://youtu.be/swrH692MIgA
+  - index: 2
+    title: 古墓出土兩封秦朝家書，家書內容讓專家哭笑不得，「媽媽，寄點錢來呀，快凍死啦！」
+    duration: '11:46'
+    duration_seconds: 706
+    source: 歷史天空
+    url: https://youtu.be/fml43I0jM1g
+  - index: 3
+    title: 事實有真假，觀點無對錯｜劉潤《5分鐘商學院・基礎》-149-事實和觀點
+    duration: '8:55'
+    duration_seconds: 535
+    source: 耀鈞x商業修煉筆記
+    url: https://youtu.be/HHg0OVNfqUY
+  items_note: 本課有 3 支影片（多數課是 2 支），與總表的 3 筆一致。

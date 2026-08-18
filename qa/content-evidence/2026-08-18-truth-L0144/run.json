@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0144",
+  "catalog_slot": "G9-L23",
+  "pdf_pages": 19,
+  "pages_read": 19,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "多文本課：一個檔裝三份完整學習單（第23/24/25課，各自從「一」編到「五」，大題序號後都跟一個星號）+ 三篇合讀（續編六七八）。三篇都沒有「念順順」與「語詞應用」，已用 sections_absent 明列理由（課文表格第 2 列印的是「◎閱讀時想一想」而不是「字數」表頭，佐證不做計時朗讀）。schema 缺口照實記在 schema_gap：body/keypoints/comprehension/vocab_definitions 只放篇1，篇2 篇3 全部走 multi_text_parts，篇1 的閱讀接力走 keypoints_followup_questions，三篇合讀引言框走 cross_text_banner。篇1 段號切法（開場五行對話整組算第 1 段、三個分節小標不佔號）由教材自己的交叉引用驗證：重點整理標的「高地環境(段2)／團隊合作(段3～5)／自我鍛鍊(段6～8)／結尾(段9)」四處全中。找字 16 條路徑＝16 個目標語詞（三篇語詞總和）＝16 個 roundRect，精準相符。meta.title 不採檔名上的「運動記錄的突破與公平」（全檔 grep 0 次、原稿一個字沒印），改採 catalog_slot G9-L23 對應的篇1 印出來的課名。retry 1 次：逐字門抓到 14 處我自己組裝的字串（part 標籤、總表內層 key、schema_gap 散文、兩個把欄名跟儲存格黏起來的 prompt），全部改成註記鍵或拆回原稿印的句子。"
+}

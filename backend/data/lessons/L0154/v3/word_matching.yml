@@ -1,0 +1,79 @@
+lesson_uid: L0154
+version_id: v3
+section_no: 二
+word_matching:
+  instruction: 以下是原文與白話文的對照。請依照文意，寫出方框文字的白話意思。
+  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
+  shape_note: '每一題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），
+
+    下列「白話」（對應位置留括號讓學生填）。這裡把填空寫成 （　），答案放 blanks，順序對應。'
+  items:
+  - index: 1
+    classical: 晉平公問於祁黃羊曰：「南陽無令，其誰可而爲之？」
+    boxed_terms:
+    - 令
+    - 可
+    - 爲
+    vernacular: 晉平公問祁黃羊說：「南陽出缺（　），誰（　）（　）這個職位？」
+    blanks:
+    - answer: 縣令
+    - answer: 可以
+    - answer: 擔任
+  - index: 2
+    classical: 平公曰：「解狐非子之仇邪？」對曰：「君問可，非問臣之仇也。」
+    boxed_terms:
+    - 子之
+    - 邪
+    - 之
+    vernacular: '平公說：「解狐不是（　）仇人（　）？」
+
+      (祁黃羊)回答說：「您問的是(誰)可以，又不是問我（　）仇人是(誰)。」'
+    blanks:
+    - answer: 你的
+    - answer: 嗎
+    - answer: 的
+  - index: 3
+    classical: 居有間，平公又問祁黃羊曰：「國無尉，其誰可而爲之？」
+    boxed_terms:
+    - 間
+    - 可
+    - 之
+    vernacular: 過了一段（　），平公又問祁黃羊說：「國家少一名軍官，誰（　）擔任（　）？」
+    blanks:
+    - answer: 時間
+    - answer: 可以
+    - answer: 這個職位
+  - index: 4
+    classical: 平公曰：「午非子之子邪？」對曰：「君問可，非問臣之子也。」
+    boxed_terms:
+    - 邪
+    - 臣之子
+    vernacular: '平公說：「祁午不是你的兒子（　）？」
+
+      (祁黃羊)回答說：「您問的是(誰)可以，又不是問（　）(是誰)。」'
+    blanks:
+    - answer: 嗎
+    - answer: 我的兒子
+  - index: 5
+    classical: 孔子聞之曰：「善哉，祁黃羊之論也。」
+    boxed_terms:
+    - 善哉
+    - 論
+    vernacular: 孔子聽說這件事就說：「祁黃羊的（　），說得（　）！」
+    blanks:
+    - answer: 話
+    - answer: 好啊
+    answer_layout_note: '這一題的兩個答案在 PDF 上各有一條細箭頭線從「善哉」「論」拉到對應的括號，
+
+      線是圖形；答案文字本身在文字層。'
+  - index: 6
+    classical: 外舉不避仇，內舉不避子。祁黃羊可謂公矣。
+    boxed_terms:
+    - 外
+    - 仇
+    - 內
+    vernacular: 舉薦（　），不避開（　），舉薦（　），不(怕嫌疑而)避開自己的兒子，祁黃羊可以稱得上是大公無私了。
+    blanks:
+    - answer: 外人
+    - answer: 仇人
+    - answer: 自己人

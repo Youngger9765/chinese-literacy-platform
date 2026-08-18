@@ -1,0 +1,142 @@
+lesson_uid: L0115
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 眾說紛紜
+  - 系統性風險
+  - 尤有甚者
+  - 兵凶戰危
+  - 鄰避效應
+  - 因噎廢食
+  - 置身事外
+  - 風靡
+  - 捉襟見肘
+  - 權衡
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 廢系統性風險鞍周蔣兵
+  - 與多因八靡宴馬配府凶
+  - 倩尤食噎破天權衡年戰
+  - 由有批星廢經地意驗危
+  - 是甚促言柴食立校轎月
+  - 不者油鄰避效應米帶捉
+  - 眾一降戰機肌霖五載襟
+  - 可說權醬置身事外風見
+  - 施無紛醋天乾語由鹽肘
+  - 佝量雲紜的光瓢駱畫計
+  answers_are_graphical: true
+  answer_paths:
+  - word: 系統性風險
+    cells:
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    - - 1
+      - 5
+    - - 1
+      - 6
+    direction: horizontal
+  - word: 兵凶戰危
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 風靡
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 5
+    direction: vertical
+  - word: 因噎廢食
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    direction: diagonal_down_right
+  - word: 尤有甚者
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 2
+    - - 5
+      - 2
+    - - 6
+      - 2
+    direction: vertical
+  - word: 權衡
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 鄰避效應
+    cells:
+    - - 6
+      - 4
+    - - 6
+      - 5
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 捉襟見肘
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 眾說紛紜
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 2
+    - - 9
+      - 3
+    - - 10
+      - 4
+    direction: diagonal_down_right
+  - word: 置身事外
+    cells:
+    - - 8
+      - 5
+    - - 8
+      - 6
+    - - 8
+      - 7
+    - - 8
+      - 8
+    direction: horizontal
+  grid_note: '「系統性風險」（橫）與「風靡」（直）共用 r1c5 的「風」，PDF p11 上兩個圈重疊。
+
+    格子裡另有干擾字：r3c7 的「權」與 r8c3 的「權」只有前者被圈（權衡在 r3），
+
+    r8c9 的「風」不是答案。'

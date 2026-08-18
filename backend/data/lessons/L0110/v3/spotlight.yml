@@ -128,12 +128,20 @@ spotlight:
     - type: single
       prompt: 推論作者認為自己的角色有了什麼變化？(單選)
       options:
-        1: 從「受壓迫的小孩」「能平等提出不同意見的大人」
-        2: 從「又怕又怨的小孩」「能夠勇敢反擊的大人」
-      answer: 1
-      options_note: '兩個選項的引號之間原稿印了一個箭頭，那是 Wingdings 符號（w:sym F0E0）、
+        1: '從「受壓迫的小孩」
 
-        不在文字流裡，故不寫入箭頭字元（PDF p8 可見）。'
+          「能平等提出不同意見的大人」'
+        2: '從「又怕又怨的小孩」
+
+          「能夠勇敢反擊的大人」'
+      answer: 1
+      options_note: '兩個選項的引號之間原稿印了一個箭頭，那是 Wingdings 符號（w:sym Wingdings/F0E0）、
+
+        不在 w:t 文字流裡，故**不寫入字面箭頭，改在箭號位置斷行**
+
+        （SKILL「箭號與圈號常是 w:sym」那條；L0031 的同款寫法用的是 Wingdings 3/F022）。
+
+        PDF p8 上仍印成一行。'
     clue_index_note: '「文章線索」後面印的 ❶❷❸❹❺ 是 Wingdings 2 符號（w:sym F075~F079），不在文字流裡，
 
       故不併進 label，另以 clue_index 記錄。'
