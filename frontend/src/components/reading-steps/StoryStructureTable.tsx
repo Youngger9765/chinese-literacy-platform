@@ -238,14 +238,31 @@ function cellInteractiveText(cell: StructureRow | StructureSubRow): string {
   return cell.value;
 }
 
+/** 學習單把作答指示寫在跟空格同一種括號裡：`【單選】`、`【勾選，可複選】`。 */
+const INSTRUCTION_WORDS = ['單選', '多選', '複選', '勾選', '打勾'];
+
+/**
+ * `【…】` 裡面裝的是作答指示，不是要學生填的空格。
+ *
+ * 兩者共用同一種括號，所以任何「數 `【】`」的地方都必須先問這一句，
+ * 否則指示語會被算成一題 —— 而它渲染成標籤、學生填不了，分母就永遠到不了。
+ * 那正是 2026-08-19「已填 5 / 7 題」提交鈕永遠是灰的原因。
+ */
+export function isInstructionBlank(inner: string): boolean {
+  return INSTRUCTION_WORDS.some((w) => inner.includes(w));
+}
+
 function countBlanks(text: string): number {
   // 每次呼叫都用新鮮的 /g literal，避免共用單例 INLINE_BLANK_RE 的 lastIndex 殘留跨 cell 污染
-  return text.match(/【[^】]*】/g)?.length ?? 0;
+  const all = text.match(/【[^】]*】/g) ?? [];
+  return all.filter((m) => !isInstructionBlank(m.slice(1, -1))).length;
 }
 
 function classifyInteractive(value: string): InteractiveType {
   // 用不帶 /g 的 literal，.test() 不會推進 lastIndex（共用單例會有殘留狀態）
-  return /【[^】]*】/.test(value) ? 'fill_blank' : 'display';
+  // 只有指示語、沒有真空格的 cell 是純文字 —— 判成 fill_blank 會畫出一個
+  // 填不了的輸入框，把「單選」兩個字吃掉，學生連要勾幾個都看不到。
+  return countBlanks(value) > 0 ? 'fill_blank' : 'display';
 }
 
 function resolveGradeIndex(
@@ -399,6 +416,20 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     while ((match = re.exec(text)) !== null) {
       if (match.index > last) {
         nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
+      }
+      // 作答指示（`【單選】`）不是空格 —— 畫成輸入框會把「單選」兩個字吃掉，
+      // 學生連要勾幾個都看不到，而且那個框他永遠填不了。當標籤顯示。
+      if (isInstructionBlank(match[1])) {
+        nodes.push(
+          <span
+            key={`i-${match.index}`}
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+          >
+            {match[1].trim()}
+          </span>,
+        );
+        last = match.index + match[0].length;
+        continue;
       }
       const key = answerKey(rowIdx, subIdx, blankIdx);
       nodes.push(
@@ -724,7 +755,6 @@ const StoryStructureTable: React.FC<Props> = ({
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
-  const [copyDone, setCopyDone] = useState(false);
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     if (showCoachProp !== undefined) return showCoachProp;
     if (previewMode) return false;
@@ -923,55 +953,6 @@ const StoryStructureTable: React.FC<Props> = ({
     return payload;
   }, [structure, answers, pushFillBlankAnswers]);
 
-  const handleCopyTemplate = useCallback(() => {
-    if (!structure) return;
-    const lines: string[] = ['【文章重點表模板】', ''];
-    if (structure.title) lines.push(structure.title, '');
-
-    if (structure.layout === 'worksheet_table' && structure.worksheet_rows) {
-      structure.worksheet_rows.forEach((wsRow) => {
-        if (wsRow.kind === 'pair') {
-          lines.push(`${wsRow.label}：${wsRow.value.replace(INLINE_BLANK_RE, '【　　　】')}`);
-        } else {
-          lines.push(`【${wsRow.section}】`);
-          wsRow.items.forEach((item) => {
-            lines.push(
-              `  ${item.label}：${item.value.replace(INLINE_BLANK_RE, '【　　　】')}`,
-            );
-          });
-        }
-        lines.push('');
-      });
-    } else {
-      structure.rows.forEach((row) => {
-        if (row.sub_rows && row.sub_rows.length > 0) {
-          lines.push(`【${row.label}】`);
-          row.sub_rows.forEach((sub) => {
-            lines.push(`  上位概念：${sub.label}`);
-            lines.push(
-              sub.interactive_type === 'display' && sub.value?.trim()
-                ? `  重點：${sub.value}`
-                : '  重點：________________',
-            );
-            lines.push('');
-          });
-        } else {
-          lines.push(`上位概念：${row.label}`);
-          lines.push(
-            row.interactive_type === 'display' && row.value?.trim()
-              ? `重點：${row.value}`
-              : '重點：________________',
-          );
-          lines.push('');
-        }
-      });
-    }
-
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-      setCopyDone(true);
-      setTimeout(() => setCopyDone(false), 1500);
-    }).catch(() => {});
-  }, [structure]);
 
   const handleSubmit = useCallback(async () => {
     if (!structure || submitting || gradeResult !== null) return;
@@ -1153,16 +1134,6 @@ const StoryStructureTable: React.FC<Props> = ({
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopyTemplate}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-300 bg-white text-amber-700 text-xs font-semibold hover:bg-amber-100 active:scale-95 transition-all select-none"
-            title="複製模板到剪貼板"
-          >
-            <span className="material-symbols-outlined text-sm" style={{ fontSize: '14px' }}>
-              {copyDone ? 'check_circle' : 'content_copy'}
-            </span>
-            {copyDone ? '已複製 ✓' : '複製模板'}
-          </button>
           {submitted && score >= 0 && (
             <span
               className={`text-sm font-bold px-3 py-1 rounded-full ${
