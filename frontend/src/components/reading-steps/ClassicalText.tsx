@@ -15,6 +15,7 @@
  */
 import React, { useState } from 'react';
 import type { Story } from '../../types';
+import NextStepFooter from '../learning/NextStepFooter';
 
 export interface ClassicalTextProps {
   story: Story;
@@ -32,9 +33,7 @@ const ClassicalText: React.FC<ClassicalTextProps> = ({ story, onFinish }) => {
         <div className="text-center space-y-4 p-8">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">menu_book</span>
           <p className="text-on-surface-variant">本課尚無原文資料</p>
-          <button onClick={onFinish} className="btn-immersive">
-            繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-          </button>
+          <NextStepFooter onNext={onFinish} label="繼續下一步" />
         </div>
       </div>
     );
@@ -104,9 +103,7 @@ const ClassicalText: React.FC<ClassicalTextProps> = ({ story, onFinish }) => {
 
       <div className="shrink-0 px-6 pb-8 pt-4 bg-surface">
         <div className="max-w-md mx-auto">
-          <button onClick={onFinish} className="btn-immersive w-full">
-            繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-          </button>
+          <NextStepFooter onNext={onFinish} label="繼續下一步" />
         </div>
       </div>
     </div>

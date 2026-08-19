@@ -6,7 +6,12 @@
  * NOT interactive (no free_text / select like guided_steps); this is a reading
  * aid that walks the student through how to approach 文圖對照.
  *
- * Wire-up: parent page sets allDone when the student clicks "我已讀完，繼續下一步".
+ * Wire-up: parent page sets allDone when the student clicks "我已讀完".
+ * This button only confirms *this* exercise card is read — it is not the page-level
+ * "下一關" navigation (that is the `NextStepFooter` the parent page renders right below,
+ * disabled until this fires). Siblings `GuidedStepsExercise`/`OrderingExercise` use the
+ * same inline-confirm role with plain wording ("確認" / "送出答案") for the same reason:
+ * calling it "…繼續下一步" would wrongly promise navigation this click does not perform.
  *
  * Why this exists as its own component: the existing StrategyExercise component
  * is keyed off a `type` field (`ordering` | `trait_inference` | `guided_steps`).
@@ -19,7 +24,7 @@ import type { StrategyExerciseItem } from '../../types';
 
 interface Props {
   exercises: StrategyExerciseItem[];
-  /** Fired once the student clicks "我已讀完，繼續下一步". */
+  /** Fired once the student clicks "我已讀完" (confirms this exercise card, not page nav). */
   onComplete?: () => void;
   /** Persist read-state across page refresh. */
   onChange?: (state: Record<string, unknown>) => void;
@@ -95,7 +100,7 @@ const GraphicTextIntegrationExercise: React.FC<Props> = ({
           onClick={handleConfirm}
           className="mt-5 w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-colors"
         >
-          我已讀完，繼續下一步
+          我已讀完
         </button>
       ) : (
         <div className="mt-5 rounded-xl p-4 bg-emerald-50 border border-emerald-200 text-center">

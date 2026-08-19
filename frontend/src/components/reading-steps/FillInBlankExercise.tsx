@@ -18,6 +18,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
+import NextStepFooter from '../learning/NextStepFooter';
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 const IS_TOUCH_DEVICE =
@@ -481,12 +482,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
                   className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
                   全部重做
                 </button>
-                <button onClick={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)}
-                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-                  繼續下一步
-                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                </button>
+                <NextStepFooter onNext={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)} label="繼續下一步" />
               </>
             )}
           </div>

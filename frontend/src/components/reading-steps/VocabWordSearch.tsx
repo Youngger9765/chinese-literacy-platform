@@ -30,6 +30,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useWordSearchProgress } from './useWordSearchProgress';
 import { PlacedWord } from './wordSearchGrid';
+import NextStepFooter from '../learning/NextStepFooter';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -398,12 +399,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       <div className="flex flex-col items-center justify-center py-16 gap-6 text-gray-500">
         <div className="text-5xl" aria-hidden="true">📚</div>
         <p className="text-base font-medium">本課無語詞資料，無法產生方格遊戲</p>
-        <button
-          onClick={() => onFinish(0)}
-          className="mt-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm min-h-[44px]"
-        >
-          繼續下一步
-        </button>
+        <NextStepFooter onNext={() => onFinish(0)} label="繼續下一步" />
       </div>
     );
   }
@@ -669,14 +665,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                 >
                   重新練習
                 </button>
-                <button
-                  onClick={() => onFinish(finishedElapsed)}
-                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                >
-                  繼續下一步
-                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                </button>
+                <NextStepFooter onNext={() => onFinish(finishedElapsed)} label="繼續下一步" />
               </>
             )}
           </div>

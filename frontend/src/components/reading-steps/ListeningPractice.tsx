@@ -23,6 +23,7 @@ import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useTTSEngine } from './listening/useTTSEngine';
 import ListeningQuestionPanel from './listening/ListeningQuestionPanel';
 import ListeningScoring from './listening/ListeningScoring';
+import NextStepFooter from '../learning/NextStepFooter';
 
 export interface ListeningResult {
   score: number;
@@ -324,12 +325,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
                 className="w-full"
               />
             ) : (
-              <button onClick={handleFinish}
-                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-                繼續下一步
-                <span className="material-symbols-outlined text-xl">arrow_forward</span>
-              </button>
+              <NextStepFooter onNext={handleFinish} label="繼續下一步" />
             )
           )}
         </div>
