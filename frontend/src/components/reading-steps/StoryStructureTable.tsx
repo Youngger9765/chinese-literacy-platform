@@ -20,7 +20,14 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type InteractiveType = 'fill_blank' | 'checkbox' | 'display';
+type InteractiveType = 'fill_blank' | 'checkbox' | 'display' | 'inline_choice';
+
+// 一句話裡好幾個空格、各自配一組小選項時用的形狀（#2776）。`options` 是這個
+// 空格自己的選項清單（跟句子裡的第 N 個真空格按順序對應），沒有 `correct_option`
+// —— 那是判分用的，伺服器端消毒時就拿掉了，作答後才由 `/structure/grade` 帶回。
+interface InlineChoiceBlank {
+  options: string[];
+}
 
 interface StructureSubRow {
   label: string;
@@ -31,6 +38,8 @@ interface StructureSubRow {
   blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
+  select_mode?: 'single' | 'multi';
+  blanks?: InlineChoiceBlank[];
 }
 
 interface StructureRow {
@@ -42,8 +51,9 @@ interface StructureRow {
   blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
+  select_mode?: 'single' | 'multi';
+  blanks?: InlineChoiceBlank[];
   sub_rows?: StructureSubRow[];
-  blank_in_label?: boolean;
 }
 
 interface WorksheetPairRow {
@@ -78,6 +88,8 @@ interface GradeResultItem {
   // 勾選題的正解索引。#2736 之前它跟著題目一起從 /structure 送過來 ——
   // 也就是作答前就在瀏覽器裡。現在改由判分結果帶回，作答後才拿得到。
   correct_options?: number[];
+  // inline_choice 單一空格的正解索引，同上，作答後才回。
+  correct_option?: number;
 }
 
 interface GradeResult {
@@ -85,7 +97,9 @@ interface GradeResult {
   score: number;
 }
 
-type AnswerMap = Record<string, string | number[]>;
+// inline_choice 一格存一個選項索引（number），fill_blank 存文字，
+// checkbox 存複選索引陣列。
+type AnswerMap = Record<string, string | number[] | number>;
 
 interface Props {
   storyId: string;
@@ -393,7 +407,7 @@ interface InlineWorksheetContentProps {
   rowIdx: number;
   subIdx?: number;
   answers: AnswerMap;
-  setAnswer: (key: string, value: string | number[]) => void;
+  setAnswer: (key: string, value: string | number[] | number) => void;
   submitted: boolean;
   gradeResults: GradeResultItem[];
 }
@@ -459,6 +473,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
   return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
 };
 
+
 // ── FillBlankCell (card layout) ─────────────────────────────────────────────
 
 interface FillBlankCellProps {
@@ -521,6 +536,9 @@ interface CheckboxCellProps {
   submitted: boolean;
   gradeItem?: GradeResultItem;
   correctOptions?: number[];
+  // 指示語寫「單選」時只准選一個（#2776）。未知（舊 AI 產生的題目沒帶這個
+  // 欄位）一律當 'multi' —— 維持既有行為，不因為新增這個 prop 而變嚴格。
+  selectMode?: 'single' | 'multi';
 }
 
 const CheckboxCell: React.FC<CheckboxCellProps> = ({
@@ -530,9 +548,18 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   submitted,
   gradeItem,
   correctOptions,
+  selectMode,
 }) => {
+  const isSingle = selectMode === 'single';
+
   const toggle = (idx: number) => {
     if (submitted) return;
+    if (isSingle) {
+      // 單選：點下去就換人，不支援點兩下取消——跟原生 radio 一樣的行為，
+      // 也讓「已作答」的判定單純（有值就是有值，不會回到「沒選」狀態）。
+      onChange([idx]);
+      return;
+    }
     if (selected.includes(idx)) {
       onChange(selected.filter((i) => i !== idx));
     } else {
@@ -541,7 +568,11 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2" {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}>
+    <div
+      className="flex flex-col gap-2"
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}
+      data-select-mode={selectMode ?? 'multi'}
+    >
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -573,12 +604,16 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
             }`}
           >
             <span
-              className={`w-4 h-4 shrink-0 rounded border-2 flex items-center justify-center text-xs ${boxStyle}`}
+              className={`w-4 h-4 shrink-0 flex items-center justify-center text-xs border-2 ${
+                isSingle ? 'rounded-full' : 'rounded'
+              } ${boxStyle}`}
             >
-              {(submitted && isCorrectOption) || (!submitted && isSelected) ? '✓' : ''}
+              {(submitted && isCorrectOption) || (!submitted && isSelected)
+                ? (isSingle ? '●' : '✓')
+                : ''}
             </span>
             <input
-              type="checkbox"
+              type={isSingle ? 'radio' : 'checkbox'}
               className="sr-only"
               checked={isSelected}
               onChange={() => toggle(idx)}
@@ -598,12 +633,157 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   );
 };
 
+// ── InlineChoicePicker ───────────────────────────────────────────────────────
+// 一句話裡的一個空格，配一組小選項（單選）。跟 CheckboxCell 不同的地方：
+// 這是「句子裡的一個空格」不是「獨立一題」——所以用緊湊的按鈕列，不是整欄
+// 卡片，讓它塞得進 InlineWorksheetContent 那種行內排版（#2776）。
+
+interface InlineChoicePickerProps {
+  options: string[];
+  selected?: number;
+  onChange: (idx: number) => void;
+  submitted: boolean;
+  gradeItem?: GradeResultItem;
+  compact?: boolean;
+}
+
+const InlineChoicePicker: React.FC<InlineChoicePickerProps> = ({
+  options,
+  selected,
+  onChange,
+  submitted,
+  gradeItem,
+  compact,
+}) => {
+  if (submitted && gradeItem) {
+    const isCorrect = gradeItem.correct;
+    const shown =
+      selected !== undefined && selected >= 0 && selected < options.length
+        ? options[selected]
+        : '（未選）';
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 mx-0.5 text-sm border-b-2 ${
+          isCorrect ? 'border-emerald-500 text-emerald-800' : 'border-red-500 text-red-800'
+        }`}
+        title={!isCorrect ? gradeItem.feedback : undefined}
+      >
+        {shown}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`inline-flex flex-wrap items-center gap-1 mx-0.5 align-middle ${compact ? '' : 'py-0.5'}`}
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'inline_choice' }}
+    >
+      {options.map((opt, idx) => (
+        <button
+          key={idx}
+          type="button"
+          onClick={() => onChange(idx)}
+          disabled={submitted}
+          className={`px-2 py-0.5 rounded-full border text-xs font-medium transition-colors ${
+            selected === idx
+              ? 'border-amber-500 bg-amber-100 text-amber-900'
+              : 'border-gray-300 bg-white text-gray-600 hover:border-amber-400 hover:bg-amber-50'
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </span>
+  );
+};
+
+// ── Inline choice sentence (worksheet table cells) ──────────────────────────
+// 跟 InlineWorksheetContent 是同一套「找 【…】 位置插元件」的邏輯，差別只在
+// 插的是選項按鈕不是文字輸入框。兩者分開寫是因為判分方式完全不同（索引比對
+// vs 模糊文字比對）——硬併成一個元件反而讓兩種資料形狀互相打架。
+
+interface InlineChoiceContentProps {
+  text: string;
+  blanks: InlineChoiceBlank[];
+  rowIdx: number;
+  subIdx?: number;
+  answers: AnswerMap;
+  setAnswer: (key: string, value: string | number[] | number) => void;
+  submitted: boolean;
+  gradeResults: GradeResultItem[];
+}
+
+const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
+  text,
+  blanks,
+  rowIdx,
+  subIdx,
+  answers,
+  setAnswer,
+  submitted,
+  gradeResults,
+}) => {
+  const parts = useMemo(() => {
+    const nodes: React.ReactNode[] = [];
+    let last = 0;
+    let blankIdx = 0;
+    const re = new RegExp(INLINE_BLANK_RE.source, 'g');
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > last) {
+        nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
+      }
+      if (isInstructionBlank(match[1])) {
+        nodes.push(
+          <span
+            key={`i-${match.index}`}
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+          >
+            {match[1].trim()}
+          </span>,
+        );
+        last = match.index + match[0].length;
+        continue;
+      }
+      // 這個空格沒有對應的選項組 —— 資料跟句子對不上，寧可留原樣的空格記號
+      // 也不要憑空造一組選項出來騙學生。
+      const blank = blanks[blankIdx];
+      if (!blank) {
+        nodes.push(<span key={`b-${blankIdx}`}>【　　　】</span>);
+        blankIdx += 1;
+        last = match.index + match[0].length;
+        continue;
+      }
+      const key = answerKey(rowIdx, subIdx, blankIdx);
+      nodes.push(
+        <InlineChoicePicker
+          key={`b-${blankIdx}`}
+          options={blank.options}
+          selected={typeof answers[key] === 'number' ? (answers[key] as number) : undefined}
+          onChange={(idx) => setAnswer(key, idx)}
+          submitted={submitted}
+          gradeItem={submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined}
+          compact
+        />,
+      );
+      blankIdx += 1;
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) {
+      nodes.push(<span key={`t-${last}`}>{text.slice(last)}</span>);
+    }
+    return nodes;
+  }, [text, blanks, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
+
+  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+};
+
 // ── Worksheet HTML table ─────────────────────────────────────────────────────
 
 interface WorksheetTableProps {
   structure: StructureData;
   answers: AnswerMap;
-  setAnswer: (key: string, value: string | number[]) => void;
+  setAnswer: (key: string, value: string | number[] | number) => void;
   submitted: boolean;
   gradeResults: GradeResultItem[];
   renderCellContent: (
@@ -629,6 +809,32 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
     rowIdx: number,
     subIdx?: number,
   ) => {
+    // ⚠️ #2776 — must check the cell's real `interactive_type` BEFORE the
+    // local bracket-based heuristic below. `classifyInteractive` only knows
+    // 'fill_blank' vs 'display'; it would see the 【　　　】 blanks in an
+    // inline_choice sentence and route them into InlineWorksheetContent as
+    // free-text inputs, discarding each blank's option list entirely.
+    const cell =
+      rowIdx >= 0 ? (subIdx !== undefined ? rows[rowIdx]?.sub_rows?.[subIdx] : rows[rowIdx]) : undefined;
+    if (cell?.interactive_type === 'inline_choice') {
+      // ⚠️ NOT `value` (the param) — that's the `worksheet_rows` copy of this
+      // cell, built straight from the RAW list-of-lists text and never run
+      // through `cell_to_structure_fields`'s parsing. It still carries the
+      // "第N個空格：…" caption lines and paren-style blanks that `rows[].value`
+      // (i.e. `cell.value`) has already had stripped/normalized.
+      return (
+        <InlineChoiceContent
+          text={cell.value}
+          blanks={cell.blanks ?? []}
+          rowIdx={rowIdx}
+          subIdx={subIdx}
+          answers={answers}
+          setAnswer={setAnswer}
+          submitted={submitted}
+          gradeResults={gradeResults}
+        />
+      );
+    }
     const itype = classifyInteractive(value);
     if (itype === 'fill_blank' && countBlanks(value) > 0) {
       return (
@@ -643,10 +849,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
         />
       );
     }
-    if (rowIdx >= 0) {
-      const cell = subIdx !== undefined ? rows[rowIdx]?.sub_rows?.[subIdx] : rows[rowIdx];
-      if (cell) return renderCellContent(cell, rowIdx, subIdx);
-    }
+    if (cell) return renderCellContent(cell, rowIdx, subIdx);
     return <span className="text-sm leading-relaxed whitespace-pre-line">{value}</span>;
   };
 
@@ -881,10 +1084,15 @@ const StoryStructureTable: React.FC<Props> = ({
   ]);
 
 
-  const setAnswer = useCallback((key: string, value: string | number[]) => {
+  const setAnswer = useCallback((key: string, value: string | number[] | number) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  // ⚠️ #2776 — key 慣例必須跟 `InlineWorksheetContent` 的寫入端一致:
+  // 那個元件**一律**用 `answerKey(rowIdx, subIdx, blankIdx)`，`blankIdx` 從 0
+  // 起算，即使這格只有一個空格。這裡以前在 `blankCount<=1` 時改用不帶 blank
+  // 後綴的 key —— 兩邊對不起來，唯一空格的欄位讀到的永遠是 `undefined`，
+  // 送出去的一律是空字串。128 課 / 400 處欄位曾經因此永遠被判空白。
   const pushFillBlankAnswers = useCallback(
     (
       payload: object[],
@@ -894,16 +1102,7 @@ const StoryStructureTable: React.FC<Props> = ({
     ) => {
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 0);
-      if (blankCount <= 1) {
-        const key = answerKey(rowIdx, subIdx);
-        payload.push({
-          row_index: rowIdx,
-          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
-          value: typeof answers[key] === 'string' ? answers[key] : '',
-        });
-        return;
-      }
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       for (let b = 0; b < blankCount; b += 1) {
         const key = answerKey(rowIdx, subIdx, b);
         payload.push({
@@ -917,41 +1116,62 @@ const StoryStructureTable: React.FC<Props> = ({
     [answers],
   );
 
+  const pushInlineChoiceAnswers = useCallback(
+    (
+      payload: object[],
+      rowIdx: number,
+      subIdx: number | undefined,
+      cell: StructureRow | StructureSubRow,
+    ) => {
+      const blanks = cell.blanks ?? [];
+      for (let b = 0; b < blanks.length; b += 1) {
+        const key = answerKey(rowIdx, subIdx, b);
+        const val = answers[key];
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          blank_index: b,
+          selected_option: typeof val === 'number' ? val : null,
+        });
+      }
+    },
+    [answers],
+  );
+
   const buildAnswerPayload = useCallback((): object[] => {
     if (!structure) return [];
     const payload: object[] = [];
 
+    const pushCell = (
+      cell: StructureRow | StructureSubRow,
+      rowIdx: number,
+      subIdx: number | undefined,
+    ) => {
+      if (cell.interactive_type === 'display') return;
+      if (cell.interactive_type === 'checkbox') {
+        const key = answerKey(rowIdx, subIdx);
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          selected_options: Array.isArray(answers[key]) ? answers[key] : [],
+        });
+      } else if (cell.interactive_type === 'inline_choice') {
+        pushInlineChoiceAnswers(payload, rowIdx, subIdx, cell);
+      } else {
+        pushFillBlankAnswers(payload, rowIdx, subIdx, cell);
+      }
+    };
+
     structure.rows.forEach((row, rowIdx) => {
       if (row.sub_rows && row.sub_rows.length > 0) {
-        row.sub_rows.forEach((sub, subIdx) => {
-          if (sub.interactive_type === 'display') return;
-          if (sub.interactive_type === 'checkbox') {
-            const key = answerKey(rowIdx, subIdx);
-            payload.push({
-              row_index: rowIdx,
-              sub_row_index: subIdx,
-              selected_options: Array.isArray(answers[key]) ? answers[key] : [],
-            });
-          } else {
-            pushFillBlankAnswers(payload, rowIdx, subIdx, sub);
-          }
-        });
+        row.sub_rows.forEach((sub, subIdx) => pushCell(sub, rowIdx, subIdx));
       } else {
-        if (row.interactive_type === 'display') return;
-        if (row.interactive_type === 'checkbox') {
-          const key = answerKey(rowIdx);
-          payload.push({
-            row_index: rowIdx,
-            selected_options: Array.isArray(answers[key]) ? answers[key] : [],
-          });
-        } else {
-          pushFillBlankAnswers(payload, rowIdx, undefined, row);
-        }
+        pushCell(row, rowIdx, undefined);
       }
     });
 
     return payload;
-  }, [structure, answers, pushFillBlankAnswers]);
+  }, [structure, answers, pushFillBlankAnswers, pushInlineChoiceAnswers]);
 
 
   const handleSubmit = useCallback(async () => {
@@ -979,6 +1199,7 @@ const StoryStructureTable: React.FC<Props> = ({
     (cell: StructureRow | StructureSubRow): number => {
       if (cell.interactive_type === 'display') return 0;
       if (cell.interactive_type === 'checkbox') return 1;
+      if (cell.interactive_type === 'inline_choice') return cell.blanks?.length || 1;
       const blanks = cell.blank_hints?.length || countBlanks(cellInteractiveText(cell));
       return blanks > 0 ? blanks : 1;
     },
@@ -1006,12 +1227,25 @@ const StoryStructureTable: React.FC<Props> = ({
         return;
       }
 
+      if (cell.interactive_type === 'inline_choice') {
+        const blankCount = cell.blanks?.length || 1;
+        total += blankCount;
+        for (let b = 0; b < blankCount; b += 1) {
+          const key = answerKey(rowIdx, subIdx, b);
+          if (typeof answers[key] === 'number') answered += 1;
+        }
+        return;
+      }
+
+      // ⚠️ #2776 — 這裡以前在只有 1 個空格時故意省略 blank 後綴
+      // （`blankCount > 1 ? b : undefined`），但寫入端 `InlineWorksheetContent`
+      // 從來不省略。單一空格欄位因此永遠讀不到剛填進去的值，計數器卡住不動。
       const blankCount =
         cell.blank_hints?.length ||
         (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       total += blankCount;
       for (let b = 0; b < blankCount; b += 1) {
-        const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);
+        const key = answerKey(rowIdx, subIdx, b);
         const val = answers[key];
         if (typeof val === 'string' && val.trim().length > 0) answered += 1;
       }
@@ -1046,9 +1280,9 @@ const StoryStructureTable: React.FC<Props> = ({
           </span>
         );
       }
-      const key = answerKey(rowIdx, subIdx);
-      const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
       if (cell.interactive_type === 'checkbox') {
+        const key = answerKey(rowIdx, subIdx);
+        const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
         return (
           <CheckboxCell
             options={cell.options ?? []}
@@ -1057,9 +1291,38 @@ const StoryStructureTable: React.FC<Props> = ({
             submitted={submitted}
             gradeItem={gradeItem}
             correctOptions={gradeItem?.correct_options ?? cell.correct_options}
+            selectMode={cell.select_mode}
           />
         );
       }
+      if (cell.interactive_type === 'inline_choice') {
+        const blanks = cell.blanks ?? [];
+        return (
+          <div className="flex flex-col gap-2">
+            {blanks.map((blank, b) => {
+              const key = answerKey(rowIdx, subIdx, b);
+              const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx, b) : undefined;
+              return (
+                <InlineChoicePicker
+                  key={b}
+                  options={blank.options}
+                  selected={typeof answers[key] === 'number' ? (answers[key] as number) : undefined}
+                  onChange={(idx) => setAnswer(key, idx)}
+                  submitted={submitted}
+                  gradeItem={gradeItem}
+                />
+              );
+            })}
+          </div>
+        );
+      }
+      // fill_blank fallback (card layout, or worksheet cells the local
+      // bracket-style heuristic didn't route through InlineWorksheetContent).
+      // ⚠️ #2776 — always keyed with blank index 0, matching the unified
+      // convention `tallyCell`/`pushFillBlankAnswers` now use for every
+      // fill_blank field, single-blank or not.
+      const key = answerKey(rowIdx, subIdx, 0);
+      const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx, 0) : undefined;
       return (
         <FillBlankCell
           value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}

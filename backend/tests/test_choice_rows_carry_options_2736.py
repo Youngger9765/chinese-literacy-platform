@@ -111,6 +111,10 @@ def test_a_row_that_says_choose_offers_something_to_choose():
                 continue
             if row.get("options"):
                 continue
+            # inline_choice：每個空格自己的選項在 `blanks[].options`，不在
+            # 這一列共用的 `options`（那個欄位對這個型別不適用，見 #2776）。
+            if row.get("interactive_type") == "inline_choice" and row.get("blanks"):
+                continue
             # 圈號寫在 value 裡也算「看得到選項」（雖然不是理想形狀）
             if len(re.findall(r"[①②③④⑤⑥⑦⑧⑨⑩]", value)) >= 2:
                 continue

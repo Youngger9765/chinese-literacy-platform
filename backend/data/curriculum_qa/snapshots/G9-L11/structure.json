@@ -2,13 +2,14 @@
   "interaction_profile": {
     "checkbox_count": 1,
     "fill_blank_count": 8,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
       "過去認為",
       "現今認為",
       "預防之道",
-      "研究一【　　　】"
+      "研究一(1)"
     ],
     "template_kind": "generic"
   },
@@ -52,7 +53,7 @@
         },
         {
           "interactive_type": "checkbox",
-          "label": "研究一【　　　】",
+          "label": "研究一(1)",
           "options": [
             "戶外活動時間",
             "家長近視情況",
@@ -60,12 +61,13 @@
             "家長近視情況",
             "做功課時間"
           ],
-          "value": "【　　　】2007年美國研究者研究514位小學生，發現\n①戶外活動時間 ②家長近視情況 ③做功課時間【 複選 】\n可有效預測學生是否會罹患近視。\n①戶外活動時間 ②家長近視情況 ③做功課時間"
+          "select_mode": "multi",
+          "value": "(1)2007年美國研究者研究514位小學生，發現\n①戶外活動時間 ②家長近視情況 ③做功課時間【 複選 】\n可有效預測學生是否會罹患近視。\n①戶外活動時間 ②家長近視情況 ③做功課時間"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "研究一【　　　】",
-          "value": "【　　　】新加坡和澳洲比較兩國6、7歲華裔兒童近視率，發現\n【　　　】\n❶室內閱讀與做功課的時間：澳洲□新加坡\n❷戶外活動時間：澳洲□新加坡\n❸近視率：澳洲□新加坡【　　　】【　　　】【　　　】"
+          "label": "研究一(2)",
+          "value": "(2)新加坡和澳洲比較兩國6、7歲華裔兒童近視率，發現\n【　　　】\n❶室內閱讀與做功課的時間：澳洲□新加坡\n❷戶外活動時間：澳洲□新加坡\n❸近視率：澳洲□新加坡【　　　】【　　　】【　　　】"
         },
         {
           "interactive_type": "fill_blank",

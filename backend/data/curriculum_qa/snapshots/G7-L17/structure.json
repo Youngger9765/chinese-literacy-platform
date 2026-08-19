@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 1,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -24,7 +25,7 @@
     {
       "interactive_type": "fill_blank",
       "label": "例子",
-      "value": "1.蜘蛛會因天氣變化【　　　】調整【　　　】的大小。\n2.蟋蟀叫聲【　　　】越高，氣溫越高。\n3.下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。\n4.天空的變化\n【　　　】看到日暈表示【　　　】、\n看到月暈表示【　　　】。\n【　　　】看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
+      "value": "1.蜘蛛會因天氣變化【　　　】調整【　　　】的大小。\n2.蟋蟀叫聲【　　　】越高，氣溫越高。\n3.下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。\n4.天空的變化\n(1)看到日暈表示【　　　】、\n看到月暈表示【　　　】。\n(2)看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
     },
     {
       "interactive_type": "display",

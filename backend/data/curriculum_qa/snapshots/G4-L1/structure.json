@@ -1,7 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
+    "checkbox_count": 2,
     "fill_blank_count": 2,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -46,6 +47,7 @@
             "世界大學運動會",
             "全國關注的比賽"
           ],
+          "select_mode": "multi",
           "value": "這個故事發生的情境？【 多選，請打勾 】\n①奧運金牌賽 ②世界大學運動會 ③全國關注的比賽"
         },
         {
@@ -55,18 +57,27 @@
             "忠於自己的球風",
             "保守地打安全球"
           ],
+          "select_mode": "single",
           "value": "在重要比賽，輸球的狀況下，仍然選擇：【 單選，請打勾 】\n①忠於自己的球風 ②保守地打安全球"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "結果",
-          "options": [
-            "贏了",
-            "輸了",
-            "贏得",
-            "失去"
+          "blanks": [
+            {
+              "options": [
+                "贏了",
+                "輸了"
+              ]
+            },
+            {
+              "options": [
+                "贏得",
+                "失去"
+              ]
+            }
           ],
-          "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。\n第一個空格：①贏了 ②輸了\n第二個空格：①贏得 ②失去"
+          "interactive_type": "inline_choice",
+          "label": "結果",
+          "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。"
         }
       ],
       "value": ""

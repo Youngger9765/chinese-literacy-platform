@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -37,7 +38,7 @@
     {
       "interactive_type": "fill_blank",
       "label": "段６ 人口負成長的影響",
-      "value": "1.缺點：工作年齡人口扶養壓力加重，每人平均要負擔的扶養人數【　　　】。\n2.可能的正面影響：【　　　】老年人多，會帶動消費經濟。\n【　　　】減少資源消耗和污染，對環境更【　　　】。"
+      "value": "1.缺點：工作年齡人口扶養壓力加重，每人平均要負擔的扶養人數【　　　】。\n2.可能的正面影響：(1)老年人多，會帶動消費經濟。\n(2)減少資源消耗和污染，對環境更【　　　】。"
     },
     {
       "interactive_type": "fill_blank",

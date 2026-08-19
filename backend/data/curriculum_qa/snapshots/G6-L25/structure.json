@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 6,
     "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -62,6 +63,7 @@
             "不甘心",
             "快樂"
           ],
+          "select_mode": "multi",
           "value": "1.當下感受：【 勾選，可複選 】\n①震驚 ②失落 ③混亂 ④悸動 ⑤勇敢 ⑥不甘心 ⑦快樂"
         },
         {
