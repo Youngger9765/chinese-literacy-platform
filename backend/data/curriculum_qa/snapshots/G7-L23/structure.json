@@ -1,7 +1,7 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
-    "fill_blank_count": 4,
+    "checkbox_count": 2,
+    "fill_blank_count": 3,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -43,9 +43,11 @@
       "interactive_type": "checkbox",
       "label": "觀察結果．末日當日",
       "options": [
-        "什麼都沒有發生"
+        "什麼都沒有發生",
+        "什麼都沒有發生",
+        "外星人出現。"
       ],
-      "value": "①什麼都沒有發生　　②外星人出現。【 單選 】"
+      "value": "①什麼都沒有發生　　②外星人出現。【 單選 】\n①什麼都沒有發生 ②外星人出現。"
     },
     {
       "interactive_type": "fill_blank",
@@ -53,9 +55,13 @@
       "value": "【　　　】原來就不太投入的人怎麼做？→【　　　】\n【　　　】對教主付出很多的人怎麼做？→【　　　】"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "研究結論",
-      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，【 單選 】"
+      "options": [
+        "可能會不看證據，做出匪夷所思的判斷",
+        "比較能根據證據做判斷。"
+      ],
+      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，【 單選 】\n①可能會不看證據，做出匪夷所思的判斷 ②比較能根據證據做判斷。"
     }
   ],
   "title": "信眾與教主",
@@ -83,7 +89,7 @@
     {
       "kind": "pair",
       "label": "觀察結果．末日當日",
-      "value": "①什麼都沒有發生　　②外星人出現。(單選)"
+      "value": "①什麼都沒有發生　　②外星人出現。(單選)\n①什麼都沒有發生 ②外星人出現。"
     },
     {
       "kind": "pair",
@@ -93,7 +99,7 @@
     {
       "kind": "pair",
       "label": "研究結論",
-      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，(單選)"
+      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，(單選)\n①可能會不看證據，做出匪夷所思的判斷 ②比較能根據證據做判斷。"
     }
   ]
 }

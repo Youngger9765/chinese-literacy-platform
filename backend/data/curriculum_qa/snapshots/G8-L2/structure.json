@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "歷史事件與結局",
       "歷史事件與結局"
@@ -18,9 +18,13 @@
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "歷史事件與結局",
-      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？【 請打勾，單選 】"
+      "options": [
+        "感到畏懼，因為敵軍人數遠遠超過自己",
+        "感到興奮，因為他們深信自己一定會獲勝"
+      ],
+      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？【 請打勾，單選 】\n①感到畏懼，因為敵軍人數遠遠超過自己 ②感到興奮，因為他們深信自己一定會獲勝"
     },
     {
       "interactive_type": "fill_blank",
@@ -77,7 +81,7 @@
     {
       "kind": "pair",
       "label": "歷史事件與結局",
-      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？(請打勾，單選)"
+      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？(請打勾，單選)\n①感到畏懼，因為敵軍人數遠遠超過自己 ②感到興奮，因為他們深信自己一定會獲勝"
     },
     {
       "kind": "pair",

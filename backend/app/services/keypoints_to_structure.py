@@ -232,9 +232,15 @@ def _flatten_items(items: list) -> list[dict]:
                 if not isinstance(sub, dict):
                     continue
                 inner = str(sub.get("index") or "").strip()
+                tpl = sub.get("value") if sub.get("value") is not None else sub.get("template")
+                # 行內選擇的子項只有 `options`，沒有 value —— 直接展開的話
+                # template 是 None，那一格什麼都沒有。母項的句子寫著
+                # 「結果，小戴（　）球賽」加上「單選，請打勾」，但沒有東西可以勾。
+                if tpl is None and sub.get("options"):
+                    tpl = _render_choice_cell(sub)
                 out.append({
                     "sub_label": f"{label}-{inner}" if inner else label,
-                    "template": sub.get("value") if sub.get("value") is not None else sub.get("template"),
+                    "template": tpl,
                     "blanks": sub.get("blanks"),
                 })
             head = _with_prompt(item, head)
@@ -257,6 +263,18 @@ def _flatten_items(items: list) -> list[dict]:
                 "blanks": None,
             })
             continue
+        # 小題自己不帶 options，但句子中間的「（　）」各有一組（L0011 的 `sub_items`）。
+        # 頂層那條路已經處理，這條沒有 —— 同一個缺口的兩個位置。
+        if _inline_choices(item):
+            base = str(item.get("value") or item.get("template") or "").strip()
+            parts = [_render_choice_cell(c) for c in _inline_choices(item)]
+            body = "\n".join([x for x in ([base] + parts) if x])
+            out.append({
+                "sub_label": label,
+                "template": _with_prompt(item, body),
+                "blanks": None,
+            })
+            continue
 
         tpl = item.get("template") if item.get("template") is not None else item.get("value")
         blanks = item.get("blanks")
@@ -265,6 +283,19 @@ def _flatten_items(items: list) -> list[dict]:
             tpl, blanks = _with_prompt(item, _render_cell(tpl, blanks)), None
         out.append({"sub_label": label, "template": tpl, "blanks": blanks})
     return out
+
+
+def _inline_choices(node: Any) -> list[dict]:
+    """句子中間那些「（　）」各自的選項。
+
+    同一件事有兩個欄名：`sub_items`（L0011）與 `inline_choices`（L0102）。
+    只認一個，另一個那批課就會顯示「單選，請打勾」但沒有東西可以勾。
+    """
+    for key in ("inline_choices", "sub_items"):
+        v = node.get(key)
+        if isinstance(v, list) and any(isinstance(c, dict) and c.get("options") for c in v):
+            return [c for c in v if isinstance(c, dict) and c.get("options")]
+    return []
 
 
 def _render_choice_cell(question: dict) -> str:
@@ -448,7 +479,26 @@ def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
             if len(cells) >= 3:
                 out.append(cells)
             continue
-        out.append([label, _with_prompt(row, _render_cell(row.get("value"), row.get("blanks")))])
+        # ⚠️ 頂層列也可能自己帶 `options`（L0012：`prompt` + `options` + `answer`）。
+        #    子項那條路早就處理了，這條沒有 —— 於是題幹送出去、選項留在原地，
+        #    畫面顯示「下列哪個是阿耀遇到的問題？【單選】」然後一個空格。
+        #    學生看到「單選」卻沒有東西可選，而且沒有任何錯誤訊息。
+        #    全庫 20 課 / 27 列（2026-08-19 實測）。
+        if row.get("options"):
+            base = str(row.get("value") or "").strip()
+            rendered = _render_choice_cell(row)
+            out.append([label, _with_prompt(row, f"{base}\n{rendered}" if base else rendered)])
+        elif _inline_choices(row):
+            # 行內選擇：句子中間的「（　）」各對應一組選項，選項收在
+            # `sub_items`（L0011）或 `inline_choices`（L0102）。兩個欄名同義。
+            # 不接的話畫面顯示「結果，小戴（　）球賽」加上「單選，請打勾」，
+            # 但沒有任何東西可以勾 —— 學生做不了那一題，而且沒有錯誤訊息。
+            base = str(row.get("value") or "").strip()
+            parts = [_render_choice_cell(c) for c in _inline_choices(row)]
+            body = "\n".join([p for p in ([base] + parts) if p])
+            out.append([label, _with_prompt(row, body)])
+        else:
+            out.append([label, _with_prompt(row, _render_cell(row.get("value"), row.get("blanks")))])
 
         # 有些列在主要內容之後還接一句結語，自己帶一個空格
         # （L0124「→所以製作植物肉需額外添加維生素【　】。」）。不接的話那一格不見。

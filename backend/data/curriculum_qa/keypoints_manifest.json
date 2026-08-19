@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-19T01:33:45.722074+00:00",
+  "generated_at": "2026-08-19T04:09:41.232571+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -25,7 +25,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 3,
-        "checkbox_count": 2,
+        "checkbox_count": 4,
         "row_count": 5
       },
       "gates": {
@@ -53,8 +53,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 2,
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
         "row_count": 5
       },
       "gates": {
@@ -370,10 +370,10 @@
       "title": "想讀書，該從哪裡著手？──阿耀與健豪學長的通信（二）",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "gates": {
@@ -573,8 +573,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 3,
+        "fill_blank_count": 4,
+        "checkbox_count": 5,
         "row_count": 6
       },
       "gates": {
@@ -600,10 +600,10 @@
       "title": "奧運銀牌背後的自我鍛鍊",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 1,
         "row_count": 7
       },
       "gates": {
@@ -774,10 +774,10 @@
       "title": "救援大隊的好幫手",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 7,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 2,
         "row_count": 8
       },
       "gates": {
@@ -948,10 +948,10 @@
       "title": "垃圾食物的誘惑與代價",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 0,
+        "fill_blank_count": 1,
+        "checkbox_count": 3,
         "row_count": 6
       },
       "gates": {
@@ -1696,10 +1696,10 @@
       "title": "物以稀為貴：從「供給」和「需求」談物價波動",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 2,
         "row_count": 7
       },
       "gates": {
@@ -1725,8 +1725,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 5,
+        "fill_blank_count": 3,
+        "checkbox_count": 6,
         "row_count": 5
       },
       "gates": {
@@ -2322,10 +2322,10 @@
       "title": "奧運性別平等這條路",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 0,
+        "fill_blank_count": 4,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "gates": {
@@ -2382,8 +2382,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 1,
+        "fill_blank_count": 3,
+        "checkbox_count": 2,
         "row_count": 8
       },
       "gates": {
@@ -2612,10 +2612,10 @@
       "title": "網紅的電子煙實驗：偽科學的陷阱",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 1,
         "row_count": 8
       },
       "gates": {
@@ -2931,10 +2931,10 @@
       "title": "隱形的征服者",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 7
       },
       "gates": {
@@ -2987,10 +2987,10 @@
       "title": "致台東：一封過客的情書",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 14,
-        "checkbox_count": 0,
+        "fill_blank_count": 9,
+        "checkbox_count": 5,
         "row_count": 15
       },
       "gates": {
@@ -3128,8 +3128,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 6,
+        "fill_blank_count": 4,
+        "checkbox_count": 8,
         "row_count": 7
       },
       "gates": {
@@ -3157,8 +3157,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 5,
-        "checkbox_count": 1,
+        "fill_blank_count": 4,
+        "checkbox_count": 2,
         "row_count": 4
       },
       "gates": {
@@ -3549,10 +3549,10 @@
       "title": "馬拉松王者──基普喬吉",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 5,
+        "checkbox_count": 1,
         "row_count": 7
       },
       "gates": {
@@ -3695,7 +3695,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 6,
-        "checkbox_count": 4,
+        "checkbox_count": 5,
         "row_count": 7
       },
       "gates": {

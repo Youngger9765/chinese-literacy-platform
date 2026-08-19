@@ -1,6 +1,6 @@
 {
   "interaction_profile": {
-    "checkbox_count": 4,
+    "checkbox_count": 5,
     "fill_blank_count": 6,
     "layout": "worksheet_table",
     "mode": "mixed",
@@ -122,9 +122,13 @@
       "value": ""
     },
     {
-      "interactive_type": "display",
+      "interactive_type": "checkbox",
       "label": "得出結論",
-      "value": "350年前含光兄弟遇虎襲的故事很可能是"
+      "options": [
+        "真的",
+        "假的"
+      ],
+      "value": "350年前含光兄弟遇虎襲的故事很可能是\n①真的 ②假的"
     },
     {
       "interactive_type": "fill_blank",
@@ -208,7 +212,7 @@
     {
       "kind": "pair",
       "label": "得出結論",
-      "value": "350年前含光兄弟遇虎襲的故事很可能是"
+      "value": "350年前含光兄弟遇虎襲的故事很可能是\n①真的 ②假的"
     },
     {
       "kind": "pair",

@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 14,
+    "checkbox_count": 5,
+    "fill_blank_count": 9,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "邂逅",
       "移動方式",
@@ -30,27 +30,46 @@
       "value": "【　　　】"
     },
     {
-      "blank_in_label": true,
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "沿途景色\n【 多選 】",
-      "value": ""
+      "options": [
+        "寬廣田野",
+        "遼闊天空",
+        "點點星光",
+        "層層山巒"
+      ],
+      "value": "①寬廣田野 ②遼闊天空 ③點點星光 ④層層山巒"
     },
     {
-      "blank_in_label": true,
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "台北景色\n【 多選 】",
-      "value": ""
+      "options": [
+        "耀眼星空",
+        "狹小天空",
+        "閃爍霓虹",
+        "棋盤街道"
+      ],
+      "value": "①耀眼星空 ②狹小天空 ③閃爍霓虹 ④棋盤街道"
     },
     {
-      "blank_in_label": true,
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "車站景色\n【 多選 】",
-      "value": ""
+      "options": [
+        "青草茶店生意興隆",
+        "麻糬已經售完",
+        "站前廣場冷冷清清",
+        "車站因沙塵一片灰濛濛"
+      ],
+      "value": "①青草茶店生意興隆 ②麻糬已經售完 ③站前廣場冷冷清清 ④車站因沙塵一片灰濛濛"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "作者感受",
-      "value": "較喜歡【　　　】的景色。"
+      "options": [
+        "台北",
+        "台東"
+      ],
+      "value": "較喜歡【　　　】的景色。\n①台北 ②台東"
     },
     {
       "interactive_type": "fill_blank",
@@ -88,10 +107,15 @@
       "value": "作者只是【　　　】，停留的時間有限，終究必須離開。"
     },
     {
-      "blank_in_label": true,
-      "interactive_type": "fill_blank",
+      "interactive_type": "checkbox",
       "label": "分別之景\n【 多選 】",
-      "value": ""
+      "options": [
+        "湛藍天空",
+        "燦爛陽光",
+        "蔚藍海洋",
+        "霓虹夜景"
+      ],
+      "value": "①湛藍天空 ②燦爛陽光 ③蔚藍海洋 ④霓虹夜景"
     }
   ],
   "title": "致台東：一封過客的情書",
@@ -109,22 +133,22 @@
     {
       "kind": "pair",
       "label": "沿途景色\n（多選）",
-      "value": ""
+      "value": "①寬廣田野 ②遼闊天空 ③點點星光 ④層層山巒"
     },
     {
       "kind": "pair",
       "label": "台北景色\n（多選）",
-      "value": ""
+      "value": "①耀眼星空 ②狹小天空 ③閃爍霓虹 ④棋盤街道"
     },
     {
       "kind": "pair",
       "label": "車站景色\n（多選）",
-      "value": ""
+      "value": "①青草茶店生意興隆 ②麻糬已經售完 ③站前廣場冷冷清清 ④車站因沙塵一片灰濛濛"
     },
     {
       "kind": "pair",
       "label": "作者感受",
-      "value": "較喜歡（　）的景色。"
+      "value": "較喜歡（　）的景色。\n①台北 ②台東"
     },
     {
       "kind": "pair",
@@ -164,7 +188,7 @@
     {
       "kind": "pair",
       "label": "分別之景\n（多選）",
-      "value": ""
+      "value": "①湛藍天空 ②燦爛陽光 ③蔚藍海洋 ④霓虹夜景"
     }
   ]
 }

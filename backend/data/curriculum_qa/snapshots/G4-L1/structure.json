@@ -1,6 +1,6 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 4,
     "fill_blank_count": 3,
     "layout": "worksheet_table",
     "mode": "mixed",
@@ -63,14 +63,22 @@
           "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。"
         },
         {
-          "interactive_type": "display",
+          "interactive_type": "checkbox",
           "label": "結果-1",
-          "value": ""
+          "options": [
+            "贏了",
+            "輸了"
+          ],
+          "value": "①贏了 ②輸了"
         },
         {
-          "interactive_type": "display",
+          "interactive_type": "checkbox",
           "label": "結果-2",
-          "value": ""
+          "options": [
+            "贏得",
+            "失去"
+          ],
+          "value": "①贏得 ②失去"
         }
       ],
       "value": ""
@@ -109,11 +117,11 @@
         },
         {
           "label": "結果-1",
-          "value": ""
+          "value": "①贏了 ②輸了"
         },
         {
           "label": "結果-2",
-          "value": ""
+          "value": "①贏得 ②失去"
         }
       ],
       "kind": "section_block",

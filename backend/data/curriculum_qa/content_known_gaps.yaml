@@ -1,7 +1,7 @@
 generated: '2026-08-15'
 issue: 2683
-what_this_is: 二修 175 課裡，有 43 課的閱讀聚光燈服務 null（前端退回 storyToLesson）。成因有兩種，分開登錄：抽取器完全沒產出
-  block（32 課），以及有 block 但全是渲染不出內容的類型（11 課）。
+what_this_is: 二修 175 課裡，有 43 課的閱讀聚光燈服務 null（前端退回 storyToLesson）。成因有兩種，分開登錄：抽取器完全沒產出 block（32 課），以及有 block
+  但全是渲染不出內容的類型（11 課）。
 not_a_bug: 載入層與 adapter 對這些課的行為正確。缺的是來源學習單裡抽取器認得的結構，要補要回到抽取器或原始 DOCX，不是改載入層。
 count: 43
 lessons:
@@ -103,14 +103,14 @@ lessons:
   title: 成長型思維 翻轉失敗的關鍵
 lesson_body_text:
   status: 缺，全部 175 課
-  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader`
-    讀回 paragraphs，而那是一修 `_parsed_2026-05-01` 餵的 —— 那層刪掉後這個循環就斷了。
+  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修
+    `_parsed_2026-05-01` 餵的 —— 那層刪掉後這個循環就斷了。
   impact: 朗讀、閱讀理解、生字、造句四個步驟沒有文本來源（story['paragraphs'] 為空）
   text_is_available: 在原始 DOCX 裡（實測 G4-L10 有 13 段 5019 字），不需要重新徵集素材
   why_not_done_now:
   - 本機只有 76 / 175 份 DOCX（缺 6、7 年級、文言文、品格教育），做不出全量
-  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96
-    份裡誤報 14 份
+  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96 份裡誤報
+    14 份
   next_step: 先取得完整 Drive 來源，再設計一個真的能判對錯的驗證（例如以字數統計欄位或人工標註的 golden set 對照），驗證成立才寫入。沒有對照就抽，可能把學習單題目當成課文，比沒有課文更糟。
 fields_not_extracted:
   what: 二修抽取管線只產出學習單的兩塊（聚光燈、重點表）。下列欄位在 175 課全部是空的 —— 全部 0/175，不是部分缺。
@@ -173,18 +173,17 @@ locks_removed_with_the_first_edition:
     locked_what: Layer-1/Layer-2 以標題合併時的影子覆蓋
     why_removed: 兩層合併機制已整個廢除，這是這次重刷的核心目標
     rebuild_when: 不需重建 —— 只要識別鍵維持 lesson_uid，這個病就不會回來
-  - removed: tests/test_spotlight_adapter_fidelity.py / test_lesson_yaml_answer_mapping_2015.py
-      / test_g7l30_spotlight_step_2080.py / test_tables_field.py
+  - removed: tests/test_spotlight_adapter_fidelity.py / test_lesson_yaml_answer_mapping_2015.py / test_g7l30_spotlight_step_2080.py
+      / test_tables_field.py
     locked_what: 對 _parsed_2026-05-01 與特定一修課號（G7-L30）的抽取忠實度
     why_removed: 來源目錄與該課號都不存在了
-    rebuild_when: 忠實度改由 tests/test_spotlight_to_lesson_content.py 覆蓋，已從 7 課手抄樣本改成
-      143 課真語料
+    rebuild_when: 忠實度改由 tests/test_spotlight_to_lesson_content.py 覆蓋，已從 7 課手抄樣本改成 143 課真語料
 key_reading_passages:
   status: 已按 right_fix 接上（140/175）；本條保留為紀錄，剩餘 35 課見 key_reading_withheld
   resolved_2026_08_16: 段落改由二修 DOCX 第二節按 lesson_uid 抽取，一修那張表不再被讀取
   what: '`backend/data/key_reading_passages.yml` 有 134 段重點朗讀文字，但它是一修資料、以課號（補零寫法 G4-L01）為鍵。'
-  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage`
-    / `tou_paragraph` / `needs_review` 三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
+  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph`
+    / `needs_review` 三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
   what_i_checked: 正規化課號後 115/134 對得上，但那個數字不代表對得『正確』；我一度拿標題比對想確認，實際上條目根本沒有標題欄位 —— 那個比對恆為真，什麼都沒驗到。課文本體也是空的（0/175），所以連『這段文字在不在該課課文裡』都比不了。
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
@@ -193,24 +192,18 @@ key_reading_withheld:
   of: 175
   status: 不是缺口 —— 那個課型本身沒有這個練習
   breakdown:
-    no_section: 28   # 學習單裡根本沒有「念順順」這一節（多為文言文與品格教育），不做計時朗讀
+    no_section: 28
   what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
   why_28_is_not_a_gap: 逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣。沒有老師標的重點段可抽，跟某課沒有影片一樣是正常狀態。
   how_to_close: 無 —— 這 28 份學習單沒有這一節。若日後改版加入，重跑 build_key_reading.py 即可。
-
 key_reading_flagged:
   count: 2
-  lessons: [L0101, L0139]
+  lessons:
+  - L0101
+  - L0139
   what: 二修 DOCX 標的段號與一修對照表差一段。已採用二修（那是二修自己的學習單指示），並在 key_reading.yml 標 needs_human_review + review_reason。
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
-
 mcq_options_emitted_as_guides:
-  # 2026-08-18：**這個缺口已經清空**。原本 6 課（L0033 L0054 L0067 L0070 L0100
-  # L0122 L0129，兩份清單合計）全部經多模態重抽修好，選項正確落在 options。
-  #
-  # 每一課都是 specs/test_spotlight_v2_spec.py 的斷言自己開火要求移除的
-  # （它把已知缺口寫成「斷言仍然壞」，修好就變紅），不是誰決定「算了」。
-  # 條目保留為紀錄，count 0 代表沒有待修的課。
   count: 0
   what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。
   resolved_2026_08_18: 多模態重抽（#2736）
@@ -218,9 +211,8 @@ mcq_options_emitted_as_guides:
 blocks_present_but_none_renderable:
   count: 11
   what: 這些課的 spotlight 只抽到 guide／figure／self_check，沒有 passage 也沒有 exercise —— 有指引文字，沒有要學的東西。
-  why_they_serve_null: 載入層會濾掉沒有圖檔的 referent=table 空框（#2455 的重跑產物），濾完這些課就剩 0 個可渲染 block，schema
-    要求至少 1 個 → fail-closed 回 null。**過濾前它們是 139 課『有內容』的一部分，但那個『有』會渲染成空白頁** —— 回 null
-    讓前端退回 storyToLesson，比送一頁空的出去誠實。
+  why_they_serve_null: 載入層會濾掉沒有圖檔的 referent=table 空框（#2455 的重跑產物），濾完這些課就剩 0 個可渲染 block，schema 要求至少 1 個
+    → fail-closed 回 null。**過濾前它們是 139 課『有內容』的一部分，但那個『有』會渲染成空白頁** —— 回 null 讓前端退回 storyToLesson，比送一頁空的出去誠實。
   lessons:
   - lesson_uid: L0015
     catalog_slot: G4-L4
@@ -308,8 +300,8 @@ resolved:
   thumbnail_url:
     was: 0 / 175
     now: 174 / 175
-    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69
-      課新生成。Imagen 3/4 全系列在本專案已 404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
+    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen
+      3/4 全系列在本專案已 404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
     spec: 400×300 WebP，中位數 19 KB，最大 42 KB —— 與一修同規格
     remaining: 同上那 1 課（沒有課文就沒有場景可畫）
   worksheet_sections:
@@ -329,7 +321,6 @@ resolved:
       課程簡介: DOCX 沒有這一節。不拿課文首段充當，那會讓簡介變成課文重複一次
       詞語複習: 找字方陣，需要能驗證「每個語詞都在方陣裡找得到」才寫入，尚未做
       知識補給站: 抽到 129 課但無交叉驗證可做，標 needs_human_review
-
 bodies_without_a_cross_check:
   count: 29
   of: 175
@@ -337,7 +328,6 @@ bodies_without_a_cross_check:
   how_marked: body.yml 標 needs_review + review_reason，跟通過檢查的 111 課區分開
   why_not_withheld: 課文本身很可能是對的（suspect 那 5 課人工看過都對），扣住等於讓學生沒課文可讀。標註比隱藏誠實。
   how_to_close: 人工確認這 29 課的課文起訖是否正確，或替這兩種版型找出各自的交叉驗證欄位
-
 reading_benchmark_not_in_source:
   count: 0
   of: 175
@@ -345,39 +335,59 @@ reading_benchmark_not_in_source:
   what: reading_benchmark 是每課的朗讀速度分級門檻（字/分鐘）。學習單只印空白的計時表格給學生自己填，沒有任何目標值。
   current_behaviour: 前端 personaConfig.ts 走「課別基準 → 年級預設 → 全域 120」的鏈，缺這欄仍有門檻可用
   how_to_close: 需要教學端提供各年級/各課的目標值，不是抽取問題
-
 lesson_without_a_passage:
   count: 1
   of: 175
   status: 不是缺口 —— 這課本來就沒有課文
   lesson: L0136《會考圖文題實戰》
   what: 這是用 112 年國中教育會考圖文題做的實戰練習課，本身不含閱讀文本。
-
 spreadsheet_title_unmatched:
   count: 13
   of: 175
   what: 這 13 課的課名在 自學教材總表.xlsx 找不到對應列，所以沒有簡介／文體來源（文體另從學習單刊頭的「Level N・文體」取得，故仍有值）。
   breakdown:
-    absent_from_sheet: 9   # 試算表確實沒有這課（用同一套查法對已知存在的課做過正向對照）
-    ambiguous: 2           # 「正太與小豬」有兩列都以它開頭，挑哪一列都是擲骰子
-    multi_text: 2          # 一課取材自試算表的兩列（巨石陣＋摩艾石像），非 1:1
+    absent_from_sheet: 9
+    ambiguous: 2
+    multi_text: 2
   why_not_forced: 課名配對錯一列 = 這課掛上別課的簡介與策略。一修的封面就是這樣接錯的。寧可留白。
   how_to_close: 請教材端在總表補上這 9 課，或確認「正太與小豬」兩列各對應哪一課
-
 spotlight_range_not_found:
   count: 30
   of: 175
   真實狀態: 聚光燈練習實際只有 143/175，不是 175/175 —— 先前的計數把 error 物件當成「有內容」
-  what: |
-    這 30 課的 spotlight.yml 內容是一個錯誤物件（lesson + error: spotlight range not found）。
+  what: '這 30 課的 spotlight.yml 內容是一個錯誤物件（lesson + error: spotlight range not found）。
+
     它被當成資料送到前端，畫面因此只剩「參考課文」而沒有任何練習題，且不會報錯。
-  is_it_a_pipeline_failure: |
-    是。code 裡原本寫「not a pipeline failure, but a structural absence」，那句話是錯的，
+
+    '
+  is_it_a_pipeline_failure: '是。code 裡原本寫「not a pipeline failure, but a structural absence」，那句話是錯的，
+
     而且正因為寫下來了所以沒人去查。逐份開 DOCX 確認：30 課裡 27 課文件中確實有「閱讀聚光燈」，
+
     只有 3 課真的沒有。
-  root_cause: |
-    `scripts/build_lesson_schema.py` 的 `find_spotlight_range()` 用很窄的 marker 開節：
+
+    '
+  root_cause: '`scripts/build_lesson_schema.py` 的 `find_spotlight_range()` 用很窄的 marker 開節：
+
     ◎/※ 加上固定字樣，或「步驟❶」，或特定的小表格。這些學習單把「閱讀聚光燈」印在**刊頭**，
+
     練習本身以「示範１：」「練習1：」開頭 —— 跟課文邊界那個 bug 是同一種版型差異。
+
+    '
   current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
-  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate + ship gate
+  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate
+    + ship gate
+choice_rows_without_options:
+  generated: '2026-08-19'
+  issue: 2736
+  what_this_is: 自稱「單選／多選」但來源真的沒有選項可抽的列。學習單把選項畫在圖上（answer_carrier 記著「紅色 ☑（w:sym Wingdings F0FE）」），文字流裡沒有，所以抽取器讀不到。
+  not_a_bug: 橋與消毒層對這些列的行為正確。2026-08-19 修好的是另外 19 課 24 列 —— 那些來源好好的（options 是 dict、或行內選擇收在 sub_items/inline_choices），只是橋沒接。剩下這幾列要補得回到原始
+    DOCX 或請教材端補印。
+  how_it_looks_to_a_student: 畫面顯示「聽完老師解釋（單選）」加一個空格，沒有東西可以選。⚠️ 這仍然是壞的使用者體驗，只是修法不在我方 code。
+  lessons:
+  - lesson_uid: L0084
+    rows: 3
+    sample: 聽完老師解釋（單選）／長大後（單選）×2
+    answer_carrier: 橘色手寫（字元樣式 af）＋ 紅色 ☑（w:sym Wingdings F0FE），共 6 個 ☑
+  count_lessons: 1
+  count_rows: 3
