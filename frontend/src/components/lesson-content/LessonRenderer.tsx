@@ -62,6 +62,14 @@ interface ExerciseMeta {
   gradable: boolean; // participates in allDone gating (custom/needsReview excluded)
 }
 
+/**
+ * Exercise kinds paginated one-at-a-time in the answer column (see the long comment at
+ * the `singleQuestionBlocks` useMemo below for why fill_in_blank joined multiple_choice
+ * here). Module-level so its identity is stable across renders — declaring it inside the
+ * component would need to be a useMemo dependency for no benefit.
+ */
+export const PAGINATED_QUESTION_KINDS = new Set(['multiple_choice', 'fill_in_blank']);
+
 /** Pre-compute per-block render metadata (paragraph numbers, figure indices, exercise
  *  gradability) in one pass so the render path is pure. */
 function buildBlockMeta(blocks: Block[]): {
@@ -228,41 +236,48 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   // 目前顯示第幾題。
   const [exerciseIdx, setExerciseIdx] = React.useState(0);
 
-  // ⚠️ **只有整份都是選擇題才分頁。** Young 要的是「閱讀理解這邊都是選擇題，
-  // 可以一題一題出嗎」——那是針對一串同型的小題。
-  // 一份混著重點表、造句、排序的練習分頁之後，學生第一頁看到的可能是
-  // 一張半格的表，而其餘的都藏起來了；第一版就是這樣，弄紅了兩條
-  // 「這一課有可作答的輸入」的既有測試。那兩條紅是對的，不是測試該改。
+  // ⚠️ **分頁對象是「一串同型小題」，不是「整份都是選擇題」。** Young 要的是
+  // 「閱讀理解這邊都是選擇題，可以一題一題出嗎」——那是針對一連串各自獨立、
+  // 一題一答的小題。重點表、造句(guided_steps/graphic_text_integration/
+  // keypoints_table/custom)這類**結構化的整份工作單**才不分頁：分頁之後
+  // 學生第一頁看到的可能是半張表，其餘藏起來；第一版就是這樣，弄紅了
+  // 「這一課有可作答的輸入」的既有測試（見下方 `混著非選擇題時` 那組）。
   //
-  // ⚠️ 判準是「**選擇題有幾題**」，不是「整份都是選擇題」。
-  // 第一版寫 `.every(...)`，而 20001 這一課同時有 5 題 MCQ 和 6 個聚光燈 block ——
-  // 兩者都算 exercise，於是判準正確地拒絕，畫面照樣一次列出五題。
-  // 部署了、chunk 裡有那段 code、測試也綠，就是不會發生：測試的 fixture 全是 MCQ。
-  const mcqBlocks = React.useMemo(
+  // ⚠️ 「小題」不只 multiple_choice。第一版判準只認 `kind === 'multiple_choice'`，
+  // 而 20011（以及全庫 175 課裡 126 課、72%）同時有 5 題 MCQ **和** 8 題
+  // fill_in_blank（語詞應用：一句話 + 詞庫按鈕，結構跟 MCQ 一模一樣，
+  // 一句就是一題）。分頁分母對了（`1/5`），可是 8 個 fill_in_blank 區塊
+  // 全部不算「選擇題」，被「非選擇題照舊全顯示」那條規則整批放行 ——
+  // 部署了、chunk 裡有那段 code、測試也綠，畫面還是一次列出 9 題
+  // （1 MCQ 分頁正確 + 8 fill_in_blank 照舊全開）。是線上真資料才看得出來：
+  // 本機 fixture 從沒餵過 fill_in_blank。
+  const singleQuestionBlocks = React.useMemo(
     () => exerciseBlocks.filter(
-      (b) => (b as { question?: { kind?: string } }).question?.kind === 'multiple_choice',
+      (b) => PAGINATED_QUESTION_KINDS.has(
+        (b as { question?: { kind?: string } }).question?.kind ?? '',
+      ),
     ),
     [exerciseBlocks],
   );
-  const paginateExercises = mcqBlocks.length > 1;
+  const paginateExercises = singleQuestionBlocks.length > 1;
   // 單欄分支畫的是 `lesson.blocks`（課文與練習混在一起）。只換掉練習那幾個，
   // 課文區塊照舊全部顯示 —— 學生要邊看課文邊作答。
   const singleVisibleBlocks = React.useMemo(() => {
     if (!paginateExercises) return lesson.blocks;
-    const shown = mcqBlocks[exerciseIdx];
-    return lesson.blocks.filter((b) => !mcqBlocks.includes(b) || b === shown);
-  }, [lesson.blocks, mcqBlocks, exerciseIdx, paginateExercises]);
+    const shown = singleQuestionBlocks[exerciseIdx];
+    return lesson.blocks.filter((b) => !singleQuestionBlocks.includes(b) || b === shown);
+  }, [lesson.blocks, singleQuestionBlocks, exerciseIdx, paginateExercises]);
 
   const visibleExercises = React.useMemo(
     () => {
       if (!paginateExercises) return exerciseBlocks;
-      // 只換掉選擇題那幾個；重點表、造句這類非選擇題照舊全部顯示 ——
+      // 只換掉小題那幾個；重點表、造句這類結構化工作單照舊全部顯示 ——
       // 把它們藏到第二頁會讓學生第一頁看到半張表（第一版就是這樣，
       // 弄紅兩條「這一課有可作答的輸入」的既有測試）。
-      const shown = mcqBlocks[exerciseIdx];
-      return exerciseBlocks.filter((b) => !mcqBlocks.includes(b) || b === shown);
+      const shown = singleQuestionBlocks[exerciseIdx];
+      return exerciseBlocks.filter((b) => !singleQuestionBlocks.includes(b) || b === shown);
     },
-    [exerciseBlocks, mcqBlocks, exerciseIdx, paginateExercises],
+    [exerciseBlocks, singleQuestionBlocks, exerciseIdx, paginateExercises],
   );
 
   // Single-column card header: 聚光燈作答 when the flow carries exercises, otherwise
@@ -393,14 +408,14 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                       上一題
                     </button>
                     <span className="text-sm text-on-surface-variant tabular-nums">
-                      {exerciseIdx + 1} / {mcqBlocks.length}
+                      {exerciseIdx + 1} / {singleQuestionBlocks.length}
                     </span>
                     <button
                       type="button"
                       onClick={() =>
-                        setExerciseIdx((i) => Math.min(mcqBlocks.length - 1, i + 1))
+                        setExerciseIdx((i) => Math.min(singleQuestionBlocks.length - 1, i + 1))
                       }
-                      disabled={exerciseIdx >= mcqBlocks.length - 1}
+                      disabled={exerciseIdx >= singleQuestionBlocks.length - 1}
                       className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
                     >
                       下一題
@@ -446,12 +461,12 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                     上一題
                   </button>
                   <span className="text-sm text-on-surface-variant tabular-nums">
-                    {exerciseIdx + 1} / {mcqBlocks.length}
+                    {exerciseIdx + 1} / {singleQuestionBlocks.length}
                   </span>
                   <button
                     type="button"
-                    onClick={() => setExerciseIdx((i) => Math.min(mcqBlocks.length - 1, i + 1))}
-                    disabled={exerciseIdx >= mcqBlocks.length - 1}
+                    onClick={() => setExerciseIdx((i) => Math.min(singleQuestionBlocks.length - 1, i + 1))}
+                    disabled={exerciseIdx >= singleQuestionBlocks.length - 1}
                     className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
                   >
                     下一題
