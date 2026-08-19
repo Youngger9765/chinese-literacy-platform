@@ -52,9 +52,9 @@ private/curriculum-source/
 | File | Role |
 |------|------|
 | `scripts/ingest_curriculum.py` | Parser: xlsx + docx → yml |
-| `scripts/check_curriculum_drift.py` | Drift detector: re-parse + diff vs backend/data/ |
-| `backend/data/curriculum/INGESTION_MANIFEST.yml` | Active version + parser-managed field list |
-| `.github/workflows/curriculum-drift-check.yml` | Weekly cron + PR gate |
+| `scripts/check_curriculum_drift.py` | ⛔ **無法執行**（來源目錄已不存在）— 見下方「二修之後誰在守」 |
+| `backend/data/curriculum/INGESTION_MANIFEST.yml` | 一修的 active version + parser-managed 欄位清單 |
+| ~~`.github/workflows/curriculum-drift-check.yml`~~ | **已刪除（#2746）** — 它只會 skip 然後報綠 |
 | `docs/curriculum-pipeline.md` | This doc |
 
 ---
@@ -168,3 +168,36 @@ CI runs this weekly + on every PR touching `backend/data/lessons/` or `curriculu
 - Issue #1624 — parser + INGESTION_MANIFEST + drift detector
 - Issue #1620, #1621 — manual yml align (the bugs this pipeline prevents)
 - `backend/data/schemas/lesson-content-v2.schema.json` — downstream content schema
+
+
+---
+
+## 二修之後誰在守（#2746，2026-08-19）
+
+`.github/workflows/curriculum-drift-check.yml` 已刪除。它每週排程 + 每個碰
+`backend/data/lessons/**` 的 PR 都跑，但**第一步就注定失敗**：它從
+`INGESTION_MANIFEST.yml` 讀 `source_dir`，那是
+`private/curriculum-source/2026-05-01/…` —— runner 沒有（`private/` gitignored），
+**開發機也沒有**（二修把它換成 `private/curriculum-source/_SOT/`）。找不到就 `skip=true`，
+然後 job 報 ✅。實測最近 8 次全部走這條，`Run drift detector` 步驟狀態是 `skipped`。
+
+⚠️ 順帶更正一個當時的推測：**這個 repo 是 PUBLIC**，所以「GHA 只留 public repo」那條成本原則
+並不禁止它。刪掉的理由與成本無關，是**它做不到它宣稱在做的事** —— 而且不是「在 CI 做不到」，
+是**在任何地方都做不到**（`python3 scripts/check_curriculum_drift.py` 本機同樣 exit 2）。
+
+那它守的東西現在誰在守：
+
+| 它宣稱守的 | 現在誰守 | 在哪跑 |
+|---|---|---|
+| 已抽取的課 vs 它宣稱的原稿 | `sot_drift_check.py --offline`（SOT_STALE）| `specs/run-ci.sh` **Gate 6**，每次 push 前 |
+| 本機原稿快照 vs Drive | `sot_drift_check.py`（完整，SOT_DRIFT）| 排程／手動 —— 要 rclone 憑證，CI 本來就做不到 |
+| `backend/data/curriculum/lessons/*.yml`（OMO 課程 catalog）| `backend/specs/test_omo_catalog_spec.py` | `specs/run-ci.sh` Gate 2 |
+
+第三列是**原本會被漏掉的那一半**：那 158 個一修 catalog 檔仍然被
+`omo_lesson_catalog._load_omo_lessons()` 讀去給 OMO 拍照批改比對課程，而它們的來源已經刪了
+—— 所以「重跑 parser 再 diff」對它們**永遠無解**，不管在哪個環境。repo 內答得出來的是
+「catalog 還在不在、欄位齊不齊、有多少 code 還對得到服務中的課」，那就是新 spec 做的事。
+
+🔴 **順帶量到一個既有缺陷（不是這次改動造成的，另案）**：那 148 筆 catalog 裡
+**只有 126 筆的 `lesson_code` 對得到服務中的課**，標題比對只有 117 筆對得上 ——
+二修 renumber 之後，OMO 有 22 個課碼指向不存在或別的課。已在 spec 裡釘成只能變好的 ratchet。
