@@ -185,7 +185,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     };
     return (
       <>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.question}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <ChoiceInput
           options={q.options}
           value={typeof value === 'number' ? value : null}
@@ -217,7 +217,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     const arr = Array.isArray(value) ? (value as number[]) : [];
     return (
       <div>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.question}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <MultiChoiceInput options={q.options} value={arr} onChange={(v) => onValueChange(v)} verdict={verdict} />
         {!submitted ? (
           <button
@@ -240,7 +240,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     const perm = Array.isArray(value) ? (value as number[]) : q.items.map((_, i) => i);
     return (
       <div>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.instruction}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.instruction}</p>
         <OrderingInput items={q.items} value={perm} onChange={(v) => onValueChange(v)} verdict={verdict} />
         {!submitted ? (
           <button
