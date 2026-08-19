@@ -15,6 +15,10 @@ import { useLearningContext } from '../../layouts/LearningLayout';
 import { ComprehensionResult } from '../../types';
 import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
 import LessonRenderer from '../../components/lesson-content/LessonRenderer';
+import { WrongAnswerReviewList } from '../../components/learning/WrongAnswerReviewList';
+import { firstTryScore, type FirstTryRecord } from '../../utils/questionReview';
+import { absorbVerdicts, reviewItemsOf, type ReviewableBlock } from './comprehensionReview';
+import { normalizeChoiceAnswer } from '../../components/lesson-content/lessonGrading';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
 
@@ -29,6 +33,9 @@ const ComprehensionMcqPage: React.FC = () => {
 
   const [mcqDone, setMcqDone] = useState(false);
   const [mcqResult, setMcqResult] = useState<{ score: number; total: number } | null>(null);
+  // 第一次作答的對錯。重試不覆蓋 —— 學生一定會重試到對，
+  // 拿「當下還錯的」當錯題來源，那個集合到最後恆為空（#2784 就是這樣壞的）。
+  const [firstTry, setFirstTry] = useState<FirstTryRecord<string, string>[]>([]);
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
@@ -59,10 +66,39 @@ const ComprehensionMcqPage: React.FC = () => {
   // and re-fires the effect. Confirmed via isolated repro (#2779 investigation): render
   // count grows unbounded, "Maximum update depth exceeded" logged repeatedly, tab pegged at
   // ~95% CPU. `useCallback` here is load-bearing, not a style nit.
+  // ⚠️ 這裡以前是 `handleMcqComplete(total, total)` —— 寫死滿分。
+  // 學生錯幾題都記 100%，而那個數字會流進學習紀錄與老師端報表。
+  // 現在用第一次作答的真實分數（#2790）。
   const handleLessonRendererComplete = useCallback(() => {
-    const total = selectedStory?.multipleChoice?.length ?? 0;
-    handleMcqComplete(total, total);
-  }, [selectedStory, handleMcqComplete]);
+    const { correct, total } = firstTryScore(firstTry);
+    const fallback = selectedStory?.multipleChoice?.length ?? 0;
+    handleMcqComplete(correct, total || fallback);
+  }, [firstTry, selectedStory, handleMcqComplete]);
+
+  // lesson.blocks → 計分/錯題卡片需要的最小形狀。`normalizeChoiceAnswer` 是
+  // 這個 repo 判定選擇題正解的單一權威（answer 可能是索引也可能是 'A' 字母）。
+  const reviewableBlocksOf = useCallback((lesson: { blocks?: unknown[] } | null | undefined): ReviewableBlock[] => {
+    if (!lesson?.blocks) return [];
+    return (lesson.blocks as Array<Record<string, any>>)
+      .filter((b) => b?.type === 'exercise' && b?.question?.kind === 'multiple_choice')
+      .map((b) => ({
+        id: String(b.id),
+        stem: String(b.question?.prompt ?? b.question?.stem ?? ''),
+        options: (b.question?.options ?? []).map((o: unknown) =>
+          typeof o === 'string' ? o : String((o as Record<string, unknown>)?.text ?? ''),
+        ),
+        answerIndex: normalizeChoiceAnswer(b.answer),
+      }));
+  }, []);
+
+  // LessonRenderer 每次判定都會呼叫 onExerciseChange。這裡只把「第一次」收下來。
+  const absorbInto = useCallback(
+    (e: { answers: Record<string, unknown>; feedback: Record<string, boolean | null> }, lesson: unknown) => {
+      const blocks = reviewableBlocksOf(lesson as { blocks?: unknown[] });
+      setFirstTry((prev) => absorbVerdicts(prev, e.feedback ?? {}, e.answers ?? {}, blocks));
+    },
+    [reviewableBlocksOf],
+  );
 
   const handleNext = useCallback(() => {
     const result: ComprehensionResult = {
@@ -136,9 +172,25 @@ const ComprehensionMcqPage: React.FC = () => {
             story={selectedStory}
             lessonCode={selectedStory.lesson_code || selectedStory.id}
             onComplete={handleLessonRendererComplete}
+            onExerciseChange={(e) => absorbInto(e, comprehensionLesson)}
           />
           {mcqDone ? (
-            <NextStepFooter onNext={handleNext} />
+            <>
+              {/* 🔴 只在 mcqDone 之後 render —— 作答中不可能看到正解。
+                  `WrongAnswerReviewList` 自己也 fail-closed（revealed 沒明確傳 true
+                  就什麼都不畫），這裡是第二道。 */}
+              <WrongAnswerReviewList
+                revealed
+                items={reviewItemsOf(firstTry, reviewableBlocksOf(comprehensionLesson)).map((it) => ({
+                  id: it.id,
+                  promptText: it.stem,
+                  correct: false,
+                  correctAnswerText: it.correctAnswer,
+                  studentAnswerText: it.studentAnswer,
+                }))}
+              />
+              <NextStepFooter onNext={handleNext} />
+            </>
           ) : null}
         </div>
       );
