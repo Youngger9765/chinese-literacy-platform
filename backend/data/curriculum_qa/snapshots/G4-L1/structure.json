@@ -1,7 +1,7 @@
 {
   "interaction_profile": {
-    "checkbox_count": 4,
-    "fill_blank_count": 3,
+    "checkbox_count": 3,
+    "fill_blank_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -58,27 +58,15 @@
           "value": "在重要比賽，輸球的狀況下，仍然選擇：【 單選，請打勾 】\n①忠於自己的球風 ②保守地打安全球"
         },
         {
-          "interactive_type": "fill_blank",
-          "label": "結果",
-          "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。"
-        },
-        {
           "interactive_type": "checkbox",
-          "label": "結果-1",
+          "label": "結果",
           "options": [
             "贏了",
-            "輸了"
-          ],
-          "value": "①贏了 ②輸了"
-        },
-        {
-          "interactive_type": "checkbox",
-          "label": "結果-2",
-          "options": [
+            "輸了",
             "贏得",
             "失去"
           ],
-          "value": "①贏得 ②失去"
+          "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。\n第一個空格：①贏了 ②輸了\n第二個空格：①贏得 ②失去"
         }
       ],
       "value": ""
@@ -113,15 +101,7 @@
         },
         {
           "label": "結果",
-          "value": "(單選，請打勾)\n結果，小戴（　）球賽，\n卻（　）全國人民的尊敬。"
-        },
-        {
-          "label": "結果-1",
-          "value": "①贏了 ②輸了"
-        },
-        {
-          "label": "結果-2",
-          "value": "①贏得 ②失去"
+          "value": "(單選，請打勾)\n結果，小戴（　）球賽，\n卻（　）全國人民的尊敬。\n第一個空格：①贏了 ②輸了\n第二個空格：①贏得 ②失去"
         }
       ],
       "kind": "section_block",

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-19T04:09:41.232571+00:00",
+  "generated_at": "2026-08-19T13:22:15.685834+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -24,8 +24,8 @@
       "layout": {
         "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 3,
-        "checkbox_count": 4,
+        "fill_blank_count": 2,
+        "checkbox_count": 3,
         "row_count": 5
       },
       "gates": {

@@ -42,6 +42,11 @@ def parse_checkbox_options(text: str) -> dict | None:
         # 只 lstrip 會留下它 → 學生看到「積極的面對與復健 □」。
         # ⚠️ 尾巴那個 □ 是下一項的干擾項標記，而下一項是從**原始 text** 讀 prefix
         #    判斷的（見下方 is_distractor），所以在這裡拿掉不影響誰是正解。
+        # chunk 也會吃到下一行開頭的引導字（「第二個空格：」）——
+        # 那是**行內選擇**的群組標籤，不是這個選項的內容。
+        # 不切的話學生看到的選項是「輸了\n第二個空格：」。
+        # 換行之後若還有文字但沒有圈號，那段屬於下一組，不屬於這一項。
+        chunk = chunk.split("\n")[0]
         clean = _CIRCLED_NUM_RE.sub("", chunk, count=1).strip(" \u3000□■☑▢").strip()
         if not clean:
             continue

@@ -139,7 +139,14 @@ def get_lesson_asset(lesson_uid: str, filename: str) -> Response:
     if not versions:
         raise HTTPException(status_code=404, detail="Not found")
 
-    path = versions[-1] / "assets" / filename
+    # 從最新版本往回找第一個有這個檔的版本。只看 `versions[-1]` 的話，
+    # 二修沒搬過去的資產（175 張封面全在 v2/assets/）一律 404 ——
+    # 而它們是課的一部分，不是版本的一部分。
+    path = next(
+        (v / "assets" / filename for v in reversed(versions)
+         if (v / "assets" / filename).is_file()),
+        versions[-1] / "assets" / filename,   # 都沒有時維持原本的 404 路徑
+    )
     # resolve() before the containment check: a symlink inside assets/ would
     # otherwise pass the string checks above and read outside the tree.
     if not path.resolve().is_file() or _LESSONS_ROOT.resolve() not in path.resolve().parents:

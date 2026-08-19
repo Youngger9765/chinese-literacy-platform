@@ -60,3 +60,36 @@ describe('LessonRenderer 的卡片標題要跟著它服務的 step', () => {
     expect(screen.getByText('閱讀聚光燈')).toBeTruthy();
   });
 });
+
+/**
+ * ⚠️ 上面那組只涵蓋單欄分支 —— 測試資料沒有課文區塊，所以走單欄。
+ * 閱讀理解頁**有**課文，走雙欄，而雙欄的欄標題是另一處寫死的字串。
+ * 上一個 commit 只改了單欄，本機全綠，**線上 QA 才抓到標題還是「閱讀聚光燈」**。
+ *
+ * 這組帶課文區塊強制走雙欄。沒有它，同樣的半修會再發生一次而測試不會說話。
+ */
+describe('雙欄版面的欄標題也要跟著 step', () => {
+  const WITH_READING = {
+    lessonCode: 'G4-L10',
+    title: null,
+    blocks: [
+      { id: 'p1', type: 'passage', kind: 'passage', text: '十秒鐘，看似短暫。' },
+      LESSON.blocks[0],
+    ],
+  };
+
+  it('閱讀理解頁的作答欄標題是「閱讀理解」', () => {
+    render(
+      <LessonRenderer lesson={WITH_READING as never} lessonCode="G4-L10" sectionLabel="閱讀理解" />,
+    );
+    expect(screen.queryByText('閱讀聚光燈')).toBeNull();
+    expect(screen.getAllByText('閱讀理解').length).toBeGreaterThan(0);
+  });
+
+  it('聚光燈頁照舊（正向對照）', () => {
+    render(
+      <LessonRenderer lesson={WITH_READING as never} lessonCode="G4-L10" sectionLabel="閱讀聚光燈" />,
+    );
+    expect(screen.getAllByText('閱讀聚光燈').length).toBeGreaterThan(0);
+  });
+});
