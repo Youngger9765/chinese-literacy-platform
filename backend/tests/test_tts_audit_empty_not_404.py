@@ -23,7 +23,6 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from app.auth.dependencies import require_role  # noqa: E402
 from app.main import app  # noqa: E402
 from app.routes import tts_audit  # noqa: E402
 
@@ -32,20 +31,23 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def _as_admin():
-    """這支端點掛 `require_role("system_admin")`。
+    """這支端點掛 `require_role("system_admin")`（`tts_audit.router` 的 router 層依賴）。
 
     這裡測的是「沒有資料時該回什麼」，不是權限 —— 權限有它自己的測試。
     不繞過的話三條都會停在 401，看起來像端點壞掉。
+
+    ⚠️ **直接拿 router 上的那個依賴實例**，不要去掃 `app.routes` 比對函式名。
+    `require_role(...)` 每次呼叫回新的 closure，而 router 層的依賴不保證出現在
+    `route.dependencies` 上 —— 掃描版本在本機過、在 CI 全部 401
+    （2026-08-19 實測）。這個版本沒有那個不確定性：它就是路由掛的那一個物件。
     """
-    dep = require_role("system_admin")
-    app.dependency_overrides[dep] = lambda: None
-    # `require_role` 每次呼叫回新物件，所以也要蓋掉路由上實際掛的那一個
-    for route in app.routes:
-        for d in getattr(route, "dependencies", []) or []:
-            if getattr(d.dependency, "__qualname__", "").startswith("require_role"):
-                app.dependency_overrides[d.dependency] = lambda: None
+    deps = [d.dependency for d in tts_audit.router.dependencies]
+    assert deps, "router 沒有依賴 —— 這個 fixture 在繞過一個不存在的東西，先查清楚"
+    for dep in deps:
+        app.dependency_overrides[dep] = lambda: None
     yield
-    app.dependency_overrides.clear()
+    for dep in deps:
+        app.dependency_overrides.pop(dep, None)
 
 
 def test_missing_file_reads_as_zero_entries_not_404(tmp_path, monkeypatch):
