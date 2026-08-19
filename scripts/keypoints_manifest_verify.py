@@ -46,13 +46,15 @@ PROFILE_KEYS = ("mode", "layout", "fill_blank_count", "checkbox_count")
 # allowed through. Fixing one means deleting its line; the gate fails on a stale
 # entry too, so the list cannot quietly outlive the bug.
 #
-#   G4-L5 (L0016 《這是什麼「意思」？》) — a matching exercise: eight sentences,
-#   each answered with a letter from an `option_bank` of eight glosses. The
-#   bridge has no case for `layout: matrix` + `option_bank`, so the 配對 column
-#   is served as plain text — the student is shown G, H, D, F, B, C, A, E, which
-#   is the answer key, and has nothing to fill in. Content defect in the
-#   converter, not in this gate.
-DISPLAY_ONLY_LESSONS = frozenset({"G4-L5"})
+# 渲染成 display_only（整課不能作答）的課，必須具名並寫理由。
+# **修好了要把名字刪掉** —— 這個名單只能縮短，不能當免死金牌。
+#
+# G4-L5（L0016）已於 2026-08-19 修復並移除：橋補上 `layout: matrix` + `option_bank`
+# 的 case，8 個配對題從 display 變成可作答的 checkbox，答案代號不再送到學生端。
+# 那個缺陷是這道 ratchet 加進來當天就抓到的 —— 它的訊息直接寫著
+# 「named in DISPLAY_ONLY_LESSONS but is interactive again — delete the entry」。
+DISPLAY_ONLY_LESSONS: frozenset[str] = frozenset()
+
 
 
 def _profile_slice(profile: dict[str, Any] | None) -> dict[str, Any]:

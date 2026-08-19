@@ -374,6 +374,17 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
                                        is_last=(i == len(rest) - 1))
                 cells.append(_render_choice_cell({"options": opts, "answers": answers}))
                 continue
+            # 配對題：整份共用一組選項，收在 `option_bank`，而這一格放的是**答案代號**。
+            # 沒有這個 case 的話代號會被當純文字送出去 —— L0016 八題的 A–H 全印在
+            # 學生眼前（他們手上有印著對照表的紙本），而且整課 17 個元素都是 display，
+            # 一題都不能作答（2026-08-19 實測）。
+            # 轉成選擇題記法：選項來自 bank、這一格的代號是答案。答案之後由消毒器
+            # 擋在學生端外（`_sanitize_row_for_client` 的白名單），作答後才由
+            # `/structure/grade` 回傳 —— 那條路已經鋪好了。
+            bank = kp.get("option_bank")
+            if isinstance(bank, dict) and str(text).strip() in bank:
+                cells.append(_render_choice_cell({"options": bank, "answers": str(text).strip()}))
+                continue
             blanks = _sidecar(row, key, "_blanks", is_last=(i == len(rest) - 1))
             cells.append(_render_cell(text, blanks))
         if len(cells) >= 3:

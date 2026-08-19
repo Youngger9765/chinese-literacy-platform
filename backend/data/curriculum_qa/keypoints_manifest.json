@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-19T00:29:39.066413+00:00",
+  "generated_at": "2026-08-19T01:13:33.913075+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -11,7 +11,7 @@
     "known_gap_count": 0,
     "failure_count": 0,
     "unreviewed": 34,
-    "display_only": 1
+    "display_only": 0
   },
   "raw_failures": [],
   "lessons": [
@@ -321,10 +321,10 @@
       "title": "這是什麼「意思」？",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "display_only",
+        "mode": "checkbox",
         "layout": "worksheet_table",
         "fill_blank_count": 0,
-        "checkbox_count": 0,
+        "checkbox_count": 8,
         "row_count": 9
       },
       "gates": {},
