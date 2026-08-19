@@ -218,11 +218,18 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* Hero: thumbnail + title */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-            <img
-              src={story.thumbnail}
-              alt={`《${story.title}》課文封面圖`}
-              className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
-            />
+            {/* 二修的 175 課一張封面都沒有，`story.thumbnail` 是空字串 ——
+                `<img src="">` 在瀏覽器裡就是一個破圖 icon，看起來像壞掉，
+                而不是像「這課還沒有封面」。缺資料的狀態不要畫成錯誤狀態。
+                上午修過圖書館列表（StoryCard），課內這個是第二處。 */}
+            {story.thumbnail ? (
+              <img
+                src={story.thumbnail}
+                alt={`《${story.title}》課文封面圖`}
+                className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : null}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
