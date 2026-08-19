@@ -17,12 +17,15 @@ owns_data:
   - backend/data/lessons/*/v*/spotlight.yml
   - backend/data/spotlight_fingerprints.json
   - backend/data/curriculum_qa/spotlight_manifest.json
+  - backend/data/curriculum_qa/content_known_gaps.yaml
 spec_tests:
   - backend/specs/test_spotlight_block_model_spec.py
   - backend/specs/test_spotlight_v2_spec.py
   - backend/specs/test_pse_mcq_parser_spec.py
   - backend/specs/test_spotlight_manifest_spec.py
-related_issues: [2205, 2727, 2747]
+legacy_tests:
+  - backend/tests/test_spotlight_known_gaps_ledger_2772.py
+related_issues: [2205, 2727, 2747, 2772]
 source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
 last_reviewed: 2026-06-20
