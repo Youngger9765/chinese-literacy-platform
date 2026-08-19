@@ -139,16 +139,12 @@ class TestNoAbsoluteGcsUrlReachesTheClient:
             assert url.startswith("/assets/"), (
                 f"{lesson.get('lesson_uid')} 的封面不是走代理：{url}"
             )
-        # 掃到 0 筆是目前的真實狀況，不當失敗；但要留下痕跡，見下一條。
-
-    def test_records_that_no_lesson_has_a_cover_yet(self):
-        """把「一張封面都沒有」寫成斷言，這樣它變回來的時候有人知道。
-
-        這條不是要求封面存在 —— 是把現況釘住。哪天封面補上了，這條會紅，
-        紅的訊息會告訴你去把上面那條的涵蓋數看一眼。
-        """
-        with_cover = [l for l in self._served_lessons() if l.get("thumbnail_url")]
-        assert not with_cover, (
-            f"有 {len(with_cover)} 課出現封面了 —— "
-            "把這條刪掉，並確認 test_thumbnail_url_is_relative_when_present 真的掃到它們"
+        # 2026-08-19：封面回來了（175 課，先前全部因為只查 v3/assets/ 而回 None）。
+        # 原本這裡掃到 0 筆也算過，旁邊靠一條「目前一張都沒有」的哨兵留痕跡。
+        # 哨兵已刪 —— 它自己的訊息就說了封面回來時該這麼做。
+        # 現在改成硬要求：掃不到就是這條在測空氣，不是「剛好沒有封面」。
+        assert checked >= 150, (
+            f"只掃到 {checked} 課有封面 —— 這條在測空氣。"
+            "封面應該有 175 課（見 test_lesson_cover_served_2767.py）"
         )
+
