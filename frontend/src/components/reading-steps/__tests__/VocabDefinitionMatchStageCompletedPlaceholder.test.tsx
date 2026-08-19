@@ -43,6 +43,35 @@ describe('StageCompletedPlaceholder — #2773 first-try classification', () => {
     expect(screen.getByText(/你選了/)).toBeInTheDocument();
   });
 
+  // Caught live on the #2773 PR preview itself (docs/evidence/qa-2026-08-20/
+  // vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png) — THIS
+  // exact screen showed "你選了 龍爭虎鬥 → 正確：龍爭虎鬥" (the correct word
+  // on both sides) because studentWord read `answeredWordIdx` (the LATEST,
+  // now-correct, retry) instead of `firstTryAnsweredWordIdx` (the actual
+  // first wrong pick). Fixture: answeredWordIdx=0 (correct word after
+  // retry), firstTryAnsweredWordIdx=1 (the real first wrong pick) — the two
+  // words differ on purpose so this can't pass by coincidence.
+  it('shows the actual FIRST wrong pick, not the word retried correctly afterward', () => {
+    const answers: AnswerRecord[] = [
+      { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: false, firstTryAnsweredWordIdx: 1 },
+      { defIndex: 1, answeredWordIdx: 1, correct: true, firstTryCorrect: true, firstTryAnsweredWordIdx: null },
+    ];
+    render(
+      <StageCompletedPlaceholder
+        title="選擇題"
+        vocab={VOCAB}
+        answers={answers}
+        otherModeLabel="拖拉配對"
+        otherDone={false}
+        onGoOther={noop}
+        onRetry={noop}
+      />,
+    );
+    const item0Card = screen.getByText(VOCAB[0].definition).closest('div');
+    expect(item0Card?.textContent).toContain('捶胸頓足');
+    expect(item0Card?.textContent).not.toContain('你選了 龍爭虎鬥');
+  });
+
   it('shows a perfect score only when every item was correct on the first try', () => {
     const answers: AnswerRecord[] = [
       { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: true },

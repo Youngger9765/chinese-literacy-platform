@@ -107,8 +107,11 @@ export function StageCompletedPlaceholder({
   const items: WrongAnswerReviewItem[] = answers.map((ans) => {
     const item = vocab[ans.defIndex];
     const isFirstTryCorrect = firstTryOf(ans);
-    const studentWord =
-      !isFirstTryCorrect && ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word ?? null : null;
+    // firstTryAnsweredWordIdx, not answeredWordIdx (the LATEST attempt) —
+    // see the same note in VocabDefinitionMatchSummary.tsx. This is the
+    // exact screen the #2773 PR preview caught the bug on.
+    const wrongWordIdx = ans.firstTryAnsweredWordIdx ?? ans.answeredWordIdx;
+    const studentWord = !isFirstTryCorrect && wrongWordIdx !== null ? vocab[wrongWordIdx]?.word ?? null : null;
     return {
       id: ans.defIndex,
       promptText: item?.definition,

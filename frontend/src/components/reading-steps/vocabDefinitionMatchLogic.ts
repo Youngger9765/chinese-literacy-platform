@@ -42,6 +42,17 @@ export interface AnswerRecord {
   correct: boolean | null;
   wrongAttempts?: number;
   firstTryCorrect?: boolean | null;
+  /**
+   * The FIRST wrong pick, captured once and never touched again — same
+   * write-once shape as `firstTryCorrect`, added for the same reason.
+   * `answeredWordIdx` reflects the LATEST attempt, so once a wrong-then-
+   * correct retry finishes, `answeredWordIdx` is the CORRECT word — using it
+   * to render "你選了 X" shows the correct answer on both sides of the arrow
+   * (caught live on the #2773 PR preview:
+   * docs/evidence/qa-2026-08-20/vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png).
+   * null when the item was correct on the first try (nothing wrong to show).
+   */
+  firstTryAnsweredWordIdx?: number | null;
 }
 
 export interface PersistedProgress {

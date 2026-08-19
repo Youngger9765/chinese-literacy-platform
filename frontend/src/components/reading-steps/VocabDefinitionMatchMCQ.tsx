@@ -223,19 +223,24 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
     const isCorrect = vocabIdx === currentDefIdx;
 
     // Update the answers record — `correct`/`answeredWordIdx` reflect the
-    // LATEST attempt on purpose (on retry, overwrite). `firstTryCorrect` is
-    // separate and write-once (#2773): set only while still null, then never
-    // touched again, so a retry-into-correct can't erase the original miss.
-    answersRef.current = answersRef.current.map((a) =>
-      a.defIndex === currentDefIdx
-        ? {
-            ...a,
-            answeredWordIdx: vocabIdx,
-            correct: isCorrect,
-            firstTryCorrect: a.firstTryCorrect ?? isCorrect,
-          }
-        : a,
-    );
+    // LATEST attempt on purpose (on retry, overwrite). `firstTryCorrect` and
+    // `firstTryAnsweredWordIdx` are write-once (#2773): captured only on the
+    // item's first attempt (while `firstTryCorrect` is still null), then never
+    // touched again — a retry-into-correct can't erase the original miss, and
+    // "你選了 X" can't end up showing the later CORRECT pick on both sides.
+    answersRef.current = answersRef.current.map((a) => {
+      if (a.defIndex !== currentDefIdx) return a;
+      const isFirstAttempt = a.firstTryCorrect == null;
+      return {
+        ...a,
+        answeredWordIdx: vocabIdx,
+        correct: isCorrect,
+        firstTryCorrect: isFirstAttempt ? isCorrect : a.firstTryCorrect,
+        firstTryAnsweredWordIdx: isFirstAttempt
+          ? (isCorrect ? null : vocabIdx)
+          : a.firstTryAnsweredWordIdx ?? null,
+      };
+    });
 
     if (isCorrect) {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);

@@ -26,10 +26,14 @@ const VOCAB: VocabItem[] = [
 ];
 
 // Mirrors the real staging scenario: both items eventually answered
-// correctly (correct: true) but item 0 was wrong on the first try.
+// correctly (correct: true, answeredWordIdx = the CORRECT word from the
+// retry) but item 0 was wrong on the first try (firstTryAnsweredWordIdx = 1,
+// i.e. the student's actual first (wrong) pick, word[1] = '捶胸頓足' —
+// deliberately a DIFFERENT word than the correct answer word[0] = '龍爭虎鬥',
+// so a test asserting the wrong word can't pass by coincidence.
 const MC_ANSWERS: AnswerRecord[] = [
-  { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: false },
-  { defIndex: 1, answeredWordIdx: 1, correct: true, firstTryCorrect: true },
+  { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: false, firstTryAnsweredWordIdx: 1 },
+  { defIndex: 1, answeredWordIdx: 1, correct: true, firstTryCorrect: true, firstTryAnsweredWordIdx: null },
 ];
 
 const noop = () => {};
@@ -78,11 +82,38 @@ describe('SummaryScreen — #2773 first-try classification', () => {
         onFinish={noop}
       />,
     );
-    // defIndex 0's studentAnswerText is vocab[0].word ('龍爭虎鬥') since
-    // answeredWordIdx === 0 in the fixture above (last attempt happened to
-    // also be word 0 — the point under test is the wording, not the value).
     expect(screen.getByText(/你選了/)).toBeInTheDocument();
     expect(screen.getByText(/^正確：/)).toBeInTheDocument();
+  });
+
+  // Caught live on the #2773 PR preview itself (docs/evidence/qa-2026-08-20/
+  // vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png): showed
+  // "你選了 龍爭虎鬥 → 正確：龍爭虎鬥" — the CORRECT word on both sides,
+  // because studentWord was read from `answeredWordIdx` (the LATEST, now-
+  // correct, retry) instead of `firstTryAnsweredWordIdx` (the actual first
+  // wrong pick). MC_ANSWERS fixture: correct word is vocab[0]='龍爭虎鬥',
+  // the actual first wrong pick is vocab[1]='捶胸頓足' — different words on
+  // purpose so this can't pass by the two words coincidentally matching.
+  it('shows the student\'s actual FIRST wrong pick, not the word they later retried correctly', () => {
+    render(
+      <SummaryScreen
+        inToolbox={false}
+        vocab={VOCAB}
+        mcAnswers={MC_ANSWERS}
+        dragDropAnswers={[]}
+        onRetryModeWrong={noop}
+        onRetryAll={noop}
+        onFinish={noop}
+      />,
+    );
+    // Scope to item 0's own card via its unique prompt text — VOCAB[1]'s word
+    // ('捶胸頓足') is ALSO the correct-answer text of the OTHER (correctly
+    // answered) item, so an unscoped `getByText('捶胸頓足')` would pass by
+    // matching that unrelated row instead of proving anything about item 0.
+    const item0Card = screen.getByText(VOCAB[0].definition).closest('div');
+    expect(item0Card?.textContent).toContain('你選了');
+    expect(item0Card?.textContent).toContain('捶胸頓足');
+    expect(item0Card?.textContent).not.toContain('你選了 龍爭虎鬥');
   });
 
   it('does not call the wrong item correct just because it was eventually retried right', () => {

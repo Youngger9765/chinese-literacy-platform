@@ -69,8 +69,13 @@ export function SummaryScreen({
     const items: WrongAnswerReviewItem[] = answers.map((ans) => {
       const item = vocab[ans.defIndex];
       const isFirstTryCorrect = firstTryOf(ans);
-      const studentWord =
-        !isFirstTryCorrect && ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word ?? null : null;
+      // firstTryAnsweredWordIdx (not answeredWordIdx, which is the LATEST
+      // attempt) — using answeredWordIdx here showed the CORRECT word on
+      // both sides of "你選了 X → 正確：Y" once a wrong-then-correct retry
+      // finished. Falls back to answeredWordIdx for records that predate
+      // the field (persisted progress saved before this fix).
+      const wrongWordIdx = ans.firstTryAnsweredWordIdx ?? ans.answeredWordIdx;
+      const studentWord = !isFirstTryCorrect && wrongWordIdx !== null ? vocab[wrongWordIdx]?.word ?? null : null;
       const wrongAttempts = ans.wrongAttempts ?? 0;
       const extraNote = mode === 'drag-drop' ? getDragDropAttemptFeedback(wrongAttempts) : null;
       return {

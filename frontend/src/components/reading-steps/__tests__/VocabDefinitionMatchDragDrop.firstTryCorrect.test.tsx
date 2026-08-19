@@ -87,4 +87,46 @@ describe('DragDropMode — #2773 firstTryCorrect (immutable first-try verdict)',
     expect(def0).toMatchObject({ correct: true, firstTryCorrect: false });
     expect(def1).toMatchObject({ correct: true, firstTryCorrect: true });
   });
+
+  // Caught live on the #2773 PR preview (docs/evidence/qa-2026-08-20/
+  // vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png), same root
+  // cause as the MCQ sibling test: `answeredWordIdx` reflects the LATEST drop,
+  // so once the wrong-then-correct retry finishes it holds the CORRECT
+  // vocabIdx (0, 勤奮) — using it to render "你選了 X" would show the correct
+  // word on both sides. `firstTryAnsweredWordIdx` must hold the actual first
+  // wrong pick (1, 謙虛) instead, immutably.
+  it('records firstTryAnsweredWordIdx as the FIRST wrong drop (謙虛, idx 1), not the later correct retry (勤奮, idx 0)', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <DragDropMode
+        vocab={VOCAB}
+        activeDefIndices={[0, 1]}
+        shuffledWords={[0, 1]}
+        onAllDone={onAllDone}
+      />,
+    );
+
+    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(800);
+    });
+    fireEvent.click(screen.getAllByText('勤奮')[0]);
+    fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
+    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.click(screen.getByText('不自誇，虛心接受他人意見。'));
+
+    for (let i = 0; i < 10; i++) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(200);
+      });
+    }
+
+    expect(onAllDone).toHaveBeenCalledOnce();
+    const finalAnswers = onAllDone.mock.calls[0][0];
+    const def0 = finalAnswers.find((a: { defIndex: number }) => a.defIndex === 0);
+    const def1 = finalAnswers.find((a: { defIndex: number }) => a.defIndex === 1);
+    expect(def0).toMatchObject({ answeredWordIdx: 0, firstTryAnsweredWordIdx: 1 });
+    expect(def1).toMatchObject({ firstTryAnsweredWordIdx: null });
+  });
 });

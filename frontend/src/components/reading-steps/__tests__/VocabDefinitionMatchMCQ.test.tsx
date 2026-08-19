@@ -256,6 +256,63 @@ describe('MultipleChoiceMode — #2773 firstTryCorrect (immutable first-try verd
     );
   });
 
+  // Caught live on the PR preview for #2773's own fix (docs/evidence/qa-2026-08-20/
+  // vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png): the summary
+  // correctly showed "答對 10 / 11 題", but the wrong item's "你選了 X" line showed
+  // the CORRECT word on both sides ("你選了 龍爭虎鬥 → 正確：龍爭虎鬥") — because
+  // `answeredWordIdx` reflects the LATEST attempt (the retry that got it right),
+  // same overwrite-on-retry behavior `firstTryCorrect` was added to work around.
+  // `firstTryAnsweredWordIdx` must capture the FIRST (wrong) pick specifically,
+  // immutably, the same way `firstTryCorrect` does.
+  it('records firstTryAnsweredWordIdx as the FIRST wrong pick, not the later correct retry', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    const wrongButton = screen.getAllByRole('button').find(
+      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
+    )!;
+    const wrongVocabIdx = VOCAB.findIndex((v) => v.word === wrongButton.textContent?.trim());
+    fireEvent.click(wrongButton);
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, firstTryAnsweredWordIdx: wrongVocabIdx }),
+      ])
+    );
+  });
+
+  it('leaves firstTryAnsweredWordIdx null for an item correct on the first try (nothing wrong to show)', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, firstTryAnsweredWordIdx: null }),
+      ])
+    );
+  });
+
   it('records firstTryCorrect: true for an item answered correctly on the first try', async () => {
     const onAllDone = vi.fn();
     render(

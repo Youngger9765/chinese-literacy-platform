@@ -295,17 +295,23 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         // Correct — trigger fly-away animation on the word chip, then mark confirmed
         const wrongAttempts = wrongAttemptCountRef.current.get(defIdx) ?? 0;
         // `correct`/`answeredWordIdx` reflect the LATEST drop (retry overwrites).
-        // `firstTryCorrect` is separate and write-once (#2773): set only while
-        // still null, so a correct retry can't erase an earlier wrong drop.
-        answersRef.current = answersRef.current.map((a) =>
-          a.defIndex === defIdx ? {
+        // `firstTryCorrect`/`firstTryAnsweredWordIdx` are separate and write-once
+        // (#2773): captured only on the first drop, so a correct retry can't
+        // erase an earlier wrong drop, and "你選了 X" can't end up showing this
+        // correct word on both sides of the arrow (caught live on the #2773 PR
+        // preview — docs/evidence/qa-2026-08-20/…wrong-word-bug.png).
+        answersRef.current = answersRef.current.map((a) => {
+          if (a.defIndex !== defIdx) return a;
+          const isFirstAttempt = a.firstTryCorrect == null;
+          return {
             ...a,
             answeredWordIdx: vocabIdx,
             correct: true,
             wrongAttempts,
-            firstTryCorrect: a.firstTryCorrect ?? true,
-          } : a,
-        );
+            firstTryCorrect: isFirstAttempt ? true : a.firstTryCorrect,
+            firstTryAnsweredWordIdx: isFirstAttempt ? null : a.firstTryAnsweredWordIdx ?? null,
+          };
+        });
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
 
         // A6 / 教授七課 §6: Show explicit praise（拉長到 1600ms，比 chip 飛走久，避免不明顯）
@@ -334,15 +340,18 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         // Wrong — record attempt, flash, bounce back
         const wrongAttempts = (wrongAttemptCountRef.current.get(defIdx) ?? 0) + 1;
         wrongAttemptCountRef.current.set(defIdx, wrongAttempts);
-        answersRef.current = answersRef.current.map((a) =>
-          a.defIndex === defIdx ? {
+        answersRef.current = answersRef.current.map((a) => {
+          if (a.defIndex !== defIdx) return a;
+          const isFirstAttempt = a.firstTryCorrect == null;
+          return {
             ...a,
             answeredWordIdx: vocabIdx,
             correct: false,
             wrongAttempts,
-            firstTryCorrect: a.firstTryCorrect ?? false,
-          } : a,
-        );
+            firstTryCorrect: isFirstAttempt ? false : a.firstTryCorrect,
+            firstTryAnsweredWordIdx: isFirstAttempt ? vocabIdx : a.firstTryAnsweredWordIdx ?? null,
+          };
+        });
         setWrongFlash((prev) => new Set([...prev, defIdx]));
         // A6: Show "再試試看！" verbal feedback (amber, not silent bounce)
         setWrongFeedbackSlot(defIdx);
