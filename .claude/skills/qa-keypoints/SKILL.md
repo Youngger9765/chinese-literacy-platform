@@ -87,6 +87,26 @@ print(r)
 #### D. 段落定位型（部分課有）
 - [ ] 如 DOCX 有「問題在第幾段」填空 → schema 有 `locate_paragraph: true` + 對應 blank
 
+### 選項真的到得了學生面前（2026-08-19 加 — 這一族靜靜壞掉不報錯）
+- [ ] **自稱選擇題的列，真的有選項可選**
+      掃學生端 payload：`value` 含 單選/多選/複選/勾選/打勾 而 `options` 為空 = 那題做不了
+      （2026-08-19 全庫 20 課 27 列都是這樣，畫面上完全看不出異常）
+- [ ] **五種選項寫法都認得**：list / dict / `sub_items` / `inline_choices` / `option_bank`
+      只認一兩種的話，其餘那批課沒有錯誤訊息、只是沒有選項
+- [ ] **行內選擇沒有被拆成獨立列**（不可出現「結果-1」「結果-2」這種孤兒）
+      句子要完整，每組選項標明對應第幾個空格
+- [ ] **選項文字乾淨**：不含 `【` `】`（切壞的碎片）、不含 `□■☑`（下一項的干擾項標記）、
+      不含跨行吃進來的群組標籤（`'輸了\n第二個空格：'`）
+- [ ] **`【單選】` 沒有被算進題數**：底部「已填 N / M」的 M == 學生真的能作答的元素數
+      （指示語渲染成標籤、填不了；算進去的話提交鈕永遠是灰的）
+- [ ] **答案代號對得上選項鍵**：全形 `Ｂ` vs 半形 `B` 對不上 = 整課判不了分而畫面正常
+      多答案 `'A/B'`（`answer_note` 會寫明）要兩個都收
+
+### 答案不可以到學生端
+- [ ] 序列化**整個** payload 掃 `"answer"` / `"correct_options"` / `"correct_answer"`
+      ⚠️ 掃整個 payload，不是只掃 `rows` —— `worksheet_rows` 是另一條消毒路徑，
+      2026-08-19 只掃一半的鎖讓本機全綠而 staging 洩漏 39 處
+
 ### 5. 自測驗收（兩課必跑）
 
 ```bash
@@ -114,6 +134,9 @@ bash   scripts/content_evidence_ship_gate.sh --run-id <id>   # 須印 CONTENT_EV
 **多文本課**（一 DOCX 多篇，compound YAML）：判斷該不該跑 L1 gate 用 `docx_keypoints_available`，不是單槽 parsed table 在不在（見 build-keypoints SKILL「Multi-text lessons」）。
 
 ## 反模式
+- ❌ **只看畫面「有東西」就算過** —— 選項缺失、答案洩漏、分母灌水三種都不會有錯誤訊息
+- ❌ 斷言只掃 `rows` 不掃 `worksheet_rows`（兩條消毒路徑，只驗一條 = 本機綠、線上漏）
+- ❌ 用「至少有一課對」當覆蓋率（要用數量：受影響課數 == 0）
 
 - ❌ 只看 auto-eval 數字就算過——cell_integrity 是 bool，但語意錯亂不一定觸發它
 - ❌ 為了過關放寬 row_recall 分子計算——P0/P2 fix 已正確處理 flat vs nested，不要再改

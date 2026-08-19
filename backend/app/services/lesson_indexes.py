@@ -308,13 +308,30 @@ def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
     from pathlib import Path
 
     root = Path(__file__).resolve().parent.parent.parent / "data" / "lessons" / uid
-    if not version_id:
-        vs = sorted((c.name for c in root.iterdir()
-                     if c.is_dir() and c.name.startswith("v"))) if root.is_dir() else []
-        version_id = vs[-1] if vs else None
-    if not version_id:
+    if not root.is_dir():
         return None
-    return "thumbnail.webp" if (root / version_id / "assets" / "thumbnail.webp").is_file() else None
+    # 封面是**課**的一部分，不是版本的一部分。
+    #
+    # 二修建了 v3 但沒把封面搬過去 —— 175 張全部留在 `v2/assets/`。
+    # 這裡原本只看 `version_id`（＝ v3），於是每一課都回 None，圖書館整片空白。
+    # Young：圖呢？？？之前有圖啊
+    #
+    # 從最新版本往回找，第一個有封面的就用它。v3 之後補了自己的封面時會優先，
+    # 沒補就沿用課本來就有的那張 —— 而不是假裝這課沒有封面。
+    versions = sorted(
+        (c for c in root.iterdir() if c.is_dir() and c.name.startswith("v")),
+        key=lambda c: c.name,
+        reverse=True,
+    )
+    if version_id:
+        # 呼叫端指定的版本先試，其餘依序往回
+        versions = ([root / version_id] if (root / version_id).is_dir() else []) + [
+            c for c in versions if c.name != version_id
+        ]
+    for v in versions:
+        if (v / "assets" / "thumbnail.webp").is_file():
+            return "thumbnail.webp"
+    return None
 
 
 #: 文言文課的線上學習流程 (#2752). Six worksheet sections

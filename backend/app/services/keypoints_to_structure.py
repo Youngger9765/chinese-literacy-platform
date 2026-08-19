@@ -226,6 +226,19 @@ def _flatten_items(items: list) -> list[dict]:
             item.get("sub_label") or item.get("index") or item.get("label") or ""
         ).strip()
         subs = item.get("sub_items")
+        # ⚠️ 先判「這些 sub_items 是不是句子中間的行內選擇」——
+        # 是的話**不可以展開成獨立子列**。它們沒有自己的句子，展開後學生看到
+        # 「結果-1 □贏了 □輸了」「結果-2 □贏得 □失去」，不知道對應母句的哪個空格。
+        # 2026-08-19 我就是這樣做的，Young：「結果1 2 感覺你沒有認真做？」
+        # 一般的 sub_items（各自帶 value / template）照舊展開。
+        if _inline_choices(item):
+            base = str(item.get("value") or item.get("template") or "").strip()
+            out.append({
+                "sub_label": label,
+                "template": _with_prompt(item, _sentence_with_inline_choices(base, item)),
+                "blanks": None,
+            })
+            continue
         if isinstance(subs, list) and subs:
             head = str(item.get("value") or item.get("template") or "").strip()
             for sub in subs:
@@ -263,18 +276,6 @@ def _flatten_items(items: list) -> list[dict]:
                 "blanks": None,
             })
             continue
-        # 小題自己不帶 options，但句子中間的「（　）」各有一組（L0011 的 `sub_items`）。
-        # 頂層那條路已經處理，這條沒有 —— 同一個缺口的兩個位置。
-        if _inline_choices(item):
-            base = str(item.get("value") or item.get("template") or "").strip()
-            parts = [_render_choice_cell(c) for c in _inline_choices(item)]
-            body = "\n".join([x for x in ([base] + parts) if x])
-            out.append({
-                "sub_label": label,
-                "template": _with_prompt(item, body),
-                "blanks": None,
-            })
-            continue
 
         tpl = item.get("template") if item.get("template") is not None else item.get("value")
         blanks = item.get("blanks")
@@ -283,6 +284,49 @@ def _flatten_items(items: list) -> list[dict]:
             tpl, blanks = _with_prompt(item, _render_cell(tpl, blanks)), None
         out.append({"sub_label": label, "template": tpl, "blanks": blanks})
     return out
+
+
+def _sentence_with_inline_choices(sentence: str, node: Any) -> str:
+    """句子 + 每個空格自己的選項，標明對應哪一個空格。
+
+    來源是一句話中間有兩個以上的「（　）」，各配一組選項：
+
+        結果，小戴（　）球賽，卻（　）全國人民的尊敬。
+                    ↑ 贏了/輸了      ↑ 贏得/失去
+
+    ⚠️ 2026-08-19 我一度把它展開成「結果-1」「結果-2」兩個獨立列，
+    讓門變綠。學生看到的是一個空的填空、底下兩組不知道對應哪個空格的選項 ——
+    Young：「結果1 2 感覺你沒有認真做？他是單選嗎？還是填充？」
+    **比原本什麼都不顯示更難懂。** 那是為了讓斷言過而做出的形狀。
+
+    句子留在同一列，每組選項標「第 N 個空格」，學生看得出對應關係。
+    沒有標的話，兩組長得一樣的選項（贏了/輸了 vs 贏得/失去）根本分不出誰是誰。
+    """
+    groups = _inline_choices(node)
+    if not groups:
+        return sentence
+    lines = [sentence] if sentence else []
+    for i, g in enumerate(groups, 1):
+        rendered = _render_choice_cell(g)
+        if rendered:
+            lines.append(f"第{_CN_ORDINAL[i] if i < len(_CN_ORDINAL) else i}個空格：{rendered}")
+    return "\n".join(lines)
+
+
+_CN_ORDINAL = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+
+
+def _options_as_list(options: Any) -> list[str]:
+    """選項 → 純文字清單，順序穩定。
+
+    來源有兩種寫法：`{1: '贏了', 2: '輸了'}`（dict）與 `['贏了','輸了']`（list）。
+    dict 依鍵排序，因為那個鍵就是學習單上印的編號。
+    """
+    if isinstance(options, dict):
+        return [str(v) for _, v in sorted(options.items(), key=lambda kv: str(kv[0]))]
+    if isinstance(options, list):
+        return [str(v) for v in options]
+    return []
 
 
 def _inline_choices(node: Any) -> list[dict]:
@@ -489,14 +533,9 @@ def keypoints_to_structure_table(keypoints: Any) -> Optional[list[list[str]]]:
             rendered = _render_choice_cell(row)
             out.append([label, _with_prompt(row, f"{base}\n{rendered}" if base else rendered)])
         elif _inline_choices(row):
-            # 行內選擇：句子中間的「（　）」各對應一組選項，選項收在
-            # `sub_items`（L0011）或 `inline_choices`（L0102）。兩個欄名同義。
-            # 不接的話畫面顯示「結果，小戴（　）球賽」加上「單選，請打勾」，
-            # 但沒有任何東西可以勾 —— 學生做不了那一題，而且沒有錯誤訊息。
+            # 同上：句子保持完整，選項掛在那一列。
             base = str(row.get("value") or "").strip()
-            parts = [_render_choice_cell(c) for c in _inline_choices(row)]
-            body = "\n".join([p for p in ([base] + parts) if p])
-            out.append([label, _with_prompt(row, body)])
+            out.append([label, _with_prompt(row, _sentence_with_inline_choices(base, row))])
         else:
             out.append([label, _with_prompt(row, _render_cell(row.get("value"), row.get("blanks")))])
 
