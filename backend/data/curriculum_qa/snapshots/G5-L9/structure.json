@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 8,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -26,7 +27,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "1",
-          "value": "日本漫畫中的夢境\n【　　　】漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n【　　　】2025年7月5日會發生大地震和海嘯，引發許多人不安。"
+          "value": "日本漫畫中的夢境\n(1)漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n(2)2025年7月5日會發生大地震和海嘯，引發許多人不安。"
         },
         {
           "interactive_type": "display",

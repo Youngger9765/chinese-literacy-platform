@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -45,7 +46,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "內容摘要",
-          "value": "問題：書生不治身亡。\n解決：【　　　】發現書生有一本【　　　】與【　　　】。\n【　　　】變賣【　　　】安葬書生，剩下【　　　】墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。【　　　】【　　　】【　　　】【　　　】"
+          "value": "問題：書生不治身亡。\n解決：(1)發現書生有一本【　　　】與【　　　】。\n(2)變賣【　　　】安葬書生，剩下【　　　】墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。【　　　】【　　　】【　　　】【　　　】"
         }
       ],
       "value": ""

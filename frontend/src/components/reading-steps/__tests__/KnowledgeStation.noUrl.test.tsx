@@ -33,29 +33,29 @@ const WITH_URL = {
 
 describe('知識補給站：沒有連結的影片仍然要出現', () => {
   it('不可以說「沒有影片」', () => {
-    render(<KnowledgeStation story={WITHOUT_URL as never} />);
+    render(<KnowledgeStation story={WITHOUT_URL as never} onFinish={() => {}} />);
     expect(screen.queryByText(/目前沒有知識補給站影片/)).toBeNull();
   });
 
   it('片名要看得到', () => {
-    render(<KnowledgeStation story={WITHOUT_URL as never} />);
+    render(<KnowledgeStation story={WITHOUT_URL as never} onFinish={() => {}} />);
     expect(screen.getByText(/最速男楊俊瀚/)).toBeTruthy();
     expect(screen.getByText(/田徑為運動之母/)).toBeTruthy();
   });
 
   it('要說清楚連結在哪（不然學生不知道怎麼看）', () => {
-    render(<KnowledgeStation story={WITHOUT_URL as never} />);
+    render(<KnowledgeStation story={WITHOUT_URL as never} onFinish={() => {}} />);
     // 兩支影片各一段說明，所以是 getAllByText —— getByText 會因為「找到多個」而失敗
     expect(screen.getAllByText(/QR code/).length).toBe(2);
   });
 
   it('真的沒有影片時仍然要說沒有（負向對照）', () => {
-    render(<KnowledgeStation story={{ id: 'x', title: 'x', videoLinks: [] } as never} />);
+    render(<KnowledgeStation story={{ id: 'x', title: 'x', videoLinks: [] } as never} onFinish={() => {}} />);
     expect(screen.getByText(/目前沒有知識補給站影片/)).toBeTruthy();
   });
 
   it('有連結的照舊可以播（正向對照）', () => {
-    const { container } = render(<KnowledgeStation story={WITH_URL as never} />);
+    const { container } = render(<KnowledgeStation story={WITH_URL as never} onFinish={() => {}} />);
     expect(container.querySelector('iframe')).toBeTruthy();
   });
 });

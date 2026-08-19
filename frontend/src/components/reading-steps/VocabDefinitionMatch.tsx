@@ -40,6 +40,7 @@ import { WrongAnswerReviewList, type WrongAnswerReviewItem } from '../learning/W
 import { StageStatus } from './VocabDefinitionMatchStageStatus';
 import { MultipleChoiceMode } from './VocabDefinitionMatchMCQ';
 import { DragDropMode } from './VocabDefinitionMatchDragDrop';
+import NextStepFooter from '../learning/NextStepFooter';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -68,9 +69,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">dictionary</span>
         <p className="text-on-surface-variant">本課尚無語詞定義資料</p>
-        <button onClick={onFinish} className="btn-immersive">
-          繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-        </button>
+        <NextStepFooter onNext={onFinish} label="繼續下一步" />
       </div>
     </div>
   );

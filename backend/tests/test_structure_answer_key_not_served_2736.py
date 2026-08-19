@@ -44,6 +44,8 @@ ALLOWED_ROW_KEYS = {
     "options",           # 選項文字（不含哪個是對的）
     "sub_rows",          # 巢狀小題
     "blank_in_label",    # 空格在標題裡還是在內容裡
+    "select_mode",       # "single"/"multi" —— 純粹的作答方式提示，不是答案（#2776）
+    "blanks",            # inline_choice 每個空格自己的選項（不含 correct_option，#2776）
 }
 
 # 掃不到課的時候 `0 個違規` 也會綠。這個下限讓那種情況講實話。
@@ -146,3 +148,27 @@ def test_grading_still_has_the_answers_it_needs():
     uid, server_side = sample
     n = sum(1 for r in _walk(server_side.get("rows")) if "correct_options" in r)
     assert n > 0, f"{uid}：伺服器端結構沒有 correct_options，判分會全部算錯"
+
+
+def test_inline_choice_blank_options_but_not_correct_option():
+    """`blanks[]` 是巢狀的，上面那條逐 key 掃描的白名單看不進去。
+
+    `correct_option` 是 inline_choice 每個空格的正解索引，跟 checkbox 的
+    `correct_options` 同一條規則 —— 判分用，作答前不給學生看（#2776）。
+    白名單放行了 `blanks` 這個 key 本身，但沒人檢查它「裡面」帶了什麼；
+    這條測試專門補那個縫。
+    """
+    found_inline_choice = False
+    for uid, row in _served_rows():
+        blanks = row.get("blanks")
+        if not blanks:
+            continue
+        found_inline_choice = True
+        for i, blank in enumerate(blanks):
+            assert set(blank.keys()) <= {"options"}, (
+                f"{uid} 第 {i} 個空格帶了不該給學生看的欄位：{sorted(blank.keys())}"
+            )
+    assert found_inline_choice, (
+        "整個語料庫都找不到 inline_choice 欄位 —— "
+        "要嘛是資料變了，要嘛這條測試沒測到它以為在測的東西"
+    )

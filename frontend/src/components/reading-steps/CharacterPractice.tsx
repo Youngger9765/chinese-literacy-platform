@@ -22,6 +22,7 @@ import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } fr
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import type { VocabStepData } from '../../types/stepProgress';
+import NextStepFooter from '../learning/NextStepFooter';
 
 interface VocabPracticeProps {
   story: Story;
@@ -262,9 +263,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
       <div className="flex-1 flex items-center justify-center bg-surface">
         <div className="text-center space-y-4 p-8">
           <p className="text-on-surface-variant">這篇課文沒有可練習的生字</p>
-          <button onClick={handleFinish} className="btn-immersive">
-            繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-          </button>
+          <NextStepFooter onNext={handleFinish} label="繼續下一步" />
         </div>
       </div>
     );

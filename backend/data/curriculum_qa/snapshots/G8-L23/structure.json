@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -35,7 +36,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "2.身體自主權，從尊重界線開始",
-          "value": "【　　　】強調每個人都有權利決定自己的【　　　】不受侵犯。\n【　　　】學習尊重別人的身體【　　　】，避免越界、冒犯的行為。"
+          "value": "(1)強調每個人都有權利決定自己的【　　　】不受侵犯。\n(2)學習尊重別人的身體【　　　】，避免越界、冒犯的行為。"
         }
       ],
       "value": ""

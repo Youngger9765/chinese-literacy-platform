@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 3,
     "fill_blank_count": 9,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -83,27 +84,29 @@
         },
         {
           "interactive_type": "checkbox",
-          "label": "2-【　　　】",
+          "label": "2-(1)",
           "options": [
             "直接受害者",
             "間接受害者",
             "未受波及者"
           ],
+          "select_mode": "multi",
           "value": "哪幾類人較容易產生強烈的自信與平靜？【 請打勾，複選 】\n①直接受害者 ②間接受害者 ③未受波及者"
         },
         {
           "interactive_type": "checkbox",
-          "label": "2-【　　　】",
+          "label": "2-(2)",
           "options": [
             "直接受害者",
             "間接受害者",
             "未受波及者"
           ],
+          "select_mode": "single",
           "value": "哪一類人最為恐懼？【 請打勾，單選 】\n①直接受害者 ②間接受害者 ③未受波及者"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "2-【　　　】",
+          "label": "2-(3)",
           "value": "重災區的人們能「親身體驗」，能「參與救災」，因此獲得【　　　】，就能讓自己找回秩序與平衡。"
         }
       ],

@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 1,
     "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -24,6 +25,7 @@
         "感到畏懼，因為敵軍人數遠遠超過自己",
         "感到興奮，因為他們深信自己一定會獲勝"
       ],
+      "select_mode": "single",
       "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？【 請打勾，單選 】\n①感到畏懼，因為敵軍人數遠遠超過自己 ②感到興奮，因為他們深信自己一定會獲勝"
     },
     {

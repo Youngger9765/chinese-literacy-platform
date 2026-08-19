@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 1,
     "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -58,12 +59,12 @@
         {
           "interactive_type": "fill_blank",
           "label": "培育階段",
-          "value": "【　　　】社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n【　　　】表現【　　　】者，可持續晉級，有機會成為兼職或全職的運動員，或進入國家代表隊。"
+          "value": "(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n(2)表現【　　　】者，可持續晉級，有機會成為兼職或全職的運動員，或進入國家代表隊。"
         },
         {
           "interactive_type": "fill_blank",
           "label": "退役後",
-          "value": "【　　　】可從事其他或原本的職業\n【　　　】回到社區俱樂部當【　　　】。"
+          "value": "(1)可從事其他或原本的職業\n(2)回到社區俱樂部當【　　　】。"
         }
       ],
       "value": ""
