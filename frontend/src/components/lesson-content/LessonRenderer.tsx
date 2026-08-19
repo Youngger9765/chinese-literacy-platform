@@ -233,22 +233,36 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   // 一份混著重點表、造句、排序的練習分頁之後，學生第一頁看到的可能是
   // 一張半格的表，而其餘的都藏起來了；第一版就是這樣，弄紅了兩條
   // 「這一課有可作答的輸入」的既有測試。那兩條紅是對的，不是測試該改。
-  const paginateExercises =
-    exerciseBlocks.length > 1 &&
-    exerciseBlocks.every(
+  //
+  // ⚠️ 判準是「**選擇題有幾題**」，不是「整份都是選擇題」。
+  // 第一版寫 `.every(...)`，而 20001 這一課同時有 5 題 MCQ 和 6 個聚光燈 block ——
+  // 兩者都算 exercise，於是判準正確地拒絕，畫面照樣一次列出五題。
+  // 部署了、chunk 裡有那段 code、測試也綠，就是不會發生：測試的 fixture 全是 MCQ。
+  const mcqBlocks = React.useMemo(
+    () => exerciseBlocks.filter(
       (b) => (b as { question?: { kind?: string } }).question?.kind === 'multiple_choice',
-    );
+    ),
+    [exerciseBlocks],
+  );
+  const paginateExercises = mcqBlocks.length > 1;
   // 單欄分支畫的是 `lesson.blocks`（課文與練習混在一起）。只換掉練習那幾個，
   // 課文區塊照舊全部顯示 —— 學生要邊看課文邊作答。
   const singleVisibleBlocks = React.useMemo(() => {
     if (!paginateExercises) return lesson.blocks;
-    const shown = exerciseBlocks[exerciseIdx];
-    return lesson.blocks.filter((b) => !exerciseBlocks.includes(b) || b === shown);
-  }, [lesson.blocks, exerciseBlocks, exerciseIdx, paginateExercises]);
+    const shown = mcqBlocks[exerciseIdx];
+    return lesson.blocks.filter((b) => !mcqBlocks.includes(b) || b === shown);
+  }, [lesson.blocks, mcqBlocks, exerciseIdx, paginateExercises]);
 
   const visibleExercises = React.useMemo(
-    () => (paginateExercises ? exerciseBlocks.slice(exerciseIdx, exerciseIdx + 1) : exerciseBlocks),
-    [exerciseBlocks, exerciseIdx, paginateExercises],
+    () => {
+      if (!paginateExercises) return exerciseBlocks;
+      // 只換掉選擇題那幾個；重點表、造句這類非選擇題照舊全部顯示 ——
+      // 把它們藏到第二頁會讓學生第一頁看到半張表（第一版就是這樣，
+      // 弄紅兩條「這一課有可作答的輸入」的既有測試）。
+      const shown = mcqBlocks[exerciseIdx];
+      return exerciseBlocks.filter((b) => !mcqBlocks.includes(b) || b === shown);
+    },
+    [exerciseBlocks, mcqBlocks, exerciseIdx, paginateExercises],
   );
 
   // Single-column card header: 聚光燈作答 when the flow carries exercises, otherwise
@@ -379,14 +393,14 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                       上一題
                     </button>
                     <span className="text-sm text-on-surface-variant tabular-nums">
-                      {exerciseIdx + 1} / {exerciseBlocks.length}
+                      {exerciseIdx + 1} / {mcqBlocks.length}
                     </span>
                     <button
                       type="button"
                       onClick={() =>
-                        setExerciseIdx((i) => Math.min(exerciseBlocks.length - 1, i + 1))
+                        setExerciseIdx((i) => Math.min(mcqBlocks.length - 1, i + 1))
                       }
-                      disabled={exerciseIdx >= exerciseBlocks.length - 1}
+                      disabled={exerciseIdx >= mcqBlocks.length - 1}
                       className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
                     >
                       下一題
@@ -400,7 +414,12 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
         </div>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-          <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+          {/* 內容寬度收到可讀範圍並置中（`~/.claude/rules/frontend-design.md`：
+              max-width 720–820px 置中、body ≥18px）。
+              原本卡片撐滿 1408px：一題四個短選項橫跨 1400px，右邊當然一片空 ——
+              Young 2026-08-19：「字太小，右邊留一堆空白做什麼？」
+              留白不是靠加東西填滿，是把行長收到讀得順的寬度。 */}
+          <div className="mx-auto w-full max-w-3xl bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="material-symbols-outlined text-accent text-xl">
                 {singleHeader.icon}
@@ -427,12 +446,12 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                     上一題
                   </button>
                   <span className="text-sm text-on-surface-variant tabular-nums">
-                    {exerciseIdx + 1} / {exerciseBlocks.length}
+                    {exerciseIdx + 1} / {mcqBlocks.length}
                   </span>
                   <button
                     type="button"
-                    onClick={() => setExerciseIdx((i) => Math.min(exerciseBlocks.length - 1, i + 1))}
-                    disabled={exerciseIdx >= exerciseBlocks.length - 1}
+                    onClick={() => setExerciseIdx((i) => Math.min(mcqBlocks.length - 1, i + 1))}
+                    disabled={exerciseIdx >= mcqBlocks.length - 1}
                     className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
                   >
                     下一題
