@@ -604,6 +604,9 @@ def get_story(story_id: str):
         sentence_matching=story.get("sentence_matching"),
         self_challenge=story.get("self_challenge"),
         intro_guide=story.get("intro_guide"),
+        # 目標策略框／讀前自我檢核 (#2752 Phase 2) — None for lessons without one.
+        goal_box=story.get("goal_box"),
+        self_check_before_reading=story.get("self_check_before_reading"),
     )
 
 

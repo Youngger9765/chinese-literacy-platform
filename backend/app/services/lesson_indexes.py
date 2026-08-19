@@ -405,7 +405,14 @@ def _uid_tree_lessons() -> list[dict]:
             # way — the field was 175/175 and the exercises were 143/175. Absent is the
             # honest value, and it is what makes the step show its empty state.
             "spotlight_v2": _spotlight_or_none(l),
-            "keypoints": (l.get("keypoints") or {}).get("keypoints"),
+            # `_unwrap`, not `.get("keypoints")` — the loader has already taken the
+            # module wrapper off, so `l["keypoints"]` IS the table. Asking for a
+            # `keypoints` key inside it found nothing and this field was None for all
+            # 175 lessons, silently: `lesson_content_loader` says in a comment that the
+            # 重點表 step is "served separately on story['keypoints']", and it was not.
+            # `_spotlight_or_none` two lines up carries the same warning for the same
+            # reason — spotlight was written correctly, keypoints was not.
+            "keypoints": _unwrap(l.get("keypoints"), "keypoints") or None,
             # The 重點表 step reads `story_structure_table` off the story and asks an
             # LLM to invent one when it is absent. The second-edition pipeline emits
             # the same table already structured, so convert rather than regenerate —
@@ -425,6 +432,10 @@ def _uid_tree_lessons() -> list[dict]:
             "sentence_matching": l.get("sentence_matching") or None,
             "self_challenge": l.get("self_challenge") or None,
             "intro_guide": l.get("intro_guide") or None,
+            # 目標策略框／讀前自我檢核 (#2752 Phase 2) — spans regular lessons too
+            # (70／58 課), not a single genre. Same "missing stays missing" rule.
+            "goal_box": l.get("goal_box") or None,
+            "self_check_before_reading": l.get("self_check_before_reading") or None,
             # Per-lesson step order (#1374 mechanism, unused by the uid tree until now —
             # every one of the 175 second-edition lessons fell back to
             # DEFAULT_STEP_SEQUENCE because this key was never in `row` for the overlay

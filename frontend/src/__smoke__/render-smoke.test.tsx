@@ -322,8 +322,31 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('Intro', <Intro story={MINIMAL_STORY} onStartReading={vi.fn()} onBack={vi.fn()} />);
   });
 
+  // #2752 Phase 2: goal_box feeds the 本課學習策略 box, 70/175 lessons.
+  it('Intro (with goal_box)', () => {
+    mountGuard(
+      'Intro-goalBox',
+      <Intro
+        story={{ ...MINIMAL_STORY, goalBox: { title: '閱讀之旅的起點', strategy_line: '目標策略：讀出故事道理' } }}
+        onStartReading={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+  });
+
   it('ReadingAnnotation', () => {
     mountGuard('ReadingAnnotation', <ReadingAnnotation story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+
+  // #2752 Phase 2: a distinct render path (selfCheckBeforeReading banner), 58/175 lessons.
+  it('ReadingAnnotation (with self_check_before_reading)', () => {
+    mountGuard(
+      'ReadingAnnotation-selfCheck',
+      <ReadingAnnotation
+        story={{ ...MINIMAL_STORY, selfCheckBeforeReading: { items: ['請在不太了解的字、詞或句做記號。'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
   });
 
   it('ParagraphReading', () => {

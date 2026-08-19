@@ -19,6 +19,8 @@ import type {
   ClassicalSentenceMatchingContent,
   ClassicalSelfChallengeContent,
   IntroGuideContent,
+  GoalBoxContent,
+  SelfCheckBeforeReadingContent,
 } from '../types';
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
@@ -156,6 +158,9 @@ interface ApiStoryDetail extends ApiStoryListItem {
   sentence_matching?: ClassicalSentenceMatchingContent | null;
   self_challenge?: ClassicalSelfChallengeContent | null;
   intro_guide?: IntroGuideContent | null;
+  // 一般課也有的無編號元素 (#2752 Phase 2) — null for lessons without one.
+  goal_box?: GoalBoxContent | null;
+  self_check_before_reading?: SelfCheckBeforeReadingContent | null;
 }
 
 interface ApiStoryListResponse {
@@ -272,6 +277,8 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     sentenceMatching: detail.sentence_matching ?? undefined,
     selfChallenge: detail.self_challenge ?? undefined,
     introGuide: detail.intro_guide ?? undefined,
+    goalBox: detail.goal_box ?? undefined,
+    selfCheckBeforeReading: detail.self_check_before_reading ?? undefined,
   };
 }
 

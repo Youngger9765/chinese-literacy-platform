@@ -132,6 +132,11 @@ class StoryDetail(StoryListItem):
     sentence_matching: Optional[dict] = None    # 文白句子比對（8 句配對）
     self_challenge: Optional[dict] = None       # 自我挑戰（選做：另一段文章＋題組）
     intro_guide: Optional[dict] = None          # 導讀
+    # 一般課也有的無編號元素 (#2752 Phase 2) — 印在「一 讀全文-做記號」之前，
+    # 不掛在任何大題編號下。與上面 6 個文言文專屬模組同款式：untyped dict
+    # 直接透傳，None 為誠實的「這課沒有這個」。
+    goal_box: Optional[dict] = None              # 目標策略框（70 課）
+    self_check_before_reading: Optional[dict] = None  # 讀前自我檢核（58 課）
 
 
 class StoryListResponse(BaseModel):

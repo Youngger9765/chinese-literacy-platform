@@ -255,6 +255,44 @@ function HintBar() {
   );
 }
 
+// ── A6: 讀前自我檢核 banner (#2752 Phase 2) ─────────────────────────────────
+//
+// The worksheet's own self-check checklist for 大題一 (讀全文-做記號), printed
+// unnumbered right before this section starts. Distinct from OnboardingCoach
+// above: OnboardingCoach is a generic, dismissible, one-time tutorial on HOW
+// to use the drag-to-mark interaction; this is the worksheet's own per-lesson
+// CONTENT (what to specifically check for), shown every time like the printed
+// page — not dismissed, not paraphrased. Present for 58/175 lessons.
+function SelfCheckBeforeReadingBanner({
+  instruction,
+  items,
+}: {
+  instruction?: string;
+  items: string[];
+}) {
+  return (
+    <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4">
+      <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 px-6 py-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-amber-700 text-xl" aria-hidden="true">
+            checklist
+          </span>
+          <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">讀前自我檢核</span>
+        </div>
+        {instruction && <p className="text-sm text-amber-800">{instruction}</p>}
+        <ul className="space-y-1">
+          {items.map((item, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-on-surface">
+              <span className="text-amber-600 mt-0.5" aria-hidden="true">☐</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 
 const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
@@ -662,6 +700,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             /* A5: Persistent mini hint bar shown after onboarding is dismissed */
             <HintBar />
           ))}
+
+          {/* A6: 讀前自我檢核 (#2752 Phase 2) — the worksheet's own checklist,
+              not gated by hideAnnotation (it's read-only content, not an
+              annotate affordance a QR-code guest visitor shouldn't have). */}
+          {story.selfCheckBeforeReading && story.selfCheckBeforeReading.items.length > 0 && (
+            <SelfCheckBeforeReadingBanner
+              instruction={story.selfCheckBeforeReading.instruction}
+              items={story.selfCheckBeforeReading.items}
+            />
+          )}
 
           {/* Whole-lesson player. Sits above the legend so it's the first control
               on the page — listening is what a lot of students come here to do. */}

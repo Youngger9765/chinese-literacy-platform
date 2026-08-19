@@ -378,6 +378,27 @@ export interface Story {
   selfChallenge?: ClassicalSelfChallengeContent;
   /** 導讀（無編號，印在標題下方）。 */
   introGuide?: IntroGuideContent;
+
+  // ── 一般課也有的無編號元素 (#2752 Phase 2) — 70／58 課，不限單一課型 ──
+  /** 目標策略框（印在標題附近，年級/文體徽章 + 本課目標策略一句話）。 */
+  goalBox?: GoalBoxContent;
+  /** 讀前自我檢核（「大題一 讀全文-做記號」開始前的自我檢核清單）。 */
+  selfCheckBeforeReading?: SelfCheckBeforeReadingContent;
+}
+
+export interface GoalBoxContent {
+  /** 裝飾性標題，如「閱讀之旅的起點」。跟 level_badge 二選一，不一定同時有。 */
+  title?: string;
+  /** 「Level N・文體」格式徽章 —— 跟既有的年級/類別 badge 語意重複，故意不重複顯示。 */
+  level_badge?: string;
+  /** 本課目標策略一句話，如「目標策略：讀出故事道理」——這是本欄位唯一必用的內容。 */
+  strategy_line: string;
+}
+
+export interface SelfCheckBeforeReadingContent {
+  /** 「※ 如果你有做到下列事項，請在□內打勾。」——部分課沒有這句（原稿如此）。 */
+  instruction?: string;
+  items: string[];
 }
 
 // ── 文言文專屬模組的內容型別 (#2752) ─────────────────────────────────────────

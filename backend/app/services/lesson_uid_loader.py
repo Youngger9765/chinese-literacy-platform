@@ -57,6 +57,10 @@ MODULES = (
     "sentence_matching",
     "word_matching",
     "self_challenge",
+    # 一般課也有的無編號元素 (#2752 Phase 2) — 目標策略框（70 課）與讀前自我
+    # 檢核（58 課），兩者都印在「一 讀全文-做記號」之前，不掛在任何大題編號下。
+    "goal_box",
+    "self_check_before_reading",
 )
 
 # ⛔ 不留 v2 的 `sections` / `body` 相容入口。

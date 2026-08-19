@@ -78,10 +78,12 @@ ENTRY: dict[str, tuple[str, str]] = {
     "self_challenge":       (STEP, "classical-self-challenge"),
     "intro_guide":          (FOLDED, "課程簡介頁（lesson-intro）多印一段導讀文字"),
 
+    # ── 一般課也有的無編號元素 (#2752 Phase 2) — 涵蓋 70／58 課，不限單一課型 ──
+    "goal_box":             (FOLDED, "課程簡介頁（lesson-intro）餵進既有『本課學習策略』框"),
+    "self_check_before_reading": (FOLDED, "讀全文-做記號頁（full-text-annotate）開頭的讀前自我檢核 banner"),
+
     # ── 目前沒有入口（債，追蹤中）────────────────────────────────
     # ⚠️ 這些不是「不用做」，是「還沒做」。見 issue #2752。
-    "goal_box":             (NO_ENTRY, "#2752 學習目標框"),
-    "self_check_before_reading": (NO_ENTRY, "#2752 讀前自我檢核"),
     "writing_practice":     (NO_ENTRY, "#2752 寫作練習"),
     "multi_text_parts":     (NO_ENTRY, "#2752 多文本各篇"),
     "cross_text_banner":    (NO_ENTRY, "#2752 跨課文橫幅"),
@@ -94,7 +96,12 @@ ENTRY: dict[str, tuple[str, str]] = {
 # 2026-08-19 (#2752 Phase 1): 83 → 82。文言文六個目標模組全部有了答案，但這 10 課
 # 裡有 9 課還背著範圍外的 `goal_box`（下一階段的債）—— 只有 L0161（沒有 goal_box）
 # 真正整課清零。老實記這個數字，不要因為「修了 6 個模組」就假裝掉了 6 課。
-NO_ENTRY_LESSON_CEILING = 82
+#
+# 2026-08-19 (#2752 Phase 2): 82 → 8。`goal_box`／`self_check_before_reading`
+# 兩個各自涵蓋 70／58 課的模組都有了答案，這次是真的清零（不是折算），因為
+# 剩下的 4 個模組（writing_practice／multi_text_parts／cross_text_banner／
+# keypoints_followup_questions）合計只覆蓋 8 課，且跟這兩個模組沒有重疊。
+NO_ENTRY_LESSON_CEILING = 8
 
 
 def _enabled_step_ids() -> set[str]:

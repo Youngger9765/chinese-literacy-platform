@@ -12,6 +12,48 @@ import type { OmoPriorUploadResponse } from '../../services/omoApi';
 import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
 import { gradeLabel } from '../../utils/gradeLabel';
 
+/**
+ * 「💡 本課學習策略」要顯示的字串，找不到就回空字串。
+ *
+ * ⚠️ 抽成獨立函式是為了測得到 —— 原本這段內聯在 JSX 的 IIFE 裡，
+ * 測試只能在自己那邊重排一次同樣的判斷，那是打在複製品上：
+ * 改壞這裡不會讓測試變紅。
+ *
+ * 鏈的順序有意義，不是隨手排的：
+ *   1. `worksheetIntro.target_strategy` — Layer-1/2 欄位
+ *   2. `intro.author` 的 " · " 後半      — 同上
+ *   3. `goal_box.strategy_line`          — 學習單原文（**最權威**，逐字印在紙上）
+ *   4. `readingStrategy`                 — 總表的策略名
+ *
+ * 前兩個是二修的 uid tree **從來不寫**的欄位。第三個只有 52 課有。
+ * 所以在接上第四個之前，這個框對 175 課裡的 123 課是空的 ——
+ * 而 `readingStrategy` 171 課都有值，`types.ts` 甚至標著
+ * `// for future Intro enhancement`：欄位是為了這個框加的，加了之後沒接上。
+ *
+ * 3 排在 4 前面因為它是學習單上逐字印的那句；兩者內容其實一樣，只差前綴：
+ *     readingStrategy        '讀出故事道理'
+ *     goal_box.strategy_line '目標策略：讀出故事道理'
+ */
+export function resolveRawStrategy(story: {
+  worksheetIntro?: { target_strategy?: string };
+  intro?: { author?: string };
+  goalBox?: { strategy_line?: string };
+  readingStrategy?: string;
+}): string {
+  const goalBoxStrategy = story.goalBox?.strategy_line
+    ? story.goalBox.strategy_line.replace(/^目標策略[:：]\s*/, '').replace(/\n/g, '，')
+    : '';
+  return (
+    story.worksheetIntro?.target_strategy ||
+    (story.intro?.author?.includes(' · ')
+      ? story.intro.author.split(' · ').slice(1).join(' · ')
+      : '') ||
+    goalBoxStrategy ||
+    story.readingStrategy ||
+    ''
+  );
+}
+
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
   Science: '自然科學',
@@ -209,12 +251,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             // the strategy portion of story.intro.author, which holds e.g.
             // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
             // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
-            const rawStrategy =
-              story.worksheetIntro?.target_strategy ||
-              (story.intro?.author?.includes(' · ')
-                ? story.intro.author.split(' · ').slice(1).join(' · ')
-                : '') ||
-              '';
+            //
+            // #2752 Phase 2: neither of the two sources above is ever populated for the
+            // uid-tree (v3) lessons — worksheetIntro/intro.author are Layer-1/2 fields
+            // this pipeline never writes. `goal_box.strategy_line` is the actual worksheet
+            // text this box was designed to show, printed verbatim as "目標策略：<text>"
+            // (sometimes with an embedded `\n` mid-phrase, e.g. "寫作手法──\n排比─..." —
+            // normalized to a comma so it reads as one line instead of a raw newline).
+            const rawStrategy = resolveRawStrategy(story);
             // For structure-type strategies, wrap the three stage words in corner quotes and
             // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
             // and CJK separators (the demo data uses ASCII '.').
@@ -232,6 +276,15 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-lg" aria-hidden="true">💡</span>
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
               </div>
+
+              {/* goal_box.title (#2752 Phase 2) — a decorative unit tagline some
+                  lessons print near the title (e.g. "閱讀之旅的起點"). Deliberately
+                  NOT rendering goal_box.level_badge here — that's a "Level N・文體"
+                  format already shown by the category/grade badges above the title,
+                  so showing it again would just repeat the same information. */}
+              {story.goalBox?.title && (
+                <p className="text-sm text-amber-700 italic">{processZhuyin(story.goalBox.title)}</p>
+              )}
 
               {strategyName && (
                 // #2082 A2: prominent highlight box for strategy name

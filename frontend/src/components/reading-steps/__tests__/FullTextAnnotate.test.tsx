@@ -419,3 +419,37 @@ describe('annotationOffsets (PUA + selection math)', () => {
     expect(fallbackTables).toBeNull();
   });
 });
+
+describe('ReadingAnnotation — self_check_before_reading banner (#2752 Phase 2)', () => {
+  const onFinishLocal = vi.fn();
+
+  it('renders the worksheet\'s own self-check items when present', () => {
+    const storyWithSelfCheck: Story = {
+      ...mockStory,
+      selfCheckBeforeReading: {
+        instruction: '※ 如果你有做到下列事項，請在□內打勾。',
+        items: ['請在不太了解的字、詞或句做記號。', '重要的地方、喜歡的語詞、句子或段落做上記號。'],
+      },
+    };
+    render(<ReadingAnnotation story={storyWithSelfCheck} onFinish={onFinishLocal} />);
+    expect(screen.getByText(/如果你有做到下列事項/)).toBeTruthy();
+    expect(screen.getByText(/請在不太了解的字、詞或句做記號/)).toBeTruthy();
+    expect(screen.getByText(/重要的地方、喜歡的語詞、句子或段落做上記號/)).toBeTruthy();
+  });
+
+  it('renders a single-item checklist with no instruction line (L0107-style variant)', () => {
+    const storyWithSingleItem: Story = {
+      ...mockStory,
+      selfCheckBeforeReading: {
+        items: ['要不停問自己：「這故事想告訴我什麼道理？」'],
+      },
+    };
+    render(<ReadingAnnotation story={storyWithSingleItem} onFinish={onFinishLocal} />);
+    expect(screen.getByText(/這故事想告訴我什麼道理/)).toBeTruthy();
+  });
+
+  it('renders nothing extra when the lesson has no self_check_before_reading (the other ~117 lessons)', () => {
+    render(<ReadingAnnotation story={mockStory} onFinish={onFinishLocal} />);
+    expect(screen.queryByText(/如果你有做到下列事項/)).toBeNull();
+  });
+});
