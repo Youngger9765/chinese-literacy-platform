@@ -21,6 +21,7 @@ import SelfAssessment, { type AssessmentRating } from './key-passage-reading/Sel
 import KeyPassageReadingControls, { type ControlState } from './key-passage-reading/KeyPassageReadingControls';
 import KeyPassageReadingScoreCard from './key-passage-reading/KeyPassageReadingScoreCard';
 import KeyPassageReadingFeedbackPanel from './key-passage-reading/KeyPassageReadingFeedbackPanel';
+import { readingPassagesOf } from './key-passage-reading/readingPassages';
 // Note: Web Speech removed (Issue #2266) — streaming transcript not available during recording.
 // Live preview area will be empty until Gemini STT returns post-submission.
 
@@ -121,10 +122,13 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
   }, [result]);
 
   /* ---- 重點朗讀 (#2559): 有 keyReading.passage 就只朗讀老師 ☞ 指定的重點段，
-   *      無則 fallback 唸全文 story.content。宣告在所有消費者(fullText/TTS/顯示)之前，避免 TDZ (#2279)。 ---- */
+   *      無則 fallback 唸全文 story.content，再無則唸文言文原文 classicalText.paragraphs
+   *      （#2792：文言文 10 課兩者皆空，畫面要學生「讀完整篇文章」卻沒有文章）。
+   *      挑選規則抽到 ./key-passage-reading/readingPassages.ts 才測得到。
+   *      宣告在所有消費者(fullText/TTS/顯示)之前，避免 TDZ (#2279)。 ---- */
   const readingContent = useMemo(
-    () => (story.keyReading?.passage ? [story.keyReading.passage] : story.content),
-    [story.keyReading, story.content]
+    () => readingPassagesOf(story),
+    [story]
   );
   const fullText = useMemo(() => readingContent.join(''), [readingContent]);
 
