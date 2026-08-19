@@ -23,12 +23,36 @@ export type Phase = 'matching' | 'summary';
  * answeredWordIdx === null  → not yet answered
  * answeredWordIdx === defIndex → correct
  * answeredWordIdx !== defIndex → wrong
+ *
+ * `correct` reflects the LATEST attempt on purpose (both MCQ and drag-drop
+ * modes let a student retry a wrong pick until they get it right, and the
+ * live in-round UI — checkmarks, tone chips — should reflect that current
+ * state). `firstTryCorrect` is the separate, WRITE-ONCE field #2773 added:
+ * once set (on the item's first answer), it never changes on a later retry.
+ * `selectRetryIndices` and the summary's 錯題解析 classification key off
+ * `firstTryCorrect`, not `correct` — otherwise a student who got something
+ * wrong once but retried into the right answer would vanish from every
+ * "what did I get wrong" accounting, which is exactly the gap this issue
+ * exposed live on staging (vocab-definition showed 11/11 all-correct with
+ * zero 錯題 even after deliberately answering wrong on the first try).
  */
 export interface AnswerRecord {
   defIndex: number;
   answeredWordIdx: number | null;
   correct: boolean | null;
   wrongAttempts?: number;
+  firstTryCorrect?: boolean | null;
+  /**
+   * The FIRST wrong pick, captured once and never touched again — same
+   * write-once shape as `firstTryCorrect`, added for the same reason.
+   * `answeredWordIdx` reflects the LATEST attempt, so once a wrong-then-
+   * correct retry finishes, `answeredWordIdx` is the CORRECT word — using it
+   * to render "你選了 X" shows the correct answer on both sides of the arrow
+   * (caught live on the #2773 PR preview:
+   * docs/evidence/qa-2026-08-20/vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png).
+   * null when the item was correct on the first try (nothing wrong to show).
+   */
+  firstTryAnsweredWordIdx?: number | null;
 }
 
 export interface PersistedProgress {
@@ -109,7 +133,10 @@ export function buildMCQOptions(vocab: VocabItem[], currentDefIdx: number): numb
 /* ------------------------------------------------------------------ */
 
 export function selectRetryIndices(answers: AnswerRecord[]): number[] {
-  return answers.filter((a) => !a.correct).map((a) => a.defIndex);
+  // firstTryCorrect ?? correct: prefer the immutable first-try verdict; fall
+  // back to `correct` for records that predate the field (persisted progress
+  // from before this fix, or single-shot fixtures where first == final).
+  return answers.filter((a) => (a.firstTryCorrect ?? a.correct) === false).map((a) => a.defIndex);
 }
 
 /* ------------------------------------------------------------------ */

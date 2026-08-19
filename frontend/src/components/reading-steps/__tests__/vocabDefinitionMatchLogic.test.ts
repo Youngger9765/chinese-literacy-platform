@@ -213,6 +213,37 @@ describe('selectRetryIndices (retry semantics)', () => {
     expect(result).toEqual(expect.arrayContaining([0, 1]));
     expect(result).toHaveLength(2);
   });
+
+  // #2773: selectRetryIndices must key off firstTryCorrect (immutable), not
+  // correct (which gets overwritten to true once the student eventually gets
+  // a retried item right — see VocabDefinitionMatchMCQ.tsx's own comment
+  // "on retry, overwrite with the latest attempt"). Before this fix, an item
+  // the student got wrong on the first try but right on a retry would show
+  // correct: true and silently disappear from every "錯題" accounting —
+  // exactly the gap Young's #2773 ask exposed live on staging.
+  it('selects an item whose first try was wrong even though correct is now true (post-retry state)', () => {
+    const postRetry: AnswerRecord[] = [
+      { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: true },
+      // Got it wrong first, then retried into a correct pick — correct is now
+      // true, but firstTryCorrect must still say false.
+      { defIndex: 1, answeredWordIdx: 1, correct: true, firstTryCorrect: false },
+    ];
+    expect(selectRetryIndices(postRetry)).toEqual([1]);
+  });
+
+  it('does NOT select an item that was correct on the first try, even if correct is later re-set', () => {
+    const answers: AnswerRecord[] = [
+      { defIndex: 0, answeredWordIdx: 0, correct: true, firstTryCorrect: true },
+    ];
+    expect(selectRetryIndices(answers)).toEqual([]);
+  });
+
+  it('falls back to correct when firstTryCorrect is absent (old/persisted records without the field)', () => {
+    const legacyAnswers: AnswerRecord[] = [
+      { defIndex: 0, answeredWordIdx: 0, correct: false },
+    ];
+    expect(selectRetryIndices(legacyAnswers)).toEqual([0]);
+  });
 });
 
 /* ------------------------------------------------------------------ */
