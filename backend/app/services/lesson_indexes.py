@@ -199,11 +199,50 @@ def _cloze_from(l: dict) -> list[dict]:
     sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
     # v2 寫 `questions[{text,answer}]`；v3 照學習單寫 `items[{stem,answer}]`。
     rows = sec.get("items") or sec.get("questions") or []
-    return [
-        {"sentence": q.get("stem") or q.get("text") or "", "answer": q.get("answer"), "_schema": "legacy"}
-        for q in rows
-        if (q.get("stem") or q.get("text")) and q.get("answer")
-    ]
+    bank = _vocab_bank_from(l)
+    out = []
+    for q in rows:
+        sentence = q.get("stem") or q.get("text") or ""
+        answer = q.get("answer")
+        if not (sentence and answer):
+            continue
+        primary, alts = _normalise_answer_code(str(answer), bank)
+        row = {"sentence": sentence, "answer": primary, "_schema": "legacy"}
+        if alts:
+            row["accepted_answers"] = [primary, *alts]
+        out.append(row)
+    return out
+
+
+def _normalise_answer_code(answer: str, bank: dict) -> tuple[str, list[str]]:
+    """答案代號 → 對得上 `option_bank` 的鍵，外加同樣算對的其他代號。
+
+    兩個實際踩到的形狀（2026-08-19 全庫掃描）：
+
+    **全形字母。** L0056 九題的答案是 `Ｂ Ｄ Ｃ Ｆ Ｈ`，而 `option_bank` 的鍵是
+    半形 `A B C`。字面比對一題都對不上 ⇒ **整課九題判不了分**，而且畫面上
+    看不出異常：選項照常顯示、學生照常選，只是永遠不對。
+
+    **一題兩個答案。** L0012 第 3 題的答案是 `'A/B'`，`answer_note` 寫著
+    「原稿手寫「A/B」，兩個答案都算對」。抽取忠實記錄了，消費端把整串當成一個代號查，
+    查無 ⇒ 那一題同樣永遠不對。
+
+    兩個都不是抽取錯 —— 抽取記下的就是學習單上的樣子。是這一層沒認得。
+    """
+    raw = answer.strip()
+    # 全形 Ａ-Ｚ / ａ-ｚ → 半形
+    half = "".join(
+        chr(ord(ch) - 0xFEE0) if "Ａ" <= ch <= "Ｚ" or "ａ" <= ch <= "ｚ" else ch
+        for ch in raw
+    )
+    parts = [p.strip().upper() for p in half.replace("、", "/").replace(",", "/").split("/") if p.strip()]
+    if not parts:
+        return raw, []
+    # 認得的代號優先；一個都認不得就原樣回傳（不要靜靜地換成別的東西）
+    known = [p for p in parts if p in bank] if bank else parts
+    if not known:
+        return half if half in bank or not bank else raw, []
+    return known[0], known[1:]
 
 
 def _vocab_bank_from(l: dict) -> dict:
