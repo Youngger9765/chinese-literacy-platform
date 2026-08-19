@@ -110,6 +110,7 @@ import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
 import GuestReadingPage from '../pages/GuestReadingPage';
 import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
+import KeypointsFollowupQuestions from '../components/reading-steps/KeypointsFollowupQuestions';
 import ClassicalText from '../components/reading-steps/ClassicalText';
 import ClassicalWordMatching from '../components/reading-steps/ClassicalWordMatching';
 import ClassicalSentenceMatching from '../components/reading-steps/ClassicalSentenceMatching';
@@ -349,6 +350,24 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     );
   });
 
+  // #2752 Phase 3: multi_text_parts + cross_text_banner + 閱讀接力, 4/175 lessons.
+  it('ReadingAnnotation (with multi_text_parts, cross_text_banner, 閱讀接力)', () => {
+    mountGuard(
+      'ReadingAnnotation-multiText',
+      <ReadingAnnotation
+        story={{
+          ...MINIMAL_STORY,
+          multiTextParts: [{ lesson_heading: '第23課', body: { paragraphs: [{ idx: 1, text: '段落一' }] } }],
+          crossTextBanner: { title_block: { title: '跨課文習作' } },
+          keypointsFollowupQuestions: {
+            items: [{ type: 'single', label: '❶', prompt: '哪一項最完整？', options: { '1': 'a' }, answer: 1 }],
+          },
+        }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
   it('ParagraphReading', () => {
     mountGuard(
       'ParagraphReading',
@@ -395,6 +414,14 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('StoryStructureTable', <StoryStructureTable storyId="1" />);
   });
 
+  // #2752 Phase 3: L0063-shape keypointsFollowupQuestions, 2/175 lessons.
+  it('KeypointsFollowupQuestions', () => {
+    mountGuard(
+      'KeypointsFollowupQuestions',
+      <KeypointsFollowupQuestions questions={[{ answer: 'A', stem: '題目一', options: { A: '選項一' } }]} />,
+    );
+  });
+
   it('ComprehensionChat', () => {
     mountGuard(
       'ComprehensionChat',
@@ -404,6 +431,17 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
 
   it('VocabWordSearch', () => {
     mountGuard('VocabWordSearch', <VocabWordSearch story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+
+  // #2752 Phase 3: writing_practice appended section, 4/175 lessons.
+  it('VocabWordSearch (with writing_practice)', () => {
+    mountGuard(
+      'VocabWordSearch-writingPractice',
+      <VocabWordSearch
+        story={{ ...MINIMAL_STORY, writingPractice: { words: ['顫顫巍巍', '尷尬'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
   });
 
   it('KnowledgeStation', () => {

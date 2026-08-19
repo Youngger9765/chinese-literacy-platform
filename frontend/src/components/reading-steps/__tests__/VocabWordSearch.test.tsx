@@ -125,3 +125,37 @@ describe('VocabWordSearch', () => {
     expect(screen.getByText(/拖曳選取字元/)).toBeTruthy();
   });
 });
+
+describe('VocabWordSearch — writing_practice section (#2752 Phase 3)', () => {
+  it('renders the worksheet\'s own writing-practice words and instruction when present', () => {
+    const storyWithWritingPractice: Story = {
+      ...mockStory,
+      writingPractice: {
+        instruction: '寫一寫：本課有一些語詞字形比較複雜，我們來練習書寫這些語詞。',
+        words: ['顫顫巍巍', '尷尬'],
+      },
+    };
+    render(<VocabWordSearch story={storyWithWritingPractice} onFinish={vi.fn()} />);
+    expect(screen.getByText(/我們來練習書寫這些語詞/)).toBeTruthy();
+    expect(screen.getByText('顫顫巍巍')).toBeTruthy();
+    expect(screen.getByText('尷尬')).toBeTruthy();
+  });
+
+  it('renders label variant (難字挑戰) when present instead of the default heading', () => {
+    const storyWithLabel: Story = {
+      ...mockStory,
+      writingPractice: {
+        label: '難字挑戰',
+        instruction: '1.仔細看左邊的字詞，記住字形。',
+        words: ['未雨綢繆', '蹂躪'],
+      },
+    };
+    render(<VocabWordSearch story={storyWithLabel} onFinish={vi.fn()} />);
+    expect(screen.getByText('難字挑戰')).toBeTruthy();
+  });
+
+  it('renders nothing extra when the lesson has no writing_practice (the other ~171 lessons)', () => {
+    render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
+    expect(screen.queryByText(/蓋起來考自己/)).toBeNull();
+  });
+});

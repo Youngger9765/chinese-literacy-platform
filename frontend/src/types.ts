@@ -384,6 +384,78 @@ export interface Story {
   goalBox?: GoalBoxContent;
   /** 讀前自我檢核（「大題一 讀全文-做記號」開始前的自我檢核清單）。 */
   selfCheckBeforeReading?: SelfCheckBeforeReadingContent;
+  /** 語詞書寫練習／難字挑戰（多為大題九，緊接在「八 詞語複習」之後）。 */
+  writingPractice?: WritingPracticeContent;
+
+  // ── 多文本合讀課 (#2752 Phase 3) — 4 課，第 1 篇已經在既有欄位（paragraphs 等）
+  // 由 full_text_annotate 提供；這裡放的是**第 2、3 篇**。 ──
+  /** 第 2、3 篇（第 1 篇走既有的 paragraphs/full-text-annotate 欄位）。 */
+  multiTextParts?: MultiTextPart[];
+  /** 「跨課文習作／三篇合讀」過場字，讀完所有篇次後顯示。 */
+  crossTextBanner?: CrossTextBannerContent;
+  /**
+   * 第一篇專屬追問——兩種形狀共用同一個欄位名（來源模組本來就是同一個檔案）：
+   *   - `questions` 形狀：文章重點表的加碼題（FOLD 進 keypoints-table）
+   *   - `items` 形狀：「閱讀接力」——check 剛讀的一篇 + 導向下一篇的問題
+   *     （FOLD 進 full-text-annotate，跟 multiTextParts 同頁）
+   */
+  keypointsFollowupQuestions?: KeypointsFollowupQuestionsContent;
+}
+
+export interface MultiTextPart {
+  lesson_heading?: string;
+  part_no?: number | null;
+  part_of?: number | null;
+  body?: {
+    paragraphs?: Array<{ idx?: number; text: string } | string>;
+  };
+  /** 少數課（如 L0144）在每一篇底下也帶了自己的「閱讀接力」——目前只顯示
+   *  頂層 keypointsFollowupQuestions 的第一篇版本，這裡先不重複渲染二三篇的，
+   *  留作已知的後續深化項（見 module_entry_gate.py 的 note）。 */
+  reading_relay?: unknown;
+}
+
+export interface CrossTextBannerContent {
+  title_block?: { title?: string };
+  heading?: string;
+  note_line?: string;
+  text?: string;
+}
+
+export interface KeypointsFollowupQuestionsItem {
+  answer: string | number;
+  stem: string;
+  options?: Record<string, string>;
+  explanation?: string;
+}
+
+export interface KeypointsFollowupQuestionsRelayItem {
+  type: 'single' | 'guide' | string;
+  label?: string;
+  prompt?: string;
+  text?: string;
+  options?: Record<string, string>;
+  answer?: string | number;
+}
+
+export interface KeypointsFollowupQuestionsContent {
+  instruction?: string;
+  belongs_to?: string;
+  /** L0063 形狀：重點表加碼題。 */
+  questions?: KeypointsFollowupQuestionsItem[];
+  /** L0144 形狀：閱讀接力（check + 導引到下一篇）。 */
+  items?: KeypointsFollowupQuestionsRelayItem[];
+  section_name_printed?: string;
+  subtitle?: string;
+}
+
+export interface WritingPracticeContent {
+  /** 少見的替代標題，如「難字挑戰」——沒有時用預設的「語詞書寫練習」。 */
+  label?: string;
+  instruction?: string;
+  words: string[];
+  /** 原稿加框標出的「時間不夠時只寫這幾個」難字（少見）。 */
+  boxed_chars?: string[];
 }
 
 export interface GoalBoxContent {

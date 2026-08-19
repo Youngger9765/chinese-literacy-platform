@@ -607,6 +607,11 @@ def get_story(story_id: str):
         # 目標策略框／讀前自我檢核 (#2752 Phase 2) — None for lessons without one.
         goal_box=story.get("goal_box"),
         self_check_before_reading=story.get("self_check_before_reading"),
+        # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3) — None for lessons without one.
+        multi_text_parts=story.get("multi_text_parts"),
+        cross_text_banner=story.get("cross_text_banner"),
+        keypoints_followup_questions=story.get("keypoints_followup_questions"),
+        writing_practice=story.get("writing_practice"),
     )
 
 

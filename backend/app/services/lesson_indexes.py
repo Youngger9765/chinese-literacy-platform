@@ -436,6 +436,13 @@ def _uid_tree_lessons() -> list[dict]:
             # (70／58 課), not a single genre. Same "missing stays missing" rule.
             "goal_box": l.get("goal_box") or None,
             "self_check_before_reading": l.get("self_check_before_reading") or None,
+            # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3). `multi_text_parts` is a
+            # LIST (one entry per additional part), not a dict — `or None` still
+            # works correctly on an empty/absent list.
+            "multi_text_parts": l.get("multi_text_parts") or None,
+            "cross_text_banner": l.get("cross_text_banner") or None,
+            "keypoints_followup_questions": l.get("keypoints_followup_questions") or None,
+            "writing_practice": l.get("writing_practice") or None,
             # Per-lesson step order (#1374 mechanism, unused by the uid tree until now —
             # every one of the 175 second-edition lessons fell back to
             # DEFAULT_STEP_SEQUENCE because this key was never in `row` for the overlay

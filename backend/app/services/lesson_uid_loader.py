@@ -61,6 +61,11 @@ MODULES = (
     # 檢核（58 課），兩者都印在「一 讀全文-做記號」之前，不掛在任何大題編號下。
     "goal_box",
     "self_check_before_reading",
+    # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3)。
+    "multi_text_parts",             # 第 2/3 篇（第 1 篇在 full_text_annotate）
+    "cross_text_banner",            # 「跨課文習作／三篇合讀」過場字
+    "keypoints_followup_questions", # 第一篇專屬追問（兩種形狀，見檔頭 schema_gap）
+    "writing_practice",             # 語詞書寫練習／難字挑戰（多為大題九）
 )
 
 # ⛔ 不留 v2 的 `sections` / `body` 相容入口。

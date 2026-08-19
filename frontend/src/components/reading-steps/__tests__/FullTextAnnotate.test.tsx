@@ -453,3 +453,68 @@ describe('ReadingAnnotation — self_check_before_reading banner (#2752 Phase 2)
     expect(screen.queryByText(/如果你有做到下列事項/)).toBeNull();
   });
 });
+
+describe('ReadingAnnotation — multi_text_parts + cross_text_banner (#2752 Phase 3)', () => {
+  const onFinishLocal = vi.fn();
+
+  it('renders each additional part\'s heading and paragraphs as a read-only section after part 1', () => {
+    const storyWithParts: Story = {
+      ...mockStory,
+      multiTextParts: [
+        { lesson_heading: '第23課　政府可以干預價格嗎？', body: { paragraphs: [{ idx: 1, text: '如果市場上某些民生必需品價格高漲。' }] } },
+        { lesson_heading: '第24課　一個月薪水80萬？', body: { paragraphs: [{ idx: 1, text: '人力市場也有供需原則。' }] } },
+      ],
+    };
+    render(<ReadingAnnotation story={storyWithParts} onFinish={onFinishLocal} />);
+    expect(screen.getByText(/第23課.*政府可以干預價格嗎/)).toBeTruthy();
+    expect(screen.getByText(/如果市場上某些民生必需品價格高漲/)).toBeTruthy();
+    expect(screen.getByText(/第24課.*一個月薪水80萬/)).toBeTruthy();
+    expect(screen.getByText(/人力市場也有供需原則/)).toBeTruthy();
+  });
+
+  it('renders the cross_text_banner after all parts (both title_block and heading/text shapes)', () => {
+    const storyWithBanner: Story = {
+      ...mockStory,
+      multiTextParts: [{ lesson_heading: 'x', body: { paragraphs: [{ idx: 1, text: 'y' }] } }],
+      crossTextBanner: { title_block: { title: '跨課文習作' }, note_line: '以下是多文本練習，作答時請同時參考兩課內容' },
+    };
+    render(<ReadingAnnotation story={storyWithBanner} onFinish={onFinishLocal} />);
+    expect(screen.getByText('跨課文習作')).toBeTruthy();
+    expect(screen.getByText(/以下是多文本練習/)).toBeTruthy();
+  });
+
+  it('renders the L0144-shape cross_text_banner (heading/text, no title_block)', () => {
+    const storyWithBanner: Story = {
+      ...mockStory,
+      multiTextParts: [{ lesson_heading: 'x', body: { paragraphs: [{ idx: 1, text: 'y' }] } }],
+      crossTextBanner: { heading: '三篇合讀', text: '前面的「閱讀接力」已經幫我們把三篇文章的關聯連接起來。' },
+    };
+    render(<ReadingAnnotation story={storyWithBanner} onFinish={onFinishLocal} />);
+    expect(screen.getByText('三篇合讀')).toBeTruthy();
+    expect(screen.getByText(/前面的「閱讀接力」/)).toBeTruthy();
+  });
+
+  it('renders the 閱讀接力 (items-shape) keypointsFollowupQuestions on the same page', () => {
+    const storyWithRelay: Story = {
+      ...mockStory,
+      multiTextParts: [{ lesson_heading: 'x', body: { paragraphs: [{ idx: 1, text: 'y' }] } }],
+      keypointsFollowupQuestions: {
+        section_name_printed: '閱讀接力',
+        items: [
+          { type: 'single', label: '❶先整理這一篇', prompt: '哪一項最完整地整理了本文內容？', options: { '1': '選項一', '2': '選項二' }, answer: 1 },
+          { type: 'guide', label: '❷帶著問題讀下一篇', text: '請帶著這個問題：近百年來，各項運動紀錄為什麼不斷進步？' },
+        ],
+      },
+    };
+    render(<ReadingAnnotation story={storyWithRelay} onFinish={onFinishLocal} />);
+    expect(screen.getByText('閱讀接力')).toBeTruthy();
+    expect(screen.getByText(/哪一項最完整地整理了本文內容/)).toBeTruthy();
+    expect(screen.getByText(/近百年來，各項運動紀錄為什麼不斷進步/)).toBeTruthy();
+  });
+
+  it('renders nothing extra for a regular single-text lesson (the other ~171 lessons)', () => {
+    render(<ReadingAnnotation story={mockStory} onFinish={onFinishLocal} />);
+    expect(screen.queryByText('跨課文習作')).toBeNull();
+    expect(screen.queryByText('閱讀接力')).toBeNull();
+  });
+});

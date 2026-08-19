@@ -293,6 +293,111 @@ function SelfCheckBeforeReadingBanner({
   );
 }
 
+// ── A7: 多文本合讀課 — 第 2/3 篇 + 過場字 + 閱讀接力 (#2752 Phase 3) ─────────
+//
+// A 多文本 lesson prints "一 讀全文-做記號" more than once — one per article.
+// The FIRST article already reaches the student through the interactive
+// paragraphs above (that data lives in `full_text_annotate.yml`, the same
+// module every single-text lesson uses). The REMAINING articles live in
+// `multi_text_parts` and had no entry at all.
+//
+// These render READ-ONLY, not wired into the annotation reducer above:
+// `annotationReducer`'s offsets are absolute positions into ONE article, with
+// no concept of "which part". Making it part-aware would be a real rewrite of
+// the annotation system for the 4 lessons this covers — the module_entry_gate
+// bar is "the content reaches the student", not "every interaction the first
+// article gets". Marking words on parts 2/3 is a deferred, separately-scoped
+// enhancement, not something this lock silently skips: see the ENTRY table
+// note in module_entry_gate.py.
+function multiTextParagraphText(p: { text: string } | string): string {
+  return typeof p === 'string' ? p : p.text;
+}
+
+function MultiTextPartSection({ part, index }: { part: NonNullable<Story['multiTextParts']>[number]; index: number }) {
+  const paragraphs = part.body?.paragraphs ?? [];
+  return (
+    <div className="max-w-4xl mx-auto px-6 md:px-16 pt-6">
+      <div className="rounded-2xl border border-surface-container-high bg-surface-container-lowest px-6 py-5 space-y-3">
+        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+          第 {index + 2} 篇
+        </span>
+        {part.lesson_heading && (
+          <h3 className="text-lg font-bold text-on-surface">{part.lesson_heading}</h3>
+        )}
+        <div className="space-y-3">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-base leading-loose text-on-surface">
+              {multiTextParagraphText(p)}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The "now read them together" transition text. Two source shapes coexist
+// (title_block/note_line vs heading/text) — both printed, neither invented.
+function CrossTextBannerSection({ banner }: { banner: NonNullable<Story['crossTextBanner']> }) {
+  const title = banner.title_block?.title ?? banner.heading;
+  const body = banner.note_line ?? banner.text;
+  return (
+    <div className="max-w-4xl mx-auto px-6 md:px-16 pt-6">
+      <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-6 py-5 space-y-2">
+        {title && (
+          <p className="text-sm font-bold text-accent uppercase tracking-widest">{title}</p>
+        )}
+        {body && <p className="text-base text-on-surface whitespace-pre-line">{body}</p>}
+      </div>
+    </div>
+  );
+}
+
+// 閱讀接力 (L0144-shape keypointsFollowupQuestions — `items[]`): a check on the
+// article just read, then a guiding question into the next one. Same
+// self-check reveal pattern as the classical-text steps (#2752 Phase 1) — see
+// ClassicalWordMatching.tsx for the precedent.
+function ReadingRelaySection({ items, title }: { items: NonNullable<Story['keypointsFollowupQuestions']>['items']; title?: string }) {
+  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="max-w-4xl mx-auto px-6 md:px-16 pt-6">
+      <div className="rounded-2xl border border-surface-container-high bg-surface-container-lowest px-6 py-5 space-y-4">
+        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+          {title || '閱讀接力'}
+        </span>
+        {items.map((item, i) => (
+          <div key={i} className="space-y-2">
+            {item.label && <p className="text-sm font-bold text-on-surface">{item.label}</p>}
+            {item.prompt && <p className="text-base text-on-surface">{item.prompt}</p>}
+            {item.text && <p className="text-base text-on-surface whitespace-pre-line">{item.text}</p>}
+            {item.options && (
+              <ul className="pl-4 space-y-1 text-sm text-on-surface-variant">
+                {Object.entries(item.options).map(([key, text]) => (
+                  <li key={key}>{key}. {text}</li>
+                ))}
+              </ul>
+            )}
+            {typeof item.answer !== 'undefined' && (
+              revealed[i] ? (
+                <p className="text-sm text-accent">答案：{item.answer}</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setRevealed((r) => ({ ...r, [i]: true }))}
+                  className="text-sm text-accent hover:brightness-110 transition-colors"
+                >
+                  顯示答案
+                </button>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 
 const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
@@ -856,6 +961,19 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               <TableDisplay tables={fallbackTables} layout="stacked" />
             </div>
           )}
+
+          {/* A7: 多文本合讀課的第 2/3 篇 + 過場字 + 閱讀接力 (#2752 Phase 3).
+              Read-only — see the comment on MultiTextPartSection above for why. */}
+          {story.multiTextParts?.map((part, i) => (
+            <MultiTextPartSection key={i} part={part} index={i} />
+          ))}
+          {story.keypointsFollowupQuestions?.items && (
+            <ReadingRelaySection
+              items={story.keypointsFollowupQuestions.items}
+              title={story.keypointsFollowupQuestions.section_name_printed}
+            />
+          )}
+          {story.crossTextBanner && <CrossTextBannerSection banner={story.crossTextBanner} />}
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
           {!hideAnnotation && toolbar.visible && (

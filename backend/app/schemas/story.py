@@ -137,6 +137,11 @@ class StoryDetail(StoryListItem):
     # 直接透傳，None 為誠實的「這課沒有這個」。
     goal_box: Optional[dict] = None              # 目標策略框（70 課）
     self_check_before_reading: Optional[dict] = None  # 讀前自我檢核（58 課）
+    # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3)。
+    multi_text_parts: Optional[list] = None        # 第 2/3 篇（4 課）
+    cross_text_banner: Optional[dict] = None       # 跨課文習作／三篇合讀過場字（2 課）
+    keypoints_followup_questions: Optional[dict] = None  # 第一篇專屬追問（2 課，兩種形狀）
+    writing_practice: Optional[dict] = None        # 語詞書寫練習／難字挑戰（4 課）
 
 
 class StoryListResponse(BaseModel):

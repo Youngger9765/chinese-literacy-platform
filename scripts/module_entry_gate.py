@@ -82,12 +82,17 @@ ENTRY: dict[str, tuple[str, str]] = {
     "goal_box":             (FOLDED, "課程簡介頁（lesson-intro）餵進既有『本課學習策略』框"),
     "self_check_before_reading": (FOLDED, "讀全文-做記號頁（full-text-annotate）開頭的讀前自我檢核 banner"),
 
-    # ── 目前沒有入口（債，追蹤中）────────────────────────────────
-    # ⚠️ 這些不是「不用做」，是「還沒做」。見 issue #2752。
-    "writing_practice":     (NO_ENTRY, "#2752 寫作練習"),
-    "multi_text_parts":     (NO_ENTRY, "#2752 多文本各篇"),
-    "cross_text_banner":    (NO_ENTRY, "#2752 跨課文橫幅"),
-    "keypoints_followup_questions": (NO_ENTRY, "#2752 重點表追問"),
+    # ── 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3) — 涵蓋 4／2／2／4 課 ──────
+    # multi_text_parts / cross_text_banner / keypoints_followup_questions(items 形狀)
+    # 都併進 full-text-annotate（唯讀，見該檔案 MultiTextPartSection 註解說明為何不
+    # 做互動式做記號）；keypoints_followup_questions 的 questions 形狀（L0063）
+    # 併進 keypoints-table；writing_practice 併進 vocab-review。
+    "writing_practice":     (FOLDED, "詞語複習頁（vocab-review）結尾追加書寫練習區塊"),
+    "multi_text_parts":     (FOLDED, "讀全文-做記號頁（full-text-annotate）追加第 2/3 篇唯讀區塊"),
+    "cross_text_banner":    (FOLDED, "讀全文-做記號頁（full-text-annotate）追加過場字，排在所有篇次之後"),
+    "keypoints_followup_questions": (FOLDED,
+        "兩種形狀各自的家：questions[]（L0063）併進 keypoints-table；"
+        "items[]／閱讀接力（L0144）併進 full-text-annotate"),
 }
 
 # 目前沒有入口的模組涵蓋幾課。**只能減少，不能增加。**
@@ -101,7 +106,15 @@ ENTRY: dict[str, tuple[str, str]] = {
 # 兩個各自涵蓋 70／58 課的模組都有了答案，這次是真的清零（不是折算），因為
 # 剩下的 4 個模組（writing_practice／multi_text_parts／cross_text_banner／
 # keypoints_followup_questions）合計只覆蓋 8 課，且跟這兩個模組沒有重疊。
-NO_ENTRY_LESSON_CEILING = 8
+#
+# 2026-08-19 (#2752 Phase 3): 8 → 0。剩下的 4 個模組全部有了答案，NO_ENTRY 清零。
+# ⚠️ 「有入口」不等於「跟第一篇一樣完整」——multi_text_parts 的第 2/3 篇是唯讀
+# 顯示，沒有做記號互動；L0144 這幾課的 multi_text_parts 內還嵌著各篇自己的
+# comprehension／keypoints／vocab_definitions／reading_relay 子欄位，目前只讀出
+# 了 body.paragraphs（核心內容），那些嵌套子欄位還沒有自己的入口——因為它們是
+# 「同一個檔案裡的巢狀欄位」，不是這道門掃描的獨立 yml 檔案，所以门本身看不到
+# 這筆債。誠實記在這裡，供下一次盤點承接。
+NO_ENTRY_LESSON_CEILING = 0
 
 
 def _enabled_step_ids() -> set[str]:

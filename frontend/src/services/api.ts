@@ -21,6 +21,10 @@ import type {
   IntroGuideContent,
   GoalBoxContent,
   SelfCheckBeforeReadingContent,
+  WritingPracticeContent,
+  MultiTextPart,
+  CrossTextBannerContent,
+  KeypointsFollowupQuestionsContent,
 } from '../types';
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
@@ -161,6 +165,10 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // 一般課也有的無編號元素 (#2752 Phase 2) — null for lessons without one.
   goal_box?: GoalBoxContent | null;
   self_check_before_reading?: SelfCheckBeforeReadingContent | null;
+  writing_practice?: WritingPracticeContent | null;
+  multi_text_parts?: MultiTextPart[] | null;
+  cross_text_banner?: CrossTextBannerContent | null;
+  keypoints_followup_questions?: KeypointsFollowupQuestionsContent | null;
 }
 
 interface ApiStoryListResponse {
@@ -279,6 +287,10 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     introGuide: detail.intro_guide ?? undefined,
     goalBox: detail.goal_box ?? undefined,
     selfCheckBeforeReading: detail.self_check_before_reading ?? undefined,
+    writingPractice: detail.writing_practice ?? undefined,
+    multiTextParts: detail.multi_text_parts ?? undefined,
+    crossTextBanner: detail.cross_text_banner ?? undefined,
+    keypointsFollowupQuestions: detail.keypoints_followup_questions ?? undefined,
   };
 }
 
