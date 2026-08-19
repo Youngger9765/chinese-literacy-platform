@@ -51,6 +51,19 @@ const ComprehensionMcqPage: React.FC = () => {
     [handleProgressChange],
   );
 
+  // `LessonRenderer.onComplete` is a dependency of its own `useEffect(() => { if (allDone)
+  // onComplete?.() }, [allDone, onComplete])`. An inline `() => {...}` literal here would be
+  // a NEW function reference every render; once `allDone` flips true, `handleMcqComplete`
+  // fires `setMcqResult({ score, total })` — a new OBJECT every call, so React never bails
+  // out on reference equality — which re-renders this page, recreates the inline callback,
+  // and re-fires the effect. Confirmed via isolated repro (#2779 investigation): render
+  // count grows unbounded, "Maximum update depth exceeded" logged repeatedly, tab pegged at
+  // ~95% CPU. `useCallback` here is load-bearing, not a style nit.
+  const handleLessonRendererComplete = useCallback(() => {
+    const total = selectedStory?.multipleChoice?.length ?? 0;
+    handleMcqComplete(total, total);
+  }, [selectedStory, handleMcqComplete]);
+
   const handleNext = useCallback(() => {
     const result: ComprehensionResult = {
       understoodCount: mcqResult?.score ?? 0,
@@ -88,27 +101,41 @@ const ComprehensionMcqPage: React.FC = () => {
     // adapter); fall back to the front-end storyToLesson stopgap when the backend flag is
     // OFF or the payload didn't parse (selectedStory.lessonContent is undefined).
     const lesson = selectedStory.lessonContent ?? storyToLesson(selectedStory).lesson;
+    // 閱讀理解 = 只有選擇題（這一頁的 hint 就寫「回答課文理解選擇題」）。`lesson` 是整份
+    // 故事轉出來的，`storyToLesson` 把 story.multipleChoice **和** story.fillInBlank 兩組
+    // 資料都轉成 exercise block 塞進同一份 lesson.blocks —— 但 fill_in_blank（語詞應用）
+    // 已經是獨立步驟「語詞應用」（`vocab-application` / `VocabApplication.tsx`）的專屬內容，
+    // 走完全不同的程式碼路徑（`story.fillInBlank` → `FillInBlankExercise`，不經過
+    // storyToLesson/LessonRenderer），自己有一套作答/計分/重做錯題機制。不濾掉的話，
+    // 學生在「語詞應用」答完這 8 句，會在「閱讀理解」原封不動再看到一次；且
+    // `LessonRenderer` 的 `allDone` 把非 custom/非 needsReview 的 exercise 全算進分母，
+    // 於是「閱讀理解完成」被撐大成要答對 13 題（5 選擇題 + 8 填空），不是產品設計要的
+    // 5 題（#2779，由 #2775/#2777 分頁症狀修復時交叉發現）。
+    // 只濾掉「exercise 且非 multiple_choice」的 block；課文/圖表等閱讀素材照舊全部保留，
+    // 不動 storyToLesson() 本身 —— 語詞應用不經過這個 adapter，改這裡風險最小。
+    const comprehensionLesson = lesson
+      ? { ...lesson, blocks: lesson.blocks.filter(
+          (b) => b.type !== 'exercise' || b.question.kind === 'multiple_choice',
+        ) }
+      : lesson;
     // Only adopt a Lesson here if it actually carries COMPREHENSION content (a
     // multiple_choice exercise). The AI-extracted lessons are 閱讀聚光燈-ONLY (guided_steps /
     // graphic_text_integration) and must NOT hijack the 閱讀理解 step — without this guard the
     // comprehension page would render the spotlight (the reading-strategy content). When the
     // lesson has no MCQ, fall through to the legacy comprehension layout.
     const lessonHasMcq =
-      !!lesson &&
-      lesson.blocks.some((b) => b.type === 'exercise' && b.question.kind === 'multiple_choice');
-    if (lesson && lessonHasMcq) {
+      !!comprehensionLesson &&
+      comprehensionLesson.blocks.some((b) => b.type === 'exercise' && b.question.kind === 'multiple_choice');
+    if (comprehensionLesson && lessonHasMcq) {
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="comprehension" />
           <LessonRenderer
             sectionLabel="閱讀理解"
-            lesson={lesson}
+            lesson={comprehensionLesson}
             story={selectedStory}
             lessonCode={selectedStory.lesson_code || selectedStory.id}
-            onComplete={() => {
-              const total = selectedStory.multipleChoice?.length ?? 0;
-              handleMcqComplete(total, total);
-            }}
+            onComplete={handleLessonRendererComplete}
           />
           {mcqDone ? (
             <NextStepFooter onNext={handleNext} />
