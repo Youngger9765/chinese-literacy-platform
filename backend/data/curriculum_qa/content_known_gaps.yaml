@@ -391,3 +391,85 @@ choice_rows_without_options:
     answer_carrier: 橘色手寫（字元樣式 af）＋ 紅色 ☑（w:sym Wingdings F0FE），共 6 個 ☑
   count_lessons: 1
   count_rows: 3
+
+comprehension_no_mcq_uses_vocab_fill_in_blank:
+  generated: '2026-08-20'
+  issue: 2779
+  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content
+    也全部不存在（不是 #2779 修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
+  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這
+    23 課的閱讀理解會落在既有的 hasMcq=false 分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實
+    payload 寫回歸鎖驗證這個行為。'
+  how_to_close: 請教材端為這 23 課補閱讀理解選擇題（回原始 DOCX 或請補印）。
+  count: 23
+  of: 175
+  lessons:
+  - catalog_slot: G6-L15
+    id: 20055
+    title: 愛冒險逞強的雄性動物
+  - catalog_slot: G6-L16
+    id: 20056
+    title: 把手上的餅吃香一點
+  - catalog_slot: G6-L9
+    id: 20076
+    title: 給神明發會診單
+  - catalog_slot: G7-L10
+    id: 20078
+    title: 別上「誘餌式標題」的鉤
+  - catalog_slot: G7-L11
+    id: 20079
+    title: 一封向醫師求助的信
+  - catalog_slot: G7-L12
+    id: 20080
+    title: 澳洲奧運金牌的X機密
+  - catalog_slot: G7-L13
+    id: 20081
+    title: 女性太空人登月
+  - catalog_slot: G7-L2
+    id: 20099
+    title: AI什麼都會，我們還要學什麼？
+  - catalog_slot: G7-L28
+    id: 20097
+    title: 綠色賽事
+  - catalog_slot: G7-L29
+    id: 20098
+    title: 隱藏在日常對話中的微歧視
+  - catalog_slot: G7-L3
+    id: 20100
+    title: 你以為的浪漫，可能是跟騷
+  - catalog_slot: G8-L6
+    id: 20126
+    title: 戲院、賭場、檳榔攤：在時代夾縫中
+  - catalog_slot: G8-L7
+    id: 20127
+    title: 當壞事已不可逆轉：集中營裡的一門
+  - catalog_slot: G8-L8
+    id: 20128
+    title: 讓黑猩猩被看見的人
+  - catalog_slot: G9-L16
+    id: 20137
+    title: 未解之謎──石頭的祕密
+  - catalog_slot: G9-L2
+    id: 20145
+    title: 看不見的故事，推動看得見的世界
+  - catalog_slot: G9-L21
+    id: 20142
+    title: 焚而不毀的倫敦
+  - catalog_slot: G9-L22
+    id: 20143
+    title: 高地訓練有助於運動表現嗎？
+  - catalog_slot: G9-L3
+    id: 20146
+    title: 語言的足跡：從臺北萬華到南太平洋
+  - catalog_slot: G9-L4
+    id: 20147
+    title: 構樹：南島祖先「出臺灣說」的植物
+  - catalog_slot: 體-L1
+    id: 20167
+    title: 心，也要一起練
+  - catalog_slot: 體-L2
+    id: 20168
+    title: 成為身體的最佳夥伴
+  - catalog_slot: 體-L3
+    id: 20169
+    title: 身體，謝謝你
