@@ -1,106 +1,32 @@
 generated: '2026-08-15'
 issue: 2683
-what_this_is: 二修 175 課裡，有 43 課的閱讀聚光燈服務 null（前端退回 storyToLesson）。成因有兩種，分開登錄：抽取器完全沒產出 block（32 課），以及有 block
-  但全是渲染不出內容的類型（11 課）。
-not_a_bug: 載入層與 adapter 對這些課的行為正確。缺的是來源學習單裡抽取器認得的結構，要補要回到抽取器或原始 DOCX，不是改載入層。
-count: 43
+what_this_is: 二修 175 課裡，閱讀聚光燈（含品格/文言文同一大題的不同印法）目前只有 7 課真的沒有內容：L0011、L0137，以及 5 個年級各一份的「正太與小豬」定向課。其餘先前登錄的
+  41 課已在後續多模態重抽（#2736）中補上，詳見 resolved.spotlight_render_null_2683。
+not_a_bug: L0011、L0137 的來源學習單本身沒有這個大題（分別只有 8 節、多文本合讀無此節）。L0021/L0049/L0077/L0107/L0130 是每個年級開學都放的同一份「正太與小豬：武僧的養成之路」定向課，`sections_present`
+  只有『讀全文-做記號』『閱讀理解』兩節，整份學習單本來就沒有其餘七個大題（含閱讀聚光燈）——不是抽取器漏抓。
+count: 7
 lessons:
-- lesson_uid: L0009
-  catalog_slot: G4-L18
-  title: 白牙的最後一戰
 - lesson_uid: L0011
   catalog_slot: G4-L1
   title: 贏得喝采的輸家
-- lesson_uid: L0022
-  catalog_slot: G5-L10
-  title: 感情小日記3──吃醋的滋味
-- lesson_uid: L0041
-  catalog_slot: G5-L2
-  title: 周天成的一天──頂尖選手的養成
-- lesson_uid: L0044
-  catalog_slot: G5-L5
-  title: 文字路上的閱讀號誌
-- lesson_uid: L0052
-  catalog_slot: G6-L12
-  title: 小藍鯨之死
-- lesson_uid: L0056
-  catalog_slot: G6-L16
-  title: 把手上的餅吃香一點
-- lesson_uid: L0059
-  catalog_slot: G6-L19
-  title: 紅領帶
-- lesson_uid: L0064
-  catalog_slot: G6-L25
-  title: 感情小日記6──我失戀了
-- lesson_uid: L0065
-  catalog_slot: G6-L26
-  title: 運動傷害，怎麼辦
-- lesson_uid: L0069
-  catalog_slot: G6-L2
-  title: 一件班服，一場思辨討論
-- lesson_uid: L0072
-  catalog_slot: G6-L5
-  title: 重複朗讀的重要性：柳丁和文旦的比喻
-- lesson_uid: L0076
-  catalog_slot: G6-L9
-  title: 給神明發會診單
-- lesson_uid: L0092
-  catalog_slot: G7-L23
-  title: 信眾與教主
-- lesson_uid: L0094
-  catalog_slot: G7-L25
-  title: 看到了嗎，然後呢
-- lesson_uid: L0102
-  catalog_slot: G7-L5
-  title: 網紅的電子煙實驗：偽科學的陷阱
-- lesson_uid: L0106
-  catalog_slot: G7-L9
-  title: 帶著血拼清單閱讀
-- lesson_uid: L0112
-  catalog_slot: G8-L15
-  title: 未來的農夫
-- lesson_uid: L0121
-  catalog_slot: G8-L23
-  title: MeToo運動與我們的權利（性別平等-辨識界線、安全回應、支持他人)
-- lesson_uid: L0123
-  catalog_slot: G8-L3
-  title: 爸爸的恩人們
-- lesson_uid: L0126
-  catalog_slot: G8-L6
-  title: 戲院、賭場、檳榔攤：在時代夾縫中成長的我
-- lesson_uid: L0136
-  catalog_slot: G9-L15
-  title: 會考圖文題實戰
 - lesson_uid: L0137
   catalog_slot: G9-L16
-  title: ~17多文本-未解之謎-巨石陣+摩艾石像
-- lesson_uid: L0143
-  catalog_slot: G9-L22
-  title: 高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題)
-- lesson_uid: L0144
-  catalog_slot: G9-L23
-  title: ~25運動記錄的突破與公平
-- lesson_uid: L0145
-  catalog_slot: G9-L2
-  title: 看不見的故事，推動看得見的世界
-- lesson_uid: L0153
-  catalog_slot: 文-L10
-  title: 荒野救亡記
-- lesson_uid: L0154
-  catalog_slot: 文-L11
-  title: 祁黃羊的思路解密(疑問助詞)
-- lesson_uid: L0155
-  catalog_slot: 文-L12
-  title: -不流血的戰爭
-- lesson_uid: L0173
-  catalog_slot: 體-L7
-  title: 讓「想很多」助你一臂之力
-- lesson_uid: L0174
-  catalog_slot: 體-L8
-  title: 面對「失敗」不只有一種可能
-- lesson_uid: L0175
-  catalog_slot: 體-L9
-  title: 成長型思維 翻轉失敗的關鍵
+  title: 未解之謎──石頭的祕密（多文本-巨石陣+摩艾石像）
+- lesson_uid: L0021
+  catalog_slot: G5-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0049
+  catalog_slot: G6-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0077
+  catalog_slot: G7-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0107
+  catalog_slot: G8-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0130
+  catalog_slot: G9-L0
+  title: 正太與小豬：武僧的養成之路
 lesson_body_text:
   status: 缺，全部 175 課
   what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修
@@ -209,86 +135,9 @@ mcq_options_emitted_as_guides:
   resolved_2026_08_18: 多模態重抽（#2736）
   lessons: []
 blocks_present_but_none_renderable:
-  count: 11
-  what: 這些課的 spotlight 只抽到 guide／figure／self_check，沒有 passage 也沒有 exercise —— 有指引文字，沒有要學的東西。
-  why_they_serve_null: 載入層會濾掉沒有圖檔的 referent=table 空框（#2455 的重跑產物），濾完這些課就剩 0 個可渲染 block，schema 要求至少 1 個
-    → fail-closed 回 null。**過濾前它們是 139 課『有內容』的一部分，但那個『有』會渲染成空白頁** —— 回 null 讓前端退回 storyToLesson，比送一頁空的出去誠實。
-  lessons:
-  - lesson_uid: L0015
-    catalog_slot: G4-L4
-    title: 穿越極限的跑者
-    blocks: 2
-    block_types:
-    - figure
-    - guide
-  - lesson_uid: L0031
-    catalog_slot: G5-L1
-    title: 奧運銀牌背後的自我鍛鍊
-    blocks: 14
-    block_types:
-    - figure
-    - guide
-    - self_check
-  - lesson_uid: L0081
-    catalog_slot: G7-L13
-    title: 女性太空人登月（用表格整理訊息-從細節歸納比較項目)
-    blocks: 4
-    block_types:
-    - figure
-    - guide
-  - lesson_uid: L0093
-    catalog_slot: G7-L24
-    title: 用科學方法伸張正義的神探
-    blocks: 5
-    block_types:
-    - guide
-  - lesson_uid: L0096
-    catalog_slot: G7-L27
-    title: 吐瓦魯：逐漸被淹沒的島國
-    blocks: 9
-    block_types:
-    - guide
-  - lesson_uid: L0119
-    catalog_slot: G8-L21
-    title: 致台東：一封過客的情書
-    blocks: 4
-    block_types:
-    - figure
-    - guide
-  - lesson_uid: L0128
-    catalog_slot: G8-L8
-    title: 讓黑猩猩被看見的人
-    blocks: 6
-    block_types:
-    - figure
-    - guide
-    - self_check
-  - lesson_uid: L0131
-    catalog_slot: G9-L10
-    title: 國高中數學當然可以使用計算機
-    blocks: 6
-    block_types:
-    - figure
-    - guide
-  - lesson_uid: L0165
-    catalog_slot: 體-L10
-    title: 信任_下一球，我相信你
-    blocks: 2
-    block_types:
-    - guide
-  - lesson_uid: L0166
-    catalog_slot: 體-L11
-    title: 信任_因為相信，所以能向前
-    blocks: 1
-    block_types:
-    - guide
-  - lesson_uid: L0172
-    catalog_slot: 體-L6
-    title: 不是想太多，只是好在乎
-    blocks: 13
-    block_types:
-    - figure
-    - guide
+  count: 0
+  lessons: []
+  note: 先前登錄的 11 課（只有 guide/figure/self_check）2026-08-19 重驗後全部已有可渲染內容，見 resolved.spotlight_render_null_2683。
 resolved:
   note: 以下缺口已補上，登錄留著是為了記錄怎麼補的與剩下什麼
   lesson_body_text:
@@ -321,6 +170,17 @@ resolved:
       課程簡介: DOCX 沒有這一節。不拿課文首段充當，那會讓簡介變成課文重複一次
       詞語複習: 找字方陣，需要能驗證「每個語詞都在方陣裡找得到」才寫入，尚未做
       知識補給站: 抽到 129 課但無交叉驗證可做，標 needs_human_review
+  spotlight_render_null_2683:
+    was: 43 / 175（32 課完全沒有 block、11 課只有 guide/figure/self_check 這類不可渲染的類型）
+    now: 2 / 175（L0011、L0137——兩課的來源學習單本來就沒有這個大題）
+    how: '2026-08-19（#2772，隨 #2736 一路推進的多模態重抽）：逐課重讀 latest version（v3 優先）的 spotlight.yml，看 block type
+      是否含 figure/guide/self_check 以外的可練習類型（single/multi/free_text/table/fill_table/matching/exercise/passage/…）。原列的
+      43 課裡 41 課現在都有——含這份清單自己漏掉的線索：品格教育軌（體-L*）跟文言文軌把這個大題印成「品格聚光燈」／「文言文聚光燈」而不是「閱讀聚光燈」，字面比對會把它們誤判成缺口；用「*聚光燈」找家族名才對得上。'
+    how_verified: 讀 backend/data/lessons/L*/v3/spotlight.yml 本身（不是重跑抽取器），逐課列出 block type 分佈人工抽查過樣本
+    note: 本次只更新這份人讀的 ledger。machine-checked 的 content_known_gaps.adapter.yaml（spotlight_to_lesson_content.py
+      讀的那份）是另一個檔，本次未動——那份要不要跟進改，需要先確認 adapter gate 現在怎麼用這 43 課的 enum，不在這次盤點範圍內。
+    caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content
+      evidence gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
 bodies_without_a_cross_check:
   count: 29
   of: 175
@@ -377,6 +237,9 @@ spotlight_range_not_found:
   current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
   how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate
     + ship gate
+  likely_stale_2772: 2026-08-19（#2772）重驗閱讀聚光燈缺口只剩 2 課（見 resolved.spotlight_render_null_2683），跟這裡的『現在 143/175』（缺
+    32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有 block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range()
+    這支窄 marker 的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
 choice_rows_without_options:
   generated: '2026-08-19'
   issue: 2736
