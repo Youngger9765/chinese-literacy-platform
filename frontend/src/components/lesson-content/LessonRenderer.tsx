@@ -54,6 +54,8 @@ export interface LessonRendererProps {
   onExerciseChange?: (state: LessonExerciseState) => void;
   onComplete?: () => void;
   initialState?: Record<string, unknown>;
+  /** 呼叫端說自己是哪一步（`閱讀理解` / `閱讀聚光燈`）。省略時沿用舊行為。 */
+  sectionLabel?: string;
 }
 
 interface ExerciseMeta {
@@ -98,6 +100,7 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   onExerciseChange,
   onComplete,
   initialState,
+  sectionLabel,
 }) => {
   const resolvedLessonCode =
     lessonCode || story?.lessonCode || story?.lesson_code || lesson.lessonCode;
@@ -222,11 +225,45 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   }, [lesson.blocks]);
   const useSplit = readingBlocks.length > 0 && exerciseBlocks.length > 0;
 
+  // 目前顯示第幾題。
+  const [exerciseIdx, setExerciseIdx] = React.useState(0);
+
+  // ⚠️ **只有整份都是選擇題才分頁。** Young 要的是「閱讀理解這邊都是選擇題，
+  // 可以一題一題出嗎」——那是針對一串同型的小題。
+  // 一份混著重點表、造句、排序的練習分頁之後，學生第一頁看到的可能是
+  // 一張半格的表，而其餘的都藏起來了；第一版就是這樣，弄紅了兩條
+  // 「這一課有可作答的輸入」的既有測試。那兩條紅是對的，不是測試該改。
+  const paginateExercises =
+    exerciseBlocks.length > 1 &&
+    exerciseBlocks.every(
+      (b) => (b as { question?: { kind?: string } }).question?.kind === 'multiple_choice',
+    );
+  // 單欄分支畫的是 `lesson.blocks`（課文與練習混在一起）。只換掉練習那幾個，
+  // 課文區塊照舊全部顯示 —— 學生要邊看課文邊作答。
+  const singleVisibleBlocks = React.useMemo(() => {
+    if (!paginateExercises) return lesson.blocks;
+    const shown = exerciseBlocks[exerciseIdx];
+    return lesson.blocks.filter((b) => !exerciseBlocks.includes(b) || b === shown);
+  }, [lesson.blocks, exerciseBlocks, exerciseIdx, paginateExercises]);
+
+  const visibleExercises = React.useMemo(
+    () => (paginateExercises ? exerciseBlocks.slice(exerciseIdx, exerciseIdx + 1) : exerciseBlocks),
+    [exerciseBlocks, exerciseIdx, paginateExercises],
+  );
+
   // Single-column card header: 聚光燈作答 when the flow carries exercises, otherwise
   // it is pure reference reading (mirrors the split view's two card titles).
+  // `sectionLabel` 是呼叫端說「我是哪一步」。沒給就沿用舊行為。
+  //
+  // 這個 renderer 同時服務聚光燈與閱讀理解，而原本的判準是
+  //「有練習題 ⇒ 我是閱讀聚光燈」—— 閱讀理解也有練習題，於是那一頁掛上了
+  // 別人的名字（Young 2026-08-19：「閱讀理解，為什麼標題是 閱讀聚光燈？」）。
+  //
+  // 只有呼叫端知道自己是誰，所以由它說，不在這裡推論。
   const singleHeader =
     exerciseBlocks.length > 0
-      ? { icon: 'highlight', label: '閱讀聚光燈' }
+      ? { icon: sectionLabel === '閱讀聚光燈' || !sectionLabel ? 'highlight' : 'quiz',
+          label: sectionLabel ?? '閱讀聚光燈' }
       : { icon: 'menu_book', label: '參考課文' };
 
   const notices = (
@@ -319,9 +356,37 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                 )}
               </div>
               <div className="space-y-6">
-                {exerciseBlocks.map((block) => (
+                {/* 一次一題（Young 2026-08-19：「閱讀理解這邊都是選擇題，可以一題一題出嗎？」）。
+                    整份一次列出來，學生要自己找現在做到哪 —— 而旁邊那條路
+                    （MultipleChoiceExercise）本來就是一次一題，兩條路行為不一致。 */}
+                {visibleExercises.map((block) => (
                   <div key={block.id}>{renderBlock(block)}</div>
                 ))}
+                {paginateExercises ? (
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setExerciseIdx((i) => Math.max(0, i - 1))}
+                      disabled={exerciseIdx === 0}
+                      className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                    >
+                      上一題
+                    </button>
+                    <span className="text-sm text-on-surface-variant tabular-nums">
+                      {exerciseIdx + 1} / {exerciseBlocks.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExerciseIdx((i) => Math.min(exerciseBlocks.length - 1, i + 1))
+                      }
+                      disabled={exerciseIdx >= exerciseBlocks.length - 1}
+                      className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                    >
+                      下一題
+                    </button>
+                  </div>
+                ) : null}
                 {notices}
               </div>
             </div>
@@ -339,9 +404,35 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
               </span>
             </div>
             <div className="space-y-6">
-              {lesson.blocks.map((block) => (
+              {/* 單欄也一次一題。這條路是「沒有課文區塊」時走的 ——
+                  Young 看到的閱讀理解頁就在這裡。第一版我只改了雙欄那條，
+                  測試照樣紅，因為測試資料沒有課文區塊。 */}
+              {singleVisibleBlocks.map((block) => (
                 <div key={block.id}>{renderBlock(block)}</div>
               ))}
+              {paginateExercises ? (
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setExerciseIdx((i) => Math.max(0, i - 1))}
+                    disabled={exerciseIdx === 0}
+                    className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                  >
+                    上一題
+                  </button>
+                  <span className="text-sm text-on-surface-variant tabular-nums">
+                    {exerciseIdx + 1} / {exerciseBlocks.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setExerciseIdx((i) => Math.min(exerciseBlocks.length - 1, i + 1))}
+                    disabled={exerciseIdx >= exerciseBlocks.length - 1}
+                    className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                  >
+                    下一題
+                  </button>
+                </div>
+              ) : null}
             </div>
             {notices}
           </div>

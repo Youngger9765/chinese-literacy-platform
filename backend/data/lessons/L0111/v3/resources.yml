@@ -17,3 +17,8 @@ resources:
     source: 故事劇樂部
     url: http://youtu.be/nnvYNY7kLEo
   note: 學習單上每支影片旁各有一個 QR code 圖檔，網址不在文字流裡，故由總表補上
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/rDRqgcJNC4M
+    url_source: 總表0816「4.影片連結」年級8課次13

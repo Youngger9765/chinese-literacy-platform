@@ -13,3 +13,12 @@ resources:
     duration: '9:36'
     duration_seconds: 576
     source: 金金長知識_小冷知識科普
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/ABlD5EY1vlk
+    url_source: 總表0816「4.影片連結」年級5課次28
+  - index: 2
+    url: https://youtu.be/v3vT9xRJOGo
+    url_source: 總表0816「4.影片連結」年級5課次28

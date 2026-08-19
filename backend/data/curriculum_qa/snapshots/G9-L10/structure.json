@@ -5,10 +5,10 @@
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "將腦袋中的__外化到紙筆。",
-      "將複雜的計算外化到計算機。",
-      "將__外化到語言。",
-      "將數千年來累積的知識，從__外化到圖書館儲存。"
+      "外化歷程",
+      "外化目的",
+      "外化歷程",
+      "外化歷程"
     ],
     "template_kind": "theme_facts"
   },
@@ -22,21 +22,23 @@
     {
       "interactive_type": "display",
       "label": "作者論點",
-      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
-    },
-    {
-      "interactive_type": "display",
-      "label": "外化的好處",
-      "value": "解決學習時大腦負荷超載的問題。"
-    },
-    {
-      "interactive_type": "display",
-      "label": "外化工具",
       "sub_rows": [
         {
           "interactive_type": "display",
           "label": "外化歷程",
-          "value": "外化目的"
+          "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "外化的好處",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "外化歷程",
+          "value": "解決學習時大腦負荷超載的問題。"
         }
       ],
       "value": ""
@@ -47,19 +49,29 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "將腦袋中的__外化到紙筆。",
-          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】"
+          "label": "外化歷程",
+          "value": "將腦袋中的【　　　】外化到紙筆。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
+          "value": "減輕大腦負荷，每一個人都能輕易解題。"
         }
       ],
       "value": ""
     },
     {
       "interactive_type": "display",
-      "label": "【計算機】",
+      "label": "【　　　】",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "外化歷程",
+          "value": "將複雜的計算外化到計算機。"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "將複雜的計算外化到計算機。",
+          "label": "外化目的",
           "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。"
         }
       ],
@@ -71,7 +83,12 @@
       "sub_rows": [
         {
           "interactive_type": "display",
-          "label": "將身體力量外化到長竿。",
+          "label": "外化歷程",
+          "value": "將身體力量外化到長竿。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
           "value": "幫人類獲取遠處或高處的東西。"
         }
       ],
@@ -79,12 +96,17 @@
     },
     {
       "interactive_type": "display",
-      "label": "【語言】",
+      "label": "【　　　】",
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "將__外化到語言。",
-          "value": "將重要訊息分享給同伴。【　　　】"
+          "label": "外化歷程",
+          "value": "將【　　　】外化到語言。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
+          "value": "將重要訊息分享給同伴。"
         }
       ],
       "value": ""
@@ -95,7 +117,12 @@
       "sub_rows": [
         {
           "interactive_type": "display",
-          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
+          "label": "外化歷程",
+          "value": "將語言外化到文字，讓知識能夠被保存與傳承。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
           "value": "保存與傳遞智慧，促進文明持續發展。"
         }
       ],
@@ -107,8 +134,13 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
-          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】"
+          "label": "外化歷程",
+          "value": "將數千年來累積的知識，從【　　　】外化到圖書館儲存。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
+          "value": ""
         }
       ],
       "value": ""
@@ -119,8 +151,13 @@
       "sub_rows": [
         {
           "interactive_type": "display",
-          "label": "電腦、網路的興起，將圖書館外化到網路上。",
-          "value": "保存與傳遞智慧，促進文明持續發展。"
+          "label": "外化歷程",
+          "value": "電腦、網路的興起，將圖書館外化到網路上。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "外化目的",
+          "value": ""
         }
       ],
       "value": ""
@@ -128,36 +165,47 @@
     {
       "interactive_type": "display",
       "label": "結論",
-      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "外化歷程",
+          "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
+        }
+      ],
+      "value": ""
     }
   ],
   "title": "國高中數學當然可以使用計算機",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "作者論點",
-      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
-    },
-    {
-      "kind": "pair",
-      "label": "外化的好處",
-      "value": "解決學習時大腦負荷超載的問題。"
+      "items": [
+        {
+          "label": "外化歷程",
+          "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "作者論點"
     },
     {
       "items": [
         {
           "label": "外化歷程",
-          "value": "外化目的"
+          "value": "解決學習時大腦負荷超載的問題。"
         }
       ],
       "kind": "section_block",
-      "section": "外化工具"
+      "section": "外化的好處"
     },
     {
       "items": [
         {
-          "label": "將腦袋中的__外化到紙筆。",
-          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】"
+          "label": "外化歷程",
+          "value": "將腦袋中的【　　　】外化到紙筆。"
+        },
+        {
+          "label": "外化目的",
+          "value": "減輕大腦負荷，每一個人都能輕易解題。"
         }
       ],
       "kind": "section_block",
@@ -166,17 +214,25 @@
     {
       "items": [
         {
-          "label": "將複雜的計算外化到計算機。",
+          "label": "外化歷程",
+          "value": "將複雜的計算外化到計算機。"
+        },
+        {
+          "label": "外化目的",
           "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。"
         }
       ],
       "kind": "section_block",
-      "section": "【計算機】"
+      "section": "【　】"
     },
     {
       "items": [
         {
-          "label": "將身體力量外化到長竿。",
+          "label": "外化歷程",
+          "value": "將身體力量外化到長竿。"
+        },
+        {
+          "label": "外化目的",
           "value": "幫人類獲取遠處或高處的東西。"
         }
       ],
@@ -186,17 +242,25 @@
     {
       "items": [
         {
-          "label": "將__外化到語言。",
-          "value": "將重要訊息分享給同伴。【　　　】"
+          "label": "外化歷程",
+          "value": "將【　　　】外化到語言。"
+        },
+        {
+          "label": "外化目的",
+          "value": "將重要訊息分享給同伴。"
         }
       ],
       "kind": "section_block",
-      "section": "【語言】"
+      "section": "【　】"
     },
     {
       "items": [
         {
-          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
+          "label": "外化歷程",
+          "value": "將語言外化到文字，讓知識能夠被保存與傳承。"
+        },
+        {
+          "label": "外化目的",
           "value": "保存與傳遞智慧，促進文明持續發展。"
         }
       ],
@@ -206,8 +270,12 @@
     {
       "items": [
         {
-          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
-          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】"
+          "label": "外化歷程",
+          "value": "將數千年來累積的知識，從【　　　】外化到圖書館儲存。"
+        },
+        {
+          "label": "外化目的",
+          "value": ""
         }
       ],
       "kind": "section_block",
@@ -216,17 +284,26 @@
     {
       "items": [
         {
-          "label": "電腦、網路的興起，將圖書館外化到網路上。",
-          "value": "保存與傳遞智慧，促進文明持續發展。"
+          "label": "外化歷程",
+          "value": "電腦、網路的興起，將圖書館外化到網路上。"
+        },
+        {
+          "label": "外化目的",
+          "value": ""
         }
       ],
       "kind": "section_block",
       "section": "網路"
     },
     {
-      "kind": "pair",
-      "label": "結論",
-      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
+      "items": [
+        {
+          "label": "外化歷程",
+          "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結論"
     }
   ]
 }

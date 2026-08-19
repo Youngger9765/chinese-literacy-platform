@@ -98,13 +98,40 @@ def _video_links(l: dict) -> list[dict] | None:
 
     109 lessons agree, 17 differ, 31 have URLs with no worksheet list, 3 the reverse.
     """
+    res = _unwrap(_sections(l).get("resources"), "resources")
+    # 二修的模組檔叫 `videos`；一修那側叫 `items`。兩個都認，否則名字對不上時
+    # 這裡不會報錯，只會靜靜地把每支片名降級成「影片 N」——學生看得到連結，
+    # 但不知道那支在講什麼。沒有紅字的失敗最難發現。
+    videos = res.get("videos") or res.get("items") or []
+
+    # URL 有兩個來源：一修總表的 `video_links`（舊路），以及模組檔自己帶的 `url`
+    # （2026-08-19 由 scripts/migrate_legacy_video_urls.py 從一修接回來，每筆帶
+    # `url_source` 可稽核）。二修的 v3 metadata 沒有 `video_links`，所以只走舊路
+    # 的話 19 課 39 支影片全部回 None，學生看到「這篇課文目前沒有知識補給站影片」。
     urls = _meta(l).get("video_links") or []
-    if not urls:
+    if not urls and videos:
+        urls = [v.get("url") for v in videos]
+
+    if not urls or not any(urls):
+        # 有影片但一支 URL 都沒有（QR 還沒解碼的 5 課）：仍然把片名送出去。
+        # 「有兩支影片，連結在紙本的 QR code」跟「沒有影片」是兩件不同的事，
+        # 而後者是騙人的。
+        if videos:
+            return [
+                {"title": v.get("title") or f"影片 {i + 1}", "url": None,
+                 "source": v.get("source"), "duration": v.get("duration")}
+                for i, v in enumerate(videos)
+            ]
         return None
-    items = _unwrap(_sections(l).get("resources"), "resources").get("items") or []
-    titled = len(items) == len(urls)
+
+    titled = len(videos) == len(urls)
     return [
-        {"title": (items[i]["title"] if titled else f"影片 {i + 1}"), "url": u}
+        {
+            "title": (videos[i].get("title") if titled else None) or f"影片 {i + 1}",
+            "url": u,
+            **({"source": videos[i].get("source"), "duration": videos[i].get("duration")}
+               if titled else {}),
+        }
         for i, u in enumerate(urls)
     ]
 
@@ -172,11 +199,50 @@ def _cloze_from(l: dict) -> list[dict]:
     sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
     # v2 寫 `questions[{text,answer}]`；v3 照學習單寫 `items[{stem,answer}]`。
     rows = sec.get("items") or sec.get("questions") or []
-    return [
-        {"sentence": q.get("stem") or q.get("text") or "", "answer": q.get("answer"), "_schema": "legacy"}
-        for q in rows
-        if (q.get("stem") or q.get("text")) and q.get("answer")
-    ]
+    bank = _vocab_bank_from(l)
+    out = []
+    for q in rows:
+        sentence = q.get("stem") or q.get("text") or ""
+        answer = q.get("answer")
+        if not (sentence and answer):
+            continue
+        primary, alts = _normalise_answer_code(str(answer), bank)
+        row = {"sentence": sentence, "answer": primary, "_schema": "legacy"}
+        if alts:
+            row["accepted_answers"] = [primary, *alts]
+        out.append(row)
+    return out
+
+
+def _normalise_answer_code(answer: str, bank: dict) -> tuple[str, list[str]]:
+    """答案代號 → 對得上 `option_bank` 的鍵，外加同樣算對的其他代號。
+
+    兩個實際踩到的形狀（2026-08-19 全庫掃描）：
+
+    **全形字母。** L0056 九題的答案是 `Ｂ Ｄ Ｃ Ｆ Ｈ`，而 `option_bank` 的鍵是
+    半形 `A B C`。字面比對一題都對不上 ⇒ **整課九題判不了分**，而且畫面上
+    看不出異常：選項照常顯示、學生照常選，只是永遠不對。
+
+    **一題兩個答案。** L0012 第 3 題的答案是 `'A/B'`，`answer_note` 寫著
+    「原稿手寫「A/B」，兩個答案都算對」。抽取忠實記錄了，消費端把整串當成一個代號查，
+    查無 ⇒ 那一題同樣永遠不對。
+
+    兩個都不是抽取錯 —— 抽取記下的就是學習單上的樣子。是這一層沒認得。
+    """
+    raw = answer.strip()
+    # 全形 Ａ-Ｚ / ａ-ｚ → 半形
+    half = "".join(
+        chr(ord(ch) - 0xFEE0) if "Ａ" <= ch <= "Ｚ" or "ａ" <= ch <= "ｚ" else ch
+        for ch in raw
+    )
+    parts = [p.strip().upper() for p in half.replace("、", "/").replace(",", "/").split("/") if p.strip()]
+    if not parts:
+        return raw, []
+    # 認得的代號優先；一個都認不得就原樣回傳（不要靜靜地換成別的東西）
+    known = [p for p in parts if p in bank] if bank else parts
+    if not known:
+        return half if half in bank or not bank else raw, []
+    return known[0], known[1:]
 
 
 def _vocab_bank_from(l: dict) -> dict:
@@ -251,6 +317,32 @@ def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
     return "thumbnail.webp" if (root / version_id / "assets" / "thumbnail.webp").is_file() else None
 
 
+#: 文言文課的線上學習流程 (#2752). Six worksheet sections
+#: (導讀／古文今譯／原文／文白句子比對／文白詞語比對／自我挑戰) have no `step_sequence`
+#: to travel on, so the frontend falls back to `DEFAULT_STEP_SEQUENCE` — the vocab/listening/
+#: dictation steps a 白話課 uses, none of which this genre has data for. This is what a
+#: 文言文 lesson gets instead, in worksheet order:
+#:   導讀+古文今譯 fold into lesson-intro；原文(+白話對照) is its own step (annotate-by-
+#:   student doesn't apply — the 注釋 are already printed, so full-text-annotate's
+#:   interaction doesn't fit); 念順順 stays key-passage-reading (already wired, #2559);
+#:   一/二/六 大題 each get their own step (matching answer / boxed-term blank / separate
+#:   passage+questions are three different interaction shapes, none of which the
+#:   existing vocab-definition/vocab-application cloze renderer can display without
+#:   mislabeling the step).
+CLASSICAL_STEP_SEQUENCE: tuple[str, ...] = (
+    "lesson-intro",
+    "classical-text",
+    "key-passage-reading",
+    "classical-sentence-matching",
+    "classical-word-matching",
+    "keypoints-table",
+    "spotlight",
+    "comprehension",
+    "classical-self-challenge",
+    "report",
+)
+
+
 def _uid_tree_lessons() -> list[dict]:
     """Second-edition lessons from the uid tree (#2687/#2692).
 
@@ -303,6 +395,14 @@ def _uid_tree_lessons() -> list[dict]:
             # `get_lesson_by_code` returned None for every code in the catalogue,
             # silently. The two names are the same value; the older loaders set both.
             "lesson_code": code,
+            # 課次／系列／排序序號（#2736）。圖書館以前按 `lesson_uid` 排 —— 那是
+            # 抽取流水號，跟課本順序無關，所以四年級第一課顯示的是第 10 課。
+            # 課次一直都在課碼裡（`G4-L10`），但那是字串，而且有三種系列
+            # （`G4-L1` / `文-L1` / `體-L1`）；每個要排序的地方各自 parse 一次，
+            # 遲早會排得不一樣。這裡送明確欄位，前端不用再拆字串。
+            "lesson_no": _meta(l).get("lesson_no"),
+            "series": _meta(l).get("series"),
+            "lesson_seq": _meta(l).get("lesson_seq"),
             "grade": grade,
             "title": l.get("title"),
             # fields the API schema expects; the uid tree has no genre/category
@@ -379,7 +479,14 @@ def _uid_tree_lessons() -> list[dict]:
             # way — the field was 175/175 and the exercises were 143/175. Absent is the
             # honest value, and it is what makes the step show its empty state.
             "spotlight_v2": _spotlight_or_none(l),
-            "keypoints": (l.get("keypoints") or {}).get("keypoints"),
+            # `_unwrap`, not `.get("keypoints")` — the loader has already taken the
+            # module wrapper off, so `l["keypoints"]` IS the table. Asking for a
+            # `keypoints` key inside it found nothing and this field was None for all
+            # 175 lessons, silently: `lesson_content_loader` says in a comment that the
+            # 重點表 step is "served separately on story['keypoints']", and it was not.
+            # `_spotlight_or_none` two lines up carries the same warning for the same
+            # reason — spotlight was written correctly, keypoints was not.
+            "keypoints": _unwrap(l.get("keypoints"), "keypoints") or None,
             # The 重點表 step reads `story_structure_table` off the story and asks an
             # LLM to invent one when it is absent. The second-edition pipeline emits
             # the same table already structured, so convert rather than regenerate —
@@ -388,6 +495,34 @@ def _uid_tree_lessons() -> list[dict]:
             "video_links": _video_links(l),
             "assets": l.get("assets") or [],
             "source": "uid_tree",
+            # 文言文專屬模組 (#2752) — passed through raw, same shape `lesson_uid_loader`
+            # already unwrapped them into. `None` for the ~9 in 10 lessons that carry
+            # none of these files; a missing module stays missing (module_entry_gate's
+            # "空狀態是誠實值" rule applies here too — inventing a self_challenge for a
+            # lesson whose worksheet never had one would be worse than showing nothing).
+            "classical_text": l.get("classical_text") or None,
+            "modern_translation": l.get("modern_translation") or None,
+            "word_matching": l.get("word_matching") or None,
+            "sentence_matching": l.get("sentence_matching") or None,
+            "self_challenge": l.get("self_challenge") or None,
+            "intro_guide": l.get("intro_guide") or None,
+            # 目標策略框／讀前自我檢核 (#2752 Phase 2) — spans regular lessons too
+            # (70／58 課), not a single genre. Same "missing stays missing" rule.
+            "goal_box": l.get("goal_box") or None,
+            "self_check_before_reading": l.get("self_check_before_reading") or None,
+            # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3). `multi_text_parts` is a
+            # LIST (one entry per additional part), not a dict — `or None` still
+            # works correctly on an empty/absent list.
+            "multi_text_parts": l.get("multi_text_parts") or None,
+            "cross_text_banner": l.get("cross_text_banner") or None,
+            "keypoints_followup_questions": l.get("keypoints_followup_questions") or None,
+            "writing_practice": l.get("writing_practice") or None,
+            # Per-lesson step order (#1374 mechanism, unused by the uid tree until now —
+            # every one of the 175 second-edition lessons fell back to
+            # DEFAULT_STEP_SEQUENCE because this key was never in `row` for the overlay
+            # loop below to carry). A 文言文 lesson (has `classical_text`) gets
+            # CLASSICAL_STEP_SEQUENCE; everything else stays None → unchanged behavior.
+            "step_sequence": _step_sequence_for(l),
         }
         # Overlay what lesson.yml actually carries. Identity stays computed — a
         # lesson must never be able to rename its own uid or id from its payload.
@@ -402,6 +537,57 @@ def _uid_tree_lessons() -> list[dict]:
     return out
 
 
+# 學習單章節 → 線上 step。名字是抽取照著學習單印的字寫的。
+_SECTION_TO_STEP = {
+    "讀全文-做記號": "full-text-annotate",
+    "念順順": "key-passage-reading",
+    "重點朗讀": "key-passage-reading",
+    "語詞我最棒": "vocab-definition",
+    "語詞應用": "vocab-application",
+    "文章重點表": "keypoints-table",
+    "閱讀聚光燈": "spotlight",
+    "閱讀理解": "comprehension",
+    "詞語複習": "vocab-review",
+    "語詞複習": "vocab-review",
+    "知識補給站": "knowledge-station",
+}
+
+
+def _step_sequence_for(l: dict) -> list[str] | None:
+    """這一課的步驟順序，來自它自己的學習單。
+
+    為什麼不能是一份通用清單
+    ------------------------
+    側欄是照學習單章節順序畫的，而「下一關」原本查一張靜態表
+    （`STEP_FINISH_TRANSITIONS`）—— 兩個來源，於是它們可以不一致。
+    2026-08-19 Young 在聚光燈按下一關，直接跳到閱讀理解，**略過文章重點表**：
+
+    > 下一關按鈕為什麼不是按照側欄順序？？？？
+
+    學習單自己就寫著順序。`lesson.yml` 的 `sections_present`：
+
+        五 文章重點表 → 六 閱讀聚光燈 → 七 閱讀理解
+
+    抽取抽出來了，只是沒有人把它接成 `step_sequence` ⇒ 前端拿不到序列，
+    只能退回靜態表。今天反覆出現的同一個形狀。
+
+    文言文課維持既有的 `CLASSICAL_STEP_SEQUENCE`：它的章節名
+    （導讀／古文今譯／原文…）跟一般課完全不同，對照表涵蓋不到。
+    """
+    if l.get("classical_text"):
+        return list(CLASSICAL_STEP_SEQUENCE)
+    seen: list[str] = []
+    for sec in l.get("sections_present") or []:
+        step = _SECTION_TO_STEP.get(str((sec or {}).get("name") or "").strip())
+        if step and step not in seen:
+            seen.append(step)
+    if not seen:
+        return None
+    # 課程簡介永遠在最前、報告永遠在最後 —— 學習單不印這兩個章節，
+    # 但它們是線上流程的頭尾，漏掉的話學生走到最後會無處可去。
+    return ["lesson-intro", *seen, "report"]
+
+
 def build_all_lessons() -> list[dict]:
     """All lessons, from the uid tree.
 
@@ -411,8 +597,21 @@ def build_all_lessons() -> list[dict]:
     whenever a title drifted by one punctuation mark, and duplicated 26 lessons
     across the two layers. Identity is now the directory name under
     `backend/data/lessons/<lesson_uid>/<version_id>/` and nothing else.
+
+    **課本順序在這裡定案，不在每個消費者各自定案。** 圖書館原本按 `id`
+    （＝ `20000 + uid`，抽取流水號）排，所以四年級的第一課顯示成第 10 課，
+    而課本的第 1 課《贏得喝采的輸家》躺在 L0011。UID 跟課本順序沒有關係。
+
+    排序鍵是 `lesson_seq`（`scripts/add_lesson_ordering_metadata.py` 寫入 metadata），
+    一把尺同時排三種系列：一般課 `年級*1000+課次*10`、文言文 90000+、體育生 91000+。
+    課碼解不出課次的課退回用 UID（99000+），排在最後但仍然是決定性的順序 ——
+    不給它位置，它會落在排序器碰巧放的地方，而那不會有任何徵兆。
     """
-    return _uid_tree_lessons()
+    lessons = _uid_tree_lessons()
+    return sorted(lessons, key=lambda l: (
+        l.get("lesson_seq") if isinstance(l.get("lesson_seq"), int) else 99000 + l["id"],
+        l["id"],
+    ))
 
 def build_indexes(all_lessons: list[dict]) -> tuple[
     dict[int, dict],

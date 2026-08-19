@@ -13,3 +13,12 @@ resources:
     duration: '9:11'
     duration_seconds: 551
     source: Sherry's Notes 雪力的心理學筆記
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://www.facebook.com/reel/1333428104837524
+    url_source: 總表0816「4.影片連結」年級4課次20（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/9MfVKw-_Sa8
+    url_source: 總表0816「4.影片連結」年級4課次20（⚠️課名與課程不符，仍依課次採用）

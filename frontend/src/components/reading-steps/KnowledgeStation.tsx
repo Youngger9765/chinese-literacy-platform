@@ -21,7 +21,10 @@ interface KnowledgeStationProps {
 
 interface VideoEntry {
   title: string;
-  url: string;
+  /** `null` = 連結還在紙本的 QR code 裡（一修沒有對應課，QR 尚未解碼）。 */
+  url: string | null;
+  source?: string;
+  duration?: string;
 }
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -42,9 +45,16 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
   // single knowledgeVideoUrl (Layer-1 lessons without a video_links field).
   const videos: VideoEntry[] = (() => {
     if (story.videoLinks && story.videoLinks.length > 0) {
-      return story.videoLinks
-        .filter((v) => !!v.url)
-        .map((v) => ({ title: v.title || '影片', url: v.url }));
+      // ⚠️ 不要 `.filter(v => !!v.url)`。有 5 課的影片連結還在紙本的 QR code 裡
+      // （一修沒有對應課，QR 尚未解碼），它們帶著片名、來源、長度但沒有 url。
+      // 濾掉之後清單變空，畫面就說「這篇課文目前沒有知識補給站影片」——
+      // 那是不實的：影片存在，我們只是還沒有連結。
+      return story.videoLinks.map((v) => ({
+        title: v.title || '影片',
+        url: v.url ?? null,
+        source: v.source,
+        duration: v.duration,
+      }));
     }
     if (story.knowledgeVideoUrl) {
       return [{ title: '影片', url: story.knowledgeVideoUrl }];
@@ -67,6 +77,32 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
           {videos.length > 0 ? (
             <div className="space-y-8">
               {videos.map((video, idx) => {
+                // 連結還在紙本 QR code 裡：把我們知道的（片名／來源／長度）
+                // 誠實顯示出來，並說清楚連結在哪。
+                // 「有兩支影片但連結在紙本上」跟「沒有影片」是兩件事。
+                if (!video.url) {
+                  return (
+                    <div
+                      key={`${idx}-noUrl`}
+                      className="rounded-2xl border border-gray-200 bg-surface-container-lowest p-5"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-gray-400 mt-0.5">
+                          qr_code_2
+                        </span>
+                        <div className="flex-1">
+                          <p className="font-bold text-on-surface leading-snug">{video.title}</p>
+                          <p className="text-sm text-on-surface-variant mt-1">
+                            {[video.source, video.duration].filter(Boolean).join('　')}
+                          </p>
+                          <p className="text-xs text-on-surface-variant mt-2">
+                            影片連結印在紙本學習單的 QR code 上，用手機掃描就可以看
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 const embedUrl = getYouTubeEmbedUrl(video.url);
                 return (
                   <div key={`${idx}-${video.url}`} className="space-y-3">

@@ -16,3 +16,11 @@ resources:
     duration: 01:50
     duration_seconds: 110
     source: 雅虎香港
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/w7wN3of133Y
+    url_source: 總表0816「4.影片連結」年級5課次15
+  - index: 2
+    url: http://youtu.be/x2K1cCWX_gI
+    url_source: 總表0816「4.影片連結」年級5課次15

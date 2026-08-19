@@ -18,3 +18,11 @@ resources:
     source: 聖工坊
     url: http://youtu.be/qOIvuoVfwDM
   items_note: 第 1 部多印了一行「☆建議觀看(2:25~5:18)」，其他課沒有這個欄位，照原樣保留。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/K7NjIXgj57s
+    url_source: 總表0816「4.影片連結」年級8課次18
+  - index: 2
+    url: http://youtu.be/qOIvuoVfwDM
+    url_source: 總表0816「4.影片連結」年級8課次18

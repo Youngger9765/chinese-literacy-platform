@@ -19,3 +19,14 @@ resources:
     duration: '2:45'
     duration_seconds: 165
     source: 青春發言人
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.facebook.com/share/v/1FKoBw29ey/?mibextid=wwXIfr
+    url_source: 總表0816「4.影片連結」年級5課次14
+  - index: 2
+    url: http://youtu.be/lWK7Ww_xbEA
+    url_source: 總表0816「4.影片連結」年級5課次14
+  - index: 3
+    url: http://youtu.be/S-mDOoygcvM
+    url_source: 總表0816「4.影片連結」年級5課次14

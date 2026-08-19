@@ -12,6 +12,14 @@ _TTS_CACHE: dict[str, bytes] = {}
 CACHE_MAX_ENTRIES = 500
 
 TTS_GCS_BUCKET = os.environ.get("TTS_GCS_BUCKET", "lingoleap-tts-cache")
+# 設定的主要 provider。`_gcs_put` 用它判斷「這段音訊是不是 primary 產出的」——
+# 不是的話就不寫共用快取（見該函式的說明）。
+#
+# ⚠️ 預設必須跟 `tts/__init__.py` 的 `TTS_PROVIDER` **同一個值**（"azure"）。
+# 第一版我寫成空字串 —— 那讓「沒設 TTS_PROVIDER」的情況落回舊行為，
+# 而那正是 2026-08-19 出事的情況（本機沒設，於是中國腔照樣寫進正式快取）。
+# 一個防線如果剛好避開它要防的那個場景，等於沒有。
+TTS_PRIMARY_PROVIDER = os.environ.get("TTS_PROVIDER", "azure").strip().lower()
 
 _GCS_UNAVAILABLE = object()
 _gcs_client: object = None
@@ -61,6 +69,25 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
 
 
 def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
+    # ⛔ **fallback 產出的音訊不寫共用快取。**
+    #
+    # 2026-08-19：本機沒有 `AZURE_SPEECH_KEY`，而 `TTS_GCS_BUCKET` 預設就是正式那顆。
+    # 於是每次朗讀都 Azure 失敗 → 退回 Google `cmn-CN-Chirp3-HD-Sulafat`（中國腔）
+    # → 寫進 `gs://lingoleap-tts-cache/tts-cache/`。
+    #
+    # 讀取路徑在 azure prefix miss 時會回讀 `tts-cache/`，所以**一次短暫失敗就把
+    # 那句永久釘在中國腔**，Azure 恢復也救不回（2026-04 盲聽已否決中國腔）。
+    #
+    # 這個預設值本身就是缺陷：任何人 clone 下來起本機都會做同樣的事，
+    # 而且沒有任何警告 —— log 只安靜地寫一行 `GCS cache write`。
+    # 記憶體快取不受影響，本機開發照樣順，只是寫不到會影響別人的地方。
+    if TTS_PRIMARY_PROVIDER and provider != TTS_PRIMARY_PROVIDER:
+        logger.warning(
+            "跳過共用快取寫入：這段是 %s 產出的，但設定的 primary 是 %s。"
+            "fallback 的音訊寫進去會被永久回讀。",
+            provider, TTS_PRIMARY_PROVIDER,
+        )
+        return
     bucket = _get_gcs_bucket()
     if bucket is None:
         return

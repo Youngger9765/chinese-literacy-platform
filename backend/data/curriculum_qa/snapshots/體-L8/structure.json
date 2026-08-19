@@ -1,124 +1,117 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 3,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "事件",
+      "面對失敗的想法",
+      "事件",
+      "面對失敗的想法"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "display",
       "label": "文章重點表",
-      "value": "",
-      "interactive_type": "display"
+      "value": ""
     },
     {
+      "interactive_type": "display",
       "label": "小齊（1～3段）",
-      "value": "",
-      "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "事件",
-          "value": "1.九局下，兩出局，落後一分，輪到小齊站上【打擊區】。\n2.小齊【 ①被投手三振 □②擊出安打 】，比賽結束。\n3.球隊【 □①贏球 ②輸球 】",
           "interactive_type": "checkbox",
+          "label": "事件",
           "options": [
-            "被投手三振 □",
-            "擊出安打 】，比賽結束。\n3.球隊【 □",
-            "贏球",
-            "輸球 】"
+            "被投手三振",
+            "贏球"
           ],
-          "correct_options": [
-            0,
-            3
-          ]
+          "value": "1.九局下，兩出局，落後一分，輪到小齊站上【　　　】。\n2.小齊【　　　】，比賽結束。\n3.球隊【　　　】"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "面對失敗的想法",
-          "value": "作者認為有的人──【　　　】\n①自責沒好好把握機會\n②認為努力都白費了\n③覺得自己不適合打棒球",
-          "interactive_type": "fill_blank"
+          "value": "作者認為有的人──【 複選 】\n①自責沒好好把握機會\n②認為努力都白費了\n③覺得自己不適合打棒球"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "display",
       "label": "楊勇緯（第4段）",
-      "value": "",
-      "interactive_type": "display",
       "sub_rows": [
         {
+          "interactive_type": "fill_blank",
           "label": "事件",
-          "value": "1.在雅加達亞運的【　　　】賽落敗，要面對曾經兩度【　　　】的勁敵。\n2.將過去比賽的【　　　】化為教訓，反覆演練，最後拿下勝利。",
-          "interactive_type": "fill_blank"
+          "value": "1.在雅加達亞運的【　　　】賽落敗，要面對曾經兩度【　　　】的勁敵。\n2.將過去比賽的【　　　】化為教訓，反覆演練，最後拿下勝利。"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "面對失敗的想法",
-          "value": "1.失敗讓他【　　　】，也讓他發現自己的【　　　】\n2.從失敗中看見【　　　】的機會與【　　　】的可能。",
-          "interactive_type": "fill_blank"
+          "value": "1.失敗讓他【　　　】，也讓他發現自己的【　　　】\n2.從失敗中看見【　　　】的機會與【　　　】的可能。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "display",
       "label": "郭婞淳（第5段）",
-      "value": "",
-      "interactive_type": "display",
       "sub_rows": [
         {
+          "interactive_type": "fill_blank",
           "label": "事件",
-          "value": "1.在仁川亞運比賽前被140多公斤的【　　　】壓傷\n2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第【　　　】名，沒有奪牌。",
-          "interactive_type": "fill_blank"
+          "value": "1.在仁川亞運比賽前被140多公斤的【　　　】壓傷\n2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第【　　　】名，沒有奪牌。"
         },
         {
-          "label": "面對失敗的想法",
-          "value": "雖然成績不亮眼，但對她來說這是她走過【受傷】和【低潮】的【 ①勝利 □②失敗 】",
           "interactive_type": "checkbox",
+          "label": "面對失敗的想法",
           "options": [
-            "勝利 □",
-            "失敗 】"
+            "勝利"
           ],
-          "correct_options": [
-            0
-          ]
+          "value": "雖然成績不亮眼，但對她來說這是她走過【　　　】和【　　　】的【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "總結",
-      "value": "",
       "interactive_type": "display",
+      "label": "總結",
       "sub_rows": [
         {
-          "label": "事件",
-          "value": "1.失敗可以讓人看見該【補強】的地方──對應的是【 ①楊勇緯 □②郭婞淳 】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【 □①楊勇緯 ②郭婞淳 】的故事\n3.我們【 □①只有一種 ②有不只一種 】的角度來面對失敗。",
           "interactive_type": "checkbox",
+          "label": "事件",
           "options": [
-            "楊勇緯 □",
-            "郭婞淳 】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【 □",
             "楊勇緯",
-            "郭婞淳 】的故事\n3.我們【 □",
-            "只有一種",
-            "有不只一種 】的角度來面對失敗。"
+            "楊勇緯",
+            "只有一種"
           ],
-          "correct_options": [
-            0,
-            3,
-            5
-          ]
+          "value": "1.失敗可以讓人看見該【　　　】的地方──對應的是【　　　】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【　　　】的故事\n3.我們【　　　】的角度來面對失敗。"
         }
-      ]
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
   "title": "文章重點表",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "小齊（1～3段）",
       "items": [
         {
           "label": "事件",
-          "value": "1.九局下，兩出局，落後一分，輪到小齊站上【　　　】。\n2.小齊（①被投手三振 □②擊出安打），比賽結束。\n3.球隊（□①贏球 ②輸球）"
+          "value": "1.九局下，兩出局，落後一分，輪到小齊站上【　　　】。\n2.小齊（①被投手三振 ②擊出安打），比賽結束。\n3.球隊（①贏球 ②輸球）"
         },
         {
           "label": "面對失敗的想法",
           "value": "作者認為有的人──(複選)\n①自責沒好好把握機會\n②認為努力都白費了\n③覺得自己不適合打棒球"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "小齊（1～3段）"
     },
     {
-      "kind": "section_block",
-      "section": "楊勇緯（第4段）",
       "items": [
         {
           "label": "事件",
@@ -128,11 +121,11 @@
           "label": "面對失敗的想法",
           "value": "1.失敗讓他【　　　】，也讓他發現自己的【　　　】\n2.從失敗中看見【　　　】的機會與【　　　】的可能。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "楊勇緯（第4段）"
     },
     {
-      "kind": "section_block",
-      "section": "郭婞淳（第5段）",
       "items": [
         {
           "label": "事件",
@@ -140,32 +133,21 @@
         },
         {
           "label": "面對失敗的想法",
-          "value": "雖然成績不亮眼，但對她來說這是她走過【　　　】和【　　　】的（①勝利 □②失敗）"
+          "value": "雖然成績不亮眼，但對她來說這是她走過【　　　】和【　　　】的（①勝利 ②失敗）"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "郭婞淳（第5段）"
     },
     {
-      "kind": "section_block",
-      "section": "總結",
       "items": [
         {
           "label": "事件",
-          "value": "1.失敗可以讓人看見該【　　　】的地方──對應的是（①楊勇緯 □②郭婞淳）的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是（□①楊勇緯 ②郭婞淳）的故事\n3.我們（□①只有一種 ②有不只一種）的角度來面對失敗。"
+          "value": "1.失敗可以讓人看見該【　　　】的地方──對應的是（①楊勇緯 ②郭婞淳）的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是（①楊勇緯 ②郭婞淳）的故事\n3.我們（①只有一種 ②有不只一種）的角度來面對失敗。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "總結"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "事件",
-      "面對失敗的想法",
-      "事件",
-      "面對失敗的想法"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

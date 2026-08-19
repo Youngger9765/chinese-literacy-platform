@@ -15,6 +15,11 @@
   "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "display",
+      "label": "文章重點表",
+      "value": ""
+    },
+    {
       "interactive_type": "fill_blank",
       "label": "問題一",
       "value": "「想很多」真的只有【　　　】嗎？"
@@ -55,6 +60,7 @@
       "value": "慢慢練習去看見、去【　　　】這些情緒，讓焦慮，也能成為【　　　】。"
     }
   ],
+  "title": "文章重點表",
   "worksheet_rows": [
     {
       "kind": "pair",

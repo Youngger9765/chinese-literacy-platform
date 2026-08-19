@@ -10,8 +10,12 @@ resources:
     duration: (5:23)
     source: 蘋果新聞網
     has_qr: true
+    url: http://youtu.be/NYA5OHRks34
+    url_source: 總表0816「4.影片連結」年級4課次10
   - index: 2
     title: 田徑為運動之母! 直擊飛毛腿養成班-台灣「這樣練」挑戰世界高手
     duration: (3:53)
     source: TVBS NEWS
     has_qr: true
+    url: http://youtu.be/gV0LXXIyG3I
+    url_source: 總表0816「4.影片連結」年級4課次10

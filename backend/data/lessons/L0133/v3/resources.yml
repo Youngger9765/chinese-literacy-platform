@@ -10,9 +10,13 @@ resources:
     duration: (04:29)
     source: 國家地理雜誌National Geographic Magazine
     has_qr: true
+    url: http://youtu.be/91wsXTHXuwE
+    url_source: 總表0816「4.影片連結」年級9課次12
   - index: 2
     title: 巴斯德-史上第一支疫苗的發明人【LIS科學史】
     duration: (12:59)
     recommend_range: 建議觀看：(06:27~09:46)
     source: LIS情境科學教材
     has_qr: true
+    url: http://youtu.be/RIBiF0BBQp0
+    url_source: 總表0816「4.影片連結」年級9課次12

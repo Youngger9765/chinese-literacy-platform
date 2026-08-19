@@ -1,14 +1,14 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 10,
+    "fill_blank_count": 14,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "問題",
       "家庭背景",
-      "狀況",
-      "想法"
+      "狀況──阿堅",
+      "狀況──小芸"
     ],
     "template_kind": "psr"
   },
@@ -31,7 +31,7 @@
         {
           "interactive_type": "display",
           "label": "人物",
-          "value": "阿堅 小芸"
+          "value": ""
         },
         {
           "interactive_type": "fill_blank",
@@ -40,13 +40,23 @@
         },
         {
           "interactive_type": "fill_blank",
-          "label": "狀況",
-          "value": "因【　　　】、【　　　】被送進少年觀護所。 國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+          "label": "狀況──阿堅",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "想法",
-          "value": "我有這樣的家庭，你期待【　　　】？ 我家都已經這樣了，我【　　　】行嗎？"
+          "label": "狀況──小芸",
+          "value": "國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──阿堅",
+          "value": "我有這樣的家庭，你期待【　　　】？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──小芸",
+          "value": "我家都已經這樣了，我【　　　】行嗎？"
         }
       ],
       "value": ""
@@ -54,12 +64,12 @@
     {
       "interactive_type": "display",
       "label": "故事二",
-      "value": "一開始 後來"
-    },
-    {
-      "interactive_type": "display",
-      "label": "故事二",
       "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "欄標題",
+          "value": ""
+        },
         {
           "interactive_type": "fill_blank",
           "label": "問題",
@@ -67,13 +77,23 @@
         },
         {
           "interactive_type": "fill_blank",
-          "label": "想法",
-          "value": "為什麼這麼【　　　】？ 我【　　　】，及早發現。"
+          "label": "想法──一開始",
+          "value": "為什麼這麼【　　　】？"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "結果",
-          "value": "心裡【　　　】，吃不好也睡不好。 快樂起來，【　　　】。"
+          "label": "想法──後來",
+          "value": "我【　　　】，及早發現。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果──一開始",
+          "value": "心裡【　　　】，吃不好也睡不好。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果──後來",
+          "value": "快樂起來，【　　　】。"
         }
       ],
       "value": ""
@@ -88,14 +108,14 @@
           "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。"
         },
         {
-          "interactive_type": "display",
-          "label": "想法",
-          "value": "學生 黃美廉"
+          "interactive_type": "fill_blank",
+          "label": "想法──學生",
+          "value": "你長這樣，怎麼【　　　】得起來？"
         },
         {
-          "interactive_type": "fill_blank",
-          "label": "想法",
-          "value": "你長這樣，怎麼\n【　　　】得起來？ 我擁有這麼多，為什麼你只看我所沒有的呢？"
+          "interactive_type": "display",
+          "label": "想法──黃美廉",
+          "value": "我擁有這麼多，為什麼你只看我所沒有的呢？"
         }
       ],
       "value": ""
@@ -103,7 +123,7 @@
     {
       "interactive_type": "fill_blank",
       "label": "結論",
-      "value": "一個人只要【　　　】對【　　　】的看法，就不至於讓情緒跌入萬丈深淵。"
+      "value": "面對不能改變的壞事，如果能【　　　】自己的【　　　】，就比較不會讓情緒跌入萬丈深淵。"
     }
   ],
   "title": "心理出狀況，是壞事導致的嗎？",
@@ -117,42 +137,57 @@
       "items": [
         {
           "label": "人物",
-          "value": "阿堅 小芸"
+          "value": ""
         },
         {
           "label": "家庭背景",
           "value": "爸爸【　　　】，媽媽【　　　】。"
         },
         {
-          "label": "狀況",
-          "value": "因【　　　】、【　　　】被送進少年觀護所。 國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+          "label": "狀況──阿堅",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。"
         },
         {
-          "label": "想法",
-          "value": "我有這樣的家庭，你期待【　　　】？ 我家都已經這樣了，我【　　　】行嗎？"
+          "label": "狀況──小芸",
+          "value": "國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+        },
+        {
+          "label": "想法──阿堅",
+          "value": "我有這樣的家庭，你期待【　　　】？"
+        },
+        {
+          "label": "想法──小芸",
+          "value": "我家都已經這樣了，我【　　　】行嗎？"
         }
       ],
       "kind": "section_block",
       "section": "故事一"
     },
     {
-      "kind": "pair",
-      "label": "故事二",
-      "value": "一開始 後來"
-    },
-    {
       "items": [
+        {
+          "label": "欄標題",
+          "value": ""
+        },
         {
           "label": "問題",
           "value": "35歲的鄧小姐，發現自己有【　　　】，必須一輩子吃藥。"
         },
         {
-          "label": "想法",
-          "value": "為什麼這麼【　　　】？ 我【　　　】，及早發現。"
+          "label": "想法──一開始",
+          "value": "為什麼這麼【　　　】？"
         },
         {
-          "label": "結果",
-          "value": "心裡【　　　】，吃不好也睡不好。 快樂起來，【　　　】。"
+          "label": "想法──後來",
+          "value": "我【　　　】，及早發現。"
+        },
+        {
+          "label": "結果──一開始",
+          "value": "心裡【　　　】，吃不好也睡不好。"
+        },
+        {
+          "label": "結果──後來",
+          "value": "快樂起來，【　　　】。"
         }
       ],
       "kind": "section_block",
@@ -165,12 +200,12 @@
           "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。"
         },
         {
-          "label": "想法",
-          "value": "學生 黃美廉"
+          "label": "想法──學生",
+          "value": "你長這樣，怎麼【　　　】得起來？"
         },
         {
-          "label": "想法",
-          "value": "你長這樣，怎麼\n【　　　】得起來？ 我擁有這麼多，為什麼你只看我所沒有的呢？"
+          "label": "想法──黃美廉",
+          "value": "我擁有這麼多，為什麼你只看我所沒有的呢？"
         }
       ],
       "kind": "section_block",
@@ -179,7 +214,7 @@
     {
       "kind": "pair",
       "label": "結論",
-      "value": "一個人只要【　　　】對【　　　】的看法，就不至於讓情緒跌入萬丈深淵。"
+      "value": "面對不能改變的壞事，如果能【　　　】自己的【　　　】，就比較不會讓情緒跌入萬丈深淵。"
     }
   ]
 }

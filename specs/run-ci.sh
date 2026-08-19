@@ -124,4 +124,8 @@ echo "-- Gate 6/6: 原稿過期偵測（sot_drift_check --offline） --"
 "$PYBIN" scripts/sot_drift_check.py --offline
 echo ""
 
+echo "-- Gate 7/7: 抽出來的模組，學生走不走得到（module_entry_gate） --"
+"$PYBIN" scripts/module_entry_gate.py
+echo ""
+
 echo "== Local Spec CI: PASS =="

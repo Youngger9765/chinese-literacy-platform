@@ -1,0 +1,114 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容摘要",
+      "內容摘要",
+      "內容摘要",
+      "內容摘要"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "祁黃羊的思路解密",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "背景",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "地點：【　　　】國\n人物：君—【　　　】、臣—【　　　】【　　　】【　　　】【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "事件1",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "問題：南陽出缺一名縣令，晉平公問合適的人選\n解決：祁黃羊推薦【　　　】\n結果：國人都讚好【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "事件2",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "問題：晉國需要一名軍官，晉平公問合適的人選\n解決：祁黃羊推薦【　　　】\n結果：國人都讚好【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "評價",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "孔子聽說祁黃羊的事後，評價他是一個【　　　】的人\n想一想：為什麼孔子這樣評價祁黃羊？\n提示：他的推薦標準是看「人際關係」還是「工作能力」？\n你的答案是：【　　　】"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "祁黃羊的思路解密",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "地點：（　）國\n人物：君—（　）、臣—（　）【　　　】【　　　】【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "背景"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "問題：南陽出缺一名縣令，晉平公問合適的人選\n解決：祁黃羊推薦（　）\n結果：國人都讚好【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "事件1"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "問題：晉國需要一名軍官，晉平公問合適的人選\n解決：祁黃羊推薦（　）\n結果：國人都讚好【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "事件2"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "孔子聽說祁黃羊的事後，評價他是一個（　）的人\n想一想：為什麼孔子這樣評價祁黃羊？\n提示：他的推薦標準是看「人際關係」還是「工作能力」？\n你的答案是：【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "評價"
+    }
+  ]
+}

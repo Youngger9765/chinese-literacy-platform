@@ -25,3 +25,12 @@ resources:
     原稿的文字層只有標題、片長、來源三項。
 
     影片標題裡的引號在原稿是**半形雙引號** "獨門記憶法"、"最新世界記憶大師"，照原稿保留。'
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/ncrFLRcWZmE
+    url_source: 總表0816「4.影片連結」年級6課次4
+  - index: 2
+    url: https://youtu.be/zjA5Hr9sx7A
+    url_source: 總表0816「4.影片連結」年級6課次4

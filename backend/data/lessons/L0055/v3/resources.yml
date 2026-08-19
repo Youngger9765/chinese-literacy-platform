@@ -14,3 +14,11 @@ resources:
     duration: (5:09)
     source: 有小鳥
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/suOXhPZgp8g
+    url_source: 總表0816「4.影片連結」年級6課次15
+  - index: 2
+    url: http://youtu.be/Vl2j4jXDz7k
+    url_source: 總表0816「4.影片連結」年級6課次15

@@ -19,3 +19,14 @@ resources:
     duration: (1:00)
     source: '@awinders426'
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/5_ik04y7YSc
+    url_source: 總表0816「4.影片連結」年級5課次9
+  - index: 2
+    url: http://youtu.be/KIP6w4v7im0
+    url_source: 總表0816「4.影片連結」年級5課次9
+  - index: 3
+    url: http://youtu.be/EX1a76aBuPc
+    url_source: 總表0816「4.影片連結」年級5課次9

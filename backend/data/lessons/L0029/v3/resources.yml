@@ -21,3 +21,11 @@ resources:
     duration: '3:35'
     duration_seconds: 215
     source: 智慧麵包
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/gGvWsLdZ0EM
+    url_source: 總表0816「4.影片連結」年級5課次17
+  - index: 2
+    url: http://youtu.be/0R51Ee5SGv0
+    url_source: 總表0816「4.影片連結」年級5課次17

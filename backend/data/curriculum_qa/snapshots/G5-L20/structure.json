@@ -1,13 +1,13 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 0,
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
     "layout": "worksheet_table",
-    "mode": "display_only",
+    "mode": "mixed",
     "primary_labels": [
       "主要服務對象",
-      "緩解醫院緊張\n的氛圍",
-      "__學",
+      "緩解醫院緊張的氛圍",
+      "【　　　】學",
       "貢獻"
     ],
     "template_kind": "generic"
@@ -34,9 +34,15 @@
       "label": "主要工作內容",
       "sub_rows": [
         {
-          "interactive_type": "fill_blank",
-          "label": "緩解醫院緊張\n的氛圍",
-          "value": "常見方式：【　　　】\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
+          "interactive_type": "checkbox",
+          "label": "緩解醫院緊張的氛圍",
+          "options": [
+            "精密的手術",
+            "搞笑表演",
+            "變魔術",
+            "提供治療藥物"
+          ],
+          "value": "常見方式：【 複選 】\n①精密的手術 ②搞笑表演 ③變魔術 ④提供治療藥物"
         }
       ],
       "value": ""
@@ -57,7 +63,7 @@
         },
         {
           "interactive_type": "fill_blank",
-          "label": "__學",
+          "label": "【　　　】學",
           "value": "應對病人和家屬的負面情緒。【　　　】"
         }
       ],
@@ -84,8 +90,8 @@
     {
       "items": [
         {
-          "label": "緩解醫院緊張\n的氛圍",
-          "value": "常見方式：(複選)\n□精密的手術   搞笑表演 \n變魔術       □提供治療藥物"
+          "label": "緩解醫院緊張的氛圍",
+          "value": "常見方式：(複選)\n①精密的手術 ②搞笑表演 ③變魔術 ④提供治療藥物"
         }
       ],
       "kind": "section_block",
@@ -102,7 +108,7 @@
           "value": "了解醫院的規範和病人的需求。"
         },
         {
-          "label": "__學",
+          "label": "【　　　】學",
           "value": "應對病人和家屬的負面情緒。【　　　】"
         }
       ],

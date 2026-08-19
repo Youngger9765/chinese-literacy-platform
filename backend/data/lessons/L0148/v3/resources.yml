@@ -10,8 +10,12 @@ resources:
     duration: (9:42)
     source: 臺灣第一等 八大電視
     has_qr: true
+    url: http://youtu.be/msJJg75ihyo
+    url_source: 總表0816「4.影片連結」年級9課次5
   - index: 2
     title: 2025臺灣國際蘭展 沉浸式展覽體驗 飽覽世界級蘭花
     duration: (9:05)
     source: 莉阿娜Liana
     has_qr: true
+    url: http://youtu.be/OLeENU3029w
+    url_source: 總表0816「4.影片連結」年級9課次5

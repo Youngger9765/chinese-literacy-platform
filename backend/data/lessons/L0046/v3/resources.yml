@@ -14,3 +14,11 @@ resources:
     duration: (11:32)
     source: 亞伯看世界,發現你想知道的
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/ZMUWib9X6RY
+    url_source: 總表0816「4.影片連結」年級5課次7
+  - index: 2
+    url: http://youtu.be/rbcJmBLxEww
+    url_source: 總表0816「4.影片連結」年級5課次7

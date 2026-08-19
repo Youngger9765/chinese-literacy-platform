@@ -46,14 +46,31 @@ FINGERPRINTS = REPO_ROOT / "backend" / "data" / "spotlight_fingerprints.json"
 
 
 def _current() -> dict[str, dict]:
-    """Fingerprint every lesson that has a spotlight, keyed by uid."""
+    """Fingerprint every lesson that has a spotlight, keyed by uid.
+
+    ⚠️ Only the version the loader serves — the highest `v*` directory — not whichever
+    version happens to sort last among the files that exist (#2747). The two are not the
+    same: seven lessons have a `v2/spotlight.yml` and no `v3/` one, and `v3` is what is
+    served. Globbing `*/v*/spotlight.yml` and letting the last write win fingerprinted
+    that v2 file, so five lessons sat green in this ratchet against a spotlight no
+    student can reach, while their step rendered its empty state.
+    """
     import yaml
 
+    from app.services.lesson_uid_loader import _latest_version, _is_uid_dir
     from app.services.spotlight_contract import fingerprint_spotlight
 
     out: dict[str, dict] = {}
-    for path in sorted(LESSONS_ROOT.glob("*/v*/spotlight.yml")):
-        uid = path.parts[-3]
+    for uid_dir in sorted(p for p in LESSONS_ROOT.iterdir() if _is_uid_dir(p)):
+        uid = uid_dir.name
+        vdir = _latest_version(uid_dir)
+        path = (vdir / "spotlight.yml") if vdir else None
+        if path is None or not path.is_file():
+            # Absent in the served version is itself a state worth recording: it is how
+            # those seven lessons look to a student, and a lesson that starts or stops
+            # having a spotlight is movement this ratchet must report.
+            out[uid] = None
+            continue
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         spotlight = doc.get("spotlight") or {}
         # A lesson whose extraction failed is stored as {lesson, error} and has no

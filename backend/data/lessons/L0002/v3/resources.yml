@@ -15,3 +15,12 @@ resources:
     duration_seconds: 813
     source: 許伯&簡芝一倉鼠人
     recommend_range: 0:00~4:35
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/9PuWnjfAtb8
+    url_source: 總表0816「4.影片連結」年級4課次11（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/NJXHfaTLFeA
+    url_source: 總表0816「4.影片連結」年級4課次11（⚠️課名與課程不符，仍依課次採用）

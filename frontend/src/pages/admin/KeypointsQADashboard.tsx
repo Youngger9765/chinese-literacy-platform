@@ -54,11 +54,22 @@ function PassBadge({ pass, label }: { pass: boolean; label: string }) {
   );
 }
 
-function OverallDot({ pass }: { pass: boolean }) {
+// Three states, not two. 34 lessons are new to the second edition and carry no recorded
+// verdict; the builder refuses to invent one. Painting `undefined` red said "a human
+// looked at this and it failed", which is a different and worse claim than "nobody has
+// looked yet".
+function OverallDot({ pass }: { pass?: boolean }) {
+  const [color, label] =
+    pass === undefined
+      ? ['bg-gray-300', 'unreviewed']
+      : pass
+        ? ['bg-green-500', 'pass']
+        : ['bg-red-500', 'fail'];
   return (
     <span
-      className={`inline-block w-2.5 h-2.5 rounded-full ${pass ? 'bg-green-500' : 'bg-red-500'}`}
-      aria-label={pass ? 'pass' : 'fail'}
+      className={`inline-block w-2.5 h-2.5 rounded-full ${color}`}
+      aria-label={label}
+      title={label === 'unreviewed' ? '尚無人工判讀' : label}
     />
   );
 }
@@ -129,7 +140,10 @@ const LessonDetailPanel: React.FC<{ lesson: KeypointsLessonSummary; token: strin
             {originalHtml ? (
               <iframe title={`${lesson.lesson_id} original`} srcDoc={originalHtml} className="w-full h-full border-0" sandbox="" />
             ) : (
-              <p className="p-4 text-sm text-gray-400">無原文預覽</p>
+              <p className="p-4 text-sm text-gray-400">
+                無原文預覽 —— 現有的 136 份是一修渲染，`render_keypoints_html` 讀不了二修
+                keypoints.yml，所以這一版沒有產生（#2749）
+              </p>
             )}
           </div>
         </div>
@@ -268,7 +282,10 @@ const KeypointsTab: React.FC<{ token: string }> = ({ token }) => {
     <>
       {summary && (
         <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 text-sm">
+          {/* `pass` counts "not known to fail", which includes lessons nobody has
+              reviewed — showing it alone read as 150 approved lessons. */}
           共 {summary.total} 課 · 通過 {summary.pass} · 失敗 {summary.fail}
+          {(summary.unreviewed ?? 0) > 0 ? ` · 尚未判讀 ${summary.unreviewed}` : ''}
           {(summary.known_gap_count ?? 0) > 0 ? ` · 已知 gap ${summary.known_gap_count}` : ''}
           {manifest?.smoke_only ? ' （smoke）' : ''}
           <div className="flex gap-2 mt-2">
@@ -289,9 +306,10 @@ const KeypointsTab: React.FC<{ token: string }> = ({ token }) => {
               <th className="px-4 py-2">課碼</th>
               <th className="px-4 py-2">標題</th>
               <th className="px-4 py-2">tier</th>
-              <th className="px-4 py-2">L1</th>
-              <th className="px-4 py-2">L2</th>
-              <th className="px-4 py-2">L3</th>
+              {/* Whatever gates the manifest computed — not a fixed L1/L2/L3 triple.
+                  L1's source was deleted with the first edition and a per-lesson L2
+                  cannot fail, so naming them here drew two badges that meant nothing. */}
+              <th className="px-4 py-2">Gate</th>
               <th className="px-4 py-2">layout</th>
             </tr>
           </thead>
@@ -311,13 +329,20 @@ const KeypointsTab: React.FC<{ token: string }> = ({ token }) => {
                         <span className="ml-1 text-amber-600">(known)</span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3"><GateBadge gate="L1" result={lesson.gates.L1} /></td>
-                    <td className="px-4 py-3"><GateBadge gate="L2" result={lesson.gates.L2} /></td>
-                    <td className="px-4 py-3"><GateBadge gate="L3" result={lesson.gates.L3} /></td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(lesson.gates ?? {}).map(([name, g]) => (
+                          <GateBadge key={name} gate={name} result={g} />
+                        ))}
+                        {Object.keys(lesson.gates ?? {}).length === 0 && (
+                          <span className="text-xs text-gray-400">未評</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{lesson.layout.mode}/{lesson.layout.layout}</td>
                   </tr>
                   {isOpen && (
-                    <tr><td colSpan={8} className="p-0"><LessonDetailPanel lesson={lesson} token={token} /></td></tr>
+                    <tr><td colSpan={6} className="p-0"><LessonDetailPanel lesson={lesson} token={token} /></td></tr>
                   )}
                 </React.Fragment>
               );
@@ -355,7 +380,14 @@ const SpotlightTab: React.FC<{ token: string }> = ({ token }) => {
     <>
       {summary && (
         <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 text-sm">
-          dev7 共 {summary.total} 課 · 通過 {summary.pass} · 失敗 {summary.fail}
+          {/* Not "dev7" any more, and `total` is not the corpus: it counts lessons that
+              HAVE a 聚光燈. Showing 168/168 without the other number read as "every
+              lesson passes" while seven serve nothing at all (#2747). */}
+          有聚光燈 {summary.total} 課 · 通過 {summary.pass} · 失敗 {summary.fail}
+          {summary.corpus_total ? ` · 全部課程 ${summary.corpus_total}` : ''}
+          {summary.lessons_without_spotlight
+            ? ` · 無聚光燈 ${summary.lessons_without_spotlight}`
+            : ''}
         </div>
       )}
       <div className="flex-1 overflow-y-auto">

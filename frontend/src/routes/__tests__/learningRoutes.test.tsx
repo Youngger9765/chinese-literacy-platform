@@ -187,3 +187,90 @@ describe('protected_routes_wrap_app_shell_pages — key routes require auth + sh
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// #2752 — classical-only steps must still get routes
+// ---------------------------------------------------------------------------
+
+describe('learningRoutes — steps outside DEFAULT_STEP_SEQUENCE still get routed', () => {
+  it('routes exist for every STEP_REGISTRY id, not only ids in DEFAULT_STEP_SEQUENCE', async () => {
+    // 文言文 steps (#2752) are deliberately kept OUT of DEFAULT_STEP_SEQUENCE (they'd
+    // pollute the ~165 白話 lessons' stepper nav with empty-state pills) — they only
+    // ever appear in a lesson's own `step_sequence`. If buildLearningRoutes() only
+    // iterated DEFAULT_STEP_SEQUENCE, these ids would have NO <Route> at all and
+    // navigating to them would 404/blank for the 10 文言文 lessons.
+    const { learningRoutes } = await import('../learningRoutes');
+    const routedKeys = learningRoutes.map((r) => r.key);
+    for (const id of [
+      'classical-text',
+      'classical-sentence-matching',
+      'classical-word-matching',
+      'classical-self-challenge',
+    ]) {
+      expect(STEP_REGISTRY[id]).toBeDefined(); // precondition: registered
+      expect(routedKeys).toContain(id);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// #2752 — the iteration-source change must not drop any of the 175 non-文言文
+// lessons' existing routes. Requested explicitly during plan review: this
+// change touches route generation for every lesson, not just the classical
+// ones, so it needs its own before/after safety net, not just "the new ids
+// work" coverage above.
+// ---------------------------------------------------------------------------
+
+describe('learningRoutes — pre-#2752 routes are fully preserved (route-generation source changed)', () => {
+  // Frozen: every step id that was routable BEFORE #2752 changed
+  // buildLearningRoutes() from `for (stepId of DEFAULT_STEP_SEQUENCE)` to
+  // `for (stepId of Object.keys(STEP_REGISTRY))`. This list must never SHRINK —
+  // growing it (a legitimate new default-sequence step) is fine and expected,
+  // but any of these 16 losing its route is the exact regression this locks.
+  const PRE_2752_ROUTED_STEP_IDS = [
+    'lesson-intro', 'full-text-annotate', 'paragraph-reading', 'key-passage-reading',
+    'listening', 'character-practice', 'vocab-definition', 'vocab-application',
+    'spotlight', 'keypoints-table', 'sentence-practice', 'comprehension',
+    'vocab-review', 'dictation', 'knowledge-station', 'report',
+  ];
+
+  it('DEFAULT_STEP_SEQUENCE (the untouched "before" source) still matches the frozen pre-#2752 set', () => {
+    // If this fails, someone changed DEFAULT_STEP_SEQUENCE itself — a
+    // different, legitimate change — and the frozen list below needs
+    // updating deliberately, not silently absorbing a drift.
+    expect(DEFAULT_STEP_SEQUENCE).toEqual(PRE_2752_ROUTED_STEP_IDS);
+  });
+
+  it('every pre-#2752 routed step id still has a <Route> after the iteration-source change', async () => {
+    const { learningRoutes } = await import('../learningRoutes');
+    const routedKeys = learningRoutes.map((r) => r.key);
+    for (const id of PRE_2752_ROUTED_STEP_IDS) {
+      expect(routedKeys).toContain(id);
+    }
+  });
+
+  it('the new route set is a strict superset of the old one — every old id, plus the 4 new classical ids', async () => {
+    // NOTE on what this does and doesn't prove: buildLearningRoutes() also emits
+    // a fixed set of `legacy-*`-keyed routes from LEGACY_STEP_ID_ALIASES, which
+    // exist independent of which set drives the main loop — so a naive
+    // `routedKeys.size > oldSet.size` check here would pass even if the
+    // iteration source were reverted to DEFAULT_STEP_SEQUENCE (those legacy
+    // routes alone outnumber the 16). The real "did the fix do something"
+    // proof is the explicit classical-id membership check below, not a size
+    // comparison.
+    const { learningRoutes } = await import('../learningRoutes');
+    const routedKeys = new Set(learningRoutes.map((r) => r.key));
+
+    for (const id of PRE_2752_ROUTED_STEP_IDS) {
+      expect(routedKeys.has(id)).toBe(true);
+    }
+    for (const id of [
+      'classical-text',
+      'classical-sentence-matching',
+      'classical-word-matching',
+      'classical-self-challenge',
+    ]) {
+      expect(routedKeys.has(id)).toBe(true);
+    }
+  });
+});

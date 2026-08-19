@@ -14,3 +14,11 @@ resources:
     duration: '3:43'
     duration_seconds: 223
     source: 民視新聞網
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/FHS-RJoE3E4
+    url_source: 總表0816「4.影片連結」年級5課次1（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/B6tXQL5nWMQ
+    url_source: 總表0816「4.影片連結」年級5課次1（⚠️課名與課程不符，仍依課次採用）

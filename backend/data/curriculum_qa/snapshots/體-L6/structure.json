@@ -1,14 +1,14 @@
 {
   "interaction_profile": {
-    "checkbox_count": 7,
-    "fill_blank_count": 1,
+    "checkbox_count": 6,
+    "fill_blank_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "內容【 ①紮實  □②馬虎 】，一筆一畫都__",
-      "感到【 □①洋洋得意  ②不好意思 】，一邊說「哪有啦！」",
-      "精神__的問好，並微微鞠躬",
-      "【 □①充滿自信  ②自我懷疑 】\n，覺得是不是自己沒做好"
+      "阿翔行動／反應",
+      "阿翔行動／反應",
+      "阿翔行動／反應",
+      "阿翔行動／反應"
     ],
     "template_kind": "generic"
   },
@@ -16,14 +16,7 @@
   "rows": [
     {
       "interactive_type": "display",
-      "label": "事件",
-      "sub_rows": [
-        {
-          "interactive_type": "display",
-          "label": "阿翔行動／反應",
-          "value": "阿翔特質"
-        }
-      ],
+      "label": "不是想太多，只是好在乎",
       "value": ""
     },
     {
@@ -31,16 +24,13 @@
       "label": "寫訓練日誌",
       "sub_rows": [
         {
-          "correct_options": [
-            1
-          ],
           "interactive_type": "checkbox",
-          "label": "內容【 ①紮實  □②馬虎 】，一筆一畫都__",
+          "label": "阿翔行動／反應",
           "options": [
-            "固執倔強",
-            "認真細心【專心投入】"
+            "紮實",
+            "馬虎"
           ],
-          "value": "□①固執倔強  \n②認真細心【專心投入】"
+          "value": "①紮實 ②馬虎"
         }
       ],
       "value": ""
@@ -50,16 +40,13 @@
       "label": "訓練日誌被誇獎",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
-          "label": "感到【 □①洋洋得意  ②不好意思 】，一邊說「哪有啦！」",
+          "label": "阿翔行動／反應",
           "options": [
-            "謙虛  \n□",
-            "冷漠"
+            "洋洋得意",
+            "不好意思"
           ],
-          "value": "①謙虛  \n□②冷漠"
+          "value": "①洋洋得意 ②不好意思"
         }
       ],
       "value": ""
@@ -69,16 +56,9 @@
       "label": "遇到學長、教練",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
-          "interactive_type": "checkbox",
-          "label": "精神__的問好，並微微鞠躬",
-          "options": [
-            "有禮貌  \n□",
-            "有想法【抖擻】"
-          ],
-          "value": "①有禮貌  \n□②有想法【抖擻】"
+          "interactive_type": "fill_blank",
+          "label": "阿翔行動／反應",
+          "value": "精神【　　　】的問好，並微微鞠躬"
         }
       ],
       "value": ""
@@ -88,16 +68,13 @@
       "label": "聽到教練對大家訓話",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
-          "label": "【 □①充滿自信  ②自我懷疑 】\n，覺得是不是自己沒做好",
+          "label": "阿翔行動／反應",
           "options": [
-            "容易焦慮  \n□",
-            "容易放棄"
+            "充滿自信",
+            "自我懷疑"
           ],
-          "value": "①容易焦慮  \n□②容易放棄"
+          "value": "①充滿自信 ②自我懷疑"
         }
       ],
       "value": ""
@@ -107,16 +84,13 @@
       "label": "傳球被教練糾正",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
-          "label": "__一沉，\n【 ①很在意  □②不在乎 】，\n心情__",
+          "label": "阿翔行動／反應",
           "options": [
-            "沒信心  \n□",
-            "沒毅力【臉色】【悶悶不樂】"
+            "很在意",
+            "不在乎"
           ],
-          "value": "①沒信心  \n□②沒毅力【臉色】【悶悶不樂】"
+          "value": "①很在意 ②不在乎"
         }
       ],
       "value": ""
@@ -126,16 +100,13 @@
       "label": "練習失誤，卻又被選上先發",
       "sub_rows": [
         {
-          "correct_options": [
-            1
-          ],
           "interactive_type": "checkbox",
-          "label": "覺得自己\n【 ①不夠資格  □②備受肯定 】\n，擔心__大家",
+          "label": "阿翔行動／反應",
           "options": [
-            "容易後悔",
-            "容易擔心【拖累】"
+            "不夠資格",
+            "備受肯定"
           ],
-          "value": "□①容易後悔  \n②容易擔心【拖累】"
+          "value": "①不夠資格 ②備受肯定"
         }
       ],
       "value": ""
@@ -145,42 +116,37 @@
       "label": "收到教練和隊友的提醒和鼓勵",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
-          "label": "心中的烏雲被趕走了，覺得\n【 □①自責   ②感謝 】",
+          "label": "阿翔行動／反應",
           "options": [
-            "懂得感恩  \n□",
-            "樂於分享"
+            "自責",
+            "感謝"
           ],
-          "value": "①懂得感恩  \n□②樂於分享"
+          "value": "①自責 ②感謝"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "隊友省思",
-      "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "阿翔行動／反應",
+          "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+        }
+      ],
+      "value": ""
     }
   ],
+  "title": "不是想太多，只是好在乎",
   "worksheet_rows": [
     {
       "items": [
         {
           "label": "阿翔行動／反應",
-          "value": "阿翔特質"
-        }
-      ],
-      "kind": "section_block",
-      "section": "事件"
-    },
-    {
-      "items": [
-        {
-          "label": "內容（①紮實  □②馬虎），一筆一畫都__",
-          "value": "□①固執倔強  \n②認真細心【　　　】"
+          "value": "①紮實 ②馬虎"
         }
       ],
       "kind": "section_block",
@@ -189,8 +155,8 @@
     {
       "items": [
         {
-          "label": "感到（□①洋洋得意  ②不好意思），一邊說「哪有啦！」",
-          "value": "①謙虛  \n□②冷漠"
+          "label": "阿翔行動／反應",
+          "value": "①洋洋得意 ②不好意思"
         }
       ],
       "kind": "section_block",
@@ -199,8 +165,8 @@
     {
       "items": [
         {
-          "label": "精神__的問好，並微微鞠躬",
-          "value": "①有禮貌  \n□②有想法【　　　】"
+          "label": "阿翔行動／反應",
+          "value": "精神【　　　】的問好，並微微鞠躬"
         }
       ],
       "kind": "section_block",
@@ -209,8 +175,8 @@
     {
       "items": [
         {
-          "label": "（□①充滿自信  ②自我懷疑）\n，覺得是不是自己沒做好",
-          "value": "①容易焦慮  \n□②容易放棄"
+          "label": "阿翔行動／反應",
+          "value": "①充滿自信 ②自我懷疑"
         }
       ],
       "kind": "section_block",
@@ -219,8 +185,8 @@
     {
       "items": [
         {
-          "label": "__一沉，\n（①很在意  □②不在乎），\n心情__",
-          "value": "①沒信心  \n□②沒毅力【　　　】【　　　】"
+          "label": "阿翔行動／反應",
+          "value": "①很在意 ②不在乎"
         }
       ],
       "kind": "section_block",
@@ -229,8 +195,8 @@
     {
       "items": [
         {
-          "label": "覺得自己\n（①不夠資格  □②備受肯定）\n，擔心__大家",
-          "value": "□①容易後悔  \n②容易擔心【　　　】"
+          "label": "阿翔行動／反應",
+          "value": "①不夠資格 ②備受肯定"
         }
       ],
       "kind": "section_block",
@@ -239,17 +205,22 @@
     {
       "items": [
         {
-          "label": "心中的烏雲被趕走了，覺得\n（□①自責   ②感謝）",
-          "value": "①懂得感恩  \n□②樂於分享"
+          "label": "阿翔行動／反應",
+          "value": "①自責 ②感謝"
         }
       ],
       "kind": "section_block",
       "section": "收到教練和隊友的提醒和鼓勵"
     },
     {
-      "kind": "pair",
-      "label": "隊友省思",
-      "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "隊友省思"
     }
   ]
 }

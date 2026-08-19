@@ -14,3 +14,11 @@ resources:
     duration: (8:15)
     source: TSNA
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/nm79cyebXOo
+    url_source: 總表0816「4.影片連結」年級4課次8
+  - index: 2
+    url: http://youtu.be/IUOcHsenX28
+    url_source: 總表0816「4.影片連結」年級4課次8

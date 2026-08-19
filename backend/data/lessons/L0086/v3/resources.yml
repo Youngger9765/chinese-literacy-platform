@@ -21,3 +21,12 @@ resources:
     `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
 
     文字層只有標題、片長、來源三項，沒有 URL。'
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/XYMBi0rkG28
+    url_source: 總表0816「4.影片連結」年級7課次18（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/6oxBp5UI0NM
+    url_source: 總表0816「4.影片連結」年級7課次18（⚠️課名與課程不符，仍依課次採用）

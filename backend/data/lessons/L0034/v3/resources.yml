@@ -13,3 +13,12 @@ resources:
     duration: '7:30'
     duration_seconds: 450
     source: 進化研究室
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/ROpkvA4b748
+    url_source: 總表0816「4.影片連結」年級5課次22
+  - index: 2
+    url: http://youtu.be/6an14289Mvw
+    url_source: 總表0816「4.影片連結」年級5課次22

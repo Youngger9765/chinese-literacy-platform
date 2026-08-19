@@ -13,3 +13,9 @@ resources:
     duration: '2:36'
     duration_seconds: 156
     source: 中時新聞網
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://www.facebook.com/watch/?mibextid=wwXIfr&v=1991603851335068&rdid=nUSA9zwiUskwXTwV
+    url_source: 總表0816「4.影片連結」年級9課次1

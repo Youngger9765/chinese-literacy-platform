@@ -14,3 +14,11 @@ resources:
     duration: (6:13)
     source: 台灣達人秀
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/wBgL3nIWAYY
+    url_source: 總表0816「4.影片連結」年級4課次7
+  - index: 2
+    url: http://youtu.be/vdG48uO_AOg
+    url_source: 總表0816「4.影片連結」年級4課次7

@@ -15,3 +15,10 @@ resources:
     duration: (0:53)
     source: 趨勢教育基金會TRENDFD
     has_qr: true
+  videos:
+  - index: 1
+    url: https://youtu.be/BzxOJqX9hE0
+    url_source: 總表0816「4.影片連結」年級7課次16
+  - index: 2
+    url: https://youtu.be/JtZE701N44M
+    url_source: 總表0816「4.影片連結」年級7課次16

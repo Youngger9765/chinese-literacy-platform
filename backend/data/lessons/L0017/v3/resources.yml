@@ -14,3 +14,11 @@ resources:
     duration: (10:25)
     source: 阿畫
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/2iJBOUROvCY
+    url_source: 總表0816「4.影片連結」年級4課次6
+  - index: 2
+    url: http://youtu.be/1n7pxzIKh1Q
+    url_source: 總表0816「4.影片連結」年級4課次6

@@ -1,19 +1,36 @@
 #!/usr/bin/env python3
 """
-Curriculum drift detector — verify backend/data/ matches 教授 source.
+Curriculum drift detector — first edition. CANNOT RUN (#2746).
 
-Workflow:
+What it did:
   1. Read backend/data/curriculum/INGESTION_MANIFEST.yml → active_version + source_dir
-  2. Re-run scripts/ingest_curriculum.py to /tmp/curriculum-regenerated/
-  3. Diff /tmp/curriculum-regenerated/ vs backend/data/ (parser-managed fields only)
-  4. Exit 0 if no drift, exit 1 if drift found (prints report)
+  2. Re-run scripts/ingest_curriculum.py to a temp dir
+  3. Diff that against backend/data/ (parser-managed fields only)
+  4. Exit 0 if no drift, exit 1 if drift found
 
-Used by:
-  - pre-commit hook (block commit if drift)
-  - .github/workflows/curriculum-drift-check.yml (weekly cron)
-  - manual: python scripts/check_curriculum_drift.py
+⛔ Step 1 names `private/curriculum-source/2026-05-01/…`, and that directory no longer
+exists — not in a CI runner (private/ is gitignored) and not on a developer machine
+either (the re-ink replaced it with `private/curriculum-source/_SOT/`). Running this
+exits 2 on a missing path, everywhere. It is kept only because
+`backend/data/curriculum/lessons/*.yml` is still served to `omo_lesson_catalog`, and
+this is the tooling that produced those files.
 
-Owner: Young / LingoLeap | Issue: #1624
+The docstring used to claim two callers, and neither was true by 2026-08:
+  * a pre-commit hook — no hook references this file (checked)
+  * `.github/workflows/curriculum-drift-check.yml` — that workflow ran on every PR
+    touching `backend/data/lessons/**` and could never get past step 1, so it skipped
+    and reported ✅ on eight consecutive runs. Deleted in #2746.
+
+For the second edition the equivalent question is answered by
+`scripts/sot_drift_check.py`, which splits it in two:
+
+    SOT_DRIFT   local snapshot vs Drive        needs rclone + credentials → scheduled/manual
+    SOT_STALE   extracted lesson vs its source  pure local → `specs/run-ci.sh` Gate 6
+
+SOT_STALE is the one that covers "the committed extraction no longer matches the source
+it claims", which is what this file was for. It runs on every push.
+
+Owner: Young / LingoLeap | Issue: #1624, retired by #2746
 """
 
 from __future__ import annotations

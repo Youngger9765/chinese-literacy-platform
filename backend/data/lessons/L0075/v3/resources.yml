@@ -15,3 +15,11 @@ resources:
     duration: '1:39'
     duration_seconds: 99
     source: 我視音樂 - I SEE
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/s83wzgxhewI
+    url_source: 總表0816「4.影片連結」年級6課次8
+  - index: 2
+    url: http://youtu.be/UeYJAnTWJYA
+    url_source: 總表0816「4.影片連結」年級6課次8

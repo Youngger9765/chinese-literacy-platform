@@ -14,3 +14,11 @@ resources:
     duration: '4:58'
     duration_seconds: 298
     source: 我是Tilaine
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/2LEPX5YR5Bc
+    url_source: 總表0816「4.影片連結」年級5課次10
+  - index: 2
+    url: http://youtu.be/ZQLVTop3ITo
+    url_source: 總表0816「4.影片連結」年級5課次10

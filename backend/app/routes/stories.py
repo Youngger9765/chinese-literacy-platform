@@ -120,8 +120,17 @@ def _sanitize_row_for_client(row: dict) -> dict:
     for field in ("label", "value"):
         if out.get(field):
             out[field] = _strip_distractor_marks(_strip_blank_answers(out[field]))
-    out["options"] = [_strip_distractor_marks(o) for o in out["options"]] if out.get("options") else out.get("options")
-    if out.get("options") is None:
+    if out.get("options"):
+        # ⚠️ 選項文字永遠是「多」「少」這種短詞。帶著 `【` 或 `】` 一定是切壞的碎片 ——
+        #    L0072 有一列的 value 裡寫了三組行內選擇（`【□①多 ②少】`），
+        #    整格按圈號切開之後 options 變成 `'少】；\n 東西越小【 柳丁 】…'` 這種東西，
+        #    而 `【 柳丁 】` 是答案。碎片對學生沒有意義，留著只會洩題。
+        #    該列的 value 已經把行內選擇挖成 `【　　　】`，選項來源在 `blanks[].options`。
+        cleaned = [_strip_distractor_marks(o) for o in out["options"]]
+        out["options"] = [o for o in cleaned if "【" not in o and "】" not in o]
+        if not out["options"]:
+            out.pop("options", None)
+    else:
         out.pop("options", None)
     sub_rows = out.get("sub_rows")
     if sub_rows:
@@ -203,14 +212,21 @@ def _sanitize_structure_for_client(structure: dict) -> dict:
     """Return a deep copy of structure with answers stripped for student UI."""
     result = copy.deepcopy(structure)
     result["rows"] = [_sanitize_row_for_client(r) for r in result.get("rows", [])]
+    # ⚠️ `worksheet_rows` 是跟 `rows` **不同的結構**，走的是另一條消毒路徑。
+    #    干擾項移除當初只加在 `_sanitize_row_for_client`（管 `rows` 的那條），
+    #    這裡漏掉了 —— staging 實測 40 課仍有 39 個 `□①` 從這條漏出去。
+    #    兩條路都要做同一件事，所以抽成一個函式，避免下次又只改一邊。
+    def _clean(text: str) -> str:
+        return _strip_distractor_marks(_strip_blank_answers(text or ""))
+
     for ws in result.get("worksheet_rows") or []:
         if ws.get("kind") == "pair":
-            ws["label"] = _strip_blank_answers(ws.get("label") or "")
-            ws["value"] = _strip_blank_answers(ws.get("value") or "")
+            ws["label"] = _clean(ws.get("label"))
+            ws["value"] = _clean(ws.get("value"))
         elif ws.get("kind") == "section_block":
             for item in ws.get("items") or []:
-                item["label"] = _strip_blank_answers(item.get("label") or "")
-                item["value"] = _strip_blank_answers(item.get("value") or "")
+                item["label"] = _clean(item.get("label"))
+                item["value"] = _clean(item.get("value"))
     result["interaction_profile"] = _derive_interaction_profile(result)
     return result
 
@@ -472,6 +488,9 @@ def list_stories(
                 title=s["title"],
                 grade=s["grade"],
                 grade_code=s["grade_code"],
+                lesson_no=s.get("lesson_no"),
+                series=s.get("series"),
+                lesson_seq=s.get("lesson_seq"),
                 genre=s["genre"],
                 category=s["category"],
                 char_count=s["char_count"],
@@ -581,6 +600,21 @@ def get_story(story_id: str):
         # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
         # behaviour when the flag is off. This is the ONLY endpoint that supplies it.
         lesson_content=get_lesson_content(story),
+        # 文言文專屬模組 (#2752) — None for every non-文言文 lesson.
+        classical_text=story.get("classical_text"),
+        modern_translation=story.get("modern_translation"),
+        word_matching=story.get("word_matching"),
+        sentence_matching=story.get("sentence_matching"),
+        self_challenge=story.get("self_challenge"),
+        intro_guide=story.get("intro_guide"),
+        # 目標策略框／讀前自我檢核 (#2752 Phase 2) — None for lessons without one.
+        goal_box=story.get("goal_box"),
+        self_check_before_reading=story.get("self_check_before_reading"),
+        # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3) — None for lessons without one.
+        multi_text_parts=story.get("multi_text_parts"),
+        cross_text_banner=story.get("cross_text_banner"),
+        keypoints_followup_questions=story.get("keypoints_followup_questions"),
+        writing_practice=story.get("writing_practice"),
     )
 
 

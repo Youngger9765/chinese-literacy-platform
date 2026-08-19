@@ -14,3 +14,11 @@ resources:
     duration: '9:54'
     duration_seconds: 594
     source: 臺北酷課雲
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/fGWQ6y4hI5U
+    url_source: 總表0816「4.影片連結」年級6課次7
+  - index: 2
+    url: http://youtu.be/btu-UgQdDdE
+    url_source: 總表0816「4.影片連結」年級6課次7

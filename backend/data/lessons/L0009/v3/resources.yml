@@ -14,3 +14,11 @@ resources:
     duration: '7:29'
     duration_seconds: 449
     source: 青春愛讀書
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/m2Stfjd4y5U
+    url_source: 總表0816「4.影片連結」年級4課次18
+  - index: 2
+    url: http://youtu.be/r0xBKghvNdQ
+    url_source: 總表0816「4.影片連結」年級4課次18

@@ -21,11 +21,6 @@
     },
     {
       "interactive_type": "display",
-      "label": "小主題",
-      "value": "重要細節"
-    },
-    {
-      "interactive_type": "display",
       "label": "數字記憶廣度測驗",
       "sub_rows": [
         {
@@ -41,7 +36,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "得分標準",
-          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。"
+          "value": "如果受試者能記住「9個」數字，無法記住10個數字，那麼得分為【　　　】。"
         }
       ],
       "value": ""
@@ -69,7 +64,7 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "另一種\n可能",
+          "label": "另一種可能",
           "value": "兩組從小接受的【　　　】可能不同，因此不能只用發音長度解釋。"
         }
       ],
@@ -96,11 +91,6 @@
   "title": "大主題：數字記憶的奧秘",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "小主題",
-      "value": "重要細節"
-    },
-    {
       "items": [
         {
           "label": "測驗目的",
@@ -112,7 +102,7 @@
         },
         {
           "label": "得分標準",
-          "value": "如果受試者能記住「9個」數字，無法記住\n10個數字，那麼得分為【　　　】。"
+          "value": "如果受試者能記住「9個」數字，無法記住10個數字，那麼得分為【　　　】。"
         }
       ],
       "kind": "section_block",
@@ -135,7 +125,7 @@
     {
       "items": [
         {
-          "label": "另一種\n可能",
+          "label": "另一種可能",
           "value": "兩組從小接受的【　　　】可能不同，因此不能只用發音長度解釋。"
         }
       ],

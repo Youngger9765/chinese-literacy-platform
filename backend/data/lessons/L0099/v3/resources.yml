@@ -16,3 +16,11 @@ resources:
     source: Brayden Chen
     _總表_url: http://youtu.be/8YIpQJMbIRw
   url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 83 列，故加 `_` 前綴標示非 DOCX 內容。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/f3Gc-GQKV-0
+    url_source: 總表0816「4.影片連結」年級7課次2
+  - index: 2
+    url: http://youtu.be/8YIpQJMbIRw
+    url_source: 總表0816「4.影片連結」年級7課次2

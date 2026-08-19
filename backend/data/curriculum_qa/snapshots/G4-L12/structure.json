@@ -1,59 +1,72 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "1",
+      "2",
+      "3",
+      "4-1"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "大自然的氣象小幫手",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主旨",
-      "value": "第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "例子",
-      "value": "",
       "interactive_type": "display",
+      "label": "大自然的氣象小幫手",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "主旨",
+      "value": "第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "例子",
       "sub_rows": [
         {
+          "interactive_type": "fill_blank",
           "label": "1",
-          "value": "蜘蛛會因天氣變化【　　　】調整【　　　】的大小。",
-          "interactive_type": "fill_blank"
+          "value": "蜘蛛會因天氣變化【　　　】調整【　　　】的大小。"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "2",
-          "value": "蟋蟀叫聲【　　　】越高，氣溫越高。",
-          "interactive_type": "fill_blank"
+          "value": "蟋蟀叫聲【　　　】越高，氣溫越高。"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "3",
-          "value": "下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。",
-          "interactive_type": "fill_blank"
+          "value": "下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。"
         },
         {
+          "interactive_type": "display",
           "label": "4",
-          "value": "天空的變化",
-          "interactive_type": "display"
+          "value": "天空的變化"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "4-1",
-          "value": "看到日暈表示【　　　】、看到月暈表示【　　　】。",
-          "interactive_type": "fill_blank"
+          "value": "看到日暈表示【　　　】、看到月暈表示【　　　】。"
         },
         {
+          "interactive_type": "fill_blank",
           "label": "4-2",
-          "value": "看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。",
-          "interactive_type": "fill_blank"
+          "value": "看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "display",
       "label": "總結",
-      "value": "大自然會偷偷告訴你天氣的答案。",
-      "interactive_type": "display"
+      "value": "大自然會偷偷告訴你天氣的答案。"
     }
   ],
-  "layout": "worksheet_table",
   "title": "大自然的氣象小幫手",
   "worksheet_rows": [
     {
@@ -62,8 +75,6 @@
       "value": "第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。"
     },
     {
-      "kind": "section_block",
-      "section": "例子",
       "items": [
         {
           "label": "1",
@@ -89,25 +100,14 @@
           "label": "4-2",
           "value": "看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "例子"
     },
     {
       "kind": "pair",
       "label": "總結",
       "value": "大自然會偷偷告訴你天氣的答案。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "1",
-      "2",
-      "3",
-      "4-1"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }
