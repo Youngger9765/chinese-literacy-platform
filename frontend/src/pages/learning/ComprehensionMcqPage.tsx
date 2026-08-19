@@ -16,6 +16,7 @@ import { ComprehensionResult } from '../../types';
 import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
 import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
+import NextStepFooter from '../../components/learning/NextStepFooter';
 
 const ComprehensionMcqPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -110,16 +111,7 @@ const ComprehensionMcqPage: React.FC = () => {
             }}
           />
           {mcqDone ? (
-            <div className="mt-6 shrink-0 w-full max-w-3xl mx-auto">
-              <button
-                onClick={handleNext}
-                className="w-full h-12 rounded-full font-headline font-bold text-base text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-              >
-                <span>下一關</span>
-                <span className="material-symbols-outlined text-base">arrow_forward</span>
-              </button>
-            </div>
+            <NextStepFooter onNext={handleNext} />
           ) : null}
         </div>
       );
@@ -150,16 +142,7 @@ const ComprehensionMcqPage: React.FC = () => {
                   : `答對 ${mcqResult.score} / ${mcqResult.total} 題，繼續加油！`}
               </p>
             )}
-            <div className="mt-4 w-full">
-              <button
-                onClick={handleNext}
-                className="w-full h-12 rounded-full font-headline font-bold text-base text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-              >
-                <span>下一關</span>
-                <span className="material-symbols-outlined text-base">arrow_forward</span>
-              </button>
-            </div>
+            <NextStepFooter onNext={handleNext} />
           </div>
         ) : (
           /* MCQ in progress */
@@ -175,14 +158,8 @@ const ComprehensionMcqPage: React.FC = () => {
         <div className="flex flex-col items-center justify-center py-12 gap-5 text-on-surface-variant">
           <span className="material-symbols-outlined text-5xl opacity-30">quiz</span>
           <p className="text-sm font-medium">此課文尚未有選擇題</p>
-          <button
-            onClick={handleSkip}
-            className="px-8 h-11 rounded-full font-headline font-bold text-sm text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-          >
-            <span>跳過，下一關</span>
-            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
+          {/* 空狀態也走同一顆 footer —— 學生每一步看到的「下一關」要一樣。 */}
+          <NextStepFooter onNext={handleSkip} label="跳過，下一關" />
         </div>
       )}
     </ComprehensionLayout>

@@ -522,7 +522,7 @@ def _uid_tree_lessons() -> list[dict]:
             # DEFAULT_STEP_SEQUENCE because this key was never in `row` for the overlay
             # loop below to carry). A 文言文 lesson (has `classical_text`) gets
             # CLASSICAL_STEP_SEQUENCE; everything else stays None → unchanged behavior.
-            "step_sequence": list(CLASSICAL_STEP_SEQUENCE) if l.get("classical_text") else None,
+            "step_sequence": _step_sequence_for(l),
         }
         # Overlay what lesson.yml actually carries. Identity stays computed — a
         # lesson must never be able to rename its own uid or id from its payload.
@@ -535,6 +535,57 @@ def _uid_tree_lessons() -> list[dict]:
                 row[k] = v
         out.append(row)
     return out
+
+
+# 學習單章節 → 線上 step。名字是抽取照著學習單印的字寫的。
+_SECTION_TO_STEP = {
+    "讀全文-做記號": "full-text-annotate",
+    "念順順": "key-passage-reading",
+    "重點朗讀": "key-passage-reading",
+    "語詞我最棒": "vocab-definition",
+    "語詞應用": "vocab-application",
+    "文章重點表": "keypoints-table",
+    "閱讀聚光燈": "spotlight",
+    "閱讀理解": "comprehension",
+    "詞語複習": "vocab-review",
+    "語詞複習": "vocab-review",
+    "知識補給站": "knowledge-station",
+}
+
+
+def _step_sequence_for(l: dict) -> list[str] | None:
+    """這一課的步驟順序，來自它自己的學習單。
+
+    為什麼不能是一份通用清單
+    ------------------------
+    側欄是照學習單章節順序畫的，而「下一關」原本查一張靜態表
+    （`STEP_FINISH_TRANSITIONS`）—— 兩個來源，於是它們可以不一致。
+    2026-08-19 Young 在聚光燈按下一關，直接跳到閱讀理解，**略過文章重點表**：
+
+    > 下一關按鈕為什麼不是按照側欄順序？？？？
+
+    學習單自己就寫著順序。`lesson.yml` 的 `sections_present`：
+
+        五 文章重點表 → 六 閱讀聚光燈 → 七 閱讀理解
+
+    抽取抽出來了，只是沒有人把它接成 `step_sequence` ⇒ 前端拿不到序列，
+    只能退回靜態表。今天反覆出現的同一個形狀。
+
+    文言文課維持既有的 `CLASSICAL_STEP_SEQUENCE`：它的章節名
+    （導讀／古文今譯／原文…）跟一般課完全不同，對照表涵蓋不到。
+    """
+    if l.get("classical_text"):
+        return list(CLASSICAL_STEP_SEQUENCE)
+    seen: list[str] = []
+    for sec in l.get("sections_present") or []:
+        step = _SECTION_TO_STEP.get(str((sec or {}).get("name") or "").strip())
+        if step and step not in seen:
+            seen.append(step)
+    if not seen:
+        return None
+    # 課程簡介永遠在最前、報告永遠在最後 —— 學習單不印這兩個章節，
+    # 但它們是線上流程的頭尾，漏掉的話學生走到最後會無處可去。
+    return ["lesson-intro", *seen, "report"]
 
 
 def build_all_lessons() -> list[dict]:

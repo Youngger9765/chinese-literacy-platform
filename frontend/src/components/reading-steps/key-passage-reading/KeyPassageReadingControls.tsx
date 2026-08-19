@@ -12,6 +12,7 @@
 import React from 'react';
 import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 import { formatTime } from '../../../utils/formatTime';
+import NextStepFooter from '../../learning/NextStepFooter';
 
 export type ControlState = 'idle' | 'preparing' | 'recording' | 'ttsPlaying' | 'result';
 
@@ -81,14 +82,7 @@ const KeyPassageReadingControls: React.FC<KeyPassageReadingControlsProps> = ({
                 <span className="material-symbols-outlined text-lg">refresh</span>
                 再讀一次
               </button>
-              <button
-                onClick={onFinish}
-                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-              >
-                <span>下一關</span>
-                <span className="material-symbols-outlined text-xl">arrow_forward</span>
-              </button>
+              <NextStepFooter onNext={onFinish} />
             </>
           )
         ) : state === 'preparing' ? (

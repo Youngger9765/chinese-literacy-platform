@@ -11,6 +11,7 @@ import ComprehensionLayout from '../../components/reading-steps/ComprehensionLay
 import StoryStructureTable from '../../components/reading-steps/StoryStructureTable';
 import KeypointsFollowupQuestions from '../../components/reading-steps/KeypointsFollowupQuestions';
 import { useLearningContext } from '../../layouts/LearningLayout';
+import NextStepFooter from '../../components/learning/NextStepFooter';
 
 const KeypointsTablePage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -59,17 +60,7 @@ const KeypointsTablePage: React.FC = () => {
         />
       )}
 
-      {/* Bottom CTA — always available (student may advance after inspecting the table) */}
-      <div className="mt-6 shrink-0">
-        <button
-          onClick={handleNext}
-          className="w-full h-12 rounded-full font-headline font-bold text-base text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-        >
-          <span>下一關</span>
-          <span className="material-symbols-outlined text-base">arrow_forward</span>
-        </button>
-      </div>
+      <NextStepFooter onNext={handleNext} />
     </ComprehensionLayout>
   );
 };
