@@ -4,6 +4,7 @@ No database dependency for platform content.
 """
 
 import copy
+from typing import Any
 import re
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
@@ -396,6 +397,22 @@ def _build_worksheet_rows(parsed: list[dict]) -> tuple[str | None, list[dict]]:
     return title, worksheet_rows
 
 
+def _sanitize_raw_table_for_client(table: Any) -> Any:
+    """原始表格（list-of-lists）送學生端之前，套跟其他路徑同一組消毒。
+
+    重用 `_strip_blank_answers` / `_strip_distractor_marks` —— 不要另寫一套。
+    今天已經證明過：同一件事寫兩份，其中一份就會漏（干擾項移除先前只加在
+    `rows`，`worksheet_rows` 那條漏掉，本機全綠而 staging 洩漏 39 處）。
+    """
+    if isinstance(table, str):
+        return _strip_distractor_marks(_strip_blank_answers(table))
+    if isinstance(table, list):
+        return [_sanitize_raw_table_for_client(x) for x in table]
+    if isinstance(table, dict):
+        return {k: _sanitize_raw_table_for_client(v) for k, v in table.items()}
+    return table
+
+
 def _format_yaml_structure_table(table: list) -> dict:
     """Convert story_structure_table YAML list → API shape.
 
@@ -594,7 +611,16 @@ def get_story(story_id: str):
         # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
         # story_structure_table: list-of-lists from docx parser (G7-L28/L29/L30).
         # story_structure_rows: AI-generated dict rows (richer shape). Both may be None.
-        story_structure_table=story.get("story_structure_table"),
+        # ⚠️ 消毒過再送。這是 docx parser 的原始 list-of-lists，未經處理時
+        # 帶著干擾項 `□②`（＝這個選項是錯的）與未挖空的答案 `【邊角球】`。
+        # 2026-08-19 全庫：51 課有干擾項、148 課有未挖空答案，全在公開回應裡。
+        #
+        # 前端沒有讀它（只有管理員的 story-structure-lab），所以畫面上看不到 ——
+        # 但開 devtools 就有。**「畫面上看不到」不是「沒有洩漏」。**
+        # 這是同一天第七條答案外洩路徑，前六條各自在別的欄位。
+        story_structure_table=_sanitize_raw_table_for_client(
+            story.get("story_structure_table")
+        ),
         story_structure_rows=story.get("story_structure_rows"),
         # Typed lesson_content contract (閱讀聚光燈 EDD, DARK). get_lesson_content is
         # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
