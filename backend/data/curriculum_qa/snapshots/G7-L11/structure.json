@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 11,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -68,7 +69,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "遺失物品・物品",
-          "value": "【　　　】遺失【　　　】和鄰居的【　　　】"
+          "value": "(1)遺失【　　　】和鄰居的【　　　】"
         },
         {
           "interactive_type": "display",
@@ -83,7 +84,7 @@
         {
           "interactive_type": "fill_blank",
           "label": "經濟與照顧的負擔",
-          "value": "【　　　】家境不好，作者與妹妹忙於【　　　】。\n【　　　】阿公無固定收入。\n【　　　】擔心阿嬤的行為造成經濟損失。\n【　　　】擔心若阿嬤無法改善，未來的照顧問題。"
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n(2)阿公無固定收入。\n(3)擔心阿嬤的行為造成經濟損失。\n(4)擔心若阿嬤無法改善，未來的照顧問題。"
         }
       ],
       "value": ""

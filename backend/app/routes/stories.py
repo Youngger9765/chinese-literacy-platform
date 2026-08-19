@@ -104,7 +104,8 @@ def _strip_distractor_marks(text: str) -> str:
 # 而那一刻他得先回答「這個能給學生看嗎」。
 # 回測鎖：backend/tests/test_structure_answer_key_not_served_2736.py
 _CLIENT_VISIBLE_ROW_KEYS = frozenset(
-    {"label", "value", "interactive_type", "options", "sub_rows", "blank_in_label"}
+    {"label", "value", "interactive_type", "options", "sub_rows", "blank_in_label",
+     "blanks", "select_mode"}
 )
 
 
@@ -133,6 +134,25 @@ def _sanitize_row_for_client(row: dict) -> dict:
             out.pop("options", None)
     else:
         out.pop("options", None)
+    if out.get("blanks"):
+        # `inline_choice` 每個空格自己的選項清單 —— `correct_option` 是判分用的
+        # 正解索引，留在伺服器端快取，跟 checkbox 的 `correct_options` 同一條
+        # 規則（見上面 docstring），一樣是作答後才由 `/structure/grade` 帶回。
+        # 同樣套用上面 `options` 那條「帶 【／】 一定是切壞的碎片」規則——
+        # 這裡的選項來自更窄的「第N個空格：…」單行，理論上不會撞到 L0072 那種
+        # 跨行行內選擇碎片，但同一套防線用兩次不吃虧（code review #2776）。
+        out["blanks"] = [
+            {
+                "options": [
+                    o for o in (_strip_distractor_marks(x) for x in (b.get("options") or []))
+                    if "【" not in o and "】" not in o
+                ]
+            }
+            for b in out["blanks"]
+            if isinstance(b, dict)
+        ]
+    else:
+        out.pop("blanks", None)
     sub_rows = out.get("sub_rows")
     if sub_rows:
         out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
@@ -160,11 +180,12 @@ def _derive_interaction_profile(structure: dict) -> dict:
     """
     fill_blank_count = 0
     checkbox_count = 0
+    inline_choice_count = 0
     primary_labels: list[str] = []
     section_labels: list[str] = []
 
     def tally_row(row: dict) -> None:
-        nonlocal fill_blank_count, checkbox_count
+        nonlocal fill_blank_count, checkbox_count, inline_choice_count
         itype = row.get("interactive_type")
         label = str(row.get("label") or "").strip()
         if itype == "fill_blank":
@@ -173,6 +194,14 @@ def _derive_interaction_profile(structure: dict) -> dict:
                 primary_labels.append(label)
         elif itype == "checkbox":
             checkbox_count += 1
+            if label:
+                primary_labels.append(label)
+        elif itype == "inline_choice":
+            # 分母/教練文案暫時併進 checkbox 家族計 —— 兩者都是「從選項挑」，
+            # 差別只在挑的地方是句子裡的空格。今天全庫只有 2 課用到這個型，
+            # 兩課都同時有其他 fill_blank/checkbox 欄位，mode 早已是 "mixed"；
+            # `inline_choice_count` 額外帶出去只是給以後想細分的人一個掛勾。
+            inline_choice_count += 1
             if label:
                 primary_labels.append(label)
 
@@ -187,11 +216,11 @@ def _derive_interaction_profile(structure: dict) -> dict:
         else:
             tally_row(row)
 
-    if fill_blank_count and checkbox_count:
+    if fill_blank_count and (checkbox_count or inline_choice_count):
         mode = "mixed"
     elif fill_blank_count:
         mode = "fill_blank"
-    elif checkbox_count:
+    elif checkbox_count or inline_choice_count:
         mode = "checkbox"
     else:
         mode = "display_only"
@@ -204,6 +233,7 @@ def _derive_interaction_profile(structure: dict) -> dict:
         ),
         "fill_blank_count": fill_blank_count,
         "checkbox_count": checkbox_count,
+        "inline_choice_count": inline_choice_count,
         "primary_labels": primary_labels[:4],
         "layout": structure.get("layout") or "cards",
     }
@@ -453,6 +483,7 @@ class StructureAnswerItem(BaseModel):
     blank_index: int | None = None
     value: str | None = None          # for fill_blank
     selected_options: list[int] | None = None  # for checkbox
+    selected_option: int | None = None  # for inline_choice (one option index per blank)
 
 
 class GradeStructureRequest(BaseModel):

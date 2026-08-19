@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 2,
     "fill_blank_count": 9,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -52,6 +53,7 @@
             "雄蟋蟀",
             "雌蟋蟀"
           ],
+          "select_mode": "single",
           "value": "會發出鳴叫聲的都是【　　　】。【 單選 】\n①雄蟋蟀 ②雌蟋蟀"
         },
         {
@@ -66,6 +68,7 @@
             "合作",
             "競爭"
           ],
+          "select_mode": "single",
           "value": "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　　　】的。【 單選 】\n①合作 ②競爭"
         }
       ],

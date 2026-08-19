@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 2,
     "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -78,6 +79,7 @@
         "她因為環境惡劣，選擇放棄努力而聽天由命",
         "她相信自己擁有改變命運的力量，並付諸行動"
       ],
+      "select_mode": "multi",
       "value": "回顧作者的成長經歷，下列哪些敘述正確？【 請打勾，複選 】\n①她一直以來都很理解父母的辛苦，不曾抱怨過 ②她曾經對家庭的動盪感到埋怨與難堪 ③隨著年齡增長，她逐漸體會父母的無奈與辛勞 ④她難忘老師在困境中給予支援與溫暖 ⑤她因為環境惡劣，選擇放棄努力而聽天由命 ⑥她相信自己擁有改變命運的力量，並付諸行動"
     }
   ],

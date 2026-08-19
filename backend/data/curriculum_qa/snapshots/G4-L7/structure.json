@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 2,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -25,7 +26,7 @@
     {
       "interactive_type": "fill_blank",
       "label": "研究支持的方法",
-      "value": "根據研究，長高的關鍵有哪三項？\n1.充足的【　　　】。\n2.適當的【　　　】。\n【　　　】有氧運動─讓核心體溫適度上升，促進生長激素分泌。\n【　　　】跳躍的動作─刺激【　　　】。\n【　　　】肌力訓練【　　　】和【　　　】運動【　　　】。\n3.均衡的【　　　】。"
+      "value": "根據研究，長高的關鍵有哪三項？\n1.充足的【　　　】。\n2.適當的【　　　】。\n(1)有氧運動─讓核心體溫適度上升，促進生長激素分泌。\n(2)跳躍的動作─刺激【　　　】。\n(3)肌力訓練【　　　】和【　　　】運動【　　　】。\n3.均衡的【　　　】。"
     }
   ],
   "title": "長高的祕密",

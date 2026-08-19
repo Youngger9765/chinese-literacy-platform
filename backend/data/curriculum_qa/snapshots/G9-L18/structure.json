@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 2,
     "fill_blank_count": 7,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -50,6 +51,7 @@
             "越打越好",
             "連敗不止"
           ],
+          "select_mode": "single",
           "value": "【 單選 】\n①越打越好 ②連敗不止"
         },
         {
@@ -59,6 +61,7 @@
             "越打越好",
             "連續低潮"
           ],
+          "select_mode": "single",
           "value": "【 單選 】\n①越打越好 ②連續低潮"
         }
       ],

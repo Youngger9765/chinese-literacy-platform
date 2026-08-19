@@ -333,6 +333,35 @@ async def grade_story_structure(
                 options = target.get("options") or []
                 correct_texts = [options[i] for i in sorted(expected) if i < len(options)]
                 result_entry["feedback"] = f"正確答案是：{'、'.join(correct_texts)}"
+
+        elif interactive_type == "inline_choice":
+            # 一句話裡好幾個空格，各自從自己的小選項組挑一個（#2776）。
+            # 跟多空格 fill_blank 一樣「一個答案項 = 一個空格」，但答案是
+            # 選項索引不是自由文字，所以走獨立分支而非併進下面的 fuzzy match。
+            blanks = target.get("blanks") or []
+            blank_idx = answer.get("blank_index")
+            if blank_idx is None or not (0 <= blank_idx < len(blanks)):
+                total -= 1  # 這個 answer item 沒對應到真正的空格，不計分母
+                continue
+            blank = blanks[blank_idx]
+            options = blank.get("options") or []
+            correct_idx = blank.get("correct_option")
+            selected_idx = answer.get("selected_option")
+            is_correct = (
+                selected_idx is not None
+                and correct_idx is not None
+                and int(selected_idx) == int(correct_idx)
+            )
+            result_entry["blank_index"] = blank_idx
+            result_entry["correct"] = is_correct
+            result_entry["correct_answer"] = (
+                options[correct_idx] if isinstance(correct_idx, int) and 0 <= correct_idx < len(options) else ""
+            )
+            result_entry["correct_option"] = correct_idx
+            if is_correct:
+                result_entry["feedback"] = "答對了！"
+            else:
+                result_entry["feedback"] = f"正確答案是：{result_entry['correct_answer']}"
         else:
             # fill_blank: fuzzy text match (per blank when blank_hints present)
             student_value = str(answer.get("value") or "").strip()

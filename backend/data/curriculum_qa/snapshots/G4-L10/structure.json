@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 3,
     "fill_blank_count": 2,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -44,6 +45,7 @@
             "積極的面對與復健",
             "放棄跑步、不願治療"
           ],
+          "select_mode": "single",
           "value": "比賽時受傷了，他選擇【 單選 】\n①積極的面對與復健 ②放棄跑步、不願治療"
         }
       ],
@@ -56,6 +58,7 @@
         "100公尺",
         "400公尺"
       ],
+      "select_mode": "single",
       "value": "他成為再度登上奧運【 單選 】【　　　】的短跑項目的臺灣選手。\n①100公尺 ②400公尺"
     },
     {
