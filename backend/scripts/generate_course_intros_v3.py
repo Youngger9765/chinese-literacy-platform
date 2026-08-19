@@ -73,12 +73,19 @@ def story_text(uid: str) -> tuple[str, str]:
             if title:
                 break
 
-    fta = v3 / "full_text_annotate.yml"
-    if not fta.exists():
+    # 一般課的正文在 `full_text_annotate.yml`；文言文那 10 課沒有那個檔，
+    # 正文在 `classical_text.yml`（原文）。只找第一個的話那批課會全部回報
+    # 「沒有課文」，而它們其實有。
+    src_file = next(
+        (v3 / name for name in ("full_text_annotate.yml", "classical_text.yml")
+         if (v3 / name).exists()),
+        None,
+    )
+    if src_file is None:
         return title, ""
-    doc = yaml.safe_load(fta.read_text(encoding="utf-8")) or {}
-    sec = doc.get("full_text_annotate") or doc
-    paras = sec.get("paragraphs") or []
+    doc = yaml.safe_load(src_file.read_text(encoding="utf-8")) or {}
+    sec = doc.get(src_file.stem) or doc
+    paras = sec.get("paragraphs") or sec.get("lines") or sec.get("sentences") or []
     parts = []
     for para in paras:
         if isinstance(para, dict):

@@ -118,6 +118,7 @@ const SpotlightPage: React.FC = () => {
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="spotlight" />
           <LessonRenderer
+            sectionLabel="閱讀聚光燈"
             lesson={lesson}
             story={selectedStory}
             lessonCode={selectedStory.lesson_code || selectedStory.id}
