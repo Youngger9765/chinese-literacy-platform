@@ -16,7 +16,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
-import { render, within } from '@testing-library/react';
+import { render, within, fireEvent } from '@testing-library/react';
 
 import { loadFixture } from '../../../schema/testHelpers';
 import { LessonSchema, type Lesson, type Block } from '../../../schema/lessonContent';
@@ -55,7 +55,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 // Imported AFTER mocks so the mocked contexts are picked up.
-import LessonRenderer from '../LessonRenderer';
+import LessonRenderer, { PAGINATED_QUESTION_KINDS } from '../LessonRenderer';
 import TableBlockView from '../blocks/TableBlockView';
 
 beforeAll(() => {
@@ -108,9 +108,34 @@ describe('every exercise exposes an interactive answerable input', () => {
   function assertExerciseInputs(lesson: Lesson) {
     const res = render(<LessonRenderer lesson={lesson} lessonCode={lesson.lessonCode} />);
     const { container } = res;
+
+    // `LessonRenderer` shows only ONE `PAGINATED_QUESTION_KINDS` block at a time (一題一題出,
+    // #2763/#20011). A global `container.querySelectorAll(...)` count is blind to WHICH
+    // block is currently on screen — with only one paginated kind (multiple_choice) it
+    // happened to stay green because some other multiple_choice block was always the one
+    // left visible; adding fill_in_blank to the paginated set exposed that this assertion
+    // was never actually checking the block it named (`ex-mcq-2 choice/trait radios:
+    // expected 0 to be greater than 0` — it had been silently reading a SIBLING block's
+    // radios). Fix: click 下一題 the right number of times so the block under test is the
+    // one actually on screen before asserting.
+    const paginatedBlocks = (lesson.blocks as Block[]).filter(
+      (b) => b.type === 'exercise' && PAGINATED_QUESTION_KINDS.has(b.question.kind),
+    );
+    let pageIdx = 0;
+    const gotoPaginatedBlock = (target: number) => {
+      while (pageIdx < target) {
+        fireEvent.click(within(container).getByRole('button', { name: /下一題/ }));
+        pageIdx += 1;
+      }
+    };
+
     for (const b of lesson.blocks as Block[]) {
       if (b.type !== 'exercise') continue;
       const q = b.question;
+      if (paginatedBlocks.length > 1) {
+        const target = paginatedBlocks.indexOf(b);
+        if (target !== -1) gotoPaginatedBlock(target);
+      }
       if (q.kind === 'custom') {
         expect(container.querySelector('textarea'), `${b.id} custom textarea`).toBeTruthy();
         expect(container.textContent).toContain('需人工檢核');
