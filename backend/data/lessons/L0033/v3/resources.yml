@@ -18,3 +18,15 @@ resources:
     duration: '14:21'
     duration_seconds: 861
     source: Mark CHUANG
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/fov2Sux_e1U
+    url_source: 總表0816「4.影片連結」年級5課次21
+  - index: 2
+    url: http://youtu.be/WJX2lEpL8NU
+    url_source: 總表0816「4.影片連結」年級5課次21
+  - index: 3
+    url: http://youtu.be/T5vVCHWFwtU
+    url_source: 總表0816「4.影片連結」年級5課次21

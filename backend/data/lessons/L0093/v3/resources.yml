@@ -14,3 +14,11 @@ resources:
     duration: (05:57)
     source: 均一教育平台
     has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.youtu.be/ghvb612GFyA
+    url_source: 總表0816「4.影片連結」年級7課次24
+  - index: 2
+    url: http://youtu.be/6RtmRAYY74M
+    url_source: 總表0816「4.影片連結」年級7課次24

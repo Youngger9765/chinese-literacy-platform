@@ -13,3 +13,11 @@ resources:
     duration: (3:30)
     source: Una Who
   qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/djT8zAxXJig&t=1s
+    url_source: 總表0816「4.影片連結」年級6課次1
+  - index: 2
+    url: http://youtu.be/-1ZDEbTal_g
+    url_source: 總表0816「4.影片連結」年級6課次1

@@ -14,3 +14,11 @@ resources:
     duration: (2:24)
     source: 土豆仁
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/f34Ye1YRzl4
+    url_source: 總表0816「4.影片連結」年級6課次25
+  - index: 2
+    url: https://youtu.be/rH2UpK57mcc
+    url_source: 總表0816「4.影片連結」年級6課次25

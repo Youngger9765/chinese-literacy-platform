@@ -19,3 +19,11 @@ resources:
     recommend_range: 建議觀看(0:00~4:33)
     source: 青春愛讀書
     has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/N-dKDHgvVTs&list=PLTBQmlY2HM37qlBMJ0czBt2laxBCK7ce5&index=2
+    url_source: 總表0816「4.影片連結」年級9課次2
+  - index: 2
+    url: http://youtu.be/1yj-_DZC7tM
+    url_source: 總表0816「4.影片連結」年級9課次2

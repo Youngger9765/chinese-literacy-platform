@@ -14,3 +14,11 @@ resources:
     duration: 08:12
     duration_seconds: 492
     source: 在台灣的故事
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/lxbGhzvr3DI
+    url_source: 總表0816「4.影片連結」年級4課次17
+  - index: 2
+    url: http://youtu.be/QAHUIhcmluE
+    url_source: 總表0816「4.影片連結」年級4課次17

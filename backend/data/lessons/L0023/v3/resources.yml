@@ -14,3 +14,11 @@ resources:
     duration: (6:37)
     source: 高雄鋼鐵人
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/qXu3tw_2rO4
+    url_source: 總表0816「4.影片連結」年級5課次11
+  - index: 2
+    url: http://youtu.be/qjXnOydaWec
+    url_source: 總表0816「4.影片連結」年級5課次11

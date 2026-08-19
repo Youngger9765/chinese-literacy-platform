@@ -16,3 +16,11 @@ resources:
     duration_seconds: 479
     source: 台灣的1001個故事
     url: http://youtu.be/45Pthxd4alc
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/54c3328Fyvk
+    url_source: 總表0816「4.影片連結」年級8課次15
+  - index: 2
+    url: http://youtu.be/45Pthxd4alc
+    url_source: 總表0816「4.影片連結」年級8課次15

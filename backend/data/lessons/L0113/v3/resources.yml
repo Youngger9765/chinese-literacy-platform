@@ -17,3 +17,11 @@ resources:
     source: 志祺七七
     url: http://youtu.be/3bhI3E6_dsA&rco=1
     url_note: 總表這一格的網址帶著 `&rco=1` 參數，照原樣記錄，未清理
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/D9tSqjn29YI
+    url_source: 總表0816「4.影片連結」年級8課次16
+  - index: 2
+    url: http://youtu.be/3bhI3E6_dsA&rco=1
+    url_source: 總表0816「4.影片連結」年級8課次16

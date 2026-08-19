@@ -19,3 +19,14 @@ resources:
     duration: '2:15'
     duration_seconds: 135
     source: BBC News 中文
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/_LAvnamrxIU
+    url_source: 總表0816「4.影片連結」年級5課次16
+  - index: 2
+    url: http://youtu.be/LDYDUB1PYvI
+    url_source: 總表0816「4.影片連結」年級5課次16
+  - index: 3
+    url: http://youtu.be/FSI757Rru-4
+    url_source: 總表0816「4.影片連結」年級5課次16

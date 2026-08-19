@@ -13,3 +13,12 @@ resources:
     duration: '2:47'
     duration_seconds: 167
     source: 公視新聞網
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/pTN5mJeoDFA
+    url_source: 總表0816「4.影片連結」年級5課次20
+  - index: 2
+    url: http://youtu.be/uQp4Y20Tgbk
+    url_source: 總表0816「4.影片連結」年級5課次20

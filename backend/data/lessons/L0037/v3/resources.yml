@@ -14,3 +14,11 @@ resources:
     duration: (1:46)
     source: 均一教育平台
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/70xwR2CUvO8
+    url_source: 總表0816「4.影片連結」年級5課次25
+  - index: 2
+    url: http://youtu.be/nY7TypRdEEg
+    url_source: 總表0816「4.影片連結」年級5課次25

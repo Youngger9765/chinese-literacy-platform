@@ -14,3 +14,11 @@ resources:
     duration: (2:51)
     source: 原視新聞網 TITV News
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.facebook.com/share/v/1LP4M8Ut87/?mibextid=wwXIfr
+    url_source: 總表0816「4.影片連結」年級5課次24
+  - index: 2
+    url: https://youtu.be/watch?v=JL5E2sJSAvI
+    url_source: 總表0816「4.影片連結」年級5課次24

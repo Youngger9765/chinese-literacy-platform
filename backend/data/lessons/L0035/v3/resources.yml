@@ -22,3 +22,15 @@ resources:
     duration: '3:01'
     duration_seconds: 181
     source: 國際特赦組織台灣分會
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/HdsGa1Mh1y8
+    url_source: 總表0816「4.影片連結」年級5課次23
+  - index: 2
+    url: https://youtu.be/5dqGPxJVtbo
+    url_source: 總表0816「4.影片連結」年級5課次23
+  - index: 3
+    url: https://youtu.be/EkvmNVKmiE8
+    url_source: 總表0816「4.影片連結」年級5課次23

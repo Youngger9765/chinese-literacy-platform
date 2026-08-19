@@ -19,3 +19,14 @@ resources:
     duration: '10:21'
     duration_seconds: 621
     source: My Media
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/NYWtSd80h8s
+    url_source: 總表0816「4.影片連結」年級7課次20
+  - index: 2
+    url: https://www.youtube.com/shorts/FYpHNePa_jM
+    url_source: 總表0816「4.影片連結」年級7課次20
+  - index: 3
+    url: https://youtu.be/hg7qyulHCPo
+    url_source: 總表0816「4.影片連結」年級7課次20

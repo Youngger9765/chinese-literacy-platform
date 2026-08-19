@@ -15,3 +15,11 @@ resources:
     source: 錢丟丟文明神話講解
     qr_code: true
     title_note: 標題只有右半個方括號「】」而沒有左半，原稿如此，未補。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/MwnrwmYkQLw
+    url_source: 總表0816「4.影片連結」年級7課次26（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/b90c0ZgdM5o
+    url_source: 總表0816「4.影片連結」年級7課次26（⚠️課名與課程不符，仍依課次採用）

@@ -356,6 +356,14 @@ def _uid_tree_lessons() -> list[dict]:
             # `get_lesson_by_code` returned None for every code in the catalogue,
             # silently. The two names are the same value; the older loaders set both.
             "lesson_code": code,
+            # 課次／系列／排序序號（#2736）。圖書館以前按 `lesson_uid` 排 —— 那是
+            # 抽取流水號，跟課本順序無關，所以四年級第一課顯示的是第 10 課。
+            # 課次一直都在課碼裡（`G4-L10`），但那是字串，而且有三種系列
+            # （`G4-L1` / `文-L1` / `體-L1`）；每個要排序的地方各自 parse 一次，
+            # 遲早會排得不一樣。這裡送明確欄位，前端不用再拆字串。
+            "lesson_no": _meta(l).get("lesson_no"),
+            "series": _meta(l).get("series"),
+            "lesson_seq": _meta(l).get("lesson_seq"),
             "grade": grade,
             "title": l.get("title"),
             # fields the API schema expects; the uid tree has no genre/category
@@ -499,8 +507,21 @@ def build_all_lessons() -> list[dict]:
     whenever a title drifted by one punctuation mark, and duplicated 26 lessons
     across the two layers. Identity is now the directory name under
     `backend/data/lessons/<lesson_uid>/<version_id>/` and nothing else.
+
+    **課本順序在這裡定案，不在每個消費者各自定案。** 圖書館原本按 `id`
+    （＝ `20000 + uid`，抽取流水號）排，所以四年級的第一課顯示成第 10 課，
+    而課本的第 1 課《贏得喝采的輸家》躺在 L0011。UID 跟課本順序沒有關係。
+
+    排序鍵是 `lesson_seq`（`scripts/add_lesson_ordering_metadata.py` 寫入 metadata），
+    一把尺同時排三種系列：一般課 `年級*1000+課次*10`、文言文 90000+、體育生 91000+。
+    課碼解不出課次的課退回用 UID（99000+），排在最後但仍然是決定性的順序 ——
+    不給它位置，它會落在排序器碰巧放的地方，而那不會有任何徵兆。
     """
-    return _uid_tree_lessons()
+    lessons = _uid_tree_lessons()
+    return sorted(lessons, key=lambda l: (
+        l.get("lesson_seq") if isinstance(l.get("lesson_seq"), int) else 99000 + l["id"],
+        l["id"],
+    ))
 
 def build_indexes(all_lessons: list[dict]) -> tuple[
     dict[int, dict],

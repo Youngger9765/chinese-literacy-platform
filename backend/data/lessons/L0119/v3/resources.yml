@@ -15,3 +15,11 @@ resources:
     duration_seconds: 122
     source: 民視讚夯
   note: 每則附 QR code（圖片）
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/1EB9psxoCmE
+    url_source: 總表0816「4.影片連結」年級8課次21
+  - index: 2
+    url: https://youtu.be/y_ux7Jf2i6Q
+    url_source: 總表0816「4.影片連結」年級8課次21

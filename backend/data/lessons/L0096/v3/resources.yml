@@ -20,3 +20,14 @@ resources:
     duration: (7:06)
     source: 雲端世界
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/lg3KQcFwdlA
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/d1Ro10IOZEI
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）
+  - index: 3
+    url: http://youtu.be/jpV8xXukp64
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）

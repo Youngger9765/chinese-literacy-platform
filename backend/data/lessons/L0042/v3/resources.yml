@@ -14,3 +14,17 @@ resources:
     duration: (07:54)
     source: HahaTai    哈哈台
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/nEi9I9CZDlc
+    url_source: 總表0816「4.影片連結」年級5課次3
+  - index: 2
+    url: http://youtu.be/InlJkVF8d-s
+    url_source: 總表0816「4.影片連結」年級5課次3
+  - index: 3
+    url: http://youtu.be/L0bD8wEal4E
+    url_source: 總表0816「4.影片連結」年級5課次3
+  - index: 4
+    url: http://youtu.be/MmsyTMcLP00
+    url_source: 總表0816「4.影片連結」年級5課次3

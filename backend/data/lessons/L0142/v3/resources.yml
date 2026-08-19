@@ -15,3 +15,10 @@ resources:
     duration: (08:14)
     source: Better Leaf 好葉
     has_qr: true
+  videos:
+  - index: 1
+    url: http://youtu.be/FniTYX9NqIY
+    url_source: 總表0816「4.影片連結」年級9課次21（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/jbUJGkM4Ksk
+    url_source: 總表0816「4.影片連結」年級9課次21（⚠️課名與課程不符，仍依課次採用）

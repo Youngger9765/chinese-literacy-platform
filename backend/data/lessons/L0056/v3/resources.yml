@@ -20,3 +20,14 @@ resources:
     duration: (7:15)
     source: 普通話教室/故事廊
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/QV4MadU3s8U
+    url_source: 總表0816「4.影片連結」年級6課次16
+  - index: 2
+    url: http://youtu.be/u_t4eYiPZEg
+    url_source: 總表0816「4.影片連結」年級6課次16
+  - index: 3
+    url: http://youtu.be/iCxh-0P2Db4
+    url_source: 總表0816「4.影片連結」年級6課次16

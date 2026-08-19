@@ -41,6 +41,13 @@ class StoryListItem(BaseModel):
     title: str
     grade: str = ""                  # "4".."9" / 文言文 / 品格教育
     grade_code: str
+    # 課本順序（#2736）。圖書館以前按 `id`（＝抽取流水號）排，四年級第一課
+    # 因此顯示成第 10 課。`lesson_seq` 是唯一一把尺，把三種系列（一般／文言文／
+    # 體育生）排在同一條線上；`lesson_no` 為 None ＝ 課碼解不出課次，
+    # 那種課依 UID 排在最後（Young 2026-08-19）。
+    lesson_no: Optional[int] = None
+    series: Optional[str] = None
+    lesson_seq: Optional[int] = None
     genre: str = ""
     category: str = ""
     char_count: int = 0

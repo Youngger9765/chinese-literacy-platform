@@ -9,3 +9,14 @@ resources:
     duration: (12:00)
     source: 遠見叢書
     has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/b71ib3aSlAs
+    url_source: 總表0816「4.影片連結」年級6課次28
+  - index: 2
+    url: http://youtu.be/hH7MIZehdB4
+    url_source: 總表0816「4.影片連結」年級6課次28
+  - index: 3
+    url: http://youtu.be/6EXARfNJIbs
+    url_source: 總表0816「4.影片連結」年級6課次28

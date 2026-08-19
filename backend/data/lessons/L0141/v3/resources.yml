@@ -19,3 +19,10 @@ resources:
   items_note: '總表 4.影片連結 分頁對應網址為 http://youtu.be/Cn8DLA074hE 與 http://youtu.be/G9YXfVHXGqM
 
     —— 學習單上只印 QR code，網址不在 DOCX 文字層。'
+  videos:
+  - index: 1
+    url: http://youtu.be/Cn8DLA074hE
+    url_source: 總表0816「4.影片連結」年級9課次20
+  - index: 2
+    url: http://youtu.be/G9YXfVHXGqM
+    url_source: 總表0816「4.影片連結」年級9課次20

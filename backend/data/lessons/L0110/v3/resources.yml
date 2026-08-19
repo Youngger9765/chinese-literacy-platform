@@ -16,3 +16,11 @@ resources:
     duration_seconds: 353
     source: Psych2Go
     url: http://youtu.be/5pzcRH665Lw
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/m8ApjhtgVFs
+    url_source: 總表0816「4.影片連結」年級8課次12
+  - index: 2
+    url: http://youtu.be/5pzcRH665Lw
+    url_source: 總表0816「4.影片連結」年級8課次12

@@ -70,15 +70,23 @@ def test_every_lesson_with_videos_serves_them():
     )
 
 
-def test_titles_are_the_real_ones_not_placeholders():
-    """片名要送真的，不是「影片 1」。
+def test_titles_are_the_real_ones_where_the_worksheet_printed_them():
+    """學習單有印片名的課，就要送真片名，不可以降級成「影片 1」。
 
-    佔位字串不會報錯，只是讓學生不知道那支影片在講什麼 —— 靜靜地變沒用。
+    ⚠️ 只針對**學習單真的列過片名**的課。2026-08-19 之後有 120 課是
+    「總表有網址、學習單只印 QR code 沒印片名」——那些課我們手上就是沒有片名，
+    顯示「影片 1」是誠實的，不是缺陷。把它們一起要求真片名，這條就會變成
+    一個永遠紅的門，然後被無視。
+
+    有片名卻送出佔位字串才是缺陷：那是 `resources["items"]` / `["videos"]`
+    欄名對不上造成的靜默降級，沒有錯誤訊息，只是變得比較沒用。
     """
     placeholder = []
-    for uid, _ in _with_videos():
-        for v in _video_links(load_lesson(uid)) or []:
-            if str(v.get("title", "")).strip().startswith("影片 "):
+    for uid, vids in _with_videos():
+        titled = [str(v.get("title") or "").strip() for v in vids]
+        for i, v in enumerate(_video_links(load_lesson(uid)) or []):
+            has_real_title = i < len(titled) and titled[i] and not titled[i].startswith("影片 ")
+            if has_real_title and str(v.get("title", "")).strip().startswith("影片 "):
                 placeholder.append((uid, v.get("title")))
     assert not placeholder, (
         f"{len({p[0] for p in placeholder})} 課的片名是佔位字串：\n"
@@ -94,10 +102,16 @@ def test_migrated_urls_are_reachable_shapes():
             url = v.get("url")
             if not url:
                 continue
-            if "youtu" not in url:
-                bad.append((uid, url, "不是 YouTube"))
+            # ⚠️ 不是每一支都是 YouTube。總表裡有 Facebook reel 與一個網站
+            # （L0012 / L0026 / L0036 / L0094）。第一版這條斷言「一律是 YouTube」，
+            # 把真實資料判成缺陷 —— 假設比資料窄，紅的是測試不是產品。
+            # 真正要守的是「是個可以打開的連結」。
+            if not url.startswith(("http://", "https://")):
+                bad.append((uid, url, "不是可以打開的連結"))
             elif not v.get("url_source"):
                 bad.append((uid, url, "沒有 url_source，將來查不到憑什麼掛這一課"))
+            elif "總表" not in str(v.get("url_source")):
+                bad.append((uid, url, f"url_source 不是總表：{v.get('url_source')}"))
     assert not bad, "\n".join(f"  {u}: {x} — {why}" for u, x, why in bad[:8])
 
 
@@ -127,4 +141,29 @@ def test_migrated_lessons_actually_serve_their_urls():
     assert not broken, (
         f"{len(broken)} 課的 URL 沒送到前端（學生看得到片名但點不了）：\n"
         + "\n".join(f"  {u}: yml={a} 送出={b}" for u, a, b in broken[:6])
+    )
+
+
+def test_notes_recording_an_older_sheet_do_not_silently_win():
+    """`videos_note` 記的是**抽取當時**那一版總表，不是現在這一版。
+
+    這條測試的來歷值得留著：L0123《爸爸的恩人們》的 note 寫著總表列的是
+    `bLOHlPOXfR8` / `hqJkg8Be-ik`，而 0816 這份總表列的是
+    `B3mgVn-hXRE` / `oszhrLJ-or8`。我一度認為 note 比較貼近來源，
+    把它當權威去「修正」——**修反了**。note 是舊快照，總表是現況。
+
+    所以現在斷言的是相反的方向：**網址一律來自總表**（`url_source` 說得出是哪一列），
+    note 只是歷史紀錄，不可以蓋過它。
+    """
+    wrong_source = []
+    for uid, vids in _with_videos():
+        for v in vids:
+            if not v.get("url"):
+                continue
+            src = str(v.get("url_source") or "")
+            if "總表0816" not in src:
+                wrong_source.append((uid, v.get("url"), src or "(空)"))
+    assert not wrong_source, (
+        "有網址不是從 0816 總表來的（可能是舊腳本或 note 殘留）：\n"
+        + "\n".join(f"  {u}: {x} ← {s}" for u, x, s in wrong_source[:8])
     )

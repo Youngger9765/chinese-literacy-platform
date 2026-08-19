@@ -24,3 +24,14 @@ resources:
     source: 耀鈞x商業修煉筆記
     url: https://youtu.be/HHg0OVNfqUY
   items_note: 本課有 3 支影片（多數課是 2 支），與總表的 3 筆一致。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/swrH692MIgA
+    url_source: 總表0816「4.影片連結」年級9課次9
+  - index: 2
+    url: https://youtu.be/fml43I0jM1g
+    url_source: 總表0816「4.影片連結」年級9課次9
+  - index: 3
+    url: https://youtu.be/HHg0OVNfqUY
+    url_source: 總表0816「4.影片連結」年級9課次9

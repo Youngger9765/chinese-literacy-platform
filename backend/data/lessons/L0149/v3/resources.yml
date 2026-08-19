@@ -11,7 +11,7 @@ resources:
     source: TVBS NEWS
     has_qr: true
     url: http://youtu.be/X_iLPs805LY
-    url_source: 一修 G9-L07（依課名對接）
+    url_source: 總表0816「4.影片連結」年級9課次6
   - index: 2
     title: 賽先生科學小常識：聊聊米田堡
     duration: (3:23
@@ -20,4 +20,4 @@ resources:
     source: 賽先生科學工廠
     has_qr: true
     url: http://youtu.be/rk08VjPL6PU
-    url_source: 一修 G9-L07（依課名對接）
+    url_source: 總表0816「4.影片連結」年級9課次6

@@ -16,3 +16,11 @@ resources:
     source: 公共電視
     has_qr: true
   note: 兩則各附一個 QR code 圖片；QR 圖上沒有可讀文字
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/UPDbd-FUzfM
+    url_source: 總表0816「4.影片連結」年級9課次14
+  - index: 2
+    url: http://youtu.be/RNEXGmgQC9k&t=480s
+    url_source: 總表0816「4.影片連結」年級9課次14

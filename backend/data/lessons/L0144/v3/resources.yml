@@ -22,3 +22,7 @@ resources:
     duration: (09:10)
     source: 吃貨男友的健身女友
     has_qr: true
+  videos:
+  - index: 1
+    url: http://youtu.be/sah7joEnaSQ
+    url_source: 總表0816「4.影片連結」年級9課次23

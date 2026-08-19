@@ -13,3 +13,11 @@ resources:
     duration: (11:06)
     source: 志祺七七 X 圖文不符
   qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/uBFTJ6MAmlo
+    url_source: 總表0816「4.影片連結」年級6課次17
+  - index: 2
+    url: http://youtu.be/DsRqWxSE40s
+    url_source: 總表0816「4.影片連結」年級6課次17

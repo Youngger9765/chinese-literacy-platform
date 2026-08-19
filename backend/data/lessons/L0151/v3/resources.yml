@@ -16,3 +16,11 @@ resources:
     duration_seconds: 434
     source: 公視P# 新聞實驗室
     url: http://youtu.be/m3gLNa-fx_w
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/8kxi0yBwYWY
+    url_source: 總表0816「4.影片連結」年級9課次8
+  - index: 2
+    url: http://youtu.be/m3gLNa-fx_w
+    url_source: 總表0816「4.影片連結」年級9課次8

@@ -19,3 +19,14 @@ resources:
     duration: '3:54'
     duration_seconds: 234
     source: 天下科普
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/0CccnSQcR08
+    url_source: 總表0816「4.影片連結」年級4課次12
+  - index: 2
+    url: http://youtu.be/Lf0f7Z-nXEk
+    url_source: 總表0816「4.影片連結」年級4課次12
+  - index: 3
+    url: http://youtu.be/cyAp1P1Lwvw
+    url_source: 總表0816「4.影片連結」年級4課次12

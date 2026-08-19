@@ -24,3 +24,17 @@ resources:
     duration: (10:10)
     source: 八戒部落
     qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/FQd0x4vjmG8
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 2
+    url: http://youtu.be/Kj7AjD3zopM
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 3
+    url: http://youtu.be/B9IBTUsyGQk
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 4
+    url: http://youtu.be/NSn8F_rm6QU
+    url_source: 總表0816「4.影片連結」年級6課次11

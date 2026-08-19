@@ -14,3 +14,11 @@ resources:
     duration: ４:20
     duration_seconds: 260
     source: 風傳媒
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/zuifSksVg2w
+    url_source: 總表0816「4.影片連結」年級6課次6
+  - index: 2
+    url: https://youtu.be/OSYdWYBOrL8
+    url_source: 總表0816「4.影片連結」年級6課次6

@@ -15,3 +15,12 @@ resources:
     duration: '10:14'
     duration_seconds: 614
     source: 陳彥博的運動冒險生活頻道
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/K4DGUX7utCU
+    url_source: 總表0816「4.影片連結」年級4課次4
+  - index: 2
+    url: http://youtu.be/b9105wafoXc
+    url_source: 總表0816「4.影片連結」年級4課次4
