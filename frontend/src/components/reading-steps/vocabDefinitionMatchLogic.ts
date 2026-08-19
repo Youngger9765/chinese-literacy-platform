@@ -23,12 +23,25 @@ export type Phase = 'matching' | 'summary';
  * answeredWordIdx === null  → not yet answered
  * answeredWordIdx === defIndex → correct
  * answeredWordIdx !== defIndex → wrong
+ *
+ * `correct` reflects the LATEST attempt on purpose (both MCQ and drag-drop
+ * modes let a student retry a wrong pick until they get it right, and the
+ * live in-round UI — checkmarks, tone chips — should reflect that current
+ * state). `firstTryCorrect` is the separate, WRITE-ONCE field #2773 added:
+ * once set (on the item's first answer), it never changes on a later retry.
+ * `selectRetryIndices` and the summary's 錯題解析 classification key off
+ * `firstTryCorrect`, not `correct` — otherwise a student who got something
+ * wrong once but retried into the right answer would vanish from every
+ * "what did I get wrong" accounting, which is exactly the gap this issue
+ * exposed live on staging (vocab-definition showed 11/11 all-correct with
+ * zero 錯題 even after deliberately answering wrong on the first try).
  */
 export interface AnswerRecord {
   defIndex: number;
   answeredWordIdx: number | null;
   correct: boolean | null;
   wrongAttempts?: number;
+  firstTryCorrect?: boolean | null;
 }
 
 export interface PersistedProgress {
@@ -109,7 +122,10 @@ export function buildMCQOptions(vocab: VocabItem[], currentDefIdx: number): numb
 /* ------------------------------------------------------------------ */
 
 export function selectRetryIndices(answers: AnswerRecord[]): number[] {
-  return answers.filter((a) => !a.correct).map((a) => a.defIndex);
+  // firstTryCorrect ?? correct: prefer the immutable first-try verdict; fall
+  // back to `correct` for records that predate the field (persisted progress
+  // from before this fix, or single-shot fixtures where first == final).
+  return answers.filter((a) => (a.firstTryCorrect ?? a.correct) === false).map((a) => a.defIndex);
 }
 
 /* ------------------------------------------------------------------ */

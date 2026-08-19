@@ -76,4 +76,25 @@ describe('WrongAnswerReviewList', () => {
     render(<WrongAnswerReviewList items={[]} revealed />);
     expect(screen.getByTestId('wrong-answer-review-list')).toBeEmptyDOMElement();
   });
+
+  // #2773 follow-up: vocab-definition's drag-drop mode has its own per-attempt
+  // coaching text ("下次小心喔～" / "要不要再複習一遍") that predates this shared
+  // component. Wiring vocab-definition into WrongAnswerReviewList must not
+  // delete that — it's optional so callers without it (comprehension,
+  // vocab-application) render exactly as before.
+  it('renders an optional extraNote when provided, and omits the line entirely when absent', () => {
+    render(
+      <WrongAnswerReviewList
+        items={[
+          { id: 0, promptText: 'q1', correct: false, correctAnswerText: 'a1', extraNote: '下次小心喔～' },
+          { id: 1, promptText: 'q2', correct: false, correctAnswerText: 'a2' },
+        ]}
+        revealed
+      />,
+    );
+    expect(screen.getByText('下次小心喔～')).toBeInTheDocument();
+    // Second item has no extraNote — its card must not render an empty note line.
+    const cards = screen.getAllByText(/^q[12]$/).map((el) => el.closest('div')?.parentElement);
+    expect(cards[1]?.textContent).not.toContain('下次小心喔～');
+  });
 });

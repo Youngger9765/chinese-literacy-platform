@@ -174,7 +174,12 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
+    activeDefIndices.map((defIdx) => ({
+      defIndex: defIdx,
+      answeredWordIdx: null,
+      correct: null,
+      firstTryCorrect: null,
+    })),
   );
 
   const confirmedRef = useRef<Set<number>>(new Set());
@@ -195,6 +200,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       answeredWordIdx: null,
       correct: null,
       wrongAttempts: 0,
+      firstTryCorrect: null,
     }));
     confirmedRef.current = new Set();
     wrongAttemptCountRef.current = new Map();
@@ -288,12 +294,16 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       if (vocabIdx === defIdx) {
         // Correct — trigger fly-away animation on the word chip, then mark confirmed
         const wrongAttempts = wrongAttemptCountRef.current.get(defIdx) ?? 0;
+        // `correct`/`answeredWordIdx` reflect the LATEST drop (retry overwrites).
+        // `firstTryCorrect` is separate and write-once (#2773): set only while
+        // still null, so a correct retry can't erase an earlier wrong drop.
         answersRef.current = answersRef.current.map((a) =>
           a.defIndex === defIdx ? {
             ...a,
             answeredWordIdx: vocabIdx,
             correct: true,
             wrongAttempts,
+            firstTryCorrect: a.firstTryCorrect ?? true,
           } : a,
         );
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
@@ -330,6 +340,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             answeredWordIdx: vocabIdx,
             correct: false,
             wrongAttempts,
+            firstTryCorrect: a.firstTryCorrect ?? false,
           } : a,
         );
         setWrongFlash((prev) => new Set([...prev, defIdx]));

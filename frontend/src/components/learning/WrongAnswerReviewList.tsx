@@ -25,6 +25,13 @@ export interface WrongAnswerReviewItem {
   correctAnswerText: string;
   /** Student's first wrong pick. Ignored (never rendered) when `correct` is true. */
   studentAnswerText?: string | null;
+  /**
+   * Optional supplementary coaching line (e.g. vocab-definition's drag-drop
+   * per-attempt tone text — "下次小心喔～" / "要不要再複習一遍"). Renders below
+   * the answer line when present; omitted entirely when absent so callers
+   * without this concept (comprehension, vocab-application) are unaffected.
+   */
+  extraNote?: React.ReactNode;
 }
 
 export interface WrongAnswerReviewListProps {
@@ -66,6 +73,9 @@ export function WrongAnswerReviewList({ items, revealed }: WrongAnswerReviewList
                 ) : null}
                 正確：<span className="font-bold text-emerald-700">{item.correctAnswerText}</span>
               </p>
+              {item.extraNote ? (
+                <p className="mt-1 text-xs font-semibold text-amber-700">{item.extraNote}</p>
+              ) : null}
             </div>
           </div>
         </div>

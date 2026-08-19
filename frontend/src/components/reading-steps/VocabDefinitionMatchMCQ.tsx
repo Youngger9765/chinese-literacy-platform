@@ -116,7 +116,12 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
 export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoiceProps) {
   const [queueIdx, setQueueIdx] = useState(0);
   const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
+    activeDefIndices.map((defIdx) => ({
+      defIndex: defIdx,
+      answeredWordIdx: null,
+      correct: null,
+      firstTryCorrect: null,
+    })),
   );
   const [answerState, setAnswerState] = useState<AnswerState>({ status: 'idle' });
   const [correctPraise, setCorrectPraise] = useState('答對了！');
@@ -217,10 +222,18 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
 
     const isCorrect = vocabIdx === currentDefIdx;
 
-    // Update the answers record — on retry, overwrite with the latest attempt
+    // Update the answers record — `correct`/`answeredWordIdx` reflect the
+    // LATEST attempt on purpose (on retry, overwrite). `firstTryCorrect` is
+    // separate and write-once (#2773): set only while still null, then never
+    // touched again, so a retry-into-correct can't erase the original miss.
     answersRef.current = answersRef.current.map((a) =>
       a.defIndex === currentDefIdx
-        ? { ...a, answeredWordIdx: vocabIdx, correct: isCorrect }
+        ? {
+            ...a,
+            answeredWordIdx: vocabIdx,
+            correct: isCorrect,
+            firstTryCorrect: a.firstTryCorrect ?? isCorrect,
+          }
         : a,
     );
 
