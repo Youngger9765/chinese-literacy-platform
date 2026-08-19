@@ -11,6 +11,11 @@ on:
       - 'backend/app/routes/stories.py'
       - 'backend/app/services/story_structure*.py'
       - 'backend/app/services/keypoints_preview.py'
+      # The 重點表 source bridge and the row builder that calls it. Both change the
+      # served interaction_profile and neither was listed — so the 2026-08-17
+      # regression this gate exists for lived in a file that could not trigger it.
+      - 'backend/app/services/keypoints_to_structure.py'
+      - 'backend/app/services/lesson_indexes.py'
       - 'backend/data/lessons/**'
       - 'backend/data/curriculum_qa/**'
       - 'backend/specs/test_keypoints_manifest_spec.py'

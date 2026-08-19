@@ -46,11 +46,23 @@ WHAT IT DOES NOT DO
    Deriving a QA verdict from the output being QA'd makes the gate agree with
    whatever it is given.
 
-2. It does not run the L1/L2/L3 content gates. Those diffed the served table
-   against the DOCX curation schema, and that schema is the directory the re-ink
-   deleted; L2 fidelity for the second edition is covered by the content evidence
-   gate instead. Entries carry `gates: {}` so the QA dashboard renders them as
-   "not run" rather than claiming a pass nobody produced.
+2. It records one gate, L3, because L3 is the only one of the three that is both
+   alive and a per-lesson verdict:
+
+     L1  DOCX ↔ keypoints.yml — its source is `private/curriculum-source/_online-schema`,
+         the curation workspace the re-ink deleted. Not computable. Recording it as
+         anything, including "—", would put a lesson's name next to a judgement nobody
+         made.
+     L2  keypoints.yml ↔ served table ↔ manifest — this is the freshness comparison
+         `keypoints_manifest_verify.py` performs over the whole manifest. Its per-lesson
+         form here would be true by construction: the builder just derived the entry
+         from that source, so a stored per-lesson L2 could never be false. A badge that
+         cannot fail is worse than an absent one, because it is counted.
+     L3  interaction_profile ↔ rows, and no answer left visible — computed per lesson
+         from the served structure, and it does fail (that is what caught #2273).
+
+   The dashboard renders whatever gates an entry carries, so an absent gate shows as
+   absent rather than as an empty badge.
 
 3. It does not write `previews/{lesson_id}/original.html`. `render_keypoints_html`
    reads the first edition's schema (`sub_label`, `template`, `blanks` as a list
@@ -74,7 +86,11 @@ sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from app.services.lesson_code_normalization import normalize_manifest_code  # noqa: E402
-from story_structure_qa_lib import SMOKE_LESSONS  # noqa: E402
+from story_structure_qa_lib import (  # noqa: E402
+    SMOKE_LESSONS,
+    summarize_gate,
+    verify_interaction_profile_contract,
+)
 
 OUT_DIR = ROOT / "backend/data/curriculum_qa"
 MANIFEST_PATH = OUT_DIR / "keypoints_manifest.json"
@@ -157,17 +173,28 @@ def build_manifest(*, smoke_only: bool = False) -> tuple[dict, dict[str, dict]]:
         struct = _sanitize_structure_for_client(_format_yaml_structure_table(table))
         uid = lesson.get("lesson_uid")
 
+        l3_issues = verify_interaction_profile_contract(struct)
         entry = {
             "lesson_id": code,
             "lesson_uid": uid,
+            # The dashboard's ④ Render panel mounts StoryStructureTable by story id.
+            # Dropped when the manifest was rebuilt for the second edition, so that
+            # panel said 「無 story_id」 for all 150 lessons.
+            "story_id": lesson.get("id"),
             "title": lesson.get("title"),
             "tier": "keypoints_yml",
             "layout": _profile(struct),
-            # See "WHAT IT DOES NOT DO" (2) — not run, not passed.
-            "gates": {},
+            # Only the gates that are real and per-lesson — see "WHAT IT DOES NOT DO" (2).
+            "gates": {"L3": summarize_gate("L3", not l3_issues, l3_issues)},
+            "overall_status": "pass" if not l3_issues else "fail",
             "artifacts": {
                 "has_structure_snapshot": True,
                 "has_keypoints_snapshot": uid in raw_keypoints,
+                # The 136 previews on disk are first-edition renders; `render_keypoints_html`
+                # cannot read v3, so none are produced for this edition. Reported per lesson
+                # rather than assumed, so the detail panel can say so instead of showing an
+                # empty frame under the heading 「原文抽取預覽」.
+                "has_original_preview": (OUT_DIR / "previews" / code / "original.html").is_file(),
             },
         }
         entry.update(by_uid.get(uid) or by_code.get(code) or {})

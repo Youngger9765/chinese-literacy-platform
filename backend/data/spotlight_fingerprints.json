@@ -1,7 +1,7 @@
 {
   "description": "Structural fingerprints for every lesson's spotlight. Regenerate with scripts/spotlight_fingerprints.py --write and state why.",
   "lesson_count": 175,
-  "with_spotlight": 173,
+  "with_spotlight": 168,
   "lessons": {
     "L0001": {
       "strategy_type": "writing_technique",
@@ -528,24 +528,7 @@
       "first_guide_prefix": "一、圈出轉折詞，找出作者特別強調的訊息",
       "mcq_leakage": 0
     },
-    "L0021": {
-      "strategy_type": "unknown",
-      "block_count": 2,
-      "type_histogram": {
-        "figure": 1,
-        "guide": 1
-      },
-      "type_sequence": [
-        "guide",
-        "figure"
-      ],
-      "guide_count": 1,
-      "passage_count": 0,
-      "qa_total": 0,
-      "null_answers": 0,
-      "first_guide_prefix": "本課閱讀策略：未知策略",
-      "mcq_leakage": 0
-    },
+    "L0021": null,
     "L0022": {
       "strategy_type": "character",
       "block_count": 11,
@@ -1319,24 +1302,7 @@
       "first_guide_prefix": "※小提醒：遇到難詞時，如果這些方法都不適用，不要硬猜，可以查字典或請教同學、老師。",
       "mcq_leakage": 0
     },
-    "L0049": {
-      "strategy_type": "unknown",
-      "block_count": 2,
-      "type_histogram": {
-        "figure": 1,
-        "guide": 1
-      },
-      "type_sequence": [
-        "guide",
-        "figure"
-      ],
-      "guide_count": 1,
-      "passage_count": 0,
-      "qa_total": 0,
-      "null_answers": 0,
-      "first_guide_prefix": "本課閱讀策略：未知策略",
-      "mcq_leakage": 0
-    },
+    "L0049": null,
     "L0050": {
       "strategy_type": "summary",
       "block_count": 7,
@@ -2349,24 +2315,7 @@
       "first_guide_prefix": "一、看看陳醫師怎麼做",
       "mcq_leakage": 0
     },
-    "L0077": {
-      "strategy_type": "unknown",
-      "block_count": 2,
-      "type_histogram": {
-        "figure": 1,
-        "guide": 1
-      },
-      "type_sequence": [
-        "guide",
-        "figure"
-      ],
-      "guide_count": 1,
-      "passage_count": 0,
-      "qa_total": 0,
-      "null_answers": 0,
-      "first_guide_prefix": "本課閱讀策略：未知策略",
-      "mcq_leakage": 0
-    },
+    "L0077": null,
     "L0078": {
       "strategy_type": "media_literacy",
       "block_count": 43,
@@ -3532,24 +3481,7 @@
       "first_guide_prefix": "示範１：來看一個例子（110年會考國文第５題；110-5）",
       "mcq_leakage": 0
     },
-    "L0107": {
-      "strategy_type": "unknown",
-      "block_count": 2,
-      "type_histogram": {
-        "figure": 1,
-        "guide": 1
-      },
-      "type_sequence": [
-        "guide",
-        "figure"
-      ],
-      "guide_count": 1,
-      "passage_count": 0,
-      "qa_total": 0,
-      "null_answers": 0,
-      "first_guide_prefix": "本課閱讀策略：未知策略",
-      "mcq_leakage": 0
-    },
+    "L0107": null,
     "L0108": {
       "strategy_type": "inference",
       "block_count": 15,
@@ -4344,24 +4276,7 @@
       "first_guide_prefix": "你在任務一已經找出各段的主要觀點，這讓複雜的文字有了清楚的概念。",
       "mcq_leakage": 0
     },
-    "L0130": {
-      "strategy_type": "unknown",
-      "block_count": 2,
-      "type_histogram": {
-        "figure": 1,
-        "guide": 1
-      },
-      "type_sequence": [
-        "guide",
-        "figure"
-      ],
-      "guide_count": 1,
-      "passage_count": 0,
-      "qa_total": 0,
-      "null_answers": 0,
-      "first_guide_prefix": "本課閱讀策略：未知策略",
-      "mcq_leakage": 0
-    },
+    "L0130": null,
     "L0131": {
       "strategy_type": "text_structure",
       "block_count": 8,

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-19T01:13:33.913075+00:00",
+  "generated_at": "2026-08-19T01:33:45.722074+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -18,6 +18,7 @@
     {
       "lesson_id": "G4-L1",
       "lesson_uid": "L0011",
+      "story_id": 20011,
       "title": "贏得喝采的輸家",
       "tier": "keypoints_yml",
       "layout": {
@@ -27,10 +28,18 @@
         "checkbox_count": 2,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -38,6 +47,7 @@
     {
       "lesson_id": "G4-L10",
       "lesson_uid": "L0001",
+      "story_id": 20001,
       "title": "十秒的背後",
       "tier": "keypoints_yml",
       "layout": {
@@ -47,10 +57,18 @@
         "checkbox_count": 2,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -58,6 +76,7 @@
     {
       "lesson_id": "G4-L11",
       "lesson_uid": "L0002",
+      "story_id": 20002,
       "title": "動物的生存妙招",
       "tier": "keypoints_yml",
       "layout": {
@@ -67,10 +86,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -78,6 +105,7 @@
     {
       "lesson_id": "G4-L12",
       "lesson_uid": "L0003",
+      "story_id": 20003,
       "title": "大自然的氣象小幫手",
       "tier": "keypoints_yml",
       "layout": {
@@ -87,10 +115,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -98,6 +134,7 @@
     {
       "lesson_id": "G4-L13",
       "lesson_uid": "L0004",
+      "story_id": 20004,
       "title": "感情小日記2──喜歡是什麼？",
       "tier": "keypoints_yml",
       "layout": {
@@ -107,10 +144,18 @@
         "checkbox_count": 4,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -118,6 +163,7 @@
     {
       "lesson_id": "G4-L14",
       "lesson_uid": "L0005",
+      "story_id": 20005,
       "title": "美好的一天",
       "tier": "keypoints_yml",
       "layout": {
@@ -127,10 +173,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -138,6 +192,7 @@
     {
       "lesson_id": "G4-L15",
       "lesson_uid": "L0006",
+      "story_id": 20006,
       "title": "誤會",
       "tier": "keypoints_yml",
       "layout": {
@@ -147,10 +202,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -158,6 +221,7 @@
     {
       "lesson_id": "G4-L16",
       "lesson_uid": "L0007",
+      "story_id": 20007,
       "title": "黃絲帶",
       "tier": "keypoints_yml",
       "layout": {
@@ -167,10 +231,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -178,6 +250,7 @@
     {
       "lesson_id": "G4-L17",
       "lesson_uid": "L0008",
+      "story_id": 20008,
       "title": "第一百碗麵",
       "tier": "keypoints_yml",
       "layout": {
@@ -187,10 +260,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -198,6 +279,7 @@
     {
       "lesson_id": "G4-L18",
       "lesson_uid": "L0009",
+      "story_id": 20009,
       "title": "白牙的最後一戰",
       "tier": "keypoints_yml",
       "layout": {
@@ -207,10 +289,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -218,6 +308,7 @@
     {
       "lesson_id": "G4-L19",
       "lesson_uid": "L0010",
+      "story_id": 20010,
       "title": "把球打好，就夠了嗎？──阿耀與健豪學長的通信（一）",
       "tier": "keypoints_yml",
       "layout": {
@@ -227,10 +318,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -238,6 +337,7 @@
     {
       "lesson_id": "G4-L2",
       "lesson_uid": "L0013",
+      "story_id": 20013,
       "title": "正太與小豬：武僧的養成之路",
       "tier": "keypoints_yml",
       "layout": {
@@ -247,10 +347,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -258,6 +366,7 @@
     {
       "lesson_id": "G4-L20",
       "lesson_uid": "L0012",
+      "story_id": 20012,
       "title": "想讀書，該從哪裡著手？──阿耀與健豪學長的通信（二）",
       "tier": "keypoints_yml",
       "layout": {
@@ -267,10 +376,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -278,6 +395,7 @@
     {
       "lesson_id": "G4-L3",
       "lesson_uid": "L0014",
+      "story_id": 20014,
       "title": "最美的畫面",
       "tier": "keypoints_yml",
       "layout": {
@@ -287,10 +405,18 @@
         "checkbox_count": 2,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -298,6 +424,7 @@
     {
       "lesson_id": "G4-L4",
       "lesson_uid": "L0015",
+      "story_id": 20015,
       "title": "穿越極限的跑者",
       "tier": "keypoints_yml",
       "layout": {
@@ -307,10 +434,18 @@
         "checkbox_count": 1,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -318,6 +453,7 @@
     {
       "lesson_id": "G4-L5",
       "lesson_uid": "L0016",
+      "story_id": 20016,
       "title": "這是什麼「意思」？",
       "tier": "keypoints_yml",
       "layout": {
@@ -327,15 +463,24 @@
         "checkbox_count": 8,
         "row_count": 9
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       }
     },
     {
       "lesson_id": "G4-L6",
       "lesson_uid": "L0017",
+      "story_id": 20017,
       "title": "感情小日記1──是友情還是愛情？",
       "tier": "keypoints_yml",
       "layout": {
@@ -345,10 +490,18 @@
         "checkbox_count": 1,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -356,6 +509,7 @@
     {
       "lesson_id": "G4-L7",
       "lesson_uid": "L0018",
+      "story_id": 20018,
       "title": "長高的祕密",
       "tier": "keypoints_yml",
       "layout": {
@@ -365,10 +519,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -376,6 +538,7 @@
     {
       "lesson_id": "G4-L8",
       "lesson_uid": "L0019",
+      "story_id": 20019,
       "title": "運動科學",
       "tier": "keypoints_yml",
       "layout": {
@@ -385,10 +548,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -396,6 +567,7 @@
     {
       "lesson_id": "G4-L9",
       "lesson_uid": "L0020",
+      "story_id": 20020,
       "title": "跟著「但是」轉個彎",
       "tier": "keypoints_yml",
       "layout": {
@@ -405,10 +577,18 @@
         "checkbox_count": 3,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -416,6 +596,7 @@
     {
       "lesson_id": "G5-L1",
       "lesson_uid": "L0031",
+      "story_id": 20031,
       "title": "奧運銀牌背後的自我鍛鍊",
       "tier": "keypoints_yml",
       "layout": {
@@ -425,10 +606,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -436,6 +625,7 @@
     {
       "lesson_id": "G5-L10",
       "lesson_uid": "L0022",
+      "story_id": 20022,
       "title": "感情小日記3──吃醋的滋味",
       "tier": "keypoints_yml",
       "layout": {
@@ -445,10 +635,18 @@
         "checkbox_count": 1,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -456,6 +654,7 @@
     {
       "lesson_id": "G5-L11",
       "lesson_uid": "L0023",
+      "story_id": 20023,
       "title": "比運氣更重要的事：《長腿叔叔》的啟發",
       "tier": "keypoints_yml",
       "layout": {
@@ -465,10 +664,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -476,6 +683,7 @@
     {
       "lesson_id": "G5-L12",
       "lesson_uid": "L0024",
+      "story_id": 20024,
       "title": "堅持到底的棒球人生──周思齊(前篇)",
       "tier": "keypoints_yml",
       "layout": {
@@ -485,10 +693,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -496,6 +712,7 @@
     {
       "lesson_id": "G5-L13",
       "lesson_uid": "L0025",
+      "story_id": 20025,
       "title": "堅持到底的棒球人生──周思齊(後篇)",
       "tier": "keypoints_yml",
       "layout": {
@@ -505,10 +722,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -516,6 +741,7 @@
     {
       "lesson_id": "G5-L14",
       "lesson_uid": "L0026",
+      "story_id": 20026,
       "title": "感情小日記4──我被告白了",
       "tier": "keypoints_yml",
       "layout": {
@@ -525,10 +751,18 @@
         "checkbox_count": 8,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -536,6 +770,7 @@
     {
       "lesson_id": "G5-L15",
       "lesson_uid": "L0027",
+      "story_id": 20027,
       "title": "救援大隊的好幫手",
       "tier": "keypoints_yml",
       "layout": {
@@ -545,10 +780,18 @@
         "checkbox_count": 0,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -556,6 +799,7 @@
     {
       "lesson_id": "G5-L16",
       "lesson_uid": "L0028",
+      "story_id": 20028,
       "title": "掃雷英雄馬嘎瓦",
       "tier": "keypoints_yml",
       "layout": {
@@ -565,10 +809,18 @@
         "checkbox_count": 2,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -576,6 +828,7 @@
     {
       "lesson_id": "G5-L17",
       "lesson_uid": "L0029",
+      "story_id": 20029,
       "title": "牧羊少年的逆轉勝",
       "tier": "keypoints_yml",
       "layout": {
@@ -585,10 +838,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -596,6 +857,7 @@
     {
       "lesson_id": "G5-L19",
       "lesson_uid": "L0030",
+      "story_id": 20030,
       "title": "六塊肌、六塊雞",
       "tier": "keypoints_yml",
       "layout": {
@@ -605,10 +867,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -616,6 +886,7 @@
     {
       "lesson_id": "G5-L2",
       "lesson_uid": "L0041",
+      "story_id": 20041,
       "title": "周天成的一天──頂尖選手的養成",
       "tier": "keypoints_yml",
       "layout": {
@@ -625,10 +896,18 @@
         "checkbox_count": 3,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -636,6 +915,7 @@
     {
       "lesson_id": "G5-L20",
       "lesson_uid": "L0032",
+      "story_id": 20032,
       "title": "小丑醫生",
       "tier": "keypoints_yml",
       "layout": {
@@ -645,10 +925,18 @@
         "checkbox_count": 1,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -656,6 +944,7 @@
     {
       "lesson_id": "G5-L21",
       "lesson_uid": "L0033",
+      "story_id": 20033,
       "title": "垃圾食物的誘惑與代價",
       "tier": "keypoints_yml",
       "layout": {
@@ -665,10 +954,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -676,6 +973,7 @@
     {
       "lesson_id": "G5-L22",
       "lesson_uid": "L0034",
+      "story_id": 20034,
       "title": "抗拒指尖上的誘惑",
       "tier": "keypoints_yml",
       "layout": {
@@ -685,10 +983,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -696,6 +1002,7 @@
     {
       "lesson_id": "G5-L23",
       "lesson_uid": "L0035",
+      "story_id": 20035,
       "title": "信件的力量──寫信馬拉松",
       "tier": "keypoints_yml",
       "layout": {
@@ -705,10 +1012,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -716,6 +1031,7 @@
     {
       "lesson_id": "G5-L24",
       "lesson_uid": "L0036",
+      "story_id": 20036,
       "title": "臺灣棒球先驅──來自花蓮的能高團",
       "tier": "keypoints_yml",
       "layout": {
@@ -725,15 +1041,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       }
     },
     {
       "lesson_id": "G5-L25",
       "lesson_uid": "L0037",
+      "story_id": 20037,
       "title": "小兵立大功：雞鳴狗盜的故事",
       "tier": "keypoints_yml",
       "layout": {
@@ -743,15 +1068,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G5-L26",
       "lesson_uid": "L0038",
+      "story_id": 20038,
       "title": "魚來了，叮咚叮咚請開門",
       "tier": "keypoints_yml",
       "layout": {
@@ -761,10 +1095,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -772,6 +1114,7 @@
     {
       "lesson_id": "G5-L27",
       "lesson_uid": "L0039",
+      "story_id": 20039,
       "title": "我有一個棒球夢",
       "tier": "keypoints_yml",
       "layout": {
@@ -781,10 +1124,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -792,6 +1143,7 @@
     {
       "lesson_id": "G5-L28",
       "lesson_uid": "L0040",
+      "story_id": 20040,
       "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
       "tier": "keypoints_yml",
       "layout": {
@@ -801,15 +1153,24 @@
         "checkbox_count": 3,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G5-L3",
       "lesson_uid": "L0042",
+      "story_id": 20042,
       "title": "「拳」力出擊──陳念琴",
       "tier": "keypoints_yml",
       "layout": {
@@ -819,10 +1180,18 @@
         "checkbox_count": 3,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -830,6 +1199,7 @@
     {
       "lesson_id": "G5-L4",
       "lesson_uid": "L0043",
+      "story_id": 20043,
       "title": "從童工到大學教授之路",
       "tier": "keypoints_yml",
       "layout": {
@@ -839,10 +1209,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -850,6 +1228,7 @@
     {
       "lesson_id": "G5-L6",
       "lesson_uid": "L0045",
+      "story_id": 20045,
       "title": "兵來將擋，水來土掩",
       "tier": "keypoints_yml",
       "layout": {
@@ -859,10 +1238,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -870,6 +1257,7 @@
     {
       "lesson_id": "G5-L7",
       "lesson_uid": "L0046",
+      "story_id": 20046,
       "title": "以植物為師的科學",
       "tier": "keypoints_yml",
       "layout": {
@@ -879,10 +1267,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -890,6 +1286,7 @@
     {
       "lesson_id": "G5-L8",
       "lesson_uid": "L0047",
+      "story_id": 20047,
       "title": "工地大嫂",
       "tier": "keypoints_yml",
       "layout": {
@@ -899,10 +1296,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -910,6 +1315,7 @@
     {
       "lesson_id": "G5-L9",
       "lesson_uid": "L0048",
+      "story_id": 20048,
       "title": "災難預言準不準？",
       "tier": "keypoints_yml",
       "layout": {
@@ -919,10 +1325,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -930,6 +1344,7 @@
     {
       "lesson_id": "G6-L1",
       "lesson_uid": "L0060",
+      "story_id": 20060,
       "title": "心理出狀況，是壞事導致的嗎",
       "tier": "keypoints_yml",
       "layout": {
@@ -939,10 +1354,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -950,6 +1373,7 @@
     {
       "lesson_id": "G6-L11",
       "lesson_uid": "L0051",
+      "story_id": 20051,
       "title": "奇蹟行動",
       "tier": "keypoints_yml",
       "layout": {
@@ -959,10 +1383,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -970,6 +1402,7 @@
     {
       "lesson_id": "G6-L12",
       "lesson_uid": "L0052",
+      "story_id": 20052,
       "title": "小藍鯨之死",
       "tier": "keypoints_yml",
       "layout": {
@@ -979,10 +1412,18 @@
         "checkbox_count": 0,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -990,6 +1431,7 @@
     {
       "lesson_id": "G6-L13",
       "lesson_uid": "L0053",
+      "story_id": 20053,
       "title": "昆蟲會思考嗎？",
       "tier": "keypoints_yml",
       "layout": {
@@ -999,10 +1441,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1010,6 +1460,7 @@
     {
       "lesson_id": "G6-L15",
       "lesson_uid": "L0055",
+      "story_id": 20055,
       "title": "愛冒險逞強的雄性動物",
       "tier": "keypoints_yml",
       "layout": {
@@ -1019,10 +1470,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1030,6 +1489,7 @@
     {
       "lesson_id": "G6-L16",
       "lesson_uid": "L0056",
+      "story_id": 20056,
       "title": "把手上的餅吃香一點",
       "tier": "keypoints_yml",
       "layout": {
@@ -1039,10 +1499,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1050,6 +1518,7 @@
     {
       "lesson_id": "G6-L17",
       "lesson_uid": "L0057",
+      "story_id": 20057,
       "title": "祝你好眠",
       "tier": "keypoints_yml",
       "layout": {
@@ -1059,10 +1528,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1070,6 +1547,7 @@
     {
       "lesson_id": "G6-L18",
       "lesson_uid": "L0058",
+      "story_id": 20058,
       "title": "末日種子庫",
       "tier": "keypoints_yml",
       "layout": {
@@ -1079,10 +1557,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1090,6 +1576,7 @@
     {
       "lesson_id": "G6-L19",
       "lesson_uid": "L0059",
+      "story_id": 20059,
       "title": "紅領帶",
       "tier": "keypoints_yml",
       "layout": {
@@ -1099,10 +1586,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1110,6 +1605,7 @@
     {
       "lesson_id": "G6-L2",
       "lesson_uid": "L0069",
+      "story_id": 20069,
       "title": "一件班服，一場思辨討論",
       "tier": "keypoints_yml",
       "layout": {
@@ -1119,10 +1615,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1130,6 +1634,7 @@
     {
       "lesson_id": "G6-L20",
       "lesson_uid": "L0061",
+      "story_id": 20061,
       "title": "因人而異，才有真正的公平",
       "tier": "keypoints_yml",
       "layout": {
@@ -1139,10 +1644,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1150,6 +1663,7 @@
     {
       "lesson_id": "G6-L21",
       "lesson_uid": "L0062",
+      "story_id": 20062,
       "title": "感情小日記5──我該告白嗎？",
       "tier": "keypoints_yml",
       "layout": {
@@ -1159,10 +1673,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1170,6 +1692,7 @@
     {
       "lesson_id": "G6-L22",
       "lesson_uid": "L0063",
+      "story_id": 20063,
       "title": "物以稀為貴：從「供給」和「需求」談物價波動",
       "tier": "keypoints_yml",
       "layout": {
@@ -1179,15 +1702,24 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       }
     },
     {
       "lesson_id": "G6-L25",
       "lesson_uid": "L0064",
+      "story_id": 20064,
       "title": "感情小日記6──我失戀了",
       "tier": "keypoints_yml",
       "layout": {
@@ -1197,10 +1729,18 @@
         "checkbox_count": 5,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1208,6 +1748,7 @@
     {
       "lesson_id": "G6-L26",
       "lesson_uid": "L0065",
+      "story_id": 20065,
       "title": "運動傷害，怎麼辦？",
       "tier": "keypoints_yml",
       "layout": {
@@ -1217,15 +1758,24 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G6-L27",
       "lesson_uid": "L0066",
+      "story_id": 20066,
       "title": "古代畫家心中的仙境",
       "tier": "keypoints_yml",
       "layout": {
@@ -1235,15 +1785,24 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G6-L28",
       "lesson_uid": "L0067",
+      "story_id": 20067,
       "title": "森林大軍的守護者",
       "tier": "keypoints_yml",
       "layout": {
@@ -1253,15 +1812,24 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G6-L29",
       "lesson_uid": "L0068",
+      "story_id": 20068,
       "title": "植物獵人",
       "tier": "keypoints_yml",
       "layout": {
@@ -1271,15 +1839,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G6-L4",
       "lesson_uid": "L0071",
+      "story_id": 20071,
       "title": "數字記憶的奧秘",
       "tier": "keypoints_yml",
       "layout": {
@@ -1289,10 +1866,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1300,6 +1885,7 @@
     {
       "lesson_id": "G6-L5",
       "lesson_uid": "L0072",
+      "story_id": 20072,
       "title": "重複朗讀的重要性：柳丁和文旦的比喻",
       "tier": "keypoints_yml",
       "layout": {
@@ -1309,10 +1895,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1320,6 +1914,7 @@
     {
       "lesson_id": "G6-L6",
       "lesson_uid": "L0073",
+      "story_id": 20073,
       "title": "與小學說再見",
       "tier": "keypoints_yml",
       "layout": {
@@ -1329,10 +1924,18 @@
         "checkbox_count": 4,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1340,6 +1943,7 @@
     {
       "lesson_id": "G6-L7",
       "lesson_uid": "L0074",
+      "story_id": 20074,
       "title": "老鷹紅豆的故事",
       "tier": "keypoints_yml",
       "layout": {
@@ -1349,10 +1953,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1360,6 +1972,7 @@
     {
       "lesson_id": "G6-L9",
       "lesson_uid": "L0076",
+      "story_id": 20076,
       "title": "給神明發會診單",
       "tier": "keypoints_yml",
       "layout": {
@@ -1369,10 +1982,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1380,6 +2001,7 @@
     {
       "lesson_id": "G7-L10",
       "lesson_uid": "L0078",
+      "story_id": 20078,
       "title": "別上「誘餌式標題」的鉤",
       "tier": "keypoints_yml",
       "layout": {
@@ -1389,10 +2011,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1400,6 +2030,7 @@
     {
       "lesson_id": "G7-L11",
       "lesson_uid": "L0079",
+      "story_id": 20079,
       "title": "一封向醫師求助的信",
       "tier": "keypoints_yml",
       "layout": {
@@ -1409,10 +2040,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1420,6 +2059,7 @@
     {
       "lesson_id": "G7-L12",
       "lesson_uid": "L0080",
+      "story_id": 20080,
       "title": "澳洲奧運金牌的X機密",
       "tier": "keypoints_yml",
       "layout": {
@@ -1429,10 +2069,18 @@
         "checkbox_count": 1,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1440,6 +2088,7 @@
     {
       "lesson_id": "G7-L13",
       "lesson_uid": "L0081",
+      "story_id": 20081,
       "title": "女性太空人登月",
       "tier": "keypoints_yml",
       "layout": {
@@ -1449,10 +2098,18 @@
         "checkbox_count": 0,
         "row_count": 2
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1460,6 +2117,7 @@
     {
       "lesson_id": "G7-L14",
       "lesson_uid": "L0082",
+      "story_id": 20082,
       "title": "從〈螞蟻與蟋蟀〉看生命的多樣性",
       "tier": "keypoints_yml",
       "layout": {
@@ -1469,10 +2127,18 @@
         "checkbox_count": 2,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1480,6 +2146,7 @@
     {
       "lesson_id": "G7-L15",
       "lesson_uid": "L0083",
+      "story_id": 20083,
       "title": "爺爺奶奶來了以後",
       "tier": "keypoints_yml",
       "layout": {
@@ -1489,10 +2156,18 @@
         "checkbox_count": 2,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1500,6 +2175,7 @@
     {
       "lesson_id": "G7-L16",
       "lesson_uid": "L0084",
+      "story_id": 20084,
       "title": "長大後，我才讀懂〈夏夜〉",
       "tier": "keypoints_yml",
       "layout": {
@@ -1509,10 +2185,18 @@
         "checkbox_count": 6,
         "row_count": 10
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1520,6 +2204,7 @@
     {
       "lesson_id": "G7-L17",
       "lesson_uid": "L0085",
+      "story_id": 20085,
       "title": "大自然的氣象小幫手",
       "tier": "keypoints_yml",
       "layout": {
@@ -1529,15 +2214,24 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       }
     },
     {
       "lesson_id": "G7-L18",
       "lesson_uid": "L0086",
+      "story_id": 20086,
       "title": "正太與小豬",
       "tier": "keypoints_yml",
       "layout": {
@@ -1547,10 +2241,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1558,6 +2260,7 @@
     {
       "lesson_id": "G7-L19",
       "lesson_uid": "L0087",
+      "story_id": 20087,
       "title": "把手上的餅吃香一點",
       "tier": "keypoints_yml",
       "layout": {
@@ -1567,10 +2270,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1578,6 +2289,7 @@
     {
       "lesson_id": "G7-L20",
       "lesson_uid": "L0089",
+      "story_id": 20089,
       "title": "「背影」讀書會",
       "tier": "keypoints_yml",
       "layout": {
@@ -1587,10 +2299,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1598,6 +2318,7 @@
     {
       "lesson_id": "G7-L21",
       "lesson_uid": "L0090",
+      "story_id": 20090,
       "title": "奧運性別平等這條路",
       "tier": "keypoints_yml",
       "layout": {
@@ -1607,10 +2328,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1618,6 +2347,7 @@
     {
       "lesson_id": "G7-L22",
       "lesson_uid": "L0091",
+      "story_id": 20091,
       "title": "你看見時代的灰犀牛了嗎？談人口負成長",
       "tier": "keypoints_yml",
       "layout": {
@@ -1627,10 +2357,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1638,6 +2376,7 @@
     {
       "lesson_id": "G7-L23",
       "lesson_uid": "L0092",
+      "story_id": 20092,
       "title": "信眾與教主",
       "tier": "keypoints_yml",
       "layout": {
@@ -1647,10 +2386,18 @@
         "checkbox_count": 1,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1658,6 +2405,7 @@
     {
       "lesson_id": "G7-L24",
       "lesson_uid": "L0093",
+      "story_id": 20093,
       "title": "用科學方法伸張正義的神探",
       "tier": "keypoints_yml",
       "layout": {
@@ -1667,10 +2415,18 @@
         "checkbox_count": 1,
         "row_count": 9
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1678,6 +2434,7 @@
     {
       "lesson_id": "G7-L25",
       "lesson_uid": "L0094",
+      "story_id": 20094,
       "title": "看到了嗎？然後呢？",
       "tier": "keypoints_yml",
       "layout": {
@@ -1687,10 +2444,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1698,6 +2463,7 @@
     {
       "lesson_id": "G7-L26",
       "lesson_uid": "L0095",
+      "story_id": 20095,
       "title": "科學怪人（弗蘭肯斯坦：現代普羅米修斯）",
       "tier": "keypoints_yml",
       "layout": {
@@ -1707,10 +2473,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1718,6 +2492,7 @@
     {
       "lesson_id": "G7-L27",
       "lesson_uid": "L0096",
+      "story_id": 20096,
       "title": "吐瓦魯：逐漸被淹沒的島國",
       "tier": "keypoints_yml",
       "layout": {
@@ -1727,10 +2502,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1738,6 +2521,7 @@
     {
       "lesson_id": "G7-L28",
       "lesson_uid": "L0097",
+      "story_id": 20097,
       "title": "綠色賽事",
       "tier": "keypoints_yml",
       "layout": {
@@ -1747,10 +2531,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1758,6 +2550,7 @@
     {
       "lesson_id": "G7-L29",
       "lesson_uid": "L0098",
+      "story_id": 20098,
       "title": "隱藏在日常對話中的微歧視",
       "tier": "keypoints_yml",
       "layout": {
@@ -1767,10 +2560,18 @@
         "checkbox_count": 4,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1778,6 +2579,7 @@
     {
       "lesson_id": "G7-L3",
       "lesson_uid": "L0100",
+      "story_id": 20100,
       "title": "你以為的浪漫，可能是跟騷",
       "tier": "keypoints_yml",
       "layout": {
@@ -1787,10 +2589,18 @@
         "checkbox_count": 0,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1798,6 +2608,7 @@
     {
       "lesson_id": "G7-L5",
       "lesson_uid": "L0102",
+      "story_id": 20102,
       "title": "網紅的電子煙實驗：偽科學的陷阱",
       "tier": "keypoints_yml",
       "layout": {
@@ -1807,10 +2618,18 @@
         "checkbox_count": 0,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1818,6 +2637,7 @@
     {
       "lesson_id": "G7-L6",
       "lesson_uid": "L0103",
+      "story_id": 20103,
       "title": "果醬男孩",
       "tier": "keypoints_yml",
       "layout": {
@@ -1827,10 +2647,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1838,6 +2666,7 @@
     {
       "lesson_id": "G8-L1",
       "lesson_uid": "L0117",
+      "story_id": 20117,
       "title": "讓你口中的甜蜜成為遠方農民的希望",
       "tier": "keypoints_yml",
       "layout": {
@@ -1847,10 +2676,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1858,6 +2695,7 @@
     {
       "lesson_id": "G8-L10",
       "lesson_uid": "L0108",
+      "story_id": 20108,
       "title": "虎襲事件的真相：誰才是受害者？",
       "tier": "keypoints_yml",
       "layout": {
@@ -1867,10 +2705,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1878,6 +2724,7 @@
     {
       "lesson_id": "G8-L11",
       "lesson_uid": "L0109",
+      "story_id": 20109,
       "title": "球場上的另類指揮家",
       "tier": "keypoints_yml",
       "layout": {
@@ -1887,10 +2734,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1898,6 +2753,7 @@
     {
       "lesson_id": "G8-L12",
       "lesson_uid": "L0110",
+      "story_id": 20110,
       "title": "我的阿嬤",
       "tier": "keypoints_yml",
       "layout": {
@@ -1907,10 +2763,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1918,6 +2782,7 @@
     {
       "lesson_id": "G8-L15",
       "lesson_uid": "L0112",
+      "story_id": 20112,
       "title": "未來的農夫",
       "tier": "keypoints_yml",
       "layout": {
@@ -1927,10 +2792,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1938,6 +2811,7 @@
     {
       "lesson_id": "G8-L16",
       "lesson_uid": "L0113",
+      "story_id": 20113,
       "title": "我能不能選擇告別方式？",
       "tier": "keypoints_yml",
       "layout": {
@@ -1947,10 +2821,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1958,6 +2840,7 @@
     {
       "lesson_id": "G8-L17",
       "lesson_uid": "L0114",
+      "story_id": 20114,
       "title": "石虎保育：遷移與否的兩難",
       "tier": "keypoints_yml",
       "layout": {
@@ -1967,10 +2850,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1978,6 +2869,7 @@
     {
       "lesson_id": "G8-L18",
       "lesson_uid": "L0115",
+      "story_id": 20115,
       "title": "核能的兩難抉擇",
       "tier": "keypoints_yml",
       "layout": {
@@ -1987,10 +2879,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -1998,6 +2898,7 @@
     {
       "lesson_id": "G8-L19",
       "lesson_uid": "L0116",
+      "story_id": 20116,
       "title": "塞翁失馬，焉知非福",
       "tier": "keypoints_yml",
       "layout": {
@@ -2007,10 +2908,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2018,6 +2927,7 @@
     {
       "lesson_id": "G8-L2",
       "lesson_uid": "L0122",
+      "story_id": 20122,
       "title": "隱形的征服者",
       "tier": "keypoints_yml",
       "layout": {
@@ -2027,10 +2937,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2038,6 +2956,7 @@
     {
       "lesson_id": "G8-L20",
       "lesson_uid": "L0118",
+      "story_id": 20118,
       "title": "懸崖邊的那顆草莓",
       "tier": "keypoints_yml",
       "layout": {
@@ -2047,15 +2966,24 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G8-L21",
       "lesson_uid": "L0119",
+      "story_id": 20119,
       "title": "致台東：一封過客的情書",
       "tier": "keypoints_yml",
       "layout": {
@@ -2065,15 +2993,24 @@
         "checkbox_count": 0,
         "row_count": 15
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G8-L22",
       "lesson_uid": "L0120",
+      "story_id": 20120,
       "title": "靈異與科學",
       "tier": "keypoints_yml",
       "layout": {
@@ -2083,15 +3020,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G8-L23",
       "lesson_uid": "L0121",
+      "story_id": 20121,
       "title": "＃MeToo運動與我們的權利",
       "tier": "keypoints_yml",
       "layout": {
@@ -2101,15 +3047,24 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G8-L3",
       "lesson_uid": "L0123",
+      "story_id": 20123,
       "title": "爸爸的恩人們",
       "tier": "keypoints_yml",
       "layout": {
@@ -2119,10 +3074,18 @@
         "checkbox_count": 0,
         "row_count": 8
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2130,6 +3093,7 @@
     {
       "lesson_id": "G8-L4",
       "lesson_uid": "L0124",
+      "story_id": 20124,
       "title": "新奇！「植物肉」你聽過嗎？",
       "tier": "keypoints_yml",
       "layout": {
@@ -2139,10 +3103,18 @@
         "checkbox_count": 1,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2150,6 +3122,7 @@
     {
       "lesson_id": "G8-L5",
       "lesson_uid": "L0125",
+      "story_id": 20125,
       "title": "好心沒好報的玻璃娃娃爭議事件",
       "tier": "keypoints_yml",
       "layout": {
@@ -2159,10 +3132,18 @@
         "checkbox_count": 6,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2170,6 +3151,7 @@
     {
       "lesson_id": "G8-L6",
       "lesson_uid": "L0126",
+      "story_id": 20126,
       "title": "戲院、賭場、檳榔攤：在時代夾縫中成長的我",
       "tier": "keypoints_yml",
       "layout": {
@@ -2179,10 +3161,18 @@
         "checkbox_count": 1,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2190,6 +3180,7 @@
     {
       "lesson_id": "G8-L7",
       "lesson_uid": "L0127",
+      "story_id": 20127,
       "title": "當壞事已不可逆轉：集中營裡的一門課",
       "tier": "keypoints_yml",
       "layout": {
@@ -2199,10 +3190,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2210,6 +3209,7 @@
     {
       "lesson_id": "G8-L8",
       "lesson_uid": "L0128",
+      "story_id": 20128,
       "title": "讓黑猩猩被看見的人",
       "tier": "keypoints_yml",
       "layout": {
@@ -2219,10 +3219,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2230,6 +3238,7 @@
     {
       "lesson_id": "G8-L9",
       "lesson_uid": "L0129",
+      "story_id": 20129,
       "title": "「按讚」背後的真相",
       "tier": "keypoints_yml",
       "layout": {
@@ -2239,10 +3248,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2250,6 +3267,7 @@
     {
       "lesson_id": "G9-L10",
       "lesson_uid": "L0131",
+      "story_id": 20131,
       "title": "國高中數學當然可以使用計算機",
       "tier": "keypoints_yml",
       "layout": {
@@ -2259,10 +3277,18 @@
         "checkbox_count": 0,
         "row_count": 11
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2270,6 +3296,7 @@
     {
       "lesson_id": "G9-L11",
       "lesson_uid": "L0132",
+      "story_id": 20132,
       "title": "預防近視？多點戶外活動就對了！",
       "tier": "keypoints_yml",
       "layout": {
@@ -2279,10 +3306,18 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2290,6 +3325,7 @@
     {
       "lesson_id": "G9-L12",
       "lesson_uid": "L0133",
+      "story_id": 20133,
       "title": "看不見的兇手：以實驗破解肉湯腐敗之謎",
       "tier": "keypoints_yml",
       "layout": {
@@ -2299,10 +3335,18 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2310,6 +3354,7 @@
     {
       "lesson_id": "G9-L16",
       "lesson_uid": "L0137",
+      "story_id": 20137,
       "title": "未解之謎──石頭的祕密",
       "tier": "keypoints_yml",
       "layout": {
@@ -2319,15 +3364,24 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L18",
       "lesson_uid": "L0138",
+      "story_id": 20138,
       "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
       "tier": "keypoints_yml",
       "layout": {
@@ -2337,15 +3391,24 @@
         "checkbox_count": 2,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L19",
       "lesson_uid": "L0139",
+      "story_id": 20139,
       "title": "長喙天蛾見前人所未見",
       "tier": "keypoints_yml",
       "layout": {
@@ -2355,15 +3418,24 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L2",
       "lesson_uid": "L0145",
+      "story_id": 20145,
       "title": "看不見的故事，推動看得見的世界",
       "tier": "keypoints_yml",
       "layout": {
@@ -2373,10 +3445,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2384,6 +3464,7 @@
     {
       "lesson_id": "G9-L20",
       "lesson_uid": "L0141",
+      "story_id": 20141,
       "title": "臺灣的太空之眼",
       "tier": "keypoints_yml",
       "layout": {
@@ -2393,15 +3474,24 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L21",
       "lesson_uid": "L0142",
+      "story_id": 20142,
       "title": "焚而不毀的倫敦",
       "tier": "keypoints_yml",
       "layout": {
@@ -2411,15 +3501,24 @@
         "checkbox_count": 3,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L22",
       "lesson_uid": "L0143",
+      "story_id": 20143,
       "title": "高地訓練有助於運動表現嗎？",
       "tier": "keypoints_yml",
       "layout": {
@@ -2429,15 +3528,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L23",
       "lesson_uid": "L0144",
+      "story_id": 20144,
       "title": "馬拉松王者──基普喬吉",
       "tier": "keypoints_yml",
       "layout": {
@@ -2447,15 +3555,24 @@
         "checkbox_count": 0,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "G9-L3",
       "lesson_uid": "L0146",
+      "story_id": 20146,
       "title": "語言的足跡：從臺北萬華到南太平洋的航海之路",
       "tier": "keypoints_yml",
       "layout": {
@@ -2465,10 +3582,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2476,6 +3601,7 @@
     {
       "lesson_id": "G9-L6",
       "lesson_uid": "L0149",
+      "story_id": 20149,
       "title": "從基因來的特別禮物",
       "tier": "keypoints_yml",
       "layout": {
@@ -2485,10 +3611,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2496,6 +3630,7 @@
     {
       "lesson_id": "G9-L8",
       "lesson_uid": "L0151",
+      "story_id": 20151,
       "title": "盡信書不如無書：從一件殺人案談起",
       "tier": "keypoints_yml",
       "layout": {
@@ -2505,10 +3640,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2516,6 +3659,7 @@
     {
       "lesson_id": "G9-L9",
       "lesson_uid": "L0152",
+      "story_id": 20152,
       "title": "帝國家書：一個普通家庭的生與死",
       "tier": "keypoints_yml",
       "layout": {
@@ -2525,10 +3669,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2536,6 +3688,7 @@
     {
       "lesson_id": "文-L1",
       "lesson_uid": "L0156",
+      "story_id": 20156,
       "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
       "tier": "keypoints_yml",
       "layout": {
@@ -2545,10 +3698,18 @@
         "checkbox_count": 4,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2556,6 +3717,7 @@
     {
       "lesson_id": "文-L10",
       "lesson_uid": "L0153",
+      "story_id": 20153,
       "title": "荒野救亡記",
       "tier": "keypoints_yml",
       "layout": {
@@ -2565,10 +3727,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2576,6 +3746,7 @@
     {
       "lesson_id": "文-L11",
       "lesson_uid": "L0154",
+      "story_id": 20154,
       "title": "祁黃羊的思路解密",
       "tier": "keypoints_yml",
       "layout": {
@@ -2585,15 +3756,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "文-L12",
       "lesson_uid": "L0155",
+      "story_id": 20155,
       "title": "不流血的戰爭",
       "tier": "keypoints_yml",
       "layout": {
@@ -2603,15 +3783,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "文-L3",
       "lesson_uid": "L0158",
+      "story_id": 20158,
       "title": "不量田",
       "tier": "keypoints_yml",
       "layout": {
@@ -2621,10 +3810,18 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2632,6 +3829,7 @@
     {
       "lesson_id": "文-L4",
       "lesson_uid": "L0159",
+      "story_id": 20159,
       "title": "陸公買硯",
       "tier": "keypoints_yml",
       "layout": {
@@ -2641,10 +3839,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2652,6 +3858,7 @@
     {
       "lesson_id": "文-L5",
       "lesson_uid": "L0160",
+      "story_id": 20160,
       "title": "重義的荀巨伯",
       "tier": "keypoints_yml",
       "layout": {
@@ -2661,10 +3868,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2672,6 +3887,7 @@
     {
       "lesson_id": "文-L6",
       "lesson_uid": "L0161",
+      "story_id": 20161,
       "title": "江乙媽媽告御狀",
       "tier": "keypoints_yml",
       "layout": {
@@ -2681,10 +3897,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2692,6 +3916,7 @@
     {
       "lesson_id": "文-L7",
       "lesson_uid": "L0162",
+      "story_id": 20162,
       "title": "相隔千里的約定",
       "tier": "keypoints_yml",
       "layout": {
@@ -2701,10 +3926,18 @@
         "checkbox_count": 0,
         "row_count": 3
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2712,6 +3945,7 @@
     {
       "lesson_id": "文-L8",
       "lesson_uid": "L0163",
+      "story_id": 20163,
       "title": "愛讀書的顧寧人",
       "tier": "keypoints_yml",
       "layout": {
@@ -2721,10 +3955,18 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2732,6 +3974,7 @@
     {
       "lesson_id": "文-L9",
       "lesson_uid": "L0164",
+      "story_id": 20164,
       "title": "從天才跌為凡人的神童",
       "tier": "keypoints_yml",
       "layout": {
@@ -2741,10 +3984,18 @@
         "checkbox_count": 0,
         "row_count": 4
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": true
       },
       "overall_pass": true,
       "known_data_gap": false
@@ -2752,6 +4003,7 @@
     {
       "lesson_id": "體-L1",
       "lesson_uid": "L0167",
+      "story_id": 20167,
       "title": "心，也要一起練",
       "tier": "keypoints_yml",
       "layout": {
@@ -2761,15 +4013,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L10",
       "lesson_uid": "L0165",
+      "story_id": 20165,
       "title": "下一球，我相信你",
       "tier": "keypoints_yml",
       "layout": {
@@ -2779,15 +4040,24 @@
         "checkbox_count": 3,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L11",
       "lesson_uid": "L0166",
+      "story_id": 20166,
       "title": "因為相信，所以能向前",
       "tier": "keypoints_yml",
       "layout": {
@@ -2797,15 +4067,24 @@
         "checkbox_count": 1,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L2",
       "lesson_uid": "L0168",
+      "story_id": 20168,
       "title": "成為身體的最佳夥伴",
       "tier": "keypoints_yml",
       "layout": {
@@ -2815,15 +4094,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L3",
       "lesson_uid": "L0169",
+      "story_id": 20169,
       "title": "身體，謝謝你",
       "tier": "keypoints_yml",
       "layout": {
@@ -2833,15 +4121,24 @@
         "checkbox_count": 0,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L4",
       "lesson_uid": "L0170",
+      "story_id": 20170,
       "title": "專注當下：關掉內心的批評噪音",
       "tier": "keypoints_yml",
       "layout": {
@@ -2851,15 +4148,24 @@
         "checkbox_count": 3,
         "row_count": 7
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L5",
       "lesson_uid": "L0171",
+      "story_id": 20171,
       "title": "從白熊到藍海豚：學習與念頭和平相處",
       "tier": "keypoints_yml",
       "layout": {
@@ -2869,15 +4175,24 @@
         "checkbox_count": 0,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L6",
       "lesson_uid": "L0172",
+      "story_id": 20172,
       "title": "不是想太多，只是好在乎",
       "tier": "keypoints_yml",
       "layout": {
@@ -2887,15 +4202,24 @@
         "checkbox_count": 6,
         "row_count": 9
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L7",
       "lesson_uid": "L0173",
+      "story_id": 20173,
       "title": "讓「想很多」助你一臂之力",
       "tier": "keypoints_yml",
       "layout": {
@@ -2905,15 +4229,24 @@
         "checkbox_count": 0,
         "row_count": 9
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L8",
       "lesson_uid": "L0174",
+      "story_id": 20174,
       "title": "面對「失敗」，不只有一種可能",
       "tier": "keypoints_yml",
       "layout": {
@@ -2923,15 +4256,24 @@
         "checkbox_count": 3,
         "row_count": 5
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     },
     {
       "lesson_id": "體-L9",
       "lesson_uid": "L0175",
+      "story_id": 20175,
       "title": "成長型思維：翻轉失敗的關鍵",
       "tier": "keypoints_yml",
       "layout": {
@@ -2941,10 +4283,18 @@
         "checkbox_count": 3,
         "row_count": 6
       },
-      "gates": {},
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
       "artifacts": {
         "has_structure_snapshot": true,
-        "has_keypoints_snapshot": true
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
       }
     }
   ]
