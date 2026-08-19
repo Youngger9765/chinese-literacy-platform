@@ -1,14 +1,14 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 6,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "運動賽事環境問題",
       "綠色賽事目的",
-      "保護環境怎麼做？",
-      "從想法到行動"
+      "1",
+      "2"
     ],
     "template_kind": "generic"
   },
@@ -30,9 +30,26 @@
       "value": "把【　　　】理念融入體育賽事，減少自然資源的消耗與碳排放，降低環境負擔，也提升大眾的【　　　】。"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "保護環境怎麼做？",
-      "value": "1.Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。\n2.Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。  \n3.Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -53,9 +70,22 @@
       "value": "把【　　　】理念融入體育賽事，減少自然資源的消耗與碳排放，降低環境負擔，也提升大眾的【　　　】。"
     },
     {
-      "kind": "pair",
-      "label": "保護環境怎麼做？",
-      "value": "1.Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。\n2.Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。  \n3.Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。"
+        },
+        {
+          "label": "2",
+          "value": "Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。"
+        },
+        {
+          "label": "3",
+          "value": "Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "保護環境怎麼做？"
     },
     {
       "kind": "pair",

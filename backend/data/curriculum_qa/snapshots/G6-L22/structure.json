@@ -1,113 +1,86 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題／答案",
+      "例一・原因",
+      "例一・後果【 單選 】",
+      "例二・後果【 單選 】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "小兵立大功：雞鳴狗盜的故事",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "問題",
-      "value": "秦昭王軟禁了孟嘗君而且想殺掉他，孟嘗君想要逃離秦國。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "解決",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "問題1",
-          "value": "孟嘗君求幸姬幫忙，幸姬要求孟嘗君給她白狐裘，但大衣已經送給秦昭王，不給，自己就【　　　】，孟嘗君去哪裡再找一件皮大衣呢?",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "解決1",
-          "value": "食客中有一位會模仿【　　　】的樣子和動作潛入家戶偷東西，他可以潛入寶庫中偷出白狐裘。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "結果1",
-          "value": "幸姬得到了白狐裘，替孟嘗君求情，秦昭王解除了對孟嘗君的【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "問題2",
-          "value": "一行人想趕快逃離秦國，他們到了函谷關，但是規定【　　　】時，士兵才能把城門打開，現在他們【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "解決2",
-          "value": "食客中有一位會模仿【　　　】的人，他唯妙唯肖的叫聲，讓公雞們以為天亮了，也都跟著鳴叫，騙過守門人。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "結果3",
-          "value": "城門【　　　】，孟嘗君也順利出關。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "物以稀為貴：從「供給」和「需求」談物價波動",
+      "value": ""
     },
     {
-      "label": "結果",
-      "value": "孟嘗君在食客們的幫助下成功逃離秦國。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "label": "問題／答案",
+      "value": "本文想回答的問題：什麼因素決定市場商品價格？\n作者的答案：【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "例一・原因",
+      "value": "1.颱風後，蔬菜受損，市場【　　　】減少。\n2.颱風前，人們預期青菜上漲，搶買青菜，市場需求增加。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "例一・後果【 單選 】",
+      "value": "所以青菜價格【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "例二・原因",
+      "value": "看到高麗菜好賺，農民搶種；收成時，市場湧入大量高麗菜。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "例二・後果【 單選 】",
+      "value": "所以高麗菜價格【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "文章結論",
+      "value": "商品價格的波動，是由市場【　　　】和【　　　】決定的。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "小兵立大功：雞鳴狗盜的故事",
+  "title": "物以稀為貴：從「供給」和「需求」談物價波動",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "問題",
-      "value": "秦昭王軟禁了孟嘗君而且想殺掉他，孟嘗君想要逃離秦國。"
-    },
-    {
-      "kind": "section_block",
-      "section": "解決",
-      "items": [
-        {
-          "label": "問題1",
-          "value": "孟嘗君求幸姬幫忙，幸姬要求孟嘗君給她白狐裘，但大衣已經送給秦昭王，不給，自己就【　　　】，孟嘗君去哪裡再找一件皮大衣呢?"
-        },
-        {
-          "label": "解決1",
-          "value": "食客中有一位會模仿【　　　】的樣子和動作潛入家戶偷東西，他可以潛入寶庫中偷出白狐裘。"
-        },
-        {
-          "label": "結果1",
-          "value": "幸姬得到了白狐裘，替孟嘗君求情，秦昭王解除了對孟嘗君的【　　　】。"
-        },
-        {
-          "label": "問題2",
-          "value": "一行人想趕快逃離秦國，他們到了函谷關，但是規定【　　　】時，士兵才能把城門打開，現在他們【　　　】。"
-        },
-        {
-          "label": "解決2",
-          "value": "食客中有一位會模仿【　　　】的人，他唯妙唯肖的叫聲，讓公雞們以為天亮了，也都跟著鳴叫，騙過守門人。"
-        },
-        {
-          "label": "結果3",
-          "value": "城門【　　　】，孟嘗君也順利出關。"
-        }
-      ]
+      "label": "問題／答案",
+      "value": "本文想回答的問題：什麼因素決定市場商品價格？\n作者的答案：【　　　】"
     },
     {
       "kind": "pair",
-      "label": "結果",
-      "value": "孟嘗君在食客們的幫助下成功逃離秦國。"
+      "label": "例一・原因",
+      "value": "1.颱風後，蔬菜受損，市場【　　　】減少。\n2.颱風前，人們預期青菜上漲，搶買青菜，市場需求增加。"
+    },
+    {
+      "kind": "pair",
+      "label": "例一・後果（單選）",
+      "value": "所以青菜價格【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "例二・原因",
+      "value": "看到高麗菜好賺，農民搶種；收成時，市場湧入大量高麗菜。"
+    },
+    {
+      "kind": "pair",
+      "label": "例二・後果（單選）",
+      "value": "所以高麗菜價格【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "文章結論",
+      "value": "商品價格的波動，是由市場【　　　】和【　　　】決定的。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "問題1",
-      "解決1",
-      "結果1",
-      "問題2"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

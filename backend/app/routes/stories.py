@@ -597,6 +597,13 @@ def get_story(story_id: str):
         # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
         # behaviour when the flag is off. This is the ONLY endpoint that supplies it.
         lesson_content=get_lesson_content(story),
+        # 文言文專屬模組 (#2752) — None for every non-文言文 lesson.
+        classical_text=story.get("classical_text"),
+        modern_translation=story.get("modern_translation"),
+        word_matching=story.get("word_matching"),
+        sentence_matching=story.get("sentence_matching"),
+        self_challenge=story.get("self_challenge"),
+        intro_guide=story.get("intro_guide"),
     )
 
 

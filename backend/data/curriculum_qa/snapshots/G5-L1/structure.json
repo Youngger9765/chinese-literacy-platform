@@ -1,9 +1,9 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
-    "fill_blank_count": 5,
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
     "layout": "worksheet_table",
-    "mode": "mixed",
+    "mode": "fill_blank",
     "primary_labels": [
       "人物背景",
       "人物特質",
@@ -30,22 +30,9 @@
       "value": "楊勇緯從小就很【　　　】，也有【　　　】。"
     },
     {
-      "correct_options": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "fill_blank",
       "label": "日常鍛鍊",
-      "options": [
-        "每天提早三、四十分鐘到校練習。",
-        "按照老師給的課表，一步一步完成訓練。",
-        "控制飲食和作息，讓身體保持最佳狀態。",
-        "隨時記下所學和需要注意的事情。\n□",
-        "只在比賽前加強練習，平時很少主動練習。"
-      ],
-      "value": "楊勇緯平時怎麼要求自己？【 多選 】\n①每天提早三、四十分鐘到校練習。\n②按照老師給的課表，一步一步完成訓練。\n③控制飲食和作息，讓身體保持最佳狀態。\n④隨時記下所學和需要注意的事情。\n□⑤只在比賽前加強練習，平時很少主動練習。"
+      "value": "楊勇緯平時怎麼要求自己？【 多選 】"
     },
     {
       "interactive_type": "fill_blank",
@@ -78,7 +65,7 @@
     {
       "kind": "pair",
       "label": "日常鍛鍊",
-      "value": "楊勇緯平時怎麼要求自己？（多選）\n①每天提早三、四十分鐘到校練習。\n②按照老師給的課表，一步一步完成訓練。\n③控制飲食和作息，讓身體保持最佳狀態。\n④隨時記下所學和需要注意的事情。\n□⑤只在比賽前加強練習，平時很少主動練習。"
+      "value": "楊勇緯平時怎麼要求自己？（多選）"
     },
     {
       "kind": "pair",

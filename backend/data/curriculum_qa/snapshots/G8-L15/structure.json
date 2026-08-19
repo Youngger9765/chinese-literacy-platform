@@ -5,10 +5,10 @@
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "志向與進入場域【 段1-2 】",
-      "農場外觀【 段3 】",
-      "農場運作方式【 段4 】",
-      "工作內容【 段5 】"
+      "志向與進入場域【　　　】",
+      "農場外觀【　　　】",
+      "農場運作方式【　　　】",
+      "工作內容【　　　】"
     ],
     "template_kind": "generic"
   },
@@ -21,32 +21,32 @@
     },
     {
       "interactive_type": "fill_blank",
-      "label": "志向與進入場域【 段1-2 】",
+      "label": "志向與進入場域【　　　】",
       "value": "1.宇晴的志向是當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，反而有消毒酒精味，農場像【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "農場外觀【 段3 】",
+      "label": "農場外觀【　　　】",
       "value": "農場一層層栽培架和LED燈光，像【　　　】，每層水耕槽的葉片【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "農場運作方式【 段4 】",
+      "label": "農場運作方式【　　　】",
       "value": "1.水耕蔬菜不是用土種出來的，而是用【　　　】。\n2.透過【　　　】監測並調整各項條件，讓農場的環境維持在最適合蔬菜生長的範圍。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "工作內容【 段5 】",
+      "label": "工作內容【　　　】",
       "value": "1.宇晴每天【　　　】，找出【　　　】的地方，能處理就處理，必要時回報。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "農場優勢【 段6 】",
+      "label": "農場優勢【　　　】",
       "value": "1.垂直農場一開始【　　　】，宇晴擔心不賺錢。\n2.無毒、蔬菜長得又快又漂亮，因此可賣【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "傳統與未來【 段7-8 】",
+      "label": "傳統與未來【　　　】",
       "value": "1.宇晴回憶【　　　】【　　　】，因此起雞皮疙瘩。\n2.未來農夫不再是戴斗笠拿鋤頭，而更像【　　　】"
     }
   ],

@@ -1,14 +1,14 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
-    "fill_blank_count": 3,
+    "checkbox_count": 4,
+    "fill_blank_count": 13,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "時間【 點 】",
-      "剛上國中",
-      "新鮮感退去後",
-      "遇見小學好友已有新夥伴"
+      "時間【　　　】",
+      "感受【 多選 】",
+      "原因",
+      "時間【　　　】"
     ],
     "template_kind": "generic"
   },
@@ -24,57 +24,87 @@
       "label": "適應國中的歷程",
       "sub_rows": [
         {
+          "blank_in_label": true,
           "interactive_type": "fill_blank",
-          "label": "時間【 點 】",
-          "value": "感受【　　　】 原因"
+          "label": "時間【　　　】",
+          "value": "剛上國中"
         },
         {
-          "correct_options": [
-            0,
-            2,
-            3
-          ],
           "interactive_type": "checkbox",
-          "label": "剛上國中",
+          "label": "感受【 多選 】",
           "options": [
-            "雀躍興奮\n□",
+            "雀躍興奮",
             "傷心不捨",
             "喜悅無比",
-            "非常忙碌 1.迎接新生活、新朋友。\n2.自己長大成為【小大人】。\n3.適應不同的課程、老師、同學，每天都是全新的【冒險】。"
+            "非常忙碌"
           ],
-          "value": "①雀躍興奮\n□②傷心不捨\n③喜悅無比\n④非常忙碌 1.迎接新生活、新朋友。\n2.自己長大成為【小大人】。\n3.適應不同的課程、老師、同學，每天都是全新的【冒險】。"
+          "value": "①雀躍興奮 ②傷心不捨 ③喜悅無比 ④非常忙碌"
         },
         {
-          "correct_options": [
-            0,
-            2,
-            3
-          ],
+          "interactive_type": "fill_blank",
+          "label": "原因",
+          "value": "1.迎接新生活、新朋友。\n2.自己長大成為【　　　】。\n3.適應不同的課程、老師、同學，每天都是全新的【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "適應國中的歷程",
+      "sub_rows": [
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "時間【　　　】",
+          "value": "新鮮感退去後"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "新鮮感退去後",
+          "label": "感受【 多選 】",
           "options": [
-            "格格不入\n□",
+            "格格不入",
             "如魚得水",
             "倍感壓力",
-            "思念不已 1.無法成為別人【最要好】的朋友，和【小學朋友】見面時也變得陌生尷尬，不斷想起過往時光。\n2.小學的【讀書策略】無法應付國中的課業。"
+            "思念不已"
           ],
-          "value": "①格格不入\n□②如魚得水\n③倍感壓力\n④思念不已 1.無法成為別人【最要好】的朋友，和【小學朋友】見面時也變得陌生尷尬，不斷想起過往時光。\n2.小學的【讀書策略】無法應付國中的課業。"
+          "value": "①格格不入 ②如魚得水 ③倍感壓力 ④思念不已"
         },
         {
-          "correct_options": [
-            0,
-            4
-          ],
+          "interactive_type": "fill_blank",
+          "label": "原因",
+          "value": "1.無法成為別人【　　　】的朋友，和【　　　】見面時也變得陌生尷尬，不斷想起過往時光。\n2.小學的【　　　】無法應付國中的課業。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "適應國中的歷程",
+      "sub_rows": [
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "時間【　　　】",
+          "value": "遇見小學好友已有新夥伴"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "遇見小學好友已有新夥伴",
+          "label": "感受【 多選 】",
           "options": [
-            "恍然大悟\n□",
-            "不知所措\n□",
-            "無憂無慮 □",
+            "恍然大悟",
+            "不知所措",
+            "無憂無慮"
+          ],
+          "value": "①恍然大悟 ②不知所措 ③無憂無慮"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "原因",
+          "options": [
             "發現小學朋友仍然很重視自己。",
             "發現小學朋友已經開始新的國中生活，只有自己還停留在過去。"
           ],
-          "value": "①恍然大悟\n□②不知所措\n□③無憂無慮 □①發現小學朋友仍然很重視自己。\n②發現小學朋友已經開始新的國中生活，只有自己還停留在過去。"
+          "value": "①發現小學朋友仍然很重視自己。 ②發現小學朋友已經開始新的國中生活，只有自己還停留在過去。"
         }
       ],
       "value": ""
@@ -82,21 +112,69 @@
     {
       "interactive_type": "display",
       "label": "想法轉折",
-      "value": "對「畢業的淚水」… 對「懷舊主題的文章」…"
+      "sub_rows": [
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "時間【　　　】",
+          "value": ""
+        },
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "感受【 多選 】",
+          "value": "對「畢業的淚水」…"
+        },
+        {
+          "interactive_type": "display",
+          "label": "原因",
+          "value": "對「懷舊主題的文章」…"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "display",
       "label": "想法轉折",
       "sub_rows": [
         {
+          "blank_in_label": true,
           "interactive_type": "fill_blank",
-          "label": "上國中前",
-          "value": "感到【　　　】：為什麼大家這麼難過？ 覺得【　　　】：自己不曾經歷，也沒興趣。"
+          "label": "時間【　　　】",
+          "value": "上國中前"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "上國中後",
-          "value": "能夠理解：眼淚是向【　　　】說再見。 深深的【　　　】：理解文章背後的那份捨不得。"
+          "label": "感受【 多選 】",
+          "value": "感到【　　　】：為什麼大家這麼難過？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "原因",
+          "value": "覺得【　　　】：自己不曾經歷，也沒興趣。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "想法轉折",
+      "sub_rows": [
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "時間【　　　】",
+          "value": "上國中後"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受【 多選 】",
+          "value": "能夠理解：眼淚是向【　　　】說再見。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "原因",
+          "value": "深深的【　　　】：理解文章背後的那份捨不得。"
         }
       ],
       "value": ""
@@ -108,38 +186,105 @@
       "items": [
         {
           "label": "時間(點)",
-          "value": "感受(多選) 原因"
+          "value": "剛上國中"
         },
         {
-          "label": "剛上國中",
-          "value": "①雀躍興奮\n□②傷心不捨\n③喜悅無比\n④非常忙碌 1.迎接新生活、新朋友。\n2.自己長大成為【　　　】。\n3.適應不同的課程、老師、同學，每天都是全新的【　　　】。"
+          "label": "感受(多選)",
+          "value": "①雀躍興奮 ②傷心不捨 ③喜悅無比 ④非常忙碌"
         },
         {
-          "label": "新鮮感退去後",
-          "value": "①格格不入\n□②如魚得水\n③倍感壓力\n④思念不已 1.無法成為別人【　　　】的朋友，和【　　　】見面時也變得陌生尷尬，不斷想起過往時光。\n2.小學的【　　　】無法應付國中的課業。"
-        },
-        {
-          "label": "遇見小學好友已有新夥伴",
-          "value": "①恍然大悟\n□②不知所措\n□③無憂無慮 □①發現小學朋友仍然很重視自己。\n②發現小學朋友已經開始新的國中生活，只有自己還停留在過去。"
+          "label": "原因",
+          "value": "1.迎接新生活、新朋友。\n2.自己長大成為【　　　】。\n3.適應不同的課程、老師、同學，每天都是全新的【　　　】。"
         }
       ],
       "kind": "section_block",
       "section": "適應國中的歷程"
     },
     {
-      "kind": "pair",
-      "label": "想法轉折",
-      "value": "對「畢業的淚水」… 對「懷舊主題的文章」…"
+      "items": [
+        {
+          "label": "時間(點)",
+          "value": "新鮮感退去後"
+        },
+        {
+          "label": "感受(多選)",
+          "value": "①格格不入 ②如魚得水 ③倍感壓力 ④思念不已"
+        },
+        {
+          "label": "原因",
+          "value": "1.無法成為別人【　　　】的朋友，和【　　　】見面時也變得陌生尷尬，不斷想起過往時光。\n2.小學的【　　　】無法應付國中的課業。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "適應國中的歷程"
     },
     {
       "items": [
         {
-          "label": "上國中前",
-          "value": "感到【　　　】：為什麼大家這麼難過？ 覺得【　　　】：自己不曾經歷，也沒興趣。"
+          "label": "時間(點)",
+          "value": "遇見小學好友已有新夥伴"
         },
         {
-          "label": "上國中後",
-          "value": "能夠理解：眼淚是向【　　　】說再見。 深深的【　　　】：理解文章背後的那份捨不得。"
+          "label": "感受(多選)",
+          "value": "①恍然大悟 ②不知所措 ③無憂無慮"
+        },
+        {
+          "label": "原因",
+          "value": "①發現小學朋友仍然很重視自己。 ②發現小學朋友已經開始新的國中生活，只有自己還停留在過去。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "適應國中的歷程"
+    },
+    {
+      "items": [
+        {
+          "label": "時間(點)",
+          "value": ""
+        },
+        {
+          "label": "感受(多選)",
+          "value": "對「畢業的淚水」…"
+        },
+        {
+          "label": "原因",
+          "value": "對「懷舊主題的文章」…"
+        }
+      ],
+      "kind": "section_block",
+      "section": "想法轉折"
+    },
+    {
+      "items": [
+        {
+          "label": "時間(點)",
+          "value": "上國中前"
+        },
+        {
+          "label": "感受(多選)",
+          "value": "感到【　　　】：為什麼大家這麼難過？"
+        },
+        {
+          "label": "原因",
+          "value": "覺得【　　　】：自己不曾經歷，也沒興趣。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "想法轉折"
+    },
+    {
+      "items": [
+        {
+          "label": "時間(點)",
+          "value": "上國中後"
+        },
+        {
+          "label": "感受(多選)",
+          "value": "能夠理解：眼淚是向【　　　】說再見。"
+        },
+        {
+          "label": "原因",
+          "value": "深深的【　　　】：理解文章背後的那份捨不得。"
         }
       ],
       "kind": "section_block",

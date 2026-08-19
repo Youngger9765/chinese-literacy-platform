@@ -32,6 +32,7 @@ import type {
   VocabResult,
 } from '../types';
 import { buildStepFinishPayload } from './stepHandlerUtils';
+import { lessonAwareNextStep } from './lessonAwareStepTransition';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
@@ -76,6 +77,10 @@ interface UseLearningStepNavigationReturn {
   handleFinishSentencePractice: () => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleFinishKnowledgeStation: () => void;
+  handleFinishClassicalText: () => void;
+  handleFinishClassicalSentenceMatching: () => void;
+  handleFinishClassicalWordMatching: () => void;
+  handleFinishClassicalSelfChallenge: () => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   handleNextStep: () => void;
@@ -126,9 +131,19 @@ export function useLearningStepNavigation({
       }
       return null;
     });
-    persistStep(STEP_PATH_TO_NUMBER['full-text-annotate']);
+    // Lesson-aware first reading step (#2752): a 文言文 lesson's own step_sequence
+    // starts at 'classical-text' (原文), not the hardcoded 'full-text-annotate' —
+    // that step has no data for this genre (讀全文-做記號 module never extracted
+    // for these 10 lessons). A regular lesson has no step_sequence, so this
+    // resolves to the same 'full-text-annotate' it always has.
+    const firstReadingStep = lessonAwareNextStep(
+      'lesson-intro',
+      selectedStory?.stepSequence,
+      'full-text-annotate',
+    );
+    persistStep(STEP_PATH_TO_NUMBER[firstReadingStep]);
     ensureDbSession();
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/full-text-annotate`);
+    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/${firstReadingStep}`);
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
   // ─── Navigation helpers ───────────────────────────────────────────────────
@@ -154,23 +169,30 @@ export function useLearningStepNavigation({
   const dispatchStepFinish = useCallback(
     (stepId: string, stepData: Record<string, unknown>, sessionPatch?: Partial<LearningSession>) => {
       const payload = buildStepFinishPayload(stepId, stepData);
+      // Lesson-aware override (#2752): STEP_FINISH_TRANSITIONS is one static table
+      // keyed by step id, so it cannot express "key-passage-reading is followed by
+      // X for 白話 lessons but Y for 文言文 lessons" — both genres route through
+      // that SAME step id. A lesson carrying its own step_sequence must advance
+      // within THAT sequence; a lesson without one gets payload.nextStep back
+      // unchanged (see lessonAwareStepTransition.ts).
+      const nextStep = lessonAwareNextStep(stepId, selectedStory?.stepSequence, payload.nextStep);
       if (sessionPatch) {
         setSession((prev) => (prev ? { ...prev, ...sessionPatch } : null));
       }
       persistStepProgressState(
         {
           completeStep: payload.completeStep,
-          currentStep: payload.currentStep,
+          currentStep: nextStep,
           stepDataPatch: payload.stepDataPatch,
         },
         true,
       );
-      if (STEP_PATH_TO_NUMBER[payload.nextStep] !== undefined) {
-        persistStep(STEP_PATH_TO_NUMBER[payload.nextStep]);
+      if (STEP_PATH_TO_NUMBER[nextStep] !== undefined) {
+        persistStep(STEP_PATH_TO_NUMBER[nextStep]);
       }
-      navigateAfterFinish(payload.nextStep);
+      navigateAfterFinish(nextStep);
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [navigateAfterFinish, persistStep, persistStepProgressState, setSession, selectedStory],
   );
 
   // ─── Step finish handlers ─────────────────────────────────────────────────
@@ -277,6 +299,26 @@ export function useLearningStepNavigation({
     },
     [dispatchStepFinish],
   );
+
+  // ── 文言文專屬 steps (#2752) — same no-arg "read it, mark done, advance"
+  // shape as handleFinishStoryStructure/handleFinishReadingStrategy above.
+  // dispatchStepFinish's lesson-aware override (see above) sends these to the
+  // right next classical step, not the static table's 'report' fallback.
+  const handleFinishClassicalText = useCallback(() => {
+    dispatchStepFinish('classical-text', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalSentenceMatching = useCallback(() => {
+    dispatchStepFinish('classical-sentence-matching', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalWordMatching = useCallback(() => {
+    dispatchStepFinish('classical-word-matching', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalSelfChallenge = useCallback(() => {
+    dispatchStepFinish('classical-self-challenge', { completed: true });
+  }, [dispatchStepFinish]);
 
   const handleRetry = useCallback(() => {
     clearPersistedSession();
@@ -407,6 +449,10 @@ export function useLearningStepNavigation({
     handleFinishSentencePractice,
     handleFinishVocabWordSearch,
     handleFinishKnowledgeStation,
+    handleFinishClassicalText,
+    handleFinishClassicalSentenceMatching,
+    handleFinishClassicalWordMatching,
+    handleFinishClassicalSelfChallenge,
     handleRetry,
     handleSessionComplete,
     handleNextStep,

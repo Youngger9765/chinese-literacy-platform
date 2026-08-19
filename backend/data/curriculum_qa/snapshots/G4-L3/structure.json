@@ -1,12 +1,14 @@
 {
   "interaction_profile": {
     "checkbox_count": 2,
-    "fill_blank_count": 0,
+    "fill_blank_count": 4,
     "layout": "worksheet_table",
-    "mode": "checkbox",
+    "mode": "mixed",
     "primary_labels": [
-      "經過",
-      "結果"
+      "起因",
+      "經過 1",
+      "經過 2",
+      "經過 3"
     ],
     "template_kind": "generic"
   },
@@ -22,44 +24,47 @@
       "label": "觀察遊戲",
       "sub_rows": [
         {
-          "interactive_type": "display",
+          "interactive_type": "fill_blank",
           "label": "起因",
-          "value": "作者和媽媽搭區間車時，媽媽提議作者可以   觀察   車廂上的人。"
+          "value": "作者和媽媽搭區間車時，媽媽提議作者可以【　　　】車廂上的人。"
         },
         {
-          "correct_options": [
-            2
-          ],
           "interactive_type": "checkbox",
-          "label": "經過",
+          "label": "經過 1",
           "options": [
-            "閱讀□",
+            "閱讀",
             "講電話",
-            "滑手機】。\n2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。\n3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。"
+            "滑手機"
           ],
-          "value": "作者發現車廂上最常見的畫面是\n【□①閱讀□②講電話③滑手機】。\n2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。\n3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。"
+          "value": "1. 作者發現車廂上最常見的畫面是\n①閱讀 ②講電話 ③滑手機"
         },
         {
-          "correct_options": [
-            0,
-            2
-          ],
+          "interactive_type": "fill_blank",
+          "label": "經過 2",
+          "value": "2.有位與眾不同的大姊姊，她在車廂內【　　　】書本。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "經過 3",
+          "value": "3.觀察遊戲變成了在各種場所裡，尋找【　　　】。"
+        },
+        {
           "interactive_type": "checkbox",
           "label": "結果",
           "options": [
-            "正向□",
+            "正向",
             "用功",
-            "愉悅】的感覺。\n【 請打勾，複選 】"
+            "愉悅"
           ],
-          "value": "發現讀書的畫面給人【①正向□②用功③愉悅】的感覺。\n【 請打勾，複選 】"
+          "value": "發現讀書的畫面給人【　　　】的感覺。\n①正向 ②用功 ③愉悅"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "display",
+      "interactive_type": "fill_blank",
       "label": "影響",
-      "value": "作者出門都會隨身帶   一本書/書   ，一有空檔就拿出來閱讀。"
+      "value": "作者出門都會隨身帶【　　　】，一有空檔就拿出來閱讀。"
     }
   ],
   "title": "最美的畫面",
@@ -68,15 +73,23 @@
       "items": [
         {
           "label": "起因",
-          "value": "作者和媽媽搭區間車時，媽媽提議作者可以   觀察   車廂上的人。"
+          "value": "作者和媽媽搭區間車時，媽媽提議作者可以【　　　】車廂上的人。"
         },
         {
-          "label": "經過",
-          "value": "作者發現車廂上最常見的畫面是\n【　　　】。\n2.有位與眾不同的大姊姊，她在車廂內   閱讀   書本。\n3.觀察遊戲變成了在各種場所裡，尋找   讀書人  。"
+          "label": "經過 1",
+          "value": "1. 作者發現車廂上最常見的畫面是\n①閱讀 ②講電話 ③滑手機"
+        },
+        {
+          "label": "經過 2",
+          "value": "2.有位與眾不同的大姊姊，她在車廂內【　　　】書本。"
+        },
+        {
+          "label": "經過 3",
+          "value": "3.觀察遊戲變成了在各種場所裡，尋找【　　　】。"
         },
         {
           "label": "結果",
-          "value": "發現讀書的畫面給人【　　　】的感覺。\n(請打勾，複選)"
+          "value": "發現讀書的畫面給人【　　　】的感覺。\n①正向 ②用功 ③愉悅"
         }
       ],
       "kind": "section_block",
@@ -85,7 +98,7 @@
     {
       "kind": "pair",
       "label": "影響",
-      "value": "作者出門都會隨身帶   一本書/書   ，一有空檔就拿出來閱讀。"
+      "value": "作者出門都會隨身帶【　　　】，一有空檔就拿出來閱讀。"
     }
   ]
 }

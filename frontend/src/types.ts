@@ -34,6 +34,11 @@ export enum AppView {
   SENTENCE_PRACTICE = 'SENTENCE_PRACTICE',
   STORY_STRUCTURE = 'STORY_STRUCTURE',
   READING_STRATEGY = 'READING_STRATEGY',
+  // 文言文專屬 (#2752) — 原文/白話對照、文白句子比對、文白詞語比對、自我挑戰。
+  CLASSICAL_TEXT = 'CLASSICAL_TEXT',
+  CLASSICAL_SENTENCE_MATCHING = 'CLASSICAL_SENTENCE_MATCHING',
+  CLASSICAL_WORD_MATCHING = 'CLASSICAL_WORD_MATCHING',
+  CLASSICAL_SELF_CHALLENGE = 'CLASSICAL_SELF_CHALLENGE',
 }
 
 export interface StoryIntro {
@@ -359,6 +364,98 @@ export interface Story {
    *  table row data. Frontend renders via TableDisplay with click-to-zoom.
    *  Absent for lessons without tables (摘要策略 / 推論策略 課文 etc.). */
   tables?: LessonTable[];
+
+  // ── 文言文專屬模組 (#2752) — 只有 10 課有這些欄位，其餘課全部 undefined ──
+  /** 原文＋注釋（大題無編號，印在「原文」區）。 */
+  classicalText?: ClassicalTextContent;
+  /** 古文今譯／白話翻譯（大題無編號）。 */
+  modernTranslation?: ModernTranslationContent;
+  /** 文白詞語比對（大題二：方框字填白話）。 */
+  wordMatching?: ClassicalWordMatchingContent;
+  /** 文白句子比對（大題一：8 句配對）。 */
+  sentenceMatching?: ClassicalSentenceMatchingContent;
+  /** 自我挑戰（大題六，選做：另一段文言文＋自己的題組）。 */
+  selfChallenge?: ClassicalSelfChallengeContent;
+  /** 導讀（無編號，印在標題下方）。 */
+  introGuide?: IntroGuideContent;
+}
+
+// ── 文言文專屬模組的內容型別 (#2752) ─────────────────────────────────────────
+// 直接對映 backend/data/lessons/*/v3/{classical_text,...}.yml 的形狀
+// （lesson_uid_loader 已把外層 wrapper 拆掉，見該檔案註解）。
+
+export interface ClassicalTextContent {
+  source_label?: string;
+  paragraphs: string[];
+  annotations_label?: string;
+  annotations?: { term: string; text: string }[];
+}
+
+export interface ModernTranslationContent {
+  section_name?: string;
+  paragraphs: string[];
+}
+
+export interface ClassicalWordMatchingBlank {
+  answer: string;
+}
+
+export interface ClassicalWordMatchingItem {
+  index: number;
+  classical: string;
+  boxed_terms?: string[];
+  vernacular: string;
+  blanks: ClassicalWordMatchingBlank[];
+}
+
+export interface ClassicalWordMatchingContent {
+  instruction?: string;
+  items: ClassicalWordMatchingItem[];
+}
+
+export interface ClassicalSentenceMatchingSegment {
+  index: number;
+  classical: string;
+  answer: number;
+}
+
+export interface ClassicalSentenceMatchingContent {
+  instruction?: string;
+  passage_paragraphs?: string[];
+  reference_label?: string;
+  reference_sentences: Record<string, string>;
+  segments: ClassicalSentenceMatchingSegment[];
+}
+
+/** One question in self_challenge's part_one/part_two — either a short-answer
+ *  fill-in (only `answer`) or a multiple-choice pick (`options` + `answer`). */
+export interface ClassicalSelfChallengeQuestionItem {
+  index: number;
+  stem: string;
+  options?: Record<string, string>;
+  answer: string | number;
+  instruction?: string;
+}
+
+export interface ClassicalSelfChallengePart {
+  label?: string;
+  items: ClassicalSelfChallengeQuestionItem[];
+}
+
+export interface ClassicalSelfChallengeContent {
+  optional_note?: string;
+  instruction?: string;
+  strategy_banner?: string;
+  passage: string;
+  annotations?: { index?: number; term: string; text: string }[];
+  translation?: string;
+  part_one?: ClassicalSelfChallengePart;
+  part_two?: ClassicalSelfChallengePart;
+}
+
+export interface IntroGuideContent {
+  section_name?: string;
+  text: string;
 }
 
 /** Row of a lesson table. `section` (optional) groups rows visually

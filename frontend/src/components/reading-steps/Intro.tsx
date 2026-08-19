@@ -387,6 +387,26 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             );
           })()}
 
+          {/* 導讀 (#2752) — 文言文 lessons carry their own worksheet 導讀 paragraph
+              (`intro_guide.yml`, no big-question number, printed under the title).
+              This is DIFFERENT content from 課文簡介 above (that's an AI/PDF teaser
+              of the lesson body; 導讀 is the worksheet author's own framing of the
+              story) — shown as its own box, and only for the 4 lessons that have
+              one (`story.introGuide` is undefined for every other lesson). */}
+          {story.introGuide?.text && (
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg text-accent-light" aria-hidden="true">auto_stories</span>
+                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
+                  {story.introGuide.section_name || '導讀'}
+                </span>
+              </div>
+              <p className={`text-on-surface text-base ${zhuyinActive ? 'leading-[2.2rem] tracking-[0.15em]' : 'leading-[1.7]'}`}>
+                {processZhuyin(story.introGuide.text)}
+              </p>
+            </div>
+          )}
+
           {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
           {/* 數位學習步驟 — #2196: clickable step chips (quick-jump shortcut).

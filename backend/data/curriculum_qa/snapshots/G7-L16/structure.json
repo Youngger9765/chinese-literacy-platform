@@ -1,13 +1,13 @@
 {
   "interaction_profile": {
-    "checkbox_count": 5,
-    "fill_blank_count": 4,
+    "checkbox_count": 6,
+    "fill_blank_count": 9,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "一開始讀",
-      "帶來__",
-      "「來了！來了！」\n可以__，也可以在__派上用場",
+      "長大後",
+      "國中時",
+      "長大後",
       "國中時"
     ],
     "template_kind": "generic"
@@ -22,16 +22,16 @@
     {
       "interactive_type": "display",
       "label": "讀〈夏夜〉中的「來了！來了！」",
-      "value": ""
-    },
-    {
-      "interactive_type": "display",
-      "label": "時間點",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "國中時",
+          "value": "一開始讀"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "一開始讀",
-          "value": "聽完老師解釋【　　　】"
+          "label": "長大後",
+          "value": "聽完老師解釋【 單選 】"
         }
       ],
       "value": ""
@@ -41,16 +41,18 @@
       "label": "感受",
       "sub_rows": [
         {
-          "correct_options": [
-            1
-          ],
+          "interactive_type": "fill_blank",
+          "label": "國中時",
+          "value": "帶來【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "帶來__",
+          "label": "長大後",
           "options": [
             "能感受到詩意",
-            "仍未感受到詩意【歡樂】"
+            "仍未感受到詩意"
           ],
-          "value": "□①能感受到詩意\n②仍未感受到詩意【歡樂】"
+          "value": "①能感受到詩意 ②仍未感受到詩意"
         }
       ],
       "value": ""
@@ -60,16 +62,18 @@
       "label": "原因",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
+          "interactive_type": "fill_blank",
+          "label": "國中時",
+          "value": "「來了！來了！」\n可以【　　　】，也可以在【　　　】派上用場"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "「來了！來了！」\n可以__，也可以在__派上用場",
+          "label": "長大後",
           "options": [
-            "嬉笑的快樂□",
-            "浪漫的詩意】"
+            "嬉笑的快樂",
+            "浪漫的詩意"
           ],
-          "value": "對十三歲的我們來說，更深刻的是那份\n【千變萬化】【不同時機】【①嬉笑的快樂□②浪漫的詩意】"
+          "value": "①嬉笑的快樂 ②浪漫的詩意"
         }
       ],
       "value": ""
@@ -77,16 +81,16 @@
     {
       "interactive_type": "display",
       "label": "讀〈夏夜〉中的「擬人」",
-      "value": ""
-    },
-    {
-      "interactive_type": "display",
-      "label": "時間點",
       "sub_rows": [
         {
-          "interactive_type": "fill_blank",
+          "interactive_type": "display",
           "label": "國中時",
-          "value": "長大後【　　　】"
+          "value": "國中時"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "長大後",
+          "value": "長大後【 單選 】"
         }
       ],
       "value": ""
@@ -96,16 +100,18 @@
       "label": "感受",
       "sub_rows": [
         {
-          "correct_options": [
-            1
-          ],
+          "interactive_type": "fill_blank",
+          "label": "國中時",
+          "value": "對詩的擬人手法感到【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "對詩的擬人手法感到__",
+          "label": "長大後",
           "options": [
             "不解",
-            "讚嘆】"
+            "讚嘆"
           ],
-          "value": "對楊喚感到【困惑】【□①不解②讚嘆】"
+          "value": "①不解 ②讚嘆"
         }
       ],
       "value": ""
@@ -116,8 +122,13 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "本文作者認為羊隊回家、小河歌唱，都是常見的景象，為什麼老師會說詩中許多句子都有__修辭呢？",
-          "value": "長大後，了解作者成年後還能有貼近【　　　】的眼光，很不容易。【　　　】"
+          "label": "國中時",
+          "value": "本文作者認為羊隊回家、小河歌唱，都是常見的景象，為什麼老師會說詩中許多句子都有【　　　】修辭呢？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "長大後",
+          "value": "長大後，了解作者成年後還能有貼近【　　　】的眼光，很不容易。"
         }
       ],
       "value": ""
@@ -125,16 +136,16 @@
     {
       "interactive_type": "display",
       "label": "讀〈夏夜〉中的溫馨場景",
-      "value": ""
-    },
-    {
-      "interactive_type": "display",
-      "label": "時間點",
       "sub_rows": [
         {
-          "interactive_type": "fill_blank",
+          "interactive_type": "display",
           "label": "國中時",
-          "value": "長大後【　　　】"
+          "value": "國中時"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "長大後",
+          "value": "長大後【 單選 】"
         }
       ],
       "value": ""
@@ -144,16 +155,18 @@
       "label": "感受",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
+          "interactive_type": "fill_blank",
+          "label": "國中時",
+          "value": "【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "__",
+          "label": "長大後",
           "options": [
-            "感佩□",
-            "失望】"
+            "感佩",
+            "失望"
           ],
-          "value": "對作者【羨慕】【①感佩□②失望】"
+          "value": "①感佩 ②失望"
         }
       ],
       "value": ""
@@ -163,19 +176,22 @@
       "label": "原因",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            2
-          ],
           "interactive_type": "checkbox",
-          "label": "認為作者能寫下如此溫馨詩，一定是因為有著：\n__\n的童年。",
+          "label": "國中時",
           "options": [
-            "幸福□",
-            "悲慘】\n的童年，\n投入【",
-            "艱辛悲苦□",
-            "無憂無慮】文學寫作是為了讓經歷苦難的孩子童年裡也有快樂。【兒童】"
+            "幸福",
+            "悲慘"
           ],
-          "value": "發現作者有著：\n【①幸福□②悲慘】\n的童年，\n投入【①艱辛悲苦□②無憂無慮】文學寫作是為了讓經歷苦難的孩子童年裡也有快樂。【兒童】"
+          "value": "①幸福 ②悲慘"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "長大後",
+          "options": [
+            "艱辛悲苦",
+            "無憂無慮"
+          ],
+          "value": "①艱辛悲苦 ②無憂無慮"
         }
       ],
       "value": ""
@@ -184,25 +200,28 @@
   "title": "長大後，我才讀懂〈夏夜〉",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "讀〈夏夜〉中的「來了！來了！」",
-      "value": ""
-    },
-    {
       "items": [
         {
-          "label": "一開始讀",
+          "label": "國中時",
+          "value": "一開始讀"
+        },
+        {
+          "label": "長大後",
           "value": "聽完老師解釋(單選)"
         }
       ],
       "kind": "section_block",
-      "section": "時間點"
+      "section": "讀〈夏夜〉中的「來了！來了！」"
     },
     {
       "items": [
         {
-          "label": "帶來__",
-          "value": "□①能感受到詩意\n②仍未感受到詩意【　　　】"
+          "label": "國中時",
+          "value": "帶來【　　　】"
+        },
+        {
+          "label": "長大後",
+          "value": "①能感受到詩意 ②仍未感受到詩意"
         }
       ],
       "kind": "section_block",
@@ -211,33 +230,40 @@
     {
       "items": [
         {
-          "label": "「來了！來了！」\n可以__，也可以在__派上用場",
-          "value": "對十三歲的我們來說，更深刻的是那份\n【　　　】【　　　】【　　　】"
+          "label": "國中時",
+          "value": "「來了！來了！」\n可以【　　　】，也可以在【　　　】派上用場"
+        },
+        {
+          "label": "長大後",
+          "value": "①嬉笑的快樂 ②浪漫的詩意"
         }
       ],
       "kind": "section_block",
       "section": "原因"
     },
     {
-      "kind": "pair",
-      "label": "讀〈夏夜〉中的「擬人」",
-      "value": ""
+      "items": [
+        {
+          "label": "國中時",
+          "value": "國中時"
+        },
+        {
+          "label": "長大後",
+          "value": "長大後(單選)"
+        }
+      ],
+      "kind": "section_block",
+      "section": "讀〈夏夜〉中的「擬人」"
     },
     {
       "items": [
         {
           "label": "國中時",
-          "value": "長大後(單選)"
-        }
-      ],
-      "kind": "section_block",
-      "section": "時間點"
-    },
-    {
-      "items": [
+          "value": "對詩的擬人手法感到【　　　】"
+        },
         {
-          "label": "對詩的擬人手法感到__",
-          "value": "對楊喚感到【　　　】【　　　】"
+          "label": "長大後",
+          "value": "①不解 ②讚嘆"
         }
       ],
       "kind": "section_block",
@@ -246,33 +272,40 @@
     {
       "items": [
         {
-          "label": "本文作者認為羊隊回家、小河歌唱，都是常見的景象，為什麼老師會說詩中許多句子都有__修辭呢？",
-          "value": "長大後，了解作者成年後還能有貼近【　　　】的眼光，很不容易。【　　　】"
+          "label": "國中時",
+          "value": "本文作者認為羊隊回家、小河歌唱，都是常見的景象，為什麼老師會說詩中許多句子都有【　　　】修辭呢？"
+        },
+        {
+          "label": "長大後",
+          "value": "長大後，了解作者成年後還能有貼近【　　　】的眼光，很不容易。"
         }
       ],
       "kind": "section_block",
       "section": "原因"
     },
     {
-      "kind": "pair",
-      "label": "讀〈夏夜〉中的溫馨場景",
-      "value": ""
+      "items": [
+        {
+          "label": "國中時",
+          "value": "國中時"
+        },
+        {
+          "label": "長大後",
+          "value": "長大後(單選)"
+        }
+      ],
+      "kind": "section_block",
+      "section": "讀〈夏夜〉中的溫馨場景"
     },
     {
       "items": [
         {
           "label": "國中時",
-          "value": "長大後(單選)"
-        }
-      ],
-      "kind": "section_block",
-      "section": "時間點"
-    },
-    {
-      "items": [
+          "value": "【　　　】"
+        },
         {
-          "label": "__",
-          "value": "對作者【　　　】【　　　】"
+          "label": "長大後",
+          "value": "①感佩 ②失望"
         }
       ],
       "kind": "section_block",
@@ -281,8 +314,12 @@
     {
       "items": [
         {
-          "label": "認為作者能寫下如此溫馨詩，一定是因為有著：\n__\n的童年。",
-          "value": "發現作者有著：\n【　　　】\n的童年，\n投入【　　　】文學寫作是為了讓經歷苦難的孩子童年裡也有快樂。【　　　】"
+          "label": "國中時",
+          "value": "①幸福 ②悲慘"
+        },
+        {
+          "label": "長大後",
+          "value": "①艱辛悲苦 ②無憂無慮"
         }
       ],
       "kind": "section_block",

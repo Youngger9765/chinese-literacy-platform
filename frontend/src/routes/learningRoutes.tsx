@@ -55,6 +55,11 @@ const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefin
 const VocabReviewPage     = lazy(() => import('../pages/learning/VocabReviewPage'));
 const KnowledgeStationPage    = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 const SentencePracticePage    = lazy(() => import('../pages/learning/SentencePracticePage'));
+// 文言文專屬 (#2752)
+const ClassicalTextPage             = lazy(() => import('../pages/learning/ClassicalTextPage'));
+const ClassicalSentenceMatchingPage = lazy(() => import('../pages/learning/ClassicalSentenceMatchingPage'));
+const ClassicalWordMatchingPage     = lazy(() => import('../pages/learning/ClassicalWordMatchingPage'));
+const ClassicalSelfChallengePage    = lazy(() => import('../pages/learning/ClassicalSelfChallengePage'));
 
 // ---------------------------------------------------------------------------
 // stepPageMap — step id → React component
@@ -80,6 +85,12 @@ const STEP_PAGE_MAP: Record<string, LazyPage> = {
   'dictation':             DictationPage,
   'knowledge-station':     KnowledgeStationPage,
   'report':                ReportPage,
+  // 文言文專屬 (#2752) — not in DEFAULT_STEP_SEQUENCE, only ever reached via a
+  // lesson's own step_sequence (see buildLearningRoutes' iteration source below).
+  'classical-text':                ClassicalTextPage,
+  'classical-sentence-matching':   ClassicalSentenceMatchingPage,
+  'classical-word-matching':       ClassicalWordMatchingPage,
+  'classical-self-challenge':      ClassicalSelfChallengePage,
 };
 
 // ---------------------------------------------------------------------------
@@ -158,7 +169,27 @@ function buildLearningRoutes(): React.ReactElement[] {
 
   const routes: React.ReactElement[] = [];
 
-  for (const stepId of DEFAULT_STEP_SEQUENCE) {
+  // #2752: iterate every REGISTERED step id, not just DEFAULT_STEP_SEQUENCE.
+  //
+  // A 文言文 lesson's classical-only steps (classical-text, classical-word-matching,
+  // classical-sentence-matching, classical-self-challenge) are deliberately kept OUT
+  // of DEFAULT_STEP_SEQUENCE — putting them there would add four empty-state pills
+  // to the stepper nav of the ~165 白話 lessons that have none of this data (that nav
+  // is driven by resolveActiveSteps(lesson.stepSequence), which falls back to
+  // DEFAULT_STEP_SEQUENCE only for lessons without their own sequence).
+  //
+  // But this loop builds the actual <Route> elements, and a route that doesn't
+  // exist here 404s/blanks regardless of what any lesson's step_sequence says.
+  // STEP_REGISTRY is the true superset of "every step id that might ever be
+  // navigated to" — DEFAULT_STEP_SEQUENCE was only ever a stand-in for that
+  // because, before #2752, every registered id happened to also be a default
+  // one. `nextEnabledStepId` above still keys off DEFAULT_STEP_SEQUENCE, so a
+  // classical-only step's StepRoute gets nextPath=undefined (no "skip on
+  // crash" fallback target) — that route-build-time value only feeds the
+  // StepErrorBoundary skip button, not normal step-finish navigation (which
+  // `dispatchStepFinish`'s lesson-aware override in useLearningStepNavigation.ts
+  // resolves correctly per-lesson at click time).
+  for (const stepId of Object.keys(STEP_REGISTRY)) {
     const step: StepConfig | undefined = STEP_REGISTRY[stepId];
     const PageComponent = STEP_PAGE_MAP[stepId];
 

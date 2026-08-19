@@ -1,72 +1,81 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 2,
+    "fill_blank_count": 3,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "主角",
+      "球風",
+      "背景",
+      "經過"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "贏得喝采的輸家",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主角",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "主題",
-      "value": "小戴即使在強大的壓力下，仍然堅持維持自己的風格。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "球風",
-      "value": "主動出擊，追求完美的【　　　】和【　　　】的穿越角度。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "事例",
-      "value": "",
       "interactive_type": "display",
+      "label": "贏得喝采的輸家",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "interactive_type": "display",
+      "label": "主題",
+      "value": "小戴即使在強大的壓力下，仍然堅持維持自己的風格。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "球風",
+      "value": "主動出擊，追求完美的【　　　】和【　　　】的穿越角度。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "事例",
       "sub_rows": [
         {
-          "label": "",
-          "value": "□①奧運金牌賽 □②世界大學運動會 □③全國關注的比賽",
           "interactive_type": "checkbox",
+          "label": "背景",
           "options": [
-            "奧運金牌賽 □",
-            "世界大學運動會 □",
+            "奧運金牌賽",
+            "世界大學運動會",
             "全國關注的比賽"
           ],
-          "correct_options": []
+          "value": "這個故事發生的情境？【 多選，請打勾 】\n①奧運金牌賽 ②世界大學運動會 ③全國關注的比賽"
         },
         {
-          "label": "",
-          "value": "①忠於自己的球風 □②保守地打安全球",
           "interactive_type": "checkbox",
+          "label": "經過",
           "options": [
-            "忠於自己的球風 □",
+            "忠於自己的球風",
             "保守地打安全球"
           ],
-          "correct_options": [
-            0
-          ]
+          "value": "在重要比賽，輸球的狀況下，仍然選擇：【 單選，請打勾 】\n①忠於自己的球風 ②保守地打安全球"
         },
         {
-          "label": "",
-          "value": "結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "【 單選，請打勾 】\n結果，小戴【　　　】球賽，\n卻【　　　】全國人民的尊敬。"
         },
         {
-          "label": "-1",
-          "value": "",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "結果-1",
+          "value": ""
         },
         {
-          "label": "-2",
-          "value": "",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "結果-2",
+          "value": ""
         }
-      ]
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
   "title": "贏得喝采的輸家",
   "worksheet_rows": [
     {
@@ -85,41 +94,30 @@
       "value": "主動出擊，追求完美的【　　　】和【　　　】的穿越角度。"
     },
     {
-      "kind": "section_block",
-      "section": "事例",
       "items": [
         {
-          "label": "",
-          "value": "□①奧運金牌賽 □②世界大學運動會 □③全國關注的比賽"
+          "label": "背景",
+          "value": "這個故事發生的情境？(多選，請打勾)\n①奧運金牌賽 ②世界大學運動會 ③全國關注的比賽"
         },
         {
-          "label": "",
-          "value": "①忠於自己的球風 □②保守地打安全球"
+          "label": "經過",
+          "value": "在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)\n①忠於自己的球風 ②保守地打安全球"
         },
         {
-          "label": "",
-          "value": "結果，小戴（　）球賽，\n卻（　）全國人民的尊敬。"
+          "label": "結果",
+          "value": "(單選，請打勾)\n結果，小戴（　）球賽，\n卻（　）全國人民的尊敬。"
         },
         {
-          "label": "-1",
+          "label": "結果-1",
           "value": ""
         },
         {
-          "label": "-2",
+          "label": "結果-2",
           "value": ""
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "事例"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 3,
-    "checkbox_count": 2,
-    "primary_labels": [
-      "主角",
-      "球風"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -1,55 +1,68 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "阿耀的問題",
+      "學長的觀點",
+      "例子1",
+      "例子2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "想讀書，該從哪裡著手？",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "阿耀的問題",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "學長的觀點",
-      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "舉例說明",
-      "value": "",
       "interactive_type": "display",
+      "label": "想讀書，該從哪裡著手？",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "阿耀的問題",
+      "value": "下列哪個是阿耀遇到的問題？【 單選 】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "學長的觀點",
+      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
       "sub_rows": [
         {
-          "label": "",
-          "value": "【　　　】【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "例子1",
+          "value": "【　　　】【　　　】"
         },
         {
-          "label": "",
-          "value": "【　　　】【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "例子2",
+          "value": "【　　　】【　　　】"
         },
         {
-          "label": "",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "例子3",
+          "value": "【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "fill_blank",
       "label": "結尾",
-      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。",
-      "interactive_type": "fill_blank"
+      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
   ],
-  "layout": "worksheet_table",
   "title": "想讀書，該從哪裡著手？",
   "worksheet_rows": [
     {
       "kind": "pair",
       "label": "阿耀的問題",
-      "value": ""
+      "value": "下列哪個是阿耀遇到的問題？(單選)"
     },
     {
       "kind": "pair",
@@ -57,38 +70,27 @@
       "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
     },
     {
-      "kind": "section_block",
-      "section": "舉例說明",
       "items": [
         {
-          "label": "",
+          "label": "例子1",
           "value": "【　　　】【　　　】"
         },
         {
-          "label": "",
+          "label": "例子2",
           "value": "【　　　】【　　　】"
         },
         {
-          "label": "",
+          "label": "例子3",
           "value": "【　　　】"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
     },
     {
       "kind": "pair",
       "label": "結尾",
       "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "學長的觀點",
-      "結尾"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

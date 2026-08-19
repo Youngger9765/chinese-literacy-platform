@@ -251,6 +251,32 @@ def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
     return "thumbnail.webp" if (root / version_id / "assets" / "thumbnail.webp").is_file() else None
 
 
+#: 文言文課的線上學習流程 (#2752). Six worksheet sections
+#: (導讀／古文今譯／原文／文白句子比對／文白詞語比對／自我挑戰) have no `step_sequence`
+#: to travel on, so the frontend falls back to `DEFAULT_STEP_SEQUENCE` — the vocab/listening/
+#: dictation steps a 白話課 uses, none of which this genre has data for. This is what a
+#: 文言文 lesson gets instead, in worksheet order:
+#:   導讀+古文今譯 fold into lesson-intro；原文(+白話對照) is its own step (annotate-by-
+#:   student doesn't apply — the 注釋 are already printed, so full-text-annotate's
+#:   interaction doesn't fit); 念順順 stays key-passage-reading (already wired, #2559);
+#:   一/二/六 大題 each get their own step (matching answer / boxed-term blank / separate
+#:   passage+questions are three different interaction shapes, none of which the
+#:   existing vocab-definition/vocab-application cloze renderer can display without
+#:   mislabeling the step).
+CLASSICAL_STEP_SEQUENCE: tuple[str, ...] = (
+    "lesson-intro",
+    "classical-text",
+    "key-passage-reading",
+    "classical-sentence-matching",
+    "classical-word-matching",
+    "keypoints-table",
+    "spotlight",
+    "comprehension",
+    "classical-self-challenge",
+    "report",
+)
+
+
 def _uid_tree_lessons() -> list[dict]:
     """Second-edition lessons from the uid tree (#2687/#2692).
 
@@ -388,6 +414,23 @@ def _uid_tree_lessons() -> list[dict]:
             "video_links": _video_links(l),
             "assets": l.get("assets") or [],
             "source": "uid_tree",
+            # 文言文專屬模組 (#2752) — passed through raw, same shape `lesson_uid_loader`
+            # already unwrapped them into. `None` for the ~9 in 10 lessons that carry
+            # none of these files; a missing module stays missing (module_entry_gate's
+            # "空狀態是誠實值" rule applies here too — inventing a self_challenge for a
+            # lesson whose worksheet never had one would be worse than showing nothing).
+            "classical_text": l.get("classical_text") or None,
+            "modern_translation": l.get("modern_translation") or None,
+            "word_matching": l.get("word_matching") or None,
+            "sentence_matching": l.get("sentence_matching") or None,
+            "self_challenge": l.get("self_challenge") or None,
+            "intro_guide": l.get("intro_guide") or None,
+            # Per-lesson step order (#1374 mechanism, unused by the uid tree until now —
+            # every one of the 175 second-edition lessons fell back to
+            # DEFAULT_STEP_SEQUENCE because this key was never in `row` for the overlay
+            # loop below to carry). A 文言文 lesson (has `classical_text`) gets
+            # CLASSICAL_STEP_SEQUENCE; everything else stays None → unchanged behavior.
+            "step_sequence": list(CLASSICAL_STEP_SEQUENCE) if l.get("classical_text") else None,
         }
         # Overlay what lesson.yml actually carries. Identity stays computed — a
         # lesson must never be able to rename its own uid or id from its payload.

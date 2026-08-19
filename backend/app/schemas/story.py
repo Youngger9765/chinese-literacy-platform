@@ -120,6 +120,18 @@ class StoryDetail(StoryListItem):
     # LessonRenderer (falling back to its storyToLesson stopgap when null). Emitting the
     # null key when flag OFF is harmless to legacy consumers (they never read this field).
     lesson_content: Optional[dict] = None
+    # 文言文專屬模組 (#2752). Untyped dict — each is the module's own shape (see
+    # backend/data/lessons/*/v3/{classical_text,modern_translation,word_matching,
+    # sentence_matching,self_challenge,intro_guide}.yml), passed straight through
+    # from `lesson_uid_loader`'s already-unwrapped module dict. None for the ~9 in
+    # 10 lessons that carry none of these files (this genre is the only source —
+    # 白話 lessons never populate them).
+    classical_text: Optional[dict] = None       # 原文＋注釋
+    modern_translation: Optional[dict] = None   # 古文今譯（白話翻譯）
+    word_matching: Optional[dict] = None        # 文白詞語比對（方框字填白話）
+    sentence_matching: Optional[dict] = None    # 文白句子比對（8 句配對）
+    self_challenge: Optional[dict] = None       # 自我挑戰（選做：另一段文章＋題組）
+    intro_guide: Optional[dict] = None          # 導讀
 
 
 class StoryListResponse(BaseModel):

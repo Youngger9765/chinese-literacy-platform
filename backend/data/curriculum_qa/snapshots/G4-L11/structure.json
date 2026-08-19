@@ -14,6 +14,11 @@
   "rows": [
     {
       "interactive_type": "display",
+      "label": "文章重點表",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
       "label": "大主題",
       "value": "動物的生存妙招"
     },
@@ -28,6 +33,7 @@
       "value": "提高自己、【　　　】和下一代的【　　　】。"
     }
   ],
+  "title": "文章重點表",
   "worksheet_rows": [
     {
       "kind": "pair",

@@ -1,125 +1,53 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 1,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "例子"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "用科學方法伸張正義的神探",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "前言",
-      "value": "1.科學是一種【　　　】解決問題的方法。\n2.警察也會依循【　　　】、【　　　】、\n【　　　】、【　　　】的程序來辦案。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "案件背景",
-      "value": "1.鄰居孩子發現老太太倒在自家廚房，老太太已死去。\n2.當天晚上十二點，李昌鈺博士趕到現場。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "案發現場",
-      "value": "1.警方已在現場調查【　　　】小時。\n2.老太太死因：【　　　】。\n3.凶器：【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "辦案歷程",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "問題",
-          "value": "假設 假設驗證 解答",
-          "interactive_type": "display"
-        },
-        {
-          "label": "被刺了十八刀，血呢？",
-          "value": "一、血跡【　　　】？\n二、廚房不是【　　　】？ 噴【　　　】驗證，地上是否有血跡反應。 有血跡反應，假設一成立",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "鞋子在哪裡？",
-          "value": "沾血的鞋，凶手不會再穿，會被丟到垃圾箱嗎？ 派200名刑警到附近垃圾箱找鞋子。 找到鞋子，假設成立。",
-          "interactive_type": "display"
-        },
-        {
-          "label": "去哪裡找鞋子的主人？",
-          "value": "？ ？ 找到前天下午買鞋的人",
-          "interactive_type": "display"
-        }
-      ]
+      "label": "大自然的氣象小幫手",
+      "value": ""
     },
     {
-      "label": "案件真相",
-      "value": "凶手是老太太的【　　　】，有【　　　】惡習。感恩節當天想找老太太要錢，老太太不給，情緒失控殺了老太太。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "主旨",
+      "value": "第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。"
     },
     {
+      "interactive_type": "fill_blank",
+      "label": "例子",
+      "value": "1.蜘蛛會因天氣變化【　　　】調整【　　　】的大小。\n2.蟋蟀叫聲【　　　】越高，氣溫越高。\n3.下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。\n4.天空的變化\n【　　　】看到日暈表示【　　　】、\n看到月暈表示【　　　】。\n【　　　】看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
+    },
+    {
+      "interactive_type": "display",
       "label": "總結",
-      "value": "李博士和他的團隊用【　　　】，替無聲的死者說話，讓正義得到伸張。",
-      "interactive_type": "fill_blank"
+      "value": "大自然會偷偷告訴你天氣的答案。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "用科學方法伸張正義的神探",
+  "title": "大自然的氣象小幫手",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "前言",
-      "value": "1.科學是一種【　　　】解決問題的方法。\n2.警察也會依循【　　　】、【　　　】、\n【　　　】、【　　　】的程序來辦案。"
+      "label": "主旨",
+      "value": "第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。"
     },
     {
       "kind": "pair",
-      "label": "案件背景",
-      "value": "1.鄰居孩子發現老太太倒在自家廚房，老太太已死去。\n2.當天晚上十二點，李昌鈺博士趕到現場。"
-    },
-    {
-      "kind": "pair",
-      "label": "案發現場",
-      "value": "1.警方已在現場調查【　　　】小時。\n2.老太太死因：【　　　】。\n3.凶器：【　　　】。"
-    },
-    {
-      "kind": "section_block",
-      "section": "辦案歷程",
-      "items": [
-        {
-          "label": "問題",
-          "value": "假設 假設驗證 解答"
-        },
-        {
-          "label": "被刺了十八刀，血呢？",
-          "value": "一、血跡【　　　】？\n二、廚房不是【　　　】？ 噴【　　　】驗證，地上是否有血跡反應。 有血跡反應，假設一成立"
-        },
-        {
-          "label": "鞋子在哪裡？",
-          "value": "沾血的鞋，凶手不會再穿，會被丟到垃圾箱嗎？ 派200名刑警到附近垃圾箱找鞋子。 找到鞋子，假設成立。"
-        },
-        {
-          "label": "去哪裡找鞋子的主人？",
-          "value": "？ ？ 找到前天下午買鞋的人"
-        }
-      ]
-    },
-    {
-      "kind": "pair",
-      "label": "案件真相",
-      "value": "凶手是老太太的【　　　】，有【　　　】惡習。感恩節當天想找老太太要錢，老太太不給，情緒失控殺了老太太。"
+      "label": "例子",
+      "value": "1.蜘蛛會因天氣變化（濕度）調整【　　　】的大小。\n2.蟋蟀叫聲【　　　】越高，氣溫越高。\n3.下雨前，濕度和氣壓會有變化，【　　　】會出現異常行為。\n4.天空的變化\n(1)看到日暈表示【　　　】、\n看到月暈表示【　　　】。\n(2)看到星星或遠山變近了，表示空氣潔淨，天氣即將【　　　】。"
     },
     {
       "kind": "pair",
       "label": "總結",
-      "value": "李博士和他的團隊用【　　　】，替無聲的死者說話，讓正義得到伸張。"
+      "value": "大自然會偷偷告訴你天氣的答案。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "前言",
-      "案發現場",
-      "被刺了十八刀，血呢？",
-      "案件真相"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

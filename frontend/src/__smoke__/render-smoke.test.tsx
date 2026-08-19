@@ -110,6 +110,10 @@ import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
 import GuestReadingPage from '../pages/GuestReadingPage';
 import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
+import ClassicalText from '../components/reading-steps/ClassicalText';
+import ClassicalWordMatching from '../components/reading-steps/ClassicalWordMatching';
+import ClassicalSentenceMatching from '../components/reading-steps/ClassicalSentenceMatching';
+import ClassicalSelfChallenge from '../components/reading-steps/ClassicalSelfChallenge';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -385,6 +389,30 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
 
   it('AssessmentReport', () => {
     mountGuard('AssessmentReport', <AssessmentReport session={MINIMAL_SESSION} onRetry={vi.fn()} />);
+  });
+
+  // 文言文專屬 steps (#2752). Mounted both with and without their data present —
+  // the empty-state branch is a distinct render path from the content branch.
+  it('ClassicalText (empty state)', () => {
+    mountGuard('ClassicalText-empty', <ClassicalText story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalText (with content)', () => {
+    mountGuard(
+      'ClassicalText-content',
+      <ClassicalText
+        story={{ ...MINIMAL_STORY, classicalText: { paragraphs: ['桓公曰'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+  it('ClassicalWordMatching', () => {
+    mountGuard('ClassicalWordMatching', <ClassicalWordMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSentenceMatching', () => {
+    mountGuard('ClassicalSentenceMatching', <ClassicalSentenceMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSelfChallenge', () => {
+    mountGuard('ClassicalSelfChallenge', <ClassicalSelfChallenge story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 });
 

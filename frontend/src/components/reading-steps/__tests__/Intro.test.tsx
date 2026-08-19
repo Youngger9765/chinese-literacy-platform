@@ -93,3 +93,20 @@ describe('Intro CTA label — #1913', () => {
     expect(onStartReading).toHaveBeenCalledOnce();
   });
 });
+
+describe('Intro — 導讀 box (#2752)', () => {
+  it('renders introGuide.text in its own 導讀 box when present', () => {
+    const storyWithGuide: Story = {
+      ...baseStory,
+      introGuide: { text: '導讀：這課講一個發生在2700年前的精采的故事。' },
+    };
+    render(<Intro story={storyWithGuide} onStartReading={vi.fn()} onBack={vi.fn()} />);
+    expect(screen.getByText(/2700年前的精采的故事/)).toBeInTheDocument();
+    expect(screen.getByText('導讀')).toBeInTheDocument();
+  });
+
+  it('renders nothing extra for a lesson with no introGuide (the other 165 lessons)', () => {
+    render(<Intro story={baseStory} onStartReading={vi.fn()} onBack={vi.fn()} />);
+    expect(screen.queryByText('導讀')).toBeNull();
+  });
+});

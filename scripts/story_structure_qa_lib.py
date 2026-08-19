@@ -156,6 +156,29 @@ def derive_mode(fill_blank: int, checkbox: int) -> str:
     return "display_only"
 
 
+# A filled-in 【…】 in served output is the answer the student was supposed to write —
+# except when it is the teacher's instruction for a choice row. The second edition
+# writes those in the same brackets (「【 單選 】」「【 請打勾，複選 】」), so the bare
+# "anything inside 【】" rule flagged 34 of them across 150 lessons and zero real
+# answers: a leak check that is wrong 34 times out of 34 is one nobody can act on.
+#
+# The instruction vocabulary is closed — 單／多／複／可／請／打／勾／選 and separators —
+# so a marker is recognisable without listing every phrasing. Boundary: an answer that
+# happened to be written only from those characters would still be excused. No such
+# answer exists in the corpus (checked: the 11 distinct bracketed strings served today
+# are all markers), and a one-character 「選」 is not a 重點表 answer.
+ANSWER_PAT = re.compile(r"【\s*[^】\s　][^】]*】")
+_INSTRUCTION_CHARS = set("單多複可請打勾選")
+_INSTRUCTION_SEPARATORS = set("，,、；;。 \t\u3000")
+
+
+def is_choice_instruction(bracketed: str) -> bool:
+    """True when 【…】 holds a choice instruction rather than an answer."""
+    body = bracketed.strip("【】")
+    core = {c for c in body if c not in _INSTRUCTION_SEPARATORS}
+    return bool(core) and core <= _INSTRUCTION_CHARS
+
+
 def verify_interaction_profile_contract(structure: dict) -> list[str]:
     """L3: interaction_profile must match rows; answers must not leak."""
     errors: list[str] = []
@@ -185,10 +208,10 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
         errors.append(f"layout {layout} != profile.layout {expected_layout}")
 
     # Answer leak check
-    answer_pat = re.compile(r"【\s*[^】\s　][^】]*】")
-
     def check_value(val: str, ctx: str) -> None:
-        if answer_pat.search(val or ""):
+        for hit in ANSWER_PAT.findall(val or ""):
+            if is_choice_instruction(hit):
+                continue
             errors.append(f"answer leak in {ctx}")
 
     for i, row in enumerate(rows):

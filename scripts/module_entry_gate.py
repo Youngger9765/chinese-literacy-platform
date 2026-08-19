@@ -68,16 +68,20 @@ ENTRY: dict[str, tuple[str, str]] = {
     # ── 刻意不給學生看 ──────────────────────────────────────────
     "errata":               (NOT_SHOWN, "教材本身的印錯紀錄，是給我方校對用的，不是課程內容"),
 
+    # ── 文言文專屬：一個新 step，或跟同一個 step 一起顯示 (#2752 Phase 1) ──────
+    # 原文＋白話對照放同一頁（annotate 互動不合這裡的形狀 — 注釋已印好，不是學
+    # 生自己選字），文白句子比對／文白詞語比對／自我挑戰各自是獨立的互動形狀。
+    "classical_text":       (STEP, "classical-text"),
+    "modern_translation":   (FOLDED, "跟 classical_text 同一頁：原文/白話對照"),
+    "word_matching":        (STEP, "classical-word-matching"),
+    "sentence_matching":    (STEP, "classical-sentence-matching"),
+    "self_challenge":       (STEP, "classical-self-challenge"),
+    "intro_guide":          (FOLDED, "課程簡介頁（lesson-intro）多印一段導讀文字"),
+
     # ── 目前沒有入口（債，追蹤中）────────────────────────────────
     # ⚠️ 這些不是「不用做」，是「還沒做」。見 issue #2752。
-    "classical_text":       (NO_ENTRY, "#2752 文言文原文"),
-    "modern_translation":   (NO_ENTRY, "#2752 白話翻譯"),
-    "word_matching":        (NO_ENTRY, "#2752 語詞連連看"),
-    "sentence_matching":    (NO_ENTRY, "#2752 句子配對"),
-    "self_challenge":       (NO_ENTRY, "#2752 自我挑戰"),
     "goal_box":             (NO_ENTRY, "#2752 學習目標框"),
     "self_check_before_reading": (NO_ENTRY, "#2752 讀前自我檢核"),
-    "intro_guide":          (NO_ENTRY, "#2752 導讀"),
     "writing_practice":     (NO_ENTRY, "#2752 寫作練習"),
     "multi_text_parts":     (NO_ENTRY, "#2752 多文本各篇"),
     "cross_text_banner":    (NO_ENTRY, "#2752 跨課文橫幅"),
@@ -86,17 +90,41 @@ ENTRY: dict[str, tuple[str, str]] = {
 
 # 目前沒有入口的模組涵蓋幾課。**只能減少，不能增加。**
 # 增加代表又有內容被抽出來卻沒人接 —— 那正是這道門要擋的事。
-NO_ENTRY_LESSON_CEILING = 83
+#
+# 2026-08-19 (#2752 Phase 1): 83 → 82。文言文六個目標模組全部有了答案，但這 10 課
+# 裡有 9 課還背著範圍外的 `goal_box`（下一階段的債）—— 只有 L0161（沒有 goal_box）
+# 真正整課清零。老實記這個數字，不要因為「修了 6 個模組」就假裝掉了 6 課。
+NO_ENTRY_LESSON_CEILING = 82
 
 
 def _enabled_step_ids() -> set[str]:
-    """前端真的啟用的 step。disabled 的不算「學生走得到」。"""
+    """前端真的啟用的 step。disabled 的不算「學生走得到」。
+
+    每個 step 的區塊掃到「下一個 `id:`」為止；**沒有下一個時**（也就是這是
+    STEP_REGISTRY 裡最後一筆），舊版會掃到檔案結尾 —— 而結尾那段
+    `DEFAULT_STEP_SEQUENCE` 的說明文字裡剛好寫著「set `enabled: false`」，
+    於是最後一筆永遠被誤判成 disabled。#2752 踩到這個：新增第 4 個 step 讓
+    `classical-self-challenge` 變成新的最後一筆，門就把它判成停用。
+    修法：把搜尋範圍框在 STEP_REGISTRY 物件本身，不讓它溢到後面的說明文字。
+    """
     src = STEP_CONFIG.read_text(encoding="utf-8")
+    registry_start = src.find("export const STEP_REGISTRY")
+    # The object literal's OWN closing `};` — not the next export. The JSDoc
+    # comment between STEP_REGISTRY and DEFAULT_STEP_SEQUENCE itself contains
+    # the literal phrase "enabled: false" (explaining what that flag does),
+    # so bounding at "the next export" instead of "this object's own close"
+    # let that comment poison the last entry's block all over again.
+    registry_end = src.find("\n};", registry_start if registry_start != -1 else 0)
+    if registry_end == -1:
+        registry_end = len(src)
     ids: set[str] = set()
     for m in re.finditer(r"id:\s*'([a-z-]+)'", src):
-        # 這個 step 的區塊到下一個 `id:` 為止
+        if m.start() > registry_end:
+            continue
+        # 這個 step 的區塊到下一個 `id:` 為止，但不超過 STEP_REGISTRY 的結尾
         nxt = src.find("id:", m.end())
-        block = src[m.end(): nxt if nxt != -1 else len(src)]
+        block_end = nxt if (nxt != -1 and nxt <= registry_end) else registry_end
+        block = src[m.end():block_end]
         if "enabled: false" not in block:
             ids.add(m.group(1))
     return ids

@@ -15,7 +15,7 @@ owns_code:
   - scripts/keypoints_manifest_verify.py
   - backend/app/services/keypoints_to_structure.py
 owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  - backend/data/lessons/*/v3/keypoints.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
   - backend/data/curriculum_qa/snapshots/**/*
 spec_tests:
@@ -126,9 +126,25 @@ keypoints.yml 的 `label_blanks` 經 `keypoints_table_sync.py` 轉成 `【 answe
 
 改 `owns_code` 或 lesson `story_structure_table` 時，**同一 PR** 必須：
 
-1. `python scripts/build_keypoints_qa_manifest.py --all`（需 private schema）
+1. `python scripts/build_keypoints_qa_manifest.py --all`
 2. `python scripts/keypoints_manifest_verify.py` 全綠
 3. CI `keypoints-manifest-gate.yml` 會擋 stale manifest
 
 `keypoints_manifest.json` 的 `layout` / `snapshots/*/structure.json` 必須與 live loader + parser 的 `interaction_profile` 一致；`PARSER_GAP_LESSONS` 為空時 `known_gap_count` 必須為 0
+
+**基準來源**（#2749 改）：builder 讀的是**平台真的在服務的那份**——
+`backend/data/lessons/<uid>/<version>/keypoints.yml` → `get_all_lessons()` →
+`story_structure_table` → route 自己的 formatter。二修把一修的
+`private/curriculum-source/_online-schema` 跟 `_parsed_2026-05-01` 都刪了，
+builder 卻還指著那兩個目錄，所以 `--all` 直接 exit 1、基準重建不了，
+這道門在每個 PR 紅了五天。**門不能刪**：2026-08-17 欄位式重點表整張掉成
+五列空的 display、學生不能作答，逐字門／拆模組／聚光燈 render 全綠，
+只有這裡的 `interaction_profile` 比對叫出來。
+
+⚠️ **重建 manifest = 重設 ratchet**，也是把 regression 洗白進基準最容易的一條路。
+所以 `keypoints_manifest_verify.DISPLAY_ONLY_LESSONS` 是一張具名清單：
+任何一課渲染成 `display_only`（= 學生看到答案、沒有東西可作答）都必須具名 + 寫理由
+才放行；修好了就要把那行刪掉，留著也會紅。人工判讀（`overall_pass` /
+`known_data_gap`）**按 lesson_uid 沿用、永不重生**——用被 QA 的產物生 QA 判讀，
+等於讓門同意它被餵的任何東西。
 
