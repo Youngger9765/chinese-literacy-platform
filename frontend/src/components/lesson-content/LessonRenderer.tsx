@@ -331,15 +331,21 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
             </section>
           )}
           <section
-            aria-label="閱讀聚光燈作答區"
+            aria-label={`${singleHeader.label}作答區`}
             className={`${readingOpen ? 'lg:col-span-5' : 'lg:col-span-12'} lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1`}
           >
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
               <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-accent text-xl">highlight</span>
+                  {/* ⚠️ 雙欄分支原本也寫死「閱讀聚光燈」。上一個 commit 只改了單欄那條，
+                      **線上 QA 才抓到閱讀理解頁的標題還是錯的** —— 那頁有課文所以走雙欄，
+                      而本機測試資料沒有課文區塊、走單欄，於是測試是綠的。
+                      同一個缺口的兩個位置，2026-08-19 第六次。 */}
+                  <span className="material-symbols-outlined text-accent text-xl">
+                    {singleHeader.icon}
+                  </span>
                   <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                    閱讀聚光燈
+                    {singleHeader.label}
                   </span>
                 </div>
                 {readingBlocks.length > 0 && (
