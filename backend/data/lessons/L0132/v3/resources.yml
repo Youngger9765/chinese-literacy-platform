@@ -10,6 +10,8 @@ resources:
     duration: (8:36)
     source: 亮生活
     has_qr: true
+    url: http://youtu.be/xLWVj5uOJPM
+    url_source: 一修 G9-L04（依課名對接）
   - index: 2
     title: '古代沒眼鏡 近視怎麼辦?
 
@@ -17,3 +19,5 @@ resources:
     duration: (影片由開頭至7:31為止)
     source: Cheap
     has_qr: true
+    url: http://youtu.be/92Ka_jDQ4qs
+    url_source: 一修 G9-L04（依課名對接）

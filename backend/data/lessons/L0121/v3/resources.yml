@@ -10,13 +10,19 @@ resources:
     duration: (1:59)
     source: 照護線上
     has_qr: true
+    url: http://youtu.be/OTSIsm4zXIA
+    url_source: 一修 G9-L05（依課名對接）
   - index: 2
     title: 防治性騷擾_專業非藉口篇
     duration: (3:11)
     source: 衛生福利部保           護服務司
     has_qr: true
+    url: http://youtu.be/dvCL4iBIFjc
+    url_source: 一修 G9-L05（依課名對接）
   - index: 3
     title: 王淨「人選之人」遭豬哥性騷 賴佩霞爆氣飆罵下屬超解氣！
     duration: (3:21)
     source: 噓!新聞
     has_qr: true
+    url: http://youtu.be/jh6jMXQ65OY
+    url_source: 一修 G9-L05（依課名對接）

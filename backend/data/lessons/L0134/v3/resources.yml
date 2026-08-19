@@ -10,8 +10,12 @@ resources:
     duration: (05:05)
     source: 台客劇場 TKstory
     has_qr: true
+    url: https://www.youtube.com/watch?v=NiRq8rynz0Y
+    url_source: 一修 G7-L29（依課名相似 86%對接）
   - index: 2
     title: 暖化危機!海平面持續上升恐讓5億人泡水｜十點不一樣20211019
     duration: (03:45)
     source: TVBS選新聞
     has_qr: true
+    url: https://www.youtube.com/watch?v=C_Broq90nl4
+    url_source: 一修 G7-L29（依課名相似 86%對接）

@@ -98,13 +98,40 @@ def _video_links(l: dict) -> list[dict] | None:
 
     109 lessons agree, 17 differ, 31 have URLs with no worksheet list, 3 the reverse.
     """
+    res = _unwrap(_sections(l).get("resources"), "resources")
+    # 二修的模組檔叫 `videos`；一修那側叫 `items`。兩個都認，否則名字對不上時
+    # 這裡不會報錯，只會靜靜地把每支片名降級成「影片 N」——學生看得到連結，
+    # 但不知道那支在講什麼。沒有紅字的失敗最難發現。
+    videos = res.get("videos") or res.get("items") or []
+
+    # URL 有兩個來源：一修總表的 `video_links`（舊路），以及模組檔自己帶的 `url`
+    # （2026-08-19 由 scripts/migrate_legacy_video_urls.py 從一修接回來，每筆帶
+    # `url_source` 可稽核）。二修的 v3 metadata 沒有 `video_links`，所以只走舊路
+    # 的話 19 課 39 支影片全部回 None，學生看到「這篇課文目前沒有知識補給站影片」。
     urls = _meta(l).get("video_links") or []
-    if not urls:
+    if not urls and videos:
+        urls = [v.get("url") for v in videos]
+
+    if not urls or not any(urls):
+        # 有影片但一支 URL 都沒有（QR 還沒解碼的 5 課）：仍然把片名送出去。
+        # 「有兩支影片，連結在紙本的 QR code」跟「沒有影片」是兩件不同的事，
+        # 而後者是騙人的。
+        if videos:
+            return [
+                {"title": v.get("title") or f"影片 {i + 1}", "url": None,
+                 "source": v.get("source"), "duration": v.get("duration")}
+                for i, v in enumerate(videos)
+            ]
         return None
-    items = _unwrap(_sections(l).get("resources"), "resources").get("items") or []
-    titled = len(items) == len(urls)
+
+    titled = len(videos) == len(urls)
     return [
-        {"title": (items[i]["title"] if titled else f"影片 {i + 1}"), "url": u}
+        {
+            "title": (videos[i].get("title") if titled else None) or f"影片 {i + 1}",
+            "url": u,
+            **({"source": videos[i].get("source"), "duration": videos[i].get("duration")}
+               if titled else {}),
+        }
         for i, u in enumerate(urls)
     ]
 

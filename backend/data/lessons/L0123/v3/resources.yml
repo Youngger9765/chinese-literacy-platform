@@ -10,11 +10,15 @@ resources:
     duration: (3:29)
     source: 八大民生新聞
     has_qr: true
+    url: https://www.youtube.com/watch?v=B3mgVn-hXRE
+    url_source: 一修 G8-L02（依課名對接）
   - index: 2
     title: 詹雅雯苦戰帕金森氏症 鼓勵病友「一起逃開」｜當掌聲響起
     duration: (6:00)
     source: TVBS NEWS
     has_qr: true
+    url: https://www.youtube.com/watch?v=oszhrLJ-or8
+    url_source: 一修 G8-L02（依課名對接）
   videos_note: 'PDF 上兩個標題前面印有「1.」「2.」，但那是 Word 自動編號（numbering.xml 產生），
 
     不在 w:t 文字流裡，所以 title 不含編號。
