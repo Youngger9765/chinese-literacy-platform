@@ -37,46 +37,16 @@ def _with_key_reading():
     return [l for l in get_all_lessons() if l.get("key_reading")]
 
 
-#: How many stored paragraphs one PRINTED paragraph may span (#2720).
-#:
-#: This assertion used to require exactly one. That was right when the passage was an
-#: index into `body.yml`, and wrong once the anchor started reading the worksheet's own
-#: 段號欄: Word splits a paragraph at a manual line break in a handful of lessons, so
-#: the paragraph the professor numbered is two stored ones. 《感情小日記1》 is 176 + 24
-#: characters, and requiring a single paragraph served the 176 — cutting off at
-#: 「只要一想到可能會跟他」, mid-sentence.
-#:
-#: Still bounded, because the property this test exists to protect is unchanged: a
-#: passage must not be a span ASSEMBLED to reach a length, which is what #2712 was. An
-#: unbounded run would permit exactly that. Three is above every observed split (all are
-#: two) and far below any length-driven assembly.
-MAX_BODY_SPAN = 3
-
-
 def test_the_passage_is_one_paragraph_of_the_lesson():
-    """Not a span assembled to hit a length. Every passage must be one of the lesson's
-    own paragraphs, or a short run of consecutive ones that Word had split."""
+    """Not a span assembled to hit a length. Every passage must be exactly one of the
+    lesson's own paragraphs."""
     assembled = []
     for l in _with_key_reading():
-        passage = "".join(l["key_reading"]["passage"].split())
-        paras = ["".join(p.split()) for p in (l.get("paragraphs") or [])]
-        ok = False
-        for i in range(len(paras)):
-            acc = ""
-            for j in range(i, min(i + MAX_BODY_SPAN, len(paras))):
-                acc += paras[j]
-                if acc == passage:
-                    ok = True
-                    break
-                if len(acc) > len(passage):
-                    break
-            if ok:
-                break
-        if not ok:
-            assembled.append((l["lesson_uid"], len(passage)))
+        passage = l["key_reading"]["passage"].strip()
+        if passage not in [p.strip() for p in (l.get("paragraphs") or [])]:
+            assembled.append((l["lesson_uid"], len(passage), passage.count("\n") + 1))
     assert assembled == [], (
-        f"{len(assembled)} passages are neither a paragraph nor a run of "
-        f"{MAX_BODY_SPAN}: {assembled[:4]}"
+        f"{len(assembled)} passages are not a single paragraph: {assembled[:4]}"
     )
 
 
