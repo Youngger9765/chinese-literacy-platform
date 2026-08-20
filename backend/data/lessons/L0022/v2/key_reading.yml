@@ -1,8 +1,8 @@
 lesson_uid: L0022
 version_id: v2
-passage: 我深吸一口氣，轉身走回教室，不想再看下去，假裝自己根本不在意。可是，回到座位後，思緒卻無法停止。阿葉下課沒有找我一起去，或許只是剛好……可如果真的是這樣，為什麼我覺得有點失落？還是其實阿葉也喜歡他？這些念頭讓我的情緒越來越低落，甚至開始有點生氣，生氣他們看起來什麼都能聊、生氣為什麼朋友那麼不貼心、生氣自己為什麼要在意這些事情。
-start_text: 我深吸一口氣，轉身走回教室，不想再看下去，假裝自
-extent_chars: 164
+passage: 我盯著他們，心裡有點不是滋味。但這應該很正常吧？他們本來就是小學同學，話題比較多也沒什麼奇怪的……而且，我又不是那種愛計較的人，這種小事根本不值得放在心上。可是，如果真的沒什麼，那為什麼不肯邁開腳步走過去？為什麼胸口悶悶的，好像吞下了一顆沒嚼碎的糖果，卡在喉嚨裡？
+start_text: 我盯著他們，心裡有點不是滋味。但這應該很正常吧？
+extent_chars: 132
 source: docx-extract
 anchor_paragraph: 3
 paragraphs_used: 1
@@ -16,4 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: confirmed
-  corroborated_by_first_edition: 3
+  corroborated_by_first_edition: true
+  printed_marks: 6
+  cell_paragraphs: 6

@@ -1,11 +1,6 @@
 lesson_uid: L0108
 version_id: v2
-passage: 1907年4月，英國獵手吉姆・科貝抵達，局勢才出現轉機。他不盲目搜山，而是花幾星期走遍受虎襲的村莊，訪察歷次遇襲的時間與地形，據此推定這隻老虎的出沒路線，並發現牠多以老人、婦女與孩童為目標。5月12日，科貝召集了298名村民，人們舉火把、敲鐵鍋，自四面八方逼近老虎藏身處，噪音迫使老虎自山坳衝出，直闖谷底伏擊圈。科貝藏在榕樹後，待老虎離得只有幾步遠，他扣動扳機，子彈打中牠的胸口和肩膀。受傷猛虎嘶吼反撲，他又抓過同伴的槍，打中它的腿，這隻危害村民多年的猛虎終於轟然倒地。
-start_text: 1907年4月，英國獵手吉姆・科貝抵達，局勢才出
-extent_chars: 235
-source: docx-extract
-anchor_paragraph: 4
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: not_a_stored_paragraph

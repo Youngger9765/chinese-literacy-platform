@@ -1,11 +1,6 @@
 lesson_uid: L0010
 version_id: v2
-passage: 升上八年級後，我被排進先發名單，除了大隊訓練和晨操，我晚上還會自己加練。雖然很累很操，但我真的喜歡棒球，而且不少學長都告訴我們：「球打得好，以後就有高中、大學可讀；更強的話，高中就能直接進職棒！」我總是夢想有朝一日能像您一樣進職棒。
-start_text: 升上八年級後，我被排進先發名單，除了大隊訓練和晨
-extent_chars: 116
-source: docx-extract
-anchor_paragraph: 2
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 2
+  verdict: no_printed_numbering

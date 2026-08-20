@@ -1,11 +1,6 @@
 lesson_uid: L0129
 version_id: v2
-passage: 當貼文獲得很多讚時，你會覺得開心、備受矚目；反之，如果按讚數不如預期，可能會感到悵然若失。久而久之，有些人甚至會把自我價值建立在按讚數上，心情隨之起伏不定。澳洲有位網紅艾絲娜曾擁有超過50萬粉絲，她公開表示，為了追求按讚數，她常常拍了數十張照片才發出去，拍到快哭、修到不想看，照片裡的完美生活都是演出來的，這讓她感到空虛和不真實，最後決定刪掉了自己的帳號。美國11歲的瑟琳娜因為在社群貼文上獲得的按讚數太少而感到自卑焦慮，她的母親甚至對平台提起法律訴訟，控訴平台的成癮性設計、有害內容、網路霸凌、安全措施不足等多項因素，這些例子提醒我們，按讚不只是數字，它正悄悄左右我們的心緒，甚至心理健康。
-start_text: 當貼文獲得很多讚時，你會覺得開心、備受矚目；反之
-extent_chars: 296
-source: docx-extract
-anchor_paragraph: 3
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: not_a_stored_paragraph

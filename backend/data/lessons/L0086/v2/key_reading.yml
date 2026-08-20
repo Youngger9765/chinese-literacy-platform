@@ -1,8 +1,8 @@
 lesson_uid: L0086
 version_id: v2
-passage: （段3）正太說：「明白了。」
-start_text: （段3）正太說：「明白了。」
-extent_chars: 14
+passage: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的秋天，寒氣逼人的冬天。正太每天抱著豬上上下下，一天又一天，一年又一年，小豬慢慢長大，小豬變中豬，中豬變大豬了。
+start_text: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的
+extent_chars: 79
 source: docx-extract
 anchor_paragraph: 7
 paragraphs_used: 1
@@ -15,5 +15,7 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 7
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 11
+  cell_paragraphs: 11

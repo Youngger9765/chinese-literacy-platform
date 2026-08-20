@@ -1,8 +1,8 @@
 lesson_uid: L0102
 version_id: v2
-passage: 用抽的啊！」阿政這樣想。
-start_text: 用抽的啊！」阿政這樣想。
-extent_chars: 12
+passage: 然而，阿政看的這兩部影片都有問題，影片製作者的描述方式看起來很像科學，但實驗方法並不能回答「電子煙是否安全」這個問題，提供的訊息也不完整，容易讓觀眾信以為真，誤入偽科學的迷魂陣。
+start_text: 然而，阿政看的這兩部影片都有問題，影片製作者的描
+extent_chars: 89
 source: docx-extract
 anchor_paragraph: 6
 paragraphs_used: 1
@@ -17,3 +17,5 @@ reading_benchmark:
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 15

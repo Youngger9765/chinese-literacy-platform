@@ -17,3 +17,5 @@ reading_benchmark:
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 6
+  cell_paragraphs: 6

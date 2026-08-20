@@ -1,8 +1,8 @@
 lesson_uid: L0110
 version_id: v2
-passage: 這種教養方式，對我心理韌性的養成有莫大助益。
-start_text: 這種教養方式，對我心理韌性的養成有莫大助益。
-extent_chars: 22
+passage: 小時候的我，對她真是又怨又怕，能逃就逃。但隨著年齡漸長，我漸漸發現，我常挨罵，也許不是我一無是處——她連看八點檔，都會挑剔演員：「這個人醜到火車都不給坐！」
+start_text: 小時候的我，對她真是又怨又怕，能逃就逃。但隨著年
+extent_chars: 78
 source: docx-extract
 anchor_paragraph: 4
 paragraphs_used: 1
@@ -15,5 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 4
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 15
+  cell_paragraphs: 16

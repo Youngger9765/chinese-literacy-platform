@@ -16,4 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: confirmed
-  corroborated_by_first_edition: 2
+  corroborated_by_first_edition: true
+  printed_marks: 14
+  cell_paragraphs: 14

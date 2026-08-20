@@ -1,8 +1,8 @@
 lesson_uid: L0094
 version_id: v2
-passage: 福爾摩斯把觀察到的線索和背景知識連結起來，做出了令人拍案叫絕的推理。這裡的推理三要素是：
+passage: 福爾摩斯把觀察到的線索和背景知識連結起來，做出了令人拍案叫絕的推理。這裡的推理三要素是：觀察線索：找出和問題有關的線索，例如帽子的高級用料、灰白髮絲、壞掉的鬆緊帶和補丁上的墨水痕跡等。
 start_text: 福爾摩斯把觀察到的線索和背景知識連結起來，做出了
-extent_chars: 44
+extent_chars: 92
 source: docx-extract
 anchor_paragraph: 3
 paragraphs_used: 1
@@ -17,3 +17,5 @@ reading_benchmark:
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 13
+  cell_paragraphs: 13

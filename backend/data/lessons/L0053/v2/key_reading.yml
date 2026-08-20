@@ -1,8 +1,8 @@
 lesson_uid: L0053
 version_id: v2
-passage: 「噗噗！噗噗！」黃面蜂（狩獵蜂的一種）正在野地裡飛來飛去，尋找獵物，為孵化後的幼蟲準備食物。黃面蜂發現一個葉苞裡藏著一隻捲葉蛾幼蟲，便飛過去停在捲起的葉子上。牢固的葉苞把牠擋在外面，牠便用觸鬚碰碰葉苞的底部，彷彿在告訴獵物：「殺手來啦！」
-start_text: 「噗噗！噗噗！」黃面蜂（狩獵蜂的一種）正在野地裡
-extent_chars: 119
+passage: 捲葉象鼻蟲折葉、捲葉，是每一隻母蟲都會的本能行為。可是，這隻象鼻蟲在折葉、捲葉的過程中碰到困難，居然做出和其他同伴不同的做法，臨機應變，另找方法解決問題。
+start_text: 捲葉象鼻蟲折葉、捲葉，是每一隻母蟲都會的本能行為
+extent_chars: 77
 source: docx-extract
 anchor_paragraph: 6
 paragraphs_used: 1
@@ -17,3 +17,5 @@ reading_benchmark:
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 11

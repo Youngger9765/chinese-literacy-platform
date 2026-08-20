@@ -16,6 +16,6 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 extraction_check:
   verdict: disagrees_with_first_edition
-  corroborated_by_first_edition: 2
-needs_human_review: true
-review_reason: 二修 DOCX 標第 3 段，一修對照表標第 2 段；採用二修
+  corroborated_by_first_edition: false
+  printed_marks: 7
+  cell_paragraphs: 8

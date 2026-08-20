@@ -1,11 +1,6 @@
 lesson_uid: L0012
 version_id: v2
-passage: 第二位是我們球隊的隊醫，以前也是學生棒球隊選手，但因運動傷害，打球期間一邊復健，一邊研究身體骨骼肌肉的解剖學，探討怎麼運動、如何訓練才能預防傷害。俗語說，久病而成良醫，他不但自己受傷，球隊裡受傷的情況太多、太頻繁了，這讓他有機會學習隊友們受傷的原因、醫師的診斷、復健師的復健指導到底怎麼做。靠著這些投入，他後來居然考上醫學相關科系。他最終雖然沒有成為職棒選手，卻用不一樣的方式，在最愛的棒球界完成夢想。
-start_text: 第二位是我們球隊的隊醫，以前也是學生棒球隊選手，
-extent_chars: 201
-source: docx-extract
-anchor_paragraph: 12
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 12
+  verdict: no_printed_numbering

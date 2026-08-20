@@ -1,11 +1,6 @@
 lesson_uid: L0092
 version_id: v2
-passage: 三位美國的社會心理學家認為，這是個做研究的大好機會，便用假身分加入了這個團體，他們在末日前、末日當天和末日之後祕密蒐集資料，並記錄信眾的反應。
-start_text: 三位美國的社會心理學家認為，這是個做研究的大好機
-extent_chars: 71
-source: docx-extract
-anchor_paragraph: 5
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 5
+  verdict: numbering_disagrees

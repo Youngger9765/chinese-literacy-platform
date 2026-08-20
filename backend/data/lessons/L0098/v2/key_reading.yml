@@ -1,11 +1,6 @@
 lesson_uid: L0098
 version_id: v2
-passage: 與原住民朋友互動時，總是用酒量和膚色作為開場白，暗示原住民「應該」會喝酒，或「應該」有較深的膚色，這樣才符合「典型的原住民」形象。這類話語顯示了社會對原住民族群的理解不足，無形中也加深了刻板印象和偏見。
-start_text: 與原住民朋友互動時，總是用酒量和膚色作為開場白，
-extent_chars: 101
-source: docx-extract
-anchor_paragraph: 6
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: numbering_disagrees

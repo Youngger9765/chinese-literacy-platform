@@ -1,11 +1,6 @@
 lesson_uid: L0119
 version_id: v2
-passage: 人比西岸是稀一點/山比西岸卻密得多
-start_text: 人比西岸是稀一點/山比西岸卻密得多
-extent_chars: 17
-source: docx-extract
-anchor_paragraph: 4
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: numbering_disagrees

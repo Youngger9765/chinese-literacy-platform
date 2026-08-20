@@ -1,0 +1,59 @@
+# 重點朗讀待人工確認清單
+
+由 `scripts/build_key_reading.py` 自動產生。列在這裡的課**沒有**寫入 `key_reading.yml`，線上會 fallback 唸全文。
+
+| lesson_uid | verdict | 段號數 | 課文段數 | anchor | 舊檔處理 |
+|---|---|---:|---:|---:|---|
+| L0010 | no_printed_numbering | — | — | 2 | 保留字數目標 |
+| L0012 | no_printed_numbering | — | — | 6 | 保留字數目標 |
+| L0013 | not_a_stored_paragraph | 11 | 11 | 7 | 保留字數目標 |
+| L0020 | numbering_disagrees | 10 | 14 | 8 | 保留字數目標 |
+| L0021 | no_anchor | — | — | — | — |
+| L0030 | not_a_stored_paragraph | 5 | 5 | 3 | 保留字數目標 |
+| L0039 | not_a_stored_paragraph | 6 | 8 | 5 | 保留字數目標 |
+| L0044 | no_anchor | — | — | — | — |
+| L0045 | numbering_disagrees | 6 | 12 | 3 | 保留字數目標 |
+| L0049 | no_anchor | — | — | — | — |
+| L0055 | numbering_disagrees | 10 | 13 | 2 | 保留字數目標 |
+| L0060 | numbering_disagrees | 16 | 26 | 8 | 保留字數目標 |
+| L0063 | numbering_disagrees | 9 | 13 | 5 | 保留字數目標 |
+| L0065 | numbering_disagrees | 8 | 12 | 4 | 保留字數目標 |
+| L0068 | no_anchor | — | — | — | — |
+| L0070 | no_anchor | — | — | — | — |
+| L0071 | numbering_disagrees | 7 | 13 | 3 | 保留字數目標 |
+| L0077 | no_anchor | — | — | — | — |
+| L0079 | numbering_disagrees | 7 | 14 | 2 | 保留字數目標 |
+| L0088 | numbering_disagrees | 8 | 13 | 2 | 保留字數目標 |
+| L0092 | numbering_disagrees | 11 | 16 | 5 | 保留字數目標 |
+| L0097 | numbering_disagrees | 7 | 10 | 5 | 保留字數目標 |
+| L0098 | numbering_disagrees | 7 | 10 | 6 | 保留字數目標 |
+| L0106 | no_anchor | — | — | — | — |
+| L0107 | no_anchor | — | — | — | — |
+| L0108 | not_a_stored_paragraph | 8 | 8 | 4 | 保留字數目標 |
+| L0111 | no_anchor | — | — | — | — |
+| L0115 | numbering_disagrees | 8 | 12 | 2 | 保留字數目標 |
+| L0119 | numbering_disagrees | 8 | 15 | 4 | 保留字數目標 |
+| L0120 | not_a_stored_paragraph | 8 | 10 | 2 | 保留字數目標 |
+| L0123 | no_printed_numbering | — | — | 13 | 保留字數目標 |
+| L0129 | not_a_stored_paragraph | 6 | 6 | 3 | 保留字數目標 |
+| L0130 | no_anchor | — | — | — | — |
+| L0133 | no_anchor | — | — | — | — |
+| L0134 | no_anchor | — | — | — | — |
+| L0135 | no_anchor | — | — | — | — |
+| L0136 | no_anchor | — | — | — | — |
+| L0137 | no_anchor | — | — | — | — |
+| L0140 | no_printed_numbering | — | — | 13 | 保留字數目標 |
+| L0144 | no_anchor | — | — | — | — |
+| L0150 | no_anchor | — | — | — | — |
+| L0153 | no_anchor | — | — | — | 保留字數目標 |
+| L0154 | no_anchor | — | — | — | 保留字數目標 |
+| L0155 | no_anchor | — | — | — | 保留字數目標 |
+| L0156 | numbering_disagrees | 6 | 14 | 2 | 保留字數目標 |
+| L0157 | no_anchor | — | — | — | — |
+| L0158 | no_anchor | — | — | — | 保留字數目標 |
+| L0159 | no_anchor | — | — | — | 保留字數目標 |
+| L0160 | no_anchor | — | — | — | 保留字數目標 |
+| L0161 | no_anchor | — | — | — | 保留字數目標 |
+| L0162 | no_anchor | — | — | — | 保留字數目標 |
+| L0163 | no_anchor | — | — | — | 保留字數目標 |
+| L0164 | no_anchor | — | — | — | 保留字數目標 |

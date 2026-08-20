@@ -1,8 +1,8 @@
 lesson_uid: L0124
 version_id: v2
-passage: 你可能會問：植物肉的營養價值如何呢？事實上，植物肉的蛋白質含量與動物肉相媲美，每100克通常含有約20克的蛋白質。而且，植物肉的脂肪含量通常較低，不含膽固醇，還富含膳食纖維。只是植物肉中的某些營養素如維生素B12，需額外添加才能達到與動物肉相當的含量。
-start_text: 你可能會問：植物肉的營養價值如何呢？事實上，植物
-extent_chars: 126
+passage: 植物肉的興起不僅提供人類新的飲食選項，也有助於環境永續發展和動物保護倡議。研究顯示，相較於傳統畜牧業生產的肉品，生產同等重量的植物肉可以大幅減少土地使用、水資源消耗和溫室氣體排放。此外，越來越多人關注動物保護議題，生產植物肉不必屠宰動物，正符合這個趨勢。
+start_text: 植物肉的興起不僅提供人類新的飲食選項，也有助於環
+extent_chars: 127
 source: docx-extract
 anchor_paragraph: 4
 paragraphs_used: 1
@@ -15,5 +15,7 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 7
+  cell_paragraphs: 7

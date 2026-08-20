@@ -1,11 +1,6 @@
 lesson_uid: L0013
 version_id: v2
-passage: 三年以後，這頭豬已經80公斤了，正太還抱得動這隻豬嗎？
-start_text: 三年以後，這頭豬已經80公斤了，正太還抱得動這隻
-extent_chars: 27
-source: docx-extract
-anchor_paragraph: 7
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 7
+  verdict: not_a_stored_paragraph

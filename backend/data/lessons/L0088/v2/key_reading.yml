@@ -1,11 +1,6 @@
 lesson_uid: L0088
 version_id: v2
-passage: 塑膠幾乎無所不在，從飲料杯、外送餐盒、瓶子、鞋子、衣服、家具，到手機與汽車，處處有塑膠的蹤跡。它不怕水，又輕又便宜，因此被大量生產。1950年以來，全球塑膠產量成長了200多倍。麻煩的是，這些塑膠用品相當「長壽」，因為它們很難在自然界裡完全分解。全球每年產生的塑膠垃圾中，超過一半最後流入海洋、河流，或被棄置在環境中，它們不會乖乖消失，甚至可能以另一種形式回到我們身邊。
-start_text: 塑膠幾乎無所不在，從飲料杯、外送餐盒、瓶子、鞋子
-extent_chars: 185
-source: docx-extract
-anchor_paragraph: 2
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 2
+  verdict: numbering_disagrees

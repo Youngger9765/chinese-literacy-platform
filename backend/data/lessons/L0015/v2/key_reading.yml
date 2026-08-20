@@ -15,5 +15,7 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 5
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 6
+  cell_paragraphs: 6

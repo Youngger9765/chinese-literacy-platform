@@ -1,11 +1,6 @@
 lesson_uid: L0020
 version_id: v2
-passage: 後來我發現，讀文章也是一樣。作者常常把重要的話放在「可是、但是、不過、然而」這些「轉折詞」後面。例如：
-start_text: 後來我發現，讀文章也是一樣。作者常常把重要的話放
-extent_chars: 51
-source: docx-extract
-anchor_paragraph: 8
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜190字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: ok
-  corroborated_by_first_edition: null
+  verdict: numbering_disagrees

@@ -1,11 +1,6 @@
 lesson_uid: L0120
 version_id: v2
-passage: 鬼火通常出現在炎熱的夏天，夜裡趕路的行人經過墳場時，就可能看見黑暗中閃爍飄動的淡藍色或淡綠色的火焰，讓人毛骨悚然。人類是唯一會想像死後世界的動物，暗夜裡在墳場乍見搖曳浮盪的藍焰，人們難免聯想到鬼魂，說不害怕還真不可能。新聞節目說，曾經有盜墓賊在烏漆墨黑的墳場被鬼火嚇跑，甚至被活活嚇死。
-start_text: 鬼火通常出現在炎熱的夏天，夜裡趕路的行人經過墳場
-extent_chars: 143
-source: docx-extract
-anchor_paragraph: 2
-paragraphs_used: 1
+passage: null
 reading_benchmark:
   levels:
   - threshold: ＜220字
@@ -15,5 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: 2
+  verdict: not_a_stored_paragraph

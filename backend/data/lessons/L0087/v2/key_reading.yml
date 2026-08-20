@@ -1,8 +1,8 @@
 lesson_uid: L0087
 version_id: v2
-passage: 這一課，我們要再往前一步：閱讀時，不是每個地方都問同一個問題，而是要判斷自己需要理解什麼，再問自己一個最有幫助的問題。
-start_text: 這一課，我們要再往前一步：閱讀時，不是每個地方都
-extent_chars: 59
+passage: 看在眼裡，我突然覺得自己「受騙」了，一定是她拿到比較大的那一半。年紀小嘛，撒󠇡賴一下，就可以把餅換回來。真的換回來後，我就開始吃了。我狼吞虎嚥，兩三下就把餅吃光，再看姊姊，她還在慢條斯理細細品嚐，又甜又香的樣子。我的嫉妒、懷疑一起發作，心裡想：「一定是我原來的那一半比較大。」我百思不解的是，為什麼每次分餅，用盡所有策略，到頭來還是覺得姊姊的餅比我的大？
+start_text: 看在眼裡，我突然覺得自己「受騙」了，一定是她拿到
+extent_chars: 177
 source: docx-extract
 anchor_paragraph: 3
 paragraphs_used: 1
@@ -17,3 +17,5 @@ reading_benchmark:
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 10
