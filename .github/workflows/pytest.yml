@@ -85,7 +85,7 @@ jobs:
       #
       # ⚠️ test_reading_benchmark_2722.py 不在這裡：它整支 module 級 skipif 依賴
       # /tmp/docx-src（刻意的 —— 用 committed 資料驗會變成抽取器自己跟自己比），
-      # 而 CI 沒有二修 DOCX。放進來只會永遠 skip，那還是 theatre。缺口另開 issue。
+      # 而 CI 沒有二修 DOCX。放進來只會永遠 skip，那還是 theatre。缺口見 #2803。
       - name: Run key-reading gates (#2720 / #2712 / #2725)
         run: |
           cd backend
