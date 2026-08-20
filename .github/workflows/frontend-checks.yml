@@ -98,4 +98,5 @@ jobs:
             src/components/learning/__tests__/nextStepFooter.test.tsx \
             src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
             src/components/layout/__tests__/Sidebar.role-split.test.tsx \
-            src/components/layout/__tests__/toolboxUnreachable.test.tsx
+            src/components/layout/__tests__/toolboxUnreachable.test.tsx \
+            src/components/reading-steps/__tests__/introStepCount.test.ts

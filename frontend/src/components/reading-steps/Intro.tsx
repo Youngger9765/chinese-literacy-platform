@@ -441,7 +441,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             return (
               <div className="space-y-2 pb-2">
                 <p className="text-xs text-gray-400 text-center">
-                  本課共 {digitalSteps.length} 個步驟，點擊可快速跳轉
+                  {/* 這份清單**不含**課程簡介本身（人就在這頁，連過去沒意義），所以它不是
+                      「本課的步驟總數」—— 底部進度條數的是含簡介的 N+1。原本寫「本課共 N 個步驟」，
+                      學生會看到「共 10 個步驟」配上「第 11 步」，兩個數字互相打架。 */}
+                  接下來還有 {digitalSteps.length} 個步驟，點擊可快速跳轉
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {digitalSteps.map((step, idx) => (
