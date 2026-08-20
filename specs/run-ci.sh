@@ -26,8 +26,19 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 # Prefer the backend venv (has google.genai etc.); fall back to python3.
+#
+# 這個 fallback 原本是靜默的，而系統 python3 沒有 google-genai —— 於是在任何沒有
+# .venv 的 worktree 裡會冒出 8 個 collection error，看起來跟「你的改動弄壞了 spec」
+# 一模一樣。已經騙過兩次（2026-08-14、2026-08-21），所以改成會叫。
 PYBIN="$REPO_ROOT/backend/.venv/bin/python"
-[ -x "$PYBIN" ] || PYBIN="$(command -v python3)"
+if [ ! -x "$PYBIN" ]; then
+  PYBIN="$(command -v python3)"
+  echo "⚠️  找不到 $REPO_ROOT/backend/.venv —— 退回系統 python3。"
+  echo "   系統 python3 沒有 google-genai，collection error 很可能是這個造成的，"
+  echo "   不是你的改動。要真的驗，用主 checkout 的 venv："
+  echo "     \$(git rev-parse --show-toplevel 2>/dev/null)/backend/.venv/bin/python -m pytest backend/specs -q"
+  echo ""
+fi
 
 echo "== Local Spec CI =="
 echo "   python: $PYBIN"
