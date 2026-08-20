@@ -6,7 +6,10 @@ import re
 from enum import Enum
 from typing import Any
 
-from app.services.story_structure_cell_parser import parse_checkbox_options
+from app.services.story_structure_cell_parser import (
+    parse_bracket_inline_choices,
+    parse_checkbox_options,
+)
 
 # Known parser gaps — empty after cell_to_structure_fields wired
 PARSER_GAP_LESSONS = frozenset()
@@ -246,7 +249,15 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
 
 
 def count_checkbox_cells_in_table(table: list | None) -> int:
-    """Count YAML cells that parse as checkbox (□ + circled option numbers)."""
+    """來源表格裡「可作答的選擇題格」有幾個。
+
+    ⚠️ 兩種寫法都要算：
+      - 選項在句子外：`□①甲 ②乙`            → `parse_checkbox_options`
+      - 選項在空格的括號內：`【□①多 ②少】`   → `parse_bracket_inline_choices`（#2786）
+
+    只認前者的話，括號寫法的課會被算成「來源沒有選擇題」，
+    然後跟服務端的 profile 對不起來 —— 明明兩邊都是對的。
+    """
     if not table:
         return 0
     count = 0
@@ -254,7 +265,9 @@ def count_checkbox_cells_in_table(table: list | None) -> int:
         if not isinstance(row, list):
             continue
         for cell in row:
-            if isinstance(cell, str) and parse_checkbox_options(cell):
+            if not isinstance(cell, str):
+                continue
+            if parse_checkbox_options(cell) or parse_bracket_inline_choices(cell):
                 count += 1
     return count
 

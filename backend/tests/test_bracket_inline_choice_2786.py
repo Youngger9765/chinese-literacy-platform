@@ -92,3 +92,18 @@ def test_the_bridge_appended_option_line_is_stripped_too():
     v = row["value"]
     assert "①" not in v and "②" not in v, f"選項還印在句子上：{v!r}"
     assert "充足" not in v and "少量" not in v, v
+
+
+def test_an_unmarked_bracket_group_is_left_alone():
+    """🔴 完全沒有 ☑/□ 標記時，文字流沒有告訴我們答案 —— 不可以猜。
+
+    體-L* 的 `（①緊張　②雀躍）（①肯定　②批評）` 就是這種：
+    答案在來源的 `內容_choices`（分別是 1 和 2），不在文字裡。
+    照「第一個沒 □ 的是答案」去套，第二組會把「肯定」標成正解，而正解是「批評」。
+    把錯的標成對的，比不標更糟。
+    """
+    text = "3.小宇站在罰球線，心裡十分【①緊張　②雀躍】\n4.佳恩準備上場，腦中都是他人【①肯定  ②批評】的聲音"
+    row = cell_to_structure_fields("舉例", text)
+    assert row["interactive_type"] != "inline_choice", (
+        "沒有標記卻自己判了答案 —— 這會把錯的選項標成正解"
+    )

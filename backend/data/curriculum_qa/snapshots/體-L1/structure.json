@@ -1,10 +1,10 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 3,
-    "inline_choice_count": 1,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
-    "mode": "mixed",
+    "mode": "fill_blank",
     "primary_labels": [
       "內容",
       "內容",
@@ -30,21 +30,7 @@
           "value": "二~五"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "緊張",
-                "雀躍"
-              ]
-            },
-            {
-              "options": [
-                "肯定",
-                "批評"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "fill_blank",
           "label": "內容",
           "value": "1.小美看見隊友的表現亮眼而感到【　　　】\n2.阿哲練習後對自己的表現感到【　　　】\n3.小宇站在罰球線，心裡十分【　　　】\n4.佳恩準備上場，腦中都是他人【　　　】的聲音"
         }

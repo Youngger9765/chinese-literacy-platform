@@ -1,10 +1,10 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 3,
-    "inline_choice_count": 1,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
-    "mode": "mixed",
+    "mode": "fill_blank",
     "primary_labels": [
       "內容",
       "內容",
@@ -64,21 +64,7 @@
           "value": "三~四"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "口渴前",
-                "口渴後"
-              ]
-            },
-            {
-              "options": [
-                "相同",
-                "不同"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "fill_blank",
           "label": "內容",
           "value": "1.營養的重要：運動員會適時補充碳水化合物與【　　　】，幫助肌肉【　　　】。\n2.【　　　】的重要：應該在【　　　】補充水分。\n3.休息的重要：「休息」、「放鬆」與「耍廢」【　　　】，充足的【　　　】及運動後的【　　　】都能降低運動傷害的風險。"
         }

@@ -113,9 +113,16 @@ def parse_bracket_inline_choices(text: str) -> list[dict]:
         if len(opts) < 2:
             continue
         marks = [mk for mk, _, _ in items]
+        # ⛔ 一個標記都沒有 = 這段文字沒有告訴我們答案是哪個，**不可以猜**。
+        # `（①緊張　②雀躍）（①肯定　②批評）` 這種（體-L* 常見）答案存在來源的
+        # `內容_choices` 欄位裡，不在文字流；照 legacy「第一個沒 □ 的是答案」去套，
+        # 第二組會判成「肯定」而正解是「批評」—— 把錯的標成對的比不標更糟。
+        # 這種留給既有路徑處理，這裡不接手。
+        if not any(marks):
+            return []
         correct = next((n for n, mk in enumerate(marks, 1) if mk in _TICKS), 0)
         if not correct:
-            # legacy 慣例：沒有 □ 的那個是答案
+            # legacy 慣例：有 □ 的是誘答，沒 □ 的那個是答案
             correct = next((n for n, mk in enumerate(marks, 1) if not mk), 0)
         groups.append({"options": opts, "correct_option": correct})
     return groups

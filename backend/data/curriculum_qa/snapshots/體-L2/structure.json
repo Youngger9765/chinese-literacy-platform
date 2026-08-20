@@ -1,10 +1,10 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 1,
-    "inline_choice_count": 3,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
-    "mode": "mixed",
+    "mode": "fill_blank",
     "primary_labels": [
       "內容",
       "內容",
@@ -30,15 +30,7 @@
           "value": "一"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "得心應手",
-                "乏善可陳"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "fill_blank",
           "label": "內容",
           "value": "阿哲因為狀況表現【　　　】，而被教練從場上【　　　】。"
         }
@@ -55,21 +47,7 @@
           "value": "二~十"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "舊傷復發",
-                "受了新傷"
-              ]
-            },
-            {
-              "options": [
-                "看重",
-                "忽略"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "fill_blank",
           "label": "內容",
           "value": "阿哲收到學長的打氣，並關心學長【　　　】的原因：學長【　　　】\n學長說，教練認為求表現之前，要先【　　　】，成為【　　　】。\n阿哲說出自己腦中的【　　　】，學長邀請他一起去找教練。\n阿哲內心反省自己時常【　　　】教練的叮嚀，也許無形中影響身體。"
         }
@@ -103,15 +81,7 @@
           "value": "十六"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "如何讓身體更有力量",
-                "傾聽身體的聲音"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "fill_blank",
           "label": "內容",
           "value": "阿哲認為自己要學習【　　　】"
         }
