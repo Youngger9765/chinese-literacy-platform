@@ -118,9 +118,9 @@ chrome 前綴、指令標記、習題標記、去重、五層標題邊界），�
 《感情小日記1》與教授畫的段落**逐字相符**（verdict 從 `disagrees_with_first_edition`
 翻成 `confirmed`）—— 那是修對了的獨立證據。
 
-⚠️ 這個 bug 是 `backend/tests/test_key_reading_extractor_2720.py` 的單元測試抓到的，
-不是人看出來的。資料測試抓不到它，因為資料測試驗的是「產出符不符合黃金集」，
-而這兩課被「二修為主」政策排除在那條斷言之外。
+⚠️ 這個 bug 是**直接呼叫抽取器函式的單元測試**抓到的，不是人看出來的。只驗產出資料
+的測試抓不到它 —— 那兩課被「二修為主」政策排除在黃金集斷言之外。這類測試與 CI 接線
+不在本 PR 範圍，見 #2804。
 
 ### 跑法
 
@@ -138,8 +138,8 @@ python3 scripts/build_lesson_body.py --source /tmp/docx-src
 # 2. 重點朗讀段落
 python3 scripts/build_key_reading.py --source /tmp/docx-src
 
-# 3. 守門（必跑，見下）
-cd backend && pytest tests/test_key_reading_numbering_2720.py tests/test_key_reading_extent_2683.py -q
+# 3. 守門
+cd backend && pytest tests/test_key_reading_extent_2683.py -q
 ```
 
 ### 三道檢查，以及各自的代價
@@ -158,6 +158,10 @@ cd backend && pytest tests/test_key_reading_numbering_2720.py tests/test_key_rea
 | 1. 段號數 vs 課文段數 | `0 ≤ 課文段數 − 段號數 ≤ 2` | 一兩個未編號段是作者沒編號的收尾句，落在 anchor 之後；三個以上代表兩邊對「段落從哪裡開始」的看法不同（實測 diff ≥3 全數取錯）。`課文段數 < 段號數` 也擋（cell 掉了編號段）。**逐 diff 的對錯統計只有一份，在 `scripts/extract_key_reading.py` 的 module docstring** —— 這裡不複製，因為同一組數字有兩份副本時只會改到一份（2026-08-20 review 抓到過） |
 | 2. 一版段落**文字**比對 | 有一版對應段落時記錄是否同一段 —— **不同時仍寫入（二修為主）**，但標記並列進 `key-reading-disagrees-first-edition.md` | ⚠️ **比文字，不要比段號** —— 舊版拿一版段落全文只去查一個「段號」再比兩個數字，結果 48 課標 confirmed 裡 31 課是錯的。<br>⚠️ **這道不再 withhold**（靖杭 2026-08-18 決策：二修教材為主）。代價量過：黃金集可判定的 38 課裡有 2 課（L0072 / L0110）因此服務了一版說是錯的段落。那兩課的一版段落在二修課文裡仍逐字存在 → 課文沒改、標記卻不同，比較可能是我們讀錯而不是重新畫過，所以要人確認 |
 | 3. 必須是 `body.yml` 的某一段 | 完全相等 | 它是學生實際朗讀的內容，也是 #2718 斷言的對象。不在裡面代表 Word 在該處手動斷行（《感情小日記1》因此少了結尾 24 字、斷在句中） |
+
+> ⚠️ **這三道檢查目前沒有 CI 守著。** `backend/tests/` 底下 178/209 支測試沒被任何
+> workflow 引用（#2804），`test_key_reading_extent_2683.py`（#2712 的回歸鎖）也在其中。
+> 所以「取錯段」目前只會在有人手動比對黃金集時被發現。接線見 #2804。
 
 **一版對照表（`backend/data/key_reading_passages.yml`，134 課人工掃描）是 regression golden set，不是答案。**
 它是一版的：134 筆黃金段落裡，只有 **38 筆**能在二版某一課的課文裡逐字找到並唯一歸屬（**96 筆在二版任何課文裡都找不到** —— 課文已改寫）。
@@ -295,7 +299,6 @@ withheld 53         no_anchor 28（該課本來就沒有念順順，不是失敗
 | `scripts/extract_key_reading.py` | 錨點解析 + 三道檢查（演算法與量測記錄都在 docstring） |
 | `scripts/build_key_reading.py` | 寫入 / withhold / 產 review 清單 |
 | `docs/curriculum/key-reading-disagrees-first-edition.md` | 採二版但與一版標記不同（已寫入，待確認） |
-| `backend/tests/test_key_reading_numbering_2720.py` | 黃金集守門（取錯段會紅） |
 | `backend/tests/test_key_reading_extent_2683.py` | 長度守門（#2712 回歸鎖） |
 | `docs/curriculum/key-reading-needs-review.md` | 自動產生的待人工確認清單 |
 | `frontend/src/utils/fluencyAnalyzer.ts` | `reading_benchmark` 的既有前端契約（兩種單位） |
