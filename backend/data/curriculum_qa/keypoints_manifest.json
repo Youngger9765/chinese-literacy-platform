@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-20T03:01:19.457549+00:00",
+  "generated_at": "2026-08-20T05:36:09.574586+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -1892,7 +1892,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 3,
-        "checkbox_count": 1,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "gates": {
@@ -2557,7 +2557,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 2,
-        "checkbox_count": 1,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "gates": {
@@ -4007,9 +4007,9 @@
       "title": "心，也要一起練",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
+        "fill_blank_count": 3,
         "checkbox_count": 0,
         "row_count": 5
       },
@@ -4037,7 +4037,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 1,
-        "checkbox_count": 3,
+        "checkbox_count": 2,
         "row_count": 5
       },
       "gates": {
@@ -4088,9 +4088,9 @@
       "title": "成為身體的最佳夥伴",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
+        "fill_blank_count": 1,
         "checkbox_count": 0,
         "row_count": 5
       },
@@ -4115,9 +4115,9 @@
       "title": "身體，謝謝你",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
+        "fill_blank_count": 3,
         "checkbox_count": 0,
         "row_count": 5
       },
@@ -4253,7 +4253,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 4,
-        "checkbox_count": 3,
+        "checkbox_count": 0,
         "row_count": 5
       },
       "gates": {

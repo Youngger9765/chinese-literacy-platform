@@ -83,6 +83,49 @@ def parse_checkbox_options(text: str) -> dict | None:
     return {"options": options, "correct_options": correct_options}
 
 
+# 第三種行內選擇寫法：選項直接寫在跟空格同一個中括號裡（#2786）。
+# 例：`【□①多 ②少】`、`【☑①充足 □②少量】`、`【 □①憐憫　□②尊重　☑③偏見 】`
+# 標記慣例跟 `parse_checkbox_options` 一致再加一個 `☑`：
+#   ☑ = 答案、□ = 誘答、兩者都沒有 = 答案（legacy）
+_BRACKET_CHOICE_RE = re.compile(r"【([^】]*[①②③④⑤⑥⑦⑧⑨⑩][^】]*)】")
+_CIRCLED = "①②③④⑤⑥⑦⑧⑨⑩"
+_TICKS = "☑■✓"
+_MARKS = "☑■✓□"
+
+
+def parse_bracket_inline_choices(text: str) -> list[dict]:
+    """把「選項寫在括號內」的每一組拆出來，回 [{options, correct_option}]。
+
+    回空 list 代表這段文字不是這種寫法 —— 呼叫端要照舊走既有路徑，
+    不要在這裡猜（猜錯會把一般勾選列改成 inline_choice）。
+    """
+    groups: list[dict] = []
+    for m in _BRACKET_CHOICE_RE.finditer(text or ""):
+        inner = m.group(1)
+        # 每個選項 =（可選標記）+ 圈號 + 文字，文字讀到下一個「標記?+圈號」為止。
+        items = re.findall(
+            rf"([{_MARKS}]?)\s*([{_CIRCLED}])\s*(.*?)(?=[{_MARKS}]?\s*[{_CIRCLED}]|$)",
+            inner,
+            re.S,
+        )
+        opts = [txt.strip().strip("　 ").rstrip("".join(_MARKS)).strip() for _, _, txt in items]
+        opts = [o for o in opts if o]
+        if len(opts) < 2:
+            continue
+        marks = [mk for mk, _, _ in items]
+        correct = next((n for n, mk in enumerate(marks, 1) if mk in _TICKS), 0)
+        if not correct:
+            # legacy 慣例：沒有 □ 的那個是答案
+            correct = next((n for n, mk in enumerate(marks, 1) if not mk), 0)
+        groups.append({"options": opts, "correct_option": correct})
+    return groups
+
+
+def strip_bracket_choices(text: str) -> str:
+    """把括號內的選項換成乾淨的空格，句子留著。"""
+    return _BRACKET_CHOICE_RE.sub("【\u3000\u3000\u3000】", text or "")
+
+
 def parse_inline_choice_groups(text: str) -> list[dict] | None:
     """Parse one "第N個空格：①A ②B" line per sentence blank into its own
     small option set.
@@ -198,6 +241,19 @@ def cell_to_structure_fields(label: str, value: str) -> dict:
     # flat list (see `parse_inline_choice_groups` docstring). Only `value_s`
     # is checked: the sentence carrying the blanks is always the cell value,
     # never the (short) label.
+    # 選項寫在括號內的寫法（#2786）：每一組括號本身就是一個空格，數量天然對得上。
+    bracket_groups = parse_bracket_inline_choices(value_s)
+    if bracket_groups:
+        return {
+            "label": label_s,
+            # 兩層都要拿掉：括號內的選項，以及橋接器另外接在句尾的
+            # legacy `①A ②B` 行 —— 只拿掉一層，學生會看到選項兩次
+            # （G7-L12 的 snapshot 就是這樣露餡的）。
+            "value": strip_choice_notation_lines(strip_bracket_choices(value_s)),
+            "interactive_type": "inline_choice",
+            "blanks": bracket_groups,
+        }
+
     inline_groups = parse_inline_choice_groups(value_s)
     if inline_groups:
         sentence = strip_inline_slot_lines(value_s)

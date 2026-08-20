@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 2,
-    "inline_choice_count": 3,
+    "inline_choice_count": 4,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -35,8 +35,6 @@
               "options": [
                 "憐憫",
                 "尊重",
-                "憐憫",
-                "尊重",
                 "偏見"
               ]
             }
@@ -49,8 +47,6 @@
           "blanks": [
             {
               "options": [
-                "低期望",
-                "尊重",
                 "低期望",
                 "尊重",
                 "平等"
@@ -74,20 +70,22 @@
       "label": "影響與特點",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "1",
-          "options": [
-            "外化",
-            "外化",
-            "內化"
+          "blanks": [
+            {
+              "options": [
+                "外化",
+                "內化"
+              ]
+            }
           ],
-          "value": "微歧視似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到人們的【　　　】中。\n①外化 ②內化"
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "微歧視似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到人們的【　　　】中。"
         },
         {
           "blanks": [
             {
               "options": [
-                "明顯",
                 "明顯",
                 "隱蔽"
               ]
