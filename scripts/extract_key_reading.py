@@ -47,9 +47,19 @@ The worksheet prints its own paragraph numbers, in a column of the body table:
           ㄧ⏎二⏎⏎⏎三⏎⏎⏎四…   最近心情起起伏伏…⏎上課時…⏎然而最近…   27⏎57⏎85⏎…
 
 So the answer is read, not re-derived: the anchor indexes the 課文 CELL's own
-paragraphs. On 靖杭's golden set that moves the hit rate from 20/34 to 30/34, and the
-four remaining misses are all lessons where the printed numbering and the cell's
-paragraph count disagree — which is a condition this file can test.
+paragraphs. Measured on the same 38 lessons 靖杭's golden set can judge, against the
+same second-edition worksheets and the same stored bodies:
+
+    body[anchor - 1]                       24 / 38
+    課文 cell's paragraphs, aligned        31 / 38
+
+The remaining misses are anchor-level, not counting-level — no reading of the numbering
+fixes them, which is what checks 2 and 3 are for.
+
+⚠️ Every figure in this file is a measurement of ONE snapshot of the corpus, and the
+corpus is still moving (#2715 changed three lessons' bodies mid-review). Re-derive
+before quoting: three stale numbers in these docstrings were caught in review rather
+than by me, and this PR's own argument is that a stale number reads as a verified one.
 
 Two traps in that column, both real:
 
@@ -66,7 +76,7 @@ fallback is degraded, a confidently wrong passage is a lie.
 
   1. The 課文 cell must hold as many paragraphs as the author numbered, give or take a
      couple of unnumbered tail lines. Measured over all 175 second-edition worksheets,
-     against the 33 lessons 靖杭's golden set can judge:
+     against the 36 lessons 靖杭's golden set can judge (the rows below sum to 36):
 
          paras - marks     correct   wrong
               0               22        2      L0030, L0072

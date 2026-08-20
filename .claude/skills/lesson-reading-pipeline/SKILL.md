@@ -161,12 +161,17 @@ cd backend && pytest tests/test_key_reading_numbering_2720.py tests/test_key_rea
 
 ```
 寫入 122 課（70%）  ok 66 / confirmed 31 / disagrees_with_first_edition 25
-withheld 52         no_anchor 28（該課本來就沒有念順順，不是失敗）
+withheld 53         no_anchor 28（該課本來就沒有念順順，不是失敗）
                     numbering_disagrees 15
                     no_printed_numbering 4 / not_a_stored_paragraph 4 / implausible_length 2
 字數目標 157 課
 黃金集可判定 38 課 → 正確 31，錯 2（二修為主的已知代價），withheld 5
 ```
+
+> **53 還是 52？兩個都對，分母不同。** `key-reading-needs-review.md` 是 **53 列**
+> （= 上面各 verdict 的加總）；但其中 `L0136` **連 `body.yml` 都沒有**，所以若用
+> 「有課文本體卻沒有段落」來數就是 **52**。報數字時說清楚是哪一個 ——
+> 這兩個數已經在 commit message 與 skill 內文之間對不上過一次。
 
 修正前是 20/34 正確（59%）。**扣掉 28 課本來就沒有念順順，真正的缺口是 24 課。**
 要縮短它的方法是處理 review 清單，**不是放寬閘門** —— 閘門是實測出來的。
