@@ -21,6 +21,7 @@ Lock 2 (pointer-rot guard):
 """
 from __future__ import annotations
 
+import glob
 import subprocess
 import sys
 from pathlib import Path
@@ -92,6 +93,35 @@ def _collect_legacy_test_paths() -> list[tuple[str, str]]:
     return paths
 
 
+
+def _check_owned_paths(errors: list[str]) -> None:
+    """Lock 3: `owns_code` / `owns_data` 指到的東西必須真的存在。
+
+    Lock 2 只看 `legacy_tests`，所以一次改名或一次目錄封存之後，
+    `owns_code` / `owns_data` 可以整批指向不存在的路徑而 `run-ci.sh` 全綠 ——
+    registry 於是變成「看起來有人管、其實誰也沒管」。實際發生過兩次：
+    2026-08-10 的元件改名留下 3 條，一修封存 `_parsed_2026-05-01/` 留下 4 條。
+
+    ⚠️ 這些欄位**混著 glob 與字面路徑**。對 glob 用 `exists()` 會把
+    `backend/data/lessons/*/v3/*.yml`（2019 個檔）判成不存在 —— 一個把健康條目
+    報成壞掉的 gate，比沒有 gate 更糟，因為它會被關掉。glob 一律看命中數。
+    """
+    for intent in sorted(MODULES_DIR.glob("*/INTENT.md")):
+        fm = _read_frontmatter(intent)
+        spec_id = fm.get("spec_id", str(intent))
+        for field in ("owns_code", "owns_data"):
+            for rel_path in (fm.get(field) or []):
+                if any(ch in rel_path for ch in "*?["):
+                    if not glob.glob(str(REPO_ROOT / rel_path), recursive=True):
+                        errors.append(
+                            f"[pointer-rot] {spec_id}: {field} glob 一個檔都沒對到: {rel_path}"
+                        )
+                elif not (REPO_ROOT / rel_path).exists():
+                    errors.append(
+                        f"[pointer-rot] {spec_id}: {field} 路徑不存在: {rel_path}"
+                    )
+
+
 def _check_legacy_test_paths(errors: list[str]) -> None:
     """Lock 2: assert every legacy_tests path EXISTS and is pytest-collectable.
 
@@ -148,12 +178,15 @@ def main(argv: list[str]) -> int:
         # Lock 2: pointer-rot guard — dangling legacy_tests paths fail loudly
         errors: list[str] = []
         _check_legacy_test_paths(errors)
+        # Lock 3: owns_code / owns_data 也會爛掉，而且沒人在看
+        _check_owned_paths(errors)
         if errors:
-            print("LEGACY_TESTS POINTER-ROT DETECTED:", file=sys.stderr)
+            print("POINTER-ROT DETECTED:", file=sys.stderr)
             for err in errors:
                 print(f"  {err}", file=sys.stderr)
             print(
-                "Fix: update the legacy_tests: path in the relevant INTENT.md, "
+                "Fix: update the legacy_tests / owns_code / owns_data path in the "
+                "relevant INTENT.md, "
                 "then re-run: python specs/build_registry.py",
                 file=sys.stderr,
             )
