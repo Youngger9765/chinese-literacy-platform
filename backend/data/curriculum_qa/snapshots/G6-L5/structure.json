@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 3,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -26,13 +26,28 @@
       "value": "工作記憶就像大腦裡的籃子，可以【　　　】保存訊息，也能初步【　　　】訊息。"
     },
     {
-      "interactive_type": "checkbox",
-      "label": "工作記憶與閱讀速度的關係",
-      "options": [
-        "多",
-        "多",
-        "好"
+      "blanks": [
+        {
+          "options": [
+            "多",
+            "少"
+          ]
+        },
+        {
+          "options": [
+            "多",
+            "少"
+          ]
+        },
+        {
+          "options": [
+            "好",
+            "不好"
+          ]
+        }
       ],
+      "interactive_type": "inline_choice",
+      "label": "工作記憶與閱讀速度的關係",
       "value": "1.東西越大【　　　】，工作記憶能記得的越【　　　】；\n  東西越小【　　　】，工作記憶能記得的越【　　　】。\n2.讀得快的人，工作記憶能記住更多內容。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得【　　　】。【　　　】【　　　】【　　　】"
     },
     {

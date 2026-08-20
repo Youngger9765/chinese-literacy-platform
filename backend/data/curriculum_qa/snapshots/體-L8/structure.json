@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
+    "checkbox_count": 0,
     "fill_blank_count": 4,
-    "inline_choice_count": 0,
+    "inline_choice_count": 3,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -25,12 +25,22 @@
       "label": "小齊（1～3段）",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "事件",
-          "options": [
-            "被投手三振",
-            "贏球"
+          "blanks": [
+            {
+              "options": [
+                "被投手三振",
+                "擊出安打"
+              ]
+            },
+            {
+              "options": [
+                "贏球",
+                "輸球"
+              ]
+            }
           ],
+          "interactive_type": "inline_choice",
+          "label": "事件",
           "value": "1.九局下，兩出局，落後一分，輪到小齊站上【　　　】。\n2.小齊【　　　】，比賽結束。\n3.球隊【　　　】"
         },
         {
@@ -68,11 +78,16 @@
           "value": "1.在仁川亞運比賽前被140多公斤的【　　　】壓傷\n2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第【　　　】名，沒有奪牌。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "面對失敗的想法",
-          "options": [
-            "勝利"
+          "blanks": [
+            {
+              "options": [
+                "勝利",
+                "失敗"
+              ]
+            }
           ],
+          "interactive_type": "inline_choice",
+          "label": "面對失敗的想法",
           "value": "雖然成績不亮眼，但對她來說這是她走過【　　　】和【　　　】的【　　　】"
         }
       ],
@@ -83,13 +98,28 @@
       "label": "總結",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "事件",
-          "options": [
-            "楊勇緯",
-            "楊勇緯",
-            "只有一種"
+          "blanks": [
+            {
+              "options": [
+                "楊勇緯",
+                "郭婞淳"
+              ]
+            },
+            {
+              "options": [
+                "楊勇緯",
+                "郭婞淳"
+              ]
+            },
+            {
+              "options": [
+                "只有一種",
+                "有不只一種"
+              ]
+            }
           ],
+          "interactive_type": "inline_choice",
+          "label": "事件",
           "value": "1.失敗可以讓人看見該【　　　】的地方──對應的是【　　　】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【　　　】的故事\n3.我們【　　　】的角度來面對失敗。"
         }
       ],

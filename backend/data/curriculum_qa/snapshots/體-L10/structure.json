@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
+    "checkbox_count": 2,
     "fill_blank_count": 1,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -68,14 +68,34 @@
           "value": "6-8"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "情節摘要",
-          "options": [
-            "孤軍奮戰",
-            "害怕",
-            "成功",
-            "拿下一分"
+          "blanks": [
+            {
+              "options": [
+                "孤軍奮戰",
+                "自責失誤"
+              ]
+            },
+            {
+              "options": [
+                "害怕",
+                "在乎"
+              ]
+            },
+            {
+              "options": [
+                "成功",
+                "失敗"
+              ]
+            },
+            {
+              "options": [
+                "拿下一分",
+                "丟了一分"
+              ]
+            }
           ],
+          "interactive_type": "inline_choice",
+          "label": "情節摘要",
           "value": "1.【　　　】告訴阿澤不必\n【　　　】\n2.小宇向阿澤道歉，阿澤才知道原來小宇也很\n【　　　】\n3.小宇在下一局時，雖然上壘【　　　】，但也讓隊上【　　　】。"
         }
       ],
