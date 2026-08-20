@@ -24,10 +24,10 @@ entries it covers, so it is the golden set and no new data has to be committed.
 
 It is a REGRESSION golden set, not an answer key, and the difference matters:
 
-  · it is the FIRST edition. 23 of the 53 comparable lessons had their text rewritten in
-    the second, so most lessons cannot be judged by it at all — the assertion below is
-    scoped to lessons where the golden passage still appears verbatim in the second
-    edition's own body, and it says nothing about the rest.
+  · it is the FIRST edition. Of its 134 passages only 38 still appear verbatim in a
+    second-edition body; 96 appear in none of them, because the text was rewritten. So
+    most lessons cannot be judged by it at all — the assertion below is scoped to the
+    ones that can, and it says nothing about the rest.
   · a passage that appears in more than one lesson's body (《正太與小豬》 recurs across
     seven) cannot identify a lesson, so those are excluded rather than guessed.
 

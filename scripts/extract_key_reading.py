@@ -8,8 +8,10 @@ is the exact thing the 2026-07-20 expert review ruled against: 朗讀只練老�
 不練全文.
 
 The first edition had this data. It is not reusable as an answer key — it is keyed by
-lesson code, the second edition renumbered every lesson, and 23 of the 53 comparable
-lessons had their text rewritten. It is a regression golden set, not a source.
+lesson code, the second edition renumbered every lesson, and of its 134 hand-scanned
+passages only 38 can still be found verbatim in a second-edition body and attributed to
+exactly one lesson; the other 96 appear in no second-edition body at all, because the
+text was rewritten. It is a regression golden set for those 38, not a source.
 
 WHERE THE PASSAGE ACTUALLY LIVES
 --------------------------------
@@ -30,7 +32,8 @@ exercise marks, dedup, five tiers of boundary heading).
 「第三段」 does not mean "the third surviving element of that list". It means the
 paragraph the worksheet PRINTS as 三. Those two coincide only when no heuristic
 happened to drop or keep a paragraph ahead of the anchor, and 靖杭's scan of the
-first edition's 148 hand-checked passages measured how often that holds:
+first edition's 148 hand-checked passages measured how often that holds — as measured on
+2026-08-18, before #2715 changed three lessons' bodies:
 
     課文沒改、段界一致的 28 課 → 錨點只有 17 課正確，錯的 11 課有 10 課差一整段
 
@@ -149,7 +152,7 @@ _ANCHOR_LOOSE = re.compile(
 )
 
 #: Bounds taken from what the professor actually marked, not from what seems reasonable.
-#: The first edition's 134 marked ranges run 19 to 412 characters, median 147; six are
+#: The first edition's 134 marked ranges run 19 to 409 characters, median 148; six are
 #: under 40. These exist only to catch a paragraph that is obviously not prose (a stray
 #: caption, a whole page swallowed), so they sit outside the observed range.
 MIN_CHARS, MAX_CHARS = 12, 900
