@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 1,
     "fill_blank_count": 4,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -50,14 +50,18 @@
           "value": "3.觀察遊戲變成了在各種場所裡，尋找【　　　】。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "結果",
-          "options": [
-            "正向",
-            "用功",
-            "愉悅"
+          "blanks": [
+            {
+              "options": [
+                "正向",
+                "用功",
+                "愉悅"
+              ]
+            }
           ],
-          "value": "發現讀書的畫面給人【　　　】的感覺。\n①正向 ②用功 ③愉悅"
+          "interactive_type": "inline_choice",
+          "label": "結果",
+          "value": "發現讀書的畫面給人【　　　】的感覺。"
         }
       ],
       "value": ""

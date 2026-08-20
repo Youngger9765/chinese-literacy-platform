@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 5,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -35,14 +35,18 @@
           "value": "設立了【　　　】的體育系統。\n1.【　　　】設置體育場設施、體育場館、學校。\n2.成立【　　　】，提供專業的科學訓練及獎學金。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "學校",
-          "options": [
-            "充足",
-            "充足",
-            "少量"
+          "blanks": [
+            {
+              "options": [
+                "充足",
+                "充足",
+                "少量"
+              ]
+            }
           ],
-          "value": "1.學生有【　　　】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。\n①充足 ②少量"
+          "interactive_type": "inline_choice",
+          "label": "學校",
+          "value": "1.學生有【　　　】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。"
         },
         {
           "interactive_type": "fill_blank",

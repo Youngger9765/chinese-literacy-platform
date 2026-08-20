@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 0,
     "fill_blank_count": 9,
-    "inline_choice_count": 0,
+    "inline_choice_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -47,14 +47,17 @@
       "label": "蟋蟀的行為",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "1",
-          "options": [
-            "雄蟋蟀",
-            "雌蟋蟀"
+          "blanks": [
+            {
+              "options": [
+                "雄蟋蟀",
+                "雌蟋蟀"
+              ]
+            }
           ],
-          "select_mode": "single",
-          "value": "會發出鳴叫聲的都是【　　　】。【 單選 】\n①雄蟋蟀 ②雌蟋蟀"
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "會發出鳴叫聲的都是【　　　】。【 單選 】"
         },
         {
           "interactive_type": "fill_blank",
@@ -62,14 +65,17 @@
           "value": "蟋蟀高歌是為了【　　　】，爭取繁衍的機會，或是【　　　】其他雄蟋蟀不要靠近地盤。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "3",
-          "options": [
-            "合作",
-            "競爭"
+          "blanks": [
+            {
+              "options": [
+                "合作",
+                "競爭"
+              ]
+            }
           ],
-          "select_mode": "single",
-          "value": "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　　　】的。【 單選 】\n①合作 ②競爭"
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　　　】的。【 單選 】"
         }
       ],
       "value": ""

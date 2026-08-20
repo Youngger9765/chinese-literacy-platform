@@ -110,6 +110,20 @@ def parse_inline_choice_groups(text: str) -> list[dict] | None:
     return groups if len(groups) >= 2 else None
 
 
+_CHOICE_ONLY_LINE_RE = re.compile(r"^[\s□]*[①②③④⑤⑥⑦⑧⑨⑩]")
+
+
+def strip_choice_notation_lines(text: str) -> str:
+    """把「□①… ②…」那一整行拿掉，只留句子。
+
+    橋接器（`keypoints_to_structure._render_choice_cell`）會把 options 渲染成
+    legacy 記法接在句子後面自成一行。句子本身有空格時，那一行必須從畫面上拿掉 ——
+    不然學生會看到選項兩次：一次是純文字、一次是可點的（#2750）。
+    """
+    kept = [ln for ln in (text or "").splitlines() if not _CHOICE_ONLY_LINE_RE.match(ln)]
+    return "\n".join(kept).strip()
+
+
 def strip_inline_slot_lines(text: str) -> str:
     """Remove the "第N個空格：…" caption lines, keeping the sentence itself.
 
@@ -204,6 +218,28 @@ def cell_to_structure_fields(label: str, value: str) -> dict:
         # Blank count doesn't line up with group count — our shape
         # assumption doesn't hold for this cell. Fall through to the
         # generic paths rather than guess a wrong pairing.
+
+    # 句子裡有**一個**真空格、又給了一組選項 → 學生要「選一個填進空格」，
+    # 那是 inline_choice，不是句子外面的勾選框。
+    #
+    # `parse_inline_choice_groups` 上面那段只認 `第N個空格：…` 且要求 >= 2 組，
+    # 它的註解說「只有一個空格的情況 parse_checkbox_options 已經處理得對」——
+    # 對「句子沒有空格」的列成立（那種本來就是勾選框），對「句子有一個空格」的列不成立：
+    # 選項會被當成句子的一部分印成純文字，可點元素 0 個，學生選不到（#2750，21 課 / 35 處）。
+    single = parse_checkbox_options(value_s)
+    if single:
+        sentence = strip_choice_notation_lines(value_s)
+        if _count_real_blanks(sentence) == 1:
+            correct = single.get("correct_options") or []
+            return {
+                "label": label_s,
+                "value": sentence,
+                "interactive_type": "inline_choice",
+                "blanks": [{
+                    "options": single["options"],
+                    "correct_option": correct[0] if correct else 0,
+                }],
+            }
 
     for source in (value_s, label_s):
         checkbox = parse_checkbox_options(source)

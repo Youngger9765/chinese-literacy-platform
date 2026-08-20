@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 3,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -35,13 +35,17 @@
       "label": "事例",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "起因",
-          "options": [
-            "骨癌",
-            "咽喉癌"
+          "blanks": [
+            {
+              "options": [
+                "骨癌",
+                "咽喉癌"
+              ]
+            }
           ],
-          "value": "他【　　　】年罹患了\n①骨癌 ②咽喉癌"
+          "interactive_type": "inline_choice",
+          "label": "起因",
+          "value": "他【　　　】年罹患了"
         },
         {
           "interactive_type": "fill_blank",
