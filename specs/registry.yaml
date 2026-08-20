@@ -126,8 +126,7 @@ modules:
   - backend/app/schemas/story.py
   - frontend/src/components/reading-steps/Intro.tsx
   - frontend/src/config/stepConfig.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_content_schema_spec.py
   related_issues:
@@ -330,8 +329,7 @@ modules:
   canonical_source: vocab_bank
   owns_code:
   - backend/app/services/omo_question_schema.py
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_omo_assessment_spec.py
   - backend/specs/test_omo_grading_corpus.py
@@ -438,8 +436,7 @@ modules:
   - frontend/src/components/omo/OmoIdentifyResult.tsx
   - frontend/src/components/omo/OmoResultPage.tsx
   - frontend/src/services/omoApi.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests: []
   related_issues: []
   source_meetings:
@@ -551,9 +548,9 @@ modules:
   - backend/app/services/assignment_lifecycle_service.py
   - scripts/reconcile_reading_audio_orphans.py
   - frontend/src/hooks/useAudioRecorder.ts
-  - frontend/src/hooks/useFullReadingSession.ts
-  - frontend/src/components/reading-steps/FullReading.tsx
-  - frontend/src/components/reading-steps/live-tutor/LiveTutor.tsx
+  - frontend/src/hooks/useKeyPassageReadingSession.ts
+  - frontend/src/components/reading-steps/KeyPassageReading.tsx
+  - frontend/src/components/reading-steps/paragraph-reading/ParagraphReading.tsx
   - frontend/src/services/learning/session.ts
   owns_data: []
   spec_tests:
@@ -666,8 +663,7 @@ modules:
   canonical_source: frontend/src/config/stepConfig.ts
   owns_code:
   - frontend/src/config/stepConfig.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_step_sequence_spec.py
   related_issues:
