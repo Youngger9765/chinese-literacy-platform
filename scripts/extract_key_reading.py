@@ -342,7 +342,10 @@ def align_to_numbering(marks: list[str], cell_paras: list[str]) -> list[str] | N
     and the result is still checked against the first edition's text where one exists.
     Measured on the 36 lessons 靖杭's golden set can judge: 29 → 31 correct, withheld
     4 → 2, and the 3 remaining errors are anchor-level (L0030 / L0072 / L0110) which no
-    alignment can fix.
+    alignment can fix. Three ERRORS, not three written passages — L0030 is withheld
+    further down by `_is_body_span`, so only two reach a student. Same three lessons,
+    two different counts, and conflating them is easy enough that it already happened
+    once in this file.
     """
     if 0 <= len(cell_paras) - len(marks) <= MAX_UNNUMBERED_TAIL:
         # One or two unnumbered tail lines; indexing lands regardless. Transforming here
@@ -516,12 +519,18 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
         # second edition's worksheet outranks a passage read off the first edition's
         # printing, so a disagreement no longer withholds — it is written and FLAGGED.
         #
-        # The cost is measured, not assumed: on the 36 judgeable lessons this writes 3
-        # passages (L0030 / L0072 / L0110) that the first edition says are the wrong
-        # paragraph, and in those three the first edition's text still appears verbatim
-        # in the second edition's body — so the text did not change and the disagreement
-        # is more likely our misread than a re-marking. They are listed in
-        # `docs/curriculum/key-reading-disagrees-first-edition.md` for a human to settle.
+        # The cost is measured, not assumed: this writes TWO passages the first edition
+        # says are the wrong paragraph — L0072 and L0110 — and in both the first
+        # edition's text still appears verbatim in the second edition's body, so the text
+        # did not change and the disagreement is more likely our misread than a
+        # re-marking. Listed in `docs/curriculum/key-reading-disagrees-first-edition.md`
+        # (25 lessons reach this branch; 2 of them are judgeable) for a human to settle.
+        #
+        # NOT three. L0030 is the third anchor-level error the alignment cannot fix, but
+        # it never reaches this branch — `_is_body_span` withholds it first
+        # (`verdict: not_a_stored_paragraph`, `passage: null`). Naming it here as
+        # "written" was wrong, and it is the kind of wrong this file exists to stop:
+        # a number in a comment that nobody re-derived after the code moved.
         out["verdict"] = "disagrees_with_first_edition"
         out["needs_human_review"] = True
         return out

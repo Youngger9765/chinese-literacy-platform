@@ -3,23 +3,27 @@
 
 Writes `backend/data/lessons/<uid>/<version>/key_reading.yml`.
 
-ONLY `ok` and `confirmed` are written. Every other verdict is withheld and the lesson
-keeps reading the whole text — degraded, but not a lie. The verdicts that withhold:
+`ok`, `confirmed` and `disagrees_with_first_edition` are written. Everything else is
+withheld and the lesson keeps reading the whole text — degraded, but not a lie. The
+verdicts that withhold:
 
-    numbering_disagrees      the worksheet's 段號 count and the 課文 cell's paragraph
-                             count differ, so "the Nth paragraph" is undefined
+    numbering_disagrees      no transformation reaches the author's paragraph count,
+                             so "the Nth paragraph" is not well defined
     no_printed_numbering     no 段號 column found; nothing says which paragraph is Nth
-    not_a_stored_paragraph   the numbered paragraph is not one of body.yml's, so it
-                             cannot be served whole (Word split it at a line break)
-    disagrees_with_first_edition   the first edition marked a different paragraph of
-                             this same lesson; one of the two is wrong
+    not_a_stored_paragraph   the numbered paragraph is not a run of body.yml's, so it
+                             cannot be served whole
     anchor_out_of_range / no_anchor / implausible_length / no_body
 
-`disagrees_with_first_edition` USED to be written-and-flagged, on the reasoning that a
-neighbouring paragraph of the right lesson beats the whole text. #2720 measured that
-reasoning: on 靖杭's golden set the paragraph the extractor picked was wrong in 14 of 34
-comparable lessons and 8 of those carried `confirmed`. A flag nobody reads is not a
-safeguard, so the disagreement now withholds and appears in the review list instead.
+`disagrees_with_first_edition` is WRITTEN, not withheld: 二修教材為主 (靖杭,
+2026-08-18) — the second edition's own instruction about the second edition's worksheet
+outranks a passage read off the first edition's printing. It is flagged and listed in
+`docs/curriculum/key-reading-disagrees-first-edition.md` (25 lessons) so a human can
+settle it; measured cost is 2 lessons (L0072, L0110) whose first-edition passage says we
+picked the wrong paragraph.
+
+It withheld until 2026-08-18, and this docstring described that. Leaving the old wording
+in place while the code did the opposite is the same defect this whole PR is about, so it
+is corrected here rather than annotated.
 """
 
 from __future__ import annotations

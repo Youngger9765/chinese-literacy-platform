@@ -121,8 +121,11 @@ cd backend && pytest tests/test_key_reading_numbering_2720.py tests/test_key_rea
 
 ### 三道檢查，以及各自的代價
 
-`build_key_reading.py` **只寫入 `ok` / `confirmed`**。其餘一律 withhold，該課 fallback 唸全文，
-並列進 `docs/curriculum/key-reading-needs-review.md`。
+`build_key_reading.py` 寫入 **`ok` / `confirmed` / `disagrees_with_first_edition`** 三種。
+其餘一律 withhold，該課 fallback 唸全文，並列進 `docs/curriculum/key-reading-needs-review.md`。
+
+`disagrees_with_first_edition` **會寫入**（二修為主，見檢查 2），另列
+`key-reading-disagrees-first-edition.md` 當確認佇列 —— 它有服務段落，是 review queue 不是缺口。
 
 > **withhold 必須刪掉舊檔，不能只是「不寫」。** 否則上一輪寫錯的課會繼續服務錯誤段落，
 > 而報表顯示它被 withheld —— 閘門看起來 fail-closed，行為是 fail-open。
