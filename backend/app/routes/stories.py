@@ -23,6 +23,7 @@ from ..services.ai_service import generate_story_structure, grade_story_structur
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..services.lesson_content_loader import get_lesson_content
+from ..services.lesson_layer_loaders import _to_asset_proxy_url
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -633,10 +634,15 @@ def get_story(story_id: str):
         worksheet_intro=story.get("worksheet_intro"),
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
         lesson_intro=story.get("lesson_intro"),
-        # 紙本學習單 PDF (#1444) — public GCS URL or None
-        worksheet_pdf_url=story.get("worksheet_pdf_url"),
+        # 紙本學習單 PDF (#1444)。
+        # ⚠️ 一定要過 `_to_asset_proxy_url`：`lingoleap-assets` bucket 在 #2486 收成
+        # private，直接送絕對 `storage.googleapis.com` URL 到瀏覽器就是 403。
+        # legacy Layer1/Layer2 loader 裡有做這件事，**uid（v3）這條路徑原本沒有** ——
+        # 現在不炸只是因為 uid tree 剛好 0 個檔帶絕對 URL，是資料乾淨不是程式擋著（#2748）。
+        # 改寫器冪等：已經是 /assets/… 或空值原樣通過。
+        worksheet_pdf_url=_to_asset_proxy_url(story.get("worksheet_pdf_url")),
         # Direct docx URL when soffice PDF conversion is broken (#2073)
-        worksheet_docx_url=story.get("worksheet_docx_url"),
+        worksheet_docx_url=_to_asset_proxy_url(story.get("worksheet_docx_url")),
         # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
         tables=story.get("tables"),
         # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
