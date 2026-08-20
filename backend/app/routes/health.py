@@ -27,6 +27,14 @@ _START_DATETIME = datetime.now(timezone.utc)
 APP_VERSION = "0.3.0"
 
 
+# `/health` 是監控工具的慣例路徑：uptime checker、Cloud Run、k8s probe、
+# 負載平衡器預設都打它。以前只有 `/api/health` 存在，於是每小時的巡檢 tick
+# 對 `/health` 拿到 404、開了一張「backend 掛了」的假 issue（#2737），
+# 而後端一直是健康的。
+#
+# 兩條路徑共用同一個 handler —— 不是各寫一份。兩份健康狀態會分岔，
+# 那時候就有兩個互相矛盾的「真相」，比 404 更難查。
+@router.get("/health")
 @router.get("/api/health")
 def health_liveness():
     """Basic liveness check. Returns 200 when the process is running."""
