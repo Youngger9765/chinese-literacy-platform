@@ -6,10 +6,20 @@ description: 從二修教材 DOCX 抽出教授指定的「重點朗讀」段落�
 # lesson-reading-pipeline — 二修 DOCX → 重點朗讀段落
 
 ```
-二修 DOCX ──> key_reading.yml
+二修 DOCX ──> <uid>/v2/key_reading.yml
                 ├── passage           教授指定的那一段
                 └── reading_benchmark 該課的每分鐘字數目標
 ```
+
+> ⚠️ **這條線目前寫的是 `v2`，而 loader 服務的是最新版本 —— 現在是 `v3`（#2736）。**
+> 也就是**這份 skill 產出的段落目前不會被學生看到**。v3 是另一套 schema
+> （`body.yml` 改名 `full_text_annotate.yml`、`key_reading` 改成巢狀含
+> `instruction`／`timing_table`／`benchmark`），而它的 `passage` 是用
+> **「從 ☞ 累積到字數欄 max」** 算的 —— 中位 388 字，正是 #2712 被否決的規則
+> （實測 `approx_chars_from_start` 與字數欄 max **106/109 完全相等**）。
+>
+> 對黃金集：v3 的起點只取那一段是 **24/38**，這條線是 **31/38**。
+> 診斷與證據見 #2805；要把這條線接到 v3 得先移植 schema。
 
 ---
 
