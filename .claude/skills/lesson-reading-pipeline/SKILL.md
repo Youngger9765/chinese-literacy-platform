@@ -18,8 +18,9 @@ description: 新課文上線「朗讀」的完整流程 — 從二修 DOCX 抽�
 > 時代的數字（本機實測每句 4.2 秒）。**換 provider 順手解掉了預生成要解的問題**，
 > 所以整批生成（8648 單位／NT$186／45 分鐘）沒有必要。
 >
-> §② 保留是因為「哪些單位、寫哪個 prefix」這些知識很難重得，而且改發音修正表那天
-> 會需要它。**但不要因為看到「涵蓋率 0%」就去跑它** —— 先量現場合成要多久。
+> §② 只留**知識**（哪些單位、寫哪個 prefix、四次踩坑），**工具不在這支 PR 裡** ——
+> 決定不做預生成之後，帶著 606 行不會跑的腳本沒有意義。要做時見 #2605 / #2606。
+> **不要因為看到「涵蓋率 0%」就去跑它** —— 先量現場合成要多久。
 
 ② 的快取 key 是 **句子原文的 sha256**。
 
@@ -225,37 +226,41 @@ withheld 52         no_anchor 28（該課本來就沒有念順順，不是失敗
 指紋加進 key 的那次改動，隱含的全量重生沒有跑。
 
 > 改 `normalization.py` 的發音表之後，全庫音檔會瞬間不可達。**在 Azure（3 秒）下這
-> 只是退回現場合成，可以接受**；換回慢的 provider 就必須接著跑 `generate_reading_audio.py`。
-> 追蹤：#2743。
+> 只是退回現場合成，可以接受**；換回慢的 provider 就必須重生全庫。追蹤：#2743。
 
-### 句表一定要從執行期的同一個函式來
+### 要做的時候，這四件事一定要照著（每一件都是踩過的）
 
-```
-build_lesson_tts_mapping()  →  _clean_for_tts  →  _split_sentences  →  _cache_key = sha256
-```
+**1. 單位從播放器的呼叫點推導，不要從句表推。**
 
-⛔ **不要另外寫一套切句**。#1208 就是這樣壞的：前端自己用 regex 切句，
-sha256 與預生成的 blob 對不上，2871 句裡只有 303 句命中，整批音檔生了用不到。
+| 路徑 | 呼叫點 | 送出的文字 |
+|---|---|---|
+| 逐段／全文朗讀（**有帶** lessonId） | `ParagraphReading:191`、`useFullTextTtsQueue:126`、`Intro:220` | **整段** —— `canonical.join('').trim()` |
+| 重點朗讀（**沒帶**） | `useKeyPassageReadingTtsQueue:55`、`LessonAudioTable:559`、`Intro:222` | **逐句**，用前端 TS 切句器 |
 
-```bash
-# 盤點（不呼叫 TTS、不花錢）；同時是 GCS 快取層的診斷工具
-python3 scripts/build_reading_audio_manifest.py --report
+實測 1637 整段 + 7221 逐句，聯集 8679。
 
-# 小樣本試跑（確認憑證 + 閉環：跑完再 --report 一次，涵蓋數應該增加）
-python3 scripts/generate_reading_audio.py --limit 20
+**2. key 是對「前端送出的字串」算的**，在 `_clean_for_tts` 之前：
 
-# 全量（7236 句 / 12 workers ≈ 70 分鐘 / 約 $2；可中斷續跑，已有的會跳過）
-python3 scripts/generate_reading_audio.py --workers 12
+```python
+key = _cache_key(text)          # ← 客戶端的文字，原封不動
+cleaned = _clean_for_tts(text)  # ← 之後才清理，只給合成器用
 ```
 
-`generate_reading_audio.py` **不自己實作任何一步** —— 切句、算 key、合成、編碼、上傳
-全部呼叫執行期同一組函式。#1208 與 #2605 都是同一種錯：多寫了一份執行期已經有的實作，
-於是產出的東西執行期讀不到。這支腳本沒有第二實作可以漂移。
+所以逐句那族必須複製**前端**的 cleaner。它比後端少一行
+`re.sub(r'[\uf410\U000E01E0-\U000E01E4]+','',text)`，差 7 個單位。
 
-（Cloud Run Job 版見 `docs/ops/ai-reading-batch.md`；本機跑得動時不需要 Job。）
+**3. provider 從 deploy workflow 讀，不要相信文件。**
+`docs/ops/ai-reading-batch.md` 寫「皆為 gemini31」，`staging-deploy.yml`／`deploy.yml`／
+`preview-deploy.yml` 三者實際都是 **`azure`**，而 `_blob_path` 兩者是不同前綴。
 
-`TTS_PROVIDER` 決定寫入哪個 GCS prefix，**必須與線上 Cloud Run 的值一致**（目前 `gemini31`）。
-設錯 = 音檔寫到執行期不會讀的路徑，白跑一輪。
+**4. 合成只呼叫 `synthesize_speech()`，不要挑 provider。**
+它算 key、查 L1/GCS、依 `TTS_PROVIDER` 選 provider、套該 provider 的後處理、寫該
+provider 的前綴。並且**要驗落地** —— Azure 失敗會 fallback 到 Google 並寫 google 前綴，
+回傳 bytes 但目標 key 仍是空的。
+
+> **同一類錯已經四次**：#1208 前端自己切句（303/2871）、#2605 key 加指紋沒重生
+> （0/7236）、對每句生而播放器要整段（53/1657）、provider 寫錯（29/8679）。
+> 四次都是「多寫一份執行期已經有的實作，然後那份偏掉」。
 
 ### 驗收（不是 curl 200，也不是後台顯示 100%）
 
@@ -329,12 +334,11 @@ python3 scripts/generate_reading_audio.py --workers 12
 | `scripts/stage_lesson_docx.py` | 本機學習單 → `<uid>.docx`（內容比對配對，離線用） |
 | `scripts/extract_key_reading.py` | 錨點解析 + 三道檢查（演算法與量測記錄都在 docstring） |
 | `scripts/build_key_reading.py` | 寫入 / withhold / 產 review 清單 |
-| `scripts/build_reading_audio_manifest.py` | 兩軌句表 + GCS 覆蓋率盤點（列不出 bucket 時 exit 2，不報數字） |
-| `scripts/generate_reading_audio.py` | 全量生成（全走執行期函式，可續跑） |
+
 | `backend/tests/test_key_reading_numbering_2720.py` | 黃金集守門（取錯段會紅） |
 | `backend/tests/test_key_reading_extent_2683.py` | 長度守門（#2712 回歸鎖） |
 | `docs/curriculum/key-reading-needs-review.md` | 自動產生的待人工確認清單 |
-| `docs/ops/ai-reading-batch.md` | ② 的 Cloud Run Job 操作手冊（#2606） |
-| `scripts/reading_audio_units.py` | 執行期會請求哪些合成單位（從播放器呼叫點推導） |
+| `docs/ops/ai-reading-batch.md` | ② 的操作手冊（#2606）⚠️ 內含錯誤的 provider 敘述 |
+| `frontend/src/services/ttsApi.ts` | 播放器 —— 單位與 key 的真正來源 |
 | `frontend/src/utils/fluencyAnalyzer.ts` | `reading_benchmark` 的既有前端契約（兩種單位） |
 | issues | #2712 長度、#2720 取錯段、#2722 字數目標、#2724/#2725 只有目標沒段落、#2605 GCS 快取層、#2606 批次生成、#2726 二修章節（已遷入本檔） |
