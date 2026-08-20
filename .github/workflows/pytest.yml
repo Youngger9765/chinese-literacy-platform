@@ -4,10 +4,14 @@ on:
   pull_request:
     paths:
       - 'backend/**'
-      # 重點朗讀的抽取器住在 scripts/，而擋它的 gate 住在 backend/tests/。
-      # 只監看 backend/** 的話，單獨改抽取器不會觸發任何檢查 —— 而 #2720 正是
-      # 抽取器選錯段落造成的。
-      - 'scripts/**'
+      # 重點朗讀的抽取器住在 scripts/，而擋它的 gate 住在 backend/tests/。只監看
+      # backend/** 的話，單獨改抽取器不會觸發任何檢查 —— 而 #2720 正是抽取器選錯
+      # 段落造成的。列檔案而不是 'scripts/**'：那底下有 78 支橫跨聚光燈／重點表／
+      # 部首／縮圖的無關腳本，全掛上去會讓它們每次改動都跑整個 job。
+      - 'scripts/extract_key_reading.py'
+      - 'scripts/build_key_reading.py'
+      - 'scripts/fetch_lesson_docx.py'
+      - 'scripts/stage_lesson_docx.py'
       - '.github/workflows/pytest.yml'
 
 jobs:
@@ -74,6 +78,9 @@ jobs:
 
       # 重點朗讀的守門 (#2720)。這三支只讀 committed 的 YAML，不需要教材原始檔，
       # 所以在 CI 裡是真的會跑、真的會紅：
+      #   test_key_reading_extractor_2720 — 抽取器的邏輯本身（純函式，不碰資料）
+      #                                     資料測試只驗昨天的產出，改了抽取器卻沒重跑
+      #                                     時它一樣綠；這支才會紅
       #   test_key_reading_numbering_2720 — 服務的段落不是教授畫的那一段 → 紅
       #                                     （對修正前的資料實測 14/38 紅）
       #   test_key_reading_extent_2683    — 段落長度被推論撐大 (#2712) → 紅
@@ -90,6 +97,7 @@ jobs:
         run: |
           cd backend
           python -m pytest --tb=short -q \
+            tests/test_key_reading_extractor_2720.py \
             tests/test_key_reading_numbering_2720.py \
             tests/test_key_reading_extent_2683.py \
             tests/test_every_lesson_detail_validates_2725.py

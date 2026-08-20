@@ -96,8 +96,21 @@ chrome 前綴、指令標記、習題標記、去重、五層標題邊界），�
 | 被 Word 切開的段 | 兩段 | **應該合併回一段** |
 
 現行實作用「課文欄 cell 自己的段落」當印刷段落清單，滿足前兩列。
-**最後一列還沒做** —— 被 Word 切開的段目前是 withhold（`not_a_stored_paragraph`，4 課），
-合併回去可以救回 `L0007`／`L0017`。
+**最後一列做了，但不是在對齊那一步。** `align_to_numbering` 只在段數差超過容許值時才變換；
+差在容許範圍內就原樣通過 —— 對「數段落」是正確的，卻讓 Word 切開的段維持切開，錨點只指到前半。
+
+**這個曾經上線**：《感情小日記1》服務 176 字、結尾停在「只要一想到可能會跟他」，掉了 24 字的
+尾巴；《黃絲帶》停在「然後，這首歌出現了：」，歌詞整段不見。兩課都是**已寫入**，不是 withheld，
+而這份 skill 前一版還宣稱這類已經處理好了。
+
+修法是一條獨立的局部規則 `absorb_split_tail()`：**段落不以句末標點結束就往後吃，有上限**。
+段落結尾斷在句中本身就是明顯錯的，所以這不是對段落結構的猜測。補上尾巴之後
+《感情小日記1》與教授畫的段落**逐字相符**（verdict 從 `disagrees_with_first_edition`
+翻成 `confirmed`）—— 那是修對了的獨立證據。
+
+⚠️ 這個 bug 是 `backend/tests/test_key_reading_extractor_2720.py` 的單元測試抓到的，
+不是人看出來的。資料測試抓不到它，因為資料測試驗的是「產出符不符合黃金集」，
+而這兩課被「二修為主」政策排除在那條斷言之外。
 
 ### 跑法
 
@@ -169,10 +182,10 @@ cd backend && pytest tests/test_key_reading_numbering_2720.py tests/test_key_rea
 > `body.yml`）。引用前重新推導 —— 這支 PR 有五個 stale 數字是 review 抓到的，不是複查到的。
 
 ```
-寫入 122 課（70%）  ok 66 / confirmed 31 / disagrees_with_first_edition 25
+寫入 122 課（70%）  ok 66 / confirmed 32 / disagrees_with_first_edition 24
 withheld 53         no_anchor 28（該課本來就沒有念順順，不是失敗）
                     numbering_disagrees 15
-                    no_printed_numbering 4 / not_a_stored_paragraph 4 / implausible_length 2
+                    not_a_stored_paragraph 6 / no_printed_numbering 4
 字數目標 157 課
 黃金集可判定 38 課 → 正確 31，錯 2（二修為主的已知代價），withheld 5
 ```

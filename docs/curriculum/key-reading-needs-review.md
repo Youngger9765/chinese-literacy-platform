@@ -10,7 +10,7 @@
 | L0020 | numbering_disagrees | 10 | 14 | 8 | 保留字數目標 |
 | L0021 | no_anchor | — | — | — | — |
 | L0030 | not_a_stored_paragraph | 5 | 5 | 3 | 保留字數目標 |
-| L0039 | implausible_length | 6 | 8 | 5 | 保留字數目標 |
+| L0039 | not_a_stored_paragraph | 6 | 8 | 5 | 保留字數目標 |
 | L0044 | no_anchor | — | — | — | — |
 | L0045 | numbering_disagrees | 6 | 12 | 3 | 保留字數目標 |
 | L0049 | no_anchor | — | — | — | — |
@@ -33,7 +33,7 @@
 | L0111 | no_anchor | — | — | — | — |
 | L0115 | numbering_disagrees | 8 | 12 | 2 | 保留字數目標 |
 | L0119 | numbering_disagrees | 8 | 15 | 4 | 保留字數目標 |
-| L0120 | implausible_length | 8 | 10 | 2 | 保留字數目標 |
+| L0120 | not_a_stored_paragraph | 8 | 10 | 2 | 保留字數目標 |
 | L0123 | no_printed_numbering | — | — | 13 | 保留字數目標 |
 | L0129 | not_a_stored_paragraph | 6 | 6 | 3 | 保留字數目標 |
 | L0130 | no_anchor | — | — | — | — |

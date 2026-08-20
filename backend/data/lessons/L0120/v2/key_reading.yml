@@ -10,4 +10,4 @@ reading_benchmark:
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
 extraction_check:
-  verdict: implausible_length
+  verdict: not_a_stored_paragraph

@@ -126,8 +126,6 @@ import sys
 import unicodedata
 from pathlib import Path
 
-import docx
-
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -295,6 +293,13 @@ def read_numbered_body(docx_path: Path) -> tuple[list[str], list[str]] | None:
     "the longest cell" would otherwise be satisfied by a duplicate of the 段號 column in
     the lessons where that one is merged instead.
     """
+    # Imported here, not at module scope, so the counting and numeral rules below can be
+    # unit-tested anywhere. `python-docx` is a build-time dependency of this script and is
+    # deliberately NOT in `backend/requirements.txt` — putting it there to make a test
+    # importable would ship a DOCX parser in the serving image. Reading a worksheet needs
+    # it; deciding which paragraph is the Nth does not.
+    import docx
+
     doc = docx.Document(str(docx_path))
     best: tuple[list[str], list[str]] | None = None
     for table in doc.tables:
@@ -378,6 +383,43 @@ def align_to_numbering(marks: list[str], cell_paras: list[str]) -> list[str] | N
     if len(merged) == len(marks):
         return merged
     return None
+
+
+#: How many following paragraphs may be absorbed to finish a sentence. Word splits a
+#: paragraph at a manual line break; the tail is one paragraph in every case observed.
+MAX_ABSORBED_TAIL = 2
+
+
+def absorb_split_tail(paras: list[str], index: int) -> str:
+    """`paras[index]`, plus the following paragraphs needed to finish its sentence.
+
+    WHY THIS IS SEPARATE FROM `align_to_numbering`
+    ----------------------------------------------
+    That function only transforms when the counts disagree by more than the tail bound.
+    Within the bound it passes the list through untouched, which is correct for counting
+    — but it means a paragraph Word split at a manual line break stays split, and the
+    anchor then names only its first half.
+
+    That shipped. 《感情小日記1》 served 176 characters ending 「只要一想到可能會跟他」,
+    dropping the 24-character tail 「有多一些互動，我就會覺得這一天好像變得特別一點。」;
+    《黃絲帶》 stopped at 「然後，這首歌出現了：」 and dropped the song. Both were written,
+    not withheld — and the skill claimed this class was already handled. Found by the
+    unit test in `backend/tests/test_key_reading_extractor_2720.py`, not by inspection.
+
+    A passage that ends mid-sentence is wrong on its face, which makes this a safe local
+    rule rather than a guess about paragraph structure: absorb only while the text does
+    not end a sentence, and only a bounded number of times.
+    """
+    passage = paras[index]
+    absorbed = 0
+    while (
+        absorbed < MAX_ABSORBED_TAIL
+        and index + 1 + absorbed < len(paras)
+        and not passage.rstrip().endswith(tuple(_SENTENCE_END))
+    ):
+        passage += paras[index + 1 + absorbed]
+        absorbed += 1
+    return passage
 
 
 def load_legacy() -> list[str]:
@@ -499,8 +541,9 @@ def extract(docx_path: Path, body: list[str] | None = None) -> dict:
         out["needs_human_review"] = True
         return out
 
-    passage = cell_paras[anchor - 1].strip()
+    passage = absorb_split_tail(cell_paras, anchor - 1).strip()
     out["passage"] = passage
+    out["absorbed_tail"] = passage != cell_paras[anchor - 1].strip()
     out["start_text"] = passage[:24]
     out["paragraphs_used"] = 1
 
