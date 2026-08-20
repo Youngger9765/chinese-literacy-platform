@@ -11,7 +11,7 @@ _CIRCLED_NUM_RE = re.compile(r"[①②③④⑤⑥⑦⑧⑨⑩]")
 # 一句話裡兩個以上空格、各自配一組選項時，`keypoints_to_structure.py` 的
 # `_sentence_with_inline_choices` 會在句子後面接上這種標籤行——
 # 「第一個空格：□①贏了 ②輸了」。這裡只認這一行的格式，不動句子本身。
-_INLINE_SLOT_LINE_RE = re.compile(r"第[一二三四五六七八九十\d]+個空格[：:]\s*(.+)")
+_INLINE_SLOT_LINE_RE = re.compile(r"第([一二三四五六七八九十\d]+)個空格[：:]\s*(.+)")
 
 # 學習單把「這題怎麼作答」寫在跟空格同一種括號裡：`（單選，請打勾）`、
 # `（多選，請打勾）`。checkbox 目前不分單選/多選、一律可複選 —— 指示語寫
@@ -120,10 +120,14 @@ def parse_bracket_inline_choices(text: str) -> list[dict]:
         # 這種留給既有路徑處理，這裡不接手。
         if not any(marks):
             return []
-        correct = next((n for n, mk in enumerate(marks, 1) if mk in _TICKS), 0)
-        if not correct:
+        # ⚠️ `correct_option` 是 **0-based**（判分那邊是 `options[correct_idx]`，
+        # 界限 `0 <= idx < len(options)`，見 ai_generation/story_structure.py）。
+        # 我第一版寫成 1-based：兩選項的題目會把正解判成錯的，
+        # 三選項且答案在最後一個的直接越界，學生永遠不可能答對。
+        correct = next((i for i, mk in enumerate(marks) if mk in _TICKS), None)
+        if correct is None:
             # legacy 慣例：有 □ 的是誘答，沒 □ 的那個是答案
-            correct = next((n for n, mk in enumerate(marks, 1) if not mk), 0)
+            correct = next((i for i, mk in enumerate(marks) if not mk), 0)
         groups.append({"options": opts, "correct_option": correct})
     return groups
 
@@ -154,10 +158,27 @@ def parse_inline_choice_groups(text: str) -> list[dict] | None:
         m = _INLINE_SLOT_LINE_RE.match(line.strip())
         if not m:
             continue
-        parsed = parse_checkbox_options(m.group(1))
+        parsed = parse_checkbox_options(m.group(2))
         if parsed:
+            # 標題寫的是「第 N 個空格」——那個 N 才是它對應的空格，
+            # 不是它在這串 caption 裡的出現順序。一格同時有填空與選擇題時
+            # 兩者會不一樣（#2785：句子是「填空、選擇、選擇」，caption 是第二、第三）。
+            parsed = dict(parsed)
+            parsed["slot"] = _ordinal_to_int(m.group(1))
             groups.append(parsed)
     return groups if len(groups) >= 2 else None
+
+
+_CN_DIGITS = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
+              "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+
+
+def _ordinal_to_int(token: str) -> int:
+    """「二」→ 2、「3」→ 3。認不得回 0（呼叫端會退回出現順序）。"""
+    token = (token or "").strip()
+    if token.isdigit():
+        return int(token)
+    return _CN_DIGITS.get(token, 0)
 
 
 _CHOICE_ONLY_LINE_RE = re.compile(r"^[\s□]*[①②③④⑤⑥⑦⑧⑨⑩]")
@@ -264,20 +285,30 @@ def cell_to_structure_fields(label: str, value: str) -> dict:
     inline_groups = parse_inline_choice_groups(value_s)
     if inline_groups:
         sentence = strip_inline_slot_lines(value_s)
-        if _count_real_blanks(sentence) == len(inline_groups):
-            blanks = [
-                {
+        total = _count_real_blanks(sentence)
+        # 每個空格一個位置。有 caption 指名的填選項，其餘留空 —— 那些是填空格。
+        # ⚠️ 以前這裡要求「選項組數 == 空格數」，對不上就整格退回 checkbox，
+        # 於是「一個填空 + 兩個選擇」的格子（L0102）兩組長得一樣的「吸/吃」
+        # 被攤平成一堆勾選框，學生分不出哪組對應哪個空格（#2785）。
+        if total >= len(inline_groups) >= 1:
+            blanks: list[dict] = [{} for _ in range(total)]
+            placed = True
+            for order, g in enumerate(inline_groups, 1):
+                slot = g.get("slot") or order          # 認不得序號就退回出現順序
+                if not 1 <= slot <= total:
+                    placed = False
+                    break
+                blanks[slot - 1] = {
                     "options": g["options"],
                     "correct_option": g["correct_options"][0] if g["correct_options"] else 0,
                 }
-                for g in inline_groups
-            ]
-            return {
-                "label": label_s,
-                "value": sentence,
-                "interactive_type": "inline_choice",
-                "blanks": blanks,
-            }
+            if placed:
+                return {
+                    "label": label_s,
+                    "value": sentence,
+                    "interactive_type": "inline_choice",
+                    "blanks": blanks,
+                }
         # Blank count doesn't line up with group count — our shape
         # assumption doesn't hold for this cell. Fall through to the
         # generic paths rather than guess a wrong pairing.

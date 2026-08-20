@@ -39,19 +39,25 @@ def test_single_bracket_group_becomes_one_inline_choice_blank():
 
 
 def test_the_tick_marks_the_answer():
-    """`☑` 標的是答案 —— 選錯邊等於把正解變成誘答。"""
+    """`☑` 標的是答案，而且索引是 **0-based**。
+
+    🔴 我第一版寫成 1-based，測試也照著寫，所以測試綠、東西是壞的：
+    判分那邊是 `options[correct_idx]`（`ai_generation/story_structure.py`），
+    兩選項會把正解判成錯的，三選項且答案在最後一個直接越界。
+    **測試會鎖住錯的慣例** —— 這條的斷言必須跟判分端對齊，不是跟我的直覺對齊。
+    """
     row = cell_to_structure_fields("學校", L0080)
-    assert row["blanks"][0]["correct_option"] == 1, "☑①充足 是答案"
+    assert row["blanks"][0]["correct_option"] == 0, "☑①充足 是答案（0-based，判分用 options[idx]）"
 
     row_b = cell_to_structure_fields("2", L0098_B)
-    assert row_b["blanks"][0]["correct_option"] == 2, "☑②隱蔽 是答案"
+    assert row_b["blanks"][0]["correct_option"] == 1, "☑②隱蔽 是答案（0-based）"
 
 
 def test_three_options_with_the_tick_in_the_middle():
     row = cell_to_structure_fields("1", L0098_A)
     assert row["interactive_type"] == "inline_choice"
     assert row["blanks"][0]["options"] == ["憐憫", "尊重", "偏見"]
-    assert row["blanks"][0]["correct_option"] == 3
+    assert row["blanks"][0]["correct_option"] == 2  # ☑③偏見，0-based
 
 
 def test_the_option_text_is_gone_from_the_sentence():
