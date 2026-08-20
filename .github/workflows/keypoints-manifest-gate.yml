@@ -22,8 +22,9 @@ on:
       - 'backend/specs/test_story_structure_spec.py'
       - 'backend/tests/test_story_structure_qa_contract.py'
       - 'scripts/story_structure_qa*.py'
-      - 'scripts/keypoints_table_sync.py'
+      - 'backend/tests/test_manifest_builder_does_not_destroy_2795.py'
       - 'scripts/build_keypoints_qa_manifest.py'
+      - 'scripts/keypoints_table_sync.py'
       - 'scripts/keypoints_manifest_verify.py'
       - 'scripts/story_structure_ship_gate.sh'
       - 'specs/modules/story-structure/**'
@@ -63,4 +64,6 @@ jobs:
             specs/test_keypoints_manifest_spec.py \
             specs/test_story_structure_spec.py \
             tests/test_story_structure_qa_contract.py \
+            tests/test_manifest_builder_does_not_destroy_2795.py \
+            tests/test_qa_lib_copies_stay_in_sync.py \
             -q
