@@ -237,13 +237,32 @@ def build_manifest(*, smoke_only: bool = False) -> tuple[dict, dict[str, dict]]:
     return manifest, snapshots
 
 
-def _write(manifest: dict, snapshots: dict[str, dict]) -> None:
+SMOKE_MANIFEST_PATH = OUT_DIR / "keypoints_manifest.smoke.json"
+
+
+def _existing_lesson_count() -> int:
+    """現有 manifest 有幾筆。讀不到就回 0（第一次建立不該被擋）。"""
+    try:
+        return len(json.loads(MANIFEST_PATH.read_text(encoding="utf-8")).get("lessons") or [])
+    except Exception:                                              # noqa: BLE001
+        return 0
+
+
+def _write(manifest: dict, snapshots: dict[str, dict], *, path=None,
+           snapshots_dir=None) -> None:
+    """寫 manifest 與 snapshot。
+
+    ⚠️ `snapshots_dir` 必須跟著 `path` 一起換 —— smoke 只跑 5 課，
+    把那 5 課寫進共用的 snapshots/ 就是用子集覆蓋（跟 manifest 同一種毀法，
+    只是分散在 5 個檔裡更難察覺）。#2795
+    """
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    MANIFEST_PATH.write_text(
+    (path or MANIFEST_PATH).write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    base_dir = snapshots_dir or SNAPSHOTS_DIR
     for lesson_id, files in snapshots.items():
-        lesson_dir = SNAPSHOTS_DIR / lesson_id
+        lesson_dir = base_dir / lesson_id
         lesson_dir.mkdir(parents=True, exist_ok=True)
         for name, payload in files.items():
             (lesson_dir / name).write_text(
@@ -271,18 +290,43 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build keypoints QA manifest")
     parser.add_argument("--smoke", action="store_true", help=f"Smoke only: {SMOKE_LESSONS}")
     parser.add_argument("--all", action="store_true", help="Whole served corpus")
+    parser.add_argument("--force", action="store_true",
+                        help="允許 --all 產出的筆數比現有 manifest 少一半以上")
     args = parser.parse_args()
 
+    # ⛔ 不要幫使用者選一個會毀資料的預設。
+    # 這裡以前是 `args.smoke = True` —— 什麼都不帶就只跑 5 課、卻寫進同一個 manifest，
+    # 等於用子集覆蓋全集，而且印「Wrote … lessons=5」、退出碼 0，看起來像成功。
+    # 2026-08-20 照檔頭第一個範例跑，當場砍掉 145 筆（#2795）。
     if not args.smoke and not args.all:
-        args.smoke = True
+        parser.error("要明確選一個：--all（全量，寫正式 manifest）或 --smoke（5 課，寫 .smoke.json）")
 
     manifest, snapshots = build_manifest(smoke_only=not args.all)
-    _write(manifest, snapshots)
+
+    # `--smoke` 只跑 SMOKE_LESSONS，永遠不寫正式 manifest。
+    out_path = SMOKE_MANIFEST_PATH if args.smoke else MANIFEST_PATH
+    out_snapshots = (OUT_DIR / "snapshots.smoke") if args.smoke else SNAPSHOTS_DIR
+
+    # 全量重生時，筆數大幅下降幾乎都是「語料沒載到」而不是「課變少了」。
+    # 擋的是意外，不是意圖 —— 真要縮帶 `--force`。
+    if args.all and not args.force:
+        before = _existing_lesson_count()
+        after = manifest["summary"]["total"]
+        if before and after < before / 2:
+            print(
+                f"⛔ 中止：manifest 目前 {before} 筆，這次只產出 {after} 筆。\n"
+                f"   筆數掉超過一半通常代表語料沒載到（例：在缺 venv 的 worktree 跑）。\n"
+                f"   確定要縮就加 --force。",
+                file=sys.stderr,
+            )
+            return 1
+
+    _write(manifest, snapshots, path=out_path, snapshots_dir=out_snapshots)
 
     s = manifest["summary"]
-    print(f"Wrote {MANIFEST_PATH}")
+    print(f"Wrote {out_path}" + ("   (SMOKE 子集，未動正式 manifest)" if args.smoke else ""))
     print(f"  lessons={s['total']} unreviewed={s['unreviewed']} display_only={s['display_only']}")
-    print(f"  snapshots: {len(snapshots)} under {SNAPSHOTS_DIR}")
+    print(f"  snapshots: {len(snapshots)} under {out_snapshots}")
     # Only meaningful for a full build — under --smoke every non-smoke directory
     # would be reported as an orphan, which is noise, not a finding.
     orphans = _report_orphan_snapshots(set(snapshots)) if args.all else []
