@@ -743,11 +743,15 @@ modules:
   - backend/app/services/tts/providers/gemini.py
   - backend/app/services/tts/providers/google.py
   - backend/app/services/tts_service.py
-  owns_data: []
+  - backend/app/services/tts/fingerprint_lock.py
+  owns_data:
+  - backend/data/tts/corrections_fingerprint.lock.json
   spec_tests:
   - backend/specs/test_tts_spec.py
   - backend/tests/test_characterization_tts_cache.py
   - backend/tests/test_no_duplicate_azure_impl.py
+  legacy_tests:
+  - backend/tests/test_tts_fingerprint_lock.py
   related_issues: []
   source_meetings:
   - docs/meetings/2026-05-01-experts-review.md

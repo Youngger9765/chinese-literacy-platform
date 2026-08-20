@@ -1,0 +1,14 @@
+{
+  "fingerprint": "cda4399d726e",
+  "measured_at": "2026-08-20T17:09:08Z",
+  "bucket": "lingoleap-tts-cache",
+  "provider": "azure",
+  "expected_keys": 6622,
+  "reachable_keys": 6613,
+  "bucket_objects": 17623,
+  "unaddressable_objects": 11010,
+  "partial": false,
+  "source": "GET {backend}/api/tts/mapping/{lesson_id}",
+  "environment": "staging",
+  "note": "改了發音修正表就要重生全庫，然後用 scripts/update_tts_fingerprint_lock.py 重量一次。手改這個檔 = 把不可達的音檔變成綠燈。"
+}

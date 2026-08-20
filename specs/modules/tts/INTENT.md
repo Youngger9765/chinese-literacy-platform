@@ -11,11 +11,15 @@ owns_code:
   - backend/app/services/tts/providers/gemini.py
   - backend/app/services/tts/providers/google.py
   - backend/app/services/tts_service.py
-owns_data: []
+  - backend/app/services/tts/fingerprint_lock.py
+owns_data:
+  - backend/data/tts/corrections_fingerprint.lock.json
 spec_tests:
   - backend/specs/test_tts_spec.py
   - backend/tests/test_characterization_tts_cache.py
   - backend/tests/test_no_duplicate_azure_impl.py
+legacy_tests:
+  - backend/tests/test_tts_fingerprint_lock.py
 related_issues: []
 source_meetings:
   - docs/meetings/2026-05-01-experts-review.md
@@ -158,7 +162,39 @@ if active_provider == "azure":
 
 ---
 
-## 7. 一個音檔要滿足什麼才算「對」（2026-08-10 新增）
+## 7. 改發音修正表 = 全庫音檔同時失效（2026-08-21 新增，#2742）
+
+`_cache_key` 把發音修正表的指紋（`CORRECTIONS_FINGERPRINT`）混進每一個 key。
+**這是對的**：改了發音，舊音檔就變成「定址不到」而不是「繼續唸錯」。
+
+代價是它**完全無聲**。2026-08-20 對真 bucket 實測：
+`PHONEME_CORRECTIONS` 加一條，指紋 `cda4399d726e` → `79e1c52637d3`，
+播放器要的 6622 個 key 命中數從 **6613 掉到 0**。
+測試綠、build 綠、部署成功、log 一行都不出。學生端唯一的症狀是「變慢」——
+而慢會被歸因到網路。bucket 裡現在有 11010 個沒有任何現行 key 定址得到的物件，
+就是前幾次改表留下來的。
+
+所以：
+
+| 東西 | 角色 |
+|---|---|
+| `backend/data/tts/corrections_fingerprint.lock.json` | 記「bucket 裡的音檔現在用哪個指紋定址」＋那次量測的佐證 |
+| `backend/app/services/tts/fingerprint_lock.py` | 純函式比對，指紋漂移就回報 |
+| `backend/tests/test_tts_fingerprint_lock.py` | 這道門本身（CI 有跑） |
+| `backend/scripts/update_tts_fingerprint_lock.py` | **唯一**該用來推進 lock 的方式：真的去列 bucket，量不到就不寫 |
+
+改發音表（含重生 `data/tts/taiwan_pronunciation.json`）之後要做的事：
+
+1. `python3 backend/scripts/prewarm_tts_cache.py --base <staging-backend>`
+2. `python3 backend/scripts/update_tts_fingerprint_lock.py --base <staging-backend>`
+
+⛔ 手改那個 lock 檔讓測試變綠 = 把幾千個不可達的音檔粉飾成綠燈，正是這道門要擋的事。
+
+⚠️ **這道門管不到的**：`he_exceptions.json` 和「和」當連接詞的規則會改變發音，
+但**不會**動到 key —— 那種改動仍然是安靜地放出唸錯的舊音檔。要修就得把指紋放寬，
+而放寬等於再付一次全庫重生。另開 issue 處理，不在 #2742 夾帶。
+
+## 8. 一個音檔要滿足什麼才算「對」（2026-08-10 新增）
 
 > 這一節存在的原因：2026-08-09 有四個讀音被回報，追下去發現**沒有任何地方寫著
 > 「音檔怎樣才算對」**。判準散在 code 註解跟 commit 訊息裡，於是每一次改動都要靠
