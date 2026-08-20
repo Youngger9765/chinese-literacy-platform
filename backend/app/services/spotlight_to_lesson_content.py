@@ -912,7 +912,15 @@ def sample_uids(limit: int = 0) -> list[str]:
                        key=lambda c: c.name)
         if not vdirs:
             continue
-        spot = load_spotlight(vdirs[-1] / "spotlight.yml")
+        # 「沒有聚光燈」有兩種：抽出來 0 個 block，以及**連檔案都沒有**。
+        # docstring 上面說的跳過原本只做到第一種 —— 第二種會直接
+        # FileNotFoundError，而這支函式在測試模組的 module 層被呼叫，
+        # 於是 3529 個測試在 collection 階段一起死（#2751）。
+        # L0011 就是這樣：它是 #2781 盤出「真的沒有聚光燈」的 7 課之一。
+        spot_path = vdirs[-1] / "spotlight.yml"
+        if not spot_path.is_file():
+            continue
+        spot = load_spotlight(spot_path)
         if spot.get("blocks"):
             uids.append(d.name)
         if limit and len(uids) >= limit:
