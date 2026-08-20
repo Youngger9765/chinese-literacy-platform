@@ -95,4 +95,7 @@ jobs:
             src/components/auth/publicSteps.test.ts \
             src/services/ttsApi.paragraph.test.ts \
             src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
-            src/components/learning/__tests__/nextStepFooter.test.tsx
+            src/components/learning/__tests__/nextStepFooter.test.tsx \
+            src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
+            src/components/layout/__tests__/Sidebar.role-split.test.tsx \
+            src/components/layout/__tests__/toolboxUnreachable.test.tsx
