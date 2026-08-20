@@ -67,6 +67,36 @@ jobs:
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
 
+      # Pronunciation fingerprint gate (#2742). Already run by spec-check.yml,
+      # repeated here on purpose: spec-check is path-filtered, this workflow
+      # triggers on all of backend/**, and the failure being guarded against is
+      # precisely "the gate existed and nothing ran it". Cheap enough (three
+      # assertions, no I/O) that redundancy costs less than another silent
+      # orphaning of the whole audio cache.
+      - name: Run pronunciation fingerprint gate (#2742)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q specs/test_tts_cache_fingerprint_spec.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # Wiring lock for the gate above (#2742): asserts every input the
+      # fingerprint is computed from is watched by a workflow that runs it.
+      - name: Run fingerprint-gate wiring lock (#2742)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_tts_fingerprint_gate_is_wired.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
       # TTS coverage lock (#2619): mocked logic only (existing_keys/missing_keys/
       # expected_keys against FakeBucket doubles + the real manifest file) — no
       # GCS credentials touched here. The real-bucket class
