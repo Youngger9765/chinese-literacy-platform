@@ -86,6 +86,28 @@ SCHEMA_VERSION = "content-evidence.v1"
 # See dedupe_stories_by_canonical_code(). 152 x 2 steps = 304 cells.
 EXPECTED_LESSONS = 152
 STEPS = ("reading-strategy", "story-structure")
+
+# ⚠️ 上面兩個是這道門**內部**的識別名（`STEP_SOURCE_FIELD`、known_gaps 的 key
+# 都用它們），但**它們已經不是 app 服務的路徑**。
+# `frontend/src/config/stepConfig.ts` 的 `LEGACY_STEP_ID_ALIASES` 記著改名：
+#
+#     reading-strategy → spotlight
+#     story-structure  → keypoints-table
+#
+# app 收到舊名會轉址到新名，而 L3 的判準是
+# `href.endswith(f"/learn/{id}/{step}")` —— 轉址之後永遠對不上，
+# 於是 350/350 全 fail，而每一格的內容其實都是好的（#2730）。
+#
+# 內部識別名保持不動（改了會連帶弄壞 known_gaps 的查詢），只在組網址時換成現行 id。
+_STEP_URL_ID = {
+    "reading-strategy": "spotlight",
+    "story-structure": "keypoints-table",
+}
+
+
+def step_url_id(step: str) -> str:
+    """這個 step 在 app 上真正的路徑片段。"""
+    return _STEP_URL_ID.get(step, step)
 STEP_SOURCE_FIELD = {
     "reading-strategy": "spotlight_v2.blocks",
     "story-structure": "story_structure_table",
@@ -1016,7 +1038,7 @@ def l3_render_cell(
 ) -> dict[str, Any]:
     story_id = story["id"]
     lesson_code = story.get("grade_code", "")
-    url = f"{STAGING_FRONTEND}/learn/{story_id}/{step}"
+    url = f"{STAGING_FRONTEND}/learn/{story_id}/{step_url_id(step)}"
     cell_shot_dir = shots_dir / str(story_id)
     cell_shot_dir.mkdir(parents=True, exist_ok=True)
     shot_path = cell_shot_dir / f"{step}.png"
@@ -1027,7 +1049,7 @@ def l3_render_cell(
         time.sleep(4)
         href = browse.js("location.href")
         on_login = "/login" in href
-        loaded = href.endswith(f"/learn/{story_id}/{step}")
+        loaded = href.endswith(f"/learn/{story_id}/{step_url_id(step)}")
         errors = browse.console_errors()
         browse.screenshot(str(shot_path))
         return {
@@ -1421,7 +1443,7 @@ def main() -> int:
                         "story_id": sid,
                         "lesson_code": lesson_code,
                         "step": step,
-                        "url": f"{STAGING_FRONTEND}/learn/{sid}/{step}",
+                        "url": f"{STAGING_FRONTEND}/learn/{sid}/{step_url_id(step)}",
                         "render": {
                             "loaded": False,
                             "on_login_page": False,
