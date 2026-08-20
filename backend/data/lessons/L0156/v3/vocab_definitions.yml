@@ -1,0 +1,68 @@
+lesson_uid: L0156
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 驚心動魄
+  - 險峻
+  - 陰黯
+  - 杳無人煙
+  - 號叫
+  - 手無寸鐵
+  - 一息尚存
+  - 攫
+  - 回天乏術
+  - 譁眾取寵
+  - 倖存
+  - 山坳
+  - 一命嗚呼
+  vocabulary_bank_label: 本課語詞
+  vocabulary_bank_note: 「號」「一」等字在文字層各夾一個隱藏 variation selector（U+E01Ex），比對前濾掉 Cf/Mn
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
+  items:
+  - index: 1
+    word: 一息尚存
+    definition: 還有一點氣息存在，表示生命危急但還活著。
+  - index: 2
+    word: 號叫
+    definition: 大叫。
+  - index: 3
+    word: 杳無人煙
+    definition: 比喻荒涼無人居住、很少人的地方。
+  - index: 4
+    word: 手無寸鐵
+    definition: 鐵指武器，在此指的是手裡沒有任何武器。
+  - index: 5
+    word: 陰黯
+    definition: 天陰，昏暗不明。
+  - index: 6
+    word: 倖存
+    definition: 僥倖活下來。
+  - index: 7
+    word: 險峻
+    definition: 地勢高聳危險。
+  - index: 8
+    word: 驚心動魄
+    definition: 驚險刺激、通常形容難忘的經歷、旅程或冒險。
+  - index: 9
+    word: 山坳
+    definition: 兩山間凹下的地方。
+  - index: 10
+    word: 譁眾取寵
+    definition: 用大眾喜歡的話或行動來吸引他人的注意。
+  - index: 11
+    word: 回天乏術
+    definition: 病情嚴重無法挽救。
+  - index: 12
+    word: 一命嗚呼
+    definition: 即「死亡」。
+  - index: 13
+    word: 攫
+    definition: 指鳥獸用爪抓取獵物。

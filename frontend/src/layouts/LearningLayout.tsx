@@ -72,6 +72,12 @@ export interface LearningContext {
   handleFinishSentencePractice: () => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleFinishKnowledgeStation: () => void;
+  /** 文言文專屬 steps (#2752) — see useLearningStepNavigation.ts for why these
+   *  route through the lesson-aware dispatchStepFinish override. */
+  handleFinishClassicalText: () => void;
+  handleFinishClassicalSentenceMatching: () => void;
+  handleFinishClassicalWordMatching: () => void;
+  handleFinishClassicalSelfChallenge: () => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
@@ -226,6 +232,10 @@ const LearningLayout: React.FC = () => {
     handleFinishSentencePractice,
     handleFinishVocabWordSearch,
     handleFinishKnowledgeStation,
+    handleFinishClassicalText,
+    handleFinishClassicalSentenceMatching,
+    handleFinishClassicalWordMatching,
+    handleFinishClassicalSelfChallenge,
     handleRetry,
     handleSessionComplete,
   } = stepNav;
@@ -295,6 +305,10 @@ const LearningLayout: React.FC = () => {
       handleFinishSentencePractice,
       handleFinishVocabWordSearch,
       handleFinishKnowledgeStation,
+      handleFinishClassicalText,
+      handleFinishClassicalSentenceMatching,
+      handleFinishClassicalWordMatching,
+      handleFinishClassicalSelfChallenge,
       handleRetry,
       handleSessionComplete,
       emptyAttempt: EMPTY_ATTEMPT,
@@ -333,6 +347,10 @@ const LearningLayout: React.FC = () => {
       handleFinishSentencePractice,
       handleFinishVocabWordSearch,
       handleFinishKnowledgeStation,
+      handleFinishClassicalText,
+      handleFinishClassicalSentenceMatching,
+      handleFinishClassicalWordMatching,
+      handleFinishClassicalSelfChallenge,
       handleRetry,
       handleSessionComplete,
       dbSessionId,

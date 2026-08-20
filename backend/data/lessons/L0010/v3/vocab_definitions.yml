@@ -1,0 +1,52 @@
+lesson_uid: L0010
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 揮之不去
+  - 有朝一日
+  - 勸誡
+  - 累癱
+  - 雀屏中選
+  - 疲憊
+  - 豐厚
+  - 報酬
+  - 擦身而過
+  - 孤注一擲
+  vocabulary_bank_errata_ref: E1
+  items:
+  - index: 1
+    word: 有朝一日
+    definition: 未來的某一天
+  - index: 2
+    word: 疲憊
+    definition: 身體或精神非常累。
+  - index: 3
+    word: 孤注一擲
+    definition: 把全部力量或希望放在一次行動上，冒險做最後一搏。
+  - index: 4
+    word: 累癱
+    definition: 累到像癱瘓了一樣，幾乎動不了。
+  - index: 5
+    word: 雀屏中選
+    definition: 在一群優秀人才中，被選中了。
+  - index: 6
+    word: 豐厚
+    definition: 形容東西很豐富、很充足。常用來形容報酬或獎品。
+  - index: 7
+    word: 揮之不去
+    definition: 一直留在心中或腦中，想忘也忘不了。
+  - index: 8
+    word: 報酬
+    definition: 指完成事情之後得到的回報。
+  - index: 9
+    word: 勸誡
+    definition: 好好的提醒或告訴別人不要做錯事。
+  - index: 10
+    word: 擦身而過
+    definition: 比喻差一點就得到，最後卻錯過人、事或機會。

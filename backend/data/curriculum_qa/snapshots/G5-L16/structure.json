@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
-    "fill_blank_count": 4,
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
       "巨鼠外型與優點",
       "地雷危害",
       "傳統掃雷",
-      "巨鼠掃雷"
+      "巨鼠掃雷1"
     ],
     "template_kind": "generic"
   },
@@ -22,12 +23,12 @@
     {
       "interactive_type": "fill_blank",
       "label": "巨鼠外型與優點",
-      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓\n練巨鼠可以幫忙偵測【　　　】。"
+      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
       "label": "地雷危害",
-      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃\n雷工作變成【　　　】的工作。"
+      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。"
     },
     {
       "interactive_type": "display",
@@ -39,27 +40,65 @@
           "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。"
         },
         {
-          "correct_options": [
-            0,
-            3
+          "interactive_type": "fill_blank",
+          "label": "巨鼠掃雷1",
+          "value": "靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置"
+        },
+        {
+          "interactive_type": "display",
+          "label": "巨鼠掃雷2",
+          "value": "安全：不會引爆地雷。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "高",
+                "低"
+              ]
+            }
           ],
-          "interactive_type": "checkbox",
-          "label": "巨鼠掃雷",
-          "options": [
-            "高□",
-            "低】，訓練成本【□",
-            "高",
-            "低】"
+          "interactive_type": "inline_choice",
+          "label": "巨鼠掃雷3-效率",
+          "value": "效率【　　　】"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "高",
+                "低"
+              ]
+            }
           ],
-          "value": "1.靠【嗅覺】偵測地雷，只對【炸藥】反應，工作\n人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【①高□②低】，訓練成本【□①高②低】"
+          "interactive_type": "inline_choice",
+          "label": "巨鼠掃雷3-訓練成本",
+          "value": "訓練成本【　　　】"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "巨鼠貢獻",
-      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。"
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "1",
+          "value": "巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "其中最著名的巨鼠就是馬嘎瓦。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "巨鼠的形象已經變成【　　　】的英雄。"
+        }
+      ],
+      "value": ""
     }
   ],
   "title": "掃雷英雄馬嘎瓦",
@@ -67,12 +106,12 @@
     {
       "kind": "pair",
       "label": "巨鼠外型與優點",
-      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓\n練巨鼠可以幫忙偵測【　　　】。"
+      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。"
     },
     {
       "kind": "pair",
       "label": "地雷危害",
-      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃\n雷工作變成【　　　】的工作。"
+      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。"
     },
     {
       "items": [
@@ -81,17 +120,42 @@
           "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。"
         },
         {
-          "label": "巨鼠掃雷",
-          "value": "1.靠【　　　】偵測地雷，只對【　　　】反應，工作\n人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【　　　】，訓練成本【　　　】"
+          "label": "巨鼠掃雷1",
+          "value": "靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置"
+        },
+        {
+          "label": "巨鼠掃雷2",
+          "value": "安全：不會引爆地雷。"
+        },
+        {
+          "label": "巨鼠掃雷3-效率",
+          "value": "效率（　）\n①高 ②低"
+        },
+        {
+          "label": "巨鼠掃雷3-訓練成本",
+          "value": "訓練成本（　）\n①高 ②低"
         }
       ],
       "kind": "section_block",
       "section": "兩種掃雷方式的比較"
     },
     {
-      "kind": "pair",
-      "label": "巨鼠貢獻",
-      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。"
+      "items": [
+        {
+          "label": "1",
+          "value": "巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。"
+        },
+        {
+          "label": "2",
+          "value": "其中最著名的巨鼠就是馬嘎瓦。"
+        },
+        {
+          "label": "3",
+          "value": "巨鼠的形象已經變成【　　　】的英雄。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "巨鼠貢獻"
     }
   ]
 }

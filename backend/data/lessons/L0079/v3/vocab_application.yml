@@ -1,0 +1,42 @@
+lesson_uid: L0079
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 祈請
+    B: 病識感
+    C: 拮据
+    D: 雪上加霜
+    E: 諮詢
+    F: 與日俱增
+    G: 聯手
+    H: 哄騙
+    I: 秋祺
+  option_bank_note: 9 個代號對應 8 道小題；I.秋祺 未被任何一題用到
+  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 離開家鄉數十年，頭髮都斑駁了，他對家人的思念（　）。
+    answer: F
+  - index: 2
+    stem: 乾旱時，全村在大廟舉行祭典，（　）老天爺降下大雨。
+    answer: A
+  - index: 3
+    stem: 同學向輔導老師進行職涯（　）時，輔導老師很有耐心的一一解答。
+    answer: E
+  - index: 4
+    stem: 如果病人缺乏（　），會很難說服他接受醫療協助。
+    answer: B
+  - index: 5
+    stem: 這個家庭剛失去收入來源，房租又突然調漲，真是（　）。
+    answer: D
+  - index: 6
+    stem: 失去工作後，他只能靠微薄的積蓄過日子，生活十分（　）。
+    answer: C
+  - index: 7
+    stem: 他在聊天軟體上用甜言蜜語取得信任，再（　）對方借錢給他。
+    answer: H
+  - index: 8
+    stem: 警方和銀行（　）追查詐騙案，希望儘快抓到主謀，減少受害者的損失。
+    answer: G

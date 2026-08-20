@@ -70,11 +70,30 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
       onClick={onClick}
     >
       <div className="h-40 overflow-hidden relative">
-        <img
-          src={story.thumbnail}
-          alt={story.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+        {/* 二修的課目前沒有封面檔（`backend/data/lessons/` 底下 0 個圖），所以
+            `thumbnail_url` 是 null。無條件 render <img> 會讓圖書館 175 張卡片
+            全部變破圖 —— 破圖看起來像壞掉，而不是像「這課還沒有封面」。
+            有圖就照常顯示；載入失敗也退回同一個佔位，兩種情況長得一樣。 */}
+        {story.thumbnail ? (
+          <img
+            src={story.thumbnail}
+            alt={story.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const ph = e.currentTarget.nextElementSibling as HTMLElement | null;
+              if (ph) ph.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div
+          data-testid="story-cover-placeholder"
+          className="w-full h-full items-center justify-center bg-gray-100 text-gray-400"
+          style={{ display: story.thumbnail ? 'none' : 'flex' }}
+          aria-hidden="true"
+        >
+          <span className="material-symbols-outlined text-4xl">menu_book</span>
+        </div>
         {/* Top-right badges */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {story.grade && (

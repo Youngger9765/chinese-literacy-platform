@@ -1,0 +1,62 @@
+lesson_uid: L0155
+version_id: v3
+section_no: 二
+word_matching:
+  instruction: 以下是原文與白話文的對照。請依照文意，寫出方框文字的白話意思。
+  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
+  shape_note: 每題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），下列「白話」留括號填空
+  items:
+  - index: 1
+    classical: 桓公曰：「吾欲下魯梁，何行而可？」
+    boxed_terms:
+    - 下
+    - 行
+    vernacular: 齊桓公說：「我想（　）魯國和梁國，怎麼（　）才可以？」
+    blanks:
+    - answer: 拿下
+    - answer: 做
+  - index: 2
+    classical: 魯梁之民俗為綈，公服綈，令左右服之，民從而服之。
+    boxed_terms:
+    - 俗
+    - 服
+    - 左右
+    vernacular: 魯梁的人民（　）織綈來穿，主公可以帶頭（　）綈做的衣服，並命令（　）穿，如此，人民也會跟著穿。
+    blanks:
+    - answer: 習慣
+    - answer: 穿
+    - answer: 身邊的人
+  - index: 3
+    classical: 齊勿敢為，必仰於魯梁，則是魯梁釋其農事而作綈矣。
+    boxed_terms:
+    - 仰
+    - 釋
+    vernacular: 齊國人不敢不聽，勢必（　）魯、梁兩國，向他們購買綈。如此，魯、梁兩國的人民就會（　）農活，爭相去織綈了。
+    blanks:
+    - answer: 仰賴
+    - answer: 放下
+  - index: 4
+    classical: 魯梁郭中之民，道路揚塵，車轂連伍而行。管子對公曰：「公宜改服帛，率民去綈，毋與魯梁通使。」
+    boxed_terms:
+    - 郭中
+    - 服
+    vernacular: 兩國（　）的人民為了織綈、運綈，忙得路上都塵土飛揚，運綈的車一輛接一輛。管仲於是對齊桓公說：「主公現在可以改（　）一般的絲織品，帶領人民不再穿綈，也不要與魯、梁兩國有任何外交往來。」
+    blanks:
+    - answer: 城裡
+    - answer: 穿
+  - index: 5
+    classical: 魯梁之人，糴十百，齊糶十錢。
+    boxed_terms:
+    - 糴
+    - 糶
+    vernacular: 魯梁的人民（　）十升糧食要花上千錢，而齊國（　）十升糧的成本卻只要十錢。
+    blanks:
+    - answer: 買
+    - answer: 賣
+  - index: 6
+    classical: 魯梁之民歸齊者十分之六，三年，魯梁之君請服。
+    boxed_terms:
+    - 服
+    vernacular: 魯梁的人民為了活下去而投奔齊國的，十人中就有六人，到了第三年，兩國的國君無計可施，只好向齊國請求（　）。
+    blanks:
+    - answer: 歸順臣服

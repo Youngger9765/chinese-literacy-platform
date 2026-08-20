@@ -1,14 +1,16 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 2,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "萬一告白失敗──\n1.【 段三 】對方可能刻意__\n2.【 段三 】相處尷尬，無法毫無__\n3.【 段四 】被大家指指點點，被當成\n__流傳\n4.被人亂開玩笑，影響心情，或變成\n__",
+      "風險──告白【　　　】",
+      "風險──不告白【　　　】",
       "兩難心情"
     ],
-    "template_kind": "psr"
+    "template_kind": "generic"
   },
   "layout": "worksheet_table",
   "rows": [
@@ -25,26 +27,17 @@
     {
       "interactive_type": "display",
       "label": "立場",
-      "sub_rows": [
-        {
-          "interactive_type": "display",
-          "label": "告白──確認關係",
-          "value": "不告白──維持現狀"
-        }
-      ],
       "value": ""
     },
     {
-      "interactive_type": "display",
-      "label": "風險",
-      "sub_rows": [
-        {
-          "interactive_type": "fill_blank",
-          "label": "萬一告白失敗──\n1.【 段三 】對方可能刻意__\n2.【 段三 】相處尷尬，無法毫無__\n3.【 段四 】被大家指指點點，被當成\n__流傳\n4.被人亂開玩笑，影響心情，或變成\n__",
-          "value": "1.【　　　】對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方【　　　】【　　　】【　　　】【　　　】"
-        }
-      ],
-      "value": ""
+      "interactive_type": "fill_blank",
+      "label": "風險──告白【　　　】",
+      "value": "萬一告白失敗──\n1.【　　　】對方可能刻意【　　　】\n2.【　　　】相處尷尬，無法毫無【　　　】\n3.【　　　】被大家指指點點，被當成【　　　】流傳\n4.被人亂開玩笑，影響心情，或變成【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "風險──不告白【　　　】",
+      "value": "1.【　　　】對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方"
     },
     {
       "interactive_type": "fill_blank",
@@ -60,24 +53,19 @@
       "value": "該不該告白"
     },
     {
-      "items": [
-        {
-          "label": "告白──確認關係",
-          "value": "不告白──維持現狀"
-        }
-      ],
-      "kind": "section_block",
-      "section": "立場"
+      "kind": "pair",
+      "label": "立場",
+      "value": ""
     },
     {
-      "items": [
-        {
-          "label": "萬一告白失敗──\n1.（段三）對方可能刻意__\n2.（段三）相處尷尬，無法毫無__\n3.（段四）被大家指指點點，被當成\n__流傳\n4.被人亂開玩笑，影響心情，或變成\n__",
-          "value": "1.（段五）對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方【　　　】【　　　】【　　　】【　　　】"
-        }
-      ],
-      "kind": "section_block",
-      "section": "風險"
+      "kind": "pair",
+      "label": "風險──告白（確認關係）",
+      "value": "萬一告白失敗──\n1.（段三）對方可能刻意【　　　】\n2.（段三）相處尷尬，無法毫無【　　　】\n3.（段四）被大家指指點點，被當成【　　　】流傳\n4.被人亂開玩笑，影響心情，或變成【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "風險──不告白（維持現狀）",
+      "value": "1.（段五）對【　　　】不明的處境感到【　　　】不安\n2.萬一對方也有好感，就會錯失【　　　】、錯過對方"
     },
     {
       "kind": "pair",

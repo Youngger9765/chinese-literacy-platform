@@ -1,0 +1,27 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 台灣媒體是怎麼爛掉的？七分鐘看懂媒體亂象五大關鍵！【記者真心話】Vol.1｜懶人包
+    duration: 07:36
+    source: 公視P#新聞實驗室
+    _總表_url: http://youtu.be/JNeBKlG0cI
+    _總表_url_note: 總表這格的影片 ID 只有 10 碼（YouTube 是 11 碼），疑似總表側漏字；未自行補字。
+  - index: 2
+    title: 你也被媒體帶風向了嗎？ft.回覆酸民留言與頭版質疑【記者真心話】Vol.3｜懶人包｜媒體識讀
+    duration: 08:56
+    source: 公視P#新聞實驗室
+    _總表_url: http://youtu.be/0JoMqP5UwQ8
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 91 列，故加 `_` 前綴標示非 DOCX 內容。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/JNeBKlG0cI
+    url_source: 總表0816「4.影片連結」年級7課次10
+  - index: 2
+    url: http://youtu.be/0JoMqP5UwQ8
+    url_source: 總表0816「4.影片連結」年級7課次10

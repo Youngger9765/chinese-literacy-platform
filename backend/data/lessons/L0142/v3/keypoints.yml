@@ -1,0 +1,80 @@
+lesson_uid: L0142
+version_id: v3
+section_no: 五
+keypoints:
+  title: 焚而不毀的倫敦
+  layout: list
+  answer_carrier: 橘色手寫 + 紅色 ☑（w:sym Wingdings F0FE，在文字層），PDF p7~p8 可見
+  rows:
+  - label: 倫敦大轟炸(段1~3)
+    items:
+    - label: '1'
+      value: 1940年秋天，倫敦遭遇【　】轟炸機空襲，持續了許多個月。
+      blanks:
+      - answer: 德國
+    - label: '2'
+      value: 轟炸後倫敦【　】、焦土遍野，滿是殘垣敗瓦。
+      blanks:
+      - answer: 滿目瘡痍
+    - label: '3'
+      value: 死亡人數【　】，可見轟炸造成嚴重傷亡。
+      options:
+        1: 眾多
+        2: 稀少
+      answer: 1
+  - label: 倫敦市民的反應(段4~9)
+    items:
+    - label: '1'
+      value: 轟炸期間，許多民眾盡自己所能幫助受難的人員。
+    - label: '2'
+      value: 警報解除後，大家儘速清理修復，讓城市恢復運轉。
+    - label: '3'
+      value: 民眾以幽默的態度面對這場災難，英國人用【　】來形容這種面不改色的心理韌性。
+      blanks:
+      - answer: 克制的上唇
+  - label: 心理學家的發現(段10)
+    items:
+    - label: '1'
+      value: 大轟炸後，幸運存活者非但沒有嚇壞，反而產生了強烈的自信與平靜，這現象被稱為【　】。
+      blanks:
+      - answer: 倖存者的鎮定
+    - label: '2'
+      value: 心理學家將大轟炸後的倫敦人民分成三類，分析大轟炸對他們的影響。
+    - label: 2-(1)
+      value: 哪幾類人較容易產生強烈的自信與平靜？(請打勾，複選)
+      options:
+        1: 直接受害者
+        2: 間接受害者
+        3: 未受波及者
+      answers:
+      - 1
+      - 2
+    - label: 2-(2)
+      value: 哪一類人最為恐懼？(請打勾，單選)
+      options:
+        1: 直接受害者
+        2: 間接受害者
+        3: 未受波及者
+      answer: 3
+    - label: 2-(3)
+      value: 重災區的人們能「親身體驗」，能「參與救災」，因此獲得【　】，就能讓自己找回秩序與平衡。
+      blanks:
+      - answer: 掌控感
+  - label: 作者結論(段11~13)
+    items:
+    - label: '1'
+      value: 人類的恐懼，常不只來自危險本身，也來自對【　】的想像。
+      blanks:
+      - answer: 未知
+    - label: '2'
+      value: 當人們真正【　】恐懼，恐懼就沒那麼可怕。
+      blanks:
+      - answer: 面對
+    - label: '3'
+      value: 當危險變成日常，人們反而會見怪不怪，【　】。
+      blanks:
+      - answer: 處變不驚
+    - label: '4'
+      value: 大轟炸讓人看見了一種名為【　】的力量。
+      blanks:
+      - answer: 心理韌性

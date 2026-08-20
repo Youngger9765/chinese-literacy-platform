@@ -1,0 +1,160 @@
+lesson_uid: L0036
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 輝煌
+  - 嶄露頭角
+  - 清一色
+  - 招募
+  - 正統
+  - 平起平坐
+  - 跌破眼鏡
+  - 脫韁野馬
+  - 摸不著頭緒
+  - 著稱
+  - 一絲不苟
+  - 敬仰
+  - 先驅
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 一絲不苟蛻招嶄露頭角
+  - 景仰頭緒跌清住輕招
+  - 真絕輝煌破一稱正一幕
+  - 統平座膽眼色先趨統色
+  - 妥招戰脫睛斬脫薑也馬
+  - 募心竟韁摸續敬仰角平
+  - 驚協平野展不狗羨揮起
+  - 軍著安馬露句著慕煌平
+  - 嫌疑稱自手先說頭充坐
+  - 跌破眼鏡腳驅懈怠緒可
+  grid_note: '第 2 列只有 9 個字：DOCX 該列第 10 個儲存格沒有文字，PDF 上那一格也是空白，兩邊一致，
+
+    不是抄漏。其餘 9 列都是 10 格，且沒有任何答案路徑經過那一格。'
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 一絲不苟
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 嶄露頭角
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 清一色
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 輝煌
+    cells:
+    - - 3
+      - 3
+    - - 3
+      - 4
+    direction: horizontal
+  - word: 正統
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 9
+    direction: diagonal_down_right
+  - word: 招募
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 1
+    direction: diagonal_down_left
+  - word: 脫韁野馬
+    cells:
+    - - 5
+      - 4
+    - - 6
+      - 4
+    - - 7
+      - 4
+    - - 8
+      - 4
+    direction: vertical
+  - word: 摸不著頭緒
+    cells:
+    - - 6
+      - 5
+    - - 7
+      - 6
+    - - 8
+      - 7
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 敬仰
+    cells:
+    - - 6
+      - 7
+    - - 6
+      - 8
+    direction: horizontal
+  - word: 平起平坐
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 著稱
+    cells:
+    - - 8
+      - 2
+    - - 9
+      - 3
+    direction: diagonal_down_right
+  - word: 先驅
+    cells:
+    - - 9
+      - 6
+    - - 10
+      - 6
+    direction: vertical
+  - word: 跌破眼鏡
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  answer_paths_note: 13 個目標語詞全部圈到。

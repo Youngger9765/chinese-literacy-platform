@@ -1,0 +1,41 @@
+lesson_uid: L0043
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 庇蔭
+    B: 積勞成疾
+    C: 彌漫
+    D: 餘悸猶存
+    E: 目不識丁
+    F: 嗷嗷待哺
+    G: 著落
+    H: 食指浩繁
+    I: 俐落
+  option_bank_note: 列 9 個代號（本課 11 個語詞中的「貼補」「按件計酬」未入選項），對應 8 道小題
+  items:
+  - index: 1
+    stem: 小鳥在巢裡（　），等待著鳥媽媽回家餵食。
+    answer: F
+  - index: 2
+    stem: 雖然他的父母（　），仍努力支持他讀書，後來他取得了博士學位。
+    answer: E
+  - index: 3
+    stem: 長期熬夜加班使得他（　），只得暫時請假在家調養。
+    answer: B
+  - index: 4
+    stem: 她想起去年的車禍，仍（　），所以常常提醒自己開車要謹慎。
+    answer: D
+  - index: 5
+    stem: 他的身手（　），一個下午就完成一層樓的大掃除。
+    answer: I
+  - index: 6
+    stem: 她的家中（　），有五個十歲以下的子女嗷嗷待哺。
+    answer: H
+  - index: 7
+    stem: 在父母的（　）下，他從小衣食無缺，直到長大才學會獨立。
+    answer: A
+  - index: 8
+    stem: 比賽開始前，休息區（　）著緊張的氣氛，每位選手都專心準備。
+    answer: C

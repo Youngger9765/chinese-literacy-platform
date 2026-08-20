@@ -1,0 +1,50 @@
+lesson_uid: L0066
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 微不足道
+    B: 浩瀚無垠
+    C: 口耳相傳
+    D: 塵囂
+    E: 疲憊不堪
+    F: 精雕細琢
+    G: 不食人間煙火
+  answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 夜晚的星空(　)，令人感嘆自然的偉大。
+    answer: B
+  - index: 2
+    stem: 這件玉雕作品經過工匠(　)，每一個細節都栩栩如生。
+    answer: F
+  - index: 3
+    stem: 在浩瀚的宇宙面前，人類的力量顯得(　)。
+    answer: A
+  - index: 4
+    stem: 他厭倦了城市的(　)，決定搬到鄉村過簡單的生活。
+    answer: D
+  - index: 5
+    stem: 在工作了一整天後，他感到(　)，只想好好休息。
+    answer: E
+  - index: 6
+    stem: 那位隱居山林的藝術家，生活簡樸，宛如(　)的世外高人。
+    answer: G
+  - index: 7
+    stem: 這個關於仙境的傳說，是村民們(　)的故事。
+    answer: C
+  synonym_application:
+    index: 8
+    title: 相似詞應用：
+    instruction: 請根據上表，在空格中填入「象徵、意味著、代表」。
+    items:
+    - index: 1
+      stem: 她被選為班長，(　)全班參加學校的討論會。
+      answer: 代表
+    - index: 2
+      stem: 這場考試的成功(　)他能進入理想的高中，實現自己的夢想。
+      answer: 意味著
+    - index: 3
+      stem: 梅花(　)堅韌與不屈，無論風雪多大，它都能挺立在寒冬中。
+      answer: 象徵

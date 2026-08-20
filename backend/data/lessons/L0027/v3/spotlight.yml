@@ -1,0 +1,242 @@
+lesson_uid: L0027
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 用表格整理訊息──比較兩個對象
+  strategy_type: comprehension_strategy
+  blocks:
+  - type: concept_box
+    text: 文章同時介紹兩個對象，細節又很多時，可以用表格來整理。怎麼做呢？先找出文章在比較哪兩個對象，再看看比較哪些項目，最後把兩個對象的訊息填進表格。完成後，就能清楚看出它們哪裡相同、哪裡不同，也比較容易說出結論。
+  - type: guide
+    text: 本課提到，救援行動中使用巨鼠好處多多，這時，我們就可以把狗與巨鼠放在一起進行比較，做成表格，就可以讓人一目了然兩者的差異囉。
+  - type: guide
+    label: (1)
+    text: 整理表格步驟：
+  - type: sub_block
+    label: A. 找對象
+    items:
+    - type: guide
+      text: 找對象：文章在比較誰和誰。
+    - type: guide
+      text: 先把比較的對象寫在表格「第一列」：巨鼠與狗
+  - type: sub_block
+    label: B. 找項目
+    items:
+    - type: guide
+      text: 找項目：文章從哪些方面比較兩個對象？
+    - type: guide
+      text: 把文章比較的項目寫在表格「第一欄」
+    - type: guide
+      text: 祕訣：文章中出現「但是」、「不同」、「比較」等語詞時，可能表示作者正在比較兩個對象喔！
+    - type: passage
+      label: 範例
+      paragraphs:
+      - 範例：訓練有素的巨鼠可以跟多位訓練員合作，但狗通常只接受一位訓練員的指導。
+    - type: sub_block
+      label: ❶
+      instruction: 讀一讀，找出巨鼠與狗不同的地方。（單選）
+      items:
+      - type: single
+        prompt: 巨鼠可以跟（　）訓練員合作，
+        options:
+          1: 多位
+          2: 一位
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        prompt: 狗只接受（　）訓練員指導。
+        options:
+          1: 多位
+          2: 一位
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      label: ❷
+      prompt: 這句話比較的項目是什麼？
+      options:
+        1: 可合作的訓練員人數
+        2: 嗅覺能力
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: guide
+      label: ❸
+      text: 把比較項目「可合作的訓練員人數」填入「第一欄」
+  - type: sub_block
+    label: C. 填細節
+    items:
+    - type: guide
+      text: 填細節：兩個對象在這個項目上有什麼不同？
+    - type: guide
+      text: 把巨鼠和狗的相關細節，分別填入對應的格子
+    - type: guide
+      text: 巨鼠可合作訓練員數量多位，狗可合作訓練員數量只有一位。
+    - type: fill_table
+      columns:
+      - 項目
+      - 對象1：巨鼠
+      - 對象2：狗
+      rows:
+      - 項目: 項目1：可合作的訓練員人數
+        對象1：巨鼠: 【　】
+        對象1：巨鼠_blanks:
+        - answer: 多位
+        對象2：狗: 【　】
+        對象2：狗_blanks:
+        - answer: 一位
+        answer_carrier: 橘色手寫字（圖形層）
+      - 項目: 項目2：
+        note: 教材此列留白，供學生自己填第二個比較項目
+  - type: guide
+    label: (2)
+    text: 看表格：比較兩個對象，找出相同和不同，再說出重點。
+  - type: guide
+    text: ◎小試身手
+  - type: sub_block
+    label: 1.0
+    instruction: 現在讓我們從文章找出比較的內容與項目
+    items:
+    - type: passage
+      label: (1)
+      paragraphs:
+      - 此外，巨鼠體型小，狗無法通過的瓦礫縫隙，巨鼠卻可以輕而易舉的鑽過。
+    - type: sub_block
+      label: (1)❶
+      instruction: 現在我們來看這句話，請你找出巨鼠與狗不同的地方。（單選）
+      items:
+      - type: single
+        prompt: 巨鼠的體型比狗（　）
+        options:
+          1: 大
+          2: 小
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        prompt: 可以（　）鑽過瓦礫縫。
+        options:
+          1: 輕易
+          2: 無法
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      label: (1)❷
+      prompt: 這句話比較的項目是什麼？
+      options:
+        1: 訓練員數量
+        2: 體型
+        3: 成本
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: passage
+      label: (2)
+      paragraphs:
+      - 飼養和訓練巨鼠的成本比較低，不必花很多錢，只要有老鼠飼料和香蕉作為獎勵就可以了。
+    - type: sub_block
+      label: (2)❶
+      instruction: 現在我們來看這句話，請你找出巨鼠與狗不同的地方。（單選）
+      items:
+      - type: single
+        prompt: 巨鼠訓練時需要的食物獎勵是（　）
+        options:
+          1: 昂貴的專業食品
+          2: 簡單的飼料和香蕉
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        prompt: 所以巨鼠的訓練成本比狗（　）。
+        options:
+          1: 高
+          2: 低
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: free_text
+      label: (2)❷
+      prompt: 這句話比較的項目是什麼？
+      answer: 訓練成本
+      answer_carrier: 橘色手寫字（圖形層）
+  - type: fill_table
+    label: 2.0
+    instruction: 請將比較項目與細節填入表格內(請打勾，單選)
+    columns:
+    - 比較項目
+    - 巨鼠
+    - 狗
+    columns_note: 第一欄表頭在教材上印的是「比較項目          對象」（同一格內左下右上兩個詞）
+    rows:
+    - 比較項目: 1.可合作的訓練員人數
+      巨鼠_options:
+        1: 多位
+        2: 一位
+      巨鼠_answer: 1
+      狗_options:
+        1: 多位
+        2: 一位
+      狗_answer: 2
+    - 比較項目: 2.【　】
+      比較項目_blanks:
+      - answer: 體型
+      巨鼠_options:
+        1: 大
+        2: 小
+      巨鼠_answer: 2
+      狗_options:
+        1: 大
+        2: 小
+      狗_answer: 1
+    - 比較項目: 3.【　】
+      比較項目_blanks:
+      - answer: 訓練成本
+      巨鼠_options:
+        1: 高
+        2: 低
+      巨鼠_answer: 2
+      狗_options:
+        1: 高
+        2: 低
+      狗_answer: 1
+    answer_carrier: 紅色 ☑（圖形）＋橘色手寫字，文字流無此資訊
+  - type: sub_block
+    label: 3.0
+    instruction: 想一想表格內容告訴我們什麼？
+    items:
+    - type: single
+      label: ❶
+      prompt: 誰可以跟多位訓練員合作？
+      options:
+        1: 巨鼠
+        2: 狗
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      label: ❷
+      prompt: 誰可以鑽過瓦礫縫隙？
+      options:
+        1: 巨鼠
+        2: 狗
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      label: ❸
+      prompt: 誰的訓練成本比較低？
+      options:
+        1: 巨鼠
+        2: 狗
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: single
+    label: 4.0
+    prompt: 總結：根據上表，下列哪一句最能說明巨鼠和狗的比較結果？
+    options:
+      1: 非洲巨鼠和搜救犬的各項能力都完全不同。
+      2: 在可合作訓練員人數、體型和訓練成本方面，巨鼠較有優勢。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: guide
+    text: ★策略帶著走
+  - type: guide
+    text: 文章比較兩個對象時，可以用「找對象—找項目—填細節—看表格」整理訊息。
+  - type: self_check
+    prompt: ◎我會了嗎？
+    items:
+    - 我能用表格整理兩個對象的相同與不同。
+    no_correct_answer: true
+    answer_carrier: 學生自我檢核，原稿的 □ 未勾選

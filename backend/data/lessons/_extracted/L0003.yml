@@ -1,0 +1,633 @@
+meta:
+  lesson_uid: L0003
+  catalog_slot: G4-L12
+  title: 大自然的氣象小幫手
+  lesson_number: 第12課
+  level: 4
+  genre: 說明文
+  strategy: 摘要策略──找小主題與重要細節
+  課文作者: 曾世杰
+  學習單: 陳允捷/陳淑麗
+  pdf_pages: 9
+source_errata: []
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 摘要策略──找小主題與重要細節
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+
+# ── 一 讀全文-做記號 ──
+body:
+  marking_checklist:
+    instruction: 如果你有做到下列事項，請在□內打勾
+    items:
+    - 請在不太了解的字、詞或句做記號。
+    - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_box: Level 4・說明文
+  strategy_box: 目標策略：摘要策略──找小主題與重要細節
+  paragraph_count: 8
+  paragraphs:
+  - idx: 1
+    text: 明天學校要去露營，你早早就把背包收好了，也查過天氣預報。但你還是忍不住走到陽台，抬頭看看天空，希望明天是個大晴天。就在這時，你發現陽台的角落有一隻蜘蛛正忙著結一個大網。你皺起眉頭，拿起掃把想把牠揮掉。
+  - idx: 2
+    text: 且慢！你也許不知道，蜘蛛雖小，但牠的結網卻是一個天晴或下雨的好指標哦。
+  - idx: 3
+    text: 蜘蛛的絲纖細到幾乎隱形，又怕風、又怕雨。如果即將下雨，牠們察覺到空氣中的濕度，就不會浪費力氣結一張會被雨打壞的大網。所以，當你看到蜘蛛在結網時，代表空氣是乾的，天氣會穩定，可能還會放晴。相反的，如果你發現蜘蛛網縮得很小，甚至整張網都不見了，也許就是快要下雨的信號。
+  - idx: 4
+    text: 很有趣吧，其實，大自然裡到處都是線索，告訴人們接下來的天氣會有什麼變化呢。只要你能明察秋毫，留心身邊的事物，也許就能像氣象署那樣預報天氣呢。
+  - idx: 5
+    text: 有位農夫宣稱，他可以從蟋蟀叫聲的頻率，判斷現在的氣溫大概幾度。經過研究，科學家的確發現，有些蟋蟀的叫聲會受到氣溫影響，氣溫越高，牠們叫得越快。如果錄下草叢裡蟋蟀的叫聲，數一數8秒內大約叫了幾聲，再把這個數字加5，就可以估算現在的攝氏氣溫。例如，蟋蟀8秒鐘內叫了20聲，20加5，現在的氣溫大概是25度。
+  - idx: 6
+    text: 除了蜘蛛、蟋蟀之外，你家的毛小孩也可能透露天氣的祕密。下雨前，空氣中的濕氣提高，氣壓降低。這種變化改變了狗狗和貓咪的毛髮乾爽度，會讓牠們坐立難安，狗狗可能會一直在屋子裡走來走去、發出低鳴；貓咪則可能變得特別愛躲藏，或身體不時抽搐。那就是快下雨的徵兆！
+  - idx: 7
+    reading_anchor: true
+    text: 除了動物，天空本身也會說話。「日暈三更雨，月暈午時風」，所謂「暈ㄩㄣˋ」就是圍繞著太陽或月亮的光環。這句諺語指出，看到日暈，夜裡可能下雨，看到月暈，隔天白天可能起風。因為高空有一層很薄的冰晶雲，把光折射開來，我們才會看到日暈或月暈，這種雲常常是鋒面來臨的前兆，也就是說，看到日暈或月暈，再過半天，很可能就會起風或下雨。此外，我們偶爾會覺得今天的星星或遠山好像變近了，歷歷在目。有文學細胞的人就會寫下「今夜星辰分明，遠山如洗，彷彿天地間的距離被悄悄拉近」的美麗文句，這通常預示著冷空氣來臨，空氣潔淨，天氣即將轉晴或變涼。
+  - idx: 8
+    text: 當然，這些自然的線索不是百分之百準確，但連中央氣象署的預報也不是絕對正確啊，它們就像是大自然的小提示。所以，當你擔心明天會不會下雨時，除了查手機上的天氣預報，也可以看看蜘蛛有沒有結網、毛小孩是不是焦躁不安，或是月亮是不是戴了光圈。說不定，大自然早就偷偷告訴你答案了！
+  inline_marked_terms:
+  - 纖細
+  - 即將
+  - 明察秋毫
+  - 頻率
+  - 坐立難安
+  - 徵兆
+  - 前兆
+  - 歷歷在目
+  - 遠山如洗
+  - 彷彿
+  - 焦躁不安
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（七☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 7
+  end: 課文結束
+  spans_paragraphs:
+  - 7
+  - 8
+  approx_chars_from_start: 392
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 纖細
+  - 即將
+  - 頻率
+  - 明察秋毫
+  - 坐立難安
+  - 徵兆
+  - 歷歷在目
+  - 彷彿
+  - 遠山如洗
+  - 焦躁不安
+  - 前兆
+  items:
+  - index: 1
+    word: 纖細
+    definition: 細小、細緻。
+  - index: 2
+    word: 明察秋毫
+    definition: 形容人觀察事物仔細，就像能看見秋天鳥獸新長的細毛。
+  - index: 3
+    word: 徵兆、前兆
+    definition: 指事情發生前所出現的跡象。
+    hint: （提示：有兩個詞）
+  - index: 4
+    word: 遠山如洗
+    definition: 形容遠處山景清晰明亮，像被清洗過。
+  - index: 5
+    word: 彷彿
+    definition: 好像。
+  - index: 6
+    word: 即將
+    definition: 表示事情快要發生。
+  - index: 7
+    word: 坐立難安
+    definition: 形容人或動物心情焦躁、不安穩，坐也不是、站也不是。
+  - index: 8
+    word: 焦躁不安
+    definition: 焦急不耐煩的樣子。
+  - index: 9
+    word: 歷歷在目
+    definition: 通常形容記憶中的畫面清楚的在眼前。本文則指畫面很清楚。
+  - index: 10
+    word: 頻率
+    definition: 指在一段時間內同一件事情發生的次數。發生次數越多，頻率就越高。
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 纖細
+    B: 遠山如洗
+    C: 頻率
+    D: 明察秋毫
+    E: 彷彿
+    F: 徵兆
+    G: 歷歷在目
+    H: 即將
+    I: 焦躁不安
+  unused_options:
+  - H
+  items:
+  - index: 1
+    stem: 他因車禍被送進醫院，在急診室外的家屬（　），不停來回踱步。
+    answer: I
+  - index: 2
+    stem: 這位警察辦案非常認真，總是能（　），順利破案。
+    answer: D
+  - index: 3
+    stem: 雨後的清晨，空氣格外清新，抬頭望去，（　），景物看得一清二楚。
+    answer: B
+  - index: 4
+    stem: 那天看牙醫的恐怖經驗（　），讓我想到就不寒而慄。
+    answer: G
+  - index: 5
+    stem: 她流鼻水可能是感冒的（　），要及早治療以免加重病情。
+    answer: F
+  - index: 6
+    stem: 這台機器故障的（　）太高，該換新的了。
+    answer: C
+  - index: 7
+    stem: 畫家用（　）的筆觸畫出雲朵的柔軟感。
+    answer: A
+  - index: 8
+    stem: 天空的雲層很低，（　）隨手就能觸碰到。
+    answer: E
+
+# ── 五 閱讀聚光燈 ──
+spotlight:
+  strategy_name: 摘要策略──找小主題與重要細節
+  strategy_type: summarizing
+  blocks:
+  - type: concept_box
+    text: 這是一篇說明文，主要說明「大自然有許多線索可以幫助人們預測天氣」，作者舉了一些例子，來支持這個觀點。閱讀這樣的文章，你只要抓住這篇文章主要想表達什麼？文章舉了哪些例子來支撐？這些例子有沒有重要的細節？你就抓到文章的重點囉！
+  - type: guide
+    text: 接下來，我們先來練習找到文章舉了哪些例子？請勾選你覺得比較清楚的答案。
+  - type: single
+    label: 第三段
+    prompt: 第三段：
+    options:
+      1: 蜘蛛
+      2: 蜘蛛結網
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流只留下未勾選項的 □
+  - type: single
+    label: 第五段
+    prompt: 第五段：
+    options:
+      1: 蟋蟀
+      2: 蟋蟀叫聲
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第六段
+    prompt: 第六段：
+    options:
+      1: 毛小孩
+      2: 毛小孩的行為
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第七段
+    prompt: 第七段：
+    options:
+      1: 天空
+      2: 日暈和月暈
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: 你發現了嗎？其實這四段，1和2的答案都可以，但2更具體、清楚喔！
+  - type: guide
+    text: 找到例子後，接下來把重要的細節找出來，你就可以抓到文章的重點囉！要怎麼找到重要的細節呢？你要扣住主題，來判斷重要細節。這一課主要是講「推測天氣」，所以我們要把和「推測天氣」有關的重要描述找出來。
+  - type: guide
+    text: 我們先用「第三段──蜘蛛結網」試試看：
+  - type: multi
+    label: 第三段示範 ❶
+    prompt: ❶找重要細節：如何從「蜘蛛結網」推測具體天氣？（4選2）
+    options:
+      1: 蜘蛛的絲纖細到幾乎隱形，又怕風、又怕雨。
+      2: 如果即將下雨，牠們察覺空氣中的濕度，就不會浪費力氣結一張會被雨打壞的大網。
+      3: 當你看到蜘蛛在結網時，代表空氣是乾的，天氣會穩定，可能還會放晴。
+      4: 如果你發現蜘蛛網縮得很小，甚至整張網都不見了，也許就是快要下雨的信號。
+    answer:
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第三段示範 ❷
+    prompt: ❷精簡：請將勾選出的答案，歸納成一句話
+    options:
+      1: 蜘蛛的網非常脆弱，要小心保護。
+      2: 蜘蛛結大網代表天氣晴，縮小或消失則是要下雨。
+      3: 蜘蛛覓食方式會因濕度不同而改變。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: 1.第五段──蟋蟀叫聲
+    items:
+    - type: single
+      index: 1
+      prompt: ❶找重要細節：如何從「蟋蟀叫聲」推測具體天氣？（3選1）
+      options:
+        1: 有位農夫宣稱，他可以從蟋蟀叫聲的頻率，判斷現在的氣溫大概幾度。
+        2: 科學家的確發現氣溫越高，蟋蟀叫得越快。
+        3: 如果錄下草叢裡蟋蟀的叫聲，看看8秒可以叫幾聲，把這個數字加5，大概就是現在的氣溫。
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形）
+      reminder_box:
+        title: 小提醒：
+        text: 這三個句子看起來都和推測天氣有關，但是如果要推測具體天氣的話，第三句比較合適。
+    - type: single
+      index: 2
+      prompt: ❷精簡：請將勾選的答案，再精簡。
+      options:
+        1: 記下蟋蟀叫聲就能知道明天會不會下雨。
+        2: 蟋蟀叫聲快慢只和牠心情好壞有關。
+        3: 數蟋蟀 8秒內的叫聲，再加5，就能估算當前氣溫。
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形）
+  - type: sub_block
+    label: 2.第七段──天空
+    items:
+    - type: single
+      index: 1
+      prompt: ❶找重要細節：如何從「日暈、月暈」推測具體天氣？（3選1）
+      options:
+        1: 看到日暈表示夜裡會下雨，看到月暈白天就會起風。
+        2: 我們偶爾會覺得今天的星星或遠山好像變近了，歷歷在目。
+        3: 所謂「暈ㄩㄣˋ」就是圍繞著太陽或月亮的光環。
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形）
+    - type: single
+      index: 2
+      prompt: ❷精簡：請將勾選的答案，再精簡。
+      options:
+        1: 日暈夜雨，月暈日風。
+        2: 天空出現光環代表天氣長期穩定。
+        3: 看到月亮有暈就一定會下一整天的大雨。
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: 恭喜你，你已經完成任務了，以後看到長篇文字時，先找出主題，再找出重要的細節，最後用一句話精簡內容，你就能很快抓住文章重點囉。
+
+# ── 六 文章重點表 ──
+keypoints:
+  title: 大自然的氣象小幫手
+  structure: flat
+  rows:
+  - label: 主旨
+    value: 第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。
+  - label: 例子
+    items:
+    - index: 1
+      value: 蜘蛛會因天氣變化（濕度）調整【　】的大小。
+      blanks:
+      - answer: 結網
+    - index: 2
+      value: 蟋蟀叫聲【　】越高，氣溫越高。
+      blanks:
+      - answer: 頻率
+    - index: 3
+      value: 下雨前，濕度和氣壓會有變化，【　】會出現異常行為。
+      blanks:
+      - answer: 貓、狗
+    - index: 4
+      value: 天空的變化
+      sub_items:
+      - index: 1
+        value: 看到日暈表示【　】、看到月暈表示【　】。
+        blanks:
+        - answer: 夜裡會下雨
+        - answer: 白天會起風
+      - index: 2
+        value: 看到星星或遠山變近了，表示空氣潔淨，天氣即將【　】。
+        blanks:
+        - answer: 轉晴或變涼
+  - label: 總結
+    value: 大自然會偷偷告訴你天氣的答案。
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列語詞，何者使用正確？
+    options:
+      A: 他「坐立不安」在沙發上閱讀，十分投入
+      B: 我想「明察秋毫」一下這杯飲料的味道
+      C: 小樹「纖細」的枝芽，禁不起風吹雨打
+      D: 我「即將」在昨天看一場精采的電影
+    teacher_note: Ａ「坐立不安」指的是情緒焦急，A狀況不符。Ｂ「明察秋毫」形容人觀察細微。D「即將」表示事情快要發生。
+    note: 本題 A 選項與教師註記寫「坐立不安」，但本課語詞是「坐立難安」；兩處一致，未列為勘誤。
+  - index: 2
+    answer: B
+    stem: 根據文章，下列哪一項動物行為可能預示「快要下雨」？
+    options:
+      A: 蜘蛛結大網
+      B: 狗狗不停的在屋子裡走動
+      C: 蟋蟀叫聲速度變慢
+      D: 鳥類在空中不停盤旋
+    teacher_note: （文中第二至七段提到，狗坐立不安是快下雨的徵兆。D未提及也不正確）
+  - index: 3
+    answer: B
+    stem: 文章中提到：「你皺起眉頭，拿起掃把想把牠揮掉。且慢！」這段話中的「且慢」最可能代表什麼意思？
+    options:
+      A: 作者要呼喚他人幫忙處理蜘蛛
+      B: 提醒主角先停下來、仔細觀察
+      C: 作者想用宏亮的聲音嚇退蜘蛛
+      D: 作者流露出對蜘蛛的強烈憤怒
+    teacher_note: （B「且慢」是說話者介入，引導讀者改變立場、暫停原先動作，轉而觀察蜘蛛。）
+  - index: 4
+    answer: D
+    stem: 依據本文，當家裡的狗狗坐立難安、貓咪亂躲藏時，你外出時可能需要準備什麼？
+    options:
+      A: 手電筒
+      B: 毛帽
+      C: 太陽眼鏡
+      D: 雨具
+  - index: 5
+    answer: A
+    stem: 本文透過蜘蛛、蟋蟀、狗、貓行為與天空現象等例子進行說明。作者最想傳達的核心觀念是下列何者？
+    options:
+      A: 多觀察自然中的蛛絲馬跡，就能提前掌握天氣變化
+      B: 借助高科技儀器才能精準預測天氣
+      C: 動物與天氣無關，真正可靠的是氣象署資料
+      D: 古代諺語早已精準掌握天氣預測法
+    teacher_note: （全文從蜘蛛、蟋蟀、毛小孩到天空與星星，引導讀者學會留心身邊自然徵兆。）
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 纖細
+  - 即將
+  - 明察秋毫
+  - 頻率
+  - 坐立難安
+  - 徵兆
+  - 前兆
+  - 歷歷在目
+  - 彷彿
+  - 遠山如洗
+  - 焦躁不安
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - - 憑
+    - 速
+    - 識
+    - 見
+    - 看
+    - 見
+    - 義
+    - 勇
+    - 為
+    - 人
+  - - 頻
+    - 率
+    - 微
+    - 微
+    - 纖
+    - 系
+    - 節
+    - 明
+    - 焦
+    - 頭
+  - - 接
+    - 頭
+    - 笑
+    - 知
+    - 細
+    - 項
+    - 焦
+    - 察
+    - 慮
+    - 即
+  - - 坐
+    - 遠
+    - 容
+    - 著
+    - 玉
+    - 目
+    - 躁
+    - 秋
+    - 日
+    - 將
+  - - 車
+    - 立
+    - 山
+    - 名
+    - 手
+    - 體
+    - 不
+    - 毫
+    - 曆
+    - 歷
+  - - 站
+    - 站
+    - 難
+    - 如
+    - 掌
+    - 會
+    - 安
+    - 全
+    - 歷
+    - 遠
+  - - 徵
+    - 立
+    - 過
+    - 安
+    - 洗
+    - 頻
+    - 佛
+    - 在
+    - 前
+    - 山
+  - - 明
+    - 天
+    - 警
+    - 察
+    - 案
+    - 繁
+    - 目
+    - 像
+    - 徵
+    - 兆
+  - - 前
+    - 面
+    - 彷
+    - 彿
+    - 體
+    - 育
+    - 組
+    - 長
+    - 如
+    - 果
+  - - 照
+    - 元
+    - 歷
+    - 史
+    - 遺
+    - 跡
+    - 洗
+    - 車
+    - 長
+    - 者
+  answers_are_graphical: true
+  answer_paths:
+  - word: 頻率
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    direction: horizontal
+  - word: 纖細
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 5
+    direction: vertical
+  - word: 明察秋毫
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 8
+    - - 4
+      - 8
+    - - 5
+      - 8
+    direction: vertical
+  - word: 焦躁不安
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    direction: vertical
+  - word: 即將
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 坐立難安
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 遠山如洗
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 歷歷在目
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 前兆
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 徵兆
+    cells:
+    - - 8
+      - 9
+    - - 8
+      - 10
+    direction: horizontal
+  - word: 彷彿
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 大愛新聞_蜘蛛真面目_蜘蛛結網久雨必晴 向大自然師法
+    duration: '5:02'
+    duration_seconds: 302
+    source: 大愛電視
+  - index: 2
+    title: 你知道嗎 蟋蟀的叫聲可以報天氣喔
+    duration: 0:23
+    duration_seconds: 23
+    source: 理財周刊
+  - index: 3
+    title: 日暈的形成原理和預報功能：科學解讀冰晶折射太陽光的美麗現象
+    duration: '3:54'
+    duration_seconds: 234
+    source: 天下科普

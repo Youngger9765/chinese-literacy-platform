@@ -2,13 +2,14 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 6,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "案例【 段1 】",
-      "保育現況：為何難存活【 段2 】",
-      "爭議【 段3 】",
-      "多元觀點：反對遷移【 段4 】"
+      "案例【　　　】",
+      "保育現況：為何難存活【　　　】",
+      "爭議【　　　】",
+      "多元觀點：反對遷移【　　　】"
     ],
     "template_kind": "generic"
   },
@@ -21,32 +22,32 @@
     },
     {
       "interactive_type": "fill_blank",
-      "label": "案例【 段1 】",
+      "label": "案例【　　　】",
       "value": "1.石虎豆棗曾經被救援並成功野放，但最終仍死於犬隻攻擊，且曾遭盜獵射擊。\n2.豆棗的遭遇凸顯【　　　】。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "保育現況：為何難存活【 段2 】",
+      "label": "保育現況：為何難存活【　　　】",
       "value": "1.石虎需要【　　　】，但人類開發使棲地【　　　】。\n2.常見威脅：汽車疾駛造成【　　　】、闖雞舍被捕殺、毒鼠造成間接毒殺、遊蕩犬追逐殺害。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "爭議【 段3 】",
+      "label": "爭議【　　　】",
       "value": "是否應該幫石虎換地方？【　　　】"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "多元觀點：反對遷移【 段4 】",
+      "label": "多元觀點：反對遷移【　　　】",
       "value": "1.立場：遷移可能引發【　　　】，主張先把原棲地變得【　　　】。\n2.作法：與其花錢【　　　】，不如把資源用在讓原地變安全：動物廊道連接、減速設施、犬隻管理、改良雞舍、友善農法與補償機制。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "多元觀點：支持遷移【 段5 】",
+      "label": "多元觀點：支持遷移【　　　】",
       "value": "1.立場：應該先把石虎的死亡風險降到最低\n2.理由：原棲地已成【　　　】，人類造成風險，就有責任先降低風險。\n3.作法：先移到更安全、人為干擾少、管制更嚴的區域。\n4.遷移不是放棄原棲地，而是【　　　】：等待原棲地修復、安全措施到位，再讓族群擴散、穩定。"
     },
     {
       "interactive_type": "fill_blank",
-      "label": "兩難與結論【 段6 】",
+      "label": "兩難與結論【　　　】",
       "value": "1.兩派都在乎石虎，差別在【　　　】：一派怕【　　　】，一派怕【　　　】。\n2.石虎未來不只生物學問題，也是【　　　】"
     }
   ],

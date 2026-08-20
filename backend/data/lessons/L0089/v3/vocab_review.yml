@@ -1,0 +1,128 @@
+lesson_uid: L0089
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  instruction_note: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
+  target_words:
+  - 經典之作
+  - 囑託
+  - 定格
+  - 鉅細靡遺
+  - 不置可否
+  - 獨白
+  - 凝住
+  - 老邁
+  - 敏捷
+  - 輕蔑
+  - 笨拙
+  target_words_note: 找字灰框只收 11 個，本課語詞的第 12 個「迂」沒有列入（原稿如此）
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 鉅細靡遺迂背挑剔喪輕
+  - 翻上翻下輕影囑咐事蔑
+  - 凝抗笨車襪片屬託考視
+  - 住拒絕拙見解托老邁而
+  - 宅訂格單獨白鋸齒開不
+  - 經典之做橘子細燭定見
+  - 氣笨經月臺敏靡白格不
+  - 喘茁典籍捷倢遣散置知
+  - 吁壯之老當益壯可辦所
+  - 吁碩作萬事通否則惜措
+  grid_note: '第 6 列 c1~c4「經典之做」是誘答（做 ≠ 作），不是格子錯字 ——
+
+    正確的「經典之作」在第 3 欄由上而下（r7 經 / r8 典 / r9 之 / r10 作）。'
+  answers_are_graphical: true
+  answer_paths:
+  - word: 鉅細靡遺
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 輕蔑
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 囑託
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 8
+    direction: diagonal_down_right
+  - word: 凝住
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 笨拙
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 4
+    direction: diagonal_down_right
+  - word: 老邁
+    cells:
+    - - 4
+      - 8
+    - - 4
+      - 9
+    direction: horizontal
+  - word: 獨白
+    cells:
+    - - 5
+      - 5
+    - - 5
+      - 6
+    direction: horizontal
+  - word: 定格
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 9
+    direction: vertical
+  - word: 經典之作
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    - - 9
+      - 3
+    - - 10
+      - 3
+    direction: vertical
+  - word: 敏捷
+    cells:
+    - - 7
+      - 6
+    - - 8
+      - 5
+    direction: diagonal_down_left
+  - word: 不置可否
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 9
+    - - 9
+      - 8
+    - - 10
+      - 7
+    direction: diagonal_down_left

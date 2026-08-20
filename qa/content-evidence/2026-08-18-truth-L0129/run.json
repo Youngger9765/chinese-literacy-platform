@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0129",
+  "catalog_slot": "G8-L9",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "content_known_gaps#mcq_options_emitted_as_guides 記本課漏 1 個選項；重抽後聚光燈只剩 1 個 guide block，用 OPTION_LINE_IN_GUIDE_RE 實跑 = 0 leaked，該課可從清單移除（已回報工頭）。roundRect 11 個 = 11 條路徑 = 11 個目標語詞，三者一致，無紙外殘留、無格子錯字。念順順兩個段界（296 / 617）都精準，但 SKILL 6.7 第 1 條在本課要擴充成『連續的非中文字串算 1 個字』——只算阿拉伯數字的話會少算 IG，末筆差 1（618 vs 617），看起來像抓錯段落。retry 1 次是逐字門 7 個 miss：4 個是我自己的註記欄沒用 _note 結尾（answer_printed_form / teacher_note_placement），1 個是混合括號『（　)』SPLIT_RE 認不得，1 個是把 Wingdings F0E0 的箭頭當成文字寫進 intro。全部是抽取者這側的問題，不是門誤報。"
+}

@@ -1,0 +1,156 @@
+lesson_uid: L0097
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 禦寒
+  - 亂竄
+  - 諷刺
+  - 環境永續
+  - 碳排放
+  - 憂心忡忡
+  - 象徵
+  - 氣候變遷
+  - 碳足跡
+  - 大放異彩
+  - 地球公民
+  - 提案
+  target_words_note: 灰框 12 個詞，比本課語詞（13 個）少「因應而生」—— 它沒進找字遊戲，不是抽漏。
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 環境永續約象徵碳碳水
+  - 球界遠氣癱捶胸頓足古
+  - 異能禦寒候瘓碳倔跡蹟
+  - 能量嬌帶遍變熱排強地
+  - 題蕉提示地移遷衷放亂
+  - 目案問環球憂心沖沖竄
+  - 睽煽情大公心心怒發刷
+  - 違變放放民衝突忡掘新
+  - 光異襯異審衝諷喇忡鮮
+  - 彩虹衫採視撞次刺條款
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 環境永續
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 象徵
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    direction: horizontal
+  - word: 碳足跡
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 9
+    - - 3
+      - 9
+    direction: vertical
+  - word: 氣候變遷
+    cells:
+    - - 2
+      - 4
+    - - 3
+      - 5
+    - - 4
+      - 6
+    - - 5
+      - 7
+    direction: diagonal_down_right
+  - word: 禦寒
+    cells:
+    - - 3
+      - 3
+    - - 3
+      - 4
+    direction: horizontal
+  - word: 碳排放
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 8
+    - - 5
+      - 9
+    direction: diagonal_down_right
+  - word: 提案
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 2
+    direction: diagonal_down_left
+  - word: 地球公民
+    cells:
+    - - 5
+      - 5
+    - - 6
+      - 5
+    - - 7
+      - 5
+    - - 8
+      - 5
+    direction: vertical
+  - word: 亂竄
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 憂心忡忡
+    cells:
+    - - 6
+      - 6
+    - - 7
+      - 7
+    - - 8
+      - 8
+    - - 9
+      - 9
+    direction: diagonal_down_right
+  - word: 大放異彩
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 3
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 諷刺
+    cells:
+    - - 9
+      - 7
+    - - 10
+      - 8
+    direction: diagonal_down_right
+  answer_paths_note: '12 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+    幾何交叉驗證（單向警報）：以找字表格元素當邊界，表格內 roundRect = **12 個**，
+
+    路徑 12 條 → 沒有「紙上 > 路徑」的缺條警報（全文 13 個，多的 1 個在表格外）。
+
+    ⚠️ **紙外殘留：未驗**（`posOffset` 判準只認錨點型溢出，對「掛在儲存格裡被排版推出去」零命中，
+
+    2026-08-18 更正）；扣掉未偵測的殘留只會讓紙上數更少，不會讓警報成立。
+
+    正確性證據是每條 cells 套回 grid 拼字（12/12 全中）。'

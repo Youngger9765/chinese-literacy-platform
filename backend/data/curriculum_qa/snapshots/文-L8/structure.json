@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 6,
+    "fill_blank_count": 7,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "主角",
-      "背景",
-      "特質",
-      "專長"
+      "居住地",
+      "家世背景",
+      "特質"
     ],
     "template_kind": "theme_facts"
   },
@@ -20,9 +21,21 @@
       "value": "【　　　】"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "背景",
-      "value": "家世背景：\n【　　　】"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "居住地",
+          "value": "【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "家世背景",
+          "value": "【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -36,18 +49,20 @@
     },
     {
       "interactive_type": "display",
-      "label": "嗜好：__",
-      "value": "支持的證據有："
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "嗜好：__",
-      "value": "1.自少至老，未嘗【　　　】。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "嗜好：__",
-      "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
+      "label": "嗜好：【　　　】",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "自少至老，未嘗【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
+        }
+      ],
+      "value": ""
     }
   ],
   "worksheet_rows": [
@@ -57,9 +72,18 @@
       "value": "【　　　】"
     },
     {
-      "kind": "pair",
-      "label": "背景",
-      "value": "家世背景：\n【　　　】"
+      "items": [
+        {
+          "label": "居住地",
+          "value": "【　　　】"
+        },
+        {
+          "label": "家世背景",
+          "value": "【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "背景"
     },
     {
       "kind": "pair",
@@ -72,19 +96,18 @@
       "value": "【　　　】，九經諸史，都能背誦。"
     },
     {
-      "kind": "pair",
-      "label": "嗜好：__",
-      "value": "支持的證據有："
-    },
-    {
-      "kind": "pair",
-      "label": "嗜好：__",
-      "value": "1.自少至老，未嘗【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "嗜好：__",
-      "value": "2.出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "自少至老，未嘗【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "出必【　　　】數簏自隨，旅店少休，披尋搜討，曾無【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "嗜好：【　】"
     }
   ]
 }

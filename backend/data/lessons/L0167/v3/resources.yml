@@ -1,0 +1,16 @@
+lesson_uid: L0167
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 走出情緒的迷宮：練習自我覺察，認識情緒宇宙(完整版)
+    duration: (2:36)
+    source: 中華民國衛生福利部
+    has_qr: true
+  - index: 2
+    title: 生活技能動畫-自我覺察
+    duration: (1:44)
+    source: 臺灣健康促進學校
+    has_qr: true

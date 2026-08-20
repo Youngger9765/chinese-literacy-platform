@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0096",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "read_calls": 1,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 2,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "🔴 **本課是 roundRect 個數單向警報的第一個真陽性**：找字 block 13 個 roundRect ＞ 灰框 12 個目標語詞，回頭查證後確認漏了一條「元宇宙」（p9 右緣直向 3 格）。用 200dpi 重繪數橘色連通塊確認：p9 恰 3 塊、p8 10 塊、合計 13，缺口正是元宇宙。若沒有這條規則就會少抽一條答案。verbatim 首跑 2 筆：一筆是我在 errata 的 source 前面多打了「…」、一筆是自己的註解欄位；0 筆真的抄錯。另發現語詞框把「先例」打了兩次（黏成「先例冤屈」）→ errata E1；以及學習單內部有兩份不同的 12 個語詞清單（A 組含元宇宙／B 組含溫室氣體），格子圈的是聯集 13 個。全課 F0FE = 0（沒有任何選擇題），第三載體 w:bdr 非 auto = 0。"
+}

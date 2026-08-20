@@ -1,0 +1,14 @@
+lesson_uid: L0163
+version_id: v3
+classical_text:
+  label: 原文
+  source: 清朝・潘耒
+  has_qr: true
+  note_dots: 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。
+  paragraphs:
+  - 崑山.顧寧人.先生，生長.世族，少負.絕異之資，潛心古學，九經.諸史，略能.背誦。
+  - 精力.絕人，無他.嗜好，自少.至老，未嘗.一日.廢書。出.必載書.數簏1.自隨，旅店少休，披尋.搜討，曾無.倦色。
+  annotations:
+  - 'no': 1
+    term: 簏
+    text: 竹子編成的箱子。

@@ -29,7 +29,53 @@ import yaml
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
 LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 
-MODULES = ("spotlight", "keypoints", "body", "sections", "metadata", "key_reading")
+# 一個大題一個模組。舊結構把語詞我最棒／閱讀理解／知識補給站三個大題擠進
+# `sections`，而語詞應用、詞語複習連檔案都沒有 —— 抽取器抽不到那兩節，不只是
+# 規則寫錯，是連放的地方都沒有。`sections` 留著讀舊版本（v2）。
+#
+# 文言文的大題集合跟白話課完全不同（文白句子比對／文白詞語比對／自我挑戰，
+# 且導讀・古文今譯・原文沒有大題編號），所以那幾個模組也列在這裡；
+# 缺檔的課直接跳過，不會因為多列而報錯。
+MODULES = (
+    # 課級
+    "metadata",
+    "errata",
+    # 白話課大題
+    "full_text_annotate",   # 一 讀全文-做記號
+    "key_reading",          # 二 念順順
+    "vocab_definitions",    # 三 語詞我最棒
+    "vocab_application",    # 四 語詞應用
+    "keypoints",            # 五 文章重點表
+    "spotlight",            # 六 閱讀聚光燈
+    "comprehension",        # 七 閱讀理解
+    "vocab_review",         # 八 詞語複習
+    "resources",            # 九 知識補給站
+    # 文言文專屬
+    "intro_guide",
+    "modern_translation",
+    "classical_text",
+    "sentence_matching",
+    "word_matching",
+    "self_challenge",
+    # 一般課也有的無編號元素 (#2752 Phase 2) — 目標策略框（70 課）與讀前自我
+    # 檢核（58 課），兩者都印在「一 讀全文-做記號」之前，不掛在任何大題編號下。
+    "goal_box",
+    "self_check_before_reading",
+    # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3)。
+    "multi_text_parts",             # 第 2/3 篇（第 1 篇在 full_text_annotate）
+    "cross_text_banner",            # 「跨課文習作／三篇合讀」過場字
+    "keypoints_followup_questions", # 第一篇專屬追問（兩種形狀，見檔頭 schema_gap）
+    "writing_practice",             # 語詞書寫練習／難字挑戰（多為大題九）
+)
+
+# ⛔ 不留 v2 的 `sections` / `body` 相容入口。
+#
+# #2683 刪掉兩個歷史 layer 時寫得很清楚：「both layers are deleted rather than kept
+# behind a flag — a compatibility path would have preserved exactly the [problem]」。
+# 同一個道理在這裡成立：留著讀舊檔名，會讓一棵只翻新了一部分的樹看起來很健康。
+#
+# 代價是明擺著的：還沒重抽的課會少掉那幾個大題。那不是要藏起來的事，是要數出來的事
+# —— `scripts/module_migration_gate.py` 會列出還停在 v2 的課，數字降到 0 才算翻新完成。
 
 
 def _is_uid_dir(p: Path) -> bool:
@@ -123,10 +169,24 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
     lesson["version_id"] = vdir.name
     for mod in MODULES:
         data = _read_yaml(vdir / f"{mod}.yml")
-        if data:
-            if mod == "spotlight":
-                _drop_assetless_table_figures(data)
-            lesson[mod] = data
+        if not data:
+            continue
+        if mod == "spotlight":
+            _drop_assetless_table_figures(data)
+        # v3 的模組檔外層是 `{lesson_uid, version_id, section_no, <mod>: {…}}`。
+        # 存包裝而不是內容，會讓每個消費端都要多剝一層 —— 而漏剝的那個不會報錯，
+        # 只是欄位查不到（`key_reading.passage` 就是這樣被判定成缺 passage 而整節丟掉）。
+        if isinstance(data, dict) and mod in data:
+            inner = data[mod]
+            if isinstance(inner, (dict, list)):
+                if isinstance(inner, dict):
+                    inner = {
+                        **{k: v for k, v in data.items() if k in ("section_no",)},
+                        **inner,
+                    }
+                lesson[mod] = inner
+                continue
+        lesson[mod] = data
     # 念順順 carries two things that fail independently: the passage a student reads
     # aloud, and the characters-per-minute target they read it against. #2722 gave the
     # eleven lessons whose passage is withheld a file holding only the target — correct

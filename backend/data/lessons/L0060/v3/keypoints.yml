@@ -1,0 +1,97 @@
+lesson_uid: L0060
+version_id: v3
+section_no: 五
+keypoints:
+  title: 心理出狀況，是壞事導致的嗎？
+  layout: list
+  answer_carrier: 橘色手寫字（PDF p6~p7）；文字層的【　】內已填有同樣的答案
+  structure_note: '原稿是一張多層合併儲存格的表：左欄是「問題／故事一／故事二／故事三／結論」，
+
+    中欄是列名（人物・家庭背景・狀況・想法・結果・事實），右邊再分成兩欄
+
+    （阿堅／小芸、一開始／後來、學生／黃美廉）。三個故事的欄名各不相同，
+
+    所以不能用 matrix（columns 只能有一組）。依 skill §⑥.55b「三層以上攤平成 items、
+
+    層級關係寫進 label」處理：欄名寫進 items 的 label，用「──」接在列名後面。'
+  rows:
+  - label: 問題
+    value: 許多人認為一個人【　】出狀況，是因不能控制的【　】導致的，這個說法是真的嗎？
+    blanks:
+    - answer: 心理
+    - answer: 壞事
+  - label: 故事一
+    items:
+    - label: 人物
+      columns:
+      - 阿堅
+      - 小芸
+      note: 原稿這一列是兩個並排的欄標題儲存格；欄名放 columns，不另造串接字串
+    - label: 家庭背景
+      value: 爸爸【　】，媽媽【　】。
+      blanks:
+      - answer: 酗酒
+      - answer: 跑掉了
+      value_note: 這一列在原稿橫跨阿堅、小芸兩欄
+    - label: 狀況──阿堅
+      value: 因【　】、【　】被送進少年觀護所。
+      blanks:
+      - answer: 偷竊
+      - answer: 打架
+    - label: 狀況──小芸
+      value: 國立大學的【　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。
+      blanks:
+      - answer: 高材生
+    - label: 想法──阿堅
+      value: 我有這樣的家庭，你期待【　】？
+      blanks:
+      - answer: 我能怎樣
+    - label: 想法──小芸
+      value: 我家都已經這樣了，我【　】行嗎？
+      blanks:
+      - answer: 不努力一點
+  - label: 故事二
+    items:
+    - label: 欄標題
+      columns:
+      - 一開始
+      - 後來
+      note: 原稿這一列是兩個並排的欄標題儲存格；欄名放 columns，不另造串接字串
+    - label: 問題
+      value: 35歲的鄧小姐，發現自己有【　】，必須一輩子吃藥。
+      blanks:
+      - answer: 先天性高血壓
+      value_note: 這一列在原稿橫跨一開始、後來兩欄
+    - label: 想法──一開始
+      value: 為什麼這麼【　】？
+      blanks:
+      - answer: 倒楣
+    - label: 想法──後來
+      value: 我【　】，及早發現。
+      blanks:
+      - answer: 運氣真不錯
+    - label: 結果──一開始
+      value: 心裡【　】，吃不好也睡不好。
+      blanks:
+      - answer: 憂鬱
+    - label: 結果──後來
+      value: 快樂起來，【　】。
+      blanks:
+      - answer: 能吃能睡
+  - label: 故事三
+    items:
+    - label: 事實
+      value: 黃美廉患有【　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。
+      blanks:
+      - answer: 腦性麻痺
+    - label: 想法──學生
+      value: 你長這樣，怎麼【　】得起來？
+      blanks:
+      - answer: 快樂
+    - label: 想法──黃美廉
+      value: 我擁有這麼多，為什麼你只看我所沒有的呢？
+  - label: 結論
+    value: 面對不能改變的壞事，如果能【　】自己的【　】，就比較不會讓情緒跌入萬丈深淵。
+    blanks:
+    - answer: 改變
+    - answer: 看法

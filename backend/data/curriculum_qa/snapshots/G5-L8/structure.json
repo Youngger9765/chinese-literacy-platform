@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 11,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "來工地的原因",
-      "大嫂的類型",
-      "大嫂在工地的功用",
-      "總結"
+      "1",
+      "2",
+      "3",
+      "1"
     ],
     "template_kind": "generic"
   },
@@ -16,23 +17,89 @@
   "rows": [
     {
       "interactive_type": "display",
+      "label": "工地大嫂",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
       "label": "定義",
       "value": "作者稱六十歲以下，和丈夫一起來工地工作的女性叫大嫂。"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "來工地的原因",
-      "value": "1.工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。\n2.大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。\n3.跟著丈夫進工地，不僅可多出一分勞力，也能\n　【　　　】丈夫、照應工作。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "跟著丈夫進工地，不僅可多出一分勞力，也能【　　　】丈夫、照應工作。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "大嫂的類型",
-      "value": "1.互補型：丈夫技術好，但是好強高傲。\n大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。\n2.管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。\n3.人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "互補型：丈夫技術好，但是好強高傲。大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "大嫂在工地的功用",
-      "value": "1.【　　　】工人爭執。\n2.提供偏方與【　　　】給身體不適的工人。\n3.協助【　　　】工地死亡的貓狗。\n4.工程順利時，帶工人同樂慶祝。\n5.工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "【　　　】工人爭執。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "提供偏方與【　　　】給身體不適的工人。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "協助【　　　】工地死亡的貓狗。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "4",
+          "value": "工程順利時，帶工人同樂慶祝。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "5",
+          "value": "工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -40,6 +107,7 @@
       "value": "工地大嫂是臺灣社會中堅強、溫柔又美麗的女性縮影，值得眾人【　　　】。"
     }
   ],
+  "title": "工地大嫂",
   "worksheet_rows": [
     {
       "kind": "pair",
@@ -47,19 +115,66 @@
       "value": "作者稱六十歲以下，和丈夫一起來工地工作的女性叫大嫂。"
     },
     {
-      "kind": "pair",
-      "label": "來工地的原因",
-      "value": "1.工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。\n2.大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。\n3.跟著丈夫進工地，不僅可多出一分勞力，也能\n　【　　　】丈夫、照應工作。"
+      "items": [
+        {
+          "label": "1",
+          "value": "工地環境【　　　】，女性多半與父親、丈夫或兄弟同行，以確保安全。"
+        },
+        {
+          "label": "2",
+          "value": "大嫂往往早婚，年紀較【　　　】，學歷相對【　　　】。"
+        },
+        {
+          "label": "3",
+          "value": "跟著丈夫進工地，不僅可多出一分勞力，也能【　　　】丈夫、照應工作。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "來工地的原因"
     },
     {
-      "kind": "pair",
-      "label": "大嫂的類型",
-      "value": "1.互補型：丈夫技術好，但是好強高傲。\n大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。\n2.管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。\n3.人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+      "items": [
+        {
+          "label": "1",
+          "value": "互補型：丈夫技術好，但是好強高傲。大嫂們【　　　】，擅長【　　　】調度，使工程銜接無虞。"
+        },
+        {
+          "label": "2",
+          "value": "管束型：丈夫技術不錯，但個性較【　　　】。大嫂們會默默收管丈夫，使其工作穩定順暢。"
+        },
+        {
+          "label": "3",
+          "value": "人脈型：大嫂極有【　　　】、人脈廣闊，可隨時調度各方人手協助趕工。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "大嫂的類型"
     },
     {
-      "kind": "pair",
-      "label": "大嫂在工地的功用",
-      "value": "1.【　　　】工人爭執。\n2.提供偏方與【　　　】給身體不適的工人。\n3.協助【　　　】工地死亡的貓狗。\n4.工程順利時，帶工人同樂慶祝。\n5.工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "【　　　】工人爭執。"
+        },
+        {
+          "label": "2",
+          "value": "提供偏方與【　　　】給身體不適的工人。"
+        },
+        {
+          "label": "3",
+          "value": "協助【　　　】工地死亡的貓狗。"
+        },
+        {
+          "label": "4",
+          "value": "工程順利時，帶工人同樂慶祝。"
+        },
+        {
+          "label": "5",
+          "value": "工程不順利時，下一步該怎麼做，大嫂會【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "大嫂在工地的功用"
     },
     {
       "kind": "pair",

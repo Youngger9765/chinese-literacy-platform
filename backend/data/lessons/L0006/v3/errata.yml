@@ -1,0 +1,12 @@
+lesson_uid: L0006
+version_id: v3
+errata:
+- id: E1
+  section: 七 閱讀理解
+  locator: 第 2 題題幹引文
+  source: 「他每經過每個人，那一個人的頭就低了下來。」請從前後文推論乘客們為什麼要低頭，並選出最可能的答案。
+  corrected: 「他每經過一個人，那一個人的頭就低了下來。」請從前後文推論乘客們為什麼要低頭，並選出最可能的答案。
+  kind: 引文與課文不符
+  why: 題幹用「」直引課文第七段，課文原句是「他每經過一個人」，此處印成「每個人」；同句後半仍作「那一個人」，前後不一致
+  confidence: high
+  evidence: PDF p9 與 document.xml 一致；課文第七段（document.xml）作「他每經過一個人」

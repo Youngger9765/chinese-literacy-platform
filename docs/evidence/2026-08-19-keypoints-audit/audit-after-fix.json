@@ -1,0 +1,2138 @@
+[
+  {
+    "lesson_id": 20011,
+    "title": "贏得喝采的輸家",
+    "bug_a_single_blank_fields": [
+      "主角"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [
+      {
+        "label": "結果",
+        "blanks": [
+          {
+            "options": [
+              "贏了",
+              "輸了"
+            ]
+          },
+          {
+            "options": [
+              "贏得",
+              "失去"
+            ]
+          }
+        ]
+      }
+    ],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20013,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [
+      "起因",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20014,
+    "title": "最美的畫面",
+    "bug_a_single_blank_fields": [
+      "起因",
+      "經過 2",
+      "經過 3",
+      "影響"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20015,
+    "title": "穿越極限的跑者",
+    "bug_a_single_blank_fields": [
+      "主角",
+      "經過",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20016,
+    "title": "這是什麼「意思」？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20017,
+    "title": "感情小日記1──是友情還是愛情？",
+    "bug_a_single_blank_fields": [
+      "事件",
+      "事件",
+      "感受",
+      "事件",
+      "事件"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20018,
+    "title": "長高的祕密",
+    "bug_a_single_blank_fields": [
+      "迷思"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20019,
+    "title": "運動科學",
+    "bug_a_single_blank_fields": [
+      "適用對象"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20020,
+    "title": "跟著「但是」轉個彎",
+    "bug_a_single_blank_fields": [
+      "1",
+      "1",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20001,
+    "title": "十秒的背後",
+    "bug_a_single_blank_fields": [
+      "主角"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20002,
+    "title": "動物的生存妙招",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20003,
+    "title": "大自然的氣象小幫手",
+    "bug_a_single_blank_fields": [
+      "2",
+      "3",
+      "4-2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20004,
+    "title": "感情小日記2──喜歡是什麼？",
+    "bug_a_single_blank_fields": [
+      "感受",
+      "感受"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20005,
+    "title": "美好的一天",
+    "bug_a_single_blank_fields": [
+      "事件起點",
+      "衝突擴大",
+      "關鍵轉折",
+      "結局"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20006,
+    "title": "誤會",
+    "bug_a_single_blank_fields": [
+      "情緒反應",
+      "轉折"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20007,
+    "title": "黃絲帶",
+    "bug_a_single_blank_fields": [
+      "學生唱歌",
+      "接近大榕樹"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20008,
+    "title": "第一百碗麵",
+    "bug_a_single_blank_fields": [
+      "背景",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20009,
+    "title": "白牙的最後一戰",
+    "bug_a_single_blank_fields": [
+      "起因",
+      "經過"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20010,
+    "title": "把球打好，就夠了嗎？──阿耀與健豪學長的通信（一）",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20012,
+    "title": "想讀書，該從哪裡著手？──阿耀與健豪學長的通信（二）",
+    "bug_a_single_blank_fields": [
+      "學長的觀點",
+      "例子3"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20021,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20031,
+    "title": "奧運銀牌背後的自我鍛鍊",
+    "bug_a_single_blank_fields": [
+      "人物背景",
+      "挫折",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20041,
+    "title": "周天成的一天──頂尖選手的養成",
+    "bug_a_single_blank_fields": [
+      "主角",
+      "早上｜1.基本訓練 (2)"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20042,
+    "title": "「拳」力出擊──陳念琴",
+    "bug_a_single_blank_fields": [
+      "主角",
+      "成就"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20043,
+    "title": "從童工到大學教授之路",
+    "bug_a_single_blank_fields": [
+      "體會與心得"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20044,
+    "title": "文字路上的閱讀號誌",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20045,
+    "title": "兵來將擋，水來土掩",
+    "bug_a_single_blank_fields": [
+      "問題",
+      "產生問題",
+      "總結"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20046,
+    "title": "以植物為師的科學",
+    "bug_a_single_blank_fields": [
+      "會飛的小種子",
+      "跟著太陽轉的花苞",
+      "滾來滾去的草球",
+      "會飛的小種子",
+      "跟著太陽轉的花苞",
+      "滾來滾去的草球",
+      "會飛的小種子",
+      "跟著太陽轉的花苞",
+      "滾來滾去的草球"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20047,
+    "title": "工地大嫂",
+    "bug_a_single_blank_fields": [
+      "1",
+      "3",
+      "2",
+      "3",
+      "1",
+      "2",
+      "3",
+      "5",
+      "總結"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20048,
+    "title": "災難預言準不準？",
+    "bug_a_single_blank_fields": [
+      "1",
+      "1",
+      "3",
+      "1",
+      "2",
+      "3",
+      "1",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20022,
+    "title": "感情小日記3──吃醋的滋味",
+    "bug_a_single_blank_fields": [
+      "事件",
+      "矛盾的想法與反應"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20023,
+    "title": "比運氣更重要的事：《長腿叔叔》的啟發",
+    "bug_a_single_blank_fields": [
+      "勤奮不懈",
+      "自立自強",
+      "讀者結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20024,
+    "title": "堅持到底的棒球人生──周思齊(前篇)",
+    "bug_a_single_blank_fields": [
+      "內容"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20025,
+    "title": "堅持到底的棒球人生──周思齊(後篇)",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20026,
+    "title": "感情小日記4──我被告白了",
+    "bug_a_single_blank_fields": [
+      "想法",
+      "感受"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20027,
+    "title": "救援大隊的好幫手",
+    "bug_a_single_blank_fields": [
+      "介紹對象",
+      "2",
+      "1",
+      "3",
+      "結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20028,
+    "title": "掃雷英雄馬嘎瓦",
+    "bug_a_single_blank_fields": [
+      "巨鼠外型與優點",
+      "地雷危害",
+      "傳統掃雷",
+      "3"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20029,
+    "title": "牧羊少年的逆轉勝",
+    "bug_a_single_blank_fields": [
+      "【　　　】",
+      "【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20030,
+    "title": "六塊肌、六塊雞",
+    "bug_a_single_blank_fields": [
+      "A",
+      "B",
+      "C"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20032,
+    "title": "小丑醫生",
+    "bug_a_single_blank_fields": [
+      "主要服務對象",
+      "【　　　】學",
+      "貢獻"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20033,
+    "title": "垃圾食物的誘惑與代價",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20034,
+    "title": "抗拒指尖上的誘惑",
+    "bug_a_single_blank_fields": [
+      "背景",
+      "問題"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20035,
+    "title": "信件的力量──寫信馬拉松",
+    "bug_a_single_blank_fields": [
+      "成功案例"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20036,
+    "title": "臺灣棒球先驅──來自花蓮的能高團",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20037,
+    "title": "小兵立大功：雞鳴狗盜的故事",
+    "bug_a_single_blank_fields": [
+      "問題1",
+      "解決1",
+      "結果1",
+      "解決2",
+      "結果2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20038,
+    "title": "魚來了，叮咚叮咚請開門",
+    "bug_a_single_blank_fields": [
+      "問題",
+      "解決【　　　】",
+      "結果",
+      "迴響"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20039,
+    "title": "我有一個棒球夢",
+    "bug_a_single_blank_fields": [
+      "學生棒球運動員的現狀",
+      "問題1：學業與訓練難以平衡"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20040,
+    "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
+    "bug_a_single_blank_fields": [
+      "2",
+      "觀念轉變的契機",
+      "省思"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20049,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20060,
+    "title": "心理出狀況，是壞事導致的嗎",
+    "bug_a_single_blank_fields": [
+      "狀況──小芸",
+      "想法──阿堅",
+      "想法──小芸",
+      "問題",
+      "想法──一開始",
+      "想法──後來",
+      "結果──一開始",
+      "結果──後來",
+      "事實",
+      "想法──學生"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20069,
+    "title": "一件班服，一場思辨討論",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20070,
+    "title": "文章中的「關鍵少數」",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20071,
+    "title": "數字記憶的奧秘",
+    "bug_a_single_blank_fields": [
+      "測驗方法",
+      "得分標準",
+      "結果",
+      "另一種可能"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20072,
+    "title": "重複朗讀的重要性：柳丁和文旦的比喻",
+    "bug_a_single_blank_fields": [
+      "結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20073,
+    "title": "與小學說再見",
+    "bug_a_single_blank_fields": [
+      "時間【　　　】",
+      "時間【　　　】",
+      "時間【　　　】",
+      "時間【　　　】",
+      "感受【 多選 】",
+      "時間【　　　】",
+      "感受【 多選 】",
+      "原因",
+      "時間【　　　】",
+      "感受【 多選 】",
+      "原因"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20074,
+    "title": "老鷹紅豆的故事",
+    "bug_a_single_blank_fields": [
+      "問題",
+      "結語"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20075,
+    "title": "白鯨救援：一場人與自然的協奏曲",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20076,
+    "title": "給神明發會診單",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "3",
+      "4-1",
+      "4-2",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20050,
+    "title": "荷蘭東印度公司：全世界第一張股票的誕生",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20051,
+    "title": "奇蹟行動",
+    "bug_a_single_blank_fields": [
+      "飛機失事\n【　　　】",
+      "搜救困難\n【　　　】",
+      "出現希望\n【　　　】",
+      "結果\n【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20052,
+    "title": "小藍鯨之死",
+    "bug_a_single_blank_fields": [
+      "時間",
+      "地點",
+      "事件",
+      "死因",
+      "省思"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20053,
+    "title": "昆蟲會思考嗎？",
+    "bug_a_single_blank_fields": [
+      "提出問題",
+      "兩項觀察",
+      "結尾問題"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20054,
+    "title": "動物談情說愛的方式",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20055,
+    "title": "愛冒險逞強的雄性動物",
+    "bug_a_single_blank_fields": [
+      "1",
+      "愛逞強的男生"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20056,
+    "title": "把手上的餅吃香一點",
+    "bug_a_single_blank_fields": [
+      "1",
+      "1",
+      "後來做法"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20057,
+    "title": "祝你好眠",
+    "bug_a_single_blank_fields": [
+      "青少年的睡眠需求",
+      "常見的睡眠【　　　】【　　　】",
+      "睡前拖延的原因與影響",
+      "改善睡眠的行動"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20058,
+    "title": "末日種子庫",
+    "bug_a_single_blank_fields": [
+      "目的【　　　】",
+      "【　　　】",
+      "安全設計【　　　】",
+      "【　　　】",
+      "敘利亞取出保存種子",
+      "作者提醒【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20059,
+    "title": "紅領帶",
+    "bug_a_single_blank_fields": [
+      "起因",
+      "沒有胃，無法躺著睡。",
+      "身體很【　　　】，只能坐在沙發上看電視。",
+      "完全不能進食，只能喝一點點水。",
+      "醫生建議不再繼續化療，改接受安寧照護。",
+      "媽媽臨終時",
+      "媽媽【　　　】，作者很傷心。"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20061,
+    "title": "因人而異，才有真正的公平",
+    "bug_a_single_blank_fields": [
+      "作者提醒【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20062,
+    "title": "感情小日記5──我該告白嗎？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20063,
+    "title": "物以稀為貴：從「供給」和「需求」談物價波動",
+    "bug_a_single_blank_fields": [
+      "問題／答案",
+      "例一・原因"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20064,
+    "title": "感情小日記6──我失戀了",
+    "bug_a_single_blank_fields": [
+      "統整"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20065,
+    "title": "運動傷害，怎麼辦？",
+    "bug_a_single_blank_fields": [
+      "如何預防",
+      "如何預防"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20066,
+    "title": "古代畫家心中的仙境",
+    "bug_a_single_blank_fields": [
+      "張公洞與仙境畫"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20067,
+    "title": "森林大軍的守護者",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20068,
+    "title": "植物獵人",
+    "bug_a_single_blank_fields": [
+      "想做什麼"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20077,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20088,
+    "title": "塑膠，好用不好甩",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20099,
+    "title": "AI什麼都會，我們還要學什麼？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20100,
+    "title": "你以為的浪漫，可能是跟騷",
+    "bug_a_single_blank_fields": [
+      "情境案例"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20101,
+    "title": "小米酒的祝福",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20102,
+    "title": "網紅的電子煙實驗：偽科學的陷阱",
+    "bug_a_single_blank_fields": [
+      "訊息來源",
+      "(1)",
+      "(2)",
+      "網紅暗示、阿政誤信的結論"
+    ],
+    "bug_b_inline_choice_swallowed": [
+      {
+        "label": "對網紅實驗的批判",
+        "options": [
+          "吸",
+          "吃",
+          "吸",
+          "吃"
+        ]
+      }
+    ],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20103,
+    "title": "果醬男孩",
+    "bug_a_single_blank_fields": [
+      "多次失敗，錢花光了",
+      "【　　　】",
+      "價格高，消費者不買",
+      "1.",
+      "2.",
+      "3.",
+      "期許"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20104,
+    "title": "當全世界都在笑你，你可以怎麼做？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20105,
+    "title": "黑猩猩的守護者",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20106,
+    "title": "帶著「血拼清單」閱讀",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20078,
+    "title": "別上「誘餌式標題」的鉤",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "3",
+      "1",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20079,
+    "title": "一封向醫師求助的信",
+    "bug_a_single_blank_fields": [
+      "1",
+      "亂發脾氣・發生時間",
+      "亂發脾氣・持續時間",
+      "就醫",
+      "經濟與照顧的負擔",
+      "1",
+      "2",
+      "1",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20080,
+    "title": "澳洲奧運金牌的X機密",
+    "bug_a_single_blank_fields": [
+      "家長",
+      "培育階段",
+      "退役後",
+      "臺灣體育的問題"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20081,
+    "title": "女性太空人登月",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20082,
+    "title": "從〈螞蟻與蟋蟀〉看生命的多樣性",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "3",
+      "1",
+      "1",
+      "作者提醒"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20083,
+    "title": "爺爺奶奶來了以後",
+    "bug_a_single_blank_fields": [
+      "2",
+      "3",
+      "4"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20084,
+    "title": "長大後，我才讀懂〈夏夜〉",
+    "bug_a_single_blank_fields": [
+      "長大後",
+      "國中時",
+      "長大後",
+      "國中時",
+      "國中時",
+      "長大後",
+      "長大後",
+      "國中時"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20085,
+    "title": "大自然的氣象小幫手",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20086,
+    "title": "正太與小豬",
+    "bug_a_single_blank_fields": [
+      "起因",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20087,
+    "title": "把手上的餅吃香一點",
+    "bug_a_single_blank_fields": [
+      "後來做法"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20089,
+    "title": "「背影」讀書會",
+    "bug_a_single_blank_fields": [
+      "討論主題",
+      "老師統整",
+      "結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20090,
+    "title": "奧運性別平等這條路",
+    "bug_a_single_blank_fields": [
+      "2024年巴黎奧運和東京奧運相比",
+      "1.為哺乳期運動員設置【　　　】",
+      "2.媒體村街道以傑出女性【　　　】",
+      "3.提高女性【　　　】的比例"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20091,
+    "title": "你看見時代的灰犀牛了嗎？談人口負成長",
+    "bug_a_single_blank_fields": [
+      "段1~2 灰犀牛？本課主題"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20092,
+    "title": "信眾與教主",
+    "bug_a_single_blank_fields": [
+      "觀察結果．末日前"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20093,
+    "title": "用科學方法伸張正義的神探",
+    "bug_a_single_blank_fields": [
+      "總結"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20094,
+    "title": "看到了嗎？然後呢？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20095,
+    "title": "科學怪人（弗蘭肯斯坦：現代普羅米修斯）",
+    "bug_a_single_blank_fields": [
+      "結果",
+      "書名意義",
+      "書名意義",
+      "書名意義",
+      "書名意義",
+      "結語"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20096,
+    "title": "吐瓦魯：逐漸被淹沒的島國",
+    "bug_a_single_blank_fields": [
+      "結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20097,
+    "title": "綠色賽事",
+    "bug_a_single_blank_fields": [
+      "1"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20098,
+    "title": "隱藏在日常對話中的微歧視",
+    "bug_a_single_blank_fields": [
+      "定義"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20107,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20117,
+    "title": "讓你口中的甜蜜成為遠方農民的希望",
+    "bug_a_single_blank_fields": [
+      "結語"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20122,
+    "title": "隱形的征服者",
+    "bug_a_single_blank_fields": [
+      "說明",
+      "說明"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20123,
+    "title": "爸爸的恩人們",
+    "bug_a_single_blank_fields": [
+      "現在爸爸的記憶【　　　】",
+      "轉折【　　　】",
+      "列舉恩人【　　　】",
+      "貧困年代的見證【　　　】",
+      "反思段【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20124,
+    "title": "新奇！「植物肉」你聽過嗎？",
+    "bug_a_single_blank_fields": [
+      "植物肉的成分"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20125,
+    "title": "好心沒好報的玻璃娃娃爭議事件",
+    "bug_a_single_blank_fields": [
+      "顏父【　　　】",
+      "一審判決",
+      "三審判決"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20126,
+    "title": "戲院、賭場、檳榔攤：在時代夾縫中成長的我",
+    "bug_a_single_blank_fields": [
+      "2",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20127,
+    "title": "當壞事已不可逆轉：集中營裡的一門課",
+    "bug_a_single_blank_fields": [
+      "3",
+      "1",
+      "2",
+      "3",
+      "1",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20128,
+    "title": "讓黑猩猩被看見的人",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "1",
+      "2",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20129,
+    "title": "「按讚」背後的真相",
+    "bug_a_single_blank_fields": [
+      "議題-現象",
+      "原因"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20108,
+    "title": "虎襲事件的真相：誰才是受害者？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20109,
+    "title": "球場上的另類指揮家",
+    "bug_a_single_blank_fields": [
+      "情境\n【　　　】",
+      "觀點/主張\n【　　　】",
+      "有功能\n【　　　】",
+      "需體能\n【　　　】",
+      "呼籲/結語\n【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20110,
+    "title": "我的阿嬤",
+    "bug_a_single_blank_fields": [
+      "關係改變\n【　　　】",
+      "成熟\n互動關係\n【　　　】",
+      "對阿嬤身世有同情的\n理解\n【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20111,
+    "title": "雨林裡的奇蹟藥物",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20112,
+    "title": "未來的農夫",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20113,
+    "title": "我能不能選擇告別方式？",
+    "bug_a_single_blank_fields": [
+      "核心議題【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20114,
+    "title": "石虎保育：遷移與否的兩難",
+    "bug_a_single_blank_fields": [
+      "案例【　　　】",
+      "爭議【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20115,
+    "title": "核能的兩難抉擇",
+    "bug_a_single_blank_fields": [
+      "段落數",
+      "段落數",
+      "精簡摘要",
+      "段落數",
+      "段落數",
+      "精簡摘要"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20116,
+    "title": "塞翁失馬，焉知非福",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20118,
+    "title": "懸崖邊的那顆草莓",
+    "bug_a_single_blank_fields": [
+      "故事後反應\n【　　　】",
+      "結尾\n【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20119,
+    "title": "致台東：一封過客的情書",
+    "bug_a_single_blank_fields": [
+      "移動方式",
+      "黃昏",
+      "分別原因"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20120,
+    "title": "靈異與科學",
+    "bug_a_single_blank_fields": [
+      "鬼壓床"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20121,
+    "title": "＃MeToo運動與我們的權利",
+    "bug_a_single_blank_fields": [
+      "1.不是你的錯，可以安心求助"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20130,
+    "title": "正太與小豬：武僧的養成之路",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20140,
+    "title": "「認命」是強者的選項",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20145,
+    "title": "看不見的故事，推動看得見的世界",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20146,
+    "title": "語言的足跡：從臺北萬華到南太平洋的航海之路",
+    "bug_a_single_blank_fields": [
+      "萬華地名典故",
+      "2"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20147,
+    "title": "構樹：南島祖先「出臺灣說」的植物證據",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20148,
+    "title": "科學辦案：破解蝴蝶蘭的花期密碼",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20149,
+    "title": "從基因來的特別禮物",
+    "bug_a_single_blank_fields": [
+      "問題與假設",
+      "研究問題",
+      "研究結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20150,
+    "title": "臺灣學生的閱讀力：美麗與哀愁",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20151,
+    "title": "盡信書不如無書：從一件殺人案談起",
+    "bug_a_single_blank_fields": [
+      "紐約時報報導",
+      "心理學界反應"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20152,
+    "title": "帝國家書：一個普通家庭的生與死",
+    "bug_a_single_blank_fields": [
+      "背景"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20131,
+    "title": "國高中數學當然可以使用計算機",
+    "bug_a_single_blank_fields": [
+      "外化歷程",
+      "外化目的",
+      "外化歷程",
+      "外化歷程"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20132,
+    "title": "預防近視？多點戶外活動就對了！",
+    "bug_a_single_blank_fields": [
+      "現今認為",
+      "預防之道",
+      "研究結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20133,
+    "title": "看不見的兇手：以實驗破解肉湯腐敗之謎",
+    "bug_a_single_blank_fields": [
+      "研究影響【　　　】",
+      "學習"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20134,
+    "title": "從四張圖看地球暖化",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20135,
+    "title": "都是八哥，為什麼命運不一樣？",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20136,
+    "title": "會考圖文題實戰",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20137,
+    "title": "未解之謎──石頭的祕密",
+    "bug_a_single_blank_fields": [
+      "巨石陣",
+      "摩艾走路",
+      "摩艾走路",
+      "巨石陣"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20138,
+    "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
+    "bug_a_single_blank_fields": [
+      "研究目的",
+      "研究方法",
+      "1.對失敗的看法",
+      "1.對失敗的看法",
+      "研究結論",
+      "國中應用"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20139,
+    "title": "長喙天蛾見前人所未見",
+    "bug_a_single_blank_fields": [
+      "觀察",
+      "提問",
+      "推測",
+      "驗證"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20141,
+    "title": "臺灣的太空之眼",
+    "bug_a_single_blank_fields": [
+      "衛星任務首部曲\n【　　　】",
+      "星光背後的二十年\n【　　　】",
+      "齊柏林衛星守望臺灣\n【　　　】",
+      "一起守護家園\n【　　　】"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20142,
+    "title": "焚而不毀的倫敦",
+    "bug_a_single_blank_fields": [
+      "1",
+      "2",
+      "3",
+      "1",
+      "2-(3)",
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20143,
+    "title": "高地訓練有助於運動表現嗎？",
+    "bug_a_single_blank_fields": [
+      "研究一",
+      "研究結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20144,
+    "title": "馬拉松王者──基普喬吉",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20156,
+    "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
+    "bug_a_single_blank_fields": [
+      "Q1",
+      "Q4",
+      "Q2",
+      "Q3",
+      "得出結論"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20157,
+    "title": "文言文怎麼讀？以鞭虎救弟記為例",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": false
+  },
+  {
+    "lesson_id": 20158,
+    "title": "不量田",
+    "bug_a_single_blank_fields": [
+      "內容摘要",
+      "內容摘要",
+      "內容摘要"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20159,
+    "title": "陸公買硯",
+    "bug_a_single_blank_fields": [
+      "內容簡述",
+      "內容簡述"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20160,
+    "title": "重義的荀巨伯",
+    "bug_a_single_blank_fields": [
+      "胡兵攻城前",
+      "結果"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20161,
+    "title": "江乙媽媽告御狀",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20162,
+    "title": "相隔千里的約定",
+    "bug_a_single_blank_fields": [
+      "1",
+      "3"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20163,
+    "title": "愛讀書的顧寧人",
+    "bug_a_single_blank_fields": [
+      "主角",
+      "居住地",
+      "家世背景",
+      "專長",
+      "1"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20164,
+    "title": "從天才跌為凡人的神童",
+    "bug_a_single_blank_fields": [
+      "主角",
+      "居住地",
+      "家世",
+      "想一想，寫一寫：關於這篇課文的內容，你覺得是否合理？請打勾表示並說明理由。"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20153,
+    "title": "荒野救亡記",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20154,
+    "title": "祁黃羊的思路解密",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20155,
+    "title": "不流血的戰爭",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20167,
+    "title": "心，也要一起練",
+    "bug_a_single_blank_fields": [
+      "內容"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20168,
+    "title": "成為身體的最佳夥伴",
+    "bug_a_single_blank_fields": [
+      "內容"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20169,
+    "title": "身體，謝謝你",
+    "bug_a_single_blank_fields": [
+      "內容"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20170,
+    "title": "專注當下：關掉內心的批評噪音",
+    "bug_a_single_blank_fields": [
+      "事件",
+      "反應",
+      "反應"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20171,
+    "title": "從白熊到藍海豚：學習與念頭和平相處",
+    "bug_a_single_blank_fields": [
+      "1.「我很爛」",
+      "3.「都是我的錯」",
+      "小結",
+      "2.念頭只是路過",
+      "結語"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20172,
+    "title": "不是想太多，只是好在乎",
+    "bug_a_single_blank_fields": [
+      "阿翔行動／反應"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20173,
+    "title": "讓「想很多」助你一臂之力",
+    "bug_a_single_blank_fields": [
+      "問題一"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20174,
+    "title": "面對「失敗」，不只有一種可能",
+    "bug_a_single_blank_fields": [
+      "面對失敗的想法"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20175,
+    "title": "成長型思維：翻轉失敗的關鍵",
+    "bug_a_single_blank_fields": [
+      "成長型思維",
+      "固定型思維"
+    ],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20165,
+    "title": "下一球，我相信你",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  },
+  {
+    "lesson_id": 20166,
+    "title": "因為相信，所以能向前",
+    "bug_a_single_blank_fields": [],
+    "bug_b_inline_choice_swallowed": [],
+    "bug_c_single_select_as_multi": [],
+    "inline_choice_fields": [],
+    "has_table": true
+  }
+]

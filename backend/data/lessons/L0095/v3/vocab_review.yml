@@ -1,0 +1,158 @@
+lesson_uid: L0095
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  instruction_note: 原稿有兩個重疊的文字方塊，另一句寫「…把灰框內的語詞刪除。」；PDF p9 上層是「劃掉」。
+  target_words:
+  - 魁梧
+  - 離群索居
+  - 遲滯
+  - 抽搐
+  - 轉瞬即逝
+  - 倫理
+  - 奪門而出
+  - 神祇
+  - 禁忌
+  - 隻手遮天
+  - 哀鳴
+  target_words_note: 灰框原文分兩行：「魁梧、離群索居、遲滯、抽搐、轉瞬即逝、倫理／奪門而出、神祇、禁忌、隻手遮天、哀鳴」（11 個，與語詞框相同）。
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 棒全拼離認懲祝禁忌弗
+  - 球遍湊群同罰福頓足蘭
+  - 魁悟縫索奪門而出痙轉
+  - 富梧補居醜陋外表攣瞬
+  - 蒻蒟普羅米修斯生強即
+  - 遲干屍之隻科神祇髮逝
+  - 滯擾塊手違學哀怒發強
+  - 犧潰遮秀莽怪鳴迢抽掘
+  - 牲天襯退倫人疑有畜搐
+  - 悲劇雞偷理種希臘神話
+  grid_note: '🔵 **格子跨頁**：第 1~4 列印在 p9 最下方、第 5~10 列印在 p10 最上方。
+
+    ⚠️ 而且橘圈與格子在 PDF 上**錯位**：碰到第 1 列的兩條（禁忌、離群索居）整個被推到 p10 頁首，
+
+    變成兩個懸空的框；p10 的其餘框也整體下移約一列。
+
+    ⛔ 因此本課**不能靠「圈壓在哪一格上」判讀** —— 判準是 cells 套回 grid 拼不拼得回目標語詞。'
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 禁忌
+    cells:
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 離群索居
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 4
+    - - 3
+      - 4
+    - - 4
+      - 4
+    direction: vertical
+  - word: 魁梧
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    direction: diagonal_down_right
+  - word: 奪門而出
+    cells:
+    - - 3
+      - 5
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 轉瞬即逝
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 遲滯
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 1
+    direction: vertical
+  - word: 神祇
+    cells:
+    - - 6
+      - 7
+    - - 6
+      - 8
+    direction: horizontal
+  - word: 隻手遮天
+    cells:
+    - - 6
+      - 5
+    - - 7
+      - 4
+    - - 8
+      - 3
+    - - 9
+      - 2
+    direction: diagonal_down_left
+  - word: 哀鳴
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    direction: vertical
+  - word: 抽搐
+    cells:
+    - - 8
+      - 9
+    - - 9
+      - 10
+    direction: diagonal_down_right
+  - word: 倫理
+    cells:
+    - - 9
+      - 5
+    - - 10
+      - 5
+    direction: vertical
+  answer_paths_note: '11 個目標語詞全部圈到（11/11），逐格取字都能拼回目標語詞，格子沒有錯字。
+
+    幾何交叉驗證（單向警報）：全檔 11 個 roundRect **全部都在找字那一 block**（block 138），
+
+    11 == 11 條路徑 → 11 ＞ 11 不成立，**不觸發**「少抓一條」警報。
+
+    ⚠️ 紙外過濾在本課同樣不可信：naive 公式把 11 個裡的 7 個算成「紙外」，
+
+    但格子裡明明看得到 11 個圈（與 L0063、L0094 同型的旋轉框誤判）。
+
+    像素佐證（200dpi 重繪、數橘色連通塊）：p9 有 3 塊、p10 有 8 塊，**合計恰好 11**，
+
+    與 roundRect 數與 answer_paths 條數三者一致。
+
+    這一步是必要的：本課的圈在 PDF 上與格子錯位（碰到第 1 列的兩條整個被推到 p10 頁首），
+
+    光看「圈壓在哪一格」會判錯。
+
+    另記：格子裡埋了「痙攣」((3,9)(4,9))，它在總表的語詞欄裡但**不在學習單的 11 個目標語詞**，
+
+    也沒有被圈起來 —— 是干擾詞，不是漏抽的答案（見 meta._總表_對照note）。'

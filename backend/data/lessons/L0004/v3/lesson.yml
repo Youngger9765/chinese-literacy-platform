@@ -1,0 +1,29 @@
+lesson_uid: L0004
+version_id: v3
+title: 感情小日記2──喜歡是什麼？
+catalog_slot: G4-L13
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 品格聚光燈
+  subtitle: 自我覺察──想法與情緒的關係
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 8
+  drive_path: 4年級/G4-L13感情小日記2──喜歡是什麼？（品格力-自我覺察─想法與情緒的關係）.docx
+  docx_md5: md5-12:5502097bb700

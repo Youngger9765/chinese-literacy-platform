@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0097",
+  "catalog_slot": "G7-L28",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 0,
+  "notes": "三載體全查：☑ 2 個（都在聚光燈）；roundRect 全文 13、找字表格內 12 = 12 條路徑；w:bdr 非 auto 0 個（17 個全是 color=auto 的課文黑框）；w:vanish 0 個。🔵 **本課直接證實了「連續英數算 1 字」這條 Word 口徑**：第 5 段第一行「打造「綠色賽事」，可以從落實「環保3R」做起：」naive 23 字，把 3R 當 1 個英文單字則是 22 —— 正好等於印出的第一個數字。但段界仍不落在印出的數字上（逐行不逐段）：第 5 段末 113、第 5+6 段末 374 都不在清單裡；最後一個 368 落在兩者之間 → span=第5~6段。本課有 footnotes.xml 註腳（能量膠 33 字），已收在 body.footnotes（掛在第 1 段，在朗讀範圍之外，不影響字數推算）。六 印的是「品格聚光燈」不是「閱讀聚光燈」；第六大題標題原稿用單一連接號「3R─從問題到行動」，總表用雙連接號，各自照原樣記錄。找字灰框 12 個，比本課語詞 13 個少「因應而生」（沒進找字遊戲，不是抽漏）。"
+}

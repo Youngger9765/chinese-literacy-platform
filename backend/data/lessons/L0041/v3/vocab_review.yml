@@ -1,0 +1,117 @@
+lesson_uid: L0041
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 羅馬不是一天造成的
+  - 鬆懈
+  - 口腹之欲
+  - 潛能
+  - 輕盈
+  - 拜會
+  - 贊助
+  - 鍛鍊
+  - 日復一日
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 大羅織陷阱球拍吸收快
+  - 輕風馬臉很長攝取費樂
+  - 盈滿大不蛋大影知贊助
+  - 滿面小浪是人片識成人
+  - 潛春口花朵一蓬鬆頭髮
+  - 能風腹朵窺探天緊懈怠
+  - 力日之朵視險危造懶惰
+  - 所復欲運送旅害言成人
+  - 青一舞動鍛程頻繁聳的
+  - 大日拜會場鍊頻多肩聽
+  answers_are_graphical: true
+  answer_paths:
+  - word: 羅馬不是一天造成的
+    cells:
+    - - 1
+      - 2
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    - - 7
+      - 8
+    - - 8
+      - 9
+    - - 9
+      - 10
+    direction: diagonal_down_right
+  - word: 輕盈
+    cells:
+    - - 2
+      - 1
+    - - 3
+      - 1
+    direction: vertical
+  - word: 贊助
+    cells:
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 潛能
+    cells:
+    - - 5
+      - 1
+    - - 6
+      - 1
+    direction: vertical
+  - word: 口腹之欲
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 3
+    - - 7
+      - 3
+    - - 8
+      - 3
+    direction: vertical
+  - word: 鬆懈
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 9
+    direction: diagonal_down_right
+  - word: 日復一日
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    - - 10
+      - 2
+    direction: vertical
+  - word: 鍛鍊
+    cells:
+    - - 9
+      - 5
+    - - 10
+      - 6
+    direction: diagonal_down_right
+  - word: 拜會
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal

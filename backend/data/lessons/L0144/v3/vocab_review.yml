@@ -1,0 +1,174 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 七
+vocab_review:
+  part_note: 三篇合讀
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 聞名於世
+  - 綿延
+  - 奠定
+  - 佼佼者
+  - 輪替
+  - 配速
+  - 魔障
+  - 瞠目結舌
+  - 審視
+  - 吞噬
+  - 迥異
+  - 千錘百鍊
+  - 演化
+  - 屢屢
+  - 界線
+  - 左右勝負
+  target_words_note: 16 個 = 三篇語詞的總和（篇1 八個 + 篇2 五個 + 篇3 三個）
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 名符其實奠定全神貫配
+  - 瘁交力心師千注審無速
+  - 壁聞名於世錘視富獨見
+  - 演對吞稀瞠百佼可有聞
+  - 分化噬奇目鍊芒佼偶朽
+  - 明如拜古結綿延莽者屢
+  - 界流會左舌羊淵博輪屢
+  - 抗線右有滑稽矗魔替可
+  - 拒勝不孤獨迥扳障一雕
+  - 負然斐效成異箭步城也
+  answers_are_graphical: true
+  answer_paths:
+  - word: 奠定
+    cells:
+    - - 1
+      - 5
+    - - 1
+      - 6
+    direction: horizontal
+  - word: 配速
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 審視
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 7
+    direction: diagonal_down_left
+  - word: 千錘百鍊
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    - - 5
+      - 6
+    direction: vertical
+  - word: 聞名於世
+    cells:
+    - - 3
+      - 2
+    - - 3
+      - 3
+    - - 3
+      - 4
+    - - 3
+      - 5
+    direction: horizontal
+  - word: 演化
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    direction: diagonal_down_right
+  - word: 吞噬
+    cells:
+    - - 4
+      - 3
+    - - 5
+      - 3
+    direction: vertical
+  - word: 瞠目結舌
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 5
+    - - 6
+      - 5
+    - - 7
+      - 5
+    direction: vertical
+  - word: 佼佼者
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 8
+    - - 6
+      - 9
+    direction: diagonal_down_right
+  - word: 綿延
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 屢屢
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    direction: vertical
+  - word: 界線
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 2
+    direction: diagonal_down_right
+  - word: 左右勝負
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 3
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 輪替
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    direction: vertical
+  - word: 魔障
+    cells:
+    - - 8
+      - 8
+    - - 9
+      - 8
+    direction: vertical
+  - word: 迥異
+    cells:
+    - - 9
+      - 6
+    - - 10
+      - 6
+    direction: vertical
+  answer_paths_note: '16 條路徑 ＝ 16 個目標語詞 ＝ 紙上 16 個 roundRect anchor，三者精準相符，無警報。
+
+    格子沒有印錯字：16 條路徑套回 grid 全部拼得回目標語詞。'

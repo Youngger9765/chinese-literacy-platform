@@ -1,0 +1,24 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 八
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 其實人人都想加入邪教？三大邪教話術一次破解！
+    duration: (10:15)
+    source: 志祺七七 X 圖文不符
+    has_qr: true
+  - index: 2
+    title: 辨識【說謊者】的10種心理學方法
+    duration: (07:22)
+    source: 工科大鼠Ph.D.
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/FJxA8WwKl2o
+    url_source: 總表0816「4.影片連結」年級7課次23
+  - index: 2
+    url: http://youtu.be/I98A48Wdags
+    url_source: 總表0816「4.影片連結」年級7課次23

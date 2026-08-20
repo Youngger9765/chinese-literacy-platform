@@ -4,6 +4,7 @@ No database dependency for platform content.
 """
 
 import copy
+from typing import Any
 import re
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
@@ -22,6 +23,7 @@ from ..services.ai_service import generate_story_structure, grade_story_structur
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..services.lesson_content_loader import get_lesson_content
+from ..services.lesson_layer_loaders import _to_asset_proxy_url
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -60,19 +62,98 @@ def _set_cached_structure(story_id: str, result):
 # YAML-first: convert story_structure_table → API response (no AI call)
 # ---------------------------------------------------------------------------
 
+# 學習單用 `【…】` 裝兩種完全不同的東西：**答案**（【上升】）和**作答指示**
+# （【單選】【勾選，可複選】）。第一版一律挖空 —— 指示語跟著沒了，學生看到
+# `【　　　】`，不知道該勾一個還是勾多個，而選項還在，畫面看起來完全正常。
+_INSTRUCTION_WORDS = ("單選", "多選", "複選", "勾選", "打勾")
+
+# 教師版用 `□` 標**干擾項**（這個選項是錯的），緊接在圈號前面：`□②放棄`。
+# 送到學生端等於把答案印出來 —— 42 課 / 256 個（#2736 查出）。
+# ⚠️ 只拿掉「圈號前面那個」。`請在□打勾` 這種指示語裡的 □ 要留著。
+_DISTRACTOR_BOX_RE = re.compile(r"[□■☑▢]+\s*(?=[①②③④⑤⑥⑦⑧⑨⑩])")
+
+
 def _strip_blank_answers(text: str) -> str:
-    """Replace 【answer】 with empty blanks for student-facing display."""
-    return _BLANK_RE.sub("【　　　】", text)
+    """Blank out 【answer】 but keep 【單選】-style instructions.
+
+    An instruction tells the student how to answer; blanking it removes
+    information they need and leaves no trace that anything was lost.
+    """
+
+    def _one(m: re.Match) -> str:
+        inner = m.group(1).strip()
+        if any(w in inner for w in _INSTRUCTION_WORDS):
+            return m.group(0)
+        return "【　　　】"
+
+    return _BLANK_RE.sub(_one, text)
+
+
+def _strip_distractor_marks(text: str) -> str:
+    """Remove the `□` that marks an option as wrong before it reaches a student."""
+    return _DISTRACTOR_BOX_RE.sub("", text)
+
+
+# 學生看得到的 row 允許帶的欄位。**白名單，不是黑名單。**
+#
+# 這裡本來是 `if k not in ("hint", "blank_hints")` —— 一份黑名單，預設放行。
+# `correct_options` 從來沒被列進去，於是 41 課、104 個 checkbox 的正解索引
+# 跟著題目一起送到瀏覽器（#2736 查出）。黑名單的問題不是漏了這一個，
+# 是下一個新欄位一樣會靜默送出去。
+#
+# 改成白名單之後，新欄位預設不送；要送必須有人主動加進來，
+# 而那一刻他得先回答「這個能給學生看嗎」。
+# 回測鎖：backend/tests/test_structure_answer_key_not_served_2736.py
+_CLIENT_VISIBLE_ROW_KEYS = frozenset(
+    {"label", "value", "interactive_type", "options", "sub_rows", "blank_in_label",
+     "blanks", "select_mode"}
+)
 
 
 def _sanitize_row_for_client(row: dict) -> dict:
-    """Remove grading answers from a structure row before API response."""
-    out = {k: v for k, v in row.items() if k not in ("hint", "blank_hints")}
-    if out.get("interactive_type") == "fill_blank":
-        if out.get("blank_in_label") and out.get("label"):
-            out["label"] = _strip_blank_answers(out["label"])
-        if out.get("value"):
-            out["value"] = _strip_blank_answers(out["value"])
+    """Keep only the fields a student is allowed to see.
+
+    ⚠️ 判分用的 `correct_options` 留在**伺服器端**的快取裡
+    （`_get_cached_structure`），只是不再放進回應 —— 前端改由
+    `/structure/grade` 的結果拿到正解，作答後才會知道。
+    """
+    out = {k: v for k, v in row.items() if k in _CLIENT_VISIBLE_ROW_KEYS}
+    # ⚠️ 挖空不分列型。原本只在 fill_blank 時做，checkbox 列整條跳過 ——
+    #    於是 `【①上升】`、`【文旦】` 這些答案原樣送出去（9 課 / 39 處）。
+    for field in ("label", "value"):
+        if out.get(field):
+            out[field] = _strip_distractor_marks(_strip_blank_answers(out[field]))
+    if out.get("options"):
+        # ⚠️ 選項文字永遠是「多」「少」這種短詞。帶著 `【` 或 `】` 一定是切壞的碎片 ——
+        #    L0072 有一列的 value 裡寫了三組行內選擇（`【□①多 ②少】`），
+        #    整格按圈號切開之後 options 變成 `'少】；\n 東西越小【 柳丁 】…'` 這種東西，
+        #    而 `【 柳丁 】` 是答案。碎片對學生沒有意義，留著只會洩題。
+        #    該列的 value 已經把行內選擇挖成 `【　　　】`，選項來源在 `blanks[].options`。
+        cleaned = [_strip_distractor_marks(o) for o in out["options"]]
+        out["options"] = [o for o in cleaned if "【" not in o and "】" not in o]
+        if not out["options"]:
+            out.pop("options", None)
+    else:
+        out.pop("options", None)
+    if out.get("blanks"):
+        # `inline_choice` 每個空格自己的選項清單 —— `correct_option` 是判分用的
+        # 正解索引，留在伺服器端快取，跟 checkbox 的 `correct_options` 同一條
+        # 規則（見上面 docstring），一樣是作答後才由 `/structure/grade` 帶回。
+        # 同樣套用上面 `options` 那條「帶 【／】 一定是切壞的碎片」規則——
+        # 這裡的選項來自更窄的「第N個空格：…」單行，理論上不會撞到 L0072 那種
+        # 跨行行內選擇碎片，但同一套防線用兩次不吃虧（code review #2776）。
+        out["blanks"] = [
+            {
+                "options": [
+                    o for o in (_strip_distractor_marks(x) for x in (b.get("options") or []))
+                    if "【" not in o and "】" not in o
+                ]
+            }
+            for b in out["blanks"]
+            if isinstance(b, dict)
+        ]
+    else:
+        out.pop("blanks", None)
     sub_rows = out.get("sub_rows")
     if sub_rows:
         out["sub_rows"] = [_sanitize_row_for_client(sr) for sr in sub_rows]
@@ -100,11 +181,12 @@ def _derive_interaction_profile(structure: dict) -> dict:
     """
     fill_blank_count = 0
     checkbox_count = 0
+    inline_choice_count = 0
     primary_labels: list[str] = []
     section_labels: list[str] = []
 
     def tally_row(row: dict) -> None:
-        nonlocal fill_blank_count, checkbox_count
+        nonlocal fill_blank_count, checkbox_count, inline_choice_count
         itype = row.get("interactive_type")
         label = str(row.get("label") or "").strip()
         if itype == "fill_blank":
@@ -113,6 +195,14 @@ def _derive_interaction_profile(structure: dict) -> dict:
                 primary_labels.append(label)
         elif itype == "checkbox":
             checkbox_count += 1
+            if label:
+                primary_labels.append(label)
+        elif itype == "inline_choice":
+            # 分母/教練文案暫時併進 checkbox 家族計 —— 兩者都是「從選項挑」，
+            # 差別只在挑的地方是句子裡的空格。今天全庫只有 2 課用到這個型，
+            # 兩課都同時有其他 fill_blank/checkbox 欄位，mode 早已是 "mixed"；
+            # `inline_choice_count` 額外帶出去只是給以後想細分的人一個掛勾。
+            inline_choice_count += 1
             if label:
                 primary_labels.append(label)
 
@@ -127,11 +217,11 @@ def _derive_interaction_profile(structure: dict) -> dict:
         else:
             tally_row(row)
 
-    if fill_blank_count and checkbox_count:
+    if fill_blank_count and (checkbox_count or inline_choice_count):
         mode = "mixed"
     elif fill_blank_count:
         mode = "fill_blank"
-    elif checkbox_count:
+    elif checkbox_count or inline_choice_count:
         mode = "checkbox"
     else:
         mode = "display_only"
@@ -144,6 +234,7 @@ def _derive_interaction_profile(structure: dict) -> dict:
         ),
         "fill_blank_count": fill_blank_count,
         "checkbox_count": checkbox_count,
+        "inline_choice_count": inline_choice_count,
         "primary_labels": primary_labels[:4],
         "layout": structure.get("layout") or "cards",
     }
@@ -153,14 +244,21 @@ def _sanitize_structure_for_client(structure: dict) -> dict:
     """Return a deep copy of structure with answers stripped for student UI."""
     result = copy.deepcopy(structure)
     result["rows"] = [_sanitize_row_for_client(r) for r in result.get("rows", [])]
+    # ⚠️ `worksheet_rows` 是跟 `rows` **不同的結構**，走的是另一條消毒路徑。
+    #    干擾項移除當初只加在 `_sanitize_row_for_client`（管 `rows` 的那條），
+    #    這裡漏掉了 —— staging 實測 40 課仍有 39 個 `□①` 從這條漏出去。
+    #    兩條路都要做同一件事，所以抽成一個函式，避免下次又只改一邊。
+    def _clean(text: str) -> str:
+        return _strip_distractor_marks(_strip_blank_answers(text or ""))
+
     for ws in result.get("worksheet_rows") or []:
         if ws.get("kind") == "pair":
-            ws["label"] = _strip_blank_answers(ws.get("label") or "")
-            ws["value"] = _strip_blank_answers(ws.get("value") or "")
+            ws["label"] = _clean(ws.get("label"))
+            ws["value"] = _clean(ws.get("value"))
         elif ws.get("kind") == "section_block":
             for item in ws.get("items") or []:
-                item["label"] = _strip_blank_answers(item.get("label") or "")
-                item["value"] = _strip_blank_answers(item.get("value") or "")
+                item["label"] = _clean(item.get("label"))
+                item["value"] = _clean(item.get("value"))
     result["interaction_profile"] = _derive_interaction_profile(result)
     return result
 
@@ -330,6 +428,22 @@ def _build_worksheet_rows(parsed: list[dict]) -> tuple[str | None, list[dict]]:
     return title, worksheet_rows
 
 
+def _sanitize_raw_table_for_client(table: Any) -> Any:
+    """原始表格（list-of-lists）送學生端之前，套跟其他路徑同一組消毒。
+
+    重用 `_strip_blank_answers` / `_strip_distractor_marks` —— 不要另寫一套。
+    今天已經證明過：同一件事寫兩份，其中一份就會漏（干擾項移除先前只加在
+    `rows`，`worksheet_rows` 那條漏掉，本機全綠而 staging 洩漏 39 處）。
+    """
+    if isinstance(table, str):
+        return _strip_distractor_marks(_strip_blank_answers(table))
+    if isinstance(table, list):
+        return [_sanitize_raw_table_for_client(x) for x in table]
+    if isinstance(table, dict):
+        return {k: _sanitize_raw_table_for_client(v) for k, v in table.items()}
+    return table
+
+
 def _format_yaml_structure_table(table: list) -> dict:
     """Convert story_structure_table YAML list → API shape.
 
@@ -370,6 +484,7 @@ class StructureAnswerItem(BaseModel):
     blank_index: int | None = None
     value: str | None = None          # for fill_blank
     selected_options: list[int] | None = None  # for checkbox
+    selected_option: int | None = None  # for inline_choice (one option index per blank)
 
 
 class GradeStructureRequest(BaseModel):
@@ -422,6 +537,9 @@ def list_stories(
                 title=s["title"],
                 grade=s["grade"],
                 grade_code=s["grade_code"],
+                lesson_no=s.get("lesson_no"),
+                series=s.get("series"),
+                lesson_seq=s.get("lesson_seq"),
                 genre=s["genre"],
                 category=s["category"],
                 char_count=s["char_count"],
@@ -516,21 +634,50 @@ def get_story(story_id: str):
         worksheet_intro=story.get("worksheet_intro"),
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
         lesson_intro=story.get("lesson_intro"),
-        # 紙本學習單 PDF (#1444) — public GCS URL or None
-        worksheet_pdf_url=story.get("worksheet_pdf_url"),
+        # 紙本學習單 PDF (#1444)。
+        # ⚠️ 一定要過 `_to_asset_proxy_url`：`lingoleap-assets` bucket 在 #2486 收成
+        # private，直接送絕對 `storage.googleapis.com` URL 到瀏覽器就是 403。
+        # legacy Layer1/Layer2 loader 裡有做這件事，**uid（v3）這條路徑原本沒有** ——
+        # 現在不炸只是因為 uid tree 剛好 0 個檔帶絕對 URL，是資料乾淨不是程式擋著（#2748）。
+        # 改寫器冪等：已經是 /assets/… 或空值原樣通過。
+        worksheet_pdf_url=_to_asset_proxy_url(story.get("worksheet_pdf_url")),
         # Direct docx URL when soffice PDF conversion is broken (#2073)
-        worksheet_docx_url=story.get("worksheet_docx_url"),
+        worksheet_docx_url=_to_asset_proxy_url(story.get("worksheet_docx_url")),
         # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
         tables=story.get("tables"),
         # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
         # story_structure_table: list-of-lists from docx parser (G7-L28/L29/L30).
         # story_structure_rows: AI-generated dict rows (richer shape). Both may be None.
-        story_structure_table=story.get("story_structure_table"),
+        # ⚠️ 消毒過再送。這是 docx parser 的原始 list-of-lists，未經處理時
+        # 帶著干擾項 `□②`（＝這個選項是錯的）與未挖空的答案 `【邊角球】`。
+        # 2026-08-19 全庫：51 課有干擾項、148 課有未挖空答案，全在公開回應裡。
+        #
+        # 前端沒有讀它（只有管理員的 story-structure-lab），所以畫面上看不到 ——
+        # 但開 devtools 就有。**「畫面上看不到」不是「沒有洩漏」。**
+        # 這是同一天第七條答案外洩路徑，前六條各自在別的欄位。
+        story_structure_table=_sanitize_raw_table_for_client(
+            story.get("story_structure_table")
+        ),
         story_structure_rows=story.get("story_structure_rows"),
         # Typed lesson_content contract (閱讀聚光燈 EDD, DARK). get_lesson_content is
         # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
         # behaviour when the flag is off. This is the ONLY endpoint that supplies it.
         lesson_content=get_lesson_content(story),
+        # 文言文專屬模組 (#2752) — None for every non-文言文 lesson.
+        classical_text=story.get("classical_text"),
+        modern_translation=story.get("modern_translation"),
+        word_matching=story.get("word_matching"),
+        sentence_matching=story.get("sentence_matching"),
+        self_challenge=story.get("self_challenge"),
+        intro_guide=story.get("intro_guide"),
+        # 目標策略框／讀前自我檢核 (#2752 Phase 2) — None for lessons without one.
+        goal_box=story.get("goal_box"),
+        self_check_before_reading=story.get("self_check_before_reading"),
+        # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3) — None for lessons without one.
+        multi_text_parts=story.get("multi_text_parts"),
+        cross_text_banner=story.get("cross_text_banner"),
+        keypoints_followup_questions=story.get("keypoints_followup_questions"),
+        writing_practice=story.get("writing_practice"),
     )
 
 

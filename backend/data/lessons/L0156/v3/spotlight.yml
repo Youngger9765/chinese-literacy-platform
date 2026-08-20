@@ -1,0 +1,158 @@
+lesson_uid: L0156
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 善用網路資源找證據
+  strategy_type: media_literacy
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，4 個在本節）＋ 橘色手寫（字元樣式 af）
+  table_header_note: '小試身手是一張四欄表（空欄／對文章提出合理的質疑／可以查詢的方向／找到的證據(請勾選)）。
+
+    這裡把每一列拆成 sub_block：`intro`＋`instruction` 放**欄名**（原稿印的），
+
+    `stem`＋`hint` 放該列的內容 —— ⛔ 不把欄名和內容用「：」接成一句，那是我自己造的字串、原稿沒有。'
+  blocks:
+  - type: concept_box
+    text: '我們在閱讀文章時，常會覺得內容有問題：「這不太可能吧！」、「這會不會太誇張了？」如果對文章有所質疑，我們可以善用網路工具去搜尋及解決我們的疑惑。
+
+      以本課為例，作者看完文章後，先提出質疑，接下來上網搜尋證據，並將證據標示於註腳，表示自己所言均有所本，不只是自己個人的意見，以加強說服力。'
+  - type: guide
+    text: 1.底下說明作者的閱讀及解決問題的歷程。最後，請你填答最右欄的是非題，只是要讓你檢查自己的閱讀習慣，沒有正確答案哦。
+  - type: table
+    columns:
+    - 論述步驟
+    - 課文中的例子
+    - 反思(請打V)
+    rows:
+    - - 1.找出自己疑惑的問題
+      - 這個故事是真的嗎？
+      - '我讀完一篇文章後，是不是就完全相信了？
+
+        □是   □否'
+    - - 2.提出合理的質疑
+      - '例如：
+
+        Q2：人類怎麼可能追得上老虎呢？
+
+        Q4：吸了好幾升的血？是真的嗎？'
+      - '我讀完一篇文章，可以提出質疑嗎？
+
+        □可以   □不可以'
+    - - 3.在網路或書籍中是否能找到證據回答2的質疑？
+      - 'A2：可能，老虎拖著自己體重1/3的獵物移動，一定跑不快，所以人類是有可能追上老虎的。
+
+        A4：假的，人體失血1/3就會死亡，含光弟弟如果失血2升，佔全身1/2血量，誇大！'
+      - '我可以應用各種方法蒐集資料解決這些問題嗎？
+
+        □可以   □不可以'
+    - - 4.下一個結論
+      - 故事很可能是真的，但失血的部分被誇大了。
+      - '我可以用簡單的文字下個結論嗎?
+
+        □可以   □不可以'
+    rows_note: 最右欄「反思」是自我檢核，**原稿明寫「沒有正確答案哦」**，所以沒有勾選、也不該標答案。
+  - type: guide
+    text: 小提醒1：閱讀不能只是像海綿吸水──把白紙黑字所記載的知識讀懂、吸進腦袋而已。你可以學習這篇文章的作者，他示範了看完一篇文章，如何提出許多合理的質疑，不但質疑，還自行查閱網路資料解決問題。
+    marker_note: 這一行開頭印一個 `w:sym Wingdings 2 F045`（☛）的圖示，是符號不是文字
+  - type: guide
+    text: 小提醒2：因為網路資料真假不一，請讀者要記得交叉比對搜尋的資料，確認訊息的真實性，以免誤用。
+    marker_note: 同上，開頭印 `w:sym Wingdings 2 F045`（☛）
+  - type: guide
+    text: 2.小試身手：提出質疑，查網路資料找證據。
+  - type: sub_block
+    label: Q5
+    intro: 對文章提出合理的質疑
+    stem: 弟弟肩膀上被老虎咬了十幾個血洞，是真的嗎?
+    instruction: 可以查詢的方向
+    hint: 老虎到底有幾顆犬齒？
+    items:
+    - type: single
+      prompt: 找到的證據(請勾選)
+      options:
+        1: 弟弟真的被咬十幾個洞
+        2: 弟弟不可能被咬十幾個洞
+      answer: 2
+    - type: free_text
+      prompt: 因為老虎只有【　】顆犬齒。
+      answer: '4'
+      answer_carrier: 橘色手寫（字元樣式 af），原稿印的是全形「４」
+  - type: sub_block
+    label: Q6
+    intro: 對文章提出合理的質疑
+    stem: 老虎牙齒真的有毒嗎？
+    instruction: 可以查詢的方向
+    hint: '動物的口腔可能有毒嗎？
+
+      https://reurl.cc/nNYopv'
+    hint_note: 這一格另有一個 QR code 圖片（Picture 5）
+    items:
+    - type: single
+      prompt: 找到的證據(請勾選)
+      options:
+        1: 真的有毒
+        2: 不可能有毒
+      answer: 1
+    - type: free_text
+      prompt: 因為【　】
+      answer: 動物口腔裡有很多看不見的細菌，這些細菌很可能對人體造成危害。
+      answer_carrier: 橘色手寫（字元樣式 af）
+  - type: sub_block
+    label: Q7
+    intro: 對文章提出合理的質疑
+    stem: 可以用嘴吮吸傷口，將毒素排出嗎?
+    instruction: 可以查詢的方向
+    hint: '如果被蛇咬了，可以用嘴巴吮吸傷口嗎？
+
+      https://reurl.cc/MOzAzn
+
+      https://reurl.cc/ZeNG4V'
+    hint_note: 兩個連結用藍色超連結字元樣式（aff3，0000FF）；同格另有兩個 QR code 圖片（Picture 1、Picture 3）
+    items:
+    - type: single
+      prompt: 找到的證據(請勾選)
+      options:
+        1: 可以用嘴吸
+        2: 不可以用嘴吸
+      answer: 2
+    - type: free_text
+      prompt: 因為【　】
+      answer: 如果嘴巴有傷口就有可能因此中毒。另外，人的口腔有很多細菌，用嘴巴吸吮，也可能造成傷口的細菌感染。
+      answer_carrier: 橘色手寫（字元樣式 af）
+  - type: sub_block
+    label: 換你試試看
+    intro: 對文章提出合理的質疑
+    items:
+    - type: free_text
+      prompt: 對文章提出合理的質疑
+      answer: 人的聲音可能震動山谷嗎？
+      answer_label: (自由發揮)
+      answer_carrier: 橘色手寫（字元樣式 af）
+    - type: single
+      prompt: 找到的證據(請勾選)
+      options:
+        1: 可能
+        2: 不可能
+      answer: 1
+    - type: free_text
+      prompt: 因為【　】
+      answer: 山谷會有回音
+      answer_carrier: 橘色手寫（字元樣式 af）
+  - type: guide
+    text: 3.在這篇文章中，我們學到了對文章提出質疑以及上網找證據。含光的品格也是值得我們學習，請問看完了這篇文章，你覺得主角──含光有什麼人格特質？請說明理由。
+  - type: guide
+    text: 例：我覺得含光很勇敢，因為他不害怕死亡，敢徒手打老虎。
+  - type: free_text
+    prompt: '➔
+
+      換你試試看：我覺得含光很【　】，因為他【　】。'
+    answers:
+    - answer: 友愛兄弟
+    - answer: 為了救弟弟，揹著弟弟下山，並找醫生醫治他
+    answer_carrier: 橘色手寫（字元樣式 af），文字流有此資訊
+    arrow_note: '🔴 這一行開頭的箭號是**符號型**（`w:sym Wingdings F0E0`，➔），**不是字面 `→`**。
+
+      依規則：符號型箭號要在前後斷行（所以 prompt 用 block scalar 把它獨立成一行），
+
+      字面箭號才保留在句中。⚠️ 把它跟後面的字直接接起來寫，逐字門一樣會過
+
+      （兩半都在原稿裡），但讀起來是錯的 —— 門綠不代表寫對。'

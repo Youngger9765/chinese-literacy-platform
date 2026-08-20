@@ -2,13 +2,14 @@
   "interaction_profile": {
     "checkbox_count": 1,
     "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "二",
-      "三\n、\n四",
-      "四\n、\n五",
-      "五"
+      "內容",
+      "內容",
+      "內容",
+      "內容"
     ],
     "template_kind": "generic"
   },
@@ -24,9 +25,14 @@
       "label": "背景",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "二"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "二",
-          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
+          "label": "內容",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在【　　　】練習"
         }
       ],
       "value": ""
@@ -36,16 +42,18 @@
       "label": "挑戰",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "三、四"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "三\n、\n四",
+          "label": "內容",
           "options": [
-            "天賦　□",
-            "努力 】不夠"
+            "天賦",
+            "努力"
           ],
-          "value": "1.三軍負責【打雜】：整理場地、處理積水。\n2.練球時只有【菜單】，球員自己練習。\n3.不被看重，內心感到【委屈】與不甘心。\n4.看見實力差距，發現「【人外有人】，天外有天」。\n5.被教練勸退，也被學長說【 ①天賦　□②努力 】不夠"
+          "value": "①天賦 ②努力"
         }
       ],
       "value": ""
@@ -55,8 +63,13 @@
       "label": "努力",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "四、五"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "四\n、\n五",
+          "label": "內容",
           "value": "調適心態：先【　　　】，再以【　　　】的精神努力。\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
         }
       ],
@@ -67,8 +80,13 @@
       "label": "成就",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "五"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "五",
+          "label": "內容",
           "value": "於高二暑假，升上【　　　】"
         }
       ],
@@ -80,8 +98,12 @@
     {
       "items": [
         {
-          "label": "二",
-          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在  【　　　】練習"
+          "label": "段落",
+          "value": "二"
+        },
+        {
+          "label": "內容",
+          "value": "1.出身：【　　　】縣光復鄉，【　　　】族人\n2.高中進入【　　　】就讀，只能待在【　　　】練習"
         }
       ],
       "kind": "section_block",
@@ -90,8 +112,12 @@
     {
       "items": [
         {
-          "label": "三\n、\n四",
-          "value": "1.三軍負責【　　　】：整理場地、處理積水。\n2.練球時只有【　　　】，球員自己練習。\n3.不被看重，內心感到【　　　】與不甘心。\n4.看見實力差距，發現「【　　　】，天外有天」。\n5.被教練勸退，也被學長說（①天賦　□②努力）不夠"
+          "label": "段落",
+          "value": "三、四"
+        },
+        {
+          "label": "內容",
+          "value": "①天賦 ②努力"
         }
       ],
       "kind": "section_block",
@@ -100,7 +126,11 @@
     {
       "items": [
         {
-          "label": "四\n、\n五",
+          "label": "段落",
+          "value": "四、五"
+        },
+        {
+          "label": "內容",
           "value": "調適心態：先【　　　】，再以【　　　】的精神努力。\n2.實際行動：把握可以練習的機會，回宿舍也不【　　　】"
         }
       ],
@@ -110,7 +140,11 @@
     {
       "items": [
         {
-          "label": "五",
+          "label": "段落",
+          "value": "五"
+        },
+        {
+          "label": "內容",
           "value": "於高二暑假，升上【　　　】"
         }
       ],

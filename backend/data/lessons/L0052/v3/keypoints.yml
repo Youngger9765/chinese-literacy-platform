@@ -1,0 +1,40 @@
+lesson_uid: L0052
+version_id: v3
+section_no: 五
+keypoints:
+  title: 小藍鯨之死
+  layout: list
+  answer_carrier: 橘色手寫字（圖形），文字流的【　】內已填有答案
+  rows:
+  - label: 時間
+    value: 【　】。
+    blanks:
+    - answer: 2020年1月25日
+  - label: 地點
+    value: 【　】。
+    blanks:
+    - answer: 臺東縣長濱鄉
+  - label: 事件
+    value: 巨大鯨魚【　】。
+    blanks:
+    - answer: 擱淺死亡
+  - label: 死者
+    value: 未滿兩歲，還在生長期的幼年藍鯨。
+  - label: 死因
+    value: 頭部被廢棄漁具的繩索長期纏繞，嘴巴無法張開進食，最終【　】。
+    blanks:
+    - answer: 餓死
+  - label: 後續行動
+    value: '1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的【　】與研究典藏。
+
+      2.屏東海生館以巨鯨之路為名，完整展示【　】，重現小藍鯨優雅下潛的姿態。
+
+      3.展廳也展示造成小藍鯨死亡的【　】，提醒大家漁具纏繞對海洋生物的威脅。'
+    blanks:
+    - answer: 骨骼重建
+    - answer: 骨骼標本
+    - answer: 尼龍繩
+  - label: 省思
+    value: 小藍鯨之死提醒人們反省並採取行動，為【　】盡一份心力。
+    blanks:
+    - answer: 保育海洋

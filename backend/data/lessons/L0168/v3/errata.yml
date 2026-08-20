@@ -1,0 +1,36 @@
+lesson_uid: L0168
+version_id: v3
+errata:
+- id: E1
+  section: 一 讀全文-做記號
+  locator: 第 1 段的段號
+  source: ㄧ
+  corrected: 一
+  kind: 字元誤用
+  why: 段號欄十六個號碼中第一個是 U+3127 注音符號ㄧ，其餘正常。同批 L0145／L0167 同型。
+  confidence: high
+  evidence: document.xml 該儲存格單一字元 U+3127
+- id: E2
+  section: 二 念順順
+  locator: 指示語的括號
+  source: 從指定段落（十一     )開始朗讀
+  corrected: 從指定段落（十一     ）開始朗讀
+  kind: 全半形括號不成對
+  why: 開括號全形「（」、閉括號半形「)」。本批四課（L0145/6/7、L0167）全部同型。
+  confidence: high
+  evidence: document.xml 念順順文字方塊
+- id: E3
+  section: 六 品格聚光燈／練習二 第 1 題
+  locator: 選項編號順序
+  source: □③慢慢伸展或轉動肩膀、手、腳  □⑤讓身體靜止不動幾分鐘
+  corrected: null
+  kind: 選項編號順序顛倒
+  why: '這一題排成兩欄，但編號的走向不一致：第一列印「③　⑤」、第二列印「④　⑥」，
+
+    也就是**左欄 ③④、右欄 ⑤⑥**，而讀者依照從左到右的閱讀順序會讀成 ③⑤④⑥。
+
+    同節其他三題（第 2、3、4 題）的兩欄都是「①②／③④」的正常走向，只有這一題不同。
+
+    PDF p7 與 document.xml 一致。⚠️ 不確定是刻意分欄還是編號排錯，**不臆測、不重排**。'
+  confidence: medium
+  evidence: PDF p7 該題；y6 dump 第 233 行

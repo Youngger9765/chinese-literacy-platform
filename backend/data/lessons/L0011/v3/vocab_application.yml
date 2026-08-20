@@ -1,0 +1,44 @@
+lesson_uid: L0011
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 疑難雜症
+    B: 龍爭虎鬥
+    C: 目不轉睛
+    D: 喝采
+    E: 讚嘆不已
+    F: 凝聚力
+    G: 勢均力敵
+    H: 捶胸頓足
+    I: 摸不著頭緒
+  example:
+    label: 例
+    stem: 他上知天文，下知地理，假使有任何【　】都可以向他請教
+    answer: A
+  items:
+  - index: 1
+    stem: 這個問題很複雜，一時之間讓人（　），無法解決。
+    answer: I
+  - index: 2
+    stem: 他精湛的演出，贏得全場觀眾的（　）。
+    answer: D
+  - index: 3
+    stem: 班上同學經過幾年相處下來，彼此的（　）很強。
+    answer: F
+  - index: 4
+    stem: 奧運會上各國選手（　），競爭非常激烈。
+    answer: B
+  - index: 5
+    stem: 上國文課時，同學們都（　）的盯著臺上新來的老師。
+    answer: C
+  - index: 6
+    stem: 這兩位棋手下棋時互不相讓，整盤對局（　），最後才分出勝負。
+    answer: G
+  - index: 7
+    stem: 比賽最後一球沒有投進，全隊與冠軍擦身而過，隊長難過得（　）。
+    answer: H
+  - index: 8
+    stem: 美術館裡展出的作品十分精緻，大家看完都（　）。
+    answer: E

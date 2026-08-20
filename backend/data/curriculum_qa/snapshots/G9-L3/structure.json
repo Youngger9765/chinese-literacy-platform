@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 5,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "萬華地名典故",
       "擴大觀察",
-      "更多例子",
-      "疑問與解釋"
+      "1",
+      "2"
     ],
     "template_kind": "generic"
   },
@@ -30,14 +31,38 @@
       "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga【　　　】指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "更多例子",
-      "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina【　　　】，數字「５」稱 lima【　　　】\n語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina【　　　】，數字「５」稱 lima【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "疑問與解釋",
-      "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？\n2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "1",
+          "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -58,14 +83,32 @@
       "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga（或vanga）指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。"
     },
     {
-      "kind": "pair",
-      "label": "更多例子",
-      "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）\n語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
+      "items": [
+        {
+          "label": "1",
+          "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）"
+        },
+        {
+          "label": "2",
+          "value": "語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "更多例子"
     },
     {
-      "kind": "pair",
-      "label": "疑問與解釋",
-      "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？\n2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
+      "items": [
+        {
+          "label": "1",
+          "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？"
+        },
+        {
+          "label": "2",
+          "value": "2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "疑問與解釋"
     },
     {
       "kind": "pair",

@@ -1,0 +1,40 @@
+lesson_uid: L0025
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 倔強
+    B: 利誘
+    C: 睽違
+    D: 嫌疑
+    E: 辜負
+    F: 身家資料
+    G: 膽戰心驚
+    H: 大展身手
+  option_bank_note: 只列 8 個代號（本課 10 個語詞中的「起訴」「自傳」未入選項），對應 8 道小題
+  items:
+  - index: 1
+    stem: 他不眠不休的練習，只為不（　）父母的支持。
+    answer: E
+  - index: 2
+    stem: 因為現場沒有留下線索，警方一時難以判斷誰最有（　）。
+    answer: D
+  - index: 3
+    stem: 儘管大家都勸他換一個方法試試，但他依然（　），不肯改變。
+    answer: A
+  - index: 4
+    stem: 即使遭受各種威脅、（　），他從未心動，也不曾改變信念。
+    answer: B
+  - index: 5
+    stem: 他終於等到上場機會，準備在國際舞台上（　）。
+    answer: H
+  - index: 6
+    stem: （　）多年，臺灣才再次於奧運的殿堂拿下金牌，十分振奮人心。
+    answer: C
+  - index: 7
+    stem: 詐騙集團假冒政府人員，騙取民眾的（　），再進行詐騙操作。
+    answer: F
+  - index: 8
+    stem: 每當回想當時事故發生的瞬間，她仍（　）。
+    answer: G

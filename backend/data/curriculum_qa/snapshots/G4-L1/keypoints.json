@@ -1,63 +1,86 @@
 {
-  "keypoints": {
-    "lesson": "G4-L1",
-    "structure": "nested",
-    "columns": [
-      "label",
-      "sub_label",
-      "value"
-    ],
-    "rows": [
-      {
-        "label": "主角",
-        "value": "__",
-        "blanks": [
-          {
-            "answer": "戴資穎",
-            "hint": ""
-          }
-        ]
-      },
-      {
-        "label": "主題",
-        "value": "小戴即使在強大的壓力下，仍然堅持維持自己的風格。",
-        "blanks": []
-      },
-      {
-        "label": "球風",
-        "value": "主動出擊，追求完美的__和__的穿越角度。",
-        "blanks": [
-          {
-            "answer": "邊角球",
-            "hint": ""
+  "rows": [
+    {
+      "blanks": [
+        {
+          "answer": "戴資穎"
+        }
+      ],
+      "label": "主角",
+      "value": "【　】"
+    },
+    {
+      "label": "主題",
+      "value": "小戴即使在強大的壓力下，仍然堅持維持自己的風格。"
+    },
+    {
+      "blanks": [
+        {
+          "answer": "邊角球"
+        },
+        {
+          "answer": "難以預測"
+        }
+      ],
+      "label": "球風",
+      "value": "主動出擊，追求完美的【　】和【　】的穿越角度。"
+    },
+    {
+      "label": "事例",
+      "sub_rows": [
+        {
+          "answer": [
+            1,
+            3
+          ],
+          "answer_carrier": "紅色 ☑（圖形）",
+          "label": "背景",
+          "multi": true,
+          "options": {
+            "1": "奧運金牌賽",
+            "2": "世界大學運動會",
+            "3": "全國關注的比賽"
           },
-          {
-            "answer": "難以預測",
-            "hint": ""
-          }
-        ]
-      },
-      {
-        "label": "事例",
-        "sub_rows": [
-          {
-            "sub_label": "背景",
-            "template": "這個故事發生的情境？(多選，請打勾)\n奧運金牌賽  □世界大學運動會  \n全國關注的比賽",
-            "blanks": []
+          "prompt": "這個故事發生的情境？(多選，請打勾)"
+        },
+        {
+          "answer": 1,
+          "answer_carrier": "紅色 ☑（圖形）",
+          "label": "經過",
+          "options": {
+            "1": "忠於自己的球風",
+            "2": "保守地打安全球"
           },
-          {
-            "sub_label": "經過",
-            "template": "在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)\n忠於自己的球風\n□保守地打安全球",
-            "blanks": []
-          },
-          {
-            "sub_label": "結果",
-            "template": "(單選，請打勾)\n結果，小戴（  □贏了 、輸了  ）球賽，\n卻（  贏得了 、 □失去了  ）全國人民的尊敬。",
-            "blanks": []
-          }
-        ]
-      }
-    ],
-    "title": "贏得喝采的輸家"
-  }
+          "prompt": "在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)"
+        },
+        {
+          "answer_carrier": "紅色 ☑（圖形）",
+          "label": "結果",
+          "prompt": "(單選，請打勾)",
+          "sub_items": [
+            {
+              "answer": 2,
+              "index": 1,
+              "options": {
+                "1": "贏了",
+                "2": "輸了"
+              }
+            },
+            {
+              "answer": 1,
+              "index": 2,
+              "options": {
+                "1": "贏得",
+                "2": "失去"
+              }
+            }
+          ],
+          "value": "結果，小戴（　）球賽，\n卻（　）全國人民的尊敬。"
+        }
+      ]
+    }
+  ],
+  "section_no": "五",
+  "structure": "nested",
+  "title": "贏得喝采的輸家"
 }

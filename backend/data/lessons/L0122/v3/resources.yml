@@ -1,0 +1,22 @@
+lesson_uid: L0122
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 168人滅了印加帝國？原來另有生物因素介入
+    duration: (16:15)
+    source: cheap
+    has_qr: true
+    index_note: 第 1 支影片的標題前面沒有印「1.」（第 2 支有印「2.」），照原稿
+    url: https://youtu.be/FLy4MquEisc
+    url_source: 總表0816「4.影片連結」年級8課次2
+  - index: 2
+    title: 比流感新冠更可怕的神秘病毒-天花
+    duration: (6:30)
+    source: 達特方的胰萬個胃什麼
+    has_qr: true
+    url: https://youtu.be/j-Wj44llbd0
+    url_source: 總表0816「4.影片連結」年級8課次2

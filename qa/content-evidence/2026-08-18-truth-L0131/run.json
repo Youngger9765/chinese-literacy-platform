@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0131",
+  "catalog_slot": "G9-L10",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "找字圈的個數只數 <wp:anchor> 會得到 3，數形狀本身（a:prstGeom prst=roundRect）才是 10 —— 圈大多包在群組裡，群組 anchor 的 extent 是整片格子的外框（4.88x3.87in）。只數 anchor 會誤以為少抓 7 條。10 個形狀逐一用尺寸與旋轉角對得上 10 條路徑。格子 (6,1) 的『榷』在 PDF 上很像『權』（字型代換），差點被寫成格子錯字 —— XML 全檔 5 次都是『有待商榷』。前言印在段號欄之外，照 SKILL 6.55 獨立存 body.preface（併進去會讓念順順的☞第五段指到第 4 段）。念順順兩個段界（274 / 386）直接吻合，四條口徑一條都不必套。重點表是混合佈局（中段三欄 + 三列跨欄），依 SKILL 6.55b 二選一選 matrix，理由是第一欄本身有填空、只有 {欄名}_blanks 表達得出來。retry 1 次是逐字門：論據那一列我用『／』串起七個詞，門判 FAIL 而且判得對（原稿沒有那些斜線），改成一列一個詞。"
+}

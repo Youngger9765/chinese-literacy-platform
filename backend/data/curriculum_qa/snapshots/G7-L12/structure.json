@@ -1,7 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 5,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -34,16 +35,17 @@
           "value": "設立了【　　　】的體育系統。\n1.【　　　】設置體育場設施、體育場館、學校。\n2.成立【　　　】，提供專業的科學訓練及獎學金。"
         },
         {
-          "correct_options": [
-            0
+          "blanks": [
+            {
+              "options": [
+                "充足",
+                "少量"
+              ]
+            }
           ],
-          "interactive_type": "checkbox",
+          "interactive_type": "inline_choice",
           "label": "學校",
-          "options": [
-            "充足□",
-            "少量】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。"
-          ],
-          "value": "1.學生有【①充足□②少量】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。"
+          "value": "1.學生有【　　　】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。"
         },
         {
           "interactive_type": "fill_blank",
@@ -60,12 +62,12 @@
         {
           "interactive_type": "fill_blank",
           "label": "培育階段",
-          "value": "【　　　】社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n【　　　】表現【　　　】者，可持續晉級，有機會成為兼職或全職的運動員，或進入國家代表隊。"
+          "value": "(1)社區俱樂部常舉辦體育競賽，依年齡與水準分級。\n(2)表現【　　　】者，可持續晉級，有機會成為兼職或全職的運動員，或進入國家代表隊。"
         },
         {
           "interactive_type": "fill_blank",
           "label": "退役後",
-          "value": "【　　　】可從事其他或原本的職業\n【　　　】回到社區俱樂部當【　　　】。"
+          "value": "(1)可從事其他或原本的職業\n(2)回到社區俱樂部當【　　　】。"
         }
       ],
       "value": ""
@@ -90,7 +92,7 @@
         },
         {
           "label": "學校",
-          "value": "1.學生有【　　　】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。"
+          "value": "1.學生有【　　　】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。\n①充足 ②少量"
         },
         {
           "label": "家長",

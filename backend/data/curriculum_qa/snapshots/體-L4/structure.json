@@ -1,7 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 4,
-    "fill_blank_count": 5,
+    "checkbox_count": 3,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -16,8 +17,8 @@
   "rows": [
     {
       "interactive_type": "display",
-      "label": "主題",
-      "value": "內容"
+      "label": "專注當下：關掉內心的批評噪音",
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -29,16 +30,13 @@
       "label": "情境一",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
           "label": "事件",
           "options": [
-            "漏接  □",
-            "接殺 】對手的高飛球，讓對手得分"
+            "漏接",
+            "接殺"
           ],
-          "value": "【 ①漏接  □②接殺 】對手的高飛球，讓對手得分"
+          "value": "對手的高飛球，讓對手得分\n①漏接 ②接殺"
         },
         {
           "interactive_type": "display",
@@ -46,16 +44,13 @@
           "value": "「你真是爛透了！」、「都是你害的！」"
         },
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
           "label": "反應",
           "options": [
-            "自責  □",
-            "鬥志 】"
+            "自責",
+            "鬥志"
           ],
-          "value": "內心充滿【 ①自責  □②鬥志 】"
+          "value": "內心充滿\n①自責 ②鬥志"
         }
       ],
       "value": ""
@@ -87,16 +82,13 @@
       "label": "情境三",
       "sub_rows": [
         {
-          "correct_options": [
-            0
-          ],
           "interactive_type": "checkbox",
           "label": "事件",
           "options": [
-            "三振  □",
-            "保送 】"
+            "三振",
+            "保送"
           ],
-          "value": "站上打擊區，被三球【 ①三振  □②保送 】"
+          "value": "站上打擊區，被三球\n①三振 ②保送"
         },
         {
           "interactive_type": "display",
@@ -112,16 +104,9 @@
       "value": ""
     },
     {
-      "correct_options": [
-        0
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "fill_blank",
       "label": "解決方法",
-      "options": [
-        "變小聲  □",
-        "變大聲 】"
-      ],
-      "value": "1.收到隊友、朋友的【鼓勵】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【暖】，但還是感到有些【自責】\n2.收到教練的提醒：「懊悔不如【行動】」，並起身去做棒式訓練→效果：內在批評【 ①變小聲  □②變大聲 】"
+      "value": "1.收到隊友、朋友的【　　　】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【　　　】，但還是感到有些【　　　】\n2.收到教練的提醒：「懊悔不如【　　　】」，並起身去做棒式訓練→效果：內在批評"
     },
     {
       "interactive_type": "fill_blank",
@@ -129,12 +114,8 @@
       "value": "只要專注在【　　　】，把【　　　】拉回正在做的事上，心裡好像也就沒有那麼糾結了。"
     }
   ],
+  "title": "專注當下：關掉內心的批評噪音",
   "worksheet_rows": [
-    {
-      "kind": "pair",
-      "label": "主題",
-      "value": "內容"
-    },
     {
       "kind": "pair",
       "label": "主要問題",
@@ -144,7 +125,7 @@
       "items": [
         {
           "label": "事件",
-          "value": "（①漏接  □②接殺）對手的高飛球，讓對手得分"
+          "value": "對手的高飛球，讓對手得分\n①漏接 ②接殺"
         },
         {
           "label": "念頭",
@@ -152,7 +133,7 @@
         },
         {
           "label": "反應",
-          "value": "內心充滿（①自責  □②鬥志）"
+          "value": "內心充滿\n①自責 ②鬥志"
         }
       ],
       "kind": "section_block",
@@ -180,7 +161,7 @@
       "items": [
         {
           "label": "事件",
-          "value": "站上打擊區，被三球（①三振  □②保送）"
+          "value": "站上打擊區，被三球\n①三振 ②保送"
         },
         {
           "label": "念頭",
@@ -197,7 +178,7 @@
     {
       "kind": "pair",
       "label": "解決方法",
-      "value": "1.收到隊友、朋友的【　　　】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【　　　】，但還是感到有些【　　　】\n2.收到教練的提醒：「懊悔不如【　　　】」，並起身去做棒式訓練→效果：內在批評（①變小聲  □②變大聲）"
+      "value": "1.收到隊友、朋友的【　　　】、打氣：「沒事啦，加油！」、「下一場一定更好！」→效果：心裡有點【　　　】，但還是感到有些【　　　】\n2.收到教練的提醒：「懊悔不如【　　　】」，並起身去做棒式訓練→效果：內在批評"
     },
     {
       "kind": "pair",

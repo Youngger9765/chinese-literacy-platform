@@ -1,0 +1,23 @@
+{
+  "lesson_uid": "L0057",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "read_calls": 1,
+  "extra_image_reads": 0,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 0,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "首次即全綠。找字遊戲 9 個 roundRect 只有 2 個印進 PDF（7 個在垂直放大 4.07 倍的 wpg 群組裡，LibreOffice 未輸出），靠幾何換算＋逐格取字補回。"
+}

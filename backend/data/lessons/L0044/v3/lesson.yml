@@ -1,0 +1,13 @@
+lesson_uid: L0044
+version_id: v3
+title: 文字路上的閱讀號誌
+catalog_slot: G5-L5
+sections_present:
+- 'no': 一
+  name: 閱讀聚光燈
+  subtitle: 解題策略──看特殊標點找線索
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 12
+  drive_path: 5年級/G5-L5文字路上的閱讀號誌 （解題策略-看特殊標點找線索）.docx
+  docx_md5: md5-12:e860d2cfea36

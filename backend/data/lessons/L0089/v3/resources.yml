@@ -1,0 +1,32 @@
+lesson_uid: L0089
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 背影-朱自清-情境式學習動畫
+    duration: 05:17
+    duration_seconds: 317
+    source: 尼西數位
+  - index: 2
+    title: 課文《背影》沒說的事，朱自清跟爸爸其實並不好！
+    duration: 0:59
+    duration_seconds: 59
+    source: Taiwan Bar
+  - index: 3
+    title: 感人至深的朱自清 背影:蘊含多少言說不盡的父子情! 背影之後的故事
+    duration: '10:21'
+    duration_seconds: 621
+    source: My Media
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/NYWtSd80h8s
+    url_source: 總表0816「4.影片連結」年級7課次20
+  - index: 2
+    url: https://www.youtube.com/shorts/FYpHNePa_jM
+    url_source: 總表0816「4.影片連結」年級7課次20
+  - index: 3
+    url: https://youtu.be/hg7qyulHCPo
+    url_source: 總表0816「4.影片連結」年級7課次20

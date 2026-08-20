@@ -350,7 +350,12 @@ const McqRescueDialog: React.FC<Props> = ({
             <div className="flex flex-col gap-2">
               {(context.options ?? []).map((optText, idx) => {
                 const label = context.optionLabels?.[idx] ?? String.fromCharCode(65 + idx);
-                const isCorrect = label === context.correctAnswer;
+                // ⛔ **不要標出正解。** 這個對話框是來引導學生想的，不是來公布答案的。
+                // 原本 `isCorrect` 那一格畫成綠底 + ✓，學生一眼就看到，
+                // 引導還沒開始就結束了（Young 2026-08-19：「還公布正確答案？」）。
+                //
+                // `context.correctAnswer` 仍然留著 —— 後端要靠它問出好問題
+                // （`correct_answer` 有在用）。拿掉的是**顯示**，不是資料。
                 const isWrong = label === context.wrongChoice;
 
                 let cardClass =
@@ -360,12 +365,7 @@ const McqRescueDialog: React.FC<Props> = ({
                 let textClass = '';
                 let suffix: React.ReactNode = null;
 
-                if (isCorrect) {
-                  cardClass += 'border-green-300 bg-green-50 text-green-900';
-                  badgeClass += 'border-green-500 text-green-700';
-                  textClass = 'font-medium';
-                  suffix = <span className="ml-auto text-green-600 text-base shrink-0">✓</span>;
-                } else if (isWrong) {
+                if (isWrong) {
                   cardClass += 'border-red-300 bg-red-50 text-red-900';
                   badgeClass += 'border-red-500 text-red-700';
                   textClass = 'line-through';

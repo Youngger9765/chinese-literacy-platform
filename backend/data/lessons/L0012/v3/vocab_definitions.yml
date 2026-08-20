@@ -1,0 +1,55 @@
+lesson_uid: L0012
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 興味盎然
+  - 欲罷不能
+  - 滴水穿石
+  - 廢寢忘食
+  - 解剖學
+  - 久病而成良醫
+  - 胃口大開
+  - 愛不釋手
+  - 不相上下
+  - 受挫
+  - 兼顧
+  items:
+  - index: 1
+    word: 欲罷不能
+    definition: 想停止卻無法停止，形容事情非常吸引人。
+  - index: 2
+    word: 廢寢忘食
+    definition: 太專心做一件事，連睡覺和吃飯都忘了。
+  - index: 3
+    word: 胃口大開
+    definition: 食慾變得很好，想吃很多。
+  - index: 4
+    word: 受挫
+    definition: 遭遇失敗或挫折。
+  - index: 5
+    word: 滴水穿石
+    definition: 水滴長久滴落在石頭上，也能穿透；比喻持之以恆的力量。
+  - index: 6
+    word: 久病而成良醫
+    definition: 一個人生病久了，因為常看醫生、吃藥、了解病情，慢慢的自己也懂得怎麼治病。指因為自己經歷過很多，所以變得很在行。
+  - index: 7
+    word: 不相上下
+    definition: 形容雙方的能力或表現差不多，很難分出誰比較好，誰比較差。
+  - index: 8
+    word: 興味盎然
+    definition: 對某件事情非常有興趣的樣子。
+  - index: 9
+    word: 兼顧
+    definition: 同時照顧到兩件或多件事情，不偏重其中一邊。
+  - index: 10
+    word: 解剖學
+    definition: 研究動、植物體內構造與器官，了解身體組成的學問。
+  - index: 11
+    word: 愛不釋手
+    definition: 形容非常喜歡某樣東西，喜歡到捨不得放下來。

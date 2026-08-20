@@ -1,80 +1,131 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 6,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "劇本設定",
-      "故事舞台",
-      "第一幕",
-      "第二幕"
+      "內容摘要",
+      "內容摘要",
+      "內容摘要",
+      "內容摘要"
     ],
     "template_kind": "generic"
   },
   "layout": "worksheet_table",
   "rows": [
     {
-      "interactive_type": "fill_blank",
-      "label": "劇本設定",
-      "value": "內容摘要\n【　　　】處填入原文，找不到原文時，再用自己的話寫。"
-    },
-    {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "故事舞台",
-      "value": "場景：魏國的【　　　】\n時間：【　　　】時分。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "場景：魏國的【　　　】\n時間：【　　　】時分。【　　　】【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "第一幕",
-      "value": "問題：鮑子都偶遇書生【　　　】\n解決：鮑子都立刻下馬施救。\n結果：書生不治身亡。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "問題：鮑子都偶遇書生【　　　】\n解決：鮑子都立刻下馬施救。\n結果：書生不治身亡。【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "第二幕",
-      "value": "問題：書生不治身亡。\n解決：【　　　】發現書生有一本【　　　】與【　　　】。\n【　　　】變賣【　　　】安葬書生，剩下【　　　】墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "問題：書生不治身亡。\n解決：(1)發現書生有一本【　　　】與【　　　】。\n(2)變賣【　　　】安葬書生，剩下【　　　】墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。【　　　】【　　　】【　　　】【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "第三幕",
-      "value": "問題：書生家人誤認鮑子都是【　　　】，厲聲質問兒子的下落。\n解決：鮑子都坦然說明往事，並帶路至墓地。\n結果：開墓後，九金與兵書完好無缺，證實鮑子都並未私吞財物。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "問題：書生家人誤認鮑子都是【　　　】，厲聲質問兒子的下落。\n解決：鮑子都坦然說明往事，並帶路至墓地。\n結果：開墓後，九金與兵書完好無缺，證實鮑子都並未私吞財物。【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "結局",
-      "value": "1.真相大白後，書生的家人從質疑轉為【　　　】。\n2.鮑子都的義舉在眾人的口耳相傳下，不久就成了很有名的人了。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "1.真相大白後，書生的家人從質疑轉為【　　　】。\n2.鮑子都的義舉在眾人的口耳相傳下，不久就成了很有名的人了。【　　　】"
+        }
+      ],
+      "value": ""
     }
   ],
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "劇本設定",
-      "value": "內容摘要\n【　　　】處填入原文，找不到原文時，再用自己的話寫。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "場景：魏國的(　)\n時間：(　)時分。【　　　】【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "故事舞台"
     },
     {
-      "kind": "pair",
-      "label": "故事舞台",
-      "value": "場景：魏國的(  野/荒野  )\n時間：(  暮/傍晚  )時分。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "問題：鮑子都偶遇書生(　)\n解決：鮑子都立刻下馬施救。\n結果：書生不治身亡。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "第一幕"
     },
     {
-      "kind": "pair",
-      "label": "第一幕",
-      "value": "問題：鮑子都偶遇書生( 卒心痛/突發心絞痛 )\n解決：鮑子都立刻下馬施救。\n結果：書生不治身亡。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "問題：書生不治身亡。\n解決：(1)發現書生有一本(　)與(　)。\n(2)變賣(　)安葬書生，剩下(　)墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。【　　　】【　　　】【　　　】【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "第二幕"
     },
     {
-      "kind": "pair",
-      "label": "第二幕",
-      "value": "問題：書生不治身亡。\n解決：(1)發現書生有一本( 素書/兵書 )與( 十塊金餅  )。\n(2)變賣(一金/一個金餅)安葬書生，剩下(九金/九個金餅)墊在遺體的頭下，兵書也放在書生的身邊。\n結果：書生得到安葬。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "問題：書生家人誤認鮑子都是(　)，厲聲質問兒子的下落。\n解決：鮑子都坦然說明往事，並帶路至墓地。\n結果：開墓後，九金與兵書完好無缺，證實鮑子都並未私吞財物。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "第三幕"
     },
     {
-      "kind": "pair",
-      "label": "第三幕",
-      "value": "問題：書生家人誤認鮑子都是( 盜/強盜  )，厲聲質問兒子的下落。\n解決：鮑子都坦然說明往事，並帶路至墓地。\n結果：開墓後，九金與兵書完好無缺，證實鮑子都並未私吞財物。"
-    },
-    {
-      "kind": "pair",
-      "label": "結局",
-      "value": "1.真相大白後，書生的家人從質疑轉為( 感激  )。\n2.鮑子都的義舉在眾人的口耳相傳下，不久就成了很有名的人了。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "1.真相大白後，書生的家人從質疑轉為(　)。\n2.鮑子都的義舉在眾人的口耳相傳下，不久就成了很有名的人了。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結局"
     }
   ]
 }

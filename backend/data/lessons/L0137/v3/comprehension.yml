@@ -1,0 +1,74 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 五
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  option_key_note: '選項用**字母代號 A~D**（不是 ①②③④），教師版答案印在題號前的括號裡（橘色手寫體）。
+
+    維持字母 key —— 改成數字會讓答案對不到選項。'
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 讀這兩篇文章時，判斷哪個假設比較有說服力，最重要的是看什麼？
+    options:
+      A: 哪個假設最神祕、最吸引人
+      B: 哪個假設有最多人贊成
+      C: 哪個假設有較多證據支持
+      D: 哪個假設聽起來最像傳說故事
+    answer: C
+  - index: 2
+    stem: 關於「巨石陣」一文中，何者敘述正確？
+    options:
+      A: 科學家已經確定巨石陣的建造目的
+      B: 巨石陣是由英國船長在航海中發現
+      C: 巨石陣為環狀組成，像圓形的石林
+      D: 巨石陣的石頭都是一根一根直立柱
+    option_teacher_notes:
+      A: （未被證實）
+      B: （神父散步發現）
+      C: （文中第一段）
+      D: （第一段，橫放的巨石）
+    option_teacher_notes_carrier: 橘色斜體，印在各選項後面（在文字流裡）
+    answer: C
+  - index: 3
+    stem: 關於「摩艾走路」一文中，何者敘述不正確？
+    stem_note: 「不正確」三字在原稿加了底線
+    options:
+      A: 距離復活節島最近的陸地為智利海岸
+      B: 多數摩艾石像是由許多塊石頭拼湊而成
+      C: 從山上到海邊石像的道路，大多崎嶇不平
+      D: 現代的起重機要豎立石像仍然極不容易
+    option_teacher_notes:
+      B: 第二段，石像大多是一體成形。
+      D: （文中第三段）
+    option_teacher_notes_carrier: B 是藍框浮動文字方塊，D 是橘色斜體印在選項後
+    answer: B
+  - index: 4
+    stem: 請問巨石陣與摩艾走路這兩篇文章，其共同的未解之謎為何？
+    options:
+      A: 兩者名稱的由來眾說紛紜
+      B: 巨石的來源地在哪
+      C: 建造它們的工具有何不同
+      D: 石頭巨大，如何搬運移動
+    option_teacher_notes:
+      D: （從兩篇文章的最後一段可知，石像移動仍是未解之謎。）
+    option_teacher_notes_carrier: 藍框浮動文字方塊，位置在選項 B 右側但內容講的是答案 D
+    answer: D
+  - index: 5
+    stem: 這兩篇文章，作者使用了相同的寫作手法，請問寫作順序為何？
+    options:
+      A: 發現由來→令人好奇的問題→三個假設→未解之謎
+      B: 發現由來→未解之謎→三個假設→令人好奇的問題
+      C: 三個假設→發現由來→令人好奇的問題→未解之謎
+      D: 未解之謎→發現由來→三個假設→令人好奇的問題
+    answer: A
+    note: 選項 D 被分頁推到下一頁（p11 最上方），四個選項是完整的
+  floating_annotations:
+  - text: 'A-矗立，
+
+      B-崎嶇，
+
+      C-艱鉅。'
+    _placement: 第 1 題右側藍框文字方塊
+    _attribution: 歸屬不明
+    errata_ref: E3

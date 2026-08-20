@@ -1,0 +1,59 @@
+lesson_uid: L0046
+version_id: v3
+section_no: 四
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 引領
+  - 盤旋
+  - 崎嶇難行
+  - 垂直起降
+  - 仿生學
+  - 內建
+  - 向陽性
+  - 危機四伏
+  - 追逐
+  - 廣闊無垠
+  - 險象環生
+  vocabulary_bank_note: '照「本課語詞」框原樣、依印出的順序記錄（框內分五行排版，此處攤平）。
+
+    與總表的差異只有一處：總表寫「探測車」，這裡是「崎嶇難行」（見 meta._總表_對照note）。'
+  answer_carrier: 橘色手寫字；文字流已含答案
+  items:
+  - index: 1
+    word: 仿生學
+    definition: 模仿生物的構造或特性，設計產品或技術的學問。
+  - index: 2
+    word: 廣闊無垠
+    definition: 形容廣大、寬闊，沒有邊界。
+  - index: 3
+    word: 盤旋
+    definition: 在空中繞圈飛行；也可形容想法一直留在腦中。
+  - index: 4
+    word: 危機四伏
+    definition: 到處隱藏著危險。
+  - index: 5
+    word: 險象環生
+    definition: 危險的狀況一直出現。
+  - index: 6
+    word: 向陽性
+    definition: 植物朝向陽光生長的特性。
+  - index: 7
+    word: 引領
+    definition: 引導、帶領。
+  - index: 8
+    word: 崎嶇難行
+    definition: 地面高低不平，很難行走。
+  - index: 9
+    word: 內建
+    definition: 機器或系統中原本就裝有某種配件或功能。
+  - index: 10
+    word: 追逐
+    definition: 從後面追趕。
+  - index: 11
+    word: 垂直起降
+    definition: 垂直起飛和降落。

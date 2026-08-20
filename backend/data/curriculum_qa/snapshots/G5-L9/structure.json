@@ -1,60 +1,178 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 8,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "預言例子",
-      "人們為何容易相信預言？",
-      "人們為何容易相信預言？",
-      "結論"
+      "1",
+      "1",
+      "3",
+      "1"
     ],
     "template_kind": "generic"
   },
   "layout": "worksheet_table",
   "rows": [
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
+      "label": "災難預言準不準",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
       "label": "預言例子",
-      "value": "1.日本漫畫中的夢境\n【　　　】漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n【　　　】2025年7月5日會發生大地震和海嘯，引發許多人不安。\n2.諾查丹瑪斯\n有人根據他的詩句，預測1999年會出現世界末日。\n3.瑪雅文明\n有人把瑪雅曆法解讀為2012年12月21日世界末日。\n上述三項災難預言，最後都【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "日本漫畫中的夢境\n(1)漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n(2)2025年7月5日會發生大地震和海嘯，引發許多人不安。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "諾查丹瑪斯\n有人根據他的詩句，預測1999年會出現世界末日。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "3",
+          "value": "瑪雅文明\n有人把瑪雅曆法解讀為2012年12月21日世界末日。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "人們為何容易相信預言？",
-      "value": "一、預言與網路的特性\n1.預言通常【　　　】，模糊的說法可以套用到多種情況。\n2.災難預言像恐怖片，讓人害怕，卻又忍不住想聽、想看。\n3.【　　　】讓內容快速傳播，相信的人也可能跟著增加。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "預言通常【　　　】，模糊的說法可以套用到多種情況。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "災難預言像恐怖片，讓人害怕，卻又忍不住想聽、想看。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "【　　　】讓內容快速傳播，相信的人也可能跟著增加。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "人們為何容易相信預言？",
-      "value": "二、心理學解釋\n1.【　　　】：只注意那些看似應驗的預言，忽略沒有應驗的預測。\n2.【　　　】：特別尋找符合自己信念的證據。\n3.對於不確定的未來，人們感到不安，災難預言能讓人暫時感到【　　　】"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "【　　　】：只注意那些看似應驗的預言，忽略沒有應驗的預測。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "【　　　】：特別尋找符合自己信念的證據。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "對於不確定的未來，人們感到不安，災難預言能讓人暫時感到【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "結論",
-      "value": "1.大多數預言缺乏【　　　】，人們無須過度恐慌。\n2.面對災難，平時應具備【　　　】與防災能力，並留意專業機構發布的資訊。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "大多數預言缺乏【　　　】，人們無須過度恐慌。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "面對災難，平時應具備【　　　】與防災能力，並留意專業機構發布的資訊。"
+        }
+      ],
+      "value": ""
     }
   ],
+  "title": "災難預言準不準",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "預言例子",
-      "value": "1.日本漫畫中的夢境\n(1)漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n(2)2025年7月5日會發生大地震和海嘯，引發許多人不安。\n2.諾查丹瑪斯\n有人根據他的詩句，預測1999年會出現世界末日。\n3.瑪雅文明\n有人把瑪雅曆法解讀為2012年12月21日世界末日。\n上述三項災難預言，最後都【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "日本漫畫中的夢境\n(1)漫畫內的夢境災難場景和後來2011年東日本大地震高度雷同。\n(2)2025年7月5日會發生大地震和海嘯，引發許多人不安。"
+        },
+        {
+          "label": "2",
+          "value": "諾查丹瑪斯\n有人根據他的詩句，預測1999年會出現世界末日。"
+        },
+        {
+          "label": "3",
+          "value": "瑪雅文明\n有人把瑪雅曆法解讀為2012年12月21日世界末日。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "預言例子"
     },
     {
-      "kind": "pair",
-      "label": "人們為何容易相信預言？",
-      "value": "一、預言與網路的特性\n1.預言通常【　　　】，模糊的說法可以套用到多種情況。\n2.災難預言像恐怖片，讓人害怕，卻又忍不住想聽、想看。\n3.【　　　】讓內容快速傳播，相信的人也可能跟著增加。"
+      "items": [
+        {
+          "label": "1",
+          "value": "預言通常【　　　】，模糊的說法可以套用到多種情況。"
+        },
+        {
+          "label": "2",
+          "value": "災難預言像恐怖片，讓人害怕，卻又忍不住想聽、想看。"
+        },
+        {
+          "label": "3",
+          "value": "【　　　】讓內容快速傳播，相信的人也可能跟著增加。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "人們為何容易相信預言？"
     },
     {
-      "kind": "pair",
-      "label": "人們為何容易相信預言？",
-      "value": "二、心理學解釋\n1.【　　　】：只注意那些看似應驗的預言，忽略沒有應驗的預測。\n2.【　　　】：特別尋找符合自己信念的證據。\n3.對於不確定的未來，人們感到不安，災難預言能讓人暫時感到【　　　】"
+      "items": [
+        {
+          "label": "1",
+          "value": "【　　　】：只注意那些看似應驗的預言，忽略沒有應驗的預測。"
+        },
+        {
+          "label": "2",
+          "value": "【　　　】：特別尋找符合自己信念的證據。"
+        },
+        {
+          "label": "3",
+          "value": "對於不確定的未來，人們感到不安，災難預言能讓人暫時感到【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "人們為何容易相信預言？"
     },
     {
-      "kind": "pair",
-      "label": "結論",
-      "value": "1.大多數預言缺乏【　　　】，人們無須過度恐慌。\n2.面對災難，平時應具備【　　　】與防災能力，並留意專業機構發布的資訊。"
+      "items": [
+        {
+          "label": "1",
+          "value": "大多數預言缺乏【　　　】，人們無須過度恐慌。"
+        },
+        {
+          "label": "2",
+          "value": "面對災難，平時應具備【　　　】與防災能力，並留意專業機構發布的資訊。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結論"
     }
   ]
 }

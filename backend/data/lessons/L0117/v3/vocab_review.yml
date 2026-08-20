@@ -1,0 +1,143 @@
+lesson_uid: L0117
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 風靡全球
+  - 小確幸
+  - 繁瑣
+  - 工序
+  - 養家活口
+  - 沉甸甸
+  - 產業鏈
+  - 終年
+  - 暗無天日
+  - 地力耗盡
+  - 剝削
+  - 標榜
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 風靡全球星暗無田繁永
+  - 糜其中典範無特殊瑣續
+  - 全用武之地天工序雇認
+  - 球沉惦惦震日列所用證
+  - 待甸養家活口思終收公
+  - 產甸氣後變遷年哖購平
+  - 血業收入微薄輕小費標
+  - 淋水鏈可標膀氣確用章
+  - 淋剝舞可榜擺盛幸關注
+  - 削球手豆興脫地力耗盡
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 風靡全球
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 暗無天日
+    cells:
+    - - 1
+      - 6
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 繁瑣
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 9
+    direction: vertical
+  - word: 工序
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 沉甸甸
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 2
+    - - 6
+      - 2
+    direction: vertical
+  - word: 養家活口
+    cells:
+    - - 5
+      - 3
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    direction: horizontal
+  - word: 終年
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    direction: diagonal_down_left
+  - word: 產業鏈
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 2
+    - - 8
+      - 3
+    direction: diagonal_down_right
+  - word: 小確幸
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    direction: vertical
+  - word: 標榜
+    cells:
+    - - 8
+      - 5
+    - - 9
+      - 5
+    direction: vertical
+  - word: 剝削
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 地力耗盡
+    cells:
+    - - 10
+      - 7
+    - - 10
+      - 8
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  geometry_check: 找字那一頁的 roundRect 錨點共 12 個（1.2 2.6 2.8 3.8 4.2 5.6 5.8 6.2 7.8 8.5 9.2 10.8），與 12 條 answer_paths 相同；無紙外殘留。全檔 13 個，另 1 個在步驟❹示意圖。

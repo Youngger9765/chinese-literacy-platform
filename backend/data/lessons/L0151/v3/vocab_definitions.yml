@@ -1,0 +1,55 @@
+lesson_uid: L0151
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 令人髮指
+  - 劈頭
+  - 煽情
+  - 杜撰
+  - 眼睜睜
+  - 援助
+  - 最負盛名
+  - 抽絲剝繭
+  - 視若無睹
+  - 鋪天蓋地
+  vocabulary_bank_note: 語詞框原文分四行印，句末有句號。
+  answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p3~p4 可見
+  items:
+  - index: 1
+    word: 抽絲剝繭
+    definition: 比喻由淺入深，一層層深入分析，探求真相。
+  - index: 2
+    word: 鋪天蓋地
+    definition: 形容聲勢很大，範圍很廣，好像連天空和地面都被覆蓋。
+  - index: 3
+    word: 劈頭
+    definition: 指一開始就直接講或做，沒有緩和的過程。
+  - index: 4
+    word: 眼睜睜
+    definition: 清楚看著壞事發生，但無法改變情況。
+  - index: 5
+    word: 援助
+    definition: 援救幫助。
+  - index: 6
+    word: 煽情
+    definition: 故意挑動情緒，以引起共同情感的反應。
+  - index: 7
+    word: 杜撰
+    definition: 無事實根據、憑空捏造。
+  - index: 8
+    word: 令人髮指
+    definition: 形容事情非常殘忍、可惡，使人憤怒到極點。
+  - index: 9
+    word: 最負盛名
+    definition: 最具有名望。
+  - index: 10
+    word: 視若無睹
+    definition: 雖然看到，但因不關心，好像沒有看到一樣。等同「視而不見」。

@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 2,
-    "fill_blank_count": 4,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
       "預言/事件",
-      "末日前",
-      "末日當日",
-      "末日後"
+      "觀察結果．末日前",
+      "觀察結果．末日當日",
+      "觀察結果．末日後"
     ],
     "template_kind": "psr"
   },
@@ -35,50 +36,35 @@
       "value": "三位心理學家以假身分加入團體，祕密觀察並蒐集資料。"
     },
     {
-      "interactive_type": "display",
-      "label": "觀察結果",
-      "sub_rows": [
-        {
-          "interactive_type": "fill_blank",
-          "label": "末日前",
-          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
-        },
-        {
-          "correct_options": [
-            0
-          ],
-          "interactive_type": "checkbox",
-          "label": "末日當日",
-          "options": [
-            "什麼都沒有發生　　□",
-            "外星人出現。【 單選 】"
-          ],
-          "value": "①什麼都沒有發生　　□②外星人出現。【 單選 】"
-        },
-        {
-          "interactive_type": "fill_blank",
-          "label": "末日後",
-          "value": "【　　　】原來就不太投入的人怎麼做？→【　　　】"
-        },
-        {
-          "interactive_type": "fill_blank",
-          "label": "末日後",
-          "value": "【　　　】對教主付出很多的人怎麼做？→【　　　】"
-        }
-      ],
-      "value": ""
+      "interactive_type": "fill_blank",
+      "label": "觀察結果．末日前",
+      "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
     },
     {
-      "correct_options": [
-        0
+      "interactive_type": "checkbox",
+      "label": "觀察結果．末日當日",
+      "options": [
+        "什麼都沒有發生",
+        "什麼都沒有發生",
+        "外星人出現。"
       ],
+      "select_mode": "single",
+      "value": "①什麼都沒有發生　　②外星人出現。【 單選 】\n①什麼都沒有發生 ②外星人出現。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "觀察結果．末日後",
+      "value": "(1)原來就不太投入的人怎麼做？→【　　　】\n(2)對教主付出很多的人怎麼做？→【　　　】"
+    },
+    {
       "interactive_type": "checkbox",
       "label": "研究結論",
       "options": [
-        "可能會不看證據，做出匪夷所思的判斷\n□",
+        "可能會不看證據，做出匪夷所思的判斷",
         "比較能根據證據做判斷。"
       ],
-      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，\n 【 單選 】\n①可能會不看證據，做出匪夷所思的判斷\n□②比較能根據證據做判斷。"
+      "select_mode": "single",
+      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，【 單選 】\n①可能會不看證據，做出匪夷所思的判斷 ②比較能根據證據做判斷。"
     }
   ],
   "title": "信眾與教主",
@@ -99,31 +85,24 @@
       "value": "三位心理學家以假身分加入團體，祕密觀察並蒐集資料。"
     },
     {
-      "items": [
-        {
-          "label": "末日前",
-          "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
-        },
-        {
-          "label": "末日當日",
-          "value": "①什麼都沒有發生　　□②外星人出現。(單選)"
-        },
-        {
-          "label": "末日後",
-          "value": "(1)原來就不太投入的人怎麼做？→【　　　】"
-        },
-        {
-          "label": "末日後",
-          "value": "(2)對教主付出很多的人怎麼做？→【　　　】"
-        }
-      ],
-      "kind": "section_block",
-      "section": "觀察結果"
+      "kind": "pair",
+      "label": "觀察結果．末日前",
+      "value": "許多人心生恐懼，為了得到【　　　】而加入這個宗教。"
+    },
+    {
+      "kind": "pair",
+      "label": "觀察結果．末日當日",
+      "value": "①什麼都沒有發生　　②外星人出現。(單選)\n①什麼都沒有發生 ②外星人出現。"
+    },
+    {
+      "kind": "pair",
+      "label": "觀察結果．末日後",
+      "value": "(1)原來就不太投入的人怎麼做？→【　　　】\n(2)對教主付出很多的人怎麼做？→【　　　】"
     },
     {
       "kind": "pair",
       "label": "研究結論",
-      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，\n (單選)\n①可能會不看證據，做出匪夷所思的判斷\n□②比較能根據證據做判斷。"
+      "value": "當一個人為某種信念投入大量時間、金錢或人際關係時，(單選)\n①可能會不看證據，做出匪夷所思的判斷 ②比較能根據證據做判斷。"
     }
   ]
 }

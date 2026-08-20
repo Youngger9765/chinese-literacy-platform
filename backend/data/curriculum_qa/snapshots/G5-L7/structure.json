@@ -1,102 +1,147 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 9,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "植物的特性",
-      "科學家的設計",
-      "功能",
-      "總結"
+      "會飛的小種子",
+      "跟著太陽轉的花苞",
+      "滾來滾去的草球",
+      "會飛的小種子"
     ],
-    "template_kind": "theme_facts"
+    "template_kind": "generic"
   },
   "layout": "worksheet_table",
   "rows": [
     {
       "interactive_type": "display",
-      "label": "大主題",
-      "value": "以植物為師的科學"
+      "label": "文章重點表",
+      "value": ""
     },
     {
       "interactive_type": "display",
-      "label": "小主題",
+      "label": "植物的特性",
       "sub_rows": [
         {
-          "interactive_type": "display",
+          "interactive_type": "fill_blank",
           "label": "會飛的小種子",
-          "value": "跟著太陽轉的花苞 滾來滾去的草球"
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "跟著太陽轉的花苞",
+          "value": "向日葵花苞整天追逐太陽，具有【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "滾來滾去的草球",
+          "value": "風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
         }
       ],
       "value": ""
     },
     {
       "interactive_type": "display",
-      "label": "細節",
+      "label": "科學家的設計",
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "植物的特性",
-          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵花苞整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
+          "label": "會飛的小種子",
+          "value": "只有【　　　】翅膀的飛行機器人"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "科學家的設計",
-          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】"
+          "label": "跟著太陽轉的花苞",
+          "value": "自動調整角度的【　　　】"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "功能",
-          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
+          "label": "滾來滾去的草球",
+          "value": "風吹時，會滾來滾去的【　　　】"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "總結",
-      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。"
+      "interactive_type": "display",
+      "label": "功能",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "會飛的小種子",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "跟著太陽轉的花苞",
+          "value": "仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "滾來滾去的草球",
+          "value": "探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
+        }
+      ],
+      "value": ""
     }
   ],
+  "title": "文章重點表",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "大主題",
-      "value": "以植物為師的科學"
+      "items": [
+        {
+          "label": "會飛的小種子",
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】"
+        },
+        {
+          "label": "跟著太陽轉的花苞",
+          "value": "向日葵花苞整天追逐太陽，具有【　　　】"
+        },
+        {
+          "label": "滾來滾去的草球",
+          "value": "風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "植物的特性"
     },
     {
       "items": [
         {
           "label": "會飛的小種子",
-          "value": "跟著太陽轉的花苞 滾來滾去的草球"
+          "value": "只有【　　　】翅膀的飛行機器人"
+        },
+        {
+          "label": "跟著太陽轉的花苞",
+          "value": "自動調整角度的【　　　】"
+        },
+        {
+          "label": "滾來滾去的草球",
+          "value": "風吹時，會滾來滾去的【　　　】"
         }
       ],
       "kind": "section_block",
-      "section": "小主題"
+      "section": "科學家的設計"
     },
     {
       "items": [
         {
-          "label": "植物的特性",
-          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵花苞整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
+          "label": "會飛的小種子",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。"
         },
         {
-          "label": "科學家的設計",
-          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】"
+          "label": "跟著太陽轉的花苞",
+          "value": "仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。"
         },
         {
-          "label": "功能",
-          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
+          "label": "滾來滾去的草球",
+          "value": "探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
         }
       ],
       "kind": "section_block",
-      "section": "細節"
-    },
-    {
-      "kind": "pair",
-      "label": "總結",
-      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。"
+      "section": "功能"
     }
   ]
 }

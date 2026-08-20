@@ -2,69 +2,136 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "背景",
-      "起因",
-      "問題",
-      "解決"
+      "內容摘要",
+      "內容摘要",
+      "內容摘要",
+      "內容摘要"
     ],
     "template_kind": "psr"
   },
   "layout": "worksheet_table",
   "rows": [
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
+      "label": "不量田",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
       "label": "背景",
-      "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "起因",
-      "value": "神祕經歷 \n空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "神祕經歷\n空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "問題",
-      "value": "產生疑惑 \n這個叫【　　　】的人，為何受上天保佑？"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "產生疑惑\n這個叫【　　　】的人，為何受上天保佑？"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "解決",
-      "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "結果",
-      "value": "商人恍然大悟 \n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "商人恍然大悟\n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。"
+        }
+      ],
+      "value": ""
     }
   ],
+  "title": "不量田",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "背景",
-      "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "某位【　　　】來到【　　　】時，為了躲避大【　　　】，便躲到田間。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "背景"
     },
     {
-      "kind": "pair",
-      "label": "起因",
-      "value": "神祕經歷 \n空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "神祕經歷\n空中有聲音說：「這是【　　　】田，不要傷害他的莊稼。」"
+        }
+      ],
+      "kind": "section_block",
+      "section": "起因"
     },
     {
-      "kind": "pair",
-      "label": "問題",
-      "value": "產生疑惑 \n這個叫【　　　】的人，為何受上天保佑？"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "產生疑惑\n這個叫【　　　】的人，為何受上天保佑？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "問題"
     },
     {
-      "kind": "pair",
-      "label": "解決",
-      "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "向村民尋求答案\n這個叫【　　　】的人非常富有，積蓄的【　　　】很多。\n他借給【　　　】的穀物，人家償還多少都不計較，不曾拿工具測量，所以大家才叫他【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "解決"
     },
     {
-      "kind": "pair",
-      "label": "結果",
-      "value": "商人恍然大悟 \n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。"
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "商人恍然大悟\n是自己誤解了人家名字的意思。\n眾人趕到田中，發現只有張不量的田【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結果"
     }
   ]
 }

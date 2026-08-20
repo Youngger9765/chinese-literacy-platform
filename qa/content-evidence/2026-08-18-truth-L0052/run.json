@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0052",
+  "catalog_slot": "G6-L12",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "念順順「三☞」= 第 3 段；右緣累計字數只用一條 Word 口徑（數字串算 1 字）就兩端吻合：第 3 段 Word 239 = 第 9 個數字，＋第 4 段 Word 210 = 449 = 末值，故朗讀區間 = 第 3~4 段，第 5、6 段沒有數字（字數欄提早停止型）。找字格 9 個 roundRect 對 9 個目標語詞，每條 cells 都拼得回目標語詞，格子無錯字。閱讀理解第 3 題的四個選項是四張手繪圖，A~C 有文字標籤、D 只有圖沒有標籤（D 的 options 值為空字串，非漏抄）；曾一度在該題掛 text_carrier: image，那會連 stem 與 A~C 標籤一起被逐字門豁免（6 個字串變「無法驗證」），已移除，改用 option_note 說明。總表 10 個語詞與學習單 9 個對不上（兩側都有差異），學習單自己三處一致，已在 _總表_對照note 記錄。"
+}

@@ -1,0 +1,24 @@
+lesson_uid: L0059
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【歐耶老師雞短講】不快樂？就像踩到💩一樣？！｜轉念有公式｜
+    duration: (13:07)
+    source: 歐耶老師
+    qr_code: true
+  - index: 2
+    title: 一念之間
+    duration: (01:41)
+    source: jankkkk
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/cee9DfHoZhE
+    url_source: 總表0816「4.影片連結」年級6課次19
+  - index: 2
+    url: http://youtu.be/IyIYiEX42bM
+    url_source: 總表0816「4.影片連結」年級6課次19

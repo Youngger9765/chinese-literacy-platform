@@ -1,0 +1,24 @@
+lesson_uid: L0143
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 什麼是高海拔訓練？
+    duration: (10:04)
+    source: Vamos Sports 翊起運動
+    has_qr: true
+  - index: 2
+    title: 血管油到長血栓，為何天氣冷容易中風
+    duration: (08:22)
+    source: 三個字SunGuts
+    has_qr: true
+  videos:
+  - index: 1
+    url: http://youtu.be/0IDzUpQcw9Q
+    url_source: 總表0816「4.影片連結」年級9課次22
+  - index: 2
+    url: http://youtu.be/VujFSKqDWJk
+    url_source: 總表0816「4.影片連結」年級9課次22

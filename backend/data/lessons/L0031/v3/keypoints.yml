@@ -1,0 +1,44 @@
+lesson_uid: L0031
+version_id: v3
+section_no: 五
+keypoints:
+  title: 奧運銀牌背後的自我鍛鍊
+  layout: list
+  rows:
+  - label: 人物背景
+    value: 主角是【　】，他從國小三年級開始練習柔道，後來成為國手。
+    blanks:
+    - answer: 楊勇緯
+  - label: 人物特質
+    value: 楊勇緯從小就很【　】，也有【　】。
+    blanks:
+    - answer: 自律
+    - answer: 強韌的心理素質
+  - label: 日常鍛鍊
+    value: 楊勇緯平時怎麼要求自己？（多選）
+    options:
+      1: 每天提早三、四十分鐘到校練習。
+      2: 按照老師給的課表，一步一步完成訓練。
+      3: 控制飲食和作息，讓身體保持最佳狀態。
+      4: 隨時記下所學和需要注意的事情。
+      5: 只在比賽前加強練習，平時很少主動練習。
+    answers:
+    - 1
+    - 2
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - label: 挫折
+    value: 2021年東京奧運金牌戰中，他未能達成奪金目標，最後獲得【　】。
+    blanks:
+    - answer: 銀牌
+  - label: 面對方式
+    value: 他認為失敗能讓人【　】，也能幫助自己找出【　】，在下一個階段繼續進步。
+    blanks:
+    - answer: 成長
+    - answer: 做不好的地方
+  - label: 結果
+    value: 東奧之後，他持續調整改進，在2021年及2022年的柔道【　】中，共奪下兩面金牌。
+    blanks:
+    - answer: 大滿貫賽
+  answer_carrier: 橘色手寫字（圖形層）＋紅色 ☑（圖形）

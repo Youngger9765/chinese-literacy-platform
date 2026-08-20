@@ -1,0 +1,43 @@
+lesson_uid: L0101
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 媒介
+    B: 莊嚴以對
+    C: 展現無遺
+    D: 分寸
+    E: 各有千秋
+    F: 伴手禮
+    G: 祖靈
+    H: 殊途同歸
+    I: 試煉
+    J: 款待
+  option_bank_note: 十個代號取自「本課語詞」框的 13 個，未入表的是陶甕、酒麴、豐年祭。
+  answer_carrier: 橘色手寫代號（PDF p4）；文字層的半形括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 青年們接受嚴格的生存挑戰，成功通過（　），獲得族人發給的勇士羽飾。
+    answer: I
+  - index: 2
+    stem: 比賽輸了之後，他情緒激動，大吼大叫，言行開始失去（　）。
+    answer: D
+  - index: 3
+    stem: 我們準備了豐盛的食物和小米酒，熱情（　）遠道而來的客人。
+    answer: J
+  - index: 4
+    stem: 他挑選部落手工小米酒作為（　），希望讓朋友嘗嘗家鄉的風味。
+    answer: F
+  - index: 5
+    stem: 兩部電影的手法（　），一部溫柔婉約，另一部陽剛熱血。
+    answer: E
+  - index: 6
+    stem: 工藝師在每一道雕刻中投入心血，他精湛的技藝在成品上（　）。
+    answer: C
+  - index: 7
+    stem: 面對族裡的重要祭儀，他們（　），不敢有絲毫輕忽或不敬。
+    answer: B
+  - index: 8
+    stem: 網路已成為現代社會最重要的（　），使資訊得以迅速流通。
+    answer: A

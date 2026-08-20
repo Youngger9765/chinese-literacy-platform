@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -14,6 +15,11 @@
   },
   "layout": "worksheet_table",
   "rows": [
+    {
+      "interactive_type": "display",
+      "label": "你以為的浪漫可能是跟騷",
+      "value": ""
+    },
     {
       "interactive_type": "display",
       "label": "主題",
@@ -50,6 +56,7 @@
       "value": "真正的喜歡要從尊重他人開始。"
     }
   ],
+  "title": "你以為的浪漫可能是跟騷",
   "worksheet_rows": [
     {
       "kind": "pair",

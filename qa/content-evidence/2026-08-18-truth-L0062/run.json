@@ -1,0 +1,23 @@
+{
+  "lesson_uid": "L0062",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "read_calls": 1,
+  "extra_image_reads": 3,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 3,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 1,
+  "notes": "verbatim 首跑 3 筆：1 筆**真的抄錯**（找字格子第 10 列把『漣』看成『連』，逐字門抓到），2 筆是我自己的註解欄位。extra_image_reads=3 是為了覆核找字圈數，用 200dpi 重繪 p9 再裁切放大兩次。"
+}

@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 5,
+    "checkbox_count": 3,
     "fill_blank_count": 2,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "上課時因為太在意他而分心，導致無法回答老師的問題",
-      "常常和他做\n【 ①相同 □②不同 】的選擇",
-      "看見他與別人談笑",
-      "下課時沒有和他互動"
+      "感受",
+      "事件",
+      "感受",
+      "感受"
     ],
     "template_kind": "generic"
   },
@@ -24,29 +25,44 @@
       "label": "二",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            2
-          ],
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "上課時因為太在意他而分心，導致無法回答老師的問題"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "上課時因為太在意他而分心，導致無法回答老師的問題",
+          "label": "感受",
           "options": [
-            "尷尬 □",
+            "尷尬",
             "生氣",
             "感到丟臉"
           ],
-          "value": "【 勾選，可複選 】 \n①尷尬 □②生氣 \n③感到丟臉"
+          "select_mode": "multi",
+          "value": "【 勾選，可複選 】\n①尷尬 ②生氣 ③感到丟臉"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "二",
+      "sub_rows": [
+        {
+          "blanks": [
+            {
+              "options": [
+                "相同",
+                "不同"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "事件",
+          "value": "常常和他做【　　　】的選擇"
         },
         {
-          "correct_options": [
-            0
-          ],
-          "interactive_type": "checkbox",
-          "label": "常常和他做\n【 ①相同 □②不同 】的選擇",
-          "options": [
-            "相同 □",
-            "不同 】的選擇"
-          ],
+          "interactive_type": "display",
+          "label": "感受",
           "value": "期待有更多相處的機會"
         }
       ],
@@ -57,18 +73,20 @@
       "label": "三",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            1
-          ],
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "看見他與別人談笑"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "看見他與別人談笑",
+          "label": "感受",
           "options": [
             "不是滋味",
-            "難過 \n□",
+            "難過",
             "害羞"
           ],
-          "value": "【 勾選，可複選 】\n ①不是滋味 ②難過 \n□③害羞"
+          "select_mode": "multi",
+          "value": "【 勾選，可複選 】\n①不是滋味 ②難過 ③害羞"
         }
       ],
       "value": ""
@@ -78,13 +96,30 @@
       "label": "四",
       "sub_rows": [
         {
-          "interactive_type": "fill_blank",
-          "label": "下課時沒有和他互動",
-          "value": "感到【　　　】"
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "下課時沒有和他互動"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "下課時有說到話或對到眼",
+          "label": "感受",
+          "value": "感到【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "四",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "下課時有說到話或對到眼"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受",
           "value": "內心【　　　】"
         }
       ],
@@ -95,33 +130,23 @@
       "label": "五",
       "sub_rows": [
         {
-          "correct_options": [
-            1,
-            2
-          ],
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "因為喜歡而有各種心情起伏"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "因為喜歡而有各種心情起伏",
+          "label": "感受",
           "options": [
             "平靜",
             "疲累",
             "困惑"
           ],
-          "value": "【 勾選，可複選 】\n□①平靜　②疲累 \n③困惑"
+          "select_mode": "multi",
+          "value": "【 勾選，可複選 】\n①平靜 ②疲累 ③困惑"
         }
       ],
       "value": ""
-    },
-    {
-      "correct_options": [
-        0
-      ],
-      "interactive_type": "checkbox",
-      "label": "統整",
-      "options": [
-        "大起大落   □",
-        "平靜如水 】的感受。"
-      ],
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情【 ①大起大落   □②平靜如水 】的感受。"
     }
   ],
   "title": "感情小日記2──喜歡是什麼？",
@@ -129,11 +154,25 @@
     {
       "items": [
         {
-          "label": "上課時因為太在意他而分心，導致無法回答老師的問題",
-          "value": "(勾選，可複選) \n①尷尬 □②生氣 \n③感到丟臉"
+          "label": "事件",
+          "value": "上課時因為太在意他而分心，導致無法回答老師的問題"
         },
         {
-          "label": "常常和他做\n（①相同 □②不同）的選擇",
+          "label": "感受",
+          "value": "(勾選，可複選)\n①尷尬 ②生氣 ③感到丟臉"
+        }
+      ],
+      "kind": "section_block",
+      "section": "二"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "常常和他做（　）的選擇\n①相同 ②不同"
+        },
+        {
+          "label": "感受",
           "value": "期待有更多相處的機會"
         }
       ],
@@ -143,8 +182,12 @@
     {
       "items": [
         {
-          "label": "看見他與別人談笑",
-          "value": "(勾選，可複選)\n ①不是滋味 ②難過 \n□③害羞"
+          "label": "事件",
+          "value": "看見他與別人談笑"
+        },
+        {
+          "label": "感受",
+          "value": "(勾選，可複選)\n①不是滋味 ②難過 ③害羞"
         }
       ],
       "kind": "section_block",
@@ -153,11 +196,25 @@
     {
       "items": [
         {
-          "label": "下課時沒有和他互動",
-          "value": "感到【　　　】"
+          "label": "事件",
+          "value": "下課時沒有和他互動"
         },
         {
-          "label": "下課時有說到話或對到眼",
+          "label": "感受",
+          "value": "感到【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "四"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "下課時有說到話或對到眼"
+        },
+        {
+          "label": "感受",
           "value": "內心【　　　】"
         }
       ],
@@ -167,17 +224,16 @@
     {
       "items": [
         {
-          "label": "因為喜歡而有各種心情起伏",
-          "value": "(勾選，可複選)\n□①平靜　②疲累 \n③困惑"
+          "label": "事件",
+          "value": "因為喜歡而有各種心情起伏"
+        },
+        {
+          "label": "感受",
+          "value": "(勾選，可複選)\n①平靜 ②疲累 ③困惑"
         }
       ],
       "kind": "section_block",
       "section": "五"
-    },
-    {
-      "kind": "pair",
-      "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發心情（ ①大起大落   □②平靜如水）的感受。"
     }
   ]
 }

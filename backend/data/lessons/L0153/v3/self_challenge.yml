@@ -1,0 +1,62 @@
+lesson_uid: L0153
+version_id: v3
+section_no: 六
+self_challenge:
+  label: 六、自我挑戰
+  teacher_note: （老師可視同學情況決定是否做此大題）
+  instruction: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
+  strategy_flow:
+  - ❶斷句
+  - ❷找動詞/形容詞
+  - ❸找/補主語
+  - ❹用自己的話說一說
+  strategy_flow_note: 四個方框之間印的箭頭是圖形，不在文字流裡，故不寫入箭頭字元。
+  passage:
+    classical: 袁宏道與友人書1云：「人情必有所寄，然後能樂。故有以弈2為寄，有以色為寄，有以技為寄，有以文為寄。古之達人3，高人一層，只是他情有所寄，不肯浮泛虛度光景。」
+    source: (104會)
+    annotations:
+    - 'no': 1
+      term: 書
+      text: 書：寫信。
+    - 'no': 2
+      term: 弈
+      text: 弈：下棋。
+    - 'no': 3
+      term: 達人
+      text: 達人：指品德修養高、能把事情看得很清楚的人。
+    modern: 袁宏道寫給朋友的信中說：「人的感情必須有所寄託，然後才能快樂。所以有人把下棋（弈）當作是心靈上的寄託，有人把聲色當作寄託，有人把鑽研技藝當作寄託，有人把寫作文章當作寄託。古代通達事理的人，能高出一般人一等，只是因為他們情感有所寄託，不肯敷衍虛度時光。」
+    modern_note: 翻譯印在藍框裡（教師版），文字流有此資訊。
+  items:
+    label: （一）請依照故事脈絡，回答下列問題。
+    answer_carrier: 橘色（字元樣式 rStyle=aff6）；第 4 題另有橘色 roundRect 圈選
+    questions:
+    - index: 1
+      stem: 斷句後的第一個分句，主語是誰？
+      answer: 袁宏道
+    - index: 2
+      stem: 承上題，這個主語怎麼樣或做什麼？
+      answer: 與友人書/寫信給朋友
+    - index: 3
+      stem: 「人情必有所寄，然後能樂」一句的主語是什麼？
+      answer: 人情
+    - index: 4
+      stem: 承上題，這個主語做了什麼才「能樂」？
+      options:
+        1: 寄信
+        2: 有寄託
+      answer: 2
+      answer_carrier: 橘色 roundRect 圈住「有寄託」（全課唯一的圈選圖形），PDF p10 可見
+      instruction_inline: (圈出適當答案)
+  quiz:
+    label: （二）閱讀理解測驗
+    questions:
+    - index: 1
+      answer: C
+      stem: 這段文字的主要涵義，與下列何者最接近?
+      options:
+        A: 以物為寄應該有所節制，不可浮濫
+        B: 古之達人寄懷於民，不求一己之樂
+        C: 情感有所依託，生命方能愉悅自適
+        D: 習得多種才藝，方能晉身達人之列
+      options_note: 四個選項的代號後面**沒有句點**（A 以物為寄…），與第五大題的「A.」不同。原稿如此。
+      stem_note: 題末是半形問號「?」，原稿如此。

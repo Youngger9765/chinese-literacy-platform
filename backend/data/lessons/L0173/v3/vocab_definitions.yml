@@ -1,0 +1,51 @@
+lesson_uid: L0173
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 庸人自擾
+  - 杞人憂天
+  - 出色
+  - 遠見
+  - 企圖心
+  - 強顏歡笑
+  - 重整旗鼓
+  - 故作
+  - 應援
+  - 如常
+  items:
+  - index: 1
+    word: 杞人憂天
+    definition: 比喻不合理且不必要的憂慮。
+  - index: 2
+    word: 遠見
+    definition: 看事情看得長遠，能想到未來的發展。
+  - index: 3
+    word: 強顏歡笑
+    definition: 心裡不快樂，卻勉強裝出笑臉。
+  - index: 4
+    word: 故作
+    definition: 故意裝出某種樣子，如故作鎮定、故作堅強。
+  - index: 5
+    word: 企圖心
+    definition: 達成目標的決心。
+  - index: 6
+    word: 出色
+    definition: 表現優秀。
+  - index: 7
+    word: 重整旗鼓
+    definition: 比喻失敗後，重新調整，再次行動。
+  - index: 8
+    word: 如常
+    definition: 像往常一樣，沒有變動。
+  - index: 9
+    word: 應援
+    definition: 給予支援、加油打氣。
+  - index: 10
+    word: 庸人自擾
+    definition: 本來沒有必要擔心，卻一直想太多，讓自己煩惱。

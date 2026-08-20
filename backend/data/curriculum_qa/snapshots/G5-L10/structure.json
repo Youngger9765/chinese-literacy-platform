@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 1,
-    "fill_blank_count": 4,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "看見自己的【 朋友                 \n   】和喜歡的人聊得很開心",
-      "轉身離開現場，回到教室座位",
-      "朋友阿葉來關心",
-      "獨自反思"
+      "事件",
+      "矛盾的想法與反應",
+      "矛盾的想法與反應",
+      "矛盾的想法與反應"
     ],
     "template_kind": "generic"
   },
@@ -25,7 +26,12 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "看見自己的【 朋友                 \n   】和喜歡的人聊得很開心",
+          "label": "事件",
+          "value": "看見自己的【　　　】和喜歡的人聊得很開心"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "矛盾的想法與反應",
           "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味"
         }
       ],
@@ -36,9 +42,14 @@
       "label": "四",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "轉身離開現場，回到教室座位"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "轉身離開現場，回到教室座位",
-          "value": "Ａ.不想再看下去\nB.【　　　】卻無法停止"
+          "label": "矛盾的想法與反應",
+          "value": "A.不想再看下去\nB.【　　　】卻無法停止"
         }
       ],
       "value": ""
@@ -48,9 +59,14 @@
       "label": "五",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "朋友阿葉來關心"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "朋友阿葉來關心",
-          "value": "Ａ.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想 \n 【　　　】"
+          "label": "矛盾的想法與反應",
+          "value": "A.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】"
         }
       ],
       "value": ""
@@ -60,24 +76,33 @@
       "label": "六",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "獨自反思"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "獨自反思",
-          "value": "Ａ.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
+          "label": "矛盾的想法與反應",
+          "value": "A.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
         }
       ],
       "value": ""
     },
     {
-      "correct_options": [
-        0
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "display",
       "label": "統整",
-      "options": [
-        "煩躁混亂  □",
-        "寂寞無奈 】的感受。"
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "煩躁混亂",
+            "寂寞無奈"
+          ],
+          "value": "①煩躁混亂 ②寂寞無奈"
+        }
       ],
-      "value": "作者看見【朋友/阿葉】和喜歡的人聊天，心裡不是滋味，卻又不想承認自己在吃醋。作者寫下這篇小日記，是想抒發心情 【 ①煩躁混亂  □②寂寞無奈 】的感受。"
+      "value": ""
     }
   ],
   "title": "感情小日記3──吃醋的滋味",
@@ -85,7 +110,11 @@
     {
       "items": [
         {
-          "label": "看見自己的【　　　】和喜歡的人聊得很開心",
+          "label": "事件",
+          "value": "看見自己的【　　　】和喜歡的人聊得很開心"
+        },
+        {
+          "label": "矛盾的想法與反應",
           "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味"
         }
       ],
@@ -95,8 +124,12 @@
     {
       "items": [
         {
-          "label": "轉身離開現場，回到教室座位",
-          "value": "Ａ.不想再看下去\nB.【　　　】卻無法停止"
+          "label": "事件",
+          "value": "轉身離開現場，回到教室座位"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.不想再看下去\nB.【　　　】卻無法停止"
         }
       ],
       "kind": "section_block",
@@ -105,8 +138,12 @@
     {
       "items": [
         {
-          "label": "朋友阿葉來關心",
-          "value": "Ａ.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想 \n 【　　　】"
+          "label": "事件",
+          "value": "朋友阿葉來關心"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】"
         }
       ],
       "kind": "section_block",
@@ -115,17 +152,26 @@
     {
       "items": [
         {
-          "label": "獨自反思",
-          "value": "Ａ.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
+          "label": "事件",
+          "value": "獨自反思"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
         }
       ],
       "kind": "section_block",
       "section": "六"
     },
     {
-      "kind": "pair",
-      "label": "統整",
-      "value": "作者看見【　　　】和喜歡的人聊天，心裡不是滋味，卻又不想承認自己在吃醋。作者寫下這篇小日記，是想抒發心情 （①煩躁混亂  □②寂寞無奈）的感受。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "①煩躁混亂 ②寂寞無奈"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
   ]
 }

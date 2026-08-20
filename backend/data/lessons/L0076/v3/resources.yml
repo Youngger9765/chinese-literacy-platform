@@ -1,0 +1,26 @@
+lesson_uid: L0076
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【一鏡到底】為了那個十七歲少年 ICU醫生陳志金
+    duration: '5:32'
+    source: 鏡人物
+    _總表_url: http://youtu.be/T4PxC3S8i5c
+  - index: 2
+    title: 鬼門關前搶救無數患者，熱血暖醫陳志金：重症病房的3堂必學功課
+    duration: '10:43'
+    source: 早安健康
+    _總表_url: http://youtu.be/jprjsByuZZg
+  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 60 列，故加 `_` 前綴標示非 DOCX 內容。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/T4PxC3S8i5c
+    url_source: 總表0816「4.影片連結」年級6課次9
+  - index: 2
+    url: http://youtu.be/jprjsByuZZg
+    url_source: 總表0816「4.影片連結」年級6課次9

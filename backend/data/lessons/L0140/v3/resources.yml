@@ -1,0 +1,21 @@
+lesson_uid: L0140
+version_id: v3
+section_no: 八
+resources:
+  items:
+  - index: 1
+    title: 如果，和解永遠等不到
+    duration: '2:50'
+    duration_seconds: 170
+    source: 張曼娟臉書
+  - index: 2
+    title: 黃仁勳大談教育觀「讓孩子多經歷失敗」不戴手錶霸氣喊：我不在意時間
+    duration: '2:36'
+    duration_seconds: 156
+    source: 中時新聞網
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://www.facebook.com/watch/?mibextid=wwXIfr&v=1991603851335068&rdid=nUSA9zwiUskwXTwV
+    url_source: 總表0816「4.影片連結」年級9課次1

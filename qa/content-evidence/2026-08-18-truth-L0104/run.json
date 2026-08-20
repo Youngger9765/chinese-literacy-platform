@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0104",
+  "catalog_slot": "G7-L7",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "🔴 聚光燈的連連看**有畫線，但 PDF 上看不到**（LibreOffice 沒把該群組畫出來）——只看 PDF 會判成「教師版沒連線、無答案可轉錄」。答案是從 document.xml 的線段端點座標解出來的：群組「群組 17」內三條 srgbClr FF0000 的 line，縱向 23153~1291926 對應三列 → (1)問題(困擾)→B、(2)解決(策略)→A、(3)結果(改變)→C，三條的語意也各自合理。這是「PDF 會漏掉圖形層」的實例，跟 skill 說的「PDF 漏掉文字層」同族。 🔴 段號欄第一個號碼印的是注音符號「ㄧ」(U+3127) 不是漢字「一」(U+4E00)，字形幾乎一樣，登 source_errata E1。 ⚠️ 字數欄同樣要扣掉第 6 段的破折號「——」兩字元（143→141），三個段界 141／312／456 全部精準吻合；起點三訊號一致（指示語「（六　）」／☞ 在第 6 段／字數欄 29 個前置空段落正好空掉第 1~5 段的行數）。 找字：全檔 roundRect 17 個，其中一個是紙外殘留（框線硬寫死 srgbClr E97132、其餘 16 個用佈景色 accent2，且 positionH relativeFrom=rightMargin posOffset=5264785≈5.76in，加回右邊界遠超 A4 頁寬）；扣掉後 16 ＝ 16 條路徑。「強」同時屬於「逞強」與「強顏歡笑」兩條路徑（十字交叉），不是重複圈選。 ⚠️ 一、找重點那張表的 ❸ 答案在 PDF 上被分頁切到下一頁（p6 只看得到空格、p7 才有橘字），單看 p6 會判成沒答案。 本課沒有文章重點表（八個大題）。"
+}

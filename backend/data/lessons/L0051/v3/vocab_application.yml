@@ -1,0 +1,42 @@
+lesson_uid: L0051
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 骨瘦如柴
+    B: 殘骸
+    C: 蚊蚋
+    D: 充飢
+    E: 植被
+    F: 危機四伏
+    G: 渺茫
+    H: 襁褓
+    I: 倖存
+    J: 罹難
+  option_bank_note: 10 個代號對 8 道小題，C.蚊蚋 與 H.襁褓 未被任何一題用到（原稿如此）。
+  items:
+  - index: 1
+    stem: 在這麼惡劣的環境中，生還的希望十分(　)，但大家沒有放棄。
+    answer: G
+  - index: 2
+    stem: 那次地震造成數百人(　)，成為全國性的悲劇。
+    answer: J
+  - index: 3
+    stem: 經過長時間的飢餓與疲勞，他已經變得(　)。
+    answer: A
+  - index: 4
+    stem: 這片山谷的(　)十分茂密，是許多動物的棲息地。
+    answer: E
+  - index: 5
+    stem: 搜救隊在森林中找到飛機的(　)，並繼續搜尋失蹤者。
+    answer: B
+  - index: 6
+    stem: 這片叢林(　)，經常有毒蛇和猛獸出沒。
+    answer: F
+  - index: 7
+    stem: 登山途中，大家拿出餅乾和巧克力(　)。
+    answer: D
+  - index: 8
+    stem: 地震後，救難人員努力尋找可能(　)的受困者。
+    answer: I

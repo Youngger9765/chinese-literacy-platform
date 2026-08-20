@@ -1,0 +1,55 @@
+lesson_uid: L0121
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 陰霾
+  - 一片譁然
+  - 標識
+  - 鏈結
+  - 舉證
+  - 冒犯
+  - 茶餘飯後
+  - 有所忌憚
+  - 凝視
+  - 自主權
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 舉證
+    definition: 提出證據。
+  - index: 2
+    word: 有所忌憚
+    definition: 有所顧忌或害怕，因而不敢任意行動。相反詞是「肆無忌憚」。
+  - index: 3
+    word: 標識
+    definition: 與標示、標誌同義，用來表明某種特徵的記號或符號。
+  - index: 4
+    word: 冒犯
+    definition: 言語或行為越過他人的界線，使人感到不受尊重或不舒服。
+  - index: 5
+    word: 鏈結
+    definition: link，可點擊並連到其他網頁或內容的文字、圖片或網址。
+  - index: 6
+    word: 凝視
+    definition: 專注地盯著看。
+  - index: 7
+    word: 自主權
+    definition: 自己作決定的權利；「身體自主權」是指每個人有權決定自己的身體界線。
+  - index: 8
+    word: 茶餘飯後
+    definition: 喝完茶吃飽飯後，此指人們閒來無事的時候。
+  - index: 9
+    word: 陰霾
+    definition: 原指天氣陰暗，「走出陰霾」指比喻逐步走出傷害帶來的痛苦或低落。
+  - index: 10
+    word: 一片譁然
+    definition: 發生一件事情，令大家很驚訝，引起討論。一般用於形容消息（多指不好的消息）傳開，引起轟動。

@@ -1,0 +1,30 @@
+lesson_uid: L0052
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 一隻巨鯨的殞落－藍鯨|中文版
+    duration: (4:00)
+    source: 國家海洋研究院
+  - index: 2
+    title: 【生態環保】 沙灘上的海龜爺爺 | 海洋塑膠垃圾的危機｜EP1
+    duration: (4:33)
+    source: FORMOSA
+  - index: 3
+    title: 一年清出41噸海洋垃圾　88%是廢棄漁網漁具｜鏡新聞
+    duration: (2:00)
+    source: 鏡新聞
+  note: 三則影片各附一個 QR code（圖形），連結網址不在文字層。第 1 則的來源列未印「來源：」二字（原稿如此）。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/0gJrpYlr_DY
+    url_source: 總表0816「4.影片連結」年級6課次12
+  - index: 2
+    url: http://youtu.be/9dLdHIi_Xtk
+    url_source: 總表0816「4.影片連結」年級6課次12
+  - index: 3
+    url: http://youtu.be/KRKBy6mi1WQ
+    url_source: 總表0816「4.影片連結」年級6課次12

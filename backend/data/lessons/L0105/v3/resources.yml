@@ -1,0 +1,24 @@
+lesson_uid: L0105
+version_id: v3
+section_no: 八
+resources:
+  items:
+  - index: 1
+    title: 【李四端的雲端世界】2014/02/22 第102集 猩猩回眸 溫暖一抱 珍古德的保育使命
+    duration: '10:59'
+    duration_seconds: 659
+    source: 雲端世界
+  - index: 2
+    title: 如果可以她願意一生待在森林研究黑猩猩，然而，這場講座徹底...改變了她，讓珍古德決心走出去【珍古德:點燃希望】
+    duration: '4:20'
+    duration_seconds: 260
+    source: 國家地理
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/zWS1o6auDGw
+    url_source: 總表0816「4.影片連結」年級7課次8
+  - index: 2
+    url: http://youtu.be/lLrPH6LFykk
+    url_source: 總表0816「4.影片連結」年級7課次8

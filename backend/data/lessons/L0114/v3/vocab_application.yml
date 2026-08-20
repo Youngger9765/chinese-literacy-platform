@@ -1,0 +1,46 @@
+lesson_uid: L0114
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 瀕危
+    B: 坎坷
+    C: 破碎化
+    D: 疾駛
+    E: 路殺
+    F: 干預
+    G: 植被
+    H: 掠食者
+    I: 補償機制
+    J: 緩不濟急
+  option_bank_note: 代號表只收 10 個，本課語詞有 12 個 —— **絕種、棲地沒有進代號表**（原稿如此）
+  unused_options:
+  - D
+  - H
+  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    stem: 機場附近居民深受噪音困擾，民航局啟動（　），補助加裝隔音窗。
+    answer: I
+  - index: 2
+    stem: 這段靠山小路剛設置了減速標誌，希望降低野生動物（　）事件。
+    answer: E
+  - index: 3
+    stem: 球員起衝突時，裁判立刻（　），吹哨制止並要求雙方退開。
+    answer: F
+  - index: 4
+    stem: 棲地（　）後，動物被迫穿越道路與聚落，意外與衝突增加。
+    answer: C
+  - index: 5
+    stem: 因為棲地被開發，石虎在臺灣成了（　）物種。
+    answer: A
+  - index: 6
+    stem: 森林火災後，（　）嚴重破壞，整片森林光禿禿的。
+    answer: G
+  - index: 7
+    stem: 校園霸凌已有人受傷，透過班會宣導恐怕（　），得立刻介入處理。
+    answer: J
+  - index: 8
+    stem: 豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　）。
+    answer: B

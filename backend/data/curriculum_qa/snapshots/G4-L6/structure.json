@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
-    "fill_blank_count": 2,
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "他主動詢問要幫我交__",
-      "__課被分在同一組",
-      "習慣看向他、__突然對上、偷偷觀察他",
-      "幫我撿掉在地上的筆、小組討論時叫我的__"
+      "事件",
+      "事件",
+      "感受",
+      "事件"
     ],
     "template_kind": "generic"
   },
@@ -25,8 +26,13 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "他主動詢問要幫我交__",
-          "value": "【　　　】\n①茫然 ②害羞 \n③緊張【　　　】"
+          "label": "事件",
+          "value": "他主動詢問要幫我交【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "①茫然 ②害羞 ③緊張"
         }
       ],
       "value": ""
@@ -37,8 +43,13 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "__課被分在同一組",
-          "value": "【　　　】漏了一拍【　　　】"
+          "label": "事件",
+          "value": "【　　　】課被分在同一組"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受",
+          "value": "【　　　】漏了一拍"
         }
       ],
       "value": ""
@@ -49,8 +60,13 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "習慣看向他、__突然對上、偷偷觀察他",
-          "value": "在乎、緊張、期待【　　　】"
+          "label": "事件",
+          "value": "習慣看向他、【　　　】突然對上、偷偷觀察他"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "在乎、緊張、期待"
         }
       ],
       "value": ""
@@ -61,23 +77,32 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
-          "value": "【　　　】\n①溫暖 ②害羞 \n③興奮【　　　】"
+          "label": "事件",
+          "value": "幫我撿掉在地上的筆、小組討論時叫我的【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "①溫暖 ②害羞 ③興奮"
         }
       ],
       "value": ""
     },
     {
-      "correct_options": [
-        0
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "display",
       "label": "統整",
-      "options": [
-        "不知所措  □",
-        "深情思念 】的心情。"
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "不知所措",
+            "深情思念"
+          ],
+          "value": "①不知所措 ②深情思念"
+        }
       ],
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發【 ①不知所措  □②深情思念 】的心情。"
+      "value": ""
     }
   ],
   "title": "感情小日記1──是友情還是愛情？",
@@ -85,8 +110,12 @@
     {
       "items": [
         {
-          "label": "他主動詢問要幫我交__",
-          "value": "(勾選，可複選)\n①茫然 ②害羞 \n③緊張【　　　】"
+          "label": "事件",
+          "value": "他主動詢問要幫我交【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①茫然 ②害羞 ③緊張"
         }
       ],
       "kind": "section_block",
@@ -95,8 +124,12 @@
     {
       "items": [
         {
-          "label": "__課被分在同一組",
-          "value": "【　　　】漏了一拍【　　　】"
+          "label": "事件",
+          "value": "【　　　】課被分在同一組"
+        },
+        {
+          "label": "感受",
+          "value": "【　　　】漏了一拍"
         }
       ],
       "kind": "section_block",
@@ -105,8 +138,12 @@
     {
       "items": [
         {
-          "label": "習慣看向他、__突然對上、偷偷觀察他",
-          "value": "在乎、緊張、期待【　　　】"
+          "label": "事件",
+          "value": "習慣看向他、【　　　】突然對上、偷偷觀察他"
+        },
+        {
+          "label": "感受",
+          "value": "在乎、緊張、期待"
         }
       ],
       "kind": "section_block",
@@ -115,17 +152,26 @@
     {
       "items": [
         {
-          "label": "幫我撿掉在地上的筆、小組討論時叫我的__",
-          "value": "(勾選，可複選)\n①溫暖 ②害羞 \n③興奮【　　　】"
+          "label": "事件",
+          "value": "幫我撿掉在地上的筆、小組討論時叫我的【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①溫暖 ②害羞 ③興奮"
         }
       ],
       "kind": "section_block",
       "section": "五"
     },
     {
-      "kind": "pair",
-      "label": "統整",
-      "value": "結合第一段與最後一段，作者寫下這篇小日記，\n是想抒發（ ①不知所措  □②深情思念 ）的心情。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "①不知所措 ②深情思念"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
   ]
 }

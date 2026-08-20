@@ -1,0 +1,40 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 攝取
+    B: 迷思
+    C: 均衡
+    D: 促進
+    E: 嘰嘰喳喳
+    F: 分泌
+    G: 前提
+    H: 根據
+  option_bank_note: 只列 8 個代號（本課 10 個語詞中的「富含」「大幅度」未入選項），對應 8 道小題
+  items:
+  - index: 1
+    stem: 飯前的開胃菜可以（　）食慾。
+    answer: D
+  - index: 2
+    stem: 每天攝取（　）的營養，才能常保身體的健康。
+    answer: C
+  - index: 3
+    stem: 那一群人（　）的，不知道在討論什麼？
+    answer: E
+  - index: 4
+    stem: 我們不管到哪裡旅遊，都應該以安全為（　）。
+    answer: G
+  - index: 5
+    stem: 睡眠時，身體會（　）生長激素，幫助身體發育。
+    answer: F
+  - index: 6
+    stem: 我們（　）天氣預報，調整行程，把戶外活動改到下午進行。
+    answer: H
+  - index: 7
+    stem: 很多人認為只要熬夜讀書，成績就會進步，這其實是一種（　）。
+    answer: B
+  - index: 8
+    stem: 醫生建議多（　）蔬菜和水果，維持均衡的飲食。
+    answer: A

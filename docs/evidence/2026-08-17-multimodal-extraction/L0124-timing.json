@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0124",
+  "catalog_slot": "G8-L4",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": 269,
+  "phases": {"convert_docx_to_pdf_and_xml": 3, "read_pdf_multimodal": 96, "write_yaml": 170},
+  "read_calls": 2,
+  "retries": 0,
+  "note": "含 LLM 逐頁閱讀 + 產出 YAML 全程；不含之後的裁判比對"
+}

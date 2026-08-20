@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 8,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "什麼是誘餌式標題",
-      "誘餌式標題的目的",
-      "面對方法",
-      "結論"
+      "1",
+      "2",
+      "3"
     ],
     "template_kind": "generic"
   },
@@ -25,14 +26,48 @@
       "value": "為吸引閱聽大眾點擊收看，新聞標題經常變得【　　　】、【　　　】，卻沒有完整、準確呈現文章內容，這就是【　　　】。"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "誘餌式標題的目的",
-      "value": "1.下標者想讓文章在眾多訊息中【　　　】。\n2.讓報導增加【　　　】，獲得較多的廣告收益。\n3.為了能【　　　】，影響大眾的認知。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "下標者想讓文章在眾多訊息中【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "讓報導增加【　　　】，獲得較多的廣告收益。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "為了能【　　　】，影響大眾的認知。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "面對方法",
-      "value": "1.看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。\n2.【　　　】標題與內容的一致性。\n3.【　　　】不同報導，培養【　　　】能力。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "【　　　】標題與內容的一致性。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "【　　　】不同報導，培養【　　　】能力。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -48,14 +83,40 @@
       "value": "為吸引閱聽大眾點擊收看，新聞標題經常變得【　　　】、【　　　】，卻沒有完整、準確呈現文章內容，這就是【　　　】。"
     },
     {
-      "kind": "pair",
-      "label": "誘餌式標題的目的",
-      "value": "1.下標者想讓文章在眾多訊息中【　　　】。\n2.讓報導增加【　　　】，獲得較多的廣告收益。\n3.為了能【　　　】，影響大眾的認知。"
+      "items": [
+        {
+          "label": "1",
+          "value": "下標者想讓文章在眾多訊息中【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "讓報導增加【　　　】，獲得較多的廣告收益。"
+        },
+        {
+          "label": "3",
+          "value": "為了能【　　　】，影響大眾的認知。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "誘餌式標題的目的"
     },
     {
-      "kind": "pair",
-      "label": "面對方法",
-      "value": "1.看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。\n2.【　　　】標題與內容的一致性。\n3.【　　　】不同報導，培養【　　　】能力。"
+      "items": [
+        {
+          "label": "1",
+          "value": "看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "【　　　】標題與內容的一致性。"
+        },
+        {
+          "label": "3",
+          "value": "【　　　】不同報導，培養【　　　】能力。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "面對方法"
     },
     {
       "kind": "pair",

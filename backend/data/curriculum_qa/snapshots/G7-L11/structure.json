@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 9,
+    "fill_blank_count": 11,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "說明來信目的",
-      "亂發\n脾氣",
-      "亂發\n脾氣",
-      "亂發\n脾氣"
+      "1",
+      "亂發脾氣・發生時間",
+      "亂發脾氣・對象",
+      "亂發脾氣・持續時間"
     ],
     "template_kind": "theme_facts"
   },
@@ -21,57 +22,59 @@
     },
     {
       "interactive_type": "display",
-      "label": "寫作目的",
-      "value": "信件內容"
-    },
-    {
-      "interactive_type": "fill_blank",
       "label": "說明來信目的",
-      "value": "1.說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。\n2.說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "display",
       "label": "說明困難與具體事例",
       "sub_rows": [
         {
-          "interactive_type": "display",
-          "label": "困難",
-          "value": "具體事例"
+          "interactive_type": "fill_blank",
+          "label": "亂發脾氣・發生時間",
+          "value": "【　　　】年前\n一年多前\n今年年初"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "亂發\n脾氣",
-          "value": "發生時間 【　　　】年前 一年多前 今年年初"
-        },
-        {
-          "interactive_type": "fill_blank",
-          "label": "亂發\n脾氣",
-          "value": "對象 【　　　】 阿公 阿公、【　　　】"
+          "label": "亂發脾氣・對象",
+          "value": "【　　　】\n阿公\n阿公、【　　　】"
         },
         {
           "interactive_type": "display",
-          "label": "亂發\n脾氣",
-          "value": "發生頻次 2~3天一次 1~2天一次 每天2~3次"
+          "label": "亂發脾氣・發生頻次",
+          "value": "2~3天一次\n1~2天一次\n每天2~3次"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "亂發\n脾氣",
-          "value": "持續時間 1鐘頭 2~3個鐘頭 【　　　】個鐘頭"
+          "label": "亂發脾氣・持續時間",
+          "value": "1鐘頭\n2~3個鐘頭\n【　　　】個鐘頭"
         },
         {
           "interactive_type": "display",
-          "label": "亂發\n脾氣",
-          "value": "方式 怪罪、責罵 大鬧、揮菜刀、丟尖銳物"
+          "label": "亂發脾氣・方式",
+          "value": "怪罪、責罵\n大鬧、揮菜刀、丟尖銳物"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "遺失\n物品",
-          "value": "物品 【　　　】遺失【　　　】和鄰居的【　　　】"
+          "label": "遺失物品・物品",
+          "value": "(1)遺失【　　　】和鄰居的【　　　】"
         },
         {
           "interactive_type": "display",
-          "label": "遺失\n物品",
-          "value": "金錢 數萬元現金不知去向"
+          "label": "遺失物品・金錢",
+          "value": "數萬元現金不知去向"
         },
         {
           "interactive_type": "fill_blank",
@@ -80,90 +83,132 @@
         },
         {
           "interactive_type": "fill_blank",
-          "label": "經濟\n與\n照顧的\n負擔",
-          "value": "【　　　】家境不好，作者與妹妹忙於【　　　】。\n\n【　　　】阿公無固定收入。\n【　　　】擔心阿嬤的行為造成經濟損失。\n【　　　】擔心若阿嬤無法改善，未來的照顧問題。"
+          "label": "經濟與照顧的負擔",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n(2)阿公無固定收入。\n(3)擔心阿嬤的行為造成經濟損失。\n(4)擔心若阿嬤無法改善，未來的照顧問題。"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "說明具體請求",
-      "value": "1.請求醫師開立【　　　】，我們要向法院聲請監護宣告。\n2.請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "請求醫師開立【　　　】，我們要向法院聲請監護宣告。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "感謝與祝福",
-      "value": "1.感謝提供病床，讓阿嬤【　　　】。\n2.敬祝【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "感謝提供病床，讓阿嬤【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "敬祝【　　　】。"
+        }
+      ],
+      "value": ""
     }
   ],
   "title": "一封向醫師求助的信",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "寫作目的",
-      "value": "信件內容"
-    },
-    {
-      "kind": "pair",
-      "label": "說明來信目的",
-      "value": "1.說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。\n2.說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+      "items": [
+        {
+          "label": "1",
+          "value": "說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。"
+        },
+        {
+          "label": "2",
+          "value": "說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明來信目的"
     },
     {
       "items": [
         {
-          "label": "困難",
-          "value": "具體事例"
+          "label": "亂發脾氣・發生時間",
+          "value": "【　　　】年前\n一年多前\n今年年初"
         },
         {
-          "label": "亂發\n脾氣",
-          "value": "發生時間 【　　　】年前 一年多前 今年年初"
+          "label": "亂發脾氣・對象",
+          "value": "【　　　】\n阿公\n阿公、【　　　】"
         },
         {
-          "label": "亂發\n脾氣",
-          "value": "對象 【　　　】 阿公 阿公、【　　　】"
+          "label": "亂發脾氣・發生頻次",
+          "value": "2~3天一次\n1~2天一次\n每天2~3次"
         },
         {
-          "label": "亂發\n脾氣",
-          "value": "發生頻次 2~3天一次 1~2天一次 每天2~3次"
+          "label": "亂發脾氣・持續時間",
+          "value": "1鐘頭\n2~3個鐘頭\n【　　　】個鐘頭"
         },
         {
-          "label": "亂發\n脾氣",
-          "value": "持續時間 1鐘頭 2~3個鐘頭 【　　　】個鐘頭"
+          "label": "亂發脾氣・方式",
+          "value": "怪罪、責罵\n大鬧、揮菜刀、丟尖銳物"
         },
         {
-          "label": "亂發\n脾氣",
-          "value": "方式 怪罪、責罵 大鬧、揮菜刀、丟尖銳物"
+          "label": "遺失物品・物品",
+          "value": "(1)遺失【　　　】和鄰居的【　　　】"
         },
         {
-          "label": "遺失\n物品",
-          "value": "物品 (1)遺失【　　　】和鄰居的【　　　】"
-        },
-        {
-          "label": "遺失\n物品",
-          "value": "金錢 數萬元現金不知去向"
+          "label": "遺失物品・金錢",
+          "value": "數萬元現金不知去向"
         },
         {
           "label": "就醫",
           "value": "阿嬤沒有【　　　】，不知道自己生病，不願就醫，"
         },
         {
-          "label": "經濟\n與\n照顧的\n負擔",
-          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n\n(2)阿公無固定收入。\n(3((3)擔心阿嬤的行為造成經濟損失。\n((4)擔心若阿嬤無法改善，未來的照顧問題。"
+          "label": "經濟與照顧的負擔",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n(2)阿公無固定收入。\n(3)擔心阿嬤的行為造成經濟損失。\n(4)擔心若阿嬤無法改善，未來的照顧問題。"
         }
       ],
       "kind": "section_block",
       "section": "說明困難與具體事例"
     },
     {
-      "kind": "pair",
-      "label": "說明具體請求",
-      "value": "1.請求醫師開立【　　　】，我們要向法院聲請監護宣告。\n2.請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+      "items": [
+        {
+          "label": "1",
+          "value": "請求醫師開立【　　　】，我們要向法院聲請監護宣告。"
+        },
+        {
+          "label": "2",
+          "value": "請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明具體請求"
     },
     {
-      "kind": "pair",
-      "label": "感謝與祝福",
-      "value": "1.感謝提供病床，讓阿嬤【　　　】。\n2.敬祝【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "感謝提供病床，讓阿嬤【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "敬祝【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "感謝與祝福"
     }
   ]
 }

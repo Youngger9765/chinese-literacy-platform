@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0099",
+  "catalog_slot": "G7-L2",
+  "pdf_pages": 11,
+  "pages_read": 11,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 2,
+  "notes": "🔴 **本課只有八個大題，沒有「文章重點表」** —— 聚光燈是第五不是第六，後面每個序號都往前一號。佐證：document.xml 全文 grep「重點表」= 0 命中；八個大題標題逐一列出也只有八個。splitter 由 sections_present 推出的 section_no 實測正確（spotlight=五、comprehension=六），沒有 keypoints.yml。三載體全查：☑ 13 個全在第五大題聚光燈；roundRect 全文 10 = 10 條路徑；w:bdr 非 auto 0 個；w:vanish 0 個。🔴 **格子錯字（errata E1/E2）**：目標語詞「轉瞬之間」在 10×10 格裡**根本拼不出來**。驗法是對整張格做八方向窮舉——9 個目標語詞各只命中唯一 1 個位置，「轉瞬之間」命中 **0** 個，而且格子裡完全沒有「之」這個字（100 格掃過 0 次）。被圈的那條斜線 [2,3]→[5,6] 逐格取字是「轉眼瞬間」（第3列4欄印成「眼」、第4列5欄印成「瞬」）。answer_paths 的 word 記「轉眼瞬間」（座標門要的是格子拼得出來的字），目標語詞寫進 intended_word_note。「磨合」有 2 個候選位置（[4,8][5,8] 直向、[6,9][5,8] 斜向），取直向 —— 斜向的 [6,9] 已被「磨難」佔用，且 PDF p10 的橘框是直的。課文有三個**不佔段號**的分節小標（AI時代，要更會發問／要更重視體驗／要更懂得判斷…），段號只有 10 個。小標不算段落但**會被算進字數**。字數逐行不逐段：第 6 段末 124、第 7 段末 285、小標末 304、第 8 段末 438，四個都不在印出的數字裡（最近 120/280/299/433 各差 4~5）；433 落在 304 與 438 之間 → span=第6~8段（中間夾一個小標）。第一個數字 27 印在小標那一行但小標只有 10 字 —— 是 skill §⑥.7 說的「數字欄整體上移」，27 實際對應第 6 段第一行。總表「議題」欄**空白**，未自行編。聚光燈有一張桌子比喻圖，文字畫在圖片像素裡，標 text_carrier: image（逐字門列 3 條「無法驗證」）。兩次重跑：(1) errata 的 source 我原本寫「轉眼瞬間」，那是四個獨立儲存格拼出來的字、原稿沒有連續字串 → 逐字門判 FAIL；拆成兩筆單字元 errata（眼→瞬、瞬→之）後 PASS，而且更精準。(2) intended_word_note 我放進 answer_paths 的條目裡，被 normalize_word_search --write 刪掉（它只保留 word/cells/direction）；L0026/L0029/L0061 的慣例是放在 vocab_review 這一層，已改正。"
+}

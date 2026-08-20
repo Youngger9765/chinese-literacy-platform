@@ -1,0 +1,48 @@
+lesson_uid: L0006
+version_id: v3
+section_no: 三
+vocab_definitions:
+  label: 本課語詞：
+  vocabulary_bank:
+  - 停滯
+  - 力不從心
+  - 糾結
+  - 左顧右盼
+  - 圍剿
+  - 反芻
+  - 無動於衷
+  - 猶豫
+  - 仆倒
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  items:
+  - index: 1
+    word: 力不從心
+    definition: 想做某件事，但能力或體力不夠，做不到。
+  - index: 2
+    word: 左顧右盼
+    definition: 向左右看看，形容東張西望。常用來表示猶豫、不專心或觀望。
+  - index: 3
+    word: 無動於衷
+    definition: 形容對事情冷漠、不關心、不在乎。
+  - index: 4
+    word: 圍剿
+    definition: 很多人一起攻擊或批評某人。也用於軍事情況。
+  - index: 5
+    word: 猶豫
+    definition: 拿不定主意，不知道該不該做。
+  - index: 6
+    word: 仆倒
+    definition: 向前倒下，通常是突然失去平衡或跌倒。
+  - index: 7
+    word: 糾結
+    definition: 心裡有兩個想法拉來拉去，拿不定主意，覺得很難選擇。
+  - index: 8
+    word: 停滯
+    definition: 事情停止發展，無法前進或進步。
+  - index: 9
+    word: 反芻
+    definition: 原指動物把吃進肚子的食物吐出來再咀嚼；比喻反覆回想某件事。

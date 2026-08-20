@@ -2,6 +2,7 @@
   "interaction_profile": {
     "checkbox_count": 0,
     "fill_blank_count": 10,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
@@ -39,19 +40,15 @@
       "label": "母親面對病痛",
       "sub_rows": [
         {
-          "interactive_type": "display",
-          "label": "不能掌控的事",
-          "value": "媽媽選擇的面對方式"
-        },
-        {
           "interactive_type": "fill_blank",
           "label": "沒有胃，無法躺著睡。",
           "value": "沒有胃，就不會【　　　】。"
         },
         {
+          "blank_in_label": true,
           "interactive_type": "fill_blank",
-          "label": "身體很__，\n只能坐在沙發上看電視。",
-          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【　　　】"
+          "label": "身體很【　　　】，只能坐在沙發上看電視。",
+          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。"
         },
         {
           "interactive_type": "fill_blank",
@@ -71,19 +68,14 @@
       "label": "面對離別",
       "sub_rows": [
         {
-          "interactive_type": "display",
-          "label": "不能掌控的事",
-          "value": "作者和家人選擇的面對方式"
-        },
-        {
           "interactive_type": "fill_blank",
           "label": "媽媽臨終時",
-          "value": "打定主意【　　　】\n陪媽媽最後一段路。"
+          "value": "打定主意【　　　】陪媽媽最後一段路。"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "媽媽__，作者很\n傷心。",
-          "value": "感謝上帝結束媽媽在世界上的\n【　　　】。【　　　】"
+          "label": "媽媽【　　　】，作者很傷心。",
+          "value": "感謝上帝結束媽媽在世界上的【　　　】。"
         },
         {
           "interactive_type": "display",
@@ -119,16 +111,12 @@
     {
       "items": [
         {
-          "label": "不能掌控的事",
-          "value": "媽媽選擇的面對方式"
-        },
-        {
           "label": "沒有胃，無法躺著睡。",
           "value": "沒有胃，就不會【　　　】。"
         },
         {
-          "label": "身體很__，\n只能坐在沙發上看電視。",
-          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。【　　　】"
+          "label": "身體很【　　　】，只能坐在沙發上看電視。",
+          "value": "生病可以整天躺在沙發上看林書豪打球，沒有罪惡感。"
         },
         {
           "label": "完全不能進食，只能喝一點點水。",
@@ -145,16 +133,12 @@
     {
       "items": [
         {
-          "label": "不能掌控的事",
-          "value": "作者和家人選擇的面對方式"
-        },
-        {
           "label": "媽媽臨終時",
-          "value": "打定主意【　　　】\n陪媽媽最後一段路。"
+          "value": "打定主意【　　　】陪媽媽最後一段路。"
         },
         {
-          "label": "媽媽__，作者很\n傷心。",
-          "value": "感謝上帝結束媽媽在世界上的\n【　　　】。【　　　】"
+          "label": "媽媽【　　　】，作者很傷心。",
+          "value": "感謝上帝結束媽媽在世界上的【　　　】。"
         },
         {
           "label": "媽媽的葬禮和追思禮拜",

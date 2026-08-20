@@ -1,0 +1,28 @@
+lesson_uid: L0120
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 這些可怕的靈異現象其實可以用科學來解釋？
+    duration: (07:51)
+    source: 志祺七七 X 圖文不符
+    has_qr: true
+    url: http://youtu.be/iAQdDHG58lc
+    url_source: 總表0816「4.影片連結」年級8課次22
+  - index: 2
+    title: 合理不等於正確
+    duration: (04:03)
+    source: 均一教育           平台
+    has_qr: true
+    url: http://youtu.be/ISjSdBwTffU
+    url_source: 總表0816「4.影片連結」年級8課次22
+  - index: 3
+    title: 為甚麼抓癢可以止癢呢？馬上解鎖「止癢」的奧祕
+    duration: (04:25)
+    source: 均一教育平台
+    has_qr: true
+    url: http://youtu.be/4S60pEKGxZc
+    url_source: 總表0816「4.影片連結」年級8課次22

@@ -31,9 +31,10 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
   ];
 
-  const toolsItems: NavItem[] = [
-    { icon: '🧰', label: '練習工具箱', path: '/tools' },
-  ];
+  // 練習工具箱入口已隱藏（Young 2026-08-20 指示，#2801）。
+  // `/tools` 路由本身保留 —— 既有的連結／書籤不會變 404，只是導覽上到不了。
+  // 學習紀錄頁那個「練習工具箱」是**過去紀錄的標籤**，不是入口，刻意沒動。
+  const toolsItems: NavItem[] = [];
 
   return (
     <nav aria-label="學生導覽" className="flex flex-col gap-1.5">
@@ -47,8 +48,11 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
         />
       ))}
 
-      {/* Divider before targeted practice tools (#1165) */}
-      <div className="my-1 border-t border-gray-100" aria-hidden="true" />
+      {/* Divider before targeted practice tools (#1165)。
+          toolsItems 空的時候不畫 —— 否則側欄底下留一條沒有東西的分隔線。 */}
+      {toolsItems.length > 0 && (
+        <div className="my-1 border-t border-gray-100" aria-hidden="true" />
+      )}
 
       {toolsItems.map((item) => (
         <NavButton
@@ -75,6 +79,4 @@ export function getStudentNavItems(pendingAssignmentCount: number): NavItem[] {
 }
 
 /** Tools items shown below divider (used by MobileTabBar extra items) */
-export const studentToolsItems: NavItem[] = [
-  { icon: '🧰', label: '練習工具箱', path: '/tools' },
-];
+export const studentToolsItems: NavItem[] = [];   // 入口已隱藏，見上方 #2801 註解

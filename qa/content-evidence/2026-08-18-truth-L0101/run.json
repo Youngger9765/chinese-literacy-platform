@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0101",
+  "catalog_slot": "G7-L4",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "🔴 念順順起點在原稿裡自相矛盾：指示語印「從指定段落（三　)」，但 ☞ 圖形掛在第 2 段的 w:p 上（H relativeFrom=margin，posOffset −35729 EMU＝貼在段號欄），字數欄也是從第 2 段第一個字開始累計（段號欄非空的 w:p 落在第 1/5/12/13/21/25/29 行、字數欄前 4 個空白後才是 28，兩欄逐行對得起來；且 207／230／461 精準等於第 2／2+3／2+3+4 段的字數）。兩個可機器驗證的結構訊號對一個字元 → 取 start_paragraph=2，指示語的「三」原樣保留、只在 start_paragraph_note 標明衝突，⛔ 未改動原稿印出來的字。 ⚠️ PDF 上段號欄看起來對不準（「三」印在「族人的禮敬。」那一行）是 LibreOffice 斷行與 Word 不同造成的位移，不是段界；真正的對位在 DOCX 儲存格結構裡。 本課沒有文章重點表（八個大題）。聚光燈的兩張表在原稿是三欄／兩欄表格、每列各含一個單選與一個複選，攤成 single＋multi 兩個 block（table/fill_table 只會畫純文字格，選項與答案會整片變成不能作答的文字）。 找字：紙上 roundRect 12 ＝ 路徑 12，紙外殘留 0，逐格套回 grid 全部拼得回，格子沒有錯字。 逐字門第一次是 traditional 門 FAIL：我在註記裡用了「錨」這個全庫原稿沒用過的字（不是抄錯，是我自己寫的說明文字），改詞即通過。"
+}

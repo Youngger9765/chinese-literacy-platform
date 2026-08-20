@@ -1,12 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 1,
-    "fill_blank_count": 1,
+    "fill_blank_count": 4,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "家庭生活的改變",
-      "作者的理解與收穫"
+      "1",
+      "2",
+      "1",
+      "2"
     ],
     "template_kind": "generic"
   },
@@ -18,42 +21,103 @@
       "value": ""
     },
     {
-      "correct_options": [
-        1,
-        3,
-        4,
-        5
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "display",
       "label": "家庭生活的改變",
-      "options": [
-        "吵鬧",
-        "熱鬧□",
-        "擁擠】【 單選 】\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n【",
-        "高齡友善空間的改造",
-        "餐桌上菜色的變化",
-        "生活作息的調整 　　　□",
-        "音樂喜好的改變　　　 】"
+      "sub_rows": [
+        {
+          "blanks": [
+            {
+              "options": [
+                "吵鬧",
+                "熱鬧",
+                "擁擠"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "家裡氣氛變得【　　　】【 單選 】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2",
+          "options": [
+            "高齡友善空間的改造",
+            "餐桌上菜色的變化",
+            "生活作息的調整",
+            "音樂喜好的改變"
+          ],
+          "select_mode": "multi",
+          "value": "第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n①高齡友善空間的改造 ②餐桌上菜色的變化 ③生活作息的調整 ④音樂喜好的改變"
+        }
       ],
-      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【□①吵鬧②熱鬧□③擁擠】【 單選 】\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n【①高齡友善空間的改造   ②餐桌上菜色的變化  \n③生活作息的調整 　　　□④音樂喜好的改變　　　 】"
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "作者的理解與收穫",
-      "value": "1.理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。\n2.認為與長輩同住有助於青少年【　　　】的培養。\n3.學會傾聽不同世代的聲音和【　　　】為他人著想。\n4.學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "認為與長輩同住有助於青少年【　　　】智商的培養。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "學會傾聽不同世代的聲音和【　　　】為他人著想。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "4",
+          "value": "學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
+        }
+      ],
+      "value": ""
     }
   ],
   "title": "爺爺奶奶來了以後",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "家庭生活的改變",
-      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】（單選）\n2.第3～6段寫到哪些爺爺奶奶同住後的生活改變？（多選）\n【　　　】"
+      "items": [
+        {
+          "label": "1",
+          "value": "家裡氣氛變得【　　　】（單選）\n①吵鬧 ②熱鬧 ③擁擠"
+        },
+        {
+          "label": "2",
+          "value": "第3～6段寫到哪些爺爺奶奶同住後的生活改變？（多選）\n①高齡友善空間的改造 ②餐桌上菜色的變化 ③生活作息的調整 ④音樂喜好的改變"
+        }
+      ],
+      "kind": "section_block",
+      "section": "家庭生活的改變"
     },
     {
-      "kind": "pair",
-      "label": "作者的理解與收穫",
-      "value": "1.理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。\n2.認為與長輩同住有助於青少年【　　　】的培養。\n3.學會傾聽不同世代的聲音和【　　　】為他人著想。\n4.學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
+      "items": [
+        {
+          "label": "1",
+          "value": "理解不同世代有各自的【　　　】和【　　　】，如：音樂喜好和冷氣使用習慣等。"
+        },
+        {
+          "label": "2",
+          "value": "認為與長輩同住有助於青少年【　　　】智商的培養。"
+        },
+        {
+          "label": "3",
+          "value": "學會傾聽不同世代的聲音和【　　　】為他人著想。"
+        },
+        {
+          "label": "4",
+          "value": "學會【　　　】，帶著好奇心聆聽爺爺奶奶的故事。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "作者的理解與收穫"
     }
   ]
 }

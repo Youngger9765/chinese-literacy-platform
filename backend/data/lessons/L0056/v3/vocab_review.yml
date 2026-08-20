@@ -1,0 +1,168 @@
+lesson_uid: L0056
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 百思不解
+  - 嘴饞
+  - 撒賴
+  - 慢條斯理
+  - 層出不窮
+  - 難如登天
+  - 自怨自艾
+  - 醍醐灌頂
+  - 嘀咕
+  - 怨懟
+  - 儼然
+  - 故技重施
+  - 犯小人
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 醍醐灌頂藝壇大師鬱嘴
+  - 開心百食故技重施卒饞
+  - 儼滿思物質慢狼吞虎嚥
+  - 然意不麥香雞條刷籬笆
+  - 不足解捨不得層斯耍撒
+  - 難如登天得出門賴理賴
+  - 脆皮炸雞不白自目嚴孔
+  - 怨對年窮品思怨怨然融
+  - 滴嘀紀嫉嚐不自目策怨
+  - 咕沽犯小人解艾艾略懟
+  grid_note: '⚠️ 格子在 PDF 上**跨頁**：第 9 頁印第 1~5 列，第 10 頁印第 6~10 列，
+
+    圈選圖形兩頁都有。只看其中一頁會漏掉一半答案。'
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 醍醐灌頂
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 嘴饞
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 故技重施
+    cells:
+    - - 2
+      - 5
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    direction: horizontal
+  - word: 百思不解
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 3
+    - - 4
+      - 3
+    - - 5
+      - 3
+    direction: vertical
+  - word: 儼然
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 慢條斯理
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 7
+    - - 5
+      - 8
+    - - 6
+      - 9
+    direction: diagonal_down_right
+  - word: 撒賴
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 層出不窮
+    cells:
+    - - 5
+      - 7
+    - - 6
+      - 6
+    - - 7
+      - 5
+    - - 8
+      - 4
+    direction: diagonal_down_left
+  - word: 難如登天
+    cells:
+    - - 6
+      - 1
+    - - 6
+      - 2
+    - - 6
+      - 3
+    - - 6
+      - 4
+    direction: horizontal
+  - word: 自怨自艾
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 嘀咕
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 怨懟
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 犯小人
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  answer_paths_note: '13 個目標語詞全部圈到。document.xml 裡的圈選圖形也剛好 **13 個**
+
+    （6 個獨立錨定 + 1 個群組內的 7 個），數量與路徑數一致。
+
+    ⚠️ 誘答字散布得很密：第 8 列「怨怨」與第 9~10 列的「自目／艾艾」都是為了讓
+
+    直行的「自怨自艾」有相鄰的錯誤路徑（第 8 欄是「目怨目艾」，拼不出來）。'

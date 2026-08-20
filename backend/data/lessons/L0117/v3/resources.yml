@@ -1,0 +1,30 @@
+lesson_uid: L0117
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 20161230中天新聞　巧克力的黑暗面　成千上萬童工苦澀
+    duration: 05:19
+    duration_seconds: 319
+    source: 中天新聞
+  - index: 2
+    title: 公平貿易幫助農民及社區發展
+    duration: 04:44
+    duration_seconds: 284
+    source: 布朗博士
+  - index: 3
+    title: 東尼巧克力不規則分割的秘密-Tony's Chocolonely
+    duration: 0:52
+    duration_seconds: 52
+    source: Tony's chocolonely東尼巧克力
+  note: 每則附 QR code（圖片）；總表「4.影片連結」分頁只登錄兩支連結，學習單印三支
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/Rd_qKOe2Dt4
+    url_source: 總表0816「4.影片連結」年級8課次1
+  - index: 2
+    url: http://youtu.be/c4XMJZIYpDw
+    url_source: 總表0816「4.影片連結」年級8課次1

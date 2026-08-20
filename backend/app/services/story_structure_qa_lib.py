@@ -6,7 +6,10 @@ import re
 from enum import Enum
 from typing import Any
 
-from app.services.story_structure_cell_parser import parse_checkbox_options
+from app.services.story_structure_cell_parser import (
+    parse_bracket_inline_choices,
+    parse_checkbox_options,
+)
 
 # Known parser gaps — empty after cell_to_structure_fields wired
 PARSER_GAP_LESSONS = frozenset()
@@ -156,6 +159,41 @@ def derive_mode(fill_blank: int, checkbox: int) -> str:
     return "display_only"
 
 
+# A filled-in 【…】 in served output is the answer the student was supposed to write —
+# except when it is the teacher's instruction for a choice row. The second edition
+# writes those in the same brackets (「【 單選 】」「【 請打勾，複選 】」), so the bare
+# "anything inside 【】" rule flagged 34 of them across 150 lessons and zero real
+# answers: a leak check that is wrong 34 times out of 34 is one nobody can act on.
+#
+# The instruction vocabulary is closed — 單／多／複／可／請／打／勾／選 and separators —
+# so a marker is recognisable without listing every phrasing. Boundary: an answer that
+# happened to be written only from those characters would still be excused. No such
+# answer exists in the corpus (checked: the 11 distinct bracketed strings served today
+# are all markers), and a one-character 「選」 is not a 重點表 answer.
+ANSWER_PAT = re.compile(r"【\s*[^】\s　][^】]*】")
+_INSTRUCTION_CHARS = set("單多複可請打勾選")
+_INSTRUCTION_SEPARATORS = set("，,、；;。 \t\u3000")
+
+
+def is_choice_instruction(bracketed: str) -> bool:
+    """True when 【…】 holds a choice instruction rather than an answer."""
+    body = bracketed.strip("【】")
+    core = {c for c in body if c not in _INSTRUCTION_SEPARATORS}
+    return bool(core) and core <= _INSTRUCTION_CHARS
+
+
+def _count_inline_choice_rows(rows: list[dict]) -> int:
+    """`interactive_type == "inline_choice"` 的列數（含 sub_rows）。"""
+    total = 0
+    for row in rows:
+        subs = row.get("sub_rows") or []
+        targets = subs if subs else [row]
+        for r in targets:
+            if r.get("interactive_type") == "inline_choice":
+                total += 1
+    return total
+
+
 def verify_interaction_profile_contract(structure: dict) -> list[str]:
     """L3: interaction_profile must match rows; answers must not leak."""
     errors: list[str] = []
@@ -170,7 +208,12 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
         return errors
 
     fb, cb, _disp = count_interactive_types(rows)
-    expected_mode = derive_mode(fb, cb)
+    # `count_interactive_types` 只認 fill_blank / checkbox，其餘全歸 display ——
+    # `inline_choice`（挑一個填進句中空格）因此被當成唯讀。決定 mode 的時候必須算它，
+    # 否則同一份資料，route 說 "mixed"、這裡說 "fill_blank"，契約永遠對不起來（#2750）。
+    # checkbox_count 的比對維持只看純 checkbox：profile 兩個數是分開帶的。
+    inline = _count_inline_choice_rows(rows)
+    expected_mode = derive_mode(fb, cb + inline)
 
     if profile.get("mode") != expected_mode:
         errors.append(f"profile.mode {profile.get('mode')} != {expected_mode}")
@@ -185,10 +228,10 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
         errors.append(f"layout {layout} != profile.layout {expected_layout}")
 
     # Answer leak check
-    answer_pat = re.compile(r"【\s*[^】\s　][^】]*】")
-
     def check_value(val: str, ctx: str) -> None:
-        if answer_pat.search(val or ""):
+        for hit in ANSWER_PAT.findall(val or ""):
+            if is_choice_instruction(hit):
+                continue
             errors.append(f"answer leak in {ctx}")
 
     for i, row in enumerate(rows):
@@ -206,7 +249,15 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
 
 
 def count_checkbox_cells_in_table(table: list | None) -> int:
-    """Count YAML cells that parse as checkbox (□ + circled option numbers)."""
+    """來源表格裡「可作答的選擇題格」有幾個。
+
+    ⚠️ 兩種寫法都要算：
+      - 選項在句子外：`□①甲 ②乙`            → `parse_checkbox_options`
+      - 選項在空格的括號內：`【□①多 ②少】`   → `parse_bracket_inline_choices`（#2786）
+
+    只認前者的話，括號寫法的課會被算成「來源沒有選擇題」，
+    然後跟服務端的 profile 對不起來 —— 明明兩邊都是對的。
+    """
     if not table:
         return 0
     count = 0
@@ -214,7 +265,9 @@ def count_checkbox_cells_in_table(table: list | None) -> int:
         if not isinstance(row, list):
             continue
         for cell in row:
-            if isinstance(cell, str) and parse_checkbox_options(cell):
+            if not isinstance(cell, str):
+                continue
+            if parse_checkbox_options(cell) or parse_bracket_inline_choices(cell):
                 count += 1
     return count
 
@@ -245,7 +298,12 @@ def gate_l3_mode_expectation(
     """Extra L3 rules per tier."""
     errors: list[str] = []
     mode = profile.get("mode")
-    checkbox_count = profile.get("checkbox_count") or 0
+    # ⚠️ 選擇題家族有兩型：`checkbox`（句子外面勾）與 `inline_choice`（挑一個填進句中空格）。
+    # 這條門問的是「來源有可作答的東西，服務端有沒有變成唯讀」——
+    # inline_choice 當然是可作答的，漏算它會把「已經修好、學生點得到」的課判成缺陷。
+    checkbox_count = (profile.get("checkbox_count") or 0) + (
+        profile.get("inline_choice_count") or 0
+    )
     if tier == LessonTier.PARSER_GAP:
         if mode != "display_only":
             errors.append(f"parser_gap expected display_only, got {mode}")

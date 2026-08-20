@@ -1,12 +1,14 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 3,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
       "提出問題",
-      "愛冒險的男生與公猴",
+      "1",
+      "2",
       "愛逞強的男生"
     ],
     "template_kind": "generic"
@@ -24,9 +26,21 @@
       "value": "男生出意外的機會遠高於女生，科學研究指出，可能原因有兩個：1.男生較愛【　　　】\n        2.男生較喜歡在別人面前【　　　】。"
     },
     {
-      "interactive_type": "fill_blank",
+      "interactive_type": "display",
       "label": "愛冒險的男生與公猴",
-      "value": "※請勾選出正確答案【　　　】\n1.社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。\n2.動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
@@ -47,9 +61,18 @@
       "value": "男生出意外的機會遠高於女生，科學研究指出，可能原因有兩個：1.男生較愛【　　　】\n        2.男生較喜歡在別人面前【　　　】。"
     },
     {
-      "kind": "pair",
-      "label": "愛冒險的男生與公猴",
-      "value": "※請勾選出正確答案(單選)\n1.社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。\n2.動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。"
+        },
+        {
+          "label": "2",
+          "value": "動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "愛冒險的男生與公猴"
     },
     {
       "kind": "pair",

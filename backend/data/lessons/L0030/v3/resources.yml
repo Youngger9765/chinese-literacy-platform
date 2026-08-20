@@ -1,0 +1,24 @@
+lesson_uid: L0030
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 運動前後飲食　成增加肌肉關鍵之一
+    duration: '1:39'
+    duration_seconds: 99
+    source: TVBS NEWS
+  - index: 2
+    title: 《花家の故事》210媽媽的體脂肪｜我們這一家
+    duration: '9:00'
+    duration_seconds: 540
+    source: Muse木棉花-闔家歡
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/pJcudZ2OGLE
+    url_source: 總表0816「4.影片連結」年級5課次19
+  - index: 2
+    url: http://youtu.be/gTw0L5sHJFI
+    url_source: 總表0816「4.影片連結」年級5課次19

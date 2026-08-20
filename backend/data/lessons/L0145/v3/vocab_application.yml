@@ -1,0 +1,41 @@
+lesson_uid: L0145
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 素昧平生
+    B: 物種
+    C: 抽象概念
+    D: 制度
+    E: 共同編織
+    F: 法人
+    G: 虛構
+    H: 約定俗成
+  answers_printed: true
+  answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
+  items:
+  - index: 1
+    stem: 一座城市的文化，是由居民的生活習慣和共同記憶(　)而成的。
+    answer: E
+  - index: 2
+    stem: 過年要發紅包、說吉祥話，是許多人長久以來(　)的習慣。
+    answer: H
+  - index: 3
+    stem: 這家公司是法律承認的(　)，可以簽約，也需要負責任。
+    answer: F
+  - index: 4
+    stem: 老師用生活例子說明「公平」這個(　)，大家才比較容易理解。
+    answer: C
+  - index: 5
+    stem: 颱風過後，許多和居民(　)的志工來到村子，協助居民清理家園。
+    answer: A
+  - index: 6
+    stem: 小說中的人物多半是作者(　)的，但仍可能讓讀者深受感動。
+    answer: G
+  - index: 7
+    stem: 學校的請假(　)很清楚，學生生病時知道該向誰報備、要交什麼證明。
+    answer: D
+  - index: 8
+    stem: 石虎是臺灣珍貴的野生(　)，需要大家一起保護。
+    answer: B

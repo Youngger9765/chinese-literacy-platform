@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0012",
+  "catalog_slot": "G4-L20",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 0,
+  "notes": "同 L0010 的兩封信結構（第一封 一~三、第二封 一~七），念順順「六☞」= 第二封第 6 段 = seq 9，右緣累計字數末值 338 與該段起算的字數相符，可互相印證。重點表的例子3／結尾列在 p6 印在「六 品格聚光燈」標題下方，經 document.xml 順序與表格續列確認仍屬第五大題。字陣只圈了 11 個目標語詞中的 5 個，已列舉頁面上所有向量筆跡確認沒有其他顏色的圈記，故其餘 6 個不列、不臆測補齊。語詞應用第 3 題原稿手寫答案是「A/B」兩個都算對。"
+}

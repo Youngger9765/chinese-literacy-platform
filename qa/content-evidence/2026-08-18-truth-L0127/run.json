@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0127",
+  "catalog_slot": "G8-L7",
+  "pdf_pages": 11,
+  "pages_read": 11,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "三種答案載體本課全都有，第三種（w:bdr color=EE0000 紅色字元框線圈住轉折詞「但／但／竟然」，共 3 個）純文字抽取與數圈圈都找不到，只有查 w:bdr 才拿得到 —— 那是第六大題（一）例子→概念表格第 5/6/7 段的答案。roundRect 11 個 anchor 扣掉 1 個紙外殘留（rightMargin + posOffset 5264785 → 距頁左 14.03in，框線硬寫死 srgb E97132，其餘 10 個用 accent2）= 10 條路徑 = 10 個目標語詞。念順順 instruction 印「（五）」但 ☞ 錨在第 6 段、字數欄 150=第6段長、341=150+第7段191 兩個段界精準吻合 → 判定教材印錯，登錄 source_errata E1，start_paragraph 取 6。逐字門第一次 FAIL 7 筆，全是我把表格欄名黏進 prompt/instruction 造出原稿沒有的字串（「概念（道理）：…是否支持主旨」「表格四欄：…」），改成只留原稿印的句子後 0 對不上。"
+}

@@ -1,0 +1,12 @@
+lesson_uid: L0025
+version_id: v3
+errata:
+- id: E1
+  section: 六 閱讀聚光燈．四、組合應用
+  locator: ◎作者想法 末句
+  source: 最後，這份信念與堅持，造就了他穩定的表現，並幫助他在臺灣棒球史上留下的重要地位。
+  corrected: 最後，這份信念與堅持，造就了他穩定的表現，並幫助他在臺灣棒球史上留下重要地位。
+  kind: 贅字
+  why: 「留下**的**重要地位」多一個「的」，使「幫助他…留下…地位」這個動賓結構斷掉；去掉「的」才通順
+  confidence: medium
+  evidence: document.xml 與 PDF p7 一致。這是語法判斷，不像錯字那樣有字形可對，故不給 high

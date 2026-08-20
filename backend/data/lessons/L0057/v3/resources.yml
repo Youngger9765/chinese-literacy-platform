@@ -1,0 +1,23 @@
+lesson_uid: L0057
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 熬夜會爆肝"竟然是假的!? 醫學迷思在此終結! | 蒼藍鴿聊醫學EP96
+    duration: (4:30)
+    source: 蒼藍鴿的醫學天地
+  - index: 2
+    title: 晚睡晚起有多傷身？那週末補眠有救嗎？
+    duration: (11:06)
+    source: 志祺七七 X 圖文不符
+  qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/uBFTJ6MAmlo
+    url_source: 總表0816「4.影片連結」年級6課次17
+  - index: 2
+    url: http://youtu.be/DsRqWxSE40s
+    url_source: 總表0816「4.影片連結」年級6課次17

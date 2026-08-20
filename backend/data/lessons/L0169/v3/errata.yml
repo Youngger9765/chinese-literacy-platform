@@ -1,0 +1,21 @@
+lesson_uid: L0169
+version_id: v3
+errata:
+- id: E1
+  section: 一 讀全文-做記號
+  locator: 第 1 段的段號
+  source: ㄧ
+  corrected: 一
+  kind: 字元誤用
+  why: 段號欄五個號碼中第一個是 U+3127 注音符號ㄧ，其餘正常。同批 L0145／L0167／L0168 同型。
+  confidence: high
+  evidence: document.xml 該儲存格單一字元 U+3127
+- id: E2
+  section: 二 念順順
+  locator: 指示語的括號
+  source: 從指定段落（一    )開始朗讀
+  corrected: 從指定段落（一    ）開始朗讀
+  kind: 全半形括號不成對
+  why: 開括號全形「（」、閉括號半形「)」。本批五課（L0145/6/7、L0167、L0168）全部同型。
+  confidence: high
+  evidence: document.xml 念順順文字方塊

@@ -1,0 +1,83 @@
+lesson_uid: L0120
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 引人入勝
+    B: 毛骨悚然
+    C: 啟人疑竇
+    D: 睡眼惺忪
+    E: 窮凶極惡
+    F: 喑啞無聲
+    G: 閃爍
+    H: 乍見
+    I: 週期
+  option_bank_note: 代號表印成 2 列 5 欄，第 2 列第 5 格是空的（只到 I）
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 1、3 題的代號印成全形（Ｇ／Ｂ），其餘半形
+  unused_options:
+  - F
+  items:
+  - index: 1
+    stem: 夜晚的星星(  )著，為夜空增添神祕的美感。
+    answer: G
+  - index: 2
+    stem: 一大早，他還(  )，頭腦無法回答困難的數學問題。
+    answer: D
+  - index: 3
+    stem: 恐怖電影中的血腥場面讓人(  )，心跳加速。
+    answer: B
+  - index: 4
+    stem: 講師的教學風格非常生動有趣，每一堂課都能夠 (  )。
+    answer: A
+  - index: 5
+    stem: 警察詢問竊案嫌犯時，嫌犯吞吞吐吐、眼神閃躲，(  )。
+    answer: C
+  - index: 6
+    stem: 這名罪犯不但偷竊，還威脅受害者，行為可說是(  )。
+    answer: E
+  - index: 7
+    stem: 月亮的形狀會照著固定的(  )改變，所以我能預測滿月出現的時間。
+    answer: I
+  - index: 8
+    stem: (  )這座老屋時，只覺得它歷史悠久；走近細看，才發現牆上保留著精緻的雕花。
+    answer: H
+  synonym_compound:
+    title: ◎同義複詞
+    definition: 由二個同義或近義的字，結合而成的複詞。
+    rows:
+    - label: 1.舉例
+      value: '(1)聆聽，聆＝聽。(2)美麗，美＝麗。
+
+        (3)肥胖，肥＝胖。
+
+        ※注意：
+
+        胖子，胖≠子，因為胖是胖，子是人的意思
+
+        →「胖子」指的是胖的人。
+
+        美女，美≠女，因為美是美麗，女是女生的意思
+
+        →「美女」指的是美麗的女生。'
+    - label: 2.請用螢光筆在課文做記號
+      value: 課文中的同義複詞：閃爍、黑暗、喑啞、燃燒。
+    exercise:
+      instruction: 3.若是同義複詞，請在□打勾。
+      type: multi
+      options:
+        1: 疾病
+        2: 歌唱
+        3: 公私
+        4: 寧靜
+        5: 整理
+        6: 喜悅
+        7: 利弊
+        8: 乍見
+      answers:
+      - 1
+      - 2
+      - 4
+      - 5
+      - 6
+      answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層但非 ☑ 字元），PDF p5 可見

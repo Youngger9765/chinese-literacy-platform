@@ -1,0 +1,188 @@
+lesson_uid: L0054
+version_id: v3
+section_no: 五
+spotlight:
+  strategy_name: 摘要策略—用標題整理重點
+  strategy_type: summarize
+  section_title_printed: 閱讀聚光燈
+  section_number_printed: 五
+  blocks:
+  - type: concept_box
+    text: '本文是一篇說明文，介紹動物「談情說愛」的方式。
+
+      文章的結構很清楚：先提出一個大主題，再用四個小標題分出不同的小主題；每個小主題下，再用動物例子和重要細節加以說明。
+
+      閱讀這類文章，可以按照以下層次找重點：
+
+      【大主題】→【小主題】→【例子】→【重要細節】
+
+      接下來，我們就按照這個順序，找出文章的重點。'
+  - type: sub_block
+    label: 一、從文章標題找大主題
+    instruction: 一、從文章標題找大主題
+    answer_carrier: 橘色手寫字（圖形）
+    items:
+    - type: guide
+      text: 1.文章標題通常會提示大主題。本文的標題是「動物談情說愛的方式」
+    - type: free_text
+      prompt: '2.「談情說愛」是比較生動的說法。把它換成簡單、清楚的說法，這篇文章主要在說明什麼？
+
+        本文的大主題是：【　】'
+      note: （答案合理即可）
+      blanks:
+      - answer: 動物求偶的不同方式
+    - type: guide
+      text: '→小祕訣：文章標題有時會使用比較生動的說法。這時可以想一想：
+
+        把標題換成簡單的話，這篇文章主要在說明什麼？'
+  - type: sub_block
+    label: 二、從段落小標題看小主題
+    instruction: 二、從段落小標題看小主題
+    answer_carrier: 橘色手寫字（圖形）
+    items:
+    - type: guide
+      text: 1.說明文有時會在段落前放一個小標題，用簡短的文字直接告訴我們：這一部分在說什麼。小標題可以幫助我們快速找到小主題。
+    - type: free_text
+      prompt: '2.從小標題看小主題
+
+        本文的小標題已經直接點出小主題。請把四個小主題填入空格。'
+      items_printed:
+      - index: 1
+        value: 用【　】求偶
+        blanks:
+        - answer: 歌聲
+      - index: 2
+        value: 用【　】求偶
+        blanks:
+        - answer: 舞姿
+      - index: 3
+        value: 以【　】求偶
+        blanks:
+        - answer: 氣味
+      - index: 4
+        value: 用【　】求偶
+        blanks:
+        - answer: 力量
+      blanks:
+      - answer: 歌聲
+      - answer: 舞姿
+      - answer: 氣味
+      - answer: 力量
+      layout_note: 四格排成兩列兩欄（①②一列、③④一列）；③用的是「以」不是「用」，照原樣。
+  - type: guide
+    text: '三、在小標題下找例子和重要細節
+
+      找到小主題後，再讀小標題下的內容，找出：
+
+      1.作者舉了哪些例子？
+
+      2.哪些細節能直接說明小主題？
+
+      3.怎麼把重要細節精簡成一句話？'
+  - type: sub_block
+    label: （一）先用「用歌聲求偶」試試看
+    instruction: （一）先用「用歌聲求偶」試試看
+    answer_carrier: 紅色 ☑ 與橘色手寫字（皆為圖形）
+    items:
+    - type: free_text
+      prompt: 1.找例子：「用歌聲求偶」舉了哪些例子：【　】
+      blanks:
+      - answer: 雄蛙、五色鳥
+    - type: guide
+      text: 2.找雄蛙的重要細節：第二段
+    - type: passage
+      paragraphs:
+      - ❶潮濕溫暖的夏夜，嘓嘓嘓、嘓嘓嘓，雄蛙奮力的在池塘裡展現歌喉，只為求得雌蛙的青睞，繁衍下一代。❷雄蛙求偶的鳴叫聲響遍池畔，也引來其他雄蛙爭強鬥勝。❸是否能順利成為心儀對象的「青蛙王子」？雄蛙們可要各憑本事才行。
+    - type: guide
+      text: '(1)小祕訣：這個小主題是「用歌聲求偶」，所以要找出：
+
+        雄蛙發出什麼聲音？這個聲音有什麼作用？'
+    - type: single
+      prompt: (2)找重要細節：哪一句最能直接說明雄蛙怎麼用歌聲求偶？
+      options:
+        1: 句❶
+        2: 句❷
+        3: 句❸
+      answer: 1
+    - type: free_text
+      prompt: '(3)精簡重點：保留「誰＋怎麼做＋作用」，把句子說得更簡短：
+
+        雄蛙【　】，吸引【　】'
+      blanks:
+      - answer: 發出嘓嘓嘓的叫聲
+      - answer: 雌蛙
+    - type: guide
+      text: 3.找五色鳥重要細節：第三段
+    - type: passage
+      paragraphs:
+      - ❶春天來臨，住在枯木洞裡的五色鳥，開始粉墨登場，準備在演唱會上一展歌喉。❷牠身穿綠衣裳，頭戴彩色帽，站在茂密枝葉搭起的舞台上，揭開演唱會的序幕。❸五色鳥發出喀、喀、喀喀喀喀……的求偶叫聲，盡情的歌唱。❹牠獨特的聲音吸引愛慕者，為繁衍後代做準備。
+      note: ⚠️ 這裡引用課文第三段時寫「舞台上」，課文原文是「舞臺上」。照各自原樣記錄。
+    - type: multi
+      prompt: (1)找重要細節：哪兩句能直接說明五色鳥怎麼用歌聲求偶？
+      options:
+        1: 句❶
+        2: 句❷
+        3: 句❸
+        4: 句❹
+      answers:
+      - 3
+      - 4
+    - type: free_text
+      prompt: '(2)精簡句子：把兩句合起來，保留「誰＋怎麼做＋作用」
+
+        五色鳥【　】。'
+      blanks:
+      - answer: 發出喀、喀、喀喀喀的求偶叫聲，吸引愛慕者
+    - type: free_text
+      prompt: '4.合起來整理
+
+        雄蛙和五色鳥的例子，共同說明：
+
+        雄蛙和五色鳥都會用【　】吸引求偶對象。'
+      blanks:
+      - answer: 歌聲
+  - type: sub_block
+    label: （二）換你自己找：「用舞姿求偶」（第四段）
+    instruction: （二）換你自己找：「用舞姿求偶」（第四段）
+    sub_instruction: 請扣住小主題「用舞姿求偶」，自己找出例子和重要細節。
+    answer_carrier: 紅色 ☑ 與橘色手寫字（皆為圖形）
+    items:
+    - type: passage
+      paragraphs:
+      - ❶到了繁殖季節，鴕鳥會舉行熱鬧非凡、令人耳目一新的招親活動。❷平常沉默的雄鳥，在求偶期間卻大展身手。❸牠一方面發出低沉的叫聲，呼喚雌鳥；❹一方面有節奏的展開、收合翅膀，露出尖端的白色羽毛，繞著雌鳥跳起獨特的求偶舞。
+    - type: free_text
+      prompt: 1.找例子：這段描寫的動物是【　】
+      blanks:
+      - answer: 雄鴕鳥
+    - type: single
+      prompt: '2.找重要細節：
+
+        請扣住小主題「用舞姿求偶」，選出重要細節的句子：'
+      options:
+        1: 句❶
+        2: 句❷
+        3: 句❸
+        4: 句❹
+      answer: 4
+    - type: free_text
+      prompt: '3.精簡句子：把重要細節精簡成一句完整的話。
+
+        雄鴕鳥【　】。'
+      blanks:
+      - answer: 展開、收合翅膀，繞著雌鳥跳求偶舞，吸引雌鳥
+    - type: single
+      prompt: '4.檢查一下
+
+        「雄鳥發出低沉的叫聲」要不要放進「用舞姿求偶」的重點？(單選）'
+      options:
+        1: 要
+        2: 不要
+      answer: 2
+    - type: guide
+      text: →因為這個細節是在說明「用聲音求偶」，不能直接說明「用舞姿求偶」
+  - type: self_check
+    label: ◎自我檢核
+    items:
+    - 1.我能從標題和小標題找出大主題、小主題。
+    - 2.我能找出例子和重要細節，整理成一句重點。
+    note: ⚠️ 本課的自我檢核**沒有**印「如果你有做到，請在□內打勾。」那一句，只有兩個檢核項。

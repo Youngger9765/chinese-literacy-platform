@@ -1,0 +1,48 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 二
+vocab_definitions:
+  part_note: 篇1（第23課）
+  vocabulary_bank:
+  - 聞名於世
+  - 綿延
+  - 奠定
+  - 佼佼者
+  - 輪替
+  - 配速
+  - 魔障
+  - 審視
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 魔障
+    definition: 比喻很難突破的障礙或限制。
+  - index: 2
+    word: 奠定
+    definition: 打下穩固的基礎，讓後來發展更順利。
+  - index: 3
+    word: 聞名於世
+    definition: 形容很有名，全世界都知道。
+  - index: 4
+    word: 綿延
+    definition: 連續延伸很長，可形容道路、山脈或時間。
+  - index: 5
+    word: 佼佼者
+    definition: 表現傑出的人。
+  - index: 6
+    word: 審視
+    definition: 仔細查看、思考，了解情況或問題。
+  - index: 7
+    word: 輪替
+    definition: 按照順序輪流替換。
+  - index: 8
+    word: 配速
+    definition: 依照距離和目標，安排並控制跑步的速度。

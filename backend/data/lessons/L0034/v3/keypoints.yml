@@ -1,0 +1,43 @@
+lesson_uid: L0034
+version_id: v3
+section_no: 五
+keypoints:
+  title: 抗拒指尖上的誘惑
+  structure: nested
+  rows:
+  - label: 背景
+    value: '1.短影音自2018年開始【　】全球。
+
+      2.臺灣青少年平均每天觀看1.5小時，遠超過閱讀紙本書的時間。
+
+      3.短影音會按照使用者喜好推薦影片，讓人停不下來。'
+    blanks:
+    - answer: 風靡
+  - label: 問題
+    value: 小睿每天【　】，無法自拔，陷入惡性循環。
+    blanks:
+    - answer: 沉迷手機
+  - label: 解決
+    value: "1.找老師求助。\n2.老師、家長和同學一起協助小睿採取具體作法：\n  (1)改變環境：\n    ❶參加班級【　】，每天晚上專心閱讀及做功課。\n    ❷與同學約【　】，減少宅在家滑手機的機會。\n  (2)設定手機使用規範：\n    ❶手機安裝【　】App，每天限用30分鐘。\n    ❷與同儕組成「脫癮小組」，互相【　】手機使用時長。\n  (3)自我提醒：\n    手腕掛橡皮筋，想滑手機時立即彈一下並大聲說「停！」"
+    blanks:
+    - answer: 晚自習
+    - answer: 戶外活動
+    - answer: 時間管理
+    - answer: 監督
+  - label: 結果
+    value: '小睿使用手機的時間□①上升 ②下降，
+
+      他的生活品質與成績①上升 □②下降，
+
+      最後頂住指尖的誘惑，成為「手機的主人」。'
+    blanks:
+    - answer: ②下降
+      choice_index: 2
+      options:
+      - 上升
+      - 下降
+    - answer: ①上升
+      choice_index: 1
+      options:
+      - 上升
+      - 下降

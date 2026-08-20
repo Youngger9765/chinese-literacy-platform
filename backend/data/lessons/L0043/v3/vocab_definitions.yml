@@ -1,0 +1,55 @@
+lesson_uid: L0043
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 食指浩繁
+  - 貼補
+  - 嗷嗷待哺
+  - 目不識丁
+  - 按件計酬
+  - 俐落
+  - 彌漫
+  - 餘悸猶存
+  - 積勞成疾
+  - 庇蔭
+  - 著落
+  items:
+  - index: 1
+    word: 彌漫
+    definition: 遍布、充滿。
+  - index: 2
+    word: 積勞成疾
+    definition: 長期勞累因而生病。
+  - index: 3
+    word: 嗷嗷待哺
+    definition: 形容飢餓哀號，等待餵食或救濟。
+  - index: 4
+    word: 俐落
+    definition: 做事明快，不拖泥帶水。
+  - index: 5
+    word: 著落
+    definition: 事情有了安排或解決的方法。
+  - index: 6
+    word: 庇蔭
+    definition: 保護、照顧，使人免受困難。
+  - index: 7
+    word: 貼補
+    definition: 拿錢補助不足的部分。
+  - index: 8
+    word: 按件計酬
+    definition: 按照完成的工作件數，計算工資。
+  - index: 9
+    word: 餘悸猶存
+    definition: 形容驚嚇、懼怕的心情，還沒平復過來。
+  - index: 10
+    word: 目不識丁
+    definition: 不識字或未受教育。
+  - index: 11
+    word: 食指浩繁
+    definition: 家裡要餵養的人數很多。

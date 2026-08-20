@@ -1,0 +1,44 @@
+lesson_uid: L0131
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 有待商榷
+    B: 闕如
+    C: 負荷超載
+    D: 迎刃而解
+    E: 前瞻性
+    F: 放諸四海皆準
+    G: 繁複
+    H: 躍升
+  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  option_bank_note: '語詞框有 10 個語詞，本大題的代號欄只列 8 個（沒有外化、攸關生命），
+
+    而且 8 個代號全部都被用到 —— 沒有 unused_options。'
+  items:
+  - index: 1
+    stem: 泰雅族以苧麻編織出名，共有十四道(　)的程序。
+    answer: G
+  - index: 2
+    stem: 體育班學生同時要準備聯賽及期中考，這兩星期已經(　)了。
+    answer: C
+    answer_printed_form_note: 原稿印全形Ｃ
+  - index: 3
+    stem: 球隊的訓練要有(　)，從了解對手到精準規劃訓練，才能掌握先機。
+    answer: E
+  - index: 4
+    stem: 臺灣巨棒陳金鋒說，他四年級就「都在打球，沒有讀書……連字都不寫」，因為長期缺少讀寫練習，他留下讀寫能力（　）的遺憾。
+    answer: B
+  - index: 5
+    stem: 善良待人、誠實守信是(　)的做人原則，無論在哪個國家都受人尊重。
+    answer: F
+  - index: 6
+    stem: 這個計畫有些部分仍然(　)，需要再多加討論。
+    answer: A
+  - index: 7
+    stem: 只要學會這個數學公式，這道難題就能(　)，一點也不難。
+    answer: D
+  - index: 8
+    stem: 2024年世界十二強棒球賽中，臺灣隊的名次從前一次的第五名(　)為第一名。
+    answer: H

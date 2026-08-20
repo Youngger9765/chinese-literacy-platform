@@ -1,11 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 1,
+    "fill_blank_count": 10,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "摘要：【　　　】林韡勳想要製作出高品質、受歡迎的__。他遇上食譜、熬煮火候、知名度、失敗果醬處理和__等問題。他逐一面對所有的問題，一再嘗試，直到__為止。最後，他到英國參賽，得到__的榮耀。"
+      "成就",
+      "起因",
+      "多次失敗，錢花光了",
+      "【　　　】"
     ],
     "template_kind": "generic"
   },
@@ -13,66 +17,141 @@
   "rows": [
     {
       "interactive_type": "display",
-      "label": "結構名稱",
-      "value": "簡要內容"
-    },
-    {
-      "interactive_type": "display",
-      "label": "1.主要問題",
-      "value": "林韡勳想要製作出高品質、受歡迎的果醬。"
-    },
-    {
-      "interactive_type": "display",
-      "label": "2.__",
-      "value": "他遇上食譜、熬煮火候、知名度、失敗果醬處理和出國比賽等問題。"
-    },
-    {
-      "interactive_type": "display",
-      "label": "3.__",
-      "value": "他逐一面對所有的問題，一再嘗試，直到問題解決為止。"
-    },
-    {
-      "interactive_type": "display",
-      "label": "4.__",
-      "value": "最後，他到英國參賽，得到一金二銅的榮耀。"
-    },
-    {
-      "blank_in_label": true,
-      "interactive_type": "fill_blank",
-      "label": "摘要：【　　　】林韡勳想要製作出高品質、受歡迎的__。他遇上食譜、熬煮火候、知名度、失敗果醬處理和__等問題。他逐一面對所有的問題，一再嘗試，直到__為止。最後，他到英國參賽，得到__的榮耀。",
+      "label": "果醬男孩",
       "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "成就",
+      "value": "林韡勳在世界柑橘類【　　　】大賽，獲得【　　　】的成績。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "起因",
+      "value": "1.因為原來的工作無法繼續，鄉間工作機會又少，他想起阿嬤做的【　　　】。\n2.他發現農場裡外觀不佳的水果往往被【　　　】，他覺得很可惜，加深要做果醬的念頭。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "困境",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "沒有專業背景",
+          "value": "自學、研究食譜，不斷調整製作方法。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "多次失敗，錢花光了",
+          "value": "【　　　】"
+        },
+        {
+          "blank_in_label": true,
+          "interactive_type": "fill_blank",
+          "label": "【　　　】",
+          "value": "失敗品拿去餵蜜蜂。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "價格高，消費者不買",
+          "value": "分送親友試吃，到市集擺攤， 建立【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "轉機",
+      "value": "英國客人鼓勵他去參加英國的比賽，他便【　　　】旅費，連年參賽，終於在【　　　】獲得桂冠。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "成功關鍵",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1.",
+          "value": "【　　　】：走遍全臺，只為找到香氣、味道深具個性的水果。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2.",
+          "value": "【　　　】：想到把紅玉紅茶、威士忌和柑橘混在一起做出「茶金」果醬。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3.",
+          "value": "【　　　】：本來「茶金」果醬茶味不足，他想到將切碎的茶葉以威士忌冰釀一晚，逼出茶香。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "期許",
+      "value": "把臺灣水果製成的果醬行銷到【　　　】。"
     }
   ],
+  "title": "果醬男孩",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "結構名稱",
-      "value": "簡要內容"
+      "label": "成就",
+      "value": "林韡勳在世界柑橘類【　　　】大賽，獲得【　　　】的成績。"
     },
     {
       "kind": "pair",
-      "label": "1.主要問題",
-      "value": "林韡勳想要製作出高品質、受歡迎的果醬。"
+      "label": "起因",
+      "value": "1.因為原來的工作無法繼續，鄉間工作機會又少，他想起阿嬤做的【　　　】。\n2.他發現農場裡外觀不佳的水果往往被【　　　】，他覺得很可惜，加深要做果醬的念頭。"
+    },
+    {
+      "items": [
+        {
+          "label": "沒有專業背景",
+          "value": "自學、研究食譜，不斷調整製作方法。"
+        },
+        {
+          "label": "多次失敗，錢花光了",
+          "value": "【　　　】"
+        },
+        {
+          "label": "【　　　】",
+          "value": "失敗品拿去餵蜜蜂。"
+        },
+        {
+          "label": "價格高，消費者不買",
+          "value": "分送親友試吃，到市集擺攤， 建立【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "困境"
     },
     {
       "kind": "pair",
-      "label": "2.__",
-      "value": "他遇上食譜、熬煮火候、知名度、失敗果醬處理和出國比賽等問題。"
+      "label": "轉機",
+      "value": "英國客人鼓勵他去參加英國的比賽，他便【　　　】旅費，連年參賽，終於在【　　　】獲得桂冠。"
+    },
+    {
+      "items": [
+        {
+          "label": "1.",
+          "value": "【　　　】：走遍全臺，只為找到香氣、味道深具個性的水果。"
+        },
+        {
+          "label": "2.",
+          "value": "【　　　】：想到把紅玉紅茶、威士忌和柑橘混在一起做出「茶金」果醬。"
+        },
+        {
+          "label": "3.",
+          "value": "【　　　】：本來「茶金」果醬茶味不足，他想到將切碎的茶葉以威士忌冰釀一晚，逼出茶香。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "成功關鍵"
     },
     {
       "kind": "pair",
-      "label": "3.__",
-      "value": "他逐一面對所有的問題，一再嘗試，直到問題解決為止。"
-    },
-    {
-      "kind": "pair",
-      "label": "4.__",
-      "value": "最後，他到英國參賽，得到一金二銅的榮耀。"
-    },
-    {
-      "kind": "pair",
-      "label": "摘要：（把簡要內容組合成摘要）林韡勳想要製作出高品質、受歡迎的__。他遇上食譜、熬煮火候、知名度、失敗果醬處理和__等問題。他逐一面對所有的問題，一再嘗試，直到__為止。最後，他到英國參賽，得到__的榮耀。",
-      "value": ""
+      "label": "期許",
+      "value": "把臺灣水果製成的果醬行銷到【　　　】。"
     }
   ]
 }

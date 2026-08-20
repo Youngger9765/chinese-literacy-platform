@@ -1,0 +1,51 @@
+lesson_uid: L0033
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 焦頭爛額
+    B: 大快朵頤
+    C: 色彩繽紛
+    D: 愁眉不展
+    E: 垂涎欲滴
+    F: 無傷大雅
+    G: 戰友
+    H: 損友
+    I: 濃郁
+    J: 釋放
+  items:
+  - index: 1
+    stem: 春天來了，公園裡百花齊放，（　），宛如一幅美麗的畫卷。
+    answer: C
+  - index: 2
+    stem: 小明為了準備各科的期末考試，忙到（　），連睡覺的時間都不夠。
+    answer: A
+  - index: 3
+    stem: 朋友聚會開一點小玩笑通常（　），但要注意分寸，以免傷了感情。
+    answer: F
+  - index: 4
+    stem: 姐姐求職不順，最近一直（　），臉上沒有一點開心的表情。
+    answer: D
+  - index: 5
+    stem: 媽媽煮了滿桌的美味佳餚，香氣四溢，讓人（　），大家可以（　）一番了。
+    answers:
+    - E
+    - B
+  - index: 6
+    stem: 我在減肥，你卻帶全糖珍奶來害我？你到底是我的戰友，還是（　）？
+    answer: H
+  - index: 7
+    stem: 運動可以幫助我們（　）壓力，讓心情變得比較輕鬆。
+    answer: J
+  - index: 8
+    stem: 春天一到，花園裡充滿了（　）的花香。
+    answer: I
+  exercise:
+    label: ◎ 小試身手
+    type: cloze_passage
+    passage: 週末，我和幾位朋友一起相約去新開的烤肉店聚餐。店裡的裝潢（　），讓人一進門就感受到熱鬧的氣氛。烤肉的香氣撲鼻，我們看著烤得金黃酥脆的肉串，早已（　）。等食物上桌後，大家立刻（　），享受這頓美味的晚餐，度過一個開心又滿足的夜晚。
+    answers:
+    - C
+    - E
+    - B

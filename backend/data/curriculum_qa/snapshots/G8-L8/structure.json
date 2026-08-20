@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 5,
+    "fill_blank_count": 10,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "關鍵發現【 段1-3 】",
-      "研究歷程【 段4-5 】",
-      "看見全貌【 段６-７ 】",
-      "從理解到行動【 段８ 】"
+      "1",
+      "2",
+      "1",
+      "2"
     ],
     "template_kind": "generic"
   },
@@ -20,52 +21,154 @@
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "關鍵發現【 段1-3 】",
-      "value": "1.珍古德觀察到黑猩猩用【　　　】釣白蟻。\n2.這件事像「震撼彈」，因為當時學界普遍相信：人類是唯一會【　　　】的生物。"
+      "interactive_type": "display",
+      "label": "關鍵發現（段1-3）",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "珍古德觀察到黑猩猩用【　　　】釣白蟻。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "這件事像「震撼彈」，因為當時學界普遍相信：人類是唯一會【　　　】的生物。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "研究歷程（段4-5）",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "她用最原始也最費力的方法：長時間【　　　】並持續記錄。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "珍古德改寫了科學界【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "當時不少學者主張為了保持客觀，應以【　　　】記錄動物；珍古德則堅持為牠們【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "4",
+          "value": "她透過為黑猩猩命名並長期追蹤，更清楚地記錄牠們的【　　　】，也看見牠們的【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "看見全貌(段６-７)",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "1",
+          "value": "看見黑猩猩的情緒和相互陪伴。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "珍古德目睹黑猩猩為了【　　　】爆發衝突，甚至演變成殘忍的【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "從理解到行動(段８)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "珍古德看見人類開發影響黑猩猩的【　　　】，使保育【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "她成立研究院、推動【　　　】，號召年輕人投入保育。"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "fill_blank",
-      "label": "研究歷程【 段4-5 】",
-      "value": "1.她用最原始也最費力的方法：長時間【　　　】並持續記錄。\n2.珍古德改寫了科學界【　　　】。\n3.當時不少學者主張為了保持客觀，應以【　　　】記錄動物；珍古德則堅持為牠們【　　　】。\n4.她透過為黑猩猩命名並長期追蹤，更清楚地記錄牠們的【　　　】，也看見牠們的【　　　】。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "看見全貌【 段６-７ 】",
-      "value": "1.看見黑猩猩的情緒和相互陪伴。\n2.珍古德目睹黑猩猩為了【　　　】爆發衝突，甚至演變成殘忍的【　　　】。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "從理解到行動【 段８ 】",
-      "value": "1.珍古德看見人類開發影響黑猩猩的【　　　】，使保育【　　　】。\n2.她成立研究院、推動【　　　】，號召年輕人投入保育。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "總結信念【 段9 】",
+      "label": "總結信念【　　　】",
       "value": "【　　　】帶來關心，關心促成【　　　】，行動帶來希望。"
     }
   ],
   "title": "讓黑猩猩被看見的人",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "關鍵發現（段1-3）",
-      "value": "1.珍古德觀察到黑猩猩用【　　　】釣白蟻。\n2.這件事像「震撼彈」，因為當時學界普遍相信：人類是唯一會【　　　】的生物。"
+      "items": [
+        {
+          "label": "1",
+          "value": "珍古德觀察到黑猩猩用【　　　】釣白蟻。"
+        },
+        {
+          "label": "2",
+          "value": "這件事像「震撼彈」，因為當時學界普遍相信：人類是唯一會【　　　】的生物。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "關鍵發現（段1-3）"
     },
     {
-      "kind": "pair",
-      "label": "研究歷程（段4-5）",
-      "value": "1.她用最原始也最費力的方法：長時間【　　　】並持續記錄。\n2.珍古德改寫了科學界【　　　】。\n3.當時不少學者主張為了保持客觀，應以【　　　】記錄動物；珍古德則堅持為牠們【　　　】。\n4.她透過為黑猩猩命名並長期追蹤，更清楚地記錄牠們的【　　　】，也看見牠們的【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "她用最原始也最費力的方法：長時間【　　　】並持續記錄。"
+        },
+        {
+          "label": "2",
+          "value": "珍古德改寫了科學界【　　　】。"
+        },
+        {
+          "label": "3",
+          "value": "當時不少學者主張為了保持客觀，應以【　　　】記錄動物；珍古德則堅持為牠們【　　　】。"
+        },
+        {
+          "label": "4",
+          "value": "她透過為黑猩猩命名並長期追蹤，更清楚地記錄牠們的【　　　】，也看見牠們的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "研究歷程（段4-5）"
     },
     {
-      "kind": "pair",
-      "label": "看見全貌(段６-７)",
-      "value": "1.看見黑猩猩的情緒和相互陪伴。\n2.珍古德目睹黑猩猩為了【　　　】爆發衝突，甚至演變成殘忍的【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "看見黑猩猩的情緒和相互陪伴。"
+        },
+        {
+          "label": "2",
+          "value": "珍古德目睹黑猩猩為了【　　　】爆發衝突，甚至演變成殘忍的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "看見全貌(段６-７)"
     },
     {
-      "kind": "pair",
-      "label": "從理解到行動(段８)",
-      "value": "1.珍古德看見人類開發影響黑猩猩的【　　　】，使保育【　　　】。\n2.她成立研究院、推動【　　　】，號召年輕人投入保育。"
+      "items": [
+        {
+          "label": "1",
+          "value": "珍古德看見人類開發影響黑猩猩的【　　　】，使保育【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "她成立研究院、推動【　　　】，號召年輕人投入保育。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "從理解到行動(段８)"
     },
     {
       "kind": "pair",

@@ -69,6 +69,8 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
 }) => {
   const { token } = useAuth();
   const [rescue, setRescue] = useState<McqRescueContext | null>(null);
+  // 答錯時備好的 context —— 備好不等於打開，學生按了才變成 `rescue`。
+  const [pendingRescue, setPendingRescue] = useState<McqRescueContext | null>(null);
   const q = exercise.question;
   const submitted = verdict !== undefined && verdict !== null;
 
@@ -158,10 +160,16 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
           is_correct: result.verdict === true,
         });
       }
-      // rescue on wrong.
+      // 答錯**不**自動彈出小語老師（Young 2026-08-19）：
+      //
+      // > 為什麼「小語老師」都在我寫錯的時候自動跳出來啊？
+      // > 應該要等我送出後，我自己決定要不要 call 小語老師
+      //
+      // 只把 context 備好，由學生按按鈕才開。旁邊那條路
+      //（`MultipleChoiceExercise`）從 #1507 起就是按鈕才開，這裡沒跟上。
       if (result.verdict === false) {
         const answerIdx = typeof exercise.answer === 'number' ? exercise.answer : 0;
-        setRescue({
+        setPendingRescue({
           questionId: exercise.id,
           lessonId: lessonCode,
           wrongChoice: LETTERS[i] ?? String(i),
@@ -177,7 +185,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     };
     return (
       <>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.question}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <ChoiceInput
           options={q.options}
           value={typeof value === 'number' ? value : null}
@@ -185,6 +193,16 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
           verdict={verdict}
         />
         {submitted ? submittedFeedback('✓ 答對了', '再想想看') : null}
+        {pendingRescue && rescue === null ? (
+          <button
+            type="button"
+            onClick={() => setRescue(pendingRescue)}
+            className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
+          >
+            <span aria-hidden="true">🦉</span>
+            問小語老師，一起想想看
+          </button>
+        ) : null}
         <McqRescueDialog
           isOpen={rescue !== null}
           context={rescue}
@@ -199,7 +217,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     const arr = Array.isArray(value) ? (value as number[]) : [];
     return (
       <div>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.question}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <MultiChoiceInput options={q.options} value={arr} onChange={(v) => onValueChange(v)} verdict={verdict} />
         {!submitted ? (
           <button
@@ -222,7 +240,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     const perm = Array.isArray(value) ? (value as number[]) : q.items.map((_, i) => i);
     return (
       <div>
-        <p className="text-base font-medium text-on-surface mb-3 whitespace-pre-wrap">{q.instruction}</p>
+        <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.instruction}</p>
         <OrderingInput items={q.items} value={perm} onChange={(v) => onValueChange(v)} verdict={verdict} />
         {!submitted ? (
           <button

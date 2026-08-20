@@ -1,0 +1,34 @@
+lesson_uid: L0053
+version_id: v3
+section_no: 五
+keypoints:
+  title: 昆蟲會思考嗎？
+  layout: list
+  answer_carrier: 橘色手寫字（圖形），文字流的【　】內已填有答案
+  rows:
+  - label: 提出問題
+    value: 昆蟲會不會【　】？
+    blanks:
+    - answer: 思考
+  - label: 證據一：捲葉象鼻蟲
+    value: '1.捲葉象鼻蟲母蟲通常依照相似的程序選葉、測量和捲葉，這些是牠的【　】行為。
+
+      2.一隻母蟲遇到葉苞轉不動的困難時，改把【　】拉過來包住葉苞，成功固定育嬰室。'
+    blanks:
+    - answer: 本能
+    - answer: 葉緣
+  - label: 證據二：黃面蜂
+    value: '1.黃面蜂原本跟著捲葉蛾幼蟲在葉苞前後來回【　】。
+
+      2.等幼蟲形成來回奔跑的規律後，黃面蜂改守在【　】，最後抓住幼蟲。'
+    blanks:
+    - answer: 追逐
+    - answer: 葉苞開口
+  - label: 兩項觀察
+    value: 捲葉象鼻蟲和黃面蜂遇到新的情況後，都改變原來的【　】，並達成目的。
+    blanks:
+    - answer: 做法
+  - label: 結尾問題
+    value: 把兩項觀察合起來，這些證據能支持什麼【　】？
+    blanks:
+    - answer: 結論

@@ -1,0 +1,12 @@
+lesson_uid: L0063
+version_id: v3
+errata:
+- id: E1
+  section: 第三篇 五*文章重點整理
+  locator: 第 2 小題「下定決心【　】」的答案
+  source: 終終身學習
+  corrected: 終身學習
+  kind: 贅字
+  why: 「終」重複一次；同一句的課文原文（第三篇第九段）寫的是「下定決心終身學習」
+  confidence: high
+  evidence: document.xml 該儲存格為「【　　　終終身學習　　　　】」，課文段九為「下定決心終身學習」

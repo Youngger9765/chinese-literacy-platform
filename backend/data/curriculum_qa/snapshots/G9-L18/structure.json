@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 2,
     "fill_blank_count": 7,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
       "研究目的",
       "研究方法",
-      "代表球隊",
-      "1.對失敗\n的看法"
+      "1.對失敗的看法",
+      "1.對失敗的看法"
     ],
     "template_kind": "generic"
   },
@@ -35,28 +36,33 @@
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
-          "label": "代表球隊",
-          "value": "波士頓塞爾提克\n【　　　】 紐澤西籃網 \n【　　　】"
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
         },
         {
           "interactive_type": "fill_blank",
-          "label": "1.對失敗\n的看法",
-          "value": "【　　　】【　　　】"
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
         },
         {
-          "correct_options": [
-            0,
-            3
-          ],
           "interactive_type": "checkbox",
-          "label": "2.之後表現 \n【 單選 】",
+          "label": "2.之後表現",
           "options": [
-            "越打越好\n□",
-            "連敗不止 □",
+            "越打越好",
+            "連敗不止"
+          ],
+          "select_mode": "single",
+          "value": "【 單選 】\n①越打越好 ②連敗不止"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2.之後表現",
+          "options": [
             "越打越好",
             "連續低潮"
           ],
-          "value": "①越打越好\n□②連敗不止 □①越打越好\n②連續低潮"
+          "select_mode": "single",
+          "value": "【 單選 】\n①越打越好 ②連續低潮"
         }
       ],
       "value": ""
@@ -92,16 +98,20 @@
     {
       "items": [
         {
-          "label": "代表球隊",
-          "value": "波士頓塞爾提克\n(樂觀型) 紐澤西籃網 \n(悲觀型)"
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
         },
         {
-          "label": "1.對失敗\n的看法",
-          "value": "【　　　】【　　　】"
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
         },
         {
-          "label": "2.之後表現 \n(單選)",
-          "value": "①越打越好\n□②連敗不止 □①越打越好\n②連續低潮"
+          "label": "2.之後表現",
+          "value": "(單選)\n①越打越好 ②連敗不止"
+        },
+        {
+          "label": "2.之後表現",
+          "value": "(單選)\n①越打越好 ②連續低潮"
         }
       ],
       "kind": "section_block",

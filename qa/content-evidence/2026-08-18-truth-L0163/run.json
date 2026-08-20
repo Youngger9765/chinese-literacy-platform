@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0163",
+  "catalog_slot": "文-L8",
+  "pdf_pages": 5,
+  "pages_read": 5,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 1,
+  "notes": "三課裡最短，也是唯一沒有六 自我挑戰的。答案全是橘字：run 層 E97132 為 0，解 rStyle 後 37 個 —— 只掃 run 顏色會判成「這課沒有教師版答案」，正是 SKILL 那條 45/146 課的形狀。w:sym 0 個，所以數 ☑ 完全沒有效力。發現用字落差：地名「崑山」全課 6 次，但第二大題文白詞語比對第 1 題的文言欄印「昆山」（同題白話欄仍印崑山）—— 兩種寫法都是這個地名的通行寫法、都不是錯字，依 SKILL 的「兩份不一致」處理**不列勘誤**、兩處都照原樣保留，記在 _variant_note 交給編輯決定。retry 1 次：meta.strategy 我填了總表版（雙線 ──），逐字門判對不上，改成學習單第四大題副標印的單線版。"
+}

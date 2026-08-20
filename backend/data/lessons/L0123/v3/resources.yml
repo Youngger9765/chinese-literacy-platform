@@ -1,0 +1,28 @@
+lesson_uid: L0123
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 懷舊時光機 舊鈔4萬換1元新台幣 |【民生八方事】| 2023091508
+    duration: (3:29)
+    source: 八大民生新聞
+    has_qr: true
+    url: https://youtu.be/B3mgVn-hXRE
+    url_source: 總表0816「4.影片連結」年級8課次3
+  - index: 2
+    title: 詹雅雯苦戰帕金森氏症 鼓勵病友「一起逃開」｜當掌聲響起
+    duration: (6:00)
+    source: TVBS NEWS
+    has_qr: true
+    url: https://youtu.be/oszhrLJ-or8
+    url_source: 總表0816「4.影片連結」年級8課次3
+  videos_note: 'PDF 上兩個標題前面印有「1.」「2.」，但那是 Word 自動編號（numbering.xml 產生），
+
+    不在 w:t 文字流裡，所以 title 不含編號。
+
+    總表「4.影片連結」分頁記的兩個網址是 http://youtu.be/bLOHlPOXfR8 與 http://youtu.be/hqJkg8Be-ik
+
+    （學習單上只印 QR code，沒有印網址）。'

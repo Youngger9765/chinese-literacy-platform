@@ -1,0 +1,136 @@
+lesson_uid: L0091
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把長框內的語詞劃掉。
+  instruction_note: 大題標題下印「長框」，格子上方的重複指示語印的是「灰框內的語詞刪除」，兩句原稿都在，本欄採大題標題下那一句
+  target_words:
+  - 視而不見
+  - 每況愈下
+  - 負成長
+  - 蹂躪
+  - 不可逆
+  - 里程碑
+  - 開路先鋒
+  - 眾所矚目
+  - 蘊含
+  - 琢磨
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 里程碑柔向風而行犀琢
+  - 道風下軟趨勢開見磨魔
+  - 選而眾所矚目電路成前
+  - 手行長不長負視每先看
+  - 搓蹂每天見成負面電鋒
+  - 揉要拳況情長不可蹂情
+  - 視不見擦愈況大躪愈況
+  - 逆行可藥掌下家愈下每
+  - 蘊草見逆風順視而不見
+  - 愈含愈快向行駛叛逆向
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 里程碑
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    direction: horizontal
+  - word: 琢磨
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 9
+    direction: diagonal_down_left
+  - word: 開路先鋒
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 8
+    - - 4
+      - 9
+    - - 5
+      - 10
+    direction: diagonal_down_right
+  - word: 眾所矚目
+    cells:
+    - - 3
+      - 3
+    - - 3
+      - 4
+    - - 3
+      - 5
+    - - 3
+      - 6
+    direction: horizontal
+  - word: 負成長
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 6
+    - - 6
+      - 6
+    direction: vertical
+  - word: 每況愈下
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    - - 8
+      - 6
+    direction: diagonal_down_right
+  - word: 蹂躪
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 8
+    direction: diagonal_down_left
+  - word: 不可逆
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 3
+    - - 9
+      - 4
+    direction: diagonal_down_right
+  - word: 蘊含
+    cells:
+    - - 9
+      - 1
+    - - 10
+      - 2
+    direction: diagonal_down_right
+  - word: 視而不見
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    - - 9
+      - 10
+    direction: horizontal
+  answer_paths_note: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
+
+    幾何交叉驗證吻合：roundRect 10 個、紙外殘留 0（像素掃描全頁橘色未觸紙緣）
+
+    → 紙上 10 ＝ 路徑 10，不觸發「紙上 > 路徑」警報。
+
+    ⚠️ 橘色連通元件只數到 9 個，那是因為「眾所矚目」與「負成長」兩個框在 目(3,6)／負(4,6)
+
+    上下相鄰而黏成一塊 —— 元件數是下限不是真值，逐格取字才是判準。'

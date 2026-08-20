@@ -31,6 +31,12 @@ const EXPECTED_NAMING: Record<string, string> = {
   dictation: '聽寫練習',
   'knowledge-station': '知識補給站',
   report: '報告',
+  // 文言文專屬 (#2752) — only ever reached via a lesson's own step_sequence,
+  // never DEFAULT_STEP_SEQUENCE (see stepConfig.ts's comment on these entries).
+  'classical-text': '原文',
+  'classical-sentence-matching': '文白句子比對',
+  'classical-word-matching': '文白詞語比對',
+  'classical-self-challenge': '自我挑戰',
 };
 
 /**
@@ -109,5 +115,55 @@ describe('念順順 仍然接得回平台', () => {
     // teacher-marked passage, not the whole text. Break this and the paper
     // worksheet stops connecting to the platform.
     expect(WORKSHEET_TYPE_ALIASES.reading_timer).toBe('key-passage-reading');
+  });
+});
+
+describe('文言文專屬 steps (#2752) 沒有動到既有 16 個 step 的 dbStepNumber', () => {
+  // Self-contained frozen snapshot — deliberately NOT reusing
+  // FROZEN_DB_STEP_NUMBERS above, so this test stands on its own as the
+  // negative control for #2752's registry additions: it only fails if THIS
+  // change (adding 4 new STEP_REGISTRY entries) altered one of the 16
+  // pre-existing numbers, independent of whatever else might edit the table
+  // above later.
+  const PRE_2752_DB_STEP_NUMBERS: Record<string, number> = {
+    'lesson-intro': 1,
+    'paragraph-reading': 2,
+    comprehension: 3,
+    'character-practice': 4,
+    dictation: 5,
+    'key-passage-reading': 6,
+    report: 7,
+    'full-text-annotate': 8,
+    'vocab-application': 9,
+    'vocab-review': 10,
+    'knowledge-station': 11,
+    'vocab-definition': 12,
+    listening: 13,
+    'sentence-practice': 14,
+    'keypoints-table': 15,
+    spotlight: 16,
+  };
+
+  it.each(Object.entries(PRE_2752_DB_STEP_NUMBERS))(
+    '%s still keeps dbStepNumber %i after the 4 new classical steps were added',
+    (id, num) => {
+      expect(STEP_REGISTRY[id]?.dbStepNumber).toBe(num);
+    },
+  );
+
+  it('the 4 new classical steps use dbStepNumbers 17-20 — no collision with any of the 16 above', () => {
+    const newIds = [
+      'classical-text',
+      'classical-sentence-matching',
+      'classical-word-matching',
+      'classical-self-challenge',
+    ];
+    const newNumbers = newIds.map((id) => STEP_REGISTRY[id]?.dbStepNumber);
+    expect(newNumbers).toEqual([17, 18, 19, 20]);
+  });
+
+  it('every dbStepNumber across the whole registry is unique (old 16 + new 4)', () => {
+    const allNumbers = Object.values(STEP_REGISTRY).map((s) => s.dbStepNumber);
+    expect(new Set(allNumbers).size).toBe(allNumbers.length);
   });
 });

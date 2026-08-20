@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
     "checkbox_count": 0,
-    "fill_blank_count": 4,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "fill_blank",
     "primary_labels": [
-      "羅格文船長",
-      "假設一",
-      "假設二",
-      "假設三"
+      "巨石陣",
+      "摩艾走路",
+      "摩艾走路",
+      "巨石陣"
     ],
     "template_kind": "generic"
   },
@@ -16,7 +17,24 @@
   "rows": [
     {
       "interactive_type": "display",
-      "label": "未解之謎：石頭的祕密（二）──摩艾石像",
+      "label": "文章重點整理",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "發現時間",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "巨石陣",
+          "value": "【　　　】年"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "摩艾走路",
+          "value": "【　　　】年"
+        }
+      ],
       "value": ""
     },
     {
@@ -24,65 +42,132 @@
       "label": "發現人",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "巨石陣",
+          "value": "一位英格蘭史學家"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "羅格文船長",
-          "value": "發現地點 【　　　】島"
+          "label": "摩艾走路",
+          "value": "【　　　】"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "假設一",
-      "value": "是【　　　】的力量，讓摩艾走路。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "假設二",
-      "value": "古代人用【　　　】把石像移到海邊。"
-    },
-    {
-      "interactive_type": "fill_blank",
-      "label": "假設三",
-      "value": "古代人把石像立起來，用【　　　】移動。"
+      "interactive_type": "display",
+      "label": "相同處",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "巨石陣",
+          "value": "1.介紹的主題都和【　　　】有關。\n2.對於人們好奇的疑問，均提出【　　　】個假設。\n3.謎團是否被解開"
+        }
+      ],
+      "value": ""
     },
     {
       "interactive_type": "display",
-      "label": "石像用途：人們至今不清楚設立的目的。",
+      "label": "相異處(單選)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "巨石陣",
+          "value": "石頭排列成【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "摩艾走路",
+          "value": "石像背向【　　　】\n面向【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "巨石陣",
+          "value": "最上方巨石的方向為"
+        },
+        {
+          "interactive_type": "display",
+          "label": "摩艾走路",
+          "value": "部分石像頭上最上方會加一塊"
+        }
+      ],
       "value": ""
     }
   ],
-  "title": "未解之謎：石頭的祕密（二）──摩艾石像",
+  "title": "文章重點整理",
   "worksheet_rows": [
     {
       "items": [
         {
-          "label": "羅格文船長",
-          "value": "發現地點 【　　　】島"
+          "label": "巨石陣",
+          "value": "【　　　】年"
+        },
+        {
+          "label": "摩艾走路",
+          "value": "【　　　】年"
+        }
+      ],
+      "kind": "section_block",
+      "section": "發現時間"
+    },
+    {
+      "items": [
+        {
+          "label": "巨石陣",
+          "value": "一位英格蘭史學家"
+        },
+        {
+          "label": "摩艾走路",
+          "value": "【　　　】"
         }
       ],
       "kind": "section_block",
       "section": "發現人"
     },
     {
-      "kind": "pair",
-      "label": "假設一",
-      "value": "是【　　　】的力量，讓摩艾走路。"
+      "items": [
+        {
+          "label": "巨石陣",
+          "value": "1.介紹的主題都和【　　　】有關。\n2.對於人們好奇的疑問，均提出【　　　】個假設。\n3.謎團是否被解開"
+        }
+      ],
+      "kind": "section_block",
+      "section": "相同處"
     },
     {
-      "kind": "pair",
-      "label": "假設二",
-      "value": "古代人用【　　　】把石像移到海邊。"
+      "items": [
+        {
+          "label": "巨石陣",
+          "value": "石頭排列成【　　　】"
+        },
+        {
+          "label": "摩艾走路",
+          "value": "石像背向（　）\n面向（　）"
+        }
+      ],
+      "kind": "section_block",
+      "section": "相異處(單選)"
     },
     {
-      "kind": "pair",
-      "label": "假設三",
-      "value": "古代人把石像立起來，用【　　　】移動。"
-    },
-    {
-      "kind": "pair",
-      "label": "石像用途：人們至今不清楚設立的目的。",
-      "value": ""
+      "items": [
+        {
+          "label": "巨石陣",
+          "value": "最上方巨石的方向為"
+        },
+        {
+          "label": "摩艾走路",
+          "value": "部分石像頭上最上方會加一塊"
+        }
+      ],
+      "kind": "section_block",
+      "section": ""
     }
   ]
 }

@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 5,
+    "checkbox_count": 2,
+    "fill_blank_count": 4,
+    "inline_choice_count": 3,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
-      "連結經驗【 段1～3 】",
-      "提出想法【 段4 】",
-      "舉出實例【 段5～7 】",
-      "連結閱讀【 段8 】"
+      "1",
+      "2",
+      "提出想法",
+      "1"
     ],
     "template_kind": "generic"
   },
@@ -20,57 +21,161 @@
       "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "連結經驗【 段1～3 】",
-      "value": "1.聽別人說話時覺得自己有【　　　】，可以猜到下一句。\n2.「但是」之後【　　　】都接壞消息。"
+      "interactive_type": "display",
+      "label": "連結經驗",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "聽別人說話時覺得自己有【　　　】，可以猜到下一句。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "一定",
+                "不一定"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "「但是」之後【　　　】都接壞消息。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "提出想法【 段4 】",
-      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」 【　　　】的訊息。"
+      "interactive_type": "checkbox",
+      "label": "提出想法",
+      "options": [
+        "之前",
+        "之後"
+      ],
+      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」【　　　】的訊息。\n①之前 ②之後"
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "舉出實例【 段5～7 】",
-      "value": "1.起因：作者希望能和小恩【　　　】。\n2.經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】\n3.結果：小恩最後【　　　】了作者的邀約。"
+      "interactive_type": "display",
+      "label": "舉出實例",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "起因：作者希望能和小恩【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "答應",
+                "婉拒"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "結果：小恩最後【　　　】了作者的邀約。"
+        }
+      ],
+      "value": ""
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "連結閱讀【 段8 】",
-      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的【　　　】。要先留意後面的訊息，再配合前後文理解。"
+      "interactive_type": "checkbox",
+      "label": "連結閱讀",
+      "options": [
+        "前面",
+        "後面"
+      ],
+      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的【　　　】。要先留意後面的訊息，再配合前後文理解。\n①前面 ②後面"
     },
     {
-      "interactive_type": "fill_blank",
-      "label": "統整結論【 段9～10 】",
-      "value": "1.轉折詞後面出現的狀況，常常和一般預期的\n【　　　】，也是整句話的重點所在。\n2.閱讀的時候要留意【　　　】之後的句子。"
+      "interactive_type": "display",
+      "label": "統整結論",
+      "sub_rows": [
+        {
+          "blanks": [
+            {
+              "options": [
+                "相同",
+                "不同"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "轉折詞後面出現的狀況，常常和一般預期的【　　　】，也是整句話的重點所在。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "閱讀的時候要留意【　　　】之後的句子。"
+        }
+      ],
+      "value": ""
     }
   ],
   "title": "跟著「但是」轉個彎",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "連結經驗(段1～3)",
-      "value": "1.聽別人說話時覺得自己有【　　　】，可以猜到下一句。\n2.「但是」之後（□一定　不一定）都接壞消息。"
+      "items": [
+        {
+          "label": "1",
+          "value": "聽別人說話時覺得自己有【　　　】，可以猜到下一句。"
+        },
+        {
+          "label": "2",
+          "value": "「但是」之後（　）都接壞消息。\n①一定 ②不一定"
+        }
+      ],
+      "kind": "section_block",
+      "section": "連結經驗"
     },
     {
       "kind": "pair",
-      "label": "提出想法（段4）",
-      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」 （□之前 　之後）的訊息。"
+      "label": "提出想法",
+      "value": "「但是」像是【　　　】，提醒我們要特別留意「但是」（　）的訊息。\n①之前 ②之後"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "起因：作者希望能和小恩【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】"
+        },
+        {
+          "label": "3",
+          "value": "結果：小恩最後（　）了作者的邀約。\n①答應 ②婉拒"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉出實例"
     },
     {
       "kind": "pair",
-      "label": "舉出實例(段5～7)",
-      "value": "1.起因：作者希望能和小恩【　　　】。\n2.經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】\n3.結果：小恩最後（答應　□婉拒）了作者的邀約。"
+      "label": "連結閱讀",
+      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的（　）。要先留意後面的訊息，再配合前後文理解。\n①前面 ②後面"
     },
     {
-      "kind": "pair",
-      "label": "連結閱讀（段8）",
-      "value": "不只說話，【　　　】也是一樣，句子的重點常常會出現在轉折詞的（□前面　後面）。要先留意後面的訊息，再配合前後文理解。"
-    },
-    {
-      "kind": "pair",
-      "label": "統整結論（段9～10）",
-      "value": "1.轉折詞後面出現的狀況，常常和一般預期的\n（□相同　不同），也是整句話的重點所在。\n2.閱讀的時候要留意【　　　】之後的句子。"
+      "items": [
+        {
+          "label": "1",
+          "value": "轉折詞後面出現的狀況，常常和一般預期的（　），也是整句話的重點所在。\n①相同 ②不同"
+        },
+        {
+          "label": "2",
+          "value": "閱讀的時候要留意【　　　】之後的句子。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整結論"
     }
   ]
 }

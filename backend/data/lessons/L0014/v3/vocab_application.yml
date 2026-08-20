@@ -1,0 +1,47 @@
+lesson_uid: L0014
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號（代號選項可重複填寫）
+  option_bank:
+    A: 遙遙領先
+    B: 索然無味
+    C: 不為所動
+    D: 優雅
+    E: 與眾不同
+    F: 賞心悅目
+    G: 偶有所見
+    H: 趣味橫生
+    I: 老神在在
+  items:
+  - index: 1
+    stem: 當新聞媒體不斷炒作這個老話題時，讓人感到（　）。
+    answer: B
+  - index: 2
+    stem: 跑在最前面的選手，一馬當先，已經（　）其他對手。
+    answer: A
+  - index: 3
+    stem: 捏麵人已越來越少在市集出現，但在古早味夜市中，仍（　）。
+    answer: G
+  - index: 4
+    stem: 她總能在對話中展現出（　）的儀態，讓人覺得親切又受尊重。
+    answer: D
+  - index: 5
+    stem: 她的設計風格總是（　），讓人在眾多作品中一眼就能認出。
+    answer: E
+  - index: 6
+    stem: 他精心布置的花園四季常青，每一處讓人看了都覺得（　）。
+    answer: F
+  - index: 7
+    stem: 即使商店推出了促銷活動，她仍然（　），只買需要的東西。
+    answer: C
+  - index: 8
+    stem: 別人都緊張得說不出話來，他卻（　），好像一切盡在掌握中。
+    answer: I
+  - index: 9
+    stem: 下面是一段短文，請根據語境填入合適的語詞代號。
+    passage: 他在這個競賽中（　），因為他思考問題的方式（　），總是能想到別人想不到的解法。挑戰過程中，雖然大家都很緊張，他卻（　），看起來格外冷靜。
+    answers:
+    - A
+    - E
+    - I

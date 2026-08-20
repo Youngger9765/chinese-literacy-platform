@@ -1,14 +1,15 @@
 {
   "interaction_profile": {
-    "checkbox_count": 5,
-    "fill_blank_count": 1,
+    "checkbox_count": 8,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
-      "收到同學的告白訊息",
-      "猶豫是否\n該答應",
-      "思考如何\n拒絕",
-      "傳訊息  \n表達拒絕"
+      "想法",
+      "感受",
+      "想法",
+      "感受"
     ],
     "template_kind": "generic"
   },
@@ -24,20 +25,25 @@
       "label": "一、二",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            2,
-            3
-          ],
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "收到同學的告白訊息"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "收到同學的告白訊息",
+          "label": "感受",
           "options": [
-            "驚訝  □",
+            "驚訝",
             "驚喜",
             "惱怒",
             "煩躁"
           ],
-          "value": "不知該【如何回應】\n2.擔心相處會變得【尷尬】 【 勾選，可複選 】\n①驚訝  □②驚喜 \n③惱怒  ④煩躁"
+          "value": "①驚訝 ②驚喜 ③惱怒 ④煩躁"
         }
       ],
       "value": ""
@@ -47,22 +53,29 @@
       "label": "三",
       "sub_rows": [
         {
-          "correct_options": [
-            1,
-            2,
-            5
-          ],
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "猶豫是否該答應"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "猶豫是否\n該答應",
+          "label": "想法",
           "options": [
             "自己喜歡的人",
-            "喜歡自己的人 】，比較不會受傷\n2.不想【勉強】接受沒有心動的關係 【 勾選，可複選 】",
-            "混亂 \n□",
-            "輕鬆 \n□",
+            "喜歡自己的人"
+          ],
+          "value": "①自己喜歡的人 ②喜歡自己的人"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "混亂",
+            "輕鬆",
             "悸動",
             "矛盾"
           ],
-          "value": "1.也許選擇【 □①自己喜歡的人　  ②喜歡自己的人 】，比較不會受傷\n2.不想【勉強】接受沒有心動的關係 【 勾選，可複選 】\n①混亂 \n□②輕鬆 \n□③悸動  \n④矛盾"
+          "value": "①混亂 ②輕鬆 ③悸動 ④矛盾"
         }
       ],
       "value": ""
@@ -72,19 +85,25 @@
       "label": "四",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            1
-          ],
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "思考如何拒絕"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "思考如何\n拒絕",
+          "label": "感受",
           "options": [
             "苦惱",
-            "猶豫\n□",
-            "憤怒  □",
+            "猶豫",
+            "憤怒",
             "無奈"
           ],
-          "value": "想要【清楚】拒絕，又不希望讓他覺得自己【不夠好】 【 勾選，可複選 】\n①苦惱 ②猶豫\n□③憤怒  □④無奈"
+          "value": "①苦惱 ②猶豫 ③憤怒 ④無奈"
         }
       ],
       "value": ""
@@ -94,9 +113,19 @@
       "label": "五",
       "sub_rows": [
         {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "傳訊息表達拒絕"
+        },
+        {
           "interactive_type": "fill_blank",
-          "label": "傳訊息  \n表達拒絕",
-          "value": "盡可能給出最【　　　】的回應 感到【　　　】"
+          "label": "想法",
+          "value": "盡可能給出最【　　　】的回應"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受",
+          "value": "感到【　　　】"
         }
       ],
       "value": ""
@@ -106,39 +135,61 @@
       "label": "六",
       "sub_rows": [
         {
-          "correct_options": [
-            0,
-            1
-          ],
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "收到對方回覆"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】"
+        },
+        {
           "interactive_type": "checkbox",
-          "label": "收到對方  回覆",
+          "label": "感受",
           "options": [
             "如釋重負",
-            "坦然 \n□",
+            "坦然",
             "難過"
           ],
-          "value": "1.能同理對方的感受\n2.真誠面對【自己】很重要\n3.感謝對方的【理解】 【 勾選，可複選 】\n①如釋重負\n②坦然 \n□③難過"
+          "value": "①如釋重負 ②坦然 ③難過"
         }
       ],
       "value": ""
     },
     {
-      "correct_options": [
-        0,
-        3,
-        4
-      ],
-      "interactive_type": "checkbox",
+      "interactive_type": "display",
       "label": "統整",
-      "options": [
-        "混亂  □",
-        "平靜 】的感受，以及勇敢【 □",
-        "答應",
-        "拒絕 】後，內心的【",
-        "踏實坦然  □",
-        "沮喪難過 】。"
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "經歷",
+          "options": [
+            "混亂",
+            "平靜"
+          ],
+          "value": "①混亂 ②平靜"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "想法",
+          "options": [
+            "答應",
+            "拒絕"
+          ],
+          "value": "①答應 ②拒絕"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "踏實坦然",
+            "沮喪難過"
+          ],
+          "value": "①踏實坦然 ②沮喪難過"
+        }
       ],
-      "value": "作者寫下這篇小日記，是想抒發被告白後【 ①混亂  □②平靜 】的感受，以及勇敢【 □①答應   ②拒絕 】後，內心的【 ①踏實坦然  □②沮喪難過 】。"
+      "value": ""
     }
   ],
   "title": "感情小日記4──我被告白了",
@@ -146,8 +197,16 @@
     {
       "items": [
         {
-          "label": "收到同學的告白訊息",
-          "value": "不知該【　　　】\n2.擔心相處會變得【　　　】 (勾選，可複選)\n①驚訝  □②驚喜 \n③惱怒  ④煩躁"
+          "label": "經歷",
+          "value": "收到同學的告白訊息"
+        },
+        {
+          "label": "想法",
+          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①驚訝 ②驚喜 ③惱怒 ④煩躁"
         }
       ],
       "kind": "section_block",
@@ -156,8 +215,16 @@
     {
       "items": [
         {
-          "label": "猶豫是否\n該答應",
-          "value": "1.也許選擇（□①自己喜歡的人　  ②喜歡自己的人），比較不會受傷\n2.不想【　　　】接受沒有心動的關係 (勾選，可複選)\n①混亂 \n□②輕鬆 \n□③悸動  \n④矛盾"
+          "label": "經歷",
+          "value": "猶豫是否該答應"
+        },
+        {
+          "label": "想法",
+          "value": "①自己喜歡的人 ②喜歡自己的人"
+        },
+        {
+          "label": "感受",
+          "value": "①混亂 ②輕鬆 ③悸動 ④矛盾"
         }
       ],
       "kind": "section_block",
@@ -166,8 +233,16 @@
     {
       "items": [
         {
-          "label": "思考如何\n拒絕",
-          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】 (勾選，可複選)\n①苦惱 ②猶豫\n□③憤怒  □④無奈"
+          "label": "經歷",
+          "value": "思考如何拒絕"
+        },
+        {
+          "label": "想法",
+          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①苦惱 ②猶豫 ③憤怒 ④無奈"
         }
       ],
       "kind": "section_block",
@@ -176,8 +251,16 @@
     {
       "items": [
         {
-          "label": "傳訊息  \n表達拒絕",
-          "value": "盡可能給出最【　　　】的回應 感到【　　　】"
+          "label": "經歷",
+          "value": "傳訊息表達拒絕"
+        },
+        {
+          "label": "想法",
+          "value": "盡可能給出最【　　　】的回應"
+        },
+        {
+          "label": "感受",
+          "value": "感到【　　　】"
         }
       ],
       "kind": "section_block",
@@ -186,17 +269,38 @@
     {
       "items": [
         {
-          "label": "收到對方  回覆",
-          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】 (勾選，可複選)\n①如釋重負\n②坦然 \n□③難過"
+          "label": "經歷",
+          "value": "收到對方回覆"
+        },
+        {
+          "label": "想法",
+          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①如釋重負 ②坦然 ③難過"
         }
       ],
       "kind": "section_block",
       "section": "六"
     },
     {
-      "kind": "pair",
-      "label": "統整",
-      "value": "作者寫下這篇小日記，是想抒發被告白後（ ①混亂  □②平靜）的感受，以及勇敢（ □①答應   ②拒絕）後，內心的（①踏實坦然  □②沮喪難過）。"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "①混亂 ②平靜"
+        },
+        {
+          "label": "想法",
+          "value": "①答應 ②拒絕"
+        },
+        {
+          "label": "感受",
+          "value": "①踏實坦然 ②沮喪難過"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
   ]
 }

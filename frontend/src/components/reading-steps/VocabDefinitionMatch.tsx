@@ -36,9 +36,11 @@ import {
   PersistedProgress,
 } from './vocabDefinitionMatchLogic';
 import { SummaryScreen } from './VocabDefinitionMatchSummary';
+import { WrongAnswerReviewList, type WrongAnswerReviewItem } from '../learning/WrongAnswerReviewList';
 import { StageStatus } from './VocabDefinitionMatchStageStatus';
 import { MultipleChoiceMode } from './VocabDefinitionMatchMCQ';
 import { DragDropMode } from './VocabDefinitionMatchDragDrop';
+import NextStepFooter from '../learning/NextStepFooter';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -67,15 +69,22 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">dictionary</span>
         <p className="text-on-surface-variant">本課尚無語詞定義資料</p>
-        <button onClick={onFinish} className="btn-immersive">
-          繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
-        </button>
+        <NextStepFooter onNext={onFinish} label="繼續下一步" />
       </div>
     </div>
   );
 }
 
-function StageCompletedPlaceholder({
+// #2773: classify by firstTryCorrect (write-once), not correct (overwritten
+// on retry) — same fix, same reason as VocabDefinitionMatchSummary.tsx. This
+// is the per-mode "選擇題 已完成" screen shown BEFORE the combined summary,
+// and it had the identical bug: verified live on staging showing "答對
+// 11 / 11 題" with zero ✗ cards despite 2 deliberate first-try misses.
+function firstTryOf(a: AnswerRecord): boolean {
+  return (a.firstTryCorrect ?? a.correct) === true;
+}
+
+export function StageCompletedPlaceholder({
   title,
   vocab,
   answers,
@@ -92,7 +101,24 @@ function StageCompletedPlaceholder({
   onGoOther: () => void;
   onRetry: () => void;
 }) {
-  const correctCount = answers.filter((a) => a.correct).length;
+  const correctCount = answers.filter(firstTryOf).length;
+
+  const items: WrongAnswerReviewItem[] = answers.map((ans) => {
+    const item = vocab[ans.defIndex];
+    const isFirstTryCorrect = firstTryOf(ans);
+    // firstTryAnsweredWordIdx, not answeredWordIdx (the LATEST attempt) —
+    // see the same note in VocabDefinitionMatchSummary.tsx. This is the
+    // exact screen the #2773 PR preview caught the bug on.
+    const wrongWordIdx = ans.firstTryAnsweredWordIdx ?? ans.answeredWordIdx;
+    const studentWord = !isFirstTryCorrect && wrongWordIdx !== null ? vocab[wrongWordIdx]?.word ?? null : null;
+    return {
+      id: ans.defIndex,
+      promptText: item?.definition,
+      correct: isFirstTryCorrect,
+      correctAnswerText: item?.word ?? '',
+      studentAnswerText: studentWord,
+    };
+  });
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 pb-48 animate-fade-in">
@@ -105,43 +131,7 @@ function StageCompletedPlaceholder({
       </div>
 
       <div className="flex flex-col gap-3 mb-6">
-        {answers.map((ans, idx) => {
-          const item = vocab[ans.defIndex];
-          const isCorrect = ans.correct;
-          const studentWord =
-            ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word : '—';
-
-          return (
-            <div
-              key={`${title}-result-${idx}`}
-              className={`rounded-xl border-2 px-4 py-3 flex items-start gap-3 ${
-                isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <span
-                className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
-                  isCorrect ? 'bg-emerald-500' : 'bg-red-500'
-                }`}
-              >
-                {isCorrect ? '✓' : '✗'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-500 leading-snug mb-1">{item?.definition}</p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                  <span className="text-gray-500">正確答案：</span>
-                  <span className="font-bold text-gray-800">{item?.word}</span>
-                  {!isCorrect && (
-                    <>
-                      <span className="text-gray-400">|</span>
-                      <span className="text-gray-500">你的答案：</span>
-                      <span className="font-bold text-red-600">{studentWord}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        <WrongAnswerReviewList items={items} revealed />
       </div>
 
       <div

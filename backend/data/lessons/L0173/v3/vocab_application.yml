@@ -1,0 +1,41 @@
+lesson_uid: L0173
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 強顏歡笑
+    B: 杞人憂天
+    C: 重整旗鼓
+    D: 企圖心
+    E: 應援
+    F: 遠見
+    G: 出色
+    H: 故作
+    I: 如常
+    J: 庸人自擾
+  items:
+  - index: 1
+    stem: 他的畫畫作品非常（　），被老師貼在佈告欄讓全班同學欣賞。
+    answer: G
+  - index: 2
+    stem: 這家公司因為主管很有（　），所以提早投入新技術的研發。
+    answer: F
+  - index: 3
+    stem: 球隊中場休息時調整策略，下半場（　），最終成功反敗為勝。
+    answer: C
+  - index: 4
+    stem: 雖然他也害怕蟑螂，但為了安撫嚇壞的弟弟，只能（　）鎮定。
+    answer: H
+  - index: 5
+    stem: 在球場上，他展現了極強的（　），不放過任何可以投籃的機會。
+    answer: D
+  - index: 6
+    stem: 比賽後他才發現自己扭傷，但因為想一起慶祝，所以忍痛（　）。
+    answer: A
+  - index: 7
+    stem: 雖然今天是週末，外面又下著小雨，媽媽還是（　）早起去公園慢跑。
+    answer: I
+  - index: 8
+    stem: 考卷都還沒發下來，你就在擔心自己會不及格，實在是（　）。
+    answer: B
