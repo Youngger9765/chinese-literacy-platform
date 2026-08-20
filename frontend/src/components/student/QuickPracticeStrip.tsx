@@ -67,14 +67,9 @@ const QuickPracticeStrip: React.FC = () => {
         >
           想練點什麼？
         </h2>
-        <button
-          type="button"
-          onClick={() => navigate('/tools')}
-          className="text-sm font-semibold text-accent hover:underline underline-offset-2 transition-colors"
-          aria-label="查看更多練習工具"
-        >
-          看更多 →
-        </button>
+        {/* 「看更多 →」通到 /tools 練習工具箱。側欄那顆已經在 #2801 拿掉，
+            這顆漏了 —— 於是工具箱在導覽上還是到得了，等於沒隱藏。
+            下面那排卡片留著：它們連的是 /write 與 /library，是練習捷徑不是工具箱。 */}
       </div>
 
       {/* Horizontal shelf: scrollable tool cards (Variant B — no icon circles) */}
