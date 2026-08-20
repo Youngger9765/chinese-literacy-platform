@@ -17,6 +17,13 @@ on:
       - 'backend/app/routes/semesters.py'
       - 'backend/data/lessons/**'
       - 'backend/data/curriculum_qa/**'
+      # The pronunciation table is half-generated: _load_taiwan_corrections()
+      # merges this file into PHONEME_CORRECTIONS before CORRECTIONS_FINGERPRINT
+      # is computed, and normalization.py says regenerating it — not appending a
+      # tuple — is how coverage is meant to grow. So the likeliest edit that
+      # orphans the entire TTS cache used to be the one edit this filter did not
+      # watch, leaving test_tts_cache_fingerprint_spec.py unrun (#2742).
+      - 'backend/data/tts/**'
       - 'backend/specs/**'
       - 'scripts/story_structure_qa.py'
       - 'scripts/build_keypoints_qa_manifest.py'
