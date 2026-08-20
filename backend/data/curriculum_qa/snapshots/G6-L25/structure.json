@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 6,
+    "checkbox_count": 1,
     "fill_blank_count": 3,
-    "inline_choice_count": 0,
+    "inline_choice_count": 5,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -21,35 +21,47 @@
       "value": ""
     },
     {
-      "interactive_type": "checkbox",
-      "label": "今【　　　】",
-      "options": [
-        "沉悶",
-        "平靜"
+      "blanks": [
+        {
+          "options": [
+            "沉悶",
+            "平靜"
+          ]
+        }
       ],
-      "value": "天氣很好，而心情【　　　】\n①沉悶 ②平靜"
+      "interactive_type": "inline_choice",
+      "label": "今【　　　】",
+      "value": "天氣很好，而心情【　　　】"
     },
     {
       "interactive_type": "display",
       "label": "昔（第二段～第五段）",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "起因",
-          "options": [
-            "有交往對象了",
-            "也喜歡自己"
+          "blanks": [
+            {
+              "options": [
+                "有交往對象了",
+                "也喜歡自己"
+              ]
+            }
           ],
-          "value": "聽到同學說喜歡的人【　　　】，\n①有交往對象了 ②也喜歡自己"
+          "interactive_type": "inline_choice",
+          "label": "起因",
+          "value": "聽到同學說喜歡的人【　　　】，"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "",
-          "options": [
-            "出乎意料",
-            "理所當然"
+          "blanks": [
+            {
+              "options": [
+                "出乎意料",
+                "理所當然"
+              ]
+            }
           ],
-          "value": "而感到【　　　】\n①出乎意料 ②理所當然"
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "而感到【　　　】"
         },
         {
           "interactive_type": "checkbox",
@@ -89,22 +101,30 @@
       "label": "今（第六段）",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "",
-          "options": [
-            "緩和",
-            "激動"
+          "blanks": [
+            {
+              "options": [
+                "緩和",
+                "激動"
+              ]
+            }
           ],
-          "value": "比起聽到消息的當下，心情【　　　】許多，\n①緩和 ②激動"
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "比起聽到消息的當下，心情【　　　】許多，"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "",
-          "options": [
-            "浪費",
-            "值得"
+          "blanks": [
+            {
+              "options": [
+                "浪費",
+                "值得"
+              ]
+            }
           ],
-          "value": "覺得真心喜歡一個人是【　　　】的。\n①浪費 ②值得"
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "覺得真心喜歡一個人是【　　　】的。"
         }
       ],
       "value": ""

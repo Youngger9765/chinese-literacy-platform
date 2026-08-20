@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 0,
     "fill_blank_count": 3,
-    "inline_choice_count": 0,
+    "inline_choice_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -31,13 +31,17 @@
       "value": "1.颱風後，蔬菜受損，市場【　　　】減少。\n2.颱風前，人們預期青菜上漲，搶買青菜，市場需求增加。"
     },
     {
-      "interactive_type": "checkbox",
-      "label": "例一・後果【 單選 】",
-      "options": [
-        "需求＞供給",
-        "需求＜供給"
+      "blanks": [
+        {
+          "options": [
+            "需求＞供給",
+            "需求＜供給"
+          ]
+        }
       ],
-      "value": "所以青菜價格【　　　】。\n①需求＞供給 ②需求＜供給"
+      "interactive_type": "inline_choice",
+      "label": "例一・後果【 單選 】",
+      "value": "所以青菜價格【　　　】。"
     },
     {
       "interactive_type": "display",
@@ -45,13 +49,17 @@
       "value": "看到高麗菜好賺，農民搶種；收成時，市場湧入大量高麗菜。"
     },
     {
-      "interactive_type": "checkbox",
-      "label": "例二・後果【 單選 】",
-      "options": [
-        "需求＞供給",
-        "需求＜供給"
+      "blanks": [
+        {
+          "options": [
+            "需求＞供給",
+            "需求＜供給"
+          ]
+        }
       ],
-      "value": "所以高麗菜價格【　　　】。\n①需求＞供給 ②需求＜供給"
+      "interactive_type": "inline_choice",
+      "label": "例二・後果【 單選 】",
+      "value": "所以高麗菜價格【　　　】。"
     },
     {
       "interactive_type": "fill_blank",

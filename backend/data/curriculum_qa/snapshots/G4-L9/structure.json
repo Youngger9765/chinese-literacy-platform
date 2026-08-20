@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 5,
+    "checkbox_count": 2,
     "fill_blank_count": 4,
-    "inline_choice_count": 0,
+    "inline_choice_count": 3,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -30,13 +30,17 @@
           "value": "聽別人說話時覺得自己有【　　　】，可以猜到下一句。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "2",
-          "options": [
-            "一定",
-            "不一定"
+          "blanks": [
+            {
+              "options": [
+                "一定",
+                "不一定"
+              ]
+            }
           ],
-          "value": "「但是」之後【　　　】都接壞消息。\n①一定 ②不一定"
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "「但是」之後【　　　】都接壞消息。"
         }
       ],
       "value": ""
@@ -65,13 +69,17 @@
           "value": "經過：作者邀請小恩一起去【　　　】，小恩先表達了她的【　　　】"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "3",
-          "options": [
-            "答應",
-            "婉拒"
+          "blanks": [
+            {
+              "options": [
+                "答應",
+                "婉拒"
+              ]
+            }
           ],
-          "value": "結果：小恩最後【　　　】了作者的邀約。\n①答應 ②婉拒"
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "結果：小恩最後【　　　】了作者的邀約。"
         }
       ],
       "value": ""
@@ -90,13 +98,17 @@
       "label": "統整結論",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "1",
-          "options": [
-            "相同",
-            "不同"
+          "blanks": [
+            {
+              "options": [
+                "相同",
+                "不同"
+              ]
+            }
           ],
-          "value": "轉折詞後面出現的狀況，常常和一般預期的【　　　】，也是整句話的重點所在。\n①相同 ②不同"
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "轉折詞後面出現的狀況，常常和一般預期的【　　　】，也是整句話的重點所在。"
         },
         {
           "interactive_type": "fill_blank",

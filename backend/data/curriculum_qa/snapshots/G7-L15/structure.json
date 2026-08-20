@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 1,
     "fill_blank_count": 4,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -25,15 +25,18 @@
       "label": "家庭生活的改變",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "1",
-          "options": [
-            "吵鬧",
-            "熱鬧",
-            "擁擠"
+          "blanks": [
+            {
+              "options": [
+                "吵鬧",
+                "熱鬧",
+                "擁擠"
+              ]
+            }
           ],
-          "select_mode": "single",
-          "value": "家裡氣氛變得【　　　】【 單選 】\n①吵鬧 ②熱鬧 ③擁擠"
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "家裡氣氛變得【　　　】【 單選 】"
         },
         {
           "interactive_type": "checkbox",

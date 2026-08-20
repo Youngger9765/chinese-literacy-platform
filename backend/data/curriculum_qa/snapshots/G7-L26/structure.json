@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 1,
+    "checkbox_count": 0,
     "fill_blank_count": 11,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -62,14 +62,17 @@
           "value": "1.名字背後帶著取名之人的【　　　】。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "",
-          "options": [
-            "有",
-            "沒有"
+          "blanks": [
+            {
+              "options": [
+                "有",
+                "沒有"
+              ]
+            }
           ],
-          "select_mode": "single",
-          "value": "小說的怪物其實【　　　】名字，可以解讀為他從未得到他人的認同與祝福。【 單選 】\n①有 ②沒有"
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "小說的怪物其實【　　　】名字，可以解讀為他從未得到他人的認同與祝福。【 單選 】"
         },
         {
           "interactive_type": "fill_blank",

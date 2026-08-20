@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 4,
+    "checkbox_count": 1,
     "fill_blank_count": 2,
-    "inline_choice_count": 0,
+    "inline_choice_count": 3,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -30,28 +30,36 @@
       "label": "例子分析",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "1",
-          "options": [
-            "憐憫",
-            "尊重",
-            "憐憫",
-            "尊重",
-            "偏見"
+          "blanks": [
+            {
+              "options": [
+                "憐憫",
+                "尊重",
+                "憐憫",
+                "尊重",
+                "偏見"
+              ]
+            }
           ],
-          "value": "對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n①憐憫 ②尊重 ③偏見"
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "2",
-          "options": [
-            "低期望",
-            "尊重",
-            "低期望",
-            "尊重",
-            "平等"
+          "blanks": [
+            {
+              "options": [
+                "低期望",
+                "尊重",
+                "低期望",
+                "尊重",
+                "平等"
+              ]
+            }
           ],
-          "value": "對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與過度保護。\n①低期望 ②尊重 ③平等"
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與過度保護。"
         },
         {
           "interactive_type": "display",
@@ -76,14 +84,18 @@
           "value": "微歧視似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到人們的【　　　】中。\n①外化 ②內化"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "2",
-          "options": [
-            "明顯",
-            "明顯",
-            "隱蔽"
+          "blanks": [
+            {
+              "options": [
+                "明顯",
+                "明顯",
+                "隱蔽"
+              ]
+            }
           ],
-          "value": "微歧視的特點在於它【　　　】，因此難以被發現和改正。\n①明顯 ②隱蔽"
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "微歧視的特點在於它【　　　】，因此難以被發現和改正。"
         }
       ],
       "value": ""

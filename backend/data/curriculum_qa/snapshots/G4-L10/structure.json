@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
+    "checkbox_count": 2,
     "fill_blank_count": 2,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -52,14 +52,17 @@
       "value": ""
     },
     {
-      "interactive_type": "checkbox",
-      "label": "結果",
-      "options": [
-        "100公尺",
-        "400公尺"
+      "blanks": [
+        {
+          "options": [
+            "100公尺",
+            "400公尺"
+          ]
+        }
       ],
-      "select_mode": "single",
-      "value": "他成為再度登上奧運【 單選 】【　　　】的短跑項目的臺灣選手。\n①100公尺 ②400公尺"
+      "interactive_type": "inline_choice",
+      "label": "結果",
+      "value": "他成為再度登上奧運【 單選 】【　　　】的短跑項目的臺灣選手。"
     },
     {
       "interactive_type": "fill_blank",

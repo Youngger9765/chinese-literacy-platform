@@ -179,6 +179,18 @@ def is_choice_instruction(bracketed: str) -> bool:
     return bool(core) and core <= _INSTRUCTION_CHARS
 
 
+def _count_inline_choice_rows(rows: list[dict]) -> int:
+    """`interactive_type == "inline_choice"` 的列數（含 sub_rows）。"""
+    total = 0
+    for row in rows:
+        subs = row.get("sub_rows") or []
+        targets = subs if subs else [row]
+        for r in targets:
+            if r.get("interactive_type") == "inline_choice":
+                total += 1
+    return total
+
+
 def verify_interaction_profile_contract(structure: dict) -> list[str]:
     """L3: interaction_profile must match rows; answers must not leak."""
     errors: list[str] = []
@@ -193,7 +205,12 @@ def verify_interaction_profile_contract(structure: dict) -> list[str]:
         return errors
 
     fb, cb, _disp = count_interactive_types(rows)
-    expected_mode = derive_mode(fb, cb)
+    # `count_interactive_types` 只認 fill_blank / checkbox，其餘全歸 display ——
+    # `inline_choice`（挑一個填進句中空格）因此被當成唯讀。決定 mode 的時候必須算它，
+    # 否則同一份資料，route 說 "mixed"、這裡說 "fill_blank"，契約永遠對不起來（#2750）。
+    # checkbox_count 的比對維持只看純 checkbox：profile 兩個數是分開帶的。
+    inline = _count_inline_choice_rows(rows)
+    expected_mode = derive_mode(fb, cb + inline)
 
     if profile.get("mode") != expected_mode:
         errors.append(f"profile.mode {profile.get('mode')} != {expected_mode}")
@@ -268,7 +285,12 @@ def gate_l3_mode_expectation(
     """Extra L3 rules per tier."""
     errors: list[str] = []
     mode = profile.get("mode")
-    checkbox_count = profile.get("checkbox_count") or 0
+    # ⚠️ 選擇題家族有兩型：`checkbox`（句子外面勾）與 `inline_choice`（挑一個填進句中空格）。
+    # 這條門問的是「來源有可作答的東西，服務端有沒有變成唯讀」——
+    # inline_choice 當然是可作答的，漏算它會把「已經修好、學生點得到」的課判成缺陷。
+    checkbox_count = (profile.get("checkbox_count") or 0) + (
+        profile.get("inline_choice_count") or 0
+    )
     if tier == LessonTier.PARSER_GAP:
         if mode != "display_only":
             errors.append(f"parser_gap expected display_only, got {mode}")

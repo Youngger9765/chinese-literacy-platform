@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 0,
     "fill_blank_count": 5,
-    "inline_choice_count": 0,
+    "inline_choice_count": 2,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -50,22 +50,30 @@
           "value": "安全：不會引爆地雷。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "巨鼠掃雷3-效率",
-          "options": [
-            "高",
-            "低"
+          "blanks": [
+            {
+              "options": [
+                "高",
+                "低"
+              ]
+            }
           ],
-          "value": "效率【　　　】\n①高 ②低"
+          "interactive_type": "inline_choice",
+          "label": "巨鼠掃雷3-效率",
+          "value": "效率【　　　】"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "巨鼠掃雷3-訓練成本",
-          "options": [
-            "高",
-            "低"
+          "blanks": [
+            {
+              "options": [
+                "高",
+                "低"
+              ]
+            }
           ],
-          "value": "訓練成本【　　　】\n①高 ②低"
+          "interactive_type": "inline_choice",
+          "label": "巨鼠掃雷3-訓練成本",
+          "value": "訓練成本【　　　】"
         }
       ],
       "value": ""

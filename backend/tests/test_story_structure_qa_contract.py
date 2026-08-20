@@ -87,11 +87,17 @@ def test_checkbox_cells_and_the_profile_agree_lesson_by_lesson():
     that holds none must not invent any. Either half failing alone is a parser bug
     that a single-lesson assertion could sit next to without noticing."""
     served = _served_tables()
+    # 「可作答的選擇題」有兩型：`checkbox`（句子外面勾）與 `inline_choice`
+    # （挑一個填進句中空格，#2750）。這條要守的規則是「來源有 □ 選項格 →
+    # 服務端就要有可作答的選擇列」，不是「一定要是 checkbox 那一型」。
+    # 只看 checkbox_count 會把已經修好、學生點得到的 inline_choice 判成缺陷。
+    def _choice_rows(profile: dict) -> int:
+        return (profile.get("checkbox_count") or 0) + (profile.get("inline_choice_count") or 0)
+
     disagree = [
-        (code, count_checkbox_cells_in_table(table), c["interaction_profile"]["checkbox_count"])
+        (code, count_checkbox_cells_in_table(table), _choice_rows(c["interaction_profile"]))
         for code, table, c in served
-        if bool(count_checkbox_cells_in_table(table))
-        != bool(c["interaction_profile"]["checkbox_count"])
+        if bool(count_checkbox_cells_in_table(table)) != bool(_choice_rows(c["interaction_profile"]))
     ]
     assert disagree == [], f"YAML checkbox cells vs profile disagree: {disagree}"
     assert any(count_checkbox_cells_in_table(t) for _, t, _ in served), "no checkbox cells at all"

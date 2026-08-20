@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 4,
+    "checkbox_count": 3,
     "fill_blank_count": 2,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -48,13 +48,17 @@
       "label": "二",
       "sub_rows": [
         {
-          "interactive_type": "checkbox",
-          "label": "事件",
-          "options": [
-            "相同",
-            "不同"
+          "blanks": [
+            {
+              "options": [
+                "相同",
+                "不同"
+              ]
+            }
           ],
-          "value": "常常和他做【　　　】的選擇\n①相同 ②不同"
+          "interactive_type": "inline_choice",
+          "label": "事件",
+          "value": "常常和他做【　　　】的選擇"
         },
         {
           "interactive_type": "display",

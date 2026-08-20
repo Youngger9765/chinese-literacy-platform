@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 3,
+    "checkbox_count": 2,
     "fill_blank_count": 9,
-    "inline_choice_count": 0,
+    "inline_choice_count": 1,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -35,13 +35,17 @@
           "value": "轟炸後倫敦【　　　】、焦土遍野，滿是殘垣敗瓦。"
         },
         {
-          "interactive_type": "checkbox",
-          "label": "3",
-          "options": [
-            "眾多",
-            "稀少"
+          "blanks": [
+            {
+              "options": [
+                "眾多",
+                "稀少"
+              ]
+            }
           ],
-          "value": "死亡人數【　　　】，可見轟炸造成嚴重傷亡。\n①眾多 ②稀少"
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "死亡人數【　　　】，可見轟炸造成嚴重傷亡。"
         }
       ],
       "value": ""
