@@ -26,7 +26,8 @@ type InteractiveType = 'fill_blank' | 'checkbox' | 'display' | 'inline_choice';
 // 空格自己的選項清單（跟句子裡的第 N 個真空格按順序對應），沒有 `correct_option`
 // —— 那是判分用的，伺服器端消毒時就拿掉了，作答後才由 `/structure/grade` 帶回。
 interface InlineChoiceBlank {
-  options: string[];
+  /** 沒有 options = 這一格是填空（同一格可以混合填空與選擇題，#2785）。 */
+  options?: string[];
 }
 
 interface StructureSubRow {
@@ -754,6 +755,27 @@ const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
         last = match.index + match[0].length;
         continue;
       }
+      // 有這一格、但沒有 options —— 那是**填空**。一格裡同時有填空與選擇題
+      // 是真實形狀（L0102「1 個填空 + 2 個選擇」，#2785），要給輸入框，
+      // 不然學生看得到卻填不了。
+      // ⚠️ 上面只判 `!blank`，而 `{}` 是 truthy —— options 是 undefined 就這樣
+      // 傳進 `InlineChoicePicker`，那一格會直接拋錯、整列不見。
+      if (!blank.options || blank.options.length === 0) {
+        const textKey = answerKey(rowIdx, subIdx, blankIdx);
+        nodes.push(
+          <InlineBlankInput
+            key={`b-${blankIdx}`}
+            value={typeof answers[textKey] === 'string' ? (answers[textKey] as string) : ''}
+            onChange={(v) => setAnswer(textKey, v)}
+            submitted={submitted}
+            gradeItem={submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined}
+            compact
+          />,
+        );
+        blankIdx += 1;
+        last = match.index + match[0].length;
+        continue;
+      }
       const key = answerKey(rowIdx, subIdx, blankIdx);
       nodes.push(
         <InlineChoicePicker
@@ -1302,6 +1324,20 @@ const StoryStructureTable: React.FC<Props> = ({
             {blanks.map((blank, b) => {
               const key = answerKey(rowIdx, subIdx, b);
               const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx, b) : undefined;
+              // 沒有 options = 這一格是填空（同一格可混合填空與選擇題，#2785）。
+              // ⚠️ 這裡以前無條件開 picker，而 picker 內部是 `options.map(...)` ——
+              // options 是 undefined 就 TypeError，整列消失。
+              if (!blank.options || blank.options.length === 0) {
+                return (
+                  <InlineBlankInput
+                    key={b}
+                    value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
+                    onChange={(v) => setAnswer(key, v)}
+                    submitted={submitted}
+                    gradeItem={gradeItem}
+                  />
+                );
+              }
               return (
                 <InlineChoicePicker
                   key={b}

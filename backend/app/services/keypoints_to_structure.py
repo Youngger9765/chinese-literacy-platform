@@ -308,9 +308,35 @@ def _sentence_with_inline_choices(sentence: str, node: Any) -> str:
     lines = [sentence] if sentence else []
     for i, g in enumerate(groups, 1):
         rendered = _render_choice_cell(g)
-        if rendered:
-            lines.append(f"第{_CN_ORDINAL[i] if i < len(_CN_ORDINAL) else i}個空格：{rendered}")
+        if not rendered:
+            continue
+        # ⚠️ 序號要指「句子裡的第幾個空格」，不是「這是第幾組選項」。
+        # 一格同時有填空與選擇題時兩者不同：L0102 的句子是「填空、選擇、選擇」，
+        # 照出現順序標會變成第一、第二 —— 下游按序號放，兩組「吸/吃」就落錯格
+        # （#2785）。來源的 `locator` 欄位就是為了講清楚這件事。
+        slot = _slot_of(sentence, g, fallback=i)
+        lines.append(f"第{_CN_ORDINAL[slot] if slot < len(_CN_ORDINAL) else slot}個空格：{rendered}")
     return "\n".join(lines)
+
+
+def _slot_of(sentence: str, group: dict, *, fallback: int) -> int:
+    """這組選項對應句子裡的第幾個空格（1-based）。
+
+    來源用 `locator` 指出所在的片段（例：「電子煙是【…】到肺裡的」）。
+    把 locator 裡的空格記號去掉當前綴去比對，數它前面有幾個空格。
+    找不到 locator 就退回出現順序 —— 那是舊行為，對「每個空格都是選擇題」的
+    格子本來就正確。
+    """
+    loc = str(group.get("locator") or "").strip()
+    if not loc or not sentence:
+        return fallback
+    head = re.split(r"【[^】]*】", loc)[0].strip()
+    if not head:
+        return fallback
+    pos = sentence.find(head)
+    if pos < 0:
+        return fallback
+    return len(re.findall(r"【[^】]*】", sentence[:pos])) + 1
 
 
 _CN_ORDINAL = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
