@@ -37,7 +37,7 @@ const ChoiceInput: React.FC<Props> = ({ options, value, onChange, disabled, verd
             disabled={locked}
             onClick={() => onChange(oi)}
             className={[
-              'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors flex items-start gap-2',
+              'w-full text-left rounded-lg border px-4 py-3 text-lg leading-relaxed transition-colors flex items-start gap-2',
               selected
                 ? 'border-violet-500 bg-violet-50 text-violet-900'
                 : 'border-gray-200 hover:border-violet-300',

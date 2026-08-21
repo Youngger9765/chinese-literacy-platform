@@ -1,0 +1,21 @@
+{
+  "lesson_uid": "L0145",
+  "catalog_slot": "G9-L2",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0,
+    "render_coverage": 0,
+    "verbatim_all": 0
+  },
+  "retries": 1,
+  "notes": "🔴 **本課教師答案幾乎全靠「字元樣式」上色，run 層沒有 w:color。** 只掃 `rPr/w:color` 抓得到 8 個（語詞我最棒），**其餘 32 個一個都看不到**——語詞應用 8 個字母、重點表 12 個填空、聚光燈表格 4 個填空、閱讀理解 5 個答案，全靠 `rPr/w:rStyle` → styles.xml 的 `af`(E97132)。它們在文字流裡（不是圖），逐字門驗得到；但要判斷「哪一段是教師答案」必須解析 rStyle，否則整批會被當題目。🔵 符號逐一查過：`w:sym` Wingdings **F0FE** ☑×11；`w16se:symEx` **Segoe UI Symbol 2606 ☆**×1（知識補給站「☆建議觀看」）；字面 `→`×3 在聚光燈概念框的四步驟串接，**字面的不斷行**。本課沒有 F0E0，所以不能只認一種 char。⚠️ 修了自己工具的一個洞：symEx 的屬性帶命名空間（`w16se:font`/`w16se:char`），用不帶前綴的 get() 讀成 None、字碼靜默消失；而該 ☆ 的文字形只存在於 `mc:Fallback`（我的 lossless 檢查器也排除 Fallback）→ 兩邊同時瞎，看起來乾淨。🔴 **roundRect 9 > 目標語詞 8 —— 單向警報，查完是紙外殘留。** 第 9 個的簽名與 SKILL 描述的 L0069 完全一樣：框線硬寫死 srgbClr E97132（其餘 8 個用佈景色 accent2）、錨點 relativeFrom=rightMargin 位移 5.76in；換算頁寬 8.27in、右界 7.27in → **絕對位置 13.03in**，從未印出。PDF p10 實際數也是 8 個橘圈，兩邊對上。🔴 PDF 大量簡體字代換（八個橫幅、重點表答案「纸／红灯停·绿灯行／骗人／想像变成秩序」），**連標點都換**（「紅燈停，綠燈行」印成「红灯停·绿灯行」，逗號變間隔號）；document.xml 乾淨，一律以 XML 為準。念順順起點第 2 段：兩個段界（149／396）**完全精準，一條 SKILL ⑥.7 口徑都不用套**；數字只標到第 3 段就停（396 不是全文長度，全文自第 2 段起算 1207 字）。勘誤 E1：第 1 段段號是 **U+3127 注音符號ㄧ**不是「一」（其餘七個都是正常國字）——與同批 L0135 段號被打成 EM DASH 同族，第一個號碼特別容易打錯。E2：念順順括號全半形不成對。一次重跑：聚光燈表格第 4 欄我把兩個選項接成一句 → 逐字門抓到**兩列**對不上，因為被勾中的選項前面是 w:sym（無 w:t）、沒勾的前面是字面「□」，原稿其實是「①甲□②乙」；改成**字串 list**（renderer 的 cellText 本來就支援陣列）後 PASS，受檢字串 176→180。⚠️ 這兩個數字是當時（14:18）那版 verbatim_gate.py 算的；該腳本 14:39 被他人更新後，同一份未改動的 yml 計為 179 —— 差異來自門本身的切分規則，不是檔案變了。本課在 content_known_gaps 的 43 課「聚光燈服務 null」清單裡（屬 32 課「抽取器完全沒產出 block」那組），重抽後聚光燈有 **15 個 block（7 個帶教師答案）**＋閱讀理解 5 題＋重點表 4 列＋語詞 8/8/8。"
+}

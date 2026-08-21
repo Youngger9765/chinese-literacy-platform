@@ -1,0 +1,151 @@
+lesson_uid: L0129
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 自我價值
+  - 席捲
+  - 欲罷不能
+  - 心緒
+  - 備受矚目
+  - 悵然若失
+  - 起伏不定
+  - 左右
+  - 過濾泡泡
+  - 演算法
+  - 推播
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 影出音回自疑主輕身宴
+  - 片席春饋我惑席演席加
+  - 思考捲貴價可算缺奉備
+  - 慮卷張全值法許輕還受
+  - 片悵開撩球心緒鬆推矚
+  - 面帳然亂蔽叮囑咐播目
+  - 狹戶起若隱若現火爐於
+  - 隘益伏發失過濾泡泡麵
+  - 欲罷不能呆保不可思議
+  - 疲倦定佐料佑情緒左右
+  answers_are_graphical: true
+  answer_paths:
+  - word: 自我價值
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 5
+    - - 3
+      - 5
+    - - 4
+      - 5
+    direction: vertical
+  - word: 席捲
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 3
+    direction: diagonal_down_right
+  - word: 演算法
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 7
+    - - 4
+      - 6
+    direction: diagonal_down_left
+  - word: 備受矚目
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 心緒
+    cells:
+    - - 5
+      - 6
+    - - 5
+      - 7
+    direction: horizontal
+  - word: 推播
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 9
+    direction: vertical
+  - word: 悵然若失
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 起伏不定
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    - - 9
+      - 3
+    - - 10
+      - 3
+    direction: vertical
+  - word: 過濾泡泡
+    cells:
+    - - 8
+      - 6
+    - - 8
+      - 7
+    - - 8
+      - 8
+    - - 8
+      - 9
+    direction: horizontal
+  - word: 欲罷不能
+    cells:
+    - - 9
+      - 1
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+  - word: 左右
+    cells:
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  geometry_check: '全檔 roundRect 錨點 11 個，全部在第八大題那一頁（本課沒有別的 roundRect —— 聚光燈與
+
+    重點表用的是一般表格，不是圓角框），與 11 條 answer_paths 相同，無「>」方向的警報。
+
+    posOffset 全部以 `column` 為基準、位移在 −0.60in ～ +0.03in，換算絕對位置遠在頁寬
+
+    8.27in 之內 → 無紙外殘留。格子沒有跨頁（10 列都在 p9）。
+
+    11 個目標語詞、11 個圈、11 條路徑，三者一致；每一條都套回 grid 拼得回目標語詞
+
+    （`normalize_word_search.py --check` 綠），本課**沒有**格子錯字。'
+  grid_note: '格子裡有數個誘答字：第 2 列有兩個「席」（c2 是答案、c7 c9 是誘答）、
+
+    第 7 列有兩個「若」、第 9 列有兩個「不」。取字時以路徑座標為準。'

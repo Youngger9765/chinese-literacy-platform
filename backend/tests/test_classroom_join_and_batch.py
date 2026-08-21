@@ -762,7 +762,7 @@ class TestLateJoinSubmissionBackfill:
             f"/api/classrooms/{classroom_id}/assignments",
             json={
                 "classroom_id": classroom_id,
-                "story_id": "1",
+                "story_id": "20001",
                 "title": "Backfill Idempotency Assignment",
             },
             headers=auth_header(teacher["token"]),

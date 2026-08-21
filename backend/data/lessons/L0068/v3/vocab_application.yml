@@ -1,0 +1,43 @@
+lesson_uid: L0068
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 倚重
+    B: 變遷
+    C: 奠定
+    D: 瀕臨
+    E: 僥倖
+    F: 汲取
+    G: 棲地
+    H: 佼佼者
+    I: 永續
+    J: 杳無人煙
+  option_bank_note: 10 個代號對應 8 道小題；I.永續、J.杳無人煙 未被任何一題用到
+  answer_carrier: 橘色手寫代號（PDF p6）；文字層的（　）內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 這場車禍十分嚴重，只有他（　）逃過一劫。
+    answer: E
+  - index: 2
+    stem: 她常閱讀科普書，不斷(　)新知。
+    answer: F
+  - index: 3
+    stem: 這座森林是石虎重要的 (　)，需要大家一起保護。
+    answer: G
+  - index: 4
+    stem: 經過多年努力，他已成為這個領域的(　)。
+    answer: H
+  - index: 5
+    stem: 良好的閱讀習慣，能為日後學習(　)基礎。
+    answer: C
+  - index: 6
+    stem: 受到氣候(　)影響，許多動植物的生活環境正在改變。
+    answer: B
+  - index: 7
+    stem: 這種動物數量快速減少，已經(　)滅絕。
+    answer: D
+  - index: 8
+    stem: 校長十分(　)這位經驗豐富的老師，常請他協助重要計畫。
+    answer: A

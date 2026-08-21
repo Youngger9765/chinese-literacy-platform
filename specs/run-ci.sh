@@ -11,6 +11,9 @@
 #   Gate 2: spec contracts   (pytest specs/)
 #   Gate 3: legacy_tests     (union of all legacy_tests: paths from the registry)
 #           Skip if no module has legacy_tests entries.
+#   Gate 4: QR-manifest reconciliation
+#   Gate 5: spotlight structural ratchet
+#   Gate 6: 原稿過期偵測 (sot_drift_check --offline)
 #
 # Usage:
 #   bash specs/run-ci.sh          # run all gates, exit non-zero on any failure
@@ -23,8 +26,19 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 # Prefer the backend venv (has google.genai etc.); fall back to python3.
+#
+# 這個 fallback 原本是靜默的，而系統 python3 沒有 google-genai —— 於是在任何沒有
+# .venv 的 worktree 裡會冒出 8 個 collection error，看起來跟「你的改動弄壞了 spec」
+# 一模一樣。已經騙過兩次（2026-08-14、2026-08-21），所以改成會叫。
 PYBIN="$REPO_ROOT/backend/.venv/bin/python"
-[ -x "$PYBIN" ] || PYBIN="$(command -v python3)"
+if [ ! -x "$PYBIN" ]; then
+  PYBIN="$(command -v python3)"
+  echo "⚠️  找不到 $REPO_ROOT/backend/.venv —— 退回系統 python3。"
+  echo "   系統 python3 沒有 google-genai，collection error 很可能是這個造成的，"
+  echo "   不是你的改動。要真的驗，用主 checkout 的 venv："
+  echo "     \$(git rev-parse --show-toplevel 2>/dev/null)/backend/.venv/bin/python -m pytest backend/specs -q"
+  echo ""
+fi
 
 echo "== Local Spec CI =="
 echo "   python: $PYBIN"
@@ -87,6 +101,42 @@ fi
 # After importing new courses, re-run this same gate.
 echo "-- Gate 4/4: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
+echo ""
+
+# ── Gate 5/5: spotlight structural ratchet ───────────────────────────────────
+# The spotlight gate existed and nothing ran it. `run_spotlight_dev_gate.sh` and
+# `content_evidence_gate.py` appear in no workflow and were not here either, while
+# CLAUDE.md said a spotlight PR must print CONTENT_EVIDENCE_GATE=PASS. The gate had
+# been exiting 1 on a deleted first-edition fixture for the whole re-ink.
+#
+# This is the cheap half — structure only, deterministic, all 175 lessons — and it is
+# the half that matters before a full rebuild: #2713 and #2714 both end by rebuilding
+# every lesson's spotlight, and without this nothing says what else moved.
+echo "-- Gate 5/5: spotlight structural ratchet (spotlight_fingerprints) --"
+"$PYBIN" scripts/spotlight_fingerprints.py --check
+echo ""
+
+# ── Gate 6/6: 原稿有沒有悄悄過期（SOT_STALE，離線半） ────────────────────────
+# 2026-08-17：案主 20:28 更新 6/7/8 年級 12 個檔，本機快照停在那之前，其中 G8-L4
+# 已經抽完 —— 抽出來的 yml 忠實反映一份**作廢的教材**，而**所有門都是綠的**，
+# 因為每一道門比對的都是本機那份過期原稿。這種過期沒有任何徵兆。
+#
+# `sot_drift_check.py` 早就會用 MD5 抓它，但**只有人想到才會被跑** —— 跟 Gate 5
+# 那個「門存在、沒人跑」是同一種病。
+#
+# 只跑 `--offline` 那半：完整版要 rclone 打 Google Drive（要網路、要憑證、逾時
+# 上限 600 秒），那不能當 push 前的門。離線半問的是「這份**已經 commit** 的抽取
+# 結果，還對得上它宣稱的來源嗎」，答案完全在 repo 與本機快照裡。
+#
+# 沒有本機原稿快照時（例：CI runner，private/ 是 gitignored 的 symlink）它會**明講**
+# 只驗得到「有沒有指紋」、驗不到「指紋對不對」—— 不會假裝全驗過了。
+# 看得見 Drive 那一側要另外跑：`python3 scripts/sot_drift_check.py`
+echo "-- Gate 6/6: 原稿過期偵測（sot_drift_check --offline） --"
+"$PYBIN" scripts/sot_drift_check.py --offline
+echo ""
+
+echo "-- Gate 7/7: 抽出來的模組，學生走不走得到（module_entry_gate） --"
+"$PYBIN" scripts/module_entry_gate.py
 echo ""
 
 echo "== Local Spec CI: PASS =="

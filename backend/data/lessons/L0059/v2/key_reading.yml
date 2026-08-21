@@ -1,0 +1,21 @@
+lesson_uid: L0059
+version_id: v2
+passage: 但這次，我繫著這條紅領帶，參加媽媽的告別式。我13歲那年，媽媽被診斷罹患一種惡性程度很高的胃癌。接下來的11個月，她承受了身體及心理的種種折磨。但是，媽媽用聖經裡的一句話鼓勵自己，也鼓勵我們：「你們落在百般試煉中，都要引以為大喜樂。」
+start_text: 但這次，我繫著這條紅領帶，參加媽媽的告別式。我1
+extent_chars: 117
+source: docx-extract
+anchor_paragraph: 2
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 12
+  cell_paragraphs: 12

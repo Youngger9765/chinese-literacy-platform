@@ -532,6 +532,13 @@ def cell_grid(tc):
     return span, vmerge
 
 
+def _cell_text(cell) -> str:
+    """Cell text WITH the checked box. `Cell.text` drops `w:sym` the same way
+    `Paragraph.text` does, and the keypoints table is built entirely from cells — which
+    is why fixing only the paragraph readers left 68 lessons still leaking (#2555)."""
+    return _para_text(cell, cell._tc).strip()
+
+
 def table_cells(tbl):
     rows = []
     for ri, row in enumerate(tbl.rows):
@@ -540,13 +547,13 @@ def table_cells(tbl):
         for ci, cell in enumerate(row.cells):
             tc = cell._tc
             if id(tc) in seen:
-                cells.append({"col": ci, "text": cell.text.strip(), "dup": True})
+                cells.append({"col": ci, "text": _cell_text(cell), "dup": True})
                 continue
             seen.add(id(tc))
             span, vmerge = cell_grid(tc)
             cells.append({
                 "col": ci,
-                "text": cell.text.strip(),
+                "text": _cell_text(cell),
                 "gridspan": span,
                 "vmerge": vmerge,
                 "has_blank": bool(BLANK_RE.search(cell.text)),
@@ -561,6 +568,29 @@ def img_count(el_or_doc):
     return len(blips)
 
 
+_W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+_BOX_GLYPHS = str.maketrans({"⃞": "□", "▢": "□", "☐": "□", "◻": "□"})
+
+
+def _para_text(para, child) -> str:
+    """Paragraph text WITH the checked-box glyph, which `Paragraph.text` drops.
+
+    `Paragraph.text` concatenates `w:t` only. A checked box is `<w:sym w:font="Wingdings"
+    w:char="F0FE"/>` and produces nothing, so the option the teacher checked arrives with
+    no box while its siblings keep theirs — and the odd one out is the answer (#2555).
+    Emitted as an ordinary 「□」 so every option looks the same. The same substitution is
+    in `extract_lesson_body._paragraphs`; both readers exist and both were leaking.
+    """
+    parts = []
+    for node in child.iter():
+        tag = node.tag
+        if tag == _W_NS + "t":
+            parts.append(node.text or "")
+        elif tag == _W_NS + "sym" and node.get(_W_NS + "char", "").upper() == "F0FE":
+            parts.append("□")
+    return "".join(parts).translate(_BOX_GLYPHS) if parts else para.text
+
+
 def extract_raw(path):
     d = docx.Document(path)
     out = []
@@ -568,7 +598,7 @@ def extract_raw(path):
     for child in d.element.body.iterchildren():
         if isinstance(child, CT_P):
             p = Paragraph(child, d)
-            t = p.text.strip()
+            t = _para_text(p, child).strip()
             if not t:
                 continue
             out.append({"kind": "p", "style": p.style.name, "text": t})
@@ -1120,7 +1150,107 @@ def clean_label(text):
 
 # ── SPOTLIGHT extraction ───────────────────────────────────────────────────
 
-def find_spotlight_range(blocks):
+#: The section heading — 閱讀聚光燈 / 品格聚光燈 / 文言聚光燈 — is drawn in a TEXT BOX,
+#: not in the paragraph flow. python-docx's `Paragraph.text` concatenates `w:r/w:t`
+#: children only, and a text box's runs sit under `mc:AlternateContent/w:drawing/…/
+#: w:txbxContent`, so the paragraph arrives with empty text and `extract_raw` drops it
+#: at `if not t: continue`.
+#:
+#: Measured over the first 40 lessons: the heading is in the document in 38 and reaches
+#: the block stream in 8. The most reliable marker in the worksheet never arrives, which
+#: is why everything downstream compensates with phrase heuristics — and why 29 lessons
+#: with a perfectly ordinary 「閱讀聚光燈」 heading extract nothing at all.
+_SPOTLIGHT_HEADING = re.compile(r"(閱讀|品格|文言)?聚光燈")
+
+
+def textbox_heading_anchor(path) -> int | None:
+    """Block index of the 聚光燈 heading that lives in a text box, or None.
+
+    Returns an index into the SAME list `extract_raw` produces, by walking the body in
+    the same order and counting what that function would have emitted. Used only as a
+    fallback: a lesson whose start is already found keeps it, so this cannot move any of
+    the 143 lessons that extract today.
+    """
+    try:
+        d = docx.Document(path)
+    except Exception:                                   # pragma: no cover
+        return None
+    emitted = 0
+    last: int | None = None
+    for child in d.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            para = Paragraph(child, d)
+            if para.text.strip():
+                emitted += 1
+                continue
+            # Empty in the paragraph flow — look inside any text box it carries.
+            boxed = "".join(
+                node.text or ""
+                for node in child.iter(
+                    "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"
+                )
+            ).strip()
+            if boxed and _SPOTLIGHT_HEADING.search(boxed):
+                # The heading itself is not emitted, so the section starts at whatever
+                # `extract_raw` emits next.
+                #
+                # LAST occurrence, not first — defensive, and load-bearing for nothing
+                # in the current corpus. Stated plainly because the version of this
+                # comment that shipped claimed it FIXED the seven 文言文 lessons that
+                # anchored at block 0, and it did not: taking the last match still left
+                # all seven moved. What fixed them is the call site, which passes None
+                # for classical_grammar because those lessons already build a schema
+                # through the no-start branch.
+                #
+                # Measured: first and last differ in 6 of 175 lessons. Five are the
+                # 文言文 ones the call site excludes. The sixth, L0111, never reaches
+                # this function — its phrase rules return a start of their own.
+                #
+                # Kept because 文言文 worksheets do print 文言聚光燈：固定句式 in the
+                # masthead, the same note `extract_lesson_body` records for its own
+                # boundary search, and a lesson that starts using this path while
+                # carrying a masthead hit would anchor at the top of the document.
+                last = emitted
+        elif isinstance(child, CT_Tbl):
+            emitted += 1
+    return last
+
+
+#: A 【 】 in a table cell is where the student writes. This is the TEACHER's copy, so it
+#: arrives filled in:
+#:
+#:      把頭和四肢【    縮進龜殼     】
+#:      身體顏色【   接近四周環境  】，不容易被【   發現  】
+#:
+#: Serving the rows as extracted hands the student every answer. 438 filled brackets
+#: across the 109 lessons that have a table block; 8 are already empty.
+#:
+#: Checked against the marker's own named style (教材：教師解答) rather than assumed: 405
+#: of the 438 carry it. The 33 that do not are answers too — 「著涼/感冒/生病」,
+#: 「學習/練習」, 「①擔心 ②希望」 — the style is simply applied inconsistently, which is
+#: why the emptiness of the bracket is the rule here rather than the style.
+#:
+#: The answers are kept beside the rows and never rendered, the same arrangement
+#: `ordering` uses for `correct_order`.
+_MARKER_BLANK = re.compile(r"【([^】]*)】")
+
+
+def _blank_marker_answers(rows):
+    """Empty every filled 【 】 and return (rows, answers) in reading order."""
+    answers = []
+
+    def blank(cell):
+        def repl(m):
+            v = m.group(1).strip()
+            if v:
+                answers.append(v)
+            return "【】"
+        return _MARKER_BLANK.sub(repl, cell)
+
+    return [[blank(c) for c in row] for row in rows], answers
+
+
+def find_spotlight_range(blocks, docx_path=None):
     """
     Return (start_idx, end_idx) of spotlight section in blocks list.
     Spotlight = after vocab-application table (T#3/T#4 typically),
@@ -1152,6 +1282,28 @@ def find_spotlight_range(blocks):
                 if re.search(r"步驟|主角|問題|故事|聚光燈|圖文|閱讀|大主題|小主題|說明文|主旨", flat):
                     spotlight_start = i
                     break
+
+    # Fallback only. The phrase rules above look for 「◎ 小試身手」 and friends; the second
+    # edition writes the same sub-heading as 「一、先複習：…」 with no ◎ at all, so they
+    # find nothing in 29 lessons that plainly have the section. The heading itself is the
+    # reliable marker and it is sitting in a text box the block stream never received.
+    #
+    # Applied ONLY when the existing rules came up empty, so a lesson that extracts today
+    # keeps exactly the start it had.
+    # Fallback only, and only for lessons the caller says have no other path. The phrase
+    # rules above look for 「◎ 小試身手」 and friends; the second edition writes the same
+    # sub-heading as 「一、先複習：…」 with no ◎ at all, so they find nothing in 29 lessons
+    # that plainly have the section. The heading itself is the reliable marker and it is
+    # sitting in a text box the block stream never received.
+    #
+    # 文言文 is excluded at the CALL SITE rather than guarded for here: those lessons
+    # already build a 文言聚光燈 schema through the `spotlight_start is None` branch, so
+    # finding a start for them REPLACES something that works. Two structural guards were
+    # tried here first — take the last heading, require it after the title table — and
+    # both cost recovered lessons without fixing the seven, because the information that
+    # settles it (which strategy this lesson is) does not exist in this function.
+    if spotlight_start is None and docx_path is not None:
+        spotlight_start = textbox_heading_anchor(docx_path)
 
     end_idx = mcq_start if mcq_start is not None else len(blocks)
     return spotlight_start, end_idx
@@ -1300,14 +1452,84 @@ def classify_block(b, idx, all_blocks, strategy_type):
                                     if not row["cells"][0].get("dup")
                                 ]}
 
-        # Data table (表一/表二) — figure with table referent
-        if b["n_cols"] >= 2 and b["n_rows"] >= 3:
-            return {"type": "figure", "referent": "table",
-                    "asset": None, "bind_paragraph": None, "_needs_asset_bind": True}
+        # Ordering exercise: a 2-column table of （N）| sentence.
+        #
+        # 《十秒的背後》 asks the student to number four events by time, and the four
+        # events live in a table like this. It matched none of the branches above, fell
+        # through to 「data table → figure with a table referent」, and figures with no
+        # asset are dropped by the uid loader — so the prompt was served with nothing
+        # under it and the step read as 「3.〈𪹚龍慶元宵〉　彭仁星」 and then nothing.
+        #
+        # The numbers in the brackets are the ANSWER, so they become `correct_order`
+        # and never reach the option text. Blank brackets (a student copy) yield an
+        # item with no order, which is still worth showing.
+        ordered = _ordering_rows(b)
+        if ordered:
+            return {"type": "ordering", "items": ordered}
+
+        # Data table — carry the CELLS, not a pointer to a picture that does not exist.
+        #
+        # This returned {figure, referent: table} for any unrecognised multi-column
+        # table, and `lesson_uid_loader._drop_assetless_table_figures` removes those
+        # because a figure with no asset renders as an empty box. The content went with
+        # it: 172 tables across 88 of 175 lessons, and they are exercise material —
+        #
+        #     動物例子 | 重要細節      柴棺龜、食蛇龜 | 把頭和四肢【 縮進龜殼 】
+        #     事件 | 想法（單選）| 情緒  1.上課舉手發言… □①天啊… ②幸好…
+        #
+        # Dropping was right while the alternative was an empty box. Carrying the rows
+        # is better than either. A table that DOES have an image stays a figure.
+        if b["n_cols"] >= 2 and b["n_rows"] >= 2:
+            rows = [
+                [c["text"].strip() for c in row["cells"] if not c.get("dup")]
+                for row in b["rows"]
+            ]
+            rows = [r for r in rows if any(r)]
+            if rows:
+                rows, answers = _blank_marker_answers(rows)
+                out = {"type": "table", "rows": rows}
+                if answers:
+                    out["answers"] = answers
+                return out
 
         return None
 
     return None
+
+
+#: 「（ 4 ）」 / 「（　）」 — an answer slot, optionally already filled in by the marker.
+_ORDER_SLOT_RE = re.compile(r"^[（(]\s*(\d+)?\s*[）)]$")
+
+
+def _ordering_rows(b):
+    """Rows of a 2-column ordering table, or None when the table is something else.
+
+    One column holds answer slots and the other holds the sentences. Which side is
+    which varies between worksheets, so it is decided by looking at the cells rather
+    than assumed. Requires at least two slot rows: a single bracketed cell in an
+    otherwise ordinary table is not an ordering exercise.
+    """
+    if b.get("n_cols") != 2 or b.get("n_rows", 0) < 2:
+        return None
+
+    pairs = []
+    for row in b.get("rows") or []:
+        cells = [c for c in row.get("cells", []) if not c.get("dup")]
+        if len(cells) < 2:
+            continue
+        left, right = cells[0]["text"].strip(), cells[1]["text"].strip()
+        for slot_text, sentence in ((left, right), (right, left)):
+            m = _ORDER_SLOT_RE.match(slot_text)
+            if m and len(sentence) >= 6:
+                pairs.append({
+                    "text": sentence,
+                    "correct_order": int(m.group(1)) if m.group(1) else None,
+                })
+                break
+
+    if len(pairs) < 2:
+        return None
+    return pairs
 
 
 def _classify_question_para(txt, strategy_type):
@@ -2010,9 +2232,13 @@ def extract_self_check(raw_blocks, spotlight_start, spotlight_end):
     return items
 
 
-def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strategy_name, assets=None):
+def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strategy_name, assets=None, docx_path=None):
     """Build the full spotlight schema dict."""
-    spotlight_start, spotlight_end = find_spotlight_range(blocks)
+    # 文言文 has its own path below when no start is found; handing it the text-box
+    # fallback would replace a working schema. Everything else gets the fallback.
+    spotlight_start, spotlight_end = find_spotlight_range(
+        blocks, None if strategy_type == "classical_grammar" else docx_path
+    )
 
     if spotlight_start is None:
         if strategy_type == "classical_grammar":
@@ -2331,7 +2557,7 @@ def process_lesson(lesson_id, docx_path, output_dir):
     # 2. Build spotlight schema (with assets for figure binding)
     sp_schema = build_spotlight_schema(
         resolved_lesson_id, raw_blocks, raw_blocks, strategy_type, strategy_name,
-        assets=assets
+        assets=assets, docx_path=docx_path
     )
     sp_path = Path(output_dir) / f"{resolved_lesson_id}.spotlight.yml"
     with open(sp_path, "w", encoding="utf-8") as f:

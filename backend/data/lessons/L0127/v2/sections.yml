@@ -1,0 +1,127 @@
+lesson_uid: L0127
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 水洩不通
+    definition: 形容擁擠、包圍或堵塞得非常嚴密，連水都流不出去。
+  - index: 2
+    word: 孱弱
+    definition: 身體或力量很弱，站不穩、撐不久。
+  - index: 3
+    word: 煎熬
+    definition: 身體或心裡被痛苦折磨，很難受，撐得很辛苦。像被火慢慢烤一樣的折磨感。
+  - index: 4
+    word: 踉蹌
+    definition: 突然失去平衡，像快要跌倒的樣子。
+  - index: 5
+    word: 屈從
+    definition: 在壓力或威脅下被迫順從，不是出於自願。
+  - index: 6
+    word: 如影隨形
+    definition: 像影子跟著身體一樣，緊緊跟著；形容壓力、恐懼或困擾一直擺脫不了。
+  - index: 7
+    word: 在劫難逃
+    definition: 劫：災禍。指即將遭遇災禍或懲罰，難以逃避。
+  - index: 8
+    word: 跋涉
+    definition: 走很遠、很辛苦的路，形容旅途艱難。
+  - index: 9
+    word: 吞沒
+    definition: 將人或事物完全淹沒，使它消失不見；也可形容情緒完全控制一個人。
+  - index: 10
+    word: 蹣跚
+    definition: 走路不穩、搖搖晃晃的樣子，常見於受傷、年老、疲憊或身體虛弱時的步伐。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 水洩不通
+    B: 在劫難逃
+    C: 如影隨形
+    D: 煎熬
+    E: 孱弱
+    F: 屈從
+    G: 跋涉
+    H: 踉蹌
+    I: 吞沒
+    J: 蹣跚
+  questions:
+  - index: 1
+    text: 颱風來襲，巨浪瞬間（　）了沿岸低地，街道立刻淹成一片。
+    answer: I
+  - index: 2
+    text: 他剛開完刀，身體很（　），走一小段路就氣喘吁吁。
+    answer: E
+  - index: 3
+    text: 朋友逼他一起惡作劇，他怕被排擠，只好（　），跟著做。
+    answer: F
+  - index: 4
+    text: 他作弊得高分，但他一直害怕被揭穿，焦慮（　），睡也睡不好。
+    answer: C
+  - index: 5
+    text: 演唱會散場時，出口被人群塞得（　），大家只能慢慢往前挪。
+    answer: A
+  - index: 6
+    text: 颱風後道路坍方，救難隊（　）數日才抵達山上的村落，進行救援。
+    answer: G
+  - index: 7
+    text: 等待癌症檢查結果的幾天，全家都備受（　），害怕聽到壞消息。
+    answer: D
+  - index: 8
+    text: 他明知資料造假遲早會被揭穿，卻仍心存僥倖，最後（　），遭到查辦。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 第2段寫道：「他們一下火車，在月台上面臨與家人生離死別的『篩選』。」根據這句話的語意，「篩選」最可能強調的是什麼？
+    options:
+      A: 人數龐大不易辨識，因此用編號管理以便點名與管控
+      B: 生活規定十分嚴格，所以每個人都必須維持外表整潔
+      C: 以編號取代姓名，把人變成數字並抹去身分與尊嚴
+      D: 為了避免疾病傳播，所以要求剃髮並完成身分記錄
+    rationale: 第2題解析：作者特別寫「姓名被編號取代」，重點不只是效率或衛生，而是把人變成數字，削弱個體身分與尊嚴。
+  - index: 3
+    answer: B
+    stem: 他把考卷摺了又摺，想把那些腥紅叉叉藏進書包。回家的路好長，連風吹樹葉聲，都像是在嘲笑。即使如此，回家後他仍翻開考卷，把錯的題目重新算了一遍。文中的「即使」最想凸顯的是什麼？
+    options:
+      B: 例子越特別→ 讀者越感動→ 主旨越顯得正確
+      C: 多個例子指向同一概念→ 概念共同支撐主旨→ 主旨更站得住
+      D: 先講出主旨→ 再補充故事→ 讀者更容易記住內容
+      A: 場景越驚悚→ 情緒越強烈→ 主旨越容易被接受
+    rationale: B「即使」引出讓步轉折，強調「條件不利（挫敗、低落）仍做出選擇（重新整理、行動）」
+  - index: 5
+    answer: B
+    stem: 運動會前，你被同學嘲笑「你根本不配參加比賽」。若用文中法蘭柯所說「我可以決定用什麼態度回應」，下列哪個做法最符合？
+    options:
+      A: 覺得對方說得有道理，決定先退出比賽，避免再被嘲笑
+      B: 承認自己會難過，但不把嘲笑當成真相，繼續準備並尋求支持
+      C: 當場用更刺的話回嗆對方，讓他閉嘴，維持自己的面子
+      D: 裝作完全不在乎這件事，把情緒吞下去，硬撐到結束
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 他她的故事：「地獄中也能開出小花」
+    duration_seconds: 60
+    source: 痛快銷研-閱讀治痛知識消炎
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 1
+  needs_human_review: true

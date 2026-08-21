@@ -1,0 +1,27 @@
+lesson_uid: L0114
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【從零開始養】石虎!挑戰1餐吃爆12隻老鼠!石虎不滅絕的最終方案(日本做法)?石虎為什麼叫石虎?【許伯簡芝】
+    duration: '14:05'
+    duration_seconds: 845
+    source: 許伯&簡芝—倉鼠人
+    url: http://youtu.be/4CELG_qIDEI
+  - index: 2
+    title: 留一條生路！石虎路殺頻傳－台灣保育動物生存危機
+    duration: '4:58'
+    duration_seconds: 298
+    source: DaAi News Storage
+    url: http://youtu.be/g_gGPsgquok
+  note: 學習單只印片名、片長與 QR code，網址不在文字流裡，由總表「4.影片連結」補上
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/4CELG_qIDEI
+    url_source: 總表0816「4.影片連結」年級8課次17
+  - index: 2
+    url: http://youtu.be/g_gGPsgquok
+    url_source: 總表0816「4.影片連結」年級8課次17

@@ -1,0 +1,53 @@
+keypoints:
+  lesson: G6-L17
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 青少年的睡眠需求
+    value: 青少年每天需要__小時的睡眠。
+    blanks:
+    - answer: 8～10
+      hint: ''
+  - label: 睡眠對__的影響
+    value: 1.睡眠能幫助身體修復__、調整運作，並清除__產生的廢物。2.長期睡不夠，可能增加健康風險。
+    blanks:
+    - answer: 肌肉
+      hint: ''
+    - answer: 代謝
+      hint: ''
+    label_blanks:
+    - answer: 身體健康
+      hint: ''
+  - label: 睡眠對__的影響
+    value: 1.睡眠時，大腦會__，把白天接收的訊息__。2.睡眠不足則會較難吸收新知，反應也會變__。
+    blanks:
+    - answer: 整理記憶
+      hint: ''
+    - answer: 去蕪存菁
+      hint: ''
+    - answer: 慢
+      hint: ''
+    label_blanks:
+    - answer: 學習
+      hint: ''
+  - label: 常見的睡眠__(迷思)
+    value: 1.平日熬夜可利用假日補眠？生理時鐘不規律，會影響睡眠的品質。2.睡前喝酒能幫助入眠？睡覺時血液若有__，容易頻繁的醒來，降低睡眠品質。
+    blanks:
+    - answer: 酒精
+      hint: ''
+    label_blanks:
+    - answer: 錯誤觀念
+      hint: ''
+  - label: 睡前拖延的原因與影響
+    value: 睡前長時間使用3C產品，容易延後睡覺；晚睡使白天更疲倦，晚上又繼續滑手機，形成__。
+    blanks:
+    - answer: 惡性循環
+      hint: ''
+  - label: 改善睡眠的行動
+    value: 睡前放下__，讓煩擾的思緒慢慢安靜，以飽滿的精神迎接新的一天。
+    blanks:
+    - answer: 3C產品
+      hint: ''
+  title: 祝你好眠

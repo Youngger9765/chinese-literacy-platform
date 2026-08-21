@@ -1,0 +1,425 @@
+# L0004 / G4-L13《感情小日記2──喜歡是什麼？》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 8/8 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/4年級/G4-L13感情小日記2──喜歡是什麼？（品格力-自我覺察─想法與情緒的關係）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+
+meta:
+  lesson_uid: L0004
+  catalog_slot: G4-L13
+  title: 感情小日記2──喜歡是什麼？
+  level: 4
+  genre: 抒情文
+  strategy: 品格力──自我覺察－想法與情緒的關係
+  strategy_label_printed: 目標議題
+  課文學習單: 張筱晴
+  pdf_pages: 8
+  # 總表（自學教材總表0812.xlsx．1.總表）決定性讀取；`_` 開頭 = 值不在 DOCX，不進逐字門
+  _總表_文體: 抒情文
+  _總表_類型: ""
+  _總表_議題: 品格力：SEL自我覺察
+  _總表_聚光燈策略: 品格力──自我覺察─想法與情緒的關係
+  _總表_第六大題標題: 自我覺察──想法與情緒的關係
+  _總表_語詞: [亂竄, 動向, 揮之不去, 起伏, 深淵, 煙消雲散, 偵測, 不是滋味, 心花怒放, 一言一行]
+  _總表_對照note: 總表只列 10 個語詞，缺「雀躍」；學習單語詞框、三、四、八大題皆為 11 個（含雀躍）。差異在總表側。
+
+# ── 原稿勘誤 ──────────────────────────────────────────────────
+source_errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 第 4 段「一言一行」與「起伏」之間
+    source: 但我卻發現我的情緒總是隨著他的一言一行 起伏。
+    corrected: 但我卻發現我的情緒總是隨著他的一言一行起伏。
+    kind: 贅餘空格
+    why: 中文句中不應有半形空格；此處為排版殘留
+    confidence: high
+    evidence: document.xml 與 PDF p1 一致，右緣累計字數 269-155=114 亦不計此空格
+  - id: E2
+    section: 三 語詞我最棒（本課語詞框）
+    locator: 語詞框第 2 行行末
+    source: 起伏、深淵、煙消雲散偵測、不是滋味、雀躍、
+    corrected: 起伏、深淵、煙消雲散、偵測、不是滋味、雀躍、
+    kind: 漏標點
+    why: 語詞框每項以「、」分隔，唯獨「煙消雲散」與「偵測」之間漏了頓號（換行處）
+    confidence: high
+    evidence: document.xml 該段為單一字串，PDF p3 顯示為換行
+# 兩處僅記錄、不列勘誤（皆非印錯）：
+#   ① 二 念順順 指示語括號在文字流是「（三    )」（前全形後半形），☞ 為圖形物件不在文字流
+#   ② 七 閱讀理解 Q1 的教師更正共 3 條（A/C/D），PDF 上 D 那條被版面遮住，文字流三條齊全
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 品格聚光燈, subtitle: 自我覺察──想法與情緒的關係}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  checklist_instruction: ※ 如果你有做到下列事項，請在□內打勾。
+  checklist:
+    - 請在不太了解的字、詞或句做記號。
+    - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  paragraph_count: 6
+  paragraphs:
+    - idx: 1
+      text: 最近心情起起伏伏，變得好不習慣，好不像我……
+    - idx: 2
+      text: 上課時，我明明想專心聽老師講解，但眼神總是不自覺飄向前排的那個身影。有時候只是瞄一眼，卻發現自己根本沒聽進去老師剛剛說了什麼。有一次，老師突然點我回答，我只能紅著臉站著，當下只想鑽進地洞裡。而下課時，無論是同學找我打球、上廁所或是去福利社，我總是會多觀察他的動向，總是偷偷跟隨著他做選擇，只希望有更多相處的機會。
+    - idx: 3
+      text: 然而最近我更發現當他和其他同學聊天聊得很開心，我的胸口就會被抓緊，心裡很不是滋味，也開始胡思亂想：他是不是喜歡那個很幽默的同學？他們會不會常常傳訊息？他跟我聊天有這麼開心嗎？還是我根本不特別？這些念頭在我腦中亂竄，有時候一閃而過，但有時候卻揮之不去，像是一群停不下來的蜜蜂，在腦袋裡嗡嗡作響，也讓我越想越難過。
+      marker: ☞ 印在本段句首（念順順起點）
+    - idx: 4
+      text: 我變得很敏感，雖然還是維持著同學般的互動，但我卻發現我的情緒總是隨著他的一言一行起伏。當他下課時沒有找我，我會感到失落，但他一旦對我說句話或我們剛好對到眼，我內心就莫名雀躍。心情就像坐雲霄飛車一樣，有時心花怒放，有時卻跌入深淵。
+      source_text: 我變得很敏感，雖然還是維持著同學般的互動，但我卻發現我的情緒總是隨著他的一言一行 起伏。當他下課時沒有找我，我會感到失落，但他一旦對我說句話或我們剛好對到眼，我內心就莫名雀躍。心情就像坐雲霄飛車一樣，有時心花怒放，有時卻跌入深淵。
+      errata_ref: E1
+    - idx: 5
+      text: 這幾天睡前，我都躺在床上盯著天花板，覺得好累。為什麼會這麼在意他的眼神？為什麼他隨口的一句話，能讓我高興一整天？為什麼喜歡一個人，反而讓我這麼不快樂？我以前認為喜歡一個人應該是開心的事，但現在卻覺得腦中被強行安裝了警報器，時時都在偵測他和我的距離，太近或太遠都會讓警鈴大作。喜歡到底是什麼？
+    - idx: 6
+      text: 我到底是怎麼了？
+  # 段號欄印 ㄧ二三四五六 共 6 個；末段「希望明天的我能平靜一點……」在段號欄之外，
+  # 且不在右緣累計字數的計數範圍內（見 running_char_counts 對帳），故獨立存放。
+  # ⛔ 不可併進第 6 段——五大題「統整」列明講「結合第一段與最後一段」，它是獨立的一段。
+  postface: 希望明天的我能平靜一點……不過，也許只要他再對我笑一次，這些煩惱又會立刻煙消雲散吧。
+  # 課文右緣印的累計字數（從 ☞ 所在的第三段起算）
+  # 對帳：155（三末）→ 269（四末，+114）→ 414（五末，+145）→ 422（六末，+8），四個斷點全對得上
+  running_char_counts: [27, 57, 85, 115, 144, 155, 183, 212, 242, 269, 297, 326, 355, 385, 414, 422]
+  inline_marked_terms: [動向, 不是滋味, 亂竄, 揮之不去, 一言一行, 起伏, 雀躍, 心花怒放, 深淵, 偵測, 煙消雲散]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（三☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 3          # ☞ 印在「然而最近我更發現」該行
+  end_paragraph: 6            # 右緣累計字數止於 422（第六段末）
+  spans_paragraphs: [3, 4, 5, 6]
+  approx_chars_from_start: 422
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+    - {threshold: ＜190字, feedback: 還要多加練習。}
+    - {threshold: 191~220字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞221字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    - 從本課語詞框框，找語詞。
+    - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    - 問同學。
+  vocabulary_bank: [亂竄, 動向, 揮之不去, 起伏, 深淵, 煙消雲散, 偵測, 不是滋味, 雀躍, 心花怒放, 一言一行]
+  items:
+    - {index: 1, word: 煙消雲散, definition: 比喻事情或情緒完全消失不見。}
+    - {index: 2, word: 不是滋味, definition: 心裡覺得不舒服、不開心，但又難以形容。}
+    - {index: 3, word: 亂竄, definition: 到處亂跑、亂動。}
+    - {index: 4, word: 揮之不去, definition: 無法從心中或腦中去掉，常指記憶或情緒。}
+    - {index: 5, word: 動向, definition: 行動和事情發展的方向。}
+    - {index: 6, word: 起伏, definition: 高高低低的變化，常用來形容情緒或局勢。}
+    - {index: 7, word: 心花怒放, definition: 形容心情像盛開的花朵一樣，非常開心。}
+    - {index: 8, word: 深淵, definition: 比喻危險或苦痛的地方。}
+    - {index: 9, word: 一言一行, definition: 說的每句話、做的每件事；常用來形容行為表現的細節。}
+    - {index: 10, word: 偵測, definition: 查看有沒有出現某種情況。}
+    - {index: 11, word: 雀躍, definition: 像麻雀輕快地跳躍；形容心情輕快愉悅。}
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank: {A: 揮之不去, B: 煙消雲散, C: 不是滋味, D: 心花怒放, E: 一言一行, F: 深淵, G: 動向, H: 起伏, I: 雀躍}
+  items:
+    - {index: 1, stem: 這次總統大選競爭激烈，記者們都密切注意選舉的（　）。, answer: G}
+    - {index: 2, stem: 看到自己努力畫的作品被老師認為是抄襲，小偉心裡真的很（　）。, answer: C}
+    - {index: 3, stem: 那天比賽失誤的畫面一直（　），讓她晚上翻來覆去睡不著。, answer: A}
+    - {index: 4, stem: 經過真誠的溝通後，原本的誤會像（　）般消失了，兩人終於和好。, answer: B}
+    - {index: 5, stem: 被喜歡的同學加好友後，她（　），笑得好開心。, answer: D}
+    - {index: 6, stem: 這部電影的劇情充滿（　）轉折，觀眾的情緒也隨著角色的命運緊張不已。, answer: H}
+    - {index: 7, stem: 身為班長，他深知自己的（　）都會影響同學，因此更加謹言慎行。, answer: E}
+    - {index: 8, stem: 幸好他及時尋求幫助，他才沒有一步步走向憂鬱的（　）。, answer: F}
+  note: 選項 I.雀躍 在八個題目中未被用到
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 感情小日記2──喜歡是什麼？
+  intro: 日記常用來記錄生活事件與心情感受，並藉此抒發情緒，上一篇小日記我們嘗試透過整理作者經歷的事件及感受來理解日記內容，這一篇也再試試看吧！
+  structure: nested
+  columns: [段落, 事件, 感受]
+  rows:
+    - paragraph: 二
+      event: 上課時因為太在意他而分心，導致無法回答老師的問題
+      feeling:
+        instruction: (勾選，可複選)
+        select: multi
+        options: {1: 尷尬, 2: 生氣, 3: 感到丟臉}
+        answer: [1, 3]
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - paragraph: 二
+      event:
+        value: 常常和他做（　）的選擇
+        select: single
+        options: {1: 相同, 2: 不同}
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      feeling: 期待有更多相處的機會
+    - paragraph: 三
+      event: 看見他與別人談笑
+      feeling:
+        instruction: (勾選，可複選)
+        select: multi
+        options: {1: 不是滋味, 2: 難過, 3: 害羞}
+        answer: [1, 2]
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - paragraph: 四
+      event: 下課時沒有和他互動
+      feeling:
+        value: 感到【　】
+        blanks: [{answer: 失落}]
+    - paragraph: 四
+      event: 下課時有說到話或對到眼
+      feeling:
+        value: 內心【　】
+        blanks: [{answer: 雀躍}]
+    - paragraph: 五
+      event: 因為喜歡而有各種心情起伏
+      feeling:
+        instruction: (勾選，可複選)
+        select: multi
+        options: {1: 平靜, 2: 疲累, 3: 困惑}
+        answer: [2, 3]
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - paragraph: 統整
+      value: |-
+        結合第一段與最後一段，作者寫下這篇小日記，
+        是想抒發心情（　）的感受。
+      select: single
+      options: {1: 大起大落, 2: 平靜如水}
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+
+# ── 六 品格聚光燈 ──
+spotlight:
+  strategy_name: 自我覺察──想法與情緒的關係
+  strategy_type: character
+  section_title_printed: 品格聚光燈
+  blocks:
+    - type: concept_box
+      text: |-
+        本文作者看到「朋友和別人聊天」，會不開心；但很多人會覺得這根本沒什麼。為什麼同一件事，不同人會有不同的情緒感受？
+        情緒常受到兩件事影響：一、遭遇的事件本身，二、我們「怎麼想這件事」。也就是說，你有情緒時，你的情緒也許是「想法」造成的。底下的練習，讓我們來學著覺察「想法和情緒間的關係」。
+
+    - type: exercise
+      label: 小試身手（第一張表）
+      instruction: ◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)
+      columns: [事件, 背後可能的想法（單選）, 情緒感受]
+      flow_note: 表頭三欄之間印有虛線箭頭，表示「事件 → 想法 → 情緒感受」的推進方向
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      items:
+        - type: single
+          index: 1
+          event: 看見喜歡的人與別人談笑
+          options: {1: 我沒有那個人幽默風趣, 2: 他真棒，能和這麼多人打成一片}
+          answer: 1
+          emotion: 不是滋味
+        - type: single
+          index: 2
+          event: 他（喜歡的人）下課沒有來找我
+          options: {1: 我是不是沒那麼重要？, 2: 今天他另有重要的事要做}
+          answer: 1
+          emotion: 沮喪失落
+        - type: single
+          index: 3
+          event: 下課時和喜歡的人說到話或對到眼
+          options: {1: 對他來說，我一定不只是普通同學, 2: 我可以繼續觀察我們的關係變化}
+          answer: 1
+          emotion: 雀躍欣喜
+
+    - type: guide
+      text: ☆勾完後，再看看沒有勾選的選項，那樣的想法所帶來的情緒有什麼不同呢？
+
+    - type: sub_block
+      label: 更多情境事件（第二張表）
+      instruction: ◎接著，我們再來看看更多情境事件，並根據題目的情緒，選擇對應的想法。
+      columns: [事件, 背後可能的想法（單選）, 情緒感受]
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      items:
+        - type: single
+          index: 1
+          event: 上課舉手發言，結果被老師糾正錯誤
+          options: {1: 天啊！大家一定覺得我愛現又很蠢, 2: 幸好我有發言，才能得到老師的糾正}
+          answer: 2
+          emotion: 踏實、感謝
+        - type: single
+          index: 2
+          event: 傳訊息問朋友作業，被未讀未回
+          options: {1: 他可能嫌我太煩、太笨所以不想回, 2: 他可能在忙，我先問問看其他人}
+          answer: 1
+          emotion: 焦慮、失落
+        - type: single
+          index: 3
+          event: 放學的時候，朋友沒等我一起走
+          options: {1: 他今天是不是有什麼急事呢？, 2: 是我做錯了什麼嗎？他想刻意避開我}
+          answer: 1
+          emotion: 平靜、好奇
+        - type: single
+          index: 4
+          event: 同學在群組約大家看電影，沒有標註我
+          options: {1: 他們可能以為我一定會去了, 2: 他們是不是想排擠我？故意針對我？}
+          answer: 2
+          emotion: 傷心、憤怒
+        - type: single
+          index: 5
+          event: 同學主動幫我處理老師交代的任務
+          options: {1: 同學好熱心，也為我省下了不少時間, 2: 他好瞧不起我，不相信我可以做好}
+          answer: 1
+          emotion: 開心、溫暖
+
+    - type: multi
+      label: 歸納
+      prompt: ◎根據上面的回答，請試著歸納，能帶來平靜、好心情的想法多半具備下列哪些特質呢？
+      options:
+        1: 能換位思考，願意站在他人立場理解行為
+        2: 願意接受事情有很多種可能，不針對自己
+        3: 自我中心，凡事只相信自己的判斷
+        4: 能從善意的角度解釋他人行為
+        5: 能保持好奇，不急著下判斷
+        6: 過度連結，認為許多事情都是自己的責任、都跟自己有關
+        7: 能看見自己的優點，不隨意否定自己
+      option_examples:
+        1: （如：他放學沒等我，可能是剛好跟家人有約，來不及說。）
+        2: （如：他已讀不回，可能是不小心按到，或是點開後手機沒電了。）
+        3: （如：對方的委婉拒絕可能只是剛好沒空，我相信他一定對我有好感。）
+        4: （如：他沒約我打遊戲，也許是怕我作業太多會分心。）
+        5: （如：他今天都沒跟我說話，不知道他怎麼了？晚點來關心他。）
+        6: （如：他分組沒有找我，一定是因為上禮拜我沒陪他去福利社。）
+        7: （如：雖然我的意見沒有被小組採用，但勇敢分享本身就是很棒的表現。）
+      answer: [1, 2, 4, 5, 7]
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+
+    - type: guide
+      text: 回到文章，我們會看見，作者雖然是因為那份「喜歡」，所以十分在乎對方，以至於心情劇烈起伏，但影響情緒的關鍵也包含他的想法。所以當我們學會覺察想法，就能慢慢讓情緒變得穩定、有力量❤︎
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: B
+      stem: 下列選項「  」中的語詞，何者使用正確？
+      options:
+        A: 經過多年的努力，他終於打破紀錄，攀上了「深淵」
+        B: 美國暫緩提升關稅後，大家都密切關注市場「動向」
+        C: 春天已經悄悄來臨，時不時都能看見路邊「心花怒放」
+        D: 他對公司「揮之不去」，儘管時常加班，他也無怨無尤
+      option_corrections: {A: 宜改為「高峰」, C: 宜改為「小花綻放」, D: 宜改為「忠心耿耿」}
+    - index: 2
+      answer: C
+      stem: 根據第三段，「（這些念頭）像是一群停不下來的蜜蜂，在腦袋裡嗡嗡作響」這句話最可能表現出作者當時的什麼狀態？
+      options:
+        A: 手足無措，對於未來感到一片茫然
+        B: 活力四射，腦海中有大量靈感出現
+        C: 煩亂不堪，無法停止各種胡思亂想
+        D: 緊張無比，深怕自己做錯了什麼事
+      teacher_note: 從前後文可推知這樣的狀態讓作者十分困擾，所以選(C)
+    - index: 3
+      answer: D
+      stem: 根據文章結尾「也許只要他再對我笑一次，這些煩惱又會立刻煙消雲散吧。」下列選項何者最貼近這句話的背後意涵？
+      options:
+        A: 強調任何煩惱都該要用微笑面對
+        B: 強調煩惱像煙霧消散，不用掛心
+        C: 強調已準備放下對方，一笑置之
+        D: 強調對方對自己的情緒影響極大
+      teacher_note: 從文章可知作者心情的起伏都和對方有關。
+    - index: 4
+      answer: A
+      stem: 根據本文標題「喜歡是什麼」及內容，下列敘述何者最貼近作者答案？
+      options:
+        A: 喜歡是颱風來臨時的海浪，高高低低，且難以控制
+        B: 喜歡是大雨過後的彩虹，繽紛美好，卻也無法久留
+        C: 喜歡是遲遲無法擺脫的惡夢，時刻相伴，無處可逃
+        D: 喜歡是童年時的糖果，讓人滿口都甜蜜，心情愉快
+      teacher_note: 從文章可知作者因為這份情感而心情起伏劇烈。
+    - index: 5
+      answer: D
+      stem: 根據品格聚光燈的練習，下列何者對於「事件─想法─感受」的理解較為合適？
+      options:
+        A: 橘子：每個人在相同的事件中都有相同的感受
+        B: 步美：比起想法，事件對感受的影響更為直接
+        C: 靜香：越快對事件下判斷就越能保持平靜喜悅
+        D: 小葵：釐清對事件的想法有助於自己調適心情
+      teacher_note: |-
+        (A)每個人感受不同(B)想法影響感受更多
+        (C)應盡量避免太快下判斷。
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [亂竄, 動向, 起伏, 深淵, 偵測, 雀躍, 揮之不去, 煙消雲散, 不是滋味, 心花怒放, 一言一行]
+  grid_size: [10, 10]
+  grid:
+    - 大同小異亂不揮不測風
+    - 心花怒放來目是之念淵
+    - 願讚崩潰不煙伏深不怒
+    - 一雀躍轉消經年累月去
+    - 言不睛雲年天伏亂雲事
+    - 一已散無齡壤竄散深與
+    - 行滋可家不之目放淵願
+    - 無言執常是別起伏張違
+    - 喻動著便滋勢均力敵偵
+    - 心情向飯味言累事測消
+  answers_are_graphical: true
+  answer_paths:
+    - word: 揮之不去
+      cells: [[1, 7], [2, 8], [3, 9], [4, 10]]
+      direction: diagonal_down_right
+    - word: 心花怒放
+      cells: [[2, 1], [2, 2], [2, 3], [2, 4]]
+      direction: horizontal
+    - word: 煙消雲散
+      cells: [[3, 6], [4, 5], [5, 4], [6, 3]]
+      direction: diagonal_down_left
+    - word: 雀躍
+      cells: [[4, 2], [4, 3]]
+      direction: horizontal
+    - word: 一言一行
+      cells: [[4, 1], [5, 1], [6, 1], [7, 1]]
+      direction: vertical
+    - word: 亂竄
+      cells: [[5, 8], [6, 7]]
+      direction: diagonal_down_left
+    - word: 深淵
+      cells: [[6, 9], [7, 9]]
+      direction: vertical
+    - word: 不是滋味
+      cells: [[7, 5], [8, 5], [9, 5], [10, 5]]
+      direction: vertical
+    - word: 起伏
+      cells: [[8, 7], [8, 8]]
+      direction: horizontal
+    - word: 動向
+      cells: [[9, 2], [10, 3]]
+      direction: diagonal_down_right
+    - word: 偵測
+      cells: [[9, 10], [10, 9]]
+      direction: diagonal_down_left
+
+# ── 九 知識補給站 ──
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+    - index: 1
+      title: 戀愛總是患得患失？工作總是失常？教你三招擺脫情緒變幸福
+      duration: (5:38)
+      source: 朵娜Donna
+      has_qr: true
+    - index: 2
+      title: 【發展輔導】困擾你的不是事件本身，而是你對事件的想法！理性情緒治療法RET|兩分鐘讀教育
+      duration: (2:18)
+      source: 王聖傑（SHENG CHIEH）
+      has_qr: true
+      note: 「RET|兩分鐘讀教育」的分隔符是半形豎線 U+007C（RET＝理性情緒治療法，「兩分鐘讀教育」為頻道名），PDF 上該字形近似大寫 I

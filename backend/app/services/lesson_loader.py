@@ -34,6 +34,7 @@ Internal structure (Issue #1889 — split into focused modules):
 """
 
 import re
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Backward-compatible re-exports from sub-modules
@@ -94,6 +95,12 @@ def get_lessons_by_grade(grade: int) -> list[dict]:
     return [l for l in _ALL_LESSONS if l["grade"] == grade]
 
 
+# Root of the lesson tree: backend/data/lessons/<lesson_uid>/<version_id>/.
+# Kept as a module-level constant because admin CRUD and several test fixtures
+# swap it out to work against a temp dir instead of the real data.
+_LESSONS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
+
+
 def get_lesson_by_id(lesson_id: int) -> dict | None:
     return _LESSONS_BY_ID.get(lesson_id)
 
@@ -145,7 +152,7 @@ def get_available_grades() -> list[int]:
 
 
 def search_lessons(
-    grade: int | None = None,
+    grade: str | None = None,
     genre: str | None = None,
     category: str | None = None,
     search: str | None = None,
@@ -153,8 +160,8 @@ def search_lessons(
     """Filter lessons by criteria. All in-memory, no DB."""
     results = _ALL_LESSONS
 
-    if grade is not None:
-        results = [l for l in results if l["grade"] == grade]
+    if grade:
+        results = [l for l in results if str(l.get("grade")) == str(grade)]
     if genre:
         results = [l for l in results if l["genre"] == genre]
     if category:

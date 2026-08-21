@@ -1,0 +1,24 @@
+lesson_uid: L0024
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 3/24 兄弟周思齊變身作家 GAME ON九局下半
+    duration: (1:29)
+    source: 緯來體育台
+    qr_code: true
+  - index: 2
+    title: 給親愛的老朋友們。
+    duration: (6:12)
+    source: CTBC Brothers 中信兄弟
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/R5AyHDjLwUM
+    url_source: 總表0816「4.影片連結」年級5課次12
+  - index: 2
+    url: http://youtu.be/VHVujx_JfPE
+    url_source: 總表0816「4.影片連結」年級5課次12

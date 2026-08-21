@@ -1,0 +1,65 @@
+lesson_uid: L0165
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 反射性
+  - 仰賴
+  - 篤定
+  - 咬中
+  - 奮不顧身
+  - 配球
+  - 心結
+  - 一意孤行
+  - 保送
+  - 孤軍奮戰
+  - 趨前
+  - 俐落
+  vocabulary_bank_note: '語詞框分四行印，**每行結尾都沒有頓號或句號**（「反射性、仰賴、篤定、」「咬中、奮不顧身、配球」…），
+
+    第 2~4 行的行末沒有標點。原稿如此。'
+  answer_carrier: 橘色（run 層與字元樣式混用），PDF p3~p4 可見
+  items:
+  - index: 1
+    word: 趨前
+    definition: 快速或主動向前靠近。
+  - index: 2
+    word: 孤軍奮戰
+    definition: 獨自面對困難或完成任務。
+  - index: 3
+    word: 反射性
+    definition: 遇到事情，來不及思考就做出反應。
+  - index: 4
+    word: 配球
+    definition: 捕手或投手根據打者的情況，安排要投的球種、位置和順序。
+  - index: 5
+    word: 一意孤行
+    definition: 不聽別人的勸告，只按照自己的想法行動。
+  - index: 6
+    word: 篤定
+    definition: 非常確定，心中沒有懷疑。
+  - index: 7
+    word: 保送
+    definition: 比賽中，投手投出四個壞球後，打者不必擊球，就可以上一壘。
+  - index: 8
+    word: 心結
+    definition: 心中放不下的事情或不願面對的問題。
+  - index: 9
+    word: 仰賴
+    definition: 依靠。
+  - index: 10
+    word: 俐落
+    definition: 動作迅速、熟練；也可以形容言語或做事簡潔明快。
+  - index: 11
+    word: 奮不顧身
+    definition: 不顧一切，勇往直前。
+  - index: 12
+    word: 咬中
+    definition: 指打者揮棒時，扎實的擊中球。

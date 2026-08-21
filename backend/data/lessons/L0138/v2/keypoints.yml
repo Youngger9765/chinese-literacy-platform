@@ -1,0 +1,55 @@
+keypoints:
+  lesson: G9-L18
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 研究目的
+    value: 心理學家塞利格曼博士想了解：球員和教練在輸球後如何解釋__，以及這樣的「詮釋方式」是否會影響後來表現。
+    blanks:
+    - answer: 失敗
+      hint: ''
+  - label: 研究方法
+    value: 研究團隊蒐集了一萬多篇美國報紙體育版上關於NBA的報導與訪談內容，分析球隊在輸球後的用語與態度，歸納出兩種不同的__。
+    blanks:
+    - answer: 詮釋風格
+      hint: ''
+  - label: 主要發現
+    sub_rows:
+    - sub_label: 代表球隊
+      template: 波士頓塞爾提克(樂觀型) 紐澤西籃網 (悲觀型)
+      blanks: []
+    - sub_label: 1.對失敗的看法
+      template: __ __
+      blanks:
+      - answer: 暫時、特定、可改變
+        hint: ''
+      - answer: 長久、全面、無法改變
+        hint: ''
+    - sub_label: 2.之後表現 (單選)
+      template: □①越打越好□②連敗不止 □①越打越好□②連續低潮
+      blanks: []
+  - label: 研究結論
+    value: __可能會影響後續表現。
+    blanks:
+    - answer: 思考方式（詮釋風格）
+      hint: ''
+  - label: 國中應用
+    value: 在考試、競賽、人際挫敗情境，如何用  樂觀__面對。
+    blanks:
+    - answer: 詮釋
+      hint: ''
+  - label: 作者結論
+    value: 1.失敗並不可怕，關鍵在於你怎麼__。2.__能讓人重新站起來，培養__。3.下次遇到挫折，告訴自己：「__只是暫時的、特定的、可改變的。」
+    blanks:
+    - answer: 解釋失敗
+      hint: ''
+    - answer: 樂觀詮釋
+      hint: ''
+    - answer: 心理韌性
+      hint: ''
+    - answer: 逆境
+      hint: ''
+  title: 樂觀者勝：向NBA球員學習「詮釋失敗」的智慧

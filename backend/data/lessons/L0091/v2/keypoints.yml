@@ -1,0 +1,49 @@
+keypoints:
+  lesson: G7-L22
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 段1~2灰犀牛？本課主題
+    value: 灰犀牛是指明明可見，會造成重大衝擊的__事件，但因為壞影響還有一段時間才發生，因此被大眾忽視。高糖飲料和炸雞對國中生健康的影響就是一例。揭示本課主題—人口負成長。
+    blanks:
+    - answer: 負面
+      hint: ''
+  - label: 段３人口負成長：定義及現狀
+    value: 1.當每年的「__人口數」少於「__人口數」時，出現人口負成長。2.人口負成長主要原因是__。
+    blanks:
+    - answer: 出生
+      hint: ''
+    - answer: 死亡
+      hint: ''
+    - answer: 少子化
+      hint: ''
+  - label: 段４~5圖1、２:臺灣婦女總生育率與人口負成長趨勢
+    value: 1.臺灣自1951年以來婦女總生育率__。2.2011年至2023年，臺灣出生人數逐年__，死亡人數逐年__。3.2020年開始，死亡人數__出生人數，臺灣出現人口負成長。
+    blanks:
+    - answer: 逐年下滑
+      hint: ''
+    - answer: 下滑
+      hint: ''
+    - answer: 上升
+      hint: ''
+    - answer: 高於
+      hint: ''
+  - label: 段６人口負成長的影響
+    value: 1.缺點：工作年齡人口扶養壓力加重，每人平均要負擔的扶養人數　__。2.可能的正面影響：(1)老年人多，會帶動消費經濟。　　　　(2)減少資源消耗和污染，對環境更__。
+    blanks:
+    - answer: 增加
+      hint: ''
+    - answer: 友善
+      hint: ''
+  - label: 段7結論
+    value: 臺灣人口負成長呈現__的趨勢，帶來人口結構改變、__人口比率下降、__扶養負擔加重，但也可能帶動經濟變革。
+    blanks:
+    - answer: 不可逆
+      hint: ''
+    - answer: 勞動力
+      hint: ''
+    - answer: 生產者
+      hint: ''
+  title: 看見時代的灰犀牛了嗎？談人口負成長

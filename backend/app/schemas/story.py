@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Union
 
 
@@ -20,7 +20,7 @@ class ReadingBenchmarkSchema(BaseModel):
 class KeyReadingSchema(BaseModel):
     """重點朗讀（念順順）指定段落 — 學生只朗讀老師 ☞ 標的重點段，非全文。
 
-    2026-07-20 教授審查決策。抽取見 skill build-key-reading。缺此欄位時前端
+    2026-07-20 教授審查決策。抽取見 skill lesson-reading-pipeline。缺此欄位時前端
     fallback 唸全文，故全欄 optional 以相容尚未抽取的課。
     """
     passage: str                            # snap 到句尾的顯示朗讀段
@@ -39,11 +39,18 @@ class StoryListItem(BaseModel):
     id: int
     lesson_number: Optional[int] = None
     title: str
-    grade: int
+    grade: str = ""                  # "4".."9" / 文言文 / 品格教育
     grade_code: str
-    genre: str
-    category: str
-    char_count: int
+    # 課本順序（#2736）。圖書館以前按 `id`（＝抽取流水號）排，四年級第一課
+    # 因此顯示成第 10 課。`lesson_seq` 是唯一一把尺，把三種系列（一般／文言文／
+    # 體育生）排在同一條線上；`lesson_no` 為 None ＝ 課碼解不出課次，
+    # 那種課依 UID 排在最後（Young 2026-08-19）。
+    lesson_no: Optional[int] = None
+    series: Optional[str] = None
+    lesson_seq: Optional[int] = None
+    genre: str = ""
+    category: str = ""
+    char_count: int = 0
     thumbnail_url: Optional[str] = None
     reading_strategy: Optional[str] = None
     has_key_reading: bool = False
@@ -120,12 +127,44 @@ class StoryDetail(StoryListItem):
     # LessonRenderer (falling back to its storyToLesson stopgap when null). Emitting the
     # null key when flag OFF is harmless to legacy consumers (they never read this field).
     lesson_content: Optional[dict] = None
+    # 文言文專屬模組 (#2752). Untyped dict — each is the module's own shape (see
+    # backend/data/lessons/*/v3/{classical_text,modern_translation,word_matching,
+    # sentence_matching,self_challenge,intro_guide}.yml), passed straight through
+    # from `lesson_uid_loader`'s already-unwrapped module dict. None for the ~9 in
+    # 10 lessons that carry none of these files (this genre is the only source —
+    # 白話 lessons never populate them).
+    classical_text: Optional[dict] = None       # 原文＋注釋
+    modern_translation: Optional[dict] = None   # 古文今譯（白話翻譯）
+    word_matching: Optional[dict] = None        # 文白詞語比對（方框字填白話）
+    sentence_matching: Optional[dict] = None    # 文白句子比對（8 句配對）
+    self_challenge: Optional[dict] = None       # 自我挑戰（選做：另一段文章＋題組）
+    intro_guide: Optional[dict] = None          # 導讀
+    # 一般課也有的無編號元素 (#2752 Phase 2) — 印在「一 讀全文-做記號」之前，
+    # 不掛在任何大題編號下。與上面 6 個文言文專屬模組同款式：untyped dict
+    # 直接透傳，None 為誠實的「這課沒有這個」。
+    goal_box: Optional[dict] = None              # 目標策略框（70 課）
+    self_check_before_reading: Optional[dict] = None  # 讀前自我檢核（58 課）
+    # 多文本合讀課 + 收尾書寫練習 (#2752 Phase 3)。
+    multi_text_parts: Optional[list] = None        # 第 2/3 篇（4 課）
+    cross_text_banner: Optional[dict] = None       # 跨課文習作／三篇合讀過場字（2 課）
+    keypoints_followup_questions: Optional[dict] = None  # 第一篇專屬追問（2 課，兩種形狀）
+    writing_practice: Optional[dict] = None        # 語詞書寫練習／難字挑戰（4 課）
 
 
 class StoryListResponse(BaseModel):
     stories: list[StoryListItem]
     total: int
-    grades: list[int]  # available grades for filter UI
+    grades: list[str]  # "4".."9" + 文言文 / 品格教育
+
+
+def _grade_as_str(v):
+    """Accept a year sent as a number and store it as the string it means.
+
+    The axis is a string because 文言文 and 品格教育 are not years, but a caller
+    that has always sent `grade: 6` is not wrong — rejecting it would break every
+    existing admin client for a representation detail.
+    """
+    return str(v) if isinstance(v, int) else v
 
 
 # ── Admin CRUD schemas ───────────────────────────────────────────────────────
@@ -134,7 +173,11 @@ class StoryCreateRequest(BaseModel):
     """Request body for creating a new story (writes a new YAML file)."""
     lesson_number: int = Field(..., ge=1, description="Unique lesson number")
     title: str = Field(..., min_length=1, max_length=200)
-    grade: int = Field(..., ge=4, le=9)
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: str = Field(..., min_length=1, max_length=10)
     grade_code: str = Field(..., min_length=1, max_length=10)
     genre: str = Field(..., min_length=1, max_length=20)
     text_type: str = Field(default="單", max_length=10)
@@ -146,11 +189,18 @@ class StoryCreateRequest(BaseModel):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     source_file: Optional[str] = Field(default=None, max_length=200)
 
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
+
 
 class StoryUpdateRequest(BaseModel):
     """Request body for updating an existing story. All fields optional."""
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
-    grade: Optional[int] = Field(default=None, ge=4, le=9)
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: Optional[str] = Field(default=None, min_length=1, max_length=10)
     grade_code: Optional[str] = Field(default=None, min_length=1, max_length=10)
     genre: Optional[str] = Field(default=None, min_length=1, max_length=20)
     text_type: Optional[str] = Field(default=None, max_length=10)
@@ -162,12 +212,19 @@ class StoryUpdateRequest(BaseModel):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     source_file: Optional[str] = Field(default=None, max_length=200)
 
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
+
 
 class StoryAdminListItem(BaseModel):
     """Admin story list item — lighter than StoryDetail, includes metadata."""
     lesson_number: int
     title: str
-    grade: int
+    # "4".."9" plus 文言文 / 品格教育 — the classification axis is a STRING.
+    # It was `int Field(ge=4, le=9)`; the second edition added two collections
+    # that are not year groups, and a lesson in either one made this raise
+    # (the admin list 500ed on the first 文言文 row it reached).
+    grade: str
     grade_code: str
     genre: str
     text_type: str
@@ -175,6 +232,9 @@ class StoryAdminListItem(BaseModel):
     char_count: int
     reading_strategy: Optional[str] = None
     source_file: Optional[str] = None
+
+    _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)
+
 
 
 class StoryAdminListResponse(BaseModel):

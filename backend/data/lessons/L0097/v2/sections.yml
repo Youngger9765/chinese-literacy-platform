@@ -1,0 +1,152 @@
+lesson_uid: L0097
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 地球公民
+    definition: 關心全世界共同問題，願意和各地的人一起為地球永續努力的人。
+  - index: 2
+    word: 碳排放
+    definition: 人類在生產、運輸或生活中，排放二氧化碳等溫室氣體。
+  - index: 3
+    word: 碳足跡
+    definition: 一項活動、產品或生活行為所產生的碳排放總量。
+  - index: 4
+    word: 提案
+    definition: 提出具體的建議或計畫，請大家討論或採用。
+  - index: 5
+    word: 亂竄
+    definition: 慌亂或快速地四處跑動。
+  - index: 6
+    word: 環境永續
+    definition: 在滿足現在生活需要的同時，也保護自然資源，讓未來的人仍能繼續使用。
+  - index: 7
+    word: 禦寒
+    definition: 抵擋寒冷，讓身體保持溫暖。
+  - index: 8
+    word: 大放異彩
+    definition: 表現非常出色，受到大家注意或肯定。
+  - index: 9
+    word: 因應而生
+    definition: 為了回應新的情況或問題而出現。
+  - index: 10
+    word: 諷刺
+    definition: 用反差、誇張或幽默的方式，指出某人、某事不合理或可笑的地方。
+  - index: 11
+    word: 氣候變遷
+    definition: 地球的氣溫、雨量或天氣型態在長時間裡發生改變，例如平均氣溫上升、乾旱或暴雨增加。
+  - index: 12
+    word: 憂心忡忡
+    definition: 非常擔心、心裡不安的樣子。
+  - index: 13
+    word: 象徵
+    definition: 用具體事物代表較抽象的意思。例如，綠色象徵環保，玫瑰象徵愛情。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 大放異彩
+    B: 憂心忡忡
+    C: 諷刺
+    D: 氣候變遷
+    E: 環境永續
+    F: 亂竄
+    G: 提案
+    H: 象徵
+    I: 禦寒
+  questions:
+  - index: 1
+    text: 許多人對地球暖化及氣候異常的情況感到（　）。
+    answer: B
+  - index: 3
+    text: 這位網紅以（　）的言論批評了社會上的不公平現象。
+    answer: C
+  - index: 4
+    text: 這部精采的國片在世界各地的影展中（　），獲得不少殊榮。
+    answer: A
+  - index: 5
+    text: 倉庫裡傳來聲響，燈一打開，幾隻老鼠立刻四處（　）。
+    answer: F
+  - index: 6
+    text: 這份（　）不只寫出活動內容，也列出經費和人力安排，所以得到同學的支持。
+    answer: G
+  - index: 7
+    text: 寒流來襲時，出門要穿厚外套（　），避免著涼感冒。
+    answer: I
+  - index: 8
+    text: （　）不只是氣溫升高，也可能造成乾旱、海平面上升和生態改變。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列語詞何者使用正確？
+    options:
+      A: 在車禍現場，他拿起手機「呼籲」救護車前來救援
+      B: 學生會提出一份「提案」，說明如何減少運動會垃圾
+      C: 這位運動員有非常優秀的心理素質，真是讓人「憂心忡忡」
+      D: 為了掩飾錯誤，有人故意「亂竄」活動紀錄
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 第一段說：「這一幕出現在強調『為愛而跑』的比賽中，顯得格外諷刺。」這句話的意思是什麼？
+    options:
+      A: 活動強調關愛，賽後卻留下大量垃圾，形成反差
+      B: 阿國完成第一場路跑，卻因天氣濕冷而無法享受比賽
+      C: 跑者為了保暖穿上雨衣，表示主辦單位沒有提供足夠服務
+      D: 參賽者留下許多垃圾，表示運動賽事帶來的壞處多於好處
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 下列何者不是舉辦「綠色賽事」的主要用意？
+    options:
+      B: 降低賽事造成的環境負擔
+      D: 增加參賽者可獲得的紀念品
+    rationale: 第3題解析：（第三、四段提到，綠色賽事針對地球的永續經營，以減少因賽事製造的物品為主。
+  - index: 4
+    answer: C
+    stem: 作者先描寫阿國看見賽後垃圾，再介紹綠色賽事與3R，最後寫阿國準備向學校提案。這樣安排主要有什麼作用？
+    options:
+      A: 先介紹路跑流程，再說明參賽者需要準備哪些運動用品
+      B: 先比較各種賽事，再選出最適合由學校舉辦的運動活動
+      C: 先呈現環境問題，再說明改善方法，最後帶向行動
+      D: 先描寫阿國的心情，再證明運動能提升個人的環保意識
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 下列哪一項最能概括本文主旨？
+    options:
+      A: 大型賽事可縮小規模，減少垃圾產生
+      B: 運動賽事可運用3R降低環境負擔，落實環保行動
+      C: 綠色賽事主要是活動後做好垃圾分類
+    rationale: 第5題解析：B正確，涵蓋環境問題、3R改善方法與實際行動
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 3
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: weak
+resources:
+  items:
+  - index: 1
+    title: 便利人生一週累積多少垃圾？
+    duration_seconds: 223
+    source: 台客劇場TKstory
+  - index: 2
+    title: 愛地球人生一週累積多少垃圾？
+    duration_seconds: 305
+    source: 台客劇場TKstory
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

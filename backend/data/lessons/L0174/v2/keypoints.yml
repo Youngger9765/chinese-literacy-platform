@@ -1,0 +1,56 @@
+keypoints:
+  lesson: 體-L8
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 主角
+    sub_rows:
+    - sub_label: 事件
+      template: 面對失敗的想法
+      blanks: []
+  - label: 小齊（１～３段）
+    sub_rows:
+    - sub_label: 1.九局下，兩出局，落後一分，輪到小齊站上__。2.小齊（□①被投手三振　□②擊出安打），比賽結束。3.球隊（□①贏球　□②輸球）
+      template: 作者認為有的人──(複選)□①自責沒好好把握機會 □②認為努力都白費了□③覺得自己不適合打棒球
+      blanks:
+      - answer: 打擊區
+        hint: ''
+  - label: 楊勇緯（第４段）
+    sub_rows:
+    - sub_label: 1.在雅加達亞運的__賽落敗，要面對曾經兩度__的勁敵。2.將過去比賽的__化為教訓，反覆演練，最後拿下勝利。
+      template: 1.失敗讓他__，也讓他發現自己的__2.從失敗中看見__的機會與__的可能。
+      blanks:
+      - answer: 八強
+        hint: ''
+      - answer: 敗北
+        hint: ''
+      - answer: 挫折
+        hint: ''
+      - answer: 不甘心
+        hint: ''
+      - answer: 不足
+        hint: ''
+      - answer: 成長
+        hint: ''
+      - answer: 變強
+        hint: ''
+  - label: 郭婞淳（第５段）
+    sub_rows:
+    - sub_label: 1.在仁川亞運比賽前被140多公斤的__壓傷2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第__名，沒有奪牌。
+      template: 雖然成績不亮眼，但對她來說這是她走過__和__的（□①勝利　□②失敗）
+      blanks:
+      - answer: 槓鈴
+        hint: ''
+      - answer: 四
+        hint: ''
+      - answer: 受傷
+        hint: ''
+      - answer: 低潮
+        hint: ''
+  - label: 總結
+    value: 1.失敗可以讓人看見該__的地方──對應的是（□①楊勇緯　□②郭婞淳）的故事2.有時候看似是失敗，但其實已經是重要的突破──對應的是（□①楊勇緯　□②郭婞淳）的故事3.我們（□①只有一種　□②有不只一種）的角度來面對失敗。
+    blanks:
+    - answer: 補強
+      hint: ''

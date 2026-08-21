@@ -1,0 +1,21 @@
+lesson_uid: L0018
+version_id: v2
+passage: 適當的運動也是長高相當重要的一環。有氧運動能讓核心體溫適度上升，促進生長激素分泌，如：慢跑、游泳。另外，在做跳繩、籃球、羽球等運動時，常會頻繁跳躍，跳躍的動作也能刺激生長板發育。此外，弓箭步、深蹲等肌力訓練，及像瑜珈這樣的伸展運動，也都有助於成長發育。適當的運動能刺激成長，但若是太過激烈，不只容易造成運動傷害，更無法達到促進長高的效果。
+start_text: 適當的運動也是長高相當重要的一環。有氧運動能讓核
+extent_chars: 169
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 6
+  cell_paragraphs: 6

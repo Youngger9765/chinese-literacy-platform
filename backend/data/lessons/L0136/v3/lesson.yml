@@ -1,0 +1,12 @@
+lesson_uid: L0136
+version_id: v3
+title: 會考圖文題實戰
+catalog_slot: G9-L15
+sections_present:
+- 'no': 一
+  name: 會考圖文題實戰
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 3
+  drive_path: 9年級/G9-L15會考圖文題實戰（圖文整合閱讀策略）.docx
+  docx_md5: md5-12:6a97dae09e24

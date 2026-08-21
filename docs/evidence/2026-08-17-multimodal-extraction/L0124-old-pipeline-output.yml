@@ -1,0 +1,350 @@
+# L0124 現行 pipeline 產物（backend/data/lessons/L0124/v2/*.yml 合併）
+lesson:
+  lesson_uid: L0124
+  version_id: v2
+  title: 新奇!「植物肉」你聽過嗎
+  catalog_slot: G8-L4
+  source:
+    drive_file_id: 1JkM4V3gIfpKlbi19jhzLZ2qb7_RICXlj
+    drive_path: 8年級/G8-L4新奇!「植物肉」你聽過嗎（推論策略-由課文觀點找出支持理由）.docx
+metadata:
+  lesson_uid: L0124
+  version_id: v2
+  source: 自學教材總表.xlsx
+  matched_spreadsheet_title: 新奇!「植物肉」你聽過嗎?
+  intro: 本課圍繞「擴展視野」，練習「由觀點找出支持理由」的閱讀方法。
+  unit_topic: 擴展視野
+  strategy: 推論策略──從課文觀點找出支持理由
+  genre: 說明文
+  category: Science
+  video_links:
+  - http://youtu.be/n5_9ZSEEiEc
+  - https://youtu.be/FbxhnYxDZ30
+body:
+  lesson_uid: L0124
+  version_id: v2
+  source: DOCX 第一節（讀全文-做記號）
+  paragraphs:
+  - 前言：植物是植物，肉是肉，但你聽說過植物肉嗎？在這篇課文裡，你將獲得意想不到的新知，事關人類未來食物市場的變革，我們一起來了解這項新興的食品科技吧！
+  - 近年來，一種由植物製成卻能模仿肉類口感和風味的食品悄然興起，引發了一場飲食革命。植物肉的歷史可以追溯到20世紀初，當時中國就有用豆腐製成的素肉，而現今普遍使用的植物肉，則是1967年美國康乃爾大學研發出來的纖維蛋白素肉，這是現代植物肉技術的一個重要里程碑。隨後的幾十年裡，植物肉技術不斷進步。2009年，超越肉類公司（Beyond Meat）開始研發新一代的植物肉；2016年，另一家公司「不可能食品」（Impossible
+    Foods）推出了一種「流血素肉漢堡」，口感和牛肉漢堡不分軒輊，轟動市場。
+  - 那麼，植物肉是如何製作的呢？現代植物肉主要由植物蛋白（如大豆、豌豆、小麥蛋白）、植物油（如椰子油、葵花油）、調味料、結構劑和天然色素等成分組成；其中，植物蛋白是主要成分，用來提供豐富的胺基酸，植物油則幫助模擬肉類的口感和肉汁。這些原料經過混合、擠壓成型、加熱處理等步驟，最終能製造出質地、口感、顏色及風味與真肉極為相似的植物肉。
+  - 你可能會問：植物肉的營養價值如何呢？事實上，植物肉的蛋白質含量與動物肉相媲美，每100克通常含有約20克的蛋白質。而且，植物肉的脂肪含量通常較低，不含膽固醇，還富含膳食纖維。只是植物肉中的某些營養素如維生素B12，需額外添加才能達到與動物肉相當的含量。
+  - 植物肉的興起不僅提供人類新的飲食選項，也有助於環境永續發展和動物保護倡議。研究顯示，相較於傳統畜牧業生產的肉品，生產同等重量的植物肉可以大幅減少土地使用、水資源消耗和溫室氣體排放。此外，越來越多人關注動物保護議題，生產植物肉不必屠宰動物，正符合這個趨勢。
+  - 隨著環保意識提升和飲食習慣的改變，植物肉市場正蓬勃發展；近年來，這個新興市場的增長速度令人矚目。根據最新的統計，2021年全球植物肉市場規模已達到51億美元；預計到2028年，這數字將成長近三倍，至149億美元，這反映出消費者對植物性蛋白的需求急劇上升。這股潮流也讓零售業和餐飲業出現令人刮目相看的改變，越來越多的連鎖超市設置專門的植物性食品區，眾多知名快餐店和餐廳也紛紛將植物肉的料理納入菜單選項，顯示其市場潛力巨大。
+  - 推動植物肉的飲食發展是一場靜默但深刻的飲食革命，它重塑了人類與食物的關係。預計會有越來越多人開始嘗試「彈性素食主義」，在日常飲食中增加植物性蛋白的比例，這將導致傳統肉類消費量的下降。在這個趨勢下，新型態的餐廳和創新食品公司將應󠇡運而生，提供更多樣化的植物肉產品選擇。
+  - 總之，植物肉代表了一種創新的飲食選擇，它不僅為我們提供另一種蛋白質來源，對環境保護、動物福利，甚至全球糧食安全等也有正向的影響。隨著技術的不斷進步，未來的植物肉會在口感和營養上更接近傳統肉類，為我們的餐桌帶來更多驚喜。你願意嘗試植物肉嗎？也許下次點餐時，可以考慮來一份植物肉漢堡哦！
+  paragraph_count: 8
+  char_count: 1222
+  level:
+    level: 8
+    genre: 說明文
+    genre_detail: 說明文
+  extraction_check:
+    method: 本課語詞是否出現在抽出的課文裡（語詞由學習單另一節獨立寫成）
+    vocabulary_found: 10
+    vocabulary_total: 10
+    ratio: 1.0
+    verdict: ok
+sections:
+  lesson_uid: L0124
+  version_id: v2
+  vocab_definitions:
+    items:
+    - index: 1
+      word: 質地
+      definition: 物品表面的觸感、組織或口感。本文指植物肉吃起來的口感與組織。
+    - index: 2
+      word: 媲美
+      definition: 媲：比得上。通常用於稱讚對方的能力比得上厲害的人。例如：媽媽的廚藝媲美五星級大廚。
+    - index: 3
+      word: 悄然興起
+      definition: 某一事物或現象在大家未察覺的情況下，慢慢興起或發展起來。
+    - index: 4
+      word: 刮目相看
+      definition: 另眼看待，用新的眼光來看待。
+    - index: 5
+      word: 應運而生
+      definition: 順應時勢需求而產生。
+    - index: 6
+      word: 膳食纖維
+      definition: 植物性食物中人體不易消化吸收的成分，可以增加飽足感，幫助腸道蠕動與排便。
+    - index: 7
+      word: 追溯
+      definition: 回想、探究事物發生的原因。溯：逆著、往前或往回。
+    - index: 8
+      word: 蓬勃
+      definition: 茂盛繁榮的樣子。
+    - index: 9
+      word: 屠宰
+      definition: 宰殺牲畜。
+    - index: 10
+      word: 不分軒輊
+      definition: 比喻分不出高下，實力相當。軒，車前高起的部分。輊，車後低下的部分。
+    extraction_check:
+      defined_words_belong_to_lesson: 1.0
+      vocabulary_bank_covered: 1.0
+      missing_definitions: []
+      indices_contiguous: true
+      verdict: ok
+  vocab_application:
+    options:
+      A: 應󠇡運而生
+      B: 媲美
+      C: 不分軒輊
+      D: 蓬勃
+      E: 悄然興起
+      F: 追溯
+      G: 刮目相󠇡看
+      H: 屠宰
+      I: 膳食纖維
+    questions:
+    - index: 1
+      text: 近年來，東部觀光（　）發展，進而提升了當地的就業率。
+      answer: D
+    - index: 2
+      text: 由於國人健康意識抬頭，於是各式各樣的運動中心（　）。
+      answer: A
+    - index: 3
+      text: 媽媽的廚藝和專業大廚（　）。
+      answer: C
+    - index: 4
+      text: 媽媽烹飪的技術足以（　）米其林三星級名廚。
+      answer: B
+    - index: 5
+      text: 這學期他的數學成績突飛猛進，令人（　）。
+      answer: G
+    - index: 6
+      text: 農業部目前推動農糧產品生產履歷，讓消費者在選購時可以（　）產品來源，購買時更加安心。
+      answer: F
+    - index: 7
+      text: 蔬菜、水果和全穀類含有豐富的（　），有助於維持腸道健康。
+      answer: I
+    - index: 8
+      text: 近年來，復古穿搭的風潮在校園裡（　），許多同學開始穿寬褲和毛帽。
+      answer: E
+    extraction_check:
+      options_not_in_lesson_vocabulary: []
+      answers_without_option: []
+      verdict: ok
+  comprehension:
+    questions:
+    - index: 2
+      answer: B
+      stem: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，，最強調哪一項改進？
+      options:
+        A: 價錢
+        B: 口感
+        C: 營養
+        D: 成分
+      rationale: null
+    - index: 3
+      answer: A
+      stem: 根據課文，下列何者不是現代植物肉的風行的原因？
+      options:
+        A: 希望藉由介紹植物肉來探討環境保護的議題
+        B: 希望介紹植物肉讓更多人認識並願意考慮嘗試
+        C: 比較兩種肉品的不同，質疑動物肉的必要性
+        D: 教導讀者如何正確的寫出植物肉的介紹文章
+      rationale: 選項A為植物肉風行後的結果，並非風行原因。
+    - index: 5
+      answer: C
+      stem: 下列有關文章觀點與支持理由的配對，何者正確？
+      options:
+        A: 雨林是個祕密的地方，搖曳的篝火令人有無限的遐想
+        B: 雨林是個深沉寧靜的地方，因為有各種新鮮有趣的事物
+        C: 雨林是個危險的地方，因為有很多自然殺手隱藏其中
+        D: 雨林是個有豐富生物的地方，因為有很多毒蟲及猛獸
+      rationale: 坐在搖曳的篝火旁邊，他用低沉的聲音，告訴我熱帶雨林的祕密。原來，這表面看來深沉寧靜的叢林，往往有突如其來的殺手──大風、暴雨、毒蟲、猛獸，盤桓其中，隨時可能要人性命；不過，只要謹慎小心，這片赤道旁的熱帶雨林，不只會讓我們走入神祕的世界，更會讓我們見識到各種新鮮有趣的事物。
+    extraction_check:
+      answers_without_option: []
+      questions_with_few_options: []
+      questions_grounded_in_body: 0.67
+      answers_recovered_from_rationale: 0
+      verdict: ok
+  resources:
+    items:
+    - index: 1
+      title: 直擊全台第一家素肉廠!"口感媲美真肉排"..植物肉需求飆!搶全球1成肉品市場│非凡財經新聞│
+      duration_seconds: 243
+      source: USTV 非凡電視
+    - index: 2
+      title: 素肉跟植物肉不同？ 關鍵在於這幾點
+      duration_seconds: 143
+      source: 人間福報The Merit Times
+    extraction_check:
+      verdict: unverified
+      needs_human_review: true
+      video_count: 2
+    needs_human_review: true
+keypoints:
+  keypoints:
+    lesson: G8-L4
+    structure: flat
+    columns:
+    - label
+    - value
+    rows:
+    - label: 新奇的植物肉
+      value: ''
+      blanks: []
+    - label: 植物肉的演進
+      value: 植物肉的歷史源頭：中國將__製成的素肉。1967年後，相關技術持續改進，後來多家公司推出更接近真肉的植物肉產品，能模仿真肉的__和__。
+      blanks:
+      - answer: 豆腐
+        hint: ''
+      - answer: 口感
+        hint: ''
+      - answer: 風味
+        hint: ''
+    - label: 植物肉的成分
+      value: 1.植物肉主要的成分有：植物蛋白、植物油、調味料、結構劑和天然色素等。其中添加__是為了仿肉類的口感和肉汁。2.植物肉與動物肉的成分比較：表格內__請填入(＞、＝或＜)成分關係比較蛋白質植物肉__動物肉膳食纖維植物肉__動物肉脂肪植物肉__動物肉膽固醇植物肉__動物肉維生素B12植物肉__動物肉→所以製作植物肉需額外添加維生素__。
+      blanks:
+      - answer: 植物油
+        hint: ''
+      - answer: null
+        hint: ''
+      - answer: ＝
+        hint: ''
+      - answer: ＞
+        hint: ''
+      - answer: ＜
+        hint: ''
+      - answer: ＜
+        hint: ''
+      - answer: ＜
+        hint: ''
+      - answer: B12
+        hint: ''
+    - label: 植物肉帶來的影響
+      value: 1.提供人類新的飲食選項。2.助於__永續發展。3.倡議__保護。4.對全球__安全，也有正向的影響。
+      blanks:
+      - answer: 環境
+        hint: ''
+      - answer: 動物
+        hint: ''
+      - answer: 糧食
+        hint: ''
+    - label: ★從文章敘述中，可以看出作者的寫作立場和目的，下列哪些敘述符合？（多選）□①讓讀者認識植物肉□②推廣植物肉的食用□③質疑植物肉的安全性□④期待植物肉帶來的正向影響□⑤期待這一波的飲食革命□⑥相信植物肉可以拉近貧富差距
+      value: ''
+      blanks: []
+    title: 新奇！「植物肉」你聽過嗎?
+spotlight:
+  spotlight:
+    lesson: G8-L4
+    strategy_name: 推論策略-由課文觀點找出支持理由
+    strategy_type: main_idea_inference
+    blocks:
+    - type: guide
+      text: 本課是說明文，作者先寫出植物物肉引發的風潮，再用具體的例子去支持作者種種的看法（觀點），讓文章更有說服力。閱讀時，若能找出作者觀點，並從文章中找出支持觀點的理由，你會更容易讀出文章的重點喔。    ※什麼是觀點和理由？「觀點」「支持理由」定義作者對某個主題提出的看法、判斷或立場。用來支撐觀點的資料、例子、事實、研究、原因或說明。例子他很用功。他每天都讀書四小時以上；他假日都到圖書館念書；田他上課都會做筆記。這份英文作業很困難。他花好久的時間查字典、大多數同學無法完成作業。
+    - type: guide
+      text: ◎ 小試身手
+    - type: guide
+      text: 一、連連看：請把左欄列出三個課文觀點，和右欄的支持理由連起來；每個觀點都有兩個支持理由。
+    - type: table
+      rows:
+      - - 文章觀點
+        - ''
+        - ''
+        - 支持的理由
+      - - '1'
+        - 植物肉口感與真肉相似
+        - ●
+        - ●
+        - A.植物肉的蛋白質含量與動物肉相媲美，每100克通常含有約20克的蛋白質。
+      - - '1'
+        - 植物肉口感與真肉相似
+        - ●
+        - ●
+        - B.生產植物肉不必屠宰動物，正符合保護動物趨勢。
+      - - '2'
+        - 植物肉的營養價值不輸動物肉
+        - ●
+        - ●
+        - C.植物肉的脂肪含量通常較低，不含膽固醇，還富含膳食纖維。
+      - - '2'
+        - 植物肉的營養價值不輸動物肉
+        - ●
+        - ●
+        - D.「流血素肉漢堡」口感和牛肉漢堡不分軒輊。
+      - - '3'
+        - 植物肉有利於環境永續與動物保護
+        - ●
+        - ●
+        - E.研究顯示，生產植物肉可以大幅減少土地使用、水資源消耗和溫室氣體排放。
+      - - '3'
+        - 植物肉有利於環境永續與動物保護
+        - ●
+        - ●
+        - F.這些原料經過混合、擠壓成型、加熱處理等步驟，最終能製造出質地、口感、顏色及風味與真肉極為相似的植物肉。
+    - type: guide
+      text: 二、由課文觀點找出支持理由
+    - type: guide
+      text: 文章觀點：植物肉市場潛力非常巨大
+    - type: guide
+      text: 支持理由：（請從文章的五、六段找出至少兩個支持理由）
+    - type: free_text
+      prompt: (1)根據最新的統計，2021年到未來2028年，全球植物肉市場規模將大幅【成長　　】，反映出消費者對植物性蛋白的需求急劇【上升　】。
+    - type: free_text
+      prompt: (2)越來越多的連鎖超市設置專門的植物性食品區。／眾多知名快餐店和餐廳也紛紛將植物肉的料理納入菜單選項。／預計會有越來越多人開始嘗試「彈性素食主    義」，在日常飲食中增加植物性蛋白的比例。
+    - type: guide
+      text: 三、總結作者觀點（小提示：觀點是含有個人的意見看法）
+    - type: single
+      prompt: 請選擇
+      options:
+      - 支持
+      - 不支持】植物肉。
+      answer: 支持
+    - type: guide
+      text: 四、挑戰題：找出全文主旨
+    - type: passage
+      source: unknown
+      paragraphs:
+      - 接著我們來練習推論文章主旨，這是更高層次的功夫喔！我們可以先猜測標題想要傳達的重點，再從第一段和最後一段找主旨線索，最後推論全文主旨。現在就讓我們來練習看看吧！
+    - type: single
+      prompt: (1)從標題「新奇！『植物肉』你聽過嗎？」可以推測，作者想強調植物肉對許多讀者來說是：
+      options:
+      - 新鮮、有趣、值得認識的食品科技
+      - 剛被發明、從未出現過的新食物
+      answer: 新鮮、有趣、值得認識的食品科技
+    - type: free_text
+      prompt: (2)可以從文章首段或末段找到全文主旨
+    - type: guide
+      text: 首段：近年來，一種由植物製成卻能模仿肉類口感和風味的食品悄然興起，引發了一場飲食革命。
+    - type: guide
+      text: 末段：植物肉代表了一種創新的飲食選擇，為我們餐桌帶來驚喜。
+    - type: guide
+      text: →由飲食革命、及創新的飲食選擇，可以推論全文主旨為：
+    - type: guide
+      text: 【　　  植物肉　  】可能改變營養、環境、動保與未來食物市場。
+    - type: guide
+      text: 恭喜你，達成任務了，你好棒！😊
+    - type: guide
+      text: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。(「刮目相看」指的是很厲害，讓人佩服。其他選項誤解詞語意思，應用錯誤。)(「刮目相看」指的是很厲害，讓人佩服。其他選項誤解詞語意思，應用錯誤。)七閱讀理解七閱讀理解（ C ）1. 請問哪一個句子使用語詞正確?
+    - type: passage
+      source: unknown
+      paragraphs:
+      - A.近來很流行戶外活動，大家很喜歡「追溯」溪邊的小魚
+      - B.這對雙胞胎的長相真的「不分軒輊」，看起來很難分辨
+      - C.看似瘦弱的他，居然能徒手打退歹徒，真令人「刮目相看」
+      - D.網路購物廣告說達到消費門檻就可以「應運而生」，買多賺多
+key_reading:
+  lesson_uid: L0124
+  version_id: v2
+  passage: 你可能會問：植物肉的營養價值如何呢？事實上，植物肉的蛋白質含量與動物肉相媲美，每100克通常含有約20克的蛋白質。而且，植物肉的脂肪含量通常較低，不含膽固醇，還富含膳食纖維。只是植物肉中的某些營養素如維生素B12，需額外添加才能達到與動物肉相當的含量。
+  start_text: 你可能會問：植物肉的營養價值如何呢？事實上，植物
+  extent_chars: 126
+  source: docx-extract
+  anchor_paragraph: 4
+  paragraphs_used: 1
+  reading_benchmark:
+    levels:
+    - threshold: ＜220字
+      feedback: 還要多加練習。
+    - threshold: 221~250字
+      feedback: 嗯，還不錯喲！
+    - threshold: ＞251字
+      feedback: 哇嗚，超級厲害！
+  extraction_check:
+    verdict: ok
+    corroborated_by_first_edition: null

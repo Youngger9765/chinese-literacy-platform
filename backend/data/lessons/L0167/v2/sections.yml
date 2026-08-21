@@ -1,0 +1,125 @@
+lesson_uid: L0167
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 不動聲色
+    definition: 不將心裡的情緒或計畫表現出來。
+  - index: 2
+    word: 不是滋味
+    definition: 心裡感到不舒服、不好受。
+  - index: 3
+    word: 平分秋色
+    definition: 兩者一樣出色、實力相當。
+  - index: 4
+    word: 心理素質
+    definition: 指一個人面對壓力及挑戰時，展現出的心理狀態和應對能力。
+  - index: 5
+    word: 左右
+    definition: 影響。
+  - index: 6
+    word: 似曾相識
+    definition: 覺得好像看過，感到熟悉。
+  - index: 7
+    word: 小劇場
+    definition: 指一個人自己想像的情境或對話。
+  - index: 8
+    word: 害群之馬
+    definition: 指一群人中做壞事、影響大家的人。
+  - index: 9
+    word: 較勁
+    definition: 彼此比高下、比輸贏。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 不是滋味
+    B: 不動聲色
+    C: 害群之馬
+    D: 似曾相識
+    E: 平分秋色
+    F: 小劇場
+    G: 較勁
+    H: 左右
+  questions:
+  - index: 1
+    text: 那位朝我微笑的女子感覺（　），卻怎麼也想不起她是誰。
+    answer: D
+  - index: 2
+    text: 他看到教練臉色嚴肅，心中就開始上演 （　），以為自己犯了錯。
+    answer: F
+  - index: 3
+    text: 兩位同學在數學上總是暗中（　），每次考試都想分個勝負。
+    answer: G
+  - index: 4
+    text: 這場籃球比賽打得非常激烈，兩隊實力（　），雙方互不相讓。
+    answer: E
+  - index: 5
+    text: 為了避免自己成為（　），妮妮投注了許多心力和時間準備表演。
+    answer: C
+  - index: 6
+    text: 他看到好友和別人走得很近，臉上裝作若無其事，心裡卻（　）。
+    answer: A
+  - index: 7
+    text: 他缺乏信心與主見，因此想法常常被身邊的人（　），一遇到不同意見就立刻改變主張。
+    answer: H
+  - index: 8
+    text: 面對網路眾多的謠言與批評，他能夠（　）沉住氣，真是不容易。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 比賽輸了，大家互相指責，場面「不動聲色」，令人緊張
+      B: 她第一次來這座城市，走在街道上卻有「似曾相識」的感覺
+      C: 即使在遭受嚴厲的批評時，他也「不是滋味」，繼續保持冷靜
+      D: 湖泊和山林交織成一幅美景，「平分秋色」，讓人心情平靜
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據第四段「這些話就像一群吵鬧的麻雀，在腦子裡飛來飛去，吵得她幾乎忘了眼前的投手正準備出手。」這句話表達了佳恩正遇到什麼困難？
+    options:
+      B: 觀眾的加油聲太熱烈，干擾她的注意力
+      C: 腦中的負面想法太多，導致她無法專注
+    rationale: 第2題解析：根據文章，「這些話」是佳恩腦袋中想像的批評。
+  - index: 3
+    answer: A
+    stem: 下列何者最能作為這篇文章的主旨？
+    options:
+      A: 柏丞：「我現在好沮喪，好像一直懷疑自己，感覺這次的考試對我來說意義重大。」
+      B: 怡萱：「考那麼差，一定是因為我沒天分，算了啦，反正再怎麼努力也沒用。」
+      C: 品妤：「老師也出太難了吧，這種題目到底有幾個人可以及格啊？」
+      D: 祐廷：「只要考卷不用帶回家簽名就好了，反正也就是一次考試，沒什麼大不了的。」
+    rationale: A)「心」是指「心理素質」(B)可以練習調節(C)不是需要隱藏
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 2
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: weak
+resources:
+  items:
+  - index: 1
+    title: 走出情緒的迷宮：練習自我覺察，認識情緒宇宙(完整版)
+    duration_seconds: 156
+    source: 中華民國衛生福利部
+  - index: 2
+    title: 生活技能動畫-自我覺察
+    duration_seconds: 104
+    source: 臺灣健康促進學校
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

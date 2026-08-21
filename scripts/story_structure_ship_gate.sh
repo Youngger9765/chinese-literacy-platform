@@ -2,10 +2,12 @@
 # Story-structure ship gate — run before merging parser/YAML/manifest changes.
 #
 #   bash scripts/story_structure_ship_gate.sh          # verify only (CI)
-#   bash scripts/story_structure_ship_gate.sh --rebuild # rebuild manifest if schema present, then verify
+#   bash scripts/story_structure_ship_gate.sh --rebuild # rebuild the manifest first, then verify
 #
-# Requires private schema for --rebuild:
-#   private/curriculum-source/_online-schema/*.keypoints.yml
+# --rebuild used to require private/curriculum-source/_online-schema, the first
+# edition's curation workspace. That directory was deleted in the re-ink, so the
+# rebuild path was unreachable and the manifest could not be refreshed (#2749).
+# The builder now reads the served lesson tree, which is in the repo.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
@@ -19,13 +21,7 @@ if [ "${1:-}" = "--rebuild" ]; then
   REBUILD=true
 fi
 
-SCHEMA_DIR="$REPO_ROOT/private/curriculum-source/_online-schema"
-
 if $REBUILD; then
-  if [ ! -d "$SCHEMA_DIR" ]; then
-    echo "ERROR: --rebuild requires $SCHEMA_DIR" >&2
-    exit 1
-  fi
   echo "== Rebuild keypoints manifest (--all) =="
   "$PYBIN" scripts/build_keypoints_qa_manifest.py --all
   echo ""

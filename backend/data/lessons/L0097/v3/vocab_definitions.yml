@@ -1,0 +1,64 @@
+lesson_uid: L0097
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 禦寒
+  - 環境永續
+  - 象徵
+  - 憂心忡忡
+  - 碳排放
+  - 亂竄
+  - 因應而生
+  - 碳足跡
+  - 氣候變遷
+  - 提案
+  - 諷刺
+  - 大放異彩
+  - 地球公民
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 地球公民
+    definition: 關心全世界共同問題，願意和各地的人一起為地球永續努力的人。
+  - index: 2
+    word: 碳排放
+    definition: 人類在生產、運輸或生活中，排放二氧化碳等溫室氣體。
+  - index: 3
+    word: 碳足跡
+    definition: 一項活動、產品或生活行為所產生的碳排放總量。
+  - index: 4
+    word: 提案
+    definition: 提出具體的建議或計畫，請大家討論或採用。
+  - index: 5
+    word: 亂竄
+    definition: 慌亂或快速地四處跑動。
+  - index: 6
+    word: 環境永續
+    definition: 在滿足現在生活需要的同時，也保護自然資源，讓未來的人仍能繼續使用。
+  - index: 7
+    word: 禦寒
+    definition: 抵擋寒冷，讓身體保持溫暖。
+  - index: 8
+    word: 大放異彩
+    definition: 表現非常出色，受到大家注意或肯定。
+  - index: 9
+    word: 因應而生
+    definition: 為了回應新的情況或問題而出現。
+  - index: 10
+    word: 諷刺
+    definition: 用反差、誇張或幽默的方式，指出某人、某事不合理或可笑的地方。
+  - index: 11
+    word: 氣候變遷
+    definition: 地球的氣溫、雨量或天氣型態在長時間裡發生改變，例如平均氣溫上升、乾旱或暴雨增加。
+  - index: 12
+    word: 憂心忡忡
+    definition: 非常擔心、心裡不安的樣子。
+  - index: 13
+    word: 象徵
+    definition: 用具體事物代表較抽象的意思。例如，綠色象徵環保，玫瑰象徵愛情。

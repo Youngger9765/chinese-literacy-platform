@@ -1,0 +1,192 @@
+lesson_uid: L0086
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 惡言相向
+  - 抱頭鼠竄
+  - 囑咐
+  - 萬紫千紅
+  - 暑氣蒸人
+  - 剃度
+  - 金風送爽
+  - 敢怒不敢言
+  - 寒氣逼人
+  - 滴水穿石
+  - 循序漸進
+  - 身材魁梧
+  - 帥氣挺拔
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 敢點躡帥精循序漸進步
+  - 怒滴手氣雕剃萬無一失
+  - 不寒躡挺細度吩萬囑咐
+  - 敢氣腳拔琢風咐暑水一
+  - 言逼惡言相向氣剃滴諾
+  - 主人金囑片蒸發刀水千
+  - 婦暑秋風人間喧抱穿金
+  - 身材魁梧送逼鬧頭石循
+  - 悲歡離合桐爽紛鼠敢環
+  - 萬紫千紅綠燈雜竄當扇
+  grid_page_break_note: '🔴 **這張格子跨頁**：第 1~9 列印在 PDF p12，**第 10 列被推到 p13**。
+
+    因此 p12 底部有一個**空的橘框**（框裡沒有字）——那是「萬紫千紅」的圈，
+
+    畫在第 10 列原本該在的位置；而 p13 上方浮著一條斜的橘框，是「抱頭鼠竄」
+
+    延伸到第 10 列的尾巴。只看 p13 會判成「這課最後一列沒被圈到」，
+
+    只看 p12 會判成「有一個框圈了空白」。兩頁一起看才拼得回來（skill ⑤ 跨頁那條）。'
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 敢怒不敢言
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 1
+    - - 3
+      - 1
+    - - 4
+      - 1
+    - - 5
+      - 1
+    direction: vertical
+  - word: 帥氣挺拔
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 4
+    - - 3
+      - 4
+    - - 4
+      - 4
+    direction: vertical
+  - word: 循序漸進
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 剃度
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    direction: vertical
+  - word: 寒氣逼人
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 2
+    - - 5
+      - 2
+    - - 6
+      - 2
+    direction: vertical
+  - word: 囑咐
+    cells:
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 暑氣蒸人
+    cells:
+    - - 4
+      - 8
+    - - 5
+      - 7
+    - - 6
+      - 6
+    - - 7
+      - 5
+    direction: diagonal_down_left
+  - word: 惡言相向
+    cells:
+    - - 5
+      - 3
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    direction: horizontal
+  - word: 滴水穿石
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 9
+    - - 7
+      - 9
+    - - 8
+      - 9
+    direction: vertical
+  - word: 金風送爽
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    - - 9
+      - 6
+    direction: diagonal_down_right
+  - word: 抱頭鼠竄
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    - - 10
+      - 8
+    direction: vertical
+  - word: 身材魁梧
+    cells:
+    - - 8
+      - 1
+    - - 8
+      - 2
+    - - 8
+      - 3
+    - - 8
+      - 4
+    direction: horizontal
+  - word: 萬紫千紅
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  answer_paths_note: '13 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有錯字。
+
+    ✅ 幾何交叉驗證乾淨：`roundRect` 共 13 個，**全部在紙面上**（無離頁殘留），
+
+    圈也是 13 個，數量相符。
+
+    ⚠️ 格子裡有兩個「萬」（第2列第7欄、第3列第8欄）與兩個「剃」（第2列第6欄、第5列第8欄）、
+
+    兩個「暑」（第4列第8欄、第7列第2欄），被圈的都是能接出完整語詞的那一個，逐格取字已確認。'

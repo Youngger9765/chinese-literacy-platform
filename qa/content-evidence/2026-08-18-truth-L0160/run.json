@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0160",
+  "catalog_slot": "文-L5",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 0,
+  "notes": "文言文專屬模組：modern_translation／classical_text／sentence_matching(一)／word_matching(二)／keypoints(三)／spotlight(四)／comprehension(五)／self_challenge(六)，沒有讀全文-做記號/念順順/語詞我最棒/語詞應用/詞語複習/知識補給站。答案全是橘字（w:sym 0 個），而橘字顏色兩條路徑都有：run 層 90 個 + 只有解 rStyle 才看得到的 113 個 —— 只掃 run 顏色會漏掉一半以上。箭號三個都是文字層字元 U+2B62（全檔 w:sym 總數 0 佐證）。找一筆勘誤 E1：自我挑戰翻譯方塊的下引號印成「⎦」(U+23A6 數學方括號下角) 而非「」」。第四大題「第二人稱代詞」表格有一格插了圖，未轉錄字形（render 上形近字分不出來，同一輪我才把泱看成決過），也未標 text_carrier: image（會讓同格真在文字層的字一起逃檢）。"
+}

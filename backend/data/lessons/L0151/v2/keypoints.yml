@@ -1,0 +1,41 @@
+keypoints:
+  lesson: G9-L8
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 凱蒂謀殺案
+    sub_rows:
+    - sub_label: 紐約時報報導
+      template: 標題：38人目擊謀殺卻未報警，凸顯社會的冷漠無情，震驚警界。(1)被害者：凱蒂(2)事發經過：一位女子在街上遭遇兇手多達三次的追殺，時間將近半小時，但38位旁觀者冷漠無情，直到女子被殺死後，才有一個人打電話報警。
+      blanks: []
+    - sub_label: 心理學界反應
+      template: 1.心理學家提出__理論來解釋這個現象。2.多年來，許多心理學教材與研究者長期沿用這個案例，沒有充分查核原始報導。
+      blanks:
+      - answer: 旁觀者效應
+        hint: ''
+    - sub_label: 重大轉折
+      template: 1.三位研究者追查發現：報導中有許多被__或誇大的情節。　(1)沒有38位目擊者  (2)只有__次的追殺，而不是３次。  (3)命案發生在__且看不清楚的街角。  (4)有人報警，但警局不以為意的__了。
+      blanks:
+      - answer: 杜撰
+        hint: ''
+      - answer: '2'
+        hint: ''
+      - answer: 黑暗
+        hint: ''
+      - answer: 吃案
+        hint: ''
+  - label: 結論
+    value: __也可能犯錯，盡信書__，面對新聞、教科書或專家說法，都要保留「這是真的嗎？」的質疑精神，回到證據去__與__，才能一步步逼近真相。
+    blanks:
+    - answer: 科學家
+      hint: ''
+    - answer: 不如無書
+      hint: ''
+    - answer: 查核
+      hint: ''
+    - answer: 檢驗
+      hint: ''
+  title: 盡信書不如無書：從一件殺人案談起

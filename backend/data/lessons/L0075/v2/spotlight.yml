@@ -1,0 +1,24 @@
+spotlight:
+  lesson: G6-L8
+  strategy_name: 摘要策略—問題—解決—結果找重點
+  strategy_type: summary_pse
+  blocks:
+  - type: guide
+    text: ◎小試身手
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 現在要給你一個比較難的任務哦，請你用上一課學到的方法，找出「白鯨救援」這一課的「問題、解決、結果」。
+  - type: fill_table
+  - type: guide
+    text: 一、請你自己檢查以下2項，確定自己是否會抓重點了。
+  - type: guide
+    text: 二、如果兩項都打勾，恭喜你，你已經學會找文章「問題、解決、結果」的方法，這對你理解文章、記憶文章內容，都有很大的幫助哦。你超厲害的！
+  - type: guide
+    text: 三、不相信你具備這種能力？不然你試著不看課本，把這個故事用「問題、解決、結果」的結構講給好朋友聽聽看。
+  - type: guide
+    text: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。七閱讀理解七閱讀理解
+  - type: self_check
+    items:
+    - 我能自己找出文章的問題、解決和結果。
+    - 我能依照事情發展，整理不同人一步一步採取的解決行動。

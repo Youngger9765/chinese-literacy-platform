@@ -1,0 +1,136 @@
+lesson_uid: L0092
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 廝殺
+    definition: 互相打殺，有競爭、比賽之意。
+  - index: 2
+    word: 自圓其說
+    definition: 設法解釋自己前後矛盾的說法。
+  - index: 3
+    word: 益發
+    definition: 更加、越發
+  - index: 4
+    word: 南轅北轍
+    definition: 行動方向和原來的目的完全相反；字面意思是原本想去南方卻駕車向北行駛。
+  - index: 5
+    word: 前仆後繼
+    definition: 作戰時前面的人倒下，後面的繼續往前衝。比喻人們接連投入不怕犧牲。
+  - index: 6
+    word: 匪夷所思
+    definition: 不是一般人根據常理所能想像出來的。
+  - index: 7
+    word: 衝鋒陷陣
+    definition: 勇猛奮進，不怕困難。形容面對困難時，所表現出的勇氣和毅力。
+  - index: 8
+    word: 罪孽
+    definition: 罪惡、過失。
+  - index: 9
+    word: 傾家蕩產
+    definition: 為了做某件事，用光了家中全部的財產。
+  - index: 10
+    word: 救贖
+    definition: 使人從罪惡、災難或痛苦中得到拯救。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 廝殺
+    B: 衝鋒陷陣
+    C: 傾家蕩產
+    D: 罪孽
+    E: 益發
+    F: 自圓其說
+    G: 匪夷所思
+    H: 南轅北轍
+    I: 前仆後繼
+    J: 救贖
+  questions:
+  - index: 1
+    text: 如果騙人的話說太多，最後將難以（　）。
+    answer: F
+  - index: 2
+    text: 將軍率領著千軍萬馬（　），一舉將敵人徹底殲滅。
+    answer: B
+  - index: 3
+    text: 這場冠軍爭霸戰，兩隊在場上奮力（　），直到最後一刻才分勝負。
+    answer: A
+  - index: 4
+    text: 自從經過老師的指點和鼓勵後，他學習的態度（　）積極。
+    answer: E
+  - index: 5
+    text: 他明明做錯事，卻得到大家的讚賞，真是令人（　）。
+    answer: G
+  - index: 6
+    text: 他沉迷賭博，不但欠下大筆債務，最後還差點（　），眾叛親離。
+    answer: C
+  - index: 7
+    text: 他年輕時做過許多壞事，晚年常想彌補自己曾犯下的（　）。
+    answer: D
+  - index: 8
+    text: 他常說健康第一，卻天天熬夜、亂吃零食，做法和目標根本 （　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: D
+    stem: 根據課文第九段，「聽其言、觀其行」的信眾，最容易做出何種舉動？
+    options:
+      B: 用一個人的外貌，決定他是否可以信任
+      C: 如果對方可以說服我，我就決定信任他
+      D: 觀察其言行是否一致，再決定是否信任
+    rationale: 第13段聽其言而觀其行者，除了聽對方的言論、也要觀察他的行為是否言行一致，才能判斷是否值得信任。
+  - index: 3
+    answer: B
+    stem: 根據你對課文的理解，教主預言失敗後，信眾反應不同，最主要和哪一項因素有關？
+    options:
+      B: 必須看信眾投入此信仰的程度而定
+      C: 必須看教主是否真能提供救贖而定
+      D: 必須看教主是否能自圓其說而定
+    rationale: 第13段提到越狂熱的教徒，越是投入；心存質疑者，離開機率越大。
+  - index: 4
+    answer: D
+    stem: 根據作者的說法，如果有一位「教主」的預言和承諾，到後來都沒有實現，下列哪一類的信眾，最有可能繼續跟隨著教主？
+    options:
+      B: 教育程度低、年紀最大、比較迷信的信眾
+      C: 平常就抱著「聽其言、觀其行」態度的信眾
+      D: 為教主捐最多錢，甚至和親友斷絶關係的信眾
+    rationale: 投入最多，除了這個宗教無處可去的人。
+  - index: 5
+    answer: B
+    stem: 下列哪一選項最符合本文想傳達的觀點？
+    options:
+      A: 人們在作決策時，總是根據證據作出客觀的判斷
+      B: 人們可能因信念和過去投入，忽略與信念不同的證據
+      C: 人們愈崇拜教主，愈投入信仰，愈可能得到期待的結果
+    rationale: 就算證據擺在眼前，教徒們仍視情況而定選擇是否繼續相信。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 其實人人都想加入邪教？三大邪教話術一次破解！
+    duration_seconds: 615
+    source: 志祺七七 X 圖文不符
+  - index: 2
+    title: 辨識【說謊者】的10種心理學方法
+    duration_seconds: 442
+    source: 工科大鼠Ph.D.
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,17 @@
+lesson_uid: L0150
+version_id: v3
+title: 臺灣學生的閱讀力：美麗與哀愁
+catalog_slot: G9-L7
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 閱讀聚光燈
+  subtitle: 圖表判讀──折線圖
+- 'no': 三
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 9年級/G9-L7臺灣學生的閱讀力：美麗與哀愁（圖表判讀-折線圖）.docx
+  docx_md5: md5-12:7ccc17fe005a

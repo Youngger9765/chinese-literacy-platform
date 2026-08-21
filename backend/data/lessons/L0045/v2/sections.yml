@@ -1,0 +1,129 @@
+lesson_uid: L0045
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 抗藥性
+    definition: 生物對藥的抵抗能力，使藥效變差。
+  - index: 2
+    word: 防治
+    definition: 預防並治理疾病、蟲害等問題。
+  - index: 3
+    word: 日新月異
+    definition: 每天更新，每月不同；形容進步或變化很快。
+  - index: 4
+    word: 翼展
+    definition: 兩邊翅膀完全展開時，左右翼尖之間的長度。
+  - index: 5
+    word: 蔓延
+    definition: 像藤蔓一樣延伸。形容向四周不斷擴展。
+  - index: 6
+    word: 施作
+    definition: 依照計畫或方法進行工作。
+  - index: 7
+    word: 兵來將擋，水來土掩
+    definition: 敵兵來了，就派將士抵擋；水來了，就用土築堤阻擋。比喻針對不同情況，採取適合的應對方法。
+  - index: 8
+    word: 想方設法
+    definition: 想出各種辦法，設法達成目的。
+  - index: 9
+    word: 一勞永逸
+    definition: 辛苦一次，以後就不用再費力。
+  - index: 10
+    word: 剋星
+    definition: 能克制對方的人或物。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 施作
+    B: 想方設法
+    C: 蔓延
+    D: 剋星
+    E: 日新月異
+    F: 一勞永逸
+    G: 防治
+    H: 兵來將擋，水來土掩
+  questions:
+  - index: 1
+    text: 活動當天突然下起大雨，大家立刻把攤位移到室內，展現出（　）的應變能力。
+    answer: H
+  - index: 6
+    text: 謠言在網路上不斷（　），許多人因此誤信了不實消息。
+    answer: C
+  - index: 7
+    text: 工程人員依照設計圖（　），確保大樓能如期完工。
+    answer: A
+  - index: 8
+    text: 爸爸決定把漏水的屋頂全部翻新，希望能（　）。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 兵來將擋，水來土掩
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 請問哪一個句子使用語詞正確？
+    options:
+      A: 我每天都整理書包，希望能夠「一勞永逸」
+      B: 可愛的韓國啦啦隊員成為許多年輕人的「剋星」
+      C: 為了找回走失的小狗，他「想方設法」打聽牠的下落
+      D: 吃泡泡糖時，我喜歡讓吹出的泡泡不斷「蔓延」變大
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 根據本文對防治秋行軍蟲的說明，下列表格的內容何者完全正確？
+    options:
+      A: 腳踏實地
+      B: 未雨綢繆
+      C: 有備無患
+      D: 見招拆招
+    rationale: 只要噴藥一次，效果可以維持兩、三週，但人工噴灑會對人體造成危害。(是噴藥需持續兩三週，並非為效果。
+    marker_notes:
+      D: 遇到什麼問題用什麼方法應對。
+  - index: 4
+    answer: A
+    stem: 本文的主旨為何？
+    options:
+      A: 昆蟲學家針對防治中出現的新問題，不斷改進方法
+      B: 秋行軍蟲繁殖力很強，農民必須增加農藥使用次數
+      C: 本文比較各種方法，主要要說明生物防治效果最好
+      D: 本文介紹無人機的用途，強調機器比人工更有效率
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 「農民正在進行病蟲害『防治』。」請運用拆詞釋義，推測「防治」的意思。
+    options:
+      A: 防護和統治
+      B: 提防和整治
+      C: 防禦和懲治
+      D: 預防和治理
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【十點不一樣】蝗蟲爆發恐侵陸？秋行軍蟲立足台灣繁衍
+    duration_seconds: 424
+    source: TVBS NEWS
+  - index: 2
+    title: 秋行軍蟲的天敵 兇手只有1釐米的大小？！【科普TIME】Ke Pu TIME＿EP.12
+    duration_seconds: 553
+    source: 台視新聞 TTV NEWS
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,121 @@
+lesson_uid: L0173
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 杞人憂天
+    definition: 比喻不合理且不必要的憂慮。
+  - index: 2
+    word: 遠見
+    definition: 看事情看得長遠，能想到未來的發展。
+  - index: 3
+    word: 強顏歡笑
+    definition: 心裡不快樂，卻勉強裝出笑臉。
+  - index: 4
+    word: 故作
+    definition: 故意裝出某種樣子，如故作鎮定、故作堅強。
+  - index: 5
+    word: 企圖心
+    definition: 達成目標的決心。
+  - index: 6
+    word: 出色
+    definition: 表現優秀。
+  - index: 7
+    word: 重整旗鼓
+    definition: 比喻失敗後，重新調整，再次行動。
+  - index: 8
+    word: 如常
+    definition: 像往常一樣，沒有變動。
+  - index: 9
+    word: 應援
+    definition: 給予支援、加油打氣。
+  - index: 10
+    word: 庸人自擾
+    definition: 本來沒有必要擔心，卻一直想太多，讓自己煩惱。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 強顏歡笑
+    B: 杞人憂天
+    C: 重整旗鼓
+    D: 企圖心
+    E: 應援
+    F: 遠見
+    G: 出色
+    H: 故作
+    I: 如常
+    J: 庸人自擾
+  questions:
+  - index: 1
+    text: 他的畫畫作品非常（　），被老師貼在佈告欄讓全班同學欣賞。
+    answer: G
+  - index: 2
+    text: 這家公司因為主管很有（　），所以提早投入新技術的研發。
+    answer: F
+  - index: 3
+    text: 球隊中場休息時調整策略，下半場（　），最終成功反敗為勝。
+    answer: C
+  - index: 4
+    text: 雖然他也害怕蟑螂，但為了安撫嚇壞的弟弟，只能（　）鎮定。
+    answer: H
+  - index: 5
+    text: 在球場上，他展現了極強的（　），不放過任何可以投籃的機會。
+    answer: D
+  - index: 6
+    text: 比賽後他才發現自己扭傷，但因為想一起慶祝，所以忍痛（　）。
+    answer: A
+  - index: 7
+    text: 雖然今天是週末，外面又下著小雨，媽媽還是（　）早起去公園慢跑。
+    answer: I
+  - index: 8
+    text: 考卷都還沒發下來，你就在擔心自己會不及格，實在是（　）。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 根據第一段，作者說「他們一定也恨不得為大腦安裝一個暫停鍵」，這句話是指焦慮者會有什麼樣的心聲？
+    options:
+      B: 鼓勵大家對焦慮的人說「不要想太多」來給予安慰
+      C: 成功的關鍵在於天賦，想得再多也無法改變結果
+      D: 焦慮是成功的絆腳石，應該透過運動來釋放壓力
+      A: 學習如何與焦慮共處，並將其轉化為行動的能量
+    rationale: 從前後文可看出焦慮者自己也很希望這些念頭可以停止。
+  - index: 5
+    answer: D
+    stem: 下列描述何者最符合「內心啦啦隊」的概念？
+    options:
+      B: 模仿啦啦隊的舞蹈口號，幫自己打起精神
+      C: 設立具體的目標行動，要求自己必須達成
+      D: 練習像家人、朋友一樣對自己說鼓勵的話
+    rationale: D)符合將焦慮轉化成打氣的方法。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 第一次建立目標就上手！3 分鐘帶你解析曼陀羅九宮格！和大谷翔平學「自律」！
+    duration_seconds: 211
+    source: Will Be Good! 黃士豪
+  - index: 2
+    title: 「幫自己加油!打氣 你可以這樣做」《心念自癒力》：「打氣」心念練習
+    duration_seconds: 92
+    source: 許瑞云
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

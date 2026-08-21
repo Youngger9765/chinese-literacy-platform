@@ -1,0 +1,99 @@
+lesson_uid: L0137
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 人煙稀少
+    definition: 形容一個地方住的人很少，較少有人活動。
+  - index: 2
+    word: 無獨有偶
+    definition: 不只有一個，還有另一個相同或相似的例子。
+  - index: 3
+    word: 崎嶇
+    definition: 地上或路面高低不平。
+  - index: 4
+    word: 千里迢迢
+    definition: 形容路途遙遠。
+  - index: 5
+    word: 矗立
+    definition: 高聳直立。
+  - index: 6
+    word: 眾說紛紜
+    definition: 各式各樣的說法，多而亂，都不一致。
+  - index: 7
+    word: 星光滿布
+    definition: 星星遍布天空。
+  - index: 8
+    word: 假設
+    definition: 一個問題還不知道答案時，人們提出的可能解釋，或暫時性的答案。
+  - index: 9
+    word: 複製
+    definition: 仿照原來的樣子再做一遍。
+  - index: 10
+    word: 爭論不休
+    definition: 一直爭辯，沒有停止，也沒有得到一致結論。
+  - index: 11
+    word: 肅然起敬
+    definition: 因敬佩某人或某事，而自然產生尊敬的感受。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 讀這兩篇文章時，判斷哪個假設比較有說服力，最重要的是看什麼？
+    options:
+      B: 哪個假設有最多人贊成
+      C: 哪個假設有較多證據支持
+      D: 哪個假設聽起來最像傳說故事
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 關於「巨石陣」一文中，何者敘述正確？
+    options:
+      A: 距離復活節島最近的陸地為智利海岸
+      B: 巨石陣是由英國船長在航海中發現
+      C: 從山上到海邊石像的道路，大多崎嶇不平
+      D: 現代的起重機要豎立石像仍然極不容易
+    rationale: Ｂ ）3. 關於「摩艾走路」一文中，何者敘述不正確？
+    marker_notes:
+      B: 神父散步發現
+      D: 文中第三段
+  - index: 4
+    answer: D
+    stem: 請問巨石陣與摩艾走路這兩篇文章，其共同的未解之謎為何？
+    options:
+      A: 發現由來→令人好奇的問題→三個假設→未解之謎
+      C: 三個假設→發現由來→令人好奇的問題→未解之謎
+      D: 未解之謎→發現由來→三個假設→令人好奇的問題
+      B: 發現由來→未解之謎→三個假設→令人好奇的問題
+    rationale: 從兩篇文章的最後一段可知，石像移動仍是未解之謎。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 史前失落文明：巨石陣之謎(備註：請從第６分鐘開始觀看)
+    duration_seconds: 540
+    source: 小宇宙傳說
+  - index: 2
+    title: 古建築奧祕：復活節島摩艾石像
+    duration_seconds: 318
+    source: 國家地理
+  - index: 3
+    title: Easter Island moai 'walked'摩艾走路實驗
+    duration_seconds: 106
+    source: Nature Newsteam
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 3
+  needs_human_review: true

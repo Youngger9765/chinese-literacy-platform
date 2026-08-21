@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import json
 from pathlib import Path
 from typing import Any
@@ -26,12 +28,43 @@ from app.services.story_structure_qa_lib import (
 )
 from app.services.story_structure_table_utils import table_fingerprint
 
+logger = logging.getLogger(__name__)
+
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
 _REPO_ROOT = _BACKEND_ROOT.parent
+# 一修的抽取產物住在 `private/curriculum-source/_online-schema/{parsed_code}.keypoints.yml`。
+# 那整個目錄隨一修封存刪除，而 `private/` 本來就 gitignored —— 部署環境從來沒有它。
+# 二修之後重點表住在課本身底下：`backend/data/lessons/{lesson_uid}/v3/keypoints.yml`。
 _SCHEMA_DIR = _REPO_ROOT / "private" / "curriculum-source" / "_online-schema"
+_LESSONS_DIR = _BACKEND_ROOT / "data" / "lessons"
 _DOCX_SNAPSHOT_DIR = _BACKEND_ROOT / "data" / "qa" / "docx_table_snapshots"
 _QA_REPORT_PATH = _SCHEMA_DIR / "story_structure_qa_report.json"
-_PINNED_STORY_IDS = {item["story_id"] for item in REPRESENTATIVE_LESSONS}
+def _pinned_story_ids() -> set:
+    """Ids of the representative lessons, resolved on first use.
+
+    This was a module-level set comprehension over `REPRESENTATIVE_LESSONS`, which
+    (a) crashed at IMPORT time once that list stopped carrying `story_id` — the
+    second edition retired story_ids — taking down every module that imports this
+    one, and (b) pinned a list of first-edition lessons that no longer exist.
+
+    The representatives are now derived from the live corpus, so they are looked up
+    by the id the tree assigns and computed lazily: importing this module must not
+    require the lesson loader.
+    """
+    global _PINNED_CACHE
+    if _PINNED_CACHE is None:
+        from app.services.lesson_loader import get_lesson_by_code
+
+        ids = set()
+        for item in REPRESENTATIVE_LESSONS:
+            lesson = get_lesson_by_code(item.get("catalog_code") or item.get("parsed_code") or "")
+            if lesson:
+                ids.add(lesson["id"])
+        _PINNED_CACHE = ids
+    return _PINNED_CACHE
+
+
+_PINNED_CACHE: set | None = None
 
 
 def _read_docx_snapshot(parsed_code: str | None) -> dict[str, Any] | None:
@@ -101,19 +134,39 @@ def _parsed_code_for_lesson(lesson: dict) -> str | None:
     return catalog_to_parsed_code(catalog)
 
 
-def _keypoints_path(parsed_code: str | None) -> Path | None:
+def _keypoints_path(parsed_code: str | None, lesson_uid: str | None = None) -> Path | None:
+    """二修的位置優先，找不到才退回一修那條路徑。
+
+    只查一修那條的話結果是 175 課一致回 None —— 而且**不會拋錯**，
+    儀表板就顯示「0/175 有重點表」，看起來像內容全部不見了（#2751）。
+    """
+    if lesson_uid:
+        # uid 給了就只認這條。**不回退到 legacy** —— legacy 以 parsed_code 為 key，
+        # 回退等於「這一課沒有，那就拿對得上 parsed_code 的那份」，可能是別課的檔；
+        # 而且它同時把「二修沒產出這一課」這個真缺口掩蓋成看起來有資料。
+        path = _LESSONS_DIR / lesson_uid / "v3" / "keypoints.yml"
+        return path if path.exists() else None
     if not parsed_code:
         return None
     path = _SCHEMA_DIR / f"{parsed_code}.keypoints.yml"
     return path if path.exists() else None
 
 
-def _read_keypoints(parsed_code: str | None) -> dict[str, Any] | None:
-    path = _keypoints_path(parsed_code)
+def _read_keypoints(parsed_code: str | None, lesson_uid: str | None = None) -> dict[str, Any] | None:
+    """讀不到就回 None —— 這條在 admin detail 路由底下，讓例外打穿就是 500。
+
+    權限、I/O race、將來某份壞掉的 YAML 都會觸發；目前 150 份都解得開，
+    所以這是防將來，不是現在壞了。
+    """
+    path = _keypoints_path(parsed_code, lesson_uid)
     if not path:
         return None
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    try:
+        with open(path, encoding="utf-8") as f:
+            return yaml.safe_load(f)
+    except (OSError, yaml.YAMLError):
+        logger.warning("讀不到重點表，當作沒有: %s", path, exc_info=True)
+        return None
 
 
 def _build_structure_views(lesson: dict) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
@@ -130,7 +183,7 @@ def _build_structure_views(lesson: dict) -> tuple[dict[str, Any] | None, dict[st
 
 
 def _classify_loader_lesson(lesson: dict, parsed_code: str | None) -> LessonTier:
-    has_kp = bool(parsed_code and _keypoints_path(parsed_code))
+    has_kp = bool(_keypoints_path(parsed_code, lesson.get("lesson_uid")))
     has_table = bool(lesson.get("story_structure_table"))
     has_ai = bool(lesson.get("story_structure_rows") and not has_table)
     return classify_lesson(
@@ -204,12 +257,12 @@ def build_lab_index() -> dict[str, Any]:
                 "tier": tier.value,
                 "has_structure_table": bool(lesson.get("story_structure_table")),
                 "has_story_structure_rows": bool(lesson.get("story_structure_rows")),
-                "has_keypoints_yml": bool(parsed_code and _keypoints_path(parsed_code)),
+                "has_keypoints_yml": bool(_keypoints_path(parsed_code, lesson.get("lesson_uid"))),
                 "interaction_profile": profile,
                 "qa_gates": {**qa_gates, "L3_live": live_l3},
                 "known_data_gap": known_gap,
                 "overall_pass": overall_pass,
-                "pinned": story_id in _PINNED_STORY_IDS,
+                "pinned": story_id in _pinned_story_ids(),
             }
         )
 
@@ -233,7 +286,8 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
     catalog_code = lesson.get("grade_code") or lesson.get("lesson_code")
     tier = _classify_loader_lesson(lesson, parsed_code)
     grading, client = _build_structure_views(lesson)
-    keypoints = _read_keypoints(parsed_code)
+    _kp_path = _keypoints_path(parsed_code, lesson.get("lesson_uid"))
+    keypoints = _read_keypoints(parsed_code, lesson.get("lesson_uid"))
     report = _load_qa_report()
     qa_gates = _qa_gates_for_story(story_id, report)
     live_l3 = _live_l3_qa(client, tier, parsed_code, lesson.get("story_structure_table"))
@@ -250,7 +304,7 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
         "catalog_code": catalog_code,
         "parsed_code": parsed_code,
         "tier": tier.value,
-        "pinned": story_id in _PINNED_STORY_IDS,
+        "pinned": story_id in _pinned_story_ids(),
         "known_data_gap": known_gap,
         "yaml_table": yaml_table,
         "yaml_rows": lesson.get("story_structure_rows"),
@@ -263,7 +317,7 @@ def build_lab_detail(story_id: int) -> dict[str, Any] | None:
         "qa_gates": {**qa_gates, "L3_live": live_l3},
         "artifacts": {
             "has_keypoints_yml": bool(keypoints),
-            "keypoints_path": str(_keypoints_path(parsed_code)) if parsed_code else None,
+            "keypoints_path": str(_kp_path) if _kp_path else None,
             "has_docx_snapshot": docx_snapshot is not None,
             "qa_report_available": report is not None,
         },

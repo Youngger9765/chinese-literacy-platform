@@ -1,0 +1,34 @@
+keypoints:
+  lesson: G8-L3
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 對比句型
+    value: __VS __
+    blanks:
+    - answer: A：甜蜜意象
+      hint: ''
+    - answer: B：落淚情緒
+      hint: ''
+  - label: 關鍵詞
+    value: 甜蜜的家庭／無父無母的家庭
+    blanks: []
+  - label: 文句內容
+    sub_rows:
+    - sub_label: A：甜蜜意象①歌名是「甜蜜的家庭」
+      template: B：落淚情緒①爸爸唱著唱著泫然欲泣②爸爸說：「我哪裡來的甜蜜的家庭？我從小就無父無母……」
+      blanks: []
+  - label: 落差焦點(二選一)
+    value: □1.技巧落差：吹口琴很熟練 vs 歌唱很走音 □2.情緒落差：甜蜜的家庭 vs 不堪提起的家庭
+    blanks: []
+  - label: 凸顯重點(依序將重點填入句中)
+    value: 作者用「  歌名甜蜜的家庭  」對比「 自己不堪提起的家庭   」，想凸顯的是：爸爸想到自己的__，所以情緒才會被放大。
+    blanks:
+    - answer: 身世缺憾／家庭傷口
+      hint: ''
+  - label: 回到理解
+    value: 接下來讀例子時，請注意：恩人不只幫忙解決生活問題，也可能在他想起傷口時，仍有人用行動讓他感到溫暖、不孤單。
+    blanks: []
+  title: 第二組(段10)「（爸爸）說著說著，哼起歌來……泫然欲泣……『我哪裡來的甜蜜的家庭？我從小就無父無母……』」

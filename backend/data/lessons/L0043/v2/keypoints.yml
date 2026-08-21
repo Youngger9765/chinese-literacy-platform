@@ -1,0 +1,37 @@
+keypoints:
+  lesson: G5-L4
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 家庭背景
+    value: 1.小花小時候家裡很窮困(1)父親早逝，母親沒有__，到處打零工。(2)家裡沒有課外讀物，吃得不好。(3)大姊、二姊__學業，國小畢業就到工廠工作。(4)孩子們放學後、寒暑假都要到工廠__貼補家用。
+    blanks:
+    - answer: 一技之長
+      hint: ''
+    - answer: 犧牲/放棄
+      hint: ''
+    - answer: 打工
+      hint: ''
+  - label: 翻身之路
+    value: (1)起因：大學聯考落榜，向媽媽爭取__的機會，希望能靠__翻身。(2)問題：必須靠自己的力量支付補習費和生活費。(3)解決：到補習班__，短時間賺到補習費。__伸出援手，願意支援她一年的生活費。(4)結果：小花考上__的師範學院，並在大學期間繼續打工和接家教，堅持完成學業。畢業後成為學校助教，並在職念碩士和博士，最終成為國立大學的__。
+    blanks:
+    - answer: 重考
+      hint: ''
+    - answer: 教育
+      hint: ''
+    - answer: 打工
+      hint: ''
+    - answer: 雙胞胎妹妹
+      hint: ''
+    - answer: 公費
+      hint: ''
+    - answer: 教授
+      hint: ''
+  - label: 體會與心得
+    value: 小花感激姊姊們為家庭所做的犧牲，並意識到__對人生進路的影響。
+    blanks:
+    - answer: 教育
+      hint: ''
+  title: 從童工到大學教授之路

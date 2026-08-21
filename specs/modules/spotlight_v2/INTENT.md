@@ -1,7 +1,7 @@
 ---
 spec_id: learning.spotlight_v2
 module: spotlight-v2
-title: 聚光燈 v2 — block 序列契約 + G6-L22 驗收
+title: 聚光燈 v2 — block 序列契約 + QA manifest 對齊服務端
 stability: active
 canonical_source: backend/app/services/spotlight_block_model.py
 owns_code:
@@ -9,13 +9,23 @@ owns_code:
   - backend/app/services/spotlight_contract.py
   - backend/app/services/spotlight_v2_loader.py
   - backend/app/services/spotlight_pse_parser.py
+  - backend/app/services/curriculum_qa_spotlight.py
   - scripts/build_lesson_schema.py
+  - scripts/spotlight_fingerprints.py
   - frontend/src/components/reading-spotlight/
+owns_data:
+  - backend/data/lessons/*/v*/spotlight.yml
+  - backend/data/spotlight_fingerprints.json
+  - backend/data/curriculum_qa/spotlight_manifest.json
+  - backend/data/curriculum_qa/content_known_gaps.yaml
 spec_tests:
   - backend/specs/test_spotlight_block_model_spec.py
   - backend/specs/test_spotlight_v2_spec.py
   - backend/specs/test_pse_mcq_parser_spec.py
-related_issues: [2205]
+  - backend/specs/test_spotlight_manifest_spec.py
+legacy_tests:
+  - backend/tests/test_spotlight_known_gaps_ledger_2772.py
+related_issues: [2205, 2727, 2747, 2772]
 source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
 last_reviewed: 2026-06-20
@@ -40,6 +50,25 @@ owner: young
 | **L5** | `/learn/{id}/reading-strategy` 渲染 `BlockSequenceRenderer`（非 legacy StrategyExercise） | browse + 代表課；見下表 | merge 後必 spot-check |
 
 **L2 gold 說明**：`backend/data/lessons/spotlight/{dev7,test15}/gold_manifest.json` 存 fingerprint（block 序列、計數、mcq_leakage 等），抓 parser 回歸；**不**保證 passage/answer 語意 — 靠 L1 + 人眼 checklist
+
+### B4 決議（2026-08-14）：L1 門檻以 code 為準
+
+`docs/issue-2205-eval-standard.md:38` 曾寫 `answer_recall == 1.0`；實測
+`scripts/eval_lesson_schema.py:406-409`（`eval_spotlight`）：
+
+```python
+passed = (
+    mcq_leakage == 0 and
+    guide_retained and
+    answer_recall >= 0.99
+)
+```
+
+**裁決：code 是 SOT。** `answer_recall` 門檻是 `>= 0.99`，不是 `== 1.0`——與
+`story-structure` module 的 `row_recall`/`blank_recall`（`== 1.0` 文件 vs
+`>= 0.95` code）是同一種「文件寫死 1.0、code 實際留容錯」模式。文件已同步改正
+（`docs/issue-2205-eval-standard.md` §2）。往後若要改門檻，先改
+`eval_lesson_schema.py`，文件跟著改，不要反過來。
 
 一鍵本地 gate：
 
@@ -118,3 +147,36 @@ dev7 七課：`normalize_spotlight_blocks` + `validate_canonical_block` 全綠�
 - backend/specs/test_spotlight_block_model_spec.py
 - backend/specs/test_spotlight_v2_spec.py
 - backend/specs/test_pse_mcq_parser_spec.py
+
+
+## QA manifest 的來源與 ratchet（#2747，2026-08-19 改）
+
+管理後台的聚光燈頁本來回 **7/7 pass、0 fail**。那七課是一修的 `dev7` fixture、
+快照最後更新在 `5d371855`，而唯一能重算它的 `build_spotlight_manifest()`
+直接 FileNotFoundError —— gold 住在 `backend/data/lessons/spotlight/dev7/`，
+二修 re-ink 把整個目錄刪了。`get_spotlight_lesson('G6-L22')` 回
+`overall_pass: True` 配 `spotlight: None`：一個關於「不存在的課」的通過判定。
+
+跟 #2749 是同一個形狀 —— **綠燈來自一份沒人能重算的舊檔**。修法也同一條：
+
+| | 現在 |
+|---|---|
+| 來源 | 服務端語料 `get_all_lessons()['spotlight_v2']`，key = `lesson_uid` |
+| gold | `backend/data/spotlight_fingerprints.json`（#2727 的 ratchet，175 課，Gate 5 在跑）|
+| 重建 | `python scripts/build_spotlight_qa_manifest.py` |
+| 驗證 | `curriculum_qa_spotlight.verify_spotlight_manifest()`，由 `specs/test_spotlight_manifest_spec.py` 跑（run-ci Gate 2）|
+
+⚠️ **重建 = 重設 ratchet**，也是「某課的抽取壞掉、悄悄從 manifest 掉出去、
+摘要看起來反而更健康」的最短路徑。所以
+`curriculum_qa_spotlight.LESSONS_WITHOUT_SPOTLIGHT` 是具名清單：服務端沒有聚光燈的課
+必須具名（今天 7 課，全部只有 `v2/spotlight.yml`、沒有 `v3/`），修好了要刪掉那行，
+留著也會紅。**只會縮小，不會長大。**
+
+⚠️ `SEMANTIC_EXPECTATIONS` 是**一修課碼**（G7-L28/29/30、G6-L22）—— 二修那些碼是別的課，
+照碼套會拿別人的數字去卡四課。所以評估一律傳 `lesson_uid`（沒有任何 uid 命中那些 key，
+查證過），全部走通用門檻。
+
+⚠️ `spotlight_fingerprints.py` 原本 glob `*/v*/spotlight.yml` 讓排序最後的版本勝出。
+七課只有 `v2/spotlight.yml`、沒有 `v3/`，而 loader 服務的是**最新版本目錄**（v3）——
+於是其中五課在 ratchet 裡對著「學生看不到的 v2 檔」長綠。已改成只看服務中的版本，
+基準同步重算（5 筆由指紋變 null）。

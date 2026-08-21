@@ -1,0 +1,122 @@
+lesson_uid: L0094
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 津津樂道
+    definition: 很感興趣地談論。
+  - index: 2
+    word: 趨勢
+    definition: 事情發展的方向。
+  - index: 3
+    word: 傳遞
+    definition: 傳達東西或消息。
+  - index: 4
+    word: 家道中落
+    definition: 本來家裡有錢、有權勢，後來漸漸沒錢、沒權了。
+  - index: 5
+    word: 力圖
+    definition: 盡力想要達成某個目標。
+  - index: 6
+    word: 家境殷實
+    definition: 家裡經濟寬裕，非常有錢。
+  - index: 7
+    word: 拍案叫絕
+    definition: 拍桌子叫好，表示對精彩的事物非常讚嘆。
+  - index: 8
+    word: 嘆為觀止
+    definition: 讚嘆所看到的事物好到了極點。
+  - index: 9
+    word: 體面
+    definition: 外表或言行看起來合宜得體，不會顯得難堪或寒酸。
+  - index: 10
+    word: 相仿
+    definition: 彼此差不多。
+  - index: 11
+    word: 結實纍纍
+    definition: 植物結果很多。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.73
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 傳遞
+    B: 家境殷實
+    C: 家道中落
+    D: 相仿
+    E: 力圖
+    F: 拍案叫絕
+    G: 趨勢
+    H: 津津樂道
+    I: 體面
+    J: 嘆為觀止
+  questions:
+  - index: 3
+    text: 這支隊伍雖然節節落敗，卻仍然（　）逆轉，不肯輕易放棄。
+    answer: E
+  - index: 7
+    text: 小說中的主角原本出身富裕，後來因父親生意失敗而（　）。
+    answer: C
+  - index: 8
+    text: 這張照片不只是記錄風景，也（　）了作者對家鄉的思念。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項「」中的語詞，何者使用正確？
+    options:
+      A: 看到未成年學生犯罪的重大新聞後，他忍不住氣得「拍案叫絕」
+      B: 網紅為了按讚數，不斷揭人隱私，誇張言行令人「嘆為觀止」
+      C: 運動後「津津樂道」的灌冰水，血管快速收縮，反而不舒服
+      D: 他曾經是富二代，但經商失敗後，現在已經「家道中落」了
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據本課「閱讀聚光燈」，哪一項最能表示簡單推理的過程？
+    options:
+      A: 觀察線索 → 推理結果 → 背景知識
+      B: 背景知識 → 推理結果 → 尋找線索
+      C: 觀察線索＋背景知識 → 進行推論 → 推理結果
+      D: 推理結果＋背景知識 → 再決定觀察什麼
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 同學的球鞋沾著紅土，小杰便推測同學剛去過棒球場，因為學校只有棒球場鋪紅土。依本文的推理方法，下列哪一項評價最合理？
+    options:
+      A: 這項推測有線索與背景知識支持，但發生時間仍需證據確認
+      B: 只要球鞋底沾有紅土，就能確定同學剛剛去過棒球場
+      C: 背景知識可能干擾觀察，只要根據球鞋上的紅土作出判斷
+      D: 這項推測沒有意義，因為推理方法只適合偵探辦案時使用
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 根據課文的內容，下列敘述何者正確？
+    options:
+      A: 福爾摩斯與王戎兩人都擅長觀察與推理，也是著名的偵探
+      B: 福爾摩斯與王戎都能從觀察的線索，結合背景知識進行推論
+      C: 福爾摩斯透過觀察帽子的款式、用料，推論出帽主的年紀
+      D: 王戎曾吃過路邊的野生李子，知道它又苦又澀，所以不肯摘
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 作者先寫福爾摩斯從舊帽推論帽主的情況，又寫王戎從路邊李樹推論果實的滋味。這樣安排最主要有什麼作用？
+    options:
+      A: 比較西方偵探與中國兒童，判斷誰的推理能力更高
+      B: 說明只要天生觀察敏銳，不需背景知識也能作出判斷
+      C: 以古今不同例子說明，推理能運用在辦案與日常生活中
+      D: 強調物品外觀與植物位置，都能直接證明事情的真相
+    rationale: null
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok

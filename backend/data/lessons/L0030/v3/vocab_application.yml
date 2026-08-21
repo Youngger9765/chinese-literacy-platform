@@ -1,0 +1,40 @@
+lesson_uid: L0030
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 結實
+    B: 覆蓋
+    C: 倘若
+    D: 循序漸進
+    E: 不可或缺
+    F: 分量
+    G: 一步登天
+    H: 欲速則不達
+  items:
+  - index: 1
+    stem: 要贏球，球隊裡每位球員的貢獻都是（　）的。
+    answer: E
+  - index: 2
+    stem: 天氣低溫加上水氣足夠，讓玉山步道沿線都（　）白雪，好像灑了糖霜般的童話世界。
+    answer: B
+  - index: 3
+    stem: 我們做事要腳踏實地，不要老是想（　）。
+    answer: G
+  - index: 4
+    stem: 他長期舉重，因此鍛鍊出一身（　）的肌肉。
+    answer: A
+  - index: 5
+    stem: （　）這件事不是你做的，為什麼你一見到我就跑？
+    answer: C
+  - index: 6
+    stem: 他急著完成美術作品，結果畫得十分潦草，真是（　）。
+    answer: H
+  - index: 7
+    stem: 教練提醒新手不要一開始就跑太遠，要（　）增加訓練量。
+    answer: D
+  - index: 8
+    stem: 雖然他說話不多，但每一句都很有（　），大家都認真聆聽。
+    answer: F
+  answer_note: 第 3、5 題原稿的答案印的是全形「Ｇ」「Ｃ」

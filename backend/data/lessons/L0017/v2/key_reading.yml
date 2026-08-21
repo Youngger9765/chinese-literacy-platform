@@ -1,0 +1,21 @@
+lesson_uid: L0017
+version_id: v2
+passage: 回家路上，我常常偷偷回想我們一整天相處的片段，像是在腦袋裡播一部只屬於自己的小電影。想到他幫我撿掉在地上的筆，或是在小組討論時不經意叫我的名字，我心裡就會不自覺發熱，像被陽光輕輕照到一樣。可是，我也不懂為什麼這種感覺只對他有。其他同學也對我很好啊，但那種溫暖又興奮的感覺，卻只有在他身上才會發生。更奇怪的是，我甚至開始期待每天上學，只要一想到可能會跟他有多一些互動，我就會覺得這一天好像變得特別一點。
+start_text: 回家路上，我常常偷偷回想我們一整天相處的片段，像
+extent_chars: 200
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 6
+  cell_paragraphs: 7

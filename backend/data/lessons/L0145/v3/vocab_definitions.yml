@@ -1,0 +1,52 @@
+lesson_uid: L0145
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    素昧平生、物種、虛構、抽象概念、制度、法人、
+
+    約定俗成、共同編織。'
+  word_bank:
+  - 素昧平生
+  - 物種
+  - 虛構
+  - 抽象概念
+  - 制度
+  - 法人
+  - 約定俗成
+  - 共同編織
+  answers_printed: true
+  answer_carrier: 橘色（E97132）填在橫線上；本節是全課**唯一**答案帶 run 層 w:color 的一節
+  items:
+  - index: 1
+    definition: 從來沒有見過面，也不認識。
+    answer: 素昧平生
+  - index: 2
+    definition: 指看不見、摸不到，但人可以理解和討論的想法，例如自由、正義、國家。
+    answer: 抽象概念
+  - index: 3
+    definition: 比喻大家一起建立或完成某件事。本文是指大家一起形成並相信某種故事、信念或規則。
+    answer: 共同編織
+  - index: 4
+    definition: 指生物的種類，例如人類、老虎、麻雀是不同物種。
+    answer: 物種
+  - index: 5
+    definition: 大家共同遵守的規定和做事方法，例如學校制度、法律制度。
+    answer: 制度
+  - index: 6
+    definition: 由人想像、創造出來的概念，不一定是自然界本來就存在的東西，也不等於騙人。
+    answer: 虛構
+  - index: 7
+    definition: 指被法律承認的組織，例如公司、基金會、協會；它可以簽約、擁有財產，也要負責任。
+    answer: 法人
+  - index: 8
+    definition: 大家長久以來都這樣做，慢慢形成大家都認同的習慣或規則。
+    answer: 約定俗成

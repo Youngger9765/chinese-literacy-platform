@@ -1,0 +1,96 @@
+lesson_uid: L0071
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 差異
+    definition: 兩件事情不一樣的地方，例如：Ａ班身高平均160cm，B班身高平均150cm，我們會說兩班的身高有「差異」。
+  - index: 2
+    word: 年齡層
+    definition: 依年齡範圍分成的群體，例如幼兒、青少年、成年人。
+  - index: 3
+    word: 複製
+    definition: 把相同的東西再做一份。
+  - index: 4
+    word: 異議
+    definition: 對原有的說法提出不同意見或質疑。
+  - index: 5
+    word: 差距
+    definition: 兩個數字或情況相差多少，常用來比較成績、能力等。例如：A 班平均 85 分，B 班平均 78 分，兩班的分數差距是85-78＝7分。
+  - index: 6
+    word: 推論
+    definition: 根據已經知道的事情或線索，想出還不知道的結果或答案。
+  - index: 7
+    word: 平均值
+    definition: 把一組數值加起來，再除以數值的個數，得到的代表性數字。例如：50、60、70 公斤的平均值是 60 公斤。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 推論
+    B: 複製
+    C: 年齡層
+    D: 異議
+    E: 差異
+    F: 平均值
+    G: 差距
+  questions:
+  - index: 1
+    text: 這對雙胞胎姊妹的外表幾乎一模一樣，只有髮型有所（　）。
+    answer: E
+  - index: 2
+    text: 看到教室地上留著一串溼腳印，我（　）剛才有人從雨中走進來。
+    answer: A
+  - index: 3
+    text: 在討論校外教學的地點時，幾位同學對老師的安排提出了（　），他們覺得去動物園更好。
+    answer: D
+  - index: 4
+    text: 電視節目透過分級制度（例如：普遍級、保護級等），讓不同（　）的觀眾選擇適合自己的節目。
+    answer: C
+  - index: 5
+    text: 7-11有標準化的經營步驟，讓每家分店都能（　）相同的經營模式。
+    answer: B
+  - index: 6
+    text: 這對情侶克服了年齡（　），最後有情人終成眷屬。
+    answer: G
+  - index: 7
+    text: 小明三次測驗的分數是7、8、9分，這三次的（　）是8分。
+    answer: F
+  - index: 8
+    text: 另一組研究者依照相同方法再做一次，希望能（　）原來的研究結果。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 5
+    answer: B
+    stem: 下列哪一個選項，是這篇文章最重要的結論？
+    options:
+      B: 數字發音越短，可能越容易記住較多數字
+      C: 年齡越小，數字記憶廣度通常就越高
+      D: 補習經驗越多，數字記憶廣度就越高
+    rationale: 實驗一與實驗二都出現「漢語數字發音較短、漢語組記憶廣度較高」的結果，因此支持B。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 2
+    title: 神奇數字7：提升記憶力的祕訣大公開！
+    duration_seconds: 355
+    source: ec 性格記憶學
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 1
+  needs_human_review: true

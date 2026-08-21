@@ -1,0 +1,40 @@
+lesson_uid: L0119
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 風塵僕僕
+    B: 揣想
+    C: 林立
+    D: 絡繹不絕
+    E: 流連忘返
+    F: 汲汲營營
+    G: 遣返
+    H: 餞行
+  option_bank_note: 代號表只列 8 個（邂逅、佇足、呢喃、一貫未編代號）；原稿如此
+  items:
+  - index: 1
+    stem: 週年慶期間，購物中心裡的人潮（　），非常熱鬧。
+    answer: D
+  - index: 2
+    stem: 圖書館內書架（　），各類書籍應有盡有，讓人目不暇給。
+    answer: C
+  - index: 3
+    stem: 人生不應該只為名聲、利益（　），還要懂得享受生活。
+    answer: F
+  - index: 4
+    stem: 他從國外（　）趕回來，只為參加好友的婚禮。
+    answer: A
+  - index: 5
+    stem: 這裡的美麗風景讓遊客們（　），捨不得離去。
+    answer: E
+  - index: 6
+    stem: 看見他滿面春風，令我不禁（　）他是否有了新戀情。
+    answer: B
+  - index: 7
+    stem: 由於違反當地法律，幾名外國遊客被（　）回國。
+    answer: G
+  - index: 8
+    stem: 好朋友即將出國留學，我們約在餐廳為她（　）。
+    answer: H

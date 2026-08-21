@@ -1,0 +1,122 @@
+lesson_uid: L0173
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 庸人自擾
+  - 杞人憂天
+  - 出色
+  - 遠見
+  - 企圖心
+  - 強顏歡笑
+  - 故作
+  - 應援
+  - 重整旗鼓
+  - 如常
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 精神抖擻我應強無短心
+  - 荒庸人自擾如爰顏立見
+  - 住謬重女夠嘗企走歡靦
+  - 遠出故作交隔圖夠腆笑
+  - 見臉旗見杞刁心己傭故
+  - 歡色袁人不鑽優媛人做
+  - 天五憂可應顏入如重企
+  - 喜天置鼓格援常天整見
+  - 地信低潮出色焦圖旗隔
+  - 不夠格強心綠園開鼓花
+  answers_are_graphical: true
+  answer_paths:
+  - word: 強顏歡笑
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 庸人自擾
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    direction: horizontal
+  - word: 企圖心
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    direction: vertical
+  - word: 遠見
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 1
+    direction: vertical
+  - word: 故作
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    direction: horizontal
+  - word: 杞人憂天
+    cells:
+    - - 5
+      - 5
+    - - 6
+      - 4
+    - - 7
+      - 3
+    - - 8
+      - 2
+    direction: diagonal_down_left
+  - word: 應援
+    cells:
+    - - 7
+      - 5
+    - - 8
+      - 6
+    direction: diagonal_down_right
+  - word: 如常
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 重整旗鼓
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 出色
+    cells:
+    - - 9
+      - 5
+    - - 9
+      - 6
+    direction: horizontal
+  _圈選note: 10 個目標語詞全部圈到，但**圈只有 9 個是 roundRect 圖形** ——「遠見」那一圈是嵌入的**圖片** （`pic`，0.382×0.814 in），只數 roundRect 會少算一條而且不會報錯。以群組框（4.776×3.533 in） 換算格距後，該圖片中心正落在第 4~5 列第 1 欄，並經 PDF 第 12 頁像素比對確認。

@@ -56,12 +56,24 @@ jobs:
       #     specifier so Vite bundles it. A dynamic import with the name in a
       #     variable passed build, lint and vitest while the feature was broken
       #     in every browser (#2622)
+      #   - BlockSequenceRenderer.newblocks: every spotlight block type must have a
+      #     case in the renderer. `multi` sat in types.ts with no branch, so 68
+      #     blocks across 37 lessons fell through to default — the question printed,
+      #     the options never did, and nothing errored. Assertions check that the
+      #     options/sub-items/right-column entries actually reach the DOM, because
+      #     "renders without throwing" cannot tell those two states apart.
       #   - LessonAudioTable: admin audio panel must (a) stop the previous
       #     clip before starting a new one — the hook's single-shot playback
       #     path does not auto-cancel a prior <audio> on its own — and (b)
       #     return a row to idle the instant it (or the header button) is
       #     stopped. Regression of either reintroduces #2622's "不能停止 /
       #     同時播其他的就會一堆聲音" follow-up bug.
+      #   - nextStepFooter: no `.tsx` may draw its own "下一關" / "繼續下一步"
+      #     button — every step's forward CTA must be the shared
+      #     `NextStepFooter`. This test file existed before #2771 but was
+      #     never pinned here, so its scan lock never actually ran in CI —
+      #     which is exactly how 23 custom buttons across 14 files shipped
+      #     past a lock whose test file was green (#2771).
       # Production build. vitest and eslint both passed while `vite build` was
       # broken — a rename left two files under their old names while every
       # import already used the new ones, and nothing in this workflow resolved
@@ -81,4 +93,10 @@ jobs:
             src/pages/admin/lesson-audio/paragraphGap.test.ts \
             src/pages/GuestReadingPage.passage.test.tsx \
             src/components/auth/publicSteps.test.ts \
-            src/services/ttsApi.paragraph.test.ts
+            src/services/ttsApi.paragraph.test.ts \
+            src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
+            src/components/learning/__tests__/nextStepFooter.test.tsx \
+            src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
+            src/components/layout/__tests__/Sidebar.role-split.test.tsx \
+            src/components/layout/__tests__/toolboxUnreachable.test.tsx \
+            src/components/reading-steps/__tests__/introStepCount.test.ts

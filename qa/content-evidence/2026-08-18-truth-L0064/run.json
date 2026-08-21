@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0064",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "read_calls": 1,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 1,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "verbatim 首跑 1 筆：我把聚光燈第三張表的 prompt 抄短了（漏掉『這五階段不一定都會發生，有時候也反反覆覆，』），補回完整句後 172 條全過。找字格子第 7 列第 10 欄是原稿空的（已列 errata E2）；10 個圈裡有 2 個是 prst=\"rect\" 不是 roundRect，只數 roundRect 會少算兩條。 ｜2026-08-18 複驗：紙上 roundRect 8 < 10 條路徑（紙外 0），屬「少於」方向不算缺陷；差額原因已知＝2 個圈用 prst=\"rect\" 畫。w:bdr 全 13 個皆 auto，無框選答案。 ｜第八道門 orphan_key_gate：PASS。resources+items 命名確認無誤。"
+}

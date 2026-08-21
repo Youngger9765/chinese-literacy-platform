@@ -263,7 +263,7 @@ def classroom_with_students(client, teacher, student1, student2, school_id):
 
 
 # A valid story_id from the YAML lesson data (L01.yml -> lesson_number=1)
-VALID_STORY_ID = "1"
+VALID_STORY_ID = "20001"
 INVALID_STORY_ID = "99999"
 
 
@@ -1902,7 +1902,7 @@ class TestSubmitAssignment:
             f"/api/classrooms/{classroom_id}/assignments",
             json={
                 "classroom_id": classroom_id,
-                "story_id": "2",
+                "story_id": "20002",
                 "title": "Session Sync Regression #1181",
             },
             headers=auth_header(teacher["token"]),
@@ -2326,7 +2326,7 @@ class TestSubmissionReadingMetrics:
     def _create_assignment_and_start(self, client, teacher, student, classroom_id):
         """Create assignment, start it as student. Returns (assignment_id, session_id).
 
-        Uses story_id="2" (not VALID_STORY_ID="1") so that earlier submit tests
+        Uses story_id="20002" (not VALID_STORY_ID="1") so that earlier submit tests
         which mark story-1 sessions as 'completed' don't cause a unique-index
         collision in SQLite (which lacks partial-index support).
         """
@@ -2334,7 +2334,7 @@ class TestSubmissionReadingMetrics:
             f"/api/classrooms/{classroom_id}/assignments",
             json={
                 "classroom_id": classroom_id,
-                "story_id": "2",
+                "story_id": "20002",
                 "title": "Reading Metrics Test",
             },
             headers=auth_header(teacher["token"]),
@@ -2500,7 +2500,7 @@ class TestTeacherFeedback:
         asn_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
             headers=auth_header(teacher["token"]),
-            json={"classroom_id": classroom_id, "story_id": "1"},
+            json={"classroom_id": classroom_id, "story_id": "20001"},
         )
         assert asn_resp.status_code == 201
         assignment_id = asn_resp.json()["id"]
@@ -2565,7 +2565,7 @@ class TestTeacherFeedback:
             student_suffix="grade_notify_student",
             classroom_name="Grade Notify Classroom",
             title="Grade Notify Assignment",
-            story_id="2",
+            story_id="20002",
         )
 
         start_resp = client.post(
@@ -2654,7 +2654,7 @@ class TestTeacherFeedback:
         asn_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
             headers=auth_header(teacher["token"]),
-            json={"classroom_id": classroom_id, "story_id": "1"},
+            json={"classroom_id": classroom_id, "story_id": "20001"},
         )
         assignment_id = asn_resp.json()["id"]
 
@@ -2724,7 +2724,7 @@ class TestTeacherGradingAuthorization:
                 headers=auth_header(teacher["token"]),
                 json={
                     "classroom_id": classroom_id,
-                    "story_id": str(idx + 1),
+                    "story_id": str(20001 + idx),
                     "title": f"Grade Auth Assignment {idx + 1}",
                 },
             )
@@ -2837,7 +2837,7 @@ class TestReadingGoalsInStartResponse:
             headers=auth_header(teacher["token"]),
             json={
                 "classroom_id": classroom_id,
-                "story_id": "1",
+                "story_id": "20001",
                 "target_cpm": 160,
                 "target_accuracy": 85.0,
                 "difficulty_label": "中級",
@@ -2900,7 +2900,7 @@ class TestReadingGoalsInStartResponse:
         asn_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
             headers=auth_header(teacher["token"]),
-            json={"classroom_id": classroom_id, "story_id": "1"},
+            json={"classroom_id": classroom_id, "story_id": "20001"},
         )
         assignment_id = asn_resp.json()["id"]
 
@@ -3199,7 +3199,7 @@ class TestIssue1982PendingAssignmentStart500:
         # Create assignment (triggers pending submission for the student)
         asn_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
-            json={"story_id": "1", "title": "1982 IntegrityError test assignment"},
+            json={"story_id": "20001", "title": "1982 IntegrityError test assignment"},
             headers=auth_header(teacher["token"]),
         )
         assert asn_resp.status_code == 201, asn_resp.text
@@ -3279,7 +3279,7 @@ class TestIssue1982PendingAssignmentStart500:
         # Create assignment (student gets a pending submission automatically)
         asn_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
-            json={"story_id": "1", "title": "Issue 1982 test assignment"},
+            json={"story_id": "20001", "title": "Issue 1982 test assignment"},
             headers=auth_header(teacher["token"]),
         )
         assert asn_resp.status_code == 201, asn_resp.text

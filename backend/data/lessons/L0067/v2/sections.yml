@@ -1,0 +1,138 @@
+lesson_uid: L0067
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 沁涼
+    definition: 形容涼爽、清涼。
+  - index: 2
+    word: 仰望
+    definition: 抬頭向上看。
+  - index: 3
+    word: 殆盡
+    definition: 幾乎全部消失或用完。
+  - index: 4
+    word: 諮詢
+    definition: 詢問、徵求意見。
+  - index: 5
+    word: 精神抖擻
+    definition: 非常有精神的樣子。
+  - index: 6
+    word: 震懾
+    definition: 受到強烈的力量或景象影響，感到震驚、害怕。
+  - index: 7
+    word: 畏懼
+    definition: 害怕，恐懼。
+  - index: 8
+    word: 與…為伍
+    definition: 和……相處、作伴。
+  - index: 9
+    word: 有生之年
+    definition: 人還活在世上的時間。
+  - index: 10
+    word: 拋家棄子
+    definition: 離開家庭，不管孩子。
+  - index: 11
+    word: 籌措
+    definition: 想辦法準備或募集所需的資金、物資。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 拋家棄子
+    B: 籌措
+    C: 震懾
+    D: 畏懼
+    E: 仰望
+    F: 有生之年
+    G: 諮詢
+    H: 精神抖擻
+    I: 殆盡
+    J: 沁涼
+  questions:
+  - index: 1
+    text: 我們站在山腳下（　）高聳的山峰，感受到大自然的壯麗。
+    answer: E
+  - index: 2
+    text: 面對強大的對手，他心中雖有些（　），仍然勇敢上場。
+    answer: D
+  - index: 4
+    text: 在這個偏遠山村裡，村民遇到問題時，常向村長（　）。
+    answer: G
+  - index: 5
+    text: 當山崩發生時，所有人看到土石滑落的景象，都被（　）住了。
+    answer: C
+  - index: 6
+    text: 為了完成這個工程，我們需要（　）大量資金。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列「　」中的語詞，哪一項使用不恰當？
+    options:
+      A: 他們歷經千辛萬苦，終於「籌措」到開店所需的資金
+      B: 眼前如詩如畫的景象，深深「震懾」了所有在場的人
+      C: 一場無情大火，把他們辛苦建立的家園燒得「殆盡」
+      D: 走進山林，迎面而來的「沁涼」空氣令人神清氣爽
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 下列對賴桑人物特質與課文證據的配對，哪一項最不合理？
+    options:
+      A: 熱愛自然——從小與大自然為伍，工作之餘常上山看神木
+      B: 堅持理想——面對親友的不理解，仍持續種樹三十多年
+      C: 勇於行動——清運垃圾、人工除草，並鋪設水管照顧樹苗
+      D: 重視名聲——愈來愈多人注意他的事，連總統也上山感謝他
+    rationale: null
+  - index: 3
+    answer: B
+    stem: 賴桑為什麼不用化學肥料和除草劑，改以人工除草？
+    options:
+      B: 為了避免繼續破壞土質，讓樹苗順利長大
+      C: 為了減少種樹花費，把經費留給購買樹苗
+      D: 為了提高除草效率，加快完成種樹的速度
+    rationale: 第五段：為了讓樹苗能夠順利長大，賴桑決定不使用化學肥料和除草劑，改以人工除草。
+  - index: 4
+    answer: A
+    stem: 根據第7段，哪一項最能說明賴太太如何支持賴桑種樹？
+    options:
+      A: 扛起家庭與公司的責任，並持續籌措種樹資金。
+      B: 先反對丈夫上山種樹，後來才逐漸接受他的選擇。
+      C: 把家庭與公司交給兒子，自己上山協助種植樹苗。
+      D: 等待森林已有成果後，才開始提供種樹所需經費。
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 下列哪一項不是賴桑種樹或推廣種樹想達成的目標？
+    options:
+      A: 在有生之年種下五十萬棵臺灣珍貴樹木
+      B: 影響更多人一起加入種樹與守護山林的行列
+      C: 透過名人和媒體宣傳，打造自己的品牌形象
+      D: 為下一代留下美麗而珍貴的森林寶藏。
+    rationale: 第4題解析：第七段：賴桑妻子理解並支援他的種樹行動，承擔起家庭和公司的重擔，並多次幫助籌措資金，支援丈夫的事業。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 《賴桑的千年之約》
+    duration_seconds: 720
+    source: 遠見叢書
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 1
+  needs_human_review: true

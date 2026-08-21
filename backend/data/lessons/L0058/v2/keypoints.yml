@@ -1,0 +1,53 @@
+keypoints:
+  lesson: G6-L18
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 小主題
+    value: 重要細節
+    blanks: []
+  - label: 種子庫是什麼（第1～2段）
+    value: 斯瓦爾巴全球種子庫是挪威政府出資興建的__，用來保存__。
+    blanks:
+    - answer: 非營利儲藏庫
+      hint: ''
+    - answer: 全世界的農作物種子
+      hint: ''
+  - label: 種子銀行的建置
+    sub_rows:
+    - sub_label: 目的（第3段）
+      template: 如聚光燈－（第三段）所寫。
+      blanks: []
+    - sub_label: __
+      template: 如聚光燈－（第四段）所寫。
+      blanks:
+      - answer: 保存環境與方式
+        hint: ''
+    - sub_label: 安全設計（第5段）
+      template: 種子庫設計具備高度的安全性，可以防範__帶來的威脅。
+      blanks:
+      - answer: 地震、核武與海平面上升
+        hint: ''
+  - label: 參與種子銀行的例子
+    sub_rows:
+    - sub_label: __
+      template: 為保存臺灣原生小米的__，臺灣把小米種子存入斯瓦爾巴全球種子庫。
+      blanks:
+      - answer: 臺灣參與種子保存計畫
+        hint: ''
+      - answer: 基因多樣性
+        hint: ''
+    - sub_label: 敘利亞取出保存種子
+      template: 2015年，因阿勒坡種子庫遭到內戰波及，中東研究人員首次__。
+      blanks:
+      - answer: 取出130箱種子
+        hint: ''
+  - label: 作者提醒（第8段）
+    value: 科學家未雨綢繆建設種子庫，我們應該保護__，希望永遠不會用到種子庫。
+    blanks:
+    - answer: 生態環境
+      hint: ''
+  title: 大主題：末日種子庫

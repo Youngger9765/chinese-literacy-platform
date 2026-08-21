@@ -1,0 +1,42 @@
+lesson_uid: L0085
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 纖細
+    B: 遠山如洗
+    C: 頻率
+    D: 明察秋毫
+    E: 彷彿
+    F: 徵兆
+    G: 歷歷在目
+    H: 即將
+    I: 焦躁不安
+  option_bank_note: 代號表只收 9 個語詞（未收 坐立難安、前兆）；9 個代號對 8 小題，H.即將 未被任何一題用到。
+  answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 他因車禍被送進醫院，在急診室外的家屬（　），不停來回踱步。
+    answer: I
+  - index: 2
+    stem: 這位警察辦案非常認真，總是能（　），順利破案。
+    answer: D
+  - index: 3
+    stem: 雨後的清晨，空氣格外清新，抬頭望去，（　），景物看得一清二楚。
+    answer: B
+  - index: 4
+    stem: 那天看牙醫的恐怖經驗（　），讓我想到就不寒而慄。
+    answer: G
+  - index: 5
+    stem: 她流鼻水可能是感冒的（　），要及早治療以免加重病情。
+    answer: F
+  - index: 6
+    stem: 這台機器故障的（　）太高，該換新的了。
+    answer: C
+  - index: 7
+    stem: 畫家用（　）的筆觸畫出雲朵的柔軟感。
+    answer: A
+  - index: 8
+    stem: 天空的雲層很低，（　）隨手就能觸碰到。
+    answer: E

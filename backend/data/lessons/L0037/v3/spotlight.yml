@@ -1,0 +1,170 @@
+lesson_uid: L0037
+version_id: v3
+section_no: 五
+spotlight:
+  strategy_name: 摘要策略──問題、解決、結果找重點
+  strategy_type: summary
+  section_title_printed: 閱讀聚光燈
+  blocks:
+  - type: concept_box
+    text: '很多故事會寫主角遇到問題、想辦法解決，最後出現結果。把這三個部分找出來，就能掌握故事怎麼發展，也比較容易整理重點。
+
+      讀這類故事時，可以先找出主角，再用三個問題整理：
+
+      ❶問題：主角遇到了什麼困難？
+
+      ❷解決：誰做了什麼，來解決這個困難？
+
+      ❸結果：問題解決後，最後結果如何？
+
+      今天，我們就來學這個超實用的閱讀方法，用「問題、解決、結果」的方式來整理故事內容，幫助你輕鬆抓到重點。舉例來說：'
+  - type: sub_block
+    label: 例一：烏鴉喝水
+    instruction: 例一：烏鴉喝水
+    quote: 天氣炎熱，烏鴉又渴又累。牠找到一個有水的瓶子，但瓶子太深，水太少，烏鴉喝不到。烏鴉叼來小石頭丟進瓶子，讓水面升高，最後順利喝到水。
+    answer_carrier: 紅色 ☑ 與紅色手寫字（圖形），文字流無勾選資訊
+    items:
+    - type: free_text
+      index: 1
+      prompt: ❶主角是誰？
+      answer: 烏鴉
+    - type: single
+      index: 2
+      prompt: ❷主角遇到了什麼「問題」？
+      options:
+        1: 喝不到水
+        2: 天氣炎熱
+      answer: 1
+    - type: free_text
+      index: 3
+      prompt: ❸問題如何「解決」？
+      answer: 叼小石頭丟進瓶子裡，讓水面升高
+    - type: single
+      index: 4
+      prompt: ❹最後得到什麼「結果」？
+      options:
+        1: 主角順利喝到水
+        2: 主角沒有喝到水
+      answer: 1
+  - type: sub_block
+    label: 課文的「雞鳴」故事
+    instruction: 接下來，我們來看課文的「雞鳴」的故事
+    quote: '孟嘗君連夜逃到函谷關，但天沒亮，城門不能開。當時規定要聽到雞鳴，士兵才會開門。
+
+      這時，一位食客雞鳴先生站出來說他會學雞叫。他學得唯妙唯肖，引來附近公雞一起叫，士兵以為天亮了，就開了城門。
+
+      孟嘗君一行人順利出關，逃出秦國。'
+    answer_carrier: 紅色 ☑ 與紅色手寫字（圖形），文字流無勾選資訊
+    items:
+    - type: single
+      index: 1
+      prompt: ❶主角是誰？
+      options:
+        1: 孟嘗君
+        2: 秦昭王
+        3: 雞鳴先生
+      answer: 1
+    - type: single
+      index: 2
+      prompt: ❷主角遇到了什麼「問題」？
+      options:
+        1: 被追兵追到
+        2: 天沒亮，城門不能開
+      answer: 2
+    - type: free_text
+      index: 3
+      prompt: ❸問題如何「解決」？孟嘗君的食客【　】，引來附近公雞也一起叫，讓士兵以為天亮。
+      blanks:
+      - answer: 模仿雞叫
+    - type: single
+      index: 4
+      prompt: ❹最後得到什麼「結果」？
+      options:
+        1: 成功出關
+        2: 沒有出關
+      answer: 1
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: 1.課文另一個故事（白狐裘）
+    instruction: 1.讓我們來看課文另一個故事
+    quote: '孟嘗君被秦昭王軟禁，情勢危急。他請幸姬幫忙，幸姬願意救他，但提出條件，要一件白狐裘。可是那件大衣已經送給秦王，孟嘗君無法再拿出一件。
+
+      這時，一位會狗盜的食客站出來。他潛入寶庫，把白狐裘偷了回來。幸姬收到大衣後很高興，便在秦王面前幫孟嘗君說好話。秦王聽了她的話，解除對孟嘗君軟禁。'
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    items:
+    - type: single
+      index: 1
+      prompt: ❶主角是誰？
+      options:
+        1: 秦昭王
+        2: 孟嘗君
+        3: 幸姬
+        4: 狗盜先生
+      answer: 2
+    - type: single
+      index: 2
+      prompt: ❷主角遇到了什麼「問題」？
+      options:
+        1: 沒錢買白狐裘
+        2: 幸姬要白狐裘但已送給秦王
+        3: 找不到人幫忙
+      answer: 2
+    - type: single
+      index: 3
+      prompt: ❸問題如何「解決」？
+      options:
+        1: 拜託秦王讓給幸姬
+        2: 再去買一件
+        3: 食客潛入寶庫偷回白狐裘
+      answer: 3
+    - type: single
+      index: 4
+      prompt: ❹最後得到什麼「結果」？
+      options:
+        1: 幸姬幫忙說話，秦王解除軟禁
+        2: 幸姬拒絕幫忙，孟嘗君被關
+        3: 秦王說話不算話，不肯放人
+      answer: 1
+  - type: sub_block
+    label: 2.策略帶著走：大象有多重？
+    instruction: 2.策略帶著走：大象有多重？
+    quote: '有一天，吳國送了一頭大象給曹操。大家都很好奇這頭大象到底有多重，可是大象那麼大，放不上秤，沒辦法知道大象的重量。
+
+      這時，年紀還小的曹沖說：「我有辦法！」他請人把大象牽到一艘大船上，等船下沉穩定後，在船身畫一條水位線。然後把大象牽下來，再往船上裝石頭，一邊裝一邊觀察水位，直到水位線回到原來的位置。
+
+      最後，把船上的石頭搬下來一個一個秤重量，就知道大象的重量了。'
+    answer_carrier: 紅色 ☑ 與紅色手寫字（圖形），文字流無勾選資訊
+    items:
+    - type: single
+      index: 1
+      prompt: ❶主角是誰？
+      options:
+        1: 曹操
+        2: 曹沖
+      answer: 2
+    - type: free_text
+      index: 2
+      prompt: ❷主角遇到了什麼「問題」？
+      answer: 大象太大，放不上秤，沒辦法秤
+    - type: single
+      index: 3
+      prompt: ❸問題如何「解決」？
+      options:
+        1: 請工人抬大象放到大磅秤上秤重
+        2: 讓大家猜一個大概的重量
+        3: 用船的水位線比對大象和石頭，再秤出石頭的重量
+      answer: 3
+    - type: single
+      index: 4
+      prompt: ❹最後得到什麼「結果」？
+      options:
+        1: 知道大象的重量
+        2: 不知道大象的重量
+      answer: 1
+  - type: self_check
+    label: ◎自我檢核
+    items:
+    - 1.我能找出主角真正要解決的問題。
+    - 2.我能找出誰用什麼方法解決問題。
+    - 3.我能找出解決後的結果，並用三個部分整理故事重點。

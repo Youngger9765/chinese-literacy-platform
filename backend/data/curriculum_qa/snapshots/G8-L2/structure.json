@@ -1,92 +1,132 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "歷史事件與結局",
+      "歷史事件與結局"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "對比句型",
-      "value": "【　　　】＋【　　　】＋【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "句型關鍵詞",
-      "value": "但是",
-      "interactive_type": "display"
-    },
-    {
-      "label": "文句內容",
-      "value": "",
       "interactive_type": "display",
+      "label": "隱形的征服者",
+      "value": ""
+    },
+    {
+      "interactive_type": "checkbox",
+      "label": "歷史事件與結局",
+      "options": [
+        "感到畏懼，因為敵軍人數遠遠超過自己",
+        "感到興奮，因為他們深信自己一定會獲勝"
+      ],
+      "select_mode": "single",
+      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？【 請打勾，單選 】\n①感到畏懼，因為敵軍人數遠遠超過自己 ②感到興奮，因為他們深信自己一定會獲勝"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "歷史事件與結局",
+      "value": "結局：印加帝國的崩潰\n1.原本強大的【　　　】在西班牙人到來後迅速瓦解。\n2.印加人放棄原本的【　　　】和語言，改信天主教。\n3.【　　　】語成為南美洲的主要語言。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "提問",
       "sub_rows": [
         {
-          "label": "洗過澡又問要不要洗\n每次出門前問要去哪裡\n③忘了媽媽過世一年多",
-          "value": "仍記得八十年前舊事，且記得的都是「恩人」",
-          "interactive_type": "display"
+          "interactive_type": "display",
+          "label": "左欄",
+          "value": "1.勢單力薄的西班牙人在短時間征服印加帝國，靠的是什麼？"
+        },
+        {
+          "interactive_type": "display",
+          "label": "右欄",
+          "value": "2.為什麼歐洲人攜帶這麼多致命的病菌，自己卻不會生病？"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "落差焦點【　　　】",
-      "value": "1.時間落差：近事 vs 舊事\n2.內容落差：日常小事 vs 恩人恩情\n□3.人物落差：家人的提醒vs 爸爸的反應",
-      "interactive_type": "fill_blank",
-      "blank_in_label": true
+      "interactive_type": "display",
+      "label": "說明",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "賈德‧戴蒙的研究指出，是西班牙人從【　　　】帶過去的病菌。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "這些疾病在歐洲已經肆虐一千多年；歐洲人逐漸產生【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "凸顯重點【 依序將重點填入句中 】",
-      "value": "作者用「記不得最近發生的事    」對比「仍記得八十年前的恩人   」，想要強調的是的【　　　】對爸爸的重要性。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "詳細說明",
+      "value": ""
     },
     {
-      "label": "回到理解",
-      "value": "作者已經用對比的手法，把「恩人」這個主題顯出來了，再來，我們就可以預期，後面一定跟著許多恩人的故事。",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "總結",
+      "value": "1.如果沒有病菌，印加帝國可能不會那麼快被嚴重削弱。\n2.天花等疾病成為西班牙人征服印加的重要推力，改變了美洲的歷史。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "隱形的征服者",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "對比句型",
-      "value": "【　　　】＋【　　　】＋【　　　】"
+      "label": "歷史事件與結局",
+      "value": "事件：1532年，西班牙 皮薩羅率領168名士兵對戰8萬士兵的印加帝國軍隊。西班牙士兵的心理感受？(請打勾，單選)\n①感到畏懼，因為敵軍人數遠遠超過自己 ②感到興奮，因為他們深信自己一定會獲勝"
     },
     {
       "kind": "pair",
-      "label": "句型關鍵詞",
-      "value": "但是"
+      "label": "歷史事件與結局",
+      "value": "結局：印加帝國的崩潰\n1.原本強大的【　　　】在西班牙人到來後迅速瓦解。\n2.印加人放棄原本的【　　　】和語言，改信天主教。\n3.【　　　】語成為南美洲的主要語言。"
     },
     {
-      "kind": "section_block",
-      "section": "文句內容",
       "items": [
         {
-          "label": "洗過澡又問要不要洗\n每次出門前問要去哪裡\n③忘了媽媽過世一年多",
-          "value": "仍記得八十年前舊事，且記得的都是「恩人」"
+          "label": "左欄",
+          "value": "1.勢單力薄的西班牙人在短時間征服印加帝國，靠的是什麼？"
+        },
+        {
+          "label": "右欄",
+          "value": "2.為什麼歐洲人攜帶這麼多致命的病菌，自己卻不會生病？"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "提問"
+    },
+    {
+      "items": [
+        {
+          "label": "",
+          "value": "賈德‧戴蒙的研究指出，是西班牙人從【　　　】帶過去的病菌。"
+        },
+        {
+          "label": "",
+          "value": "這些疾病在歐洲已經肆虐一千多年；歐洲人逐漸產生【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明"
     },
     {
       "kind": "pair",
-      "label": "落差焦點(複選)",
-      "value": "1.時間落差：近事 vs 舊事\n2.內容落差：日常小事 vs 恩人恩情\n□3.人物落差：家人的提醒vs 爸爸的反應"
+      "label": "詳細說明",
+      "value": ""
     },
     {
       "kind": "pair",
-      "label": "凸顯重點(依序將重點填入句中)",
-      "value": "作者用「記不得最近發生的事    」對比「仍記得八十年前的恩人   」，想要強調的是的【　　　】對爸爸的重要性。"
-    },
-    {
-      "kind": "pair",
-      "label": "回到理解",
-      "value": "作者已經用對比的手法，把「恩人」這個主題顯出來了，再來，我們就可以預期，後面一定跟著許多恩人的故事。"
+      "label": "總結",
+      "value": "1.如果沒有病菌，印加帝國可能不會那麼快被嚴重削弱。\n2.天花等疾病成為西班牙人征服印加的重要推力，改變了美洲的歷史。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "對比句型",
-      "落差焦點【　　　】",
-      "凸顯重點【 依序將重點填入句中 】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

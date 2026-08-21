@@ -1,0 +1,71 @@
+lesson_uid: L0133
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 根據圖一，哪一選項的情況下，肉湯很快就腐敗了？
+    options:
+      A: 情境❶和❷
+      B: 情境❶和❸
+      C: 情境❷和❸
+      D: 情境❶、❷、❸
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 第二段巴斯德提出假設：「只要把肉湯煮沸，並且阻止空氣中的微生物落入湯裡，肉湯即使接觸空氣，應該也不會腐敗。」從這句話可以推知，巴斯德設計實驗時最想驗證的是什麼？
+    options:
+      A: 肉湯腐敗是否因為沒有煮沸完全造成
+      B: 肉湯腐敗到底是空氣還是微生物造成的
+      C: 瓶子的大小與肉湯靜置的時間長短
+      D: 肉湯腐敗是否因為玻璃瓶內殘留雜質造成
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 文章最後提到「洗手、戴口罩的重要性，都與這項研究的精神息息相關」，這句話最適合用來說明下列哪一種想法？
+    options:
+      A: 預防疾病的重要做法之一，是減少微生物傳播
+      B: 現代醫學進步的原因，主要來自顯微鏡的發明
+      C: 巴斯德做鵝頸瓶實驗時洗手、戴口罩，才能成功
+      D: 巴斯德設計實驗的目的，就是解決現代的疫情
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 圖一呈現的鵝頸瓶構造，最能幫助讀者理解下列哪一選項的文字？
+    options:
+      A: 鵝頸瓶的彎曲瓶頸，可讓空氣通過卻攔住微生物
+      B: 煮沸後，鵝頸瓶肉湯中的微生物就可以完全消滅
+      C: 鵝頸瓶經過加熱之後，瓶內空氣就不再造成污染
+      D: 鵝頸瓶的主要作用，就是把外界空氣完全隔絕掉
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 本文先寫「最普遍的解釋是自然發生說」，接著又寫「但法國的科學家巴斯德卻有一個新的說法」，這樣安排最能突顯什麼？
+    options:
+      A: 巴斯德的觀點，是把原有觀念說得更加完整
+      B: 巴斯德的觀點，是從舊說法中找到較合理部分
+      C: 巴斯德的觀點，是把注意重點轉到實驗工具上
+      D: 第4題解析：圖一的價值，不只是讓學生知道瓶子長什麼樣子，而是幫助理解「彎曲瓶頸」在實驗中的功能：空氣仍可進入，但微生物會沉積在彎曲處，難以進入肉湯。
+    rationale: 第4題解析：圖一的價值，不只是讓學生知道瓶子長什麼樣子，而是幫助理解「彎曲瓶頸」在實驗中的功能：空氣仍可進入，但微生物會沉積在彎曲處，難以進入肉湯。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 國家地理探索系列：「微生物學之父」巴斯德
+    duration_seconds: 269
+    source: 國家地理雜誌National Geographic Magazine
+  - index: 2
+    title: 巴斯德-史上第一支疫苗的發明人【LIS科學史】
+    duration_seconds: 779
+    source: LIS情境科學教材
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

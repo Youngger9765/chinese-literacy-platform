@@ -1,0 +1,40 @@
+lesson_uid: L0051
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 《八戒部落》＃22. 「我要活下去」之野外求生第一招：搭建遮蔽屋
+    duration: (11:44)
+    source: 八戒部落
+    qr_code: true
+  - index: 2
+    title: 《八戒部落》＃23. 「野外生火」 最原始的野外取火法 大公開！
+    duration: (12:13)
+    source: 八戒部落
+    qr_code: true
+  - index: 3
+    title: 《八戒部落》＃24. 「野外淨水」 濁水變淨水， 超天然的竹筒淨水器！
+    duration: (8:26)
+    source: 八戒部落
+    qr_code: true
+  - index: 4
+    title: 《八戒部落》＃25. 「野外取食」 自製天然釣竿、 野生植物變身餐桌佳餚！
+    duration: (10:10)
+    source: 八戒部落
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/FQd0x4vjmG8
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 2
+    url: http://youtu.be/Kj7AjD3zopM
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 3
+    url: http://youtu.be/B9IBTUsyGQk
+    url_source: 總表0816「4.影片連結」年級6課次11
+  - index: 4
+    url: http://youtu.be/NSn8F_rm6QU
+    url_source: 總表0816「4.影片連結」年級6課次11

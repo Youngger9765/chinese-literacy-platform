@@ -1,0 +1,124 @@
+lesson_uid: L0079
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 祈請
+    definition: 十分誠懇的請求。
+  - index: 2
+    word: 拮据
+    definition: 指生活貧困、經濟困難。
+  - index: 3
+    word: 與日俱增
+    definition: 隨著時間不斷增加。
+  - index: 4
+    word: 雪上加霜
+    definition: 降雪過多，又降霜，造成農作物雙重傷害。比喻在糟糕的情況下，又發生新的不幸，讓狀況更困難。相反詞是「錦上添花」。
+  - index: 5
+    word: 聯手
+    definition: 共同合作。
+  - index: 6
+    word: 哄騙
+    definition: 用溫和的言語、行動或謊言對兒童或病人進行安撫、欺騙。
+  - index: 7
+    word: 諮詢
+    definition: 向專業人士請教意見或建議。
+  - index: 8
+    word: 秋祺
+    definition: 通常放在書信結尾，祝福收信人秋日安好。季節不同可用春祺、夏祺、冬祺；「時祺」則不分季節都可以用。
+  - index: 9
+    word: 病識感
+    definition: 生病時，對自己病情的認知和接受程度。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 祈請
+    B: 病識感
+    C: 拮据
+    D: 雪上加霜
+    E: 諮詢
+    F: 與日俱增
+    G: 聯手
+    H: 哄騙
+    I: 秋祺
+  questions:
+  - index: 1
+    text: 離開家鄉數十年，頭髮都斑駁了，他對家人的思念（　）。
+    answer: F
+  - index: 2
+    text: 乾旱時，全村在大廟舉行祭典，（　）老天爺降下大雨。
+    answer: A
+  - index: 3
+    text: 同學向輔導老師進行職涯（　）時，輔導老師很有耐心的一一解答。
+    answer: E
+  - index: 4
+    text: 如果病人缺乏（　），會很難說服他接受醫療協助。
+    answer: B
+  - index: 5
+    text: 這個家庭剛失去收入來源，房租又突然調漲，真是（　）。
+    answer: D
+  - index: 7
+    text: 他在聊天軟體上用甜言蜜語取得信任，再（　）對方借錢給他。
+    answer: H
+  - index: 8
+    text: 警方和銀行（　）追查詐騙案，希望儘快抓到主謀，減少受害者的損失。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列語詞，何者使用正確？
+    options:
+      A: 多虧善心路人真誠的「拐騙」，小女孩才終於停止哭泣
+      B: 阿公向營養師「諮詢」飲食建議後，才了解平常都吃太鹹了
+      C: 他不僅錄取了柔道隊，還獲得學長的肯定，真是「雪上加霜」D.在美麗的燈光與柔和的音樂中，他們夫妻「聯手」走進會場
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 根據文章，為什麼作者要用寫信的方式表達？
+    options:
+      A: 讓阿嬤不會因為被拐騙而有金錢損失
+      B: 讓阿嬤在外面行動時有法院的人員保護
+      C: 讓家人可以知道阿嬤生活的一舉一動
+      D: 向社區宣告，讓大家知道阿嬤生病了
+    rationale: 從前後文可看出有作者和妹妹的「居中協調」會降低衝突次數，因此最能降低衝突的應該是C選項
+  - index: 5
+    answer: D
+    stem: 根據文章判斷，若雷醫師回應了作者的請求，下列何者最可能發生？
+    options:
+      A: 阿嬤診斷的結果為精神與行為皆正常，返家休養
+      B: 阿公被要求一起接受診斷治療，協助兩人相處
+      C: 醫院直接報警，指出阿嬤是偷竊腳踏車的兇手
+      D: 根據最後作者提出的要求「開立診斷證明，向法院申請監護宣告」，與A矛盾，而「向社工師諮詢」則符合D的情境。
+    rationale: 根據最後作者提出的要求「開立診斷證明，向法院申請監護宣告」，與A矛盾，而「向社工師諮詢」則符合D的情境。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 你一定要懂得成年監護制度(90秒)國語版 2022-04-21
+    duration_seconds: 90
+    source: 衛生福利部社會及家庭署
+  - index: 2
+    title: 新北衛生局失智動畫 阿嬤的大腦迷宮2021-05-20
+    duration_seconds: 280
+    source: 新北市政府衛生局
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,21 @@
+lesson_uid: L0139
+version_id: v2
+passage: 新的問題來了——昆蟲若要取得這朵花的花蜜，牠應該要有一個長達30公分的口器，才能嚐到花距末端甜美的花蜜。這樣的推論讓他更興奮、也更困惑。這世界上真的有口器這麼長的昆蟲嗎？這實在令人難以置信！但如果沒有這樣的昆蟲，這種蘭花就不可能繁衍、不可能存在啊。因為當時已經發現有口器長達20公分的蛾，達爾文於是寫下他的推測：在馬達加斯加島上，應該有一種口器長達30公分的蛾類，能夠幫這朵風蘭授粉。
+start_text: 新的問題來了——昆蟲若要取得這朵花的花蜜，牠應該
+extent_chars: 192
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 9
+  cell_paragraphs: 16

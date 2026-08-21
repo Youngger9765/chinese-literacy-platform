@@ -1,0 +1,97 @@
+lesson_uid: L0062
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 坐立難安  _
+    definition: 坐也不是、站也不是，形容緊張或不安。
+  - index: 2
+    word: 拘謹
+    definition: 因為緊張或怕做錯，說話、動作不自然，也不放鬆。
+  - index: 3
+    word: 曖昧
+    definition: 態度、意思或關係不明確，讓人難以判斷。
+  - index: 4
+    word: 糾結
+    definition: 心裡有不同想法互相拉扯，很難做決定。
+  - index: 5
+    word: 渾身
+    definition: 整個身體、從頭到腳。
+  - index: 6
+    word: 遲疑
+    definition: 拿不定主意，不能馬上做決定或行動。
+  - index: 7
+    word: 顧忌
+    definition: 因為擔心不好的後果，所以不敢隨便行動。
+  - index: 8
+    word: 指指點點  _
+    definition: 用手指著別人或東西，比喻議論或批評別人。
+  - index: 9
+    word: 盤旋
+    definition: 在空中繞圈飛；也比喻某個念頭反覆出現在腦中。
+  - index: 10
+    word: 眼睜睜
+    definition: 親眼看著事情發生，卻無法阻止或改變。
+  - index: 11
+    word: 自作多情
+    definition: 別人只是一般的友善或關心，自己卻以為對方特別喜歡自己。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.69
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 坐立難安
+    B: 指指點點
+    C: 曖昧
+    D: 遲疑
+    E: 拘謹
+    F: 顧忌
+    G: 渾身
+    H: 眼睜睜
+  questions:
+  - index: 1
+    text: 他從惡夢中驚醒，（　） 冒著冷汗，喘著氣回想剛才的恐懼。
+    answer: G
+  - index: 2
+    text: 她毫無（　），直接提出反對意見，不怕得罪不同想法的人。
+    answer: F
+  - index: 3
+    text: 他總是習慣在背後（　），卻從不願直接找當事人說清楚。
+    answer: B
+  - index: 4
+    text: 他們的互動方式非常（　），讓人無法輕易解讀。
+    answer: C
+  - index: 5
+    text: 面對突如其來的選擇，他（　）了，停頓了幾秒，才緩緩做出決定。
+    answer: D
+  - index: 6
+    text: 我們只能（　）看著颱風摧毀農作物，卻對災情無能為力。
+    answer: H
+  - index: 7
+    text: 手術進行中，家屬在候診區（　），不斷看向時鐘。
+    answer: A
+  - index: 8
+    text: 他穿著正式的西裝參加面試，一言一行都比平常（　）許多。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: JingTong Talk | 影響圈關注圈 | leader in me
+    duration_seconds: 103
+    source: JingTong菁桐國民小學
+  - index: 2
+    title: 吿白失敗了該怎麼辦？｜一起戀愛吧｜卓苡瑄
+    duration_seconds: 350
+    source: 卓苡瑄Jessie
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

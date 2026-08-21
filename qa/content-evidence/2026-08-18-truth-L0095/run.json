@@ -1,0 +1,24 @@
+{
+  "lesson_uid": "L0095",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "read_calls": 1,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 1,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "notes": "verbatim 首跑 1 筆是我自己的註解欄位 `idx_evidence`（改成 `_note` 後全過）。0 筆真的抄錯。本課段號**不是一段一號**：15 個 <w:p> 只印 11 個段號，四個分節小標不佔號 —— 有兩個獨立證據（閱讀理解解析寫「第七段」對得上；字數欄 333/343 兩點只有把小標算進去才對得上）。個數警報：11 個 roundRect 全在找字 block == 11 條路徑，不觸發。第三載體 w:bdr 非 auto = 0。"
+}

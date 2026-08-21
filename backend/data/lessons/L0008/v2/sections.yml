@@ -1,0 +1,130 @@
+lesson_uid: L0008
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 熱氣騰騰
+    definition: 形容食物或飲料熱呼呼的，蒸氣不斷上升的樣子。
+  - index: 2
+    word: 搓手踏腳
+    definition: 摩擦雙手並用腳踏地，形容藉著活動身體來取暖。
+  - index: 3
+    word: 言外之意
+    definition: 沒有明白說出來，但間接透露出來的意思。
+  - index: 4
+    word: 陸續
+    definition: 接連不斷的樣子。
+  - index: 5
+    word: 渲染
+    definition: 用色彩、光線或文字，營造出某種氣氛或感覺。也比喻言詞、文字過度誇大。
+  - index: 6
+    word: 漸行漸遠
+    definition: 慢慢的越走越遠。也可以形容方向、關係越來越疏離。
+  - index: 7
+    word: 暈黃
+    definition: 帶著淡淡黃色、柔和不明亮的光。暈，光影、色澤四周模糊的樣子。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 漸行漸遠
+    B: 陸續
+    C: 熱氣騰騰
+    D: 渲染
+    E: 言外之意
+    F: 搓手踏腳
+    G: 暈黃
+    H: 招待
+  questions:
+  - index: 4
+    text: 自從小學畢業後，他們的聯絡越來越少，因此關係也（　）了。
+    answer: A
+  - index: 5
+    text: 當志明說：「春嬌這麼美，這麼好，是不可能看上我的。」志明的（　）是他好希望春嬌可以喜歡他。
+    answer: E
+  - index: 6
+    text: 親戚遠道而來，爸爸熱情（　）他們，請他們品嘗家鄉的美食。
+    answer: H
+  - index: 7
+    text: 冬天的寒風吹個不停，等公車的人們一邊（　），一邊縮著身子取暖。
+    answer: F
+  - index: 8
+    text: 傍晚時分，路燈散發出（　）的光芒，讓街道多了一分溫暖。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 招待
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 小夫捉弄胖虎，胖虎氣炸了，「熱氣騰騰」的跑去找他算帳
+      B: 他們因為觀念相差太多，最終感情「漸行漸遠」，離婚收場
+      C: 晚飯時間，我的爸爸下班後「陸續」離開公司回來了
+      D: 開學前他去把頭髮「渲染」成金色，希望吸引大家的目光
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 根據本文，下列哪一個線索，主要是在表現老人想讓孫子安心吃麵？
+    options:
+      A: 老人家摸摸自己的肚子，對孫子說自己飽的像蜘蛛
+      B: 老人家在社區做資源回收，提著裝了回收物的垃圾袋
+      C: 老人家看菜單，數一數手中零錢，點最便宜的陽春麵
+      D: 老人家只點一碗麵給孫子吃，自己只是拚命喝水
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 根據第三段，老阿公真的是第一百個客人嗎？為什麼老闆要這麼說？
+    options:
+      A: 是，因為這是他們店裡新的促銷活動，阿公正好是幸運兒
+      B: 是，因為他是店裡第一百個客人，所以免費得到一碗麵
+      C: 不是，因為老闆根本沒算人數，他只想快點賣完回家休息
+      D: 不是，因為老闆看出祖孫生活不寬裕，想幫忙他們
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 根據第三段內容，為什麼老人要跟小男孩說他飽的像蜘蛛一樣？
+    options:
+      A: 因為他有啤酒肚，看起來像蜘蛛
+      B: 他剛剛有吃其他東西，真的很飽
+      C: 他想開玩笑讓吃飯氛圍更開心
+      D: 他想用玩笑來化解孫子的擔心
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 根據本文，老闆最後說小男孩正在學習「不吃東西也會飽」的道理，請問這個道理是什麼意思呢？
+    options:
+      A: 這是一種鍛鍊意志力的方法
+      B: 這是運用想像力讓自己度過難關的練習
+      C: 這是為重要的人付出，心裡也會感到滿足
+      D: 這是一種新的飲食型態，斷食久了就會習慣
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 15歲的他，開了家窮人免費的面店，送出4萬碗麵！
+    duration_seconds: 316
+    source: 一条Yit
+  - index: 2
+    title: 用一枚銅板換一頓溫飽 莊朱玉女阿嬤堅持販售10元自助餐 倒貼負債也要讓每個人都能吃到熱騰騰的飯菜
+    duration_seconds: 492
+    source: 在台灣的故事
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

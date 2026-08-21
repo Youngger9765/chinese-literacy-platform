@@ -1,0 +1,67 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "主角",
+      "想做什麼",
+      "困難與行動",
+      "成果與改變"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "植物獵人",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "主角",
+      "value": "1.洪信介，大家稱他為阿介，是臺灣山林界的【　　　】\n2.他熱愛植物，透過【　　　】和請教【　　　】的方式持續學習，累積山林經驗與植物知識。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "想做什麼",
+      "value": "他想進入保種中心，讓自己的專長真正用在【　　　】上。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "困難與行動",
+      "value": "1.困難一：他因只有國中學歷，多次被保種中心拒絕；\n2.行動一：在中年【　　　】，考上員林農工園藝科，最後進入保種中心。\n3.困難二：山林採集辛苦又危險\n4.行動二：為了【　　　】的使命，持續進入山林採集。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "成果與改變",
+      "value": "1.對植物與研究：二十五年來，他採集了【　　　】種植物，協助植物保育與科學研究。\n2.對阿介自己：他的專業，為他贏得【　　　】，也讓他找回【　　　】，重新找回自己。"
+    }
+  ],
+  "title": "植物獵人",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "1.洪信介，大家稱他為阿介，是臺灣山林界的【　　　】\n2.他熱愛植物，透過【　　　】和請教【　　　】的方式持續學習，累積山林經驗與植物知識。"
+    },
+    {
+      "kind": "pair",
+      "label": "想做什麼",
+      "value": "他想進入保種中心，讓自己的專長真正用在【　　　】上。"
+    },
+    {
+      "kind": "pair",
+      "label": "困難與行動",
+      "value": "1.困難一：他因只有國中學歷，多次被保種中心拒絕；\n2.行動一：在中年【　　　】，考上員林農工園藝科，最後進入保種中心。\n3.困難二：山林採集辛苦又危險\n4.行動二：為了【　　　】的使命，持續進入山林採集。"
+    },
+    {
+      "kind": "pair",
+      "label": "成果與改變",
+      "value": "1.對植物與研究：二十五年來，他採集了【　　　】種植物，協助植物保育與科學研究。\n2.對阿介自己：他的專業，為他贏得【　　　】，也讓他找回【　　　】，重新找回自己。"
+    }
+  ]
+}

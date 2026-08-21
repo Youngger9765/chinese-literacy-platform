@@ -1,0 +1,49 @@
+keypoints:
+  lesson: G7-L27
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 吐瓦魯危機
+    value: 因全球__、海平面持續__，吐瓦魯即將面臨國土逐漸被__的危機。
+    blanks:
+    - answer: 暖化
+      hint: ''
+    - answer: 上升
+      hint: ''
+    - answer: 海水淹沒
+      hint: ''
+  - label: 因應方法
+    value: 吐瓦魯部長柯飛提出建立__的計畫：透過數位科技複製__、讓國家在__永久存在。
+    blanks:
+    - answer: 元宇宙國家
+      hint: ''
+    - answer: 地標
+      hint: ''
+    - answer: 雲端
+      hint: ''
+  - label: 挑戰
+    value: __版國家是否能獲得__，並持續擁有海洋邊界及海域內的__？
+    blanks:
+    - answer: 數位
+      hint: ''
+    - answer: 國際承認
+      hint: ''
+    - answer: 資源
+      hint: ''
+  - label: 作者反思
+    value: 太平洋島國溫室氣體只佔全球__%，卻必須承擔全球暖化的後果、成為氣候難民，實在很__。全球暖化，臺灣沿海鄉鎮__、也會更容易淹水。
+    blanks:
+    - answer: '0.03'
+      hint: ''
+    - answer: 冤屈
+      hint: ''
+    - answer: 排水困難
+      hint: ''
+  - label: 結論
+    value: 對抗__，沒有人是局外人，元宇宙真是解方嗎？
+    blanks:
+    - answer: 全球暖化
+      hint: ''
+  title: 吐瓦魯：逐漸被淹沒的島國

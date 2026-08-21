@@ -1,0 +1,26 @@
+lesson_uid: L0015
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: '【夢想 勇敢出發】
+
+      穿越極限 超馬勇者陳彥博 單元1'
+    duration: '15:33'
+    duration_seconds: 933
+    source: 華視新聞
+  - index: 2
+    title: 【馬拉松、超級馬拉松、越野跑傻傻分不清？】
+    duration: '10:14'
+    duration_seconds: 614
+    source: 陳彥博的運動冒險生活頻道
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/K4DGUX7utCU
+    url_source: 總表0816「4.影片連結」年級4課次4
+  - index: 2
+    url: http://youtu.be/b9105wafoXc
+    url_source: 總表0816「4.影片連結」年級4課次4

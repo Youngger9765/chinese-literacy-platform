@@ -1,0 +1,132 @@
+lesson_uid: L0009
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 凜冽
+    definition: 形容天氣非常寒冷。
+  - index: 2
+    word: 遍體鱗傷
+    definition: 全身都是傷。
+  - index: 3
+    word: 蹭
+    definition: 用身體輕輕靠著、磨一磨，有時是撒嬌。
+  - index: 4
+    word: 奄奄一息
+    definition: 形容生命快要結束，或非常虛弱。
+  - index: 5
+    word: 忠心耿耿
+    definition: 非常忠實，不會背叛或離開。
+  - index: 6
+    word: 毫髮無傷
+    definition: 形容在危險或災難中平安無事，連一點傷都沒有。
+  - index: 7
+    word: 輾󠇡轉難眠
+    definition: 因為緊張、擔心或想太多事，翻來翻去睡不著。
+  - index: 8
+    word: 忐忑不安
+    definition: 心情緊張、焦慮，不知道會發生什麼事。
+  - index: 9
+    word: 淚水奪眶而出
+    definition: 眼淚不由自主的流出來。
+  - index: 10
+    word: 凌亂
+    definition: 雜亂沒有秩序。
+  - index: 11
+    word: 威風凜凜
+    definition: 看起來很有氣勢，讓人覺得厲害或很強。
+  - index: 12
+    word: 不寒而慄
+    definition: 形容在極度恐懼之下，明明不冷，卻在發抖。
+  extraction_check:
+    defined_words_belong_to_lesson: 0.92
+    vocabulary_bank_covered: 0.69
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 凌亂
+    B: 不寒而慄
+    C: 蹭
+    D: 凜冽
+    E: 威風凜凜
+    F: 忠心耿耿
+    G: 忐忑不安
+    H: 輾轉難眠
+    I: 淚水奪眶而出
+  questions:
+  - index: 1
+    text: 小貓一直（　）我的腳，好像在說「摸我！」
+    answer: C
+  - index: 3
+    text: 聽完那個可怕的故事，我整個人都（　）。
+    answer: B
+  - index: 4
+    text: 想到明天要比賽，他因緊張而整夜（　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 蹭
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列語詞何者使用不正確？
+    options:
+      A: 一陣「凜冽」的寒風吹來，冷得我不由自主地縮起脖子
+      B: 他從二樓跳下來，竟然「毫髮無傷」，真讓人驚訝
+      C: 一想起跟好朋友吵架的事，我就「輾轉難眠」，一直睡不著
+      D: 跑完一百公尺，我只能「奄奄一息」的喘氣
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 獵人在山中無法安心入睡，最可能的原因是什麼？
+    options:
+      B: 因為朋友曾經警告他
+      C: 因為白牙很喜歡小寶
+      D: 因為白牙搖著尾巴迎接他
+      A: 因為白牙肚子餓了
+    rationale: 第四段描述獵人「輾轉難眠，想著的都是：小寶會不會餓了？白牙會照顧他吧？」所以擔心的是孩子跟白牙。
+  - index: 4
+    answer: A
+    stem: 第十三段提到：「白牙已經奄奄一息，但牠用盡全力，把尾巴搖了幾下。」為什麼白牙快死了，還在搖尾巴？
+    options:
+      B: 因為每隻狗臨死時都會搖尾巴
+      C: 因為白牙覺得主人在跟牠玩
+      D: 因為白牙想要主人給牠東西吃
+      A: 第十三段：白牙沒有反抗，還搖尾巴，是牠信任主人的表現。
+    rationale: 第十三段：白牙沒有反抗，還搖尾巴，是牠信任主人的表現。
+    is_rationale: true
+  - index: 5
+    answer: B
+    stem: 讀完本課，請問作者想要傳達什麼道理？
+    options:
+      A: 狗咬人的本性很難改變，要特別小心
+      B: 衝動的決定可能帶來無法挽回的錯誤
+      C: 不要單獨留小孩子在家裡，容易有意外發生
+      D: 防人之心不可無，即使是信任的朋友，也要有所保留
+    rationale: A-是村人偏見的錯誤看法。C-是情節中安排情境，不是作者的主張。D-雖看似合理，但白牙並沒有背叛，是獵人自己誤會了牠。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 你要如何與情緒共存，停止情緒化思考？｜《你可以生氣，但不要越想越氣》｜見人哥來說書
+    duration_seconds: 419
+    source: 見人哥
+  - index: 2
+    title: 當情緒升起，你控制得住嗎？先不要討厭情緒，三隻小豬實戰給你看｜五分鐘看一本書｜青春愛讀書
+    duration_seconds: 449
+    source: 青春愛讀書
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

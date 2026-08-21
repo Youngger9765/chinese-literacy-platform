@@ -64,14 +64,28 @@ def create_learning_session(
     # Normalize slug using the centralized normalizer (#985 + #984)
     normalized_slug = normalize_story_slug(payload.story_slug) if payload.story_slug else None
 
-    # --- Validate story_slug against texts table (#1135) ---
+    # --- Validate story_slug against the stories that exist (#1135, widened #2683) ---
+    #
+    # This checked the `texts` table alone, and that table holds FIRST-EDITION lesson
+    # numbers. The re-ink renumbered every lesson, so no second-edition id is in it and
+    # every POST came back 422 — no session, and nothing a student did was recorded, for
+    # all 175 lessons. The eleven steps each rendered while this failed underneath, so
+    # it survived every check that only looked at whether a page had content.
+    #
+    # A story served by the catalogue is a real story whether or not a row exists for
+    # it: `text_id` is nullable and the list route already titles a session from
+    # `get_lesson_by_id` when `text` is None. The gate's purpose is unchanged — a slug
+    # naming nothing is still refused.
     if normalized_slug:
         try:
             ln = int(normalized_slug)
-            text_exists = db.query(Text).filter(Text.lesson_number == ln).first() is not None
         except (ValueError, TypeError):
-            text_exists = False
-        if not text_exists:
+            ln = None
+        known = ln is not None and (
+            db.query(Text).filter(Text.lesson_number == ln).first() is not None
+            or get_lesson_by_id(ln) is not None
+        )
+        if not known:
             raise HTTPException(
                 status_code=422,
                 detail=f"unknown story_slug: {payload.story_slug!r}",

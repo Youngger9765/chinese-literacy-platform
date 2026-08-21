@@ -1,0 +1,46 @@
+lesson_uid: L0063
+version_id: v3
+title: 物以稀為貴：從「供給」和「需求」談物價波動
+catalog_slot: G6-L22
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+  _scope: 每篇各一
+- 'no': 二
+  name: 念順順
+  printed: 二*念順順
+  _scope: 每篇各一
+- 'no': 三
+  name: 語詞我最棒
+  printed: 三*語詞我最棒
+  _scope: 每篇各一
+- 'no': 四
+  name: 語詞應用
+  printed: 四*語詞應用
+  _scope: 每篇各一
+- 'no': 五
+  name: 文章重點整理
+  printed: 五*文章重點整理
+  _scope: 每篇各一
+- 'no': 六
+  name: 閱讀聚光燈
+  printed: 六*閱讀聚光燈
+  subtitle: 寫作手法──用不同角度的例子說明概念
+  scope: 三篇合讀
+- 'no': 七
+  name: 綜合閱讀理解
+  printed: 七*綜合閱讀理解
+  scope: 三篇合讀
+- 'no': 八
+  name: 詞語複習
+  printed: 八*詞語複習
+  scope: 三篇合讀
+- 'no': 九
+  name: 知識補給站
+  printed: 九*知識補給站
+  scope: 三篇合讀
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 22
+  drive_path: 6年級/G6-L22-24物以稀為貴（多文本閱讀-寫作手法-用不同角度的例子說明概念）.docx
+  docx_md5: md5-12:7ee522df9aee

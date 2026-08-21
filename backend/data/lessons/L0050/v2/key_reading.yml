@@ -1,0 +1,21 @@
+lesson_uid: L0050
+version_id: v2
+passage: 這時，荷蘭人有了一個巧妙的構想——大家一起出錢，讓一家公司主導遠洋行動。於是，荷蘭東印度公司（Dutch East India Company）成立了，它是全世界第一家發行「股票」的公司。它把經營公司所需的資金分成許多小份，每一小份就是一張股票。如果人們認為這家公司會賺錢，就可以出錢認購股票，投資這家公司。只要有許多人投資，公司就能集到足夠的經費，組成船隊，揚帆啟航。
+start_text: 這時，荷蘭人有了一個巧妙的構想——大家一起出錢，
+extent_chars: 185
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 10

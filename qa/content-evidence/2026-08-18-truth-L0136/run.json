@@ -1,0 +1,20 @@
+{
+  "lesson_uid": "L0136",
+  "catalog_slot": "G9-L15",
+  "pdf_pages": 3,
+  "pages_read": 3,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0,
+    "render_coverage": 0
+  },
+  "retries": 1,
+  "notes": "🔴 **全庫罕見的 image-only 課**：文字層只有 39 個非空白 w:t run（頁首／課名／說明＋提醒＋四步驟／一句作答指示／一行答案）。**第 2 頁整張跳水圖文與第 3 頁三道會考題（題幹＋選項＋評審分數表）一個字都不在文字層**，是 image4.png(542KB) 與 image5.jpeg(292KB) 兩張掃描圖。依 SKILL ⑥.63 標 image 前先 grep **合併 run 後的 dump**：12 個關鍵詞（挑戰勇氣的跳水／跳水比賽規則／斯金納／運動大百科／評審一／難度係數／入水時水花／根據圖文／起跳／騰空／評分／入水）dump 與 raw XML 全回 0；**正向對照**（前面三課／目標策略／會考圖文題實戰／陳淑麗）全回 1 以上 —— 有這個對照才敢說是圖不是我 grep 壞了。圖上的字仍**逐字轉錄**（多模態的價值），只是標明無法用逐字門驗證：受檢 14、無法驗證 40。🔴 **PDF 嚴重簡體字代換**（p1 印成「会考图文题实战」「我们已经学过」），教材本身是正體，document.xml 乾淨 —— 所有文字層內容以 XML 為準。⚠️ 我一度用手打的簡體字清單自查，誤把「什／充／教／育／考／科」六個**正體**字判成簡體 —— 正是 SKILL 說的「判準錯的門比沒有門更糟」，改以 traditional_only_gate（語料推導字集）為準，PASS。三載體：☑ 0 個、roundRect 0 個、w:bdr 0 個 —— 本課答案載體是文字層那一行橘字「答：27.(Ａ)、28.(Ｂ)、29.( Ｃ)」，**答案本身可驗**。第 29 題另用規則獨立驗算：七位評審 7/8/8/7/9/7/9，去掉 2 高 2 低剩 7/8/8 → (7＋8＋8)×3.0 = (C)，與印出的答案一致。🔴 **勘誤 E1：右上角級別框印「Leve9」**，少了 Level 的字尾 l（同批其餘 G9 課印「Level 9・說明文」）。🔴 **schema 缺口（已實測）**：`SECTION_NAME_TO_MODULE` 沒有「會考圖文題實戰」，本課 sections_present 對不到任何模組 → splitter 退回常數表，spotlight 標 `section_no: 六`、comprehension 標 `七`，**而學習單印的是「一」**（整份只有一個大題）。已回報工頭，未改 scripts/。⚠️ 本課一開始讓 coverage_gate FAIL（「v3 沒有課文段落」）—— 本課型本來就沒有課文。該門已由他人於 13:xx 修正為「v2 也沒有段落 ⇒ 沒有東西可以不見」，現 PASS。一次重跑：schema_gap 我原本寫成一段散文字串，逐字門把它當原稿字串比對 → FAIL；改成 L0063/L0111 的慣例（子 key 以 `_` 開頭）後 PASS。"
+}

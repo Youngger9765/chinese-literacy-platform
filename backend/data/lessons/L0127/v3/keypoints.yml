@@ -1,0 +1,64 @@
+lesson_uid: L0127
+version_id: v3
+section_no: 五
+keypoints:
+  title: 當壞事已不可逆轉：集中營裡的一門課
+  layout: list
+  answer_carrier: 橘色手寫（在文字層），PDF p5~p6 可見
+  rows:
+  - label: 問題（段1）
+    value: 遇上【　】的壞事，人還可能過著【　】嗎？
+    blanks:
+    - answer: 不可逆轉
+    - answer: 有意義的人生
+  - label: 背景（段2-4）
+    items:
+    - label: '1'
+      value: 二戰期間，德國的種族迫害使猶太人被送往【　】；法蘭柯全家被捕並在月台面臨【　】。
+      blanks:
+      - answer: 集中營
+      - answer: 篩選
+    - label: '2'
+      value: 青壯年被挑選進營區成為【　】；老人、小孩與病人往往【　】，被屠殺。
+      blanks:
+      - answer: 奴工
+      - answer: 在劫難逃
+    - label: '3'
+      value: 在生不如死的煎熬裡，法蘭柯卻親眼看見人的【　】。
+      blanks:
+      - answer: 心理韌性
+  - label: 例子與道理（段5-9)
+    items:
+    - label: '1'
+      value: 仍分享最後一口麵包：情況壞到極點，人仍能決定自己【　】的高度。
+      blanks:
+      - answer: 道德與品格
+    - label: '2'
+      value: 獄卒辱罵羞辱：我們不能阻止別人說什麼，但可以選擇不讓【　】定義自己。
+      blanks:
+      - answer: 謊言
+    - label: '3'
+      value: 女子將死仍感恩：在死亡前一刻，有人能靠智慧、想像而感受到【　】。
+      blanks:
+      - answer: 平靜與恩典
+    - label: '4'
+      value: 寒夜長途跋涉：靠著愛與期待，受苦的人仍能得到【　】，保有【　】。
+      blanks:
+      - answer: 鼓舞
+      - answer: 內在自由
+    - label: '5'
+      value: 仍看見黎明之美：人仍保有對【　】的感受力，並因此並獲得片刻的【　】。
+      blanks:
+      - answer: 美
+      - answer: 心靈自由
+      errata_ref: E2
+  - label: 總結主旨(段10)
+    items:
+    - label: '1'
+      value: 外在一切可能被奪走，但仍能決定用什麼【　】回應遭遇。
+      blanks:
+      - answer: 態度
+    - label: '2'
+      value: 提出意義治療法，幫助人找到【　】，踏出可以前進的下一步。
+      blanks:
+      - answer: 支撐自己的理由

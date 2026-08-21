@@ -1,0 +1,127 @@
+lesson_uid: L0023
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 貴人相助
+    definition: 指在關鍵時刻得到有能力的人幫助。
+  - index: 2
+    word: 蛻變
+    definition: 比喻經過改變後，變得更成熟、更好。
+  - index: 3
+    word: 傾注
+    definition: 將全部心力投入在一件事情上。
+  - index: 4
+    word: 歸咎
+    definition: 把過錯或責任推給別人或事物。
+  - index: 5
+    word: 低微
+    definition: 地位、身分或聲望較低，不受重視。
+  - index: 6
+    word: 詼諧
+    definition: 風趣幽默，帶有機智的趣味。
+  - index: 7
+    word: 瞥見
+    definition: 用眼睛快速看到某個東西或情境，通常是一瞬間的動作。
+  - index: 8
+    word: 有條不紊
+    definition: 形容做事有秩序，不慌亂。
+  - index: 9
+    word: 前衛
+    definition: 走在潮流或時代的前端，具有創新性。
+  - index: 10
+    word: 名列前茅
+    definition: 形容成績或表現排在前幾位。
+  - index: 11
+    word: 資助
+    definition: 提供金錢或物資幫助別人。
+  - index: 12
+    word: 脫穎而出
+    definition: 比喻在眾人之中顯露出色的才華或能力。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 詼諧
+    B: 歸咎
+    C: 瞥見
+    D: 傾注
+    E: 蛻變
+    F: 脫穎而出
+    G: 有條不紊
+    H: 貴人相助
+    I: 資助
+  questions:
+  - index: 1
+    text: 創業失敗後，他沒有（　）於環境，而是反思自己的不足。
+    answer: B
+  - index: 2
+    text: 她在考試前做好計畫，（　）的複習每一個重點，最後獲得好成績。
+    answer: G
+  - index: 3
+    text: 這位作家的文筆十分（　），常讓讀者忍不住發笑。
+    answer: A
+  - index: 4
+    text: 經過多年努力，他從一名害羞的學生（　）為優秀的演講者。
+    answer: E
+  - index: 5
+    text: 疫情時，店裡的生意一落千丈，多虧有（　），幫助他度過難關。
+    answer: H
+  - index: 6
+    text: 他在這次英文測驗中（　），名列前茅。
+    answer: F
+  - index: 7
+    text: 他為了這場比賽（　）許多心血，終於獲得了冠軍。
+    answer: D
+  - index: 8
+    text: 這位企業家長期（　）偏鄉學生，幫助他們安心讀書。
+    answer: I
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 請問哪一個句子使用語詞正確？
+    options:
+      A: 朱蒂的努力與獨立見解，贏得長腿叔叔的理解與尊重
+      B: 朱蒂發現長腿叔叔的真實身分後，立刻和他成為朋友
+      C: 長腿叔叔決定不再擔任資助者，也不再提供任何幫助
+      D: 朱蒂長大後和長腿叔叔合夥，一起資助其他孤兒
+    rationale: Ｂ ）2. 朱蒂如何彌補自己學識上的不足？
+  - index: 5
+    answer: B
+    stem: 根據本文，以下哪位同學的成長過程和朱蒂最相像？
+    options:
+      A: 小明因考試不及格，決定換個學校，選擇合適的環境學習
+      B: 「脫穎而出」：人或事物的優秀表現。
+      C: 小強因為家人支持，從不擔心成績問題，隨遇而安的生活
+      D: 「瞥見」：短暫的看到
+    rationale: 第一題解析A.「低微」：地位、身分或聲望低下
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 作文教學-閱讀心得怎麼寫？超實用的９大格式-以王溢嘉《青春第二課》舉例示範書寫
+    duration_seconds: 694
+    source: 凃文
+  - index: 2
+    title: 【厝逼開槓】越努力越幸運 不甘坐板凳就苦練 藍少甫成「苦練代言人」
+    duration_seconds: 397
+    source: 高雄鋼鐵人
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

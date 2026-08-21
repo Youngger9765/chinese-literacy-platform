@@ -1,0 +1,118 @@
+lesson_uid: L0066
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 雲霧飄渺
+    definition: 雲霧飄動、若隱若現，看起來朦朧又遙遠的樣子。
+  - index: 2
+    word: 不食人間煙火
+    definition: 原指神仙不吃人間煮熟的食物；後來形容人遠離世俗生活，彷彿不受現實生活影響。
+  - index: 3
+    word: 口耳相傳
+    definition: 人們用口說、用耳聽，一代一代流傳下來。
+  - index: 4
+    word: 疲憊不堪
+    definition: 形容非常疲累，累得快要撐不住。
+  - index: 5
+    word: 滄海一粟
+    definition: 大海裡的一粒米，比喻在非常廣大的事物中顯得十分渺小。
+  - index: 6
+    word: 微不足道
+    definition: 形容非常渺小或不重要，不值得特別提起。
+  - index: 7
+    word: 浩瀚無垠
+    definition: 廣大到看不到邊，常用來形容天空、海洋或宇宙。
+  - index: 8
+    word: 凡塵俗世
+    definition: 人們日常生活的世界，常用來和神仙世界相比。
+  - index: 9
+    word: 塵囂
+    definition: 人群和日常生活中的喧鬧、忙亂。
+  - index: 10
+    word: 庶民
+    definition: 普通百姓，也就是一般人民。
+  - index: 11
+    word: 精雕細琢
+    definition: 仔細雕刻、反覆修整；也比喻做事或創作非常用心，重視每一個細節。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 微不足道
+    B: 浩瀚無垠
+    C: 口耳相傳
+    D: 塵囂
+    E: 疲憊不堪
+    F: 精雕細琢
+    G: 不食人間煙火
+  questions:
+  - index: 1
+    text: 夜晚的星空（　），令人感嘆自然的偉大。
+    answer: B
+  - index: 2
+    text: 這件玉雕作品經過工匠（　），每一個細節都栩栩如生。
+    answer: F
+  - index: 3
+    text: 在浩瀚的宇宙面前，人類的力量顯得（　）。
+    answer: A
+  - index: 4
+    text: 他厭倦了城市的（　），決定搬到鄉村過簡單的生活。
+    answer: D
+  - index: 5
+    text: 在工作了一整天後，他感到（　），只想好好休息。
+    answer: E
+  - index: 6
+    text: 那位隱居山林的藝術家，生活簡樸，宛如（　）的世外高人。
+    answer: G
+  - index: 7
+    text: 這個關於仙境的傳說，是村民們（　）的故事。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 張公洞為什麼常被畫家描繪成通往仙境的入口？
+    options:
+      A: 仙境畫從宮廷走向民間，投入創作的畫家更多
+      B: 元明時期的畫家開始失去皇室的支持
+      C: 人們對仙境的信仰開始動搖，反對虛構仙境
+      D: 庶民畫家更熱衷於描繪真實的山水，「旅行」到仙境
+    rationale: 藉由兩者巨大落差，人在大自然面前是如此渺小，更應該懷有謙卑的心。
+  - index: 5
+    answer: C
+    stem: 文末說：「誰說世界沒有神仙呢？」這句話最主要想表達什麼？
+    options:
+      A: 神仙是真實存在的，只是現代人失去尋找的能力
+      B: 神仙居住山林，只有有緣人方能找到心中的神仙
+      C: 藝術具有永恆的力量，能讓人在心中產生共鳴
+    rationale: 文章最後強調人們心中對美好生活與心靈寧靜的追求，這種精神上的「神仙」才是作者真正想表達的含義。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 中國古代畫家為什麼不追求寫實？
+    duration_seconds: 277
+    source: 野望繪畫
+  - index: 2
+    title: 【中國古代文人心目中最好的江南是什麼樣？瀟湘圖了解一下】
+    duration_seconds: 212
+    source: 海峽導報
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

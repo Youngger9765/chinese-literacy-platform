@@ -1,0 +1,28 @@
+keypoints:
+  lesson: G4-L2
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 背景
+    value: 兩百年前日本奈良，市集。
+    blanks: []
+  - label: 起因
+    value: 正太看到僧人制服惡霸，讓他想要去興福寺__。
+    blanks:
+    - answer: 學武功
+      hint: ''
+  - label: 經過
+    value: 師父給他__，每天讓正太抱著小豬走上走下，持續__年，每日不間斷。
+    blanks:
+    - answer: 小豬
+      hint: ''
+    - answer: 三
+      hint: ''
+  - label: 結果
+    value: 三年後，正太變成了__，一般的匪徒強盜再也不是他的對手。
+    blanks:
+    - answer: 強壯的人/高手
+      hint: ''
+  title: 正太與小豬：武僧的養成之路

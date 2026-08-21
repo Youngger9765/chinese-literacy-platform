@@ -1,0 +1,22 @@
+{
+  "lesson_uid": "L0091",
+  "catalog_slot": "G7-L22",
+  "pdf_pages": 12,
+  "pages_read": 12,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "sot_drift": 0,
+    "orphan_key": 0,
+    "pytest_specs": 0
+  },
+  "retries": 0,
+  "notes": "圖表判讀課（折線圖）。節次順序五＝文章重點表、六＝閱讀聚光燈（與多數課相反）。🔴 三處內容只在圖片上、文字層完全沒有，已標 text_carrier: image：「灰犀牛小檔案」整個側欄（體長／體重／特徵／戰鬥指數 —— 五個關鍵詞對 document.xml/footnotes/endnotes 全部 grep 回 0）。⚠️ 一開始我把四個 figure block 整塊標 text_carrier: image，結果逐字門把 10 個字串列為「無法驗證」——但其中 caption／referent／axis_label 都在文字層（逐一驗過），等於讓它們逃過檢查（skill 明文警告的形狀）。改成只有「灰犀牛小檔案」標 image 後，受檢字串從 165 升到 170、無法驗證剩 1，這才是對的。另兩個 referent 原本是我自己造的名字（折線圖示範／體重折線圖繪製區），逐字門判 FAIL 判得對 ——改用圖上印的標題當 referent。字數欄：段1=138、段1+2=178 兩端點精準；段1+2+3 我算 295、印 294，差 1 字為 Word 口徑差異（段3 已逐字元檢查：無數字串、無註腳、無隱藏字元）。最後一個數字 406 落在第 4 段中間，不是段界。🔴 第四大題代號表 F 與 I 都印「首當其衝」（10 個代號只有 9 個相異語詞），兩者都沒被任何小題用到，不影響作答；未擅自改成別的語詞（第 10 格原意無法判定）。🔴 總表的「達標」在學習單四處都不存在，學習單另多出未雨綢繆／長此以往／不容小覷／首當其衝。找字：roundRect 10 個、紙外殘留 0、路徑 10 條，無警報；橘色連通元件只數到 9 是因為「眾所矚目」與「負成長」兩框在 目(3,6)／負(4,6) 上下相鄰黏成一塊（元件數是下限不是真值）。難字挑戰收進 writing_practice（MODULES 認得的模組），不另造 top-level key。"
+}

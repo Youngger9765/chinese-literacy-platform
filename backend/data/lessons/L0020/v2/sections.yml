@@ -1,0 +1,122 @@
+lesson_uid: L0020
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 婉拒
+    definition: 用有禮貌的方式拒絕別人。
+  - index: 2
+    word: 常理
+    definition: 一般人都知道、都認同的道理。
+  - index: 3
+    word: 吶喊
+    definition: 大聲喊叫。
+  - index: 4
+    word: 預期
+    definition: 在事情發生前，先想到或猜測可能的情況。
+  - index: 5
+    word: 顧慮
+    definition: 對某件事情感到擔心。
+  - index: 6
+    word: 工整
+    definition: 整齊、端正。
+  - index: 7
+    word: 讀心術
+    definition: 知道別人在想什麼的能力，也用來形容很了解別人的想法。
+  - index: 8
+    word: 路標
+    definition: 用來告訴大家方向或地點的標誌。
+  - index: 9
+    word: 出乎意料
+    definition: 事情的結果和原本想的不一樣。
+  - index: 10
+    word: 截然不同
+    definition: 完全不一樣，差別很大。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 讀心術
+    B: 工整
+    C: 路標
+    D: 婉拒
+    E: 常理
+    F: 預期
+    G: 出乎意料
+    H: 顧慮
+  questions:
+  - index: 1
+    text: 面對銷售員熱情的招呼，她微笑著（　）了對方的推銷。
+    answer: D
+  - index: 2
+    text: 外面下著大雨，他卻沒有帶傘就出門，實在不合（　）。
+    answer: E
+  - index: 3
+    text: 好朋友相處久了，好像都會有（　），一個眼神就知道彼此的想法。
+    answer: A
+  - index: 4
+    text: 這次跨年級英語競賽的結果（　），經驗最少的新生隊竟然獲勝了。
+    answer: G
+  - index: 5
+    text: 經過朋友的鼓勵，他才終於放下心中的（　），決定嘗試看看。
+    answer: H
+  - index: 6
+    text: 他的字寫得非常（　），老師常常拿來當作範本提供大家參考。
+    answer: B
+  - index: 7
+    text: 因為下雨，這週末老街的遊客比（　）的少很多。
+    answer: F
+  - index: 8
+    text: 這裡有許多岔路，如果沒有（　），遊客很容易迷路。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 他為了出席這場會議，打扮得十分「工整」正式
+      B: 他熱情地「婉拒」朋友，還一直要求朋友留下來
+      C: 父母過世後，他一個人「顧慮」妹妹，十分辛苦
+      D: 按照「常理」，校外教學前他應該會興奮得睡不著
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 下列哪一組語詞皆屬於「轉折詞」？
+    options:
+      B: 接受別人的邀約前，應先說明自己的所有顧慮
+      C: 看到轉折詞，要留意後面的訊息，並配合前後文理解
+      D: 閱讀文章時，找到轉折詞後就不必再閱讀前面的內容
+      A: 聽別人說話時，不應事先猜測對方接下來的話
+    rationale: 關鍵在於「不過」之後：「懂得求助，也是一種解決問題的能力」
+  - index: 4
+    answer: A
+    stem: 「很多人以為會求助就是不夠厲害，不過懂得求助，也是一種解決問題的能力。」下列何者最符合句意？
+    options:
+      A: 懂得在適當的時候求助，也是一種解決問題的能力
+      B: 只有能力不足的人，才會需要主動向別人尋求幫助
+      C: 遇到問題時，先自己處理，通常比開口求助更重要
+      D: 向別人求助雖能解決問題，卻會凸顯自己能力不足
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 「撐一把有形的傘，那是正當的事，因為我們不必在雨中表現異於同類的乖張。但如果撐起一把無形的傘，使我們不去面對風雨，面對苦難，那我們永遠無法領略雨過天青的喜悅。」這段話所寄寓的道理，與下列何者最接近？（題幹引自103年會考國文第9題）
+    options:
+      B: 關鍵在於「但」之後：不面對風雨就無法領略喜悅，所以不該逃避。
+    rationale: 關鍵在於「但」之後：不面對風雨就無法領略喜悅，所以不該逃避。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 5
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: weak

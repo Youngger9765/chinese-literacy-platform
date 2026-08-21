@@ -1,0 +1,39 @@
+lesson_uid: L0015
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 崩潰
+    B: 執著
+    C: 插曲
+    D: 頑強
+    E: 無可言喻
+    F: 歷屆
+    G: 痛快淋漓
+    H: 家常便飯
+  items:
+  - index: 1
+    stem: 聽到這個不幸的消息，他幾乎（　）了。
+    answer: A
+  - index: 2
+    stem: 本著對舞蹈的（　），她日夜苦練從不以為苦。
+    answer: B
+  - index: 3
+    stem: 這項比賽吸引（　）冠軍回來參加。
+    answer: F
+  - index: 4
+    stem: 他個性（　），從不願服輸。
+    answer: D
+  - index: 5
+    stem: 人生的路上，總是有許多（　），令人意想不到。
+    answer: C
+  - index: 6
+    stem: 經過一場（　）的比賽，大家雖然滿身大汗，卻都覺得十分過癮。
+    answer: G
+  - index: 7
+    stem: 經過長時間的練習，每天跑五公里對他來說已是（　）。
+    answer: H
+  - index: 8
+    stem: 得知自己獲得第一名時，他內心的喜悅（　），久久無法平靜。
+    answer: E

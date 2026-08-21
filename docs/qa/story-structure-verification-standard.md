@@ -72,7 +72,15 @@ StoryStructureTable + ComprehensionLayout
 | `row_recall` | ≥ 0.95 | 是 |
 | `blank_recall` | ≥ 0.95 | 是 |
 | `nesting_preserved` | true | 是 |
-| `label_family_correct` | true | **否**（僅 warn） |
+| `label_family_correct` | true | **是** |
+
+> **B4 修正（2026-08-14）**：`label_family_correct` 過去在這裡標「否（僅
+> warn）」，但 code SOT（`scripts/eval_lesson_schema.py:345-350` 的
+> `passed = row_recall>=0.95 and blank_recall>=0.95 and nesting_preserved and
+> label_family_correct`）從一開始就把它當硬 gate，從未只是 warn。此表與
+> `docs/issue-2205-eval-standard.md`（曾寫 `row_recall == 1.0`）兩份互相矛盾
+> 且都與實作不符 —— 已裁定**以 code 為準**，兩份文件同步更正。詳見
+> `specs/modules/story-structure/INTENT.md` 的 B4 決議記錄。
 
 ### L2 — YAML sync
 

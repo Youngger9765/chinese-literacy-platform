@@ -1,94 +1,214 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 11,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "1",
+      "亂發脾氣・發生時間",
+      "亂發脾氣・對象",
+      "亂發脾氣・持續時間"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "AI時代的學習 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "一封向醫師求助的信",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①AI能保證答案正確 ②AI懂回答卻不懂發問 □③AI能判斷觀點意義",
-      "interactive_type": "checkbox",
-      "options": [
-        "AI能保證答案正確",
-        "AI懂回答卻不懂發問 □",
-        "AI能判斷觀點意義"
+      "interactive_type": "display",
+      "label": "說明來信目的",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 2",
-      "value": "□①AI能感受人生磨難 □②AI能代替你體驗成就感 ③體驗是人類探索的價值",
-      "interactive_type": "checkbox",
-      "options": [
-        "AI能感受人生磨難 □",
-        "AI能代替你體驗成就感",
-        "體驗是人類探索的價值"
+      "interactive_type": "display",
+      "label": "說明困難與具體事例",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "亂發脾氣・發生時間",
+          "value": "【　　　】年前\n一年多前\n今年年初"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "亂發脾氣・對象",
+          "value": "【　　　】\n阿公\n阿公、【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "亂發脾氣・發生頻次",
+          "value": "2~3天一次\n1~2天一次\n每天2~3次"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "亂發脾氣・持續時間",
+          "value": "1鐘頭\n2~3個鐘頭\n【　　　】個鐘頭"
+        },
+        {
+          "interactive_type": "display",
+          "label": "亂發脾氣・方式",
+          "value": "怪罪、責罵\n大鬧、揮菜刀、丟尖銳物"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "遺失物品・物品",
+          "value": "(1)遺失【　　　】和鄰居的【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "遺失物品・金錢",
+          "value": "數萬元現金不知去向"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "就醫",
+          "value": "阿嬤沒有【　　　】，不知道自己生病，不願就醫，"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "經濟與照顧的負擔",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n(2)阿公無固定收入。\n(3)擔心阿嬤的行為造成經濟損失。\n(4)擔心若阿嬤無法改善，未來的照顧問題。"
+        }
       ],
-      "correct_options": [
-        2
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 3",
-      "value": "□①完全依賴AI最厲害 ②駕馭AI讓自己更聰明 □③AI會取代你的想法",
-      "interactive_type": "checkbox",
-      "options": [
-        "完全依賴AI最厲害",
-        "駕馭AI讓自己更聰明 □",
-        "AI會取代你的想法"
+      "interactive_type": "display",
+      "label": "說明具體請求",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "請求醫師開立【　　　】，我們要向法院聲請監護宣告。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "結論",
-      "value": "學習是培養思考、情感與勇氣的起點 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "感謝與祝福",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "感謝提供病床，讓阿嬤【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "敬祝【　　　】。"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
+  "title": "一封向醫師求助的信",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "主題",
-      "value": "AI時代的學習 【　　　】"
+      "items": [
+        {
+          "label": "1",
+          "value": "說明阿嬤就醫前的症狀，希望對【　　　】有所幫助。"
+        },
+        {
+          "label": "2",
+          "value": "說明阿嬤症狀帶來的困難，希望醫師提供幫助。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明來信目的"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①AI能保證答案正確 ②AI懂回答卻不懂發問 □③AI能判斷觀點意義"
+      "items": [
+        {
+          "label": "亂發脾氣・發生時間",
+          "value": "【　　　】年前\n一年多前\n今年年初"
+        },
+        {
+          "label": "亂發脾氣・對象",
+          "value": "【　　　】\n阿公\n阿公、【　　　】"
+        },
+        {
+          "label": "亂發脾氣・發生頻次",
+          "value": "2~3天一次\n1~2天一次\n每天2~3次"
+        },
+        {
+          "label": "亂發脾氣・持續時間",
+          "value": "1鐘頭\n2~3個鐘頭\n【　　　】個鐘頭"
+        },
+        {
+          "label": "亂發脾氣・方式",
+          "value": "怪罪、責罵\n大鬧、揮菜刀、丟尖銳物"
+        },
+        {
+          "label": "遺失物品・物品",
+          "value": "(1)遺失【　　　】和鄰居的【　　　】"
+        },
+        {
+          "label": "遺失物品・金錢",
+          "value": "數萬元現金不知去向"
+        },
+        {
+          "label": "就醫",
+          "value": "阿嬤沒有【　　　】，不知道自己生病，不願就醫，"
+        },
+        {
+          "label": "經濟與照顧的負擔",
+          "value": "(1)家境不好，作者與妹妹忙於【　　　】。\n(2)阿公無固定收入。\n(3)擔心阿嬤的行為造成經濟損失。\n(4)擔心若阿嬤無法改善，未來的照顧問題。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明困難與具體事例"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①AI能感受人生磨難 □②AI能代替你體驗成就感 ③體驗是人類探索的價值"
+      "items": [
+        {
+          "label": "1",
+          "value": "請求醫師開立【　　　】，我們要向法院聲請監護宣告。"
+        },
+        {
+          "label": "2",
+          "value": "請求醫師協助聯繫【　　　】，我們要諮詢相關問題。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "說明具體請求"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①完全依賴AI最厲害 ②駕馭AI讓自己更聰明 □③AI會取代你的想法"
-    },
-    {
-      "kind": "pair",
-      "label": "結論",
-      "value": "學習是培養思考、情感與勇氣的起點 【　　　】"
+      "items": [
+        {
+          "label": "1",
+          "value": "感謝提供病床，讓阿嬤【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "敬祝【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "感謝與祝福"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

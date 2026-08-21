@@ -1,0 +1,13 @@
+lesson_uid: L0160
+version_id: v2
+passage: null
+reading_benchmark:
+  levels:
+  - threshold: 45秒以下
+    feedback: 速度有點快，要讀清楚哦！
+  - threshold: 45~55秒
+    feedback: 強者就是你啦！
+  - threshold: 55秒以上
+    feedback: 速度再快一點！
+extraction_check:
+  verdict: no_anchor

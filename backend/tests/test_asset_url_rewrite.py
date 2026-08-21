@@ -72,39 +72,79 @@ class TestDeriveDocxUrlIsRelative:
         assert _derive_docx_url(None) is None
 
 
-class TestLayer1LessonsUseAssetProxyUrls:
-    """Integration: the actual lesson dicts served to the frontend must never
-    carry an absolute storage.googleapis.com URL after the #2486 fix."""
+class TestNoAbsoluteGcsUrlReachesTheClient:
+    """整條服務路徑上不可以出現絕對 GCS URL —— #2486 的不變量。
 
-    def test_no_lesson_has_absolute_gcs_thumbnail_url(self):
-        lessons = load_layer1_lessons()
-        for lesson in lessons:
-            url = lesson.get("thumbnail_url", "")
-            assert not url.startswith("https://storage.googleapis.com/"), (
-                f"Lesson {lesson.get('lesson_number')} thumbnail_url is still absolute: {url}"
+    ⚠️ **這一段原本是四條空跑的測試**（2026-08-18 查出）。它們迭代
+    `load_layer1_lessons()`，而那支讀的是一修的扁平檔 `data/lessons/L*.yml`，
+    那批檔案隨一修封存刪除之後它就恆回 `[]` —— 迭代空集合的 for 迴圈裡
+    一條斷言都不會執行，測試永遠綠。
+
+    mutation 證實過：把 `_to_asset_proxy_url` 改成永遠回絕對 GCS URL，
+    同檔的 9 條單元測試有 4 條轉紅（突變確實生效），那四條整合測試照樣綠。
+
+    換成掃**現在真的在服務的**語料（uid tree，175 課）。附下限：
+    掃不到課要講「沒掃到」，不是靜靜地通過。
+    """
+
+    # 掃不到課時 `0 個違規` 也會綠。這個下限讓那種情況講實話。
+    MIN_LESSONS = 100
+
+    @staticmethod
+    def _served_lessons():
+        from app.services.lesson_loader import search_lessons
+
+        lessons = search_lessons()
+        assert len(lessons) >= TestNoAbsoluteGcsUrlReachesTheClient.MIN_LESSONS, (
+            f"只載到 {len(lessons)} 課，少於下限 —— "
+            "這代表這支測試沒掃到語料，不是語料變乾淨了"
+        )
+        return lessons
+
+    def test_no_absolute_gcs_url_anywhere_in_the_served_payload(self):
+        """深掃整個 payload，不只頂層那幾個欄位。
+
+        原本只查 `thumbnail_url` / `worksheet_pdf_url` / `worksheet_docx_url`
+        三個頂層鍵。一個絕對 URL 藏在 `spotlight_v2` 或 `keypoints` 裡照樣會 403。
+        """
+        import json
+
+        bad = []
+        for lesson in self._served_lessons():
+            blob = json.dumps(lesson, ensure_ascii=False)
+            if "storage.googleapis.com" in blob:
+                i = blob.index("storage.googleapis.com")
+                bad.append((lesson.get("lesson_uid"), blob[max(0, i - 30): i + 60]))
+        assert not bad, (
+            f"{len(bad)} 課的 payload 帶絕對 GCS URL（bucket 轉 private 之後會 403）：\n"
+            + "\n".join(f"  {u} …{c}…" for u, c in bad[:5])
+        )
+
+    def test_thumbnail_url_is_relative_when_present(self):
+        """有封面時，位址必須是我們自己的代理路徑。
+
+        ⚠️ 現況：**175 課全部沒有封面**（`data/lessons/` 底下 0 個圖檔，
+        `_thumbnail_name()` 全回 None）。所以這條目前掃不到任何一筆 ——
+        那不是這條測試的錯，是內容缺口，記在下面那條。
+        """
+        checked = 0
+        for lesson in self._served_lessons():
+            url = lesson.get("thumbnail_url")
+            if not url:
+                continue
+            checked += 1
+            assert not url.startswith("https://"), (
+                f"{lesson.get('lesson_uid')} 的封面是絕對 URL：{url}"
             )
+            assert url.startswith("/assets/"), (
+                f"{lesson.get('lesson_uid')} 的封面不是走代理：{url}"
+            )
+        # 2026-08-19：封面回來了（175 課，先前全部因為只查 v3/assets/ 而回 None）。
+        # 原本這裡掃到 0 筆也算過，旁邊靠一條「目前一張都沒有」的哨兵留痕跡。
+        # 哨兵已刪 —— 它自己的訊息就說了封面回來時該這麼做。
+        # 現在改成硬要求：掃不到就是這條在測空氣，不是「剛好沒有封面」。
+        assert checked >= 150, (
+            f"只掃到 {checked} 課有封面 —— 這條在測空氣。"
+            "封面應該有 175 課（見 test_lesson_cover_served_2767.py）"
+        )
 
-    def test_thumbnail_url_uses_asset_proxy_prefix(self):
-        lessons = load_layer1_lessons()
-        for lesson in lessons:
-            assert lesson["thumbnail_url"].startswith("/assets/stories/thumbnails/")
-
-    def test_no_lesson_has_absolute_gcs_worksheet_pdf_url(self):
-        lessons = load_layer1_lessons()
-        for lesson in lessons:
-            url = lesson.get("worksheet_pdf_url")
-            if url:
-                assert not url.startswith("https://storage.googleapis.com/"), (
-                    f"Lesson {lesson.get('lesson_number')} worksheet_pdf_url is still absolute: {url}"
-                )
-                assert url.startswith("/assets/worksheets/")
-
-    def test_no_lesson_has_absolute_gcs_worksheet_docx_url(self):
-        lessons = load_layer1_lessons()
-        for lesson in lessons:
-            url = lesson.get("worksheet_docx_url")
-            if url:
-                assert not url.startswith("https://storage.googleapis.com/"), (
-                    f"Lesson {lesson.get('lesson_number')} worksheet_docx_url is still absolute: {url}"
-                )
-                assert url.startswith("/assets/worksheets/")

@@ -1,0 +1,137 @@
+lesson_uid: L0073
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 寫作手法─從譬喻推論作者感受
+  strategy_type: writing_technique
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）＋橘色手寫填空；「請圈出譬喻關鍵字詞」的圈是橘色框（僅圖形層）
+  blocks:
+  - type: concept_box
+    text: '《譬喻：用大家熟悉的事物(A)，說明或凸顯另一件事物(B)的特點 》
+
+      譬喻是一種寫作常見的手法，它和「轉化」與「誇飾」一樣，都是運用聯想、想像力的方式，把一件事物比成另一件大家熟悉的事物，讓原本抽象的特點或感受變得更具體，也讓讀者更容易想像和感受。
+
+      例１：「他的笑容像太陽。」→把「笑容」比成「太陽」，凸顯他的笑容帶給人溫暖、耀眼的感受。
+
+      例2：「他的笑容像盛放的花。」→把「笑容」比成「盛放的花」，凸顯他的笑容帶給人美好、燦爛的感受。
+
+      使用譬喻時，句子常會出現「好像」、「像」、「彷彿」、「如（同）」、「一樣」、「A（像）是B」等字詞。文章中使用譬喻的地方，常是作者特別想描寫或表達感受的地方。因此，閱讀時可以留意文章中的譬喻，想一想作者想表達什麼感受或想法。'
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: '1'
+    prompt: 那時的我像顆陀螺，不僅忙得暈頭轉向，在短暫的下課時間橫衝直撞，也在同學之間不斷打轉，想尋找志同道合的伴。
+    circled_keyword: 像
+    circled_keyword_carrier: '橘色方框，**在文字層**：該 run 掛字元樣式 `rStyle val="af5"`，樣式名就叫
+
+      「教材：教師解答文字框」，其 rPr 帶 `<w:bdr w:val="single" w:sz="18" w:color="E97132"/>`。
+
+      ⚠️ 不是 inline 的 w:bdr —— 直接掃 run 自己的 rPr 會 0 命中（要先解 rStyle 才看得到）；
+
+      也不是圖形（本課 10 個 roundRect 全在第八大題找字遊戲，沒有一個在這張表裡）。
+
+      六列各一個，逐一對得上：像／像／如／彷彿／是／像。'
+    items:
+    - stem: 我像【　】
+      blanks:
+      - answer: 陀螺
+    - stem: 欲凸顯的共同點(多選)
+      options:
+        1: 需要人啟動
+        2: 橫衝直撞
+        3: 無法停止
+        4: 在某處／人圍繞
+      answers:
+      - 2
+      - 3
+      - 4
+  - type: sub_block
+    label: '2'
+    prompt: 及格不再唾手可得，反而像斷線的風箏般，遠走高飛。
+    circled_keyword: 像
+    items:
+    - stem: 及格像【　】
+      blanks:
+      - answer: 斷線風箏
+    - stem: 欲凸顯的共同點(多選)
+      options:
+        1: 遙不可及
+        2: 無法捕捉
+        3: 單薄輕盈
+      answers:
+      - 1
+      - 2
+  - type: sub_block
+    label: '3'
+    prompt: 孤單和壓力卻如影隨形，無法擺脫也無處可逃。
+    circled_keyword: 如
+    items:
+    - stem: 孤單和壓力像【　】
+      blanks:
+      - answer: 影子
+    - stem: 欲凸顯的共同點(多選)
+      cell_note: 這一列的儲存格另印「(單選)」，覆蓋欄頭的「(多選)」——六列中只有這一列是單選
+      options:
+        1: 無所不在
+        2: 黑且明顯
+      answer: 1
+  - type: sub_block
+    label: '4'
+    prompt: 那些回憶彷彿一張張散落的照片，在我想念時自動跳到眼前，尤其是畢業典禮的那一幕。
+    circled_keyword: 彷彿
+    items:
+    - stem: 回憶像【　】
+      blanks:
+      - answer: 照片
+    - stem: 欲凸顯的共同點(多選)
+      options:
+        1: 老舊泛黃
+        2: 一個個畫面呈現
+        3: 鮮明清晰
+      answers:
+      - 2
+      - 3
+  - type: sub_block
+    label: '5'
+    prompt: 而思念是烏雲，日積月累，不斷膨脹，遮住了我的笑容
+    circled_keyword: 是
+    items:
+    - stem: 思念像【　】
+      blanks:
+      - answer: 烏雲
+    - stem: 欲凸顯的共同點(多選)
+      options:
+        1: 能遮擋
+        2: 會變大
+      answers:
+      - 1
+      - 2
+  - type: sub_block
+    label: '6'
+    prompt: 作者寫下的字字句句，無非是希望那像珍珠般飽滿耀眼的回憶，能禁得起時間的沖刷，讓美好多留存一些。
+    circled_keyword: 像
+    items:
+    - stem: 回憶像【　】
+      blanks:
+      - answer: 珍珠
+    - stem: 欲凸顯的共同點(多選)
+      options:
+        1: 飽滿耀眼
+        2: 不因時間而衰敗
+        3: 美好無暇
+        4: 昂貴稀有
+      answers:
+      - 1
+      - 2
+      - 3
+  - type: guide
+    text: ◎你發現了嗎？
+  - type: single
+    prompt: 上面的譬喻有什麼作用？（單選）
+    options:
+      1: 介紹陀螺、風箏、影子等事物的特點。
+      2: 把抽象的感受寫得具體，讓人更容易理解作者的心情。
+      3: 依照時間順序，說明事情發生的經過。
+    answer: 2
+  - type: guide
+    text: →閱讀譬喻時，找出作者「把什麼比成什麼」，再想兩者的共同點，就能推論作者想表達的感受或想法。

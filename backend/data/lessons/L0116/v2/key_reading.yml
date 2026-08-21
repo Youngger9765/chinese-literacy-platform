@@ -1,0 +1,21 @@
+lesson_uid: L0116
+version_id: v2
+passage: 從傳統文化來看，這個故事表現了「禍福相倚」的智慧——意思是災禍和福氣會相伴而來、彼此轉化。今天看似倒楣的事，明天可能成為祝福；今天看似幸運的事，日後也可能帶來麻煩。古人藉著故事提醒我們：世事無常，得失難料，不必太早下定論。
+start_text: 從傳統文化來看，這個故事表現了「禍福相倚」的智慧
+extent_chars: 111
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 7

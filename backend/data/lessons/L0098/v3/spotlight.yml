@@ -1,0 +1,108 @@
+lesson_uid: L0098
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 辨識與回應微歧視
+  strategy_type: character_education
+  section_title_printed: 品格聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，本節 7 個）與橘色手寫字，PDF p5~p7 可見
+  structure_note: '⛔ 兩個勾選表刻意攤成 `multi` 留在 blocks 最上層、沒有塞進 sub_block ——
+
+    `BlockSequenceRenderer` 的 `renderSubBlock` 不依 type 分派，巢狀的表格
+
+    只會畫出 instruction，內容整片消失而且不報錯。'
+  blocks:
+  - type: concept_box
+    text: '看完了本課，我們知道，微歧視常常不是故意的，卻可能藏著刻板印象或偏見。這些話看似沒什麼，卻可能讓人不舒服或受傷。
+
+      例如：「你是原住民，應該很會唱歌喔？」、「你是體育班，搬重的東西一定沒問題吧！」「女生找個好老公比找個好工作重要吧！」這些話可能沒有惡意，但如果只因對方屬於某個群體，就替他預設能力、個性或生活方式，便可能形成微歧視。
+
+      為了避免這樣尷尬的情形發生，從日常生活中，我們可以培養個人的覺察能力，學習如何正面應對微歧視！底下是一些練習！'
+  - type: guide
+    text: 小叮嚀：刻板印象或對某族群體的偏見，很可能就是微歧視。
+    text_note: 原稿這行開頭有一個 `w:sym Wingdings 2 F045`（☛ 手指符號），是裝飾不是勾選。
+  - type: guide
+    text: ◎ 小試身手
+  - type: guide
+    text: 一、辨識微歧視：
+  - type: multi
+    prompt: 請判斷下列情況是否為微歧視，是微歧視的打Ｖ。
+    options:
+      1: 對女生說：「你這麼漂亮，面試絕對大大加分。」
+      2: 對同學說：「你上次接力跑得很快，這次還想參加嗎？」
+      3: 你是原住民？那運動會全看你表現了！
+      4: 對身障者說：「你這樣還來上學，大家應該跟你看齊。」
+      5: 對新朋友說：「你平常喜歡做什麼運動？」
+      6: 對同性戀的朋友說：「同性戀的藝術細胞是不是都比較好？」
+    answers:
+    - 1
+    - 3
+    - 4
+    - 6
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE），每列左欄一格
+  - type: guide
+    text: 二、處理微歧視：
+  - type: multi
+    prompt: 如果是你遭遇微歧視，可以怎麼反應？(可以的打Ｖ；可參考課文末段作答）
+    options:
+      1: 溫和的表達自己當下的感受：「你這樣講，我感覺不舒服」。
+      2: 也許是我想太多，是我太玻璃心了。
+      3: 如果當下不方便回應，可先離開，之後再找可信任的人協助。
+      4: 說清楚界線：「我不希望別人因為我是OO，就這樣判斷我。」
+    answers:
+    - 1
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE），每列左欄一格
+  - type: guide
+    text: 三、向微歧視說不：停下來想一想、換個說法
+  - type: guide
+    text: '❶停下來想一想：
+
+      1.這句話是不是在替一群人貼標籤？
+
+      2.如果別人只看我的身分就判斷我，我會有什麼感受？
+
+      被誤解？被小看？被特別對待？'
+  - type: guide
+    text: '❷換個說法：
+
+      避免群體標籤，改問個人特質'
+  - type: passage
+    paragraphs:
+    - 1.示例：
+    - X（微歧視的說法）:「你是體育班，搬重物一定超強的！」
+    - ↓換個說法
+    - Ｏ（不是微歧視）:「現在需要人手幫忙搬桌椅，你可以來幫忙嗎？」
+  - type: free_text
+    prompt: '2.你來換個說法：
+
+      X（微歧視的說法）:「你是原住民，運動會大隊接力全靠你了！」
+
+      ↓換個說法
+
+      Ｏ（不是微歧視）:【　】'
+    blanks:
+    - answer: 運動會大隊接力缺人吔，你可以跑嗎？
+    answer_carrier: 橘色手寫字（PDF p6）；文字層已填有同樣的答案
+  - type: guide
+    text: 四、開啟友善對話：問對方自己，不替群體下結論
+  - type: guide
+    text: 你想拉近與朋友的距離，但又不知道會不會讓對方不舒服嗎？來練習用「安全的話題」以及「請對方分享」的方式開啟友善對話吧！
+  - type: free_text
+    prompt: '❶用安全的話題開啟對話：有些話題是中性、大家喜歡，又不會踩雷的，例如：食物、天氣、運動、最近的時事。
+
+      例→麟洋配又得一次奧運羽球雙打金牌，超感動的！你有看轉播嗎？
+
+      （換你）→【　】'
+    blanks:
+    - answer: 學校旁邊開了一家賣滷肉飯的店，聽說便宜又好吃，你有吃過嗎？
+    answer_carrier: 橘色手寫字（PDF p7）；文字層已填有同樣的答案
+  - type: free_text
+    prompt: '❷請對方分享：真心讚賞對方優點，邀請對方分享專長和興趣。
+
+      例→你讀好多書喔，最近讀的哪一本好看？有推薦的嗎？
+
+      （換你）→'
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿這一格是空的（前一題有填、這題沒填）

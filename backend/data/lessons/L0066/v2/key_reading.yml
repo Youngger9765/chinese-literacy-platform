@@ -1,0 +1,21 @@
+lesson_uid: L0066
+version_id: v2
+passage: 首先，畫家們常在畫中安排三種特別的元素：山洞、小橋和小船。山洞意味著通往仙境的神祕門戶，小橋代表跨進另一個世界的通道，小船象徵載人渡向仙境的交通工具。這些元素彷彿是進入另一個世界的「護照」，標誌著從凡塵俗世走向神奇仙境的奇妙轉變。
+start_text: 首先，畫家們常在畫中安排三種特別的元素：山洞、小
+extent_chars: 115
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 10

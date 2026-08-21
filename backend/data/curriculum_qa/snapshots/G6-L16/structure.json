@@ -1,96 +1,109 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "1",
+      "2",
+      "1",
+      "2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "奇蹟行動",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "把手上的餅吃香一點！",
+      "value": ""
     },
     {
-      "label": "前情提要",
-      "value": "",
       "interactive_type": "display",
+      "label": "問題",
       "sub_rows": [
         {
-          "label": "事件",
-          "value": "2023年5月1日，小飛機在飛越亞馬遜雨林上空時，意外【　　　】。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "作者百思不解的問題是：\n小時候大人分餅，為什麼每次總覺得【　　　】？"
         },
         {
-          "label": "罹難\n人數",
-          "value": "軍方花了二週才找到飛機殘骸，機上的三位\n【　　　】，全部罹難。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "失踪\n人數",
-          "value": "四名【　　　】，年紀最大的只有13歲，另外三位分別為9歲、4歲和不到1歲。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "類似的狀況在生活中層出不窮：\n(1)分組任務時，覺得別人的任務比較【　　　】。\n(2)看書時，覺得別人手裡的書比較有趣。\n(3)點餐時，覺得別人的餐點比較好吃。\n(4)看同學的家庭，覺得別人的家庭比較【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "搜救過程",
-      "value": "1.軍方派出上百名【　　　】，帶著10隻搜救犬展開地毯式搜索。\n2.超過200名【　　　】加入搜救行動。\n3.軍方空投傳單和食物箱、播放祖母的叮嚀。\n4.請問搜救行動困難的主要原因是什麼？【　　　】\n搜尋範圍太大。       雷雨不斷，能見度低。\n□科技設備不足。       雨林植被茂密。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "轉念契機",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "作者讀到【　　　】中刷籬笆的故事，解決了他的問題。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "湯姆的姨媽要他去【　　　】，一開始他刷得【　　　】。後來他把自己想成正在創作偉大壁畫的藝術家，全神投入。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "奇蹟生還的原因",
-      "value": "1.萊絲莉帶著弟妹們在雨林中可以生存下來的原因？【　　　】\n她從小在原住民部落長大，熟悉【　　　】技巧。\n她知道雨林中什麼能吃，什麼不能吃。\n她知道只能喝雨水。\n她知道如何搭建樹屋，避開野獸和毒蛇。\n她懂得如何照顧小嬰兒。\n2.搜救員們不放棄並持續的找尋。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "領悟",
+      "value": "原來問題不在於【　　　】，而在怎麼把手上的餅【　　　】。"
     },
     {
-      "label": "結局",
-      "value": "歷經【　　　】後，搜救隊找到四個孩子，他們雖然虛弱，但意識清楚。這場名為「奇蹟行動」的搜救行動受到國際注目。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "後來做法",
+      "value": "作者遇到不順利的事時，會試著換個角度看，用【　　　】的方式面對。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "奇蹟行動",
+  "title": "把手上的餅吃香一點！",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "前情提要",
       "items": [
         {
-          "label": "事件",
-          "value": "2023年5月1日，小飛機在飛越亞馬遜雨林上空時，意外【　　　】。"
+          "label": "1",
+          "value": "作者百思不解的問題是：\n小時候大人分餅，為什麼每次總覺得【　　　】？"
         },
         {
-          "label": "罹難\n人數",
-          "value": "軍方花了二週才找到飛機殘骸，機上的三位\n【　　　】，全部罹難。"
-        },
-        {
-          "label": "失踪\n人數",
-          "value": "四名【　　　】，年紀最大的只有13歲，另外三位分別為9歲、4歲和不到1歲。"
+          "label": "2",
+          "value": "類似的狀況在生活中層出不窮：\n(1)分組任務時，覺得別人的任務比較【　　　】。\n(2)看書時，覺得別人手裡的書比較有趣。\n(3)點餐時，覺得別人的餐點比較好吃。\n(4)看同學的家庭，覺得別人的家庭比較【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "問題"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "作者讀到【　　　】中刷籬笆的故事，解決了他的問題。"
+        },
+        {
+          "label": "2",
+          "value": "湯姆的姨媽要他去【　　　】，一開始他刷得【　　　】。後來他把自己想成正在創作偉大壁畫的藝術家，全神投入。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "轉念契機"
     },
     {
       "kind": "pair",
-      "label": "搜救過程",
-      "value": "1.軍方派出上百名【　　　】，帶著10隻搜救犬展開地毯式搜索。\n2.超過200名【　　　】加入搜救行動。\n3.軍方空投傳單和食物箱、播放祖母的叮嚀。\n4.請問搜救行動困難的主要原因是什麼？（多選）\n搜尋範圍太大。       雷雨不斷，能見度低。\n□科技設備不足。       雨林植被茂密。"
+      "label": "領悟",
+      "value": "原來問題不在於【　　　】，而在怎麼把手上的餅【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "奇蹟生還的原因",
-      "value": "1.萊絲莉帶著弟妹們在雨林中可以生存下來的原因？（多選）\n她從小在原住民部落長大，熟悉【　　　】技巧。\n她知道雨林中什麼能吃，什麼不能吃。\n她知道只能喝雨水。\n她知道如何搭建樹屋，避開野獸和毒蛇。\n她懂得如何照顧小嬰兒。\n2.搜救員們不放棄並持續的找尋。"
-    },
-    {
-      "kind": "pair",
-      "label": "結局",
-      "value": "歷經【　　　】後，搜救隊找到四個孩子，他們雖然虛弱，但意識清楚。這場名為「奇蹟行動」的搜救行動受到國際注目。"
+      "label": "後來做法",
+      "value": "作者遇到不順利的事時，會試著換個角度看，用【　　　】的方式面對。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "事件",
-      "罹難\n人數",
-      "失踪\n人數",
-      "搜救過程"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

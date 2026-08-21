@@ -1,0 +1,118 @@
+lesson_uid: L0025
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 大展身手
+  - 利誘
+  - 睽違
+  - 身家資料
+  - 膽戰心驚
+  - 辜負
+  - 起訴
+  - 嫌疑
+  - 自傳
+  - 倔強
+  bank_note: 語詞框的排列順序與第三大題不同（此處把膽戰心驚排在身家資料之後），但語詞完全相同，10 個一一對應
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 資技擔倔辜讀寄予厚望
+  - 料不兼戰強富身家資料
+  - 自如大驚慌謙疑鴻心顫
+  - 傳人展立睽違自轉溝疑
+  - 力可身家秀目越南膽自
+  - 展誘手起晉升訴戰立身
+  - 力五言幸訴移心自手搶
+  - 邀利退懈怠驚強妥諧辜
+  - 生家誘屈莠我自激勵負
+  - 無辜超訴強嫌疑佳厲擅
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 倔強
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 5
+    direction: diagonal_down_right
+  - word: 身家資料
+    cells:
+    - - 2
+      - 7
+    - - 2
+      - 8
+    - - 2
+      - 9
+    - - 2
+      - 10
+    direction: horizontal
+  - word: 自傳
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 大展身手
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 3
+    - - 5
+      - 3
+    - - 6
+      - 3
+    direction: vertical
+  - word: 睽違
+    cells:
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 膽戰心驚
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 8
+    - - 7
+      - 7
+    - - 8
+      - 6
+    direction: diagonal_down_left
+  - word: 起訴
+    cells:
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 利誘
+    cells:
+    - - 8
+      - 2
+    - - 9
+      - 3
+    direction: diagonal_down_right
+  - word: 辜負
+    cells:
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 嫌疑
+    cells:
+    - - 10
+      - 6
+    - - 10
+      - 7
+    direction: horizontal
+  answer_paths_note: 10 個目標語詞全部圈到。

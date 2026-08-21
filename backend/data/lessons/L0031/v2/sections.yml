@@ -1,0 +1,142 @@
+lesson_uid: L0031
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 劣勢
+    definition: 較不利的情況或地位。
+  - index: 2
+    word: 不得閒
+    definition: 一直忙著，沒有空閒。
+  - index: 3
+    word: 按部就班
+    definition: 依照一定的順序和步驟做事。
+  - index: 4
+    word: 過關斬將
+    definition: 一路克服難關或擊敗對手，順利前進。
+  - index: 5
+    word: 注重
+    definition: 特別看重。
+  - index: 6
+    word: 大滿貫
+    definition: 國際柔道總會舉辦的高級別國際賽事。
+  - index: 7
+    word: 心理素質
+    definition: 面對壓力或挫折時，保持穩定的心理能力。
+  - index: 8
+    word: 干擾
+    definition: 擾亂、打擾。
+  - index: 9
+    word: 自律
+    definition: 規範、要求自己。
+  - index: 10
+    word: 壓制
+    definition: 柔道中用身體控制對手，使對方難以動彈的動作。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 心理素質
+    B: 自律
+    C: 注重
+    D: 干擾
+    E: 劣勢
+    F: 過關斬將
+    G: 不得閒
+    H: 按部就班
+  questions:
+  - index: 1
+    text: 夜深了，請把電視機的音量轉小，以免（　）他人的睡眠。
+    answer: D
+  - index: 3
+    text: 這次的辯論比賽，反方陷入（　），勝算不大。
+    answer: E
+  - index: 6
+    text: 老師提醒大家只要（　）複習，每天累積一點，就能提升成績。
+    answer: H
+  - index: 7
+    text: 媽媽一下班就忙著煮飯、整理家裡，從早到晚都（　）。
+    answer: G
+  - index: 8
+    text: 籃球隊一路（　），接連擊敗強敵，終於闖進冠軍賽。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 第三段中的「注重」，意思最接近下列何者？
+    options:
+      A: 注意、重視
+      B: 將視線注意在一點上
+      C: 集中注意力，精神專注
+      D: 上天早已決定，非人力所能改變
+    rationale: null
+    marker_notes:
+      A: 注重
+      B: 注目
+      C: 全神貫注
+      D: 注定
+  - index: 2
+    answer: D
+    stem: 根據第二段，楊勇緯後來能在國手選拔賽中擊敗哥哥，最可能與哪一項行為有關？
+    options:
+      A: 哥哥在比賽中禮讓弟弟
+      B: 楊勇緯天生比哥哥厲害
+      C: 楊勇緯三年級就學柔道
+      D: 他長期勤於訓練、持續精進
+    rationale: null
+    source_paragraphs:
+      D: 第二段
+  - index: 3
+    answer: B
+    stem: 楊勇緯說：「我的目標是金牌！」你認為他說這句話的心情是什麼？
+    options:
+      B: 不甘心，因為沒為臺灣拿到金牌
+      C: 驕傲，獲得臺灣柔道奧運銀牌
+      D: 恐懼，因為達不成人民的期望
+    rationale: 第五段，楊勇緯眼眶泛紅，激動的說「想拿金牌！」
+  - index: 4
+    answer: C
+    stem: 根據第四段，楊勇緯如何讓自己在比賽中重新專注？
+    options:
+      B: 提早到校勤於練習精益求精
+      C: 深呼吸冷靜→調整心情→思考下一步
+      D: 雙手緊握仔細觀察壓制對手
+    rationale: 第三段，先深呼吸冷靜，再調整好心情重新開始，然後思考應該再做些什麼，好讓自己多一點機會。
+  - index: 5
+    answer: D
+    stem: 根據全文，下列哪一句最適合作為本文結語？
+    options:
+      A: 思考會讓你的思想更強大
+      C: 人生要放慢腳步，才能欣賞沿途的美景
+      D: 自律讓人進步，挫折也能帶來成長
+    rationale: 第六段，因為失敗會讓你更成長
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 奮戰不懈楊勇緯-讓世界看見台灣
+    duration_seconds: 683
+    source: 鏡新聞
+  - index: 2
+    title: 射擊、柔道警專必備技能-台灣警察搖籃！
+    duration_seconds: 223
+    source: 民視新聞網
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

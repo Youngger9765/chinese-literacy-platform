@@ -1,0 +1,21 @@
+lesson_uid: L0143
+version_id: v2
+passage: 長跑是有氧運動，跑步時，肌肉會大量耗氧，怎麼讓運動員的身體可以運送更大量的氧氣，就成了訓練的重要課題。一個假設是，基普喬吉和夥伴們在高地訓練，低氣壓、氧氣稀薄的環境，可能會促使他們血液中運送氧氣的紅血球和血紅素高於常人，心肺功能及耐力也可能有所進步。但高地訓練真的對每個運動員都有幫助嗎？
+start_text: 長跑是有氧運動，跑步時，肌肉會大量耗氧，怎麼讓運
+extent_chars: 144
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 8

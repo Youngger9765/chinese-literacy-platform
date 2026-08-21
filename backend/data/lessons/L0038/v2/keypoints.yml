@@ -1,0 +1,33 @@
+keypoints:
+  lesson: G5-L26
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 背景
+    value: 荷蘭運河的__可控制水流，讓船隻順利通過或防止洪水。但閘門沒考慮到洄游魚類的天性。洄游魚類成長和產卵的地方不同，牠們產卵會順著本能從海洋游往河川（或從河川游向海洋）去繁殖下一代。
+    blanks:
+    - answer: 閘門
+      hint: ''
+  - label: 問題
+    value: 魚兒洄游時，被__
+    blanks:
+    - answer: 閘門擋住，製造了多重危機
+      hint: ''
+  - label: 解決（誰＋做什麼）
+    value: 1.__。2.水下攝影機把魚群影像傳到網站；網友發現魚群聚集後按下「魚門鈴」，管理員收到訊息便開啟閘門。
+    blanks:
+    - answer: 生態學家馬克．范赫斯和工程師、科學家合作，設計了魚門鈴
+      hint: ''
+  - label: 結果
+    value: __，運河的生態系統也因此變得更健康。
+    blanks:
+    - answer: 幫助無數魚兒順利通過運河閘門
+      hint: ''
+  - label: 迴響
+    value: 用心觀察、動動腦筋、付諸行動，就能為 __開啟一扇門。
+    blanks:
+    - answer: 生態保育
+      hint: ''
+  title: 魚來了，叮咚叮咚請開門

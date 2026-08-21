@@ -1,0 +1,55 @@
+lesson_uid: L0175
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 義無反顧
+  - 喃喃自語
+  - 氣餒
+  - 一步到位
+  - 躺平
+  - 羅盤
+  - 思維
+  - 停損點
+  - 懊惱
+  - 良機
+  - 截然不同
+  items:
+  - index: 1
+    word: 喃喃自語
+    definition: 小聲說話、自言自語的樣子。
+  - index: 2
+    word: 良機
+    definition: 良好的時機或機會。
+  - index: 3
+    word: 一步到位
+    definition: 指事情一次就做到完整或達到目標。
+  - index: 4
+    word: 停損點
+    definition: 指在情緒、行動上，設定一個停止線，避免繼續損失。
+  - index: 5
+    word: 羅盤
+    definition: 用來指示方向的工具；比喻能幫助人判斷方向或做決定的依據。
+  - index: 6
+    word: 截然不同
+    definition: 完全不同。
+  - index: 7
+    word: 躺平
+    definition: 形容遇壓力或困難時，不想努力、選擇放棄。
+  - index: 8
+    word: 義無反顧
+    definition: 指為了正確或重要的事勇敢向前，不退縮。反顧：回頭看。
+  - index: 9
+    word: 氣餒
+    definition: 因為遇到困難或失敗而失去信心。
+  - index: 10
+    word: 思維
+    definition: 指一個人思考事情的方式或習慣。
+  - index: 11
+    word: 懊惱
+    definition: 後悔、煩惱。

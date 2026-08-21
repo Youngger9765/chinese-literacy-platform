@@ -34,6 +34,11 @@ export enum AppView {
   SENTENCE_PRACTICE = 'SENTENCE_PRACTICE',
   STORY_STRUCTURE = 'STORY_STRUCTURE',
   READING_STRATEGY = 'READING_STRATEGY',
+  // 文言文專屬 (#2752) — 原文/白話對照、文白句子比對、文白詞語比對、自我挑戰。
+  CLASSICAL_TEXT = 'CLASSICAL_TEXT',
+  CLASSICAL_SENTENCE_MATCHING = 'CLASSICAL_SENTENCE_MATCHING',
+  CLASSICAL_WORD_MATCHING = 'CLASSICAL_WORD_MATCHING',
+  CLASSICAL_SELF_CHALLENGE = 'CLASSICAL_SELF_CHALLENGE',
 }
 
 export interface StoryIntro {
@@ -133,6 +138,21 @@ export interface SpotlightFigureBlock {
   bind_paragraph?: string | number | null;
 }
 
+/** 聚光燈裡的表格練習。抽取器原本把無圖表格標成 figure(referent=table)，
+ *  而 loader 會丟棄沒有圖檔的 figure —— 172 個表格、88 課的練習內容因此消失。 */
+export interface SpotlightTableBlock {
+  type: 'table';
+  rows: string[][];
+  /** 老師版填在【】裡的答案，依閱讀順序。不可顯示 —— 同 ordering 的 correct_order。 */
+  answers?: string[];
+}
+
+/** 排序題：把句子依時間／因果順序編號。`correct_order` 是老師的答案，不可顯示。 */
+export interface SpotlightOrderingBlock {
+  type: 'ordering';
+  items: { text: string; correct_order: number | null }[];
+}
+
 export interface SpotlightSelfCheckBlock {
   type: 'self_check';
   items: string[];
@@ -140,6 +160,60 @@ export interface SpotlightSelfCheckBlock {
 
 export interface SpotlightFillTableBlock {
   type: 'fill_table';
+}
+
+/** 策略說明框。每一課的聚光燈都以它開場，舊抽取把它壓成 guide 文字流。 */
+export interface SpotlightConceptBoxBlock {
+  type: 'concept_box';
+  text: string;
+  label?: string;
+}
+
+/**
+ * 連連看。答案在教師版上是紅色連線 —— 圖形，不在 DOCX 文字流裡，
+ * 所以只有多模態閱讀抽得到。`answer` 是左欄代號 → 右欄代號清單。
+ */
+export interface SpotlightMatchingBlock {
+  type: 'matching';
+  label?: string;
+  instruction?: string;
+  left_header?: string;
+  right_header?: string;
+  left: Record<string, string>;
+  right: Record<string, string>;
+  answer?: Record<string, string[]>;
+}
+
+/**
+ * 巢狀小題（一、→（一）→ 1.2.3.）。學習單本來就是這個形狀，
+ * 舊抽取沒有遞迴，把它壓平成一串 guide + free_text，層級全部消失。
+ */
+export interface SpotlightSubBlock {
+  type: 'sub_block';
+  label?: string;
+  prompt?: string;
+  stem?: string;
+  intro?: string;
+  instruction?: string;
+  hint?: string;
+  value?: string;
+  options?: Record<string, string> | string[];
+  answer?: string | number | number[];
+  blanks?: { answer: string; hint?: string }[];
+  items?: SpotlightSubBlock[];
+  reflection?: string;
+}
+
+/** 小試身手：打勾表格 ＋ 填代號，兩種練習共用一個容器。 */
+export interface SpotlightExerciseBlock {
+  type: 'exercise';
+  index?: number;
+  label?: string;
+  prompt?: string;
+  instruction?: string;
+  option_bank?: Record<string, string>;
+  rows?: Record<string, unknown>[];
+  items?: { index?: number; stem?: string; answer?: string | number }[];
 }
 
 export interface SpotlightUnknownBlock {
@@ -156,8 +230,15 @@ export type SpotlightBlock =
   | SpotlightMultiBlock
   | SpotlightFreeTextBlock
   | SpotlightFigureBlock
+  | SpotlightOrderingBlock
+  | SpotlightTableBlock
   | SpotlightSelfCheckBlock
   | SpotlightFillTableBlock
+  // ⚠️ concept_box / matching / sub_block / exercise 刻意**不**進這個 union。
+  //    `SpotlightUnknownBlock` 帶 `[key: string]: unknown` 的 index signature，
+  //    多加一個成員會讓 TS 對既有成員的窄化失效（`block.options` 變成 unknown，
+  //    連 single / table / ordering 都一起壞）。它們由 renderer 在 case 內轉型使用，
+  //    型別定義留在下面供元件與測試引用。
   | SpotlightUnknownBlock;
 
 export interface SpotlightV2 {
@@ -177,13 +258,13 @@ export interface StrategyExerciseItem {
 export interface Story {
   id: string;
   title: string;
-  level: number;
+  level: string;                // "4".."9" / 文言文 / 品格教育
   content: string[];
   thumbnail: string;
   category: 'Fable' | 'Science' | 'History' | 'Daily';
   filename: string;
   intro?: StoryIntro;
-  grade?: number;               // 4-9
+  grade?: string;               // "4".."9" / 文言文 / 品格教育
   genre?: string;               // 記敘文/說明文/議論文
   readingStrategy?: string;     // for future Intro enhancement
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
@@ -283,6 +364,191 @@ export interface Story {
    *  table row data. Frontend renders via TableDisplay with click-to-zoom.
    *  Absent for lessons without tables (摘要策略 / 推論策略 課文 etc.). */
   tables?: LessonTable[];
+
+  // ── 文言文專屬模組 (#2752) — 只有 10 課有這些欄位，其餘課全部 undefined ──
+  /** 原文＋注釋（大題無編號，印在「原文」區）。 */
+  classicalText?: ClassicalTextContent;
+  /** 古文今譯／白話翻譯（大題無編號）。 */
+  modernTranslation?: ModernTranslationContent;
+  /** 文白詞語比對（大題二：方框字填白話）。 */
+  wordMatching?: ClassicalWordMatchingContent;
+  /** 文白句子比對（大題一：8 句配對）。 */
+  sentenceMatching?: ClassicalSentenceMatchingContent;
+  /** 自我挑戰（大題六，選做：另一段文言文＋自己的題組）。 */
+  selfChallenge?: ClassicalSelfChallengeContent;
+  /** 導讀（無編號，印在標題下方）。 */
+  introGuide?: IntroGuideContent;
+
+  // ── 一般課也有的無編號元素 (#2752 Phase 2) — 70／58 課，不限單一課型 ──
+  /** 目標策略框（印在標題附近，年級/文體徽章 + 本課目標策略一句話）。 */
+  goalBox?: GoalBoxContent;
+  /** 讀前自我檢核（「大題一 讀全文-做記號」開始前的自我檢核清單）。 */
+  selfCheckBeforeReading?: SelfCheckBeforeReadingContent;
+  /** 語詞書寫練習／難字挑戰（多為大題九，緊接在「八 詞語複習」之後）。 */
+  writingPractice?: WritingPracticeContent;
+
+  // ── 多文本合讀課 (#2752 Phase 3) — 4 課，第 1 篇已經在既有欄位（paragraphs 等）
+  // 由 full_text_annotate 提供；這裡放的是**第 2、3 篇**。 ──
+  /** 第 2、3 篇（第 1 篇走既有的 paragraphs/full-text-annotate 欄位）。 */
+  multiTextParts?: MultiTextPart[];
+  /** 「跨課文習作／三篇合讀」過場字，讀完所有篇次後顯示。 */
+  crossTextBanner?: CrossTextBannerContent;
+  /**
+   * 第一篇專屬追問——兩種形狀共用同一個欄位名（來源模組本來就是同一個檔案）：
+   *   - `questions` 形狀：文章重點表的加碼題（FOLD 進 keypoints-table）
+   *   - `items` 形狀：「閱讀接力」——check 剛讀的一篇 + 導向下一篇的問題
+   *     （FOLD 進 full-text-annotate，跟 multiTextParts 同頁）
+   */
+  keypointsFollowupQuestions?: KeypointsFollowupQuestionsContent;
+}
+
+export interface MultiTextPart {
+  lesson_heading?: string;
+  part_no?: number | null;
+  part_of?: number | null;
+  body?: {
+    paragraphs?: Array<{ idx?: number; text: string } | string>;
+  };
+  /** 少數課（如 L0144）在每一篇底下也帶了自己的「閱讀接力」——目前只顯示
+   *  頂層 keypointsFollowupQuestions 的第一篇版本，這裡先不重複渲染二三篇的，
+   *  留作已知的後續深化項（見 module_entry_gate.py 的 note）。 */
+  reading_relay?: unknown;
+}
+
+export interface CrossTextBannerContent {
+  title_block?: { title?: string };
+  heading?: string;
+  note_line?: string;
+  text?: string;
+}
+
+export interface KeypointsFollowupQuestionsItem {
+  answer: string | number;
+  stem: string;
+  options?: Record<string, string>;
+  explanation?: string;
+}
+
+export interface KeypointsFollowupQuestionsRelayItem {
+  type: 'single' | 'guide' | string;
+  label?: string;
+  prompt?: string;
+  text?: string;
+  options?: Record<string, string>;
+  answer?: string | number;
+}
+
+export interface KeypointsFollowupQuestionsContent {
+  instruction?: string;
+  belongs_to?: string;
+  /** L0063 形狀：重點表加碼題。 */
+  questions?: KeypointsFollowupQuestionsItem[];
+  /** L0144 形狀：閱讀接力（check + 導引到下一篇）。 */
+  items?: KeypointsFollowupQuestionsRelayItem[];
+  section_name_printed?: string;
+  subtitle?: string;
+}
+
+export interface WritingPracticeContent {
+  /** 少見的替代標題，如「難字挑戰」——沒有時用預設的「語詞書寫練習」。 */
+  label?: string;
+  instruction?: string;
+  words: string[];
+  /** 原稿加框標出的「時間不夠時只寫這幾個」難字（少見）。 */
+  boxed_chars?: string[];
+}
+
+export interface GoalBoxContent {
+  /** 裝飾性標題，如「閱讀之旅的起點」。跟 level_badge 二選一，不一定同時有。 */
+  title?: string;
+  /** 「Level N・文體」格式徽章 —— 跟既有的年級/類別 badge 語意重複，故意不重複顯示。 */
+  level_badge?: string;
+  /** 本課目標策略一句話，如「目標策略：讀出故事道理」——這是本欄位唯一必用的內容。 */
+  strategy_line: string;
+}
+
+export interface SelfCheckBeforeReadingContent {
+  /** 「※ 如果你有做到下列事項，請在□內打勾。」——部分課沒有這句（原稿如此）。 */
+  instruction?: string;
+  items: string[];
+}
+
+// ── 文言文專屬模組的內容型別 (#2752) ─────────────────────────────────────────
+// 直接對映 backend/data/lessons/*/v3/{classical_text,...}.yml 的形狀
+// （lesson_uid_loader 已把外層 wrapper 拆掉，見該檔案註解）。
+
+export interface ClassicalTextContent {
+  source_label?: string;
+  paragraphs: string[];
+  annotations_label?: string;
+  annotations?: { term: string; text: string }[];
+}
+
+export interface ModernTranslationContent {
+  section_name?: string;
+  paragraphs: string[];
+}
+
+export interface ClassicalWordMatchingBlank {
+  answer: string;
+}
+
+export interface ClassicalWordMatchingItem {
+  index: number;
+  classical: string;
+  boxed_terms?: string[];
+  vernacular: string;
+  blanks: ClassicalWordMatchingBlank[];
+}
+
+export interface ClassicalWordMatchingContent {
+  instruction?: string;
+  items: ClassicalWordMatchingItem[];
+}
+
+export interface ClassicalSentenceMatchingSegment {
+  index: number;
+  classical: string;
+  answer: number;
+}
+
+export interface ClassicalSentenceMatchingContent {
+  instruction?: string;
+  passage_paragraphs?: string[];
+  reference_label?: string;
+  reference_sentences: Record<string, string>;
+  segments: ClassicalSentenceMatchingSegment[];
+}
+
+/** One question in self_challenge's part_one/part_two — either a short-answer
+ *  fill-in (only `answer`) or a multiple-choice pick (`options` + `answer`). */
+export interface ClassicalSelfChallengeQuestionItem {
+  index: number;
+  stem: string;
+  options?: Record<string, string>;
+  answer: string | number;
+  instruction?: string;
+}
+
+export interface ClassicalSelfChallengePart {
+  label?: string;
+  items: ClassicalSelfChallengeQuestionItem[];
+}
+
+export interface ClassicalSelfChallengeContent {
+  optional_note?: string;
+  instruction?: string;
+  strategy_banner?: string;
+  passage: string;
+  annotations?: { index?: number; term: string; text: string }[];
+  translation?: string;
+  part_one?: ClassicalSelfChallengePart;
+  part_two?: ClassicalSelfChallengePart;
+}
+
+export interface IntroGuideContent {
+  section_name?: string;
+  text: string;
 }
 
 /** Row of a lesson table. `section` (optional) groups rows visually

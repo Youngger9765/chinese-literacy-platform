@@ -1,0 +1,29 @@
+lesson_uid: L0065
+version_id: v3
+title: 運動傷害，怎麼辦？
+catalog_slot: G6-L26
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 閱讀聚光燈
+  subtitle: 寫作手法—倒反：讀懂反話
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 9
+  drive_path: 6年級/G6-L26運動傷害，怎麼辦（寫作手法-倒反：讀懂反話）.docx
+  docx_md5: md5-12:9f8343b718fa

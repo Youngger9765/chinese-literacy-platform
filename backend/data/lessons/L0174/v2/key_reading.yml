@@ -1,0 +1,21 @@
+lesson_uid: L0174
+version_id: v2
+passage: 柔道選手楊勇緯曾在雅加達亞運的八強賽落敗，而緊接著的復活賽，卻迎來更加艱困的局面。他的對手──來自蒙古的達許達瓦，是楊勇緯過去曾兩度敗北的勁敵。然而，那些失敗除了帶給他不甘心的眼淚，也讓他發現自己的不足。賽前，他針對比賽情境反覆演練，將過往的挫折化為珍貴的教訓。終於，在交錯的手腳間，在重心的攻防間，看準得分的契機，一舉扳倒對手。比賽場上，輸的人往往學到最多也進步最多。面對失敗，楊勇緯沒有急著否定自己，而是看見成長的機會與變強的可能。
+start_text: 柔道選手楊勇緯曾在雅加達亞運的八強賽落敗，而緊接
+extent_chars: 218
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 6
+  cell_paragraphs: 6

@@ -1,0 +1,16 @@
+lesson_uid: L0103
+version_id: v3
+errata:
+- id: E1
+  section: 八 詞語複習
+  locator: 找字格子第 3 列第 3 欄
+  source: 脱
+  corrected: 脫
+  kind: 格子錯字
+  why: '「脫穎而出」的第一個字，格子裡印的是異體字「脱」（U+8131），
+
+    課文與語詞框用的都是「脫」（U+812B）。全檔 `document.xml` 裡「脱」只出現這一次、
+
+    「脫」出現 7 次 —— 確定是格子單獨印錯，不是全課用字習慣。'
+  confidence: high
+  evidence: document.xml 逐字元比對；PDF p10 格子印出來也是「脱」

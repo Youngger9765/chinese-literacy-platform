@@ -1,0 +1,17 @@
+lesson_uid: L0141
+version_id: v3
+errata:
+- id: E1
+  section: 八 詞語複習
+  locator: 找字格子第 3 列第 6 欄
+  source: 泱
+  corrected: 決
+  kind: 格子錯字
+  why: 目標語詞「潰決」的第二個字，格子印成形近的「泱」，圈選路徑因此拼出「潰泱」
+  confidence: high
+  evidence: 'document.xml 該儲存格是 U+6CF1（泱）；全檔「泱」僅此 1 次、「決」6 次（課文與其他三處都正確）。
+
+    PDF 上兩字形近，肉眼讀成「決」；座標門（normalize_word_search.py）比對格子後抓出。'
+  handling_note: '**格子不改**（照原稿保留「泱」），answer_paths 的 word 寫「潰泱」，
+
+    目標語詞記在該條的 intended_word_note。線上呈現與教材一致。'

@@ -1,94 +1,177 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "事件",
+      "事件",
+      "感受",
+      "事件"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "「意思」的多元用法 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "感情小日記1──是友情還是愛情？",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①「意思」只能代表「意義」。 ②「意思」有很多種不同的意義。 □③「意思」是外來語。",
-      "interactive_type": "checkbox",
-      "options": [
-        "「意思」只能代表「意義」。",
-        "「意思」有很多種不同的意義。 □",
-        "「意思」是外來語。"
+      "interactive_type": "display",
+      "label": "二",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "他主動詢問要幫我交【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "①茫然 ②害羞 ③緊張"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 2",
-      "value": "□①課文只提到「意思」代表「意義」。 ②課文舉例了「意思」的多種用法。 □③課文沒有舉例「意思」的用法。",
-      "interactive_type": "checkbox",
-      "options": [
-        "課文只提到「意思」代表「意義」。",
-        "課文舉例了「意思」的多種用法。 □",
-        "課文沒有舉例「意思」的用法。"
+      "interactive_type": "display",
+      "label": "三",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "【　　　】課被分在同一組"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受",
+          "value": "【　　　】漏了一拍"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 3",
-      "value": "□①「意思」的含義是固定的。 ②要理解「意思」需看前後文。 □③「意思」的含義與文章無關。",
-      "interactive_type": "checkbox",
-      "options": [
-        "「意思」的含義是固定的。",
-        "要理解「意思」需看前後文。 □",
-        "「意思」的含義與文章無關。"
+      "interactive_type": "display",
+      "label": "四",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "習慣看向他、【　　　】突然對上、偷偷觀察他"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "在乎、緊張、期待"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "結論",
-      "value": "語言很有趣，一個詞語要參考前後文才能理解真正的含義。 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "五",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "幫我撿掉在地上的筆、小組討論時叫我的【　　　】"
+        },
+        {
+          "interactive_type": "display",
+          "label": "感受",
+          "value": "①溫暖 ②害羞 ③興奮"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "統整",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "不知所措",
+            "深情思念"
+          ],
+          "value": "①不知所措 ②深情思念"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
+  "title": "感情小日記1──是友情還是愛情？",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "主題",
-      "value": "「意思」的多元用法 【　　　】"
+      "items": [
+        {
+          "label": "事件",
+          "value": "他主動詢問要幫我交【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①茫然 ②害羞 ③緊張"
+        }
+      ],
+      "kind": "section_block",
+      "section": "二"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①「意思」只能代表「意義」。 ②「意思」有很多種不同的意義。 □③「意思」是外來語。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "【　　　】課被分在同一組"
+        },
+        {
+          "label": "感受",
+          "value": "【　　　】漏了一拍"
+        }
+      ],
+      "kind": "section_block",
+      "section": "三"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①課文只提到「意思」代表「意義」。 ②課文舉例了「意思」的多種用法。 □③課文沒有舉例「意思」的用法。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "習慣看向他、【　　　】突然對上、偷偷觀察他"
+        },
+        {
+          "label": "感受",
+          "value": "在乎、緊張、期待"
+        }
+      ],
+      "kind": "section_block",
+      "section": "四"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①「意思」的含義是固定的。 ②要理解「意思」需看前後文。 □③「意思」的含義與文章無關。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "幫我撿掉在地上的筆、小組討論時叫我的【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①溫暖 ②害羞 ③興奮"
+        }
+      ],
+      "kind": "section_block",
+      "section": "五"
     },
     {
-      "kind": "pair",
-      "label": "結論",
-      "value": "語言很有趣，一個詞語要參考前後文才能理解真正的含義。 【　　　】"
+      "items": [
+        {
+          "label": "事件",
+          "value": "①不知所措 ②深情思念"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

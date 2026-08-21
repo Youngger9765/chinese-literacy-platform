@@ -1,0 +1,66 @@
+lesson_uid: L0047
+version_id: v3
+section_no: 六
+keypoints:
+  title: 工地大嫂
+  title_note: 表格第一列的右欄印「工地大嫂」，左欄空白，是整張表的標題列。
+  layout: list
+  answer_carrier: 橘色手寫字；文字流的【　】內已填有答案
+  rows:
+  - label: 定義
+    value: 作者稱六十歲以下，和丈夫一起來工地工作的女性叫大嫂。
+  - label: 來工地的原因
+    items:
+    - label: 1
+      value: 工地環境【　】，女性多半與父親、丈夫或兄弟同行，以確保安全。
+      blanks:
+      - answer: 粗野陽剛
+    - label: 2
+      value: 大嫂往往早婚，年紀較【　】，學歷相對【　】。
+      blanks:
+      - answer: 輕
+      - answer: 不高/低
+      blanks_note: 第二格教師版印「不高/低」，是兩個並列的可接受答案，照原樣記錄不拆。
+    - label: 3
+      value: 跟著丈夫進工地，不僅可多出一分勞力，也能【　】丈夫、照應工作。
+      blanks:
+      - answer: 約束
+  - label: 大嫂的類型
+    items:
+    - label: 1
+      value: 互補型：丈夫技術好，但是好強高傲。大嫂們【　】，擅長【　】調度，使工程銜接無虞。
+      blanks:
+      - answer: 長袖善舞
+      - answer: 接案
+    - label: 2
+      value: 管束型：丈夫技術不錯，但個性較【　】。大嫂們會默默收管丈夫，使其工作穩定順暢。
+      blanks:
+      - answer: 不穩定
+    - label: 3
+      value: 人脈型：大嫂極有【　】、人脈廣闊，可隨時調度各方人手協助趕工。
+      blanks:
+      - answer: 度量
+  - label: 大嫂在工地的功用
+    items:
+    - label: 1
+      value: 【　】工人爭執。
+      blanks:
+      - answer: 調停
+    - label: 2
+      value: 提供偏方與【　】給身體不適的工人。
+      blanks:
+      - answer: 藥物
+    - label: 3
+      value: 協助【　】工地死亡的貓狗。
+      blanks:
+      - answer: 埋葬
+    - label: 4
+      value: 工程順利時，帶工人同樂慶祝。
+    - label: 5
+      value: 工程不順利時，下一步該怎麼做，大嫂會【　】。
+      blanks:
+      - answer: 指點迷津
+  - label: 總結
+    value: 工地大嫂是臺灣社會中堅強、溫柔又美麗的女性縮影，值得眾人【　】。
+    blanks:
+    - answer: 尊敬

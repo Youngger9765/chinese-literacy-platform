@@ -1,0 +1,141 @@
+lesson_uid: L0076
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 稱職
+    definition: 把分內的工作做得很好。
+  - index: 2
+    word: 會診
+    definition: 一位醫師邀請其他醫師一起討論、判斷病情。
+  - index: 3
+    word: 喬裝
+    definition: 改變穿著或外表，假裝成另一種身分。
+  - index: 4
+    word: 不情之請
+    definition: 自己知道可能會讓別人為難，還是提出的請求。
+  - index: 5
+    word: 退駕
+    definition: 民間信仰中，指神明離開乩童的身體，附身的狀態結束。
+  - index: 6
+    word: 觸怒
+    definition: 惹人生氣。
+  - index: 7
+    word: 納悶
+    definition: 心裡有疑問。
+  - index: 8
+    word: 不假思索
+    definition: 沒有仔細想，就立刻回答或行動。
+  - index: 9
+    word: 預後
+    definition: 病人之後可能的病情發展或結果。
+  - index: 10
+    word: 刻板印象
+    definition: 還沒有真正了解，就先認定某一類人、事物或做法都是某個樣子。
+  - index: 11
+    word: 攙扶
+    definition: 用手扶著他人。
+  - index: 12
+    word: 由衷
+    definition: 真心的、發自內心的。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 不情之請
+    B: 納悶
+    C: 觸怒
+    D: 攙扶
+    E: 不假思索
+    F: 刻板印象
+    G: 喬裝
+    H: 預後
+    I: 會診
+    J: 由衷
+  questions:
+  - index: 5
+    text: 真讓人（　），氣溫35度，居然還有人穿厚夾克在街上走動？
+    answer: B
+  - index: 7
+    text: 我（　）感謝您多年來的照顧。
+    answer: J
+  - index: 8
+    text: 他的病情十分嚴重，需要多位醫師一起（　）。
+    answer: I
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列語詞何者使用不正確？
+    options:
+      A: 他「喬裝」成水電工人，以躲避警方的追緝
+      B: 最近天氣多變，時常讓人感到胸口「納悶」
+      C: 她扭傷了腳踝，痛到要人「攙扶」著去保健室
+      D: 他工作表現十分「稱職」，很受上級的器重
+    rationale: null
+    marker_notes:
+      B: 鬱悶
+  - index: 2
+    answer: A
+    stem: 家屬想請乩童進入病房時，陳醫師的做法最能說明哪一種態度？
+    options:
+      A: 先理解家屬想盡心的需要，再在不妨礙醫療下尊重配合
+      B: 為了安撫家屬，放棄醫療判斷，完全照家屬的意思
+      C: 認為所有民俗作法都能治病，因此主動請乩童會診
+      D: 避免和家屬發生衝突，所以不再說明病情與治療
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 第十三段，護理師後來轉述說，她向太太說：「我上有老下有小，是放心不下，但是，也不想回來了。」請問句中的「我」指的是誰？
+    options:
+      A: 醫生
+      B: 乩童
+      C: 病人
+      D: 病人的哥哥
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 陳醫師在文章裡寫道：「這完全顛覆了我對乩童的刻板印象！」請問下列哪一個選項顛覆了陳醫師對乩童的刻板印象？
+    options:
+      B: 乩童會代替病人擁抱家屬
+      C: 乩童很辛苦，退駕時滿身大汗
+      D: 乩童是這個站在床邊的年輕女性
+    rationale: 第八段：由上下文推測，陳醫師因為乩童是位年輕女性而吃驚。
+  - index: 5
+    answer: C
+    stem: 下列哪一項最能表達本文想傳達的道理？
+    options:
+      A: 醫療專業遇到民俗信仰時，應完全退讓
+      B: 只要家屬有心，任何作法都不必考慮安全
+      C: 面對不同文化，先了解背後的心意，再找安全、尊重的做法
+      D: 醫師應把乩童當成真正醫師，讓她參與所有治療決定
+    rationale: 陳醫師先理解家屬請乩童、使用符水背後的心意，再透過溝通與說明病情，在不放棄醫療專業的情況下尊重家屬文化
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【一鏡到底】為了那個十七歲少年 ICU醫生陳志金
+    duration_seconds: 332
+    source: 鏡人物
+  - index: 2
+    title: 鬼門關前搶救無數患者，熱血暖醫陳志金：重症病房的3堂必學功課
+    duration_seconds: 643
+    source: 早安健康
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

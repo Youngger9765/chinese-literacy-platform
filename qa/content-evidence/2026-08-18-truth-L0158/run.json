@@ -1,0 +1,7 @@
+{
+  "lesson_uid": "L0158", "catalog_slot": "文-L3", "pdf_pages": 10, "pages_read": 10,
+  "wall_clock_seconds": null, "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 2,
+  "notes": "找到一筆教材漏字（E1）：文白句子比對第二題印「每春間民就貸」，少一個「貧」。同一份學習單「每春間」出現 5 次，其餘 4 次都是「每春間貧民就貸」，而該題對應的參考句是「每到春天，窮人就來找他借貸穀物」。用 text/source_text 機制處理。答案載體：☑ 0 個（w:sym 全檔 0），所以「數 F0FE 對答案數」在這課完全沒有效力；橘色 run 層 31 + 樣式 65 = 96，兩邊都要看。紅色 FF0000 出現 26 次但遞迴 wps:wsp 檢查每個圖形的 a:ln，紅線圖形 0 個 —— 那 26 次全是紅色文字（第四大題的翻譯註解框），只 grep FF0000 會誤判成有連線題。箭號全是字面 ➡（w:sym 0），照抄保留。retry 2 次：① YAML flow mapping 裡 stem 含「?」要加引號 ② 兩題的原文我接成一整段，原稿是照印刷斷行分行、行間夾著［N］代號那一行，逐字門判 FAIL 且判得對。"
+}

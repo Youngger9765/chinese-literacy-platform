@@ -67,6 +67,36 @@ jobs:
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
 
+      # Pronunciation fingerprint gate (#2742). Already run by spec-check.yml,
+      # repeated here on purpose: spec-check is path-filtered, this workflow
+      # triggers on all of backend/**, and the failure being guarded against is
+      # precisely "the gate existed and nothing ran it". Cheap enough (three
+      # assertions, no I/O) that redundancy costs less than another silent
+      # orphaning of the whole audio cache.
+      - name: Run pronunciation fingerprint gate (#2742)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q specs/test_tts_cache_fingerprint_spec.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # Wiring lock for the gate above (#2742): asserts every input the
+      # fingerprint is computed from is watched by a workflow that runs it.
+      - name: Run fingerprint-gate wiring lock (#2742)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_tts_fingerprint_gate_is_wired.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
       # TTS coverage lock (#2619): mocked logic only (existing_keys/missing_keys/
       # expected_keys against FakeBucket doubles + the real manifest file) — no
       # GCS credentials touched here. The real-bucket class
@@ -76,6 +106,32 @@ jobs:
         run: |
           cd backend
           python -m pytest --tb=short -q tests/test_audit_tts_coverage.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # 重點表 bridge lock (#2736): `app/services/keypoints_to_structure.py` 供給 150 課的
+      # 重點表（`lesson_indexes.py` → `story_structure_table` → `/stories/{id}/structure`），
+      # 但**沒有任何 spec module 認領它**，而這個 workflow 是點名清單不是掃目錄 ——
+      # 於是它的測試檔一直存在、卻從來沒有任何門會執行（GHA 0 / run-ci 0 / registry 0，
+      # 2026-08-18 實測，以 test_rate_limiting 與 test_verify_qr_manifest 當正向對照）。
+      # 兩個靜默流失的 bug（子項標題 63 課、題幹 3 課）就是在這個空隙裡活下來的。
+      # An un-run lock is theatre — pin it.
+      - name: Run keypoints bridge locks (sub-labels + prompt stems)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_keypoints_to_structure.py \
+            tests/test_keypoints_subitem_label_2736.py \
+            tests/test_keypoints_prompt_stem_2736.py \
+            tests/test_structure_answer_key_not_served_2736.py \
+            tests/test_structure_option_display_2736.py \
+            tests/test_asset_url_rewrite.py \
+            tests/test_tts_audit_empty_not_404.py \
+            tests/test_lab_keypoints_source_2751.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

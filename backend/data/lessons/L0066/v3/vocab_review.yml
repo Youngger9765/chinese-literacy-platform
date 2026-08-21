@@ -1,0 +1,157 @@
+lesson_uid: L0066
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 庶民
+  - 雲霧飄渺
+  - 口耳相傳
+  - 不食人間煙火
+  - 精雕細琢
+  - 浩瀚無垠
+  - 微不足道
+  - 滄海一粟
+  - 疲憊不堪
+  - 塵囂
+  - 凡塵俗世
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 浩精微小不足囂張跋扈
+  - 精雲雕平凡庶民不聊口
+  - 細霧口細疲憊不堪生耳
+  - 雕飄浩蜜琢灰粟米不相
+  - 工渺大瀚腹塵人凡食傳
+  - 疲不微海劍囂間塵人滄
+  - 倦堪妙不滄海一粟間海
+  - 凡塵俗世足無邊界煙俗
+  - 勘浩瀚無垠道無垠火世
+  - 查水銀道盡人生雕刻畫
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 精雕細琢
+    cells:
+    - - 1
+      - 2
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    direction: diagonal_down_right
+  - word: 庶民
+    cells:
+    - - 2
+      - 6
+    - - 2
+      - 7
+    direction: horizontal
+  - word: 雲霧飄渺
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    - - 4
+      - 2
+    - - 5
+      - 2
+    direction: vertical
+  - word: 口耳相傳
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 疲憊不堪
+    cells:
+    - - 3
+      - 5
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 不食人間煙火
+    cells:
+    - - 4
+      - 9
+    - - 5
+      - 9
+    - - 6
+      - 9
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    direction: vertical
+  - word: 塵囂
+    cells:
+    - - 5
+      - 6
+    - - 6
+      - 6
+    direction: vertical
+  - word: 微不足道
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    - - 9
+      - 6
+    direction: diagonal_down_right
+  - word: 滄海一粟
+    cells:
+    - - 7
+      - 5
+    - - 7
+      - 6
+    - - 7
+      - 7
+    - - 7
+      - 8
+    direction: horizontal
+  - word: 凡塵俗世
+    cells:
+    - - 8
+      - 1
+    - - 8
+      - 2
+    - - 8
+      - 3
+    - - 8
+      - 4
+    direction: horizontal
+  - word: 浩瀚無垠
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  answer_paths_note: '11 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
+
+    幾何交叉驗證吻合：document.xml 有 11 個 roundRect，與讀圖看到的 11 個橘框
+
+    （6 橫、3 直、2 斜）數量一致。'

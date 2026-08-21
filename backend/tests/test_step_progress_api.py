@@ -35,6 +35,14 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role
 
+# "L06" is a first-edition lesson code. #1135 added a gate requiring the slug to name a
+# real story, and these eight tests have errored ever since — permanently red tests are
+# where a genuine regression hides.
+from app.services.lesson_loader import get_all_lessons
+
+_VALID_SLUG = str(get_all_lessons()[0]["id"])
+
+
 # ---------------------------------------------------------------------------
 # In-memory SQLite test database
 # ---------------------------------------------------------------------------
@@ -132,7 +140,7 @@ def session_id(client, student):
     """Create a learning session owned by student; return its DB id."""
     resp = client.post(
         "/api/learning/sessions",
-        json={"story_slug": "L06"},
+        json={"story_slug": _VALID_SLUG},
         headers=auth_header(student["token"]),
     )
     assert resp.status_code == 201, resp.text

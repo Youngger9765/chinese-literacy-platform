@@ -1,0 +1,7 @@
+{
+  "lesson_uid": "L0141", "catalog_slot": "G9-L20", "pdf_pages": 10, "pages_read": 10,
+  "wall_clock_seconds": null, "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 2,
+  "notes": "🔴 座標門抓到一個我讀錯的格子字：找字格子 (3,6) 我在 PDF 上讀成『決』，實際是『泱』(U+6CF1)。document.xml 全檔『泱』只出現 1 次（就是這一格）、『決』6 次（課文與其餘三處都正確）→ 這是教材的形近字格子錯字，已登錄 source_errata E1，word 寫『潰泱』。這一格正是那道門存在的理由（同 L0131『榷/權』那次我僥倖沒錯）。retry 第 2 次是形狀：我把 intended_word_note 寫在 answer_paths 的清單項目裡，normalize_word_search --write 只保留 word/cells/direction，會整段吃掉 —— L0026 早就記過這個坑，註解要放在 answer_paths 之前。段號 一~九 對應 9 個散文段落，5 個小標題不佔段號（它們就是本課聚光燈『從小標題找重要細節』的主角，聚光燈逐一引用的段落範圍與本檔段號完全一致，是獨立佐證）；第 4 段在 XML 拆成兩個 w:p，字數欄 321/329 兩個相鄰值分別對上前後半。本課有真的頁尾註腳（37 字）但掛在第 2 段、在 ☞ 起點之前，不必套 SKILL 6.7 第 2 條。"
+}

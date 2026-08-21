@@ -1,0 +1,51 @@
+lesson_uid: L0001
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 轉瞬即逝
+  - 睽違
+  - 血脈賁張
+  - 天壤之別
+  - 事與願違
+  - 經年累月
+  - 沮喪
+  - 孤寂感
+  - 擊垮
+  - 迎刃而解
+  items:
+  - index: 1
+    word: 血脈賁張
+    definition: 形容情緒非常激動、緊張。
+  - index: 2
+    word: 擊垮
+    definition: 心志被打敗了。
+  - index: 3
+    word: 事與願違
+    definition: 事情的發展和願望相反、相違背。
+  - index: 4
+    word: 孤寂感
+    definition: 孤單寂寞的感覺。
+  - index: 5
+    word: 沮喪
+    definition: 情緒難過、非常灰心。
+  - index: 6
+    word: 天壤之別
+    definition: 比喻差別極大。
+  - index: 7
+    word: 迎刃而解
+    definition: 比喻事情很容易處理。
+  - index: 8
+    word: 經年累月
+    definition: 形容時間長久。
+  - index: 9
+    word: 轉瞬即逝
+    definition: 在很短的時間就消失。
+  - index: 10
+    word: 睽違
+    definition: 隔了很久沒有見到或發生。

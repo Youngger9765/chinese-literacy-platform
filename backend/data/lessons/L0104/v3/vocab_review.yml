@@ -1,0 +1,218 @@
+lesson_uid: L0104
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 加油添醋
+  - 眾矢之的
+  - 跟風起鬨
+  - 做作
+  - 發酵
+  - 如坐針氈
+  - 強顏歡笑
+  - 進退維谷
+  - 無妄之災
+  - 重整旗鼓
+  - 有憑有據
+  - 逞強
+  - 孤立無援
+  - 撥雲見日
+  - 咆哮
+  - 得不償失
+  target_words_note: 灰框列 16 個（三行），與三大題「本課語詞」框的 16 個完全相同，只是順序不同。
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 目不眾亦加經如坐針氈
+  - 淺捲矢無反油做作右摀
+  - 無妄之災顧莿添亦咆哮
+  - 繳兔的蒿物孤辣醋及喘
+  - 進跟風起鬨立亦南捨我
+  - 退添醋逞強無撥雲見日
+  - 維重針毯顏援無災有旗
+  - 谷發整坦歡眾發春憑鼓
+  - 援雲見旗笑人踢酵有添
+  - 得不償失鼓進退誤據天
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 眾矢之的
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 3
+    - - 3
+      - 3
+    - - 4
+      - 3
+    direction: vertical
+  - word: 加油添醋
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 6
+    - - 3
+      - 7
+    - - 4
+      - 8
+    direction: diagonal_down_right
+  - word: 如坐針氈
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 做作
+    cells:
+    - - 2
+      - 7
+    - - 2
+      - 8
+    direction: horizontal
+  - word: 無妄之災
+    cells:
+    - - 3
+      - 1
+    - - 3
+      - 2
+    - - 3
+      - 3
+    - - 3
+      - 4
+    direction: horizontal
+  - word: 咆哮
+    cells:
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 孤立無援
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 6
+    - - 6
+      - 6
+    - - 7
+      - 6
+    direction: vertical
+  - word: 進退維谷
+    cells:
+    - - 5
+      - 1
+    - - 6
+      - 1
+    - - 7
+      - 1
+    - - 8
+      - 1
+    direction: vertical
+  - word: 跟風起鬨
+    cells:
+    - - 5
+      - 2
+    - - 5
+      - 3
+    - - 5
+      - 4
+    - - 5
+      - 5
+    direction: horizontal
+  - word: 逞強
+    cells:
+    - - 6
+      - 4
+    - - 6
+      - 5
+    direction: horizontal
+  - word: 撥雲見日
+    cells:
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    - - 6
+      - 10
+    direction: horizontal
+  - word: 強顏歡笑
+    cells:
+    - - 6
+      - 5
+    - - 7
+      - 5
+    - - 8
+      - 5
+    - - 9
+      - 5
+    direction: vertical
+  - word: 重整旗鼓
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 3
+    - - 9
+      - 4
+    - - 10
+      - 5
+    direction: diagonal_down_right
+  - word: 有憑有據
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 發酵
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 8
+    direction: diagonal_down_right
+  - word: 得不償失
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  answer_paths_note: '16 條路徑對 16 個目標語詞，逐格取字皆能拼回，格子沒有錯字。
+
+    ✅ 幾何交叉驗證：全檔 `roundRect` **17** 個，但其中一個是**紙外殘留**——
+
+    它的框線硬寫死 `srgbClr E97132`（其餘 16 個都用佈景色 `accent2`），
+
+    而且 `positionH relativeFrom="rightMargin" posOffset=5264785`（約 5.76 in，
+
+    加回右邊界基準遠超過 A4 頁寬 8.27 in）。扣掉它之後紙上 **16 個 ＝ 16 條路徑**。
+
+    ⚠️「強」（第 6 列第 5 欄）同時屬於「逞強」與「強顏歡笑」兩條路徑（十字交叉），
+
+    不是重複圈選。
+
+    ⚠️ 干擾字：第 5 列第 2~3 欄的「添」「醋」、第 9 列第 1~3 欄的「援」「雲」「見」、
+
+    第 10 列第 6~7 欄的「進」「退」都接不出完整語詞。'

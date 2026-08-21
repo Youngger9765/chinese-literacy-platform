@@ -1,0 +1,21 @@
+lesson_uid: L0057
+version_id: v2
+passage: 好好睡一覺，好處多多。當你以為身體在休息時，睡眠其實正幫助身體默默進行修復與調整：修復勞累一天的肌肉、調整各部分的運作，並清除代謝產生的廢物。如果老是睡不夠，身體恢復與修復的時間就會減少。長期下來，可能增加肥胖、糖尿病、心血管疾病及憂鬱等健康風險。
+start_text: 好好睡一覺，好處多多。當你以為身體在休息時，睡眠
+extent_chars: 124
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 9

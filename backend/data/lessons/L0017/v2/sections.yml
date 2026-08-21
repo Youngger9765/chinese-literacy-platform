@@ -1,0 +1,135 @@
+lesson_uid: L0017
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 心跳漏了一拍
+    definition: 形容緊張、驚訝或激動時，心臟突然一震的感覺。
+  - index: 2
+    word: 結結巴巴
+    definition: 說話不順暢，時常中斷停頓。
+  - index: 3
+    word: 不經意
+    definition: 不是故意的、沒有特別留意。
+  - index: 4
+    word: 茫然
+    definition: 不知所措的樣子。
+  - index: 5
+    word: 目光
+    definition: 眼神。
+  - index: 6
+    word: 腦海
+    definition: 腦中。
+  - index: 7
+    word: 片段
+    definition: 不完整的一小段內容或記憶。
+  - index: 8
+    word: 不自覺
+    definition: 自己沒發現、不是刻意的。
+  - index: 9
+    word: 瞬間
+    definition: 很短的時間、一眨眼的時間。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 茫然
+    B: 目光
+    C: 片段
+    D: 腦海
+    E: 不經意
+    F: 不自覺
+    G: 結結巴巴
+    H: 心跳漏了一拍
+    I: 瞬間
+  questions:
+  - index: 1
+    text: 多年後，她贏得冠軍的燦爛笑容仍然在我（　）揮之不去。
+    answer: D
+  - index: 2
+    text: 迷路的他，站在人來人往的車站中，頓時感到一陣（　）。
+    answer: A
+  - index: 3
+    text: 他努力想解開和朋友的誤會，但卻緊張的（　）說不清楚。
+    answer: G
+  - index: 4
+    text: 這部電影的某些 （　）並不適合年幼的兒童觀賞。
+    answer: C
+  - index: 5
+    text: 他開了一個誇張的玩笑，所有人的（　）都集中在他身上。
+    answer: B
+  - index: 6
+    text: 集訓結束後，老師（　）的一句肯定和鼓勵，讓我開心了一整個暑假。
+    answer: E
+  - index: 7
+    text: 當他突然接到爸爸出車禍的壞消息時，表情（　）轉為沉重。
+    answer: I
+  - index: 8
+    text: 聽到「立正！」時，他（　）挺直了腰桿，顯得很有精神。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      B: 他「不經意」準備了生日驚喜，希望能夠讓好朋友開心
+      C: 當她穿著一襲禮服登場時，所有人的「目光」都落在她身上
+      D: 小老師「結結巴巴」的交代著作業，令老師相當讚賞
+    rationale: 由於經過充分的準備，輪到他上台報告時，他一臉「茫然」
+  - index: 2
+    answer: B
+    stem: 根據第四段，「他的眼神會突然和我對上，我只好急忙低下頭看小說」這句話最可能表現出敘述者當時的什麼情緒？
+    options:
+      B: 害羞與緊張，因為被對方注意到而慌亂
+      C: 討厭與厭煩，不想和對方產生任何互動
+      D: 擔心與尷尬，不想突然被拉去加入話題
+    rationale: 從前文想關注同學一舉一動的心情，可以推論是(B
+  - index: 3
+    answer: B
+    stem: 根據全文，下列選項何者最貼近作者的心理變化？
+    options:
+      B: 感到不確定，但發現這份情感與友情不同而疑惑
+      C: 雖然覺得他不錯，但後來發現其實和朋友差不多
+      D: 不想給予對方任何回應，最後決定完全忘記對方
+    rationale: 從結尾可以知道作者不知所措與疑惑。
+  - index: 4
+    answer: D
+    stem: 根據閱讀聚光燈的練習，下列何者對待感情的態度較為合適？
+    options:
+      B: 大雄：為了避免被他人誤會，保持適當距離比較安全
+      C: 柯南：友情和愛情必須有很清楚的界線，一看就知道
+      D: 小智：比起為關係命名，更重要的是了解自己的感受
+    rationale: 從聚光燈結尾可知感情界線可能是難以定義的，但重點是了解自己。
+  - index: 5
+    answer: A
+    stem: 關於本文的行為與心理感受描述，下列詮釋何者正確？
+    options:
+      A: 「像是在腦袋裡播一部只屬於自己的小電影（第五段）」──表達心中對美好回憶的陶醉
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 5
+    questions_grounded_in_body: 0.4
+    answers_recovered_from_rationale: 0
+    verdict: weak
+resources:
+  items:
+  - index: 2
+    title: 【兩性】他是把你當朋友？還是喜歡你？#戀愛補償效應｜心理學｜阿畫
+    duration_seconds: 625
+    source: 阿畫
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 1
+  needs_human_review: true

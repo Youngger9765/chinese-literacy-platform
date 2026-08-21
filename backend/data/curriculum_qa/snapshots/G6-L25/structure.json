@@ -1,85 +1,195 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "inline_choice_count": 5,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "今【　　　】",
+      "起因",
+      "經過",
+      "轉折"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "問題\n/（1.2）",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "描述一個「不好的事或困難」",
-          "value": "歐洲人遇到什麼困難?\n歐洲人【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "感情小日記6──我失戀了",
+      "value": ""
     },
     {
-      "label": "解決\n/（3）",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
+      "blanks": [
         {
-          "label": "有人想出辦法或行動 【 誰＋做什麼 】",
-          "value": "1. 荷蘭人提出一個構想：【　　　】【　　　】\n2.荷蘭人成立【　　　】",
-          "interactive_type": "fill_blank"
+          "options": [
+            "沉悶",
+            "平靜"
+          ]
         }
-      ]
+      ],
+      "interactive_type": "inline_choice",
+      "label": "今【　　　】",
+      "value": "天氣很好，而心情【　　　】"
     },
     {
-      "label": "結果\n/（5. 10）",
-      "value": "",
       "interactive_type": "display",
+      "label": "昔（第二段～第五段）",
       "sub_rows": [
         {
-          "label": "行動後，造成了什麼改變？",
-          "value": "1.許多人【　　　】\n2.最後【　　　】",
-          "interactive_type": "fill_blank"
+          "blanks": [
+            {
+              "options": [
+                "有交往對象了",
+                "也喜歡自己"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "起因",
+          "value": "聽到同學說喜歡的人【　　　】，"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "出乎意料",
+                "理所當然"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "而感到【　　　】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "經過",
+          "options": [
+            "震驚",
+            "失落",
+            "混亂",
+            "悸動",
+            "勇敢",
+            "不甘心",
+            "快樂"
+          ],
+          "select_mode": "multi",
+          "value": "1.當下感受：【 勾選，可複選 】\n①震驚 ②失落 ③混亂 ④悸動 ⑤勇敢 ⑥不甘心 ⑦快樂"
+        },
+        {
+          "interactive_type": "display",
+          "label": "",
+          "value": "2.當下想法：還沒告白就失戀了，過去的相處算什麼呢？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "轉折",
+          "value": "【　　　】告訴主角，喜歡一個人不是【　　　】，這也代表自己有能力【　　　】人。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "主角認為能有這份感情、曾經因此【　　　】與【　　　】就代表沒有白費。"
         }
-      ]
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "今（第六段）",
+      "sub_rows": [
+        {
+          "blanks": [
+            {
+              "options": [
+                "緩和",
+                "激動"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "比起聽到消息的當下，心情【　　　】許多，"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "浪費",
+                "值得"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "覺得真心喜歡一個人是【　　　】的。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "統整",
+      "value": "本篇小日記主要在抒發自己【　　　】後，調適心情的歷程。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "感情小日記6──我失戀了",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "問題\n/（1.2）",
-      "items": [
-        {
-          "label": "描述一個「不好的事或困難」",
-          "value": "歐洲人遇到什麼困難?\n歐洲人【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "今（第一段）",
+      "value": "天氣很好，而心情（　）\n①沉悶 ②平靜"
     },
     {
-      "kind": "section_block",
-      "section": "解決\n/（3）",
       "items": [
         {
-          "label": "有人想出辦法或行動 (誰＋做什麼)",
-          "value": "1. 荷蘭人提出一個構想：【　　　】（可省略）\n2.荷蘭人成立【　　　】"
+          "label": "起因",
+          "value": "聽到同學說喜歡的人（　），\n①有交往對象了 ②也喜歡自己"
+        },
+        {
+          "label": "",
+          "value": "而感到（　）\n①出乎意料 ②理所當然"
+        },
+        {
+          "label": "經過",
+          "value": "1.當下感受：（勾選，可複選）\n①震驚 ②失落 ③混亂 ④悸動 ⑤勇敢 ⑥不甘心 ⑦快樂"
+        },
+        {
+          "label": "",
+          "value": "2.當下想法：還沒告白就失戀了，過去的相處算什麼呢？"
+        },
+        {
+          "label": "轉折",
+          "value": "【　　　】告訴主角，喜歡一個人不是【　　　】，這也代表自己有能力【　　　】人。"
+        },
+        {
+          "label": "結果",
+          "value": "主角認為能有這份感情、曾經因此【　　　】與【　　　】就代表沒有白費。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "昔（第二段～第五段）"
     },
     {
-      "kind": "section_block",
-      "section": "結果\n/（5. 10）",
       "items": [
         {
-          "label": "行動後，造成了什麼改變？",
-          "value": "1.許多人【　　　】\n2.最後【　　　】"
+          "label": "",
+          "value": "比起聽到消息的當下，心情（　）許多，\n①緩和 ②激動"
+        },
+        {
+          "label": "",
+          "value": "覺得真心喜歡一個人是（　）的。\n①浪費 ②值得"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "今（第六段）"
+    },
+    {
+      "kind": "pair",
+      "label": "統整",
+      "value": "本篇小日記主要在抒發自己【　　　】後，調適心情的歷程。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "描述一個「不好的事或困難」",
-      "有人想出辦法或行動 【 誰＋做什麼 】",
-      "行動後，造成了什麼改變？"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

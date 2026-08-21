@@ -1,0 +1,10 @@
+spotlight:
+  lesson: 文-L3
+  strategy_name: 判讀主語
+  strategy_type: classical_grammar
+  blocks:
+  - type: guide
+    text: '[MISSING_SPOTLIGHT_SOURCE] 判讀主語（文言聚光燈）缺可抽取素材，需人工補件（語法焦點：指出主語）'
+  - type: free_text
+    prompt: 判讀主語（文言聚光燈）缺料（語法焦點：指出主語，待補件）
+  _missing_source: true

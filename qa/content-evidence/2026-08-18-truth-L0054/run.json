@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0054",
+  "catalog_slot": "G6-L14",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "🔴 本課只有八個大題 —— 原稿沒有『文章重點表』，聚光燈是第五大題。大題編號 一~八 連續無跳號，屬來源缺料不是抽取漏抄，已記在 sections_absent（split 後也確實沒有 keypoints.yml）。念順順「五☞」= 第 5 段；累計字數六個邊界全中，用到『不佔段號的分節小標也算進去』這條口徑（102→107 與 193→195→200 那幾個小跳躍正是兩個 5 字小標），朗讀區間 = 第 5~8 段＋兩個小標。找字格 10 個 roundRect 對 10 個目標語詞，全部拼得回，格子無錯字；第 3 列「耳日一薪」是誘答不是錯字（正確的「耳目一新」在第 1 欄第 6~9 列且被圈起）。格子跨頁（1~8 列 p9、9~10 列 p10），圈全畫在 p9。⚠️ 第七大題灰框清單與本課語詞不同（多脫穎而出／千里迢迢，少招親／尾隨而至，且把「雄赳赳，氣昂昂」拆成兩項），target_words 以格子與圈為準取 10 個，已在 gray_box_note 說明。曾寫了兩個 stem_emphasis 描述底線的散文欄位，被逐字門判 FAIL（原稿沒有那句話），已移除。"
+}

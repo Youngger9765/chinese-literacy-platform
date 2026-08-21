@@ -1,0 +1,12 @@
+{
+  "lesson_uid": "L0151",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "checkmarks_F0FE": 1,
+  "verbatim_strings_checked": 142,
+  "gate_failures": {"schema": 0, "contract": 0, "verbatim": 0},
+  "retries": 0,
+  "note": "wall_clock 未量測 —— 沒量過就不給估計數字"
+}

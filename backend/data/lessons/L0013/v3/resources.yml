@@ -1,0 +1,24 @@
+lesson_uid: L0013
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 品格教育－勇敢說不
+    duration: '5:17'
+    duration_seconds: 317
+    source: 孝養父母，奉事師長
+  - index: 2
+    title: 「高雄好家載」短片分析：手法細膩且精準到位的政府廣告｜敘事X光機
+    duration: '12:04'
+    duration_seconds: 724
+    source: 朱宥勳使出人生攻擊
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/XYMBi0rkG28
+    url_source: 總表0816「4.影片連結」年級4課次2
+  - index: 2
+    url: http://youtu.be/6oxBp5UI0NM
+    url_source: 總表0816「4.影片連結」年級4課次2

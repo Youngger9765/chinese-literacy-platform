@@ -1,0 +1,122 @@
+lesson_uid: L0145
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 素昧平生
+    definition: 從來沒有見過面，也不認識。
+  - index: 2
+    word: 抽象概念
+    definition: 指看不見、摸不到，但人可以理解和討論的想法，例如自由、正義、國家。
+  - index: 3
+    word: 共同編織
+    definition: 比喻大家一起建立或完成某件事。本文是指大家一起形成並相信某種故事、信念或規則。
+  - index: 4
+    word: 物種
+    definition: 指生物的種類，例如人類、老虎、麻雀是不同物種。
+  - index: 5
+    word: 制度
+    definition: 大家共同遵守的規定和做事方法，例如學校制度、法律制度。
+  - index: 6
+    word: 虛構
+    definition: 由人想像、創造出來的概念，不一定是自然界本來就存在的東西，也不等於騙人。
+  - index: 7
+    word: 法人
+    definition: 指被法律承認的組織，例如公司、基金會、協會；它可以簽約、擁有財產，也要負責任。
+  - index: 8
+    word: 約定俗成
+    definition: 大家長久以來都這樣做，慢慢形成大家都認同的習慣或規則。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.73
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 素昧平生
+    B: 物種
+    C: 抽象概念
+    D: 制度
+    E: 共同編織
+    F: 法人
+    G: 虛構
+    H: 約定俗成
+  questions:
+  - index: 1
+    text: 一座城市的文化，是由居民的生活習慣和共同記憶（　）而成的。
+    answer: E
+  - index: 2
+    text: 過年要發紅包、說吉祥話，是許多人長久以來（　）的習慣。
+    answer: H
+  - index: 3
+    text: 這家公司是法律承認的（　），可以簽約，也需要負責任。
+    answer: F
+  - index: 4
+    text: 老師用生活例子說明「公平」這個（　），大家才比較容易理解。
+    answer: C
+  - index: 5
+    text: 颱風過後，許多和居民（　）的志工來到村子，協助居民清理家園。
+    answer: A
+  - index: 6
+    text: 小說中的人物多半是作者（　）的，但仍可能讓讀者深受感動。
+    answer: G
+  - index: 7
+    text: 學校的請假（　）很清楚，學生生病時知道該向誰報備、要交什麼證明。
+    answer: D
+  - index: 8
+    text: 石虎是臺灣珍貴的野生（　），需要大家一起保護。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 一家公司為什麼能在老闆更換、員工離職、大樓拆掉後，仍然被認為存在？
+    options:
+      B: 因為法律承認它，銀行、顧客和員工也承認它
+      C: 因為老闆曾經創立公司，所以公司永遠屬於老闆
+      D: 因為公司的大樓還在，所以公司自然能繼續存在
+    rationale: 公司能存在，是因為法律承認它，銀行替它開戶，顧客購買產品，員工相信自己在為它工作
+  - index: 2
+    answer: C
+    stem: 第5段提及：「國家像一張巨大的網，把無數陌生人連接在一起。」這句話最合理的意思是什麼？
+    options:
+      A: 國家的土地越大，人民就越容易彼此認識
+      B: 國旗和護照本身，能直接把人民組織起來
+      C: 共同的國家認同，能讓陌生人產生連結
+      D: 國際比賽的加油聲，是國家存在的主要原因
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 本文第7段比較其他動物和智人，最主要是為了凸顯智人的哪一項特別能力？
+    options:
+      B: 其實動物只要數量夠多，也能建立金錢和法律制度
+      C: 人類合作完全不靠本能，也不需要熟人互相信任
+      D: 只有人類能讓大量陌生人，因共同故事而一起合作
+    rationale: 比較是為了說明智人的特別之處，是能讓大量互不相識的人，因共同相信同一張紙、同一面旗、同一條法律而合作
+  - index: 4
+    answer: D
+    stem: 作者舉出錢、紅綠燈、公司、國家等多個例子，最主要的寫作作用是什麼？
+    options:
+      B: 比較不同制度的優缺點，協助判斷哪一種最有力量
+      C: 按照事物的重要程度，說明金錢比制度更有關鍵影響
+      D: 用不同的例子，支持共同相信的故事會產生力量的觀點
+    rationale: 作者舉很多例子是要讀者看見：不同生活層面都靠共同相信產生真實力量，進而支持作者一開始提出的觀點
+  - index: 5
+    answer: A
+    stem: 下列哪一選項的文字最能概括本文主旨？
+    options:
+      A: 人類能靠共同相信的故事，組織陌生人合作並推動世界
+      C: 人類能靠法律規定和命令，讓每個人都願意服從
+      D: 人類能靠熟悉同伴和本能，建立穩定的社會秩序
+    rationale: 本文錢、國家、學校、公司、紅綠燈等例子，都在說明共同故事能組織人類合作，推動看得見的世界
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok

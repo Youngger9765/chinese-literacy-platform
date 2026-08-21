@@ -1,0 +1,40 @@
+keypoints:
+  lesson: G6-L16
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 問題
+    value: 1.作者百思不解的問題是：小時候大人分餅，為什麼每次總覺得__？2.類似的狀況在生活中層出不窮：(1)分組任務時，覺得別人的任務比較__。(2)看書時，覺得別人手裡的書比較有趣。(3)點餐時，覺得別人的餐點比較好吃。(4)看同學的家庭，覺得別人的家庭比較__。→作者遇到的問題是：無論在任何情況中，為什麼別人都比較__？
+    blanks:
+    - answer: 姊姊的餅比較大
+      hint: ''
+    - answer: 輕鬆
+      hint: ''
+    - answer: 溫暖
+      hint: ''
+    - answer: 好/幸運
+      hint: ''
+  - label: 轉念契機
+    value: 1.作者讀到__中刷籬笆的故事，解決了他的問題。2.湯姆的姨媽要他去__，一開始他刷得__。後來他把自己想成正在創作偉大壁畫的藝術家，全神投入。
+    blanks:
+    - answer: 湯姆歷險記
+      hint: ''
+    - answer: 刷籬笆
+      hint: ''
+    - answer: 不甘願
+      hint: ''
+  - label: 領悟
+    value: 原來問題不在於__，而在怎麼把手上的餅__。
+    blanks:
+    - answer: 餅的大小
+      hint: ''
+    - answer: 吃香一點
+      hint: ''
+  - label: 後來做法
+    value: 作者遇到不順利的事時，會試著換個角度看，用__的方式面對。
+    blanks:
+    - answer: 幽默
+      hint: ''
+  title: 把手上的餅吃香一點！

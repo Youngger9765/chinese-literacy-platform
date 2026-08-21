@@ -259,32 +259,6 @@ exports[`StudentSidebar — role=student nav items > snapshot — collapsed=fals
       學習紀錄
     </span>
   </button>
-  <div
-    aria-hidden="true"
-    class="my-1 border-t border-gray-100"
-  />
-  <button
-    aria-label="練習工具箱"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        px-3 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🧰
-    </span>
-    <span
-      class="text-sm truncate"
-    >
-      練習工具箱
-    </span>
-  </button>
 </nav>
 `;
 
@@ -381,28 +355,6 @@ exports[`StudentSidebar — role=student nav items > snapshot — collapsed=true
       class="text-lg shrink-0"
     >
       📖
-    </span>
-  </button>
-  <div
-    aria-hidden="true"
-    class="my-1 border-t border-gray-100"
-  />
-  <button
-    aria-label="練習工具箱"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        justify-center px-2 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    title="練習工具箱"
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🧰
     </span>
   </button>
 </nav>

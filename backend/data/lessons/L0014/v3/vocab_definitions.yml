@@ -1,0 +1,55 @@
+lesson_uid: L0014
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 區間車
+  - 索然無味
+  - 趣味橫生
+  - 集體催眠
+  - 優雅
+  - 與眾不同
+  - 遙遙領先
+  - 偶有所見
+  - 不為所動
+  - 賞心悅目
+  - 老神在在
+  items:
+  - index: 1
+    word: 優雅
+    definition: 優美高雅，指一個人的行為舉止或言談，展現出自信、從容的感覺。
+  - index: 2
+    word: 偶有所見
+    definition: 指某種事物並不常見，但偶爾會出現。
+  - index: 3
+    word: 區間車
+    definition: 是臺鐵火車種類之一，通常每站都停，班次多。
+  - index: 4
+    word: 索然無味
+    definition: 覺得無聊、不有趣、沒有意思。
+  - index: 5
+    word: 與眾不同
+    definition: 和大眾不一樣，通常是有特色或令人印象深刻的部分。例如：穿著、髮型或想法與眾不同。
+  - index: 6
+    word: 不為所動
+    definition: 不受外界影響而改變心意或行動。
+  - index: 7
+    word: 趣味橫生
+    definition: 樂趣不斷產生。
+  - index: 8
+    word: 遙遙領先
+    definition: 領先其他人一大段距離。
+  - index: 9
+    word: 集體催眠
+    definition: 形容人們在無意中接受了人或環境發出的訊息後，個體間相互暗示、模仿，做出類似反應的一種特殊心理現象。
+  - index: 10
+    word: 賞心悅目
+    definition: 因為欣賞到美好的情景，而感到心情愉悅。
+  - index: 11
+    word: 老神在在
+    definition: 比喻很有把握，一切情況都在掌握之中。

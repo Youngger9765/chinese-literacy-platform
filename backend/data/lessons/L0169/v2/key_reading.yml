@@ -1,0 +1,21 @@
+lesson_uid: L0169
+version_id: v2
+passage: 人體其實是一座精密的工廠，由206塊骨頭和數百條肌肉構成。清晨，你睜開眼、伸個懶腰，手臂一抬、一呼一吸，身體早已全員上工。你也許沒注意到，這短短幾秒，背後有超過二十條肌肉、十多塊骨頭、還有肺、肋間肌、橫膈膜、心臟一起配合協作──就像一支默契絕佳的工作團隊。每一次呼吸，數百萬個細胞正在同時衰亡與新生。所以，不但平凡的伸懶腰是一場無聲的奇蹟，連運動員在場上的精湛表現，都是這座工廠全力運轉的傑出成果。
+start_text: 人體其實是一座精密的工廠，由206塊骨頭和數百條
+extent_chars: 199
+source: docx-extract
+anchor_paragraph: 1
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 5
+  cell_paragraphs: 5

@@ -1,0 +1,21 @@
+lesson_uid: L0127
+version_id: v2
+passage: 集中營裡食物匱乏，一口麵包都可能關乎生死，但仍有些瘦弱得像骷髏的難友，走過一間間囚房，向更孱弱的難友問好、為他們禱告，甚至把最後一口麵包分享出去。這讓法蘭柯深受感動，也領悟到：即使情況壞到極點，人仍能決定自己道德與品格的高度。
+start_text: 集中營裡食物匱乏，一口麵包都可能關乎生死，但仍有
+extent_chars: 113
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 10
+  cell_paragraphs: 10

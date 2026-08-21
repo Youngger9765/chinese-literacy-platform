@@ -1,0 +1,100 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 遞進複句
+  strategy_type: syntax
+  section_title_printed: 閱讀聚光燈
+  blocks:
+  - type: concept_box
+    text: '「我愛吃冰棒，更愛吃冰淇淋。」這句話裡，「更」表示：我喜歡冰棒，但我更喜歡冰淇淋，也就是喜歡冰淇淋的程度更高。像這樣，用「更」這類詞語，讓後半句的程度再加強的句子，就是遞進複句。
+
+      常見的遞進複句語詞有：「還」、「更」、「不但……還……」、「不只……更……」、「不但……而且……」、「除了……還……」。這些能連接前後兩個內容的詞語，叫做關聯詞。
+
+      讀到遞進複句時，可以特別注意後半句，因為後半句常是作者想加強說明的重點。'
+    emphasis_note: 首段「更喜歡」與末段「關聯詞」印成粗體
+  - type: guide
+    text: ◎ 小試身手：
+  - type: figure
+    referent: 兩台車比較的手繪插圖（綠色 1 號車、紅色 2 號車，配上下箭頭）
+    text_carrier: image
+    caption_lines:
+    - 1.阿光的車子跑得很快。
+    - 2.小傑的車子不但跑得很快，還很省油。
+    placement: 印在「1.請依照下圖提示作答。」右側
+  - type: exercise
+    label: 小試身手第1題
+    instruction: 1.請依照下圖提示作答。
+    answer_carrier: 紅色手寫字與紅色 ☑（圖形），文字流無此資訊
+    items:
+    - type: free_text
+      index: 1
+      prompt: 請問小傑跟阿光的車相同的地方是什麼？都跑得【　】
+      blanks:
+      - answer: 很快
+    - type: free_text
+      index: 2
+      prompt: 請問小傑跟阿光的車哪裡不一樣？小傑的車【　】
+      blanks:
+      - answer: 還很省油
+    - type: single
+      index: 3
+      prompt: 誰的車子比較好？
+      options:
+        1: 小傑
+        2: 阿光
+      answer: 1
+      tail: ，因為他的車子多了【　】的優點。
+      tail_blank:
+        answer: 省油
+    - type: single
+      index: 4
+      prompt: 小傑的車子「不但」跑得很快，「還」很省油。「不但……還……」這類把前後意思連起來的詞語，叫做
+      options:
+        1: 關聯詞
+        2: 形容詞
+      answer: 1
+  - type: fill_table
+    label: 小試身手第2題
+    instruction: 2.請先圈出遞進關聯詞，再勾選作者最想強調的重點。
+    columns:
+    - 課文句子
+    - 作者想強調哪一句？(單選)
+    answer_carrier: 橘色圈選（關聯詞）與紅色 ☑（強調句），皆為圖形，文字流無此資訊
+    rows:
+    - index: 1
+      課文句子: '但運動若是太過激烈
+
+        （1）不只容易造成運動傷害
+
+        （2）更無法達到促進長高的效果'
+      circled_connectives:
+      - 不只
+      - 更
+      options:
+        1: 第(1)句
+        2: 第(2)句
+      answer: 2
+    - index: 2
+      課文句子: '如果常吃這類食物，
+
+        （1）不但容易造成體重過重
+
+        （2）也可能會影響生長激素的分泌，進而影響長高喔'
+      circled_connectives:
+      - 不但
+      - 也
+      options:
+        1: 第(1)句
+        2: 第(2)句
+      answer: 2
+  - type: free_text
+    label: 小試身手第3題
+    instruction: 3. 讀一讀，把運動的兩個好處合成一句遞進複句
+    quote: 規律運動有兩個好處：可以讓肌肉變強壯，也可以讓心情變好。
+    prompt: ☆運動的好處：（請把你想強調的好處放後半句）運動不但能讓【　】，還能讓【　】。
+    blanks:
+    - answer: 肌肉變強壯
+    - answer: 心情變好
+    teacher_note: （學生答案也可以前後對調）
+    answer_carrier: 紅色手寫字（圖形），文字流無此資訊

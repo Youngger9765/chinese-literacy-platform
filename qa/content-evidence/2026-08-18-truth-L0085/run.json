@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0085",
+  "catalog_slot": "G7-L17",
+  "pdf_pages": 12,
+  "pages_read": 12,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 1,
+    "keypoints_shape": 0,
+    "orphan_key": 1
+  },
+  "retries": 2,
+  "notes": "🔴 兩份學習單裝在同一個檔，大題序號從一重新編過一次：前半 p1~p5 = 一 閱讀聚光燈-自我提問策略1（可獨立使用），後半 p6~p12 = 一 讀全文-做記號…八 知識補給站。兩個「一」都是原稿印的，銜接處印了分流指示（已學過可跳過後半）。課文全文在檔內出現兩次（聚光燈表格版帶「（段N）」前綴、讀全文版不帶），body 取後者。14 個 w:sym F0FE 與圖上 14 個紅 ☑ 逐一相符。🔴 念順順字數欄需要一條 skill 沒列到的 Word 口徑：隱藏的 variation selector 不算字 —— 第 7 段的「彷彿」是「彷」+U+E01E1+「彿」，naive len() 得 260/393，濾掉 Cf/Mn 後得 259/392，正好等於印出的兩個數字。找字格 roundRect 11 個全在紙面、圈也 11 個，數量相符；「徵兆」與「前兆」共用第8列第10欄的「兆」（一橫一斜同格），且格子裡有兩個「焦」、被圈的是第3列那個（只有它底下接得出「躁不安」）。交件前被兩道門各擋一次：orphan_key_gate 抓到我自創的 top-level key `sections_present_note`（改用記帳表已有的 `sections_note`）；traditional_only_gate 抓到「綴」——但那個字在我自己寫的註解裡、不是抄來的內容（見回報）。"
+}

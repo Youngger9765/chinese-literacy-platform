@@ -1,0 +1,132 @@
+lesson_uid: L0116
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 契機
+    definition: 讓事情可能出現改變的好機會。
+  - index: 2
+    word: 轉圜
+    definition: 事情還有改變或挽回的機會。
+  - index: 3
+    word: 無常
+    definition: 事情變化不定，難以預料。
+  - index: 4
+    word: 心不在焉
+    definition: 心思不在正在做的事情上，不專心。
+  - index: 5
+    word: 奠定
+    definition: 建立穩固的基礎。
+  - index: 6
+    word: 禍福相倚
+    definition: 壞事和好事常常連在一起，一件事不一定永遠是好或壞。
+  - index: 7
+    word: 詮釋
+    definition: 「詮、釋」都有解釋的意思。指對一件事的理解和解釋。
+  - index: 8
+    word: 得意忘形
+    definition: 「得意」是高興；「忘形」是忘了分寸。因為太高興、太驕傲，言行變得不恰當。
+  - index: 9
+    word: 愁雲慘霧
+    definition: 形容心情低落，或氣氛沉重。
+  - index: 10
+    word: 於事無補
+    definition: 對事情沒有幫助，不能讓情況變好。
+  - index: 11
+    word: 鄙夷
+    definition: 看不起、輕視別人。
+  - index: 12
+    word: 門可羅雀
+    definition: 形容生意非常冷清，來的人非常少，門口可以張網捕麻雀。
+  - index: 13
+    word: 市井
+    definition: 一般老百姓生活、買賣、活動的地方。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.72
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 心不在焉
+    B: 鄙夷
+    C: 轉圜
+    D: 禍福相倚
+    E: 無常
+    F: 詮釋
+    G: 愁雲慘霧
+    H: 得意忘形
+    I: 於事無補
+    J: 門可羅雀
+  questions:
+  - index: 1
+    text: 比賽已經結束，再責怪隊友也（　），不如一起討論下次怎麼防守。
+    answer: I
+  - index: 2
+    text: 大維是百米冠軍的熱門人選，卻在賽前騎車跌斷腿，世事真是（　）啊。
+    answer: E
+  - index: 3
+    text: 對於老師的提醒，小安覺得被責備，小妍卻認為老師是在幫她，兩人的（　）很不一樣。
+    answer: F
+  - index: 4
+    text: 兩人因分組吵得很僵，但只要有人先道歉，關係還有（　）的空間。
+    answer: C
+  - index: 5
+    text: 阿哲上課時一直想著喜歡的女生，整節課都（　），連老師叫他都沒聽見。
+    answer: A
+  - index: 6
+    text: 段考成績公布後，全班一片（　），連愛開玩笑的同學都安靜了。
+    answer: G
+  - index: 7
+    text: 這家餐廳以前常大排長龍，換了老闆後生意冷清，如今（　）。
+    answer: J
+  - index: 8
+    text: 小傑的海報被老師稱讚後，有些（　），開始到處炫耀。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 本文第4段提到，塞翁失馬後說：「是福是禍？還不知道呢。」從這段可以推論，塞翁遇見事情時，有怎樣的詮釋習慣？
+    options:
+      A: 都認為挫折本身值得追求，能使人獲得好的結果
+      B: 都提醒人，不要只看當下的不順利，就急著下定論
+      C: 都強調經歷多次失敗之後，人自然就會懂得珍惜
+      D: 都說明人生主要靠運氣，努力和選擇並不那麼重要
+    rationale: 羅伯茲的「反向祝福」和「塞翁失馬」都不是說壞事一定會變好，而是提醒人：眼前看似不順利的事，不一定只有負面意義，不要太快下定論。
+  - index: 3
+    answer: A
+    stem: 本文第3段說「不必太早下定論」，第4段又說「想法會影響情緒與行動」。把這兩段合起來看，下列哪一種反應最符合作者的想法？
+    options:
+      C: 考差後先不要往壞處想，成績自然會慢慢進步
+      D: 考差時先避免談論成績，等心情平靜後再處理
+      A: 這兩段最符合作者想法的是：先不要急著否定自己，再思考可以調整的地方。
+    rationale: 這兩段最符合作者想法的是：先不要急著否定自己，再思考可以調整的地方。
+    is_rationale: true
+  - index: 4
+    answer: C
+    stem: 本文後半舉出新冠肺炎和羅伯茲「反向祝福」的例子，最主要是為了達成哪一種寫作效果？
+    options:
+      B: 把內容放到社會與文化，補充疫情與演講資料
+      C: 把道理放到社會與文化，說明壞事也可能帶來轉機
+      D: 把主題放到社會與文化，改談經濟發展與演講
+    rationale: 把「塞翁失馬」的道理放到不同情境中，使觀點更清楚、更有說服力。
+  - index: 5
+    answer: D
+    stem: 你上台報告時太緊張，講得斷斷續續，下台後很沮喪。下列哪一種想法最符合本文觀點？
+    options:
+      B: 我果然不適合上台報告，以後能避開就避開
+      C: 這次只是運氣不好，下次可能自然會講得更順
+      D: 我可以想想哪裡講得不順，整理內容後再多練習
+    rationale: D不是否定自己，也不是等待壞事自然變好，而是從挫敗中看見問題，思考可以調整的方法，最符合本文觀點。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok

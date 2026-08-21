@@ -1,94 +1,171 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 11,
+    "inline_choice_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "作品簡介",
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "小米酒的文化意義 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "科學怪人",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①小米酒是原住民族的日常飲品。 ②小米酒是連結祖靈、土地與族人的重要媒介。 □③小米酒是族人賺錢的重要商品。",
-      "interactive_type": "checkbox",
-      "options": [
-        "小米酒是原住民族的日常飲品。",
-        "小米酒是連結祖靈、土地與族人的重要媒介。 □",
-        "小米酒是族人賺錢的重要商品。"
+      "interactive_type": "fill_blank",
+      "label": "作品簡介",
+      "value": "1.作者是英國作家【　　　】。\n2.書名叫做《Frankenstein》【　　　】，中文翻譯書名是：【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "故事大意",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "起因",
+          "value": "弗蘭肯斯坦是一位【　　　】，對探究生命起源很有興趣，並且從【　　　】得到靈感，決定進行【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "經過",
+          "value": "他將【　　　】縫補成人的形狀，某夜，他製造的「人」居然【　　　】，他害怕的奪門而出，留【　　　】自己探索世界。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果",
+          "value": "怪物被迫進入人類世界，卻因為【　　　】，一再被誤解與傷害，最後導致一連串悲劇。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 2",
-      "value": "□①釀小米酒的過程很隨意，沒有特別規定。 ②釀小米酒的過程非常講究，充滿對天地、祖靈與族人的禮敬。 □③釀小米酒的過程只有女性可以參與。",
-      "interactive_type": "checkbox",
-      "options": [
-        "釀小米酒的過程很隨意，沒有特別規定。",
-        "釀小米酒的過程非常講究，充滿對天地、祖靈與族人的禮敬。 □",
-        "釀小米酒的過程只有女性可以參與。"
+      "interactive_type": "display",
+      "label": "書名意義",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "主標題是【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "1.名字背後帶著取名之人的【　　　】。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "有",
+                "沒有"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "",
+          "value": "小說的怪物其實【　　　】名字，可以解讀為他從未得到他人的認同與祝福。【 單選 】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "2.小說中文譯名是科學怪人，有人認為科學怪人是【　　　】，也有人是【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "副標題是【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "1.普羅米修斯是希臘神話的神，他【　　　】觸犯禁忌，不得善終。作者把弗蘭肯斯坦比喻為「現代普羅米修斯」，可能意味弗蘭肯斯坦同樣觸犯了【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "2.人類是否能【　　　】？引發後世讀者熱烈討論。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 3",
-      "value": "□①小米酒在儀式中只是一種飲料。 ②小米酒在不同族群的儀式中，都代表連結與祝福。 □③小米酒在儀式中是用來慶祝豐收的。",
-      "interactive_type": "checkbox",
-      "options": [
-        "小米酒在儀式中只是一種飲料。",
-        "小米酒在不同族群的儀式中，都代表連結與祝福。 □",
-        "小米酒在儀式中是用來慶祝豐收的。"
-      ],
-      "correct_options": [
-        1
-      ]
-    },
-    {
-      "label": "結論",
-      "value": "小米酒不僅是酒，更承載著深厚的文化與情感。 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "結語",
+      "value": "科學的發展是不是也該有【　　　】的界線？"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "科學怪人",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主題",
-      "value": "小米酒的文化意義 【　　　】"
+      "label": "作品簡介",
+      "value": "1.作者是英國作家【　　　】。\n2.書名叫做《Frankenstein》（弗蘭肯斯坦），中文翻譯書名是：【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "起因",
+          "value": "弗蘭肯斯坦是一位【　　　】，對探究生命起源很有興趣，並且從【　　　】得到靈感，決定進行【　　　】。"
+        },
+        {
+          "label": "經過",
+          "value": "他將【　　　】縫補成人的形狀，某夜，他製造的「人」居然【　　　】，他害怕的奪門而出，留【　　　】自己探索世界。"
+        },
+        {
+          "label": "結果",
+          "value": "怪物被迫進入人類世界，卻因為【　　　】，一再被誤解與傷害，最後導致一連串悲劇。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "故事大意"
+    },
+    {
+      "items": [
+        {
+          "label": "",
+          "value": "主標題是【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "1.名字背後帶著取名之人的【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "小說的怪物其實【　　　】名字，可以解讀為他從未得到他人的認同與祝福。(單選)\n①有 ②沒有"
+        },
+        {
+          "label": "",
+          "value": "2.小說中文譯名是科學怪人，有人認為科學怪人是【　　　】，也有人是【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "副標題是【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "1.普羅米修斯是希臘神話的神，他【　　　】觸犯禁忌，不得善終。作者把弗蘭肯斯坦比喻為「現代普羅米修斯」，可能意味弗蘭肯斯坦同樣觸犯了【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "2.人類是否能【　　　】？引發後世讀者熱烈討論。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "書名意義"
     },
     {
       "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①小米酒是原住民族的日常飲品。 ②小米酒是連結祖靈、土地與族人的重要媒介。 □③小米酒是族人賺錢的重要商品。"
-    },
-    {
-      "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①釀小米酒的過程很隨意，沒有特別規定。 ②釀小米酒的過程非常講究，充滿對天地、祖靈與族人的禮敬。 □③釀小米酒的過程只有女性可以參與。"
-    },
-    {
-      "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①小米酒在儀式中只是一種飲料。 ②小米酒在不同族群的儀式中，都代表連結與祝福。 □③小米酒在儀式中是用來慶祝豐收的。"
-    },
-    {
-      "kind": "pair",
-      "label": "結論",
-      "value": "小米酒不僅是酒，更承載著深厚的文化與情感。 【　　　】"
+      "label": "結語",
+      "value": "科學的發展是不是也該有【　　　】的界線？"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

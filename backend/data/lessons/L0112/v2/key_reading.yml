@@ -1,0 +1,21 @@
+lesson_uid: L0112
+version_id: v2
+passage: 「你的任務之一，」他把平板遞給她，「就是每天巡檢數據：看哪一區的酸鹼值或肥料配方有偏差、哪一層的溫濕度曲線不正常。能自己處理的問題就儘快處理，必要時回報，讓值班同事去校󠇡正或調整配方。」宇晴盯著平板看，螢幕上跳動的數字像心電圖，她緊張的心情，忽然踏實了幾分：原來讀圖表、看趨勢、抓異常也是在種菜。
+start_text: 「你的任務之一，」他把平板遞給她，「就是每天巡檢
+extent_chars: 148
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 8
+  cell_paragraphs: 8

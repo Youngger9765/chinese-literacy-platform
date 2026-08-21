@@ -1,0 +1,142 @@
+lesson_uid: L0038
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 洄游
+    definition: 魚類為了繁殖或生存，在不同水域之間移動的行為。
+  - index: 2
+    word: 命脈
+    definition: 維持生存與發展最重要的事物。
+  - index: 3
+    word: 萬頭鑽動
+    definition: 形容很多人或動物擠在一起移動的樣子。
+  - index: 4
+    word: 本能
+    definition: 不用學就會的反應或行為。
+  - index: 5
+    word: 承載
+    definition: 承受或運送人、物，也可指包含情感、責任等抽象事物。
+  - index: 6
+    word: 暢行無阻
+    definition: 順利通行，沒有阻礙。
+  - index: 7
+    word: 與生俱來
+    definition: 出生時就已具備的，天生的。
+  - index: 8
+    word: 契機
+    definition: 讓事情開始、改變或發展的關鍵機會。
+  - index: 9
+    word: 棲息地
+    definition: 動植物生長、生活的自然環境。
+  - index: 10
+    word: 閘門
+    definition: 設在水道中，可以升降或開合，用來控制水流的裝置。
+  - index: 11
+    word: 滯留
+    definition: 停留在某處，無法離開或繼續前進。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 本能
+    B: 與生俱來
+    C: 承載
+    D: 暢行無阻
+    E: 萬頭鑽動
+    F: 洄游
+    G: 滯留
+    H: 棲息地
+    I: 契機
+    J: 命脈
+  questions:
+  - index: 1
+    text: 這座老橋已無法（　）大量車輛的重量。
+    answer: C
+  - index: 2
+    text: 砍伐森林會破壞許多生物的（　），使牠們失去生存的地方。
+    answer: H
+  - index: 3
+    text: 他因颱風（　）在機場兩天，無法返家。
+    answer: G
+  - index: 4
+    text: 半導體產業在臺灣經濟中十分重要，可說是臺灣經濟的（　）。
+    answer: J
+  - index: 5
+    text: 他展現出（　）的節奏感，即使沒學過打鼓，也能輕鬆跟上節拍。
+    answer: B
+  - index: 6
+    text: 演唱會開場前，大巨蛋外已經（　），密密麻麻的人潮擠滿四周。
+    answer: E
+  - index: 7
+    text: 有了通行證後，他們便能（　）的進出原本禁止通行的管制區。
+    answer: D
+  - index: 8
+    text: 那次運動會的成功經驗成為他全心投入田徑競技的重要（　）。
+    answer: I
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列哪一個句子中，語詞的使用錯誤？
+    options:
+      A: 海邊擠滿了遊客，放眼望去真是「萬頭鑽動」，十分熱鬧
+      B: 這條街道拓寬整修後變得「暢行無阻」，再也不會塞車了
+      C: 公車每天要「承載」大量乘客，因此需要定期檢查保養
+      D: 他經過長時間練習，終於培養出「與生俱來」的節奏感
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 文中提到「代表魚兒塞車了」，「魚兒塞車」是指什麼情況？
+    options:
+      A: 暗示裝置的聲音特別，凸顯魚門鈴設計的新穎創意
+      B: 用門鈴意象說明網站功能，讓讀者了解按鈴後會開閘
+      C: 用門鈴首尾呼應，邀請讀者以有創意的方式參與關心生態保育
+      D: 透過聲音營造輕快感，讓讀者感覺文章讀起來順暢
+    rationale: 作者透過這種首尾呼應，用魚門鈴意象，邀請讀者也能像按下門鈴一樣採取行動關心生態
+  - index: 4
+    answer: B
+    stem: 本文的主旨是什麼？
+    options:
+      A: 強調興建堤防、水閘對環境的危害，呼籲拆除多餘的水閘設施
+      B: 介紹荷蘭人如何以創意幫助魚群洄游、並讓人們可以參與保育
+      C: 說明荷蘭運河的歷史與功能，展現人類水利工程的智慧成果
+      D: 討論魚類洄游的習性與面臨的挑戰，提醒大眾關注水域生態
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 下列哪項做法的理念和本文介紹的「魚門鈴」最相近？
+    options:
+      A: 在高速公路架設野生動物天橋，讓動物安全穿越道路
+      B: 規定每年魚類產卵季節禁止關閉任何水閘，讓河道保持暢通
+      C: 使用聲波裝置驅趕捕食魚類的鳥類，減少魚群天敵
+    rationale: 魚門鈴的精神在於運用巧思與科技幫助動物克服人為障礙，並保護生態
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 千萬雙眼緊盯水底直播  魚群遷徙幫按門鈴
+    duration_seconds: 117
+    source: 大愛新聞
+  - index: 2
+    title: 荷蘭學者運河安裝「魚門鈴」 協助魚群洄游產卵－民視新聞
+    duration_seconds: 84
+    source: 民視新聞網
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

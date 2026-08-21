@@ -1,0 +1,24 @@
+lesson_uid: L0065
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 「抽筋」好痛苦!! 淺談抽筋原因與預防，絕對不只有缺鈣! | 三分鐘聊醫學EP29
+    duration: (3:21)
+    source: 蒼藍鴿的醫學天地
+    qr_code: true
+  - index: 2
+    title: 【常會運動傷害嗎？ 職能治療師教你最新處理準則！PEACE & LOVE】
+    duration: (7:15)
+    source: 米蔚 Life & Health｜健康生活全方位
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/2miUh3veYgU
+    url_source: 總表0816「4.影片連結」年級6課次26
+  - index: 2
+    url: http://youtu.be/Ep3cD4zcCDs
+    url_source: 總表0816「4.影片連結」年級6課次26

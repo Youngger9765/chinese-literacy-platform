@@ -1,114 +1,147 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 9,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "會飛的小種子",
+      "跟著太陽轉的花苞",
+      "滾來滾去的草球",
+      "會飛的小種子"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "堅持到底的棒球人生──周思齊",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "文章重點表",
+      "value": ""
     },
     {
-      "label": "背景",
-      "value": "",
       "interactive_type": "display",
+      "label": "植物的特性",
       "sub_rows": [
         {
-          "label": "二",
-          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "會飛的小種子",
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "跟著太陽轉的花苞",
+          "value": "向日葵花苞整天追逐太陽，具有【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "滾來滾去的草球",
+          "value": "風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "挑戰",
-      "value": "",
       "interactive_type": "display",
+      "label": "科學家的設計",
       "sub_rows": [
         {
-          "label": "三\n、\n四",
-          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "會飛的小種子",
+          "value": "只有【　　　】翅膀的飛行機器人"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "跟著太陽轉的花苞",
+          "value": "自動調整角度的【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "滾來滾去的草球",
+          "value": "風吹時，會滾來滾去的【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "努力",
-      "value": "",
       "interactive_type": "display",
+      "label": "功能",
       "sub_rows": [
         {
-          "label": "四",
-          "value": "1.設法逃脫：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.堅持信念：不願違背【　　　】，也不願辜負支持他的【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "成就",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
+          "interactive_type": "fill_blank",
+          "label": "會飛的小種子",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。"
+        },
         {
-          "label": "五\n、\n六",
-          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "跟著太陽轉的花苞",
+          "value": "仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "滾來滾去的草球",
+          "value": "探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
         }
-      ]
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "堅持到底的棒球人生──周思齊",
+  "title": "文章重點表",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "背景",
       "items": [
         {
-          "label": "二",
-          "value": "1.高中：學校只注重【　　　】成績。\n2.大學：進入重視學業的【　　　】就讀，提升語言與專業能力。"
+          "label": "會飛的小種子",
+          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】"
+        },
+        {
+          "label": "跟著太陽轉的花苞",
+          "value": "向日葵花苞整天追逐太陽，具有【　　　】"
+        },
+        {
+          "label": "滾來滾去的草球",
+          "value": "風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "植物的特性"
     },
     {
-      "kind": "section_block",
-      "section": "挑戰",
       "items": [
         {
-          "label": "三\n、\n四",
-          "value": "1.進入職棒第三年才當上【　　　】球員，卻被黑道掌控，被要求【　　　】。\n2.來自黑道的威脅：掌握球員的【　　　】。\n3.來自黑道的利誘：高額的簽約金及【　　　】。"
+          "label": "會飛的小種子",
+          "value": "只有【　　　】翅膀的飛行機器人"
+        },
+        {
+          "label": "跟著太陽轉的花苞",
+          "value": "自動調整角度的【　　　】"
+        },
+        {
+          "label": "滾來滾去的草球",
+          "value": "風吹時，會滾來滾去的【　　　】"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "科學家的設計"
     },
     {
-      "kind": "section_block",
-      "section": "努力",
       "items": [
         {
-          "label": "四",
-          "value": "1.設法逃脫：假裝不在房間、假裝【　　　】逃跑、躲藏。\n2.堅持信念：不願違背【　　　】，也不願辜負支持他的【　　　】。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "成就",
-      "items": [
+          "label": "會飛的小種子",
+          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。"
+        },
         {
-          "label": "五\n、\n六",
-          "value": "1.獲得最佳十人獎中的最佳【　　　】。\n2.和中信兄弟拿下了【　　　】。\n3.成為少數職棒生涯【　　　】年的球員。\n4.創辦了【　　　】基金會，幫助【　　　】地區的孩子。\n5.考上研究所，研究臺灣棒球的【　　　】和文化。"
+          "label": "跟著太陽轉的花苞",
+          "value": "仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。"
+        },
+        {
+          "label": "滾來滾去的草球",
+          "value": "探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "功能"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "二",
-      "三\n、\n四",
-      "四",
-      "五\n、\n六"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

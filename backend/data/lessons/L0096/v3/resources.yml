@@ -1,0 +1,33 @@
+lesson_uid: L0096
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 吐瓦魯外長站海水中發表演說 對COP26沉痛呼籲
+    duration: (2:17)
+    source: 公視新聞網
+    qr_code: true
+  - index: 2
+    title: 國家即將消失海平面 吐瓦魯兒童活在恐懼中
+    duration: (9:28)
+    source: TVBS文茜的世界周
+    qr_code: true
+    source_note: 「TVBS文茜的世界周」原稿如此（一般寫「文茜的世界周報」），未補字。
+  - index: 3
+    title: Metaverse何謂元宇宙？數位分身虛擬世界互動
+    duration: (7:06)
+    source: 雲端世界
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/lg3KQcFwdlA
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/d1Ro10IOZEI
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）
+  - index: 3
+    url: http://youtu.be/jpV8xXukp64
+    url_source: 總表0816「4.影片連結」年級7課次27（⚠️課名與課程不符，仍依課次採用）

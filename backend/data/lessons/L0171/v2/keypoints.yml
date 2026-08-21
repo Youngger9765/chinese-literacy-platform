@@ -1,0 +1,60 @@
+keypoints:
+  lesson: 體-L5
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 架構
+    value: 內容
+    blanks: []
+  - label: 引言
+    value: 日常生活中，我們腦袋中有眾多念頭，且多半是（□①正面  □②負面），使我們充滿（□①自信  □②懷疑）。
+    blanks: []
+  - label: 問題描述
+    sub_rows:
+    - sub_label: 負面念頭舉例
+      template: 影響
+      blanks: []
+    - sub_label: 1.「我很爛」
+      template: 遇到事情容易__
+      blanks:
+      - answer: 退縮
+        hint: ''
+    - sub_label: 2.「我只會添麻煩」
+      template: 覺得自己是__，不敢向他人__
+      blanks:
+      - answer: 負擔
+        hint: ''
+      - answer: 求助
+        hint: ''
+    - sub_label: 3.「都是我的錯」
+      template: 遭遇挫折容易過度__
+      blanks:
+      - answer: 自責
+        hint: ''
+  - label: 問題描述
+    value: 如果抗拒這些念頭，它們就會（□①消失  □②放大）。越要自己不去想，念頭反而越清晰，這就是__效應。
+    blanks:
+    - answer: 白熊
+      hint: ''
+  - label: 解決方法
+    sub_rows:
+    - sub_label: 1.召喚藍海豚
+      template: 運用方法轉移__，讓注意力回到__正在做的、最重要的事上。
+      blanks:
+      - answer: 注意力
+        hint: ''
+      - answer: 當下
+        hint: ''
+    - sub_label: 2.念頭只是路過
+      template: 提醒自己──「這只是__，不是真的」，重新選擇回應念頭的方法。
+      blanks:
+      - answer: 念頭
+        hint: ''
+  - label: 結語
+    value: 下次又浮現負面想法時，記得把__拉回當下，只要（□①看見  □②相信）那些念頭，不必跟隨它。
+    blanks:
+    - answer: 注意力
+      hint: ''

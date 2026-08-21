@@ -30,6 +30,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useWordSearchProgress } from './useWordSearchProgress';
 import { PlacedWord } from './wordSearchGrid';
+import NextStepFooter from '../learning/NextStepFooter';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,6 +59,33 @@ interface WordSearchDemoRuntime {
 interface DemoCursor {
   x: number;
   y: number;
+}
+
+// 語詞書寫練習／難字挑戰 (#2752 Phase 3) — the worksheet's own last practice item
+// (usually 大題九, right after 詞語複習/大題八). Same "copy it, cover it, self-test,
+// check the box" exercise the worksheet describes — not graded (原稿本來就是學生
+// 自填檢查，no answer key to compare against), so this is a checklist, not a quiz.
+function WritingPracticeSection({ label, instruction, words }: { label?: string; instruction?: string; words: string[] }) {
+  if (!words || words.length === 0) return null;
+  return (
+    <div className="rounded-2xl border border-surface-container-high bg-surface-container-lowest px-6 py-5 space-y-3">
+      <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+        {label || '語詞書寫練習'}
+      </span>
+      {instruction && <p className="text-sm text-on-surface-variant">{instruction}</p>}
+      <ul className="flex flex-wrap gap-3">
+        {words.map((w, i) => (
+          <li
+            key={i}
+            className="px-4 py-2 rounded-xl bg-surface border border-surface-container-high text-lg font-bold text-on-surface"
+          >
+            {w}
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-on-surface-variant">先看著寫一遍，蓋起來考自己，再檢查是否寫對了。</p>
+    </div>
+  );
 }
 
 function DemoBubble({ children }: { children: React.ReactNode }) {
@@ -371,12 +399,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       <div className="flex flex-col items-center justify-center py-16 gap-6 text-gray-500">
         <div className="text-5xl" aria-hidden="true">📚</div>
         <p className="text-base font-medium">本課無語詞資料，無法產生方格遊戲</p>
-        <button
-          onClick={() => onFinish(0)}
-          className="mt-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm min-h-[44px]"
-        >
-          繼續下一步
-        </button>
+        <NextStepFooter onNext={() => onFinish(0)} label="繼續下一步" />
       </div>
     );
   }
@@ -617,6 +640,16 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       </div>
       </div>
 
+      {story.writingPractice && (
+        <div className="max-w-2xl mx-auto w-full">
+          <WritingPracticeSection
+            label={story.writingPractice.label}
+            instruction={story.writingPractice.instruction}
+            words={story.writingPractice.words}
+          />
+        </div>
+      )}
+
       {/* Completion — fixed bottom CTA */}
       {finished && (
         <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
@@ -632,14 +665,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                 >
                   重新練習
                 </button>
-                <button
-                  onClick={() => onFinish(finishedElapsed)}
-                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-                >
-                  繼續下一步
-                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                </button>
+                <NextStepFooter onNext={() => onFinish(finishedElapsed)} label="繼續下一步" />
               </>
             )}
           </div>

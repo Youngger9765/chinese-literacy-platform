@@ -1,0 +1,51 @@
+keypoints:
+  lesson: G5-L10
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 二、三
+    sub_rows:
+    - sub_label: 看見自己的__和喜歡的人聊得很開心
+      template: A.覺得很正常、不值得__B.覺得胸口__、不是滋味
+      blanks:
+      - answer: 朋友
+        hint: ''
+      - answer: 放在心上
+        hint: ''
+      - answer: 悶悶
+        hint: ''
+  - label: 四
+    sub_rows:
+    - sub_label: 轉身離開現場，回到教室座位
+      template: Ａ.不想再看下去B.__卻無法停止
+      blanks:
+      - answer: 思緒
+        hint: ''
+  - label: 五
+    sub_rows:
+    - sub_label: 朋友阿葉來關心
+      template: Ａ.認為自己沒有回應阿葉，太__B.認為阿葉忽略自己的心情，所以不想  __
+      blanks:
+      - answer: 小氣
+        hint: ''
+      - answer: 開口回應
+        hint: ''
+  - label: 六
+    sub_rows:
+    - sub_label: 獨自反思
+      template: Ａ.心情亂成一團，心裡莫名__B.不想對朋友__、不想承認因為阿葉__
+      blanks:
+      - answer: 煩躁
+        hint: ''
+      - answer: 擺臭臉
+        hint: ''
+      - answer: 吃醋
+        hint: ''
+  - label: 統整
+    value: 作者看見__和喜歡的人聊天，心裡不是滋味，卻又不想承認自己在吃醋。作者寫下這篇小日記，是想抒發心情 （□①煩躁混亂  □②寂寞無奈）的感受。
+    blanks:
+    - answer: 朋友/阿葉
+      hint: ''
+  title: 感情小日記3──吃醋的滋味

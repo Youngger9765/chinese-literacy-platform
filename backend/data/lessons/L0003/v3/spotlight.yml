@@ -1,0 +1,119 @@
+lesson_uid: L0003
+version_id: v3
+section_no: 五
+spotlight:
+  strategy_name: 摘要策略──找小主題與重要細節
+  strategy_type: summarizing
+  blocks:
+  - type: concept_box
+    text: 這是一篇說明文，主要說明「大自然有許多線索可以幫助人們預測天氣」，作者舉了一些例子，來支持這個觀點。閱讀這樣的文章，你只要抓住這篇文章主要想表達什麼？文章舉了哪些例子來支撐？這些例子有沒有重要的細節？你就抓到文章的重點囉！
+  - type: guide
+    text: 接下來，我們先來練習找到文章舉了哪些例子？請勾選你覺得比較清楚的答案。
+  - type: single
+    label: 第三段
+    prompt: 第三段：
+    options:
+      1: 蜘蛛
+      2: 蜘蛛結網
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流只留下未勾選項的 □
+  - type: single
+    label: 第五段
+    prompt: 第五段：
+    options:
+      1: 蟋蟀
+      2: 蟋蟀叫聲
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第六段
+    prompt: 第六段：
+    options:
+      1: 毛小孩
+      2: 毛小孩的行為
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第七段
+    prompt: 第七段：
+    options:
+      1: 天空
+      2: 日暈和月暈
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: 你發現了嗎？其實這四段，1和2的答案都可以，但2更具體、清楚喔！
+  - type: guide
+    text: 找到例子後，接下來把重要的細節找出來，你就可以抓到文章的重點囉！要怎麼找到重要的細節呢？你要扣住主題，來判斷重要細節。這一課主要是講「推測天氣」，所以我們要把和「推測天氣」有關的重要描述找出來。
+  - type: guide
+    text: 我們先用「第三段──蜘蛛結網」試試看：
+  - type: multi
+    label: 第三段示範 ❶
+    prompt: ❶找重要細節：如何從「蜘蛛結網」推測具體天氣？（4選2）
+    options:
+      1: 蜘蛛的絲纖細到幾乎隱形，又怕風、又怕雨。
+      2: 如果即將下雨，牠們察覺空氣中的濕度，就不會浪費力氣結一張會被雨打壞的大網。
+      3: 當你看到蜘蛛在結網時，代表空氣是乾的，天氣會穩定，可能還會放晴。
+      4: 如果你發現蜘蛛網縮得很小，甚至整張網都不見了，也許就是快要下雨的信號。
+    answer:
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（圖形）
+  - type: single
+    label: 第三段示範 ❷
+    prompt: ❷精簡：請將勾選出的答案，歸納成一句話
+    options:
+      1: 蜘蛛的網非常脆弱，要小心保護。
+      2: 蜘蛛結大網代表天氣晴，縮小或消失則是要下雨。
+      3: 蜘蛛覓食方式會因濕度不同而改變。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: ◎小試身手：
+  - type: sub_block
+    label: 1.第五段──蟋蟀叫聲
+    items:
+    - type: single
+      index: 1
+      prompt: ❶找重要細節：如何從「蟋蟀叫聲」推測具體天氣？（3選1）
+      options:
+        1: 有位農夫宣稱，他可以從蟋蟀叫聲的頻率，判斷現在的氣溫大概幾度。
+        2: 科學家的確發現氣溫越高，蟋蟀叫得越快。
+        3: 如果錄下草叢裡蟋蟀的叫聲，看看8秒可以叫幾聲，把這個數字加5，大概就是現在的氣溫。
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形）
+      reminder_box:
+        title: 小提醒：
+        text: 這三個句子看起來都和推測天氣有關，但是如果要推測具體天氣的話，第三句比較合適。
+    - type: single
+      index: 2
+      prompt: ❷精簡：請將勾選的答案，再精簡。
+      options:
+        1: 記下蟋蟀叫聲就能知道明天會不會下雨。
+        2: 蟋蟀叫聲快慢只和牠心情好壞有關。
+        3: 數蟋蟀 8秒內的叫聲，再加5，就能估算當前氣溫。
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形）
+  - type: sub_block
+    label: 2.第七段──天空
+    items:
+    - type: single
+      index: 1
+      prompt: ❶找重要細節：如何從「日暈、月暈」推測具體天氣？（3選1）
+      options:
+        1: 看到日暈表示夜裡會下雨，看到月暈白天就會起風。
+        2: 我們偶爾會覺得今天的星星或遠山好像變近了，歷歷在目。
+        3: 所謂「暈ㄩㄣˋ」就是圍繞著太陽或月亮的光環。
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形）
+    - type: single
+      index: 2
+      prompt: ❷精簡：請將勾選的答案，再精簡。
+      options:
+        1: 日暈夜雨，月暈日風。
+        2: 天空出現光環代表天氣長期穩定。
+        3: 看到月亮有暈就一定會下一整天的大雨。
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形）
+  - type: guide
+    text: 恭喜你，你已經完成任務了，以後看到長篇文字時，先找出主題，再找出重要的細節，最後用一句話精簡內容，你就能很快抓住文章重點囉。

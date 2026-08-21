@@ -1,0 +1,122 @@
+lesson_uid: L0113
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 家喻戶曉
+    definition: 幾乎每家每戶都知道，形容非常有名。
+  - index: 2
+    word: 瘦骨嶙峋
+    definition: 形容人很瘦，骨頭都凸出來，多指生病或受苦。
+  - index: 3
+    word: 叱吒風雲
+    definition: 形容一個人氣勢很強、影響力很大。
+  - index: 4
+    word: 形容枯槁
+    definition: 枯槁：乾枯、沒有生氣。形容人很憔悴、消瘦，精神很差。
+  - index: 5
+    word: 不言而喻
+    definition: 不用特別解釋，就能明白。
+  - index: 6
+    word: 設身處地
+    definition: 把自己放到別人的立場想，理解對方的處境與感受。
+  - index: 7
+    word: 臨終
+    definition: 臨：接近；終：結束。生命快要結束、接近死亡的時候。
+  - index: 8
+    word: 迫在眉睫
+    definition: 事情非常緊急，立刻就要處理。
+  - index: 9
+    word: 非黑即白
+    definition: 把事情看成只有兩種結果：不是對就是錯、不是好就是壞，忽略中間的灰色地帶。
+  - index: 10
+    word: 覆水難收
+    definition: 事情一旦發生就很難挽回，像潑出去的水收不回來。
+  - index: 11
+    word: 莫衷一是
+    definition: 意見分歧，無法判定哪一個最恰當，也無法形成一致結論。
+  - index: 12
+    word: 眾說紛紜
+    definition: 大家提出許多不同的說法或意見。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 叱吒風雲
+    B: 家喻戶曉
+    C: 形容枯槁
+    D: 不言而喻
+    E: 臨終
+    F: 設身處地
+    G: 非黑即白
+    H: 迫在眉睫
+    I: 眾說紛紜
+    J: 莫衷一是
+  questions:
+  - index: 1
+    text: 他年輕時在球場上（　），帶隊拿下好幾次全國冠軍。
+    answer: A
+  - index: 2
+    text: 報告明天要交，時間（　），我們決定今晚熬夜做報告。
+    answer: H
+  - index: 3
+    text: 和父母家人意見不同時，我試著（　）理解他們的想法與立場。
+    answer: F
+  - index: 4
+    text: 他照顧住院的家人好幾週，整個人（　），看起來很累。
+    answer: C
+  - index: 5
+    text: 事件真相尚未釐清，外界對原因（　），各有各的說法。
+    answer: I
+  - index: 6
+    text: 這件事還在調查中，別用（　）的想法，過早把人判定成好或壞。
+    answer: G
+  - index: 7
+    text: 題目做得越多越熟練，練習的重要（　）。
+    answer: D
+  - index: 8
+    text: 這部動畫在臺灣（　），大家對它的經典情節都能舉出例子。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 第三段指出臺灣已有安寧緩和醫療與《病人自主權利法》，並鼓勵民眾預先決定醫療選擇。作者最想強調的重點是什麼？
+    options:
+      A: 很多求死念頭，可能來自疼痛與孤單等生不如死的處境
+      B: 是否贊成參考瑞士的制度來處理臨終病人的選擇
+      C: 對「自主與尊嚴」和「開放後風險」的取捨不同
+      D: 是否認為只要程序嚴格就能完全避免制度被濫用
+    rationale: 第2題解析：這句話的重點在「如果資源到位」，病人就不會只剩「非黑即白」的極端選項
+  - index: 4
+    answer: D
+    stem: 作者先用傅達仁案例，再進行三種類型的分類，接著呈現三方立場。這種安排最可能是為了什麼？
+    options:
+      A: 先製造情緒衝突，再讓讀者只接受作者強調的結論
+      B: 先描寫人物形象，再把他塑造成唯一正確的選擇榜樣
+      C: 先解釋法律條文細節，再用案例補充艱深的專業內容
+      D: 先建立共感與問題感，再用概念與觀點整理複雜議題
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 下列哪一項最能概括本文主旨？
+    options:
+      A: 以傅達仁案例，引出安樂死爭議並分析多方立場與制度困境
+      B: 批判臺灣政府消極無為，讓末期病人只能出國尋求協助自殺
+      C: 介紹傅達仁的生平事蹟，凸顯他對臨終病人生命決定的訴求
+      D: 提醒民眾不要害怕談死亡，要早一點做重要決定、預立遺囑
+    rationale: 本文核心是用案例引出議題，進一步定義分類、說明臺灣現況、呈現支持/反對/保留三方觀點，最後回到制度設計與價值拉扯
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok

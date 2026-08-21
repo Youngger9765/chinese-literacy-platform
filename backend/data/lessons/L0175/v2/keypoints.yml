@@ -1,0 +1,65 @@
+keypoints:
+  lesson: 體-L9
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 類型
+    sub_rows:
+    - sub_label: 成長型思維
+      template: 固定型思維
+      blanks: []
+  - label: 情境
+    sub_rows:
+    - sub_label: 打籃球時沒投進會□①鍥而不捨□②原地躺平
+      template: 遇到練習題不會就□①鍥而不捨□②原地躺平
+      blanks: []
+  - label: 比較1：大腦能力
+    sub_rows:
+    - sub_label: □①天生決定 □②越練越強
+      template: □①天生決定 □②越練越強
+      blanks: []
+  - label: 比較2：看到他人的成就
+    sub_rows:
+    - sub_label: □①受到激勵 □②感到挫折
+      template: □①受到激勵 □②感到挫折
+      blanks: []
+  - label: 比較3：遭遇挫折時
+    sub_rows:
+    - sub_label: □①想藏起來，不被發現□②找到可以加強的地方
+      template: □①想藏起來，不被發現□②找到可以加強的地方
+      blanks: []
+  - label: 目標
+    sub_rows:
+    - sub_label: 不斷學習，追求成長
+      template: 遠離__，確保__。
+      blanks:
+      - answer: 挑戰
+        hint: ''
+      - answer: 安全
+        hint: ''
+  - label: 比喻
+    sub_rows:
+    - sub_label: 像是大腦在__
+      template: 像是大腦進入__。
+      blanks:
+      - answer: 重訓
+        hint: ''
+      - answer: 省電模式
+        hint: ''
+  - label: 小結
+    value: 如果期待看見成長、突破失敗，就需要（□①成長型思維　□②固定型思維）。
+    blanks: []
+  - label: 舉例
+    value: 1.周思齊：失敗是另一次__的起點，要從失敗中__、調整。2.陳冠宇：相信每次的失敗都有__，將失敗視為檢視自己的__。
+    blanks:
+    - answer: 成功
+      hint: ''
+    - answer: 修正
+      hint: ''
+    - answer: 意義
+      hint: ''
+    - answer: 良機
+      hint: ''
+  title: 成長型思維：翻轉失敗的關鍵

@@ -1,0 +1,21 @@
+lesson_uid: L0026
+version_id: v2
+passage: 我盯著螢幕，思緒變得混亂。每次遇到這樣的情境，我總是會猶豫：到底要堅持追求自己喜歡的人，但可能沒有結果，還是要選擇喜歡自己的人，也許會更幸福？當下有個念頭閃現：不如答應他的告白吧，這樣至少不用擔心受傷，畢竟他對我很好，和他在一起應該會很輕鬆吧？或許……我也可以試著喜歡他？可是，不管我怎麼努力說服自己，心裡卻始終沒有任何悸動。我低下頭，輕輕嘆了口氣——勉強自己接受一段沒有心動的關係，最後只會讓彼此都不快樂吧。
+start_text: 我盯著螢幕，思緒變得混亂。每次遇到這樣的情境，我
+extent_chars: 205
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 6
+  cell_paragraphs: 6

@@ -1,0 +1,21 @@
+lesson_uid: L0069
+version_id: v2
+passage: 兩組一直無法對班服方案達成共識，台上的氣氛一度顯得有些緊繃。這時，擔任會議主席的班長說話了：「謝謝兩組代表的精采介紹，也謝謝同學們提供了不同方向的分析。我們討論的目的，不是要爭辯出一個人人滿意的『超完美決策』，而是做出班上『比較多人贊同』的決策，也不能只看哪一邊人比較多，重要的是找出多數人能接受、也不讓少數同學為難的方案。剛才大家在意的不只有美感，還包括家庭負擔、舒適和紀念價值。兩組的方案看起來差很多，我們有可能找出一個兼顧這些需求的折衷方案嗎？」
+start_text: 兩組一直無法對班服方案達成共識，台上的氣氛一度顯
+extent_chars: 226
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 9

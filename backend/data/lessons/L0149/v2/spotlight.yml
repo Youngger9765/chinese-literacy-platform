@@ -1,0 +1,57 @@
+spotlight:
+  lesson: G9-L6
+  strategy_name: 圖表繪製與判讀-長條圖與圓形圖
+  strategy_type: image_text
+  blocks:
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 請在圖❸畫出阿美族的比率長條圖。
+  - type: guide
+    text: 學生版-圖❸藍色長條要去除
+  - type: free_text
+    prompt: 2.圓形圖：
+  - type: guide
+    text: 將統計資料用百分率(部分÷全部)表示，每個「扇形」代表某項目在全體中所占的比率，整個圓形是100%，代表全體。
+  - type: guide
+    text: ※以課文第一段阿美族參與東京奧運國手的比率為例：
+  - type: free_text
+    prompt: ❶算出百分比：
+  - type: guide
+    text: 阿美族7位，全部國手68位，7÷68=0.103=10.3%。
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：圖表繪製與判讀
+  - type: free_text
+    prompt: ❹在正下方寫上「阿美族人占奧運國手人數比率圓形圖」。
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 68名奧運國手中，閩南人共34人，先計算出閩南人在奧運國手中佔的百分比，再畫出所占比率。(50%)
+  - type: guide
+    text: 閩南人占奧運國手人數比率圓形圖閩南人占奧運國手人數比率圓形圖
+  - type: guide
+    text: 106年國中會考國文科第22題106年國中會考國文科第22題3.小試身手：
+  - type: free_text
+    prompt: (1)周老師在黑板上寫道：「天下所有的人都會羨慕別人，絕大多數的人曾經被別人羨慕。」請問下列哪一張圖表最能表示周老師的這句話?
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 占天下人口百分比(%)(A)占天下人口百分比(%)(B)占天下人口百分比(%)(C)占天下人口百分比(%)(D)占天下人口百分比(%)(A)占天下人口百分比(%)(B)占天下人口百分比(%)(C)占天下人口百分比(%)(D)
+  - type: guide
+    text: 答案：(   A    )答案：(   A    )
+  - type: free_text
+    prompt: (2)根據聯合國《2019年永續發展目標報告》內容：全球曾有過伴侶的15至49歲女性中，其中有18%在過去12個月經歷過來自伴侶的身體或性暴力。
+  - type: free_text
+    prompt: ❶請就文中敘述的資訊，畫出圓形圖。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 標題：全球曾有過伴侶的15-49歲女性，在過去一年經歷過伴侶的身體或性暴力。標題：全球曾有過伴侶的15-49歲女性，在過去一年經歷過伴侶的身體或性暴力。
+  - type: guide
+    text: 有6.9%的台大學生來自大安區，超出了我們對該群體的預期。有6.9%的台大學生來自大安區，超出了我們對該群體的預期。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。七閱讀理解七閱讀理解

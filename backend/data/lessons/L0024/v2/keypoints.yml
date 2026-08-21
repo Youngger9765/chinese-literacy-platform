@@ -1,0 +1,52 @@
+keypoints:
+  lesson: G5-L12
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 背景
+    sub_rows:
+    - sub_label: 二
+      template: 1.出身：__縣光復鄉，__族人2.高中進入__就讀，只能待在  __練習
+      blanks:
+      - answer: 花蓮
+        hint: ''
+      - answer: 阿美
+        hint: ''
+      - answer: 高苑工商
+        hint: ''
+      - answer: 三軍
+        hint: ''
+  - label: 挑戰
+    sub_rows:
+    - sub_label: 三、四
+      template: 1.三軍負責__：整理場地、處理積水。2.練球時只有__，球員自己練習。3.不被看重，內心感到__與不甘心。4.看見實力差距，發現「__，天外有天」。5.被教練勸退，也被學長說（□①天賦　□②努力）不夠
+      blanks:
+      - answer: 打雜
+        hint: ''
+      - answer: 菜單
+        hint: ''
+      - answer: 委屈
+        hint: ''
+      - answer: 人外有人
+        hint: ''
+  - label: 努力
+    sub_rows:
+    - sub_label: 四、五
+      template: 調適心態：先__，再以__的精神努力。2.實際行動：把握可以練習的機會，回宿舍也不__
+      blanks:
+      - answer: 認輸
+        hint: ''
+      - answer: 不服輸
+        hint: ''
+      - answer: 懈怠
+        hint: ''
+  - label: 成就
+    sub_rows:
+    - sub_label: 五
+      template: 於高二暑假，升上__
+      blanks:
+      - answer: 一軍
+        hint: ''
+  title: 堅持到底的棒球人生──周思齊

@@ -1,0 +1,21 @@
+lesson_uid: L0089
+version_id: v2
+passage: 第一組有三位同學，分別扮演父親、兒子和茶房。演的是父親起先囑託茶房陪兒子同去，後來改變主意，決定親自送兒子去浦口車站的情節。演出時，父親對茶房鉅細靡遺的交代，兒子則在一旁抱胸而立，表現出不󠇡置可否的樣子。演完後，老師在黑板上畫出三人互動的示意圖。
+start_text: 第一組有三位同學，分別扮演父親、兒子和茶房。演的
+extent_chars: 123
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 14
+  cell_paragraphs: 14

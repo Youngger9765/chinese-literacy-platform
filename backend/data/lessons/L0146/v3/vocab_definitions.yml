@@ -1,0 +1,80 @@
+lesson_uid: L0146
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    匯流、典故、耐人尋味、歲月淘洗、溯源、遷徙、引人入勝、如出一轍、
+
+    司空見慣、接踵而來、
+
+    浩瀚無垠、天馬行空、
+
+    言歸正傳、開枝散葉。'
+  word_bank:
+  - 匯流
+  - 典故
+  - 耐人尋味
+  - 歲月淘洗
+  - 溯源
+  - 遷徙
+  - 引人入勝
+  - 如出一轍
+  - 司空見慣
+  - 接踵而來
+  - 浩瀚無垠
+  - 天馬行空
+  - 言歸正傳
+  - 開枝散葉
+  answers_printed: true
+  answer_carrier: 橘色（E97132）填在橫線上
+  items:
+  - index: 1
+    definition: 指成群的人或動物，從一個地方搬到另一個地方。
+    answer: 遷徙
+  - index: 2
+    definition: 指地名、人物、事件背後的歷史來源、語言根源或文化故事。
+    answer: 典故
+  - index: 3
+    definition: 往回找，找到事物最早的來源或原因。
+    answer: 溯源
+  - index: 4
+    definition: 匯：水流會合。指不同方向的水流、意見或資訊聚集在一起。
+    answer: 匯流
+  - index: 5
+    definition: 轍：車子走過的輪跡。比喻做法或想法幾乎一模一樣，像同一個輪子印出來的。
+    answer: 如出一轍
+  - index: 6
+    definition: 形容非常廣大，看不到邊際。
+    answer: 浩瀚無垠
+  - index: 7
+    definition: 把話題拉回原來要談的重點。
+    answer: 言歸正傳
+  - index: 8
+    definition: 內容很有吸引力，帶人走進美好的情境。
+    answer: 引人入勝
+  - index: 9
+    definition: 像樹木長出新的枝葉，比喻家族或事物逐漸繁衍、擴展。
+    answer: 開枝散葉
+  - index: 10
+    definition: 常常看到，已經覺得很平常、不奇怪。
+    answer: 司空見慣
+  - index: 11
+    definition: 踵：腳後跟；「接踵而來」指的是前一人的腳後跟，接著下一個人的腳後跟。比喻事情一件接著一件發生，連續不斷的到來。
+    answer: 接踵而來
+  - index: 12
+    definition: 比喻時間像水流一樣，不斷沖刷、篩選，造成了改變。
+    answer: 歲月淘洗
+  - index: 13
+    definition: 形容想法非常自由、不受拘束，富有想像力。
+    answer: 天馬行空
+  - index: 14
+    definition: 讓人越想越覺得有意思，值得細細品味、反覆思考。
+    answer: 耐人尋味

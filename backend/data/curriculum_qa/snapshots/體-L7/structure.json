@@ -1,0 +1,107 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 7,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題一",
+      "作者觀點",
+      "舉例",
+      "小結論"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "文章重點表",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "問題一",
+      "value": "「想很多」真的只有【　　　】嗎？"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者觀點",
+      "value": "1.「想很多」也可能是【　　　】關鍵\n2.「想很多」的人經常擁有認真、【　　　】、細心等特質，也是願意投注【　　　】和時間的人。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "舉例",
+      "value": "大聯盟知名投手【　　　】的【　　　】目標達成法──把目標再拆解成努力的方向"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "小結論",
+      "value": "將焦慮化成具體的【　　　】和【　　　】，「想很多」也可以是助力。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "問題二",
+      "value": "明明已經努力了，心裡還是會焦慮，怎麼辦？"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者觀點",
+      "value": "1.我們可以在心中組一支提振士氣的【　　　】\n2.把擔心化為對自己的【　　　】或【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "舉例",
+      "value": "奧運金牌舉重選手【　　　】在面對大賽時，會在心裡不斷為自己【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "總結",
+      "value": "慢慢練習去看見、去【　　　】這些情緒，讓焦慮，也能成為【　　　】。"
+    }
+  ],
+  "title": "文章重點表",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "問題一",
+      "value": "「想很多」真的只有【　　　】嗎？"
+    },
+    {
+      "kind": "pair",
+      "label": "作者觀點",
+      "value": "1.「想很多」也可能是【　　　】關鍵\n2.「想很多」的人經常擁有認真、【　　　】、細心等特質，也是願意投注【　　　】和時間的人。"
+    },
+    {
+      "kind": "pair",
+      "label": "舉例",
+      "value": "大聯盟知名投手【　　　】的【　　　】目標達成法──把目標再拆解成努力的方向"
+    },
+    {
+      "kind": "pair",
+      "label": "小結論",
+      "value": "將焦慮化成具體的【　　　】和【　　　】，「想很多」也可以是助力。"
+    },
+    {
+      "kind": "pair",
+      "label": "問題二",
+      "value": "明明已經努力了，心裡還是會焦慮，怎麼辦？"
+    },
+    {
+      "kind": "pair",
+      "label": "作者觀點",
+      "value": "1.我們可以在心中組一支提振士氣的【　　　】\n2.把擔心化為對自己的【　　　】或【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "舉例",
+      "value": "奧運金牌舉重選手【　　　】在面對大賽時，會在心裡不斷為自己【　　　】"
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "慢慢練習去看見、去【　　　】這些情緒，讓焦慮，也能成為【　　　】。"
+    }
+  ]
+}

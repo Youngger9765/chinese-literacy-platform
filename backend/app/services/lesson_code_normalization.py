@@ -76,19 +76,18 @@ def normalize_manifest_code(code: str) -> str:
 # Secondary slots: curriculum code → compound lesson_code in parsed YAML
 #   (these are skipped — content is accessible via the primary slot)
 MULTI_LESSON_PRIMARY: dict[str, str] = {
-    "G4-L20": "G4-L20-22",
-    "G5-L24": "G5-L24-25",
-    "G9-L15": "G9-L15-16",
-    "G9-L17": "G9-L17-19",
+    # EMPTY BY DESIGN (#2683).
+    #
+    # The first edition parsed several consecutive lessons into one compound YAML
+    # (`G4-L20-22.yml`), so a catalogue code had to be redirected to that file. The
+    # second edition extracts one file per lesson, and those compound stems do not
+    # exist — leaving the pairs in place rewrote three live codes (G4-L20, G5-L24,
+    # G9-L15) into filenames nothing can resolve.
 }
 
 MULTI_LESSON_MAP: dict[str, str] = {
-    "G4-L21": "G4-L20-22",
-    "G4-L22": "G4-L20-22",
-    "G5-L25": "G5-L24-25",
-    "G9-L16": "G9-L15-16",
-    "G9-L18": "G9-L17-19",
-    "G9-L19": "G9-L17-19",
+    # EMPTY BY DESIGN (#2683) — see MULTI_LESSON_PRIMARY. Same compound-file
+    # redirect, for the non-primary members of each range.
 }
 
 
@@ -112,31 +111,21 @@ MULTI_LESSON_MAP: dict[str, str] = {
 #
 # 3. G7-L31 (1 課): shares Layer-2 G7-L23 (multi-text 第一篇/第二篇).
 CATALOG_TO_PARSED_OVERRIDE: dict[str, str] = {
-    # Category A: G8 offset (#1669) — catalog uses curriculum sub-letter
-    # numbering, Layer-2 uses sequential parse-order. The offset grows by 1
-    # each time an a/b split occurs in the curriculum.
-    "G8-L4": "G8-L5",    # 好心沒好報玻璃娃娃 (catalog G8-L04 after normalize)
-    "G8-L5": "G8-L6",    # 戲院賭場檳榔攤 (catalog G8-L05 after normalize)
-    "G8-L7": "G8-L9",    # 讓黑猩猩被看見 (catalog G8-L07 after normalize)
-    "G8-L8": "G8-L10",   # 按讚背後的真相 (catalog G8-L08 after normalize)
-    "G8-L10": "G8-L13",  # 構樹 (catalog G8-L10 after normalize)
-    "G8-L11": "G8-L14",  # 蝴蝶蘭花期密碼 (catalog G8-L11 after normalize)
-    "G8-L13": "G8-L17",  # 我能不能選擇告別方式 (catalog G8-L13 after normalize)
-    "G8-L14": "G8-L18",  # 石虎保育 (catalog G8-L14 after normalize)
-    "G8-L15": "G8-L19",  # 核能的兩難抉擇 (catalog G8-L15 after normalize)
-    # Category B: G8 sub-letter (each a/b has own parsed file)
-    "G8-L3a": "G8-L3",   # 集中營的一門課
-    "G8-L3b": "G8-L4",   # 新奇植物肉
-    "G8-L6a": "G8-L7",   # 讓你口中的甜蜜
-    "G8-L6b": "G8-L8",   # 隱形的征服者
-    "G8-L9a": "G8-L11",  # 虎襲事件的真相
-    "G8-L9b": "G8-L12",  # 語言的足跡
-    "G8-L12a": "G8-L15", # 球場上的另類指揮家
-    "G8-L12b": "G8-L16", # 我的阿嬤
-    # Category C: G7-L31 (旅人鴿 = 第二篇 of G7-L23 multi-text docx)
-    # Removed: G7-L31 now has its own parsed YAML (G7-L31.yml) built in #2392.
-    # normalize_manifest_code("G7-L31") already returns "G7-L31" directly,
-    # so no CATALOG_TO_PARSED_OVERRIDE entry is needed.
+    # EMPTY BY DESIGN (#2683).
+    #
+    # This held 20-odd hand-maintained pairs patching a numbering offset between the
+    # catalogue and Layer-2 — "catalog G8-L4 means parsed G8-L5", growing by one at
+    # each a/b split. The offset existed because there were two layers with two
+    # numbering schemes. There is one source now, so a code means itself.
+    #
+    # Leaving the first-edition pairs in place was not neutral: the second edition
+    # renumbered every lesson, so the table quietly redirected live lookups to a
+    # DIFFERENT lesson. `keypoints_manifest_verify` was reading G8-L7
+    # (集中營裡的一門課) while checking G8-L9 (「按讚」背後的真相) and reporting the
+    # mismatch as a stale manifest.
+    #
+    # Do not repopulate. If two numbering schemes ever coexist again, the answer is
+    # a version_id on the uid, not a lookup table keyed by position.
 }
 
 # Legacy: kept for backward compat; superseded by CATALOG_TO_PARSED_OVERRIDE.

@@ -1,0 +1,120 @@
+lesson_uid: L0006
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 力不從心
+    definition: 想做某件事，但能力或體力不夠，做不到。
+  - index: 2
+    word: 左顧右盼
+    definition: 向左右看看，形容東張西望。常用來表示猶豫、不專心或觀望。
+  - index: 3
+    word: 無動於衷
+    definition: 形容對事情冷漠、不關心、不在乎。
+  - index: 4
+    word: 糾結
+    definition: 心裡有兩個想法拉來拉去，拿不定主意，覺得很難選擇。
+  - index: 5
+    word: 猶豫
+    definition: 拿不定主意，不知道該不該做。
+  - index: 6
+    word: 仆倒
+    definition: 向前倒下，通常是突然失去平衡或跌倒。
+  - index: 7
+    word: 圍剿
+    definition: 很多人一起攻擊或批評某人。也用於軍事情況。
+  - index: 8
+    word: 停滯
+    definition: 事情停止發展，無法前進或進步。
+  - index: 9
+    word: 反芻
+    definition: 原指動物把吃進肚子的食物吐出來再咀嚼；比喻反覆回想某件事。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 反芻
+    B: 猶豫
+    C: 力不從心
+    D: 停滯
+    E: 仆倒
+    F: 圍剿
+    G: 無動於衷
+    H: 左顧右盼
+    I: 糾結
+  questions:
+  - index: 1
+    text: 功課一下子變多，我覺得有點（　），怎麼努力都做不完。
+    answer: C
+  - index: 2
+    text: 媽媽一直沒出現，小安站在校門口（　），焦急地等媽媽來接他。
+    answer: H
+  - index: 3
+    text: 他對同學的苦苦拜託（　），讓人覺得很冷漠。
+    answer: G
+  - index: 4
+    text: 小芳又想參加演講比賽，又怕表現不好，心裡已經（　）好幾天了。
+    answer: I
+  - index: 5
+    text: 老師邀她代表班級參加演講比賽，她（　）了很久，才鼓起勇氣說「好」。
+    answer: B
+  - index: 6
+    text: 他被石頭絆到，整個人（　）在地。
+    answer: E
+  - index: 7
+    text: 明星一不小心說錯話，網友就開始在網路上（　）他。
+    answer: F
+  - index: 8
+    text: 他對文言文一直抓不到方法，學習進度（　），讓他很擔心。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列哪一個句子，「」中的語詞使用錯誤？
+    options:
+      A: 面對好友的邀約，他內心十分「糾結」，不知道該怎麼選擇
+      B: 看見受傷的狗，他「無動於衷」地送去醫院，焦急等待醫生
+      C: 阿公老了，爬樓梯時常覺得「力不從心」，得慢慢走才不會喘
+      D: 她習慣睡前「反芻」當天發生過的事情，從中學習寶貴經驗
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 「他每經過每一個人，那一個人的頭就低了下來。」請從前後文推論乘客們為什麼要低頭，並選出最可能的答案。
+    options:
+      A: 愧疚自責，因為自己也曾誤會並傷害過對方
+      B: 緊張不安，擔心對方會因此記恨自己
+      C: 生氣難過，無法接受自己竟然做錯了事情
+      D: 沮喪放棄，覺得自己再怎麼補救也沒有用
+    rationale: 這句話帶有明顯的自責語氣，敘述者發現自己先前的言行造成對方心理上的傷害，因此感到愧疚與懊悔。
+  - index: 4
+    answer: B
+    stem: 年輕人說「我習慣了」，他想表達的最可能是哪一選項？
+    options:
+      A: 他很習慣把自己的座位讓給老人家
+      B: 經常有人誤會他、要求他離開博愛座
+      D: 他習慣自己的身心障礙，已經不在意了
+    rationale: 本文敘述者對年輕人的誤解與事後懊悔，強調「不應只憑外表就下判斷」，要在充分理解後再做評價
+  - index: 5
+    answer: C
+    stem: 這篇故事主要想表達什麼？
+    options:
+      A: 做錯事情時要負起責任，勇敢面對錯誤與後果
+      B: 年輕人搭車時應有禮讓心，主動讓座是基本禮貌
+      C: 評斷他人前應了解真相，避免因誤會造成傷害
+      D: 身體不便的人應該避免搭乘公車，以免造成他人困擾
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.75
+    answers_recovered_from_rationale: 0
+    verdict: ok

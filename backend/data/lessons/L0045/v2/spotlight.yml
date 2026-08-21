@@ -1,0 +1,168 @@
+spotlight:
+  lesson: G5-L6
+  strategy_name: 詞彙推測策略-拆詞釋義
+  strategy_type: inference
+  blocks:
+  - type: guide
+    text: 遇到不認識的詞怎麼辦？有些不認識的詞，拆開來看，會發現它是由熟悉的字或詞組成的。我們可以想想每個字或詞的意思，再把意思合起來，猜一猜整個詞的意思。這種方法叫做「拆詞釋義」。本課有些語詞，就可以用這個方法來推測詞義。使用拆詞釋義時，可以照著四個步驟來做：❶拆一拆：把語詞拆開。❷想意思：想想拆開後每個字的意思。❸合詞義：把各部分的意思合起來，推測整個詞義。❹放回句子：把推測出的詞義放回原句，讀一讀，看看是否合理＊小提醒：拆開後的字或詞要看得懂，合起來也要說得通，才適合用拆詞釋義。如果不適合，就要改用其他方法。
+  - type: guide
+    text: 一、先看示範：翼展
+  - type: guide
+    text: 課文句子：秋行軍蟲是一種原產於美洲的飛蛾，翼展約3.5公分。
+  - type: free_text
+    prompt: ❶拆一拆：翼/展
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 先判斷：拆開後，這兩個字的意思都知道嗎？ →「翼」和「展」的意思都知道，可以繼續使用拆詞釋義
+  - type: free_text
+    prompt: ❷想意思
+  - type: free_text
+    prompt: 1.翼：翅膀。
+  - type: free_text
+    prompt: 2.展：展開。
+  - type: free_text
+    prompt: ❸合詞義：
+  - type: free_text
+    prompt: 1.先把字義合起來：翅膀展開
+  - type: free_text
+    prompt: 2.再看句中的「約3.5公分」，可以知道這裡是在說長度。因此可以推測，「翼展」是：兩邊翅膀完全展開時，左右翅膀尖端之間的長度。
+  - type: free_text
+    prompt: ❹放回句子：把推測出的詞義放回原句
+  - type: guide
+    text: 秋行軍蟲「兩邊翅膀完全展開時，左右翼尖之間的長度」約3.5公分。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 二、換你試試看：集資
+  - type: guide
+    text: 句子：他們幾個好朋友集資開了一間飲料店
+  - type: free_text
+    prompt: ❶拆一拆：集/資
+  - type: single
+    prompt: 先判斷：拆開後，這兩個字的意思我都知道嗎？
+    options:
+    - 都知道，可以繼續使用拆詞釋義。
+    - 有字不知道，先改用其他方法。
+    answer: 都知道，可以繼續使用拆詞釋義。
+  - type: free_text
+    prompt: ❷想意思
+  - type: guide
+    text: 請圈出適合的意思
+  - type: free_text
+    prompt: 1.集：聚集  ⁄ 分開
+  - type: free_text
+    prompt: 2.資：資金  ⁄ 資料
+  - type: free_text
+    prompt: ❸合詞義：
+  - type: free_text
+    prompt: 1.先把字義合起來：　聚集資金
+  - type: free_text
+    prompt: 2.再整理成通順的說法：「集資」的意思是：把資金聚集起來
+  - type: free_text
+    prompt: ❹放回句子：把推測出的詞義放回原句
+  - type: guide
+    text: 他們幾個好朋友「把資金聚集起來」，開了一間飲料店。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 三、自己試試看：日新月異
+  - type: guide
+    text: 句子：科技日新月異，許多事情現在都可以交由機器處理。
+  - type: free_text
+    prompt: ❶拆一拆：請用「／」把語詞拆開：  　日 / 新 / 月 / 異
+  - type: single
+    prompt: 先判斷：拆開後，這些字的意思我都知道嗎？
+    options:
+    - 都知道，可以繼續使用拆詞釋義。
+    - 大多不知道，先改用其他方法。
+    answer: 都知道，可以繼續使用拆詞釋義。
+  - type: free_text
+    prompt: ❷想意思：請圈出適合的意思
+  - type: free_text
+    prompt: 1.日：每天／生日
+  - type: free_text
+    prompt: 2.新：新年／更新
+  - type: free_text
+    prompt: 3.月：每月／月亮
+  - type: free_text
+    prompt: 4.異：不同／奇怪
+  - type: free_text
+    prompt: ❸合詞義：
+  - type: single
+    prompt: 1.先把字義合起來
+    options:
+    - 每天更新，每月不同
+    - 每天出現新東西，每月發生奇怪的事
+    answer: 每天更新，每月不同
+  - type: free_text
+    prompt: 2.再配合句子，可以推測「日新月異」的意思是：形容   進步或變化很快
+  - type: free_text
+    prompt: ❹放回句子：把上面推測的詞義放回原句，讀一讀，看看是否合理。
+  - type: guide
+    text: 原句：科技日新月異，許多事情現在都可以交由機器處理。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 四、挑戰自己：遙不可及
+  - type: guide
+    text: 句子：成為職業球員，曾是他遙不可及的夢想。
+  - type: free_text
+    prompt: ❶拆一拆：請用「／」把語詞拆開
+  - type: guide
+    text: 遙 / 不可 / 及
+  - type: single
+    prompt: 先判斷：拆開後，這些字的意思我都知道嗎？
+    options:
+    - 都知道，可以繼續使用拆詞釋義。
+    - 大多不知道，先改用其他方法。
+    answer: 都知道，可以繼續使用拆詞釋義。
+  - type: free_text
+    prompt: ❷想意思：請寫出字詞的意思
+  - type: free_text
+    prompt: 1.遙：　遙遠
+  - type: free_text
+    prompt: 2.不可：　不能
+  - type: free_text
+    prompt: 3.及：到達
+  - type: free_text
+    prompt: ❸合詞義：
+  - type: free_text
+    prompt: 1.先把字義合起來：   遙遠，不能到達
+  - type: single
+    prompt: 2.再配合句中的「夢想」
+    options:
+    - 很難實現
+    - 不想實現
+    answer: 很難實現
+  - type: free_text
+    prompt: ❹放回句子：把上面推測的詞義放回原句，讀一讀，看看是否合理。
+  - type: guide
+    text: 原句：成為職業球員，曾是他遙不可及的夢想。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 合理
+    - 不合理
+    answer: 合理
+  - type: guide
+    text: 如果你做得到，請在□內打勾。
+  - type: guide
+    text: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。七閱讀理解七閱讀理解
+  - type: self_check
+    items:
+    - 我能用「拆一拆、想字義、合詞義、放回句子」，推測新詞的意思。
+    - 我知道：拆開後的字義看得懂、合起來也合理，才適合用拆詞釋義。
+    - 下次遇到由熟悉字詞組成的新詞，我會試著用拆詞釋義。

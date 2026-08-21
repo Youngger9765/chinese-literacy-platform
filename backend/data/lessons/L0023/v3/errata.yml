@@ -1,0 +1,12 @@
+lesson_uid: L0023
+version_id: v3
+errata:
+- id: E1
+  section: 八 詞語複習
+  locator: 找一找指示語
+  source: 找一找：請圈格子內的語詞，圈出後，把灰框內的語詞刪除。
+  corrected: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  kind: 漏字
+  why: 「請圈格子內」漏一個「出」字；同批 L0017／L0018／L0019 三課此句皆為「請圈出格子內的語詞」
+  confidence: high
+  evidence: document.xml 與 PDF p9 一致；同批其他課的同一句可作對照

@@ -1,0 +1,21 @@
+lesson_uid: L0076
+version_id: v2
+passage: 我想她心裡一定很納悶󠇡，以往去加護病房作法都是偷偷摸摸的，還要喬裝成家屬，經常遭受到醫療人員異樣、甚至不屑的眼神。怎麼現在這位醫師，竟然還會主動的來和她說明病情，簡直太不可思議了！
+start_text: 我想她心裡一定很納悶󠇡，以往去加護病房作法都是偷
+extent_chars: 90
+source: docx-extract
+anchor_paragraph: 10
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 18
+  cell_paragraphs: 20

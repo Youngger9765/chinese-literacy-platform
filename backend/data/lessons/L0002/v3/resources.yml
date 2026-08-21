@@ -1,0 +1,26 @@
+lesson_uid: L0002
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 【動物界驚人偽裝大師Top10！枯葉、蛇頭秒變身】
+    duration: '9:12'
+    duration_seconds: 552
+    source: 台灣達人秀
+    recommend_range: 0:00~1:00
+  - index: 2
+    title: 【從零開始養】皇蛾!世界上最大的蛾!模擬雙頭蛇?
+    duration: '13:33'
+    duration_seconds: 813
+    source: 許伯&簡芝一倉鼠人
+    recommend_range: 0:00~4:35
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/9PuWnjfAtb8
+    url_source: 總表0816「4.影片連結」年級4課次11（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/NJXHfaTLFeA
+    url_source: 總表0816「4.影片連結」年級4課次11（⚠️課名與課程不符，仍依課次採用）

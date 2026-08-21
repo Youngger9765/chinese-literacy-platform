@@ -1,0 +1,131 @@
+lesson_uid: L0125
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 自告奮勇
+    definition: 自己主動要
+  - index: 2
+    word: 好心沒好報
+    definition: 形容做好
+  - index: 3
+    word: 事在人為
+    definition: 表示事情能
+  - index: 4
+    word: 不堪設想
+    definition: 形容事情發
+  - index: 5
+    word: 悲痛欲絕
+    definition: 形容極度悲
+  - index: 6
+    word: 苛責
+    definition: 嚴厲的責備或要求。
+  - index: 7
+    word: 提告
+    definition: 向法院提出
+  - index: 8
+    word: 情有可原
+    definition: 指某人的過
+  - index: 9
+    word: 因噎廢食
+    definition: 因為怕噎著，
+  - index: 10
+    word: 感同身受
+    definition: 心裡的感覺
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 自告奮勇
+    B: 事在人為
+    C: 不堪設想
+    D: 情有可原
+    E: 因噎廢食
+    F: 悲痛欲絕
+    G: 苛責
+    H: 感同身受
+    I: 好心沒好報
+  questions:
+  - index: 1
+    text: 小明幫忙澆花，卻不小心打破花瓶，因而被同學責怪，真是（　）。
+    answer: I
+  - index: 2
+    text: 聽到愛妻離世的消息，他（　），久久不能平復悲傷的心情。
+    answer: F
+  - index: 3
+    text: 班級大掃除時，小美（　）擔任組長，帶領大家分工合作。
+    answer: A
+  - index: 4
+    text: 他遲到卻沒有被老師處罰，是因為遇上了突發的交通事故，（　）。
+    answer: D
+  - index: 5
+    text: 馬路如虎口，如果大家不遵守交通規則，後果將（　）。
+    answer: C
+  - index: 6
+    text: 雖然這次籃球比賽失敗了，但你不能（　），放棄所有的練習。
+    answer: E
+  - index: 7
+    text: 雖然考試不容易，但（　），只要努力學習，就有機會取得好成績。
+    answer: B
+  - index: 8
+    text: 面對別人的失誤，我們應該多一些理解，少一些 （　）。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: A
+    stem: 文章提到二審法官判定陳同學也需賠償顏家，何者是法官做出此判決的原因？(第六段，二審法官的理由)
+    options:
+      A: 他很生氣機車騎士居然不禮讓老人，害人受傷
+      B: 他覺得機車騎士好心沒好報，因而忿忿不平
+      C: 他認為機車騎士假好心，根本不是真心要幫人
+      D: 緒恩以前也遇過類似的經驗，所以非常生氣
+    rationale: B由第一段可知緒恩認為好心沒好報，所以質疑助人為快樂之本不合理。
+    marker_notes:
+      D: 文中未提到
+  - index: 4
+    answer: B
+    stem: 第八段第4行，雅柔說：「如果是我，我會先哭死，再氣死。」請問她話中的「我」，指的是誰？(第八段末行)
+    options:
+      A: 陳同學家人
+      B: 顏同學家屬
+      C: 陳同學
+      D: 顏同學
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 作者透過這篇文章想要達成什麼目的？請選出最可能的答案。
+    options:
+      B: 主張最好不要主動幫助別人，以免惹上麻煩
+      C: 用爭議事件引發關注，從不同角度深入思考問題
+      D: 說明法律可以解決許多糾紛，未來可考慮當法官
+    rationale: 最末段，世界上常出現兩難的狀況，這些問題必須要透過多方討論及思考才能做出適當的決定。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 熱心助人也要賠償嗎？玻璃娃娃案 | 貓奴律師 | 律師說故事
+    duration_seconds: 544
+    source: 喵星律師-施宇宸
+  - index: 2
+    title: 「玻璃娃娃」載客助人　123公分運將趴趴走
+    duration_seconds: 131
+    source: NOWnews
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,140 @@
+lesson_uid: L0103
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 兩全其美
+    definition: 一件事同時顧到兩方面，讓兩方面都能獲益。
+  - index: 2
+    word: 脫穎而出
+    definition: 在眾人中顯露出優秀的表現。
+  - index: 3
+    word: 籌措
+    definition: 設法準備或募集需要的錢、物品。
+  - index: 4
+    word: 坐困愁城
+    definition: 形容情況艱難，沒有出路，而且無力擺脫。
+  - index: 5
+    word: 口碑
+    definition: 眾人口耳相傳的評價。
+  - index: 6
+    word: 靈機一動
+    definition: 突然想到了解決問題的方法。
+  - index: 7
+    word: 虜獲
+    definition: 吸引並獲得。本文指獲得評審的喜愛。
+  - index: 8
+    word: 雲集
+    definition: 許多人從各地聚集在一起。
+  - index: 9
+    word: 桂冠
+    definition: 原指月桂葉編成的冠帽，後來比喻比賽中的最高榮譽。
+  - index: 10
+    word: 大為嘆服
+    definition: 很讚嘆、佩服。
+  - index: 11
+    word: 層出不窮
+    definition: 形容接連不斷地出現，好像永遠不會停止。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.73
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 桂冠
+    B: 靈機一動
+    C: 虜獲
+    D: 大為嘆服
+    E: 坐困愁城
+    F: 兩全其美
+    G: 籌措
+    H: 口碑
+    I: 層出不窮
+    J: 脫穎而出
+  questions:
+  - index: 1
+    text: 阿明在比賽中的優異表現讓他（　），受到球團和球迷的矚目。
+    answer: J
+  - index: 5
+    text: 為了（　）資金興建棒球場，學校舉辦募捐活動，獲得大家的支持。
+    answer: G
+  - index: 6
+    text: 做實驗時材料不夠，組長（　），改用身邊可替代的物品完成任務。
+    answer: B
+  - index: 7
+    text: 他只看一次示範，就能把舞步完整跳出來，讓同學們（　）。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 「如果自己能像阿嬤那樣將它們熬煮成果醬，豈不是『兩全其美』嗎？」這裡的『兩全其美』指的是哪兩件事呢？
+    options:
+      A: 能解決次級水果被丟棄的問題，也可以用做果醬來懷念阿嬤
+      B: 能解決找工作不易的困境，製作果醬還能夠精進自己的廚藝
+      C: 能解決找工作不易的困境，也能解決次級水果被丟棄的問題
+      D: 能解決找工作不易的困境，還能出國參加果醬比賽為國爭光
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 林韡勳在「研發與銷售」自己的果醬時遇到了許多困難，下列哪一項不是這個階段的問題？
+    options:
+      A: 要如何籌措前往出國參加果醬比賽的旅費
+      B: 沒有製作果醬的專業背景，導致製作頻頻失敗
+      C: 追求果醬品質導致果醬售價太高，賣不出去
+      D: 研發果醬的過程失敗太多次，浪費了許多食材
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 下面哪個事件直接促使林韡勳開始參加英國果醬比賽？
+    options:
+      A: 林韡勳不想浪費食物，所以把做失敗的果醬拿去餵蜜蜂
+      B: 林韡勳沒有果醬專業背景，仍堅持不斷研究並製作果醬
+      C: 林韡勳將自己的果醬分送給親友，並且常常到市集擺攤
+      D: 林韡勳接受英國籍客人的建議，去參加英國的果醬比賽
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 根據課文，下列哪些特質最能說明林韡勳成功的重要原因？
+    options:
+      A: 甲乙戊
+      B: 甲丙戊
+      C: 丙丁戊
+      D: 乙丙丁
+    rationale: 甲.重視細節    乙.大學的專業    丙.看重創意
+  - index: 5
+    answer: C
+    stem: 請回頭看一下聚光燈裡的表１，請問它最主要想傳達什麼訊息？
+    options:
+      A: 許多國中生都覺得寫摘要是個讓人頭痛的功課
+      B: 寫摘要最具挑戰的是必須從瑣碎的細節裡，抽取共同的元素
+      C: 寫摘要可根據故事結構簡要寫出內容，再組合這些內容
+      D: 寫摘要最重要的是如何有根有據的寫出簡要的內容
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 這專注的風味得獎果醬(林韡勳) 一步一腳印 20201129
+    duration_seconds: 721
+    source: TVBS優選頻道
+  - index: 2
+    title: 自己做的威士忌橘子果醬，帶有橘子皮的口感，風味也很有層次感喔～
+    duration_seconds: 521
+    source: Rosalina's Kitchen 蘿潔塔的廚房
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

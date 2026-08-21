@@ -1,0 +1,113 @@
+lesson_uid: L0170
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 震耳欲聾
+    definition: 巨大的聲響，聲音大到讓耳朵受不了了。
+  - index: 2
+    word: 吆喝     _
+    definition: 大聲喊叫。多用來吸引生意、帶動氣氛或指揮他人。
+  - index: 3
+    word: 瀰漫      _
+    definition: 指氣味、情緒或某種氣氛遍布整個空間。
+  - index: 4
+    word: 排山倒海
+    definition: 形容力量巨大，氣勢壯闊，像山海一起壓過來。
+  - index: 5
+    word: 扳回一城
+    definition: 原本落後，後來成功追回局勢或分數。
+  - index: 6
+    word: 宏亮
+    definition: 聲音大且響亮。與「洪亮」同意思。
+  - index: 7
+    word: 虎視眈眈
+    definition: 形容像老虎盯著獵物一樣，帶著強烈企圖注視，隨時準備行動。
+  - index: 8
+    word: 懊悔
+    definition: 後悔、自責。
+  - index: 9
+    word: 踉蹌
+    definition: 形容走路不穩、跌跌撞撞的樣子。
+  - index: 10
+    word: 蓄勢待發
+    definition: 形容做好準備，隨時可以展現身手。
+  - index: 11
+    word: 作祟
+    definition: 像鬼魂或妖魔一樣地搗亂、破壞。
+  - index: 12
+    word: 打席
+    definition: 棒球比賽中，打擊者站上來準備揮棒進攻的回合或位置。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 升上國三後，龐大的考試壓力「排山倒海」而來
+      B: 已經二連霸的隊伍，今年再度「扳回一城」拿下冠軍
+      C: 感謝祖靈的「作祟」，讓我們今年穀物豐收，家畜平安
+      D: 一聲尖叫「瀰漫」寧靜的夜晚，附近聽到的人都很不安
+    rationale: null
+  - index: 2
+    answer: C
+    stem: 根據第二段「下一秒，腦內的毒舌球評開始廣播：『你真是爛透了！』、『都是你害的！』」這句話主要是想表達什麼？
+    options:
+      B: 大腦扭曲了教練和隊友的建議
+      D: 主角模仿球評播報比賽的語氣
+      C: 第2題解析：從前後文可看出，此處的「毒舌球評」士主角內在的自我批評
+    rationale: 第2題解析：從前後文可看出，此處的「毒舌球評」士主角內在的自我批評
+    is_rationale: true
+  - index: 3
+    answer: A
+    stem: 根據本文，下列敘述何者正確？
+    options:
+      A: 主角一次次的失誤，使他內心產生巨大自責
+      B: 主角認為朋友的關心只是風涼話，沒有幫助
+      C: 主角的內在批評都是事實，只是他不敢面對
+      D: 主角在隊友的打氣之後隨即振作，全力以赴
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 根據本文，下列何者最符合文章主旨？
+    options:
+      A: 挫折來自能力不足，應加強訓練避免失誤
+      B: 面對批評時應學會反擊，證明自己的價值
+      C: 球員需要壓抑情緒才能在比賽中有好表現
+      D: 專注當下的行動，有助於調整情緒與狀態
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 根據品格聚光燈，下列哪一種想法最能降低內在批評的影響？
+    options:
+      A: 「我就是爛，做什麼都會失敗」
+      B: 「他們是不是不喜歡我？但也可能我誤會了」
+      D: 「只要有我參與的比賽，就一定會輸」
+    rationale: 第5題解析：(B)儘管有負面念頭，仍加入了不同可能的思考。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.4
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 艾菲爾與影子 關於自我批判的動畫
+    duration_seconds: 326
+    source: HY K
+  - index: 2
+    title: 非黑即白的思考模式 | 打破極端的二元思考
+    duration_seconds: 251
+    source: 均一教育平台
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,21 @@
+lesson_uid: L0019
+version_id: v2
+passage: 運動科學結合現代科技後，在競技運動上有了突破性的發展，教練開始透過精準的測量，幫助運動者在安全的狀況下達到更快、更高、更遠的目標。競技場上，失之毫釐，差之千里，即使是一點點差距，都可能會影響選手的勝敗，有了運動科技加持，教練團可用各種設備測量記錄選手的表現，讓選手看到自己、甚至是對手數據或動作的變化，讓選手明白問題，進而透過加強訓練，改善問題，才能爭取更佳成績。
+start_text: 運動科學結合現代科技後，在競技運動上有了突破性的
+extent_chars: 182
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 190~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 6
+  cell_paragraphs: 6

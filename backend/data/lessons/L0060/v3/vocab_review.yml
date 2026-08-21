@@ -1,0 +1,168 @@
+lesson_uid: L0060
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 一蹶不振
+  - 三頭六臂
+  - 反芻
+  - 茶飯不思
+  - 輾轉反側
+  - 倒楣
+  - 無妄之災
+  - 潸然淚下
+  - 豁達
+  - 鴉雀無聲
+  - 萬丈深淵
+  - 半身不遂
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 倒到無力三頭六臂憂反
+  - 眉楣忘鴨雀無聲力鬱芻
+  - 飯菜之一美半身不遂濟
+  - 茶潸災一蹶萬仗探淵然
+  - 不濟然後蕨不少觀所淚
+  - 恩萬惡淚類不振害豁下
+  - 無丈劣勢下地震達躂輾
+  - 妄深茶飯不思醉醺醺轉
+  - 之淵逆轉烏展轉反則反
+  - 災高血壓鴉雀無聲音側
+  grid_note: '格子裡放了兩組形近誘答，不是印錯：第 2 列「鴨雀無聲」（鴨）對照第 10 列真答案
+
+    「鴉雀無聲」（鴉）；第 9 列「展轉反則」對照第 10 欄直排的真答案「輾轉反側」。
+
+    第 5 列的「蕨」也是「蹶」的誘答。'
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 倒楣
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 2
+    direction: diagonal_down_right
+  - word: 三頭六臂
+    cells:
+    - - 1
+      - 5
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    direction: horizontal
+  - word: 反芻
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 半身不遂
+    cells:
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    - - 3
+      - 9
+    direction: horizontal
+  - word: 一蹶不振
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    direction: diagonal_down_right
+  - word: 潸然淚下
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 萬丈深淵
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    direction: vertical
+  - word: 豁達
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 8
+    direction: diagonal_down_left
+  - word: 無妄之災
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 茶飯不思
+    cells:
+    - - 8
+      - 3
+    - - 8
+      - 4
+    - - 8
+      - 5
+    - - 8
+      - 6
+    direction: horizontal
+  - word: 輾轉反側
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 鴉雀無聲
+    cells:
+    - - 10
+      - 5
+    - - 10
+      - 6
+    - - 10
+      - 7
+    - - 10
+      - 8
+    direction: horizontal
+  answer_paths_note: '12 個目標語詞全部圈到，12 個橘圈在 PDF p11 上都印得出來，逐格取字皆能拼回，格子沒有印錯字。
+
+    幾何交叉驗證通過：格子區共 12 個 roundRect（7 個在格子那個 wpg 群組裡、5 個獨立錨在
+
+    「三頭六」「濟然後」「恩萬惡」「下無丈」「茶飯不」等儲存格上），中心座標換算回 10×10
+
+    後與上列 12 條路徑一一對應、無剩無缺。全檔另有 16 個 roundRect 屬於聚光燈三張流程圖的方框。'

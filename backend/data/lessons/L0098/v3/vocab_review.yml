@@ -1,0 +1,150 @@
+lesson_uid: L0098
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 屢見不鮮
+  - 無傷大雅
+  - 開場白
+  - 刻板印象
+  - 隱蔽
+  - 憐憫
+  - 日積月累
+  - 滴水穿石
+  - 滲透
+  - 內化
+  - 偏見
+  target_words_note: '灰框 **11** 個 —— 是總表那組（含滴水穿石）與語詞框那組（含偏見）的聯集。
+
+    語詞框與第三、四大題都只有 10 個，見 meta._總表_對照note。'
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 隱藏癮君子無商大偏白
+  - 形隱穩定滴水穿透冰見
+  - 眼蔽遮屢開滲刻話滴水
+  - 鏡看見戰場透象板鞋日
+  - 傷不無屢白海印畫印積
+  - 鮮家內敗人滲人蔘果象
+  - 隱話畫化日積月累無理
+  - 避雕刻畫人生印章傷受
+  - 月滴水穿石可憐鄰大人
+  - 累黑板白板聯憫懷雅風
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 偏見
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 10
+    direction: diagonal_down_right
+  - word: 隱蔽
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    direction: vertical
+  - word: 屢見不鮮
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 3
+    - - 5
+      - 2
+    - - 6
+      - 1
+    direction: diagonal_down_left
+  - word: 開場白
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 5
+    - - 5
+      - 5
+    direction: vertical
+  - word: 滲透
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 刻板印象
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 8
+    - - 5
+      - 9
+    - - 6
+      - 10
+    direction: diagonal_down_right
+  - word: 內化
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 日積月累
+    cells:
+    - - 7
+      - 5
+    - - 7
+      - 6
+    - - 7
+      - 7
+    - - 7
+      - 8
+    direction: horizontal
+  - word: 無傷大雅
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 滴水穿石
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  - word: 憐憫
+    cells:
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  answer_paths_note: '11 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+    幾何交叉驗證（單向警報）：以找字表格元素當邊界，表格內 roundRect = **11 個**（全文也是 11），
+
+    路徑 11 條 → 沒有「紙上 > 路徑」的缺條警報。
+
+    ⚠️ **紙外殘留：未驗**（`posOffset` 判準只認錨點型溢出，對「掛在儲存格裡被排版推出去」零命中，
+
+    2026-08-18 更正）；扣掉未偵測的殘留只會讓紙上數更少，不會讓警報成立。
+
+    正確性證據是每條 cells 套回 grid 拼字（11/11 全中）。
+
+    ⚠️ 格子裡有多個誘答：第 2 列有「滴水穿」但第 4 格是「透」不是「石」，真正的「滴水穿石」在第 9 列。'

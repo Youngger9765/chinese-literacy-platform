@@ -1,0 +1,24 @@
+lesson_uid: L0022
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 愛情關係中的嫉妒｜❤️情感關係系列❤️
+    duration: '6:02'
+    duration_seconds: 362
+    source: 輔仁大學學生輔導中心
+  - index: 2
+    title: 【Tilaine 姐跟你說】在感情裡，能不能吃醋？
+    duration: '4:58'
+    duration_seconds: 298
+    source: 我是Tilaine
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/2LEPX5YR5Bc
+    url_source: 總表0816「4.影片連結」年級5課次10
+  - index: 2
+    url: http://youtu.be/ZQLVTop3ITo
+    url_source: 總表0816「4.影片連結」年級5課次10

@@ -1,0 +1,21 @@
+lesson_uid: L0075
+version_id: v2
+passage: 一位當地的村民發現了這緊急情況，他召集了附近的獵人和漁民，冒著嚴寒，用鐵鍬和鏟子努力鑿開冰洞，並餵食白鯨冷凍魚。這樣持續了一個多月，但海水結凍的速度實在太快，救援緩不濟急、資源僧多粥少，體弱的白鯨開始死亡，村民的努力徒勞無功，只好請求政府派出救援。
+start_text: 一位當地的村民發現了這緊急情況，他召集了附近的獵
+extent_chars: 124
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 7

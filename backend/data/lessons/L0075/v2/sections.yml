@@ -1,0 +1,126 @@
+lesson_uid: L0075
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 束手無策
+    definition: 束手是「手被綁起來」，無策是「沒有辦法」。束手無策是形容完全沒有辦法解決問題。
+  - index: 2
+    word: 翻騰
+    definition: 形容水、浪等劇烈地上下滾動；也可比喻情緒起伏很大、難以平靜。本課用來形容海水翻動。
+  - index: 3
+    word: 屏氣凝神
+    definition: 屏住呼吸，集中精神，形容非常專注的樣子。
+  - index: 4
+    word: 凜冽
+    definition: 形容天氣非常寒冷。
+  - index: 5
+    word: 筋疲力竭
+    definition: 形容非常疲累，一點力氣也沒有了。
+  - index: 6
+    word: 僧多粥少
+    definition: 比喻資源有限，需求的人太多，無法滿足每個人。
+  - index: 7
+    word: 窒息
+    definition: 無法呼吸；也可比喻感到非常壓迫，像喘不過氣來。
+  - index: 8
+    word: 緩不濟急
+    definition: 行動太慢，無法應付迫切的需要。
+  - index: 9
+    word: 徒勞無功
+    definition: 努力想做某件事，卻沒達成目標，白費力氣。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 翻騰
+    B: 凜冽
+    C: 窒息
+    D: 徒勞無功
+    E: 筋疲力竭
+    F: 束手無策
+    G: 屏氣凝神
+    H: 緩不濟急
+    I: 僧多粥少
+  questions:
+  - index: 1
+    text: 教師職缺只有十個，報名者卻有百人，（　），因此錄取不易。
+    answer: I
+  - index: 2
+    text: 颱風即將到來，岸邊巨浪（　），聲勢真是嚇人。
+    answer: A
+  - index: 3
+    text: 北風（　），即使裹緊大衣，還是覺得很冷。
+    answer: B
+  - index: 4
+    text: 學校為了推動週三第八節的「興趣探索課」花了許多心力，但因家長反對，最後（　），令人遺憾。
+    answer: D
+  - index: 5
+    text: 面對突如其來的危機，大家一時（　），不知道該怎麼辦。
+    answer: F
+  - index: 6
+    text: 忙完畢業展的布置後，大家都（　），希望好好休息。
+    answer: E
+  - index: 7
+    text: 災後援助若拖延太久，恐怕（　），災民的食物與醫療需求將受影響。
+    answer: H
+  - index: 8
+    text: 他白天忙著工作、晚上又得照顧生病的母親，雙重壓力讓他覺得快要（　）了，感到十分辛苦。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 文中第三段提到「資源僧多粥少」，根據上下文，「僧多粥少」最可能的意思是：
+    options:
+      A: 讓白鯨不再害怕破冰船，主動游到船的旁邊
+      B: 讓原本害怕的白鯨開始游動，沿著水道前進
+      C: 讓白鯨恢復體力，不再需要村民繼續餵食
+      D: 讓白鯨誤以為同伴在前方，因此跟著叫聲前進
+    rationale: 破冰船「冒著黑煙、又會發出噪音的大怪獸」
+  - index: 4
+    answer: D
+    stem: 作者以「協奏曲」作為副標題，主要想凸顯這場救援的哪一項特色？
+    options:
+      A: 破冰船發出轟隆聲響，像多種樂器同時演奏
+      B: 船員播放古典音樂，使救援過程充滿藝術氣息
+      C: 白鯨能欣賞優美旋律，與人類有相同音樂喜好
+      D: 不同的人與方法接力配合，共同完成白鯨救援
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 本文最想傳達的觀點是什麼？
+    options:
+      A: 面對其他生命時，關懷、理解與創意可能創造新的希望
+      B: 面對極地災難時，只有大型機械才能有效完成救援任務
+      C: 野生動物容易受到環境威脅，人類應避免接近牠們
+      D: 古典音樂能安撫各種動物，可以廣泛運用在救援行動中
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.67
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: '白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in Ice'
+    duration_seconds: 59
+    source: World Amazing Facts
+  - index: 2
+    title: 柴可夫斯基《天鵝湖》四小天鵝舞 - 柏林國家歌劇院獻演
+    duration_seconds: 99
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

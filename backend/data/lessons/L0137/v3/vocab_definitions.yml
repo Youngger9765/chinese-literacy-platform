@@ -1,0 +1,60 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 二
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: 本課語詞：矗立、眾說紛紜、爭論不休、複製、崎嶇、千里迢迢、無獨有偶、人煙稀少、星光滿布、假設、肅然起敬。
+  word_bank:
+  - 矗立
+  - 眾說紛紜
+  - 爭論不休
+  - 複製
+  - 崎嶇
+  - 千里迢迢
+  - 無獨有偶
+  - 人煙稀少
+  - 星光滿布
+  - 假設
+  - 肅然起敬
+  answers_printed: true
+  answer_carrier: 橘色手寫體填在橫線上（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    definition: 形容一個地方住的人很少，較少有人活動。
+    answer: 人煙稀少
+  - index: 2
+    definition: 不只有一個，還有另一個相同或相似的例子。
+    answer: 無獨有偶
+  - index: 3
+    definition: 地上或路面高低不平。
+    answer: 崎嶇
+  - index: 4
+    definition: 形容路途遙遠。
+    answer: 千里迢迢
+  - index: 5
+    definition: 高聳直立。
+    answer: 矗立
+  - index: 6
+    definition: 各式各樣的說法，多而亂，都不一致。
+    answer: 眾說紛紜
+  - index: 7
+    definition: 星星遍布天空。
+    answer: 星光滿布
+  - index: 8
+    definition: 一個問題還不知道答案時，人們提出的可能解釋，或暫時性的答案。
+    answer: 假設
+  - index: 9
+    definition: 仿照原來的樣子再做一遍。
+    answer: 複製
+  - index: 10
+    definition: 一直爭辯，沒有停止，也沒有得到一致結論。
+    answer: 爭論不休
+  - index: 11
+    definition: 因敬佩某人或某事，而自然產生尊敬的感受。
+    answer: 肅然起敬

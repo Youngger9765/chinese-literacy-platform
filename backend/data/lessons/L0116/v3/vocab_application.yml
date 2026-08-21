@@ -1,0 +1,46 @@
+lesson_uid: L0116
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 心不在焉
+    B: 鄙夷
+    C: 轉圜
+    D: 禍福相倚
+    E: 無常
+    F: 詮釋
+    G: 愁雲慘霧
+    H: 得意忘形
+    I: 於事無補
+    J: 門可羅雀
+  option_bank_note: 語詞框有 13 個語詞，但代號表只列 10 個（沒有「契機」「市井」「奠定」）——原稿如此
+  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  unused_options:
+  - B
+  - D
+  items:
+  - index: 1
+    stem: 比賽已經結束，再責怪隊友也(  )，不如一起討論下次怎麼防守。
+    answer: I
+  - index: 2
+    stem: 大維是百米冠軍的熱門人選，卻在賽前騎車跌斷腿，世事真是(  )啊。
+    answer: E
+  - index: 3
+    stem: 對於老師的提醒，小安覺得被責備，小妍卻認為老師是在幫她，兩人的(  )很不一樣。
+    answer: F
+  - index: 4
+    stem: 兩人因分組吵得很僵，但只要有人先道歉，關係還有(  )的空間。
+    answer: C
+  - index: 5
+    stem: 阿哲上課時一直想著喜歡的女生，整節課都(  )，連老師叫他都沒聽見。
+    answer: A
+  - index: 6
+    stem: 段考成績公布後，全班一片(  )，連愛開玩笑的同學都安靜了。
+    answer: G
+  - index: 7
+    stem: 這家餐廳以前常大排長龍，換了老闆後生意冷清，如今(  )。
+    answer: J
+  - index: 8
+    stem: 小傑的海報被老師稱讚後，有些(  )，開始到處炫耀。
+    answer: H

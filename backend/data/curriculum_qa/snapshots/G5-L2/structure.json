@@ -1,102 +1,113 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 3,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "主角",
+      "早上｜1.基本訓練 (1)",
+      "早上｜1.基本訓練 (2)",
+      "中午｜2.飲食控制"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "大主題",
-      "value": "以植物為師的科學",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "周天成的一天──頂尖選手的養成",
+      "value": ""
     },
     {
-      "label": "小主題",
-      "value": "",
+      "interactive_type": "fill_blank",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
       "interactive_type": "display",
+      "label": "周天成的一天──自律事例",
       "sub_rows": [
         {
-          "label": "會飛的小種子",
-          "value": "跟著太陽轉的花 滾來滾去的草",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "細節",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "植物的現象",
-          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵的花朵整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "早上｜1.基本訓練 (1)",
+          "value": "1.基本訓練：\n(1)周天成進行基本訓練時，依序做了哪些事？請按照文章順序填入代號。\n▶首先做【　　　】，接著是【　　　】，再來是【　　　】，最後是【　　　】。\n①放鬆腳底筋膜 ②旋轉身體拉筋 ③對打比賽 ④網前平推、殺球和發球練習"
         },
         {
-          "label": "科學家的設計",
-          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "早上｜1.基本訓練 (2)",
+          "value": "(2)為了強健肌肉、開發身體潛能，周天成做了哪些訓練？【 多選 】\n①核心肌群訓練 ②下肢肌群訓練 ③上肢肌群訓練"
         },
         {
-          "label": "功能",
-          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "checkbox",
+          "label": "中午｜2.飲食控制",
+          "options": [
+            "吃原型食物",
+            "依照順序吃各類食物",
+            "快速吃完食物"
+          ],
+          "select_mode": "multi",
+          "value": "2.飲食控制：為了減少熱量的攝取，保持輕盈的身軀，他的飲食有哪些特點？【 多選 】\n①吃原型食物 ②依照順序吃各類食物 ③快速吃完食物"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "晚上｜3.安全意識",
+          "options": [
+            "騎腳踏車",
+            "自己開車",
+            "搭乘大眾運輸工具"
+          ],
+          "select_mode": "single",
+          "value": "3.安全意識：為了降低受傷風險，周天成晚上外出時會選擇哪種方式？【 單選 】\n①騎腳踏車 ②自己開車 ③搭乘大眾運輸工具"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "深夜｜4.自我反省與調整",
+          "options": [
+            "提高成績領比賽獎金。",
+            "提高成績，讓自己有能力回饋並影響更多人。",
+            "提高成績爭取更多企業贊助。"
+          ],
+          "select_mode": "single",
+          "value": "4.自我反省與調整：周天成持續尋找進步的方法，是為了什麼？【 單選 】\n①提高成績領比賽獎金。 ②提高成績，讓自己有能力回饋並影響更多人。 ③提高成績爭取更多企業贊助。"
         }
-      ]
-    },
-    {
-      "label": "總結",
-      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。",
-      "interactive_type": "fill_blank"
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
+  "title": "周天成的一天──頂尖選手的養成",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "大主題",
-      "value": "以植物為師的科學"
+      "label": "主角",
+      "value": "【　　　】"
     },
     {
-      "kind": "section_block",
-      "section": "小主題",
       "items": [
         {
-          "label": "會飛的小種子",
-          "value": "跟著太陽轉的花 滾來滾去的草"
+          "label": "早上｜1.基本訓練 (1)",
+          "value": "1.基本訓練：\n(1)周天成進行基本訓練時，依序做了哪些事？請按照文章順序填入代號。\n▶首先做【　　　】，接著是【　　　】，再來是【　　　】，最後是【　　　】。\n①放鬆腳底筋膜 ②旋轉身體拉筋 ③對打比賽 ④網前平推、殺球和發球練習"
+        },
+        {
+          "label": "早上｜1.基本訓練 (2)",
+          "value": "(2)為了強健肌肉、開發身體潛能，周天成做了哪些訓練？(多選)\n①核心肌群訓練 ②下肢肌群訓練 ③上肢肌群訓練"
+        },
+        {
+          "label": "中午｜2.飲食控制",
+          "value": "2.飲食控制：為了減少熱量的攝取，保持輕盈的身軀，他的飲食有哪些特點？(多選)\n①吃原型食物 ②依照順序吃各類食物 ③快速吃完食物"
+        },
+        {
+          "label": "晚上｜3.安全意識",
+          "value": "3.安全意識：為了降低受傷風險，周天成晚上外出時會選擇哪種方式？(單選)\n①騎腳踏車 ②自己開車 ③搭乘大眾運輸工具"
+        },
+        {
+          "label": "深夜｜4.自我反省與調整",
+          "value": "4.自我反省與調整：周天成持續尋找進步的方法，是為了什麼？(單選)\n①提高成績領比賽獎金。 ②提高成績，讓自己有能力回饋並影響更多人。 ③提高成績爭取更多企業贊助。"
         }
-      ]
-    },
-    {
+      ],
       "kind": "section_block",
-      "section": "細節",
-      "items": [
-        {
-          "label": "植物的現象",
-          "value": "楓樹的種子從樹上飄落時，會像小直升機一樣【　　　】 向日葵的花朵整天追逐太陽，具有\n【　　　】 風滾草的草球藉著強風在原野翻滾和轉動，藉此【　　　】。"
-        },
-        {
-          "label": "科學家的設計",
-          "value": "只有【　　　】翅膀的飛行機器人 自動調整角度的【　　　】 風吹時，會滾來滾去的【　　　】"
-        },
-        {
-          "label": "功能",
-          "value": "構造簡單，體積小、省電。沒電時它會【　　　】而下，比較不會摔壞。 仿生太陽能板跟著太陽轉，讓【　　　】大幅提升。 探測器靠火星上的強風滾動，可以快速探索【　　　】地表。"
-        }
-      ]
-    },
-    {
-      "kind": "pair",
-      "label": "總結",
-      "value": "植物有許多聰明的生存技巧，為人類帶來【　　　】。"
+      "section": "周天成的一天──自律事例"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "植物的現象",
-      "科學家的設計",
-      "功能",
-      "總結"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

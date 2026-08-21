@@ -1,0 +1,238 @@
+lesson_uid: L0110
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 推論策略──推論角色關係與觀點
+  strategy_type: inference
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，共 17 個）
+  blocks:
+  - type: concept_box
+    label: 推論和腦補
+    text: '請試著讀底下的文字，再回答一個問題：
+
+      　　「阿嬤在屋裡喊：『過來！』我手心立刻冒汗，連呼吸都放輕，小跑步進房間。」'
+  - type: single
+    prompt: 問題：作者和阿嬤的關係可能是？
+    options:
+      1: 很愛阿嬤
+      2: 很怕阿嬤
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym），PDF p7 可見
+    prompt_note: 題幹前印的「➔」是 Wingdings 符號（w:sym F0E0），不在文字流裡，故不寫入箭頭字元。
+  - type: guide
+    text: '在回答這個簡單的問題時，你已經在做推論了。
+
+      你看，「作者很怕阿嬤」根本就沒有寫出來，但你是怎麼知道的？這就是「推論」，最近的流行語叫做「腦補」。
+
+      閱讀高手的特色之一，就是超級會推論文章沒有寫出來的細節！
+
+      這篇故事，描述了作者和阿嬤之間的互動，故事沒有把他們的關係和想法講白，而是把線索藏在對話、動作和反應裡。
+
+      接下來要做的就是抓住這些線索，推論作者和阿嬤的關係如何改變，並進一步理解作者真正想傳達的意思。'
+  - type: sub_block
+    label: 小時候
+    left_header: 階段
+    right_header: 文章線索及推論想法
+    table_note: '原稿是一張三欄表格（階段／標籤／內容），「階段」欄用 vMerge 縱跨該階段所有列。
+
+      此處以 sub_block 表達分組，每個「推論…」小題各自帶答案。'
+    items:
+    - type: guide
+      label: 文章線索
+      text: '①只看見作者該改進的地方
+
+        ②「再哭一聲看看！」我會立刻噤聲。
+
+        ③她只要大喊我的名字……小朋友立刻神色大變……'
+    - type: single
+      label: '推論作者想表達的想法
+
+        （單選）'
+      options:
+        1: 阿嬤很嚴厲，讓我總是戰戰兢兢
+        2: 阿嬤討厭我，總是修理我、恐嚇我
+      answer: 1
+    - type: single
+      label: 推論祖孫關係(單選)
+      prompt: 阿嬤與作者：
+      options:
+        1: 權威者 vs. 服從者
+        2: 照顧者 vs. 被照顧者
+      answer: 1
+  - type: sub_block
+    label: 讀大學時期
+    items:
+    - type: guide
+      label: 文章線索
+      clue_index: 1
+      text: 阿嬤連看八點檔，都會挑剔演員，說他很醜
+    - type: single
+      label: '推論作者想表達的想法
+
+        （單選）'
+      options:
+        1: 我常挨阿嬤罵，是因為我很糟，不夠好
+        2: 阿嬤愛罵人是她自己的問題，我不必每句話都當真
+      answer: 2
+    - type: guide
+      label: 文章線索
+      clue_index: 2
+      text: 聽見鄰兵啜泣……我心裡不屑：哼，嬌生慣養！開始感謝起阿嬤來。
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 班長本來就該嚴厲，我不懂鄰兵為什麼哭
+        2: 阿嬤對我的嚴厲，能幫助我適應軍中生活
+      answer: 2
+    - type: guide
+      label: 文章線索
+      clue_index: 3
+      text: （從軍中回家見到阿嬤）把她風雨不透的抱離地面，轉了一個圈。
+    - type: multi
+      label: '推論作者未寫出的想法
+
+        (3選2)'
+      options:
+        1: 藉此展現在部隊裡訓練出來的肌肉
+        2: 很久沒有見到阿嬤，很高興再見到她
+        3: 不再是小孩了，現在不論身心，我都能輕易面對阿嬤
+      answers:
+      - 2
+      - 3
+    - type: guide
+      label: 文章線索
+      clue_index: 4
+      text: 我試著講完全的尊重接納……並抗議她總是在嫌我罵我。
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 我們的關係改變了，我不再怕她，可以提不同想法
+        2: 我進入了反抗期，對什麼都不滿意，都要抗議
+      answer: 1
+    - type: guide
+      label: 文章線索
+      clue_index: 5
+      text: 晚餐有滿桌子的菜，我知道這是她愛我的方式
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 壞脾氣的她，畢竟也有心情好的時候
+        2: 我開始讀懂她用行動在乎我，雖然說話難聽
+      answer: 2
+    - type: single
+      prompt: 推論作者認為自己的角色有了什麼變化？(單選)
+      options:
+        1: '從「受壓迫的小孩」
+
+          「能平等提出不同意見的大人」'
+        2: '從「又怕又怨的小孩」
+
+          「能夠勇敢反擊的大人」'
+      answer: 1
+      options_note: '兩個選項的引號之間原稿印了一個箭頭，那是 Wingdings 符號（w:sym Wingdings/F0E0）、
+
+        不在 w:t 文字流裡，故**不寫入字面箭頭，改在箭號位置斷行**
+
+        （SKILL「箭號與圈號常是 w:sym」那條；L0031 的同款寫法用的是 Wingdings 3/F022）。
+
+        PDF p8 上仍印成一行。'
+    clue_index_note: '「文章線索」後面印的 ❶❷❸❹❺ 是 Wingdings 2 符號（w:sym F075~F079），不在文字流裡，
+
+      故不併進 label，另以 clue_index 記錄。'
+  - type: sub_block
+    label: '35歲
+
+      ｜
+
+      作者在大學教學'
+    items:
+    - type: guide
+      label: 文章線索
+      clue_index: 1
+      text: '①她嫌我動作慢：「我看你一輩子也做不完。」忘了鎖門，她：「你讀什麼博士？讀到天邊去了？」我哼個歌，她：「你牙齒痛是嗎？」
+
+        ②三歲的小昀被薰陶一個月，也學會說「幹恁婆啊！」'
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 在任何情境，不管對誰，阿嬤說話方式從未改變
+        2: 阿嬤對孩子的口頭霸凌方式歷歷可數
+      answer: 1
+    - type: guide
+      label: 文章線索
+      clue_index: 2
+      text: 作者唱歌被罵，阿嬤唱歌，作者笑著反酸：「阿嬤，你牙齒痛是嗎？」
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 祖孫關係改變了，我現在能幽默接住阿嬤的刻薄
+        2: 從小被罵被酸，我當然要找機會報仇一下
+      answer: 1
+    - type: guide
+      label: 文章線索
+      clue_index: 3
+      text: 阿嬤成長在一個威權當道、階級分明的世代。阿嬤對我們說話的方式，就是她小時候大人對她說話的方式。
+    - type: single
+      label: '推論作者未寫出的想法
+
+        (單選)'
+      options:
+        1: 我不再怕她，能用幽默接住她的刻薄，也能理解她的成長，並決定如何詮釋自己的童年經驗
+        2: 我用反酸贏了她，證明我比較厲害，她以後就不敢再罵我了
+      answer: 1
+    - type: single
+      prompt: 試著推論作者現在怎麼看待他的阿嬤？
+      options:
+        1: 一個沒水準、滿口髒話、家暴小孩、死性不改的長輩
+        2: 阿嬤愛我，她說話刻薄有其成長背景，我能理解
+      answer: 2
+  - type: guide
+    text: 二、把三個階段串連起來看歷程。(單選)
+  - type: guide
+    text: 1.互動方式變化（關係）：
+  - type: single
+    prompt: 請選出最符合本文「作者×阿嬤」互動方式的變化？
+    options:
+      1: 噤聲不敢回→能提出不同想法→能幽默接住刻薄
+      2: 噤聲不敢回→越來越反感→逐漸疏離對立
+    answer: 1
+    options_note: '這兩題的「→」跟角色變化那題不同，是文字流裡真正的箭頭字元，照抄。
+
+      另：原稿只在第 2 個選項印了「②」，第 1 個選項沒有印「①」（被 ☑ 佔位），
+
+      下一題與第三大題也是同樣形狀 —— 照原樣，不補號。'
+  - type: guide
+    text: 2.想法變化路線：
+  - type: single
+    prompt: 本文中「作者對阿嬤的想法」，變化歷程為何？(單選)
+    options:
+      1: 覺得被討厭→覺得溝通無用→決定遠離她
+      2: 先求不挨罵→不再句句當真、看懂她的愛→理解脈絡並重新詮釋
+    answer: 2
+  - type: single
+    prompt: 三、從上述作者觀點轉變歷程，本文最想提醒讀者的是什麼?(單選)
+    options:
+      1: 人不是被早期經驗決定的；我們可以選擇怎麼詮釋自己的童年
+      2: 長輩多半愛挑剔，孩子只能忍耐，關係很難改變
+      3: 心理韌性靠打罵養成，受過嚴格管教的人一定更強
+      4: 當兵最能鍛鍊意志，因此比讀書更能改變一個人
+    answer: 1
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 請你自己檢查以下3項，確定自己是否會推論角色關係與想法了
+    items:
+    - 1.我會根據對話、語氣、動作與反應，推論作者和阿嬤的關係。
+    - 2.我會把文章線索前後連起來，推論角色關係變化歷程。
+    - 3.我能從關係變化推到作者的觀點轉變，並進一步推論本文的主旨。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選

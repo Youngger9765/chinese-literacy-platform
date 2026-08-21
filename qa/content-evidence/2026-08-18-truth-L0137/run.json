@@ -1,0 +1,20 @@
+{
+  "lesson_uid": "L0137",
+  "catalog_slot": "G9-L16",
+  "pdf_pages": 12,
+  "pages_read": 12,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0,
+    "render_coverage": 0
+  },
+  "retries": 2,
+  "notes": "🔴 **多文本課（一個檔兩篇課文）**，對應總表**兩列**（課次 16 巨石陣／課次 17 摩艾石像）。版面：第16課 一 讀全文-做記號＋篇末重點表 →（請繼續閱讀下篇文章）→ 第17課 同樣結構 → 跨課文習作 二*~七*（兩篇合做）。兩個「一」都是原稿印的。第二篇存進 `multi_text_parts`（**實測**已落地 v3/multi_text_parts.yml：grep「西元1722年4月5日」命中 1，正向對照第一篇「西元1130年前後」在 full_text_annotate.yml 命中 1）。🔴 **本課最重要的發現：連連看的 6 條紅線在 PDF 上一條都看不到，但在 document.xml 裡。**只讀 PDF 會判成「教師版沒連線、無答案」（SKILL 鐵律 #10 講的正是這種）。⚠️ 第一次用 `wp:anchor` 的 posOffset 定位，**六條線全落在兩個錨點上**，看起來像三條線疊在同一列；真正的位移在**群組內的 `a:off`**（線被包在「群組 2／群組 3」裡）。加上 a:off 後六個左端點才分得開：群組2 左端 -0.062/0.521/1.112 對第 1/2/3 列、群組3 左端 0.000/0.692/1.127 對第 4/5/6 列（列距約 0.58in）。解出 (1)→B (2)→C (3)→A (4)→E (5)→F (6)→D，**與純讀課文語意推出的配對完全一致**（例 (1)觀測天文↔B「古代人哪有天文知識？」對應第 4 段「是誰教他們預測日食、月食的天文知識呢？」）。兩條獨立證據互相印證，單靠任一邊都不夠。三載體：☑ 21 個；roundRect **11 個**全 srgbClr E97132、posOffset 換算最大 1.06in（頁寬 8.27in）無紙外殘留，11 圈 = 11 條 answer_paths = 11 個目標語詞，個數相符無警報；w:bdr 非 auto 0 個（22 個全 auto）。找字座標門對 11 條路徑逐格套回格子驗過；另做 mutation（把「眾說紛紜」起點左移一格）確認門會紅（🔴「座標拼出『彩眾說紛』」），證明那個綠是真的在檢查，不是裝飾。段號：第16課 5 個（假設一/二/三小標與說明段不佔段號，掛 hypothesis_blocks after_paragraph 3）、第17課 4 個。兩篇段號欄都比它標的段落**上移約一行**（第16課的「四」印在假設三說明段中間），屬排版位移不是段號錯 —— 號碼數與段落數完全吻合。勘誤三筆都是「查證後判定**不是**錯」的類型，仍登錄以免下一個人重查：E1 三*語詞應用選項 H「感同身受」不在本課語詞內，但第 (8) 題答案就是它、語意上也只有它通 → 刻意誘答項；E2 第17課標題印「摩艾走路」而篇末重點表與總表寫「摩艾石像」，兩者都通順 → 並存不擇一；E3 閱讀理解第 1 題右側藍框「A-矗立，B-崎嶇，C-艱鉅。」與該題四個選項完全無關（同頁其他浮動框都是該題解析）→ 疑似舊版語詞題的解答殘留，原樣收進 floating_annotations 並標「歸屬不明」，沒有硬指給某題。🔴 **schema 缺口（已實測）**：(a) `keypoints_to_structure.py` 只讀 title/columns/rows/tail_question 四個 key，所以 `keypoints.matching`（連連看）與 `keypoints.exercise`（小試身手）**資料進得去但畫不出來**（grep 確認兩節內容確實在 v3/keypoints.yml）。(b) `SECTION_NAME_TO_MODULE` 的 needle 是「文章重點表」/「重點表」，本課印「文章重點**整理**」對不上 → keypoints 退回常數表標 `section_no: 五`，而 comprehension 也是五 —— **兩個模組同時宣稱是「五」，「四」沒人認領**。⚠️ schema_gap 我改寫過一次：第一版寫「multi_text_parts 沒有落地」，那是依我開工時讀到的 MODULES 表；`split_lesson_modules.py` 在 13:47 被他人更新加進了多文本容器，**舊觀察在幾十分鐘內就過期**，檔內記的是重跑後的結果。兩次重跑：(1) 我自己的註記欄（material_form/scope/placement/attribution）被逐字門當原稿字串比對 → FAIL，改成 `_` 開頭後 PASS；(2)「跨課文習作」橫幅標題 grep dump 與 raw XML 都 0（正向對照三個字串都命中）→ 確認畫在圖上，標 text_carrier: image。另把畫圖題的 text_carrier 收窄成 answers_are_graphical —— 那行指示語**在文字層**，標成 image 會讓它逃過檢查（受檢字串因此 206→207）。"
+}

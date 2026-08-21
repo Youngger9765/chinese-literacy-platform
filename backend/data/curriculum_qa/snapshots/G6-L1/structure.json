@@ -1,66 +1,221 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 14,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題",
+      "家庭背景",
+      "狀況──阿堅",
+      "狀況──小芸"
+    ],
+    "template_kind": "psr"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "運動傷害，怎麼辦？",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "心理出狀況，是壞事導致的嗎？",
+      "value": ""
     },
     {
-      "label": "如何預防",
-      "value": "1.不管是哪一種運動，都要先做好【　　　】運動。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "問題",
+      "value": "許多人認為一個人【　　　】出狀況，是因不能控制的【　　　】導致的，這個說法是真的嗎？"
     },
     {
-      "label": "如何預防",
-      "value": "2.正確的暖身時間至少要佔整個運動時間的【　　　】，\n主要目的是什麼？【　　　】\n增加關節的靈活性　　提升體溫　\n促進肌肉收放效能    提高心肺功能",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "故事一",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "人物",
+          "value": ""
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "家庭背景",
+          "value": "爸爸【　　　】，媽媽【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "狀況──阿堅",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "狀況──小芸",
+          "value": "國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──阿堅",
+          "value": "我有這樣的家庭，你期待【　　　】？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──小芸",
+          "value": "我家都已經這樣了，我【　　　】行嗎？"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "受傷時的處理",
-      "value": "3.受傷後可以如何處理？【　　　】\n避免　　壓迫　　保護　　教育　　抬高",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "故事二",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "欄標題",
+          "value": ""
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "問題",
+          "value": "35歲的鄧小姐，發現自己有【　　　】，必須一輩子吃藥。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──一開始",
+          "value": "為什麼這麼【　　　】？"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──後來",
+          "value": "我【　　　】，及早發現。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果──一開始",
+          "value": "心裡【　　　】，吃不好也睡不好。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "結果──後來",
+          "value": "快樂起來，【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "受傷時的處理",
-      "value": "4.若不幸自己或他人意外受傷，可以怎麼做？【　　　】\n找老師／防護員求助       態度冷靜  \n依ＰＥＡＣＥ五步驟處置",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "故事三",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事實",
+          "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法──學生",
+          "value": "你長這樣，怎麼【　　　】得起來？"
+        },
+        {
+          "interactive_type": "display",
+          "label": "想法──黃美廉",
+          "value": "我擁有這麼多，為什麼你只看我所沒有的呢？"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結論",
+      "value": "面對不能改變的壞事，如果能【　　　】自己的【　　　】，就比較不會讓情緒跌入萬丈深淵。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "運動傷害，怎麼辦？",
+  "title": "心理出狀況，是壞事導致的嗎？",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "如何預防",
-      "value": "1.不管是哪一種運動，都要先做好【　　　】運動。"
+      "label": "問題",
+      "value": "許多人認為一個人【　　　】出狀況，是因不能控制的【　　　】導致的，這個說法是真的嗎？"
+    },
+    {
+      "items": [
+        {
+          "label": "人物",
+          "value": ""
+        },
+        {
+          "label": "家庭背景",
+          "value": "爸爸【　　　】，媽媽【　　　】。"
+        },
+        {
+          "label": "狀況──阿堅",
+          "value": "因【　　　】、【　　　】被送進少年觀護所。"
+        },
+        {
+          "label": "狀況──小芸",
+          "value": "國立大學的【　　　】，兼家教賺錢，照顧酒醉的老爸、探望少觀所的弟弟。"
+        },
+        {
+          "label": "想法──阿堅",
+          "value": "我有這樣的家庭，你期待【　　　】？"
+        },
+        {
+          "label": "想法──小芸",
+          "value": "我家都已經這樣了，我【　　　】行嗎？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "故事一"
+    },
+    {
+      "items": [
+        {
+          "label": "欄標題",
+          "value": ""
+        },
+        {
+          "label": "問題",
+          "value": "35歲的鄧小姐，發現自己有【　　　】，必須一輩子吃藥。"
+        },
+        {
+          "label": "想法──一開始",
+          "value": "為什麼這麼【　　　】？"
+        },
+        {
+          "label": "想法──後來",
+          "value": "我【　　　】，及早發現。"
+        },
+        {
+          "label": "結果──一開始",
+          "value": "心裡【　　　】，吃不好也睡不好。"
+        },
+        {
+          "label": "結果──後來",
+          "value": "快樂起來，【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "故事二"
+    },
+    {
+      "items": [
+        {
+          "label": "事實",
+          "value": "黃美廉患有【　　　】，手腳扭曲變形，不但走路東倒西歪，還無法說話。"
+        },
+        {
+          "label": "想法──學生",
+          "value": "你長這樣，怎麼【　　　】得起來？"
+        },
+        {
+          "label": "想法──黃美廉",
+          "value": "我擁有這麼多，為什麼你只看我所沒有的呢？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "故事三"
     },
     {
       "kind": "pair",
-      "label": "如何預防",
-      "value": "2.正確的暖身時間至少要佔整個運動時間的【　　　】，\n主要目的是什麼？（多選）\n增加關節的靈活性　　提升體溫　\n促進肌肉收放效能    提高心肺功能"
-    },
-    {
-      "kind": "pair",
-      "label": "受傷時的處理",
-      "value": "3.受傷後可以如何處理？（多選）\n避免　　壓迫　　保護　　教育　　抬高"
-    },
-    {
-      "kind": "pair",
-      "label": "受傷時的處理",
-      "value": "4.若不幸自己或他人意外受傷，可以怎麼做？(多選)\n找老師／防護員求助       態度冷靜  \n依ＰＥＡＣＥ五步驟處置"
+      "label": "結論",
+      "value": "面對不能改變的壞事，如果能【　　　】自己的【　　　】，就比較不會讓情緒跌入萬丈深淵。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "如何預防",
-      "如何預防",
-      "受傷時的處理",
-      "受傷時的處理"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

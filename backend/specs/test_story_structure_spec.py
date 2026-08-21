@@ -7,8 +7,6 @@ Module spec: specs/modules/story-structure/INTENT.md
 import sys
 from pathlib import Path
 
-import yaml
-
 _BACKEND_DIR = Path(__file__).resolve().parents[1]
 _SCRIPTS_DIR = _BACKEND_DIR.parent / "scripts"
 if str(_BACKEND_DIR) not in sys.path:
@@ -25,6 +23,7 @@ from app.services.story_structure_cell_parser import (
 from story_structure_qa_lib import (
     LessonTier,
     classify_lesson,
+    is_choice_instruction,
     verify_interaction_profile_contract,
 )
 
@@ -50,33 +49,51 @@ class TestCellParser:
         assert row.get("blank_in_label") is True
 
 
-class TestRepresentativeLessons:
-    def test_g7_l6_fill_blank_not_display_only(self):
-        yml = _BACKEND_DIR / "data/lessons/_parsed_2026-05-01/G7-L6.yml"
-        if not yml.exists():
-            import pytest
+def _served_tables():
+    """(code, client_structure) for every lesson serving a 重點表."""
+    from app.services.lesson_loader import get_all_lessons
 
-            pytest.skip("G7-L6.yml missing")
-        data = yaml.safe_load(yml.read_text(encoding="utf-8"))
-        client = _sanitize_structure_for_client(
-            _format_yaml_structure_table(data["story_structure_table"])
+    for lesson in get_all_lessons():
+        table = lesson.get("story_structure_table")
+        if not table:
+            continue
+        yield lesson.get("grade_code"), _sanitize_structure_for_client(
+            _format_yaml_structure_table(table)
         )
-        assert verify_interaction_profile_contract(client) == []
-        assert client["interaction_profile"]["mode"] == "fill_blank"
-        assert client["interaction_profile"]["fill_blank_count"] >= 4
 
-    def test_g8_l13_checkbox_rows(self):
-        yml = _BACKEND_DIR / "data/lessons/_parsed_2026-05-01/G8-L13.yml"
-        if not yml.exists():
-            import pytest
 
-            pytest.skip("G8-L13.yml missing")
-        data = yaml.safe_load(yml.read_text(encoding="utf-8"))
-        client = _sanitize_structure_for_client(
-            _format_yaml_structure_table(data["story_structure_table"])
-        )
-        assert client["interaction_profile"]["mode"] == "checkbox"
-        assert client["interaction_profile"]["checkbox_count"] >= 3
+class TestServedCorpusHonoursTheContract:
+    """These were two tests pinned to `_parsed_2026-05-01/G7-L6.yml` and
+    `G8-L13.yml`. The re-ink deleted that directory, so both had been skipping
+    since — green, named after lessons that no longer exist, testing nothing
+    (#2749, same root cause as the manifest gate going red). The lessons were
+    only ever stand-ins for "one per interaction shape", and the shapes are
+    readable off the corpus, so the corpus is what they check now: 150 tables
+    instead of 2 missing files.
+    """
+
+    def test_every_served_table_honours_its_own_profile(self):
+        broken = [(code, errs) for code, c in _served_tables()
+                  if (errs := verify_interaction_profile_contract(c))]
+        assert broken == [], f"{len(broken)} served tables break the profile contract: {broken[:5]}"
+
+    def test_the_interactive_shapes_still_have_lessons_behind_them(self):
+        """A shape with no lesson left is a shape nothing is watching — which is
+        how a regression in it would land unnoticed. Asserts the two interactive
+        shapes are populated, not that the mix is any particular size."""
+        modes = {c["interaction_profile"]["mode"] for _, c in _served_tables()}
+        assert {"fill_blank", "mixed"} <= modes, f"served modes: {sorted(modes)}"
+
+    def test_a_choice_instruction_is_not_read_as_a_leaked_answer(self):
+        """The leak rule used to flag anything inside 【】, and the second edition
+        writes its choice instructions there — 34 findings across the corpus, all
+        of them markers, none an answer. A check that is wrong every time it fires
+        gets ignored, so the marker vocabulary is excluded and real answers are not."""
+        assert is_choice_instruction("【 單選 】")
+        assert is_choice_instruction("【 請打勾，複選 】")
+        assert not is_choice_instruction("【 戴資穎 】")
+        # Contains 選, and is still an answer — the rule is the whole string, not a substring.
+        assert not is_choice_instruction("【 選手 】")
 
 
 class TestClassifyLessonTier:

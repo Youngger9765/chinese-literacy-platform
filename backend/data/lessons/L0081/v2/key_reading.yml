@@ -1,0 +1,21 @@
+lesson_uid: L0081
+version_id: v2
+passage: 這次NASA特別關注女性太空人登月，是有原因的。長期以來女性太空人的比例非常低，傳統觀念認為，高大強壯的男性更適合艱鉅的太空任務，許多太空裝備和任務設定也都依男性需求設計，這種對女性的偏見，使科學家缺乏太空活動對女性健康影響的研究資料。隨著醫學進步，如今科學家認為，女性可能更適合長途的太空任務，因為女性在任務中消耗的飲食和氧氣比男性少，在幽閉的環境中情緒與精神狀態平均也較為穩定，這些都是女性太空人的優勢。
+start_text: 這次NASA特別關注女性太空人登月，是有原因的。
+extent_chars: 204
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 8

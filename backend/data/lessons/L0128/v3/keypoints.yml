@@ -1,0 +1,64 @@
+lesson_uid: L0128
+version_id: v3
+section_no: 五
+keypoints:
+  title: 讓黑猩猩被看見的人
+  layout: list
+  answer_carrier: 橘色手寫（在文字層），PDF p6 可見
+  rows:
+  - label: 關鍵發現（段1-3）
+    items:
+    - label: '1'
+      value: 珍古德觀察到黑猩猩用【　】釣白蟻。
+      blanks:
+      - answer: 草桿
+    - label: '2'
+      value: 這件事像「震撼彈」，因為當時學界普遍相信：人類是唯一會【　】的生物。
+      blanks:
+      - answer: 製造與使用工具
+  - label: 研究歷程（段4-5）
+    items:
+    - label: '1'
+      value: 她用最原始也最費力的方法：長時間【　】並持續記錄。
+      blanks:
+      - answer: 守候與觀察
+    - label: '2'
+      value: 珍古德改寫了科學界【　】。
+      blanks:
+      - answer: 理解黑猩猩的方式
+    - label: '3'
+      value: 當時不少學者主張為了保持客觀，應以【　】記錄動物；珍古德則堅持為牠們【　】。
+      blanks:
+      - answer: 編號
+      - answer: 命名
+    - label: '4'
+      value: 她透過為黑猩猩命名並長期追蹤，更清楚地記錄牠們的【　】，也看見牠們的【　】。
+      blanks:
+      - answer: 互動與關係
+      - answer: 情緒與選擇
+  - label: 看見全貌(段６-７)
+    items:
+    - label: '1'
+      value: 看見黑猩猩的情緒和相互陪伴。
+    - label: '2'
+      value: 珍古德目睹黑猩猩為了【　】爆發衝突，甚至演變成殘忍的【　】。
+      blanks:
+      - answer: 地盤與資源
+      - answer: 戰爭
+  - label: 從理解到行動(段８)
+    items:
+    - label: '1'
+      value: 珍古德看見人類開發影響黑猩猩的【　】，使保育【　】。
+      blanks:
+      - answer: 棲地
+      - answer: 難以為繼
+    - label: '2'
+      value: 她成立研究院、推動【　】，號召年輕人投入保育。
+      blanks:
+      - answer: 根與芽計畫
+  - label: 總結信念（段9）
+    value: 【　】帶來關心，關心促成【　】，行動帶來希望。
+    blanks:
+    - answer: 了解
+    - answer: 行動
+  rows_note: 「看見全貌」與「從理解到行動」兩列的段號用全形數字（段６-７／段８），其餘用半形，原稿如此

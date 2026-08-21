@@ -1,0 +1,19 @@
+lesson_uid: L0134
+version_id: v3
+title: 從四張圖看地球暖化
+catalog_slot: G9-L13
+sections_present:
+- 'no': 一
+  name: 讀全文
+- 'no': 二
+  name: 閱讀聚光燈
+  subtitle: 圖文整合閱讀策略——先文後圖，再整合
+- 'no': 三
+  name: 知識補給站
+- 'no': 四
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 11
+  drive_path: 9年級/G9-L13四張圖看地球暖化（圖文整合閱讀策略）.docx
+  docx_md5: md5-12:92b8d47ace1f

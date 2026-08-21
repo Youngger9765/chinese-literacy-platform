@@ -1,0 +1,49 @@
+keypoints:
+  lesson: G7-L5
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 好奇的問題
+    value: 電子煙是否安全？
+    blanks: []
+  - label: 訊息來源
+    value: 看朋友傳來的兩部__。
+    blanks:
+    - answer: 電子煙實驗影片
+      hint: ''
+  - label: 網紅的實驗
+    sub_rows:
+    - sub_label: (1)__實驗：用紙菸和電子煙的煙霧試驗棉花有沒有變色。
+      template: (2)__實驗：把煙油加入食物、飲料後吃下，宣稱煙油無害。
+      blanks:
+      - answer: 棉花肺
+        hint: ''
+      - answer: 煙油食材
+        hint: ''
+  - label: 錯誤推論
+    value: 棉花未變色、煙油可以吃
+    blanks: []
+  - label: 網紅暗示、阿政誤信的結論
+    value: 棉花未變色、煙油可以吃，所以，電子煙對人體__。
+    blanks:
+    - answer: 無害
+      hint: ''
+  - label: 對網紅實驗的批判
+    value: (1)棉花肺實驗的問題→A.棉花不等於人的肺。B.光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本__。 (2)煙油食材實驗的問題(單選)　→電子煙是__到肺裡的，網紅把煙油__下肚，完全沒有說明吸電子煙對人體的影響。
+    blanks:
+    - answer: 看不見
+      hint: ''
+    - answer: □①吸□②吃
+      hint: ''
+    - answer: □①吸□②吃
+      hint: ''
+  - label: 總結
+    value: 理性判斷、聰明識讀的方法：(1)認清廠商的行銷手法，學會質疑傳播者的__。(2)多方__網路上訊息的正確性。
+    blanks:
+    - answer: 動機
+      hint: ''
+    - answer: 查證
+      hint: ''
+  title: 網紅的電子煙實驗：偽科學的陷阱

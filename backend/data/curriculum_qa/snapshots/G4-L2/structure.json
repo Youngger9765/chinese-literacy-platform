@@ -1,87 +1,66 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "十秒的背後",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主角",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "挫折事件",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "雅加達亞運",
-          "value": "【　　　】\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "拿坡里世大運",
-          "value": "比賽時受傷了，他選擇【　　　】\n積極的面對與復健   □放棄跑步、不願治療",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "正太與小豬：武僧的養成之路",
+      "value": ""
     },
     {
+      "interactive_type": "display",
+      "label": "背景",
+      "value": "兩百年前日本奈良，市集。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "起因",
+      "value": "正太看到僧人制服惡霸，讓他想要去興福寺【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "經過",
+      "value": "師父給他【　　　】，每天讓正太抱著小豬走上走下，持續【　　　】年，每日不間斷。"
+    },
+    {
+      "interactive_type": "fill_blank",
       "label": "結果",
-      "value": "他成為再度登上奧運【　　　】\n一百公尺  □四百公尺   的短跑項目的臺灣選手。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "他學到了什麼?",
-      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。",
-      "interactive_type": "fill_blank"
+      "value": "三年後，正太變成了【　　　】，一般的匪徒強盜再也不是他的對手。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "十秒的背後",
+  "title": "正太與小豬：武僧的養成之路",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主角",
-      "value": "【　　　】"
+      "label": "背景",
+      "value": "兩百年前日本奈良，市集。"
     },
     {
-      "kind": "section_block",
-      "section": "挫折事件",
-      "items": [
-        {
-          "label": "雅加達亞運",
-          "value": "（單選）\n□驕傲地奪得銀牌     \n不甘心以微小的差距奪得銀牌"
-        },
-        {
-          "label": "拿坡里世大運",
-          "value": "比賽時受傷了，他選擇（單選）\n積極的面對與復健   □放棄跑步、不願治療"
-        }
-      ]
+      "kind": "pair",
+      "label": "起因",
+      "value": "正太看到僧人制服惡霸，讓他想要去興福寺【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "經過",
+      "value": "師父給他【　　　】，每天讓正太抱著小豬走上走下，持續【　　　】年，每日不間斷。"
     },
     {
       "kind": "pair",
       "label": "結果",
-      "value": "他成為再度登上奧運（單選）\n一百公尺  □四百公尺   的短跑項目的臺灣選手。"
-    },
-    {
-      "kind": "pair",
-      "label": "他學到了什麼?",
-      "value": "他學會了先了解害怕的事物，【　　　】，再戰勝它。\n2.學習和自己【　　　】，找尋答案。"
+      "value": "三年後，正太變成了【　　　】，一般的匪徒強盜再也不是他的對手。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "主角",
-      "雅加達亞運",
-      "拿坡里世大運",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

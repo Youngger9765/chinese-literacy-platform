@@ -1,0 +1,21 @@
+lesson_uid: L0006
+version_id: v2
+passage: 公車慢慢地停在站牌旁，一位白髮蒼蒼的老爺爺上了車，從他登階時的緩慢動作可以看出他的力不從心。車上已經擠滿了人，大家稍微讓開一條小路，讓老爺爺進入走道中間。老爺爺左顧右盼，可惜已經滿座，他只好站在博愛座旁的空間，拉著吊環，隨著晃動的公車搖搖擺擺，就像風中抖動的燭光。
+start_text: 公車慢慢地停在站牌旁，一位白髮蒼蒼的老爺爺上了車
+extent_chars: 132
+source: docx-extract
+anchor_paragraph: 1
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 9

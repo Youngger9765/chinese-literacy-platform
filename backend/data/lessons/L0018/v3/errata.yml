@@ -1,0 +1,12 @@
+lesson_uid: L0018
+version_id: v3
+errata:
+- id: E1
+  section: 五 文章重點表
+  locator: 最左側直排欄「主題：…的關鍵」
+  source: 主題：】長高【的關鍵
+  corrected: 主題：【長高】的關鍵
+  kind: 標點順序顛倒
+  why: 本教材一律用【　】標學生要填的空格（本表其餘 6 個空格都是「【…】」），此處前後括號寫反了
+  confidence: medium
+  evidence: document.xml 文字流為「】長高【」；PDF p5 此欄為直排，兩個括號字形旋轉後肉眼無法判定方向，故只依文字流認定

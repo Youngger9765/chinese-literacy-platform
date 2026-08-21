@@ -1,0 +1,21 @@
+lesson_uid: L0101
+version_id: v2
+passage: 小米酒的意義，在一次次被舉起的場合中展現無遺。
+start_text: 小米酒的意義，在一次次被舉起的場合中展現無遺。
+extent_chars: 23
+source: docx-extract
+anchor_paragraph: 3
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 7
+  cell_paragraphs: 8

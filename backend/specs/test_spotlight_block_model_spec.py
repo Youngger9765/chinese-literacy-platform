@@ -135,14 +135,41 @@ def g6_l22_blocks() -> list[dict]:
     return sp["blocks"]
 
 
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
+
+
 def test_g6_l22_fixture_loads():
     assert load_spotlight_v2("G6-L22") is not None
+
+
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
 
 
 def test_g6_l22_acceptance_passes(g6_l22_blocks: list[dict]):
     """Professor intent: guide → passage+exercise loops, not static answers in guide."""
     result = eval_g6_l22_acceptance(g6_l22_blocks)
     assert result["pass"], f"G6-L22 acceptance failures: {result['failures']}"
+
+
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
 
 
 def test_g6_l22_mengchang_segment_structure(g6_l22_blocks: list[dict]):
@@ -168,6 +195,15 @@ def test_g6_l22_mengchang_segment_structure(g6_l22_blocks: list[dict]):
     assert "fill_blank" in interactions
 
 
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
+
+
 def test_g6_l22_no_option_lines_in_guide_role(g6_l22_blocks: list[dict]):
     canonical = normalize_spotlight_blocks(g6_l22_blocks)
     for i, b in enumerate(canonical):
@@ -177,6 +213,15 @@ def test_g6_l22_no_option_lines_in_guide_role(g6_l22_blocks: list[dict]):
         assert not text.startswith("□"), f"block[{i}] guide-like role has □ option: {text[:40]}"
 
 
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
+
+
 def test_g6_l22_answer_gold(g6_l22_blocks: list[dict]):
     from app.services.spotlight_block_model import eval_g6_l22_answers
 
@@ -184,11 +229,29 @@ def test_g6_l22_answer_gold(g6_l22_blocks: list[dict]):
     assert result["pass"], f"answer gold failures: {result['failures']}"
 
 
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
+
+
 def test_g6_l22_four_exercises_per_passage(g6_l22_blocks: list[dict]):
     from app.services.spotlight_block_model import eval_g6_l22_segments
 
     result = eval_g6_l22_segments(g6_l22_blocks)
     assert result["pass"], f"segment failures: {result['failures']}"
+
+
+@pytest.mark.skip(
+
+
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+
+
+)
 
 
 def test_g6_l22_crow_first_question_is_mcq(g6_l22_blocks: list[dict]):
@@ -205,6 +268,9 @@ def test_g6_l22_crow_first_question_is_mcq(g6_l22_blocks: list[dict]):
 
 
 @pytest.mark.parametrize("lesson_id", ["G6-L23", "G6-L24", "G6-L25", "G7-L28", "G7-L29", "G7-L30"])
+@pytest.mark.skip(
+    reason="G6-L22 是一修的垂直切片驗收課，其 fixture 與 DEV7 名單隨一修刪除（#2683）；block model 的通則契約已改由 specs/test_spotlight_v2_spec.py 對 143 課真語料覆蓋"
+)
 def test_dev7_canonical_normalize_valid(lesson_id: str):
     sp = load_dev7_spotlight(lesson_id)
     assert sp is not None

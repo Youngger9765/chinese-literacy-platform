@@ -1,0 +1,21 @@
+lesson_uid: L0175
+version_id: v2
+passage: 第一種──固定型思維：覺得聰明是天生的，「我沒有數學細胞」、「不行就是不行」。看到別人強，心裡會酸酸的，覺得自己被打敗了。被打了紅叉叉時，只想趕快把它藏起來，因為那代表「我很笨」。第二種──成長型思維：覺得大腦像肌肉，越練會越強壯。看到別人厲害的表現，會想：「他是怎麼辦到的？我也想學！」失敗時，雖然會懊惱，但也會想：「原來這部分還可以再加強！我想再試一次！」
+start_text: 第一種──固定型思維：覺得聰明是天生的，「我沒有
+extent_chars: 180
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 9

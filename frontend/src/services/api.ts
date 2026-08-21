@@ -11,7 +11,21 @@
  * fetchStories, fetchStory.
  */
 
-import type { Story } from '../types';
+import type {
+  Story,
+  ClassicalTextContent,
+  ModernTranslationContent,
+  ClassicalWordMatchingContent,
+  ClassicalSentenceMatchingContent,
+  ClassicalSelfChallengeContent,
+  IntroGuideContent,
+  GoalBoxContent,
+  SelfCheckBeforeReadingContent,
+  WritingPracticeContent,
+  MultiTextPart,
+  CrossTextBannerContent,
+  KeypointsFollowupQuestionsContent,
+} from '../types';
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
@@ -68,7 +82,7 @@ interface ApiStoryListItem {
   id: number;
   lesson_number: number;
   title: string;
-  grade: number;
+  grade: string;   // "4".."9" / 文言文 / 品格教育
   grade_code: string;
   genre: string;
   category: string;
@@ -141,12 +155,26 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // straight from pydantic model_dump; null when the backend flag is OFF or no source.
   // Parsed in apiDetailToStory via camelizeKeys + LessonSchema.safeParse (fail-safe).
   lesson_content?: Record<string, unknown> | null;
+  // 文言文專屬模組 (#2752) — null for every non-文言文 lesson.
+  classical_text?: ClassicalTextContent | null;
+  modern_translation?: ModernTranslationContent | null;
+  word_matching?: ClassicalWordMatchingContent | null;
+  sentence_matching?: ClassicalSentenceMatchingContent | null;
+  self_challenge?: ClassicalSelfChallengeContent | null;
+  intro_guide?: IntroGuideContent | null;
+  // 一般課也有的無編號元素 (#2752 Phase 2) — null for lessons without one.
+  goal_box?: GoalBoxContent | null;
+  self_check_before_reading?: SelfCheckBeforeReadingContent | null;
+  writing_practice?: WritingPracticeContent | null;
+  multi_text_parts?: MultiTextPart[] | null;
+  cross_text_banner?: CrossTextBannerContent | null;
+  keypoints_followup_questions?: KeypointsFollowupQuestionsContent | null;
 }
 
 interface ApiStoryListResponse {
   stories: ApiStoryListItem[];
   total: number;
-  grades: number[];
+  grades: string[];
 }
 
 function apiListItemToStory(item: ApiStoryListItem): Story {
@@ -249,10 +277,24 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
       }
       return parsed.data;
     })(),
+    // 文言文專屬模組 (#2752) — undefined for every non-文言文 lesson (matches
+    // the `undefined`-means-absent convention every other optional field here uses).
+    classicalText: detail.classical_text ?? undefined,
+    modernTranslation: detail.modern_translation ?? undefined,
+    wordMatching: detail.word_matching ?? undefined,
+    sentenceMatching: detail.sentence_matching ?? undefined,
+    selfChallenge: detail.self_challenge ?? undefined,
+    introGuide: detail.intro_guide ?? undefined,
+    goalBox: detail.goal_box ?? undefined,
+    selfCheckBeforeReading: detail.self_check_before_reading ?? undefined,
+    writingPractice: detail.writing_practice ?? undefined,
+    multiTextParts: detail.multi_text_parts ?? undefined,
+    crossTextBanner: detail.cross_text_banner ?? undefined,
+    keypointsFollowupQuestions: detail.keypoints_followup_questions ?? undefined,
   };
 }
 
-export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: number[] }> {
+export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: string[] }> {
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
   // Bounded content (~270 lessons): fetch all in one request so client-side

@@ -1,0 +1,45 @@
+keypoints:
+  lesson: 文-L9
+  structure: flat
+  columns:
+  - label
+  - hint
+  - value
+  rows:
+  - label: 主角
+    value: __
+    blanks:
+    - answer: 方仲永
+      hint: ''
+  - label: 背景
+    value: 居住地：__
+    blanks:
+    - answer: 金谿
+      hint: ''
+  - label: 背景
+    value: 家  世：__
+    blanks:
+    - answer: 世隸耕／世代種田
+      hint: ''
+  - label: 發展或變化
+    hint: 天才時期
+    value: __歲開始展現天才。1.不曾見過__，沒有人教，卻會寫詩，還能簽名。2.指定任何事物叫他作詩，都能立刻做出來。3.寫出來的詩有__也有__。4.他的父親帶他__鄉人作詩，沒有讓他學習。
+    blanks:
+    - answer: 五
+      hint: ''
+    - answer: 書具／寫字的紙筆
+      hint: ''
+    - answer: 文（采）
+      hint: ''
+    - answer: （道）理
+      hint: ''
+    - answer: 環謁／四處拜訪
+      hint: ''
+  - label: 發展或變化
+    hint: 變成凡人過程
+    value: 1.__歲時，寫的詩已不如傳聞中的好。2.__歲，天資消失，變成普通人。
+    blanks:
+    - answer: 十二、三
+      hint: ''
+    - answer: 二十
+      hint: ''

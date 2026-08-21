@@ -1,0 +1,98 @@
+lesson_uid: L0093
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 科學推理策略──用科學步驟解決問題
+  strategy_type: scientific_reasoning
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）與橘色手寫字
+  structure_note: '三個小節各是一張「問題→假設→檢驗→解答」的流程圖（圓角方框＋箭頭），
+
+    本檔攤平成 guide／free_text／single 的線性序列，流程關係寫進 prompt 的行首標籤。
+
+    ⚠️ 流程圖的圓角方框也是 `roundRect`，所以全檔 roundRect 總數（22）遠大於找字圈的 10 個。'
+  blocks:
+  - type: concept_box
+    text: '根據課文，李昌鈺博士在辦案的過程中，不斷運用這四個步驟思考、解決問題。發現問題→提出假設→檢驗假設→提出解答。
+
+      *發現問題：從現場觀察到的現象或找到的線索，產生疑問。
+
+      *提出假設：針對問題，提出一些可能的答案。
+
+      *檢驗假設：運用方法、蒐集證據，判斷假設是否得到支持。
+
+      *提出解答：根據驗證結果，回答原先的問題。
+
+      除了警察辦案，遇到生活中的問題，我們也可以用這四個步驟，一步一步找出有根據的答案。讓我們回到課文，跟著李博士用這四個步驟一起辦案吧！'
+  - type: guide
+    text: 一、推理示範
+  - type: table
+    columns:
+    - 問題
+    - 假設
+    - 檢驗
+    rows:
+    - - 死者被刺18刀，為什麼地上沒有血？
+      - '一、血跡已經清理過了。
+
+        二、這裡不是第一現場。'
+      - 用化學藥品，看到廚房大片血跡反應。
+  - type: single
+    prompt: 根據「廚房有大片血跡反應」，哪一假設較獲支持？
+    options:
+      1: 假設一：血跡已經清理過了。
+      2: 假設二：這裡不是第一現場。
+    answer: 1
+  - type: guide
+    text: 說明：破案的過程，要面對一連串還沒有答案的問題，而在解答每一個問題時，都可以用上科學程序的四步驟哦。
+  - type: guide
+    text: 二、小試身手
+  - type: guide
+    text: 凶手踩過血跡，留下鞋印，要去哪裡找鞋呢？
+    note: 流程圖第 1 格（上方黑色標籤印「問題」）
+  - type: guide
+    text: '思考：鞋子沾血，凶手會想把鞋子丟掉。
+
+      假設：凶手把鞋子丟在垃圾箱'
+    note: 流程圖第 2 格（上方黑色標籤印「假設」）
+  - type: free_text
+    prompt: 怎麼做：【　】
+    blanks:
+    - answer: 派刑警到附近所有的垃圾箱找鞋子
+    note: 流程圖第 3 格（上方黑色標籤印「檢驗」）
+  - type: free_text
+    prompt: 刑警在【　】找到鞋子
+    blanks:
+    - answer: 垃圾箱
+    note: 流程圖第 4 格（上方黑色標籤印「解答」）的前半
+  - type: single
+    prompt: 根據此結果，「凶手把鞋子丟到垃圾箱」這個假設：
+    options:
+      1: 獲得支持
+      2: 未獲支持
+    answer: 1
+  - type: guide
+    text: 三、挑戰題
+  - type: guide
+    text: 找到鞋子了，那要去哪裡找鞋子的主人呢？
+    note: 流程圖第 1 格（上方黑色標籤印「問題」）
+  - type: free_text
+    prompt: '思考：沾血的鞋子丟掉後，凶手會需要【　】。
+
+      假設：凶手可能會去【　】。'
+    blanks:
+    - answer: 一雙新鞋
+    - answer: 購物中心買鞋
+    note: 流程圖第 2 格（上方黑色標籤印「假設」）
+  - type: free_text
+    prompt: 詢問購物中心的【　】，前一天下午有沒有人來【　】
+    blanks:
+    - answer: 鞋店老闆
+    - answer: 買鞋
+    note: 流程圖第 3 格（上方黑色標籤印「檢驗」）
+  - type: single
+    prompt: 鞋店老闆說，前一天下午曾賣鞋給符合凶嫌特徵的人。因此，「凶手把鞋子丟掉後，去購物中心買鞋」這個假設：
+    options:
+      1: 獲得支持
+      2: 未獲支持
+    answer: 1

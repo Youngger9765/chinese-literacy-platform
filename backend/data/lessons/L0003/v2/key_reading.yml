@@ -1,0 +1,21 @@
+lesson_uid: L0003
+version_id: v2
+passage: 除了動物，天空本身也會說話。「日暈三更雨，月暈午時風」，所謂「暈ㄩㄣˋ」就是圍繞著太陽或月亮的光環。這句諺語指出，看到日暈，夜裡可能下雨，看到月暈，隔天白天可能起風。因為高空有一層很薄的冰晶雲，把光折射開來，我們才會看到日暈或月暈，這種雲常常是鋒面來臨的前兆，也就是說，看到日暈或月暈，再過半天，很可能就會起風或下雨。此外，我們偶爾會覺得今天的星星或遠山好像變近了，歷歷在目。有文學細胞的人就會寫下「今夜星辰分明，遠山如洗，彷󠇡彿天地間的距離被悄悄拉近」的美麗文句，這通常預示著冷空氣來臨，空氣潔淨，天氣即將轉晴或變涼。
+start_text: 除了動物，天空本身也會說話。「日暈三更雨，月暈午
+extent_chars: 260
+source: docx-extract
+anchor_paragraph: 7
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 8
+  cell_paragraphs: 8

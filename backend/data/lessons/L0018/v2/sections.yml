@@ -1,0 +1,141 @@
+lesson_uid: L0018
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 均衡
+    definition: 各方面搭配得剛好，不會只偏重某一部分。
+  - index: 2
+    word: 前提
+    definition: 做一件事之前，要先做到或注意的事。
+  - index: 3
+    word: 嘰嘰喳喳
+    definition: 形容很多人一直說話，聲音又多又吵。
+  - index: 4
+    word: 根據
+    definition: 按照、依據。
+  - index: 5
+    word: 富含
+    definition: 含有很多，很豐富。
+  - index: 6
+    word: 攝取
+    definition: 把食物或營養吃進、喝進身體裡。
+  - index: 7
+    word: 分泌
+    definition: 身體自己製造某種物質，並把它釋放出來。
+  - index: 8
+    word: 促進
+    definition: 幫助某件事發展得更快、更好。
+  - index: 9
+    word: 迷思
+    definition: 很多人相信，但其實不一定正確的想法。
+  - index: 10
+    word: 大幅度
+    definition: 改變或變動的程度很大。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 攝取
+    B: 迷思
+    C: 均衡
+    D: 促進
+    E: 嘰嘰喳喳
+    F: 分泌
+    G: 前提
+    H: 根據
+  questions:
+  - index: 1
+    text: 飯前的開胃菜可以（　）食慾。
+    answer: D
+  - index: 3
+    text: 那一群人（　）的，不知道在討論什麼？
+    answer: E
+  - index: 6
+    text: 我們（　）天氣預報，調整行程，把戶外活動改到下午進行。
+    answer: H
+  - index: 7
+    text: 很多人認為只要熬夜讀書，成績就會進步，這其實是一種（　）。
+    answer: B
+  - index: 8
+    text: 醫生建議多（　）蔬菜和水果，維持均衡的飲食。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 請問文中第四段提到「適當的運動也是長高相當重要的一環。」這裡的「一環」最可能是什麼意思?
+    options:
+      A: 圓形而中空的東西
+      B: 其中一個重要部分
+      C: 圍繞
+      D: 玉石雕的圓形圈子
+    rationale: null
+    marker_notes:
+      A: 玉環
+      C: 環繞
+      D: 玉環
+  - index: 2
+    answer: C
+    stem: 小承恩不喜歡他的外號的原因是什麼？
+    options:
+      A: 因為他討厭承恩這個名字
+      B: 因為他討厭大承恩
+      C: 因為這個外號提醒他身高比較矮
+      D: 因為都坐在第一排
+    rationale: null
+  - index: 3
+    answer: D
+    stem: 根據本文，下列關於幫助身體成長的做法，何者正確？
+    options:
+      A: 轉骨湯是有效的民間偏方
+      B: 激烈運動有助於骨骼生長
+      C: 要熬夜才能分泌生長激素
+      D: 攝取足夠且多樣的營養素
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 根據本文，請問促進成長的運動，下列何者配對錯誤？
+    options:
+      A: 有氧運動→→慢跑
+      B: 肌力訓練→→弓箭步
+      C: 跳躍刺激生長板→→游泳（第四段）D.伸展運動→→瑜珈
+    rationale: null
+  - index: 5
+    answer: A
+    stem: 下列何者是最符合均衡飲食的菜盤？（少了肉類及蔬菜）
+    options:
+      A: 白飯+菠菜+雞胸肉+杏鮑菇
+      B: 一盤蛋炒飯
+      C: 時蔬清炒義大利麵
+      D: 滷肉飯+豆干+貢丸湯
+    rationale: 少了肉類）                      （少了蔬菜
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 多補鈣會長高? 打籃球會長高? 打臉各種長高迷思!
+    duration_seconds: 215
+    source: 蒼藍鴿的醫
+  - index: 2
+    title: 網路「長高貼片」真有效？ 花千元實測30天成果他傻眼
+    duration_seconds: 373
+    source: 台灣達人秀
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

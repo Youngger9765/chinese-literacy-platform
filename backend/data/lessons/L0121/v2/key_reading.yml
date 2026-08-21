@@ -1,0 +1,21 @@
+lesson_uid: L0121
+version_id: v2
+passage: 再者，不少加害者和被害者處於「權力不對等」的關係，例如導演與演員、上司與部屬、明星與粉絲、老師與學生、長輩與晚輩等。處於權力優勢位置的人，可能以愛護或關心的方式接近對方，使人一開始難以察覺界線已被越過；而處於權力弱勢位置的受害者，可能擔心說出來會被報復，或是不被相信。
+start_text: 再者，不少加害者和被害者處於「權力不對等」的關係
+extent_chars: 134
+source: docx-extract
+anchor_paragraph: 7
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 12
+  cell_paragraphs: 17

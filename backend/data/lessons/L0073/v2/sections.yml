@@ -1,0 +1,121 @@
+lesson_uid: L0073
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 韶光
+    definition: 時間，常指美好的時光。
+  - index: 2
+    word: 唾手可得
+    definition: 往手上吐口水，比喻非常容易得到。同「易如反掌」。
+  - index: 3
+    word: 枯燥乏味
+    definition: 單調、無趣。
+  - index: 4
+    word: 眷戀
+    definition: 懷念、不捨。
+  - index: 5
+    word: 如影隨形
+    definition: 像影子一直跟著人，比喻緊緊跟隨、難以擺脫。
+  - index: 6
+    word: 格格不入
+    definition: 不適合、難以融入。
+  - index: 7
+    word: 恍然大悟
+    definition: 突然醒悟、明白。
+  - index: 8
+    word: 雀躍
+    definition: 像雀鳥一樣跳躍，比喻非常開心、興奮。
+  - index: 9
+    word: 翻天覆地
+    definition: 形容變化非常大。同「天翻地覆」。
+  - index: 10
+    word: 嶄新
+    definition: 全新。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 如影隨形
+    B: 唾手可得
+    C: 翻天覆地
+    D: 恍然大悟
+    E: 枯燥乏味
+    F: 格格不入
+    G: 眷戀
+    H: 韶光
+  questions:
+  - index: 1
+    text: 他穿著體育服出現在喜宴上，顯得非常 （　）。
+    answer: F
+  - index: 2
+    text: 這十年來，科技的進步讓我們的生活發生（　）的變化。
+    answer: C
+  - index: 3
+    text: 自從他在眾人面前出糗後，犯錯的焦慮就（　），緊緊跟著他。
+    answer: A
+  - index: 4
+    text: 「盛年不重來，一日難再晨」，美好的（　）要好好把握。
+    answer: H
+  - index: 5
+    text: 畢業多年，他依然（　）著校園的一草一木。
+    answer: G
+  - index: 6
+    text: 這場（　）的演講讓台下的人感到不耐煩，紛紛開始聊天。
+    answer: E
+  - index: 7
+    text: 經過多年的苦練與突破後，進入決賽對他來說已（　）。
+    answer: B
+  - index: 8
+    text: 媽媽解釋完事情的來龍去脈後，我才（　），知道自己誤會弟弟了。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 3
+    answer: C
+    stem: 作者「升上國中的新鮮感」隨著時間有何變化？下列哪一張圖最能說明？
+    options:
+      C: 國中生活比小學辛苦，因此應盡量維持原本的生活方式。
+      A: 離開熟悉環境後，只要回去找舊朋友，就能解決所有不適應。
+      B: 成長不是忘記過去，而是珍惜回憶，也學會告別並把握眼前。
+      D: 朋友有了新的關係後，過去的友情就不再值得珍惜。
+    rationale: 從新鮮感逐漸退去，可以知道是逐漸下降。
+  - index: 5
+    answer: C
+    stem: 下列文句的聯想和運用，何者正確？
+    options:
+      A: 妹妹的個性像綿羊一樣火爆
+      B: 他嚴肅說話的樣子像個小丑
+      D: 從空中看，地上的房子好像雨滴
+      C: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 邊緣人被排擠？會讓你被朋友討厭的三件事！
+    duration_seconds: 495
+    source: SKimmy
+  - index: 2
+    title: 讀書時間長不一定有效，5個方法讓你輕鬆變學霸
+    duration_seconds: 260
+    source: 風傳媒
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0075",
+  "catalog_slot": "G6-L8",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 0,
+  "notes": "🔴 本課 w:sym F0FE 計數 = 0，整份學習單沒有任何 ☑。這不是漏抽：教師答案全部是橘色手寫填空（語詞 9 條、代號 8 條、小試身手 4 格）加三條手繪連線；唯二的 □ 是學生自填用的（讀前自我檢核 2 項、學後自我檢核 2 項），原稿本來就沒勾，已標 no_correct_answer。🔴 連連看的三條答案線在 PDF 上完全看不到——LibreOffice 沒渲染它們——但它們在 document.xml 裡：連連看那張表內有 3 個 prstGeom prst=\"line\"，是全檔 19 條 line 中唯三 cy≠0 的（其餘 16 條 cy=0 是版面裝飾橫線，分佈在各大題標題處）。只讀 PDF 會判成「這題沒有答案」。對應關係由兩條互相獨立的證據判定且一致：① 幾何——三條線端點的 y 值把左欄三列（問題 y≈0／解決 y≈915253／結果 y≈1737033）分別接到右欄的 B(y≈915819)／C(y≈1666990)／A(y≈2)，其中接到 A 的那條帶 flipV=\"1\"（由下往上），跨距 1737031 正好是兩列高；② 語意——B「文章前面…需要解決的困難」＝問題、C「文章中段…誰做了什麼」＝解決、A「文章後面…行動後的成果」＝結果。故 answer = {1:B, 2:C, 3:A}。結構特例兩項，均照原稿記錄：(a) 知識補給站排在第二大題，不是慣例的最後一題；(b) 整份沒有「文章重點表」，全課只有八個大題且一~八連號無缺——把「整理問題—解決—結果」放進第六大題聚光燈的◎小試身手表格由學生自己整理，學習單本文也明講「這一課，我們要運用同樣的方法，自己整理重點」，是設計如此非漏抽，v3 因此正確地沒有 keypoints.yml。念順順「三☞」= 第 3 段，右緣累計字數兩個段界全中（Word 口徑：連續阿拉伯數字算 1 個字）：第 3 段 124 = 印的 124，第 3+4 段 324 = 印的最後一個 324；第 5~7 段沒有標。找字 roundRect 9 個 = 目標語詞 9 個 = 路徑 9 條，逐格取字全部拼得回，格子沒有錯字；XML 字陣與 p9 圖上逐格核對一致。語詞應用代號表 9 個語詞齊全，但 G.屏氣凝神 在 8 題中未被使用（原稿如此，已記 unused_options）。學習單與總表都印全名「白鯨救援：一場人與自然的協奏曲」，而 backend/data/lessons/L0075/v2/lesson.yml 的 title 是簡稱「白鯨救援」，已記 title_note。總表策略欄用「──」（U+2500 x2）、學習單標題印「—」（U+2014），meta.strategy 採學習單形式。 第八道門 orphan_key_gate（2026-08-18 新增）：PASS。本課 self_check_before_reading 原本因 splitter 的 MODULES 表沒這一格而整節沒搬進 v3（抽取沒錯、是搬運表缺一格），工頭補進 MODULES 後重跑 split，模組數 11→12（L0075 10→11），self_check_before_reading.yml 342 bytes 內容完整。已逐一確認本課每個 top-level key 都落在 MODULES（會搬進 v3），只有 meta / sections_present / sections_absent_note 在 BOOKKEEPING，那三個確為記帳欄。 2026-08-18 後補：body.running_char_counts 從 XML 補上（12 個值），四條口徑窮舉重驗：濾隱藏字元＋數字口徑B＋小標不計入 → 段界 124/324 全中，與原本結論一致。"
+}

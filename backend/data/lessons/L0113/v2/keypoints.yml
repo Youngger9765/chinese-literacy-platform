@@ -1,0 +1,60 @@
+keypoints:
+  lesson: G8-L16
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 案例（段1）
+    value: 問題：傅達仁罹癌，他想結束痛苦折磨，但臺灣無合法管道。解決：寫信給總統盼__，但爭議大、難有共識。結果：在家人陪伴下前往瑞士，依當地制度以__方式離世。
+    blanks:
+    - answer: 推動立法
+      hint: ''
+    - answer: 協助自殺
+      hint: ''
+  - label: 核心議題（段2）
+    value: 當生命只剩疼痛，是否能__？誰能協助做決定？
+    blanks:
+    - answer: 選擇告別
+      hint: ''
+  - label: 三種性質不同的臨終選擇(段3)
+    value: 1.__：不做無效醫療，讓生命自然走到終點2.__：他人主動用藥，讓無法自我決定的病人死亡3.__：在醫療人員的協助下，自己按下注射藥劑的開關，完成最後一步。
+    blanks:
+    - answer: 撤除維生醫療
+      hint: ''
+    - answer: 安樂死
+      hint: ''
+    - answer: 協助自殺
+      hint: ''
+  - label: 臺灣現況(段3)
+    value: 臺灣目前已有__與__，主要保障的是第一種；第二、三種仍不合法。
+    blanks:
+    - answer: 安寧緩和醫療
+      hint: ''
+    - answer: 病人自主權利法
+      hint: ''
+  - label: 對議題看法：多元觀點(段4-6)
+    value: 1.贊成：在__下開放讓病人可選擇結束生命。2.反對：擔心開放後__；也擔心弱勢病患因__而被迫選擇死亡。3.保留：主張先落實__：疼痛控制、心理支持、長照與照顧者喘息更普及。
+    blanks:
+    - answer: 法律監督
+      hint: ''
+    - answer: 適用範圍擴大
+      hint: ''
+    - answer: 費用／照護壓力
+      hint: ''
+    - answer: 臨終照顧
+      hint: ''
+  - label: 兩難(段7)
+    value: 1.此難題同時牽涉__、信仰、風險與__。2.若開放要設計__；若不開放要確保病人不被__吞沒、補足__。
+    blanks:
+    - answer: 人權
+      hint: ''
+    - answer: 制度設計
+      hint: ''
+    - answer: 審查、申訴與監督
+      hint: ''
+    - answer: 疼痛
+      hint: ''
+    - answer: 照護缺口
+      hint: ''
+  title: 我能不能選擇告別方式？

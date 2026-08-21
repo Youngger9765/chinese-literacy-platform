@@ -1,0 +1,7 @@
+{
+  "lesson_uid": "L0159", "catalog_slot": "文-L4", "pdf_pages": 9, "pages_read": 9,
+  "wall_clock_seconds": null, "read_calls": 1,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0, "verbatim_all": 0},
+  "retries": 2,
+  "notes": "🔴 本課有真的 text_carrier: image（三張 130~160KB 的圖：斷句示範、圈補主語思路、挑戰題解答），而**第一版標太寬**：自檢（把 image 子樹的片段拿回合併 run 後的 dump grep）抓到 4 個片段其實在文字層（明有陸盧峰者/婦欲試之/有醫者自稱善外科/乃持并州剪）。改成只轉錄「圖上獨有」的東西（紅筆斷句記號、補上的主語、螢光標示、圖上獨有的註記），句子本身指回文字層的欄位。改完自檢 0 命中，正負向對照都成立（『請根據文章內容』找得到、『誰在京城待用』找不到）。找到一筆錯字（E1）：練習一第②句印「簇在膜內者」，注 5 與上方原文圖都是「鏃」。答案載體：☑ 0 個；橘色 run 層只有 1 個、解 rStyle（樣式 aff）才有 53 個 —— 只掃 run 會判成『這課沒答案』。紅筆斷句與圈補主語是 19 個紅色圖形，要遞迴 wps:wsp 才數得到。主語標籤 10 個是浮動文字方塊，document 順序≠版面順序，用版面位置+語意配對，並以『標籤總數 10 = 1+1+3+4+1』與『每個動詞短語恰好一個標籤』兩項交叉檢查。retry 2 次：逐字門的 3 處（合併兩行、拿掉上標注號 ×2），以及上述 image 標太寬的自檢。"
+}

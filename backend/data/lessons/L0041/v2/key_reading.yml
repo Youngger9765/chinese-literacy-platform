@@ -1,0 +1,21 @@
+lesson_uid: L0041
+version_id: v2
+passage: 食量、維持輕盈的體態，讓他在羽球場上移動得更靈活。
+start_text: 食量、維持輕盈的體態，讓他在羽球場上移動得更靈活
+extent_chars: 25
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 8

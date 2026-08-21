@@ -1,0 +1,58 @@
+lesson_uid: L0074
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 食物鏈
+  - 追根究柢
+  - 猛禽
+  - 侷限
+  - 坦承錯誤
+  - 先驅
+  - 苦撐待變
+  - 青睞
+  - 契作協議
+  - 層層把關
+  - 鍥而不捨
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 食物鏈
+    definition: 自然界中，生物間「誰吃誰」的關係，像一條鏈子連接起來。像「大魚吃小魚，小魚吃蝦米」就是一個食物鏈。
+  - index: 2
+    word: 青睞
+    definition: 喜愛、看重某人或某事。常用來表示受到別人喜歡或肯定。
+  - index: 3
+    word: 先驅
+    definition: 最早開始做改變的人或為後來者開路的人。
+  - index: 4
+    word: 侷限
+    definition: 受到某些條件限制，只能在一定的範圍內。
+  - index: 5
+    word: 坦承錯誤
+    definition: 誠實地承認自己做錯了事。
+  - index: 6
+    word: 契作協議
+    definition: 農民與企業簽訂的書面合約，約定產品的生產方式、數量、品質與收購價格等內容。
+  - index: 7
+    word: 鍥而不捨
+    definition: 遇到困難不放棄，一直努力到底。
+  - index: 8
+    word: 追根究柢
+    definition: 徹底查清楚事情的原因或來龍去脈。
+  - index: 9
+    word: 猛禽
+    definition: 會用利爪和尖喙抓捕其他動物當食物的鳥類，例如老鷹、貓頭鷹。
+  - index: 10
+    word: 層層把關
+    definition: 每個步驟都小心檢查，避免出錯。
+  - index: 11
+    word: 苦撐待變
+    definition: 在困難中勉強支撐，等待情況改善。

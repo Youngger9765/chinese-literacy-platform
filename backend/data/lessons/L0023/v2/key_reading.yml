@@ -1,0 +1,21 @@
+lesson_uid: L0023
+version_id: v2
+passage: 朱蒂在孤兒院時沒能受到完整的教育，上大學後發現自己的知識遠遠落後其他同學，她從未看過「蒙娜麗莎的微笑」畫像，也沒聽說過「福爾摩斯」的名字；大一就面臨數學和拉丁文成績不及格的慘狀。許多人遇到這樣的情況，可能會因自卑而選擇逃避，或是把挫折歸咎於低微的出身；但朱蒂只讓自己失落一下下，很快就發揮她樂觀不怕失敗的個性，拾起戰鬥力。
+start_text: 朱蒂在孤兒院時沒能受到完整的教育，上大學後發現自
+extent_chars: 161
+source: docx-extract
+anchor_paragraph: 4
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 8
+  cell_paragraphs: 8

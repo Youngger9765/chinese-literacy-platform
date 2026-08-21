@@ -1,0 +1,21 @@
+lesson_uid: L0128
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 「黑猩猩之母」珍古德逝世！證明黑猩猩會用工具、也會想念朋友！她的一生如何改變人類看待動物的方式？
+    duration: (9:34)
+    source: TODAY看世界
+    has_qr: true
+    url: http://youtu.be/nhXKQvtlQbE
+    url_source: 總表0816「4.影片連結」年級8課次8
+  - index: 2
+    title: '她是珍古德，早餐的咖啡是重複沖泡的咖啡渣、尿液樣本罐拿來裝糖粉，愛地球的想法已深植她心【珍古德: 點燃希望】'
+    duration: (5:59)
+    source: 國家地理 National Geographic TW
+    has_qr: true
+    url: http://youtu.be/KHzBsfMvN1c&t=223s
+    url_source: 總表0816「4.影片連結」年級8課次8

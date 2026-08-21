@@ -16,6 +16,7 @@ import type { StrategyExercise as StrategyExerciseType, StrategyExerciseItem } f
 import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
 import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
+import NextStepFooter from '../../components/learning/NextStepFooter';
 
 const SpotlightPage: React.FC = () => {
   const navigate = useNavigate();
@@ -73,26 +74,11 @@ const SpotlightPage: React.FC = () => {
     !('type' in (rawExercise[0] as object));
 
   const nextButton = (
-    <div className="mt-6 shrink-0 max-w-3xl mx-auto w-full">
-      <button
-        onClick={handleNext}
-        className={`w-full h-12 rounded-full font-headline font-bold text-base text-white transition-all flex items-center justify-center gap-2 ${
-          strategyDone
-            ? 'shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98]'
-            : 'opacity-60 cursor-not-allowed'
-        }`}
-        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-        disabled={!strategyDone}
-      >
-        <span>下一關</span>
-        <span className="material-symbols-outlined text-base">arrow_forward</span>
-      </button>
-      {!strategyDone && (
-        <p className="text-center text-xs text-on-surface-variant mt-2">
-          完成閱讀聚光燈後才能繼續
-        </p>
-      )}
-    </div>
+    <NextStepFooter
+      onNext={handleNext}
+      disabled={!strategyDone}
+      disabledHint="完成閱讀聚光燈後才能繼續"
+    />
   );
 
   // Phase-2 unified renderer (flag-guarded, default OFF). Placed BEFORE every legacy
@@ -118,6 +104,7 @@ const SpotlightPage: React.FC = () => {
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="spotlight" />
           <LessonRenderer
+            sectionLabel="閱讀聚光燈"
             lesson={lesson}
             story={selectedStory}
             lessonCode={selectedStory.lesson_code || selectedStory.id}
@@ -195,15 +182,11 @@ const SpotlightPage: React.FC = () => {
             <span className="material-symbols-outlined text-sm">library_books</span>
             <span>找其他課文練習</span>
           </button>
-          <button
-            onClick={handleNext}
-            className="px-6 h-9 rounded-full font-headline text-sm text-on-surface-variant border border-outline-variant hover:bg-surface-variant active:scale-[0.98] transition-all flex items-center gap-1"
-          >
-            <span>跳過，下一關</span>
-            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
         </div>
       )}
+      {/* 這一課沒有聚光燈資料時的出口。用同一個 footer —— 學生在每一步看到的
+          「下一關」要是同一顆，不能因為這頁走空狀態就換一種樣子。 */}
+      {!hasStrategy && <NextStepFooter onNext={handleNext} label="跳過，下一關" />}
     </ComprehensionLayout>
   );
 };

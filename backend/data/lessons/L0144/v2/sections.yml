@@ -1,0 +1,56 @@
+lesson_uid: L0144
+version_id: v2
+comprehension:
+  questions:
+  - index: 2
+    answer: D
+    stem: 本文第5至8段列出跳高、鉛球、體操、籃球、游泳與跑步選手的身材差異。這些例子共同說明什麼？
+    options:
+      A: 優秀選手多半需要高大體型，才能在各項運動占有優勢
+      B: 身體條件比訓練更重要，教練應先看體型再看選手表現
+      C: 現代選手的體型逐漸接近，才能符合競賽的共同標準
+      D: 不同運動需要不同條件，教練會依專項需求挑選人才
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 作者先比較歐文斯與博爾特的比賽條件，再列舉不同運動選手的身材資料。這樣安排主要有什麼作用？
+    options:
+      A: 分別用比較與例子，支持科技進步和專項選才兩項解釋
+      B: 依照運動出現年代，說明不同項目世界紀錄的發展順序
+      C: 透過大量名人數據，證明身材條件比科技設備更為重要
+      D: 比較各項運動難度，判斷哪一種運動最容易改寫紀錄
+    rationale: null
+  - index: 4
+    answer: C
+    stem: 某校田徑隊換成PU跑道和輕量釘鞋後，教練說：「有了新設備，選手一定能大幅破紀錄。」根據全文，哪一項評估最適合？
+    options:
+      A: 說法合理，新設備改善比賽條件，是現代運動紀錄進步的重要原因。
+      B: 說法大致合理，只要設備進步，選手原有的身體條件就不再那麼重要。
+      C: 說法不夠完整，新設備能提供協助，但訓練與適合專項的條件仍很重要。
+      D: 說法不太合理，新設備主要改善比賽環境，對選手實際成績的幫助有限。
+    rationale: 五*閱讀接力：從科技影響成績，到科技使用的公平問題
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【人類歷史新頁！】全馬1小時59分40秒 奇普喬蓋史上第一人
+    duration_seconds: 120
+    source: 愛爾達體育家族
+  - index: 2
+    title: 基普喬吉的破2跑鞋到底是不是外掛？為什麼遭到田聯的封殺？
+    duration_seconds: 202
+    source: HIRUN
+  - index: 3
+    title: 運動如何影響體型的？不同運動不同的身材！
+    duration_seconds: 550
+    source: 吃貨男友的健身女友
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 3
+  needs_human_review: true

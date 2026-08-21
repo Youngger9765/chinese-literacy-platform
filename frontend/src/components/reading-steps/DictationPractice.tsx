@@ -4,6 +4,7 @@ import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import type { DictationStepData } from '../../types/stepProgress';
+import NextStepFooter from '../learning/NextStepFooter';
 
 export interface DictationResult {
   totalWords: number;
@@ -525,12 +526,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
         </div>
 
         <div className="w-full flex flex-col gap-2 mt-2">
-          <button
-            onClick={handleContinue}
-            className="w-full py-3 rounded-2xl bg-accent text-white font-semibold hover:bg-accent-hover transition-colors"
-          >
-            繼續下一關
-          </button>
+          <NextStepFooter onNext={handleContinue} />
           <button
             onClick={handleRedo}
             className="w-full py-3 rounded-2xl bg-white text-gray-700 border border-gray-300 font-semibold hover:bg-gray-50 transition-colors"

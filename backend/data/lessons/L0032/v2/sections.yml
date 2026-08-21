@@ -1,0 +1,161 @@
+lesson_uid: L0032
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 非營利組織
+    definition: 不是以賺錢為目的的團體。
+  - index: 2
+    word: 沮喪
+    definition: 心情很不好，覺得失望。
+  - index: 3
+    word: 摧毀
+    definition: 破壞。
+  - index: 4
+    word: 兵荒馬亂
+    definition: 形容很亂、很緊張的情況。
+  - index: 5
+    word: 笑逐顏開
+    definition: 笑得很開心，臉上充滿笑容。
+  - index: 6
+    word: 重拾
+    definition: 重新找回或重新開始。
+  - index: 7
+    word: 忐忑不安
+    definition: 心裡很緊張，覺得不放心。
+  - index: 8
+    word: 即興
+    definition: 沒有事先準備，當場想到就做。
+  - index: 9
+    word: 氛圍
+    definition: 周圍的感覺或氣氛。
+  - index: 10
+    word: 緩解
+    definition: 舒緩、減輕。
+  - index: 11
+    word: 忘卻
+    definition: 忘記、遺忘。
+  - index: 12
+    word: 追溯
+    definition: 回想或查找過去的事情。
+  - index: 13
+    word: 眉頭深鎖
+    definition: 皺著眉頭，看起來很煩惱或生氣。
+  - index: 14
+    word: 壓力鍋
+    definition: 可以快速加壓烹煮食物的鍋具。這裡引申為壓力極大、情緒緊繃的環境或狀態。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 眉頭深鎖
+    B: 壓力鍋
+    C: 追溯
+    D: 重拾
+    E: 兵荒馬亂
+    F: 忐忑不安
+    G: 忘卻
+    H: 即興
+  questions:
+  - index: 1
+    text: 儘管他已經全力以赴，但想到隔天就要比賽，還是感到十分（　）。
+    answer: F
+  - index: 2
+    text: 面對那道數學題，小華（　），煩惱著該如何下筆，遲遲無法作答。
+    answer: A
+  - index: 3
+    text: 考試當天，小明遺失了准考證，為了趕上考試，全家人一陣（　）。
+    answer: E
+  - index: 4
+    text: 我把和朋友的合照刪掉，只想（　）那些不快樂的青春往事。
+    answer: G
+  - index: 5
+    text: 在才藝表演時，阿強忘了準備的台詞，只好（　）說了一段笑話，結果全場笑翻了。
+    answer: H
+  - index: 6
+    text: 原本打算退隊的小郭，在教練的鼓勵下（　）對棒球的熱愛，再次努力投入訓練。
+    answer: D
+  - index: 7
+    text: 在校慶活動中，老師帶我們（　）學校的歷史，講述創校時的有趣故事。
+    answer: C
+  - index: 8
+    text: 他的情緒已經像（　）一樣快撐不住了，誰也無法安撫他。
+    answer: B
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 即興
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項「 」中的詞語，何者使用正確？
+    options:
+      A: 老師鼓勵學生「追溯」未來的職涯方向，盡早規劃
+      B: 主持人在典禮中「即興」發表感人致詞，令全場感動
+      C: 為了「緩解」疲憊，他選擇徹夜的工作，持續加班
+      D: 課後「重拾」了老師上課講的重點，所以她的成績不理想
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 根據課文內容判斷，為何「小丑醫生」必須學習心理學相關知識？
+    options:
+      A: 便於了解病童及家屬的需求，在演出時撫慰他們的情緒
+      B: 便於了解病童病情的嚴重程度，配合醫院提供治療
+      C: 便於學習各種變臉與特技的心理效果，讓節目更吸睛
+      D: 便於了解醫院的各種規範，知道如何在醫院表演
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 根據本課內容，以下哪一位最符合擔任小丑醫生的條件？
+    options:
+      A: 小文：個性安靜，做事一板一眼，常常喜歡一個人待著
+      B: 小剛：學習認真，考試總是高分，是老師眼中的資優生
+      C: 小玉：有創意又幽默，擅長舞台表演，也懂得關心別人
+      D: 小偉：體力好，常代表學校參加比賽，是名優秀運動員
+    rationale: null
+  - index: 4
+    answer: D
+    stem: 作者在文章最後寫到新冠肺炎和烏 俄戰爭時的小丑醫生，主要想告訴我們什麼？
+    options:
+      A: 想表示小丑醫生不怕危險，常到處去旅行
+      B: 表示小丑醫生工作時間長，假日也要工作
+      C: 小丑醫生既有強健的身體又能打仗保護病童
+      D: 不管遇到什麼困難，小丑醫生都努力帶來歡樂
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 文末寫道：「他們讓我們知道：笑，本身就是最好的良藥！」根據全文，作者想表達的是什麼意思？
+    options:
+      A: 醫生應該接受小丑專業訓練，以改善醫院的氣氛
+      B: 小丑醫生的表演比藥物還重要，因此應取代部分治療
+      D: 小丑醫生能成功讓病人分心忘記病痛，不再需要醫療
+      C: 強調病人的心理與情感需求，也是相當重要。故選(C
+    rationale: 強調病人的心理與情感需求，也是相當重要。故選(C
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 小丑醫生來了 帶給病童歡笑
+    duration_seconds: 247
+    source: 華視新聞
+  - index: 2
+    title: 癌童隨小丑醫生起舞 點閱爆巨量
+    duration_seconds: 167
+    source: 公視新聞網
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

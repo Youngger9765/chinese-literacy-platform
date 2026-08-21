@@ -1,0 +1,21 @@
+lesson_uid: L0040
+version_id: v2
+passage: 理智上我知道，作息時間表剛出爐時就必須嚴格執行，但情感上，這樣的自我要求讓我痛苦萬分，特別是晚上九點半，不論遊戲多麼精彩刺激，也必須強迫關機。還好，這不是我一個人的武林，隊友們雖然都捨不得下線，仍互相提醒，一起按表操課，登出遊戲。經過幾個月持之以恆的自律和精確的時間管理，我們在遊戲中的排名節節攀升，學校成績也有明顯進步。爸媽都看在眼裡，臉上終於露出欣慰的笑容。
+start_text: 理智上我知道，作息時間表剛出爐時就必須嚴格執行，
+extent_chars: 181
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 11
+  cell_paragraphs: 11

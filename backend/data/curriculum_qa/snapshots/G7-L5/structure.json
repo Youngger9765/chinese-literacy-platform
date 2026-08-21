@@ -1,43 +1,135 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "訊息來源",
+      "(1)",
+      "(2)",
+      "網紅暗示、阿政誤信的結論"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "爺爺奶奶來了以後",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "網紅的電子煙實驗：偽科學的陷阱",
+      "value": ""
     },
     {
-      "label": "家庭生活的改變",
-      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】【　　　】\n2.下列哪些是作者家的生活改變？【　　　】\n【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "好奇的問題",
+      "value": "電子煙是否安全？"
     },
     {
-      "label": "作者的收穫",
-      "value": "1.作者理解不同世代有各自的  生活方式     和  價值觀     ，如：音樂喜好和冷氣使用習慣等。\n2.同住後，有助於青少年  情緒           智商的培養。\n3.作者學會了傾聽不同世代的聲音和  設身處地  為他人著想。\n4.作者學會轉換觀點，帶著   好奇心   聆聽爺爺奶奶的故事。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "label": "訊息來源",
+      "value": "看朋友傳來的兩部【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "網紅的實驗",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "(1)",
+          "value": "【　　　】實驗：\n用紙菸和電子煙的煙霧試驗棉花有沒有變色。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "(2)",
+          "value": "【　　　】實驗：\n把煙油加入食物、飲料後吃下，宣稱煙油無害。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "錯誤推論",
+      "value": "棉花未變色、煙油可以吃"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "網紅暗示、阿政誤信的結論",
+      "value": "棉花未變色、煙油可以吃，所以，電子煙對人體【　　　】。"
+    },
+    {
+      "blanks": [
+        {
+          "options": []
+        },
+        {
+          "options": [
+            "吸",
+            "吃"
+          ]
+        },
+        {
+          "options": [
+            "吸",
+            "吃"
+          ]
+        }
+      ],
+      "interactive_type": "inline_choice",
+      "label": "對網紅實驗的批判",
+      "value": "(1)棉花肺實驗的問題\n→A.棉花不等於人的肺。B.光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【　　　】。\n(2)煙油食材實驗的問題【 單選 】\n→電子煙是【　　　】到肺裡的，\n網紅把煙油【　　　】下肚，完全沒有說明吸電子煙對人體的影響。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "總結",
+      "value": "理性判斷、聰明識讀的方法：\n(1)認清廠商的行銷手法，學會質疑傳播者的【　　　】。\n(2)多方【　　　】網路上訊息的正確性。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "爺爺奶奶來了以後",
+  "title": "網紅的電子煙實驗：偽科學的陷阱",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "家庭生活的改變",
-      "value": "爺爺奶奶搬來後，\n1.家裡氣氛變得【　　　】（單選）\n2.下列哪些是作者家的生活改變？（多選）\n【　　　】"
+      "label": "好奇的問題",
+      "value": "電子煙是否安全？"
     },
     {
       "kind": "pair",
-      "label": "作者的收穫",
-      "value": "1.作者理解不同世代有各自的  生活方式     和  價值觀     ，如：音樂喜好和冷氣使用習慣等。\n2.同住後，有助於青少年  情緒           智商的培養。\n3.作者學會了傾聽不同世代的聲音和  設身處地  為他人著想。\n4.作者學會轉換觀點，帶著   好奇心   聆聽爺爺奶奶的故事。"
+      "label": "訊息來源",
+      "value": "看朋友傳來的兩部【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "(1)",
+          "value": "【　　　】實驗：\n用紙菸和電子煙的煙霧試驗棉花有沒有變色。"
+        },
+        {
+          "label": "(2)",
+          "value": "【　　　】實驗：\n把煙油加入食物、飲料後吃下，宣稱煙油無害。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "網紅的實驗"
+    },
+    {
+      "kind": "pair",
+      "label": "錯誤推論",
+      "value": "棉花未變色、煙油可以吃"
+    },
+    {
+      "kind": "pair",
+      "label": "網紅暗示、阿政誤信的結論",
+      "value": "棉花未變色、煙油可以吃，所以，電子煙對人體【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "對網紅實驗的批判",
+      "value": "(1)棉花肺實驗的問題\n→A.棉花不等於人的肺。B.光看棉花潔白與否不足以證明電子煙無害，很多有害物質如尼古丁、重金屬根本【　　　】。\n(2)煙油食材實驗的問題(單選)\n→電子煙是【　　　】到肺裡的，\n網紅把煙油【　　　】下肚，完全沒有說明吸電子煙對人體的影響。\n第二個空格：①吸 ②吃\n第三個空格：①吸 ②吃"
+    },
+    {
+      "kind": "pair",
+      "label": "總結",
+      "value": "理性判斷、聰明識讀的方法：\n(1)認清廠商的行銷手法，學會質疑傳播者的【　　　】。\n(2)多方【　　　】網路上訊息的正確性。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 1,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "家庭生活的改變"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

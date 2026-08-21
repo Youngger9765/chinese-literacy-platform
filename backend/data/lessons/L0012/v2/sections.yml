@@ -1,0 +1,122 @@
+lesson_uid: L0012
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 欲罷不能
+    definition: 想停止卻無法停止，形容事情非常吸引人。
+  - index: 2
+    word: 廢寢忘食
+    definition: 太專心做一件事，連睡覺和吃飯都忘了。
+  - index: 3
+    word: 胃口大開
+    definition: 食慾變得很好，想吃很多。
+  - index: 4
+    word: 受挫
+    definition: 遭遇失敗或挫折。
+  - index: 5
+    word: 滴水穿石
+    definition: 水滴長久滴落在石頭上，也能穿透；比喻持之以恆的力量。
+  - index: 6
+    word: 久病而成良醫
+    definition: 一個人生病久了，因為常看醫生、吃藥、了解病情，慢慢的自己也懂得怎麼治病。指因為自己經歷過很多，所以變得很在行。
+  - index: 7
+    word: 不相上下
+    definition: 形容雙方的能力或表現差不多，很難分出誰比較好，誰比較差。
+  - index: 8
+    word: 興味盎然
+    definition: 對某件事情非常有興趣的樣子。
+  - index: 9
+    word: 兼顧
+    definition: 同時照顧到兩件或多件事情，不偏重其中一邊。
+  - index: 10
+    word: 解剖學
+    definition: 研究動、植物體內構造與器官，了解身體組成的學問。
+  - index: 11
+    word: 愛不釋手
+    definition: 形容非常喜歡某樣東西，喜歡到捨不得放下來。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 興味盎然
+    B: 欲罷不能
+    C: 滴水穿石
+    D: 廢寢忘食
+    E: 兼顧
+    F: 久病而成良醫
+    G: 胃口大開
+    H: 愛不釋手
+    I: 不相上下
+    J: 受挫
+  questions:
+  - index: 1
+    text: 在決賽中，兩隊實力（　），比分一度僵持，現場氣氛十分緊張。
+    answer: I
+  - index: 2
+    text: 他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　）。
+    answer: F
+  - index: 4
+    text: 弟弟看到滿桌的美食，立刻（　），吃了好幾碗飯。
+    answer: G
+  - index: 5
+    text: 老師教我們要（　）玩樂和學習，不能只玩不讀書。
+    answer: E
+  - index: 6
+    text: 為了完成科展作品，他連續幾天（　）的研究程式設計，直到成功才露出笑容。
+    answer: D
+  - index: 7
+    text: 妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　），連睡覺都不放開。
+    answer: H
+  - index: 8
+    text: 他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　）的毅力取得好成績。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 阿耀在信中提到他在課業上的最大困難是什麼？
+    options:
+      B: 擁有優秀的英文天分，只要稍加努力就能成功
+      C: 運氣比努力更加重要，剛好受傷時出現翻譯機會
+      D: 遇到困難時懂得改變方向，從興趣中找到新的機會
+      A: 熱愛棒球、願意堅持到底，永不放棄當球員的夢想
+    rationale: 文中明確指出：「比賽、集訓很多，我們常常請假在外，回來也跟不上課程。」是最直接的描述。A、C、D都未提及。
+  - index: 4
+    answer: C
+    stem: 健豪學長舉了三個朋友的例子來回答阿耀的信，這種寫作手法的效果是什麼？
+    options:
+      B: 對數學有興趣，就可以從生活中的購物、比價開始學習
+      C: 對學校課程沒興趣，就應該放棄，追尋自己熱愛的事物
+      D: 學校的課業不可荒廢，興趣與課業本來就該兼顧
+      A: 喜歡畫畫的人，就要專心畫圖，精益求精
+    rationale: 三個故事彼此呼應，共同支持主張，達到以例證論點、提升說服力的效果。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 走在好玩的路上，努力不會白費
+    duration_seconds: 47
+    source: 請聽哈佛管理學
+  - index: 2
+    title: 人生沒有目標？容易放棄？重啟你的內在指南針｜Sherry's Notes 雪力的心理學筆記
+    duration_seconds: 551
+    source: Sherry's Notes 雪力的心理學筆記
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

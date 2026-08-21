@@ -1,0 +1,36 @@
+lesson_uid: L0035
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 【文字的力量】貝爾納多自由了！他想親自傳達對你的感謝
+    duration: '1:30'
+    duration_seconds: 90
+    source: 國際特赦組織台灣分會
+  - index: 2
+    title: '【2020 寫信馬拉松】你有能力改變世界！
+
+      2021-05-20'
+    duration: '2:04'
+    duration_seconds: 124
+    source: 國際特赦組織台灣分會
+  - index: 3
+    title: '【2021 寫信馬拉松】
+
+      泰國/蓉：要求社會改革而面臨終身監禁'
+    duration: '3:01'
+    duration_seconds: 181
+    source: 國際特赦組織台灣分會
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/HdsGa1Mh1y8
+    url_source: 總表0816「4.影片連結」年級5課次23
+  - index: 2
+    url: https://youtu.be/5dqGPxJVtbo
+    url_source: 總表0816「4.影片連結」年級5課次23
+  - index: 3
+    url: https://youtu.be/EkvmNVKmiE8
+    url_source: 總表0816「4.影片連結」年級5課次23

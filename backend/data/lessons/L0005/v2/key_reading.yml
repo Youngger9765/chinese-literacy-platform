@@ -1,0 +1,21 @@
+lesson_uid: L0005
+version_id: v2
+passage: 下班時刻，262路公車上有點擠。一位國中女生從前門上車，站在司機旁，搖搖晃晃的，臉色慘白，好像隨時會昏倒的樣子。
+start_text: 下班時刻，262路公車上有點擠。一位國中女生從前
+extent_chars: 56
+source: docx-extract
+anchor_paragraph: 1
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 14
+  cell_paragraphs: 14

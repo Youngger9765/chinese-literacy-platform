@@ -1,0 +1,21 @@
+lesson_uid: L0086
+version_id: v2
+passage: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的秋天，寒氣逼人的冬天。正太每天抱著豬上上下下，一天又一天，一年又一年，小豬慢慢長大，小豬變中豬，中豬變大豬了。
+start_text: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的
+extent_chars: 79
+source: docx-extract
+anchor_paragraph: 7
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 190~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
+  printed_marks: 11
+  cell_paragraphs: 11

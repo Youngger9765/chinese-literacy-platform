@@ -1,0 +1,63 @@
+lesson_uid: L0036
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 輝煌
+  - 嶄露頭角
+  - 清一色
+  - 招募
+  - 正統
+  - 平起平坐
+  - 跌破眼鏡
+  - 脫韁野馬
+  - 敬仰
+  - 摸不著頭緒
+  - 著稱
+  - 先驅
+  - 一絲不苟
+  items:
+  - index: 1
+    word: 平起平坐
+    definition: 指地位、能力與他人差不多。
+  - index: 2
+    word: 輝煌
+    definition: 光彩耀眼或是成就非凡的樣子。
+  - index: 3
+    word: 著稱
+    definition: 因為具有某種特色而出名、被大家知道。
+  - index: 4
+    word: 敬仰
+    definition: 尊敬、仰慕。
+  - index: 5
+    word: 嶄露頭角
+    definition: 形容表現出色，開始受到注意。
+  - index: 6
+    word: 招募
+    definition: 尋找需要的人加入組織或參與活動。
+  - index: 7
+    word: 一絲不苟
+    definition: 做事非常仔細，連最細微的地方都不馬虎。
+  - index: 8
+    word: 清一色
+    definition: 形容全部都是同一種類型，沒有混雜。
+  - index: 9
+    word: 摸不著頭緒
+    definition: 不知道從哪裡開始，不明白事情的狀況。
+  - index: 10
+    word: 跌破眼鏡
+    definition: 形容事情的結果出乎意料，令人驚訝。
+  - index: 11
+    word: 脫韁野馬
+    definition: 比喻行動快速、難以控制。本文形容能高團的攻勢猛烈。
+  - index: 12
+    word: 正統
+    definition: 指最被認可或最標準的形式或做法。
+  - index: 13
+    word: 先驅
+    definition: 最早開始做某件事，並為後來的人開路的人或團體。

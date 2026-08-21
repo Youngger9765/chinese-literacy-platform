@@ -1,0 +1,45 @@
+lesson_uid: L0150
+version_id: v2
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 根據本文，請問下列關於閱讀的敘述何者正確?
+    options:
+      A: 閱讀是天生的能力，不需學習
+      B: 閱讀能力越強，人際關係越好
+      C: 讀得慢，會讓閱讀成效變更好
+      D: 閱讀可以提升認知與學習能力
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 臺灣在2022年的疫情階段，PISA閱讀成績不減反增，請問可能的原因何者不正確？
+    options:
+      A: 臺灣學校的停課時間相較他國更短
+      D: 其他國家的學生素質較臺灣低落
+      C: 臺灣的國家課綱看重學生自主學習
+    rationale: null
+  - index: 3
+    answer: B
+    stem: 根據本文的PISA資料與表1，以下敘述何者正確？
+    options:
+      A: 圖1資料顯示，臺灣歷年閱讀分數的平均都低於參加國
+      B: 表1顯示，臺灣城鄉學生的識字能力，有明顯的差距
+      C: 圖1顯示，參加國的閱讀成績越來越高，臺灣卻越來越低
+      D: 圖2資料顯示，臺灣學生的閱讀分數排名越來越差
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 下表顯示臺灣學生三次在PISA學生能力評量的表現，請問底下選項對於此表的描述何者錯誤？
+    options:
+      A: 臺灣學生閱讀能力，和參與國比較，越來越好
+      B: 閱讀、數學和科學三個領域相較，閱讀的表現最好
+      C: 臺灣學生的數學能力，和參與國比較，一直都是前五名
+      D: 臺灣學生的科學能力，和參與國比較，表現起伏不定
+    rationale: 國際學生能力評量計畫(PISA)臺灣歷年排名
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

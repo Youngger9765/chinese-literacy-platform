@@ -1,0 +1,147 @@
+lesson_uid: L0080
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 退役
+    definition: 軍人退伍或運動員結束服役或選手生涯。
+  - index: 2
+    word: 鞏固
+    definition: 使原有的基礎、力量或成果更加穩固。
+  - index: 3
+    word: 幅員遼闊
+    definition: 國土範圍非常廣大。
+  - index: 4
+    word: 遍地開花
+    definition: 滿地開花，比喻好的事物到處湧現。
+  - index: 5
+    word: 發掘
+    definition: 發現、引出。
+  - index: 6
+    word: 後顧之憂
+    definition: 在前進過程中，擔心有其他的壞事發生。
+  - index: 7
+    word: 天壤之別
+    definition: 有巨大的差別。
+  - index: 8
+    word: 熱衷
+    definition: 十分喜愛，急切的追求且全心投入。
+  - index: 9
+    word: 井井有條
+    definition: 形容整齊有秩序的樣子。
+  - index: 10
+    word: 斥資
+    definition: 投入大量經費。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 斥資
+    B: 遍地開花
+    C: 後顧之憂
+    D: 幅員遼闊
+    E: 發掘
+    F: 鞏固
+    G: 井井有條
+    H: 退役
+  questions:
+  - index: 1
+    text: 因為建物老舊，政府決定（　）兩千萬元修建新的體育館。
+    answer: A
+  - index: 2
+    text: 因為有全家人的支持，他能專心從事體育工作，毫無（　）。
+    answer: C
+  - index: 3
+    text: 他的藏書很多但不雜亂，整理得（　）。
+    answer: G
+  - index: 4
+    text: 教練善於（　）學員的潛能，然後根據每個人的專長進行培訓。
+    answer: E
+  - index: 5
+    text: 俄羅斯是世界上土地面積最大的國家，（　），資源相當豐富。
+    answer: D
+  - index: 6
+    text: 隨著環保意識提高，無塑市集逐漸（　），成為新的生活風潮。
+    answer: B
+  - index: 7
+    text: 球隊每天加強基本動作，是為了（　）基本功，避免比賽時失誤。
+    answer: F
+  - index: 8
+    text: 這架老舊飛機完成最後一次任務後，終於（　），改放在博物館展示。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列語詞何者使用正確？
+    options:
+      A: 學校為了節省支出，「斥資」兩千元買了一盒彩色筆。
+      B: 臺灣的社區普遍「井井有條」，地下水資源豐富
+      C: 因為有全家人的支持，讓他沒有「後顧之憂」，可以專心工作
+      D: 這所學校「幅員遼闊」，從前門就可以看到後門
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 澳洲政府成立國家運動中心，主要的用意為何？
+    options:
+      B: 成為未來舉辦國際賽事的場地
+      C: 培養運動員良好、健全的品格
+      D: 讓運動員退役後能進入社區教學
+      A: 第二段提到，為了培育更多有潛力的運動員。
+    rationale: 第二段提到，為了培育更多有潛力的運動員。
+    is_rationale: true
+  - index: 3
+    answer: B
+    stem: 下列何者不是澳洲奪得眾多獎牌的原因？
+    options:
+      B: 主要由各級學校體育班集中培養少數學生選手
+      C: 學校課程時間短，家長鼓勵孩子課後投入運動
+      D: 社區有各種運動俱樂部，由退役運動員當教練
+    rationale: 氣候宜人是澳洲人喜歡運動的原因，人口數與臺灣相距不遠。
+  - index: 4
+    answer: D
+    stem: 比較澳洲與臺灣的體育環境，下列何者正確？
+    options:
+      A: 面積差距很大
+      B: 人口數差不多
+      C: 家長都把課業看得比體育重要
+      D: 澳洲推動體育的力量較多元
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 臺灣或許可以學習澳洲的成功經驗。請問何者不是澳洲帶給臺灣的啟示？
+    options:
+      A: 鼓勵社區增設運動俱樂部，讓更多人參與體育
+      B: 善用退役運動員進入社區，做更多人才的篩選與訓練
+      C: 教育家長改變「重學科、輕體育」的態度
+      D: 讓體育資優選手進體育班，接受長時嚴格訓練
+    rationale: 目前臺灣是用此方法，澳洲更推崇人人熱愛運動，從此找出選手。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 人口差不多 金牌是臺灣的8.5倍 為什麼澳洲體育如此強
+    duration_seconds: 729
+    source: Cheap
+  - index: 2
+    title: 奧運小常識06古代奧林匹克運動會
+    duration_seconds: 100
+    source: MOESports
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,54 @@
+lesson_uid: L0065
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 充斥
+  - 此起彼落
+  - 滑稽
+  - 全神貫注
+  - 評估
+  - 僵硬
+  - 處置
+  - 壓迫
+  - 抑制
+  - 哄堂大笑
+  vocabulary_bank_note: 語詞框原文為「本課語詞：充斥、此起彼落、滑稽、全神貫注、評估、僵硬、處置、壓迫、抑制、哄堂大笑。」
+  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+  items:
+  - index: 1
+    word: 評估
+    definition: 根據觀察到的情況，判斷事情的狀況或程度。本文指判斷受傷情形。
+  - index: 2
+    word: 處置
+    definition: 採取適當方法處理事情。本文指處理受傷狀況。
+  - index: 3
+    word: 此起彼落
+    definition: 形容聲音或事情接連不斷。
+  - index: 4
+    word: 壓迫
+    definition: 用力量壓住；也指用權力逼迫別人。本文指用彈性繃帶適度包紮受傷部位。
+  - index: 5
+    word: 哄堂大笑
+    definition: 許多人同時大笑
+  - index: 6
+    word: 抑制
+    definition: 讓某種情況減弱、受到控制，不再繼續加重。
+  - index: 7
+    word: 滑稽
+    definition: 言語動作非常有趣。
+  - index: 8
+    word: 充斥
+    definition: 到處充滿、遍布。
+  - index: 9
+    word: 僵硬
+    definition: 肌肉或身體部位緊繃，活動不靈活。
+  - index: 10
+    word: 全神貫注
+    definition: 把全部心思和注意力集中在一件事上。
+  items_note: 第 5 題的解釋原稿句末**沒有**句號（其餘 9 題都有），照原樣抄，不補標點。

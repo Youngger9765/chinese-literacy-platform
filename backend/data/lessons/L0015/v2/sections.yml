@@ -1,0 +1,145 @@
+lesson_uid: L0015
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 家常便飯
+    definition: 比喻很常見或很普通的事情。
+  - index: 2
+    word: 罹癌
+    definition: 罹患癌症。
+  - index: 3
+    word: 殊榮
+    definition: 特殊的榮耀。
+  - index: 4
+    word: 頑強
+    definition: 堅強，不容易被打敗或放棄。
+  - index: 5
+    word: 痛快淋漓
+    definition: 心情非常暢快。
+  - index: 6
+    word: 歷屆
+    definition: 以往各屆。
+  - index: 7
+    word: 執著
+    definition: 對某件事、目標或想法非常堅持，不容易放下。
+  - index: 8
+    word: 崩潰
+    definition: 精神潰散，情緒相當難過。
+  - index: 9
+    word: 無可言喻
+    definition: 無法用話說明白。
+  - index: 10
+    word: 插曲
+    definition: 進行的事情過程中，意外發生的故事。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 崩潰
+    B: 執著
+    C: 插曲
+    D: 頑強
+    E: 無可言喻
+    F: 歷屆
+    G: 痛快淋漓
+    H: 家常便飯
+  questions:
+  - index: 2
+    text: 本著對舞蹈的（　），她日夜苦練從不以為苦。
+    answer: B
+  - index: 5
+    text: 人生的路上，總是有許多（　），令人意想不到。
+    answer: C
+  - index: 6
+    text: 經過一場（　）的比賽，大家雖然滿身大汗，卻都覺得十分過癮。
+    answer: G
+  - index: 7
+    text: 經過長時間的練習，每天跑五公里對他來說已是（　）。
+    answer: H
+  - index: 8
+    text: 得知自己獲得第一名時，他內心的喜悅（　），久久無法平靜。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: A
+    stem: 第一段陳彥博為亞洲創下了什麼成就？
+    options:
+      A: 勇奪四大極地超級馬拉松巡迴賽總冠軍
+      B: 醫生告知他得了咽喉癌，但他成功復原
+      C: 高中時即為田徑長跑選手，有亮眼成績
+      D: 他克服家人與醫生的勸說，不放棄夢想
+    rationale: null
+    source_paragraphs:
+      A: 第一段
+  - index: 2
+    answer: B
+    stem: 第三段陳彥博意外的遇到一段「插曲」，根據後文這裡的「插曲」指的是什麼事件？
+    options:
+      B: 醫生告知他得癌症
+      C: 害怕麻醉後醒不來
+      D: 肌肉強度都不見了
+    rationale: 第二段，這場比賽帶給他的感動無可言喻。
+    source_paragraphs:
+      B: 第四段
+  - index: 3
+    answer: A
+    stem: 為什麼陳彥博說磁北極六百五十公里極限馬拉松是他的夢想起點？
+    options:
+      A: 因為他獲得好成績，也有成就感，所以願意繼續挑戰
+      B: 他夢想五年內挑戰世界七大洲、八大站的超級馬拉松
+      C: 他認為夢想存在的價值在於制定計畫並且勇於執行
+      D: 他利用這場賽事進行肌肉復健，加速復健的速度
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 第六段說陳彥博『超越自己的極限』，下列哪一項最能說明這句話的意思？
+    options:
+      A: 跑出極地馬拉松的世界紀錄
+      B: 克服癌症，完成自己的夢想
+      C: 磁北極極限馬松獲得第三名
+      D: 他成功登上喜馬拉雅的高山
+    rationale: null
+    source_paragraphs:
+      B: 第四段及第六段
+  - index: 5
+    answer: C
+    stem: 根據本文，哪一項最能表現陳彥博的精神？
+    options:
+      A: 充滿智慧，眼光長遠
+      B: 寬宏大量，有容乃大
+      C: 不屈不撓，永不放棄
+      D: 身體強壯，精力過人
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    source_paragraphs:
+      C: 第六段
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 【夢想 勇敢出發】
+    duration_seconds: 933
+    source: 華視新聞
+  - index: 2
+    title: 【馬拉松、超級馬拉松、越野跑傻傻分不清？】
+    duration_seconds: 614
+    source: 陳彥博的運動冒險生活頻道
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

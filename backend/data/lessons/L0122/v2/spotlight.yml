@@ -1,0 +1,143 @@
+spotlight:
+  lesson: G8-L2
+  strategy_name: 推論策略-找出一連串因果
+  strategy_type: causal_inference
+  blocks:
+  - type: figure
+    referent: image
+    asset: fig1.png
+    bind_paragraph: 目標策略：推論策略──
+  - type: guide
+    text: 推論本文的因果關係
+  - type: guide
+    text: 步驟❶──找事件
+  - type: free_text
+    prompt: 1.問自己：這段文字提到的重要事件或現象？
+  - type: guide
+    text: ◎小試身手：
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 找出文中可能造成印加帝國被削弱或衰敗的事件。先不管發生順序，全部找出來。 (請在□中打勾，複選，有四個答案）
+  - type: multi
+    prompt: 請選擇
+    options:
+    - 天花病菌傳入印加
+    - 繼承人爭奪王位，引發內戰
+    - 人民改說西班牙語
+    - 多年戰亂，政治經濟崩潰
+    - 印加皇帝染疫過世
+    - 皮薩羅帶著168名士兵準備偷襲
+    answer:
+    - 天花病菌傳入印加
+    - 繼承人爭奪王位，引發內戰
+    - 人民改說西班牙語
+    - 多年戰亂，政治經濟崩潰
+    - 印加皇帝染疫過世
+    - 皮薩羅帶著168名士兵準備偷襲
+  - type: guide
+    text: 步驟❷──找因果線索
+  - type: free_text
+    prompt: 1.問自己：文章中哪些地方透露出「原因結果」的線索？有哪些語句在說明事情發生的原因或帶來的後果？
+  - type: free_text
+    prompt: 2.祕訣：
+  - type: guide
+    text: A.「有關鍵詞」的文句：
+  - type: table
+    rows:
+    - - ''
+      - 原因
+      - 結果
+    - - 關鍵詞
+      - 因為、由於、為了
+      - 因此、所以、導致、造成
+  - type: guide
+    text: B.「沒有關鍵詞」的文句：
+  - type: guide
+    text: 判斷策略：加因果關鍵詞，判斷是否為因果句。
+  - type: guide
+    text: 例如：「皇帝死了，內戰爆發。」
+  - type: guide
+    text: 加入關鍵詞「因為皇帝死了，所以內戰爆發。」
+  - type: guide
+    text: ◎小試身手
+  - type: table
+    rows:
+    - - 句子
+      - 判斷是否為因果句
+    - - 1. 1528年，印加皇帝也染疫去世，兩位繼承人爆發激烈的內戰。
+      - □①是因果句□②不是因果句
+    - - 2.天花透過歐洲水手和士兵傳入美洲，造成印加人民大量死亡
+      - □①是因果句□②不是因果句
+    - - 3.皮薩羅帶著168人偷偷觀察印加軍隊
+      - □①是因果句□②不是因果句
+    - - 4.皇帝染病死亡，引發繼承人爭奪王位，爆發內戰
+      - □①是因果句□②不是因果句
+  - type: guide
+    text: 步驟❸──判斷因果，畫箭頭
+  - type: free_text
+    prompt: 1.問自己：在找到的因果語句中，「原因」是哪一部分？「結果」是哪一部分？兩者之間如何連接？
+  - type: free_text
+    prompt: 2.祕訣：畫一個箭頭「→」從原因指向結果，就一目了然了！
+  - type: guide
+    text: ◎小試身手
+  - type: guide
+    text: 根據上表，請判斷誰是因？誰是果？並畫正確箭頭方向
+  - type: table
+    rows:
+    - - 事件
+      - 因
+      - 果
+      - 箭頭方向
+      - 事件
+      - 因
+      - 果
+    - - 1.天花病菌傳入印加
+      - □
+      - □
+      - →
+      - 印加人大量死亡，皇帝也染病死亡
+      - □
+      - □
+    - - 2.皇帝染病死亡
+      - □
+      - □
+      - →
+      - 繼承人爭奪王位，爆發內戰
+      - □
+      - □
+    - - 3.內戰與分裂多年
+      - □
+      - □
+      - →
+      - 帝國政治經濟瓦解
+      - □
+      - □
+  - type: passage
+    source: unknown
+    paragraphs:
+    - 果1因1因2果2因3果3因4果4果1因1因2果2因3果3因4果4步驟❹──連成一連串因果
+  - type: guide
+    text: ◎小試身手
+  - type: passage
+    source: unknown
+    paragraphs:
+    - A.以本文為例，隱含著一條重要的因果鏈。上表我們已經找到3個因果關係，接下來我們再看看它們之間的關係，請排序畫出一條因果鏈。
+  - type: single
+    prompt: 請選擇
+    options:
+    - 天花病菌傳入印加地區   ②帝國持續內戰與分裂
+    - 皇帝染病死亡 　　　　　④帝國政治經濟瓦解
+    answer: 天花病菌傳入印加地區   ②帝國持續內戰與分裂
+  - type: guide
+    text: B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
+  - type: guide
+    text: ①天花病菌傳入印加 ③印加人大量死亡，皇帝也染疫去世  　 ②帝國持續內戰與分裂　  ④帝國政治經濟瓦解
+  - type: guide
+    text: C.最後造成的總結果：帝國變得非常虛弱、不堪一擊。
+  - type: passage
+    source: unknown
+    paragraphs:
+    - D.這條因果鏈告訴我們：印加帝國在還沒跟西班牙人真正交戰前，已經因為天花傳入，造成大量人民死亡、皇帝染疫去世，進而引發內戰分裂和政治經濟瓦解，變得非常虛弱、不堪一擊。
+  - type: guide
+    text: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。七閱讀理解七閱讀理解

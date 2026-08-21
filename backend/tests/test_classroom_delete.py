@@ -52,7 +52,7 @@ SEED_ROLES = [
     {"name": "student", "display_name": "Student", "scope_level": "school"},
 ]
 
-VALID_STORY_ID = "1"
+VALID_STORY_ID = "20001"
 
 
 def _seed_roles(session):

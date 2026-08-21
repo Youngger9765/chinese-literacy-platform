@@ -1,0 +1,29 @@
+lesson_uid: L0093
+version_id: v3
+title: 用科學方法伸張正義的神探
+catalog_slot: G7-L24
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 閱讀聚光燈
+  subtitle: 科學推理策略──用科學步驟解決問題
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 7年級/G7-L24用科學方法伸張正義的神探（科學推理策略--用科學步驟解決問題）.docx
+  docx_md5: md5-12:259b715f314f

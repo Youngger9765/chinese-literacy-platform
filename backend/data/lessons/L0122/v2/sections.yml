@@ -1,0 +1,92 @@
+lesson_uid: L0122
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 勢單力薄
+    definition: 人少力量弱，難以與對方抗衡。
+  - index: 2
+    word: 抗體
+    definition: 身體為了對抗病毒或細菌而產生的防禦物質。
+  - index: 3
+    word: 懸殊
+    definition: 兩者差別很大，無法相比。
+  - index: 4
+    word: 撕心裂肺
+    definition: 形容非常痛苦、難以忍受的哭聲或情緒。
+  - index: 5
+    word: 哀鴻遍野
+    definition: 比喻災難過後到處都是痛苦哭喊的人，情況非常慘重。
+  - index: 6
+    word: 區區
+    definition: 表示數量少或力量弱，有輕視的語氣。
+  - index: 7
+    word: 蔓延
+    definition: 像藤蔓一樣向外擴散，常用來形容災情、疫情、火勢等擴大。
+  - index: 8
+    word: 肆虐
+    definition: 災害或疾病到處破壞、傷害，毫不收斂。
+  - index: 9
+    word: 對峙
+    definition: 雙方相對而立，彼此不退讓，形成緊張對抗。
+  - index: 10
+    word: 不堪一󠇢擊
+    definition: 形容力量非常薄弱，經不起一次攻擊就失敗。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 區區
+    B: 對峙
+    C: 蔓延
+    D: 勢單力薄
+    E: 哀鴻遍野
+    F: 懸殊
+    G: 肆虐
+    H: 抗體
+    I: 不堪一󠇢擊
+    J: 撕心裂肺
+  questions:
+  - index: 1
+    text: （　）一場小病竟然拖了這麼久，真令人煩惱。
+    answer: A
+  - index: 2
+    text: 他的論點漏洞百出，一再被大眾質疑，簡直是（　）。
+    answer: I
+  - index: 3
+    text: 網路上的謠言正在（　），令人擔憂。
+    answer: C
+  - index: 4
+    text: 在國際談判中，我國代表團人數稀少，與其他大國相比顯得（　），談判過程格外艱難。
+    answer: D
+  - index: 5
+    text: 戰火過後，百姓流離失所、（　），情況十分慘重。
+    answer: E
+  - index: 6
+    text: 這場比賽雙方實力（　），還沒開打便可預見結果。
+    answer: F
+  - index: 7
+    text: 打過疫苗，身體產生（　），感染新冠病毒的機率才會下降。
+    answer: H
+  - index: 8
+    text: 她聽到媽媽過世的消息，忍不住（　）的哭了起來。
+    answer: J
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 2
+    title: 比流感新冠更可怕的神秘病毒-天花
+    duration_seconds: 390
+    source: 達特方的胰萬個胃什麼
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 1
+  needs_human_review: true

@@ -1,0 +1,21 @@
+lesson_uid: L0117
+version_id: v2
+passage: 可可樹分布在赤道附近的熱帶地區，其中西非地區的象牙海岸、迦納、奈及利亞、喀麥隆等國，供應了全球70% 左右的可可豆。可可果不像蘋果、橘子那樣長在細細的枝頭上，它像一顆小型橄欖球，直接生長在樹幹和粗壯的枝條上，採收時，工人必須彎腰或仰頭，用彎刀或長柄刀具砍下來，剖開果殼，取出裡面的可可豆。
+start_text: 可可樹分布在赤道附近的熱帶地區，其中西非地區的象
+extent_chars: 144
+source: docx-extract
+anchor_paragraph: 2
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 7
+  cell_paragraphs: 7

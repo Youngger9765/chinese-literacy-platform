@@ -1,0 +1,21 @@
+lesson_uid: L0146
+version_id: v2
+passage: 表1 南島語族最常被提起的跨族共通詞彙新的疑問接踵而來：南島語族散居於南太平洋、南海、印度洋，各島之間隔著浩瀚無垠的海洋，他們的語言怎麼可能有這麼多相似的語彙？從臺灣到復活節島的直線距離約有15,000公里吔！難道是有外星人頒布共同語言教材，再派語言教師搭著飛碟巡迴各島授課？講到這裡，你大概會忍不住翻白眼：「拜託，別再天馬行空了！」
+start_text: 表1 南島語族最常被提起的跨族共通詞彙新的疑問接
+extent_chars: 167
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 8
+  cell_paragraphs: 9

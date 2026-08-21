@@ -1,0 +1,29 @@
+lesson_uid: L0007
+version_id: v3
+title: 黃絲帶
+catalog_slot: G4-L16
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 推論策略—推論情緒和感受
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 語詞書寫練習
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 4年級/G4-L16黃絲帶（推論策略-推論情緒和感受）.docx
+  docx_md5: md5-12:a48de095980a

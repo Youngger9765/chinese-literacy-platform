@@ -1,0 +1,55 @@
+lesson_uid: L0063
+version_id: v3
+keypoints_followup_questions:
+  part_no: 1
+  belongs_to: 五*文章重點整理
+  instruction: 2.請依據第一篇文章的內容，選出正確答案
+  answer_carrier: 橘色手寫代號（PDF p5~p6）；文字層的（　）內已填有同樣的代號
+  note: '⚠️ 沒有對應欄位：`comprehension` 已經被「七*綜合閱讀理解」佔用（那是三篇合讀的），
+
+    而這三題是**第一篇專屬**、印在第五大題底下。放這裡以免整組不見；
+
+    拆模組時會被丟掉（見檔頭 schema_gap）。'
+  questions:
+  - index: 1
+    answer: A
+    stem: 請從下列語詞中，選出用字正確的語詞。
+    options:
+      A: 人滿為患
+      B: 高棚滿座
+      C: 期貨可居
+      D: 遭秧
+    explanation: '解析
+
+      (A)用字正確無誤
+
+      (B)高朋滿座
+
+      (C)奇貨可居
+
+      (D)遭殃'
+    explanation_note: 原稿是一個浮動文字方塊，印在選項右側
+  - index: 2
+    answer: B
+    stem: 下方兩張圖呈現颱風過後蔬菜產地與市場的情況。根據圖片和本文，消費者最可能面臨哪一種情況？
+    figure:
+      count: 2
+      caption: 圖：市場青菜數量不足
+      description: 上圖為颱風後泡水的菜田（農民站在水中）；下圖為市場貨架，蔬菜稀少、標價牌明顯。兩圖之間有一個紅色向下箭頭。
+      text_carrier: image
+    options:
+      A: 青菜供給減少，但價格維持不變
+      B: 青菜供不應求，價格上漲
+      C: 青菜需求減少，價格下跌
+      D: 青菜供過於求，價格下跌
+    explanation: （C-奇貨可居是商人有貨但不拿出來賣，想要更好的價格，但圖片上商人自己都沒有貨了，所以答案為B。）
+    explanation_note: 原稿是一個浮動文字方塊，疊在圖片右側（PDF p5 上被圖片壓住最後一行）
+  - index: 3
+    answer: C
+    stem: 高麗菜價格從每公斤45元跌到5元的案例中，以下哪一種現象最能解釋價格崩跌的原因？
+    options:
+      A: 高麗菜的需求突然下降，市場對高麗菜失去興趣
+      B: 市場上的高麗菜品質下降，導致價格無法維持穩定
+      C: 市場上高麗菜供應量遠遠超過市場需求
+      D: 消費者對高麗菜的價格敏感度提高，轉而購買其他蔬菜
+  tail_note: 第一篇末尾印有「（請繼續閱讀下篇文章）」。

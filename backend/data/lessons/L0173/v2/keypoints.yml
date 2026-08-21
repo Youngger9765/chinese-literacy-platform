@@ -1,0 +1,61 @@
+keypoints:
+  lesson: 體-L7
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 問題一
+    value: 「想很多」真的只有__嗎？
+    blanks:
+    - answer: 壞處
+      hint: ''
+  - label: 作者觀點
+    value: 1.「想很多」也可能是__關鍵2.「想很多」的人經常擁有認真、__、細心等特質，也是願意投注__和時間的人。
+    blanks:
+    - answer: 致勝
+      hint: ''
+    - answer: 謹慎
+      hint: ''
+    - answer: 心力
+      hint: ''
+  - label: 舉例
+    value: 大聯盟知名投手__的__目標達成法──把目標再拆解成努力的方向
+    blanks:
+    - answer: 大谷翔平
+      hint: ''
+    - answer: 九宮格
+      hint: ''
+  - label: 小結論
+    value: 將焦慮化成具體的__和__，「想很多」也可以是助力。
+    blanks:
+    - answer: 目標
+      hint: ''
+    - answer: 行動
+      hint: ''
+  - label: 問題二
+    value: 明明已經努力了，心裡還是會焦慮，怎麼辦？
+    blanks: []
+  - label: 作者觀點
+    value: 1.我們可以在心中組一支提振士氣的__2.把擔心化為對自己的__或__
+    blanks:
+    - answer: 啦啦隊
+      hint: ''
+    - answer: 祝福
+      hint: ''
+    - answer: 打氣
+      hint: ''
+  - label: 舉例
+    value: 奧運金牌舉重選手__在面對大賽時，會在心裡不斷為自己__
+    blanks:
+    - answer: 郭婞淳
+      hint: ''
+    - answer: 打氣
+      hint: ''
+  - label: 總結
+    value: 慢慢練習去看見、去__這些情緒，讓焦慮，也能成為__。
+    blanks:
+    - answer: 欣賞
+      hint: ''
+    - answer: 助力
+      hint: ''

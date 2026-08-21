@@ -1,0 +1,21 @@
+lesson_uid: L0173
+version_id: v2
+passage: 把焦慮的空轉，化為心中的「啦啦隊」
+start_text: 把焦慮的空轉，化為心中的「啦啦隊」
+extent_chars: 17
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 8
+  cell_paragraphs: 10

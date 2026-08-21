@@ -1,0 +1,21 @@
+lesson_uid: L0168
+version_id: v2
+passage: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊熱絡的打招呼。
+start_text: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊
+extent_chars: 31
+source: docx-extract
+anchor_paragraph: 11
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 16
+  cell_paragraphs: 16

@@ -1,0 +1,30 @@
+lesson_uid: L0082
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 七下生物｜【觀念】生物多樣性
+    duration: (8:56)
+    source: 臺北酷課雲
+  - index: 2
+    title: 走進螞蟻的世界，感受螞蟻的神奇與偉大
+    duration: (7:39)
+    source: L科學探索號
+  - index: 3
+    title: 【在地真台灣】蟋蟀學問多 蟋蟀生態館在雲林麥寮
+    duration: (2:41)
+    source: 民視讚夯
+  qr_note: 三則各附一個 QR code（圖形，網址不在文字層）；本課是三則，不是其他課的兩則
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/J3u-WayXR3A
+    url_source: 總表0816「4.影片連結」年級7課次14
+  - index: 2
+    url: http://youtu.be/jnkQEcxFvJM
+    url_source: 總表0816「4.影片連結」年級7課次14
+  - index: 3
+    url: http://youtu.be/L7dB1IFNYFc
+    url_source: 總表0816「4.影片連結」年級7課次14

@@ -1,0 +1,24 @@
+lesson_uid: L0074
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【全聯福利中心】二廚帶你去旅行－老鷹紅豆篇
+    duration: '6:52'
+    duration_seconds: 412
+    source: PX Channel
+  - index: 2
+    title: 【觀念】生態系的組成(食物鏈)
+    duration: '9:54'
+    duration_seconds: 594
+    source: 臺北酷課雲
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/fGWQ6y4hI5U
+    url_source: 總表0816「4.影片連結」年級6課次7
+  - index: 2
+    url: http://youtu.be/btu-UgQdDdE
+    url_source: 總表0816「4.影片連結」年級6課次7

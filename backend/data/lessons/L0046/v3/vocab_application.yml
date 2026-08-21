@@ -1,0 +1,60 @@
+lesson_uid: L0046
+version_id: v3
+section_no: 五
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 內建
+    B: 險象環生
+    C: 追逐
+    D: 引領
+    E: 危機四伏
+    F: 廣闊無垠
+    G: 盤旋
+    H: 向陽性
+  option_bank_note: 只列 8 個代號（本課語詞中的「崎嶇難行」「垂直起降」「仿生學」未入選項），對應 8 道小題。
+  answer_carrier: 橘色手寫字；文字流已含答案
+  items:
+  - index: 1
+    stem: 戰場上雖然（　），但將士們仍然無所畏懼，勇往直前。（可複選）
+    answer: B
+    answers:
+    - B
+    - E
+    answer_printed: B/Ｅ
+    answer_note: '教師版印「B/Ｅ」，題幹自己註明「（可複選）」，兩個答案都成立
+
+      （B 險象環生、E 危機四伏）。
+
+      ⚠️ 消費端 lesson_indexes._vocab_application_from 只讀單一 `answer`，
+
+      而且**沒有 `answer` 的項目會被靜默丟掉**（那一行是
+
+      `if (q.get("stem") or q.get("text")) and q.get("answer")`）。
+
+      所以保留 `answer: B` 讓這題不消失，完整答案放 `answers`。
+
+      這是 schema 表達不了複選的缺口，不是抽取判斷 —— 修它要動消費端，不在本次範圍。
+
+      全庫目前只有這一題是複選的語詞應用（既有 45 課的 vocab_application 都沒有 answers）。'
+  - index: 2
+    stem: 小朋友在操場上互相（　）著，嘻嘻哈哈真開心。
+    answer: C
+  - index: 3
+    stem: 救援隊冒著暴雨和落石前進，過程（　），最後終於找到受困者。
+    answer: B
+  - index: 4
+    stem: 科技進步（　）我們走進新的數位時代。
+    answer: D
+  - index: 5
+    stem: 這支手機（　）多種拍照功能。
+    answer: A
+  - index: 6
+    stem: 站在山頂上，看著（　）的綠色草原，心情格外愉快。
+    answer: F
+  - index: 7
+    stem: 教室窗邊的植物具有（　），枝葉總是朝著陽光生長。
+    answer: H
+  - index: 8
+    stem: 與同學的人際關係一直困擾著我，各種想法在腦海中（　），始終找不到答案。
+    answer: G

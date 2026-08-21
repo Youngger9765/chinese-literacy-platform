@@ -1,0 +1,21 @@
+lesson_uid: L0170
+version_id: v2
+passage: 隨著打席越來越接近，沒想到腦中的念頭又開始作祟——「我真的打得到嗎？」、「不要又丟人現眼了啊！」、「再打不好，大家會恨死我！」我走向打擊區時，隊友們吆喝󠇡著「給他們好看！」、「加油，你沒問題的！」，但這讓我更加緊張，腦海裡的廣播排山倒海而來。我站上打擊區，手心全是汗，我無法全神貫注，根本來不及反應。「OUT！」三球就被解決，「又來了……」我在心裡嘆了一口氣，不敢看隊友。隨著攻守互換的哨聲響起，我戴上手套跑向外野，心裡滿是失落。每次都這樣，只要關鍵時刻或遭遇挫折，那個毒舌球評總是拖我後腿。
+start_text: 隨著打席越來越接近，沒想到腦中的念頭又開始作祟—
+extent_chars: 246
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 6
+  cell_paragraphs: 6

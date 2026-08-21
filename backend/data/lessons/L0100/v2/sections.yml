@@ -1,0 +1,122 @@
+lesson_uid: L0100
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 保護令
+    definition: 法院為保護當事人的安全，而發出禁止對方靠近、聯絡的命令。
+  - index: 2
+    word: 死纏爛打
+    definition: 糾纏不休、讓人厭煩，形容不知分寸的強求。
+  - index: 3
+    word: 鍥而不捨
+    definition: 有毅力，不放棄，持續努力到底。
+  - index: 4
+    word: 精誠所至，金石為開
+    definition: 只要真心誠意去做，連最困難的事情也能成功。
+  - index: 5
+    word: 怦然心動
+    definition: 被某人或某事吸引而動心。常用來形容愛情的感覺。
+  - index: 6
+    word: 輾轉難眠
+    definition: 因為煩惱，整晚翻來覆去睡不著。
+  - index: 7
+    word: 觸犯
+    definition: 違反法律或規定，或冒犯他人。
+  - index: 8
+    word: 驚弓之鳥
+    definition: 鳥兒曾經被獵人的弓箭所傷，再看見弓時，就害怕起來。形容一個人曾經受過驚嚇或傷害，變得非常敏感。
+  - index: 9
+    word: 界線
+    definition: 人與人之間應該遵守的分際或範圍，常用來指行為上的分寸。
+  - index: 10
+    word: 初衷
+    definition: 最初的想法或目的。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 驚弓之鳥
+    B: 輾轉難眠
+    C: 鍥而不捨
+    D: 怦然心動
+    E: 界線
+    F: 觸犯
+    G: 初衷
+    H: 死纏爛打
+    I: 精誠所至，金石為開
+  questions:
+  - index: 1
+    text: 做科展過程雖然艱辛，但她以（　）的態度完成了研究。
+    answer: C
+  - index: 2
+    text: 明天要上台報告，他很焦慮，一整晚（　）。
+    answer: B
+  - index: 3
+    text: 經歷那場火災後，他變得像（　）一樣，一聽到警鈴就害怕。
+    answer: A
+  - index: 4
+    text: 她的前男友（　），使她不得不報警以保護自己。
+    answer: H
+  - index: 5
+    text: 她不懂得與人相處的（　），常讓人覺得不舒服。
+    answer: E
+  - index: 6
+    text: 他參加志工服務的（　），是希望用自己的力量幫助需要的人。
+    answer: G
+  - index: 7
+    text: 他肇事逃逸的行為已經（　）法律，因此被法院定罪。
+    answer: F
+  - index: 8
+    text: 看見暗戀的人走來，他不禁（　），臉紅到了耳根。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 精誠所至，金石為開
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項「  」中的語詞，何者使用錯誤？
+    options:
+      A: 勸他尊重對方的決定，不要再干擾對方
+      B: 鼓勵他更加熱情地表達愛意，對方終會被感動
+      C: 要他暫時先放棄，隔一段時間再繼續嘗試
+      D: 建議他設計更有創意的驚喜，好讓對方回心轉意
+    rationale: 第2題解析：作者描述電影情節讓觀眾「誤以為這就是浪漫的模樣」，暗示大眾易受電影影響而產生錯誤認知。
+  - index: 5
+    answer: B
+    stem: 若有人不斷在網路社群標註你、留言「我愛你」，使你感到困擾，依文章觀點，下列哪一種處理方式較適當？
+    options:
+      A: 默默刪除留言或退出群組，不要讓人知道
+      B: 清楚告知對方停止，若仍持續，可向大人求助
+      C: 找好朋友去警告，再不停止會有嚴重後果
+      D: 對方畢竟是好意，保持安靜，不理會不處理
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 跟蹤騷擾防治法
+    duration_seconds: 40
+    source: 衛生福利部 桃園醫院
+  - index: 2
+    title: 當有人在街上跟蹤你時，該怎麼辦
+    duration_seconds: 398
+    source: 亮生活 / Bright Side
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

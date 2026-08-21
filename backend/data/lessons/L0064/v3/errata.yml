@@ -1,0 +1,25 @@
+lesson_uid: L0064
+version_id: v3
+errata:
+- id: E1
+  section: 一 讀全文-做記號
+  locator: 段號欄第 1 個號碼
+  source: ㄧ
+  corrected: 一
+  kind: 錯字（注音符號誤植）
+  why: 段號欄第一格打成注音「ㄧ」(U+3127)，其餘 5 個都是漢字數字
+  confidence: high
+  evidence: document.xml 段號儲存格首字碼位 U+3127（與 L0061 E2 同型）
+- id: E2
+  section: 八 詞語複習
+  locator: 找字格子 第7列第10欄
+  source: ''
+  corrected: ''
+  kind: 格子缺字
+  why: 10×10 的格子裡，第 7 列第 10 欄是**空的**（該列只印出 9 個字）
+  confidence: high
+  evidence: 'document.xml 該列有 10 個 <w:tc>，最後一個沒有任何 w:t；PDF p9 該位置也是空白。
+
+    無法判定原本該是哪個字，所以 corrected 留空 —— 不猜。
+
+    不影響任何答案：10 條 answer_paths 沒有一條經過 (7,10)。'

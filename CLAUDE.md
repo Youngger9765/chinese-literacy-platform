@@ -339,14 +339,19 @@ gcloud run revisions describe <該 revision> --region asia-east1 --project lingo
 | `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊） |
 | `backend/data/key_reading_passages.yml` | 重點朗讀（念順順）段落 SOT，by lesson code（`G4-L01`）；134 條有 passage，其中 32 條對不到 DB 任一課（孤兒，待清） |
 
-### ⚠️ 課程清單的真相在 DB，不在 repo（2026-08-08 verified）
+### ⚠️ 課程清單的真相是 uid tree 檔案，不是 DB、也不是 manifest（2026-08-18 verified）
+
+⚠️ **這一段 2026-08-08 寫的是「真相在 DB」，二修 re-ink（#2683/#2736）之後已不成立。**
+`/api/stories` 的 handler（`backend/app/routes/stories.py:382 list_stories`）**沒有 DB
+session**，它呼叫 `search_lessons()`，而那支的註解就寫著 `All in-memory, no DB` ——
+資料來自 `build_all_lessons()` → `backend/data/lessons/<lesson_uid>/<version_id>/`。
 
 ```
-repo backend/data/curriculum/manifest.yml    158 筆
-staging DB（API 回應的 total）               165 筆     ← 服務端真相
+backend/data/lessons/L*/v3/                  175 課     ← 服務端真相
+backend/data/curriculum/manifest.yml         158 筆     ← 一修遺留，已不是服務來源
 ```
 
-要「所有課程」一律走 API，**不要 grep repo 檔案**：
+要「所有課程」仍然一律走 API（別 grep `manifest.yml`，它少 17 課）：
 
 ```bash
 curl -s "$BACKEND/api/stories?page_size=300" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['stories']), d['total'])"
@@ -355,7 +360,7 @@ curl -s "$BACKEND/api/stories?page_size=300" | python3 -c "import json,sys; d=js
 ⚠️ 分頁參數是 **`page_size`**（預設 60，上限 300），**不是 `limit`**。傳 `limit=500` 會被
 **靜默忽略**只回 60 筆，看起來像全部。**斷言拿到的筆數等於回應的 `total`**，否則就是沒拿全。
 
-（2026-08-08 我因此把「60 課 / 47 有重點段」當成全體回報，實際是 165 / 107。）
+（2026-08-08 我因此把「60 課 / 47 有重點段」當成全體回報，實際是全體 175 課。）
 
 ## 簡報資料（公開，不需登入）
 

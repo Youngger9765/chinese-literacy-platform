@@ -499,7 +499,7 @@ class TestAssignWithExpiry:
         future = (datetime.now(timezone.utc) + timedelta(days=60)).isoformat()
         resp = client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "50", "expires_at": future, "copyright_confirmed": True},
+            json={"text_id": "20050", "expires_at": future, "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 201
@@ -510,7 +510,7 @@ class TestAssignWithExpiry:
     def test_assign_without_expires_at_returns_null(self, client, teacher, classroom_id):
         resp = client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "51", "copyright_confirmed": True},
+            json={"text_id": "20051", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 201
@@ -521,7 +521,7 @@ class TestAssignWithExpiry:
         future = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
         client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "52", "expires_at": future, "copyright_confirmed": True},
+            json={"text_id": "20052", "expires_at": future, "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
         list_resp = client.get(
@@ -529,7 +529,7 @@ class TestAssignWithExpiry:
             headers=auth_header(teacher["token"]),
         )
         items = list_resp.json()
-        item_52 = next((i for i in items if i["text_id"] == "52"), None)
+        item_52 = next((i for i in items if i["text_id"] == "20052"), None)
         assert item_52 is not None
         assert item_52["expires_at"] is not None
 

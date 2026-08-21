@@ -1,66 +1,195 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 9,
+    "inline_choice_count": 2,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "1",
+      "2",
+      "3",
+      "1"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "隱藏在日常對話中的「微歧視」",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "從〈螞蟻與蟋蟀〉看生命的多樣性",
+      "value": ""
     },
     {
-      "label": "定義",
-      "value": "微歧視：指的是那些看似微小、隱蔽且多半是\n【　　　】的歧視行為，\n雖不易察覺，但對特定群體影響深遠。【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "螞蟻的行為",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "螞蟻工作往往【　　　】，行動有紀律、有秩序。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "螞蟻是【　　　】昆蟲，分工嚴密。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "整個蟻群的核心是蟻后，所以螞蟻都有一個共同目標：【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "例子分析",
-      "value": "※請勾選出正確答案【　　　】\n1對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n2.對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與憐憫，並剝奪了他參與活動的決定權。\n3.對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "蟋蟀的行為",
+      "sub_rows": [
+        {
+          "blanks": [
+            {
+              "options": [
+                "雄蟋蟀",
+                "雌蟋蟀"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "會發出鳴叫聲的都是【　　　】。【 單選 】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "蟋蟀高歌是為了【　　　】，爭取繁衍的機會，或是【　　　】其他雄蟋蟀不要靠近地盤。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "合作",
+                "競爭"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　　　】的。【 單選 】"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "影響與特點",
-      "value": "1.微歧視雖然看似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到每個人的   價值觀   中，最終影響整個社會。\n2.微歧視的特點在於它【　　　】，因此難以被發現和改正。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "寓言中的看法",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "起源於【　　　】寓言，諷刺蟋蟀鎮日高歌，不知貯糧的天兵。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "寓言中的螞蟻是【　　　】的代表，蟋蟀被批評為【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "破除方法",
-      "value": "※如何破除微歧視 【　　　】\n破除微歧視的關鍵是　A  ，並且在言行中避免對某個群體產生簡化的刻板印象。\nA.經常反思自己的言行。\nB.對每個人保持低期望。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "從生物行為看",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "蟋蟀的高歌與螞蟻的存糧一樣，都是生物遵從【　　　】的行動。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "螞蟻藉由【　　　】，來達成【　　　】的需求；蟋蟀則透過【　　　】，延續自己的基因。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者提醒",
+      "value": "人們看待事物時，不要只從自己的角度出發，否則很容易得出【　　　】的結論。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "隱藏在日常對話中的「微歧視」",
+  "title": "從〈螞蟻與蟋蟀〉看生命的多樣性",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "定義",
-      "value": "微歧視：指的是那些看似微小、隱蔽且多半是\n【　　　】的歧視行為，\n雖不易察覺，但對特定群體影響深遠。(單選)"
+      "items": [
+        {
+          "label": "1",
+          "value": "螞蟻工作往往【　　　】，行動有紀律、有秩序。"
+        },
+        {
+          "label": "2",
+          "value": "螞蟻是【　　　】昆蟲，分工嚴密。"
+        },
+        {
+          "label": "3",
+          "value": "整個蟻群的核心是蟻后，所以螞蟻都有一個共同目標：【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "螞蟻的行為"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "會發出鳴叫聲的都是【　　　】。（單選）\n①雄蟋蟀 ②雌蟋蟀"
+        },
+        {
+          "label": "2",
+          "value": "蟋蟀高歌是為了【　　　】，爭取繁衍的機會，或是【　　　】其他雄蟋蟀不要靠近地盤。"
+        },
+        {
+          "label": "3",
+          "value": "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　　　】的。（單選）\n①合作 ②競爭"
+        }
+      ],
+      "kind": "section_block",
+      "section": "蟋蟀的行為"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "起源於【　　　】寓言，諷刺蟋蟀鎮日高歌，不知貯糧的天兵。"
+        },
+        {
+          "label": "2",
+          "value": "寓言中的螞蟻是【　　　】的代表，蟋蟀被批評為【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "寓言中的看法"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "蟋蟀的高歌與螞蟻的存糧一樣，都是生物遵從【　　　】的行動。"
+        },
+        {
+          "label": "2",
+          "value": "螞蟻藉由【　　　】，來達成【　　　】的需求；蟋蟀則透過【　　　】，延續自己的基因。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "從生物行為看"
     },
     {
       "kind": "pair",
-      "label": "例子分析",
-      "value": "※請勾選出正確答案(單選)\n1對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n2.對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與憐憫，並剝奪了他參與活動的決定權。\n3.對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。"
-    },
-    {
-      "kind": "pair",
-      "label": "影響與特點",
-      "value": "1.微歧視雖然看似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到每個人的   價值觀   中，最終影響整個社會。\n2.微歧視的特點在於它【　　　】，因此難以被發現和改正。"
-    },
-    {
-      "kind": "pair",
-      "label": "破除方法",
-      "value": "※如何破除微歧視 (填入代號)\n破除微歧視的關鍵是　A  ，並且在言行中避免對某個群體產生簡化的刻板印象。\nA.經常反思自己的言行。\nB.對每個人保持低期望。"
+      "label": "作者提醒",
+      "value": "人們看待事物時，不要只從自己的角度出發，否則很容易得出【　　　】的結論。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "定義",
-      "例子分析",
-      "影響與特點",
-      "破除方法"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

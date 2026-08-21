@@ -1,0 +1,19 @@
+lesson_uid: L0157
+version_id: v3
+title: 文言文怎麼讀？以鞭虎救弟記為例
+catalog_slot: 文-L2
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 古今對照表
+- 'no': 三
+  name: 文言文聚光燈
+  subtitle: 如何讀懂文言文
+- 'no': 四
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 8
+  drive_path: 文言文/文-L2文言文怎麼讀？以鞭虎救弟記為例（文言文閱讀策略-如何讀懂文言文）.docx
+  docx_md5: md5-12:23b4606bfec0

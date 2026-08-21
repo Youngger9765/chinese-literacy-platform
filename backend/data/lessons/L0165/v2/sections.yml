@@ -1,0 +1,126 @@
+lesson_uid: L0165
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 趨前
+    definition: 快速或主動向前靠近。
+  - index: 2
+    word: 孤軍奮戰
+    definition: 獨自面對困難或完成任務。
+  - index: 3
+    word: 反射性
+    definition: 遇到事情，來不及思考就做出反應。
+  - index: 4
+    word: 配球
+    definition: 捕手或投手根據打者的情況，安排要投的球種、位置和順序。
+  - index: 5
+    word: 一意孤行
+    definition: 不聽別人的勸告，只按照自己的想法行動。
+  - index: 6
+    word: 篤定
+    definition: 非常確定，心中沒有懷疑。
+  - index: 7
+    word: 保送
+    definition: 比賽中，投手投出四個壞球後，打者不必擊球，就可以上一壘。
+  - index: 8
+    word: 心結
+    definition: 心中放不下的事情或不願面對的問題。
+  - index: 9
+    word: 仰賴
+    definition: 依靠。
+  - index: 10
+    word: 俐落
+    definition: 動作迅速、熟練；也可以形容言語或做事簡潔明快。
+  - index: 11
+    word: 奮不顧身
+    definition: 不顧一切，勇往直前。
+  - index: 12
+    word: 咬中
+    definition: 指打者揮棒時，扎實的擊中球。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.71
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 一意孤行
+    B: 孤軍奮戰
+    C: 奮不顧身
+    D: 篤定
+    E: 俐落
+    F: 心結
+    G: 仰賴
+    H: 趨前
+  questions:
+  - index: 1
+    text: 球隊中，我們彼此是互相扶持的隊友，你不必（　）。
+    answer: B
+  - index: 2
+    text: 他擔任災區志工行之有年，因此處理事情十分迅速（　）。
+    answer: E
+  - index: 3
+    text: 農作物的生長（　）充足的陽光、水分和適合的土壤。
+    answer: G
+  - index: 4
+    text: 面對評審的犀利提問，他依然十分（　），從容回答每一題。
+    answer: D
+  - index: 5
+    text: 下公車時，這位老人一個重心不穩，差點跌倒，好在路人趕緊（　）扶住他。
+    answer: H
+  - index: 6
+    text: 看到小狗不慎落水，他（　） 想要跳下去救牠，卻被阻止。
+    answer: C
+  - index: 7
+    text: 受傷就需要休息，如果你還 （　），堅持上場，舊傷可能會變得更嚴重。
+    answer: A
+  - index: 8
+    text: 經過那次真誠坦白的溝通，兩人終於解開多年的（　）。
+    answer: F
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 下列選項中「  」的語詞，何者使用正確？
+    options:
+      A: 團購飲料時，全班同學都「一意孤行」地選擇了黑糖珍奶
+      B: 聽到獲得冠軍的消息，他「奮不顧身」，在現場又跳又叫
+      C: 答應的事情，如果經常「仰賴」帶過，很快就會失去信任
+      D: 他的神情「篤定」，面對不公不義的事情他決定勇敢面對
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 根據第六段，教練對阿澤說：「你剛剛反而丟掉了自己最厲害的武器。」這句話的意思是什麼？
+    options:
+      A: 「既然我能力比較好，這次就由我全部完成。」B.「你們都靠不住，以後我不會再和你們一組。」C.「每個人還是要完成分工，我可以協助你卡住的部分。」D.「為了避免爭吵，我們先不要討論誰應該負責。」
+      B: 能力較強的人應該承擔更多責任，才能確保團隊獲得成功C.比賽中出現失誤時，球員應該立刻改變原本的戰術D.團隊中的每個人都要避免犯錯，才能獲得彼此的信任
+      D: 阿澤決定自己三振選手後，改以直球對決，放棄自己擅長的球路。
+    rationale: 阿澤決定自己三振選手後，改以直球對決，放棄自己擅長的球路。
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.5
+    answers_recovered_from_rationale: 1
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: The Power Of Teamwork - Funny Animation
+    duration_seconds: 82
+    source: Tibi Tibi
+  - index: 2
+    title: 分組報告怎麼做才避免出問題？ColleGo! 教你三個關鍵！｜高中生活
+    duration_seconds: 372
+    source: ColleGo!大學選才與高中育才輔助系統
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

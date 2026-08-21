@@ -1,0 +1,32 @@
+keypoints:
+  lesson: G7-L13
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 項目對象
+    sub_rows:
+    - sub_label: 阿波羅計畫
+      template: 阿提米絲計畫
+      blanks: []
+  - label: 範例【計畫特色】
+    sub_rows:
+    - sub_label: 實現人類登月夢想
+      template: 強調性別、族裔多元參與
+      blanks: []
+  - label: 【代表神話人物】
+    sub_rows:
+    - sub_label: 太陽神阿波羅
+      template: 月亮女神阿提米絲
+      blanks: []
+  - label: 【執行時間】
+    sub_rows:
+    - sub_label: 1969年~1972年
+      template: 2022年~2025年
+      blanks: []
+  - label: 【太空人的背景】
+    sub_rows:
+    - sub_label: 12位太空人都是男性
+      template: 第一位女性太空人與第一位有色族裔太空人
+      blanks: []

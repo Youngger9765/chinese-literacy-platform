@@ -1,0 +1,21 @@
+lesson_uid: L0080
+version_id: v2
+passage: 澳洲國家隊選手除了運動員身分外，大多還有其他的職業，例如醫師、工程師、收銀員等。也就是說，他們退役後，可以運用在各行各業的專業技能，繼續發展職涯，較不會有後顧之憂。有些退役的運動員也會在工作之餘，到社區運動俱樂部擔任教練，指導更多孩子。就這樣形成了良好的循環，鞏固了澳洲體育人才篩選與訓練系統。
+start_text: 澳洲國家隊選手除了運動員身分外，大多還有其他的職
+extent_chars: 147
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 7

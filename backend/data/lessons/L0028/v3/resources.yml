@@ -1,0 +1,32 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 7年在柬埔寨找地雷，非洲巨鼠獲獎
+    duration: '1:58'
+    duration_seconds: 118
+    source: 公視新聞網
+  - index: 2
+    title: 這則短片說明馬嘎瓦怎樣嗅出地雷來
+    duration: '1:17'
+    duration_seconds: 77
+    source: Al Jazeera English
+  - index: 3
+    title: 嗅出超過100枚地雷的英雄鼠過世
+    duration: '2:15'
+    duration_seconds: 135
+    source: BBC News 中文
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/_LAvnamrxIU
+    url_source: 總表0816「4.影片連結」年級5課次16
+  - index: 2
+    url: http://youtu.be/LDYDUB1PYvI
+    url_source: 總表0816「4.影片連結」年級5課次16
+  - index: 3
+    url: http://youtu.be/FSI757Rru-4
+    url_source: 總表0816「4.影片連結」年級5課次16

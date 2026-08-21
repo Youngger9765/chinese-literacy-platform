@@ -1,0 +1,21 @@
+lesson_uid: L0149
+version_id: v2
+passage: 米田堡血型是指紅血球外層的紅血球膜上有較多的「帶三蛋白」，這種蛋白的主要功能是協助人們把體內的二氧化碳(CO2)由肺部呼氣排出體外，就像是細胞膜上開了很多道小門，讓二氧化碳能夠透過這些小門更快排出體外。據此，我們推論有米田堡血型的人排出二氧化碳的能力應該會比一般人強。為了檢驗這個想法，我們就進一步想看看「米田堡血型」和「非米田堡血型」的人們，運動後代謝二氧化碳的效率是否有所差異。
+start_text: 米田堡血型是指紅血球外層的紅血球膜上有較多的「帶
+extent_chars: 191
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  printed_marks: 8
+  cell_paragraphs: 8

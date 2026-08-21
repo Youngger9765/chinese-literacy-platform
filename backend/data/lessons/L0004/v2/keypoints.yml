@@ -1,0 +1,42 @@
+keypoints:
+  lesson: G4-L13
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 二
+    sub_rows:
+    - sub_label: 上課時因為太在意他而分心，導致無法回答老師的問題
+      template: (勾選，可複選) □①尷尬 □②生氣 □③感到丟臉
+      blanks: []
+    - sub_label: 常常和他做（□①相同 □②不同）的選擇
+      template: 期待有更多相處的機會
+      blanks: []
+  - label: 三
+    sub_rows:
+    - sub_label: 看見他與別人談笑
+      template: (勾選，可複選) □①不是滋味 □②難過 □③害羞
+      blanks: []
+  - label: 四
+    sub_rows:
+    - sub_label: 下課時沒有和他互動
+      template: 感到__
+      blanks:
+      - answer: 失落
+        hint: ''
+    - sub_label: 下課時有說到話或對到眼
+      template: 內心__
+      blanks:
+      - answer: 雀躍
+        hint: ''
+  - label: 五
+    sub_rows:
+    - sub_label: 因為喜歡而有各種心情起伏
+      template: (勾選，可複選)□①平靜　□②疲累 □③困惑
+      blanks: []
+  - label: 統整
+    value: 結合第一段與最後一段，作者寫下這篇小日記，是想抒發心情（ □①大起大落   □②平靜如水）的感受。
+    blanks: []
+  title: 感情小日記2──喜歡是什麼？

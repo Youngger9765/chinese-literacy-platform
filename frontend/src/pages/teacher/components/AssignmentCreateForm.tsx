@@ -5,7 +5,7 @@ import { Story } from '../../../types';
 
 export interface AssignmentCreateFormProps {
   stories: Story[];
-  storyGrade: number | null;
+  storyGrade: string | null;   // "4".."9" / 文言文 / 品格教育
   isLoadingStories: boolean;
   storiesError: string | null;
   selectedStoryId: string;
@@ -178,7 +178,12 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
         <ReadingGoalsForm
           value={formGoals}
           onChange={setFormGoals}
-          grade={selectedStoryId ? storyGrade : null}
+            /* ReadingGoalsForm derives a CPM target from the school year.
+               文言文 / 品格教育 have no year, so they fall through to the
+               default instead of borrowing another grade's target. */
+            grade={selectedStoryId && storyGrade && /^\d+$/.test(storyGrade)
+              ? Number(storyGrade)
+              : null}
         />
       </fieldset>
 

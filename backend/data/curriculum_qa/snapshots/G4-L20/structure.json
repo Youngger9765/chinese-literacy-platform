@@ -1,150 +1,102 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "阿耀的問題",
+      "學長的觀點",
+      "例子1",
+      "例子2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "職業",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
-          "value": "引水人",
-          "interactive_type": "display"
-        }
-      ]
+      "label": "想讀書，該從哪裡著手？",
+      "value": ""
     },
     {
-      "label": "薪水",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低",
-          "interactive_type": "display"
-        }
-      ]
+      "interactive_type": "checkbox",
+      "label": "阿耀的問題",
+      "options": [
+        "阿耀的疑問：一定要讀書嗎？",
+        "阿耀覺得自己跟不上課程，想請教學長。"
+      ],
+      "select_mode": "single",
+      "value": "下列哪個是阿耀遇到的問題？【 單選 】\n①阿耀的疑問：一定要讀書嗎？ ②阿耀覺得自己跟不上課程，想請教學長。"
     },
     {
-      "label": "技術門檻",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低",
-          "interactive_type": "display"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "學長的觀點",
+      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
     },
     {
-      "label": "條件",
-      "value": "",
       "interactive_type": "display",
+      "label": "舉例說明",
       "sub_rows": [
         {
-          "label": "__",
-          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "例子1",
+          "value": "【　　　】【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "例子2",
+          "value": "【　　　】【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "例子3",
+          "value": "【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "市場稀有性",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "□常見　　□稀有",
-          "value": "□常見　　□稀有",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "市場供需情況（填多或少）",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "供給__\n需求__",
-          "value": "供給【　　　】\n需求【　　　】【　　　】【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "結尾",
+      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "想讀書，該從哪裡著手？",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "職業",
-      "items": [
-        {
-          "label": "商店店員、飯店房務人員、拔釘工人、送餐人員",
-          "value": "引水人"
-        }
-      ]
+      "kind": "pair",
+      "label": "阿耀的問題",
+      "value": "下列哪個是阿耀遇到的問題？(單選)\n①阿耀的疑問：一定要讀書嗎？ ②阿耀覺得自己跟不上課程，想請教學長。"
     },
     {
-      "kind": "section_block",
-      "section": "薪水",
-      "items": [
-        {
-          "label": "□高　　□低",
-          "value": "□高　　□低"
-        }
-      ]
+      "kind": "pair",
+      "label": "學長的觀點",
+      "value": "他學習方式有【　　　】，不一定在教室讀課本才叫學習。"
     },
     {
-      "kind": "section_block",
-      "section": "技術門檻",
       "items": [
         {
-          "label": "□高　　□低",
-          "value": "□高　　□低"
+          "label": "例子1",
+          "value": "【　　　】【　　　】"
+        },
+        {
+          "label": "例子2",
+          "value": "【　　　】【　　　】"
+        },
+        {
+          "label": "例子3",
+          "value": "【　　　】"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
     },
     {
-      "kind": "section_block",
-      "section": "條件",
-      "items": [
-        {
-          "label": "__",
-          "value": "❶證照難易度□難  □簡單\n❷經驗需要  □多  □少\n❸年資需要  □短  □長\n❹體能需要  □強  □普通【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "市場稀有性",
-      "items": [
-        {
-          "label": "□常見　　□稀有",
-          "value": "□常見　　□稀有"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "市場供需情況（填多或少）",
-      "items": [
-        {
-          "label": "供給__\n需求__",
-          "value": "供給【　　　】\n需求【　　　】【　　　】【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "結尾",
+      "value": "三人共通點：當原本的路受挫時，想辦法從【　　　】的事物出發、找出新的可能，靠【　　　】與【　　　】，\n繼續留在熱愛的領域。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "__",
-      "供給__\n需求__"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

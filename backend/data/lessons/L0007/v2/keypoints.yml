@@ -1,0 +1,39 @@
+keypoints:
+  lesson: G4-L16
+  structure: flat
+  columns:
+  - label
+  - value
+  rows:
+  - label: 火車上的相遇
+    value: 學生們在火車上玩牌、嘻笑、調侃，男人在一旁微笑著。
+    blanks: []
+  - label: 學生唱歌
+    value: 學生唱〈故鄉〉時，男人__了、視線模糊、低頭，將臉埋在大手裡，肩膀輕輕抽動。
+    blanks:
+    - answer: 哽咽
+      hint: ''
+  - label: 男人說自己的過去
+    value: 1.男人說他年輕時就認識了美麗的妻子，要結婚時岳父反對。他想要賺很多錢，讓岳父__。2.為了__加入詐騙團體，被抓，判了18個月。3.他寫信給老婆認錯，想回家，如果老婆願意讓他回家，就在__。
+    blanks:
+    - answer: 刮目相看
+      hint: ''
+    - answer: 賺快錢
+      hint: ''
+    - answer: 大榕樹上綁一條黃絲帶
+      hint: ''
+  - label: 接近大榕樹
+    value: 火車快到大榕樹時，年輕人們心中__，都湊到窗邊，睜大眼睛。
+    blanks:
+    - answer: 忐忑不安
+      hint: ''
+  - label: 黃絲帶出現
+    value: 1.大榕樹上，掛著滿樹的__，像太陽一樣閃耀。2.男人一邊笑一邊哭：「__。」  學生們掌聲更加熱烈，齊聲大喊：「__！」
+    blanks:
+    - answer: 黃絲帶
+      hint: ''
+    - answer: 我要回家了
+      hint: ''
+    - answer: 祝福你
+      hint: ''
+  title: 黃絲帶

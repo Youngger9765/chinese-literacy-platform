@@ -1,0 +1,31 @@
+keypoints:
+  lesson: G4-L10
+  structure: nested
+  columns:
+  - label
+  - value
+  rows:
+  - label: 主角
+    value: __
+    blanks:
+    - answer: 楊俊瀚
+      hint: ''
+  - label: 挫折事件
+    sub_rows:
+    - sub_label: 雅加達亞運
+      template: （單選）□①驕傲地奪得銀牌     □②以微小差距與金牌擦身而過，感到不甘心
+      blanks: []
+    - sub_label: 拿坡里世大運
+      template: 比賽時受傷了，他選擇（單選）□①積極的面對與復健   □②放棄跑步、不願治療
+      blanks: []
+  - label: 結果
+    value: 他成為再度登上奧運（單選）□①100公尺  □②400公尺 的短跑項目的臺灣選手。
+    blanks: []
+  - label: 他學到了什麼？
+    value: 他學會了先了解害怕的事物，__，再戰勝它。2.學習和自己__，找尋答案。
+    blanks:
+    - answer: 擁抱恐懼
+      hint: ''
+    - answer: 對話
+      hint: ''
+  title: 十秒的背後

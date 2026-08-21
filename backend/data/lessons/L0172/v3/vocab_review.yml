@@ -1,0 +1,146 @@
+lesson_uid: L0172
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 五體投地
+  - 靦腆
+  - 游擊
+  - 精神抖擻
+  - 鑽牛角尖
+  - 刁鑽
+  - 臉色一沉
+  - 不可置信
+  - 荒謬
+  - 氣急敗壞
+  - 悠悠
+  - 低潮
+  target_words_note: 灰框裡分兩行印：第 1 行「五體投地、靦腆、游擊、精神抖擻、鑽牛角尖」，第 2 行「刁鑽、臉色一沉、不可置信、荒謬、氣急敗壞、悠悠、低潮」。
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 效應刁退荒精神斗數鑽
+  - 宏氣鑽士縮謬氣折牛山
+  - 亮急氣器及敗壞角至遊
+  - 角敗群焦五人尖悠信擊
+  - 尖壞好悠惱體信一靦腆
+  - 作祟低預悠大投沈低朝
+  - 不潮言荒寥肆刀地效慌
+  - 可我精神抖擻鑽馬謬應
+  - 置攸惱人瀰漫臉色一沉
+  - 信攸慮游擊挫無體頭地
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 刁鑽
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 3
+    direction: vertical
+  - word: 荒謬
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 6
+    direction: diagonal_down_right
+  - word: 鑽牛角尖
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 9
+    - - 3
+      - 8
+    - - 4
+      - 7
+    direction: diagonal_down_left
+  - word: 氣急敗壞
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    - - 4
+      - 2
+    - - 5
+      - 2
+    direction: vertical
+  - word: 五體投地
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    - - 7
+      - 8
+    direction: diagonal_down_right
+  - word: 靦腆
+    cells:
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 悠悠
+    cells:
+    - - 5
+      - 4
+    - - 6
+      - 5
+    direction: diagonal_down_right
+  - word: 低潮
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 2
+    direction: diagonal_down_left
+  - word: 不可置信
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 精神抖擻
+    cells:
+    - - 8
+      - 3
+    - - 8
+      - 4
+    - - 8
+      - 5
+    - - 8
+      - 6
+    direction: horizontal
+  - word: 臉色一沉
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    - - 9
+      - 10
+    direction: horizontal
+  - word: 游擊
+    cells:
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  geometry_check: "\U0001F534 **12 個圈，但只有 11 個是圖形**：群組（4.87×3.93in）裡有 11 個 roundRect\n＋ **1 張內嵌圖片**（`圖片 103` / rId27，off 0.918,0.000、ext 0.383×0.815in）。\n那張圖蓋住的正是 R1C3+R2C3 的「刁鑽」——只數 `prst=\"roundRect\"`（＝11）會判成\n「刁鑽沒被圈、answers_printed: partial」，而那是錯的。\n怎麼抓到的：把 PDF 點陣化（200dpi）後對橘色做連通元件 → **12 個**，\n跟圖形數（11）差一個，回頭在 XML 才找到那張圖。\n⚠️ `fitz.get_drawings()` 也只看得到 11 個（它看不到那張點陣圖），\n   所以**向量清點與圖形清點會一起漏掉同一個東西**，兩者不算互相對照 —— 要用像素。\n沒有紙外殘留（11 個 roundRect 的 positionH 換算後全在紙內，也沒有 bg1/白色線的隱形框）。\n格子沒有跨頁（10 列都在同一頁）。\n12 條路徑全部用「把 cells 套回 grid 拼字」驗過，都拼得回目標語詞 —— 格子沒有印錯字。\n⚠️ 格子裡有幾組同音／形近誘答，不是答案：R1C6~C9「精神斗數」、R6C9~C10「低朝」、\n   R8C7「鑽」、R3C2~C3「急氣」。"

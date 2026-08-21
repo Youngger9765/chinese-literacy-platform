@@ -1,0 +1,143 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 六
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  word_bank_line: '矗立、假設、眾說紛紜、千里迢迢、無獨有偶、複製、
+
+    人煙稀少、星光滿布、崎嶇、爭論不休、肅然起敬'
+  target_words:
+  - 矗立
+  - 假設
+  - 眾說紛紜
+  - 千里迢迢
+  - 無獨有偶
+  - 複製
+  - 人煙稀少
+  - 星光滿布
+  - 崎嶇
+  - 爭論不休
+  - 肅然起敬
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 具面假手他人千里相送
+  - 實真設無獨有偶里巴巴
+  - 質假戲真作品質星迢下
+  - 艷人煙稀少不光神明迢
+  - 鬥士怪奇蹟滿芒四射箭
+  - 奇妙人古布彩眾說紛紜
+  - 爭吵肅怪俠色製作人崎
+  - 風論遇然行筆矗立不嶇
+  - 吃說不孤起老人爭老實
+  - 醋文化休自敬論雜複製
+  answers_are_graphical: true
+  answer_carrier: 11 個橘色 roundRect（srgbClr E97132），全部錨在紙內，個數與路徑數相符
+  answer_paths:
+  - word: 假設
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 3
+    direction: vertical
+  - word: 千里迢迢
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 無獨有偶
+    cells:
+    - - 2
+      - 4
+    - - 2
+      - 5
+    - - 2
+      - 6
+    - - 2
+      - 7
+    direction: horizontal
+  - word: 星光滿布
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 7
+    - - 5
+      - 6
+    - - 6
+      - 5
+    direction: diagonal_down_left
+  - word: 人煙稀少
+    cells:
+    - - 4
+      - 2
+    - - 4
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    direction: horizontal
+  - word: 眾說紛紜
+    cells:
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    - - 6
+      - 10
+    direction: horizontal
+  - word: 肅然起敬
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 4
+    - - 9
+      - 5
+    - - 10
+      - 6
+    direction: diagonal_down_right
+  - word: 爭論不休
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 2
+    - - 9
+      - 3
+    - - 10
+      - 4
+    direction: diagonal_down_right
+  - word: 崎嶇
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 矗立
+    cells:
+    - - 8
+      - 7
+    - - 8
+      - 8
+    direction: horizontal
+  - word: 複製
+    cells:
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal

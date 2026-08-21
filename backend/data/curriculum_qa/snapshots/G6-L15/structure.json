@@ -1,96 +1,88 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "提出問題",
+      "1",
+      "2",
+      "愛逞強的男生"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "小藍鯨之死",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "愛冒險逞強的雄性動物",
+      "value": ""
     },
     {
-      "label": "時間",
-      "value": "【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "提出問題",
+      "value": "男生出意外的機會遠高於女生，科學研究指出，可能原因有兩個：1.男生較愛【　　　】\n        2.男生較喜歡在別人面前【　　　】。"
     },
     {
-      "label": "地點",
-      "value": "【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "愛冒險的男生與公猴",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "事件",
-      "value": "巨大鯨魚【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "愛逞強的男生",
+      "value": "心理學套圈圈實驗：男生有人旁觀時，會站得更遠，顯示出男生比女生更愛【　　　】。"
     },
     {
-      "label": "死者",
-      "value": "未滿兩歲，還在生長期的幼年藍鯨。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "死因",
-      "value": "因頭骨兩側被繩索纏繞，長期無法進食，最終【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "後續行動",
-      "value": "1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的\n【　　　】與研究典藏。\n2.屏東海生館以巨鯨之路為名，向國人展現其【　　　】。\n3.展廳也展示造成小藍鯨死亡的凶器，藉此提醒大家\n【　　　】是大型鯨類和海洋生物的威脅。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "省思",
-      "value": "小藍鯨的死亡也提醒人們要有反省及行動，\n為【　　　】盡一份心力。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "影片案例",
+      "value": "《山道猴子的一生》描述一群年輕人借高利貸買車、改車，主角最後在山路飆速時命喪輪底，呈現冒險與逞強可能帶來的嚴重後果。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "小藍鯨之死",
+  "title": "愛冒險逞強的雄性動物",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "時間",
-      "value": "【　　　】。"
+      "label": "提出問題",
+      "value": "男生出意外的機會遠高於女生，科學研究指出，可能原因有兩個：1.男生較愛【　　　】\n        2.男生較喜歡在別人面前【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "社會案例：跑酷短片中的跑酷者幾乎清一色是【　　　】。他們做出各種高難度動作，也可能因此受傷。"
+        },
+        {
+          "label": "2",
+          "value": "動物行為研究：\n日本短尾猴的【　　　】比母猴更常做出冒險行為，也較容易因危險行為而【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "愛冒險的男生與公猴"
     },
     {
       "kind": "pair",
-      "label": "地點",
-      "value": "【　　　】。"
+      "label": "愛逞強的男生",
+      "value": "心理學套圈圈實驗：男生有人旁觀時，會站得更遠，顯示出男生比女生更愛【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "事件",
-      "value": "巨大鯨魚【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "死者",
-      "value": "未滿兩歲，還在生長期的幼年藍鯨。"
-    },
-    {
-      "kind": "pair",
-      "label": "死因",
-      "value": "因頭骨兩側被繩索纏繞，長期無法進食，最終【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "後續行動",
-      "value": "1.海洋保育署、成功大學與海洋生物博物館進行藍鯨的\n【　　　】與研究典藏。\n2.屏東海生館以巨鯨之路為名，向國人展現其【　　　】。\n3.展廳也展示造成小藍鯨死亡的凶器，藉此提醒大家\n【　　　】是大型鯨類和海洋生物的威脅。"
-    },
-    {
-      "kind": "pair",
-      "label": "省思",
-      "value": "小藍鯨的死亡也提醒人們要有反省及行動，\n為【　　　】盡一份心力。"
+      "label": "影片案例",
+      "value": "《山道猴子的一生》描述一群年輕人借高利貸買車、改車，主角最後在山路飆速時命喪輪底，呈現冒險與逞強可能帶來的嚴重後果。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "時間",
-      "地點",
-      "事件",
-      "死因"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

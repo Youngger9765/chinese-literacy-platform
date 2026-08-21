@@ -1,44 +1,67 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "背景",
+      "起因",
+      "經過",
+      "結果"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "把球打好，就夠了嗎？",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "第一百碗麵",
+      "value": ""
     },
     {
-      "label": "阿耀背景",
-      "value": "1.阿耀的夢想：想成為【　　　】。\n2.阿耀的疑問：一定要【　　　】嗎？未來真的不能只靠打球生活嗎？",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "背景",
+      "value": "做【　　　】的老人牽著小男孩，走進麵攤。"
     },
     {
-      "label": "健豪學長的回覆",
-      "value": "1.學長以前的想法：\n只要球打好，就能進職棒、獲得豐厚的【　　　】。\n2.進職棒後才發現，成功不只要【　　　】，還要【　　　】。\n3.舉例可能會遇到的三種情況\n  【　　　】選秀遇到怪物級選手，自己未能【　　　】。\n  【　　　】因為長時間比賽，身體容易【　　　】、受傷。\n  【　　　】守備位置競爭激烈，即使實力不錯，也沒機會上場。\n4.結論\n  【　　　】我們無法控制各種情況，雖然打球很重要，但不要【　　　】，不要只剩一條路可以走。\n  【　　　】讀書是要讓你【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "起因",
+      "value": "老人點了最便宜的【　　　】給孫子，自己只喝水。\n老闆看了說他們是【　　　】個客人，那碗麵他請客。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "經過",
+      "value": "1.寒流來那天，小男孩想請阿公吃麵，在攤子旁數有多少【　　　】進去吃麵，人數一直停留在85人。\n2.老闆看見小男孩的舉動，【　　　】給老顧客和朋友，邀請他們來店裡吃麵。\n3.小男孩數到第【　　　】個客人時，把老人拉進店裡，完成請阿公吃麵的心願。\n4.老闆娘想送一碗麵給小男孩，老闆卻說小男孩正在學習「【　　　】」的道理。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結果",
+      "value": "吃完麵後，祖孫倆【　　　】的離去。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "把球打好，就夠了嗎？",
+  "title": "第一百碗麵",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "阿耀背景",
-      "value": "1.阿耀的夢想：想成為【　　　】。\n2.阿耀的疑問：一定要【　　　】嗎？未來真的不能只靠打球生活嗎？"
+      "label": "背景",
+      "value": "做【　　　】的老人牽著小男孩，走進麵攤。"
     },
     {
       "kind": "pair",
-      "label": "健豪學長的回覆",
-      "value": "1.學長以前的想法：\n只要球打好，就能進職棒、獲得豐厚的【　　　】。\n2.進職棒後才發現，成功不只要【　　　】，還要【　　　】。\n3.舉例可能會遇到的三種情況\n  (1)選秀遇到怪物級選手，自己未能【　　　】。\n  (2)因為長時間比賽，身體容易【　　　】、受傷。\n  (3)守備位置競爭激烈，即使實力不錯，也沒機會上場。\n4.結論\n  (1)我們無法控制各種情況，雖然打球很重要，但不要【　　　】，不要只剩一條路可以走。\n  (2)讀書是要讓你【　　　】。"
+      "label": "起因",
+      "value": "老人點了最便宜的【　　　】給孫子，自己只喝水。\n老闆看了說他們是【　　　】個客人，那碗麵他請客。"
+    },
+    {
+      "kind": "pair",
+      "label": "經過",
+      "value": "1.寒流來那天，小男孩想請阿公吃麵，在攤子旁數有多少【　　　】進去吃麵，人數一直停留在85人。\n2.老闆看見小男孩的舉動，【　　　】給老顧客和朋友，邀請他們來店裡吃麵。\n3.小男孩數到第【　　　】個客人時，把老人拉進店裡，完成請阿公吃麵的心願。\n4.老闆娘想送一碗麵給小男孩，老闆卻說小男孩正在學習「【　　　】」的道理。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "吃完麵後，祖孫倆【　　　】的離去。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "阿耀背景",
-      "健豪學長的回覆"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

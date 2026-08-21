@@ -1,0 +1,124 @@
+lesson_uid: L0041
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 推論人物特質
+  strategy_type: inference
+  blocks:
+  - type: concept_box
+    text: '上一課，我們學過：課文直接寫出人物特質時，可以回到人物說的話和做的事，找出支持這項特質的線索。這一課，課文沒有把周天成的每一項特質都直接說出來。我們要從他的言行，推論他是怎樣的人。
+
+      推論人物特質的方法：
+
+      ❶找言行：人物說了什麼、做了什麼？
+
+      ❷找共同點：這些言行有什麼相同的地方？
+
+      ❸推特質：這些言行最能看出人物具有什麼特質？'
+  - type: sub_block
+    label: 一、先複習：哪些言行能支持「自律」？
+    instruction: 課文直接寫出周天成過著高度自律的生活。下列哪些言行能支持「自律」？
+    items:
+    - type: multi
+      prompt: 下列哪些言行能支持「自律」？（複選）
+      options:
+        1: 每天按照順序完成羽球基本訓練。
+        2: 完成羽球訓練後，繼續進行重量訓練。
+        3: 選擇原型食物，並按照固定順序進食。
+        4: 晚上出席公開活動，拜會企業與政府機構。
+        5: 為了降低受傷風險，外出時選擇大眾運輸工具。
+      answers:
+      - 1
+      - 2
+      - 3
+      - 5
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: guide
+      text: →你發現了嗎？楊勇緯和周天成都有「自律」的特質，這是他們成為頂尖選手的重要條件之一喔。
+  - type: sub_block
+    label: 二、把線索合起來，推論人物特質
+    instruction: 除了「自律」這項特質，周天成還有哪些特質，請讀一讀每組課文句子，先判斷是人物「說的話」還是「做的事」，再把兩個線索合起來，選出最適合的人物特質。（單選）
+    left_header: 課文線索
+    right_header: 人物特質
+    items:
+    - type: sub_block
+      label: '1.'
+      items:
+      - type: single
+        label: (1)
+        prompt: (1)即使已經是臺灣頂尖的羽球選手，周天成仍然不自滿，持續尋找各種進步的方法。
+        options:
+          1: 做的事
+          2: 說的話
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        label: (2)
+        prompt: (2)哪怕只有百分之一的進步機會，他都會去嘗試。
+        options:
+          1: 做的事
+          2: 說的話
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        label: 人物特質
+        prompt: 選出最適合的人物特質。（單選）
+        options:
+          1: 精益求精
+          2: 有使命感
+          3: 謹慎小心
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: free_text
+        prompt: '兩個線索共同表現出什麼？
+
+          周天成已經有很好的成績，仍然想讓自己【　】。'
+        answer: 繼續進步
+        answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+        hint: 提示：維持現狀、繼續進步
+    - type: sub_block
+      label: '2.'
+      items:
+      - type: single
+        label: (1)
+        prompt: (1)他舉啞鈴強化左手肌肉，讓左右手的肌力更加平衡，降低脊椎歪斜的風險。
+        options:
+          1: 做的事
+          2: 說的話
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        label: (2)
+        prompt: (2)為了減少受傷的風險，他不騎機車，也不自行開車，盡量搭乘捷運或公車。
+        options:
+          1: 做的事
+          2: 說的話
+        answer: 1
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        label: 人物特質
+        prompt: 選出最適合的人物特質。（單選）
+        options:
+          1: 追求卓越
+          2: 做事謹慎
+          3: 堅持不懈
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: free_text
+        prompt: '兩個線索共同表現出什麼？
+
+          他會事先想到可能發生的【　】，並採取方法【　】。'
+        blanks:
+        - answer: 危險
+        - answer: 降低風險
+        answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+        hint: 提示：危險、提高名氣、降低風險
+  - type: self_check
+    label: ◎自我檢核
+    items:
+    - 1.我能分辨人物說的話和做的事。
+    - 2.我能把幾個言行線索合起來，找出共同點。
+    - 3.我能根據共同點，選出最適合的人物特質。
+    checked: []
+    no_correct_answer: true
+    note: 學生自評，教師版三格都是空 □ —— 本來就沒有標準答案

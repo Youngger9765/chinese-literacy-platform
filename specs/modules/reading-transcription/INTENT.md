@@ -13,9 +13,9 @@ owns_code:
   - backend/app/services/assignment_lifecycle_service.py
   - scripts/reconcile_reading_audio_orphans.py
   - frontend/src/hooks/useAudioRecorder.ts
-  - frontend/src/hooks/useFullReadingSession.ts
-  - frontend/src/components/reading-steps/FullReading.tsx
-  - frontend/src/components/reading-steps/live-tutor/LiveTutor.tsx
+  - frontend/src/hooks/useKeyPassageReadingSession.ts
+  - frontend/src/components/reading-steps/KeyPassageReading.tsx
+  - frontend/src/components/reading-steps/paragraph-reading/ParagraphReading.tsx
   - frontend/src/services/learning/session.ts
 owns_data: []
 spec_tests:

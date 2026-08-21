@@ -1,94 +1,87 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "inline_choice_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "工作記憶的功能",
+      "工作記憶與閱讀速度的關係",
+      "重複朗讀的優點",
+      "結論"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "卡通人氣王票選政見發表會 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "重複朗讀的重要性",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①哆啦A夢是普通的機器貓。 ②哆啦A夢會從百寶袋掏出法寶幫助大雄。 □③哆啦A夢只會幫助大雄，不幫其他人。",
-      "interactive_type": "checkbox",
-      "options": [
-        "哆啦A夢是普通的機器貓。",
-        "哆啦A夢會從百寶袋掏出法寶幫助大雄。 □",
-        "哆啦A夢只會幫助大雄，不幫其他人。"
+      "interactive_type": "fill_blank",
+      "label": "工作記憶的功能",
+      "value": "工作記憶就像大腦裡的籃子，可以【　　　】保存訊息，也能初步【　　　】訊息。"
+    },
+    {
+      "blanks": [
+        {
+          "options": [
+            "多",
+            "少"
+          ]
+        },
+        {
+          "options": [
+            "多",
+            "少"
+          ]
+        },
+        {
+          "options": [
+            "好",
+            "不好"
+          ]
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "inline_choice",
+      "label": "工作記憶與閱讀速度的關係",
+      "value": "1.東西越大【　　　】，工作記憶能記得的越【　　　】；\n  東西越小【　　　】，工作記憶能記得的越【　　　】。\n2.讀得快的人，工作記憶能記住更多內容。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得【　　　】。【　　　】【　　　】【　　　】"
     },
     {
-      "label": "重要事實 2",
-      "value": "□①育勤崇拜哆啦A夢的百寶袋。 ②育勤認為哆啦A夢會讓大雄養成逃避問題的習慣。 □③育勤覺得哆啦A夢的法寶不夠驚奇。",
-      "interactive_type": "checkbox",
-      "options": [
-        "育勤崇拜哆啦A夢的百寶袋。",
-        "育勤認為哆啦A夢會讓大雄養成逃避問題的習慣。 □",
-        "育勤覺得哆啦A夢的法寶不夠驚奇。"
-      ],
-      "correct_options": [
-        1
-      ]
+      "interactive_type": "fill_blank",
+      "label": "重複朗讀的優點",
+      "value": "1.重複朗讀，朗讀速度會【　　　】，也有提升閱讀理解力的效果。2.重複朗讀課文的效果，可以【　　　】到新的課文上。"
     },
     {
-      "label": "重要事實 3",
-      "value": "□①魯夫從小父母照顧。 ②魯夫吃了橡膠果實，刀槍不入。 □③魯夫會為了追求夢想傷害別人。",
-      "interactive_type": "checkbox",
-      "options": [
-        "魯夫從小父母照顧。",
-        "魯夫吃了橡膠果實，刀槍不入。 □",
-        "魯夫會為了追求夢想傷害別人。"
-      ],
-      "correct_options": [
-        1
-      ]
-    },
-    {
+      "interactive_type": "fill_blank",
       "label": "結論",
-      "value": "透過投票決定誰是卡通人氣王。 【　　　】",
-      "interactive_type": "fill_blank"
+      "value": "重複朗讀可以提升閱讀速度，使【　　　】能容納更多內容，最終提升閱讀理解力。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "重複朗讀的重要性",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主題",
-      "value": "卡通人氣王票選政見發表會 【　　　】"
+      "label": "工作記憶的功能",
+      "value": "工作記憶就像大腦裡的籃子，可以【　　　】保存訊息，也能初步【　　　】訊息。"
     },
     {
       "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①哆啦A夢是普通的機器貓。 ②哆啦A夢會從百寶袋掏出法寶幫助大雄。 □③哆啦A夢只會幫助大雄，不幫其他人。"
+      "label": "工作記憶與閱讀速度的關係",
+      "value": "1.東西越大(文旦)，工作記憶能記得的越【　　　】；\n  東西越小(柳丁)，工作記憶能記得的越【　　　】。\n2.讀得快的人，工作記憶能記住更多內容。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得【　　　】。【　　　】【　　　】【　　　】"
     },
     {
       "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①育勤崇拜哆啦A夢的百寶袋。 ②育勤認為哆啦A夢會讓大雄養成逃避問題的習慣。 □③育勤覺得哆啦A夢的法寶不夠驚奇。"
-    },
-    {
-      "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①魯夫從小父母照顧。 ②魯夫吃了橡膠果實，刀槍不入。 □③魯夫會為了追求夢想傷害別人。"
+      "label": "重複朗讀的優點",
+      "value": "1.重複朗讀，朗讀速度會【　　　】，也有提升閱讀理解力的效果。2.重複朗讀課文的效果，可以【　　　】到新的課文上。"
     },
     {
       "kind": "pair",
       "label": "結論",
-      "value": "透過投票決定誰是卡通人氣王。 【　　　】"
+      "value": "重複朗讀可以提升閱讀速度，使【　　　】能容納更多內容，最終提升閱讀理解力。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

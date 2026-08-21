@@ -1,0 +1,21 @@
+lesson_uid: L0113
+version_id: v2
+passage: 對於是否開放安樂死或協助自殺，常見的討論大致可分為三種主要立場。
+start_text: 對於是否開放安樂死或協助自殺，常見的討論大致可分
+extent_chars: 32
+source: docx-extract
+anchor_paragraph: 5
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 9
+  cell_paragraphs: 10

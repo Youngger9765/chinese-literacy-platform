@@ -1,0 +1,115 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容摘要",
+      "內容摘要",
+      "內容摘要",
+      "內容摘要"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "不流血的戰爭",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出問題",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "提問人：齊【　　　】\n問  題：想要攻取魯、梁兩國，但不知道怎麼做?【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "戰略前期",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "戰略設計人：【　　　】\n利用魯梁擅長製作【　　　】的習俗，實施以下政策：\n❶齊國君臣帶頭【　　　】綈\n❷禁止齊國【　　　】綈\n❸向魯梁商人高價收購綈\n目的：利誘魯梁百姓及魯梁國君，轉移【　　　】【　　　】【　　　】【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "戰略後期",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "反轉：❶齊國改穿帛，不再向魯梁進口綈。\n❷禁止與魯梁【　　　】\n目的：造成梁魯內亂，通貨膨脹，經濟失衡。【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "最終結局",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容摘要",
+          "value": "【　　　】年後：魯梁大量人民逃往齊國【　　　】\n【　　　】年後：魯梁國君被迫臣服齊國。\n想一想：齊國的戰略，為何能導致梁魯內亂，人民出逃?\n答：【　　　】【　　　】"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "不流血的戰爭",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "提問人：齊（　）\n問  題：想要攻取魯、梁兩國，但不知道怎麼做?【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出問題"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "戰略設計人：（　）\n利用魯梁擅長製作（　）的習俗，實施以下政策：\n❶齊國君臣帶頭（　）綈\n❷禁止齊國（　）綈\n❸向魯梁商人高價收購綈\n目的：利誘魯梁百姓及魯梁國君，轉移【　　　】【　　　】【　　　】【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "戰略前期"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "反轉：❶齊國改穿帛，不再向魯梁進口綈。\n❷禁止與魯梁（　）\n目的：造成梁魯內亂，通貨膨脹，經濟失衡。【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "戰略後期"
+    },
+    {
+      "items": [
+        {
+          "label": "內容摘要",
+          "value": "（　）年後：魯梁大量人民逃往齊國（十分之六）\n（　）年後：魯梁國君被迫臣服齊國。\n想一想：齊國的戰略，為何能導致梁魯內亂，人民出逃?\n答：【　　　】【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "最終結局"
+    }
+  ]
+}

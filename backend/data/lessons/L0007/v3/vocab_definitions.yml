@@ -1,0 +1,55 @@
+lesson_uid: L0007
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 嘲弄
+  - 調侃
+  - 歉疚
+  - 靦腆
+  - 飛馳而過
+  - 哽咽
+  - 小心翼翼
+  - 輕蔑
+  - 譏諷
+  - 刮目相看
+  - 忐忑不安
+  items:
+  - index: 1
+    word: 嘲弄
+    definition: 取笑或羞辱別人，讓人難堪。
+  - index: 2
+    word: 調侃
+    definition: 用開玩笑的語氣說話，有時帶點諷刺。
+  - index: 3
+    word: 譏諷
+    definition: 嘲笑、諷刺別人，讓人感到受辱。
+  - index: 4
+    word: 靦腆
+    definition: 害羞、不太敢表現自己。
+  - index: 5
+    word: 飛馳而過
+    definition: 形容速度很快，像風一樣奔馳過去。
+  - index: 6
+    word: 哽咽
+    definition: 因為情緒激動，說不出話或聲音顫抖。
+  - index: 7
+    word: 小心翼翼
+    definition: 形容非常小心，害怕弄壞或做錯。
+  - index: 8
+    word: 輕蔑
+    definition: 看不起人、態度不屑或鄙視。
+  - index: 9
+    word: 歉疚
+    definition: 因為做錯事或傷害別人，心裡感到後悔和不安。
+  - index: 10
+    word: 刮目相看
+    definition: 改變原本看法，重新用欣賞的眼光看待某人。
+  - index: 11
+    word: 忐忑不安
+    definition: 心情緊張、焦慮，不知道會發生什麼事。

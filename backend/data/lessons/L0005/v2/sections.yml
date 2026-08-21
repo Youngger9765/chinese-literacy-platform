@@ -1,0 +1,117 @@
+lesson_uid: L0005
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 示意
+    definition: 用動作、眼神等方式讓別人知道自己的意思。
+  - index: 2
+    word: 局面
+    definition: 事情進行到某一階段時，出現的整體情況或狀態。
+  - index: 3
+    word: 火藥味
+    definition: 比喻氣氛緊張，好像快要吵起來或發生衝突。
+  - index: 4
+    word: 不可收拾
+    definition: 事情變得很嚴重、很混亂，已經沒辦法解決或控制。
+  - index: 5
+    word: 尷尬
+    definition: 讓人不好意思，不知道該怎麼辦。
+  - index: 6
+    word: 顫顫巍巍
+    definition: 形容人因老弱、害怕或不舒服，動作不穩、發抖的樣子。
+  - index: 7
+    word: 一溜煙
+    definition: 形容動作非常快，像煙一樣迅速不見。
+  - index: 8
+    word: 側目
+    definition: 斜著眼睛看人，通常表示驚訝、不滿、或看不慣。
+  - index: 9
+    word: 路見不平
+    definition: 看到不公正或不合理的事情，挺身而出，打抱不平。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.64
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 尷尬
+    B: 側目
+    C: 示意
+    D: 火藥味
+    E: 顫顫巍巍
+    F: 局面
+    G: 不可收拾
+    H: 一溜煙
+    I: 路見不平
+  questions:
+  - index: 1
+    text: 老師用眼神向我（　）要我站起來回答問題，我趕緊從座位上站起來。
+    answer: C
+  - index: 2
+    text: 下課鐘一響，學生們（　）跑出教室，衝向福利社買點心。
+    answer: H
+  - index: 3
+    text: 他在網路上亂留言，如果不及早處理，後果恐怕（　）。
+    answer: G
+  - index: 4
+    text: 他看不慣班上霸凌的行為，所以（　），出面說了幾句公道話。
+    answer: I
+  - index: 5
+    text: 他在火車上大聲講電話，引來大家（　）相看。
+    answer: B
+  - index: 6
+    text: 他剛生完大病，走路時還是（　），需要人扶著。
+    answer: E
+  - index: 7
+    text: 比賽最後幾分鐘，雙方攻防激烈，（　）變得非常緊張。
+    answer: F
+  - index: 8
+    text: 學校開會討論要不要取消早自修，學生和學校立場不同，誰也不讓誰，會議室裡充滿（　）。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: D
+    stem: 課文中有幾位不認識國中女生的陌生人，都出來對大媽說話了，下列哪一個詞，最能夠形容這些人的共同特點？
+    options:
+      A: 熱心公益
+      B: 誠懇善良
+      C: 智慧溫暖
+      D: 見義勇為
+    rationale: null
+  - index: 2
+    answer: A
+    stem: 從「女生都快哭出來了，勉強要站起來」，可以推測女生當時想做什麼？
+    options:
+      A: 她感到害怕，想把座位讓給大媽B.她覺得休息夠了，不想再坐C.她生氣地想站起來跟大媽爭吵D.她正好要下車，所以站起來
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 從司機在故事中「說的話、做的事」，可以推論他是個怎樣的人？
+    options:
+      A: 關心乘客，也懂得處理衝突的人B.凶巴巴又不講理的人C.冷淡、不關心乘客的人D.害羞、不敢說話的人
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 這篇故事主要想表達什麼？
+    options:
+      A: 不舒服的時候可以坐博愛座，司機會幫忙留座位B.互相體諒和幫助可以化解誤會，讓一天變得美好C.在公車上大吵大鬧會被司機趕下車D.年紀大的人通常比較有智慧，要聽從長者意見
+      B: 故事的轉折點在於白髮老奶奶站出來關心生病的女生，並願意把自己的座位讓給大媽
+    rationale: 故事的轉折點在於白髮老奶奶站出來關心生病的女生，並願意把自己的座位讓給大媽
+    is_rationale: true
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options:
+    - 2
+    - 3
+    - 4
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 1
+    verdict: weak

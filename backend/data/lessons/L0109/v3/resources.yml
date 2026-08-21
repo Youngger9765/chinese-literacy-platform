@@ -1,0 +1,28 @@
+lesson_uid: L0109
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: '滿滿新人美♥台灣第一！首登場 就站上首爾高尺巨蛋！
+
+      【宇宙啦啦隊-韓國特訓EP5】'
+    duration: '9:55'
+    duration_seconds: 595
+    source: 宇宙啦啦隊
+    url: http://youtu.be/_ulsGTY8u30
+  - index: 2
+    title: 超人氣啦啦隊女神李多慧公開職業秘辛！
+    duration: '13:26'
+    duration_seconds: 806
+    source: GQ Taiwan
+    url: http://youtu.be/FI17wIHBndk
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/_ulsGTY8u30
+    url_source: 總表0816「4.影片連結」年級8課次11
+  - index: 2
+    url: http://youtu.be/FI17wIHBndk
+    url_source: 總表0816「4.影片連結」年級8課次11

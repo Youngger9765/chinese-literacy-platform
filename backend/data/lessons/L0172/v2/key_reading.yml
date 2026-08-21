@@ -1,0 +1,21 @@
+lesson_uid: L0172
+version_id: v2
+passage: 阿翔就是這樣，總是容易懷疑自己，也更容易把一點點問題放在心上。那次，我本來安慰的話都到了嘴邊，聽到他這麼荒謬的發言，不禁氣急敗壞，說：「哪是啊！你幹嘛這麼不相信自己的實力？」也許是我們的爭論聲引來了教練的注意，教練走過來悠悠的說：「你不相信自己的實力就算了，也不相信我的眼光嗎？」「不是不是，教練我不是那個意思！」阿翔連忙鞠躬。教練說：「那就對啦，也別忘了你還有一群可靠的隊友，調整一下，明天看你表現了！」教練拍拍他的背，感覺也拍走了阿翔心中的烏雲。後來，阿翔傳訊息跟我道謝：「感謝你發現我的鑽牛角尖，你的鼓勵我都有放在心上，謝啦！」
+start_text: 阿翔就是這樣，總是容易懷疑自己，也更容易把一點點
+extent_chars: 267
+source: docx-extract
+anchor_paragraph: 6
+paragraphs_used: 1
+reading_benchmark:
+  levels:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  printed_marks: 7
+  cell_paragraphs: 7

@@ -161,6 +161,27 @@ def _register_user(client, suffix: str | None = None) -> dict:
 def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
+# #1182 made `step_progress.steps_completed` the single source of truth for how far a
+# student has got; the integer `current_step` column is no longer synced and the value
+# a session reports is derived. PATCHing `current_step` is still accepted — it is in
+# the request schema — but it does not move the reported step, by design. These tests
+# asserted the old round-trip and had been failing since that change.
+_STEP_ORDER = ["intro", "live_tutor", "comprehension", "vocab", "full_reading", "report"]
+
+
+def _advance_to_step(client, token: str, session_id: int, step_num: int) -> None:
+    """Complete steps 1..step_num-1 so the session reports `step_num` as current."""
+    resp = client.put(
+        f"/api/learning/sessions/{session_id}/progress",
+        json={"current_step": _STEP_ORDER[step_num - 1],
+              "steps_completed": _STEP_ORDER[: step_num - 1],
+              "step_data": {}},
+        headers=auth_header(token),
+    )
+    assert resp.status_code in (200, 201), resp.text
+
+
+
 
 @pytest.fixture(scope="module")
 def user_a(client):
@@ -485,7 +506,12 @@ class TestUpdateSession:
             headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
-        assert resp.json()["current_step"] == 3
+
+        # The reported step follows completed progress, not the PATCH body (#1182).
+        _advance_to_step(client, u["token"], session_id, 3)
+        again = client.get(f"/api/learning/sessions/{session_id}",
+                           headers=auth_header(u["token"]))
+        assert again.json()["current_step"] == 3
 
     def test_update_status(self, client):
         u = _register_user(client, "upd_status")
@@ -616,8 +642,14 @@ class TestUpdateSession:
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "completed"
-        assert data["current_step"] == 6
         assert data["overall_score"] == 95.0
+        # The step a completed session reports comes from what was completed (#1182),
+        # so it is 6 once the five preceding steps are marked done — not because the
+        # PATCH body said so.
+        _advance_to_step(client, u["token"], session_id, 6)
+        again = client.get(f"/api/learning/sessions/{session_id}",
+                           headers=auth_header(u["token"]))
+        assert again.json()["current_step"] == 6
         assert data["completed_at"] is not None
 
     def test_update_not_found_returns_404(self, client, user_a):
@@ -738,6 +770,9 @@ class TestUpdateSession:
         )
         assert resp.status_code == 200
         data = resp.json()
+        _advance_to_step(client, u["token"], session_id, 4)
+        data = client.get(f"/api/learning/sessions/{session_id}",
+                          headers=auth_header(u["token"])).json()
         assert data["current_step"] == 4
         assert data["accuracy"] == 78.3
         assert data["comprehension_result"] == {"q1": True, "q2": False}
@@ -838,7 +873,9 @@ class TestSessionFlow:
                 headers=headers,
             )
             assert resp.status_code == 200
-            assert resp.json()["current_step"] == step
+            _advance_to_step(client, user["token"], session_id, step)
+            seen = client.get(f"/api/learning/sessions/{session_id}", headers=headers)
+            assert seen.json()["current_step"] == step
 
         # 3. Add results
         client.patch(

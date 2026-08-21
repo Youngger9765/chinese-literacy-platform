@@ -1,0 +1,25 @@
+lesson_uid: L0118
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 《雜草的夢想》-迪士尼勵志動畫小短片
+    duration: '2:47'
+    duration_seconds: 167
+    source: 馬來觀雲
+  - index: 2
+    title: 怎樣才算「活在當下」？
+    duration: '3:48'
+    duration_seconds: 228
+    source: Wisdom Bread 智慧麵包
+  note: 每則附 QR code（圖片）；序號 1./2. 由 Word 自動編號產生，不在文字流
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/0R51Ee5SGv0
+    url_source: 總表0816「4.影片連結」年級8課次20
+  - index: 2
+    url: http://youtu.be/FZNmJ6NIcE
+    url_source: 總表0816「4.影片連結」年級8課次20

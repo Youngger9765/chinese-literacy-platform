@@ -1,0 +1,98 @@
+lesson_uid: L0166
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 備受矚目
+    definition: 指受到許多人關注。
+  - index: 2
+    word: 一己之力
+    definition: 指一個人自己的力量。
+  - index: 3
+    word: 釐清
+    definition: 指把混亂或不明白的事情整理清楚。
+  - index: 4
+    word: 出色
+    definition: 表現特別好，超出一般水準。
+  - index: 5
+    word: 滿腹委屈
+    definition: 心中充滿委屈。
+  - index: 6
+    word: 出局數
+    definition: 棒球比賽中，一隊進攻時已經出局的人次。
+  - index: 7
+    word: 口令
+    definition: 簡短的命令或口號。
+  - index: 8
+    word: 不見蹤影
+    definition: 指完全看不見人或事物，也找不到去向。
+  - index: 9
+    word: 頻頻
+    definition: 接連多次；一再地。
+  - index: 10
+    word: 推進
+    definition: 推動事情、工作或位置向前發展。本文指協助跑者向下一個壘包前進。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 一己之力
+    B: 推進
+    C: 不見蹤影
+    D: 備受矚目
+    E: 一手包辦
+    F: 滿腹委屈
+    G: 頻頻
+    H: 出色
+    I: 釐清
+    J: 外界
+  questions:
+  - index: 1
+    text: 經過許多練習的累積，他這次的音樂競賽表現相當 （　）。
+    answer: H
+  - index: 2
+    text: 這次園遊會需要大家分工，不能由班長（　）。
+    answer: E
+  - index: 3
+    text: 警方調閱監視畫面，希望進一步（　）事情的經過。
+    answer: I
+  - index: 4
+    text: 他明明完成了工作，卻被誤會偷懶，心中（　）。
+    answer: F
+  - index: 5
+    text: 這家宮廟總在深夜放鞭炮、煙火，（　）遭到鄰居的抗議。
+    answer: G
+  - index: 6
+    text: 剛才還在沙發上的黑貓，一看到客人進門就（　）。
+    answer: C
+  - index: 7
+    text: 這個計畫十分龐大複雜，任何人都無法只靠 （　）完成。
+    answer: A
+  - index: 8
+    text: 新建的圖書館設備完善，開幕前便（　）。
+    answer: D
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 一手包辦
+    - 外界
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 建立信任感的六步驟，你覺得很困難嗎？
+    duration_seconds: 370
+    source: Mr.Ant安老爹切諾
+  - index: 2
+    title: 怎樣說話才能獲得別人的信任？
+    duration_seconds: 258
+    source: Wisdom Bread 智慧麵包
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

@@ -1,0 +1,25 @@
+lesson_uid: L0119
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 遇見一首詩：台東 / 余光中
+    duration: '1:05'
+    duration_seconds: 65
+    source: 趨勢教育基金會
+  - index: 2
+    title: 飛閱文學地景Ⅲ Ep 12 - 少年池上 蔣勳
+    duration: '2:02'
+    duration_seconds: 122
+    source: 民視讚夯
+  note: 每則附 QR code（圖片）
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/1EB9psxoCmE
+    url_source: 總表0816「4.影片連結」年級8課次21
+  - index: 2
+    url: https://youtu.be/y_ux7Jf2i6Q
+    url_source: 總表0816「4.影片連結」年級8課次21

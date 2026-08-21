@@ -1,0 +1,32 @@
+lesson_uid: L0103
+version_id: v3
+section_no: 九
+resources:
+  row_label: 影片連結
+  items:
+  - index: 1
+    title: 這專注的風味得獎果醬(林韡勳) 一步一腳印 20201129
+    duration: '12:01'
+    duration_seconds: 721
+    source: TVBS優選頻道
+    qr_code: true
+  - index: 2
+    title: 自己做的威士忌橘子果醬，帶有橘子皮的口感，風味也很有層次感喔～
+    duration: 08:41
+    duration_seconds: 521
+    source: Rosalina's Kitchen 蘿潔塔的廚房
+    qr_code: true
+  items_note: '原稿的片長印成「・片長：(12:01)」（含半形括號），本欄照既有形狀去掉括號存成
+
+    `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
+
+    文字層只有標題、片長、來源三項，沒有 URL。'
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/dkpNRAPUXMY
+    url_source: 總表0816「4.影片連結」年級7課次6
+  - index: 2
+    url: http://youtu.be/T5EFbaUXAag
+    url_source: 總表0816「4.影片連結」年級7課次6

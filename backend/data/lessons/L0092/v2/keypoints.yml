@@ -1,0 +1,47 @@
+keypoints:
+  lesson: G7-L23
+  structure: nested
+  columns:
+  - label
+  - sub_label
+  - value
+  rows:
+  - label: 預言/事件
+    value: 一位__聲稱__即將來臨，洪水會淹沒全世界，只有__會被外星人用飛碟救走。
+    blanks:
+    - answer: 家庭主婦／宗教教主
+      hint: ''
+    - answer: 世界末日
+      hint: ''
+    - answer: 信徒
+      hint: ''
+  - label: 研究問題
+    value: 信眾對教主的態度是否因預言結果有所改變？
+    blanks: []
+  - label: 研究方法
+    value: 三位心理學家以假身分加入團體，祕密觀察並蒐集資料。
+    blanks: []
+  - label: 觀察結果
+    sub_rows:
+    - sub_label: 末日前
+      template: 許多人心生恐懼，為了得到__而加入這個宗教。
+      blanks:
+      - answer: 救贖
+        hint: ''
+    - sub_label: 末日當日
+      template: □①什麼都沒有發生　　□②外星人出現。(單選)
+      blanks: []
+    - sub_label: 末日後
+      template: (1)原來就不太投入的人怎麼做？→__
+      blanks:
+      - answer: 離開
+        hint: ''
+    - sub_label: 末日後
+      template: (2)對教主付出很多的人怎麼做？→__
+      blanks:
+      - answer: 更加投入
+        hint: ''
+  - label: 研究結論
+    value: 當一個人為某種信念投入大量時間、金錢或人際關係時， (單選)□①可能會不看證據，做出匪夷所思的判斷□②比較能根據證據做判斷。
+    blanks: []
+  title: 信眾與教主

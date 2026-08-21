@@ -1,0 +1,140 @@
+lesson_uid: L0054
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 爭強鬥勝
+    definition: 在競爭中總想勝過別人，不願意落後。
+  - index: 2
+    word: 耳目一新
+    definition: 看到或聽到和以前不同的事物，讓人感到新鮮。
+  - index: 3
+    word: 雄赳赳，氣昂昂
+    definition: 形容精神飽滿、氣勢威武的樣子。
+  - index: 4
+    word: 粉墨登場
+    definition: 原指化妝上臺演戲；現在也比喻人物上場或出現。
+  - index: 5
+    word: 真摯
+    definition: 真誠、不虛假。
+  - index: 6
+    word: 嬌客
+    definition: 受到特別照顧或款待的客人；也可形容珍貴、惹人喜愛的動物。
+  - index: 7
+    word: 尾隨而至
+    definition: 緊跟在後面，接著來到。
+  - index: 8
+    word: 青睞
+    definition: 喜歡或重視。
+  - index: 9
+    word: 招親
+    definition: 公開尋找結婚對象。本文用來比喻動物求偶。
+  - index: 10
+    word: 丰采
+    definition: 美好、吸引人的樣子或特色。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 爭強鬥勝
+    B: 招親
+    C: 耳目一新
+    D: 粉墨登場
+    E: 尾隨而至
+    F: 青睞
+    G: 雄赳赳，氣昂昂
+    H: 丰采
+  questions:
+  - index: 1
+    text: 今年校慶我們班要表演舞臺劇，到時全班都會（　）。
+    answer: D
+  - index: 2
+    text: 颱風來襲，狂風呼嘯而過，暴雨（　），街道很快就積水了。
+    answer: E
+  - index: 5
+    text: 運動會上，參賽選手（　）、互不相讓，努力爭取最好的成績。
+    answer: A
+  - index: 8
+    text: 畢業典禮上，每位學生都展現了屬於自己的 （　）。
+    answer: H
+  extraction_check:
+    options_not_in_lesson_vocabulary:
+    - 雄赳赳，氣昂昂
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 小狗追著自己的尾巴跑，「尾隨而至」的模樣，可愛極了
+      B: 家裡教室重新粉刷、換上窗簾後，讓人感到「耳目一新」
+      C: 王阿姨的孩子走失了，她上網「招親」尋找
+      D: 姊姊帶著畫具參加比賽，準備「粉墨登場」作畫
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 根據本文，下列關於動物求偶的敘述，何者不恰當？
+    options:
+      A: 求偶的方式十分多元
+      B: 求偶的時間各不相同
+      C: 求偶目的為繁衍後代
+      D: 不同動物求偶地點皆相同
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 請問本文主旨為何？
+    options:
+      A: 作者對大自然被破壞感到憂心，希望大家能盡可能地愛護動物
+      B: 作者非常喜愛動物，希望動物能多多繁衍，豐富大自然的風采
+      C: 動物用不同方式求偶，以繁衍後代，也讓自然展現不同丰采
+      D: 動物求偶時必須擊敗競爭對手，才能順利延續生命
+    rationale: null
+  - index: 4
+    answer: A
+    stem: 小華閱讀了&lt;口腔保健&gt;一文，文章內有多個小標題，請問下列何者較不可能是它的小標題？
+    options:
+      A: 裝飾牙齒的方法
+      B: 牙齒疾病形成原因
+      C: 潔牙方式與步驟
+      D: 牙齒的功能與分類
+    rationale: null
+  - index: 5
+    answer: B
+    stem: 「用力量求偶」這個小主題，哪組內容最適合放進去？
+    options:
+      A: 雄蛙發出鳴叫聲；五色鳥發出求偶叫聲。
+      B: 雄蟹揮動大螯；有些雄蛇彼此搏鬥。
+      C: 雄海馬舞出姿勢；雄鴕鳥跳起求偶舞。
+      D: 雌蛾分泌氣味；雌蛇釋放特殊氣味。
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.6
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 動物界暖男排行榜！奇葩求偶方式大盤點
+    duration_seconds: 145
+    source: PanSci 泛科學
+  - index: 2
+    title: 公視《台灣特有種》微視界HD版Episode#6 台灣招潮蟹
+    duration_seconds: 245
+    source: 小公視
+  - index: 3
+    title: 動物們的小怪癖？氣味用途大不同
+    duration_seconds: 160
+    source: 臺北市立動物園
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 3
+  needs_human_review: true

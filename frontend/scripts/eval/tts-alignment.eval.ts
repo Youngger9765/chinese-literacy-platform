@@ -73,8 +73,8 @@ async function fetchJsonReal<T>(url: string): Promise<T> {
 // ── Mocks for the synthesize-call interception phase ───────────────────────
 // Audio fires 'ended' on the next microtask after play() — just needs to let
 // _speakViaBackendWithProgress's sentence loop run to completion; timing
-// fidelity doesn't matter for this eval (unlike Intro.aiTts.test.tsx, which
-// deliberately controls it to test UI state transitions).
+// fidelity doesn't matter for this eval (unlike useFullTextTtsQueue.test.ts,
+// which deliberately controls it to test UI state transitions).
 class AutoEndAudio {
   onended: (() => void) | null = null;
   onerror: (() => void) | null = null;
@@ -102,8 +102,8 @@ beforeEach(() => {
   // NOTE: URL is deliberately NOT stubbed here. jsdom's real fetch (used for
   // the pre-fetch phase below, before the synthesize interceptor is
   // installed) needs the real `URL` constructor internally to parse request
-  // URLs — stubbing it globally with a plain object (as Intro.aiTts.test.tsx
-  // does, safe there because that file mocks fetch entirely) breaks real
+  // URLs — stubbing it globally with a plain object (as the fetch-mocking TTS
+  // unit tests do, safe there because they mock fetch entirely) breaks real
   // fetch with "URL is not a constructor". createObjectURL/revokeObjectURL
   // are added via installSynthesizeInterceptor() instead, once real network
   // calls are done.

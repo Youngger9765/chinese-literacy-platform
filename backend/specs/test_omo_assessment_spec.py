@@ -47,9 +47,27 @@ def _load(path: Path) -> dict:
     return yaml.safe_load(path.read_text())
 
 
+@pytest.mark.skip(
+
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+
+)
+
+
 def test_lesson_dir_exists():
     """Guardrail: the spec is anchored to a real data directory."""
     assert LESSON_DIR.is_dir(), f"lesson dir missing: {LESSON_DIR}"
+
+
+@pytest.mark.skip(
+
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+
+)
 
 
 def test_some_lessons_declare_vocab_bank():

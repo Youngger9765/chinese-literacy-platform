@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0080",
+  "catalog_slot": "G7-L12",
+  "pdf_pages": 8,
+  "pages_read": 8,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "三載體全查：☑(w:sym F0FE) **全課只有 1 個**（重點表「學校」列的 ☑①充足）——第六大題聚光燈一個都沒有，它的答案全部是橘色手寫字且在文字層裡，照樣抽得到。⛔ 不要因為 F0FE 少就判定「這課沒有教師答案」，載體不同而已。roundRect 全文 11、找字表格內紙上 10、紙外 0 = 10 條路徑（多的 1 個在表格外）；w:bdr 非 auto 0 個（14 個全是 color=auto）。字數欄兩端精準吻合、不需任何 Word 特殊口徑：第 5 段 147 = 印出的第 6 個數字，＋第 6 段 227 = 374 = 最後一個數字，span=第5~6段。PDF 版面陷阱：「◎我的表現」表格在 p3 被第三大題內容疊印壓住幾乎看不見，文字層完整。閱讀理解第 4 題的說明框在 document.xml 裡插在選項 A 與 B 之間，已歸位到題級 explanation。找字格子跨頁：第 1~9 列在 p7、第 10 列在 p8，「井井有條」終點落在第 10 列而圈線整組畫在 p7。總表 10 個語詞與學習單完全一致（僅順序不同）。課名的 X 在標題列是半形、在重點表標題是全形，各自照原樣記錄。"
+}

@@ -1,0 +1,96 @@
+lesson_uid: L0151
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 抽絲剝繭
+    definition: 比喻由淺入深，一層層深入分析，探求真相。
+  - index: 2
+    word: 鋪天蓋地
+    definition: 形容聲勢很大，範圍很廣，好像連天空和地面都被覆蓋。
+  - index: 3
+    word: 劈頭
+    definition: 指一開始就直接講或做，沒有緩和的過程。
+  - index: 4
+    word: 眼睜睜
+    definition: 清楚看著壞事發生，但無法改變情況。
+  - index: 5
+    word: 援助
+    definition: 援救幫助。
+  - index: 6
+    word: 煽情
+    definition: 故意挑動情緒，以引起共同情感的反應。
+  - index: 7
+    word: 杜撰
+    definition: 無事實根據、憑空捏造。
+  - index: 8
+    word: 令人髮指
+    definition: 形容事情非常殘忍、可惡，使人憤怒到極點。
+  - index: 9
+    word: 最負盛名
+    definition: 最具有名望。
+  - index: 10
+    word: 視若無睹
+    definition: 雖然看到，但因不關心，好像沒有看到一樣。等同「視而不見」。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 令人髮指
+    B: 杜撰
+    C: 最負盛名
+    D: 抽絲剝繭
+    E: 視若無睹
+    F: 鋪天蓋地
+    G: 煽情
+    H: 援助
+    I: 眼睜睜
+    J: 劈頭
+  questions:
+  - index: 1
+    text: 這起離奇的殺人案經警方連日來的（　），終於真相大白。
+    answer: D
+  - index: 2
+    text: 暴風雨來襲時，雨水如注、風聲如雷，（　）的黑雲籠罩著全城。
+    answer: F
+  - index: 3
+    text: 在地震災區，各地的救援隊紛紛運送物資前來（　）災民們。
+    answer: H
+  - index: 4
+    text: 嫌犯為了搶錢，竟傷害無辜路人，犯下（　）的罪行。
+    answer: A
+  - index: 5
+    text: 藝術家達文西的油畫作品眾多，其中以《蒙娜麗莎》（　）。
+    answer: C
+  - index: 6
+    text: 這篇報告裡有些人物和事件都是作者（　）的，不能當成真實歷史。
+    answer: B
+  - index: 7
+    text: 演講時可以表達情感，但如果只靠誇張語氣讓人落淚，就會顯得 （　）而少了些真誠。
+    answer: G
+  - index: 8
+    text: 看到同學被嘲笑，如果我們（　），也可能讓傷害繼續發生。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 假新聞與我們的距離
+    duration_seconds: 123
+    source: 數位時代Official
+  - index: 2
+    title: '假新聞出沒！破解 #媒體與牠們的產地ft.劣質媒體黑名單'
+    duration_seconds: 434
+    source: 公視P# 新聞實驗室
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

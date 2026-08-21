@@ -1,0 +1,88 @@
+lesson_uid: L0143
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 因人而異
+    definition: 每個人的情況或反應都不相同。
+  - index: 2
+    word: 囊括
+    definition: 比喻得到全部的獎項或事物。
+  - index: 3
+    word: 血栓
+    definition: 堵塞血管的血塊。
+  - index: 4
+    word: 稀薄
+    definition: 稀少、淡薄。
+  - index: 5
+    word: 堵住
+    definition: 塞住。
+  - index: 6
+    word: 功不可沒
+    definition: 功勞極大，不可忽略。
+  - index: 7
+    word: 濃稠
+    definition: 濃厚而黏稠。
+  - index: 8
+    word: 凝血現象
+    definition: 血液由液態逐漸凝固，形成血塊的過程。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 囊括
+    B: 堵住
+    C: 稀薄
+    D: 因人而異
+    E: 濃稠
+    F: 凝血現象
+    G: 功不可沒
+    H: 血栓
+  questions:
+  - index: 1
+    text: 每個人的體質不同，對藥物的反應也（　）。
+    answer: D
+  - index: 2
+    text: 豚骨拉麵的湯底是用（　）的豬骨湯調製而成。
+    answer: E
+  - index: 3
+    text: 天氣一冷，血管彈性不佳的老人較容易形成（　），引發腦中風。
+    answer: H
+  - index: 4
+    text: 愛迪生有許多重要發明，為人類帶來新文明，真是（　）。
+    answer: G
+  - index: 5
+    text: 哥哥是體育健將，只要是他參加的比賽，幾乎（　）所有金牌。
+    answer: A
+  - index: 6
+    text: 他一緊張，喉嚨像被什麼（　）一樣，半天說不出話。
+    answer: B
+  - index: 7
+    text: 皮膚受傷流血時，身體會出現 （　），幫助傷口止血。
+    answer: F
+  - index: 8
+    text: 高山上的空氣比較（　），剛爬上去時容易覺得喘。
+    answer: C
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 什麼是高海拔訓練？
+    duration_seconds: 604
+    source: Vamos Sports翊起運動
+  - index: 2
+    title: 血管油到長血栓，為何天氣冷容易中風
+    duration_seconds: 502
+    source: 三個字SunGuts
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

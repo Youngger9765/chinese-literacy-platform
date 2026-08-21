@@ -1,0 +1,24 @@
+lesson_uid: L0008
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 15歲的他，開了家窮人免費的面店，送出4萬碗麵！
+    duration: '5:16'
+    duration_seconds: 316
+    source: 一条Yit
+  - index: 2
+    title: 用一枚銅板換一頓溫飽 莊朱玉女阿嬤堅持販售10元自助餐 倒貼負債也要讓每個人都能吃到熱騰騰的飯菜
+    duration: 08:12
+    duration_seconds: 492
+    source: 在台灣的故事
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/lxbGhzvr3DI
+    url_source: 總表0816「4.影片連結」年級4課次17
+  - index: 2
+    url: http://youtu.be/QAHUIhcmluE
+    url_source: 總表0816「4.影片連結」年級4課次17

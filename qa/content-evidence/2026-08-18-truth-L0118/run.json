@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0118",
+  "catalog_slot": "G8-L20",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 0,
+  "notes": "八道門一次過。找字 12 條路徑全部由 grid 反查驗證。roundRect 13 個 > 12 條路徑，查證後第 13 個是紙外殘留（rightMargin + 5.76in ＝ 距頁左 13.03in，頁寬 8.27in；框線寫死 srgb E97132，其餘 12 個用 accent2）。念順順四個段界 129/254/289/377 用最單純算法直接吻合，Word 四條口徑一條都不必套。"
+}

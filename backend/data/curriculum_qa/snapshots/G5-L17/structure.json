@@ -1,87 +1,77 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "【　　　】",
+      "【　　　】",
+      "【　　　】",
+      "【　　　】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "掃雷英雄馬嘎瓦",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "巨鼠外型與優點",
-      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "地雷危害",
-      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "兩種掃雷方式的比較",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "傳統掃雷",
-          "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "巨鼠掃雷",
-          "value": "1.靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【　　　】，訓練成本【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "牧羊少年的逆轉勝",
+      "value": ""
     },
     {
-      "label": "巨鼠貢獻",
-      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "【　　　】",
+      "value": "西元前 1100 年左右，以色列與非利士兩軍隔著【　　　】對峙，僵持數月。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "【　　　】",
+      "value": "非利士巨人【　　　】連日出來叫陣單挑，要求以單挑決定雙方勝負，以色列軍隊【　　　】，士氣低落。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "【　　　】",
+      "value": "15歲牧羊少年【　　　】送飯到陣地，自告奮勇請戰。\n→國王一開始拒絕，後來被大衛的決心說服，讓大衛應戰。\n→大衛拿了牧羊的杖，以及在溪邊挑選【　　　】，帶著甩石的機弦迎向巨人。\n→大衛將石頭甩射出去，一石擊中歌利亞未防護的【　　　】，大衛拔出巨人的【　　　】將其斬首。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "【　　　】",
+      "value": "巨人倒地身亡，非利士軍【　　　】，以色列人大獲全勝。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "作者結語",
+      "value": "面對可怕的挑戰及困難，勇敢面對，發揮自己的長處，就有機會將危機變成轉機。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "掃雷英雄馬嘎瓦",
+  "title": "牧羊少年的逆轉勝",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "巨鼠外型與優點",
-      "value": "馬嘎瓦是非洲巨鼠，重量約1至1.5公斤，科學家發現訓練巨鼠可以幫忙偵測【　　　】。"
+      "label": "（左欄第1格）",
+      "value": "西元前 1100 年左右，以色列與非利士兩軍隔著【　　　】對峙，僵持數月。"
     },
     {
       "kind": "pair",
-      "label": "地雷危害",
-      "value": "戰爭結束多年後，很多平民仍被殘留的地雷殺傷，因此掃雷工作變成【　　　】的工作。"
-    },
-    {
-      "kind": "section_block",
-      "section": "兩種掃雷方式的比較",
-      "items": [
-        {
-          "label": "傳統掃雷",
-          "value": "由掃雷人員手持【　　　】搜索，每遇金屬訊號都得停下確認，危險耗時，效能低，而且不方便。"
-        },
-        {
-          "label": "巨鼠掃雷",
-          "value": "1.靠【　　　】偵測地雷，只對【　　　】反應，工作人員能快速鎖定炸藥位置\n2安全：不會引爆地雷。\n3.效率【　　　】，訓練成本【　　　】"
-        }
-      ]
+      "label": "（左欄第2格）",
+      "value": "非利士巨人【　　　】連日出來叫陣單挑，要求以單挑決定雙方勝負，以色列軍隊【　　　】，士氣低落。"
     },
     {
       "kind": "pair",
-      "label": "巨鼠貢獻",
-      "value": "1.巨鼠已經在各國協助掃雷，成功找到超過10萬枚地雷。\n2.其中最著名的巨鼠就是馬嘎瓦。\n3.巨鼠的形象已經變成【　　　】的英雄。"
+      "label": "（左欄第3格）",
+      "value": "15歲牧羊少年【　　　】送飯到陣地，自告奮勇請戰。\n→國王一開始拒絕，後來被大衛的決心說服，讓大衛應戰。\n→大衛拿了牧羊的杖，以及在溪邊挑選【　　　】，帶著甩石的機弦迎向巨人。\n→大衛將石頭甩射出去，一石擊中歌利亞未防護的【　　　】，大衛拔出巨人的【　　　】將其斬首。"
+    },
+    {
+      "kind": "pair",
+      "label": "（左欄第4格）",
+      "value": "巨人倒地身亡，非利士軍【　　　】，以色列人大獲全勝。"
+    },
+    {
+      "kind": "pair",
+      "label": "作者結語",
+      "value": "面對可怕的挑戰及困難，勇敢面對，發揮自己的長處，就有機會將危機變成轉機。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "巨鼠外型與優點",
-      "地雷危害",
-      "傳統掃雷",
-      "巨鼠掃雷"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

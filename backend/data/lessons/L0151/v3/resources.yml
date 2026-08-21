@@ -1,0 +1,26 @@
+lesson_uid: L0151
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 假新聞與我們的距離
+    duration: '2:03'
+    duration_seconds: 123
+    source: 數位時代Official
+    url: http://youtu.be/8kxi0yBwYWY
+  - index: 2
+    title: 假新聞出沒！破解
+    duration: '7:14'
+    duration_seconds: 434
+    source: 公視P# 新聞實驗室
+    url: http://youtu.be/m3gLNa-fx_w
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/8kxi0yBwYWY
+    url_source: 總表0816「4.影片連結」年級9課次8
+  - index: 2
+    url: http://youtu.be/m3gLNa-fx_w
+    url_source: 總表0816「4.影片連結」年級9課次8

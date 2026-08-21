@@ -1,0 +1,38 @@
+{
+  "lesson_uid": "L0172",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "整段抽取未計時。唯二量過的是轉檔：整份 DOCX → PDF **900 秒逾時失敗**（先前另一位 worker 用預設 300 秒也逾時）；七份 subset.docx 平行轉檔 < 40 秒全數成功。",
+  "pdf_pages": 13,
+  "pdf_pages_note": "13 = 七份 subset.docx 的頁數和（3+2+1+1+4+1+1）。整份 DOCX 轉不出 PDF，所以沒有『整份頁數』這個數字可引。",
+  "pages_read": 13,
+  "read_calls": 8,
+  "read_calls_note": "7 次讀 subset PDF（涵蓋全部 13 頁，非抽樣）＋ 1 次讀找字格子的 200dpi 放大裁切圖。",
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 0,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "orphan_key": 0
+  },
+  "retries": 1,
+  "retries_note": "第一次 verbatim_gate FAIL 2 條，是我自己新造的註解欄位名（start_paragraph_evidence / answer_evidence）不在門的 ANNOTATION 白名單裡，被當成原稿字串比對。改成 *_note 後 PASS。不是抽取內容的錯。",
+  "gate_results": {
+    "verbatim_gate": "PASS（受檢 185 條、對不上 0、無法驗證 0）",
+    "verbatim_all": "PASS 175/175",
+    "coverage_gate": "PASS 175/175",
+    "traditional_only_gate": "PASS 175/175",
+    "orphan_key_gate": "PASS（L0172 → 14 個模組）",
+    "normalize_block_types": "PASS",
+    "normalize_word_search": "PASS（L0172 12 條路徑）",
+    "keypoints_shape_gate": "PASS",
+    "render_coverage_gate": "PASS"
+  },
+  "notes": "🔴 這一課最重要的一筆：**找字遊戲的 12 個圈裡有 1 個不是圖形，是內嵌圖片**（`圖片 103` / rId27，0.383×0.815in，蓋住 R1C3+R2C3 的「刁鑽」）。只數 `prst=\"roundRect\"` 得到 11，會判成「刁鑽沒被圈、answers_printed: partial」——那是錯的。⚠️ `fitz.get_drawings()` 也只看得到 11（它讀不到點陣圖），所以**向量清點與 XML 圖形清點會一起漏掉同一個東西，兩者不構成互相對照**。抓到的方法是把 PDF 點陣化後對橘色做連通元件 → 12 個，差額才逼我回頭去 XML 找那張圖。 ｜ 12 條路徑全部用『cells 套回 grid 拼字』驗過，且對座標門做過 mutation（把刁鑽改成鄰格 → 門轉紅並指名「座標拼出『退士』」；還原後轉綠；mutation 前先用 diff 確認檔案真的被改到 1 行，避免無聲不命中）。 ｜ ☑ F0FE 13 個，全部在文章重點表，數目與記錄的 ☑ 相符；特質伸展台用的是手寫「Ｖ」字元不是 F0FE，所以『數 F0FE 對全課答案』在這課不成立。 ｜ 連連看 6 條線的配對由三重佐證收斂：幾何端點、PDF 像素、以及下一個練習「特質伸展台」印出來的六組『特質／超能力』對照，三者一致。 ｜ 念順順兩個段界裸算就吻合（段6=267、段6+7=413），一條字數口徑都不必套。 ｜ 橘色答案走 run 層 w:color，不需解 rStyle（與 L0170/L0171 不同）。 ｜ 2026-08-18 追加（回應工頭廣播的新規則）：連連看原本只有『看圖確認』的定性像素證據，補做量化比對 —— 從 render 出來的 PDF 抓 6 條連線的向量端點，跟文字層 12 個「●」座標比（左欄 x≈206、右欄 x≈359，兩欄列位皆 y=435/478/521/563/606/649，列距 43pt）。六條端點各自落在某個 ● 上、最大偏差 7.8pt、且為雙射，推出 {1:D,2:F,3:A,4:E,5:C,6:B}，與 XML 幾何算出的完全相同。⚠️ 這一輪特意**不使用 XML 的任何中間結果**，才算得上獨立對照。同時查了新規則①的容器問題：這課的容器是 wgp 一層（off=(0,0)、chOff.y=-0.0348in、scale 0.9511×0.9988），我的 walker 有套 chOff 與縮放；沒有 a:grpSp。新規則②：兩個 anchor 都是 positionV relativeFrom=paragraph + 正位移（0.294/0.237in），不是紙外殘留形狀。新規則③：六條線逐條各自確認畫得出來，沒有拿『這一區有畫』推廣。"
+}

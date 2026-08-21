@@ -1,0 +1,137 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 7,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "1.「我很爛」",
+      "2.「我只會添麻煩」",
+      "3.「都是我的錯」",
+      "小結"
+    ],
+    "template_kind": "psr"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "從白熊到藍海豚：學習與念頭和平相處",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "引言",
+      "value": "日常生活中，我們腦袋中有眾多念頭，且多半是\n使我們充滿"
+    },
+    {
+      "interactive_type": "display",
+      "label": "問題描述",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1.「我很爛」",
+          "value": "遇到事情容易【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2.「我只會添麻煩」",
+          "value": "覺得自己是【　　　】，不敢向他人【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3.「都是我的錯」",
+          "value": "遭遇挫折容易過度【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "小結",
+          "value": "越要自己不去想，念頭反而越清晰，這就是【　　　】效應。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "解決方法",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1.召喚藍海豚",
+          "value": "運用方法轉移【　　　】，讓注意力回到【　　　】正在做的、最重要的事上。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2.念頭只是路過",
+          "value": "提醒自己──「這只是【　　　】，不是真的」，重新選擇回應念頭的方法。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結語",
+      "value": "下次又浮現負面想法時，記得把【　　　】拉回當下，只要"
+    },
+    {
+      "interactive_type": "display",
+      "label": "結語",
+      "value": "那些念頭，不必跟隨它。"
+    }
+  ],
+  "title": "從白熊到藍海豚：學習與念頭和平相處",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "引言",
+      "value": "日常生活中，我們腦袋中有眾多念頭，且多半是\n使我們充滿"
+    },
+    {
+      "items": [
+        {
+          "label": "1.「我很爛」",
+          "value": "遇到事情容易【　　　】"
+        },
+        {
+          "label": "2.「我只會添麻煩」",
+          "value": "覺得自己是【　　　】，不敢向他人【　　　】"
+        },
+        {
+          "label": "3.「都是我的錯」",
+          "value": "遭遇挫折容易過度【　　　】"
+        },
+        {
+          "label": "小結",
+          "value": "越要自己不去想，念頭反而越清晰，這就是【　　　】效應。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "問題描述"
+    },
+    {
+      "items": [
+        {
+          "label": "1.召喚藍海豚",
+          "value": "運用方法轉移【　　　】，讓注意力回到【　　　】正在做的、最重要的事上。"
+        },
+        {
+          "label": "2.念頭只是路過",
+          "value": "提醒自己──「這只是【　　　】，不是真的」，重新選擇回應念頭的方法。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "解決方法"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "下次又浮現負面想法時，記得把【　　　】拉回當下，只要"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "那些念頭，不必跟隨它。"
+    }
+  ]
+}

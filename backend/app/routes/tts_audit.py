@@ -36,8 +36,13 @@ def get_provenance() -> JSONResponse:
     Reads the entire JSONL in one shot so the response is consistent even
     while a batch job is appending to the file concurrently.
     """
+    # 檔案不存在 = 還沒有人跑過那支批次工具 = **有 0 筆**，不是「找不到端點」。
+    # 這個檔沒有進 repo、也沒被 git 追蹤，所以線上永遠不存在 —— 回 404 會讓
+    # 後台顯示紅字「載入失敗：HTTP 404」，跟後端真的掛掉長得一模一樣，
+    # 而實際上只是還沒有資料（2026-08-19 在 staging 實測到）。
     if not _PROVENANCE_PATH.exists():
-        raise HTTPException(status_code=404, detail="tts-provenance.jsonl not found")
+        logger.info("No provenance file yet at %s — returning an empty set", _PROVENANCE_PATH)
+        return JSONResponse(content={"total": 0, "entries": []})
 
     entries: list[dict] = []
     try:

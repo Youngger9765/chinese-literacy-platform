@@ -1,106 +1,338 @@
-# content_known_gaps.yaml — honest registry of content the platform genuinely
-# lacks for the聚光燈 (reading-strategy) / 重點表 (story-structure) steps (#2397).
-#
-# WHY THIS EXISTS (not a fake-pass list):
-#   The content evidence gate iterates every live lesson and marks a cell
-#   `unknown` when the source content is missing. `unknown` == fail at gate
-#   time. But some lessons have NO extractable聚光燈/重點表 in their source
-#   DOCX (classical Chinese 文-L*, lessons whose worksheet has no spotlight
-#   range, multi-text secondary slots). Those are真實內容缺口, not bugs — they
-#   must be surfaced honestly, not faked green and not blocked as un-triaged
-#   unknowns. Listing a lesson here flips its cell from `unknown` to
-#   `known_gap`: still NOT a pass, but an explicitly-owned, auditable gap.
-#
-# HOW IT IS USED:
-#   content_evidence_gate.py reads this file. For a (lesson_code, step) listed
-#   here it sets status=known_gap + failure_code KNOWN_CONTENT_GAP_<reason>.
-#   The ship gate counts known_gap cells separately (reported, non-blocking)
-#   but REQUIRES every entry to carry a reason — so adding one is a deliberate,
-#   reviewable act, never a silent skip.
-#
-# REASONS (machine-checked enum):
-#   no_spotlight_source   — DOCX 學習單沒有可抽取的閱讀聚光燈段落
-#                           (extractor: "spotlight range not found" / empty)
-#   no_keypoints_source   — DOCX 沒有可抽取的文章重點表
-#   multi_text_secondary  — 多文本課的第二/三篇 slot，內容在 primary slot
-#   classical_no_step     — 文言文課型本就無此步驟素材
-#   built_pending_deploy  — 線上版 schema 已建好(_online-schema)但尚未進 DB
-#                           → 真正解法是部署，不是補件；先誠實標記不擋
-#   figure_missing        — 源 DOCX/GCS 都沒有可用真圖資產（不可用 placeholder 補綠）
-#
-# 校驗來源 (2026-06-22, staging full sweep, post dedup+normalization fix):
-#   每筆都對照 private/curriculum-source/_online-schema/<code>.spotlight.yml /
-#   .keypoints.yml 的抽取結果，error/_missing_source/empty blocks 才列入。
-#   修內容後請從本檔移除對應 entry，讓 gate 重新驗 pass。
+generated: '2026-08-15'
+issue: 2683
+what_this_is: 二修 175 課裡，閱讀聚光燈（含品格/文言文同一大題的不同印法）目前只有 7 課真的沒有內容：L0011、L0137，以及 5 個年級各一份的「正太與小豬」定向課。其餘先前登錄的
+  41 課已在後續多模態重抽（#2736）中補上，詳見 resolved.spotlight_render_null_2683。
+not_a_bug: L0011、L0137 的來源學習單本身沒有這個大題（分別只有 8 節、多文本合讀無此節）。L0021/L0049/L0077/L0107/L0130 是每個年級開學都放的同一份「正太與小豬：武僧的養成之路」定向課，`sections_present`
+  只有『讀全文-做記號』『閱讀理解』兩節，整份學習單本來就沒有其餘七個大題（含閱讀聚光燈）——不是抽取器漏抓。
+count: 7
+lessons:
+- lesson_uid: L0011
+  catalog_slot: G4-L1
+  title: 贏得喝采的輸家
+- lesson_uid: L0137
+  catalog_slot: G9-L16
+  title: 未解之謎──石頭的祕密（多文本-巨石陣+摩艾石像）
+- lesson_uid: L0021
+  catalog_slot: G5-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0049
+  catalog_slot: G6-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0077
+  catalog_slot: G7-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0107
+  catalog_slot: G8-L0
+  title: 正太與小豬：武僧的養成之路
+- lesson_uid: L0130
+  catalog_slot: G9-L0
+  title: 正太與小豬：武僧的養成之路
+lesson_body_text:
+  status: 缺，全部 175 課
+  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修
+    `_parsed_2026-05-01` 餵的 —— 那層刪掉後這個循環就斷了。
+  impact: 朗讀、閱讀理解、生字、造句四個步驟沒有文本來源（story['paragraphs'] 為空）
+  text_is_available: 在原始 DOCX 裡（實測 G4-L10 有 13 段 5019 字），不需要重新徵集素材
+  why_not_done_now:
+  - 本機只有 76 / 175 份 DOCX（缺 6、7 年級、文言文、品格教育），做不出全量
+  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96 份裡誤報
+    14 份
+  next_step: 先取得完整 Drive 來源，再設計一個真的能判對錯的驗證（例如以字數統計欄位或人工標註的 golden set 對照），驗證成立才寫入。沒有對照就抽，可能把學習單題目當成課文，比沒有課文更糟。
+fields_not_extracted:
+  what: 二修抽取管線只產出學習單的兩塊（聚光燈、重點表）。下列欄位在 175 課全部是空的 —— 全部 0/175，不是部分缺。
+  measured: 2026-08-15，對 backend/data/lessons/ 全量實測
+  impact: 圖書館的文體/分類篩選會回空；課文簡介、生字、語詞應用、閱讀理解、朗讀基準這幾個步驟沒有資料來源。API 不會報錯，欄位是 null／空陣列。
+  source: 多數欄位的原料在原始 DOCX 裡（語詞、閱讀理解題目都在學習單上），需要擴充抽取器
+  fields:
+    paragraphs:
+      count: 174
+      of: 175
+      是什麼: 課文本體（見 lesson_body_text）
+    vocabulary:
+      count: 0
+      of: 175
+      是什麼: 生字語詞
+    fill_in_blank:
+      count: 0
+      of: 175
+      是什麼: 語詞應用填空
+    multiple_choice:
+      count: 0
+      of: 175
+      是什麼: 閱讀理解選擇題
+    intro:
+      count: 0
+      of: 175
+      是什麼: 課文簡介（作者／背景）
+    thumbnail_url:
+      count: 174
+      of: 175
+      是什麼: 課文縮圖
+    genre:
+      count: 0
+      of: 175
+      是什麼: 文體（記敘文／說明文…）
+    category:
+      count: 0
+      of: 175
+      是什麼: 分類標籤
+    reading_benchmark:
+      count: 0
+      of: 175
+      是什麼: 朗讀字數基準
+    has_key_reading:
+      count: 147
+      of: 175
+      是什麼: 重點朗讀段落
+locks_removed_with_the_first_edition:
+  why_this_list_exists: 刪掉的回歸鎖如果沒登記，等於把一個已知會壞的地方變回沒人看守。以下是隨一修資料一起刪掉的鎖，以及對應內容補上時要重建什麼。
+  items:
+  - removed: tests/test_regression_fill_in_blank_schema_1675.py
+    locked_what: fill_in_blank 的 schema 一致性（#1675 修的 6 課）
+    why_removed: 該欄位二修 0/175，且測試寫死一修的補零課號（G6-L04，二修是 G6-L4）
+    rebuild_when: 抽取器開始產 fill_in_blank 時，對全量重建同樣的 schema 一致性斷言
+  - removed: tests/test_g8_lettered_spotlight_binding.py
+    locked_what: G8 a/b 後綴課號的聚光燈繫結
+    why_removed: 二修沒有任何 a/b 後綴課號（實測 0 筆），分冊編法已廢
+    rebuild_when: 若未來再出現一課多冊的編號，需要重新設計繫結規則與鎖
+  - removed: tests/test_regression_layer2_shadow_merge_1666.py
+    locked_what: Layer-1/Layer-2 以標題合併時的影子覆蓋
+    why_removed: 兩層合併機制已整個廢除，這是這次重刷的核心目標
+    rebuild_when: 不需重建 —— 只要識別鍵維持 lesson_uid，這個病就不會回來
+  - removed: tests/test_spotlight_adapter_fidelity.py / test_lesson_yaml_answer_mapping_2015.py / test_g7l30_spotlight_step_2080.py
+      / test_tables_field.py
+    locked_what: 對 _parsed_2026-05-01 與特定一修課號（G7-L30）的抽取忠實度
+    why_removed: 來源目錄與該課號都不存在了
+    rebuild_when: 忠實度改由 tests/test_spotlight_to_lesson_content.py 覆蓋，已從 7 課手抄樣本改成 143 課真語料
+key_reading_passages:
+  status: 已按 right_fix 接上（140/175）；本條保留為紀錄，剩餘 35 課見 key_reading_withheld
+  resolved_2026_08_16: 段落改由二修 DOCX 第二節按 lesson_uid 抽取，一修那張表不再被讀取
+  what: '`backend/data/key_reading_passages.yml` 有 134 段重點朗讀文字，但它是一修資料、以課號（補零寫法 G4-L01）為鍵。'
+  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph`
+    / `needs_review` 三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
+  what_i_checked: 正規化課號後 115/134 對得上，但那個數字不代表對得『正確』；我一度拿標題比對想確認，實際上條目根本沒有標題欄位 —— 那個比對恆為真，什麼都沒驗到。課文本體也是空的（0/175），所以連『這段文字在不在該課課文裡』都比不了。
+  current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
+  right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
+key_reading_withheld:
+  count: 28
+  of: 175
+  status: 不是缺口 —— 那個課型本身沒有這個練習
+  breakdown:
+    no_section: 28
+  what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
+  why_28_is_not_a_gap: 逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣。沒有老師標的重點段可抽，跟某課沒有影片一樣是正常狀態。
+  how_to_close: 無 —— 這 28 份學習單沒有這一節。若日後改版加入，重跑 build_key_reading.py 即可。
+key_reading_flagged:
+  count: 2
+  lessons:
+  - L0101
+  - L0139
+  what: 二修 DOCX 標的段號與一修對照表差一段。已採用二修（那是二修自己的學習單指示），並在 key_reading.yml 標 needs_human_review + review_reason。
+  why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
+mcq_options_emitted_as_guides:
+  count: 0
+  what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。
+  resolved_2026_08_18: 多模態重抽（#2736）
+  lessons: []
+blocks_present_but_none_renderable:
+  count: 0
+  lessons: []
+  note: 先前登錄的 11 課（只有 guide/figure/self_check）2026-08-19 重驗後全部已有可渲染內容，見 resolved.spotlight_render_null_2683。
+resolved:
+  note: 以下缺口已補上，登錄留著是為了記錄怎麼補的與剩下什麼
+  lesson_body_text:
+    was: 0 / 175
+    now: 174 / 175
+    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是
+      1:1（96 份誤報 14 份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
+    remaining: 1 課（G9-L15 會考圖文題實戰）整份是考題，本來就沒有課文
+  thumbnail_url:
+    was: 0 / 175
+    now: 174 / 175
+    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen
+      3/4 全系列在本專案已 404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
+    spec: 400×300 WebP，中位數 19 KB，最大 42 KB —— 與一修同規格
+    remaining: 同上那 1 課（沒有課文就沒有場景可畫）
+  worksheet_sections:
+    note: 學習單九節裡，抽取器原本只做兩節（聚光燈、重點表）。現在做了七節。
+    counts:
+      課文本體: 174 / 175
+      課文封面: 175 / 175
+      生字（語詞我最棒）: 116 / 175
+      語詞應用: 129 / 175
+      閱讀理解: 140 / 175
+    how_verified: 每節都有自己的對照，等級 A（跟文件另一節交叉比對）優先。生字：定義的詞 vs 本課語詞清單。語詞應用：選項必屬本課語詞、答案代號必在選項內。閱讀理解：答案必在選項內、題幹必接地到課文。沒通過的不寫入
+      —— 抽錯比沒抽更糟。
+    two_source_shapes_that_looked_like_bugs:
+    - 教師版把正確選項換成答案解析（有時加括號有時不加）→ 138 課曾被誤判為抽錯
+    - 本課語詞跨行時會黏在一起（揮之不去起伏）→ 42 課曾被誤判為對不上
+    not_extracted:
+      課程簡介: DOCX 沒有這一節。不拿課文首段充當，那會讓簡介變成課文重複一次
+      詞語複習: 找字方陣，需要能驗證「每個語詞都在方陣裡找得到」才寫入，尚未做
+      知識補給站: 抽到 129 課但無交叉驗證可做，標 needs_human_review
+  spotlight_render_null_2683:
+    was: 43 / 175（32 課完全沒有 block、11 課只有 guide/figure/self_check 這類不可渲染的類型）
+    now: 2 / 175（L0011、L0137——兩課的來源學習單本來就沒有這個大題）
+    how: '2026-08-19（#2772，隨 #2736 一路推進的多模態重抽）：逐課重讀 latest version（v3 優先）的 spotlight.yml，看 block type
+      是否含 figure/guide/self_check 以外的可練習類型（single/multi/free_text/table/fill_table/matching/exercise/passage/…）。原列的
+      43 課裡 41 課現在都有——含這份清單自己漏掉的線索：品格教育軌（體-L*）跟文言文軌把這個大題印成「品格聚光燈」／「文言文聚光燈」而不是「閱讀聚光燈」，字面比對會把它們誤判成缺口；用「*聚光燈」找家族名才對得上。'
+    how_verified: 讀 backend/data/lessons/L*/v3/spotlight.yml 本身（不是重跑抽取器），逐課列出 block type 分佈人工抽查過樣本
+    note: 本次只更新這份人讀的 ledger。machine-checked 的 content_known_gaps.adapter.yaml（spotlight_to_lesson_content.py
+      讀的那份）是另一個檔，本次未動——那份要不要跟進改，需要先確認 adapter gate 現在怎麼用這 43 課的 enum，不在這次盤點範圍內。
+    caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content
+      evidence gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
+bodies_without_a_cross_check:
+  count: 29
+  of: 175
+  what: 這 29 課的課文抽出來了，但**沒有任何交叉驗證** —— 學習單沒有「本課語詞」可以拿來比對邊界（其中 11 課是文言文，用「古文今譯」不是語詞框）。
+  how_marked: body.yml 標 needs_review + review_reason，跟通過檢查的 111 課區分開
+  why_not_withheld: 課文本身很可能是對的（suspect 那 5 課人工看過都對），扣住等於讓學生沒課文可讀。標註比隱藏誠實。
+  how_to_close: 人工確認這 29 課的課文起訖是否正確，或替這兩種版型找出各自的交叉驗證欄位
+reading_benchmark_not_in_source:
+  count: 0
+  of: 175
+  status: 不是缺口 —— 來源沒有這份資料
+  what: reading_benchmark 是每課的朗讀速度分級門檻（字/分鐘）。學習單只印空白的計時表格給學生自己填，沒有任何目標值。
+  current_behaviour: 前端 personaConfig.ts 走「課別基準 → 年級預設 → 全域 120」的鏈，缺這欄仍有門檻可用
+  how_to_close: 需要教學端提供各年級/各課的目標值，不是抽取問題
+lesson_without_a_passage:
+  count: 1
+  of: 175
+  status: 不是缺口 —— 這課本來就沒有課文
+  lesson: L0136《會考圖文題實戰》
+  what: 這是用 112 年國中教育會考圖文題做的實戰練習課，本身不含閱讀文本。
+spreadsheet_title_unmatched:
+  count: 13
+  of: 175
+  what: 這 13 課的課名在 自學教材總表.xlsx 找不到對應列，所以沒有簡介／文體來源（文體另從學習單刊頭的「Level N・文體」取得，故仍有值）。
+  breakdown:
+    absent_from_sheet: 9
+    ambiguous: 2
+    multi_text: 2
+  why_not_forced: 課名配對錯一列 = 這課掛上別課的簡介與策略。一修的封面就是這樣接錯的。寧可留白。
+  how_to_close: 請教材端在總表補上這 9 課，或確認「正太與小豬」兩列各對應哪一課
+spotlight_range_not_found:
+  count: 30
+  of: 175
+  真實狀態: 聚光燈練習實際只有 143/175，不是 175/175 —— 先前的計數把 error 物件當成「有內容」
+  what: '這 30 課的 spotlight.yml 內容是一個錯誤物件（lesson + error: spotlight range not found）。
 
-schema_version: content-known-gaps.v1
+    它被當成資料送到前端，畫面因此只剩「參考課文」而沒有任何練習題，且不會報錯。
 
-reading-strategy:
-  # fail-closed: padded alias/identity drift slots (避免鄰號錯綁內容)
-  - {lesson_code: G4-L2,  reason: no_spotlight_source}
-  - {lesson_code: G4-L3,  reason: no_spotlight_source}
-  - {lesson_code: G4-L17, reason: no_spotlight_source}
-  - {lesson_code: G4-L20, reason: no_spotlight_source}
-  # vision-judge confirmed served spotlight embeds another lesson's example/
-  # practice text; no verified correct source found → fail-closed (not 放錯課)
-  - {lesson_code: G5-L11, reason: no_spotlight_source}
-  - {lesson_code: G6-L12, reason: no_spotlight_source}
-  - {lesson_code: G7-L31, reason: no_spotlight_source}
-  - {lesson_code: G9-L8,  reason: no_spotlight_source}
-  # 無可抽取聚光燈段落 (extractor: spotlight range not found / empty blocks)
-  - {lesson_code: G4-L1,  reason: no_spotlight_source}
-  - {lesson_code: G4-L12, reason: no_spotlight_source}
-  - {lesson_code: G4-L14, reason: no_spotlight_source}
-  - {lesson_code: G5-L1,  reason: no_spotlight_source}
-  - {lesson_code: G5-L15, reason: no_spotlight_source}
-  - {lesson_code: G5-L19, reason: no_spotlight_source}
-  - {lesson_code: G6-L1,  reason: no_spotlight_source}
-  - {lesson_code: G6-L16, reason: no_spotlight_source}
-  - {lesson_code: G6-L19, reason: no_spotlight_source}
-  - {lesson_code: G6-L21, reason: no_spotlight_source}
-  - {lesson_code: G7-L6,  reason: no_spotlight_source}
-  - {lesson_code: G7-L7,  reason: no_spotlight_source}
-  - {lesson_code: G7-L15, reason: no_spotlight_source}
-  # verified no-source in source DOCX (G7-L20 extractor returned spotlight blocks: 0)
-  - {lesson_code: G7-L20, reason: no_spotlight_source}
-  - {lesson_code: G7-L22, reason: no_spotlight_source}
-  - {lesson_code: G7-L27, reason: no_spotlight_source}
-  - {lesson_code: G8-L2,  reason: no_spotlight_source}
-  - {lesson_code: G8-L10, reason: no_spotlight_source}
-  - {lesson_code: G9-L7,  reason: no_spotlight_source}
-  - {lesson_code: G9-L10, reason: no_spotlight_source}
-  # 文言文課型 — 無聚光燈素材 / 標記待補件
-  - {lesson_code: 文-L3,  reason: classical_no_step}
-  - {lesson_code: 文-L4,  reason: classical_no_step}
-  - {lesson_code: 文-L5,  reason: classical_no_step}
-  - {lesson_code: 文-L6,  reason: classical_no_step}
-  - {lesson_code: 文-L7,  reason: classical_no_step}
-  - {lesson_code: 文-L8,  reason: classical_no_step}
-  - {lesson_code: 文-L9,  reason: classical_no_step}
-  - {lesson_code: 文-L10, reason: classical_no_step}
-  # G8 a/b multi-text siblings — spotlight now BOUND to their verified base/
-  # companion catalog source via correct-mapping.json (#2461, content-verified
-  # per-lesson): G8-L3a→G8-L3, G8-L6a→G8-L7, G8-L9b→G8-L12, G8-L12a→G8-L15,
-  # G8-L12b→G8-L16. Removed from known_gaps — no longer pending.
+    '
+  is_it_a_pipeline_failure: '是。code 裡原本寫「not a pipeline failure, but a structural absence」，那句話是錯的，
 
-story-structure:
-  # 多文本課的第二/三篇 slot — 重點表內容在 primary slot (G7-L23)
-  - {lesson_code: G7-L31, reason: multi_text_secondary}
+    而且正因為寫下來了所以沒人去查。逐份開 DOCX 確認：30 課裡 27 課文件中確實有「閱讀聚光燈」，
 
-# Figure-asset gaps.
-# #2459: the gate previously ALSO audited the synthetic spotlight_v2
-# blocks[].asset name (figN.png) which the frontend never fetches — it renders
-# from story.images[].filename via buildImageSrc. That produced FALSE gaps on
-# lessons whose real per-page image (G7-L28-08.jpg …) is uploaded and rendering.
-# The gate now audits story.images[].filename only; G7-L28/L29/L30/G9-L9 were
-# verified pass (real images 200 in GCS) and removed from this list.
-# NOTE: FIGURE_BLACKLIST_HIT (placeholder served) 應優先補真圖；若確認源頭沒有
-# 真圖可供上傳，允許以 figure_missing 誠實標記缺口，不得用 placeholder 假裝通過。
-figure:
-  # Remaining = genuine gaps: story.images[].filename points at a name absent
-  # from GCS (real fix = correct the figure reference / upload the real asset).
-  - {lesson_code: G6-L8,    reason: figure_missing}
-  - {lesson_code: G5-L24,   reason: figure_asset_not_uploaded}  # story → fig10.png (404); real source asset TBD by content owner (#2458)
-  - {lesson_code: G8-L7,    reason: figure_asset_not_uploaded}  # story → fig10.png (404); G8-L9 dir (#2458)
-  - {lesson_code: G8-L8,    reason: figure_missing}             # G8-L6b only has placeholder fig1.png in G8-L8 dir
-  - {lesson_code: G8-L6b,   reason: figure_missing}             # source figure is placeholder-only (no authentic asset)
+    只有 3 課真的沒有。
+
+    '
+  root_cause: '`scripts/build_lesson_schema.py` 的 `find_spotlight_range()` 用很窄的 marker 開節：
+
+    ◎/※ 加上固定字樣，或「步驟❶」，或特定的小表格。這些學習單把「閱讀聚光燈」印在**刊頭**，
+
+    練習本身以「示範１：」「練習1：」開頭 —— 跟課文邊界那個 bug 是同一種版型差異。
+
+    '
+  current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
+  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate
+    + ship gate
+  likely_stale_2772: 2026-08-19（#2772）重驗閱讀聚光燈缺口只剩 2 課（見 resolved.spotlight_render_null_2683），跟這裡的『現在 143/175』（缺
+    32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有 block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range()
+    這支窄 marker 的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
+choice_rows_without_options:
+  generated: '2026-08-19'
+  issue: 2736
+  what_this_is: 自稱「單選／多選」但來源真的沒有選項可抽的列。學習單把選項畫在圖上（answer_carrier 記著「紅色 ☑（w:sym Wingdings F0FE）」），文字流裡沒有，所以抽取器讀不到。
+  not_a_bug: 橋與消毒層對這些列的行為正確。2026-08-19 修好的是另外 19 課 24 列 —— 那些來源好好的（options 是 dict、或行內選擇收在 sub_items/inline_choices），只是橋沒接。剩下這幾列要補得回到原始
+    DOCX 或請教材端補印。
+  how_it_looks_to_a_student: 畫面顯示「聽完老師解釋（單選）」加一個空格，沒有東西可以選。⚠️ 這仍然是壞的使用者體驗，只是修法不在我方 code。
+  lessons:
+  - lesson_uid: L0084
+    rows: 3
+    sample: 聽完老師解釋（單選）／長大後（單選）×2
+    answer_carrier: 橘色手寫（字元樣式 af）＋ 紅色 ☑（w:sym Wingdings F0FE），共 6 個 ☑
+  count_lessons: 1
+  count_rows: 3
+
+comprehension_no_mcq_uses_vocab_fill_in_blank:
+  generated: '2026-08-20'
+  issue: 2779
+  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content
+    也全部不存在（不是 #2779 修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
+  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這
+    23 課的閱讀理解會落在既有的 hasMcq=false 分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實
+    payload 寫回歸鎖驗證這個行為。'
+  how_to_close: 請教材端為這 23 課補閱讀理解選擇題（回原始 DOCX 或請補印）。
+  count: 23
+  of: 175
+  lessons:
+  - catalog_slot: G6-L15
+    id: 20055
+    title: 愛冒險逞強的雄性動物
+  - catalog_slot: G6-L16
+    id: 20056
+    title: 把手上的餅吃香一點
+  - catalog_slot: G6-L9
+    id: 20076
+    title: 給神明發會診單
+  - catalog_slot: G7-L10
+    id: 20078
+    title: 別上「誘餌式標題」的鉤
+  - catalog_slot: G7-L11
+    id: 20079
+    title: 一封向醫師求助的信
+  - catalog_slot: G7-L12
+    id: 20080
+    title: 澳洲奧運金牌的X機密
+  - catalog_slot: G7-L13
+    id: 20081
+    title: 女性太空人登月
+  - catalog_slot: G7-L2
+    id: 20099
+    title: AI什麼都會，我們還要學什麼？
+  - catalog_slot: G7-L28
+    id: 20097
+    title: 綠色賽事
+  - catalog_slot: G7-L29
+    id: 20098
+    title: 隱藏在日常對話中的微歧視
+  - catalog_slot: G7-L3
+    id: 20100
+    title: 你以為的浪漫，可能是跟騷
+  - catalog_slot: G8-L6
+    id: 20126
+    title: 戲院、賭場、檳榔攤：在時代夾縫中
+  - catalog_slot: G8-L7
+    id: 20127
+    title: 當壞事已不可逆轉：集中營裡的一門
+  - catalog_slot: G8-L8
+    id: 20128
+    title: 讓黑猩猩被看見的人
+  - catalog_slot: G9-L16
+    id: 20137
+    title: 未解之謎──石頭的祕密
+  - catalog_slot: G9-L2
+    id: 20145
+    title: 看不見的故事，推動看得見的世界
+  - catalog_slot: G9-L21
+    id: 20142
+    title: 焚而不毀的倫敦
+  - catalog_slot: G9-L22
+    id: 20143
+    title: 高地訓練有助於運動表現嗎？
+  - catalog_slot: G9-L3
+    id: 20146
+    title: 語言的足跡：從臺北萬華到南太平洋
+  - catalog_slot: G9-L4
+    id: 20147
+    title: 構樹：南島祖先「出臺灣說」的植物
+  - catalog_slot: 體-L1
+    id: 20167
+    title: 心，也要一起練
+  - catalog_slot: 體-L2
+    id: 20168
+    title: 成為身體的最佳夥伴
+  - catalog_slot: 體-L3
+    id: 20169
+    title: 身體，謝謝你

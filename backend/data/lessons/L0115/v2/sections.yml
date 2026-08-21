@@ -1,0 +1,106 @@
+lesson_uid: L0115
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 眾說紛紜
+    definition: 眾說：很多人的說法；紛紜：雜亂、不相同。大家說法很多、意見不一致。
+  - index: 2
+    word: 兵凶戰危
+    definition: 戰爭可能發生，局勢十分緊張不安。
+  - index: 3
+    word: 系統性風險
+    definition: 不是單一問題，而是整個系統連鎖出問題的大風險。
+  - index: 4
+    word: 因噎廢食
+    definition: 因為害怕出問題，便停止原本有益的作法，反而失去應有的好處。
+  - index: 5
+    word: 風靡
+    definition: 非常流行，迅速受到很多人喜愛與追捧。
+  - index: 6
+    word: 置身事外
+    definition: 置：放；事外：事情之外。把自己放在事情之外，認為事情與自己無關。
+  - index: 7
+    word: 捉襟見肘
+    definition: 捉襟：拉住前襟；見肘：露出手肘。資源不夠用，怎麼安排都很吃緊。
+  - index: 8
+    word: 尤有甚者
+    definition: 更糟的是、甚至更過分的是（用來加重後面情況）。
+  - index: 9
+    word: 權衡
+    definition: 把不同選項的利弊放在一起比較，再做選擇。
+  - index: 10
+    word: 鄰避效應
+    definition: 大家知道某設施「有需要」，但不希望蓋在自己家附近（例如垃圾場、核廢料）。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 0.67
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 眾說紛紜
+    B: 捉襟見肘
+    C: 尤有甚者
+    D: 鄰避效應
+    E: 兵凶戰危
+    F: 因噎廢食
+    G: 置身事外
+    H: 系統性風險
+    I: 風靡
+    J: 權衡
+  questions:
+  - index: 1
+    text: 事件真相尚未釐清，網路上的說法（　），讀者反而更難判斷對錯。
+    answer: A
+  - index: 2
+    text: 供應鏈環節一斷，影響不只一家公司，可能蔓延成（　），讓整個產業連帶停擺。
+    answer: H
+  - index: 3
+    text: 他被詐騙過一次，就拒絕所有線上交易，這樣未免（　），反而失去許多便利。
+    answer: F
+  - index: 4
+    text: 他不但拒絕道歉，（　），還把責任推給受害者，引發了更大反感。
+    answer: C
+  - index: 5
+    text: 這款手遊一上架就（　）全校，走到哪都聽到同學在討論。
+    answer: I
+  - index: 6
+    text: 動手術花了太多錢，整個家庭的經濟（　），必須非常節省。
+    answer: B
+  - index: 7
+    text: 面對兩難選擇，他反覆（　）利弊，最後選擇較能長期承擔的方案。
+    answer: J
+  - index: 8
+    text: 團隊出現問題，主管若（　），只會讓衝突擴大。
+    answer: G
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 作者先用車諾比與福島的撤離案例，再轉到「放到臺灣會更具體」，這段最主要的作用是什麼？
+    options:
+      A: 民意支持、政黨立場、選舉結果三者的互動變化
+      B: 供電成本、電價漲幅、民眾負擔三者的影響比較
+      C: 核安技術、設備新舊、專家判斷三者的可靠程度
+      D: 供電穩定、核能安全、減碳目標三者的取捨平衡
+    rationale: 本文不是要讀者立刻站隊，而是引導做「權衡」：安全、戰時想像、核廢治理 vs 能源韌性、減碳、供電需求，各有代價與風險。
+  - index: 5
+    answer: B
+    stem: 作者最後提出「公開透明的數據、嚴格監管與持續對話」，最可能想改善的是哪一個問題？
+    options:
+      B: 回到資料與監督，降低情緒對立與互不信任
+      C: 應託付專家決定，民眾不能也不必了解細節
+      D: 先拚口號動員，趁選舉前快速形成決策壓力
+    rationale: 這句話的核心是「程序」：用資料、監管、對話提升可檢核性與信任，讓公共討論不被情緒與同溫層綁架。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok

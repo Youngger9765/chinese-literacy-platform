@@ -1,0 +1,136 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 2,
+    "fill_blank_count": 7,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "研究目的",
+      "研究方法",
+      "1.對失敗的看法",
+      "1.對失敗的看法"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "研究目的",
+      "value": "心理學家塞利格曼博士想了解：球員和教練在輸球後如何解釋【　　　】，以及這樣的「詮釋方式」是否會影響後來表現。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "研究方法",
+      "value": "研究團隊蒐集了一萬多篇美國報紙體育版上關於NBA的報導與訪談內容，分析球隊在輸球後的用語與態度，歸納出兩種不同的【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "主要發現",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2.之後表現",
+          "options": [
+            "越打越好",
+            "連敗不止"
+          ],
+          "select_mode": "single",
+          "value": "【 單選 】\n①越打越好 ②連敗不止"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2.之後表現",
+          "options": [
+            "越打越好",
+            "連續低潮"
+          ],
+          "select_mode": "single",
+          "value": "【 單選 】\n①越打越好 ②連續低潮"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "研究結論",
+      "value": "【　　　】】可能會影響後續表現。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "國中應用",
+      "value": "在考試、競賽、人際挫敗情境，如何用  樂觀【　　　】面對。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "作者結論",
+      "value": "1.失敗並不可怕，關鍵在於你怎麼【　　　】。\n2.【　　　】能讓人重新站起來，培養【　　　】。\n3.下次遇到挫折，告訴自己：「【　　　】只是暫時的、特定的、可改變的。」"
+    }
+  ],
+  "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "研究目的",
+      "value": "心理學家塞利格曼博士想了解：球員和教練在輸球後如何解釋【　　　】，以及這樣的「詮釋方式」是否會影響後來表現。"
+    },
+    {
+      "kind": "pair",
+      "label": "研究方法",
+      "value": "研究團隊蒐集了一萬多篇美國報紙體育版上關於NBA的報導與訪談內容，分析球隊在輸球後的用語與態度，歸納出兩種不同的【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
+        },
+        {
+          "label": "1.對失敗的看法",
+          "value": "【　　　】"
+        },
+        {
+          "label": "2.之後表現",
+          "value": "(單選)\n①越打越好 ②連敗不止"
+        },
+        {
+          "label": "2.之後表現",
+          "value": "(單選)\n①越打越好 ②連續低潮"
+        }
+      ],
+      "kind": "section_block",
+      "section": "主要發現"
+    },
+    {
+      "kind": "pair",
+      "label": "研究結論",
+      "value": "【　　　】可能會影響後續表現。"
+    },
+    {
+      "kind": "pair",
+      "label": "國中應用",
+      "value": "在考試、競賽、人際挫敗情境，如何用  樂觀【　　　】面對。"
+    },
+    {
+      "kind": "pair",
+      "label": "作者結論",
+      "value": "1.失敗並不可怕，關鍵在於你怎麼【　　　】。\n2.【　　　】能讓人重新站起來，培養【　　　】。\n3.下次遇到挫折，告訴自己：「【　　　】只是暫時的、特定的、可改變的。」"
+    }
+  ]
+}

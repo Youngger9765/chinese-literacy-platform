@@ -1,0 +1,24 @@
+lesson_uid: L0036
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【國球的起點 花蓮能高團】
+    duration: (6:49)
+    source: 花蓮縣政府
+    qr_code: true
+  - index: 2
+    title: 能高團成立百年 花蓮市設展回顧輝煌歷史
+    duration: (2:51)
+    source: 原視新聞網 TITV News
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.facebook.com/share/v/1LP4M8Ut87/?mibextid=wwXIfr
+    url_source: 總表0816「4.影片連結」年級5課次24
+  - index: 2
+    url: https://youtu.be/watch?v=JL5E2sJSAvI
+    url_source: 總表0816「4.影片連結」年級5課次24

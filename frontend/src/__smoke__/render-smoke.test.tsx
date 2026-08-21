@@ -110,19 +110,24 @@ import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
 import GuestReadingPage from '../pages/GuestReadingPage';
 import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
+import KeypointsFollowupQuestions from '../components/reading-steps/KeypointsFollowupQuestions';
+import ClassicalText from '../components/reading-steps/ClassicalText';
+import ClassicalWordMatching from '../components/reading-steps/ClassicalWordMatching';
+import ClassicalSentenceMatching from '../components/reading-steps/ClassicalSentenceMatching';
+import ClassicalSelfChallenge from '../components/reading-steps/ClassicalSelfChallenge';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
 const MINIMAL_STORY: Story = {
   id: '1',
   title: '測試課文',
-  level: 1,
+  level: '1',
   content: ['這是第一段。', '這是第二段。'],
   paragraphs: ['這是第一段。', '這是第二段。'],
   thumbnail: '',
   category: 'Fable',
   filename: 'smoke-test.yml',
-  grade: 4,
+  grade: '4',
   charCount: 10,
   vocabulary: [{ word: '測試', definition: '試驗' }],
 };
@@ -318,8 +323,49 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('Intro', <Intro story={MINIMAL_STORY} onStartReading={vi.fn()} onBack={vi.fn()} />);
   });
 
+  // #2752 Phase 2: goal_box feeds the 本課學習策略 box, 70/175 lessons.
+  it('Intro (with goal_box)', () => {
+    mountGuard(
+      'Intro-goalBox',
+      <Intro
+        story={{ ...MINIMAL_STORY, goalBox: { title: '閱讀之旅的起點', strategy_line: '目標策略：讀出故事道理' } }}
+        onStartReading={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+  });
+
   it('ReadingAnnotation', () => {
     mountGuard('ReadingAnnotation', <ReadingAnnotation story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+
+  // #2752 Phase 2: a distinct render path (selfCheckBeforeReading banner), 58/175 lessons.
+  it('ReadingAnnotation (with self_check_before_reading)', () => {
+    mountGuard(
+      'ReadingAnnotation-selfCheck',
+      <ReadingAnnotation
+        story={{ ...MINIMAL_STORY, selfCheckBeforeReading: { items: ['請在不太了解的字、詞或句做記號。'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
+  // #2752 Phase 3: multi_text_parts + cross_text_banner + 閱讀接力, 4/175 lessons.
+  it('ReadingAnnotation (with multi_text_parts, cross_text_banner, 閱讀接力)', () => {
+    mountGuard(
+      'ReadingAnnotation-multiText',
+      <ReadingAnnotation
+        story={{
+          ...MINIMAL_STORY,
+          multiTextParts: [{ lesson_heading: '第23課', body: { paragraphs: [{ idx: 1, text: '段落一' }] } }],
+          crossTextBanner: { title_block: { title: '跨課文習作' } },
+          keypointsFollowupQuestions: {
+            items: [{ type: 'single', label: '❶', prompt: '哪一項最完整？', options: { '1': 'a' }, answer: 1 }],
+          },
+        }}
+        onFinish={vi.fn()}
+      />,
+    );
   });
 
   it('ParagraphReading', () => {
@@ -368,6 +414,14 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('StoryStructureTable', <StoryStructureTable storyId="1" />);
   });
 
+  // #2752 Phase 3: L0063-shape keypointsFollowupQuestions, 2/175 lessons.
+  it('KeypointsFollowupQuestions', () => {
+    mountGuard(
+      'KeypointsFollowupQuestions',
+      <KeypointsFollowupQuestions questions={[{ answer: 'A', stem: '題目一', options: { A: '選項一' } }]} />,
+    );
+  });
+
   it('ComprehensionChat', () => {
     mountGuard(
       'ComprehensionChat',
@@ -379,12 +433,47 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('VocabWordSearch', <VocabWordSearch story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 
+  // #2752 Phase 3: writing_practice appended section, 4/175 lessons.
+  it('VocabWordSearch (with writing_practice)', () => {
+    mountGuard(
+      'VocabWordSearch-writingPractice',
+      <VocabWordSearch
+        story={{ ...MINIMAL_STORY, writingPractice: { words: ['顫顫巍巍', '尷尬'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
   it('KnowledgeStation', () => {
     mountGuard('KnowledgeStation', <KnowledgeStation story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 
   it('AssessmentReport', () => {
     mountGuard('AssessmentReport', <AssessmentReport session={MINIMAL_SESSION} onRetry={vi.fn()} />);
+  });
+
+  // 文言文專屬 steps (#2752). Mounted both with and without their data present —
+  // the empty-state branch is a distinct render path from the content branch.
+  it('ClassicalText (empty state)', () => {
+    mountGuard('ClassicalText-empty', <ClassicalText story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalText (with content)', () => {
+    mountGuard(
+      'ClassicalText-content',
+      <ClassicalText
+        story={{ ...MINIMAL_STORY, classicalText: { paragraphs: ['桓公曰'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+  it('ClassicalWordMatching', () => {
+    mountGuard('ClassicalWordMatching', <ClassicalWordMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSentenceMatching', () => {
+    mountGuard('ClassicalSentenceMatching', <ClassicalSentenceMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSelfChallenge', () => {
+    mountGuard('ClassicalSelfChallenge', <ClassicalSelfChallenge story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 });
 

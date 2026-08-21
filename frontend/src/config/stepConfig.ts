@@ -121,7 +121,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   // 課文旁手指頭符號標起點、右欄累計字數標長度)，不練全文。做法＝把既有 full-reading step **改造**成
   // 重點朗讀（保留 step id 'key-passage-reading' → 完成/進度/作業 gate 全沿用現成佈線，不新增 step 避免完成-識別 bug）。
   // 重點段資料就緒前，KeyPassageReadingPage 暫唸全文作 fallback；Phase 1 接 key_reading 欄位後只唸指定段
-  // （見 docs/reading-key-passage-TODO.md、skill build-key-reading）。
+  // （見 docs/reading-key-passage-TODO.md、skill lesson-reading-pipeline）。
   // ⚠️ 改這個 id 一定要同步更新後端 `backend/app/models/session.py` 的 `_FRONTEND_STEP_ALIAS`
   // （前端 step key → 後端 canonical key → step number）。後端查無此 key 會算成 0，
   // 完成度掉單、作業提交卡住且靜默無 error（#2588）。
@@ -270,6 +270,68 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
     needsStory: false,
     enabled: true,
     category: 'report',
+  },
+
+  // ── 文言文專屬 steps (#2752) ────────────────────────────────────────────
+  //
+  // Deliberately NOT added to DEFAULT_STEP_SEQUENCE: these ids only ever
+  // appear in a lesson's own `step_sequence` (backend
+  // `lesson_indexes.py::CLASSICAL_STEP_SEQUENCE`, populated only when
+  // `classical_text` is present). Adding them to the default sequence would
+  // put four empty-state steps into the stepper nav of the other ~165
+  // 白話 lessons that have none of this data.
+  //
+  // `enabled: true` is still required — `resolveActiveSteps()` filters a
+  // resolved sequence by `.enabled` regardless of which sequence it came
+  // from, so `false` here would strip these out of the 文言文 lessons too,
+  // not just hide them from the default.
+  //
+  // Routes for these ids exist because `learningRoutes.tsx::buildLearningRoutes()`
+  // iterates `Object.keys(STEP_REGISTRY)` (not `DEFAULT_STEP_SEQUENCE`) — see
+  // the comment there for why that iteration source had to change.
+  'classical-text': {
+    id: 'classical-text',
+    label: '原文',
+    displayChar: '文',
+    hint: '閱讀文言文原文，對照白話翻譯與注釋',
+    view: AppView.CLASSICAL_TEXT,
+    dbStepNumber: 17,
+    needsStory: true,
+    enabled: true,
+    category: 'reading',
+  },
+  'classical-sentence-matching': {
+    id: 'classical-sentence-matching',
+    label: '文白句子比對',
+    displayChar: '句',
+    hint: '找出原文句子對應的白話參考句',
+    view: AppView.CLASSICAL_SENTENCE_MATCHING,
+    dbStepNumber: 18,
+    needsStory: true,
+    enabled: true,
+    category: 'practice',
+  },
+  'classical-word-matching': {
+    id: 'classical-word-matching',
+    label: '文白詞語比對',
+    displayChar: '詞',
+    hint: '寫出方框文字對應的白話意思',
+    view: AppView.CLASSICAL_WORD_MATCHING,
+    dbStepNumber: 19,
+    needsStory: true,
+    enabled: true,
+    category: 'practice',
+  },
+  'classical-self-challenge': {
+    id: 'classical-self-challenge',
+    label: '自我挑戰',
+    displayChar: '戰',
+    hint: '選做：閱讀另一段文言文，運用學到的策略作答',
+    view: AppView.CLASSICAL_SELF_CHALLENGE,
+    dbStepNumber: 20,
+    needsStory: true,
+    enabled: true,
+    category: 'comprehension',
   },
 };
 

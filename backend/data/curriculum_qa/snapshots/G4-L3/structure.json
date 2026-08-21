@@ -1,55 +1,109 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 4,
+    "inline_choice_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "起因",
+      "經過 1",
+      "經過 2",
+      "經過 3"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "長高的秘密",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "最美的畫面",
+      "value": ""
     },
     {
-      "label": "主題：】長高【的關鍵",
-      "value": "",
       "interactive_type": "display",
+      "label": "觀察遊戲",
       "sub_rows": [
         {
-          "label": "迷思",
-          "value": "多喝【　　　】就可以長高。──這是錯誤的迷思唷！",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "起因",
+          "value": "作者和媽媽搭區間車時，媽媽提議作者可以【　　　】車廂上的人。"
         },
         {
-          "label": "研究支持的\n方法",
-          "value": "根據研究，長高的方法有哪三項？\n1.充足的【　　　】。\n2.適當的【　　　】。\n【　　　】有氧運動─提升核心體溫，促進生長激素分泌。\n【　　　】跳躍的動作─刺激【　　　】。\n【　　　】肌力訓練【　　　】和【　　　】運動【　　　】。\n3.均衡的【　　　】。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "checkbox",
+          "label": "經過 1",
+          "options": [
+            "閱讀",
+            "講電話",
+            "滑手機"
+          ],
+          "value": "1. 作者發現車廂上最常見的畫面是\n①閱讀 ②講電話 ③滑手機"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "經過 2",
+          "value": "2.有位與眾不同的大姊姊，她在車廂內【　　　】書本。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "經過 3",
+          "value": "3.觀察遊戲變成了在各種場所裡，尋找【　　　】。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "正向",
+                "用功",
+                "愉悅"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "結果",
+          "value": "發現讀書的畫面給人【　　　】的感覺。"
         }
-      ]
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "影響",
+      "value": "作者出門都會隨身帶【　　　】，一有空檔就拿出來閱讀。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "長高的秘密",
+  "title": "最美的畫面",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "主題：】長高【的關鍵",
       "items": [
         {
-          "label": "迷思",
-          "value": "多喝【　　　】就可以長高。──這是錯誤的迷思唷！"
+          "label": "起因",
+          "value": "作者和媽媽搭區間車時，媽媽提議作者可以【　　　】車廂上的人。"
         },
         {
-          "label": "研究支持的\n方法",
-          "value": "根據研究，長高的方法有哪三項？\n1.充足的【　　　】。\n2.適當的【　　　】。\n(1)有氧運動─提升核心體溫，促進生長激素分泌。\n(2)跳躍的動作─刺激【　　　】。\n(3)肌力訓練（弓箭步、深蹲）和【　　　】運動（瑜珈）。\n3.均衡的【　　　】。"
+          "label": "經過 1",
+          "value": "1. 作者發現車廂上最常見的畫面是\n①閱讀 ②講電話 ③滑手機"
+        },
+        {
+          "label": "經過 2",
+          "value": "2.有位與眾不同的大姊姊，她在車廂內【　　　】書本。"
+        },
+        {
+          "label": "經過 3",
+          "value": "3.觀察遊戲變成了在各種場所裡，尋找【　　　】。"
+        },
+        {
+          "label": "結果",
+          "value": "發現讀書的畫面給人【　　　】的感覺。\n①正向 ②用功 ③愉悅"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "觀察遊戲"
+    },
+    {
+      "kind": "pair",
+      "label": "影響",
+      "value": "作者出門都會隨身帶【　　　】，一有空檔就拿出來閱讀。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "迷思",
-      "研究支持的\n方法"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

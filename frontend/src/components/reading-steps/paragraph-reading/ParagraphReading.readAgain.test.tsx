@@ -56,13 +56,13 @@ Object.defineProperty(navigator, 'mediaDevices', {
 const SINGLE_PARA_STORY: Story = {
   id: '99',
   title: '單段測試課文',
-  level: 1,
+  level: '1',
   content: ['這是唯一的一段課文。'],
   paragraphs: ['這是唯一的一段課文。'],
   thumbnail: '',
   category: 'Fable',
   filename: 'read-again-test.yml',
-  grade: 4,
+  grade: '4',
   charCount: 10,
   vocabulary: [],
 };

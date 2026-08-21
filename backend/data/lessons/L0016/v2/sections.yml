@@ -1,0 +1,113 @@
+lesson_uid: L0016
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 不妨
+    definition: 可以、沒關係。
+  - index: 2
+    word: 諧音
+    definition: 字詞的讀音相似，常用於語言遊戲、吉祥話或雙關語。
+  - index: 3
+    word: 總結
+    definition: 整理重點後，作出簡要說明。
+  - index: 4
+    word: 連忙
+    definition: 趕緊、急忙。
+  - index: 5
+    word: 好感
+    definition: 對某人或某事產生喜歡或欣賞的感覺。
+  - index: 6
+    word: 歉意
+    definition: 抱歉的心意。
+  - index: 7
+    word: 器具
+    definition: 工具、用具。
+  - index: 8
+    word: 略表       _
+    definition: 以簡單的方式表達心意。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 連忙
+    B: 不妨
+    C: 歉意
+    D: 略表
+    E: 器具
+    F: 諧音
+    G: 好感
+    H: 總結
+  questions:
+  - index: 1
+    text: 這本書的章節結尾皆有重點（　），幫助讀者釐清概念。
+    answer: H
+  - index: 2
+    text: 許多廣告標語會巧妙運用（　）效果，讓人印象深刻。
+    answer: F
+  - index: 3
+    text: 雖然他道歉了，但從語氣中絲毫感受不到真正的（　）。
+    answer: C
+  - index: 4
+    text: 面對這樣的難題，我們（　）採取新的思考方式。
+    answer: B
+  - index: 5
+    text: 她親手煮了一桌菜，對奶奶多年的辛勞 （　）謝意。
+    answer: D
+  - index: 6
+    text: 若想在互動中留下（　），誠懇與尊重是不可或缺的。
+    answer: G
+  - index: 7
+    text: 媽媽剛提到客人要來，弟弟就（　）起身打掃房間。
+    answer: A
+  - index: 8
+    text: 古代農業社會發明了許多簡易（　），大大提升了耕作效率。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 2
+    answer: B
+    stem: 根據第四段「這根本一點意思都沒有！」這句話最可能表達什麼心情？
+    options:
+      B: 認為事情讓人很失望與生氣
+      C: 覺得組員們講的話太過傷人
+      D: 覺得老師安排的課程沒意義
+    rationale: 從段四和同學吵架可看出。
+  - index: 3
+    answer: D
+    stem: 根據文章最後一段「下次再看到這個詞時，不妨停下來想一想：這是什麼『意思』呢？」，這句話的用意最可能是什麼？
+    options:
+      D: 在這麼重要的聚會遲到真是不好「意思」
+      A: 我聽不太懂你的「意思」是什麼
+      B: 他說這點小「意思」，不用放在心上
+      C: 真是沒「意思」的聚會，浪費我時間
+    rationale: 從最後一段強調「參考前後文，才看得出它真正的圖案」可知要透過文章內容了解。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 1.0
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 不好意思！台灣人最愛說這句話
+    duration_seconds: 90
+    source: 三立iNEWS
+  - index: 2
+    title: 你覺得異性說你可愛會是什麼意思？
+    duration_seconds: 160
+    source: 問問 wenwen
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

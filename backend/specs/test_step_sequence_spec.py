@@ -94,6 +94,12 @@ DEFAULT_STEP_SEQUENCE: list[str] = [
 # Infrastructure
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skip(
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+)
+
 def test_lesson_dir_exists():
     assert LESSON_DIR.is_dir(), f"lesson dir missing: {LESSON_DIR}"
 
@@ -202,6 +208,15 @@ def test_step_sequence_values_reference_valid_ids():
         if invalid:
             failures.append(f"{path.stem}: unknown step ID(s): {invalid}")
     assert not failures, "\n".join(failures)
+
+
+@pytest.mark.skip(
+
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+
+)
 
 
 def test_some_lessons_have_step_sequence():

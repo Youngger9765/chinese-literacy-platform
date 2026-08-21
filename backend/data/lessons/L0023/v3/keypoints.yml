@@ -1,0 +1,58 @@
+lesson_uid: L0023
+version_id: v3
+section_no: 五
+keypoints:
+  title: 比運氣更重要的事：《長腿叔叔》的啟發
+  intro: 閱讀完本文，請你完成文章重點表吧！
+  layout: list
+  answer_carrier: 紅色手寫字與紅色 ☑（圖形），文字流的【　】內已填有答案
+  rows:
+  - label: 故事介紹
+    items:
+    - label: 書名
+      value: 長腿叔叔
+    - label: 作者
+      value: 珍‧韋伯斯特
+    - label: 故事大綱
+      value: 描述孤兒朱蒂在「長腿叔叔」的【　】下進入大學，克服因【　】而導致的種種【　】困難，成為【　】的女性。
+      blanks:
+      - answer: 資助
+      - answer: 教育不足
+      - answer: 學習
+      - answer: 獨立
+  - label: 讀者自問自答
+    value: '自問：朱蒂成功，只是得到貴人相助的好運嗎？
+
+      自答：除了貴人相助，朱蒂【　】、自立自強的特質，也是她【　】的關鍵'
+    blanks:
+    - answer: 勤奮不懈
+    - answer: 蛻變
+  - label: 從故事內容找支持「自答」的證據
+    items:
+    - label: 勤奮不懈
+      value: '1.在學業上，朱蒂有什麼困難？（請打勾，多選）
+
+        2.朱蒂如何克服困難：制定有條不紊的【　】，持續閱讀與學習。
+
+        3.結果：朱蒂學業短時間內脫穎而出，成績名列前茅。'
+      options:
+        1: 在孤兒院沒有受到完整教育
+        2: 文化常識薄弱，也不認識名人
+        3: 大一時，數學及拉丁文成績不及格
+      answers:
+      - 1
+      - 2
+      - 3
+      blanks:
+      - answer: 學習計畫
+      note: options 屬於本格第 1 小題（三個選項全部打勾）；blanks 屬於第 2 小題
+    - label: 自立自強
+      value: '1.生活儉樸，不【　】資助的學費與生活費。
+
+        2.靠自己能力賺錢、得獎學金時，想償還資助款。'
+      blanks:
+      - answer: 濫用
+  - label: 讀者結論
+    value: 除了貴人相助，朱蒂也把握機會、愈挫愈勇，不斷付出【　】，最後成為獨立自主的女性。
+    blanks:
+    - answer: 努力

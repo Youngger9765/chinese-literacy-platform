@@ -1,0 +1,46 @@
+lesson_uid: L0055
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 飛簷走壁
+    B: 審時度勢
+    C: 逞強
+    D: 清一色
+    E: 自命不凡
+    F: 相去無幾
+    G: 英姿煥發
+    H: 有過之而無不及
+  items:
+  - index: 1
+    stem: 這兩種茶葉喝起來的口感(　)，讓人難以分辨。
+    answer: F
+  - index: 2
+    stem: 小華明知自己的體力有限，仍為了證明自己而(　)，參加連續三天的登山活動，最後因體力不支而送醫。
+    answer: C
+  - index: 3
+    stem: 這次比賽參賽的選手(　)都是年輕人，平均年齡不超過二十歲，充滿青春活力。
+    answer: D
+  - index: 4
+    stem: 在運動會的開幕式上，運動員穿著整齊劃一的服裝，(　)的接受大家的喝采。
+    answer: G
+  - index: 5
+    stem: 電影中的武俠人物經常能(　)，讓觀眾驚嘆不已。
+    answer: A
+  - index: 6
+    stem: 他是全校第一名，但為人謙虛，從不(　)。
+    answer: E
+  - index: 7
+    stem: 企業面對市場激烈競爭時，必須(　)，隨著環境變化調整策略。
+    answer: B
+  - index: 8
+    stem: 哥哥每天都認真練球，弟弟練習的時間比哥哥更長，努力程度真是 (　)。
+    answer: H
+  - index: 9
+    stem: 下面是一段短文，請根據語境填入合適的語詞代號。
+    passage: 小明是一個（　）的學生，總覺得班上沒有人比得上自己。這樣的心態讓他時常（　），想證明自己很厲害，結果常把自己累壞。老師希望小明未來能學會（　），先看清情況再決定怎麼做，不要每次都急著和別人爭勝。
+    blanks:
+    - answer: E
+    - answer: C
+    - answer: B

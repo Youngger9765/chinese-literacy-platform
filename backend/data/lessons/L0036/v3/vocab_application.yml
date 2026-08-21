@@ -1,0 +1,40 @@
+lesson_uid: L0036
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 著稱
+    B: 先驅
+    C: 正統
+    D: 敬仰
+    E: 輝煌
+    F: 嶄露頭角
+    G: 跌破眼鏡
+    H: 一絲不苟
+  option_bank_note: 只列 8 個代號（本課 13 個語詞中的「清一色」「招募」「平起平坐」「脫韁野馬」「摸不著頭緒」未入選項），對應 8 道小題
+  items:
+  - index: 1
+    stem: 他接受（　）的音樂訓練，因此技巧非常扎實。
+    answer: C
+  - index: 2
+    stem: 在這次科技展中，許多年輕設計師（　），受到企業關注。
+    answer: F
+  - index: 3
+    stem: 人高馬大的他，看到蟑螂卻尖叫逃走，讓同學們都（　）。
+    answer: G
+  - index: 4
+    stem: 這間小吃攤以料多味美（　），受到當地人和觀光客的喜愛。
+    answer: A
+  - index: 5
+    stem: 這位醫師最早投入偏鄉巡迴醫療，成為當地行動醫療的（　）。
+    answer: B
+  - index: 6
+    stem: 這位教練帶著球隊走過低潮，創下了最（　）的戰績。
+    answer: E
+  - index: 7
+    stem: 他長期投入偏鄉教育，不計時間、心力，令人由衷（　）。
+    answer: D
+  - index: 8
+    stem: 他對實驗數據的處理（　），絲毫不容許誤差。
+    answer: H

@@ -1,0 +1,131 @@
+lesson_uid: L0060
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 輾轉反側
+    definition: 因為心事而翻來覆去睡不著覺。
+  - index: 2
+    word: 一蹶不振
+    definition: 跌了一跤就不敢再走路，後來比喻遭遇挫折或失敗就無法振作。
+  - index: 3
+    word: 豁達
+    definition: 指心胸開闊，性格開朗，能瀟灑地看待事物，從容的面對。
+  - index: 4
+    word: 無妄之災
+    definition: 意外的災禍。無妄，意外的意思。
+  - index: 5
+    word: 反芻
+    definition: 原指牛羊將胃中食物送至口中重複咀嚼。後來比喻人一次又一次仔細的思考。
+  - index: 6
+    word: 半身不遂
+    definition: 身體因中風或是脊椎受損，導致一邊麻痺無法移動。
+  - index: 7
+    word: 三頭六臂
+    definition: 原本指某一種天神的長相，後來比喻人很有本事，能力很強，能同時做許多事。
+  - index: 8
+    word: 茶飯不思
+    definition: 因內心焦慮、苦惱，連吃飯、喝水的心情都沒有。
+  - index: 9
+    word: 萬丈深淵
+    definition: 非常深的地方。本文指情緒非常低落的意思。
+  - index: 10
+    word: 鴉雀無聲
+    definition: 形容非常安靜。
+  - index: 11
+    word: 倒楣
+    definition: 運氣不好，事情發展不順利。楣，門框上方的橫木。
+  - index: 12
+    word: 潸然淚下
+    definition: 傷心落淚。潸然，流淚的樣子。
+  extraction_check:
+    defined_words_belong_to_lesson: 1.0
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 一蹶不振
+    B: 三頭六臂
+    C: 茶飯不思
+    D: 無妄之災
+    E: 潸然淚下
+    F: 反芻
+    G: 鴉雀無聲
+  questions:
+  - index: 2
+    text: 自從他上次比賽慘敗，從此就（　），連平日的練習都不參加了。
+    answer: A
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: C
+    stem: 下列選項「  」中的語詞，何者使用正確？
+    options:
+      A: 他因為酒駕撞到行道樹而受重傷，真是「無妄之災」
+      B: 便利商店裡的熱狗，在架子上「輾轉反側」轉個不停
+      C: 他因為一次考試失敗就「一蹶不振」，從此放棄學習
+      D: 小明睡覺姿勢不良，起床右半邊都麻痺，「半身不遂」
+    rationale: null
+  - index: 2
+    answer: D
+    stem: 根據故事一的內容，為什麼阿堅會偷竊、打架，甚至進少年觀護所呢？
+    options:
+      A: 因為他的家庭失能，沒有任何的溫暖
+      B: 因為他的姊姊很優秀，讓他很有壓力
+      C: 因為他需要錢，改善家裡的經濟狀況
+      D: 因為他覺得家庭很糟，所以自我放棄
+    rationale: null
+  - index: 3
+    answer: A
+    stem: 故事二的鄧小姐要一輩子吃藥的事實並沒有改變，為什麼她突然不憂鬱了呢？
+    options:
+      A: 她改變了自己對壞事的看法
+      B: 她四處求醫，還找到了名醫
+      C: 她在沒症狀時，就發現高血壓
+      D: 本來吃很多藥，後來只吃一顆
+    rationale: null
+  - index: 4
+    answer: B
+    stem: 在黃美廉的故事中，學生問她：「你從小就長成這樣，怎麼還快樂得起來呢？」請根據故事三內容，推論黃美廉在黑板上寫下的結論可能是什麼？
+    options:
+      A: 因為我從小就這樣，所以更要讓自己快樂起來。
+      B: 我擁有這麼多，為什麼你只看我所沒有的呢？
+      C: 我遇到這麼多挫折跟痛苦，才需要更堅強呀！
+      D: 雖然我長得不好看，但是我有一隻可愛的貓。
+    rationale: null
+  - index: 5
+    answer: D
+    stem: 根據本文，作者想強調影響心理狀態的重要因素是什麼？
+    options:
+      A: 家庭貧窮或失能
+      B: 惡劣的童年經驗
+      C: 學業或情感失敗
+      D: 人對壞事的看法
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 腦麻畫家的彩色人生 黃美廉
+    duration_seconds: 436
+    source: Naer330
+  - index: 2
+    title: 憂鬱症才不只是心情不好！憂鬱症症狀、成因與治療
+    duration_seconds: 210
+    source: Una Who
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

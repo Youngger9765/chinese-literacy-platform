@@ -1,0 +1,135 @@
+lesson_uid: L0156
+version_id: v2
+vocab_definitions:
+  items:
+  - index: 1
+    word: 一息尚存
+    definition: 還有一點氣息存在，表示生命危急但還活著。
+  - index: 2
+    word: 號叫
+    definition: 大叫。
+  - index: 3
+    word: 杳無人煙
+    definition: 比喻荒涼無人居住、很少人的地方。
+  - index: 4
+    word: 手無寸鐵
+    definition: 鐵指武器，在此指的是手裡沒有任何武器。
+  - index: 5
+    word: 陰黯
+    definition: 天陰，昏暗不明。
+  - index: 6
+    word: 倖存
+    definition: 僥倖活下來。
+  - index: 7
+    word: 險峻
+    definition: 地勢高聳危險。
+  - index: 8
+    word: 驚心動魄
+    definition: 驚險刺激、通常形容難忘的經歷、旅程或冒險。
+  - index: 9
+    word: 山坳
+    definition: 兩山間凹下的地方。
+  - index: 10
+    word: 譁眾取寵
+    definition: 用大眾喜歡的話或行動來吸引他人的注意。
+  - index: 11
+    word: 回天乏術
+    definition: 病情嚴重無法挽救。
+  - index: 12
+    word: 一命嗚呼
+    definition: 即「死亡」。
+  - index: 13
+    word: 攫
+    definition: 指鳥獸用爪抓取獵物。
+  extraction_check:
+    defined_words_belong_to_lesson: 0.92
+    vocabulary_bank_covered: 1.0
+    missing_definitions: []
+    indices_contiguous: true
+    verdict: ok
+vocab_application:
+  options:
+    A: 倖存
+    B: 杳無人煙
+    C: 譁眾取寵
+    D: 回天乏術
+    E: 驚心動魄
+    F: 險峻
+    G: 手無寸鐵
+    H: 一息尚存
+  questions:
+  - index: 2
+    text: 這部電影特效連連，場面（　），讓觀眾直呼過癮。
+    answer: E
+  extraction_check:
+    options_not_in_lesson_vocabulary: []
+    answers_without_option: []
+    verdict: ok
+comprehension:
+  questions:
+  - index: 1
+    answer: B
+    stem: 下列文句，何者語詞使用最恰當?
+    options:
+      A: 這裡風光明媚，是「杳無人煙」的旅遊勝地
+      B: 這部電影有許多令人「驚心動魄」的火爆場面，超級可怕
+      C: 這個道士學藝不精，破綻百出，真是「回天乏術」
+      D: 做事應用「譁眾取寵」的態度，博取流量及曝光度
+    rationale: null
+  - index: 2
+    answer: B
+    stem: 根據作者的說法，為什麼含光可以擊退老虎、救回弟弟？
+    options:
+      A: 因為含光有道士的即時幫忙和提醒
+      B: 老虎可能身體狀態不佳，不敵人類
+      C: 因為含光是百年難得一見的大力士
+      D: 含光不怕死的吮吸弟弟傷口的毒血
+    rationale: null
+  - index: 3
+    answer: C
+    stem: 根據本課內容，何者敘述為真？
+    options:
+      A: 故事發生的地點是人跡眾多地方
+      B: 弟弟受傷過重，從頭到尾未甦醒
+      C: 含光為救弟弟，不顧自身的安全
+      D: 故事中的老虎敏捷迅速、很強壯
+    rationale: 用自己的嘴巴吸出毒素，不怕中毒
+  - index: 4
+    answer: A
+    stem: 請問這篇文章中，作者（曾世杰）最想傳達什麼理念給讀者？
+    options:
+      A: 對任何事情都要保持先懷疑，後求證的態度
+      B: 批判古人在記載故事都十分潦草、不求謹慎
+      C: 宣揚兄弟友愛的理念，互助合作來打退猛虎
+      D: 宣傳在野外被動物咬傷時，正確的急救方式
+    rationale: null
+  - index: 5
+    answer: C
+    stem: 這篇文章示範了一種閱讀態度，請選出底下最接近的描述？
+    options:
+      A: 文字紀錄是可靠的，隔了350年仍然可信
+      B: 閱讀時應該全然信任作者
+      C: 閱讀時可以提出質疑，並蒐集資料
+      D: 閱讀時寧願相信書，而不要相信網路
+    rationale: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  extraction_check:
+    answers_without_option: []
+    questions_with_few_options: []
+    questions_grounded_in_body: 0.8
+    answers_recovered_from_rationale: 0
+    verdict: ok
+resources:
+  items:
+  - index: 1
+    title: 簡直令人難以相信 他與獅子
+    duration_seconds: 572
+    source: 雲端世界
+  - index: 2
+    title: 小心!背對老虎多危險實驗影片告訴你
+    duration_seconds: 110
+    source: 台視新聞TTV NEWS
+  extraction_check:
+    verdict: unverified
+    needs_human_review: true
+    video_count: 2
+  needs_human_review: true

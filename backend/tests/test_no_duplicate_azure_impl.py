@@ -44,16 +44,11 @@ def test_init_does_not_redefine_what_it_imports():
     shadowed = sorted(imported & defined)
 
     # Six cache helpers (_gcs_get, _gcs_put, _get_gcs_bucket, _l1_put,
-    # get_cached_tts, delete_tts_cache) are shadowed the same way. They are
-    # known and tracked in specs/modules/tts/INTENT.md; removing them is a
-    # separate change with its own blast radius, and pretending otherwise by
-    # deleting them in passing is how the audio broke in the first place.
-    #
-    # Anything NOT on this list is new, and new is what this test is for.
-    KNOWN = {
-        "_gcs_get", "_gcs_put", "_get_gcs_bucket",
-        "_l1_put", "get_cached_tts", "delete_tts_cache",
-    }
+    # get_cached_tts, delete_tts_cache) used to be shadowed the same way.
+    # Consolidated into cache.py (#2649): __init__.py now only imports and
+    # re-exports them, so KNOWN is empty — any future shadowing of *any*
+    # imported name in this file, including these six again, must fail here.
+    KNOWN: set[str] = set()
     new_shadows = sorted(set(shadowed) - KNOWN)
 
     assert not new_shadows, (

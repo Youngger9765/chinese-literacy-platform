@@ -1,0 +1,62 @@
+lesson_uid: L0090
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框中找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 大顯身手
+  - 約莫
+  - 里程碑
+  - 眾所矚目
+  - 侷限
+  - 籌備
+  - 荊棘
+  - 趨勢
+  - 印記
+  - 開路先鋒
+  - 彰顯
+  - 抹滅
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 趨勢
+    definition: 一件事在一段時間內，往哪個方向變化的情形。
+  - index: 2
+    word: 印記
+    definition: 在本課文中，指的是在心靈或歷史上留下的痕跡。
+  - index: 3
+    word: 籌備
+    definition: 指為了活動進行準備。
+  - index: 4
+    word: 里程碑
+    definition: 比喻在歷史發展過程中的重大事件或標誌性成就。
+  - index: 5
+    word: 眾所矚目
+    definition: 形容受到大家特別的關注和重視。
+  - index: 6
+    word: 大顯身手
+    definition: 充分展現出自己的才能和技藝。
+  - index: 7
+    word: 侷限
+    definition: 指受到限制或約束，不能充分發展。
+  - index: 8
+    word: 彰顯
+    definition: 指明顯的表現出來。
+  - index: 9
+    word: 荊棘
+    definition: 多刺的灌木，比喻前進道路上的困難和障礙。
+  - index: 10
+    word: 抹滅
+    definition: 指徹底消除，使它不存在。
+  - index: 11
+    word: 開路先鋒
+    definition: 比喻率先開創道路的人。
+  - index: 12
+    word: 約莫
+    definition: 大約、大概。

@@ -1,16 +1,58 @@
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { fontForZhuyin } from '../../constants/fonts';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import { useAuth } from '../../contexts/AuthContext';
 import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
 import type { OmoPriorUploadResponse } from '../../services/omoApi';
 import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
+import { gradeLabel } from '../../utils/gradeLabel';
+
+/**
+ * 「💡 本課學習策略」要顯示的字串，找不到就回空字串。
+ *
+ * ⚠️ 抽成獨立函式是為了測得到 —— 原本這段內聯在 JSX 的 IIFE 裡，
+ * 測試只能在自己那邊重排一次同樣的判斷，那是打在複製品上：
+ * 改壞這裡不會讓測試變紅。
+ *
+ * 鏈的順序有意義，不是隨手排的：
+ *   1. `worksheetIntro.target_strategy` — Layer-1/2 欄位
+ *   2. `intro.author` 的 " · " 後半      — 同上
+ *   3. `goal_box.strategy_line`          — 學習單原文（**最權威**，逐字印在紙上）
+ *   4. `readingStrategy`                 — 總表的策略名
+ *
+ * 前兩個是二修的 uid tree **從來不寫**的欄位。第三個只有 52 課有。
+ * 所以在接上第四個之前，這個框對 175 課裡的 123 課是空的 ——
+ * 而 `readingStrategy` 171 課都有值，`types.ts` 甚至標著
+ * `// for future Intro enhancement`：欄位是為了這個框加的，加了之後沒接上。
+ *
+ * 3 排在 4 前面因為它是學習單上逐字印的那句；兩者內容其實一樣，只差前綴：
+ *     readingStrategy        '讀出故事道理'
+ *     goal_box.strategy_line '目標策略：讀出故事道理'
+ */
+export function resolveRawStrategy(story: {
+  worksheetIntro?: { target_strategy?: string };
+  intro?: { author?: string };
+  goalBox?: { strategy_line?: string };
+  readingStrategy?: string;
+}): string {
+  const goalBoxStrategy = story.goalBox?.strategy_line
+    ? story.goalBox.strategy_line.replace(/^目標策略[:：]\s*/, '').replace(/\n/g, '，')
+    : '';
+  return (
+    story.worksheetIntro?.target_strategy ||
+    (story.intro?.author?.includes(' · ')
+      ? story.intro.author.split(' · ').slice(1).join(' · ')
+      : '') ||
+    goalBoxStrategy ||
+    story.readingStrategy ||
+    ''
+  );
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -18,18 +60,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   History: '歷史故事',
   Daily: '生活文化',
 };
-
-// Module-level stable no-ops for useTtsPlayback's progress/diff-clear callbacks
-// (Intro has no per-char highlight to sync, unlike ParagraphReading's paragraph view).
-// Must be stable identities, not inline `() => {}` literals — useTtsPlayback's
-// speakText is a useCallback keyed on these two, so a fresh literal every
-// render would make speakText (and everything built on it: speakParagraphAt,
-// the auto-advance effect's dep array) unstable too. Correctness today relies
-// on wasSpeakingRef doing the real true→false transition check rather than
-// the effect's own dep array — code-review flagged this as fragile-but-safe;
-// fixing it here removes the fragility outright rather than leaving it as a
-// footnote for a future refactor to trip over.
-function noop(): void {}
 
 interface IntroProps {
   story: Story;
@@ -141,128 +171,19 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     });
   }, [priorUpload, token]);
 
-  // #2607 (revised — real staging data changed the design, see PR #2608): AI
-  // 朗讀 now narrates the actual full lesson body (story.content) via the same
-  // useTtsPlayback hook ParagraphReading/KeyPassageReading already use, NOT the 課文簡介
-  // teaser below. Sampling 8 staging lessons found 0/8 had real course_intro
-  // data; all 8 fell back to intro.background, which is a hard-truncated
-  // substring of the lesson body (always ~103 chars, cutting off mid-word, e.g.
-  // "…神仙不"). That text is not a real summary and should not be read aloud as
-  // if it were one. This supersedes the original #2607 design (commit
-  // cd4b5f7d), which read course_intro/background and deliberately did NOT
-  // pass lessonId/paragraphIdx — correct for THAT text, since it wasn't one of
-  // story.content's paragraphs. Now that story.content itself is narrated, the
-  // opposite holds: passing lessonId + paragraphIdx per paragraph is what lets
-  // each call hit the backend's canonical-sentence cache (GET
-  // /api/tts/mapping/{id}, keyed by story.content's paragraph index) instead of
-  // paying a live 8-15s synthesis on every play — mirrors ParagraphReading's
-  // `speakText(text, Number(story.id), currentLineIndex)`.
-  const {
-    isTtsLoading,
-    isTtsSpeaking,
-    ttsError,
-    speakText,
-    stopTts,
-  } = useTtsPlayback(noop, noop);
-
-  // #1598: 課文簡介 teaser — still shown below for context, but no longer what
-  // AI 朗讀 narrates. Never falls back to strategy/target text (which would
-  // read aloud "圖文題就是..." instead of the actual lesson topic).
+  // #1598: 課文簡介 teaser. Never falls back to strategy/target text (which
+  // would show "圖文題就是..." instead of the actual lesson topic).
+  //
+  // #2719: the #2607 "AI 朗讀全文 / 展開看全文" controls that used to sit under
+  // this teaser were removed — reading and listening to the full lesson body
+  // belongs to step 2「讀全文－做記號」(FullReading), and having it here too
+  // duplicated that step and blurred what the intro page is for. The intro page
+  // is now teaser + strategy + worksheet + step chips only; do NOT re-add a
+  // full-text player here. (The pre-#2607 speechSynthesis button that narrated
+  // this teaser is deliberately not restored either: PR #2608 verified 8/8
+  // sampled lessons have no real course_intro, so the teaser is a hard-truncated
+  // ~103-char slice of the lesson body that cuts off mid-word.)
   const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
-
-  // The actual lesson body — same array ParagraphReading/KeyPassageReading narrate from.
-  // Falls back to introText only when a lesson somehow has no content array at
-  // all, so the button is never left with literally nothing to read. Memoized
-  // so speakParagraphAt/speakFullText below don't get a new dependency identity
-  // (and thus recreate) on every render.
-  const paragraphs = useMemo(
-    () => (story.content?.length ? story.content : (introText ? [introText] : [])),
-    [story.content, introText],
-  );
-
-  // Only story.content's paragraphs are addressable in the backend's canonical
-  // sentence cache (GET /api/tts/mapping/{id} is keyed by story.content's
-  // paragraph index). When we fall back to the 課文簡介 teaser there is no
-  // paragraph index that describes it, so passing one would make useTtsPlayback
-  // play back whatever sentences happen to sit at that index of the lesson body —
-  // unrelated audio. Same reasoning the superseded v1 (cd4b5f7d) used to justify
-  // omitting lessonId entirely; it still holds for this branch.
-  const paragraphsAreCanonical = Boolean(story.content?.length);
-
-  // Numeric lesson id for the TTS canonical-sentence cache. undefined (not NaN)
-  // when story.id isn't numeric, so useTtsPlayback takes the no-cache
-  // single-shot path per paragraph instead of sending a NaN lessonId that would
-  // 422 against GET /api/tts/mapping/{lessonId} (an int path param).
-  const storyIdAsNumber = Number(story.id);
-  const lessonIdForTts = Number.isFinite(storyIdAsNumber) ? storyIdAsNumber : undefined;
-
-  // "展開看全文" — collapsed by default; auto-expands when AI 朗讀 starts so the
-  // student sees the same text being narrated (看到的和聽到的一致), not just the
-  // short 課文簡介 teaser above it.
-  const [showFullText, setShowFullText] = useState(false);
-
-  // Sequential multi-paragraph playback queue — mirrors useKeyPassageReadingTtsQueue's
-  // proven advance-on-finish pattern (frontend/src/hooks/useKeyPassageReadingTtsQueue.ts),
-  // extended to pass lessonId/paragraphIdx per paragraph (that hook's own queue
-  // does not — a known, separate cache-miss issue, out of scope for this PR).
-  // -1 = idle / not playing.
-  const [activeParagraphIdx, setActiveParagraphIdx] = useState(-1);
-
-  const speakParagraphAt = useCallback((idx: number) => {
-    const text = paragraphs[idx];
-    if (!text) {
-      setActiveParagraphIdx(-1);
-      return;
-    }
-    setActiveParagraphIdx(idx);
-    if (paragraphsAreCanonical) {
-      speakText(text, lessonIdForTts, idx);
-    } else {
-      speakText(text);
-    }
-  }, [paragraphs, paragraphsAreCanonical, lessonIdForTts, speakText]);
-
-  const speakFullText = useCallback(() => {
-    if (paragraphs.length === 0) return;
-    setShowFullText(true);
-    speakParagraphAt(0);
-  }, [paragraphs, speakParagraphAt]);
-
-  const stopFullText = useCallback(() => {
-    stopTts();
-    setActiveParagraphIdx(-1);
-  }, [stopTts]);
-
-  // Advance to the next paragraph once the current one finishes playing on its
-  // own (isTtsSpeaking true → false while a paragraph is active). Guarded on
-  // !ttsError so a failed paragraph aborts the sequence (via the effect below)
-  // instead of racing to also advance in the same render.
-  const wasSpeakingRef = useRef(false);
-  useEffect(() => {
-    if (wasSpeakingRef.current && !isTtsSpeaking && activeParagraphIdx >= 0 && !ttsError) {
-      speakParagraphAt(activeParagraphIdx + 1);
-    }
-    wasSpeakingRef.current = isTtsSpeaking;
-  }, [isTtsSpeaking, activeParagraphIdx, ttsError, speakParagraphAt]);
-
-  // A TTS error aborts the whole sequence (rather than silently advancing to
-  // the next paragraph) — returns the controls to idle so the error message
-  // below is the only thing implying "not playing", not a stuck stop-button.
-  useEffect(() => {
-    if (ttsError) setActiveParagraphIdx(-1);
-  }, [ttsError]);
-
-  const isFullTextActive = activeParagraphIdx >= 0;
-
-  // #2607: stop any in-progress AI 朗讀 playback if the user navigates away from
-  // Intro via a path that doesn't already call stopFullText() explicitly
-  // (breadcrumb 圖書館, 返回圖書館, or a step-chip quick-jump) — otherwise the
-  // fetched audio clip keeps playing after the page has unmounted.
-  useEffect(() => {
-    return () => {
-      stopTts();
-    };
-  }, [stopTts]);
 
   return (
     <div
@@ -297,11 +218,18 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* Hero: thumbnail + title */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-            <img
-              src={story.thumbnail}
-              alt={`《${story.title}》課文封面圖`}
-              className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
-            />
+            {/* 二修的 175 課一張封面都沒有，`story.thumbnail` 是空字串 ——
+                `<img src="">` 在瀏覽器裡就是一個破圖 icon，看起來像壞掉，
+                而不是像「這課還沒有封面」。缺資料的狀態不要畫成錯誤狀態。
+                上午修過圖書館列表（StoryCard），課內這個是第二處。 */}
+            {story.thumbnail ? (
+              <img
+                src={story.thumbnail}
+                alt={`《${story.title}》課文封面圖`}
+                className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : null}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
@@ -311,7 +239,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     discouraging for older students. Mapping: story.level is
                     already a numeric level (e.g. 4), shown as 「第 N 級」.
                     Product-tunable: owner may prefer pure number or different label. */}
-                <span className="text-[10px] text-gray-400">第 {story.level} 級</span>
+                <span className="text-[10px] text-gray-400">{gradeLabel(String(story.level))}</span>
               </div>
               <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
@@ -330,12 +258,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             // the strategy portion of story.intro.author, which holds e.g.
             // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
             // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
-            const rawStrategy =
-              story.worksheetIntro?.target_strategy ||
-              (story.intro?.author?.includes(' · ')
-                ? story.intro.author.split(' · ').slice(1).join(' · ')
-                : '') ||
-              '';
+            //
+            // #2752 Phase 2: neither of the two sources above is ever populated for the
+            // uid-tree (v3) lessons — worksheetIntro/intro.author are Layer-1/2 fields
+            // this pipeline never writes. `goal_box.strategy_line` is the actual worksheet
+            // text this box was designed to show, printed verbatim as "目標策略：<text>"
+            // (sometimes with an embedded `\n` mid-phrase, e.g. "寫作手法──\n排比─..." —
+            // normalized to a comma so it reads as one line instead of a raw newline).
+            const rawStrategy = resolveRawStrategy(story);
             // For structure-type strategies, wrap the three stage words in corner quotes and
             // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
             // and CJK separators (the demo data uses ASCII '.').
@@ -353,6 +283,15 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-lg" aria-hidden="true">💡</span>
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
               </div>
+
+              {/* goal_box.title (#2752 Phase 2) — a decorative unit tagline some
+                  lessons print near the title (e.g. "閱讀之旅的起點"). Deliberately
+                  NOT rendering goal_box.level_badge here — that's a "Level N・文體"
+                  format already shown by the category/grade badges above the title,
+                  so showing it again would just repeat the same information. */}
+              {story.goalBox?.title && (
+                <p className="text-sm text-amber-700 italic">{processZhuyin(story.goalBox.title)}</p>
+              )}
 
               {strategyName && (
                 // #2082 A2: prominent highlight box for strategy name
@@ -433,43 +372,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </button>
               ) : null}
 
-              {/* Upload button — #1637: available for any lesson with a lesson_code */}
-              {story.lesson_code && (
-                priorUpload?.has_prior_upload ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleOpenUploadedModal}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-1"
-                      aria-label="檢視已上傳學習單"
-                    >
-                      <span aria-hidden="true">📷</span>
-                      檢視已上傳
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleUploadWorksheet}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-                      aria-label="重新上傳學習單"
-                    >
-                      <span aria-hidden="true">📤</span>
-                      重新上傳
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleUploadWorksheet}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-                    aria-label="上傳學習單"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    上傳學習單
-                  </button>
-                )
-              )}
             </div>
           )}
 
@@ -504,86 +406,29 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 {sourceLabel && (
                   <p className="text-xs text-on-surface-variant">{sourceLabel}</p>
                 )}
-
-                <div className="pt-2 flex flex-wrap items-center gap-2">
-                  {isFullTextActive ? (
-                    <button
-                      type="button"
-                      onClick={stopFullText}
-                      aria-label={isTtsLoading ? 'AI 朗讀準備中，點擊取消' : '停止朗讀'}
-                      aria-pressed={true}
-                      aria-busy={isTtsLoading}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
-                    >
-                      {isTtsLoading ? (
-                        <span className="w-4 h-4 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      ) : (
-                        <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                        </svg>
-                      )}
-                      {isTtsLoading ? 'AI 朗讀中…' : '停止朗讀'}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={speakFullText}
-                      aria-label="AI 朗讀全文"
-                      aria-pressed={false}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                      </svg>
-                      AI 朗讀全文
-                    </button>
-                  )}
-
-                  {/* #2607: expand-to-full-text — makes the visible text match
-                      what AI 朗讀全文 narrates (看到的和聽到的一致), instead of
-                      only the short 課文簡介 teaser above. */}
-                  <button
-                    type="button"
-                    onClick={() => setShowFullText((v) => !v)}
-                    aria-expanded={showFullText}
-                    aria-controls="intro-full-text-panel"
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-600 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                  >
-                    <svg
-                      className={`w-4 h-4 transition-transform ${showFullText ? 'rotate-180' : ''}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                    {showFullText ? '收合全文' : '展開看全文'}
-                  </button>
-                </div>
-
-                {ttsError && (
-                  <p className="text-xs text-red-500" role="alert">{ttsError}</p>
-                )}
-
-                {showFullText && (
-                  <div
-                    id="intro-full-text-panel"
-                    className={`pt-2 border-t border-gray-200 space-y-3 ${zhuyinActive ? 'text-lg leading-[2.2rem] tracking-[0.15em]' : 'text-base leading-[1.9]'}`}
-                  >
-                    {paragraphs.map((paragraph, idx) => (
-                      <p
-                        key={idx}
-                        className={`text-on-surface rounded-lg transition-colors ${
-                          activeParagraphIdx === idx ? 'bg-amber-200/50 -mx-2 px-2 py-1' : ''
-                        }`}
-                      >
-                        {processZhuyin(paragraph)}
-                      </p>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })()}
+
+          {/* 導讀 (#2752) — 文言文 lessons carry their own worksheet 導讀 paragraph
+              (`intro_guide.yml`, no big-question number, printed under the title).
+              This is DIFFERENT content from 課文簡介 above (that's an AI/PDF teaser
+              of the lesson body; 導讀 is the worksheet author's own framing of the
+              story) — shown as its own box, and only for the 4 lessons that have
+              one (`story.introGuide` is undefined for every other lesson). */}
+          {story.introGuide?.text && (
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg text-accent-light" aria-hidden="true">auto_stories</span>
+                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
+                  {story.introGuide.section_name || '導讀'}
+                </span>
+              </div>
+              <p className={`text-on-surface text-base ${zhuyinActive ? 'leading-[2.2rem] tracking-[0.15em]' : 'leading-[1.7]'}`}>
+                {processZhuyin(story.introGuide.text)}
+              </p>
+            </div>
+          )}
 
           {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
@@ -596,7 +441,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             return (
               <div className="space-y-2 pb-2">
                 <p className="text-xs text-gray-400 text-center">
-                  本課共 {digitalSteps.length} 個步驟，點擊可快速跳轉
+                  {/* 這份清單**不含**課程簡介本身（人就在這頁，連過去沒意義），所以它不是
+                      「本課的步驟總數」—— 底部進度條數的是含簡介的 N+1。原本寫「本課共 N 個步驟」，
+                      學生會看到「共 10 個步驟」配上「第 11 步」，兩個數字互相打架。 */}
+                  接下來還有 {digitalSteps.length} 個步驟，點擊可快速跳轉
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {digitalSteps.map((step, idx) => (
@@ -627,10 +475,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         {/* Primary CTA — full-width on mobile, min-height ~56px */}
         <button
           type="button"
-          onClick={() => {
-            stopFullText();
-            onStartReading();
-          }}
+          onClick={onStartReading}
           className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始學習

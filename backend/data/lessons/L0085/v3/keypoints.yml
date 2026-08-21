@@ -1,0 +1,34 @@
+lesson_uid: L0085
+version_id: v3
+section_no: 五
+keypoints:
+  title: 大自然的氣象小幫手
+  layout: list
+  answer_carrier: 橘色手寫字（PDF p10）；文字層的空格內已填有同樣的答案
+  blank_marker_note: 原稿這一張表的空格是**底線**（不是【　】也不是（　）），本檔統一以【　】表示空格位置、答案放 blanks。
+  rows:
+  - label: 主旨
+    value: 第四段：大自然裡到處都是線索，告訴人們接下來的天氣變化。
+  - label: 例子
+    value: '1.蜘蛛會因天氣變化（濕度）調整【　】的大小。
+
+      2.蟋蟀叫聲【　】越高，氣溫越高。
+
+      3.下雨前，濕度和氣壓會有變化，【　】會出現異常行為。
+
+      4.天空的變化
+
+      (1)看到日暈表示【　】、
+
+      看到月暈表示【　】。
+
+      (2)看到星星或遠山變近了，表示空氣潔淨，天氣即將【　】。'
+    blanks:
+    - answer: 結網
+    - answer: 頻率
+    - answer: 貓、狗
+    - answer: 夜裡會下雨
+    - answer: 白天會起風
+    - answer: 轉晴或變涼
+  - label: 總結
+    value: 大自然會偷偷告訴你天氣的答案。
