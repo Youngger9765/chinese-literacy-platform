@@ -25,6 +25,7 @@ const ReportPage: React.FC = () => {
     firstIncompleteStepPath,
     hasActiveAssignment,
     saveStepProgressPatch,
+    stepProgressData,
   } = useLearningContext();
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -203,6 +204,7 @@ const ReportPage: React.FC = () => {
         token={token}
         comprehensionScores={comprehensionScores}
         comprehensionScoresLoading={comprehensionScoresLoading}
+        stepProgressData={stepProgressData}
         readingGoals={
           assignmentReadingGoals
             ? {

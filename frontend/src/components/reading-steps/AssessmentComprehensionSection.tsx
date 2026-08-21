@@ -14,12 +14,20 @@ import { encourageQuiz } from '../../utils/encouragement';
 export interface AssessmentComprehensionSectionProps {
   comprehensionScores?: ComprehensionScoreResult | null;
   comprehensionScoresLoading?: boolean;
+  /**
+   * MCQ-based 閱讀理解 result (Issue #2835). The live flow's comprehension
+   * step (ComprehensionMcqPage) produces THIS, not dialogue turns — so
+   * comprehensionScores (which requires a Socratic-dialogue history) stays
+   * null forever for MCQ-only sessions. When comprehensionScores is absent
+   * but this exists, render a simplified MCQ score card instead of the
+   * "尚未完成課文理解對話" placeholder that was misleading every MCQ session.
+   */
+  comprehensionResult?: ComprehensionResult | null;
   hideScores: boolean;
 }
 
 export interface AssessmentLegacyResultsProps {
   dictationResult: DictationResult | null;
-  comprehensionResult: ComprehensionResult | null;
   hideScores: boolean;
 }
 
@@ -29,9 +37,42 @@ export interface AssessmentLegacyResultsProps {
 export const AssessmentComprehensionSection: React.FC<AssessmentComprehensionSectionProps> = ({
   comprehensionScores,
   comprehensionScoresLoading,
+  comprehensionResult,
   hideScores,
 }) => {
   if (!comprehensionScores && !comprehensionScoresLoading) {
+    if (comprehensionResult) {
+      const pct = Math.round(
+        (comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100,
+      );
+      return (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-bold text-gray-900">閱讀理解測驗</span>
+            {!hideScores && (
+              <span className="ml-auto text-sm font-black text-accent">
+                {comprehensionResult.understoodCount}/{comprehensionResult.requiredCount}
+              </span>
+            )}
+          </div>
+          <div className="bg-gray-200 rounded-full h-2 mb-3">
+            <div
+              className="bg-emerald-500 h-2 rounded-full transition-all"
+              style={{ width: `${Math.min(100, pct)}%` }}
+            />
+          </div>
+          {hideScores ? (
+            <p className="text-sm text-emerald-600 font-medium">
+              {encourageQuiz(comprehensionResult.understoodCount, comprehensionResult.requiredCount)}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500">
+              答對 {comprehensionResult.understoodCount}/{comprehensionResult.requiredCount} 題（{pct}%）
+            </p>
+          )}
+        </div>
+      );
+    }
     return (
       <div className="p-6 bg-gray-50 rounded-2xl text-center">
         <p className="text-sm text-gray-400 font-bold">尚未完成課文理解對話</p>
@@ -54,15 +95,21 @@ export const AssessmentComprehensionSection: React.FC<AssessmentComprehensionSec
 };
 
 /**
- * 補充資訊: dictation + legacy comprehension dialogue results panel.
- * Only renders if dictationResult or comprehensionResult exists.
+ * 補充資訊: dictation legacy results panel.
+ * Only renders if dictationResult exists.
+ *
+ * Issue #2835: this used to ALSO render a "課文理解 (legacy dialogue result)"
+ * card driven by comprehensionResult — but that data now IS the live MCQ
+ * 閱讀理解 step's result, and is already shown properly (with the right
+ * label, not "課文理解") by AssessmentComprehensionSection's MCQ fallback
+ * card above. Keeping both would show the same score twice under two
+ * different, confusing labels.
  */
 export const AssessmentLegacyResults: React.FC<AssessmentLegacyResultsProps> = ({
   dictationResult,
-  comprehensionResult,
   hideScores,
 }) => {
-  if (!dictationResult && !comprehensionResult) return null;
+  if (!dictationResult) return null;
 
   return (
     <div className="space-y-4">
@@ -121,37 +168,6 @@ export const AssessmentLegacyResults: React.FC<AssessmentLegacyResultsProps> = (
             </div>
           </div>
         )}
-
-        {/* 課文理解 (legacy dialogue result) */}
-        <div className={`rounded-2xl border p-5 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
-            <h4 className={`text-sm font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h4>
-            {comprehensionResult?.isComplete && (
-              <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">已完成</span>
-            )}
-          </div>
-          {comprehensionResult ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }} />
-                </div>
-                {!hideScores && (
-                  <span className="text-xs font-bold text-gray-600">{comprehensionResult.understoodCount}/{comprehensionResult.requiredCount}</span>
-                )}
-              </div>
-              {!hideScores && (
-                <div className="flex gap-3 text-xs text-gray-500">
-                  <span>對話 {comprehensionResult.conversationLength} 回</span>
-                  <span>理解率 {Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400 text-center py-2">未完成</p>
-          )}
-        </div>
       </div>
     </div>
   );
