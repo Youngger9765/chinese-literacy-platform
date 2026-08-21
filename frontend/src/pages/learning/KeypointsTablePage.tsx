@@ -19,6 +19,7 @@ const KeypointsTablePage: React.FC = () => {
     selectedStory,
     handleFinishStoryStructure,
     dbSessionId,
+    stepProgressData,
     saveStepProgressPatch,
   } = useLearningContext();
   const navigate = useNavigate();
@@ -42,6 +43,14 @@ const KeypointsTablePage: React.FC = () => {
 
   if (!selectedStory) return null;
 
+  // #2833 — the last-persisted { answers, gradeResult } for this step, restored
+  // once on mount by StoryStructureTable. Without this, and without wiring
+  // handleProgressChange in as onProgressChange below, filled-in answers were
+  // never sent to saveStepProgressPatch at all — a reload always came back blank.
+  const initialProgress = (stepProgressData.step_data?.['keypoints-table'] as
+    | Record<string, unknown>
+    | undefined) ?? undefined;
+
   return (
     <ComprehensionLayout
       story={selectedStory}
@@ -49,7 +58,11 @@ const KeypointsTablePage: React.FC = () => {
       exerciseIcon="summarize"
       exerciseLabel="文章重點表"
     >
-      <StoryStructureTable storyId={selectedStory.id} />
+      <StoryStructureTable
+        storyId={selectedStory.id}
+        initialProgress={initialProgress}
+        onProgressChange={handleProgressChange}
+      />
 
       {/* 第一篇專屬加碼題 (#2752 Phase 3, L0063-shape keypointsFollowupQuestions —
           the `items` shape belongs to full-text-annotate instead, see FullTextAnnotate.tsx). */}
