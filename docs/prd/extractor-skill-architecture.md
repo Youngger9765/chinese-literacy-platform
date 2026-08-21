@@ -596,11 +596,15 @@ print(sorted(k.items(), key=lambda x:-x[1]))"
 # 比對 glob('*/v3/key_reading.yml') 與 load_all() 裡有 key_reading 的 uid 集合
 
 # 反向依賴盤點（319 處 / 10 tokens）
+# ⚠️ 下面刻意用 printf 展開，不寫成 `--token <值>` 逐個列 ——
+#    GitGuardian 的 Generic CLI Secret 偵測器會把那個形狀判成憑證外洩
+#    （2026-08-21 incident #36458689，誤報；--token 是搜尋字串不是憑證）
 python3 ~/.claude/skills/migration-reverse-audit/reverse_dep_audit.py \
-  --token _online-schema --token build_lesson_schema --token _parsed_2026-05-01 \
-  --token sections.yml --token body.yml --token lesson_content \
-  --token spotlight/catalog --token lesson_code_normalization \
-  --token key_reading_passages --token manifest.yml \
+  $(printf -- '--token %s ' \
+      _online-schema build_lesson_schema _parsed_2026-05-01 \
+      sections.yml body.yml lesson_content \
+      spotlight/catalog lesson_code_normalization \
+      key_reading_passages manifest.yml) \
   --scope backend/app scripts frontend/src .claude/skills specs
 
 # 已刪除目錄確認（含正向對照）
