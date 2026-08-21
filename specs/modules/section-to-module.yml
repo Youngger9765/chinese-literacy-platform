@@ -86,3 +86,7 @@ not_sections:
   - cross_text_banner            # 跨文本橫幅
   - multi_text_parts             # 多文本分部
   - keypoints_followup_questions # 重點表的延伸追問
+
+  # 派工單自己 —— 它跟模組檔放在同一個目錄，所以掃 *.yml 會掃到它。
+  # 漏了這一條的後果實測過：對帳門把 174 課全判成「有檔案但沒宣告」。
+  - _manifest
