@@ -30,6 +30,7 @@ import {
   shuffle,
   mergePersistedProgress,
   selectRetryIndices,
+  mergeRetryAnswers,
   InteractionMode,
   Phase,
   AnswerRecord,
@@ -323,32 +324,54 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     [mode, mcDone, dragDropDone, allIndices],
   );
 
+  // #2849 —「重做錯題」按下時上一輪的完整作答。重做輪的 `activeDefIndices` 只剩
+  // 答錯的那幾題，`onAllDone` 交回來的也只有那幾筆；不留 baseline 就會把先前答對的
+  // 題目整批從結算畫面刷掉。null = 目前不在重做輪。
+  const mcRetryBaselineRef = useRef<AnswerRecord[] | null>(null);
+  const dragDropRetryBaselineRef = useRef<AnswerRecord[] | null>(null);
+
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
     if (mode === 'multiple-choice') {
-      setMcAnswers(answers);
-      goToSummaryIfBothDone(answers, dragDropAnswers);
+      const baseline = mcRetryBaselineRef.current;
+      const merged = baseline ? mergeRetryAnswers(baseline, answers) : answers;
+      mcRetryBaselineRef.current = null;
+      setMcAnswers(merged);
+      goToSummaryIfBothDone(merged, dragDropAnswers);
       return;
     }
-    setDragDropAnswers(answers);
-    goToSummaryIfBothDone(mcAnswers, answers);
+    const baseline = dragDropRetryBaselineRef.current;
+    const merged = baseline ? mergeRetryAnswers(baseline, answers) : answers;
+    dragDropRetryBaselineRef.current = null;
+    setDragDropAnswers(merged);
+    goToSummaryIfBothDone(mcAnswers, merged);
   }, [mode, mcAnswers, dragDropAnswers, goToSummaryIfBothDone]);
 
   const handleRetryModeWrong = useCallback((targetMode: InteractionMode) => {
     const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
     const wrongIndices = selectRetryIndices(sourceAnswers);
     if (wrongIndices.length === 0) return;
-    // ⚠️ 這兩行目前到不了子元件：`startStage` 不會清 `mcAnswers`/`dragDropAnswers`，
-    // 所以 `mcDone` 仍是 true，render 會落到「選擇題 已完成」的 placeholder 而不是
-    // 重新掛載 MultipleChoiceMode（先於 #2839 就存在的流程 bug，已另開票）。
-    // 先寫對，等那張票修好 render gate 之後這裡就是對的。
-    if (targetMode === 'multiple-choice') setMcProgress([]);
-    else setDragDropProgress([]);
+    // #2849 — 必須把該模式的「最終結果」清掉。render gate 是
+    // `mcDone ? <StageCompletedPlaceholder/> : <MultipleChoiceMode/>`，而
+    // `mcDone = mcAnswers.length > 0`；只設 mode/phase/activeDefIndices 的話它仍是
+    // true，畫面就停在「選擇題 已完成」、列著上一輪完整的答案，學生按了沒用。
+    // 先前的作答存進 baseline，重做輪結束時由 `handleAllDone` 合併回來。
+    if (targetMode === 'multiple-choice') {
+      mcRetryBaselineRef.current = sourceAnswers;
+      setMcAnswers([]);
+      setMcProgress([]);
+    } else {
+      dragDropRetryBaselineRef.current = sourceAnswers;
+      setDragDropAnswers([]);
+      setDragDropProgress([]);
+    }
     startStage(targetMode, wrongIndices);
   }, [mcAnswers, dragDropAnswers, startStage]);
 
   // 重做一律連「作答中」的快照一起清 —— 只清最終結果的話，還原時會把上一輪的
   // 中途答案接回來，學生按了「重做」卻發現題目已經被填好（#2839 code review）。
   const handleRetryAll = useCallback(() => {
+    mcRetryBaselineRef.current = null;
+    dragDropRetryBaselineRef.current = null;
     setMcAnswers([]);
     setDragDropAnswers([]);
     setMcProgress([]);
@@ -357,12 +380,14 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   }, [startStage, allIndices]);
 
   const handleRetryMc = useCallback(() => {
+    mcRetryBaselineRef.current = null;
     setMcAnswers([]);
     setMcProgress([]);
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
   const handleRetryDragDrop = useCallback(() => {
+    dragDropRetryBaselineRef.current = null;
     setDragDropAnswers([]);
     setDragDropProgress([]);
     startStage('drag-drop', allIndices);
@@ -446,6 +471,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
                   activeDefIndices={activeDefIndices}
                   shuffledWords={shuffledWords.current}
                   onAllDone={handleAllDone}
+                  initialAnswers={dragDropProgress}
                   onAnswersChange={setDragDropProgress}
                 />
               )

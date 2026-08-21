@@ -97,6 +97,21 @@ interface Props {
   vocabBank: Record<string, string>;
   onComplete: (score: number, total: number, firstTryResults?: QuestionResult[]) => void;
   storyId?: string | number;
+  /**
+   * #2848 — 先前存下的作答快照（DB 優先於 localStorage）。
+   * 沒給就退回 localStorage，跟這個元件原本的行為一樣。
+   */
+  initialProgress?: SavedProgress | null;
+  /**
+   * #2848 — 每答一題回報一次。
+   *
+   * 這個 callback 之前不存在，是這一關進度存不進 DB 的根因：逐題作答只寫進
+   * localStorage（`vocab_app_progress_<story>`），parent 完全不知情，所以
+   * `VocabApplication` 送進 DB 的 patch 只有 `phase === 'done'` 的最終成績，
+   * 以及 beforeunload 那個「一題答案都沒有」的 `{phase, partialAt}` 心跳。
+   * 學生換一台裝置或清快取，整關從第 1 題重來。
+   */
+  onProgressChange?: (progress: SavedProgress) => void;
 }
 
 export interface QuestionResult {
@@ -112,7 +127,7 @@ function storageKey(storyId: string | number | undefined): string | null {
   return storyId != null ? scopedStepStorageKey('vocab_app_progress_', storyId) : null;
 }
 
-interface SavedProgress {
+export interface SavedProgress {
   currentIdx: number;
   usedCodes: string[];
   score: number;
@@ -156,10 +171,18 @@ function nextPraise(): string {
   return msg;
 }
 
-const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete, storyId }) => {
+const FillInBlankExercise: React.FC<Props> = ({
+  sentences,
+  vocabBank,
+  onComplete,
+  storyId,
+  initialProgress,
+  onProgressChange,
+}) => {
   const bankEntries = Object.entries(vocabBank).sort(([a], [b]) => a.localeCompare(b));
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const savedProgress = loadProgress(storyId);
+  // #2848: DB 快照優先，localStorage 只是離線 / 尚未載入時的 L1 快取。
+  const savedProgress = initialProgress ?? loadProgress(storyId);
 
   // Onboarding state — gated by localStorage
   const [showCoach, setShowCoach] = useState<boolean>(() => {
@@ -221,12 +244,16 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const done = currentIdx >= total;
 
   useEffect(() => {
-    if (storyId == null) return;
-    saveProgress(storyId, {
+    const progress: SavedProgress = {
       currentIdx, usedCodes: Array.from(usedCodes), score, firstTryResults,
       pendingRetryIndices: retryIndices, retryMode,
-    });
-  }, [currentIdx, usedCodes, score, firstTryResults, retryIndices, retryMode, storyId]);
+    };
+    if (storyId != null) saveProgress(storyId, progress);
+    // #2848 — 同一份快照也往上送，讓它進得了 DB。跟 localStorage 綁在同一個
+    // effect 是刻意的：兩邊存的是同一個東西，一起壞一起好，不會出現
+    //「localStorage 有、DB 沒有」那種換裝置才發現的落差。
+    onProgressChange?.(progress);
+  }, [currentIdx, usedCodes, score, firstTryResults, retryIndices, retryMode, storyId, onProgressChange]);
 
   useEffect(() => {
     if (done && phase === 'exercise') setPhase('summary');

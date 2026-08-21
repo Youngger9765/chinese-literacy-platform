@@ -117,22 +117,72 @@ export interface DragDropProps {
   /**
    * #2839 — 每放對/放錯一次就回報一次，讓作答中的進度存得進 DB。
    * 跟 MCQ 同一個原因：答案只活在 `answersRef` 裡，parent 要等 `onAllDone` 才知道。
-   *
-   * ⚠️ 這裡只做「存」，還沒做「還原」—— 拖拉配對要還原得把 placements / confirmed /
-   * wrongAttempts 這幾組畫面狀態一起重建，比 MCQ 大一截。存下來的資料是對的，
-   * 還原留給 follow-up（見 PR 說明）。MCQ 是預設模式，兩件都做完了。
    */
   onAnswersChange?: (answers: AnswerRecord[]) => void;
+  /**
+   * #2850 — 先前存下的作答快照，用來把已定案的格子放回去。
+   *
+   * 存了讀不回來等於沒存：#2839 把「存」接上之後，`dragDropProgress` 確實進得了 DB，
+   * 但沒人讀，重新載入還是從空的重來。
+   */
+  initialAnswers?: AnswerRecord[];
 }
 
-export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone, onAnswersChange }: DragDropProps) {
+/**
+ * 把還原回來的作答對回目前這一輪的題目集合（#2850）。用 `defIndex` 對，不是用
+ * 陣列位置 ——「重做錯題」會讓 `activeDefIndices` 只剩一部分，位置對不起來。
+ */
+function seedAnswers(activeDefIndices: number[], restored?: AnswerRecord[]): AnswerRecord[] {
+  const byDefIndex = new Map((restored ?? []).map((a) => [a.defIndex, a]));
+  return activeDefIndices.map(
+    (defIdx) =>
+      byDefIndex.get(defIdx) ?? {
+        defIndex: defIdx,
+        answeredWordIdx: null,
+        correct: null,
+        wrongAttempts: 0,
+        firstTryCorrect: null,
+      },
+  );
+}
+
+/**
+ * 從作答快照重建畫面狀態（#2850）。只有「已定案」的格子會被放回去 ——
+ * 答錯的 chip 在原本的互動裡會彈回語詞庫，沒有留在格子上的狀態要還原。
+ */
+function seedBoardState(answers: AnswerRecord[]) {
+  const placements = new Map<number, number>();
+  const confirmed = new Set<number>();
+  const wrongAttempts = new Map<number, number>();
+  for (const a of answers) {
+    if (a.wrongAttempts) wrongAttempts.set(a.defIndex, a.wrongAttempts);
+    if (a.answeredWordIdx === null || a.correct !== true) continue;
+    placements.set(a.defIndex, a.answeredWordIdx);
+    confirmed.add(a.defIndex);
+  }
+  return { placements, confirmed, wrongAttempts };
+}
+
+export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone, onAnswersChange, initialAnswers }: DragDropProps) {
   // #2135: zhuyin support — read context directly (same pattern as VocabDefinitionMatch.tsx)
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
+  // #2850 — mount 當下就把還原快照攤成畫面狀態。用 lazy initializer 是必要的：
+  // 這幾個 state 一旦 render 過就不能再從 props 重種（下面那個 reset effect 只負責
+  // 「題目集合換了」的情境）。
+  const seededRef = useRef<ReturnType<typeof seedBoardState> | null>(null);
+  if (seededRef.current === null) {
+    seededRef.current = seedBoardState(seedAnswers(activeDefIndices, initialAnswers));
+  }
+
   const [draggingVocabIdx, setDraggingVocabIdx] = useState<number | null>(null);
-  const [placements, setPlacements] = useState<Map<number, number>>(new Map());
-  const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
+  const [placements, setPlacements] = useState<Map<number, number>>(
+    () => new Map(seededRef.current!.placements),
+  );
+  const [confirmed, setConfirmed] = useState<Set<number>>(
+    () => new Set(seededRef.current!.confirmed),
+  );
   const [wrongFlash, setWrongFlash] = useState<Set<number>>(new Set());
   const [hoverTarget, setHoverTarget] = useState<number | null>(null);
   const [touchSelected, setTouchSelected] = useState<number | null>(null);
@@ -182,19 +232,29 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   }, [demo?.step, demo?.wordIdx, demo?.slotIdx]);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
-  const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-      firstTryCorrect: null,
-    })),
+  const answersRef = useRef<AnswerRecord[]>(seedAnswers(activeDefIndices, initialAnswers));
+
+  const confirmedRef = useRef<Set<number>>(new Set(seededRef.current!.confirmed));
+  const wrongAttemptCountRef = useRef<Map<number, number>>(
+    new Map(seededRef.current!.wrongAttempts),
   );
 
-  const confirmedRef = useRef<Set<number>>(new Set());
-  const wrongAttemptCountRef = useRef<Map<number, number>>(new Map());
-
+  // 題目集合換了（重做錯題 / 全部重做 / 切換模式）→ 從頭開始。
+  //
+  // #2850：這個 effect 在 mount 時也會跑一次，會把上面剛從 `initialAnswers` 種好的
+  // 快照整個抹掉 —— 還原就永遠不會生效，而且不會有任何錯誤，看起來就只是「沒還原」。
+  //
+  // 這裡刻意用「**值**變了才 reset」而不是「跑過第一次就跳過」的旗標：
+  // React 18 的 StrictMode 在 mount 時會 setup → cleanup → setup 跑兩次，旗標在
+  // 第二次 setup 已經是 true，reset 照跑，還原一樣被抹掉 —— 開發模式下看起來就是
+  // 「存的進度都不見了」。比對值就不會有這個縫（同樣的 key 重跑幾次都不動作）。
+  const lastRoundKeyRef = useRef<string>(
+    JSON.stringify([activeDefIndices, shuffledWords]),
+  );
   useEffect(() => {
+    const key = JSON.stringify([activeDefIndices, shuffledWords]);
+    if (key === lastRoundKeyRef.current) return;
+    lastRoundKeyRef.current = key;
     setDraggingVocabIdx(null);
     setPlacements(new Map());
     setConfirmed(new Set());
@@ -204,16 +264,30 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     setFlyingAway(new Set());
     setWrongFeedbackSlot(null);
     setCorrectFeedbackSlot(null);
-    answersRef.current = activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-      wrongAttempts: 0,
-      firstTryCorrect: null,
-    }));
+    answersRef.current = seedAnswers(activeDefIndices);
     confirmedRef.current = new Set();
     wrongAttemptCountRef.current = new Map();
   }, [activeDefIndices, shuffledWords]);
+
+  // #2850 — 還原回來就已經全部放完的情況。
+  //
+  // `onAllDone` 只有一個呼叫點（`attemptPlace` 裡的 `setConfirmed` updater），只有
+  // 「活的一次放格」才會觸發。最後一格放對的當下 `onAnswersChange` 是同步送出的，
+  // 但 `onAllDone` 還要等 ~1.15s（fly-away 550ms + 600ms）；學生在這個空窗切走分頁，
+  // `useProgressSync` 的 pagehide beacon 會把「全部放完」的 dragDropProgress 存進 DB，
+  // 而代表「這一關完成」的 dragDropAnswers 還是空的。下次進來格子全滿、語詞庫空了、
+  // `dragDropDone` 仍是 false 所以結算畫面也不會出現 —— 學生卡在一個沒有任何按鈕的
+  // 畫面，而且每次重進都一樣。這裡在 mount 後補一次完成判定把它接回去。
+  const restoredCompletionFiredRef = useRef(false);
+  useEffect(() => {
+    if (restoredCompletionFiredRef.current) return;
+    if (activeDefIndices.length === 0) return;
+    if (confirmedRef.current.size < activeDefIndices.length) return;
+    restoredCompletionFiredRef.current = true;
+    onAllDone(answersRef.current);
+    // 只看 mount 當下的還原狀態；活的放格走 attemptPlace 自己那條路。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDismissCoach = () => {
     setShowCoach(false);

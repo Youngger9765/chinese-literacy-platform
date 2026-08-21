@@ -58,20 +58,48 @@ export interface WordSearchProgressReturn {
   handleRedo: () => void;
 }
 
+/**
+ * 一次遊戲的進度快照。localStorage 與 DB 存的是同一份東西（#2848）。
+ */
+export interface WordSearchProgress {
+  foundWords: string[];
+  elapsedTime: number;
+  completed?: boolean;
+}
+
+export interface WordSearchProgressOptions {
+  /**
+   * #2848 — 先前存下的進度（DB 優先於 localStorage）。
+   * 沒給就退回 localStorage，跟這個 hook 原本的行為一樣。
+   */
+  initialProgress?: WordSearchProgress | null;
+  /**
+   * #2848 — 進度變動時回報一次，讓它進得了 DB。
+   *
+   * 這個 callback 之前不存在，是這一關的根因：整個 hook 沒有任何 API import，
+   * 找到的字只寫 localStorage，`VocabReviewPage` 連 `saveStepProgressPatch` 都
+   * 沒拿。學生換裝置或清快取，找到的字全部消失。
+   */
+  onProgressChange?: (progress: WordSearchProgress) => void;
+}
+
 export function useWordSearchProgress(
   vocabWords: string[],
-  storyId: string
+  storyId: string,
+  options: WordSearchProgressOptions = {}
 ): WordSearchProgressReturn {
+  const { initialProgress, onProgressChange } = options;
   const storageKey = scopedStepStorageKey('wordSearch_progress_', storyId);
 
   const loadSaved = () => {
     try {
       const raw = localStorage.getItem(storageKey);
       if (!raw) return null;
-      return JSON.parse(raw) as { foundWords: string[]; elapsedTime: number; completed?: boolean };
+      return JSON.parse(raw) as WordSearchProgress;
     } catch { return null; }
   };
-  const savedRef = useRef(loadSaved());
+  // #2848: DB 快照優先，localStorage 只是離線 / 尚未載入時的 L1 快取。
+  const savedRef = useRef<WordSearchProgress | null>(initialProgress ?? loadSaved());
 
   const [redoKey, setRedoKey] = useState(0);
 
@@ -123,31 +151,38 @@ export function useWordSearchProgress(
   const timerRunning = !finished && vocabWords.length > 0;
   const elapsed = useTimer(timerRunning);
 
-  // ── localStorage persistence ────────────────────────────────────────
+  // ── localStorage + DB persistence (#2848) ───────────────────────────
+  // 只在「找到的字」變動時送，不跟著 `elapsed` 每 500ms 跳一次 —— 否則計時器
+  // 會把進度端點打成每半秒一次。時間仍然一起存，只是由找到字這件事觸發。
+  const elapsedRef = useRef(elapsed);
+  elapsedRef.current = elapsed;
   useEffect(() => {
     if (foundWords.size === 0) return;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify({
-        foundWords: Array.from(foundWords),
-        elapsedTime: elapsed,
-      }));
-    } catch {}
-  }, [foundWords, elapsed, storageKey]);
+    const progress: WordSearchProgress = {
+      foundWords: Array.from(foundWords),
+      elapsedTime: elapsedRef.current,
+    };
+    try { localStorage.setItem(storageKey, JSON.stringify(progress)); } catch {}
+    // 同一份快照也往上送。跟 localStorage 綁在同一個 effect 是刻意的：兩邊存的
+    // 是同一個東西，一起壞一起好，不會出現「localStorage 有、DB 沒有」那種
+    // 換裝置才發現的落差。
+    onProgressChange?.(progress);
+  }, [foundWords, storageKey, onProgressChange]);
 
   useEffect(() => {
     if (allFound && !finished) {
       setFinished(true);
       setFinishedElapsed(elapsed);
       // #816: persist completion — do NOT removeItem here
-      try {
-        localStorage.setItem(storageKey, JSON.stringify({
-          foundWords: Array.from(foundWords),
-          elapsedTime: elapsed,
-          completed: true,
-        }));
-      } catch {}
+      const progress: WordSearchProgress = {
+        foundWords: Array.from(foundWords),
+        elapsedTime: elapsed,
+        completed: true,
+      };
+      try { localStorage.setItem(storageKey, JSON.stringify(progress)); } catch {}
+      onProgressChange?.(progress);
     }
-  }, [allFound, finished, elapsed, storageKey, foundWords]);
+  }, [allFound, finished, elapsed, storageKey, foundWords, onProgressChange]);
 
   // ── Drag handlers ────────────────────────────────────────────────────
 

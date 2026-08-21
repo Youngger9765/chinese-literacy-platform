@@ -150,6 +150,36 @@ export function buildMCQOptions(vocab: VocabItem[], currentDefIdx: number): numb
 /*  selectRetryIndices — filter wrong answers for retry-wrong mode     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * 把「重做錯題」那一輪的結果合併回上一輪的完整作答（#2849）。
+ *
+ * 重做輪的 `activeDefIndices` 只剩答錯的那幾題，所以 `onAllDone` 交回來的陣列
+ * 也只有那幾筆。直接拿它當 `mcAnswers`，先前答對的題目會整批從結算畫面消失。
+ *
+ * `firstTryCorrect` / `firstTryAnsweredWordIdx` 是 write-once 的第一次作答紀錄
+ * （#2773），重做**不覆蓋** —— 一旦覆蓋，錯過一次但重做答對的題目會從
+ * 「我錯了什麼」的統計裡整個消失，那正是 #2773 修掉的洞。
+ */
+export function mergeRetryAnswers(
+  baseline: AnswerRecord[],
+  retried: AnswerRecord[],
+): AnswerRecord[] {
+  if (baseline.length === 0) return retried;
+  const byDefIndex = new Map(retried.map((a) => [a.defIndex, a]));
+  const merged = baseline.map((base) => {
+    const next = byDefIndex.get(base.defIndex);
+    if (!next) return base;
+    byDefIndex.delete(base.defIndex);
+    return {
+      ...next,
+      firstTryCorrect: base.firstTryCorrect ?? next.firstTryCorrect,
+      firstTryAnsweredWordIdx: base.firstTryAnsweredWordIdx ?? next.firstTryAnsweredWordIdx,
+    };
+  });
+  // 重做輪出現了 baseline 沒有的題（理論上不會，防禦性保留）。
+  return [...merged, ...byDefIndex.values()];
+}
+
 export function selectRetryIndices(answers: AnswerRecord[]): number[] {
   // firstTryCorrect ?? correct: prefer the immutable first-try verdict; fall
   // back to `correct` for records that predate the field (persisted progress
