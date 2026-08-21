@@ -165,6 +165,25 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 > 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
 
+## 會議議程 / 會議記錄 → 一律進 repo，不開 issue（Young 2026-08-21 明令）
+
+要開會 → **議程必須在 GitHub 上有一個穩定的檔案 URL**，發給與會者的就是那個連結。
+
+| 做 | 不做 |
+|---|---|
+| 寫進 `docs/meetings/YYYY-MM-DD-agenda.md`（會後紀錄用 `-record.md`） | ⛔ 開成 GitHub issue |
+| commit + push，把 GitHub 上的檔案連結發給與會者 | ⛔ 只寫在對話裡、只留本機不推 |
+
+**為什麼不用 issue**：議程開成票會混進待辦票流，跟真正的工作票搶注意力；
+而開會當下需要一個穩定可讀的 URL，票裡的內容會被留言洗掉。
+
+**物理擋**：`~/.claude/hooks/pre-bash-meeting-agenda-to-repo-guard.sh`
+（PreToolUse/Bash；只認命令位置、會先剝掉 heredoc 內文，所以「寫文件說明這條規則」不會被誤擋）
+golden set：`~/.claude/hooks/tests/meeting-agenda-to-repo-guard.eval.sh`（12 case，兩種 mutation 都驗過會紅）
+
+> 起因：2026-08-21 我把當晚議程開成票 #2827 → 「誰叫你開 issue?????? meeting呢？？？」，
+> 同日再一次「會議就要開 agenda to github 知道嗎？？？」。規則層講兩次還犯，所以上 hook。
+
 ## Modular Spec System (`specs/`) — #2029
 
 改 backend code / lesson 資料前，**先查該段是否被某個 spec module 擁有**：
