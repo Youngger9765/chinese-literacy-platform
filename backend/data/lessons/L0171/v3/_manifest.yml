@@ -2,7 +2,7 @@ lesson_uid: L0171
 generated_by: scripts/build_lesson_manifest.py
 note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
 sections:
-- 'no': ㄧ
+- 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
 - 'no': 二

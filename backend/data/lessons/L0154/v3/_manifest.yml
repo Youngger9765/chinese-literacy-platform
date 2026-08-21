@@ -8,7 +8,7 @@ sections:
 - 'no': ''
   name: 原文
   module: classical_text
-- 'no': ㄧ
+- 'no': 一
   name: 文白句子比對
   module: sentence_matching
 - 'no': 二

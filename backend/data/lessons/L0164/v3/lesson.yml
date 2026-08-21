@@ -9,7 +9,7 @@ sections_present:
   name: 原文（含斷詞點）＋注釋
 - 'no': null
   name: 朗讀計時
-- 'no': ㄧ
+- 'no': 一
   name: 文白句子比對
 - 'no': 二
   name: 文白詞語比對
