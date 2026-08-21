@@ -120,6 +120,17 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
             dispatch_pages.setdefault(module, set()).update(section["pages"])  # type: ignore[arg-type]
     dispatch_pages = {k: sorted(v) for k, v in sorted(dispatch_pages.items())}
 
+    # 哪幾個模組的頁碼是「夾出來的」而不是定位到的（#2857 N2）。
+    # `pages_source: bracketed` 本來只寫在 sections[]，而飛機讀的是 dispatch_pages ——
+    # 23 個低信心標記因此一個都到不了使用端，飛機拿到一段可能寬達 54% 的範圍
+    # 卻不知道那是猜的。這裡把同一件事放到它讀得到的地方。
+    low_confidence = sorted({
+        section["module"]
+        for section in sections
+        if section.get("module") and section.get("pages")
+        and section.get("pages_source") == "bracketed"
+    })
+
     return {
         "lesson_uid": uid,
         "generated_by": "scripts/build_lesson_manifest.py",
@@ -138,6 +149,10 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
         # 飛機收到空的要回 BLOCKED，不要自己去讀全份（#2857）
         "pdf_pages": page_entry.get("pdf_pages"),
         "dispatch_pages": dispatch_pages,
+        # ⚠️ 這幾個模組的 dispatch_pages 是用前後鄰居夾出來的，不是定位到的。
+        # 飛機讀到自己在名單上 → 範圍可能過寬（實測最寬 54%），抽完要自己確認
+        # 讀到的真的是自己那一節，別把隔壁的內容收進來。
+        **({"low_confidence_pages": low_confidence} if low_confidence else {}),
         **({"pages_unavailable": blocked_reason} if blocked_reason else {}),
     }
 
@@ -155,7 +170,11 @@ def main() -> int:
     }
     pages_db = yaml.safe_load(PAGES_FILE.read_text(encoding="utf-8")) or {} if PAGES_FILE.is_file() else {}
 
-    drifted, written, drift = [], 0, []
+    drifted, drift = [], []
+    # 先全部算完再寫。邊算邊寫的話，偵測到漂移時檔案早就落地了 ——
+    # exit 1 會叫人「重新定位」，但工作樹已經是用**過期頁碼**產的那一份，
+    # 而它看起來完全正常（每一課都有派工單、格式也對）。
+    pending: list[tuple[pathlib.Path, str]] = []
     for version_dir in sorted(LESSONS.glob("L*/v3")):
         manifest = build_one(version_dir, table, gaps, pages_db, drift)
         if manifest is None:
@@ -166,15 +185,20 @@ def main() -> int:
             if not target.is_file() or target.read_text(encoding="utf-8") != text:
                 drifted.append(version_dir.parent.name)
         else:
-            target.write_text(text, encoding="utf-8")
-            written += 1
+            pending.append((target, text))
 
     if drift:
         print(f"🔴 {len(drift)} 個大題的名字跟 section-pages.yml 對不上（來源改了但沒重定位）：")
         for line in drift[:15]:
             print(f"    {line}")
         print("\n跑 `python3 scripts/build_section_pages.py` 重新定位，再重產 manifest。")
+        print("⛔ 一份都沒寫出去 —— 用過期頁碼產出來的派工單看起來完全正常。")
         return 1
+
+    written = 0
+    for target, text in pending:
+        target.write_text(text, encoding="utf-8")
+        written += 1
 
     if args.check:
         if drifted:

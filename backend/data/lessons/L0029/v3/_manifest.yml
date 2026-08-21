@@ -170,3 +170,5 @@ dispatch_pages:
   vocab_review:
   - 20
   - 21
+low_confidence_pages:
+- comprehension

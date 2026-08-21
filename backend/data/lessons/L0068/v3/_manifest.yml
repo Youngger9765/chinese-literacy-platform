@@ -87,3 +87,5 @@ dispatch_pages:
   - 6
   vocab_review:
   - 8
+low_confidence_pages:
+- spotlight

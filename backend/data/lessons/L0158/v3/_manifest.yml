@@ -104,3 +104,5 @@ dispatch_pages:
   word_matching:
   - 4
   - 5
+low_confidence_pages:
+- key_reading

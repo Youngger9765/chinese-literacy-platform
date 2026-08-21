@@ -118,3 +118,6 @@ dispatch_pages:
   - 10
   vocab_review:
   - 12
+low_confidence_pages:
+- comprehension
+- spotlight

@@ -222,6 +222,13 @@ mkdir -p $W && cp "$SOT/<drive_path>" $W/src.docx
 #    過期殭屍清理、timeout、產出與頁數檢查（0 頁也算失敗）。
 scripts/docx_to_pdf.sh $W/src.docx $W $UID     # 印出 `<pdf路徑> pages=N`
 
+# 🔴 派工之前必跑（#2857 B1）：這份 PDF 是不是算頁碼時的那一份
+#    同一份 DOCX 連轉三次會得到不同頁數（L0016 → 8,9,9；L0013 → 11,10,11），
+#    整份對比 172 課有 7 課頁數不同、11 課共 33 個大題頁碼不同。
+#    位移一頁時 span 通常仍有重疊 → 飛機讀到「那一節的一部分」然後回報成功 = 靜默截斷。
+python3 scripts/assert_pdf_matches_manifest.py --uid $UID --pdf $W/$UID.pdf || {
+  echo "⛔ PDF 與派工單不一致 —— 不派工"; exit 1; }
+
 cd $W && unzip -o -q src.docx word/document.xml
 ```
 

@@ -115,3 +115,5 @@ dispatch_pages:
   vocab_review:
   - 12
   - 13
+low_confidence_pages:
+- spotlight

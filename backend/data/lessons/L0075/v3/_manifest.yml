@@ -102,3 +102,5 @@ dispatch_pages:
   - 5
   vocab_review:
   - 9
+low_confidence_pages:
+- vocab_definitions

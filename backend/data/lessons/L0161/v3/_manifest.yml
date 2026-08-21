@@ -141,3 +141,6 @@ dispatch_pages:
   - 5
   - 6
   - 7
+low_confidence_pages:
+- classical_text
+- key_reading

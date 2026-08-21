@@ -95,3 +95,6 @@ dispatch_pages:
   word_matching:
   - 2
   - 3
+low_confidence_pages:
+- classical_text
+- key_reading
