@@ -97,6 +97,9 @@ def observe() -> dict[str, dict]:
     )
     for version_dir in sorted(LESSONS.glob("L*/v3")):
         for path in sorted(version_dir.glob("*.yml")):
+            # 底線前綴 = 衍生檔不是模組（_manifest.yml），不該有自己的 schema
+            if path.stem.startswith("_"):
+                continue
             try:
                 data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
             except Exception:

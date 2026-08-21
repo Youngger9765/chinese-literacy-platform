@@ -171,6 +171,10 @@ def main() -> int:
         if not (d.is_dir() and d.name.startswith("L") and v3.is_dir()):
             continue
         for f in v3.glob("*.yml"):
+            # 底線前綴 = 不是模組，是放在同一層的衍生檔（目前只有 _manifest.yml）。
+            # 少了這行的後果實測過：對帳門與這道門先後把 174 課全判紅。
+            if f.stem.startswith("_"):
+                continue
             present[f.stem] += 1
     if len(present) < 5:
         raise SystemExit(f"⛔ 只掃到 {len(present)} 種模組，明顯太少 —— 沒掃到語料")
