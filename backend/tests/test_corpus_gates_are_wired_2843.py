@@ -47,7 +47,7 @@ WIRED = [
 CANNOT_WIRE = {
     "coverage_gate": "讀 private/curriculum-source/（.gitignore:2），CI checkout 沒有那個目錄",
     "traditional_only_gate": "同樣讀 private/curriculum-source/ 比對原稿用字，CI 裡沒有那個目錄",
-    "verbatim_gate": "要逐課帶 --uid 參數與原稿，不是全庫掃描型",
+    "verbatim_gate": "介面是 --yaml <檔> --docx <原稿>，原稿在 gitignore 的 private/，CI 拿不到",
 }
 
 

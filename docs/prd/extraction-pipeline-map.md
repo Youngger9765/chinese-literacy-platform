@@ -132,7 +132,90 @@
 
 ---
 
-## 5. 重現指令（圖裡每個 ✅/❌ 的來源）
+## 5. TODO 工單（給接手的人 —— 依序，前一項沒綠不做下一項）
+
+> 每一項都寫了**怎麼驗**，不是只寫要做什麼。
+> ⚠️ 動手前先跑 §6 的重現指令確認數字沒漂 —— 資料每次重抽都會變。
+
+### 🟢 T1 快、安全、做了就不會錯（先做這批）
+
+- [ ] **T1a 淘汰 `module_migration_gate.py`**
+      它數「還有幾課停在 v2」，實測 175 課全在 v3 → 恆綠、量不到東西。
+      ⚠️ 刪之前先 `grep -rn module_migration_gate` 確認沒有別的東西讀它
+      （它現在在 `test_corpus_gates_are_wired_2843.py` 的 `WIRED` 裡，要一起拿掉，
+      而該檔有一條 `len(WIRED) >= 4` 的斷言會擋，順手改成 3）
+
+- [ ] **T1b 清掉指向已刪除目錄的引用**
+      三個目錄 git 追蹤數都是 0，但還有 code 在讀：
+      ```
+      _online-schema         0 檔    21 個檔在引用
+      _parsed_2026-05-01     0 檔    26 個檔在引用
+      spotlight/catalog      0 檔     5 個檔在引用
+      ```
+      這些讀取多半 fail-soft 成空值，**所以沒人發現**。
+      逐一判讀：刻意保留的相容路徑（要在 code 寫明原因）還是漏掉的遺留（刪）。
+      ⚠️ `spotlight/catalog` 那 5 處碰到 @stgst 的範圍，先問過。
+
+- [ ] **T1c 淘汰 `keypoints_shape_gate.py`**
+      今天的 `module_schemas` 對 24 個模組驗同一件事，它只驗 keypoints 一個。
+      ⛔ **但現在還不能刪** —— keypoints 的 schema 是 `x-enforcement: warn`
+      （@stgst 正在改）。等他把 keypoints 轉成 `error` 之後才刪。
+
+### 🔴 T2 內容忠實度 —— 這是「隨機」真正住的那一層
+
+**上面所有的門在「結構全對但內容放錯課」時都是綠的。** 這一層一道 CI 都沒有。
+
+- [ ] **T2a 盤點 5 支既有 eval 各自涵蓋什麼、為什麼沒在 CI**
+      `eval_lesson_schema.py`（DOCX → 聚光燈量化）
+      `eval_keypoints_text_fidelity.py` / `eval_keypoints_dual.py`
+      `eval_strategy_validate.py`（free_text AI 評分）
+      `eval_lesson_content.py`（block-based EDD harness）
+      ⚠️ 先確認它們需要什麼輸入 —— 若跟 `coverage_gate` 一樣要 `private/`，
+      那就跟結構門是同一個問題（CI 拿不到原稿），要先解那個。
+
+- [ ] **T2b 決定 EDD 的判準怎麼接地**
+      vision judge 是機率性的，要有校準（~20 個人工標註樣本）與 human-agreement 數字，
+      否則 judge 自己會 drift。⛔ 別直接把 judge 的輸出當 gate。
+      參考 `qa-spotlight` / `qa-keypoints` skill 既有做法。
+
+- [ ] **T2c eval case 要來自真實壞過的課**，不是憑空設計
+      候選：8/19 那批「抽對了但下游沒接」的課、聚光燈放錯課的歷史案例。
+
+### ⚪ T3 讓派工單真的有人吃（工程量大，不解決隨機）
+
+現在 `_manifest.yml` 的 `dispatch: [...]` 寫著「這課要出動哪幾個模組 skill」，
+**但那些 skill 不存在** —— 它目前只被對帳門讀，沒有真的在派工。
+
+- [ ] **T3a 從 `extract-lesson-multimodal` 切出第一個模組 skill 當範本**
+      選 `vocab_definitions`(150 課) 或 `comprehension`(172 課)。
+      ⛔ 不能選 `spotlight` / `keypoints`（@stgst）或 `key_reading`（@if-else-master）。
+- [ ] **T3b** 驗過範本可複用再批次擴，順序：無人認領 → 文言文那 6 個 → 最後才是被認領的三個
+- [ ] **T3c** `lesson-overview-scan` 對真實新教材跑一次，把實測數字補回 SKILL.md
+      （跑兩次的一致率、對帳門結果、跟 `sections_present` 的差異數）
+
+### ⛔ 不要做的
+
+| 不要做 | 為什麼 |
+|---|---|
+| 再加結構門 | 結構層已經夠了（10 道在 CI）。再加是在容易的地方使力 |
+| 把 `coverage_gate` / `traditional_only_gate` / `verbatim_gate` 硬接進 CI | 它們讀 gitignore 的 `private/`，接了就是恆紅的門，**紅久了大家學會忽略它** |
+| 為了讓門變綠去補內容 | 那 46 課的缺口是學習單本來就沒有，補了是造假 |
+| 憑名字像就往 `section-to-module.yml` 加一條 | 猜錯會讓對帳門把好課判成壞課，比留欠債更糟 |
+
+### 相關 PR / issue
+
+| | |
+|---|---|
+| #2843 | 抽取器 skill 模組化（母票） |
+| #2844 | 架構 PRD（已 merge） |
+| #2847 | yml 形狀正規化 606→416（已 merge） |
+| #2851 | 46 課缺口宣告（已 merge） |
+| **#2852** | **本 PR** — schema + 對照表 + 對帳門 + 派工單 + 接線 + overview skill |
+| #2853 | 進度持久化剩下 3 關（另一條線） |
+
+---
+
+## 6. 重現指令（圖裡每個 ✅/❌ 的來源）
 
 ```bash
 # 各門有沒有真的被「執行」（會看到 10/16）
