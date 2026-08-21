@@ -164,13 +164,10 @@
       "inner_shapes": 19,
       "lessons": 70,
       "mid": [
-        "lesson_heading",
         "level_badge",
-        "level_genre",
         "notes",
         "strategy_line",
-        "target_strategy",
-        "title_line"
+        "title"
       ],
       "rare": [
         "author",
@@ -189,8 +186,6 @@
         "strategy_line_source_text",
         "target_issue",
         "text",
-        "title",
-        "文言文類型",
         "文言聚光燈"
       ],
       "rare_noteish": [],

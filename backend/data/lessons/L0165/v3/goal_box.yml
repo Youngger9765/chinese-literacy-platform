@@ -1,10 +1,10 @@
 lesson_uid: L0165
 version_id: v3
 goal_box:
-  level_genre: Level 5・記敘文
   target_issue: '目標議題：品格力──
 
     合作中的信任：溝通與調整'
-  lesson_heading: 第10課  下一球，我相信你
   notes:
     target_issue: ⚠️ 這個課型用「目標**議題**」，白話課與文言文用「目標**策略**」。
+  title: 第10課  下一球，我相信你
+  level_badge: Level 5・記敘文
