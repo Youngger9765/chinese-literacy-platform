@@ -125,7 +125,20 @@ python3 scripts/yml_shape_report.py --compare before.json after.json
 - [ ] **T4** 先對**一個模組**跑（選 `full_text_annotate`：164 課 115 形狀，最亂且無人認領）
 - [ ] **T5** 值不變驗證通過 → 擴到其餘**無人認領**模組
 - [ ] **T6** 棘輪測試 + mutation 驗過會紅 + 加進 CI 具名清單
-- [ ] **T7** `goal_box` 單獨處理（**0 個核心欄位**，是唯一真的壞掉的，可能要重抽而非改鍵）
+- [x] **T7** `goal_box` —— **不用重抽**。0 個核心欄位的成因是同義欄位各自為名，
+      不是資料缺。已用 `specs/modules/field-aliases.yml` 正名（`title_line` /
+      `lesson_heading` → `title` 等）。消費端讀得到的課數 `title` 4→21、
+      `strategy_line` 52→59、`level_badge` 46→56。
+      ⚠️ 形狀數沒降（19→19、核心仍 0）—— 改名是把形狀換一個不是合併，
+      而 `strategy_line` 59/70=84% 仍在 90% 門檻下。**這件事的價值在可達性不在一致性。**
+
+### 接下來（本輪之外）
+
+- [ ] 其餘模組的同義欄位（`footnote`⟷`footnotes`、`sidebar`⟷`sidebars`）
+      —— ⛔ 那批是**純量 vs list**，合併會改變消費端讀到的型別，
+      必須先查誰在讀才能動，不可比照 goal_box 直接套 alias 表
+- [ ] `backend/tests/test_lesson_uid_loader.py` 在 staging 上 20 failed，
+      而它不在 CI 的 21 支具名清單裡 → 那些紅一直沒人看見，另開票
 
 ### 不在這次範圍
 
