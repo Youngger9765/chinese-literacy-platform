@@ -139,7 +139,8 @@ jobs:
             tests/test_inactive_threshold_matches_prd_2787.py \
             tests/test_yml_shape_ratchet_2843.py \
             tests/test_module_gaps_are_declared_2836.py \
-            tests/test_module_schemas_2843.py
+            tests/test_module_schemas_2843.py \
+            tests/test_module_reconcile_2843.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

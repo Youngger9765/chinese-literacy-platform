@@ -1,0 +1,88 @@
+# 學習單大題名稱 → 模組（#2843 總覽分派）
+#
+# 這張表是**分派的契約**：總覽看到一個大題，靠它決定要派哪個模組 skill 去抽。
+# 它同時也是對帳門的判準 —— 宣告的模組集合對不對得上實際產出的模組檔。
+#
+# ## 為什麼是手維護的表而不是自動推導
+#
+# 試過兩條自動路，都不成立，記在這裡免得下一個人再試一次：
+#
+# 1. **共現法**（看擁有這個大題的課產出了哪些模組）——
+#    文言文課全都同時產出那五、六個模組，分不出哪個大題對哪個模組。
+#
+# 2. **`label` 欄位**（模組檔自己寫的標題）——
+#    只有文言文那批模組有 label，**1529 個模組檔裡只對得上 47 個**。
+#    主流模組（comprehension / full_text_annotate / spotlight / key_reading …）
+#    完全沒有 label。
+#
+# 所以：表要手維護。但**文言文那幾條是 label 實證的**，不是憑名字像就寫。
+#
+# ## 加一條之前
+#
+# 先確認那個大題真的對應到那個模組 —— 開一課實際的 yml 看內容，
+# 不要因為名字看起來像就加。⛔ 猜錯會讓對帳門把好課判成壞課。
+
+version: 1
+
+#: 比對方式：大題名稱**包含**這個字串就算命中，由上往下第一個命中者勝。
+#: 順序有意義 —— 「文章重點表」要排在「重點表」前面。
+matches:
+  # ── 原本就在 split_lesson_modules.py 裡的（沿用，不改行為）──
+  - {needle: 讀全文,     module: full_text_annotate}
+  - {needle: 念順順,     module: key_reading}
+  - {needle: 語詞我最棒,  module: vocab_definitions}
+  - {needle: 語詞應用,    module: vocab_application}
+  - {needle: 文章重點表,  module: keypoints}
+  - {needle: 重點表,      module: keypoints}
+  - {needle: 聚光燈,      module: spotlight}
+  - {needle: 閱讀理解,    module: comprehension}
+  - {needle: 詞語複習,    module: vocab_review}
+  - {needle: 知識補給站,  module: resources}
+  - {needle: 語詞書寫,    module: writing_practice}
+  # 文言文的朗讀節印「朗讀計時」而不是「念順順」
+  - {needle: 朗讀計時,    module: key_reading}
+
+  # ── 本次新增：文言文與特殊課型（原本 13 種名稱、62 個大題對不到任何模組）──
+  # 這五條由 `label` 實證：模組檔自己寫的 label 就是大題名。
+  - {needle: 古文今譯,      module: modern_translation}   # label「古文今譯」
+  - {needle: 文白句子比對,   module: sentence_matching}    # label「一、文白句子比對」
+  - {needle: 文白詞語比對,   module: word_matching}
+  - {needle: 古今對照表,     module: word_matching}        # 內容：「勾選出原文「 」中的白話文意思」
+  - {needle: 自我挑戰,       module: self_challenge}       # label「六、自我挑戰」
+  - {needle: 原文,           module: classical_text}       # label「原文」
+  # 導讀 3 課 + 故事賞析 1 課 = 4，正好等於 intro_guide 的 4 課
+  - {needle: 導讀,           module: intro_guide}
+  - {needle: 故事賞析,       module: intro_guide}
+  # 對帳門反過來解掉的一條：L0136 全課只有「會考圖文題實戰」一個大題，
+  # 而它產出 comprehension，沒有其他大題會對到 comprehension → 可歸因。
+  - {needle: 會考圖文題實戰,  module: comprehension}
+
+#: ⚠️ 這幾種大題名稱**還沒對到模組**，而且我不猜。
+#:
+#: 共現法對它們無交集（擁有這些大題的課沒有共同的獨有模組），label 也沒有。
+#: 硬填一個看起來像的會讓對帳門把好課判成壞課 —— 那比不填更糟。
+#:
+#: 對帳門對這幾個大題**不報錯**，只列進 `unresolved`，讓它們是看得見的欠債
+#: 而不是靜默的漏洞。要解掉就開該課的原稿與 yml 對一次。
+unresolved:
+  - {needle: 文章重點整理,   lessons: 4, note: 那 4 課同時有別的會對到 keypoints 的大題，無法歸因}
+  - {needle: 閱讀接力,       lessons: 1, note: 只有 1 課，同時有 4 個候選模組}
+  - {needle: 綜合練習,       lessons: 1, note: 無交集}
+
+#: 不是「大題」的模組 —— 它們是版面家具或整課屬性，不會出現在 sections_present，
+#: 所以對帳門不能因為它們沒被宣告就報錯。
+not_sections:
+  - lesson       # 課文身份與屬性
+  - metadata     # 總表欄位
+  - errata       # 勘誤
+  - goal_box     # 頁首的目標框
+  - notes        # 抽取當下的旁註（#2843 收攏後的固定欄位）
+
+  # ── 以下四個是對帳門實測發現的：174 課裡**從來沒有一課**把它們印成大題 ──
+  # 它們是從版面推導出來的結構，不是學習單的章節，所以不該進對帳比較。
+  # 查法：掃全庫 sections_present 的 34 種大題名，找不到任何相關字樣
+  #      （讀前/檢核/預測、跨文/多文本、延伸/追問）。
+  - self_check_before_reading    # 讀前檢核，58 課有檔、0 課印成大題
+  - cross_text_banner            # 跨文本橫幅
+  - multi_text_parts             # 多文本分部
+  - keypoints_followup_questions # 重點表的延伸追問
