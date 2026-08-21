@@ -18,6 +18,12 @@ from .teacher_schemas import (
     StudentAlertResponse,
 )
 
+
+#: PRD 兩處都寫「超過 7 天沒進展」（docs/PRD.md:71、652）。
+#: 實作原本是 14 天，程式裡沒有寫任何理由 —— 沒註解、沒 issue 連結。
+#: 既然沒有依據就照 PRD；而且 14 天是半個月，對「早期介入」來說太晚（#2787）。
+INACTIVE_DAYS = 7
+
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
 
@@ -34,7 +40,7 @@ def _build_classroom_alerts_for_teacher(
     )
 
     now = datetime.now(timezone.utc)
-    fourteen_days_ago = now - timedelta(days=14)
+    inactive_cutoff = now - timedelta(days=INACTIVE_DAYS)
     results: list[tuple[Classroom, StudentAlertResponse]] = []
 
     def _make_aware(dt: datetime) -> datetime:
@@ -92,7 +98,7 @@ def _build_classroom_alerts_for_teacher(
 
             is_inactive = (
                 last_session_date is None
-                or _make_aware(last_session_date) < fourteen_days_ago
+                or _make_aware(last_session_date) < inactive_cutoff
             )
             if is_inactive:
                 days_since = (

@@ -283,6 +283,29 @@ def _has_phoneme_corrections(text: str) -> bool:
     return any(pattern in text for pattern, _ in PHONEME_CORRECTIONS)
 
 
+#: 文言文課文帶著兩種**給眼睛看的**標記，它們不是字：
+#:
+#:      斷詞點   賈人.某，至.直隸1界      ASCII `.` 夾在字之間
+#:      註腳數字 直隸1界 的 `1`           貼在字中間的孤立數字
+#:
+#: 兩者都會被念出來。⚠️ 這個清理**只掛在文言文來源**，沒有進共用的
+#: `_clean_for_tts` —— `衛福部2023年` 跟 `直隸1界` 的形狀完全一樣
+#: （中文-數字-中文），全域規則分不出註腳與年份，套上去會把一般課文的
+#: 數字一起吃掉。
+_CJK = r"\u4e00-\u9fff"
+_WORD_BREAK_DOT = re.compile(rf"(?<=[{_CJK}])\.(?=[{_CJK}])")
+_FOOTNOTE_DIGIT = re.compile(rf"(?<=[{_CJK}])\d{{1,2}}(?=[{_CJK}])")
+
+
+def strip_classical_markup(text: str) -> str:
+    """把文言文的斷詞點與註腳數字拿掉，標點與字都留著。"""
+    if not text:
+        return text
+    out = _WORD_BREAK_DOT.sub("", str(text))
+    out = _FOOTNOTE_DIGIT.sub("", out)
+    return out
+
+
 def _clean_for_tts(text: str) -> str:
     text = re.sub(r'[~～]+', '', text)
     text = re.sub(r'[──—–−]{1,}', '，', text)
@@ -392,7 +415,12 @@ def _numbers_to_chinese_tw(text: str) -> str:
 
 def _split_sentences(text: str) -> list[str]:
     parts = re.split(r'(?<=[。！？\n])', text)
-    sentences = [s.strip() for s in parts if s.strip()]
+    # 只剩標點的片段不是句子。切在「。」之後會把結尾的「」」單獨留成一段，
+    # 送去合成就是一個沒有字的請求（多一次 API 呼叫、多一段沒意義的音）。
+    sentences = [
+        s.strip() for s in parts
+        if s.strip() and s.strip(' 「」『』（）()，。、！？：；\u3000')
+    ]
 
     result: list[str] = []
     for s in sentences:

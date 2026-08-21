@@ -157,6 +157,33 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   }, []);
 
+  // PRD 指定 Space 切換注音。切換本體早就在（上面那個 none→difficult→all 循環），
+  // 但沒有任何地方綁鍵 —— 所以 PRD 那條一直是沒做的（#2787）。
+  //
+  // ⚠️ Space 同時是「捲頁」與「觸發焦點按鈕」，而造句練習那類步驟有自由輸入框。
+  // 沒有下面這幾道防護，學生會打不出空白。
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== ' ' && e.code !== 'Space') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;   // 那些是別的快捷鍵
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        tag === 'BUTTON' ||          // Space 是按鈕的啟用鍵，不可以搶
+        el?.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();            // 只有真的處理時才擋捲頁
+      toggleZhuyin();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [toggleZhuyin]);
+
   const processZhuyin = useCallback((text: string): string => {
     if (!isZhuyinAny) return text;
     try {
