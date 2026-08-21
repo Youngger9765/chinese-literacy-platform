@@ -609,9 +609,18 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
                 isSingle ? 'rounded-full' : 'rounded'
               } ${boxStyle}`}
             >
-              {(submitted && isCorrectOption) || (!submitted && isSelected)
-                ? (isSingle ? '●' : '✓')
-                : ''}
+              {/* #2832 — the U+25CF '●' glyph used to mark a selected radio option
+                  renders far larger than its 12px font-size in this font stack
+                  (verified on staging: a ~12px-diameter white disc filling almost
+                  the entire 16px box, leaving only the 2px border ring visibly
+                  amber). The result looked *hollow*, the opposite of "selected".
+                  A checkbox's '✓' doesn't have this problem (thin stroke, not a
+                  filled disc) so it keeps the glyph. Radio gets a fixed-size CSS
+                  dot instead — its size can't drift with font/platform. */}
+              {!isSingle && ((submitted && isCorrectOption) || (!submitted && isSelected)) && '✓'}
+              {isSingle && ((submitted && isCorrectOption) || (!submitted && isSelected)) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              )}
             </span>
             <input
               type={isSingle ? 'radio' : 'checkbox'}

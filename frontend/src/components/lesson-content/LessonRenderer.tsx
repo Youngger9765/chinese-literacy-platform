@@ -363,7 +363,18 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
             aria-label={`${singleHeader.label}作答區`}
             className={`${readingOpen ? 'lg:col-span-5' : 'lg:col-span-12'} lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1`}
           >
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+            {/* #2832 — the single-column path below (line ~437) already got the
+                max-w-3xl treatment for "字太小，右邊留一堆空白" (2026-08-19). This
+                is the sibling: same full-bleed card, reached whenever a lesson has
+                BOTH reference text and exercises but the reading panel starts
+                collapsed (`readingOpen` defaults false) — i.e. every 閱讀理解 page
+                with 參考課文 on first load. Only constrain width in the collapsed
+                (12-col) state; the 5-col split state is already narrow. */}
+            <div
+              className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 ${
+                readingOpen ? '' : 'mx-auto w-full max-w-3xl'
+              }`}
+            >
               <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-2">
                   {/* ⚠️ 雙欄分支原本也寫死「閱讀聚光燈」。上一個 commit 只改了單欄那條，
