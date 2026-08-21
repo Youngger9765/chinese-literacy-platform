@@ -171,7 +171,7 @@ L0153 的 6 個差異裡段落標記只佔 2，而 **L0151 的 18 個差異裡�
 ① 定位來源      lesson.yml 的 source.drive_path → private/curriculum-source/_SOT/<path>
 ② DOCX → PDF    soffice --headless --convert-to pdf
 ③ 抽 XML        unzip word/document.xml（校對用，不是主抽取）
-④ 逐頁讀 PDF    Read(pages) 全頁不抽樣 ← 主抽取
+④ 派工          讀 _manifest.yml 的 dispatch，逐一派 extract-<module>（見下）
 ⑤ 讀總表        自學教材總表0812.xlsx 對應列（決定性，不經 LLM）
 ⑥ 產 truth.yml
 ⑦ 三道格式門
@@ -249,7 +249,35 @@ L0028 實測：**整份 300 秒逾時 → 單張表 1.4 秒出 1 頁**。
 順帶好處：重建出來的 PDF 文字層可以拿去跟你從 XML 抄的格子逐字對，
 **等於免費多一組正向對照**（L0028 對出 10×10 完全相同）。
 
-### ④ 逐頁讀 PDF ← 主抽取
+### ④ 派工 ← 這一步已被拆走（#2843）
+
+> ⚠️ **這一步不再由本 skill 執行。**
+>
+> 原本這裡是「逐頁讀完整份 PDF、一次抽出全部 24 種模組」—— 那就是
+> 「一個 skill 打遍天下」，也是東漏西漏的來源：一次要記住 24 種模組的規則，
+> 漏了一種不會有任何症狀，要人比對 truth.yml 才發現。
+>
+> 現在改成：
+>
+> ```
+> 讀 backend/data/lessons/<uid>/v3/_manifest.yml 的 dispatch: [...]
+>   → 逐一派 extract-<module>，每支只讀自己那幾頁（manifest 帶 pages）
+>   → 每支只產自己那一份 yml，且必須通過自己的 schema
+>   → 對帳門檢查「宣告的模組集合 == 產出的模組檔集合」
+> ```
+>
+> 骨架與介面契約見 `.claude/skills/extract-module/SKILL.md`。
+>
+> **①②③⑤⑧ 留在本 skill** —— 定位來源、轉 PDF、抽 XML、讀總表、產 diff
+> 本來就該共用，不該每架飛機各做一次。
+>
+> 🔴 **現況：模組 skill 一支都還沒寫。** 在第一支落地之前，
+> 下面的舊做法仍然是實際在跑的路徑 —— 保留在這裡不是因為它是對的，
+> 是因為拿掉會沒有東西可跑。第一支上線後就該刪掉下面整段。
+
+<details>
+<summary>舊做法（過渡期仍在跑，模組 skill 落地後刪除）</summary>
+
 
 用 `Read` 工具帶 `pages`（單次上限 20 頁，教材多為 6~12 頁）。
 
@@ -460,6 +488,8 @@ L0028 的 `mc:Choice` 有 12 個 roundRect，圈選只有 11 個。多的那個 
 這條在兩種情況下是唯一可靠的做法：
 - **格子跨頁**：圈是同一個群組，分頁時整組留在前一頁 → 只看後半頁會判成「這課沒圈任何答案」
 - **框的顏色不一致**：有一課 11 個框裡 1 個是黑色（其餘 accent2），顏色不同不代表它不是答案
+
+</details>
 
 ### ⑤ 總表欄位（不經 LLM）
 

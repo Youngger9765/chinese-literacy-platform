@@ -32,7 +32,7 @@ HEADER = """# 多模態抽取進度
 |---|---|
 | 已抽取並過逐字門 | {done} |
 | 目標 | 175 |
-| 進度門 | `python3 scripts/module_migration_gate.py`（ratchet 防倒退） |
+| 進度門 | 二修翻新已完成（175/175 走 v3），該門已於 #2843 淘汰 |
 
 ## 已完成
 

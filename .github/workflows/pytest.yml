@@ -138,7 +138,14 @@ jobs:
             tests/test_classical_tts_normalization_2792.py \
             tests/test_inactive_threshold_matches_prd_2787.py \
             tests/test_yml_shape_ratchet_2843.py \
-            tests/test_module_gaps_are_declared_2836.py
+            tests/test_module_gaps_are_declared_2836.py \
+            tests/test_module_schemas_2843.py \
+            tests/test_module_reconcile_2843.py \
+            tests/test_corpus_gates_are_wired_2843.py \
+            tests/test_section_no_is_hanzi_2843.py \
+            tests/test_comprehension_carrier_shape_2843.py \
+            tests/test_vocab_definitions_shape_2843.py \
+            tests/test_module_reaches_the_student_2843.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
