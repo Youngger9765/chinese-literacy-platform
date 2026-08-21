@@ -48,47 +48,59 @@
 
 ---
 
-## 2. After（2026-08-21 深夜）
+## 2. After（2026-08-22 凌晨）
 
 ```
 ┌─ INPUT ─────────────────────────────────────────────────────────────────────┐
 │  教師版 DOCX   private/curriculum-source/_SOT/   175 份                      │
 └────────────────────────────┬────────────────────────────────────────────────┘
                              ▼
-┌─ 總覽／分派 ─────────────────────────────────────────────────────────────────┐
+┌─ ① 總覽／分派 ───────────────────────────────────────────────────────────────┐
 │                                                                             │
-│  既有教材（175 課）          新教材                                           │
-│  lesson.yml                 lesson-overview-scan  🆕 skill                   │
-│   └ sections_present         └ LLM 多模態逐頁讀，只問「有哪幾個大題」          │
-│     174/175 課有                （跟 extract-lesson-multimodal 同技術）       │
-│           │                          │                                      │
-│           └──────────┬───────────────┘                                      │
-│                      ▼                                                      │
-│        section-to-module.yml 🆕  大題名 → 模組（1467 個大題，99.3% 對到）      │
-│                      ▼                                                      │
-│           _manifest.yml 🆕      派工單 × 174 份                              │
-│           dispatch: [...]       ← 這課要出動哪幾個模組 skill                   │
+│   既有 175 課                        新教材                                   │
+│   lesson.yml                        lesson-overview-scan 🆕                  │
+│    └ sections_present  174/175       └ LLM 多模態讀，只問「有哪幾個大題」      │
+│           │                              🔴 尚未對真實新教材跑過               │
+│           └──────────────┬───────────────┘                                  │
+│                          ▼                                                  │
+│         section-to-module.yml 🆕   1467 個大題 · 99.3% 對到模組               │
+│                          ▼          （3 個名稱標為已知未解，不猜）             │
+│              _manifest.yml 🆕       派工單 × 174                             │
+│              dispatch: [...]        ← 這課要派哪幾架飛機                       │
 └────────────────────────────┬────────────────────────────────────────────────┘
                              ▼
-┌─ PROCESS ───────────────────────────────────────────────────────────────────┐
-│  extract-lesson-multimodal   ⚠️ 仍是一個 skill 打遍天下（模組 skill 未拆）      │
-│           ▼                                                                 │
-│     L*/v3/<module>.yml       2019 份，內層形狀 606 → 416                      │
+┌─ ② 抽取 ────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  航母 extract-lesson-multimodal（已降級 🆕）                                  │
+│    ①定位 ②轉PDF ③抽XML ⑤讀總表 ⑧產diff   ← 共用，留著                        │
+│    ④ 主抽取 ──改成──▶ 讀 dispatch，派 extract-<module>                       │
+│                          │                                                  │
+│              ┌───────────┴───────────┐                                      │
+│              ▼           ▼           ▼                                      │
+│         extract-      extract-   extract-       ← 飛機                       │
+│         vocab_defs    comprehen   …×24                                       │
+│                                                                             │
+│         🔴 一支都還沒寫。骨架與契約在 extract-module 🆕                        │
+│            （已併入 @stgst 的 ai-lesson-extract 答案紀律）                     │
+│         ⚠️ 舊做法收在 <details> 標過渡期，第一支落地就刪                        │
+│                          ▼                                                  │
+│         L*/v3/<module>.yml    2019 份 · 內層形狀 606 → 416                    │
 └────────────────────────────┬────────────────────────────────────────────────┘
                              ▼
-┌─ OUTPUT + 門 ───────────────────────────────────────────────────────────────┐
-│  ① 抽對了沒    verbatim_gate ❌   coverage_gate ⛔   traditional_only ⛔       │
-│  ② 結構對不對  module_schemas 🆕 ✅（24/24 模組）                             │
-│                yml_shape_ratchet 🆕 ✅                                       │
-│                keypoints_shape ✅（接線 🆕）                                  │
-│  ③ 整節掉了沒  orphan_key_gate ✅（接線 🆕）                                  │
-│                module_reconcile 🆕 ✅   module_gaps_declared 🆕 ✅            │
-│  ④ 畫得出來沒  render_coverage_gate ✅（接線 🆕）                             │
-│  ⑤ 走得到嗎    module_entry_gate ✅                                          │
-│  ⑥ 內容忠實度  content_evidence_gate ❌   eval_* ×5 ❌   ← 🔴 這一層還是空的   │
+┌─ ③ 門 ──────────────────────────────────────────────────────────────────────┐
 │                                                                             │
-│  ✅ CI 覆蓋 1 → 10 道                                                        │
-│  ⛔ = 接不了（讀 private/，CI checkout 沒有那個目錄）                          │
+│  抽對了沒    verbatim_gate ⛔  coverage_gate ⛔  traditional_only ⛔           │
+│  結構對不對  module_schemas ✅🆕（24/24）  yml_shape_ratchet ✅🆕              │
+│              keypoints_shape ✅接線🆕                                         │
+│  整節掉了沒  orphan_key ✅接線🆕  module_reconcile ✅🆕  gaps_declared ✅🆕     │
+│  畫得出來沒  render_coverage ✅接線🆕                                          │
+│  走得到嗎    module_entry ✅                                                  │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  內容忠實度  content_evidence ❌   eval_* ×5 ❌      🔴 整層空的               │
+│              「這課的聚光燈是不是這課的」—— 上面全綠時它照樣壞                   │
+│                                                                             │
+│  CI 覆蓋 1 → 10 道 ✅       ⛔ = 接不了（讀 private/，CI 沒有那個目錄）         │
+│  已淘汰：module_migration_gate（175 課全 v3，恆綠）+ 11 支死腳本               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
