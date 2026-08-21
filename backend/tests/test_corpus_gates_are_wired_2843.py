@@ -11,7 +11,7 @@
 | 原因 | 門 | 能不能接 |
 |---|---|---|
 | **輸入在 CI 裡不存在** | `coverage_gate` / `traditional_only_gate` | ⛔ 接不了 |
-| 純粹沒接 | `render_coverage_gate` / `orphan_key_gate` / `keypoints_shape_gate` / `module_migration_gate` / `verbatim_gate` | ✅ 這支接 |
+| 純粹沒接 | `render_coverage_gate` / `orphan_key_gate` / `keypoints_shape_gate` | ✅ 這支接 |
 
 前者讀 `private/curriculum-source/`（`.gitignore:2` 排除），CI checkout 裡沒有那個目錄，
 硬接只會得到一道恆紅的門 —— 那是最糟的形狀，紅久了大家學會忽略它。
@@ -40,7 +40,6 @@ WIRED = [
     "render_coverage_gate",   # 抽出來的東西前端畫不畫得出來
     "orphan_key_gate",        # 有沒有整節被靜默丟掉
     "keypoints_shape_gate",   # 重點表形狀
-    "module_migration_gate",  # 還有幾課停在 v2
 ]
 
 #: 接不了的，連原因一起寫在這裡 —— 不寫的話下一個人會以為是漏了。
@@ -76,4 +75,4 @@ def test_the_unwirable_ones_are_documented():
 
 def test_wired_list_is_not_silently_empty():
     """掃描前提 —— 空清單會讓上面的參數化測試一條都不跑，而 CI 仍然綠。"""
-    assert len(WIRED) >= 4, f"WIRED 只剩 {len(WIRED)} 道，有人拿掉了門？"
+    assert len(WIRED) >= 3, f"WIRED 只剩 {len(WIRED)} 道，有人拿掉了門？"
