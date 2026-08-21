@@ -29,6 +29,7 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useWordSearchProgress } from './useWordSearchProgress';
+import type { WordSearchProgress } from './useWordSearchProgress';
 import { PlacedWord } from './wordSearchGrid';
 import NextStepFooter from '../learning/NextStepFooter';
 
@@ -40,6 +41,10 @@ interface VocabWordSearchProps {
   story: Story;
   onFinish: (elapsedSeconds: number) => void;
   zhuyinActive?: boolean;
+  /** #2848 — DB 裡先前存下的進度（存了讀不回來等於沒存）。 */
+  initialProgress?: WordSearchProgress | null;
+  /** #2848 — 找到字就回報一次，讓作答中的進度進得了 DB。 */
+  onProgressChange?: (progress: WordSearchProgress) => void;
 }
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
@@ -170,7 +175,12 @@ function cursorAtCell(row: number, col: number): DemoCursor | null {
 // Main component
 // ---------------------------------------------------------------------------
 
-export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProps) {
+export default function VocabWordSearch({
+  story,
+  onFinish,
+  initialProgress,
+  onProgressChange,
+}: VocabWordSearchProps) {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
   const zhuyinFont = fontForZhuyin(zhuyinActive);
@@ -201,7 +211,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     handleDragMove,
     handleDragEnd,
     handleRedo,
-  } = useWordSearchProgress(vocabWords, story.id);
+  } = useWordSearchProgress(vocabWords, story.id, { initialProgress, onProgressChange });
 
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     try {

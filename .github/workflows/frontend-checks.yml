@@ -74,6 +74,14 @@ jobs:
       #     從沒變過，dedup 正確地判定「沒變化」→ 一次 PUT 都沒發出去，學生換裝置
       #     或清快取就整步重來。斷言用「答 N 題要存回 N 筆」的數量形式，因為
       #     「有一筆就算過」連「只回報第一題」都能矇混過去（#2839）。
+      #   - VocabApplication/VocabWordSearch progressPersistence + DragDrop restore +
+      #     retryWrong: #2839 盤點剩下的關卡（#2848/#2849/#2850）。語詞應用的逐題作答
+      #     只寫 localStorage、語詞複習整個 hook 沒有任何 API import —— 兩關作答中對 DB
+      #     完全不存在，換裝置就整關重來。拖拉配對是「存得進去、讀不回來」（存了讀不回來
+      #     等於沒存）。詞語理解的「重做錯題」則因為 render gate 用 `mcAnswers.length > 0`
+      #     判完成，按下去只會停在「選擇題 已完成」的 placeholder。斷言一律用
+      #     「做了 N 個就要讀回 N 個」的數量形式 ——「有一筆就算過」連「只回報第一題」
+      #     都能矇混過去。
       #   - nextStepFooter: no `.tsx` may draw its own "下一關" / "繼續下一步"
       #     button — every step's forward CTA must be the shared
       #     `NextStepFooter`. This test file existed before #2771 but was
@@ -133,4 +141,8 @@ jobs:
           src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
           src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
           src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
-          src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx
+          src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabApplication.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabWordSearch.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatch.retryWrong.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx
