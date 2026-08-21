@@ -1,0 +1,330 @@
+{
+  "$id": "lingoleap/module/full_text_annotate",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 164 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "appendix": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "bold_marked_terms": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "byline": {
+      "type": "string",
+      "x-seen-in": "12/164"
+    },
+    "byline_學習單": {
+      "type": "string",
+      "x-seen-in": "5/164"
+    },
+    "byline_課文": {
+      "type": "string",
+      "x-seen-in": "5/164"
+    },
+    "char_count": {
+      "type": "integer",
+      "x-seen-in": "164/164"
+    },
+    "checklist": {
+      "type": "array",
+      "x-seen-in": "67/164"
+    },
+    "checklist_instruction": {
+      "type": "string",
+      "x-seen-in": "65/164"
+    },
+    "checklist_source_text": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "closing": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "comparison_table": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "explanation_box": {
+      "type": "string",
+      "x-seen-in": "2/164"
+    },
+    "figures": {
+      "type": "array",
+      "x-seen-in": "8/164"
+    },
+    "footnote": {
+      "type": "object",
+      "x-seen-in": "2/164"
+    },
+    "footnotes": {
+      "type": "array",
+      "x-seen-in": "14/164"
+    },
+    "header": {
+      "type": "string",
+      "x-seen-in": "3/164"
+    },
+    "header_extra": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "header_level": {
+      "type": "string",
+      "x-seen-in": "17/164"
+    },
+    "header_material_form": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "header_part": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "header_strategy": {
+      "type": "string",
+      "x-seen-in": "17/164"
+    },
+    "hypothesis_blocks": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "inline_boxed_terms": {
+      "type": "array",
+      "x-seen-in": "2/164"
+    },
+    "inline_headings": {
+      "type": "array",
+      "x-seen-in": "10/164"
+    },
+    "inline_marked_terms": {
+      "type": "array",
+      "x-seen-in": "150/164"
+    },
+    "inline_marked_terms_part1": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "inline_marked_terms_part2": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "inline_table": {
+      "type": "object",
+      "x-seen-in": "3/164"
+    },
+    "inline_tables": {
+      "type": "array",
+      "x-seen-in": "3/164"
+    },
+    "inline_underlined_terms": {
+      "type": "array",
+      "x-seen-in": "6/164"
+    },
+    "inquiry_blocks": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "2/164"
+    },
+    "instruction_box": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "lesson_heading": {
+      "type": "string",
+      "x-seen-in": "21/164"
+    },
+    "letters": {
+      "type": "array",
+      "x-seen-in": "2/164"
+    },
+    "level_box": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "level_label": {
+      "type": "string",
+      "x-seen-in": "10/164"
+    },
+    "marking_checklist": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "marking_instruction": {
+      "type": "object",
+      "x-seen-in": "22/164"
+    },
+    "no_correct_answer": {
+      "type": "boolean",
+      "x-seen-in": "1/164"
+    },
+    "note_paragraph_count": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "110/164"
+    },
+    "paragraph_count": {
+      "type": "integer",
+      "x-seen-in": "164/164"
+    },
+    "paragraph_numbering": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "paragraph_numbers_printed": {
+      "type": "boolean",
+      "x-seen-in": "1/164"
+    },
+    "paragraphs": {
+      "type": "array",
+      "x-seen-in": "164/164"
+    },
+    "part_no": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "x-seen-in": "2/164"
+    },
+    "part_of": {
+      "type": "integer",
+      "x-seen-in": "1/164"
+    },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "postface": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "postscript": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "preface": {
+      "type": "string",
+      "x-seen-in": "8/164"
+    },
+    "printed_title": {
+      "type": "string",
+      "x-seen-in": "9/164"
+    },
+    "reading_prompt": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "reading_tip": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "running_char_counts": {
+      "type": "array",
+      "x-seen-in": "87/164"
+    },
+    "salutation": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "section_headings": {
+      "type": "array",
+      "x-seen-in": "8/164"
+    },
+    "section_subheads": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "sidebar": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "sidebars": {
+      "type": "array",
+      "x-seen-in": "2/164"
+    },
+    "source_line": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "strategy_box": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "summary_table": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "table_1": {
+      "type": "object",
+      "x-seen-in": "1/164"
+    },
+    "tables": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "target_strategy_label": {
+      "type": "string",
+      "x-seen-in": "10/164"
+    },
+    "title_line": {
+      "type": "string",
+      "x-seen-in": "37/164"
+    },
+    "trailing": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "trailing_line": {
+      "type": "string",
+      "x-seen-in": "1/164"
+    },
+    "underlined_proper_nouns": {
+      "type": "array",
+      "x-seen-in": "3/164"
+    },
+    "underlined_terms": {
+      "type": "array",
+      "x-seen-in": "60/164"
+    },
+    "unnumbered_blocks": {
+      "type": "array",
+      "x-seen-in": "2/164"
+    },
+    "unnumbered_lines": {
+      "type": "array",
+      "x-seen-in": "1/164"
+    },
+    "學習單": {
+      "type": "string",
+      "x-seen-in": "6/164"
+    },
+    "課文作者": {
+      "type": "string",
+      "x-seen-in": "6/164"
+    }
+  },
+  "required": [
+    "char_count",
+    "paragraph_count",
+    "paragraphs"
+  ],
+  "title": "full_text_annotate module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "char_count",
+    "inline_marked_terms",
+    "paragraph_count",
+    "paragraphs"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 164
+}

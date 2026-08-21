@@ -1,0 +1,83 @@
+{
+  "$id": "lingoleap/module/vocab_definitions",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 150 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answers_printed": {
+      "type": "boolean",
+      "x-seen-in": "7/150"
+    },
+    "hints": {
+      "type": "array",
+      "x-seen-in": "3/150"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "143/150"
+    },
+    "items": {
+      "type": "array",
+      "x-seen-in": "150/150"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "3/150"
+    },
+    "methods": {
+      "type": [
+        "array",
+        "object"
+      ],
+      "x-seen-in": "88/150"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "109/150"
+    },
+    "part_no": {
+      "type": "integer",
+      "x-seen-in": "1/150"
+    },
+    "supplement": {
+      "type": "object",
+      "x-seen-in": "2/150"
+    },
+    "synonym_analysis": {
+      "type": "object",
+      "x-seen-in": "1/150"
+    },
+    "synonym_bank": {
+      "type": "array",
+      "x-seen-in": "1/150"
+    },
+    "vocabulary_bank": {
+      "type": "array",
+      "x-seen-in": "143/150"
+    },
+    "vocabulary_bank_label": {
+      "type": "string",
+      "x-seen-in": "28/150"
+    },
+    "word_bank": {
+      "type": "array",
+      "x-seen-in": "7/150"
+    },
+    "word_bank_line": {
+      "type": "string",
+      "x-seen-in": "7/150"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "title": "vocab_definitions module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "instruction",
+    "items",
+    "vocabulary_bank"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 150
+}

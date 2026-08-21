@@ -1,0 +1,98 @@
+{
+  "$id": "lingoleap/module/goal_box",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 70 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "author": {
+      "type": "string",
+      "x-seen-in": "1/70"
+    },
+    "byline": {
+      "type": "string",
+      "x-seen-in": "3/70"
+    },
+    "category": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "category_value": {
+      "type": "string",
+      "x-seen-in": "1/70"
+    },
+    "genre": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "has_qr": {
+      "type": "boolean",
+      "x-seen-in": "3/70"
+    },
+    "header": {
+      "type": "string",
+      "x-seen-in": "1/70"
+    },
+    "header_left": {
+      "type": "string",
+      "x-seen-in": "4/70"
+    },
+    "header_left_value": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "header_right": {
+      "type": "string",
+      "x-seen-in": "5/70"
+    },
+    "level": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "level_badge": {
+      "type": "string",
+      "x-seen-in": "56/70"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "12/70"
+    },
+    "part_badge": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "part_badge_2": {
+      "type": "string",
+      "x-seen-in": "1/70"
+    },
+    "strategy_line": {
+      "type": "string",
+      "x-seen-in": "59/70"
+    },
+    "strategy_line_source_text": {
+      "type": "string",
+      "x-seen-in": "1/70"
+    },
+    "target_issue": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "text": {
+      "type": "string",
+      "x-seen-in": "2/70"
+    },
+    "title": {
+      "type": "string",
+      "x-seen-in": "21/70"
+    },
+    "文言聚光燈": {
+      "type": "string",
+      "x-seen-in": "3/70"
+    }
+  },
+  "required": [],
+  "title": "goal_box module payload",
+  "type": "object",
+  "x-core-90pct": [],
+  "x-enforcement": "error",
+  "x-lessons-observed": 70
+}

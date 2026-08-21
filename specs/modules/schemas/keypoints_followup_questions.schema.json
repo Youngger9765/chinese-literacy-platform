@@ -1,0 +1,58 @@
+{
+  "$id": "lingoleap/module/keypoints_followup_questions",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 2 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "belongs_to": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "items": {
+      "type": "array",
+      "x-seen-in": "1/2"
+    },
+    "note": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "part_no": {
+      "type": "integer",
+      "x-seen-in": "1/2"
+    },
+    "part_note": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "questions": {
+      "type": "array",
+      "x-seen-in": "1/2"
+    },
+    "section_name_printed": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "subtitle": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    },
+    "tail_note": {
+      "type": "string",
+      "x-seen-in": "1/2"
+    }
+  },
+  "required": [],
+  "title": "keypoints_followup_questions module payload",
+  "type": "object",
+  "x-core-90pct": [],
+  "x-enforcement": "error",
+  "x-lessons-observed": 2
+}
