@@ -117,3 +117,44 @@ describe('computePracticeStepsSummary — 文言文 classical steps (#2835 follo
     expect(result[0]).toMatchObject({ completed: true, label: '自我挑戰', scoreLabel: null });
   });
 });
+
+// #2833 landed on staging while this PR was in flight and wired real
+// answers/gradeResult into keypoints-table's step_data (previously it only
+// ever got { completed: true } — see the original "no established numeric
+// score concept" comment on keypoints-table, which predates #2833). Now that
+// the score exists, surface it — the original issue explicitly listed
+// 文章重點表 as one of the steps this report must reflect.
+describe('computePracticeStepsSummary — keypoints-table score (post #2833)', () => {
+  it('extracts a real score label from step_data.gradeResult.results (correct/total)', () => {
+    const stepData = {
+      'keypoints-table': {
+        answers: { r0: 'x' },
+        gradeResult: {
+          score: 75,
+          results: [
+            { row_index: 0, correct: true, feedback: '', correct_answer: 'x' },
+            { row_index: 1, correct: true, feedback: '', correct_answer: 'y' },
+            { row_index: 2, correct: false, feedback: '', correct_answer: 'z' },
+            { row_index: 3, correct: true, feedback: '', correct_answer: 'w' },
+          ],
+        },
+      },
+    };
+    const result = computePracticeStepsSummary(['keypoints-table'], ['keypoints-table'], stepData);
+    expect(result[0]).toMatchObject({ completed: true, scoreLabel: '答對 3/4 題' });
+  });
+
+  it('falls back to null scoreLabel when gradeResult is the network-failure sentinel (empty results)', () => {
+    const stepData = {
+      'keypoints-table': { answers: {}, gradeResult: { score: -1, results: [] } },
+    };
+    const result = computePracticeStepsSummary(['keypoints-table'], ['keypoints-table'], stepData);
+    expect(result[0]).toMatchObject({ completed: true, scoreLabel: null });
+  });
+
+  it('falls back to null scoreLabel when the student has not submitted yet (no gradeResult)', () => {
+    const stepData = { 'keypoints-table': { answers: { r0: 'x' } } };
+    const result = computePracticeStepsSummary(['keypoints-table'], ['keypoints-table'], stepData);
+    expect(result[0]).toMatchObject({ completed: true, scoreLabel: null });
+  });
+});

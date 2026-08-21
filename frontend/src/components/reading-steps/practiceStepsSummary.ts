@@ -89,8 +89,27 @@ function scoreLabelFor(stepId: string, entry: unknown): string | null {
     return null;
   }
 
-  // keypoints-table / spotlight / vocab-review / knowledge-station / full-text-annotate:
-  // exploratory practice, no established numeric score concept — completion status only.
+  if (stepId === 'keypoints-table') {
+    // #2833 wired real answers/gradeResult into step_data['keypoints-table']
+    // (POST /api/stories/{id}/structure/grade). gradeResult.score alone isn't
+    // trustworthy as a count source — a network-failure sentinel sets it to
+    // -1 with an empty results array — so derive from results.length /
+    // .correct instead, and simply show nothing until the student has
+    // actually submitted (no gradeResult yet, or the sentinel).
+    const gradeResult = entry.gradeResult;
+    if (isPlainObject(gradeResult) && Array.isArray(gradeResult.results) && gradeResult.results.length > 0) {
+      const total = gradeResult.results.length;
+      const correctCount = gradeResult.results.filter(
+        (r) => isPlainObject(r) && r.correct === true,
+      ).length;
+      return `答對 ${correctCount}/${total} 題`;
+    }
+    return null;
+  }
+
+  // spotlight / vocab-review / knowledge-station / full-text-annotate /
+  // classical-sentence-matching / classical-word-matching / classical-self-challenge:
+  // no established numeric score concept persisted yet — completion status only.
   return null;
 }
 
