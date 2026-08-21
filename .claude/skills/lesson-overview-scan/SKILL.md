@@ -1,0 +1,122 @@
+---
+name: lesson-overview-scan
+description: 用 LLM 多模態讀完整份學習單，只回答一個問題「這張有哪幾個大題、各在第幾頁」，產出 _manifest.yml 派工單交給各模組 skill。⛔ 它不抽任何內容。當需要「新教材進來」「這課有哪些大題」「產派工單」「overview scan」「先總覽再分派」時使用。來源 issue #2843。
+---
+
+# lesson-overview-scan — 航空母艦的眼睛
+
+## 它做什麼（以及不做什麼）
+
+Young 2026-08-21 會議：
+
+> 「我們是不是要先有一個流程，是第一眼要先看完 —— LLM 要先看完整張，
+>   然後再確定我們有幾個 skill 要出動了。而不是一張一個 skill 要打遍天下無敵手。」
+>
+> 「它本身可以是一個航空母艦。但它每次要出發，就是小小一隻飛機飛出去。」
+
+這支就是那雙眼睛。**它只回答「有哪幾個大題」，一個字的內容都不抽。**
+
+| | |
+|---|---|
+| 輸入 | 教師版 DOCX（`lesson.yml` 的 `source.drive_path` → `private/curriculum-source/_SOT/`） |
+| 輸出 | `backend/data/lessons/<uid>/v3/_manifest.yml`，**唯一產物** |
+| 失敗 | `status: BLOCKED` + 原因。⛔ 不猜、不半套、不 fallback |
+
+## 為什麼需要它（既有做法為什麼不夠）
+
+現有 175 課靠 `lesson.yml` 的 `sections_present`（學習單自己印的目錄，174/175 課有）
+配 `specs/modules/section-to-module.yml` 手維護對照表，已經覆蓋 **1467 個大題的 99.3%**。
+
+**所以既有教材用不到這支。** 它是給**新教材**用的，而差別正是隨機性：
+
+| | 手維護對照表 | 這支 skill |
+|---|---|---|
+| 沒見過的大題名 | 回 `None`，靜默掉下去 | 讀那一頁就知道它是什麼 |
+| 三修加了新大題 | 要人去補表才認得 | 直接認得 |
+| 同一件事換個說法 | 「古今對照表」跟「文白詞語比對」我花了半小時才對上 | 讀內容就知道是同一件事 |
+
+實測記錄：那張表是手維護的，因為兩條自動推導路都失敗
+（共現法分不出文言文那批、`label` 欄位 1529 個檔只對得上 47 個）。
+**pattern matching 解不了的，正是 LLM 該上場的地方。**
+
+## 技術
+
+跟 `extract-lesson-multimodal` **同一套**：DOCX → PDF → LLM 逐頁讀。
+差別只在問它什麼。
+
+```
+extract-lesson-multimodal   「把這課全部內容抽出來」  → truth.yml（一大包）
+lesson-overview-scan        「這張有哪幾個大題」      → _manifest.yml（只有目錄）
+```
+
+同樣逐頁讀，但只回目錄，所以 output token 少一個數量級。
+
+## 流程
+
+```
+① 定位原稿   lesson.yml 的 source.drive_path → private/curriculum-source/_SOT/<path>
+② DOCX → PDF  走 scripts/docx_to_pdf.sh
+              ⚠️ 一定要走這支，不要自己敲 soffice —— LibreOffice headless 共用
+                 user profile 並上鎖，第二個進來會靜默卡死（實測三個同時轉：裸 soffice 0 個 PDF）
+③ 逐頁讀      Read(pages) 全頁不抽樣
+④ 產 manifest 見下方格式
+⑤ 過門        python3 scripts/module_reconcile_gate.py --uid <uid>
+```
+
+### ③ 要問 LLM 的話
+
+只問這三件，**不要順便問內容**（問了就會想抽，抽了就變成第二個航空母艦）：
+
+1. 這張學習單印出來的**大題**有哪些？照印出來的順序，含序號（一、二、三…）與標題
+2. 每個大題在**第幾頁**
+3. 有沒有印了序號但沒有標題、或有標題沒序號的？照實記，不要補
+
+⛔ **不要問「這個大題是什麼模組」** —— 模組歸屬由 `section-to-module.yml` 決定，
+那是我方的分類不是學習單的事實。LLM 只回報它看到什麼。
+
+### ④ manifest 格式
+
+跟 `scripts/build_lesson_manifest.py` 產的完全一致（那支是從既有 `sections_present` 推的，
+這支是從原稿讀的，**兩者輸出必須同構**，否則對帳門會把新舊教材判成兩套）：
+
+```yaml
+lesson_uid: L0176
+generated_by: lesson-overview-scan
+sections:
+  - {no: 一, name: 讀全文-做記號, module: full_text_annotate, pages: [1, 2]}
+  - {no: 二, name: 念順順,       module: key_reading,        pages: [2]}
+dispatch: [full_text_annotate, key_reading]   # 要出動哪幾個模組 skill
+produced: []                                   # 抽完之後才填
+absent_from_source: []                         # 學習單本來就沒印的
+```
+
+`module` 由對照表填。**對不到就留 `module: null` 加 `module_unresolved: true`** ——
+明說「還沒歸因」而不是留空讓人以為漏填。
+
+## 🔴 驗收
+
+⛔ **不可以只看「manifest 產出來了」就算過。**
+
+1. **對帳門要綠**：`module_reconcile_gate.py --uid <uid>` exit 0
+2. **跟 `sections_present` 對得起來**（若該課有）：宣告的大題集合一致 ——
+   兩邊不一致就是其中一邊看錯了，要查出是哪邊
+3. **重跑一致**：同一份 DOCX 跑兩次，`sections` 必須完全相同。
+   不一致代表這支不夠決定性，整個分派層就不可靠
+
+第 3 條是這支最容易壞的地方 —— LLM 會 run-to-run 飄。
+先跑兩次比對，再談它抽得準不準。
+
+## 反模式
+
+- ❌ 順便抽內容（那就變成第二個航空母艦，回到「一個 skill 打遍天下」）
+- ❌ 對不到模組就挑一個像的填（會讓對帳門把好課判成壞課）
+- ❌ 沒讀完整份就回報（大題可能印在最後一頁）
+- ❌ 讀不到原稿時產一份空 manifest（要回 `status: BLOCKED`）
+
+## 現況
+
+**尚未對真實新教材跑過** —— 現有 175 課都有 `sections_present`，用不到這支。
+它要等三修或新教材進來才有東西可驗。
+
+⚠️ 所以上面的驗收條件是**設計**，不是**實測結果**。第一次真的跑的人要把實測數字補回來
+（跑兩次的一致率、對帳門結果、跟 `sections_present` 的差異數）。
