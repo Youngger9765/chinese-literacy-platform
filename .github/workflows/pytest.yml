@@ -130,6 +130,8 @@ jobs:
             tests/test_structure_answer_key_not_served_2736.py \
             tests/test_structure_option_display_2736.py \
             tests/test_asset_url_rewrite.py \
+            tests/test_section_label_dash_normalisation.py \
+            tests/test_table_cells_carry_the_tick_2735.py \
             tests/test_tts_audit_empty_not_404.py \
             tests/test_lab_keypoints_source_2751.py \
             tests/test_tts_mapping_covers_classical_2792.py \
@@ -141,3 +143,22 @@ jobs:
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # Ticked-answer ground-truth lock (#2735): #2555 closed the "no box = answer"
+      # leak, which was the extractor's only signal — closing it silently changed
+      # 312 spotlight answers. `checked_box_positions()` reads the teacher's tick
+      # directly instead of inferring it from an absent box; this file is the only
+      # thing proving that read actually reaches the seven call sites that used to
+      # trust the leak (three review rounds found six of them one at a time, plus a
+      # box-glyph-counting bug in the primitive itself — each round's finding has its
+      # own test class here). Not caught by `backend/specs` (this repo isn't on that
+      # path) — pin it here or it goes unrun like the bridge lock above did.
+      - name: Run ticked-answer ground-truth lock (#2735)
+        run: |
+          cd backend
+          # scripts/build_lesson_schema.py (a DOCX->YAML build tool, not a served
+          # endpoint) needs python-docx + lxml. Installed here, not in
+          # requirements.txt, so the deployed Cloud Run image doesn't carry a
+          # dependency it never uses at runtime.
+          pip install python-docx==1.2.0 lxml==6.1.0
+          python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py
