@@ -38,6 +38,43 @@ export interface MultipleChoiceProps {
   vocab: VocabItem[];
   activeDefIndices: number[];
   onAllDone: (answers: AnswerRecord[]) => void;
+  /**
+   * #2839 — 已作答的快照，用來「接著答」而不是從第 1 題重來。
+   */
+  initialAnswers?: AnswerRecord[];
+  /**
+   * #2839 — 每答一題回報一次。
+   *
+   * 這個 callback 之前不存在，是這一關進度存不進 DB 的根因：每一題的作答只寫進
+   * `answersRef`（useRef，不觸發 render、不通知 parent），parent 要等到 11 題全部
+   * 答完的 `onAllDone` 才知道任何事。作答中 parent 的 `mcAnswers` 恆為 `[]`，
+   * 進度 payload 每次算出來都一模一樣，dedup 正確地判定沒變化 → 一次 PUT 都不發。
+   */
+  onAnswersChange?: (answers: AnswerRecord[]) => void;
+}
+
+/**
+ * 把還原回來的作答對回目前這一輪的題目集合。用 `defIndex` 對，不是用陣列位置 ——
+ * 「重做錯題」會讓 `activeDefIndices` 只剩一部分，位置對不起來。
+ */
+function seedAnswers(activeDefIndices: number[], restored?: AnswerRecord[]): AnswerRecord[] {
+  const byDefIndex = new Map((restored ?? []).map((a) => [a.defIndex, a]));
+  return activeDefIndices.map(
+    (defIdx) =>
+      byDefIndex.get(defIdx) ?? {
+        defIndex: defIdx,
+        answeredWordIdx: null,
+        correct: null,
+        firstTryCorrect: null,
+      },
+  );
+}
+
+/** 還原後該從第幾題接著答 —— 第一個還沒作答的。全部答完就停在最後一題。 */
+function resumeQueueIdx(answers: AnswerRecord[]): number {
+  const idx = answers.findIndex((a) => a.answeredWordIdx === null);
+  if (idx !== -1) return idx;
+  return Math.max(0, answers.length - 1);
 }
 
 // AnswerState now tracks all wrong choices for the current question so
@@ -113,16 +150,15 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   );
 }
 
-export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoiceProps) {
-  const [queueIdx, setQueueIdx] = useState(0);
-  const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-      firstTryCorrect: null,
-    })),
-  );
+export function MultipleChoiceMode({
+  vocab,
+  activeDefIndices,
+  onAllDone,
+  initialAnswers,
+  onAnswersChange,
+}: MultipleChoiceProps) {
+  const answersRef = useRef<AnswerRecord[]>(seedAnswers(activeDefIndices, initialAnswers));
+  const [queueIdx, setQueueIdx] = useState(() => resumeQueueIdx(answersRef.current));
   const [answerState, setAnswerState] = useState<AnswerState>({ status: 'idle' });
   const [correctPraise, setCorrectPraise] = useState('答對了！');
   const [wrongEncouragement, setWrongEncouragement] = useState('加油！再想想看');
@@ -142,16 +178,22 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
   const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // 題目集合換了（重做錯題 / 全部重做 / 切換模式）→ 從頭開始。
+  //
+  // #2839：這個 effect 在 mount 時也會跑一次，會把上面剛從 `initialAnswers` 種好的
+  // 快照整個抹掉 —— 還原就永遠不會生效，而且不會有任何錯誤，看起來就只是「沒還原」。
+  // 所以第一次跑要跳過：mount 當下的種子已經是對的了。
+  const didResetOnceRef = useRef(false);
   useEffect(() => {
+    if (!didResetOnceRef.current) {
+      didResetOnceRef.current = true;
+      return;
+    }
     setQueueIdx(0);
     setAnswerState({ status: 'idle' });
     setCorrectPraise('答對了！');
     setWrongEncouragement('加油！再想想看');
-    answersRef.current = activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-    }));
+    answersRef.current = seedAnswers(activeDefIndices);
   }, [activeDefIndices]);
 
   const clearDemoTimers = () => {
@@ -241,6 +283,10 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
           : a.firstTryAnsweredWordIdx ?? null,
       };
     });
+
+    // #2839 — 每一題都回報，答對答錯都要。少了這行，作答中的答案只活在 ref 裡，
+    // parent 的進度 payload 從頭到尾不會變，PUT 一次都不會送出去。
+    onAnswersChange?.(answersRef.current);
 
     if (isCorrect) {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);

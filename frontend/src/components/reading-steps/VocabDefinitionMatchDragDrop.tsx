@@ -114,9 +114,18 @@ export interface DragDropProps {
   activeDefIndices: number[];
   shuffledWords: number[];
   onAllDone: (answers: AnswerRecord[]) => void;
+  /**
+   * #2839 — 每放對/放錯一次就回報一次，讓作答中的進度存得進 DB。
+   * 跟 MCQ 同一個原因：答案只活在 `answersRef` 裡，parent 要等 `onAllDone` 才知道。
+   *
+   * ⚠️ 這裡只做「存」，還沒做「還原」—— 拖拉配對要還原得把 placements / confirmed /
+   * wrongAttempts 這幾組畫面狀態一起重建，比 MCQ 大一截。存下來的資料是對的，
+   * 還原留給 follow-up（見 PR 說明）。MCQ 是預設模式，兩件都做完了。
+   */
+  onAnswersChange?: (answers: AnswerRecord[]) => void;
 }
 
-export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: DragDropProps) {
+export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone, onAnswersChange }: DragDropProps) {
   // #2135: zhuyin support — read context directly (same pattern as VocabDefinitionMatch.tsx)
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
@@ -313,6 +322,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           };
         });
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
+        onAnswersChange?.(answersRef.current); // #2839
 
         // A6 / 教授七課 §6: Show explicit praise（拉長到 1600ms，比 chip 飛走久，避免不明顯）
         setCorrectFeedbackSlot(defIdx);
@@ -352,6 +362,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             firstTryAnsweredWordIdx: isFirstAttempt ? vocabIdx : a.firstTryAnsweredWordIdx ?? null,
           };
         });
+        onAnswersChange?.(answersRef.current); // #2839
         setWrongFlash((prev) => new Set([...prev, defIdx]));
         // A6: Show "再試試看！" verbal feedback (amber, not silent bounce)
         setWrongFeedbackSlot(defIdx);
@@ -370,7 +381,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         }, 650);
       }
     },
-    [activeDefIndices.length, onAllDone],
+    [activeDefIndices.length, onAllDone, onAnswersChange],
   );
 
   const handleDragStart = (vocabIdx: number) => {
