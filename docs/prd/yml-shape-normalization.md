@@ -119,12 +119,12 @@ python3 scripts/yml_shape_report.py --compare before.json after.json
 
 ## 3. TODO（依序，前一項沒綠不做下一項）
 
-- [ ] **T1** `scripts/yml_shape_report.py` —— 量測器（含 `--json` / `--compare`）
-- [ ] **T2** 量 before 基準，進版控
-- [ ] **T3** `scripts/yml_shape_normalize.py` —— 收攏註解（含 `--dry-run` / `--verify`）
-- [ ] **T4** 先對**一個模組**跑（選 `full_text_annotate`：164 課 115 形狀，最亂且無人認領）
-- [ ] **T5** 值不變驗證通過 → 擴到其餘**無人認領**模組
-- [ ] **T6** 棘輪測試 + mutation 驗過會紅 + 加進 CI 具名清單
+- [x] **T1** `scripts/yml_shape_report.py` —— 量測器（含 `--json` / `--compare`）
+- [x] **T2** 量 before 基準，進版控（24 模組 / 內層形狀 606）
+- [x] **T3** `scripts/yml_shape_normalize.py` —— 收攏註解（含 `--dry-run`；值保全由獨立驗證器強制）
+- [x] **T4** `full_text_annotate` 先跑：164 課動到 110，形狀 **115 → 93**，8623 個葉節點值零變動
+- [x] **T5** 擴到其餘 18 個無人認領模組：927 檔，總形狀 **606 → 416**（`metadata` 94→43、`vocab_review` 58→17、`errata` 6→1）
+- [x] **T6** 棘輪 `test_yml_shape_ratchet_2843.py` + mutation 驗過會紅（`comprehension: 基準 10 → 現在 11`）+ 已進 CI 具名清單
 - [x] **T7** `goal_box` —— **不用重抽**。0 個核心欄位的成因是同義欄位各自為名，
       不是資料缺。已用 `specs/modules/field-aliases.yml` 正名（`title_line` /
       `lesson_heading` → `title` 等）。消費端讀得到的課數 `title` 4→21、
