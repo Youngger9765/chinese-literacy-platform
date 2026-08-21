@@ -12,7 +12,7 @@ Young 2026-08-22 問的那句：「schema 對的 yml 可以滿足 HTML render �
 
 | 模組 | 課數 | 現況 |
 |---|---:|---|
-| `vocab_review` | 150 | 🔴 抽了教師版真實找字表（10×10 grid + 每個詞的座標路徑），<br>但 `VocabWordSearch.tsx:184` 拿 `story.vocabulary` **自己隨機生一個新格子**。<br>老師設計的那張表，一課都沒用到 |
+| `vocab_review` | 150 | ✅ #2860 已接通：API 送出 143 課的教師版格子（10×10 grid + 每個詞的座標路徑），<br>`VocabWordSearch` 用它而不是自己生。7 課沒有 grid，維持生成並標記 `gridSource: 'generated'` |
 | `resources` | 148 | 🔴 API 不送、前端不讀 |
 
 這條鎖不修那兩個（那要改 API 與前端，是另一張票）。
@@ -39,8 +39,10 @@ NOT_RENDERED = {"lesson", "metadata", "errata", "goal_box", "notes"}
 #: 🔴 已知斷掉的。修好一個就從這裡拿掉（並更新上面的說明）。
 #: ⛔ 不要為了讓測試變綠而往這裡加東西 —— 加之前先確認它真的該斷。
 KNOWN_UNREACHED = {
-    "vocab_review": "前端 VocabWordSearch.tsx:184 用 story.vocabulary 自己生格子，沒讀教師版的 grid/answer_paths",
-    "resources": "API 不送、前端不讀",
+    # vocab_review 於 #2860 接通：API 送出 143 課的教師版格子，
+    # VocabWordSearch 用它而不是自己生。移除這一項是這條反向鎖要求的
+    # —— 它就是為了不讓豁免清單爛在這裡。
+    "resources": "API 已送出 148 課（#2860），但前端還沒有任何畫面在讀它",
 }
 
 

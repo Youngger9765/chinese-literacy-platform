@@ -28,7 +28,7 @@ describe('教師版格子的穩定性', () => {
   it('內容相同的新物件不會讓格子重建', () => {
     const words = ['讚嘆不已', '喝采'];
     const { result, rerender } = renderHook(
-      ({ src }) => useWordSearchProgress(words, 'L0011-stability', src),
+      ({ src }) => useWordSearchProgress(words, 'L0011-stability', { teacherSource: src }),
       { initialProps: { src: SOURCE() } }
     );
     const first = result.current.grid;
@@ -41,7 +41,7 @@ describe('教師版格子的穩定性', () => {
   it('內容真的變了才重建', () => {
     const words = ['讚嘆不已'];
     const { result, rerender } = renderHook(
-      ({ src }) => useWordSearchProgress(words, 'L0011-change', src),
+      ({ src }) => useWordSearchProgress(words, 'L0011-change', { teacherSource: src }),
       { initialProps: { src: SOURCE() } }
     );
     const first = result.current.grid;
