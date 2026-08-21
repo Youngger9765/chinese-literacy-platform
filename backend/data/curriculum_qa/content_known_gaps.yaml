@@ -1,7 +1,7 @@
 generated: '2026-08-15'
 issue: 2683
-what_this_is: 二修 175 課裡，閱讀聚光燈（含品格/文言文同一大題的不同印法）目前只有 7 課真的沒有內容：L0011、L0137，以及 5 個年級各一份的「正太與小豬」定向課。其餘先前登錄的
-  41 課已在後續多模態重抽（#2736）中補上，詳見 resolved.spotlight_render_null_2683。
+what_this_is: 二修 175 課裡，閱讀聚光燈（含品格/文言文同一大題的不同印法）目前只有 7 課真的沒有內容：L0011、L0137，以及 5 個年級各一份的「正太與小豬」定向課。其餘先前登錄的 41 課已在後續多模態重抽（#2736）中補上，詳見
+  resolved.spotlight_render_null_2683。
 not_a_bug: L0011、L0137 的來源學習單本身沒有這個大題（分別只有 8 節、多文本合讀無此節）。L0021/L0049/L0077/L0107/L0130 是每個年級開學都放的同一份「正太與小豬：武僧的養成之路」定向課，`sections_present`
   只有『讀全文-做記號』『閱讀理解』兩節，整份學習單本來就沒有其餘七個大題（含閱讀聚光燈）——不是抽取器漏抓。
 count: 7
@@ -29,14 +29,13 @@ lessons:
   title: 正太與小豬：武僧的養成之路
 lesson_body_text:
   status: 缺，全部 175 課
-  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修
-    `_parsed_2026-05-01` 餵的 —— 那層刪掉後這個循環就斷了。
+  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修 `_parsed_2026-05-01`
+    餵的 —— 那層刪掉後這個循環就斷了。
   impact: 朗讀、閱讀理解、生字、造句四個步驟沒有文本來源（story['paragraphs'] 為空）
   text_is_available: 在原始 DOCX 裡（實測 G4-L10 有 13 段 5019 字），不需要重新徵集素材
   why_not_done_now:
   - 本機只有 76 / 175 份 DOCX（缺 6、7 年級、文言文、品格教育），做不出全量
-  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96 份裡誤報
-    14 份
+  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96 份裡誤報 14 份
   next_step: 先取得完整 Drive 來源，再設計一個真的能判對錯的驗證（例如以字數統計欄位或人工標註的 golden set 對照），驗證成立才寫入。沒有對照就抽，可能把學習單題目當成課文，比沒有課文更糟。
 fields_not_extracted:
   what: 二修抽取管線只產出學習單的兩塊（聚光燈、重點表）。下列欄位在 175 課全部是空的 —— 全部 0/175，不是部分缺。
@@ -108,8 +107,8 @@ key_reading_passages:
   status: 已按 right_fix 接上（140/175）；本條保留為紀錄，剩餘 35 課見 key_reading_withheld
   resolved_2026_08_16: 段落改由二修 DOCX 第二節按 lesson_uid 抽取，一修那張表不再被讀取
   what: '`backend/data/key_reading_passages.yml` 有 134 段重點朗讀文字，但它是一修資料、以課號（補零寫法 G4-L01）為鍵。'
-  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph`
-    / `needs_review` 三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
+  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph` / `needs_review`
+    三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
   what_i_checked: 正規化課號後 115/134 對得上，但那個數字不代表對得『正確』；我一度拿標題比對想確認，實際上條目根本沒有標題欄位 —— 那個比對恆為真，什麼都沒驗到。課文本體也是空的（0/175），所以連『這段文字在不在該課課文裡』都比不了。
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
@@ -143,14 +142,14 @@ resolved:
   lesson_body_text:
     was: 0 / 175
     now: 174 / 175
-    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是
-      1:1（96 份誤報 14 份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
+    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是 1:1（96
+      份誤報 14 份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
     remaining: 1 課（G9-L15 會考圖文題實戰）整份是考題，本來就沒有課文
   thumbnail_url:
     was: 0 / 175
     now: 174 / 175
-    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen
-      3/4 全系列在本專案已 404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
+    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen 3/4 全系列在本專案已
+      404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
     spec: 400×300 WebP，中位數 19 KB，最大 42 KB —— 與一修同規格
     remaining: 同上那 1 課（沒有課文就沒有場景可畫）
   worksheet_sections:
@@ -173,12 +172,11 @@ resolved:
   spotlight_render_null_2683:
     was: 43 / 175（32 課完全沒有 block、11 課只有 guide/figure/self_check 這類不可渲染的類型）
     now: 2 / 175（L0011、L0137——兩課的來源學習單本來就沒有這個大題）
-    how: '2026-08-19（#2772，隨 #2736 一路推進的多模態重抽）：逐課重讀 latest version（v3 優先）的 spotlight.yml，看 block type
-      是否含 figure/guide/self_check 以外的可練習類型（single/multi/free_text/table/fill_table/matching/exercise/passage/…）。原列的
-      43 課裡 41 課現在都有——含這份清單自己漏掉的線索：品格教育軌（體-L*）跟文言文軌把這個大題印成「品格聚光燈」／「文言文聚光燈」而不是「閱讀聚光燈」，字面比對會把它們誤判成缺口；用「*聚光燈」找家族名才對得上。'
+    how: '2026-08-19（#2772，隨 #2736 一路推進的多模態重抽）：逐課重讀 latest version（v3 優先）的 spotlight.yml，看 block type 是否含 figure/guide/self_check
+      以外的可練習類型（single/multi/free_text/table/fill_table/matching/exercise/passage/…）。原列的 43 課裡 41 課現在都有——含這份清單自己漏掉的線索：品格教育軌（體-L*）跟文言文軌把這個大題印成「品格聚光燈」／「文言文聚光燈」而不是「閱讀聚光燈」，字面比對會把它們誤判成缺口；用「*聚光燈」找家族名才對得上。'
     how_verified: 讀 backend/data/lessons/L*/v3/spotlight.yml 本身（不是重跑抽取器），逐課列出 block type 分佈人工抽查過樣本
-    note: 本次只更新這份人讀的 ledger。machine-checked 的 content_known_gaps.adapter.yaml（spotlight_to_lesson_content.py
-      讀的那份）是另一個檔，本次未動——那份要不要跟進改，需要先確認 adapter gate 現在怎麼用這 43 課的 enum，不在這次盤點範圍內。
+    note: 本次只更新這份人讀的 ledger。machine-checked 的 content_known_gaps.adapter.yaml（spotlight_to_lesson_content.py 讀的那份）是另一個檔，本次未動——那份要不要跟進改，需要先確認
+      adapter gate 現在怎麼用這 43 課的 enum，不在這次盤點範圍內。
     caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content
       evidence gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
 bodies_without_a_cross_check:
@@ -235,11 +233,11 @@ spotlight_range_not_found:
 
     '
   current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
-  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate
-    + ship gate
+  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate + ship
+    gate
   likely_stale_2772: 2026-08-19（#2772）重驗閱讀聚光燈缺口只剩 2 課（見 resolved.spotlight_render_null_2683），跟這裡的『現在 143/175』（缺
-    32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有 block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range()
-    這支窄 marker 的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
+    32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有 block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range() 這支窄 marker
+    的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
 choice_rows_without_options:
   generated: '2026-08-19'
   issue: 2736
@@ -254,14 +252,13 @@ choice_rows_without_options:
     answer_carrier: 橘色手寫（字元樣式 af）＋ 紅色 ☑（w:sym Wingdings F0FE），共 6 個 ☑
   count_lessons: 1
   count_rows: 3
-
 comprehension_no_mcq_uses_vocab_fill_in_blank:
   generated: '2026-08-20'
   issue: 2779
-  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content
-    也全部不存在（不是 #2779 修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
-  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這
-    23 課的閱讀理解會落在既有的 hasMcq=false 分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實
+  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content 也全部不存在（不是
+    #2779 修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
+  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這 23 課的閱讀理解會落在既有的
+    hasMcq=false 分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實
     payload 寫回歸鎖驗證這個行為。'
   how_to_close: 請教材端為這 23 課補閱讀理解選擇題（回原始 DOCX 或請補印）。
   count: 23
@@ -336,3 +333,420 @@ comprehension_no_mcq_uses_vocab_fill_in_blank:
   - catalog_slot: 體-L3
     id: 20169
     title: 身體，謝謝你
+modules_absent_from_source:
+  what_this_is: 46 課的學習單本身就沒有某些大題，共 167 個模組缺口。逐課開教師版原稿數過關鍵字確認，不是抽取器漏抓。登錄在這裡是為了讓「這課本來就沒有」變成機器可讀的宣告 —— 沒有它，每次有人看到缺口就要再翻一次原稿（2026-08-21
+    就翻過一次）。
+  evidence: 開 private/curriculum-source/ 的 175 份教師版 docx 數關鍵字，每組都帶正向對照：keypoints 抽樣 12 課「重點表」0 次，對照組 5/5 課各 4 次；resources
+    6 課「知識補給站」0 次，對照組 2/2 課各 2 次；key_reading 4 課「念順順」0 次，對照組 2/2 課各 2 次。三組對照都命中，所以那些 0 是真的 0，不是查法壞掉。
+  how_to_reverify: python3 - <<PY / 開 lesson.yml 取 source.drive_path → 到 private/curriculum-source/ 找同名 docx → unzip
+    -p word/document.xml 去標籤數關鍵字。⚠️ 一定要同時跑一個「已知有該模組」的課當正向對照，否則 0 可能是查法壞掉。
+  groups:
+    classical_course: 文言文課型：有 classical_text / sentence_matching 等專屬大題，本來就沒有語詞應用那套
+    orientation_course: 每個年級開學的同一份「正太與小豬」定向課：sections_present 只有兩節
+    strategy_course: 教閱讀方法的課：沒有生字語詞那套
+    single_lesson_gap: 單課缺口：該課學習單就是沒印那一節
+  count_lessons: 46
+  count_gaps: 167
+  by_group:
+    single_lesson_gap: 22
+    orientation_course: 5
+    strategy_course: 8
+    classical_course: 11
+  lessons:
+  - lesson_uid: L0005
+    catalog_slot: G4-L14
+    title: 美好的一天
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0006
+    catalog_slot: G4-L15
+    title: 誤會
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0007
+    catalog_slot: G4-L16
+    title: 黃絲帶
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0011
+    catalog_slot: G4-L1
+    title: 贏得喝采的輸家
+    group: single_lesson_gap
+    absent_modules:
+    - spotlight
+  - lesson_uid: L0020
+    catalog_slot: G4-L9
+    title: 跟著「但是」轉個彎
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0021
+    catalog_slot: G5-L0
+    title: 正太與小豬：武僧的養成之路
+    group: orientation_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - spotlight
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0044
+    catalog_slot: G5-L5
+    title: 文字路上的閱讀號誌
+    group: strategy_course
+    absent_modules:
+    - comprehension
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0049
+    catalog_slot: G6-L0
+    title: 正太與小豬：武僧的養成之路
+    group: orientation_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - spotlight
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0050
+    catalog_slot: G6-L10
+    title: 荷蘭東印度公司：全世界第一張股票的誕生
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0054
+    catalog_slot: G6-L14
+    title: 動物談情說愛的方式
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0061
+    catalog_slot: G6-L20
+    title: 因人而異，才有真正的公平
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0068
+    catalog_slot: G6-L29
+    title: 植物獵人
+    group: single_lesson_gap
+    absent_modules:
+    - key_reading
+  - lesson_uid: L0069
+    catalog_slot: G6-L2
+    title: 一件班服，一場思辨討論
+    group: single_lesson_gap
+    absent_modules:
+    - resources
+  - lesson_uid: L0070
+    catalog_slot: G6-L3
+    title: 文章中的「關鍵少數」
+    group: strategy_course
+    absent_modules:
+    - comprehension
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0075
+    catalog_slot: G6-L8
+    title: 白鯨救援：一場人與自然的協奏曲
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0077
+    catalog_slot: G7-L0
+    title: 正太與小豬：武僧的養成之路
+    group: orientation_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - spotlight
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0088
+    catalog_slot: G7-L1
+    title: 塑膠，好用不好甩
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0099
+    catalog_slot: G7-L2
+    title: AI什麼都會，我們還要學什麼？
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0101
+    catalog_slot: G7-L4
+    title: 小米酒的祝福
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0104
+    catalog_slot: G7-L7
+    title: 當全世界都在笑你，你可以怎麼做？
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0105
+    catalog_slot: G7-L8
+    title: 黑猩猩的守護者
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0106
+    catalog_slot: G7-L9
+    title: 帶著「血拼清單」閱讀
+    group: strategy_course
+    absent_modules:
+    - comprehension
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0107
+    catalog_slot: G8-L0
+    title: 正太與小豬：武僧的養成之路
+    group: orientation_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - spotlight
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0111
+    catalog_slot: G8-L13
+    title: 雨林裡的奇蹟藥物
+    group: strategy_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0130
+    catalog_slot: G9-L0
+    title: 正太與小豬：武僧的養成之路
+    group: orientation_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - spotlight
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0133
+    catalog_slot: G9-L12
+    title: 看不見的兇手：以實驗破解肉湯腐敗之謎
+    group: single_lesson_gap
+    absent_modules:
+    - key_reading
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0134
+    catalog_slot: G9-L13
+    title: 從四張圖看地球暖化
+    group: strategy_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0135
+    catalog_slot: G9-L14
+    title: 都是八哥，為什麼命運不一樣？
+    group: strategy_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0136
+    catalog_slot: G9-L15
+    title: 會考圖文題實戰
+    group: strategy_course
+    absent_modules:
+    - full_text_annotate
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0137
+    catalog_slot: G9-L16
+    title: 未解之謎──石頭的祕密
+    group: single_lesson_gap
+    absent_modules:
+    - key_reading
+    - spotlight
+  - lesson_uid: L0140
+    catalog_slot: G9-L1
+    title: 「認命」是強者的選項
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0144
+    catalog_slot: G9-L23
+    title: 馬拉松王者──基普喬吉
+    group: single_lesson_gap
+    absent_modules:
+    - key_reading
+    - vocab_application
+  - lesson_uid: L0147
+    catalog_slot: G9-L4
+    title: 構樹：南島祖先「出臺灣說」的植物證據
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0148
+    catalog_slot: G9-L5
+    title: 科學辦案：破解蝴蝶蘭的花期密碼
+    group: single_lesson_gap
+    absent_modules:
+    - keypoints
+  - lesson_uid: L0150
+    catalog_slot: G9-L7
+    title: 臺灣學生的閱讀力：美麗與哀愁
+    group: strategy_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0153
+    catalog_slot: 文-L10
+    title: 荒野救亡記
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0154
+    catalog_slot: 文-L11
+    title: 祁黃羊的思路解密
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0155
+    catalog_slot: 文-L12
+    title: 不流血的戰爭
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0157
+    catalog_slot: 文-L2
+    title: 文言文怎麼讀？以鞭虎救弟記為例
+    group: classical_course
+    absent_modules:
+    - key_reading
+    - keypoints
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0158
+    catalog_slot: 文-L3
+    title: 不量田
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0159
+    catalog_slot: 文-L4
+    title: 陸公買硯
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0160
+    catalog_slot: 文-L5
+    title: 重義的荀巨伯
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0161
+    catalog_slot: 文-L6
+    title: 江乙媽媽告御狀
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0162
+    catalog_slot: 文-L7
+    title: 相隔千里的約定
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0163
+    catalog_slot: 文-L8
+    title: 愛讀書的顧寧人
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+  - lesson_uid: L0164
+    catalog_slot: 文-L9
+    title: 從天才跌為凡人的神童
+    group: classical_course
+    absent_modules:
+    - full_text_annotate
+    - resources
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
