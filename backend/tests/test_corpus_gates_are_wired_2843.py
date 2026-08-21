@@ -36,10 +36,13 @@ SCRIPTS = REPO_ROOT / "scripts"
 #: 輸入只需要 repo 內資料、且實測 exit 0 的門。
 #: ⚠️ 加新的進來之前先在本地跑一次確認是綠的 —— 接一道紅的門進 CI
 #: 等於擋住所有人，而且大家會學會忽略它。
-WIRED = [
+WIRED: list[str | tuple[str, list[str]]] = [
     "render_coverage_gate",   # 抽出來的東西前端畫不畫得出來
     "orphan_key_gate",        # 有沒有整節被靜默丟掉
     "keypoints_shape_gate",   # 重點表形狀
+    # 派工單有沒有跟來源脫節（#2857）。⚠️ **一定要帶 --check** ——
+    # 不帶參數這支會**寫**檔，測試把 174 份 manifest 重產一遍就不是唯讀稽核了。
+    ("build_lesson_manifest", ["--check"]),
 ]
 
 #: 接不了的，連原因一起寫在這裡 —— 不寫的話下一個人會以為是漏了。
@@ -50,12 +53,14 @@ CANNOT_WIRE = {
 }
 
 
-@pytest.mark.parametrize("gate", WIRED)
-def test_gate_still_passes(gate: str):
-    script = SCRIPTS / f"{gate}.py"
+@pytest.mark.parametrize("gate", WIRED, ids=lambda g: g if isinstance(g, str) else g[0])
+def test_gate_still_passes(gate):
+    name, args = (gate, []) if isinstance(gate, str) else gate
+    script = SCRIPTS / f"{name}.py"
     assert script.is_file(), f"門不見了：{script}"
+    gate = name
     proc = subprocess.run(
-        [sys.executable, str(script)],
+        [sys.executable, str(script), *args],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
     )
     tail = "\n".join((proc.stdout + proc.stderr).strip().split("\n")[-12:])
@@ -68,6 +73,8 @@ def test_the_unwirable_ones_are_documented():
     沒有這條的話，下一個盤點的人會把「接不了」當成「漏接」，
     然後接上去得到一道恆紅的門 —— 我今天差點就這麼做。
     """
+    wired_names = {g if isinstance(g, str) else g[0] for g in WIRED}
+    assert not (wired_names & set(CANNOT_WIRE)), "同一道門不能同時列在 WIRED 與 CANNOT_WIRE"
     for gate, reason in CANNOT_WIRE.items():
         assert (SCRIPTS / f"{gate}.py").is_file(), f"{gate} 已不存在，請從 CANNOT_WIRE 移除"
         assert len(reason) > 10, f"{gate} 的原因寫得太短"

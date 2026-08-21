@@ -6,6 +6,16 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略—帶著問題閱讀
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
 dispatch:
 - spotlight
 produced:
@@ -19,3 +29,15 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 9
+dispatch_pages:
+  spotlight:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9

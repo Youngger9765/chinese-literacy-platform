@@ -39,9 +39,11 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 LESSONS = REPO_ROOT / "backend" / "data" / "lessons"
 MAP_FILE = REPO_ROOT / "specs" / "modules" / "section-to-module.yml"
 GAPS_FILE = REPO_ROOT / "backend" / "data" / "curriculum_qa" / "content_known_gaps.yaml"
+PAGES_FILE = REPO_ROOT / "specs" / "modules" / "section-pages.yml"
 
 
-def build_one(version_dir: pathlib.Path, table: dict, gaps: dict) -> dict | None:
+def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict,
+              drift: list[str] | None = None) -> dict | None:
     lesson_file = version_dir / "lesson.yml"
     if not lesson_file.is_file():
         return None
@@ -52,6 +54,14 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict) -> dict | None
 
     uid = version_dir.parent.name
     not_sections = set(table.get("not_sections", []))
+
+    # 頁碼來自 committed 的 section-pages.yml，不是現場讀原稿 —— CI 沒有 private/，
+    # 現場讀會讓 --check 恆紅（見 tests/test_corpus_gates_are_wired_2843.py 的 CANNOT_WIRE）
+    drift = drift if drift is not None else []
+    page_entry = (pages_db.get("lessons") or {}).get(uid) or {}
+    page_rows = page_entry.get("sections") or []
+    blocked_reason = (pages_db.get("convert_blocked") or {}).get(uid)
+
     sections = []
     for row in rows:
         if not isinstance(row, dict):
@@ -76,11 +86,50 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict) -> dict | None
         if unresolved:
             # 明說「還沒歸因」而不是留 module: null 讓人以為是漏填
             entry["module_unresolved"] = True
+
+        # 按**位置**取頁碼，並用名字驗一次。位置對得上但名字對不上
+        # = sections_present 改過而頁碼沒重定位 —— 那會讓飛機讀到隔壁那一節
+        idx = len(sections)
+        if idx < len(page_rows):
+            stored = page_rows[idx]
+            if str(stored.get("name")) != name:
+                # ⛔ 不在這裡 raise。main() 是邊算邊寫，中途炸掉會留下
+                # 「前 k-1 課新、其餘舊」的混合工作樹，而之後 --check 會指著那些舊的
+                # 說「來源改了沒重產」—— 指向完全錯的原因。收集起來，跑完一次報完。
+                drift.append(
+                    f"{uid} 第 {idx + 1} 個大題對不上：manifest 要「{name}」，"
+                    f"section-pages.yml 存的是「{stored.get('name')}」"
+                )
+            if stored.get("pages"):
+                entry["pages"] = list(stored["pages"])
+                if stored.get("pages_source") != "located":
+                    # 標題沒印出來、範圍是靠前後鄰居夾的 —— 消費端該知道信心比較低
+                    entry["pages_source"] = stored["pages_source"]
         sections.append(entry)
 
     produced = sorted({p.stem for p in version_dir.glob("*.yml")} - not_sections - {"_manifest"})
     dispatched = sorted({s["module"] for s in sections if s["module"]})
     absent = sorted(gaps.get(uid, set()))
+
+    # 每個模組要讀哪幾頁 = 它名下所有大題頁碼的聯集。
+    # 這是拆分唯一的收益來源：飛機只讀這幾頁，不是全份
+    dispatch_pages: dict[str, list[int]] = {}
+    for section in sections:
+        module = section.get("module")
+        if module and section.get("pages"):
+            dispatch_pages.setdefault(module, set()).update(section["pages"])  # type: ignore[arg-type]
+    dispatch_pages = {k: sorted(v) for k, v in sorted(dispatch_pages.items())}
+
+    # 哪幾個模組的頁碼是「夾出來的」而不是定位到的（#2857 N2）。
+    # `pages_source: bracketed` 本來只寫在 sections[]，而飛機讀的是 dispatch_pages ——
+    # 23 個低信心標記因此一個都到不了使用端，飛機拿到一段可能寬達 54% 的範圍
+    # 卻不知道那是猜的。這裡把同一件事放到它讀得到的地方。
+    low_confidence = sorted({
+        section["module"]
+        for section in sections
+        if section.get("module") and section.get("pages")
+        and section.get("pages_source") == "bracketed"
+    })
 
     return {
         "lesson_uid": uid,
@@ -96,6 +145,15 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict) -> dict | None
         "produced": produced,
         # 學習單本身就沒印的那幾節（已逐課開原稿確認，見 content_known_gaps.yaml）
         "absent_from_source": absent,
+        # 派工單的頁碼欄。⛔ 空的不代表「讀全份」，代表這課還沒定位過 ——
+        # 飛機收到空的要回 BLOCKED，不要自己去讀全份（#2857）
+        "pdf_pages": page_entry.get("pdf_pages"),
+        "dispatch_pages": dispatch_pages,
+        # ⚠️ 這幾個模組的 dispatch_pages 是用前後鄰居夾出來的，不是定位到的。
+        # 飛機讀到自己在名單上 → 範圍可能過寬（實測最寬 54%），抽完要自己確認
+        # 讀到的真的是自己那一節，別把隔壁的內容收進來。
+        **({"low_confidence_pages": low_confidence} if low_confidence else {}),
+        **({"pages_unavailable": blocked_reason} if blocked_reason else {}),
     }
 
 
@@ -110,10 +168,15 @@ def main() -> int:
         e["lesson_uid"]: set(e["absent_modules"])
         for e in (gaps_data.get("modules_absent_from_source") or {}).get("lessons", [])
     }
+    pages_db = yaml.safe_load(PAGES_FILE.read_text(encoding="utf-8")) or {} if PAGES_FILE.is_file() else {}
 
-    drifted, written = [], 0
+    drifted, drift = [], []
+    # 先全部算完再寫。邊算邊寫的話，偵測到漂移時檔案早就落地了 ——
+    # exit 1 會叫人「重新定位」，但工作樹已經是用**過期頁碼**產的那一份，
+    # 而它看起來完全正常（每一課都有派工單、格式也對）。
+    pending: list[tuple[pathlib.Path, str]] = []
     for version_dir in sorted(LESSONS.glob("L*/v3")):
-        manifest = build_one(version_dir, table, gaps)
+        manifest = build_one(version_dir, table, gaps, pages_db, drift)
         if manifest is None:
             continue
         target = version_dir / "_manifest.yml"
@@ -122,8 +185,20 @@ def main() -> int:
             if not target.is_file() or target.read_text(encoding="utf-8") != text:
                 drifted.append(version_dir.parent.name)
         else:
-            target.write_text(text, encoding="utf-8")
-            written += 1
+            pending.append((target, text))
+
+    if drift:
+        print(f"🔴 {len(drift)} 個大題的名字跟 section-pages.yml 對不上（來源改了但沒重定位）：")
+        for line in drift[:15]:
+            print(f"    {line}")
+        print("\n跑 `python3 scripts/build_section_pages.py` 重新定位，再重產 manifest。")
+        print("⛔ 一份都沒寫出去 —— 用過期頁碼產出來的派工單看起來完全正常。")
+        return 1
+
+    written = 0
+    for target, text in pending:
+        target.write_text(text, encoding="utf-8")
+        written += 1
 
     if args.check:
         if drifted:

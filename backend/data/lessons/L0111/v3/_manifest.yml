@@ -5,23 +5,42 @@ sections:
 - 'no': 一
   name: 讀全文
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
 - 'no': 二
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 閱讀策略——跳過卡關，先瀏覽全文
+  pages:
+  - 2
+  - 3
+  - 4
 - 'no': 三
   name: 讀全文
   module: full_text_annotate
+  pages:
+  - 4
+  - 5
 - 'no': 四
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 閱讀策略——跳過卡關，先瀏覽全文
+  pages:
+  - 5
+  - 6
+  - 7
 - 'no': 五
   name: 知識補給站
   module: resources
+  pages:
+  - 7
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 7
+  - 8
 dispatch:
 - comprehension
 - full_text_annotate
@@ -38,3 +57,22 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 8
+dispatch_pages:
+  comprehension:
+  - 7
+  - 8
+  full_text_annotate:
+  - 1
+  - 2
+  - 4
+  - 5
+  resources:
+  - 7
+  spotlight:
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7

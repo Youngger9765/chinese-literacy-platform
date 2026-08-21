@@ -5,28 +5,55 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
 - 'no': 二
   name: 知識補給站
   module: resources
+  pages:
+  - 2
+  - 3
 - 'no': 三
   name: 念順順
   module: key_reading
+  pages:
+  - 3
+  - 4
+  - 5
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 3
+  - 4
+  - 5
+  pages_source: bracketed
 - 'no': 五
   name: 語詞應用
   module: vocab_application
+  pages:
+  - 5
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略—問題—解決—結果找重點
+  pages:
+  - 5
+  - 6
+  - 7
+  - 8
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 8
+  - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  pages:
+  - 9
 dispatch:
 - comprehension
 - full_text_annotate
@@ -47,3 +74,33 @@ produced:
 - vocab_review
 absent_from_source:
 - keypoints
+pdf_pages: 9
+dispatch_pages:
+  comprehension:
+  - 8
+  - 9
+  full_text_annotate:
+  - 1
+  - 2
+  key_reading:
+  - 3
+  - 4
+  - 5
+  resources:
+  - 2
+  - 3
+  spotlight:
+  - 5
+  - 6
+  - 7
+  - 8
+  vocab_application:
+  - 5
+  vocab_definitions:
+  - 3
+  - 4
+  - 5
+  vocab_review:
+  - 9
+low_confidence_pages:
+- vocab_definitions

@@ -5,66 +5,120 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 3
+  - 4
 - 'no': 三
   name: 文章重點整理
   module: null
   module_unresolved: true
+  pages:
+  - 4
+  - 5
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 5
+  - 6
 - 'no': 五
   name: 閱讀接力
   module: null
   subtitle: 從一位選手，到各項運動紀錄
   module_unresolved: true
+  pages:
+  - 6
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 6
+  - 7
+  - 8
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 8
+  - 9
 - 'no': 三
   name: 文章重點整理
   module: null
   module_unresolved: true
+  pages:
+  - 9
+  - 10
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 10
+  - 11
 - 'no': 五
   name: 閱讀接力
   module: null
   subtitle: 從科技影響成績，到科技使用的公平問題
   module_unresolved: true
+  pages:
+  - 11
+  - 12
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 12
+  - 13
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 13
+  - 14
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  pages:
+  - 14
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 14
+  - 15
 - 'no': 五
   name: 閱讀接力
   module: null
   subtitle: 從突破紀錄到公平界線
   module_unresolved: true
+  pages:
+  - 15
+  - 16
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 從多文本閱讀──看文章之間的關係
+  pages:
+  - 16
+  - 17
+  - 18
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  pages:
+  - 18
 - 'no': 八
   name: 知識補給站
   module: resources
+  pages:
+  - 18
+  - 19
 dispatch:
 - comprehension
 - full_text_annotate
@@ -84,3 +138,39 @@ produced:
 absent_from_source:
 - key_reading
 - vocab_application
+pdf_pages: 19
+dispatch_pages:
+  comprehension:
+  - 5
+  - 6
+  - 10
+  - 11
+  - 14
+  - 15
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  - 6
+  - 7
+  - 8
+  - 12
+  - 13
+  keypoints:
+  - 14
+  resources:
+  - 18
+  - 19
+  spotlight:
+  - 16
+  - 17
+  - 18
+  vocab_definitions:
+  - 3
+  - 4
+  - 8
+  - 9
+  - 13
+  - 14
+  vocab_review:
+  - 18

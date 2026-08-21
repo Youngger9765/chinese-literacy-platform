@@ -5,55 +5,110 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
 - 'no': 二
   name: 念順順
   module: key_reading
+  pages:
+  - 5
+  - 6
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 6
+  - 7
+  - 8
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  pages:
+  - 8
 - 'no': 五
   name: 文章重點整理
   module: null
   module_unresolved: true
+  pages:
+  - 8
+  - 9
+  - 10
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 8
+  - 9
+  - 10
+  pages_source: bracketed
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 10
+  - 11
+  - 12
 - 'no': 二
   name: 知識補給站
   module: resources
+  pages:
+  - 12
+  - 13
 - 'no': 三
   name: 念順順
   module: key_reading
+  pages:
+  - 13
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 13
+  - 14
 - 'no': 五
   name: 語詞應用
   module: vocab_application
+  pages:
+  - 14
+  - 15
 - 'no': 六
   name: 文章重點整理
   module: null
   module_unresolved: true
+  pages:
+  - 15
+  - 16
 - 'no': 七
   name: 綜合練習
   module: null
   module_unresolved: true
+  pages:
+  - 16
+  - 17
 - 'no': 八
   name: 品格聚光燈
   module: spotlight
   subtitle: 認識自我：看見長處與限制
+  pages:
+  - 17
+  - 18
+  - 19
 - 'no': 九
   name: 綜合閱讀理解
   module: comprehension
+  pages:
+  - 19
+  - 20
 - 'no': 十
   name: 詞語複習
   module: vocab_review
+  pages:
+  - 20
+  - 21
 dispatch:
 - comprehension
 - full_text_annotate
@@ -74,3 +129,46 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
+pdf_pages: 21
+dispatch_pages:
+  comprehension:
+  - 8
+  - 9
+  - 10
+  - 19
+  - 20
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 10
+  - 11
+  - 12
+  key_reading:
+  - 5
+  - 6
+  - 13
+  resources:
+  - 12
+  - 13
+  spotlight:
+  - 17
+  - 18
+  - 19
+  vocab_application:
+  - 8
+  - 14
+  - 15
+  vocab_definitions:
+  - 6
+  - 7
+  - 8
+  - 13
+  - 14
+  vocab_review:
+  - 20
+  - 21
+low_confidence_pages:
+- comprehension

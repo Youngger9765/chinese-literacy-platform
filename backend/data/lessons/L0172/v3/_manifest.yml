@@ -51,3 +51,6 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
+pdf_pages: null
+dispatch_pages: {}
+pages_unavailable: 同上，實測 900s 仍逾時；需切成 7 份 subset

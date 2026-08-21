@@ -5,28 +5,54 @@ sections:
 - 'no': ''
   name: 古文今譯
   module: modern_translation
+  pages:
+  - 1
+  - 2
 - 'no': ''
   name: 原文
   module: classical_text
+  pages:
+  - 2
 - 'no': ''
   name: 朗讀計時
   module: key_reading
+  pages:
+  - 2
+  pages_source: bracketed
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  pages:
+  - 2
+  - 3
+  - 4
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  pages:
+  - 4
+  - 5
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  pages:
+  - 5
+  - 6
 - 'no': 四
   name: 文言文聚光燈
   module: spotlight
   subtitle: 判讀主語
+  pages:
+  - 6
+  - 7
+  - 8
+  - 9
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 9
+  - 10
 dispatch:
 - classical_text
 - comprehension
@@ -51,3 +77,32 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 10
+dispatch_pages:
+  classical_text:
+  - 2
+  comprehension:
+  - 9
+  - 10
+  key_reading:
+  - 2
+  keypoints:
+  - 5
+  - 6
+  modern_translation:
+  - 1
+  - 2
+  sentence_matching:
+  - 2
+  - 3
+  - 4
+  spotlight:
+  - 6
+  - 7
+  - 8
+  - 9
+  word_matching:
+  - 4
+  - 5
+low_confidence_pages:
+- key_reading

@@ -5,24 +5,46 @@ sections:
 - 'no': 一
   name: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
   module: spotlight
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  pages_source: bracketed
 - 'no': 二
   name: 文章重點表
   module: keypoints
+  pages:
+  - 4
+  - 5
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  pages:
+  - 5
+  - 6
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  pages:
+  - 6
+  - 7
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 7
+  - 8
 - 'no': 六
   name: 詞語複習
   module: vocab_review
+  pages:
+  - 8
 - 'no': 七
   name: 知識補給站
   module: resources
+  pages:
+  - 8
 dispatch:
 - comprehension
 - keypoints
@@ -42,3 +64,28 @@ produced:
 - vocab_review
 absent_from_source:
 - key_reading
+pdf_pages: 8
+dispatch_pages:
+  comprehension:
+  - 7
+  - 8
+  keypoints:
+  - 4
+  - 5
+  resources:
+  - 8
+  spotlight:
+  - 1
+  - 2
+  - 3
+  - 4
+  vocab_application:
+  - 6
+  - 7
+  vocab_definitions:
+  - 5
+  - 6
+  vocab_review:
+  - 8
+low_confidence_pages:
+- spotlight
