@@ -16,9 +16,8 @@ import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
-import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
-import NextStepFooter from '../learning/NextStepFooter';
+import QuizCompletionScreen from '../learning/QuizCompletionScreen';
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 const IS_TOUCH_DEVICE =
@@ -407,6 +406,10 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   }
 
   // ── Summary screen ──────────────────────────────────────────────
+  // #2834：header card + CTA row 抽到 `QuizCompletionScreen`（跟 ComprehensionMcqPage
+  // 共用）。逐題清單留在這裡自己畫——這裡把正解嵌進句子裡的括號（`【word】`），跟
+  // comprehension 用「正確：」另起一行不是同一種形狀，勉強共用會犧牲這個既有的
+  // bracket-fill 呈現方式，見 QuizCompletionScreen.tsx 檔頭說明。
   if (phase === 'summary') {
     const firstTryScore = firstTryResults.filter((r) => r.firstTryCorrect).length;
     const firstTryTotal = sentences.length;
@@ -414,80 +417,47 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     const wrongCount = firstTryResults.filter((r) => !r.firstTryCorrect).length;
 
     return (
-      <div className="flex-1 flex flex-col bg-surface overflow-y-auto pb-48" style={{ fontFamily: zhuyinFont }}>
-        <div className="max-w-2xl mx-auto px-6 pt-8 w-full space-y-6">
-          {/* Score */}
-          <div className={`rounded-3xl p-8 text-center ${allCorrect ? 'bg-emerald-50' : 'bg-surface-container-lowest shadow-editorial'}`}>
-            <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${allCorrect ? 'bg-emerald-100' : 'bg-tertiary-container/20'}`}>
-              <span className={`material-symbols-outlined text-4xl ${allCorrect ? 'text-emerald-600' : 'text-tertiary'}`}>
-                {allCorrect ? 'emoji_events' : 'school'}
-              </span>
-            </div>
-            <p className="text-2xl font-headline font-black text-on-surface mb-1">
-              {allCorrect ? '全部答對！' : '你完成了！'}
-            </p>
-            <p className="text-sm text-on-surface-variant">
-              {allCorrect ? '每一題都一次答對，表現優異！' : '以下是各題的作答結果'}
-            </p>
-          </div>
+      <QuizCompletionScreen
+        allCorrect={allCorrect}
+        wrongCount={wrongCount}
+        onRetryWrong={handleRetryWrong}
+        onRetryAll={handleRetryAll}
+        onNext={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)}
+        style={{ fontFamily: zhuyinFont }}
+        toolboxMode={isToolboxMode()}
+      >
+        {/* Per-question breakdown — summary is the ONLY place correct answers are shown (A12) */}
+        <div className="space-y-3">
+          {sentences.map((s, idx) => {
+            const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
+            const correct = qResult?.firstTryCorrect ?? false;
+            const correctCode = qResult?.correctAnswer ?? '';
+            const wrongCode = qResult?.studentFirstAnswer ?? null;
 
-          {/* Per-question breakdown — summary is the ONLY place correct answers are shown (A12) */}
-          <div className="space-y-3">
-            {sentences.map((s, idx) => {
-              const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
-              const correct = qResult?.firstTryCorrect ?? false;
-              const correctCode = qResult?.correctAnswer ?? '';
-              const wrongCode = qResult?.studentFirstAnswer ?? null;
-
-              return (
-                <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
-                  <div className="flex items-start gap-3">
-                    <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {correct ? 'check_circle' : 'cancel'}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base text-on-surface leading-relaxed mb-1">
-                        {zh(s.sentence.replace(/[（(]　　[）)]/, `【${vocabBank[correctCode] ?? correctCode}】`))}
+            return (
+              <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {correct ? 'check_circle' : 'cancel'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base text-on-surface leading-relaxed mb-1">
+                      {zh(s.sentence.replace(/[（(]　　[）)]/, `【${vocabBank[correctCode] ?? correctCode}】`))}
+                    </p>
+                    {!correct && wrongCode && (
+                      <p className="text-sm text-amber-700">
+                        你選了 <span className="font-bold">{zh(vocabBank[wrongCode] ?? wrongCode)}</span>
+                        <span className="text-on-surface-variant mx-1">→</span>
+                        正確：<span className="font-bold text-emerald-700">{zh(vocabBank[correctCode] ?? correctCode)}</span>
                       </p>
-                      {!correct && wrongCode && (
-                        <p className="text-sm text-amber-700">
-                          你選了 <span className="font-bold">{zh(vocabBank[wrongCode] ?? wrongCode)}</span>
-                          <span className="text-on-surface-variant mx-1">→</span>
-                          正確：<span className="font-bold text-emerald-700">{zh(vocabBank[correctCode] ?? correctCode)}</span>
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
-
-        {/* Fixed bottom CTA */}
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
-            {isToolboxMode() ? (
-              <ToolboxCompletionActions onRetry={handleRetryAll} className="w-full" />
-            ) : (
-              <>
-                {wrongCount > 0 && (
-                  <button onClick={handleRetryWrong}
-                    className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all">
-                    重做錯題（{wrongCount} 題）
-                  </button>
-                )}
-                <button onClick={handleRetryAll}
-                  className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
-                  全部重做
-                </button>
-                <NextStepFooter onNext={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)} label="繼續下一步" />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      </QuizCompletionScreen>
     );
   }
 

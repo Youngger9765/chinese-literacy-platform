@@ -16,8 +16,10 @@ import { ComprehensionResult } from '../../types';
 import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
 import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { WrongAnswerReviewList } from '../../components/learning/WrongAnswerReviewList';
-import { firstTryScore, type FirstTryRecord } from '../../utils/questionReview';
-import { absorbVerdicts, reviewItemsOf, type ReviewableBlock } from './comprehensionReview';
+import { isToolboxMode } from '../../services/learningStorageScope';
+import QuizCompletionScreen from '../../components/learning/QuizCompletionScreen';
+import { firstTryScore, wrongFirstTryIds, type FirstTryRecord } from '../../utils/questionReview';
+import { absorbVerdicts, allReviewItemsOf, type ReviewableBlock } from './comprehensionReview';
 import { normalizeChoiceAnswer } from '../../components/lesson-content/lessonGrading';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
@@ -36,6 +38,9 @@ const ComprehensionMcqPage: React.FC = () => {
   // 第一次作答的對錯。重試不覆蓋 —— 學生一定會重試到對，
   // 拿「當下還錯的」當錯題來源，那個集合到最後恆為空（#2784 就是這樣壞的）。
   const [firstTry, setFirstTry] = useState<FirstTryRecord<string, string>[]>([]);
+  // #2834：null = 完整測驗；非 null = 「重做錯題」模式，只顯示這些 block id
+  // （只在完成卡按下「重做錯題」後才會被設值，見 handleRetryWrong）。
+  const [retryFilterIds, setRetryFilterIds] = useState<string[] | null>(null);
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
@@ -75,6 +80,15 @@ const ComprehensionMcqPage: React.FC = () => {
     handleMcqComplete(correct, total || fallback);
   }, [firstTry, selectedStory, handleMcqComplete]);
 
+  // #2834「重做錯題」模式的 LessonRenderer 只顯示先前答錯的那幾題（見
+  // `activeLesson` 的 blocks 過濾）。這幾題答完之後只是回到完成卡 —— 分數已經在
+  // 第一次作答時定案（`firstTry` 對已存在的 id 不會被覆蓋，見 questionReview.ts
+  // `recordFirstTry`），這裡不重新呼叫 `handleMcqComplete`，避免重覆 patch 進度。
+  const handleRetryWrongComplete = useCallback(() => {
+    setRetryFilterIds(null);
+    setMcqDone(true);
+  }, []);
+
   // lesson.blocks → 計分/錯題卡片需要的最小形狀。`normalizeChoiceAnswer` 是
   // 這個 repo 判定選擇題正解的單一權威（answer 可能是索引也可能是 'A' 字母）。
   const reviewableBlocksOf = useCallback((lesson: { blocks?: unknown[] } | null | undefined): ReviewableBlock[] => {
@@ -83,7 +97,12 @@ const ComprehensionMcqPage: React.FC = () => {
       .filter((b) => b?.type === 'exercise' && b?.question?.kind === 'multiple_choice')
       .map((b) => ({
         id: String(b.id),
-        stem: String(b.question?.prompt ?? b.question?.stem ?? ''),
+        // #2834：multiple_choice 的題幹欄位是 `question.question`（見
+        // lessonContentAdapter.ts 跟 schema/lessonContent.ts 的 QuestionSchema）。
+        // `prompt`/`stem` 是別的 question kind 用的欄位名，這裡原本只認得那兩個，
+        // 對 multiple_choice 一律落到空字串 —— 完成卡逐題列表因此從沒印出過題目
+        // 原文（Young 2026-08-21：「而且從截圖看，錯題列表只有…沒有題目原文」）。
+        stem: String(b.question?.question ?? b.question?.prompt ?? b.question?.stem ?? ''),
         options: (b.question?.options ?? []).map((o: unknown) =>
           typeof o === 'string' ? o : String((o as Record<string, unknown>)?.text ?? ''),
         ),
@@ -99,6 +118,22 @@ const ComprehensionMcqPage: React.FC = () => {
     },
     [reviewableBlocksOf],
   );
+
+  // #2834：完成卡「重做錯題」——只把先前 first-try 答錯的 block id 記下來，
+  // 讓底下的 LessonRenderer 過濾成只顯示這些題（見 activeLesson）。分數/firstTry
+  // 完全不動，這是給學生練習用的，不是重新測驗。
+  const handleRetryWrong = useCallback(() => {
+    setRetryFilterIds(wrongFirstTryIds(firstTry));
+    setMcqDone(false);
+  }, [firstTry]);
+
+  // #2834：完成卡「全部重做」——徹底重置，等同學生第一次進到這個步驟。
+  const handleRetryAll = useCallback(() => {
+    setFirstTry([]);
+    setMcqResult(null);
+    setRetryFilterIds(null);
+    setMcqDone(false);
+  }, []);
 
   const handleNext = useCallback(() => {
     const result: ComprehensionResult = {
@@ -163,35 +198,73 @@ const ComprehensionMcqPage: React.FC = () => {
       !!comprehensionLesson &&
       comprehensionLesson.blocks.some((b) => b.type === 'exercise' && b.question.kind === 'multiple_choice');
     if (comprehensionLesson && lessonHasMcq) {
+      // #2834：完成卡取代整個作答畫面（跟 vocab-application 一樣是「兩個互斥的
+      // phase」，不是作答區跟結算並排顯示）——mcqDone 時完全不 render LessonRenderer。
+      if (mcqDone) {
+        const items = allReviewItemsOf(firstTry, reviewableBlocksOf(comprehensionLesson)).map((it) => ({
+          id: it.id,
+          promptText: it.stem,
+          correct: it.correct,
+          correctAnswerText: it.correctAnswer,
+          studentAnswerText: it.studentAnswer,
+        }));
+        const wrongCount = items.filter((it) => !it.correct).length;
+        return (
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
+            {/* 修補 code review 發現的漏洞：mcqDone 分支原本整段換成
+                QuizCompletionScreen，把這顆一起丟掉了。它自己會在沒有紙本成績時
+                render 空（見檔頭「safe to drop into any step page unconditionally」），
+                所以留著不影響沒有 OMO 紙本作答的學生。 */}
+            <OmoPaperResultBanner stepId="comprehension" />
+            <QuizCompletionScreen
+              allCorrect={wrongCount === 0}
+              wrongCount={wrongCount}
+              onRetryWrong={handleRetryWrong}
+              onRetryAll={handleRetryAll}
+              onNext={handleNext}
+              // #2834 code review：comprehension 是 TOOLBOX_TOOL_IDS 之一（可從
+              // /tools 進來），FillInBlankExercise 兩邊都有傳 toolboxMode，這裡漏了
+              // 會讓工具箱模式看到錯的 CTA、且 ToolboxCompletionActions 不會 mount
+              // →toolbox_comprehension_sessions 永遠不會被寫入。
+              toolboxMode={isToolboxMode()}
+            >
+              {/* 🔴 只有完成卡（mcqDone）才會走到這裡 —— 作答中不可能看到正解。
+                  `WrongAnswerReviewList` 自己也 fail-closed（revealed 沒明確傳 true
+                  就什麼都不畫），這裡是第二道。 */}
+              <WrongAnswerReviewList revealed items={items} />
+            </QuizCompletionScreen>
+          </div>
+        );
+      }
+
+      // #2834「重做錯題」：只把先前答錯的 block 留在 exercise 區，其餘 exercise
+      // block（已答對的）拿掉；非 exercise block（課文/圖表等參考素材）照舊全留。
+      // ⚠️ 不可用 useMemo 包這行——這裡在條件式的 render 分支裡（`if (mcqDone)` 之後、
+      // `if (comprehensionLesson && lessonHasMcq)` 裡面），Hooks 規則不允許 hook
+      // 條件式呼叫。跟上面 `comprehensionLesson`/`lessonHasMcq` 一樣是既有的
+      // unmemoized 模式（code review 有指出：每次 render 都是新物件參考，會讓
+      // LessonRenderer 內部 keyed on lesson.blocks 的 useMemo 跟著每次重算）——
+      // 這是這個檔案原本就有的特性，不是這次改動新引入的，這次不擴大處理範圍去修。
+      const activeLesson = retryFilterIds
+        ? {
+            ...comprehensionLesson,
+            blocks: comprehensionLesson.blocks.filter(
+              (b) => b.type !== 'exercise' || retryFilterIds.includes(b.id),
+            ),
+          }
+        : comprehensionLesson;
+
       return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden px-4 py-6">
           <OmoPaperResultBanner stepId="comprehension" />
           <LessonRenderer
             sectionLabel="閱讀理解"
-            lesson={comprehensionLesson}
+            lesson={activeLesson}
             story={selectedStory}
             lessonCode={selectedStory.lesson_code || selectedStory.id}
-            onComplete={handleLessonRendererComplete}
-            onExerciseChange={(e) => absorbInto(e, comprehensionLesson)}
+            onComplete={retryFilterIds ? handleRetryWrongComplete : handleLessonRendererComplete}
+            onExerciseChange={(e) => absorbInto(e, activeLesson)}
           />
-          {mcqDone ? (
-            <>
-              {/* 🔴 只在 mcqDone 之後 render —— 作答中不可能看到正解。
-                  `WrongAnswerReviewList` 自己也 fail-closed（revealed 沒明確傳 true
-                  就什麼都不畫），這裡是第二道。 */}
-              <WrongAnswerReviewList
-                revealed
-                items={reviewItemsOf(firstTry, reviewableBlocksOf(comprehensionLesson)).map((it) => ({
-                  id: it.id,
-                  promptText: it.stem,
-                  correct: false,
-                  correctAnswerText: it.correctAnswer,
-                  studentAnswerText: it.studentAnswer,
-                }))}
-              />
-              <NextStepFooter onNext={handleNext} />
-            </>
-          ) : null}
         </div>
       );
     }
