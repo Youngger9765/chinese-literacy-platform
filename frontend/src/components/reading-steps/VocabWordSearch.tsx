@@ -211,7 +211,9 @@ export default function VocabWordSearch({
     handleDragMove,
     handleDragEnd,
     handleRedo,
-  } = useWordSearchProgress(vocabWords, story.id, { initialProgress, onProgressChange });
+  } = useWordSearchProgress(vocabWords, story.id, {
+    initialProgress, onProgressChange, teacherSource: story.vocabReview,
+  });
 
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     try {

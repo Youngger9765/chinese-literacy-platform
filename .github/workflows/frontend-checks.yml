@@ -145,4 +145,7 @@ jobs:
           src/components/reading-steps/__tests__/VocabApplication.progressPersistence.test.tsx \
           src/components/reading-steps/__tests__/VocabWordSearch.progressPersistence.test.tsx \
           src/components/reading-steps/__tests__/VocabDefinitionMatch.retryWrong.test.tsx \
-          src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx
+          src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx \
+          src/components/reading-steps/__tests__/teacherWordSearch2860.test.ts \
+          src/components/reading-steps/__tests__/teacherGridStability2860.test.tsx \
+          src/components/reading-steps/__tests__/wordSearchGrid.test.ts

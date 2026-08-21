@@ -517,6 +517,12 @@ def _uid_tree_lessons() -> list[dict]:
             # none of these files; a missing module stays missing (module_entry_gate's
             # "空狀態是誠實值" rule applies here too — inventing a self_challenge for a
             # lesson whose worksheet never had one would be worse than showing nothing).
+            # 詞語複習的教師版找字表 + 知識補給站 (#2860)。抽取器 150／148 課早就抽好，
+            # 但這條路上「後端 story dict → StoryDetail → api.ts → 元件」四處都是
+            # 逐欄位列舉，沒列到就靜默掉 —— 前端因此一直用 story.vocabulary
+            # 自己隨機生格子，老師出的那張表一課都沒到過學生面前，且沒有任何錯誤訊息。
+            "vocab_review": l.get("vocab_review") or None,
+            "resources": l.get("resources") or None,
             "classical_text": l.get("classical_text") or None,
             "modern_translation": l.get("modern_translation") or None,
             "word_matching": l.get("word_matching") or None,

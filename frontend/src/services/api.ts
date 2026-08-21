@@ -1,3 +1,4 @@
+import type { TeacherWordSearchSource } from '../components/reading-steps/wordSearchGrid';
 /**
  * api.ts — Core session utilities and story fetch APIs.
  *
@@ -156,6 +157,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Parsed in apiDetailToStory via camelizeKeys + LessonSchema.safeParse (fail-safe).
   lesson_content?: Record<string, unknown> | null;
   // 文言文專屬模組 (#2752) — null for every non-文言文 lesson.
+  vocab_review?: TeacherWordSearchSource | null;
   classical_text?: ClassicalTextContent | null;
   modern_translation?: ModernTranslationContent | null;
   word_matching?: ClassicalWordMatchingContent | null;
@@ -279,6 +281,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     })(),
     // 文言文專屬模組 (#2752) — undefined for every non-文言文 lesson (matches
     // the `undefined`-means-absent convention every other optional field here uses).
+    vocabReview: detail.vocab_review ?? undefined,
     classicalText: detail.classical_text ?? undefined,
     modernTranslation: detail.modern_translation ?? undefined,
     wordMatching: detail.word_matching ?? undefined,
