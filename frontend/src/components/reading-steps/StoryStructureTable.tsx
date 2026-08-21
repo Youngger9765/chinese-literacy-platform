@@ -107,6 +107,20 @@ interface Props {
   structure?: StructureData | null;
   previewMode?: boolean;
   showCoach?: boolean;
+  /**
+   * #2833 — previously-persisted `{ answers, gradeResult }` for this step, read
+   * once on mount to restore in-progress work after a reload or step revisit.
+   * Only the initial value is used (see the lazy useState initializers below) —
+   * this component owns `answers`/`gradeResult` afterwards and reports changes
+   * back out via `onProgressChange`, it does not keep re-syncing from this prop.
+   */
+  initialProgress?: Record<string, unknown>;
+  /**
+   * #2833 — called with `{ answers, gradeResult }` whenever either changes, so
+   * the caller can persist it (debounced) the same way every other step
+   * component (VocabDefinitionMatch, KeyPassageReading, ...) already does.
+   */
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
@@ -245,6 +259,39 @@ function answerKey(rowIdx: number, subIdx?: number, blankIdx?: number): string {
   if (subIdx !== undefined) return `${rowIdx}-${subIdx}`;
   if (blankIdx !== undefined) return `${rowIdx}-b${blankIdx}`;
   return `${rowIdx}`;
+}
+
+// #2833 — the restored value comes off the wire as `unknown` JSON; validate
+// its shape matches AnswerMap before trusting it as initial React state.
+// A malformed/legacy payload falls back to `{}` instead of crashing render.
+function isValidAnswerMap(value: unknown): value is AnswerMap {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return Object.values(value as Record<string, unknown>).every((v) => {
+    if (typeof v === 'string' || typeof v === 'number') return true;
+    return Array.isArray(v) && v.every((n) => typeof n === 'number');
+  });
+}
+
+// #2833 code-review — checking only `Array.isArray(results)` let a malformed
+// element (e.g. `null`, or an object missing `row_index`) through: the first
+// `submitted` render then calls `findGradeItem()`, which does `r.row_index` on
+// every element with no null-guard, and crashes the whole step instead of
+// falling back safely the way the sibling isValidAnswerMap check does.
+function isValidGradeResultItem(item: unknown): item is GradeResultItem {
+  if (!item || typeof item !== 'object') return false;
+  const r = item as Partial<GradeResultItem>;
+  return (
+    typeof r.row_index === 'number' &&
+    typeof r.correct === 'boolean' &&
+    typeof r.feedback === 'string' &&
+    typeof r.correct_answer === 'string'
+  );
+}
+
+function isValidGradeResult(value: unknown): value is GradeResult {
+  if (!value || typeof value !== 'object') return false;
+  const results = (value as GradeResult).results;
+  return Array.isArray(results) && results.every(isValidGradeResultItem);
 }
 
 
@@ -980,15 +1027,26 @@ const StoryStructureTable: React.FC<Props> = ({
   structure: structureProp,
   previewMode = false,
   showCoach: showCoachProp,
+  initialProgress,
+  onProgressChange,
 }) => {
   const { token } = useAuth();
   const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
   const [loading, setLoading] = useState(structureProp === undefined);
   const [fetchError, setFetchError] = useState(false);
 
-  const [answers, setAnswers] = useState<AnswerMap>({});
+  // #2833 — restore in-progress answers/grade once on mount. Lazy initializer
+  // so this only runs on the very first render, not every re-render caused by
+  // the parent passing a fresh `initialProgress` object reference.
+  const [answers, setAnswers] = useState<AnswerMap>(() => {
+    const restored = initialProgress?.answers;
+    return isValidAnswerMap(restored) ? restored : {};
+  });
   const [submitting, setSubmitting] = useState(false);
-  const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
+  const [gradeResult, setGradeResult] = useState<GradeResult | null>(() => {
+    const restored = initialProgress?.gradeResult;
+    return isValidGradeResult(restored) ? restored : null;
+  });
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     if (showCoachProp !== undefined) return showCoachProp;
     if (previewMode) return false;
@@ -1006,19 +1064,37 @@ const StoryStructureTable: React.FC<Props> = ({
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+  // #2833 — tracks which storyId the in-memory `answers`/`gradeResult` belong
+  // to, so this effect can tell "first mount of this story (keep the restored
+  // initial state)" apart from "storyId actually changed under us (must wipe
+  // stale answers from the previous story)". Before this fix the effect wiped
+  // `answers`/`gradeResult` unconditionally on every run — including the very
+  // first run right after the lazy useState initializers above restored them
+  // from `initialProgress`, which is exactly why reload always came back blank.
+  const loadedStoryIdRef = useRef<string | undefined>(storyId);
+  const isInitialAnswersMountRef = useRef(true);
+
   useEffect(() => {
+    const isStoryChange = !isInitialAnswersMountRef.current && loadedStoryIdRef.current !== storyId;
+    isInitialAnswersMountRef.current = false;
+    loadedStoryIdRef.current = storyId;
+
     if (structureProp !== undefined) {
       setStructure(structureProp);
       setLoading(false);
       setFetchError(false);
-      setAnswers({});
-      setGradeResult(null);
+      if (isStoryChange) {
+        setAnswers({});
+        setGradeResult(null);
+      }
       return;
     }
     setLoading(true);
     setFetchError(false);
-    setAnswers({});
-    setGradeResult(null);
+    if (isStoryChange) {
+      setAnswers({});
+      setGradeResult(null);
+    }
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
     fetch(`${API_BASE}/api/stories/${storyId}/structure`, { headers })
@@ -1030,6 +1106,16 @@ const StoryStructureTable: React.FC<Props> = ({
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, [storyId, token, API_BASE, structureProp]);
+
+  // #2833 — report the live answer/grade state so the caller can persist it
+  // (debounced, same mechanism every other step component already uses via
+  // useProgressSync). Fires on mount too so a first-ever visit seeds step_data
+  // with `{}` rather than leaving it undefined; persistStepProgressState
+  // no-ops when the payload is unchanged, so this costs nothing when restored.
+  useEffect(() => {
+    if (!onProgressChange) return;
+    onProgressChange({ answers, gradeResult }, false);
+  }, [answers, gradeResult, onProgressChange]);
 
 
   const clearDemoTimers = useCallback(() => {
