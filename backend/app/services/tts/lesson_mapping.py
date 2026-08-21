@@ -4,7 +4,12 @@ import json
 import logging
 import os
 
-from .normalization import _cache_key, _clean_for_tts, _split_sentences
+from .normalization import (
+    _cache_key,
+    _clean_for_tts,
+    _split_sentences,
+    strip_classical_markup,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +59,16 @@ def synthesize_sentence(text: str) -> bytes:
 
 def build_lesson_tts_mapping(lesson: dict) -> dict:
     lesson_id = lesson.get("id") or lesson.get("lesson_number")
-    paragraphs_raw = lesson.get("paragraphs", [])
+    # 文言文那批的 `paragraphs` 是空的，本文在 `classical_text.paragraphs`。
+    # 不接這條的話 mapping 回 0 句 → 預熱腳本從 mapping 列舉 → 這 10 課永遠
+    # 不在預熱範圍 → 每次「AI 朗讀」都是冷合成（#2792，症狀同 #2764）。
+    paragraphs_raw = lesson.get("paragraphs") or []
+    is_classical = False
+    if not paragraphs_raw:
+        classical = (lesson.get("classical_text") or {}).get("paragraphs") or []
+        if classical:
+            paragraphs_raw = classical
+            is_classical = True
 
     v2_index = _load_sentences_v2()
     lesson_data = v2_index.get(int(lesson_id)) if lesson_id is not None else None
@@ -74,7 +88,11 @@ def build_lesson_tts_mapping(lesson: dict) -> dict:
         for idx, paragraph in enumerate(paragraphs_raw):
             if not paragraph or not str(paragraph).strip():
                 continue
-            cleaned_paragraph = _clean_for_tts(str(paragraph))
+            text = str(paragraph)
+            if is_classical:
+                # 斷詞點與註腳數字是給眼睛看的，會被念出來
+                text = strip_classical_markup(text)
+            cleaned_paragraph = _clean_for_tts(text)
             if not cleaned_paragraph:
                 continue
             sentences = _split_sentences(cleaned_paragraph)

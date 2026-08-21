@@ -131,7 +131,9 @@ jobs:
             tests/test_structure_option_display_2736.py \
             tests/test_asset_url_rewrite.py \
             tests/test_tts_audit_empty_not_404.py \
-            tests/test_lab_keypoints_source_2751.py
+            tests/test_lab_keypoints_source_2751.py \
+            tests/test_tts_mapping_covers_classical_2792.py \
+            tests/test_classical_tts_normalization_2792.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
