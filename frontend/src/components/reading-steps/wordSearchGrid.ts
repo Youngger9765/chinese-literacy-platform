@@ -336,3 +336,89 @@ export function buildTeacherGrid(
   if (placedWords.length === 0) return null;
   return { grid, placedWords, size };
 }
+
+// ---------------------------------------------------------------------------
+// 找到之後畫在哪（#2860）
+// ---------------------------------------------------------------------------
+
+export interface OverlayRect {
+  key: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * 「找到了」的紅框。回一到多塊矩形。
+ *
+ * 自動生成的格子只有水平／垂直，一整條矩形就夠。教師版的表有 30% 是斜線
+ * （實測 445/1490，139/143 課至少各有一條），而矩形畫不出斜線 ——
+ * 靠 `direction` 推的話會畫成一根從第一格往下的直條，蓋到不相干的格子、
+ * 也搆不到真正的最後一個字。學生會看到「紅框跟我剛剛拖的不一樣」。
+ *
+ * ⛔ 不要為了斜線把水平／垂直也拆成逐格 —— 那會在每個字之間留下邊框接縫。
+ */
+export function overlayRects(placed: PlacedWord, cellSizePx: number): OverlayRect[] {
+  const cells = placed.cells;
+  const straight =
+    !cells?.length ||
+    cells.every((c) => c.row === cells[0].row) ||
+    cells.every((c) => c.col === cells[0].col);
+
+  if (straight) {
+    const len = [...placed.word].length;
+    const first = cells?.length ? cells[0] : { row: placed.row, col: placed.col };
+    const horizontal = cells?.length
+      ? cells.length > 1 && cells.every((c) => c.row === cells[0].row)
+      : placed.direction === 'horizontal';
+    return [{
+      key: placed.word,
+      x: first.col * cellSizePx,
+      y: first.row * cellSizePx,
+      w: horizontal ? len * cellSizePx : cellSizePx,
+      h: horizontal ? cellSizePx : len * cellSizePx,
+    }];
+  }
+
+  return cells.map((c) => ({
+    key: `${placed.word}-${c.row},${c.col}`,
+    x: c.col * cellSizePx,
+    y: c.row * cellSizePx,
+    w: cellSizePx,
+    h: cellSizePx,
+  }));
+}
+
+/**
+ * 前 `upToIndex + 1` 個字所在的格子（教學動畫逐字點亮用）。
+ *
+ * 跟 `overlayRects` 同一個病根：靠 `direction` 推，斜線就點錯格子。
+ */
+export function cellsAlongWord(placed: PlacedWord, upToIndex: number): Set<string> {
+  const keys = new Set<string>();
+  if (placed.cells?.length) {
+    for (let i = 0; i <= upToIndex && i < placed.cells.length; i++) {
+      keys.add(`${placed.cells[i].row},${placed.cells[i].col}`);
+    }
+    return keys;
+  }
+  const chars = [...placed.word];
+  for (let i = 0; i <= upToIndex && i < chars.length; i++) {
+    const r = placed.direction === 'vertical' ? placed.row + i : placed.row;
+    const c = placed.direction === 'horizontal' ? placed.col + i : placed.col;
+    keys.add(`${r},${c}`);
+  }
+  return keys;
+}
+
+/** 路徑上的第 `index` 格。有 `cells` 就照它走，否則沿 direction 推。 */
+export function cellAt(placed: PlacedWord, index: number): CellPos {
+  if (placed.cells?.length) {
+    return placed.cells[Math.min(index, placed.cells.length - 1)];
+  }
+  return {
+    row: placed.direction === 'vertical' ? placed.row + index : placed.row,
+    col: placed.direction === 'horizontal' ? placed.col + index : placed.col,
+  };
+}

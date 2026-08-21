@@ -13,6 +13,8 @@ import {
   buildTeacherGrid,
   getCellsBetween,
   wordCellKeys,
+  overlayRects,
+  cellsAlongWord,
 } from '../wordSearchGrid';
 
 /** L0011 的真實片段（1-based 座標，跟 yml 同形狀） */
@@ -92,5 +94,65 @@ describe('斜線 —— 全庫 445 條路徑是斜的，佔 30%', () => {
       ],
     });
     expect([...keys].sort()).toEqual(['2,7', '3,6', '4,5', '5,4']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 找到之後畫在哪（#2860 覆審 Finding 2）
+// ---------------------------------------------------------------------------
+
+describe('斜線找到之後的紅框要跟著路徑走', () => {
+  const DIAG = {
+    word: '血脈賁張',
+    row: 2, col: 7, direction: 'vertical' as const,
+    cells: [
+      { row: 2, col: 7 }, { row: 3, col: 6 }, { row: 4, col: 5 }, { row: 5, col: 4 },
+    ],
+  };
+
+  it('斜線畫成四個格子，不是一根直條', () => {
+    const rects = overlayRects(DIAG, 40);
+    expect(rects.map((r) => [r.x, r.y])).toEqual([
+      [7 * 40, 2 * 40], [6 * 40, 3 * 40], [5 * 40, 4 * 40], [4 * 40, 5 * 40],
+    ]);
+    // 每一塊都是一格大小 —— 不是 wordLen 倍
+    expect(rects.every((r) => r.w === 40 && r.h === 40)).toBe(true);
+  });
+
+  it('水平詞仍然是一整條（不要為了斜線把正常的也拆掉）', () => {
+    const rects = overlayRects(
+      { word: '喝采', row: 1, col: 0, direction: 'horizontal' }, 40
+    );
+    expect(rects).toEqual([{ key: '喝采', x: 0, y: 40, w: 80, h: 40 }]);
+  });
+
+  it('cellsAlongWord 沿著真實路徑，不是沿著 direction 推', () => {
+    expect([...cellsAlongWord(DIAG, 2)].sort()).toEqual(['2,7', '3,6', '4,5']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 這條防的是「下次又長回來」（#2860 覆審 Finding 2）
+// ---------------------------------------------------------------------------
+
+describe('VocabWordSearch 不可以再靠 direction 算座標', () => {
+  it('元件裡沒有任何 direction 推導的座標算式', async () => {
+    const [fs, path] = await Promise.all([import('fs'), import('path')]);
+    const file = path.resolve(process.cwd(), 'src/components/reading-steps/VocabWordSearch.tsx');
+    // 正向對照：先確認真的讀到了那個檔。少了這行，路徑寫錯會讀到空字串，
+    // 而空字串當然沒有任何推導 —— 一條永遠綠的鎖。
+    expect(fs.existsSync(file)).toBe(true);
+    const src = fs.readFileSync(file, 'utf-8');
+    expect(src).toContain('overlayRects');
+    // `direction === 'horizontal' ? … col + i` 這一族推導對斜線一律算錯。
+    // 三個消費端（紅框 / 逐字點亮 / 示範游標）都曾經這樣寫，
+    // 而它不會報錯 —— 只是畫在別的地方。
+    const derivations = src
+      .split('\n')
+      .map((line, i) => [i + 1, line] as const)
+      .filter(([, line]) =>
+        /direction\s*===\s*'(horizontal|vertical)'\s*\?/.test(line)
+      );
+    expect(derivations).toEqual([]);
   });
 });
