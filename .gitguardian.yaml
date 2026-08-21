@@ -1,0 +1,27 @@
+# GitGuardian 設定 —— 這個 repo 是 PUBLIC，所以誤報成本很高：
+# 每一筆都要人去判讀，判多了就會開始無視，真的外洩那次也會被一起無視。
+#
+# 起因：2026-08-21 incident #36458689「Generic CLI Secret」
+#   命中 docs/prd/extractor-skill-architecture.md 的
+#     --token spotlight/catalog
+#   那是 reverse_dep_audit.py 的**搜尋字串**參數（值是一個已刪除的目錄路徑），
+#   不是憑證。偵測器只認 `--token <值>` 這個形狀。
+#
+# ⚠️ 這份只擋未來。已經開出來的 incident 要到 GitGuardian dashboard
+#    手動標 false-positive，設定檔消不掉它。
+version: 2
+
+secret:
+  ignored-paths:
+    # 文件裡的示範指令會出現 --token / --key / 假帳密，那是給人照著跑的說明，
+    # 不是憑證。真的憑證一律走 .env（gitignored），不會出現在 docs。
+    - "docs/**"
+    # 測試 fixture 的假帳密。用的是常見 placeholder（demo1234 那類，
+    # 在 GitGuardian 的 CommonValuesBanlist 上），不是自創的高熵字串。
+    - "backend/tests/**"
+    - "frontend/src/**/__tests__/**"
+
+  ignored-matches:
+    - name: reverse-dep-audit-search-token
+      # `--token <目錄路徑>` 是 reverse_dep_audit.py 的搜尋字串參數
+      match: spotlight/catalog
