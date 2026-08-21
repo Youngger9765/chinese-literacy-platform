@@ -1,0 +1,53 @@
+lesson_uid: L0001
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+- 'no': 二
+  name: 念順順
+  module: key_reading
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+- 'no': 六
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 寫作手法──順敘──從時間詞判斷事件順序
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+- 'no': 九
+  name: 知識補給站
+  module: resources
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []

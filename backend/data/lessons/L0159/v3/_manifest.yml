@@ -1,0 +1,58 @@
+lesson_uid: L0159
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': ''
+  name: 古文今譯
+  module: modern_translation
+- 'no': ''
+  name: 故事賞析
+  module: intro_guide
+- 'no': ''
+  name: 原文
+  module: classical_text
+- 'no': ''
+  name: 朗讀計時
+  module: key_reading
+- 'no': ㄧ
+  name: 文白句子比對
+  module: sentence_matching
+- 'no': 二
+  name: 文白詞語比對
+  module: word_matching
+- 'no': 三
+  name: 文章重點表
+  module: keypoints
+- 'no': 四
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 斷句及判讀主語II
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+dispatch:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- sentence_matching
+- spotlight
+- word_matching
+produced:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- sentence_matching
+- spotlight
+- word_matching
+absent_from_source:
+- full_text_annotate
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review

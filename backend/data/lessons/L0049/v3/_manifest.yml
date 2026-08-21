@@ -1,0 +1,24 @@
+lesson_uid: L0049
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+- 'no': 二
+  name: 閱讀理解
+  module: comprehension
+dispatch:
+- comprehension
+- full_text_annotate
+produced:
+- comprehension
+- full_text_annotate
+absent_from_source:
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
