@@ -7,7 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
-import { PlacedWord, wordCellKeys, generateGrid } from './wordSearchGrid';
+import {
+  PlacedWord, wordCellKeys, generateGrid,
+  buildTeacherGrid, TeacherWordSearchSource,
+} from './wordSearchGrid';
 
 // ---------------------------------------------------------------------------
 // Timer hook (elapsed tracking only; not displayed in UI)
@@ -51,6 +54,12 @@ export interface WordSearchProgressReturn {
   placedWords: PlacedWord[];
   size: number;
   wordKeysMap: Map<string, Set<string>>;
+  /**
+   * 這張表哪來的（#2860）。`teacher` = 老師出的那張；`generated` = 這課沒有，自己生的。
+   * ⛔ 一定要露出來 —— 靜默降級會讓 QA 看到格子就當成功，
+   * 那正是 useTtsPlayback 降級成瀏覽器機器音沒被發現的形狀。
+   */
+  gridSource: 'teacher' | 'generated';
   // Actions
   handleDragStart: (pos: { row: number; col: number }) => void;
   handleDragMove: (pos: { row: number; col: number }) => void;
@@ -73,6 +82,13 @@ export interface WordSearchProgressOptions {
    * 沒給就退回 localStorage，跟這個 hook 原本的行為一樣。
    */
   initialProgress?: WordSearchProgress | null;
+  /**
+   * #2860 — 老師出的那張找字表（`story.vocabReview`）。給了就用它，
+   * 不給才自己生格子。⚠️ 這裡收的是**內容**不是參考：
+   * 下面 memo 依 JSON 字串，因為任何上層 `{...story}` 都會換掉參考，
+   * 而重建格子會讓 `foundWords`（按詞存）跟 `highlightedCells`（按座標存）對不上。
+   */
+  teacherSource?: TeacherWordSearchSource | null;
   /**
    * #2848 — 進度變動時回報一次，讓它進得了 DB。
    *
@@ -103,11 +119,24 @@ export function useWordSearchProgress(
 
   const [redoKey, setRedoKey] = useState(0);
 
-  const { grid, placedWords, size } = useMemo(() => {
-    if (vocabWords.length === 0) return { grid: [], placedWords: [], size: 0 };
-    return generateGrid(vocabWords);
+  // 依**內容**不依**參考**（#2860）。`teacherSource` 是 `story.vocabReview`，
+  // 只要任何上層每次 render 造一個新的 story 物件（`{...story}`），
+  // 直接把它放進依賴陣列就會每次重建格子 —— 而 `foundWords` 按詞存、
+  // `highlightedCells` 按座標存，重建之後學生做到一半的高亮就對不上了。
+  // 一課的表約 100 字，序列化的成本遠低於它防的那個 bug。
+  const teacherSource = options.teacherSource;
+  const teacherKey = teacherSource ? JSON.stringify(teacherSource) : '';
+
+  const { grid, placedWords, size, gridSource } = useMemo(() => {
+    // 老師出的表優先（#2860）。150 課抽了卻從沒送到學生面前。
+    const teacher = buildTeacherGrid(teacherSource);
+    if (teacher) return { ...teacher, gridSource: 'teacher' as const };
+    if (vocabWords.length === 0) {
+      return { grid: [], placedWords: [], size: 0, gridSource: 'generated' as const };
+    }
+    return { ...generateGrid(vocabWords), gridSource: 'generated' as const };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vocabWords, redoKey]);
+  }, [vocabWords, redoKey, teacherKey]);
 
   const wordKeysMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -299,6 +328,7 @@ export function useWordSearchProgress(
     grid,
     placedWords,
     size,
+    gridSource,
     wordKeysMap,
     handleDragStart,
     handleDragMove,

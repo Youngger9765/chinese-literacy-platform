@@ -1,3 +1,4 @@
+import type { TeacherWordSearchSource } from './components/reading-steps/wordSearchGrid';
 import type { Lesson } from './schema/lessonContent';
 
 export enum AppView {
@@ -367,6 +368,13 @@ export interface Story {
 
   // ── 文言文專屬模組 (#2752) — 只有 10 課有這些欄位，其餘課全部 undefined ──
   /** 原文＋注釋（大題無編號，印在「原文」區）。 */
+  /**
+   * 詞語複習的教師版找字表（#2860）。150 課抽了 grid + answer_paths，
+   * 但這條路徑上後端 response、api.ts 映射、前端元件三處都沒有它，
+   * 於是 VocabWordSearch 一直用 story.vocabulary 自己隨機生格子 ——
+   * 沒有錯誤訊息，畫面上完全正常，只是那張表不是老師出的。
+   */
+  vocabReview?: TeacherWordSearchSource;
   classicalText?: ClassicalTextContent;
   /** 古文今譯／白話翻譯（大題無編號）。 */
   modernTranslation?: ModernTranslationContent;

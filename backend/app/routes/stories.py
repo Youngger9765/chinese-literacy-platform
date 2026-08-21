@@ -663,6 +663,10 @@ def get_story(story_id: str):
         # flag-gated (default OFF → None) + fail-closed; adds NOTHING to this endpoint's
         # behaviour when the flag is off. This is the ONLY endpoint that supplies it.
         lesson_content=get_lesson_content(story),
+        # 詞語複習的教師版找字表與知識補給站 (#2860) —— loader 早就載進 story dict，
+        # 只是這個逐欄位列舉的 response 沒列它們，於是靜默掉在後端。
+        vocab_review=story.get("vocab_review"),
+        resources=story.get("resources"),
         # 文言文專屬模組 (#2752) — None for every non-文言文 lesson.
         classical_text=story.get("classical_text"),
         modern_translation=story.get("modern_translation"),

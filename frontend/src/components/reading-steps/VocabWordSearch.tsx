@@ -30,7 +30,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { useWordSearchProgress } from './useWordSearchProgress';
 import type { WordSearchProgress } from './useWordSearchProgress';
-import { PlacedWord } from './wordSearchGrid';
+import { PlacedWord, overlayRects, cellsAlongWord, cellAt } from './wordSearchGrid';
 import NextStepFooter from '../learning/NextStepFooter';
 
 // ---------------------------------------------------------------------------
@@ -153,17 +153,6 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   );
 }
 
-function cellsAlongWord(placed: PlacedWord, upToIndex: number): Set<string> {
-  const keys = new Set<string>();
-  const chars = [...placed.word];
-  for (let i = 0; i <= upToIndex && i < chars.length; i++) {
-    const r = placed.direction === 'vertical' ? placed.row + i : placed.row;
-    const c = placed.direction === 'horizontal' ? placed.col + i : placed.col;
-    keys.add(`${r},${c}`);
-  }
-  return keys;
-}
-
 function cursorAtCell(row: number, col: number): DemoCursor | null {
   const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
   if (!el) return null;
@@ -211,7 +200,9 @@ export default function VocabWordSearch({
     handleDragMove,
     handleDragEnd,
     handleRedo,
-  } = useWordSearchProgress(vocabWords, story.id, { initialProgress, onProgressChange });
+  } = useWordSearchProgress(vocabWords, story.id, {
+    initialProgress, onProgressChange, teacherSource: story.vocabReview,
+  });
 
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     try {
@@ -248,8 +239,15 @@ export default function VocabWordSearch({
 
   const demoTargetPlaced = useMemo(() => {
     if (placedWords.length === 0) return null;
-    const horizontal = placedWords.find((pw) => pw.direction === 'horizontal');
-    return horizontal ?? placedWords[0];
+    // 挑水平的示範最好懂。挑不到就退而求其次挑**直的**（overlayRects 回一塊 = 直線），
+    // 最後才隨便挑一個 —— 拿斜線示範會讓學生以為只能斜著拖。
+    const isStraight = (pw: PlacedWord) => overlayRects(pw, 1).length === 1;
+    const horizontal = placedWords.find(
+      (pw) => isStraight(pw)
+        && (pw.cells?.length ? pw.cells.every((c) => c.row === pw.cells![0].row)
+                             : pw.direction === 'horizontal')
+    );
+    return horizontal ?? placedWords.find(isStraight) ?? placedWords[0];
   }, [placedWords]);
 
   const handleDemo = useCallback(() => {
@@ -280,9 +278,8 @@ export default function VocabWordSearch({
         targetWord: target.word,
         highlightCells: cellsAlongWord(target, midIndex),
       });
-      const r = target.direction === 'vertical' ? target.row + midIndex : target.row;
-      const c = target.direction === 'horizontal' ? target.col + midIndex : target.col;
-      setDemoCursor(cursorAtCell(r, c));
+      const at = cellAt(target, midIndex);
+      setDemoCursor(cursorAtCell(at.row, at.col));
     }, 1800);
 
     scheduleDemoStep(() => {
@@ -291,9 +288,8 @@ export default function VocabWordSearch({
         targetWord: target.word,
         highlightCells: cellsAlongWord(target, endIndex),
       });
-      const r = target.direction === 'vertical' ? target.row + endIndex : target.row;
-      const c = target.direction === 'horizontal' ? target.col + endIndex : target.col;
-      setDemoCursor(cursorAtCell(r, c));
+      const at = cellAt(target, endIndex);
+      setDemoCursor(cursorAtCell(at.row, at.col));
     }, 2700);
 
     scheduleDemoStep(() => {
@@ -430,24 +426,13 @@ export default function VocabWordSearch({
   const foundWordOverlays = [
     ...placedWords
       .filter((pw) => foundWords.has(pw.word))
-      .map((pw) => {
-        const wordLen = [...pw.word].length;
-        const x = pw.col * cellSizePx;
-        const y = pw.row * cellSizePx;
-        const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
-        const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
-        return { word: pw.word, x, y, w, h };
-      }),
+      // 逐格 or 一整條由 overlayRects 判斷 —— 教師版的表 30% 是斜線，
+      // 靠 direction 推會畫成一根直條、蓋到不相干的格子（#2860 覆審 Finding 2）
+      .flatMap((pw) => overlayRects(pw, cellSizePx).map((r) => ({ word: r.key, ...r }))),
     ...(demo?.step === 'success' && demoTargetPlaced
-      ? (() => {
-          const pw = demoTargetPlaced;
-          const wordLen = [...pw.word].length;
-          const x = pw.col * cellSizePx;
-          const y = pw.row * cellSizePx;
-          const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
-          const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
-          return [{ word: `demo-${pw.word}`, x, y, w, h }];
-        })()
+      ? overlayRects(demoTargetPlaced, cellSizePx).map((r) => ({
+          word: `demo-${r.key}`, x: r.x, y: r.y, w: r.w, h: r.h,
+        }))
       : []),
   ];
 
