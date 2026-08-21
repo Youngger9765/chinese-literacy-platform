@@ -26,6 +26,10 @@ vi.mock('../../../layouts/LearningLayout', () => ({
 
 vi.mock('react-router-dom', () => ({
   useParams: () => ({}),
+  // ToolboxCompletionActions (rendered when the completion screen's toolboxMode=true)
+  // calls these — the toolbox-mode regression test below needs them stubbed.
+  useNavigate: () => vi.fn(),
+  useLocation: () => ({ pathname: '/tools/20011/comprehension' }),
 }));
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -114,6 +118,158 @@ describe('閱讀理解只該有選擇題，語詞應用的填空句不該混進�
     }
     // LessonRenderer 的 onComplete 觸發 handleMcqComplete(5, 5) → mcqDone=true → NextStepFooter 出現。
     expect(screen.getByText(/下一步|下一關/)).toBeTruthy();
+  });
+});
+
+/**
+ * #2834 (Young 2026-08-21)：「選擇題請統一用 vocab-application 的結束方式」。
+ *
+ * 語詞應用（FillInBlankExercise）答完後有完成卡（🎓「你完成了！」+ 副標 + 逐題列出
+ * 題目原文與作答結果 + 重做錯題/全部重做/繼續下一步）。閱讀理解答完後只有一串
+ * 「你選了 X → 正確：Y」跟一顆「下一步」——沒有完成卡、沒有重做、而且從畫面上看
+ * 連題目原文都沒有（見下面「題幹不是空字串」那條 —— 這其實是另一個 bug：
+ * `reviewableBlocksOf` 讀錯欄位名，`multiple_choice` 的題幹欄位是 `question.question`
+ * 不是 `question.prompt`/`question.stem`，之前一路回傳空字串）。
+ */
+describe('閱讀理解完成卡統一成 vocab-application 的樣式（#2834）', () => {
+  function answerAllCorrectly() {
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) {
+      fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[i]));
+      if (i < CORRECT_OPTION_TEXT.length - 1) {
+        fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+      }
+    }
+  }
+
+  it('全對時完成卡顯示「全部答對！」，且沒有「重做錯題」按鈕', () => {
+    setup();
+    answerAllCorrectly();
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+    expect(screen.getByText('每一題都一次答對，表現優異！')).toBeInTheDocument();
+    expect(screen.queryByText(/重做錯題/)).toBeNull();
+    expect(screen.getByRole('button', { name: '全部重做' })).toBeInTheDocument();
+  });
+
+  it('第一題先答錯（重試後答對）：完成卡顯示「你完成了！」、逐題列出全部 5 題原文、重做錯題（1 題）按鈕出現', () => {
+    const { container } = setup();
+
+    // Q0：先選一個錯的選項 → 出現「再試一次」→ 按下去解鎖 → 再選正解。
+    const q0 = story.multipleChoice![0];
+    const wrongIdx = (q0.options ?? []).findIndex((_, i) => i !== LETTER_TO_INDEX(q0.answer as string));
+    fireEvent.click(screen.getByText(q0.options![wrongIdx]));
+    fireEvent.click(screen.getByRole('button', { name: '再試一次' }));
+    fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[0]));
+    fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) {
+      fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[i]));
+      if (i < CORRECT_OPTION_TEXT.length - 1) {
+        fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+      }
+    }
+
+    expect(screen.getByText('你完成了！')).toBeInTheDocument();
+    expect(screen.getByText('以下是各題的作答結果')).toBeInTheDocument();
+
+    // 逐題列出「全部」5 題 —— 不是只列錯題（跟 vocab-application 一樣，答對的也要出現）。
+    for (const mcq of story.multipleChoice!) {
+      expect(container.textContent).toContain(mcq.question);
+    }
+
+    expect(screen.getByRole('button', { name: '重做錯題（1 題）' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '全部重做' })).toBeInTheDocument();
+  });
+
+  it('點「全部重做」回到第一題，完成卡消失', () => {
+    setup();
+    answerAllCorrectly();
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '全部重做' }));
+
+    expect(screen.queryByText('全部答對！')).toBeNull();
+    expect(screen.queryByText('你完成了！')).toBeNull();
+    expect(screen.getByText(story.multipleChoice![0].question!)).toBeInTheDocument();
+    expect(screen.getByText(/1\s*\/\s*5/)).toBeInTheDocument();
+  });
+
+  it('code review #2834 追蹤：紙本批改結果（OmoPaperResultBanner）完成卡也要繼續顯示，不能因為答完數位題就消失', () => {
+    vi.mocked(useLearningContext).mockReturnValue({
+      selectedStory: story,
+      handleFinishComprehension: mockHandleFinishComprehension,
+      dbSessionId: 'sess-test',
+      saveStepProgressPatch: mockSaveStepProgressPatch,
+      stepProgressData: {
+        step_data: {
+          comprehension: {
+            omo: {
+              graded_at: '2026-08-21T00:00:00Z',
+              source: 'paper',
+              answers: [
+                { question_id: 'q1', student_answer: 'C', correct_answer: 'C', score: 1, ai_confidence: 0.9, context: '' },
+              ],
+            },
+          },
+        },
+      },
+    } as unknown as ReturnType<typeof useLearningContext>);
+    render(<ComprehensionMcqPage />);
+    // 作答中就該看得到（既有行為，不是這次改的）。
+    expect(screen.getByText('紙本批改結果')).toBeInTheDocument();
+
+    answerAllCorrectly();
+
+    // #2834 之前：mcqDone 整段換成 QuizCompletionScreen，這顆banner 連同 LessonRenderer
+    // 一起消失了。它「沒有紙本紀錄時 render 空」，所以留著不影響其他學生。
+    expect(screen.getByText('紙本批改結果')).toBeInTheDocument();
+  });
+
+  it('code review #2834 追蹤：comprehension 在 /tools 進來時(isToolboxMode)，完成卡換成「重做」／「回到練習工具箱」', () => {
+    sessionStorage.setItem('toolboxMode', '1');
+    try {
+      setup();
+      answerAllCorrectly();
+      expect(screen.getByRole('button', { name: '重做' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: '回到練習工具箱' })).toBeInTheDocument();
+      expect(screen.queryByText(/重做錯題/)).toBeNull();
+      expect(screen.queryByText('全部重做')).toBeNull();
+      expect(screen.queryByText(/繼續下一步/)).toBeNull();
+    } finally {
+      sessionStorage.removeItem('toolboxMode');
+    }
+  });
+
+  it('點「重做錯題」只出現先前答錯的那一題，答對後回到完成卡（分數不因重做而改變）', () => {
+    setup();
+
+    const q0 = story.multipleChoice![0];
+    const wrongIdx = (q0.options ?? []).findIndex((_, i) => i !== LETTER_TO_INDEX(q0.answer as string));
+    fireEvent.click(screen.getByText(q0.options![wrongIdx]));
+    fireEvent.click(screen.getByRole('button', { name: '再試一次' }));
+    fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[0]));
+    fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) {
+      fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[i]));
+      if (i < CORRECT_OPTION_TEXT.length - 1) {
+        fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+      }
+    }
+    expect(screen.getByRole('button', { name: '重做錯題（1 題）' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '重做錯題（1 題）' }));
+
+    // 只剩第一題可作答，沒有分頁器（只有一題）。
+    expect(screen.getByText(q0.question!)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /下一題/ })).toBeNull();
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) {
+      expect(screen.queryByText(story.multipleChoice![i].question!)).toBeNull();
+    }
+
+    fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[0]));
+
+    // 回到完成卡 —— 仍記得第一次是答錯的（分數不會因為重做而洗成全對）。
+    expect(screen.getByText('你完成了！')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '重做錯題（1 題）' })).toBeInTheDocument();
   });
 });
 

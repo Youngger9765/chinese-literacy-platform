@@ -47,7 +47,7 @@ function detectToolIdFromPath(pathname: string): ToolId | null {
   return (TOOLBOX_TOOL_IDS as readonly string[]).includes(last) ? (last as ToolId) : null;
 }
 
-interface ToolboxCompletionActionsProps {
+export interface ToolboxCompletionActionsProps {
   /**
    * Reset the tool to a fresh, blank state — the student wants to redo
    * the same tool. Each tool defines its own reset semantics.

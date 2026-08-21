@@ -10,7 +10,7 @@
  * 否則「重做錯題」會變成空集合（學生一定會重試到對）。
  */
 import { describe, it, expect } from 'vitest';
-import { absorbVerdicts, reviewItemsOf } from '../comprehensionReview';
+import { absorbVerdicts, allReviewItemsOf } from '../comprehensionReview';
 import { firstTryScore, wrongFirstTryIds } from '../../../utils/questionReview';
 
 const BLOCKS = [
@@ -43,17 +43,49 @@ describe('閱讀理解 first-try 計分', () => {
     expect(recs.map((r) => r.id)).toEqual(['q2']);
   });
 
-  it('錯題卡片帶得出「你選了 X → 正確：Y」的兩邊', () => {
-    const recs = absorbVerdicts([], { q1: false }, { q1: 0 }, BLOCKS);
-    const items = reviewItemsOf(recs, BLOCKS);
-    expect(items).toHaveLength(1);
-    expect(items[0].studentAnswer).toBe('天差地遠');
-    expect(items[0].correctAnswer).toBe('不分上下');
-    expect(items[0].studentAnswer).not.toBe(items[0].correctAnswer);
+});
+
+/**
+ * 完成卡的逐題清單（#2834）要跟 vocab-application 一樣「全部列出」——包含答對的題目，
+ * 不是只列錯題。原本有一顆只列錯題的 `reviewItemsOf`（給舊的 WrongAnswerReviewList
+ * 呼叫點），code review 發現 ComprehensionMcqPage 改用這顆之後它變成死 code，
+ * 已經連同它的兩條專屬測試一起移除（「你選了 X → 正確：Y」跟「答對不進卡片」
+ * 兩個行為，下面 allReviewItemsOf 的測試都涵蓋到了）。
+ */
+describe('閱讀理解完成卡的逐題清單（#2834，全部列出不只錯題）', () => {
+  it('全對時兩題都要出現，且都標記 correct:true', () => {
+    const recs = absorbVerdicts([], { q1: true, q2: true }, { q1: 2, q2: 1 }, BLOCKS);
+    const items = allReviewItemsOf(recs, BLOCKS);
+    expect(items).toHaveLength(2);
+    expect(items.every((it) => it.correct)).toBe(true);
   });
 
-  it('答對的題目不進錯題卡片', () => {
-    const recs = absorbVerdicts([], { q1: true, q2: true }, { q1: 2, q2: 1 }, BLOCKS);
-    expect(reviewItemsOf(recs, BLOCKS)).toEqual([]);
+  it('一對一錯時兩題都要出現，錯題帶得出學生選的答案，對題的 studentAnswer 是 null', () => {
+    const recs = absorbVerdicts([], { q1: false, q2: true }, { q1: 0, q2: 1 }, BLOCKS);
+    const items = allReviewItemsOf(recs, BLOCKS);
+    expect(items).toHaveLength(2);
+
+    const q1Item = items.find((it) => it.id === 'q1')!;
+    expect(q1Item.correct).toBe(false);
+    expect(q1Item.studentAnswer).toBe('天差地遠');
+    expect(q1Item.correctAnswer).toBe('不分上下');
+
+    const q2Item = items.find((it) => it.id === 'q2')!;
+    expect(q2Item.correct).toBe(true);
+    expect(q2Item.studentAnswer).toBeNull();
+  });
+
+  it('保留 blocks 的原始順序（題目在畫面上的順序），不是 records 被記錄的順序', () => {
+    // q2 先被記錄（後測完先送出），q1 後記錄 —— 輸出仍要照 BLOCKS 的 q1, q2 順序。
+    const recs = absorbVerdicts([], { q2: true }, { q2: 1 }, BLOCKS);
+    const recs2 = absorbVerdicts(recs, { q1: false }, { q1: 0 }, BLOCKS);
+    const items = allReviewItemsOf(recs2, BLOCKS);
+    expect(items.map((it) => it.id)).toEqual(['q1', 'q2']);
+  });
+
+  it('還沒作答的題目不出現（防呆——完成卡理論上不該碰到這種情形）', () => {
+    const recs = absorbVerdicts([], { q1: true }, { q1: 2 }, BLOCKS);
+    const items = allReviewItemsOf(recs, BLOCKS);
+    expect(items.map((it) => it.id)).toEqual(['q1']);
   });
 });

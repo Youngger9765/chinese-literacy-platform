@@ -38,14 +38,6 @@ export interface ReviewableBlock {
   answerIndex: number | null;
 }
 
-/** 錯題卡片要顯示的一列。 */
-export interface ComprehensionReviewItem {
-  id: string;
-  stem: string;
-  studentAnswer: string;
-  correctAnswer: string;
-}
-
 function labelAt(block: ReviewableBlock, idx: unknown): string {
   return typeof idx === 'number' && block.options[idx] !== undefined
     ? block.options[idx]
@@ -78,27 +70,42 @@ export function absorbVerdicts(
   return out;
 }
 
+/** 完成卡的逐題資料 — 跟舊的錯題卡片資料不同在於保留答對的題目（見下方函式說明）。 */
+export interface ComprehensionCompletionItem {
+  id: string;
+  stem: string;
+  correct: boolean;
+  studentAnswer: string | null;
+  correctAnswer: string;
+}
+
 /**
- * 錯題卡片的資料。
+ * 完成卡（#2834，統一成 vocab-application 的樣式）逐題列出全部題目 —— 答對的也要
+ * 出現，不是只列錯題（ComprehensionMcqPage 原本有一顆只列錯題的 `reviewItemsOf`，
+ * code review 發現改用這顆之後它變成死 code，已移除；要「只列錯題」直接
+ * `.filter(it => !it.correct)` 這顆的輸出即可，不必另開一個函式）。順序照 `blocks`
+ * （畫面上的題目順序），不是
+ * `records` 被 `absorbVerdicts` 記錄下來的順序（那個順序取決於學生作答快慢）。
  *
- * ⚠️ 這裡只回「答錯的那些」。正解字串從這裡出去之後，
- * 只能由**送出後才渲染**的元件顯示（`WrongAnswerReviewList` 的 `revealed`
- * 是 fail-closed 的：沒明確傳 true 就什麼都不畫）。
+ * 還沒有 first-try 紀錄的題目（理論上完成卡出現時不該發生）防呆略過，不是回傳
+ * 半吊子的空殼列。
  */
-export function reviewItemsOf(
+export function allReviewItemsOf(
   records: FirstTryRecord<string, string>[],
   blocks: ReviewableBlock[],
-): ComprehensionReviewItem[] {
-  const byId = new Map(blocks.map((b) => [b.id, b]));
-  return records
-    .filter((r) => !r.firstTryCorrect)
-    .map((r) => {
-      const b = byId.get(r.id);
-      return {
-        id: r.id,
-        stem: b?.stem ?? '',
-        studentAnswer: r.studentFirstAnswer ?? '',
-        correctAnswer: r.correctAnswer,
-      };
+): ComprehensionCompletionItem[] {
+  const byId = new Map(records.map((r) => [r.id, r]));
+  const out: ComprehensionCompletionItem[] = [];
+  for (const b of blocks) {
+    const r = byId.get(b.id);
+    if (!r) continue;
+    out.push({
+      id: b.id,
+      stem: b.stem,
+      correct: r.firstTryCorrect,
+      studentAnswer: r.firstTryCorrect ? null : r.studentFirstAnswer ?? '',
+      correctAnswer: r.correctAnswer,
     });
+  }
+  return out;
 }

@@ -101,6 +101,10 @@ jobs:
             src/components/layout/__tests__/toolboxUnreachable.test.tsx \
             src/components/reading-steps/__tests__/introStepCount.test.ts \
             src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
+            src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
+            src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
+            src/pages/learning/__tests__/comprehensionReview.test.ts \
+            src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
             src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
             src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
             src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx
