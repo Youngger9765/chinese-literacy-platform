@@ -80,6 +80,18 @@ jobs:
       #     never pinned here, so its scan lock never actually ran in CI —
       #     which is exactly how 23 custom buttons across 14 files shipped
       #     past a lock whose test file was green (#2771).
+      # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
+      # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
+      # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
+      # space, so every file after the first line arrives as an argument with a leading
+      # space, matches nothing, and vitest silently drops it. That is not an error —
+      # vitest just reports the files it did match and exits 0. This step ran
+      # "8 passed (8)" while listing 37 files, i.e. 29 pinned locks (including the two
+      # #2839 ones added in the same commit) had never executed in CI while the step
+      # showed green. Verify after editing this list with:
+      #   files=$(python3 -c "import yaml;d=yaml.safe_load(open('.github/workflows/frontend-checks.yml'));\
+      #     print([s['run'] for s in d['jobs']['frontend-checks']['steps'] if 'vitest' in str(s.get('run',''))][0])")
+      # then confirm the run's "Test Files N passed (N)" equals the number of files listed.
       # Production build. vitest and eslint both passed while `vite build` was
       # broken — a rename left two files under their old names while every
       # import already used the new ones, and nothing in this workflow resolved
@@ -91,33 +103,34 @@ jobs:
 
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
-            src/components/auth/LearningRouteGate.test.tsx \
-            src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
-            src/hooks/useFullTextTtsQueue.test.ts \
-            src/services/ttsApi.prefetch.test.ts \
-            src/pages/admin/lesson-audio/paragraphGap.test.ts \
-            src/pages/GuestReadingPage.passage.test.tsx \
-            src/components/auth/publicSteps.test.ts \
-            src/services/ttsApi.paragraph.test.ts \
-            src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
-            src/components/learning/__tests__/nextStepFooter.test.tsx \
-            src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
-            src/components/layout/__tests__/Sidebar.role-split.test.tsx \
-            src/components/layout/__tests__/toolboxUnreachable.test.tsx \
-            src/components/reading-steps/__tests__/introStepCount.test.ts \
-            src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
-            src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
-            src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
-            src/pages/learning/__tests__/comprehensionReview.test.ts \
-            src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
-            src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
-            src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
-            src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx \
-            src/components/reading-steps/__tests__/assessmentReportMetrics.test.ts \
-            src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
-            src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
-            src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
-            src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
-            src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
-            src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx
+        run: |
+          npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
+          src/components/auth/LearningRouteGate.test.tsx \
+          src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
+          src/hooks/useFullTextTtsQueue.test.ts \
+          src/services/ttsApi.prefetch.test.ts \
+          src/pages/admin/lesson-audio/paragraphGap.test.ts \
+          src/pages/GuestReadingPage.passage.test.tsx \
+          src/components/auth/publicSteps.test.ts \
+          src/services/ttsApi.paragraph.test.ts \
+          src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
+          src/components/learning/__tests__/nextStepFooter.test.tsx \
+          src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
+          src/components/layout/__tests__/Sidebar.role-split.test.tsx \
+          src/components/layout/__tests__/toolboxUnreachable.test.tsx \
+          src/components/reading-steps/__tests__/introStepCount.test.ts \
+          src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
+          src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
+          src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
+          src/pages/learning/__tests__/comprehensionReview.test.ts \
+          src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
+          src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
+          src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
+          src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/assessmentReportMetrics.test.ts \
+          src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
+          src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
+          src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
+          src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
+          src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx
