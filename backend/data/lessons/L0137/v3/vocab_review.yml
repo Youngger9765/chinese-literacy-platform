@@ -34,7 +34,6 @@ vocab_review:
   - 吃說不孤起老人爭老實
   - 醋文化休自敬論雜複製
   answers_are_graphical: true
-  answer_carrier: 11 個橘色 roundRect（srgbClr E97132），全部錨在紙內，個數與路徑數相符
   answer_paths:
   - word: 假設
     cells:
@@ -141,3 +140,5 @@ vocab_review:
     - - 10
       - 10
     direction: horizontal
+  notes:
+    answer_carrier: 11 個橘色 roundRect（srgbClr E97132），全部錨在紙內，個數與路徑數相符

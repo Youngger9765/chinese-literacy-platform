@@ -3,8 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p11~p12）；文字層的（　）內已填有同樣的代號
-  answer_width_note: 五題的代號在原稿**全部都是全形**（Ａ／Ｃ／Ｂ／Ｃ／Ｄ）。
   questions:
   - index: 1
     answer: A
@@ -62,3 +60,6 @@ comprehension:
       D: 成功沒有捷徑，需要日積月累的努力
     explanation: (從故事可知，正太最後能夠變得身材魁梧，就是因為每天抱豬，長久的鍛鍊日積月累，才能成功。)
     explanation_note: 原稿是一個浮動說明框，印在選項 B、C 右側。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p11~p12）；文字層的（　）內已填有同樣的代號
+    answer_width: 五題的代號在原稿**全部都是全形**（Ａ／Ｃ／Ｂ／Ｃ／Ｄ）。

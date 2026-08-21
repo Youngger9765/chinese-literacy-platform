@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  explanations_absent_note: 本課五題**都沒有**教師解析框（同批的 L0138 有四個）
   questions:
   - index: 1
     answer: A
@@ -52,3 +50,6 @@ comprehension:
     options_note: '⚠️ 選項 D 在 PDF p11 上被中間一個裝飾圖框擠到下一頁的開頭，看起來像脫隊；
 
       文字層順序正常（A→B→C→D）。'
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    explanations_absent: 本課五題**都沒有**教師解析框（同批的 L0138 有四個）

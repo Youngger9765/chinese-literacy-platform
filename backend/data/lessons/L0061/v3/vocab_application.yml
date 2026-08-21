@@ -14,7 +14,6 @@ vocab_application:
     H: 木訥
     I: 因材施教
     J: 對症下藥
-  option_bank_note: 10 個代號對應 8 道小題；D.怯生生、F.不偏不倚 未被任何一題用到
   items:
   - index: 1
     stem: 教練瞭解每位選手的體能與專長後，以（　）的方式設計不同的訓練。
@@ -40,3 +39,5 @@ vocab_application:
   - index: 8
     stem: 教練不因球員是主力或替補而偏心，對每個人都（　）。
     answer: B
+  notes:
+    option_bank: 10 個代號對應 8 道小題；D.怯生生、F.不偏不倚 未被任何一題用到

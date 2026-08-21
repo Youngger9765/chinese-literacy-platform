@@ -12,8 +12,6 @@ vocab_application:
     F: 格格不入
     G: 眷戀
     H: 韶光
-  option_bank_note: 代號表只收 8 個語詞；本課語詞中的「雀躍」「嶄新」沒有列入（原稿如此）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 他穿著體育服出現在喜宴上，顯得非常 （　）。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 媽媽解釋完事情的來龍去脈後，我才（　），知道自己誤會弟弟了。
     answer: D
+  notes:
+    option_bank: 代號表只收 8 個語詞；本課語詞中的「雀躍」「嶄新」沒有列入（原稿如此）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 self_challenge:
   label: 六、自我挑戰
-  teacher_note: （老師可視同學情況決定是否做此大題）
   instruction: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
   strategy_flow:
   - ❶斷句
@@ -51,3 +50,5 @@ self_challenge:
         C: 邊候侵吞子胥的美珠又誣陷他
         D: 邊候相信子胥的清白而釋放他
       teacher_note: 子胥說上面的人要抓他是因為他有美珠，但假如美珠不在自己身上而在邊候身上，那上面的人就該改抓邊候了。邊候擔心引火自焚，只好放了子胥。
+  notes:
+    teacher: （老師可視同學情況決定是否做此大題）

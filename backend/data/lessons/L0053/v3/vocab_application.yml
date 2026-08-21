@@ -12,8 +12,6 @@ vocab_application:
     F: 守株待兔
     G: 迅雷不及掩耳
     H: 臨機應變
-  option_bank_note: 8 個代號對應 8 道小題（本課 10 個語詞中「葉苞」「孵化」未入選項）。
-  answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
   items:
   - index: 1
     stem: 他每週固定運動三天，(　)的運動習慣，讓他能保持身體健康。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 我們(　)地圖上的指示前進，順利抵達目的地。
     answer: A
+  notes:
+    option_bank: 8 個代號對應 8 道小題（本課 10 個語詞中「葉苞」「孵化」未入選項）。
+    answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號

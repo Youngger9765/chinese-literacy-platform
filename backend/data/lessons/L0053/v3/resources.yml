@@ -12,9 +12,6 @@ resources:
     title: 【See Yellow-Face bee (Hylaeus communis) making its cellophane-like nest】
     duration: (4:25)
     source: George Pilkington
-  note: '本課只有 2 則影片（L0052 有 3 則），非漏抄。各附一個 QR code（圖形），連結網址不在文字層。
-
-    第 1 則標題開頭的「 沒有配對的結束引號，原稿如此。'
   section_name: 知識補給站
   videos:
   - index: 1
@@ -23,3 +20,7 @@ resources:
   - index: 2
     url: http://youtu.be/2R4UwzvlbR4
     url_source: 總表0816「4.影片連結」年級6課次13
+  notes:
+    note: '本課只有 2 則影片（L0052 有 3 則），非漏抄。各附一個 QR code（圖形），連結網址不在文字層。
+
+      第 1 則標題開頭的「 沒有配對的結束引號，原稿如此。'

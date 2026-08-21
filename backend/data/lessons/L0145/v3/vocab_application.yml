@@ -13,7 +13,6 @@ vocab_application:
     G: 虛構
     H: 約定俗成
   answers_printed: true
-  answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
   items:
   - index: 1
     stem: 一座城市的文化，是由居民的生活習慣和共同記憶(　)而成的。
@@ -39,3 +38,5 @@ vocab_application:
   - index: 8
     stem: 石虎是臺灣珍貴的野生(　)，需要大家一起保護。
     answer: B
+  notes:
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**

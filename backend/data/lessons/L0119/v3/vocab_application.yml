@@ -12,7 +12,6 @@ vocab_application:
     F: 汲汲營營
     G: 遣返
     H: 餞行
-  option_bank_note: 代號表只列 8 個（邂逅、佇足、呢喃、一貫未編代號）；原稿如此
   items:
   - index: 1
     stem: 週年慶期間，購物中心裡的人潮（　），非常熱鬧。
@@ -38,3 +37,5 @@ vocab_application:
   - index: 8
     stem: 好朋友即將出國留學，我們約在餐廳為她（　）。
     answer: H
+  notes:
+    option_bank: 代號表只列 8 個（邂逅、佇足、呢喃、一貫未編代號）；原稿如此

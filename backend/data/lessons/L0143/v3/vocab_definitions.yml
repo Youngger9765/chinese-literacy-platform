@@ -19,8 +19,6 @@ vocab_definitions:
     🅑再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒問同學。'
-  instruction_note: 本課的 🅐🅑🅒 後面沒有空格（多數課有），照原稿抄
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 因人而異
@@ -46,3 +44,6 @@ vocab_definitions:
   - index: 8
     word: 凝血現象
     definition: 血液由液態逐漸凝固，形成血塊的過程。
+  notes:
+    instruction: 本課的 🅐🅑🅒 後面沒有空格（多數課有），照原稿抄
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

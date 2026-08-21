@@ -19,10 +19,6 @@ vocab_definitions:
   - 簽署
   - 自行其是
   - 有增無減
-  vocabulary_bank_note: '語詞框在原稿是分四行排的，行末沒有頓號，攤平後會變成
-
-    「塑膠微粒無遠弗屆」「倡議者杯水車薪」黏在一起 —— 那是換行不是漏字。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 塑膠微粒
@@ -51,3 +47,8 @@ vocab_definitions:
   - index: 9
     word: 有增無減
     definition: 只有增加，沒有減少。
+  notes:
+    vocabulary_bank: '語詞框在原稿是分四行排的，行末沒有頓號，攤平後會變成
+
+      「塑膠微粒無遠弗屆」「倡議者杯水車薪」黏在一起 —— 那是換行不是漏字。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

@@ -1,20 +1,21 @@
 lesson_uid: L0134
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文／圖三（畫在圖片上）
-  locator: 圖三上排第 ❸ 個圓框的說明文字
-  text_carrier: image
-  source: 向蓋上更厚的被子，地球散熱更慢。
-  corrected: 像蓋上更厚的被子，地球散熱更慢。
-  kind: 錯字（同音字）
-  why: '「向蓋上更厚的被子」不成句；同一排另外三個圓框都是完整敘述，
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文／圖三（畫在圖片上）
+    locator: 圖三上排第 ❸ 個圓框的說明文字
+    text_carrier: image
+    source: 向蓋上更厚的被子，地球散熱更慢。
+    corrected: 像蓋上更厚的被子，地球散熱更慢。
+    kind: 錯字（同音字）
+    why: '「向蓋上更厚的被子」不成句；同一排另外三個圓框都是完整敘述，
 
-    而且這一句在文章裡對應的是第 2 段的比喻「就好像給地球穿上一件厚外套」，
+      而且這一句在文章裡對應的是第 2 段的比喻「就好像給地球穿上一件厚外套」，
 
-    應為「像蓋上更厚的被子」。'
-  confidence: high
-  evidence: word/media/image6.png（圖三原圖）逐字讀取；此字串不在文字層，只在像素裡
-  downstream_note: '這一句畫在圖片上，線上呈現直接沿用原圖，所以沒有可套用修正的欄位 ——
+      應為「像蓋上更厚的被子」。'
+    confidence: high
+    evidence: word/media/image6.png（圖三原圖）逐字讀取；此字串不在文字層，只在像素裡
+    downstream_note: '這一句畫在圖片上，線上呈現直接沿用原圖，所以沒有可套用修正的欄位 ——
 
-    這條勘誤是給出版方回頭修圖用的。'
+      這條勘誤是給出版方回頭修圖用的。'

@@ -14,8 +14,6 @@ vocab_application:
     H: 踉蹌
     I: 吞沒
     J: 蹣跚
-  option_bank_note: 代號表印成 2 列 5 欄（A~E／F~J）；H 踉蹌 與 J 蹣跚 未被任何一題使用（原稿如此）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 颱風來襲，巨浪瞬間(   )了沿岸低地，街道立刻淹成一片。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 他明知資料造假遲早會被揭穿，卻仍心存僥倖，最後(   )，遭到查辦。
     answer: B
+  notes:
+    option_bank: 代號表印成 2 列 5 欄（A~E／F~J）；H 踉蹌 與 J 蹣跚 未被任何一題使用（原稿如此）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

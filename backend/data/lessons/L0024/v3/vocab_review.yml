@@ -18,7 +18,6 @@ vocab_review:
   - 激勵
   - 晉升
   target_words_source_text: 盛夏、引退、寄予厚望、力邀、菜單、自立自強、直言、鴻溝、技不如人、懈怠、激勵、晉升、
-  target_words_errata_ref: E2
   grid_size:
   - 10
   - 10
@@ -132,4 +131,6 @@ vocab_review:
     - - 10
       - 10
     direction: horizontal
-  answer_paths_note: 12 個目標語詞全部圈到。
+  notes:
+    target_words_errata_ref: E2
+    answer_paths: 12 個目標語詞全部圈到。

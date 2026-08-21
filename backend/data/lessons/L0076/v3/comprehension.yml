@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: B
@@ -50,3 +49,5 @@ comprehension:
       D: 醫師應把乩童當成真正醫師，讓她參與所有治療決定
     explanation: 陳醫師先理解家屬請乩童、使用符水背後的心意，再透過溝通與說明病情，在不放棄醫療專業的情況下尊重家屬文化
     explanation_note: 原稿是一個浮動說明框，印在選項 D 下方
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號

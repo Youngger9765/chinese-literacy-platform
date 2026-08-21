@@ -18,7 +18,6 @@ vocab_definitions:
   - 節衣縮食
   - 集資
   - 滿手老繭
-  answer_carrier: 橘色手寫體字（文字流已含答案，非圖形層）
   items:
   - index: 1
     word: 股票
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 10
     word: 派遣
     definition: 指派某人到某地工作或執行任務。
+  notes:
+    answer_carrier: 橘色手寫體字（文字流已含答案，非圖形層）

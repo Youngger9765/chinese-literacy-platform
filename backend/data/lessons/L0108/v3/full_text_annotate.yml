@@ -48,5 +48,6 @@ full_text_annotate:
   - 霧靄
   - 荒蕪
   - 束手無策
-  inline_marked_terms_note: 本課語詞 10 個中，「蠶食鯨吞」在課文裡沒有加框，其餘 9 個都有
   char_count: 1147
+  notes:
+    inline_marked_terms: 本課語詞 10 個中，「蠶食鯨吞」在課文裡沒有加框，其餘 9 個都有

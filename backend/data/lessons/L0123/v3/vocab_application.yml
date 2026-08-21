@@ -14,11 +14,9 @@ vocab_application:
     H: 素昧平生
     I: 經濟蕭條
     J: 走投無路
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   unused_options:
   - A
   - D
-  answers_note: 第 (5) 題的答案代號在原稿印的是全形「Ｈ」，其餘七題是半形；這裡一律記半形 H
   items:
   - index: 1
     stem: 小鎮因(  )，街上店家一間間收起來，連想找份打工都不容易。
@@ -44,3 +42,6 @@ vocab_application:
   - index: 8
     stem: 外公以前走路很快，這兩年(  )，爬樓時得扶著扶手慢慢走。
     answer: B
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    answers: 第 (5) 題的答案代號在原稿印的是全形「Ｈ」，其餘七題是半形；這裡一律記半形 H

@@ -1,21 +1,22 @@
 lesson_uid: L0124
 version_id: v3
-errata:
-- id: E1
-  section: 七 閱讀理解
-  locator: 第 2 題題幹
-  source: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，，最強調哪一項改進？
-  corrected: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，最強調哪一項改進？
-  kind: 重複標點
-  why: 「素肉」後連續兩個全形逗號
-  confidence: high
-  evidence: PDF p8 與 document.xml 一致
-- id: E2
-  section: 六 閱讀聚光燈
-  locator: 概念說明框第 1 句
-  source: 本課是說明文，作者先寫出植物物肉引發的風潮
-  corrected: 本課是說明文，作者先寫出植物肉引發的風潮
-  kind: 贅字
-  why: 「植物肉」誤植為「植物物肉」
-  confidence: high
-  evidence: PDF p6 與 document.xml 一致
+notes:
+  errata:
+  - id: E1
+    section: 七 閱讀理解
+    locator: 第 2 題題幹
+    source: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，，最強調哪一項改進？
+    corrected: 從課文第一段可推論，現在的植物肉相較於早期豆腐製成的素肉，最強調哪一項改進？
+    kind: 重複標點
+    why: 「素肉」後連續兩個全形逗號
+    confidence: high
+    evidence: PDF p8 與 document.xml 一致
+  - id: E2
+    section: 六 閱讀聚光燈
+    locator: 概念說明框第 1 句
+    source: 本課是說明文，作者先寫出植物物肉引發的風潮
+    corrected: 本課是說明文，作者先寫出植物肉引發的風潮
+    kind: 贅字
+    why: 「植物肉」誤植為「植物物肉」
+    confidence: high
+    evidence: PDF p6 與 document.xml 一致

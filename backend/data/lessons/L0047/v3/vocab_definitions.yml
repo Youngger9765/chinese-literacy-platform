@@ -19,8 +19,6 @@ vocab_definitions:
   - 調停折衝
   - 當面戳破
   - 心知肚明
-  vocabulary_bank_note: 照「本課語詞」框原樣、依印出的順序記錄（框內分五行排版，此處攤平）。
-  answer_carrier: 橘色手寫字；文字流已含答案
   items:
   - index: 1
     word: 溫柔婉約
@@ -55,3 +53,6 @@ vocab_definitions:
   - index: 11
     word: 當面戳破
     definition: 當著對方的面揭穿謊言或指出問題。
+  notes:
+    vocabulary_bank: 照「本課語詞」框原樣、依印出的順序記錄（框內分五行排版，此處攤平）。
+    answer_carrier: 橘色手寫字；文字流已含答案

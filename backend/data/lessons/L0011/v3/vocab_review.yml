@@ -31,7 +31,6 @@ vocab_review:
   - 球人稀少數目不轉睛手
   - 員凝聚力以萬計謀畫冊
   answers_are_graphical: true
-  answer_paths_note: 11 個目標語詞全部都有圈記，其中「鷹眼」的框是**灰色**、其餘 10 個是橘色。
   answer_paths:
   - word: 讚嘆不已
     cells:
@@ -142,3 +141,5 @@ vocab_review:
     - - 10
       - 4
     direction: horizontal
+  notes:
+    answer_paths: 11 個目標語詞全部都有圈記，其中「鷹眼」的框是**灰色**、其餘 10 個是橘色。

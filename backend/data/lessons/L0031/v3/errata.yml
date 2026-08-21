@@ -1,12 +1,13 @@
 lesson_uid: L0031
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文-做記號（右緣「字數」欄）
-  locator: 由上往下數第 11 個累計數
-  source: 376
-  corrected: null
-  kind: 數值錯置
-  why: 「字數」是逐行累加的字元數，必須遞增。這一欄印的順序是 …257、265、**376**、310、369、400、412 —— 376 夾在 265 與 310 之間，破壞遞增。正確值應該落在 265~310 之間，但教材沒有其他線索可推定，所以**不臆測、不更正**，只登錄
-  confidence: high
-  evidence: document.xml 的段落順序與 PDF p2 的印刷順序一致，兩邊都是 376 排在 310 前面
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號（右緣「字數」欄）
+    locator: 由上往下數第 11 個累計數
+    source: 376
+    corrected: null
+    kind: 數值錯置
+    why: 「字數」是逐行累加的字元數，必須遞增。這一欄印的順序是 …257、265、**376**、310、369、400、412 —— 376 夾在 265 與 310 之間，破壞遞增。正確值應該落在 265~310 之間，但教材沒有其他線索可推定，所以**不臆測、不更正**，只登錄
+    confidence: high
+    evidence: document.xml 的段落順序與 PDF p2 的印刷順序一致，兩邊都是 376 排在 310 前面

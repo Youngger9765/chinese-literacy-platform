@@ -3,7 +3,6 @@ version_id: v3
 section_no: 二
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
   questions:
   - index: 1
     answer: C
@@ -33,4 +32,6 @@ comprehension:
       A: 閱讀能力要像正太抱小豬一樣，每次學一點，慢慢累積進步
       B: 所有的學習都是困難的，要學好，就必須不怕困難
       C: 學習需要好老師的指導，找到好老師，是學習第一步
-  options_note: 四題都只有 A/B/C 三個選項（沒有 D），原稿如此。
+  notes:
+    answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
+    options: 四題都只有 A/B/C 三個選項（沒有 D），原稿如此。

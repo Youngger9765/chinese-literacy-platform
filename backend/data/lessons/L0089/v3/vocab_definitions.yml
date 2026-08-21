@@ -22,7 +22,6 @@ vocab_definitions:
   - 輕蔑
   - 笨拙
   - 迂
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 囑託
@@ -60,3 +59,5 @@ vocab_definitions:
   - index: 12
     word: 凝住
     definition: 形容像水凝固成冰一樣，表示停頓或靜止。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

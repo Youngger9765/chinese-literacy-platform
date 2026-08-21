@@ -4,11 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第7課 當壞事已不可逆轉：集中營裡的一門課
   paragraph_count: 10
-  paragraphs_note: '段號欄印 10 個號碼，與課文儲存格的 10 個 <w:p> 一一對應，沒有分節小標、沒有未編號引言。
-
-    ⚠️ 第 1 個段號在文字層是注音符號「ㄧ」（U+3127），不是漢字「一」（U+4E00）——原稿如此，
-
-    其餘九個是漢字。這在數字上不影響任何索引，但 grep 段號時要注意。'
   paragraphs:
   - idx: 1
     text: 遇上不可逆轉的壞事，人還可能過著有意義的人生嗎？來看看法蘭柯（V. Frankl）的故事。他是精神科醫師與心理治療學者，也是一位在二十世紀歐洲遭受迫害的猶太人。
@@ -41,5 +36,11 @@ full_text_annotate:
   - 踉蹌
   - 蹣跚
   - 吞沒
-  inline_marked_terms_note: 課文中用黑框（w:bdr color=auto）標出的 10 個語詞，與本課語詞框一致
   char_count: 1501
+  notes:
+    paragraphs: '段號欄印 10 個號碼，與課文儲存格的 10 個 <w:p> 一一對應，沒有分節小標、沒有未編號引言。
+
+      ⚠️ 第 1 個段號在文字層是注音符號「ㄧ」（U+3127），不是漢字「一」（U+4E00）——原稿如此，
+
+      其餘九個是漢字。這在數字上不影響任何索引，但 grep 段號時要注意。'
+    inline_marked_terms: 課文中用黑框（w:bdr color=auto）標出的 10 個語詞，與本課語詞框一致

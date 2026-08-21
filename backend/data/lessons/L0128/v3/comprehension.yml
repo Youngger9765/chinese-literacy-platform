@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p11 可見
   items:
   - index: 1
     stem: 為何「黑猩猩用草桿釣白蟻」在當時被形容為投下「震撼彈」？
@@ -48,3 +47,5 @@ comprehension:
       D: 黑猩猩仍有許多神秘的習性需要人類去研究了解
     answer: C
     explanation: 第5題解析：文章是用她的研究歷程讓黑猩猩從「被想像」到「被看見」，再推進到棲地危機與保育倡議。最後用名言收束：了解→關心→行動
+  notes:
+    answer_carrier: 橘色手寫代號（在文字層），PDF p11 可見

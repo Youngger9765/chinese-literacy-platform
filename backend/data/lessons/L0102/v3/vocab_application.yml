@@ -14,12 +14,6 @@ vocab_application:
     H: 指鹿為馬
     I: 混淆
     J: 偽科學
-  option_bank_note: '🔴 **A 與 I 都是「混淆」**（原稿如此，見 source_errata E1），
-
-    而語詞框的「尼古丁」「長期提款機」沒有出現在代號表裡。
-
-    十個代號對 8 小題；扣掉重複後實際只有 9 個相異語詞。'
-  answer_carrier: 橘色手寫代號（PDF p5）；文字層的括號內已填有同樣的代號
   items:
   - index: 1
     stem: 這兩件事情性質完全不同，怎麼可以（　）。
@@ -46,3 +40,10 @@ vocab_application:
   - index: 8
     stem: 他感冒後鼻涕又黃又（　），醫生提醒他多喝水、多休息。
     answer: E
+  notes:
+    option_bank: '🔴 **A 與 I 都是「混淆」**（原稿如此，見 source_errata E1），
+
+      而語詞框的「尼古丁」「長期提款機」沒有出現在代號表裡。
+
+      十個代號對 8 小題；扣掉重複後實際只有 9 個相異語詞。'
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的括號內已填有同樣的代號

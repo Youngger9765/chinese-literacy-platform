@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號，PDF p10 可見
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、2、5 題有
   questions:
   - index: 1
     answer: B
@@ -54,3 +52,6 @@ comprehension:
       C: 繼續獨自處理，等確定無法完成時再說明原因
       D: 先把工作交給別人，以免自己的失誤影響團隊
     teacher_hint: 修復信任的關鍵：說清楚、主動回報、負責補救。
+  notes:
+    answer_carrier: 橘色代號，PDF p10 可見
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、2、5 題有

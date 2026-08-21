@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: D
@@ -55,3 +54,5 @@ comprehension:
       C: 找好朋友去警告，再不停止會有嚴重後果
       D: 對方畢竟是好意，保持安靜，不理會不處理
     explanation_note: 本題**沒有**浮動解析框。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號

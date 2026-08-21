@@ -2,10 +2,8 @@ lesson_uid: L0155
 version_id: v3
 section_no: 六
 self_challenge:
-  optional_note: （老師可視同學情況決定是否做此大題）
   instruction: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
   strategy_banner: ❶斷句 ⭢❷找動詞/形容詞 ⭢❸找/補主語 ⭢❹用自己的話說一說
-  strategy_banner_note: 箭號是**字面字元「⭢」（U+2B62）**，不是 `→` 也不是 `w:sym`；依規則保留原樣、不斷行
   passage: 弈秋，通國之善弈1者也。使弈秋誨二人弈，其一人專心致志，惟弈秋之爲聽；一人雖聽之，一心以爲有鴻鵠將至，思援弓繳2而射之。雖與之俱學，弗若3之矣。爲是其智弗若與？曰：非然也。(91基二)
   annotations:
   - index: 1
@@ -17,9 +15,7 @@ self_challenge:
   - index: 3
     term: 弗若
     text: 不如。
-  annotations_marker_note: 注釋清單前印一個 `w:sym Wingdings F026` 的書本圖示，不是文字
   translation: 弈秋是全國最會下棋的人。讓弈秋教兩個人下棋，其中一人專心學習，只聽弈秋的教導；另一人雖然也聽課，卻一心以為有大鳥要飛來，總想著要拉弓射鳥。雖然他跟那個專心學棋的人一起學習，棋力卻不如人。是因為他的智力不如人家嗎?(我)說：不是這樣的。
-  translation_carrier: 深藍色（C:156082）文字方塊，印在文章右側
   part_one:
     label: （一）請依照故事脈絡，回答下列問題。
     answer_carrier: 橘色手寫（字元樣式 aff6）；第 3、4 題是**橘色圈選**（roundRect FF9900）
@@ -58,3 +54,8 @@ self_challenge:
         B: 強調天資將決定學習成敗
         C: 指出專心致志的重要性
         D: 說明下棋比射箭更難學
+  notes:
+    optional: （老師可視同學情況決定是否做此大題）
+    strategy_banner: 箭號是**字面字元「⭢」（U+2B62）**，不是 `→` 也不是 `w:sym`；依規則保留原樣、不斷行
+    annotations_marker: 注釋清單前印一個 `w:sym Wingdings F026` 的書本圖示，不是文字
+    translation_carrier: 深藍色（C:156082）文字方塊，印在文章右側

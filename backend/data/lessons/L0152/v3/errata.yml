@@ -1,12 +1,13 @@
 lesson_uid: L0152
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文-做記號
-  locator: 讀前自我檢核第 2 項句末
-  source: 重要的地方、喜歡的語詞、句子或段落做上記
-  corrected: 重要的地方、喜歡的語詞、句子或段落做上記號。
-  kind: 漏字
-  why: 其餘各課同一句都是「做上記號。」，本課文字層與 PDF 都缺「號。」
-  confidence: high
-  evidence: document.xml 該 run 即以「做上記」結尾；PDF p1 同
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 讀前自我檢核第 2 項句末
+    source: 重要的地方、喜歡的語詞、句子或段落做上記
+    corrected: 重要的地方、喜歡的語詞、句子或段落做上記號。
+    kind: 漏字
+    why: 其餘各課同一句都是「做上記號。」，本課文字層與 PDF 都缺「號。」
+    confidence: high
+    evidence: document.xml 該 run 即以「做上記」結尾；PDF p1 同

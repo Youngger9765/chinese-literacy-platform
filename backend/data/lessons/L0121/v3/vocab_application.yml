@@ -12,8 +12,6 @@ vocab_application:
     F: 陰霾
     G: 舉證
     H: 自主權
-  option_bank_note: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 5、6 題的代號印成全形（Ａ／Ｂ），其餘半形
   items:
   - index: 1
     stem: 這件賄選案被媒體揭發，輿論(  )。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 性騷擾常發生在沒有旁人在場的地方，因此受害者往往難以（  ）。
     answer: G
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 5、6 題的代號印成全形（Ａ／Ｂ），其餘半形

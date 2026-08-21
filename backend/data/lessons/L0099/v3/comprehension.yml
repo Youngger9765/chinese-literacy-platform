@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p9）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: A
@@ -57,3 +56,5 @@ comprehension:
       D: 學生把報告交給 AI 完成，最後加上一句自己的心得
     explanation: 第5題解析：A、B、D是錯誤選項，它們的共同問題是：缺乏自主思考。A-看似合理（有整理重點），但缺乏「自己詮釋」。B-看似幫助學習，但學生仍是被動接受。D-看似有成果，但學生沒有參與思考過程。
     explanation_note: 原稿是一個浮動說明框，印在題目下方
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p9）；文字層的（　）內已填有同樣的代號

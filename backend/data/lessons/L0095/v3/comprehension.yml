@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: D
@@ -51,3 +50,5 @@ comprehension:
       B: 不要隨便觸犯神的禁忌，否則將會招來厄運，最後不得善終
       C: 怪物很可憐，沒有名字，也沒有人愛，才會造成一連串悲劇
       D: 發展科學時不能只關注研發成果，也要留意可能帶來的後果
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號

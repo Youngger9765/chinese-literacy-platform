@@ -4,8 +4,6 @@ section_no: 五
 comprehension:
   label: 五、閱讀理解
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p8~p9 可見
-  header_note: 標題那一叢文字方塊裡有一個孤立的「✓」(U+2713)，是章節圖示的裝飾，不是答案
   questions:
   - index: 1
     stem: 下列選項「」中的字，何者字義解釋錯誤？
@@ -68,3 +66,6 @@ comprehension:
     explanation_note: '這一題的解析方塊在文字層裡尾巴多黏了第 4 題解析的三行（「C.是／替、給／轉變成的意思。」），
 
       PDF p9 上那三行被排到方塊外看不見。判為文字方塊複製殘留，未收進 explanation。'
+  notes:
+    answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p8~p9 可見
+    header: 標題那一叢文字方塊裡有一個孤立的「✓」(U+2713)，是章節圖示的裝飾，不是答案

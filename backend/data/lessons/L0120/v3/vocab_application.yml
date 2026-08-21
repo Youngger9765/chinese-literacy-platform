@@ -13,8 +13,6 @@ vocab_application:
     G: 閃爍
     H: 乍見
     I: 週期
-  option_bank_note: 代號表印成 2 列 5 欄，第 2 列第 5 格是空的（只到 I）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 1、3 題的代號印成全形（Ｇ／Ｂ），其餘半形
   unused_options:
   - F
   items:
@@ -81,3 +79,6 @@ vocab_application:
       - 5
       - 6
       answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層但非 ☑ 字元），PDF p5 可見
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列第 5 格是空的（只到 I）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 1、3 題的代號印成全形（Ｇ／Ｂ），其餘半形

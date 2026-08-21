@@ -14,8 +14,6 @@ vocab_application:
     H: 奪門而出
     I: 禁忌
     J: 神祇
-  option_bank_note: 10 個代號對應 8 道小題；H.奪門而出、J.神祇未被任何一題用到。語詞框的 11 個裡「倫理」沒有進代號表。
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
   items:
   - index: 1
     stem: 她厭倦了都市嘈雜的生活，決定隱居山林，過著（　）的生活。
@@ -41,4 +39,7 @@ vocab_application:
   - index: 8
     stem: 受傷的小狗躲在牆角低聲（　），讓路過的人聽了很心疼。
     answer: F
-  items_note: 第 (2) 題原稿寫「歳月」（歳，U+6B33），不是常用的「歲」。照原樣抄。
+  notes:
+    option_bank: 10 個代號對應 8 道小題；H.奪門而出、J.神祇未被任何一題用到。語詞框的 11 個裡「倫理」沒有進代號表。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
+    items: 第 (2) 題原稿寫「歳月」（歳，U+6B33），不是常用的「歲」。照原樣抄。

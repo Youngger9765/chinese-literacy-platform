@@ -13,8 +13,6 @@ vocab_application:
     G: 輻射
     H: 承載
     I: 意味深長
-  option_bank_note: 9 個代號對應 8 道小題；E.族裔 未被任何一題用到。語詞框有 12 個語詞，天體／月相變化／世紀 沒有進第四大題。
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 一個人若無法克服（　），就難以真正理解不同文化的價值觀。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 他沒有給一個明確的答覆，只留下一個（　）的微笑。
     answer: I
+  notes:
+    option_bank: 9 個代號對應 8 道小題；E.族裔 未被任何一題用到。語詞框有 12 個語詞，天體／月相變化／世紀 沒有進第四大題。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號

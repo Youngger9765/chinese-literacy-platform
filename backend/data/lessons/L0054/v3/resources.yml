@@ -16,7 +16,6 @@ resources:
     title: 動物們的小怪癖？氣味用途大不同
     duration: (2:40)
     source: 臺北市立動物園
-  note: 三則影片各附一個 QR code（圖形），連結網址不在文字層。
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 3
     url: http://youtu.be/yTRoNgo53UY
     url_source: 總表0816「4.影片連結」年級6課次14
+  notes:
+    note: 三則影片各附一個 QR code（圖形），連結網址不在文字層。

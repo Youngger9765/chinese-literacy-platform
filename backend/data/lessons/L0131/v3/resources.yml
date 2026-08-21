@@ -20,13 +20,6 @@ resources:
     duration: (2:48)
     source: theNLPI
     has_qr: true
-  items_note: '三支影片的「1.」「2.」「3.」在原稿是印出來的字元（不是 Word 自動編號）。
-
-    總表 4.影片連結 分頁對應網址為 http://youtu.be/DOnaWWW7kBY ／
-
-    http://youtu.be/LFJjOSNgfxA ／ http://youtu.be/Ex_Oy3vhuC8 —— 學習單上只印 QR code，
-
-    網址不在 DOCX 文字層。'
   videos:
   - index: 1
     url: http://youtu.be/DOnaWWW7kBY
@@ -37,3 +30,11 @@ resources:
   - index: 3
     url: http://youtu.be/Ex_Oy3vhuC8
     url_source: 總表0816「4.影片連結」年級9課次10（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    items: '三支影片的「1.」「2.」「3.」在原稿是印出來的字元（不是 Word 自動編號）。
+
+      總表 4.影片連結 分頁對應網址為 http://youtu.be/DOnaWWW7kBY ／
+
+      http://youtu.be/LFJjOSNgfxA ／ http://youtu.be/Ex_Oy3vhuC8 —— 學習單上只印 QR code，
+
+      網址不在 DOCX 文字層。'

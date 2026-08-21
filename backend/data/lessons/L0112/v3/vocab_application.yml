@@ -17,7 +17,6 @@ vocab_application:
   unused_options:
   - C
   - J
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 儘管環境困難，他追求夢想的態度（　），令人敬佩。
@@ -43,3 +42,5 @@ vocab_application:
   - index: 8
     stem: 山難發生時，雖然北風（　），消防隊員們仍冒著嚴寒上山搜救。
     answer: B
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

@@ -3,10 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（字元樣式 rStyle=af），PDF p9 可見
-  teacher_hint_carrier: '本課沒有藍框解析方塊；改成把出處直接印在**選項後面**（橘色小字），
-
-    共 3 處：第 2 題 B、第 3 題 D、第 4 題 C。這是與其他課不同的做法。'
   questions:
   - index: 1
     answer: B
@@ -50,3 +46,8 @@ comprehension:
       B: 展示了秦朝皇帝的英明神武
       C: 反映秦代底層人民的生活壓力
       D: 說明了秦朝的徵兵制度非常完善
+  notes:
+    answer_carrier: 橘色代號（字元樣式 rStyle=af），PDF p9 可見
+    teacher_hint_carrier: '本課沒有藍框解析方塊；改成把出處直接印在**選項後面**（橘色小字），
+
+      共 3 處：第 2 題 B、第 3 題 D、第 4 題 C。這是與其他課不同的做法。'

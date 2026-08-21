@@ -21,7 +21,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 自告奮勇
@@ -53,3 +52,5 @@ vocab_definitions:
   - index: 10
     word: 感同身受
     definition: 心裡的感覺好像親身經歷一般。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

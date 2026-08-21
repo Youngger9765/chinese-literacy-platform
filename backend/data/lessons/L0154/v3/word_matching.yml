@@ -3,10 +3,6 @@ version_id: v3
 section_no: 二
 word_matching:
   instruction: 以下是原文與白話文的對照。請依照文意，寫出方框文字的白話意思。
-  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
-  shape_note: '每一題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），
-
-    下列「白話」（對應位置留括號讓學生填）。這裡把填空寫成 （　），答案放 blanks，順序對應。'
   items:
   - index: 1
     classical: 晉平公問於祁黃羊曰：「南陽無令，其誰可而爲之？」
@@ -77,3 +73,8 @@ word_matching:
     - answer: 外人
     - answer: 仇人
     - answer: 自己人
+  notes:
+    answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
+    shape: '每一題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），
+
+      下列「白話」（對應位置留括號讓學生填）。這裡把填空寫成 （　），答案放 blanks，順序對應。'

@@ -14,8 +14,6 @@ vocab_application:
     H: 佼佼者
     I: 永續
     J: 杳無人煙
-  option_bank_note: 10 個代號對應 8 道小題；I.永續、J.杳無人煙 未被任何一題用到
-  answer_carrier: 橘色手寫代號（PDF p6）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 這場車禍十分嚴重，只有他（　）逃過一劫。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 校長十分(　)這位經驗豐富的老師，常請他協助重要計畫。
     answer: A
+  notes:
+    option_bank: 10 個代號對應 8 道小題；I.永續、J.杳無人煙 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p6）；文字層的（　）內已填有同樣的代號

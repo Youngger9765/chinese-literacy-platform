@@ -2,7 +2,6 @@ lesson_uid: L0144
 version_id: v3
 section_no: 八
 resources:
-  part_note: 三篇合讀
   section_name: 知識補給站
   label: 影片連結
   items:
@@ -26,3 +25,5 @@ resources:
   - index: 1
     url: http://youtu.be/sah7joEnaSQ
     url_source: 總表0816「4.影片連結」年級9課次23
+  notes:
+    part: 三篇合讀

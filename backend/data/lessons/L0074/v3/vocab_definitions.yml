@@ -21,7 +21,6 @@ vocab_definitions:
   - 契作協議
   - 層層把關
   - 鍥而不捨
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 食物鏈
@@ -56,3 +55,5 @@ vocab_definitions:
   - index: 11
     word: 苦撐待變
     definition: 在困難中勉強支撐，等待情況改善。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

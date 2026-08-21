@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: A
@@ -55,3 +54,5 @@ comprehension:
       D: 老師在課堂上鼓勵學生提出不同的意見和觀點
     explanation: 第5題解析：根據轉學生是臺東來的，推測其不會使用交通工具，這顯示了對轉學生的刻板印象。
     explanation_note: 原稿是一個浮動說明框，排在本題之後
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號

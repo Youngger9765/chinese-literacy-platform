@@ -4,7 +4,6 @@ section_no: ㄧ
 full_text_annotate:
   title_line: 第5課  從白熊到藍海豚：學習與念頭和平相處
   paragraph_count: 7
-  paragraphs_note: 段號欄印 ㄧ~七 共 7 個。
   paragraphs:
   - idx: 1
     text: 清晨鬧鐘一響，你迷迷糊糊睜開眼睛，腦袋馬上開始運作：「好累喔，我一定起不來……等一下又會遲到吧。」刷牙時，看到鏡子裡的自己，又浮出另一個念頭：「今天看起來好沒精神，同學一定會覺得我很邋遢。」出門後，天氣陰陰的，你心裡冒出：「完了，沒帶傘，晚點下雨就慘了。」走進教室，看見同學三三兩兩聊天，突然瞥了你一眼，你心裡又冒出個聲音說：「他們是不是在講我？」
@@ -32,5 +31,7 @@ full_text_annotate:
   - 俯仰
   - 唱衰
   - 酸言酸語
-  inline_marked_terms_note: 課文用黑色字元框線（w:bdr color=auto）標出本課語詞；是題目標示不是答案
   char_count: 1206
+  notes:
+    paragraphs: 段號欄印 ㄧ~七 共 7 個。
+    inline_marked_terms: 課文用黑色字元框線（w:bdr color=auto）標出本課語詞；是題目標示不是答案

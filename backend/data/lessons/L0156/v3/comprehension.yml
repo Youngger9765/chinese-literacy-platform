@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
-  teacher_notes_note: 第 1、3 題的選項右側有小括號註記（成語誤用／人煙杳然…），是印在選項行內的正文，不是文字方塊
   questions:
   - index: 1
     answer: B
@@ -55,3 +53,6 @@ comprehension:
       B: 閱讀時應該全然信任作者
       C: 閱讀時可以提出質疑，並蒐集資料
       D: 閱讀時寧願相信書，而不要相信網路
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
+    teacher_notes: 第 1、3 題的選項右側有小括號註記（成語誤用／人煙杳然…），是印在選項行內的正文，不是文字方塊

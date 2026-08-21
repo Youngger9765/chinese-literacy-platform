@@ -17,7 +17,6 @@ vocab_definitions:
   - 崎嶇不平
   - 逆轉
   - 蜿蜒凶險
-  answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案
   items:
   - index: 1
     word: 如影隨形
@@ -46,3 +45,5 @@ vocab_definitions:
   - index: 9
     word: 逆轉
     definition: 事情的發展方向改變，出現不同或相反的結果。「不可逆轉」是指事情已經無法回到原來的狀態，也無法挽回。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案

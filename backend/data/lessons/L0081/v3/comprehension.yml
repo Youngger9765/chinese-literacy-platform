@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: D
@@ -55,3 +54,5 @@ comprehension:
       C: 內含假人模型，模仿成年女性的骨骼、肌肉器官
       D: 使用兩具假人的目的是為了對比背心的防護效果
     stem_note: 題幹的「有誤」加了底線；選項 B 後面的「（文中並未提到）」是橘色教師註，在文字流裡，照原樣保留。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號

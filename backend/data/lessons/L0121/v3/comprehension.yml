@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊；第 1、2、3 題的代號印成全形（Ｃ／Ｄ）
   questions:
   - index: 1
     answer: C
@@ -48,3 +47,5 @@ comprehension:
       B: 教導讀者如何用「＃MeToo」在社群網站上建立運動標識
       C: 教導讀者遇到壞事，如何以牙還牙，以眼還眼
       D: 作者比較「＃MeToo」在西方和臺灣社會的異同
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊；第 1、2、3 題的代號印成全形（Ｃ／Ｄ）

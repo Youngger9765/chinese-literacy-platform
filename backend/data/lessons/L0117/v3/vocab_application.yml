@@ -14,7 +14,6 @@ vocab_application:
     H: 終年
     I: 暗無天日
     J: 地力耗盡
-  option_bank_note: 代號表只列 10 個，本課語詞有 12 個（產業鏈、剝削未編代號）；原稿如此。
   items:
   - index: 1
     stem: 做一個瓷器要經過十幾道（　），每一道都要小心處理。
@@ -40,3 +39,5 @@ vocab_application:
   - index: 8
     stem: 這家餐廳（　）使用天然食材，吸引很多看重健康的顧客。
     answer: G
+  notes:
+    option_bank: 代號表只列 10 個，本課語詞有 12 個（產業鏈、剝削未編代號）；原稿如此。

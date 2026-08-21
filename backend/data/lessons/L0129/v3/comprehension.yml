@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，讀完每一個選項後，選出最適合的答案。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: C
@@ -53,3 +52,5 @@ comprehension:
       D: 隱藏讚數並刻意看不同內容
     explanation: 作者建議別讓讚數左右情緒與自我價值（可用隱藏讚數減壓），也要留意自己滑動內容、避免過濾泡泡限制視野；D同時符合兩面向。
     explanation_placement_note: 印在題目右側的獨立文字方塊（藍框），是教師版解析
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

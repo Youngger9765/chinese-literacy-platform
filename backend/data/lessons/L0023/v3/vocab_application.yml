@@ -13,7 +13,6 @@ vocab_application:
     G: 有條不紊
     H: 貴人相助
     I: 資助
-  option_bank_note: 只列 9 個代號（本課 12 個語詞中的「低微」「前衛」「名列前茅」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 創業失敗後，他沒有（　）於環境，而是反思自己的不足。
@@ -39,3 +38,5 @@ vocab_application:
   - index: 8
     stem: 這位企業家長期（　）偏鄉學生，幫助他們安心讀書。
     answer: I
+  notes:
+    option_bank: 只列 9 個代號（本課 12 個語詞中的「低微」「前衛」「名列前茅」未入選項），對應 8 道小題

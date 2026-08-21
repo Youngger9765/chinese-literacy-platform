@@ -12,7 +12,6 @@ vocab_application:
     F: 徒手訓練
     G: 失之毫釐，差之千里
     H: 負擔
-  option_bank_note: 只列 8 個代號（本課 10 個語詞中的「精準」「加持」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 收到這次測驗的結果，他的心情（　）到極點，完全提不起勁了。
@@ -38,3 +37,5 @@ vocab_application:
   - index: 8
     stem: 因為沒有健身器材，他每天在家做（　），培養運動習慣。
     answer: F
+  notes:
+    option_bank: 只列 8 個代號（本課 10 個語詞中的「精準」「加持」未入選項），對應 8 道小題

@@ -18,7 +18,6 @@ vocab_definitions:
   - 彷彿
   - 守株待兔
   - 迅雷不及掩耳
-  answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案
   items:
   - index: 1
     word: 覓食
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 10
     word: 迅雷不及掩耳
     definition: 雷聲突然響起，讓人來不及掩住耳朵；比喻速度非常快，讓人來不及反應或防備。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案

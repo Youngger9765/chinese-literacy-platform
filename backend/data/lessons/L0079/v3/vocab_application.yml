@@ -13,8 +13,6 @@ vocab_application:
     G: 聯手
     H: 哄騙
     I: 秋祺
-  option_bank_note: 9 個代號對應 8 道小題；I.秋祺 未被任何一題用到
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 離開家鄉數十年，頭髮都斑駁了，他對家人的思念（　）。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 警方和銀行（　）追查詐騙案，希望儘快抓到主謀，減少受害者的損失。
     answer: G
+  notes:
+    option_bank: 9 個代號對應 8 道小題；I.秋祺 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號

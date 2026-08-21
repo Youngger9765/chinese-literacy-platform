@@ -31,7 +31,6 @@ vocab_review:
   - 顧受人口霸王折下醫忘
   - 挫不能笑水滴兼顧家食
   answers_are_graphical: true
-  answer_paths_note: 原稿只圈出 11 個目標語詞中的 5 個；其餘 6 個未畫圈，故不列。
   answer_paths:
   - word: 滴水穿石
     cells:
@@ -84,3 +83,5 @@ vocab_review:
     - - 10
       - 8
     direction: horizontal
+  notes:
+    answer_paths: 原稿只圈出 11 個目標語詞中的 5 個；其餘 6 個未畫圈，故不列。

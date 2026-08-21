@@ -3,12 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案，印在題號前的括號內），文字流有此資訊
-  teacher_notes_note: '每一題右側都有一個深藍色（C:0F4761）的教師解析文字方塊，印在頁面右緣。
-
-    PDF 上第 2、3 題的方塊被右邊界裁掉一部分（看起來像缺字），
-
-    但 document.xml 的內容是完整的，這裡以文字層為準。'
   questions:
   - index: 1
     answer: D
@@ -61,3 +55,10 @@ comprehension:
       C: 這次只是運氣不好，下次可能自然會講得更順
       D: 我可以想想哪裡講得不順，整理內容後再多練習
     teacher_note: D不是否定自己，也不是等待壞事自然變好，而是從挫敗中看見問題，思考可以調整的方法，最符合本文觀點。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案，印在題號前的括號內），文字流有此資訊
+    teacher_notes: '每一題右側都有一個深藍色（C:0F4761）的教師解析文字方塊，印在頁面右緣。
+
+      PDF 上第 2、3 題的方塊被右邊界裁掉一部分（看起來像缺字），
+
+      但 document.xml 的內容是完整的，這裡以文字層為準。'

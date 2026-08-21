@@ -26,10 +26,11 @@ full_text_annotate:
   underlined_terms:
   - 平溪
   inline_marked_terms: []
-  inline_marked_terms_note: '課文裡**沒有**加框的語詞（`w:bdr` 非 auto 的 6 段全在聚光燈的練習2、練習3 裡）。
-
-    這與總表「語詞1 = 無」一致 —— 這課沒有語詞單元。'
-  paragraph_numbering_note: '段號欄印的是「ㄧ二三四五六七八」，其中第一個是注音符號 `ㄧ`（U+3123）不是漢字「一」，
-
-    原稿如此（全庫常見）。本檔的 idx 用阿拉伯數字，對應關係 ㄧ=1 … 八=8。'
   char_count: 577
+  notes:
+    inline_marked_terms: '課文裡**沒有**加框的語詞（`w:bdr` 非 auto 的 6 段全在聚光燈的練習2、練習3 裡）。
+
+      這與總表「語詞1 = 無」一致 —— 這課沒有語詞單元。'
+    paragraph_numbering: '段號欄印的是「ㄧ二三四五六七八」，其中第一個是注音符號 `ㄧ`（U+3123）不是漢字「一」，
+
+      原稿如此（全庫常見）。本檔的 idx 用阿拉伯數字，對應關係 ㄧ=1 … 八=8。'

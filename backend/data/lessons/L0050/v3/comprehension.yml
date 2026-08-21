@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
   questions:
   - index: 1
     answer: D
@@ -48,4 +47,6 @@ comprehension:
       B: 十七世紀航海探險的種種危險與高昂成本
       C: 股票制度的起源以及所帶來的影響
       D: 荷蘭人在臺灣建立殖民地的歷史經過
-  teacher_hint_carrier: 三則教師註解印在題目右側的小方框內（文字方塊），文字流已含。
+  notes:
+    answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
+    teacher_hint_carrier: 三則教師註解印在題目右側的小方框內（文字方塊），文字流已含。

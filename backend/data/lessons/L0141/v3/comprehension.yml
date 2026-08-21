@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: B
@@ -61,3 +60,5 @@ comprehension:
     explanation_placement_note: '⚠️ 印在 PDF p9 的獨立文字方塊（藍框），與選項 D、第八大題的標題疊印在一起，
 
       看起來像版面壞掉。document.xml 的文字流是完整乾淨的，本欄以文字層為準。'
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

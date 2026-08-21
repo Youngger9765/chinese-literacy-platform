@@ -3,9 +3,6 @@ version_id: v3
 section_no: 四
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: '本課選項用**字母代號 A~D**（不是 ①②③④），教師版答案印在題號前的括號裡
-
-    （橘色手寫體）。維持字母 key —— 改成數字會讓答案對不到選項。'
   answers_printed: true
   items:
   - index: 1
@@ -53,3 +50,7 @@ comprehension:
       D: 八哥近年比麻雀更常被看見，主要是因為牠們叫聲特別明顯熱鬧
     answer: C
     answer_carrier: 橘色手寫體印在題號前的括號內（原稿印全形「Ｃ」）
+  notes:
+    option_key: '本課選項用**字母代號 A~D**（不是 ①②③④），教師版答案印在題號前的括號裡
+
+      （橘色手寫體）。維持字母 key —— 改成數字會讓答案對不到選項。'

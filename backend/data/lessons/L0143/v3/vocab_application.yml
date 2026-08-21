@@ -3,7 +3,6 @@ version_id: v3
 section_no: 四
 vocab_application:
   instruction: 在空格填入正確的語詞代號
-  instruction_note: 本課這句句末沒有句號，照原稿抄
   option_bank:
     A: 囊括
     B: 堵住
@@ -13,8 +12,6 @@ vocab_application:
     F: 凝血現象
     G: 功不可沒
     H: 血栓
-  option_bank_note: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）；8 個代號全部用到
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 每個人的體質不同，對藥物的反應也(  )。
@@ -40,3 +37,7 @@ vocab_application:
   - index: 8
     stem: 高山上的空氣比較(  )，剛爬上去時容易覺得喘。
     answer: C
+  notes:
+    instruction: 本課這句句末沒有句號，照原稿抄
+    option_bank: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）；8 個代號全部用到
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

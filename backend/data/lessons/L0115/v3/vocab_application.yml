@@ -17,7 +17,6 @@ vocab_application:
   unused_options:
   - D
   - E
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 事件真相尚未釐清，網路上的說法(　)，讀者反而更難判斷對錯。
@@ -43,3 +42,5 @@ vocab_application:
   - index: 8
     stem: 團隊出現問題，主管若(　)，只會讓衝突擴大。
     answer: G
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

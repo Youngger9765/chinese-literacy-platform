@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（字元樣式 rStyle=af），PDF p9 可見
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3 題有
   questions:
   - index: 1
     answer: B
@@ -55,3 +53,6 @@ comprehension:
       B: 書中的知識都經過前人驗證，可相信
       C: 聽權威的科學家、醫師等專業人士怎麼說
       D: 多質疑、多檢驗，並保持探究的心
+  notes:
+    answer_carrier: 橘色代號（字元樣式 rStyle=af），PDF p9 可見
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3 題有

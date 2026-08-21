@@ -14,8 +14,6 @@ vocab_application:
     H: 咆哮
     I: 得不償失
     J: 進退維谷
-  option_bank_note: 十個代號取自本課 16 個語詞；代號 H（咆哮）與 I（得不償失）在八小題裡沒有被用到。
-  answer_carrier: 橘色手寫代號（PDF p5）；文字層的半形括號內已填有同樣的代號
   items:
   - index: 1
     stem: 有人發現他就是謠言的源頭，他因此成為（　），大家都罵他。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 導師叫我下課找她說明作弊的事，我這節課（　），無法專心上課。
     answer: B
+  notes:
+    option_bank: 十個代號取自本課 16 個語詞；代號 H（咆哮）與 I（得不償失）在八小題裡沒有被用到。
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的半形括號內已填有同樣的代號

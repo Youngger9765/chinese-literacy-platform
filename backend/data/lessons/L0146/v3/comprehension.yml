@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）
   answers_printed: true
   items:
   - index: 1
@@ -53,3 +52,5 @@ comprehension:
       C: 詳細介紹南島語族的分布範圍，讓讀者認識其活動區域之廣
       D: 運用專業的語言學知識與研究成果，提高文章的學術深度
     answer: B
+  notes:
+    option_key: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）

@@ -19,7 +19,6 @@ resources:
     duration: 0:52
     duration_seconds: 52
     source: Tony's chocolonely東尼巧克力
-  note: 每則附 QR code（圖片）；總表「4.影片連結」分頁只登錄兩支連結，學習單印三支
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 2
     url: http://youtu.be/c4XMJZIYpDw
     url_source: 總表0816「4.影片連結」年級8課次1
+  notes:
+    note: 每則附 QR code（圖片）；總表「4.影片連結」分頁只登錄兩支連結，學習單印三支

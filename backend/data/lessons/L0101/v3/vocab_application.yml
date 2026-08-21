@@ -14,8 +14,6 @@ vocab_application:
     H: 殊途同歸
     I: 試煉
     J: 款待
-  option_bank_note: 十個代號取自「本課語詞」框的 13 個，未入表的是陶甕、酒麴、豐年祭。
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的半形括號內已填有同樣的代號
   items:
   - index: 1
     stem: 青年們接受嚴格的生存挑戰，成功通過（　），獲得族人發給的勇士羽飾。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 網路已成為現代社會最重要的（　），使資訊得以迅速流通。
     answer: A
+  notes:
+    option_bank: 十個代號取自「本課語詞」框的 13 個，未入表的是陶甕、酒麴、豐年祭。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的半形括號內已填有同樣的代號

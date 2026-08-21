@@ -3,7 +3,6 @@ version_id: v3
 section_no: 四
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊；第 4 題的代號印成全形（Ｃ），其餘半形
   questions:
   - index: 1
     answer: D
@@ -52,3 +51,5 @@ comprehension:
       B: 先把整篇文字讀完，再回頭一次把四張圖全部快速看完
       C: 先看圖片猜出大意，再靠自然科的知識補上沒有寫明的內容
       D: 先挑最容易的圖來看，只要圖看懂了就不必細讀文章內容
+  notes:
+    answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊；第 4 題的代號印成全形（Ｃ），其餘半形

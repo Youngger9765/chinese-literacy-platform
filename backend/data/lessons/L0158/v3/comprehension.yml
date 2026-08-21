@@ -3,8 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（run 層 w:color ＋ 字元樣式），文字流有此資訊
-  teacher_note_carrier: 藍色（156082／215E99）文字方塊，印在題目右側；只有第 1、3、5 題有
   questions:
   - index: 1
     answer: D
@@ -66,3 +64,6 @@ comprehension:
       C人做的壞事，上天都看著。比喻天理昭昭，報應不爽；
 
       D盡自己的能力去做，但能否成功就看上天的安排。'
+  notes:
+    answer_carrier: 橘色手寫代號（run 層 w:color ＋ 字元樣式），文字流有此資訊
+    teacher_note_carrier: 藍色（156082／215E99）文字方塊，印在題目右側；只有第 1、3、5 題有

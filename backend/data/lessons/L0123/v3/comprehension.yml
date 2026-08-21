@@ -3,10 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案，印在題號前的括號內），文字流有此資訊
-  teacher_notes_note: '第 1、2、3 題右側各有一個深藍色（C:0F4761）的教師解析文字方塊，第 4、5 題沒有。
-
-    PDF 上這些方塊被右邊界裁掉一部分，但 document.xml 的內容完整，這裡以文字層為準。'
   questions:
   - index: 1
     answer: C
@@ -51,3 +47,8 @@ comprehension:
       B: 透過描寫用裱框保護斧頭，表示裱框有防鏽的功能
       C: 把斧頭設計成一個伏筆，表示再來的情節會有大的突破
       D: 用裱框展示收藏品味與經濟能力，表示一切都已苦盡甘來
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案，印在題號前的括號內），文字流有此資訊
+    teacher_notes: '第 1、2、3 題右側各有一個深藍色（C:0F4761）的教師解析文字方塊，第 4、5 題沒有。
+
+      PDF 上這些方塊被右邊界裁掉一部分，但 document.xml 的內容完整，這裡以文字層為準。'

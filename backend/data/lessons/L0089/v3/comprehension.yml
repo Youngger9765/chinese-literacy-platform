@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版詳解），文字流有此資訊；五題都有
   questions:
   - index: 1
     answer: C
@@ -51,3 +49,6 @@ comprehension:
       C: 強調四組學生對原文情節的記憶都十分正確
       D: 說明讀書會應以角色扮演取代個人閱讀與思考。
     teacher_hint: 第5題詳解：作者詳細呈現表演、畫圖與討論，是讓讀者跟著學生一步步比較父子互動，形成對「背影」的理解。A只是表面效果，C、D都不是文章要表達的重點。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版詳解），文字流有此資訊；五題都有

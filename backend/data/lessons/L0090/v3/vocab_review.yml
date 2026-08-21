@@ -4,7 +4,6 @@ section_no: 八
 vocab_review:
   type: word_search
   instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
-  instruction_note: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
   target_words:
   - 大顯身手
   - 籌備
@@ -18,13 +17,6 @@ vocab_review:
   - 彰顯
   - 侷限
   - 眾所矚目
-  target_words_note: '這 12 個是灰框實際印出來的。格子上另外圈了「多多益善」（第 10 列 c3~c6），
-
-    它在課文、閱讀理解第 1 題選項 C 與總表語詞13 都有，但灰框沒列 ——
-
-    判為灰框漏列，未把它補進 target_words（那會變成竄改原稿），改在該條路徑標
-
-    not_in_printed_list: true。'
   grid_size:
   - 10
   - 10
@@ -39,7 +31,6 @@ vocab_review:
   - 秦程畫矚多刺刑端限彰
   - 王碑目中人花荊茶棘皮
   - 限制多多益善手棘住路
-  grid_note: 第 2 列只有 9 個字 —— 第 10 欄是空白儲存格（原稿如此，不是漏抄）
   answers_are_graphical: true
   answer_paths:
   - word: 趨勢
@@ -151,10 +142,20 @@ vocab_review:
     - - 10
       - 6
     direction: horizontal
-  answer_paths_note: '共 13 條，比灰框列出的 12 個目標語詞多一條：最後那條「多多益善」（第 10 列 c3~c6）
+  notes:
+    instruction: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
+    target_words: '這 12 個是灰框實際印出來的。格子上另外圈了「多多益善」（第 10 列 c3~c6），
 
-    格子上確實有圈，但第八大題灰框沒把它列進目標語詞（見 target_words_note）。
+      它在課文、閱讀理解第 1 題選項 C 與總表語詞13 都有，但灰框沒列 ——
 
-    ⚠️ answer_paths 的元素必須維持 {word, cells, direction} 三個 key 的固定形狀
+      判為灰框漏列，未把它補進 target_words（那會變成竄改原稿），改在該條路徑標
 
-    （scripts/normalize_word_search.py 會比對），所以這個註記放在這裡而不是那一條路徑裡。'
+      not_in_printed_list: true。'
+    grid: 第 2 列只有 9 個字 —— 第 10 欄是空白儲存格（原稿如此，不是漏抄）
+    answer_paths: '共 13 條，比灰框列出的 12 個目標語詞多一條：最後那條「多多益善」（第 10 列 c3~c6）
+
+      格子上確實有圈，但第八大題灰框沒把它列進目標語詞（見 target_words_note）。
+
+      ⚠️ answer_paths 的元素必須維持 {word, cells, direction} 三個 key 的固定形狀
+
+      （scripts/normalize_word_search.py 會比對），所以這個註記放在這裡而不是那一條路徑裡。'

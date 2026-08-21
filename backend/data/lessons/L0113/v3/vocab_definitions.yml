@@ -23,12 +23,6 @@ vocab_definitions:
   - 眾說紛紜
   - 莫衷一是
   vocabulary_bank_label: 本課語詞
-  vocabulary_bank_note: '語詞框裡的「莫衷一是」在文字層寫成 `莫衷一` + `U+E01E1`（變體選擇符）+ `是`，
-
-    其餘三處（定義列、代號表、找字灰框）都是乾淨的四個字。本檔一律寫乾淨版；
-
-    記在這裡是因為 naive `len()` 會多算 1 個字。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 家喻戶曉
@@ -66,3 +60,10 @@ vocab_definitions:
   - index: 12
     word: 眾說紛紜
     definition: 大家提出許多不同的說法或意見。
+  notes:
+    vocabulary_bank: '語詞框裡的「莫衷一是」在文字層寫成 `莫衷一` + `U+E01E1`（變體選擇符）+ `是`，
+
+      其餘三處（定義列、代號表、找字灰框）都是乾淨的四個字。本檔一律寫乾淨版；
+
+      記在這裡是因為 naive `len()` 會多算 1 個字。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

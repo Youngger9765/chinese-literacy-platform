@@ -13,10 +13,8 @@ vocab_application:
     G: 花瓶
     H: 低迷不振
     I: 訕笑
-  option_bank_note: 選項庫只有 9 個（A~I），比第三大題的語詞框再少一個「物化」，也沒有「震耳欲聾」。原稿如此。
   unused_options:
   - E
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 他剛開口談夢想，就被同儕(  　 )，讓他非常挫折。
@@ -42,3 +40,6 @@ vocab_application:
   - index: 8
     stem: 比賽最後十秒我們逆轉得分，全班(  　 )，拍手叫好。
     answer: B
+  notes:
+    option_bank: 選項庫只有 9 個（A~I），比第三大題的語詞框再少一個「物化」，也沒有「震耳欲聾」。原稿如此。
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

@@ -1,12 +1,13 @@
 lesson_uid: L0039
 version_id: v3
-errata:
-- id: E1
-  section: 八 詞語複習
-  locator: 找字格子第 3 列第 3 欄
-  source: 慕
-  corrected: 暮
-  kind: 錯字（找字格子）
-  why: 被圈起來的斜線 (1,1)→(4,4) 取字是「朝思**慕**想」，拼不回目標語詞「朝思暮想」。 格子裡也沒有第二處正確拼法（第 1 列橫的是「朝夕暮想」，「夕」同樣不對，而且沒有被圈）。 所以「朝思暮想」這個目標語詞在格子裡**無法正確拼出**，answer_paths 只列得出其餘 7 個。
-  confidence: high
-  evidence: PDF p11 與 document.xml 一致；8 個 roundRect 對 8 個目標語詞，形狀一一對得上
+notes:
+  errata:
+  - id: E1
+    section: 八 詞語複習
+    locator: 找字格子第 3 列第 3 欄
+    source: 慕
+    corrected: 暮
+    kind: 錯字（找字格子）
+    why: 被圈起來的斜線 (1,1)→(4,4) 取字是「朝思**慕**想」，拼不回目標語詞「朝思暮想」。 格子裡也沒有第二處正確拼法（第 1 列橫的是「朝夕暮想」，「夕」同樣不對，而且沒有被圈）。 所以「朝思暮想」這個目標語詞在格子裡**無法正確拼出**，answer_paths 只列得出其餘 7 個。
+    confidence: high
+    evidence: PDF p11 與 document.xml 一致；8 個 roundRect 對 8 個目標語詞，形狀一一對得上

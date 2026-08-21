@@ -3,8 +3,6 @@ version_id: v3
 section_no: 二
 word_matching:
   instruction: 請依照文意，勾選出原文「 」中的白話文意思。
-  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層），8 題各 1 個
-  shape_note: 每題一列：文言原句（要解釋的字用「」框住）＋ 兩個白話選項二選一
   items:
   - index: 1
     classical: 「俄而」腥風驟起
@@ -62,8 +60,11 @@ word_matching:
       1: 已經
       2: 既然
     answer: 1
-  items_note: '第 (3) 題的文言句在原稿印成「於是。醫數十日漸平，「乃」偕歸」——句首多了「於是。」
+  notes:
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層），8 題各 1 個
+    shape: 每題一列：文言原句（要解釋的字用「」框住）＋ 兩個白話選項二選一
+    items: '第 (3) 題的文言句在原稿印成「於是。醫數十日漸平，「乃」偕歸」——句首多了「於是。」
 
-    而課文原句是「醫數十日漸平，乃偕歸」。這是題目自己的寫法（把答案先寫在前面當提示），
+      而課文原句是「醫數十日漸平，乃偕歸」。這是題目自己的寫法（把答案先寫在前面當提示），
 
-    照原樣抄、不修。'
+      照原樣抄、不修。'

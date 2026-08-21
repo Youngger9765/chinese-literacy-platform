@@ -13,8 +13,6 @@ vocab_application:
     G: 惺忪
     H: 兵貴神速
     I: 目睹
-  option_bank_note: 只有 A~I 九個代號（沒有 J），代號表第 10 格是空的；9 個代號對應 8 道小題，I.目睹 未被任何一題用到
-  answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 她睡眼（　）的走到廚房倒水喝，沒發現屋裡進來了不速之客。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: (　)，我們要乘勝追擊，不給敵人喘息的機會。
     answer: H
+  notes:
+    option_bank: 只有 A~I 九個代號（沒有 J），代號表第 10 格是空的；9 個代號對應 8 道小題，I.目睹 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號

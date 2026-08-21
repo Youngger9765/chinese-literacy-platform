@@ -5,9 +5,6 @@ full_text_annotate:
   title_line: 第0課  正太與小豬：武僧的養成之路
   byline: 課文/學習單：曾世杰
   paragraph_count: 11
-  paragraph_numbering_note: '本課課文**沒有印段號欄**（其他課左側有ㄧ二三四…），也沒有右緣字數欄，
-
-    故 idx 為本檔自編的順序號，依 `word/document.xml` 的 `<w:p>` 界線切。'
   paragraphs:
   - idx: 1
     text: 大約在兩百年前，日本 奈良有一個叫正太的男孩，在市集裡幫媽媽賣菜。有兩個腰間掛著長刀的惡霸，經常來這裡欺負農民，跟小攤子收保護費。交不出錢來，就翻人家的菜攤，農民們都敢怒不敢言。有一天，來了一個僧人，身材瘦削的他，居然敢為農民們打抱不平。兩惡霸不但惡言相向，講沒兩句，居然動起手來。但這位僧人是興福寺裡的武僧，功夫了得，他以一敵二，兩三下就把帶著武器的惡霸打得抱頭鼠竄。旁觀的正太又是害怕，又是佩服，心想：「有一天，我也要去以武術聞名的興福寺學武功。」
@@ -41,8 +38,12 @@ full_text_annotate:
 
       sibling L0049 在此處切成兩段，判為誤切（見 _siblings_note）。'
   inline_marked_terms: []
-  inline_marked_terms_note: '本課課文沒有任何加框標示的語詞（其他課有）。有底線的是專名
-
-    （日本 奈良／正太／興福寺），那是強調不是語詞標記，不列入。'
-  qr_note: 標題「第0課」左下角印了一個 QR code（word/media/image3.png），原稿沒有印對應網址。
   char_count: 859
+  notes:
+    paragraph_numbering: '本課課文**沒有印段號欄**（其他課左側有ㄧ二三四…），也沒有右緣字數欄，
+
+      故 idx 為本檔自編的順序號，依 `word/document.xml` 的 `<w:p>` 界線切。'
+    inline_marked_terms: '本課課文沒有任何加框標示的語詞（其他課有）。有底線的是專名
+
+      （日本 奈良／正太／興福寺），那是強調不是語詞標記，不列入。'
+    qr: 標題「第0課」左下角印了一個 QR code（word/media/image3.png），原稿沒有印對應網址。

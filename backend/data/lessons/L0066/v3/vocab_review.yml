@@ -150,8 +150,9 @@ vocab_review:
     - - 9
       - 5
     direction: horizontal
-  answer_paths_note: '11 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
+  notes:
+    answer_paths: '11 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
 
-    幾何交叉驗證吻合：document.xml 有 11 個 roundRect，與讀圖看到的 11 個橘框
+      幾何交叉驗證吻合：document.xml 有 11 個 roundRect，與讀圖看到的 11 個橘框
 
-    （6 橫、3 直、2 斜）數量一致。'
+      （6 橫、3 直、2 斜）數量一致。'

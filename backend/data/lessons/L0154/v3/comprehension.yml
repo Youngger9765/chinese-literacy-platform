@@ -3,10 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（字元樣式 aff6，色 E97132），文字流有此資訊
-  stray_marks_note: '標題附近有兩個橘色「✓」字元（字元樣式 af），不在任何題號上、也不對應任何一題，
-
-    照原稿記錄，不當成答案。'
   questions:
   - index: 1
     answer: C
@@ -50,3 +46,8 @@ comprehension:
       D: 阮宣子和大家一樣，都親眼看過鬼穿著衣服的樣子
     teacher_note: 第5題翻譯：阮宣子和別人討論世上有沒有鬼神，有人以為人死後會變成鬼，唯獨阮宣子認為沒有，他說：「現在那些說自己見過鬼的人，都說見到鬼穿著活著時候的衣服。如果人死後會變成鬼，難道衣服死後也會變成衣服鬼嗎？」
     teacher_note_carrier: 深藍色（C:156082）文字方塊，印在題目右側
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 aff6，色 E97132），文字流有此資訊
+    stray_marks: '標題附近有兩個橘色「✓」字元（字元樣式 af），不在任何題號上、也不對應任何一題，
+
+      照原稿記錄，不當成答案。'

@@ -4,9 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第8課  讓黑猩猩被看見的人
   paragraph_count: 9
-  paragraphs_note: '段號欄印 9 個號碼（第 1 個在文字層是注音符號「ㄧ」U+3127，其餘是漢字，原稿如此）。
-
-    四個分節小標不佔段號，另存 inline_headings。第 8 段在 DOCX 裡被版面拆成兩個 <w:p>，本檔併回一段。'
   paragraphs:
   - idx: 1
     text: 1960年的某個午後，坦尚尼亞的岡貝森林悶熱異常。26歲的珍古德伏在草叢中，汗如雨下。她屏息以待，目光鎖定在前方的一隻黑猩猩身上——她稱呼牠為「大衛鬍子」。
@@ -47,5 +44,9 @@ full_text_annotate:
   - 難以為繼
   - 命運共同體
   - 大聲疾呼
-  inline_marked_terms_note: 課文中用黑框（w:bdr color=auto）標出的 10 個語詞，與本課語詞框一致
   char_count: 1398
+  notes:
+    paragraphs: '段號欄印 9 個號碼（第 1 個在文字層是注音符號「ㄧ」U+3127，其餘是漢字，原稿如此）。
+
+      四個分節小標不佔段號，另存 inline_headings。第 8 段在 DOCX 裡被版面拆成兩個 <w:p>，本檔併回一段。'
+    inline_marked_terms: 課文中用黑框（w:bdr color=auto）標出的 10 個語詞，與本課語詞框一致

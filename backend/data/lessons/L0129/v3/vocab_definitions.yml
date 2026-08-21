@@ -22,7 +22,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 備受矚目
@@ -57,3 +56,5 @@ vocab_definitions:
   - index: 11
     word: 過濾泡泡
     definition: 過濾：把某些東西篩選掉，只留下特定的內容。本文指網路平台持續推薦符合使用者偏好的資訊，使相似內容較常出現，其他觀點較少被看見，像被泡泡包住一樣。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

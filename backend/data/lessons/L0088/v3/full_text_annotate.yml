@@ -50,5 +50,6 @@ full_text_annotate:
   - 功敗垂成
   - 自行其是
   - 倡議者
-  inline_marked_terms_note: 「塑膠微粒」在課文中未加框，其餘 8 個語詞都有框
   char_count: 1286
+  notes:
+    inline_marked_terms: 「塑膠微粒」在課文中未加框，其餘 8 個語詞都有框

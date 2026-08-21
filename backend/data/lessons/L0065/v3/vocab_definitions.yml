@@ -18,8 +18,6 @@ vocab_definitions:
   - 壓迫
   - 抑制
   - 哄堂大笑
-  vocabulary_bank_note: 語詞框原文為「本課語詞：充斥、此起彼落、滑稽、全神貫注、評估、僵硬、處置、壓迫、抑制、哄堂大笑。」
-  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 評估
@@ -51,4 +49,7 @@ vocab_definitions:
   - index: 10
     word: 全神貫注
     definition: 把全部心思和注意力集中在一件事上。
-  items_note: 第 5 題的解釋原稿句末**沒有**句號（其餘 9 題都有），照原樣抄，不補標點。
+  notes:
+    vocabulary_bank: 語詞框原文為「本課語詞：充斥、此起彼落、滑稽、全神貫注、評估、僵硬、處置、壓迫、抑制、哄堂大笑。」
+    answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
+    items: 第 5 題的解釋原稿句末**沒有**句號（其餘 9 題都有），照原樣抄，不補標點。

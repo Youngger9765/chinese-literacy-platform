@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1~5 題都有
   questions:
   - index: 1
     answer: D
@@ -53,3 +51,6 @@ comprehension:
       C: 不對，本文未推廣打罵，只強調人不是早期經驗決定的
       D: 不對，作者完全否定童年經驗，所以教養方式不重要
     teacher_hint: 文章確實呈現體罰與惡言，但作者最後的焦點放在「詮釋」與「主體性」：同樣的經驗可能造成傷害，也可能被重新理解成某種力量。作者是在分享自己如何理解阿嬤，而不是在下指令說「打罵才對」
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1~5 題都有

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊
   questions:
   - index: 1
     answer: B
@@ -50,3 +49,5 @@ comprehension:
       C: 方便比較三種例子的差異
       D: 科學問題一定要有三個支持的證據
     teacher_note: (作者用三個例子說明阿美族的特殊之處，加強文章說服力。)
+  notes:
+    answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊

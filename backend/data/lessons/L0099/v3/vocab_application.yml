@@ -14,8 +14,6 @@ vocab_application:
     H: 駕馭
     I: 牽著鼻子走
     J: 構思
-  option_bank_note: 10 個代號對應 8 道小題；D.詞藻優美、J.構思 未被任何一題用到。
-  answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 他太在意別人的看法，常被大家的喜好（　），沒有自己的想法。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 這部電影讓我產生了（　），因為我也曾經經歷過類似的事情。
     answer: C
+  notes:
+    option_bank: 10 個代號對應 8 道小題；D.詞藻優美、J.構思 未被任何一題用到。
+    answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號

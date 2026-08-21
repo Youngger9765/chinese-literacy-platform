@@ -2,9 +2,7 @@ lesson_uid: L0144
 version_id: v3
 section_no: 四
 comprehension:
-  part_note: 篇1（第23課）
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p5 可見
   items:
   - index: 1
     stem: 本文第5段提到2019年與2022年的兩次挑戰。下列說明何者正確？
@@ -38,3 +36,6 @@ comprehension:
       C: 規律訓練並記錄調整，也善用團隊合作與科技提供的協助
       D: 維持規律生活與閱讀習慣，靠自律與反省持續提升自己的表現
     answer: C
+  notes:
+    part: 篇1（第23課）
+    answer_carrier: 橘色手寫代號（在文字層），PDF p5 可見

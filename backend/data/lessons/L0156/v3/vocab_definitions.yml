@@ -17,7 +17,6 @@ vocab_definitions:
   - 山坳
   - 一命嗚呼
   vocabulary_bank_label: 本課語詞
-  vocabulary_bank_note: 「號」「一」等字在文字層各夾一個隱藏 variation selector（U+E01Ex），比對前濾掉 Cf/Mn
   instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
 
     🅐 從本課語詞框框，找語詞。
@@ -25,7 +24,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
   items:
   - index: 1
     word: 一息尚存
@@ -66,3 +64,6 @@ vocab_definitions:
   - index: 13
     word: 攫
     definition: 指鳥獸用爪抓取獵物。
+  notes:
+    vocabulary_bank: 「號」「一」等字在文字層各夾一個隱藏 variation selector（U+E01Ex），比對前濾掉 Cf/Mn
+    answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊

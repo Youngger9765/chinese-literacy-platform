@@ -49,4 +49,5 @@ vocab_definitions:
   - index: 10
     word: 舒適區
     definition: 讓人感到舒服、安適的狀態。
-  answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊
+  notes:
+    answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊

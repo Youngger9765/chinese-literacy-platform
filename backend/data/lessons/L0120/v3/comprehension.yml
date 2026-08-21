@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊；解析印在右側藍色小方框
   questions:
   - index: 1
     answer: B
@@ -64,3 +63,5 @@ comprehension:
       B: 乙丙甲
       C: 甲乙丙
       D: 丙乙甲
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊；解析印在右側藍色小方框

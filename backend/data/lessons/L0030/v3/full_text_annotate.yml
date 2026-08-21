@@ -33,5 +33,6 @@ full_text_annotate:
   - 欲速則不達
   - 一步登天
   - 循序漸進
-  inline_marked_terms_note: 課文框起來的除了 10 個本課語詞，還多框了「脂肪」與「炸」兩處（不在本課語詞清單裡）
   char_count: 688
+  notes:
+    inline_marked_terms: 課文框起來的除了 10 個本課語詞，還多框了「脂肪」與「炸」兩處（不在本課語詞清單裡）

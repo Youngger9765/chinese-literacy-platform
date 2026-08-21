@@ -23,7 +23,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（多數走字元樣式 af0，少數走 run 層 w:color，兩種都是 E97132），文字流有此資訊
   items:
   - index: 1
     word: 震耳欲聾
@@ -61,3 +60,5 @@ vocab_definitions:
   - index: 12
     word: 打席
     definition: 棒球比賽中，打擊者站上來準備揮棒進攻的回合或位置。
+  notes:
+    answer_carrier: 橘色手寫（多數走字元樣式 af0，少數走 run 層 w:color，兩種都是 E97132），文字流有此資訊

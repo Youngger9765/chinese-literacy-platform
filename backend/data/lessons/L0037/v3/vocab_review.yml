@@ -16,7 +16,6 @@ vocab_review:
   - 匪夷所思
   - 唯妙唯肖
   - 快馬加鞭
-  bank_note: 語詞框只列 11 個（第三大題的 14 個中少了「投奔」「讒言」「軟禁」），是題目自己縮小範圍
   grid_size:
   - 10
   - 10
@@ -33,8 +32,10 @@ vocab_review:
   - 對互比苗頭雀舌面子鞭
   answers_are_graphical: true
   answers_printed: false
-  answers_printed_note: '⛔ 這一課的教師版**一個圈都沒有** —— 格子跨 p9／p10 兩頁，兩頁都逐頁放大看過，
+  notes:
+    bank: 語詞框只列 11 個（第三大題的 14 個中少了「投奔」「讒言」「軟禁」），是題目自己縮小範圍
+    answers_printed: '⛔ 這一課的教師版**一個圈都沒有** —— 格子跨 p9／p10 兩頁，兩頁都逐頁放大看過，
 
-    沒有任何橘框或圈線。依 skill：沒圈到就整個省略 answer_paths，不寫空 list，
+      沒有任何橘框或圈線。依 skill：沒圈到就整個省略 answer_paths，不寫空 list，
 
-    更不可自己算路徑填進去。這是教材缺口，不是沒轉錄到。'
+      更不可自己算路徑填進去。這是教材缺口，不是沒轉錄到。'

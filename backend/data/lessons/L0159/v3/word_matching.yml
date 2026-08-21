@@ -3,8 +3,6 @@ version_id: v3
 section_no: 二
 word_matching:
   instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
-  answer_carrier: 橘色手寫（字元樣式 aff，色 E97132），文字流有此資訊
-  shape_note: 每題兩列：上列「文言」（要解釋的詞用**灰底** `w:shd` 標出，不是框線），下列「白話」留括號填空
   items:
   - index: 1
     classical: 嘗於市遇一佳硯，議價未定。
@@ -66,3 +64,6 @@ word_matching:
     vernacular: 陸公感到（　）可惜。
     blanks:
     - answer: 十分
+  notes:
+    answer_carrier: 橘色手寫（字元樣式 aff，色 E97132），文字流有此資訊
+    shape: 每題兩列：上列「文言」（要解釋的詞用**灰底** `w:shd` 標出，不是框線），下列「白話」留括號填空

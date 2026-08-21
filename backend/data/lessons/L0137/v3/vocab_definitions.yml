@@ -23,7 +23,6 @@ vocab_definitions:
   - 假設
   - 肅然起敬
   answers_printed: true
-  answer_carrier: 橘色手寫體填在橫線上（教師版答案），文字流有此資訊
   items:
   - index: 1
     definition: 形容一個地方住的人很少，較少有人活動。
@@ -58,3 +57,5 @@ vocab_definitions:
   - index: 11
     definition: 因敬佩某人或某事，而自然產生尊敬的感受。
     answer: 肅然起敬
+  notes:
+    answer_carrier: 橘色手寫體填在橫線上（教師版答案），文字流有此資訊

@@ -1,12 +1,13 @@
 lesson_uid: L0149
 version_id: v3
-errata:
-- id: E1
-  section: 九 知識補給站
-  locator: 第 2 支影片的片長
-  source: ・片長：(3:23
-  corrected: ・片長：(3:23)
-  kind: 漏字（括號未閉合）
-  why: 同一格的第 1 支影片印「・片長：(3:34)」，右括號齊備；第 2 支少了右括號。
-  confidence: high
-  evidence: PDF p12 與 document.xml 一致（不是轉檔造成的）
+notes:
+  errata:
+  - id: E1
+    section: 九 知識補給站
+    locator: 第 2 支影片的片長
+    source: ・片長：(3:23
+    corrected: ・片長：(3:23)
+    kind: 漏字（括號未閉合）
+    why: 同一格的第 1 支影片印「・片長：(3:34)」，右括號齊備；第 2 支少了右括號。
+    confidence: high
+    evidence: PDF p12 與 document.xml 一致（不是轉檔造成的）

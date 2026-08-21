@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號，PDF p10 可見
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1~5 題都有
   questions:
   - index: 1
     answer: D
@@ -56,3 +54,6 @@ comprehension:
       C: 「每個人還是要完成分工，我可以協助你卡住的部分。」
       D: 「為了避免爭吵，我們先不要討論誰應該負責。」
     teacher_hint: 符合說明問題、調整合作、做好本分，準備支援的原則
+  notes:
+    answer_carrier: 橘色代號，PDF p10 可見
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1~5 題都有

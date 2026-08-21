@@ -1,40 +1,41 @@
 lesson_uid: L0167
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文-做記號
-  locator: 第 1 段的段號
-  source: ㄧ
-  corrected: 一
-  kind: 字元誤用
-  why: '段號欄八個號碼中第一個是 **U+3127 注音符號ㄧ**，不是 U+4E00「一」，其餘七個正常。
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 第 1 段的段號
+    source: ㄧ
+    corrected: 一
+    kind: 字元誤用
+    why: '段號欄八個號碼中第一個是 **U+3127 注音符號ㄧ**，不是 U+4E00「一」，其餘七個正常。
 
-    與同批 L0145 完全同型（第一個號碼特別容易打錯），PDF 上看不出來。'
-  confidence: high
-  evidence: document.xml 該儲存格單一字元 U+3127
-- id: E2
-  section: 三 語詞我最棒
-  locator: 「本課語詞」框末行
-  source: 平分秋色、心理素質
-  corrected: null
-  kind: 重複
-  why: '語詞框最後印「…平分秋色、心理素質」之後**又換行再印一次「心理素質」**，
+      與同批 L0145 完全同型（第一個號碼特別容易打錯），PDF 上看不出來。'
+    confidence: high
+    evidence: document.xml 該儲存格單一字元 U+3127
+  - id: E2
+    section: 三 語詞我最棒
+    locator: 「本課語詞」框末行
+    source: 平分秋色、心理素質
+    corrected: null
+    kind: 重複
+    why: '語詞框最後印「…平分秋色、心理素質」之後**又換行再印一次「心理素質」**，
 
-    同一個語詞連續出現兩次（文字流：`平分秋色、心理素質` + `心理素質`）。
+      同一個語詞連續出現兩次（文字流：`平分秋色、心理素質` + `心理素質`）。
 
-    九個語詞本身沒有錯、也沒有漏，只是最後一個被重複排了一行。
+      九個語詞本身沒有錯、也沒有漏，只是最後一個被重複排了一行。
 
-    PDF p4 的框內只看得到一次（版面把重複那行擠掉了）——**文字層才看得到**。
+      PDF p4 的框內只看得到一次（版面把重複那行擠掉了）——**文字層才看得到**。
 
-    ⚠️ 不確定是要刪掉重複那行、還是原本想印第 10 個語詞漏填，所以**不臆測、不刪**，照原樣記錄。'
-  confidence: high
-  evidence: document.xml 該文字方塊；y6 dump 第 111 行
-- id: E3
-  section: 二 念順順
-  locator: 指示語的括號
-  source: 從指定段落（六    )開始朗讀
-  corrected: 從指定段落（六    ）開始朗讀
-  kind: 全半形括號不成對
-  why: 開括號全形「（」、閉括號半形「)」。同批 L0145／L0146／L0147 完全同型。
-  confidence: high
-  evidence: document.xml 念順順文字方塊；PDF p2 一致
+      ⚠️ 不確定是要刪掉重複那行、還是原本想印第 10 個語詞漏填，所以**不臆測、不刪**，照原樣記錄。'
+    confidence: high
+    evidence: document.xml 該文字方塊；y6 dump 第 111 行
+  - id: E3
+    section: 二 念順順
+    locator: 指示語的括號
+    source: 從指定段落（六    )開始朗讀
+    corrected: 從指定段落（六    ）開始朗讀
+    kind: 全半形括號不成對
+    why: 開括號全形「（」、閉括號半形「)」。同批 L0145／L0146／L0147 完全同型。
+    confidence: high
+    evidence: document.xml 念順順文字方塊；PDF p2 一致

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）
   answers_printed: true
   items:
   - index: 1
@@ -54,3 +53,5 @@ comprehension:
     answer: A
     teacher_note: 本文錢、國家、學校、公司、紅綠燈等例子，都在說明共同故事能組織人類合作，推動看得見的世界
     teacher_note_carrier: 藍框浮動文字方塊（在文字層）
+  notes:
+    option_key: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）

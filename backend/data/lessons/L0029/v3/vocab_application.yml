@@ -25,7 +25,6 @@ vocab_application:
     H: 駕輕就熟
     I: 挑釁
     J: 匪夷所思
-  option_bank_note: 兩篇各有一組 A~J 選項框，字母對應的語詞完全不同；items 的 part 欄決定該用哪一組
   items:
   - part: 1
     section_no_printed: 四
@@ -96,3 +95,5 @@ vocab_application:
     index: 8
     stem: 對手先出言（　），試圖影響我們的心情。
     answer: I
+  notes:
+    option_bank: 兩篇各有一組 A~J 選項框，字母對應的語詞完全不同；items 的 part 欄決定該用哪一組

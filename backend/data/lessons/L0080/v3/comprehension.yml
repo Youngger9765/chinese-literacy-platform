@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: C
@@ -59,3 +58,5 @@ comprehension:
       D: 讓體育資優選手進體育班，接受長時嚴格訓練
     explanation: （目前臺灣是用此方法，澳洲更推崇人人熱愛運動，從此找出選手。）
     explanation_note: 原稿是一個浮動說明框，印在選項 D 下方；題幹的「不是」加了底線
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號
