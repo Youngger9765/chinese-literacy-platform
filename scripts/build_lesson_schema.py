@@ -616,13 +616,21 @@ def table_cells(tbl):
         for ci, cell in enumerate(row.cells):
             tc = cell._tc
             if id(tc) in seen:
-                cells.append({"col": ci, "text": _cell_text(cell), "dup": True})
+                cells.append({
+                    "col": ci,
+                    "text": _cell_text(cell),
+                    "checked": checked_box_positions(tc),
+                    "dup": True,
+                })
                 continue
             seen.add(id(tc))
             span, vmerge = cell_grid(tc)
             cells.append({
                 "col": ci,
                 "text": _cell_text(cell),
+                # 重點表那類題目的答案住在表格裡。段落層讀了勾、表格層沒讀，
+                # 全庫真值只讀得到 31%（19 課實測 57/183）——#2735 只修好三分之一。
+                "checked": checked_box_positions(tc),
                 "gridspan": span,
                 "vmerge": vmerge,
                 "has_blank": bool(BLANK_RE.search(cell.text)),
