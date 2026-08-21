@@ -61,6 +61,24 @@ export interface PersistedProgress {
   activeDefIndices?: number[];
   mcAnswers?: AnswerRecord[];
   dragDropAnswers?: AnswerRecord[];
+  /**
+   * #2839 — 「作答到一半」的答案。跟 `mcAnswers` / `dragDropAnswers` 分開存，因為那兩個
+   * 是「這個模式已完成」的最終結果，而且 `mcDone` / `dragDropDone` 就是用
+   * `.length > 0` 判的 —— 把中途答案塞進去，學生答完第 1 題整個作答畫面就會被
+   * 「選擇題 已完成」的結算畫面取代。
+   *
+   * 這兩個欄位在作答中每答一題就更新一次，是進度 PUT 唯一會變的內容。
+   */
+  mcProgress?: AnswerRecord[];
+  dragDropProgress?: AnswerRecord[];
+}
+
+/**
+ * 已作答的題數（`answeredWordIdx` 有值）。存進度 / 還原 / 斷言都用這個定義，
+ * 避免「陣列長度」被誤當成作答數 —— 陣列一開始就被預先填滿了未作答的空記錄。
+ */
+export function answeredCount(answers: AnswerRecord[] | undefined): number {
+  return (answers ?? []).filter((a) => a.answeredWordIdx !== null).length;
 }
 
 /* ------------------------------------------------------------------ */
@@ -155,5 +173,7 @@ export function mergePersistedProgress(
     activeDefIndices: initialProgress.activeDefIndices ?? localStorageProgress.activeDefIndices,
     mcAnswers: initialProgress.mcAnswers ?? localStorageProgress.mcAnswers,
     dragDropAnswers: initialProgress.dragDropAnswers ?? localStorageProgress.dragDropAnswers,
+    mcProgress: initialProgress.mcProgress ?? localStorageProgress.mcProgress,
+    dragDropProgress: initialProgress.dragDropProgress ?? localStorageProgress.dragDropProgress,
   };
 }

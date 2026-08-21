@@ -237,6 +237,17 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       : [],
   );
 
+  // #2839 — 作答「中」的答案。刻意跟 `mcAnswers` / `dragDropAnswers` 分開：那兩個是
+  // 「這個模式已完成」的最終結果，而 `mcDone` / `dragDropDone` 直接用 `.length > 0` 判 ——
+  // 把中途答案塞進去，學生答完第 1 題整個作答畫面就會被「選擇題 已完成」的結算畫面
+  // 換掉。這兩個 state 才是作答中唯一會變的 payload 內容，也就是 PUT 的觸發來源。
+  const [mcProgress, setMcProgress] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.mcProgress) ? mergedInitialProgress.mcProgress : [],
+  );
+  const [dragDropProgress, setDragDropProgress] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.dragDropProgress) ? mergedInitialProgress.dragDropProgress : [],
+  );
+
   const isStepCompleted =
     phase === 'summary' && mcAnswers.length > 0 && dragDropAnswers.length > 0;
 
@@ -246,8 +257,10 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     activeDefIndices,
     mcAnswers,
     dragDropAnswers,
+    mcProgress,
+    dragDropProgress,
     completed: isStepCompleted,
-  }), [mode, phase, activeDefIndices, mcAnswers, dragDropAnswers, isStepCompleted]);
+  }), [mode, phase, activeDefIndices, mcAnswers, dragDropAnswers, mcProgress, dragDropProgress, isStepCompleted]);
 
   // Persist to localStorage so page close / logout / cross-step navigation can restore.
   useEffect(() => {
@@ -324,22 +337,34 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
     const wrongIndices = selectRetryIndices(sourceAnswers);
     if (wrongIndices.length === 0) return;
+    // ⚠️ 這兩行目前到不了子元件：`startStage` 不會清 `mcAnswers`/`dragDropAnswers`，
+    // 所以 `mcDone` 仍是 true，render 會落到「選擇題 已完成」的 placeholder 而不是
+    // 重新掛載 MultipleChoiceMode（先於 #2839 就存在的流程 bug，已另開票）。
+    // 先寫對，等那張票修好 render gate 之後這裡就是對的。
+    if (targetMode === 'multiple-choice') setMcProgress([]);
+    else setDragDropProgress([]);
     startStage(targetMode, wrongIndices);
   }, [mcAnswers, dragDropAnswers, startStage]);
 
+  // 重做一律連「作答中」的快照一起清 —— 只清最終結果的話，還原時會把上一輪的
+  // 中途答案接回來，學生按了「重做」卻發現題目已經被填好（#2839 code review）。
   const handleRetryAll = useCallback(() => {
     setMcAnswers([]);
     setDragDropAnswers([]);
+    setMcProgress([]);
+    setDragDropProgress([]);
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
   const handleRetryMc = useCallback(() => {
     setMcAnswers([]);
+    setMcProgress([]);
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
   const handleRetryDragDrop = useCallback(() => {
     setDragDropAnswers([]);
+    setDragDropProgress([]);
     startStage('drag-drop', allIndices);
   }, [startStage, allIndices]);
 
@@ -399,6 +424,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
                   vocab={vocab}
                   activeDefIndices={activeDefIndices}
                   onAllDone={handleAllDone}
+                  initialAnswers={mcProgress}
+                  onAnswersChange={setMcProgress}
                 />
               )
             )}
@@ -419,6 +446,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
                   activeDefIndices={activeDefIndices}
                   shuffledWords={shuffledWords.current}
                   onAllDone={handleAllDone}
+                  onAnswersChange={setDragDropProgress}
                 />
               )
             )}

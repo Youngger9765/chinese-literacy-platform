@@ -6,7 +6,7 @@
  * When the lesson has no MCQ data, shows a placeholder + skip button.
  * Calls handleFinishComprehension from LearningContext when done.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import MultipleChoiceExercise from '../../components/reading-steps/MultipleChoiceExercise';
@@ -31,13 +31,33 @@ const ComprehensionMcqPage: React.FC = () => {
     handleFinishComprehension,
     dbSessionId,
     saveStepProgressPatch,
+    stepProgressData,
   } = useLearningContext();
+
+  // #2839：這一步先前存下的進度快照。用 ref 凍結在「第一次 render 當下」的值，因為
+  // `LessonRenderer` 的 `initialState` 是 lazy useState initializer（只在 mount 讀一次）——
+  // 若讓它跟著每次 patch 後的新 stepProgressData 變動，讀到的會是自己剛寫回去的值，
+  // 語意變得繞。LearningLayout 的 `waitingForProgress` gate（#1549）保證 DB 載完才
+  // render 這一頁，所以第一次 render 拿到的就已經是 DB 的值。
+  const savedStepDataRef = useRef<Record<string, unknown> | null>(null);
+  if (savedStepDataRef.current === null) {
+    const fromDb = (stepProgressData?.step_data as Record<string, unknown> | undefined)?.comprehension;
+    savedStepDataRef.current = (fromDb && typeof fromDb === 'object' ? fromDb : {}) as Record<string, unknown>;
+  }
+  const savedStepData = savedStepDataRef.current;
 
   const [mcqDone, setMcqDone] = useState(false);
   const [mcqResult, setMcqResult] = useState<{ score: number; total: number } | null>(null);
   // 第一次作答的對錯。重試不覆蓋 —— 學生一定會重試到對，
   // 拿「當下還錯的」當錯題來源，那個集合到最後恆為空（#2784 就是這樣壞的）。
-  const [firstTry, setFirstTry] = useState<FirstTryRecord<string, string>[]>([]);
+  //
+  // #2839：從 DB 還原。只靠還原的 `feedback` 重算是不夠的 —— feedback 是「最新一次」
+  // 的對錯，先錯後對的題目重新載入後會變成一次答對，錯題複習就少一題。
+  const [firstTry, setFirstTry] = useState<FirstTryRecord<string, string>[]>(
+    () => (Array.isArray(savedStepData.firstTry)
+      ? (savedStepData.firstTry as FirstTryRecord<string, string>[])
+      : []),
+  );
   // #2834：null = 完整測驗；非 null = 「重做錯題」模式，只顯示這些 block id
   // （只在完成卡按下「重做錯題」後才會被設值，見 handleRetryWrong）。
   const [retryFilterIds, setRetryFilterIds] = useState<string[] | null>(null);
@@ -110,13 +130,52 @@ const ComprehensionMcqPage: React.FC = () => {
       }));
   }, []);
 
+  // `firstTry` 的鏡像。`absorbInto` 需要「合併後」的值來存進度，但合併不可以寫在
+  // `setFirstTry(prev => ...)` 的 updater 裡再順手 patch —— updater 必須是純函式
+  // （StrictMode 會重複呼叫）。所以合併算在外面，ref 負責記住最新值。
+  const firstTryRef = useRef<FirstTryRecord<string, string>[]>(firstTry);
+
+  // 跨「整份測驗」與「重做錯題」累積的完整作答。**不可以**直接把 LessonRenderer
+  // 當下 emit 的 `e.answers` 存進 DB（code review 抓到，已補回歸測試）：
+  // 「重做錯題」會掛一個只含錯題的新 LessonRenderer，它內部的 answers/feedback
+  // 從空的開始，只會累積被重做的那幾題；而 `persistStepProgressState` 的 merge
+  // 只做一層，`answers` 是整包換掉 —— 於是先前答對的那幾題會被從進度裡刷掉。
+  // 學生這時關掉分頁，重新載入就只剩重做的那幾題要重答，正是 #2839 本身。
+  const fullAnswersRef = useRef<Record<string, unknown>>(
+    (savedStepData.answers as Record<string, unknown> | undefined) ?? {},
+  );
+  const fullFeedbackRef = useRef<Record<string, boolean | null>>(
+    (savedStepData.feedback as Record<string, boolean | null> | undefined) ?? {},
+  );
+
   // LessonRenderer 每次判定都會呼叫 onExerciseChange。這裡只把「第一次」收下來。
+  //
+  // #2839：這裡同時是「作答中存進度」的唯一入口。原本這個 callback 只做計分
+  // （`setFirstTry`），答案完全沒有轉給 `handleProgressChange`，於是 payload 在作答中
+  // 從頭到尾沒變過，`persistStepProgressState` 的 dedup 正確地判定「沒變化」→
+  // 一次 PUT 都不會發出去。傳輸層沒問題，是這條線沒接上。
   const absorbInto = useCallback(
     (e: { answers: Record<string, unknown>; feedback: Record<string, boolean | null> }, lesson: unknown) => {
       const blocks = reviewableBlocksOf(lesson as { blocks?: unknown[] });
-      setFirstTry((prev) => absorbVerdicts(prev, e.feedback ?? {}, e.answers ?? {}, blocks));
+      const nextFirstTry = absorbVerdicts(firstTryRef.current, e.feedback ?? {}, e.answers ?? {}, blocks);
+      firstTryRef.current = nextFirstTry;
+      setFirstTry(nextFirstTry);
+
+      // 作答中的快照 —— 不標記完成（交卷走 handleNext / handleMcqComplete）。
+      // `immediate: false` 讓 useProgressSync 的 5 秒 debounce 把連續作答收斂成一次
+      // PUT，不會每點一下就打一次 rate-limited 端點。
+      fullAnswersRef.current = { ...fullAnswersRef.current, ...(e.answers ?? {}) };
+      fullFeedbackRef.current = { ...fullFeedbackRef.current, ...(e.feedback ?? {}) };
+      handleProgressChange(
+        {
+          answers: fullAnswersRef.current,
+          feedback: fullFeedbackRef.current,
+          firstTry: nextFirstTry,
+        },
+        false,
+      );
     },
-    [reviewableBlocksOf],
+    [reviewableBlocksOf, handleProgressChange],
   );
 
   // #2834：完成卡「重做錯題」——只把先前 first-try 答錯的 block id 記下來，
@@ -129,6 +188,9 @@ const ComprehensionMcqPage: React.FC = () => {
 
   // #2834：完成卡「全部重做」——徹底重置，等同學生第一次進到這個步驟。
   const handleRetryAll = useCallback(() => {
+    firstTryRef.current = [];
+    fullAnswersRef.current = {};
+    fullFeedbackRef.current = {};
     setFirstTry([]);
     setMcqResult(null);
     setRetryFilterIds(null);
@@ -264,6 +326,13 @@ const ComprehensionMcqPage: React.FC = () => {
             lessonCode={selectedStory.lesson_code || selectedStory.id}
             onComplete={retryFilterIds ? handleRetryWrongComplete : handleLessonRendererComplete}
             onExerciseChange={(e) => absorbInto(e, activeLesson)}
+            // #2839：把 DB 存下的作答還原回來。`LessonRenderer` 早就支援 `initialState`
+            // （answers/feedback 兩個 lazy useState initializer），這一頁從來沒傳過 ——
+            // 存了讀不回來就等於沒存，所以存跟還原一起接上。
+            initialState={{
+              answers: savedStepData.answers ?? {},
+              feedback: savedStepData.feedback ?? {},
+            }}
           />
         </div>
       );

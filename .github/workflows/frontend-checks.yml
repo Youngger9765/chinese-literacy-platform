@@ -68,6 +68,12 @@ jobs:
       #     return a row to idle the instant it (or the header button) is
       #     stopped. Regression of either reintroduces #2622's "不能停止 /
       #     同時播其他的就會一堆聲音" follow-up bug.
+      #   - VocabDefinitionMatch/ComprehensionMcqPage progressPersistence: 作答「中」
+      #     的答案必須進得了進度 payload。詞語理解的答案只活在子元件的 `answersRef`
+      #     裡、閱讀理解的 onExerciseChange 只接到計分 —— 兩邊 payload 在作答中都
+      #     從沒變過，dedup 正確地判定「沒變化」→ 一次 PUT 都沒發出去，學生換裝置
+      #     或清快取就整步重來。斷言用「答 N 題要存回 N 筆」的數量形式，因為
+      #     「有一筆就算過」連「只回報第一題」都能矇混過去（#2839）。
       #   - nextStepFooter: no `.tsx` may draw its own "下一關" / "繼續下一步"
       #     button — every step's forward CTA must be the shared
       #     `NextStepFooter`. This test file existed before #2771 but was
@@ -112,4 +118,6 @@ jobs:
             src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
             src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
             src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
-            src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx
+            src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
+            src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
+            src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx
