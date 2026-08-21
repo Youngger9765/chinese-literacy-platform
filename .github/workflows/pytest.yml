@@ -154,4 +154,9 @@ jobs:
       - name: Run ticked-answer ground-truth lock (#2735)
         run: |
           cd backend
+          # scripts/build_lesson_schema.py (a DOCX->YAML build tool, not a served
+          # endpoint) needs python-docx + lxml. Installed here, not in
+          # requirements.txt, so the deployed Cloud Run image doesn't carry a
+          # dependency it never uses at runtime.
+          pip install python-docx==1.2.0 lxml==6.1.0
           python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py
