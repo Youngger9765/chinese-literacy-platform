@@ -1,108 +1,186 @@
 ---
 name: extract-vocab-definitions
-description: 抽「語詞我最棒」這一個模組 —— 照派工單只讀自己那幾頁，產出 vocab_definitions.yml 並通過它自己的 schema。⛔ 不抽其他模組。當需要「抽語詞我最棒」「重抽 vocab_definitions」「派工單派到 vocab_definitions」時使用。來源 issue #2843。
+description: 抽一課的「語詞我最棒」（語詞解釋填空）成 vocab_definitions.yml —— 照派工單只讀自己那幾頁，輸出通過 vocab_definitions.schema.json。當需要「抽語詞我最棒」「抽語詞解釋」「重抽 vocab_definitions」「語詞填空轉 yml」時使用。骨架契約見 extract-module。來源 issue #2857。
 ---
 
-# extract-vocab-definitions — 語詞我最棒
+# extract-vocab-definitions — 第一架飛機
 
-> **骨架與共同紀律在 `.claude/skills/extract-module/SKILL.md`，先讀那份。**
-> 這裡只寫這個模組專屬的 know-how。
+> 骨架、介面契約、三條鐵律在 **`.claude/skills/extract-module/SKILL.md`**，先讀那份。
+> 這裡**只有**「語詞我最棒」這一節專屬的東西。
 
-## 規模（2026-08-22 實測全庫）
+## 這一節長什麼樣
 
-```
-150 / 175 課有   ·   題目載體 100% 是 items（沒有第二種）
-schema: required=[items]  ·  核心(90%)=[instruction, items, vocabulary_bank]
-```
-
-⚠️ 跟 `comprehension` 不同 —— 那個模組有 `questions`/`items` 兩種載體，
-**這個只有一種**。別把那邊的紀律照搬過來。
-
----
-
-## 🔴 專屬陷阱一：有沒有語詞框，決定欄位叫什麼
+學習單上的「**語詞我最棒**」（少數課印成別的名字，以派工單的 `name` 為準）：
+一個**語詞框**列出本課語詞，下面是編號的解釋，學生把語詞填進空格。
+教師版的空格裡已經填好答案。
 
 ```
-143 課  vocabulary_bank 是 list   → item 用 word
-  7 課  vocabulary_bank 是 None   → item 用 answer
+本課語詞：矗立、眾說紛紜、爭論不休、…          ← vocabulary_bank
+① ______ 形容一個地方住的人很少。               ← items[0]
+② ______ 心裡非常佩服。                        ← items[1]
 ```
+
+## 🔴 三個會讓你抽錯而且看不出來的地方
+
+### 1. 答案是 `word`，但有 8 課叫 `answer` —— 不要自己選一個
+
+| 鍵 | 出現 | 什麼時候 |
+|---|---|---|
+| `word` | 1519 個 item | 主流 |
+| `answer` | 73 個 item（L0083 / L0137 / L0145 / L0146 / L0147 / L0167 / L0168 / L0169） | 這 8 課 |
+
+⛔ **重抽既有課時沿用該課原本的鍵**，不要順手「統一」成 `word` ——
+那會讓逐欄比對整課變紅，而真正的抽取品質根本沒變，
+於是你得花時間證明「這 73 個差異是我故意的」。
+
+新課用 `word`。**⛔ 不准發明第三個名字**（`term`／`vocab`／`answer_word` 都不行）。
+同理 `vocabulary_bank`(143 課) vs `word_bank`(7 課) —— 沿用該課的，新課用 `vocabulary_bank`。
+
+### 2. 這一節裡**混得進選擇題**
+
+L0083 那一節的第 9 題不是填空：
 
 ```yaml
-# 有語詞框（143 課）：學生從框裡挑
-vocabulary_bank: [喝采, 龍爭虎鬥, 讚嘆不已, …]
-items: [{index: 1, word: 龍爭虎鬥, definition: 形容像巨龍和猛虎般地相互爭鬥…}]
-
-# 沒有語詞框（7 課，如 L0137）：學生自己想
-vocabulary_bank: null
-items: [{index: 1, answer: 人煙稀少, definition: 形容一個地方住的人很少…}]
+- index: 9
+  type: single
+  stem: 「琢磨」有三種解釋，課文中「琢磨」的意思應該是下列哪個選項？（單選）
+  options: {A: 雕琢和磨製玉石。, B: 思索、研究…, C: 在課業或品德不斷精益求精…}
+  answer: B
+  answer_carrier: 紅色 ☑（w:sym），印在選項 B 前
+  note: 本題與前 8 題形狀不同 —— 不是填空，是三選一的單選題（原稿如此）
 ```
 
-**這不是不一致，是兩種題型。** `word` = 從給定的框裡挑那一個；
-`answer` = 沒有框、學生自己填。
+⛔ **不要把它硬掰成 `word`/`definition`**。原稿印成選擇題就記成選擇題，
+`answer` 存選項字母不是語詞。硬塞會產生一個「看起來合法、內容是錯的」的 item ——
+schema 過得了，逐字門也過得了，只有真的去看原稿的人會發現。
 
-⛔ **不要統一成同一個欄位名** —— 那會把「這課有沒有給語詞框」這個資訊抹掉，
-而那正是判分方式的差別（前者可以做成選擇/拖拉，後者只能 free_text）。
+### 3. 語詞框印的是**簡寫**，答案是全稱 —— 那不是抽錯
 
-判斷方式：**看那一頁有沒有印語詞框**。有 → `vocabulary_bank` + `word`；
-沒有 → `vocabulary_bank: null` + `answer`。
+全庫只有 3 個，但每一個都會讓「答案必須在語詞框裡」這條檢查誤報：
 
-## 🔴 專屬陷阱二：一格填兩個詞是正常的
+| 課 | 語詞框印 | 答案是 |
+|---|---|---|
+| L0003 / L0085 | `前兆` | `徵兆、前兆` |
+| L0045 | `兵來將擋` | `兵來將擋，水來土掩` |
 
-```
-L0003 / L0085   word: 徵兆、前兆              bank 裡是 ['徵兆', '前兆'] 分開兩筆
-L0045           word: 兵來將擋，水來土掩       bank 裡是 ['兵來將擋', '水來土掩']
-```
+⇒ 交叉檢查要允許「**語詞框那條是答案的子字串**」，不是要求完全相等。
+判準訂太嚴會把三個正確的答案判成錯的，然後有人去「修正」它們 ——
+**判準錯的門比沒有門更糟**。
 
-學習單上那一格的答案就是**兩個詞並列**，bank 分開列是因為它列的是「可選的語詞」。
+## ✅ 這一節有一個別的模組沒有的自驗
 
-⛔ 這不是抽錯，**不要拆開也不要改 bank**。
-所以「`word` 一定要能在 `vocabulary_bank` 裡找到」這條**不成立**，
-鎖只驗「多詞答案的每一段都在 bank 裡」。
+`items[].word`（或 `answer`）**應該都能在 `vocabulary_bank` 裡找到** ——
+語詞框就是答案池。實測 143 課裡 140 課完全命中，另外 3 課是上面那種簡寫。
 
-## 版面辨識
-
-實測 L0011 p3-4：
-
-```
-本課語詞：喝采、龍爭虎鬥、讚嘆不已、摸不著頭緒、…    ← 語詞框（虛線框，通常在右上）
-
-(1)___龍爭虎鬥___：形容像巨龍和猛虎般地相互爭鬥，難分高低。
-(2)___捶胸頓足___：捶打胸膛，以腳跺地。形容極為悲憤或悔恨。
-```
-
-- 答案寫在**底線上**（教師版是橘色手寫體）
-- 題號是 `(1)(2)(3)…` 帶括號，不是「一二三」
-- **雙欄排版**：左欄 (1)-(6)、右欄 (7)-(11)，⚠️ 要照**編號**收不是照視覺順序
-- ⚠️ 可能跨頁（L0011 的補充註解在 p4）
-
-## 收尾自驗
+所以抽完可以**不看原稿就知道自己有沒有抽歪**：
 
 ```bash
-python3 -c "
-import json,yaml,sys
-s=json.load(open('specs/modules/schemas/vocab_definitions.schema.json'))
-b=yaml.safe_load(open('$OUT'))['vocab_definitions']
-extra=set(b)-set(s['properties']); missing=set(s['required'])-set(b)
-items=b.get('items') or []
-bank=b.get('vocabulary_bank')
-# 有 bank 用 word、無 bank 用 answer
-wrong=[i.get('index') for i in items
-       if ('word' in i) != (bank is not None)]
-print('未宣告欄位:', extra or '無'); print('缺必填:', missing or '無')
-print('欄位名跟有無語詞框對不上的題:', wrong or '無')
-sys.exit(1 if (extra or missing or wrong) else 0)"
+python3 .claude/skills/extract-vocab-definitions/verify_bank_coverage.py <uid>
 ```
 
-再跑對帳門：`python3 scripts/module_reconcile_gate.py --uid <uid>`
+⚠️ 它證明的是「答案來自語詞框」，**不證明**你有沒有把某一題整個漏掉，
+也不證明解釋文字抄對了。漏題要靠 `index` 連號（見下），文字要靠逐字門。
 
-## 現況
+## 抽的時候
 
-**尚未實跑。** 數字來自對現有 150 課的統計，版面描述來自實際讀過 L0011 的 PDF。
+1. **`index` 照學習單印的編號**，不是你的計數器。跳號要在 `notes` 說明，⛔ 不要補齊
+2. **`definition` 抄印出來的整段**，含「例如：…」的例句 —— 那是解釋的一部分不是註解
+3. **雙篇課**（`_manifest.yml` 的 sections 出現兩次「語詞我最棒」）：
+   兩篇合成**一個** `vocab_definitions.yml`，用 `part: 1|2` 區分，
+   `index` 各篇從 1 重編。`vocabulary_bank` 併成一份並在 `notes.vocabulary_bank` 說明各篇幾個
+   （L0029 就是這樣：篇 1 十三個、篇 2 十四個，語詞框分開印）
+4. **`methods`**（「遇到困難可以試試」那幾條）：list(64 課) 與 dict(24 課) 兩種都有，
+   原稿有印 A/B/C 標籤就用 dict，只是條列就用 list
+5. **`notes.answer_carrier`**（104 課有）：記答案是怎麼印的（橘色手寫字／紅色 ☑／黑字），
+   讓下一個人知道這課的答案可不可信
 
-### 骨架可複用性（第 2 支的意義）
+## 派工單怎麼用
 
-這支寫下來，**骨架的部分一行都沒重寫** —— 只讀 `pages`、schema 自驗、
-註解進 `notes`、判不出就 `needs_review`，全部沿用 `extract-module`。
-專屬內容只有上面兩個陷阱加版面辨識。
+```bash
+UID=L0072
+python3 -c "
+import yaml; m=yaml.safe_load(open('backend/data/lessons/$UID/v3/_manifest.yml'))
+print('pages:', m['dispatch_pages'].get('vocab_definitions'))
+print('pdf_pages:', m['pdf_pages'])"
+# → pages: [3]   pdf_pages: 9      ← 讀第 3 頁，不是 9 頁
+```
 
-→ 骨架可複用，其餘 22 支可以照這個形狀擴。
+`dispatch_pages` 沒有 `vocab_definitions` 或值是空的 → 回 `BLOCKED`。
+⛔ **不要因此讀全份** —— 那正是拆分要消滅的成本結構。
+（L0028 / L0172 目前就是這種，manifest 上有 `pages_unavailable` 寫明原因。）
+
+`pages_source: bracketed` 的大題（全庫 23 個）表示標題沒印出來、範圍是用前後鄰居夾的，
+範圍會寬一點但仍遠小於全份 —— 照樣只讀那幾頁。
+
+### 🔴 讀到的第一件事：確認「語詞我最棒」真的在你這幾頁上
+
+DOCX→PDF **不可重現**（實測同一份 DOCX 轉出 8 頁或 9 頁都有），而頁碼是在
+**定位時那一份** PDF 上算的。你拿到的是航母**另一次**轉檔的產物。
+
+所以讀完之後先確認你那一節的標題在畫面上。**不在就回 `BLOCKED`：**
+
+```
+BLOCKED: manifest 說 vocab_definitions 在第 3 頁，但第 3 頁上沒有「語詞我最棒」
+         （PDF 實際 N 頁 vs manifest 記的 M 頁 → 分頁可能已經漂掉）
+```
+
+⛔ **不要往前後多翻兩頁把它找出來。** 找得到反而更糟 —— 那表示頁碼已經漂了，
+而你這次「補救成功」會讓漂移繼續沒人發現，下一課可能就只抽到半節而且回報成功。
+正確處置是重跑 `scripts/build_section_pages.py --uid <uid>` 重新定位。
+
+## 實測成本（2026-08-22 量的，不是估的）
+
+### 端到端 A/B：同一課、同一個抽取任務，只差「讀幾頁」
+
+| | 讀的頁 | token | 耗時 |
+|---|---|---|---|
+| 照派工單 | L0072 第 3 頁 **1/9** | **172,767** | 3 分 36 秒 |
+| 航母模式 | L0072 **9/9** | 202,824 | 4 分 32 秒 |
+
+**省 15% token、21% 時間。** ⚠️ 這不是乾淨的對照：兩邊的 tool_uses 是 18 vs 21，
+讀全份那邊還自己多跑了一輪逐字比對。所以 15% 是「兩次真實抽取的差」，
+不是「8 頁的價錢」。
+
+### 隔離量測：一頁到底多少錢
+
+只讀 PDF、什麼都不做的兩個 agent（各 1 次 tool call）：
+
+| 讀 | token | 耗時 |
+|---|---|---|
+| 1 頁 | 150,208 | 9.6 秒 |
+| 9 頁 | 160,386 | 15.5 秒 |
+
+⇒ **一頁 ≈ 1,272 token**（(160386−150208)/8），**固定開銷 ≈ 149,000 token**。
+
+## 🔴 所以拆分划不划算？分開講，不要含混
+
+**頁數這一軸：省很多。** 全庫 172 課、1425 個模組派工：
+
+```
+照派工單各讀自己那幾頁    3,005 頁
+每個模組都讀全份         14,695 頁      ← 派工單沒有 pages 時的下場
+                        ─────────
+                        20.4%（省 11,690 次頁讀 ≈ 14.9M token）
+```
+
+**但固定開銷這一軸：貴得多。** 每派出一架飛機就是一份 ~149k 的固定開銷，
+1425 次派工 = **212M token**，是頁數省下來那 14.9M 的 **14 倍**。
+
+⇒ **誠實的結論：拆分不能拿「省 token」當理由。**
+它的理由是**漏抽會被看見**（該模組的 yml 沒產出 → 對帳門直接指名），
+而 `pages` 的作用是讓拆分**在頁數這一軸不要變成負收益** —— 沒有它就是 14,695 頁。
+
+⇒ **實務上的意思**：⛔ 不要為了「重抽全庫」而一課派 9 架飛機（那是 212M token）。
+派工的正確用法是**某個模組的抽取修好了，只對受影響的課重跑那一個模組** ——
+那時省下的是「不必為了改一個模組而重跑整課的八個模組」。
+
+⚠️ 149k 那個數字是**這個 repo 的 subagent 基線**（CLAUDE.md 與 skill 清單都很大），
+各 1 個樣本。換 repo、換 harness 會不一樣，要重量。
+
+## 反模式
+
+- ❌ 讀 `pages` 以外的頁（找不到要回 BLOCKED，那是 manifest 錯了）
+- ❌ 為了讓答案落在語詞框裡而改寫答案（L0045 那種簡寫是原稿如此）
+- ❌ 把選擇題硬塞成 `word`/`definition`
+- ❌ 補上原稿沒印的 `index`
+- ❌ 新開 top-level key 放旁註（進 `notes`）

@@ -5,6 +5,10 @@ sections:
 - 'no': 一
   name: 會考圖文題實戰
   module: comprehension
+  pages:
+  - 1
+  - 2
+  - 3
 dispatch:
 - comprehension
 produced:
@@ -18,3 +22,9 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 3
+dispatch_pages:
+  comprehension:
+  - 1
+  - 2
+  - 3

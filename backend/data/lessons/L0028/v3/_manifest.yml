@@ -51,3 +51,6 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
+pdf_pages: null
+dispatch_pages: {}
+pages_unavailable: LibreOffice 整份轉檔無窮迴圈（300s 逾時）。解法是拆 subset 再轉，見 extract-lesson-multimodal ②③

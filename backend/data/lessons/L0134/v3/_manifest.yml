@@ -5,16 +5,33 @@ sections:
 - 'no': 一
   name: 讀全文
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
 - 'no': 二
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖文整合閱讀策略——先文後圖，再整合
+  pages:
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
 - 'no': 三
   name: 知識補給站
   module: resources
+  pages:
+  - 9
+  - 10
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 10
 dispatch:
 - comprehension
 - full_text_annotate
@@ -31,3 +48,22 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 10
+dispatch_pages:
+  comprehension:
+  - 10
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  resources:
+  - 9
+  - 10
+  spotlight:
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9

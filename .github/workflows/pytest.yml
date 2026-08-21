@@ -145,7 +145,9 @@ jobs:
             tests/test_section_no_is_hanzi_2843.py \
             tests/test_comprehension_carrier_shape_2843.py \
             tests/test_vocab_definitions_shape_2843.py \
-            tests/test_module_reaches_the_student_2843.py
+            tests/test_module_reaches_the_student_2843.py \
+            tests/test_section_pages_2857.py \
+            tests/test_section_locator_2857.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

@@ -5,31 +5,60 @@ sections:
 - 'no': ''
   name: 導讀
   module: intro_guide
+  pages:
+  - 1
 - 'no': ''
   name: 古文今譯
   module: modern_translation
+  pages:
+  - 1
+  - 2
+  - 3
 - 'no': ''
   name: 原文
   module: classical_text
+  pages:
+  - 3
+  - 4
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  pages:
+  - 4
+  - 5
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  pages:
+  - 5
+  - 6
+  - 7
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  pages:
+  - 7
+  - 8
 - 'no': 四
   name: 文言文聚光燈
   module: spotlight
   subtitle: 賓語前置：倒裝句
+  pages:
+  - 8
+  - 9
+  - 10
+  - 11
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 11
+  - 12
 - 'no': 六
   name: 自我挑戰
   module: self_challenge
+  pages:
+  - 12
 dispatch:
 - classical_text
 - comprehension
@@ -57,3 +86,34 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 12
+dispatch_pages:
+  classical_text:
+  - 3
+  - 4
+  comprehension:
+  - 11
+  - 12
+  intro_guide:
+  - 1
+  keypoints:
+  - 7
+  - 8
+  modern_translation:
+  - 1
+  - 2
+  - 3
+  self_challenge:
+  - 12
+  sentence_matching:
+  - 4
+  - 5
+  spotlight:
+  - 8
+  - 9
+  - 10
+  - 11
+  word_matching:
+  - 5
+  - 6
+  - 7

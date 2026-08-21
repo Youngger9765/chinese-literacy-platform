@@ -5,9 +5,15 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
 - 'no': 二
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 2
+  - 3
 dispatch:
 - comprehension
 - full_text_annotate
@@ -22,3 +28,11 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 3
+dispatch_pages:
+  comprehension:
+  - 2
+  - 3
+  full_text_annotate:
+  - 1
+  - 2

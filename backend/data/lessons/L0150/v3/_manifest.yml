@@ -5,13 +5,28 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
 - 'no': 二
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖表判讀──折線圖
+  pages:
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
 - 'no': 三
   name: 閱讀理解
   module: comprehension
+  pages:
+  - 9
+  - 10
 dispatch:
 - comprehension
 - full_text_annotate
@@ -27,3 +42,20 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
+pdf_pages: 10
+dispatch_pages:
+  comprehension:
+  - 9
+  - 10
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  spotlight:
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
