@@ -23,6 +23,10 @@ import pytest
 
 
 def _bls():
+    # `build_lesson_schema` import python-docx。CI 不裝它（那是離線抽取用的），
+    # 而且 CI 也拿不到 L2 的教師版原稿 —— 這支測試在那裡沒有可測的東西。
+    # 讓它 skip，不要 fail：fail 會讓人以為 code 壞了，實際上是環境沒有素材。
+    pytest.importorskip("docx", reason="python-docx 只有離線抽取環境才裝")
     spec = importlib.util.spec_from_file_location("bls", ROOT / "scripts" / "build_lesson_schema.py")
     m = importlib.util.module_from_spec(spec)
     sys.modules["bls"] = m
