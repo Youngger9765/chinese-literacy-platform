@@ -18,6 +18,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 import AssessmentReport from '../AssessmentReport';
+import { resolveActiveSteps } from '../../../config/stepConfig';
 import type { LearningSession, Story } from '../../../types';
 import type { StepProgressData } from '../../../services/learningApi';
 
@@ -138,6 +139,38 @@ describe('AssessmentReport — realistic modern-flow session (#2835)', () => {
     const knowledgeStationLabel = screen.getByText('知識補給站');
     const card = knowledgeStationLabel.closest('div');
     expect(card?.textContent).toContain('尚未完成');
+  });
+
+  it('分母就是真實啟用關卡數 —— 不是任何寫死的常數', () => {
+    // Young 回報的原話是「已完成 3 / 6 環節？？？？？？ 明明就一堆環節啊」。
+    // 症狀在**分母**，所以斷言必須打在分母的「值」上。
+    //
+    // 原本這裡只有一條負向斷言 not.toMatch(/\/\s*6\s*環節/)，它同時綁死了
+    // 數字「6」跟舊措辭「環節」。把 totalActiveSteps 改回寫死的 6 之後，
+    // 新分支印的是「/ 6 關卡」—— 不含「環節」，那條負向斷言照樣綠。
+    // 實測：把 Young 抱怨的那個 bug 原樣裝回去，本 PR 全部 69 條測試不會紅。
+    //
+    // 所以改成正向、數量式的斷言：分母 === resolveActiveSteps 算出來的關卡數
+    // （跟 StepperNav 那排圓點同源）。任何寫死的常數都會讓它紅。
+    const { container } = render(
+      <AssessmentReport
+        session={REALISTIC_SESSION}
+        story={REALISTIC_STORY}
+        onRetry={vi.fn()}
+        stepProgressData={REALISTIC_STEP_PROGRESS}
+      />,
+    );
+
+    const expectedTotal = resolveActiveSteps(REALISTIC_STORY.stepSequence)
+      .map((step) => step.id)
+      .filter((id) => id !== 'report').length;
+
+    // 掃描前提：算不出關卡數的話，下面的斷言會變成恆綠
+    expect(expectedTotal).toBeGreaterThan(6);
+
+    const matched = container.textContent?.match(/已完成\s*(\d+)\s*\/\s*(\d+)\s*關卡/);
+    expect(matched).toBeTruthy();
+    expect(Number(matched![2])).toBe(expectedTotal);
   });
 
   it('does NOT render a fixed "/ 6" denominator in the progress indicator', () => {
