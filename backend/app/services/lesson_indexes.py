@@ -555,6 +555,26 @@ def _uid_tree_lessons() -> list[dict]:
 
 
 # 學習單章節 → 線上 step。名字是抽取照著學習單印的字寫的。
+#: 學習單印出來的破折號有好幾種寫法，而 `_SECTION_TO_STEP` 是字面比對。
+#: 實測（2026-08-21，350 份 lesson.yml）：
+#:
+#:     讀全文-做記號   U+002D HYPHEN-MINUS         122 課   ← 表裡有
+#:     讀全文—做記號   U+2014 EM DASH               36 課   ← 表裡沒有，全部掉步驟
+#:
+#: 那 36 課的 `step_sequence` 完全沒有 `full-text-annotate`，學生走到第二關時
+#: 那一關不存在。同族還有三個標籤帶 U+2500（BOX DRAWINGS，抽取管線的產物）。
+#:
+#: 修法是**比對前正規化**而不是加四條別名：別名治的是「今天看到的那四個」，
+#: 破折號變體不只四種，每多一種就要有人再發現一次。
+_DASH_VARIANTS = "\u2014\u2013\u2012\u2015\u2500\u2501\uff0d\u2212\u2043"
+_DASH_TABLE = str.maketrans({c: "-" for c in _DASH_VARIANTS})
+
+
+def normalise_section_label(name: str) -> str:
+    """把章節標籤裡的各種破折號統一成 HYPHEN-MINUS，其餘一字不動。"""
+    return (name or "").translate(_DASH_TABLE)
+
+
 _SECTION_TO_STEP = {
     "讀全文-做記號": "full-text-annotate",
     "念順順": "key-passage-reading",
@@ -595,7 +615,9 @@ def _step_sequence_for(l: dict) -> list[str] | None:
         return list(CLASSICAL_STEP_SEQUENCE)
     seen: list[str] = []
     for sec in l.get("sections_present") or []:
-        step = _SECTION_TO_STEP.get(str((sec or {}).get("name") or "").strip())
+        step = _SECTION_TO_STEP.get(
+            normalise_section_label(str((sec or {}).get("name") or "").strip())
+        )
         if step and step not in seen:
             seen.append(step)
     if not seen:
