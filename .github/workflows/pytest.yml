@@ -143,7 +143,8 @@ jobs:
             tests/test_module_reconcile_2843.py \
             tests/test_corpus_gates_are_wired_2843.py \
             tests/test_section_no_is_hanzi_2843.py \
-            tests/test_comprehension_carrier_shape_2843.py
+            tests/test_comprehension_carrier_shape_2843.py \
+            tests/test_vocab_definitions_shape_2843.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
