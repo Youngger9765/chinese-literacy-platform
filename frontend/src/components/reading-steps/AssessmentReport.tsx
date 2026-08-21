@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
-import type { ComprehensionScoreResult } from '../../services/learningApi';
+import type { ComprehensionScoreResult, StepProgressData } from '../../services/learningApi';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
+import { resolveActiveSteps } from '../../config/stepConfig';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
@@ -30,6 +31,12 @@ import IntelligentAnalysisSection from './IntelligentAnalysisSection';
 import ErrorWordListSection from './ErrorWordListSection';
 import PracticeRecommendationSection from './PracticeRecommendationSection';
 
+// 練習關卡總覽 (#2835) — surfaces steps that had zero representation in the
+// report before this issue (詞語理解/語詞應用/文章重點表/閱讀聚光燈/語詞複習/
+// 知識補給站/讀全文-做記號).
+import { computePracticeStepsSummary } from './practiceStepsSummary';
+import PracticeStepsSummarySection from './PracticeStepsSummarySection';
+
 interface AssessmentReportProps {
   session: LearningSession | null;
   story?: Story | null;
@@ -45,6 +52,12 @@ interface AssessmentReportProps {
   token?: string | null;
   /** When true, suppresses celebration overlays and interactive elements (teacher view) */
   readOnly?: boolean;
+  /**
+   * Persisted step progress snapshot (Issue #2835). Used ONLY to read
+   * already-existing step_data scores (vocab-definition/vocab-application)
+   * for the 練習關卡總覽 section — does not change any persistence writes.
+   */
+  stepProgressData?: StepProgressData | null;
 }
 
 /** Generate practice suggestions based on performance */
@@ -82,6 +95,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
   dbSessionId,
   token,
   readOnly,
+  stepProgressData,
 }) => {
   // ── Metrics (pure computation, no side effects) ──────────────────────────
   const {
@@ -148,7 +162,17 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
   const lineBreakdown = readingAttempt?.lineBreakdown ?? [];
   const cpm = readingAttempt?.cpm ?? 0;
   const accuracy = readingAttempt?.accuracy ?? 0;
-  const suggestions = readingAttempt ? generateSuggestions(wrongTokens, accuracy, cpm) : [];
+  // Issue #2835: 練習建議 must fire for the live flow's reading step too
+  // (key-passage-reading → fullReadingResult), not only the disabled
+  // paragraph-reading (readingAttempt). Prefer readingAttempt's numbers when
+  // both exist (unchanged behavior); fall back to fullReadingResult's own
+  // cpm/accuracy (bestReadingAccuracy already unifies the two sources).
+  const hasAnyReadingResult = !!(readingAttempt || fullReadingResult);
+  const suggestionCpm = readingAttempt ? cpm : fullReadingResult?.cpm ?? 0;
+  const suggestionAccuracy = readingAttempt ? accuracy : bestReadingAccuracy ?? 0;
+  const suggestions = hasAnyReadingResult
+    ? generateSuggestions(wrongTokens, suggestionAccuracy, suggestionCpm)
+    : [];
 
   // Transcription from readingAttempt or fullReadingResult
   const transcription =
@@ -159,6 +183,38 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
     readingAccuracy: bestReadingAccuracy,
     comprehensionScore: comprehensionPct,
   });
+
+  // ── Practice steps summary + real step-count progress (#2835) ────────────
+  // Issue #2835: the top progress indicator used to say "已完成 X / 6 環節"
+  // where 6 was hard-coded from an earlier version of the flow — it never
+  // matched the 10 step-dots students actually see in StepperNav. Both
+  // numbers here come from the SAME source of truth StepperNav already uses
+  // (resolveActiveSteps + session.completedSteps), so they can never drift
+  // apart again.
+  //
+  // session.completedSteps is ONLY populated by the LIVE learning flow
+  // (useStepProgressPersistence's onProgressLoaded hydration). The teacher
+  // and student session-HISTORY report pages build their LearningSession
+  // from a different backend response (SessionDetailResponse /
+  // TeacherSessionReport) that never sets this field — for those views we
+  // fall back to the original completedSections/6 display rather than
+  // showing a false "0 completed" for an already-finished session.
+  const hasStepCompletionData = Array.isArray(session?.completedSteps);
+  const activeStepIds = resolveActiveSteps(story?.stepSequence)
+    .map((s) => s.id)
+    .filter((id) => id !== 'report');
+  const completedStepIds = session?.completedSteps ?? [];
+  const totalActiveSteps = hasStepCompletionData ? activeStepIds.length : 0;
+  const completedActiveStepsCount = hasStepCompletionData
+    ? activeStepIds.filter((id) => completedStepIds.includes(id)).length
+    : 0;
+  const allActiveStepsDone = hasStepCompletionData
+    ? totalActiveSteps > 0 && completedActiveStepsCount >= totalActiveSteps
+    : completedSections >= 6;
+
+  const practiceStepsSummary = hasStepCompletionData
+    ? computePracticeStepsSummary(activeStepIds, completedStepIds, stepProgressData?.step_data)
+    : [];
 
   // ── No session guard ─────────────────────────────────────────────────────
   if (!session) {
@@ -195,35 +251,62 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
         />
       )}
 
-      {/* Progress indicator — shown while sections are still being completed (#2201: no lock gate) */}
-      {completedSections < 6 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-          <div className="flex gap-1">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className={`h-2 rounded-full transition-all ${i < completedSections ? 'w-6 bg-accent' : 'w-4 bg-gray-200'}`}
-              />
-            ))}
+      {/* Progress indicator — shown while sections are still being completed (#2201: no lock gate).
+          Issue #2835: for the LIVE flow (hasStepCompletionData), M/N come from
+          the same active-step list StepperNav's 10 dots render from, instead
+          of a hard-coded "6" left over from an earlier flow. Teacher/history
+          report pages (no completedSteps data) keep the original /6 display. */}
+      {hasStepCompletionData ? (
+        !allActiveStepsDone &&
+        totalActiveSteps > 0 && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+            <div className="flex gap-1">
+              {Array.from({ length: totalActiveSteps }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 rounded-full transition-all ${i < completedActiveStepsCount ? 'w-6 bg-accent' : 'w-4 bg-gray-200'}`}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-blue-700 font-medium">
+              已完成 <span className="font-black">{completedActiveStepsCount}</span> / {totalActiveSteps} 關卡
+            </p>
           </div>
-          <p className="text-sm text-blue-700 font-medium">
-            已完成 <span className="font-black">{completedSections}</span> / 6 環節
-          </p>
-        </div>
+        )
+      ) : (
+        completedSections < 6 && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+            <div className="flex gap-1">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 rounded-full transition-all ${i < completedSections ? 'w-6 bg-accent' : 'w-4 bg-gray-200'}`}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-blue-700 font-medium">
+              已完成 <span className="font-black">{completedSections}</span> / 6 環節
+            </p>
+          </div>
+        )
       )}
 
       {/* Header */}
       <div className="text-center">
-        {completedSections >= 6 && (
+        {allActiveStepsDone && (
           <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
             恭喜完成練習！
           </div>
         )}
         <h2 className="text-4xl font-bold mb-2">
-          {completedSections >= 6 ? '好棒！你今天又進步了。' : '朗朗上口診斷報告'}
+          {allActiveStepsDone ? '好棒！你今天又進步了。' : '朗朗上口診斷報告'}
         </h2>
         <p className="text-gray-500">
-          {completedSections >= 6 ? '讓我們看看這次學習的完整成果吧。' : '完成各練習環節，這裡會顯示你的六環節完整成果。'}
+          {allActiveStepsDone
+            ? '讓我們看看這次學習的完整成果吧。'
+            : hasStepCompletionData
+            ? '完成各練習關卡，這裡會顯示你的完整學習成果。'
+            : '完成各練習環節，這裡會顯示你的六環節完整成果。'}
         </p>
         {story && (
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>
@@ -284,32 +367,55 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
           wrongTokens={wrongTokens}
           missingChars={missingChars}
           onGoToVocab={onGoToVocab}
-          hasReadingAttempt={!!readingAttempt}
+          hasReadingAttempt={hasAnyReadingResult}
         />
       </AssessmentSectionWrapper>
 
       {/* ============ 環節五：練習建議 ============ */}
-      <AssessmentSectionWrapper number={5} title="練習建議" defaultOpen={false} disabled={!readingAttempt}>
+      {/* Issue #2835: gate on any reading result (fullReadingResult included),
+          not just the disabled paragraph-reading's readingAttempt — otherwise
+          this section is permanently empty for every real student session. */}
+      <AssessmentSectionWrapper number={5} title="練習建議" defaultOpen={false} disabled={!hasAnyReadingResult}>
         <PracticeRecommendationSection
           suggestions={suggestions}
-          hasReadingAttempt={!!readingAttempt}
+          hasReadingAttempt={hasAnyReadingResult}
         />
       </AssessmentSectionWrapper>
 
       {/* ============ 環節六：課文理解力評估 (Issue #243) ============ */}
-      <AssessmentSectionWrapper number={6} title="課文理解力評估" defaultOpen={true} disabled={!comprehensionScores && !comprehensionScoresLoading}>
+      {/* Issue #2835: comprehensionResult (MCQ, the live flow's 閱讀理解 step)
+          also counts as "done" here — comprehensionScores alone only ever
+          gets populated for the old Socratic-dialogue flow, which the MCQ
+          step never produces. */}
+      <AssessmentSectionWrapper
+        number={6}
+        title="課文理解力評估"
+        defaultOpen={true}
+        disabled={!comprehensionScores && !comprehensionScoresLoading && !comprehensionResult}
+      >
         <AssessmentComprehensionSection
           comprehensionScores={comprehensionScores}
           comprehensionScoresLoading={comprehensionScoresLoading}
+          comprehensionResult={comprehensionResult}
           hideScores={hideScores}
         />
       </AssessmentSectionWrapper>
 
-      {/* ============ 補充資訊：聽寫練習 + 課文理解 ============ */}
+      {/* ============ 環節七：練習關卡總覽 (Issue #2835) ============ */}
+      {/* 詞語理解/語詞應用/文章重點表/閱讀聚光燈/語詞複習/知識補給站/讀全文-做記號
+          (and, for 文言文 lessons, 文白句子比對/文白詞語比對/自我挑戰) had zero
+          representation anywhere in this report before this issue, even
+          though every one of them is already persisted. */}
+      {practiceStepsSummary.length > 0 && (
+        <AssessmentSectionWrapper number={7} title="練習關卡總覽" defaultOpen={true}>
+          <PracticeStepsSummarySection items={practiceStepsSummary} />
+        </AssessmentSectionWrapper>
+      )}
+
+      {/* ============ 補充資訊：聽寫練習 ============ */}
       {/* vocab (#1333): removed from report — now a standalone practice tool in 練習工具箱. */}
       <AssessmentLegacyResults
         dictationResult={dictationResult}
-        comprehensionResult={comprehensionResult}
         hideScores={hideScores}
       />
 

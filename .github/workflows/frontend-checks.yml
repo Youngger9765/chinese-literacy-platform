@@ -107,4 +107,9 @@ jobs:
             src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
             src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
             src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
-            src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx
+            src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx \
+            src/components/reading-steps/__tests__/assessmentReportMetrics.test.ts \
+            src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
+            src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
+            src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
+            src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx

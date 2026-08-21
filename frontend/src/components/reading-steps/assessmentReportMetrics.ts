@@ -85,7 +85,10 @@ export function computeReportMetrics(
     !!(readingAttempt || fullReadingResult),
     !!(readingAttempt?.lineBreakdown?.length),
     !!(readingAttempt || fullReadingResult),
-    !!readingAttempt,
+    // Issue #2835: 練習建議 (section 5) must count as done for the live flow's
+    // reading step (key-passage-reading → fullReadingResult), not just the
+    // disabled paragraph-reading (readingAttempt).
+    !!(readingAttempt || fullReadingResult),
     !!(comprehensionScores || comprehensionResult),
   ].filter(Boolean).length;
 
