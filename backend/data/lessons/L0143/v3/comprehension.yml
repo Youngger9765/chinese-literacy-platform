@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p9 可見
   items:
   - index: 1
     stem: 依文中所述，下列哪一個圖是「血栓」?
@@ -62,3 +61,5 @@ comprehension:
       D: 用三個研究增強文章的豐富度
     answer: B
     explanation: （作者先拋出提問高地訓練對運動員均有幫助嗎?答案是不一定。最後用三個研究證明他的論點，加強文章說服力。)
+  notes:
+    answer_carrier: 橘色手寫代號（在文字層），PDF p9 可見

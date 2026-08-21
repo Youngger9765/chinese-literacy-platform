@@ -3,15 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（字元樣式 rStyle=aff6），PDF p9 可見
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 3、5 題有
-  layout_note: '⚠️ PDF p9 上「五 閱讀理解」標題框與指示語**疊印在第 1 題上面**，三者互相遮蓋、
-
-    幾乎讀不出來。那是 LibreOffice 把浮動框排在文字上造成的，不是教材缺頁 ——
-
-    第 1 題的完整內容在文字流裡是齊全的。另有 2 個橘色「✓」字元浮在標題附近
-
-    （文字層裡就是字面 U+2713，不是 w:sym），不屬於任何一題，用途不明，未當成答案。'
   questions:
   - index: 1
     answer: C
@@ -79,4 +70,14 @@ comprehension:
       B: 看到九塊金餅與素書放在屍身的頭下、身旁
       C: 鮑子都主動帶路，表現出問心無愧的樣子
       D: 鮑子都詳細描述了書生當時發病的情況
-  questions_note: 本課有 6 題（白話課多為 5 題）。
+  notes:
+    answer_carrier: 橘色代號（字元樣式 rStyle=aff6），PDF p9 可見
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 3、5 題有
+    layout: '⚠️ PDF p9 上「五 閱讀理解」標題框與指示語**疊印在第 1 題上面**，三者互相遮蓋、
+
+      幾乎讀不出來。那是 LibreOffice 把浮動框排在文字上造成的，不是教材缺頁 ——
+
+      第 1 題的完整內容在文字流裡是齊全的。另有 2 個橘色「✓」字元浮在標題附近
+
+      （文字層裡就是字面 U+2713，不是 w:sym），不屬於任何一題，用途不明，未當成答案。'
+    questions: 本課有 6 題（白話課多為 5 題）。

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
   questions:
   - index: 1
     answer: B
@@ -45,4 +44,6 @@ comprehension:
       B: 雄蟹揮動大螯；有些雄蛇彼此搏鬥。
       C: 雄海馬舞出姿勢；雄鴕鳥跳起求偶舞。
       D: 雌蛾分泌氣味；雌蛇釋放特殊氣味。
-  questions_note: 本課五題都沒有印解析方框，非漏抄。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
+    questions: 本課五題都沒有印解析方框，非漏抄。

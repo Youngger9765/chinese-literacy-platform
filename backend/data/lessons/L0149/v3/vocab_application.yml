@@ -11,8 +11,6 @@ vocab_application:
     E: 事半功倍
     F: 得天獨厚
     G: 因材施教
-  option_bank_note: 代號表印成 2 列 5 欄，第 2 列後 3 格是空的（只到 G）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 每天堅持十分鐘的練習，日積月累，(  )，讓他獲得好成果。
@@ -48,3 +46,6 @@ vocab_application:
     - index: 8
       stem: 新手不會操作機器，做起事來又錯又慢，總是(  )。
       answer: 事倍功半
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列後 3 格是空的（只到 G）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

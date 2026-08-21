@@ -32,9 +32,6 @@ vocab_review:
   - 薪一裂輕各有千秋搜找
   - 目十重面不改色找尋覓
   answers_are_graphical: true
-  answer_carrier: '9 個橘色 roundRect（全部硬寫死 srgbClr E97132），全部錨在紙內（posOffset 皆 |x| < 0.3in），
-
-    9 圈 = 9 條路徑 = 9 個目標語詞，個數相符無警報。'
   answer_paths:
   - word: 星羅棋布
     cells:
@@ -127,6 +124,10 @@ vocab_review:
     - - 8
       - 4
     direction: horizontal
-  answer_paths_note: '「一」在第 6 列第 7 格被**兩條路徑共用**（掛一漏萬的第 2 字、一目了然的第 1 字），
+  notes:
+    answer_carrier: '9 個橘色 roundRect（全部硬寫死 srgbClr E97132），全部錨在紙內（posOffset 皆 |x| < 0.3in），
 
-    PDF p9 上兩個橘圈在該格交叉，與座標一致。'
+      9 圈 = 9 條路徑 = 9 個目標語詞，個數相符無警報。'
+    answer_paths: '「一」在第 6 列第 7 格被**兩條路徑共用**（掛一漏萬的第 2 字、一目了然的第 1 字），
+
+      PDF p9 上兩個橘圈在該格交叉，與座標一致。'

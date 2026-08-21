@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫字；文字流已含答案
   questions:
   - index: 1
     answer: B
@@ -48,3 +47,5 @@ comprehension:
       B: 把河馬張開大嘴的相片貼在大胃王餐廳的招牌上
       C: 模仿荷葉不易沾水的特性，設計不容易沾水的雨傘
       D: 把虎豹的斑紋印在布料上，做成服飾，以吸引人注意
+  notes:
+    answer_carrier: 橘色手寫字；文字流已含答案

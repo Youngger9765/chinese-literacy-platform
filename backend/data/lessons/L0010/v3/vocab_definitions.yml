@@ -18,7 +18,6 @@ vocab_definitions:
   - 報酬
   - 擦身而過
   - 孤注一擲
-  vocabulary_bank_errata_ref: E1
   items:
   - index: 1
     word: 有朝一日
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 10
     word: 擦身而過
     definition: 比喻差一點就得到，最後卻錯過人、事或機會。
+  notes:
+    vocabulary_bank_errata_ref: E1

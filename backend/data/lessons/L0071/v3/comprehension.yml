@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
-  answer_width_note: 第 1~3 題的代號是全形（Ｂ／Ｄ／Ａ），第 4~5 題是半形（C／B），原稿如此。
   questions:
   - index: 1
     answer: B
@@ -69,3 +67,6 @@ comprehension:
       D: 補習經驗越多，數字記憶廣度就越高
     explanation: 實驗一與實驗二都出現「漢語數字發音較短、漢語組記憶廣度較高」的結果，因此支持B。
     explanation_note: 原稿是一個浮動說明框，印在選項 A 右側
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
+    answer_width: 第 1~3 題的代號是全形（Ｂ／Ｄ／Ａ），第 4~5 題是半形（C／B），原稿如此。

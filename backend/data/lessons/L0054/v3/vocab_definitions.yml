@@ -18,7 +18,6 @@ vocab_definitions:
   - 嬌客
   - 招親
   - 尾隨而至
-  answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案
   items:
   - index: 1
     word: 爭強鬥勝
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 10
     word: 丰采
     definition: 美好、吸引人的樣子或特色。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案

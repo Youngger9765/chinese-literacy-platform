@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2~5 題有
   questions:
   - index: 1
     answer: D
@@ -50,3 +48,6 @@ comprehension:
       C: 國際奧會應該提升決策系統的女性占比
       D: 女性在月經期間應避免運動，以免受傷
     teacher_hint: (A-應注重實力就好。B-女性可自行選擇想穿的衣服。C-多元聲音，有助實施性別平等。D-無根據。)
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2~5 題有

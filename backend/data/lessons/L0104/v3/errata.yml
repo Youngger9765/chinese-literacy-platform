@@ -1,14 +1,15 @@
 lesson_uid: L0104
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文—做記號
-  locator: 段號欄第一個號碼
-  source: ㄧ
-  corrected: 一
-  kind: 錯字（注音符號誤植）
-  why: '課文段號欄的第一個號碼印的是**注音符號「ㄧ」（U+3127）**，不是漢字「一」（U+4E00）。
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文—做記號
+    locator: 段號欄第一個號碼
+    source: ㄧ
+    corrected: 一
+    kind: 錯字（注音符號誤植）
+    why: '課文段號欄的第一個號碼印的是**注音符號「ㄧ」（U+3127）**，不是漢字「一」（U+4E00）。
 
-    同一欄後面的二~九都是漢字。兩者字形幾乎一樣，看不出來，但編碼不同。'
-  confidence: high
-  evidence: document.xml 逐字元比對（該儲存格第 1 個 `w:p` 的內容是 U+3127）
+      同一欄後面的二~九都是漢字。兩者字形幾乎一樣，看不出來，但編碼不同。'
+    confidence: high
+    evidence: document.xml 逐字元比對（該儲存格第 1 個 `w:p` 的內容是 U+3127）

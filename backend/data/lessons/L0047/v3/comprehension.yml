@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫字；文字流已含答案
   questions:
   - index: 1
     answer: B
@@ -55,3 +54,5 @@ comprehension:
       C: 說明大嫂在工地的弱勢，希望推動性別平等
       D: 凸顯工地大嫂的多元能力並表達敬意
     teacher_note: 第五到十段，作者先介紹大嫂的功用與職場的重要性，最後結論是無比尊敬工地大嫂。
+  notes:
+    answer_carrier: 橘色手寫字；文字流已含答案

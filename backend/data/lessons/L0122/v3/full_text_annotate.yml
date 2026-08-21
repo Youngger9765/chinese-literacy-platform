@@ -4,9 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第2課  隱形的征服者
   paragraph_count: 11
-  paragraphs_note: '段號欄印 一~十一 共 11 個，與 v2 的 11 段一致。三個加框分節小標
-
-    （168人對決8萬大軍／無形的殺手／如果沒有病菌）不佔段號，另存 inline_headings。'
   paragraphs:
   - idx: 1
     text: 公元1532年11月的一個夜晚，南美洲安第斯山區的卡哈馬卡谷地（在現在的秘魯北部）寒風陣陣。西班牙探險隊遠渡重洋而來，領隊皮薩羅帶著168名士兵，躲在山坡的陰影中悄悄觀察著山下的印加帝國大軍。士兵們的臉上浮現出一絲恐懼——山谷間的火光綿延數公里，八萬名印加士兵的營帳像繁星般密布，場景既壯觀又令人膽寒。第二天，就是印加和西班牙軍隊的第一次接觸。西班牙士兵在日記裡這樣形容：「我們彷彿面對的是一座從未見過的巨大城市，我們人數太少，完全無法抵擋……。」
@@ -38,7 +35,6 @@ full_text_annotate:
     text: 無形的殺手
   - after_paragraph: 9
     text: 如果沒有病菌
-  inline_headings_note: 第一個小標印在第 1 段之前（after_paragraph 為 0），不是課文的段落
   inline_marked_terms:
   - 區區
   - 懸殊
@@ -50,3 +46,8 @@ full_text_annotate:
   - 哀鴻遍野
   - 撕心裂肺
   char_count: 1226
+  notes:
+    paragraphs: '段號欄印 一~十一 共 11 個，與 v2 的 11 段一致。三個加框分節小標
+
+      （168人對決8萬大軍／無形的殺手／如果沒有病菌）不佔段號，另存 inline_headings。'
+    inline_headings: 第一個小標印在第 1 段之前（after_paragraph 為 0），不是課文的段落

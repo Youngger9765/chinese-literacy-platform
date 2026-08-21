@@ -17,9 +17,6 @@ vocab_review:
   - 探測車
   - 險象環生
   - 廣闊無垠
-  target_words_note: '灰框列 12 個語詞（分兩行印）。這是本課唯一同時含「崎嶇難行」與「探測車」的地方
-
-    —— 比「本課語詞」框與第四大題各多一個（見 meta._總表_對照note）。'
   grid_size:
   - 10
   - 10
@@ -36,19 +33,6 @@ vocab_review:
   - 行襲伏帶領林涯垠降落
   answers_are_graphical: true
   answers_printed: true
-  answer_paths_note: '12 個圈全部圈到，與 12 個目標語詞一一對應，每條路徑都能套回 grid 拼出該語詞。
-
-    ⚠️ document.xml 共有 15 個 roundRect，其中 3 個不屬於找字遊戲
-
-    （2 個是第三大題例二的紅色答案框 srgb=C00000「範圍很大」「沒有」，
-
-    1 個是 5.96in 寬的整列外框）。
-
-    剩下 12 個之中**顏色不一致**：10 個是 schemeClr accent2，另外 2 個是
-
-    srgb E97132 —— 顏色不同不代表它不是答案（skill ⑥.6 已記過同型）。
-
-    所以「roundRect 個數 ≠ 語詞數」在本課是預期的，判準以逐格取字為準。'
   answer_paths:
   - word: 追逐
     cells:
@@ -160,3 +144,20 @@ vocab_review:
     - - 10
       - 5
     direction: vertical
+  notes:
+    target_words: '灰框列 12 個語詞（分兩行印）。這是本課唯一同時含「崎嶇難行」與「探測車」的地方
+
+      —— 比「本課語詞」框與第四大題各多一個（見 meta._總表_對照note）。'
+    answer_paths: '12 個圈全部圈到，與 12 個目標語詞一一對應，每條路徑都能套回 grid 拼出該語詞。
+
+      ⚠️ document.xml 共有 15 個 roundRect，其中 3 個不屬於找字遊戲
+
+      （2 個是第三大題例二的紅色答案框 srgb=C00000「範圍很大」「沒有」，
+
+      1 個是 5.96in 寬的整列外框）。
+
+      剩下 12 個之中**顏色不一致**：10 個是 schemeClr accent2，另外 2 個是
+
+      srgb E97132 —— 顏色不同不代表它不是答案（skill ⑥.6 已記過同型）。
+
+      所以「roundRect 個數 ≠ 語詞數」在本課是預期的，判準以逐格取字為準。'

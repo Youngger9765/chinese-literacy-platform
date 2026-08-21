@@ -19,7 +19,6 @@ vocab_definitions:
   - 捶胸頓足
   - 疑難雜症
   - 落寞
-  vocabulary_bank_note: 學習單框內列 11 個，總表語詞欄只列 10 個（少「鷹眼」）。 以學習單為準 —— 第 (10) 小題的答案就是鷹眼，第七大題找字遊戲也要圈它。
   items:
   - index: 1
     word: 龍爭虎鬥
@@ -56,3 +55,5 @@ vocab_definitions:
     definition: 難以解決的困難或問題。
   supplement:
     text: '*「鷹眼」常用的意思是銳利的眼光。'
+  notes:
+    vocabulary_bank: 學習單框內列 11 個，總表語詞欄只列 10 個（少「鷹眼」）。 以學習單為準 —— 第 (10) 小題的答案就是鷹眼，第七大題找字遊戲也要圈它。

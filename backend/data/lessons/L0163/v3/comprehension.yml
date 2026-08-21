@@ -4,7 +4,6 @@ section_no: 五
 comprehension:
   label: 五、閱讀理解
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p5 可見
   questions:
   - index: 1
     stem: 下列成語，何者最適合用來形容顧寧人先生的讀書態度？
@@ -59,3 +58,5 @@ comprehension:
     explanation: '第5題解析：
 
       A年幼的人；B稍微；C不要；D很少、不多的。'
+  notes:
+    answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p5 可見

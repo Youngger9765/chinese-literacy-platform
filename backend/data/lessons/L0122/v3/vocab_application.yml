@@ -14,7 +14,6 @@ vocab_application:
     H: 抗體
     I: 不堪一擊
     J: 撕心裂肺
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   unused_options:
   - B
   - G
@@ -79,3 +78,5 @@ vocab_application:
         蔓延：強調範圍逐漸擴大，但不一定帶有劇烈破壞性。
 
         →這可以用來描述疾病、思想、影響力等的擴散過程。'
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

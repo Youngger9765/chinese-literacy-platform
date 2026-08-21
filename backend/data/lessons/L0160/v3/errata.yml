@@ -1,16 +1,17 @@
 lesson_uid: L0160
 version_id: v3
-errata:
-- id: E1
-  section: 六 自我挑戰／翻譯方塊
-  locator: 「還不滿足嗎?」句末的下引號
-  source: 現在一下子得了十兩銀子，還不滿足嗎?⎦漁夫很失望地走開了。
-  corrected: 現在一下子得了十兩銀子，還不滿足嗎？」漁夫很失望地走開了。
-  kind: 標點誤用
-  why: '下引號印成「⎦」（U+23A6 RIGHT SQUARE BRACKET LOWER CORNER，數學排版用的方括號下角），
+notes:
+  errata:
+  - id: E1
+    section: 六 自我挑戰／翻譯方塊
+    locator: 「還不滿足嗎?」句末的下引號
+    source: 現在一下子得了十兩銀子，還不滿足嗎?⎦漁夫很失望地走開了。
+    corrected: 現在一下子得了十兩銀子，還不滿足嗎？」漁夫很失望地走開了。
+    kind: 標點誤用
+    why: '下引號印成「⎦」（U+23A6 RIGHT SQUARE BRACKET LOWER CORNER，數學排版用的方括號下角），
 
-    不是中文的「」」。同一段前面的上引號用的是正常的「：「」。另外句末的問號是半形「?」，
+      不是中文的「」」。同一段前面的上引號用的是正常的「：「」。另外句末的問號是半形「?」，
 
-    同段其他問號是全形。'
-  confidence: high
-  evidence: document.xml 與 PDF p9 一致（不是轉檔造成的）
+      同段其他問號是全形。'
+    confidence: high
+    evidence: document.xml 與 PDF p9 一致（不是轉檔造成的）

@@ -17,9 +17,6 @@ vocab_review:
   - 玄妙
   - 繪聲繪影
   - 屏息以待
-  target_words_note: '灰框列 12 個語詞（分兩行印）。比第五大題代號表多「倖存者」與「玄妙」；
-
-    「玄妙」只在課文第 3 段出現過，四份語詞清單裡只有這裡有它。'
   grid_size:
   - 10
   - 10
@@ -36,11 +33,6 @@ vocab_review:
   - 倖言告掩耳寺盜鈴騰慌
   answers_are_graphical: true
   answers_printed: true
-  answer_paths_note: '12 個圈全部圈到，與 12 個目標語詞一一對應；document.xml 的 roundRect 恰為 12 個，
-
-    與路徑數相符。格子裡另有多組誘答字（第 5 列第 1 格「屏」、第 10 列第 1 格「倖」、
-
-    第 8 列第 3 格「雷」、第 6 列第 1 格「誤」等），都不在任何一條路徑上。'
   answer_paths:
   - word: 屏息以待
     cells:
@@ -142,3 +134,12 @@ vocab_review:
     - - 10
       - 10
     direction: diagonal_down_right
+  notes:
+    target_words: '灰框列 12 個語詞（分兩行印）。比第五大題代號表多「倖存者」與「玄妙」；
+
+      「玄妙」只在課文第 3 段出現過，四份語詞清單裡只有這裡有它。'
+    answer_paths: '12 個圈全部圈到，與 12 個目標語詞一一對應；document.xml 的 roundRect 恰為 12 個，
+
+      與路徑數相符。格子裡另有多組誘答字（第 5 列第 1 格「屏」、第 10 列第 1 格「倖」、
+
+      第 8 列第 3 格「雷」、第 6 列第 1 格「誤」等），都不在任何一條路徑上。'

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）
   answers_printed: true
   items:
   - index: 1
@@ -51,3 +50,5 @@ comprehension:
       C: 構樹 DNA 的研究結果、南島語族語言的相似性，及文化證據
       D: 南島語族遷徙的距離、各島嶼的氣候條件，及航海技術的發展
     answer: C
+  notes:
+    option_key: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af）

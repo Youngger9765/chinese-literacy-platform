@@ -20,7 +20,6 @@ vocab_definitions:
   - 韶光
   - 枯燥乏味
   - 翻天覆地
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 韶光
@@ -52,3 +51,5 @@ vocab_definitions:
   - index: 10
     word: 嶄新
     definition: 全新。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

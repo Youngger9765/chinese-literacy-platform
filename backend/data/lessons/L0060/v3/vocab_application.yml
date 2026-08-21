@@ -12,8 +12,6 @@ vocab_application:
     F: 反芻
     G: 鴉雀無聲
     H: 萬丈深淵
-  option_bank_note: 12 個本課語詞只有 8 個進代號表（倒楣、輾轉反側、豁達、半身不遂 未列），8 個代號對應 8 道小題、全部用到
-  answer_carrier: 橘色手寫代號（PDF p5）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 我只是走在路上，沒想到卻被飛來的磚頭砸到進醫院，簡直是（　）。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 自從心愛的寵物走丟後，他每天（　），不斷尋找丟失的寵物。
     answer: C
+  notes:
+    option_bank: 12 個本課語詞只有 8 個進代號表（倒楣、輾轉反側、豁達、半身不遂 未列），8 個代號對應 8 道小題、全部用到
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的（　）內已填有同樣的代號

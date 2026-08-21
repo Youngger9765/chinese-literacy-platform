@@ -4,7 +4,6 @@ section_no: 八
 vocab_review:
   type: word_search
   instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
-  instruction_note: 本課用「刪除」，L0109/L0110/L0115 用「劃掉」。原稿如此。
   target_words:
   - 令人髮指
   - 劈頭
@@ -124,10 +123,12 @@ vocab_review:
     - - 10
       - 10
     direction: vertical
-  grid_note: '三條斜線在格子中央互相交叉（視若無睹↘、令人髮指↘、抽絲剝繭↙），
+  notes:
+    instruction: 本課用「刪除」，L0109/L0110/L0115 用「劃掉」。原稿如此。
+    grid: '三條斜線在格子中央互相交叉（視若無睹↘、令人髮指↘、抽絲剝繭↙），
 
-    PDF p10 上看得很清楚；抽絲剝繭是本批唯一一條 **diagonal_down_left**。
+      PDF p10 上看得很清楚；抽絲剝繭是本批唯一一條 **diagonal_down_left**。
 
-    干擾字很多：「絲」出現 3 次（r3c3／r5c5／r8c3）、「繭」3 次、「髮」4 次、
+      干擾字很多：「絲」出現 3 次（r3c3／r5c5／r8c3）、「繭」3 次、「髮」4 次、
 
-    「睜」3 次，只有落在上述路徑上的才被圈。'
+      「睜」3 次，只有落在上述路徑上的才被圈。'

@@ -12,10 +12,6 @@ vocab_application:
     F: 險峻
     G: 手無寸鐵
     H: 一息尚存
-  option_bank_note: '代號表只到 H，最後兩格是空的（沒有 I、J）——原稿如此。
-
-    語詞框有 13 個語詞，代號表只列 8 個。'
-  answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊；(1)(3)(4)(5) 印全形、(2) 印半形，這裡一律記半形
   unused_options:
   - B
   - C
@@ -36,3 +32,8 @@ vocab_application:
   - index: 5
     stem: 他憑著努力不懈的意志，終於攀上(  )的山頂，完成登峰壯舉。
     answer: F
+  notes:
+    option_bank: '代號表只到 H，最後兩格是空的（沒有 I、J）——原稿如此。
+
+      語詞框有 13 個語詞，代號表只列 8 個。'
+    answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊；(1)(3)(4)(5) 印全形、(2) 印半形，這裡一律記半形

@@ -5,4 +5,5 @@ goal_box:
   strategy_line: '目標策略：文言文閱讀策略
 
     ──如何讀懂文言文'
-  strategy_line_note: 框內印成兩行，第二行以破折號開頭
+  notes:
+    strategy_line: 框內印成兩行，第二行以破折號開頭

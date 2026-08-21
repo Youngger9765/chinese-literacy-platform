@@ -5,9 +5,6 @@ comprehension:
   instruction: '請根據文章內容，選出最適合的答案，
 
     要讀完每一個選項再作答。'
-  instruction_note: 這句指示語在原稿是排成兩行的浮動文字方塊（其他課多為一行）。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  options_note: 本課每題只有 A、B、C 三個選項（其他課多為四個）
   questions:
   - index: 1
     answer: C
@@ -38,3 +35,7 @@ comprehension:
       A: 閱讀能力要像正太抱小豬一樣，每次學一點，慢慢累積進步
       B: 所有的學習都是困難的，要學好，就必須不怕困難
       C: 學習需要好老師的指導，找到好老師，是學習第一步
+  notes:
+    instruction: 這句指示語在原稿是排成兩行的浮動文字方塊（其他課多為一行）。
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    options: 本課每題只有 A、B、C 三個選項（其他課多為四個）

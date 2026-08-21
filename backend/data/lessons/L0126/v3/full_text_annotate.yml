@@ -4,7 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第6課 戲院、賭場、檳榔攤：在時代夾縫中成長的我
   paragraph_count: 11
-  paragraphs_note: 段號欄印 一~十一 共 11 個，與課文儲存格的 11 個 <w:p> 一一對應，沒有分節小標、沒有未編號引言。
   paragraphs:
   - idx: 1
     text: 在電視尚未普及的年代，爸爸與伯父在南部各縣市巡迴放映電影，貨車載著放映機、膠卷與銀幕，深入鄉間。當時鄉下娛樂設施少，人們熱切期盼「流動電影院」的到來。雖然收入不錯，但四處漂泊十分辛苦，幾年後，他們決定在高雄美濃定居，集資興建「第一戲院」，而我也在這時出生。
@@ -41,5 +40,7 @@ full_text_annotate:
   - 驚駭不已
   - 蕭條
   - 訣竅
-  inline_marked_terms_note: 課文中用黑框（w:bdr color=auto）標出的 12 個語詞，與本課語詞框一致
   char_count: 1456
+  notes:
+    paragraphs: 段號欄印 一~十一 共 11 個，與課文儲存格的 11 個 <w:p> 一一對應，沒有分節小標、沒有未編號引言。
+    inline_marked_terms: 課文中用黑框（w:bdr color=auto）標出的 12 個語詞，與本課語詞框一致

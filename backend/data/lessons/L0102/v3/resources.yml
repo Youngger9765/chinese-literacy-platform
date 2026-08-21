@@ -17,11 +17,6 @@ resources:
     duration_seconds: 337
     source: 微博最火視頻搬運工
     qr_code: true
-  items_note: '原稿的片長印成「・片長：(05:21)」（含括號、分鐘數補零），本欄照既有形狀去掉括號存成
-
-    `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
-
-    文字層只有標題、片長、來源三項，沒有 URL。'
   section_name: 知識補給站
   label: 影片連結
   videos:
@@ -31,3 +26,9 @@ resources:
   - index: 2
     url: http://youtu.be/bUA3j82je3o
     url_source: 總表0816「4.影片連結」年級7課次5
+  notes:
+    items: '原稿的片長印成「・片長：(05:21)」（含括號、分鐘數補零），本欄照既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
+
+      文字層只有標題、片長、來源三項，沒有 URL。'

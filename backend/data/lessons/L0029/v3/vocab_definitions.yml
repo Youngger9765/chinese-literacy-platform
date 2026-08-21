@@ -35,7 +35,6 @@ vocab_definitions:
   - 匪夷所思
   - 舉步維艱
   - 獨排眾議
-  vocabulary_bank_note: 上面是兩篇合併後的完整清單；篇1 有 13 個、篇2 有 14 個，各自的語詞框分開印
   items:
   - part: 1
     section_no_printed: 三
@@ -147,4 +146,6 @@ vocab_definitions:
     index: 14
     word: 羊入虎口
     definition: 弱小的羊進入兇猛老虎的嘴巴，完全沒有逃脫的機會。比喻弱者陷入很大的危險，很難脫身。
-  answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊
+  notes:
+    vocabulary_bank: 上面是兩篇合併後的完整清單；篇1 有 13 個、篇2 有 14 個，各自的語詞框分開印
+    answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊

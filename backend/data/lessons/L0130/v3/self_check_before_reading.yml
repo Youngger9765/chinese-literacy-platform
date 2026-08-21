@@ -3,8 +3,9 @@ version_id: v3
 self_check_before_reading:
   items:
   - 要不停問自己：「這故事想告訴我什麼道理？」
-  instruction_note: '⚠️ 這課的檢核框**只有一項，而且沒有「※ 如果你有做到下列事項，請在□內打勾。」
-
-    那句指示語**（其他課都有）—— 原稿如此，未代補。'
   no_correct_answer: true
-  answer_carrier: 學生自填，原稿無勾選
+  notes:
+    instruction: '⚠️ 這課的檢核框**只有一項，而且沒有「※ 如果你有做到下列事項，請在□內打勾。」
+
+      那句指示語**（其他課都有）—— 原稿如此，未代補。'
+    answer_carrier: 學生自填，原稿無勾選

@@ -12,7 +12,6 @@ vocab_application:
     F: 嶄露頭角
     G: 跌破眼鏡
     H: 一絲不苟
-  option_bank_note: 只列 8 個代號（本課 13 個語詞中的「清一色」「招募」「平起平坐」「脫韁野馬」「摸不著頭緒」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 他接受（　）的音樂訓練，因此技巧非常扎實。
@@ -38,3 +37,5 @@ vocab_application:
   - index: 8
     stem: 他對實驗數據的處理（　），絲毫不容許誤差。
     answer: H
+  notes:
+    option_bank: 只列 8 個代號（本課 13 個語詞中的「清一色」「招募」「平起平坐」「脫韁野馬」「摸不著頭緒」未入選項），對應 8 道小題

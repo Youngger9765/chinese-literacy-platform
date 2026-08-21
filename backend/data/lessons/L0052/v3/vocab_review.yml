@@ -101,6 +101,7 @@ vocab_review:
     - - 10
       - 9
     direction: diagonal_down_right
-  answer_path_note: '9 條路徑對上 document.xml 的 9 個 roundRect（本課 roundRect 總數 = 9，無跨頁、無異色框），
+  notes:
+    answer_path: '9 條路徑對上 document.xml 的 9 個 roundRect（本課 roundRect 總數 = 9，無跨頁、無異色框），
 
-    且每一條套回 grid 都拼得出目標語詞。格子裡未發現錯字。'
+      且每一條套回 grid 都拼得出目標語詞。格子裡未發現錯字。'

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af0）
   answers_printed: true
   items:
   - index: 1
@@ -67,3 +66,5 @@ comprehension:
       D: 偉翔每天熬夜讀書，常靠能量棒及手搖杯維持精神
     answer: D
     note: 題幹「下列何者最可能**最**需要」重複了「最」字，照原稿抄
+  notes:
+    option_key: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af0）

@@ -22,10 +22,6 @@ vocab_definitions:
   - 孤軍奮戰
   - 趨前
   - 俐落
-  vocabulary_bank_note: '語詞框分四行印，**每行結尾都沒有頓號或句號**（「反射性、仰賴、篤定、」「咬中、奮不顧身、配球」…），
-
-    第 2~4 行的行末沒有標點。原稿如此。'
-  answer_carrier: 橘色（run 層與字元樣式混用），PDF p3~p4 可見
   items:
   - index: 1
     word: 趨前
@@ -63,3 +59,8 @@ vocab_definitions:
   - index: 12
     word: 咬中
     definition: 指打者揮棒時，扎實的擊中球。
+  notes:
+    vocabulary_bank: '語詞框分四行印，**每行結尾都沒有頓號或句號**（「反射性、仰賴、篤定、」「咬中、奮不顧身、配球」…），
+
+      第 2~4 行的行末沒有標點。原稿如此。'
+    answer_carrier: 橘色（run 層與字元樣式混用），PDF p3~p4 可見

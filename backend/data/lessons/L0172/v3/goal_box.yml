@@ -7,4 +7,5 @@ goal_box:
   byline: 課文/學習單：
   author: 張筱晴
   has_qr: false
-  qr_note: 這一課的標題區與課文結束後都**沒有** QR code；全篇只有知識補給站兩支影片各一個 QR。
+  notes:
+    qr: 這一課的標題區與課文結束後都**沒有** QR code；全篇只有知識補給站兩支影片各一個 QR。

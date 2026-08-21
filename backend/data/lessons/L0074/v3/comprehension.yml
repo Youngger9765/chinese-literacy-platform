@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: A
@@ -45,3 +44,5 @@ comprehension:
       B: 有人使用特製肥料讓植物長得更快，吸引遊客購票參觀賺錢
       C: 政府禁止農民在農地使用農藥，以防止鳥類再次出現中毒
       D: 為了保護青蛙，農民停用農藥，企業以高價收購他的稻米
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

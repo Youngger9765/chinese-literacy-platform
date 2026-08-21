@@ -15,7 +15,6 @@ vocab_application:
     I: 僧多粥少
   unused_options:
   - G
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 教師職缺只有十個，報名者卻有百人，（　），因此錄取不易。
@@ -41,3 +40,5 @@ vocab_application:
   - index: 8
     stem: 他白天忙著工作、晚上又得照顧生病的母親，雙重壓力讓他覺得快要（　）了，感到十分辛苦。
     answer: C
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

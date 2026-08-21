@@ -14,8 +14,6 @@ vocab_application:
     H: 喧嘩
     I: 驚駭不已
     J: 蕭條
-  option_bank_note: 代號表印成 2 列 5 欄（A~E／F~J）；F 突如其來 未被任何一題使用（原稿如此）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 他整天(  )能中大樂透，卻不願認真工作。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 圖書館內應保持安靜，不可大聲(  )。
     answer: H
+  notes:
+    option_bank: 代號表印成 2 列 5 欄（A~E／F~J）；F 突如其來 未被任何一題使用（原稿如此）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

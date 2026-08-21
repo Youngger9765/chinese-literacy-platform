@@ -19,10 +19,11 @@ resources:
     has_qr: true
     url: https://youtu.be/oszhrLJ-or8
     url_source: 總表0816「4.影片連結」年級8課次3
-  videos_note: 'PDF 上兩個標題前面印有「1.」「2.」，但那是 Word 自動編號（numbering.xml 產生），
+  notes:
+    videos: 'PDF 上兩個標題前面印有「1.」「2.」，但那是 Word 自動編號（numbering.xml 產生），
 
-    不在 w:t 文字流裡，所以 title 不含編號。
+      不在 w:t 文字流裡，所以 title 不含編號。
 
-    總表「4.影片連結」分頁記的兩個網址是 http://youtu.be/bLOHlPOXfR8 與 http://youtu.be/hqJkg8Be-ik
+      總表「4.影片連結」分頁記的兩個網址是 http://youtu.be/bLOHlPOXfR8 與 http://youtu.be/hqJkg8Be-ik
 
-    （學習單上只印 QR code，沒有印網址）。'
+      （學習單上只印 QR code，沒有印網址）。'

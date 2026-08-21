@@ -31,7 +31,6 @@ vocab_review:
   - 做自己的主其來謀反木
   - 被受壓迫切尋想見面瓜
   answers_are_graphical: true
-  extra_circle_note: 第 12 個圈是一條 4 格斜線，從第 7 列第 4 欄往右下到第 10 列第 7 欄， 取字為「突發[其]想」—— 格子第 9 列第 6 欄該是「奇」卻放成「其」， 所以拼不回任何目標語詞。這是教材的格子錯字（source_errata E1）， 不是漏抽；「突發奇想」正確的那一次是第 4 列橫向那條，已列在 answer_paths。
   answer_paths:
   - word: 乾著急
     cells:
@@ -136,3 +135,5 @@ vocab_review:
     - - 10
       - 4
     direction: horizontal
+  notes:
+    extra_circle: 第 12 個圈是一條 4 格斜線，從第 7 列第 4 欄往右下到第 10 列第 7 欄， 取字為「突發[其]想」—— 格子第 9 列第 6 欄該是「奇」卻放成「其」， 所以拼不回任何目標語詞。這是教材的格子錯字（source_errata E1）， 不是漏抽；「突發奇想」正確的那一次是第 4 列橫向那條，已列在 answer_paths。

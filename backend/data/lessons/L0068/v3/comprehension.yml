@@ -3,7 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p7）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: C
@@ -56,3 +55,5 @@ comprehension:
       D: 他為了受到世界注目，才願意持續從事危險的採集工作
     explanation: 第2段寫出阿介因熱愛植物而持續學習；第5～6段寫他跨越學歷門檻；第9～10段則寫他投入植物保育，最後找回自信與人生價值。
     explanation_note: 說明框引用的段號與課文印的（段N）同樣差一號；照原稿記錄，未更動
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p7）；文字層的（　）內已填有同樣的代號

@@ -1,12 +1,13 @@
 lesson_uid: L0081
 version_id: v3
-errata:
-- id: E1
-  section: 二 念順順
-  locator: 指示語第一句句末
-  source: 在表格中記錄計時1分鐘朗讀字數，並。
-  corrected: 在表格中記錄計時1分鐘朗讀字數。
-  kind: 贅字（殘留的連接詞）
-  why: 「，並」後面直接接句號，沒有接續的動詞，是改稿留下的殘句；其餘各課同句都寫「在表格中記錄1分鐘朗讀的字數。」
-  confidence: high
-  evidence: PDF p2 與 document.xml 一致，都印「朗讀字數，並。如果你計時3次後」
+notes:
+  errata:
+  - id: E1
+    section: 二 念順順
+    locator: 指示語第一句句末
+    source: 在表格中記錄計時1分鐘朗讀字數，並。
+    corrected: 在表格中記錄計時1分鐘朗讀字數。
+    kind: 贅字（殘留的連接詞）
+    why: 「，並」後面直接接句號，沒有接續的動詞，是改稿留下的殘句；其餘各課同句都寫「在表格中記錄1分鐘朗讀的字數。」
+    confidence: high
+    evidence: PDF p2 與 document.xml 一致，都印「朗讀字數，並。如果你計時3次後」

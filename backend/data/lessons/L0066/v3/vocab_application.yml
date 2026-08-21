@@ -11,7 +11,6 @@ vocab_application:
     E: 疲憊不堪
     F: 精雕細琢
     G: 不食人間煙火
-  answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 夜晚的星空(　)，令人感嘆自然的偉大。
@@ -48,3 +47,5 @@ vocab_application:
     - index: 3
       stem: 梅花(　)堅韌與不屈，無論風雪多大，它都能挺立在寒冬中。
       answer: 象徵
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號

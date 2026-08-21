@@ -21,7 +21,6 @@ vocab_definitions:
   - 模擬
   - 雞皮疙瘩
   vocabulary_bank_label: 本課語詞
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 鬱鬱蔥蔥
@@ -53,6 +52,8 @@ vocab_definitions:
   - index: 10
     word: 校正
     definition: 修正錯誤，把不準或有偏差的地方調整回正確的狀態。可用於數據、儀器或位置等。
-  items_note: '第 10 題的定義在 PDF p6 上被一個空的圓形徽章切成兩截（「可用於數據、儀器或位置等。」
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    items: '第 10 題的定義在 PDF p6 上被一個空的圓形徽章切成兩截（「可用於數據、儀器或位置等。」
 
-    落到徽章下方）。文字層是同一個段落，本檔照文字層合起來記。'
+      落到徽章下方）。文字層是同一個段落，本檔照文字層合起來記。'

@@ -6,8 +6,6 @@ full_text_annotate:
   checklist:
   - 請在不太了解的字、詞或句做記號。
   - 請在重要的地方、喜歡的語詞、句子或段落做記號。
-  checklist_note: 第 2 條在 PDF p1 被文字方塊邊界裁掉尾字，印成「…段落做記」；文字層是完整的「做記號。」
-  preface_note: 本課**沒有**前言（課文表格的前言列是空的），不是漏抽。
   paragraph_count: 7
   paragraphs:
   - idx: 1
@@ -40,11 +38,6 @@ full_text_annotate:
   - 324
   - 354
   - 374
-  char_count_note: '兩端精準吻合，不需要任何 Word 特殊口徑（本段沒有阿拉伯數字串、沒有註腳、沒有分節小標）：
-
-    第 5 段 147 字 = 印出的第 6 個數字；＋第 6 段 227 = 374 = 最後一個數字。
-
-    字數欄止於第 6 段，不含第 7 段（全文 1154 字）。'
   inline_marked_terms:
   - 幅員遼闊
   - 斥資
@@ -56,7 +49,6 @@ full_text_annotate:
   - 鞏固
   - 遍地開花
   - 天壤之別
-  inline_marked_note: 以 `w:bdr color=auto`（黑框）標在課文裡的生難語詞，逐一由 XML 取得，共 10 個，與語詞框一致。
   underlined_terms:
   - 東京
   - 美國
@@ -67,3 +59,12 @@ full_text_annotate:
   - 臺灣
   - 澳洲
   char_count: 1154
+  notes:
+    checklist: 第 2 條在 PDF p1 被文字方塊邊界裁掉尾字，印成「…段落做記」；文字層是完整的「做記號。」
+    preface: 本課**沒有**前言（課文表格的前言列是空的），不是漏抽。
+    char_count: '兩端精準吻合，不需要任何 Word 特殊口徑（本段沒有阿拉伯數字串、沒有註腳、沒有分節小標）：
+
+      第 5 段 147 字 = 印出的第 6 個數字；＋第 6 段 227 = 374 = 最後一個數字。
+
+      字數欄止於第 6 段，不含第 7 段（全文 1154 字）。'
+    inline_marked: 以 `w:bdr color=auto`（黑框）標在課文裡的生難語詞，逐一由 XML 取得，共 10 個，與語詞框一致。

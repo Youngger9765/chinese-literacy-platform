@@ -3,7 +3,6 @@ version_id: v3
 section_no: 二
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p2）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: C
@@ -35,3 +34,5 @@ comprehension:
       B: 所有的學習都是困難的，要學好，就必須不怕困難
       C: 學習需要好老師的指導，找到好老師，是學習第一步
     note: 選項 B、C 印在 PDF 第 3 頁（該頁只有這兩行）。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p2）；文字層的（　）內已填有同樣的代號

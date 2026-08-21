@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；只有第 2、3 題有
   questions:
   - index: 1
     answer: A
@@ -48,3 +46,6 @@ comprehension:
       B: 面對極地災難時，只有大型機械才能有效完成救援任務
       C: 野生動物容易受到環境威脅，人類應避免接近牠們
       D: 古典音樂能安撫各種動物，可以廣泛運用在救援行動中
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；只有第 2、3 題有

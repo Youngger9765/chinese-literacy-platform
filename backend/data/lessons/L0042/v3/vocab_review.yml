@@ -17,7 +17,6 @@ vocab_review:
   - 橫逆
   - 心力交瘁
   - 質疑
-  bank_note: 語詞框 12 個，比第三大題的 11 個多一個「羨慕」；「羨慕」不在本課語詞，但確實排在格子裡（第 8~9 列第 1 格）也被圈起來
   grid_size:
   - 10
   - 10
@@ -135,4 +134,6 @@ vocab_review:
     - - 10
       - 3
     direction: diagonal_down_right
-  answer_paths_note: 12 個目標語詞全部圈到。
+  notes:
+    bank: 語詞框 12 個，比第三大題的 11 個多一個「羨慕」；「羨慕」不在本課語詞，但確實排在格子裡（第 8~9 列第 1 格）也被圈起來
+    answer_paths: 12 個目標語詞全部圈到。

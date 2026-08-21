@@ -14,8 +14,6 @@ vocab_application:
     H: 本能
     I: 片面
     J: 基因
-  option_bank_note: 10 個代號對應 8 道小題；A.覓食、J.基因 未被任何一題用到
-  answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 做公共決策時，不能只聽某方（　）的說法，必須聽到多元的意見。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 對陌生的事物提高警覺，是所有動物的（　）反應。
     answer: H
+  notes:
+    option_bank: 10 個代號對應 8 道小題；A.覓食、J.基因 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號

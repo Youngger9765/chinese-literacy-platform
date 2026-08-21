@@ -12,7 +12,6 @@ vocab_application:
     F: 一勞永逸
     G: 防治
     H: 兵來將擋，水來土掩
-  option_bank_note: 只列 8 個代號（本課語詞中的「翼展」「抗藥性」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 活動當天突然下起大雨，大家立刻把攤位移到室內，展現出（　）的應變能力。
@@ -38,3 +37,5 @@ vocab_application:
   - index: 8
     stem: 爸爸決定把漏水的屋頂全部翻新，希望能（　）。
     answer: F
+  notes:
+    option_bank: 只列 8 個代號（本課語詞中的「翼展」「抗藥性」未入選項），對應 8 道小題

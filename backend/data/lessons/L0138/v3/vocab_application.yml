@@ -12,10 +12,6 @@ vocab_application:
     F: 歸咎
     G: 峰迴路轉
     H: 心理韌性
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  option_bank_note: '語詞框有 9 個語詞，本大題的代號欄只列 8 個（沒有苛責），8 個全部都被用到 ——
-
-    沒有 unused_options。代號表印成 2 列 × 5 欄，第 2 列後兩格是空的。'
   items:
   - index: 1
     stem: 他經歷一段低潮後，終於(  )，順利找到理想的工作與方向。
@@ -42,3 +38,8 @@ vocab_application:
   - index: 8
     stem: 醫生全力搶救，但病情惡化太快，最後仍然(  )，讓家屬悲痛不已。
     answer: B
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    option_bank: '語詞框有 9 個語詞，本大題的代號欄只列 8 個（沒有苛責），8 個全部都被用到 ——
+
+      沒有 unused_options。代號表印成 2 列 × 5 欄，第 2 列後兩格是空的。'

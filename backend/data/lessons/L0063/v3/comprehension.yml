@@ -2,9 +2,7 @@ lesson_uid: L0063
 version_id: v3
 section_no: 七
 comprehension:
-  _scope: 三篇合讀
   instruction: 請根據三篇文章的內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p21）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: C
@@ -72,3 +70,6 @@ comprehension:
       D: 商品或人才只要數量稀少，價格與薪資就會持續上漲
     explanation: 第一、三篇說明供需影響價格與薪資；第二篇指出限價可能減少供給，因此選B
     explanation_note: 原稿是一個浮動說明框，疊在題幹上（PDF p21 蓋住了題幹尾巴）
+  notes:
+    scope: 三篇合讀
+    answer_carrier: 橘色手寫代號（PDF p21）；文字層的（　）內已填有同樣的代號

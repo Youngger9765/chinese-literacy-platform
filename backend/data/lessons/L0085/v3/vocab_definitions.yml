@@ -19,8 +19,6 @@ vocab_definitions:
   - 遠山如洗
   - 焦躁不安
   - 前兆
-  vocabulary_bank_note: 語詞框印 11 個、句末有句號；第 3 題把「徵兆、前兆」併成一題，所以本大題只有 10 小題。
-  answer_carrier: 橘色手寫字（PDF p9）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 纖細
@@ -53,3 +51,6 @@ vocab_definitions:
   - index: 10
     word: 頻率
     definition: 指在一段時間內同一件事情發生的次數。發生次數越多，頻率就越高。
+  notes:
+    vocabulary_bank: 語詞框印 11 個、句末有句號；第 3 題把「徵兆、前兆」併成一題，所以本大題只有 10 小題。
+    answer_carrier: 橘色手寫字（PDF p9）；文字層的空格內已填有同樣的答案

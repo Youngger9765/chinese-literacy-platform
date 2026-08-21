@@ -4,7 +4,6 @@ section_no: 八
 vocab_review:
   type: word_search
   instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
-  instruction_note: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
   target_words:
   - 經典之作
   - 囑託
@@ -17,7 +16,6 @@ vocab_review:
   - 敏捷
   - 輕蔑
   - 笨拙
-  target_words_note: 找字灰框只收 11 個，本課語詞的第 12 個「迂」沒有列入（原稿如此）
   grid_size:
   - 10
   - 10
@@ -32,9 +30,6 @@ vocab_review:
   - 喘茁典籍捷倢遣散置知
   - 吁壯之老當益壯可辦所
   - 吁碩作萬事通否則惜措
-  grid_note: '第 6 列 c1~c4「經典之做」是誘答（做 ≠ 作），不是格子錯字 ——
-
-    正確的「經典之作」在第 3 欄由上而下（r7 經 / r8 典 / r9 之 / r10 作）。'
   answers_are_graphical: true
   answer_paths:
   - word: 鉅細靡遺
@@ -126,3 +121,9 @@ vocab_review:
     - - 10
       - 7
     direction: diagonal_down_left
+  notes:
+    instruction: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
+    target_words: 找字灰框只收 11 個，本課語詞的第 12 個「迂」沒有列入（原稿如此）
+    grid: '第 6 列 c1~c4「經典之做」是誘答（做 ≠ 作），不是格子錯字 ——
+
+      正確的「經典之作」在第 3 欄由上而下（r7 經 / r8 典 / r9 之 / r10 作）。'

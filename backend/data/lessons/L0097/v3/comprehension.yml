@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: B
@@ -53,3 +52,5 @@ comprehension:
       D: 運動賽事應改用再生材料製作紀念品
     explanation: 第5題解析：B正確，涵蓋環境問題、3R改善方法與實際行動
     explanation_note: 原稿是一個浮動說明框，在 PDF p8 上印在選項 C 與 D 之間
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號

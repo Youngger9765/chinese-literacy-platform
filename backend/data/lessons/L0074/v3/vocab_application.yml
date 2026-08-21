@@ -13,10 +13,8 @@ vocab_application:
     G: 追根究柢
     H: 先驅
     I: 食物鏈
-  option_bank_note: 代號表只收 9 個語詞（本課 11 個語詞中的「猛禽」「契作協議」沒有列入）
   unused_options:
   - F
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 面對這次實驗室爆炸，我們需要（　），找出真正的原因。
@@ -42,3 +40,6 @@ vocab_application:
   - index: 8
     stem: 阿姆斯壯是太空探索的（　），他是第一個登上月球的人。
     answer: H
+  notes:
+    option_bank: 代號表只收 9 個語詞（本課 11 個語詞中的「猛禽」「契作協議」沒有列入）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

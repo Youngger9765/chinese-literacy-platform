@@ -3,8 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（字元樣式 aff），文字流有此資訊
-  teacher_note_carrier: 藍色（156082）文字方塊，印在題目右側；第 4 題沒有解析
   questions:
   - index: 1
     answer: A
@@ -85,3 +83,6 @@ comprehension:
       B 條講的是選項 D（生雞卵的無）。原稿如此，照原樣抄、不重排
 
       （重排等於替教材決定哪一條配哪一項）。'
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 aff），文字流有此資訊
+    teacher_note_carrier: 藍色（156082）文字方塊，印在題目右側；第 4 題沒有解析

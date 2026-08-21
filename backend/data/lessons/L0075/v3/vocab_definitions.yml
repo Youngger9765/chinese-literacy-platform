@@ -19,7 +19,6 @@ vocab_definitions:
   - 筋疲力竭
   - 束手無策
   - 屏氣凝神
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 束手無策
@@ -48,3 +47,5 @@ vocab_definitions:
   - index: 9
     word: 徒勞無功
     definition: 努力想做某件事，卻沒達成目標，白費力氣。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

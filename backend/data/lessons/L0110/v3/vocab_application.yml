@@ -17,7 +17,6 @@ vocab_application:
   unused_options:
   - D
   - F
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 爸媽都是畫家，他從小受到藝術的(　)，一眼就看出配色的好壞。
@@ -43,3 +42,5 @@ vocab_application:
   - index: 8
     stem: 比賽輸了之後，我曾經覺得自己(　)，但在老師的鼓勵下，終於轉念，開心起來。
     answer: B
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

@@ -18,5 +18,6 @@ writing_practice:
   - 綢繆
   - 蹂躪
   - 覷
-  boxed_chars_note: 「框框裡的字」＝原稿在該字上加了黑色 w:bdr 框線的難字，時間不夠時只寫這幾個
-  answer_carrier: 空白待學生書寫，三列各三格皆空
+  notes:
+    boxed_chars: 「框框裡的字」＝原稿在該字上加了黑色 w:bdr 框線的難字，時間不夠時只寫這幾個
+    answer_carrier: 空白待學生書寫，三列各三格皆空

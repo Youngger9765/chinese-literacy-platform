@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: B
@@ -53,3 +52,5 @@ comprehension:
       D: 神仙只是古代藝術作品中的象徵，並無現實意義
     explanation: 文章最後強調人們心中對美好生活與心靈寧靜的追求，這種精神上的「神仙」才是作者真正想表達的含義。
     explanation_note: 原稿是一個浮動說明框，印在選項 D 左側
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8）；文字層的（　）內已填有同樣的代號

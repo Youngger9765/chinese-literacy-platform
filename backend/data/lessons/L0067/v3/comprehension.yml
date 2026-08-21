@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p11~p12）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: B
@@ -53,3 +52,5 @@ comprehension:
       D: 為下一代留下美麗而珍貴的森林寶藏。
     explanation: 第5題解析：文章最後寫到：賴桑認為，推廣種樹和種樹一樣重要，他希望影響更多人，一起為下一代留下美麗的森林寶藏。
     explanation_note: 原稿是一個浮動說明框，與第 4 題解析並排
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p11~p12）；文字層的（　）內已填有同樣的代號

@@ -5,9 +5,6 @@ full_text_annotate:
   header_level: Level 6・說明文
   header_strategy: 目標策略：自我提問策略2──跟著人物故事線問問題
   paragraph_count: 13
-  paragraphs_note: 'idx 是連續編號；printed_idx 是原稿印的（段N）。因為（段10）用了兩次（見 E1），
-
-    idx 11～13 與 printed_idx 10～12 相差一號。'
   paragraphs:
   - idx: 1
     printed_idx: 1
@@ -72,3 +69,7 @@ full_text_annotate:
   - 辜嚴倬雲植物保種中心
   - 員林
   char_count: 1650
+  notes:
+    paragraphs: 'idx 是連續編號；printed_idx 是原稿印的（段N）。因為（段10）用了兩次（見 E1），
+
+      idx 11～13 與 printed_idx 10～12 相差一號。'

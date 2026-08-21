@@ -19,7 +19,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 流行疫病
@@ -46,3 +45,5 @@ vocab_definitions:
     word: 多巴胺
     definition: 一種神經傳遞物質，對大腦的情感和動機起著重要作用。
     example: 例句：運動可以促使大腦釋放多巴胺，讓人感到快樂和興奮。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

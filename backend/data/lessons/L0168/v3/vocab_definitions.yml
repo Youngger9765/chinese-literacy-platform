@@ -28,9 +28,7 @@ vocab_definitions:
   - 家常便飯
   - 微不足道
   - 一針見血
-  word_bank_note: 框內最後以頓號「、」結尾而非句號，照原稿抄
   answers_printed: true
-  answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
   items:
   - index: 1
     definition: 想做某事卻因能力或體力不足而無法完成。
@@ -59,3 +57,6 @@ vocab_definitions:
   - index: 9
     definition: 指派他人去做事。
     answer: 使喚
+  notes:
+    word_bank: 框內最後以頓號「、」結尾而非句號，照原稿抄
+    answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）

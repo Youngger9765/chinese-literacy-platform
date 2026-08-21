@@ -32,7 +32,6 @@ vocab_definitions:
   - 馬虎
   - 本錢
   answers_printed: true
-  answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
   items:
   - index: 1
     definition: 發生得很突然，讓人來不及反應。
@@ -70,3 +69,5 @@ vocab_definitions:
   - index: 12
     definition: 做事隨便、不仔細，常出錯。
     answer: 馬虎
+  notes:
+    answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）

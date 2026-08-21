@@ -157,8 +157,9 @@ vocab_review:
     - - 10
       - 7
     direction: horizontal
-  answer_paths_note: '12 條路徑 ＝ 12 個目標語詞 ＝ 紙上 12 個 roundRect anchor（全在紙內），三者相符，無警報。
+  notes:
+    answer_paths: '12 條路徑 ＝ 12 個目標語詞 ＝ 紙上 12 個 roundRect anchor（全在紙內），三者相符，無警報。
 
-    「心神不寧」與「處變不驚」在第 3 列第 3 欄的「不」交叉（PDF p13 上是一個 X），原稿如此。
+      「心神不寧」與「處變不驚」在第 3 列第 3 欄的「不」交叉（PDF p13 上是一個 X），原稿如此。
 
-    格子沒有印錯字：12 條路徑套回 grid 全部拼得回目標語詞。'
+      格子沒有印錯字：12 條路徑套回 grid 全部拼得回目標語詞。'

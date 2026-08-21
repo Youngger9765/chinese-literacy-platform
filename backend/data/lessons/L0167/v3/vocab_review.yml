@@ -16,7 +16,6 @@ vocab_review:
   - 左右
   - 較勁
   - 平分秋色
-  target_words_note: 只有 8 個（語詞我最棒的九個裡，「心理素質」沒有進找字框）
   grid_size:
   - 10
   - 10
@@ -32,15 +31,6 @@ vocab_review:
   - 夏場理馬彼平分秋色擊
   - 緊張萬分落芝麻綠豆區
   answers_are_graphical: true
-  answer_carrier: '找字那一頁（PDF p9）實際印出 **8 個橘圈**，等於 8 條路徑、8 個目標語詞。
-
-    ⚠️ 全檔 roundRect 有 **9 個**（都錨在紙內、都用佈景色 accent2），比路徑數多 1 ——
-
-    照 SKILL 這是「單向警報」要查。查法是**把範圍限在找字那一頁**：p9 逐個數只有 8 個橘圈，
-
-    第 9 個 roundRect 屬於別頁的版面元件（品格聚光燈的情境標籤框），不是圈選。
-
-    → 無漏抓。'
   answer_paths:
   - word: 不是滋味
     cells:
@@ -120,3 +110,14 @@ vocab_review:
     - - 9
       - 9
     direction: horizontal
+  notes:
+    target_words: 只有 8 個（語詞我最棒的九個裡，「心理素質」沒有進找字框）
+    answer_carrier: '找字那一頁（PDF p9）實際印出 **8 個橘圈**，等於 8 條路徑、8 個目標語詞。
+
+      ⚠️ 全檔 roundRect 有 **9 個**（都錨在紙內、都用佈景色 accent2），比路徑數多 1 ——
+
+      照 SKILL 這是「單向警報」要查。查法是**把範圍限在找字那一頁**：p9 逐個數只有 8 個橘圈，
+
+      第 9 個 roundRect 屬於別頁的版面元件（品格聚光燈的情境標籤框），不是圈選。
+
+      → 無漏抓。'

@@ -23,8 +23,6 @@ vocab_definitions:
   - 絕筆
   - 嚴峻
   - 生死未卜
-  vocabulary_bank_note: 語詞框共 13 個，比總表少「文房四寶」。原稿「嚴峻、」與「生死未卜」之間有一段多餘空白，照原樣不補不刪。
-  answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p4 可見
   items:
   - index: 1
     word: 拋頭顱灑熱血
@@ -65,3 +63,6 @@ vocab_definitions:
   - index: 13
     word: 有幸窺見
     definition: 很幸運的看見一部分不容易看見的事情。
+  notes:
+    vocabulary_bank: 語詞框共 13 個，比總表少「文房四寶」。原稿「嚴峻、」與「生死未卜」之間有一段多餘空白，照原樣不補不刪。
+    answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p4 可見

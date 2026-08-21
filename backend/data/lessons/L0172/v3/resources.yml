@@ -17,4 +17,5 @@ resources:
     source: SIZZ
     has_qr: true
     _總表_url: http://youtu.be/jW-2BepfL2Y
-  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 166 列（適用年級欄填「體育品格」、課次 6），故加 `_` 前綴標示非 DOCX 內容。
+  notes:
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 166 列（適用年級欄填「體育品格」、課次 6），故加 `_` 前綴標示非 DOCX 內容。

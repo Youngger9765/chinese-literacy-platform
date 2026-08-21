@@ -3,8 +3,6 @@ version_id: v3
 section_no: 五
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號，PDF p8 可見
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3 題有
   questions:
   - index: 1
     answer: A
@@ -69,3 +67,6 @@ comprehension:
       C: 邑人奇之，稍稍賓客其父，或以錢幣乞之
       D: 父利其然，日扳仲永環謁於邑人，不使學
     options_note: D 選項寫「父利其然」，原文是「父利其然**也**」（少一個「也」）。屬引文與原文的落差，照原樣未改。
+  notes:
+    answer_carrier: 橘色代號，PDF p8 可見
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3 題有

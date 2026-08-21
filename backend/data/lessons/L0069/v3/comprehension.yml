@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: A
@@ -53,3 +52,5 @@ comprehension:
       D: 團體討論難免出現不同意見，最後仍應以多數票決定適合的方案
     explanation: 全文從兩組方案、同學質疑、班長統整到最後表決，強調聆聽需求、衡量得失與照顧少數。
     explanation_note: 原稿是一個浮動說明框，印在選項 D 下方（跨 p9～p10）
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的（　）內已填有同樣的代號

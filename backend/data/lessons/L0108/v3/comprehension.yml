@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、4、5 題有
   questions:
   - index: 1
     answer: C
@@ -50,3 +48,6 @@ comprehension:
       C: 文章重點在追虎與伏擊技巧，呈現獵虎過程並教人方法
       D: 文章透過虎襲案例反思，指出人虎衝突常與人類行為相關
     teacher_hint: 文章最後談人口與棲地擠壓、科貝轉向保育，核心在「反思原因與責任」。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、4、5 題有

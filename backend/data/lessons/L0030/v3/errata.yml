@@ -1,12 +1,13 @@
 lesson_uid: L0030
 version_id: v3
-errata:
-- id: E1
-  section: 六 閱讀聚光燈
-  locator: 第三段結構圖「細節」欄，對應「保持良好的睡眠」那一格
-  source: 幫助分泌生長激素激素素
-  corrected: 幫助分泌生長激素
-  kind: 贅字（重複）
-  why: 「激素」後面又多打了「激素素」。同一份教材第五大題寫的是「可以幫助分泌生長激素促進生長。」，可見正確的詞就是「生長激素」
-  confidence: high
-  evidence: document.xml 該儲存格原文；PDF p5 也印成「幫助分泌生長激素」後面吊一個「素」
+notes:
+  errata:
+  - id: E1
+    section: 六 閱讀聚光燈
+    locator: 第三段結構圖「細節」欄，對應「保持良好的睡眠」那一格
+    source: 幫助分泌生長激素激素素
+    corrected: 幫助分泌生長激素
+    kind: 贅字（重複）
+    why: 「激素」後面又多打了「激素素」。同一份教材第五大題寫的是「可以幫助分泌生長激素促進生長。」，可見正確的詞就是「生長激素」
+    confidence: high
+    evidence: document.xml 該儲存格原文；PDF p5 也印成「幫助分泌生長激素」後面吊一個「素」

@@ -136,7 +136,8 @@ jobs:
             tests/test_lab_keypoints_source_2751.py \
             tests/test_tts_mapping_covers_classical_2792.py \
             tests/test_classical_tts_normalization_2792.py \
-            tests/test_inactive_threshold_matches_prd_2787.py
+            tests/test_inactive_threshold_matches_prd_2787.py \
+            tests/test_yml_shape_ratchet_2843.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

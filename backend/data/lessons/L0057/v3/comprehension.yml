@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: A
@@ -57,3 +56,5 @@ comprehension:
     explanation: 最後一句是整段的關鍵句，概括吃早餐能維持精神與專注力，因此B最適合。
     explanation_note: 原稿是一個浮動說明框，印在選項右側
     options_note: PDF p9 上選項 D 被中間一個裝飾圖框擠到下方，看起來像脫隊；文字層順序正常
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號

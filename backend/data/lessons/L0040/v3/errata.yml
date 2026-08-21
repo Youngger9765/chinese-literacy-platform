@@ -1,12 +1,13 @@
 lesson_uid: L0040
 version_id: v3
-errata:
-- id: E1
-  section: 八 詞語複習
-  locator: 找字格子第 9 列第 7 欄
-  source: 咎
-  corrected: 疚
-  kind: 錯字（找字格子）
-  why: 被圈起來的直線 (8,7)→(9,7) 取字是「愧**咎**」，拼不回目標語詞「愧疚」。 整個格子裡沒有「疚」字，所以「愧疚」在格子裡無法正確拼出， answer_paths 只列得出其餘 9 個。
-  confidence: high
-  evidence: PDF p12 與 document.xml 一致；10 個 roundRect 對 10 個目標語詞，形狀一一對得上
+notes:
+  errata:
+  - id: E1
+    section: 八 詞語複習
+    locator: 找字格子第 9 列第 7 欄
+    source: 咎
+    corrected: 疚
+    kind: 錯字（找字格子）
+    why: 被圈起來的直線 (8,7)→(9,7) 取字是「愧**咎**」，拼不回目標語詞「愧疚」。 整個格子裡沒有「疚」字，所以「愧疚」在格子裡無法正確拼出， answer_paths 只列得出其餘 9 個。
+    confidence: high
+    evidence: PDF p12 與 document.xml 一致；10 個 roundRect 對 10 個目標語詞，形狀一一對得上

@@ -41,7 +41,6 @@ full_text_annotate:
   - 遷徙
   - 開枝散葉
   - 司空見慣
-  inline_marked_note: 課文中加了細方框的本課語詞（PDF p1~p2）
   inline_tables:
   - id: table1
     caption: 表1 南島語族最常被提起的跨族共通詞彙
@@ -88,3 +87,5 @@ full_text_annotate:
       - lina
       - ringa
   char_count: 1101
+  notes:
+    inline_marked: 課文中加了細方框的本課語詞（PDF p1~p2）

@@ -2,7 +2,6 @@ lesson_uid: L0144
 version_id: v3
 section_no: 七
 vocab_review:
-  part_note: 三篇合讀
   type: word_search
   instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
   target_words:
@@ -22,7 +21,6 @@ vocab_review:
   - 屢屢
   - 界線
   - 左右勝負
-  target_words_note: 16 個 = 三篇語詞的總和（篇1 八個 + 篇2 五個 + 篇3 三個）
   grid_size:
   - 10
   - 10
@@ -169,6 +167,9 @@ vocab_review:
     - - 10
       - 6
     direction: vertical
-  answer_paths_note: '16 條路徑 ＝ 16 個目標語詞 ＝ 紙上 16 個 roundRect anchor，三者精準相符，無警報。
+  notes:
+    part: 三篇合讀
+    target_words: 16 個 = 三篇語詞的總和（篇1 八個 + 篇2 五個 + 篇3 三個）
+    answer_paths: '16 條路徑 ＝ 16 個目標語詞 ＝ 紙上 16 個 roundRect anchor，三者精準相符，無警報。
 
-    格子沒有印錯字：16 條路徑套回 grid 全部拼得回目標語詞。'
+      格子沒有印錯字：16 條路徑套回 grid 全部拼得回目標語詞。'

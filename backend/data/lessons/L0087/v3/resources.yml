@@ -24,11 +24,6 @@ resources:
     duration_seconds: 435
     source: 普通話教室/故事廊
     qr_code: true
-  items_note: '原稿的片長印成「・片長：(22:55)」（含括號），本欄照既有形狀去掉括號存成
-
-    `duration` ＋ `duration_seconds`。三支影片各附一個 QR code（圖形），未解碼；
-
-    文字層只有標題、片長、來源三項，沒有 URL。'
   section_name: 知識補給站
   label: 影片連結
   videos:
@@ -41,3 +36,9 @@ resources:
   - index: 3
     url: http://youtu.be/iCxh-0P2Db4
     url_source: 總表0816「4.影片連結」年級7課次19（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    items: '原稿的片長印成「・片長：(22:55)」（含括號），本欄照既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。三支影片各附一個 QR code（圖形），未解碼；
+
+      文字層只有標題、片長、來源三項，沒有 URL。'

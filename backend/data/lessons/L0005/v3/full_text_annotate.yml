@@ -9,7 +9,6 @@ full_text_annotate:
   checklist_source_text:
   - 請在不太了解的字、詞或句做記號
   - 重要的地方、喜歡的語詞、句子或段落做上記號。
-  checklist_errata_ref: E1
   paragraph_count: 14
   paragraphs:
   - idx: 1
@@ -69,3 +68,5 @@ full_text_annotate:
   - 尷尬
   - 一溜煙
   char_count: 774
+  notes:
+    checklist_errata_ref: E1

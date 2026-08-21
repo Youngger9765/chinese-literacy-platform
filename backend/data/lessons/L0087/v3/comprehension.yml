@@ -3,8 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p13）；文字層的（　）內已填有同樣的代號
-  explanation_absent_note: 本課五題**都沒有**教師解說框（L0085／L0086 各有 4 個），不是漏抽。
   questions:
   - index: 1
     answer: B
@@ -57,3 +55,6 @@ comprehension:
     stem_note: '這一題是「甲乙丙丁」四個敘述＋A~D 四個組合選項的兩層結構。
 
       四個敘述原稿印在題幹底下（不是選項），所以收進 stem；A~D 四個組合印在同一行。'
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p13）；文字層的（　）內已填有同樣的代號
+    explanation_absent: 本課五題**都沒有**教師解說框（L0085／L0086 各有 4 個），不是漏抽。

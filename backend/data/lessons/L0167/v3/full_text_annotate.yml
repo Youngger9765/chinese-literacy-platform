@@ -5,7 +5,6 @@ full_text_annotate:
   title_line: 第1課  心，也要一起練
   byline: 課文/學習單：張筱晴
   paragraph_count: 8
-  paragraphs_note: 第 2~5 段在版面上各前置一個「●」項目符號（四個情境），文字流無該符號
   paragraphs:
   - idx: 1
     text: 以下情境，你是否覺得似曾相識呢？
@@ -34,5 +33,7 @@ full_text_annotate:
   - 較勁
   - 平分秋色
   - 心理素質
-  inline_marked_note: 課文中加了細方框的本課語詞，九個全部出現（PDF p1~p2）
   char_count: 863
+  notes:
+    paragraphs: 第 2~5 段在版面上各前置一個「●」項目符號（四個情境），文字流無該符號
+    inline_marked: 課文中加了細方框的本課語詞，九個全部出現（PDF p1~p2）

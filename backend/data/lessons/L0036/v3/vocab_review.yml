@@ -32,9 +32,6 @@ vocab_review:
   - 軍著安馬露句著慕煌平
   - 嫌疑稱自手先說頭充坐
   - 跌破眼鏡腳驅懈怠緒可
-  grid_note: '第 2 列只有 9 個字：DOCX 該列第 10 個儲存格沒有文字，PDF 上那一格也是空白，兩邊一致，
-
-    不是抄漏。其餘 9 列都是 10 格，且沒有任何答案路徑經過那一格。'
   answers_are_graphical: true
   answers_printed: true
   answer_paths:
@@ -157,4 +154,8 @@ vocab_review:
     - - 10
       - 4
     direction: horizontal
-  answer_paths_note: 13 個目標語詞全部圈到。
+  notes:
+    grid: '第 2 列只有 9 個字：DOCX 該列第 10 個儲存格沒有文字，PDF 上那一格也是空白，兩邊一致，
+
+      不是抄漏。其餘 9 列都是 10 格，且沒有任何答案路徑經過那一格。'
+    answer_paths: 13 個目標語詞全部圈到。

@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2、3、4、5 題有，第 1 題沒有
   questions:
   - index: 1
     answer: B
@@ -56,3 +54,6 @@ comprehension:
       C: 家庭理髮比較省錢，所以更值得選
       D: 髮廊設計師更辛苦，所以應該多收費
     teacher_hint: 他在談垂直農場雖成本高，但蔬菜乾淨漂亮、無農藥、風險少、生長快，因此可以有「溢價」，就像專業設計師的價錢更高
+  notes:
+    answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2、3、4、5 題有，第 1 題沒有

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，讀完每一個選項後，選出最適合的答案。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p9~p10 可見
   items:
   - index: 1
     stem: 下列語詞何者使用不正確?
@@ -47,3 +46,5 @@ comprehension:
       D: 呈現早期鄉鎮戲院的治安隱憂，提醒觀眾自我保護
     answer: C
     explanation: (這些事件皆為鋪陳童年的社會背景與不安定感，為後段作者奮發讀書做情境對比與情感深化。)
+  notes:
+    answer_carrier: 橘色手寫代號（在文字層），PDF p9~p10 可見

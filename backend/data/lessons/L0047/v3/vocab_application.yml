@@ -14,8 +14,6 @@ vocab_application:
     H: 穿梭
     I: 當面戳破
     J: 心知肚明
-  option_bank_note: 10 個代號 A–J，對應 8 道小題（F 使臂使指、A 粗野陽剛 未被任何一題用到）。
-  answer_carrier: 橘色手寫字；文字流已含答案
   items:
   - index: 1
     stem: 她說話總是（　），輕聲細語，讓人感到如沐春風。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 他喜歡把大家（　）的事直接說出來，常常弄得現場很尷尬。
     answer: J
+  notes:
+    option_bank: 10 個代號 A–J，對應 8 道小題（F 使臂使指、A 粗野陽剛 未被任何一題用到）。
+    answer_carrier: 橘色手寫字；文字流已含答案

@@ -17,7 +17,6 @@ vocab_application:
   unused_options:
   - I
   - J
-  answer_carrier: 橘色（字元樣式 rStyle=af），PDF p5 可見
   items:
   - index: 1
     stem: 這起離奇的殺人案經警方連日來的(　)，終於真相大白。
@@ -43,3 +42,5 @@ vocab_application:
   - index: 8
     stem: 看到同學被嘲笑，如果我們(　)，也可能讓傷害繼續發生。
     answer: E
+  notes:
+    answer_carrier: 橘色（字元樣式 rStyle=af），PDF p5 可見

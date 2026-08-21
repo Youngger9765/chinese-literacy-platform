@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p9~p10 可見
   items:
   - index: 1
     stem: 第2段寫道：「他們一下火車，在月台上面臨與家人生離死別的『篩選』。」根據這句話的語意，「篩選」最可能強調的是什麼？
@@ -51,3 +50,5 @@ comprehension:
     answer: B
     explanation: 第5題解析：C承認「我會難過」很正常，同時把嘲笑視為「別人的話」而不是「我的定義」，再選擇繼續準備、尋求支持，這就是把主導權拿回來
     explanation_note: 解析文字開頭寫「C」，但題目印的答案是 B，且解析內容描述的正是 B 選項；原稿如此，不擅自改
+  notes:
+    answer_carrier: 橘色手寫代號（在文字層），PDF p9~p10 可見

@@ -23,7 +23,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 餘燼
@@ -61,3 +60,5 @@ vocab_definitions:
   - index: 12
     word: 心理韌性
     definition: 面對壓力、災難或挫折時，能調整心態、尋找支持，並重新站起來的能力。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

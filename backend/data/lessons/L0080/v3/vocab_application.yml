@@ -12,8 +12,6 @@ vocab_application:
     F: 鞏固
     G: 井井有條
     H: 退役
-  option_bank_note: 8 個代號對應 8 道小題，每個代號各用一次。語詞框有 10 個語詞，熱衷／天壤之別沒有進第四大題。
-  answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 因為建物老舊，政府決定（　）兩千萬元修建新的體育館。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 這架老舊飛機完成最後一次任務後，終於（　），改放在博物館展示。
     answer: H
+  notes:
+    option_bank: 8 個代號對應 8 道小題，每個代號各用一次。語詞框有 10 個語詞，熱衷／天壤之別沒有進第四大題。
+    answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號

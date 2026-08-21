@@ -17,7 +17,6 @@ vocab_definitions:
   - 消耗殆盡
   - 珍稀
   - 蛻變
-  answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案
   items:
   - index: 1
     word: 解剖
@@ -46,3 +45,5 @@ vocab_definitions:
   - index: 9
     word: 消耗殆盡
     definition: 因不斷使用而幾乎沒有剩下。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案

@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，讀完每一個選項後，選出最適合的答案。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 3、4、5 題有
   questions:
   - index: 1
     answer: D
@@ -49,3 +47,6 @@ comprehension:
       C: 強調啦啦隊的專業與辛勞，並呼籲觀眾以尊重的眼光看待
       D: 主張最好不要在網路上傳截圖改圖，以減少啦啦隊的爭議
     teacher_hint: 文中用大量篇幅說明訓練、體能、情緒管理，並在結尾呼籲「換一種角度」看她們背後的付出，立場明顯偏向尊重專業
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 3、4、5 題有

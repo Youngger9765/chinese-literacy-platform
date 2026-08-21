@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2、3、4、5 題有，第 1 題沒有
   questions:
   - index: 1
     answer: D
@@ -51,3 +49,6 @@ comprehension:
       D: 提醒民眾不要害怕談死亡，要早一點做重要決定、預立遺囑
     teacher_hint: 本文核心是用案例引出議題，進一步定義分類、說明臺灣現況、呈現支持/反對/保留三方觀點，最後回到制度設計與價值拉扯
     teacher_hint_note: 這一則解析的藍框沒有寫「第5題」前綴，位置排在第 5 題選項下方（PDF p10 上方）
+  notes:
+    answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 2、3、4、5 題有，第 1 題沒有

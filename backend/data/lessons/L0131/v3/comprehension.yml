@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: C
@@ -60,3 +59,5 @@ comprehension:
       文字層順序正常（A→B→C→D）。另，選項 C 的「書藉」原稿如此（未改）。'
     explanation: ABC皆不是寫作目的。
     explanation_placement_note: 印在選項 A 右側的獨立文字方塊（藍框），是教師版解析
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

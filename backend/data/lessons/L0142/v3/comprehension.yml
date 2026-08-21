@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（在文字層），PDF p12 可見
   items:
   - index: 1
     stem: 下列語詞何者使用錯誤？
@@ -51,3 +50,5 @@ comprehension:
       D: 結合事證與研究，強化文章的可信度與說服力
     answer: D
     explanation: 第5題解析：作者在描寫戰爭慘況後引用具體數據與心理學研究，屬於「以事證支撐觀點」的寫作策略。
+  notes:
+    answer_carrier: 橘色手寫代號（在文字層），PDF p12 可見

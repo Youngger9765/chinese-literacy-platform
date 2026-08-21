@@ -31,7 +31,6 @@ vocab_review:
   - 水藤條鐵路人愧對次無
   answers_are_graphical: true
   answers_printed: partial
-  answer_note: 10 個目標語詞都圈了，但「愧疚」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。
   answer_paths:
   - word: 康莊大道
     cells:
@@ -124,3 +123,5 @@ vocab_review:
     - - 9
       - 5
     direction: horizontal
+  notes:
+    answer: 10 個目標語詞都圈了，但「愧疚」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。

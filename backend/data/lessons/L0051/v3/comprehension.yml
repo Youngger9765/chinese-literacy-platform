@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
   questions:
   - index: 1
     answer: B
@@ -48,4 +47,6 @@ comprehension:
       B: 族人傳承的求生知識與持續搜救，共同促成孩子獲救
       C: 軍方擁有大量人力與設備，是救援成功的唯一原因
       D: 野外求生最重要的是辨識植物，其他方法並不重要
-  teacher_hint_carrier: 三則教師註解印在題目右側的小方框內（文字方塊），文字流已含。
+  notes:
+    answer_carrier: 答案代號印在題號前的（　）內，文字流已含，非圖形層
+    teacher_hint_carrier: 三則教師註解印在題目右側的小方框內（文字方塊），文字流已含。

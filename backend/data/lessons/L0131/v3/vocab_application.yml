@@ -12,10 +12,6 @@ vocab_application:
     F: 放諸四海皆準
     G: 繁複
     H: 躍升
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  option_bank_note: '語詞框有 10 個語詞，本大題的代號欄只列 8 個（沒有外化、攸關生命），
-
-    而且 8 個代號全部都被用到 —— 沒有 unused_options。'
   items:
   - index: 1
     stem: 泰雅族以苧麻編織出名，共有十四道(　)的程序。
@@ -42,3 +38,8 @@ vocab_application:
   - index: 8
     stem: 2024年世界十二強棒球賽中，臺灣隊的名次從前一次的第五名(　)為第一名。
     answer: H
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    option_bank: '語詞框有 10 個語詞，本大題的代號欄只列 8 個（沒有外化、攸關生命），
+
+      而且 8 個代號全部都被用到 —— 沒有 unused_options。'

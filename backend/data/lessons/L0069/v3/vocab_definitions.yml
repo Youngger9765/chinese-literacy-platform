@@ -17,7 +17,6 @@ vocab_definitions:
   - 妥協
   - 迫不及待
   - 衡量得失
-  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 迫不及待
@@ -46,3 +45,5 @@ vocab_definitions:
   - index: 9
     word: 妥協
     definition: 為了解決爭議，願意放棄部分原來的要求。
+  notes:
+    answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案

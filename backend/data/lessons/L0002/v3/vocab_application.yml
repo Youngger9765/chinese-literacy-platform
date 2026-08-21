@@ -4,7 +4,6 @@ section_no: 四
 vocab_application:
   instruction: 在空格中填入正確的語詞代號
   instruction_source_text: 在空格中入正確的語詞代號
-  errata_ref: E2
   option_bank:
     A: 掠食者
     B: 融為一體
@@ -41,3 +40,5 @@ vocab_application:
   - index: 8
     stem: 小青蛙趴在綠葉上，遠遠看去幾乎和葉子（　），不仔細看，根本找不到牠。
     answer: B
+  notes:
+    errata_ref: E2

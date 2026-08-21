@@ -14,8 +14,6 @@ vocab_application:
     H: 應驗
     I: 風險意識
     J: 預言
-  option_bank_note: 10 個代號 A–J，對應 8 道小題（H 應驗、J 預言 未被任何一題用到）。
-  answer_carrier: 橘色手寫字；文字流已含答案
   items:
   - index: 1
     stem: 網路謠言引發不必要的（　），政府呼籲大家要冷靜。
@@ -41,3 +39,6 @@ vocab_application:
   - index: 8
     stem: 政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民（　）的措施。
     answer: I
+  notes:
+    option_bank: 10 個代號 A–J，對應 8 道小題（H 應驗、J 預言 未被任何一題用到）。
+    answer_carrier: 橘色手寫字；文字流已含答案

@@ -30,5 +30,6 @@ full_text_annotate:
   - 照表操課
   - 馬虎
   - 本錢
-  inline_marked_note: 課文中加了細方框的本課語詞，十二個全部出現（PDF p1~p2）
   char_count: 1016
+  notes:
+    inline_marked: 課文中加了細方框的本課語詞，十二個全部出現（PDF p1~p2）

@@ -4,9 +4,6 @@ section_no: 八
 vocab_review:
   type: word_search
   instruction: 找一找：請圈出格子內的語詞，圈出後，再把灰框內的語詞刪除。
-  instruction_variant_note: '文字流有兩個版本：文字方塊那份有「再」（＝PDF p8 印出來的那份，本檔採用），
-
-    本文那份沒有「再」。兩份都在原稿裡，非抄錯。'
   target_words:
   - 承載
   - 閘門
@@ -127,4 +124,8 @@ vocab_review:
     - - 10
       - 8
     direction: horizontal
-  answer_paths_note: 11 個目標語詞全部圈到。
+  notes:
+    instruction_variant: '文字流有兩個版本：文字方塊那份有「再」（＝PDF p8 印出來的那份，本檔採用），
+
+      本文那份沒有「再」。兩份都在原稿裡，非抄錯。'
+    answer_paths: 11 個目標語詞全部圈到。

@@ -16,7 +16,6 @@ resources:
     title: 【在地真台灣】蟋蟀學問多 蟋蟀生態館在雲林麥寮
     duration: (2:41)
     source: 民視讚夯
-  qr_note: 三則各附一個 QR code（圖形，網址不在文字層）；本課是三則，不是其他課的兩則
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 3
     url: http://youtu.be/L7dB1IFNYFc
     url_source: 總表0816「4.影片連結」年級7課次14
+  notes:
+    qr: 三則各附一個 QR code（圖形，網址不在文字層）；本課是三則，不是其他課的兩則

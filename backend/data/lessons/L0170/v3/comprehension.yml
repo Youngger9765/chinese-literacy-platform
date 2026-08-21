@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（run 層 w:color E97132），文字流有此資訊
-  teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側
   questions:
   - index: 1
     answer: A
@@ -63,3 +61,6 @@ comprehension:
       C: 「不管我有沒有努力，結果都沒差」
       D: 「只要有我參與的比賽，就一定會輸」
     teacher_note: 第5題解析：(B)儘管有負面念頭，仍加入了不同可能的思考。
+  notes:
+    answer_carrier: 橘色手寫代號（run 層 w:color E97132），文字流有此資訊
+    teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側

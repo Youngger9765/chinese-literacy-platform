@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: C
@@ -68,3 +67,5 @@ comprehension:
     stem_note: '題幹寫「根據**閱讀**聚光燈的練習」，但本課第六大題印的是「**品格**聚光燈」。
 
       原稿名稱不一致，照原樣記錄未更動。'
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8~p9）；文字層的（　）內已填有同樣的代號

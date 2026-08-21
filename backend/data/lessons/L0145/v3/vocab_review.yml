@@ -31,11 +31,6 @@ vocab_review:
   - 啟轉文共同編織腋憲概
   - 央持之股列霍摩撤仰念
   answers_are_graphical: true
-  answer_carrier: '紙上 8 個橘圈（佈景色 accent2）＝ 8 條路徑 ＝ 8 個目標語詞，個數相符無警報。
-
-    全檔 roundRect 有 9 個，第 9 個錨在距頁左 13.03in（頁寬 8.27in）＝ 紙外殘留，
-
-    且框線硬寫死 srgbClr E97132（其餘 8 個用佈景色）—— 從未被印出，PDF p10 實際數也是 8 個。'
   answer_paths:
   - word: 制度
     cells:
@@ -109,3 +104,9 @@ vocab_review:
     - - 10
       - 10
     direction: vertical
+  notes:
+    answer_carrier: '紙上 8 個橘圈（佈景色 accent2）＝ 8 條路徑 ＝ 8 個目標語詞，個數相符無警報。
+
+      全檔 roundRect 有 9 個，第 9 個錨在距頁左 13.03in（頁寬 8.27in）＝ 紙外殘留，
+
+      且框線硬寫死 srgbClr E97132（其餘 8 個用佈景色）—— 從未被印出，PDF p10 實際數也是 8 個。'

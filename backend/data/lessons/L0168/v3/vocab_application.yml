@@ -12,9 +12,7 @@ vocab_application:
     F: 垂頭喪氣
     G: 耳邊風
     H: 使喚
-  option_bank_note: 八個代號取自九個語詞，「貼紮」沒有列入選項
   answers_printed: true
-  answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af0，run 層沒有 w:color**
   items:
   - index: 1
     stem: 這場比賽球員們頻頻失誤，(　)的表現讓許多球迷大失所望。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 議員在院會上(　)的詢問市長有關預算的問題，引起媒體關注。
     answer: C
+  notes:
+    option_bank: 八個代號取自九個語詞，「貼紮」沒有列入選項
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af0，run 層沒有 w:color**
