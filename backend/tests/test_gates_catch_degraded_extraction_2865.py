@@ -543,3 +543,62 @@ def test_multi_text_lessons_are_marked_not_applicable_not_passed():
     src = RECONCILE.read_text(encoding="utf-8")
     assert "多文本" in src
     assert "不代表**它被驗過" in src, "不適用的訊息沒有講清楚"
+
+
+# ---------------------------------------------------------------------------
+# 跑 147 課又撞出來的四個（#2865 第三輪）
+#
+# 這輪最重要的收穫不是修好幾個 bug，是**承認有一種課驗不了**。
+# pdftotext 對某些雙欄版面會完全打亂文字順序（三種模式都一樣），
+# 那時候任何切節規則都是錯的 —— 與其給假答案，不如說驗不了。
+# ---------------------------------------------------------------------------
+
+def test_item_ids_do_not_carry_the_page():
+    """跨頁時同一題號不可以被算成兩個見證。
+
+    實測 L0047 的語詞應用跨三頁，帶頁碼的 id 讓 8 題數成 16。
+    題號在一節裡本來就唯一。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert 'f"item-{n}"' in src, "item id 還帶著頁碼"
+    assert 'f"p{p}-heading' in src, "heading 反而不該拿掉頁碼"
+
+
+def test_scrambled_text_order_is_reported_not_guessed():
+    """文字順序還原不出版面順序時，要說驗不了，⛔ 不可以猜。
+
+    實測 L0038 p3：「三 語詞我最棒」排在第 39 行 —— 在它自己的題目
+    和「四 語詞應用」**之後**。-layout / 預設 / -raw 三種都一樣亂。
+    那時候切出來的範圍只剩 21 個字元，回報「漏抽 11 題」是假指控。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "ORDER-SCRAMBLED" in src
+    assert "unreliable" in src
+    gate = RECONCILE.read_text(encoding="utf-8")
+    assert "unreliable" in gate, "對帳門沒有處理這個狀態"
+    assert "這**不是**通過" in gate, "驗不了必須跟通過分得開"
+
+
+def test_scrambling_check_only_looks_at_my_own_section():
+    """判準只看**我要找的那一節**排錯沒有，不是整頁序號遞不遞增。
+
+    第一版用整頁遞增，把 L0047 / L0022 這種「別節排錯、我這節好好的」
+    也判成驗不了 —— 把好的判死比漏抓更糟。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "earlier_bigger" in src, "判準沒有收斂到自己那一節"
+
+
+def test_continuation_stitching_refuses_a_restart():
+    """切點之後那段如果**重新從 1 開始**，那是下一節不是我的延續。
+
+    L0022 切點後只有 (8)，接得上我的 7 → 收。
+    L0055 切點後有 (1)…(9)，重新從 1 → 不收。
+    兩者長得一模一樣，少了這個判準就是多一題或少一題。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "1 not in tail_nums" in src, "續頁銜接沒有擋掉重新編號"

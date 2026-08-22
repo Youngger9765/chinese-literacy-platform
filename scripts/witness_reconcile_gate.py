@@ -151,6 +151,15 @@ def main() -> int:
     ws = esw.witnesses(args.pdf, pages, args.section)
     src_items = [w for w in ws if w["kind"] == "item"]
 
+    unreliable = [w for w in ws if w["kind"] == "unreliable"]
+    if unreliable:
+        # 文字順序還原不出版面順序 —— 這道門在這一頁上沒有判斷力。
+        # ⛔ 回 2（材料不齊）不是 1（對不上），也不是 0。
+        print(f"  🟡 {args.uid} · {args.module}：{unreliable[0]['text']}")
+        print("     這道門在這一頁上驗不了。⛔ 這**不是**通過，也不是「抽錯了」。")
+        print("     要驗只能回原稿人工看，或換一個不靠文字順序的做法。")
+        return 2
+
     if not ws:
         print(f"⛔ 在第 {pages} 頁數不到任何見證 —— 頁碼可能錯了。"
               "⛔ 不可以當成通過", file=sys.stderr)
