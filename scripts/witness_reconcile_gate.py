@@ -94,13 +94,53 @@ def yml_items(path: pathlib.Path, module: str) -> list | None:
     return None
 
 
+def _docx_second_opinion(args) -> tuple[list[int], str] | None:
+    """PDF 驗不了時，改問 DOCX 的 XML。答不出來就回 None（⛔ 不猜）。
+
+    需要 `--docx` 與 `--next-section`；缺任一個就回 None ——
+    ⛔ 不要自己去猜下一節是誰，猜錯會把整段範圍算歪，然後給一個看起來
+    很篤定的錯答案。
+    """
+    docx = getattr(args, "docx", None)
+    if not docx or not pathlib.Path(docx).is_file():
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "dw", pathlib.Path(__file__).resolve().parent / "docx_witnesses.py")
+    dw = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dw)
+    r = dw.count(pathlib.Path(docx), args.section, getattr(args, "next_section", None))
+    if r.get("status") != "ok":
+        return None
+    return r["numbers"], "docx-xml"
+
+
+class _Parser(argparse.ArgumentParser):
+    """argparse 用錯參數時預設 exit 2 —— 而這道門的 2 是「材料不齊/驗不了」。
+
+    🔴 撞碼的後果：指令打錯會**看起來像「這一頁驗不了」**，而那正是這道門
+    最常見的正常輸出，於是沒有人會發現指令根本沒跑起來。實測過一次：
+    `--docx` 忘了加進 add_argument，回 exit 2、stdout 全空，我第一眼判成
+    「第二意見沒生效」而不是「參數根本不認得」。用 3 區隔開。
+    """
+
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        print(f"⛔ 參數錯誤（不是「驗不了」）：{message}", file=sys.stderr)
+        raise SystemExit(3)
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = _Parser()
     ap.add_argument("--uid", required=True)
     ap.add_argument("--module", required=True)
     ap.add_argument("--pdf", required=True, type=pathlib.Path)
     ap.add_argument("--section", required=True, help="大題名稱，如「語詞我最棒」")
     ap.add_argument("--yaml", required=True, type=pathlib.Path)
+    ap.add_argument("--docx", default=None, type=pathlib.Path,
+                    help="原稿。PDF 驗不了時改用 DOCX XML 當第二意見（#2868）")
+    ap.add_argument("--next-section", default=None,
+                    help="下一個大題的名稱，XML 用它切節尾。⛔ 沒給就不啟用第二意見")
     ap.add_argument("--pages", default=None,
                     help="逗號分隔。不給就從派工單的 dispatch_pages 取")
     args = ap.parse_args()
@@ -157,11 +197,32 @@ def main() -> int:
 
     unreliable = [w for w in ws if w["kind"] == "unreliable"]
     if unreliable:
-        # 文字順序還原不出版面順序 —— 這道門在這一頁上沒有判斷力。
-        # ⛔ 回 2（材料不齊）不是 1（對不上），也不是 0。
+        # 文字順序還原不出版面順序 —— PDF 這條路在這一頁上沒有判斷力。
+        # 改問**第二個來源**：DOCX 的 XML 是文件順序，不經過排版（#2868）。
+        # ⛔ 它不是更好的來源，是**不同盲區**的來源：
+        #      PDF   看得到印出來的樣子；看不到版面被重排時的真實順序
+        #      XML   看得到文件順序；看不到畫在圖上的字、Word 自動編號，
+        #            而且文字方塊會被錨定在下一節標題之後（實測 L0009 / L0103）
+        #    所以只在 PDF 說「驗不了」時才問它，而且它自己也可能答不出來。
+        second = _docx_second_opinion(args)
+        if second is not None:
+            src_ns, why = second
+            yml_ns = sorted(i.get("index") for i in items
+                            if isinstance(i, dict) and isinstance(i.get("index"), int))
+            print(f"  {args.uid} · {args.module}（PDF 驗不了，改用 DOCX XML）")
+            print(f"    原稿數到 {len(src_ns)} 題  {src_ns}")
+            print(f"    yml 有   {len(yml_ns)} 題  {yml_ns}")
+            if src_ns == yml_ns:
+                print(f"\n✅ 原稿與 yml 逐題對得上（{len(src_ns)} 題，來源：DOCX XML）")
+                return 0
+            print(f"\n🔴 對不上：原稿 {src_ns} / yml {yml_ns}")
+            print("   ⚠️ 這是 XML 這條路給的答案，而它有已知盲區："
+                  "文字方塊可能被錨定在下一節標題之後，於是這一節少數到最後幾題。")
+            print("   ⛔ 先開原稿看那幾題在不在，再決定是漏抽還是錨點假象。")
+            return 1
         print(f"  🟡 {args.uid} · {args.module}：{unreliable[0]['text']}")
-        print("     這道門在這一頁上驗不了。⛔ 這**不是**通過，也不是「抽錯了」。")
-        print("     要驗只能回原稿人工看，或換一個不靠文字順序的做法。")
+        print("     兩條路都驗不了（PDF 版面順序亂、XML 也數不到題號）。")
+        print("     ⛔ 這**不是**通過，也不是「抽錯了」。")
         return 2
 
     if not ws:
