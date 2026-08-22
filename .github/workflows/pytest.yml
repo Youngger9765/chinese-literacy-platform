@@ -149,6 +149,7 @@ jobs:
             tests/test_section_pages_2857.py \
             tests/test_section_locator_2857.py \
             tests/test_pdf_manifest_gate_2857.py \
+            tests/test_gates_catch_degraded_extraction_2865.py \
             tests/test_vocab_review_reaches_student_2860.py
         env:
           DATABASE_URL: sqlite://
