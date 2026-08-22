@@ -384,3 +384,103 @@ def test_verify_refuses_an_empty_output_dir(tmp_path):
         cwd=REPO, capture_output=True, text=True, timeout=180,
     )
     assert r.returncode == 2, r.stdout + r.stderr
+
+
+# ---------------------------------------------------------------------------
+# 跑真課跑出來的四個缺陷（#2865，2026-08-22）
+#
+# 這四個都不是想出來的 —— 是拿 5 課普通白話課從頭跑到尾才撞到的。
+# 每一個當下的症狀都是「來源 0 題」或「抽失敗」，看起來像資料壞了，
+# 實際上全是門自己的問題。假警報比沒有門更糟：紅久了大家學會忽略。
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+
+def _item_re():
+    esw = _witness_mod()
+    return esw.ITEM_RE
+
+
+def _heading_re():
+    esw = _witness_mod()
+    return esw.HEADING_RE
+
+
+@pytest.mark.parametrize("line,expected,why", [
+    ("（ A ）1. 下列哪個詞語使用正確？", ["1"], "閱讀理解：題號緊貼在答案括號後"),
+    ("(1)  質疑   ：對某件事", ["1"], "語詞我最棒：括號包數字"),
+    ("（ C ）2. 楊俊瀚在 2018 年面對失敗的態度", ["2"], "同一行有年份也只能抓題號"),
+    ("例如：這間教室可以容納 30 位學生。", [], "內文數字不是題號"),
+    ("2017-2021 年楊俊瀚的體育生涯", [], "年份範圍不是題號"),
+    ("字數 190 字 191~220 字", [], "字數表不是題號"),
+    ("（ B ）5. 根據這篇文章", ["5"], "最後一題"),
+])
+def test_item_marker_regex(line, expected, why):
+    """題號有兩種寫法，而且不能把內文數字誤認。
+
+    只認 `(N)` 的話，閱讀理解**每一課都數到 0 題** —— 而那看起來像頁碼錯了。
+    """
+    got = [g for m in _item_re().finditer(line) for g in m.groups() if g]
+    assert got == expected, why
+
+
+@pytest.mark.parametrize("line,expected,why", [
+    ("三    語詞我最棒", ("三", "語詞我最棒"), "一般寫法"),
+    ("三 🅐  語詞我最棒", ("三", "語詞我最棒"), "🔴 同一份 DOCX 轉兩次會變成這樣"),
+    ("三  語詞我最棒   在空格內填入語詞", ("三", "語詞我最棒"), "標題後面還有字"),
+    ("四          語詞應用", ("四", "語詞應用"), "序號後空格超過 8 個"),
+    ("ㄧ    讀全文-做記號", ("ㄧ", "讀全文-做記號"), "序號是注音（9 課原稿如此）"),
+])
+def test_heading_regex_survives_layout_drift(line, expected, why):
+    """標題抓不到 = 整節消失，而症狀只是「來源 0 題」。
+
+    🅐 那個 case 是實測撞到的：同一份 DOCX 轉兩次，一次乾淨、
+    一次圈號跑進標題。**兩份都是 8 頁，所以 ⑤ 的頁數檢查放行。**
+    """
+    m = _heading_re().search(line)
+    assert m, f"抓不到：{why}"
+    assert (m.group(1), m.group(2)) == expected, why
+
+
+def test_non_numbered_modules_are_not_reported_as_failures():
+    """21 個模組裡只有 7 個是題號型。
+
+    對 `key_reading` / `keypoints` / `spotlight` 喊「讀不到 items = 抽失敗」
+    是假警報 —— 它們的內容本來就不是編號題目。
+    """
+    src = RECONCILE.read_text(encoding="utf-8")
+    assert "NUMBERED_MODULES" in src
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wrg", RECONCILE)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert "comprehension" in m.NUMBERED_MODULES
+    assert "vocab_definitions" in m.NUMBERED_MODULES
+    for not_numbered in ("key_reading", "keypoints", "spotlight", "full_text_annotate"):
+        assert not_numbered not in m.NUMBERED_MODULES, \
+            f"{not_numbered} 沒有編號題目，不該進對帳"
+
+
+def test_resources_carrier_is_not_only_items():
+    """`resources` 有 19 課只有 `videos`（實測 items+videos 120 / videos 19 / items 9）。
+
+    只認 items 的話那 19 課會被報成抽失敗。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wrg", RECONCILE)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    src = RECONCILE.read_text(encoding="utf-8")
+    assert '"videos"' in src, "載體沒有認 videos"
+
+
+def test_lesson_level_files_skip_reconciliation():
+    """`metadata` / `errata` 是課級檔，沒有大題，派工單自然沒有它們的節名。
+
+    拿它們跑對帳只會得到「派工單沒有節名，驗不了」—— 又一個假警報。
+    ⚠️ 但 schema 還是要驗，所以只從對帳排除。
+    """
+    src = PIPELINE.read_text(encoding="utf-8")
+    assert "LESSON_LEVEL" in src
+    assert "schema" in src, "課級檔的 schema 檢查不可以一起被跳過"

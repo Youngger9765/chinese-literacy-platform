@@ -213,6 +213,10 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
         print(f"⛔ 在 {work} 找不到 PDF —— verify 需要飛機讀的那一份", file=sys.stderr)
         return 2
 
+    # 課級檔沒有「大題」，派工單自然沒有它們的節名與頁碼 ——
+    # 拿它們去跑對帳會得到「派工單沒有節名，驗不了」，那是**假警報**。
+    # ⚠️ 但 schema 還是要驗，所以只從對帳排除，不從清單排除。
+    LESSON_LEVEL = {"lesson", "metadata", "errata"}
     produced = sorted(p for p in out.glob("*.yml") if not p.name.startswith("_"))
     if not produced:
         print(f"⛔ {out} 一份 yml 都沒有 —— 那是抽失敗，不是零模組", file=sys.stderr)
@@ -244,6 +248,9 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
             worst = max(worst, 2)
 
         # ⑥b 見證對帳
+        if mod in LESSON_LEVEL:
+            _step(f"{mod} · 見證對帳", True, "課級檔，沒有大題（不適用）")
+            continue
         sec, pages = sections.get(mod), dispatch_pages.get(mod)
         if sec and pages:
             r = subprocess.run(

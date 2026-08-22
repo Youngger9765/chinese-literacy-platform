@@ -56,6 +56,21 @@ def _witnesses_mod():
     return mod
 
 
+#: 有題號型內容的模組（實測全庫 2019 份 yml 分類的結果）。
+#: 只有這 7 個適用「來源幾題 == yml 幾題」的對帳 —— 其餘 14 個模組的內容
+#: 不是編號題目（課文段落、重點表格、聚光燈 block、找字表…），
+#: ⛔ 對它們喊「讀不到 items = 抽失敗」是**假警報**，會讓人學會忽略這道門。
+NUMBERED_MODULES = {
+    "comprehension",                 # 172 份
+    "vocab_definitions",             # 150 份
+    "vocab_application",             # 149 份
+    "resources",                     # 148 份
+    "self_check_before_reading",     #  58 份
+    "word_matching",                 #  11 份
+    "keypoints_followup_questions",  #   2 份
+}
+
+
 def yml_items(path: pathlib.Path, module: str) -> list | None:
     try:
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -64,10 +79,13 @@ def yml_items(path: pathlib.Path, module: str) -> list | None:
     body = doc.get(module, doc)
     if not isinstance(body, dict):
         return None
-    items = body.get("items")
-    if items is None:
-        items = body.get("questions")
-    return items if isinstance(items, list) else None
+    # 載體不只一種（實測 resources：items+videos 120 課、只有 videos 19 課、只有 items 9 課）。
+    # 只認 items 的話，那 19 課會被報成「抽失敗」—— 假警報比沒有門更糟。
+    for key in ("items", "questions", "videos"):
+        v = body.get(key)
+        if isinstance(v, list):
+            return v
+    return None
 
 
 def main() -> int:
@@ -98,6 +116,15 @@ def main() -> int:
             print(f"⛔ 派工單沒有 {args.module} 的頁碼 —— 不能當成「這節沒題目」",
                   file=sys.stderr)
             return 2
+
+    if args.module not in NUMBERED_MODULES:
+        # 這個模組的內容不是編號題目 —— 這道門對它沒有意義。
+        # ⚠️ 回 0 不是「驗過了」，是「不適用」。訊息要講清楚，
+        # 否則下一個人會以為這個模組的內容被驗過了。
+        print(f"  ⬜ {args.module} 不是題號型模組，這道門不適用（{len(NUMBERED_MODULES)} "
+              f"個模組適用：{', '.join(sorted(NUMBERED_MODULES))}）")
+        print("     ⚠️ 這**不代表**它的內容被驗過 —— 那要靠逐字門。")
+        return 0
 
     items = yml_items(args.yaml, args.module)
     if items is None:

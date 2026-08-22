@@ -55,7 +55,15 @@ import sys
 #: 題號。⚠️ **不能只認行首** —— 雙欄排版下右欄的題號在行中間
 #: （實測 L0072 第 3 頁：`(1)` 跟 `(4)` 在同一行、`(5)` 在行中間）。
 #: 只認行首會漏掉整個右欄，而漏掉的部分不會有任何症狀。
-ITEM_RE = re.compile(r"[（(](\d{1,2})[）)]")
+#: 兩種寫法都在真實學習單上（實測）：
+#:   語詞我最棒   `(1)  質疑 ：對某件事…`      → 括號包數字
+#:   閱讀理解     `（ A ）1. 下列哪個詞語…`     → 括號裡是**答案代號**，題號是 `1.`
+#: ⚠️ 只認第一種的話，閱讀理解整節會數到 0 題，而那看起來像「頁碼錯了」。
+#: 題號前面允許行首、空白、或**全形右括號** —— 閱讀理解是
+#: `（ A ）1. 下列哪個…`，題號緊貼在答案括號後面，要求前面是空白就抓不到。
+#: 後面用 `(?!\d)` 擋掉 `2017-2021`、`190 字` 這類內文數字。
+#: 七個正負向 case 驗過（見 test_gates_catch_degraded_extraction_2865）。
+ITEM_RE = re.compile(r"[（(]\s*(\d{1,2})\s*[）)]|(?:^|[\s）)])(\d{1,2})[.．、](?!\d)", re.M)
 
 #: 大題標題：行首的序號 + 名稱。
 #: 序號含注音「ㄧ」—— 9 課的原稿真的是注音，那是老師打的不是錯字。
@@ -64,7 +72,14 @@ ITEM_RE = re.compile(r"[（(](\d{1,2})[）)]")
 #:   - 空格數不設上界：L0001 p3 是「四」+ 10 個空格 +「語詞應用」
 #:   - 標題後面允許還有字：L0012 p4 是「四  語詞應用   在空格填入正確的語詞代號」
 #:   - 名稱只吃非空白：避免把後面那串說明一起吃進來
-HEADING_RE = re.compile(r"^[ \t]*([一二三四五六七八九十ㄧ])[ \t]{1,20}(\S{2,12})", re.M)
+#: ⚠️ 序號與名稱之間可能夾雜圈號等符號。**同一份 DOCX 轉兩次就會不一樣**：
+#:   一次是「三    語詞我最棒」，另一次是「三 🅐  語詞我最棒」。
+#:   吃不到就整節消失，而那不會有任何症狀 —— 對帳只會說「來源 0 題」。
+#:   所以序號到名稱之間允許非中文字元，名稱本身只吃中文與連字號。
+HEADING_RE = re.compile(
+    r"^[ \t]*([一二三四五六七八九十ㄧ])[ \t]+[^\u4e00-\u9fff\n]{0,6}([\u4e00-\u9fff][\u4e00-\u9fff\-－]{1,11})",
+    re.M,
+)
 
 #: 語詞框標題
 BANK_RE = re.compile(r"(本課語詞|語詞框|參考語詞)")
@@ -125,7 +140,8 @@ def witnesses(pdf: pathlib.Path, pages: list[int], section: str | None = None) -
             if BANK_RE.search(seg):
                 out.append({"id": f"p{p}-bank", "kind": "bank", "page": p,
                             "text": BANK_RE.search(seg).group(1)})
-            for n in sorted({int(m.group(1)) for m in ITEM_RE.finditer(seg)}):
+            nums = {int(g) for m in ITEM_RE.finditer(seg) for g in m.groups() if g}
+            for n in sorted(nums):
                 if not 1 <= n <= 30:
                     continue
                 out.append({"id": f"p{p}-item-{n}", "kind": "item",
