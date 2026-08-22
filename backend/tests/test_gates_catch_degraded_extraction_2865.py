@@ -734,10 +734,24 @@ def test_hashes_do_not_look_like_tokens():
     """
     m = _attest_mod()
     assert m.HASH_CHARS <= 32, "雜湊太長，會被 secret 掃描器誤判"
+    # ⚠️ 只看**雜湊欄位**。第一版掃整份 JSON 的長字串，於是模組名
+    #    `self_check_before_reading`（25 字）被判成 token —— 這條鎖在
+    #    語料庫從 1 份證明長到 174 份的那一刻才紅，而它抓的是自己的判準錯，
+    #    不是資料有問題。判準太寬的鎖跟沒有鎖一樣沒用：它會被當成雜訊關掉。
     for f in FIDELITY.glob("L*.json"):
-        import re as _re
-        long_runs = _re.findall(r"[A-Za-z0-9_\-]{20,}", f.read_text(encoding="utf-8"))
-        assert not long_runs, f"{f.name} 有看起來像 token 的長字串：{long_runs[:2]}"
+        doc = json.loads(f.read_text(encoding="utf-8"))
+        hashes = [doc.get("docx_sha256", "")] + [
+            rec.get("yaml_sha256", "") for rec in (doc.get("modules") or {}).values()
+        ]
+        too_long = [h for h in hashes if len(h.replace("-", "")) > m.HASH_CHARS]
+        assert not too_long, f"{f.name} 的雜湊沒截短：{too_long[:2]}"
+        # 分組也是必要的 —— 純十六進位會撞台灣身分證 / 手機號規則，
+        # 而習慣去 touch bypass marker 就是真 secret 溜進去的方式。
+        flat = [h for h in hashes if h and "-" not in h]
+        assert not flat, f"{f.name} 的雜湊沒分組：{flat[:2]}"
+        raw = f.read_text(encoding="utf-8")
+        assert not re.findall(r"[A-Za-z][12]\d{8}", raw), f"{f.name} 有像身分證的字串"
+        assert not re.findall(r"09\d{8}", raw), f"{f.name} 有像手機號的字串"
 
 
 def test_url_source_is_excluded_but_passage_source_is_not():
@@ -890,3 +904,80 @@ def test_page_prints_do_not_look_like_taiwan_id_or_phone():
     raw = db.read_text(encoding="utf-8")
     assert not re.findall(r"[A-Za-z][12]\d{8}", raw), "檔裡有像身分證的字串"
     assert not re.findall(r"09\d{8}", raw), "檔裡有像手機號的字串"
+
+
+# ---------------------------------------------------------------------------
+# ⑦b 內容忠實度證明 —— 門要真的插電（#2865）
+# ---------------------------------------------------------------------------
+
+def test_fidelity_gate_is_actually_wired_into_ci():
+    """⛔ 門建了沒插電比沒有門更糟 —— 大家會以為它在看。
+
+    2026-08-22 之前：`content_fidelity_attest.py` 存在、只有 **1 課**有證明、
+    而且沒有任何 workflow 或 run-ci 跑過它。這條鎖住「它在具名清單裡」。
+    """
+    ci = (REPO / "specs" / "run-ci.sh").read_text(encoding="utf-8")
+    assert "content_fidelity_attest.py --verify-all" in ci, \
+        "run-ci.sh 沒有跑內容忠實度門"
+
+    wf = REPO / ".github" / "workflows" / "spec-check.yml"
+    assert "specs/run-ci.sh" in wf.read_text(encoding="utf-8"), \
+        "spec-check.yml 不再跑 run-ci.sh —— 上面那條就白鎖了"
+
+
+def test_every_lesson_has_a_fidelity_attestation():
+    """覆蓋率要用**數量**斷言，不是「至少有一份」。
+
+    只驗「有沒有存在一份證明」的話，1 份跟 174 份長得一樣綠 ——
+    而 1 份正是這道門躺了整段時間的實際狀態。
+    """
+    lessons = {p.parent.parent.name
+               for p in (REPO / "backend" / "data" / "lessons").glob("L*/v3/_manifest.yml")}
+    attested = {p.stem for p in (REPO / "specs" / "modules" / "fidelity").glob("L*.json")}
+    missing = sorted(lessons - attested)
+    assert not missing, f"{len(missing)} 課沒有內容忠實度證明：{missing[:8]}"
+    assert len(attested) >= 174, f"證明只有 {len(attested)} 份"
+
+
+def test_fidelity_records_three_states_not_two():
+    """「一個字串都沒驗到」跟「驗了對不上」不可以混成同一個紅燈。
+
+    混成一個會製造**沒有人修得掉的紅**（22 份 errata 的原文只有一個字，
+    短於 4 字門檻本來就驗不到），而恆紅的門最後會被關掉。
+    ⛔ 但也不可以判 pass —— 那是把「沒驗」講成「驗過了」。
+    """
+    seen = set()
+    for p in (REPO / "specs" / "modules" / "fidelity").glob("L*.json"):
+        for rec in (json.loads(p.read_text(encoding="utf-8")).get("modules") or {}).values():
+            assert "status" in rec, f"{p.stem} 還在用兩態"
+            seen.add(rec["status"])
+    assert seen <= {"pass", "fail", "unverifiable"}, f"冒出沒定義的狀態：{seen}"
+    assert "unverifiable" in seen, "一個 unverifiable 都沒有 —— 三態是假的"
+
+
+def test_unverifiable_count_is_ratcheted():
+    """驗不到的數量只准往下 —— 無聲增加 = 覆蓋率在漏，而每次都是綠的。"""
+    ratchet = REPO / "specs" / "modules" / "fidelity" / "_ratchet.json"
+    assert ratchet.is_file(), "沒有棘輪基準檔，那個數字就可以無限漲"
+    cap = json.loads(ratchet.read_text(encoding="utf-8"))["unverifiable_max"]
+    actual = sum(
+        1
+        for p in (REPO / "specs" / "modules" / "fidelity").glob("L*.json")
+        for rec in (json.loads(p.read_text(encoding="utf-8")).get("modules") or {}).values()
+        if rec.get("status") == "unverifiable"
+    )
+    assert actual <= cap, f"驗不到的從 {cap} 漲到 {actual}"
+
+
+def test_gate_emits_machine_readable_checked_count():
+    """受檢數要走契約行，⛔ 不要刮中文散文。
+
+    刮的那版把**每一份** attestation 都算成 4 —— 它切全形「：」但輸出用半形，
+    於是整行都進去，再把非數字濾掉，從「≥ 4」跟真正的數字湊出 "04"。
+    我拿那個數字對外報過「1176 字串」「308196 字串」，全是假的。
+    """
+    gate = (REPO / "scripts" / "verbatim_gate.py").read_text(encoding="utf-8")
+    assert "VERBATIM_GATE_CHECKED=" in gate, "逐字門沒印契約行"
+    att = (REPO / "scripts" / "content_fidelity_attest.py").read_text(encoding="utf-8")
+    assert "VERBATIM_GATE_CHECKED=" in att, "attest 沒讀契約行"
+    assert 'line.split("：")' not in att, "還在刮中文散文"

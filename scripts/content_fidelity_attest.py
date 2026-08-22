@@ -72,7 +72,16 @@ HASH_CHARS = 16
 
 
 def sha(path: pathlib.Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()[:HASH_CHARS]
+    """截短 + 每 4 字元分組。
+
+    🔴 分組不是為了好看。純十六進位串會撞上 secret 掃描器的台灣身分證
+    （字母 + 1/2 + 8 位數）與手機號規則 —— 174 份證明裡有十幾個中招。
+    ⛔ 正確解法是改格式，不是去 touch bypass marker：習慣繞掃描器，
+    真的 secret 遲早會跟著過去。（同一天 build_section_pages.page_print
+    也踩過一模一樣的坑，處理方式一致。）
+    """
+    h = hashlib.sha256(path.read_bytes()).hexdigest()[:HASH_CHARS]
+    return "-".join(h[i:i + 4] for i in range(0, len(h), 4))
 
 
 def vdir(uid: str) -> pathlib.Path | None:
@@ -110,20 +119,36 @@ def attest(uid: str, docx: pathlib.Path) -> int:
         out = r.stdout
         passed = "VERBATIM_GATE=PASS" in out
         # 「受檢 0 個字串」不是通過 —— 那是沒驗到。逐字門自己回 1，這裡照收。
-        checked = 0
+        # ⚠️ 只認機器可讀那一行。刮中文散文那版把每一份都算成 4
+        #    （半形冒號沒切到，加上同一行的「≥ 4」）。
+        checked = None
         for line in out.split("\n"):
-            if "受檢字串" in line:
-                digits = "".join(c for c in line.split("：")[-1] if c.isdigit())
-                checked = int(digits) if digits else 0
+            if line.startswith("VERBATIM_GATE_CHECKED="):
+                checked = int(line.split("=", 1)[1])
+        if checked is None:
+            print(f"  ⛔ {f.stem}：逐字門沒印出受檢數 —— 契約壞了，不當成通過",
+                  file=sys.stderr)
+            checked, passed = 0, False
+        # 🔴 三態，不是兩態。
+        #    「一個字串都沒驗到」跟「驗了而且對不上」是兩件完全不同的事，
+        #    混成同一個紅燈會產生**沒有人修得掉的紅** —— 22 份 errata 的
+        #    原文是單一個字（「五」印成「六」），短於 4 字門檻本來就驗不到，
+        #    3 份的錯字印在圖片裡。把它們判 FAIL 不會讓資料變好，只會讓
+        #    這道門的紅燈變成背景雜訊，然後真的壞掉那天沒人看。
+        #    ⛔ 但也不可以判 PASS —— 那就是把「沒驗」講成「驗過了」。
+        status = "pass" if passed else ("unverifiable" if checked == 0 else "fail")
         results[f.stem] = {
             "yaml_sha256": sha(f),
             "checked": checked,
-            "passed": bool(passed),
+            "status": status,
+            "passed": status == "pass",     # 舊欄位保留，別讓既有讀者壞掉
             "exit": r.returncode,
         }
-        if not passed:
+        if status == "fail":
             worst = max(worst, 1)
-        print(f"  {'✅' if passed else '🔴'} {f.stem:26} 受檢 {checked:3} 字串")
+        icon = {"pass": "✅", "fail": "🔴", "unverifiable": "🟡"}[status]
+        note = "" if status != "unverifiable" else "  ← 驗不到（原文太短或印在圖上）"
+        print(f"  {icon} {f.stem:26} 受檢 {checked:3} 字串{note}")
 
     doc = {
         "uid": uid,
@@ -134,10 +159,12 @@ def attest(uid: str, docx: pathlib.Path) -> int:
     path = ATTEST_DIR / f"{uid}.json"
     path.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     total = sum(m["checked"] for m in results.values())
+    unv = sum(1 for m in results.values() if m["status"] == "unverifiable")
     print(f"\n  {'✅' if worst == 0 else '🔴'} {uid}：{len(files)} 個模組 · 受檢 {total} 字串"
-          f" → {path.relative_to(REPO)}")
+          f"{f' · 🟡 {unv} 個驗不到' if unv else ''} → {path.relative_to(REPO)}")
     if total == 0:
-        print("  ⛔ 一個字串都沒被檢查 —— 那是沒驗到，不是通過", file=sys.stderr)
+        # 整課一個字串都沒驗到 —— 那不是「這課沒問題」，是這課沒被驗過。
+        print("  ⛔ 整課一個字串都沒被檢查 —— 那是沒驗到，不是通過", file=sys.stderr)
         return 1
     return worst
 
@@ -167,10 +194,8 @@ def verify(uid: str) -> int:
             continue
         if sha(f) != rec.get("yaml_sha256"):
             problems.append(f"{mod}：內容改過了，證明失效")
-        elif not rec.get("passed"):
+        elif rec.get("status", "pass" if rec.get("passed") else "fail") == "fail":
             problems.append(f"{mod}：證明記的是**沒通過**")
-        elif not rec.get("checked"):
-            problems.append(f"{mod}：受檢 0 個字串 —— 那是沒驗到")
 
     # 反向：有 yml 卻不在證明裡
     covered = set((doc.get("modules") or {}).keys())
@@ -185,17 +210,105 @@ def verify(uid: str) -> int:
         return 1
 
     total = sum(m["checked"] for m in doc["modules"].values())
+    unv = sum(1 for m in doc["modules"].values() if m.get("status") == "unverifiable")
     print(f"✅ {uid} 的內容忠實度證明有效"
-          f"（{len(doc['modules'])} 個模組 · 受檢 {total} 字串 · 判準 v{GATE_VERSION}）")
+          f"（{len(doc['modules'])} 個模組 · 受檢 {total} 字串"
+          f"{f' · 🟡 {unv} 個驗不到' if unv else ''} · 判準 v{GATE_VERSION}）")
+    return 0
+
+
+# ── 全庫驗證（CI 用）─────────────────────────────────────────────────────
+# 🔴 這一段存在的理由：門建了沒插電 = 比沒有門更糟，因為大家會以為它在看。
+#    attest 只能在讀得到原稿的機器上跑，CI 讀不到 —— 所以 CI 驗的是「證明」。
+
+RATCHET = ATTEST_DIR / "_ratchet.json"
+
+
+def verify_all() -> int:
+    """把每一課的證明都驗一次，並對「驗不到」的數量上棘輪。
+
+    ⛔ 「驗不到」不可以無聲增加 —— 那會讓覆蓋率一點一點漏光，
+    而每一次看起來都是綠的。所以記一個上限，只准往下不准往上。
+    """
+    uids = sorted(p.parent.parent.name
+                  for p in LESSONS.glob("L*/v3/_manifest.yml"))
+    missing, broken, unv_total, checked_total = [], [], 0, 0
+    for uid in uids:
+        path = ATTEST_DIR / f"{uid}.json"
+        if not path.is_file():
+            missing.append(uid)
+            continue
+        rc = verify_quiet(uid)
+        if rc:
+            broken.append(uid)
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for m in doc.get("modules", {}).values():
+            checked_total += m.get("checked", 0)
+            unv_total += m.get("status") == "unverifiable"
+
+    base = json.loads(RATCHET.read_text(encoding="utf-8")) if RATCHET.is_file() else {}
+    cap = base.get("unverifiable_max")
+
+    print(f"\n  課數 {len(uids)} · 有證明 {len(uids) - len(missing)}"
+          f" · 受檢 {checked_total} 字串 · 🟡 驗不到 {unv_total}")
+    bad = False
+    if missing:
+        print(f"  🔴 {len(missing)} 課沒有證明：{' '.join(missing[:10])}")
+        bad = True
+    if broken:
+        print(f"  🔴 {len(broken)} 課的證明不成立：{' '.join(broken[:10])}")
+        bad = True
+    if cap is None:
+        print("  ⛔ 沒有棘輪基準檔 —— 先跑 --set-ratchet 記一個上限")
+        bad = True
+    elif unv_total > cap:
+        print(f"  🔴 驗不到的從 {cap} 漲到 {unv_total} —— 覆蓋率在漏，不准無聲增加")
+        bad = True
+    elif unv_total < cap:
+        print(f"  ✅ 驗不到的從 {cap} 降到 {unv_total} —— 記得跑 --set-ratchet 收緊")
+    return 1 if bad else 0
+
+
+def verify_quiet(uid: str) -> int:
+    import io
+    import contextlib
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        return verify(uid)
+
+
+def set_ratchet() -> int:
+    uids = sorted(p.parent.parent.name
+                  for p in LESSONS.glob("L*/v3/_manifest.yml"))
+    n = 0
+    for uid in uids:
+        path = ATTEST_DIR / f"{uid}.json"
+        if not path.is_file():
+            continue
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        n += sum(1 for m in doc.get("modules", {}).values()
+                 if m.get("status") == "unverifiable")
+    RATCHET.write_text(json.dumps({"unverifiable_max": n}, indent=2) + "\n",
+                       encoding="utf-8")
+    print(f"  棘輪上限設為 {n} → {RATCHET.relative_to(REPO)}")
     return 0
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--uid", required=True)
+    ap.add_argument("--uid")
     ap.add_argument("--docx", type=pathlib.Path)
     ap.add_argument("--verify", action="store_true", help="CI 側：只驗證明，不需要原稿")
+    ap.add_argument("--verify-all", action="store_true", help="CI 側：全庫驗證 + 棘輪")
+    ap.add_argument("--set-ratchet", action="store_true", help="把現在的「驗不到」數記成上限")
     a = ap.parse_args()
+    if a.set_ratchet:
+        return set_ratchet()
+    if a.verify_all:
+        return verify_all()
+    if not a.uid:
+        print("⛔ 要給 --uid（或用 --verify-all / --set-ratchet）", file=sys.stderr)
+        return 2
     if a.verify:
         return verify(a.uid)
     if not a.docx:

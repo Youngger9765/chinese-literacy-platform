@@ -1,0 +1,21 @@
+{
+  "uid": "L0021",
+  "gate_version": 1,
+  "docx_sha256": "bd4c-66f4-ebce-b86f",
+  "modules": {
+    "comprehension": {
+      "yaml_sha256": "afdd-a99e-e9f9-e615",
+      "checked": 17,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate": {
+      "yaml_sha256": "0eaf-ca8b-ae16-af61",
+      "checked": 13,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

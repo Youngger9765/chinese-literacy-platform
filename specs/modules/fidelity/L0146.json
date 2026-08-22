@@ -1,0 +1,91 @@
+{
+  "uid": "L0146",
+  "gate_version": 1,
+  "docx_sha256": "0447-e13a-b970-2c9c",
+  "modules": {
+    "comprehension": {
+      "yaml_sha256": "bf26-b0b4-b60d-ff3a",
+      "checked": 26,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "2fa1-3746-bbba-500e",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate": {
+      "yaml_sha256": "ed77-f2c6-e351-0324",
+      "checked": 27,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box": {
+      "yaml_sha256": "1ae8-ddd0-79fd-4945",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading": {
+      "yaml_sha256": "efb8-175e-e65a-7b63",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints": {
+      "yaml_sha256": "f6f9-15d1-e44b-599a",
+      "checked": 14,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources": {
+      "yaml_sha256": "ae03-d1c4-913c-c118",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading": {
+      "yaml_sha256": "5df5-a70b-fe46-1680",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight": {
+      "yaml_sha256": "c628-246f-8f3e-a6a1",
+      "checked": 33,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application": {
+      "yaml_sha256": "8a65-5ea7-5458-86e4",
+      "checked": 17,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions": {
+      "yaml_sha256": "8d8d-90cb-f032-c046",
+      "checked": 36,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review": {
+      "yaml_sha256": "6823-3346-b865-35c7",
+      "checked": 22,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

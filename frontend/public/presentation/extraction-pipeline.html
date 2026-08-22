@@ -226,8 +226,7 @@ b{font-weight:600}
   <div class="todo">
     <h2>還沒做的，照急迫度</h2>
     <ol>
-      <li><b>內容忠實度門（⑦b）</b> —— 壞資料會以「成功」身分穿到學生面前。這是完整性失效不是可用性失效，學生端會把它放大成教學內容錯誤。</li>
-      <li>把 <b>⑥a</b> 的一致率量到別的模組與課型 —— 目前只有 1 課 1 模組 × 3 次。</li>
+            <li>把 <b>⑥a</b> 的一致率量到別的模組與課型 —— 目前只有 1 課 1 模組 × 3 次。</li>
             <li>那 42 個看不了的（<b>#2868</b>）—— 用文字座標自己重排，或改讀 Word 的 XML。</li>
       <li><b>②</b> 的根因 —— 三個假設都排除了（冷熱 profile、字型替換、多數決）。要真的解決得換排版引擎或改用內容錨點，而它已經被 ⑤ 轉成大聲失敗（172/172 課存了每頁指紋），<b>不急</b>。</li>
     </ol>
@@ -431,9 +430,9 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <tr><td>誤殺</td><td class="n">0（收緊 item 層約束後對 150 課重驗）</td></tr></tbody></table></div>
 <div class="m">收緊之前，一份被砍成「1 題、空定義、無語詞框、無外層」的劣化輸出<b>三道門全綠</b>。成因三個疊在一起：<code>required</code> 只有 <code>items</code> 而 <code>items</code> 是裸陣列、自驗只比鍵名、語詞框缺席時回綠燈。</div>`},
 
-  {k:"7b", num:"⑦b", ttl:"內容忠實度門", kind:"gone", badge:["crit","建置中"],
+  {k:"7b", num:"⑦b", ttl:"內容忠實度門", kind:"machine", badge:["ok","174 課全上"],
    src:"scripts/content_fidelity_attest.py",
-   fact:"逐字比對 + 證明機制 · 今天剛建",
+   fact:"1634 通過 · 0 失敗 · 25 驗不到 · 已進 CI",
    body:`<h4>它守什麼</h4>
 <p>前面所有的門都在驗<b>形狀</b>。這一道驗<b>抄的字對不對</b>。</p>
 <div class="tw"><table><thead><tr><th>狀況</th><th>沒有它的話</th></tr></thead><tbody>
@@ -445,27 +444,30 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <pre>私有側（讀得到原稿）  跑逐字比對 → 產 attestation
 CI（讀不到原稿）      只驗「有證明嗎、雜湊對得上嗎」</pre>
 <p>證明綁死三個雜湊：<b>原稿</b>、<b>yml</b>、<b>判準版本</b>。任何一邊變了證明就失效 —— 不綁的話證明可以被回收利用到別的內容上，那比沒有更糟。</p>
-<h4>第一次跑（L0072）</h4>
-<div class="tw"><table><thead><tr><th>模組</th><th>受檢字串</th><th>結果</th></tr></thead><tbody>
-<tr><td>comprehension</td><td class="n">274</td><td class="g">✓</td></tr>
-<tr><td>spotlight</td><td class="n">354</td><td class="g">✓</td></tr>
-<tr><td>full_text_annotate</td><td class="n">104</td><td class="g">✓</td></tr>
-<tr><td>vocab_application</td><td class="n">104</td><td class="g">✓</td></tr>
-<tr><td>key_reading</td><td class="n">94</td><td class="g">✓</td></tr>
-<tr><td>keypoints</td><td class="n">84</td><td class="g">✓</td></tr>
-<tr><td>vocab_definitions</td><td class="n">74</td><td class="g">✓</td></tr>
-<tr><td>vocab_review</td><td class="n">54</td><td class="g">✓</td></tr>
-<tr><td>resources</td><td class="n">54</td><td class="y">誤報</td></tr>
-<tr><td><b>合計</b></td><td class="n"><b>1196</b></td><td></td></tr>
+<h4>全庫實跑</h4>
+<pre>174 課 · 1634 個模組通過 · 0 失敗 · 🟡 25 個驗不到 · 實際比對 30215 個字串</pre>
+<h4>🔴 從 25 綠到 174 綠，中間修的全是門自己的毛病</h4>
+<div class="tw"><table><thead><tr><th>第一次全庫跑</th><th>診斷</th><th>修法</th></tr></thead><tbody>
+<tr><td class="n">25 綠 / 149 紅</td><td>註解排除只套在<b>葉節點的鍵</b>上。<code>notes</code> 在名單裡，卻只保護得了 <code>notes:&nbsp;"一句話"</code>；<code>notes:&nbsp;{…}</code> 會被走進去，然後拿葉鍵去比對名單 —— 裡面裝的是抽取器自己寫的分析</td><td>排除要套在<b>容器</b>上</td></tr>
+<tr><td class="n">96 綠</td><td><code>errata</code> 整包被跳過 → 一個字串都沒驗 → 69/69 恆紅</td><td>走進去，只驗 <code>source</code>（原稿真的印了那個錯字，是它唯一可驗的主張）</td></tr>
+<tr><td class="n">137 綠</td><td>原稿的文字流被<b>插在段落中間的圖說</b>切斷 —— 課文一個字都沒抄錯，卻因為「不連續」被判 FAIL</td><td>放寬成「<b>依序</b>出現、可被打斷」</td></tr>
+<tr><td class="n">148 綠</td><td><code>videos[].url</code> 來自總表不是原稿（<code>url_source</code> 自己就寫了）</td><td><code>X_source</code> 已列為註解 → <code>X</code> 也不拿原稿驗。⚠️ 判準在資料裡：<code>passage_source</code> 不在註解名單，所以 <code>passage</code> 照驗</td></tr>
+<tr><td class="n">174 綠</td><td>「一個字串都沒驗到」跟「驗了對不上」混成同一個紅燈 → 製造<b>沒有人修得掉的紅</b></td><td>改三態</td></tr>
 </tbody></table></div>
-<div class="m y"><code>resources</code> 那個是<b>誤報不是缺陷</b>：<code>url_source</code> 是我方記錄「這連結出自哪張總表」的溯源欄位，本來就不在原稿上。全庫 291 處，逐字門不該檢查它 —— 修正中。</div>
-<div class="m r"><b>還沒接進持續整合。</b>目前只跑過 1 課，175 課的證明都還沒產。</div>`},
+<div class="m y"><b>放寬要有負向對照，否則就是把門弄瞎。</b>改一個詞、把第 4 句搬到最前面、換成別課的課文、中間插一段編的 —— 四種都必須紅，實測都紅了。</div>
+<h4>🟡 三態，不是兩態</h4>
+<pre>pass          驗了，而且對得上
+fail          驗了，對不上          ← 0 個
+unverifiable  沒得驗                ← 25 個</pre>
+<p>那 25 個裡，22 個是勘誤的原文只有<b>一個字</b>（「五」印成「六」），短於 4 字門檻；3 個是錯字印在圖片裡。⛔ 判 fail 不會讓資料變好，只會讓紅燈變成背景雜訊；判 pass 則是把「沒驗」講成「驗過了」。這個數字上<b>棘輪</b>，只准往下。</p>
+<h4>🔴 我報過的字串數是假的</h4>
+<div class="m y">受檢數原本是去<b>刮中文散文那一行</b>拿的 —— 那行用半形冒號，而 parser 切全形「：」，於是整行都進去，再濾掉非數字，從「≥ 4」跟真正的數字湊出 <code>04</code>。<b>每一份證明都寫著 4</b>，不管實際驗了 0 個還是 200 個。我拿它報過「1176 字串」「308196 字串」。現在走機器可讀的契約行。教訓跟這一整天同一條：<b>拿工具的輸出下判斷之前，先驗那個工具。</b></div>`},
 
   {k:"8", num:"⑧", ttl:"學生畫面", kind:"machine", badge:["ok","—"],
    src:"frontend",
    fact:"終點",
    body:`<p>前面所有的門加起來，保證的是「形狀對、沒有整題被靜默丟掉」。</p>
-<div class="m"><b>不保證抄的字是對的</b> —— 那是 ⑦b 的事，而它今天才剛建起來、還沒接進持續整合。</div>`},
+<div class="m"><b>不保證抄的字是對的</b> —— 那是 ⑦b 的事，它現在 174 課全有證明、已經進 CI 具名清單。</div>`},
 ];
 
 const PLANES = ["一 讀全文-做記號","二 念順順","三 語詞我最棒","四 語詞應用",

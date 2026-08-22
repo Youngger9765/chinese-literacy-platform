@@ -1,0 +1,91 @@
+{
+  "uid": "L0137",
+  "gate_version": 1,
+  "docx_sha256": "ee46-53c3-8a1a-c604",
+  "modules": {
+    "comprehension": {
+      "yaml_sha256": "4cca-db1f-045c-7381",
+      "checked": 34,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "cross_text_banner": {
+      "yaml_sha256": "750e-dfdf-f0cb-3b7c",
+      "checked": 0,
+      "status": "unverifiable",
+      "passed": false,
+      "exit": 1
+    },
+    "errata": {
+      "yaml_sha256": "5601-e56a-f85c-e7f1",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate": {
+      "yaml_sha256": "17b6-cea8-cc13-0f40",
+      "checked": 29,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box": {
+      "yaml_sha256": "9320-89c4-878e-e727",
+      "checked": 4,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints": {
+      "yaml_sha256": "8f59-b6df-c01d-d0b7",
+      "checked": 30,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "multi_text_parts": {
+      "yaml_sha256": "bf1b-0d60-90e9-9ed8",
+      "checked": 25,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources": {
+      "yaml_sha256": "3956-093f-ab43-f7a3",
+      "checked": 4,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading": {
+      "yaml_sha256": "de0a-6d6e-0058-ce8d",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application": {
+      "yaml_sha256": "e4a3-d940-4ec2-37cb",
+      "checked": 16,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions": {
+      "yaml_sha256": "9228-1e33-291d-c93b",
+      "checked": 27,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review": {
+      "yaml_sha256": "3f55-f3a1-a4a0-4ddc",
+      "checked": 19,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}
