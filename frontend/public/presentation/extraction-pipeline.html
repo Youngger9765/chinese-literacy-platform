@@ -2,353 +2,380 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<title>抽取管線體檢台</title>
+<title>抽取管線架構圖</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
+/* ═══ tokens ═══════════════════════════════════════════════ */
 :root{
-  --ground:#f6f7f8; --panel:#ffffff; --panel-2:#eef1f3;
-  --ink:#131a21; --ink-2:#4a555f; --ink-3:#78838d;
-  --rule:#dbe1e6; --rule-2:#c3ccd3;
-  --machine:#0d6e78; --machine-soft:#e3f0f1;
-  --model:#a75f14; --model-soft:#f8ecdd;
-  --ok:#2f7d4f; --warn:#a8720d; --crit:#a8323f; --none:#7b858e;
-  --ok-soft:#e6f2ea; --warn-soft:#fbf0d9; --crit-soft:#f8e5e7; --none-soft:#eceff1;
-  --mono:'IBM Plex Mono','SFMono-Regular',ui-monospace,monospace;
-  --sans:'IBM Plex Sans','Noto Sans TC',-apple-system,'Helvetica Neue',sans-serif;
-  --cond:'IBM Plex Sans Condensed','IBM Plex Sans','Noto Sans TC',sans-serif;
+  --ground:#f5f6f8;  --box:#ffffff;   --box-2:#eceff3;
+  --ink:#11171d;     --ink-2:#4c5661; --ink-3:#7b8590;
+  --line:#a3adb6;    --rule:#dce1e6;
+
+  --machine:#0d6e78; --machine-bg:#e6f1f2;   /* 腳本 */
+  --model:#a35d13;   --model-bg:#faeddb;     /* 模型 */
+
+  --ok:#2f7d4f;   --ok-bg:#e6f3ea;
+  --warn:#a5700c; --warn-bg:#fbf1d8;
+  --crit:#a63140; --crit-bg:#f9e5e7;
+  --none:#79838c; --none-bg:#edeff1;
+
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
+  --sans:'IBM Plex Sans','Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+
+  --w:660px;          /* 圖的寬度，所有節點共用 */
+  --panel-w:min(560px,92vw);
 }
-@media (prefers-color-scheme: dark){
+@media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --ground:#0e1418; --panel:#151d23; --panel-2:#1d262d;
-    --ink:#e8edf0; --ink-2:#a4b0b9; --ink-3:#76838d;
-    --rule:#26323a; --rule-2:#38454e;
-    --machine:#4fbfc9; --machine-soft:#123034;
-    --model:#e0a45c; --model-soft:#33250f;
-    --ok:#63c48b; --warn:#e0b24a; --crit:#e8757f; --none:#8e9aa3;
-    --ok-soft:#14301f; --warn-soft:#332a10; --crit-soft:#361a1e; --none-soft:#1e262c;
+    --ground:#0c1115; --box:#151d23;  --box-2:#1e272f;
+    --ink:#e9eef2;    --ink-2:#a5b0b9; --ink-3:#76818b;
+    --line:#4a5761;   --rule:#27323a;
+    --machine:#55c4ce; --machine-bg:#0f2d31;
+    --model:#e0a55e;   --model-bg:#31240f;
+    --ok:#67c98f;   --ok-bg:#132f1f;
+    --warn:#e2b451; --warn-bg:#322910;
+    --crit:#e97a84; --crit-bg:#351a1e;
+    --none:#8e99a2; --none-bg:#1e262c;
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0e1418; --panel:#151d23; --panel-2:#1d262d;
-  --ink:#e8edf0; --ink-2:#a4b0b9; --ink-3:#76838d;
-  --rule:#26323a; --rule-2:#38454e;
-  --machine:#4fbfc9; --machine-soft:#123034;
-  --model:#e0a45c; --model-soft:#33250f;
-  --ok:#63c48b; --warn:#e0b24a; --crit:#e8757f; --none:#8e9aa3;
-  --ok-soft:#14301f; --warn-soft:#332a10; --crit-soft:#361a1e; --none-soft:#1e262c;
+  --ground:#0c1115; --box:#151d23;  --box-2:#1e272f;
+  --ink:#e9eef2;    --ink-2:#a5b0b9; --ink-3:#76818b;
+  --line:#4a5761;   --rule:#27323a;
+  --machine:#55c4ce; --machine-bg:#0f2d31;
+  --model:#e0a55e;   --model-bg:#31240f;
+  --ok:#67c98f;   --ok-bg:#132f1f;
+  --warn:#e2b451; --warn-bg:#322910;
+  --crit:#e97a84; --crit-bg:#351a1e;
+  --none:#8e99a2; --none-bg:#1e262c;
 }
+
+/* ═══ base ═════════════════════════════════════════════════ */
 *{box-sizing:border-box}
-body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
-  font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
-code{font-family:var(--mono);font-size:.92em}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px 96px}
-header{padding:56px 0 28px;border-bottom:1px solid var(--rule)}
-.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
-h1{font-family:var(--cond);font-weight:700;font-size:clamp(30px,4.4vw,46px);
-  line-height:1.1;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
-.lede{margin:0;max-width:62ch;color:var(--ink-2);font-size:16px}
-.lede b{color:var(--ink)}
-.stamp{margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--ink-3);
-  display:flex;flex-wrap:wrap;gap:6px 20px}
-.stamp b{color:var(--ink-2);font-weight:500}
-.summary{display:grid;gap:1px;background:var(--rule);
-  grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
-  border:1px solid var(--rule);margin:32px 0 8px}
-.cell{background:var(--panel);padding:16px 18px}
-.cell .n{font-family:var(--mono);font-weight:600;font-size:30px;line-height:1;
-  font-variant-numeric:tabular-nums;display:block;margin-bottom:6px}
-.cell .k{font-size:12.5px;color:var(--ink-2)}
-.cell.is-crit .n{color:var(--crit)} .cell.is-warn .n{color:var(--warn)}
-.cell.is-ok .n{color:var(--ok)} .cell.is-none .n{color:var(--none)}
-.legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
-  font-size:12.5px;color:var(--ink-2);margin:14px 0 0}
-.chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);
-  font-size:11.5px;letter-spacing:.02em;padding:3px 9px;border:1px solid var(--rule-2)}
-.chip .sw{width:9px;height:9px;flex:none}
-.sw-machine{background:var(--machine)} .sw-model{background:var(--model)}
-.pipe{margin:44px 0 0;position:relative}
-.section-h{font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--ink-3);margin:0 0 18px;padding-bottom:8px;
-  border-bottom:1px solid var(--rule)}
-.row{display:grid;grid-template-columns:64px 1fr;position:relative}
-.spine{position:relative}
-.spine::before{content:"";position:absolute;left:26px;top:0;bottom:0;width:4px;background:var(--machine)}
-.spine.model::before{background:var(--model)}
-.node{position:absolute;left:19px;top:24px;width:18px;height:18px;border-radius:50%;
-  background:var(--ground);border:4px solid var(--machine)}
-.spine.model .node{border-color:var(--model)}
-details.block{border:1px solid var(--rule);background:var(--panel);margin:0 0 10px}
-details.block[open]{border-color:var(--rule-2)}
-summary{list-style:none;cursor:pointer;padding:15px 18px;display:grid;
-  grid-template-columns:1fr auto;gap:12px;align-items:start}
-summary::-webkit-details-marker{display:none}
-summary:focus-visible{outline:2px solid var(--machine);outline-offset:-2px}
-.b-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
-.b-id{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--ink-3);min-width:26px}
-.b-name{font-family:var(--cond);font-weight:600;font-size:19px;letter-spacing:-.005em}
-.b-tool{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);word-break:break-all}
-.b-sub{grid-column:1/-1;margin-top:5px;font-size:13.5px;color:var(--ink-2);max-width:72ch}
-.b-sub b{color:var(--ink)}
-.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.tag{font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding:2px 8px;
-  white-space:nowrap;border:1px solid transparent}
-.t-machine{background:var(--machine-soft);color:var(--machine);border-color:var(--machine)}
-.t-model{background:var(--model-soft);color:var(--model);border-color:var(--model)}
-.t-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
-.t-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
-.t-crit{background:var(--crit-soft);color:var(--crit);border-color:var(--crit)}
-.t-none{background:var(--none-soft);color:var(--none);border-color:var(--none)}
-.detail{padding:2px 18px 18px;border-top:1px solid var(--rule)}
-.detail>*:first-child{margin-top:14px}
-.detail h4{font-family:var(--cond);font-size:12px;font-weight:600;letter-spacing:.11em;
-  text-transform:uppercase;color:var(--ink-3);margin:20px 0 8px}
-.detail p{margin:0 0 10px;max-width:74ch;font-size:14px;color:var(--ink-2)}
-.detail p b{color:var(--ink);font-weight:600}
-pre{font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--panel-2);
-  border:1px solid var(--rule);padding:12px 14px;margin:0 0 12px;overflow-x:auto;color:var(--ink)}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:13.5px;margin:0 0 12px}
-.kv dt{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
-.kv dd{margin:0;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.kv dd b{color:var(--ink)}
-.note{border-left:3px solid var(--rule-2);padding:2px 0 2px 13px;margin:0 0 12px;
-  font-size:13.5px;color:var(--ink-2);max-width:72ch}
-.note.crit{border-left-color:var(--crit)}
-.note.warn{border-left-color:var(--warn)}
-.note.ok{border-left-color:var(--ok)}
-.note b{color:var(--ink)}
-a{color:var(--machine);text-decoration-thickness:1px;text-underline-offset:2px}
-.tablewrap{overflow-x:auto;border:1px solid var(--rule);margin:0 0 12px}
-table{border-collapse:collapse;width:100%;font-size:13px;min-width:480px}
-th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--rule)}
-th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink-3);font-weight:500;background:var(--panel-2);white-space:nowrap}
-tbody tr:last-child td{border-bottom:none}
-td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-td.ok{color:var(--ok)} td.crit{color:var(--crit)} td.warn{color:var(--warn)}
-td b{color:var(--ink)}
-section.blk{margin:48px 0 0}
-.grid2{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(310px,1fr))}
-.card{border:1px solid var(--rule);background:var(--panel);padding:18px}
-.card h3{font-family:var(--cond);font-size:16px;font-weight:600;margin:0 0 10px}
-.card p{margin:0 0 9px;font-size:13.5px;color:var(--ink-2)}
-.card p:last-child{margin-bottom:0}
-.card p b{color:var(--ink)}
-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
-  font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
-@media (max-width:640px){
-  .row{grid-template-columns:34px 1fr}
-  .spine::before{left:12px} .node{left:5px}
-  .wrap{padding:0 16px 64px}
-  summary{grid-template-columns:1fr}
-  .tags{justify-content:flex-start}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font:15px/1.6 var(--sans); -webkit-font-smoothing:antialiased;
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+code{font-family:var(--mono); font-size:.9em}
+b{font-weight:600}
+
+.page{max-width:calc(var(--w) + 300px); margin:0 auto; padding:44px 24px 90px;
+  transition:margin-right .22s ease}
+@media (min-width:960px){ body.open .page{ margin-right:var(--panel-w) } }
+
+/* ═══ header ═══════════════════════════════════════════════ */
+.hd{max-width:var(--w); margin:0 auto 30px}
+.hd h1{font:600 25px/1.2 var(--mono); margin:0 0 8px; letter-spacing:-.01em}
+.hd p{margin:0 0 4px; color:var(--ink-2); font-size:14px}
+.hd .meta{font:11.5px/1.6 var(--mono); color:var(--ink-3); margin-top:10px}
+.hd .keys{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center;
+  margin-top:16px; font:11.5px/1 var(--mono)}
+.hd .keys span{display:inline-flex; align-items:center; gap:6px; color:var(--ink-2)}
+.hd .keys i{width:20px; height:8px; border-radius:1px}
+.hd .keys .m1 i{background:var(--machine)}
+.hd .keys .m2 i{background:var(--model)}
+.hd .keys .note{color:var(--ink-3)}
+
+/* ═══ diagram ══════════════════════════════════════════════ */
+.flow{display:flex; flex-direction:column; align-items:center; gap:0}
+
+.link{width:2px; height:20px; background:var(--line); position:relative; flex:none}
+.link::after{content:""; position:absolute; left:-4px; bottom:-1px;
+  border:5px solid transparent; border-top-color:var(--line)}
+
+.step{
+  width:100%; max-width:var(--w); display:block; text-align:left;
+  font:inherit; color:inherit; cursor:pointer; position:relative;
+  background:var(--box); border:1px solid var(--rule);
+  border-left:6px solid var(--machine);
+  padding:13px 88px 13px 16px;
+}
+.step.is-model{border-left-color:var(--model)}
+.step.is-gone{border-left-color:var(--crit); border-color:var(--crit)}
+.step:hover{background:var(--box-2)}
+.step:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+
+.step .r1{display:flex; align-items:baseline; gap:9px}
+.step .num{font:600 12.5px/1 var(--mono); color:var(--ink-3); flex:none; min-width:22px}
+.step .ttl{font-weight:600; font-size:16px; letter-spacing:-.003em}
+.step .src{display:block; font:11.5px/1.5 var(--mono); color:var(--ink-3);
+  margin-top:4px; overflow-wrap:anywhere}
+.step .fact{display:block; font:12px/1.5 var(--mono); color:var(--ink-2); margin-top:2px}
+
+.badge{position:absolute; top:12px; right:14px;
+  font:500 10.5px/1.5 var(--mono); padding:1px 7px; border:1px solid currentColor}
+.b-ok{color:var(--ok); background:var(--ok-bg)}
+.b-warn{color:var(--warn); background:var(--warn-bg)}
+.b-crit{color:var(--crit); background:var(--crit-bg)}
+.b-none{color:var(--none); background:var(--none-bg)}
+.step .open{position:absolute; right:14px; bottom:10px;
+  font:10px/1 var(--mono); color:var(--ink-3)}
+
+/* 扇出 */
+.fan{
+  width:100%; max-width:var(--w); display:block; text-align:left;
+  font:inherit; color:inherit; cursor:pointer; position:relative;
+  background:var(--model-bg); border:1px dashed var(--model);
+  border-left:6px solid var(--model); padding:12px 16px 26px;
+}
+.fan:hover{filter:brightness(.985)}
+.fan:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.fan .cap{display:block; font:600 11px/1 var(--mono); color:var(--model); margin-bottom:8px}
+.fan .row{display:flex; flex-wrap:wrap; gap:5px}
+.fan .row em{font-style:normal; font:11px/1.5 var(--mono); color:var(--ink-2);
+  background:var(--box); border:1px solid var(--model); padding:2px 7px; white-space:nowrap}
+.fan .open{position:absolute; right:14px; bottom:8px; font:10px/1 var(--mono); color:var(--ink-3)}
+
+/* ═══ todo ═════════════════════════════════════════════════ */
+.todo{max-width:var(--w); margin:46px auto 0}
+.todo h2{font:600 11.5px/1 var(--mono); letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 13px; padding-bottom:8px; border-bottom:1px solid var(--rule)}
+.todo ol{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px}
+.todo li{font-size:13.5px; color:var(--ink-2)}
+.todo li b{color:var(--ink)}
+.foot{max-width:var(--w); margin:38px auto 0; font:11px/1.6 var(--mono); color:var(--ink-3)}
+
+/* ═══ right panel ══════════════════════════════════════════ */
+.scrim{position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:19;
+  opacity:0; pointer-events:none; transition:opacity .22s}
+.scrim.on{opacity:1; pointer-events:auto}
+@media (min-width:960px){ .scrim{display:none} }
+
+.panel{
+  position:fixed; top:0; right:0; bottom:0; width:var(--panel-w); z-index:20;
+  background:var(--box); border-left:4px solid var(--machine);
+  box-shadow:-10px 0 34px rgba(0,0,0,.16);
+  transform:translateX(101%); transition:transform .22s ease;
+  visibility:hidden; overflow-y:auto; overscroll-behavior:contain;
+}
+.panel.on{transform:translateX(0); visibility:visible}
+.panel.is-model{border-left-color:var(--model)}
+.panel.is-gone{border-left-color:var(--crit)}
+
+.panel .bar{position:sticky; top:0; z-index:2; background:var(--box);
+  border-bottom:1px solid var(--rule); padding:14px 20px;
+  display:flex; align-items:flex-start; gap:12px}
+.panel .bar .who{flex:1; min-width:0}
+.panel .bar .n{font:600 12px/1.5 var(--mono); color:var(--ink-3)}
+.panel .bar .t{font-weight:600; font-size:18px; margin:0; letter-spacing:-.005em}
+.panel .bar .s{display:block; font:11px/1.5 var(--mono); color:var(--ink-3);
+  margin-top:3px; overflow-wrap:anywhere}
+.panel .x{flex:none; background:none; border:1px solid var(--rule); color:var(--ink-2);
+  font:12px/1 var(--mono); padding:5px 9px; cursor:pointer}
+.panel .x:hover{background:var(--box-2)}
+
+.panel .body{padding:16px 20px 40px}
+.panel h4{font:600 10.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); margin:20px 0 8px}
+.panel h4:first-child{margin-top:0}
+.panel p{margin:0 0 9px; font-size:13.5px; color:var(--ink-2)}
+.panel p b{color:var(--ink)}
+.panel pre{font:12px/1.55 var(--mono); background:var(--box-2); border:1px solid var(--rule);
+  padding:11px 13px; margin:0 0 11px; overflow-x:auto; color:var(--ink)}
+
+.panel .tw{overflow-x:auto; border:1px solid var(--rule); margin:0 0 11px}
+.panel table{border-collapse:collapse; width:100%; font-size:12.5px}
+.panel th,.panel td{padding:6px 10px; text-align:left; border-bottom:1px solid var(--rule)}
+.panel th{font:500 10px/1.4 var(--mono); letter-spacing:.05em; text-transform:uppercase;
+  color:var(--ink-3); background:var(--box-2); white-space:nowrap}
+.panel tbody tr:last-child td{border-bottom:none}
+.panel td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.panel td.g{color:var(--ok)} .panel td.y{color:var(--warn)} .panel td.r{color:var(--crit)}
+.panel td b{color:var(--ink)}
+
+.panel .m{border-left:3px solid var(--line); padding:3px 0 3px 12px;
+  margin:0 0 11px; font-size:13px; color:var(--ink-2)}
+.panel .m b{color:var(--ink)}
+.panel .m.g{border-left-color:var(--ok)}
+.panel .m.y{border-left-color:var(--warn)}
+.panel .m.r{border-left-color:var(--crit)}
+
+@media (max-width:620px){
+  .page{padding:26px 14px 70px}
+  .step{padding-right:16px; padding-bottom:26px}
+  .badge{position:static; display:inline-block; margin-left:6px}
+  .panel{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  .panel,.scrim,.page{transition:none}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<header>
-  <p class="eyebrow">LingoLeap · 抽取管線</p>
-  <h1>抽取管線體檢台</h1>
-  <p class="lede">一份 Word 學習單走到學生畫面上要經過 11 個關卡。這裡標出每一關是<b>腳本</b>還是<b>大型語言模型</b>、現在穩不穩、以及那個判斷背後的實測數字。點任一關展開細節。</p>
-  <p class="stamp">
-    <span>更新 <b>2026-08-22</b></span>
-    <span>來源 <b>docs/prd/extraction-pipeline-map.md §0</b></span>
-    <span>票 <b>#2865</b></span>
-  </p>
-</header>
+<div class="page">
 
-<div class="summary">
-  <div class="cell is-ok"><span class="n">377</span><span class="k">模組逐題對得上</span></div>
-  <div class="cell is-warn"><span class="n">42</span><span class="k">這道門看不了（10%）</span></div>
-  <div class="cell is-crit"><span class="n">1</span><span class="k">抓到的真缺陷</span></div>
-  <div class="cell"><span class="n">143<span style="font-size:18px;color:var(--ink-3)">/147</span></span><span class="k">課通過派工前檢查</span></div>
-  <div class="cell is-none"><span class="n">2</span><span class="k">還沒量過的環節</span></div>
+  <div class="hd">
+    <h1>抽取管線架構圖</h1>
+    <p>一份 Word 學習單走到學生畫面。<b>左邊色條</b>就是那一關由誰決定結果。</p>
+    <p>點任一格，右側面板會列出實測數字。</p>
+    <div class="keys">
+      <span class="m1"><i></i>腳本 · 決定性</span>
+      <span class="m2"><i></i>大型語言模型 · 會飄</span>
+      <span class="note">12 關裡只有 2 關是模型</span>
+    </div>
+    <div class="meta">更新 2026-08-22 · 來源 docs/prd/extraction-pipeline-map.md §0 · 票 #2865</div>
+  </div>
+
+  <div class="flow" id="flow"></div>
+
+  <div class="todo">
+    <h2>還沒做的，照急迫度</h2>
+    <ol>
+      <li><b>內容忠實度門（⑦b）</b> —— 壞資料會以「成功」身分穿到學生面前。這是完整性失效不是可用性失效，學生端會把它放大成教學內容錯誤。</li>
+      <li>量 <b>⑥a</b> 的重跑一致率 —— 不知道就等於不能信。成本是六次模型抽取。</li>
+      <li><b>⑤</b> 從比頁數改成比每頁文字雜湊 —— 把「頁數一樣但版面重排」補起來，約 20 行。</li>
+      <li>那 42 個看不了的（<b>#2868</b>）—— 用文字座標自己重排，或改讀 Word 的 XML。</li>
+      <li><b>②</b> 的根因 —— 看起來最刺眼但<b>最不急</b>，它已經被 ⑤ 轉成大聲失敗。</li>
+    </ol>
+  </div>
+
+  <div class="foot">數字皆為實測，非估計 · 詳見 docs/prd/extraction-pipeline-map.md</div>
 </div>
 
-<p class="legend">
-  <span class="chip"><span class="sw sw-machine"></span>腳本 · 決定性</span>
-  <span class="chip"><span class="sw sw-model"></span>大型語言模型 · 會飄</span>
-  <span style="color:var(--ink-3)">主軸的顏色＝那一段由誰決定結果</span>
-</p>
+<div class="scrim" id="scrim"></div>
 
-<div class="pipe">
-<h2 class="section-h">管線</h2>
+<aside class="panel" id="panel" role="dialog" aria-modal="false" aria-labelledby="ptitle">
+  <div class="bar">
+    <div class="who">
+      <span class="n" id="pnum"></span>
+      <h2 class="t" id="ptitle"></h2>
+      <span class="s" id="psrc"></span>
+    </div>
+    <button class="x" id="px" type="button">關閉 ✕</button>
+  </div>
+  <div class="body" id="pbody"></div>
+</aside>
 
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">①</span><span class="b-name">定位原稿</span><span class="b-tool">lesson.yml → private/…/_SOT/*.docx</span></div>
-        <div class="b-sub">從課程設定找出這一課的 Word 原稿在哪。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><h4>證據</h4>
-<dl class="kv"><dt>原稿數</dt><dd>175 份 DOCX 全部就位</dd><dt>失敗</dt><dd>0</dd></dl>
-<div class="note">原稿住在 <code>private/</code>，那個目錄不進版控 —— 這一關<b>只能在本機跑</b>，持續整合環境永遠拿不到。這是刻意的，不是缺陷。</div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">②</span><span class="b-name">Word 轉 PDF</span><span class="b-tool">scripts/docx_to_pdf.sh</span></div>
-        <div class="b-sub">後面每一關都建立在這份 PDF 上，而<b>同一份 Word 轉兩次不保證一樣</b>。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-crit">不穩</span></div>
-    </summary>
-    <div class="detail"><div class="note crit"><b>這是整條管線唯一真正不穩的地方，而且根因還沒查出來。</b>它是腳本卻不決定性 —— LibreOffice 的排版結果會變。</div>
+<script>
+const STEPS = [
+  {k:"1", num:"①", ttl:"定位原稿", kind:"machine", badge:["ok","穩"],
+   src:"lesson.yml → private/…/_SOT/*.docx",
+   fact:"175 份 DOCX · 失敗 0",
+   body:`<h4>證據</h4>
+<div class="tw"><table><tbody>
+<tr><td>原稿數</td><td class="n">175 份 DOCX 全部就位</td></tr>
+<tr><td>失敗</td><td class="n">0</td></tr></tbody></table></div>
+<div class="m">原稿住在 <code>private/</code>，那個目錄不進版控 —— 這一關<b>只能在本機跑</b>，持續整合環境永遠拿不到。這是刻意的，不是缺陷。</div>`},
+
+  {k:"2", num:"②", ttl:"Word 轉 PDF", kind:"machine", badge:["crit","不穩"],
+   src:"scripts/docx_to_pdf.sh",
+   fact:"同一份轉三次 → 8 / 9 / 9 頁",
+   body:`<div class="m r"><b>整條管線唯一真正不穩的地方，根因還沒查出來。</b>它是腳本卻不決定性 —— LibreOffice 的排版結果會變。</div>
 <h4>實測</h4>
-<pre>同一份 L0016 連轉三次     → 8 / 9 / 9 頁
-172 課與既有紀錄對比      → 7 課頁數不同
-                          → 11 課共 33 個大題頁碼不同
-L0016                     → 從第 3 頁起每一節整體位移一頁</pre>
+<pre>同一份 L0016 連轉三次   → 8 / 9 / 9 頁
+172 課與既有紀錄對比    → 7 課頁數不同
+                        → 11 課共 33 個大題頁碼不同
+L0016                   → 從第 3 頁起每一節整體位移一頁</pre>
 <h4>為什麼會咬人</h4>
 <p>頁碼一位移，派給抽取任務的範圍就跟著錯。而錯開一頁通常仍與正確範圍重疊，於是它抽到「那一節的一部分」然後<b>回報成功</b> —— 沒有錯誤訊息。</p>
 <h4>目前的止血</h4>
-<p>第 ⑤ 關在派工前比對頁數，不符就擋下來。⚠️ 那只擋得住頁數變了的情況；頁數一樣但版面重排一樣會放行（見 ⑤）。</p></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine model"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">③a</span><span class="b-name">判斷有哪幾個大題</span><span class="b-tool">skill: lesson-overview-scan</span></div>
-        <div class="b-sub">讀完整份學習單，只回答「印了哪幾個大題」。<b>這是模型的第一個環節。</b></div>
-      </div>
-      <div class="tags"><span class="tag t-model">模型</span><span class="tag t-ok">穩</span><span class="tag t-warn">樣本小</span></div>
-    </summary>
-    <div class="detail"><h4>重跑一致率（同一份 PDF 跑三次）</h4>
-<div class="tablewrap"><table><thead><tr><th>量的東西</th><th>結果</th></tr></thead><tbody>
-<tr><td>大題數</td><td class="num">9 / 9 / 9</td></tr>
-<tr><td>序號＋名稱＋順序</td><td class="num ok">3/3 完全相同</td></tr>
-<tr><td>頁碼</td><td class="num warn">8/9 相同 — 一次答錯</td></tr>
-</tbody></table></div>
-<div class="note ok">結論很清楚：<b>「要派幾個任務出去」它答得穩，「每個讀哪幾頁」它答不穩。</b>所以頁碼不再問它 —— 交給 ③b，兩者在 ③c 合流。</div>
-<div class="note warn"><b>樣本只有 1 課 × 3 次。</b>文言文、多文本那些課型都還沒測過，不能當成全庫結論。</div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">③b</span><span class="b-name">算出各在第幾頁</span><span class="b-tool">scripts/build_section_pages.py</span></div>
-        <div class="b-sub">在 PDF 的文字層裡定位每個大題標題，用單調指派解出頁碼。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><h4>覆蓋</h4>
-<dl class="kv"><dt>定位到</dt><dd>1426 個大題</dd><dt>夾出來的</dt><dd>23 個（前後鄰居之間，標題沒印出來）</dd><dt>定位不到</dt><dd>0</dd></dl>
-<p>它修過兩個真實缺陷：<b>子字串吃掉</b>（「閱讀理解」被「綜合閱讀理解」比中，游標推過頭毀掉後面八節）與<b>散文提及被當標題</b>（交叉引用寫到大題名，用序號區分才判得出來）。所以任何地方要算頁碼都應該叫它，⛔ 不要另外實作一份。</p></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">③c</span><span class="b-name">橋接：把模型的答案交給腳本算</span><span class="b-tool">scripts/locate_scanned_sections.py</span></div>
-        <div class="b-sub">模型只交出大題清單，頁碼一律由 ③b 重算。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><div class="note ok"><b>三份不同的模型輸出 → 三份逐位元組相同的派工單。</b>模型飄，最終結果不飄 —— 這一關的存在意義就是這句話。</div>
-<p>驗證方式是把三次掃描（其中一次頁碼是錯的）分別餵進去，比對輸出檔的雜湊。錯的那次被修正成與決定性定位器一致。</p></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">④</span><span class="b-name">派工單</span><span class="b-tool">scripts/build_lesson_manifest.py</span></div>
-        <div class="b-sub">寫下這一課要派幾個抽取任務、各讀哪幾頁。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><h4>派工單記什麼</h4>
+<p>⑤ 在派工前比對頁數，不符就擋。⚠️ 只擋得住頁數變了的情況。</p>`},
+
+  {k:"3a", num:"③a", ttl:"判斷有哪幾個大題", kind:"model", badge:["ok","穩 · 樣本小"],
+   src:"skill: lesson-overview-scan",
+   fact:"跑 3 次 → 序號＋名稱＋順序 9/9 全同",
+   body:`<h4>重跑一致率（同一份 PDF 跑三次）</h4>
+<div class="tw"><table><thead><tr><th>量的東西</th><th>結果</th></tr></thead><tbody>
+<tr><td>大題數</td><td class="n">9 / 9 / 9</td></tr>
+<tr><td>序號＋名稱＋順序</td><td class="n g">3/3 完全相同</td></tr>
+<tr><td>頁碼</td><td class="n y">8/9 相同 — 一次答錯</td></tr></tbody></table></div>
+<div class="m g"><b>「要派幾個任務出去」它答得穩，「每個讀哪幾頁」它答不穩。</b>所以頁碼不問它 —— 交給 ③b 重算。</div>
+<div class="m y"><b>樣本只有 1 課 × 3 次。</b>文言文、多文本那些課型都還沒測過。</div>
+<h4>它與 ③b 的關係</h4>
+<p>新教材時大題名稱<b>只有它知道</b>，③b 要拿這份清單才定位得了 —— 所以是串接不是平行。既有 175 課的名稱在 <code>lesson.yml</code> 裡，③b 可以獨立跑。</p>`},
+
+  {k:"3b", num:"③b", ttl:"算出各在第幾頁", kind:"machine", badge:["ok","穩"],
+   src:"scripts/build_section_pages.py",
+   fact:"1426 定位 / 23 夾出 / 0 失敗",
+   body:`<h4>覆蓋</h4>
+<div class="tw"><table><tbody>
+<tr><td>定位到</td><td class="n">1426 個大題</td></tr>
+<tr><td>夾出來的</td><td class="n">23 個（標題沒印，用前後鄰居夾）</td></tr>
+<tr><td>定位不到</td><td class="n">0</td></tr></tbody></table></div>
+<p>它修過兩個真實缺陷：<b>子字串吃掉</b>（「閱讀理解」被「綜合閱讀理解」比中，游標推過頭毀掉後面八節）與<b>散文提及被當標題</b>（交叉引用寫到大題名，用序號區分才判得出來）。</p>
+<div class="m">要算頁碼一律叫它，⛔ 不要另外實作一份 —— 複製一份等於把那兩個 bug 放回來。</div>`},
+
+  {k:"3c", num:"③c", ttl:"橋接：頁碼交給腳本重算", kind:"machine", badge:["ok","穩"],
+   src:"scripts/locate_scanned_sections.py",
+   fact:"3 份不同輸入 → 3 份逐位元組相同的派工單",
+   body:`<div class="m g"><b>三份不同的模型輸出 → 三份逐位元組相同的派工單。</b>模型飄，最終結果不飄 —— 這一關的存在意義就是這句話。</div>
+<p>驗證方式是把三次掃描（其中一次頁碼是錯的）分別餵進去，比對輸出檔的雜湊。錯的那次被修正成與決定性定位器一致。</p>`},
+
+  {k:"4", num:"④", ttl:"派工單", kind:"machine", badge:["ok","穩"],
+   src:"scripts/build_lesson_manifest.py",
+   fact:"--check 已進持續整合",
+   body:`<h4>派工單記什麼</h4>
 <pre>sections              這課印了哪些大題
 dispatch              要出動哪幾個抽取任務
 dispatch_pages        每個任務讀哪幾頁
 pdf_pages             算頁碼時那份 PDF 有幾頁   ← ⑤ 靠它
 low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
-<p>寫檔是<b>全有或全無</b>：先全部算完，發現任何漂移就一份都不寫。之前是全寫完才報漂移，於是工作目錄留下一份用過期頁碼產的派工單 —— 而它看起來完全正常。</p></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑤</span><span class="b-name">派工前對帳</span><span class="b-tool">scripts/assert_pdf_matches_manifest.py</span></div>
-        <div class="b-sub">手上這份 PDF 的頁數 ≠ 派工單記的，就不派工。② 不穩的止血。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-warn">半套</span></div>
-    </summary>
-    <div class="detail"><div class="note warn"><b>它只比頁數，所以擋不住「頁數一樣但版面重排」。</b>實測 L0001 兩次轉檔都是 8 頁，但大題標題從 <code>三　語詞我最棒</code> 變成 <code>三 🅐 語詞我最棒</code> —— 這道門放行，而抽取範圍已經變了。</div>
-<h4>它擋得住的 / 擋不住的</h4>
-<div class="tablewrap"><table><thead><tr><th>情況</th><th>反應</th><th>對嗎</th></tr></thead><tbody>
-<tr><td>頁數不同</td><td class="num">擋下</td><td class="ok">✓ 正確</td></tr>
-<tr><td>頁數相同但版面重排</td><td class="num">放行</td><td class="crit">✗ 漏掉</td></tr>
-<tr><td>頁數不同但錨點都找得到</td><td class="num">擋下</td><td class="warn">✗ 其實可以執行</td></tr>
+<p>寫檔是<b>全有或全無</b>：先全部算完，發現任何漂移就一份都不寫。</p>
+<div class="m">之前是全寫完才報漂移，於是工作目錄留下一份用過期頁碼產的派工單 —— 而它看起來完全正常。</div>`},
+
+  {k:"5", num:"⑤", ttl:"派工前對帳", kind:"machine", badge:["warn","半套"],
+   src:"scripts/assert_pdf_matches_manifest.py",
+   fact:"只比頁數 —— 同頁數版面重排會放行",
+   body:`<div class="m y"><b>它只比頁數，擋不住「頁數一樣但版面重排」。</b>實測 L0001 兩次轉檔都是 8 頁，但標題從 <code>三　語詞我最棒</code> 變成 <code>三 🅐 語詞我最棒</code> —— 放行，而抽取範圍已經變了。</div>
+<div class="tw"><table><thead><tr><th>情況</th><th>反應</th><th>對嗎</th></tr></thead><tbody>
+<tr><td>頁數不同</td><td class="n">擋下</td><td class="g">✓ 正確</td></tr>
+<tr><td>頁數相同但版面重排</td><td class="n">放行</td><td class="r">✗ 漏掉</td></tr>
+<tr><td>頁數不同但錨點都找得到</td><td class="n">擋下</td><td class="y">✗ 其實可以執行</td></tr>
 </tbody></table></div>
 <h4>怎麼補</h4>
-<p><b>便宜的做法：</b>定位時把每一頁文字的雜湊存進派工單，派工前比對雜湊而不只是頁數。大約 20 行，用現有材料就做得到。</p>
-<p><b>根治：</b>架構複審的判斷是「頁碼這個抽象本身就錯」—— 頁碼是某次轉檔產物的座標，不是內容的身分。應該用<b>大題標題與邊界</b>當真相，頁碼只是對這份 PDF 的投影。代價是標題要能唯一化，而且要有「錨點解析失敗」的正式狀態（不准猜，一律擋）。</p></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine model"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑥</span><span class="b-name">N 個抽取任務各抽一個模組</span><span class="b-tool">skill: extract-&lt;module&gt;</span></div>
-        <div class="b-sub">每個任務只讀自己那幾頁、只產自己那一份 yml。<b>這是模型的第二個環節。</b></div>
-      </div>
-      <div class="tags"><span class="tag t-model">模型</span><span class="tag t-none">沒量過</span></div>
-    </summary>
-    <div class="detail"><div class="note"><b>重跑一致率完全沒量 —— 只跑過 1 課 1 次。</b>同一課同一模組派三個獨立任務、比對輸出，就會有數字。成本是六次模型抽取。</div>
-<h4>唯一一次實跑的結果（L0072 語詞我最棒）</h4>
-<div class="tablewrap"><table><thead><tr><th>檢查</th><th>結果</th></tr></thead><tbody>
-<tr><td>通過自己的 schema</td><td class="ok">0 未宣告欄位 · 0 缺必填</td></tr>
-<tr><td>題數</td><td class="num ok">5 / 5</td></tr>
-<tr><td>語詞框</td><td class="ok">逐項相同</td></tr>
-<tr><td>逐題完全相同</td><td class="num warn">3 / 5</td></tr>
-<tr><td>多抽到現有沒有的欄位</td><td class="ok">4 個</td></tr>
+<p><b>便宜：</b>定位時把每頁文字的雜湊存進派工單，派工前比雜湊而不只是頁數。約 20 行。</p>
+<p><b>根治：</b>架構複審的判斷是「頁碼這個抽象本身就錯」—— 它是某次轉檔產物的座標，不是內容的身分。應該用<b>大題標題與邊界</b>當真相，頁碼只是對這份 PDF 的投影。</p>
+<div class="m">代價：標題要能唯一化（重複標題、改字、全半形都會讓字串比對失效），而且要有「錨點解析失敗」的正式狀態 —— 不准猜，一律擋。</div>`},
+
+  {k:"fan", num:"⑤→⑥a", ttl:"扇出：9 個抽取任務", kind:"model", fan:true,
+   src:"dispatch_pages",
+   body:`<h4>L0072 這一課派出的 9 個</h4>
+<div class="tw"><table><thead><tr><th>大題</th><th>模組</th><th>讀哪幾頁</th><th>見證對帳</th></tr></thead><tbody>
+<tr><td>一 讀全文-做記號</td><td class="n">full_text_annotate</td><td class="n">p1-2</td><td>—</td></tr>
+<tr><td>二 念順順</td><td class="n">key_reading</td><td class="n">p2-3</td><td>—</td></tr>
+<tr><td>三 語詞我最棒</td><td class="n">vocab_definitions</td><td class="n">p3</td><td class="g">適用</td></tr>
+<tr><td>四 語詞應用</td><td class="n">vocab_application</td><td class="n">p3-4</td><td class="g">適用</td></tr>
+<tr><td>五 文章重點表</td><td class="n">keypoints</td><td class="n">p4-5</td><td>—</td></tr>
+<tr><td>六 閱讀聚光燈</td><td class="n">spotlight</td><td class="n">p5-7</td><td>—</td></tr>
+<tr><td>七 閱讀理解</td><td class="n">comprehension</td><td class="n">p7-8</td><td class="g">適用</td></tr>
+<tr><td>八 詞語複習</td><td class="n">vocab_review</td><td class="n">p8-9</td><td>—</td></tr>
+<tr><td>九 知識補給站</td><td class="n">resources</td><td class="n">p9</td><td>—</td></tr>
 </tbody></table></div>
-<div class="note ok">那 2 題的差異查了原稿：<b>是現有已入庫的資料吃掉了數字前後的空格</b>，新抽的才對。也就是說模型的輸出比既有資料更忠實。</div>
+<div class="m"><b>只有 3 個適用見證對帳</b> —— 21 個模組裡只有 6 個有編號題目。其餘的內容不是題目（課文段落、重點表格、聚光燈 block、找字表），對它們喊「漏抽」是假警報。</div>
+<div class="m y">每個任務<b>只讀自己那幾頁</b>。實測 150 筆派工，<b>100% 的課至少與別的大題共用一頁</b> —— 所以每個任務都要自己切上下邊界。</div>
+<p>頁碼加起來大於總頁數是正常的：相鄰大題共用交界頁。</p>`},
+
+  {k:"6a", num:"⑥a", ttl:"N 個抽取任務各抽一模組", kind:"model", badge:["none","沒量過"],
+   src:"skill: extract-&lt;module&gt;",
+   fact:"重跑一致率沒量 —— 只跑過 1 課 1 次",
+   body:`<div class="m y"><b>重跑一致率完全沒量 —— 只跑過 1 課 1 次。</b>同一課同一模組派三個獨立任務、比對輸出，就會有數字。成本是六次模型抽取。</div>
+<h4>唯一一次實跑（L0072 語詞我最棒）</h4>
+<div class="tw"><table><thead><tr><th>檢查</th><th>結果</th></tr></thead><tbody>
+<tr><td>通過自己的 schema</td><td class="g">0 未宣告欄位 · 0 缺必填</td></tr>
+<tr><td>題數</td><td class="n g">5 / 5</td></tr>
+<tr><td>語詞框</td><td class="g">逐項相同</td></tr>
+<tr><td>逐題完全相同</td><td class="n y">3 / 5</td></tr>
+<tr><td>多抽到現有沒有的欄位</td><td class="g">4 個</td></tr></tbody></table></div>
+<div class="m g">那 2 題的差異查了原稿：<b>是現有已入庫的資料吃掉了數字前後的空格</b>，新抽的才對 —— 模型輸出比既有資料更忠實。</div>
 <h4>版面陷阱（跑 147 課撞出來的）</h4>
-<div class="tablewrap"><table><thead><tr><th>陷阱</th><th>實例</th></tr></thead><tbody>
+<div class="tw"><table><thead><tr><th>陷阱</th><th>實例</th></tr></thead><tbody>
 <tr><td>同份 Word 轉兩次標題會變</td><td>圈號跑進標題</td></tr>
 <tr><td>題號兩種寫法</td><td><code>(1)</code> 與 <code>（ A ）1.</code></td></tr>
 <tr><td>標題被拆成兩行</td><td>中間那行是別欄的內文</td></tr>
 <tr><td>續頁的題排在下個標題之後</td><td>雙欄文字順序如此</td></tr>
-<tr><td>一頁上一定有別的大題</td><td class="num">150 筆派工 · 100%</td></tr>
-</tbody></table></div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑥b</span><span class="b-name">見證對帳</span><span class="b-tool">extract_source_witnesses.py + witness_reconcile_gate.py</span></div>
-        <div class="b-sub">腳本先從原稿數出「有幾題」，抽完逐一對帳。<b>裁判整條鏈上沒有模型。</b></div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><h4>它解決的問題</h4>
-<pre>之前   抽取任務自己說「我看到 5 題，都抽了」
+<tr><td>一頁上一定有別的大題</td><td class="n">150 筆派工 · 100%</td></tr>
+</tbody></table></div>`},
+
+  {k:"6b", num:"⑥b", ttl:"見證對帳", kind:"machine", badge:["ok","穩"],
+   src:"extract_source_witnesses.py + witness_reconcile_gate.py",
+   fact:"147 課：377 對得上 / 42 看不了 / 1 真缺陷",
+   body:`<h4>它解決的問題</h4>
+<pre>之前   任務自己說「我看到 5 題，都抽了」
        那個 5 是它自己數的
        少看到 3 題、回報 3 題 → 所有門全綠
 
@@ -358,113 +385,121 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <h4>裁判自己也被校準過</h4>
 <p>拿 12 課已知答案的課去對。<b>第一版只有 7/12</b> —— 露餡後查出三個對版面的錯誤假設（標題後面可以有字、序號後空格超過八個、跨頁續頁不印標題被整頁跳過），修完 12/12。</p>
 <h4>147 課全跑</h4>
-<div class="tablewrap"><table><thead><tr><th>層級</th><th>結果</th></tr></thead><tbody>
-<tr><td>課：通過派工前檢查</td><td class="num">143 / 147</td></tr>
-<tr><td>模組：逐題對得上</td><td class="num ok">377</td></tr>
-<tr><td>模組：這道門看不了</td><td class="num warn">42（10%）</td></tr>
-<tr><td>模組：真缺陷</td><td class="num crit">1</td></tr>
+<div class="tw"><table><thead><tr><th>層級</th><th>結果</th></tr></thead><tbody>
+<tr><td>課：通過派工前檢查</td><td class="n">143 / 147</td></tr>
+<tr><td>模組：逐題對得上</td><td class="n g">377</td></tr>
+<tr><td>模組：這道門看不了</td><td class="n y">42（10%）</td></tr>
+<tr><td>模組：真缺陷</td><td class="n r">1</td></tr></tbody></table></div>
+<div class="m r"><b>抓到的真缺陷：</b>L0066 的語詞應用。原稿第 5 頁印著 <code>(8) 相似詞應用</code>，而 yml 只有 7 題 —— 第 8 題整題不在。schema 過、之前所有門都過，因為<b>沒有任何一道在問「來源上有幾題」</b>。</div>
+<div class="m y"><b>那 42 個不是 42 課壞掉</b> —— 是 419 個模組實例裡的 42 個，它們所在的頁面 pdftotext 還原不出閱讀順序。資料可能完全正確，只是這道門在那些頁上沒有判斷力。它誠實回「驗不了」，跟「通過」「抽錯了」三者分開。</div>
+<div class="m"><b>最險的一次：</b>錯亂偵測第一版太寬，差點把 L0066 那個真缺陷判成「驗不了」。分辨點是「標題後面有沒有第 1 題」。把正確資料判成壞的很糟，<b>把壞資料判成不可判更糟</b>。</div>`},
+
+  {k:"7a", num:"⑦a", ttl:"形狀門", kind:"machine", badge:["ok","穩"],
+   src:"schema × 24 · module_reconcile · render_coverage · orphan_key",
+   fact:"全庫 2019 份 yml · 0 不合",
+   body:`<div class="tw"><table><tbody>
+<tr><td>schema 覆蓋</td><td class="n">24 份，對全庫 2019 份 yml <b>0 不合</b></td></tr>
+<tr><td>誤殺</td><td class="n">0（收緊 item 層約束後對 150 課重驗）</td></tr></tbody></table></div>
+<div class="m">收緊之前，一份被砍成「1 題、空定義、無語詞框、無外層」的劣化輸出<b>三道門全綠</b>。成因三個疊在一起：<code>required</code> 只有 <code>items</code> 而 <code>items</code> 是裸陣列、自驗只比鍵名、語詞框缺席時回綠燈。</div>`},
+
+  {k:"7b", num:"⑦b", ttl:"內容忠實度門", kind:"gone", badge:["crit","建置中"],
+   src:"scripts/content_fidelity_attest.py",
+   fact:"逐字比對 + 證明機制 · 今天剛建",
+   body:`<h4>它守什麼</h4>
+<p>前面所有的門都在驗<b>形狀</b>。這一道驗<b>抄的字對不對</b>。</p>
+<div class="tw"><table><thead><tr><th>狀況</th><th>沒有它的話</th></tr></thead><tbody>
+<tr><td>原稿寫「對某件事提出疑問」，yml 寫「對事情有意見」</td><td class="r">全綠</td></tr>
+<tr><td>把甲課的解釋抄到乙課去</td><td class="r">全綠</td></tr>
+<tr><td>正解 A 抄成 B</td><td class="r">全綠</td></tr>
 </tbody></table></div>
-<div class="note crit"><b>抓到的真缺陷：</b>L0066 的語詞應用。原稿第 5 頁印著 <code>(8) 相似詞應用</code>，而 yml 只有 7 題 —— 第 8 題整題不在。schema 過、之前所有門都過，因為<b>沒有任何一道在問「來源上有幾題」</b>。</div>
-<div class="note warn"><b>那 42 個不是 42 課壞掉</b> —— 是 419 個模組實例裡有 42 個，它們所在的頁面 pdftotext 還原不出閱讀順序（三種模式都一樣）。資料可能完全正確，只是這道門在那些頁上沒有判斷力。它誠實回「驗不了」，跟「通過」「抽錯了」三者分開。</div>
-<div class="note"><b>最險的一次：</b>錯亂偵測第一版太寬，差點把 L0066 那個真缺陷判成「驗不了」。分辨點是「標題後面有沒有第 1 題」。把正確資料判成壞的很糟，<b>把壞資料判成不可判更糟</b> —— 後者會讓缺口靜靜溜過去。</div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑦</span><span class="b-name">形狀門</span><span class="b-tool">schema × 24 · module_reconcile · render_coverage · orphan_key …</span></div>
-        <div class="b-sub">欄位齊不齊、格式對不對、前端畫不畫得出來。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span><span class="tag t-ok">穩</span></div>
-    </summary>
-    <div class="detail"><dl class="kv"><dt>schema 覆蓋</dt><dd>24 份，對全庫 2019 份 yml <b>0 不合</b></dd><dt>誤殺</dt><dd>0（收緊 item 層約束後對 150 課重驗）</dd></dl>
-<div class="note">收緊之前，一份被砍成「1 題、空定義、無語詞框、無外層」的劣化輸出<b>三道門全綠</b>。成因三個疊在一起：<code>required</code> 只有 <code>items</code> 而 <code>items</code> 是裸陣列、自驗只比鍵名、語詞框缺席時回綠燈。</div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node" style="border-color:var(--crit)"></span></div>
-  <details class="block" style="border-color:var(--crit)">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑦</span><span class="b-name">內容忠實度門</span><span class="b-tool">—</span></div>
-        <div class="b-sub"><b>整層不存在。</b>沒有任何東西在檢查「抄的字對不對」。</div>
-      </div>
-      <div class="tags"><span class="tag t-crit">不存在</span></div>
-    </summary>
-    <div class="detail"><h4>會漏掉什麼</h4>
-<div class="tablewrap"><table><thead><tr><th>狀況</th><th>現有的門</th></tr></thead><tbody>
-<tr><td>原稿寫「對某件事提出疑問」，yml 寫「對事情有意見」</td><td class="crit">全綠</td></tr>
-<tr><td>把甲課的解釋抄到乙課去</td><td class="crit">全綠</td></tr>
-<tr><td>正解 A 抄成 B</td><td class="crit">全綠</td></tr>
+<h4>兩個信任區</h4>
+<pre>私有側（讀得到原稿）  跑逐字比對 → 產 attestation
+CI（讀不到原稿）      只驗「有證明嗎、雜湊對得上嗎」</pre>
+<p>證明綁死三個雜湊：<b>原稿</b>、<b>yml</b>、<b>判準版本</b>。任何一邊變了證明就失效 —— 不綁的話證明可以被回收利用到別的內容上，那比沒有更糟。</p>
+<h4>第一次跑（L0072）</h4>
+<div class="tw"><table><thead><tr><th>模組</th><th>受檢字串</th><th>結果</th></tr></thead><tbody>
+<tr><td>comprehension</td><td class="n">274</td><td class="g">✓</td></tr>
+<tr><td>spotlight</td><td class="n">354</td><td class="g">✓</td></tr>
+<tr><td>full_text_annotate</td><td class="n">104</td><td class="g">✓</td></tr>
+<tr><td>vocab_application</td><td class="n">104</td><td class="g">✓</td></tr>
+<tr><td>key_reading</td><td class="n">94</td><td class="g">✓</td></tr>
+<tr><td>keypoints</td><td class="n">84</td><td class="g">✓</td></tr>
+<tr><td>vocab_definitions</td><td class="n">74</td><td class="g">✓</td></tr>
+<tr><td>vocab_review</td><td class="n">54</td><td class="g">✓</td></tr>
+<tr><td>resources</td><td class="n">54</td><td class="y">誤報</td></tr>
+<tr><td><b>合計</b></td><td class="n"><b>1196</b></td><td></td></tr>
 </tbody></table></div>
-<p>唯一沾得上邊的是逐字門，但它要讀原稿 Word，而原稿在不進版控的目錄裡 —— <b>持續整合環境拿不到，所以它從沒在那裡跑過</b>。</p>
-<div class="note"><b>架構複審的建議：</b>切成兩個信任區。能讀原稿的私有執行器跑逐字比對並產出「證明」，綁定原稿雜湊、PDF 雜湊、yml 雜湊與門的版本；持續整合只驗「有沒有那份證明、雜湊對不對得上」。它的責任是「沒有證明就不能進」，不是自己重跑比對。</div></div>
-  </details>
-</div>
-<div class="row">
-  <div class="spine"><span class="node"></span></div>
-  <details class="block">
-    <summary>
-      <div>
-        <div class="b-head"><span class="b-id">⑧</span><span class="b-name">學生畫面</span><span class="b-tool">frontend</span></div>
-        <div class="b-sub">終點。</div>
-      </div>
-      <div class="tags"><span class="tag t-machine">腳本</span></div>
-    </summary>
-    <div class="detail"><p>前面所有的門加起來，保證的是「形狀對、沒有整題被靜默丟掉」。<b>不保證抄的字是對的</b> —— 那要等內容忠實度門。</p></div>
-  </details>
-</div>
-</div>
+<div class="m y"><code>resources</code> 那個是<b>誤報不是缺陷</b>：<code>url_source</code> 是我方記錄「這連結出自哪張總表」的溯源欄位，本來就不在原稿上。全庫 291 處，逐字門不該檢查它 —— 修正中。</div>
+<div class="m r"><b>還沒接進持續整合。</b>目前只跑過 1 課，175 課的證明都還沒產。</div>`},
 
-<section class="blk">
-  <h2 class="section-h">整條怎麼跑</h2>
-  <pre>python3 scripts/run_extraction_pipeline.py plan   --uid L0072
-#   ①②③④⑤ 全跑，任一步紅就停，最後印出「哪幾個任務讀哪幾頁」
-#
-#            ↓  中間是唯一的模型環節
-#
-python3 scripts/run_extraction_pipeline.py verify --uid L0072 --out &lt;產出目錄&gt;
-#   ⑥b + ⑦ 逐個模組跑，任一個沒過就非零退出</pre>
-  <p style="max-width:74ch;color:var(--ink-2);font-size:14px;margin:0">在這支之前，積木都做好了但<b style="color:var(--ink)">沒有任何東西把它們串起來</b> —— 流程只存在於文件的散文裡，而散文不會擋人。</p>
-</section>
+  {k:"8", num:"⑧", ttl:"學生畫面", kind:"machine", badge:["ok","—"],
+   src:"frontend",
+   fact:"終點",
+   body:`<p>前面所有的門加起來，保證的是「形狀對、沒有整題被靜默丟掉」。</p>
+<div class="m"><b>不保證抄的字是對的</b> —— 那是 ⑦b 的事，而它今天才剛建起來、還沒接進持續整合。</div>`},
+];
 
-<section class="blk">
-  <h2 class="section-h">固化程度</h2>
-  <div class="grid2">
-    <div class="card">
-      <h3>腳本與覆蓋</h3>
-      <dl class="kv">
-        <dt>scripts 總數</dt><dd>101 支</dd>
-        <dt>持續整合到得了</dt><dd>29 支（直接跑 10 · 經點名測試 19）</dd>
-        <dt>到不了</dt><dd>72 支（多為一次性建置腳本，非門）</dd>
-        <dt>決定性核心</dt><dd>19 支 · <b>零模型呼叫</b>（逐支查證）</dd>
-      </dl>
-    </div>
-    <div class="card">
-      <h3>模型行為的量測</h3>
-      <p>本輪之前<b>幾乎沒有</b>：四支名字叫 eval 的腳本裡，三支是純結構檢查，只有一支真的碰模型，而且都沒接進持續整合。</p>
-      <p>現在多了一支量重跑一致率的（它本身不呼叫模型，只做決定性比對）。⚠️ 但 ⑥ 那一層的一致率<b>仍然沒量</b>。</p>
-    </div>
-  </div>
-</section>
+const PLANES = ["一 讀全文-做記號","二 念順順","三 語詞我最棒","四 語詞應用",
+                "五 文章重點表","六 閱讀聚光燈","七 閱讀理解","八 詞語複習","九 知識補給站"];
 
-<section class="blk">
-  <h2 class="section-h">還沒做的，照急迫度</h2>
-  <div class="tablewrap"><table>
-    <thead><tr><th>#</th><th>要做的</th><th>為什麼是這個順序</th></tr></thead>
-    <tbody>
-      <tr><td class="num crit">1</td><td><b>內容忠實度門（⑦）</b></td><td>壞資料會以「成功」身分穿到學生面前。這是<b>完整性</b>失效，不是可用性失效 —— 而且學生端會把它放大成教學內容錯誤。</td></tr>
-      <tr><td class="num warn">2</td><td>量 ⑥ 的重跑一致率</td><td>不知道就等於不能信。成本是六次模型抽取。</td></tr>
-      <tr><td class="num warn">3</td><td>⑤ 從比頁數改成比每頁文字雜湊</td><td>把「頁數一樣但版面重排」那個洞補起來。約 20 行。</td></tr>
-      <tr><td class="num">4</td><td>那 42 個看不了的（#2868）</td><td>要嘛用文字座標自己重排版面，要嘛改讀 Word 的 XML。</td></tr>
-      <tr><td class="num">5</td><td>② 的根因</td><td>看起來最刺眼但<b>最不急</b> —— 它已經被 ⑤ 轉成大聲失敗，會擋住產出但不會悄悄送錯資料。</td></tr>
-    </tbody>
-  </table></div>
-</section>
+/* ── 畫圖 ── */
+const flow = document.getElementById('flow');
+const parts = [];
+STEPS.forEach((s, i) => {
+  if (i) parts.push('<div class="link"></div>');
+  if (s.fan) {
+    parts.push(
+      `<button class="fan" type="button" data-k="${s.k}">
+         <span class="cap">扇出 9 個抽取任務 · L0072</span>
+         <span class="row">${PLANES.map(p => `<em>${p}</em>`).join('')}</span>
+         <span class="open">點開看各讀哪幾頁 ▾</span>
+       </button>`);
+  } else {
+    const cls = s.kind === 'model' ? ' is-model' : s.kind === 'gone' ? ' is-gone' : '';
+    const [bk, bt] = s.badge;
+    parts.push(
+      `<button class="step${cls}" type="button" data-k="${s.k}">
+         <span class="badge b-${bk}">${bt}</span>
+         <span class="r1"><span class="num">${s.num}</span><span class="ttl">${s.ttl}</span></span>
+         <span class="src">${s.src}</span>
+         <span class="fact">${s.fact}</span>
+         <span class="open">點開 ▾</span>
+       </button>`);
+  }
+});
+flow.innerHTML = parts.join('');
 
-<footer>抽取管線體檢台 · 數字皆為實測，非估計 · 詳見 docs/prd/extraction-pipeline-map.md</footer>
-</div>
+/* ── 面板 ── */
+const panel = document.getElementById('panel');
+const scrim = document.getElementById('scrim');
+const byKey = Object.fromEntries(STEPS.map(s => [s.k, s]));
+
+function openPanel(k) {
+  const s = byKey[k];
+  if (!s) return;
+  panel.className = 'panel on' +
+    (s.kind === 'model' ? ' is-model' : s.kind === 'gone' ? ' is-gone' : '');
+  document.getElementById('pnum').textContent = s.num;
+  document.getElementById('ptitle').textContent = s.ttl;
+  document.getElementById('psrc').innerHTML = s.src;
+  document.getElementById('pbody').innerHTML = s.body;
+  panel.scrollTop = 0;
+  scrim.classList.add('on');
+  document.body.classList.add('open');
+}
+function closePanel() {
+  panel.classList.remove('on');
+  scrim.classList.remove('on');
+  document.body.classList.remove('open');
+}
+flow.addEventListener('click', e => {
+  const b = e.target.closest('[data-k]');
+  if (b) openPanel(b.dataset.k);
+});
+document.getElementById('px').addEventListener('click', closePanel);
+scrim.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+
 </body>
 </html>

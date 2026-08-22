@@ -669,3 +669,93 @@ def test_both_scrambling_shapes_are_covered():
     src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
     assert "earlier_bigger" in src, "缺第一種（序號更大的節排在前面）"
     assert "排在自己的標題之前" in src, "缺第二種（自己的題排在自己標題前）"
+
+
+# ---------------------------------------------------------------------------
+# 內容忠實度：Layer ⑥（#2865）
+#
+# 前面所有的門都在驗形狀。這一道驗「抄的字對不對」——
+# 在它之前，把甲課的解釋抄到乙課、把正解 A 抄成 B，所有門都是綠的。
+# ---------------------------------------------------------------------------
+
+ATTEST = REPO / "scripts" / "content_fidelity_attest.py"
+FIDELITY = REPO / "specs" / "modules" / "fidelity"
+
+
+def _attest_mod():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("cfa", ATTEST)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_attestation_binds_all_three_hashes():
+    """證明必須綁死原稿、yml、判準版本三者。
+
+    少綁任何一個，證明就能被回收利用到不同的內容上 ——
+    那比沒有證明更糟，因為它看起來像有守。
+    """
+    src = ATTEST.read_text(encoding="utf-8")
+    for k in ("docx_sha256", "yaml_sha256", "gate_version"):
+        assert k in src, f"證明沒綁 {k}"
+
+
+def test_verify_rejects_changed_content(tmp_path):
+    """yml 改過之後證明要失效 —— 那才是「綁定」的意思。"""
+    m = _attest_mod()
+    real = sorted(FIDELITY.glob("L*.json"))
+    if not real:
+        pytest.skip("還沒有任何證明")
+    doc = json.loads(real[0].read_text(encoding="utf-8"))
+    uid = doc["uid"]
+    mod, rec = next(iter(doc["modules"].items()))
+    f = REPO / "backend" / "data" / "lessons" / uid / "v3" / f"{mod}.yml"
+    if not f.is_file():
+        pytest.skip(f"{mod}.yml 不見了")
+    # 正向對照：現在應該是有效的
+    assert m.sha(f) == rec["yaml_sha256"], "證明與現況已經對不上（先重產）"
+    # 負向：改一個位元組就該失效
+    original = f.read_bytes()
+    try:
+        f.write_bytes(original + b"\n# mutation\n")
+        assert m.sha(f) != rec["yaml_sha256"], "改了內容雜湊卻沒變 —— 綁定是假的"
+    finally:
+        f.write_bytes(original)
+
+
+def test_hashes_do_not_look_like_tokens():
+    """雜湊留 16 字元。
+
+    完整的 64 字元 sha256 會被 secret 掃描器判成 Azure / CircleCI /
+    Linode / LINE 的 token（實測一份證明觸發 62 次警報），
+    於是每次 commit 都要 bypass —— **而習慣 bypass 就是真 secret 溜進去的方式**。
+    """
+    m = _attest_mod()
+    assert m.HASH_CHARS <= 32, "雜湊太長，會被 secret 掃描器誤判"
+    for f in FIDELITY.glob("L*.json"):
+        import re as _re
+        long_runs = _re.findall(r"[A-Za-z0-9_\-]{20,}", f.read_text(encoding="utf-8"))
+        assert not long_runs, f"{f.name} 有看起來像 token 的長字串：{long_runs[:2]}"
+
+
+def test_url_source_is_excluded_but_passage_source_is_not():
+    """溯源註記不該進逐字門，但**不可以一律排除所有 `*_source`**。
+
+    `url_source`（291 處）是我方記「這連結出自哪張總表」—— 原稿沒有這行字。
+    `passage_source` 是「（本文出自國立編譯館）」—— 那是原稿印的出處註記，該檢查。
+    一律排除等於把該驗的也放掉。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("vg", REPO / "scripts" / "verbatim_gate.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert "url_source" in m.ANNOTATION_KEYS
+    assert "passage_source" not in m.ANNOTATION_KEYS, \
+        "passage_source 是原稿印的出處，不可以排除"
+
+
+def test_zero_checked_strings_is_not_a_pass():
+    """「一個字串都沒被檢查」不是通過，是沒驗到。"""
+    src = ATTEST.read_text(encoding="utf-8")
+    assert "受檢 0" in src or "total == 0" in src, "沒有處理『零受檢』的情況"

@@ -122,6 +122,12 @@ ANNOTATION_KEYS = frozenset({
     "type", "index", "idx", "grid_size", "bind", "id", "recommend_range",
     "kind", "why", "confidence", "evidence", "corrected", "errata_ref",
     "drive_file_id", "drive_path", "pdf_pages", "pages_read",
+    # `url_source` 是我方記「這個影片連結出自哪張總表」的溯源註記
+    # （全庫 291 處，例：「總表0816『4.影片連結』年級9課次16」）——
+    # 原稿上根本沒有這行字，拿它去逐字比對必然對不上。
+    # ⚠️ 但**不要**把所有 `*_source` 一起排除：`passage_source`
+    # 是「（本文出自國立編譯館）」，那是原稿印的出處註記，該檢查。
+    "url_source",
     "section", "locator", "end", "label", "left_header", "right_header",
     "columns", "unit", "attached_to", "marker", "duration", "name",
 })
