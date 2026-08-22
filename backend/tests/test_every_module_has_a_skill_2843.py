@@ -172,3 +172,48 @@ def test_skills_that_claim_a_real_run_say_which_lesson():
         assert re.search(r"L\d{4}", section), (
             f"{d.name} 宣稱實跑過，但實跑那一段裡沒有課號 —— 無法重跑確認"
         )
+
+
+def test_every_skill_has_a_run_record():
+    """每一支 skill 都要有實跑紀錄，⛔ 不可以再有「尚未實跑」。
+
+    2026-08-23 之前 22/25 支標著「尚未實跑」—— 那些 skill 裡的數字全是
+    「對現有語料的統計」，不是「照這份 skill 做會抽出什麼」。
+
+    ⚠️ 這條鎖的是「**有沒有跑過**」，不是「跑得好不好」。全庫重抽對帳綠
+    只代表**現有 yml 的逐字欄位**跟原稿一致；它不驗判斷型欄位、
+    也不驗「該有的東西在不在」。`extract-vocab-definitions` 就是活例：
+    全庫 150/150 綠，但逐題重抽 L0011 掉了一個頓號 ——
+    **綠的是資料，不是 skill。**
+    """
+    stale = []
+    for d in sorted(SKILLS.glob("extract-*")):
+        src = (d / "SKILL.md").read_text(encoding="utf-8")
+        if d.name in ("extract-module", "extract-lesson-multimodal"):
+            continue          # 骨架與舊的整包抽取器，不是模組 skill
+        if "本身沒有實跑紀錄" in src:
+            continue          # 三支薄轉接，實跑看它指到的那份
+        # ⚠️ 判準只看**有沒有實跑紀錄段**，不看散落的「尚未實跑」四個字 ——
+        #    第一版兩個條件都查，結果被自己新寫的說明句咬到：
+        #    「在這之前這支標著『尚未實跑』——」裡面就有那四個字，
+        #    於是 19 支剛寫好紀錄的 skill 全被判成沒寫。判準太寬。
+        has_record = any(
+            ln.lstrip("#").strip().startswith(("實跑紀錄", "🔴 實跑紀錄",
+                                               "首次實跑紀錄", "🔴 首次實跑紀錄"))
+            for ln in src.split("\n") if ln.startswith("#")
+        )
+        if not has_record:
+            stale.append(d.name)
+    assert not stale, f"{len(stale)} 支還沒有實跑紀錄：{stale}"
+
+
+def test_the_dryrun_harness_is_honest_about_what_it_does_not_check():
+    """重抽對帳器必須寫明它**不驗什麼**。
+
+    ⛔ 一支只驗逐字的工具，如果讀的人以為它驗了全部，那比沒有更危險 ——
+    「23 個模組全綠」會被當成「抽取沒問題」。
+    """
+    src = (REPO / "scripts" / "skill_dryrun_diff.py").read_text(encoding="utf-8")
+    assert "不是**完整的抽取器" in src or "不是完整的抽取器" in src, \
+        "沒寫明它不是完整抽取器"
+    assert "一個字串都沒被檢查" in src, "沒有『0 受檢不算通過』的護欄"

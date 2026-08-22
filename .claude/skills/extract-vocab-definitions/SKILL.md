@@ -281,6 +281,7 @@ BLOCKED: manifest 說 vocab_definitions 在第 3 頁，但第 3 頁上沒有「�
 - ❌ 新開 top-level key 放旁註（進 `notes`）
 
 
+<<<<<<< Updated upstream
 ## 🔴 首次實跑紀錄（2026-08-23，L0011）
 
 在這之前這支**從來沒有真的抽過一課** —— 上面所有數字都是「對現有 150 課的統計」。
@@ -299,6 +300,22 @@ BLOCKED: manifest 說 vocab_definitions 在第 3 頁，但第 3 頁上沒有「�
 
 四個都已寫進上面。
 
+### 另外：全庫重抽對帳（同日）
+
+`scripts/skill_dryrun_diff.py --module vocab_definitions` 對**全部 150 課**
+把每個逐字欄位從 DOCX 的 `<w:t>` 流重新取一次比對：
+
+```
+150 課 · 逐字一致 150 · 對不上 0 · 受檢 3548 字串
+```
+
+⚠️ **注意這裡的落差**：全庫重抽對帳是綠的，但逐題重抽 L0011 卻抽錯了一個頓號。
+差別在於重抽對帳是拿**現有 yml** 去對原稿（現有那份是對的），
+而逐題重抽是**我照 skill 重新產生一份**（我照著 `-layout` 讀，就掉了標點）。
+**綠的是資料，不是這份 skill。**
+
+
 ⚠️ **跑之前要先重算頁碼**：② 的排版不穩，新轉的 PDF 常跟算頁碼那份不同，
 ⑤ 會 fail-closed 擋住（L0011 第一次就被擋，第 1、3 頁指紋對不上）。
 先跑 `python3 scripts/build_section_pages.py --uid <UID>` 再 plan。
+=======
