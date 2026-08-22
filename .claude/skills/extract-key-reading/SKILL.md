@@ -33,13 +33,11 @@ description: 抽「念順順 / 重點朗讀」這一個模組。⚠️ 內容規
 
 1. **只讀派工單給你的那幾頁**（`sections[].pages`）。⛔ 不要「順便看一下別頁」——
    一頁上幾乎一定有別的大題（實測 150 筆派工，100% 的課至少與別的大題共用一頁）。
-2. **先確認手上這份 PDF 就是算頁碼那份**：
-   `python3 scripts/assert_pdf_matches_manifest.py --uid <UID> --pdf <PDF>`
-   ⛔ exit 非 0 就不要開始 —— 頁碼會整體位移，而抽取器讀到一半仍會回報成功。
+2. **先確認手上這份 PDF 就是算頁碼那份**（`assert_pdf_matches_manifest.py`）——
+   ⛔ 非 0 不要開始，頁碼會整體位移而抽取器仍會回報成功。
 3. **抽完過自己的 schema**：`specs/modules/schemas/key_reading.schema.json`
    （`additionalProperties: false`，沒宣告的欄位會被擋）。
-4. **判不出來就 `needs_review: true`**，⛔ 不要猜一個看起來合理的填進去。
-   寧 🟡 不假 🟢 —— 假綠會讓錯的內容以「通過」的身分穿到學生面前。
+4. **判不出來就 `needs_review: true`** —— 寧 🟡 不假 🟢，⛔ 不要猜一個合理的填進去。
 
 ## 收尾
 
@@ -48,8 +46,8 @@ python3 scripts/witness_reconcile_gate.py --uid <UID> --module key_reading \
   --pdf <PDF> --section <大題名> --yaml <產出>
 ```
 
-⚠️ 這道門只對**題號型**模組有意義。`key_reading` 不在 `NUMBERED_MODULES` 裡時
-它會回「不適用」——那**不代表內容被驗過**，內容要靠逐字忠實度門：
+⚠️ `key_reading` 不在 `NUMBERED_MODULES` 裡，這道門會回「不適用」——
+那**不代表內容被驗過**。內容靠逐字忠實度門：
 
 ```bash
 python3 scripts/content_fidelity_attest.py --uid <UID> --docx <原稿>
@@ -83,3 +81,9 @@ python3 scripts/content_fidelity_attest.py --uid <UID> --docx <原稿>
 ⚠️ 真正逐題重抽過的只有 `extract-vocab-definitions`（L0011），
 而那一次就撞出四個本文沒寫的東西，其中一個是真的抽錯
 （兩欄折行處掉了一個頓號）。**統計綠 ≠ 抽得出來。**
+
+## ⚠️ 少了 `passage` 等於沒做
+
+2026-08-23 實跑 L0011 漏掉它，而八道門全綠。
+`lesson_uid_loader` 沒有 passage 就丟掉整個模組，學生那一步直接不見。
+細節在 `lesson-reading-pipeline`。

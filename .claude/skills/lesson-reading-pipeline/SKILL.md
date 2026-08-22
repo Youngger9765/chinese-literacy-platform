@@ -303,3 +303,16 @@ withheld 53         no_anchor 28（該課本來就沒有念順順，不是失敗
 | `docs/curriculum/key-reading-needs-review.md` | 自動產生的待人工確認清單 |
 | `frontend/src/utils/fluencyAnalyzer.ts` | `reading_benchmark` 的既有前端契約（兩種單位） |
 | issues | #2712 長度、#2720 取錯段、#2722 字數目標、#2724/#2725 只有目標沒段落、#2726 二修章節（已遷入本檔） |
+
+## 🔴 實跑撞到（2026-08-23，L0011）：只抽了一半
+
+第一次用新分派架構完整抽 L0011 時，這個模組**計時表、量尺、benchmark 都對，
+但課文段落本身（`passage`）沒抽** —— 而那正是它存在的理由。
+
+⚠️ **沒有任何一道門擋下來**：schema 的 `required` 不要求 `passage`、
+逐字門只驗「有寫的部分抄得對不對」、派工單只說「這支讀 p2-3」。
+八道門全綠，而學生會拿到一個沒有課文的朗讀步驟。
+
+⇒ 抽之前先問：**這個模組少了哪一欄就等於沒做？** 這裡是 `passage`。
+（`lesson_uid_loader` 也是這樣判的：`if not kr.get("passage"): lesson.pop("key_reading")`
+—— 沒有 passage 的話整個模組會被丟掉，學生那一步直接不見。）
