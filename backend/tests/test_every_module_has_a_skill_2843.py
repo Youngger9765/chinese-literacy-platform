@@ -125,3 +125,50 @@ def test_the_three_new_skills_state_their_measured_scale(name):
     assert "尚未實跑" in src, f"{name} 沒有誠實標明還沒真的跑過"
     assert "/ 175 課" in src or "/ 175" in src or "175 課" in src, \
         f"{name} 沒寫涵蓋幾課"
+
+
+def test_the_first_real_run_is_recorded():
+    """⑤ 的洞：這套 skill 從來沒真的抽過一課，而 skill 裡的數字全是
+    「對現有語料的統計」不是「我用它抽出來的結果」。
+
+    2026-08-23 拿 L0011 對 `extract-vocab-definitions` 實跑第一次 ——
+    11 題全中，但撞出四個那份沒寫的東西，其中一個是**真的抽錯**
+    （兩欄折行處掉了一個頓號，逐字門抓到）。
+
+    這條鎖住那份紀錄不被改回「尚未實跑」。⛔ 一支 skill 標著實跑過、
+    內容卻沒有任何實跑撞出來的東西，比標「尚未實跑」更糟 ——
+    讀的人會以為它驗證過了。
+    """
+    src = (SKILLS / "extract-vocab-definitions" / "SKILL.md").read_text(encoding="utf-8")
+    assert "首次實跑紀錄" in src, "實跑紀錄不見了"
+    assert "L0011" in src, "沒寫是拿哪一課跑的"
+    assert "頓號" in src, "沒寫實跑撞出來的那個真錯誤"
+    assert "尚未實跑" not in src, "又標回尚未實跑了"
+
+
+def test_skills_that_claim_a_real_run_say_which_lesson():
+    """標了實跑就要寫出**拿哪一課跑的**。
+
+    ⛔ 「已實跑」三個字本身不是證據 —— 沒有課號就沒有人能重跑確認。
+    """
+    import re
+    for d in sorted(SKILLS.glob("extract-*")):
+        src = (d / "SKILL.md").read_text(encoding="utf-8")
+        if "尚未實跑" in src or "本身沒有實跑紀錄" in src:
+            continue
+        # ⚠️ 判準收窄過兩次，兩次都是**太寬**：
+        #    ① 「檔案裡有沒有任何 L####」—— 這些 skill 本文常引用一堆課號
+        #       當例子，把實跑那一段的課號拿掉，斷言照樣綠（mutation 沒咬）
+        #    ② 「提到『實跑』就算宣稱跑過」—— 骨架 extract-module 只是在
+        #       註解裡提到「第一次實跑才發現」，被判成宣稱，基線就紅
+        #    現在的規則：**寫了實跑紀錄段，就要在那一段裡寫出課號。**
+        idx = src.find("實跑紀錄")
+        if idx < 0:
+            continue
+        # ⚠️ 只查「檔案裡有沒有任何 L####」太寬 —— 這些 skill 本文常引用一堆
+        #    課號當例子（L0083 / L0137 …），於是把實跑那一段的課號拿掉，
+        #    斷言照樣綠（mutation 實測沒咬）。收窄到**實跑那一段之內**。
+        section = src[idx:]
+        assert re.search(r"L\d{4}", section), (
+            f"{d.name} 宣稱實跑過，但實跑那一段裡沒有課號 —— 無法重跑確認"
+        )
