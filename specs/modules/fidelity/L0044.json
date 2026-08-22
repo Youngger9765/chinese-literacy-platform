@@ -1,0 +1,21 @@
+{
+  "uid": "L0044",
+  "gate_version": 1,
+  "docx_sha256": "6f4c-81c3-4257-f8fe",
+  "modules": {
+    "full_text_annotate": {
+      "yaml_sha256": "eefc-af26-0937-5726",
+      "checked": 9,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight": {
+      "yaml_sha256": "7664-591d-6974-13b1",
+      "checked": 180,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

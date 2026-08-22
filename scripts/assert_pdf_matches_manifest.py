@@ -31,6 +31,7 @@ exit 2 = 材料不齊（沒有派工單／沒有 pdf_pages／讀不到 PDF）—
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import pathlib
 import re
 import subprocess
@@ -65,11 +66,60 @@ def pdf_page_count(pdf: pathlib.Path) -> int | None:
     return n or None
 
 
+def _compare_prints(uid: str, pdf: pathlib.Path, manifest: dict,
+                    db_path: pathlib.Path | None = None) -> int | None:
+    """比對每一頁的文字指紋。回 None = 這課沒存指紋（舊資料），跳過不擋。
+
+    ⚠️ 「沒存指紋」與「指紋不符」必須分開。舊的 section-pages.yml 沒有這個欄位，
+    把它當成不符會讓每一課都紅 —— 那道門紅久了就等於沒有。
+    """
+    # `db_path` 可覆寫，只為了讓正向對照在 CI 也跑得到 —— CI 沒有 private/，
+    # 生不出「指紋真的對得上」的 PDF，於是「exit 0 到不到得了」永遠沒被證明過。
+    # ⛔ 沒有正向對照的話，下面每一個「擋住」都可能只是腳本壞了。
+    db_path = db_path or REPO / "specs" / "modules" / "section-pages.yml"
+    if not db_path.is_file():
+        return None
+    try:
+        db = yaml.safe_load(db_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError:
+        return None
+    entry = (db.get("lessons") or {}).get(uid) or {}
+    want = entry.get("page_prints")
+    if not isinstance(want, list) or not want:
+        return None   # 這課還沒存指紋
+
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "bsp", REPO / "scripts" / "build_section_pages.py")
+        bsp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bsp)
+        got = [bsp.page_print(t) for t in bsp.page_texts(pdf)]
+    except Exception as exc:  # noqa: BLE001
+        # 算不出來要說出來，⛔ 不可以當成「比對過了」
+        print(f"⛔ 算不出這份 PDF 的頁面指紋（{exc}）—— 不派工", file=sys.stderr)
+        return 2
+
+    if len(got) != len(want):
+        print(f"🔴 {uid} 手上這份 PDF 有 {len(got)} 頁，派工單記了 {len(want)} 頁的指紋。")
+        print("   ⛔ 不要派工。")
+        return 1
+
+    diff = [i + 1 for i, (a, b) in enumerate(zip(got, want)) if a != b]
+    if diff:
+        print(f"🔴 {uid} 頁數相同（{len(got)} 頁）但**第 {diff} 頁的內容跟算頁碼時不一樣**。")
+        print("   同一份 DOCX 轉兩次版面會變（實測 55/45），切節結果會跟著變。")
+        print("   ⛔ 不要派工。重跑 scripts/build_section_pages.py 更新派工單。")
+        return 1
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--uid", required=True)
     ap.add_argument("--pdf", required=True)
     ap.add_argument("--version", default=None, help="預設取最新的 v* 目錄")
+    ap.add_argument("--db", type=pathlib.Path, default=None,
+                    help="覆寫 section-pages.yml 的位置（測試正向對照用）")
     args = ap.parse_args()
 
     uid_dir = REPO / "backend" / "data" / "lessons" / args.uid
@@ -105,6 +155,10 @@ def main() -> int:
         print(f"⛔ 數不出 {pdf.name} 的頁數（pdfinfo 沒裝且 fallback 也失敗）—— 不派工")
         return 2
 
+    # ⚠️ 頁數不符先短路 —— 那一關只靠 raw bytes 的 regex，不需要 poppler。
+    #    把指紋放在它前面的話，沒裝 pdftotext 的環境（CI）一律回 2
+    #    「算不出來」，於是「差一頁要擋」那條測試在 CI 裡永遠測不到東西。
+    #    先答得出來的先答，是通則。
     if actual != expected:
         print(
             f"🔴 {args.uid} 手上這份 PDF 是 {actual} 頁，派工單是對 {expected} 頁那份算的。\n"
@@ -112,6 +166,14 @@ def main() -> int:
             "   ⛔ 不要派工。重轉一次，或重跑 scripts/build_section_pages.py 更新派工單。"
         )
         return 1
+
+    # ── 頁數對得上之後，再比每一頁的文字指紋（#2865）─────────────────
+    # 頁數一樣不代表版面一樣。實測 L0001 兩次轉檔都是 8 頁，但標題從
+    # 「三　語詞我最棒」變成「三 🅐 語詞我最棒」—— 只比頁數會放行，
+    # 而那份 PDF 的切節結果已經不同了。
+    prints_verdict = _compare_prints(args.uid, pdf, manifest, args.db)
+    if prints_verdict is not None:
+        return prints_verdict
 
     print(f"✅ {args.uid} PDF {actual} 頁，與派工單一致")
     return 0

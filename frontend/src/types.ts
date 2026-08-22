@@ -57,6 +57,19 @@ export interface VocabItem {
 export interface FillInBlankItem {
   sentence: string;
   answer: string;  // letter code e.g. "A", "B"
+  /**
+   * 這一題自己的選項組（語詞應用底下的「子練習」用）。
+   *
+   * 🔴 沒有它的話，◎牛刀小試 / ◎詞義辨識 / 相似詞應用 這些子練習
+   * 只能沿用整課的 A–G，而它們的選項**自成一組**（肆虐/蔓延、
+   * 事半功倍/事倍功半、象徵/意味著/代表）—— 沿用等於做出一個
+   * 學生永遠答不對的題目。後端 `_sub_exercise_cloze` 產生它。
+   *
+   * 沒有這個欄位時就用整課的 vocabBank，跟以前一樣。
+   */
+  options?: Record<string, string>;
+  /** 子練習的標題（◎牛刀小試…）。只用來顯示，不影響判分。 */
+  _sub_exercise?: string;
 }
 
 // ⑦ 閱讀理解選擇題 (#615)

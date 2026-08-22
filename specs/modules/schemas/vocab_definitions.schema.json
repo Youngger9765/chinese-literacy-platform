@@ -18,7 +18,57 @@
     },
     "items": {
       "type": "array",
-      "x-seen-in": "150/150"
+      "x-seen-in": "150/150",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "index"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "definition"
+            ],
+            "properties": {
+              "definition": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "word"
+                ],
+                "properties": {
+                  "word": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "answer"
+                ],
+                "properties": {
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "required": [
+              "stem",
+              "options"
+            ]
+          }
+        ]
+      }
     },
     "label": {
       "type": "string",

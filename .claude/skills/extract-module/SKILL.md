@@ -46,6 +46,12 @@ description: 抽單一模組的骨架 skill —— 照派工單只讀自己那�
 
 ## 2. 答案紀律（沿用 `ai-lesson-extract`，這是最重要的一段）
 
+> 🔴 **§2.1 對「模組自己已有既定形狀」的模組不適用**（#2865 裁決）。
+> 例：`vocab_definitions` 的 `word` **就是** §2.1 講的 `answer`（space=text、grader=exact），
+> ⛔ 不要另外生 `answer_space` / `grader` 三個欄位 —— 150 課、schema、既有資料全都沒有它們，
+> 而 §3 鐵律 2 又說不准發明欄位名。**模組 skill 的形狀優先於這一節。**
+> §2.1 管的是**新設計的作答型別**（如新的互動題），不是回頭改既有模組。
+
 ### 2.1 答案不變量 —— 鐵律，`custom` 也不豁免
 
 每一個要學生作答的東西都必須帶：
@@ -112,6 +118,19 @@ grader        ∈ exact / set / ordered / rubric_ai / manual（且 space ↔ gra
 輸出:
   backend/data/lessons/<uid>/v3/<module>.yml    ← 恰好一個檔
 
+  ⚠️ **外層是固定的，schema 不管它**（#2865，第一次實跑才發現沒人寫過）：
+
+  ```yaml
+  lesson_uid: L0072      # 三個都要
+  version_id: v3
+  section_no: 三          # 這一節在學習單上的序號（漢字，見 test_section_no_is_hanzi_2843）
+  <module>:              # ← schema 只驗這底下
+    …
+  ```
+
+  ⛔ 少了外層會產出「裸 body」，而**四道門全部照樣綠** ——
+  第一架飛機是偷看既有檔的鍵名才知道要包，真正的新課沒有既有檔可看。
+
 失敗:
   status: BLOCKED / PARTIAL + reason
   ⛔ 不產半套、不猜、不 fallback 到別課或舊版
@@ -136,6 +155,21 @@ L0016 從第 3 頁起每一節整體位移一頁（語詞我最棒 [3] → [4]�
 ⛔ **最糟的不是會錯，是不會喊**：span 含下一節的起始頁，位移一頁通常仍有重疊，
 飛機會找到自己那一節的**一部分**、然後回報成功。靜默截斷，五條鎖沒有一條看得到。
 
+### 🔴 版面陷阱（跑 30 課真課撞出來的，每一個都不會有症狀）
+
+抽的時候會遇到，判斷邊界時要記得：
+
+| 陷阱 | 實例 | 為什麼危險 |
+|---|---|---|
+| 同一份 DOCX 轉兩次，標題會變 | `三 語詞我最棒` → `三 🅐 語詞我最棒` | 兩份都是 8 頁，⑤ 放行 |
+| 題號兩種寫法 | `(1) 質疑：…` vs `（ A ）1. 下列…` | 只認一種，整節數到 0 |
+| 標題被拆成兩行 | 第 19 行只有「七」，名稱在第 21 行 | 中間那行是**別欄的內文** |
+| 續頁的題排在下一個標題**之後** | L0022 p4：標題在第 1 行、第 8 題在第 4 行 | 雙欄排版下文字順序就是這樣 |
+| 一頁上一定有別的大題 | 實測 150 筆派工，**100%** | 不分節就把隔壁的算進來 |
+
+⇒ **收尾時逐條自問「這一條真的屬於我這一節嗎」**，上下緣都要切。
+判不掉就 `needs_review`，⛔ 不要猜。
+
 ### 三條鐵律
 
 **0b. 先看自己在不在 `low_confidence_pages` 裡。** 在的話，你的頁碼是用前後鄰居
@@ -149,6 +183,11 @@ L0016 從第 3 頁起每一節整體位移一頁（語詞我最棒 [3] → [4]�
 **2. 輸出必須通過自己的 schema**，產完立刻自驗：
 
 ```bash
+# ⚠️ 在 repo root 跑（下面是相對路徑），這兩個變數自己先設好 —— 沒設會炸在
+# 'specs/modules/schemas/.schema.json'（至少不是靜默，但別浪費那一次）
+MODULE=<你的模組名>
+OUT=backend/data/lessons/<uid>/v3/$MODULE.yml
+
 python3 -c "
 import json,yaml,sys
 s=json.load(open('specs/modules/schemas/$MODULE.schema.json'))
@@ -160,6 +199,24 @@ sys.exit(1 if (extra or missing) else 0)"
 
 ⛔ **不准為了過門發明欄位名。** 需要新欄位是先改 schema 並在 PR 說明，不是偷偷加 ——
 那正是 597 種 key-shape 的成因。
+
+**2b. 抽完必跑見證對帳** —— 這道門問的是「來源上有幾題，你交了幾題」：
+
+```bash
+# 單獨驗自己這一架：
+python3 scripts/witness_reconcile_gate.py \
+  --uid <uid> --module <module> --pdf <你讀的那份 PDF> \
+  --section <大題名稱> --yaml <你的產出>
+
+# 一整課全部交件之後（航母跑）：schema + 見證對帳，逐個模組
+python3 scripts/run_extraction_pipeline.py verify --uid <uid> --out <產出目錄>
+```
+
+⛔ **不是可選的。** 在它之前，飛機自己說「我看到 5 題，都抽了」——
+那個 5 是它自己數的，少看到 3 題、回報 3 題，schema 一樣全綠。
+這道門的見證清單由 `extract_source_witnesses.py` 從原稿數，**LLM 碰不到**。
+
+它**不**證明內容抄對了（那是逐字門的事），只證明沒有整題被靜默丟掉。
 
 **3. 註解寫進 `notes: {}`**，不要開新 top-level key。
    每課發明一個 `char_count_note` 就是形狀爆炸的來源（#2843 收攏過一次，別長回來）。
@@ -186,6 +243,7 @@ skill 只負責骨架。
 2. **只寫那個模組專屬的 know-how**。⛔ 骨架部分不要複製貼上 ——
    寫出來若跟隔壁 90% 一樣，是這份骨架沒抽乾淨，回頭改這裡
 3. 確認 `specs/modules/section-to-module.yml` 有對應的大題名
+   ⚠️ 派工單裡那個鍵叫 **`sections`**，不是 `sections_present`（後者是 `lesson.yml` 的鍵）—— 寫錯會印出空白，不會報錯
 4. 跑對帳門：`python3 scripts/module_reconcile_gate.py --uid <uid>`
 
 ### 各模組該寫什麼（示意，實際從真實錯誤長出來）

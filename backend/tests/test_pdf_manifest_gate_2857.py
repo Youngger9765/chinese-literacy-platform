@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import pathlib
+import shutil
 import subprocess
 import sys
 
@@ -71,11 +72,94 @@ def expected_pages() -> int:
     return n
 
 
-def test_matching_page_count_passes(tmp_path, expected_pages):
-    """正向對照 —— 沒有這條，下面的『擋住』可能只是腳本整支壞了。"""
+# 2026-08-22：⑤ 從「只比頁數」升級成「比每頁文字指紋」。
+# 合成的空白 PDF 頁數對得上，但文字對不上 —— **新門本來就該擋**，
+# 那正是升級要抓的東西（L0072 兩份都 9 頁、第 3 頁不同）。
+# 所以正向對照換一課：`L0028` 有派工單但還沒存指紋，走的是「舊資料只比頁數」
+# 那條路 —— ⛔ 這條不可以拿掉：沒有它，下面每一個「擋住」都可能只是腳本壞了。
+UID_NO_PRINTS = "L0028"
+
+# 指紋那兩條真的需要 poppler。沒裝時門會回 2「算不出這份 PDF 的指紋」——
+# 那是正確的 fail-closed，但測不到東西。
+# ⚠️ 所以 `.github/workflows/pytest.yml` 必須裝 poppler-utils，
+#    否則它們會在 CI 靜默 skip —— 而**被 skip 的對照等於沒有對照**。
+#    下面 `test_ci_installs_poppler` 鎖住那件事。
+needs_poppler = pytest.mark.skipif(
+    shutil.which("pdftotext") is None or shutil.which("pdfinfo") is None,
+    reason="沒有 poppler（pdftotext / pdfinfo）",
+)
+
+
+def _run_uid(uid: str, pdf: pathlib.Path) -> int:
+    return subprocess.run(
+        [sys.executable, str(GATE), "--uid", uid, "--pdf", str(pdf)],
+        cwd=REPO, capture_output=True, text=True, timeout=120,
+    ).returncode
+
+
+@needs_poppler
+def test_matching_fingerprints_pass(tmp_path):
+    """正向對照 —— 沒有這條，下面每一個『擋住』都可能只是腳本壞了。
+
+    CI 沒有 private/，生不出「指紋真的對得上」的真 PDF，所以這裡自己造一份：
+    合成 PDF → 用同一支 `page_print` 算出它的指紋 → 寫進臨時 DB → 門必須放行。
+    ⛔ 這條被 skip 掉就等於沒有正向對照。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsp", REPO / "scripts" / "build_section_pages.py")
+    bsp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bsp)
+
     pdf = tmp_path / "ok.pdf"
-    _make_pdf(pdf, expected_pages)
-    assert _run(pdf) == 0
+    _make_pdf(pdf, 3)
+    prints = [bsp.page_print(t) for t in bsp.page_texts(pdf)]
+    db = tmp_path / "section-pages.yml"
+    db.write_text(yaml.safe_dump(
+        {"lessons": {UID: {"pdf_pages": 3, "page_prints": prints}}},
+        allow_unicode=True), encoding="utf-8")
+
+    mf = REPO / "backend" / "data" / "lessons" / UID / "v3" / "_manifest.yml"
+    if not mf.is_file():
+        pytest.skip(f"{UID} 沒有派工單")
+    orig = yaml.safe_load(mf.read_text(encoding="utf-8")) or {}
+    if orig.get("pdf_pages") != 3:
+        # 派工單記的頁數不是 3 → 頁數那一關就會擋，測不到指紋這一關。
+        # 改用派工單自己的頁數重造。
+        n = orig.get("pdf_pages")
+        if not isinstance(n, int) or n <= 0:
+            pytest.skip(f"{UID} 的派工單沒有 pdf_pages")
+        _make_pdf(pdf, n)
+        prints = [bsp.page_print(t) for t in bsp.page_texts(pdf)]
+        db.write_text(yaml.safe_dump(
+            {"lessons": {UID: {"pdf_pages": n, "page_prints": prints}}},
+            allow_unicode=True), encoding="utf-8")
+
+    rc = subprocess.run(
+        [sys.executable, str(GATE), "--uid", UID, "--pdf", str(pdf), "--db", str(db)],
+        cwd=REPO, capture_output=True, text=True, timeout=120)
+    assert rc.returncode == 0, f"指紋對得上卻被擋：\n{rc.stdout}\n{rc.stderr}"
+
+    # 負向對照：只改一頁的指紋就要擋
+    bad = dict(yaml.safe_load(db.read_text(encoding="utf-8")))
+    bad["lessons"][UID]["page_prints"][0] = "dead-beef-0000"
+    db.write_text(yaml.safe_dump(bad, allow_unicode=True), encoding="utf-8")
+    rc2 = subprocess.run(
+        [sys.executable, str(GATE), "--uid", UID, "--pdf", str(pdf), "--db", str(db)],
+        cwd=REPO, capture_output=True, text=True, timeout=120)
+    assert rc2.returncode == 1, "改了一頁指紋卻放行 —— 這道門沒有在看"
+
+
+@needs_poppler
+def test_same_page_count_but_different_content_is_blocked(tmp_path, expected_pages):
+    """頁數一樣、內容不同 → 擋。這是 ⑤ 升級的全部意義。
+
+    舊版只比頁數，這種情況整批放行 —— 而那正是 ② 最常見的失敗形狀：
+    同一份 DOCX 轉兩次，頁數可能一樣但版面重排，派工單上的頁碼指向別頁。
+    """
+    pdf = tmp_path / "same-count.pdf"
+    _make_pdf(pdf, expected_pages)     # 頁數對，但是空白頁，文字指紋一定不同
+    assert _run(pdf) == 1
 
 
 def test_one_page_off_is_blocked(tmp_path, expected_pages):
@@ -141,3 +225,13 @@ def test_the_module_skill_tells_the_plane_to_check_it():
     """標記放進派工單但沒人叫飛機看 = 又一道沒插電的門。"""
     text = (REPO / ".claude" / "skills" / "extract-module" / "SKILL.md").read_text(encoding="utf-8")
     assert "low_confidence_pages" in text, "飛機的契約沒提到這個欄位"
+
+
+def test_ci_installs_poppler():
+    """CI 必須裝 poppler，⛔ 否則指紋那兩條會靜默 skip。
+
+    被 skip 的正向對照等於沒有正向對照 —— 而指紋是擋「版面重排」的唯一一道門，
+    它在 CI 裡零覆蓋的話，這整個升級只在我的機器上成立。
+    """
+    wf = (REPO / ".github" / "workflows" / "pytest.yml").read_text(encoding="utf-8")
+    assert "poppler-utils" in wf, "pytest workflow 沒裝 poppler-utils"

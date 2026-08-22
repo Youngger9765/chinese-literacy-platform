@@ -1,0 +1,84 @@
+{
+  "uid": "L0160",
+  "gate_version": 1,
+  "docx_sha256": "5e28-ac0b-5ff9-375e",
+  "modules": {
+    "classical_text": {
+      "yaml_sha256": "1d54-e0dd-dadb-5e8a",
+      "checked": 6,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "comprehension": {
+      "yaml_sha256": "a86c-abb7-5f43-6c61",
+      "checked": 36,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "cbe9-3aa2-d09c-0aaf",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box": {
+      "yaml_sha256": "93c2-cc56-d63d-3b81",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading": {
+      "yaml_sha256": "63bd-33a1-60a8-ddd9",
+      "checked": 7,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints": {
+      "yaml_sha256": "297a-a0e8-7c24-dc2c",
+      "checked": 11,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "modern_translation": {
+      "yaml_sha256": "86e8-fef9-1b0c-e487",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_challenge": {
+      "yaml_sha256": "17c0-c76a-c1fc-f002",
+      "checked": 34,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "sentence_matching": {
+      "yaml_sha256": "d70b-15f6-2d11-b282",
+      "checked": 26,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight": {
+      "yaml_sha256": "5618-5ebc-9bfb-1452",
+      "checked": 36,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "word_matching": {
+      "yaml_sha256": "bfd3-119c-79f7-f0f5",
+      "checked": 15,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

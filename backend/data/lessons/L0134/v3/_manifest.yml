@@ -21,17 +21,18 @@ sections:
   - 7
   - 8
   - 9
+  - 10
 - 'no': 三
   name: 知識補給站
   module: resources
   pages:
-  - 9
   - 10
 - 'no': 四
   name: 閱讀理解
   module: comprehension
   pages:
   - 10
+  - 11
 dispatch:
 - comprehension
 - full_text_annotate
@@ -48,10 +49,11 @@ absent_from_source:
 - vocab_application
 - vocab_definitions
 - vocab_review
-pdf_pages: 10
+pdf_pages: 11
 dispatch_pages:
   comprehension:
   - 10
+  - 11
   full_text_annotate:
   - 1
   - 2
@@ -59,7 +61,6 @@ dispatch_pages:
   - 4
   - 5
   resources:
-  - 9
   - 10
   spotlight:
   - 5
@@ -67,3 +68,4 @@ dispatch_pages:
   - 7
   - 8
   - 9
+  - 10

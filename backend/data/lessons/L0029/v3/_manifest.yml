@@ -51,11 +51,11 @@ sections:
   pages:
   - 10
   - 11
-  - 12
 - 'no': 二
   name: 知識補給站
   module: resources
   pages:
+  - 11
   - 12
   - 13
 - 'no': 三
@@ -145,12 +145,12 @@ dispatch_pages:
   - 5
   - 10
   - 11
-  - 12
   key_reading:
   - 5
   - 6
   - 13
   resources:
+  - 11
   - 12
   - 13
   spotlight:

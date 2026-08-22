@@ -12,7 +12,6 @@ sections:
   - 4
   - 5
   - 6
-  pages_source: bracketed
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
@@ -111,5 +110,3 @@ dispatch_pages:
   vocab_review:
   - 11
   - 12
-low_confidence_pages:
-- spotlight

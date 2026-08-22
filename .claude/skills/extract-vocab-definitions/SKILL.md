@@ -76,10 +76,31 @@ schema 過得了，逐字門也過得了，只有真的去看原稿的人會發�
 
 ```bash
 python3 .claude/skills/extract-vocab-definitions/verify_bank_coverage.py <uid>
+# 還沒落地的產出用 --root（#2865 加的）：
+#   … verify_bank_coverage.py <uid> --root <放 <uid>/v3/*.yml 的目錄>
+# ⛔ 不加 --root 它驗的是**既有那份** —— 那個綠在你動筆之前就已經綠了
 ```
 
 ⚠️ 它證明的是「答案來自語詞框」，**不證明**你有沒有把某一題整個漏掉，
 也不證明解釋文字抄對了。漏題要靠 `index` 連號（見下），文字要靠逐字門。
+
+## 要抽哪些欄位（2026-08-22 補 —— 原本這份沒有清單）
+
+第一架飛機是**去讀 schema 的 `x-seen-in` 才知道這些欄位存在**，
+只讀這份 SKILL 的飛機會漏掉 `instruction` 與 `vocabulary_bank_label`，而三道門全綠。
+
+| 欄位 | 命中率 | 什麼時候該有 |
+|---|---:|---|
+| `items` | 150/150 | 必有。⛔ 一題都沒有 = 抽失敗 |
+| `instruction` | 143/150 | 那一節開頭那句「請在空格內填入…」，逐字抄 |
+| `vocabulary_bank` | 143/150 | 有印語詞框就抄。**沒有的話先懷疑自己漏抽** |
+| `methods` | 88/150 | 「遇到困難可以試試」那幾條 |
+| `vocabulary_bank_label` | 28/150 | 語詞框自己的標題（如「本課語詞」），有印才寫 |
+| `notes` | 依情況 | 註解一律進這裡，⛔ 不要開新的 top-level key |
+| `answers_printed` | 7/150 | ⛔ **不要用**。答案怎麼印的寫 `notes.answer_carrier` |
+
+item 層（實測 1592 個）：`index` 100%、`definition` 99%、`word` 95%、`answer` 4%。
+唯一沒有 `definition` 的是 L0083 第 9 題 —— 那是混進這一節的選擇題（見上），schema 放行。
 
 ## 抽的時候
 
@@ -93,6 +114,25 @@ python3 .claude/skills/extract-vocab-definitions/verify_bank_coverage.py <uid>
    原稿有印 A/B/C 標籤就用 dict，只是條列就用 list
 5. **`notes.answer_carrier`**（104 課有）：記答案是怎麼印的（橘色手寫字／紅色 ☑／黑字），
    讓下一個人知道這課的答案可不可信
+
+## 🔴 你那幾頁上一定還有別的大題（實測，不是可能）
+
+150 筆 `vocab_definitions` 派工全跑過一遍：
+
+```
+跨頁（pages 不只一頁）    104  (69%)
+與別的大題共用至少一頁    150  (100%)
+整頁只有我這一節            0  (0%)
+```
+
+**所以邊界判斷是每一課都要做的，不是 low-confidence 那 23 課才要。**
+（這段原本寫在 `low_confidence_pages` 底下，讀起來像特例 —— 那是排錯位置。）
+
+**上下緣都要切**：L0072 的第 3 頁上同時有第二大題「念順順」的字數表尾巴、
+我的第三大題、以及第四大題「語詞應用」的開頭。
+
+好判：大題有圓形編號徽章（三／四）+ 粗體標題；而「語詞應用」是**給代號填空**
+（`A.負擔 B.負荷 C.負責`），形狀跟「給解釋填語詞」完全不同。
 
 ## 派工單怎麼用
 
@@ -110,6 +150,7 @@ print('pdf_pages:', m['pdf_pages'])"
 （L0028 / L0172 目前就是這種，manifest 上有 `pages_unavailable` 寫明原因。）
 
 **派工單上有 `low_confidence_pages: [vocab_definitions]` 就先看這一段。**
+⚠️ 這個鍵**可能整個不存在**（只有 15 課有）—— 用 `m.get('low_confidence_pages') or []`，直接 `m['low_confidence_pages']` 會 KeyError。
 那表示這一課的「語詞我最棒」標題**沒印出來**，你的頁碼是用前後鄰居**夾出來的**
 （全庫 23 個，實測最寬涵蓋整份的 54%）。
 

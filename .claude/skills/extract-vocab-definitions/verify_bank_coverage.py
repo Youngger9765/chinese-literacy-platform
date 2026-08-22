@@ -29,8 +29,12 @@ import yaml
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 
 
-def check(uid: str) -> tuple[int, list[str]]:
-    path = REPO_ROOT / "backend" / "data" / "lessons" / uid / "v3" / "vocab_definitions.yml"
+def check(uid: str, root: pathlib.Path | None = None) -> tuple[int, list[str]]:
+    # `--root` 讓還沒進 backend/data 的產出也驗得了（#2865）。原本路徑寫死，
+    # 意思是「要驗自己抽的東西，得先覆蓋掉真實課程資料」—— 於是驗證性跑批
+    # 照文件跑會拿到一個跟自己輸出無關的綠燈（那個綠在動筆之前就已經綠了）。
+    base = root or (REPO_ROOT / "backend" / "data" / "lessons")
+    path = base / uid / "v3" / "vocab_definitions.yml"
     if not path.is_file():
         return 2, [f"沒有這個檔：{path}"]
     body = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("vocab_definitions") or {}
@@ -39,8 +43,15 @@ def check(uid: str) -> tuple[int, list[str]]:
     if not items:
         return 1, ["一個 item 都沒有 —— 這是抽失敗，不是通過"]
     if not bank:
-        # 語詞框本來就不是每課都有（143/150），沒有就沒得驗，要說出來而不是報綠
-        return 0, [f"⚠️  {uid} 沒有語詞框，這支驗不了（{len(items)} 個 item 未受檢）"]
+        # 「沒得驗」不是「通過」（#2865）。原本這裡回 0 —— 而語詞框 143/150 課都有印，
+        # 所以「這課沒有 bank」幾乎一定是抽漏了，那卻是這支唯一會回綠的失敗路徑。
+        # 第一次真的派飛機（L0072）時，一份被砍成 1 題、空定義、無 bank 的劣化輸出
+        # 就是從這裡拿到綠燈的。回 3 = INVALID（沒驗到），跟 1（驗到有錯）分開。
+        return 3, [
+            f"🟡 {uid} 沒有語詞框 —— 這支驗不了（{len(items)} 個 item 未受檢）。",
+            "   ⚠️ 143/150 課都印語詞框，所以這多半是抽漏了而不是這課沒有。",
+            "   要嘛補抽，要嘛在回報裡寫明這課原稿真的沒印。⛔ 不可以當成通過。",
+        ]
 
     problems = []
     checked = 0
@@ -68,10 +79,12 @@ def check(uid: str) -> tuple[int, list[str]]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("uids", nargs="+")
+    ap.add_argument("--root", type=pathlib.Path, default=None,
+                    help="改讀這個目錄下的 <uid>/v3/*.yml（驗還沒落地的產出用）")
     args = ap.parse_args()
     worst = 0
     for uid in args.uids:
-        code, lines = check(uid)
+        code, lines = check(uid, args.root)
         worst = max(worst, code)
         print("\n".join(lines))
     return worst

@@ -1,0 +1,28 @@
+{
+  "uid": "L0106",
+  "gate_version": 1,
+  "docx_sha256": "1cd0-627d-4124-15e7",
+  "modules": {
+    "full_text_annotate": {
+      "yaml_sha256": "9abf-08dc-205b-7e49",
+      "checked": 9,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box": {
+      "yaml_sha256": "1ce1-725b-36e9-6a60",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight": {
+      "yaml_sha256": "18ff-ac72-dd3f-51d9",
+      "checked": 135,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}
