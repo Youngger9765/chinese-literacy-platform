@@ -237,7 +237,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     fillInBlank: detail.fill_in_blank
       ? detail.fill_in_blank.filter((item) =>
           item['_schema'] === 'legacy' || typeof item['sentence'] === 'string' && !('context_before' in item)
-        ) as Array<{ sentence: string; answer: string }>
+        ) as Array<{ sentence: string; answer: string; options?: Record<string, string> }>
       : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,

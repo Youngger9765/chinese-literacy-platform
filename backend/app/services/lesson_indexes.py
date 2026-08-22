@@ -211,6 +211,95 @@ def _cloze_from(l: dict) -> list[dict]:
         if alts:
             row["accepted_answers"] = [primary, *alts]
         out.append(row)
+    out.extend(_sub_exercise_cloze(sec))
+    return out
+
+
+#: 語詞應用底下的「子練習」（◎小試身手 / ◎牛刀小試 / ◎詞義辨識 / 相似詞應用），
+#: 每一個都自成一組題目與選項，跟主題目的 A–G 不同組。
+SUB_EXERCISE_SKIP = {"items", "questions", "videos", "notes"}
+
+
+def _is_option_code(a: str) -> bool:
+    """A–Z（含全形）才算代號；其餘一律當語詞。"""
+    return len(a) == 1 and ("A" <= a.upper() <= "Z" or "Ａ" <= a <= "Ｚ")
+
+
+def _sub_exercise_cloze(sec: dict) -> list[dict]:
+    """語詞應用底下的子練習 → 同一套 legacy 填空形狀。
+
+    🔴 **這一段之前不存在，於是那些題目印在學習單上、抽進了 yml、
+    卻從來沒有到過學生面前。** 實測 staging：L0149 學生拿到 6 題
+    （原稿 8 題）、L0066 拿到 7 題（原稿 8 題）。
+
+    ⚠️ 資料是忠實的 —— 我一度以為是抽取漏了，還為此開了兩張缺陷票
+    （#2867 #2869），兩張都是假的。真正的斷點在**這裡**：
+    `rows = sec.get("items")` 只讀頂層，子練習整包沒人讀。
+    這跟見證對帳門犯的是同一個錯，差別是門只會誤報，這裡會讓學生少做題。
+
+    子練習的選項**自成一組**，不能沿用主題目的 A–G：
+
+        L0122 ◎牛刀小試      自己就有 `option_bank` {A: 肆虐, B: 蔓延}
+        L0066 相似詞應用      沒有 bank，答案是語詞（象徵/意味著/代表）
+        L0149 ◎詞義辨識      沒有 bank，`glossary` 給了那兩個詞
+
+    後兩種在這裡合成一組 bank（答案本身當選項），把答案改寫成代號 ——
+    元件的判分就是「點到的代號 == answer」，這樣不必改判分邏輯。
+
+    ⛔ 一題有多個空格的（L0027 ◎小試身手，`answers` 是 list）**不處理** ——
+    那是不同題型，硬塞進單選框只會做出一個學生答不對的題目。
+    """
+    out: list[dict] = []
+    for key, sub in sec.items():
+        if key in SUB_EXERCISE_SKIP or not isinstance(sub, dict):
+            continue
+        rows = sub.get("items")
+        if not isinstance(rows, list) or not rows:
+            continue
+        rows = [r for r in rows if isinstance(r, dict)]
+        # 多空格題：跳過，且不要假裝它不存在（見上方 ⛔）
+        if any("answers" in r for r in rows):
+            continue
+
+        declared = sub.get("option_bank")
+        if isinstance(declared, dict) and declared:
+            bank = {str(k): str(v) for k, v in declared.items()}
+        else:
+            # 沒有印出來的選項組 → 用「這幾題的答案」當選項。
+            # 順序優先照 glossary（原稿印的順序），否則照題號順序。
+            words: list[str] = []
+            for g in (sub.get("glossary") or []):
+                w = g.get("word") if isinstance(g, dict) else None
+                if isinstance(w, str) and w not in words:
+                    words.append(w)
+            for r in rows:
+                a = r.get("answer")
+                # ⚠️ 判「代號 vs 語詞」用**是不是 A–Z**，不是字數 ——
+                #    單字語詞（「蹭」）用字數判會被當成代號然後整題丟掉。
+                if isinstance(a, str) and not _is_option_code(a) and a not in words:
+                    words.append(a)
+            if not words:
+                continue
+            bank = {chr(ord("A") + i): w for i, w in enumerate(words)}
+
+        word_to_code = {v: k for k, v in bank.items()}
+        for r in rows:
+            sentence = r.get("stem") or r.get("text") or ""
+            answer = r.get("answer")
+            if not (sentence and isinstance(answer, str)):
+                continue
+            code = answer if answer in bank else word_to_code.get(answer)
+            if not code:
+                # 答案既不是這組的代號、也不是這組的語詞 —— ⛔ 不猜。
+                # 送出去只會做出一個永遠答不對的題目。
+                continue
+            out.append({
+                "sentence": sentence,
+                "answer": code,
+                "options": bank,          # ← 這一題自己的選項組
+                "_schema": "legacy",
+                "_sub_exercise": sub.get("title") or key,
+            })
     return out
 
 

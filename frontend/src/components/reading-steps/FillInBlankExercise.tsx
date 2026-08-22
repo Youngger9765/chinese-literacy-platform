@@ -179,7 +179,6 @@ const FillInBlankExercise: React.FC<Props> = ({
   initialProgress,
   onProgressChange,
 }) => {
-  const bankEntries = Object.entries(vocabBank).sort(([a], [b]) => a.localeCompare(b));
   const { zhuyinActive, processZhuyin } = useZhuyin();
   // #2848: DB 快照優先，localStorage 只是離線 / 尚未載入時的 L1 快取。
   const savedProgress = initialProgress ?? loadProgress(storyId);
@@ -260,6 +259,15 @@ const FillInBlankExercise: React.FC<Props> = ({
   }, [done, phase]);
 
   const currentSentence = !done ? activeSentences[currentIdx] : null;
+
+  // 這一題用哪一組選項：子練習自帶 `options`，其餘沿用整課的 vocabBank。
+  // ⛔ 不可以只改 bankEntries —— 判分後的講解也要用同一組去查語詞，
+  //    混用會讓「正確：X」印出另一組的詞。
+  // ⚠️ 必須宣告在 `currentSentence` **之後**。第一版放在檔案上方，
+  //    那正是 #2279 的 TDZ 形狀（mount 就 ReferenceError、白屏，
+  //    而 tsc 與 vite build 都抓不到）。eslint `no-use-before-define` 會擋。
+  const activeBank: Record<string, string> = currentSentence?.options ?? vocabBank;
+  const bankEntries = Object.entries(activeBank).sort(([a], [b]) => a.localeCompare(b));
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
 
   // #7 教授「選項呈現兩案」(featureFlag FILLBLANK_OPTION_MODE):
@@ -416,7 +424,7 @@ const FillInBlankExercise: React.FC<Props> = ({
             ? 'bg-amber-50 border-amber-400 text-amber-800'
             : 'bg-accent/10 border-accent/40 text-accent'
         }`}>
-          {zh(vocabBank[selectedCode])}
+          {zh(activeBank[selectedCode] ?? vocabBank[selectedCode])}
         </span>
       )
       : (
@@ -460,6 +468,10 @@ const FillInBlankExercise: React.FC<Props> = ({
             const correct = qResult?.firstTryCorrect ?? false;
             const correctCode = qResult?.correctAnswer ?? '';
             const wrongCode = qResult?.studentFirstAnswer ?? null;
+            // ⚠️ 這裡是逐題 map，不能用「當前那一題」的 activeBank ——
+            //    子練習跟主題目的代號會撞（兩邊都有 A），拿錯組會在
+            //    結果頁印出另一組的語詞，而畫面看起來完全正常。
+            const rowBank = s.options ?? vocabBank;
 
             return (
               <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
@@ -469,13 +481,13 @@ const FillInBlankExercise: React.FC<Props> = ({
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-base text-on-surface leading-relaxed mb-1">
-                      {zh(s.sentence.replace(/[（(]　　[）)]/, `【${vocabBank[correctCode] ?? correctCode}】`))}
+                      {zh(s.sentence.replace(/[（(]　　[）)]/, `【${rowBank[correctCode] ?? correctCode}】`))}
                     </p>
                     {!correct && wrongCode && (
                       <p className="text-sm text-amber-700">
-                        你選了 <span className="font-bold">{zh(vocabBank[wrongCode] ?? wrongCode)}</span>
+                        你選了 <span className="font-bold">{zh(rowBank[wrongCode] ?? wrongCode)}</span>
                         <span className="text-on-surface-variant mx-1">→</span>
-                        正確：<span className="font-bold text-emerald-700">{zh(vocabBank[correctCode] ?? correctCode)}</span>
+                        正確：<span className="font-bold text-emerald-700">{zh(rowBank[correctCode] ?? correctCode)}</span>
                       </p>
                     )}
                   </div>
