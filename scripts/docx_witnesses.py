@@ -59,17 +59,59 @@ def docx_paragraphs(docx: pathlib.Path) -> list[str]:
     return out
 
 
+ORDINAL = "一二三四五六七八九十ㄧ"
+DUP_HEADING_WINDOW = 5   # 幾段以內視為同一個標題的複本（實測複本間距是 2）
+
+
+def _heading_hits(paras: list[str], name: str) -> list[int]:
+    """哪幾個段落**是這一節的標題**（而不是別處提到這幾個字）。
+
+    🔴 只取「第一個含這個字串的段落」會出事：L0072 的「閱讀理解」四個字
+    先出現在聚光燈那一節的說明裡（#31），真正的標題在 #200。用它當起點，
+    整個聚光燈的編號都被算進閱讀理解，於是這道門會宣稱「原稿有 9 題、
+    yml 只有 5 題」—— 而原稿其實正好 5 題。**我差點照這個開兩張缺陷票。**
+
+    標題的形狀：段落很短（就是標題本身），而且上一段是序號（一二三…）
+    或這一段自己以序號開頭。
+    """
+    raw = []
+    for i, t in enumerate(paras):
+        if name not in t or len(t) > len(name) + 8:
+            continue
+        prev = paras[i - 1].strip() if i else ""
+        if (len(prev) == 1 and prev in ORDINAL) or (t[:1] in ORDINAL):
+            raw.append(i)
+    # 🔴 同一個標題常在 XML 裡出現兩次（文字方塊的複本，實測間距固定是 2），
+    #    而多文本課的兩個「閱讀理解」隔了 100 段以上。不合併的話，
+    #    「這個標題出現幾次」會把單文本課誤判成多文本 —— 那會讓多文本護欄
+    #    把 40 個本來判得出來的模組一起關掉（假警報跟漏抓一樣會廢掉一道門）。
+    out: list[int] = []
+    for i in raw:
+        if out and i - out[-1] <= DUP_HEADING_WINDOW:
+            continue
+        out.append(i)
+    return out
+
+
 def section_span(paras: list[str], name: str, next_name: str | None) -> tuple[int, int] | None:
-    """這一節從哪個段落到哪個段落。找不到起點就回 None（⛔ 不猜）。"""
-    starts = [i for i, t in enumerate(paras) if name in t]
+    """這一節從哪個段落到哪個段落。找不到起點就回 None（⛔ 不猜）。
+
+    ⚠️ 多文本課（同一個大題名出現好幾次，一篇一組）**不適用** ——
+    第一個標題到下一節之間會橫跨第二、三篇，題號整片被算進來。
+    L0144 有三篇、每篇各一個「閱讀理解」，這樣算會宣稱原稿有 5 題、
+    yml 只有 4 題，而第一篇其實正好 4 題。呼叫端要自己擋（見 `count`）。
+    """
+    starts = _heading_hits(paras, name)
+    if not starts:
+        # 退而求其次：短段落且完全等於節名。⛔ 仍然不接受「內文裡提到」。
+        starts = [i for i, t in enumerate(paras) if t.strip() == name]
     if not starts:
         return None
     lo = starts[0]
-    if next_name:
-        after = [i for i, t in enumerate(paras) if next_name in t and i > lo]
-        hi = after[0] if after else len(paras)
-    else:
-        hi = len(paras)
+    ends = [i for i in _heading_hits(paras, next_name) if i > lo] if next_name else []
+    if next_name and not ends:
+        ends = [i for i, t in enumerate(paras) if t.strip() == next_name and i > lo]
+    hi = ends[0] if ends else len(paras)
     return lo + 1, hi
 
 
@@ -84,6 +126,13 @@ def item_numbers(paras: list[str], span: tuple[int, int]) -> list[int]:
 
 def count(docx: pathlib.Path, section: str, next_section: str | None) -> dict:
     paras = docx_paragraphs(docx)
+    # 多文本課：同一個大題名在原稿裡出現好幾次（一篇一組）→ 這條路算不了。
+    # ⛔ 回 unknown，不要給一個橫跨兩三篇的答案 —— 那會看起來很篤定，
+    #    而且方向是「原稿比 yml 多」，最像真缺陷，最容易被照著開票。
+    if len(_heading_hits(paras, section)) > 1:
+        return {"status": "unknown",
+                "why": f"「{section}」在原稿裡出現 "
+                       f"{len(_heading_hits(paras, section))} 次（多文本課），這條路算不了"}
     span = section_span(paras, section, next_section)
     if span is None:
         return {"status": "unknown", "why": f"XML 裡找不到「{section}」這個標題"}

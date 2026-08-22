@@ -145,3 +145,104 @@ def test_xml_and_yml_agree_on_the_lessons_pdf_could_not_read():
             if r["numbers"] == idx:
                 ok += 1
     assert ok >= 40, f"XML 只判得出 {ok}/42（建立時是 40）—— 退化了，要查"
+
+
+def test_heading_hits_ignore_mentions_and_merge_duplicate_anchors():
+    """節名判準要擋兩種假象，⛔ 兩邊都會製造看起來很篤定的錯答案。
+
+    ① **內文提到 ≠ 標題**：L0072 的「閱讀理解」四個字先出現在聚光燈那一節
+       的說明裡，真正的標題在後面。拿前者當起點，整個聚光燈的編號都被算進
+       閱讀理解 → 這道門會宣稱「原稿 9 題、yml 只有 5 題」，而原稿正好 5 題。
+       **我差點照這個開兩張缺陷票（L0071 / L0072）。**
+    ② **同一個標題在 XML 裡常出現兩次**（文字方塊的複本，實測間距固定是 2），
+       而多文本課的兩個「閱讀理解」隔了 100 段以上。不合併的話，
+       「出現幾次」會把單文本課誤判成多文本，多文本護欄就會把 40 個本來
+       判得出來的模組一起關掉 —— 假警報跟漏抓一樣會廢掉一道門。
+    """
+    dw = _dw()
+    paras = ["一", "閱讀理解", "（ B ）1. 題目", "二", "詞語複習"]
+    assert dw._heading_hits(paras, "閱讀理解") == [1]
+
+    # 內文提到，不是標題 —— 不可以算進去
+    paras2 = ["這一節在練閱讀理解的摘要策略，請照著做", "一", "閱讀理解", "（ B ）1. 題"]
+    assert dw._heading_hits(paras2, "閱讀理解") == [2]
+
+    # ⚠️ 上面那個 fixture 光靠序號檢查就擋掉了 —— 長度那一關**從沒被測到**
+    #    （mutation 把長度上限拿掉，測試照樣綠）。這一個才走得到它：
+    #    前一段就是序號、這一段也含節名，只有「太長」能否決它。
+    long_mention = ["一", "本節閱讀理解的重點在於摘要策略，請先讀完全文再作答", "（ B ）1. 題"]
+    assert dw._heading_hits(long_mention, "閱讀理解") == [], \
+        "長段落含節名被當成標題了 —— 起點會抓錯，整節範圍跟著歪"
+
+    # 相鄰複本併成一個
+    dup = ["一", "閱讀理解", "一", "閱讀理解", "（ B ）1. 題"]
+    assert len(dw._heading_hits(dup, "閱讀理解")) == 1, "沒有把複本併起來"
+
+    # 隔很遠的才算多文本
+    far = ["一", "閱讀理解"] + ["內文"] * 40 + ["一", "閱讀理解"]
+    assert len(dw._heading_hits(far, "閱讀理解")) == 2, "多文本被誤併了"
+
+
+def test_multi_text_lessons_return_unknown_not_a_confident_wrong_answer():
+    """多文本課要回 unknown。
+
+    ⛔ 不可以給一個橫跨兩三篇的答案 —— 那個答案的方向永遠是「原稿比 yml 多」，
+    最像真缺陷，最容易被照著開票。L0144 有三篇、每篇各一個「閱讀理解」，
+    橫跨算會說「原稿 5 題、yml 只有 4 題」，而第一篇其實正好 4 題。
+    """
+    dw = _dw()
+    src = DW.read_text(encoding="utf-8")
+    assert "多文本" in src and "_heading_hits(paras, section)) > 1" in src, \
+        "沒有多文本護欄"
+
+
+def test_only_the_known_defects_disagree_upward():
+    """回測鎖：XML 說「原稿比 yml 多」的，只能是已知那三筆。
+
+    多一筆＝可能是新缺陷（好事，要查），也可能是判準又放寬了（壞事）。
+    兩種都要有人看，所以這條鎖住數量。
+    """
+    dw = _dw()
+    sot = None
+    for base in (REPO, REPO.parent / "chinese-literacy-platform"):
+        cand = base / "private" / "curriculum-source" / "_SOT"
+        if cand.is_dir():
+            sot = cand
+            break
+    if sot is None:
+        pytest.skip("讀不到原稿（CI 沒有 private/）")
+    matches = yaml.safe_load(
+        (REPO / "specs" / "modules" / "section-to-module.yml").read_text(
+            encoding="utf-8"))["matches"]
+    carriers = ("items", "questions", "videos")
+    more = []
+    for ly in sorted((REPO / "backend" / "data" / "lessons").glob("L*/v3/lesson.yml")):
+        uid = ly.parent.parent.name
+        d = yaml.safe_load(ly.read_text(encoding="utf-8"))
+        rel = (d.get("source") or {}).get("drive_path")
+        names = [s["name"] if isinstance(s, dict) else str(s)
+                 for s in (d.get("sections_present") or [])]
+        if not rel or not (sot / rel).is_file():
+            continue
+        for i, name in enumerate(names):
+            mod = next((m["module"] for m in matches if m["needle"] in name), None)
+            f = ly.parent / f"{mod}.yml" if mod else None
+            if not f or not f.is_file():
+                continue
+            y = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get(mod) or {}
+            items = next((y[c] for c in carriers if isinstance(y.get(c), list)), None)
+            if items is None:
+                continue
+            idx = sorted({it.get("index") for it in items
+                          if isinstance(it.get("index"), int)})
+            if not idx:
+                continue
+            r = dw.count(sot / rel, name, names[i + 1] if i + 1 < len(names) else None)
+            if r.get("status") != "ok":
+                continue
+            if set(r["numbers"]) - set(idx):
+                more.append(f"{uid}/{mod}")
+    assert sorted(set(more)) == ["L0066/vocab_application",
+                                 "L0066/vocab_definitions",
+                                 "L0149/vocab_application"], \
+        f"「原稿比 yml 多」的清單變了：{sorted(set(more))}（已知：#2867 L0066、#2869 L0149）"
