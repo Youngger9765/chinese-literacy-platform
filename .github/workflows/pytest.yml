@@ -26,8 +26,11 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      - name: Install ffmpeg (testset transcode + silence-gate tests)
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg + poppler (transcode / silence gate / PDF fingerprint gate)
+        # poppler-utils 給 ⑤ 的每頁文字指紋用（pdftotext / pdfinfo）。
+        # 沒裝的話那道門一律回 2「算不出來」—— 那是正確的 fail-closed，
+        # 但等於 CI 對它零覆蓋，而它是擋「版面重排」的唯一一道門。
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg poppler-utils
 
       - name: Run characterization tests (refactor safety gate)
         run: |

@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import pathlib
+import shutil
 import subprocess
 import sys
 
@@ -78,6 +79,16 @@ def expected_pages() -> int:
 # 那條路 —— ⛔ 這條不可以拿掉：沒有它，下面每一個「擋住」都可能只是腳本壞了。
 UID_NO_PRINTS = "L0028"
 
+# 指紋那兩條真的需要 poppler。沒裝時門會回 2「算不出這份 PDF 的指紋」——
+# 那是正確的 fail-closed，但測不到東西。
+# ⚠️ 所以 `.github/workflows/pytest.yml` 必須裝 poppler-utils，
+#    否則它們會在 CI 靜默 skip —— 而**被 skip 的對照等於沒有對照**。
+#    下面 `test_ci_installs_poppler` 鎖住那件事。
+needs_poppler = pytest.mark.skipif(
+    shutil.which("pdftotext") is None or shutil.which("pdfinfo") is None,
+    reason="沒有 poppler（pdftotext / pdfinfo）",
+)
+
 
 def _run_uid(uid: str, pdf: pathlib.Path) -> int:
     return subprocess.run(
@@ -86,6 +97,7 @@ def _run_uid(uid: str, pdf: pathlib.Path) -> int:
     ).returncode
 
 
+@needs_poppler
 def test_matching_fingerprints_pass(tmp_path):
     """正向對照 —— 沒有這條，下面每一個『擋住』都可能只是腳本壞了。
 
@@ -138,6 +150,7 @@ def test_matching_fingerprints_pass(tmp_path):
     assert rc2.returncode == 1, "改了一頁指紋卻放行 —— 這道門沒有在看"
 
 
+@needs_poppler
 def test_same_page_count_but_different_content_is_blocked(tmp_path, expected_pages):
     """頁數一樣、內容不同 → 擋。這是 ⑤ 升級的全部意義。
 
@@ -212,3 +225,13 @@ def test_the_module_skill_tells_the_plane_to_check_it():
     """標記放進派工單但沒人叫飛機看 = 又一道沒插電的門。"""
     text = (REPO / ".claude" / "skills" / "extract-module" / "SKILL.md").read_text(encoding="utf-8")
     assert "low_confidence_pages" in text, "飛機的契約沒提到這個欄位"
+
+
+def test_ci_installs_poppler():
+    """CI 必須裝 poppler，⛔ 否則指紋那兩條會靜默 skip。
+
+    被 skip 的正向對照等於沒有正向對照 —— 而指紋是擋「版面重排」的唯一一道門，
+    它在 CI 裡零覆蓋的話，這整個升級只在我的機器上成立。
+    """
+    wf = (REPO / ".github" / "workflows" / "pytest.yml").read_text(encoding="utf-8")
+    assert "poppler-utils" in wf, "pytest workflow 沒裝 poppler-utils"

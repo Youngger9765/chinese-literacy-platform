@@ -155,14 +155,10 @@ def main() -> int:
         print(f"⛔ 數不出 {pdf.name} 的頁數（pdfinfo 沒裝且 fallback 也失敗）—— 不派工")
         return 2
 
-    # ── 頁數之外，再比每一頁的文字指紋（#2865）─────────────────────
-    # 頁數一樣不代表版面一樣。實測 L0001 兩次轉檔都是 8 頁，但標題從
-    # 「三　語詞我最棒」變成「三 🅐 語詞我最棒」—— 只比頁數會放行，
-    # 而那份 PDF 的切節結果已經不同了。
-    prints_verdict = _compare_prints(args.uid, pdf, manifest, args.db)
-    if prints_verdict is not None:
-        return prints_verdict
-
+    # ⚠️ 頁數不符先短路 —— 那一關只靠 raw bytes 的 regex，不需要 poppler。
+    #    把指紋放在它前面的話，沒裝 pdftotext 的環境（CI）一律回 2
+    #    「算不出來」，於是「差一頁要擋」那條測試在 CI 裡永遠測不到東西。
+    #    先答得出來的先答，是通則。
     if actual != expected:
         print(
             f"🔴 {args.uid} 手上這份 PDF 是 {actual} 頁，派工單是對 {expected} 頁那份算的。\n"
@@ -170,6 +166,14 @@ def main() -> int:
             "   ⛔ 不要派工。重轉一次，或重跑 scripts/build_section_pages.py 更新派工單。"
         )
         return 1
+
+    # ── 頁數對得上之後，再比每一頁的文字指紋（#2865）─────────────────
+    # 頁數一樣不代表版面一樣。實測 L0001 兩次轉檔都是 8 頁，但標題從
+    # 「三　語詞我最棒」變成「三 🅐 語詞我最棒」—— 只比頁數會放行，
+    # 而那份 PDF 的切節結果已經不同了。
+    prints_verdict = _compare_prints(args.uid, pdf, manifest, args.db)
+    if prints_verdict is not None:
+        return prints_verdict
 
     print(f"✅ {args.uid} PDF {actual} 頁，與派工單一致")
     return 0
