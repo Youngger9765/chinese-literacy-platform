@@ -36,6 +36,13 @@ import yaml
 from jsonschema import Draft7Validator
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
+#: poppler（pdftotext / pdfinfo）在 CI 沒裝。
+#: ⚠️ 這些測試**不是**可有可無 —— 它們是本機開發的主力回歸鎖。
+#: skip 掉只是承認「CI 這個環境驗不了」，跟「不用驗」是兩件事。
+#: 要在 CI 也跑，得在 workflow 裝 poppler-utils（見 #2868 一併處理）。
+import shutil
+HAS_POPPLER = bool(shutil.which("pdftotext") and shutil.which("pdfinfo"))
+needs_poppler = pytest.mark.skipif(not HAS_POPPLER, reason="CI 沒裝 poppler（pdftotext/pdfinfo）")
 SCHEMAS = REPO / "specs" / "modules" / "schemas"
 LESSONS = REPO / "backend" / "data" / "lessons"
 
@@ -183,7 +190,8 @@ def _bridge(tmp_path, scan: list[dict], pdf: pathlib.Path):
     )
 
 
-@pytest.mark.skipif(not FIXTURE_PDF.is_file(), reason="沒有 fixture PDF（要 private/ 才生得出來）")
+@needs_poppler
+@pytest.mark.skipif(not FIXTURE_PDF.is_file(), reason="沒有 fixture PDF")
 def test_llm_page_numbers_are_overridden_by_the_locator(tmp_path):
     """LLM 給錯頁碼時，出來的派工單要是對的。
 
@@ -231,6 +239,7 @@ RECONCILE = REPO / "scripts" / "witness_reconcile_gate.py"
 SYNTH = REPO / "backend" / "tests" / "fixtures" / "synthetic_worksheet.pdf"
 
 
+
 def _witness_mod():
     import importlib.util
     spec = importlib.util.spec_from_file_location("esw", WITNESS)
@@ -239,6 +248,7 @@ def _witness_mod():
     return m
 
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 @pytest.mark.parametrize("section,pages,expected", [
     # 跨頁：續頁沒有再印標題。第一版整頁跳過，L0009 的第 6–12 題就是這樣丟的
@@ -259,6 +269,7 @@ def test_referee_counts_the_right_targets(section, pages, expected):
     assert len(got) == expected, f"{section} 數到 {len(got)} 題，應該是 {expected}"
 
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 def test_referee_refuses_when_the_section_is_not_on_that_page():
     """頁碼錯了要回空，⛔ 不可以退回「整頁都算」。
@@ -272,6 +283,7 @@ def test_referee_refuses_when_the_section_is_not_on_that_page():
         "在沒有這一節的頁上數到了題目 —— 那是隔壁節的"
 
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 def test_reconcile_gate_catches_missing_items(tmp_path):
     """漏抽要擋，而且要指名漏了哪幾題。"""
@@ -288,6 +300,7 @@ def test_reconcile_gate_catches_missing_items(tmp_path):
     assert "漏抽" in r.stdout, r.stdout
 
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 def test_reconcile_gate_passes_a_complete_extraction(tmp_path):
     """正向對照 —— 沒有它，上面的『擋住』可能只是這支恆紅。"""
@@ -304,6 +317,7 @@ def test_reconcile_gate_passes_a_complete_extraction(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 def test_reconcile_gate_catches_shifted_indices(tmp_path):
     """題數對但編號錯位 —— 數量相同不代表抽對了。"""
@@ -493,6 +507,7 @@ def test_lesson_level_files_skip_reconciliation():
 # 這正是「樣本小就別宣稱穩」的實證。
 # ---------------------------------------------------------------------------
 
+@needs_poppler
 @pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
 def test_continuation_items_after_the_next_heading():
     """雙欄下，續頁的題號可能排在**下一個大題標題之後**。
