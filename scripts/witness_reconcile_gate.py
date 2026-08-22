@@ -94,6 +94,47 @@ def yml_items(path: pathlib.Path, module: str) -> list | None:
     return None
 
 
+def all_indices(path: pathlib.Path, module: str) -> set[int]:
+    """這個模組裡，**任何地方**出現過的大題號。
+
+    🔴 這道門原本只數頂層 `items`，於是把「子練習」一律當成漏抽 ——
+    我照著它開了兩張缺陷票（#2867 #2869），兩張都是假的：
+
+      L0066 語詞應用   原稿 (8) 是「相似詞應用：」整個子練習
+                       → yml `synonym_application` 自己就帶著 `index: 8`
+      L0066 語詞我最棒 原稿 (12) 是「相似詞的比較分析」比較表
+                       → yml `synonym_analysis` 自己就帶著 `index: 12`
+      L0149 語詞應用   原稿 (7)(8) 填的是語詞本身不是代號
+                       → yml `word_sense_discrimination.items` 沿用 7、8
+
+    **抽取器早就把大題號記在子容器上了，是這道門從來沒往下看。**
+    ⛔ 這種錯的方向永遠是「原稿比 yml 多」—— 長得跟真缺陷一模一樣，
+    而且會讓人去「補」一個本來就在的東西。
+
+    所以改成遞迴收集：任何層級的 `index`（整數）都算數。
+    """
+    try:
+        doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return set()
+    body = doc.get(module, doc)
+    out: set[int] = set()
+
+    def walk(node, in_notes: bool = False) -> None:
+        if isinstance(node, dict):
+            for k, v in node.items():
+                # `notes` 底下是抽取器自己寫的分析，裡面的數字不是大題號
+                walk(v, in_notes or k == "notes")
+            if not in_notes and isinstance(node.get("index"), int):
+                out.add(node["index"])
+        elif isinstance(node, list):
+            for v in node:
+                walk(v, in_notes)
+
+    walk(body)
+    return out
+
+
 def _docx_second_opinion(args) -> tuple[list[int], str] | None:
     """PDF 驗不了時，改問 DOCX 的 XML。答不出來就回 None（⛔ 不猜）。
 
@@ -207,8 +248,8 @@ def main() -> int:
         second = _docx_second_opinion(args)
         if second is not None:
             src_ns, why = second
-            yml_ns = sorted(i.get("index") for i in items
-                            if isinstance(i, dict) and isinstance(i.get("index"), int))
+            # ⚠️ 收「任何層級」的 index —— 子練習的大題號記在子容器上（見 all_indices）
+            yml_ns = sorted(all_indices(args.yaml, args.module))
             print(f"  {args.uid} · {args.module}（PDF 驗不了，改用 DOCX XML）")
             print(f"    原稿數到 {len(src_ns)} 題  {src_ns}")
             print(f"    yml 有   {len(yml_ns)} 題  {yml_ns}")
@@ -231,19 +272,18 @@ def main() -> int:
         return 2
 
     src_ns = sorted(w["n"] for w in src_items)
-    yml_ns = sorted(
-        i.get("index") for i in items
-        if isinstance(i, dict) and isinstance(i.get("index"), int)
-    )
+    # ⚠️ 收「任何層級」的 index。只數頂層 items 的那版把子練習當成漏抽，
+    #    我照它開了兩張假缺陷票（#2867 #2869）。見 all_indices 的說明。
+    yml_ns = sorted(all_indices(args.yaml, args.module))
 
     print(f"  {args.uid} · {args.module} · 第 {pages} 頁")
     print(f"    來源數到 {len(src_ns)} 題  {src_ns}")
     print(f"    yml 有   {len(yml_ns)} 題  {yml_ns}")
 
-    if len(src_ns) != len(items):
+    if len(src_ns) != len(yml_ns):
         missing = sorted(set(src_ns) - set(yml_ns))
         extra = sorted(set(yml_ns) - set(src_ns))
-        print(f"\n🔴 對不上：來源 {len(src_ns)} 題，yml {len(items)} 題")
+        print(f"\n🔴 對不上：來源 {len(src_ns)} 題，yml {len(yml_ns)} 題")
         if missing:
             print(f"   來源有、yml 沒有（漏抽）：{missing}")
         if extra:

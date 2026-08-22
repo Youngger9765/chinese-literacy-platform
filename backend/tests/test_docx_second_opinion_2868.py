@@ -196,13 +196,27 @@ def test_multi_text_lessons_return_unknown_not_a_confident_wrong_answer():
         "沒有多文本護欄"
 
 
-def test_only_the_known_defects_disagree_upward():
-    """回測鎖：XML 說「原稿比 yml 多」的，只能是已知那三筆。
+def test_no_module_this_gate_covers_disagrees_upward():
+    """回測鎖：這道門覆蓋的模組，沒有一個是「原稿比 yml 多」。
 
-    多一筆＝可能是新缺陷（好事，要查），也可能是判準又放寬了（壞事）。
-    兩種都要有人看，所以這條鎖住數量。
+    🔴 這條原本鎖的是「只能是已知那三筆」（#2867 L0066 ×2、#2869 L0149）——
+    **而那三筆全是假的。** 只數頂層 `items` 的比對把「子練習」當成漏抽，
+    但抽取器早就把大題號記在子容器上了（`synonym_application.index: 8`、
+    `synonym_analysis.index: 12`、`word_sense_discrimination.items` 沿用 7/8）。
+    改成遞迴收集 index 之後，三筆全部對得上，兩張票都關掉了。
+
+    ⚠️ 教訓：那個方向的錯**永遠長得像真缺陷**，而且會讓人去「補」一個
+    本來就在的東西。所以現在的門檻是 0 —— 冒出任何一筆都要開原稿看過
+    才可以下判斷，⛔ 不可以照工具輸出開票。
+
+    ⛔ 只掃這道門負責的模組。`spotlight` / `keypoints` 是別人的區域，
+    而且不在 NUMBERED_MODULES 裡 —— 掃進來只會製造不歸這裡管的雜訊。
     """
     dw = _dw()
+    spec = importlib.util.spec_from_file_location("wg", GATE)
+    wg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(wg)
+
     sot = None
     for base in (REPO, REPO.parent / "chinese-literacy-platform"):
         cand = base / "private" / "curriculum-source" / "_SOT"
@@ -214,7 +228,6 @@ def test_only_the_known_defects_disagree_upward():
     matches = yaml.safe_load(
         (REPO / "specs" / "modules" / "section-to-module.yml").read_text(
             encoding="utf-8"))["matches"]
-    carriers = ("items", "questions", "videos")
     more = []
     for ly in sorted((REPO / "backend" / "data" / "lessons").glob("L*/v3/lesson.yml")):
         uid = ly.parent.parent.name
@@ -226,23 +239,62 @@ def test_only_the_known_defects_disagree_upward():
             continue
         for i, name in enumerate(names):
             mod = next((m["module"] for m in matches if m["needle"] in name), None)
-            f = ly.parent / f"{mod}.yml" if mod else None
-            if not f or not f.is_file():
+            if mod not in wg.NUMBERED_MODULES:
                 continue
-            y = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get(mod) or {}
-            items = next((y[c] for c in carriers if isinstance(y.get(c), list)), None)
-            if items is None:
+            f = ly.parent / f"{mod}.yml"
+            if not f.is_file():
                 continue
-            idx = sorted({it.get("index") for it in items
-                          if isinstance(it.get("index"), int)})
+            idx = sorted(wg.all_indices(f, mod))
             if not idx:
                 continue
             r = dw.count(sot / rel, name, names[i + 1] if i + 1 < len(names) else None)
             if r.get("status") != "ok":
                 continue
-            if set(r["numbers"]) - set(idx):
-                more.append(f"{uid}/{mod}")
-    assert sorted(set(more)) == ["L0066/vocab_application",
-                                 "L0066/vocab_definitions",
-                                 "L0149/vocab_application"], \
-        f"「原稿比 yml 多」的清單變了：{sorted(set(more))}（已知：#2867 L0066、#2869 L0149）"
+            missing = sorted(set(r["numbers"]) - set(idx))
+            if missing:
+                more.append(f"{uid}/{mod} 缺 {missing}")
+    assert not more, (
+        "冒出「原稿比 yml 多」的模組。⛔ 先開原稿看過再下判斷 —— "
+        f"上一次照工具輸出開票，兩張都是假的：{more}"
+    )
+
+
+def test_indices_are_collected_from_every_level():
+    """子練習的大題號記在子容器上，⛔ 只數頂層 items 會把它當成漏抽。
+
+    三種實際存在的收法（都合法，schema 明文宣告）：
+        synonym_application:  {index: 8, items: [...]}     ← 號碼在容器上
+        synonym_analysis:     {index: 12, columns/rows}    ← 容器就是那一題
+        word_sense_discrimination: {items: [{index: 7}, {index: 8}]}  ← 沿用大題號
+    """
+    spec = importlib.util.spec_from_file_location("wg", GATE)
+    wg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(wg)
+    base = REPO / "backend" / "data" / "lessons"
+    cases = [
+        ("L0066", "vocab_application", 8),
+        ("L0066", "vocab_definitions", 12),
+        ("L0149", "vocab_application", 8),
+    ]
+    for uid, mod, want_max in cases:
+        f = base / uid / "v3" / f"{mod}.yml"
+        if not f.is_file():
+            pytest.skip(f"{uid}/{mod} 不在")
+        got = wg.all_indices(f, mod)
+        assert got == set(range(1, want_max + 1)), \
+            f"{uid}/{mod} 收到 {sorted(got)}，應該是 1..{want_max}"
+
+
+def test_notes_numbers_are_not_mistaken_for_item_indices():
+    """`notes` 底下是抽取器自己寫的分析，裡面的 index 不是大題號。"""
+    spec = importlib.util.spec_from_file_location("wg", GATE)
+    wg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(wg)
+    import tempfile
+    with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False,
+                                     encoding="utf-8") as t:
+        yaml.safe_dump({"m": {"items": [{"index": 1}],
+                              "notes": {"x": {"index": 99}}}}, t,
+                       allow_unicode=True)
+        path = pathlib.Path(t.name)
+    assert wg.all_indices(path, "m") == {1}, "notes 裡的數字被當成大題號了"
