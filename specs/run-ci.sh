@@ -62,8 +62,8 @@ echo "   python: $PYBIN"
 echo "   modules: $(ls -d specs/modules/*/ 2>/dev/null | wc -l | tr -d ' ')"
 echo ""
 
-# ── Gate 1/8: registry freshness + legacy_tests pointer-rot ──────────────────
-echo "-- Gate 1/8: registry freshness + pointer-rot check (build_registry.py --check) --"
+# ── Gate 1/9: registry freshness + legacy_tests pointer-rot ──────────────────
+echo "-- Gate 1/9: registry freshness + pointer-rot check (build_registry.py --check) --"
 "$PYBIN" specs/build_registry.py --check
 echo "   OK"
 echo ""
@@ -73,8 +73,8 @@ if [ "${1:-}" = "--quick" ]; then
   exit 0
 fi
 
-# ── Gate 2/8: spec contracts ──────────────────────────────────────────────────
-echo "-- Gate 2/8: spec contracts (pytest specs/) --"
+# ── Gate 2/9: spec contracts ──────────────────────────────────────────────────
+echo "-- Gate 2/9: spec contracts (pytest specs/) --"
 ( cd backend && "$PYBIN" -m pytest specs/ -q )
 echo ""
 
@@ -113,14 +113,14 @@ else
   echo ""
 fi
 
-# ── Gate 4/8: QR-manifest reconciliation (no 空砲, no missing QR) ─────────────
+# ── Gate 4/9: QR-manifest reconciliation (no 空砲, no missing QR) ─────────────
 # Reusable: validates against current data, not hard-coded lesson numbers.
 # After importing new courses, re-run this same gate.
-echo "-- Gate 4/8: QR-manifest reconciliation (verify_qr_manifest) --"
+echo "-- Gate 4/9: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
 echo ""
 
-# ── Gate 5/8: spotlight structural ratchet ───────────────────────────────────
+# ── Gate 5/9: spotlight structural ratchet ───────────────────────────────────
 # The spotlight gate existed and nothing ran it. `run_spotlight_dev_gate.sh` and
 # `content_evidence_gate.py` appear in no workflow and were not here either, while
 # CLAUDE.md said a spotlight PR must print CONTENT_EVIDENCE_GATE=PASS. The gate had
@@ -129,11 +129,11 @@ echo ""
 # This is the cheap half — structure only, deterministic, all 175 lessons — and it is
 # the half that matters before a full rebuild: #2713 and #2714 both end by rebuilding
 # every lesson's spotlight, and without this nothing says what else moved.
-echo "-- Gate 5/8: spotlight structural ratchet (spotlight_fingerprints) --"
+echo "-- Gate 5/9: spotlight structural ratchet (spotlight_fingerprints) --"
 "$PYBIN" scripts/spotlight_fingerprints.py --check
 echo ""
 
-# ── Gate 6/8: 原稿有沒有悄悄過期（SOT_STALE，離線半） ────────────────────────
+# ── Gate 6/9: 原稿有沒有悄悄過期（SOT_STALE，離線半） ────────────────────────
 # 2026-08-17：案主 20:28 更新 6/7/8 年級 12 個檔，本機快照停在那之前，其中 G8-L4
 # 已經抽完 —— 抽出來的 yml 忠實反映一份**作廢的教材**，而**所有門都是綠的**，
 # 因為每一道門比對的都是本機那份過期原稿。這種過期沒有任何徵兆。
@@ -148,15 +148,15 @@ echo ""
 # 沒有本機原稿快照時（例：CI runner，private/ 是 gitignored 的 symlink）它會**明講**
 # 只驗得到「有沒有指紋」、驗不到「指紋對不對」—— 不會假裝全驗過了。
 # 看得見 Drive 那一側要另外跑：`python3 scripts/sot_drift_check.py`
-echo "-- Gate 6/8: 原稿過期偵測（sot_drift_check --offline） --"
+echo "-- Gate 6/9: 原稿過期偵測（sot_drift_check --offline） --"
 "$PYBIN" scripts/sot_drift_check.py --offline
 echo ""
 
-echo "-- Gate 7/8: 抽出來的模組，學生走不走得到（module_entry_gate） --"
+echo "-- Gate 7/9: 抽出來的模組，學生走不走得到（module_entry_gate） --"
 "$PYBIN" scripts/module_entry_gate.py
 echo ""
 
-# ── Gate 8/8: 內容忠實度證明（content_fidelity_attest --verify-all） ─────────
+# ── Gate 8/9: 內容忠實度證明（content_fidelity_attest --verify-all） ─────────
 # ⑦b。這道門在 2026-08-22 之前只有**一課**有證明、而且沒有任何流程跑它 ——
 # 「門建了沒插電」跟沒有門的差別是：大家會以為它在看。
 #
@@ -167,8 +167,19 @@ echo ""
 #
 # 棘輪守的是「驗不到」的數量（原文只有一個字、或錯字印在圖上，共 25 個）——
 # ⛔ 那個數字只准往下。無聲增加 = 覆蓋率在漏，而每一次都是綠的。
-echo "-- Gate 8/8: 內容忠實度證明（content_fidelity_attest --verify-all） --"
+echo "-- Gate 8/9: 內容忠實度證明（content_fidelity_attest --verify-all） --"
 "$PYBIN" scripts/content_fidelity_attest.py --verify-all
+echo ""
+
+# ── Gate 9/9: 學習單印的大題有沒有著落（section_completeness_gate） ─────────
+# 前面每一道門問的都是「抽出來的東西對不對」（形狀 / 逐字 / 題號），
+# 沒有一道問「該有的東西在不在」—— 一整個大題被漏抽，前面全綠。
+#
+# ⚠️ 最容易被忽略的失敗形狀不是「內容不見了」，是**對照表少一個字**：
+#    「文章重點表」vs「文章重點整理」差一個字，6 課的那一節就在完整性
+#    檢查眼裡消失，而內容其實好端端在 keypoints.yml 裡。沒有症狀。
+echo "-- Gate 9/9: 大題有沒有著落（section_completeness_gate） --"
+"$PYBIN" scripts/section_completeness_gate.py
 echo ""
 
 echo "== Local Spec CI: PASS =="
