@@ -228,7 +228,6 @@ b{font-weight:600}
     <ol>
       <li><b>那 25 個「驗不到」</b> —— 22 個是勘誤原文只有一個字（「五」印成「六」），短於 4 字門檻；3 個錯字印在圖片裡。要驗得到得換方法（單字比對容易誤中，圖的要 OCR）。<b>已上棘輪</b>，只准往下。</li>
             <li>把 <b>⑥a</b> 的一致率量到別的模組與課型 —— 目前只有 1 課 1 模組 × 3 次。</li>
-      <li><b>#2869</b> L0149 語詞應用漏抽 2 題 —— 而且要查「答案寫在格子裡而非代號」這個形狀還有沒有別課中招（⛔ 只修一課等於只修一半）。</li>
       <li><b>②</b> 的根因 —— 三個假設都排除了（冷熱 profile、字型替換、多數決）。要真的解決得換排版引擎或改用內容錨點，而它已經被 ⑤ 轉成大聲失敗（172/172 課存了每頁指紋），<b>不急</b>。</li>
     </ol>
   </div>
@@ -402,7 +401,7 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 
   {k:"6b", num:"⑥b", ttl:"見證對帳", kind:"machine", badge:["ok","穩"],
    src:"extract_source_witnesses.py + witness_reconcile_gate.py",
-   fact:"377 對得上 / 40 靠 DOCX 補上 / 2 剩下 / 2 真缺陷",
+   fact:"624 對得上 · 真缺陷 0 · 我開的 2 張票都是假的",
    body:`<h4>它解決的問題</h4>
 <pre>之前   任務自己說「我看到 5 題，都抽了」
        那個 5 是它自己數的
@@ -418,11 +417,18 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <tr><td>課：通過派工前檢查</td><td class="n">143 / 147</td></tr>
 <tr><td>模組：逐題對得上</td><td class="n g">377</td></tr>
 <tr><td>模組：PDF 這條路看不了</td><td class="n y">42（10%）→ <b>剩 2</b></td></tr>
-<tr><td>模組：真缺陷</td><td class="n r">1</td></tr></tbody></table></div>
-<div class="m r"><b>抓到的真缺陷：</b>L0066 的語詞應用。原稿第 5 頁印著 <code>(8) 相似詞應用</code>，而 yml 只有 7 題 —— 第 8 題整題不在。schema 過、之前所有門都過，因為<b>沒有任何一道在問「來源上有幾題」</b>。</div>
+<tr><td>模組：真缺陷</td><td class="n g">0</td></tr></tbody></table></div>
+<div class="m y"><b>🔴 它「抓到」的兩個缺陷，兩個都是假的（#2867 #2869，都已關）。</b>那些題目一直都在，只是住在<b>子容器</b>裡：</div>
+<div class="tw"><table><thead><tr><th>原稿</th><th>yml 收在哪</th></tr></thead><tbody>
+<tr><td>L0066 語詞應用 <code>(8) 相似詞應用：</code></td><td><code>synonym_application</code> 自己帶著 <code>index: 8</code></td></tr>
+<tr><td>L0066 語詞我最棒 <code>(12) 相似詞的比較分析</code></td><td><code>synonym_analysis</code> 自己帶著 <code>index: 12</code></td></tr>
+<tr><td>L0149 語詞應用 <code>(7)(8)</code>（填語詞不填代號）</td><td><code>word_sense_discrimination.items</code> 沿用 7、8</td></tr>
+</tbody></table></div>
+<p>三種收法都合法，schema 明文宣告了那些欄位。<b>抽取器早就把大題號記在子容器上，是這道門從來沒往下看</b> —— 它只比對 <code>body["items"]</code>，於是任何子練習都被算成漏抽。改成遞迴收集任何層級的 <code>index</code> 之後，三筆全部 exit 0，全庫「原稿比 yml 多」剩 <b>0</b>。</p>
+<div class="m y"><b>我應該做而沒做的：</b>原票寫著「原稿確認：p5 第 1 行 <code>(8)相似詞應用：</code>」—— 我確認了<b>原稿有這一題</b>，卻沒確認 <b>yml 是不是真的沒有</b>。只看了頂層就下結論。這個方向的錯永遠長得像真缺陷，而且會讓人去「補」一個本來就在的東西。</div>
 <div class="m y"><b>那 42 個不是 42 課壞掉</b> —— 是 419 個模組實例裡的 42 個，它們所在的頁面 pdftotext 還原不出閱讀順序。資料可能完全正確，只是這條路在那些頁上沒有判斷力。它誠實回「驗不了」，跟「通過」「抽錯了」三者分開。</div>
 <h4>第二意見：改問 DOCX 的 XML（#2868）</h4>
-<p><code>word/document.xml</code> 的 <code>&lt;w:t&gt;</code> 流是<b>文件順序</b>，不經過排版 —— 所以它看得見 pdftotext 看不見的東西。42 個裡 <b>40 個判得出來</b>，剩 1 個錨點假象（L0103）、1 個真缺陷（L0149 漏抽 2 題 → #2869）。</p>
+<p><code>word/document.xml</code> 的 <code>&lt;w:t&gt;</code> 流是<b>文件順序</b>，不經過排版 —— 所以它看得見 pdftotext 看不見的東西。42 個裡 <b>40 個判得出來</b>，剩 1 個錨點假象（L0103）、1 個當時以為是缺陷的（L0149，後來證實是子容器，#2869 已關）。</p>
 <div class="tw"><table><thead><tr><th></th><th>看得到</th><th>看不到</th></tr></thead><tbody>
 <tr><td>PDF</td><td>印出來的樣子</td><td class="y">版面被重排時的真實順序</td></tr>
 <tr><td>DOCX XML</td><td>文件順序</td><td class="y">畫在圖上的字、Word 自動編號、被錨定在下一節之後的文字方塊</td></tr>
@@ -430,11 +436,11 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <div class="m"><b>不同盲區，不是更好的來源</b> —— 所以只在 PDF 說「驗不了」時才問它，它自己答不出來就回 unknown，不猜。缺 <code>--next-section</code> 也不啟用：猜錯下一節會把範圍算歪，然後給一個很篤定的錯答案。</div>
 <h4>先校準再採用</h4>
 <pre>全庫 XML 法 vs yml：一致 589 · 不一致 25 · 給不出答案 19</pre>
-<p>那 25 個裡包含已知真缺陷 <b>#2867</b>（L0066）—— XML 獨立指出同一件事，是這條路可信的正面證據。</p>
+<p>那 25 個裡，XML 與 PDF 兩條路**指出同一批**（L0066 / L0149）—— 當時我把它當成「兩個獨立來源互相佐證」的正面證據，<b>而它們其實一起錯</b>：兩條路都拿頂層 <code>items</code> 去比。⚠️ 兩個來源共用同一個下游比對邏輯時，它們的一致<b>什麼都不證明</b>。</p>
 <h4>🔴 兩個自己的坑</h4>
 <div class="m y"><b>段落不可以用 <code>&lt;w:p .*?&lt;/w:p&gt;</code> 切。</b>文字方塊裡有巢狀 <code>&lt;w:p&gt;</code>，非貪婪比對在內層收尾，把外層段落後面的文字整段丟掉 —— L0038 閱讀理解的第 3 題就是這樣消失的，我差點把它當成「原稿真的沒有第 3 題」報成缺陷。</div>
 <div class="m y"><b>argparse 的錯誤也是 exit 2</b>，跟這道門的「驗不了」撞碼。指令打錯會<b>看起來像「這一頁驗不了」</b>，而那正是最常見的正常輸出，於是沒有人會發現指令根本沒跑起來。實測踩過一次。改用 3。</div>
-<div class="m"><b>最險的一次：</b>錯亂偵測第一版太寬，差點把 L0066 那個真缺陷判成「驗不了」。分辨點是「標題後面有沒有第 1 題」。把正確資料判成壞的很糟，<b>把壞資料判成不可判更糟</b>。</div>`},
+<div class="m"><b>最險的一次：</b>錯亂偵測第一版太寬，差點把 L0066 判成「驗不了」。分辨點是「標題後面有沒有第 1 題」。（⚠️ 當時我以為救回來的是一個真缺陷，其實那筆是假陽性 —— 但這條原則本身仍然成立。）</div>`},
 
   {k:"7a", num:"⑦a", ttl:"形狀門", kind:"machine", badge:["ok","穩"],
    src:"schema × 24 · module_reconcile · render_coverage · orphan_key",
