@@ -116,6 +116,19 @@ rm -f "$OUT_PDF"
 # ⚠️ `rc` 一定要先給值。`set -u` 之下，如果 timeout 被外部訊號中斷、
 #    這一行沒跑完就跳走，下面的錯誤處理會炸 `rc: unbound variable`，
 #    **把真正的失敗訊息蓋掉** —— 有 worker 因此看不到自己是逾時還是轉檔失敗。
+# ⚠️ **LibreOffice 的排版不是決定性的**（#2865 實測，20 次單轉：8 頁 9 次 / 9 頁 11 次）。
+#
+#    排除過的假設：
+#      · 冷熱 profile —— 驗過兩輪像是對的，第三輪就翻掉
+#      · 字型替換     —— 三次轉檔的 pdffonts 輸出逐字相同（11 個子集化字型、順序一樣）
+#      · 三次取多數   —— 55/45 的分布下只有 57% 命中多數值，等於沒用
+#
+#    ⇒ 這裡**不試圖讓它變決定性**。正確做法是把 PDF 當**一次性產物**：
+#      轉一次、算頁碼、派工、抽取，整條流程用**同一份** PDF 從頭到尾。
+#      重轉就要重算頁碼 —— 這是 assert_pdf_matches_manifest.py 在守的事。
+#
+#    ⛔ 不要在這裡加重試或多數決。要讓它穩，得換掉排版引擎或改用內容錨點
+#      （見 docs/prd/extraction-pipeline-map.md §0.5 Q1）。
 rc=0
 timeout "$CONVERT_TIMEOUT" soffice --headless \
   -env:UserInstallation="file://$PROFILE" \

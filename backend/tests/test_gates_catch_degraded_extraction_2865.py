@@ -759,3 +759,50 @@ def test_zero_checked_strings_is_not_a_pass():
     """「一個字串都沒被檢查」不是通過，是沒驗到。"""
     src = ATTEST.read_text(encoding="utf-8")
     assert "受檢 0" in src or "total == 0" in src, "沒有處理『零受檢』的情況"
+
+
+# ---------------------------------------------------------------------------
+# ⑥a 重跑一致率 + ② 的隨機性（#2865）
+# ---------------------------------------------------------------------------
+
+REP = REPO / "scripts" / "eval_extract_repeatability.py"
+
+
+def test_repeatability_tool_separates_content_from_annotation():
+    """教學內容與自由註記要分開報。
+
+    實測 L0072 語詞我最棒跑三次：題數、題號、答案、解釋逐字、欄位集合
+    **全部 3/3 相同**，飄的只有 `notes` —— 三個任務描述同一件事用了
+    三個不同的 key（layout / section_boundary / page_boundary）。
+
+    混在一起報「不一致」會讓人以為內容會飄；完全不報又會漏掉真的差異。
+    ⚠️ 第一版就漏了：報「每一層都一致」，但三個檔案大小是 1699/1561/1512。
+    """
+    src = REP.read_text(encoding="utf-8")
+    assert "CONTENT" in src and "ANNOT" in src, "沒有分層"
+    assert "if layer in CONTENT:" in src, "註記層不該計入 exit code"
+
+
+def test_repeatability_tool_compares_definitions_verbatim():
+    """只比題數會騙人 —— 三份可以題數相同而解釋全不一樣。"""
+    src = REP.read_text(encoding="utf-8")
+    for layer in ("題數", "題號集合", "答案", "解釋逐字", "欄位集合"):
+        assert layer in src, f"少了 {layer} 這一層"
+
+
+def test_docx_conversion_does_not_pretend_to_be_deterministic():
+    """⛔ 不要在轉檔腳本裡加重試或多數決。
+
+    實測 20 次單轉：8 頁 9 次 / 9 頁 11 次 —— 55/45，幾乎是擲硬幣。
+    在那個分布下三次取多數只有 57% 命中多數值，等於沒用（實際跑 6 次
+    仍然 8/9 交錯）。
+
+    正確做法是把 PDF 當一次性產物，整條流程用同一份 ——
+    那是 assert_pdf_matches_manifest.py 在守的事。
+    """
+    src = (REPO / "scripts" / "docx_to_pdf.sh").read_text(encoding="utf-8")
+    assert "不是決定性" in src, "沒有寫明這件事"
+    assert "DOCX2PDF_ATTEMPTS" not in src, "多數決沒移乾淨 —— 它只有 57% 命中"
+    # 排除過的假設要留在檔案裡，否則下一個人會再驗一次
+    for ruled_out in ("冷熱 profile", "字型替換", "三次取多數"):
+        assert ruled_out in src, f"沒記錄排除過「{ruled_out}」"
