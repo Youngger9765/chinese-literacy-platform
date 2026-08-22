@@ -74,6 +74,51 @@ NUMBERED_MODULES = {
     "vocab_application",             # 149 份
     "word_matching",                 #  11 份
     "keypoints_followup_questions",  #   2 份
+    "self_challenge",                #   6 份（2026-08-23 加：6/6 原稿題號與 yml 全中）
+}
+
+
+#: 🔴 這道門**只看得懂「有編號題目」的模組**。其餘 17 種它一律回「不適用」——
+#: 而「不適用」跟「驗過了」在輸出上長得太像，於是那 17 種等於沒有人在看。
+#:
+#: 這張表把它們從隱形變成有名有姓：每一種都要寫出**誰在守它**。
+#: 值是「守它的那道門」，`None` = 目前真的沒有人守（那是待辦，不是狀態）。
+#:
+#: ⛔ 新增模組時必須在這裡登記。鎖：
+#: `backend/tests/test_every_module_has_a_named_guard_2872.py`
+GUARDED_BY = {
+    # 題號型 —— 這道門守
+    "comprehension": "witness_reconcile_gate",
+    "vocab_definitions": "witness_reconcile_gate",
+    "vocab_application": "witness_reconcile_gate",
+    "word_matching": "witness_reconcile_gate",
+    "keypoints_followup_questions": "witness_reconcile_gate",
+    "self_challenge": "witness_reconcile_gate",
+
+    # 有題號，但**原稿不印**它們 —— 這道門會誤報，刻意排除
+    "resources": "content_fidelity_attest（題號原稿不印，QR 圖與影片連結）",
+
+    # 課級檔，沒有大題 —— 見證對帳本來就不適用
+    "metadata": "schema + content_fidelity_attest",
+    "errata": "content_fidelity_attest（只驗 source 那一欄）",
+    "multi_text_parts": "content_fidelity_attest（多文本，見證對帳算不了）",
+    "cross_text_banner": "content_fidelity_attest",
+    "goal_box": "content_fidelity_attest",
+    "self_check_before_reading": "content_fidelity_attest（沒有編號，是勾選項）",
+
+    # 連續文字，不是題目 —— 逐字忠實度是唯一守它的
+    "key_reading": "content_fidelity_attest",
+    "full_text_annotate": "content_fidelity_attest",
+    "classical_text": "content_fidelity_attest",
+    "modern_translation": "content_fidelity_attest",
+    "intro_guide": "content_fidelity_attest",
+    "writing_practice": "content_fidelity_attest",
+    "sentence_matching": "content_fidelity_attest（配對題，不是編號題）",
+    "vocab_review": "content_fidelity_attest + normalize_word_search（找字遊戲走座標）",
+
+    # 各自有專屬的門
+    "keypoints": "keypoints_shape_gate + content_fidelity_attest",
+    "spotlight": "spotlight_fingerprints + content_fidelity_attest",
 }
 
 
