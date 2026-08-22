@@ -128,6 +128,12 @@ ANNOTATION_KEYS = frozenset({
     # ⚠️ 但**不要**把所有 `*_source` 一起排除：`passage_source`
     # 是「（本文出自國立編譯館）」，那是原稿印的出處註記，該檢查。
     "url_source",
+    # `intro` 是我方寫的課文摘要（給線上頁用），**學習單上沒有這段** ——
+    # 實測 174 課有 intro，印在原稿上的 **0 課**。拿它去逐字比對必然全紅。
+    # ⚠️ 這一欄先前從沒被檢查過（⑦b 不涵蓋 metadata），是 2026-08-23
+    # 重抽對帳器第一次掃到它才發現 —— 174/175「對不上」看起來像資料大壞，
+    # 實際上是那一欄本來就不該驗。
+    "intro",
     "section", "locator", "end", "label", "left_header", "right_header",
     "columns", "unit", "attached_to", "marker", "duration", "name",
 })
