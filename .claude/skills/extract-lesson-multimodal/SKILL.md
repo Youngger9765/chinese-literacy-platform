@@ -222,6 +222,13 @@ mkdir -p $W && cp "$SOT/<drive_path>" $W/src.docx
 #    過期殭屍清理、timeout、產出與頁數檢查（0 頁也算失敗）。
 scripts/docx_to_pdf.sh $W/src.docx $W $UID     # 印出 `<pdf路徑> pages=N`
 
+# 🔴 整條決定性流程用一支就跑完（#2865）——
+#    ①定位原稿 ②轉PDF ③頁碼 ④派工單 ⑤PDF對帳，任一步紅就停
+python3 scripts/run_extraction_pipeline.py plan --uid $UID
+# 飛機全部交件之後：
+#    python3 scripts/run_extraction_pipeline.py verify --uid $UID --out <產出目錄>
+#
+# 下面這幾行是它裡面做的事，單獨要跑時才用：
 # 🔴 派工之前必跑（#2857 B1）：這份 PDF 是不是算頁碼時的那一份
 #    同一份 DOCX 連轉三次會得到不同頁數（L0016 → 8,9,9；L0013 → 11,10,11），
 #    整份對比 172 課有 7 課頁數不同、11 課共 33 個大題頁碼不同。

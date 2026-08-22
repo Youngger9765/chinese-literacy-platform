@@ -108,8 +108,17 @@ absent_from_source: []                         # 學習單本來就沒印的
 而頁碼錯了**不會有任何症狀**：少讀一頁的飛機照樣抽得出東西、照樣過門、照樣回報成功。
 少數的那次（`[1]`）就是錯的 —— 決定性定位器與多數決都是 `[1,2]`。
 
-**所以頁碼交給 `scripts/build_section_pages.py`**（字串定位 + 單調指派，不受 run-to-run 影響），
-這支只回答「有哪幾個大題」。兩邊對不起來就擋下來不派工。
+**所以頁碼交給定位器**，這支只回答「有哪幾個大題」：
+
+```bash
+# 把這支的輸出（JSON array）餵給橋接器，頁碼一律重算
+python3 scripts/locate_scanned_sections.py \
+  --scan <你的輸出.json> --pdf <PDF> --uid <uid>
+```
+
+實證：**三次不同的 LLM 輸出 → 三份逐位元組相同的派工單**。
+`locate_scanned_sections.py` 借用 `build_section_pages.locate`（字串定位 + 單調指派），
+⛔ 不要自己再實作一次 —— 那支修過兩個真實 bug（子字串吃掉、散文提及被當標題）。
 
 ⛔ 不要在這支裡問 LLM 頁碼 —— 它會給你一個看起來很合理的答案，而錯的那次你分不出來。
 

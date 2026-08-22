@@ -332,3 +332,55 @@ def test_the_referee_has_no_llm_in_it():
             code = "\n".join(l for l in src.split("\n")
                              if not l.strip().startswith("#") and marker in l)
             assert not code, f"{path.name} 裡有 LLM 呼叫：{code[:80]}"
+
+
+# ---------------------------------------------------------------------------
+# 串接器：積木要真的被串起來（#2865）
+# ---------------------------------------------------------------------------
+
+PIPELINE = REPO / "scripts" / "run_extraction_pipeline.py"
+SKILLS = REPO / ".claude" / "skills"
+
+
+def test_the_pipeline_script_exists_and_has_both_halves():
+    """LLM 前後各一道，缺一邊等於沒夾住。"""
+    src = PIPELINE.read_text(encoding="utf-8")
+    assert "def plan(" in src and "def verify(" in src
+
+
+@pytest.mark.parametrize("skill,must_mention", [
+    # 航母要叫整條決定性流程
+    ("extract-lesson-multimodal", "run_extraction_pipeline.py"),
+    # 飛機要叫見證對帳
+    ("extract-module", "witness_reconcile_gate.py"),
+    # overview 的頁碼要交給橋接器，不是自己回
+    ("lesson-overview-scan", "locate_scanned_sections.py"),
+])
+def test_skill_actually_calls_its_gate(skill, must_mention):
+    """門建了沒插電 = 比沒有門更糟，因為大家以為它在守。
+
+    #2843 盤點時 16 道門只有 1 道從 CI 到得了，就是這個病；
+    `pdf_pages` 也是寫在每一份派工單裡卻沒有任何消費者。
+    """
+    path = SKILLS / skill / "SKILL.md"
+    assert path.is_file(), f"{skill} 不見了"
+    assert must_mention in path.read_text(encoding="utf-8"), \
+        f"{skill} 沒有叫 {must_mention}"
+
+
+def test_pipeline_refuses_an_unknown_lesson():
+    """材料不齊要回 2，⛔ 不可以因為「沒發現問題」就回 0。"""
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "plan", "--uid", "L9999"],
+        cwd=REPO, capture_output=True, text=True, timeout=180,
+    )
+    assert r.returncode == 2, f"未知的課回了 {r.returncode}：{r.stdout}{r.stderr}"
+
+
+def test_verify_refuses_an_empty_output_dir(tmp_path):
+    """一份 yml 都沒有 = 抽失敗，不是零模組。"""
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "verify", "--uid", "L0072", "--out", str(tmp_path)],
+        cwd=REPO, capture_output=True, text=True, timeout=180,
+    )
+    assert r.returncode == 2, r.stdout + r.stderr

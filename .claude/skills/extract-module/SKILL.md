@@ -188,9 +188,13 @@ sys.exit(1 if (extra or missing) else 0)"
 **2b. 抽完必跑見證對帳** —— 這道門問的是「來源上有幾題，你交了幾題」：
 
 ```bash
+# 單獨驗自己這一架：
 python3 scripts/witness_reconcile_gate.py \
   --uid <uid> --module <module> --pdf <你讀的那份 PDF> \
   --section <大題名稱> --yaml <你的產出>
+
+# 一整課全部交件之後（航母跑）：schema + 見證對帳，逐個模組
+python3 scripts/run_extraction_pipeline.py verify --uid <uid> --out <產出目錄>
 ```
 
 ⛔ **不是可選的。** 在它之前，飛機自己說「我看到 5 題，都抽了」——
