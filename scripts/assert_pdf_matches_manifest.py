@@ -31,6 +31,7 @@ exit 2 = 材料不齊（沒有派工單／沒有 pdf_pages／讀不到 PDF）—
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import pathlib
 import re
 import subprocess
@@ -63,6 +64,49 @@ def pdf_page_count(pdf: pathlib.Path) -> int | None:
         return None
     n = len(re.findall(rb"/Type\s*/Page[^s]", raw))
     return n or None
+
+
+def _compare_prints(uid: str, pdf: pathlib.Path, manifest: dict) -> int | None:
+    """比對每一頁的文字指紋。回 None = 這課沒存指紋（舊資料），跳過不擋。
+
+    ⚠️ 「沒存指紋」與「指紋不符」必須分開。舊的 section-pages.yml 沒有這個欄位，
+    把它當成不符會讓每一課都紅 —— 那道門紅久了就等於沒有。
+    """
+    db_path = REPO / "specs" / "modules" / "section-pages.yml"
+    if not db_path.is_file():
+        return None
+    try:
+        db = yaml.safe_load(db_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError:
+        return None
+    entry = (db.get("lessons") or {}).get(uid) or {}
+    want = entry.get("page_prints")
+    if not isinstance(want, list) or not want:
+        return None   # 這課還沒存指紋
+
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "bsp", REPO / "scripts" / "build_section_pages.py")
+        bsp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bsp)
+        got = [bsp.page_print(t) for t in bsp.page_texts(pdf)]
+    except Exception as exc:  # noqa: BLE001
+        # 算不出來要說出來，⛔ 不可以當成「比對過了」
+        print(f"⛔ 算不出這份 PDF 的頁面指紋（{exc}）—— 不派工", file=sys.stderr)
+        return 2
+
+    if len(got) != len(want):
+        print(f"🔴 {uid} 手上這份 PDF 有 {len(got)} 頁，派工單記了 {len(want)} 頁的指紋。")
+        print("   ⛔ 不要派工。")
+        return 1
+
+    diff = [i + 1 for i, (a, b) in enumerate(zip(got, want)) if a != b]
+    if diff:
+        print(f"🔴 {uid} 頁數相同（{len(got)} 頁）但**第 {diff} 頁的內容跟算頁碼時不一樣**。")
+        print("   同一份 DOCX 轉兩次版面會變（實測 55/45），切節結果會跟著變。")
+        print("   ⛔ 不要派工。重跑 scripts/build_section_pages.py 更新派工單。")
+        return 1
+    return None
 
 
 def main() -> int:
@@ -104,6 +148,14 @@ def main() -> int:
     if actual is None:
         print(f"⛔ 數不出 {pdf.name} 的頁數（pdfinfo 沒裝且 fallback 也失敗）—— 不派工")
         return 2
+
+    # ── 頁數之外，再比每一頁的文字指紋（#2865）─────────────────────
+    # 頁數一樣不代表版面一樣。實測 L0001 兩次轉檔都是 8 頁，但標題從
+    # 「三　語詞我最棒」變成「三 🅐 語詞我最棒」—— 只比頁數會放行，
+    # 而那份 PDF 的切節結果已經不同了。
+    prints_verdict = _compare_prints(args.uid, pdf, manifest)
+    if prints_verdict is not None:
+        return prints_verdict
 
     if actual != expected:
         print(

@@ -74,6 +74,7 @@ private/ 原稿 ──[本機跑這支]──> specs/modules/section-pages.yml (
 from __future__ import annotations
 
 import argparse
+import hashlib
 import concurrent.futures as cf
 import os
 import pathlib
@@ -88,7 +89,27 @@ import yaml
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 LESSONS = REPO_ROOT / "backend" / "data" / "lessons"
-SOT = REPO_ROOT / "private" / "curriculum-source" / "_SOT"
+def _find_sot() -> pathlib.Path:
+    """原稿目錄。⚠️ `private/` 是 gitignore 的，**worktree 裡沒有** ——
+    只有主 checkout 有。在 worktree 裡跑要回頭找主 checkout，
+    否則會報「原稿目錄不在」而那其實是路徑問題不是資料問題。"""
+    here = REPO_ROOT / "private" / "curriculum-source" / "_SOT"
+    if here.is_dir():
+        return here
+    try:
+        r = subprocess.run(["git", "rev-parse", "--path-format=absolute",
+                            "--git-common-dir"], cwd=REPO_ROOT if "REPO_ROOT" in globals() else ".",
+                           capture_output=True, text=True, timeout=30)
+        if r.returncode == 0:
+            cand = pathlib.Path(r.stdout.strip()).parent / "private" / "curriculum-source" / "_SOT"
+            if cand.is_dir():
+                return cand
+    except Exception:  # noqa: BLE001
+        pass
+    return here
+
+
+SOT = _find_sot()
 OUT_FILE = REPO_ROOT / "specs" / "modules" / "section-pages.yml"
 DOCX_TO_PDF = REPO_ROOT / "scripts" / "docx_to_pdf.sh"
 
@@ -147,6 +168,33 @@ def page_count(pdf: pathlib.Path) -> int:
     if not m:
         raise RuntimeError(f"讀不出頁數：{pdf}")
     return int(m.group(1))
+
+
+#: 一頁文字的指紋長度。⚠️ 不要用完整 sha256 —— 64 個十六進位字元會被
+#: secret 掃描器判成 token（見 content_fidelity_attest.py 的同一個坑）。
+PRINT_CHARS = 12
+
+
+def page_print(text: str) -> str:
+    """一頁的文字指紋。
+
+    ⛔ **不要先 normalise**。第一版這麼做，結果指紋抓不到
+    「三　語詞我最棒」→「三 🅐 語詞我最棒」的差異 —— 因為 normalise
+    的工作就是把那類符號洗掉。而那正是 ⑤ 要抓的東西：兩份都 8 頁、
+    字也一樣，但標題被塞了一個圈號，於是切節切不到。
+
+    只壓掉連續空白（那在兩次轉檔之間本來就會浮動，且不影響切節）。
+
+    🔴 **每 4 字元插一個連字號，不是為了好看。** 純十六進位串會撞上
+    secret 掃描器的台灣身分證規則（字母 + 1/2 + 8 位數）—— 第一版
+    172 課裡就有 7 個長成 `b26431196…`，pre-commit 直接擋。
+    ⛔ 正確解法是改格式，不是去 touch bypass marker ——
+    習慣繞掃描器，真的 secret 遲早會跟著過去。
+    """
+    squeezed = re.sub(r"[ \t]+", " ", text)
+    squeezed = re.sub(r"\n{2,}", "\n", squeezed).strip()
+    h = hashlib.sha256(squeezed.encode("utf-8")).hexdigest()[:PRINT_CHARS]
+    return "-".join(h[i:i + 4] for i in range(0, len(h), 4))
 
 
 def page_texts(pdf: pathlib.Path) -> list[str]:
@@ -314,6 +362,12 @@ def build_one(uid: str) -> dict:
     return {
         "uid": uid,
         "pdf_pages": len(texts),
+        # 每一頁文字的指紋（#2865）。⑤ 原本只比頁數，擋不住
+        # 「頁數一樣但版面重排」—— 實測 L0001 兩次轉檔都是 8 頁，
+        # 但標題從「三　語詞我最棒」變成「三 🅐 語詞我最棒」，
+        # 頁數檢查放行，而抽取範圍已經變了。
+        # 存指紋而不是全文：全文會讓這個檔膨脹到幾 MB。
+        "page_prints": [page_print(t) for t in texts],
         "sections": [
             # name 一起存下來，讓 manifest 端能發現「來源改了但頁碼沒重定位」
             {"name": n, "pages": pages or None, "pages_source": how}
@@ -348,7 +402,9 @@ def main() -> int:
             elif r.get("error"):
                 errors.append(f"{r['uid']}: {r['error']}")
             else:
-                results[r["uid"]] = {"pdf_pages": r["pdf_pages"], "sections": r["sections"]}
+                results[r["uid"]] = {"pdf_pages": r["pdf_pages"],
+                                     "page_prints": r["page_prints"],
+                                     "sections": r["sections"]}
 
     unlocated = [
         {"lesson_uid": uid, "section": s["name"], "pages_source": s["pages_source"]}

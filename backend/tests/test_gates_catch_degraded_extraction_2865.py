@@ -28,6 +28,7 @@
 """
 from __future__ import annotations
 
+import re
 import json
 import pathlib
 
@@ -806,3 +807,86 @@ def test_docx_conversion_does_not_pretend_to_be_deterministic():
     # 排除過的假設要留在檔案裡，否則下一個人會再驗一次
     for ruled_out in ("冷熱 profile", "字型替換", "三次取多數"):
         assert ruled_out in src, f"沒記錄排除過「{ruled_out}」"
+
+
+# ---------------------------------------------------------------------------
+# ⑤ 從「只比頁數」升級成「比每頁文字指紋」（#2865）
+# ---------------------------------------------------------------------------
+
+def test_page_print_catches_layout_drift_but_ignores_whitespace():
+    """指紋要抓得到版面重排，又不能被空白數量騙。
+
+    🔴 第一版先 `normalise` 再雜湊 —— 而 normalise 的工作就是洗掉符號，
+    於是「三　語詞我最棒」→「三 🅐 語詞我最棒」的差異**抓不到**，
+    而那正是這道門要抓的東西（兩份都 8 頁、字也一樣，只是標題多了圈號，
+    切節就切不到了）。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsp", REPO / "scripts" / "build_section_pages.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+
+    base = "三　語詞我最棒 請在空格內填入"
+    assert m.page_print(base) != m.page_print("三 🅐 語詞我最棒 請在空格內填入"), \
+        "塞了圈號卻抓不到 —— 指紋沒有用"
+    assert m.page_print(base) == m.page_print("三　語詞我最棒    請在空格內填入"), \
+        "只是空白數不同就報警 —— 這道門會恆紅"
+
+
+def test_page_prints_are_stored_and_are_not_token_shaped():
+    """指紋要真的存進派工單，而且不能長得像 token。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsp", REPO / "scripts" / "build_section_pages.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert m.PRINT_CHARS <= 20, "指紋太長，會被 secret 掃描器誤判成 token"
+
+    db = REPO / "specs" / "modules" / "section-pages.yml"
+    if not db.is_file():
+        pytest.skip("沒有 section-pages.yml")
+    doc = yaml.safe_load(db.read_text(encoding="utf-8")) or {}
+    with_prints = [u for u, e in (doc.get("lessons") or {}).items()
+                   if isinstance(e, dict) and e.get("page_prints")]
+    assert with_prints, "一課都沒有指紋 —— 這道門形同不存在"
+    for u in with_prints[:5]:
+        e = doc["lessons"][u]
+        assert len(e["page_prints"]) == e["pdf_pages"], \
+            f"{u} 的指紋數與頁數對不上"
+
+
+def test_missing_prints_are_skipped_not_treated_as_mismatch():
+    """舊資料沒有指紋 —— 要跳過，⛔ 不可以當成不符。
+
+    把「沒存」當成「不符」會讓每一課都紅，而那道門紅久了就等於沒有。
+    """
+    src = (REPO / "scripts" / "assert_pdf_matches_manifest.py").read_text(encoding="utf-8")
+    assert "這課還沒存指紋" in src or "return None   # 這課還沒存指紋" in src, \
+        "沒有處理『舊資料沒指紋』"
+    assert "算不出這份 PDF 的頁面指紋" in src, \
+        "算不出來時必須擋，不可以當成比對過了"
+
+
+def test_page_prints_do_not_look_like_taiwan_id_or_phone():
+    """指紋不可以長得像個資 —— ⛔ 這條不是潔癖。
+
+    第一版是純十六進位 12 碼，172 課裡有 7 個長成 `b26431196…`
+    （字母 + 1/2 + 8 位數 = 台灣身分證的形狀），pre-commit 直接擋下。
+    當下最省事的做法是 touch bypass marker —— 而那正是
+    「習慣繞掃描器，真的 secret 遲早跟著過去」的起點。
+    正解是改格式。這條鎖住它別被改回去。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bsp", REPO / "scripts" / "build_section_pages.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert "-" in m.page_print("x"), "指紋沒有分組 —— 會撞回掃描器"
+
+    db = REPO / "specs" / "modules" / "section-pages.yml"
+    if not db.is_file():
+        pytest.skip("沒有 section-pages.yml")
+    raw = db.read_text(encoding="utf-8")
+    assert not re.findall(r"[A-Za-z][12]\d{8}", raw), "檔裡有像身分證的字串"
+    assert not re.findall(r"09\d{8}", raw), "檔裡有像手機號的字串"
