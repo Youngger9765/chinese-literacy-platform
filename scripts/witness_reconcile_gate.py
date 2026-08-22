@@ -60,6 +60,11 @@ def _witnesses_mod():
 #: 只有這 7 個適用「來源幾題 == yml 幾題」的對帳 —— 其餘 14 個模組的內容
 #: 不是編號題目（課文段落、重點表格、聚光燈 block、找字表…），
 #: ⛔ 對它們喊「讀不到 items = 抽失敗」是**假警報**，會讓人學會忽略這道門。
+#: ⛔ `self_check_before_reading` / `goal_box` / `multi_text_parts` /
+#: `cross_text_banner` 也不在：它們是**無編號元素**（跨大題的框），
+#: 派工單裡本來就沒有它們的節名（實測 58/58、70/70、4/4、2/2 課皆然）。
+#: 對它們喊「派工單沒有節名，驗不了」會讓 31 課無故變紅。
+#:
 #: ⛔ `resources`（知識補給站）**刻意不在名單裡**：它的內容是 QR 圖與影片連結，
 #: 文字層數不到。實測 26 課只對 20 課（77%），而錯的那 6 課都不是資料壞，
 #: 是文字層本來就沒有那些編號。判準訂錯比沒有判準更糟。
@@ -67,7 +72,6 @@ NUMBERED_MODULES = {
     "comprehension",                 # 172 份
     "vocab_definitions",             # 150 份
     "vocab_application",             # 149 份
-    "self_check_before_reading",     #  58 份
     "word_matching",                 #  11 份
     "keypoints_followup_questions",  #   2 份
 }

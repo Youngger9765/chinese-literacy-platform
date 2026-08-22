@@ -602,3 +602,55 @@ def test_continuation_stitching_refuses_a_restart():
     esw = _witness_mod()
     src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
     assert "1 not in tail_nums" in src, "續頁銜接沒有擋掉重新編號"
+
+
+# ---------------------------------------------------------------------------
+# 147 課全跑（#2865 第四輪）
+#
+# 這輪的核心是**分辨「驗不了」與「抽錯了」**。兩者的畫面症狀一樣，
+# 但把真缺陷判成「驗不了」等於放它過去，把正確資料判成「抽錯」是假指控。
+# ---------------------------------------------------------------------------
+
+def test_unnumbered_elements_are_excluded():
+    """無編號元素（跨大題的框）本來就沒有節名。
+
+    實測 goal_box 70/70、self_check_before_reading 58/58、
+    multi_text_parts 4/4、cross_text_banner 2/2 課都沒有節名。
+    不排除的話 147 課裡有 31 課無故變紅。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wrg", RECONCILE)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    for mod in ("self_check_before_reading", "goal_box",
+                "multi_text_parts", "cross_text_banner"):
+        assert mod not in m.NUMBERED_MODULES, f"{mod} 是無編號元素，不該進對帳"
+    src = PIPELINE.read_text(encoding="utf-8")
+    for mod in ("goal_box", "self_check_before_reading"):
+        assert mod in src, f"流程沒有排除 {mod}"
+
+
+def test_scrambling_detector_distinguishes_a_real_gap():
+    """🔴 這條最重要：把真缺陷判成「驗不了」= 放它過去。
+
+    三種情況的標題前後題號分布：
+
+        L0067 p11  標題前 1,2,3   標題後 3,4,5   → 錯亂（我的 1、2 被排到前面）
+        L0022 p3   標題前 1..8    標題後 1..7    → 正常（前面是上一節的）
+        L0066 p4   標題前 1,2,3…  標題後 1..7    → 正常，而且它是**真的漏抽第 8 題**
+
+    判準是「標題後面有沒有第 1 題」。少了它，兩課正確的和一個真缺陷
+    會被一起判成驗不了 —— 而 L0066 的缺口就這樣溜過去了（見 #2867）。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "nums_after" in src, "沒有檢查標題後面的題號"
+    assert "1 not in nums_after" in src, "判準沒有收斂 —— 會把真缺陷判成驗不了"
+
+
+def test_both_scrambling_shapes_are_covered():
+    """兩種錯亂形狀都要抓：別節排在我前面、我的題排在我標題前。"""
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "earlier_bigger" in src, "缺第一種（序號更大的節排在前面）"
+    assert "排在自己的標題之前" in src, "缺第二種（自己的題排在自己標題前）"

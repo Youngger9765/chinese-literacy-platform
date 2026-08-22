@@ -166,6 +166,37 @@ def witnesses(pdf: pathlib.Path, pages: list[int], section: str | None = None) -
                     h for h in heads
                     if h[0] < my_pos and h[1] in ORD and ORD.index(h[1]) > ORD.index(my_no)
                 ]
+                # 另一種同族的錯亂：**自己的題目排在自己的標題之前**。
+                # 實測 L0067 p11：「七 閱讀理解」在位置 465，它的第 1、2 題
+                # 在 263 / 434。切節從標題往後取就少了那兩題，而回報會變成
+                # 「yml 多抽了 1, 2」—— 對正確資料的假指控。
+                before = [
+                    mm for mm in ITEM_RE.finditer(text[:my_pos])
+                    if any(g for g in mm.groups())
+                ]
+                if before and not earlier_bigger:
+                    nums_before = {int(g) for mm in before for g in mm.groups() if g}
+                    # 只有「1 在標題之前」才算錯亂 —— 前一節的題號在前面是正常的，
+                    # 那些會被切節排除掉。這裡要抓的是「我的第 1 題就在標題前」。
+                    # 判準：**標題之後沒有第 1 題**才算錯亂。
+                    #
+                    # L0067 p11：標題後面是 3,4,5 —— 第 1、2 題被排到標題前面了 → 錯亂
+                    # L0022 p3 ：標題後面是 1..7 —— 前面那些是上一節的 → 正常
+                    # L0066 p4 ：標題後面是 1..7 —— 同上 → 正常（它是真的漏抽第 8 題）
+                    #
+                    # 少了「後面沒有 1」這一條，會把兩課正確的和一個真缺陷一起判死 ——
+                    # 而把真缺陷judge成「驗不了」等於放它過去。
+                    nums_after = {
+                        int(g) for mm in ITEM_RE.finditer(text[my_pos:])
+                        for g in mm.groups() if g
+                    }
+                    if 1 in nums_before and 1 not in nums_after:
+                        out.append({"id": f"p{p}-ORDER-SCRAMBLED", "kind": "unreliable",
+                                    "page": p,
+                                    "text": f"「{section}」的題目排在自己的標題之前"
+                                            f"（標題在 {my_pos}，題號 1 在更前面）"})
+                        continue
+
                 if earlier_bigger:
                     # 序號比我大的大題排在我前面 = 我這一節的文字位置不可信
                     out.append({"id": f"p{p}-ORDER-SCRAMBLED", "kind": "unreliable",
