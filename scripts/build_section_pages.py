@@ -344,7 +344,19 @@ def spans(starts: list[int | None], total: int) -> list[tuple[list[int], str]]:
     return out
 
 
-def build_one(uid: str) -> dict:
+def build_one(uid: str, pdf_override: pathlib.Path | None = None) -> dict:
+    """算這一課的頁碼與每頁指紋。
+
+    🔴 `pdf_override` 是給管線用的，不是方便選項。② 的排版不穩代表
+    **兩次獨立轉檔幾乎不會一致**（實測 20 次單轉：8 頁 9 次 / 9 頁 11 次）。
+    所以「⑤ 對不上 → 重算頁碼 → 再試」這個修法在自己重轉一份的情況下
+    **永遠不會收斂**：重算出來的指紋來自第三份 PDF，跟管線手上那份還是不同。
+
+    正解是**一次轉檔、全程共用**：管線把它手上那份傳進來，
+    指紋就是從那一份算的，於是 plan / 抽取 / verify 看到的是同一份。
+    ⛔ 這不是放寬 ⑤ —— 它保證的「派工單的頁碼對得上手上這份 PDF」
+    一點都沒少，只是把「哪一份」定死成一份。
+    """
     lesson_file = LESSONS / uid / "v3" / "lesson.yml"
     lesson = yaml.safe_load(lesson_file.read_text(encoding="utf-8")) or {}
     rows = [r for r in (lesson.get("sections_present") or []) if isinstance(r, dict) and r.get("name")]
@@ -354,7 +366,7 @@ def build_one(uid: str) -> dict:
     drive_path = (lesson.get("source") or {}).get("drive_path")
     if not drive_path:
         return {"uid": uid, "error": "lesson.yml 沒有 source.drive_path"}
-    pdf = ensure_pdf(uid, drive_path)
+    pdf = pdf_override if pdf_override else ensure_pdf(uid, drive_path)
     texts = page_texts(pdf)
     names = [str(r["name"]) for r in rows]
     ordinals = [str(r.get("no") or "") for r in rows]
@@ -380,6 +392,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--uid")
     ap.add_argument("--jobs", type=int, default=4)
+    ap.add_argument("--pdf", type=pathlib.Path, default=None,
+                    help="用這一份 PDF 算（管線一次轉檔全程共用；需搭 --uid）")
     args = ap.parse_args()
 
     uids = [
@@ -395,8 +409,11 @@ def main() -> int:
         return 2
 
     results, errors, blocked = {}, [], {}
+    if args.pdf and not args.uid:
+        print("⛔ --pdf 必須搭 --uid（一份 PDF 只屬於一課）", file=sys.stderr)
+        return 2
     with cf.ThreadPoolExecutor(max_workers=args.jobs) as ex:
-        for r in ex.map(lambda u: _safe(u), uids):
+        for r in ex.map(lambda u: _safe(u, args.pdf), uids):
             if r.get("blocked"):
                 blocked[r["uid"]] = r["blocked"]
             elif r.get("error"):
@@ -463,9 +480,9 @@ def main() -> int:
     return 0
 
 
-def _safe(uid: str) -> dict:
+def _safe(uid: str, pdf: pathlib.Path | None = None) -> dict:
     try:
-        return build_one(uid)
+        return build_one(uid, pdf)
     except Exception as exc:  # noqa: BLE001 — 一課壞掉不該讓整輪停掉
         return {"uid": uid, "error": f"{type(exc).__name__}: {exc}"}
 
