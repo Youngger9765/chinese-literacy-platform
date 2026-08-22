@@ -131,14 +131,21 @@ python3 scripts/run_extraction_pipeline.py verify --uid L0072 --out <產出目�
 
 ### 固化程度（實測）
 
+（2026-08-22 重量）
+
 ```
-scripts/ 共 97 支
-  ├─ CI 到得了            24 支（直接跑 11 · 經 CI 點名的測試 13）
-  └─ CI 到不了            73 支（多為一次性建置/遷移腳本，非門）
-決定性核心 14 支          零 LLM 呼叫（逐支 grep 驗過）
-LLM 行為的 eval           **幾乎沒有** —— 四支 `eval_*` 裡三支是純結構檢查，
-                          只有 eval_strategy_validate 真的碰 LLM，且都沒接 CI
+scripts/ 共 101 支
+  ├─ CI 到得了            29 支（直接跑 10 · 經 CI 點名的測試 19）
+  └─ CI 到不了            72 支（多為一次性建置/遷移腳本，非門）
+決定性核心 19 支          **零 LLM 呼叫**（逐支 grep 驗過，含本輪新增 5 支）
 ```
+
+**LLM 行為的量測**：本輪之前**幾乎沒有** —— 四支 `eval_*` 裡三支是純結構檢查，
+只有 `eval_strategy_validate` 真的碰 LLM，且都沒接 CI。
+
+現在多了 `eval_overview_repeatability.py`（量 overview 的重跑一致率，
+本身**不呼叫 LLM**，只做決定性比對）。
+⚠️ 但 ⑥ 飛機那一層的一致率**仍然沒量** —— 只跑過 1 課 1 次。
 
 ## 0.5 架構判斷（2026-08-22，kc gpt-5.6-terra）—— 決定修復順序
 
