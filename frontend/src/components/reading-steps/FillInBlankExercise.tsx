@@ -275,8 +275,18 @@ const FillInBlankExercise: React.FC<Props> = ({
   //   'disappear'→ 全部選項，用過直接移除 = 案 (b)
   //   'random4'  → 每題只 4 個（正解 + 3 確定性 decoy）= 案 (a) 降難度
   // random4 用 currentOriginalIdx 當 seed → 同題重選不會洗牌。
+  // 🔴 子練習不參與「用過就消失」。兩個理由，任一個都足以壞掉：
+  //   ① 代號會撞：子練習自己的 A（肆虐）跟主題目的 A 是不同的詞，
+  //      但 usedCodes 是一份扁平的代號集合 —— 主題目用掉 A 之後，
+  //      子練習的正確答案就變成 disabled，**學生答不了**。
+  //      （L0122 第 9 題實測：選項只剩肆虐/蔓延是對的，但肆虐是 disabled）
+  //   ② 語意本來就不同：主題目是一對一配對（每個詞用一次），
+  //      子練習會**重複用同一個詞**（L0122 的答案是 肆虐/蔓延/肆虐/蔓延）。
+  //      就算沒有 ①，消失機制也會讓後兩題無解。
+  const isSubExercise = Boolean(currentSentence?.options);
+
   const availableEntries = useMemo(() => {
-    if (FILLBLANK_OPTION_MODE === 'disappear') {
+    if (FILLBLANK_OPTION_MODE === 'disappear' && !isSubExercise) {
       return bankEntries.filter(([code]) => !usedCodes.has(code));
     }
     if (FILLBLANK_OPTION_MODE === 'random4' && currentSentence) {
@@ -292,7 +302,7 @@ const FillInBlankExercise: React.FC<Props> = ({
       return out;
     }
     return bankEntries; // 'all'
-  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx]);
+  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx, isSubExercise]);
 
   /**
    * Guided demo on the real UI — tooltips + animated tap on the correct option.
@@ -325,9 +335,13 @@ const FillInBlankExercise: React.FC<Props> = ({
     setSelectedCode(code);
 
     if (code === currentSentence.answer) {
-      const newUsed = new Set(usedCodes);
-      newUsed.add(code);
-      setUsedCodes(newUsed);
+      // ⛔ 子練習答對不記進 usedCodes —— 那份集合是給主題目的一對一配對用的，
+      //    記進去會把後面某一題的正確答案關掉（見 isSubExercise 那段）。
+      if (!isSubExercise) {
+        const newUsed = new Set(usedCodes);
+        newUsed.add(code);
+        setUsedCodes(newUsed);
+      }
 
       const alreadyRecorded = firstTryResults.some((r) => r.sentenceIdx === currentOriginalIdx);
       if (!alreadyRecorded) {
@@ -592,7 +606,7 @@ const FillInBlankExercise: React.FC<Props> = ({
               demo?.step === 'pick' ? 'ring-4 ring-amber-300/40 rounded-2xl p-1' : ''
             }`}>
               {availableEntries.map(([code, word]) => {
-                const isUsedDecoy = usedCodes.has(code);
+                const isUsedDecoy = !isSubExercise && usedCodes.has(code);
                 const isDemoTarget = demo?.targetCode === code;
                 const isWrongSelected =
                   feedback === 'wrong' &&
