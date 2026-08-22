@@ -25,11 +25,19 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 SKILLS = REPO / ".claude" / "skills"
 LESSONS = REPO / "backend" / "data" / "lessons"
 
-#: 別人負責的區域 —— 不是我方漏寫。改動這份名單要有人真的接手了才行。
-OWNED_ELSEWHERE = {
-    "key_reading",    # 靖杭 @if-else-master
-    "keypoints",      # 啟翔 @stgst
-    "spotlight",      # 啟翔 @stgst
+#: 這三個模組的**內容規格寫在別的名字底下**，`extract-*` 只是轉接。
+#:
+#: 🔴 第一版我把它們列成「別人負責、還沒寫」的 known gap —— **那是錯的**。
+#:    三份規格都存在而且很完整（305 / 241 / 174 行），只是不叫 `extract-*`：
+#:    我掃的時候只看了 `extract-` 前綴，於是把「命名不同」誤判成「沒有」。
+#:    查得太窄 → 回報成缺口。
+#:
+#: 所以現在三支 `extract-*` 都在（轉接），但它們**不可以自己長出內容** ——
+#: 抄一份就會漂，而漂掉的那一份不會報錯。
+POINTER_ONLY = {
+    "key_reading": "lesson-reading-pipeline",  # 靖杭 @if-else-master（重點朗讀那個 PR）
+    "keypoints": "build-keypoints",            # 啟翔 @stgst
+    "spotlight": "build-spotlight",            # 啟翔 @stgst
 }
 
 #: 不是模組，是骨架 / 舊的整包抽取器
@@ -56,26 +64,45 @@ def test_every_corpus_module_has_an_extraction_skill():
 
     只驗「skills 目錄非空」的話，1 支跟 20 支長得一樣綠。
     """
-    missing = sorted(_corpus_modules() - _skills() - OWNED_ELSEWHERE)
+    missing = sorted(_corpus_modules() - _skills())
     assert not missing, (
-        f"{len(missing)} 種模組沒有自己的抽取 skill：{missing}\n"
+        f"{len(missing)} 種模組沒有 extract-<module> skill：{missing}\n"
+        "   派工單印的是「跑 extract-<module>」，名字解不到就等於沒有。\n"
         "   缺的時候沒有任何症狀 —— 派工單照樣產、形狀門照樣綠。"
     )
 
 
-def test_the_known_gaps_are_still_other_peoples_and_still_missing():
-    """known gap 名單要跟現實對得上。
+def test_pointer_skills_point_somewhere_real_and_stay_thin():
+    """轉接就是轉接，⛔ 不可以自己長出內容。
 
-    ⛔ 兩個方向都要擋：
-      · 名單上的其實已經有人寫了 → 該從名單移除，否則它會遮住未來的真缺口
-      · 名單上的模組語料庫已經沒有了 → 名單過期
+    抄一份規格過來就會漂，而漂掉的那一份**不會報錯** ——
+    只會讓下一個人照著舊的做（`build-key-reading` 就是這樣變成 #2712 的成因）。
     """
-    mods, skills = _corpus_modules(), _skills()
-    for m in sorted(OWNED_ELSEWHERE):
-        assert m in mods, f"{m} 已不在語料庫裡 —— known gap 名單過期了"
-        assert m not in skills, (
-            f"{m} 已經有 skill 了 —— 從 OWNED_ELSEWHERE 移除，"
-            "否則它會遮住未來真的缺口"
+    for mod, target in POINTER_ONLY.items():
+        d = SKILLS / f"extract-{mod.replace('_', '-')}"
+        assert d.is_dir(), f"{mod} 的轉接不見了"
+        src = (d / "SKILL.md").read_text(encoding="utf-8")
+        assert target in src, f"extract-{mod} 沒有指向 {target}"
+        assert (SKILLS / target / "SKILL.md").is_file(), \
+            f"extract-{mod} 指向 {target}，但那份不存在 —— 懸空引用"
+        n = len(src.split("\n"))
+        assert n <= 90, (
+            f"extract-{mod} 長到 {n} 行 —— 轉接不該有這麼多內容，"
+            f"真規格在 {target}"
+        )
+
+
+def test_the_real_specs_are_not_deprecated():
+    """轉接指到的那份必須是活的。
+
+    ⚠️ `build-key-reading` 現在整份是「已停用」說明 —— 它明文寫的規則正是
+    #2712（朗讀範圍比教授畫的多一倍）的成因。指到一份停用的規格
+    比沒有轉接更糟：名字解得到，內容是有害的。
+    """
+    for mod, target in POINTER_ONLY.items():
+        head = (SKILLS / target / "SKILL.md").read_text(encoding="utf-8")[:600]
+        assert "已停用" not in head, (
+            f"extract-{mod} 指向 {target}，而那份已停用 —— 要改指到取代它的那份"
         )
 
 
