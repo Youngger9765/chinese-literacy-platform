@@ -251,7 +251,17 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
         if mod in LESSON_LEVEL:
             _step(f"{mod} · 見證對帳", True, "課級檔，沒有大題（不適用）")
             continue
+        # ⛔ 不要在這裡自己判斷「驗不驗得了」—— 那是對帳門的職責。
+        # 原本這裡在沒有節名時直接報紅，於是 keypoints 那種本來就沒有題號的模組
+        # 被判成失敗（L0029）。判斷集中在門裡面，這裡只負責叫它。
         sec, pages = sections.get(mod), dispatch_pages.get(mod)
+        if not (sec and pages):
+            import importlib.util as _il
+            _sp = _il.spec_from_file_location("wrg", REPO / "scripts" / "witness_reconcile_gate.py")
+            _w = _il.module_from_spec(_sp); _sp.loader.exec_module(_w)
+            if mod not in _w.NUMBERED_MODULES:
+                _step(f"{mod} · 見證對帳", True, "非題號型模組（不適用）")
+                continue
         if sec and pages:
             r = subprocess.run(
                 [sys.executable, str(REPO / "scripts" / "witness_reconcile_gate.py"),

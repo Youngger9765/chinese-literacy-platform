@@ -81,6 +81,12 @@ HEADING_RE = re.compile(
     re.M,
 )
 
+#: 序號獨佔一行（雙欄排版把標題拆成兩行時會這樣）
+LONE_ORDINAL_RE = re.compile(r"^[ \t]*([一二三四五六七八九十ㄧ])[ \t]*$")
+
+#: 大題名稱：2–12 字純中文（含連字號）。⛔ 不要放寬，會把內文抓成標題。
+SECTION_NAME_RE = re.compile(r"([\u4e00-\u9fff][\u4e00-\u9fff\-－]{1,11})")
+
 #: 語詞框標題
 BANK_RE = re.compile(r"(本課語詞|語詞框|參考語詞)")
 
@@ -102,12 +108,39 @@ def witnesses(pdf: pathlib.Path, pages: list[int], section: str | None = None) -
     """
     out: list[dict] = []
     started = False  # 這一節的標題出現過了沒（跨頁續頁靠它判斷）
+    _last_ordinal = [None]  # 自己的序號，續頁要靠它判斷「哪個標題才算下一節」
+    _seen_max = [0]         # 目前收到的最大題號，續頁銜接靠它
     for p in pages:
         text = page_text(pdf, p)
         if not text.strip():
             continue
 
         heads = [(m.start(), m.group(1), m.group(2)) for m in HEADING_RE.finditer(text)]
+        # 雙欄排版會把標題自己拆成兩行 —— 實測 L0018 p7：第 2 行只有「七」，
+        # 名稱「閱讀理解」被擠到第 4 行（跟另一欄的答案括號混在一起）。
+        # 序號獨佔一行時，往後三行找第一個像大題名稱的中文詞補上。
+        # ⛔ 只找三行，且只認 2–12 字的純中文 —— 放寬會把內文抓成標題。
+        if not heads or True:
+            lines = text.split("\n")
+            offs, acc = [], 0
+            for ln in lines:
+                offs.append(acc); acc += len(ln) + 1
+            known = {h[1] for h in heads}
+            for i, ln in enumerate(lines):
+                mm = LONE_ORDINAL_RE.match(ln)
+                if not mm or mm.group(1) in known:
+                    continue
+                # ⛔ **不可以隨便抓第一個中文詞當名稱** —— 雙欄下前一行常是別欄的內文
+                # （實測 L0018：序號「七」的下一行是「明都叫承恩，身高卻差了…」）。
+                # 只認**我們要找的那個節名**，找不到就不補 —— 寧可少一個標題，
+                # 也不要造一個假的出來污染切節。
+                if not section:
+                    continue
+                for j in range(i + 1, min(i + 5, len(lines))):
+                    if section in lines[j]:
+                        heads.append((offs[i], mm.group(1), section))
+                        break
+            heads.sort()
         for pos, no, name in heads:
             out.append({"id": f"p{p}-heading-{no}", "kind": "heading",
                         "page": p, "text": f"{no} {name}"})
@@ -120,14 +153,43 @@ def witnesses(pdf: pathlib.Path, pages: list[int], section: str | None = None) -
                     end = heads[i + 1][0] if i + 1 < len(heads) else len(text)
                     ranges.append((pos, end, name))
                     started = True
+                    _last_ordinal[0] = no
             if not ranges:
                 if started:
                     # 續頁：這一節從上一頁延續過來，續頁上**不會再印一次標題**。
-                    # 範圍是「頁首 → 這頁第一個標題」（下一個大題開始的地方），
-                    # 沒有標題就是整頁都還是我的。
-                    # 校準時 L0009 p4 的題號 6–12 就是這樣整頁被丟掉的。
-                    end = heads[0][0] if heads else len(text)
-                    ranges.append((0, end, section))
+                    #
+                    # ⚠️ 範圍**不能**取到「這頁第一個標題」就切 —— 雙欄排版下
+                    # 右欄的下一個大題標題會排在左欄的續題**前面**（實測 L0022 p4：
+                    # 第 1 行是「五 品格聚光燈」，第 2 行才是語詞應用的第 8 題）。
+                    # 那樣切會漏掉續頁的第一批題，而症狀只是「少一題」。
+                    #
+                    # 改成切在「序號**大於**自己的下一個大題」，而且要往後找到
+                    # 第一個真的比自己晚的。找不到就整頁都還是我的。
+                    ORD = "一二三四五六七八九十"
+                    mine = _last_ordinal[0]
+                    cut = len(text)
+                    for pos, no, _name in heads:
+                        if mine and no in ORD and mine in ORD and ORD.index(no) > ORD.index(mine):
+                            cut = pos
+                            break
+                    ranges.append((0, cut, section))
+                    # ⚠️ 雙欄排版下，續頁的題號可能排在下一個大題標題**之後**
+                    # （實測 L0022 p4：「五 品格聚光燈」在第 1 行，語詞應用的
+                    #  第 8 題在第 4 行）。切在標題救不了 —— 文字順序就是這樣。
+                    #
+                    # 所以切點之後再收一次，但**只收編號接得上自己的**：
+                    # 上一頁最後是第 7 題，就只認第 8 題，不認重新從 1 開始的。
+                    # 這樣不會把隔壁節的 (1)(2)(3) 吃進來。
+                    if cut < len(text):
+                        tail_nums = {
+                            int(g) for mm in ITEM_RE.finditer(text[cut:])
+                            for g in mm.groups() if g
+                        }
+                        nxt = (_seen_max[0] or 0) + 1
+                        while nxt in tail_nums:
+                            out.append({"id": f"p{p}-item-{nxt}", "kind": "item",
+                                        "page": p, "n": nxt, "section": section})
+                            nxt += 1
                 else:
                     # 還沒開始就沒有標題 = 頁碼錯了，不是「這節沒題目」。
                     # ⛔ 不可以退回「整頁都算」—— 那會把隔壁節的題目算成自己的。
@@ -141,6 +203,8 @@ def witnesses(pdf: pathlib.Path, pages: list[int], section: str | None = None) -
                 out.append({"id": f"p{p}-bank", "kind": "bank", "page": p,
                             "text": BANK_RE.search(seg).group(1)})
             nums = {int(g) for m in ITEM_RE.finditer(seg) for g in m.groups() if g}
+            if nums:
+                _seen_max[0] = max(_seen_max[0], max(nums))
             for n in sorted(nums):
                 if not 1 <= n <= 30:
                     continue

@@ -60,11 +60,13 @@ def _witnesses_mod():
 #: 只有這 7 個適用「來源幾題 == yml 幾題」的對帳 —— 其餘 14 個模組的內容
 #: 不是編號題目（課文段落、重點表格、聚光燈 block、找字表…），
 #: ⛔ 對它們喊「讀不到 items = 抽失敗」是**假警報**，會讓人學會忽略這道門。
+#: ⛔ `resources`（知識補給站）**刻意不在名單裡**：它的內容是 QR 圖與影片連結，
+#: 文字層數不到。實測 26 課只對 20 課（77%），而錯的那 6 課都不是資料壞，
+#: 是文字層本來就沒有那些編號。判準訂錯比沒有判準更糟。
 NUMBERED_MODULES = {
     "comprehension",                 # 172 份
     "vocab_definitions",             # 150 份
     "vocab_application",             # 149 份
-    "resources",                     # 148 份
     "self_check_before_reading",     #  58 份
     "word_matching",                 #  11 份
     "keypoints_followup_questions",  #   2 份
@@ -116,6 +118,20 @@ def main() -> int:
             print(f"⛔ 派工單沒有 {args.module} 的頁碼 —— 不能當成「這節沒題目」",
                   file=sys.stderr)
             return 2
+
+    # 多文本課：同一個模組對應到兩個以上大題（兩篇各一節），`dispatch_pages`
+    # 是兩篇的**聯集**，而兩篇的題號各自從 1 開始 —— 逐一對帳在這裡沒有意義。
+    # ⚠️ 回 0 是「不適用」不是「驗過了」，訊息要講清楚。
+    # 實測全庫 4 課有 `篇次`（L0029/L0063/L0137/L0144）。
+    mf_path = REPO / "backend" / "data" / "lessons" / args.uid / "v3" / "_manifest.yml"
+    if mf_path.is_file():
+        _m = yaml.safe_load(mf_path.read_text(encoding="utf-8")) or {}
+        _same = [x for x in (_m.get("sections") or []) if x.get("module") == args.module]
+        if len(_same) > 1:
+            print(f"  ⬜ {args.uid} 的 {args.module} 對應到 {len(_same)} 個大題（多文本課），"
+                  "頁碼是聯集、題號各篇從 1 開始 —— 這道門不適用")
+            print("     ⚠️ 這**不代表**它被驗過。多文本要逐篇對帳，那還沒做。")
+            return 0
 
     if args.module not in NUMBERED_MODULES:
         # 這個模組的內容不是編號題目 —— 這道門對它沒有意義。

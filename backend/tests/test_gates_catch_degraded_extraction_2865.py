@@ -484,3 +484,62 @@ def test_lesson_level_files_skip_reconciliation():
     src = PIPELINE.read_text(encoding="utf-8")
     assert "LESSON_LEVEL" in src
     assert "schema" in src, "課級檔的 schema 檢查不可以一起被跳過"
+
+
+# ---------------------------------------------------------------------------
+# 跑 30 課真課又跑出來的四個版面陷阱（#2865 第二輪）
+#
+# 前一輪跑 5 課，這輪跑 30 課。每多跑一批就多撞到幾個 ——
+# 這正是「樣本小就別宣稱穩」的實證。
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not SYNTH.is_file(), reason="沒有合成 fixture")
+def test_continuation_items_after_the_next_heading():
+    """雙欄下，續頁的題號可能排在**下一個大題標題之後**。
+
+    實測 L0022 p4：第 1 行是「五 品格聚光燈」，語詞應用的第 8 題在第 4 行。
+    切在標題救不了 —— 文字順序就是這樣。只收「編號接得上自己的」，
+    這樣不會把隔壁節重新從 1 開始的題吃進來。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "_seen_max" in src, "沒有續頁編號銜接"
+    assert "編號接得上自己的" in src or "nxt in tail_nums" in src
+
+
+def test_split_heading_only_accepts_the_requested_section_name():
+    """序號與名稱被拆成兩行時，⛔ 不可以隨便抓第一個中文詞當名稱。
+
+    實測 L0018 p7：第 19 行只有「七」，第 20 行是別欄的內文
+    「明都叫承恩，身高卻差了近三十公分」—— 抓它就造出一個假標題。
+    只認派工單給的那個節名，找不到就不補。
+    """
+    esw = _witness_mod()
+    src = pathlib.Path(esw.__file__).read_text(encoding="utf-8")
+    assert "LONE_ORDINAL_RE" in src
+    assert "if section in lines[j]" in src, "拆行標題沒有比對節名"
+
+
+def test_resources_is_deliberately_excluded_from_reconciliation():
+    """`resources` 的內容是 QR 圖與影片連結，文字層數不到。
+
+    實測 26 課只對 20 課（77%），而錯的 6 課都不是資料壞。
+    判準訂錯比沒有判準更糟 —— 所以刻意不放進名單。
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wrg", RECONCILE)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert "resources" not in m.NUMBERED_MODULES
+    assert "QR" in RECONCILE.read_text(encoding="utf-8"), "沒寫明為什麼排除"
+
+
+def test_multi_text_lessons_are_marked_not_applicable_not_passed():
+    """多文本課（4 課）同一模組對應兩個大題，頁碼是聯集、題號各篇從 1 開始。
+
+    對帳在這裡沒有意義 —— 但回 0 必須講清楚是「不適用」而不是「驗過了」，
+    否則那 4 課會被當成有守。
+    """
+    src = RECONCILE.read_text(encoding="utf-8")
+    assert "多文本" in src
+    assert "不代表**它被驗過" in src, "不適用的訊息沒有講清楚"
