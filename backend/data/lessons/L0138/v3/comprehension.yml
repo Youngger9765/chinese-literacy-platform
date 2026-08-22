@@ -16,6 +16,7 @@ comprehension:
     explanation_placement_note: '印在題目右側的獨立文字方塊（藍框），是教師版解析。
 
       「忐忑難安」後面那個半形右中括號是原稿印的（見 source_errata_note ①），照抄。'
+    teacher_note: 選項A忐忑難安]形容心情緊張不安、坐立難安的樣子，此為成語誤用。
   - index: 2
     answer: B
     stem: 心理學家塞利格曼（Seligman）和研究團隊為了研究什麼問題，蒐集了一萬多篇NBA的報導？
@@ -35,6 +36,7 @@ comprehension:
       D: 樂觀的人相信問題只是暫時的，悲觀的人覺得問題會一直存在
     explanation: 第3題解析：本文指出樂觀者會把失敗看成「暫時、特定、可以改變的」，悲觀者則認為失敗是「永久、全面、無法改變的」。
     explanation_placement_note: 印在 PDF p10 底部的獨立文字方塊（藍框），版面上落在第 5 題之後、第八大題標題之上
+    teacher_note: 本文指出樂觀者會把失敗看成「暫時、特定、可以改變的」，悲觀者則認為失敗是「永久、全面、無法改變的」。
   - index: 4
     answer: C
     stem: 選出以下最符合本文主旨的選項。
@@ -45,6 +47,7 @@ comprehension:
       D: 學習心理學的方法，可以幫助球員提升表現與信心
     explanation: 第4題解析：本文核心在於「思考方式會影響行動與結果」，強調以樂觀態度面對挫折能盡速恢復。
     explanation_placement_note: 印在 PDF p10 底部的獨立文字方塊（藍框），與第 3、5 題的解析框疊在一起
+    teacher_note: 本文核心在於「思考方式會影響行動與結果」，強調以樂觀態度面對挫折能盡速恢復。
   - index: 5
     answer: C
     stem: 若你在運動會接力比賽失誤，以下哪一個選項最能展現「樂觀詮釋」？
@@ -57,5 +60,6 @@ comprehension:
     explanation_placement_note: '⚠️ 第 3、4、5 題的解析框在 PDF p10 上**互相疊印、也蓋住第八大題的標題與指示語**，
 
       看起來像版面壞掉。document.xml 的文字流是完整乾淨的，本欄以文字層為準。'
+    teacher_note: 選項C表現「問題可修正」的思考模式，是樂觀詮釋的具體行為。D.是錯誤選項，因為它帶有「永久性」與「不可改變」的悲觀詮釋：把一次失誤擴大成「我不適合接力」，甚至決定「以後都不要參加」。
   notes:
     answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

@@ -90,7 +90,20 @@ def _step(n: str, ok: bool, detail: str = "") -> None:
     print(f"  {'✅' if ok else '🔴'} {n}{('  ' + detail) if detail else ''}")
 
 
-def plan(uid: str, as_json: bool, workdir: pathlib.Path | None) -> int:
+def _reload_manifest(uid: str) -> dict | None:
+    """重算頁碼之後派工單也變了，要重讀 —— 不然後面派的還是舊頁碼。"""
+    vd = _vdir(uid)
+    f = vd / "_manifest.yml" if vd else None
+    if not f or not f.is_file():
+        return None
+    try:
+        return yaml.safe_load(f.read_text(encoding="utf-8")) or None
+    except yaml.YAMLError:
+        return None
+
+
+def plan(uid: str, as_json: bool, workdir: pathlib.Path | None,
+         refresh_pages: bool = False) -> int:
     vdir = _vdir(uid)
     if not vdir:
         print(f"⛔ 找不到 {uid} 的版本目錄", file=sys.stderr)
@@ -153,9 +166,37 @@ def plan(uid: str, as_json: bool, workdir: pathlib.Path | None) -> int:
          "--uid", uid, "--pdf", str(pdf)],
         capture_output=True, text=True, timeout=180,
     )
+    if r.returncode != 0 and refresh_pages:
+        # 🔴 ② 的排版不穩讓這裡幾乎每次都擋下來（實測 20 次單轉 8 頁 9 次 /
+        #    9 頁 11 次）。門是對的 —— 手上這份 PDF 真的不是算頁碼那份 ——
+        #    但如果每一次都要人先去跑 build_section_pages，這條流程實務上
+        #    就跑不動，而**跑不動的流程等於不存在**。
+        #
+        #    ⛔ 這不是放寬判準：重算之後 plan / 抽取 / verify 用的仍然是
+        #    **同一份 PDF**，⑤ 保證的那件事一點都沒少。差別只在「誰去重算」。
+        if not as_json:
+            _step("⑤ PDF 對帳", False, "頁碼過期 → 重算中")
+        rb = subprocess.run(
+            # ⭐ 關鍵：把**管線手上這一份** PDF 傳進去。
+            #    不傳的話它會自己再轉一份，而兩次獨立轉檔幾乎不會一致 ——
+            #    重算出來的指紋來自第三份 PDF，這個修法永遠不會收斂。
+            [sys.executable, str(REPO / "scripts" / "build_section_pages.py"),
+             "--uid", uid, "--pdf", str(pdf)],
+            capture_output=True, text=True, timeout=600,
+        )
+        if rb.returncode == 0:
+            manifest = _reload_manifest(uid) or manifest
+            r = subprocess.run(
+                [sys.executable, str(REPO / "scripts" / "assert_pdf_matches_manifest.py"),
+                 "--uid", uid, "--pdf", str(pdf)],
+                capture_output=True, text=True, timeout=180,
+            )
+
     if r.returncode != 0:
         if not as_json:
             _step("⑤ PDF 對帳", False, r.stdout.strip().split("\n")[0][:80])
+            print("     💡 頁碼可能過期 —— 加 --refresh-pages 讓它自己重算",
+                  file=sys.stderr)
         else:
             print(json.dumps({"uid": uid, "status": "BLOCKED",
                               "reason": r.stdout.strip()}, ensure_ascii=False))
@@ -253,6 +294,24 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
             _step(f"{mod} · schema", False, "沒有 schema 可驗（不是通過）")
             worst = max(worst, 2)
 
+        # 必要欄位：schema 的 required 只要求最低限度，擋不住「少抽了一欄」。
+        # L0011 實跑時 key_reading 沒抽 passage，八道門全綠 —— 而少了它
+        # lesson_uid_loader 會丟掉整個模組，學生那一步直接不見。
+        rf = subprocess.run(
+            [sys.executable, str(REPO / "scripts" / "essential_fields_check.py"),
+             # ⭐ 讀**這一輪的產出**，不是語料庫 —— 不傳 --dir 的話它會去驗舊資料，
+             #    對新抽的東西一句話都沒說（實測踩過：我那份沒有 passage 卻回 ✅）
+             "--uid", uid, "--dir", str(out)],
+            capture_output=True, text=True, timeout=120,
+        )
+        if rf.returncode == 1 and f"/{mod}:" in rf.stdout:
+            line = next((l.strip() for l in rf.stdout.split("\n")
+                         if f"/{mod}:" in l), "少了必要欄位")
+            _step(f"{mod} · 必要欄位", False, line[:70])
+            worst = max(worst, 1)
+        elif rf.returncode == 0:
+            _step(f"{mod} · 必要欄位", True, "")
+
         # ⑥b 見證對帳
         if mod in LESSON_LEVEL:
             _step(f"{mod} · 見證對帳", True, "課級檔，沒有大題（不適用）")
@@ -295,13 +354,15 @@ def main() -> int:
     p1.add_argument("--uid", required=True)
     p1.add_argument("--json", action="store_true")
     p1.add_argument("--workdir", type=pathlib.Path, default=None)
+    p1.add_argument("--refresh-pages", action="store_true",
+                    help="⑤ 對不上時自己重算頁碼再試一次（②不穩的常態解）")
     p2 = sub.add_parser("verify", help="飛機交件後：schema + 見證對帳")
     p2.add_argument("--uid", required=True)
     p2.add_argument("--out", required=True, type=pathlib.Path)
     p2.add_argument("--workdir", type=pathlib.Path, default=None)
     a = ap.parse_args()
     if a.cmd == "plan":
-        return plan(a.uid, a.json, a.workdir)
+        return plan(a.uid, a.json, a.workdir, a.refresh_pages)
     return verify(a.uid, a.out, a.workdir)
 
 

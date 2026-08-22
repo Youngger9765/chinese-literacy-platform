@@ -4,7 +4,7 @@
   "docx_sha256": "803c-7e65-e385-38b9",
   "modules": {
     "comprehension": {
-      "yaml_sha256": "d8d9-40a4-b500-f23f",
+      "yaml_sha256": "fea7-c1bd-5355-8927",
       "checked": 31,
       "status": "pass",
       "passed": true,

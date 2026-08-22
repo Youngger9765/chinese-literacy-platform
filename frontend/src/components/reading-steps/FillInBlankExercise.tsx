@@ -92,6 +92,25 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   );
 }
 
+/**
+ * 句子裡的那個空格。結果頁靠它把正確答案填回句子裡給學生看。
+ *
+ * 🔴 原本寫死成 `/[（(]　　[）)]/` —— **要求兩個全形空格**，
+ * 而全庫 1198 題裡符合的有 **0 題**。實際存在的寫法有六種：
+ *
+ *     791  （\u3000）      全形括號 + 一個全形空格
+ *     223  (\u3000)        半形括號 + 一個全形空格
+ *     137  (  )            半形括號 + 兩個半形空格
+ *      17  (   )    15  (    )    8  (  \u3000 )
+ *
+ * 所以那個 replace 對每一題都是空轉 —— 學生做完看到的還是空格，
+ * 不是「【喝采】」。⛔ 沒有任何症狀：畫面照樣渲染、測試照樣綠。
+ *
+ * 改成容忍任意數量的空白（含全形），括號全形半形都認。
+ * 2026-08-23 拿真資料跑 L0011 逐欄比對時撞出來的。
+ */
+const BLANK_RE = /[（(][\s\u3000]*[）)]/;
+
 interface Props {
   sentences: FillInBlankItem[];
   vocabBank: Record<string, string>;
@@ -495,7 +514,7 @@ const FillInBlankExercise: React.FC<Props> = ({
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-base text-on-surface leading-relaxed mb-1">
-                      {zh(s.sentence.replace(/[（(]　　[）)]/, `【${rowBank[correctCode] ?? correctCode}】`))}
+                      {zh(s.sentence.replace(BLANK_RE, `【${rowBank[correctCode] ?? correctCode}】`))}
                     </p>
                     {!correct && wrongCode && (
                       <p className="text-sm text-amber-700">

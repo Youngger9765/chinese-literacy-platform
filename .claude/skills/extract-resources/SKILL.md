@@ -70,3 +70,17 @@ sys.exit(1 if (extra or missing) else 0)"
 ⚠️ 真正逐題重抽過的只有 `extract-vocab-definitions`（L0011），
 而那一次就撞出四個本文沒寫的東西，其中一個是真的抽錯
 （兩欄折行處掉了一個頓號）。**統計綠 ≠ 抽得出來。**
+
+## 🔴 實跑撞到（2026-08-23，L0011）：載體鍵用錯
+
+我寫成 `items`，而 L0011 現有用的是 `videos`（帶 `url` 與 `url_source`）。
+**這份正文已經警告過「載體不只一種」，我還是踩了。**
+
+⇒ 光讀 skill 正文不夠。**抽之前先打開該課現有的 yml 看它用哪個鍵**：
+
+```bash
+python3 -c "import yaml;b=yaml.safe_load(open('backend/data/lessons/<UID>/v3/resources.yml'))['resources'];print([k for k in b if isinstance(b[k],list)])"
+```
+
+⚠️ schema 兩種都收、逐字門兩種都過 —— **沒有任何一道門會告訴你用錯了**，
+只有消費端讀不到。
