@@ -123,3 +123,46 @@ def test_frontend_uses_the_per_item_bank_not_the_lesson_bank():
     # #2279 的 TDZ：activeBank 必須宣告在 currentSentence 之後
     assert src.index("const currentSentence") < src.index("const activeBank"), \
         "activeBank 宣告在 currentSentence 之前 —— mount 會 TDZ 白屏"
+
+
+def test_sub_exercises_are_excluded_from_the_used_code_mechanic():
+    """🔴 「用過就消失」不可以套在子練習上。
+
+    真瀏覽器實測（staging，登入學生小明，L0122 第 9 題）抓到的：
+    選項組是對的（只有肆虐/蔓延），但**正確答案「肆虐」是 disabled，
+    學生答不了**。API 層完全看不到這件事 —— 回應裡一切正常。
+
+    兩個獨立的成因，任一個都足以壞掉：
+
+      ① 代號會撞。子練習自己的 A（肆虐）跟主題目的 A 是不同的詞，
+         而 `usedCodes` 是一份**扁平的代號集合** —— 主題目用掉 A 之後，
+         子練習的 A 就被當成用過。
+      ② 語意本來就不同。主題目是一對一配對（每個詞用一次），
+         子練習會**重複用同一個詞**（L0122 的四題答案是
+         肆虐/蔓延/肆虐/蔓延）。就算沒有 ①，消失機制也會讓後兩題無解。
+
+    ⚠️ 這條看的是程式碼；真正的驗證是那次瀏覽器實測，這條防它被改回去。
+    """
+    src = (REPO / "frontend" / "src" / "components" / "reading-steps"
+           / "FillInBlankExercise.tsx").read_text(encoding="utf-8")
+    assert "const isSubExercise" in src, "沒有區分子練習"
+    assert "FILLBLANK_OPTION_MODE === 'disappear' && !isSubExercise" in src, \
+        "選項篩選沒排除子練習 —— 正確答案會被濾掉"
+    assert "if (!isSubExercise) {" in src, \
+        "答對時仍會寫進 usedCodes —— 會關掉後面某一題的正確答案"
+    assert "!isSubExercise && usedCodes.has(code)" in src, \
+        "選項仍會被灰掉 —— 看得到但點不下去"
+    assert src.index("const currentSentence") < src.index("const isSubExercise"), \
+        "isSubExercise 宣告在 currentSentence 之前 —— mount 會 TDZ 白屏"
+
+
+def test_a_sub_exercise_answer_can_repeat():
+    """子練習的答案本來就會重複 —— 這是「消失機制不適用」的資料證據。"""
+    lesson = load_lesson("L0122")
+    if lesson is None:
+        pytest.skip("L0122 不在")
+    subs = [r for r in li._cloze_from(lesson) if r.get("_sub_exercise")]
+    answers = [r["answer"] for r in subs]
+    assert len(answers) > len(set(answers)), (
+        "L0122 的子練習答案不再重複了 —— 這條鎖的前提變了，去確認消失機制"
+    )
