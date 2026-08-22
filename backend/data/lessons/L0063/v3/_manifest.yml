@@ -27,8 +27,7 @@ sections:
   - 4
 - 'no': 五
   name: 文章重點整理
-  module: null
-  module_unresolved: true
+  module: keypoints
   pages:
   - 4
   - 5
@@ -74,6 +73,7 @@ dispatch:
 - comprehension
 - full_text_annotate
 - key_reading
+- keypoints
 - resources
 - spotlight
 - vocab_application
@@ -101,6 +101,20 @@ dispatch_pages:
   key_reading:
   - 2
   - 3
+  keypoints:
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
   resources:
   - 22
   spotlight:
