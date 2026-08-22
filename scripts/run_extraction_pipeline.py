@@ -294,6 +294,24 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
             _step(f"{mod} · schema", False, "沒有 schema 可驗（不是通過）")
             worst = max(worst, 2)
 
+        # 必要欄位：schema 的 required 只要求最低限度，擋不住「少抽了一欄」。
+        # L0011 實跑時 key_reading 沒抽 passage，八道門全綠 —— 而少了它
+        # lesson_uid_loader 會丟掉整個模組，學生那一步直接不見。
+        rf = subprocess.run(
+            [sys.executable, str(REPO / "scripts" / "essential_fields_check.py"),
+             # ⭐ 讀**這一輪的產出**，不是語料庫 —— 不傳 --dir 的話它會去驗舊資料，
+             #    對新抽的東西一句話都沒說（實測踩過：我那份沒有 passage 卻回 ✅）
+             "--uid", uid, "--dir", str(out)],
+            capture_output=True, text=True, timeout=120,
+        )
+        if rf.returncode == 1 and f"/{mod}:" in rf.stdout:
+            line = next((l.strip() for l in rf.stdout.split("\n")
+                         if f"/{mod}:" in l), "少了必要欄位")
+            _step(f"{mod} · 必要欄位", False, line[:70])
+            worst = max(worst, 1)
+        elif rf.returncode == 0:
+            _step(f"{mod} · 必要欄位", True, "")
+
         # ⑥b 見證對帳
         if mod in LESSON_LEVEL:
             _step(f"{mod} · 見證對帳", True, "課級檔，沒有大題（不適用）")
