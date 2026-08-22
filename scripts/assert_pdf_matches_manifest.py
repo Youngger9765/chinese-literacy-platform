@@ -66,13 +66,17 @@ def pdf_page_count(pdf: pathlib.Path) -> int | None:
     return n or None
 
 
-def _compare_prints(uid: str, pdf: pathlib.Path, manifest: dict) -> int | None:
+def _compare_prints(uid: str, pdf: pathlib.Path, manifest: dict,
+                    db_path: pathlib.Path | None = None) -> int | None:
     """比對每一頁的文字指紋。回 None = 這課沒存指紋（舊資料），跳過不擋。
 
     ⚠️ 「沒存指紋」與「指紋不符」必須分開。舊的 section-pages.yml 沒有這個欄位，
     把它當成不符會讓每一課都紅 —— 那道門紅久了就等於沒有。
     """
-    db_path = REPO / "specs" / "modules" / "section-pages.yml"
+    # `db_path` 可覆寫，只為了讓正向對照在 CI 也跑得到 —— CI 沒有 private/，
+    # 生不出「指紋真的對得上」的 PDF，於是「exit 0 到不到得了」永遠沒被證明過。
+    # ⛔ 沒有正向對照的話，下面每一個「擋住」都可能只是腳本壞了。
+    db_path = db_path or REPO / "specs" / "modules" / "section-pages.yml"
     if not db_path.is_file():
         return None
     try:
@@ -114,6 +118,8 @@ def main() -> int:
     ap.add_argument("--uid", required=True)
     ap.add_argument("--pdf", required=True)
     ap.add_argument("--version", default=None, help="預設取最新的 v* 目錄")
+    ap.add_argument("--db", type=pathlib.Path, default=None,
+                    help="覆寫 section-pages.yml 的位置（測試正向對照用）")
     args = ap.parse_args()
 
     uid_dir = REPO / "backend" / "data" / "lessons" / args.uid
@@ -153,7 +159,7 @@ def main() -> int:
     # 頁數一樣不代表版面一樣。實測 L0001 兩次轉檔都是 8 頁，但標題從
     # 「三　語詞我最棒」變成「三 🅐 語詞我最棒」—— 只比頁數會放行，
     # 而那份 PDF 的切節結果已經不同了。
-    prints_verdict = _compare_prints(args.uid, pdf, manifest)
+    prints_verdict = _compare_prints(args.uid, pdf, manifest, args.db)
     if prints_verdict is not None:
         return prints_verdict
 

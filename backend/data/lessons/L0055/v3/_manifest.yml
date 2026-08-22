@@ -52,11 +52,11 @@ sections:
   module: vocab_review
   pages:
   - 10
+  - 11
 - 'no': 九
   name: 知識補給站
   module: resources
   pages:
-  - 10
   - 11
 dispatch:
 - comprehension
@@ -94,7 +94,6 @@ dispatch_pages:
   - 5
   - 6
   resources:
-  - 10
   - 11
   spotlight:
   - 6
@@ -109,3 +108,4 @@ dispatch_pages:
   - 4
   vocab_review:
   - 10
+  - 11

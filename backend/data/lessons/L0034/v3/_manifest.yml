@@ -40,23 +40,24 @@ sections:
   - 6
   - 7
   - 8
+  - 9
 - 'no': 七
   name: 閱讀理解
   module: comprehension
   pages:
-  - 8
   - 9
+  - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
   pages:
-  - 9
   - 10
+  - 11
 - 'no': 九
   name: 知識補給站
   module: resources
   pages:
-  - 10
+  - 11
 dispatch:
 - comprehension
 - full_text_annotate
@@ -78,11 +79,11 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
-pdf_pages: 10
+pdf_pages: 11
 dispatch_pages:
   comprehension:
-  - 8
   - 9
+  - 10
   full_text_annotate:
   - 1
   - 2
@@ -93,11 +94,12 @@ dispatch_pages:
   - 5
   - 6
   resources:
-  - 10
+  - 11
   spotlight:
   - 6
   - 7
   - 8
+  - 9
   vocab_application:
   - 4
   - 5
@@ -105,5 +107,5 @@ dispatch_pages:
   - 3
   - 4
   vocab_review:
-  - 9
   - 10
+  - 11

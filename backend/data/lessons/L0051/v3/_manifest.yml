@@ -57,6 +57,7 @@ sections:
   module: resources
   pages:
   - 10
+  - 11
 dispatch:
 - comprehension
 - full_text_annotate
@@ -78,7 +79,7 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
-pdf_pages: 10
+pdf_pages: 11
 dispatch_pages:
   comprehension:
   - 9
@@ -94,6 +95,7 @@ dispatch_pages:
   - 6
   resources:
   - 10
+  - 11
   spotlight:
   - 6
   - 7

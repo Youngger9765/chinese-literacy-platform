@@ -30,12 +30,12 @@ sections:
   module: keypoints
   pages:
   - 4
+  - 5
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 找出故事道理
   pages:
-  - 4
   - 5
   - 6
   - 7
@@ -51,11 +51,13 @@ sections:
   module: vocab_review
   pages:
   - 9
+  - 10
 - 'no': 九
   name: 知識補給站
   module: resources
   pages:
-  - 9
+  - 10
+  - 11
 dispatch:
 - comprehension
 - full_text_annotate
@@ -77,7 +79,7 @@ produced:
 - vocab_definitions
 - vocab_review
 absent_from_source: []
-pdf_pages: 9
+pdf_pages: 11
 dispatch_pages:
   comprehension:
   - 8
@@ -90,10 +92,11 @@ dispatch_pages:
   - 3
   keypoints:
   - 4
+  - 5
   resources:
-  - 9
+  - 10
+  - 11
   spotlight:
-  - 4
   - 5
   - 6
   - 7
@@ -105,3 +108,4 @@ dispatch_pages:
   - 4
   vocab_review:
   - 9
+  - 10

@@ -43,15 +43,12 @@ sections:
   pages:
   - 10
   - 11
-  - 12
 - 'no': 七
   name: 閱讀理解
   module: comprehension
   pages:
-  - 10
   - 11
   - 12
-  pages_source: bracketed
 - 'no': 八
   name: 詞語複習
   module: vocab_review
@@ -87,7 +84,6 @@ absent_from_source: []
 pdf_pages: 13
 dispatch_pages:
   comprehension:
-  - 10
   - 11
   - 12
   full_text_annotate:
@@ -99,7 +95,6 @@ dispatch_pages:
   keypoints:
   - 10
   - 11
-  - 12
   resources:
   - 12
   - 13
@@ -119,5 +114,4 @@ dispatch_pages:
   vocab_review:
   - 12
 low_confidence_pages:
-- comprehension
 - spotlight
