@@ -125,7 +125,7 @@ describe('閱讀理解只該有選擇題，語詞應用的填空句不該混進�
  * #2834 (Young 2026-08-21)：「選擇題請統一用 vocab-application 的結束方式」。
  *
  * 語詞應用（FillInBlankExercise）答完後有完成卡（🎓「你完成了！」+ 副標 + 逐題列出
- * 題目原文與作答結果 + 重做錯題/全部重做/繼續下一步）。閱讀理解答完後只有一串
+ * 題目原文與作答結果 + 重做錯題/全部重做/下一關）。閱讀理解答完後只有一串
  * 「你選了 X → 正確：Y」跟一顆「下一步」——沒有完成卡、沒有重做、而且從畫面上看
  * 連題目原文都沒有（見下面「題幹不是空字串」那條 —— 這其實是另一個 bug：
  * `reviewableBlocksOf` 讀錯欄位名，`multiple_choice` 的題幹欄位是 `question.question`
@@ -233,7 +233,7 @@ describe('閱讀理解完成卡統一成 vocab-application 的樣式（#2834）'
       expect(screen.getByRole('button', { name: '回到練習工具箱' })).toBeInTheDocument();
       expect(screen.queryByText(/重做錯題/)).toBeNull();
       expect(screen.queryByText('全部重做')).toBeNull();
-      expect(screen.queryByText(/繼續下一步/)).toBeNull();
+      expect(screen.queryByText(/下一關/)).toBeNull();
     } finally {
       sessionStorage.removeItem('toolboxMode');
     }

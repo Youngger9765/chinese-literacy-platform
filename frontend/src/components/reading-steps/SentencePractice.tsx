@@ -23,6 +23,7 @@ import { useSentencePracticeState } from './useSentencePracticeState';
 import SentenceInputCard from './SentenceInputCard';
 import ExampleSentencesPanel from './ExampleSentencesPanel';
 import WordProgressSidebar from './WordProgressSidebar';
+import StepActionBar from '../learning/StepActionBar';
 
 // ── Props ─────────────────────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         <div className="text-center space-y-4 p-8">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">edit_note</span>
           <p className="text-on-surface-variant">沒有需要造句練習的詞語</p>
-          <NextStepFooter onNext={onFinish} label="繼續下一步" />
+          <NextStepFooter onNext={onFinish} />
         </div>
       </div>
     );
@@ -264,19 +265,16 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
       {/* Fixed bottom CTA — only when all words done */}
       {allWordsDone && (
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto">
+        <StepActionBar>
             {isToolboxMode() ? (
               <ToolboxCompletionActions
                 onRetry={resetAll}
                 className="w-full"
               />
             ) : (
-              <NextStepFooter onNext={onFinish} label="繼續下一步" />
+              <NextStepFooter onNext={onFinish} />
             )}
-          </div>
-        </div>
+        </StepActionBar>
       )}
 
       {/* Background decoration */}

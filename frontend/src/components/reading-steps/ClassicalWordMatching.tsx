@@ -27,7 +27,7 @@ const ClassicalWordMatching: React.FC<ClassicalWordMatchingProps> = ({ story, on
         <div className="text-center space-y-4 p-8">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">translate</span>
           <p className="text-on-surface-variant">本課尚無文白詞語比對資料</p>
-          <NextStepFooter onNext={onFinish} label="繼續下一步" />
+          <NextStepFooter onNext={onFinish} />
         </div>
       </div>
     );
@@ -70,7 +70,7 @@ const ClassicalWordMatching: React.FC<ClassicalWordMatchingProps> = ({ story, on
 
       <div className="shrink-0 px-6 pb-8 pt-4 bg-surface">
         <div className="max-w-md mx-auto">
-          <NextStepFooter onNext={onFinish} label="繼續下一步" />
+          <NextStepFooter onNext={onFinish} />
         </div>
       </div>
     </div>

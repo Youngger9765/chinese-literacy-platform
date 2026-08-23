@@ -82,6 +82,13 @@ jobs:
       #     判完成，按下去只會停在「選擇題 已完成」的 placeholder。斷言一律用
       #     「做了 N 個就要讀回 N 個」的數量形式 ——「有一筆就算過」連「只回報第一題」
       #     都能矇混過去。
+      #   - stepSharedShell / rendererHeader: 自學模式每一步的外框只能有一份實作。
+      #     底部固定動作列曾有 12 份逐字相同的 copy（連 `#FBF6EE` 都硬寫 12 次），
+      #     「怎麼玩？」教學卡有 6 份而且已經漂成兩種底色兩種字級。抽成
+      #     `StepActionBar` / `StepCoachCard` 之後，掃描鎖擋的是「再複製一份」；
+      #     每條掃描都配正向對照，因為 class 字串一改名，掃描器就會什麼都找不到
+      #     而恆綠。`rendererHeader` 另外鎖住「閱讀學習 ＋ 課名」頁首預設關閉 ——
+      #     那條頁首在學習流程裡是第三次出現的課名（#2897）。
       #   - nextStepFooter: no `.tsx` may draw its own "下一關" / "繼續下一步"
       #     button — every step's forward CTA must be the shared
       #     `NextStepFooter`. This test file existed before #2771 but was
@@ -148,4 +155,6 @@ jobs:
           src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx \
           src/components/reading-steps/__tests__/teacherWordSearch2860.test.ts \
           src/components/reading-steps/__tests__/teacherGridStability2860.test.tsx \
-          src/components/reading-steps/__tests__/wordSearchGrid.test.ts
+          src/components/reading-steps/__tests__/wordSearchGrid.test.ts \
+          src/components/learning/__tests__/stepSharedShell.test.tsx \
+          src/components/lesson-content/__tests__/rendererHeader.test.tsx

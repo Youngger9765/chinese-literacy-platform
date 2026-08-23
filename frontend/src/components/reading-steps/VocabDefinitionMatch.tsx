@@ -42,6 +42,7 @@ import { StageStatus } from './VocabDefinitionMatchStageStatus';
 import { MultipleChoiceMode } from './VocabDefinitionMatchMCQ';
 import { DragDropMode } from './VocabDefinitionMatchDragDrop';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -70,7 +71,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">dictionary</span>
         <p className="text-on-surface-variant">本課尚無語詞定義資料</p>
-        <NextStepFooter onNext={onFinish} label="繼續下一步" />
+        <NextStepFooter onNext={onFinish} />
       </div>
     </div>
   );
@@ -135,11 +136,7 @@ export function StageCompletedPlaceholder({
         <WrongAnswerReviewList items={items} revealed />
       </div>
 
-      <div
-        className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-        style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
-      >
-        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+      <StepActionBar layout="stack">
           {!otherDone && (
             <button
               type="button"
@@ -158,8 +155,7 @@ export function StageCompletedPlaceholder({
           >
             重新做題
           </button>
-        </div>
-      </div>
+      </StepActionBar>
     </div>
   );
 }

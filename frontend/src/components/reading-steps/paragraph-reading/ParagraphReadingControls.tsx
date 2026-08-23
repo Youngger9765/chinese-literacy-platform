@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DiffToken } from '../../../types';
 import { formatTime } from '../../../utils/formatTime';
 import { EvalProgress } from '../EvalProgress';
+import StepActionBar from '../../learning/StepActionBar';
 
 interface ParagraphReadingControlsProps {
   // Session state
@@ -174,12 +175,7 @@ const ParagraphReadingControls: React.FC<ParagraphReadingControlsProps> = ({
      舊版假掃描步驟（EVAL_STEPS 固定 minMs）已移除。 */
 
   return (
-    <div
-      className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-      style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
-    >
-      <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
-
+    <StepActionBar layout="stack-center">
         {/* ── Painpoint 2: mic error prominent card — shown above other buttons ── */}
         {micError && !isSessionActive && !isSubmittingSentence && !recordingPendingReview && (
           <div className="w-full p-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-md flex flex-col gap-3">
@@ -423,8 +419,7 @@ const ParagraphReadingControls: React.FC<ParagraphReadingControlsProps> = ({
             </button>
           </div>
         ) : null}
-      </div>
-    </div>
+    </StepActionBar>
   );
 };
 

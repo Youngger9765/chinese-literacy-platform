@@ -93,3 +93,37 @@ describe('雙欄版面的欄標題也要跟著 step', () => {
     expect(screen.getAllByText('閱讀聚光燈').length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * 「閱讀學習 ＋ 課名」那條頁首，在學習流程裡是第三次出現的課名。
+ *
+ * #2897：學習頂欄已經寫著《贏得喝采的輸家》· 閱讀理解 7/10 ＋ 一行提示。
+ * `LessonRenderer` 自己又印一次課名，還多一個對學生沒有意義的 eyebrow
+ * 「閱讀學習」—— 而十一步裡只有 `comprehension` 與 `spotlight` 這兩步有，
+ * 因為只有它們用這個 renderer。
+ *
+ * 這條頁首是給 `DevLessonPage` 那種沒有頂欄的獨立頁用的，所以預設關閉、
+ * 由那頁自己打開。預設值本身就是鎖：新的學習步驟接上來時不會再默默多一份課名。
+ */
+describe('閱讀學習頁首（#2897）', () => {
+  const TITLED = { ...LESSON, title: '贏得喝采的輸家' };
+
+  it('預設不印「閱讀學習」eyebrow，也不重複課名', () => {
+    render(<LessonRenderer lesson={TITLED as never} lessonCode="G4-L10" sectionLabel="閱讀理解" />);
+    expect(screen.queryByText('閱讀學習')).toBeNull();
+    expect(screen.queryByText('贏得喝采的輸家')).toBeNull();
+  });
+
+  it('showLessonHeader 打開時才印（正向對照 —— 少了這條，整個元件壞掉也會「通過」）', () => {
+    render(
+      <LessonRenderer
+        lesson={TITLED as never}
+        lessonCode="G4-L10"
+        sectionLabel="閱讀理解"
+        showLessonHeader
+      />,
+    );
+    expect(screen.getByText('閱讀學習')).toBeTruthy();
+    expect(screen.getByText('贏得喝采的輸家')).toBeTruthy();
+  });
+});
