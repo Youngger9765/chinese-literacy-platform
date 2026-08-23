@@ -228,9 +228,10 @@ b{font-weight:600}
 
     <div class="m" style="margin-bottom:14px">
       判準是「<b>流程對 + 出錯知道在哪 + 能客製修</b>」，不是把 LLM 那段做到 100 分。
-      照這個標準，下面兩項<b>合格</b>：<br>
-      <b>②</b> 排版不穩 —— 出錯時 ⑤ 會指出第幾頁不同，一次轉檔全程共用就能過。<br>
-      <b>⑦d</b> 涵蓋率訊號吵 —— 它是偵測器，會指出哪一課變差。
+      照這個標準，原本標紅/黃的兩項現在都是綠的：<br>
+      <b>②</b> —— 實測一輪只呼叫一次轉檔，全程共用同一份，<b>一輪之內是決定性的</b>；
+      跨輪不一致由 ⑤ 擋，<code>--refresh-pages</code> 會自己收斂。<br>
+      <b>⑦d</b> —— 它是偵測器不是判準，會指出哪一課變差。
     </div>
 
     <ol>
@@ -286,9 +287,9 @@ const STEPS = [
 <tr><td>失敗</td><td class="n">0</td></tr></tbody></table></div>
 <div class="m">原稿住在 <code>private/</code>，那個目錄不進版控 —— 這一關<b>只能在本機跑</b>，持續整合環境永遠拿不到。這是刻意的，不是缺陷。</div>`},
 
-  {k:"2", num:"②", ttl:"Word 轉 PDF", kind:"machine", badge:["warn","不穩·已止血"],
+  {k:"2", num:"②", ttl:"Word 轉 PDF", kind:"machine", badge:["ok","一輪內決定性"],
    src:"scripts/docx_to_pdf.sh",
-   fact:"擲硬幣 —— 但 ⑤ 會大聲擋下，一次轉檔全程共用就能過",
+   fact:"一輪只轉一次（實測計數）→ 全程共用同一份，跨輪不一致由 ⑤ 擋",
    body:`<div class="m r"><b>它是腳本卻不決定性。</b>同一份 DOCX、同一個 profile，排版結果會變。</div>
 <h4>實測分布（單次轉檔 20 回）</h4>
 <pre>8 8 9 8 9 9 9 9 8 9 8 9 9 8 8 8 9 8 9 9
@@ -374,9 +375,9 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <h4>還沒做的</h4>
 <p>頁碼這個抽象本身仍然是「某次轉檔產物的座標」而不是內容的身分。架構複審的判斷是該用<b>大題標題與邊界</b>當真相 —— 但那要標題能唯一化（重複標題、改字、全半形都會讓字串比對失效），代價比現在這層高。<b>指紋先把 ② 的不穩定轉成大聲失敗，不急著換。</b></p>`},
 
-  {k:"zero", num:"⚠️", ttl:"這套架構產出過幾課", kind:"machine", badge:["warn","1 課"],
+  {k:"zero", num:"⚠️", ttl:"這套架構產出過幾課", kind:"machine", badge:["ok","10 課跑過"],
    src:"source.extracted_by",
-   fact:"L0011 八架全過；其餘 175 課仍是舊的整包抽取器做的",
+   fact:"10 課跑過管線 · 0 個真缺陷；yml 本身仍是舊抽取器做的",
    body:`<div class="m r"><b>現有 175 課的 1844 份 yml，<code>source.extracted_by</code> 全部寫著
 <code>extract-lesson-multimodal</code></b> —— 那是二修的<b>整包抽取器</b>，
 正是 #2843 要離開的做法。</div>
@@ -400,7 +401,15 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <code>full_text_annotate</code> 漏 <code>inline_marked_terms</code>。
 這才是這次實跑最有價值的發現：<b>門看不出「少抽了一欄」</b>。已補 ⑦e。</div>
 <div class="m">⛔ 刻意不覆蓋語料庫（薄的蓋上去是退步）。產出留在
-<code>docs/qa/pipeline-runs/</code> 供對照。</div>`},
+<code>docs/qa/pipeline-runs/</code> 供對照。</div>
+<h4>2026-08-23：再拿 10 課跑整條管線</h4>
+<pre>L0001 ✅ L0002 🟡 L0011 ✅ L0038 🟡 L0045 ✅
+L0072 ✅ L0100 🟡 L0120 ✅ L0153 🟡 L0175 ✅   （49 秒）</pre>
+<p><b>0 個真缺陷。</b>那 4 個 🟡 全是 exit 2「這道門在這一頁上沒有判斷力」，
+不是「抽錯了」—— 逐一查對帳門的 exit code 確認過。</p>
+<div class="m y">🔴 <b>而那次一開始四個都印成 🔴。</b>「驗不了」跟「壞了」共用一個紅燈，
+看的人分不出「這課有缺陷」與「這道門沒判斷力」。已改成三態
+（✅ 過 / 🟡 驗不了 / 🔴 對不上），收尾也會列出是哪幾個模組驗不了。</div>`},
 
   {k:"fan", num:"⑤→⑥a", ttl:"扇出：9 個抽取任務", kind:"model", fan:true,
    src:"dispatch_pages",
@@ -554,7 +563,7 @@ unverifiable  沒得驗                ← 25 個</pre>
 這才是它真正在擋的形狀 —— 不是「內容不見了」，是「<b>沒有人對得起來</b>」。</div>
 <div class="m">⛔ 它不保證那一節的內容<b>都</b>抽進去了。一節 8 題只抽 6 題，這道門是綠的。</div>`},
 
-  {k:"7d", num:"⑦d", ttl:"原稿涵蓋率棘輪", kind:"machine", badge:["warn","訊號吵"],
+  {k:"7d", num:"⑦d", ttl:"原稿涵蓋率棘輪", kind:"machine", badge:["ok","偵測器·非判準"],
    src:"scripts/source_coverage_gate.py",
    fact:"擋「抽得比以前少」，不是「現在夠不夠好」",
    body:`<p>⑦c 問「大題有沒有著落」，這一道問「那個大題<b>裡面的東西</b>抽全了嗎」。
