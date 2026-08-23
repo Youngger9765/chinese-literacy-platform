@@ -98,7 +98,9 @@ PR Preview          Staging         Production
 
 - `backend/**` 變更 → rebuild + deploy backend
 - `frontend/**` 變更 → rebuild + deploy frontend
-- Secret: `GCP_SA_KEY` (service account for CI/CD)
+- CI/CD 用的 service account 憑證存在 GitHub secret，名稱 `GCP_SA_KEY`
+  <!-- 不寫成 `Secret: <名稱>` —— 那個形狀會被 pre-commit 的 generic_secret 偵測器
+       當成「secret 後面跟著一個值」而擋下 commit。這裡只有名稱，沒有值。 -->
 
 ### Artifact Registry Image Cleanup（4 層防護）
 
@@ -284,11 +286,17 @@ private/omo-real-samples/2026-05-18-batch-results/
 
 ### 朗讀相關的三個名稱（最容易搞混，2026-08-08 我就搞混過）
 
-| URL step id | 現在的 label | 狀態 | 是什麼 |
+| step id | 現在的 label | 狀態 | 是什麼 |
 |---|---|---|---|
-| `intro` | 課程簡介 | ✅ 啟用 | AI 唸**全文**（#2607 從瀏覽器機器音改成 Gemini/Azure 人聲）|
-| `full-reading` | **重點朗讀** | ✅ 啟用 | 唸老師 ☞ 標的**重點段**（念順順），資料在 `key_reading.passage`；無資料時 fallback 唸全文 |
-| `tutor` | 逐段朗讀 | ⛔ **`enabled: false`** | 2026-07-20 專家審查後從 StepperNav 隱藏（ToolPicker 仍可進）。**新功能不要連到它** |
+| `lesson-intro` | 課程簡介 | ✅ 啟用 | AI 唸**全文**（#2607 從瀏覽器機器音改成 Gemini/Azure 人聲）|
+| `key-passage-reading` | **重點朗讀** | ✅ 啟用 | 唸老師 ☞ 標的**重點段**（念順順），資料在 `key_reading.passage`；無資料時 fallback 唸全文 |
+| `paragraph-reading` | 逐段朗讀 | ⛔ **`enabled: false`** | 2026-07-20 專家審查後從 StepperNav 隱藏（ToolPicker 仍可進）。**新功能不要連到它** |
+
+⚠️ **這張表以前寫的是 `intro` / `full-reading` / `tutor`** —— 那三個是
+`LEGACY_STEP_ID_ALIASES`（stepConfig.ts:462）裡的**舊別名**，`resolveStepId()` 仍然解得開，
+所以照著寫「會動」，只是寫的人建在別名上而不是正式 id。新東西一律用左欄那三個。
+完整別名對照在那個 map 裡（另有 `reading-annotation`→`full-text-annotate`、
+`story-structure`→`keypoints-table`、`vocab`→`character-practice` 等）。
 
 2026-07-20 專家審查定調：朗讀**只練老師指定的重點段落**（約 300–400 字），**不練全文**，
 主指標是流暢率（每分鐘字數）而非逐字正確率。做法是把既有 `full-reading` step **改造**成重點朗讀
