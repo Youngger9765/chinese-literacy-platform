@@ -38,6 +38,8 @@ import AnnotationToolbar from './AnnotationToolbar';
 import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
+import LessonQrButton from '../qr/LessonQrButton';
+import { deliversFullText } from '../qr/lessonQr';
 
 // Re-export types for consumers that import from ReadingAnnotation
 export type { AnnotationType, Annotation };
@@ -864,6 +866,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             >
               清除全部
             </button>
+            {/* #2886: the QR for THIS page, so a teacher can hand it out in
+                class without opening the admin panel. 8-9 年級 deliberately get
+                no 全文 code — see docs/requirements/reading-demo-audio-qr.md R1. */}
+            {deliversFullText(story.grade) && (
+              <LessonQrButton
+                lessonId={story.id}
+                step="full-text-annotate"
+                lessonTitle={story.title}
+              />
+            )}
           </div>
 
           {/* Title */}
