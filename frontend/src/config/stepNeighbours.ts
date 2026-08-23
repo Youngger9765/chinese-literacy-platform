@@ -37,10 +37,20 @@ export interface StepNeighbours {
 
 const NONE: StepNeighbours = { index: -1, current: null, prev: null, next: null, inSequence: false };
 
-export function stepNeighbours(activeSteps: StepConfig[], stepId: string): StepNeighbours {
-  const id = resolveStepId(stepId);
+/**
+ * `key` may be a step id (`'spotlight'`, or a legacy alias) **or** an `AppView`.
+ *
+ * Both call sites hand it an AppView — that is what the code this replaced
+ * matched on (`s.view === currentView`). The first version of this helper only
+ * compared `s.id`, so every lookup missed and both chevrons went dead on lessons
+ * that had previously been fine. The unit tests passed throughout, because they
+ * passed step ids: they exercised the helper, not the way it is actually called.
+ */
+export function stepNeighbours(activeSteps: StepConfig[], key: string): StepNeighbours {
+  const id = resolveStepId(key);
 
-  const index = activeSteps.findIndex((s) => s.id === id);
+  const matches = (s: StepConfig) => s.id === id || String(s.view) === String(key);
+  const index = activeSteps.findIndex(matches);
   if (index >= 0) {
     return {
       index,
@@ -54,8 +64,12 @@ export function stepNeighbours(activeSteps: StepConfig[], stepId: string): StepN
   // Not one of this lesson's steps. Only fall back for something that is a real
   // step — an unknown id gets nothing rather than a guess, or a typo in a URL
   // would silently navigate somewhere plausible.
-  if (!STEP_REGISTRY[id]) return NONE;
-  const canonical = DEFAULT_STEP_SEQUENCE.indexOf(id);
+  // Off-sequence: resolve to a canonical id first, accepting an AppView too.
+  const canonicalId = STEP_REGISTRY[id]
+    ? id
+    : Object.values(STEP_REGISTRY).find((s) => String(s.view) === String(key))?.id;
+  if (!canonicalId) return NONE;
+  const canonical = DEFAULT_STEP_SEQUENCE.indexOf(canonicalId);
   if (canonical < 0) return NONE;
 
   const has = (candidate: string) => activeSteps.find((s) => s.id === candidate) ?? null;

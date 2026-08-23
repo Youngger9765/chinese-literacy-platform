@@ -21,7 +21,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { stepNeighbours } from '../stepNeighbours';
-import { resolveActiveSteps, DEFAULT_STEP_SEQUENCE } from '../stepConfig';
+import { resolveActiveSteps, DEFAULT_STEP_SEQUENCE, STEP_REGISTRY } from '../stepConfig';
 
 const WITHOUT_SPOTLIGHT = DEFAULT_STEP_SEQUENCE.filter((id) => id !== 'spotlight');
 
@@ -79,5 +79,44 @@ describe('#2905 stepNeighbours', () => {
     const steps = resolveActiveSteps(null);
     expect(stepNeighbours(steps, steps[0].id).prev).toBeNull();
     expect(stepNeighbours(steps, steps[steps.length - 1].id).next).toBeNull();
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// 這一組是被踩出來的：第一版只比 `s.id`，而兩個呼叫端傳的都是 AppView
+// ---------------------------------------------------------------------------
+
+describe('#2905 呼叫端傳的是 AppView，不是 step id', () => {
+  it('finds the step when given an AppView, the way both call sites do', () => {
+    // AppShell 與 StepFooterNav 都是 stepNeighbours(activeSteps, currentView)。
+    // 第一版只比 s.id，於是每一次查找都落空 —— 本來好好的課（20013）兩顆箭頭
+    // 一起變 disabled、底部整條消失。**五條單元測試全綠**，因為它們餵的是 id：
+    // 測到了 helper，沒測到它實際被呼叫的方式。
+    const steps = resolveActiveSteps(null);
+    const spotlight = STEP_REGISTRY['spotlight'];
+    const byView = stepNeighbours(steps, String(spotlight.view));
+    const byId = stepNeighbours(steps, 'spotlight');
+    expect(byView.index).toBe(byId.index);
+    expect(byView.current?.id).toBe('spotlight');
+    expect(byView.prev?.id).toBe(byId.prev?.id);
+    expect(byView.next?.id).toBe(byId.next?.id);
+  });
+
+  it('falls back to neighbours for an off-sequence step given as an AppView', () => {
+    const steps = resolveActiveSteps(WITHOUT_SPOTLIGHT);
+    const n = stepNeighbours(steps, String(STEP_REGISTRY['spotlight'].view));
+    expect(n.inSequence).toBe(false);
+    expect(n.current).toBeNull();
+    expect(n.prev, 'no way back when addressed by view').not.toBeNull();
+    expect(n.next, 'no way forward when addressed by view').not.toBeNull();
+  });
+
+  it('every enabled step is reachable by its own view', () => {
+    // 數量斷言，不是抽一個試 —— 只對一個 step 成立的比對，換一個 step 就可能又壞。
+    const steps = resolveActiveSteps(null);
+    const missed = steps.filter((s) => stepNeighbours(steps, String(s.view)).current?.id !== s.id);
+    expect(missed.map((s) => s.id)).toEqual([]);
+    expect(steps.length).toBeGreaterThan(8);
   });
 });
