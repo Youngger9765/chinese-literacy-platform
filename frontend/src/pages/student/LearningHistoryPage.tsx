@@ -21,9 +21,10 @@ import StepProgressStrip from '../../components/ui/StepProgressStrip';
 
 type TabKey = 'assignment' | 'self';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'assignment', label: '作業回顧' },
+// Both rendered, in this order. 自學 first because it is where the volume is.
+const SECTIONS: { key: TabKey; label: string }[] = [
   { key: 'self', label: '自學紀錄' },
+  { key: 'assignment', label: '作業回顧' },
 ];
 
 const PAGE_SIZE = 20;
@@ -311,36 +312,34 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
 // ---------------------------------------------------------------------------
 
 const LearningHistoryPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('assignment');
-
+  // Both lists, always, on one page — no tabs (#2889).
+  //
+  // This was two tabs defaulting to 作業回顧. For a student who practises on their
+  // own that tab is empty: measured on staging for the demo student, 9 completed
+  // assignment sessions against 554 self-study ones. You landed on
+  // 「還沒有作業學習紀錄」 with 554 records behind an unlabelled click, and read it as
+  // your history being gone. That is exactly how it was reported.
+  //
+  // Owner's call: 「自學紀錄跟作業回顧都要有」. Making 自學 the default would still have
+  // put one of them behind a click, so neither is. Each section keeps its own
+  // paging and its own empty state, so an empty 作業回顧 now reads as "no assignments
+  // yet" sitting next to your work, rather than as the whole page.
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-      <div className="max-w-2xl mx-auto space-y-4">
+      <div className="max-w-2xl mx-auto space-y-8">
         <div>
           <h1 className="text-base font-bold text-gray-900">學習紀錄</h1>
           <p className="text-sm text-gray-500 mt-0.5">回顧過去的學習練習</p>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="flex -mb-px" aria-label="學習紀錄分頁">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-                  activeTab === tab.key
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <TabContent key={activeTab} source={activeTab} />
+        {SECTIONS.map((section) => (
+          <section key={section.key} aria-label={section.label}>
+            <h2 className="text-sm font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200">
+              {section.label}
+            </h2>
+            <TabContent source={section.key} />
+          </section>
+        ))}
       </div>
     </div>
   );
