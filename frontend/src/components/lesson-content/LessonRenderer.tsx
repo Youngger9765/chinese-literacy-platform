@@ -56,6 +56,16 @@ export interface LessonRendererProps {
   initialState?: Record<string, unknown>;
   /** 呼叫端說自己是哪一步（`閱讀理解` / `閱讀聚光燈`）。省略時沿用舊行為。 */
   sectionLabel?: string;
+  /**
+   * 是否顯示「閱讀學習 ＋ 課名」那條頁首。預設 **不顯示**。
+   *
+   * #2897：學習流程的頂欄已經寫著《課名》· 步驟名 ＋ 一行提示，這條頁首讓
+   * `閱讀理解` 與 `閱讀聚光燈` 兩步的畫面上出現第三次課名，還多一個對學生
+   * 沒有意義的 eyebrow「閱讀學習」——其餘九步都沒有。它原本是給 `DevLessonPage`
+   * 那種沒有頂欄的獨立頁用的，所以預設改成關閉、由那個頁自己打開：新的學習
+   * 步驟接上來時不會再默默多一份課名。
+   */
+  showLessonHeader?: boolean;
 }
 
 interface ExerciseMeta {
@@ -109,6 +119,7 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   onComplete,
   initialState,
   sectionLabel,
+  showLessonHeader = false,
 }) => {
   const resolvedLessonCode =
     lessonCode || story?.lessonCode || story?.lesson_code || lesson.lessonCode;
@@ -314,14 +325,16 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
       data-layout={useSplit ? 'reading-split' : layout}
       className="flex flex-col flex-1 min-h-0 overflow-hidden"
     >
-      <header className="border-b border-surface-container-high pb-4 mb-4 shrink-0">
-        <div className="font-headline font-bold text-accent text-sm uppercase tracking-wider">
-          閱讀學習
-        </div>
-        {(lesson.title ?? null) && (
-          <h2 className="font-headline text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
-        )}
-      </header>
+      {showLessonHeader && (
+        <header className="border-b border-surface-container-high pb-4 mb-4 shrink-0">
+          <div className="font-headline font-bold text-accent text-sm uppercase tracking-wider">
+            閱讀學習
+          </div>
+          {(lesson.title ?? null) && (
+            <h2 className="font-headline text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
+          )}
+        </header>
+      )}
 
       {useSplit ? (
         // Two-pane: LEFT 課文(+其圖表)可捲動對照;RIGHT 聚光燈答題區可捲動。
