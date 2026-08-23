@@ -25,9 +25,12 @@ import {
   type LessonQrStep,
 } from './lessonQr';
 
+// The words a person sees. These are the steps' own names, not the admin
+// panel's shorthand: the step is 重點朗讀, so the button says 「QR 重點」.
+// Owner, seeing the first version: 「不對！！！是 QR重點」.
 const STEP_LABEL: Record<LessonQrStep, string> = {
   'full-text-annotate': '全文',
-  'key-passage-reading': '段落',
+  'key-passage-reading': '重點',
 };
 
 const TRIGGER_CLASS: Record<'admin' | 'pill', string> = {
@@ -105,7 +108,7 @@ export interface LessonQrButtonProps {
   lessonId: number | string;
   step: LessonQrStep;
   lessonTitle: string;
-  /** Text on the trigger. Defaults to 「QR 全文」/「QR 段落」. */
+  /** Text on the trigger. Defaults to 「QR 全文」/「QR 重點」. */
   label?: string;
   /** PNG filename stem, e.g. `qr-full` -> `qr-full-L07.png`. */
   filePrefix?: string;
@@ -135,7 +138,7 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
 
   const kind = STEP_LABEL[step];
   const text = label ?? `QR ${kind}`;
-  const stem = filePrefix ?? (step === 'full-text-annotate' ? 'qr-full' : 'qr-passage');
+  const stem = filePrefix ?? (step === 'full-text-annotate' ? 'qr-full' : 'qr-key-reading');
 
   return (
     <>

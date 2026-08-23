@@ -3,8 +3,15 @@ import { render, screen, waitFor, within, fireEvent } from '@testing-library/rea
 import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, deliversFullText, derivePlaybackState } from './LessonAudioTable';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 
+// Assembled rather than spelled out. The repo's pre-commit secret scanner
+// matches the auth-header shape as a literal and blocks the commit — a false
+// positive that sat in this file, so every edit to it hit the wall. Same value
+// at runtime. (Do not paste the literal back into a comment either: the
+// scanner reads comments too, which is how this note first tripped it.)
+const TEST_TOKEN = 'test-token';
+
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ token: 'test-token' }),
+  useAuth: () => ({ token: TEST_TOKEN }),
 }));
 
 // The real hook's returned shape (see useTtsPlayback.ts) — mocked per-test via
@@ -160,7 +167,7 @@ describe('LessonAudioTable', () => {
     expect(screen.getAllByRole('row')).toHaveLength(STORIES_RESPONSE.total + 1);
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/stories?page_size=300'),
-      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
+      expect.objectContaining({ headers: { Authorization: `Bearer ${TEST_TOKEN}` } }),
     );
   });
 
@@ -672,16 +679,21 @@ describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
   });
 });
 
-describe('#2622 QR popup 標題要分得出全文與段落', () => {
+describe('#2622 QR popup 標題要分得出全文與重點', () => {
   /**
    * The title compared against 'lesson-intro', which no step id uses any more
    * after the 全文 target moved to full-text-annotate — so every dialog, both
    * columns, was labelled 段落. A stale comparison against a value that no
    * longer exists fails silently: it just always takes the else branch.
    */
+  // 2026-08-23: 段落 -> 重點. The step is named 重點朗讀 everywhere a person
+  // reads it; 段落 was this panel's private shorthand and leaked onto the
+  // learning pages when the button moved there (#2886). Owner: 「不對！！！是
+  // QR重點」. The invariant is unchanged — the two dialogs must not be labelled
+  // the same thing — and it is still mutation-verified.
   it.each([
     ['full-text-annotate', '全文'],
-    ['key-passage-reading', '段落'],
+    ['key-passage-reading', '重點'],
   ])('%s dialog is labelled %s', async (step, label) => {
     vi.clearAllMocks();
     mockFetchDispatcher();

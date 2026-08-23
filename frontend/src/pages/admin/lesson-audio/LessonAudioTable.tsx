@@ -606,7 +606,7 @@ const LessonAudioTable: React.FC = () => {
         <span>全文朗讀</span>
         <span>段落朗讀</span>
         <span>QR（全文）</span>
-        <span>QR（段落）</span>
+        <span>QR（重點）</span>
       </div>
 
       <div className="flex-1 overflow-y-auto" role="grid" aria-label="課程音檔總表">
