@@ -47,7 +47,7 @@
     },
     "keypoints": {
       "yaml_sha256": "393f-8ea9-2e64-ae28",
-      "checked": 10,
+      "checked": 9,
       "status": "pass",
       "passed": true,
       "exit": 0

@@ -12,7 +12,7 @@
     },
     "errata": {
       "yaml_sha256": "26ca-376e-b653-37bd",
-      "checked": 0,
+      "checked": 1,
       "status": "unverifiable",
       "passed": false,
       "exit": 1
