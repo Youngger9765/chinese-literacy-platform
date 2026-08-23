@@ -17,6 +17,8 @@ import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useStepSequence } from '../../hooks/useStepSequence';
 import { useAppView } from '../../hooks/useAppView';
 import { isToolboxMode } from '../../services/learningStorageScope';
+import { stepNeighbours } from '../../config/stepNeighbours';
+import { STEP_REGISTRY, resolveStepId } from '../../config/stepConfig';
 
 const StepFooterNav: React.FC = () => {
   const navigate = useNavigate();
@@ -25,32 +27,27 @@ const StepFooterNav: React.FC = () => {
   const inToolbox = isToolboxMode();
 
   const activeSteps = useStepSequence(selectedStory ?? null);
-  const currentStepIndex = activeSteps.findIndex((s) => s.view === currentView);
+  // #2905 — see config/stepNeighbours.ts. -1 no longer means "nowhere".
+  const nav = useMemo(() => stepNeighbours(activeSteps, currentView), [activeSteps, currentView]);
+  const currentStepIndex = nav.index;
   const totalSteps = activeSteps.length;
-  const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
+  const { current: currentStep, prev: prevStep, next: nextStep } = nav;
 
   const completedSet = new Set(session?.completedSteps ?? []);
 
-  const prevStep = useMemo(
-    () => (currentStepIndex > 0 ? activeSteps[currentStepIndex - 1] : null),
-    [activeSteps, currentStepIndex],
-  );
 
-  const nextStep = useMemo(
-    () =>
-      currentStepIndex >= 0 && currentStepIndex < activeSteps.length - 1
-        ? activeSteps[currentStepIndex + 1]
-        : null,
-    [activeSteps, currentStepIndex],
-  );
 
   const handleNav = (step: (typeof activeSteps)[number] | null) => {
     if (!step || !selectedStory) return;
     navigate(`/learn/${selectedStory.id}/${step.id}`);
   };
 
-  // Don't render outside the learning flow, in toolbox mode, or when no story
-  if (inToolbox || !selectedStory || currentStepIndex < 0 || !currentStep) {
+  // #2905: the bar used to vanish whenever the URL step was not in this lesson's
+  // sequence (`currentStepIndex < 0`). Lesson 20011 has no 聚光燈, so
+  // /learn/20011/spotlight rendered with no bottom bar in the DOM at all.
+  // Being off-sequence is exactly when a student most needs a way out, so the
+  // bar now renders as long as there is somewhere to go.
+  if (inToolbox || !selectedStory || (!prevStep && !nextStep)) {
     return null;
   }
 
@@ -79,8 +76,19 @@ const StepFooterNav: React.FC = () => {
       {/* Center: compact progress indicator */}
       <div className="flex-1 flex flex-col items-center gap-1 min-w-0 px-2">
         <span className="text-xs text-gray-500 font-medium truncate max-w-full leading-none">
-          第 {currentStepIndex + 1}&nbsp;/&nbsp;{totalSteps} 步&nbsp;·&nbsp;
-          <span className="text-accent font-semibold">{currentStep.label}</span>
+          {/* Off-sequence (#2905): no 「第 N / M 步」, because this step is not one
+              of this lesson's N. Naming it is still useful — the student can see
+              where they are — so the label comes from the registry. */}
+          {currentStep ? (
+            <>
+              第 {currentStepIndex + 1}&nbsp;/&nbsp;{totalSteps} 步&nbsp;·&nbsp;
+              <span className="text-accent font-semibold">{currentStep.label}</span>
+            </>
+          ) : (
+            <span className="text-accent font-semibold">
+              {STEP_REGISTRY[resolveStepId(currentView)]?.label ?? ''}
+            </span>
+          )}
         </span>
         {/* Thin progress bar */}
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
