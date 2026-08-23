@@ -75,7 +75,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">edit_note</span>
         <p className="text-on-surface-variant">本課尚無語詞應用題目</p>
-        <NextStepFooter onNext={onFinish} label="繼續下一步" />
+        <NextStepFooter onNext={onFinish} />
       </div>
     </div>
   );
@@ -267,7 +267,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
     }
     setPhase('done');
     // Navigate to next step — FillInBlankExercise already shows its own summary,
-    // so when it calls onComplete from "繼續下一步", we proceed immediately.
+    // so when it calls onComplete from the 下一關 footer, we proceed immediately.
     const completionRate = total > 0 ? score / total : 1;
     onFinish({ score, total, completionRate });
   }

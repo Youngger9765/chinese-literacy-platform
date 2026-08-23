@@ -11,7 +11,7 @@
  * "下一關" navigation (that is the `NextStepFooter` the parent page renders right below,
  * disabled until this fires). Siblings `GuidedStepsExercise`/`OrderingExercise` use the
  * same inline-confirm role with plain wording ("確認" / "送出答案") for the same reason:
- * calling it "…繼續下一步" would wrongly promise navigation this click does not perform.
+ * calling it "…下一關" would wrongly promise navigation this click does not perform.
  *
  * Why this exists as its own component: the existing StrategyExercise component
  * is keyed off a `type` field (`ordering` | `trait_inference` | `guided_steps`).

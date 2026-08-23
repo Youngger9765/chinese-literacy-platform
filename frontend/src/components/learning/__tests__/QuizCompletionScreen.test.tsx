@@ -4,7 +4,7 @@
  *
  * Extracted from FillInBlankExercise's summary phase — the header card (icon +
  * "你完成了！"/"全部答對！" + subtitle) and the bottom CTA row (重做錯題 / 全部重做 /
- * 繼續下一步, or the toolbox-mode swap) were IDENTICAL markup duplicated across
+ * 下一關, or the toolbox-mode swap) were IDENTICAL markup duplicated across
  * FillInBlankExercise.tsx and VocabDefinitionMatchSummary.tsx. This component is the
  * one source both FillInBlankExercise and ComprehensionMcqPage now render through —
  * see `quizCompletionScreenUsage.test.ts` for the "nobody hand-rolls a second copy" lock.
@@ -82,15 +82,16 @@ describe('QuizCompletionScreen', () => {
     expect(onRetryAll).toHaveBeenCalledOnce();
   });
 
-  it('「繼續下一步」呼叫 onNext（預設文字）', () => {
+  it('「下一關」呼叫 onNext（預設文字）', () => {
     const { onNext } = setup();
-    fireEvent.click(screen.getByRole('button', { name: /繼續下一步/ }));
+    fireEvent.click(screen.getByRole('button', { name: /下一關/ }));
     expect(onNext).toHaveBeenCalledOnce();
   });
 
+  // 覆寫值不能是「下一關」——那正是預設值，不管 nextLabel 有沒有被讀取都會綠。
   it('nextLabel 可覆寫按鈕文字', () => {
-    setup({ nextLabel: '下一關' });
-    expect(screen.getByRole('button', { name: /下一關/ })).toBeInTheDocument();
+    setup({ nextLabel: '跳過，下一關' });
+    expect(screen.getByRole('button', { name: /跳過，下一關/ })).toBeInTheDocument();
   });
 
   it('toolboxMode=true 時換成「重做」／「回到練習工具箱」，不顯示錯題/全部重做/下一步三顆', () => {
@@ -99,7 +100,7 @@ describe('QuizCompletionScreen', () => {
     expect(screen.getByRole('button', { name: '回到練習工具箱' })).toBeInTheDocument();
     expect(screen.queryByText(/重做錯題/)).toBeNull();
     expect(screen.queryByText('全部重做')).toBeNull();
-    expect(screen.queryByText(/繼續下一步/)).toBeNull();
+    expect(screen.queryByText(/下一關/)).toBeNull();
   });
 
   it('title/subtitle 可被覆寫（供尚未遷移的呼叫端沿用自己的措辭）', () => {

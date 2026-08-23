@@ -79,4 +79,39 @@ describe('NextStepFooter', () => {
     }
     expect(custom).toEqual([]);
   });
+
+  /**
+   * #2897：上面那條只擋「自己畫一顆」，擋不住「用共用元件、但傳自己的字」。
+   *
+   * 實測（staging，2026-08-23）學生一路走過去看到的同一顆按鈕：
+   *   重點朗讀 下一關 → 詞語理解 繼續下一步 → 語詞應用 繼續下一步 →
+   *   文章重點表 下一關 → 閱讀理解 下一關 → 語詞複習 繼續下一步 →
+   *   知識補給站 繼續下一步
+   * 六處用預設、十八處傳「繼續下一步」。措辭是共用元件唯一還能各自決定的東西，
+   * 所以它就是漂移最後的落腳處。
+   *
+   * 唯一允許的覆寫是「跳過，下一關」——空狀態要說清楚這一步被跳過了。
+   */
+  it('沒有任何地方把前進鈕的文字改成「繼續下一步」', () => {
+    const root = path.resolve(__dirname, '../../..');
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.isFile() && p.endsWith('.tsx') && !p.includes('.test.')) files.push(p);
+      }
+    };
+    walk(root);
+    expect(files.length).toBeGreaterThan(50);
+
+    const BANNED = /label=\{?['"`]繼續下一步/;
+    // 正向對照：確認這個 matcher 認得出違規的寫法
+    expect(BANNED.test('<NextStepFooter onNext={f} label="繼續下一步" />')).toBe(true);
+
+    const offenders = files
+      .filter((f) => BANNED.test(fs.readFileSync(f, 'utf8')))
+      .map((f) => path.relative(root, f));
+    expect(offenders).toEqual([]);
+  });
 });
