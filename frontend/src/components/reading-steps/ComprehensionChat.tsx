@@ -15,6 +15,7 @@ import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStor
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -352,9 +353,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* ── Fixed bottom CTA — shows after MCQ (or structure) is complete ── */}
       {isWorksheetComplete && (
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto">
+        <StepActionBar>
             {isToolboxMode() ? (
               <ToolboxCompletionActions
                 onRetry={() => {
@@ -368,8 +367,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             ) : (
               <NextStepFooter onNext={handleFinish} />
             )}
-          </div>
-        </div>
+        </StepActionBar>
       )}
 
       {/* Floating AI helper */}

@@ -18,6 +18,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
 import QuizCompletionScreen from '../learning/QuizCompletionScreen';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 const IS_TOUCH_DEVICE =
@@ -60,35 +61,9 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   return (
-    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          lightbulb
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">語詞應用怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            讀句子，從下面選出最適合填進空格的語詞。
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard title="語詞應用怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
+      讀句子，從下面選出最適合填進空格的語詞。
+    </StepCoachCard>
   );
 }
 
@@ -705,14 +680,7 @@ const FillInBlankExercise: React.FC<Props> = ({
         {/* Show help button after onboarding is dismissed */}
         {!showCoach && (
           <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowCoach(true)}
-              className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1"
-            >
-              <span className="material-symbols-outlined text-sm">help_outline</span>
-              怎麼玩？
-            </button>
+            <StepCoachHelpButton onClick={() => setShowCoach(true)} />
           </div>
         )}
 

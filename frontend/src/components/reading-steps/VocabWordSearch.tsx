@@ -32,6 +32,8 @@ import { useWordSearchProgress } from './useWordSearchProgress';
 import type { WordSearchProgress } from './useWordSearchProgress';
 import { PlacedWord, overlayRects, cellsAlongWord, cellAt } from './wordSearchGrid';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
+import StepActionBar from '../learning/StepActionBar';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -121,35 +123,9 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
     ? '用手指在方格上滑過，水平或垂直圈出語詞'
     : '用滑鼠在方格上拖曳，水平或垂直圈出語詞';
   return (
-    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          lightbulb
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">語詞複習怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            {instruction}。右邊列出要找的語詞，全部找到就完成
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard title="語詞複習怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
+      {instruction}。右邊列出要找的語詞，全部找到就完成
+    </StepCoachCard>
   );
 }
 
@@ -405,7 +381,7 @@ export default function VocabWordSearch({
       <div className="flex flex-col items-center justify-center py-16 gap-6 text-gray-500">
         <div className="text-5xl" aria-hidden="true">📚</div>
         <p className="text-base font-medium">本課無語詞資料，無法產生方格遊戲</p>
-        <NextStepFooter onNext={() => onFinish(0)} label="繼續下一步" />
+        <NextStepFooter onNext={() => onFinish(0)} />
       </div>
     );
   }
@@ -461,14 +437,7 @@ export default function VocabWordSearch({
             <p className="text-sm text-on-surface-variant">
               {IS_TOUCH_DEVICE ? '水平或垂直滑過圈出語詞' : '水平或垂直拖曳圈出語詞'}
             </p>
-            <button
-              type="button"
-              onClick={() => setShowCoach(true)}
-              className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1 shrink-0"
-            >
-              <span className="material-symbols-outlined text-sm">help_outline</span>
-              怎麼玩？
-            </button>
+            <StepCoachHelpButton onClick={() => setShowCoach(true)} />
           </div>
         ) : (
           <p className="text-sm text-on-surface-variant mt-0.5">
@@ -647,9 +616,7 @@ export default function VocabWordSearch({
 
       {/* Completion — fixed bottom CTA */}
       {finished && (
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+        <StepActionBar layout="stack">
             {isToolboxMode() ? (
               <ToolboxCompletionActions onRetry={handleRedo} className="w-full" />
             ) : (
@@ -660,11 +627,10 @@ export default function VocabWordSearch({
                 >
                   重新練習
                 </button>
-                <NextStepFooter onNext={() => onFinish(finishedElapsed)} label="繼續下一步" />
+                <NextStepFooter onNext={() => onFinish(finishedElapsed)} />
               </>
             )}
-          </div>
-        </div>
+        </StepActionBar>
       )}
     </div>
   );

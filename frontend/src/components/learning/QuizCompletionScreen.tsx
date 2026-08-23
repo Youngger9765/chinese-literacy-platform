@@ -3,7 +3,7 @@
  * (issue #2834, Young 2026-08-21: 「選擇題請統一用 vocab-application 的結束方式」).
  *
  * Before this, the header card (🎓/🏆 icon + 「你完成了！」/「全部答對！」 + subtitle) and
- * the bottom CTA row (重做錯題 / 全部重做 / 繼續下一步, or the toolbox-mode swap) were
+ * the bottom CTA row (重做錯題 / 全部重做 / 下一關, or the toolbox-mode swap) were
  * IDENTICAL markup independently duplicated in `FillInBlankExercise.tsx` (語詞應用) and
  * `VocabDefinitionMatchSummary.tsx` (詞語理解) — same Tailwind classes, same copy, copy-
  * pasted. `ComprehensionMcqPage` (閱讀理解) had neither: no completion card, no retry
@@ -23,6 +23,7 @@
 import React from 'react';
 import ToolboxCompletionActions, { type ToolboxCompletionActionsProps } from '../tools/ToolboxCompletionActions';
 import NextStepFooter from './NextStepFooter';
+import StepActionBar from './StepActionBar';
 
 export interface QuizCompletionScreenProps {
   /** Drives the header icon/copy/color. True only when EVERY question was correct on the first try. */
@@ -52,7 +53,7 @@ const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({
   onRetryWrong,
   onRetryAll,
   onNext,
-  nextLabel = '繼續下一步',
+  nextLabel = '下一關',
   title,
   subtitle,
   style,
@@ -93,11 +94,7 @@ const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({
       </div>
 
       {/* Fixed bottom CTA */}
-      <div
-        className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-        style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
-      >
-        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+      <StepActionBar layout="stack">
           {toolboxMode ? (
             <ToolboxCompletionActions onRetry={onRetryAll} className="w-full" recordPayload={toolboxRecordPayload} />
           ) : (
@@ -121,8 +118,7 @@ const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({
               <NextStepFooter onNext={onNext} label={nextLabel} />
             </>
           )}
-        </div>
-      </div>
+      </StepActionBar>
     </div>
   );
 };

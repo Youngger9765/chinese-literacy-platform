@@ -23,6 +23,7 @@ import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStor
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import type { VocabStepData } from '../../types/stepProgress';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 
 interface VocabPracticeProps {
   story: Story;
@@ -263,7 +264,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
       <div className="flex-1 flex items-center justify-center bg-surface">
         <div className="text-center space-y-4 p-8">
           <p className="text-on-surface-variant">這篇課文沒有可練習的生字</p>
-          <NextStepFooter onNext={handleFinish} label="繼續下一步" />
+          <NextStepFooter onNext={handleFinish} />
         </div>
       </div>
     );
@@ -474,9 +475,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
 
       {/* ── Fixed bottom CTA — only show "完成練習" when all done ──── */}
       {allDone && (
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto">
+        <StepActionBar>
             {isToolboxMode() ? (
               <ToolboxCompletionActions
                 onRetry={() => {
@@ -497,8 +496,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
                 <span className="material-symbols-outlined text-xl">arrow_forward</span>
               </button>
             )}
-          </div>
-        </div>
+        </StepActionBar>
       )}
 
       {/* Background decoration */}
