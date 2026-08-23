@@ -111,10 +111,14 @@ const StepDots: React.FC<StepDotsProps> = ({
     }
   }, [currentStepIndex, steps.length]);
 
+  // Sized to its content, not flex-1 (#2889). flex-1 made this box eat every
+  // spare pixel, so the dots centred inside it while the two chevrons were pushed
+  // to the far edges of the header — 「左右的 < > 拉到圈圈左右側，不要離那麼遠」.
+  // min-w-0 keeps overflow-x-auto working when the dots are wider than the space.
   return (
     <div
       ref={scrollRef}
-      className="flex-1 min-w-0 overflow-x-auto scrollbar-hide overscroll-x-contain"
+      className="min-w-0 max-w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
       aria-label="學習步驟進度"
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
@@ -286,7 +290,7 @@ const ImmersiveTopBar: React.FC = () => {
             Toolbox mode (#1460): hide entirely — single-shot practice has no
             cross-step navigation. Other steps remain unreachable from here. */}
         {!inToolbox && (
-          <div className="flex items-center gap-0.5 sm:gap-1 w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1 w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
             <button
               type="button"
               onClick={() => prevStep && handleStepClick(prevStep)}
