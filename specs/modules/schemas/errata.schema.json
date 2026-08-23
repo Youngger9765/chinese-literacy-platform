@@ -2,11 +2,17 @@
   "$id": "lingoleap/module/errata",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "從 70 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "description": "從 70 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。 ⚠️ `note` 是例外：它是人寫的，不是從 yml 長出來的，重跑 build_module_schemas.py 不會產生它 —— 重產後要記得補回來。",
   "properties": {
     "errata": {
       "type": "array",
       "x-seen-in": "70/70"
+    },
+    "note": {
+      "type": "string",
+      "description": "為什麼這一課的 errata 是空的。手寫，不是抽取器產的。一份空的勘誤檔跟一份「查證過原稿是對的」的勘誤檔長得一模一樣，而下一個人重抽時會把同樣的假勘誤再加回去一次 —— L0124 就是這樣才需要它。只在 errata 為空時使用。",
+      "x-seen-in": "1/70",
+      "x-hand-written": true
     }
   },
   "required": [

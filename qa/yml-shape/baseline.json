@@ -62,11 +62,15 @@
       "core": [
         "errata"
       ],
-      "inner_shapes": 1,
+      "inner_shapes": 2,
       "lessons": 70,
       "mid": [],
-      "rare": [],
-      "rare_noteish": [],
+      "rare": [
+        "note"
+      ],
+      "rare_noteish": [
+        "note"
+      ],
       "top_level_shapes": 1
     },
     "full_text_annotate": {
