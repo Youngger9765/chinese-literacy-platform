@@ -226,39 +226,34 @@ b{font-weight:600}
   <div class="todo">
     <h2>還沒做的，照急迫度</h2>
 
-    <div class="m r" style="margin-bottom:14px">
-      <b>🔴 最大的一個：這套架構到今天產出過 0 課。</b><br>
-      現有 175 課的 1844 份 yml，<code>source.extracted_by</code> 全部寫著
-      <code>extract-lesson-multimodal</code> —— 那是二修的<b>整包抽取器</b>，
-      正是 #2843 要離開的做法。23 支 skill、派工單、10 道門，
-      驗的都是<b>另一個流程做出來的資料</b>。<br>
-      唯一一次真的用新 skill 抽（L0011 的語詞我最棒）就掉了一個頓號，
-      而那是逐字門抓到的 —— <b>資料綠 ≠ 這套流程能用。</b>
+    <div class="m" style="margin-bottom:14px">
+      判準是「<b>流程對 + 出錯知道在哪 + 能客製修</b>」，不是把 LLM 那段做到 100 分。
+      照這個標準，下面兩項<b>合格</b>：<br>
+      <b>②</b> 排版不穩 —— 出錯時 ⑤ 會指出第幾頁不同，一次轉檔全程共用就能過。<br>
+      <b>⑦d</b> 涵蓋率訊號吵 —— 它是偵測器，會指出哪一課變差。
     </div>
 
     <ol>
-      <li><b>拿一課從頭到尾走完新流程並落地</b> —— 派工單 → 8 支 skill 逐一抽 →
-        過 10 道門 → 寫進 <code>backend/data/lessons/</code>。
-        在這件事發生之前，「一對一 23/23」只是名冊齊全，不是能用。</li>
-
-      <li><b>② 每跑一次都要先重算頁碼</b> —— 排版不穩，新轉的 PDF 常跟算頁碼那份不同，
-        ⑤ 直接 fail-closed 擋住（L0011 第一次就被擋）。門是對的，
-        但這讓整條流程<b>實務上跑不動</b>。上一項要成立，得先解決這個。</li>
+      <li><b>其餘 174 課還沒用新流程走過</b> —— L0011 走完了（八架全過），
+        但那 174 課的 yml 仍是舊的整包抽取器做的。
+        ⚠️ 不急著重抽：現有資料經 10 道門驗過是好的，重抽反而可能變薄
+        （L0011 就有三個模組被我抽薄）。<b>新教材進來時走新流程</b>就好。</li>
 
       <li><b>那 25 個「驗不到」</b> —— 22 個是勘誤原文只有一個字（「五」印成「六」），
         短於 4 字門檻；3 個錯字印在圖片裡。已上棘輪，只准往下。</li>
 
-      <li><b>⑥a 的一致率只量過 1 課 1 模組 × 3 次</b> —— 其他課型與模組未量。</li>
+      <li><b>⑥a 的一致率只量過 1 課 1 模組 × 3 次</b> —— 其他課型與模組未量。
+        LLM 那段本來就不用 100 分，這條的價值只在「知道它大概多穩」。</li>
+
+      <li><b>#2874</b> L0124 的勘誤指著一個不存在的錯字（原稿只有一個逗號）。</li>
     </ol>
 
     <div class="m" style="margin-top:12px">
-      <b>⚠️ 從清單上拿掉的兩項</b>（查過之後發現是我讀錯訊號，不是缺口）：<br>
-      「原稿有 15% 沒被收走」—— 逐條看才發現<b>多數是標題前綴</b>：
-      <code>◎我的表現</code>（5 字）的量尺內容早就在 <code>benchmark</code> 裡、
-      <code>第4題解析：</code> 的本文多數也在 <code>teacher_note</code> 裡。
-      真正撈出來的只有 23 課 54 題教師解析，<b>已補</b>。<br>
-      「涵蓋率只有 49%」—— 那是整段比對造成的，改成貪婪片段比對後是 85%。
-      <b>先驗量法再報災。</b>
+      <b>⚠️ 從清單上拿掉的</b>（查過發現是我讀錯訊號）：<br>
+      「原稿有 15% 沒被收走」—— 多數是標題前綴（<code>◎我的表現</code> 的量尺早在
+      <code>benchmark</code> 裡、<code>第4題解析：</code> 的本文多數在 <code>teacher_note</code> 裡）。
+      真正撈出來的 23 課 54 題教師解析已補。<br>
+      「涵蓋率只有 49%」—— 整段比對造成的，改貪婪片段比對後 85%。<b>先驗量法再報災。</b>
     </div>
   </div>
 
@@ -290,9 +285,9 @@ const STEPS = [
 <tr><td>失敗</td><td class="n">0</td></tr></tbody></table></div>
 <div class="m">原稿住在 <code>private/</code>，那個目錄不進版控 —— 這一關<b>只能在本機跑</b>，持續整合環境永遠拿不到。這是刻意的，不是缺陷。</div>`},
 
-  {k:"2", num:"②", ttl:"Word 轉 PDF", kind:"machine", badge:["crit","不穩"],
+  {k:"2", num:"②", ttl:"Word 轉 PDF", kind:"machine", badge:["warn","不穩·已止血"],
    src:"scripts/docx_to_pdf.sh",
-   fact:"20 次單轉：8 頁 ×9 · 9 頁 ×11 —— 幾乎是擲硬幣",
+   fact:"擲硬幣 —— 但 ⑤ 會大聲擋下，一次轉檔全程共用就能過",
    body:`<div class="m r"><b>它是腳本卻不決定性。</b>同一份 DOCX、同一個 profile，排版結果會變。</div>
 <h4>實測分布（單次轉檔 20 回）</h4>
 <pre>8 8 9 8 9 9 9 9 8 9 8 9 9 8 8 8 9 8 9 9
@@ -378,9 +373,9 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <h4>還沒做的</h4>
 <p>頁碼這個抽象本身仍然是「某次轉檔產物的座標」而不是內容的身分。架構複審的判斷是該用<b>大題標題與邊界</b>當真相 —— 但那要標題能唯一化（重複標題、改字、全半形都會讓字串比對失效），代價比現在這層高。<b>指紋先把 ② 的不穩定轉成大聲失敗，不急著換。</b></p>`},
 
-  {k:"zero", num:"⚠️", ttl:"這套架構產出過幾課", kind:"gone", badge:["crit","0 課"],
+  {k:"zero", num:"⚠️", ttl:"這套架構產出過幾課", kind:"machine", badge:["warn","1 課"],
    src:"source.extracted_by",
-   fact:"175 課全是舊的整包抽取器做的",
+   fact:"L0011 八架全過；其餘 175 課仍是舊的整包抽取器做的",
    body:`<div class="m r"><b>現有 175 課的 1844 份 yml，<code>source.extracted_by</code> 全部寫著
 <code>extract-lesson-multimodal</code></b> —— 那是二修的<b>整包抽取器</b>，
 正是 #2843 要離開的做法。</div>
@@ -396,10 +391,15 @@ low_confidence_pages  23 個「夾出來」的範圍，可能過寬</pre>
 <code>pdftotext -layout</code> 在欄寬處折行，折點正好在標點上。逐字門抓到了。</p>
 <div class="m y"><b>資料綠 ≠ 這套流程能用。</b>重抽對帳是拿<b>現有 yml</b> 去對原稿
 （現有那份是對的），跟「照 skill 重新產生一份」是兩回事。</div>
-<h4>要讓它成立，缺的是</h4>
-<pre>拿一課從頭到尾走完並落地：派工單 → 8 支 skill 逐一抽 → 過 10 道門 → 寫進 lessons/</pre>
-<div class="m">⚠️ 但 ② 排版不穩讓 ⑤ 每次都 fail-closed 擋住（L0011 第一次就被擋）——
-門是對的，卻讓整條流程<b>實務上跑不動</b>。這是前置條件。</div>`},
+<h4>✅ 2026-08-23：L0011 走完了</h4>
+<p>八架全抽完，<b>8/8 schema ✅ + 逐字門 ✅</b>。<code>keypoints</code> 與
+<code>vocab_review</code>（100 格找字遊戲）跟現有<b>完全相同</b>。</p>
+<div class="m y"><b>但三個模組我抽得比現有薄，而八道門全綠</b> ——
+<code>key_reading</code> 漏 <code>passage</code>、<code>resources</code> 用錯載體鍵、
+<code>full_text_annotate</code> 漏 <code>inline_marked_terms</code>。
+這才是這次實跑最有價值的發現：<b>門看不出「少抽了一欄」</b>。已補 ⑦e。</div>
+<div class="m">⛔ 刻意不覆蓋語料庫（薄的蓋上去是退步）。產出留在
+<code>docs/qa/pipeline-runs/</code> 供對照。</div>`},
 
   {k:"fan", num:"⑤→⑥a", ttl:"扇出：9 個抽取任務", kind:"model", fan:true,
    src:"dispatch_pages",
@@ -567,6 +567,27 @@ unverifiable  沒得驗                ← 25 個</pre>
 <p>真正撈出來的：<b>23 課 54 題教師解析</b>（印在教師版、線上一個字都沒有）—— 已補。</p>
 <div class="m y"><b>所以它是偵測器不是判準。</b>⛔ 不用絕對門檻 —— 未涵蓋字裡混著真缺口與量法雜訊，訂 90% 會對一半的課誤報，而<b>會誤報的門最後會被關掉</b>。</div>
 <div class="m">mutation 驗過會咬：拿掉一整份模組 +250 字、拿掉單一題 +19 字。</div>`},
+
+  {k:"7e", num:"⑦e", ttl:"必要欄位在不在", kind:"machine", badge:["ok","1696 實例"],
+   src:"scripts/essential_fields_check.py",
+   fact:"每個模組自己宣告「什麼叫做完」",
+   body:`<p>前面每一道問的都是「<b>寫下來的東西對不對</b>」。
+L0011 實跑證明它們合起來仍然<b>看不出「少抽了一欄」</b>：</p>
+<pre>key_reading         漏 passage           → loader 直接丟掉整個模組，學生那一步不見
+resources           用錯載體鍵            → schema 過、逐字過，只有消費端讀不到
+full_text_annotate  漏 inline_marked_terms</pre>
+<p>schema 的 <code>required</code> 只要求最低限度、逐字門只驗「有寫的抄得對不對」、
+見證對帳只數題號 —— <b>八道門全綠</b>。</p>
+<h4>做法：不蓋通用門，讓每個模組自己宣告</h4>
+<pre>specs/modules/essential-fields.yml   18 個模組
+  all      每一課都有的欄位（實測 100%）
+  any_of   載體不只一種時至少要有一個
+  except   實測的例外，附理由</pre>
+<div class="tw"><table><thead><tr><th>坑</th><th>怎麼處理</th></tr></thead><tbody>
+<tr><td>逐課列例外會變成要人維護的名單（18 課原稿真的沒標記語詞）</td><td>改成<b>數量上限</b> —— 個別不報，總數漲了才叫</td></tr>
+<tr><td class="r">檢查器去讀<b>語料庫</b>而不是這一輪的產出</td><td>verify 時回 ✅ 而我那份根本沒 passage。<b>一道檢查別的東西的門比沒有門更危險。</b>加 <code>--dir</code> 修掉</td></tr>
+</tbody></table></div>
+<p>全庫 <b>1696 個模組實例 PASS</b>（不誤報）；拿抽薄的那份餵進去會紅。</p>`},
 
   {k:"8", num:"⑧", ttl:"學生畫面", kind:"machine", badge:["ok","—"],
    src:"frontend",
