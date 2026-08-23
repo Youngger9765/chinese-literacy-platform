@@ -115,3 +115,41 @@ describe('#2886 重點朗讀：重點 QR', () => {
     expect(qrButton()).toBeNull();
   });
 });
+
+/**
+ * #2886 follow-up — the anonymous path renders a DIFFERENT component.
+ *
+ * GuestReadingPage stands in for both steps (a visitor with no account never
+ * reaches KeyPassageReading), so it renders FullTextAnnotate for 重點朗讀 too.
+ * The signed-in tests above all passed while the anonymous 重點 page was
+ * offering the 全文 code. Testing one path says nothing about the other.
+ */
+describe('#2886 免登入：GuestReadingPage 要給對的那個碼', () => {
+  const render1 = (qrStep: 'full-text-annotate' | 'key-passage-reading' | null | undefined) =>
+    render(<FullTextAnnotate story={STORY} onFinish={vi.fn()} hideAnnotation qrStep={qrStep} />);
+
+  it('offers the 重點 code when the guest page says 重點', () => {
+    render1('key-passage-reading');
+    const btn = qrButton();
+    expect(btn).not.toBeNull();
+    expect(btn!.textContent).toContain('重點');
+    expect(btn!.getAttribute('title')).toBe(`${window.location.origin}/learn/7/key-passage-reading`);
+  });
+
+  it('offers the 全文 code when the guest page says 全文', () => {
+    render1('full-text-annotate');
+    const btn = qrButton();
+    expect(btn!.textContent).toContain('全文');
+    expect(btn!.getAttribute('title')).toBe(`${window.location.origin}/learn/7/full-text-annotate`);
+  });
+
+  it('offers nothing when the guest page says there is none', () => {
+    render1(null);
+    expect(qrButton()).toBeNull();
+  });
+
+  it('keeps the ordinary grade rule when no override is given', () => {
+    render1(undefined);
+    expect(qrButton()!.textContent).toContain('全文');
+  });
+});

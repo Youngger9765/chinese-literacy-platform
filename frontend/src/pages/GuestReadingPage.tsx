@@ -29,6 +29,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
 import { resolveStepId } from '../config/stepConfig';
+import { deliversFullText } from '../components/qr/lessonQr';
 import { fetchStory } from '../services/api';
 import type { Story } from '../types';
 
@@ -110,7 +111,20 @@ const GuestReadingPage: React.FC = () => {
         </div>
       </div>
 
-      <ReadingAnnotation story={shown} onFinish={() => {}} hideAnnotation />
+      {/* #2886: this page stands in for BOTH steps, so it — not the component —
+          decides which code to offer. Passing nothing gave the 全文 code on the
+          重點 page. Same rules as the signed-in pages: 全文 only for the grades
+          the spec gives one to, 重點 only where a 念順順段 exists. */}
+      <ReadingAnnotation
+        story={shown}
+        onFinish={() => {}}
+        hideAnnotation
+        qrStep={
+          wantsPassage
+            ? (passage ? 'key-passage-reading' : null)
+            : (deliversFullText(story.grade) ? 'full-text-annotate' : null)
+        }
+      />
     </div>
   );
 };
