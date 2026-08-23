@@ -39,7 +39,7 @@ import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
 import LessonQrButton from '../qr/LessonQrButton';
-import { deliversFullText } from '../qr/lessonQr';
+import { deliversFullText, type LessonQrStep } from '../qr/lessonQr';
 
 // Re-export types for consumers that import from ReadingAnnotation
 export type { AnnotationType, Annotation };
@@ -72,6 +72,21 @@ function genId(): string {
 
 interface ReadingAnnotationProps {
   story: Story;
+  /**
+   * Which QR code this page should offer, when the caller knows better than
+   * this component does (#2886).
+   *
+   * GuestReadingPage renders THIS component for both 讀全文-做記號 and 重點朗讀
+   * — an anonymous visitor never reaches KeyPassageReading — so without this it
+   * offered the 全文 code on the 重點 page: button 「QR 全文」, dialog ／全文,
+   * file qr-full-*.png. Caught on staging, anonymous, after the signed-in path
+   * had already passed; the two paths render different components, so testing
+   * one says nothing about the other.
+   *
+   * `undefined` keeps the ordinary rule (全文, and only for the grades the spec
+   * gives one to). `null` hides it — the caller decided there is none.
+   */
+  qrStep?: LessonQrStep | null;
   onFinish: (summary: ReturnType<typeof computeSummary>) => void;
   fontSizePx?: number;
   /** DB session id — when provided, annotations are persisted to and loaded from DB. */
@@ -408,6 +423,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   fontSizePx = 22,
   dbSessionId = null,
   hideAnnotation = false,
+  qrStep,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -869,10 +885,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             {/* #2886: the QR for THIS page, so a teacher can hand it out in
                 class without opening the admin panel. 8-9 年級 deliberately get
                 no 全文 code — see docs/requirements/reading-demo-audio-qr.md R1. */}
-            {deliversFullText(story.grade) && (
+            {(qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep) && (
               <LessonQrButton
                 lessonId={story.id}
-                step="full-text-annotate"
+                step={(qrStep ?? 'full-text-annotate') as LessonQrStep}
                 lessonTitle={story.title}
               />
             )}
