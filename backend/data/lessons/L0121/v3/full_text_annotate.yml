@@ -4,13 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第23課
   paragraph_count: 12
-  paragraphs_note: '段號欄印 一~十二 共 12 個。四個分節小標（#MeToo運動的起源／臺灣的#MeToo運動／
-
-    不是你的錯，可以安心求助／身體自主權，從尊重界線開始）不佔段號，另存 inline_headings。
-
-    ⚠️ 第 4 段在 DOCX 裡被拆成兩個 <w:p>（「…這個運動不僅關」＋「注女性，也強調男性也可能受害。」），
-
-    那是為了讓文字繞過旁邊的小知識方框，不是兩段；v2 把它算成兩段。本檔併回一段。'
   paragraphs:
   - idx: 1
     text: 近年「#MeToo」一詞受到社會大眾的關注和討論，究竟「#MeToo」是什麼？和我們又有什麼關係呢？
@@ -64,3 +57,11 @@ full_text_annotate:
   - 自主權
   - 冒犯
   char_count: 1359
+  notes:
+    paragraphs: '段號欄印 一~十二 共 12 個。四個分節小標（#MeToo運動的起源／臺灣的#MeToo運動／
+
+      不是你的錯，可以安心求助／身體自主權，從尊重界線開始）不佔段號，另存 inline_headings。
+
+      ⚠️ 第 4 段在 DOCX 裡被拆成兩個 <w:p>（「…這個運動不僅關」＋「注女性，也強調男性也可能受害。」），
+
+      那是為了讓文字繞過旁邊的小知識方框，不是兩段；v2 把它算成兩段。本檔併回一段。'

@@ -13,6 +13,7 @@ import React from 'react';
 import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 import { formatTime } from '../../../utils/formatTime';
 import NextStepFooter from '../../learning/NextStepFooter';
+import StepActionBar from '../../learning/StepActionBar';
 
 export type ControlState = 'idle' | 'preparing' | 'recording' | 'ttsPlaying' | 'result';
 
@@ -65,11 +66,7 @@ const KeyPassageReadingControls: React.FC<KeyPassageReadingControlsProps> = ({
   recordingSecs,
 }) => {
   return (
-    <div
-      className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-      style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
-    >
-      <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
+    <StepActionBar layout="stack-center">
         {state === 'result' ? (
           inToolbox ? (
             <ToolboxCompletionActions onRetry={onRetry} className="w-full" />
@@ -162,8 +159,7 @@ const KeyPassageReadingControls: React.FC<KeyPassageReadingControlsProps> = ({
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </StepActionBar>
   );
 };
 

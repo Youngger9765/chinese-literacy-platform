@@ -1,21 +1,22 @@
 lesson_uid: L0102
 version_id: v3
-errata:
-- id: E1
-  section: 四 語詞應用
-  locator: 代號表 A 與 I
-  source: I.混淆
-  source_note: 重複的是 A 與 I 兩格，此處 `source` 只放 I 那一格的原文（逐字門要求 source 必須是原稿上真的有的連續字串）。
-  corrected: null
-  kind: 重複代號
-  why: '代號表十個代號裡「混淆」出現兩次（A 與 I），而語詞框的十一個語詞中，
+notes:
+  errata:
+  - id: E1
+    section: 四 語詞應用
+    locator: 代號表 A 與 I
+    source: I.混淆
+    source_note: 重複的是 A 與 I 兩格，此處 `source` 只放 I 那一格的原文（逐字門要求 source 必須是原稿上真的有的連續字串）。
+    corrected: null
+    kind: 重複代號
+    why: '代號表十個代號裡「混淆」出現兩次（A 與 I），而語詞框的十一個語詞中，
 
-    「尼古丁」與「長期提款機」完全沒有出現在代號表裡。
+      「尼古丁」與「長期提款機」完全沒有出現在代號表裡。
 
-    推測 I 原本要放其中之一，但**原稿沒有任何線索可以判定是哪一個**，
+      推測 I 原本要放其中之一，但**原稿沒有任何線索可以判定是哪一個**，
 
-    因此 `corrected` 留 null、未自行填入（填了就是替教材做決定）。
+      因此 `corrected` 留 null、未自行填入（填了就是替教材做決定）。
 
-    連帶影響：第 (5) 題答案印「A」，在 A/I 同義的情況下無法區分指哪一個代號。'
-  confidence: high
-  evidence: document.xml 代號表兩格皆為「混淆」；PDF p5 印出來也是兩個「混淆」
+      連帶影響：第 (5) 題答案印「A」，在 A/I 同義的情況下無法區分指哪一個代號。'
+    confidence: high
+    evidence: document.xml 代號表兩格皆為「混淆」；PDF p5 印出來也是兩個「混淆」

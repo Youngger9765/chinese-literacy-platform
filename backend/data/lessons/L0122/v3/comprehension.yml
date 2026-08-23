@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: C
@@ -48,3 +47,5 @@ comprehension:
       B: 刻意營造懸殊反差，第二段揭示出乎意料的結果，製造驚奇
       C: 為了突顯西班牙軍人英勇無畏，強調以小勝大的奇蹟
       D: 為了引導讀者相信歷史發展冥冥中自有安排，無從解釋
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

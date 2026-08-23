@@ -3,8 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；只有第 5 題有
   questions:
   - index: 1
     answer: D
@@ -47,3 +45,7 @@ comprehension:
       C: 外出購物自備環保購物袋，盡量避免使用一次性塑膠袋
       D: 關注國際塑膠公約的進展，等待各國政府解決塑膠污染問題
     teacher_hint: 第5題解析：作者提倡從日常生活減少塑膠，例如文中提到自備購物袋、減少使用塑膠袋，選項 C 符合這些做法。
+    teacher_note: 作者提倡從日常生活減少塑膠，例如文中提到自備購物袋、減少使用塑膠袋，選項 C 符合這些做法。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；只有第 5 題有

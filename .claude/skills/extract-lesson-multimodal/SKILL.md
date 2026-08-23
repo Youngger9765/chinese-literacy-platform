@@ -171,7 +171,7 @@ L0153 的 6 個差異裡段落標記只佔 2，而 **L0151 的 18 個差異裡�
 ① 定位來源      lesson.yml 的 source.drive_path → private/curriculum-source/_SOT/<path>
 ② DOCX → PDF    soffice --headless --convert-to pdf
 ③ 抽 XML        unzip word/document.xml（校對用，不是主抽取）
-④ 逐頁讀 PDF    Read(pages) 全頁不抽樣 ← 主抽取
+④ 派工          讀 _manifest.yml 的 dispatch，逐一派 extract-<module>（見下）
 ⑤ 讀總表        自學教材總表0812.xlsx 對應列（決定性，不經 LLM）
 ⑥ 產 truth.yml
 ⑦ 三道格式門
@@ -222,6 +222,20 @@ mkdir -p $W && cp "$SOT/<drive_path>" $W/src.docx
 #    過期殭屍清理、timeout、產出與頁數檢查（0 頁也算失敗）。
 scripts/docx_to_pdf.sh $W/src.docx $W $UID     # 印出 `<pdf路徑> pages=N`
 
+# 🔴 整條決定性流程用一支就跑完（#2865）——
+#    ①定位原稿 ②轉PDF ③頁碼 ④派工單 ⑤PDF對帳，任一步紅就停
+python3 scripts/run_extraction_pipeline.py plan --uid $UID
+# 飛機全部交件之後：
+#    python3 scripts/run_extraction_pipeline.py verify --uid $UID --out <產出目錄>
+#
+# 下面這幾行是它裡面做的事，單獨要跑時才用：
+# 🔴 派工之前必跑（#2857 B1）：這份 PDF 是不是算頁碼時的那一份
+#    同一份 DOCX 連轉三次會得到不同頁數（L0016 → 8,9,9；L0013 → 11,10,11），
+#    整份對比 172 課有 7 課頁數不同、11 課共 33 個大題頁碼不同。
+#    位移一頁時 span 通常仍有重疊 → 飛機讀到「那一節的一部分」然後回報成功 = 靜默截斷。
+python3 scripts/assert_pdf_matches_manifest.py --uid $UID --pdf $W/$UID.pdf || {
+  echo "⛔ PDF 與派工單不一致 —— 不派工"; exit 1; }
+
 cd $W && unzip -o -q src.docx word/document.xml
 ```
 
@@ -249,12 +263,64 @@ L0028 實測：**整份 300 秒逾時 → 單張表 1.4 秒出 1 頁**。
 順帶好處：重建出來的 PDF 文字層可以拿去跟你從 XML 抄的格子逐字對，
 **等於免費多一組正向對照**（L0028 對出 10×10 完全相同）。
 
-### ④ 逐頁讀 PDF ← 主抽取
+### ④ 派工 ← 這一步已被拆走（#2843）
 
-用 `Read` 工具帶 `pages`（單次上限 20 頁，教材多為 6~12 頁）。
+> ⚠️ **這一步不再由本 skill 執行。**
+>
+> 原本這裡是「逐頁讀完整份 PDF、一次抽出全部 24 種模組」—— 那就是
+> 「一個 skill 打遍天下」，也是東漏西漏的來源：一次要記住 24 種模組的規則，
+> 漏了一種不會有任何症狀，要人比對 truth.yml 才發現。
+>
+> 現在改成：
+>
+> ```
+> 讀 backend/data/lessons/<uid>/v3/_manifest.yml 的 dispatch: [...]
+>   → 逐一派 extract-<module>，每支只讀自己那幾頁（manifest 帶 pages）
+>   → 每支只產自己那一份 yml，且必須通過自己的 schema
+>   → 對帳門檢查「宣告的模組集合 == 產出的模組檔集合」
+> ```
+>
+> 骨架與介面契約見 `.claude/skills/extract-module/SKILL.md`。
+>
+> **①②③⑤⑧ 留在本 skill** —— 定位來源、轉 PDF、抽 XML、讀總表、產 diff
+> 本來就該共用，不該每架飛機各做一次。
+>
+> ✅ **第一支已經落地**：`.claude/skills/extract-vocab-definitions/SKILL.md`（#2857）。
+> 舊做法（逐頁讀完整份、一次抽全部）**已經拿掉** —— 兩套抽取並行比現在更糟。
+>
+> ⚠️ **派工不是免費的。** 每派出一架飛機有一份固定開銷（本 repo 實測 ~149k token），
+> 比省下來的頁數貴得多。⛔ 不要為了重抽全庫而一課派九架；派工的用法是
+> **某個模組的抽取修好了，只對受影響的課重跑那一個模組**。
+> 成本實測見 `extract-vocab-definitions` 的「實測成本」。
+>
+> ⛔ `dispatch_pages` 是空的（L0028 / L0172，manifest 上有 `pages_unavailable`
+> 寫明原因）→ 先修那課的頁碼，**不要叫飛機讀全份**。
+>
+> 🔴 **派工前必跑這一步**（②轉完 PDF 之後）：
+>
+> ```bash
+> python3 scripts/assert_pdf_matches_manifest.py --uid $UID --pdf $W/$UID.pdf || exit 1
+> ```
+>
+> DOCX→PDF **不可重現** —— 同一份 DOCX 實測轉出 8 頁或 9 頁都有，
+> 172 課裡 7 課總頁數會變、11 課共 33 個大題頁碼會變。派工單的頁碼是在
+> **定位時那一份** PDF 上算的，跟你這次轉出來的不保證一樣。
+> 對不上就重跑 `scripts/build_section_pages.py --uid $UID` 重新定位，
+> ⛔ 不要改成叫飛機讀全份。
+
+### ④.1 共用：答案載體怎麼讀（**每一架飛機都適用**）
+
+> 下面這一整段**不是**舊做法，是跨模組共用的知識 —— 每一支 `extract-<module>`
+> 讀自己那幾頁時都會撞到同樣的坑（PDF 騙人、符號不在文字流、答案在圖形層）。
+> 它留在航母這裡當**單一來源**，模組 skill 引用它，⛔ **不要各自複製一份**
+> （複製就會各自長歪，那正是 597 種 key-shape 的成因）。
+
+用 `Read` 工具帶 `pages`（單次上限 20 頁）。
 
 **鐵律**：
-- **每一頁都要讀**，不抽樣。頁數要在報告裡寫成 `9/9`
+- **派給你的每一頁都要讀**，不抽樣。讀了幾頁要在報告裡寫成 `1/1`、`5/5`
+- ⛔ **只讀派工單給的那幾頁。** 在那裡面找不到 → 回 `BLOCKED` 說「manifest 說在第 N 頁
+  但那裡沒有」，**不要自己去翻別頁** —— 那是 manifest 錯了，要修 manifest
 - 紅色 `☑`／橘色圈選／框線 **就是教師版答案**，這是多模態存在的理由，逐一記下
 - 看到的是**印出來的樣子**——教材上印什麼就記什麼，不要腦補、不要潤稿
 - 版面會騙人（元素互相遮擋、換行、裁切）。判「缺／錯」前先換基準確認，不要直接寫進差異表
@@ -460,6 +526,7 @@ L0028 的 `mc:Choice` 有 12 個 roundRect，圈選只有 11 個。多的那個 
 這條在兩種情況下是唯一可靠的做法：
 - **格子跨頁**：圈是同一個群組，分頁時整組留在前一頁 → 只看後半頁會判成「這課沒圈任何答案」
 - **框的顏色不一致**：有一課 11 個框裡 1 個是黑色（其餘 accent2），顏色不同不代表它不是答案
+
 
 ### ⑤ 總表欄位（不經 LLM）
 
@@ -942,7 +1009,9 @@ python3 scripts/traditional_only_gate.py --uid <UID>                    # 有沒
 ⚠️ 第 4 道目前**只管課文**。其他大題的完整性還沒有可靠的判準（v2 是平的、v3 是
 巢狀的，任何比「字串接起來長什麼樣」的做法都會把排版差異報成內容遺失 ——
 試過三種寫法都在量相鄰關係，見 `coverage_gate.py` 的檔頭）。所以那些大題目前
-**靠逐頁讀 PDF 的紀律，不靠機器**：④ 那條「每一頁都要讀，不抽樣」是這個缺口的擋箭牌。
+**靠逐頁讀 PDF 的紀律，不靠機器**：④.1 那條「派給你的每一頁都要讀，不抽樣」是這個缺口的擋箭牌。
+⚠️ 拆模組之後這條紀律落在**每一架飛機**身上，而它讀的範圍由派工單界定 ——
+派工單漏給頁碼，這個擋箭牌就跟著漏，所以 `dispatch_pages` 空的時候要回 BLOCKED。
 
 ```bash
 python3 scripts/verbatim_gate.py --yaml <抽出的.yml> --docx <原稿.docx>

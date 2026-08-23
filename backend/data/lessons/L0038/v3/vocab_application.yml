@@ -14,7 +14,6 @@ vocab_application:
     H: 棲息地
     I: 契機
     J: 命脈
-  option_bank_note: 10 個代號涵蓋本課 11 個語詞中的 10 個（「閘門」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 這座老橋已無法（　）大量車輛的重量。
@@ -40,3 +39,5 @@ vocab_application:
   - index: 8
     stem: 那次運動會的成功經驗成為他全心投入田徑競技的重要（　）。
     answer: I
+  notes:
+    option_bank: 10 個代號涵蓋本課 11 個語詞中的 10 個（「閘門」未入選項），對應 8 道小題

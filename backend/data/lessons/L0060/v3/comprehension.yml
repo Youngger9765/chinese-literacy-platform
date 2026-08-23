@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p10）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: C
@@ -46,4 +45,6 @@ comprehension:
       C: 學業或情感失敗
       D: 人對壞事的看法
     options_note: PDF p10 上選項 D 被中間一個裝飾圖框擠到下方，看起來像脫隊；文字層順序正常
-  explanations_absent_note: 本課五題原稿都沒有浮動說明框（L0057、L0062 有）
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p10）；文字層的（　）內已填有同樣的代號
+    explanations_absent: 本課五題原稿都沒有浮動說明框（L0057、L0062 有）

@@ -53,6 +53,7 @@ class StoryListItem(BaseModel):
     char_count: int = 0
     thumbnail_url: Optional[str] = None
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     has_key_reading: bool = False
     intro: Optional[StoryIntroSchema] = None
 
@@ -127,6 +128,15 @@ class StoryDetail(StoryListItem):
     # LessonRenderer (falling back to its storyToLesson stopgap when null). Emitting the
     # null key when flag OFF is harmless to legacy consumers (they never read this field).
     lesson_content: Optional[dict] = None
+
+    # 詞語複習的教師版找字表（#2860）。150 課抽了 grid + answer_paths，
+    # 但這個 response 是逐欄位列舉的，沒列進來就整包掉在後端 ——
+    # 前端因此一直用 story.vocabulary 自己隨機生格子，老師設計的那張表
+    # 一課都沒到過學生面前，而且沒有任何錯誤訊息。
+    vocab_review: Optional[dict] = None
+
+    # 知識補給站（#2860）。同上：抽了 148 課，API 沒送。
+    resources: Optional[dict] = None
     # 文言文專屬模組 (#2752). Untyped dict — each is the module's own shape (see
     # backend/data/lessons/*/v3/{classical_text,modern_translation,word_matching,
     # sentence_matching,self_challenge,intro_guide}.yml), passed straight through
@@ -205,6 +215,7 @@ class StoryUpdateRequest(BaseModel):
     genre: Optional[str] = Field(default=None, min_length=1, max_length=20)
     text_type: Optional[str] = Field(default=None, max_length=10)
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     paragraphs: Optional[list[str]] = Field(default=None, min_length=1)
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None
@@ -231,6 +242,7 @@ class StoryAdminListItem(BaseModel):
     paragraph_count: int
     char_count: int
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     source_file: Optional[str] = None
 
     _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)

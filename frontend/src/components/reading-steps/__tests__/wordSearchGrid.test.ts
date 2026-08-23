@@ -294,8 +294,17 @@ describe('getCellsBetween', () => {
     cells.forEach(c => expect(c.col).toBe(2));
   });
 
-  it('returns single cell for diagonal (not supported)', () => {
+  // #2860：斜線從「不支援」改成「支援 45°」。教師版的表 30% 是斜的
+  // （實測全庫 445 條），不支援等於那些詞選不起來。
+  it('returns the full path for a 45\u00b0 diagonal', () => {
     const cells = getCellsBetween({ row: 0, col: 0 }, { row: 2, col: 2 });
+    expect(cells).toEqual([
+      { row: 0, col: 0 }, { row: 1, col: 1 }, { row: 2, col: 2 },
+    ]);
+  });
+
+  it('still refuses a non-45\u00b0 drag', () => {
+    const cells = getCellsBetween({ row: 0, col: 0 }, { row: 1, col: 3 });
     expect(cells).toHaveLength(1);
     expect(cells[0]).toEqual({ row: 0, col: 0 });
   });

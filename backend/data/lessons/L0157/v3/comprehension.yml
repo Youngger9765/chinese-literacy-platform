@@ -3,8 +3,6 @@ version_id: v3
 section_no: 四
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
-  teacher_note_carrier: 深藍色（153D63）文字方塊，印在題目右側；只有第 1、3 題有
   questions:
   - index: 1
     answer: D
@@ -43,3 +41,6 @@ comprehension:
       B: 說明文言文中生字、難字、古字的字義
       C: 告訴讀者文言文的由來以及閱讀的策略
       D: 說明文言文傳承古人智慧，現代人不可不學
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
+    teacher_note_carrier: 深藍色（153D63）文字方塊，印在題目右側；只有第 1、3 題有

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: C
@@ -53,3 +52,5 @@ comprehension:
       B: 寫摘要最具挑戰的是必須從瑣碎的細節裡，抽取共同的元素
       C: 寫摘要可根據故事結構簡要寫出內容，再組合這些內容
       D: 寫摘要最重要的是如何有根有據的寫出簡要的內容
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的（　）內已填有同樣的代號

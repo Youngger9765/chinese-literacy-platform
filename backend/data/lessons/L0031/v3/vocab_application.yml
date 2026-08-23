@@ -37,4 +37,5 @@ vocab_application:
   - index: 8
     stem: 籃球隊一路（　），接連擊敗強敵，終於闖進冠軍賽。
     answer: F
-  answer_note: 第 2、4、5 題原稿的答案印的是全形「Ａ」「Ｂ」「Ｃ」
+  notes:
+    answer: 第 2、4、5 題原稿的答案印的是全形「Ａ」「Ｂ」「Ｃ」

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: B
@@ -15,6 +14,7 @@ comprehension:
       D: 為了掩飾錯誤，有人故意「亂竄」活動紀錄
     explanation: 第1題解析：（A－誤用，呼叫。Ｃ－誤用，同音不同義。Ｄ－誤用，應是竄改。）
     explanation_note: 原稿是一個浮動說明框，印在題目右上方；C、D 兩個代號用全形。
+    teacher_note: （A－誤用，呼叫。Ｃ－誤用，同音不同義。Ｄ－誤用，應是竄改。）
   - index: 2
     answer: A
     stem: 第一段說：「這一幕出現在強調『為愛而跑』的比賽中，顯得格外諷刺。」這句話的意思是什麼？
@@ -33,6 +33,7 @@ comprehension:
       D: 增加參賽者可獲得的紀念品
     explanation: 第3題解析：（第三、四段提到，綠色賽事針對地球的永續經營，以減少因賽事製造的物品為主。）
     explanation_note: 原稿是一個浮動說明框，在 document.xml 裡插在選項 B 之前；題幹的「不是」加了底線。
+    teacher_note: （第三、四段提到，綠色賽事針對地球的永續經營，以減少因賽事製造的物品為主。）
   - index: 4
     answer: C
     stem: 作者先描寫阿國看見賽後垃圾，再介紹綠色賽事與3R，最後寫阿國準備向學校提案。這樣安排主要有什麼作用？
@@ -53,3 +54,6 @@ comprehension:
       D: 運動賽事應改用再生材料製作紀念品
     explanation: 第5題解析：B正確，涵蓋環境問題、3R改善方法與實際行動
     explanation_note: 原稿是一個浮動說明框，在 PDF p8 上印在選項 C 與 D 之間
+    teacher_note: B正確，涵蓋環境問題、3R改善方法與實際行動
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號

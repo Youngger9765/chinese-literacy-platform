@@ -30,9 +30,6 @@ vocab_review:
   - 花門忪悚炸毛超惡石好
   - 查覺醒自然後級人極苦
   answers_are_graphical: true
-  grid_note: '第 8 列第 8 字在 PDF 上看起來像「碟」，document.xml 是「礫」——以文字層為準。
-
-    第 5 列第 4 字是「啓」（不是「啟」），第 1 列第 5 字才是「啟」，兩個異體字同時出現在格子裡。'
   answer_paths:
   - word: 啟人疑竇
     cells:
@@ -128,12 +125,16 @@ vocab_review:
     - - 10
       - 9
     direction: diagonal_down_right
-  answer_note: '最後一條的 word 寫「窮凶惡極」而不是目標語詞「窮凶極惡」——
-
-    格子沿橘圈路徑 (7,6)(8,7)(9,8)(10,9) 就是拼出「窮凶惡極」，「極」「惡」對調。
-
-    照目標語詞寫會讓 normalize_word_search 的座標驗證 FAIL 而且看不出原因。見 source_errata E2。'
-  errata_ref: E2
   geometry_check: '全檔 roundRect 錨點 11 個，扣掉 1 個 5.29×1.13in 白框（bg1，小試身手案例框）＝ 紙上 10 個橘圈，
 
     與 10 條 answer_paths 相同；posOffset 全在紙內，無紙外殘留。'
+  notes:
+    grid: '第 8 列第 8 字在 PDF 上看起來像「碟」，document.xml 是「礫」——以文字層為準。
+
+      第 5 列第 4 字是「啓」（不是「啟」），第 1 列第 5 字才是「啟」，兩個異體字同時出現在格子裡。'
+    answer: '最後一條的 word 寫「窮凶惡極」而不是目標語詞「窮凶極惡」——
+
+      格子沿橘圈路徑 (7,6)(8,7)(9,8)(10,9) 就是拼出「窮凶惡極」，「極」「惡」對調。
+
+      照目標語詞寫會讓 normalize_word_search 的座標驗證 FAIL 而且看不出原因。見 source_errata E2。'
+    errata_ref: E2

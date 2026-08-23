@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p9）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: A
@@ -45,3 +44,5 @@ comprehension:
       B: 能調派大量警力搜索附近垃圾箱的領導與指揮能力
       C: 從有限線索提出合理假設，再找證據加以檢驗的科學思維
       D: 熟悉各種犯罪者的行為，可以直接猜出凶手身分的超能力
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p9）；文字層的（　）內已填有同樣的代號

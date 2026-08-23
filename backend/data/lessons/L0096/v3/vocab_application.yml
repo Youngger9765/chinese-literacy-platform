@@ -13,8 +13,6 @@ vocab_application:
     G: 雲端
     H: 沒有人是局外人
     I: 冤屈
-  option_bank_note: 9 個代號對應 8 道小題；F.先例未被任何一題用到。語詞框的 12 個裡，臨界點、元宇宙、氣候難民沒有進代號表。
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
   items:
   - index: 1
     stem: 運動團隊中，（　），每個隊員的努力對團隊的成功都很重要。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 大地震過後的豪雨讓土石鬆動，山坡上的住宅顯得（　）。
     answer: A
+  notes:
+    option_bank: 9 個代號對應 8 道小題；F.先例未被任何一題用到。語詞框的 12 個裡，臨界點、元宇宙、氣候難民沒有進代號表。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號

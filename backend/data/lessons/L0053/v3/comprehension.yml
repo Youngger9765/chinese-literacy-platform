@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
   questions:
   - index: 1
     answer: C
@@ -51,4 +50,6 @@ comprehension:
       B: 因為全文從問題出發，引導讀者根據觀察一步步尋找答案
       C: 因為作者想比較兩種昆蟲的能力，判斷哪一種比較聰明
       D: 因為昆蟲是否會思考無法研究，所以只能用疑問句當標題
-  questions_note: 本課五題**都沒有**印解析方框（與 L0052 不同），非漏抄。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
+    questions: 本課五題**都沒有**印解析方框（與 L0052 不同），非漏抄。

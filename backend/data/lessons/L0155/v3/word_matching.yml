@@ -3,8 +3,6 @@ version_id: v3
 section_no: 二
 word_matching:
   instruction: 以下是原文與白話文的對照。請依照文意，寫出方框文字的白話意思。
-  answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
-  shape_note: 每題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），下列「白話」留括號填空
   items:
   - index: 1
     classical: 桓公曰：「吾欲下魯梁，何行而可？」
@@ -60,3 +58,6 @@ word_matching:
     vernacular: 魯梁的人民為了活下去而投奔齊國的，十人中就有六人，到了第三年，兩國的國君無計可施，只好向齊國請求（　）。
     blanks:
     - answer: 歸順臣服
+  notes:
+    answer_carrier: 橘色手寫（字元樣式 af，色 E97132），文字流有此資訊
+    shape: 每題兩列：上列「文言」（要解釋的字用黑框 w:bdr color=auto 標出），下列「白話」留括號填空

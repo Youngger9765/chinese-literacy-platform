@@ -3,7 +3,6 @@ version_id: v3
 section_no: 一
 full_text_annotate:
   checklist_instruction: ※ 如果你有做到下列事項，請在□內打勾
-  checklist_instruction_note: 本課這一行**句末沒有句號**（多數課有），照原稿保留。
   checklist:
   - 請在不太了解的字、詞或句做記號。
   - 重要的地方、喜歡的語詞、句子或段落做上記號。
@@ -44,7 +43,6 @@ full_text_annotate:
   - 347
   - 376
   - 392
-  char_count_note: "兩端精準吻合，但需要一條 **skill 目前沒有列到的 Word 口徑**：\n**隱藏的 variation selector 不算字**。第 7 段的「彷彿」在文字層是「彷」+U+E01E1+「彿」，\nnaive `len()` 會數成 260；濾掉 Cf/Mn 後是 259 ＝ 印出的第 9 個數字。\n再加第 8 段 133 ＝ 392 ＝ 最後一個數字。字數欄止於第 8 段（全文最後一段）。\n⚠️ 不濾隱藏字元會算成 260／393，兩個數字都差 1，看起來像抓錯段界。\n（本段沒有阿拉伯數字串，所以「數字串算 1 字」那條在這一課用不到；\n  第 5 段雖有 8/5/20/25 等數字串，但不在字數欄涵蓋範圍內。）"
   inline_marked_terms:
   - 纖細
   - 即將
@@ -57,5 +55,8 @@ full_text_annotate:
   - 彷彿
   - 前兆
   - 焦躁不安
-  inline_marked_terms_note: 課文中加方框的本課語詞（`w:bdr`），11 個與語詞框一致。
   char_count: 1005
+  notes:
+    checklist_instruction: 本課這一行**句末沒有句號**（多數課有），照原稿保留。
+    char_count: "兩端精準吻合，但需要一條 **skill 目前沒有列到的 Word 口徑**：\n**隱藏的 variation selector 不算字**。第 7 段的「彷彿」在文字層是「彷」+U+E01E1+「彿」，\nnaive `len()` 會數成 260；濾掉 Cf/Mn 後是 259 ＝ 印出的第 9 個數字。\n再加第 8 段 133 ＝ 392 ＝ 最後一個數字。字數欄止於第 8 段（全文最後一段）。\n⚠️ 不濾隱藏字元會算成 260／393，兩個數字都差 1，看起來像抓錯段界。\n（本段沒有阿拉伯數字串，所以「數字串算 1 字」那條在這一課用不到；\n  第 5 段雖有 8/5/20/25 等數字串，但不在字數欄涵蓋範圍內。）"
+    inline_marked_terms: 課文中加方框的本課語詞（`w:bdr`），11 個與語詞框一致。

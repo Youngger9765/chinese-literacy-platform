@@ -16,7 +16,6 @@ resources:
     duration_seconds: 298
     source: DaAi News Storage
     url: http://youtu.be/g_gGPsgquok
-  note: 學習單只印片名、片長與 QR code，網址不在文字流裡，由總表「4.影片連結」補上
   section_name: 知識補給站
   videos:
   - index: 1
@@ -25,3 +24,5 @@ resources:
   - index: 2
     url: http://youtu.be/g_gGPsgquok
     url_source: 總表0816「4.影片連結」年級8課次17
+  notes:
+    note: 學習單只印片名、片長與 QR code，網址不在文字流裡，由總表「4.影片連結」補上

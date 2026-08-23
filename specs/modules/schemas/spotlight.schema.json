@@ -1,0 +1,183 @@
+{
+  "$id": "lingoleap/module/spotlight",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 168 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "_practises": {
+      "type": "string",
+      "x-seen-in": "2/168"
+    },
+    "_scope": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "_scope_printed": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "_總表_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "_總表_第六大題標題": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "absent_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "93/168"
+    },
+    "answer_carrier_bdr_note": {
+      "type": "string",
+      "x-seen-in": "3/168"
+    },
+    "arrow_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "blank_marker_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "blocks": {
+      "type": "array",
+      "x-seen-in": "168/168"
+    },
+    "connect_the_dots_geometry_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "4/168"
+    },
+    "layout_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "no_answer_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "note": {
+      "type": "string",
+      "x-seen-in": "5/168"
+    },
+    "options_key_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "overlap_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "part_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "practises": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "section_label": {
+      "type": "string",
+      "x-seen-in": "2/168"
+    },
+    "section_label_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "section_no_note": {
+      "type": "string",
+      "x-seen-in": "4/168"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "6/168"
+    },
+    "section_number_printed": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "section_subtitle_printed": {
+      "type": "string",
+      "x-seen-in": "4/168"
+    },
+    "section_title_note": {
+      "type": "string",
+      "x-seen-in": "4/168"
+    },
+    "section_title_printed": {
+      "type": "string",
+      "x-seen-in": "96/168"
+    },
+    "self_check_absent_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "shape_note": {
+      "type": "string",
+      "x-seen-in": "2/168"
+    },
+    "single_vs_multi_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "source_images": {
+      "type": "array",
+      "x-seen-in": "1/168"
+    },
+    "strategy_name": {
+      "type": "string",
+      "x-seen-in": "168/168"
+    },
+    "strategy_name_errata_ref": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "strategy_type": {
+      "type": "string",
+      "x-seen-in": "155/168"
+    },
+    "structure_note": {
+      "type": "string",
+      "x-seen-in": "25/168"
+    },
+    "table_header_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "table_layout_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "title_line": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    },
+    "title_note": {
+      "type": "string",
+      "x-seen-in": "1/168"
+    }
+  },
+  "required": [
+    "blocks",
+    "strategy_name"
+  ],
+  "title": "spotlight module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "blocks",
+    "strategy_name",
+    "strategy_type"
+  ],
+  "x-enforcement": "warn",
+  "x-lessons-observed": 168,
+  "x-owner": "@stgst",
+  "x-why-warn": "@stgst 正在改這個模組，現在硬擋等於在他的工作區丟紅燈。等他收完再由他自己改成 error。"
+}

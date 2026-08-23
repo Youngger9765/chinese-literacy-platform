@@ -6,5 +6,6 @@ self_check_before_reading:
   - 請在不太了解的字、詞或句做記號。
   - 重要的地方、喜歡的語詞、句子或段落做上記號
   no_correct_answer: true
-  answer_carrier: 學生自填，原稿兩個□都沒有勾選
-  note: 第一條句末有句號、第二條沒有，照原稿抄
+  notes:
+    answer_carrier: 學生自填，原稿兩個□都沒有勾選
+    note: 第一條句末有句號、第二條沒有，照原稿抄

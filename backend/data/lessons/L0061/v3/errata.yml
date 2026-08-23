@@ -1,21 +1,22 @@
 lesson_uid: L0061
 version_id: v3
-errata:
-- id: E1
-  section: 八 詞語複習
-  locator: 找字格子 第10列第8欄
-  source: 納
-  corrected: 訥
-  kind: 格子錯字
-  why: 目標語詞是「木訥」，格子印成「木納」（形近字）；灰框語詞欄與第三、四大題三處都寫「木訥」
-  confidence: high
-  evidence: document.xml 該格 w:t 為「納」；PDF p10 橘框圈的也是「木納」兩格
-- id: E2
-  section: 一 讀全文-做記號
-  locator: 段號欄第 1 個號碼
-  source: ㄧ
-  corrected: 一
-  kind: 錯字（注音符號誤植）
-  why: 段號欄第一格打成注音「ㄧ」(U+3127)，其餘 11 個都是漢字數字
-  confidence: high
-  evidence: document.xml 段號儲存格首字碼位 U+3127
+notes:
+  errata:
+  - id: E1
+    section: 八 詞語複習
+    locator: 找字格子 第10列第8欄
+    source: 納
+    corrected: 訥
+    kind: 格子錯字
+    why: 目標語詞是「木訥」，格子印成「木納」（形近字）；灰框語詞欄與第三、四大題三處都寫「木訥」
+    confidence: high
+    evidence: document.xml 該格 w:t 為「納」；PDF p10 橘框圈的也是「木納」兩格
+  - id: E2
+    section: 一 讀全文-做記號
+    locator: 段號欄第 1 個號碼
+    source: ㄧ
+    corrected: 一
+    kind: 錯字（注音符號誤植）
+    why: 段號欄第一格打成注音「ㄧ」(U+3127)，其餘 11 個都是漢字數字
+    confidence: high
+    evidence: document.xml 段號儲存格首字碼位 U+3127

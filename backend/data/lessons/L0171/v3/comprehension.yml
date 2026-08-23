@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（run 層 w:color E97132）；第 1 題印全形「Ａ」，其餘半形
-  teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側
   questions:
   - index: 1
     answer: A
@@ -52,3 +50,6 @@ comprehension:
       D: 專注練習，在心中反覆複習報告重點
     teacher_note: (D)符合「專注當下」「找出可以控制的事」
     teacher_note_note: 這個文字方塊在 PDF 上被右邊界裁掉一部分，此處以文字層為準
+  notes:
+    answer_carrier: 橘色手寫代號（run 層 w:color E97132）；第 1 題印全形「Ａ」，其餘半形
+    teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側

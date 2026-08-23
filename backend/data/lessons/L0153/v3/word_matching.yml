@@ -4,7 +4,6 @@ section_no: 二
 word_matching:
   label: 二、文白詞語比對
   instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
-  answer_carrier: 橘色（字元樣式），PDF p4~p5 可見
   items:
   - index: 1
     文言: 魏　鮑子都，暮行於野，見一書生卒心痛。
@@ -53,6 +52,8 @@ word_matching:
     - answer: 全家
     - answer: 的
     - answer: 從此
-  items_note: '第 2 題的文言把原文的兩句（「子都下馬，為摩其心。有頃，書生卒。」）併成一句並改標點為逗號；
+  notes:
+    answer_carrier: 橘色（字元樣式），PDF p4~p5 可見
+    items: '第 2 題的文言把原文的兩句（「子都下馬，為摩其心。有頃，書生卒。」）併成一句並改標點為逗號；
 
-    第 1 題的文言則與原文完全一致。原稿如此。'
+      第 1 題的文言則與原文完全一致。原稿如此。'

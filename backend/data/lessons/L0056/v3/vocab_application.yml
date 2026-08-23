@@ -13,8 +13,6 @@ vocab_application:
     G: 儼然
     H: 慢條斯理
     I: 犯小人
-  option_bank_note: 列了 9 個代號但只有 8 道小題，「I.犯小人」沒有對應的題目。
-  answer_carrier: 橘色手寫字（圖形字型），文字流的括號內已填有答案；代號一律**全形**
   items:
   - index: 1
     stem: 教練要小夫每天多練習半小時，小夫不滿的(　)幾句，讓教練大發雷霆。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 我們本來是無話不談的好朋友，為什麼她突然變得冷淡，這讓我(　)。
     answer: Ａ
+  notes:
+    option_bank: 列了 9 個代號但只有 8 道小題，「I.犯小人」沒有對應的題目。
+    answer_carrier: 橘色手寫字（圖形字型），文字流的括號內已填有答案；代號一律**全形**

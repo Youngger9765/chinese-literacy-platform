@@ -22,7 +22,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（多數走字元樣式 af0，少數走 run 層 w:color，兩種都是 E97132）
   items:
   - index: 1
     word: 酸言酸語
@@ -57,3 +56,5 @@ vocab_definitions:
   - index: 11
     word: 充斥
     definition: 大量充滿；多用於負面事物。
+  notes:
+    answer_carrier: 橘色手寫（多數走字元樣式 af0，少數走 run 層 w:color，兩種都是 E97132）

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p11）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: D
@@ -56,3 +55,5 @@ comprehension:
       D: 投票前夕突然出現對某陣營特別不利的消息，我會特別小心
     explanation: （A要先蒐證再下判斷，不可人云亦云。）
     explanation_note: 原稿是一個浮動說明框，印在選項下方。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p11）；文字層的（　）內已填有同樣的代號

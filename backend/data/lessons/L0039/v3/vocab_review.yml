@@ -29,7 +29,6 @@ vocab_review:
   - 套離浹克藍計備隔人境
   answers_are_graphical: true
   answers_printed: partial
-  answer_note: 8 個目標語詞都圈了，但「朝思暮想」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。
   answer_paths:
   - word: 僧多粥少
     cells:
@@ -98,3 +97,5 @@ vocab_review:
     - - 8
       - 2
     direction: vertical
+  notes:
+    answer: 8 個目標語詞都圈了，但「朝思暮想」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。

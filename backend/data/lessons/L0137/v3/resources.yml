@@ -19,9 +19,10 @@ resources:
     duration: (01:46)
     source: Nature Newsteam
     has_qr: true
-  note: 三則各附一個 QR code 圖片；QR 圖上沒有可讀文字
   section_name: 知識補給站
   videos:
   - index: 1
     url: https://www.epochtimes.com/b5/21/4/30/n12917210.htm (文章)
     url_source: 總表0816「4.影片連結」年級9課次16（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    note: 三則各附一個 QR code 圖片；QR 圖上沒有可讀文字

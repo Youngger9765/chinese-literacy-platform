@@ -1,0 +1,66 @@
+lesson_uid: L0157
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+- 'no': 二
+  name: 古今對照表
+  module: word_matching
+  pages:
+  - 4
+- 'no': 三
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 如何讀懂文言文
+  pages:
+  - 4
+  - 5
+  - 6
+  - 7
+- 'no': 四
+  name: 閱讀理解
+  module: comprehension
+  pages:
+  - 7
+  - 8
+dispatch:
+- comprehension
+- full_text_annotate
+- spotlight
+- word_matching
+produced:
+- comprehension
+- full_text_annotate
+- spotlight
+- word_matching
+absent_from_source:
+- key_reading
+- keypoints
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 8
+dispatch_pages:
+  comprehension:
+  - 7
+  - 8
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  - 4
+  spotlight:
+  - 4
+  - 5
+  - 6
+  - 7
+  word_matching:
+  - 4

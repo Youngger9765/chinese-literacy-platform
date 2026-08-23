@@ -14,11 +14,9 @@ vocab_application:
     H: 開路先鋒
     I: 彰顯
     J: 荊棘
-  option_bank_note: 代號表只收 10 個（本課語詞的「約莫」「印記」沒有列入）
   unused_options:
   - C
   - J
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 這次AI技術的突破，是公司發展歷程中重要的（　）。
@@ -44,3 +42,6 @@ vocab_application:
   - index: 8
     stem: 戰爭留下的傷痛，不會因為幾句道歉就被完全（　）。
     answer: E
+  notes:
+    option_bank: 代號表只收 10 個（本課語詞的「約莫」「印記」沒有列入）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

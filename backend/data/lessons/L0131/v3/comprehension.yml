@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   questions:
   - index: 1
     answer: C
@@ -26,6 +25,7 @@ comprehension:
       D: 理解所有的直角三角形都符合畢氏定理
     explanation: 第2題解析：教師檢核學生是否理解「畢氏定理是否放諸四海皆準，適用於每一個不同的直角三角形」。
     explanation_placement_note: 印在選項右側的獨立文字方塊（藍框），是教師版解析
+    teacher_note: 教師檢核學生是否理解「畢氏定理是否放諸四海皆準，適用於每一個不同的直角三角形」。
   - index: 3
     answer: C
     stem: 文章中提到人類文明發展歷程中的「外化」例子，以下哪一項不屬於「外化」的例子？
@@ -37,6 +37,7 @@ comprehension:
       D: 將課堂所學重點打在電腦上
     explanation: 第3題解析：C選項未將訊息外化，只是記在心裡。其他選項ABD都涉及將信息外化。
     explanation_placement_note: 印在選項右側的獨立文字方塊（藍框），是教師版解析
+    teacher_note: C選項未將訊息外化，只是記在心裡。其他選項ABD都涉及將信息外化。
   - index: 4
     answer: B
     stem: 根據本文，關於數學學習中使用計算機的敘述，下列何者正確？
@@ -47,6 +48,7 @@ comprehension:
       D: 計算機能減少計算錯誤，但可能會讓學生不思考解題過程
     explanation: 第4題解析：B計算機能快速計算，並釋放大腦空間，讓學生可以專注於理解數學概念。其他選項的描述不完全符合文章中的觀點。
     explanation_placement_note: 印在第 3 題選項右側的獨立文字方塊（藍框），版面上比它所屬的第 4 題還早出現
+    teacher_note: B計算機能快速計算，並釋放大腦空間，讓學生可以專注於理解數學概念。其他選項的描述不完全符合文章中的觀點。
   - index: 5
     answer: D
     stem: 請問以下選項，何者最能說明作者第五、六段的「寫作目的」？
@@ -60,3 +62,5 @@ comprehension:
       文字層順序正常（A→B→C→D）。另，選項 C 的「書藉」原稿如此（未改）。'
     explanation: ABC皆不是寫作目的。
     explanation_placement_note: 印在選項 A 右側的獨立文字方塊（藍框），是教師版解析
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

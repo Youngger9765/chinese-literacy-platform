@@ -106,6 +106,8 @@ import VocabWordSearch from '../components/reading-steps/VocabWordSearch';
 import KnowledgeStation from '../components/reading-steps/KnowledgeStation';
 import AssessmentReport from '../components/reading-steps/AssessmentReport';
 import LessonRenderer from '../components/lesson-content/LessonRenderer';
+import StepActionBar from '../components/learning/StepActionBar';
+import StepCoachCard, { StepCoachHelpButton } from '../components/learning/StepCoachCard';
 import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
 import GuestReadingPage from '../pages/GuestReadingPage';
@@ -496,6 +498,30 @@ describe('render-smoke: LessonRenderer — Phase-2 unified block renderer (#2289
 describe('render-smoke: LoginPage — quick-login handler mounts without TDZ (#2410)', () => {
   it('LoginPage', () => {
     mountGuard('LoginPage', <LoginPage onSwitchToRegister={vi.fn()} />);
+  });
+});
+
+describe('render-smoke: 自學模式共用外框（#2897）', () => {
+  it('StepActionBar', () => {
+    mountGuard(
+      'StepActionBar',
+      <StepActionBar layout="stack">
+        <button type="button">下一關</button>
+      </StepActionBar>,
+    );
+  });
+
+  it('StepCoachCard', () => {
+    mountGuard(
+      'StepCoachCard',
+      <StepCoachCard title="語詞應用怎麼玩？" onDemo={vi.fn()} onDismiss={vi.fn()}>
+        讀句子，從下面選出最適合填進空格的語詞。
+      </StepCoachCard>,
+    );
+  });
+
+  it('StepCoachHelpButton', () => {
+    mountGuard('StepCoachHelpButton', <StepCoachHelpButton onClick={vi.fn()} />);
   });
 });
 

@@ -1,0 +1,34 @@
+{
+  "generated_by": "scripts/module_reconcile_gate.py",
+  "how_to_shrink": "每一筆都要開該課的原稿確認：是學習單真的沒印那個大題（那就是 sections_present 對的，模組檔才是多的），還是總覽漏看了（那就要補進 sections_present）。解掉一筆就更新這個基準。",
+  "unannounced": {
+    "full_text_annotate": [
+      "L0044",
+      "L0068",
+      "L0070",
+      "L0106"
+    ],
+    "key_reading": [
+      "L0154",
+      "L0155"
+    ],
+    "keypoints": [
+      "L0029",
+      "L0063",
+      "L0137"
+    ],
+    "spotlight": [
+      "L0136"
+    ],
+    "writing_practice": [
+      "L0091"
+    ]
+  },
+  "unannounced_count": 11,
+  "unresolved_sections": {
+    "文章重點整理": 6,
+    "綜合練習": 1,
+    "閱讀接力": 3
+  },
+  "what_this_is": "對帳門的基準。這些是「模組檔存在、但學習單的 sections_present 沒宣告那個大題」的課。記成基準是為了讓門現在就能上 CI —— 若寫 == 0，門一上線就恆紅，紅久了沒人看，真的有新的漏看冒出來也不會有人發現。"
+}

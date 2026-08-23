@@ -27,7 +27,6 @@ vocab_definitions:
   - 支離破碎
   - 一目了然
   answers_printed: true
-  answer_carrier: 橘色（E97132）填在橫線上
   items:
   - index: 1
     definition: 範圍非常大，廣大到沒有邊界。
@@ -56,3 +55,5 @@ vocab_definitions:
   - index: 9
     definition: 目：眼睛；了然：清楚明白。形容事情或結果非常清楚，看一眼就懂，不需要再解釋。
     answer: 一目了然
+  notes:
+    answer_carrier: 橘色（E97132）填在橫線上

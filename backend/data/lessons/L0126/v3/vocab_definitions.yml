@@ -23,7 +23,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 妄想
@@ -61,3 +60,5 @@ vocab_definitions:
   - index: 12
     word: 蜂擁而至
     definition: 形容人群像蜜蜂一樣迅速且大量的朝某個方向聚集。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

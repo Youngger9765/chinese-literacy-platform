@@ -2,7 +2,6 @@ lesson_uid: L0063
 version_id: v3
 section_no: 九
 resources:
-  _scope: 三篇合讀
   label: 影片連結
   items:
   - index: 1
@@ -25,3 +24,5 @@ resources:
   - index: 1
     url: http://youtu.be/zmfAptILp9c
     url_source: 總表0816「4.影片連結」年級6課次22
+  notes:
+    scope: 三篇合讀

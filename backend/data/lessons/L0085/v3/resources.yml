@@ -22,11 +22,6 @@ resources:
     duration_seconds: 234
     source: 天下科普
     qr_code: true
-  items_note: '原稿的片長印成「・片長：(5:02)」（含括號），本欄照 L0072／L0071 的既有形狀去掉括號存成
-
-    `duration` ＋ `duration_seconds`。三支影片各附一個 QR code（圖形），未解碼；
-
-    文字層只有標題、片長、來源三項，沒有 URL。'
   section_name: 知識補給站
   label: 影片連結
   videos:
@@ -36,3 +31,9 @@ resources:
   - index: 2
     url: http://youtu.be/Lf0f7Z-nXEk
     url_source: 總表0816「4.影片連結」年級7課次17（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    items: '原稿的片長印成「・片長：(5:02)」（含括號），本欄照 L0072／L0071 的既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。三支影片各附一個 QR code（圖形），未解碼；
+
+      文字層只有標題、片長、來源三項，沒有 URL。'

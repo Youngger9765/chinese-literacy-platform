@@ -16,11 +16,6 @@ resources:
     duration_seconds: 521
     source: Rosalina's Kitchen 蘿潔塔的廚房
     qr_code: true
-  items_note: '原稿的片長印成「・片長：(12:01)」（含半形括號），本欄照既有形狀去掉括號存成
-
-    `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
-
-    文字層只有標題、片長、來源三項，沒有 URL。'
   section_name: 知識補給站
   label: 影片連結
   videos:
@@ -30,3 +25,9 @@ resources:
   - index: 2
     url: http://youtu.be/T5EFbaUXAag
     url_source: 總表0816「4.影片連結」年級7課次6
+  notes:
+    items: '原稿的片長印成「・片長：(12:01)」（含半形括號），本欄照既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。兩支影片各附一個 QR code（圖形），未解碼；
+
+      文字層只有標題、片長、來源三項，沒有 URL。'

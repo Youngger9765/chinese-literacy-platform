@@ -1,0 +1,73 @@
+version: 1
+matches:
+- needle: 讀全文
+  module: full_text_annotate
+- needle: 念順順
+  module: key_reading
+- needle: 語詞我最棒
+  module: vocab_definitions
+- needle: 語詞應用
+  module: vocab_application
+- needle: 文章重點表
+  module: keypoints
+- needle: 重點表
+  module: keypoints
+- needle: 聚光燈
+  module: spotlight
+- needle: 閱讀理解
+  module: comprehension
+- needle: 詞語複習
+  module: vocab_review
+- needle: 知識補給站
+  module: resources
+- needle: 語詞書寫
+  module: writing_practice
+- needle: 朗讀計時
+  module: key_reading
+- needle: 古文今譯
+  module: modern_translation
+- needle: 文白句子比對
+  module: sentence_matching
+- needle: 文白詞語比對
+  module: word_matching
+- needle: 古今對照表
+  module: word_matching
+- needle: 自我挑戰
+  module: self_challenge
+- needle: 原文
+  module: classical_text
+- needle: 導讀
+  module: intro_guide
+- needle: 故事賞析
+  module: intro_guide
+- needle: 會考圖文題實戰
+  module: comprehension
+- needle: 文章重點整理
+  module: keypoints
+- needle: 綜合練習
+  module: spotlight
+unresolved:
+- needle: 文章重點整理
+  lessons: 4
+  note: 那 4 課同時有別的會對到 keypoints 的大題，無法歸因
+- needle: 閱讀接力
+  lessons: 1
+  note: 只有 1 課，同時有 4 個候選模組
+- needle: 綜合練習
+  lessons: 1
+  note: 無交集
+not_sections:
+- lesson
+- metadata
+- errata
+- goal_box
+- notes
+- self_check_before_reading
+- cross_text_banner
+- multi_text_parts
+- keypoints_followup_questions
+- _manifest
+lives_inside:
+- needle: 閱讀接力
+  inside: multi_text_parts[].reading_relay
+  why: 跨篇的題目，本質上不屬於任何單一篇，所以沒有自己的頂層 yml。L0144 實測 2/2 個 part 都有這一欄。

@@ -38,7 +38,6 @@ vocab_review:
   - 池爪舞張桃挑弱可勢維
   - 獨排眾議興釁信廝殺艱
   answers_are_graphical: true
-  intended_word_note: 「堅不可催」那一條的目標語詞是「堅不可摧」，格子第 8 列第 5 欄印成「催」，見 source_errata E1
   answer_paths:
   - word: 駕輕就熟
     cells:
@@ -213,3 +212,5 @@ vocab_review:
     - - 10
       - 9
     direction: horizontal
+  notes:
+    intended_word: 「堅不可催」那一條的目標語詞是「堅不可摧」，格子第 8 列第 5 欄印成「催」，見 source_errata E1

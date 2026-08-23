@@ -16,7 +16,6 @@ resources:
     title: 【阿公的電視機】 全國電子2017
     duration: (6:33)
     source: 全國電子
-  qr_note: 三則各附一個 QR code（圖形，網址不在文字層）
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 3
     url: http://youtu.be/oADIpGnUjfY
     url_source: 總表0816「4.影片連結」年級7課次15
+  notes:
+    qr: 三則各附一個 QR code（圖形，網址不在文字層）

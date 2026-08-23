@@ -20,8 +20,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
-  note: 第 9 題的題號在原稿印成全形「（９）」，其餘 (1)~(8) 是半形。
   items:
   - index: 1
     word: 首屈一指
@@ -50,3 +48,6 @@ vocab_definitions:
   - index: 9
     word: 大放異彩
     definition: 有突出、與眾不同的表現。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    note: 第 9 題的題號在原稿印成全形「（９）」，其餘 (1)~(8) 是半形。

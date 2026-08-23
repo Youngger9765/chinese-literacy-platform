@@ -22,7 +22,6 @@ vocab_definitions:
   - 開路先鋒
   - 彰顯
   - 抹滅
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 趨勢
@@ -60,3 +59,5 @@ vocab_definitions:
   - index: 12
     word: 約莫
     definition: 大約、大概。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

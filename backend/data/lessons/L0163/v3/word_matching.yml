@@ -4,7 +4,6 @@ section_no: 二
 word_matching:
   label: 二、文白詞語比對
   instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
-  answer_carrier: 橘色手寫（在文字層，顏色只有解 rStyle 才看得到），PDF p3 可見
   items:
   - index: 1
     文言: 昆山 顧寧人先生，生長世族，少負絕異之資。
@@ -26,3 +25,5 @@ word_matching:
     - answer: 超越一般人
     - answer: 從來沒有
     - answer: 不讀書
+  notes:
+    answer_carrier: 橘色手寫（在文字層，顏色只有解 rStyle 才看得到），PDF p3 可見

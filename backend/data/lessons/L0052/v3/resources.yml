@@ -16,7 +16,6 @@ resources:
     title: 一年清出41噸海洋垃圾　88%是廢棄漁網漁具｜鏡新聞
     duration: (2:00)
     source: 鏡新聞
-  note: 三則影片各附一個 QR code（圖形），連結網址不在文字層。第 1 則的來源列未印「來源：」二字（原稿如此）。
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 3
     url: http://youtu.be/KRKBy6mi1WQ
     url_source: 總表0816「4.影片連結」年級6課次12
+  notes:
+    note: 三則影片各附一個 QR code（圖形），連結網址不在文字層。第 1 則的來源列未印「來源：」二字（原稿如此）。

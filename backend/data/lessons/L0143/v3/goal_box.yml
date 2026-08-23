@@ -4,4 +4,5 @@ goal_box:
   level_badge: Level 9・說明文
   strategy_line: 目標策略：說明文結構──用研究證據回答問題
   strategy_line_source_text: 目標策略：說明文結構──用研究證據回答問題無
-  errata_ref: E1
+  notes:
+    errata_ref: E1

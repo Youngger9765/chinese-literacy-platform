@@ -13,7 +13,6 @@ vocab_application:
     G: 股東
     H: 大手一揮
     I: 派遣
-  option_bank_note: 9 個代號對 8 道小題，G.股東 未被任何一題用到（原稿如此）。
   items:
   - index: 1
     stem: 公司今年（　）大增，決定發放員工獎金。
@@ -39,3 +38,5 @@ vocab_application:
   - index: 8
     stem: 他每天關注（　）市場的變化，希望找到投資機會。
     answer: B
+  notes:
+    option_bank: 9 個代號對 8 道小題，G.股東 未被任何一題用到（原稿如此）。

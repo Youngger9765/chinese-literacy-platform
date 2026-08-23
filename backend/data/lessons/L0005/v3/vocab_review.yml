@@ -30,8 +30,9 @@ vocab_review:
   - 尬循序漸進暑廢墟隙平
   answers_are_graphical: true
   answers_printed: false
-  render_note: '文字流有完整 100 字（10×10），但 DOCX→PDF 轉出的版面只印第 2~10 列，
+  notes:
+    render: '文字流有完整 100 字（10×10），但 DOCX→PDF 轉出的版面只印第 2~10 列，
 
-    第 1 列「瓦礫不可收拾翻騰本顫」被分頁切掉（p9 末與 p10 首皆無）。
+      第 1 列「瓦礫不可收拾翻騰本顫」被分頁切掉（p9 末與 p10 首皆無）。
 
-    grid 以文字層為準；Word 原生版面是否同樣切掉未經證實。'
+      grid 以文字層為準；Word 原生版面是否同樣切掉未經證實。'

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: A
@@ -15,6 +14,7 @@ comprehension:
       D: 這間小店位置「隱蔽」，第一次來的人很難發現
     explanation: 第1題解析：(指某事常見、已經見怪不怪，偶爾犯錯不太合適。)
     explanation_note: 原稿是一個浮動說明框，印在題目右上方；題幹的「錯誤」加了底線。
+    teacher_note: (指某事常見、已經見怪不怪，偶爾犯錯不太合適。)
   - index: 2
     answer: B
     stem: 為什麼老師每次都讓體育班學生搬桌椅，可能構成微歧視？
@@ -55,3 +55,5 @@ comprehension:
       D: 老師在課堂上鼓勵學生提出不同的意見和觀點
     explanation: 第5題解析：根據轉學生是臺東來的，推測其不會使用交通工具，這顯示了對轉學生的刻板印象。
     explanation_note: 原稿是一個浮動說明框，排在本題之後
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p7~p8）；文字層的（　）內已填有同樣的代號

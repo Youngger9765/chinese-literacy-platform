@@ -1,0 +1,108 @@
+lesson_uid: L0154
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': ''
+  name: 古文今譯
+  module: modern_translation
+  pages:
+  - 1
+  - 2
+- 'no': ''
+  name: 原文
+  module: classical_text
+  pages:
+  - 2
+  - 3
+- 'no': 一
+  name: 文白句子比對
+  module: sentence_matching
+  pages:
+  - 3
+- 'no': 二
+  name: 文白詞語比對
+  module: word_matching
+  pages:
+  - 3
+  - 4
+  - 5
+- 'no': 三
+  name: 文章重點表
+  module: keypoints
+  pages:
+  - 5
+  - 6
+- 'no': 四
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 疑問標籤：疑問助詞
+  pages:
+  - 6
+  - 7
+  - 8
+  - 9
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  pages:
+  - 9
+  - 10
+  - 11
+- 'no': 六
+  name: 自我挑戰
+  module: self_challenge
+  pages:
+  - 11
+dispatch:
+- classical_text
+- comprehension
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+produced:
+- classical_text
+- comprehension
+- key_reading
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+absent_from_source:
+- full_text_annotate
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 11
+dispatch_pages:
+  classical_text:
+  - 2
+  - 3
+  comprehension:
+  - 9
+  - 10
+  - 11
+  keypoints:
+  - 5
+  - 6
+  modern_translation:
+  - 1
+  - 2
+  self_challenge:
+  - 11
+  sentence_matching:
+  - 3
+  spotlight:
+  - 6
+  - 7
+  - 8
+  - 9
+  word_matching:
+  - 3
+  - 4
+  - 5

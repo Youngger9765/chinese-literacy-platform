@@ -12,10 +12,6 @@ vocab_application:
     F: 繁衍
     G: 懸而未決
     H: 機制
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  option_bank_note: '八個代號正好等於本課八個語詞，全部都被用到 —— 沒有 unused_options。
-
-    代號表印成 2 列 × 5 欄，第 2 列後兩格是空的。'
   items:
   - index: 1
     stem: 校園假日是否開放民眾使用，因為安全與維護問題，至今仍(  )。
@@ -41,3 +37,8 @@ vocab_application:
   - index: 8
     stem: 學校設計的服務獎勵(  )很清楚，服務時數達標就能換到社團點數。
     answer: H
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    option_bank: '八個代號正好等於本課八個語詞，全部都被用到 —— 沒有 unused_options。
+
+      代號表印成 2 列 × 5 欄，第 2 列後兩格是空的。'

@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（run 層 w:color E97132）
-  teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側
   questions:
   - index: 1
     answer: C
@@ -58,3 +56,6 @@ comprehension:
       (C)特質沒有好壞
 
       (D)本文沒有提到'
+  notes:
+    answer_carrier: 橘色手寫代號（run 層 w:color E97132）
+    teacher_note_carrier: 深藍色（C:0F4761）文字方塊，印在題目右側

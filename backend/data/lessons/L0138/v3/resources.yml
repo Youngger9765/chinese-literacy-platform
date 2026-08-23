@@ -15,11 +15,6 @@ resources:
     duration: (04:35)
     source: 邱耀進
     has_qr: true
-  items_note: '第 2 支的片長印「(04:35)」（補零），第 1 支印「(3:00)」（不補零）—— 原稿不一致，照抄。
-
-    總表 4.影片連結 分頁對應網址為 http://youtu.be/5rIhliTNP7o 與 http://youtu.be/cOfEIeMd72I
-
-    —— 學習單上只印 QR code，網址不在 DOCX 文字層。'
   videos:
   - index: 1
     url: http://youtu.be/5rIhliTNP7o
@@ -27,3 +22,9 @@ resources:
   - index: 2
     url: http://youtu.be/cOfEIeMd72I
     url_source: 總表0816「4.影片連結」年級9課次18
+  notes:
+    items: '第 2 支的片長印「(04:35)」（補零），第 1 支印「(3:00)」（不補零）—— 原稿不一致，照抄。
+
+      總表 4.影片連結 分頁對應網址為 http://youtu.be/5rIhliTNP7o 與 http://youtu.be/cOfEIeMd72I
+
+      —— 學習單上只印 QR code，網址不在 DOCX 文字層。'

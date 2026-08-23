@@ -13,13 +13,6 @@ vocab_application:
     G: 別出心裁
     H: 暑氣蒸人
     I: 大放異彩
-  option_bank_note: 代號表印成 2 列 5 欄，第 2 列第 5 格是空的（只到 I）
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
-  answer_schema_note: '第 1、3、4 題是複選。消費端 `lesson_indexes._cloze_from` 只讀單一 `answer`，
-
-    而且**沒有 `answer` 的項目會被靜默丟掉** —— 所以保留 `answer` 為第一個代號讓題目不消失，
-
-    完整答案放 `answers`（沿用 L0046／L0118 的既有寫法）。'
   items:
   - index: 1
     stem: 這張海報的視覺編排（　），每個細節都看得出設計者的巧思。
@@ -57,3 +50,11 @@ vocab_application:
   - index: 8
     stem: 他很衝動，(  )為小事發火，同學都怕跟他相處。
     answer: D
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列第 5 格是空的（只到 I）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    answer_schema: '第 1、3、4 題是複選。消費端 `lesson_indexes._cloze_from` 只讀單一 `answer`，
+
+      而且**沒有 `answer` 的項目會被靜默丟掉** —— 所以保留 `answer` 為第一個代號讓題目不消失，
+
+      完整答案放 `answers`（沿用 L0046／L0118 的既有寫法）。'

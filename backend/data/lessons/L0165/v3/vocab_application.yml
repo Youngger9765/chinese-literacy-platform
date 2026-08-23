@@ -12,9 +12,7 @@ vocab_application:
     F: 心結
     G: 仰賴
     H: 趨前
-  option_bank_note: 只有 8 個選項，比第三大題的 12 個語詞少（少了反射性／咬中／配球／保送）。原稿如此。
   unused_options: []
-  answer_carrier: 橘色代號，PDF p4 可見
   items:
   - index: 1
     stem: 球隊中，我們彼此是互相扶持的隊友，你不必(　)。
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 經過那次真誠坦白的溝通，兩人終於解開多年的(　)。
     answer: F
+  notes:
+    option_bank: 只有 8 個選項，比第三大題的 12 個語詞少（少了反射性／咬中／配球／保送）。原稿如此。
+    answer_carrier: 橘色代號，PDF p4 可見

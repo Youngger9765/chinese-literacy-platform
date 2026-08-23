@@ -12,7 +12,6 @@ resources:
     title: 憂鬱症才不只是心情不好！憂鬱症症狀、成因與治療
     duration: (3:30)
     source: Una Who
-  qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）
   section_name: 知識補給站
   videos:
   - index: 1
@@ -21,3 +20,5 @@ resources:
   - index: 2
     url: http://youtu.be/-1ZDEbTal_g
     url_source: 總表0816「4.影片連結」年級6課次1
+  notes:
+    qr: 兩則各附一個 QR code（圖形，網址不在文字層）

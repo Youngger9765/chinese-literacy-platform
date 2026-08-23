@@ -1,0 +1,62 @@
+{
+  "$id": "lingoleap/module/comprehension",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 172 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answer_line": {
+      "type": "string",
+      "x-seen-in": "1/172"
+    },
+    "answers_printed": {
+      "type": "boolean",
+      "x-seen-in": "9/172"
+    },
+    "floating_annotations": {
+      "type": "array",
+      "x-seen-in": "1/172"
+    },
+    "groups": {
+      "type": "array",
+      "x-seen-in": "1/172"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "172/172"
+    },
+    "items": {
+      "type": "array",
+      "x-seen-in": "27/172"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "4/172"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "119/172"
+    },
+    "questions": {
+      "type": "array",
+      "x-seen-in": "145/172"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "2/172"
+    },
+    "source_exam": {
+      "type": "string",
+      "x-seen-in": "1/172"
+    }
+  },
+  "required": [
+    "instruction"
+  ],
+  "title": "comprehension module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "instruction"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 172
+}

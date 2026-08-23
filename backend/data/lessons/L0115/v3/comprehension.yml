@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3、4、5 題有
   questions:
   - index: 1
     answer: A
@@ -51,3 +49,6 @@ comprehension:
       D: 先拚口號動員，趁選舉前快速形成決策壓力
     teacher_hint: (這句話的核心是「程序」：用資料、監管、對話提升可檢核性與信任，讓公共討論不被情緒與同溫層綁架。
     teacher_hint_note: 這則解析開頭有一個沒有閉合的半形左括號「(」，原稿如此，未補未刪。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、3、4、5 題有

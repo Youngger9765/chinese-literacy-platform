@@ -12,8 +12,6 @@ resources:
     title: 吿白失敗了該怎麼辦？｜一起戀愛吧｜卓苡瑄
     duration: (5:50)
     source: 卓苡瑄Jessie
-  qr_note: 兩則各附一個 QR code（圖形，網址不在文字層）
-  title_note: 第 2 則標題原稿用的是「吿」(U+544A 的異體 U+543F)，不是常見的「告」；照原稿記錄
   section_name: 知識補給站
   videos:
   - index: 1
@@ -22,3 +20,6 @@ resources:
   - index: 2
     url: https://youtu.be/qWn9h9kLZhw
     url_source: 總表0816「4.影片連結」年級6課次21
+  notes:
+    qr: 兩則各附一個 QR code（圖形，網址不在文字層）
+    title: 第 2 則標題原稿用的是「吿」(U+544A 的異體 U+543F)，不是常見的「告」；照原稿記錄

@@ -15,7 +15,6 @@ vocab_review:
   - 嫌疑
   - 自傳
   - 倔強
-  bank_note: 語詞框的排列順序與第三大題不同（此處把膽戰心驚排在身家資料之後），但語詞完全相同，10 個一一對應
   grid_size:
   - 10
   - 10
@@ -115,4 +114,6 @@ vocab_review:
     - - 10
       - 7
     direction: horizontal
-  answer_paths_note: 10 個目標語詞全部圈到。
+  notes:
+    bank: 語詞框的排列順序與第三大題不同（此處把膽戰心驚排在身家資料之後），但語詞完全相同，10 個一一對應
+    answer_paths: 10 個目標語詞全部圈到。

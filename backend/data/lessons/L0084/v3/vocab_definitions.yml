@@ -23,7 +23,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（**字元樣式 af**，色 E97132；run 層掃不到）
   items:
   - index: 1
     word: 乏味
@@ -61,3 +60,5 @@ vocab_definitions:
   - index: 12
     word: 熱衷
     definition: 十分喜愛、投入。
+  notes:
+    answer_carrier: 橘色手寫（**字元樣式 af**，色 E97132；run 層掃不到）

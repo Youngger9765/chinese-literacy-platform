@@ -14,11 +14,9 @@ vocab_application:
     H: 迫在眉睫
     I: 眾說紛紜
     J: 莫衷一是
-  option_bank_note: 代號表只收 10 個，本課語詞有 12 個 —— **瘦骨嶙峋、覆水難收沒有進代號表**（原稿如此）。
   unused_options:
   - E
   - J
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 他年輕時在球場上（　），帶隊拿下好幾次全國冠軍。
@@ -44,3 +42,6 @@ vocab_application:
   - index: 8
     stem: 這部動畫在臺灣（　），大家對它的經典情節都能舉出例子。
     answer: B
+  notes:
+    option_bank: 代號表只收 10 個，本課語詞有 12 個 —— **瘦骨嶙峋、覆水難收沒有進代號表**（原稿如此）。
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

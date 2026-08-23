@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊
   questions:
   - index: 1
     answer: D
@@ -60,3 +58,6 @@ comprehension:
       C: 你閃亮的眼眸彷彿天上的星星
       D: 從空中看，地上的房子好像雨滴
     teacher_hint: （Ａ）綿羊的個性溫和（Ｂ）小丑形象活潑（Ｄ）房子是方正形狀。
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊

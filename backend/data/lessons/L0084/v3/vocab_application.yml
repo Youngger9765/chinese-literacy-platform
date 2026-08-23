@@ -13,12 +13,8 @@ vocab_application:
     G: 希冀
     H: 黯淡
     I: 領略
-  answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
   unused_options:
   - G
-  option_bank_note: '語詞框有 12 個，代號欄只列 9 個（沒有壯膽、驚悚、傾盡），
-
-    八題只用到 8 個 —— **G（希冀）沒有被用到**。代號表印成 2 列 × 5 欄，第 2 列第 5 格是空的。'
   items:
   - index: 1
     stem: 在花蓮居住多年後，他已經對頻繁的小地震(  )。
@@ -44,3 +40,8 @@ vocab_application:
   - index: 8
     stem: 走進山林後，他第一次(  )到大自然安靜而壯闊的美。
     answer: I
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
+    option_bank: '語詞框有 12 個，代號欄只列 9 個（沒有壯膽、驚悚、傾盡），
+
+      八題只用到 8 個 —— **G（希冀）沒有被用到**。代號表印成 2 列 × 5 欄，第 2 列第 5 格是空的。'

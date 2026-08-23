@@ -4,9 +4,6 @@ section_no: 一
 full_text_annotate:
   title_line: 第5課  好心沒好報的玻璃娃娃爭議事件
   paragraph_count: 11
-  paragraphs_note: '段號欄印 一~十一 共 11 個。第 6 段與第 7 段之間插了一張「法院三次判決」表格，
-
-    它不佔段號，另存 inline_table。'
   paragraphs:
   - idx: 1
     text: 今天公民課，景杰老師一進教室，緒恩就舉手發問：「老師，大家都說助人為快樂之本，但是前幾天有一位老爺爺自己跌倒，一名路過的機車騎士好心扶他起來，老爺爺根本沒有受到嚴重的傷，沒想到，後來老爺爺卻反告機車騎士撞倒他，要求賠償。」緒恩越說越激動：「還好警方調閱監視器還原了真相。沒想到做好事卻遇到這種人，真是好心沒好報，以後還有誰敢幫助別人呢？」
@@ -58,9 +55,6 @@ full_text_annotate:
       - 顏家再上訴高等法院
       - 陳同學、學校再上訴最高法院。
       - 雙方接受判決。校方與家屬成立顏旭男急難救助獎學金。
-  inline_marked_terms_note: '課文裡用黑色字元框線（w:bdr color=auto）標出的語詞。
-
-    ⚠️ 這些框是 color=auto 的黑框，**不是**「框選語詞」型的答案載體（那種是非 auto 顏色）。'
   inline_marked_terms:
   - 好心沒好報
   - 不堪設想
@@ -73,3 +67,10 @@ full_text_annotate:
   - 因噎廢食
   - 苛責
   char_count: 1310
+  notes:
+    paragraphs: '段號欄印 一~十一 共 11 個。第 6 段與第 7 段之間插了一張「法院三次判決」表格，
+
+      它不佔段號，另存 inline_table。'
+    inline_marked_terms: '課文裡用黑色字元框線（w:bdr color=auto）標出的語詞。
+
+      ⚠️ 這些框是 color=auto 的黑框，**不是**「框選語詞」型的答案載體（那種是非 auto 顏色）。'

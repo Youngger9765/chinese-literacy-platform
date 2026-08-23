@@ -14,8 +14,6 @@ vocab_application:
     H: 得意忘形
     I: 於事無補
     J: 門可羅雀
-  option_bank_note: 語詞框有 13 個語詞，但代號表只列 10 個（沒有「契機」「市井」「奠定」）——原稿如此
-  answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
   unused_options:
   - B
   - D
@@ -44,3 +42,6 @@ vocab_application:
   - index: 8
     stem: 小傑的海報被老師稱讚後，有些(  )，開始到處炫耀。
     answer: H
+  notes:
+    option_bank: 語詞框有 13 個語詞，但代號表只列 10 個（沒有「契機」「市井」「奠定」）——原稿如此
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊

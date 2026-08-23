@@ -16,6 +16,7 @@ import { VocabItem } from '../../types';
 import { AnswerRecord } from './vocabDefinitionMatchLogic';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 // Using a module-level constant so it is evaluated once and shared across renders.
@@ -77,35 +78,9 @@ function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
     ? '點選上方語詞，再點下方解釋框放入'
     : '把右邊的語詞拖到左邊正確的解釋上';
   return (
-    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          lightbulb
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">詞語配對怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            {instruction}。左右兩欄都可以上下捲動查看更多語詞與解釋。配對正確後，該組會移到下方，尚未配對的會留在上方
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard title="詞語配對怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
+      {instruction}。左右兩欄都可以上下捲動查看更多語詞與解釋。配對正確後，該組會移到下方，尚未配對的會留在上方
+    </StepCoachCard>
   );
 }
 
@@ -114,16 +89,75 @@ export interface DragDropProps {
   activeDefIndices: number[];
   shuffledWords: number[];
   onAllDone: (answers: AnswerRecord[]) => void;
+  /**
+   * #2839 — 每放對/放錯一次就回報一次，讓作答中的進度存得進 DB。
+   * 跟 MCQ 同一個原因：答案只活在 `answersRef` 裡，parent 要等 `onAllDone` 才知道。
+   */
+  onAnswersChange?: (answers: AnswerRecord[]) => void;
+  /**
+   * #2850 — 先前存下的作答快照，用來把已定案的格子放回去。
+   *
+   * 存了讀不回來等於沒存：#2839 把「存」接上之後，`dragDropProgress` 確實進得了 DB，
+   * 但沒人讀，重新載入還是從空的重來。
+   */
+  initialAnswers?: AnswerRecord[];
 }
 
-export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: DragDropProps) {
+/**
+ * 把還原回來的作答對回目前這一輪的題目集合（#2850）。用 `defIndex` 對，不是用
+ * 陣列位置 ——「重做錯題」會讓 `activeDefIndices` 只剩一部分，位置對不起來。
+ */
+function seedAnswers(activeDefIndices: number[], restored?: AnswerRecord[]): AnswerRecord[] {
+  const byDefIndex = new Map((restored ?? []).map((a) => [a.defIndex, a]));
+  return activeDefIndices.map(
+    (defIdx) =>
+      byDefIndex.get(defIdx) ?? {
+        defIndex: defIdx,
+        answeredWordIdx: null,
+        correct: null,
+        wrongAttempts: 0,
+        firstTryCorrect: null,
+      },
+  );
+}
+
+/**
+ * 從作答快照重建畫面狀態（#2850）。只有「已定案」的格子會被放回去 ——
+ * 答錯的 chip 在原本的互動裡會彈回語詞庫，沒有留在格子上的狀態要還原。
+ */
+function seedBoardState(answers: AnswerRecord[]) {
+  const placements = new Map<number, number>();
+  const confirmed = new Set<number>();
+  const wrongAttempts = new Map<number, number>();
+  for (const a of answers) {
+    if (a.wrongAttempts) wrongAttempts.set(a.defIndex, a.wrongAttempts);
+    if (a.answeredWordIdx === null || a.correct !== true) continue;
+    placements.set(a.defIndex, a.answeredWordIdx);
+    confirmed.add(a.defIndex);
+  }
+  return { placements, confirmed, wrongAttempts };
+}
+
+export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone, onAnswersChange, initialAnswers }: DragDropProps) {
   // #2135: zhuyin support — read context directly (same pattern as VocabDefinitionMatch.tsx)
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
+  // #2850 — mount 當下就把還原快照攤成畫面狀態。用 lazy initializer 是必要的：
+  // 這幾個 state 一旦 render 過就不能再從 props 重種（下面那個 reset effect 只負責
+  // 「題目集合換了」的情境）。
+  const seededRef = useRef<ReturnType<typeof seedBoardState> | null>(null);
+  if (seededRef.current === null) {
+    seededRef.current = seedBoardState(seedAnswers(activeDefIndices, initialAnswers));
+  }
+
   const [draggingVocabIdx, setDraggingVocabIdx] = useState<number | null>(null);
-  const [placements, setPlacements] = useState<Map<number, number>>(new Map());
-  const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
+  const [placements, setPlacements] = useState<Map<number, number>>(
+    () => new Map(seededRef.current!.placements),
+  );
+  const [confirmed, setConfirmed] = useState<Set<number>>(
+    () => new Set(seededRef.current!.confirmed),
+  );
   const [wrongFlash, setWrongFlash] = useState<Set<number>>(new Set());
   const [hoverTarget, setHoverTarget] = useState<number | null>(null);
   const [touchSelected, setTouchSelected] = useState<number | null>(null);
@@ -173,19 +207,29 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
   }, [demo?.step, demo?.wordIdx, demo?.slotIdx]);
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
-  const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-      firstTryCorrect: null,
-    })),
+  const answersRef = useRef<AnswerRecord[]>(seedAnswers(activeDefIndices, initialAnswers));
+
+  const confirmedRef = useRef<Set<number>>(new Set(seededRef.current!.confirmed));
+  const wrongAttemptCountRef = useRef<Map<number, number>>(
+    new Map(seededRef.current!.wrongAttempts),
   );
 
-  const confirmedRef = useRef<Set<number>>(new Set());
-  const wrongAttemptCountRef = useRef<Map<number, number>>(new Map());
-
+  // 題目集合換了（重做錯題 / 全部重做 / 切換模式）→ 從頭開始。
+  //
+  // #2850：這個 effect 在 mount 時也會跑一次，會把上面剛從 `initialAnswers` 種好的
+  // 快照整個抹掉 —— 還原就永遠不會生效，而且不會有任何錯誤，看起來就只是「沒還原」。
+  //
+  // 這裡刻意用「**值**變了才 reset」而不是「跑過第一次就跳過」的旗標：
+  // React 18 的 StrictMode 在 mount 時會 setup → cleanup → setup 跑兩次，旗標在
+  // 第二次 setup 已經是 true，reset 照跑，還原一樣被抹掉 —— 開發模式下看起來就是
+  // 「存的進度都不見了」。比對值就不會有這個縫（同樣的 key 重跑幾次都不動作）。
+  const lastRoundKeyRef = useRef<string>(
+    JSON.stringify([activeDefIndices, shuffledWords]),
+  );
   useEffect(() => {
+    const key = JSON.stringify([activeDefIndices, shuffledWords]);
+    if (key === lastRoundKeyRef.current) return;
+    lastRoundKeyRef.current = key;
     setDraggingVocabIdx(null);
     setPlacements(new Map());
     setConfirmed(new Set());
@@ -195,16 +239,30 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     setFlyingAway(new Set());
     setWrongFeedbackSlot(null);
     setCorrectFeedbackSlot(null);
-    answersRef.current = activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-      wrongAttempts: 0,
-      firstTryCorrect: null,
-    }));
+    answersRef.current = seedAnswers(activeDefIndices);
     confirmedRef.current = new Set();
     wrongAttemptCountRef.current = new Map();
   }, [activeDefIndices, shuffledWords]);
+
+  // #2850 — 還原回來就已經全部放完的情況。
+  //
+  // `onAllDone` 只有一個呼叫點（`attemptPlace` 裡的 `setConfirmed` updater），只有
+  // 「活的一次放格」才會觸發。最後一格放對的當下 `onAnswersChange` 是同步送出的，
+  // 但 `onAllDone` 還要等 ~1.15s（fly-away 550ms + 600ms）；學生在這個空窗切走分頁，
+  // `useProgressSync` 的 pagehide beacon 會把「全部放完」的 dragDropProgress 存進 DB，
+  // 而代表「這一關完成」的 dragDropAnswers 還是空的。下次進來格子全滿、語詞庫空了、
+  // `dragDropDone` 仍是 false 所以結算畫面也不會出現 —— 學生卡在一個沒有任何按鈕的
+  // 畫面，而且每次重進都一樣。這裡在 mount 後補一次完成判定把它接回去。
+  const restoredCompletionFiredRef = useRef(false);
+  useEffect(() => {
+    if (restoredCompletionFiredRef.current) return;
+    if (activeDefIndices.length === 0) return;
+    if (confirmedRef.current.size < activeDefIndices.length) return;
+    restoredCompletionFiredRef.current = true;
+    onAllDone(answersRef.current);
+    // 只看 mount 當下的還原狀態；活的放格走 attemptPlace 自己那條路。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDismissCoach = () => {
     setShowCoach(false);
@@ -313,6 +371,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
           };
         });
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
+        onAnswersChange?.(answersRef.current); // #2839
 
         // A6 / 教授七課 §6: Show explicit praise（拉長到 1600ms，比 chip 飛走久，避免不明顯）
         setCorrectFeedbackSlot(defIdx);
@@ -352,6 +411,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             firstTryAnsweredWordIdx: isFirstAttempt ? vocabIdx : a.firstTryAnsweredWordIdx ?? null,
           };
         });
+        onAnswersChange?.(answersRef.current); // #2839
         setWrongFlash((prev) => new Set([...prev, defIdx]));
         // A6: Show "再試試看！" verbal feedback (amber, not silent bounce)
         setWrongFeedbackSlot(defIdx);
@@ -370,7 +430,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         }, 650);
       }
     },
-    [activeDefIndices.length, onAllDone],
+    [activeDefIndices.length, onAllDone, onAnswersChange],
   );
 
   const handleDragStart = (vocabIdx: number) => {
@@ -704,14 +764,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
             </span>
             {instructionText}
           </p>
-          <button
-            type="button"
-            onClick={() => setShowCoach(true)}
-            className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1 shrink-0"
-          >
-            <span className="material-symbols-outlined text-sm">help_outline</span>
-            怎麼玩？
-          </button>
+          <StepCoachHelpButton onClick={() => setShowCoach(true)} />
         </div>
       )}
 

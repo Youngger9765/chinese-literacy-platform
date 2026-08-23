@@ -1,27 +1,28 @@
 lesson_uid: L0099
 version_id: v3
-errata:
-- id: E1
-  section: 七 詞語複習
-  locator: 找字格子 第3列第4欄（被圈斜線的第 2 格）
-  source: 眼
-  corrected: 瞬
-  kind: 格子錯字
-  why: '目標語詞「轉瞬之間」的第 2 字應為「瞬」，格子印成「眼」。
+notes:
+  errata:
+  - id: E1
+    section: 七 詞語複習
+    locator: 找字格子 第3列第4欄（被圈斜線的第 2 格）
+    source: 眼
+    corrected: 瞬
+    kind: 格子錯字
+    why: '目標語詞「轉瞬之間」的第 2 字應為「瞬」，格子印成「眼」。
 
-    連帶後果：整個詞在格子裡拼不出來 —— 對 10×10 格做八方向窮舉，
+      連帶後果：整個詞在格子裡拼不出來 —— 對 10×10 格做八方向窮舉，
 
-    9 個目標語詞各命中唯一 1 個位置，「轉瞬之間」命中 **0** 個，
+      9 個目標語詞各命中唯一 1 個位置，「轉瞬之間」命中 **0** 個，
 
-    而且格子裡**完全沒有「之」這個字**（100 格掃過 0 次）。'
-  confidence: high
-  evidence: 窮舉結果 + PDF p10 那條橘色斜帶的位置（[2,3]→[5,6]）逐格取字為「轉眼瞬間」
-- id: E2
-  section: 七 詞語複習
-  locator: 找字格子 第4列第5欄（被圈斜線的第 3 格）
-  source: 瞬
-  corrected: 之
-  kind: 格子錯字
-  why: 目標語詞「轉瞬之間」的第 3 字應為「之」，格子印成「瞬」（與 E1 同一條斜線）。
-  confidence: high
-  evidence: 同 E1
+      而且格子裡**完全沒有「之」這個字**（100 格掃過 0 次）。'
+    confidence: high
+    evidence: 窮舉結果 + PDF p10 那條橘色斜帶的位置（[2,3]→[5,6]）逐格取字為「轉眼瞬間」
+  - id: E2
+    section: 七 詞語複習
+    locator: 找字格子 第4列第5欄（被圈斜線的第 3 格）
+    source: 瞬
+    corrected: 之
+    kind: 格子錯字
+    why: 目標語詞「轉瞬之間」的第 3 字應為「之」，格子印成「瞬」（與 E1 同一條斜線）。
+    confidence: high
+    evidence: 同 E1

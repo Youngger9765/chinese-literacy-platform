@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
-  teacher_note_carrier: 深藍色（0F4761）文字方塊，印在題目附近；五題都有
   questions:
   - index: 1
     answer: A
@@ -63,3 +61,6 @@ comprehension:
       D: 營造生命循環反覆的希望
     options_note: 四個選項印成兩行、每行兩個（A／B 一行，C／D 一行），中間以全形空格分隔
     explanation: 排比句型為：……了，有再……的時候，「燕子去了」、「楊柳枯了」、「桃花謝了」，可歸納為生命消逝，而「來」、「青」、「開」可歸納為生命出現。因此答案選(D)
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 af），文字流有此資訊
+    teacher_note_carrier: 深藍色（0F4761）文字方塊，印在題目附近；五題都有

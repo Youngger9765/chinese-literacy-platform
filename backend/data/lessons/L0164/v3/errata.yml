@@ -1,12 +1,13 @@
 lesson_uid: L0164
 version_id: v3
-errata:
-- id: E1
-  section: 古文今譯
-  locator: 第 3 段末的引號
-  source: 舅舅說：「他的才能已經消失，變得跟普通人一樣了。
-  corrected: 舅舅說：「他的才能已經消失，變得跟普通人一樣了。」
-  kind: 漏標點（缺下引號）
-  why: 有上引號「而無下引號」；同一句在原文（泯然眾人矣。」）與第一大題參考句［６］都有完整收尾
-  confidence: high
-  evidence: document.xml 該段即以「一樣了。」結束；PDF p1 同
+notes:
+  errata:
+  - id: E1
+    section: 古文今譯
+    locator: 第 3 段末的引號
+    source: 舅舅說：「他的才能已經消失，變得跟普通人一樣了。
+    corrected: 舅舅說：「他的才能已經消失，變得跟普通人一樣了。」
+    kind: 漏標點（缺下引號）
+    why: 有上引號「而無下引號」；同一句在原文（泯然眾人矣。」）與第一大題參考句［６］都有完整收尾
+    confidence: high
+    evidence: document.xml 該段即以「一樣了。」結束；PDF p1 同

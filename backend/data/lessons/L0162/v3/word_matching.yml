@@ -4,7 +4,6 @@ section_no: 二
 word_matching:
   label: 二、文白詞語比對
   instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
-  answer_carrier: 橘色手寫（在文字層，顏色只有解 rStyle 才看得到），PDF p4 可見
   items:
   - index: 1
     文言: 二人並告歸鄉里。
@@ -53,3 +52,5 @@ word_matching:
     - answer: 那天
     - answer: 果然
     - answer: 拜見
+  notes:
+    answer_carrier: 橘色手寫（在文字層，顏色只有解 rStyle 才看得到），PDF p4 可見

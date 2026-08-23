@@ -13,8 +13,6 @@ vocab_application:
     G: 帶風向
     H: 氾濫
     I: 語不驚人死不休
-  option_bank_note: 9 個代號對應 9 道小題，每個代號各用一次。語詞框有 13 個語詞，推播／核對／眼花撩亂沒有進第四大題。
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 他用哭泣來（　）同情，希望老師能原諒他作弊的行為。
@@ -43,3 +41,6 @@ vocab_application:
   - index: 9
     stem: 初次體驗潛水，海底世界的奇妙景觀令人（　），讓人流連忘返。
     answer: B
+  notes:
+    option_bank: 9 個代號對應 9 道小題，每個代號各用一次。語詞框有 13 個語詞，推播／核對／眼花撩亂沒有進第四大題。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號

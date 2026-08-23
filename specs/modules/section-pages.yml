@@ -1,0 +1,6849 @@
+generated_by: scripts/build_section_pages.py
+note: 衍生檔，但**必須 commit** —— 它是 CI 唯一拿得到頁碼的地方（頁碼要從 private/curriculum-source/ 的原稿轉 PDF 才推導得出來，CI 沒有那個目錄）。改了 sections_present 之後要重跑這支，再重產 _manifest.yml。
+lessons:
+  L0001:
+    pdf_pages: 8
+    page_prints:
+    - 0744-5db8-7f35
+    - 0f90-8ed3-f4da
+    - 8f52-150c-3466
+    - 47e0-6412-a6a5
+    - c95c-75aa-9e32
+    - aef0-1171-ddb9
+    - 26c0-16c3-55db
+    - 09b0-b559-6f8f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3]
+      pages_source: located
+    - name: 文章重點表
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7]
+      pages_source: located
+    - name: 知識補給站
+      pages: [7, 8]
+      pages_source: located
+  L0002:
+    pdf_pages: 10
+    page_prints:
+    - 39fc-2a06-2623
+    - 4889-ad89-308a
+    - 2251-a284-a794
+    - b8fb-01a2-513c
+    - 94f4-190f-112b
+    - 8a2b-1cc8-4a91
+    - 7261-5359-b866
+    - 03ec-ffcb-747c
+    - 87fd-a0a7-3f47
+    - 0dfc-5f76-0d24
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0003:
+    pdf_pages: 9
+    page_prints:
+    - 32a9-f8c6-ab1c
+    - 4226-80c9-f2d4
+    - 494d-68e1-56ef
+    - e9c6-a37c-2e28
+    - d0c1-f3f6-49db
+    - 5c28-b0fa-9acf
+    - 3f66-62b8-83d6
+    - 6f3c-de36-1f24
+    - b7d0-3fae-aaa0
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0004:
+    pdf_pages: 8
+    page_prints:
+    - 979f-ded0-a03a
+    - bcdd-d729-436e
+    - 1692-d7c5-9723
+    - aa75-8d78-26fe
+    - 8418-e9d9-be96
+    - 3a78-9e25-cb75
+    - c278-e07c-0b48
+    - 1798-34cd-4136
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0005:
+    pdf_pages: 10
+    page_prints:
+    - c3d9-9b6c-7acb
+    - ad04-ab05-566a
+    - d9af-4b9f-071b
+    - 730b-4926-e997
+    - a7dc-76e7-2b35
+    - 1750-fe9d-d22d
+    - fa63-8db5-86e7
+    - fc65-ae4c-213e
+    - 21ad-f6da-f793
+    - 0324-c8bd-bd1f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞書寫練習
+      pages: [10]
+      pages_source: located
+  L0006:
+    pdf_pages: 11
+    page_prints:
+    - 9d05-09fd-ebad
+    - de84-cc7d-7df7
+    - 4fe8-443c-d2bd
+    - 2d40-2cab-a725
+    - 104c-d2d9-f404
+    - ad65-f008-6700
+    - 8803-d6bf-85e6
+    - f419-2c3c-3ad4
+    - e2f7-432a-b0fb
+    - 3727-2722-46d3
+    - 728e-42b9-0be0
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞書寫練習
+      pages: [10, 11]
+      pages_source: located
+  L0007:
+    pdf_pages: 10
+    page_prints:
+    - 17f6-75ff-b6b0
+    - 10eb-e12b-9fa7
+    - 48c1-01dd-0858
+    - 5c4c-a970-64d3
+    - 0908-581e-9d84
+    - b6e6-0745-eecd
+    - 4e82-c503-1cc3
+    - 3326-7dc8-6bb3
+    - f76b-6820-9805
+    - b344-6fb8-a203
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞書寫練習
+      pages: [10]
+      pages_source: located
+  L0008:
+    pdf_pages: 10
+    page_prints:
+    - c6c0-eaed-25cd
+    - c733-c8af-4faa
+    - e3b0-c442-98fc
+    - 3ccf-e014-4f45
+    - 99ff-2342-7f2a
+    - b5d4-4e0f-de52
+    - 7c6f-f5c5-d490
+    - 8e45-9585-e5cd
+    - bfae-443a-0092
+    - 5fd9-f584-11d1
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0009:
+    pdf_pages: 10
+    page_prints:
+    - 6855-b53a-7e81
+    - e6c4-bcfc-7289
+    - a52f-2147-6949
+    - da8b-8c92-6cfa
+    - 7380-32c8-bdda
+    - 6c82-fa40-22c6
+    - 481c-d07a-4ace
+    - 052e-64d0-6486
+    - 0f61-61f6-f418
+    - 0993-e538-ef33
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0010:
+    pdf_pages: 10
+    page_prints:
+    - 4bac-6902-bbbf
+    - 76b4-f248-30cd
+    - aa1c-4738-8b3d
+    - 9e88-1351-9813
+    - 1d9e-e2b8-373f
+    - 109a-2322-c28b
+    - 464a-7f05-ef83
+    - 4e9b-1258-3735
+    - 1feb-e912-45fd
+    - a797-2ffd-92bc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0011:
+    pdf_pages: 8
+    page_prints:
+    - ef16-fa10-e91b
+    - 4f0a-9b75-80c9
+    - db12-d819-d2dd
+    - 5075-cd1d-6f88
+    - 9b26-4311-960c
+    - 9517-d450-d486
+    - 6a60-77cd-982c
+    - 8b2d-9218-756f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [5, 6]
+      pages_source: located
+    - name: 詞語複習
+      pages: [6, 7]
+      pages_source: located
+    - name: 知識補給站
+      pages: [7, 8]
+      pages_source: located
+  L0012:
+    pdf_pages: 10
+    page_prints:
+    - ad3c-d708-6c18
+    - c903-678a-3c7f
+    - 15c7-4bba-2178
+    - 3b45-7d2c-3269
+    - 5fbb-6c83-e897
+    - 08ba-58aa-e675
+    - d8f2-3c82-7d54
+    - 2aa1-1029-2362
+    - 0424-16a6-5b56
+    - 973d-0c1c-71c3
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0013:
+    pdf_pages: 11
+    page_prints:
+    - 805e-9353-2643
+    - c928-3bb0-466e
+    - 7e88-552c-59dc
+    - 13e9-e767-6cc6
+    - 0c6c-7519-73e3
+    - d590-da9b-5d07
+    - dff2-d193-0b9b
+    - 3d64-969a-72ad
+    - 09fa-6764-1dbf
+    - f66f-c33d-af90
+    - 647b-004b-fa6a
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0014:
+    pdf_pages: 9
+    page_prints:
+    - a769-c7d0-f092
+    - 7b2a-ae29-cd76
+    - 61af-2d18-cdd4
+    - 648d-355a-2583
+    - 957c-6e01-8c2e
+    - e8b8-639f-7fc3
+    - 65c8-4f43-2fe3
+    - bb34-c2e0-c529
+    - 392e-4a48-3752
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3]
+      pages_source: located
+    - name: 文章重點表
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0015:
+    pdf_pages: 8
+    page_prints:
+    - 8c57-d8bf-ed0d
+    - d8b4-ca50-4fb3
+    - 668f-c028-b37e
+    - 5735-d5d0-f0f3
+    - ed13-49c2-a9b4
+    - 0f52-d826-a15d
+    - e5b7-fa0d-0e96
+    - 18ee-8ace-a51f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [5, 6]
+      pages_source: located
+    - name: 詞語複習
+      pages: [6, 7]
+      pages_source: located
+    - name: 知識補給站
+      pages: [7, 8]
+      pages_source: located
+  L0016:
+    pdf_pages: 9
+    page_prints:
+    - 00c5-c877-c54e
+    - c830-ed27-c78c
+    - e3b0-c442-98fc
+    - 1e86-d9f8-a8fb
+    - 2d09-4718-01db
+    - 7fd1-c078-f8e1
+    - 995f-0bc6-30fc
+    - 93fb-e768-bd8f
+    - e2df-55fc-f5f1
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0017:
+    pdf_pages: 8
+    page_prints:
+    - 4e62-6b45-c652
+    - 9f49-8d58-fc22
+    - 8781-0ee4-c51a
+    - 0bf9-9ae1-7d11
+    - 6b60-d590-905b
+    - c472-59dc-67b2
+    - d193-c9b3-a1ff
+    - 33e6-8be1-8a66
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0018:
+    pdf_pages: 8
+    page_prints:
+    - 0d34-c89d-ccac
+    - adb3-a371-8a42
+    - e3b0-c442-98fc
+    - 8a2e-eedb-4fa8
+    - 3f86-025d-7c47
+    - f5b5-0314-a572
+    - 1262-faa0-29d8
+    - 5bfd-138e-4af1
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0019:
+    pdf_pages: 9
+    page_prints:
+    - cd71-a643-a772
+    - 0dc5-00fb-257f
+    - d281-8ebc-7a35
+    - bcf0-8d6f-d539
+    - 75bc-8cf4-39cd
+    - bde7-dbaa-3bc9
+    - ebd9-a599-4273
+    - 0343-fffa-225a
+    - b996-554d-f80f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0020:
+    pdf_pages: 10
+    page_prints:
+    - 94b5-eb68-d727
+    - bbcf-f981-7322
+    - bed0-4570-fd68
+    - 2090-3216-d37d
+    - 3eda-eb1b-43dc
+    - e47d-9b0f-f1db
+    - 43eb-8cae-5144
+    - ef29-5617-a167
+    - 6992-5b44-c369
+    - 03f7-ef29-0679
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+  L0021:
+    pdf_pages: 3
+    page_prints:
+    - 3eeb-63e1-aa3b
+    - 25cf-ff57-32be
+    - 3cdd-7f08-c7c2
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [2, 3]
+      pages_source: located
+  L0022:
+    pdf_pages: 9
+    page_prints:
+    - bcb4-35cc-f905
+    - bd2e-def5-2e57
+    - 17f5-cf39-6e6b
+    - 6188-3ec8-0b78
+    - 26bb-495b-d5c5
+    - d851-d187-1fb2
+    - 7a1b-b02f-a289
+    - dcee-7762-fa43
+    - 9b06-0722-e4c9
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0023:
+    pdf_pages: 10
+    page_prints:
+    - 0cef-3088-974a
+    - c5b2-b80f-c03e
+    - 9d32-90a0-7df8
+    - 3b1f-9b42-23b9
+    - 21b1-10d7-eaf6
+    - a53f-106a-d405
+    - b39a-82a8-03da
+    - 3a86-9d8e-3b64
+    - 7ca7-d1f8-9682
+    - 13e5-b09b-8128
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0024:
+    pdf_pages: 10
+    page_prints:
+    - 8c80-4782-faf1
+    - cf37-4b76-496d
+    - ecba-db2b-7877
+    - 8848-e986-aa2b
+    - 2dbf-0ef1-4abf
+    - 103d-b0fa-e152
+    - 454d-7f0f-f314
+    - fbf5-7a39-c8ed
+    - 8d31-8a33-3015
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0025:
+    pdf_pages: 9
+    page_prints:
+    - 1ed0-d883-20b5
+    - 02f2-45e1-2c91
+    - 3aab-f168-d9f8
+    - bea5-b596-86ea
+    - 3388-841e-0c91
+    - e452-27a3-cfae
+    - e1f0-578c-2949
+    - e6db-2985-6d32
+    - 1199-eb55-cf6e
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0026:
+    pdf_pages: 10
+    page_prints:
+    - ac9a-840a-b65e
+    - 1ade-d9bd-335b
+    - 7020-17ad-6bb3
+    - 9f68-5431-3321
+    - 44b1-2f50-3752
+    - 7310-1f28-0bc3
+    - 6df0-f493-afcb
+    - df96-8033-9be8
+    - 760d-54f3-f14e
+    - d228-320e-ec61
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0027:
+    pdf_pages: 9
+    page_prints:
+    - b009-00c7-717f
+    - 32c5-865d-5b92
+    - 7fbb-0fe8-8632
+    - 4b9b-5f21-d620
+    - bcd8-78df-4f1a
+    - 5044-4110-44a2
+    - f4f3-1ec7-0ab9
+    - 826b-b4d0-977b
+    - 9e4a-a772-2100
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0029:
+    pdf_pages: 21
+    page_prints:
+    - 39bb-ad1b-9c13
+    - 8418-e586-0af4
+    - 6909-417b-e5c6
+    - e3b0-c442-98fc
+    - 1e50-ac26-5d80
+    - a1e9-eaeb-9d51
+    - d437-aba1-6075
+    - 52c7-9681-5e88
+    - 7b6a-3b17-a6cd
+    - 90de-c08d-a03b
+    - d29c-7513-b499
+    - e3b0-c442-98fc
+    - 3d86-d0b7-f22e
+    - 1cec-b43b-ce57
+    - a2ef-51e3-8641
+    - 4538-d996-9d81
+    - 9651-8af8-de40
+    - 380b-101c-ce68
+    - 0314-89b4-9824
+    - 5c27-9d1b-4f15
+    - ab40-74a3-4209
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4, 5]
+      pages_source: located
+    - name: 念順順
+      pages: [5, 6]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 語詞應用
+      pages: [8]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9, 10]
+      pages_source: bracketed
+    - name: 讀全文-做記號
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12, 13]
+      pages_source: located
+    - name: 念順順
+      pages: [13]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [13, 14]
+      pages_source: located
+    - name: 語詞應用
+      pages: [14, 15]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [15, 16]
+      pages_source: located
+    - name: 綜合練習
+      pages: [16, 17]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [17, 18, 19]
+      pages_source: located
+    - name: 綜合閱讀理解
+      pages: [19, 20]
+      pages_source: located
+    - name: 詞語複習
+      pages: [20, 21]
+      pages_source: located
+  L0030:
+    pdf_pages: 8
+    page_prints:
+    - 19f2-fd4b-1883
+    - 1603-a9c8-1af6
+    - 7a65-e1ce-f01b
+    - 7da2-d98f-4655
+    - 3cac-ea45-9b5c
+    - 5436-be56-734e
+    - 18e2-15b9-66ef
+    - bdde-27ed-6f3a
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3]
+      pages_source: located
+    - name: 文章重點表
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0031:
+    pdf_pages: 9
+    page_prints:
+    - 820a-e55e-8c07
+    - 367e-178a-08a1
+    - 8918-1720-a7b2
+    - 0e5e-0fcb-0fb5
+    - 3dca-bca6-84b1
+    - 38dc-65ce-3305
+    - 11b5-8657-c28e
+    - 47ed-f35c-ed58
+    - 1336-befa-80df
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0032:
+    pdf_pages: 10
+    page_prints:
+    - b87b-8674-36be
+    - 71e4-0a14-6d50
+    - 5d80-70da-189f
+    - cc65-db93-c898
+    - f02e-f65e-938f
+    - eefc-cce5-626d
+    - 549f-f13b-b9d0
+    - f9c3-2e88-8fae
+    - c556-6650-f4b0
+    - a8c6-3257-bea8
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0033:
+    pdf_pages: 10
+    page_prints:
+    - 1eae-1469-3cde
+    - dc1d-a266-a843
+    - cb6b-f4fc-9cf7
+    - 9521-0e34-693c
+    - 9bec-8df2-9f4c
+    - 8233-3cb4-745f
+    - 4dd8-b7a3-ef54
+    - bb93-9149-16b6
+    - c1e4-8675-6060
+    - 0555-f209-8c30
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0034:
+    pdf_pages: 11
+    page_prints:
+    - d90b-fe63-a9b4
+    - 49be-1687-ad7b
+    - b0e4-be0e-2b22
+    - f699-5c33-4eba
+    - 4835-7ce3-e65c
+    - 3f0f-76ef-309c
+    - b720-1ad6-10f7
+    - d7d4-92eb-829c
+    - 43cc-481a-ca62
+    - d0a6-4418-2e72
+    - cb2f-e518-1fdb
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0035:
+    pdf_pages: 11
+    page_prints:
+    - d959-18c0-63b4
+    - c354-1f21-14e6
+    - cada-f2fa-e01b
+    - 39b9-718e-fa67
+    - bdf8-0282-1c35
+    - 888a-0c9e-aed9
+    - 25b5-830c-3db7
+    - eba8-83f8-ca08
+    - 033d-a4fb-d847
+    - a2e3-52cf-d15a
+    - 799e-e53a-a074
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0036:
+    pdf_pages: 11
+    page_prints:
+    - 53c4-f297-0c69
+    - 76f5-9ff8-92bc
+    - 6612-2db9-3208
+    - a6cc-1dc4-6407
+    - 9868-3244-e45c
+    - 8916-7c93-3580
+    - 6f76-8b0f-582c
+    - 7a80-2eb0-27a8
+    - cfc1-8c35-9dc7
+    - 3bd4-9808-c081
+    - c14a-98a5-2a85
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0037:
+    pdf_pages: 10
+    page_prints:
+    - c08a-505e-7fff
+    - 1cf3-eff3-b4c6
+    - 1194-2af3-b727
+    - 0d0c-dc30-9f23
+    - 4abe-5060-4b48
+    - a88b-28c7-7a96
+    - 8991-1fc9-c749
+    - 6eea-bdc7-6e60
+    - b64c-e528-4fc9
+    - b770-8a32-539b
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0038:
+    pdf_pages: 9
+    page_prints:
+    - 9e75-7470-095f
+    - 28a3-19c4-5611
+    - 4d43-92ee-1835
+    - de4a-db76-1d69
+    - 8ac7-a815-5faa
+    - 4183-73c6-9e68
+    - 8a41-de02-22fd
+    - 5412-2d1d-15e3
+    - 5df6-9a94-454c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0039:
+    pdf_pages: 11
+    page_prints:
+    - bb0f-5008-3419
+    - 4a94-078f-3199
+    - 523b-5fb2-3613
+    - a6d3-2573-1136
+    - f352-08a8-d136
+    - ec23-a67a-3f8f
+    - 888b-8cf6-1f8e
+    - 8ce0-76dc-171c
+    - e983-5343-4a7c
+    - ad0c-f062-794f
+    - cf35-39fe-cfad
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0040:
+    pdf_pages: 12
+    page_prints:
+    - 90e1-814a-970a
+    - 47a4-bd7f-b6df
+    - 6244-2edd-b20a
+    - 98ec-b89e-d105
+    - b832-2bee-a7cf
+    - c95c-40f0-2c1e
+    - 9e0a-79e9-9803
+    - c437-db97-d42c
+    - 8749-be79-18a4
+    - 90c5-891f-2452
+    - 950b-dd3d-67fa
+    - 5fe0-0ff4-57d8
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0041:
+    pdf_pages: 9
+    page_prints:
+    - ce24-6e18-5574
+    - d636-d71e-9098
+    - b724-9036-c4b4
+    - 7d4b-c8f2-c67f
+    - d027-b9a0-3d04
+    - dfb4-ae31-01bc
+    - 447e-076c-710b
+    - 82f0-f176-4139
+    - d7f8-e404-ca3f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0042:
+    pdf_pages: 10
+    page_prints:
+    - 54ee-ccce-f89d
+    - cdd2-769c-3c1f
+    - 5c5c-d5f3-6b01
+    - cf24-ecc0-043d
+    - 854c-21dd-91a2
+    - 3503-cae4-3479
+    - 2c12-5d39-9daa
+    - 04dc-a2c3-5f15
+    - d42d-a0be-b5e8
+    - e952-27ea-31a0
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0043:
+    pdf_pages: 10
+    page_prints:
+    - c581-7776-9cc6
+    - f287-a9f0-122a
+    - bfb7-9ae1-5f2b
+    - 484d-94b7-1bb7
+    - 0611-5836-9b71
+    - fa88-e20c-8183
+    - 1cff-8a53-bf30
+    - c523-0348-fdbb
+    - 4b2b-36bd-9826
+    - d9e4-ae99-f380
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0044:
+    pdf_pages: 12
+    page_prints:
+    - 8f67-69de-76d9
+    - a6b9-1c75-ca50
+    - 6a9e-98c7-96fc
+    - b64e-469e-892f
+    - d84c-279f-6e11
+    - 198e-cadd-e9d4
+    - fa24-3526-95e8
+    - 248a-9c11-fcae
+    - c937-b032-0910
+    - d92d-06c9-28be
+    - b04f-4367-fb30
+    - 7b92-11a6-3216
+    sections:
+    - name: 閱讀聚光燈
+      pages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      pages_source: located
+  L0045:
+    pdf_pages: 10
+    page_prints:
+    - dd62-3dd9-4c59
+    - c1bd-771c-9ecb
+    - 3452-158f-94ed
+    - 3ea7-b93e-51a4
+    - 337f-8dc6-3268
+    - 3f5a-c6ad-4ba5
+    - 54e9-63a8-662b
+    - ea2e-5f35-8b7c
+    - d613-5105-9b2a
+    - 5f31-7f20-dbf2
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0046:
+    pdf_pages: 9
+    page_prints:
+    - fc8d-fac4-d8fb
+    - d3bc-6668-ddcc
+    - 8436-622b-9532
+    - 7448-8e23-71ea
+    - 0d8f-648b-5b76
+    - 6a37-7776-94ca
+    - d278-e3e4-e106
+    - 833e-1ccb-7fa0
+    - fd8a-8940-5a4c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0047:
+    pdf_pages: 10
+    page_prints:
+    - 2f5e-a27a-7019
+    - dcd2-052d-eb8a
+    - 3c89-f018-de8e
+    - c782-0e19-e667
+    - 9f93-33c0-fdb0
+    - caf6-60ec-b7a8
+    - b919-5fd8-c099
+    - 2a19-b614-0eec
+    - 8121-bb5a-dc95
+    - 45b5-aa57-fce5
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0048:
+    pdf_pages: 11
+    page_prints:
+    - 5be2-92cd-3a51
+    - 61d1-4df1-c272
+    - da42-c54c-8fbe
+    - 0e93-1f41-8d48
+    - 4a31-a4a7-4f85
+    - 9c56-e107-ad1a
+    - 0c62-5786-7971
+    - 884d-4717-76c7
+    - 4b59-0198-8474
+    - 9750-b113-5592
+    - a237-b100-795c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 語詞應用
+      pages: [8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0049:
+    pdf_pages: 3
+    page_prints:
+    - 60a1-3a5c-c628
+    - 026a-3b97-4d9c
+    - 0086-bc16-1269
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [2, 3]
+      pages_source: located
+  L0050:
+    pdf_pages: 9
+    page_prints:
+    - 8a9d-1a6a-42bb
+    - 81f4-8a35-e497
+    - 01cf-6b67-9599
+    - 6a59-0843-b5e0
+    - 03fd-b243-9517
+    - 1656-b504-a8fa
+    - 0fc1-b2cf-c20a
+    - 1ac4-8720-03c9
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0051:
+    pdf_pages: 11
+    page_prints:
+    - cc4e-beee-02cb
+    - 4075-c264-3e64
+    - df2e-0dc5-6477
+    - c350-b985-c174
+    - a030-e4fd-c2d1
+    - b28a-c1c3-884e
+    - e58c-cd34-d785
+    - 6b15-9929-40c0
+    - 0427-d0b2-216c
+    - 9d4d-00aa-8ea3
+    - d0a7-8515-c679
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0052:
+    pdf_pages: 9
+    page_prints:
+    - d17b-6013-b4bc
+    - 82a8-93f9-b6a4
+    - faaf-b798-69d5
+    - 1b0e-74c0-2031
+    - a53c-3bf5-7f72
+    - f579-9def-6067
+    - 601a-a3bf-861b
+    - a666-4b0c-3917
+    - b325-913a-cfa4
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0053:
+    pdf_pages: 9
+    page_prints:
+    - f402-a9eb-3664
+    - 1a37-3902-f176
+    - 0a75-e65c-c353
+    - 7253-e43f-b33a
+    - 20f7-c4db-2e86
+    - 5944-9723-5aa7
+    - da08-e316-d8a3
+    - 252a-469c-9d7e
+    - 59f0-1bfc-b879
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0054:
+    pdf_pages: 10
+    page_prints:
+    - 8494-4fd8-c0aa
+    - 5f85-2faf-1fad
+    - d9a0-a830-c132
+    - 94e3-beac-68e9
+    - f2c9-0ffb-4332
+    - 9acc-29e1-be22
+    - 64ee-bfbc-93bc
+    - 8d82-b993-6738
+    - edf7-0856-43af
+    - 9781-cf18-3119
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0055:
+    pdf_pages: 11
+    page_prints:
+    - b16d-bbcc-832c
+    - c7e8-04d8-7654
+    - 99fb-b3fe-413b
+    - 2e8f-4ada-1f22
+    - a0de-5b9b-feb2
+    - ea10-6cd0-7d6e
+    - dce1-50ee-61f6
+    - f2e5-d84e-b6af
+    - eb8c-0b3c-e9ff
+    - 5d48-d18e-5e82
+    - f284-947d-a902
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0056:
+    pdf_pages: 10
+    page_prints:
+    - ee8c-37ad-eee4
+    - 8209-90db-c7c1
+    - 3b0c-10d5-3eaa
+    - 4f3a-9fab-f3d0
+    - d152-32f4-857d
+    - cec4-ae2f-8352
+    - 4741-bb6f-ab24
+    - 7c93-e3f9-9f23
+    - ecfc-33db-9894
+    - 74ec-0c5c-617c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0057:
+    pdf_pages: 10
+    page_prints:
+    - 711b-634a-b610
+    - 399a-4ab9-fe22
+    - 884f-5b02-44c4
+    - a78d-a312-3ff4
+    - 38d6-b9a8-8763
+    - e1f3-e6c7-31e7
+    - 6483-498b-ac93
+    - d432-72c7-4543
+    - 08bb-36dc-a213
+    - aec3-406e-d71e
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0058:
+    pdf_pages: 9
+    page_prints:
+    - 3824-ebd4-4c30
+    - f972-bc1b-d597
+    - a11a-fb70-846c
+    - 9d5b-45d3-454e
+    - 30d1-90d7-6fcd
+    - 0aec-9023-e2da
+    - 3554-7d5c-76d2
+    - f9bd-a9a7-10c2
+    - 6fe4-d517-45c1
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0059:
+    pdf_pages: 10
+    page_prints:
+    - 35d9-4bb2-2519
+    - c7cd-4ed3-6a12
+    - c58f-2e6d-334c
+    - 7666-b0f4-23fc
+    - 3a60-610e-373e
+    - ee16-3298-af31
+    - aa65-d8d3-a0aa
+    - bbb7-03cc-86b6
+    - 92dd-90ed-6229
+    - 5330-661b-ee3c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0060:
+    pdf_pages: 11
+    page_prints:
+    - 44bd-85d0-cea5
+    - acb0-428f-6113
+    - 16cb-54a1-bad2
+    - 94c8-9602-b47c
+    - c99b-a623-da82
+    - a05a-70dd-1abe
+    - 67eb-4d73-9c39
+    - a0bf-7cea-5518
+    - c356-d97f-f819
+    - c5f3-c961-076f
+    - 25c5-9d49-bb0d
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0061:
+    pdf_pages: 10
+    page_prints:
+    - b7f9-d2d6-e1e2
+    - 5839-855c-7623
+    - ab62-b7db-a46d
+    - c5a1-523b-1070
+    - 223d-e3d1-f766
+    - b5b5-b908-6473
+    - 9368-bdd2-434a
+    - 4c4f-d2a1-42ec
+    - 392d-65dc-d376
+    - 4992-a27c-076f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+  L0062:
+    pdf_pages: 10
+    page_prints:
+    - 48fd-f451-459c
+    - 275e-16c2-335a
+    - e3b0-c442-98fc
+    - 088d-6ed0-a0a3
+    - 6f86-1605-6f45
+    - 748e-52f3-4dc5
+    - 0fe3-923f-b358
+    - ea8d-38a3-7c98
+    - c507-0795-f593
+    - 6a5a-5a91-7e0e
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0063:
+    pdf_pages: 22
+    page_prints:
+    - b352-923f-5a2d
+    - 0238-42ef-8724
+    - f43c-ac0b-b57d
+    - da1e-5636-4e84
+    - 52ce-d7da-590b
+    - 7ff1-4d14-258a
+    - 832b-0040-4dee
+    - 969b-acba-3e67
+    - 844c-c0f3-8abe
+    - ffdc-195a-9dae
+    - 5962-3f8a-33c3
+    - 60e8-38be-bc81
+    - 8cce-2183-57cc
+    - 4796-6a0b-1012
+    - 50b1-cf18-55b5
+    - 91bb-55c3-2f3d
+    - 3f45-f034-75a9
+    - f979-df28-0aea
+    - 9409-628d-8cce
+    - eaca-75af-4bb5
+    - 74d7-bc7b-e767
+    - fe5a-1d32-697d
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [16, 17, 18, 19, 20, 21]
+      pages_source: located
+    - name: 綜合閱讀理解
+      pages: [21, 22]
+      pages_source: located
+    - name: 詞語複習
+      pages: [22]
+      pages_source: located
+    - name: 知識補給站
+      pages: [22]
+      pages_source: located
+  L0064:
+    pdf_pages: 10
+    page_prints:
+    - 7f8c-52b5-6213
+    - 8dcf-3ce1-a13d
+    - c111-8db1-e463
+    - 9546-1296-c72d
+    - 6140-7142-5f72
+    - 1cdd-218e-c783
+    - 1161-97e6-37b8
+    - 0f95-6f8e-6887
+    - 09fe-703d-ac0a
+    - e2b1-02c5-c2e7
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0065:
+    pdf_pages: 9
+    page_prints:
+    - e5d1-9ea7-2443
+    - 6d5e-aabe-b822
+    - fec1-0922-4819
+    - 729a-f26c-9fee
+    - e10f-eda3-a5a2
+    - a2c4-add7-de5c
+    - fbf6-4563-7a63
+    - 3e6f-fd42-ac5b
+    - 6ddc-a3a0-7386
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0066:
+    pdf_pages: 9
+    page_prints:
+    - 9bb6-641e-f223
+    - d2b6-9bbc-e6d1
+    - 9032-14cd-3859
+    - ebff-317c-fe81
+    - 379f-b55e-06eb
+    - f5e0-176d-3082
+    - 49e9-2be5-5fe0
+    - b0c6-c2c7-b2d6
+    - abb7-a1cd-7b50
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0067:
+    pdf_pages: 13
+    page_prints:
+    - 30a8-e9b0-2e93
+    - a198-12fb-3846
+    - 755d-0f63-1838
+    - b927-aada-b9ab
+    - e9f2-4e3f-4c18
+    - f0cc-637b-f849
+    - c130-5d2e-e897
+    - 5330-d563-4dae
+    - ebb8-42c3-f4c8
+    - 6d7e-3ab8-9dcf
+    - 5ac9-9c14-3e22
+    - 89ab-eaa0-12d7
+    - 5c0a-efa7-9e5c
+    sections:
+    - name: 閱讀聚光燈-自我提問策略1──跟著人物故事線問問題
+      pages: [1, 2, 3, 4, 5, 6, 7]
+      pages_source: bracketed
+    - name: 讀全文
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 念順順
+      pages: [9]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞應用
+      pages: [10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0068:
+    pdf_pages: 8
+    page_prints:
+    - db9f-70b0-bb3d
+    - d4ad-fb0f-4eb3
+    - 6a4d-8969-adef
+    - 2315-fc78-f75f
+    - 5f4e-3209-13b9
+    - 4d53-823e-210e
+    - ea53-ea58-1c0a
+    - caba-fe83-51c7
+    sections:
+    - name: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
+      pages: [1, 2, 3, 4]
+      pages_source: bracketed
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0069:
+    pdf_pages: 10
+    page_prints:
+    - d86e-009e-4158
+    - 48de-9d85-bd1f
+    - b6ab-d979-193c
+    - 1218-d119-d442
+    - 962a-6ada-4e5e
+    - 3a80-3a91-250e
+    - 4359-102c-d001
+    - f4d0-3204-29b1
+    - 4509-a46a-aaef
+    - 2e3b-ff4a-619c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+  L0070:
+    pdf_pages: 10
+    page_prints:
+    - dcae-bcb3-c93f
+    - 339e-f475-90f6
+    - 1d6a-5bf5-fbdd
+    - 6711-6a8d-4819
+    - 198c-3168-0ec3
+    - 9d31-ca3b-c899
+    - 31a5-8bb1-7a60
+    - 3866-b3f1-1d6f
+    - ae70-c0cc-a67f
+    - f592-ea2a-48ce
+    sections:
+    - name: 閱讀聚光燈
+      pages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      pages_source: located
+  L0071:
+    pdf_pages: 10
+    page_prints:
+    - 13aa-7815-0bd5
+    - c372-9ad0-b6d8
+    - 8384-d362-d4af
+    - 918b-a1af-d532
+    - 9319-0be7-54d3
+    - 4a6a-f580-3893
+    - 4b56-d65d-6251
+    - 422f-db29-d774
+    - ab1d-2bb2-b582
+    - 1a17-16c1-182e
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0072:
+    pdf_pages: 9
+    page_prints:
+    - 06bc-702a-a816
+    - 30bb-19ca-eef0
+    - c013-f9fa-2ecc
+    - 5b3f-3337-9a13
+    - 00c3-5667-c16a
+    - 4ef8-5e3b-4695
+    - 70b0-25ba-f0ca
+    - aa59-9b4e-1ad4
+    - 2a1a-1049-5314
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0073:
+    pdf_pages: 9
+    page_prints:
+    - 7e65-e3a8-2e02
+    - cade-c230-f528
+    - 3b68-ddef-0eab
+    - e7f1-5c91-299b
+    - 1568-f59a-8628
+    - 74fb-78d6-161e
+    - 712a-2b93-bf91
+    - 8354-de63-c564
+    - 12af-9b9f-cf11
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0074:
+    pdf_pages: 13
+    page_prints:
+    - 100a-2ff5-3a82
+    - e65a-108b-cfb2
+    - 2d7b-fc54-96eb
+    - 06bb-7348-619b
+    - 8246-4681-952d
+    - c1c9-2da8-57de
+    - 5b5f-172b-b5cc
+    - 2533-f81e-f695
+    - e8b9-f86f-bc7e
+    - 0c34-1ada-a670
+    - 020b-2995-4160
+    - f4d7-f9c4-f105
+    - 82e7-3568-0344
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0075:
+    pdf_pages: 9
+    page_prints:
+    - bff3-f91c-0936
+    - f0d7-1a11-8c71
+    - 7743-9c6d-ed62
+    - c62e-fdf0-2514
+    - d92c-787d-0165
+    - 4b01-70ce-0986
+    - 15e0-0b81-63ae
+    - 7cc8-ed79-f9ce
+    - e271-7c8a-706a
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 知識補給站
+      pages: [2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: bracketed
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+  L0076:
+    pdf_pages: 10
+    page_prints:
+    - 078b-e91d-0b9a
+    - 361c-c64b-0528
+    - 06db-1473-b47c
+    - 74ac-e121-0c03
+    - a4cf-adcf-48de
+    - d549-c148-4028
+    - 4c25-7919-8676
+    - aae9-4c4f-3790
+    - 44d6-5e2a-a210
+    - f531-a9e8-29ef
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0077:
+    pdf_pages: 3
+    page_prints:
+    - 61da-f1e8-fded
+    - 026a-3b97-4d9c
+    - 0086-bc16-1269
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [2, 3]
+      pages_source: located
+  L0078:
+    pdf_pages: 11
+    page_prints:
+    - 897b-c58b-2719
+    - b3c7-9633-441b
+    - cc47-d1d0-af9f
+    - f3a8-f407-707f
+    - 894d-ef77-82e6
+    - fa18-fc28-fe23
+    - 5e43-2c56-14fb
+    - d68f-24a9-c2a8
+    - 9623-0d0f-104d
+    - 5ee4-95da-18e1
+    - fe94-4618-087e
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0079:
+    pdf_pages: 12
+    page_prints:
+    - 0529-4c42-4880
+    - 2b4c-676e-ee23
+    - 1e12-1fdf-1594
+    - 5365-b8b1-8e7b
+    - c75b-2df2-5a8e
+    - cb24-92f7-a869
+    - a3e9-0045-628f
+    - 5ca0-fcc5-d831
+    - 4a20-5564-34b8
+    - 4e25-6fa2-95e9
+    - e7ff-6acc-262e
+    - 31b3-0312-e093
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11, 12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0080:
+    pdf_pages: 8
+    page_prints:
+    - d3ed-44c0-4dbd
+    - f285-e141-8db3
+    - e5b5-3ee0-0995
+    - 0ec9-99ea-2774
+    - e248-89ae-3eed
+    - 5c5b-88ea-146b
+    - 2df6-de47-a9bf
+    - c831-a8c0-b4b3
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0081:
+    pdf_pages: 8
+    page_prints:
+    - 2f0a-01c4-7d7c
+    - bcb1-2259-b557
+    - bc3b-42eb-542b
+    - c42a-39e6-3e33
+    - 98f0-560a-0391
+    - bf3f-1b6e-eaf6
+    - f29e-e84f-48fe
+    - e761-adc2-c3da
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0082:
+    pdf_pages: 8
+    page_prints:
+    - 9973-1b0b-25bd
+    - 39f9-31f2-97f6
+    - 7855-071c-03ab
+    - 698b-aa90-c3be
+    - 11b4-ea16-d42d
+    - 592f-98b4-09ba
+    - 0c11-36d4-ebfd
+    - f60a-aa91-6b09
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0083:
+    pdf_pages: 10
+    page_prints:
+    - c87d-b5f2-8d7d
+    - f378-1115-dbf8
+    - 4d54-8ad0-e21a
+    - b637-dc01-ff22
+    - e5cf-1082-47d1
+    - 4682-1893-77e9
+    - 2ac0-0456-4210
+    - 898e-e0c2-1d78
+    - 8e08-993e-dac8
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0084:
+    pdf_pages: 14
+    page_prints:
+    - 0238-6aeb-d99c
+    - 3063-5928-066d
+    - e3b0-c442-98fc
+    - 9a0a-1670-7d79
+    - e3b0-c442-98fc
+    - b19c-009d-1dea
+    - 4cd8-bb0c-834e
+    - 5b1d-6c38-4133
+    - 88b9-fd69-3ac8
+    - 3318-8fb7-4a47
+    - 9bcd-5a05-870e
+    - b1bb-ee4f-399a
+    - e480-39d5-7b03
+    - db27-5b5c-d3d2
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 念順順
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [8, 9, 10, 11, 12]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [12, 13]
+      pages_source: located
+    - name: 詞語複習
+      pages: [13]
+      pages_source: located
+    - name: 知識補給站
+      pages: [13, 14]
+      pages_source: located
+  L0085:
+    pdf_pages: 12
+    page_prints:
+    - 6bc5-c761-fbfa
+    - 442c-0895-cf5e
+    - 2563-d48e-8c30
+    - 68c1-45ce-e09d
+    - a675-0dc5-ff00
+    - 3480-bc6d-19eb
+    - 293f-8b5f-e77d
+    - 365e-6077-ffb8
+    - 7ccd-ff54-6492
+    - cfc3-7b8a-b510
+    - 5d64-31c6-4a03
+    - 66c6-2809-9424
+    sections:
+    - name: 閱讀聚光燈-自我提問策略1-讀出段落重點
+      pages: [1, 2, 3, 4, 5, 6]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 念順順
+      pages: [8]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [8, 9]
+      pages_source: located
+    - name: 語詞應用
+      pages: [9, 10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11, 12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0086:
+    pdf_pages: 14
+    page_prints:
+    - b3c8-bfad-af46
+    - 464f-12da-e820
+    - 07a8-633f-9c35
+    - 73d4-ed40-fa19
+    - 5a23-591e-3e19
+    - 2dc0-bac6-90a8
+    - b11e-e982-99b2
+    - e406-7ac0-ea04
+    - 9e5b-0599-5b4f
+    - 13e9-e767-6cc6
+    - 76da-d0b3-97f8
+    - 8712-e6c9-63d0
+    - 8f95-d729-1b04
+    - 0c0e-6711-0cd2
+    sections:
+    - name: 閱讀聚光燈：自我提問策略2——讀出前後關係
+      pages: [1, 2, 3, 4, 5, 6, 7]
+      pages_source: bracketed
+    - name: 讀全文-做記號
+      pages: [7, 8]
+      pages_source: located
+    - name: 念順順
+      pages: [8, 9]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞應用
+      pages: [10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12, 13]
+      pages_source: located
+    - name: 知識補給站
+      pages: [13, 14]
+      pages_source: located
+  L0087:
+    pdf_pages: 14
+    page_prints:
+    - f359-afb2-1870
+    - eb7f-023b-80aa
+    - a0e3-d4e3-2d31
+    - bfd2-c3fe-c4d2
+    - 3389-d7f8-2a87
+    - 7899-3807-c313
+    - 46e6-36c4-f5ea
+    - 8533-aedd-09e5
+    - 3ade-4e8a-6984
+    - b3a6-a610-ec64
+    - d982-e81f-c803
+    - cedc-825b-2b8b
+    - 135d-06f0-4e85
+    - 58cd-d2c3-c696
+    sections:
+    - name: 閱讀聚光燈-自我提問策略3--問好問題
+      pages: [1, 2, 3, 4, 5, 6, 7]
+      pages_source: bracketed
+    - name: 讀全文-做記號
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 念順順
+      pages: [9, 10]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [10, 11]
+      pages_source: located
+    - name: 語詞應用
+      pages: [11]
+      pages_source: located
+    - name: 文章重點表
+      pages: [11, 12]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [12, 13, 14]
+      pages_source: located
+    - name: 詞語複習
+      pages: [14]
+      pages_source: located
+    - name: 知識補給站
+      pages: [14]
+      pages_source: located
+  L0088:
+    pdf_pages: 9
+    page_prints:
+    - 9fd3-a135-9fbb
+    - 190b-3da1-3713
+    - 79ad-6010-3853
+    - 64fd-aaec-9b63
+    - 381e-0465-4652
+    - 6416-c2fc-3ca2
+    - 886a-327e-6c26
+    - a735-e4ff-721a
+    - 5f57-6bcc-e14f
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0089:
+    pdf_pages: 11
+    page_prints:
+    - 6c7a-1bf2-ee2d
+    - 39cc-1b7a-f363
+    - 2fc1-b110-14be
+    - 6f45-5d36-6be1
+    - a86b-990a-ce05
+    - 52a7-2ac4-e3f1
+    - fd37-d475-12a2
+    - a6f3-2f62-2f9e
+    - 55da-fa84-7379
+    - 3e54-256c-dc18
+    - 7add-dcb2-4caa
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0090:
+    pdf_pages: 11
+    page_prints:
+    - 2f63-c5c1-06e7
+    - ecf4-ef25-558d
+    - 792c-29a1-79c8
+    - c444-eabb-bed2
+    - 04ad-e9b1-7ade
+    - 9cba-c572-07f5
+    - a7a9-31b6-ebcc
+    - ac65-253c-6f2a
+    - 720a-5f19-1993
+    - ac90-f202-86b8
+    - f106-d122-6196
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0091:
+    pdf_pages: 13
+    page_prints:
+    - dccd-1438-4e44
+    - 52c5-79e7-bb23
+    - 606b-fc82-6891
+    - 38a5-a3cb-f685
+    - ae14-638c-b12d
+    - 8492-747e-c436
+    - 26f6-7c4a-f88b
+    - 57ce-8a51-373d
+    - dcaa-03d1-2fc4
+    - 48df-fd92-279d
+    - 068f-85f3-a4bb
+    - d0e1-1fcf-ad20
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0092:
+    pdf_pages: 13
+    page_prints:
+    - 5a7e-2aa3-cdd5
+    - 7942-e3b8-451f
+    - 5d7c-058e-e37f
+    - 82da-bb8b-8ab3
+    - 0b94-8192-4e91
+    - 1700-2166-0d0a
+    - e5ca-d726-4d89
+    - bb2a-03fd-deba
+    - f2e0-f1ce-bc3c
+    - b243-217b-3709
+    - f236-11f3-e7a0
+    - 904e-adb1-5732
+    - 3a8d-5519-e9f1
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+    - name: 詞語複習
+      pages: [7, 8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [8, 9, 10, 11, 12, 13]
+      pages_source: located
+  L0093:
+    pdf_pages: 10
+    page_prints:
+    - 7868-c874-cb7f
+    - c02d-277f-fd6b
+    - 0615-0e34-032f
+    - 26d9-2ae7-c78d
+    - 3c31-068a-31bb
+    - f323-7c97-6ffd
+    - 9ac0-2487-f26a
+    - 781d-d992-f40e
+    - c908-db9d-899c
+    - 7592-0ff1-9ced
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0094:
+    pdf_pages: 9
+    page_prints:
+    - 4c37-a0c9-92d8
+    - 7237-c3cc-62c7
+    - 6495-deba-8d7e
+    - 08f2-fcea-255d
+    - 0e9e-2c7c-cd36
+    - ed44-af42-c067
+    - 6e5c-03f9-af29
+    - bd25-d4b6-a989
+    - 3276-80bc-31bb
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0095:
+    pdf_pages: 10
+    page_prints:
+    - 35de-369d-b8f5
+    - 57fe-00e5-dc65
+    - e8a1-84aa-a3d3
+    - 3ed6-8850-c615
+    - b880-3d21-a6ec
+    - 2e56-42af-4801
+    - 00ec-ed62-6202
+    - 54d2-0ec4-a5c3
+    - 9445-9723-c37a
+    - 9a98-3cf2-2d17
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0096:
+    pdf_pages: 10
+    page_prints:
+    - 1426-be6e-6bf4
+    - f03e-6380-f394
+    - 1420-c3b6-0488
+    - 860d-f9e6-4f9f
+    - a0e9-eccd-6a08
+    - fe90-ee41-4dac
+    - 344c-95e4-81de
+    - b6e9-d907-ce4b
+    - d5e1-21c5-d33a
+    - 8069-6a3f-1fb4
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0097:
+    pdf_pages: 9
+    page_prints:
+    - 8810-70c9-021b
+    - 4fbd-a0fb-a000
+    - d0c4-06d1-c53c
+    - ea83-9140-e515
+    - cefa-852d-5938
+    - b791-27c0-6abf
+    - 7951-5ec9-ac8b
+    - 63ce-bee9-acd7
+    - 10f3-6126-d2bc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0098:
+    pdf_pages: 9
+    page_prints:
+    - 0d9b-7583-3c70
+    - 4e3e-d901-97dc
+    - bcd3-bc7f-2065
+    - 3f4a-a9fb-7f84
+    - b956-8243-ea4e
+    - d774-3f85-19d3
+    - d4f0-8c57-ad5d
+    - 197a-8ae0-8df5
+    - a2cc-77eb-9ab5
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8, 9]
+      pages_source: located
+  L0099:
+    pdf_pages: 11
+    page_prints:
+    - 09b9-866e-1124
+    - ccc4-4768-1767
+    - 4036-f0c9-5cc3
+    - 7be2-fe89-2073
+    - 6dc8-0645-be15
+    - 8bac-a865-ce90
+    - 555e-b5b1-7c4b
+    - 47ed-be9e-83cb
+    - aca7-3114-2840
+    - 7ff4-4c53-213e
+    - 53e9-42f1-3f6c
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0100:
+    pdf_pages: 10
+    page_prints:
+    - 9fb9-64f1-5f96
+    - 440a-6df5-0d2b
+    - ee49-1a57-541d
+    - 563e-bac8-cb00
+    - 8817-771b-afe0
+    - d81f-36f0-a432
+    - 141e-4a4e-a011
+    - 8dbb-2e66-0b63
+    - f098-8a2d-8a49
+    - 1856-915e-7708
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0101:
+    pdf_pages: 9
+    page_prints:
+    - f7cb-c197-5ea0
+    - a5ae-606a-0bf2
+    - 97e3-938d-68eb
+    - 5dde-5fc9-d922
+    - f62d-7813-4ed9
+    - ca77-cafa-eb71
+    - af12-b3c4-990b
+    - bfe9-2cf2-02f3
+    - b342-6b73-44c3
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0102:
+    pdf_pages: 13
+    page_prints:
+    - be56-a747-528f
+    - da9d-35e9-f49e
+    - 163c-225d-2e00
+    - f2e4-3da5-7166
+    - 63c3-36d7-205b
+    - a79d-dd01-196b
+    - e92d-2ee7-dad7
+    - bd6f-efae-8ab2
+    - 931f-6da8-b24e
+    - 447a-93dd-c3be
+    - 4ebc-4df5-23cc
+    - a0d5-7e66-b3f4
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0103:
+    pdf_pages: 11
+    page_prints:
+    - a287-8e1b-6fcf
+    - be0b-6fec-6f50
+    - 3fe8-a17d-d62c
+    - a502-4ebd-2c49
+    - 9342-a892-ffe1
+    - 0d39-a40e-7359
+    - c393-ccab-d8b2
+    - 748f-b4f3-5bfd
+    - d1d4-74a5-d6b7
+    - 5364-6efd-53a5
+    - 362b-68f7-452e
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0104:
+    pdf_pages: 10
+    page_prints:
+    - 0011-2813-8d53
+    - 13df-c6d6-de36
+    - b1e2-2d7a-a7d2
+    - 41ae-9a92-04c5
+    - d0b7-01c1-9489
+    - a0e4-d6f2-e2da
+    - b8a1-b0c7-72d5
+    - 45ae-8cc2-9439
+    - c286-3f5a-8e84
+    - 4f47-7b1a-ac66
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0105:
+    pdf_pages: 11
+    page_prints:
+    - e8ab-482e-0e7c
+    - 767e-085c-08a6
+    - 09d5-fee9-2ec9
+    - 2514-bf08-b1d0
+    - e0eb-5125-a97f
+    - 1c92-a0d8-94ad
+    - 2720-54a5-344d
+    - 411d-d0f1-ceae
+    - ce42-684c-3253
+    - 0622-6649-451f
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0106:
+    pdf_pages: 9
+    page_prints:
+    - f59a-e340-035e
+    - 5676-987d-22c1
+    - a584-f890-0908
+    - 0248-4ec7-401d
+    - 8415-8d6e-7f05
+    - 1c31-d057-fc30
+    - f7ca-5070-2de9
+    - 0bd8-c22c-be5b
+    - 1465-e3ea-1054
+    sections:
+    - name: 閱讀聚光燈
+      pages: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      pages_source: located
+  L0107:
+    pdf_pages: 3
+    page_prints:
+    - 60a1-3a5c-c628
+    - 026a-3b97-4d9c
+    - 0086-bc16-1269
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [2, 3]
+      pages_source: located
+  L0108:
+    pdf_pages: 9
+    page_prints:
+    - 6f9d-3629-7815
+    - 8a8f-016c-001e
+    - 529b-f795-d0ec
+    - 1ea6-d187-ae06
+    - 9f29-dc82-9601
+    - cd10-0dcf-c615
+    - db79-6924-709e
+    - 3560-f629-823e
+    - 2c75-7f57-498e
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0109:
+    pdf_pages: 10
+    page_prints:
+    - 38fb-465a-af2f
+    - 3f8b-bba2-50a8
+    - 4397-fedc-0d1b
+    - fbc7-6cba-6056
+    - f57f-fa43-a5f5
+    - 5975-06c8-5d88
+    - ebaf-d83b-1205
+    - 709e-8b8f-a8dc
+    - c31a-8a4e-dfc7
+    - f5b5-071b-0b6a
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0110:
+    pdf_pages: 11
+    page_prints:
+    - 7f75-ad27-d854
+    - 034a-c611-f08f
+    - 2a85-2451-312c
+    - 6a75-2cfd-152b
+    - e5fa-021b-2e18
+    - de5f-8025-bd97
+    - d7a2-0512-f70c
+    - 9a66-71fa-77d1
+    - a1d2-1ce2-224c
+    - e1ad-d125-f478
+    - 9291-6f8d-5fe8
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0111:
+    pdf_pages: 8
+    page_prints:
+    - b0b1-0270-7aaa
+    - 2473-7851-27e2
+    - 2c10-f3a9-79ea
+    - 9b1e-176b-a08c
+    - 3a7e-e5d5-f4bc
+    - 733a-f2e6-c490
+    - b9d6-189c-82b6
+    - e7b9-8453-ce9e
+    sections:
+    - name: 讀全文
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 讀全文
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 知識補給站
+      pages: [7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+  L0112:
+    pdf_pages: 9
+    page_prints:
+    - 9e1c-a5cf-60a5
+    - 7910-22a5-59bf
+    - 5d42-9956-b7d2
+    - a3f6-0b78-c1b6
+    - b990-891c-b5fc
+    - 4acb-919d-3b38
+    - d07e-272a-4e52
+    - 3154-b1af-9bf1
+    - f015-d5c7-721c
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 念順順
+      pages: [5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0113:
+    pdf_pages: 11
+    page_prints:
+    - c259-ef9c-ed1a
+    - 3ba3-0d42-47c6
+    - ba8e-360c-1ae1
+    - 96db-d88a-89b2
+    - 41ea-d51e-871f
+    - b27d-53cb-c776
+    - 45d5-58a3-bf71
+    - a66d-f87a-c5ac
+    - 2713-59f6-c5b8
+    - 2d08-3357-233d
+    - 1437-9828-6471
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0114:
+    pdf_pages: 11
+    page_prints:
+    - 0c58-c109-bce5
+    - 9947-4317-228a
+    - 7bd2-4219-e03b
+    - c0a3-05c0-5bf9
+    - e3b0-c442-98fc
+    - 9dfc-3286-0df5
+    - 068a-2ec6-5b88
+    - 6c57-5085-38f0
+    - b9b8-6f9f-263d
+    - d233-a661-951e
+    - d8c8-4d88-0a58
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0115:
+    pdf_pages: 11
+    page_prints:
+    - fe70-91e6-c43b
+    - 05a7-af24-9554
+    - 2e6a-2f1a-e47c
+    - a7be-8967-c8d9
+    - cc87-1ac0-7007
+    - 978c-f4ce-78d7
+    - 8b9b-b9fa-a8b8
+    - 6b00-ef3d-ab17
+    - d827-5983-8f48
+    - dacc-95d6-ae0e
+    - 5af8-0efc-60ae
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 文章重點表
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0116:
+    pdf_pages: 12
+    page_prints:
+    - 23b4-cb8b-6daa
+    - 982b-0cb7-6131
+    - 6f2b-33c8-a6cf
+    - f95f-9388-0c57
+    - e3b0-c442-98fc
+    - 85ba-6035-14bf
+    - 84be-6e8f-868c
+    - 08c8-253c-7573
+    - 7a3f-2724-d96f
+    - 00ec-690d-06b3
+    - aa2f-f8b9-947e
+    - a92c-002c-dc50
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0117:
+    pdf_pages: 13
+    page_prints:
+    - 7cd4-f151-226f
+    - e384-f789-f439
+    - 708c-791a-6130
+    - 5685-c6c6-01c9
+    - 40e1-9991-7847
+    - 29db-2c86-9ea2
+    - c8a0-83c8-21fa
+    - bb9c-0ac7-c88a
+    - 9c27-d783-c557
+    - 8a7f-e653-a23f
+    - b689-4ec5-9eb0
+    - 30ed-3e0f-c075
+    - a9d8-e3aa-b539
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 文章重點表
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0118:
+    pdf_pages: 10
+    page_prints:
+    - 65e2-90ef-565f
+    - 7055-d071-c48d
+    - e658-6574-2441
+    - 07e6-55b7-ef33
+    - 678f-a71c-12c6
+    - d666-83d0-c88b
+    - f733-051b-9a9e
+    - 8b49-64fd-99d9
+    - f9a0-b5a3-a256
+    - e0ee-d99f-67ac
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0119:
+    pdf_pages: 10
+    page_prints:
+    - bede-607a-ba18
+    - 23f1-fd09-fd20
+    - 3f83-6c19-23c7
+    - 8ad6-261f-2d01
+    - 17e8-9e68-048b
+    - 30cd-1152-7ee5
+    - bb84-200f-7706
+    - 9e94-e149-c0f7
+    - c6cf-3c0f-33bb
+    - e554-6335-c0bc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3]
+      pages_source: located
+    - name: 語詞應用
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0120:
+    pdf_pages: 12
+    page_prints:
+    - 5f12-fdb5-78e9
+    - 8944-2a56-e336
+    - d1ae-0243-6dcf
+    - 41c0-2454-6cd1
+    - 84c1-cedb-dc6f
+    - 2202-5c7d-9335
+    - 9df9-0c57-957c
+    - 75d5-79e9-fdae
+    - bbfa-672f-be0f
+    - 0789-9b37-ee36
+    - 28de-e639-2fb6
+    - 1369-9262-a24f
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0121:
+    pdf_pages: 11
+    page_prints:
+    - 38a2-928f-7944
+    - 0113-db7c-e653
+    - 06eb-fa08-acbb
+    - 4c88-08a0-1652
+    - ac9c-6220-bc92
+    - 40ca-b93c-fa4e
+    - 0db6-f534-31e1
+    - a51b-91f8-c581
+    - 6d73-a36d-d549
+    - 88fc-5bb5-2725
+    - 4968-8f51-7c7c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0122:
+    pdf_pages: 11
+    page_prints:
+    - e7df-556a-79f3
+    - 19d6-fb48-ea77
+    - 3f24-f490-878a
+    - ccff-eebd-f2f4
+    - 7522-5a91-b763
+    - 5eb0-dbab-aff6
+    - 707a-5801-5f71
+    - e903-3b8a-1170
+    - 7b14-36e5-f74d
+    - 55d2-2ab5-2d5d
+    - 159b-7c4b-1c19
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0123:
+    pdf_pages: 11
+    page_prints:
+    - 090f-f559-3497
+    - a362-5b87-cc5e
+    - 7e3c-4d3d-8534
+    - 7e53-00d3-a7c7
+    - 51b2-6468-9573
+    - b308-ee41-9d89
+    - ec1f-9301-05c7
+    - 5fb1-f067-b1bb
+    - a5b0-fb3d-6aed
+    - 0390-ca59-da24
+    - 98bc-69b6-7a43
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0125:
+    pdf_pages: 9
+    page_prints:
+    - d3ba-6e54-6404
+    - acd7-2506-15fa
+    - f0db-a6ee-2627
+    - ce2d-434f-3752
+    - 28ea-3ad0-2450
+    - 0e7c-7704-b324
+    - 21ef-fa42-c65e
+    - ab47-b1d6-0f93
+    - c391-3891-c949
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8, 9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0126:
+    pdf_pages: 11
+    page_prints:
+    - 7c56-ba65-7146
+    - 0188-af3c-2b30
+    - c5c1-5df7-1a85
+    - 21fb-2c96-d608
+    - ebf9-7b72-3d49
+    - 908d-cc7a-d821
+    - 1266-0d68-7e44
+    - b3cf-ed74-8ad0
+    - fd0f-64df-95f5
+    - 24ee-ec94-35ea
+    - 267a-7b86-8d3d
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0127:
+    pdf_pages: 11
+    page_prints:
+    - 50ec-a4e6-d0ee
+    - e036-59bb-5242
+    - 7b2b-cb64-0aae
+    - 4d53-1b86-16f2
+    - 256e-222b-0903
+    - a4af-fcde-0e26
+    - e105-3edb-e5b6
+    - 784a-f0af-f04f
+    - 55af-e87f-4aa3
+    - 095e-fcf1-ea64
+    - 7473-90e6-7169
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0128:
+    pdf_pages: 13
+    page_prints:
+    - 44b9-5f88-7f15
+    - 48a8-0ab3-9a97
+    - 7ba6-6a8d-c9a9
+    - c920-f83d-a4eb
+    - 2540-c33b-bb2b
+    - f71a-4531-76a6
+    - 44e6-174c-e62f
+    - adb0-cc81-9b56
+    - 9191-26e7-8069
+    - bf04-813d-eb1a
+    - e09b-f67b-be40
+    - 90ad-d3d5-43dc
+    - e660-7b65-24c7
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12, 13]
+      pages_source: located
+  L0129:
+    pdf_pages: 9
+    page_prints:
+    - 726d-4143-4436
+    - 04d5-42f8-4d5d
+    - 20a0-f35a-68ed
+    - ba04-7d13-fd08
+    - d074-1560-619f
+    - 6d88-59b1-aabc
+    - 98f5-522e-5800
+    - b051-c22c-c7b0
+    - cc28-af96-878f
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9]
+      pages_source: located
+  L0130:
+    pdf_pages: 3
+    page_prints:
+    - 61da-f1e8-fded
+    - 026a-3b97-4d9c
+    - 0086-bc16-1269
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [2, 3]
+      pages_source: located
+  L0131:
+    pdf_pages: 10
+    page_prints:
+    - b39d-e51b-1246
+    - 5d37-e70c-b64d
+    - 10f2-ae10-7843
+    - 94db-f6fa-3e7c
+    - 0f40-573e-e605
+    - 9b4c-112f-10c7
+    - e9be-b075-192f
+    - effa-f0a0-a548
+    - c54c-1e41-9415
+    - 5029-ac53-fae5
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0132:
+    pdf_pages: 12
+    page_prints:
+    - 5e68-f6cb-d375
+    - be4a-030d-fd27
+    - eaef-6457-842e
+    - eed2-70af-9d3b
+    - f917-e4f1-ba3f
+    - 69b8-2bf8-b07c
+    - 8ee5-d4d2-c9e7
+    - 691f-4e69-327c
+    - fafb-287a-d69b
+    - dac7-e88d-7bc9
+    - e06b-5143-d99f
+    - 4c0f-9220-25f9
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 念順順
+      pages: [4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0133:
+    pdf_pages: 7
+    page_prints:
+    - fa06-d9be-79f2
+    - 069a-91bd-97d9
+    - 71d4-7f3e-4ff0
+    - 0788-e677-955f
+    - d969-78d2-3393
+    - 5ff4-5cd1-5261
+    - 6565-4a86-aa56
+    sections:
+    - name: 讀全文
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 知識補給站
+      pages: [3]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [6, 7]
+      pages_source: located
+  L0134:
+    pdf_pages: 11
+    page_prints:
+    - 923b-b47d-6167
+    - ec96-a1d3-d52f
+    - d666-c4ac-7c3d
+    - f9c5-60f0-47dd
+    - dfa1-dcdc-6b10
+    - c960-2482-c6a8
+    - 9e78-10c9-47b5
+    - 993a-dad3-95ee
+    - cc03-33ac-3a2c
+    - 7e7a-658d-bb05
+    - 7f0c-0e50-6798
+    sections:
+    - name: 讀全文
+      pages: [1, 2, 3, 4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+  L0135:
+    pdf_pages: 9
+    page_prints:
+    - ba6f-49ff-7894
+    - b779-1fa0-f503
+    - b000-fa9c-e44a
+    - 4f92-2cce-20d8
+    - 19ca-2eae-50e6
+    - 7d87-0919-fc85
+    - fd3f-e613-e481
+    - 4dc9-41bf-511a
+    - 16ab-751a-4852
+    sections:
+    - name: 讀全文
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 知識補給站
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [4, 5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+  L0136:
+    pdf_pages: 3
+    page_prints:
+    - aac4-63d1-0834
+    - e3b0-c442-98fc
+    - 3220-38da-cb4b
+    sections:
+    - name: 會考圖文題實戰
+      pages: [1, 2, 3]
+      pages_source: located
+  L0137:
+    pdf_pages: 12
+    page_prints:
+    - 4d39-c3b4-589d
+    - 9697-3a5a-bae5
+    - 9320-d92c-2b7e
+    - c05f-538c-89f2
+    - 802e-7c75-fb1d
+    - 9018-311d-40f2
+    - 0d5d-5be6-11e6
+    - 8bf5-e439-618b
+    - f5f4-9dc2-72af
+    - 04da-0bb3-c8e9
+    - 56d1-adce-51f8
+    - ca3e-b25b-6164
+    sections:
+    - name: 讀全文-做記號
+      pages: [1]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4, 5, 6, 7]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [7, 8]
+      pages_source: located
+    - name: 語詞應用
+      pages: [8]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0138:
+    pdf_pages: 12
+    page_prints:
+    - 118a-9745-e687
+    - db3e-e4e8-6f6f
+    - e7a1-9022-a402
+    - 6eaa-0431-dedd
+    - 710c-38ea-bcfc
+    - cbfd-153d-c75f
+    - 6ea8-7252-5b59
+    - 8774-4e93-a764
+    - 5bbc-8a80-c247
+    - 6f9f-91a8-2b7f
+    - f1ad-e3c2-e2d8
+    - 2d64-0c4b-94a2
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0139:
+    pdf_pages: 12
+    page_prints:
+    - e634-c76a-17b9
+    - f57a-7edc-f9a3
+    - 1680-6df1-54b1
+    - c4f3-56eb-23e4
+    - f103-40f4-9a0d
+    - 5b5b-c611-7952
+    - e34b-fe28-01e4
+    - 673b-cb96-b57b
+    - b942-e1a0-488a
+    - 38bb-981e-1543
+    - 6ba2-b3e0-dd31
+    - b6d0-4025-951e
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 文章重點表
+      pages: [9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0140:
+    pdf_pages: 10
+    page_prints:
+    - 7339-1d2b-91e5
+    - 5717-7f41-4905
+    - f374-c2ca-4e6c
+    - 2646-19c6-049f
+    - 0467-f461-a570
+    - 4f98-2040-d490
+    - 6a70-e133-ff68
+    - c6f8-615e-a325
+    - 18b2-dafd-d594
+    - 1ee1-84f2-607d
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0141:
+    pdf_pages: 10
+    page_prints:
+    - 3aab-52d0-91df
+    - f9fd-dcea-8749
+    - 4ffa-2e53-284c
+    - ac91-4d14-a92f
+    - 66ea-e0ce-9ddb
+    - 8d9d-dda6-1688
+    - d672-037c-eda0
+    - c42b-ddc6-b01a
+    - 7c94-accb-3d62
+    - 738a-6d1d-6eca
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0142:
+    pdf_pages: 14
+    page_prints:
+    - 3c4b-039b-3135
+    - 984a-c3d1-f1ed
+    - 03ce-e1ed-5188
+    - a5d4-6d9b-a141
+    - 3e45-5729-8cf8
+    - e3b0-c442-98fc
+    - b238-f057-56e1
+    - 4e1c-c1a6-e9b0
+    - 7a1f-a73a-a083
+    - 064f-10f3-f80e
+    - 2ee2-17f9-1f4c
+    - c7c1-d31c-a3b7
+    - 621e-5675-3912
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [9, 10, 11, 12]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [12, 13]
+      pages_source: located
+    - name: 詞語複習
+      pages: [13]
+      pages_source: located
+    - name: 知識補給站
+      pages: [13, 14]
+      pages_source: located
+  L0143:
+    pdf_pages: 10
+    page_prints:
+    - a99d-1fba-e884
+    - e3b0-c442-98fc
+    - 1c76-72d9-4fc3
+    - 3599-c3cd-e6bd
+    - f9ce-2749-167f
+    - 7005-8ff8-9910
+    - 7fbb-77b5-45e8
+    - b600-fa86-ec55
+    - f841-69b0-f565
+    - edc9-98cc-1010
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 念順順
+      pages: [4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0144:
+    pdf_pages: 19
+    page_prints:
+    - 87f0-cc34-269f
+    - 156a-4b44-6456
+    - d7d9-6987-1800
+    - 0166-ed90-3097
+    - 0204-32cc-e9eb
+    - 6138-ba3f-98b6
+    - 01a5-9433-518f
+    - 607c-e943-9460
+    - 7378-3463-2bc3
+    - 52e8-3f37-6f72
+    - 4539-0dbd-2769
+    - 8b48-38c3-9e33
+    - c7bb-55ff-f30d
+    - 44eb-d58c-4435
+    - 627f-4981-7d4d
+    - c5aa-7751-6a52
+    - 5029-f24b-929f
+    - 40c1-18b9-994a
+    - e3b0-c442-98fc
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀接力
+      pages: [6]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [8, 9]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 閱讀接力
+      pages: [11, 12]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [12, 13]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [13, 14]
+      pages_source: located
+    - name: 文章重點表
+      pages: [14]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [14, 15]
+      pages_source: located
+    - name: 閱讀接力
+      pages: [15, 16]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [16, 17, 18]
+      pages_source: located
+    - name: 詞語複習
+      pages: [18]
+      pages_source: located
+    - name: 知識補給站
+      pages: [18, 19]
+      pages_source: located
+  L0145:
+    pdf_pages: 10
+    page_prints:
+    - d6c6-0f6a-218b
+    - 72c4-8897-02a6
+    - 4e39-d0d7-484d
+    - d14b-243b-044b
+    - 41a6-d4ca-6961
+    - c227-fff7-2277
+    - 2c59-5186-1692
+    - 6788-69e0-5dc4
+    - 90f9-49bf-827b
+    - be32-00bb-3139
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0146:
+    pdf_pages: 11
+    page_prints:
+    - 71e9-77c2-0b2d
+    - b273-245c-f8d8
+    - 326f-87cb-bd6d
+    - 2eb1-d3d4-5f25
+    - cf25-5487-5a0d
+    - da1d-7300-85b8
+    - af9d-8fcf-af00
+    - 2544-2df1-91c2
+    - ec21-fb11-33de
+    - 59c0-9838-b80e
+    - bf0e-5d59-e0db
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+  L0147:
+    pdf_pages: 10
+    page_prints:
+    - 6b15-4e3b-8cd3
+    - 2b5c-ebba-2502
+    - f53e-6280-a8f7
+    - 978b-c087-6dc9
+    - 4f43-2402-eaf8
+    - e4f3-6e4b-55c4
+    - 16b3-4768-192d
+    - 5efa-57f2-3ceb
+    - 5154-d5a0-2075
+    - 6771-9567-84cd
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0148:
+    pdf_pages: 8
+    page_prints:
+    - daf9-f66d-6baf
+    - 6490-b471-50a3
+    - da8e-cb8b-4c2a
+    - c347-041b-9e19
+    - df56-72c3-6853
+    - 4b16-639a-a37b
+    - 42d8-9e05-56ea
+    - 22ec-72f0-8064
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 詞語複習
+      pages: [8]
+      pages_source: located
+    - name: 知識補給站
+      pages: [8]
+      pages_source: located
+  L0149:
+    pdf_pages: 12
+    page_prints:
+    - c3db-20af-c444
+    - 7f86-f12f-5f94
+    - f88b-a588-b40d
+    - 2259-f514-37ca
+    - e297-e19f-b76b
+    - 0065-71e8-0af1
+    - 403c-dd8c-592c
+    - 43fe-bfe6-407c
+    - 5ad3-29d3-d186
+    - 5aa3-592a-2d62
+    - bf14-d2f7-7ca8
+    - 7fe8-87fe-c4a8
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11, 12]
+      pages_source: located
+  L0150:
+    pdf_pages: 11
+    page_prints:
+    - eed3-63d9-52f4
+    - 7d15-4c98-fa6b
+    - f5b9-3f30-c0c3
+    - 422b-9b77-510e
+    - 653a-8eb5-ba8e
+    - 4321-953b-eaa0
+    - 7539-f224-47ec
+    - f67e-7f65-2d0c
+    - 9a8a-7aaa-e2ba
+    - 31c8-f426-5a45
+    - 3d34-a165-9e6f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [3, 4, 5, 6, 7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+  L0151:
+    pdf_pages: 10
+    page_prints:
+    - c91a-b623-d0de
+    - 4e3b-18bc-a55b
+    - a357-8a67-b11b
+    - 8e07-414d-6111
+    - ed0d-6b87-1598
+    - 4904-c0d1-e629
+    - 62f2-617f-0b4d
+    - f55a-9aab-07f2
+    - 0920-d4d1-6d23
+    - 0080-b4cf-936c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0152:
+    pdf_pages: 10
+    page_prints:
+    - fcac-a2a3-64db
+    - 271a-29c1-5a72
+    - 62a6-64f5-af6e
+    - 0d5b-3d5f-4683
+    - ad50-251a-501d
+    - bc2a-2b04-2dc8
+    - 4293-81b6-7a79
+    - 1d02-271a-b8ec
+    - 5aa3-9b0a-a286
+    - 63e8-b26b-d4d0
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0153:
+    pdf_pages: 10
+    page_prints:
+    - 90af-1f28-5aa1
+    - 76e0-720b-f6e1
+    - eb26-889d-a159
+    - 4c88-f8fb-e3b7
+    - de9b-6c55-1974
+    - 8117-e58a-f9e0
+    - e3ff-5e73-4c70
+    - 686c-e804-8164
+    - 06a5-fba0-b2bd
+    - 64b9-e6ed-2a19
+    sections:
+    - name: 古文今譯
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1, 2, 3]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1, 2, 3]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [3, 4]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [10]
+      pages_source: located
+  L0154:
+    pdf_pages: 11
+    page_prints:
+    - be05-cc87-234c
+    - efba-8a1f-e9d5
+    - 08e7-72fc-8e41
+    - 7988-c210-acfb
+    - 4370-0788-cc8a
+    - f381-3516-3838
+    - 038e-c556-4d32
+    - 8239-ad27-5b6a
+    - 51c9-cd38-503c
+    - 4294-b0c3-6426
+    - 013a-b9f4-cf03
+    sections:
+    - name: 古文今譯
+      pages: [1, 2]
+      pages_source: located
+    - name: 原文
+      pages: [2, 3]
+      pages_source: located
+    - name: 文白句子比對
+      pages: [3]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10, 11]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [11]
+      pages_source: located
+  L0155:
+    pdf_pages: 12
+    page_prints:
+    - 968b-daef-5ba2
+    - 8704-6106-43bb
+    - 8b45-74d4-c974
+    - c035-ff6c-dba5
+    - 8bc8-93d3-98fc
+    - f7c3-87c0-c405
+    - 1924-fdea-3ddb
+    - e6b4-8b91-9692
+    - 9bbe-9f0f-3693
+    - 9bec-7f99-178f
+    - 3619-1a35-7ebd
+    - 98f4-fdfe-439d
+    sections:
+    - name: 導讀
+      pages: [1]
+      pages_source: located
+    - name: 古文今譯
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 原文
+      pages: [3, 4]
+      pages_source: located
+    - name: 文白句子比對
+      pages: [4, 5]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [12]
+      pages_source: located
+  L0156:
+    pdf_pages: 10
+    page_prints:
+    - 5e09-c6c3-bd89
+    - 4eec-9e51-1ad3
+    - e3a4-af0b-43a4
+    - 428d-0027-5972
+    - f0ea-1b0c-4138
+    - e677-73e8-2c45
+    - ef75-8fe4-c09e
+    - 38f9-a6d6-5a7e
+    - d332-8462-9984
+    - c812-388e-8d5f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0157:
+    pdf_pages: 8
+    page_prints:
+    - 4959-bca9-9540
+    - 9271-3521-633a
+    - 5ac7-c70f-8520
+    - 600b-094b-8f37
+    - eaae-020b-ddef
+    - 2372-2df5-529b
+    - 9812-43b0-87a5
+    - c4fc-d052-e74c
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 古今對照表
+      pages: [4]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [4, 5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+  L0158:
+    pdf_pages: 10
+    page_prints:
+    - 227c-7fe3-623c
+    - 35fe-c7a4-efb3
+    - b2ae-8b25-eeba
+    - ffa1-405b-3cfd
+    - d6e9-47b0-ce98
+    - 3217-ce1c-8c0c
+    - f44b-f9ec-c5e7
+    - bad0-ad55-e9bf
+    - e192-e4b6-2110
+    - 2b54-3e18-bb75
+    sections:
+    - name: 古文今譯
+      pages: [1, 2]
+      pages_source: located
+    - name: 原文
+      pages: [2]
+      pages_source: located
+    - name: 朗讀計時
+      pages: [2]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+  L0159:
+    pdf_pages: 9
+    page_prints:
+    - 34f8-47d6-3990
+    - c1e6-cca2-71d1
+    - 9b62-dc06-88fd
+    - 0727-6466-eb9c
+    - 8e9b-7437-a0e3
+    - 8a46-430a-1306
+    - c9ce-c744-6870
+    - fa43-bbcb-7d9b
+    - 9114-91ee-39b2
+    sections:
+    - name: 古文今譯
+      pages: [1, 2]
+      pages_source: located
+    - name: 故事賞析
+      pages: [1, 2]
+      pages_source: bracketed
+    - name: 原文
+      pages: [2]
+      pages_source: located
+    - name: 朗讀計時
+      pages: [2]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+  L0160:
+    pdf_pages: 9
+    page_prints:
+    - 574a-3708-b40d
+    - 7c20-e850-d598
+    - 4c26-afd4-26dd
+    - a4f5-561e-dea6
+    - e190-0f59-9a6b
+    - f834-f6cc-5d38
+    - 08f2-8e55-d96f
+    - ed68-0f02-daac
+    - 52c7-f0a1-0adc
+    sections:
+    - name: 古文今譯
+      pages: [1, 2]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1, 2]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1, 2]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [2, 3]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [3, 4]
+      pages_source: located
+    - name: 文章重點表
+      pages: [4, 5]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [7, 8]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [8, 9]
+      pages_source: located
+  L0161:
+    pdf_pages: 13
+    page_prints:
+    - 93e9-3f39-67c3
+    - 58d9-cc49-0b16
+    - 240a-e506-cdf4
+    - 981e-819b-4a24
+    - 19ef-1401-92c0
+    - f4fa-436b-af98
+    - 83b0-7375-813a
+    - 19d5-c2c0-ffff
+    - 03a4-7bfd-4452
+    - 86aa-9d4a-457a
+    - 20f0-594f-44cc
+    - f4a0-ce8c-9a12
+    - 0f7e-06b9-5ba0
+    sections:
+    - name: 導讀
+      pages: [1]
+      pages_source: located
+    - name: 古文今譯
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1, 2, 3, 4]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1, 2, 3, 4]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [4, 5]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [5, 6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8, 9]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [9, 10, 11, 12]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [12, 13]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [13]
+      pages_source: located
+  L0162:
+    pdf_pages: 10
+    page_prints:
+    - dc6d-de38-4f40
+    - 277a-60f4-f806
+    - 64e9-644b-3503
+    - d826-0c17-e635
+    - e960-8917-7e5f
+    - b17e-8a46-93f8
+    - a4ed-9f9b-3119
+    - d434-6e2e-14be
+    - 4fc5-7a0e-0104
+    - ce18-e3b6-988c
+    sections:
+    - name: 導讀
+      pages: [1]
+      pages_source: located
+    - name: 古文今譯
+      pages: [1, 2]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1, 2]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1, 2]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [2, 3]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9, 10]
+      pages_source: located
+    - name: 自我挑戰
+      pages: [10]
+      pages_source: located
+  L0163:
+    pdf_pages: 5
+    page_prints:
+    - 7ef8-c7ce-d90b
+    - 3e01-30a5-0a5e
+    - f3bc-0c5c-f5f6
+    - 3de3-d151-a1ef
+    - 7723-d964-79aa
+    sections:
+    - name: 古文今譯
+      pages: [1]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [1, 2]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [2, 3]
+      pages_source: located
+    - name: 文章重點表
+      pages: [3]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [3, 4]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [4, 5]
+      pages_source: located
+  L0164:
+    pdf_pages: 9
+    page_prints:
+    - 0627-6cc8-efe2
+    - 4228-00d5-b2dd
+    - 9124-d698-fafb
+    - 9f0d-8243-08c7
+    - dd17-a7ba-0492
+    - 6c75-e7e5-e087
+    - 55ac-4924-e68c
+    - 781c-5e26-4d0d
+    - 44cc-6b96-8437
+    sections:
+    - name: 古文今譯
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 原文（含斷詞點）＋注釋
+      pages: [1, 2, 3]
+      pages_source: bracketed
+    - name: 朗讀計時
+      pages: [1, 2, 3]
+      pages_source: bracketed
+    - name: 文白句子比對
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 文白詞語比對
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 文言文聚光燈
+      pages: [7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+  L0165:
+    pdf_pages: 11
+    page_prints:
+    - 59eb-fb3a-0e0e
+    - 2132-0dc5-ba98
+    - edc5-622d-39d8
+    - 5e2f-1fba-123e
+    - e3b0-c442-98fc
+    - b442-410c-366e
+    - 32f1-1123-5ff7
+    - 419a-5c88-46a5
+    - e448-880a-6a58
+    - 9b18-0527-9152
+    - bf87-5b2f-c1c8
+    sections:
+    - name: 讀全文—做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0166:
+    pdf_pages: 11
+    page_prints:
+    - a1ad-3cb4-7f82
+    - d290-073a-c469
+    - e3b0-c442-98fc
+    - c879-1451-d495
+    - 0b0d-a505-2652
+    - 98a0-8951-3697
+    - b6ed-457a-8781
+    - 6e32-7f31-d426
+    - f1fb-d059-ca70
+    - f3d8-cc3e-9b01
+    - 4209-d138-24a5
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 念順順
+      pages: [4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10, 11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0167:
+    pdf_pages: 10
+    page_prints:
+    - d622-4545-2a35
+    - 887a-1356-49ba
+    - b263-430d-1d49
+    - 84f5-11c8-c666
+    - ec6d-ca9d-7b28
+    - 6753-4eba-3cee
+    - 5c0b-b8f8-8734
+    - 7dbe-9ae4-00a6
+    - e1c2-b82a-58c6
+    - a3dd-320c-ecab
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3, 4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9]
+      pages_source: located
+    - name: 知識補給站
+      pages: [9, 10]
+      pages_source: located
+  L0168:
+    pdf_pages: 10
+    page_prints:
+    - e6e3-89dd-c822
+    - 74f7-c703-ef0c
+    - 62e7-bd95-9ca6
+    - 5eab-51a6-5f0a
+    - 7c16-e1be-3c0d
+    - b16f-b4d1-867e
+    - 2a7f-8851-32a8
+    - d160-ffb4-9ce7
+    - bc50-7775-8be4
+    - 748b-9027-5417
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0169:
+    pdf_pages: 11
+    page_prints:
+    - ae3d-3796-66ab
+    - 4331-98c6-eb3e
+    - 7b04-b902-e271
+    - e3b0-c442-98fc
+    - 442c-2c04-1ed4
+    - 3969-6bd9-7001
+    - af44-04f5-ed6f
+    - 5725-ece0-aaaa
+    - e3b0-c442-98fc
+    - d0df-b59c-b390
+    - 0a55-33b0-ea22
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [10, 11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11]
+      pages_source: located
+    - name: 知識補給站
+      pages: [11]
+      pages_source: located
+  L0170:
+    pdf_pages: 13
+    page_prints:
+    - f149-6c49-1f84
+    - 82d2-5474-abec
+    - 598e-3e86-b61e
+    - 728c-5e05-082d
+    - 8e78-782a-0620
+    - 3dad-c618-6aac
+    - 3000-a667-a741
+    - d62d-fcf1-8a32
+    - 0657-c59d-9ad2
+    - 905a-28e6-9a62
+    - e02b-72b9-56b8
+    - 42a2-06da-d425
+    - f50d-cf3b-6d54
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2]
+      pages_source: located
+    - name: 念順順
+      pages: [2, 3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10, 11, 12]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [12, 13]
+      pages_source: located
+    - name: 詞語複習
+      pages: [13]
+      pages_source: located
+    - name: 知識補給站
+      pages: [13]
+      pages_source: located
+  L0171:
+    pdf_pages: 12
+    page_prints:
+    - 1479-96a5-f29e
+    - 8f5c-63db-422c
+    - 1146-e316-4a6c
+    - e145-dc3f-53af
+    - 20e9-0275-d8cb
+    - cb11-e8a4-1c90
+    - 5537-bc82-0911
+    - ac11-0ddd-67fe
+    - 162f-ed51-23e8
+    - f937-95d9-7d09
+    - 02e8-f577-4954
+    - 9d22-f16b-e1ef
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [7, 8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11, 12]
+      pages_source: located
+    - name: 詞語複習
+      pages: [12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0173:
+    pdf_pages: 12
+    page_prints:
+    - 386b-011a-c9a1
+    - a119-12ce-453c
+    - e3b0-c442-98fc
+    - b03b-9087-bade
+    - 7eb3-8d63-e793
+    - 0b53-0729-91d5
+    - 76fc-0df0-98cb
+    - 631e-6632-b596
+    - 845d-8c6f-ae03
+    - d995-809d-721f
+    - 81cc-ad85-6dc3
+    - 6895-c2c3-a365
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3, 4]
+      pages_source: located
+    - name: 念順順
+      pages: [4]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 語詞應用
+      pages: [6, 7]
+      pages_source: located
+    - name: 文章重點表
+      pages: [7, 8]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [8, 9, 10, 11]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [11]
+      pages_source: located
+    - name: 詞語複習
+      pages: [11, 12]
+      pages_source: located
+    - name: 知識補給站
+      pages: [12]
+      pages_source: located
+  L0174:
+    pdf_pages: 10
+    page_prints:
+    - e712-50d4-522e
+    - 3712-70f9-beab
+    - 3630-edcd-e549
+    - fd1e-34cb-0348
+    - 0a2f-d435-88b6
+    - 238c-f921-50ea
+    - c308-e575-c079
+    - 7a4e-60fb-62d8
+    - 30b0-8f95-a150
+    - c14f-028e-6ae6
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4, 5]
+      pages_source: located
+    - name: 語詞應用
+      pages: [5, 6]
+      pages_source: located
+    - name: 文章重點表
+      pages: [6]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
+  L0175:
+    pdf_pages: 11
+    page_prints:
+    - 5530-364d-ba29
+    - c5d8-a5b3-495f
+    - 6231-d7c8-0f04
+    - 666d-33e4-504f
+    - 3717-369c-5ae7
+    - 15f9-a7c2-c1e7
+    - 7421-3a21-1a1a
+    - 05aa-eb61-e795
+    - 4513-cff7-6560
+    - ff8d-e47c-0f25
+    - 3c42-f2f6-7a52
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5]
+      pages_source: located
+    - name: 品格聚光燈
+      pages: [5, 6, 7, 8, 9]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [9, 10]
+      pages_source: located
+    - name: 詞語複習
+      pages: [10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10, 11]
+      pages_source: located
+unlocated:
+- lesson_uid: L0029
+  section: 閱讀理解
+  pages_source: bracketed
+- lesson_uid: L0067
+  section: 閱讀聚光燈-自我提問策略1──跟著人物故事線問問題
+  pages_source: bracketed
+- lesson_uid: L0068
+  section: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
+  pages_source: bracketed
+- lesson_uid: L0075
+  section: 語詞我最棒
+  pages_source: bracketed
+- lesson_uid: L0086
+  section: 閱讀聚光燈：自我提問策略2——讀出前後關係
+  pages_source: bracketed
+- lesson_uid: L0087
+  section: 閱讀聚光燈-自我提問策略3--問好問題
+  pages_source: bracketed
+- lesson_uid: L0153
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0153
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0158
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0159
+  section: 故事賞析
+  pages_source: bracketed
+- lesson_uid: L0159
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0160
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0160
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0161
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0161
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0162
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0162
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0163
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0163
+  section: 朗讀計時
+  pages_source: bracketed
+- lesson_uid: L0164
+  section: 原文（含斷詞點）＋注釋
+  pages_source: bracketed
+- lesson_uid: L0164
+  section: 朗讀計時
+  pages_source: bracketed
+convert_blocked:
+  L0028: LibreOffice 整份轉檔無窮迴圈（300s 逾時）。解法是拆 subset 再轉，見 extract-lesson-multimodal ②③
+  L0172: 同上，實測 900s 仍逾時；需切成 7 份 subset

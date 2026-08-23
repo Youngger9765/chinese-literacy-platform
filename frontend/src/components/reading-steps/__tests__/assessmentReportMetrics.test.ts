@@ -419,6 +419,18 @@ describe('completedSections count', () => {
     const metrics = computeReportMetrics(SESSION_WITH_READING, false, AI_COMPREHENSION_SCORES);
     expect(metrics.completedSections).toBe(6);
   });
+
+  // Issue #2835: the live flow's reading step is now key-passage-reading
+  // (fullReadingResult), not the disabled paragraph-reading (readingAttempt).
+  // Section 5 (練習建議) must count as done when only fullReadingResult exists,
+  // otherwise every real student session shows an empty 練習建議 section.
+  it('counts section 5 (練習建議) as done when only fullReadingResult exists (#2835)', () => {
+    const metrics = computeReportMetrics(SESSION_WITH_FULL_READING, false, null);
+    // Sections 1,2,3,4,5 should all be true for fullReadingResult-only session
+    // (section 3 逐句分析 needs lineBreakdown which fullReadingResult doesn't have,
+    // so it stays false — only section 5 is the one under test here).
+    expect(metrics.completedSections).toBe(4);
+  });
 });
 
 /* ------------------------------------------------------------------ */

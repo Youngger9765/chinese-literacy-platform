@@ -12,8 +12,6 @@ vocab_application:
     F: 悲壯
     G: 反駁
     H: 苦澀
-  option_bank_note: 8 個代號對應 8 道小題，一一對應無剩餘。語詞框的 10 個語詞裡，波瀾、酸澀未被本大題使用。
-  answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的括號內已填有同樣的代號
   items:
   - index: 1
     stem: 這部電影討論的議題比較嚴肅，因此有的人覺得劇情太過（　）。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 面對沒有根據的指控，他冷靜提出具體證據（　）對方。
     answer: G
+  notes:
+    option_bank: 8 個代號對應 8 道小題，一一對應無剩餘。語詞框的 10 個語詞裡，波瀾、酸澀未被本大題使用。
+    answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的括號內已填有同樣的代號

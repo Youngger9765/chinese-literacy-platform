@@ -1,0 +1,89 @@
+# 每個模組「少了它就等於沒做」的欄位（#2843 L0011 實跑之後補）
+#
+# 🔴 為什麼需要這份
+#
+# L0011 第一次用新架構完整抽完，八道門全綠 —— 但三個模組抽得比現有薄：
+#   key_reading   只抽了計時表，`passage` 沒抽
+#   resources     用錯載體鍵（寫 items，該課用 videos）
+#   full_text_annotate  漏了 inline_marked_terms
+#
+# schema 的 `required` 擋不住（它只要求最低限度）、逐字門只驗「有寫的抄得對不對」、
+# 見證對帳只數題號。**沒有任何一道門會說「你少抽了一欄」。**
+#
+# ⛔ 這不是再蓋一道通用門 —— 是每個模組自己宣告「什麼叫做完」，
+#    在既有的 verify 步驟裡順手檢查。判準來自實測，不是想像。
+#
+# ## 欄位怎麼定的
+#
+# `all`      這幾欄每一課都要有（實測 100% 的課都有）
+# `any_of`   這幾欄至少要有一個（載體不只一種的模組）
+# `except`   實測的例外課，附理由 —— ⛔ 不是「跑不過就加進來」
+version: 1
+
+modules:
+  key_reading:
+    all: [timing_table]
+    any_of: [[passage]]
+    except:
+      passage:
+        uids: [L0153, L0154, L0155, L0158, L0159, L0160, L0161, L0162, L0163, L0164]
+        why: >
+          這 10 課的重點段落刻意不提供（#2722）。⚠️ 但要知道代價：
+          `lesson_uid_loader` 沒有 passage 就 `lesson.pop("key_reading")` ——
+          整個模組被丟掉，學生那一步直接不見。所以這是「已知且接受」，
+          不是「沒關係」。
+    why: 少了 passage 學生會拿到一個沒有課文的朗讀步驟
+
+  resources:
+    any_of: [[items, videos]]
+    why: >
+      載體有兩種：`items`（QR 圖卡）與 `videos`（影片連結），
+      實測 148 課裡 120 課兩種都有、**0 課兩種都沒有**。
+      ⛔ 抽的時候沿用該課原本用的鍵 —— 用錯鍵 schema 過、逐字門過，
+      只有消費端讀不到。
+
+  full_text_annotate:
+    all: [paragraphs, paragraph_count, char_count]
+    any_of: [[inline_marked_terms]]
+    except:
+      inline_marked_terms:
+        uids_count_max: 18
+        why: >
+          146/164 課有。那 18 課是課文裡真的沒有標記語詞，
+          不是抽漏 —— 但數量會漲就代表有人開始漏抽了，所以上限鎖住。
+
+  vocab_definitions:
+    all: [items]
+  vocab_application:
+    all: [instruction, items]
+  comprehension:
+    all: [instruction]
+    any_of: [[questions, items]]
+    why: 題目載體有 questions / items 兩種（144 課 / 27 課），沿用該課原本的
+  keypoints:
+    all: [rows]
+  spotlight:
+    all: [strategy_name, blocks]
+  vocab_review:
+    all: [type, instruction, target_words, grid_size]
+  metadata:
+    all: [lesson_no, series, lesson_seq]
+  classical_text:
+    all: [paragraphs, annotations]
+  modern_translation:
+    all: [paragraphs]
+  sentence_matching:
+    all: [instruction]
+  word_matching:
+    all: [instruction, items]
+  writing_practice:
+    all: [instruction, columns, words]
+  self_challenge:
+    all: [instruction, passage]
+  self_check_before_reading:
+    all: [items]
+  multi_text_parts:
+    all: [multi_text_parts]
+
+# ⬜ 刻意沒有必要欄位的模組（實測 100% 共通欄位是空的，強訂只會誤報）：
+#    cross_text_banner · errata · goal_box · intro_guide · keypoints_followup_questions

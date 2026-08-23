@@ -14,7 +14,6 @@ vocab_application:
     H: 烽火漫天
     I: 森嚴
     J: 多樣性
-  option_bank_note: 列滿 10 個代號（本課 11 個語詞中的「極端」未入選項），對應 8 道小題；I.森嚴、J.多樣性 兩個代號未被任何小題用到
   items:
   - index: 1
     stem: 哥哥打破花瓶，弟弟卻也被責罵，真是（　）。
@@ -40,3 +39,5 @@ vocab_application:
   - index: 8
     stem: 幾位同學共同（　），購買畢業紀念品送給老師。
     answer: F
+  notes:
+    option_bank: 列滿 10 個代號（本課 11 個語詞中的「極端」未入選項），對應 8 道小題；I.森嚴、J.多樣性 兩個代號未被任何小題用到

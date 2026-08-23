@@ -17,9 +17,6 @@ vocab_review:
   - 調停折衝
   - 當面戳破
   - 心知肚明
-  target_words_note: '灰框列 12 個語詞（分兩行印）。比「本課語詞」框（11 個）多一個「指點迷津」——
-
-    那是第三大題聚光燈小試身手第 2 題用的難詞，不在本課語詞框內。不是抽錯。'
   grid_size:
   - 10
   - 10
@@ -36,11 +33,6 @@ vocab_review:
   - 光解津津有味婉衝出去
   answers_are_graphical: true
   answers_printed: true
-  answer_paths_note: '12 個圈全部圈到，與 12 個目標語詞一一對應；document.xml 的 roundRect 恰為 12 個，
-
-    與路徑數相符。第三、四頁的橘色答案框（調停／拜請／指點迷津／失事）是別的圖形類型，
-
-    沒有混進 roundRect 計數。'
   answer_paths:
   - word: 溫柔婉約
     cells:
@@ -162,3 +154,12 @@ vocab_review:
     - - 10
       - 8
     direction: diagonal_down_right
+  notes:
+    target_words: '灰框列 12 個語詞（分兩行印）。比「本課語詞」框（11 個）多一個「指點迷津」——
+
+      那是第三大題聚光燈小試身手第 2 題用的難詞，不在本課語詞框內。不是抽錯。'
+    answer_paths: '12 個圈全部圈到，與 12 個目標語詞一一對應；document.xml 的 roundRect 恰為 12 個，
+
+      與路徑數相符。第三、四頁的橘色答案框（調停／拜請／指點迷津／失事）是別的圖形類型，
+
+      沒有混進 roundRect 計數。'

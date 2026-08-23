@@ -1,3 +1,4 @@
+import type { TeacherWordSearchSource } from './components/reading-steps/wordSearchGrid';
 import type { Lesson } from './schema/lessonContent';
 
 export enum AppView {
@@ -56,6 +57,19 @@ export interface VocabItem {
 export interface FillInBlankItem {
   sentence: string;
   answer: string;  // letter code e.g. "A", "B"
+  /**
+   * 這一題自己的選項組（語詞應用底下的「子練習」用）。
+   *
+   * 🔴 沒有它的話，◎牛刀小試 / ◎詞義辨識 / 相似詞應用 這些子練習
+   * 只能沿用整課的 A–G，而它們的選項**自成一組**（肆虐/蔓延、
+   * 事半功倍/事倍功半、象徵/意味著/代表）—— 沿用等於做出一個
+   * 學生永遠答不對的題目。後端 `_sub_exercise_cloze` 產生它。
+   *
+   * 沒有這個欄位時就用整課的 vocabBank，跟以前一樣。
+   */
+  options?: Record<string, string>;
+  /** 子練習的標題（◎牛刀小試…）。只用來顯示，不影響判分。 */
+  _sub_exercise?: string;
 }
 
 // ⑦ 閱讀理解選擇題 (#615)
@@ -266,7 +280,9 @@ export interface Story {
   intro?: StoryIntro;
   grade?: string;               // "4".."9" / 文言文 / 品格教育
   genre?: string;               // 記敘文/說明文/議論文
-  readingStrategy?: string;     // for future Intro enhancement
+  readingStrategy?: string;     // 策略「名稱」，13 字左右的標籤
+  /** #2898：批次預生成的 2-3 句白話說明。策略名稱只是標籤，學生看不出要練什麼。 */
+  readingStrategyExplained?: string;
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
@@ -367,6 +383,13 @@ export interface Story {
 
   // ── 文言文專屬模組 (#2752) — 只有 10 課有這些欄位，其餘課全部 undefined ──
   /** 原文＋注釋（大題無編號，印在「原文」區）。 */
+  /**
+   * 詞語複習的教師版找字表（#2860）。150 課抽了 grid + answer_paths，
+   * 但這條路徑上後端 response、api.ts 映射、前端元件三處都沒有它，
+   * 於是 VocabWordSearch 一直用 story.vocabulary 自己隨機生格子 ——
+   * 沒有錯誤訊息，畫面上完全正常，只是那張表不是老師出的。
+   */
+  vocabReview?: TeacherWordSearchSource;
   classicalText?: ClassicalTextContent;
   /** 古文今譯／白話翻譯（大題無編號）。 */
   modernTranslation?: ModernTranslationContent;

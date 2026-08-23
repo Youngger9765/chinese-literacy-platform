@@ -15,10 +15,6 @@ vocab_definitions:
   - 風險意識
   - 偏誤
   - 含糊其辭
-  vocabulary_bank_note: '只有 7 個（本課四份清單中最短的一份），照「本課語詞」框原樣、依印出的順序記錄。
-
-    「含糊其辭」只在這一份出現，不在總表、也不在第五大題代號表。'
-  answer_carrier: 橘色手寫字；文字流已含答案
   items:
   - index: 1
     word: 預言
@@ -41,3 +37,8 @@ vocab_definitions:
   - index: 7
     word: 含糊其辭
     definition: 說話或表達得不清楚，讓人難以知道真正的意思。
+  notes:
+    vocabulary_bank: '只有 7 個（本課四份清單中最短的一份），照「本課語詞」框原樣、依印出的順序記錄。
+
+      「含糊其辭」只在這一份出現，不在總表、也不在第五大題代號表。'
+    answer_carrier: 橘色手寫字；文字流已含答案

@@ -6,7 +6,8 @@
  * #1683 fixes:
  *  - 多影片 render：catalog 有多個 video_links 時全部 iframe 出來，不再只放第一部
  *  - 移除「你還有 N 個關卡沒有完成」reminder（per Young 5/19）
- *  - CTA 改「繼續下一步」由 stepper nav 帶到下一個 step，不再硬寫「前往報告」
+ *  - CTA 改成共用的「下一關」footer，由 stepper nav 帶到下一個 step，不再硬寫「前往報告」
+ *    （#2897 統一措辭：同一顆前進鈕以前有「下一關」「繼續下一步」兩種寫法）
  *    （知識補給站不一定是最後一關，例如 G7-L30 step_sequence 把它排在第 3 step）
  */
 import React, { useEffect } from 'react';
@@ -14,6 +15,7 @@ import type { Story } from '../../types';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 
 interface KnowledgeStationProps {
   story: Story;
@@ -151,9 +153,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
       </div>
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto">
+      <StepActionBar>
           {isToolboxMode() ? (
             <ToolboxCompletionActions
               onRetry={() => {
@@ -165,10 +165,9 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
               className="w-full"
             />
           ) : (
-            <NextStepFooter onNext={onFinish} label="繼續下一步" />
+            <NextStepFooter onNext={onFinish} />
           )}
-        </div>
-      </div>
+      </StepActionBar>
 
       {/* Background decoration */}
       <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />

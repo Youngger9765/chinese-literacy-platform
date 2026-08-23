@@ -26,8 +26,11 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      - name: Install ffmpeg (testset transcode + silence-gate tests)
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg + poppler (transcode / silence gate / PDF fingerprint gate)
+        # poppler-utils 給 ⑤ 的每頁文字指紋用（pdftotext / pdfinfo）。
+        # 沒裝的話那道門一律回 2「算不出來」—— 那是正確的 fail-closed，
+        # 但等於 CI 對它零覆蓋，而它是擋「版面重排」的唯一一道門。
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg poppler-utils
 
       - name: Run characterization tests (refactor safety gate)
         run: |
@@ -136,7 +139,21 @@ jobs:
             tests/test_lab_keypoints_source_2751.py \
             tests/test_tts_mapping_covers_classical_2792.py \
             tests/test_classical_tts_normalization_2792.py \
-            tests/test_inactive_threshold_matches_prd_2787.py
+            tests/test_inactive_threshold_matches_prd_2787.py \
+            tests/test_yml_shape_ratchet_2843.py \
+            tests/test_module_gaps_are_declared_2836.py \
+            tests/test_module_schemas_2843.py \
+            tests/test_module_reconcile_2843.py \
+            tests/test_corpus_gates_are_wired_2843.py \
+            tests/test_section_no_is_hanzi_2843.py \
+            tests/test_comprehension_carrier_shape_2843.py \
+            tests/test_vocab_definitions_shape_2843.py \
+            tests/test_module_reaches_the_student_2843.py \
+            tests/test_section_pages_2857.py \
+            tests/test_section_locator_2857.py \
+            tests/test_pdf_manifest_gate_2857.py \
+            tests/test_gates_catch_degraded_extraction_2865.py \
+            tests/test_vocab_review_reaches_student_2860.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

@@ -21,7 +21,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 舉證
@@ -53,3 +52,5 @@ vocab_definitions:
   - index: 10
     word: 一片譁然
     definition: 發生一件事情，令大家很驚訝，引起討論。一般用於形容消息（多指不好的消息）傳開，引起轟動。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

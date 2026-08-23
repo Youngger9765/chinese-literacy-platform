@@ -9,7 +9,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  instruction_note: 🅐 這一行本課寫「從本課語詞框**中**」，L0165 與白話課寫「從本課語詞框**框**」。
   vocabulary_bank:
   - 滿腹委屈
   - 頻頻
@@ -21,8 +20,6 @@ vocab_definitions:
   - 一己之力
   - 出局數
   - 推進
-  vocabulary_bank_note: 語詞框共 10 個，分四行印，行末無標點。
-  answer_carrier: 橘色（run 層與字元樣式混用），PDF p4~p5 可見
   items:
   - index: 1
     word: 備受矚目
@@ -54,4 +51,8 @@ vocab_definitions:
   - index: 10
     word: 推進
     definition: 推動事情、工作或位置向前發展。本文指協助跑者向下一個壘包前進。
-  items_note: 第 (5) 題的解釋句末**沒有句號**，其餘九題都有。原稿如此。
+  notes:
+    instruction: 🅐 這一行本課寫「從本課語詞框**中**」，L0165 與白話課寫「從本課語詞框**框**」。
+    vocabulary_bank: 語詞框共 10 個，分四行印，行末無標點。
+    answer_carrier: 橘色（run 層與字元樣式混用），PDF p4~p5 可見
+    items: 第 (5) 題的解釋句末**沒有句號**，其餘九題都有。原稿如此。

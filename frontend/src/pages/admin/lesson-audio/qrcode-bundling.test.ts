@@ -39,8 +39,16 @@ describe('#2622 qrcode bundling', () => {
     expect(dataUrl.length).toBeGreaterThan(500);
   });
 
+  // The static import moved to components/qr/lessonQr.ts when the learning
+  // pages became a second caller (#2886). The invariant did not move: whichever
+  // file holds `QRCode.toDataURL` must name 'qrcode' as a literal specifier.
+  // Both files are checked so this cannot pass by looking at the wrong one.
+  const QR_HOME = join(__dirname, '..', '..', '..', 'components', 'qr', 'lessonQr.ts');
+
   it('imports qrcode statically so the bundler can see it', () => {
-    const raw = readFileSync(join(__dirname, 'LessonAudioTable.tsx'), 'utf-8');
+    const raw = readFileSync(QR_HOME, 'utf-8');
+    // Positive control: the file really is the one that calls the library.
+    expect(raw).toContain('QRCode.toDataURL');
 
     // Strip comments first. The explanation of this very bug mentions the
     // dangerous construct by name, and an assertion that matched anywhere in
@@ -60,5 +68,16 @@ describe('#2622 qrcode bundling', () => {
     }
     // A literal top-level specifier is what makes Vite include the library.
     expect(code).toMatch(/^import QRCode from 'qrcode';$/m);
+  });
+
+  it('no other file re-implements the call with a dynamic specifier', () => {
+    // The admin table used to own this. If someone puts it back there (or
+    // anywhere else) with the unbundlable shape, this catches it.
+    const admin = readFileSync(join(__dirname, 'LessonAudioTable.tsx'), 'utf-8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+    for (const [, specifier] of admin.matchAll(/\bimport\s*\(\s*([^)]*)\)/g)) {
+      expect(specifier.trim()).toMatch(/^['"][^'"]+['"]$/);
+    }
   });
 });

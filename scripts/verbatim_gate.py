@@ -122,6 +122,18 @@ ANNOTATION_KEYS = frozenset({
     "type", "index", "idx", "grid_size", "bind", "id", "recommend_range",
     "kind", "why", "confidence", "evidence", "corrected", "errata_ref",
     "drive_file_id", "drive_path", "pdf_pages", "pages_read",
+    # `url_source` 是我方記「這個影片連結出自哪張總表」的溯源註記
+    # （全庫 291 處，例：「總表0816『4.影片連結』年級9課次16」）——
+    # 原稿上根本沒有這行字，拿它去逐字比對必然對不上。
+    # ⚠️ 但**不要**把所有 `*_source` 一起排除：`passage_source`
+    # 是「（本文出自國立編譯館）」，那是原稿印的出處註記，該檢查。
+    "url_source",
+    # `intro` 是我方寫的課文摘要（給線上頁用），**學習單上沒有這段** ——
+    # 實測 174 課有 intro，印在原稿上的 **0 課**。拿它去逐字比對必然全紅。
+    # ⚠️ 這一欄先前從沒被檢查過（⑦b 不涵蓋 metadata），是 2026-08-23
+    # 重抽對帳器第一次掃到它才發現 —— 174/175「對不上」看起來像資料大壞，
+    # 實際上是那一欄本來就不該驗。
+    "intro",
     "section", "locator", "end", "label", "left_header", "right_header",
     "columns", "unit", "attached_to", "marker", "duration", "name",
 })
@@ -130,6 +142,31 @@ ANNOTATION_RE = re.compile(r"^(note_|_)|(_note|_check|_carrier|_ref)$")
 # `source` 在 meta 底下是「來源檔名」，但在 source_errata 底下是「原稿字串」，
 # 必須比對。所以用「路徑」判斷，不是用 key 名。
 SOURCE_IS_ANNOTATION_PARENTS = frozenset({"meta", "resources", "items", "supplement"})
+
+# 這些容器雖然掛在註解鍵底下，裡面**有一個欄位是可驗的**，所以要走進去。
+# `errata`：整份都是我方的判斷（corrected / why / kind / confidence 都在
+# ANNOTATION_KEYS 裡），唯獨 `source` 是「原稿實際印的那行錯字」——
+# 那是它唯一可以拿原稿驗的主張，而且值得驗：source 對不上 = 這條勘誤本身有問題。
+# ⛔ 不要把 errata 整包跳過 —— 那會讓 69 課的 errata 變成「一個字串都沒驗」，
+#    而 attest 把「0 受檢」算 FAIL（那是對的），於是 69/69 恆紅、無人能修。
+ANNOTATION_CONTAINERS_TO_DESCEND = frozenset({"errata"})
+
+
+def _holds_verifiable(node) -> bool:
+    """這個註解容器裡面，還藏著該驗的東西嗎？
+
+    ⚠️ 不能只看容器自己的鍵。`errata` 實際住在 `notes.errata`，
+    在 `notes` 那一層就被擋掉了，於是 69 課的 errata 一個字串都沒驗到 ——
+    而 attest 把「0 受檢」算 FAIL（那是對的），結果是 69/69 恆紅、無人能修。
+    """
+    if isinstance(node, dict):
+        return any(
+            k in ANNOTATION_CONTAINERS_TO_DESCEND or _holds_verifiable(v)
+            for k, v in node.items()
+        )
+    if isinstance(node, list):
+        return any(_holds_verifiable(v) for v in node)
+    return False
 
 
 def has_cjk(s: str) -> bool:
@@ -169,9 +206,33 @@ def walk(node, key=None, parent=None, out=None, unverifiable=None, in_image=Fals
                 corrected.add("text")
             elif k.endswith("_source_text"):
                 corrected.add(k[: -len("_source_text")])
+            # `X_source` 已經被列為註解 → 那句註解講的就是「X 是從別處抄來的」，
+            # 於是 X 本身也不該拿 DOCX 驗。`videos[].url` 就是這樣：
+            # `url_source: 總表0816「4.影片連結」…` —— 連結印在總表上，
+            # 學習單上只有 QR code，原稿文字流裡一個字母都沒有。
+            # ⚠️ 這條靠「`X_source` 在不在註解名單」判別，不是靠字尾 —— 因為
+            # `passage_source` 是「（本文出自國立編譯館）」，那是原稿印的出處，
+            # 它不在註解名單，所以 `passage` 照驗。判準已經在資料裡，不用另立表。
+            elif k.endswith("_source") and k in ANNOTATION_KEYS:
+                corrected.add(k[: -len("_source")])
         for k, v in node.items():
             ks = str(k)
             if ks in corrected:
+                continue
+            # 🔴 註解排除必須套在**容器**上，不能只套葉節點。
+            #    `notes` 一直在 ANNOTATION_KEYS 裡，但那個檢查寫在字串分支、
+            #    用的是**葉節點自己的鍵** —— 所以它只保護得了 `notes: "一句話"`。
+            #    `notes: {char_count: …, paragraphs: […]}` 會被走進去，
+            #    然後拿葉鍵 `char_count` 去比對名單，不在名單 → 照驗，
+            #    而那裡面裝的是抽取器自己寫的分析（「本課要用第四條 Word 口徑…」），
+            #    原稿當然沒有這行字。全庫 149/174 課紅，這是最大一股。
+            #    ⛔ 86% 說壞掉的門沒有人會信 —— 假警報跟漏抓一樣會讓門被關掉。
+            if (
+                isinstance(v, (dict, list))
+                and (ks in ANNOTATION_KEYS or ANNOTATION_RE.search(ks))
+                and ks not in ANNOTATION_CONTAINERS_TO_DESCEND
+                and not _holds_verifiable(v)
+            ):
                 continue
             if ks == "source" and parent in SOURCE_IS_ANNOTATION_PARENTS:
                 continue
@@ -207,6 +268,40 @@ def walk(node, key=None, parent=None, out=None, unverifiable=None, in_image=Fals
     return out
 
 
+# 原稿的文字流會被「插在段落中間的圖說」切斷。L0002 的課文中間插了
+#   枯葉蝶(左下)與皇蛾(右上)翅膀上的蛇頭紋圖1圖2   （而且重複兩次）
+# 於是整段課文一個字都沒抄錯，卻因為在原稿裡「不連續」而被判 FAIL。
+#
+# 放寬成「**依序**出現、允許被打斷」——不是「每一塊各自找得到」。
+# 順序仍然要對，所以搬到別課、改寫、重排都還是會紅；
+# 只有「中間被塞了東西」會過。
+MAX_GAPS = 4        # 一段課文最多容忍被打斷幾次
+MIN_PIECE = 8       # 每一塊至少要這麼長，否則就是碎片湊答案
+
+
+def found_in_order(seg: str, src: str) -> bool:
+    """seg 的每一塊都能在 src 裡**依序**找到（中間可以夾別的東西）。"""
+    pos, rest, gaps = 0, seg, 0
+    while rest:
+        lo, hi, best = MIN_PIECE, len(rest), 0
+        while lo <= hi:                       # 二分找最長可匹配前綴
+            mid = (lo + hi) // 2
+            if src.find(rest[:mid], pos) >= 0:
+                best, lo = mid, mid + 1
+            else:
+                hi = mid - 1
+        if best < MIN_PIECE:
+            return False
+        pos = src.find(rest[:best], pos) + best
+        rest = rest[best:]
+        gaps += 1
+        if gaps > MAX_GAPS:
+            return False
+        if len(rest) < MIN_PIECE:             # 尾巴太短，跟著前一塊算
+            return True
+    return True
+
+
 def check(yaml_path: Path, docx_path: Path, min_len: int):
     src = docx_text(docx_path)
     data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
@@ -226,6 +321,8 @@ def check(yaml_path: Path, docx_path: Path, min_len: int):
         bad = []
         for seg in segs:
             if seg in src:
+                continue
+            if found_in_order(seg, src):      # 被圖說之類插斷，但順序沒亂
                 continue
             # 這一段對不上 → 再切短，把真正歧異的那幾個字揪出來
             span = 20
@@ -257,6 +354,12 @@ def main() -> int:
 
     print(f"原稿字元數 : {len(src)}")
     print(f"受檢字串   : {checked}（片段長度 ≥ {a.min_len} 且含中文）")
+    # 🔴 機器可讀的那一行 —— 給 content_fidelity_attest.py 用。
+    #    ⛔ 不要叫呼叫端去刮上面那行散文：它用半形冒號、而且同一行還印著
+    #    「≥ 4」，把非數字濾掉會得到 "04" → 4。所以每一份 attestation 的
+    #    checked 都是 4，不管實際受檢 0 個還是 200 個 —— 我拿那個數字報過
+    #    「1176 字串」「308816 字串」，全是刮出來的垃圾。
+    print(f"VERBATIM_GATE_CHECKED={checked}")
     print(f"對不上     : {len(misses)}")
     print(f"無法驗證   : {len(unverifiable)}（標了 text_carrier: image，文字畫在圖上）")
     if misses:

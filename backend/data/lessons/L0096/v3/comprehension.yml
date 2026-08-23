@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: A
@@ -47,3 +46,5 @@ comprehension:
       B: 讓讀者了解吐瓦魯的處境
       C: 想要臺灣提早建立虛擬國家
       D: 希望大家一起正視暖化議題
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p6~p7）；文字層的（　）內已填有同樣的代號

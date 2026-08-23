@@ -3,4 +3,5 @@ version_id: v3
 goal_box:
   level_badge: Level 4・議論文
   strategy_line: 目標議題：品格力──身體覺察與照護
-  note: 本課的目標議題框印成一行，L0167／L0168 是兩行，照各自原樣抄
+  notes:
+    note: 本課的目標議題框印成一行，L0167／L0168 是兩行，照各自原樣抄

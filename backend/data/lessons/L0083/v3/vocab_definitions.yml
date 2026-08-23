@@ -17,7 +17,6 @@ vocab_definitions:
   - 喧鬧紛雜
   - 悲歡離合
   - 設身處地
-  answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 獨門
@@ -53,3 +52,5 @@ vocab_definitions:
     answer: B
     answer_carrier: 紅色 ☑（w:sym），印在選項 B 前
     note: 本題與前 8 題形狀不同 —— 不是填空，是三選一的單選題（原稿如此）
+  notes:
+    answer_carrier: 橘色手寫字（PDF p3~p4）；文字層的空格內已填有同樣的答案

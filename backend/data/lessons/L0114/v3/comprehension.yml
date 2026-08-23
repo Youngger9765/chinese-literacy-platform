@@ -3,8 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
-  teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、2、4、5 題有，第 3 題沒有
   questions:
   - index: 1
     answer: C
@@ -50,3 +48,6 @@ comprehension:
       C: 僅做必要監測通報，盡量不介入，讓石虎自行尋找出路與棲地
       D: 先移到管制嚴、干擾少的區域降風險，同步改善原棲地環境
     teacher_hint: 支持遷移者強調「緩不濟急」時先降立即風險（先救命），並把遷移視為「爭取時間」，同時推進原棲地修復。
+  notes:
+    answer_carrier: 橘色手寫代號寫在題號前的括號內（教師版答案），文字流有此資訊
+    teacher_hint_carrier: 藍框文字方塊（教師版解析），文字流有此資訊；第 1、2、4、5 題有，第 3 題沒有

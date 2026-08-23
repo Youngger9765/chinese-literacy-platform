@@ -17,6 +17,7 @@ import {
   resolveDemoTargetElement,
   type StructureInteractionProfile,
 } from './storyStructureProfile';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -218,33 +219,15 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ introText, onDismiss, onDemo }: OnboardingCoachProps) {
   return (
-    <div className="mb-4 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          account_tree
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">文章重點表怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">{introText}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard
+      title="文章重點表怎麼玩？"
+      icon="account_tree"
+      className="mb-4"
+      onDemo={onDemo}
+      onDismiss={onDismiss}
+    >
+      {introText}
+    </StepCoachCard>
   );
 }
 
@@ -1502,14 +1485,7 @@ const StoryStructureTable: React.FC<Props> = ({
       )}
       {!showCoach && (
         <div className="flex justify-end mb-2">
-          <button
-            type="button"
-            onClick={() => setShowCoach(true)}
-            className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">help_outline</span>
-            怎麼玩？
-          </button>
+          <StepCoachHelpButton onClick={() => setShowCoach(true)} />
         </div>
       )}
       {demo && demoTargetRect && activeDemoStep && (

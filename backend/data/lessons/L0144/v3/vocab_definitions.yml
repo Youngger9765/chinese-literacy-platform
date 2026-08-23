@@ -2,7 +2,6 @@ lesson_uid: L0144
 version_id: v3
 section_no: 二
 vocab_definitions:
-  part_note: 篇1（第23課）
   vocabulary_bank:
   - 聞名於世
   - 綿延
@@ -20,7 +19,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 魔障
@@ -46,3 +44,6 @@ vocab_definitions:
   - index: 8
     word: 配速
     definition: 依照距離和目標，安排並控制跑步的速度。
+  notes:
+    part: 篇1（第23課）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

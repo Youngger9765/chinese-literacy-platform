@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫字；文字流已含答案
   questions:
   - index: 1
     answer: B
@@ -48,3 +47,5 @@ comprehension:
       D: 在網路上大量轉發預言，提醒更多人注意
     teacher_note: （文章強調真正可靠的是防災意識與專業機構資訊，而不是聽信模糊預言。）
     options_note: D 選項在 PDF p10 被「八 詞語複習」的圓形標題圖示擠到下方，文字流內完整。
+  notes:
+    answer_carrier: 橘色手寫字；文字流已含答案

@@ -19,7 +19,6 @@ vocab_definitions:
   - 極端
   - 甦醒
   - 殃及池魚
-  answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案
   items:
   - index: 1
     word: 多樣性
@@ -54,3 +53,5 @@ vocab_definitions:
   - index: 11
     word: 出資
     definition: 提供金錢，讓某項計畫或工作可以進行。
+  notes:
+    answer_carrier: 橘色手寫字（圖形），文字流的空格內已填有答案

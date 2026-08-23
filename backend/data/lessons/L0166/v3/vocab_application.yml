@@ -14,12 +14,8 @@ vocab_application:
     H: 出色
     I: 釐清
     J: 外界
-  option_bank_note: '⚠️ 選項庫 10 個，與第三大題語詞框**不同**：多了「一手包辦」「外界」，
-
-    少了「口令」「出局數」。兩者都是課文裡加框的詞。原稿如此。'
   unused_options:
   - B
-  answer_carrier: 橘色代號，PDF p5 可見
   items:
   - index: 1
     stem: 經過許多練習的累積，他這次的音樂競賽表現相當 (　)。
@@ -45,3 +41,8 @@ vocab_application:
   - index: 8
     stem: 新建的圖書館設備完善，開幕前便(　)。
     answer: D
+  notes:
+    option_bank: '⚠️ 選項庫 10 個，與第三大題語詞框**不同**：多了「一手包辦」「外界」，
+
+      少了「口令」「出局數」。兩者都是課文裡加框的詞。原稿如此。'
+    answer_carrier: 橘色代號，PDF p5 可見

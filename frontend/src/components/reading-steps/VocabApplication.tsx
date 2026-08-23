@@ -22,10 +22,10 @@
  * - On manual redo, both localStorage keys are cleared.
  * - Fix #758: handleFinish no longer removes phase storage — completion persists.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
-import type { QuestionResult } from './FillInBlankExercise';
+import type { QuestionResult, SavedProgress as ExerciseProgress } from './FillInBlankExercise';
 import { getLearningStorageScope, scopedStepStorageKey } from '../../services/learningStorageScope';
 import NextStepFooter from '../learning/NextStepFooter';
 
@@ -57,6 +57,11 @@ export interface VocabApplicationProps {
     markCompleted?: boolean;
     immediate?: boolean;
   }) => void;
+  /**
+   * #2848 — DB 裡 `step_data['vocab-application']` 先前存下的內容。
+   * 存了讀不回來等於沒存，所以「存」跟「還原」一起接上。
+   */
+  initialProgress?: Record<string, unknown> | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -70,7 +75,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">edit_note</span>
         <p className="text-on-surface-variant">本課尚無語詞應用題目</p>
-        <NextStepFooter onNext={onFinish} label="繼續下一步" />
+        <NextStepFooter onNext={onFinish} />
       </div>
     </div>
   );
@@ -117,6 +122,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   onFinish,
   fontSizePx,
   saveStepProgressPatch,
+  initialProgress,
 }) => {
   const storageKey = phaseStorageKey(story.id);
   const loadSaved = () => {
@@ -144,6 +150,39 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
       localStorage.setItem(storageKey, JSON.stringify({ phase, result, firstTryResults: savedFirstTryResults }));
     } catch {}
   }, [phase, result, savedFirstTryResults, storageKey]);
+
+  // ── DB restore + mid-exercise DB persistence (#2848) ─────────────────────
+  // 之前這一關作答中完全不進 DB：逐題答案只寫 localStorage，DB 只在做完時收到
+  // 最終成績。2026-08-21 staging 實測答 1 題等 12 秒 → 0 次 PUT、
+  // `step_progress` 仍是 null。換裝置 / 清快取就整關重來。
+  //
+  // 用 ref 把還原快照凍結在「第一次 render 當下」：下面的 patch 會讓
+  // LearningLayout 的 stepProgressData 更新，若讓它跟著變，讀到的會是自己剛寫
+  // 回去的值。LearningLayout 的 waitingForProgress gate（#1549）保證 DB 載完才
+  // render 這一頁，所以第一次 render 拿到的就已經是 DB 的值。
+  const restoredExerciseRef = useRef<ExerciseProgress | null | undefined>(undefined);
+  if (restoredExerciseRef.current === undefined) {
+    const raw = initialProgress?.exercise;
+    restoredExerciseRef.current =
+      raw && typeof raw === 'object' ? (raw as ExerciseProgress) : null;
+  }
+
+  const handleExerciseProgress = useCallback(
+    (progress: ExerciseProgress) => {
+      if (!saveStepProgressPatch) return;
+      // 作答中的快照 —— **不可以** markCompleted。標了完成，學生才答一題報告頁
+      // 就會把整步算成做完。交卷走 handleComplete 那條（markCompleted: true）。
+      // immediate: false 讓 useProgressSync 的 debounce 把連續作答收斂成一次 PUT，
+      // 不會每點一下就打一次 rate-limited 端點。
+      saveStepProgressPatch({
+        stepId: 'vocab-application',
+        currentStep: 'vocab-application',
+        immediate: false,
+        stepData: { phase: 'exercise', exercise: progress },
+      });
+    },
+    [saveStepProgressPatch],
+  );
 
   // ── DB persistence on completion ─────────────────────────────────────────
   // When phase transitions to 'done', flush progress to DB immediately via patch
@@ -228,7 +267,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
     }
     setPhase('done');
     // Navigate to next step — FillInBlankExercise already shows its own summary,
-    // so when it calls onComplete from "繼續下一步", we proceed immediately.
+    // so when it calls onComplete from the 下一關 footer, we proceed immediately.
     const completionRate = total > 0 ? score / total : 1;
     onFinish({ score, total, completionRate });
   }
@@ -279,6 +318,8 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
           vocabBank={vocabBank}
           onComplete={handleComplete}
           storyId={getLearningStorageScope(story.id)}
+          initialProgress={restoredExerciseRef.current}
+          onProgressChange={handleExerciseProgress}
         />
       )}
     </div>

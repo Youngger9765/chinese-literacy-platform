@@ -34,7 +34,6 @@ vocab_definitions:
   - 言歸正傳
   - 開枝散葉
   answers_printed: true
-  answer_carrier: 橘色（E97132）填在橫線上
   items:
   - index: 1
     definition: 指成群的人或動物，從一個地方搬到另一個地方。
@@ -78,3 +77,5 @@ vocab_definitions:
   - index: 14
     definition: 讓人越想越覺得有意思，值得細細品味、反覆思考。
     answer: 耐人尋味
+  notes:
+    answer_carrier: 橘色（E97132）填在橫線上

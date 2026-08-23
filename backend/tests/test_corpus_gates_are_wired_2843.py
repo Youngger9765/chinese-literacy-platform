@@ -1,0 +1,85 @@
+"""把既有的門接上 CI（#2843）。
+
+## 為什麼需要這支
+
+盤點全流程時發現：16 道門裡只有 6 道有 CI 路徑，其中 4 道還是同一天剛加的。
+既有的門**存在但沒人跑** —— 那跟不存在的差別只在「有人以為它在守著」，
+而那個誤會比沒有門更危險。
+
+不過原因分兩種，混在一起看就會誤判成「都是疏忽」：
+
+| 原因 | 門 | 能不能接 |
+|---|---|---|
+| **輸入在 CI 裡不存在** | `coverage_gate` / `traditional_only_gate` | ⛔ 接不了 |
+| 純粹沒接 | `render_coverage_gate` / `orphan_key_gate` / `keypoints_shape_gate` | ✅ 這支接 |
+
+前者讀 `private/curriculum-source/`（`.gitignore:2` 排除），CI checkout 裡沒有那個目錄，
+硬接只會得到一道恆紅的門 —— 那是最糟的形狀，紅久了大家學會忽略它。
+它們留在本地跑，並在 PRD 記明原因。
+
+## 這支不重寫門的邏輯
+
+只負責「叫它們跑一次、確認 exit 0」。門自己的正確性由門自己的測試管，
+這裡管的是**它有沒有被執行**。
+"""
+from __future__ import annotations
+
+import pathlib
+import subprocess
+import sys
+
+import pytest
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+SCRIPTS = REPO_ROOT / "scripts"
+
+#: 輸入只需要 repo 內資料、且實測 exit 0 的門。
+#: ⚠️ 加新的進來之前先在本地跑一次確認是綠的 —— 接一道紅的門進 CI
+#: 等於擋住所有人，而且大家會學會忽略它。
+WIRED: list[str | tuple[str, list[str]]] = [
+    "render_coverage_gate",   # 抽出來的東西前端畫不畫得出來
+    "orphan_key_gate",        # 有沒有整節被靜默丟掉
+    "keypoints_shape_gate",   # 重點表形狀
+    # 派工單有沒有跟來源脫節（#2857）。⚠️ **一定要帶 --check** ——
+    # 不帶參數這支會**寫**檔，測試把 174 份 manifest 重產一遍就不是唯讀稽核了。
+    ("build_lesson_manifest", ["--check"]),
+]
+
+#: 接不了的，連原因一起寫在這裡 —— 不寫的話下一個人會以為是漏了。
+CANNOT_WIRE = {
+    "coverage_gate": "讀 private/curriculum-source/（.gitignore:2），CI checkout 沒有那個目錄",
+    "traditional_only_gate": "同樣讀 private/curriculum-source/ 比對原稿用字，CI 裡沒有那個目錄",
+    "verbatim_gate": "介面是 --yaml <檔> --docx <原稿>，原稿在 gitignore 的 private/，CI 拿不到",
+}
+
+
+@pytest.mark.parametrize("gate", WIRED, ids=lambda g: g if isinstance(g, str) else g[0])
+def test_gate_still_passes(gate):
+    name, args = (gate, []) if isinstance(gate, str) else gate
+    script = SCRIPTS / f"{name}.py"
+    assert script.is_file(), f"門不見了：{script}"
+    gate = name
+    proc = subprocess.run(
+        [sys.executable, str(script), *args],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+    )
+    tail = "\n".join((proc.stdout + proc.stderr).strip().split("\n")[-12:])
+    assert proc.returncode == 0, f"{gate} 紅了（exit {proc.returncode}）：\n{tail}"
+
+
+def test_the_unwirable_ones_are_documented():
+    """接不了的門必須留下原因。
+
+    沒有這條的話，下一個盤點的人會把「接不了」當成「漏接」，
+    然後接上去得到一道恆紅的門 —— 我今天差點就這麼做。
+    """
+    wired_names = {g if isinstance(g, str) else g[0] for g in WIRED}
+    assert not (wired_names & set(CANNOT_WIRE)), "同一道門不能同時列在 WIRED 與 CANNOT_WIRE"
+    for gate, reason in CANNOT_WIRE.items():
+        assert (SCRIPTS / f"{gate}.py").is_file(), f"{gate} 已不存在，請從 CANNOT_WIRE 移除"
+        assert len(reason) > 10, f"{gate} 的原因寫得太短"
+
+
+def test_wired_list_is_not_silently_empty():
+    """掃描前提 —— 空清單會讓上面的參數化測試一條都不跑，而 CI 仍然綠。"""
+    assert len(WIRED) >= 3, f"WIRED 只剩 {len(WIRED)} 道，有人拿掉了門？"

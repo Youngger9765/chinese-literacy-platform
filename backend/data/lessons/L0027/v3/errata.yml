@@ -1,12 +1,13 @@
 lesson_uid: L0027
 version_id: v3
-errata:
-- id: E1
-  section: 九 知識補給站
-  locator: 第 2 支影片標題開頭
-  source: 搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
-  corrected: 「搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
-  kind: 漏字（前引號）
-  why: 有下引號「」」卻沒有對應的上引號，標題開頭少了「
-  confidence: high
-  evidence: PDF p9 與 document.xml 一致
+notes:
+  errata:
+  - id: E1
+    section: 九 知識補給站
+    locator: 第 2 支影片標題開頭
+    source: 搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    corrected: 「搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    kind: 漏字（前引號）
+    why: 有下引號「」」卻沒有對應的上引號，標題開頭少了「
+    confidence: high
+    evidence: PDF p9 與 document.xml 一致

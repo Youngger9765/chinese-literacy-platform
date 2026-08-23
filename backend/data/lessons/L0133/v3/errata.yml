@@ -1,16 +1,17 @@
 lesson_uid: L0133
 version_id: v3
-errata:
-- id: E1
-  section: 一 讀全文
-  locator: 課文左側段號欄第 1 個號碼
-  source: —
-  corrected: 一
-  kind: 字元用錯（破折號當成「一」）
-  why: '段號欄依序印 —、二、三、四、五。第一個字元的碼位是 U+2014 EM DASH，
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文
+    locator: 課文左側段號欄第 1 個號碼
+    source: —
+    corrected: 一
+    kind: 字元用錯（破折號當成「一」）
+    why: '段號欄依序印 —、二、三、四、五。第一個字元的碼位是 U+2014 EM DASH，
 
-    不是 U+4E00「一」，所以那一格排出來是一條比「一」更長更細的橫線。
+      不是 U+4E00「一」，所以那一格排出來是一條比「一」更長更細的橫線。
 
-    其餘四個都是正規的中文數字。'
-  confidence: high
-  evidence: PDF p1 與 document.xml 一致（不是轉檔造成的）
+      其餘四個都是正規的中文數字。'
+    confidence: high
+    evidence: PDF p1 與 document.xml 一致（不是轉檔造成的）

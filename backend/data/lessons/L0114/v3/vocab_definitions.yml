@@ -23,7 +23,6 @@ vocab_definitions:
   - 破碎化
   - 掠食者
   vocabulary_bank_label: 本課語詞
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 絕種
@@ -61,4 +60,6 @@ vocab_definitions:
   - index: 12
     word: 疾駛
     definition: 疾：快；駛：車子行駛。車子開得很快。
-  items_note: 第 4 題的定義原稿印「被：覆蓋指。」——「指」字疑為贅字，但兩處（PDF 與文字層）一致，照原樣抄、不列勘誤
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    items: 第 4 題的定義原稿印「被：覆蓋指。」——「指」字疑為贅字，但兩處（PDF 與文字層）一致，照原樣抄、不列勘誤

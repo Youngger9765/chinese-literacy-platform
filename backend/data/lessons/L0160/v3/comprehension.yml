@@ -4,7 +4,6 @@ section_no: 五
 comprehension:
   label: 五、閱讀理解
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色代號（在文字層），PDF p7~p8 可見
   questions:
   - index: 1
     stem: 下列選項「」中字，何者字音、字義完全正確？
@@ -21,6 +20,7 @@ comprehension:
       B字音ㄨㄟˇ，字義「拋下」；
 
       D字音ㄙㄨㄟˋ。'
+    teacher_note: 「予」是指「我」。
   - index: 2
     stem: 關於「重義的荀巨伯」一文的寫作手法，下列敘述何者最恰當？
     options:
@@ -43,6 +43,7 @@ comprehension:
     explanation: '第3題解析:
 
       D荀巨伯不忍心丟下朋友自己逃命，甚至願意為了朋友犧牲，可見他有多麼重視道義。'
+    teacher_note: 「爾」是指「你」。
   - index: 4
     stem: 下列哪一個選項中的代詞代表荀巨伯的朋友？
     options:
@@ -81,3 +82,6 @@ comprehension:
       在下，我，自謙詞；
 
       敝人，我，自謙詞。'
+    teacher_note: 「某等」是指「我們」。
+  notes:
+    answer_carrier: 橘色代號（在文字層），PDF p7~p8 可見

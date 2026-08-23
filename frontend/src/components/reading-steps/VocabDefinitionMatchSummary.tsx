@@ -23,6 +23,7 @@ import { VocabItem } from '../../types';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { WrongAnswerReviewList, type WrongAnswerReviewItem } from '../learning/WrongAnswerReviewList';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 import {
   getDragDropAttemptFeedback,
   AnswerRecord,
@@ -120,9 +121,7 @@ export function SummaryScreen({
       {renderResultSection('第二關：拖拉配對', dragDropAnswers, 'drag-drop')}
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+      <StepActionBar layout="stack">
           {inToolbox ? (
             <ToolboxCompletionActions onRetry={onRetryAll} className="w-full" />
           ) : (
@@ -138,11 +137,10 @@ export function SummaryScreen({
                 className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
                 全部重做
               </button>
-              <NextStepFooter onNext={onFinish} label="繼續下一步" />
+              <NextStepFooter onNext={onFinish} />
             </>
           )}
-        </div>
-      </div>
+      </StepActionBar>
     </div>
   );
 }

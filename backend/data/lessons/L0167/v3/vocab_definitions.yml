@@ -28,9 +28,7 @@ vocab_definitions:
   - 較勁
   - 平分秋色
   - 心理素質
-  word_bank_errata_ref: E2
   answers_printed: true
-  answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
   items:
   - index: 1
     definition: 不將心裡的情緒或計畫表現出來。
@@ -59,3 +57,6 @@ vocab_definitions:
   - index: 9
     definition: 彼此比高下、比輸贏。
     answer: 較勁
+  notes:
+    word_bank_errata_ref: E2
+    answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）

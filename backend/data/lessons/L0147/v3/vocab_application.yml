@@ -14,9 +14,7 @@ vocab_application:
     H: 掛一漏萬
     I: 天各一方
     J: 耐人尋味
-  option_bank_errata_ref: E2
   answers_printed: true
-  answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
   items:
   - index: 1
     stem: 從飛機上往下看台北市，街燈（　），整個城市看起來閃閃發亮。
@@ -42,4 +40,7 @@ vocab_application:
   - index: 8
     stem: 他在比賽中展現出(　)的球技，讓全場觀眾不斷拍手叫好。
     answer: D
-  items_note: 九個語詞裡「天各一方」(I) 與誘答項「耐人尋味」(J) 沒有任何一題用到
+  notes:
+    option_bank_errata_ref: E2
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
+    items: 九個語詞裡「天各一方」(I) 與誘答項「耐人尋味」(J) 沒有任何一題用到

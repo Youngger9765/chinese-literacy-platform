@@ -18,7 +18,6 @@ vocab_definitions:
   - 熱衷
   - 天壤之別
   - 遍地開花
-  answer_carrier: 橘色手寫字（PDF p3）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 退役
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 10
     word: 斥資
     definition: 投入大量經費。
+  notes:
+    answer_carrier: 橘色手寫字（PDF p3）；文字層的空格內已填有同樣的答案

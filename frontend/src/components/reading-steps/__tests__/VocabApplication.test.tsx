@@ -78,7 +78,7 @@ describe('VocabApplication', () => {
   it('fallback continue button calls onFinish with completionRate=1', () => {
     const onFinish = vi.fn();
     render(<VocabApplication story={storyNoData} onFinish={onFinish} />);
-    fireEvent.click(screen.getByRole('button', { name: '繼續下一步' }));
+    fireEvent.click(screen.getByRole('button', { name: '下一關' }));
     expect(onFinish).toHaveBeenCalledWith(
       expect.objectContaining({ completionRate: 1 })
     );
@@ -114,7 +114,7 @@ describe('VocabApplication', () => {
     fireEvent.click(screen.getByRole('button', { name: /繼續/ }));
 
     // In completion screen, click the final continue button
-    fireEvent.click(screen.getByRole('button', { name: /繼續下一步/ }));
+    fireEvent.click(screen.getByRole('button', { name: /下一關/ }));
 
     expect(onFinish).toHaveBeenCalledWith({
       score: 2,

@@ -20,8 +20,6 @@ vocab_definitions:
   - 抽絲剝繭
   - 視若無睹
   - 鋪天蓋地
-  vocabulary_bank_note: 語詞框原文分四行印，句末有句號。
-  answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p3~p4 可見
   items:
   - index: 1
     word: 抽絲剝繭
@@ -53,3 +51,6 @@ vocab_definitions:
   - index: 10
     word: 視若無睹
     definition: 雖然看到，但因不關心，好像沒有看到一樣。等同「視而不見」。
+  notes:
+    vocabulary_bank: 語詞框原文分四行印，句末有句號。
+    answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p3~p4 可見

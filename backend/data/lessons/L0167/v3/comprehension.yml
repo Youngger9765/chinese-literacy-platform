@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  option_key_note: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af0）
   answers_printed: true
   items:
   - index: 1
@@ -61,3 +60,5 @@ comprehension:
     teacher_note: (B)(C)(D)都沒有針對自己的情緒、想法思考，只是逃避或指責其他人
     teacher_note_carrier: 藍框浮動文字方塊（在文字層）
     note: 四個選項在原稿排成 2×2 的表格（A/B 一列、C/D 一列），不是直式清單
+  notes:
+    option_key: 選項用字母 A~D，答案印在題號前的括號內（橘色，字元樣式 af0）

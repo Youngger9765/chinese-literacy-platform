@@ -1,10 +1,9 @@
 lesson_uid: L0170
 version_id: v3
-section_no: ㄧ
+section_no: 一
 full_text_annotate:
   title_line: 第4課  專注當下：關掉內心的批評噪音
   paragraph_count: 6
-  paragraphs_note: 段號欄印 ㄧ二三四五六 共 6 個。第 5 段之後有一張插圖（圖片 127），不佔段號。
   paragraphs:
   - idx: 1
     text: 「狀態爛死了。對不起大家。真的很討厭現在的自己。我到底在幹嘛。」煩悶的心情無處抒發，我忍不住在社群媒體上發文。幾秒後就跳出隊友的留言：「哎呀不要想太多！一起加油啦！」我也不想要想這麼多啊，我輕輕嘆了口氣，便往床上一躺，想要拋開腦袋中的各種念頭，但比賽的畫面還是不斷浮現。
@@ -32,5 +31,7 @@ full_text_annotate:
   - 吆喝
   - 排山倒海
   - 懊悔
-  inline_marked_terms_note: 課文用黑色字元框線（w:bdr color=auto）標出本課語詞；是題目標示不是答案
   char_count: 1121
+  notes:
+    paragraphs: 段號欄印 ㄧ二三四五六 共 6 個。第 5 段之後有一張插圖（圖片 127），不佔段號。
+    inline_marked_terms: 課文用黑色字元框線（w:bdr color=auto）標出本課語詞；是題目標示不是答案

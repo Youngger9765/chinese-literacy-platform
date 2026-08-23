@@ -14,11 +14,7 @@ vocab_application:
     H: 天馬行空
     I: 開枝散葉
     J: 浩瀚無垠
-  option_bank_note: '十個代號取自十四個語詞，未列入的是 匯流／典故／歲月淘洗／引人入勝。
-
-    I（開枝散葉）與 J（浩瀚無垠）在八題裡都沒有被用到，是誘答項。'
   answers_printed: true
-  answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
   items:
   - index: 1
     stem: 大家把握時間，不要把話題扯得太遠，趕緊（　）吧！
@@ -44,3 +40,8 @@ vocab_application:
   - index: 8
     stem: 這家店總是大排長龍，對附近的居民來說早已(　)。
     answer: D
+  notes:
+    option_bank: '十個代號取自十四個語詞，未列入的是 匯流／典故／歲月淘洗／引人入勝。
+
+      I（開枝散葉）與 J（浩瀚無垠）在八題裡都沒有被用到，是誘答項。'
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**

@@ -12,8 +12,6 @@ vocab_application:
     F: 青睞
     G: 雄赳赳，氣昂昂
     H: 丰采
-  option_bank_note: 8 個代號對應 8 道小題（本課 10 個語詞中「真摯」「嬌客」未入選項）。
-  answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
   items:
   - index: 1
     stem: 今年校慶我們班要表演舞臺劇，到時全班都會(　)。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 畢業典禮上，每位學生都展現了屬於自己的 (　)。
     answer: H
+  notes:
+    option_bank: 8 個代號對應 8 道小題（本課 10 個語詞中「真摯」「嬌客」未入選項）。
+    answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號

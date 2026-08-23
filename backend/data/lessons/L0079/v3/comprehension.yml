@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p10~p11）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     answer: B
@@ -55,3 +54,5 @@ comprehension:
       D: 開立阿嬤的診斷書，並請社工師聯繫作者
     explanation: (根據最後作者提出的要求「開立診斷證明，向法院申請監護宣告」，與A矛盾，而「向社工師諮詢」則符合D的情境。
     explanation_note: 原稿是一個浮動說明框，左括號沒有對應的右括號，照原樣保留
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p10~p11）；文字層的（　）內已填有同樣的代號

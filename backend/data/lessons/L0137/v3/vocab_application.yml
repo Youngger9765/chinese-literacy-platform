@@ -13,11 +13,7 @@ vocab_application:
     G: 千里迢迢
     H: 感同身受
     I: 眾說紛紜
-  option_bank_note: '九個代號裡 H「感同身受」不在本課十一個語詞內，是刻意的誘答項（第 (8) 題答案就是它）；
-
-    反過來，語詞表裡的「複製」「無獨有偶」沒有出現在選項欄。見 E1。'
   answers_printed: true
-  answer_carrier: 橘色手寫體填在（　）內（教師版答案），文字流有此資訊
   items:
   - index: 1
     stem: 太魯閣名聞遐邇，許多遊客(　)而來只為了一睹這裡的美景。
@@ -43,3 +39,8 @@ vocab_application:
   - index: 8
     stem: 聽完他不幸遭遇後，我對他的痛苦(　)，十分遺憾。
     answer: H
+  notes:
+    option_bank: '九個代號裡 H「感同身受」不在本課十一個語詞內，是刻意的誘答項（第 (8) 題答案就是它）；
+
+      反過來，語詞表裡的「複製」「無獨有偶」沒有出現在選項欄。見 E1。'
+    answer_carrier: 橘色手寫體填在（　）內（教師版答案），文字流有此資訊

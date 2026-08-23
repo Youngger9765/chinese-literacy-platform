@@ -17,11 +17,6 @@ vocab_definitions:
   - 市井
   - 門可羅雀
   vocabulary_bank_label: 本課語詞
-  vocabulary_bank_note: '語詞框裡的順序與總表不同（框裡「奠定」排第 9，總表排第 13），這裡照**學習單印的順序**。
-
-    框裡的「心不在焉」「禍福相倚」中間各夾一個隱藏的 variation selector（U+E01E1），
-
-    比對時要濾掉 Unicode 類別 Cf/Mn 才對得上。'
   instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
 
     🅐 從本課語詞框框，找語詞。
@@ -29,7 +24,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（C:E97132，教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 契機
@@ -70,3 +64,10 @@ vocab_definitions:
   - index: 13
     word: 市井
     definition: 一般老百姓生活、買賣、活動的地方。
+  notes:
+    vocabulary_bank: '語詞框裡的順序與總表不同（框裡「奠定」排第 9，總表排第 13），這裡照**學習單印的順序**。
+
+      框裡的「心不在焉」「禍福相倚」中間各夾一個隱藏的 variation selector（U+E01E1），
+
+      比對時要濾掉 Unicode 類別 Cf/Mn 才對得上。'
+    answer_carrier: 橘色手寫（C:E97132，教師版答案），文字流有此資訊

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 九
 resources:
   label: 影片連結
-  label_note: 標題印「影片連結」，但這一課的兩則其實是**網站**（謎題訂閱與益智遊戲站），不是影片；原稿如此。
   items:
   - index: 1
     title: 腦力補給
@@ -28,3 +27,5 @@ resources:
   - index: 2
     url: http://gameschool.cc/ (網站)
     url_source: 總表0816「4.影片連結」年級7課次25
+  notes:
+    label: 標題印「影片連結」，但這一課的兩則其實是**網站**（謎題訂閱與益智遊戲站），不是影片；原稿如此。

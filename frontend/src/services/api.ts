@@ -1,3 +1,4 @@
+import type { TeacherWordSearchSource } from '../components/reading-steps/wordSearchGrid';
 /**
  * api.ts — Core session utilities and story fetch APIs.
  *
@@ -89,6 +90,7 @@ interface ApiStoryListItem {
   char_count: number;
   thumbnail_url: string;
   reading_strategy: string | null;
+  reading_strategy_explained?: string | null;
   intro: ApiStoryIntro;
 }
 
@@ -156,6 +158,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Parsed in apiDetailToStory via camelizeKeys + LessonSchema.safeParse (fail-safe).
   lesson_content?: Record<string, unknown> | null;
   // 文言文專屬模組 (#2752) — null for every non-文言文 lesson.
+  vocab_review?: TeacherWordSearchSource | null;
   classical_text?: ClassicalTextContent | null;
   modern_translation?: ModernTranslationContent | null;
   word_matching?: ClassicalWordMatchingContent | null;
@@ -190,6 +193,7 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
     grade: item.grade,
     genre: item.genre,
     readingStrategy: item.reading_strategy ?? undefined,
+    readingStrategyExplained: item.reading_strategy_explained ?? undefined,
     charCount: item.char_count,
   };
 }
@@ -207,6 +211,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     grade: detail.grade,
     genre: detail.genre,
     readingStrategy: detail.reading_strategy ?? undefined,
+    readingStrategyExplained: detail.reading_strategy_explained ?? undefined,
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
@@ -235,7 +240,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     fillInBlank: detail.fill_in_blank
       ? detail.fill_in_blank.filter((item) =>
           item['_schema'] === 'legacy' || typeof item['sentence'] === 'string' && !('context_before' in item)
-        ) as Array<{ sentence: string; answer: string }>
+        ) as Array<{ sentence: string; answer: string; options?: Record<string, string> }>
       : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
@@ -279,6 +284,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     })(),
     // 文言文專屬模組 (#2752) — undefined for every non-文言文 lesson (matches
     // the `undefined`-means-absent convention every other optional field here uses).
+    vocabReview: detail.vocab_review ?? undefined,
     classicalText: detail.classical_text ?? undefined,
     modernTranslation: detail.modern_translation ?? undefined,
     wordMatching: detail.word_matching ?? undefined,

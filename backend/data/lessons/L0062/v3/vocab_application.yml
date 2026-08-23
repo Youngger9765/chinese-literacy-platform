@@ -12,8 +12,6 @@ vocab_application:
     F: 顧忌
     G: 渾身
     H: 眼睜睜
-  option_bank_note: 11 個本課語詞只有 8 個進代號表（盤旋、糾結、自作多情 未列），8 個代號對應 8 道小題、全部用到
-  answer_carrier: 橘色手寫代號（PDF p5）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 他從惡夢中驚醒，（　） 冒著冷汗，喘著氣回想剛才的恐懼。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 他穿著正式的西裝參加面試，一言一行都比平常（　）許多。
     answer: E
+  notes:
+    option_bank: 11 個本課語詞只有 8 個進代號表（盤旋、糾結、自作多情 未列），8 個代號對應 8 道小題、全部用到
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的（　）內已填有同樣的代號

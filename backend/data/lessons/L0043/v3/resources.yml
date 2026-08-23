@@ -19,7 +19,6 @@ resources:
     duration: (9:55)
     source: 健康多1點HEALTH PLUS
     qr_code: true
-  items_note: 本課有 3 個影片連結（同批其他課多為 2 個）
   section_name: 知識補給站
   videos:
   - index: 1
@@ -28,3 +27,5 @@ resources:
   - index: 2
     url: http://youtu.be/kBCYeaSrz6U
     url_source: 總表0816「4.影片連結」年級5課次4
+  notes:
+    items: 本課有 3 個影片連結（同批其他課多為 2 個）

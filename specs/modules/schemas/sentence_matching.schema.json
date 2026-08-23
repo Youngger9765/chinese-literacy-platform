@@ -1,0 +1,59 @@
+{
+  "$id": "lingoleap/module/sentence_matching",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 10 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "example": {
+      "type": "object",
+      "x-seen-in": "5/10"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "10/10"
+    },
+    "items": {
+      "type": "array",
+      "x-seen-in": "5/10"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "7/10"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "9/10"
+    },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "2/10"
+    },
+    "passage_paragraphs": {
+      "type": "array",
+      "x-seen-in": "3/10"
+    },
+    "reference_label": {
+      "type": "string",
+      "x-seen-in": "3/10"
+    },
+    "reference_sentences": {
+      "type": "object",
+      "x-seen-in": "8/10"
+    },
+    "segments": {
+      "type": "array",
+      "x-seen-in": "3/10"
+    }
+  },
+  "required": [
+    "instruction"
+  ],
+  "title": "sentence_matching module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "instruction",
+    "notes"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 10
+}

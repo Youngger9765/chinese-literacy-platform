@@ -3,7 +3,6 @@ version_id: v3
 section_no: 四
 vocab_application:
   instruction: 在空格填入正確的語詞代號(答案可重複)
-  instruction_note: 本課指示語比多數課多了「(答案可重複)」—— B.複製 確實被第 5、8 題各用一次。
   option_bank:
     A: 推論
     B: 複製
@@ -12,7 +11,6 @@ vocab_application:
     E: 差異
     F: 平均值
     G: 差距
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
   items:
   - index: 1
     stem: 這對雙胞胎姊妹的外表幾乎一模一樣，只有髮型有所（　）。
@@ -38,3 +36,6 @@ vocab_application:
   - index: 8
     stem: 另一組研究者依照相同方法再做一次，希望能（　）原來的研究結果。
     answer: B
+  notes:
+    instruction: 本課指示語比多數課多了「(答案可重複)」—— B.複製 確實被第 5、8 題各用一次。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號

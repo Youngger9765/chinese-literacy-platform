@@ -4,7 +4,6 @@ section_no: 二
 word_matching:
   label: 二、文白詞語比對
   instruction: 以下是原文與白話文的對照。請依照文意，寫出原文中灰底的白話文意思。
-  answer_carrier: 橘色（字元樣式），PDF p5~p6 可見
   items:
   - index: 1
     文言: 金谿民方仲永，世隸耕。
@@ -46,3 +45,5 @@ word_matching:
     - answer: 從
     - answer: 回來
     - answer: 消失
+  notes:
+    answer_carrier: 橘色（字元樣式），PDF p5~p6 可見

@@ -3,7 +3,6 @@ version_id: v3
 section_no: 六
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF p8）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: A
@@ -52,3 +51,5 @@ comprehension:
       D: 先停損離開現場，截圖蒐證再求助
     explanation: 文章主張「冷處理、不要以牙還牙」並「蒐證」，同時要「不要一個人扛」尋求師長協助。
     explanation_note: 原稿是一個浮動說明框，印在選項右側。
+  notes:
+    answer_carrier: 橘色手寫代號（PDF p8）；文字層的（　）內已填有同樣的代號

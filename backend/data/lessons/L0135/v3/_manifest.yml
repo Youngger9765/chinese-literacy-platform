@@ -1,0 +1,67 @@
+lesson_uid: L0135
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文
+  module: full_text_annotate
+  pages:
+  - 1
+  - 2
+  - 3
+- 'no': 二
+  name: 知識補給站
+  module: resources
+  pages:
+  - 3
+  - 4
+- 'no': 三
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 圖文表整合閱讀策略
+  pages:
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+- 'no': 四
+  name: 閱讀理解
+  module: comprehension
+  pages:
+  - 8
+  - 9
+dispatch:
+- comprehension
+- full_text_annotate
+- resources
+- spotlight
+produced:
+- comprehension
+- full_text_annotate
+- resources
+- spotlight
+absent_from_source:
+- key_reading
+- keypoints
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 9
+dispatch_pages:
+  comprehension:
+  - 8
+  - 9
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  resources:
+  - 3
+  - 4
+  spotlight:
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8

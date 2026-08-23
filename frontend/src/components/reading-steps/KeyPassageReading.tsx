@@ -22,6 +22,8 @@ import KeyPassageReadingControls, { type ControlState } from './key-passage-read
 import KeyPassageReadingScoreCard from './key-passage-reading/KeyPassageReadingScoreCard';
 import KeyPassageReadingFeedbackPanel from './key-passage-reading/KeyPassageReadingFeedbackPanel';
 import { readingPassagesOf } from './key-passage-reading/readingPassages';
+import LessonQrButton from '../qr/LessonQrButton';
+import { hasKeyPassage } from '../qr/lessonQr';
 // Note: Web Speech removed (Issue #2266) — streaming transcript not available during recording.
 // Live preview area will be empty until Gemini STT returns post-submission.
 
@@ -433,6 +435,18 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                     ? '練習流暢度，放輕鬆自然地讀吧'
                     : '標準比逐段朗讀寬鬆，放輕鬆自然地讀吧'}
                 </p>
+                {/* #2886: the QR for THIS page. Shown on exactly the lessons
+                    the admin panel emits a passage_url for — one rule, asked
+                    through hasKeyPassage() so the two cannot disagree. */}
+                {hasKeyPassage(story) && (
+                  <div className="mt-4">
+                    <LessonQrButton
+                      lessonId={story.id}
+                      step="key-passage-reading"
+                      lessonTitle={story.title}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

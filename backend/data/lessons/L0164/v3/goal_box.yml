@@ -3,5 +3,5 @@ version_id: v3
 goal_box:
   category: 文言文類型
   category_value: 記敘人物
-  target_strategy: 文言聚光燈：一字多義：「聞」
-  lesson_heading: 第9課  從天才跌為凡人的神童
+  title: 第9課  從天才跌為凡人的神童
+  strategy_line: 文言聚光燈：一字多義：「聞」

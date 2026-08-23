@@ -12,7 +12,6 @@ vocab_application:
     F: 技不如人
     G: 自立自強
     H: 寄予厚望
-  option_bank_note: 只列 8 個代號（本課 12 個語詞中的「盛夏」「力邀」「菜單」「晉升」未入選項），對應 8 道小題
   items:
   - index: 1
     stem: 這位球員在受傷後決定（　），轉為擔任教練。
@@ -38,3 +37,5 @@ vocab_application:
   - index: 8
     stem: 訓練時，即使沒人監督，他仍毫不（　），完成每一項練習。
     answer: C
+  notes:
+    option_bank: 只列 8 個代號（本課 12 個語詞中的「盛夏」「力邀」「菜單」「晉升」未入選項），對應 8 道小題

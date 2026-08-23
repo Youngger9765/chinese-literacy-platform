@@ -3,6 +3,7 @@ version_id: v3
 goal_box:
   level_badge: Level 4・議論文
   strategy_line: 目標議題：品格力──念頭覺察
-  title_line: 第5課  從白熊到藍海豚：學習與念頭和平相處
   has_qr: true
-  qr_note: 標題右側有一個 QR code；課文結束後（p2 下方）另有一個較大的 QR code
+  notes:
+    qr: 標題右側有一個 QR code；課文結束後（p2 下方）另有一個較大的 QR code
+  title: 第5課  從白熊到藍海豚：學習與念頭和平相處

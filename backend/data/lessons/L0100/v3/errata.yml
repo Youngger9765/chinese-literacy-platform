@@ -1,47 +1,48 @@
 lesson_uid: L0100
 version_id: v3
-errata:
-- id: E1
-  section: 七 閱讀理解
-  locator: 第 4 題右側的浮動解析框（第一段）
-  source: 第4題解析：文章強調真正喜歡一個人就應該尊重對方意願，因此遇到朋友纠纏他人時，最符合本文觀點的建議是勸他停止干擾、尊重對方的決定。)
-  corrected: 第4題解析：文章強調真正喜歡一個人就應該尊重對方意願，因此遇到朋友糾纏他人時，最符合本文觀點的建議是勸他停止干擾、尊重對方的決定。
-  kind: 簡體字＋贅字
-  why: '①「纠纏」的「纠」是簡體字，全文其他地方（課文第 5 段「當有人不斷靠近、糾纏」）都寫正體「糾」。
+notes:
+  errata:
+  - id: E1
+    section: 七 閱讀理解
+    locator: 第 4 題右側的浮動解析框（第一段）
+    source: 第4題解析：文章強調真正喜歡一個人就應該尊重對方意願，因此遇到朋友纠纏他人時，最符合本文觀點的建議是勸他停止干擾、尊重對方的決定。)
+    corrected: 第4題解析：文章強調真正喜歡一個人就應該尊重對方意願，因此遇到朋友糾纏他人時，最符合本文觀點的建議是勸他停止干擾、尊重對方的決定。
+    kind: 簡體字＋贅字
+    why: '①「纠纏」的「纠」是簡體字，全文其他地方（課文第 5 段「當有人不斷靠近、糾纏」）都寫正體「糾」。
 
-    ②句末多一個沒有配對的右括號「)」——本課其他四題的解析框都沒有用括號包住。'
-  confidence: high
-  evidence: document.xml 該文字方塊第一段字串，與 PDF p8 一致（PDF 上也印得出「纠」）
-- id: E2
-  section: 七 閱讀理解
-  locator: 第 3 題右側的浮動解析框（第二段）
-  source: 意願的重要。
-  corrected: ''
-  kind: 整句重複
-  why: '解析框裡有兩段，第一段已是完整句「…強調尊重他人意願的重要。」，第二段只有它的尾巴
+      ②句末多一個沒有配對的右括號「)」——本課其他四題的解析框都沒有用括號包住。'
+    confidence: high
+    evidence: document.xml 該文字方塊第一段字串，與 PDF p8 一致（PDF 上也印得出「纠」）
+  - id: E2
+    section: 七 閱讀理解
+    locator: 第 3 題右側的浮動解析框（第二段）
+    source: 意願的重要。
+    corrected: ''
+    kind: 整句重複
+    why: '解析框裡有兩段，第一段已是完整句「…強調尊重他人意願的重要。」，第二段只有它的尾巴
 
-    「意願的重要。」。PDF p8 上兩段疊印成一團看不清楚的字。研判是編輯時的殘留，應刪。'
-  confidence: high
-  evidence: document.xml 該 txbxContent 有兩個 w:p；PDF p8 該框中段有明顯疊字
-- id: E3
-  section: 七 閱讀理解
-  locator: 第 4 題右側的浮動解析框（第二段）
-  source: 議是勸他停止干擾、尊重對方的決定。
-  corrected: ''
-  kind: 整句重複
-  why: 同 E2，是第一段尾巴「…建議是勸他停止干擾、尊重對方的決定。」的殘留片段（連「建」字都斷掉了），應刪。
-  confidence: high
-  evidence: document.xml 該 txbxContent 有兩個 w:p；PDF p8 該框中段有明顯疊字
-- id: E4
-  section: 八 詞語複習
-  locator: 「找一找」指示語（浮動文字方塊）
-  source: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
-  corrected: ''
-  kind: 整句重複
-  why: '同一句指示語在文字層有**兩個**文字方塊，一個結尾寫「劃掉」、一個寫「刪除」。
+      「意願的重要。」。PDF p8 上兩段疊印成一團看不清楚的字。研判是編輯時的殘留，應刪。'
+    confidence: high
+    evidence: document.xml 該 txbxContent 有兩個 w:p；PDF p8 該框中段有明顯疊字
+  - id: E3
+    section: 七 閱讀理解
+    locator: 第 4 題右側的浮動解析框（第二段）
+    source: 議是勸他停止干擾、尊重對方的決定。
+    corrected: ''
+    kind: 整句重複
+    why: 同 E2，是第一段尾巴「…建議是勸他停止干擾、尊重對方的決定。」的殘留片段（連「建」字都斷掉了），應刪。
+    confidence: high
+    evidence: document.xml 該 txbxContent 有兩個 w:p；PDF p8 該框中段有明顯疊字
+  - id: E4
+    section: 八 詞語複習
+    locator: 「找一找」指示語（浮動文字方塊）
+    source: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+    corrected: ''
+    kind: 整句重複
+    why: '同一句指示語在文字層有**兩個**文字方塊，一個結尾寫「劃掉」、一個寫「刪除」。
 
-    PDF p9 只印得出「劃掉」那一個（另一個被蓋住）。研判「刪除」版是改稿殘留，應刪。
+      PDF p9 只印得出「劃掉」那一個（另一個被蓋住）。研判「刪除」版是改稿殘留，應刪。
 
-    ⛔ 未自行判定哪一版才「對」—— 兩種說法都通順，這裡只記錄重複這件事。'
-  confidence: high
-  evidence: document.xml 有兩個 txbxContent 各含一版；PDF p9 只顯示「劃掉」版
+      ⛔ 未自行判定哪一版才「對」—— 兩種說法都通順，這裡只記錄重複這件事。'
+    confidence: high
+    evidence: document.xml 有兩個 txbxContent 各含一版；PDF p9 只顯示「劃掉」版

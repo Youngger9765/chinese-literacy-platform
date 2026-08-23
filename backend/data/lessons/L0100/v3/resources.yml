@@ -15,7 +15,6 @@ resources:
     duration: 06:38
     source: 亮生活 / Bright Side
     _總表_url: http://youtu.be/zY_0xgbTLGw
-  url_note: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 84 列，故加 `_` 前綴標示非 DOCX 內容。
   section_name: 知識補給站
   videos:
   - index: 1
@@ -24,3 +23,5 @@ resources:
   - index: 2
     url: http://youtu.be/zY_0xgbTLGw
     url_source: 總表0816「4.影片連結」年級7課次3
+  notes:
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 84 列，故加 `_` 前綴標示非 DOCX 內容。

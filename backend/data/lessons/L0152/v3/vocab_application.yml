@@ -12,11 +12,7 @@ vocab_application:
     F: 拋頭顱灑熱血
     G: 贍養
     H: 搏命
-  option_bank_note: '⚠️ 只有 8 個選項（其他課多為 10 個），而且 **C.歉疚 不在本課任何一份語詞清單裡**
-
-    （不在總表 14 個、不在第三大題 13 個、也不在第八大題灰框 14 個）。原稿如此。'
   unused_options: []
-  answer_carrier: 橘色（字元樣式 rStyle=af），PDF p4~p5 可見
   items:
   - index: 1
     stem: 這位演員常在電影中(　)演出，從不使用替身。
@@ -42,4 +38,9 @@ vocab_application:
   - index: 8
     stem: 因為忘了朋友的生日，她感到非常 (　)。
     answer: C
-  items_note: 第 (7) 題的括號是**全形（　）**，其餘七題是半形(　)。原稿如此。
+  notes:
+    option_bank: '⚠️ 只有 8 個選項（其他課多為 10 個），而且 **C.歉疚 不在本課任何一份語詞清單裡**
+
+      （不在總表 14 個、不在第三大題 13 個、也不在第八大題灰框 14 個）。原稿如此。'
+    answer_carrier: 橘色（字元樣式 rStyle=af），PDF p4~p5 可見
+    items: 第 (7) 題的括號是**全形（　）**，其餘七題是半形(　)。原稿如此。

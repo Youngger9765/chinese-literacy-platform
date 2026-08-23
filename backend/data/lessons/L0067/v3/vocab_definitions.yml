@@ -19,7 +19,6 @@ vocab_definitions:
   - 諮詢
   - 拋家棄子
   - 精神抖擻
-  answer_carrier: 橘色手寫字（PDF p9~p10）；文字層的空格內已填有同樣的答案
   items:
   - index: 1
     word: 沁涼
@@ -54,3 +53,5 @@ vocab_definitions:
   - index: 11
     word: 籌措
     definition: 想辦法準備或募集所需的資金、物資。
+  notes:
+    answer_carrier: 橘色手寫字（PDF p9~p10）；文字層的空格內已填有同樣的答案

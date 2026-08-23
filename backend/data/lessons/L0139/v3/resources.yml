@@ -15,9 +15,6 @@ resources:
     duration: (1:30)
     source: 尼克の香草田園生活 talk2herb
     has_qr: true
-  items_note: '總表 4.影片連結 分頁對應網址為 http://youtu.be/SZhRuo1CPq8 與 http://youtu.be/BONU1-J10Is
-
-    —— 學習單上只印 QR code，網址不在 DOCX 文字層。'
   videos:
   - index: 1
     url: http://youtu.be/SZhRuo1CPq8
@@ -25,3 +22,7 @@ resources:
   - index: 2
     url: http://youtu.be/BONU1-J10Is
     url_source: 總表0816「4.影片連結」年級9課次19
+  notes:
+    items: '總表 4.影片連結 分頁對應網址為 http://youtu.be/SZhRuo1CPq8 與 http://youtu.be/BONU1-J10Is
+
+      —— 學習單上只印 QR code，網址不在 DOCX 文字層。'

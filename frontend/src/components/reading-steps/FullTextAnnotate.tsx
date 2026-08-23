@@ -38,6 +38,10 @@ import AnnotationToolbar from './AnnotationToolbar';
 import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
+import LessonQrButton from '../qr/LessonQrButton';
+import { deliversFullText, type LessonQrStep } from '../qr/lessonQr';
+import StepCoachCard from '../learning/StepCoachCard';
+import StepActionBar from '../learning/StepActionBar';
 
 // Re-export types for consumers that import from ReadingAnnotation
 export type { AnnotationType, Annotation };
@@ -70,6 +74,21 @@ function genId(): string {
 
 interface ReadingAnnotationProps {
   story: Story;
+  /**
+   * Which QR code this page should offer, when the caller knows better than
+   * this component does (#2886).
+   *
+   * GuestReadingPage renders THIS component for both 讀全文-做記號 and 重點朗讀
+   * — an anonymous visitor never reaches KeyPassageReading — so without this it
+   * offered the 全文 code on the 重點 page: button 「QR 全文」, dialog ／全文,
+   * file qr-full-*.png. Caught on staging, anonymous, after the signed-in path
+   * had already passed; the two paths render different components, so testing
+   * one says nothing about the other.
+   *
+   * `undefined` keeps the ordinary rule (全文, and only for the grades the spec
+   * gives one to). `null` hides it — the caller decided there is none.
+   */
+  qrStep?: LessonQrStep | null;
   onFinish: (summary: ReturnType<typeof computeSummary>) => void;
   fontSizePx?: number;
   /** DB session id — when provided, annotations are persisted to and loaded from DB. */
@@ -193,49 +212,26 @@ function OnboardingCoach({ onDismiss }: OnboardingCoachProps) {
     <>
       {showDemo && <DemoOverlay onClose={handleDemoClose} />}
       <div className="mx-auto max-w-4xl px-6 md:px-16 pt-4 pb-2">
-        <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 px-6 py-5 flex flex-col gap-4">
-
-          {/* How-to header */}
-          <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-accent text-3xl flex-shrink-0 mt-0.5">
-              {IS_TOUCH ? 'swipe' : 'select_all'}
-            </span>
-            <div className="flex-1">
-              <p className="font-bold text-on-surface text-lg mb-1">如何標記詞語？</p>
-              <p className="text-base text-on-surface-variant leading-relaxed">
-                {gestureWord}，就能標記不懂的詞語。
-              </p>
-            </div>
-          </div>
-
-          {/* Reading round instructions (merged from grey banner) */}
-          <div className="border-t border-accent/20 pt-3 space-y-2">
-            <p className="text-base text-on-surface-variant">
+        {/* #2897：這張卡以前是自己畫的紫色版（text-lg 標題、px-6 py-5、text-base 按鈕），
+            跟其餘五步的琥珀色教學卡對不起來。改走共用的 StepCoachCard —— 兩段閱讀的說明
+            留在 children 裡，那是這一步獨有的內容，不是樣式。 */}
+        <StepCoachCard
+          title="如何標記詞語？"
+          icon={IS_TOUCH ? 'swipe' : 'select_all'}
+          className="mb-0"
+          onDemo={() => setShowDemo(true)}
+          onDismiss={onDismiss}
+        >
+          <p>{gestureWord}，就能標記不懂的詞語。</p>
+          <div className="border-t border-amber-400/40 mt-3 pt-3 space-y-1.5">
+            <p>
               <span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記
             </p>
-            <p className="text-base text-on-surface-variant">
+            <p>
               <span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記
             </p>
           </div>
-
-          {/* Action row */}
-          <div className="flex items-center gap-3 justify-end">
-            <button
-              type="button"
-              onClick={() => setShowDemo(true)}
-              className="px-5 py-2 rounded-full text-base font-bold text-accent border-2 border-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-            >
-              示範
-            </button>
-            <button
-              type="button"
-              onClick={onDismiss}
-              className="px-5 py-2 rounded-full text-base font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-            >
-              我知道了
-            </button>
-          </div>
-        </div>
+        </StepCoachCard>
       </div>
     </>
   );
@@ -406,6 +402,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   fontSizePx = 22,
   dbSessionId = null,
   hideAnnotation = false,
+  qrStep,
 }) => {
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
@@ -864,6 +861,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             >
               清除全部
             </button>
+            {/* #2886: the QR for THIS page, so a teacher can hand it out in
+                class without opening the admin panel. 8-9 年級 deliberately get
+                no 全文 code — see docs/requirements/reading-demo-audio-qr.md R1. */}
+            {(qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep) && (
+              <LessonQrButton
+                lessonId={story.id}
+                step={(qrStep ?? 'full-text-annotate') as LessonQrStep}
+                lessonTitle={story.title}
+              />
+            )}
           </div>
 
           {/* Title */}
@@ -1000,9 +1007,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto">
+      <StepActionBar>
           <button
             type="button"
             onClick={() => onFinish(summary)}
@@ -1012,8 +1017,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             <span>完成標記</span>
             <span className="material-symbols-outlined text-xl">arrow_forward</span>
           </button>
-        </div>
-      </div>
+      </StepActionBar>
         </>
       )}
 

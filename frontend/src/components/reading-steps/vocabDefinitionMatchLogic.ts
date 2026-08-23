@@ -61,6 +61,24 @@ export interface PersistedProgress {
   activeDefIndices?: number[];
   mcAnswers?: AnswerRecord[];
   dragDropAnswers?: AnswerRecord[];
+  /**
+   * #2839 — 「作答到一半」的答案。跟 `mcAnswers` / `dragDropAnswers` 分開存，因為那兩個
+   * 是「這個模式已完成」的最終結果，而且 `mcDone` / `dragDropDone` 就是用
+   * `.length > 0` 判的 —— 把中途答案塞進去，學生答完第 1 題整個作答畫面就會被
+   * 「選擇題 已完成」的結算畫面取代。
+   *
+   * 這兩個欄位在作答中每答一題就更新一次，是進度 PUT 唯一會變的內容。
+   */
+  mcProgress?: AnswerRecord[];
+  dragDropProgress?: AnswerRecord[];
+}
+
+/**
+ * 已作答的題數（`answeredWordIdx` 有值）。存進度 / 還原 / 斷言都用這個定義，
+ * 避免「陣列長度」被誤當成作答數 —— 陣列一開始就被預先填滿了未作答的空記錄。
+ */
+export function answeredCount(answers: AnswerRecord[] | undefined): number {
+  return (answers ?? []).filter((a) => a.answeredWordIdx !== null).length;
 }
 
 /* ------------------------------------------------------------------ */
@@ -132,6 +150,36 @@ export function buildMCQOptions(vocab: VocabItem[], currentDefIdx: number): numb
 /*  selectRetryIndices — filter wrong answers for retry-wrong mode     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * 把「重做錯題」那一輪的結果合併回上一輪的完整作答（#2849）。
+ *
+ * 重做輪的 `activeDefIndices` 只剩答錯的那幾題，所以 `onAllDone` 交回來的陣列
+ * 也只有那幾筆。直接拿它當 `mcAnswers`，先前答對的題目會整批從結算畫面消失。
+ *
+ * `firstTryCorrect` / `firstTryAnsweredWordIdx` 是 write-once 的第一次作答紀錄
+ * （#2773），重做**不覆蓋** —— 一旦覆蓋，錯過一次但重做答對的題目會從
+ * 「我錯了什麼」的統計裡整個消失，那正是 #2773 修掉的洞。
+ */
+export function mergeRetryAnswers(
+  baseline: AnswerRecord[],
+  retried: AnswerRecord[],
+): AnswerRecord[] {
+  if (baseline.length === 0) return retried;
+  const byDefIndex = new Map(retried.map((a) => [a.defIndex, a]));
+  const merged = baseline.map((base) => {
+    const next = byDefIndex.get(base.defIndex);
+    if (!next) return base;
+    byDefIndex.delete(base.defIndex);
+    return {
+      ...next,
+      firstTryCorrect: base.firstTryCorrect ?? next.firstTryCorrect,
+      firstTryAnsweredWordIdx: base.firstTryAnsweredWordIdx ?? next.firstTryAnsweredWordIdx,
+    };
+  });
+  // 重做輪出現了 baseline 沒有的題（理論上不會，防禦性保留）。
+  return [...merged, ...byDefIndex.values()];
+}
+
 export function selectRetryIndices(answers: AnswerRecord[]): number[] {
   // firstTryCorrect ?? correct: prefer the immutable first-try verdict; fall
   // back to `correct` for records that predate the field (persisted progress
@@ -155,5 +203,7 @@ export function mergePersistedProgress(
     activeDefIndices: initialProgress.activeDefIndices ?? localStorageProgress.activeDefIndices,
     mcAnswers: initialProgress.mcAnswers ?? localStorageProgress.mcAnswers,
     dragDropAnswers: initialProgress.dragDropAnswers ?? localStorageProgress.dragDropAnswers,
+    mcProgress: initialProgress.mcProgress ?? localStorageProgress.mcProgress,
+    dragDropProgress: initialProgress.dragDropProgress ?? localStorageProgress.dragDropProgress,
   };
 }

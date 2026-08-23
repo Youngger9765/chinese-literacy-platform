@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 括號內的答案代號為橘色手寫字（圖形字型），文字流已含此資訊
   items:
   - index: 1
     answer: C
@@ -17,7 +16,7 @@ comprehension:
       C: (飛簷走壁必須用來形容身手矯健的情況。)
     note_placement: 藍色說明框印在題幹右側。
   - index: 2
-    answer: Ｄ
+    answer: D
     answer_note: 這一題的答案代號在原稿是**全形**「Ｄ」，其餘各題為半形。
     stem: 根據課文，成年後的公猴比例下降的原因不包括何者？
     options:
@@ -40,7 +39,7 @@ comprehension:
       A: (第八段，當有旁觀者時，男生會選擇站得更遠來投圈圈，這種行為反映了男性傾向展示自己的能力，希望獲得他人認可或尊重。)
     note_placement: 藍色說明框印在選項 A 那一行的右側。
   - index: 4
-    answer: Ｂ
+    answer: B
     answer_note: 這一題的答案代號在原稿是**全形**「Ｂ」。
     stem: 請問下方文章的主題句是哪句話呢？
     passage: 英國首相威爾遜正在演講，台下突然有個異議分子高聲打斷了他：「狗屎！垃圾！」威爾遜雖然受到了干擾，但他不慌不忙的說：「這位先生，請稍安勿躁，我馬上就會講到你所提出的關於環保的問題。」威爾遜以幽默化解危機，值得大家學習。
@@ -66,3 +65,5 @@ comprehension:
       ⛔ 沒有列入 source_errata，因為勘誤要能寫出「應該是什麼」，而這裡無從得知 ——
 
       猜一個出來就是編造。照原樣保留，交給人決定。'
+  notes:
+    answer_carrier: 括號內的答案代號為橘色手寫字（圖形字型），文字流已含此資訊

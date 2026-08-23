@@ -32,7 +32,6 @@ vocab_review:
   - 任堤玲龍利遲有有迢審
   - 回饋雞腿事與願素條視
   answers_are_graphical: true
-  answer_paths_note: 原稿只圈出 12 個目標語詞中的 9 個；靈敏、廢墟、本領未畫圈，故不列
   answer_paths:
   - word: 瓦礫
     cells:
@@ -105,3 +104,5 @@ vocab_review:
     - - 10
       - 8
     direction: diagonal_down_right
+  notes:
+    answer_paths: 原稿只圈出 12 個目標語詞中的 9 個；靈敏、廢墟、本領未畫圈，故不列

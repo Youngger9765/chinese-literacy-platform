@@ -30,6 +30,7 @@ import {
   shuffle,
   mergePersistedProgress,
   selectRetryIndices,
+  mergeRetryAnswers,
   InteractionMode,
   Phase,
   AnswerRecord,
@@ -41,6 +42,7 @@ import { StageStatus } from './VocabDefinitionMatchStageStatus';
 import { MultipleChoiceMode } from './VocabDefinitionMatchMCQ';
 import { DragDropMode } from './VocabDefinitionMatchDragDrop';
 import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -69,7 +71,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       <div className="text-center space-y-4 p-8">
         <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">dictionary</span>
         <p className="text-on-surface-variant">本課尚無語詞定義資料</p>
-        <NextStepFooter onNext={onFinish} label="繼續下一步" />
+        <NextStepFooter onNext={onFinish} />
       </div>
     </div>
   );
@@ -134,11 +136,7 @@ export function StageCompletedPlaceholder({
         <WrongAnswerReviewList items={items} revealed />
       </div>
 
-      <div
-        className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-        style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}
-      >
-        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+      <StepActionBar layout="stack">
           {!otherDone && (
             <button
               type="button"
@@ -157,8 +155,7 @@ export function StageCompletedPlaceholder({
           >
             重新做題
           </button>
-        </div>
-      </div>
+      </StepActionBar>
     </div>
   );
 }
@@ -237,6 +234,17 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       : [],
   );
 
+  // #2839 — 作答「中」的答案。刻意跟 `mcAnswers` / `dragDropAnswers` 分開：那兩個是
+  // 「這個模式已完成」的最終結果，而 `mcDone` / `dragDropDone` 直接用 `.length > 0` 判 ——
+  // 把中途答案塞進去，學生答完第 1 題整個作答畫面就會被「選擇題 已完成」的結算畫面
+  // 換掉。這兩個 state 才是作答中唯一會變的 payload 內容，也就是 PUT 的觸發來源。
+  const [mcProgress, setMcProgress] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.mcProgress) ? mergedInitialProgress.mcProgress : [],
+  );
+  const [dragDropProgress, setDragDropProgress] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.dragDropProgress) ? mergedInitialProgress.dragDropProgress : [],
+  );
+
   const isStepCompleted =
     phase === 'summary' && mcAnswers.length > 0 && dragDropAnswers.length > 0;
 
@@ -246,8 +254,10 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     activeDefIndices,
     mcAnswers,
     dragDropAnswers,
+    mcProgress,
+    dragDropProgress,
     completed: isStepCompleted,
-  }), [mode, phase, activeDefIndices, mcAnswers, dragDropAnswers, isStepCompleted]);
+  }), [mode, phase, activeDefIndices, mcAnswers, dragDropAnswers, mcProgress, dragDropProgress, isStepCompleted]);
 
   // Persist to localStorage so page close / logout / cross-step navigation can restore.
   useEffect(() => {
@@ -310,36 +320,72 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     [mode, mcDone, dragDropDone, allIndices],
   );
 
+  // #2849 —「重做錯題」按下時上一輪的完整作答。重做輪的 `activeDefIndices` 只剩
+  // 答錯的那幾題，`onAllDone` 交回來的也只有那幾筆；不留 baseline 就會把先前答對的
+  // 題目整批從結算畫面刷掉。null = 目前不在重做輪。
+  const mcRetryBaselineRef = useRef<AnswerRecord[] | null>(null);
+  const dragDropRetryBaselineRef = useRef<AnswerRecord[] | null>(null);
+
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
     if (mode === 'multiple-choice') {
-      setMcAnswers(answers);
-      goToSummaryIfBothDone(answers, dragDropAnswers);
+      const baseline = mcRetryBaselineRef.current;
+      const merged = baseline ? mergeRetryAnswers(baseline, answers) : answers;
+      mcRetryBaselineRef.current = null;
+      setMcAnswers(merged);
+      goToSummaryIfBothDone(merged, dragDropAnswers);
       return;
     }
-    setDragDropAnswers(answers);
-    goToSummaryIfBothDone(mcAnswers, answers);
+    const baseline = dragDropRetryBaselineRef.current;
+    const merged = baseline ? mergeRetryAnswers(baseline, answers) : answers;
+    dragDropRetryBaselineRef.current = null;
+    setDragDropAnswers(merged);
+    goToSummaryIfBothDone(mcAnswers, merged);
   }, [mode, mcAnswers, dragDropAnswers, goToSummaryIfBothDone]);
 
   const handleRetryModeWrong = useCallback((targetMode: InteractionMode) => {
     const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
     const wrongIndices = selectRetryIndices(sourceAnswers);
     if (wrongIndices.length === 0) return;
+    // #2849 — 必須把該模式的「最終結果」清掉。render gate 是
+    // `mcDone ? <StageCompletedPlaceholder/> : <MultipleChoiceMode/>`，而
+    // `mcDone = mcAnswers.length > 0`；只設 mode/phase/activeDefIndices 的話它仍是
+    // true，畫面就停在「選擇題 已完成」、列著上一輪完整的答案，學生按了沒用。
+    // 先前的作答存進 baseline，重做輪結束時由 `handleAllDone` 合併回來。
+    if (targetMode === 'multiple-choice') {
+      mcRetryBaselineRef.current = sourceAnswers;
+      setMcAnswers([]);
+      setMcProgress([]);
+    } else {
+      dragDropRetryBaselineRef.current = sourceAnswers;
+      setDragDropAnswers([]);
+      setDragDropProgress([]);
+    }
     startStage(targetMode, wrongIndices);
   }, [mcAnswers, dragDropAnswers, startStage]);
 
+  // 重做一律連「作答中」的快照一起清 —— 只清最終結果的話，還原時會把上一輪的
+  // 中途答案接回來，學生按了「重做」卻發現題目已經被填好（#2839 code review）。
   const handleRetryAll = useCallback(() => {
+    mcRetryBaselineRef.current = null;
+    dragDropRetryBaselineRef.current = null;
     setMcAnswers([]);
     setDragDropAnswers([]);
+    setMcProgress([]);
+    setDragDropProgress([]);
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
   const handleRetryMc = useCallback(() => {
+    mcRetryBaselineRef.current = null;
     setMcAnswers([]);
+    setMcProgress([]);
     startStage('multiple-choice', allIndices);
   }, [startStage, allIndices]);
 
   const handleRetryDragDrop = useCallback(() => {
+    dragDropRetryBaselineRef.current = null;
     setDragDropAnswers([]);
+    setDragDropProgress([]);
     startStage('drag-drop', allIndices);
   }, [startStage, allIndices]);
 
@@ -399,6 +445,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
                   vocab={vocab}
                   activeDefIndices={activeDefIndices}
                   onAllDone={handleAllDone}
+                  initialAnswers={mcProgress}
+                  onAnswersChange={setMcProgress}
                 />
               )
             )}
@@ -419,6 +467,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
                   activeDefIndices={activeDefIndices}
                   shuffledWords={shuffledWords.current}
                   onAllDone={handleAllDone}
+                  initialAnswers={dragDropProgress}
+                  onAnswersChange={setDragDropProgress}
                 />
               )
             )}

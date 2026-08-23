@@ -13,7 +13,6 @@ vocab_application:
     G: 黑色幽默
     H: 珍重
     I: 崎嶇不平
-  option_bank_note: 9 個代號對應 8 道小題；E.逆轉 未被任何小題用到（代號表最後一格是空白儲存格）
   items:
   - index: 1
     stem: 這條山路（　），充滿許多未知的危險，只有當地人才敢上山。
@@ -39,3 +38,5 @@ vocab_application:
   - index: 8
     stem: 連日大雨沖壞路面，山路變得（　），車子經過時不停顛簸。
     answer: I
+  notes:
+    option_bank: 9 個代號對應 8 道小題；E.逆轉 未被任何小題用到（代號表最後一格是空白儲存格）

@@ -12,8 +12,6 @@ vocab_application:
     F: 去蕪存菁
     G: 流連忘返
     H: 懸梁刺股
-  option_bank_note: 8 個代號對應 8 道小題，一題一個、全部用到。C 在此寫「新陳代謝」，語詞框與第三大題寫「代謝」（原稿不一致）
-  answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
   items:
   - index: 1
     stem: 良好的睡眠有助於身體正常（　），維持健康。
@@ -39,3 +37,6 @@ vocab_application:
   - index: 8
     stem: 日月潭風光秀麗，讓無數遊客（　），讚嘆不已。
     answer: G
+  notes:
+    option_bank: 8 個代號對應 8 道小題，一題一個、全部用到。C 在此寫「新陳代謝」，語詞框與第三大題寫「代謝」（原稿不一致）
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號

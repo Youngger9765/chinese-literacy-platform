@@ -19,7 +19,6 @@ vocab_definitions:
     🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
 
     🅒 問同學。'
-  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
   items:
   - index: 1
     word: 難以置信
@@ -45,3 +44,5 @@ vocab_definitions:
   - index: 8
     word: 白駒過隙
     definition: 形容時間過得很快，像白色的駿馬一閃而過。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊

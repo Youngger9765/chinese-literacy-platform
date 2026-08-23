@@ -24,7 +24,6 @@ vocab_definitions:
   - 約定俗成
   - 共同編織
   answers_printed: true
-  answer_carrier: 橘色（E97132）填在橫線上；本節是全課**唯一**答案帶 run 層 w:color 的一節
   items:
   - index: 1
     definition: 從來沒有見過面，也不認識。
@@ -50,3 +49,5 @@ vocab_definitions:
   - index: 8
     definition: 大家長久以來都這樣做，慢慢形成大家都認同的習慣或規則。
     answer: 約定俗成
+  notes:
+    answer_carrier: 橘色（E97132）填在橫線上；本節是全課**唯一**答案帶 run 層 w:color 的一節

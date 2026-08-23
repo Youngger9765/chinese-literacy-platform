@@ -3,7 +3,6 @@ version_id: v3
 section_no: 三
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊
   questions:
   - index: 1
     answer: D
@@ -64,3 +63,5 @@ comprehension:
       B: 閱讀、數學和科學三個領域相較，閱讀的表現最好
       C: 臺灣學生的數學能力，和參與國比較，一直都是前五名
       D: 臺灣學生的科學能力，和參與國比較，表現起伏不定
+  notes:
+    answer_carrier: 橘色手寫代號印在題號前的（　）裡，文字流有此資訊

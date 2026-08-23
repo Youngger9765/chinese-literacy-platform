@@ -3,7 +3,6 @@ version_id: v3
 section_no: 七
 comprehension:
   instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
-  answer_carrier: 橘色手寫代號（PDF）；文字層的（　）內已填有同樣的代號
   questions:
   - index: 1
     answer: D
@@ -54,3 +53,5 @@ comprehension:
       B: 老師為了避免爭議，要求全班用同一方法完成相同練習
       C: 老師知道小安個性害羞，便長期免除所有口頭表達任務
       D: 老師依學習程度，給予提示或挑戰，讓每個人都能進步
+  notes:
+    answer_carrier: 橘色手寫代號（PDF）；文字層的（　）內已填有同樣的代號

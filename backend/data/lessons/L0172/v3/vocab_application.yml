@@ -12,8 +12,6 @@ vocab_application:
     F: 荒謬
     G: 刁鑽
     H: 靦腆
-  option_bank_note: 原稿是 2 列 × 5 欄的表，第 5 欄兩格都是空的（只有 8 個代號）。
-  answer_carrier: 橘色手寫代號（run 層 w:color E97132），文字流有此資訊
   unused_options: []
   items:
   - index: 1
@@ -40,3 +38,6 @@ vocab_application:
   - index: 8
     stem: 面對顧客 (    )的提問與要求，他仍然耐著性子，一一回應。
     answer: G
+  notes:
+    option_bank: 原稿是 2 列 × 5 欄的表，第 5 欄兩格都是空的（只有 8 個代號）。
+    answer_carrier: 橘色手寫代號（run 層 w:color E97132），文字流有此資訊

@@ -29,7 +29,6 @@ vocab_review:
   - 悸意起氣從眼或然片反
   - 動有經忽視許廉能段映
   answers_are_graphical: true
-  intended_word_note: 「苦惱」那一條的 word 記成「苦腦」——格子第 6 列第 9 欄印的是「腦」（見 source_errata E2），橘色圈選也確實圈了「苦」「腦」兩格。word 必須跟格子拼得出來的字一致，否則座標門會判 FAIL；學生要找的目標語詞是「苦惱」。
   answer_paths:
   - word: 尷尬
     cells:
@@ -98,3 +97,5 @@ vocab_review:
     - - 10
       - 5
     direction: horizontal
+  notes:
+    intended_word: 「苦惱」那一條的 word 記成「苦腦」——格子第 6 列第 9 欄印的是「腦」（見 source_errata E2），橘色圈選也確實圈了「苦」「腦」兩格。word 必須跟格子拼得出來的字一致，否則座標門會判 FAIL；學生要找的目標語詞是「苦惱」。

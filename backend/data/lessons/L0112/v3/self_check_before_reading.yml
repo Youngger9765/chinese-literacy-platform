@@ -8,4 +8,5 @@ self_check_before_reading:
   - 請你先讀一次全文，第4、5段大略讀過就好。
   - 讀完後，請回想你最容易卡住的是哪裡？為什麼卡住？
   no_correct_answer: true
-  answer_carrier: 學生自填，原稿兩個 □ 都沒有勾
+  notes:
+    answer_carrier: 學生自填，原稿兩個 □ 都沒有勾

@@ -12,7 +12,7 @@ sections_present:
 - 'no': ''
   name: 原文
   note: 無大題編號，含注釋與朗讀計時
-- 'no': ㄧ
+- 'no': 一
   name: 文白句子比對
   note: 原稿印注音符號「ㄧ」不是漢字「一」
 - 'no': 二

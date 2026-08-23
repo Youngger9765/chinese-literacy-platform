@@ -4,9 +4,6 @@ section_no: 一
 full_text_annotate:
   part_no: 1
   part_of: 3
-  multi_text_note: '這裡放的是**第一篇**（第22課）。第二篇（第23課）與第三篇（第24課）的課文
-
-    在本檔的 `multi_text_parts`，見檔頭 schema_gap。'
   header_level: Level 6．說明文
   header_material_form: 教材形式：多文本閱讀
   header_strategy: 目標策略：寫作手法──用不同角度的例子說明概念
@@ -49,11 +46,6 @@ full_text_annotate:
   - 313
   - 343
   - 365
-  char_count_note: '兩端精準吻合（Word 口徑：一串阿拉伯數字算 1 個字）：
-
-    第 5 段 171 字 = 印出的第 6 個數字；＋第 6 段 194 = 365 = 最後一個數字。
-
-    字數欄止於第 6 段，不含第 7 段（第 7 段 66 字，加上去會變 431）。'
   inline_marked_terms:
   - 稀奇
   - 物以稀為貴
@@ -66,6 +58,15 @@ full_text_annotate:
   - 高朋滿座
   - 崩跌
   - 波動
-  inline_marked_terms_note: 課文中用方框（w:bdr）標出的 11 個語詞，與第一篇語詞框的 11 個完全相同。
   underlined_terms: []
   char_count: 800
+  notes:
+    multi_text: '這裡放的是**第一篇**（第22課）。第二篇（第23課）與第三篇（第24課）的課文
+
+      在本檔的 `multi_text_parts`，見檔頭 schema_gap。'
+    char_count: '兩端精準吻合（Word 口徑：一串阿拉伯數字算 1 個字）：
+
+      第 5 段 171 字 = 印出的第 6 個數字；＋第 6 段 194 = 365 = 最後一個數字。
+
+      字數欄止於第 6 段，不含第 7 段（第 7 段 66 字，加上去會變 431）。'
+    inline_marked_terms: 課文中用方框（w:bdr）標出的 11 個語詞，與第一篇語詞框的 11 個完全相同。
