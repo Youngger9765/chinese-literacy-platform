@@ -60,15 +60,29 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 目前 **27 個 module**（OMO / 朗讀理解 / 計分 / 教材 / auth / 學習功能 / AI infra…）。完整索引 `specs/registry.yaml`，說明 `specs/README.md`。
 **Local CI**：GH Actions 自動跑卡在 workflow token（issue 2041），在那之前 push 前一律手動 `bash specs/run-ci.sh`（最近一次本機全綠：457 passed / 31 xfailed）。
 
-## 學習流程（7 步驟，StepperNav 定義）
+## 學習流程
 
-1. **簡介** — 課文背景介紹（Intro）
-2. **逐段朗讀** — AI 即時朗讀指導（LiveTutor）
-3. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
-4. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
-5. **聽寫練習** — AI 唸字學生打字（DictationPractice）
-6. **全文朗讀** — 完整朗讀評估（FullReading）
-7. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
+> ⛔ **這裡的步驟名稱只是導覽用。真相 SOT 是 `frontend/src/config/stepConfig.ts`**——
+> 每個 step 上方都有決策註解寫明「為什麼、何時改的」，**那些註解才是答案，不是 label 字串**。
+> 想知道某個 step 現在是什麼、還在不在用，讀那個檔並**讀完該段註解**。
+
+### 朗讀相關的三個名稱（最容易搞混，2026-08-08 我就搞混過）
+
+| step id | 現在的 label | 狀態 | 是什麼 |
+|---|---|---|---|
+| `lesson-intro` | 課程簡介 | ✅ 啟用 | AI 唸**全文**（#2607 從瀏覽器機器音改成 Gemini/Azure 人聲）|
+| `key-passage-reading` | **重點朗讀** | ✅ 啟用 | 唸老師 ☞ 標的**重點段**（念順順），資料在 `key_reading.passage`；無資料時 fallback 唸全文 |
+| `paragraph-reading` | 逐段朗讀 | ⛔ **`enabled: false`** | 2026-07-20 專家審查後從 StepperNav 隱藏（ToolPicker 仍可進）。**新功能不要連到它** |
+
+⚠️ **這張表以前寫的是 `intro` / `full-reading` / `tutor`** —— 那三個是
+`LEGACY_STEP_ID_ALIASES`（stepConfig.ts:462）裡的**舊別名**，`resolveStepId()` 仍然解得開，
+所以照著寫「會動」，只是寫的人建在別名上而不是正式 id。新東西一律用左欄那三個。
+完整別名對照在那個 map 裡（另有 `reading-annotation`→`full-text-annotate`、
+`story-structure`→`keypoints-table`、`vocab`→`character-practice` 等）。
+
+2026-07-20 專家審查定調：朗讀**只練老師指定的重點段落**（約 300–400 字），**不練全文**，
+主指標是流暢率（每分鐘字數）而非逐字正確率。做法是把既有 `full-reading` step **改造**成重點朗讀
+並**保留 step id**（新增 step 會讓完成記錄寫錯 step → 作業無法提交）。
 
 ### 其他練習元件（未在主流程 stepper 中）
 - **SentencePractice** — AI 引導造句
