@@ -435,9 +435,11 @@
         "lesson_seq",
         "level",
         "series",
-        "strategy"
+        "strategy",
+        "strategy_explained",
+        "strategy_sources"
       ],
-      "inner_shapes": 43,
+      "inner_shapes": 48,
       "lessons": 175,
       "mid": [
         "notes",
@@ -484,7 +486,7 @@
         "_header_box",
         "_第一頁右上標題"
       ],
-      "top_level_shapes": 43
+      "top_level_shapes": 48
     },
     "modern_translation": {
       "core": [

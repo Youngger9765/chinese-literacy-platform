@@ -280,7 +280,9 @@ export interface Story {
   intro?: StoryIntro;
   grade?: string;               // "4".."9" / 文言文 / 品格教育
   genre?: string;               // 記敘文/說明文/議論文
-  readingStrategy?: string;     // for future Intro enhancement
+  readingStrategy?: string;     // 策略「名稱」，13 字左右的標籤
+  /** #2898：批次預生成的 2-3 句白話說明。策略名稱只是標籤，學生看不出要練什麼。 */
+  readingStrategyExplained?: string;
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };

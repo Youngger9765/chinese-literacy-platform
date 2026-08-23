@@ -90,6 +90,7 @@ interface ApiStoryListItem {
   char_count: number;
   thumbnail_url: string;
   reading_strategy: string | null;
+  reading_strategy_explained?: string | null;
   intro: ApiStoryIntro;
 }
 
@@ -192,6 +193,7 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
     grade: item.grade,
     genre: item.genre,
     readingStrategy: item.reading_strategy ?? undefined,
+    readingStrategyExplained: item.reading_strategy_explained ?? undefined,
     charCount: item.char_count,
   };
 }
@@ -209,6 +211,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     grade: detail.grade,
     genre: detail.genre,
     readingStrategy: detail.reading_strategy ?? undefined,
+    readingStrategyExplained: detail.reading_strategy_explained ?? undefined,
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,

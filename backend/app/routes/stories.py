@@ -545,6 +545,7 @@ def list_stories(
                 char_count=s["char_count"],
                 thumbnail_url=s["thumbnail_url"],
                 reading_strategy=s["reading_strategy"],
+                reading_strategy_explained=s.get("reading_strategy_explained"),
                 # Not `key_reading_passages.get(grade_code)` — that table is
                 # first-edition data keyed by catalogue position, so after the
                 # renumber it matched the wrong lesson. See the detail route.
@@ -608,6 +609,7 @@ def get_story(story_id: str):
         char_count=story["char_count"],
         thumbnail_url=story["thumbnail_url"],
         reading_strategy=story["reading_strategy"],
+        reading_strategy_explained=story.get("reading_strategy_explained"),
         intro=(StoryIntroSchema(**story["intro"]) if story.get("intro") else None),
         paragraphs=story["paragraphs"],
         vocabulary=story["vocabulary"],

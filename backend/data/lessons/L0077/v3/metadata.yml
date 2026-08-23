@@ -2,7 +2,7 @@ lesson_uid: L0077
 version_id: v3
 level: 7
 genre: 記敘文
-strategy: 讀出故事道理
+strategy: 推論策略──找出故事道理
 課文作者: 曾世杰
 學習單: 曾世杰
 _header_box:
@@ -46,3 +46,12 @@ notes:
     （找出故事道理）；G7-L0 這列是空白，故 `_總表_第六大題標題: null`。'
   節次順序: 只有一、二兩個大題，沒有其他課的三~九，依 sections_present 為準。
   header_box: 其他課這個框印的是「目標議題」，本課印的是「目標策略」，照原稿記錄。
+strategy_explained: '這篇文章要引導你練習「從故事裡發現重要的道理」
+
+  因為故事裡的正太為了成為武僧，每天辛辛苦苦餵養小豬、爬樓梯，透過這個過程，你就能發現努力和堅持才能達成目標這個道理
+
+  讀的時候，你可以想想正太為什麼要這麼做，以及他從中學到了什麼'
+strategy_sources:
+  worksheet: 讀出故事道理
+  master_sheet: 推論策略──找出故事道理
+  previous: 讀出故事道理

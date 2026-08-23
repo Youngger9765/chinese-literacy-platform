@@ -539,6 +539,9 @@ def _uid_tree_lessons() -> list[dict]:
             # 閱讀聚光燈策略 from the master spreadsheet — the reading method the
             # lesson teaches, shown on the library card and the spotlight step.
             "reading_strategy": _meta(l).get("strategy") or None,
+            # #2898：策略「名稱」只有 13 字，是一個標籤不是說明。這一欄是批次
+            # 預生成的 2-3 句白話，給學生看的。沒有的課回 None，前端就不畫那一段。
+            "reading_strategy_explained": _meta(l).get("strategy_explained") or None,
             "has_key_reading": bool(_key_reading(l)),
             # The intro is a sentence about what the lesson is FOR, built from its
             # unit topic and reading strategy — not the opening paragraph, which
