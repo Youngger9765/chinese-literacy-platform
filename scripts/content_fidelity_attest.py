@@ -137,6 +137,29 @@ def attest(uid: str, docx: pathlib.Path) -> int:
         #    這道門的紅燈變成背景雜訊，然後真的壞掉那天沒人看。
         #    ⛔ 但也不可以判 PASS —— 那就是把「沒驗」講成「驗過了」。
         status = "pass" if passed else ("unverifiable" if checked == 0 else "fail")
+
+        # errata 專屬補救：原文只有一個字（「五」印成「六」、找字格子某一格）
+        # 的勘誤，逐字門的 4 字門檻碰不到 —— 但它們帶著 `locator`，
+        # 用**位置**去查就精確驗得到。⛔ 這不是放寬判準，是換一種驗法：
+        # 找字格子對 vocab_review.grid[列][欄]、段號對原稿的段號序列。
+        # 實測 27 條裡 20 條這樣驗得過、0 條對不上。
+        if f.stem == "errata" and status == "unverifiable":
+            rl = subprocess.run(
+                [sys.executable, str(REPO / "scripts" / "errata_locator_check.py"),
+                 "--uid", uid, "--json"],
+                capture_output=True, text=True, timeout=180,
+            )
+            try:
+                tal = json.loads(rl.stdout)["tally"]
+            except Exception:  # noqa: BLE001
+                tal = None
+            if tal and tal.get("fail"):
+                status, checked = "fail", tal["pass"] + tal["fail"]
+            elif tal and tal.get("pass") and not tal.get("unverifiable"):
+                status, checked = "pass", tal["pass"]
+            elif tal and tal.get("pass"):
+                # 有些驗得過、有些仍驗不到 —— 誠實記成部分
+                status, checked = "unverifiable", tal["pass"]
         results[f.stem] = {
             "yaml_sha256": sha(f),
             "checked": checked,
@@ -230,8 +253,11 @@ def verify_all() -> int:
     ⛔ 「驗不到」不可以無聲增加 —— 那會讓覆蓋率一點一點漏光，
     而每一次看起來都是綠的。所以記一個上限，只准往下不准往上。
     """
-    uids = sorted(p.parent.parent.name
-                  for p in LESSONS.glob("L*/v3/_manifest.yml"))
+    # 🔴 走**證明檔**不是派工單。走派工單會漏掉「有證明但沒派工單」的課
+    #    （實測 L0124 就是），於是這裡數 8、鎖直接數證明檔數 9 ——
+    #    同一件事兩個數字。⛔ 棘輪的分母跟鎖的分母必須是同一個集合。
+    uids = sorted({p.parent.parent.name for p in LESSONS.glob("L*/v3/_manifest.yml")}
+                  | {p.stem for p in ATTEST_DIR.glob("L*.json")})
     missing, broken, unv_total, checked_total = [], [], 0, 0
     for uid in uids:
         path = ATTEST_DIR / f"{uid}.json"
@@ -278,8 +304,9 @@ def verify_quiet(uid: str) -> int:
 
 
 def set_ratchet() -> int:
-    uids = sorted(p.parent.parent.name
-                  for p in LESSONS.glob("L*/v3/_manifest.yml"))
+    # 同上：走證明檔，跟 verify_all 與鎖同一個集合
+    uids = sorted({p.parent.parent.name for p in LESSONS.glob("L*/v3/_manifest.yml")}
+                  | {p.stem for p in ATTEST_DIR.glob("L*.json")})
     n = 0
     for uid in uids:
         path = ATTEST_DIR / f"{uid}.json"

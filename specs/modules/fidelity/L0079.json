@@ -12,9 +12,9 @@
     },
     "errata": {
       "yaml_sha256": "ae73-4c8d-2f56-2a20",
-      "checked": 0,
-      "status": "unverifiable",
-      "passed": false,
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
       "exit": 1
     },
     "full_text_annotate": {
