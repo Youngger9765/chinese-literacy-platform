@@ -224,7 +224,7 @@ b{font-weight:600}
   <div class="flow" id="flow"></div>
 
   <div class="todo">
-    <h2>剩下的三項 —— 都是刻意不做，不是積著</h2>
+    <h2>剩下的兩項 —— 一項刻意不做，一項已到底</h2>
 
     <div class="m" style="margin-bottom:14px">
       判準是「<b>流程對 + 出錯知道在哪 + 能客製修</b>」，不是把 LLM 那段做到 100 分。
@@ -247,8 +247,12 @@ b{font-weight:600}
         剩下的是原文為數字、錯字畫在圖上、<code>corrected</code> 是 None ——
         <b>換任何驗法都碰不到</b>，不是還沒做。</li>
 
-      <li><b>⬜ 低優先｜⑥a 的一致率只量過 1 課 1 模組 × 3 次</b> —— 其他課型與模組未量。
-        LLM 那段本來就不用 100 分，這條的價值只在「知道它大概多穩」。</li>
+      <li><b>✅ 已量｜⑥a 的一致率</b>（原本只有 1 課 1 模組 × 3 次）——
+        改用 <b>N=175</b> 量：<code>scripts/shape_stability_report.py</code>。
+        <b>核心欄位一致率 91~100%</b>，最低是 <code>vocab_definitions</code> 91%。
+        ⚠️ 不是跑三次量的 —— <b>我看過自己第一次的輸出，第二三次就不是獨立的</b>，
+        假裝跑三次然後報「3/3 相同」是騙人。現有語料是同一個抽取器跑過 175 次的
+        產物，量它的變異樣本大得多也沒汙染。</li>
 
     </ol>
 
@@ -431,9 +435,9 @@ L0072 ✅ L0100 🟡 L0120 ✅ L0153 🟡 L0175 ✅   （49 秒）</pre>
 <div class="m y">每個任務<b>只讀自己那幾頁</b>。實測 150 筆派工，<b>100% 的課至少與別的大題共用一頁</b> —— 所以每個任務都要自己切上下邊界。</div>
 <p>頁碼加起來大於總頁數是正常的：相鄰大題共用交界頁。</p>`},
 
-  {k:"6a", num:"⑥a", ttl:"N 個抽取任務各抽一模組", kind:"model", badge:["ok","內容不飄"],
+  {k:"6a", num:"⑥a", ttl:"N 個抽取任務各抽一模組", kind:"model", badge:["ok","核心 91~100%"],
    src:"skill: extract-&lt;module&gt;",
-   fact:"3 次獨立跑：教學內容每一層 3/3 相同",
+   fact:"N=175 實測：核心欄位一致率 91~100%，最低 vocab_definitions 91%",
    body:`<h4>重跑一致率（同一課同一模組，三個獨立任務）</h4>
 <div class="tw"><table><thead><tr><th>層</th><th>結果</th></tr></thead><tbody>
 <tr><td>題數</td><td class="n g">5 / 5 / 5</td></tr>
