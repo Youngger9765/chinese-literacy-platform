@@ -2,7 +2,7 @@ lesson_uid: L0120
 version_id: v3
 level: 8
 genre: 說明文
-strategy: 科學探究策略——假設與假設檢驗
+strategy: 解決問題──科學探究法
 課文作者: 吳漢庭
 學習單: 巫怡蓉/曾世杰
 lesson_no: 22
@@ -27,3 +27,11 @@ notes:
   - 睡眼惺忪
   - 窮凶極惡
   - 喑啞無聲
+strategy_explained: '這一課我們練習用科學的方法來找出事物的真相
+
+  因為這篇文章用科學解釋了鬼火和鬼壓床這些過去被認為是靈異的現象
+
+  所以讀的時候，你可以試著像作者一樣，看看能不能從現象背後找到合理的解釋'
+strategy_sources:
+  worksheet: 科學探究策略
+  master_sheet: 解決問題──科學探究法

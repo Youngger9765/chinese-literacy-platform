@@ -3,7 +3,7 @@ version_id: v3
 level: 5
 genre: 說明文
 text_type: 科學
-strategy: 用表格整理訊息──比較兩個對象
+strategy: 用表格整理訊息──用表格整理兩組對象的細節
 header_target: 目標策略：用表格整理訊息──比較兩個對象
 課文: 曾世杰
 學習單: 張明珠/陳淑麗
@@ -13,4 +13,9 @@ lesson_seq: 5150
 intro: 這篇文章介紹了一種特別的救援動物——非洲巨鼠。你可能會覺得奇怪，老鼠怎麼能幫助救援呢？文章會告訴你，這種非洲巨鼠體型像小貓，聽力和嗅覺都非常靈敏，而且能鑽進狹小的空間。科學家們正訓練牠們執行救援任務，並為牠們配備了特殊的裝備。文章將探討巨鼠在救援行動中的優勢，像是牠們的嗅覺、訓練方式以及體型大小帶來的便利。同時，文章也會提到在運用巨鼠救援時，可能遇到的挑戰，以及研究人員如何克服這些困難，讓牠們成為名副其實的「救援大隊好幫手」。
 notes:
   intro_topic: 擴展視野： 有趣的（總表原值，看起來未寫完）
-  render_artifact: PDF 有大量簡體字形，是 LibreOffice 對 variation selector 的字型代換，document.xml 全為繁體
+  render_artifact: PDF 有大量簡體字形，是 LibreOffice 對 variation selector 的字型代換，document.xml
+    全為繁體
+strategy_explained: 這一課我們來練習「用表格整理訊息」，這篇文章介紹了非洲巨鼠，牠和一般老鼠很不一樣，很適合用表格來比較巨鼠的優點和可能的困難，這樣就能清楚記住牠們是怎麼當上救援好幫手的，讀的時候可以一邊讀一邊想想，有哪些地方可以填進表格裡喔
+strategy_sources:
+  worksheet: 用表格整理訊息
+  master_sheet: 用表格整理訊息──用表格整理兩組對象的細節

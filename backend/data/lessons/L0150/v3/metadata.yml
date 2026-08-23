@@ -2,7 +2,7 @@ lesson_uid: L0150
 version_id: v3
 level: 9
 genre: 說明文
-strategy: 圖表判讀——折線圖
+strategy: 圖表繪製與判讀──折線圖
 課文作者: 陳淑麗
 學習單: 陳允捷
 lesson_no: 7
@@ -17,3 +17,11 @@ notes:
   總表_第六大題標題: 圖表判讀──折線圖
   總表_文本類型: 單
   總表_語詞_原樣: null
+strategy_explained: '這一課要帶你學會怎麼看懂和畫出折線圖
+
+  這篇文章用了 PISA 數據分析臺灣學生的閱讀力趨勢和排名，最適合練習從圖表中看出重要的變化和比較
+
+  讀的時候，你可以試著畫出 PISA 數據的折線圖，並從中找出臺灣學生閱讀力成長或退步的關鍵點喔'
+strategy_sources:
+  worksheet: 圖表判讀
+  master_sheet: 圖表繪製與判讀──折線圖
