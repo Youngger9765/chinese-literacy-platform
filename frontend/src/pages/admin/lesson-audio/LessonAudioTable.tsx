@@ -4,11 +4,25 @@ import { Download, Loader2, Play, QrCode, Square } from 'lucide-react';
 // Static, top-level, literal specifier — this is what makes Vite bundle the
 // library. Do not turn this back into a dynamic import with the module name in
 // a variable; that silently drops it from the bundle (see qrCodeToDataUrl).
-import QRCode from 'qrcode';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { prefetchText } from '../../../services/ttsApi';
 import { planParagraphWalk, type ParagraphWalk } from './paragraphWalk';
+import LessonQrButton from '../../../components/qr/LessonQrButton';
+import {
+  buildLessonQrValue,
+  deliversFullText,
+  qrCodeToDataUrl,
+  qrFileName,
+  triggerDownload,
+  type LessonQrStep,
+} from '../../../components/qr/lessonQr';
+
+// Re-exported so this file's existing tests keep addressing them here. The
+// implementations moved to components/qr/lessonQr.ts when the learning pages
+// became a second caller — one rule, two surfaces (see that file's header).
+export { buildLessonQrValue, deliversFullText, qrFileName };
+export type { LessonQrStep };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -19,7 +33,6 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 // when no id said "whole text" — `full-reading` was taken and read a single key
 // passage — so the closest thing was the intro. Reported as 「QR code全文朗讀的
 // 部分會進到課程簡介」.
-type LessonQrStep = 'full-text-annotate' | 'key-passage-reading';
 type AudioMode = 'full' | 'key';
 
 interface StoryListItem {
@@ -124,14 +137,6 @@ function detailToFullText(detail: StoryDetailResponse): string {
  * was offering play and QR for all of them, so an admin could hear and hand out
  * a code for audio that will never be generated.
  */
-export function deliversFullText(grade: number): boolean {
-  return grade <= 7;
-}
-
-export function buildLessonQrValue(origin: string, lessonId: number, step: LessonQrStep): string {
-  return `${origin}/learn/${lessonId}/${step}`;
-}
-
 async function fetchStoryList(token: string | null | undefined): Promise<StoryListResponse> {
   const res = await fetch(`${API_BASE}/api/stories?page_size=300`, {
     headers: getAuthHeaders(token),
@@ -152,20 +157,6 @@ async function fetchStoryDetail(lessonId: number, token: string | null | undefin
   return res.json() as Promise<StoryDetailResponse>;
 }
 
-async function qrCodeToDataUrl(value: string): Promise<string> {
-  // Plain static import (see the top of this file). This was previously
-  // `await import(/* @vite-ignore */ moduleName)` with the name held in a
-  // variable, which tells Vite not to analyse or bundle the module: the build
-  // succeeded with the package absent, the unit test passed because it mocks
-  // 'qrcode', and in a real browser the bare specifier could not be resolved,
-  // so every QR download threw. Verified by grepping the build output for the
-  // library's own strings — zero hits before, present after.
-  return QRCode.toDataURL(value, {
-    errorCorrectionLevel: 'M',
-    margin: 2,
-    width: 512,
-  });
-}
 
 export interface QrManifestRow {
   lesson_no: string;
@@ -219,122 +210,16 @@ export function buildQrManifestCsv(rows: QrManifestRow[]): string {
   return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 
-export function qrFileName(filePrefix: string, lessonId: number): string {
-  return `${filePrefix}-L${String(lessonId).padStart(2, '0')}.png`;
-}
-
-function triggerDownload(href: string, filename: string): void {
-  const link = document.createElement('a');
-  link.href = href;
-  link.download = filename;
-  link.click();
-}
-
-/**
- * Preview dialog for one QR code.
- *
- * Downloading blind was the previous behaviour and it gives you no way to tell
- * a correct code from a wrong one until you have already pasted it into a
- * worksheet and scanned it with a phone. Showing the image and the URL it
- * encodes turns that into a two-second check.
- */
-const QrPreviewDialog: React.FC<{
-  title: string;
-  value: string;
-  dataUrl: string;
-  filename: string;
-  onClose: () => void;
-}> = ({ title, value, dataUrl, filename, onClose }) => {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  // Rendered into document.body rather than in place.
-  //
-  // `position: fixed` resolves against the nearest ancestor that establishes a
-  // containing block — any transform, filter, or contain on the way up does it,
-  // and the admin shell has several. In place, the overlay was laying itself
-  // out inside the table row, so the QR appeared jammed between two columns
-  // instead of centred over the page. A portal is the only reliable fix; there
-  // is no combination of z-index or overflow on the dialog itself that escapes
-  // an ancestor's containing block.
-  return createPortal((
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="mb-3 text-sm font-semibold text-gray-800">{title}</h3>
-        <img src={dataUrl} alt={`${title} QR code`} className="mx-auto h-56 w-56" />
-        <p className="mt-3 break-all rounded bg-gray-50 px-2 py-1.5 text-xs text-gray-500">{value}</p>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-          >
-            關閉
-          </button>
-          <button
-            type="button"
-            onClick={() => triggerDownload(dataUrl, filename)}
-            className="inline-flex items-center gap-1.5 rounded bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
-          >
-            <Download className="h-3.5 w-3.5" />
-            下載 PNG
-          </button>
-        </div>
-      </div>
-    </div>
-  ), document.body);
-};
-
-const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle: title }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [preview, setPreview] = useState<{ dataUrl: string; value: string } | null>(null);
-
-  const openPreview = useCallback(async () => {
-    setIsGenerating(true);
-    try {
-      const value = buildLessonQrValue(window.location.origin, lessonId, step);
-      setPreview({ dataUrl: await qrCodeToDataUrl(value), value });
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [lessonId, step]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={openPreview}
-        disabled={isGenerating}
-        className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
-        title={buildLessonQrValue(window.location.origin, lessonId, step)}
-      >
-        {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <QrCode className="h-3.5 w-3.5" />}
-        {label}
-      </button>
-      {preview && (
-        <QrPreviewDialog
-          title={`${title}／${step === 'full-text-annotate' ? '全文' : '段落'}`}
-          value={preview.value}
-          dataUrl={preview.dataUrl}
-          filename={qrFileName(filePrefix, lessonId)}
-          onClose={() => setPreview(null)}
-        />
-      )}
-    </>
-  );
-};
+const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle }) => (
+  <LessonQrButton
+    lessonId={lessonId}
+    step={step}
+    lessonTitle={lessonTitle}
+    label={label}
+    filePrefix={filePrefix}
+    variant="admin"
+  />
+);
 
 const LessonAudioTable: React.FC = () => {
   const { token } = useAuth();
