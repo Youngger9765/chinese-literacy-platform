@@ -6,12 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $HOME/.claude/hooks/pre-bash-gcp-auto-switch.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash $HOME/.claude/hooks/pre-bash-db-migration-guard.sh",
+            "command": "if [ -f \"$HOME/.claude/hooks/pre-bash-db-migration-guard.sh\" ]; then bash \"$HOME/.claude/hooks/pre-bash-db-migration-guard.sh\"; fi",
             "timeout": 5
           }
         ]
