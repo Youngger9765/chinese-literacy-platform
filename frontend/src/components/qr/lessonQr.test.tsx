@@ -62,7 +62,7 @@ describe('the URL rule has exactly one implementation', () => {
 
   it('zero-pads the filename', () => {
     expect(qrFileName('qr-full', 7)).toBe('qr-full-L07.png');
-    expect(qrFileName('qr-passage', 123)).toBe('qr-passage-L123.png');
+    expect(qrFileName('qr-key-reading', 123)).toBe('qr-key-reading-L123.png');
   });
 });
 
@@ -85,7 +85,7 @@ describe('LessonQrButton', () => {
 
     render(<LessonQrButton lessonId={7} step="key-passage-reading" lessonTitle="風箏" />);
 
-    fireEvent.click(screen.getByRole('button', { name: '顯示段落朗讀 QR code' }));
+    fireEvent.click(screen.getByRole('button', { name: '顯示重點朗讀 QR code' }));
 
     const url = `${window.location.origin}/learn/7/key-passage-reading`;
     await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy());
@@ -97,7 +97,7 @@ describe('LessonQrButton', () => {
     fireEvent.click(screen.getByRole('button', { name: '下載 PNG' }));
 
     expect(clicked).toHaveLength(1);
-    expect(clicked[0].download).toBe('qr-passage-L07.png');
+    expect(clicked[0].download).toBe('qr-key-reading-L07.png');
     expect(clicked[0].href).toContain('QR(');
   });
 

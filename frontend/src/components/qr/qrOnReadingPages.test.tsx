@@ -86,7 +86,7 @@ describe('#2886 讀全文-做記號：全文 QR', () => {
   );
 });
 
-describe('#2886 重點朗讀：段落 QR', () => {
+describe('#2886 重點朗讀：重點 QR', () => {
   it('renders when the lesson has a 念順順段', () => {
     const withPassage: Story = {
       ...STORY,
