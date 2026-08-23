@@ -27,6 +27,7 @@ import DevSkipButton from '../ui/DevSkipButton';
 import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
+import { stepNeighbours } from '../../config/stepNeighbours';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -252,9 +253,15 @@ const ImmersiveTopBar: React.FC = () => {
   // Falls back to DEFAULT_STEP_SEQUENCE when lesson has no step_sequence field.
   const activeSteps = useStepSequence(selectedStory ?? null);
 
-  // Find current step index and label
-  const currentStepIndex = activeSteps.findIndex((s) => s.view === currentView);
-  const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
+  // #2905: one helper, so a step this lesson does not have still has neighbours.
+  // Both this file and StepFooterNav used to do `findIndex(...)` and treat -1 as
+  // "nowhere", which disabled every chevron on e.g. /learn/20011/spotlight.
+  const nav = useMemo(
+    () => stepNeighbours(activeSteps, currentView),
+    [activeSteps, currentView],
+  );
+  const currentStepIndex = nav.index;
+  const currentStep = nav.current;
   const totalSteps = activeSteps.length;
 
   // Determine completed steps
@@ -278,18 +285,7 @@ const ImmersiveTopBar: React.FC = () => {
     navigate(`/learn/${selectedStory.id}/${step.id}`);
   };
 
-  const prevStep = useMemo(
-    () => (currentStepIndex > 0 ? activeSteps[currentStepIndex - 1] : null),
-    [activeSteps, currentStepIndex],
-  );
-
-  const nextStep = useMemo(
-    () =>
-      currentStepIndex >= 0 && currentStepIndex < activeSteps.length - 1
-        ? activeSteps[currentStepIndex + 1]
-        : null,
-    [activeSteps, currentStepIndex],
-  );
+  const { prev: prevStep, next: nextStep } = nav;
 
   return (
     <header
