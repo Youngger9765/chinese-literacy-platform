@@ -53,6 +53,7 @@ class StoryListItem(BaseModel):
     char_count: int = 0
     thumbnail_url: Optional[str] = None
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     has_key_reading: bool = False
     intro: Optional[StoryIntroSchema] = None
 
@@ -214,6 +215,7 @@ class StoryUpdateRequest(BaseModel):
     genre: Optional[str] = Field(default=None, min_length=1, max_length=20)
     text_type: Optional[str] = Field(default=None, max_length=10)
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     paragraphs: Optional[list[str]] = Field(default=None, min_length=1)
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None
@@ -240,6 +242,7 @@ class StoryAdminListItem(BaseModel):
     paragraph_count: int
     char_count: int
     reading_strategy: Optional[str] = None
+    reading_strategy_explained: Optional[str] = None
     source_file: Optional[str] = None
 
     _coerce_grade = field_validator("grade", mode="before")(_grade_as_str)

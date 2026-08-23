@@ -262,11 +262,18 @@ def main() -> int:
             skipped += 1
             continue
         found += 1
-        # 名稱欄取比較具體的那一份（長的通常帶了細分項），原始兩份都留著可回溯。
-        strategy = max((ws, sheet_val), key=len)
-        mp = LESSONS / uid / "v3" / "metadata.yml"
-        meta_doc = yaml.safe_load(mp.read_text(encoding="utf-8")) if mp.is_file() else {}
-        meta = meta_doc.get("metadata", meta_doc) if isinstance(meta_doc, dict) else {}
+        mp_early = LESSONS / uid / "v3" / "metadata.yml"
+        _doc = yaml.safe_load(mp_early.read_text(encoding="utf-8")) if mp_early.is_file() else {}
+        meta = _doc.get("metadata", _doc) if isinstance(_doc, dict) else {}
+        # 三個候選，不是兩個。`metadata.strategy` 在這支跑之前就有值（171 課，
+        # 更早的 pipeline 寫的），有幾課它比現在兩個來源都完整 ——
+        # L0025 既有「推論策略──找出觀點與支持理由」，學習單只抽到「推論策略」，
+        # 總表寫「觀點找支持理由」。直接覆蓋會把最完整的那份弄丟，而且沒有任何症狀：
+        # 欄位還是有值、schema 還是過。抓到它的是原稿涵蓋率棘輪（Gate 10），
+        # 因為被丟掉的那幾個字從此不再出現在任何 yml 裡。
+        existing = str(meta.get("strategy") or "").strip()
+        strategy = max((ws, sheet_val, existing), key=len)
+        mp, meta_doc = mp_early, _doc
 
         if a.dry_run:
             same = "＝" if ws and sheet_val and ws == sheet_val else " "
@@ -284,7 +291,11 @@ def main() -> int:
         meta["strategy_explained"] = explained
         # 兩份原始紀錄都留著。將來有人問「這句話依據什麼」，答案要在檔案裡，
         # 不是在某次跑批次的終端機捲軸裡。
-        meta["strategy_sources"] = {"worksheet": ws or None, "master_sheet": sheet_val or None}
+        meta["strategy_sources"] = {
+            "worksheet": ws or None,
+            "master_sheet": sheet_val or None,
+            "previous": existing or None,
+        }
         if "metadata" in meta_doc:
             meta_doc["metadata"] = meta
         else:

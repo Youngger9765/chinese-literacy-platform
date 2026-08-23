@@ -192,25 +192,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         fontFamily: fontForZhuyin(zhuyinActive),
       }}
     >
-      {/* Top bar */}
-      <nav aria-label="麵包屑導覽" className="h-9 bg-surface-container-lowest border-b border-gray-200 flex items-center px-4 gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="返回圖書館"
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          圖書館
-        </button>
-        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
-        <span className="text-xs text-gray-600">{story.title}</span>
-        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
-        <span className="text-xs text-accent-light font-bold" aria-current="page">簡介</span>
-        <div className="flex-1" />
-      </nav>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
@@ -299,6 +280,17 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
                     {processZhuyin(strategyName)}
                   </p>
+                  {/* #2898 — the name alone is a 13-character label. Owner, seeing
+                      「推論策略──推論代名詞」 and nothing else: 「就這麼短嗎？」
+                      This is 2-3 sentences generated once per lesson and stored in
+                      metadata.strategy_explained, grounded in this article rather
+                      than in the strategy in the abstract. 160 of 175 lessons have
+                      one; the rest keep the bare name, which is what the source has. */}
+                  {story.readingStrategyExplained && (
+                    <p className={`mt-2 text-amber-900/80 text-sm whitespace-pre-line ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.8]'}`}>
+                      {processZhuyin(story.readingStrategyExplained)}
+                    </p>
+                  )}
                 </div>
               )}
 
