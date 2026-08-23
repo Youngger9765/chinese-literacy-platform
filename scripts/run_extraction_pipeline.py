@@ -86,8 +86,16 @@ def _vdir(uid: str) -> pathlib.Path | None:
     return vs[-1] if vs else None
 
 
-def _step(n: str, ok: bool, detail: str = "") -> None:
-    print(f"  {'✅' if ok else '🔴'} {n}{('  ' + detail) if detail else ''}")
+def _step(n: str, ok: bool, detail: str = "", unverifiable: bool = False) -> None:
+    """🔴 對不上 / 🟡 驗不了 / ✅ 過 —— 三態。
+
+    ⛔ 「驗不了」跟「壞了」都印 🔴 的話，看的人分不出
+    「這課有缺陷」與「這道門在這一頁上沒有判斷力」。
+    實測 10 課有 4 課出現 🔴，逐一查才發現**四個都是 exit 2（驗不了）
+    而不是缺陷** —— 那個顯示等於在製造假警報。
+    """
+    icon = "🟡" if unverifiable else ("✅" if ok else "🔴")
+    print(f"  {icon} {n}{('  ' + detail) if detail else ''}")
 
 
 def _reload_manifest(uid: str) -> dict | None:
@@ -271,6 +279,7 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
 
     print(f"  {uid}：收到 {len(produced)} 份 yml")
     worst = 0
+    unverifiable_mods: list[str] = []
     for f in produced:
         mod = f.stem
         # schema
@@ -336,14 +345,29 @@ def verify(uid: str, out: pathlib.Path, workdir: pathlib.Path | None) -> int:
                 capture_output=True, text=True, timeout=300,
             )
             tail = [l for l in (r.stdout + r.stderr).strip().split("\n") if l.strip()]
+            # exit 2 = 這道門在這一頁上沒有判斷力（pdftotext 還原不出版面順序），
+            # 不是「抽錯了」。⛔ 印成 🔴 會讓人以為那課壞了。
             _step(f"{mod} · 見證對帳", r.returncode == 0,
-                  (tail[-1][:70] if tail else "")) 
+                  (tail[-1][:70] if tail else ""),
+                  unverifiable=(r.returncode == 2))
             worst = max(worst, r.returncode)
+            if r.returncode == 2:
+                unverifiable_mods.append(mod)
         else:
-            _step(f"{mod} · 見證對帳", False, "派工單沒有節名或頁碼，驗不了")
+            _step(f"{mod} · 見證對帳", False, "派工單沒有節名或頁碼，驗不了",
+                  unverifiable=True)
             worst = max(worst, 2)
+            unverifiable_mods.append(mod)
 
-    print(f"\n  {'✅ 全部通過' if worst == 0 else '🔴 有門沒過（exit %d）' % worst}")
+    if worst == 0:
+        print("\n  ✅ 全部通過")
+    elif worst == 1:
+        print(f"\n  🔴 有門判定**對不上**（exit 1）")
+    else:
+        # 只有「驗不了」時要講清楚 —— 那不是缺陷
+        print(f"\n  🟡 沒有任何一道門說它壞了，但 {len(unverifiable_mods)} 個模組"
+              f"**驗不了**（exit 2）：{', '.join(unverifiable_mods) or '—'}")
+        print("     ⛔ 這不是通過，也不是抽錯了。要驗只能換做法或人工看。")
     return worst
 
 
