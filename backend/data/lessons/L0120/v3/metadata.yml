@@ -2,7 +2,7 @@ lesson_uid: L0120
 version_id: v3
 level: 8
 genre: 說明文
-strategy: 解決問題──科學探究法
+strategy: 科學探究策略——假設與假設檢驗
 課文作者: 吳漢庭
 學習單: 巫怡蓉/曾世杰
 lesson_no: 22
@@ -35,3 +35,4 @@ strategy_explained: '這一課我們練習用科學的方法來找出事物的�
 strategy_sources:
   worksheet: 科學探究策略
   master_sheet: 解決問題──科學探究法
+  previous: 科學探究策略——假設與假設檢驗

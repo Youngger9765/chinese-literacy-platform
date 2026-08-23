@@ -73,3 +73,54 @@ def test_house_rule_is_deterministic_not_prompted():
     assert warn == [], warn
     long_out, long_warn = bls.tidy("字" * 200)
     assert any("超過" in w for w in long_warn), "超長沒有被標記出來"
+
+
+# ---------------------------------------------------------------------------
+# 回歸鎖：策略名稱只准變完整，不准變短
+# ---------------------------------------------------------------------------
+
+
+def _all_metadata():
+    import yaml
+
+    for p in sorted((REPO / "backend" / "data" / "lessons").glob("L*/v3/metadata.yml")):
+        doc = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        yield p.parts[-3], (doc.get("metadata", doc) or {})
+
+
+def test_no_lesson_lost_a_fuller_strategy_name():
+    """`strategy` 不可以比它自己記錄的任何一份來源短。
+
+    這條是被踩出來的。合併規則本來是「兩個來源取較長」，漏掉第三個候選 ——
+    `metadata.strategy` 在這支跑之前就有值（171 課，更早的 pipeline 寫的），
+    而其中 21 課它比兩個新來源都完整。覆蓋之後：
+
+        L0029  原「品格力──認識自我─看見長處與限制」→ 新「品格力──認識自我」
+        L0047  原「詞彙推測策略──從上下文推測詞義」  → 新「從上下文推測詞義」
+
+    **完全沒有症狀**：欄位有值、schema 過、前端照樣顯示一個看起來正常的策略名。
+    要跟 staging 逐課比才看得出來。所以鎖在這裡，用檔案自己記的 provenance 就能驗，
+    不需要連 git。
+    """
+    offenders = []
+    for uid, meta in _all_metadata():
+        name = str(meta.get("strategy") or "")
+        src = meta.get("strategy_sources") or {}
+        if not name or not isinstance(src, dict):
+            continue
+        for where, val in src.items():
+            v = str(val or "")
+            if len(v) > len(name):
+                offenders.append(f"{uid}: strategy={name!r} 比 sources.{where}={v!r} 短")
+    assert not offenders, (
+        "以下課的策略名稱比它自己記錄的來源還短 —— 合併規則丟掉了比較完整的那份：\n  "
+        + "\n  ".join(offenders[:12])
+        + f"\n（共 {len(offenders)} 筆）"
+    )
+
+
+def test_every_explained_lesson_records_where_it_came_from():
+    """有說明就要有 provenance。沒有它，上面那條鎖就沒有東西可以比。"""
+    missing = [uid for uid, m in _all_metadata()
+               if m.get("strategy_explained") and not m.get("strategy_sources")]
+    assert not missing, f"{len(missing)} 課有 strategy_explained 但沒有 strategy_sources: {missing[:8]}"

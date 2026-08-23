@@ -2,7 +2,7 @@ lesson_uid: L0047
 version_id: v3
 level: 5
 genre: 記敘文
-strategy: 從上下文推測詞義
+strategy: 詞彙推測策略──從上下文推測詞義
 課文作者: 林立青
 學習單: 巫怡蓉
 lesson_no: 8
@@ -50,3 +50,4 @@ strategy_explained: '這篇文章讓我們學習怎麼從周圍的句子猜出�
 strategy_sources:
   worksheet: 詞彙推測策略
   master_sheet: 從上下文推測詞義
+  previous: 詞彙推測策略──從上下文推測詞義

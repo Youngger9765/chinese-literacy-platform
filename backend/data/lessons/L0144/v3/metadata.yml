@@ -2,7 +2,7 @@ lesson_uid: L0144
 version_id: v3
 level: 9
 genre: 說明文
-strategy: 多文本閱讀──比較多元觀點
+strategy: 多文本閱讀──看文章之間的關係
 課文作者: 曾世杰
 lesson_no: 23
 series: 一般
@@ -68,3 +68,4 @@ strategy_explained: '這次咱們要練習的是，從不同的資料裡找出�
 strategy_sources:
   worksheet: 多文本閱讀
   master_sheet: 多文本閱讀──比較多元觀點
+  previous: 多文本閱讀──看文章之間的關係

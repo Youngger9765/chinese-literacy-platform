@@ -3,7 +3,7 @@ version_id: v3
 level: 8
 genre: 說明文
 topic_line: 目標議題：性別平等——辨識界線、安全回應、支持他人
-strategy: 性別平等──認識性騷擾
+strategy: 性別平等——辨識界線、安全回應、支持他人
 課文作者: 林玫伶
 學習單: 陳允捷/曾世杰
 lesson_no: 23
@@ -45,3 +45,4 @@ strategy_explained: '這一課我們要練習的是，如何理解和分析社�
 strategy_sources:
   worksheet: null
   master_sheet: 性別平等──認識性騷擾
+  previous: 性別平等——辨識界線、安全回應、支持他人

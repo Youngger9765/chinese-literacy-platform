@@ -2,7 +2,7 @@ lesson_uid: L0093
 version_id: v3
 level: 7
 genre: 記敘文
-strategy: 解決問題──科學探究法
+strategy: 科學推理策略──用科學步驟解決問題
 課文作者: 曾世杰
 學習單: 唐儀庭
 lesson_no: 24
@@ -40,3 +40,4 @@ strategy_explained: '這一課我們要練習的是，像偵探一樣，運用�
 strategy_sources:
   worksheet: 科學推理策略
   master_sheet: 解決問題──科學探究法
+  previous: 科學推理策略──用科學步驟解決問題

@@ -2,7 +2,7 @@ lesson_uid: L0029
 version_id: v3
 level: 5
 material_form: 雙文本閱讀
-strategy: 品格力──認識自我
+strategy: 品格力──認識自我─看見長處與限制
 header_target: 目標議題：品格力──認識自我─看見長處與限制
 parts:
 - part: 1
@@ -34,3 +34,4 @@ strategy_explained: '這一課要練的是「認識自己、相信自己」，�
 strategy_sources:
   worksheet: null
   master_sheet: 品格力──認識自我
+  previous: 品格力──認識自我─看見長處與限制
