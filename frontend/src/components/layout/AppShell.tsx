@@ -87,18 +87,65 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 // StepDots — progress dot row with desktop hover/focus tooltip
 // ---------------------------------------------------------------------------
 
+type Step = ReturnType<typeof useStepSequence>[number];
+
 interface StepDotsProps {
   steps: ReturnType<typeof useStepSequence>;
   currentStepIndex: number;
   completedSet: Set<string>;
-  onStepClick: (step: ReturnType<typeof useStepSequence>[number]) => void;
+  onStepClick: (step: Step) => void;
+  /** Prev/next live INSIDE the dot row (#2889) — see NavArrow below. */
+  prevStep: Step | null;
+  nextStep: Step | null;
+  navDisabled: boolean;
 }
+
+/**
+ * The chevrons sit inside the same flex row as the circles, as its first and
+ * last children.
+ *
+ * They used to be siblings of the scroll box in the header row. That box carried
+ * `flex-1`, so at 2000px wide it measured 1648px and the circles centred inside
+ * it — leaving the two chevrons pinned to the far edges of the screen with a
+ * wide empty gap on either side of the circles. Shrinking the box helped, but
+ * only inside the row is the position actually guaranteed: whatever the header
+ * width, "next to the first circle" is where the first circle is.
+ *
+ * Owner: 「直接把上下頁 放到 圈圈 row 內，左右貼合」.
+ */
+const NavArrow: React.FC<{
+  dir: 'prev' | 'next';
+  step: Step | null;
+  disabled: boolean;
+  onClick: (step: Step) => void;
+}> = ({ dir, step, disabled, onClick }) => {
+  const label = step
+    ? `${dir === 'prev' ? '上一步' : '下一步'}：${step.label}`
+    : dir === 'prev' ? '已是第一步' : '已是最後一步';
+  return (
+    <button
+      type="button"
+      onClick={() => step && onClick(step)}
+      disabled={!step || disabled}
+      className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      aria-label={label}
+      title={label}
+    >
+      <span className="material-symbols-outlined leading-none text-2xl sm:text-[28px]">
+        {dir === 'prev' ? 'chevron_left' : 'chevron_right'}
+      </span>
+    </button>
+  );
+};
 
 const StepDots: React.FC<StepDotsProps> = ({
   steps,
   currentStepIndex,
   completedSet,
   onStepClick,
+  prevStep,
+  nextStep,
+  navDisabled,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +169,7 @@ const StepDots: React.FC<StepDotsProps> = ({
       aria-label="學習步驟進度"
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
+      <NavArrow dir="prev" step={prevStep} disabled={navDisabled} onClick={onStepClick} />
       {steps.map((step, i) => {
         const isCompleted = completedSet.has(step.id);
         const isActive = i === currentStepIndex;
@@ -178,6 +226,7 @@ const StepDots: React.FC<StepDotsProps> = ({
           </span>
         );
       })}
+      <NavArrow dir="next" step={nextStep} disabled={navDisabled} onClick={onStepClick} />
       </div>
     </div>
   );
@@ -290,35 +339,16 @@ const ImmersiveTopBar: React.FC = () => {
             Toolbox mode (#1460): hide entirely — single-shot practice has no
             cross-step navigation. Other steps remain unreachable from here. */}
         {!inToolbox && (
-          <div className="flex items-center justify-center gap-0.5 sm:gap-1 w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
-            <button
-              type="button"
-              onClick={() => prevStep && handleStepClick(prevStep)}
-              disabled={!prevStep || !selectedStory}
-              className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-              title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-            >
-              <span className="material-symbols-outlined leading-none text-2xl sm:text-[28px]">chevron_left</span>
-            </button>
-
+          <div className="flex items-center justify-center w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
             <StepDots
               steps={activeSteps}
               currentStepIndex={currentStepIndex}
               completedSet={completedSet}
               onStepClick={handleStepClick}
+              prevStep={prevStep}
+              nextStep={nextStep}
+              navDisabled={!selectedStory}
             />
-
-            <button
-              type="button"
-              onClick={() => nextStep && handleStepClick(nextStep)}
-              disabled={!nextStep || !selectedStory}
-              className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-              title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-            >
-              <span className="material-symbols-outlined leading-none text-2xl sm:text-[28px]">chevron_right</span>
-            </button>
           </div>
         )}
       </div>
