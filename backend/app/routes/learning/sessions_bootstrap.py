@@ -2,6 +2,7 @@
 
 Extracted from learning_sessions.py (Issue #1955).
 """
+import copy
 import logging
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -110,6 +111,43 @@ def create_learning_session(
             )
             return existing
 
+    # --- carry the student's own progress forward (#2889) ---------------------
+    #
+    # The dedup above only reuses an `in_progress` session. Finish a lesson and come
+    # back to it and you got a brand-new row with `step_progress = NULL`, so the page
+    # drew ten grey pills over 73 completed runs of the same lesson. The records were
+    # never lost — every completed session still answers /progress with its steps —
+    # they were simply not the ones the new session read.
+    #
+    # Owner's call (asked explicitly, 2026-08-23): carry forward, rather than start
+    # clean with a history link.
+    #
+    # Scoped to THIS student and THIS story, deliberately: seeding from "the latest
+    # completed session for this story" would show one child another child's work,
+    # which is a worse bug than the blank page. Status is not filtered — an abandoned
+    # session's progress is just as much the student's own — but `in_progress` can
+    # never reach here, having been returned above.
+    carried: dict | None = None
+    if normalized_slug:
+        previous = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.student_id == current_user.id,
+                LearningSession.story_slug == normalized_slug,
+                LearningSession.step_progress.is_not(None),
+            )
+            .order_by(LearningSession.started_at.desc())
+            .first()
+        )
+        if previous is not None and isinstance(previous.step_progress, dict):
+            # Deep copy: sharing the dict would let a later write to the new session
+            # mutate the old row's JSONB through the same Python object.
+            carried = copy.deepcopy(previous.step_progress)
+            logger.info(
+                "Carrying step_progress forward from session %d for user %d, story=%s (#2889)",
+                previous.id, current_user.id, normalized_slug,
+            )
+
     # Self-study sessions are NOT attributed to any classroom.
     classroom_id = None
 
@@ -130,6 +168,7 @@ def create_learning_session(
         text_id=text_id,
         status="in_progress",
         classroom_id=classroom_id,
+        step_progress=carried,
     )
     db.add(session)
     try:
