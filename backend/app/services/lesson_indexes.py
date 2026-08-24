@@ -72,12 +72,28 @@ def _section_slugs_by_article(l: dict) -> dict[str, dict[str, str]]:
 
     跨篇的節（`text_ref` 是清單）不屬於任何單一篇，這裡不收。
     """
+    secs = l.get("manifest_sections") or []
+    arts = [s.get("slug") for s in secs
+            if s.get("module") in ARTICLE_MODULES and s.get("slug")]
+    # 一課只有一篇課文時，歸屬沒有歧義：其餘每一節都屬於它，寫不寫 `text_ref` 都一樣。
+    #
+    # 這條不是方便，是**必要**：發配 slug 時 `text_ref` 只從 `full_text_annotate`
+    # 那一族收，而文言文的課文模組叫 `classical_text` —— 那 10 課因此
+    # 每一節都沒有 `text_ref`，光靠 `text_ref` 歸戶的話它們的朗讀計時
+    # 印不出代號，QR 安靜退回長網址（2026-08-25 抽樣驗到）。
+    lone = arts[0] if len(arts) == 1 else None
     out: dict[str, dict[str, str]] = {}
-    for sec in l.get("manifest_sections") or []:
+    for sec in secs:
         mod, slug, ref = sec.get("module"), sec.get("slug"), sec.get("text_ref")
         if not mod or not slug:
             continue
-        art = slug if mod in ARTICLE_MODULES else (ref if isinstance(ref, str) else None)
+        if mod in ARTICLE_MODULES:
+            art = slug
+        elif isinstance(ref, str) and ref:
+            art = ref
+        else:
+            # 多篇課而這一節沒說屬於誰 → 不猜（跨篇的節就是這樣）。
+            art = lone
         if not art:
             continue
         out.setdefault(art, {}).setdefault(mod, slug)

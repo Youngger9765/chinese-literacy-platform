@@ -87,3 +87,25 @@ owner 已定：入口用 `https://lingoleap-prod.web.app/...`，轉址做在後�
 L0097 L0098 …（完整清單重跑量測即可）
 
 ⛔ 沒有在 #2916 這一輪處理 —— 它跟一課多篇無關，範圍是另一件事。
+
+## 9. 文言文的 QR 掃進去是登入牆（2026-08-25 抽樣走 QR 才看到）
+
+**現況**：交付面沒有問題 —— 後台對 10 課文言文**兩種碼都不印**（實測 10/10），
+所以老師手上不會有指向登入牆的紙。已由
+`test_classical_lessons_print_no_codes_yet` 鎖住這個「不印」。
+
+**但代號本身解得開**：`/q/jp6dx` → `/learn/20153/classical-text`，而
+
+- `classical-text` 不在 `PUBLIC_LEARNING_STEPS` 裡 → 訪客被導去 `/login`
+- 文言文的課文在 `detail.classical_text`，不是 `detail.paragraphs`；
+  `GuestReadingPage` 讀的是後者，所以就算放行也會是空白頁
+- 那 8 課的朗讀計時 `key_reading` 在 API 是 `null`（帳本有「朗讀計時」這一節，
+  但沒有 passage 內容）
+
+**要做的話是兩件事一起**：把 `classical-text` 加進訪客白名單 **並且** 讓
+`GuestReadingPage` 認得 `classical_text` 的形狀。只做前者會得到一個
+打得開的空白頁 —— 那比登入牆更糟，因為它看起來像成功。
+
+**先不做的理由**：這是新功能，不在「把一課多篇做完並驗證」的範圍內。
+放寬印製規則之前要先補這個，`test_no_printed_code_points_at_a_page_a_guest_cannot_read`
+會在那個順序做錯時變紅。

@@ -33,6 +33,19 @@ _MODULE_TO_STEP: dict[str, str] = {
     "spotlight": "spotlight",
     "vocab_review": "vocab-review",
     "resources": "knowledge-station",
+    # 文言文的課文（10 課）。漏掉它的話那 10 課的 `/q/{代號}` 回 404 ——
+    # 而 404 訊息寫的是「查不到這個代號」，看起來像紙印錯了，
+    # 實際上是我們的對照表少一列（2026-08-25 抽樣走 QR 才看到）。
+    "classical_text": "classical-text",
+    # ⛔ `modern_translation`（古文今譯）**刻意不對**：它印在學習單上，
+    #    但線上沒有自己的步驟，內容在 `classical-text` 那一頁裡。
+    #    硬對過去的話同一課會有兩個代號指到同一個地方 ——
+    #    掃起來都通，卻是兩張紙一個目的地
+    #    （`test_every_multi_text_lesson_has_all_distinct_destinations` 抓到）。
+    #    沒有自己的頁面就沒有自己的 QR，這是誠實的。
+    "sentence_matching": "classical-sentence-matching",
+    "word_matching": "classical-word-matching",
+    "self_challenge": "classical-self-challenge",
 }
 
 

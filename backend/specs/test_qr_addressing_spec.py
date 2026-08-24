@@ -114,3 +114,107 @@ def test_lessons_without_an_article_are_named_not_silently_skipped(rows):
                      if not any(s.get("module") in ARTICLE_MODULES
                                 for s in (r.get("manifest_sections") or [])))
     assert without == ["L0044", "L0068", "L0070", "L0106", "L0124", "L0136"], without
+
+
+def test_classical_lessons_get_their_passage_code_too(rows):
+    """文言文的朗讀計時也要有代號（#2916）。
+
+    文言文的課文模組叫 `classical_text`，而發配 slug 時 `text_ref` 只從
+    `full_text_annotate` 那一族收 —— 於是文言文**每一節都沒有 text_ref**。
+    歸戶靠 text_ref 的話，這 10 課的朗讀計時印不出代號，QR 安靜退回長網址。
+
+    一課只有一篇課文時，歸屬沒有歧義：其餘每一節都屬於它。
+    """
+    classical = [uid for uid, r in rows.items()
+                 if any(s.get("module") == "classical_text" for s in (r.get("manifest_sections") or []))]
+    assert len(classical) >= 8, f"只找到 {len(classical)} 課文言文 —— 這條測不到東西"
+    with_key = []
+    for uid in classical:
+        r = rows[uid]
+        has_kr = any(s.get("module") == "key_reading" for s in (r.get("manifest_sections") or []))
+        if not has_kr:
+            continue
+        with_key.append(uid)
+        p = (r.get("part_rounds") or [{}])[0]
+        assert p.get("key_slug"), f"{uid} 有朗讀計時卻沒有代號"
+        assert p["key_slug"] != p.get("full_slug"), f"{uid} 朗讀計時借用了課文的代號"
+    assert with_key, "沒有一課文言文有朗讀計時 —— 這條測不到東西"
+
+
+def test_single_article_lessons_attach_every_section_to_it(rows):
+    """一課只有一篇課文時，其餘每一節都歸它 —— 不論有沒有寫 text_ref。
+
+    有寫的照寫的走；沒寫的（文言文、以及任何舊資料）也不該掉出去。
+    """
+    checked = missing = 0
+    for uid, r in rows.items():
+        arts = [s for s in (r.get("manifest_sections") or [])
+                if s.get("module") in ARTICLE_MODULES and s.get("slug")]
+        if len(arts) != 1:
+            continue
+        has_kr = any(s.get("module") == "key_reading" for s in (r.get("manifest_sections") or []))
+        if not has_kr:
+            continue
+        checked += 1
+        if not (r.get("part_rounds") or [{}])[0].get("key_slug"):
+            missing += 1
+    assert checked > 100, f"只驗到 {checked} 課 —— 這條測不到東西"
+    assert missing == 0, f"{missing} 課的念順順沒有代號"
+
+
+def test_no_printed_code_points_at_a_page_a_guest_cannot_read(rows):
+    """會**印在紙上**的每一個代號，訪客都要看得到內容（#2916）。
+
+    這條問的是交付面，不是資料面：資料裡的代號可以比印出來的多，
+    但印出去的那些收不回來。
+
+    2026-08-25 抽樣走 QR 時，文言文的 `/q/{代號}` 轉到 `classical-text`，
+    而那個 step 不在訪客白名單裡 → 掃進去是登入牆；它的朗讀計時頁
+    則因為 `key_reading` 是 null 而空白。兩者都不是交付缺陷 ——
+    後台對文言文兩種碼都不印（實測 10/10 課）。這條鎖住那個「不印」，
+    免得哪天有人放寬印製規則卻沒補訪客支援。
+    """
+    from app.services.slug_index import _MODULE_TO_STEP
+    # 前端 PUBLIC_LEARNING_STEPS 的鏡像。⛔ 改那邊要改這邊 ——
+    # 兩份會分岔，但分岔時這條會紅，而不是學生撞到登入牆。
+    GUEST_OK = {"full-text-annotate", "key-passage-reading"}
+
+    def delivers_full(g):
+        try:
+            n = int(str(g))
+        except (TypeError, ValueError):
+            return False
+        return 4 <= n <= 7
+
+    printed, bad = 0, []
+    for uid, r in rows.items():
+        for p in (r.get("part_rounds") or []):
+            for kind, slug, gate in (
+                ("全文", p.get("full_slug"), delivers_full(r.get("grade")) and p.get("has_full")),
+                ("重點", p.get("key_slug"), p.get("has_key")),
+            ):
+                if not (slug and gate):
+                    continue
+                printed += 1
+                mod = next((s.get("module") for s in (r.get("manifest_sections") or [])
+                            if s.get("slug") == slug), None)
+                step = _MODULE_TO_STEP.get(mod or "")
+                if step not in GUEST_OK:
+                    bad.append((uid, kind, slug, mod, step))
+    assert printed > 100, f"只有 {printed} 個會印出的碼 —— 這條測不到東西"
+    assert not bad, f"這些印出來的碼訪客打不開: {bad[:5]}"
+
+
+def test_classical_lessons_print_no_codes_yet(rows):
+    """文言文目前一個碼都不印 —— 訪客頁還不支援文言文（開放項）。
+
+    點名而不是靜默：哪天訪客頁支援了、或有人放寬印製規則，這條會紅，
+    提醒去確認兩件事有沒有一起做。
+    """
+    classical = [uid for uid, r in rows.items()
+                 if any(s.get("module") == "classical_text"
+                        for s in (r.get("manifest_sections") or []))]
+    assert len(classical) == 10, f"文言文課數變了: {len(classical)}"
+    for uid in classical:
+        p = (rows[uid].get("part_rounds") or [{}])[0]
+        assert not p.get("has_key"), f"{uid} 開始印重點碼了 —— 訪客頁支援文言文了嗎？"

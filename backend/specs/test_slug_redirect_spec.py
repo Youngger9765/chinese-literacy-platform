@@ -151,3 +151,44 @@ def test_every_multi_text_lesson_has_all_distinct_destinations():
                 clashes.append((uid, p, ss))
     assert len(by_lesson) > 150, f"只掃到 {len(by_lesson)} 課 —— 這條測不到東西"
     assert not clashes, f"{len(clashes)} 處撞目的地，例: {clashes[:4]}"
+
+
+def test_every_module_that_has_a_step_can_be_reached_by_code(idx):
+    """帳本裡每一種有線上畫面的模組，都要解得開代號。
+
+    2026-08-25 抽樣走 QR 才發現文言文的 `classical_text` 不在對照表裡：
+    那 10 課的課文代號回 404，而 404 說的是「查不到這個代號」——
+    看起來像紙印錯，實際上是我們少一列。
+    """
+    from app.services.lesson_indexes import build_all_lessons
+    from app.services.slug_index import _MODULE_TO_STEP
+    seen = {}
+    for l in build_all_lessons():
+        # ⚠️ `step_sequence` 的元素帶輪次後綴（`key-passage-reading#9a7x4`）。
+        #    拿裸 step id 去比會全部對不上 —— 我第一版就是這樣，量出
+        #    「166 課的讀全文沒有畫面」，而那 166 課的頁面明明開得好好的。
+        steps = {k.split("#", 1)[0] for k in (l.get("step_sequence") or [])}
+        for sec in l.get("manifest_sections") or []:
+            mod, slug = sec.get("module"), sec.get("slug")
+            if not mod or not slug:
+                continue
+            step = _MODULE_TO_STEP.get(mod)
+            # 這個模組在這一課真的有畫面嗎？沒有的話不強求代號解得開。
+            if step and step in steps:
+                seen.setdefault(mod, []).append(slug)
+    # 點名，不用門檻數字：某個模組哪天整族掉出去，這裡會直接顯示少了誰。
+    assert set(seen) == {
+        "full_text_annotate", "key_reading", "vocab_definitions", "vocab_application",
+        "keypoints", "comprehension", "spotlight", "vocab_review", "resources",
+        "classical_text", "sentence_matching", "word_matching", "self_challenge",
+    }, f"有畫面的模組清單變了: {sorted(seen)}"
+    unresolvable = {m: ss[:2] for m, ss in seen.items() if not resolve(ss[0])}
+    assert not unresolvable, f"這些模組的代號解不開: {unresolvable}"
+
+
+def test_classical_lessons_resolve(idx):
+    """文言文的課文與朗讀計時都要解得開。"""
+    for slug, want in (("jp6dx", "classical-text"), ("9ry3u", "key-passage-reading")):
+        e = resolve(slug)
+        assert e, f"/q/{slug} 解不開"
+        assert e["step"] == want, (slug, e["step"])
