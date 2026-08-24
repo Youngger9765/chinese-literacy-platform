@@ -52,6 +52,7 @@ source_profile:
   note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
   has_key_reading_section: true
   multi_text: false
+  repeated_modules: []
   text_boundary_known: null
   has_body_paragraphs: true
   paragraph_idx_unique: true

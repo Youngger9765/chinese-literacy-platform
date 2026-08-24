@@ -18,6 +18,7 @@ source_profile:
   note: 段落 idx 有重複（書信體）—— 用列表位置定址，不能用 idx
   has_key_reading_section: true
   multi_text: false
+  repeated_modules: []
   text_boundary_known: null
   has_body_paragraphs: true
   paragraph_idx_unique: false
