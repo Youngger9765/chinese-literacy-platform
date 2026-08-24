@@ -49,13 +49,17 @@ def slug_index() -> dict[str, dict[str, Any]]:
         # 每一列帶 name / type(模組) / slug / text_ref / part。
         for sec in l.get("manifest_sections") or []:
             slug = sec.get("slug")
-            mod = sec.get("type")
+            # 欄位名就是帳本自己的 `module`。三層同名同形（#2916）——
+            # 這裡本來寫 `type`，因為 API 那層曾經把 `module` 改名；
+            # 改名拿掉之後這行就一直讀到 None，整張表是空的而不會報錯。
+            mod = sec.get("module")
             if not slug or not mod:
                 continue
             step = _MODULE_TO_STEP.get(mod)
             if not step:
                 continue
             out[slug] = {
+                "slug": slug,
                 "lesson_id": l["id"],
                 "lesson_uid": l.get("lesson_uid"),
                 "grade_code": l.get("grade_code"),
@@ -75,9 +79,19 @@ def resolve(slug: str) -> dict[str, Any] | None:
 
 
 def target_path(entry: dict[str, Any]) -> str:
-    """這個大題的頁面路徑。一課多篇時帶 `?p=` 圈起它所屬的那一輪。"""
+    """這個大題的頁面路徑。一課多篇時帶 `?p=` 圈起它是哪一節。
+
+    ⚠️ `?p=` 帶的是**這一節自己的 slug**，不是它引用的課文（`text_ref`）。
+    前端 `useCurrentStepId` 把它接成步驟 key（`key-passage-reading#9a7x4`），
+    再由 `articleSlugForStep` 拿帳本查出這一節要哪一篇課文。
+
+    帶成 `text_ref` 的話那個查找會落空，而落空的行為是**退回頂層資料** ——
+    也就是安靜地顯示第 1 篇。網址看起來有帶輪次、頁面打得開、不報錯，
+    只是三個 QR 都掃到第 1 篇。
+    """
     p = f"/learn/{entry['lesson_id']}/{entry['step']}"
-    ref = entry.get("text_ref")
-    if isinstance(ref, str) and ref:
-        p += f"?p={ref}"
+    slug = entry.get("slug")
+    # 單篇課不帶輪次：沒有第二篇可分，多一個參數只是讓網址更脆。
+    if slug and entry.get("text_ref") is not None:
+        p += f"?p={slug}"
     return p

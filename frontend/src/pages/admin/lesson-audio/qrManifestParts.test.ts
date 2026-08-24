@@ -24,18 +24,24 @@ describe('buildQrManifestRows — 一課多篇', () => {
     expect(rows[0].lesson_no).toBe('G4-L1');
   });
 
-  it('三篇課展開成三列，各自帶自己的 ?p=', () => {
+  it('三篇課展開成三列，六個 QR 各自是自己那一節的代號', () => {
     const rows = buildQrManifestRows([{ ...(base as object), id: 20063, part_rounds: [
-      { slug: 'p3kud', part: 1, has_full: true, has_key: true },
-      { slug: '4uee3', part: 2, has_full: true, has_key: true },
-      { slug: '7wavn', part: 3, has_full: true, has_key: true },
+      // `slug` 是課文的；`full_slug` / `key_slug` 是那一節自己的。
+      // 念順順的代號跟課文的**不同號** —— slug 是身分，不是引用（#2916）。
+      { slug: 'p3kud', part: 1, has_full: true, has_key: true, full_slug: 'p3kud', key_slug: 'yprak' },
+      { slug: '4uee3', part: 2, has_full: true, has_key: true, full_slug: '4uee3', key_slug: '9a7x4' },
+      { slug: '7wavn', part: 3, has_full: true, has_key: true, full_slug: '7wavn', key_slug: 'ajy9w' },
     ] }] as never, 'https://x');
     expect(rows).toHaveLength(3);
     expect(rows.map(r => r.lesson_no)).toEqual(['G6-L22（篇1）', 'G6-L22（篇2）', 'G6-L22（篇3）']);
-    expect(rows[1].full_url).toBe('https://x/learn/20063/full-text-annotate?p=4uee3');
-    expect(rows[2].passage_url).toBe('https://x/learn/20063/key-passage-reading?p=7wavn');
+    // 短網址：紙上只有代號，沒有課號也沒有路由名（#2916）
+    expect(rows[1].full_url).toBe('https://x/q/4uee3');
+    expect(rows[2].passage_url).toBe('https://x/q/ajy9w');
+    // 念順順不可以印成課文的碼 —— 那會讓兩個不同的 QR 掃到同一個地方
+    expect(rows[2].passage_url).not.toBe(rows[2].full_url);
     const urls = rows.flatMap(r => [r.full_url, r.passage_url]);
     expect(new Set(urls).size).toBe(urls.length);
+    expect(urls).toHaveLength(6);
   });
 
   it('🔴 有課文不代表有念順順：該篇 has_key=false 就不發碼', () => {
@@ -51,9 +57,10 @@ describe('buildQrManifestRows — 一課多篇', () => {
   it('8–9 年級依規格不交付全文碼', () => {
     const rows = buildQrManifestRows([{ ...(base as object), id: 20144, grade_code: 'G9-L23',
       grade: 9, part_rounds: [
-        { slug: 'wdnd7', part: 1, has_full: true, has_key: true },
+        { slug: 'wdnd7', part: 1, has_full: true, has_key: true,
+          full_slug: 'wdnd7', key_slug: 'mca6h' },
       ] }] as never, 'https://x');
     expect(rows[0].full_url).toBe('');
-    expect(rows[0].passage_url).toBe('https://x/learn/20144/key-passage-reading?p=wdnd7');
+    expect(rows[0].passage_url).toBe('https://x/q/mca6h');
   });
 });

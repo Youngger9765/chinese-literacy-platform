@@ -19,6 +19,7 @@ import { Download, Loader2, QrCode } from 'lucide-react';
 
 import {
   buildLessonQrValue,
+  QR_ENTRY_ORIGIN,
   qrCodeToDataUrl,
   qrFileName,
   triggerDownload,
@@ -112,6 +113,12 @@ export interface LessonQrButtonProps {
   label?: string;
   /** PNG filename stem, e.g. `qr-full` -> `qr-full-L07.png`. */
   filePrefix?: string;
+  /**
+   * 這一節**自己的**代號（#2916）。有就印短網址 `/q/{代號}`。
+   * 一份學習單多篇課文時，每一篇的每一節各有各的代號 ——
+   * 少了它，三篇的 QR 會全部指到同一個地方。
+   */
+  sectionSlug?: string | null;
   variant?: 'admin' | 'pill';
 }
 
@@ -121,6 +128,7 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
   lessonTitle,
   label,
   filePrefix,
+  sectionSlug,
   variant = 'pill',
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -129,12 +137,16 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
   const openPreview = useCallback(async () => {
     setIsGenerating(true);
     try {
-      const value = buildLessonQrValue(window.location.origin, lessonId, step);
+      // ⛔ 這裡本來傳 `window.location.origin` —— 也就是「在哪個站按下載」
+      //    決定紙上印什麼。lessonQr.ts 的註解早就寫明不可以這樣做，
+      //    但修只落在後台那支，這一支（老師在課堂上會按的那顆）漏掉了。
+      //    2026-08-25 查證：PM 在 staging 產的那批 QR 每一張都指向測試站。
+      const value = buildLessonQrValue(QR_ENTRY_ORIGIN, lessonId, step, sectionSlug);
       setPreview({ dataUrl: await qrCodeToDataUrl(value), value });
     } finally {
       setIsGenerating(false);
     }
-  }, [lessonId, step]);
+  }, [lessonId, step, sectionSlug]);
 
   const kind = STEP_LABEL[step];
   const text = label ?? `QR ${kind}`;
@@ -152,7 +164,7 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
         // those lookups would stop matching.
         aria-label={label ? undefined : `顯示${kind}朗讀 QR code`}
         className={TRIGGER_CLASS[variant]}
-        title={buildLessonQrValue(window.location.origin, lessonId, step)}
+        title={buildLessonQrValue(QR_ENTRY_ORIGIN, lessonId, step, sectionSlug)}
       >
         {isGenerating
           ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

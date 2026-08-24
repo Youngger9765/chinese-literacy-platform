@@ -47,7 +47,17 @@ interface StoryListItem {
   char_count: number;
   has_key_reading: boolean;
   /** 一課多篇時每一篇一筆（#2916）；單篇課是 null/undefined。 */
-  part_rounds?: Array<{ slug: string; part: number | null; has_full: boolean; has_key: boolean }> | null;
+  part_rounds?: Array<{
+    /** 這一篇課文的代號（歸戶用）。 */
+    slug: string;
+    part: number | null;
+    has_full: boolean;
+    has_key: boolean;
+    /** 讀全文那一節自己的代號 —— QR 印它。 */
+    full_slug?: string | null;
+    /** 念順順那一節自己的代號 —— QR 印它。跟上面不同號。 */
+    key_slug?: string | null;
+  }> | null;
 }
 
 interface StoryListResponse {
@@ -196,7 +206,9 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
     full_url: deliversFullText(s.grade) && (r ? r.has_full : true)
-      ? buildLessonQrValue(origin, s.id, 'full-text-annotate', r?.slug) : '',
+      // 印**讀全文那一節自己的**代號。用 `r.slug`（課文的）的話，
+      // 三篇的念順順會跟讀全文共用同一個碼 —— 掃得開、頁面打得開、指錯地方。
+      ? buildLessonQrValue(origin, s.id, 'full-text-annotate', r?.full_slug ?? r?.slug) : '',
     // Same rule on the passage side: build_demo_reading.plan_demo_audio only
     // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
     // (has_key_reading). Emitting a code for a lesson without one — as this
@@ -204,7 +216,7 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     // the 全文 gate above prevents, just on the passage side. Gate on the data
     // (does a passage exist), never on the grade.
     passage_url: (r ? r.has_key : s.has_key_reading)
-      ? buildLessonQrValue(origin, s.id, 'key-passage-reading', r?.slug) : '',
+      ? buildLessonQrValue(origin, s.id, 'key-passage-reading', r?.key_slug) : '',
     }));
   });
 }

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import LessonQrButton from './LessonQrButton';
-import { buildLessonQrValue, deliversFullText, qrFileName } from './lessonQr';
+import { buildLessonQrValue, deliversFullText, qrFileName, QR_ENTRY_ORIGIN } from './lessonQr';
 import * as adminTable from '../../pages/admin/lesson-audio/LessonAudioTable';
 
 vi.mock('qrcode', () => ({
@@ -87,7 +87,7 @@ describe('LessonQrButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '顯示重點朗讀 QR code' }));
 
-    const url = `${window.location.origin}/learn/7/key-passage-reading`;
+    const url = `${QR_ENTRY_ORIGIN}/learn/7/key-passage-reading`;
     await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy());
     // The URL is on screen so a teacher can check it before printing.
     expect(screen.getByText(url)).toBeTruthy();

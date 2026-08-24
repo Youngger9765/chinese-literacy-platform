@@ -49,11 +49,19 @@ export function buildLessonQrValue(
   origin: string,
   lessonId: number | string,
   step: LessonQrStep,
-  roundSlug?: string | null,
+  /** 這一節**自己的**代號（不是它引用的課文）。有就印短網址。 */
+  sectionSlug?: string | null,
 ): string {
-  // 一份學習單多篇文章時（#2916），同一個 step 每篇各一個 QR，靠 `?p=` 分辨。
-  const q = roundSlug ? `?p=${roundSlug}` : '';
-  return `${origin}/learn/${lessonId}/${step}${q}`;
+  // 紙上只印一個不帶語意的代號：`/q/9a7x4`（#2916）。
+  //
+  // 長網址 `/learn/{id}/{step}?p={slug}` 把四樣東西焊死在紙上 ——
+  // 網域、路由名、課的流水號、篇次 —— 而這四樣 2026-08 全都動過。
+  // QR 印進學習單、貼在教室，那張紙收不回來，所以紙上不可以有
+  // 任何我們還會改的東西。代號永不變，目的地是我們這邊的設定。
+  if (sectionSlug) return `${origin}/q/${sectionSlug}`;
+  // 還沒有代號的舊資料：退回長網址。能掃的 QR 勝過沒有 QR，
+  // 而且後台清單有網址欄，長的在那裡一眼認得出來 —— 不是無聲降級。
+  return `${origin}/learn/${lessonId}/${step}`;
 }
 
 /**

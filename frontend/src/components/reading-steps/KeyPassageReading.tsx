@@ -30,6 +30,15 @@ import { hasKeyPassage } from '../qr/lessonQr';
 /* ------------------------------------------------------------------ */
 
 interface KeyPassageReadingProps {
+  /**
+   * 這一節**自己的**代號，QR 印它（#2916）。
+   *
+   * ⛔ 由頁面傳進來，不在這裡呼叫 `useLocation` —— 葉元件不該知道路由。
+   *    一度改成在這裡叫 hook，結果 31 條既有測試（直接 render 不包 Router）
+   *    全數炸掉，而那不是測試的問題，是把 routing 依賴放錯了層。
+   *    沒傳就退回長網址：能掃的 QR 勝過沒有 QR。
+   */
+  sectionSlug?: string | null;
   story: Story;
   onFinish: (result: KeyPassageReadingResult) => void;
   onBack: () => void;
@@ -46,6 +55,7 @@ interface KeyPassageReadingProps {
 }
 
 const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
+  sectionSlug: qrSectionSlug,
   story,
   onFinish,
   onBack,
@@ -444,7 +454,8 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                       lessonId={story.id}
                       step="key-passage-reading"
                       lessonTitle={story.title}
-                    />
+                    sectionSlug={qrSectionSlug}
+              />
                   </div>
                 )}
               </div>

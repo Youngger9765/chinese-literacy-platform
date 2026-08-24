@@ -41,4 +41,16 @@ export function useCurrentStepId(fallbackStepId: string): string {
   return ROUND_SLUG.test(round) ? `${segment}#${round}` : segment;
 }
 
+/**
+ * 目前這一步屬於哪一節（`?p=` 的代號），沒有輪次就是 null（#2916）。
+ *
+ * 課堂上的 QR 按鈕要印**這一節自己的**代號 —— 老師站在第 2 篇的頁面按下去，
+ * 印出來就該是第 2 篇的。少了它三篇會印出同一張 QR。
+ */
+export function useCurrentSectionSlug(): string | null {
+  const stepId = useCurrentStepId('');
+  const i = stepId.indexOf('#');
+  return i < 0 ? null : stepId.slice(i + 1) || null;
+}
+
 export default useCurrentStepId;

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import KeyPassageReading from '../../components/reading-steps/KeyPassageReading';
-import { useCurrentStepId } from '../../hooks/useCurrentStepId';
+import { useCurrentStepId, useCurrentSectionSlug } from '../../hooks/useCurrentStepId';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { KeyPassageReadingStepData } from '../../types/stepProgress';
 
@@ -18,6 +18,8 @@ const KeyPassageReadingPage: React.FC = () => {
     saveStepProgressPatch,
     dbSessionId,
   } = useLearningContext();
+  // QR 要印這一節自己的代號（#2916）—— 頁面在 Router 裡，葉元件不是
+  const sectionSlug = useCurrentSectionSlug();
   const navigate = useNavigate();
 
   // #2588: read/write progress under the step id this page is actually mounted at
@@ -41,6 +43,7 @@ const KeyPassageReadingPage: React.FC = () => {
 
   return (
     <KeyPassageReading
+      sectionSlug={sectionSlug}
       story={selectedStory}
       onFinish={handleFinishKeyPassageReading}
       onBack={() => navigate(`/learn/${storyId}/paragraph-reading`)}

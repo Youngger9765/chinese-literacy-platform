@@ -58,6 +58,26 @@ def _ledger_round_order(l: dict) -> list[str]:
     return out
 
 
+def _section_slugs_by_article(l: dict) -> dict[str, dict[str, str]]:
+    """{課文 slug: {模組: 那一節自己的 slug}} —— 出處是帳本（#2916）。
+
+    slug 是身分，`text_ref` 是引用。課文那一節沒有 `text_ref`（它就是被引用的
+    那一個），所以用它自己的 slug 當 key；其餘各節用它 `text_ref` 指到的課文歸戶。
+
+    跨篇的節（`text_ref` 是清單）不屬於任何單一篇，這裡不收。
+    """
+    out: dict[str, dict[str, str]] = {}
+    for sec in l.get("manifest_sections") or []:
+        mod, slug, ref = sec.get("module"), sec.get("slug"), sec.get("text_ref")
+        if not mod or not slug:
+            continue
+        art = slug if mod == "full_text_annotate" else (ref if isinstance(ref, str) else None)
+        if not art:
+            continue
+        out.setdefault(art, {}).setdefault(mod, slug)
+    return out
+
+
 def _parts_summary(l: dict) -> list[dict]:
     """每一篇的輕量摘要，給清單用（#2916）。
 
@@ -69,6 +89,8 @@ def _parts_summary(l: dict) -> list[dict]:
     if not rounds:
         return []
     out = []
+    # 帳本才知道哪一節是哪一節的身分 —— 這裡不自己推。
+    own = _section_slugs_by_article(l)
     for slug, mods in rounds.items():
         fta = (mods or {}).get("full_text_annotate") or {}
         kr = (mods or {}).get("key_reading") or {}
@@ -77,6 +99,11 @@ def _parts_summary(l: dict) -> list[dict]:
             "part": kr.get("part") or fta.get("part") or fta.get("part_no"),
             "has_full": bool(fta.get("paragraphs") or (fta.get("body") or {}).get("paragraphs")),
             "has_key": bool(kr.get("passage")),
+            # QR 印的是**那一節自己的代號**，不是課文的。
+            # 只帶 `slug`（課文的）的話，三篇的念順順 QR 會全部指到讀全文那一節 ——
+            # 而且掃得開、頁面打得開，錯得完全沒有徵兆。
+            "full_slug": own.get(slug, {}).get("full_text_annotate") or slug,
+            "key_slug": own.get(slug, {}).get("key_reading"),
         })
     # 順序照帳本，不自己排（#2916）——帳本是唯一的順序來源。
     order = _ledger_round_order(l)

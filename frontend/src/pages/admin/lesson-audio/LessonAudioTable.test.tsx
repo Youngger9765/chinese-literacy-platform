@@ -438,7 +438,9 @@ describe('#2622 QR 交付表', () => {
     // One row per lesson, not one per QR code: the 教材端 works lesson by
     // lesson, so both codes belong on the same line.
     expect(rows).toHaveLength(2);
-    expect(rows[0].lesson_no).toBe('L01');
+    // 課程欄印課碼（`G4-L01`）而不是 `L01`：後台一張表混著六個年級，
+    // 光看 L01 分不出是四年級還是九年級的第一課。
+    expect(rows[0].lesson_no).toBe('G4-L01');
     expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
     expect(rows[0].passage_url).toBe('https://x.test/learn/1/key-passage-reading');
     // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
@@ -632,7 +634,8 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     await waitFor(() => screen.getByText('贏得喝采的輸家'));
 
     const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
-    fireEvent.click(within(row).getByRole('button', { name: /播放段落/ }));
+    // 2026-08-25 改稱「重點」——它唸的是老師 ☞ 標的重點段，不是任意一段。
+    fireEvent.click(within(row).getByRole('button', { name: /播放重點/ }));
 
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalled());
     const [text, , idx] = mockSpeakText.mock.calls[0];
