@@ -41,3 +41,14 @@ strategy_sources:
   worksheet: 科學推理策略
   master_sheet: 解決問題──科學探究法
   previous: 科學推理策略──用科學步驟解決問題
+source_profile:
+  class: no_anchor
+  note: ☞ 錨點對不到任何課文段落 —— XML 沒訊號，只能靠 vision
+  has_key_reading_section: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

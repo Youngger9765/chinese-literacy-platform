@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'backend/**'
+      # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
+      # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
+      - 'scripts/split_lesson_modules.py'
+      - 'scripts/key_reading_xml_rule.py'
+      - 'scripts/corpus_profile.py'
 
 jobs:
   pytest:
@@ -154,6 +159,20 @@ jobs:
             tests/test_pdf_manifest_gate_2857.py \
             tests/test_gates_catch_degraded_extraction_2865.py \
             tests/test_vocab_review_reaches_student_2860.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      - name: "Run 念順順 key-reading locks (#2912 / #2712 / #2683 / #2562)"
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_key_reading_passages_2562.py \
+            tests/test_key_reading_golden_2912.py \
+            tests/test_source_profile_gate.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

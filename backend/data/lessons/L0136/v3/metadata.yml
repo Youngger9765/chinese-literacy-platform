@@ -22,3 +22,14 @@ notes:
   總表_語詞_原樣: []
 strategy_sources:
   previous: 圖文整合閱讀策略
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  has_body_paragraphs: false
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: false
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'
