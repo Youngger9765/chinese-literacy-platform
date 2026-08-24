@@ -26,3 +26,14 @@ strategy_sources:
   worksheet: 圖表判讀
   master_sheet: 圖表繪製與判讀──折線圖
   previous: 圖表判讀——折線圖
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

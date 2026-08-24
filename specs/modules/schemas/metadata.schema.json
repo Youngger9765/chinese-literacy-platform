@@ -191,6 +191,11 @@
       "description": "strategy 的三份原始紀錄：worksheet（學習單第一頁）/ master_sheet（總表）/ previous（更早的 pipeline）。三份都留著，是因為它們互有詳略，而 strategy 只能存一個值 —— 將來有人問「這句依據什麼」，答案要在檔案裡。",
       "x-seen-in": "160/175",
       "x-generated": true
+    },
+    "source_profile": {
+      "type": "object",
+      "x-seen-in": "175/175",
+      "description": "原稿分類（#2912）。抽取前的普查把每課歸成六類之一，抽取器讀它決定走哪條路徑，不是每次重新試錯。由 scripts/corpus_profile.py --write 產生，backend/tests/test_source_profile_gate.py 守著它不漂移。"
     }
   },
   "required": [

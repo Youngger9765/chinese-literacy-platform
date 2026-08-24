@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading": {
-      "yaml_sha256": "8045-b13f-79b7-84a4",
+      "yaml_sha256": "47f3-b389-6739-efc8",
       "checked": 10,
       "status": "pass",
       "passed": true,
@@ -26,7 +26,7 @@
     },
     "keypoints": {
       "yaml_sha256": "3fc0-cdd0-bdae-7760",
-      "checked": 11,
+      "checked": 10,
       "status": "pass",
       "passed": true,
       "exit": 0

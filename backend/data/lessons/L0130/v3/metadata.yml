@@ -51,3 +51,14 @@ strategy_sources:
   worksheet: 讀出故事道理
   master_sheet: 推論策略──找出故事道理
   previous: 讀出故事道理
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'
