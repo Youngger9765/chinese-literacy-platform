@@ -17,7 +17,13 @@ DATA = pathlib.Path(__file__).resolve().parents[1] / "data" / "lessons"
 
 
 def _on_disk() -> int:
-    return len(list(DATA.glob("L*/v3/keypoints.*.yml")))
+    """有重點表的**課數**，不是檔案數。
+
+    儀表板是一課一列，而多篇課一課有好幾份 keypoints（#2916）——
+    數檔案會得到 155、數課會得到 150，兩者比對永遠對不上，
+    而那個差不是缺陷，是單位不同。
+    """
+    return len({p.parts[-3] for p in DATA.glob("L*/v3/keypoints.*.yml")})
 
 
 def test_dashboard_counts_the_keypoints_that_are_actually_on_disk():
@@ -125,7 +131,9 @@ def test_a_broken_keypoints_file_does_not_500_the_admin_route(tmp_path, monkeypa
 
     uid = "L9999"
     (tmp_path / uid / "v3").mkdir(parents=True)
-    bad = tmp_path / module_file(uid / "v3", "keypoints")
+    # tmp_path 自建自讀 —— 名字由這裡決定，不必走解析器。
+    # 檔名照新規則帶一個 slug，才驗得到服務端真的用 glob 找得到。
+    bad = tmp_path / uid / "v3" / "keypoints.zzzzz.yml"
     bad.write_text("這行沒問題\n  - 但這裡縮排壞了: [未閉合\n", encoding="utf-8")
 
     monkeypatch.setattr(svc, "_LESSONS_DIR", tmp_path)

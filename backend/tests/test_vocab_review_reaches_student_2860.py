@@ -32,7 +32,9 @@ LESSONS = REPO / "backend" / "data" / "lessons"
 
 def _count_in_source(module: str, require_grid: bool = False) -> int:
     n = 0
-    for f in LESSONS.glob(f"L*/v3/{module}.yml"):
+    # 檔名帶自己的 slug（#2916）。用舊形式的話一個檔都對不到，
+    # 而回傳 0 會讓「一課都不能少」變成「0 課都不能少」—— 恆真。
+    for f in LESSONS.glob(f"L*/v3/{module}.*.yml"):
         body = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get(module) or {}
         if require_grid and not body.get("grid"):
             continue

@@ -48,7 +48,7 @@ UID = "L0016"
 
 
 def _source():
-    doc = yaml.safe_load((LESSONS / module_file(UID / "v3", "keypoints")).read_text(encoding="utf-8")) or {}
+    doc = yaml.safe_load(module_file(LESSONS / UID / "v3", "keypoints").read_text(encoding="utf-8")) or {}
     return doc.get("keypoints") or {}
 
 

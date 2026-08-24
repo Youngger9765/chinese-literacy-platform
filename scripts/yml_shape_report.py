@@ -35,6 +35,9 @@ HEADER_KEYS = {"lesson_uid", "version_id", "section_no"}
 
 #: 註解型欄位的樣態。保守：寧可漏收，不可誤收 —— 誤收會把真資料搬走。
 #: `_scope` / `_圈選note` 這種底線開頭的也算，它們是抽取當下的旁註。
+#: 我們自己加的定址欄位（#2916）——不屬於抽取器的形狀，不進簽章也不算註解欄位。
+ADDRESSING = frozenset({"slug", "text_ref"})
+
 NOTEISH = re.compile(r"(note|說明|備註)$|^_|_ref$|errata|carrier|scope", re.IGNORECASE)
 
 #: 核心 / 邊緣的門檻。核心 = 幾乎每課都有；邊緣 = 幾乎沒課有。
@@ -76,6 +79,11 @@ def collect(module: str | None = None) -> dict:
             # 重複大題的檔名是 `{module}.{slug}.yml`（#2916）——收斂回模組名，
             # 否則每個 slug 都變成一個「只有 1 種形狀」的假模組，形狀棘輪形同虛設
             stem = path.stem.partition(".")[0]
+            # `_manifest.yml` 是衍生檔不是模組 —— 它有自己的形狀（sections 列表），
+            # 混進來會被算成第 25 個「模組」。schema 產生器早就跳過底線前綴，
+            # 這裡漏了，於是 #2916 產出帳本之後它憑空多出 0→3 種形狀。
+            if path.name.startswith("_"):
+                continue
             if module and stem != module:
                 continue
             try:
@@ -85,10 +93,16 @@ def collect(module: str | None = None) -> dict:
                 continue
             if not isinstance(data, dict):
                 continue
-            top_level[stem].append(frozenset(data.keys()))
+            top_level[stem].append(frozenset(data.keys()) - ADDRESSING)
             body = payload_of(data, stem)
             if isinstance(body, dict):
-                per_module[stem].append(frozenset(body.keys()))
+                # ⛔ 定址欄位不進形狀簽章（#2916）。
+                #    `slug` 每個檔都有，不影響變異數；但 `text_ref` 只有引用型的
+                #    節才有（課文自己是被引用的那個、跨篇的是清單）——
+                #    於是**每一個既有形狀都一分為二**，11 個模組的數字一起上升。
+                #    這量的是抽取器的形狀一不一致，而這兩個欄位是我們加的定址，
+                #    不是抽取器產的內容。
+                per_module[stem].append(frozenset(body.keys()) - ADDRESSING)
 
     report = {}
     for stem, shapes in per_module.items():

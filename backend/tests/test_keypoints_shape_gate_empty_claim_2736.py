@@ -42,7 +42,7 @@ def _content_rows(table):
 
 
 def _bridge(uid: str):
-    src = ROOT / "backend/data/lessons" / module_file(uid / "v3", "keypoints")
+    src = module_file(ROOT / "backend/data/lessons" / uid / "v3", "keypoints")
     return keypoints_to_structure_table(yaml.safe_load(src.read_text(encoding="utf-8")))
 
 

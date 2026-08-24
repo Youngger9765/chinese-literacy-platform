@@ -40,7 +40,7 @@ LESSONS = pathlib.Path(__file__).resolve().parent.parent / "data" / "lessons"
 
 
 def _served(uid: str):
-    kp = (yaml.safe_load((LESSONS / module_file(uid / "v3", "keypoints")).read_text(encoding="utf-8"))
+    kp = (yaml.safe_load(module_file(LESSONS / uid / "v3", "keypoints").read_text(encoding="utf-8"))
           or {}).get("keypoints") or {}
     return _sanitize_structure_for_client(_format_yaml_structure_table(
         keypoints_to_structure_table(kp)))

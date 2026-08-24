@@ -22,7 +22,7 @@ def _golden() -> dict:
 
 
 def _key_reading(uid: str) -> dict:
-    f = LESSONS / module_file(uid / "v3", "key_reading")
+    f = module_file(LESSONS / uid / "v3", "key_reading")
     if not f:
         return {}
     d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
