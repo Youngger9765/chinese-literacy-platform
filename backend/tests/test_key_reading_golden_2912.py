@@ -104,6 +104,83 @@ def test_lessons_without_a_marked_paragraph_ship_nothing():
     assert wrong == [], "應該擋下來卻給了段落：\n" + "\n".join(wrong)
 
 
+def _extractor():
+    """`scripts/extract_key_reading_v3.py`，直接載入（它不是套件的一部分）。"""
+    import importlib.util
+    p = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "extract_key_reading_v3.py"
+    spec = importlib.util.spec_from_file_location("ek_v3", p)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_an_unnumbered_block_is_absorbed_only_when_the_sentence_is_unfinished():
+    """沒編號的收尾段：斷在句中才吃，句子講完了就不吃。
+
+    **為什麼要有這條**：`unnumbered_blocks` 一度完全沒被讀（L0084 因此有 125 字的
+    結語不在考慮範圍內）。補讀它的時候，很容易順手用「字數欄末筆含它」當理由把它
+    接上去 —— 那是 #2712 換個地方再做一次。在教授親手標了段落的 38 課上實測，
+    字數欄的 max **38/38 全部大於**教授標的長度（中位 +264），它界定不了範圍。
+
+    所以判準只有一個：句子有沒有結束。兩個方向都鎖，只鎖一邊會退化成「總是吃」
+    或「總是不吃」。
+    """
+    m = _extractor()
+    block = {6: ["另一個沒編號的收尾段。"]}
+    passage, n = m.absorb_split_tail(["指定段的內容，這句話講完了。"], [6], 6, {6: 0}, block)
+    assert (passage, n) == ("指定段的內容，這句話講完了。", 0), (
+        "指定段自己以句末標點收尾，沒編號的收尾段是**另一段**，不可以吃進來"
+    )
+
+    passage2, n2 = m.absorb_split_tail(
+        ["指定段的內容，這句話還沒"], [6], 6, {6: 0}, {6: ["講完就換段了。"]})
+    assert (passage2, n2) == ("指定段的內容，這句話還沒講完就換段了。", 1), (
+        "指定段斷在句中、下一段正好沒編號 —— 不吃就會截斷"
+    )
+
+
+def test_the_lesson_with_an_unnumbered_block_still_ships_the_marked_paragraph():
+    """L0084 的實資料：段號欄 6 個號、課文欄 7 段，第 7 段沒號。
+
+    第六段以「。」收尾，所以出貨的是第六段本身（179 字），不含後面 125 字的結語。
+    ⚠️ 這條鎖的是**結果**，上面那條鎖的是**判準** —— 少了判準那條，有人把規則改成
+    「總是吃」時這條仍會綠（L0084 剛好不受影響），反之亦然。
+    """
+    kr = _key_reading("L0084")
+    assert kr.get("start_paragraph") == kr.get("end_paragraph") == 6
+    assert kr["passage"].rstrip().endswith("直到現在我才讀懂。")
+    assert "阿德勒" not in kr["passage"], (
+        "沒編號的結語被吃進來了 —— 檢查是不是又拿字數欄當終點依據"
+    )
+
+
+def test_a_repeated_paragraph_number_resolves_to_the_last_run():
+    """段號重編時取**最後**一次出現，而且吸收尾巴要接對位置。
+
+    一份學習單裝兩篇（書信體、兩則短文）時段號從頭再數，全庫 4 課如此。
+    L0010（錨點二）與 L0029（錨點七）真的有兩個候選，取最後一次出現的那個，
+    兩課都逐字命中教授的一版人工掃描。
+
+    **為什麼要測**：這件事以前是靠 dict 後蓋前**隱性**成立的，而取位置的
+    `order.index(idx)` 拿的是**第一次**出現 —— 兩者對不起來。今天沒爆只是因為全庫
+    都沒觸發吸收；哪天某課的指定段斷在句中，就會接上第一份文本的下一段。
+    這條把「選最後一個」與「接對位置」一起鎖住。
+    """
+    m = _extractor()
+    # 兩份文本，段號各自從 1 數起；第二份的「2」才是要的，而且它斷在句中。
+    texts = ["甲一。", "甲二。", "乙一。", "乙二還沒", "講完。"]
+    order = [1, 2, 1, 2, 3]
+    pos_of = {}
+    for i, ix in enumerate(order):
+        pos_of[ix] = i
+    passage, n = m.absorb_split_tail(texts, order, 2, pos_of)
+    assert passage == "乙二還沒講完。", (
+        f"取到 {passage!r} —— 段號 2 出現兩次時要取最後一次（第二份文本），"
+        "而且往後接也要從那個位置接"
+    )
+    assert n == 1
+
+
 def test_every_golden_lesson_still_exists():
     """golden set 引用的課必須存在。
 

@@ -168,8 +168,31 @@ def read_lesson(uid: str) -> dict:
         # Ordered, because absorbing a tail walks the printed sequence, and `idx` is not
         # guaranteed to be 1..n contiguous.
         out["order"] = [p.get("idx") for p in paras]
-        out["by_idx"] = {p.get("idx"): (p.get("text") or "") for p in paras}
+        out["texts"] = [(p.get("text") or "") for p in paras]
+        # 🔴 段號會重編：一份學習單裝兩篇（書信體、兩則短文）時，段號從頭再數一次。
+        # 全庫 4 課如此 —— L0010 [1-4,1-8]、L0012 [1-3,1-7]、L0016 [1,2,3,4,4,5,6]、
+        # L0029 [1-9,1-10]。其中 L0010（錨點二）與 L0029（錨點七）真的有兩個候選。
+        #
+        # **取最後一次出現的那一個**：兩課都因此逐字命中教授的一版人工掃描
+        # （verdict=confirmed，2/2）。前面的編號段是引文／範例，念順順練的是正文。
+        #
+        # ⚠️ 這件事以前是靠 dict 後蓋前**隱性**成立的，而 `order.index(idx)` 取的卻是
+        # **第一次**出現的位置 —— 兩者對不起來。今天沒爆是因為全庫 absorbed_tail 都是 0；
+        # 一旦某課的指定段斷在句中，就會接上第一份文本的下一段。改成顯式的位置。
+        out["pos_of"] = {}
+        for i, p in enumerate(paras):
+            out["pos_of"][p.get("idx")] = i          # 後蓋前 ＝ 取最後一次出現
+        out["by_idx"] = {idx: out["texts"][i] for idx, i in out["pos_of"].items()}
         out["preface"] = ft.get("preface")
+        # 課文欄可能比段號欄多出一兩段 —— 作者沒編號的收尾段。它們**不是**編號段落的
+        # 一部分（L0084 原稿：段號欄 6 個號、課文欄 7 個 `w:p`），所以不進 `by_idx`：
+        # 進去會多一個沒人指得到的「段」，還會被 `order` 當成下一段吸收。
+        # 但要讀進來，因為指定段若斷在句中、而下一段正好沒編號，不看它就會截斷。
+        out["unnumbered_after"] = {}
+        for b in ft.get("unnumbered_blocks") or []:
+            if isinstance(b, dict) and b.get("after_paragraph") is not None:
+                out["unnumbered_after"].setdefault(b["after_paragraph"], []).append(
+                    b.get("text") or "")
     if lf.exists():
         l = yaml.safe_load(lf.read_text(encoding="utf-8")) or {}
         l = l.get("lesson", l)
@@ -178,21 +201,43 @@ def read_lesson(uid: str) -> dict:
     return out
 
 
-def absorb_split_tail(by_idx: dict, order: list, idx) -> tuple[str, int]:
-    """`by_idx[idx]`, plus following paragraphs needed to finish its sentence.
+def _unfinished(passage: str) -> bool:
+    return not passage.rstrip().endswith(tuple(_SENTENCE_END))
+
+
+def absorb_split_tail(texts: list, order: list, idx, pos_of: dict,
+                      unnumbered_after: dict | None = None) -> tuple[str, int]:
+    """指定段的文字，加上「把句子講完」所需的後續文字。
 
     A passage that stops mid-sentence is wrong on its face, which makes this a local
     rule rather than a guess about paragraph structure. Bounded: a run where nothing ends
     a sentence is a parsing failure, not a passage.
+
+    ⛔ 判準只有一個：**句子有沒有結束**。不是「字數欄數到哪」——
+    在教授親手標了段落的 38 課上實測，字數欄的 max **38/38 全部大於**教授標的長度
+    （中位 +264，沒有一課落在 ±5 內），所以它界定不了朗讀範圍。用它收尾就是把
+    #2712 換個地方再做一次。
+
+    沒編號的收尾段（`unnumbered_blocks`）走同一條判準：指定段自己把句子講完了就不吃，
+    斷在句中才吃。L0084 是這條規則的實例 —— 第六段以「。」收尾，後面那 125 字的
+    阿德勒結語是**另一個沒編號的段落**，所以不屬於第六段（原稿：段號欄 6 個號、
+    課文欄 7 個 `w:p`；repo 對這個現象的既有結論也是「作者沒編號的收尾句」）。
     """
-    passage = by_idx[idx]
-    pos = order.index(idx)
+    pos = pos_of[idx]
+    passage = texts[pos]
     n = 0
+    # 走**位置**，不走段號 —— 段號會重複，位置不會。
     while (n < MAX_ABSORBED_TAIL
-           and pos + 1 + n < len(order)
-           and not passage.rstrip().endswith(tuple(_SENTENCE_END))):
-        passage += by_idx[order[pos + 1 + n]]
+           and pos + 1 + n < len(texts)
+           and _unfinished(passage)):
+        passage += texts[pos + 1 + n]
         n += 1
+    # 編號段走完句子還沒結束時，才看掛在這幾段後面、沒編號的區塊。
+    for tail in order[pos: pos + 1 + n]:
+        for block in (unnumbered_after or {}).get(tail, []):
+            if n < MAX_ABSORBED_TAIL and _unfinished(passage):
+                passage += block
+                n += 1
     return passage, n
 
 
@@ -264,7 +309,8 @@ def extract(uid: str) -> dict:
         out["body_paragraphs"] = len(l["by_idx"])
         return out
 
-    passage, absorbed = absorb_split_tail(l["by_idx"], l["order"], anchor)
+    passage, absorbed = absorb_split_tail(l["texts"], l["order"], anchor, l["pos_of"],
+                                          l.get("unnumbered_after"))
     passage = passage.strip()
     out.update(passage=passage, absorbed_tail=absorbed,
                start_text=passage[:24], chars=len(_norm(passage)))
