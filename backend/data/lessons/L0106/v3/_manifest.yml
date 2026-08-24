@@ -6,6 +6,8 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略—帶著問題閱讀
+  slug: null
+  file: spotlight.yml
   pages:
   - 1
   - 2

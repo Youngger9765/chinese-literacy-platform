@@ -1,0 +1,29 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 二
+vocab_definitions:
+  vocabulary_bank:
+  - 瞠目結舌
+  - 吞噬
+  - 迥異
+  - 千錘百鍊
+  - 演化
+  vocabulary_bank_label: 本課語詞
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 瞠目結舌
+    definition: 形容非常驚訝，睜大眼睛說不出話。
+  - index: 2
+    word: 演化
+    definition: 生物經過許多世代，身體或特徵逐漸改變的過程。
+  - index: 3
+    word: 迥異
+    definition: 兩者差異很大，明顯不同。
+  - index: 4
+    word: 千錘百鍊
+    definition: 形容人的意志、技藝經過多次磨練之後變得非常出色。
+  - index: 5
+    word: 吞噬
+    definition: 原指吞食。本文比喻鬆軟的跑道消耗了選手的腿部力量。
+  part: 2

@@ -5,23 +5,31 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: null
+  file: full_text_annotate.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  slug: null
+  file: key_reading.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  slug: null
+  file: vocab_definitions.yml
   pages:
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  slug: null
+  file: vocab_application.yml
   pages:
   - 3
   - 4
@@ -29,6 +37,8 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略──找小主題與重要細節
+  slug: null
+  file: spotlight.yml
   pages:
   - 4
   - 5
@@ -36,23 +46,31 @@ sections:
 - 'no': 六
   name: 文章重點表
   module: keypoints
+  slug: null
+  file: keypoints.yml
   pages:
   - 6
   - 7
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 7
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  slug: null
+  file: vocab_review.yml
   pages:
   - 8
 - 'no': 九
   name: 知識補給站
   module: resources
+  slug: null
+  file: resources.yml
   pages:
   - 8
   - 9

@@ -5,17 +5,23 @@ sections:
 - 'no': null
   name: 導讀
   module: intro_guide
+  slug: null
+  file: intro_guide.yml
   pages:
   - 1
 - 'no': null
   name: 古文今譯
   module: modern_translation
+  slug: null
+  file: modern_translation.yml
   pages:
   - 1
   - 2
 - 'no': null
   name: 原文（含斷詞點）＋注釋
   module: classical_text
+  slug: null
+  file: classical_text.yml
   pages:
   - 1
   - 2
@@ -23,6 +29,8 @@ sections:
 - 'no': null
   name: 朗讀計時
   module: key_reading
+  slug: null
+  file: key_reading.yml
   pages:
   - 1
   - 2
@@ -30,12 +38,16 @@ sections:
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  slug: null
+  file: sentence_matching.yml
   pages:
   - 2
   - 3
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  slug: null
+  file: word_matching.yml
   pages:
   - 3
   - 4
@@ -43,6 +55,8 @@ sections:
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  slug: null
+  file: keypoints.yml
   pages:
   - 5
   - 6
@@ -50,6 +64,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 判斷句
+  slug: null
+  file: spotlight.yml
   pages:
   - 6
   - 7
@@ -57,6 +73,8 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 8
   - 9
@@ -64,6 +82,8 @@ sections:
 - 'no': 六
   name: 自我挑戰
   module: self_challenge
+  slug: null
+  file: self_challenge.yml
   pages:
   - 10
 dispatch:

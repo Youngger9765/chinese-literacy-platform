@@ -45,9 +45,28 @@ export function deliversFullText(grade: string | number | undefined | null): boo
   return Number.isInteger(n) && n >= 4 && n <= 7;
 }
 
-export function buildLessonQrValue(origin: string, lessonId: number | string, step: LessonQrStep): string {
-  return `${origin}/learn/${lessonId}/${step}`;
+export function buildLessonQrValue(
+  origin: string,
+  lessonId: number | string,
+  step: LessonQrStep,
+  roundSlug?: string | null,
+): string {
+  // 一份學習單多篇文章時（#2916），同一個 step 每篇各一個 QR，靠 `?p=` 分辨。
+  const q = roundSlug ? `?p=${roundSlug}` : '';
+  return `${origin}/learn/${lessonId}/${step}${q}`;
 }
+
+/**
+ * QR 要印的入口網域。
+ *
+ * ⛔ **不要傳 `window.location.origin`。** 那會讓「在哪個站按下載」決定紙上印什麼 ——
+ * 2026-08-25 查出 PM 在 staging 產的那批 QR **每一張都指向測試站**，
+ * 學生掃進去用測試站登入、學習歷程留在測試站。那不是設定失誤，
+ * 是「用當下網址當印刷內容」這個設計保證會發生的事。
+ */
+export const QR_ENTRY_ORIGIN =
+  (import.meta.env.VITE_QR_ENTRY_ORIGIN as string | undefined)?.replace(/\/$/, '')
+  || 'https://lingoleap-prod.web.app';
 
 export function qrFileName(filePrefix: string, lessonId: number | string): string {
   return `${filePrefix}-L${String(lessonId).padStart(2, '0')}.png`;

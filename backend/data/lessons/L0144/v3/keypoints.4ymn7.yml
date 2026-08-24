@@ -1,0 +1,39 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 三
+keypoints:
+  section_name_printed: 文章重點表
+  section_name_note: 篇3 印「文章重點表」，前兩篇印「文章重點整理」
+  instruction: 請根據課文內容，完成底下表格。
+  title: 靠跑鞋破紀錄，合理嗎?
+  title_note: 表頭的問號是半形「?」（內頁大標是全形「？」），原稿如此
+  layout: list
+  answer_carrier: 橘色手寫（在文字層），PDF p13 可見
+  rows:
+  - label: 主要爭議（第1段）
+    value: 2019年，基普喬吉穿著尚未公開販售的高科技【　】，在兩小時內跑完馬拉松，但成績不列入【　】。
+    blanks:
+    - answer: 原型跑鞋
+    - answer: 世界紀錄
+  - label: 跑鞋的特色（第2段）
+    value: 這款跑鞋「極輕」又【　】，鞋面不容易吸收汗水和雨水，腳掌跑步時也更【　】。
+    blanks:
+    - answer: 高回彈
+    - answer: 穩定
+  - label: 公平爭議（第3段）
+    value: 有人認為，選手仍須長年【　】；質疑者擔心，跑鞋可能讓裝備影響【　】。
+    blanks:
+    - answer: 苦練
+    - answer: 勝負
+  - label: 規則界線（第4段）
+    value: 參賽鞋款必須先公開販售至少【　】，鞋底厚度等規格也要符合【　】。
+    blanks:
+    - answer: 四個月
+    - answer: 規定
+  - label: 尚未解決的 問題（第5段）
+    value: 如何讓科技幫助選手【　】，又不讓裝備【　】？
+    blanks:
+    - answer: 突破極限
+    - answer: 左右勝負
+    label_note: 這一列的標籤原稿印成「尚未解決的 問題」，中間有一個空格
+  part: 3

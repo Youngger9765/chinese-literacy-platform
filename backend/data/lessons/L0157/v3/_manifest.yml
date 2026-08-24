@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: null
+  file: full_text_annotate.yml
   pages:
   - 1
   - 2
@@ -13,12 +15,16 @@ sections:
 - 'no': 二
   name: 古今對照表
   module: word_matching
+  slug: null
+  file: word_matching.yml
   pages:
   - 4
 - 'no': 三
   name: 文言文聚光燈
   module: spotlight
   subtitle: 如何讀懂文言文
+  slug: null
+  file: spotlight.yml
   pages:
   - 4
   - 5
@@ -27,6 +33,8 @@ sections:
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 7
   - 8

@@ -51,15 +51,87 @@ def _key_reading(l: dict) -> dict | None:
     against the body, so its presence is the check — there is no verdict to re-test
     here.
     """
-    kr = l.get("key_reading")
-    if not isinstance(kr, dict) or not kr.get("passage"):
-        return None
-    return {
-        "passage": kr["passage"],
-        "start_text": kr.get("start_text"),
-        "extent_chars": kr.get("extent_chars"),
-        "source": kr.get("source") or "docx-extract",
-    }
+    rounds = _key_readings(l)
+    return rounds[0] if rounds else None
+
+
+def _parts_summary(l: dict) -> list[dict]:
+    """每一篇的輕量摘要，給清單用（#2916）。
+
+    後台的 QR 清單要「一篇一列」，但它是從 `/api/stories`（清單）抓的，
+    而篇次資訊本來只在單課詳情裡 —— 為了 175 課各打一次詳情太貴，
+    所以在清單就帶著這一份摘要。
+    """
+    rounds = l.get("repeat_rounds") or {}
+    if not rounds:
+        return []
+    out = []
+    for slug, mods in rounds.items():
+        fta = (mods or {}).get("full_text_annotate") or {}
+        kr = (mods or {}).get("key_reading") or {}
+        out.append({
+            "slug": slug,
+            "part": kr.get("part") or fta.get("part") or fta.get("part_no"),
+            "has_full": bool(fta.get("paragraphs") or (fta.get("body") or {}).get("paragraphs")),
+            "has_key": bool(kr.get("passage")),
+        })
+    out.sort(key=lambda r: (r.get("part") is None, r.get("part") or 0, r["slug"]))
+    return out
+
+
+def _worksheet_order(l: dict) -> list[dict]:
+    """學習單印的大題順序 → 前台的步驟順序（#2916）。
+
+    `type` 給的是**模組名**（`key_reading`），前台用 WORKSHEET_TYPE_ALIASES
+    對到 step id（`key-passage-reading`）。沒有 module 的列（還沒歸因的大題）
+    直接略過 —— 那種列沒有東西可以顯示。
+    """
+    out = []
+    for s in l.get("manifest_sections") or []:
+        mod = s.get("module")
+        if not mod:
+            continue
+        row = {"number": s.get("no"), "name": s.get("name"), "type": mod}
+        for k in ("part", "slug", "file"):
+            if s.get(k) is not None:
+                row[k] = s[k]
+        out.append(row)
+    return out
+
+
+def _key_readings(l: dict) -> list[dict]:
+    """所有的 重點朗讀 —— **一輪一個，不是一課一個**（#2916）。
+
+    一份學習單印兩篇文章時，念順順也印兩次，各自有自己的 ☞ 起點與字數。
+    兩份都帶 slug（`key_reading.fqwda.yml` / `key_reading.n3qxn.yml`），
+    `slug` 就是定址用的 key：`?p=fqwda` 圈起那一輪。
+
+    單篇課回一筆、`slug` 是 None —— 形狀跟多輪課一樣，消費端不必分兩種寫法。
+    """
+    def _one(kr, slug):
+        if not isinstance(kr, dict) or not kr.get("passage"):
+            return None
+        return {
+            "slug": slug,
+            "part": kr.get("part"),
+            "passage": kr["passage"],
+            "start_text": kr.get("start_text"),
+            "extent_chars": kr.get("extent_chars"),
+            "source": kr.get("source") or "docx-extract",
+        }
+
+    out = []
+    base = _one(l.get("key_reading"), None)
+    if base:
+        out.append(base)
+    rounds = l.get("repeat_rounds") or {}
+    for slug, mods in rounds.items():
+        got = _one((mods or {}).get("key_reading"), slug)
+        if got:
+            out.append(got)
+    # 篇次是老師與學生看到的順序；沒有 part 的（單篇課）排在最前面
+    out.sort(key=lambda r: (r.get("part") is None and 0 or 1, r.get("part") or 0))
+    return out
 
 
 #: 文體 → the four categories the API contract allows. Mirrors the table in
@@ -565,6 +637,26 @@ def _uid_tree_lessons() -> list[dict]:
             # A section that failed its check is absent from that file rather than
             # present-and-wrong, so `or None` here is the honest empty state and the
             # step renders 「本課尚無…」 instead of another lesson's questions.
+            # 重複出現的大題（#2916）。一份學習單印兩篇文章時，念順順／讀全文／語詞
+            # 這些大題會各出現一次，檔名各帶一個 slug（`key_reading.fqwda.yml`）。
+            #
+            # ⚠️ 這個 row 是**逐欄寫死的字典**，下面那個 overlay 迴圈只覆蓋
+            #    「row 裡已經有的 key」——所以沒有宣告在這裡的欄位，
+            #    loader 讀到了也永遠送不出去，而且不會有任何錯誤或紅燈
+            #    （2026-08-24 實測：L0029 兩個念順順都在硬碟上，API 回 repeat_rounds 空）。
+            "repeat_rounds": l.get("repeat_rounds") or None,
+            # ⚠️ 不能叫 `parts` —— `lesson.yml` 自己就有一個 `parts:`（{id,label}），
+            #    而下面那個 overlay 迴圈會用課的版本蓋掉這裡算的（實測 0/5 課拿得到）。
+            "part_rounds": _parts_summary(l) or None,
+            # 前台的導航順序 —— 直接來自那一課的總帳（`_manifest.yml`），
+            # 不是寫死的預設步驟表（#2916）。
+            #
+            # ⚠️ 在此之前這個欄位**175 課全是 None**，所以每一課都退回
+            #    DEFAULT_STEP_SEQUENCE —— 前台從來沒有照學習單的順序走過。
+            #
+            # 一課多篇時同一個大題會出現多次，`file` 寫明各自要載哪一份，
+            # 前台照列表由上往下走就對了，不必知道 slug 規則。
+            "worksheet_section_order": _worksheet_order(l) or None,
             "vocabulary": _vocabulary_from(l) or None,
             "fill_in_blank": _cloze_from(l) or None,
             "vocab_bank": _vocab_bank_from(l) or None,
@@ -580,6 +672,9 @@ def _uid_tree_lessons() -> list[dict]:
             # own text — the first-edition table, keyed by code, was serving another
             # lesson's paragraph aloud.
             "key_reading": _key_reading(l),
+            # 一輪一個（#2916）。單篇課就是一筆、slug=None；一課兩篇就是兩筆。
+            # ⚠️ 單數那個保留指向第一輪，所以 168 課單篇的行為一個字都沒變。
+            "key_readings": _key_readings(l) or None,
             "text_type": "單",
             "source_file": None,
             # An extraction that failed is stored as {"lesson": …, "error": …} in

@@ -41,6 +41,15 @@ export const STEP_CATEGORY_COLORS: Record<StepCategory, { badge: string; activeB
 export interface StepConfig {
   /** Unique identifier — must match the URL path segment under /learn/:storyId/ */
   id: string;
+  /**
+   * 一份學習單多篇文章時（#2916），同一個大題會出現好幾次。
+   * 那幾步的 `id` 帶後綴（`key-passage-reading#4uee3`）讓它們天然不撞，
+   * `baseId` 是拿掉後綴的原始 step id（決定要 render 哪個元件、走哪條路由），
+   * `roundSlug` 是這一步屬於哪一篇（`?p=` 用它、進度紀錄的 key 也用它）。
+   * 單篇課這兩個都是 undefined，行為跟以前一模一樣。
+   */
+  baseId?: string;
+  roundSlug?: string;
   /** Display label shown in StepperNav */
   label: string;
   /** Single-char hint shown inside the step badge circle (mobile / compact view). Pick the most representative character of the step, not necessarily label[0]. */
@@ -406,7 +415,16 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
     ? lessonStepSequence
     : DEFAULT_STEP_SEQUENCE;
   return seq
-    .map((id) => STEP_REGISTRY[id])
+    .map((key) => {
+      // `key-passage-reading#4uee3` → registry 查 `key-passage-reading`，
+      // 但回傳的 id 保留整個 key，讓三篇的步驟、進度紀錄、網址天然不撞（#2916）。
+      const hash = key.indexOf('#');
+      if (hash < 0) return STEP_REGISTRY[key];
+      const base = key.slice(0, hash);
+      const slug = key.slice(hash + 1);
+      const cfg = STEP_REGISTRY[base];
+      return cfg ? { ...cfg, id: key, baseId: base, roundSlug: slug } : undefined;
+    })
     .filter((s): s is StepConfig => !!s && s.enabled);
 }
 
@@ -424,6 +442,21 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
  * stepSequenceFromWorksheet flags any type that still resolves to nothing).
  */
 export const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
+  // ── 模組名 → step id（#2916）────────────────────────────────────
+  // `worksheet_section_order` 的 `type` 現在直接給模組名，因為那份順序是從
+  // 每一課的總帳 `_manifest.yml` 來的，而總帳講的是模組。
+  // ⚠️ 這張表要跟 `scripts/module_entry_gate.py` 的 ENTRY 保持一致 ——
+  //    那道門會解析本檔驗證「每個抽出來的模組，學生都走得到」。
+  full_text_annotate: 'full-text-annotate', //   一 讀全文-做記號
+  key_reading: 'key-passage-reading', //          念順順 → 重點朗讀
+  vocab_application: 'vocab-application', //      語詞應用
+  keypoints: 'keypoints-table', //                文章重點表／文章重點整理
+  vocab_review: 'vocab-review', //                詞語複習
+  resources: 'knowledge-station', //              知識補給站
+  comprehension: 'comprehension', //              閱讀理解
+  spotlight: 'spotlight', //                      閱讀聚光燈／品格聚光燈
+
+  // ── 舊的學習單 section type（parser 詞彙）──────────────────────
   vocab_definitions: 'vocab-definition', // 語詞我最棒 (plural type → singular id)
   structure_table: 'keypoints-table', //   文章重點表
   reading_strategy: 'spotlight', //   閱讀聚光燈（學習單的 section type 是 reading_strategy，不可改）
@@ -504,13 +537,21 @@ export function isPublicLearningStep(id: string): boolean {
 }
 
 export function stepSequenceFromWorksheet(
-  worksheet?: Array<{ number?: string; name?: string; type?: string }> | null,
+  worksheet?: Array<{ number?: string; name?: string; type?: string; part?: number | string | null; slug?: string | null }> | null,
 ): string[] | null {
   if (!worksheet || worksheet.length === 0) return null;
   const ids: string[] = ['lesson-intro'];
   for (const section of worksheet) {
     const type = section?.type;
     if (!type) continue;
+    // 一份學習單印好幾篇文章時（#2916），同一個大題會出現好幾次。
+    // 帶 slug 的那幾列要各自成為一個步驟，所以 key 加後綴 `#<slug>`：
+    //     key-passage-reading          單篇課，跟以前一模一樣
+    //     key-passage-reading#4uee3    第 2 篇的念順順
+    // ⚠️ 下面那行去重原本是 `!ids.includes(id)`，三個念順順會被收斂成一個 ——
+    //    L0063 帳本 19 列、畫面只出現 9 步，學生看不到另外兩篇的入口
+    //    （2026-08-25 真瀏覽器實測抓到）。後綴讓它們天然不相等。
+    const round = section?.slug ? `#${section.slug}` : '';
     // Alias BEFORE the dash transform, then look up in the registry.
     const aliased = WORKSHEET_TYPE_ALIASES[type] ?? type;
     // Underscore→dash yields the *historical* id (reading_annotation →
@@ -519,7 +560,8 @@ export function stepSequenceFromWorksheet(
     // reaching the current step ids.
     const id = resolveStepId(aliased.replace(/_/g, '-'));
     if (STEP_REGISTRY[id]) {
-      if (!ids.includes(id)) ids.push(id);
+      const key = id + round;
+      if (!ids.includes(key)) ids.push(key);
     } else {
       // #2526: never silently drop. Surface unmapped types so future parser
       // vocabulary drift is visible instead of quietly deleting steps.

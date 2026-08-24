@@ -42,6 +42,9 @@ class AudioPlan:
     text: str
     object_path: str
     grade: int | None = None
+    #: 一課多篇時，這一條屬於哪一輪（part slug）。單篇課是 None。
+    slug: str | None = None
+    part: int | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -52,9 +55,63 @@ _PASSAGE_ONLY_GRADES = {8, 9}
 _FULL_AND_PASSAGE_GRADES = {4, 5, 6, 7}
 
 
+def _grade_num(grade) -> int | None:
+    """把 `grade` 收斂成數字年級；不是數字的回 None。
+
+    🔴 2026-08-25 實測：`/api/stories` 的 `grade` 是**字串**（'4'…'9'，
+    另有 `文言文` 12 課、`品格教育` 11 課），而下面兩個規則集是整數。
+    `'4' in {4,5,6,7}` 永遠是 False —— 所以 **plan_demo_audio 對全部 175 課
+    產出 0 條**，整支腳本等於失效，而且不會報錯、只會安靜地什麼都不做。
+    （這是既有缺陷：把腳本退回動這次改動之前的版本，同樣是 0 條。）
+
+    前端 `lessonQr.ts::deliversFullText` 早就處理了同一件事，
+    這裡沿用它的判法，不另外發明。
+    """
+    if isinstance(grade, bool) or grade is None:
+        return None
+    if isinstance(grade, int):
+        return grade
+    try:
+        return int(str(grade).strip())
+    except ValueError:
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Public: plan_demo_audio
 # ---------------------------------------------------------------------------
+
+
+def _rounds_of(lesson: dict) -> list[tuple[str | None, int | None, str, str | None]]:
+    """把一課拆成幾輪 →（slug, 篇次, 全文, 念順順）。
+
+    ⚠️ 一份學習單印好幾篇文章時（G5-L17-18 / G6-L22-24 等 5 課），
+    舊做法把整課段落黏成一條就送去合成 —— 教材端聽到的整課音檔會把
+    三篇連著念完（2026-08-25 明珠老師回報）。這裡改成一輪一條。
+
+    ⛔ 單篇課回傳的 slug 必須是 None，因為下面的物件路徑靠它決定要不要
+       多一層目錄。**單篇課的路徑一個字都不能變** —— staging 已經有 912
+       個檔，而且 QR 已經印在紙上了。
+    """
+    rounds = lesson.get("repeat_rounds") or {}
+    if not rounds:
+        kr = lesson.get("key_reading") or {}
+        return [(None, None, "\n".join(lesson.get("paragraphs") or []),
+                 kr.get("passage") if kr else None)]
+
+    out: list[tuple[str | None, int | None, str, str | None]] = []
+    for slug, mods in rounds.items():
+        fta = (mods or {}).get("full_text_annotate") or {}
+        paras = fta.get("paragraphs") or (fta.get("body") or {}).get("paragraphs") or []
+        text = "\n".join(
+            (x.get("text") if isinstance(x, dict) else str(x)) for x in paras
+        )
+        kr = (mods or {}).get("key_reading") or {}
+        part = kr.get("part") or fta.get("part_no")
+        out.append((slug, part, text, kr.get("passage")))
+    # 篇次是老師與學生看到的順序；沒有篇次的排在最後，但順序穩定
+    out.sort(key=lambda r: (r[1] is None, r[1] or 0, r[0] or ""))
+    return out
 
 
 def plan_demo_audio(lessons: list[dict]) -> list[AudioPlan]:
@@ -62,52 +119,34 @@ def plan_demo_audio(lessons: list[dict]) -> list[AudioPlan]:
 
     G4-G7: full + passage (if passage text exists).
     G8-G9: passage only.
+
+    一課多篇時，每一篇各自一條（#2916）。物件路徑多一層 slug：
+        單篇   demo-reading/{id}/full.mp3          ← 不變
+        多篇   demo-reading/{id}/{slug}/full.mp3
     """
     plans: list[AudioPlan] = []
 
     for lesson in lessons:
         lid = lesson["id"]
-        grade = lesson["grade"]
-        paragraphs: list[str] = lesson.get("paragraphs") or []
-        full_text = "\n".join(paragraphs)
+        grade = _grade_num(lesson["grade"])
 
-        key_reading = lesson.get("key_reading") or {}
-        passage_text: str | None = key_reading.get("passage") if key_reading else None
+        for slug, part, full_text, passage_text in _rounds_of(lesson):
+            prefix = f"demo-reading/{lid}" + (f"/{slug}" if slug else "")
 
-        if grade in _FULL_AND_PASSAGE_GRADES:
-            # Always produce full
-            plans.append(
-                AudioPlan(
-                    lesson_id=lid,
-                    kind="full",
-                    text=full_text,
-                    object_path=f"demo-reading/{lid}/full.mp3",
-                    grade=grade,
-                )
-            )
-            # Passage only if text is present
-            if passage_text:
-                plans.append(
-                    AudioPlan(
-                        lesson_id=lid,
-                        kind="passage",
-                        text=passage_text,
-                        object_path=f"demo-reading/{lid}/passage.mp3",
-                        grade=grade,
-                    )
-                )
-        elif grade in _PASSAGE_ONLY_GRADES:
-            # Passage only
-            if passage_text:
-                plans.append(
-                    AudioPlan(
-                        lesson_id=lid,
-                        kind="passage",
-                        text=passage_text,
-                        object_path=f"demo-reading/{lid}/passage.mp3",
-                        grade=grade,
-                    )
-                )
+            if grade in _FULL_AND_PASSAGE_GRADES:
+                if full_text:
+                    plans.append(AudioPlan(lesson_id=lid, kind="full", text=full_text,
+                                           object_path=f"{prefix}/full.mp3",
+                                           grade=grade, slug=slug, part=part))
+                if passage_text:
+                    plans.append(AudioPlan(lesson_id=lid, kind="passage", text=passage_text,
+                                           object_path=f"{prefix}/passage.mp3",
+                                           grade=grade, slug=slug, part=part))
+            elif grade in _PASSAGE_ONLY_GRADES:
+                if passage_text:
+                    plans.append(AudioPlan(lesson_id=lid, kind="passage", text=passage_text,
+                                           object_path=f"{prefix}/passage.mp3",
+                                           grade=grade, slug=slug, part=part))
 
     return plans
 
@@ -139,16 +178,23 @@ def build_qr_rows(plans: list[AudioPlan], base_url: str) -> list[dict]:
     rows: list[dict] = []
 
     for plan in plans:
-        url = f"{base_url}/demo-reading/{plan.lesson_id}/{plan.kind}"
+        # ⚠️ 路徑一律從 `plan.object_path` 推，**不要**用 lesson_id + kind 重拼。
+        #    一課多篇時 object_path 帶著 slug（`demo-reading/20063/4uee3/full.mp3`），
+        #    重拼會把 slug 丟掉 —— 三篇會產出三列一模一樣的 QR，
+        #    教材端貼上去之後三張都指到同一段音檔（#2916）。
+        stem = plan.object_path[: -len(".mp3")] if plan.object_path.endswith(".mp3") else plan.object_path
         rows.append(
             {
                 "course_id": plan.lesson_id,
                 "grade": plan.grade,
                 "lesson_id": plan.lesson_id,
                 "kind": plan.kind,
-                "url": url,
-                "audio_asset_path": f"demo-reading/{plan.lesson_id}/{plan.kind}.mp3",
-                "qr_asset_path": f"demo-reading/{plan.lesson_id}/{plan.kind}.png",
+                # 一課多篇才有；單篇課是 None，欄位仍在，教材端的 Excel 欄位數不變
+                "part": plan.part,
+                "slug": plan.slug,
+                "url": f"{base_url}/{stem}",
+                "audio_asset_path": plan.object_path,
+                "qr_asset_path": f"{stem}.png",
             }
         )
 
@@ -368,6 +414,11 @@ def main(argv: list[str] | None = None) -> int:
                 "title": detail.get("title", story.get("title", "")),
                 "paragraphs": detail.get("paragraphs", []),
                 "key_reading": detail.get("key_reading"),
+                # 一份多課的那 5 課（#2916）：每一篇的課文與念順順住在這裡。
+                # ⚠️ 少了這一行，plan_demo_audio 就退回「整課黏成一條」——
+                #    那正是 2026-08-25 明珠老師回報的「整課音檔幾篇混在一起」。
+                #    改了 plan 卻沒帶資料進來，跑起來會完全看不出差別。
+                "repeat_rounds": detail.get("repeat_rounds"),
             }
         )
 

@@ -6,6 +6,8 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略──看特殊標點找線索
+  slug: null
+  file: spotlight.yml
   pages:
   - 1
   - 2

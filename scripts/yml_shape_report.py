@@ -73,7 +73,10 @@ def collect(module: str | None = None) -> dict:
 
     for version_dir in sorted(LESSONS.glob("L*/v3")):
         for path in sorted(version_dir.glob("*.yml")):
-            if module and path.stem != module:
+            # 重複大題的檔名是 `{module}.{slug}.yml`（#2916）——收斂回模組名，
+            # 否則每個 slug 都變成一個「只有 1 種形狀」的假模組，形狀棘輪形同虛設
+            stem = path.stem.partition(".")[0]
+            if module and stem != module:
                 continue
             try:
                 data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -82,10 +85,10 @@ def collect(module: str | None = None) -> dict:
                 continue
             if not isinstance(data, dict):
                 continue
-            top_level[path.stem].append(frozenset(data.keys()))
-            body = payload_of(data, path.stem)
+            top_level[stem].append(frozenset(data.keys()))
+            body = payload_of(data, stem)
             if isinstance(body, dict):
-                per_module[path.stem].append(frozenset(body.keys()))
+                per_module[stem].append(frozenset(body.keys()))
 
     report = {}
     for stem, shapes in per_module.items():

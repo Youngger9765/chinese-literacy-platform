@@ -30,6 +30,7 @@ manifest 是它**加上模組歸屬**之後的產物 —— 多了 `module` 欄�
 from __future__ import annotations
 
 import argparse
+import re
 import pathlib
 import sys
 
@@ -40,6 +41,16 @@ LESSONS = REPO_ROOT / "backend" / "data" / "lessons"
 MAP_FILE = REPO_ROOT / "specs" / "modules" / "section-to-module.yml"
 GAPS_FILE = REPO_ROOT / "backend" / "data" / "curriculum_qa" / "content_known_gaps.yaml"
 PAGES_FILE = REPO_ROOT / "specs" / "modules" / "section-pages.yml"
+
+
+def _part_ordinal(part) -> int | None:
+    """把 `part` 的各種寫法收斂成篇次序號；取不到回 None（＝共用區，不分篇）。"""
+    if isinstance(part, bool) or part is None:
+        return None
+    if isinstance(part, int):
+        return part
+    m = re.search(r"\d+", str(part))
+    return int(m.group()) if m else None
 
 
 def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict,
@@ -54,6 +65,8 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
 
     uid = version_dir.parent.name
     not_sections = set(table.get("not_sections", []))
+    # 篇次 → slug。`parts[]` 的順序就是第 1 篇、第 2 篇…（#2916）
+    lesson_parts = lesson.get("parts") or []
 
     # 頁碼來自 committed 的 section-pages.yml，不是現場讀原稿 —— CI 沒有 private/，
     # 現場讀會讓 --check 恆紅（見 tests/test_corpus_gates_are_wired_2843.py 的 CANNOT_WIRE）
@@ -83,6 +96,32 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
         entry = {"no": row.get("no"), "name": name, "module": module}
         if row.get("subtitle"):
             entry["subtitle"] = row["subtitle"]
+
+        # 一課多篇時，同一個大題會出現好幾次（L0029 印兩個念順順）。
+        # 光有 module 名分不出哪一列對哪一份檔 —— 所以這裡把**要載的檔名**寫死，
+        # 消費端照著載就好，不必自己拼字串、也不必知道 slug 規則。
+        #
+        # `part` 直接沿用學習單目錄印的值（可能是 1/2/3，也可能是「前半」
+        # 「篇次 1/3」這種自由文字 —— 那是原稿怎麼印就怎麼記，不強行正規化）。
+        if row.get("part") is not None:
+            entry["part"] = row["part"]
+        if module:
+            slug = None
+            # `part` 是原稿怎麼印就怎麼記，五種寫法都出現過：
+            #   1 / 2 / 3          （L0029、L0063、L0111）
+            #   '1/2' '2/2'        （L0137）
+            #   '篇次 1/3' '篇次3/3-(新聞短文)'（L0144）
+            #   '三篇合讀' '前半' '後半'        ← 沒有篇次，是共用區或版面切分
+            # 取第一個數字當篇次；取不到就是共用區，不給 slug。
+            ordinal = _part_ordinal(row.get("part"))
+            if ordinal and 1 <= ordinal <= len(lesson_parts):
+                cand = (lesson_parts[ordinal - 1] or {}).get("id")
+                # ⚠️ 只有那份檔**真的存在**才寫 slug。寫一個不存在的檔名
+                #    會讓消費端載不到東西，而且看起來像資料壞了
+                if cand and (version_dir / f"{module}.{cand}.yml").is_file():
+                    slug = cand
+            entry["slug"] = slug
+            entry["file"] = f"{module}.{slug}.yml" if slug else f"{module}.yml"
         if unresolved:
             # 明說「還沒歸因」而不是留 module: null 讓人以為是漏填
             entry["module_unresolved"] = True
@@ -107,7 +146,12 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
                     entry["pages_source"] = stored["pages_source"]
         sections.append(entry)
 
-    produced = sorted({p.stem for p in version_dir.glob("*.yml")} - not_sections - {"_manifest"})
+    # 重複模組的檔名是 `{module}.{slug}.yml`（#2916），拿整個 stem 會冒出
+    # `key_reading.m7qxv` 這種不存在的模組名，跟 dispatch 永遠對不上
+    produced = sorted(
+        {p.stem.partition(".")[0] for p in version_dir.glob("*.yml")}
+        - not_sections - {"_manifest"}
+    )
     dispatched = sorted({s["module"] for s in sections if s["module"]})
     absent = sorted(gaps.get(uid, set()))
 

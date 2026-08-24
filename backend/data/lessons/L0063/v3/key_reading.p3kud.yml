@@ -28,3 +28,4 @@ key_reading:
   source: docx-anchor-and-count
   start_paragraph: 5
   end_paragraph: 6
+  part: 1

@@ -77,3 +77,4 @@ full_text_annotate:
 
       v2 的 body.paragraphs 把兩篇共 22 段全部攤平（含假設小標），與印出來的段號對不上。'
     inline_marked: 課文中以外框標示的本課語詞（PDF 上是細方框），與二*語詞我最棒的詞表對得上
+  part: 1

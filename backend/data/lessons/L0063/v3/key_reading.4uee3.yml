@@ -1,0 +1,35 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 2
+key_reading:
+  instruction: 請用計時器，從指定段落（三    )開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 3
+  end_paragraph: 6
+  spans_paragraphs:
+  - 3
+  - 4
+  - 5
+  - 6
+  approx_chars_from_start: 340
+  span_confidence: high
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 190~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+  passage: 「這不是趁火打劫嗎？受災戶已經很可憐了，政府應該要出面，制定公道的價錢，制止這種災後漲價的現象。」一定會有人義憤填膺的說。假定政府料事如神，為了預防趁火打劫，早就立法規定災區工資、材料不得漲價，只要漲價就違法，就罰錢，就關人。但這樣做，反而可能壞事。災後，修繕人力和材料成為稀缺資源，價格自然上漲。漲價後有了誘因，全國各地的鐵工、鋁門窗師傅和水電工等修繕人員才可能願意離鄉背井，放下原本的工作，趕到臺東支援，災區復原工作才能加速完成。如果不准漲價，到臺東路程又遠、又辛苦、還沒地方住，賺的錢又沒有比較多，到底會有幾個人願意只憑著愛心來臺東呢？結果一定是臺東人望穿秋水，卻怎麼等也等不到人來修他們的房子。因此，這時政府該做的是發放賑災補助，受災戶每戶發給多少錢，而不是直接限制價格。
+  extent_chars: 340
+  start_text: 「這不是趁火打劫嗎？受災戶已經很可憐了，政府應該
+  source: part-scoped-anchor-and-count
+  part: 2

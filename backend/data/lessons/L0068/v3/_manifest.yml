@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
   module: spotlight
+  slug: null
+  file: spotlight.yml
   pages:
   - 1
   - 2
@@ -14,35 +16,47 @@ sections:
 - 'no': 二
   name: 文章重點表
   module: keypoints
+  slug: null
+  file: keypoints.yml
   pages:
   - 4
   - 5
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  slug: null
+  file: vocab_definitions.yml
   pages:
   - 5
   - 6
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  slug: null
+  file: vocab_application.yml
   pages:
   - 6
   - 7
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 7
   - 8
 - 'no': 六
   name: 詞語複習
   module: vocab_review
+  slug: null
+  file: vocab_review.yml
   pages:
   - 8
 - 'no': 七
   name: 知識補給站
   module: resources
+  slug: null
+  file: resources.yml
   pages:
   - 8
 dispatch:

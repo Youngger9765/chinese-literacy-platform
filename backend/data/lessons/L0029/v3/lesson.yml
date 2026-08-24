@@ -40,6 +40,10 @@ sections_present:
 - part: 2
   'no': 六
   name: 文章重點整理
+- part: 2
+  'no': null
+  name: 閱讀理解
+  note_printed: 印在「◎請依據第二篇文章的內容，選出正確答案」底下，沒有大題編號
 - part: 3
   'no': 七
   name: 綜合練習

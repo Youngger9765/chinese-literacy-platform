@@ -5,6 +5,9 @@ sections:
 - 'no': 一
   name: 閱讀聚光燈-自我提問策略3--問好問題
   module: spotlight
+  part: 前半
+  slug: null
+  file: spotlight.yml
   pages:
   - 1
   - 2
@@ -17,6 +20,9 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 後半
+  slug: null
+  file: full_text_annotate.yml
   pages:
   - 7
   - 8
@@ -24,29 +30,44 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  part: 後半
+  slug: null
+  file: key_reading.yml
   pages:
   - 9
   - 10
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  part: 後半
+  slug: null
+  file: vocab_definitions.yml
   pages:
   - 10
   - 11
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  part: 後半
+  slug: null
+  file: vocab_application.yml
   pages:
   - 11
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  part: 後半
+  slug: null
+  file: keypoints.yml
   pages:
   - 11
   - 12
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  part: 後半
+  slug: null
+  file: comprehension.yml
   pages:
   - 12
   - 13
@@ -54,11 +75,17 @@ sections:
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  part: 後半
+  slug: null
+  file: vocab_review.yml
   pages:
   - 14
 - 'no': 八
   name: 知識補給站
   module: resources
+  part: 後半
+  slug: null
+  file: resources.yml
   pages:
   - 14
 dispatch:

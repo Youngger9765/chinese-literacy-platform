@@ -44,8 +44,6 @@ matches:
   module: comprehension
 - needle: 文章重點整理
   module: keypoints
-- needle: 綜合練習
-  module: spotlight
 unresolved:
 - needle: 文章重點整理
   lessons: 4
@@ -55,7 +53,26 @@ unresolved:
   note: 只有 1 課，同時有 4 個候選模組
 - needle: 綜合練習
   lessons: 1
-  note: 無交集
+  note: |
+    無交集 —— 它沒有對應的模組，是刻意的，不是漏填。
+
+    2026-08-25 owner 決定：yml 與 HTML 都之後再做。
+
+    曾經有一條「綜合練習 → spotlight」的對應，那是錯的：L0029 的
+    spotlight.yml 的 `section_no_printed` 是「八」（品格聚光燈），
+    綜合練習是「七」。錯的對應會讓同一份 spotlight 被兩列指到，
+    看起來像「重複模組沒拆」，實際上是兩個不同大題被塞進同一個模組。
+    ⛔ 不要再把它接回任何既有模組 —— 它的形狀跟現有 24 個都不一樣：
+
+        1. 連連看（配對）：把寫法連到對應的課文
+        2. 兩題單選：①記敘文(故事) / ②說明文
+        3. 一題單選：把兩篇合起來讀，第二篇讓我們對第一篇多懂了什麼
+
+    現在的行為：帳本（`_manifest.yml`）**留著**這一列，誠實記錄紙上印了它；
+    但 `lesson_indexes._worksheet_order()` 會跳過沒有 module 的列，
+    所以它不會出現在學生的流程裡。等哪天做了它自己的模組，
+    帳本那一列自己就會亮起來，不需要另外開關。
+    全庫只有 L0029 一課有這個大題。
 not_sections:
 - lesson
 - metadata

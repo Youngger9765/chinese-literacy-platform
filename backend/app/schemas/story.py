@@ -55,6 +55,9 @@ class StoryListItem(BaseModel):
     reading_strategy: Optional[str] = None
     reading_strategy_explained: Optional[str] = None
     has_key_reading: bool = False
+    # 一份學習單多篇文章時（#2916），每一篇一筆：{slug, part, has_full, has_key}。
+    # 單篇課是 None。清單就帶著，後台產 QR 清單才不必為 175 課各打一次詳情。
+    part_rounds: Optional[list] = None
     intro: Optional[StoryIntroSchema] = None
 
     model_config = {"from_attributes": True}
@@ -73,6 +76,16 @@ class StoryDetail(StoryListItem):
     video_links: Optional[list[dict]] = None
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     key_reading: Optional[KeyReadingSchema] = None  # 重點朗讀指定段 (#2559)；缺→前端唸全文 fallback
+    # 一課裡重複出現的大題，第 2 輪起（#2916）。key = slug（?p=<slug> 就圈起那一輪的全部模組），
+    # value = {模組名: 該輪的內容}。第 1 輪仍住在上面各自的欄位裡，形狀一個字都沒改。
+    # ⚠️ 這個欄位一定要宣告 —— response_model 只留宣告過的欄位，漏了就是
+    #    loader 讀得到、API 回應裡沒有、學生看不到，而且不會有任何一道門紅
+    #    （2026-08-19 已踩過同型：來源全對、九道門全綠、東西到不了學生面前）。
+    repeat_rounds: Optional[dict] = None
+    # 所有的重點朗讀 —— **一輪一個，不是一課一個**（#2916）。
+    # 單篇課一筆、`slug` 是 None；一份多課的那 5 課一篇一筆。
+    # 單數的 `key_reading` 保留指向第一輪，所以既有前端行為不變。
+    key_readings: Optional[list] = None
     text_type: str = "單"
     source_file: Optional[str] = None
     strategy_exercise: Optional[Union[dict, list]] = None  # 閱讀策略練習 (#943); list for multi-exercise lessons (G7 圖文整合)

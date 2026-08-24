@@ -5,12 +5,16 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: null
+  file: full_text_annotate.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 2
   - 3

@@ -5,12 +5,16 @@ sections:
 - 'no': ''
   name: 古文今譯
   module: modern_translation
+  slug: null
+  file: modern_translation.yml
   pages:
   - 1
   - 2
 - 'no': ''
   name: 故事賞析
   module: intro_guide
+  slug: null
+  file: intro_guide.yml
   pages:
   - 1
   - 2
@@ -18,17 +22,23 @@ sections:
 - 'no': ''
   name: 原文
   module: classical_text
+  slug: null
+  file: classical_text.yml
   pages:
   - 2
 - 'no': ''
   name: 朗讀計時
   module: key_reading
+  slug: null
+  file: key_reading.yml
   pages:
   - 2
   pages_source: bracketed
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  slug: null
+  file: sentence_matching.yml
   pages:
   - 2
   - 3
@@ -36,12 +46,16 @@ sections:
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  slug: null
+  file: word_matching.yml
   pages:
   - 4
   - 5
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  slug: null
+  file: keypoints.yml
   pages:
   - 5
   - 6
@@ -49,6 +63,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 斷句及判讀主語II
+  slug: null
+  file: spotlight.yml
   pages:
   - 6
   - 7
@@ -56,6 +72,8 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 8
   - 9

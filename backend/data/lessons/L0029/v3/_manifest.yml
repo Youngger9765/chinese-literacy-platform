@@ -5,6 +5,9 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 1
+  slug: fqwda
+  file: full_text_annotate.fqwda.yml
   pages:
   - 1
   - 2
@@ -14,12 +17,18 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  part: 1
+  slug: fqwda
+  file: key_reading.fqwda.yml
   pages:
   - 5
   - 6
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  part: 1
+  slug: fqwda
+  file: vocab_definitions.fqwda.yml
   pages:
   - 6
   - 7
@@ -27,11 +36,17 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  part: 1
+  slug: fqwda
+  file: vocab_application.fqwda.yml
   pages:
   - 8
 - 'no': 五
   name: 文章重點整理
   module: keypoints
+  part: 1
+  slug: fqwda
+  file: keypoints.fqwda.yml
   pages:
   - 8
   - 9
@@ -39,6 +54,9 @@ sections:
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  part: 1
+  slug: fqwda
+  file: comprehension.fqwda.yml
   pages:
   - 8
   - 9
@@ -47,42 +65,72 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 2
+  slug: n3qxn
+  file: full_text_annotate.n3qxn.yml
   pages:
   - 10
   - 11
+  - 12
 - 'no': 二
   name: 知識補給站
   module: resources
+  part: 2
+  slug: null
+  file: resources.yml
   pages:
-  - 11
   - 12
   - 13
 - 'no': 三
   name: 念順順
   module: key_reading
+  part: 2
+  slug: n3qxn
+  file: key_reading.n3qxn.yml
   pages:
   - 13
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
+  part: 2
+  slug: n3qxn
+  file: vocab_definitions.n3qxn.yml
   pages:
   - 13
   - 14
 - 'no': 五
   name: 語詞應用
   module: vocab_application
+  part: 2
+  slug: n3qxn
+  file: vocab_application.n3qxn.yml
   pages:
   - 14
   - 15
 - 'no': 六
   name: 文章重點整理
   module: keypoints
+  part: 2
+  slug: n3qxn
+  file: keypoints.n3qxn.yml
   pages:
   - 15
   - 16
+- 'no': null
+  name: 閱讀理解
+  module: comprehension
+  part: 2
+  slug: n3qxn
+  file: comprehension.n3qxn.yml
+  pages:
+  - 15
+  - 16
+  pages_source: bracketed
 - 'no': 七
   name: 綜合練習
-  module: spotlight
+  module: null
+  part: 3
+  module_unresolved: true
   pages:
   - 16
   - 17
@@ -90,6 +138,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 認識自我：看見長處與限制
+  part: 3
+  slug: null
+  file: spotlight.yml
   pages:
   - 17
   - 18
@@ -97,12 +148,18 @@ sections:
 - 'no': 九
   name: 綜合閱讀理解
   module: comprehension
+  part: 3
+  slug: null
+  file: comprehension.yml
   pages:
   - 19
   - 20
 - 'no': 十
   name: 詞語複習
   module: vocab_review
+  part: 3
+  slug: null
+  file: vocab_review.yml
   pages:
   - 20
   - 21
@@ -133,6 +190,8 @@ dispatch_pages:
   - 8
   - 9
   - 10
+  - 15
+  - 16
   - 19
   - 20
   full_text_annotate:
@@ -143,6 +202,7 @@ dispatch_pages:
   - 5
   - 10
   - 11
+  - 12
   key_reading:
   - 5
   - 6
@@ -154,11 +214,9 @@ dispatch_pages:
   - 15
   - 16
   resources:
-  - 11
   - 12
   - 13
   spotlight:
-  - 16
   - 17
   - 18
   - 19

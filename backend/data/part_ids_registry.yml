@@ -19,7 +19,9 @@
 akaux:
   label_snapshot: 我叫阿耀，是您母校棒球隊的學弟，
   lesson_uid: L0010
-  status: active
+  retired_reason: 2026-08-24 owner 判定：兩封信是同一篇課文（一個念順順，紙上只印一組計時表）。偵測器把「段號重數」當成換篇而誤發
+    part id；此課改歸 renumbered（同 L0016）。
+  status: retired
 dvxj6:
   label_snapshot: 1936年美國選手歐文斯（J.O
   lesson_uid: L0144
@@ -35,7 +37,9 @@ n3qxn:
 n9jqu:
   label_snapshot: 第 2 篇（label 待補）
   lesson_uid: L0010
-  status: active
+  retired_reason: 2026-08-24 owner 判定：兩封信是同一篇課文（一個念順順，紙上只印一組計時表）。偵測器把「段號重數」當成換篇而誤發
+    part id；此課改歸 renumbered（同 L0016）。
+  status: retired
 p3kud:
   label_snapshot: 市場上，不同商品的價格不同。奇異
   lesson_uid: L0063
@@ -51,7 +55,9 @@ r4d9j:
 tce7x:
   label_snapshot: 謝謝您的回信，我懂您說的「多準備
   lesson_uid: L0012
-  status: active
+  retired_reason: 2026-08-24 owner 判定：兩封信是同一篇課文（一個念順順，紙上只印一組計時表）。偵測器把「段號重數」當成換篇而誤發
+    part id；此課改歸 renumbered（同 L0016）。
+  status: retired
 ut67x:
   label_snapshot: 西元1130年前後，一位英格蘭史
   lesson_uid: L0137
@@ -63,4 +69,6 @@ wdnd7:
 y4j6n:
   label_snapshot: 第 2 篇（label 待補）
   lesson_uid: L0012
-  status: active
+  retired_reason: 2026-08-24 owner 判定：兩封信是同一篇課文（一個念順順，紙上只印一組計時表）。偵測器把「段號重數」當成換篇而誤發
+    part id；此課改歸 renumbered（同 L0016）。
+  status: retired

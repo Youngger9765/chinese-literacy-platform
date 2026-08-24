@@ -66,9 +66,12 @@ def _measure() -> dict[str, int]:
                 continue
             if not isinstance(data, dict):
                 continue
-            body = _payload(data, path.stem)
+            # 帶 slug 的重複大題（#2916）要跟本體算同一個模組，
+            # 否則每個 slug 都變成一個「只有 1 種形狀」的假模組，形狀棘輪就形同虛設
+            module_name = path.stem.partition(".")[0]
+            body = _payload(data, module_name)
             if isinstance(body, dict):
-                shapes.setdefault(path.stem, set()).add(frozenset(body.keys()))
+                shapes.setdefault(module_name, set()).add(frozenset(body.keys()))
     return {k: len(v) for k, v in shapes.items()}
 
 

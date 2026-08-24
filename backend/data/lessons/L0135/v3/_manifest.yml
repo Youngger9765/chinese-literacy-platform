@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文
   module: full_text_annotate
+  slug: null
+  file: full_text_annotate.yml
   pages:
   - 1
   - 2
@@ -12,6 +14,8 @@ sections:
 - 'no': 二
   name: 知識補給站
   module: resources
+  slug: null
+  file: resources.yml
   pages:
   - 3
   - 4
@@ -19,6 +23,8 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖文表整合閱讀策略
+  slug: null
+  file: spotlight.yml
   pages:
   - 4
   - 5
@@ -28,6 +34,8 @@ sections:
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  slug: null
+  file: comprehension.yml
   pages:
   - 8
   - 9

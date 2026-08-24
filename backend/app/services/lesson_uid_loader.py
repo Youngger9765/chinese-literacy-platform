@@ -203,6 +203,99 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
         if not kr.get("passage"):
             lesson.pop("key_reading")
 
+    # 重複出現的大題（#2916）。有些學習單把同一個大題印好幾次 —— 一份多篇文章的課，
+    # 每一輪都有自己的讀全文、念順順、語詞…。沿用「一個模組一份 yml」的慣例，
+    # 第二輪以後的檔名帶 slug：`key_reading.m7qxv.yml`。同一個 slug ＝ 同一輪。
+    #
+    # ⚠️ 沒有這一段的話，那些檔案**在硬碟上但沒有人看得到** —— 上面的 MODULES 迴圈
+    #    只讀 `{mod}.yml`，多出來的檔會被靜默忽略（2026-08-24 dry run 實測）。
+    #    單篇課的檔名沒有 slug，所以完全不受影響。
+    # 總帳（#2843/#2916）—— 這一課有哪些大題、照學習單的順序、各自要載哪一份檔。
+    # 一課多篇時，同一個大題會出現多次，每一列的 `file` 直接寫明是哪一份
+    # （`key_reading.fqwda.yml` / `key_reading.n3qxn.yml`），消費端不必懂 slug 規則。
+    man = _read_yaml(vdir / "_manifest.yml")
+    if isinstance(man, dict) and man.get("sections"):
+        lesson["manifest_sections"] = man["sections"]
+
+    repeats: dict[str, dict[str, Any]] = {}
+    for path in sorted(vdir.glob("*.*.yml")):
+        mod, _, slug = path.stem.partition(".")
+        if mod not in MODULES or not slug:
+            continue
+        data = _read_yaml(path)
+        if not data:
+            continue
+        if mod == "spotlight":
+            _drop_assetless_table_figures(data)
+        if isinstance(data, dict) and mod in data:
+            inner = data[mod]
+            if isinstance(inner, dict):
+                inner = {
+                    **{k: v for k, v in data.items() if k in ("section_no",)},
+                    **inner,
+                }
+            data = inner
+        repeats.setdefault(slug, {})[mod] = data
+    if repeats:
+        # 形狀：{slug: {module: payload}}。消費端拿 `?p=<slug>` 就取那一輪的全部模組。
+        lesson["repeat_rounds"] = repeats
+
+        # 某個模組**只**存在於帶 slug 的檔裡時（例如 L0010 的兩封信各自成檔、
+        # 沒有合併版的 full_text_annotate.yml），要在這裡合成一份頂層的。
+        #
+        # ⚠️ 少了這一段的後果實測過：L0010 的 `paragraphs` 變成 0 段 —— 學生看到
+        #    空白課文，而且**朗讀一句都對不到**。音檔本身是用 sha256(句子) 定址的、
+        #    不會失效，但 `/api/tts/mapping/{id}` 是從 `lesson["paragraphs"]` 建的，
+        #    那個陣列空了就沒有任何句子可以對。
+        #
+        # 順序用段落自己的 `seq`（整課連續段號）決定，**不是**檔名排序 ——
+        # slug 是不透明亂碼，字母序跟課文順序沒有任何關係。
+        # 🔴 順序的唯一真相是**總帳**（`_manifest.yml`），不是這裡自己排。
+        #
+        # 之前這裡按 `seq`／檔名排，結果 L0063 的段落只有 `idx` 沒有 `seq`，
+        # 三輪拿到同一個排序值 → 退回檔名字母序（4uee3, 7wavn, p3kud）
+        # ＝ 篇2、篇3、篇1。學生打開課文第一段看到的是第23課不是第22課，
+        # 而且沒有任何錯誤或紅燈（2026-08-25 真瀏覽器實測抓到）。
+        #
+        # 帳本已經照學習單的順序列好每一列要載哪一份檔，照它走就不會有第二套順序。
+        order: dict[str, list[str]] = {}
+        for sec in lesson.get("manifest_sections") or []:
+            f = sec.get("file")
+            if not f:
+                continue
+            mod_name, _, rest = f.partition(".")
+            slug_name = rest[:-4] if rest.endswith(".yml") else rest
+            if slug_name and slug_name != "yml":
+                order.setdefault(mod_name, [])
+                if slug_name not in order[mod_name]:
+                    order[mod_name].append(slug_name)
+
+        for mod in MODULES:
+            if mod in lesson:
+                continue
+            seq = order.get(mod) or sorted(repeats)
+            rounds = [(sl, repeats[sl][mod]) for sl in seq
+                      if sl in repeats and isinstance(repeats[sl].get(mod), dict)]
+            if len(rounds) < 2:
+                continue
+            merged = dict(rounds[0][1])
+            paras: list = []
+            for _slug, payload in rounds:
+                paras.extend(payload.get("paragraphs")
+                             or (payload.get("body") or {}).get("paragraphs") or [])
+            if not paras:
+                continue
+            merged["paragraphs"] = paras
+            merged["paragraph_count"] = len(paras)
+            merged["assembled_from_rounds"] = [sl for sl, _ in rounds]
+            for k in ("letters", "inline_marked_terms"):
+                if any(k in payload for _s, payload in rounds):
+                    out: list = []
+                    for _s, payload in rounds:
+                        out.extend(payload.get(k) or [])
+                    merged[k] = out
+            lesson[mod] = merged
+
     assets = vdir / "assets"
     lesson["assets"] = (
         sorted(p.name for p in assets.iterdir() if p.is_file()) if assets.is_dir() else []
