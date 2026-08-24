@@ -45,6 +45,12 @@ def slug_index() -> dict[str, dict[str, Any]]:
     """
     out: dict[str, dict[str, Any]] = {}
     for l in build_all_lessons():
+        # 這一課有幾篇課文。決定要不要在網址帶輪次的是**這個**，
+        # 不是「這一節有沒有 text_ref」——課文那一節本來就沒有 text_ref
+        # （它是被引用的那一個），用 text_ref 判斷的話，多篇課的讀全文
+        # 永遠不帶輪次，三張不同的紙掃出來都是第 1 篇（2026-08-25 curl 抓到）。
+        articles = sum(1 for x in (l.get("manifest_sections") or [])
+                       if x.get("module") == "full_text_annotate" and x.get("slug"))
         # row 上的 `manifest_sections` 就是帳本（`_manifest.yml`）送出來的那一份，
         # 每一列帶 name / type(模組) / slug / text_ref / part。
         for sec in l.get("manifest_sections") or []:
@@ -69,6 +75,8 @@ def slug_index() -> dict[str, dict[str, Any]]:
                 "name": sec.get("name"),
                 "part": sec.get("part"),
                 "text_ref": sec.get("text_ref"),
+                #: 這一課是不是多篇。多篇的每一節都要在網址帶輪次。
+                "multi": articles > 1,
             }
     return out
 
@@ -91,7 +99,8 @@ def target_path(entry: dict[str, Any]) -> str:
     """
     p = f"/learn/{entry['lesson_id']}/{entry['step']}"
     slug = entry.get("slug")
-    # 單篇課不帶輪次：沒有第二篇可分，多一個參數只是讓網址更脆。
-    if slug and entry.get("text_ref") is not None:
+    # 多篇課的**每一節**都要帶輪次，課文那一節也不例外。
+    # 單篇課不帶：沒有第二篇可分，多一個參數只讓網址更脆。
+    if slug and entry.get("multi"):
         p += f"?p={slug}"
     return p

@@ -111,3 +111,43 @@ def test_malformed_code_is_rejected_before_lookup(client):
     for bad in ("../etc/passwd", "ABC", "1", "z" * 40):
         r = client.get(f"/q/{bad}", follow_redirects=False)
         assert r.status_code == 404, f"{bad} → {r.status_code}"
+
+
+def test_multi_text_full_text_codes_also_land_in_different_places():
+    """一課多篇時，**讀全文**的三個 QR 也必須各自到自己那一篇。
+
+    2026-08-25 真的跑 curl 才抓到：三個代號全部轉到
+    `/learn/20063/full-text-annotate`，沒有 `?p=`，也就是三張不同的紙
+    掃出來都是第 1 篇。判斷「要不要帶輪次」原本看的是 `text_ref` 有沒有值，
+    而課文那一節本來就沒有 `text_ref`（它是被引用的那一個）——
+    於是條件對念順順成立、對讀全文永遠不成立。
+
+    上一條 `test_the_round_marker_is_the_sections_own_slug` 只驗了念順順，
+    所以這個洞從那條測試底下走過去了。**同一族的東西要整族驗，不是挑一個。**
+    """
+    slugs = ["p3kud", "4uee3", "7wavn"]
+    paths = [target_path(resolve(s)) for s in slugs]
+    assert len(set(paths)) == 3, f"三篇的讀全文掃到同一個地方: {paths}"
+    for s, p in zip(slugs, paths):
+        assert p.endswith(f"?p={s}"), p
+
+
+def test_every_multi_text_lesson_has_all_distinct_destinations():
+    """全庫掃一遍：任何一課裡，兩個不同的代號不可以指到同一個地方。
+
+    挑一課驗過不算 —— 這一輪的錯就是「驗了念順順、沒驗讀全文」。
+    """
+    from collections import defaultdict
+    by_lesson = defaultdict(list)
+    for slug, e in slug_index().items():
+        by_lesson[e["lesson_uid"]].append((slug, target_path(e)))
+    clashes = []
+    for uid, items in by_lesson.items():
+        seen = defaultdict(list)
+        for slug, p in items:
+            seen[p].append(slug)
+        for p, ss in seen.items():
+            if len(ss) > 1:
+                clashes.append((uid, p, ss))
+    assert len(by_lesson) > 150, f"只掃到 {len(by_lesson)} 課 —— 這條測不到東西"
+    assert not clashes, f"{len(clashes)} 處撞目的地，例: {clashes[:4]}"

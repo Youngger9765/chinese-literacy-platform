@@ -82,5 +82,11 @@ export function scopeDetailToRound<T extends Record<string, unknown>>(
   for (const [mod, data] of Object.entries(round)) {
     if (data !== undefined && data !== null) out[mod] = data;
   }
+  // ⚠️ 這裡曾經自己從 `round.full_text_annotate.paragraphs` 把段落提上來。
+  //    那份是抽取的原始形狀 `[{idx, text}]`，而 API 頂層的 `paragraphs`
+  //    是攤平的字串陣列 —— 提錯形狀，讀全文整頁 `text.match is not a function`。
+  //    攤平現在只有一份實作（後端 `_flat_paragraphs`），每一輪自己就帶著
+  //    攤好的 `paragraphs`，所以上面那個一般迴圈已經把它覆蓋進來了。
+  //    **不要在這裡再寫第二套。**
   return out as T;
 }

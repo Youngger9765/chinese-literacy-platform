@@ -30,7 +30,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
 import { resolveStepId } from '../config/stepConfig';
 import { deliversFullText } from '../components/qr/lessonQr';
-import { fetchStory } from '../services/api';
+import { fetchStory, storyForStep } from '../services/api';
 import type { Story } from '../types';
 
 const GuestReadingPage: React.FC = () => {
@@ -38,7 +38,16 @@ const GuestReadingPage: React.FC = () => {
   // The step is NOT a route param here. The gate that renders this page sits on
   // /learn/:storyId, so the step is the third path segment — read it from the
   // location, exactly as LearningRouteGate does when deciding to render us.
-  const step = useLocation().pathname.split('/')[3] ?? '';
+  const loc = useLocation();
+  const step = loc.pathname.split('/')[3] ?? '';
+  // 一課多篇時，QR 用 `?p=` 說明掃的是哪一節（#2916）。
+  //
+  // ⚠️ 這一段本來不存在，而它的缺席在**每一項機器檢查底下都是綠的**：
+  //    資料層對、API 回應對、頁面打得開、0 pageerror。
+  //    2026-08-25 用真瀏覽器走 QR 那條路才看到 —— L0063 三篇的讀全文
+  //    掃出來逐字相同（各 2822 字元）。輪次切換做在 LearningLayout 上，
+  //    而掃 QR 進來的人是**未登入的訪客**，根本不經過那一層。
+  const roundSlug = new URLSearchParams(loc.search).get('p') || '';
   const [story, setStory] = useState<Story | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -82,9 +91,14 @@ const GuestReadingPage: React.FC = () => {
   // no passage recorded, the passage code falls back to the whole text rather
   // than showing an empty page.
   const wantsPassage = resolveStepId(step) === 'key-passage-reading';
-  const passage = story.keyReading?.passage?.trim();
+  // 先換成這一節所屬的那一篇，再決定要顯示全文還是重點段 ——
+  // 順序不能反：反過來的話重點段仍然取自第 1 篇。
+  const scoped = roundSlug
+    ? (storyForStep(story, `${resolveStepId(step)}#${roundSlug}`) ?? story)
+    : story;
+  const passage = scoped.keyReading?.passage?.trim();
   const shown: Story =
-    wantsPassage && passage ? { ...story, content: [passage] } : story;
+    wantsPassage && passage ? { ...scoped, content: [passage] } : scoped;
 
   return (
     <div className="min-h-screen bg-surface" data-testid="guest-reading-page">

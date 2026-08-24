@@ -57,3 +57,60 @@ def test_codes_are_globally_unique_across_every_lesson(rows):
                 seen[c] = uid
     assert not dup, f"撞號: {dup[:5]}"
     assert len(seen) > 10, f"只收集到 {len(seen)} 個代號 —— 這條測不到東西"
+
+
+def test_single_text_lessons_also_carry_their_codes(rows):
+    """單篇課也要有代號 —— 它們也有自己的 slug，也該印短網址。
+
+    `part_rounds` 原本只在多篇課才有值（5/175），其餘 170 課是空的，
+    於是 QR 退回長網址：**97% 的課仍然把課號跟路由名印在紙上**。
+    退回本身是對的（能掃勝過沒有），但它不該是常態。
+
+    形狀跟多篇課一樣：一筆，`part` 是 None。消費端不必分兩種寫法。
+    """
+    r = rows["L0001"]
+    parts = r.get("part_rounds") or []
+    assert len(parts) == 1, f"單篇課應該一筆，實得 {len(parts)}"
+    p = parts[0]
+    assert p["full_slug"], p
+    assert p["key_slug"], p
+    assert p["full_slug"] != p["key_slug"], "讀全文跟念順順共用一個代號 —— 兩個 QR 會掃到同一處"
+
+
+ARTICLE_MODULES = ("full_text_annotate", "classical_text")
+
+
+def test_every_lesson_that_has_an_article_can_print_a_short_code(rows):
+    """不變式，不是魔術數字：**有課文的課，就印得出短網址**。
+
+    課文模組有兩種：一般課 `full_text_annotate`，文言文 `classical_text`。
+    只認前者的話，8 課文言文會安靜地退回長網址 —— 沒有錯誤、QR 掃得開，
+    只是紙上又把課號跟路由名印了上去。
+
+    ⛔ 這裡刻意不寫「至少 N 課」。數字會隨教材增減漂移，而漂移時
+    「少了一課」跟「門檻訂太鬆」分不出來。問的是每一課自己的條件。
+    """
+    missing = []
+    for uid, r in rows.items():
+        has_article = any(s.get("module") in ARTICLE_MODULES and s.get("slug")
+                          for s in (r.get("manifest_sections") or []))
+        can_print = any(p.get("full_slug") or p.get("key_slug")
+                        for p in (r.get("part_rounds") or []))
+        if has_article and not can_print:
+            missing.append(uid)
+    checked = sum(1 for r in rows.values()
+                  if any(s.get("module") in ARTICLE_MODULES for s in (r.get("manifest_sections") or [])))
+    assert checked > 150, f"只有 {checked} 課有課文模組 —— 這條測不到東西"
+    assert not missing, f"有課文卻印不出代號: {missing}"
+
+
+def test_lessons_without_an_article_are_named_not_silently_skipped(rows):
+    """沒有課文的課印不出 QR —— 那是對的，但要**點名**。
+
+    無聲跳過的話，某一課哪天掉了課文模組會看起來跟這幾課一樣正常。
+    2026-08-25 實測這 6 課：學習單上就沒有讀全文那一節。
+    """
+    without = sorted(uid for uid, r in rows.items()
+                     if not any(s.get("module") in ARTICLE_MODULES
+                                for s in (r.get("manifest_sections") or [])))
+    assert without == ["L0044", "L0068", "L0070", "L0106", "L0124", "L0136"], without
