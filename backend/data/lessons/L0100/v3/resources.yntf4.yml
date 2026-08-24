@@ -1,0 +1,29 @@
+lesson_uid: L0100
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 跟蹤騷擾防治法
+    duration: 0:40
+    source: 衛生福利部 桃園醫院
+    _總表_url: http://youtu.be/CoRDmXHAc5I
+  - index: 2
+    title: 當有人在街上跟蹤你時，該怎麼辦
+    duration: 06:38
+    source: 亮生活 / Bright Side
+    _總表_url: http://youtu.be/zY_0xgbTLGw
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/CoRDmXHAc5I
+    url_source: 總表0816「4.影片連結」年級7課次3
+  - index: 2
+    url: http://youtu.be/zY_0xgbTLGw
+    url_source: 總表0816「4.影片連結」年級7課次3
+  notes:
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 84 列，故加 `_` 前綴標示非 DOCX 內容。
+  slug: yntf4
+  text_ref: rcmdx

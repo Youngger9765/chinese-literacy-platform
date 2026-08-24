@@ -15,13 +15,6 @@ import os
 import re
 from typing import Any
 
-from app.services.lesson_layer_loaders import (
-    ENRICHMENT_FIELDS,
-    load_curriculum_manifest,
-    load_layer1_lessons,
-    load_layer2_lessons,
-    build_layer2_enrichment_index,
-)
 from app.services.spotlight_figure_images import merge_spotlight_images
 from app.services.spotlight_v2_loader import (
     load_spotlight_v2,
@@ -55,6 +48,16 @@ def _key_reading(l: dict) -> dict | None:
     return rounds[0] if rounds else None
 
 
+def _ledger_round_order(l: dict) -> list[str]:
+    """帳本裡課文出現的順序 —— 一切「第幾篇」的排序都以它為準（#2916）。"""
+    out: list[str] = []
+    for s in l.get("manifest_sections") or []:
+        if s.get("module") == "full_text_annotate" and s.get("slug"):
+            if s["slug"] not in out:
+                out.append(s["slug"])
+    return out
+
+
 def _parts_summary(l: dict) -> list[dict]:
     """每一篇的輕量摘要，給清單用（#2916）。
 
@@ -75,28 +78,38 @@ def _parts_summary(l: dict) -> list[dict]:
             "has_full": bool(fta.get("paragraphs") or (fta.get("body") or {}).get("paragraphs")),
             "has_key": bool(kr.get("passage")),
         })
-    out.sort(key=lambda r: (r.get("part") is None, r.get("part") or 0, r["slug"]))
+    # 順序照帳本，不自己排（#2916）——帳本是唯一的順序來源。
+    order = _ledger_round_order(l)
+    out.sort(key=lambda r: order.index(r["slug"]) if r["slug"] in order else len(order))
     return out
 
 
-def _worksheet_order(l: dict) -> list[dict]:
-    """學習單印的大題順序 → 前台的步驟順序（#2916）。
+def _manifest_sections(l: dict) -> list[dict]:
+    """帳本，送給前端的那一層（#2916）。
 
-    `type` 給的是**模組名**（`key_reading`），前台用 WORKSHEET_TYPE_ALIASES
-    對到 step id（`key-passage-reading`）。沒有 module 的列（還沒歸因的大題）
-    直接略過 —— 那種列沒有東西可以顯示。
+    ## 一份東西，一個名字，一種形狀，三層
+
+        _manifest.yml                  帳本本體（檔案）—— 唯一真相
+        lesson["manifest_sections"]    同一份，載進記憶體（loader 層）
+        row["manifest_sections"]       同一份，送給前端（API 層）
+
+    **同名不夠，欄位也要同名。** 這一層本來叫 `worksheet_section_order`，
+    而且會把 `no` 改名成 `number`、`module` 改名成 `type`。兩件事各自看起來都很小，
+    合起來就是：同一份東西有兩個名字、兩種形狀，「到底哪一份才算數」沒有答案。
+    2026-08-25 統一成一個名字之後，兩層寫進同一個 key，形狀不同的那份直接把另一份蓋掉 ——
+    L0063 的每一列 `type` 和 `number` 全變成 None，而**沒有任何錯誤**。
+    改名把潛伏的分岔變成看得見的碰撞，這是好事；解法是讓形狀也一致，不是把名字改回去。
+
+    所以這裡不做任何改寫：帳本印什麼欄位，前端就收到什麼欄位
+    （`no` / `name` / `module` / `part` / `slug` / `file` / `text_ref` / `pages`）。
+    前端用 WORKSHEET_TYPE_ALIASES 把 `module`（`key_reading`）對到 step id
+    （`key-passage-reading`）。
+
+    沒有 module 的列（例如 L0029 的「綜合練習」，還沒有自己的模組）**照樣送出去**，
+    由前端跳過 —— `stepSequenceFromManifest` 遇到沒有 `module` 的列本來就 `continue`。
+    帳本誠實記錄紙上印了什麼；要不要顯示是消費端的事，不是帳本的事。
     """
-    out = []
-    for s in l.get("manifest_sections") or []:
-        mod = s.get("module")
-        if not mod:
-            continue
-        row = {"number": s.get("no"), "name": s.get("name"), "type": mod}
-        for k in ("part", "slug", "file"):
-            if s.get(k) is not None:
-                row[k] = s[k]
-        out.append(row)
-    return out
+    return list(l.get("manifest_sections") or [])
 
 
 def _key_readings(l: dict) -> list[dict]:
@@ -121,16 +134,22 @@ def _key_readings(l: dict) -> list[dict]:
         }
 
     out = []
-    base = _one(l.get("key_reading"), None)
-    if base:
-        out.append(base)
     rounds = l.get("repeat_rounds") or {}
-    for slug, mods in rounds.items():
-        got = _one((mods or {}).get("key_reading"), slug)
-        if got:
-            out.append(got)
+    if rounds:
+        # 多輪課：一輪一筆。⛔ 不要再把頂層那份也加進來 —— 頂層就是其中一輪
+        # （照帳本挑的第一份），加了會變成 4 筆而實際只有 3 個念順順（實測）。
+        for slug, mods in rounds.items():
+            got = _one((mods or {}).get("key_reading"), slug)
+            if got:
+                out.append(got)
+    else:
+        base = _one(l.get("key_reading"), None)
+        if base:
+            out.append(base)
     # 篇次是老師與學生看到的順序；沒有 part 的（單篇課）排在最前面
-    out.sort(key=lambda r: (r.get("part") is None and 0 or 1, r.get("part") or 0))
+    # 同上：照帳本。單篇課只有一筆，順序無意義但仍走同一條路。
+    order = _ledger_round_order(l)
+    out.sort(key=lambda r: order.index(r.get("slug")) if r.get("slug") in order else len(order))
     return out
 
 
@@ -656,7 +675,7 @@ def _uid_tree_lessons() -> list[dict]:
             #
             # 一課多篇時同一個大題會出現多次，`file` 寫明各自要載哪一份，
             # 前台照列表由上往下走就對了，不必知道 slug 規則。
-            "worksheet_section_order": _worksheet_order(l) or None,
+            "manifest_sections": _manifest_sections(l) or None,
             "vocabulary": _vocabulary_from(l) or None,
             "fill_in_blank": _cloze_from(l) or None,
             "vocab_bank": _vocab_bank_from(l) or None,
@@ -783,6 +802,21 @@ _SECTION_TO_STEP = {
 }
 
 
+#: 模組名 → step id。跟 `scripts/module_entry_gate.py` 的 ENTRY 同一份對照，
+#: 那道門會解析 stepConfig.ts 驗「每個抽出來的模組，學生都走得到」。
+_MODULE_TO_STEP: dict[str, str] = {
+    "full_text_annotate": "full-text-annotate",
+    "key_reading": "key-passage-reading",
+    "vocab_definitions": "vocab-definition",
+    "vocab_application": "vocab-application",
+    "keypoints": "keypoints-table",
+    "comprehension": "comprehension",
+    "spotlight": "spotlight",
+    "vocab_review": "vocab-review",
+    "resources": "knowledge-station",
+}
+
+
 def _step_sequence_for(l: dict) -> list[str] | None:
     """這一課的步驟順序，來自它自己的學習單。
 
@@ -806,13 +840,35 @@ def _step_sequence_for(l: dict) -> list[str] | None:
     """
     if l.get("classical_text"):
         return list(CLASSICAL_STEP_SEQUENCE)
+
+    # 🔴 帳本（`_manifest.yml`）優先 —— 順序只能有一個來源（#2916）。
+    #
+    # 這支原本自己再從 `sections_present` 算一次，於是全站有三套順序：
+    # 這裡、`_manifest_sections()`、以及前端的 `stepSequenceFromManifest`。
+    # 而 `api.ts` 是 `detail.step_sequence ?? stepSequenceFromManifest(...)` ——
+    # 只要這裡有值，前端那支就永遠不會被呼叫。2026-08-25 實測：帳本 19 列、
+    # 前端只顯示 9 步，三個念順順收斂成一個，而我改的是永遠跑不到的那一支。
+    #
+    # 帶 slug 的那幾列要各自成為一步，key 加後綴 `#<slug>`，
+    # 前端 `resolveActiveSteps` 會把後綴剝掉查 registry。
     seen: list[str] = []
-    for sec in l.get("sections_present") or []:
-        step = _SECTION_TO_STEP.get(
-            normalise_section_label(str((sec or {}).get("name") or "").strip())
-        )
-        if step and step not in seen:
-            seen.append(step)
+    rows = l.get("manifest_sections") or []
+    if rows:
+        for sec in rows:
+            mod = (sec or {}).get("module")
+            step = _MODULE_TO_STEP.get(mod) if mod else None
+            if not step:
+                continue
+            key = f"{step}#{sec['slug']}" if sec.get("slug") else step
+            if key not in seen:
+                seen.append(key)
+    else:
+        for sec in l.get("sections_present") or []:
+            step = _SECTION_TO_STEP.get(
+                normalise_section_label(str((sec or {}).get("name") or "").strip())
+            )
+            if step and step not in seen:
+                seen.append(step)
     if not seen:
         return None
     # 課程簡介永遠在最前、報告永遠在最後 —— 學習單不印這兩個章節，

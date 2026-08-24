@@ -1,0 +1,50 @@
+lesson_uid: L0141
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 休戚與共
+    B: 潰決
+    C: 一蹴可幾
+    D: 萬籟俱寂
+    E: 未雨綢繆
+    F: 仰人鼻息
+    G: 覆水難收
+    H: 縝密周延
+    I: 麻雀雖小，五臟俱全
+  unused_options:
+  - I
+  items:
+  - index: 1
+    stem: 建立團隊合作無法(  )，通常需要長時間的磨合才能形成默契。
+    answer: C
+  - index: 2
+    stem: 深夜下著毛毛雨的校園(  )，只聽見屋簷的滴水聲。
+    answer: D
+  - index: 3
+    stem: 如果我們不能掌握關鍵技術，全靠進口，產業發展就只能(  )了。
+    answer: F
+  - index: 4
+    stem: 出發前先查天氣、準備雨衣，這是(  )，才不會行程泡湯。
+    answer: E
+    answer_printed_form_note: 原稿印全形Ｅ
+  - index: 5
+    stem: 我們是同一個團隊，成敗得失都與大家(  )，沒有人能置身事外。
+    answer: A
+  - index: 6
+    stem: 連日豪雨後，河堤突然(  )，低窪地區立刻淹水。
+    answer: B
+  - index: 7
+    stem: 你洩露同學的祕密，傷害造成後往往(  )，道歉也難修補信任。
+    answer: G
+  - index: 8
+    stem: 這份報告不只資料完整，連結論與建議也非常(  )，很有說服力。
+    answer: H
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    option_bank: '代號表列 9 個（沒有「劃破」），八題只用到 8 個 —— **I（麻雀雖小，五臟俱全）沒有被用到**。
+
+      代號表印成 2 列 × 5 欄，第 2 列第 5 格是空的。'
+  slug: 4xcrv
+  text_ref: q4jk9

@@ -635,7 +635,7 @@ def get_story(story_id: str):
         # Image gallery for graphic-text layout (#1341)
         images=story.get("images") or [],
         # Worksheet metadata (#1434) — surface to API
-        worksheet_section_order=story.get("worksheet_section_order"),
+        manifest_sections=story.get("manifest_sections"),
         # ⚠️ 這裡是**逐欄列舉**建 StoryDetail —— 沒有寫在這裡的欄位，
         #    後端算得再對也送不出去，而且不會有任何錯誤或紅燈。
         #    2026-08-25 實測：L0063 三輪的資料在 loader 裡都在，

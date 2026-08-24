@@ -1,0 +1,58 @@
+lesson_uid: L0064
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 沉悶
+  - 難以平息
+  - 波瀾
+  - 苦澀
+  - 交織
+  - 遙不可及
+  - 拉扯
+  - 悲壯
+  - 反駁
+  - 酸澀
+  items:
+  - index: 1
+    word: 苦澀
+    definition: 原指味道又苦又澀；也可形容心裡痛苦、難受。
+  - index: 2
+    word: 拉扯
+    definition: 原指用力往不同方向拉；比喻心裡有不同想法互相衝突，難以決定。
+  - index: 3
+    word: 酸澀
+    definition: 原指味道又酸又澀；也可形容心裡有遺憾、難過等複雜感受。
+  - index: 4
+    word: 難以平息
+    definition: 情緒、爭執或風波一時無法平靜下來。
+  - index: 5
+    word: 反駁
+    definition: 針對別人的說法提出理由，表示不同意。
+  - index: 6
+    word: 波瀾
+    definition: 原指水面上的大波浪；比喻情緒或事情的起伏變化。
+  - index: 7
+    word: 交織
+    definition: 不同的事物或感受彼此交錯在一起。
+  - index: 8
+    word: 遙不可及
+    definition: 形容距離很遠，或目標、願望很難達成。
+  - index: 9
+    word: 悲壯
+    definition: 情境雖然悲傷、結局不幸，卻帶有勇敢、壯烈的氣氛。
+  - index: 10
+    word: 沉悶
+    definition: 心情不開朗，或氣氛讓人覺得壓抑、無聊。
+  notes:
+    vocabulary_bank: '語詞框原文為「本課語詞：沉悶、難以平息、波瀾、苦澀、交織、遙不可及、拉扯、悲壯、反駁、酸澀」
+
+      （句末**沒有**句號）。「沉悶」後面掛了一個隱藏的 variation selector，本檔寫乾淨的字。'
+    answer_carrier: 橘色手寫字（PDF p3）；文字層的空格內已填有同樣的答案
+  slug: 777qc
+  text_ref: 4fwdm

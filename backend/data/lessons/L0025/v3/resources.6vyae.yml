@@ -1,0 +1,26 @@
+lesson_uid: L0025
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 周思齊 feat. 五月天 [ 倔強 Persistence ]
+    duration: (5:49)
+    source: 相信音樂BinMusic
+    qr_code: true
+  - index: 2
+    title: 20年來周思齊的「頑固」精神
+    duration: (4:44)
+    source: CTBC Brothers 中信兄弟
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/FpYPmkfynIo
+    url_source: 總表0816「4.影片連結」年級5課次13
+  - index: 2
+    url: http://youtu.be/WmiIyoXBLLM
+    url_source: 總表0816「4.影片連結」年級5課次13
+  slug: 6vyae
+  text_ref: 9tmnd

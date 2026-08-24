@@ -1,0 +1,75 @@
+lesson_uid: L0082
+version_id: v3
+section_no: 五
+keypoints:
+  title: 從〈螞蟻與蟋蟀〉看生命的多樣性
+  layout: list
+  answer_carrier: 橘色手寫字與紅色 ☑（w:sym）；PDF p4~p5
+  structure_note: '左欄的「螞蟻／的／行為」在原稿是直排三行，本檔記為連續字串。
+
+    每一格底下的 1./2./3. 小題各自有自己的空格或選項，依 skill §⑥.55b 攤平成 items。'
+  rows:
+  - label: 螞蟻的行為
+    items:
+    - label: 1
+      value: 螞蟻工作往往【　】，行動有紀律、有秩序。
+      blanks:
+      - answer: 集體出動
+    - label: 2
+      value: 螞蟻是【　】昆蟲，分工嚴密。
+      blanks:
+      - answer: 社會性
+    - label: 3
+      value: 整個蟻群的核心是蟻后，所以螞蟻都有一個共同目標：【　】。
+      blanks:
+      - answer: 協助蟻后繁衍後代
+  - label: 蟋蟀的行為
+    items:
+    - label: 1
+      value: 會發出鳴叫聲的都是【　】。（單選）
+      options:
+        1: 雄蟋蟀
+        2: 雌蟋蟀
+      answer: 1
+      answer_carrier: 紅色 ☑（w:sym），印在選項①前
+    - label: 2
+      value: 蟋蟀高歌是為了【　】，爭取繁衍的機會，或是【　】其他雄蟋蟀不要靠近地盤。
+      blanks:
+      - answer: 求偶
+      - answer: 警告
+    - label: 3
+      value: 雄蟋蟀為了爭取交配機會，牠們之間的關係是【　】的。（單選）
+      options:
+        1: 合作
+        2: 競爭
+      answer: 2
+      answer_carrier: 紅色 ☑（w:sym），印在選項②前
+  - label: 寓言中的看法
+    items:
+    - label: 1
+      value: 起源於【　】寓言，諷刺蟋蟀鎮日高歌，不知貯糧的天兵。
+      blanks:
+      - answer: 伊索
+    - label: 2
+      value: 寓言中的螞蟻是【　】的代表，蟋蟀被批評為【　】。
+      blanks:
+      - answer: 勤奮
+      - answer: 懶惰
+  - label: 從生物行為看
+    items:
+    - label: 1
+      value: 蟋蟀的高歌與螞蟻的存糧一樣，都是生物遵從【　】的行動。
+      blanks:
+      - answer: 本能
+    - label: 2
+      value: 螞蟻藉由【　】，來達成【　】的需求；蟋蟀則透過【　】，延續自己的基因。
+      blanks:
+      - answer: 合作
+      - answer: 群體繁衍
+      - answer: 競爭
+  - label: 作者提醒
+    value: 人們看待事物時，不要只從自己的角度出發，否則很容易得出【　】的結論。
+    blanks:
+    - answer: 片面
+  slug: duhpt
+  text_ref: 67fkn

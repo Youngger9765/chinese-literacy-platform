@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: k3kau
+  file: full_text_annotate.k3kau.yml
   pages:
   - 1
   - 2
@@ -14,8 +14,9 @@ sections:
 - 'no': 二
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: k3kau
+  slug: cjvr6
+  file: resources.cjvr6.yml
   pages:
   - 3
   - 4
@@ -23,8 +24,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖文表整合閱讀策略
-  slug: null
-  file: spotlight.yml
+  text_ref: k3kau
+  slug: afd9j
+  file: spotlight.afd9j.yml
   pages:
   - 4
   - 5
@@ -34,8 +36,9 @@ sections:
 - 'no': 四
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: k3kau
+  slug: 4fajv
+  file: comprehension.4fajv.yml
   pages:
   - 8
   - 9

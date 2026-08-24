@@ -5,15 +5,15 @@ sections:
 - 'no': null
   name: 導讀
   module: intro_guide
-  slug: null
-  file: intro_guide.yml
+  slug: jkkup
+  file: intro_guide.jkkup.yml
   pages:
   - 1
 - 'no': null
   name: 古文今譯
   module: modern_translation
-  slug: null
-  file: modern_translation.yml
+  slug: 3h7ad
+  file: modern_translation.3h7ad.yml
   pages:
   - 1
   - 2
@@ -22,8 +22,8 @@ sections:
 - 'no': null
   name: 原文（含斷詞點）＋注釋
   module: classical_text
-  slug: null
-  file: classical_text.yml
+  slug: xahdd
+  file: classical_text.xahdd.yml
   pages:
   - 1
   - 2
@@ -33,8 +33,8 @@ sections:
 - 'no': null
   name: 朗讀計時
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  slug: y76jd
+  file: key_reading.y76jd.yml
   pages:
   - 1
   - 2
@@ -44,16 +44,16 @@ sections:
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
-  slug: null
-  file: sentence_matching.yml
+  slug: vrrma
+  file: sentence_matching.vrrma.yml
   pages:
   - 4
   - 5
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
-  slug: null
-  file: word_matching.yml
+  slug: w4r3j
+  file: word_matching.w4r3j.yml
   pages:
   - 5
   - 6
@@ -61,8 +61,8 @@ sections:
 - 'no': 三
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  slug: d9m7p
+  file: keypoints.d9m7p.yml
   pages:
   - 7
   - 8
@@ -71,8 +71,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 指示代詞、疑問代詞
-  slug: null
-  file: spotlight.yml
+  slug: deqve
+  file: spotlight.deqve.yml
   pages:
   - 9
   - 10
@@ -81,16 +81,16 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  slug: dj4uv
+  file: comprehension.dj4uv.yml
   pages:
   - 12
   - 13
 - 'no': 六
   name: 自我挑戰
   module: self_challenge
-  slug: null
-  file: self_challenge.yml
+  slug: 7aemk
+  file: self_challenge.7aemk.yml
   pages:
   - 13
 dispatch:

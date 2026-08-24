@@ -15,8 +15,9 @@ sections:
   name: 念順順
   module: key_reading
   part: 1
-  slug: p3kud
-  file: key_reading.p3kud.yml
+  text_ref: p3kud
+  slug: yprak
+  file: key_reading.yprak.yml
   pages:
   - 2
   - 3
@@ -24,8 +25,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 1
-  slug: p3kud
-  file: vocab_definitions.p3kud.yml
+  text_ref: p3kud
+  slug: mc9mf
+  file: vocab_definitions.mc9mf.yml
   pages:
   - 3
   - 4
@@ -33,16 +35,18 @@ sections:
   name: 語詞應用
   module: vocab_application
   part: 1
-  slug: p3kud
-  file: vocab_application.p3kud.yml
+  text_ref: p3kud
+  slug: 4fq9w
+  file: vocab_application.4fq9w.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點整理
   module: keypoints
   part: 1
-  slug: p3kud
-  file: keypoints.p3kud.yml
+  text_ref: p3kud
+  slug: dydnq
+  file: keypoints.dydnq.yml
   pages:
   - 4
   - 5
@@ -61,8 +65,9 @@ sections:
   name: 念順順
   module: key_reading
   part: 2
-  slug: 4uee3
-  file: key_reading.4uee3.yml
+  text_ref: 4uee3
+  slug: 9a7x4
+  file: key_reading.9a7x4.yml
   pages:
   - 8
   - 9
@@ -70,16 +75,18 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 2
-  slug: 4uee3
-  file: vocab_definitions.4uee3.yml
+  text_ref: 4uee3
+  slug: 3944x
+  file: vocab_definitions.3944x.yml
   pages:
   - 9
 - 'no': 四
   name: 語詞應用
   module: vocab_application
   part: 2
-  slug: 4uee3
-  file: vocab_application.4uee3.yml
+  text_ref: 4uee3
+  slug: 3q3cd
+  file: vocab_application.3q3cd.yml
   pages:
   - 9
   - 10
@@ -87,8 +94,9 @@ sections:
   name: 文章重點整理
   module: keypoints
   part: 2
-  slug: 4uee3
-  file: keypoints.4uee3.yml
+  text_ref: 4uee3
+  slug: 6xvh6
+  file: keypoints.6xvh6.yml
   pages:
   - 10
   - 11
@@ -107,16 +115,18 @@ sections:
   name: 念順順
   module: key_reading
   part: 3
-  slug: 7wavn
-  file: key_reading.7wavn.yml
+  text_ref: 7wavn
+  slug: ajy9w
+  file: key_reading.ajy9w.yml
   pages:
   - 14
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
   part: 3
-  slug: 7wavn
-  file: vocab_definitions.7wavn.yml
+  text_ref: 7wavn
+  slug: arpnw
+  file: vocab_definitions.arpnw.yml
   pages:
   - 14
   - 15
@@ -124,16 +134,18 @@ sections:
   name: 語詞應用
   module: vocab_application
   part: 3
-  slug: 7wavn
-  file: vocab_application.7wavn.yml
+  text_ref: 7wavn
+  slug: 6x4t9
+  file: vocab_application.6x4t9.yml
   pages:
   - 15
 - 'no': 五
   name: 文章重點整理
   module: keypoints
   part: 3
-  slug: 7wavn
-  file: keypoints.7wavn.yml
+  text_ref: 7wavn
+  slug: 6pyvc
+  file: keypoints.6pyvc.yml
   pages:
   - 15
   - 16
@@ -141,8 +153,12 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   part: 4
-  slug: null
-  file: spotlight.yml
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: fpctd
+  file: spotlight.fpctd.yml
   pages:
   - 16
   - 17
@@ -154,8 +170,12 @@ sections:
   name: 綜合閱讀理解
   module: comprehension
   part: 4
-  slug: null
-  file: comprehension.yml
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: 9a3ve
+  file: comprehension.9a3ve.yml
   pages:
   - 21
   - 22
@@ -163,16 +183,24 @@ sections:
   name: 詞語複習
   module: vocab_review
   part: 4
-  slug: null
-  file: vocab_review.yml
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: 9ahm4
+  file: vocab_review.9ahm4.yml
   pages:
   - 22
 - 'no': 九
   name: 知識補給站
   module: resources
   part: 4
-  slug: null
-  file: resources.yml
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: xf7e3
+  file: resources.xf7e3.yml
   pages:
   - 22
 dispatch:

@@ -1,0 +1,64 @@
+lesson_uid: L0167
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    似曾相識、不是滋味、
+
+    不動聲色、害群之馬、
+
+    小劇場、左右、較勁、
+
+    平分秋色、心理素質'
+  word_bank:
+  - 似曾相識
+  - 不是滋味
+  - 不動聲色
+  - 害群之馬
+  - 小劇場
+  - 左右
+  - 較勁
+  - 平分秋色
+  - 心理素質
+  answers_printed: true
+  items:
+  - index: 1
+    definition: 不將心裡的情緒或計畫表現出來。
+    answer: 不動聲色
+  - index: 2
+    definition: 心裡感到不舒服、不好受。
+    answer: 不是滋味
+  - index: 3
+    definition: 兩者一樣出色、實力相當。
+    answer: 平分秋色
+  - index: 4
+    definition: 指一個人面對壓力及挑戰時，展現出的心理狀態和應對能力。
+    answer: 心理素質
+  - index: 5
+    definition: 影響。
+    answer: 左右
+  - index: 6
+    definition: 覺得好像看過，感到熟悉。
+    answer: 似曾相識
+  - index: 7
+    definition: 指一個人自己想像的情境或對話。
+    answer: 小劇場
+  - index: 8
+    definition: 指一群人中做壞事、影響大家的人。
+    answer: 害群之馬
+  - index: 9
+    definition: 彼此比高下、比輸贏。
+    answer: 較勁
+  notes:
+    word_bank_errata_ref: E2
+    answer_carrier: 橘色填在橫線上（run 層與字元樣式兩種來源都有）
+  slug: v34ww
+  text_ref: 9jcxw

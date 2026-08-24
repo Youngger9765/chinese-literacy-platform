@@ -1,0 +1,24 @@
+lesson_uid: L0172
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 1.夢想雨果｜想過你自己的特質嗎? 別輕看自己!｜動畫
+    duration: (1:43)
+    source: Dream Hugo 夢想雨果
+    has_qr: true
+    _總表_url: http://youtu.be/RKzwxDnvc8Y
+  - index: 2
+    title: 2.【Sizz翻譯】悲觀主義者獨有的智慧
+    duration: (2:30)
+    source: SIZZ
+    has_qr: true
+    _總表_url: http://youtu.be/jW-2BepfL2Y
+  notes:
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 166 列（適用年級欄填「體育品格」、課次 6），故加 `_`
+      前綴標示非 DOCX 內容。
+  slug: 7euxw
+  text_ref: ampvv

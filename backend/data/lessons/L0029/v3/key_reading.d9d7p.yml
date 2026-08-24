@@ -1,0 +1,48 @@
+lesson_uid: L0029
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（七☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  printed_char_count: 331
+  parts:
+  - part: 1
+    section_no_printed: 二
+    start_paragraph_printed: 7
+    spans_seq:
+    - 7
+    - 8
+    - 9
+    printed_char_count: 331
+  - part: 2
+    section_no_printed: 三
+    start_paragraph_printed: 7
+    spans_seq:
+    - 16
+    - 17
+    - 18
+    - 19
+    printed_char_count: 333
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 大衛奔赴戰場，因為沒有笨重的盔甲，他行動迅捷自如。不顧歌利亞的怒吼挑釁，始終保持距離，讓對方的武器神力毫無用武之地。他把石子放入投石器裡，在頭上旋轉六、七圈，石子在空中呼呼作響，速度愈來愈快。他瞄準歌利亞的前額——重甲保護下唯一的破綻，果斷出手。石子像子彈一樣疾射而出，以時速130公里的速度擊中歌利亞的額頭，那顆堅硬冰冷的鵝卵石，將巨人當場擊倒。這場戰鬥告訴我們，戰爭的勝負從來不是決定於誰更大、更強，而是決定於誰更有創意，誰能善用優勢，誰更懂得用智慧破解困局。雖然大衛各樣條件遠遠不及歌利亞，但他用投石器遠距攻擊的策略，讓巨人的優勢毫無用武之地，讓自己最熟悉的工具，成為勝負的關鍵。
+  start_text: 大衛奔赴戰場，因為沒有笨重的盔甲，他行動迅捷自如
+  extent_chars: 293
+  source: docx-anchor-and-count
+  start_idx: 7
+  end_idx: 8
+  part: 2
+  slug: d9d7p
+  text_ref: n3qxn

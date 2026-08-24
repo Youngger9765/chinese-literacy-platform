@@ -1,0 +1,49 @@
+lesson_uid: L0125
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 自告奮勇
+    B: 事在人為
+    C: 不堪設想
+    D: 情有可原
+    E: 因噎廢食
+    F: 悲痛欲絕
+    G: 苛責
+    H: 感同身受
+    I: 好心沒好報
+    J: 提告
+  unused_options:
+  - H
+  - J
+  items:
+  - index: 1
+    stem: 小明幫忙澆花，卻不小心打破花瓶，因而被同學責怪，真是(  )。
+    answer: I
+  - index: 2
+    stem: 聽到愛妻離世的消息，他(  )，久久不能平復悲傷的心情。
+    answer: F
+  - index: 3
+    stem: 班級大掃除時，小美(  )擔任組長，帶領大家分工合作。
+    answer: A
+  - index: 4
+    stem: 他遲到卻沒有被老師處罰，是因為遇上了突發的交通事故，(  )。
+    answer: D
+  - index: 5
+    stem: 馬路如虎口，如果大家不遵守交通規則，後果將(  )。
+    answer: C
+  - index: 6
+    stem: 雖然這次籃球比賽失敗了，但你不能(　)，放棄所有的練習。
+    answer: E
+  - index: 7
+    stem: 雖然考試不容易，但(　)，只要努力學習，就有機會取得好成績。
+    answer: B
+  - index: 8
+    stem: 面對別人的失誤，我們應該多一些理解，少一些 (　)。
+    answer: G
+  notes:
+    option_bank: 代號表第 2 列的「I.好心沒好報」與「J.提告」擠在同一個儲存格，其餘每格一個代號——原稿如此
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  slug: 3rfxh
+  text_ref: 4etxq

@@ -16,8 +16,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 篇次 1/3
-  slug: wdnd7
-  file: vocab_definitions.wdnd7.yml
+  text_ref: wdnd7
+  slug: 3rp4q
+  file: vocab_definitions.3rp4q.yml
   pages:
   - 3
   - 4
@@ -25,8 +26,9 @@ sections:
   name: 文章重點整理
   module: keypoints
   part: 篇次 1/3
-  slug: wdnd7
-  file: keypoints.wdnd7.yml
+  text_ref: wdnd7
+  slug: 337rq
+  file: keypoints.337rq.yml
   pages:
   - 4
   - 5
@@ -34,8 +36,9 @@ sections:
   name: 閱讀理解
   module: comprehension
   part: 篇次 1/3
-  slug: wdnd7
-  file: comprehension.wdnd7.yml
+  text_ref: wdnd7
+  slug: 3dufp
+  file: comprehension.3dufp.yml
   pages:
   - 5
   - 6
@@ -61,8 +64,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 篇次2/3
-  slug: dvxj6
-  file: vocab_definitions.dvxj6.yml
+  text_ref: dvxj6
+  slug: wpr7x
+  file: vocab_definitions.wpr7x.yml
   pages:
   - 8
   - 9
@@ -70,8 +74,9 @@ sections:
   name: 文章重點整理
   module: keypoints
   part: 篇次2/3
-  slug: dvxj6
-  file: keypoints.dvxj6.yml
+  text_ref: dvxj6
+  slug: hdp9w
+  file: keypoints.hdp9w.yml
   pages:
   - 9
   - 10
@@ -79,8 +84,9 @@ sections:
   name: 閱讀理解
   module: comprehension
   part: 篇次2/3
-  slug: dvxj6
-  file: comprehension.dvxj6.yml
+  text_ref: dvxj6
+  slug: mpwdc
+  file: comprehension.mpwdc.yml
   pages:
   - 10
   - 11
@@ -106,8 +112,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 篇次3/3-(新聞短文)
-  slug: 4ymn7
-  file: vocab_definitions.4ymn7.yml
+  text_ref: 4ymn7
+  slug: y4xxx
+  file: vocab_definitions.y4xxx.yml
   pages:
   - 13
   - 14
@@ -115,16 +122,18 @@ sections:
   name: 文章重點表
   module: keypoints
   part: 篇次3/3-(新聞短文)
-  slug: 4ymn7
-  file: keypoints.4ymn7.yml
+  text_ref: 4ymn7
+  slug: vvk4v
+  file: keypoints.vvk4v.yml
   pages:
   - 14
 - 'no': 四
   name: 閱讀理解
   module: comprehension
   part: 篇次3/3-(新聞短文)
-  slug: 4ymn7
-  file: comprehension.4ymn7.yml
+  text_ref: 4ymn7
+  slug: 9w4yp
+  file: comprehension.9w4yp.yml
   pages:
   - 14
   - 15
@@ -142,8 +151,12 @@ sections:
   module: spotlight
   subtitle: 從多文本閱讀──看文章之間的關係
   part: 三篇合讀
-  slug: null
-  file: spotlight.yml
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: 7xwy3
+  file: spotlight.7xwy3.yml
   pages:
   - 16
   - 17
@@ -152,16 +165,24 @@ sections:
   name: 詞語複習
   module: vocab_review
   part: 三篇合讀
-  slug: null
-  file: vocab_review.yml
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: cmp6q
+  file: vocab_review.cmp6q.yml
   pages:
   - 18
 - 'no': 八
   name: 知識補給站
   module: resources
   part: 三篇合讀
-  slug: null
-  file: resources.yml
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: 7ccvr
+  file: resources.7ccvr.yml
   pages:
   - 18
   - 19

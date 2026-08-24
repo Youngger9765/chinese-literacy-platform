@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: uy3fm
+  file: full_text_annotate.uy3fm.yml
   pages:
   - 1
   - 2
@@ -14,15 +14,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: uy3fm
+  slug: x96ca
+  file: key_reading.x96ca.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: uy3fm
+  slug: y7uew
+  file: vocab_definitions.y7uew.yml
   pages:
   - 3
   - 4
@@ -30,16 +32,18 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: uy3fm
+  slug: pk73c
+  file: vocab_application.pk73c.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: uy3fm
+  slug: mn3k4
+  file: keypoints.mn3k4.yml
   pages:
   - 6
   - 7
@@ -47,8 +51,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 寫作手法——用例子說明觀點
-  slug: null
-  file: spotlight.yml
+  text_ref: uy3fm
+  slug: qacnp
+  file: spotlight.qacnp.yml
   pages:
   - 7
   - 8
@@ -56,23 +61,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: uy3fm
+  slug: x6fnn
+  file: comprehension.x6fnn.yml
   pages:
   - 9
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: uy3fm
+  slug: kwnrq
+  file: vocab_review.kwnrq.yml
   pages:
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: uy3fm
+  slug: mhedt
+  file: resources.mhedt.yml
   pages:
   - 10
 dispatch:

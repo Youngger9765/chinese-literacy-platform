@@ -1,0 +1,53 @@
+lesson_uid: L0170
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 虎視眈眈
+    B: 排山倒海
+    C: 蓄勢待發
+    D: 扳回一城
+    E: 震耳欲聾
+    F: 作祟
+    G: 瀰漫
+    H: 吆喝
+    I: 懊悔
+    J: 士氣
+  unused_options:
+  - I
+  - J
+  items:
+  - index: 1
+    stem: 接獲老師生病過世的消息，教室裡(  )著悲傷的氣氛，許多人都默默拭淚。
+    answer: G
+  - index: 2
+    stem: 冠亞軍賽結果出爐，現場歡呼聲(  )，球迷們雀躍的互相擁抱。
+    answer: E
+  - index: 3
+    stem: 早期的傳染病經常被解釋成有妖魔鬼怪在(  )，危害百姓健康。
+    answer: F
+  - index: 4
+    stem: 餐廳販賣過期商品的新聞一出，網路負評(  )而來，讓老闆不得不暫時關閉社群媒體。
+    answer: B
+  - index: 5
+    stem: 儘管他們前面接棒失誤連連，仍在最後一刻(  )，拿下冠軍。
+    answer: D
+  - index: 6
+    stem: 祭典時，長老一聲(  )，眾人便一起高聲回應，場面十分震撼。
+    answer: H
+  - index: 7
+    stem: 校慶大隊接力，跑道上的選手們個個摩拳擦掌、 (  )。
+    answer: C
+  - index: 8
+    stem: 那條重要的運河讓周圍國家(  )，卻因情勢複雜，誰都不敢輕舉妄動。
+    answer: A
+  notes:
+    option_bank: '代號表第 2 列的「H.吆喝」與「I.懊悔」擠在同一個儲存格——原稿如此。
+
+      ⚠️ J 是「士氣」，它**不在**第三大題的「本課語詞」框（那框 12 個沒有士氣），
+
+      但課文第 3 段有用到並且有黑框標示。照原稿記錄。'
+    answer_carrier: 橘色手寫代號（字元樣式 af0），文字流有此資訊
+  slug: wxmwv
+  text_ref: 3vey6

@@ -1,0 +1,238 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 物以稀為貴
+  - 人滿為患
+  - 奇貨可居
+  - 高朋滿座
+  - 應接不暇
+  - 趁火打劫
+  - 義憤填膺
+  - 誘因
+  - 離鄉背井
+  - 望穿秋水
+  - 賑災
+  - 頒布
+  - 兢兢業業
+  - 精益求精
+  - 水漲船高
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 義憤填膺供望穿秋水比
+  - 飆漲稀奇給奇崩干預比
+  - 物以稀為貴貨跌來襲皆
+  - 人物頒龐趁可波濤應是
+  - 接滿布然火居動接賑難
+  - 高搏為大打閒不兢遭災
+  - 多朋難患劫暇兢水離殃
+  - 年熬滿有滑業比漲鄉及
+  - 媳婦成座業誘皆船背池
+  - 精益求精婆因是高井魚
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 義憤填膺
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 望穿秋水
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 奇貨可居
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    - - 5
+      - 6
+    direction: vertical
+  - word: 物以稀為貴
+    cells:
+    - - 3
+      - 1
+    - - 3
+      - 2
+    - - 3
+      - 3
+    - - 3
+      - 4
+    - - 3
+      - 5
+    direction: horizontal
+  - word: 人滿為患
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 頒布
+    cells:
+    - - 4
+      - 3
+    - - 5
+      - 3
+    direction: vertical
+  - word: 趁火打劫
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 5
+    - - 6
+      - 5
+    - - 7
+      - 5
+    direction: vertical
+  - word: 應接不暇
+    cells:
+    - - 4
+      - 9
+    - - 5
+      - 8
+    - - 6
+      - 7
+    - - 7
+      - 6
+    direction: diagonal_down_left
+  - word: 賑災
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 10
+    direction: diagonal_down_right
+  - word: 高朋滿座
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 2
+    - - 8
+      - 3
+    - - 9
+      - 4
+    direction: diagonal_down_right
+  - word: 兢兢業業
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 7
+    - - 8
+      - 6
+    - - 9
+      - 5
+    direction: diagonal_down_left
+  - word: 水漲船高
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    - - 10
+      - 8
+    direction: vertical
+  - word: 離鄉背井
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 誘因
+    cells:
+    - - 9
+      - 6
+    - - 10
+      - 6
+    direction: vertical
+  - word: 精益求精
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  notes:
+    scope: 三篇合讀
+    target_words: '15 個目標語詞跨三篇（篇1 四個、篇2 八個、篇3 三個），是這批教材裡最多的一課。
+
+      灰框原文分三行印：「物以稀為貴、人滿為患、奇貨可居、高朋滿座、／應接不暇、趁火打劫、義憤填膺、誘因、離鄉背井、／望穿秋水、賑災、頒布、兢兢業業、精益求精、水漲船高」'
+    answer_paths: '15 個目標語詞全部圈到（15/15），逐格取字都能拼回目標語詞，格子沒有錯字。
+
+
+      幾何交叉驗證（單向警報）——**這一課要先把範圍縮到找字那一塊，不能數全檔**：
+
+      全檔 29 個 roundRect，但依文件順序分佈是
+
+      ・block 76：8 個＝第一篇第五大題流程圖的圓角方塊
+
+      ・block 184：1 個＝第二篇第四大題克漏字短文的外框
+
+      ・block 198：5 個＝第二篇第五大題流程圖
+
+      ・**block 397：15 個＝找字格子本身**
+
+      找字那一塊 15 個，與 answer_paths 15 條相同 → 15 ＞ 15 不成立，**不觸發**警報。
+
+      ⛔ 若直接用全檔 29 去比 15，會得到「29 ＞ 15 ⇒ 少抓 14 條」的假警報。
+
+
+      另外做了一次**像素級獨立驗證**（不靠 EMU 幾何）：把 p22 以 200dpi 重繪，
+
+      用暗像素投影抓出 10×10 字元格中心，再檢查每格附近有無 E97132 橘色。
+
+      結果：本清單 15 條路徑覆蓋的 55 格**全部**有橘框（0 格落空）；
+
+      有橘色但不在任何路徑上的格全是斜向膠囊經過相鄰格的溢出（像素數多在 200~600，
+
+      遠低於被圈中格的 800~1600），沒有第 16 條路徑。
+
+
+      另記：格子右上角埋了一組「比比皆是」（(1,10)→(4,10) 直向），
+
+      但它**不在灰框的 15 個語詞裡，像素檢查也確認該四格無橘色** —— 是干擾詞，不是漏抽的答案。'
+  slug: 9ahm4
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn

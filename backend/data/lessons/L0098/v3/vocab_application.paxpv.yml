@@ -1,0 +1,46 @@
+lesson_uid: L0098
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 屢見不鮮
+    B: 刻板印象
+    C: 日積月累
+    D: 內化
+    E: 無傷大雅
+    F: 開場白
+    G: 滲透
+    H: 憐憫
+    I: 隱蔽
+    J: 偏見
+  items:
+  - index: 1
+    stem: 這份報告只有幾個小錯字，不影響整體內容，應該（　）。
+    answer: E
+  - index: 2
+    stem: 日本動漫和遊戲逐漸（　）到日常生活，改變了年輕人的價值觀。
+    answer: G
+  - index: 3
+    stem: 含糖飲料看似安全，但（　）後，會對身體產生長遠的傷害。
+    answer: C
+  - index: 4
+    stem: 經過一次次練習，他逐漸把教練教的技能（　）成自己的能力。
+    answer: D
+  - index: 5
+    stem: 比賽中因為緊張而失誤的情形（　），選手必須學會調整心情。
+    answer: A
+  - index: 6
+    stem: 我們不應該根據他黑壯的外表，就帶著（　）說他會很粗魯。
+    answer: J
+  - index: 7
+    stem: 這條小路藏在樹林後方，位置十分（　），外地人很難發現。
+    answer: I
+  - index: 8
+    stem: 看到流浪狗在雨中發抖，她心生（　），便拿出毛巾幫牠擦乾。
+    answer: H
+  notes:
+    option_bank: 10 個代號對應 8 道小題；B.刻板印象、F.開場白 未被任何一題用到。代號組成與語詞框一致（有偏見、無滴水穿石）。
+    answer_carrier: 橘色手寫代號（PDF p3~p4）；文字層的（　）內已填有同樣的代號
+  slug: paxpv
+  text_ref: phue3

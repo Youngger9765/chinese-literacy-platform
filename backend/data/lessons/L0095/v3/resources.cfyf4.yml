@@ -1,0 +1,27 @@
+lesson_uid: L0095
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 用屍塊造人但不想負責！《科學怪人》科技時代的警示寓言
+    duration: (10:02)
+    source: TaiwanBar
+    qr_code: true
+  - index: 2
+    title: 希臘神話-眾神篇 第八期】盜火的普羅米修斯，偉大的先知被囚禁。
+    duration: (12:15)
+    source: 錢丟丟文明神話講解
+    qr_code: true
+    title_note: 標題只有右半個方括號「】」而沒有左半，原稿如此，未補。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/MwnrwmYkQLw
+    url_source: 總表0816「4.影片連結」年級7課次26（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/b90c0ZgdM5o
+    url_source: 總表0816「4.影片連結」年級7課次26（⚠️課名與課程不符，仍依課次採用）
+  slug: cfyf4
+  text_ref: 9yvqf

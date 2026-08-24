@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: heaup
+  file: full_text_annotate.heaup.yml
   pages:
   - 1
   - 2
@@ -15,8 +15,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 閱讀策略——跳過卡關，先瀏覽全文
-  slug: null
-  file: spotlight.yml
+  text_ref: heaup
+  slug: mnfjr
+  file: spotlight.mnfjr.yml
   pages:
   - 3
   - 4
@@ -24,54 +25,61 @@ sections:
 - 'no': 三
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: heaup
+  slug: hk7wa
+  file: key_reading.hk7wa.yml
   pages:
   - 5
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: heaup
+  slug: fpeh3
+  file: vocab_definitions.fpeh3.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: heaup
+  slug: parcv
+  file: vocab_application.parcv.yml
   pages:
   - 6
   - 7
 - 'no': 六
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: heaup
+  slug: pq6fr
+  file: keypoints.pq6fr.yml
   pages:
   - 7
   - 8
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: heaup
+  slug: ny6m6
+  file: comprehension.ny6m6.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: heaup
+  slug: caf4m
+  file: vocab_review.caf4m.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: heaup
+  slug: xt3vv
+  file: resources.xt3vv.yml
   pages:
   - 9
 dispatch:

@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: envdq
+  file: full_text_annotate.envdq.yml
   pages:
   - 1
   - 2
@@ -14,15 +14,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: envdq
+  slug: p7jef
+  file: key_reading.p7jef.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: envdq
+  slug: mca6n
+  file: vocab_definitions.mca6n.yml
   pages:
   - 3
   - 4
@@ -30,16 +32,18 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: envdq
+  slug: 7ahj9
+  file: vocab_application.7ahj9.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: envdq
+  slug: a7ma3
+  file: keypoints.a7ma3.yml
   pages:
   - 6
   - 7
@@ -47,8 +51,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 調節與因應負面念頭
-  slug: null
-  file: spotlight.yml
+  text_ref: envdq
+  slug: wvqw9
+  file: spotlight.wvqw9.yml
   pages:
   - 7
   - 8
@@ -58,23 +63,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: envdq
+  slug: pqkvq
+  file: comprehension.pqkvq.yml
   pages:
   - 11
   - 12
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: envdq
+  slug: ajwv9
+  file: vocab_review.ajwv9.yml
   pages:
   - 12
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: envdq
+  slug: 4uqpv
+  file: resources.4uqpv.yml
   pages:
   - 12
 dispatch:

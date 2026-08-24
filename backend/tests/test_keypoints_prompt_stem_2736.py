@@ -70,7 +70,8 @@ def test_every_authored_prompt_survives_the_bridge() -> None:
     total = 0
     missing: list[tuple[str, str]] = []
 
-    for path in sorted(LESSONS.glob("*/v3/keypoints.yml")):
+    # 檔名帶自己的 slug（#2916）；多篇課一篇一份，每一份都要驗。
+    for path in sorted(LESSONS.glob("*/v3/keypoints.*.yml")):
         uid = path.parts[-3]
         kp = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("keypoints") or {}
         authored = _authored_prompts(kp)

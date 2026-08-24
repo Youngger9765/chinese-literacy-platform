@@ -106,8 +106,8 @@ class StoryDetail(StoryListItem):
     # Untyped dict passes the field straight through from YAML.
     images: list[dict] = []
     # 學習單 section ordering + intro metadata (#1434)
-    # worksheet_section_order: [{number: '二', name: '念順順', type: 'reading_timer'}, ...]
-    worksheet_section_order: Optional[list[dict]] = None
+    # manifest_sections: [{number: '二', name: '念順順', type: 'reading_timer'}, ...]
+    manifest_sections: Optional[list[dict]] = None
     # worksheet_intro: {step_label, target_strategy, instructions, level_label, lesson_label, authors}
     worksheet_intro: Optional[dict] = None
     # lesson_intro: real course introduction (#1443)

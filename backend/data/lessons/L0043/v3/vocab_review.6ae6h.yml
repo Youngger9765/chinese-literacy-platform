@@ -1,0 +1,144 @@
+lesson_uid: L0043
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 嗷嗷待哺
+  - 目不識丁
+  - 貼補
+  - 按件計酬
+  - 俐落
+  - 彌漫
+  - 餘悸猶存
+  - 著落
+  - 積勞成疾
+  - 庇蔭
+  - 食指浩繁
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 如魚得水包嗷嗷嗚彌累
+  - 目不識丁庇熱嗷呼補積
+  - 不彌足珍貴衷待待沙丘
+  - 轉撒貼蔭果貼補成哺杜
+  - 睛積心瓜斷裂塔效撰餘
+  - 店木勞按件計酬覓悸鋪
+  - 鋪俐食成按鍵食猶天剪
+  - 著落指莽疾庇存蓋體貼
+  - 目不浩給撞佑地庇樹彌
+  - 的案繁家常便飯護蔭漫
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 目不識丁
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 嗷嗷待哺
+    cells:
+    - - 1
+      - 6
+    - - 2
+      - 7
+    - - 3
+      - 8
+    - - 4
+      - 9
+    direction: diagonal_down_right
+  - word: 貼補
+    cells:
+    - - 4
+      - 6
+    - - 4
+      - 7
+    direction: horizontal
+  - word: 積勞成疾
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 餘悸猶存
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 按件計酬
+    cells:
+    - - 6
+      - 4
+    - - 6
+      - 5
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 俐落
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 食指浩繁
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    - - 9
+      - 3
+    - - 10
+      - 3
+    direction: vertical
+  - word: 著落
+    cells:
+    - - 8
+      - 1
+    - - 8
+      - 2
+    direction: horizontal
+  - word: 庇蔭
+    cells:
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 彌漫
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  notes:
+    answer_paths: '11 個目標語詞全部圈到。「俐落」與「著落」共用 (8,2) 的「落」，兩條路徑在該格交叉。
+
+      ⚠️ PDF p10 的找字格子被第九大題的影片連結表整片疊印蓋住，橘框仍可辨讀，
+
+      格子文字則以 document.xml 為準。'
+  slug: 6ae6h
+  text_ref: nraty

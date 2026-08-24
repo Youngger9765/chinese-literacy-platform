@@ -1,0 +1,44 @@
+lesson_uid: L0121
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 有所忌憚
+    B: 冒犯
+    C: 茶餘飯後
+    D: 一片譁然
+    E: 凝視
+    F: 陰霾
+    G: 舉證
+    H: 自主權
+  items:
+  - index: 1
+    stem: 這件賄選案被媒體揭發，輿論(  )。
+    answer: D
+  - index: 2
+    stem: 我們一家喜歡在(  )聊聊生活瑣事，分享彼此的看法。
+    answer: C
+  - index: 3
+    stem: 他久久(  )這幅畫，不發一語，不知道在思考什麼。
+    answer: E
+  - index: 4
+    stem: 看到她揮別往事，重拾往日笑容，終於走出(  )，真是替她開心。
+    answer: F
+  - index: 5
+    stem: 今天火車站有警察巡邏，小偷（  ），不敢行竊。
+    answer: A
+  - index: 6
+    stem: 不敲門就闖進別人的家，十分（  ）他人。
+    answer: B
+  - index: 7
+    stem: 每個人都有身體（  ），別人不能隨便碰觸或強迫。
+    answer: H
+  - index: 8
+    stem: 性騷擾常發生在沒有旁人在場的地方，因此受害者往往難以（  ）。
+    answer: G
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列後兩格是空的（只到 H）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；第 5、6 題的代號印成全形（Ａ／Ｂ），其餘半形
+  slug: pxtem
+  text_ref: a6hyh

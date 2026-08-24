@@ -1,0 +1,60 @@
+lesson_uid: L0166
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框中，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 滿腹委屈
+  - 頻頻
+  - 口令
+  - 備受矚目
+  - 釐清
+  - 出色
+  - 不見蹤影
+  - 一己之力
+  - 出局數
+  - 推進
+  items:
+  - index: 1
+    word: 備受矚目
+    definition: 指受到許多人關注。
+  - index: 2
+    word: 一己之力
+    definition: 指一個人自己的力量。
+  - index: 3
+    word: 釐清
+    definition: 指把混亂或不明白的事情整理清楚。
+  - index: 4
+    word: 出色
+    definition: 表現特別好，超出一般水準。
+  - index: 5
+    word: 滿腹委屈
+    definition: 心中充滿委屈
+  - index: 6
+    word: 出局數
+    definition: 棒球比賽中，一隊進攻時已經出局的人次。
+  - index: 7
+    word: 口令
+    definition: 簡短的命令或口號。
+  - index: 8
+    word: 不見蹤影
+    definition: 指完全看不見人或事物，也找不到去向。
+  - index: 9
+    word: 頻頻
+    definition: 接連多次；一再地。
+  - index: 10
+    word: 推進
+    definition: 推動事情、工作或位置向前發展。本文指協助跑者向下一個壘包前進。
+  notes:
+    instruction: 🅐 這一行本課寫「從本課語詞框**中**」，L0165 與白話課寫「從本課語詞框**框**」。
+    vocabulary_bank: 語詞框共 10 個，分四行印，行末無標點。
+    answer_carrier: 橘色（run 層與字元樣式混用），PDF p4~p5 可見
+    items: 第 (5) 題的解釋句末**沒有句號**，其餘九題都有。原稿如此。
+  slug: xu67m
+  text_ref: pvqer

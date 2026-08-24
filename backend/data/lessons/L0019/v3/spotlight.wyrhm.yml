@@ -1,0 +1,181 @@
+lesson_uid: L0019
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 條件複句
+  strategy_type: syntax
+  section_title_printed: 閱讀聚光燈
+  blocks:
+  - type: concept_box
+    text: '「只要獲得獎牌，就有保送升學的機會。」在這個句子裡，前句是「條件」，後句是「結果」，像這樣用條件引出結果的句子，就是條件複句。
+
+      常見的句型有：「只要……就……」、「只有……才……」、「如果……就……」、「無論／不管……都……」、「除非……否則……」、「沒有……就……」。
+
+      讀到條件複句，可以這樣讀懂句子的關係：
+
+      ①先圈出關聯詞。
+
+      ②找出「要先發生或做到的事」（條件）。
+
+      ③找出「接著會出現的結果」（結果）。
+
+      ④用「條件 → 結果」說出句子的意思。'
+  - type: matching
+    label: 1.連連看
+    instruction: 1.連連看，先圈出關聯詞，再將相關的句子連起來。
+    left_header: 條件
+    right_header: 產生結果
+    left:
+      1: 只要遵照訓練菜單，
+      2: 你沒有看重睡眠，
+      3: 不管你再怎麼辯解，
+      4: 哥哥只要通過體能測驗，
+      5: 除非把功課寫完，
+    right:
+      A: 就可以加入籃球隊。
+      B: 就有機會打敗敵人。
+      C: 隔天就無精打采。
+      D: 都改變不了既定的事實。
+      E: 否則你不能出去玩。
+    answer:
+      1: B
+      2: C
+      3: D
+      4: A
+      5: E
+    answer_carrier: 手繪連線（1 條黑線、4 條紅線）為圖形，文字流無此資訊
+    circled_connectives:
+      left:
+        1: 只要
+        2: 沒有
+        3: 不管
+        4: 只要
+        5: 除非
+      right:
+        A: 就
+        B: 就
+        C: 就
+        D: 都
+        E: 否則
+    circle_position_note: '第 4 列的橘框在 PDF 上落在「體能測驗」而不是「只要」。該列是這張表唯一換行的一列，
+
+      換行後整列被左右對齊拉開字距，而框是絕對定位、不隨文字重排 —— 據此判定它原本圈的是
+
+      「只要」。這一格是推論，不是直接讀到的；其餘四列的框都直接落在關聯詞上。'
+  - type: fill_table
+    label: 2.辨別句子的意思
+    instruction: 2.辨別句子的意思，選出適當的分句，在□打勾。(單選)
+    columns:
+    - 條件
+    - 結果
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    rows:
+    - label: 例
+      條件: 只要獲得獎牌，
+      結果_options:
+        1: 就有保送升學的機會。
+        2: 就想回家。
+      結果_answer: 1
+    - label: (1)
+      條件: 只要妹妹想畫畫，
+      結果_options:
+        1: 就會拿起彩色筆。
+        2: 就會穿上游泳衣。
+      結果_answer: 1
+    - label: (2)
+      條件: 只要
+      條件_options:
+        1: 放暑假，
+        2: 開學，
+      條件_answer: 1
+      結果: 就會有很多人出國去玩。
+      note: 本列的選項印在「條件」欄（其餘三列印在「結果」欄）
+    - label: (3)
+      條件: 只要有人打電話求助，
+      結果_options:
+        1: 警察就會立刻提供援助。
+        2: 植物就可以快速生長。
+      結果_answer: 1
+  - type: exercise
+    label: 3.句型大比拚
+    instruction: 3.句型大比拚：請你選擇適當的關聯詞填入括號內，成為通順的句子。
+    option_bank:
+      1: 不但…而且
+      2: 雖然…但是
+      3: 只要…就
+      4: 先…然後
+      5: 無論…都
+      6: 一邊…一邊
+      7: 既…又
+      8: 寧可…也
+    answer_carrier: 紅色手寫字（圖形），文字流無此資訊
+    items:
+    - type: free_text
+      index: 1
+      prompt: 小美【　】功課好，【　】熱心助人。
+      blanks:
+      - answer: 不但
+      - answer: 而且
+      bank_ref: 1
+    - type: free_text
+      index: 2
+      prompt: 【　】實驗失敗了，【　】愛迪生絲毫不氣餒。
+      blanks:
+      - answer: 雖然
+      - answer: 但是
+      bank_ref: 2
+    - type: free_text
+      index: 3
+      prompt: 【　】晚上早點睡，白天上課【　】不會打瞌睡了。
+      blanks:
+      - answer: 只要
+      - answer: 就
+      bank_ref: 3
+    - type: free_text
+      index: 4
+      prompt: 每次出門，爸爸會【　】繫好安全帶，【　】再開車。
+      blanks:
+      - answer: 先
+      - answer: 然後
+      bank_ref: 4
+    - type: free_text
+      index: 5
+      prompt: 【　】謊言聽起來多麼動聽，最終【　】會被人拆穿。
+      blanks:
+      - answer: 無論
+      - answer: 都
+      bank_ref: 5
+  - type: sub_block
+    label: 4.讀和課文有關的句子
+    instruction: 4.讀和課文有關的句子：判斷「條件」和「結果」
+    answer_carrier: 橘框圈選（圖形），文字流無此資訊
+    items:
+    - type: sub_block
+      label: (1)請圈出「條件」
+      instruction: (1)請圈出「條件」：
+      items:
+      - type: free_text
+        label: a
+        prompt: 如果大量長跑和肌力訓練排得太密集，就可能影響訓練效果。
+        answer: 如果大量長跑和肌力訓練排得太密集
+      - type: free_text
+        label: b
+        prompt: 只有根據科學證據安排訓練，才能安全又有效的提升運動表現。
+        answer: 只有根據科學證據安排訓練
+    - type: sub_block
+      label: (2)請圈出「結果」
+      instruction: (2)請圈出「結果」：
+      items:
+      - type: free_text
+        label: a
+        prompt: 如果教練能透過數據找出選手的問題，就能設計更適合的訓練方式。
+        answer: 就能設計更適合的訓練方式
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 請你自己檢查以下3項，確定自己是否會條件複句了。
+    items:
+    - 我會圈出條件複句的關聯詞。
+    - 我能分出哪一部分是條件，哪一部分是結果。
+    - 我能用「條件 → 結果」說出句子的意思。
+  slug: wyrhm
+  text_ref: 3hhtn

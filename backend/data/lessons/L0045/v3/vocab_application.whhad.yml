@@ -1,0 +1,43 @@
+lesson_uid: L0045
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 施作
+    B: 想方設法
+    C: 蔓延
+    D: 剋星
+    E: 日新月異
+    F: 一勞永逸
+    G: 防治
+    H: 兵來將擋，水來土掩
+  items:
+  - index: 1
+    stem: 活動當天突然下起大雨，大家立刻把攤位移到室內，展現出（　）的應變能力。
+    answer: H
+  - index: 2
+    stem: 現在詐騙手法（　），稍不留意，就容易受騙。
+    answer: E
+  - index: 3
+    stem: 良好的生活習慣是疾病的（　），讓我們能遠離病痛。
+    answer: D
+  - index: 4
+    stem: 園遊會的攤位被強風吹壞了，眼看校慶在即，大家（　）修復它。
+    answer: B
+  - index: 5
+    stem: 為了（　）登革熱，環保人員定期在社區裡噴藥。
+    answer: G
+  - index: 6
+    stem: 謠言在網路上不斷（　），許多人因此誤信了不實消息。
+    answer: C
+  - index: 7
+    stem: 工程人員依照設計圖（　），確保大樓能如期完工。
+    answer: A
+  - index: 8
+    stem: 爸爸決定把漏水的屋頂全部翻新，希望能（　）。
+    answer: F
+  notes:
+    option_bank: 只列 8 個代號（本課語詞中的「翼展」「抗藥性」未入選項），對應 8 道小題
+  slug: whhad
+  text_ref: urk49

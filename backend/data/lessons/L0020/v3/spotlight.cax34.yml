@@ -1,0 +1,172 @@
+lesson_uid: L0020
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 解題策略——轉折詞後有重點
+  strategy_type: comprehension_strategy
+  blocks:
+  - type: concept_box
+    text: 本課透過日常的對話經驗，連結到閱讀文章，提醒我們：看到轉折詞時，可以先留意後面的訊息，再配合前後文理解句意。希望同學在閱讀時能藉由留意轉折詞，更準確掌握文意。現在就讓我們一起來完成以下練習吧！
+  - type: guide
+    text: 一、圈出轉折詞，找出作者特別強調的訊息
+  - type: guide
+    text: 文章中常見的轉折詞有：可是、但是、不過、然而、卻。另外，「不是……而是……」也是常見的轉折句型。請在以下題目中完成任務：
+  - type: guide
+    text: '❶圈出轉折詞。
+
+      ❷讀一讀轉折詞前後的內容。
+
+      ❸勾選作者在「轉折詞之後」特別強調的訊息。'
+  - type: single
+    index: 1
+    prompt: 很多人以為運動讓人疲累，不過適度運動反而能讓精神變好。
+    circled_word: 不過
+    options:
+      1: 運動會讓人疲累。
+      2: 適度運動能讓精神變好。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: single
+    index: 2
+    prompt: 家人已經提醒他使用手機超過約定的時間，他卻大呼小叫，仍然不肯放下手機。
+    circled_word: 卻
+    options:
+      1: 家人提醒他超過時間。
+      2: 他不肯放下手機，還大呼小叫。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: single
+    index: 3
+    prompt: 這部電影我已經看過很多次，但是每一次都還是可以發現新的細節。
+    circled_word: 但是
+    options:
+      1: 我已經看過很多次這部電影。
+      2: 每次重看這部電影都有新發現。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: single
+    index: 4
+    prompt: 氣象署已經發布大雨特報，然而還是有許多遊客前往山區。
+    circled_word: 然而
+    options:
+      1: 氣象署發布了大雨特報。
+      2: 大雨特報已發布，許多遊客仍前往山區。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: single
+    index: 5
+    prompt: 這次報告的分數很低，不是因為資料太少，而是重點沒有整理清楚。
+    circled_word: 而是
+    options:
+      1: 因為資料太少所以分數低。
+      2: 因為重點不清楚所以分數低。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: guide
+    text: 提醒：先看轉折詞後面說什麼，再看看前面的內容，才知道真正的重點。
+  - type: guide
+    text: 二、圈出轉折詞，並勾選文章的重點
+  - type: passage
+    paragraphs:
+    - 阿凱一直給人很冷淡的感覺。下課時，他常常一個人坐在位子上，不太主動和大家聊天。有一次我忘了帶美勞用具，正不知道該怎麼辦時，阿凱卻默默把自己的剪刀和膠水推到我面前。後來我才發現，他不是不關心別人，而是比較不會主動開口。原來，有些人雖然話不多，但是不代表冷漠，他們只是用自己的方式在幫助別人。
+  - type: free_text
+    index: 1
+    prompt: 圈出文章中的轉折詞（共三處）。
+    answers:
+    - 卻
+    - 而是
+    - 但是
+    answer_carrier: 橘色方框（圖形），文字流無此資訊
+  - type: single
+    index: 2
+    prompt: 比較轉折詞前後的內容，下列何者最可能是這篇文章的主旨？
+    options:
+      1: 不愛說話的人，通常不願意主動幫助同學
+      2: 判斷一個人時，說話方式比實際行動更重要
+      3: 不要只憑表面判斷一個人，也要觀察他的行動
+      4: 與安靜的人相處時，應該主動要求他表達想法
+    answer: 3
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: guide
+    text: 三、挑戰題：用策略試試會考題
+  - type: guide
+    text: 以下為會考的歷屆試題，請先圈出轉折詞，再比較前後內容，找出作者特別強調的訊息，判斷正確答案。
+  - type: sub_block
+    label: 1.111年第5題
+    items:
+    - type: single
+      answer: D
+      text_carrier: image
+      paragraphs:
+      - 「過去賭客玩拉霸機時，需要把紙鈔塞進機器裡，所以會看見皮夾裡的鈔票越來越少，能提醒自己適時收手。但現在他們用卡片玩拉霸機，卡片僅會記錄他們的輸贏情況。賭客難以意識到自己正不斷輸錢，只能隱約記得花了多少錢。」這段文字的主旨與下列何者最接近？
+      options:
+        A: 欲望會創造新的發明
+        B: 科技的進步使生活更便利
+        C: 長期沉溺於賭博之中容易讓人迷失自我
+        D: 不用現金支付使人對花錢的感受變得較遲鈍
+    - type: free_text
+      index: 1
+      prompt: 請圈出轉折詞。
+      answers:
+      - 但
+      answer_carrier: 學生自圈，原稿無圈選痕跡
+    - type: sub_block
+      label: (2)
+      instruction: 留意轉折詞之後，強調：
+      items:
+      - type: single
+        prompt: 他們用（　）玩拉霸機，卡片只會呈現輸贏狀況。
+        options:
+          1: 紙鈔
+          2: 卡片
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+      - type: single
+        prompt: 賭客比較（　）意識到輸了多少錢。
+        options:
+          1: 容易
+          2: 困難
+        answer: 2
+        answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 3
+      prompt: 根據轉折詞之後的敘述，選項何者正確？
+      answer: D
+      note: 選項 (A)~(D) 印在上方那張圖片裡，不重複列
+      answer_carrier: 橘色手寫字（圖形層）
+  - type: sub_block
+    label: 2.節錄文章自112年第34~35題：
+    items:
+    - type: passage
+      paragraphs:
+      - 「隱私」是一種多元流動的概念，窗簾代表一種隱私，提款卡密碼是一種 隱私，筆電防窺貼片是一種隱私。在我讀高中的年代，「隱私」意謂著上鎖的日記本、父母進房間前先敲門。
+      - 如今在網路上，瀏覽紀錄、按讚喜好、地理位置、基本個資等這些看不到的數據，都是商業可變現、政治可操縱的黑箱資料。
+      - 關於網路隱私，當前最重要的挑戰是，當我們同意使用某一網路服務，形同自願交出私密資料。然而，我們完全不知道，誰可能取得這些資料，又會用在哪些地方？
+      attribution: ——改寫自黃哲斌〈個資可以吃嗎？給現代公民的網路隱私守則〉
+    - type: free_text
+      index: 1
+      prompt: 請圈出轉折詞。
+      answers:
+      - 然而
+      answer_carrier: 學生自圈，原稿無圈選痕跡
+    - type: single
+      index: 2
+      prompt: 留意轉折詞後面主要強調哪一項訊息？請勾選。
+      options:
+        1: 「隱私」在現在與過去有截然不同的定義和範圍。
+        2: 我們的隱私資料在商人與政治家眼中是有價值的。
+        3: 我們難以確認自己提交的隱私資料會被如何運用。
+      answer: 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      index: 3
+      prompt: 依據本文，下列何者最符合作者的觀點？
+      options:
+        A: 只要使用者同意，交出資料就不算隱私問題。
+        B: 網路隱私的難處，是資料交出後難以掌握去向。
+        C: 網路資料有商業價值，所以最好完全不要使用網路。
+        D: 現代隱私都藏在數據中，傳統隱私已經不重要。
+      answer: B
+      answer_carrier: 橘色手寫字（圖形層）
+  slug: cax34
+  text_ref: 6xkpp

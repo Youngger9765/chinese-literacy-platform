@@ -1,0 +1,59 @@
+lesson_uid: L0083
+version_id: v3
+section_no: 五
+keypoints:
+  title: 爺爺奶奶來了以後
+  layout: list
+  answer_carrier: 紅色 ☑（w:sym）與橘色手寫字；PDF p5
+  structure_note: 左欄「家庭／生活的／改變」在原稿是直排三行，本檔記為連續字串。
+  rows:
+  - label: 家庭生活的改變
+    lead: 爺爺奶奶搬來後，
+    items:
+    - label: 1
+      value: 家裡氣氛變得【　】（單選）
+      options:
+        1: 吵鬧
+        2: 熱鬧
+        3: 擁擠
+      answer: 2
+    - label: 2
+      value: 第3～6段寫到哪些爺爺奶奶同住後的生活改變？（多選）
+      options:
+        1: 高齡友善空間的改造
+        2: 餐桌上菜色的變化
+        3: 生活作息的調整
+        4: 音樂喜好的改變
+      answers:
+      - 1
+      - 2
+      - 3
+  - label: 作者的理解與收穫
+    items:
+    - label: 1
+      value: 理解不同世代有各自的【　】和【　】，如：音樂喜好和冷氣使用習慣等。
+      blanks:
+      - answer: 生活方式
+      - answer: 價值觀
+    - label: 2
+      value: 認為與長輩同住有助於青少年【　】智商的培養。
+      value_source_text: 認為與長輩同住有助於青少年【　情緒　智商】的培養。
+      value_note: '原稿這格印成「青少年【 情緒　智商】的培養」—— 括號**同時包住**要填的「情緒」
+
+        與印好的「智商」（情緒智商＝EQ 是一個詞）。本檔的 value 依空格慣例把括號縮到
+
+        只包答案，原樣留在 value_source_text 給逐字門比對。這不是勘誤，是括號範圍
+
+        與我們的 【　】 慣例不一致。'
+      blanks:
+      - answer: 情緒
+    - label: 3
+      value: 學會傾聽不同世代的聲音和【　】為他人著想。
+      blanks:
+      - answer: 設身處地
+    - label: 4
+      value: 學會【　】，帶著好奇心聆聽爺爺奶奶的故事。
+      blanks:
+      - answer: 轉換觀點
+  slug: 96j93
+  text_ref: xmaax

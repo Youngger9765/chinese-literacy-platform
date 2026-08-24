@@ -439,11 +439,11 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
  *
  * These 5 mappings are UNAMBIGUOUS and applied BEFORE the dash transform.
  * When the parser vocabulary drifts, add the new alias here (a console.warn in
- * stepSequenceFromWorksheet flags any type that still resolves to nothing).
+ * stepSequenceFromManifest flags any type that still resolves to nothing).
  */
 export const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
   // ── 模組名 → step id（#2916）────────────────────────────────────
-  // `worksheet_section_order` 的 `type` 現在直接給模組名，因為那份順序是從
+  // `manifest_sections` 的 `type` 現在直接給模組名，因為那份順序是從
   // 每一課的總帳 `_manifest.yml` 來的，而總帳講的是模組。
   // ⚠️ 這張表要跟 `scripts/module_entry_gate.py` 的 ENTRY 保持一致 ——
   //    那道門會解析本檔驗證「每個抽出來的模組，學生都走得到」。
@@ -472,14 +472,14 @@ export const WORKSHEET_TYPE_ALIASES: Record<string, string> = {
  * 曾在 tutor(逐段) / full-reading(全文) 間無法定案，會議定調朗讀只練老師指定的「重點段落」
  * → 把 full-reading step 改造成「重點朗讀」並把 reading_timer 對應過去（見 WORKSHEET_TYPE_ALIASES）。
  * 目前沒有其他已知未對應的 type；若 parser 詞彙漂移，新的未對應 type 會在
- * stepSequenceFromWorksheet 觸發 console.warn（intended，讓 drop 保持可見）。
+ * stepSequenceFromManifest 觸發 console.warn（intended，讓 drop 保持可見）。
  */
 export const KNOWN_UNMAPPED_WORKSHEET_TYPES = [] as const;
 
 /**
  * Derive a per-lesson step sequence from the printed worksheet's section order.
  *
- * Each lesson YAML carries `worksheet_section_order`: the AUTHORITATIVE ordered
+ * Each lesson YAML carries `manifest_sections`: the AUTHORITATIVE ordered
  * list of the paper 學習單 sections, e.g.
  *   [{number:'一', name:'讀全文-做記號', type:'reading_annotation'}, ...]
  * The section `type` (underscored) maps 1:1 to a STEP_REGISTRY id (hyphenated),
@@ -536,13 +536,28 @@ export function isPublicLearningStep(id: string): boolean {
   return PUBLIC_LEARNING_STEPS.has(resolveStepId(id));
 }
 
-export function stepSequenceFromWorksheet(
-  worksheet?: Array<{ number?: string; name?: string; type?: string; part?: number | string | null; slug?: string | null }> | null,
+/** 帳本的一列 —— 欄位名跟 `_manifest.yml` 完全一致，三層都是這個形狀（#2916）。 */
+export interface ManifestSection {
+  no?: string;
+  name?: string;
+  module?: string | null;
+  part?: number | string | null;
+  slug?: string | null;
+  file?: string | null;
+  /** 這一節要用誰的課文：別人的 slug；跨篇的節帶一個清單。 */
+  text_ref?: string | string[] | null;
+  pages?: number[] | null;
+}
+
+export function stepSequenceFromManifest(
+  manifest?: ManifestSection[] | null,
 ): string[] | null {
-  if (!worksheet || worksheet.length === 0) return null;
+  if (!manifest || manifest.length === 0) return null;
   const ids: string[] = ['lesson-intro'];
-  for (const section of worksheet) {
-    const type = section?.type;
+  for (const section of manifest) {
+    // 讀帳本自己的欄位名 `module`。這裡本來讀 `type`，因為後端那一層會把
+    // `module` 改名成 `type` —— 同一份東西兩種形狀。2026-08-25 統一（#2916）。
+    const type = section?.module;
     if (!type) continue;
     // 一份學習單印好幾篇文章時（#2916），同一個大題會出現好幾次。
     // 帶 slug 的那幾列要各自成為一個步驟，所以 key 加後綴 `#<slug>`：

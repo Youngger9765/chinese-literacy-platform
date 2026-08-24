@@ -16,8 +16,9 @@ sections:
   module: spotlight
   subtitle: 閱讀策略——跳過卡關，先瀏覽全文
   part: 1
-  slug: 33uhx
-  file: spotlight.33uhx.yml
+  text_ref: 33uhx
+  slug: qedhr
+  file: spotlight.qedhr.yml
   pages:
   - 2
   - 3
@@ -36,8 +37,9 @@ sections:
   module: spotlight
   subtitle: 閱讀策略——跳過卡關，先瀏覽全文
   part: 2
-  slug: r4d9j
-  file: spotlight.r4d9j.yml
+  text_ref: r4d9j
+  slug: jj4jh
+  file: spotlight.jj4jh.yml
   pages:
   - 5
   - 6
@@ -46,16 +48,22 @@ sections:
   name: 知識補給站
   module: resources
   part: 3
-  slug: null
-  file: resources.yml
+  text_ref:
+  - 33uhx
+  - r4d9j
+  slug: amhwp
+  file: resources.amhwp.yml
   pages:
   - 7
 - 'no': 六
   name: 閱讀理解
   module: comprehension
   part: 3
-  slug: null
-  file: comprehension.yml
+  text_ref:
+  - 33uhx
+  - r4d9j
+  slug: 6tr3f
+  file: comprehension.6tr3f.yml
   pages:
   - 7
   - 8

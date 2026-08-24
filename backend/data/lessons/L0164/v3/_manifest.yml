@@ -5,8 +5,8 @@ sections:
 - 'no': null
   name: 古文今譯
   module: modern_translation
-  slug: null
-  file: modern_translation.yml
+  slug: hwrrf
+  file: modern_translation.hwrrf.yml
   pages:
   - 1
   - 2
@@ -14,8 +14,8 @@ sections:
 - 'no': null
   name: 原文（含斷詞點）＋注釋
   module: classical_text
-  slug: null
-  file: classical_text.yml
+  slug: ntp7h
+  file: classical_text.ntp7h.yml
   pages:
   - 1
   - 2
@@ -24,8 +24,8 @@ sections:
 - 'no': null
   name: 朗讀計時
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  slug: rm7fa
+  file: key_reading.rm7fa.yml
   pages:
   - 1
   - 2
@@ -34,8 +34,8 @@ sections:
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
-  slug: null
-  file: sentence_matching.yml
+  slug: 4jph7
+  file: sentence_matching.4jph7.yml
   pages:
   - 3
   - 4
@@ -43,16 +43,16 @@ sections:
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
-  slug: null
-  file: word_matching.yml
+  slug: hf9jn
+  file: word_matching.hf9jn.yml
   pages:
   - 5
   - 6
 - 'no': 三
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  slug: 9n9v9
+  file: keypoints.9n9v9.yml
   pages:
   - 6
   - 7
@@ -60,16 +60,16 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 認識文言文—一字多義：聞
-  slug: null
-  file: spotlight.yml
+  slug: hduj6
+  file: spotlight.hduj6.yml
   pages:
   - 7
   - 8
 - 'no': 五
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  slug: a4dpr
+  file: comprehension.a4dpr.yml
   pages:
   - 8
   - 9

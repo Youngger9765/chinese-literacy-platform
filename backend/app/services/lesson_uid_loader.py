@@ -167,8 +167,26 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
 
     lesson: dict[str, Any] = dict(meta)
     lesson["version_id"] = vdir.name
+    # 每一份模組檔都有自己的 slug，檔名一律 `{模組}.{slug}.yml`（#2916）——
+    # 沒有「有 slug／沒 slug」兩種分支了。同一個模組出現多次（一課多篇）時，
+    # 就是多個檔，順序由帳本決定，這裡只負責把第一個放到頂層當預設。
+    by_mod: dict[str, list[pathlib.Path]] = {}
+    for f in sorted(vdir.glob("*.*.yml")):
+        m = f.stem.partition(".")[0]
+        if m in MODULES:
+            by_mod.setdefault(m, []).append(f)
+
+    # 帳本決定「哪一份是頂層的預設」——⛔ 不要用檔名排序，slug 是不透明亂碼。
+    man_pre = _read_yaml(vdir / "_manifest.yml")
+    ledger_files = [s.get("file") for s in ((man_pre or {}).get("sections") or []) if s.get("file")]
+    for m, fs in by_mod.items():
+        fs.sort(key=lambda f: ledger_files.index(f.name) if f.name in ledger_files else 10**6)
+
     for mod in MODULES:
-        data = _read_yaml(vdir / f"{mod}.yml")
+        files = by_mod.get(mod) or []
+        if not files:
+            continue
+        data = _read_yaml(files[0])
         if not data:
             continue
         if mod == "spotlight":
@@ -217,11 +235,23 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
     if isinstance(man, dict) and man.get("sections"):
         lesson["manifest_sections"] = man["sections"]
 
+    # 「一輪」＝ text_ref 指向同一篇課文的那些大題（#2916）。
+    # slug 現在是**每個大題自己的身分**，所以不能再拿它當分組的 key ——
+    # 分組要看它指向誰（text_ref），課文自己則用自己的 slug 當這一輪的 key。
     repeats: dict[str, dict[str, Any]] = {}
     for path in sorted(vdir.glob("*.*.yml")):
-        mod, _, slug = path.stem.partition(".")
-        if mod not in MODULES or not slug:
+        mod, _, own = path.stem.partition(".")
+        if mod not in MODULES or not own:
             continue
+        _probe = _read_yaml(path) or {}
+        _body = _probe.get(mod) if isinstance(_probe.get(mod), dict) else _probe
+        _ref = (_body or {}).get("text_ref")
+        if mod == "full_text_annotate":
+            slug = own
+        elif isinstance(_ref, str):
+            slug = _ref
+        else:
+            continue          # 跨篇的（text_ref 是清單）不屬於任何單一輪
         data = _read_yaml(path)
         if not data:
             continue
@@ -236,7 +266,9 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
                 }
             data = inner
         repeats.setdefault(slug, {})[mod] = data
-    if repeats:
+    # 只有**真的多輪**才給 repeat_rounds。單篇課只有一輪，給了會讓 175 課
+    # 的下游行為全部改變（念順順會變成兩筆、清單會多一個欄位）。
+    if len(repeats) > 1:
         # 形狀：{slug: {module: payload}}。消費端拿 `?p=<slug>` 就取那一輪的全部模組。
         lesson["repeat_rounds"] = repeats
 
@@ -271,7 +303,10 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
                     order[mod_name].append(slug_name)
 
         for mod in MODULES:
-            if mod in lesson:
+            # ⚠️ 條件是「這個模組有多份檔」，不是「頂層還沒有」——
+            #    頂層現在一定有（照帳本挑第一份），所以用舊條件會整段跳過，
+            #    L0063 的課文就只剩篇1 的 7 段（實測）。
+            if len(by_mod.get(mod) or []) < 2:
                 continue
             seq = order.get(mod) or sorted(repeats)
             rounds = [(sl, repeats[sl][mod]) for sl in seq
@@ -284,6 +319,19 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
                 paras.extend(payload.get("paragraphs")
                              or (payload.get("body") or {}).get("paragraphs") or [])
             if not paras:
+                # 沒有段落的模組（文章重點整理／聚光燈／語詞…）沒有東西可以串接，
+                # 但**頂層還是要有一份**，否則那一課在服務端等於少了一整個大題。
+                #
+                # 🔴 2026-08-25 實測：少了這一段，L0029 / L0063 / L0144 的
+                #    keypoints 與 L0111 的 spotlight 全部消失，
+                #    `test_keypoints_manifest_spec` 直接報「in manifest but no
+                #    served lesson has that code」。
+                #
+                # 取帳本的第一輪當頂層（既有消費端看到的跟拆之前一樣），
+                # 每一輪各自的內容仍然在 `repeat_rounds` 裡，
+                # 前台照帶篇次的步驟去拿自己那一輪。
+                lesson[mod] = dict(rounds[0][1])
+                lesson[mod]["from_round"] = rounds[0][0]
                 continue
             merged["paragraphs"] = paras
             merged["paragraph_count"] = len(paras)

@@ -1,0 +1,139 @@
+lesson_uid: L0053
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 依循
+  - 覓食
+  - 葉苞
+  - 孵化
+  - 規律
+  - 臨機應變
+  - 巧妙
+  - 彷彿
+  - 迅雷不及掩耳
+  - 守株待兔
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 過僵硬風險自忙不得臨
+  - 中關靈活性覓壓制勉機
+  - 葉卡斬抗發食迫撇回應
+  - 抑苞依循處全神貫注便
+  - 腳脖子此迅雷不及掩耳
+  - 巧妙起注重雷血脈賁張
+  - 筋彼事與願違規評守按
+  - 落干心孵化質律集株部
+  - 打擾滑稽卡位大巨待就
+  - 彷彿貫劣勢笑防護兔爾
+  answers_are_graphical: true
+  answer_paths:
+  - word: 覓食
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    direction: vertical
+  - word: 葉苞
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    direction: diagonal_down_right
+  - word: 依循
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    direction: horizontal
+  - word: 臨機應便
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 迅雷不及掩耳
+    cells:
+    - - 5
+      - 5
+    - - 5
+      - 6
+    - - 5
+      - 7
+    - - 5
+      - 8
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 巧妙
+    cells:
+    - - 6
+      - 1
+    - - 6
+      - 2
+    direction: horizontal
+  - word: 規律
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    direction: vertical
+  - word: 守株待兔
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 孵化
+    cells:
+    - - 8
+      - 4
+    - - 8
+      - 5
+    direction: horizontal
+  - word: 彷彿
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    direction: horizontal
+  answers_printed: partial
+  notes:
+    answer: '10 條路徑對上 10 個目標語詞，其中 9 條套回 grid 拼得出目標語詞，第 10 條
+
+      （臨機應便）拼出的是格子印錯的字 —— 格子裡沒有第二個「變」，所以這個語詞
+
+      在本課格子中沒有正確拼法。'
+    answer_path: '⚠️ 本課 roundRect 共 11 個，但**只有 10 個是答案圈**：
+
+      第 11 個是 `bg1`（灰）色、2.98×0.77 in 的方塊，就是題目講的那個「灰框」
+
+      （框住語詞清單），錨點在格子上方，不是圈。其餘 10 個都是 `#E97132` 橘色。
+
+      ⚠️ 格子跨頁（第 1~7 列在 p8、第 8~10 列在 p9），但**所有圈都畫在 p8**——
+
+      第 8~10 列的三個圈（孵化／守株待兔下半／彷彿）在 p8 底部看起來像空框。
+
+      只看 p9 會判成「後三列沒有任何答案」。幾何（rot／長度／中心座標）與逐頁讀圖一致。'
+  slug: 4x9cm
+  text_ref: 3np3k

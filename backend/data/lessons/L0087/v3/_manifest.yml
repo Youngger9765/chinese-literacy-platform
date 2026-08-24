@@ -6,8 +6,9 @@ sections:
   name: 閱讀聚光燈-自我提問策略3--問好問題
   module: spotlight
   part: 前半
-  slug: null
-  file: spotlight.yml
+  text_ref: rpcyh
+  slug: e636a
+  file: spotlight.e636a.yml
   pages:
   - 1
   - 2
@@ -21,8 +22,8 @@ sections:
   name: 讀全文-做記號
   module: full_text_annotate
   part: 後半
-  slug: null
-  file: full_text_annotate.yml
+  slug: rpcyh
+  file: full_text_annotate.rpcyh.yml
   pages:
   - 7
   - 8
@@ -31,8 +32,9 @@ sections:
   name: 念順順
   module: key_reading
   part: 後半
-  slug: null
-  file: key_reading.yml
+  text_ref: rpcyh
+  slug: haxwv
+  file: key_reading.haxwv.yml
   pages:
   - 9
   - 10
@@ -40,8 +42,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 後半
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: rpcyh
+  slug: caeff
+  file: vocab_definitions.caeff.yml
   pages:
   - 10
   - 11
@@ -49,16 +52,18 @@ sections:
   name: 語詞應用
   module: vocab_application
   part: 後半
-  slug: null
-  file: vocab_application.yml
+  text_ref: rpcyh
+  slug: yp4d3
+  file: vocab_application.yp4d3.yml
   pages:
   - 11
 - 'no': 五
   name: 文章重點表
   module: keypoints
   part: 後半
-  slug: null
-  file: keypoints.yml
+  text_ref: rpcyh
+  slug: xepeu
+  file: keypoints.xepeu.yml
   pages:
   - 11
   - 12
@@ -66,8 +71,9 @@ sections:
   name: 閱讀理解
   module: comprehension
   part: 後半
-  slug: null
-  file: comprehension.yml
+  text_ref: rpcyh
+  slug: 6696v
+  file: comprehension.6696v.yml
   pages:
   - 12
   - 13
@@ -76,16 +82,18 @@ sections:
   name: 詞語複習
   module: vocab_review
   part: 後半
-  slug: null
-  file: vocab_review.yml
+  text_ref: rpcyh
+  slug: jxnrm
+  file: vocab_review.jxnrm.yml
   pages:
   - 14
 - 'no': 八
   name: 知識補給站
   module: resources
   part: 後半
-  slug: null
-  file: resources.yml
+  text_ref: rpcyh
+  slug: wq7tw
+  file: resources.wq7tw.yml
   pages:
   - 14
 dispatch:

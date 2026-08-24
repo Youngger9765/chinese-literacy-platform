@@ -1,0 +1,46 @@
+lesson_uid: L0139
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 引人矚目
+    B: 白駒過隙
+    C: 難以置信
+    D: 膾炙人口
+    E: 洞察
+    F: 繁衍
+    G: 懸而未決
+    H: 機制
+  items:
+  - index: 1
+    stem: 校園假日是否開放民眾使用，因為安全與維護問題，至今仍(  )。
+    answer: G
+  - index: 2
+    stem: 那支公益廣告因為內容溫暖感人，因此 (  )，分享數衝破百萬。
+    answer: D
+  - index: 3
+    stem: 校慶展場裡，那幅寶特瓶做成的鯨魚最(  )，大家都來拍照。
+    answer: A
+  - index: 4
+    stem: 如果棲地被破壞，動物將失去生存條件，進而難以(  )，族群數量也會快速下降。
+    answer: F
+  - index: 5
+    stem: 平常沉默的同學拿到全國演說冠軍，大家都覺得(  )。
+    answer: C
+  - index: 6
+    stem: 回想國中三年如(  )，轉眼就要畢業了。
+    answer: B
+  - index: 7
+    stem: 同學的書評能(  )角色內心的矛盾，讓評論更有深度與說服力。
+    answer: E
+  - index: 8
+    stem: 學校設計的服務獎勵(  )很清楚，服務時數達標就能換到社團點數。
+    answer: H
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+    option_bank: '八個代號正好等於本課八個語詞，全部都被用到 —— 沒有 unused_options。
+
+      代號表印成 2 列 × 5 欄，第 2 列後兩格是空的。'
+  slug: tkaj7
+  text_ref: 4dcq9

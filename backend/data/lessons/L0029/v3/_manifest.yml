@@ -18,8 +18,9 @@ sections:
   name: 念順順
   module: key_reading
   part: 1
-  slug: fqwda
-  file: key_reading.fqwda.yml
+  text_ref: fqwda
+  slug: tfewt
+  file: key_reading.tfewt.yml
   pages:
   - 5
   - 6
@@ -27,8 +28,9 @@ sections:
   name: 語詞我最棒
   module: vocab_definitions
   part: 1
-  slug: fqwda
-  file: vocab_definitions.fqwda.yml
+  text_ref: fqwda
+  slug: d3aqn
+  file: vocab_definitions.d3aqn.yml
   pages:
   - 6
   - 7
@@ -37,16 +39,18 @@ sections:
   name: 語詞應用
   module: vocab_application
   part: 1
-  slug: fqwda
-  file: vocab_application.fqwda.yml
+  text_ref: fqwda
+  slug: r9jxj
+  file: vocab_application.r9jxj.yml
   pages:
   - 8
 - 'no': 五
   name: 文章重點整理
   module: keypoints
   part: 1
-  slug: fqwda
-  file: keypoints.fqwda.yml
+  text_ref: fqwda
+  slug: n3q4d
+  file: keypoints.n3q4d.yml
   pages:
   - 8
   - 9
@@ -55,8 +59,11 @@ sections:
   name: 閱讀理解
   module: comprehension
   part: 1
-  slug: fqwda
-  file: comprehension.fqwda.yml
+  text_ref:
+  - fqwda
+  - n3qxn
+  slug: 7cfa6
+  file: comprehension.7cfa6.yml
   pages:
   - 8
   - 9
@@ -76,8 +83,11 @@ sections:
   name: 知識補給站
   module: resources
   part: 2
-  slug: null
-  file: resources.yml
+  text_ref:
+  - fqwda
+  - n3qxn
+  slug: 9npfp
+  file: resources.9npfp.yml
   pages:
   - 12
   - 13
@@ -85,16 +95,18 @@ sections:
   name: 念順順
   module: key_reading
   part: 2
-  slug: n3qxn
-  file: key_reading.n3qxn.yml
+  text_ref: n3qxn
+  slug: d9d7p
+  file: key_reading.d9d7p.yml
   pages:
   - 13
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
   part: 2
-  slug: n3qxn
-  file: vocab_definitions.n3qxn.yml
+  text_ref: n3qxn
+  slug: vycpf
+  file: vocab_definitions.vycpf.yml
   pages:
   - 13
   - 14
@@ -102,8 +114,9 @@ sections:
   name: 語詞應用
   module: vocab_application
   part: 2
-  slug: n3qxn
-  file: vocab_application.n3qxn.yml
+  text_ref: n3qxn
+  slug: r49ht
+  file: vocab_application.r49ht.yml
   pages:
   - 14
   - 15
@@ -111,8 +124,9 @@ sections:
   name: 文章重點整理
   module: keypoints
   part: 2
-  slug: n3qxn
-  file: keypoints.n3qxn.yml
+  text_ref: n3qxn
+  slug: huac7
+  file: keypoints.huac7.yml
   pages:
   - 15
   - 16
@@ -120,8 +134,9 @@ sections:
   name: 閱讀理解
   module: comprehension
   part: 2
-  slug: n3qxn
-  file: comprehension.n3qxn.yml
+  text_ref: fqwda
+  slug: xvud3
+  file: comprehension.xvud3.yml
   pages:
   - 15
   - 16
@@ -139,8 +154,11 @@ sections:
   module: spotlight
   subtitle: 認識自我：看見長處與限制
   part: 3
-  slug: null
-  file: spotlight.yml
+  text_ref:
+  - fqwda
+  - n3qxn
+  slug: mw3dn
+  file: spotlight.mw3dn.yml
   pages:
   - 17
   - 18
@@ -149,8 +167,9 @@ sections:
   name: 綜合閱讀理解
   module: comprehension
   part: 3
-  slug: null
-  file: comprehension.yml
+  text_ref: n3qxn
+  slug: 6je7j
+  file: comprehension.6je7j.yml
   pages:
   - 19
   - 20
@@ -158,8 +177,11 @@ sections:
   name: 詞語複習
   module: vocab_review
   part: 3
-  slug: null
-  file: vocab_review.yml
+  text_ref:
+  - fqwda
+  - n3qxn
+  slug: vfd96
+  file: vocab_review.vfd96.yml
   pages:
   - 20
   - 21

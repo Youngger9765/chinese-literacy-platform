@@ -1,0 +1,46 @@
+lesson_uid: L0002
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  instruction_source_text: 在空格中入正確的語詞代號
+  option_bank:
+    A: 掠食者
+    B: 融為一體
+    C: 偽裝
+    D: 枯萎
+    E: 一模一樣
+    F: 活靈活現
+    G: 威嚇
+    H: 銅牆鐵壁
+    I: 弱肉強食
+    J: 讚嘆
+  items:
+  - index: 1
+    stem: 盆栽好幾天沒有澆水，葉子慢慢變黃，開始（　）。
+    answer: D
+  - index: 2
+    stem: 這對雙胞胎不只長得像，連說話的聲音都幾乎（　）。
+    answer: E
+  - index: 3
+    stem: 他把老師說話的語氣模仿得（　），全班都笑了。
+    answer: F
+  - index: 4
+    stem: 詐騙集團把假訊息（　）成銀行簡訊，騙人點連結填資料。
+    answer: C
+  - index: 5
+    stem: 決賽最後一分鐘，球隊防守得像（　），讓對手完全攻不進來。
+    answer: H
+  - index: 6
+    stem: 陌生人靠近時，小狗露出牙齒低吼，像是在（　）對方。
+    answer: G
+  - index: 7
+    stem: 科展上，同學用回收材料做出自動澆水器，讓評審都忍不住（　）。
+    answer: J
+  - index: 8
+    stem: 小青蛙趴在綠葉上，遠遠看去幾乎和葉子（　），不仔細看，根本找不到牠。
+    answer: B
+  notes:
+    errata_ref: E2
+  slug: 47nhx
+  text_ref: wfrxc

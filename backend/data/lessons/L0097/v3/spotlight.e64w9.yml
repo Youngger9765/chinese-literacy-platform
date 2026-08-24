@@ -1,0 +1,142 @@
+lesson_uid: L0097
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 落實環保3R─從問題到行動
+  strategy_type: character_education
+  section_title_printed: 品格聚光燈
+  answer_carrier: '橘色手寫字為主（【　】內的 A/B/C 與 ①②③），另有 **2 個**紅色 ☑
+
+    （w:sym Wingdings F0FE）在「二-1-2」與「二-(二)」兩道單選，PDF p6~p7 可見。'
+  structure_note: '⛔ 兩張表格刻意留在 blocks 最上層、沒有塞進 sub_block ——
+
+    `BlockSequenceRenderer` 的 `renderSubBlock` 不依 type 分派，巢狀的 fill_table
+
+    只會畫出 instruction，`columns`/`rows` 整片消失而且不報錯。'
+  blocks:
+  - type: concept_box
+    text: '課文中的綠色賽事，用3R改變物品和材料的使用方式，減少對環境的負擔。
+
+      真正落實3R，不只是知道三個R的意思，還要學會：
+
+      ①找出問題 → ②想3R改善方法 → ③檢查問題有沒有改善
+
+      3R小提醒：
+
+      A. Reduce（減少使用）
+
+      B. Reuse（重複使用）
+
+      C. Recycle（回收再利用）'
+  - type: guide
+    text: 一、從生活中辨認3R
+  - type: fill_table
+    prompt: 下面三種做法，主要運用哪一個R？(請填入A、B或C)
+    columns:
+    - 生活中的做法
+    - 主要運用哪個R？
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的【　】內已填有同樣的代號
+    rows:
+    - 生活中的做法: ①能看電子資料時，就不另外列印紙本。
+      主要運用哪個R？: 【　】
+      主要運用哪個R？_blanks:
+      - answer: A
+    - 生活中的做法: ②哥哥在二手網站購買仍可使用的家電
+      主要運用哪個R？: 【　】
+      主要運用哪個R？_blanks:
+      - answer: B
+    - 生活中的做法: ③選用回收紙再製成的筆記本。
+      主要運用哪個R？: 【　】
+      主要運用哪個R？_blanks:
+      - answer: C
+  - type: guide
+    text: 二、用3R解決問題：
+  - type: guide
+    text: （一）幫阿國完成「綠色運動會」提案
+  - type: guide
+    text: 阿國和同學觀察以前的運動會，發現三個可以改善的地方。
+  - type: passage
+    paragraphs:
+    - 問題A：每人都會拿到一件紀念衫，但有些人不需要，拿回家後也很少穿。
+    - 問題B：每年都重新製作班級指示牌，活動結束後就丟掉。
+    - 問題C：活動後留下許多寶特瓶，有些被丟進一般垃圾。
+  - type: fill_table
+    prompt: 1.請從下面圓框中選出最適合的改善方法，完成提案。
+    option_bank:
+      1: 調查需求，有需要的人再訂購紀念衫。
+      2: 指示牌活動後收回保存，下次繼續使用。
+      3: 設置清楚的瓶罐回收區，將寶特瓶分類回收。
+      4: 在體育館屋頂裝設太陽能板，利用太陽能發電。
+    option_bank_note: 原稿把這四項印在一個圓角框裡，位在表格上方；④ 是誘答（見下一題）。
+    columns:
+    - 發現的問題
+    - 改善方法（填入①～④）
+    - 主要運用哪個R？（填入A～C代號）
+    answer_carrier: 橘色手寫的圈碼與代號（PDF p6）
+    rows:
+    - 發現的問題: A-紀念衫有人不需要
+      改善方法（填入①～④）: 【　】
+      改善方法（填入①～④）_blanks:
+      - answer: ①
+      主要運用哪個R？（填入A～C代號）: 【　】
+      主要運用哪個R？（填入A～C代號）_blanks:
+      - answer: A
+    - 發現的問題: B-指示牌用完就丟
+      改善方法（填入①～④）: 【　】
+      改善方法（填入①～④）_blanks:
+      - answer: ②
+      主要運用哪個R？（填入A～C代號）: 【　】
+      主要運用哪個R？（填入A～C代號）_blanks:
+      - answer: B
+    - 發現的問題: C-寶特瓶沒有做好回收
+      改善方法（填入①～④）: 【　】
+      改善方法（填入①～④）_blanks:
+      - answer: ③
+      主要運用哪個R？（填入A～C代號）: 【　】
+      主要運用哪個R？（填入A～C代號）_blanks:
+      - answer: C
+  - type: single
+    prompt: 2.想一想，圓框中最後一項「改善方法④」也是環保做法，為什麼沒有被放進這份3R提案裡？
+    options:
+      1: 太陽能對環境沒有幫助。
+      2: 太陽能有環保作用，但不屬於Reduce、Reuse或Recycle。
+      3: 只有運動用品才能使用3R的方法。
+    answer: 2
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: （二）這份提案真的能改善問題嗎？
+  - type: guide
+    text: 阿國把提案寫好後，又逐項檢查這些做法是否真的能改善原來的問題：
+  - type: passage
+    paragraphs:
+    - A.紀念衫改為有需要的人再訂購 → 減少不必要的製作
+    - B.指示牌收回，下次再用 → 減少重複製作與丟棄
+    - C.寶特瓶分類回收 → 讓材料可以回收再利用
+  - type: single
+    prompt: 從這三個例子可以看出，運用3R改善問題時，應該先怎麼做？
+    options:
+      1: 每一場活動都一定要同時做到三個R。
+      2: 活動結束後把所有垃圾分類好就可以。
+      3: 先找出活動中的問題，再用適合的3R方法改善。
+    answer: 3
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE）
+  - type: guide
+    text: 三、換我做做看
+  - type: self_check
+    instruction: 下次班級或學校辦活動時，請至少選一項你願意先做到的事：
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿三格皆為空 □（無 w:sym F0FE）
+    items:
+    - ①不拿自己不需要的用品。
+    - ②把可以再用的物品留下來，下次繼續使用。
+    - ③把可回收的物品放進正確的回收區。
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 如果你有做到，請在□打勾。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿兩格皆為空 □（無 w:sym F0FE）
+    items:
+    - 我能找出活動中需要改善的問題。
+    - 我能選擇適合的3R方法，想出做得到的改善方式。
+  slug: e64w9
+  text_ref: pa39q

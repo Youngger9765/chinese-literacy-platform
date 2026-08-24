@@ -1,0 +1,139 @@
+lesson_uid: L0083
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 典型
+  - 動員
+  - 獨門
+  - 蘊含
+  - 琢磨
+  - 設身處地
+  - 躡手躡腳
+  - 窸窸窣窣
+  - 喧鬧紛雜
+  - 悲歡離合
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 點雕琢攝取喧設身處地
+  - 心聞雞起舞獨角仙力雕
+  - 字典啄嘩喧門動琢磨細
+  - 目型米鬧熱祕物均衡琢
+  - 不繽紛窸拍方園獨立自
+  - 轉雜醞窣攝悲歡離合主
+  - 睛蘊釀聶影劇欣躡作沮
+  - 典範含小動透鼓手業喪
+  - 蟋悉心倩員洞舞躡鑷典
+  - 蟀窸窸窣窣察姿腳子藏
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 設身處地
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 獨門
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    direction: vertical
+  - word: 琢磨
+    cells:
+    - - 3
+      - 8
+    - - 3
+      - 9
+    direction: horizontal
+  - word: 典型
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 2
+    direction: vertical
+  - word: 喧鬧紛雜
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 4
+    - - 5
+      - 3
+    - - 6
+      - 2
+    direction: diagonal_down_left
+  - word: 悲歡離合
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    direction: horizontal
+  - word: 蘊含
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 3
+    direction: diagonal_down_right
+  - word: 躡手躡腳
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    - - 10
+      - 8
+    direction: vertical
+  - word: 動員
+    cells:
+    - - 8
+      - 5
+    - - 9
+      - 5
+    direction: vertical
+  - word: 窸窸窣窣
+    cells:
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  notes:
+    grid: '格子放了多組形近／同字誘答：第 1 列「琢」與第 3 列真答案「琢磨」的「琢」、
+
+      第 3 列「啄」、第 5 列「窸」與第 10 列真答案的「窸」、第 7 列「聶」對「躡」、
+
+      第 5 列「獨立」對第 2 列真答案「獨門」的「獨」。上列路徑取的是被圈中的那一組。'
+    answer_paths: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+      個數交叉驗證：紙上 roundRect 10 == 10 條路徑、紙外殘留 0，不觸發警報。
+
+      ⚠️ 畫面上「喧鬧紛雜」（左下斜）與「蘊含」（右下斜）在第 6~7 列附近首尾相接，
+
+      看起來像一條折線，實際是兩個獨立的框；逐格取字兩條都拼得回自己的語詞。'
+  slug: v3eam
+  text_ref: xmaax

@@ -5,31 +5,34 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: rcmdx
+  file: full_text_annotate.rcmdx.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: rcmdx
+  slug: 9jqxw
+  file: key_reading.9jqxw.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: rcmdx
+  slug: p4yyu
+  file: vocab_definitions.p4yyu.yml
   pages:
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: rcmdx
+  slug: hdhut
+  file: vocab_application.hdhut.yml
   pages:
   - 3
   - 4
@@ -37,8 +40,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 推論作者觀點與寫作目的
-  slug: null
-  file: spotlight.yml
+  text_ref: rcmdx
+  slug: 7cdpn
+  file: spotlight.7cdpn.yml
   pages:
   - 4
   - 5
@@ -47,31 +51,35 @@ sections:
 - 'no': 六
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: rcmdx
+  slug: drn94
+  file: keypoints.drn94.yml
   pages:
   - 7
   - 8
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: rcmdx
+  slug: 4nyuv
+  file: comprehension.4nyuv.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: rcmdx
+  slug: qmxt9
+  file: vocab_review.qmxt9.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: rcmdx
+  slug: yntf4
+  file: resources.yntf4.yml
   pages:
   - 9
   - 10

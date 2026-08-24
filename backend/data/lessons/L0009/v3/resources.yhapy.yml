@@ -1,0 +1,26 @@
+lesson_uid: L0009
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 你要如何與情緒共存，停止情緒化思考？｜《你可以生氣，但不要越想越氣》｜見人哥來說書
+    duration: '6:59'
+    duration_seconds: 419
+    source: 見人哥
+  - index: 2
+    title: 當情緒升起，你控制得住嗎？先不要討厭情緒，三隻小豬實戰給你看｜五分鐘看一本書｜青春愛讀書
+    duration: '7:29'
+    duration_seconds: 449
+    source: 青春愛讀書
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/m2Stfjd4y5U
+    url_source: 總表0816「4.影片連結」年級4課次18
+  - index: 2
+    url: http://youtu.be/r0xBKghvNdQ
+    url_source: 總表0816「4.影片連結」年級4課次18
+  slug: yhapy
+  text_ref: xxwkf

@@ -1,0 +1,48 @@
+lesson_uid: L0033
+version_id: v3
+section_no: 五
+keypoints:
+  title: 垃圾食物的誘惑與代價
+  layout: list
+  rows:
+  - label: 主題
+    value: 垃圾食物
+  - label: 定義
+    value: 垃圾食物通常【　】、【　】、【　】含量較高，營養也不均衡。
+    blanks:
+    - answer: 糖
+    - answer: 鹽
+    - answer: 脂肪
+  - label: 難以抗拒的原因
+    value: 為什麼我們會忍不住想吃垃圾食物？（請打勾，多選）
+    options:
+      1: 味道經過精心調配，口感令人難以抗拒
+      2: 吃下去會讓人感到愉快和滿足，也更容易想再吃
+      3: 吃垃圾食物能讓人變得更聰明
+      4: 與快樂時光連結
+    answers:
+    - 1
+    - 2
+    - 4
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - label: 健康代價
+    value: 長期吃垃圾食物可能造成哪些影響？（請打勾，多選）
+    options:
+      1: 熱量較高、膳食纖維較少，容易造成營養不均衡
+      2: 增強免疫力，讓身體更健康
+      3: 影響血糖穩定，容易感到飢餓，導致過量飲食
+      4: 可能引發高血壓、糖尿病、心血管疾病等健康問題
+    answers:
+    - 1
+    - 3
+    - 4
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - label: 給青少年的建議
+    value: 在飲食方面，我們應該怎麼做？
+    options:
+      1: 絕對不能吃垃圾食物，以免付出代價。
+      2: 偶爾吃無傷大雅，但不要讓垃圾食物主導飲食習慣。
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  slug: qh9ep
+  text_ref: p7q67

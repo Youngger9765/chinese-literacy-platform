@@ -1,0 +1,223 @@
+lesson_uid: L0003
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 纖細
+  - 即將
+  - 明察秋毫
+  - 頻率
+  - 坐立難安
+  - 徵兆
+  - 前兆
+  - 歷歷在目
+  - 彷彿
+  - 遠山如洗
+  - 焦躁不安
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - - 憑
+    - 速
+    - 識
+    - 見
+    - 看
+    - 見
+    - 義
+    - 勇
+    - 為
+    - 人
+  - - 頻
+    - 率
+    - 微
+    - 微
+    - 纖
+    - 系
+    - 節
+    - 明
+    - 焦
+    - 頭
+  - - 接
+    - 頭
+    - 笑
+    - 知
+    - 細
+    - 項
+    - 焦
+    - 察
+    - 慮
+    - 即
+  - - 坐
+    - 遠
+    - 容
+    - 著
+    - 玉
+    - 目
+    - 躁
+    - 秋
+    - 日
+    - 將
+  - - 車
+    - 立
+    - 山
+    - 名
+    - 手
+    - 體
+    - 不
+    - 毫
+    - 曆
+    - 歷
+  - - 站
+    - 站
+    - 難
+    - 如
+    - 掌
+    - 會
+    - 安
+    - 全
+    - 歷
+    - 遠
+  - - 徵
+    - 立
+    - 過
+    - 安
+    - 洗
+    - 頻
+    - 佛
+    - 在
+    - 前
+    - 山
+  - - 明
+    - 天
+    - 警
+    - 察
+    - 案
+    - 繁
+    - 目
+    - 像
+    - 徵
+    - 兆
+  - - 前
+    - 面
+    - 彷
+    - 彿
+    - 體
+    - 育
+    - 組
+    - 長
+    - 如
+    - 果
+  - - 照
+    - 元
+    - 歷
+    - 史
+    - 遺
+    - 跡
+    - 洗
+    - 車
+    - 長
+    - 者
+  answers_are_graphical: true
+  answer_paths:
+  - word: 頻率
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    direction: horizontal
+  - word: 纖細
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 5
+    direction: vertical
+  - word: 明察秋毫
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 8
+    - - 4
+      - 8
+    - - 5
+      - 8
+    direction: vertical
+  - word: 焦躁不安
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    direction: vertical
+  - word: 即將
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 坐立難安
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 遠山如洗
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 歷歷在目
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 前兆
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 徵兆
+    cells:
+    - - 8
+      - 9
+    - - 8
+      - 10
+    direction: horizontal
+  - word: 彷彿
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+  slug: pqm6e
+  text_ref: mcda3

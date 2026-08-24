@@ -1,0 +1,60 @@
+lesson_uid: L0047
+version_id: v3
+section_no: 四
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 粗野陽剛
+  - 調度
+  - 溫柔婉約
+  - 長袖善舞
+  - 銜接無虞
+  - 度量
+  - 穿梭
+  - 使臂使指
+  - 調停折衝
+  - 當面戳破
+  - 心知肚明
+  items:
+  - index: 1
+    word: 溫柔婉約
+    definition: 溫和柔順，柔美含蓄。
+  - index: 2
+    word: 心知肚明
+    definition: 不用明說，心裡也非常清楚。
+  - index: 3
+    word: 粗野陽剛
+    definition: 粗獷豪放，顯得剛強有力。
+  - index: 4
+    word: 穿梭
+    definition: 快速的來回移動。
+  - index: 5
+    word: 調度
+    definition: 安排、調配人力或工作。
+  - index: 6
+    word: 調停折衝
+    definition: 調解爭端、協調各方。
+  - index: 7
+    word: 銜接無虞
+    definition: 前後接續順利，沒有問題。
+  - index: 8
+    word: 使臂使指
+    definition: 比喻指揮、調度得靈活自如。
+  - index: 9
+    word: 度量
+    definition: 能寬容、體諒別人的氣度。
+  - index: 10
+    word: 長袖善舞
+    definition: 比喻善於交際、協調，辦事靈活。
+  - index: 11
+    word: 當面戳破
+    definition: 當著對方的面揭穿謊言或指出問題。
+  notes:
+    vocabulary_bank: 照「本課語詞」框原樣、依印出的順序記錄（框內分五行排版，此處攤平）。
+    answer_carrier: 橘色手寫字；文字流已含答案
+  slug: cp6uh
+  text_ref: 4mq6a

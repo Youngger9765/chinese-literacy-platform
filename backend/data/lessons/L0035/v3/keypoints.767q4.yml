@@ -1,0 +1,65 @@
+lesson_uid: L0035
+version_id: v3
+section_no: 五
+keypoints:
+  title: 寫信馬拉松
+  layout: list
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  rows:
+  - label: 起源與目的
+    items:
+    - label: 行動起源
+      value: 由一群關注人權的朋友發起，後來成為【　】的活動，目的是為【　】的人發聲。
+      blanks:
+      - answer: 國際特赦組織
+      - answer: 遭受不公平對待
+    - label: 行動時間
+      value: 每年【　】，是【　】日。
+      blanks:
+      - answer: 12 月10 日
+      - answer: 世界人權
+    - label: 行動目的
+      value: 透過【　】支持遭受【　】的人，並向【　】或相關單位施壓。
+      blanks:
+      - answer: 信件
+      - answer: 政府壓迫
+      - answer: 政府
+  - label: 聲援對象
+    items:
+    - label: 兩位受迫害的青少年｜琪哈姆
+      value: 嘗試逃離【　】失敗，被捕至今【　】。
+      blanks:
+      - answer: 厄利垂亞
+      - answer: 生死不明
+    - label: 兩位受迫害的青少年｜米基塔
+      value: 意外捲入抗議人群，被判【　】，不但未獲【　】，且疑似遭受酷刑。
+      blanks:
+      - answer: 五年徒刑
+      - answer: 醫療照顧
+  - label: 具體影響與成果
+    items:
+    - label: 成功案例
+      value: 泰國的蓉因批評王室特權，而面臨【　】，後因「寫信馬拉松」行動而被釋放。
+      blanks:
+      - answer: 終身監禁
+    - label: 行動成果(第五段)
+      value: 已成功改變【　】的命運，使他們擺脫【　】。
+      blanks:
+      - answer: 超過百人
+      - answer: 不公平的對待
+  - label: 臺灣參與
+    value: 每年12月於【　】舉行活動，寫明信片傳遞【　】與【　】。
+    blanks:
+    - answer: 北中南
+    - answer: 關懷
+    - answer: 祝福
+  - label: 行動意義
+    value: '1.一封封充滿關懷與支持的信，為身陷困境的人們帶來【　】與【　】。
+
+      2.讓大家看見，【　】都能成為改變的推手。'
+    blanks:
+    - answer: 希望
+    - answer: 勇氣
+    - answer: 每個人
+  slug: 767q4
+  text_ref: vc3at

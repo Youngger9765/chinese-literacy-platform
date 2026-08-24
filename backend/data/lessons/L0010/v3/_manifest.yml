@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: ajk7q
+  file: full_text_annotate.ajk7q.yml
   pages:
   - 1
   - 2
@@ -14,30 +14,34 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: ajk7q
+  slug: wkmdr
+  file: key_reading.wkmdr.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: ajk7q
+  slug: 6w6kf
+  file: vocab_definitions.6w6kf.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: ajk7q
+  slug: twnct
+  file: vocab_application.twnct.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: ajk7q
+  slug: 3rk4j
+  file: keypoints.3rk4j.yml
   pages:
   - 4
   - 5
@@ -46,8 +50,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 生涯探索──讀書，讓夢想多一條路
-  slug: null
-  file: spotlight.yml
+  text_ref: ajk7q
+  slug: ndpr3
+  file: spotlight.ndpr3.yml
   pages:
   - 6
   - 7
@@ -55,24 +60,27 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: ajk7q
+  slug: xkwrh
+  file: comprehension.xkwrh.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: ajk7q
+  slug: pyu9y
+  file: vocab_review.pyu9y.yml
   pages:
   - 9
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: ajk7q
+  slug: xhwph
+  file: resources.xhwph.yml
   pages:
   - 10
 dispatch:

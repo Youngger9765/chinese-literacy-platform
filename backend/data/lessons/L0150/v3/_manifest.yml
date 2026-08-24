@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: wppq9
+  file: full_text_annotate.wppq9.yml
   pages:
   - 1
   - 2
@@ -15,8 +15,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖表判讀──折線圖
-  slug: null
-  file: spotlight.yml
+  text_ref: wppq9
+  slug: c97yq
+  file: spotlight.c97yq.yml
   pages:
   - 3
   - 4
@@ -29,8 +30,9 @@ sections:
 - 'no': 三
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: wppq9
+  slug: afk6r
+  file: comprehension.afk6r.yml
   pages:
   - 10
   - 11

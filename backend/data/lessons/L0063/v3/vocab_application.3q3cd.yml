@@ -1,0 +1,56 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 應接不暇
+    B: 義憤填膺
+    C: 望穿秋水
+    D: 誘因
+    E: 賑災
+    F: 離鄉背井
+    G: 趁火打劫
+    H: 料事如神
+    I: 干預
+    J: 頒布
+  option_bank_note: 這一篇有 10 個代號（A~J），且第 9 小題是一段短文克漏字，一題用掉 4 個代號。
+  answer_carrier: 橘色手寫代號（PDF p9~p10）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 老爺爺是生活經驗豐富的農夫，對天氣的變化總是（　）。
+    answer: H
+  - index: 2
+    stem: 不肖商人遇到天災不但沒有助人，反而（　），大發國難財。
+    answer: G
+  - index: 3
+    stem: 為了實現夢想，許多人（　）到陌生的環境努力打拚。
+    answer: F
+  - index: 4
+    stem: 面對法院不公的判決，被害者家屬都（　），決定抗爭到底。
+    answer: B
+  - index: 5
+    stem: 公司新推出的商品訂單多到讓員工（　），不過老闆卻高興得不得了！
+    answer: A
+  - index: 6
+    stem: 出外打拚的孫子要回家了，奶奶在門口（　），盼著他早點出現。
+    answer: C
+  - index: 7
+    stem: 父母可以關心孩子的交友，但不應過度（　）孩子的生活。
+    answer: I
+  - index: 8
+    stem: 較高的薪水，常是公司吸引人才的重要（　）。
+    answer: D
+  - index: 9
+    stem: '下面是一段短文，請根據語境填入合適的語詞代號。
+
+      地震發生後，政府（　）災後重建辦法，並展開（　）工作。同時，政府提供租稅優惠作為（　），鼓勵企業捐款；透過適度的（　），讓救援資源更快送到災區。'
+    answers:
+    - J
+    - E
+    - D
+    - I
+    type_note: 克漏字短文，一題四個空格，依序作答（不是單選）
+  part: 2
+  slug: 3q3cd
+  text_ref: 4uee3

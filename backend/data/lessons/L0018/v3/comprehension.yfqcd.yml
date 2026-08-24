@@ -1,0 +1,59 @@
+lesson_uid: L0018
+version_id: v3
+section_no: 七
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+  - index: 1
+    answer: B
+    stem: 請問文中第四段提到「適當的運動也是長高相當重要的一環。」這裡的「一環」最可能是什麼意思？
+    options:
+      A: 圓形而中空的東西
+      B: 其中一個重要部分
+      C: 圍繞
+      D: 玉石雕的圓形圈子
+    option_notes:
+      A: （玉環）
+      C: （環繞）
+      D: （玉環）
+  - index: 2
+    answer: C
+    stem: 小承恩不喜歡他的外號的原因是什麼？
+    options:
+      A: 因為他討厭承恩這個名字
+      B: 因為他討厭大承恩
+      C: 因為這個外號提醒他身高比較矮
+      D: 因為都坐在第一排
+    teacher_note: 第2題解析：由後句「明明都是男生，明明都叫承恩，身高卻差了近三十公分，他真的很不喜歡小承恩這個外號。」可推論。
+  - index: 3
+    answer: D
+    stem: 根據本文，下列關於幫助身體成長的做法，何者正確？
+    options:
+      A: 轉骨湯是有效的民間偏方
+      B: 激烈運動有助於骨骼生長
+      C: 要熬夜才能分泌生長激素
+      D: 攝取足夠且多樣的營養素
+  - index: 4
+    answer: C
+    stem: 根據本文，請問促進成長的運動，下列何者配對錯誤？
+    options:
+      A: 有氧運動→慢跑
+      B: 肌力訓練→弓箭步
+      C: 跳躍刺激生長板→游泳
+      D: 伸展運動→瑜珈
+    option_notes:
+      C: （第四段）
+  - index: 5
+    answer: A
+    stem: 下列何者是最符合均衡飲食的菜盤？
+    options:
+      A: 白飯+菠菜+雞胸肉+杏鮑菇
+      B: 一盤蛋炒飯
+      C: 時蔬清炒義大利麵
+      D: 滷肉飯+豆干+貢丸湯
+    option_notes:
+      B: （少了肉類及蔬菜）
+      C: （少了肉類）
+      D: （少了蔬菜）
+  slug: yfqcd
+  text_ref: j4dyf

@@ -1,0 +1,163 @@
+lesson_uid: L0090
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 大顯身手
+  - 籌備
+  - 荊棘
+  - 趨勢
+  - 開端
+  - 里程碑
+  - 開路先鋒
+  - 抹滅
+  - 印記
+  - 彰顯
+  - 侷限
+  - 眾所矚目
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 開養樂多準益生菌萬里
+  - 趨身籌備新印大彰化
+  - 勢眾抹茶郎開展顯所人
+  - 烽所布滅路籌端矚身足
+  - 滅皆手先印資目印先手
+  - 軻知鋒章限眾記焗烤走
+  - 刺里籌極所多成善侷表
+  - 秦程畫矚多刺刑端限彰
+  - 王碑目中人花荊茶棘皮
+  - 限制多多益善手棘住路
+  answers_are_graphical: true
+  answer_paths:
+  - word: 趨勢
+    cells:
+    - - 2
+      - 1
+    - - 3
+      - 1
+    direction: vertical
+  - word: 籌備
+    cells:
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 彰顯
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 8
+    direction: vertical
+  - word: 大顯身手
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 8
+    - - 4
+      - 9
+    - - 5
+      - 10
+    direction: diagonal_down_right
+  - word: 抹滅
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 4
+    direction: diagonal_down_right
+  - word: 開端
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 7
+    direction: diagonal_down_right
+  - word: 開路先鋒
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 5
+    - - 5
+      - 4
+    - - 6
+      - 3
+    direction: diagonal_down_left
+  - word: 印記
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    direction: diagonal_down_left
+  - word: 眾所矚目
+    cells:
+    - - 6
+      - 6
+    - - 7
+      - 5
+    - - 8
+      - 4
+    - - 9
+      - 3
+    direction: diagonal_down_left
+  - word: 里程碑
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    direction: vertical
+  - word: 侷限
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    direction: vertical
+  - word: 荊棘
+    cells:
+    - - 9
+      - 7
+    - - 10
+      - 8
+    direction: diagonal_down_right
+  - word: 多多益善
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    - - 10
+      - 6
+    direction: horizontal
+  notes:
+    instruction: 原稿同時存在「劃掉」與「刪除」兩版文字方塊；版面顯示的是「劃掉」，本檔採之。
+    target_words: '這 12 個是灰框實際印出來的。格子上另外圈了「多多益善」（第 10 列 c3~c6），
+
+      它在課文、閱讀理解第 1 題選項 C 與總表語詞13 都有，但灰框沒列 ——
+
+      判為灰框漏列，未把它補進 target_words（那會變成竄改原稿），改在該條路徑標
+
+      not_in_printed_list: true。'
+    grid: 第 2 列只有 9 個字 —— 第 10 欄是空白儲存格（原稿如此，不是漏抄）
+    answer_paths: '共 13 條，比灰框列出的 12 個目標語詞多一條：最後那條「多多益善」（第 10 列 c3~c6）
+
+      格子上確實有圈，但第八大題灰框沒把它列進目標語詞（見 target_words_note）。
+
+      ⚠️ answer_paths 的元素必須維持 {word, cells, direction} 三個 key 的固定形狀
+
+      （scripts/normalize_word_search.py 會比對），所以這個註記放在這裡而不是那一條路徑裡。'
+  slug: y7ycx
+  text_ref: 4x996

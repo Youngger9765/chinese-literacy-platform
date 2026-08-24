@@ -1,0 +1,45 @@
+lesson_uid: L0039
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 汗流浹背
+  - 精湛
+  - 達標
+  - 不外乎
+  - 僧多粥少
+  - 合作無間
+  - 想方設法
+  - 朝思暮想
+  items:
+  - index: 1
+    word: 不外乎
+    definition: 通常就是這幾種情況，不會超出這個範圍。
+  - index: 2
+    word: 汗流浹背
+    definition: 全身流了很多汗，形容天氣炎熱或做事非常辛苦。
+  - index: 3
+    word: 僧多粥少
+    definition: 人多資源少，供不應求。
+  - index: 4
+    word: 達標
+    definition: 達到原先設立的標準或目標。
+  - index: 5
+    word: 合作無間
+    definition: 形容彼此間密切合作。
+  - index: 6
+    word: 想方設法
+    definition: 用各種方法來達成目標。
+  - index: 7
+    word: 精湛
+    definition: 技術或技能非常高超。
+  - index: 8
+    word: 朝思暮想
+    definition: 白天晚上都在想念。形容非常想念某個人或非常想做某件事。
+  slug: pwvwj
+  text_ref: phhwe

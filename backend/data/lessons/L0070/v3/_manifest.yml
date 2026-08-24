@@ -6,8 +6,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略—看頭尾、找結論線索
-  slug: null
-  file: spotlight.yml
+  text_ref: cdhdt
+  slug: nch9f
+  file: spotlight.nch9f.yml
   pages:
   - 1
   - 2

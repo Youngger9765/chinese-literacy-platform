@@ -1,0 +1,54 @@
+lesson_uid: L0138
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 歸咎
+  - 自怨自艾
+  - 回天乏術
+  - 百折不撓
+  - 苛責
+  - 心理韌性
+  - 峰迴路轉
+  - 忐忑難安
+  - 否極泰來
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 百折不撓
+    definition: 經過許多挫折仍不屈服，形容意志堅強。
+  - index: 2
+    word: 歸咎
+    definition: 把錯誤或責任怪罪到某人或某事上。
+  - index: 3
+    word: 忐忑難安
+    definition: 內心不安、焦慮不定。
+  - index: 4
+    word: 回天乏術
+    definition: 比喻情勢已無法挽回，再怎麼努力也難以改變結果。
+  - index: 5
+    word: 苛責
+    definition: 過度嚴厲的批評或責怪。
+  - index: 6
+    word: 峰迴路轉
+    definition: 原指山路曲折蜿蜒；比喻情勢出現轉機。
+  - index: 7
+    word: 自怨自艾
+    definition: 因對現況不滿，所以埋怨自己、陷入自責之中。
+  - index: 8
+    word: 否極泰來
+    definition: 壞運到了極點，好運就要來了，情況會變好。
+  - index: 9
+    word: 心理韌性
+    definition: 面對壓力、逆境時，能調整心態並重新站起的能力。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: 4xrk4
+  text_ref: v77k6

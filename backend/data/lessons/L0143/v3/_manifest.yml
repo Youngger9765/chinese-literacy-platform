@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: 6mpre
+  file: full_text_annotate.6mpre.yml
   pages:
   - 1
   - 2
@@ -15,15 +15,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: 6mpre
+  slug: 96jnp
+  file: key_reading.96jnp.yml
   pages:
   - 4
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: 6mpre
+  slug: 6hx3d
+  file: vocab_definitions.6hx3d.yml
   pages:
   - 4
   - 5
@@ -31,15 +33,17 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: 6mpre
+  slug: upfj7
+  file: vocab_application.upfj7.yml
   pages:
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: 6mpre
+  slug: yvp6r
+  file: keypoints.yvp6r.yml
   pages:
   - 6
   - 7
@@ -47,8 +51,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 說明文結構──用研究證據回答問題
-  slug: null
-  file: spotlight.yml
+  text_ref: 6mpre
+  slug: p4kj9
+  file: spotlight.p4kj9.yml
   pages:
   - 7
   - 8
@@ -56,23 +61,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: 6mpre
+  slug: mjvdr
+  file: comprehension.mjvdr.yml
   pages:
   - 9
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: 6mpre
+  slug: 3q43q
+  file: vocab_review.3q43q.yml
   pages:
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: 6mpre
+  slug: 49cux
+  file: resources.49cux.yml
   pages:
   - 10
 dispatch:

@@ -5,16 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: 9jcxw
+  file: full_text_annotate.9jcxw.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: 9jcxw
+  slug: dkhf7
+  file: key_reading.dkhf7.yml
   pages:
   - 2
   - 3
@@ -22,23 +23,26 @@ sections:
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: 9jcxw
+  slug: v34ww
+  file: vocab_definitions.v34ww.yml
   pages:
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: 9jcxw
+  slug: 6ak9v
+  file: vocab_application.6ak9v.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: 9jcxw
+  slug: c3r97
+  file: keypoints.c3r97.yml
   pages:
   - 5
   - 6
@@ -46,8 +50,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 自我覺察
-  slug: null
-  file: spotlight.yml
+  text_ref: 9jcxw
+  slug: xcrwa
+  file: spotlight.xcrwa.yml
   pages:
   - 6
   - 7
@@ -55,23 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: 9jcxw
+  slug: rarna
+  file: comprehension.rarna.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: 9jcxw
+  slug: ujdrh
+  file: vocab_review.ujdrh.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: 9jcxw
+  slug: 3rhhu
+  file: resources.3rhhu.yml
   pages:
   - 9
   - 10

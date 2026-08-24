@@ -1,0 +1,14 @@
+lesson_uid: L0151
+version_id: v3
+self_check_before_reading:
+  instruction: ※ 如果你有做到下列事項，請在□內打勾
+  items:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號
+  no_correct_answer: true
+  notes:
+    instruction: 本課句末沒有句號（其他課有「。」），照原樣。
+    items: 第 2 項句末沒有句號，原稿如此。
+    answer_carrier: 學生自填，原稿無勾選
+  slug: fexkw
+  text_ref: n3hxj

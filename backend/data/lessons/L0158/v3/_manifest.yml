@@ -5,31 +5,31 @@ sections:
 - 'no': ''
   name: 古文今譯
   module: modern_translation
-  slug: null
-  file: modern_translation.yml
+  slug: w4ftv
+  file: modern_translation.w4ftv.yml
   pages:
   - 1
   - 2
 - 'no': ''
   name: 原文
   module: classical_text
-  slug: null
-  file: classical_text.yml
+  slug: 34ehy
+  file: classical_text.34ehy.yml
   pages:
   - 2
 - 'no': ''
   name: 朗讀計時
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  slug: t7efe
+  file: key_reading.t7efe.yml
   pages:
   - 2
   pages_source: bracketed
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
-  slug: null
-  file: sentence_matching.yml
+  slug: 7kd4e
+  file: sentence_matching.7kd4e.yml
   pages:
   - 2
   - 3
@@ -37,16 +37,16 @@ sections:
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
-  slug: null
-  file: word_matching.yml
+  slug: 4cway
+  file: word_matching.4cway.yml
   pages:
   - 4
   - 5
 - 'no': 三
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  slug: vyt3c
+  file: keypoints.vyt3c.yml
   pages:
   - 5
   - 6
@@ -54,8 +54,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 判讀主語
-  slug: null
-  file: spotlight.yml
+  slug: cwrdn
+  file: spotlight.cwrdn.yml
   pages:
   - 6
   - 7
@@ -64,8 +64,8 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  slug: f7nh7
+  file: comprehension.f7nh7.yml
   pages:
   - 9
   - 10

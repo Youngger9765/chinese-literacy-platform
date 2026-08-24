@@ -1,0 +1,45 @@
+lesson_uid: L0168
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 家常便飯
+    B: 微不足道
+    C: 一針見血
+    D: 力不從心
+    E: 乏善可陳
+    F: 垂頭喪氣
+    G: 耳邊風
+    H: 使喚
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 這場比賽球員們頻頻失誤，(　)的表現讓許多球迷大失所望。
+    answer: E
+  - index: 2
+    stem: 他總喜歡(　)學弟妹幫他跑腿，讓人覺得不太尊重。
+    answer: H
+  - index: 3
+    stem: 雖然第一局不幸失分，但隊長鼓勵大家不要(　)，繼續努力。
+    answer: F
+  - index: 4
+    stem: 因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分(　)。
+    answer: D
+  - index: 5
+    stem: 營養師一再警告青少年少喝含糖飲料，但許多人仍當成(　)。
+    answer: G
+  - index: 6
+    stem: 在段考前熬夜唸書，對他來說已是(　)，週末也幾乎沒有休息。
+    answer: A
+  - index: 7
+    stem: 這筆募款儘管 (　)，但也代表我們對流浪動物的一點心意。
+    answer: B
+  - index: 8
+    stem: 議員在院會上(　)的詢問市長有關預算的問題，引起媒體關注。
+    answer: C
+  notes:
+    option_bank: 八個代號取自九個語詞，「貼紮」沒有列入選項
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af0，run 層沒有 w:color**
+  slug: m9k4k
+  text_ref: pmxkq

@@ -1,0 +1,48 @@
+lesson_uid: L0151
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 令人髮指
+    B: 杜撰
+    C: 最負盛名
+    D: 抽絲剝繭
+    E: 視若無睹
+    F: 鋪天蓋地
+    G: 煽情
+    H: 援助
+    I: 眼睜睜
+    J: 劈頭
+  unused_options:
+  - I
+  - J
+  items:
+  - index: 1
+    stem: 這起離奇的殺人案經警方連日來的(　)，終於真相大白。
+    answer: D
+  - index: 2
+    stem: 暴風雨來襲時，雨水如注、風聲如雷，(　)的黑雲籠罩著全城。
+    answer: F
+  - index: 3
+    stem: 在地震災區，各地的救援隊紛紛運送物資前來(　)災民們。
+    answer: H
+  - index: 4
+    stem: 嫌犯為了搶錢，竟傷害無辜路人，犯下(　)的罪行。
+    answer: A
+  - index: 5
+    stem: 藝術家達文西的油畫作品眾多，其中以《蒙娜麗莎》(　)。
+    answer: C
+  - index: 6
+    stem: 這篇報告裡有些人物和事件都是作者(　)的，不能當成真實歷史。
+    answer: B
+  - index: 7
+    stem: 演講時可以表達情感，但如果只靠誇張語氣讓人落淚，就會顯得 (　)而少了些真誠。
+    answer: G
+  - index: 8
+    stem: 看到同學被嘲笑，如果我們(　)，也可能讓傷害繼續發生。
+    answer: E
+  notes:
+    answer_carrier: 橘色（字元樣式 rStyle=af），PDF p5 可見
+  slug: ttu4r
+  text_ref: n3hxj

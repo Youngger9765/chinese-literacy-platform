@@ -5,8 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
-  slug: null
-  file: full_text_annotate.yml
+  slug: uw6dr
+  file: full_text_annotate.uw6dr.yml
   pages:
   - 1
   - 2
@@ -14,15 +14,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
-  slug: null
-  file: key_reading.yml
+  text_ref: uw6dr
+  slug: jx79c
+  file: key_reading.jx79c.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
-  slug: null
-  file: vocab_definitions.yml
+  text_ref: uw6dr
+  slug: nxwxd
+  file: vocab_definitions.nxwxd.yml
   pages:
   - 3
   - 4
@@ -30,16 +32,18 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
-  slug: null
-  file: vocab_application.yml
+  text_ref: uw6dr
+  slug: 9u7wd
+  file: vocab_application.9u7wd.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
-  slug: null
-  file: keypoints.yml
+  text_ref: uw6dr
+  slug: rcwjp
+  file: keypoints.rcwjp.yml
   pages:
   - 6
   - 7
@@ -47,8 +51,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 推論策略──推論角色關係與觀點
-  slug: null
-  file: spotlight.yml
+  text_ref: uw6dr
+  slug: e6ny9
+  file: spotlight.e6ny9.yml
   pages:
   - 7
   - 8
@@ -57,23 +62,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
-  slug: null
-  file: comprehension.yml
+  text_ref: uw6dr
+  slug: w6pnt
+  file: comprehension.w6pnt.yml
   pages:
   - 10
   - 11
 - 'no': 八
   name: 詞語複習
   module: vocab_review
-  slug: null
-  file: vocab_review.yml
+  text_ref: uw6dr
+  slug: ptjv4
+  file: vocab_review.ptjv4.yml
   pages:
   - 11
 - 'no': 九
   name: 知識補給站
   module: resources
-  slug: null
-  file: resources.yml
+  text_ref: uw6dr
+  slug: c37fq
+  file: resources.c37fq.yml
   pages:
   - 11
 dispatch:

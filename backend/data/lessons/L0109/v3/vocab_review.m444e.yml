@@ -1,0 +1,137 @@
+lesson_uid: L0109
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 震耳欲聾
+  - 群情激昂
+  - 交織
+  - 蛻變
+  - 氣勢如虹
+  - 排山倒海
+  - 花瓶
+  - 物化
+  - 無遠弗屆
+  - 訕笑
+  - 低迷不振
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 首屈一指動輒排山倒海
+  - 震耳欲聾奼別出心裁課
+  - 暑氣蒸人紫物化不氣氛
+  - 秀花馨漬奼順迷能訕葵
+  - 持有瓶蓉紅群情激昂笑
+  - 大放異彩哲入不敷出延
+  - 無知交溫望氣匠心獨具
+  - 遠控織度假旺勢秤勝下
+  - 弗訴低迷不振演如山蛻
+  - 屆不實破蘭鯨算法虹變
+  answers_are_graphical: true
+  answer_paths:
+  - word: 排山倒海
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 震耳欲聾
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 物化
+    cells:
+    - - 3
+      - 6
+    - - 3
+      - 7
+    direction: horizontal
+  - word: 花瓶
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    direction: diagonal_down_right
+  - word: 訕笑
+    cells:
+    - - 4
+      - 9
+    - - 5
+      - 10
+    direction: diagonal_down_right
+  - word: 群情激昂
+    cells:
+    - - 5
+      - 6
+    - - 5
+      - 7
+    - - 5
+      - 8
+    - - 5
+      - 9
+    direction: horizontal
+  - word: 無遠弗屆
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 交織
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    direction: vertical
+  - word: 氣勢如虹
+    cells:
+    - - 7
+      - 6
+    - - 8
+      - 7
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 低迷不振
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    - - 9
+      - 6
+    direction: horizontal
+  - word: 蛻變
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  slug: m444e
+  text_ref: ptwcu
