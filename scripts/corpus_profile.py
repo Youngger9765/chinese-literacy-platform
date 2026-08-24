@@ -24,6 +24,7 @@ ZEROWIDTH = re.compile(r"[︀-️​-‏⁠﻿]")
 # 順序有意義：由「最擋路」到「最好走」，第一個成立的就是它的類別。
 CLASSES = [
     ("no_section",     "學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有"),
+    ("multi_text",     "一份學習單包多篇文章（多文本閱讀）—— 整課音檔會把幾篇混在一起念"),
     ("no_body",        "課文沒有段落 —— 上游課文抽取的缺口，這一層修不了"),
     ("no_counter",     "沒有累計字數欄 —— 多為定向課／文言文，可能本來就沒有念順順"),
     ("no_anchor",      "☞ 錨點對不到任何課文段落 —— XML 沒訊號，只能靠 vision"),
@@ -39,6 +40,10 @@ def classify(f: dict) -> str:
     #    於是有人（我）會一直去修一個根本不存在的東西。
     if not f["has_key_reading_section"]:
         return "no_section"
+    # 一份學習單多篇文章：整課音檔會把幾篇連著念（2026-08-24 教材端回報 G5-L17-18 / G6-L22-24）。
+    # ⚠️ 排在很前面，因為它影響的不只念順順 —— 音檔、QR、進度都以「一課一篇」為前提。
+    if f.get("multi_text"):
+        return "multi_text"
     if not f["has_body_paragraphs"]:
         return "no_body"
     if not f["has_counter_column"]:
@@ -75,10 +80,22 @@ def main() -> int:
             d = yaml.safe_load(fa.read_text(encoding="utf-8")) or {}
             ft = d.get("full_text_annotate") or d
             paras = [p for p in (ft.get("paragraphs") or []) if isinstance(p, dict)]
-        facts[uid] = {"has_key_reading_section": False,
+        facts[uid] = {"has_key_reading_section": False, "multi_text": False,
+                      "text_boundary_known": None,
                       "has_body_paragraphs": bool(paras), "paragraph_idx_unique": True,
                       "anchor_hits": 0, "has_counter_column": False,
                       "body_in_tables": False, "invisible_chars_docx_only": False}
+        # 一份多篇？兩個訊號：檔名寫明（G5-L17-18／多文本）、或段落 idx 重新起算
+        dp = ((meta.get("source") or {}).get("drive_path") or "")
+        by_name = bool(re.search(r"[A-Z]\d+-L\d+[-~]\d+", dp)) or "多文本" in dp
+        idxs = [x.get("idx") for x in paras if isinstance(x, dict)]
+        resets = sum(1 for i in range(1, len(idxs)) if idxs[i] == 1 and idxs[i - 1] != 1)
+        if by_name or resets:
+            facts[uid]["multi_text"] = True
+            facts[uid]["text_boundary_known"] = bool(resets)
+            stats["一份學習單多篇文章"] += 1
+            detail["多文本" + ("（界線抓得到）" if resets else "（🔴 界線抓不到）")].append(uid)
+
         # 有沒有念順順這一節 —— 看該課自己的 key_reading.yml 與 sections_present
         krf = LESSONS / uid / "v3" / "key_reading.yml"
         has_section = False
