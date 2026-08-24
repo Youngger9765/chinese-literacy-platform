@@ -54,5 +54,10 @@ key_reading:
     feedback: 哇嗚，超級厲害！
   passage: 一名女子從倫敦地鐵避難所回家，裙腳還沾著灰塵。她家那條街已成廢墟，但她受訪時並未呼天搶地，只平靜幽默的說：「炸得還可以，沒打破我的茶壺。」當時英國人用「克制的上唇（stiff upper lip）」來形容這種面不改色的心理韌性。隨著大眾媒體的報導，「克制的上唇」成了英國的文化象徵，成了對恐懼集體免疫的預防針，更成了「我們撐得下去」的證據。
   start_text: 一名女子從倫敦地鐵避難所回家，裙腳還沾著灰塵。她
-  extent_chars: 170
-  source: derived-from-body
+  extent_chars: 168
+  source: extract_key_reading_v3
+  end_paragraph: 8
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

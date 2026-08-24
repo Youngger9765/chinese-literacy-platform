@@ -50,9 +50,13 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
-  passage: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，自己卻不會生病？戴蒙指出，這是因為這些疾病在歐洲已經肆虐了一千多年，在多次的大瘟疫之後，歐洲人身上已經產生抗體，逐漸適應並能抵擋這些病菌的侵襲。相反的，美洲隔著大西洋，當地的原住民從未暴露在這些病菌中，疫情一起，才會出現哀鴻遍野的慘狀。而疾病造成人口崩潰，使原本繁榮穩定的社會迅速瓦解。此外，為了驅除疫病，消災祈福，印加社會舉辦了許多大規模的宗教祭典，但每一個家庭仍然傳出撕心裂肺的嚎哭聲。相反的，印加人發現信仰天主教的西班牙人，居然是不會生病的。在巨大的反差下，印加人開始認為：「他們的神才是真神。」回到1532年11月，印加和西班牙兩方軍隊第一次對峙的那天。其實，當時印加帝國在實力上和心理上都早已被削弱，這是讓西班牙人能以少數部隊贏得壓倒性勝利的根本原因。
+  passage: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，自己卻不會生病？
   start_text: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，
-  extent_chars: 355
-  source: docx-anchor-and-count
+  extent_chars: 32
+  source: extract_key_reading_v3
   start_paragraph: 6
-  end_paragraph: 9
+  end_paragraph: 6
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0
