@@ -40,5 +40,5 @@ key_reading:
   start_text: 下了車，站前廣場依舊熱鬧，麻糬果然已經售完，在陣
   extent_chars: 417
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 7
+  start_paragraph: 4
+  end_paragraph: 7

@@ -22,5 +22,5 @@ key_reading:
   start_text: 在非洲東北部的厄利垂亞，20年來由同一位總統治理
   extent_chars: 381
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

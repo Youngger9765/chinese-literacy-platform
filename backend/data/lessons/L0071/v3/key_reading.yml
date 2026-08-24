@@ -26,5 +26,5 @@ key_reading:
   start_text: 1987年，科學家找了兩組大學生做這個測驗，第一
   extent_chars: 440
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

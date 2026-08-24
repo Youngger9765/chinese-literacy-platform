@@ -25,5 +25,5 @@ key_reading:
   start_text: 第一組有三位同學，分別扮演父親、兒子和茶房。演的
   extent_chars: 420
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 8
+  start_paragraph: 5
+  end_paragraph: 8

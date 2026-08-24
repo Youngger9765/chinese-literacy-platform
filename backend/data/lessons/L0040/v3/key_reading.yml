@@ -22,5 +22,5 @@ key_reading:
   start_text: 理智上我知道，作息時間表剛出爐時就必須嚴格執行，
   extent_chars: 434
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 7
+  start_paragraph: 6
+  end_paragraph: 7

@@ -23,5 +23,5 @@ key_reading:
   start_text: 小花在鄉下長大，三歲時，爸爸就過世了，家中食指浩
   extent_chars: 362
   source: docx-anchor-and-count
-  start_idx: 1
-  end_idx: 1
+  start_paragraph: 1
+  end_paragraph: 1

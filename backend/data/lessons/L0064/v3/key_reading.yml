@@ -25,5 +25,5 @@ key_reading:
   start_text: 我的心像被什麼狠狠撞了一下，混亂、震驚、失落，各
   extent_chars: 496
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

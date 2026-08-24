@@ -32,5 +32,5 @@ key_reading:
   start_text: 然而，阿政看的這兩部影片都有問題，影片製作者的描
   extent_chars: 406
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

@@ -4,7 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（四    )開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（四    )」的空白；右括號原稿就是半形「)」
-  span_note: 字數欄從第 4 段起算，停在第 6 段中途（371 字）；第 6 段整段跑完是 541 字
   timing_table:
     columns:
     - 第1次計時
@@ -25,5 +24,5 @@ key_reading:
   start_text: 好好睡一覺，好處多多。當你以為身體在休息時，睡眠
   extent_chars: 541
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 6
+  start_paragraph: 4
+  end_paragraph: 6

@@ -7,7 +7,6 @@ key_reading:
   errata_ref: E1
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（四    )」的空白；右括號原稿是半形。
   span_confidence: high
-  span_note: 印出的最後一個累計字數 338 落在第 5 段內（第 4 段結束 208、第 5 段結束 349），故涵蓋第 4~5 段。
   timing_table:
     columns:
     - 第1次計時
@@ -28,5 +27,5 @@ key_reading:
   start_text: 這次NASA特別關注女性太空人登月，是有原因的。
   extent_chars: 345
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

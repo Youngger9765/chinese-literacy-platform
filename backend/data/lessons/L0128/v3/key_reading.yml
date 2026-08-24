@@ -43,5 +43,5 @@ key_reading:
   start_text: 走進非洲之前，珍古德常被人用懷疑的眼光打量：一個
   extent_chars: 315
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 4
+  start_paragraph: 4
+  end_paragraph: 4

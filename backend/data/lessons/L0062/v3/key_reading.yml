@@ -27,5 +27,5 @@ key_reading:
   start_text: 更讓我不安的是，萬一這件事傳開了呢？我們班上的八
   extent_chars: 343
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

@@ -54,5 +54,5 @@ key_reading:
   start_text: 你可能會好奇，為什麼歐洲人攜帶這麼多致命的病菌，
   extent_chars: 355
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 9
+  start_paragraph: 6
+  end_paragraph: 9

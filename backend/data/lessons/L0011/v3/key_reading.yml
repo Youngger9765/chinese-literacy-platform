@@ -22,5 +22,5 @@ key_reading:
   start_text: 2021年8月1日，小戴在東京奧運金牌賽的轉播收
   extent_chars: 379
   source: derived-from-body
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

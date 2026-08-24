@@ -49,5 +49,5 @@ key_reading:
   start_text: 難友每天最重要的餐，是一碗內容貧乏的湯。領湯時囚
   extent_chars: 341
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 7
+  start_paragraph: 6
+  end_paragraph: 7

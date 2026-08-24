@@ -23,5 +23,5 @@ key_reading:
   start_text: 後來我發現，讀文章也是一樣。作者常常把重要的話放
   extent_chars: 362
   source: docx-anchor-and-count
-  start_idx: 8
-  end_idx: 10
+  start_paragraph: 8
+  end_paragraph: 10

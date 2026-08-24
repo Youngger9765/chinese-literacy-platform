@@ -55,5 +55,5 @@ key_reading:
   start_text: 爸爸九十歲生日那天，我們把當年他阿公用來養家那把
   extent_chars: 363
   source: docx-anchor-and-count
-  start_idx: 13
-  end_idx: 16
+  start_paragraph: 13
+  end_paragraph: 16

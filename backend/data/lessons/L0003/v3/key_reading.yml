@@ -22,5 +22,5 @@ key_reading:
   start_text: 除了動物，天空本身也會說話。「日暈三更雨，月暈午
   extent_chars: 392
   source: docx-anchor-and-count
-  start_idx: 7
-  end_idx: 8
+  start_paragraph: 7
+  end_paragraph: 8

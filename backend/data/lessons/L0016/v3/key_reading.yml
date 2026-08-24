@@ -23,5 +23,5 @@ key_reading:
   start_text: 有一次，我走路不小心撞到隔壁班的同學，連忙說：「
   extent_chars: 408
   source: docx-anchor-and-count
-  start_idx: 1
-  end_idx: 5
+  start_paragraph: 1
+  end_paragraph: 5

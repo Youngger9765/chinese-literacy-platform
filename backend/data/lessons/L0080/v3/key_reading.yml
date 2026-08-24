@@ -5,7 +5,6 @@ key_reading:
   instruction: 請用計時器，從指定段落（五    ）開始朗讀，在表格記錄計時1分鐘朗讀的字數。如果計時3次後，對自己還不滿意，可以多練幾次喔。最後一次，找一位同學，請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（五    ）」的空白。
   span_confidence: high
-  span_note: 第 5 段 147 = 印出的第 6 個數字，＋第 6 段 227 = 374 = 最後一個數字，兩端精準吻合。
   timing_table:
     columns:
     - 第1次計時
@@ -27,5 +26,5 @@ key_reading:
   start_text: 澳洲國家隊選手除了運動員身分外，大多還有其他的職
   extent_chars: 374
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

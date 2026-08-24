@@ -23,5 +23,5 @@ key_reading:
   start_text: 運動科學結合現代科技後，在競技運動上有了突破性的
   extent_chars: 450
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

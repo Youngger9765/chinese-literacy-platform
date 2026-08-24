@@ -34,7 +34,7 @@ def _norm(text: str) -> str:
 
 
 def test_golden_lessons_carry_the_range_the_worksheet_marks():
-    """每一課的 start_idx / end_idx / 字數要跟 golden set 一致。
+    """每一課的 start_paragraph / end_paragraph / 字數要跟 golden set 一致。
 
     逐課判定 —— 一課一個 verdict，失敗訊息列出是哪幾課、差在哪。
     ⛔ 不看中位數、不看通過比例。
@@ -42,7 +42,7 @@ def test_golden_lessons_carry_the_range_the_worksheet_marks():
     wrong = []
     for uid, (start, end, chars, why) in _golden()["must_resolve"].items():
         kr = _key_reading(uid)
-        got = (kr.get("start_idx"), kr.get("end_idx"), len(_norm(kr.get("passage"))))
+        got = (kr.get("start_paragraph"), kr.get("end_paragraph"), len(_norm(kr.get("passage"))))
         if got != (start, end, chars):
             wrong.append(f"  {uid} 應 ({start}, {end}, {chars}) 實際 {got} — {why}")
     assert wrong == [], "golden set 對不上：\n" + "\n".join(wrong)

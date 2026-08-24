@@ -58,5 +58,5 @@ key_reading:
   start_text: 小美他們的經驗，你是否也曾經遭遇？明明想好好表現
   extent_chars: 328
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 7
+  start_paragraph: 6
+  end_paragraph: 7

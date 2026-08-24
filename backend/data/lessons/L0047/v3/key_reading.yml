@@ -24,5 +24,5 @@ key_reading:
   start_text: 也有的大嫂極有度量，帶著娘家、夫家侄兒親戚等一同
   extent_chars: 393
   source: docx-anchor-and-count
-  start_idx: 7
-  end_idx: 9
+  start_paragraph: 7
+  end_paragraph: 9

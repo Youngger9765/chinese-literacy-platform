@@ -50,5 +50,5 @@ key_reading:
   start_text: 那年我已升上國中，戲院更加蕭條。導師了解我的處境
   extent_chars: 339
   source: docx-anchor-and-count
-  start_idx: 9
-  end_idx: 10
+  start_paragraph: 9
+  end_paragraph: 10

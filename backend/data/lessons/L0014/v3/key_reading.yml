@@ -22,5 +22,5 @@ key_reading:
   start_text: 從此，我的「觀察遊戲」就成了「尋找讀書人」。不限
   extent_chars: 397
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

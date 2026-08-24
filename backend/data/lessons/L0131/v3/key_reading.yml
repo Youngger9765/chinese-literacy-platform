@@ -55,5 +55,5 @@ key_reading:
   start_text: 其實，人類的文明發展，就是一部把能力、經驗與知識
   extent_chars: 386
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

@@ -26,5 +26,5 @@ key_reading:
   start_text: 鄧小姐憂鬱起來，她日間茶飯不思，夜裡輾轉反側，心
   extent_chars: 338
   source: docx-anchor-and-count
-  start_idx: 8
-  end_idx: 10
+  start_paragraph: 8
+  end_paragraph: 10

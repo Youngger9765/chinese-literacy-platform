@@ -23,5 +23,5 @@ key_reading:
   start_text: 我盯著螢幕，思緒變得混亂。每次遇到這樣的情境，我
   extent_chars: 404
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

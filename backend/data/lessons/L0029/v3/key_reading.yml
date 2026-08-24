@@ -41,5 +41,5 @@ key_reading:
   start_text: 大衛奔赴戰場，因為沒有笨重的盔甲，他行動迅捷自如
   extent_chars: 293
   source: docx-anchor-and-count
-  start_idx: 16
-  end_idx: 17
+  start_paragraph: 16
+  end_paragraph: 17

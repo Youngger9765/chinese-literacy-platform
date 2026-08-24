@@ -23,5 +23,5 @@ key_reading:
   start_text: 不過，周思齊被肯定的從來不是他的天賦，而是努力。
   extent_chars: 380
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

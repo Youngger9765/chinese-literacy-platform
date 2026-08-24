@@ -27,5 +27,5 @@ key_reading:
   start_text: 看在眼裡，我突然覺得自己「受騙」了，一定是她拿到
   extent_chars: 337
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

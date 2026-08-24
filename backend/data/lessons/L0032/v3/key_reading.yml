@@ -22,5 +22,5 @@ key_reading:
   start_text: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，
   extent_chars: 283
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

@@ -25,5 +25,5 @@ key_reading:
   start_text: 兩組一直無法對班服方案達成共識，台上的氣氛一度顯
   extent_chars: 391
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 7
+  start_paragraph: 6
+  end_paragraph: 7

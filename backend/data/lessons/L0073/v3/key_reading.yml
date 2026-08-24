@@ -27,5 +27,5 @@ key_reading:
   start_text: 慢慢的，我發現自己和每個同學都能相談甚歡，卻不是
   extent_chars: 463
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

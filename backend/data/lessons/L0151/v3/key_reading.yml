@@ -26,5 +26,5 @@ key_reading:
   start_text: 心理學家因此提出了「旁觀者效應」的理論，來解釋這
   extent_chars: 339
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

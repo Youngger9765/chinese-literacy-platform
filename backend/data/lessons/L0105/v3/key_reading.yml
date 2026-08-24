@@ -22,5 +22,5 @@ key_reading:
   start_text: 珍古德母女搭船進入保護區，映入眼簾的是險峻的山壁
   extent_chars: 409
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

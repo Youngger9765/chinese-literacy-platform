@@ -34,5 +34,5 @@ key_reading:
   start_text: 支持者最重視「自主」與「尊嚴」，認為末期病人若反
   extent_chars: 351
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 7
+  start_paragraph: 5
+  end_paragraph: 7

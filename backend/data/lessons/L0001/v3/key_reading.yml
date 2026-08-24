@@ -23,5 +23,5 @@ key_reading:
   start_text: 但事與願違，在2019年，楊俊瀚的體育生涯反而走
   extent_chars: 405
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 6
+  start_paragraph: 4
+  end_paragraph: 6

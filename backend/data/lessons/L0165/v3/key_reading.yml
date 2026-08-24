@@ -29,5 +29,5 @@ key_reading:
   start_text: 阿澤輕輕點頭，看著腳下紅土的痕跡又深又亂，就像他
   extent_chars: 412
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 7
+  start_paragraph: 5
+  end_paragraph: 7

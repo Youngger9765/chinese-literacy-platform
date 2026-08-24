@@ -25,5 +25,5 @@ key_reading:
   start_text: 朱蒂在孤兒院時沒能受到完整的教育，上大學後發現自
   extent_chars: 561
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 7
+  start_paragraph: 4
+  end_paragraph: 7

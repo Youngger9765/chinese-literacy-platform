@@ -28,5 +28,5 @@ key_reading:
   start_text: 後來，台灣隊在冠軍戰以4比0擊敗日本，陳傑憲也在
   extent_chars: 417
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

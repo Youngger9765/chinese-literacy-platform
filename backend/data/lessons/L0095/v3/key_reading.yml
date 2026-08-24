@@ -4,11 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（三    ）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（三    ）」的空白；開關括號都是全形。
-  spans_note: '朗讀範圍實際上還包含段 5 與段 6 之間的兩個分節小標（二、書名意義：／(1)主標題：弗蘭肯斯坦），
-
-    共 17 字 —— 字數欄有把它們算進去。`spans_paragraphs` 只列有編號的段，所以由它推導出來的
-
-    passage 會比 390 少那 17 字。'
   span_confidence: high
   timing_table:
     columns:
@@ -31,5 +26,5 @@ key_reading:
   start_text: 他從此離群索居，祕密進行實驗，從停屍房和墓穴找來
   extent_chars: 373
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 6
+  start_paragraph: 3
+  end_paragraph: 6

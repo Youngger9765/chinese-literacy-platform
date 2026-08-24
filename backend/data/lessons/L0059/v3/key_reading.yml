@@ -24,5 +24,5 @@ key_reading:
   start_text: 但這次，我繫著這條紅領帶，參加媽媽的告別式。我1
   extent_chars: 366
   source: docx-anchor-and-count
-  start_idx: 2
-  end_idx: 5
+  start_paragraph: 2
+  end_paragraph: 5

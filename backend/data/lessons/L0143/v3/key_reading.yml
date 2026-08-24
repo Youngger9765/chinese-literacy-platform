@@ -45,5 +45,5 @@ key_reading:
   start_text: 長跑是有氧運動，跑步時，肌肉會大量耗氧，怎麼讓運
   extent_chars: 170
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

@@ -24,5 +24,5 @@ key_reading:
   start_text: 研究團隊檢驗發現，這頭死亡的藍鯨體內仍有許多軟骨
   extent_chars: 454
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

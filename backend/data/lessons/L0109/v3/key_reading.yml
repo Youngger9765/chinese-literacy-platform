@@ -27,5 +27,5 @@ key_reading:
   start_text: 這裡所說的「啦啦隊」，是指競賽時在場邊加油、歡呼
   extent_chars: 384
   source: docx-anchor-and-count
-  start_idx: 2
-  end_idx: 3
+  start_paragraph: 2
+  end_paragraph: 3

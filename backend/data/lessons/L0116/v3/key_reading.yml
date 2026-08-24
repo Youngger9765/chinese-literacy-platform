@@ -52,5 +52,5 @@ key_reading:
   start_text: 從傳統文化來看，這個故事表現了「禍福相倚」的智慧
   extent_chars: 462
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

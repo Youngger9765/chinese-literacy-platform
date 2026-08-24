@@ -23,5 +23,5 @@ key_reading:
   start_text: 那時，球員平均月薪不到十萬元，對方卻開出五、六百
   extent_chars: 463
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

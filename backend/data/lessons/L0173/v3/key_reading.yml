@@ -22,5 +22,5 @@ key_reading:
   start_text: 在比賽中，啦啦隊的加油聲、場邊觀眾的應援，常能幫
   extent_chars: 453
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

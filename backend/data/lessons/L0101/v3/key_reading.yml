@@ -12,9 +12,6 @@ key_reading:
     \ 4 個空段落只空掉第 1 段的 4 行；\n    且 207／230／461 三個數字精準等於第 2／2+3／2+3+4 段的字數）→ 第 2 段\n\
     → 取 **2**：☞ 與字數欄是兩個各自獨立、且可機器驗證的結構訊號，\n  指示語的「三」只是一個字元，且若採信它，字數欄每一格都會多算 207 字（等於整套計時失效）。\n\
     ⛔ 沒有把指示語的「三」改掉（那會改動原稿印出來的字），只在此標明衝突。"
-  end_paragraph_note: '終點標 medium：字數欄印到 461 就停（＝第 4 段末），第 5~7 段沒有任何數字。
-
-    「唸到第 4 段」是依數字停止的位置推的，原稿沒有明寫終點。'
   timing_table:
     columns:
     - 第1次計時
@@ -36,5 +33,5 @@ key_reading:
   start_text: 釀小米酒的過程十分講究。許多部落由女性負責釀酒，
   extent_chars: 461
   source: docx-anchor-and-count
-  start_idx: 2
-  end_idx: 4
+  start_paragraph: 2
+  end_paragraph: 4

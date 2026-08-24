@@ -22,5 +22,5 @@ key_reading:
   start_text: 也許會有人想問：「可是我閱讀真的超慢的，那怎麼辦
   extent_chars: 364
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 9
+  start_paragraph: 6
+  end_paragraph: 9

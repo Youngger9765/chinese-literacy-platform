@@ -23,5 +23,5 @@ key_reading:
   start_text: 寒流來襲那天，老闆又看見了小男孩。他守在攤子旁邊
   extent_chars: 289
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

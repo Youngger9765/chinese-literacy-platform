@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""念順順起訖 —— 從原稿的兩個標記算出 start_idx / end_idx
+"""念順順起訖 —— 從原稿的兩個標記算出 start_paragraph / end_paragraph
 
 規則（Young 2026-08-24 看原稿定案）：
   start = ☞ 錨點所在的那一段
@@ -251,8 +251,8 @@ def apply(uid: str, r: dict) -> None:
     nested = "key_reading" in doc
     kr = doc["key_reading"] if nested else doc
     kr["passage"] = r["passage"]
-    kr["start_idx"] = r["start"]
-    kr["end_idx"] = r["end"]
+    kr["start_paragraph"] = r["start"]
+    kr["end_paragraph"] = r["end"]
     kr["extent_chars"] = len(r["passage"])
     kr["start_text"] = r["passage"][:24]
     kr["source"] = "docx-anchor-and-count"
@@ -286,16 +286,16 @@ def main() -> int:
             print(f"✅ {uid}  ☞第{r['start']}段 · 最後數字 {r['last_value']} 落第{r['end']}段"
                   f" → 第 {span} 段 = {len(r['passage'])} 字（現存 {cur}）"
                   + (f"  [{r['how']}]" if r.get("how") else ""))
-            # 字數本來就對的課也要寫 —— 它們缺 start_idx/end_idx，
+            # 字數本來就對的課也要寫 —— 它們缺 start_paragraph/end_paragraph，
             # 只看字數會讓那些課永遠沒有段號（golden set 2026-08-24 抓到）
             kr_now = (yaml.safe_load(kr_file.read_text(encoding="utf-8")) or {}) if kr_file.is_file() else {}
             kr_now = kr_now.get("key_reading") or kr_now or {}
             needs = (len(r["passage"]) != cur
-                     or kr_now.get("start_idx") != r["start"]
-                     or kr_now.get("end_idx") != r["end"])
+                     or kr_now.get("start_paragraph") != r["start"]
+                     or kr_now.get("end_paragraph") != r["end"])
             if a.apply and needs:
                 apply(uid, r)
-                print(f"      ↳ 寫入 start_idx={r['start']} end_idx={r['end']}")
+                print(f"      ↳ 寫入 start_paragraph={r['start']} end_paragraph={r['end']}")
         else:
             print(f"—  {uid}  {r['why']}（現存 {cur} 字）")
     return 0

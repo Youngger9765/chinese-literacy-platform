@@ -73,5 +73,5 @@ key_reading:
   start_text: 研究背後的推理很簡單：若構樹由臺灣向外擴散，臺灣
   extent_chars: 444
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

@@ -25,5 +25,5 @@ key_reading:
   start_text: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此
   extent_chars: 321
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

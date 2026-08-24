@@ -24,5 +24,5 @@ key_reading:
   start_text: 由於全球氣候變遷越來越劇烈，對生物多樣性造成威脅
   extent_chars: 348
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

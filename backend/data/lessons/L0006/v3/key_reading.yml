@@ -23,5 +23,5 @@ key_reading:
   start_text: 公車慢慢地停在站牌旁，一位白髮蒼蒼的老爺爺上了車
   extent_chars: 374
   source: docx-anchor-and-count
-  start_idx: 1
-  end_idx: 4
+  start_paragraph: 1
+  end_paragraph: 4

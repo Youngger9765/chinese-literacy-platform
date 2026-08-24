@@ -26,5 +26,5 @@ key_reading:
   start_text: 是這樣的，颱風前，新聞一直預報會有強風豪雨，消費
   extent_chars: 375
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

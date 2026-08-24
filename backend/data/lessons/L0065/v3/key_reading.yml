@@ -25,5 +25,5 @@ key_reading:
   start_text: 「為什麼會抽筋啊？真是的。」皓祥問道。詹老師說：
   extent_chars: 383
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

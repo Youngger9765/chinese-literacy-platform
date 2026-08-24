@@ -61,5 +61,5 @@ key_reading:
   start_text: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊
   extent_chars: 300
   source: docx-anchor-and-count
-  start_idx: 11
-  end_idx: 15
+  start_paragraph: 11
+  end_paragraph: 15

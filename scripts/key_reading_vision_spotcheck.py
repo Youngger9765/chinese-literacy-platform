@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """念順順：vision 粗查 —— 只確認 XML 判的錨點與最後數字沒有離譜
 
-⛔ 不做精確比對。XML 已經給出 start_idx / end_idx，這裡只問 vision
+⛔ 不做精確比對。XML 已經給出 start_paragraph / end_paragraph，這裡只問 vision
    「☞ 是不是在這一段旁邊」「右緣最後一個數字是不是大約這個值」，
    答不是才挑出來給人看。
 
@@ -106,7 +106,7 @@ def main() -> int:
             continue
         ok = v.get("arrow_beside_start")
         mark = "✅" if ok else ("—" if ok is None else "⚠️")
-        print(f"{mark} {uid}  start_idx={kr.get('start_idx')} end_idx={kr.get('end_idx')}"
+        print(f"{mark} {uid}  start_paragraph={kr.get('start_paragraph')} end_paragraph={kr.get('end_paragraph')}"
               f" · vision 看到最後數字 {v.get('last_margin_number')}")
         if ok is False:
             bad.append(uid)

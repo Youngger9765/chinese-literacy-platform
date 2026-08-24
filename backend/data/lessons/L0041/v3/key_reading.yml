@@ -23,5 +23,5 @@ key_reading:
   start_text: 到了晚上，周天成有時要出席公開活動，或拜會企業與
   extent_chars: 362
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

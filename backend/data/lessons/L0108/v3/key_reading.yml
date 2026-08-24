@@ -27,5 +27,5 @@ key_reading:
   start_text: 1907年4月，英國獵手吉姆・科貝抵達，局勢才出
   extent_chars: 346
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

@@ -24,5 +24,5 @@ key_reading:
   start_text: 說實話，我以前也覺得只要球打得好，就能進職棒、獲
   extent_chars: 326
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 12
+  start_paragraph: 6
+  end_paragraph: 12

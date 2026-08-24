@@ -23,5 +23,5 @@ key_reading:
   start_text: 1925年，這群來自花蓮的年輕阿美族球員，懷抱著
   extent_chars: 380
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

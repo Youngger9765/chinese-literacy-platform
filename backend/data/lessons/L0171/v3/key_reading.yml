@@ -46,5 +46,5 @@ key_reading:
   start_text: 有時候，一句「我很爛」，會讓我們明明有能力，卻在
   extent_chars: 379
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

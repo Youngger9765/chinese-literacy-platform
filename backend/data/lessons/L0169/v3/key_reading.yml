@@ -59,5 +59,5 @@ key_reading:
   start_text: 人體其實是一座精密的工廠，由206塊骨頭和數百條
   extent_chars: 346
   source: docx-anchor-and-count
-  start_idx: 1
-  end_idx: 2
+  start_paragraph: 1
+  end_paragraph: 2

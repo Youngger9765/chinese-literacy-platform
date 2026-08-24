@@ -27,5 +27,5 @@ key_reading:
   start_text: 不只如此，這些古代畫作還有個引人深思的特點──「
   extent_chars: 394
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

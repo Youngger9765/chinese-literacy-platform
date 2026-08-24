@@ -70,5 +70,5 @@ key_reading:
   start_text: 當貼文獲得很多讚時，你會覺得開心、備受矚目；反之
   extent_chars: 621
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 4
+  start_paragraph: 3
+  end_paragraph: 4

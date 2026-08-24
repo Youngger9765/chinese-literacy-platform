@@ -9,9 +9,6 @@ key_reading:
   start_paragraph_note: '三個訊號一致：指示語印「（六　）」、☞ 圖形印在第 6 段句首、
 
     字數欄的 29 個前置空段落正好把第 1~5 段的行數空掉（第 30 行同時是段號「六」與數字「28」）。'
-  end_paragraph_note: '終點：字數欄最後一個數字 456 正好等於第 6~8 段（見 body.char_count_note），落在段末。
-
-    原稿沒有明寫終點，「唸到第 8 段」是依數字停止的位置推的。'
   timing_table:
     columns:
     - 第1次計時
@@ -33,5 +30,5 @@ key_reading:
   start_text: 根據她的經驗，如果你正在經歷網路或關係霸凌，第一
   extent_chars: 458
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

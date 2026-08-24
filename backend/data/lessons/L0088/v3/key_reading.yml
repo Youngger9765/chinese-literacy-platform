@@ -25,5 +25,5 @@ key_reading:
   start_text: 塑膠幾乎無所不在，從飲料杯、外送餐盒、瓶子、鞋子
   extent_chars: 390
   source: docx-anchor-and-count
-  start_idx: 2
-  end_idx: 3
+  start_paragraph: 2
+  end_paragraph: 3

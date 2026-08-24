@@ -22,5 +22,5 @@ key_reading:
   start_text: 然而，垃圾食物卻是這麼好吃，讓人一口接一口停不下
   extent_chars: 361
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

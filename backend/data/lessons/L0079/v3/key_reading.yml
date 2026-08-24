@@ -5,7 +5,6 @@ key_reading:
   instruction: 請用計時器，從指定段落（二    ）開始朗讀，在表格中記錄1分鐘的朗讀字數。如果你計時3次後，還不滿意，可以多練幾次喔。最後一次，找一位同學，請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（二    ）」的空白。
   span_confidence: high
-  span_note: 印出的最後一個累計字數 417 落在第 3 段內（第 2 段結束 268、第 3 段結束 427），故涵蓋第 2~3 段。
   timing_table:
     columns:
     - 第1次計時
@@ -26,5 +25,5 @@ key_reading:
   start_text: 我和妹妹是阿公阿嬤養大的，爸媽在我們小時候就離開
   extent_chars: 427
   source: docx-anchor-and-count
-  start_idx: 2
-  end_idx: 3
+  start_paragraph: 2
+  end_paragraph: 3

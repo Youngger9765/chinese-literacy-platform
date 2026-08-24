@@ -22,5 +22,5 @@ key_reading:
   start_text: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的
   extent_chars: 341
   source: docx-anchor-and-count
-  start_idx: 7
-  end_idx: 11
+  start_paragraph: 7
+  end_paragraph: 11

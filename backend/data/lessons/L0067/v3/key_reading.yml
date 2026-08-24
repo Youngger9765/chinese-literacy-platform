@@ -25,5 +25,5 @@ key_reading:
   start_text: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。
   extent_chars: 384
   source: docx-anchor-and-count
-  start_idx: 1
-  end_idx: 3
+  start_paragraph: 1
+  end_paragraph: 3

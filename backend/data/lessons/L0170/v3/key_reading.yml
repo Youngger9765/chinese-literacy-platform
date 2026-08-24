@@ -56,5 +56,5 @@ key_reading:
   start_text: 隨著打席越來越接近，沒想到腦中的念頭又開始作祟—
   extent_chars: 566
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

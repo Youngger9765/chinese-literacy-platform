@@ -46,5 +46,5 @@ key_reading:
   start_text: 要解決這個問題，花農必須先找到幾個可能催促開花的
   extent_chars: 397
   source: docx-anchor-and-count
-  start_idx: 3
-  end_idx: 5
+  start_paragraph: 3
+  end_paragraph: 5

@@ -51,5 +51,5 @@ key_reading:
   start_text: 米田堡血型是指紅血球外層的紅血球膜上有較多的「帶
   extent_chars: 524
   source: docx-anchor-and-count
-  start_idx: 6
-  end_idx: 8
+  start_paragraph: 6
+  end_paragraph: 8

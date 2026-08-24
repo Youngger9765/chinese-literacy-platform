@@ -22,5 +22,5 @@ key_reading:
   start_text: 這個故事有三個大轉折。第一次轉折是，聽眾被引導去
   extent_chars: 410
   source: docx-anchor-and-count
-  start_idx: 13
-  end_idx: 19
+  start_paragraph: 13
+  end_paragraph: 19

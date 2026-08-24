@@ -23,5 +23,5 @@ key_reading:
   start_text: 回家路上，我常常偷偷回想我們一整天相處的片段，像
   extent_chars: 287
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 6
+  start_paragraph: 5
+  end_paragraph: 6

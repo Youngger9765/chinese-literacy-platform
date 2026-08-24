@@ -23,5 +23,5 @@ key_reading:
   start_text: 適當的運動也是長高相當重要的一環。有氧運動能讓核
   extent_chars: 367
   source: docx-anchor-and-count
-  start_idx: 4
-  end_idx: 5
+  start_paragraph: 4
+  end_paragraph: 5

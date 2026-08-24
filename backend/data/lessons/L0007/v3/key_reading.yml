@@ -23,5 +23,5 @@ key_reading:
   start_text: 吉他及歌聲開始飄揚，男人看著窗外飛馳而過的青山與
   extent_chars: 367
   source: docx-anchor-and-count
-  start_idx: 5
-  end_idx: 10
+  start_paragraph: 5
+  end_paragraph: 10
