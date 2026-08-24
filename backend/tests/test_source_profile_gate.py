@@ -31,14 +31,20 @@ import yaml
 LESSONS = pathlib.Path(__file__).resolve().parents[1] / "data" / "lessons"
 
 KNOWN_CLASSES = {
-    "standard", "no_section", "no_body", "no_anchor", "multi_anchor", "renumbered",
+    "standard", "no_section", "multi_text", "no_body", "no_anchor",
+    "multi_anchor", "renumbered",
     "no_counter",
 }
 
 # 2026-08-24 的分布。變動要**刻意**改這裡，順便回答「為什麼變了」。
 BASELINE = {
-    "standard": 129, "no_section": 22, "no_anchor": 7,
-    "multi_anchor": 7, "no_body": 6, "renumbered": 4,
+    "standard": 128,
+    "no_section": 22,
+    "multi_anchor": 7,
+    "no_anchor": 7,
+    "no_body": 6,
+    "multi_text": 4,
+    "renumbered": 1,
 }
 
 
