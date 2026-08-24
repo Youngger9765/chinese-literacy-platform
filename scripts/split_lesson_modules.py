@@ -196,15 +196,23 @@ def _derive(data: dict) -> None:
 
     kr = data.get("key_reading")
     if isinstance(kr, dict) and not kr.get("passage"):
-        spans = kr.get("spans_paragraphs") or (
-            [kr["start_paragraph"]] if kr.get("start_paragraph") else []
-        )
+        # 念順順的範圍只有一個來源：學習單印的「從指定段落（X）開始朗讀」。
+        #
+        # ⛔ 不要改回 `spans_paragraphs`。那一欄記的是抽取當時對「一分鐘讀到哪」的推論，
+        #    把它接起來就是 #2712 —— 中位 370 字對教授畫的 153 字，而那條規則已經被
+        #    否決三次（pilot / 第一次修正票 / v3 重建）。學生讀多久是學生的事，
+        #    不是抽取器的事。右緣累計字數欄同理（實測 280–520，課文 535–1670）。
+        start = kr.get("start_paragraph")
         # 段號是 1-based（教材印的段號），paras 是 0-based
-        picked = [paras[i - 1] for i in spans if isinstance(i, int) and 1 <= i <= len(paras)]
-        if picked:
-            kr["passage"] = "".join(picked)
-            kr["start_text"] = picked[0][:24]
-            kr["extent_chars"] = len(kr["passage"])
+        passage = (
+            paras[start - 1]
+            if isinstance(start, int) and 1 <= start <= len(paras)
+            else None
+        )
+        if passage:
+            kr["passage"] = passage
+            kr["start_text"] = passage[:24]
+            kr["extent_chars"] = len(passage)
             kr["source"] = "derived-from-body"
 
 

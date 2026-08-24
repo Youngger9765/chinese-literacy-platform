@@ -7,3 +7,14 @@ lesson_no: 1
 series: 一般
 lesson_seq: 4010
 intro: 這篇文章介紹了臺灣羽球選手戴資穎的故事。文章從大家熟悉的廣告歌曲切入，引領讀者認識這位世界級的運動員。接著，文章描寫了戴資穎獨特的球風，她如何在壓力下堅持自己的風格，以及她充滿魅力的攻擊方式。文章也記錄了她在東京奧運比賽時，全臺灣人民高度關注的盛況，以及比賽過程中緊張刺激的戰況。透過戴資穎在比賽中的表現，以及她賽後展現的態度，文章帶領我們思考，即使在面對挫折和不如意的結果時，如何保持自我，並從中學習成長。
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

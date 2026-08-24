@@ -46,3 +46,14 @@ strategy_sources:
   worksheet: null
   master_sheet: 品格力──落實環保3R
   previous: 落實環保3R－從問題到行動
+source_profile:
+  class: no_anchor
+  note: ☞ 錨點對不到任何課文段落 —— XML 沒訊號，只能靠 vision
+  has_key_reading_section: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

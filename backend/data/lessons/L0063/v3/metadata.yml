@@ -53,3 +53,14 @@ strategy_sources:
   worksheet: 寫作手法──用不同角度的例子說明概念
   master_sheet: 多文本閱讀─以不同角度的例子說明概念
   previous: 寫作手法──用不同角度的例子說明概念
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

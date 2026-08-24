@@ -41,3 +41,14 @@ strategy_sources:
   worksheet: null
   master_sheet: 品格力──正向思考─特定句型的轉念練習
   previous: 品格力──正向思考─如何面對不能改變的事
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'
