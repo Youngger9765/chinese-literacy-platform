@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import yaml
@@ -47,7 +48,7 @@ UID = "L0016"
 
 
 def _source():
-    doc = yaml.safe_load((LESSONS / UID / "v3" / "keypoints.yml").read_text(encoding="utf-8")) or {}
+    doc = yaml.safe_load((LESSONS / module_file(UID / "v3", "keypoints")).read_text(encoding="utf-8")) or {}
     return doc.get("keypoints") or {}
 
 

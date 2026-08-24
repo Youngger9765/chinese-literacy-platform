@@ -32,6 +32,7 @@ Young 在 `/learn/20001/keypoints-table` 看到：
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import re
 import sys
 
@@ -80,8 +81,8 @@ def _walk(rows):
 def _served():
     scanned = 0
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "keypoints.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "keypoints")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         try:
@@ -145,7 +146,7 @@ def test_dict_shaped_options_survive_the_bridge():
     L0012 的來源 `options: {1: ..., 2: ...}` 完好，橋卻回 `options: None`。
     今天已經接好 list 那個形狀 —— 同一個缺口的兩個形狀，只修了看得見的那個。
     """
-    doc = yaml.safe_load((LESSONS / "L0012" / "v3" / "keypoints.yml").read_text(encoding="utf-8"))
+    doc = yaml.safe_load(module_file(LESSONS / "L0012" / "v3", "keypoints").read_text(encoding="utf-8"))
     kp = doc.get("keypoints") or {}
     src = kp["rows"][0]
     assert isinstance(src.get("options"), dict), "來源形狀變了，這條在測別的東西"

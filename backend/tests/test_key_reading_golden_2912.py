@@ -9,6 +9,7 @@
 """
 
 import pathlib
+from _module_files import module_file, module_files
 
 import yaml
 
@@ -21,8 +22,8 @@ def _golden() -> dict:
 
 
 def _key_reading(uid: str) -> dict:
-    f = LESSONS / uid / "v3" / "key_reading.yml"
-    if not f.is_file():
+    f = LESSONS / module_file(uid / "v3", "key_reading")
+    if not f:
         return {}
     d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
     return d.get("key_reading") or d

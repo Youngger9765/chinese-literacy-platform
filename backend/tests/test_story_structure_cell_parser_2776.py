@@ -13,6 +13,7 @@ C) "單選" instructions rendering as an unconstrained multi-select checkbox —
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import pytest
@@ -138,8 +139,8 @@ class TestCorpusWideRegressionCounts:
 
         scanned = 0
         for d in sorted(self.LESSONS.iterdir()):
-            f = d / "v3" / "keypoints.yml"
-            if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+            f = module_file(d / "v3", "keypoints")
+            if not (d.is_dir() and d.name.startswith("L") and f):
                 continue
             doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
             try:

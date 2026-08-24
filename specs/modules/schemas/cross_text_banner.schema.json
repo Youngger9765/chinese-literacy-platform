@@ -12,9 +12,17 @@
       "type": "string",
       "x-seen-in": "1/2"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "2/2"
+    },
     "text": {
       "type": "string",
       "x-seen-in": "1/2"
+    },
+    "text_ref": {
+      "type": "array",
+      "x-seen-in": "2/2"
     },
     "title_block": {
       "type": "object",
@@ -25,10 +33,16 @@
       "x-seen-in": "1/2"
     }
   },
-  "required": [],
+  "required": [
+    "slug",
+    "text_ref"
+  ],
   "title": "cross_text_banner module payload",
   "type": "object",
-  "x-core-90pct": [],
+  "x-core-90pct": [
+    "slug",
+    "text_ref"
+  ],
   "x-enforcement": "error",
   "x-lessons-observed": 2
 }

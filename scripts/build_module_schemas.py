@@ -100,16 +100,23 @@ def observe() -> dict[str, dict]:
             # 底線前綴 = 衍生檔不是模組（_manifest.yml），不該有自己的 schema
             if path.stem.startswith("_"):
                 continue
+            # 檔名是 `{模組}.{自己的 slug}.yml`（#2916），模組名是第一段。
+            #
+            # ⚠️ 這裡本來直接用 `path.stem`，改名之後那是 `comprehension.34pme` ——
+            #    重產會吐出 **1627 份 per-file schema** 而不是 24 份 per-module。
+            #    每份只由一個檔長成，等於完全沒有約束力，而檔案數看起來還「更完整」。
+            #    2026-08-25 實際跑出來過，靠「產出份數」才看出不對。
+            module = path.stem.partition(".")[0]
             try:
                 data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
             except Exception:
                 continue
             if not isinstance(data, dict):
                 continue
-            body = payload_of(data, path.stem)
+            body = payload_of(data, module)
             if not isinstance(body, dict):
                 continue
-            entry = seen[path.stem]
+            entry = seen[module]
             entry["n"] += 1
             for key, value in body.items():
                 entry["fields"][key] += 1

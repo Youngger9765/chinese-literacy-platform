@@ -1,3 +1,4 @@
+from _module_files import module_file, module_files
 """重點表的來源目錄隨一修刪掉了，儀表板因此把 150 課報成「沒有重點表」(#2751 症狀 2)。
 
 `_SCHEMA_DIR` 指向 `private/curriculum-source/_online-schema` —— 那個目錄不在 repo 裡
@@ -16,7 +17,7 @@ DATA = pathlib.Path(__file__).resolve().parents[1] / "data" / "lessons"
 
 
 def _on_disk() -> int:
-    return len(list(DATA.glob("L*/v3/keypoints.yml")))
+    return len(list(DATA.glob("L*/v3/keypoints.*.yml")))
 
 
 def test_dashboard_counts_the_keypoints_that_are_actually_on_disk():
@@ -124,7 +125,7 @@ def test_a_broken_keypoints_file_does_not_500_the_admin_route(tmp_path, monkeypa
 
     uid = "L9999"
     (tmp_path / uid / "v3").mkdir(parents=True)
-    bad = tmp_path / uid / "v3" / "keypoints.yml"
+    bad = tmp_path / module_file(uid / "v3", "keypoints")
     bad.write_text("這行沒問題\n  - 但這裡縮排壞了: [未閉合\n", encoding="utf-8")
 
     monkeypatch.setattr(svc, "_LESSONS_DIR", tmp_path)

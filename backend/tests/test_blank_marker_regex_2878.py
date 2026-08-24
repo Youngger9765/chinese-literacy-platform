@@ -47,7 +47,7 @@ def _frontend_regex() -> re.Pattern:
 def _stems() -> list[tuple[str, int, str]]:
     out = []
     for f in sorted((REPO / "backend" / "data" / "lessons").glob(
-            "L*/v3/vocab_application.yml")):
+            "L*/v3/vocab_application.*.yml")):
         b = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get(
             "vocab_application") or {}
         for it in (b.get("items") or []):

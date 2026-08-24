@@ -24,6 +24,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from _module_files import module_file, module_files
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -41,7 +42,7 @@ def _content_rows(table):
 
 
 def _bridge(uid: str):
-    src = ROOT / "backend/data/lessons" / uid / "v3/keypoints.yml"
+    src = ROOT / "backend/data/lessons" / module_file(uid / "v3", "keypoints")
     return keypoints_to_structure_table(yaml.safe_load(src.read_text(encoding="utf-8")))
 
 

@@ -269,7 +269,7 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true")
     a = ap.parse_args()
     uids = a.uids or sorted(d.parent.parent.name
-                            for d in LESSONS.glob("L*/v3/key_reading.yml"))
+                            for d in LESSONS.glob("L*/v3/key_reading.*.yml"))
     for uid in uids:
         try:
             r = run(uid)

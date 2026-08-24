@@ -23,6 +23,7 @@ schema 用 `blank_choices`（與既有的 `blank_hints` 同位置、同順序）
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import yaml
@@ -39,7 +40,7 @@ LESSONS = pathlib.Path(__file__).resolve().parent.parent / "data" / "lessons"
 
 
 def _served(uid: str):
-    kp = (yaml.safe_load((LESSONS / uid / "v3" / "keypoints.yml").read_text(encoding="utf-8"))
+    kp = (yaml.safe_load((LESSONS / module_file(uid / "v3", "keypoints")).read_text(encoding="utf-8"))
           or {}).get("keypoints") or {}
     return _sanitize_structure_for_client(_format_yaml_structure_table(
         keypoints_to_structure_table(kp)))
@@ -53,7 +54,7 @@ def _walk(rows):
 
 def test_the_source_is_still_the_shape_this_is_about():
     """前置：L0011 那一列還是「一句兩空格 + sub_items」。"""
-    kp = (yaml.safe_load((LESSONS / "L0011" / "v3" / "keypoints.yml").read_text(encoding="utf-8"))
+    kp = (yaml.safe_load(module_file(LESSONS / "L0011" / "v3", "keypoints").read_text(encoding="utf-8"))
           or {}).get("keypoints") or {}
     row = kp["rows"][3]["sub_rows"][2]
     assert row["label"] == "結果"
