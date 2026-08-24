@@ -19,6 +19,27 @@
     "title": {
       "type": "string",
       "x-seen-in": "175/175"
+    },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "7/175",
+      "description": "一份學習單包多篇文章時，每一篇的身分（#2916）。有序清單 —— **順序就是排列**，不另存 order。`id` 是不透明 5 碼、永不修改也永不重用（QR 印在紙上）；`label` 給人看、隨便改。沒有 parts 的課視為單篇。",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[34679acdefhjkmnpqrtuvwxy]{5}$"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [

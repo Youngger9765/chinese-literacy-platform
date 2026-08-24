@@ -58,10 +58,11 @@ strategy_sources:
   master_sheet: 閱讀策略─跳過卡關，瀏覽全文
   previous: 閱讀策略─跳過卡關，先瀏覽全文
 source_profile:
-  class: no_section
-  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  class: multi_text
+  note: 一份學習單包多篇文章（多文本閱讀）—— 整課音檔會把幾篇混在一起念
   has_key_reading_section: false
   multi_text: true
+  repeated_modules: []
   text_boundary_known: false
   has_body_paragraphs: true
   paragraph_idx_unique: true

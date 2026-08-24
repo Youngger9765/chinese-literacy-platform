@@ -19,6 +19,7 @@ source_profile:
   note: 一份學習單包多篇文章（多文本閱讀）—— 整課音檔會把幾篇混在一起念
   has_key_reading_section: true
   multi_text: true
+  repeated_modules: []
   text_boundary_known: true
   has_body_paragraphs: true
   paragraph_idx_unique: false

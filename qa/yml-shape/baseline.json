@@ -418,12 +418,15 @@
         "source",
         "title"
       ],
-      "inner_shapes": 1,
+      "inner_shapes": 2,
       "lessons": 175,
       "mid": [],
-      "rare": [],
+      "rare": [
+        "parts"
+      ],
       "rare_noteish": [],
-      "top_level_shapes": 1
+      "top_level_shapes": 1,
+      "why_raised_2026_08_24_parts": "1 → 2（#2916）。7 課的 lesson.yml 新增 parts（一份學習單多篇文章時，每篇的身分），其餘 168 課刻意**不加** —— 加了等於動到全部已上架的課文檔。所以形狀本來就會是兩種：有 parts 與沒有。沒有 parts 的課由 loader 正規化成「單篇」。⛔ 這個數字不會再回到 1，別等它回落。"
     },
     "metadata": {
       "core": [

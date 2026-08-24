@@ -32,6 +32,7 @@ source_profile:
   note: 課文沒有段落 —— 上游課文抽取的缺口，這一層修不了
   has_key_reading_section: true
   multi_text: false
+  repeated_modules: []
   text_boundary_known: null
   has_body_paragraphs: false
   paragraph_idx_unique: true

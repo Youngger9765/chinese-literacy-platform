@@ -38,12 +38,17 @@ def classify(f: dict) -> str:
     # ⚠️ 這一條必須排第一。2026-08-24 我是「抽不到」之後回頭才發現「本來就沒有」，
     #    順序反了 —— 那些課被歸成 no_body / no_counter，看起來像抽取失敗，
     #    於是有人（我）會一直去修一個根本不存在的東西。
+    # ⚠️ multi_text 要排在 no_section **前面**。
+    #    L0111/L0137/L0144 是「一份多篇」但沒有念順順那一節，先判 no_section 會把它們吃掉，
+    #    建 parts 時就漏了三課（2026-08-24 實際踩到）。
+    #    「有沒有念順順」跟「是不是一份多篇」是兩個獨立的事實，不該互相遮蔽。
+    # 課文重複、或任何模組重複 → 都要特別處理，不能走主路徑
+    if f.get("multi_text") or f.get("repeated_modules"):
+        return "multi_text"
     if not f["has_key_reading_section"]:
         return "no_section"
     # 一份學習單多篇文章：整課音檔會把幾篇連著念（2026-08-24 教材端回報 G5-L17-18 / G6-L22-24）。
     # ⚠️ 排在很前面，因為它影響的不只念順順 —— 音檔、QR、進度都以「一課一篇」為前提。
-    if f.get("multi_text"):
-        return "multi_text"
     if not f["has_body_paragraphs"]:
         return "no_body"
     if not f["has_counter_column"]:
@@ -81,10 +86,34 @@ def main() -> int:
             ft = d.get("full_text_annotate") or d
             paras = [p for p in (ft.get("paragraphs") or []) if isinstance(p, dict)]
         facts[uid] = {"has_key_reading_section": False, "multi_text": False,
+                      "repeated_modules": [],
                       "text_boundary_known": None,
                       "has_body_paragraphs": bool(paras), "paragraph_idx_unique": True,
                       "anchor_hits": 0, "has_counter_column": False,
                       "body_in_tables": False, "invisible_chars_docx_only": False}
+        # 有沒有「同一個模組出現多份」—— 不只課文會重複
+        # owner 2026-08-24：「未來也可以面對單課其他模組、隨機組裝的問題」
+        # 目前實測只有 L0029（key_reading 有 parts[2]，兩個念順順），且它已被課文訊號抓到。
+        # 但辨識邏輯不該只綁在課文上，否則哪天出現「課文一篇、理解題兩份」就會漏。
+        repeated_modules = []
+        for mod in ("key_reading", "comprehension", "spotlight", "keypoints",
+                    "vocab_definitions", "vocab_application", "vocab_review",
+                    "keypoints_followup_questions", "resources"):
+            mf = LESSONS / uid / "v3" / f"{mod}.yml"
+            if not mf.is_file():
+                continue
+            y = yaml.safe_load(mf.read_text(encoding="utf-8")) or {}
+            inner = y.get(mod) or y
+            if isinstance(inner, list) and len(inner) > 1:
+                repeated_modules.append(mod)
+            elif isinstance(inner, dict) and isinstance(inner.get("parts"), list) \
+                    and len(inner["parts"]) > 1:
+                repeated_modules.append(mod)
+        if repeated_modules:
+            facts[uid]["repeated_modules"] = repeated_modules
+            stats["同一個模組出現多份"] += 1
+            detail["模組重複"].append(f"{uid}({','.join(repeated_modules)})")
+
         # 一份多篇？兩個訊號：檔名寫明（G5-L17-18／多文本）、或段落 idx 重新起算
         dp = ((meta.get("source") or {}).get("drive_path") or "")
         by_name = bool(re.search(r"[A-Z]\d+-L\d+[-~]\d+", dp)) or "多文本" in dp
