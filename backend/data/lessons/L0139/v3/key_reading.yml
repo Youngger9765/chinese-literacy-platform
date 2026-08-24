@@ -19,9 +19,6 @@ key_reading:
   - 334
   - 364
   - 387
-  char_marks_cover_paragraphs:
-  - 4
-  - 5
   needs_human_review: true
   review_reason_note: '本課列在 content_known_gaps.yaml#key_reading_flagged（二修 DOCX 標的段號與一修對照表
 

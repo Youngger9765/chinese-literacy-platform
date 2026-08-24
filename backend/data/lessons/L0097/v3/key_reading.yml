@@ -6,8 +6,6 @@ key_reading:
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（五    )」的空白；右括號原稿是半形。
   start_paragraph: 5
   end_paragraph: 5
-  span_confidence: high
-  span_note: 第一個印出的數字 22 正好等於第 5 段第一行（「3R」算 1 字）；最後一個 368 落在第 5 段末 113 與第 6 段末 374 之間。
   timing_table:
     columns:
     - 第1次計時

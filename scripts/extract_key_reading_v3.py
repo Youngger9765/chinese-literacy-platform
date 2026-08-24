@@ -108,6 +108,35 @@ MAX_ABSORBED_TAIL = 2
 #:              ships the passage and flags it (L0140 第十三段 = 11 chars, genuinely).
 MIN_CHARS, MAX_CHARS = 12, 900
 
+#: 範圍規則時代留下的欄位：它們**宣稱 passage 到哪裡結束、跨幾段**。單段 passage 旁邊
+#: 放著這些，檔案就自相矛盾 —— L0050 的 `span_evidence_note` 講第 4、5 段的長度，
+#: 而它的 passage 是第 3 段；L0084 的 `passage_note` 寫「兩段合計 304 字」，
+#: 而它的 passage 是 179 字。
+#:
+#: 🔴 這比 review 指出的 L0084 一課大得多：`span_confidence` 37 課、
+#: `char_marks_cover_paragraphs` 30 課、`end` 10 課。三審的 reviewer 自己就說
+#: 「我上一輪是被 passage_note 引導做出『被截斷』的判斷」—— 矛盾的敘述會讓下一個
+#: 讀資料的人得到錯的結論，所以清掉，不是留著當歷史。
+#:
+#: ⚠️ 只清「宣稱範圍」的。**忠實轉錄紙上內容的一律保留**
+#: （`printed_char_marks` / `printed_cumulative_chars` / `printed_char_count` 是字數欄
+#: 印出來的數字本身，`instruction_note` / `start_marker_note` /
+#: `start_paragraph_conflict_note` 講的是錨點與指示句）—— 那些是原稿的事實，
+#: 與 passage 取到哪裡無關，刪掉是湮滅證據而不是消除矛盾。
+RANGE_ERA_FIELDS = (
+    "spans_paragraphs",            # 「跨哪幾段」
+    "approx_chars_from_start",     # ＝字數欄 max
+    "end",                         # 「課文結束」
+    "passage_note",                # L0084：「兩段合計 304 字」
+    "char_marks_cover_note",
+    "char_marks_cover_paragraphs",
+    "span_confidence",
+    "span_confidence_note",
+    "span_evidence_note",
+    "span_note",
+    "parts",                       # L0029：內含 spans_seq [7,8,9]
+)
+
 
 def _norm(s: str) -> str:
     """Fold width, drop whitespace, combining marks and variation selectors.
@@ -189,10 +218,13 @@ def read_lesson(uid: str) -> dict:
         # 進去會多一個沒人指得到的「段」，還會被 `order` 當成下一段吸收。
         # 但要讀進來，因為指定段若斷在句中、而下一段正好沒編號，不看它就會截斷。
         out["unnumbered_after"] = {}
+        out["unnumbered_notes"] = {}
         for b in ft.get("unnumbered_blocks") or []:
             if isinstance(b, dict) and b.get("after_paragraph") is not None:
                 out["unnumbered_after"].setdefault(b["after_paragraph"], []).append(
                     b.get("text") or "")
+                out["unnumbered_notes"].setdefault(b["after_paragraph"], []).append(
+                    b.get("role_note") or "")
     if lf.exists():
         l = yaml.safe_load(lf.read_text(encoding="utf-8")) or {}
         l = l.get("lesson", l)
@@ -323,6 +355,14 @@ def extract(uid: str) -> dict:
 
     agreed = corroborate(passage, l["by_idx"])
     out["corroborated_by_first_edition"] = agreed
+    # 抽這一課全文時，讀圖的人對「那個沒段號的收尾段算不算在朗讀範圍內」留了判斷。
+    # 我們的句尾規則說不算（指定段自己把句子講完了）。兩個訊號相反、又沒有教授的
+    # 掃描可以仲裁時，**照規則出貨並標記**，不是默默選一個。
+    if (not out.get("absorbed_tail")
+            and any("朗讀範圍" in (n or "")
+                    for n in (l.get("unnumbered_notes") or {}).get(anchor, []))):
+        out["verdict"] = "unnumbered_tail_disputed"
+        return out
     if len(_norm(passage)) < MIN_CHARS:
         # L0140 第十三段 is 「這個故事有三個大轉折。」— 11 characters, its own printed
         # number, its own line. The rule says that one paragraph, so that one paragraph
@@ -368,8 +408,8 @@ def apply(uid: str, r: dict) -> None:
     kr["extent_chars"] = r["chars"]
     kr["start_paragraph"] = r["anchor"]
     kr["end_paragraph"] = r["anchor"]
-    kr.pop("spans_paragraphs", None)
-    kr.pop("approx_chars_from_start", None)
+    for stale in RANGE_ERA_FIELDS:   # ⚠️ 不要叫 f —— 外面的 f 是要寫回的 Path
+        kr.pop(stale, None)
     kr.pop("extraction_check", None)  # earlier runs of this script nested it here
     kr["source"] = "extract_key_reading_v3"
     doc["extraction_check"] = {
@@ -389,7 +429,8 @@ def apply(uid: str, r: dict) -> None:
                  encoding="utf-8")
 
 
-WRITEABLE = {"ok", "confirmed", "disagrees_with_first_edition", "short_marked_paragraph"}
+WRITEABLE = {"ok", "confirmed", "disagrees_with_first_edition", "short_marked_paragraph",
+             "unnumbered_tail_disputed"}
 
 #: Verdicts that ship a passage but ask for eyes. Keyed rather than boolean so the file
 #: records WHY — 「flagged with no reason」 is the failure mode #2725 named.
@@ -397,6 +438,11 @@ REVIEW_REASONS = {
     "disagrees_with_first_edition":
         "二修學習單指定第{anchor}段，一版人工掃描標的是同一課的另一段，且那段文字在"
         "本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。",
+    "unnumbered_tail_disputed":
+        "第{anchor}段後面有一段沒有段號的收尾文字。本檔採句尾判準：第{anchor}段自己以"
+        "句末標點結束，所以那段是另一段、不在 passage 內（{chars} 字）。但 "
+        "`full_text_annotate.yml` 的 role_note 說它「在朗讀範圍內」—— 兩個訊號相反，"
+        "且本課不在一版人工掃描可裁判的 38 課內，沒有第三方可仲裁。要人看紙本。",
     "short_marked_paragraph":
         "學習單指定的那一段只有 {chars} 字（第{anchor}段）。規則是只取指定的那一段，"
         "所以照寫；但這長度不像一分鐘的朗讀量，要人看紙本確認段號沒讀錯。",

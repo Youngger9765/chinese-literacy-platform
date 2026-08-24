@@ -4,7 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（八    ）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   start_paragraph: 8
-  end: 課文結束
   printed_char_marks:
   - 27
   - 56
@@ -18,9 +17,6 @@ key_reading:
   - 334
   - 363
   - 372
-  char_marks_cover_paragraphs:
-  - 8
-  - 9
   char_marks_note: '起點取第 8 段，依據是兩個印出來的訊號：instruction 印「（八）」＋ ☞ 圖形錨在段號欄的「八」。
 
     字數欄的獨立佐證：**306 − 146 = 160，正好是第 8 段套第 1 條口徑後的長度**

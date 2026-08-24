@@ -18,11 +18,6 @@ key_reading:
   - 299
   - 328
   - 351
-  char_marks_cover_paragraphs:
-  - 6
-  - 7
-  - 8
-  - 9
   char_marks_note: '四個段界值全部精準吻合（32／167／275／351），確認起點是第 6 段。
 
     只需套 SKILL ⑥.7 第 1 條（一串阿拉伯數字算 1 個字）：

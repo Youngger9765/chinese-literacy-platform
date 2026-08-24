@@ -20,9 +20,6 @@ key_reading:
   - 285
   - 314
   - 344
-  char_marks_cover_paragraphs:
-  - 1
-  - 2
   char_marks_note: '兩個段界精準吻合，需套 SKILL ⑥.7 **第 1 條**（一串阿拉伯數字算 1 個字）：
 
     第 1 段含「206」，裸算 199、整串算 1 字後 **197** ＝印出的 197；

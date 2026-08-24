@@ -4,14 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（二    ）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（二    ）」的空白；開關括號都是全形。
-  span_confidence: medium
-  span_confidence_note: '起點確定（☞ 與指示語都指段 2，且段 2 末 110 字與印出的數字精準吻合）；
-
-    但**終點落在第 4 段中間**（字數欄停在 400，而段 2+3+4 讀完是 514 字），
-
-    這一課的印刷字數欄沒有標到段界。`spans_paragraphs` 列到段 4，
-
-    所以由它推導出來的 passage（514 字）會比印出的 400 長。'
   timing_table:
     columns:
     - 第1次計時

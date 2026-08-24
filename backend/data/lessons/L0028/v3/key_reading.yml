@@ -4,7 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（二☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   start_paragraph: 2
-  end: 課文結束
   printed_char_count: 456
   timing_table:
     columns:

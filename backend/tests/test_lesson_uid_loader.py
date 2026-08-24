@@ -895,7 +895,8 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
             flagged += 1
             assert doc.get("review_reason"), f"{uid}: flagged with no reason"
             verdict = (doc.get("extraction_check") or {}).get("verdict")
-            assert verdict in ("disagrees_with_first_edition", "short_marked_paragraph"), (
+            assert verdict in ("disagrees_with_first_edition", "short_marked_paragraph",
+                               "unnumbered_tail_disputed"), (
                 f"{uid}: verdict {verdict!r}"
             )
     assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"

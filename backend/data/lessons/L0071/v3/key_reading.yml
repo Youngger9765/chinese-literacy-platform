@@ -4,8 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（三　)開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（三　)」的空白；右括號在原稿是半形。
-  span_confidence: high
-  span_confidence_note: 三個段界（106／271／439）與印出的數字精準吻合，見 body.char_count_note。
   timing_table:
     columns:
     - 第1次計時

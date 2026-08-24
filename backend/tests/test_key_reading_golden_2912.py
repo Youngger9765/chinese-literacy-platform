@@ -72,20 +72,53 @@ def test_the_marked_paragraph_is_the_whole_passage():
     )
 
 
-def test_no_lesson_reintroduces_the_count_column_fields():
-    """`spans_paragraphs` / `approx_chars_from_start` 不可以回來。
+#: 宣稱「passage 到哪結束 / 跨幾段」的欄位。與 `scripts/extract_key_reading_v3.py`
+#: 的 `RANGE_ERA_FIELDS` 是同一份清單，這裡重寫一次是為了讓測試不依賴被測的那支
+#: —— 抽取器把某個欄位從清單拿掉時，這條才會紅。
+_RANGE_ERA_FIELDS = (
+    "spans_paragraphs", "approx_chars_from_start", "end", "passage_note",
+    "char_marks_cover_note", "char_marks_cover_paragraphs", "span_confidence",
+    "span_confidence_note", "span_evidence_note", "span_note", "parts",
+)
+
+
+def test_no_lesson_reintroduces_the_range_era_fields():
+    """宣稱範圍的欄位不可以回來。
 
     **為什麼**：`approx_chars_from_start` 是右緣累計字數欄的最大值 —— 那是「一分鐘能讀
     到哪」，不是段落長度。把它留在單段 passage 旁邊，下一個人就會拿它重建範圍規則
     （#2712 已經這樣復發過四次）。欄位不存在，就沒得重建。
+
+    ⚠️ 清單是 2026-08-24 三審擴充的：原本只擋兩個欄位，但實際上還有 `span_confidence`
+    37 課、`char_marks_cover_paragraphs` 30 課、`end` 10 課在講範圍，而且**內容與
+    passage 直接矛盾**（L0050 的 `span_evidence_note` 講第 4、5 段，passage 卻是第 3 段；
+    L0084 的 `passage_note` 寫「兩段合計 304 字」，passage 卻是 179 字）。
+    reviewer 自己就說「我上一輪是被 `passage_note` 引導做出『被截斷』的判斷」——
+    矛盾的敘述會讓下一個讀資料的人得到錯的結論。
+
+    ⛔ 這條**不擋**忠實轉錄紙上內容的欄位（`printed_char_marks` 等是字數欄印出來的
+    數字本身，`instruction_note` 講的是指示句）。刪那些是湮滅證據，不是消除矛盾。
     """
     dirty = []
     for f in sorted(LESSONS.glob("L*/v3/key_reading.yml")):
-        kr = _key_reading(f.parts[-3])
-        bad = [k for k in ("spans_paragraphs", "approx_chars_from_start") if k in kr]
+        bad = [k for k in _RANGE_ERA_FIELDS if k in _key_reading(f.parts[-3])]
         if bad:
             dirty.append(f"  {f.parts[-3]}: {bad}")
-    assert dirty == [], "計數欄衍生欄位又出現了：\n" + "\n".join(dirty)
+    assert dirty == [], "宣稱範圍的欄位又出現了：\n" + "\n".join(dirty)
+
+
+def test_the_transcribed_worksheet_numbers_are_not_swept_away():
+    """反過來鎖：清理不可以順手刪掉原稿的事實轉錄。
+
+    **沒有這條會怎樣**：上面那條會鼓勵「把所有跟字數欄沾邊的欄位都刪掉」，
+    但 `printed_char_marks` 是**紙上真的印著的數字**。它不能決定朗讀範圍，
+    卻是這一課的原稿證據 —— 刪掉之後就再也回答不了「那一欄到底印了什麼」。
+    """
+    kept = sum(1 for f in LESSONS.glob("L*/v3/key_reading.yml")
+               if "printed_char_marks" in _key_reading(f.parts[-3]))
+    assert kept >= 25, (
+        f"只剩 {kept} 課有 printed_char_marks —— 清理範圍規則欄位時把原稿轉錄也刪了？"
+    )
 
 
 def test_lessons_without_a_marked_paragraph_ship_nothing():

@@ -5,7 +5,6 @@ key_reading:
   instruction: 請用計時器，從指定段落（六　）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
   instruction_note: 括號內原稿另有一個 ☞ 圖形物件（不在文字流）。
   printed_paragraph_in_instruction: 六
-  span_confidence: high
   start_paragraph_note: '三個訊號一致：指示語印「（六　）」、☞ 圖形印在第 6 段句首、
 
     字數欄的 29 個前置空段落正好把第 1~5 段的行數空掉（第 30 行同時是段號「六」與數字「28」）。'

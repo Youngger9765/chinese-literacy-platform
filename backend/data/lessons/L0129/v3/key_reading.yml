@@ -26,9 +26,6 @@ key_reading:
   - 560
   - 589
   - 617
-  char_marks_cover_paragraphs:
-  - 3
-  - 4
   char_marks_note: '兩個段界值都精準吻合，確認起點是第 3 段：
 
     第 3 段裸算 298 字，「50」「11」兩串各算 1 個字（SKILL ⑥.7 第 1 條）→ 296 = 第 11 個數字；

@@ -6,8 +6,6 @@ key_reading:
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（三    ）」的空白
   start_paragraph: 3
   end_paragraph: 3
-  span_confidence: high
-  span_evidence_note: 第 3 段 95、第 3+4 段 160 兩個檢查點精準吻合；末筆 329 與第 5 段結尾 330 差 1 字（見 char_count_note）
   timing_table:
     columns:
     - 第1次計時

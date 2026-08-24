@@ -18,10 +18,6 @@ key_reading:
   - 311
   - 339
   - 353
-  char_marks_cover_paragraphs:
-  - 3
-  - 4
-  - 5
   char_marks_note: '只印到 353（p2 中段），段落六之後那一欄是空的 —— 原稿如此，不是漏抽。
 
     交叉驗證：200 = 段落三 201 字套 SKILL ⑥.7 第 1 條（「30」算 1 字）；

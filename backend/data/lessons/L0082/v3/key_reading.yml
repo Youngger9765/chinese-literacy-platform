@@ -4,8 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（二    ）開始朗讀，在表格中記錄計時1分鐘朗讀的字數。如果計時3次後還不滿意，可以再多練幾次。最後一次，找一位同學，請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（二    ）」的空白
-  span_confidence: high
-  span_evidence_note: 字數欄末筆 344 == 第 2~5 段字數和（扣 U+2014 後 110+40+84+110），四個檢查點全中
   timing_table:
     columns:
     - 第1次計時

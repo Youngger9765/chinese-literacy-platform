@@ -6,8 +6,6 @@ key_reading:
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（七　)」的空白；右括號在原稿是半形。
   start_paragraph: 7
   end_paragraph: 7
-  span_confidence: high
-  span_confidence_note: 五個段界（79／105／156／170／336）與印出的數字全部精準吻合，見 body.char_count_note。
   timing_table:
     columns:
     - 第1次計時
