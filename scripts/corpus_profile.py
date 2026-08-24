@@ -38,12 +38,16 @@ def classify(f: dict) -> str:
     # ⚠️ 這一條必須排第一。2026-08-24 我是「抽不到」之後回頭才發現「本來就沒有」，
     #    順序反了 —— 那些課被歸成 no_body / no_counter，看起來像抽取失敗，
     #    於是有人（我）會一直去修一個根本不存在的東西。
+    # ⚠️ multi_text 要排在 no_section **前面**。
+    #    L0111/L0137/L0144 是「一份多篇」但沒有念順順那一節，先判 no_section 會把它們吃掉，
+    #    建 parts 時就漏了三課（2026-08-24 實際踩到）。
+    #    「有沒有念順順」跟「是不是一份多篇」是兩個獨立的事實，不該互相遮蔽。
+    if f.get("multi_text"):
+        return "multi_text"
     if not f["has_key_reading_section"]:
         return "no_section"
     # 一份學習單多篇文章：整課音檔會把幾篇連著念（2026-08-24 教材端回報 G5-L17-18 / G6-L22-24）。
     # ⚠️ 排在很前面，因為它影響的不只念順順 —— 音檔、QR、進度都以「一課一篇」為前提。
-    if f.get("multi_text"):
-        return "multi_text"
     if not f["has_body_paragraphs"]:
         return "no_body"
     if not f["has_counter_column"]:

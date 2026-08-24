@@ -27,3 +27,8 @@ source:
   pdf_pages: 10
   drive_path: 4年級/G4-L19把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
   docx_md5: md5-12:7b3144529f65
+parts:
+- id: akaux
+  label: 我叫阿耀，是您母校棒球隊的學弟，
+- id: n9jqu
+  label: 第 2 篇（label 待補）

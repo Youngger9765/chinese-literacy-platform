@@ -38,12 +38,16 @@ KNOWN_CLASSES = {
 
 # 2026-08-24 的分布。變動要**刻意**改這裡，順便回答「為什麼變了」。
 BASELINE = {
+    # 2026-08-24 調整：multi_text 的判斷提到 no_section **前面**。
+    # L0111 L0137 L0144 是「一份多篇」但沒有念順順那一節，原本被 no_section 吃掉，
+    # 導致建 parts 時漏了三課。「有沒有念順順」與「是不是一份多篇」是兩個獨立事實，
+    # 不該互相遮蔽 —— 所以 no_section 19（原 22）、multi_text 7（原 4）。
     "standard": 128,
-    "no_section": 22,
+    "no_section": 19,
     "multi_anchor": 7,
     "no_anchor": 7,
+    "multi_text": 7,
     "no_body": 6,
-    "multi_text": 4,
     "renumbered": 1,
 }
 
