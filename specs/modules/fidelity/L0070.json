@@ -1,6 +1,6 @@
 {
   "uid": "L0070",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "e6c7-58ae-de2b-51e3",
   "modules": {
     "errata": {

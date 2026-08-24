@@ -1,6 +1,6 @@
 {
   "uid": "L0155",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "711d-80d9-d761-6075",
   "modules": {
     "classical_text": {

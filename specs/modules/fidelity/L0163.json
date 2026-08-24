@@ -1,6 +1,6 @@
 {
   "uid": "L0163",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "a217-ba57-d753-b229",
   "modules": {
     "classical_text": {
@@ -33,7 +33,7 @@
     },
     "keypoints": {
       "yaml_sha256": "387b-35de-309c-4806",
-      "checked": 13,
+      "checked": 12,
       "status": "pass",
       "passed": true,
       "exit": 0

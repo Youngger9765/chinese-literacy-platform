@@ -1,6 +1,6 @@
 {
   "uid": "L0147",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "25b0-b989-5fe3-78a4",
   "modules": {
     "comprehension": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading": {
-      "yaml_sha256": "80fa-d5b2-339e-da0f",
+      "yaml_sha256": "55c0-0a39-6f2c-0d36",
       "checked": 10,
       "status": "pass",
       "passed": true,

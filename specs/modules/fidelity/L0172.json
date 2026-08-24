@@ -1,6 +1,6 @@
 {
   "uid": "L0172",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "c7e9-56ab-bdbf-93e6",
   "modules": {
     "comprehension": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading": {
-      "yaml_sha256": "6bbe-cc19-fda2-ed64",
+      "yaml_sha256": "5910-91b7-34e7-07df",
       "checked": 11,
       "status": "pass",
       "passed": true,
@@ -40,7 +40,7 @@
     },
     "keypoints": {
       "yaml_sha256": "ba2a-2f5f-37a1-b096",
-      "checked": 33,
+      "checked": 32,
       "status": "pass",
       "passed": true,
       "exit": 0
@@ -61,7 +61,7 @@
     },
     "spotlight": {
       "yaml_sha256": "1f5e-bc92-cdf6-f244",
-      "checked": 34,
+      "checked": 28,
       "status": "pass",
       "passed": true,
       "exit": 0

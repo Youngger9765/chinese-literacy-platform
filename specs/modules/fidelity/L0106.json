@@ -1,6 +1,6 @@
 {
   "uid": "L0106",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "1cd0-627d-4124-15e7",
   "modules": {
     "full_text_annotate": {
