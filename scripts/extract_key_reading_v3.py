@@ -5,7 +5,11 @@ WHY THIS REPLACES THE RANGE RULE
 --------------------------------
 `scripts/key_reading_xml_rule.py` computes a RANGE: ☞ 起點段 → 右緣累計字數欄末筆落在
 的那一段. Run over all 175 worksheets it yields 132 passages, of which only 3 are a
-single paragraph; the median is 393 characters.
+single paragraph, median 393 characters.
+
+⚠️ 383 vs 393 是兩個不同的母體，不要互相引用：383 是**出貨資料**改前的中位
+（v3 樹 147 篇有 passage 的課），393 是**那支腳本自己跑出來**的 132 篇的中位。
+本檔其他地方講「改前服務的長度」時一律用 383。
 
 靖杭 checked the worksheets against that output on 2026-08-24 and rejected it:
 
@@ -85,7 +89,7 @@ _ANCHOR_LOOSE = re.compile(r"指定段落[^0-9一二三四五六七八九十ㄧ]
 #: 《感情小日記2》 in the v2 line — the misfire #2726 warned this signal has.
 #:
 #: 「：」 is here for the same reason, found by
-#: `test_lesson_uid_loader.py::test_key_reading_passage_is_one_of_the_paragraphs`:
+#: `test_lesson_uid_loader.py::test_key_reading_is_the_marked_paragraph_not_an_inferred_span`:
 #: a paragraph may legitimately END on a colon that introduces a list which is itself
 #: separate numbered paragraphs —「這裡的推理三要素是：」(L0094)、「然後，這首歌出現了：」
 #: (L0007)、「例如：」(L0138). Without it all three absorbed the paragraph after them and
