@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -443,7 +444,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     <button
                       key={step.id}
                       type="button"
-                      onClick={() => navigate(`/learn/${story.id}/${step.id}`)}
+                      onClick={() => navigate(stepPath(story.id, step.id))}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                       aria-label={`跳轉到第 ${idx + 1} 步：${step.label}`}
                     >

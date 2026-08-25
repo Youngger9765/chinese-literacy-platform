@@ -12,6 +12,7 @@
  * Issue #2082 (A9 — in-place next nav, professor demo feedback 2026-06-04).
  */
 import React, { useMemo } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useStepSequence } from '../../hooks/useStepSequence';
@@ -39,7 +40,7 @@ const StepFooterNav: React.FC = () => {
 
   const handleNav = (step: (typeof activeSteps)[number] | null) => {
     if (!step || !selectedStory) return;
-    navigate(`/learn/${selectedStory.id}/${step.id}`);
+    navigate(stepPath(selectedStory.id, step.id));
   };
 
   // #2905: the bar used to vanish whenever the URL step was not in this lesson's
