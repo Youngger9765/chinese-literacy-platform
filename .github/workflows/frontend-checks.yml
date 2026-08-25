@@ -127,6 +127,9 @@ jobs:
           src/pages/admin/lesson-audio/paragraphGap.test.ts \
           src/pages/GuestReadingPage.passage.test.tsx \
           src/components/auth/publicSteps.test.ts \
+          src/config/__tests__/repeatedModulesSplit.test.ts \
+          src/pages/admin/lesson-audio/multiPartRows.test.tsx \
+          src/components/reading-steps/__tests__/splitPartsNotDuplicated.test.tsx \
           src/services/ttsApi.paragraph.test.ts \
           src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
           src/components/learning/__tests__/nextStepFooter.test.tsx \

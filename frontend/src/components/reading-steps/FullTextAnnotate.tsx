@@ -421,6 +421,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // ⚠️ 不能只用「當前步驟」的代號：訪客頁可能停在讀全文卻要給重點的碼。
   // 單篇課帳本只有一列 → 推導得到；多篇課有好幾列 → `sectionSlugForStep` 回 null，
   // 這時才用 `?p=` 從網址傳進來的那個（它才知道是哪一篇）。
+  // 這一課有沒有被拆成各篇的步驟：帳本裡讀全文出現兩列以上就是。
+  const isSplitIntoParts =
+    (story.manifestSections ?? []).filter((x) => x?.module === 'full_text_annotate').length > 1;
+
   const qrEffectiveStep =
     qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep;
   const qrCode =
@@ -995,7 +999,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* A7: 多文本合讀課的第 2/3 篇 + 過場字 + 閱讀接力 (#2752 Phase 3).
               Read-only — see the comment on MultiTextPartSection above for why. */}
-          {story.multiTextParts?.map((part, i) => (
+          {/* ⛔ 已經拆成各篇步驟的課**不要**再整份重畫（#2916）。
+              帳本有兩列以上讀全文 = 這一課的每一篇各自是一個步驟，
+              學生停在第 1 篇時再把第 2、3 篇貼在下面，就是同一份內容出現兩次。
+              2026-08-25 owner 截圖：第 1 篇的讀全文往下捲出現「第 2 篇 第23課」。
+              沒拆的舊課維持原本行為（一頁到底）—— 那是 #2752 的設計。 */}
+          {!isSplitIntoParts && story.multiTextParts?.map((part, i) => (
             <MultiTextPartSection key={i} part={part} index={i} />
           ))}
           {story.keypointsFollowupQuestions?.items && (
