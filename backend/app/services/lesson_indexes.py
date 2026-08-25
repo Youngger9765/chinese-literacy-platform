@@ -557,7 +557,17 @@ def _mcq_from(l: dict) -> list[dict]:
     explanation — the worksheet genuinely has nothing else there.
     """
     out = []
-    for q in _unwrap(_sections(l).get("comprehension"), "comprehension").get("questions") or []:
+    body = _unwrap(_sections(l).get("comprehension"), "comprehension")
+    # 抽取器對同一種東西用了兩個容器名：144 課叫 `questions`、27 課叫 `items`（#2922）。
+    # 每一題的結構完全一樣（index / answer / stem / options 字典），差別只在外面那層。
+    #
+    # ⚠️ 這裡本來只讀 `questions`，於是那 27 課的 `multiple_choice` 是空的 ——
+    #    **題目抽出來了，學生看不到**。沒有錯誤、頁面打得開、十道門全綠。
+    #    跟 #2683 那批（options 是 dict、欄名叫 videos 不叫 items）同一個病。
+    #
+    # ⛔ 不要「順手」把資料改成統一容器名：那要動 27 份已上線的內容檔，
+    #    而讀取端多認一個名字是零風險的。真要統一是抽取器那邊的事。
+    for q in (body.get("questions") or body.get("items") or []):
         opts = q.get("options") or {}
         if not opts:
             continue
@@ -575,7 +585,10 @@ def _mcq_from(l: dict) -> list[dict]:
             "question": q.get("stem", ""),
             "options": [opts.get(k, "") for k in letters],
             "answer": answer,
-            "explanation": opts.get(answer) if q.get("is_rationale") else None,
+            # 教師版的說明：`questions` 那批叫 `option_corrections`，
+            # `items` 那批叫 `option_notes`。兩個都收，欄位名不同不代表意思不同。
+            "explanation": (opts.get(answer) if q.get("is_rationale")
+                            else (q.get("option_corrections") or q.get("option_notes") or {}).get(answer)),
         })
     return out
 
