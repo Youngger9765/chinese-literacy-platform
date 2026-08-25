@@ -325,7 +325,7 @@ describe('LessonAudioTable', () => {
     pending[89].resolve({ paragraphs: ['lesson-89-text'] });
 
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
-    expect(mockSpeakText).toHaveBeenCalledWith('lesson-89-text', 89, 0);
+    expect(mockSpeakText).toHaveBeenCalledWith('lesson-89-text', 89, 0, 'wfrxc');
     expect(mockSpeakText).not.toHaveBeenCalledWith('lesson-1-text', 1, 0);
   });
 
@@ -609,7 +609,7 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
     fireEvent.click(within(row).getByRole('button', { name: /播放全文/ }));
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(1));
-    expect(mockSpeakText.mock.calls[0]).toEqual(['p0-of-1', 1, 0]);
+    expect(mockSpeakText.mock.calls[0]).toEqual(['p0-of-1', 1, 0, 'mcyjp']);
 
     // Paragraph 0 starts, then finishes: the hook reports speaking, then idle.
     // The component must pick that up and play paragraph 1 — an earlier version
@@ -620,7 +620,7 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     rerender(<LessonAudioTable />);
 
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(2));
-    expect(mockSpeakText.mock.calls[1]).toEqual(['p1-of-1', 1, 1]);
+    expect(mockSpeakText.mock.calls[1]).toEqual(['p1-of-1', 1, 1, 'mcyjp']);
 
     mockTts({ isTtsSpeaking: true });
     rerender(<LessonAudioTable />);
@@ -628,7 +628,7 @@ describe('#2627 播放全文必須唸完整篇，不是只唸第一段', () => {
     rerender(<LessonAudioTable />);
 
     await waitFor(() => expect(mockSpeakText).toHaveBeenCalledTimes(3));
-    expect(mockSpeakText.mock.calls[2]).toEqual(['p2-of-1', 1, 2]);
+    expect(mockSpeakText.mock.calls[2]).toEqual(['p2-of-1', 1, 2, 'mcyjp']);
   });
 
   it('段落 uses the key passage, not paragraph 0', async () => {
