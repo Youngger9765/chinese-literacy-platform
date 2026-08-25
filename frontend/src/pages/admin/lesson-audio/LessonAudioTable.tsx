@@ -69,6 +69,8 @@ interface StoryDetailResponse {
   paragraphs?: string[];
   content?: string[];
   key_reading?: { passage?: string | null } | null;
+  /** 多文本課每一篇的內容，key 是那篇課文的 slug（#2916）。 */
+  repeat_rounds?: Record<string, { paragraphs?: string[]; key_reading?: { passage?: string | null } | null }> | null;
 }
 
 interface QrButtonProps {
@@ -454,8 +456,10 @@ const LessonAudioTable: React.FC = () => {
     setIsFetchingDetail(false);
   }, [stopTts]);
 
-  const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode) => {
-    const key = `${story.id}:${mode}`;
+  // `round` = 這一篇的課文 slug（多文本課才有）。播放要放**那一篇**的字，
+  // 不是整課頂層那一份（頂層是照帳本挑的第一篇）。
+  const playLesson = useCallback(async (story: StoryListItem, mode: AudioMode, round?: string | null) => {
+    const key = `${story.id}:${round ?? ''}:${mode}`;
     const requestId = ++activeRequestRef.current;
     // No stop call here: every caller now runs stopCurrentPlayback() first,
     // which is strictly stronger (it also pauses the tracked elements, not just
@@ -469,8 +473,14 @@ const LessonAudioTable: React.FC = () => {
     try {
       const detail = await fetchStoryDetail(story.id, token);
       if (activeRequestRef.current !== requestId) return; // superseded by a later click
-      const paragraphs = detail.paragraphs ?? detail.content ?? [];
-      const fullText = detailToFullText(detail);
+      // 多文本課：取這一篇的段落與重點段（#2916）。
+      // 後端每一輪都附了攤平好的 `paragraphs`，所以這裡不必自己攤。
+      const roundData = round ? (detail.repeat_rounds ?? {})[round] : null;
+      const paragraphs = (roundData?.paragraphs as string[] | undefined)
+        ?? detail.paragraphs ?? detail.content ?? [];
+      const fullText = roundData?.paragraphs
+        ? (roundData.paragraphs as string[]).join('\n')
+        : detailToFullText(detail);
       setIsFetchingDetail(false);
 
       if (mode === 'key') {
@@ -478,7 +488,8 @@ const LessonAudioTable: React.FC = () => {
         // must go through the single-shot path. Passing a paragraph index here
         // is what made 「播放段落」 read paragraph 0 instead — the hook prefers
         // the backend's cached sentences for that index and drops the text.
-        speakText(detail.key_reading?.passage || fullText);
+        const kr = (roundData?.key_reading as { passage?: string } | undefined)?.passage;
+        speakText(kr || detail.key_reading?.passage || fullText);
         return;
       }
 
@@ -647,9 +658,16 @@ const LessonAudioTable: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto" role="grid" aria-label="課程音檔總表">
-        {sortedStories.map((story) => {
-          const fullKey = `${story.id}:full`;
-          const keyKey = `${story.id}:key`;
+        {sortedStories.flatMap((story) =>
+          // 多文本課一篇一列（#2916）。一課一列的話三篇共用篇 1 的碼 ——
+          // 教材端拿到的六張 QR 會有四張指錯地方，而且掃得開、看不出錯。
+          ((story.part_rounds && story.part_rounds.length > 0)
+            ? story.part_rounds
+            : [null]
+          ).map((part, partIdx) => {
+          const round = part?.slug ?? null;
+          const fullKey = `${story.id}:${round ?? ''}:full`;
+          const keyKey = `${story.id}:${round ?? ''}:key`;
           const fullState = derivePlaybackState(fullKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
           const keyState = derivePlaybackState(keyKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
           const fullContent = playbackButtonContent(fullState, '播放全文');
@@ -658,14 +676,14 @@ const LessonAudioTable: React.FC = () => {
 
           return (
             <div
-              key={story.id}
+              key={`${story.id}:${round ?? 'single'}`}
               role="row"
               className={`grid grid-cols-[minmax(220px,1.5fr)_minmax(112px,0.7fr)_minmax(168px,0.9fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)] items-center gap-3 border-b border-gray-100 px-4 py-3 text-sm [content-visibility:auto] [contain-intrinsic-size:64px] ${isRowPlaying ? 'bg-blue-50' : ''}`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
-                    {lessonTitle(story)}
+                    {lessonTitle(story)}{part ? `（篇${part.part ?? partIdx + 1}）` : ''}
                   </span>
                   <span className="truncate font-medium text-gray-900">{story.title}</span>
                 </div>
@@ -695,7 +713,7 @@ const LessonAudioTable: React.FC = () => {
                   // class of failure: a click can never leave audio running.
                   const wasIdle = fullState === 'idle';
                   stopCurrentPlayback();
-                  if (wasIdle) playLesson(story, 'full');
+                  if (wasIdle) playLesson(story, 'full', round);
                 }}
                 className="inline-flex w-fit items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               >
@@ -716,27 +734,27 @@ const LessonAudioTable: React.FC = () => {
                   // class of failure: a click can never leave audio running.
                   const wasIdle = keyState === 'idle';
                   stopCurrentPlayback();
-                  if (wasIdle) playLesson(story, 'key');
+                  if (wasIdle) playLesson(story, 'key', round);
                 }}
                   className="inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                 >
                   {keyContent.icon}
                   {keyContent.label}
                 </button>
-                {!story.has_key_reading && (
+                {!(part ? part.has_key : story.has_key_reading) && (
                   <span className="text-xs text-amber-700">無重點段（唸全文）</span>
                 )}
               </div>
 
               {deliversFullText(story.grade)
                 ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title}
-                    sectionSlug={(story.part_rounds ?? [])[0]?.full_slug ?? (story.part_rounds ?? [])[0]?.slug} />
+                    sectionSlug={part?.full_slug ?? part?.slug} />
                 : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付重點朗讀">—</span>}
               <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title}
-                sectionSlug={(story.part_rounds ?? [])[0]?.key_slug} />
+                sectionSlug={part?.key_slug} />
             </div>
           );
-        })}
+        }))}
         {sortedStories.length === 0 && (
           <div className="px-4 py-12 text-center text-sm text-gray-400">沒有課程資料</div>
         )}
