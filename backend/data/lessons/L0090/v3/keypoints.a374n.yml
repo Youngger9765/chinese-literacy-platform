@@ -1,0 +1,43 @@
+lesson_uid: L0090
+version_id: v3
+section_no: 六
+keypoints:
+  title: 奧運性別平等這條路
+  intro: ※我們來練習整理出本課第七~九段的重要訊息：
+  layout: list
+  answer_carrier: 橘色手寫填空＋紅色 ☑（w:sym Wingdings F0FE）
+  rows:
+  - label: 2024年巴黎奧運和東京奧運相比
+    value: 朝著【　】的目標更邁進一步。
+    blanks:
+    - answer: 性別平等
+  - label: 2024年巴黎奧運重要措施
+    column_headers_note: 這一段原稿是兩欄表（左欄「2024年巴黎奧運重要措施」／右欄「目的」）；下面每個 item 的 label = 措施、value
+      = 目的
+    items:
+    - label: 1.為哺乳期運動員設置【　】
+      blanks:
+      - answer: 哺乳室
+      value: 讓「母親」也可以同時是「頂尖運動員」。
+    - label: 2.媒體村街道以傑出女性【　】
+      blanks:
+      - answer: 命名
+      value: 提高女性在公共空間中的知名度，彰顯女性在社會的重要性。
+    - label: 3.提高女性【　】的比例
+      blanks:
+      - answer: 賽事評論員
+      value: 讓運動相關產業不再侷限於男性，女性也能有一展長才的機會。
+  - label: 未來努力的方向
+    value: 往性別文化平等邁進
+  - label: 仍待解決的問題
+    value: '1.女性運動員的【　】被忽略：女性運動員的外表和身材常常比實力更受關注。
+
+      2.女子運動員的地位仍然（　）男性運動，特別是在大型職業運動中，男性運動員仍佔主導地位。(單選)'
+    blanks:
+    - answer: 努力與成就
+    options:
+      1: 高於
+      2: 低於
+    answer: 2
+  slug: a374n
+  text_ref: 4x996

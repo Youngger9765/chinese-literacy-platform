@@ -1,0 +1,46 @@
+lesson_uid: L0047
+version_id: v3
+section_no: 五
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 粗野陽剛
+    B: 溫柔婉約
+    C: 長袖善舞
+    D: 銜接無虞
+    E: 度量
+    F: 使臂使指
+    G: 調停折衝
+    H: 穿梭
+    I: 當面戳破
+    J: 心知肚明
+  items:
+  - index: 1
+    stem: 她說話總是（　），輕聲細語，讓人感到如沐春風。
+    answer: B
+  - index: 2
+    stem: 雙方爭執不下，里長出面（　），終於化解衝突。
+    answer: G
+  - index: 3
+    stem: 她每天（　）於各科教室之間，忙碌得像個小蜜蜂。
+    answer: H
+  - index: 4
+    stem: 他（　）了對方的藉口，場面一度尷尬。
+    answer: I
+  - index: 5
+    stem: 區間車準時到站，接著轉乘高鐵，兩段行程（　），時間充裕。
+    answer: D
+  - index: 6
+    stem: 領導者應有（　），接納不同的看法，才能服眾。
+    answer: E
+  - index: 7
+    stem: 他（　），交際手腕高明，一下子就能和各方談成合作。
+    answer: C
+  - index: 8
+    stem: 他喜歡把大家（　）的事直接說出來，常常弄得現場很尷尬。
+    answer: J
+  notes:
+    option_bank: 10 個代號 A–J，對應 8 道小題（F 使臂使指、A 粗野陽剛 未被任何一題用到）。
+    answer_carrier: 橘色手寫字；文字流已含答案
+  slug: 76kh3
+  text_ref: 4mq6a

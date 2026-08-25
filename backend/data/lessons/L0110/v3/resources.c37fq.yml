@@ -1,0 +1,28 @@
+lesson_uid: L0110
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 看歐普拉如何扭轉命運 從貧民變身傳奇媒體女王【TODAY 看世界｜人物放大鏡】
+    duration: '6:43'
+    duration_seconds: 403
+    source: TODAY 看世界
+    url: http://youtu.be/m8ApjhtgVFs
+  - index: 2
+    title: Dealing With Childhood Trauma & Emotional Neglect
+    duration: '5:53'
+    duration_seconds: 353
+    source: Psych2Go
+    url: http://youtu.be/5pzcRH665Lw
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/m8ApjhtgVFs
+    url_source: 總表0816「4.影片連結」年級8課次12
+  - index: 2
+    url: http://youtu.be/5pzcRH665Lw
+    url_source: 總表0816「4.影片連結」年級8課次12
+  slug: c37fq
+  text_ref: uw6dr

@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
+  slug: nperf
+  file: full_text_annotate.nperf.yml
   pages:
   - 1
   - 2
@@ -12,17 +14,26 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: nperf
+  slug: k9fef
+  file: key_reading.k9fef.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: nperf
+  slug: ahp9e
+  file: vocab_definitions.ahp9e.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: nperf
+  slug: rdytj
+  file: vocab_application.rdytj.yml
   pages:
   - 4
   - 5
@@ -31,6 +42,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略——用問題-解決-結果找重點
+  text_ref: nperf
+  slug: r49yu
+  file: spotlight.r49yu.yml
   pages:
   - 6
   - 7
@@ -38,17 +52,26 @@ sections:
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  text_ref: nperf
+  slug: xqqem
+  file: comprehension.xqqem.yml
   pages:
   - 8
   - 9
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  text_ref: nperf
+  slug: yrkmh
+  file: vocab_review.yrkmh.yml
   pages:
   - 9
 - 'no': 八
   name: 知識補給站
   module: resources
+  text_ref: nperf
+  slug: vx9vt
+  file: resources.vx9vt.yml
   pages:
   - 9
   - 10

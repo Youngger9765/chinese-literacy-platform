@@ -46,9 +46,21 @@ BASELINE = {
     "no_section": 19,
     "multi_anchor": 7,
     "no_anchor": 7,
-    "multi_text": 7,
+    #
+    # 2026-08-25（#2916）：multi_text 7 → 5、renumbered 1 → 3。
+    # L0010 與 L0012 從 multi_text 移到 renumbered。
+    #
+    # ⚠️ 這**不是**分類器改了判準，是 owner 看過兩份原稿之後的認定：
+    # 那兩課印的是一來一往的兩封信，「兩封信就是一篇課文」（2026-08-25 原話），
+    # 所以它們不是一份學習單包多篇文章。書信體的段落 idx 會重編，
+    # 那正是 renumbered 的定義 —— 分類跟著事實走，事實被人看過了。
+    # 兩課的 multi_text 登記已從 metadata 清掉。
+    #
+    # ⛔ 下一個人看到這條紅不要直接改數字：先確認是**原稿事實變了**
+    # （教材方重發、或有人重新認定）還是**分類器判錯了**。前者改基準，後者修分類器。
+    "multi_text": 5,
     "no_body": 6,
-    "renumbered": 1,
+    "renumbered": 3,
 }
 
 

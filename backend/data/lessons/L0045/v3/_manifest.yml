@@ -5,29 +5,43 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: urk49
+  file: full_text_annotate.urk49.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: urk49
+  slug: ejvcp
+  file: key_reading.ejvcp.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: urk49
+  slug: rhc73
+  file: vocab_definitions.rhc73.yml
   pages:
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: urk49
+  slug: whhad
+  file: vocab_application.whhad.yml
   pages:
   - 3
   - 4
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: urk49
+  slug: jpt7f
+  file: keypoints.jpt7f.yml
   pages:
   - 4
   - 5
@@ -35,6 +49,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 詞彙推測策略─拆詞釋義
+  text_ref: urk49
+  slug: f4up3
+  file: spotlight.f4up3.yml
   pages:
   - 5
   - 6
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: urk49
+  slug: xfa3f
+  file: comprehension.xfa3f.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: urk49
+  slug: chu9q
+  file: vocab_review.chu9q.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: urk49
+  slug: xhcrf
+  file: resources.xhcrf.yml
   pages:
   - 9
   - 10

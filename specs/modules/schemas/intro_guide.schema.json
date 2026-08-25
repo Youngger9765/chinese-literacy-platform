@@ -24,15 +24,23 @@
       "type": "string",
       "x-seen-in": "2/4"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
     "text": {
       "type": "string",
       "x-seen-in": "3/4"
     }
   },
-  "required": [],
+  "required": [
+    "slug"
+  ],
   "title": "intro_guide module payload",
   "type": "object",
-  "x-core-90pct": [],
+  "x-core-90pct": [
+    "slug"
+  ],
   "x-enforcement": "error",
   "x-lessons-observed": 4
 }

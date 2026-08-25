@@ -1,0 +1,42 @@
+lesson_uid: L0124
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 應運而生
+    B: 媲美
+    C: 不分軒輊
+    D: 蓬勃
+    E: 悄然興起
+    F: 追溯
+    G: 刮目相看
+    H: 屠宰
+    I: 膳食纖維
+  items:
+  - index: 1
+    stem: 近年來，東部觀光（　）發展，進而提升了當地的就業率。
+    answer: D
+  - index: 2
+    stem: 由於國人健康意識抬頭，於是各式各樣的運動中心（　）。
+    answer: A
+  - index: 3
+    stem: 媽媽的廚藝和專業大廚（　）。
+    answer: C
+  - index: 4
+    stem: 媽媽烹飪的技術足以（　）米其林三星級名廚。
+    answer: B
+  - index: 5
+    stem: 這學期他的數學成績突飛猛進，令人（　）。
+    answer: G
+  - index: 6
+    stem: 農業部目前推動農糧產品生產履歷，讓消費者在選購時可以（　）產品來源，購買時更加安心。
+    answer: F
+  - index: 7
+    stem: 蔬菜、水果和全穀類含有豐富的（　），有助於維持腸道健康。
+    answer: I
+  - index: 8
+    stem: 近年來，復古穿搭的風潮在校園裡（　），許多同學開始穿寬褲和毛帽。
+    answer: E
+  slug: mjfcx
+  text_ref: u7rhq

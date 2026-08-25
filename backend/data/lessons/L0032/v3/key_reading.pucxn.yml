@@ -1,0 +1,28 @@
+lesson_uid: L0032
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（六☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，小丑醫生的計畫由一些非營利組織推動，許多志工投入其中，為孩子們帶來希望和勇氣。新冠肺炎疫情期間，許多醫院限制訪客，小丑醫生改用線上表演的方式，透過螢幕繼續為病人帶來歡樂。烏俄戰爭爆發以後，醫療設施面臨被攻擊、被摧毀的壓力，住在醫院的兒童除了身體病痛，還必須面對兵荒馬亂中的忐忑不安。一批小丑醫生悄悄進入烏克蘭的醫院，安撫並陪伴病童，提供歡樂，讓他們笑逐顏開，暫時忘卻不安。小丑醫生的到來，讓冰冷的病房多了笑聲，這份歡樂不僅幫助病童降低治療的焦慮，也舒緩了壓力鍋下家長緊繃的心情，他們讓我們知道：笑，本身就是最好的良藥！
+  start_text: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，
+  extent_chars: 283
+  source: docx-anchor-and-count
+  start_paragraph: 6
+  end_paragraph: 8
+  slug: pucxn
+  text_ref: qjn4x

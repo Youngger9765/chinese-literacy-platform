@@ -1,0 +1,77 @@
+lesson_uid: L0001
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 寫作手法——順敘──從時間詞判斷事件順序
+  strategy_type: writing_technique
+  blocks:
+  - type: concept_box
+    text: '有些文章會照著事情發生的順序來寫，這叫做順敘。
+
+      讀順敘文章時，可以先找出時間詞，例如：幾年、之前、過後。
+
+      時間詞就像路標，能幫助我們知道事情的先後順序。
+
+      找到時間詞後，再看看每個時間點發生了什麼事，就能看清楚事情怎麼一步一步發展。'
+    note: PDF 上此框被裝飾圖形部分遮住，內文以 document.xml 文字流為準
+  - type: guide
+    text: ◎ 小試身手：
+  - type: ordering
+    label: 小試身手 1（本課課文）
+    instruction: 1.先圈出時間，再讀一讀這個時間點發生了什麼事，最後依先後順序在（ ）中填入1~4。
+    marked_time_words:
+    - 2019年
+    - 2018年
+    - 2017年
+    - 2021年
+    answers_are_graphical: false
+    items:
+    - index: 1
+      text: 2019年，楊俊瀚的體育生涯反而走到了谷底。他在拿坡里世大運比賽時受傷，開始了漫長的復健。
+      answer: 3
+    - index: 2
+      text: 2018年雅加達亞運上，他以千分之二秒的差距與金牌擦身而過。
+      answer: 2
+    - index: 3
+      text: 2017年夏季世界大學運動會田徑男子一百公尺決賽，替中華臺北拿下睽違二十六年的世大運田徑金牌。
+      answer: 1
+    - index: 4
+      text: 終於熬過了這段恢復期，突破困境，在2021年重新回到賽場。他最終順利拿下東京奧運參賽的資格。
+      answer: 4
+  - type: single
+    label: 小試身手 2
+    prompt: 2.排完時間順序後，把這些事件連起來看。哪一個說法最能整理楊俊瀚這幾年的經歷？
+    options:
+      1: 拿下世大運金牌後，一路順利，最後取得奧運資格
+      2: 先拿下金牌，後來遇到失敗與受傷，但仍努力復健、重回賽場
+      3: 一開始就受傷復健，後來才拿下世大運金牌，最後參加亞運比賽
+    answer: 2
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - type: ordering
+    label: 小試身手 3（延伸文本）
+    instruction: 3.〈𪹚龍慶元宵〉　彭仁星
+    title: 〈𪹚龍慶元宵〉
+    author: 彭仁星
+    marked_time_words:
+    - 元宵節過後
+    - 元宵節前
+    - 元宵節前一天
+    items:
+    - index: 1
+      text: 元宵節過後，「化龍返天」是活動的尾聲，火化神龍象徵事事圓滿。
+      answer: 4
+    - index: 2
+      text: 今年元宵節前，我回到苗栗的阿公家，參加𪹚龍慶元宵活動。
+      answer: 1
+    - index: 3
+      text: 元宵夜，我們到公園參加「𪹚龍之夜」，這是活動的高潮。相傳「炸龍」可以納吉招福，越炸越旺，人山人海，歡天喜地，熱鬧得不得了。
+      answer: 3
+    - index: 4
+      text: 元宵節前一天，街上家家戶戶歡喜的「迎龍」，希望迎來新年的好福氣。
+      answer: 2
+  - type: guide
+    text: '你發現了嗎？
+
+      時間詞不一定都是年份，也可能是「元宵節前、前一天、元宵夜、過後」這類說法。找到時間詞，就比較能看懂事情怎麼發展。'
+  slug: fyq9q
+  text_ref: mcyjp

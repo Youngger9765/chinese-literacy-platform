@@ -1,0 +1,26 @@
+lesson_uid: L0064
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 俗女養成記│ EP4 悲傷五階段步步驚心！
+    duration: (2:49)
+    source: Vidol TV
+    qr_code: true
+  - index: 2
+    title: 戀愛甘苦談 │ 「失戀也能好好過！來學習從悲傷到接受的五個階段吧！」
+    duration: (2:24)
+    source: 土豆仁
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/f34Ye1YRzl4
+    url_source: 總表0816「4.影片連結」年級6課次25
+  - index: 2
+    url: https://youtu.be/rH2UpK57mcc
+    url_source: 總表0816「4.影片連結」年級6課次25
+  slug: 7jtnn
+  text_ref: 4fwdm

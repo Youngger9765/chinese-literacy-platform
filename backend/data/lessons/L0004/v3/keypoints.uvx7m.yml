@@ -1,0 +1,85 @@
+lesson_uid: L0004
+version_id: v3
+section_no: 五
+keypoints:
+  title: 感情小日記2──喜歡是什麼？
+  intro: 日記常用來記錄生活事件與心情感受，並藉此抒發情緒，上一篇小日記我們嘗試透過整理作者經歷的事件及感受來理解日記內容，這一篇也再試試看吧！
+  structure: nested
+  columns:
+  - 段落
+  - 事件
+  - 感受
+  rows:
+  - paragraph: 二
+    event: 上課時因為太在意他而分心，導致無法回答老師的問題
+    feeling:
+      instruction: (勾選，可複選)
+      select: multi
+      options:
+        1: 尷尬
+        2: 生氣
+        3: 感到丟臉
+      answer:
+      - 1
+      - 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - paragraph: 二
+    event:
+      value: 常常和他做（　）的選擇
+      select: single
+      options:
+        1: 相同
+        2: 不同
+      answer: 1
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    feeling: 期待有更多相處的機會
+  - paragraph: 三
+    event: 看見他與別人談笑
+    feeling:
+      instruction: (勾選，可複選)
+      select: multi
+      options:
+        1: 不是滋味
+        2: 難過
+        3: 害羞
+      answer:
+      - 1
+      - 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - paragraph: 四
+    event: 下課時沒有和他互動
+    feeling:
+      value: 感到【　】
+      blanks:
+      - answer: 失落
+  - paragraph: 四
+    event: 下課時有說到話或對到眼
+    feeling:
+      value: 內心【　】
+      blanks:
+      - answer: 雀躍
+  - paragraph: 五
+    event: 因為喜歡而有各種心情起伏
+    feeling:
+      instruction: (勾選，可複選)
+      select: multi
+      options:
+        1: 平靜
+        2: 疲累
+        3: 困惑
+      answer:
+      - 2
+      - 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - paragraph: 統整
+    value: '結合第一段與最後一段，作者寫下這篇小日記，
+
+      是想抒發心情（　）的感受。'
+    select: single
+    options:
+      1: 大起大落
+      2: 平靜如水
+    answer: 1
+    answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  slug: uvx7m
+  text_ref: dmhc3

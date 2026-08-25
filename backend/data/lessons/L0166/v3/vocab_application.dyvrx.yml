@@ -1,0 +1,50 @@
+lesson_uid: L0166
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 一己之力
+    B: 推進
+    C: 不見蹤影
+    D: 備受矚目
+    E: 一手包辦
+    F: 滿腹委屈
+    G: 頻頻
+    H: 出色
+    I: 釐清
+    J: 外界
+  unused_options:
+  - B
+  items:
+  - index: 1
+    stem: 經過許多練習的累積，他這次的音樂競賽表現相當 (　)。
+    answer: H
+  - index: 2
+    stem: 這次園遊會需要大家分工，不能由班長(　)。
+    answer: E
+  - index: 3
+    stem: 警方調閱監視畫面，希望進一步(　)事情的經過。
+    answer: I
+  - index: 4
+    stem: 他明明完成了工作，卻被誤會偷懶，心中(　)。
+    answer: F
+  - index: 5
+    stem: 這家宮廟總在深夜放鞭炮、煙火，(　)遭到鄰居的抗議。
+    answer: G
+  - index: 6
+    stem: 剛才還在沙發上的黑貓，一看到客人進門就(　)。
+    answer: C
+  - index: 7
+    stem: 這個計畫十分龐大複雜，任何人都無法只靠 (　)完成。
+    answer: A
+  - index: 8
+    stem: 新建的圖書館設備完善，開幕前便(　)。
+    answer: D
+  notes:
+    option_bank: '⚠️ 選項庫 10 個，與第三大題語詞框**不同**：多了「一手包辦」「外界」，
+
+      少了「口令」「出局數」。兩者都是課文裡加框的詞。原稿如此。'
+    answer_carrier: 橘色代號，PDF p5 可見
+  slug: dyvrx
+  text_ref: pvqer

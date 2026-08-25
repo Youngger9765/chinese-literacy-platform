@@ -1,0 +1,56 @@
+lesson_uid: L0088
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框中找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 功敗垂成
+  - 塑膠微粒
+  - 無遠弗屆
+  - 倡議者
+  - 杯水車薪
+  - 闕如
+  - 簽署
+  - 自行其是
+  - 有增無減
+  items:
+  - index: 1
+    word: 塑膠微粒
+    definition: 塑膠製品碎裂後形成的微小的塑膠碎片，可進入河川、海洋與生物體內。
+  - index: 2
+    word: 功敗垂成
+    definition: 事情快成功了，卻在最後一刻失敗。
+  - index: 3
+    word: 自行其是
+    definition: 不聽別人的意見，只照自己的想法做事。
+  - index: 4
+    word: 簽署
+    definition: 在正式文件上簽名，使協議或公文生效。
+  - index: 5
+    word: 闕如
+    definition: 缺少、不足。
+  - index: 6
+    word: 杯水車薪
+    definition: 力量太小，像用一杯水去救一車著火的柴薪，難以解決大問題。
+  - index: 7
+    word: 無遠弗屆
+    definition: 沒有到不了的地方。指的是影響或力量傳得很遠。
+  - index: 8
+    word: 倡議者
+    definition: 為了公共議題發聲、提出做法並帶頭推動的人。
+  - index: 9
+    word: 有增無減
+    definition: 只有增加，沒有減少。
+  notes:
+    vocabulary_bank: '語詞框在原稿是分四行排的，行末沒有頓號，攤平後會變成
+
+      「塑膠微粒無遠弗屆」「倡議者杯水車薪」黏在一起 —— 那是換行不是漏字。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: a77en
+  text_ref: y4x3j

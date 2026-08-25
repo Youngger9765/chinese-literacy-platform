@@ -5,12 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: ww4d9
+  file: full_text_annotate.ww4d9.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: ww4d9
+  slug: jak3k
+  file: key_reading.jak3k.yml
   pages:
   - 2
   - 3
@@ -18,17 +23,26 @@ sections:
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: ww4d9
+  slug: c6qyc
+  file: vocab_definitions.c6qyc.yml
   pages:
   - 4
   - 5
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: ww4d9
+  slug: cjwcc
+  file: vocab_application.cjwcc.yml
   pages:
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: ww4d9
+  slug: eyxax
+  file: keypoints.eyxax.yml
   pages:
   - 5
   - 6
@@ -36,6 +50,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 負責任的決定──區辨控制圈
+  text_ref: ww4d9
+  slug: tyudy
+  file: spotlight.tyudy.yml
   pages:
   - 6
   - 7
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: ww4d9
+  slug: yhuc9
+  file: comprehension.yhuc9.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: ww4d9
+  slug: jy7tt
+  file: vocab_review.jy7tt.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: ww4d9
+  slug: ayufn
+  file: resources.ayufn.yml
   pages:
   - 9
   - 10

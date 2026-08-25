@@ -30,6 +30,7 @@ manifest 是它**加上模組歸屬**之後的產物 —— 多了 `module` 欄�
 from __future__ import annotations
 
 import argparse
+import re
 import pathlib
 import sys
 
@@ -40,6 +41,16 @@ LESSONS = REPO_ROOT / "backend" / "data" / "lessons"
 MAP_FILE = REPO_ROOT / "specs" / "modules" / "section-to-module.yml"
 GAPS_FILE = REPO_ROOT / "backend" / "data" / "curriculum_qa" / "content_known_gaps.yaml"
 PAGES_FILE = REPO_ROOT / "specs" / "modules" / "section-pages.yml"
+
+
+def _part_ordinal(part) -> int | None:
+    """把 `part` 的各種寫法收斂成篇次序號；取不到回 None（＝共用區，不分篇）。"""
+    if isinstance(part, bool) or part is None:
+        return None
+    if isinstance(part, int):
+        return part
+    m = re.search(r"\d+", str(part))
+    return int(m.group()) if m else None
 
 
 def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict,
@@ -54,6 +65,55 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
 
     uid = version_dir.parent.name
     not_sections = set(table.get("not_sections", []))
+    # 篇次 → slug。`parts[]` 的順序就是第 1 篇、第 2 篇…（#2916）
+    lesson_parts = lesson.get("parts") or []
+
+    # 這一課每個模組有哪些檔（含各自的 slug 與 text_ref），依「指向第幾篇」排序。
+    _module_files: dict[str, list] = {}
+    _module_seen: dict[str, int] = {}
+    # 課文的順序由**學習單自己印的目錄**（`sections_present`）決定 ——
+    # 第 k 個「讀全文」列就是第 k 篇。檔案的 `part` 欄位只當**識別碼**
+    # （我是第幾篇），拿來跟目錄的列對上，不是拿它來排序。
+    #
+    # ⛔ 不要用檔名字母序（slug 是不透明亂碼，排出來會是 篇2、篇3、篇1），
+    #    也不要讓檔案自己決定順序 —— 那會變成第二套順序來源。
+    _by_part: dict[int, str] = {}
+    for f in sorted(version_dir.glob("full_text_annotate.*.yml")):
+        doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        b = doc.get("full_text_annotate") if isinstance(doc.get("full_text_annotate"), dict) else doc
+        pt = (b or {}).get("part") or (b or {}).get("part_no")
+        _by_part[pt if isinstance(pt, int) else len(_by_part) + 1] = f.stem.partition(".")[2]
+    _text_order: list[str] = []
+    for r in rows:
+        if not isinstance(r, dict) or "讀全文" not in str(r.get("name") or ""):
+            continue
+        pt = _part_ordinal(r.get("part")) or (len(_text_order) + 1)
+        sl = _by_part.get(pt)
+        if sl and sl not in _text_order:
+            _text_order.append(sl)
+    for sl in _by_part.values():           # 目錄沒點到的（單篇課沒有 part）補在後面
+        if sl not in _text_order:
+            _text_order.append(sl)
+    for f in sorted(version_dir.glob("*.*.yml")):
+        mod, _, sl = f.stem.partition(".")
+        if not sl or mod in not_sections or mod.startswith("_"):
+            continue
+        doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        body = doc.get(mod) if isinstance(doc.get(mod), dict) else doc
+        tr = (body or {}).get("text_ref")
+        _module_files.setdefault(mod, []).append((sl, tr))
+        _module_seen.setdefault(mod, 0)
+    def _rank(item):
+        sl, tr = item
+        key = tr[0] if isinstance(tr, list) and tr else tr
+        if mod_is_text := False:
+            pass
+        return (_text_order.index(key) if key in _text_order else len(_text_order), sl)
+    for m in _module_files:
+        if m == "full_text_annotate":
+            _module_files[m].sort(key=lambda x: _text_order.index(x[0]) if x[0] in _text_order else 99)
+        else:
+            _module_files[m].sort(key=_rank)
 
     # 頁碼來自 committed 的 section-pages.yml，不是現場讀原稿 —— CI 沒有 private/，
     # 現場讀會讓 --check 恆紅（見 tests/test_corpus_gates_are_wired_2843.py 的 CANNOT_WIRE）
@@ -83,6 +143,36 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
         entry = {"no": row.get("no"), "name": name, "module": module}
         if row.get("subtitle"):
             entry["subtitle"] = row["subtitle"]
+
+        # 一課多篇時，同一個大題會出現好幾次（L0029 印兩個念順順）。
+        # 光有 module 名分不出哪一列對哪一份檔 —— 所以這裡把**要載的檔名**寫死，
+        # 消費端照著載就好，不必自己拼字串、也不必知道 slug 規則。
+        #
+        # `part` 直接沿用學習單目錄印的值（可能是 1/2/3，也可能是「前半」
+        # 「篇次 1/3」這種自由文字 —— 那是原稿怎麼印就怎麼記，不強行正規化）。
+        if row.get("part") is not None:
+            entry["part"] = row["part"]
+        if module:
+            slug = None
+            # 每一份模組檔都有自己的 slug（#2916）。同一個模組在一課裡出現多次時，
+            # 用「它的 text_ref 指向第幾篇」把檔案排序，再依帳本順序配過去。
+            # ⛔ 不能用檔名字母序 —— slug 是不透明亂碼，跟課本順序無關。
+            cand = _module_files.get(module) or []
+            k = _module_seen[module]
+            if k < len(cand):
+                sl, tr = cand[k]
+                slug = sl
+                if tr is not None:
+                    entry["text_ref"] = tr
+            _module_seen[module] += 1
+            # `part` 是原稿怎麼印就怎麼記，五種寫法都出現過：
+            #   1 / 2 / 3          （L0029、L0063、L0111）
+            #   '1/2' '2/2'        （L0137）
+            #   '篇次 1/3' '篇次3/3-(新聞短文)'（L0144）
+            #   '三篇合讀' '前半' '後半'        ← 沒有篇次，是共用區或版面切分
+            # 取第一個數字當篇次；取不到就是共用區，不給 slug。
+            entry["slug"] = slug
+            entry["file"] = f"{module}.{slug}.yml" if slug else f"{module}.yml"
         if unresolved:
             # 明說「還沒歸因」而不是留 module: null 讓人以為是漏填
             entry["module_unresolved"] = True
@@ -107,7 +197,12 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
                     entry["pages_source"] = stored["pages_source"]
         sections.append(entry)
 
-    produced = sorted({p.stem for p in version_dir.glob("*.yml")} - not_sections - {"_manifest"})
+    # 重複模組的檔名是 `{module}.{slug}.yml`（#2916），拿整個 stem 會冒出
+    # `key_reading.m7qxv` 這種不存在的模組名，跟 dispatch 永遠對不上
+    produced = sorted(
+        {p.stem.partition(".")[0] for p in version_dir.glob("*.yml")}
+        - not_sections - {"_manifest"}
+    )
     dispatched = sorted({s["module"] for s in sections if s["module"]})
     absent = sorted(gaps.get(uid, set()))
 

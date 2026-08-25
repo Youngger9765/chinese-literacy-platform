@@ -1,0 +1,58 @@
+lesson_uid: L0123
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 雕鏤
+  - 通貨膨脹
+  - 老態龍鍾
+  - 泫然欲泣
+  - 貧無立錐
+  - 鏽跡斑斑
+  - 走投無路
+  - 素昧平生
+  - 臨終
+  - 經濟蕭條
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 雕鏤
+    definition: 很細緻的刻畫、雕刻，本課用來描述老人臉上深刻的皺紋。雕鏤也常用來形容文字描寫細膩。
+  - index: 2
+    word: 老態龍鍾
+    definition: 形容一個人年紀大、身體衰弱、動作很慢。
+  - index: 3
+    word: 走投無路
+    definition: 遇到困難時完全找不到辦法，也沒有人可求助，好像被逼到角落，沒有出路。
+  - index: 4
+    word: 泫然欲泣
+    definition: 眼眶泛淚、就快哭出來了。
+  - index: 5
+    word: 通貨膨脹
+    definition: 物價普遍上漲，使貨幣購買力下降。本文指物價在短時間內急速上漲，錢很快變得不值錢。
+  - index: 6
+    word: 鏽跡斑斑
+    definition: 形容金屬製品到處都有生鏽的痕跡，看起來又舊又粗糙。
+  - index: 7
+    word: 貧無立錐
+    definition: 立錐：立起一支錐子（尖尖的工具）需要一小塊空地；「無立錐」就是連能立一支錐子的地方都沒有。指非常窮，窮到幾乎一無所有。
+  - index: 8
+    word: 素昧平生
+    definition: 兩個人從來沒見過面，也不認識。
+  - index: 9
+    word: 經濟蕭條
+    definition: 景氣很差，生意不好、工作機會變少。
+  - index: 10
+    word: 臨終
+    definition: 一個人快要過世的時候。
+  notes:
+    answer_carrier: 橘色手寫（C:E97132，教師版答案），文字流有此資訊
+  slug: vwfym
+  text_ref: yvden

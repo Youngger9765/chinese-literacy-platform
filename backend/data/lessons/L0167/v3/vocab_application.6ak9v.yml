@@ -1,0 +1,45 @@
+lesson_uid: L0167
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 不是滋味
+    B: 不動聲色
+    C: 害群之馬
+    D: 似曾相識
+    E: 平分秋色
+    F: 小劇場
+    G: 較勁
+    H: 左右
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 那位朝我微笑的女子感覺(　)，卻怎麼也想不起她是誰。
+    answer: D
+  - index: 2
+    stem: 他看到教練臉色嚴肅，心中就開始上演 (　)，以為自己犯了錯。
+    answer: F
+  - index: 3
+    stem: 兩位同學在數學上總是暗中(　)，每次考試都想分個勝負。
+    answer: G
+  - index: 4
+    stem: 這場籃球比賽打得非常激烈，兩隊實力(　)，雙方互不相讓。
+    answer: E
+  - index: 5
+    stem: 為了避免自己成為(　)，妮妮投注了許多心力和時間準備表演。
+    answer: C
+  - index: 6
+    stem: 他看到好友和別人走得很近，臉上裝作若無其事，心裡卻(　)。
+    answer: A
+  - index: 7
+    stem: 他缺乏信心與主見，因此想法常常被身邊的人(　)，一遇到不同意見就立刻改變主張。
+    answer: H
+  - index: 8
+    stem: 面對網路眾多的謠言與批評，他能夠(　)沉住氣，真是不容易。
+    answer: B
+  notes:
+    option_bank: 八個代號取自九個語詞，「心理素質」沒有列入選項（第八大題找字框也沒有它）
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af0，run 層沒有 w:color**
+  slug: 6ak9v
+  text_ref: 9jcxw

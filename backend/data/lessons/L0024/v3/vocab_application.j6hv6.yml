@@ -1,0 +1,43 @@
+lesson_uid: L0024
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 鴻溝
+    B: 激勵
+    C: 懈怠
+    D: 引退
+    E: 直言
+    F: 技不如人
+    G: 自立自強
+    H: 寄予厚望
+  items:
+  - index: 1
+    stem: 這位球員在受傷後決定（　），轉為擔任教練。
+    answer: D
+  - index: 2
+    stem: 隨著時代變遷，親子之間想法的（　）似乎越來越深。
+    answer: A
+  - index: 3
+    stem: 他一向以敢於（　）聞名，時常提出關鍵的建議。
+    answer: E
+  - index: 4
+    stem: 這場演講內容充實、情感真誠，深深（　）在場所有聽眾。
+    answer: B
+  - index: 5
+    stem: 國家隊的教練對新加入的選手（　），希望他能奪冠。
+    answer: H
+  - index: 6
+    stem: 她在沒有幫手的情況下，靠著（　）精神，創造不凡成績。
+    answer: G
+  - index: 7
+    stem: 面對世界級選手，我們只能承認（　），並設法迎頭趕上。
+    answer: F
+  - index: 8
+    stem: 訓練時，即使沒人監督，他仍毫不（　），完成每一項練習。
+    answer: C
+  notes:
+    option_bank: 只列 8 個代號（本課 12 個語詞中的「盛夏」「力邀」「菜單」「晉升」未入選項），對應 8 道小題
+  slug: j6hv6
+  text_ref: eak94

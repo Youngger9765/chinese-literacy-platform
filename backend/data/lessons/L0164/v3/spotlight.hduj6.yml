@@ -1,0 +1,75 @@
+lesson_uid: L0164
+version_id: v3
+section_no: 四
+spotlight:
+  strategy_name: 認識文言文—一字多義：聞
+  strategy_type: classical_polysemy
+  answer_carrier: 橘色代號（8 題全部是；run 層與字元樣式混用），PDF p7 可見。本課無 ☑
+  blocks:
+  - type: guide
+    text: 在〈愛讀書的顧寧人〉一課，我們知道文言文有「一字多義」的特性，今天，我們要繼續學習這個策略，練習其他的「多義」字哦！
+  - type: table
+    label: 多義字對照表
+    columns:
+    - 多義字
+    - 讀 音
+    - 意 思
+    - 例 句
+    - 例句解釋
+    rows:
+    - - 聞
+      - ㄨㄣˊ
+      - Ａ.聽到、聽說
+      - 予聞之也久
+      - 我聽說他的事很久了
+    - - ''
+      - ''
+      - Ｂ.有名、著稱
+      - 吾愛孟夫子，風流天下聞
+      - 我喜愛孟先生，他的瀟灑天下有名
+    - - ''
+      - ''
+      - Ｃ.聽見的事情、消息
+      - 不能稱前時之聞
+      - 不能符合先前的傳聞
+    rows_note: '「多義字」與「讀 音」兩欄是 vmerge 縱跨三列（只印一次），此處後兩列留空字串表示合併。
+
+      欄名的「讀 音」「意 思」「例 句」中間有空格，原稿如此。'
+  - type: guide
+    text: 換你試試看！下面的每個句子都有「聞」，請利用上表查找合適的意思，再將代號填入(  )中。
+  - type: exercise
+    option_bank:
+      A: 聽到、聽說
+      B: 有名、著稱
+      C: 聽見的事情、消息
+    option_bank_note: 代號取自上方對照表的「意 思」欄（原稿用全形Ａ/Ｂ/Ｃ標示）。
+    answer_carrier: 橘色代號，PDF p7 可見
+    items:
+    - index: 1
+      stem: 1.百「聞」不如一見
+      answer: A
+    - index: 2
+      stem: 2.孤陋寡「聞」
+      answer: C
+    - index: 3
+      stem: 3.不「聞」機杼聲，惟「聞」女歎息
+      answer: A
+    - index: 4
+      stem: 4.舜年二十以孝「聞」
+      answer: B
+    - index: 5
+      stem: 5.博學多「聞」
+      answer: C
+    - index: 6
+      stem: 6.名「聞」遐邇
+      answer: B
+    - index: 7
+      stem: 7.心不在焉，視而不見，聽而不「聞」
+      answer: A
+    - index: 8
+      stem: 8.「聞」雞起舞
+      answer: A
+    items_note: '⚠️ 教師版填的代號**全形半形混用**：第 2、4、6 題是全形Ｃ／Ｂ／Ｂ，
+
+      第 1、3、5、7、8 題是半形 A／A／C／A／A。此處一律正規化成半形記錄。'
+  slug: hduj6

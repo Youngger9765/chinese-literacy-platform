@@ -154,6 +154,8 @@ jobs:
             tests/test_comprehension_carrier_shape_2843.py \
             tests/test_vocab_definitions_shape_2843.py \
             tests/test_module_reaches_the_student_2843.py \
+            tests/test_part_ids_2916.py \
+            tests/test_repeat_rounds_2916.py \
             tests/test_section_pages_2857.py \
             tests/test_section_locator_2857.py \
             tests/test_pdf_manifest_gate_2857.py \

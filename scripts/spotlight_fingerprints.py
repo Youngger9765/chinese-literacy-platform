@@ -45,6 +45,25 @@ LESSONS_ROOT = REPO_ROOT / "backend" / "data" / "lessons"
 FINGERPRINTS = REPO_ROOT / "backend" / "data" / "spotlight_fingerprints.json"
 
 
+def _spotlight_files(vdir) -> list:
+    """這個版本目錄裡的聚光燈，照帳本順序（#2916）。
+
+    檔名帶各自的 slug，所以字母序是隨機的；帳本 `_manifest.yml` 才有真正的順序。
+    沒有帳本時退回檔名序 —— 那時只有一份，順序沒有意義。
+    """
+    import yaml
+
+    files = sorted(vdir.glob("spotlight.*.yml"))
+    if len(files) < 2:
+        return files
+    man = vdir / "_manifest.yml"
+    if not man.is_file():
+        return files
+    doc = yaml.safe_load(man.read_text(encoding="utf-8")) or {}
+    order = [s.get("file") for s in (doc.get("sections") or []) if s.get("module") == "spotlight"]
+    return sorted(files, key=lambda f: order.index(f.name) if f.name in order else 10 ** 6)
+
+
 def _current() -> dict[str, dict]:
     """Fingerprint every lesson that has a spotlight, keyed by uid.
 
@@ -64,20 +83,39 @@ def _current() -> dict[str, dict]:
     for uid_dir in sorted(p for p in LESSONS_ROOT.iterdir() if _is_uid_dir(p)):
         uid = uid_dir.name
         vdir = _latest_version(uid_dir)
-        path = (vdir / "spotlight.yml") if vdir else None
-        if path is None or not path.is_file():
+        # 檔名現在是 `spotlight.{自己的 slug}.yml`（#2916），而且一課可能有好幾份 ——
+        # 一份學習單印了兩篇課文時，每篇各有自己的聚光燈（L0111 就是）。
+        # 順序照帳本，不照檔名字母序：檔名是不透明 id，字母序沒有意義。
+        paths = _spotlight_files(vdir) if vdir else []
+        if not paths:
             # Absent in the served version is itself a state worth recording: it is how
             # those seven lessons look to a student, and a lesson that starts or stops
             # having a spotlight is movement this ratchet must report.
             out[uid] = None
             continue
-        doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        spotlight = doc.get("spotlight") or {}
+        # 一課好幾份時（多篇課每篇一份，#2916），把 blocks 照帳本順序串成一條，
+        # 指紋仍然是**一個 dict**。
+        #
+        # 一開始寫成清單，形狀誠實但破壞了「每課一個 dict」的契約 ——
+        # `curriculum_qa_spotlight._entry` 立刻 `TypeError: unhashable type: dict`。
+        # 那個崩潰發生在「偵測到有東西動了」之後的報告階段，看起來像工具壞掉、
+        # 不像內容變了。契約不該為了一課的新形狀而改，串起來一樣抓得到變動：
+        # 任何一篇的 block 增減或改順序都會讓串起來的序列不同。
+        blocks = []
+        strategy = None
+        for path in paths:
+            doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            spotlight = doc.get("spotlight") or {}
+            blocks.extend(spotlight.get("blocks") or [])
+            strategy = strategy or spotlight.get("strategy_type")
         # A lesson whose extraction failed is stored as {lesson, error} and has no
         # blocks. Recorded with a null fingerprint rather than skipped: going from
         # failed to extracted, or back, is exactly the kind of movement worth catching,
         # and skipping would make a lesson that stopped extracting look untouched.
-        out[uid] = fingerprint_spotlight(spotlight) if spotlight.get("blocks") else None
+        out[uid] = (
+            fingerprint_spotlight({"strategy_type": strategy, "blocks": blocks})
+            if blocks else None
+        )
     return out
 
 
@@ -115,6 +153,18 @@ def check() -> int:
         if a is None or b is None:
             print(f"  {uid}: {'lost its spotlight' if b is None else 'gained a spotlight'}",
                   file=sys.stderr)
+            continue
+        # 多篇課的指紋是一份清單（一篇一個，#2916）。逐欄比對只對單份成立 ——
+        # 之前這裡直接 `set(a) | set(b)`，遇到清單會 TypeError 掛掉，
+        # 而那是這道門「發現有東西動了」之後才走的路：門會在報告階段死掉，
+        # 看起來像工具壞了而不是內容變了。
+        if isinstance(a, list) or isinstance(b, list):
+            na = len(a) if isinstance(a, list) else (0 if a is None else 1)
+            nb = len(b) if isinstance(b, list) else (0 if b is None else 1)
+            if na != nb:
+                print(f"  {uid}: 聚光燈份數 {na} → {nb}（多篇課每篇一份）", file=sys.stderr)
+            else:
+                print(f"  {uid}: {nb} 份聚光燈，內容有變", file=sys.stderr)
             continue
         diff = {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
         # type_sequence is long and its own summary; block_count already says it moved.

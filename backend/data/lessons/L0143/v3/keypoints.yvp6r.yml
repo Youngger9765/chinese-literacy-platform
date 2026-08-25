@@ -1,0 +1,37 @@
+lesson_uid: L0143
+version_id: v3
+section_no: 五
+keypoints:
+  title: 高地訓練有助於運動表現嗎？
+  layout: list
+  answer_carrier: 橘色手寫（在文字層），PDF p6 可見
+  rows:
+  - label: 探究問題
+    value: 高地訓練有助於運動表現嗎？
+  - label: 答案
+    value: 不一定，因人而異。
+  - label: 支持證據
+    items:
+    - label: 研究一
+      value: 在高地，紅血球生成素的濃度變化【　】。
+      blanks:
+      - answer: 因人而異
+    - label: 研究二
+      value: '(1)重複研究一的結論，高地訓練對紅血球增生效果因人而異
+
+        (2)高地訓練後，紅血球增加者5000公尺成績【　】；紅血球未增加者成績反而略為【　】。'
+      blanks:
+      - answer: 進步
+      - answer: 退步
+    - label: 研究三
+      value: 玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生【　】，對運動員來說【　】是好事。
+      blanks:
+      - answer: 血栓
+      - answer: 未必/不一定/不見得
+      blanks_note: 第二個空格的教師版答案印的是三個並列的可接受寫法（未必/不一定/不見得），照原樣收
+  - label: 研究結論
+    value: 高地訓練需要考量【　】，才可能得到最好成效。
+    blanks:
+    - answer: 個別差異
+  slug: yvp6r
+  text_ref: 6mpre

@@ -1,0 +1,38 @@
+lesson_uid: L0055
+version_id: v3
+section_no: 五
+keypoints:
+  title: 愛冒險逞強的雄性動物
+  layout: list
+  answer_carrier: 橘色手寫字（圖形字型），文字流的【　】內已填有答案
+  rows:
+  - label: 提出問題
+    value: "男生出意外的機會遠高於女生，科學研究指出，可能原因有兩個：1.男生較愛【　】\n        2.男生較喜歡在別人面前【　】。"
+    blanks:
+    - answer: 冒險
+    - answer: 逞強
+  - label: 愛冒險的男生與公猴
+    instruction: ※請勾選出正確答案(單選)
+    instruction_note: '原稿印著這句，但這一列**沒有任何選項可勾**，三處都是填空。判為套版殘留的
+
+      指示語，照原樣保留，不改成填空指示（改了就是我在潤稿）。'
+    items:
+    - label: '1'
+      value: 社會案例：跑酷短片中的跑酷者幾乎清一色是【　】。他們做出各種高難度動作，也可能因此受傷。
+      blanks:
+      - answer: 男生
+    - label: '2'
+      value: '動物行為研究：
+
+        日本短尾猴的【　】比母猴更常做出冒險行為，也較容易因危險行為而【　】。'
+      blanks:
+      - answer: 公猴
+      - answer: 死亡
+  - label: 愛逞強的男生
+    value: 心理學套圈圈實驗：男生有人旁觀時，會站得更遠，顯示出男生比女生更愛【　】。
+    blanks:
+    - answer: 逞強
+  - label: 影片案例
+    value: 《山道猴子的一生》描述一群年輕人借高利貸買車、改車，主角最後在山路飆速時命喪輪底，呈現冒險與逞強可能帶來的嚴重後果。
+  slug: 3dv69
+  text_ref: 9pfan

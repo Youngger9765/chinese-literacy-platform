@@ -1,0 +1,45 @@
+lesson_uid: L0093
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 令人髮指
+    B: 孤苦伶仃
+    C: 逕自
+    D: 移駕
+    E: 環顧
+    F: 赫然
+    G: 惺忪
+    H: 兵貴神速
+    I: 目睹
+  items:
+  - index: 1
+    stem: 她睡眼（　）的走到廚房倒水喝，沒發現屋裡進來了不速之客。
+    answer: G
+  - index: 2
+    stem: 二十年前的那場車禍，他失去所有的家人，只能(　)的長大。
+    answer: B
+  - index: 3
+    stem: 他原以為自己被淘汰，沒想到名單公布時，(　)發現自己的名字在選手名單中，不禁欣喜若狂。
+    answer: F
+  - index: 4
+    stem: 主持人說：「典禮即將開始，請貴賓(　)到十樓特賣現場搶購，再次感謝您的光臨！」
+    answer: D
+  - index: 5
+    stem: 他不理會旁人的勸告，(　)跨過禁止線拍照，最終發生意外。
+    answer: C
+  - index: 6
+    stem: 他(　)球場，赫然發現觀眾席上全是對手的粉絲，心涼了一半。
+    answer: E
+  - index: 7
+    stem: 這個獨居的男人，只因為夜裡貓叫擾人，居然拿了毒藥毒殺街頭的流浪貓，行徑(　)。
+    answer: A
+  - index: 8
+    stem: (　)，我們要乘勝追擊，不給敵人喘息的機會。
+    answer: H
+  notes:
+    option_bank: 只有 A~I 九個代號（沒有 J），代號表第 10 格是空的；9 個代號對應 8 道小題，I.目睹 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的（　）內已填有同樣的代號
+  slug: tkv4p
+  text_ref: ch7x6

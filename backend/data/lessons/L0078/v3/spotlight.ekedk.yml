@@ -1,0 +1,246 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 媒體素養與識讀——認識誘餌式新聞標題
+  strategy_type: media_literacy
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層但非 ☑ 字元），PDF p5~p9 可見
+  structure_note: '⛔ 三張表格刻意留在 blocks 最上層、沒有塞進 sub_block ——
+
+    `BlockSequenceRenderer` 的 `renderSubBlock` 不依 type 分派，巢狀的 table
+
+    只會畫出 instruction，`columns`/`rows` 整片消失而且不報錯。
+
+    層級關係改用 guide 標題（一~六 與 ❶❷❸）表達。'
+  blocks:
+  - type: concept_box
+    text: '誘餌式標題充斥在我們的生活中，但我們可以用三個步驟判斷，到底所讀的報導是不是誘餌式標題：
+
+      ❶看標題：標題用什麼方式吸引我？它用了引發好奇、誇張等方式嗎？
+
+      ❷對內容：標題和內容是否一致？有沒有省略、放大或扭曲？
+
+      ❸下判斷：這是準確標題、吸睛但不誤導？還是誘餌式標題？
+
+      底下的學習任務將讓你有多次練習這三個判斷步驟的機會！'
+  - type: guide
+    text: 一、跟著做：判讀「雷雨炸全臺」
+  - type: passage
+    paragraphs:
+    - 新聞標題：「雷雨炸全臺！氣象署急發快訊」
+    - 新聞內容：氣象署例行發布天氣預報，提醒下週部分地區可能出現雷擊與瞬間大雨。
+  - type: guide
+    text: ❶看標題：
+  - type: multi
+    prompt: 它用了哪些語詞吸引讀者？（可複選）
+    options:
+      1: 雷雨炸全臺
+      2: 下週
+      3: 氣象署
+      4: 「急發快訊」
+    answers:
+    - 1
+    - 4
+  - type: guide
+    text: →是的，「炸全臺」會讓人感到災情嚴重；「急發」則製造緊急感。
+  - type: concept_box
+    text: ※小提醒：看到誇張、模糊或引發強烈情緒的語句時，應該提高警覺，但還不能立刻判定它是誘餌式標題，要繼續核對內容。
+  - type: guide
+    text: ❷對內容：
+  - type: table
+    prompt: 標題和內容有什麼落差？請看底下表格的分析：
+    columns:
+    - 標題寫法
+    - 實際內容
+    rows:
+    - - 雷雨炸全臺
+      - 部分地區可能出現雷擊與瞬間大雨
+    - - 急發快訊
+      - 氣象署例行發布天氣預報
+    rows_note: PDF 上「炸全臺」「部分地區」「急發」「例行發布」四處加了黑框強調，文字層沒有樣式資訊。
+  - type: multi
+    prompt: 請問這個標題用了哪兩種誤導方式？（複選）
+    options:
+      1: 把「局部」放大成「全部」
+      2: 把已經發生的事說成尚未發生
+      3: 完全沒有提到新聞的主題
+      4: 把「例行發布」說成「緊急發布」。
+    answers:
+    - 1
+    - 4
+  - type: guide
+    text: ❸下判斷：
+  - type: single
+    prompt: 這個標題最適合判斷為：
+    options:
+      1: 準確標題：完整呈現內容。
+      2: 吸睛標題：寫法較有趣，但沒有造成明顯誤解。
+      3: 誘餌式標題：放大或扭曲內容，容易使讀者產生錯誤理解。
+    answer: 3
+  - type: guide
+    text: 二、再練一次：判讀「明星慘遭爆打」
+  - type: passage
+    paragraphs:
+    - 新聞標題：「某明星慘遭爆打，死前驚吐一句話！」
+    - 新聞內容：報導介紹這位明星即將上映的新戲。劇中角色遭人毆打，臨死前說出一句重要臺詞。
+  - type: guide
+    text: ❶看標題：
+  - type: multi
+    prompt: 這個標題用了哪些方式吸引讀者？（可複選）
+    options:
+      1: 使用「死前驚吐一句話」引發好奇
+      2: 完整說明這是戲劇情節
+      3: 清楚交代事件發生的時間地點
+      4: 使用「慘遭爆打」等強烈字眼
+    answers:
+    - 1
+    - 4
+  - type: guide
+    text: ❷對內容：
+  - type: single
+    prompt: 1.標題省略了哪一項最重要的資訊？
+    options:
+      1: 明星的年齡
+      2: 這是新戲中的情節
+      3: 電影上映的日期
+      4: 明星在劇中的名字
+    answer: 2
+  - type: single
+    prompt: 2.省略這項資訊後，讀者可能產生什麼誤會？
+    options:
+      1: 以為明星不再演戲
+      2: 以為明星在現實生活中遭到攻擊或死亡
+      3: 以為電影已經下檔
+      4: 以為明星拒絕接受訪問
+    answer: 2
+  - type: guide
+    text: ❸下判斷：
+  - type: single
+    prompt: 1.這個標題最適合判斷為：
+    options:
+      1: 準確標題
+      2: 吸睛但未造成誤解
+      3: 誘餌式標題
+    answer: 3
+  - type: free_text
+    prompt: 2.我這樣判斷
+    answer: 標題刻意省略「戲中角色」這項重要資訊，使讀者誤以為是真實事件，因此屬於誘餌式標題。
+    answer_carrier: 原稿已印出參考答案（黑字，非學生手寫）
+  - type: guide
+    text: 三、你發現了嗎？誘餌式標題常用的三種方法
+  - type: table
+    columns:
+    - 誤導方式
+    - 意思
+    - 例子
+    rows:
+    - - ❶放大
+      - 把局部、少數或可能發生，寫成全部、普遍或一定發生
+      - 把「部分地區有雨」寫成「雷雨炸全臺」
+    - - ❷省略
+      - 故意不說重要背景，引起好奇或誤解
+      - 不說明「明星被打」是戲劇情節
+    - - ❸扭曲
+      - 改變原本的程度、原因或關係
+      - 把「例行預報」寫成「急發快訊」
+  - type: guide
+    text: '提醒：看到下列誇張的語詞，可以先提高警覺：
+
+      沒想到、震驚、慘遭、恐怖、千萬不要、所有人、一定'
+  - type: guide
+    text: 四、分一分：三種標題不一樣
+  - type: guide
+    text: 閱讀下列標題與內容摘要，判斷標題屬於哪一類。
+  - type: guide
+    text: 第1則
+  - type: passage
+    paragraphs:
+    - 標題：「登革熱旺季，衛福部提醒：檢查並清除家中積水」
+    - 內容摘要：衛福部提醒民眾定期檢查住家環境，清除容易孳生病媒蚊的積水容器。
+  - type: single
+    prompt: 我的判斷：
+    options:
+      1: 準確標題
+      2: 吸睛但不誤導
+      3: 誘餌式標題
+    answer: 1
+  - type: guide
+    text: 第2則
+  - type: passage
+    paragraphs:
+    - 標題：「每天喝這種飲料，國中生成績竟然一路下滑！」
+    - 內容摘要：一項調查發現，睡眠不足和學習表現可能有關；部分睡眠不足的學生也常喝含糖飲料，但研究沒有證明飲料會直接造成成績下降。
+  - type: single
+    prompt: 1.我的判斷：
+    options:
+      1: 準確標題
+      2: 吸睛但不誤導
+      3: 誘餌式標題
+    answer: 3
+  - type: multi
+    prompt: 2.標題有什麼問題？（可複選）
+    options:
+      1: 把同時出現的兩件事，寫成直接的因果關係。
+      2: 把「可能有關」寫得像「一定造成」。
+      3: 沒有提到國中生。
+      4: 沒有使用驚嘆號。
+    answers:
+    - 1
+    - 2
+  - type: guide
+    text: 五、小試身手：換你自己判斷
+  - type: passage
+    paragraphs:
+    - 新聞標題：「去健身房千萬不要這樣做，95%的人都不知道！」
+    - 內容摘要：文章提醒初次使用跑步機的人，應先了解操作方式，並依自己的體能調整速度。文中沒有提供「95%」的調查來源。
+  - type: multi
+    prompt: ❶看標題：標題使用了哪些吸引方式？（可複選）
+    options:
+      1: 「千萬不要」製造危險感
+      2: 用「這樣做」隱藏重要資訊。
+      3: 使用「95%」增加可信感。
+      4: 清楚說明是哪一個健身動作。
+    answers:
+    - 1
+    - 2
+    - 3
+  - type: multi
+    prompt: ❷對內容：標題和內容有哪些落差？（可複選）
+    options:
+      1: 標題暗示有嚴重危險，內容只是一般安全提醒。
+      2: 標題使用「95%」，內容卻沒有提供調查來源。
+      3: 標題說的是健身房，內容卻在介紹游泳池。
+      4: 標題提到操作跑步機，內容也完整說明。
+    answers:
+    - 1
+    - 2
+  - type: single
+    prompt: ❸下判斷：這個標題最適合判斷為?
+    options:
+      1: 準確標題
+      2: 吸睛但不誤導
+      3: 誘餌式標題
+    answer: 3
+  - type: guide
+    text: 六、幫新聞換一個好標題
+  - type: passage
+    paragraphs:
+    - 誘餌式標題：「去健身房千萬不要這樣做，95%的人都不知道！」
+  - type: single
+    prompt: 哪一個修改後的標題比較完整、準確？
+    options:
+      1: 震驚！跑步機竟藏著可怕危機
+      2: 初次使用跑步機，先了解操作方式與安全速度
+      3: 跑步機千萬別亂碰，否則後果不堪設想
+    answer: 2
+  - type: guide
+    text: '※好標題的三個原則
+
+      ❶說清楚主題。
+
+      ❷符合文章內容。
+
+      ❸不故意誇大或製造誤解。'
+  slug: ekedk
+  text_ref: 3ynpe

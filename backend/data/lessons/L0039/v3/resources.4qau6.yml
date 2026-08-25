@@ -1,0 +1,26 @@
+lesson_uid: L0039
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 績優運動選手就業輔導"上路 培育優秀人才 2020-10-12
+    duration: '4:09'
+    duration_seconds: 249
+    source: IPCF-TITV 原文會 原視新聞
+  - index: 2
+    title: 運動員退役後殘酷真相 ！「兩大關鍵」贏回人生下半場
+    duration: '5:37'
+    duration_seconds: 337
+    source: 拜倫
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/09VtaEhBjok
+    url_source: 總表0816「4.影片連結」年級5課次27
+  - index: 2
+    url: http://youtu.be/lIPsXEbw0FQ
+    url_source: 總表0816「4.影片連結」年級5課次27
+  slug: 4qau6
+  text_ref: phhwe

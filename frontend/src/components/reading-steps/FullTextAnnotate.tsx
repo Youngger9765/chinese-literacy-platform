@@ -7,6 +7,8 @@ import React, {
   useReducer,
 } from 'react';
 import { Story } from '../../types';
+import { sectionSlugForStep } from '../../config/roundScope';
+import { moduleForStep } from '../../config/stepConfig';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { loadAnnotations, saveAnnotations } from '../../services/learning/annotationApi';
@@ -73,6 +75,15 @@ function genId(): string {
 // ── Props ──────────────────────────────────────────────────────────────────
 
 interface ReadingAnnotationProps {
+  /**
+   * 這一節**自己的**代號，QR 印它（#2916）。
+   *
+   * ⛔ 由頁面傳進來，不在這裡呼叫 `useLocation` —— 葉元件不該知道路由。
+   *    一度改成在這裡叫 hook，結果 31 條既有測試（直接 render 不包 Router）
+   *    全數炸掉，而那不是測試的問題，是把 routing 依賴放錯了層。
+   *    沒傳就退回長網址：能掃的 QR 勝過沒有 QR。
+   */
+  sectionSlug?: string | null;
   story: Story;
   /**
    * Which QR code this page should offer, when the caller knows better than
@@ -397,6 +408,7 @@ function ReadingRelaySection({ items, title }: { items: NonNullable<Story['keypo
 // ── Main Component ─────────────────────────────────────────────────────────
 
 const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
+  sectionSlug: qrSectionSlug,
   story,
   onFinish,
   fontSizePx = 22,
@@ -404,6 +416,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   hideAnnotation = false,
   qrStep,
 }) => {
+  // QR 實際要指的那一步（訪客頁可以用 `qrStep` 覆寫），再回帳本查它自己的代號。
+  //
+  // ⚠️ 不能只用「當前步驟」的代號：訪客頁可能停在讀全文卻要給重點的碼。
+  // 單篇課帳本只有一列 → 推導得到；多篇課有好幾列 → `sectionSlugForStep` 回 null，
+  // 這時才用 `?p=` 從網址傳進來的那個（它才知道是哪一篇）。
+  const qrEffectiveStep =
+    qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep;
+  const qrCode =
+    (qrEffectiveStep
+      ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
+      : null) ?? qrSectionSlug ?? null;
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
 
@@ -869,6 +892,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 lessonId={story.id}
                 step={(qrStep ?? 'full-text-annotate') as LessonQrStep}
                 lessonTitle={story.title}
+              sectionSlug={qrCode}
               />
             )}
           </div>

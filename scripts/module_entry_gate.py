@@ -175,7 +175,9 @@ def main() -> int:
             # 少了這行的後果實測過：對帳門與這道門先後把 174 課全判紅。
             if f.stem.startswith("_"):
                 continue
-            present[f.stem] += 1
+            # `{module}.{slug}.yml` 收斂回模組名（#2916）——否則重複模組會被
+            # 當成「語料裡有、前端沒入口」的新模組，整課誤判成學生走不到
+            present[f.stem.partition(".")[0]] += 1
     if len(present) < 5:
         raise SystemExit(f"⛔ 只掃到 {len(present)} 種模組，明顯太少 —— 沒掃到語料")
 
@@ -189,7 +191,7 @@ def main() -> int:
     no_entry_lessons = len({
         d.name for d in LESSONS.iterdir()
         if d.is_dir() and d.name.startswith("L") and (d / "v3").is_dir()
-        and {f.stem for f in (d / "v3").glob("*.yml")} & no_entry_mods
+        and {f.stem.partition(".")[0] for f in (d / "v3").glob("*.yml")} & no_entry_mods
     })
 
     print(f"  語料裡的模組：{len(present)} 種 / 前端啟用的 step：{len(steps)} 個")

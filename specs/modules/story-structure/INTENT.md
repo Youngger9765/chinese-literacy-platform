@@ -15,7 +15,7 @@ owns_code:
   - scripts/keypoints_manifest_verify.py
   - backend/app/services/keypoints_to_structure.py
 owns_data:
-  - backend/data/lessons/*/v3/keypoints.yml
+  - backend/data/lessons/*/v3/keypoints.*.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
   - backend/data/curriculum_qa/snapshots/**/*
 spec_tests:

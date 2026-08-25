@@ -1,0 +1,42 @@
+lesson_uid: L0017
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 茫然
+    B: 目光
+    C: 片段
+    D: 腦海
+    E: 不經意
+    F: 不自覺
+    G: 結結巴巴
+    H: 心跳漏了一拍
+    I: 瞬間
+  items:
+  - index: 1
+    stem: 多年後，她贏得冠軍的燦爛笑容仍然在我（　）揮之不去。
+    answer: D
+  - index: 2
+    stem: 迷路的他，站在人來人往的車站中，頓時感到一陣（　）。
+    answer: A
+  - index: 3
+    stem: 他努力想解開和朋友的誤會，但卻緊張的（　）說不清楚。
+    answer: G
+  - index: 4
+    stem: 這部電影的某些（　）並不適合年幼的兒童觀賞。
+    answer: C
+  - index: 5
+    stem: 他開了一個誇張的玩笑，所有人的（　）都集中在他身上。
+    answer: B
+  - index: 6
+    stem: 集訓結束後，老師（　）的一句肯定和鼓勵，讓我開心了一整個暑假。
+    answer: E
+  - index: 7
+    stem: 當他突然接到爸爸出車禍的壞消息時，表情（　）轉為沉重。
+    answer: I
+  - index: 8
+    stem: 聽到「立正！」時，他（　）挺直了腰桿，顯得很有精神。
+    answer: F
+  slug: 6pkat
+  text_ref: qeqwt

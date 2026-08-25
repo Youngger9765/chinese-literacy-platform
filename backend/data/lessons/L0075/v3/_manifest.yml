@@ -5,18 +5,26 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: tvf6u
+  file: full_text_annotate.tvf6u.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 知識補給站
   module: resources
+  text_ref: tvf6u
+  slug: amxfk
+  file: resources.amxfk.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 念順順
   module: key_reading
+  text_ref: tvf6u
+  slug: 4jkpq
+  file: key_reading.4jkpq.yml
   pages:
   - 3
   - 4
@@ -24,6 +32,9 @@ sections:
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: tvf6u
+  slug: jnemx
+  file: vocab_definitions.jnemx.yml
   pages:
   - 3
   - 4
@@ -32,12 +43,18 @@ sections:
 - 'no': 五
   name: 語詞應用
   module: vocab_application
+  text_ref: tvf6u
+  slug: kqu6u
+  file: vocab_application.kqu6u.yml
   pages:
   - 5
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略—問題—解決—結果找重點
+  text_ref: tvf6u
+  slug: xprv7
+  file: spotlight.xprv7.yml
   pages:
   - 5
   - 6
@@ -46,12 +63,18 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: tvf6u
+  slug: d7vhw
+  file: comprehension.d7vhw.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: tvf6u
+  slug: q767k
+  file: vocab_review.q767k.yml
   pages:
   - 9
 dispatch:

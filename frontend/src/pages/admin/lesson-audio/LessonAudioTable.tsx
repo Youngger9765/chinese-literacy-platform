@@ -11,6 +11,7 @@ import { planParagraphWalk, type ParagraphWalk } from './paragraphWalk';
 import LessonQrButton from '../../../components/qr/LessonQrButton';
 import {
   buildLessonQrValue,
+  QR_ENTRY_ORIGIN,
   deliversFullText,
   qrCodeToDataUrl,
   qrFileName,
@@ -38,11 +39,25 @@ type AudioMode = 'full' | 'key';
 interface StoryListItem {
   id: number;
   lesson_number: number;
+  lesson_seq?: number;
+  lesson_no?: number;
   title: string;
   grade: number;
   grade_code: string;
   char_count: number;
   has_key_reading: boolean;
+  /** 一課多篇時每一篇一筆（#2916）；單篇課是 null/undefined。 */
+  part_rounds?: Array<{
+    /** 這一篇課文的代號（歸戶用）。 */
+    slug: string;
+    part: number | null;
+    has_full: boolean;
+    has_key: boolean;
+    /** 讀全文那一節自己的代號 —— QR 印它。 */
+    full_slug?: string | null;
+    /** 念順順那一節自己的代號 —— QR 印它。跟上面不同號。 */
+    key_slug?: string | null;
+  }> | null;
 }
 
 interface StoryListResponse {
@@ -69,7 +84,12 @@ function getAuthHeaders(token: string | null | undefined): Record<string, string
 }
 
 function lessonTitle(story: StoryListItem): string {
-  return `L${String(story.lesson_number).padStart(2, '0')}`;
+  // ⛔ 不要用 `lesson_number` —— 那是**抽取流水號**（20001–20175），
+  //    印出來是「L20001」，跟老師手上紙本的「四年級 第1課」對不起來，
+  //    而教材端就是拿這張表產 QR 清單的（2026-08-25 owner 指出）。
+  //    `grade_code`（G4-L1 / G5-L17 / G6-L22）才是課本課號，
+  //    也跟原稿檔名（G5-L17-18.docx）同一套。
+  return story.grade_code || `L${String(story.lesson_number).padStart(2, '0')}`;
 }
 
 export type PlaybackState = 'idle' | 'working' | 'playing';
@@ -175,21 +195,30 @@ export interface QrManifestRow {
  * belong on the same line.
  */
 export function buildQrManifestRows(stories: StoryListItem[], origin: string): QrManifestRow[] {
-  return stories.map((s) => ({
-    lesson_no: lessonTitle(s),
+  // 一課多篇時展開成**一篇一列**（#2916）。教材端要貼的是「這一篇的 QR」，
+  // 一課一列就只能給整課的碼 —— G6-L22 有三篇，一列給不出六個碼。
+  return stories.flatMap((s) => {
+    const rounds = s.part_rounds && s.part_rounds.length > 0 ? s.part_rounds : [null];
+    return rounds.map((r) => ({
+    lesson_no: lessonTitle(s) + (r?.part ? `（篇${r.part}）` : ''),
     title: s.title,
     grade: s.grade,
     // Blank rather than a URL: the batch produces no whole-text clip for
     // grades 8-9, so handing the 教材端 a code for it would point at silence.
-    full_url: deliversFullText(s.grade) ? buildLessonQrValue(origin, s.id, 'full-text-annotate') : '',
+    full_url: deliversFullText(s.grade) && (r ? r.has_full : true)
+      // 印**讀全文那一節自己的**代號。用 `r.slug`（課文的）的話，
+      // 三篇的念順順會跟讀全文共用同一個碼 —— 掃得開、頁面打得開、指錯地方。
+      ? buildLessonQrValue(origin, s.id, 'full-text-annotate', r?.full_slug ?? r?.slug) : '',
     // Same rule on the passage side: build_demo_reading.plan_demo_audio only
     // produces demo-reading/{id}/passage.mp3 when the lesson has a 念順順段
     // (has_key_reading). Emitting a code for a lesson without one — as this
     // did unconditionally before — is the identical "points at silence" bug
     // the 全文 gate above prevents, just on the passage side. Gate on the data
     // (does a passage exist), never on the grade.
-    passage_url: s.has_key_reading ? buildLessonQrValue(origin, s.id, 'key-passage-reading') : '',
-  }));
+    passage_url: (r ? r.has_key : s.has_key_reading)
+      ? buildLessonQrValue(origin, s.id, 'key-passage-reading', r?.key_slug) : '',
+    }));
+  });
 }
 
 /**
@@ -202,7 +231,7 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
  */
 export function buildQrManifestCsv(rows: QrManifestRow[]): string {
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
-  const header = ['課程', '課名', '年級', '全文網址', '段落網址'];
+  const header = ['課程', '課名', '年級', '全文網址', '重點網址'];
   const lines = [header.map(esc).join(',')];
   for (const r of rows) {
     lines.push([r.lesson_no, r.title, r.grade, r.full_url, r.passage_url].map(esc).join(','));
@@ -210,13 +239,18 @@ export function buildQrManifestCsv(rows: QrManifestRow[]): string {
   return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 
-const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle }) => (
+const QrDownloadButton: React.FC<QrButtonProps & { sectionSlug?: string | null }> = ({
+  lessonId, step, label, filePrefix, lessonTitle, sectionSlug,
+}) => (
   <LessonQrButton
     lessonId={lessonId}
     step={step}
     lessonTitle={lessonTitle}
     label={label}
     filePrefix={filePrefix}
+    // 這一節自己的代號（#2916）。沒有它按鈕不會出現 ——
+    // 這一列本來就漏傳，所以後台每一列的 QR 鈕也在印長網址。
+    sectionSlug={sectionSlug}
     variant="admin"
   />
 );
@@ -252,7 +286,9 @@ const LessonAudioTable: React.FC = () => {
   const { speakText, stopTts, isTtsLoading, isTtsSpeaking, ttsError } = useTtsPlayback(() => {}, () => {});
 
   const sortedStories = useMemo(
-    () => [...stories].sort((a, b) => a.lesson_number - b.lesson_number),
+    // 照課本順序（lesson_seq），不是抽取流水號 —— 用流水號排，第一列會變成
+    // 「十秒的背後」而圖書館第一課是「贏得喝采的輸家」（2026-08-25 實測）。
+    () => [...stories].sort((a, b) => (a.lesson_seq ?? a.lesson_number) - (b.lesson_seq ?? b.lesson_number)),
     [stories],
   );
 
@@ -310,7 +346,8 @@ const LessonAudioTable: React.FC = () => {
     setIsZipping(true);
     try {
       const { default: ExcelJS } = await import('exceljs');
-      const rows = buildQrManifestRows(sortedStories, window.location.origin);
+      // ⛔ 不用 window.location.origin —— 在 staging 按下載會印出指向測試站的 QR。
+      const rows = buildQrManifestRows(sortedStories, QR_ENTRY_ORIGIN);
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet('課程 QR');
@@ -320,8 +357,8 @@ const LessonAudioTable: React.FC = () => {
         { header: '年級', key: 'grade', width: 6 },
         { header: '全文 QR', key: 'fullQr', width: 22 },
         { header: '全文網址', key: 'fullUrl', width: 52 },
-        { header: '段落 QR', key: 'passageQr', width: 22 },
-        { header: '段落網址', key: 'passageUrl', width: 52 },
+        { header: '重點 QR', key: 'passageQr', width: 22 },
+        { header: '重點網址', key: 'passageUrl', width: 52 },
       ];
       ws.getRow(1).font = { bold: true };
       ws.views = [{ state: 'frozen', ySplit: 1 }];
@@ -604,7 +641,7 @@ const LessonAudioTable: React.FC = () => {
       <div className="grid grid-cols-[minmax(220px,1.5fr)_minmax(112px,0.7fr)_minmax(168px,0.9fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)] items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-500" role="row">
         <span>課程</span>
         <span>全文朗讀</span>
-        <span>段落朗讀</span>
+        <span>重點朗讀</span>
         <span>QR（全文）</span>
         <span>QR（重點）</span>
       </div>
@@ -616,7 +653,7 @@ const LessonAudioTable: React.FC = () => {
           const fullState = derivePlaybackState(fullKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
           const keyState = derivePlaybackState(keyKey, activeKey, isFetchingDetail, isTtsLoading, isTtsSpeaking);
           const fullContent = playbackButtonContent(fullState, '播放全文');
-          const keyContent = playbackButtonContent(keyState, '播放段落');
+          const keyContent = playbackButtonContent(keyState, '播放重點');
           const isRowPlaying = fullState === 'playing' || keyState === 'playing';
 
           return (
@@ -643,6 +680,10 @@ const LessonAudioTable: React.FC = () => {
                 already working/playing stops it instead of restarting it —
                 this row's own control is the primary way to stop it.
               */}
+              {/* ⚠️ 這一格必須是**單一**子元素。之前這裡有第二個 span，
+                  而格線只有 5 欄 —— 它一出現就把後面每一格往右推一欄，
+                  QR 鈕被擠到下一行（2026-08-25 owner 截圖）。 */}
+              <div className="flex min-w-0 flex-col gap-1">
               <button
                 type="button"
                 onClick={() => {
@@ -661,9 +702,7 @@ const LessonAudioTable: React.FC = () => {
                 {fullContent.icon}
                 {fullContent.label}
               </button>
-              {!deliversFullText(story.grade) && (
-                <span className="mt-1 block text-xs text-gray-400">僅試聽，不列入交付</span>
-              )}
+              </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -690,9 +729,11 @@ const LessonAudioTable: React.FC = () => {
               </div>
 
               {deliversFullText(story.grade)
-                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
-                : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付段落朗讀">—</span>}
-              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
+                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title}
+                    sectionSlug={(story.part_rounds ?? [])[0]?.full_slug ?? (story.part_rounds ?? [])[0]?.slug} />
+                : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付重點朗讀">—</span>}
+              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title}
+                sectionSlug={(story.part_rounds ?? [])[0]?.key_slug} />
             </div>
           );
         })}

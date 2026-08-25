@@ -1,0 +1,33 @@
+lesson_uid: L0094
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 腦力補給
+    feature: '特色：
+
+      有文字偵探、觀察力、創造力等11類謎題。
+
+      每週二、四、六寄送「腦力謎題」給訂閱者。'
+    qr_code: true
+  - index: 2
+    title: 遊戲學校
+    feature: '特色：
+
+      「各式各樣的益智謎題」及可線上玩的益智Flash遊戲？'
+    qr_code: true
+    feature_note: 句末的「？」原稿如此（語意上應為句號），未更動。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://www.morningrefresh.com/ (網站)
+    url_source: 總表0816「4.影片連結」年級7課次25
+  - index: 2
+    url: http://gameschool.cc/ (網站)
+    url_source: 總表0816「4.影片連結」年級7課次25
+  notes:
+    label: 標題印「影片連結」，但這一課的兩則其實是**網站**（謎題訂閱與益智遊戲站），不是影片；原稿如此。
+  slug: 9m9tu
+  text_ref: qxvp9

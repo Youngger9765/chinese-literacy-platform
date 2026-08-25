@@ -5,6 +5,10 @@ sections:
 - 'no': 一
   name: 閱讀聚光燈-自我提問策略1-讀出段落重點
   module: spotlight
+  part: 前半
+  text_ref: ttk9y
+  slug: ux3nd
+  file: spotlight.ux3nd.yml
   pages:
   - 1
   - 2
@@ -15,6 +19,9 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 後半
+  slug: ttk9y
+  file: full_text_annotate.ttk9y.yml
   pages:
   - 6
   - 7
@@ -22,40 +29,68 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  part: 後半
+  text_ref: ttk9y
+  slug: eekyd
+  file: key_reading.eekyd.yml
   pages:
   - 8
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  part: 後半
+  text_ref: ttk9y
+  slug: w6t9u
+  file: vocab_definitions.w6t9u.yml
   pages:
   - 8
   - 9
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  part: 後半
+  text_ref: ttk9y
+  slug: fw4na
+  file: vocab_application.fw4na.yml
   pages:
   - 9
   - 10
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  part: 後半
+  text_ref: ttk9y
+  slug: 7uwux
+  file: keypoints.7uwux.yml
   pages:
   - 10
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  part: 後半
+  text_ref: ttk9y
+  slug: c3k3q
+  file: comprehension.c3k3q.yml
   pages:
   - 10
   - 11
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  part: 後半
+  text_ref: ttk9y
+  slug: vf4wj
+  file: vocab_review.vf4wj.yml
   pages:
   - 11
   - 12
 - 'no': 八
   name: 知識補給站
   module: resources
+  part: 後半
+  text_ref: ttk9y
+  slug: xfmvj
+  file: resources.xfmvj.yml
   pages:
   - 12
 dispatch:

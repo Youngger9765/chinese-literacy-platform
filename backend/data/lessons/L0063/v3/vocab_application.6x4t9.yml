@@ -1,0 +1,44 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 兢兢業業
+    B: 比比皆是
+    C: 龐然大物
+    D: 精益求精
+    E: 無人能及
+    F: 指引
+    G: 水漲船高
+    H: 接駁
+  option_bank_note: 8 個代號對應 8 道小題；語詞框的 9 個語詞裡，多年媳婦熬成婆未被本大題使用。
+  answer_carrier: 橘色手寫代號（PDF p15）；文字層的括號內已填有同樣的代號
+  items:
+  - index: 1
+    stem: 靠著手機上GPS導航軟體的（　），我們順利找到正確的路徑。
+    answer: F
+  - index: 2
+    stem: 和旁邊的小漁船比較起來，那艘大輪船是個（　），特別壯觀。
+    answer: C
+  - index: 3
+    stem: 他在畫畫時總是（　），每次都畫得比上次更好。
+    answer: D
+  - index: 4
+    stem: 哥哥解數學題的能力在班上（　），大家都很佩服他。
+    answer: E
+  - index: 5
+    stem: 颱風來襲之前，政府安排了（　）車，方便居民前往避難所。
+    answer: H
+  - index: 6
+    stem: 他剛接下新的職務，處理每一項工作都（　），認真又仔細。
+    answer: A
+  - index: 7
+    stem: 這種類型的產品（　），你不必急著下單，貨比三家不吃虧。
+    answer: B
+  - index: 8
+    stem: 隨著明星的名氣越來越大，他的代言費用也（　）。
+    answer: G
+  part: 3
+  slug: 6x4t9
+  text_ref: 7wavn

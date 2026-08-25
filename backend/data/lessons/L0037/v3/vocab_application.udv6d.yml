@@ -1,0 +1,45 @@
+lesson_uid: L0037
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 互比苗頭
+    B: 津津樂道
+    C: 開門見山
+    D: 凶多吉少
+    E: 面面相覷
+    F: 鴉雀無聲
+    G: 悶不吭聲
+    H: 匪夷所思
+    I: 唯妙唯肖
+    J: 快馬加鞭
+  items:
+  - index: 1
+    stem: 考試時，教室裡（　），只有筆尖劃過紙面的聲音。
+    answer: F
+  - index: 2
+    stem: 他一開口就（　），立刻說明來意，毫不拖泥帶水。
+    answer: C
+  - index: 3
+    stem: 那位登山者失聯多日，恐怕（　）。
+    answer: D
+  - index: 4
+    stem: 他們嘴上說要合作，實際上卻（　），誰也不肯示弱。
+    answer: A
+  - index: 5
+    stem: 那場經典籃球比賽至今仍然令人（　），大家一談起來就停不下來。
+    answer: B
+  - index: 6
+    stem: 我們必須（　），才能如期完成這份重要的報告。
+    answer: J
+  - index: 7
+    stem: 他把老師說話的聲音和動作模仿得（　），全班笑成一團。
+    answer: I
+  - index: 8
+    stem: 她明明有更好的機會卻選擇放棄，真讓人（　）。
+    answer: H
+  notes:
+    option_bank: 列 10 個代號（本課 14 個語詞中的「投奔」「讒言」「軟禁」「爭強鬥勝」未入選項），對應 8 道小題
+  slug: udv6d
+  text_ref: fv7cm

@@ -1,0 +1,176 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 閱讀表格策略
+  strategy_type: comprehension_strategy
+  blocks:
+  - type: concept_box
+    text: 如果一篇文章能善用表格整理訊息，就能讓讀者一目了然，更容易讀到重點。本課運用表格整理了「使用巨鼠掃雷」和「使用金屬探測器」的差異，就是一個好例子。底下以表１為例，說明閱讀表格的步驟：
+  - type: table
+    label: 表1（第一次引用）
+    caption: 表1 兩種掃雷方式的比較：「金屬探測器」和「非洲巨鼠」
+    columns:
+    - 項目
+    - 金屬探測器
+    - 非洲巨鼠
+    columns_note: 第一欄的表頭在教材上是空白格；表格外另有「第一欄」「第一列」兩個指示文字方塊
+    rows:
+    - - 1.安全性
+      - 掃雷人員常被地雷炸傷
+      - 不會引爆地雷
+    - - 2.效能
+      - 對所有金屬(如鋁罐、瓶蓋)發出警報，須逐一確認
+      - 只對TNT炸藥發出警報
+    - - 3.成本
+      - 購買、維護金屬探測器很貴
+      - 飼養和訓練便宜很多
+    - - 4.方便性
+      - 在泥濘、雜草叢生處無法工作
+      - 在泥濘、雜草叢生處仍可工作
+  - type: guide
+    text: 步驟一：看標題
+  - type: guide
+    text: 標題會告訴我們表格想表達的主題喔。你會看到，表１的標題是【兩種掃雷方式的比較：「金屬探測器」和「非洲巨鼠」】，你心裡馬上就要浮現一個概念：「啊，我知道了，這個表格是要比較兩樣事物的。」
+  - type: guide
+    text: 步驟二：找比較對象和項目：
+  - type: sub_block
+    label: 步驟二 小挑戰
+    instruction: 小挑戰：請你閱讀表１的「第一列」和「第一欄」，判斷一下，它們寫了什麼，並在正確的□打勾。(單選）
+    items:
+    - type: single
+      prompt: 「第一列」寫的是什麼？
+      options:
+        1: 比較的對象
+        2: 比較的項目
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: single
+      prompt: 「第一欄」寫的是什麼？
+      options:
+        1: 比較的對象
+        2: 比較的項目
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: guide
+    text: 步驟三：閱讀表格裡的內容
+  - type: guide
+    text: 請仔細閱讀下面(1)的範例說明，並以同樣的方法，回答(2)~(4)題，在正確的□打勾。(單選）
+  - type: single
+    label: (1) 範例
+    prompt: 範例「只對TNT炸藥發出警報」是在表達什麼？
+    options:
+      1: 金屬探測器的效能
+      2: 非洲巨鼠的效能
+      3: 非洲巨鼠的安全性
+    answer: 2
+    answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: guide
+    text: 說明：a.先找到「只對TNT炸藥發出警報」的格子；b.往第一列看，就是「非洲巨鼠」;往第一欄看是「效能」，所以題目「 」裡講的是「非洲巨鼠的效能」。
+  - type: table
+    label: 表1（第二次引用）
+    columns:
+    - 項目
+    - 金屬探測器
+    - 非洲巨鼠
+    rows:
+    - - 1.安全性
+      - 掃雷人員常被地雷炸傷
+      - 不會引爆地雷
+    - - 2.效能
+      - 對所有金屬(如鋁罐、瓶蓋)發出警報，須逐一確認
+      - 只對TNT炸藥發出警報
+    - - 3.成本
+      - 購買、維護金屬探測器很貴
+      - 飼養和訓練便宜很多
+    - - 4.方便性
+      - 在泥濘、雜草叢生處無法工作
+      - 在泥濘、雜草叢生處仍可工作
+  - type: guide
+    text: 再來，請你看著表1，回答底下的單選題
+  - type: single
+    label: (2)
+    prompt: 「掃雷人員常被地雷炸傷」是在表達什麼？
+    options:
+      1: 金屬探測器的效能
+      2: 非洲巨鼠的安全性
+      3: 金屬探測器的安全性
+    answer: 3
+    answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: single
+    label: (3)
+    prompt: 「飼養和訓練便宜很多」是在表達什麼？
+    options:
+      1: 金屬探測器的成本
+      2: 非洲巨鼠的成本
+      3: 金屬探測器的方便性
+    answer: 2
+    answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: single
+    label: (4)
+    prompt: 「在泥濘、雜草叢生處無法工作」是在表達什麼？
+    options:
+      1: 金屬探測器的方便性
+      2: 非洲巨鼠的安全性
+      3: 非洲巨鼠的方便性
+    answer: 1
+    answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: guide
+    text: 步驟四：讀出重點：問自己，這個表在表達什麼？
+  - type: guide
+    text: 例如：不斷的問自己：「兩種掃雷方式，哪一種成本比較便宜？」你帶著這個疑問，在讀表１時，很容易就看到「3.成本」那列，你就會讀到，使用巨鼠掃雷便宜很多。
+  - type: sub_block
+    label: 步驟四 小挑戰
+    instruction: 小挑戰：請你看著表1，問自己底下的問題，並勾選出正確的選項。
+    items:
+    - type: single
+      label: (1)
+      prompt: 哪一種掃雷方式比較安全？
+      options:
+        1: 金屬探測器
+        2: 非洲巨鼠
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: single
+      label: (2)
+      prompt: 哪一種掃雷方式效能比較好？
+      options:
+        1: 金屬探測器
+        2: 非洲巨鼠
+      answer: 2
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+    - type: single
+      label: (3)
+      prompt: 哪一種掃雷方式比較不方便？
+      options:
+        1: 金屬探測器
+        2: 非洲巨鼠
+      answer: 1
+      answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: guide
+    text: 步驟五：在文章裡找到這個表格的結論
+  - type: guide
+    text: 作者呈現表格之後，通常會在文字段落裡，做一個結論—簡單的寫出這個表格最重要的訊息。你閱讀文章第五段，判斷哪一句是這個表格的結論呢？
+  - type: passage
+    label: 步驟五 引文
+    paragraphs:
+    - 簡單的說，以巨鼠掃雷相對安全、有效能、便宜而且方便。例如，馬嘎瓦可在30分鐘內掃描完一個網球場大小的區域，而人類使用金屬探測器則需要1至4天才能完成相同的任務。
+    note: 課文第五段原文是「簡單來說」，此處引文寫成「簡單的說」，見 source_errata E2；兩處均照原樣保留
+  - type: single
+    prompt: 判斷哪一句是這個表格的結論呢？
+    options:
+      1: 以巨鼠掃雷相對安全、有效能、便宜而且方便性高
+      2: 巨鼠已經幫助清理2,300萬平方公尺的土地
+      3: 巨鼠得到英國頒發的動物勇氣金牌獎
+    answer: 1
+    answer_carrier: Wingdings F0FE（☑，圖形字元）
+  - type: single
+    label: ◎自我評估
+    prompt: 「利用這五個步驟，我學會怎樣讀表格了嗎？」
+    options:
+      1: 我學會了
+      2: 我還沒學會
+    no_correct_answer: true
+    answer_carrier: 學生自我評估，原稿兩個 □ 都沒有勾（全檔 12 個 F0FE 都不在這一題）
+  slug: rjyaa
+  text_ref: 977nw

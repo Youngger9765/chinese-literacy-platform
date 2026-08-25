@@ -1,0 +1,90 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 三
+keypoints:
+  section_name_printed: 文章重點整理
+  instruction: 請根據課文內容，整理作者如何回答「近百年運動紀錄為什麼大幅進步」。
+  layout: list
+  answer_carrier: 橘色手寫（在文字層），PDF p9~p10 可見
+  rows:
+  - label: 一、文章提出來的問題
+    value: 近百年來，各項競技運動的世界紀錄，為什麼有這麼大的【　】？
+    blanks:
+    - answer: 進步
+  - label: 二、作者提出的解釋一：科技進步
+    items:
+    - label: 1.以100公尺短跑運動為例
+      table_columns:
+      - 設備器材
+      - 1936年的歐文斯
+      - 2013年的博爾特
+      table_rows:
+      - 設備器材: 起跑架
+        1936年的歐文斯: 自己用小鏟子挖出【　】
+        1936年的歐文斯_blanks:
+        - answer: 腳踏洞
+        2013年的博爾特: 有【　】，更能提升爆發力
+        2013年的博爾特_blanks:
+        - answer: 起跑架
+      - 設備器材: 【　】
+        設備器材_blanks:
+        - answer: 釘鞋
+        1936年的歐文斯: 又【　】又容易變形
+        1936年的歐文斯_blanks:
+        - answer: 重
+        2013年的博爾特: 又【　】又合腳
+        2013年的博爾特_blanks:
+        - answer: 輕
+      - 設備器材: 【　】
+        設備器材_blanks:
+        - answer: 跑道
+        1936年的歐文斯: 由煤渣和木頭焚燒後的【　】鋪成，容易消耗力量
+        1936年的歐文斯_blanks:
+        - answer: 灰渣
+        2013年的博爾特: 由彩色【　】鋪成，較能幫助選手發揮力量
+        2013年的博爾特_blanks:
+        - answer: PU塑膠粒
+    - label: 2.小結
+      value: 起跑方式、釘鞋與跑道經過科技改善，讓現代選手面對更有利的【　】。
+      blanks:
+      - answer: 比賽條件
+  - label: 三、作者提出的解釋二：專項選才
+    items:
+    - label: 過去看法
+      value: 認為【　】、中等體重的身材，適合所有運動的體型。
+      blanks:
+      - answer: 中等身高
+    - label: 現今的選才方式
+      value: '依照不同運動的需要，選擇不同【　】與【　】的選手。
+
+        例如：
+
+        (1)跳高選手多【　】；鉛球選手則較矮、較重。
+
+        (2)體操選手較【　】；籃球選手較高大，臂展也較長。
+
+        (3)游泳選手雙臂長，下半身較短；跑步選手上半身較【　】，腿較【　】'
+      blanks:
+      - answer: 體型
+      - answer: 身體比例
+      - answer: 高瘦型
+      - answer: 小巧
+      - answer: 短
+      - answer: 長
+    - label: 小結
+      value: 教練依照不同運動的【　】，挑選較適合的人才。
+      blanks:
+      - answer: 專項需求
+  - label: 四、訓練仍不可少
+    value: 不論科技與選才如何進步，選手仍須經過【　】的訓練與比賽。
+    blanks:
+    - answer: 千錘百鍊
+  - label: 五、全文重點
+    value: 選手想有好表現，仍要經過長期【　】；而近百年運動紀錄大幅進步，也受到【　】與【　】的影響。
+    blanks:
+    - answer: 訓練
+    - answer: 科技進步
+    - answer: 專項選才
+  part: 2
+  slug: hdp9w
+  text_ref: dvxj6

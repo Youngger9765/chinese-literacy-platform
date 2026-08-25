@@ -1,0 +1,33 @@
+lesson_uid: L0043
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【世界充滿愛】20210806-以教育的力量翻轉非洲
+    duration: (4:53)
+    source: 大愛電視 Tzu Chi DaAiVid
+    qr_code: true
+  - index: 2
+    title: 走過"愛的蠻荒"文國士從偏鄉到兒少家園 立志讓走偏孩子找回人生路 撕下壞囡仔標籤全因一位貴人
+    duration: (10:44)
+    source: 台灣亮起來
+    qr_code: true
+  - index: 3
+    title: '#醫師談心室｜田知學－EP02：用教育翻轉人生 DOCTOR WITH STORIES'
+    duration: (9:55)
+    source: 健康多1點HEALTH PLUS
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/01Ef9l4VM_I
+    url_source: 總表0816「4.影片連結」年級5課次4
+  - index: 2
+    url: http://youtu.be/kBCYeaSrz6U
+    url_source: 總表0816「4.影片連結」年級5課次4
+  notes:
+    items: 本課有 3 個影片連結（同批其他課多為 2 個）
+  slug: vm6me
+  text_ref: nraty

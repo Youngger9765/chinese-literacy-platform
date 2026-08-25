@@ -1,0 +1,45 @@
+lesson_uid: L0169
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 固然
+    B: 不妨
+    C: 精湛
+    D: 馬虎
+    E: 本錢
+    F: 祕訣
+    G: 輸人一截
+    H: 突如其來
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 手機(　)為生活帶來許多便利，也可能造成專注力下降的問題。
+    answer: A
+  - index: 2
+    stem: 他(　)的演技，讓台下的觀眾目不轉睛，也因此獲得許多好評。
+    answer: C
+  - index: 3
+    stem: 考試前夕，(　)提早就寢，讓大腦消化和運用知識更有效率。
+    answer: B
+  - index: 4
+    stem: 他做事(　)，又常推卸責任，讓同組同學都感到氣憤不已。
+    answer: D
+  - index: 5
+    stem: 「健康」是探索世界的(　)，唯有顧好身體，才能走得更遠。
+    answer: E
+  - index: 6
+    stem: 保持良好人際關係的(　)，其實就是多傾聽與尊重他人。
+    answer: F
+  - index: 7
+    stem: 面對同學(　)的公開告白，他一時不知所措，惹得全班哄堂大笑。
+    answer: H
+  - index: 8
+    stem: 在籃球場上，我們的默契明顯(　)，也因此最終無緣晉級。
+    answer: G
+  notes:
+    option_bank: 八個代號取自十二個語詞；紮實／碳水化合物／鹽漬／照表操課四個沒有列入選項
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af0，run 層沒有 w:color**
+  slug: wcr3f
+  text_ref: 9ja7n

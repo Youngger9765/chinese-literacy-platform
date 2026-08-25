@@ -43,16 +43,22 @@
     "segments": {
       "type": "array",
       "x-seen-in": "3/10"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "10/10"
     }
   },
   "required": [
-    "instruction"
+    "instruction",
+    "slug"
   ],
   "title": "sentence_matching module payload",
   "type": "object",
   "x-core-90pct": [
     "instruction",
-    "notes"
+    "notes",
+    "slug"
   ],
   "x-enforcement": "error",
   "x-lessons-observed": 10

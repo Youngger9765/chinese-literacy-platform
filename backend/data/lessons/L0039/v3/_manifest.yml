@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: phhwe
+  file: full_text_annotate.phhwe.yml
   pages:
   - 1
   - 2
@@ -12,22 +14,34 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: phhwe
+  slug: e7umc
+  file: key_reading.e7umc.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: phhwe
+  slug: pwvwj
+  file: vocab_definitions.pwvwj.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: phhwe
+  slug: 3y3kq
+  file: vocab_application.3y3kq.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: phhwe
+  slug: 3a94d
+  file: keypoints.3a94d.yml
   pages:
   - 4
   - 5
@@ -35,6 +49,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 自我管理──時間管理策略
+  text_ref: phhwe
+  slug: 7me4e
+  file: spotlight.7me4e.yml
   pages:
   - 5
   - 6
@@ -45,17 +62,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: phhwe
+  slug: fee43
+  file: comprehension.fee43.yml
   pages:
   - 10
   - 11
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: phhwe
+  slug: m3rha
+  file: vocab_review.m3rha.yml
   pages:
   - 11
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: phhwe
+  slug: 4qau6
+  file: resources.4qau6.yml
   pages:
   - 11
 dispatch:

@@ -1,0 +1,26 @@
+lesson_uid: L0066
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 中國古代畫家為什麼不追求寫實？
+    duration: (4:37)
+    source: 野望繪畫
+    has_qr: true
+  - index: 2
+    title: 【中國古代文人心目中最好的江南是什麼樣？瀟湘圖了解一下】
+    duration: (3:32)
+    source: 海峽導報
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/oVo_HkashUA
+    url_source: 總表0816「4.影片連結」年級6課次27
+  - index: 2
+    url: http://youtu.be/YVXpVpcNzU0
+    url_source: 總表0816「4.影片連結」年級6課次27
+  slug: 7yah9
+  text_ref: my7tn

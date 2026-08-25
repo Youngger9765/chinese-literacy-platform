@@ -1,0 +1,27 @@
+lesson_uid: L0062
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: JingTong Talk | 影響圈關注圈 | leader in me
+    duration: (1:43)
+    source: JingTong菁桐國民小學
+  - index: 2
+    title: 吿白失敗了該怎麼辦？｜一起戀愛吧｜卓苡瑄
+    duration: (5:50)
+    source: 卓苡瑄Jessie
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://youtu.be/gxfiRqH1CDk
+    url_source: 總表0816「4.影片連結」年級6課次21
+  - index: 2
+    url: https://youtu.be/qWn9h9kLZhw
+    url_source: 總表0816「4.影片連結」年級6課次21
+  notes:
+    qr: 兩則各附一個 QR code（圖形，網址不在文字層）
+    title: 第 2 則標題原稿用的是「吿」(U+544A 的異體 U+543F)，不是常見的「告」；照原稿記錄
+  slug: ayufn
+  text_ref: ww4d9

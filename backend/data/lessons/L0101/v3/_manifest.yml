@@ -5,23 +5,34 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
+  slug: ffk64
+  file: full_text_annotate.ffk64.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: ffk64
+  slug: cw744
+  file: key_reading.cw744.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: ffk64
+  slug: xyutt
+  file: vocab_definitions.xyutt.yml
   pages:
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: ffk64
+  slug: w7hq4
+  file: vocab_application.w7hq4.yml
   pages:
   - 3
   - 4
@@ -29,6 +40,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 推論策略—找段落重點、推論作者觀點
+  text_ref: ffk64
+  slug: uqfxj
+  file: spotlight.uqfxj.yml
   pages:
   - 4
   - 5
@@ -38,17 +52,26 @@ sections:
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  text_ref: ffk64
+  slug: cjdtp
+  file: comprehension.cjdtp.yml
   pages:
   - 8
   - 9
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  text_ref: ffk64
+  slug: 7d9d6
+  file: vocab_review.7d9d6.yml
   pages:
   - 9
 - 'no': 八
   name: 知識補給站
   module: resources
+  text_ref: ffk64
+  slug: p7aky
+  file: resources.p7aky.yml
   pages:
   - 9
 dispatch:

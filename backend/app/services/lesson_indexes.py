@@ -15,13 +15,6 @@ import os
 import re
 from typing import Any
 
-from app.services.lesson_layer_loaders import (
-    ENRICHMENT_FIELDS,
-    load_curriculum_manifest,
-    load_layer1_lessons,
-    load_layer2_lessons,
-    build_layer2_enrichment_index,
-)
 from app.services.spotlight_figure_images import merge_spotlight_images
 from app.services.spotlight_v2_loader import (
     load_spotlight_v2,
@@ -51,15 +44,184 @@ def _key_reading(l: dict) -> dict | None:
     against the body, so its presence is the check — there is no verdict to re-test
     here.
     """
-    kr = l.get("key_reading")
-    if not isinstance(kr, dict) or not kr.get("passage"):
-        return None
-    return {
-        "passage": kr["passage"],
-        "start_text": kr.get("start_text"),
-        "extent_chars": kr.get("extent_chars"),
-        "source": kr.get("source") or "docx-extract",
-    }
+    rounds = _key_readings(l)
+    return rounds[0] if rounds else None
+
+
+def _ledger_round_order(l: dict) -> list[str]:
+    """帳本裡課文出現的順序 —— 一切「第幾篇」的排序都以它為準（#2916）。"""
+    out: list[str] = []
+    for s in l.get("manifest_sections") or []:
+        if s.get("module") == "full_text_annotate" and s.get("slug"):
+            if s["slug"] not in out:
+                out.append(s["slug"])
+    return out
+
+
+#: 哪些模組「就是課文本身」——它們沒有 `text_ref`，因為它們是被引用的那一個。
+#: 一般課是 `full_text_annotate`；文言文的課文叫 `classical_text`（8 課）。
+#: 漏掉後者的話那 8 課印不出短網址，而且症狀是「安靜地退回長網址」。
+ARTICLE_MODULES = ("full_text_annotate", "classical_text")
+
+
+def _section_slugs_by_article(l: dict) -> dict[str, dict[str, str]]:
+    """{課文 slug: {模組: 那一節自己的 slug}} —— 出處是帳本（#2916）。
+
+    slug 是身分，`text_ref` 是引用。課文那一節沒有 `text_ref`（它就是被引用的
+    那一個），所以用它自己的 slug 當 key；其餘各節用它 `text_ref` 指到的課文歸戶。
+
+    跨篇的節（`text_ref` 是清單）不屬於任何單一篇，這裡不收。
+    """
+    secs = l.get("manifest_sections") or []
+    arts = [s.get("slug") for s in secs
+            if s.get("module") in ARTICLE_MODULES and s.get("slug")]
+    # 一課只有一篇課文時，歸屬沒有歧義：其餘每一節都屬於它，寫不寫 `text_ref` 都一樣。
+    #
+    # 這條不是方便，是**必要**：發配 slug 時 `text_ref` 只從 `full_text_annotate`
+    # 那一族收，而文言文的課文模組叫 `classical_text` —— 那 10 課因此
+    # 每一節都沒有 `text_ref`，光靠 `text_ref` 歸戶的話它們的朗讀計時
+    # 印不出代號，QR 安靜退回長網址（2026-08-25 抽樣驗到）。
+    lone = arts[0] if len(arts) == 1 else None
+    out: dict[str, dict[str, str]] = {}
+    for sec in secs:
+        mod, slug, ref = sec.get("module"), sec.get("slug"), sec.get("text_ref")
+        if not mod or not slug:
+            continue
+        if mod in ARTICLE_MODULES:
+            art = slug
+        elif isinstance(ref, str) and ref:
+            art = ref
+        else:
+            # 多篇課而這一節沒說屬於誰 → 不猜（跨篇的節就是這樣）。
+            art = lone
+        if not art:
+            continue
+        out.setdefault(art, {}).setdefault(mod, slug)
+    return out
+
+
+def _parts_summary(l: dict) -> list[dict]:
+    """每一篇的輕量摘要，給清單用（#2916）。
+
+    後台的 QR 清單要「一篇一列」，但它是從 `/api/stories`（清單）抓的，
+    而篇次資訊本來只在單課詳情裡 —— 為了 175 課各打一次詳情太貴，
+    所以在清單就帶著這一份摘要。
+    """
+    # 帳本才知道哪一節是哪一節的身分 —— 這裡不自己推。
+    own = _section_slugs_by_article(l)
+    rounds = l.get("repeat_rounds") or {}
+    if not rounds:
+        # 單篇課也回一筆（#2916）。它也有自己的代號，也該印短網址。
+        # 這裡原本直接回 []，於是 170/175 課的 QR 退回長網址 ——
+        # 也就是 97% 的紙本仍然把課號跟路由名印上去。形狀跟多篇一致，
+        # 消費端不必分兩種寫法。
+        art = next((x.get("slug") for x in (l.get("manifest_sections") or [])
+                    if x.get("module") in ARTICLE_MODULES and x.get("slug")), None)
+        if not art:
+            return []
+        mods = own.get(art, {})
+        kr = l.get("key_reading") if isinstance(l.get("key_reading"), dict) else {}
+        return [{
+            "slug": art,
+            "part": None,
+            # ⚠️ 判準要跟 row 的 `paragraphs` **同源**（`_flat_paragraphs(_body(l))`）。
+            #    這裡本來讀 `l["paragraphs"]`，而 loader 那一層是 None ——
+            #    段落是 row 攤出來的。結果 4–7 年級 106 課裡 104 課的
+            #    `has_full` 是 False，全文 QR 整批消失，後台那一欄變空字串。
+            #    沒有錯誤、清單照樣產出，只是少了 104 個碼。
+            "has_full": bool(_flat_paragraphs(_body(l))),
+            "has_key": bool((kr or {}).get("passage")),
+            "full_slug": mods.get("full_text_annotate") or mods.get("classical_text") or art,
+            "key_slug": mods.get("key_reading"),
+        }]
+    out = []
+    for slug, mods in rounds.items():
+        fta = (mods or {}).get("full_text_annotate") or {}
+        kr = (mods or {}).get("key_reading") or {}
+        out.append({
+            "slug": slug,
+            "part": kr.get("part") or fta.get("part") or fta.get("part_no"),
+            "has_full": bool(fta.get("paragraphs") or (fta.get("body") or {}).get("paragraphs")),
+            "has_key": bool(kr.get("passage")),
+            # QR 印的是**那一節自己的代號**，不是課文的。
+            # 只帶 `slug`（課文的）的話，三篇的念順順 QR 會全部指到讀全文那一節 ——
+            # 而且掃得開、頁面打得開，錯得完全沒有徵兆。
+            "full_slug": own.get(slug, {}).get("full_text_annotate") or slug,
+            "key_slug": own.get(slug, {}).get("key_reading"),
+        })
+    # 順序照帳本，不自己排（#2916）——帳本是唯一的順序來源。
+    order = _ledger_round_order(l)
+    out.sort(key=lambda r: order.index(r["slug"]) if r["slug"] in order else len(order))
+    return out
+
+
+def _manifest_sections(l: dict) -> list[dict]:
+    """帳本，送給前端的那一層（#2916）。
+
+    ## 一份東西，一個名字，一種形狀，三層
+
+        _manifest.yml                  帳本本體（檔案）—— 唯一真相
+        lesson["manifest_sections"]    同一份，載進記憶體（loader 層）
+        row["manifest_sections"]       同一份，送給前端（API 層）
+
+    **同名不夠，欄位也要同名。** 這一層本來叫 `worksheet_section_order`，
+    而且會把 `no` 改名成 `number`、`module` 改名成 `type`。兩件事各自看起來都很小，
+    合起來就是：同一份東西有兩個名字、兩種形狀，「到底哪一份才算數」沒有答案。
+    2026-08-25 統一成一個名字之後，兩層寫進同一個 key，形狀不同的那份直接把另一份蓋掉 ——
+    L0063 的每一列 `type` 和 `number` 全變成 None，而**沒有任何錯誤**。
+    改名把潛伏的分岔變成看得見的碰撞，這是好事；解法是讓形狀也一致，不是把名字改回去。
+
+    所以這裡不做任何改寫：帳本印什麼欄位，前端就收到什麼欄位
+    （`no` / `name` / `module` / `part` / `slug` / `file` / `text_ref` / `pages`）。
+    前端用 WORKSHEET_TYPE_ALIASES 把 `module`（`key_reading`）對到 step id
+    （`key-passage-reading`）。
+
+    沒有 module 的列（例如 L0029 的「綜合練習」，還沒有自己的模組）**照樣送出去**，
+    由前端跳過 —— `stepSequenceFromManifest` 遇到沒有 `module` 的列本來就 `continue`。
+    帳本誠實記錄紙上印了什麼；要不要顯示是消費端的事，不是帳本的事。
+    """
+    return list(l.get("manifest_sections") or [])
+
+
+def _key_readings(l: dict) -> list[dict]:
+    """所有的 重點朗讀 —— **一輪一個，不是一課一個**（#2916）。
+
+    一份學習單印兩篇文章時，念順順也印兩次，各自有自己的 ☞ 起點與字數。
+    兩份都帶 slug（`key_reading.fqwda.yml` / `key_reading.n3qxn.yml`），
+    `slug` 就是定址用的 key：`?p=fqwda` 圈起那一輪。
+
+    單篇課回一筆、`slug` 是 None —— 形狀跟多輪課一樣，消費端不必分兩種寫法。
+    """
+    def _one(kr, slug):
+        if not isinstance(kr, dict) or not kr.get("passage"):
+            return None
+        return {
+            "slug": slug,
+            "part": kr.get("part"),
+            "passage": kr["passage"],
+            "start_text": kr.get("start_text"),
+            "extent_chars": kr.get("extent_chars"),
+            "source": kr.get("source") or "docx-extract",
+        }
+
+    out = []
+    rounds = l.get("repeat_rounds") or {}
+    if rounds:
+        # 多輪課：一輪一筆。⛔ 不要再把頂層那份也加進來 —— 頂層就是其中一輪
+        # （照帳本挑的第一份），加了會變成 4 筆而實際只有 3 個念順順（實測）。
+        for slug, mods in rounds.items():
+            got = _one((mods or {}).get("key_reading"), slug)
+            if got:
+                out.append(got)
+    else:
+        base = _one(l.get("key_reading"), None)
+        if base:
+            out.append(base)
+    # 篇次是老師與學生看到的順序；沒有 part 的（單篇課）排在最前面
+    # 同上：照帳本。單篇課只有一筆，順序無意義但仍走同一條路。
+    order = _ledger_round_order(l)
+    out.sort(key=lambda r: order.index(r.get("slug")) if r.get("slug") in order else len(order))
+    return out
 
 
 #: 文體 → the four categories the API contract allows. Mirrors the table in
@@ -168,6 +330,38 @@ def _unwrap(mod: Any, key: str) -> dict:
         return {}
     inner = mod.get(key)
     return inner if isinstance(inner, dict) else mod
+
+
+def _rounds_with_flat_paragraphs(l: dict) -> dict:
+    """`repeat_rounds`，每一輪多一個攤平好的 `paragraphs`（#2916）。
+
+    形狀跟 API 頂層的 `paragraphs` 一致，前端換篇時直接取用，不必知道
+    原始資料是 `[{idx,text}]`。
+    """
+    rounds = l.get("repeat_rounds") or {}
+    if not rounds:
+        return {}
+    out = {}
+    for slug, mods in rounds.items():
+        m = dict(mods or {})
+        paras = _flat_paragraphs(m.get("full_text_annotate"))
+        if paras:
+            m["paragraphs"] = paras
+        out[slug] = m
+    return out
+
+
+def _flat_paragraphs(fta: dict | None) -> list[str]:
+    """課文段落攤成純字串陣列 —— API 的 `paragraphs` 是這個形狀。
+
+    抽取出來的原始形狀是 `[{idx, text}, ...]`。攤平**只能有一份實作**：
+    2026-08-25 我一度在前端另寫一次，形狀猜錯（以為是字串陣列），
+    讀全文那一頁直接當掉。要換篇的是同一份資料，攤平也該是同一支。
+    """
+    return [
+        (x.get("text") if isinstance(x, dict) else x)
+        for x in ((fta or {}).get("paragraphs") or ((fta or {}).get("body") or {}).get("paragraphs") or [])
+    ]
 
 
 def _body(l: dict) -> dict:
@@ -553,10 +747,7 @@ def _uid_tree_lessons() -> list[dict]:
             # pipeline read paragraphs back out of the layer the re-ink deleted —
             # which left 朗讀 / 閱讀理解 / 生字 / 造句 with no text to work on and
             # 「參考課文」 blank beside the keypoints table.
-            "paragraphs": [
-                (p.get("text") if isinstance(p, dict) else p)
-                for p in _body(l).get("paragraphs") or []
-            ],
+            "paragraphs": _flat_paragraphs(_body(l)),
             # StoryDetail indexes these directly. The second-edition extraction
             # produces spotlight + keypoints; the remaining practice modules are
             # not yet extracted, so they are present-but-empty rather than absent
@@ -565,6 +756,29 @@ def _uid_tree_lessons() -> list[dict]:
             # A section that failed its check is absent from that file rather than
             # present-and-wrong, so `or None` here is the honest empty state and the
             # step renders 「本課尚無…」 instead of another lesson's questions.
+            # 重複出現的大題（#2916）。一份學習單印兩篇文章時，念順順／讀全文／語詞
+            # 這些大題會各出現一次，檔名各帶一個 slug（`key_reading.fqwda.yml`）。
+            #
+            # ⚠️ 這個 row 是**逐欄寫死的字典**，下面那個 overlay 迴圈只覆蓋
+            #    「row 裡已經有的 key」——所以沒有宣告在這裡的欄位，
+            #    loader 讀到了也永遠送不出去，而且不會有任何錯誤或紅燈
+            #    （2026-08-24 實測：L0029 兩個念順順都在硬碟上，API 回 repeat_rounds 空）。
+            # 每一輪額外附上**攤平好的** `paragraphs`（#2916）。
+            # 輪次裡原始的是 `[{idx,text}]`，而 API 頂層的 `paragraphs` 是字串陣列 ——
+            # 不在這裡對齊的話，前端換篇時得自己再攤一次，那就是第二套實作。
+            "repeat_rounds": _rounds_with_flat_paragraphs(l) or None,
+            # ⚠️ 不能叫 `parts` —— `lesson.yml` 自己就有一個 `parts:`（{id,label}），
+            #    而下面那個 overlay 迴圈會用課的版本蓋掉這裡算的（實測 0/5 課拿得到）。
+            "part_rounds": _parts_summary(l) or None,
+            # 前台的導航順序 —— 直接來自那一課的總帳（`_manifest.yml`），
+            # 不是寫死的預設步驟表（#2916）。
+            #
+            # ⚠️ 在此之前這個欄位**175 課全是 None**，所以每一課都退回
+            #    DEFAULT_STEP_SEQUENCE —— 前台從來沒有照學習單的順序走過。
+            #
+            # 一課多篇時同一個大題會出現多次，`file` 寫明各自要載哪一份，
+            # 前台照列表由上往下走就對了，不必知道 slug 規則。
+            "manifest_sections": _manifest_sections(l) or None,
             "vocabulary": _vocabulary_from(l) or None,
             "fill_in_blank": _cloze_from(l) or None,
             "vocab_bank": _vocab_bank_from(l) or None,
@@ -580,6 +794,9 @@ def _uid_tree_lessons() -> list[dict]:
             # own text — the first-edition table, keyed by code, was serving another
             # lesson's paragraph aloud.
             "key_reading": _key_reading(l),
+            # 一輪一個（#2916）。單篇課就是一筆、slug=None；一課兩篇就是兩筆。
+            # ⚠️ 單數那個保留指向第一輪，所以 168 課單篇的行為一個字都沒變。
+            "key_readings": _key_readings(l) or None,
             "text_type": "單",
             "source_file": None,
             # An extraction that failed is stored as {"lesson": …, "error": …} in
@@ -641,8 +858,18 @@ def _uid_tree_lessons() -> list[dict]:
         }
         # Overlay what lesson.yml actually carries. Identity stays computed — a
         # lesson must never be able to rename its own uid or id from its payload.
+        #
+        # ⚠️ 這份清單不只是「身分」，是**所有這裡算過、不可以被原始 payload 蓋掉的欄位**。
+        #    row 是逐欄寫死的字典，欄名跟 lesson.yml 的欄名撞到就會被這個迴圈蓋回原值 ——
+        #    沒有錯誤、型別也對，只是你算的那份不見了。已經踩過三次：
+        #      `parts`（0/5 課拿得到篇次）
+        #      `repeat_rounds`（攤平好的段落被原始 [{idx,text}] 蓋回去 → 讀全文當掉）
+        #      `manifest_sections`（形狀不同的兩份互蓋 → type/number 全變 None）
+        #    加新的計算欄位時，**如果 lesson.yml 也有同名欄位就要加進這裡**。
+        #    `test_computed_fields_survive_the_overlay` 會盯著這件事。
         _IDENTITY = {"id", "lesson_uid", "version_id", "grade", "assets", "source",
-                     "spotlight_v2", "keypoints", "story_structure_table"}
+                     "spotlight_v2", "keypoints", "story_structure_table",
+                     "repeat_rounds", "manifest_sections"}
         for k, v in l.items():
             if k in _IDENTITY or v in (None, "", [], {}):
                 continue
@@ -688,6 +915,21 @@ _SECTION_TO_STEP = {
 }
 
 
+#: 模組名 → step id。跟 `scripts/module_entry_gate.py` 的 ENTRY 同一份對照，
+#: 那道門會解析 stepConfig.ts 驗「每個抽出來的模組，學生都走得到」。
+_MODULE_TO_STEP: dict[str, str] = {
+    "full_text_annotate": "full-text-annotate",
+    "key_reading": "key-passage-reading",
+    "vocab_definitions": "vocab-definition",
+    "vocab_application": "vocab-application",
+    "keypoints": "keypoints-table",
+    "comprehension": "comprehension",
+    "spotlight": "spotlight",
+    "vocab_review": "vocab-review",
+    "resources": "knowledge-station",
+}
+
+
 def _step_sequence_for(l: dict) -> list[str] | None:
     """這一課的步驟順序，來自它自己的學習單。
 
@@ -711,13 +953,35 @@ def _step_sequence_for(l: dict) -> list[str] | None:
     """
     if l.get("classical_text"):
         return list(CLASSICAL_STEP_SEQUENCE)
+
+    # 🔴 帳本（`_manifest.yml`）優先 —— 順序只能有一個來源（#2916）。
+    #
+    # 這支原本自己再從 `sections_present` 算一次，於是全站有三套順序：
+    # 這裡、`_manifest_sections()`、以及前端的 `stepSequenceFromManifest`。
+    # 而 `api.ts` 是 `detail.step_sequence ?? stepSequenceFromManifest(...)` ——
+    # 只要這裡有值，前端那支就永遠不會被呼叫。2026-08-25 實測：帳本 19 列、
+    # 前端只顯示 9 步，三個念順順收斂成一個，而我改的是永遠跑不到的那一支。
+    #
+    # 帶 slug 的那幾列要各自成為一步，key 加後綴 `#<slug>`，
+    # 前端 `resolveActiveSteps` 會把後綴剝掉查 registry。
     seen: list[str] = []
-    for sec in l.get("sections_present") or []:
-        step = _SECTION_TO_STEP.get(
-            normalise_section_label(str((sec or {}).get("name") or "").strip())
-        )
-        if step and step not in seen:
-            seen.append(step)
+    rows = l.get("manifest_sections") or []
+    if rows:
+        for sec in rows:
+            mod = (sec or {}).get("module")
+            step = _MODULE_TO_STEP.get(mod) if mod else None
+            if not step:
+                continue
+            key = f"{step}#{sec['slug']}" if sec.get("slug") else step
+            if key not in seen:
+                seen.append(key)
+    else:
+        for sec in l.get("sections_present") or []:
+            step = _SECTION_TO_STEP.get(
+                normalise_section_label(str((sec or {}).get("name") or "").strip())
+            )
+            if step and step not in seen:
+                seen.append(step)
     if not seen:
         return None
     # 課程簡介永遠在最前、報告永遠在最後 —— 學習單不印這兩個章節，

@@ -1,0 +1,50 @@
+lesson_uid: L0139
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 引人矚目
+  - 難以置信
+  - 繁衍
+  - 懸而未決
+  - 洞察
+  - 白駒過隙
+  - 膾炙人口
+  - 機制
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 難以置信
+    definition: 讓人很難相信、超出一般想像。
+  - index: 2
+    word: 懸而未決
+    definition: 問題或爭議暫時沒有定論，還沒被解決。
+  - index: 3
+    word: 引人矚目
+    definition: 非常吸引大家注意。
+  - index: 4
+    word: 膾炙人口
+    definition: 形容作品或事物非常受歡迎。
+  - index: 5
+    word: 洞察
+    definition: 看得深入、看出表面之下的關鍵與本質。
+  - index: 6
+    word: 機制
+    definition: 事物「怎麼運作」的方式與規則。例如比賽獎勵機制，指的是比賽提供獎勵的辦法。
+  - index: 7
+    word: 繁衍
+    definition: 生物透過生殖而增加數量、延續族群。
+  - index: 8
+    word: 白駒過隙
+    definition: 形容時間過得很快，像白色的駿馬一閃而過。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: d3acm
+  text_ref: 4dcq9

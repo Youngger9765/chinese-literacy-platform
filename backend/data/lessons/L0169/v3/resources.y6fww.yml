@@ -1,0 +1,18 @@
+lesson_uid: L0169
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 「我的餐盤」均衡飲食_青少年篇
+    duration: (1:11)
+    source: 衛生福利部國民健康署
+    has_qr: true
+  - index: 2
+    title: 84期午餐通訊-喝水的好處
+    duration: (3:32)
+    source: 營養探索樂園
+    has_qr: true
+  slug: y6fww
+  text_ref: 9ja7n

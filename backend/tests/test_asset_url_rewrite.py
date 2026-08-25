@@ -21,8 +21,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from app.services.lesson_layer_loaders import (
     _to_asset_proxy_url,
     _derive_docx_url,
-    load_layer1_lessons,
 )
+# `load_layer1_lessons` 曾經被這裡 import —— 那支讀一修的扁平檔，
+# 檔案封存後它恆回 `[]`（見下方 TestNoAbsoluteGcsUrl 的說明），
+# 測試早就改用 `search_lessons()`，只剩 import 沒清。函式已於 #2916 刪除。
 
 
 class TestToAssetProxyUrl:

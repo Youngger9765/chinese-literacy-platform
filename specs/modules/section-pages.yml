@@ -1061,8 +1061,8 @@ lessons:
     pdf_pages: 21
     page_prints:
     - 39bb-ad1b-9c13
-    - 8418-e586-0af4
-    - 6909-417b-e5c6
+    - 11c3-0792-ff46
+    - 0e90-2f9e-ca0a
     - e3b0-c442-98fc
     - 1e50-ac26-5d80
     - a1e9-eaeb-9d51
@@ -1070,17 +1070,17 @@ lessons:
     - 52c7-9681-5e88
     - 7b6a-3b17-a6cd
     - 90de-c08d-a03b
-    - d29c-7513-b499
-    - e3b0-c442-98fc
+    - b3ff-c2b1-87e4
+    - 97fa-9ec4-2355
     - 3d86-d0b7-f22e
-    - 1cec-b43b-ce57
+    - 389b-9919-4a34
     - a2ef-51e3-8641
     - 4538-d996-9d81
     - 9651-8af8-de40
     - 380b-101c-ce68
-    - 0314-89b4-9824
-    - 5c27-9d1b-4f15
-    - ab40-74a3-4209
+    - c738-b58e-c1f2
+    - c45c-e9e2-9a91
+    - ed14-9bb3-5839
     sections:
     - name: 讀全文-做記號
       pages: [1, 2, 3, 4, 5]
@@ -1101,10 +1101,10 @@ lessons:
       pages: [8, 9, 10]
       pages_source: bracketed
     - name: 讀全文-做記號
-      pages: [10, 11]
+      pages: [10, 11, 12]
       pages_source: located
     - name: 知識補給站
-      pages: [11, 12, 13]
+      pages: [12, 13]
       pages_source: located
     - name: 念順順
       pages: [13]
@@ -1118,6 +1118,9 @@ lessons:
     - name: 文章重點整理
       pages: [15, 16]
       pages_source: located
+    - name: 閱讀理解
+      pages: [15, 16]
+      pages_source: bracketed
     - name: 綜合練習
       pages: [16, 17]
       pages_source: located
@@ -2463,7 +2466,37 @@ lessons:
       pages: [4]
       pages_source: located
     - name: 文章重點整理
-      pages: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+      pages: [4, 5, 6]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 念順順
+      pages: [8, 9]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [9]
+      pages_source: located
+    - name: 語詞應用
+      pages: [9, 10]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [10, 11, 12]
+      pages_source: located
+    - name: 讀全文-做記號
+      pages: [12, 13, 14]
+      pages_source: located
+    - name: 念順順
+      pages: [14]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [14, 15]
+      pages_source: located
+    - name: 語詞應用
+      pages: [15]
+      pages_source: located
+    - name: 文章重點整理
+      pages: [15, 16]
       pages_source: located
     - name: 閱讀聚光燈
       pages: [16, 17, 18, 19, 20, 21]
@@ -6781,6 +6814,9 @@ lessons:
       pages: [10, 11]
       pages_source: located
 unlocated:
+- lesson_uid: L0029
+  section: 閱讀理解
+  pages_source: bracketed
 - lesson_uid: L0029
   section: 閱讀理解
   pages_source: bracketed

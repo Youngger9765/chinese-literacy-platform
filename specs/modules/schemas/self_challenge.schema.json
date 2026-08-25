@@ -50,6 +50,10 @@
       "type": "object",
       "x-seen-in": "4/6"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "6/6"
+    },
     "strategy_banner": {
       "type": "string",
       "x-seen-in": "2/6"
@@ -73,14 +77,16 @@
   "required": [
     "instruction",
     "notes",
-    "passage"
+    "passage",
+    "slug"
   ],
   "title": "self_challenge module payload",
   "type": "object",
   "x-core-90pct": [
     "instruction",
     "notes",
-    "passage"
+    "passage",
+    "slug"
   ],
   "x-enforcement": "error",
   "x-lessons-observed": 6
