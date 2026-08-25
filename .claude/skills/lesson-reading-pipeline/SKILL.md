@@ -6,12 +6,17 @@ description: 抽出教授在學習單上指定的「重點朗讀」段落（規�
 # lesson-reading-pipeline — 重點朗讀段落（只取指定的那一段）
 
 ```
-v3 的兩個模組 ──> <uid>/v3/key_reading.yml
-  key_reading.instruction          指示句，錨點從這裡讀
-  full_text_annotate.paragraphs[]  idx 已經是印刷段號
+<uid>/v3/_manifest.yml            module → 檔名（#2916 起檔名帶 slug）
+  key_reading.{slug}.yml            .instruction        指示句，錨點從這裡讀
+        └── text_ref ──> full_text_annotate.{slug}.yml  .paragraphs[].idx 是印刷段號
                                     ↓
                         passage = idx == 錨點 的那一段
 ```
+
+⚠️ **一課可能有好幾篇**（一份學習單裝兩三篇課文：L0029 兩篇、L0063 三篇），
+每篇各有自己的念順順與課文，靠 manifest 的 `text_ref` 配對。
+⛔ 不要用「檔名排序後一一對應」代替 `text_ref` —— slug 是亂數，排序與版面順序無關，
+兩篇課的念順順會配到對方的課文上。
 
 > **規則：只取指定的那一段。** 不是「☞→結尾」、不是「累積到某個字數」、也不是
 > 「☞ → 字數欄末筆落在的那一段」—— 後者是 #2913 的範圍版，靖杭看原稿後否決
@@ -20,8 +25,10 @@ v3 的兩個模組 ──> <uid>/v3/key_reading.yml
 > 「包含」正確那一段）。
 >
 > 實作：`scripts/extract_key_reading_v3.py`。**不需要 DOCX / PDF / LibreOffice** ——
-> v3 自己的 `instruction` + `paragraphs[].idx` 就夠。175 課中 157 課有念順順，
-> 其中 147 課解得出錨點，其餘 10 課寫明原因不猜。
+> v3 自己的 `instruction` + `paragraphs[].idx` 就夠。全庫 160 篇有念順順，
+> **150 篇解得出錨點**，其餘 10 篇寫明原因不猜（6 篇文言文的指示句是「朗讀原文」、
+> 4 篇段號解不出）。跑法：`python scripts/extract_key_reading_v3.py`
+> （不加 `--apply` 只報告不寫檔）。
 
 > ⚠️ **下面 §① 的 DOCX 抽取流程是歷史，不是現在的跑法。**
 > 它寫的是 `二修 DOCX → <uid>/v2/key_reading.yml` 這條線，而 **v2 已於本次移除**
@@ -33,6 +40,13 @@ v3 的兩個模組 ──> <uid>/v3/key_reading.yml
 > 在 v3 仍然存在且仍在服務）。讀它們當知識，不要照著跑指令。
 
 ---
+
+> 🔴 **開工前先把 branch 同步到最新 staging**（Young 2026-08-24）。
+> 從 staging 開分支只保證**開的那一刻**是最新的；你在寫的期間別人會 merge。
+> `git fetch origin && git merge origin/staging` —— 開工前、每次 push 前都跑。
+> 本檔涉及的 lesson 資料**特別容易衝突**（#2916 一次改了全庫檔名 → #2918 撞出 298 個衝突）。
+> 衝突的是生成物就**取 staging 版再重跑產生器**，不要手工併。詳見 `CLAUDE.md` 的
+> 「開工前一定要先同步 staging」。
 
 ## 何時用
 

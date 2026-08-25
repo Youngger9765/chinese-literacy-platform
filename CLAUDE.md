@@ -72,13 +72,45 @@ PR Preview          Staging         Production
 
 #### Workflow
 
-1. Create feature branch from `staging`
-2. Develop and test locally
-3. Open PR to `staging` (auto-deploys preview)
-4. Test on preview URL (posted as PR comment)
-5. Merge to `staging` for team testing
-6. Create PR from `staging` to `main`
-7. Merge to `main` for production release
+1. **`git fetch origin && git merge origin/staging`** —— 開工前先把 branch 更新到最新
+2. Create feature branch from `staging`
+3. Develop and test locally
+4. **開 PR 前、以及 PR 開著的期間每次要 push 之前，再同步一次 staging**
+5. Open PR to `staging` (auto-deploys preview)
+6. Test on preview URL (posted as PR comment)
+7. Merge to `staging` for team testing
+8. Create PR from `staging` to `main`
+9. Merge to `main` for production release
+
+#### 🔴 開工前一定要先同步 staging（Young 2026-08-24）
+
+**「雖然每一次的開發都是從 staging 開出去，但也許我們在開發的同時別人也在開發，
+如果對方率先 merge 他的 br，那我們就要更新 br。」**
+
+從 staging 開分支**只保證開的那一刻是最新的**。你寫程式的期間別人會 merge，
+你的 branch 就開始落後 —— 而 GitHub 只有在你要 merge 時才會告訴你，那時衝突已經堆好了。
+
+```bash
+git fetch origin
+git merge origin/staging      # 開工前、每次 push 前、PR 被說有衝突時
+```
+
+**實例（#2918，2026-08-24）**：分支開出去之後 staging 前進了 **25 個 commit**，
+其中 #2916 把 lesson 檔名整批改成 `{模組}.{slug}.yml` 並新增 `_manifest.yml`。
+Young 要 merge 時才發現 **298 個衝突**，PR 從 MERGEABLE 變成 DIRTY。
+早一天同步的話，衝突只有幾個檔。
+
+| 情況 | 做法 |
+|------|------|
+| 開工前 | 一律 `git fetch origin && git merge origin/staging` |
+| PR 開著、要再 push | push 前再同步一次 —— 別人可能剛 merge |
+| 衝突的是**生成物**（lesson yml、fidelity 證明、registry） | ⛔ 不要手工併。**取 staging 版，再重跑產生器**，然後比對測試 |
+| 衝突的是**程式碼／測試** | 手工併，並確認雙方的意圖都還在（不是選一邊丟一邊） |
+| 同步完 | 重跑 `bash specs/run-ci.sh` + 與**新的** staging 基準比對失敗集合 |
+
+> ⚠️ **同步之後一定要重跑，不能只看「沒有衝突標記」了。**
+> #2918 同步完 git 沒報衝突的檔案裡，有一個 `spotlight_v2` 的 `owns_data` glob
+> 因為對方改了檔名 + 我這邊刪了 v2 而變成 0 檔 —— git 看不出來，是 gate 抓到的。
 
 #### Environment URLs
 

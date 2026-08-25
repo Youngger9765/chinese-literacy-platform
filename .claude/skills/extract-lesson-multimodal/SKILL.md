@@ -5,6 +5,14 @@ description: 用 LLM 多模態逐頁讀 PDF 抽取一課學習單的全部內容
 
 # extract-lesson-multimodal — LLM 讀 PDF 抽一課
 
+> 🔴 **開工前先把 branch 同步到最新 staging**（Young 2026-08-24）。
+> 從 staging 開分支只保證**開的那一刻**是最新的；你在寫的期間別人會 merge。
+> `git fetch origin && git merge origin/staging` —— 開工前、每次 push 前都跑。
+> 本檔涉及的 lesson 資料**特別容易衝突**（#2916 一次改了全庫檔名 → #2918 撞出 298 個衝突）。
+> 衝突的是生成物就**取 staging 版再重跑產生器**，不要手工併。詳見 `CLAUDE.md` 的
+> 「開工前一定要先同步 staging」。
+
+
 ## 為什麼不用舊管線
 
 實測 L0072：9 個大題只有 **2 個**可用（見 `docs/prd/2026-08-17-multimodal-extraction.md`）。
@@ -902,8 +910,11 @@ key_reading:
 
 實作在 `scripts/extract_key_reading_v3.py`。它**不需要 DOCX 或 PDF** ——
 `key_reading.instruction` 有指示句、`full_text_annotate.paragraphs[].idx` 已經是印刷
-段號（§⑥.55），兩者就夠。175 課中 157 課有這一節，其中 147 課解得出錨點；其餘 10 課
-**寫明原因不猜**（6 課文言文的指示句是「朗讀原文」，根本沒有指定段落；4 課段號解不出）。
+段號（§⑥.55），兩者就夠。全庫 160 篇有這一節，其中 **150 篇**解得出錨點；其餘 10 篇
+**寫明原因不猜**（6 篇文言文的指示句是「朗讀原文」，根本沒有指定段落；4 篇段號解不出）。
+
+⚠️ #2916 之後檔名是 `{模組}.{slug}.yml`，且**一課可能有好幾篇**。配對念順順與它練的
+那份課文要走 `_manifest.yml` 的 `text_ref`，不可以用檔名排序 —— slug 是亂數。
 
 **兩個實作上會踩到的細節**（都是重跑時真的踩到才寫進來的）：
 
