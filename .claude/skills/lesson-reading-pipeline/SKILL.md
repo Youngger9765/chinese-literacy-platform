@@ -41,13 +41,6 @@ description: 抽出教授在學習單上指定的「重點朗讀」段落（規�
 
 ---
 
-> 🔴 **開工前先把 branch 同步到最新 staging**（Young 2026-08-24）。
-> 從 staging 開分支只保證**開的那一刻**是最新的；你在寫的期間別人會 merge。
-> `git fetch origin && git merge origin/staging` —— 開工前、每次 push 前都跑。
-> 本檔涉及的 lesson 資料**特別容易衝突**（#2916 一次改了全庫檔名 → #2918 撞出 298 個衝突）。
-> 衝突的是生成物就**取 staging 版再重跑產生器**，不要手工併。詳見 `CLAUDE.md` 的
-> 「開工前一定要先同步 staging」。
-
 ## 何時用
 
 - 有新課文／新版教材進來，要點亮重點朗讀
