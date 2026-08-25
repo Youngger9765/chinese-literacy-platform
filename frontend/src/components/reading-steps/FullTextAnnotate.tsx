@@ -440,7 +440,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // drives its own player off the pre-generated mp3, because the synthesis
   // endpoint this one calls answers 401 without a session.
   const numericLessonId = Number.isFinite(Number(story.id)) ? Number(story.id) : undefined;
-  const reader = useFullTextTtsQueue({ paragraphs: story.content, lessonId: numericLessonId });
+  const reader = useFullTextTtsQueue({
+    paragraphs: story.content,
+    lessonId: numericLessonId,
+    // 一課印好幾篇時，句子對照表要跟著篇次走（#2930）。
+    roundSlug: qrSectionSlug ?? undefined,
+  });
   const paragraphRefs = useRef<Record<number, HTMLElement | null>>({});
 
   // Scroll the paragraph being read into view. `nearest` rather than `center`

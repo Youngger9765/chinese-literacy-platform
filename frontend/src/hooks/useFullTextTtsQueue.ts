@@ -42,6 +42,9 @@ interface UseFullTextTtsQueueProps {
    *  no-cache single-shot path per paragraph instead of a 422 against
    *  GET /api/tts/mapping/{lessonId} (an int path param). */
   lessonId: number | undefined;
+  /** 這一節自己的代號。一課印好幾篇時，少了它後端會回第 1 篇的句子，
+   *  於是畫面是這一篇、聲音是第 1 篇（#2930）。 */
+  roundSlug?: string;
 }
 
 export interface UseFullTextTtsQueueReturn {
@@ -65,6 +68,7 @@ export interface UseFullTextTtsQueueReturn {
 export function useFullTextTtsQueue({
   paragraphs,
   lessonId,
+  roundSlug,
 }: UseFullTextTtsQueueProps): UseFullTextTtsQueueReturn {
   const [currentParagraphIdx, setCurrentParagraphIdx] = useState(-1);
 
@@ -123,13 +127,13 @@ export function useFullTextTtsQueue({
     setCurrentParagraphIdx(idx);
     // Passing the paragraph's OWN index (not a hardcoded 0) is the #2627 fix —
     // this is what lets each call hit the backend's per-paragraph cache.
-    tts.speakText(list[idx], lessonId, idx);
+    tts.speakText(list[idx], lessonId, idx, roundSlug);
     // Warm the next paragraph while this one is being read. The in-loop
     // prefetch inside ttsApi only reaches the next *sentence* of the current
     // paragraph, so without this every paragraph boundary fetches cold and the
     // reading audibly stalls there (owner: 「段落之間的延遲太多了」).
-    prefetchText(list[idx + 1], lessonId, idx + 1);
-  }, [tts, lessonId]);
+    prefetchText(list[idx + 1], lessonId, idx + 1, roundSlug);
+  }, [tts, lessonId, roundSlug]);
 
   const play = useCallback(() => {
     if (paragraphsRef.current.length === 0) return;

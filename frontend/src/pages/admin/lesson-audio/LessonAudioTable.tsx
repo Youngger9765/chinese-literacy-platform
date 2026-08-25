@@ -507,12 +507,13 @@ const LessonAudioTable: React.FC = () => {
         speakText(fullText);
         return;
       }
-      const walk = planParagraphWalk({ storyId: story.id, paragraphs, requestId });
+      const walk = planParagraphWalk({ storyId: story.id, roundSlug: round ?? undefined, paragraphs, requestId });
       paragraphQueueRef.current = walk;
-      speakText(paragraphs[0], story.id, 0);
+      // 帶上篇次，否則句子對照表會回第 1 篇 —— 後台試聽第 2/3 篇會播到第 1 篇（#2930）。
+      speakText(paragraphs[0], story.id, 0, round ?? undefined);
       // Warm paragraph 2 while paragraph 1 is being read, so the boundary
       // doesn't stall (owner: 「段落之間的延遲太多了」).
-      prefetchText(walk.textAt(walk.next), story.id, walk.next);
+      prefetchText(walk.textAt(walk.next), story.id, walk.next, round ?? undefined);
     } catch (err) {
       if (activeRequestRef.current !== requestId) return;
       setIsFetchingDetail(false);
@@ -570,8 +571,8 @@ const LessonAudioTable: React.FC = () => {
       setActiveKey(null);
       return;
     }
-    speakText(text, q.storyId, idx);
-    prefetchText(q.textAt(q.next), q.storyId, q.next);
+    speakText(text, q.storyId, idx, q.roundSlug);
+    prefetchText(q.textAt(q.next), q.storyId, q.next, q.roundSlug);
   }, [isTtsSpeaking, isTtsLoading, speakText, token]);
 
   useEffect(() => {

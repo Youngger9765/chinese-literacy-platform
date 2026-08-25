@@ -129,11 +129,13 @@ export async function speakText(
   text: string,
   lessonId?: number,
   paragraphIdx?: number,
+  /** 這一節自己的代號。一課多篇時少了它會唸到第 1 篇（#2930）。 */
+  roundSlug?: string,
 ): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackend(text, lessonId, paragraphIdx);
+  await _speakViaBackend(text, lessonId, paragraphIdx, roundSlug);
 }
 
 /**
@@ -147,13 +149,19 @@ export async function speakText(
  * Never throws and never interrupts playback: a failed warm-up simply means
  * the real request pays for it later.
  */
-export function prefetchText(text: string | undefined, lessonId?: number, paragraphIdx?: number): void {
+export function prefetchText(
+  text: string | undefined,
+  lessonId?: number,
+  paragraphIdx?: number,
+  /** 這一節自己的代號（#2930）—— 少了它會預熱到第 1 篇。 */
+  roundSlug?: string,
+): void {
   if (!text || !text.trim()) return;
   void (async () => {
     try {
       let sentences: string[] | null = null;
       if (lessonId !== undefined && paragraphIdx !== undefined) {
-        sentences = await _fetchLessonSentences(lessonId, paragraphIdx);
+        sentences = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
       }
       // Warm exactly what playback will ask for, or the warm-up is wasted and
       // pays for a second synthesis on top. When there is lesson context that
@@ -201,11 +209,13 @@ export async function speakTextWithProgress(
   onProgress: (info: TtsProgressInfo) => void,
   lessonId?: number,
   paragraphIdx?: number,
+  /** 這一節自己的代號（#2930）。 */
+  roundSlug?: string,
 ): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackendWithProgress(text, onProgress, lessonId, paragraphIdx);
+  await _speakViaBackendWithProgress(text, onProgress, lessonId, paragraphIdx, roundSlug);
 }
 
 /**
@@ -300,21 +310,26 @@ function _splitSentences(text: string): string[] {
 async function _fetchLessonSentences(
   lessonId: number,
   paragraphIdx: number,
+  roundSlug?: string,
 ): Promise<string[] | null> {
-  const cacheKey = `${lessonId}-${paragraphIdx}`;
+  // 一課印好幾篇時，`lessonId + 段落序號` 定址的是**整課頂層**（＝第 1 篇），
+  // 所以快取 key 也要分篇 —— 少了它，第 1 篇先到就把後兩篇釘死，
+  // 而且畫面正常、音檔正常播出，只是唸錯篇（#2930）。
+  const cacheKey = `${lessonId}-${roundSlug ?? ''}-${paragraphIdx}`;
   if (_mappingCache.has(cacheKey)) {
     return _mappingCache.get(cacheKey)!;
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/tts/mapping/${lessonId}`);
+    const qs = roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : '';
+    const response = await fetch(`${API_BASE}/api/tts/mapping/${lessonId}${qs}`);
     if (!response.ok) return null;
     const data = await response.json() as {
       paragraphs: Array<{ index: number; sentences: Array<{ text: string }> }>;
     };
     // Populate all paragraphs from this lesson into the cache at once.
     for (const para of data.paragraphs) {
-      const key = `${lessonId}-${para.index}`;
+      const key = `${lessonId}-${roundSlug ?? ''}-${para.index}`;
       _mappingCache.set(key, para.sentences.map((s) => s.text));
     }
     return _mappingCache.get(cacheKey) ?? null;
@@ -410,6 +425,7 @@ async function _speakViaBackend(
   text: string,
   lessonId?: number,
   paragraphIdx?: number,
+  roundSlug?: string,
 ): Promise<void> {
   let sentences: string[];
 
@@ -426,7 +442,7 @@ async function _speakViaBackend(
   // paragraph exactly as the backend split it, so the text sent matches the
   // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
-    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
     const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
     sentences = paragraph ? [paragraph] : [];
   } else {
@@ -480,6 +496,7 @@ async function _speakViaBackendWithProgress(
   onProgress: (info: TtsProgressInfo) => void,
   lessonId?: number,
   paragraphIdx?: number,
+  roundSlug?: string,
 ): Promise<void> {
   let sentences: string[];
 
@@ -496,7 +513,7 @@ async function _speakViaBackendWithProgress(
   // paragraph exactly as the backend split it, so the text sent matches the
   // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
-    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
     const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
     sentences = paragraph ? [paragraph] : [];
   } else {
